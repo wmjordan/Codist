@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Commentist.Views
+namespace Codist.Views
 {
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType("code")]

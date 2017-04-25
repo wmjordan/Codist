@@ -4,18 +4,20 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Media;
 using Newtonsoft.Json;
+using AppHelpers;
 
-namespace Commentist
+namespace Codist
 {
 	class Config
 	{
-		public static readonly string Path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Commentist\\Config.json";
+		public static readonly string Path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Codist\\Config.json";
 		public static readonly Config Instance = LoadConfig();
 
 		public List<CommentLabel> Labels { get; private set; } = new List<CommentLabel>();
 		public List<CommentStyleOption> Styles { get; private set; } = new List<CommentStyleOption>();
 
 		public static Config LoadConfig() {
+			LogHelper.UseLogMethod(i => Debug.WriteLine(i));
 			Config config;
 			if (File.Exists(Path) == false) {
 				config = GetDefaultConfig();

@@ -1,5 +1,4 @@
-﻿//#define DIAG_TIMING
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
@@ -9,7 +8,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Commentist.Classifiers
+namespace Codist.Classifiers
 {
 	[Export(typeof(IViewTaggerProvider))]
     [ContentType("code")]
@@ -27,8 +26,11 @@ namespace Commentist.Classifiers
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
 			var tagger = Aggregator.CreateTagAggregator<IClassificationTag>(buffer);
+			var tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
 			textView.Closed += (s, args) => { tagger.Dispose(); };
-			return new CodeTagger(ClassificationRegistry, tagger) as ITagger<T>;
+			var codeTagger = new CodeTagger(ClassificationRegistry, tagger, tags);
+			tags.Tagger = codeTagger;
+			return codeTagger as ITagger<T>;
         }
     }
 
@@ -41,14 +43,15 @@ namespace Commentist.Classifiers
     {
 		static ClassificationTag[] _classifications;
 		readonly ITagAggregator<IClassificationTag> _aggregator;
+		readonly TaggerResult _tags;
 
-        static readonly string[] Comments = { "//", "/*", "'", "#", "<!--" };
+		static readonly string[] Comments = { "//", "/*", "'", "#", "<!--" };
 
 #pragma warning disable 67
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 #pragma warning restore 67
 
-        internal CodeTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator)
+        internal CodeTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags)
         {
 			if (_classifications == null) {
 				var t = typeof(CommentStyle);
@@ -65,6 +68,7 @@ namespace Commentist.Classifiers
 				}
 			}
             _aggregator = aggregator;
+			_tags = tags;
 		}
 
         public IEnumerable<ITagSpan<ClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
@@ -72,16 +76,49 @@ namespace Commentist.Classifiers
             if (spans.Count == 0) {
 				yield break;
 			}
+			AppHelpers.LogHelper.Log("get tags: " + spans.ToString());
 
 			var snapshot = spans[0].Snapshot;
+			//if (_tags.Version != snapshot.Version.VersionNumber) {
+			//	_tags.Version = snapshot.Version.VersionNumber;
+			//	_tags.Reset();
+			//}
 			var contentType = snapshot.TextBuffer.ContentType;
             if (!contentType.IsOfType("code")) {
 				yield break;
 			}
+			IEnumerable<IMappingTagSpan<IClassificationTag>> tagSpans;
+			if (_tags.LastParsed == 0) {
+				// perform a full parse for the first time
+				tagSpans = _aggregator.GetTags(new SnapshotSpan(snapshot, 0, snapshot.Length));
+				_tags.LastParsed = snapshot.Length;
+			}
+			else {
+				var start = spans[0].Start;
+				var end = spans[spans.Count - 1].End;
+				// return cached tags if spans are within parsed tags
+				foreach (var item in _tags.Tags) {
+					if (start <= item.Start && item.Start <= end
+						|| start <= item.End && item.End <= end
+						|| item.Start <= start && end <= item.End) {
+						yield return new TagSpan<ClassificationTag>(new SnapshotSpan(snapshot, item.Start, item.Length), item.Tag);
+					}
+				}
+				// parse the rest part
+				if (end > _tags.LastParsed) {
+					tagSpans = _aggregator.GetTags(new SnapshotSpan(snapshot, _tags.LastParsed, end - _tags.LastParsed));
+					_tags.LastParsed = end;
+				}
+				else {
+					yield break;
+				}
+			}
 
+			//var gap = spans[0].Start.Position - _tags.LastParsed;
+			//var skippedTags = gap > 0 ? _aggregator.GetTags(new SnapshotSpan(snapshot, _tags.LastParsed, gap)) : Array.Empty<IMappingTagSpan<IClassificationTag>>();
 			var codeType = GetCodeType(contentType);
-			TagSpan<ClassificationTag> mayBeType = null;
-			foreach (var tagSpan in _aggregator.GetTags(spans)) {
+			//foreach (var tagSpan in skippedTags.Concat(_aggregator.GetTags(spans))) {
+			foreach (var tagSpan in tagSpans) {
 				var className = tagSpan.Tag.ClassificationType.Classification;
 				if (codeType == CodeType.CSharp) {
 					switch (className) {
@@ -89,12 +126,12 @@ namespace Commentist.Classifiers
 						case Constants.InterfaceName:
 						case Constants.StructName:
 						case Constants.EnumName:
-							yield return new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag);
+							yield return _tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
 							continue;
 						case Constants.PreProcessorKeyword:
 							var ss = tagSpan.Span.GetSpans(snapshot)[0];
 							if (ss.GetText() == "region") {
-								yield return new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag);
+								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
 							}
 							continue;
 						default:
@@ -104,7 +141,7 @@ namespace Commentist.Classifiers
 				
 				var c = TagComments(className, snapshot, tagSpan, codeType == CodeType.Markup);
 				if (c != null) {
-					yield return c;
+					yield return _tags.Add(c);
 				}
 			}
         }

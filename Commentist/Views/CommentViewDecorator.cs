@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
 
-namespace Commentist.Views
+namespace Codist.Views
 {
 	internal sealed class CommentViewDecorator
 	{

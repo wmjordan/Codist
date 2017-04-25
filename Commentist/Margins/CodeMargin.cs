@@ -5,7 +5,7 @@ using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 
-namespace Commentist.Margins
+namespace Codist.Margins
 {
 	/// <summary>
 	/// Margin's canvas and visual definition including both size and content

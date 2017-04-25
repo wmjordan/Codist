@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Windows.Media;
 
-namespace Commentist
+namespace Codist
 {
 	#region Demo area
 	/////////////////////////////////////////

@@ -5,19 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using Codist.Classifiers;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 
-namespace Commentist.Margins
+namespace Codist.Margins
 {
 	class CodeMarginElement : FrameworkElement
 	{
 		readonly IWpfTextView _textView;
 		readonly IEditorFormatMap _editorFormatMap;
 		readonly IVerticalScrollBar _scrollBar;
-		readonly ITagAggregator<ClassificationTag> _commentTagAggregator;
+		readonly TaggerResult _tags;
 		//ToDo: Change brush colors according to user settings
 		readonly static Pen MarkerPen = new Pen(Brushes.LightGreen, 1);
 		readonly static Brush EmphasisBrush = new SolidColorBrush(Constants.CommentColor);
@@ -40,65 +41,42 @@ namespace Commentist.Margins
 		bool _hasEvents;
 		bool _optionsChanging;
 		bool _isMarginEnabled;
-		Brush[] _markers;
 		const double MarkPadding = 1.0;
 		const double MarkThickness = 4.0;
 
 		public CodeMarginElement(IWpfTextView textView, CodeMarginFactory factory, ITagAggregator<ClassificationTag> tagger, IVerticalScrollBar verticalScrollbar) {
 			_textView = textView;
 
-			this.IsHitTestVisible = false;
+			IsHitTestVisible = false;
 
 			_scrollBar = verticalScrollbar;
-			_commentTagAggregator = tagger;
-			//_commentTagAggregator.TagsChanged += (s, args) => {
-			//	System.Diagnostics.Debug.WriteLine(args.Span.Start.GetPoint(_textView.TextBuffer, PositionAffinity.Predecessor).Value.ToString());
-			//};
+			_tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
+			//_tagger = textView.Properties.GetProperty<ITagAggregator<ClassificationTag>>("_Tagger");
 			_editorFormatMap = factory.EditorFormatMapService.GetEditorFormatMap(textView);
 
-			this.Width = 6.0;
+			Width = 6.0;
 
-			_textView.Options.OptionChanged += this.OnOptionChanged;
-			//TODO: subscribe to change events and use them to update the markers
-			//_textView.TextBuffer.Changed += (s, args) => {
-			//	int d = 0;
-			//	int e = 0;
-			//	if (_markers == null) {
-			//		_markers = new Brush[args.After.LineCount];
-			//	}
-			//	var m = _markers;
-			//	foreach (var change in args.Changes) {
-			//		var start = args.Before.GetLineFromPosition(change.OldSpan.Start).LineNumber;
-			//		var end = args.Before.GetLineFromPosition(change.OldSpan.End).LineNumber;
-			//		for (int i = start; i <= end && i < m.Length; i++) {
-			//			m[i] = null;
-			//		}
-			//		d = end;
-			//		var ss = new SnapshotSpan(args.AfterVersion.TextBuffer.CurrentSnapshot, change.NewPosition, change.NewLength);
-			//		foreach (var tag in _commentTagAggregator.GetTags(ss)) {
-			//			var c = tag.Tag.ClassificationType.Classification;
-			//			Brush b;
-			//			if (ClassificationBrushMapper.TryGetValue(c, out b) == false) {
-			//				continue;
-			//			}
-			//			var l = args.After.GetLineFromPosition(tag.Span.Start.GetPoint(args.After, PositionAffinity.Predecessor).Value.Position).LineNumber;
-			//			if (l >= m.Length) {
-			//				Array.Resize(ref m, l + 10);
-			//			}
-			//			m[l] = b;
-			//			e = l;
-			//		}
-			//	}
-			//	if (e - d != 0) {
+			_textView.Options.OptionChanged += OnOptionChanged;
+			//subscribe to change events and use them to update the markers
+			_textView.TextBuffer.Changed += (s, args) => {
+				foreach (var change in args.Changes) {
+					//TODO: shift positions of remained items
+					for (int i = _tags.Tags.Count - 1; i >= 0; i--) {
+						var t = _tags.Tags[i];
+						if (!(t.Start > change.OldEnd || t.End < change.OldPosition))
+							_tags.Tags.RemoveAt(i);
+						else if (t.Start > change.OldEnd) {
+							t.Start += change.Delta;
+						}
+					}
+				}
+				_tags.LastParsed = args.Changes[0].OldPosition;
+				InvalidateVisual();
+			};
+			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
+			_textView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 
-			//	}
-			//	_markers = m;
-			//	InvalidateVisual();
-			//};
-			this.IsVisibleChanged += this.OnViewOrMarginVisiblityChanged;
-			_textView.VisualElement.IsVisibleChanged += this.OnViewOrMarginVisiblityChanged;
-
-			this.OnOptionChanged(null, null);
+			OnOptionChanged(null, null);
 		}
 
 		private void OnViewOrMarginVisiblityChanged(object sender, DependencyPropertyChangedEventArgs e) {
@@ -108,7 +86,7 @@ namespace Commentist.Margins
 			//It is possible this will get called twice in quick succession (when the tab containing the host is made visible, the view and the margin
 			//will get visibility changed events).
 			if (!_optionsChanging) {
-				this.UpdateEventHandlers(true);
+				UpdateEventHandlers(true);
 			}
 		}
 		private void OnOptionChanged(object sender, EditorOptionChangedEventArgs e) {
@@ -125,13 +103,13 @@ namespace Commentist.Margins
 			//	_optionsChanging = false;
 			//}
 
-			bool refreshed = this.UpdateEventHandlers(true);
+			bool refreshed = UpdateEventHandlers(true);
 
 			//If the UpdateEventHandlers call above didn't initiate a search then we need to force the margin to update
 			//to update if they were turned on/off.
 			if (!refreshed) {
 				//if (wasMarginEnabled != _isMarginEnabled) {
-					this.InvalidateVisual();
+				InvalidateVisual();
 				//}
 			}
 		}
@@ -161,7 +139,7 @@ namespace Commentist.Margins
 					//_textView.Selection.SelectionChanged += OnPositionChanged;
 					//_scrollBar.Map.MappingChanged += OnMappingChanged;
 					_scrollBar.TrackSpanChanged += OnMappingChanged;
-					this.OnFormatMappingChanged(null, null);
+					OnFormatMappingChanged(null, null);
 
 					return true;
 				}
@@ -188,7 +166,7 @@ namespace Commentist.Margins
 		/// </summary>
 		private void OnMappingChanged(object sender, EventArgs e) {
 			//Simply invalidate the visual: the positions of the various highlights haven't changed.
-			this.InvalidateVisual();
+			InvalidateVisual();
 		}
 		/// <summary>
 		/// Override for the FrameworkElement's OnRender. When called, redraw all markers.
@@ -196,59 +174,36 @@ namespace Commentist.Margins
 		/// <param name="drawingContext">The <see cref="DrawingContext"/> used to render the margin.</param>
 		protected override void OnRender(DrawingContext drawingContext) {
 			base.OnRender(drawingContext);
-			//TODO: update using cached subsets
-			if (_textView.IsClosed || _textView.TextSnapshot.LineCount > 1000) {
+			if (_textView.IsClosed) {
 				return;
 			}
 			var lastY = double.MinValue;
-			//if (_markers != null) {
-			//	var m = _markers;
-			//	for (int i = 0; i < m.Length; i++) {
-			//		if (m[i] == null) {
-			//			continue;
-			//		}
-			//		var y = _scrollBar.GetYCoordinateOfBufferPosition(_textView.TextSnapshot.GetLineFromLineNumber(i).Start);
-			//		if (y + MarkThickness < lastY) {
-			//			// avoid drawing too many closed markers
-			//			continue;
-			//		}
-			//		lastY = y;
-			//		var b = m[i];
-			//		if (b == ClassNameBrush || b == PreProcessorBrush) {
-			//			DrawCircleMark(drawingContext, b, y);
-			//		}
-			//		else {
-			//			DrawRectangleMark(drawingContext, b, y);
-			//		}
-			//	}
-			//}
-
-			foreach (var line in _textView.TextSnapshot.Lines) {
-				foreach (var tag in _commentTagAggregator.GetTags(line.Extent)) {
-					var c = tag.Tag.ClassificationType.Classification;
-					Brush b;
-					if (ClassificationBrushMapper.TryGetValue(c, out b) == false) {
-						continue;
-					}
-					var y = _scrollBar.GetYCoordinateOfBufferPosition(line.Start.TranslateTo(_textView.TextSnapshot, PointTrackingMode.Negative));
-					if (y + MarkThickness < lastY) {
-						// avoid drawing too many closed markers
-						continue;
-					}
-					lastY = y;
-					if (b == ClassNameBrush || b == PreProcessorBrush) {
-						DrawCircleMark(drawingContext, b, y);
-					}
-					else {
-						DrawRectangleMark(drawingContext, b, y);
-					}
-					break;
+			var tags = new List<SpanTag>(_tags.Tags);
+			_tags.Tags.Sort((x, y) => { return x.Start - y.Start; });
+			foreach (var tag in tags) {
+				var c = tag.Tag.ClassificationType.Classification;
+				Brush b;
+				if (ClassificationBrushMapper.TryGetValue(c, out b) == false) {
+					continue;
 				}
+				var y = _scrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(_textView.TextSnapshot, tag.Start));
+				if (y + MarkThickness < lastY) {
+					// avoid drawing too many closed markers
+					continue;
+				}
+				lastY = y;
+				if (b == ClassNameBrush || b == PreProcessorBrush) {
+					DrawCircleMark(drawingContext, b, y);
+				}
+				else {
+					DrawRectangleMark(drawingContext, b, y);
+				}
+				//break;
 			}
 		}
 
 		void DrawRectangleMark(DrawingContext dc, Brush brush, double y) {
-			dc.DrawRectangle(brush, MarkerPen, new Rect(MarkPadding, y - MarkThickness * 0.5, this.Width - MarkPadding * 2.0, MarkThickness));
+			dc.DrawRectangle(brush, MarkerPen, new Rect(MarkPadding, y - MarkThickness * 0.5, Width - MarkPadding * 2.0, MarkThickness));
 			//dc.DrawEllipse(brush, null, new Point(Width / 2.0, y + MarkThickness / 2.0), MarkThickness / 2, MarkThickness / 2);
 		}
 		void DrawCircleMark(DrawingContext dc, Brush brush, double y) {
