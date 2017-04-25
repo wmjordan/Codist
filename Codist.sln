@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codist", "Commentist\Codist.csproj", "{357D8F0C-57B1-4981-949D-204FEE0EC424}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codist", "Codist\Codist.csproj", "{357D8F0C-57B1-4981-949D-204FEE0EC424}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
