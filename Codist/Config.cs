@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Media;
 using Newtonsoft.Json;
-using AppHelpers;
 
 namespace Codist
 {
@@ -17,7 +16,7 @@ namespace Codist
 		public List<CommentStyleOption> Styles { get; private set; } = new List<CommentStyleOption>();
 
 		public static Config LoadConfig() {
-			LogHelper.UseLogMethod(i => Debug.WriteLine(i));
+			//AppHelpers.LogHelper.UseLogMethod(i => Debug.WriteLine(i));
 			Config config;
 			if (File.Exists(Path) == false) {
 				config = GetDefaultConfig();

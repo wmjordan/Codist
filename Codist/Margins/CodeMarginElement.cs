@@ -27,6 +27,8 @@ namespace Codist.Margins
 		readonly static Brush HackBrush = new SolidColorBrush(Constants.HackColor);
 		readonly static Brush ClassNameBrush = Brushes.Blue;
 		readonly static Brush PreProcessorBrush = Brushes.Gray;
+		readonly static Brush ThrowKeywordBrush = Brushes.Red;
+		readonly static Brush ReturnKeywordBrush = Brushes.Blue;
 		readonly static Dictionary<string, Brush> ClassificationBrushMapper = new Dictionary<string, Brush> {
 			{ Constants.EmphasisComment, EmphasisBrush },
 			{ Constants.TodoComment, ToDoBrush },
@@ -37,12 +39,15 @@ namespace Codist.Margins
 			{ Constants.InterfaceName, ClassNameBrush },
 			{ Constants.EnumName, ClassNameBrush },
 			{ Constants.PreProcessorKeyword, PreProcessorBrush },
+			{ Constants.ThrowKeyword, ThrowKeywordBrush },
+			{ Constants.ReturnKeyword, ReturnKeywordBrush },
 		};
 		bool _hasEvents;
 		bool _optionsChanging;
 		bool _isMarginEnabled;
 		const double MarkPadding = 1.0;
-		const double MarkThickness = 4.0;
+		const double MarkSize = 4.0;
+		const double HalfMarkSize = MarkSize / 2;
 
 		public CodeMarginElement(IWpfTextView textView, CodeMarginFactory factory, ITagAggregator<ClassificationTag> tagger, IVerticalScrollBar verticalScrollbar) {
 			_textView = textView;
@@ -51,7 +56,6 @@ namespace Codist.Margins
 
 			_scrollBar = verticalScrollbar;
 			_tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
-			//_tagger = textView.Properties.GetProperty<ITagAggregator<ClassificationTag>>("_Tagger");
 			_editorFormatMap = factory.EditorFormatMapService.GetEditorFormatMap(textView);
 
 			Width = 6.0;
@@ -59,18 +63,21 @@ namespace Codist.Margins
 			_textView.Options.OptionChanged += OnOptionChanged;
 			//subscribe to change events and use them to update the markers
 			_textView.TextBuffer.Changed += (s, args) => {
+				var tags = _tags.Tags;
 				foreach (var change in args.Changes) {
-					//TODO: shift positions of remained items
-					for (int i = _tags.Tags.Count - 1; i >= 0; i--) {
-						var t = _tags.Tags[i];
-						if (!(t.Start > change.OldEnd || t.End < change.OldPosition))
-							_tags.Tags.RemoveAt(i);
+					for (int i = tags.Count - 1; i >= 0; i--) {
+						var t = tags[i];
+						if (!(t.Start > change.OldEnd || t.End < change.OldPosition)) {
+							// remove tags within the updated range
+							tags.RemoveAt(i);
+						}
 						else if (t.Start > change.OldEnd) {
+							// shift positions of remained items
 							t.Start += change.Delta;
 						}
 					}
 				}
-				_tags.LastParsed = args.Changes[0].OldPosition;
+				_tags.LastParsed = args.Before.GetLineFromPosition(args.Changes[0].OldPosition).Start.Position;
 				InvalidateVisual();
 			};
 			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
@@ -153,8 +160,6 @@ namespace Codist.Margins
 					//	_search.Abort();
 					//	_search = null;
 					//}
-					//_highlight = null;
-					//_highlightSpan = null;
 				}
 			}
 
@@ -179,7 +184,7 @@ namespace Codist.Margins
 			}
 			var lastY = double.MinValue;
 			var tags = new List<SpanTag>(_tags.Tags);
-			_tags.Tags.Sort((x, y) => { return x.Start - y.Start; });
+			tags.Sort((x, y) => { return x.Start - y.Start; });
 			foreach (var tag in tags) {
 				var c = tag.Tag.ClassificationType.Classification;
 				Brush b;
@@ -187,27 +192,31 @@ namespace Codist.Margins
 					continue;
 				}
 				var y = _scrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(_textView.TextSnapshot, tag.Start));
-				if (y + MarkThickness < lastY) {
+				if (y + MarkSize < lastY) {
 					// avoid drawing too many closed markers
 					continue;
 				}
 				lastY = y;
 				if (b == ClassNameBrush || b == PreProcessorBrush) {
-					DrawCircleMark(drawingContext, b, y);
+					DrawDeclarationMark(drawingContext, b, y);
+				}
+				else if (b == ThrowKeywordBrush) {
+					DrawKeywordMark(drawingContext, b, y);
 				}
 				else {
-					DrawRectangleMark(drawingContext, b, y);
+					DrawCommentMark(drawingContext, b, y);
 				}
-				//break;
 			}
 		}
 
-		void DrawRectangleMark(DrawingContext dc, Brush brush, double y) {
-			dc.DrawRectangle(brush, MarkerPen, new Rect(MarkPadding, y - MarkThickness * 0.5, Width - MarkPadding * 2.0, MarkThickness));
-			//dc.DrawEllipse(brush, null, new Point(Width / 2.0, y + MarkThickness / 2.0), MarkThickness / 2, MarkThickness / 2);
+		void DrawCommentMark(DrawingContext dc, Brush brush, double y) {
+			dc.DrawRectangle(brush, MarkerPen, new Rect(MarkPadding, y - HalfMarkSize, Width - MarkPadding - MarkPadding, MarkSize));
 		}
-		void DrawCircleMark(DrawingContext dc, Brush brush, double y) {
-			dc.DrawEllipse(brush, null, new Point(Width / 2.0, y + MarkThickness / 2.0), MarkThickness, MarkThickness);
+		void DrawDeclarationMark(DrawingContext dc, Brush brush, double y) {
+			dc.DrawEllipse(brush, null, new Point(Width * 0.5, y + HalfMarkSize), MarkSize, MarkSize);
+		}
+		void DrawKeywordMark(DrawingContext dc, Brush brush, double y) {
+			dc.DrawEllipse(brush, null, new Point(Width * 0.5, y + HalfMarkSize), HalfMarkSize, HalfMarkSize);
 		}
 	}
 }

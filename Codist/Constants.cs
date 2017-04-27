@@ -21,7 +21,7 @@ namespace Codist
 	/// Comment style constants
 	/// </summary>
 	static class Constants
-    {
+	{
 		public const string DefaultComment = "Comment";
 		public const string XmlDocComment = "xml doc comment - text";
 		public const string XmlDocTag = "xml doc comment - name";
@@ -29,20 +29,20 @@ namespace Codist
 		public const string StructName = "struct name";
 		public const string EnumName = "enum name";
 		public const string InterfaceName = "interface name";
-		public const string Keyword = "keyword";
+		public const string Keyword = "Keyword";
 		public const string PreProcessorKeyword = "preprocessor keyword";
 		//! Important
 		//# Notice
 		public const String EmphasisComment = "Comment - Emphasis";
-        //? Question
-        public const String QuestionComment = "Comment - Question";
-        //!? Exclaimation
-        public const String ExclaimationComment = "Comment - Exclaimation";
-        //x Removed
-        public const String DeletionComment = "Comment - Deletion";
+		//? Question
+		public const String QuestionComment = "Comment - Question";
+		//!? Exclaimation
+		public const String ExclaimationComment = "Comment - Exclaimation";
+		//x Removed
+		public const String DeletionComment = "Comment - Deletion";
 
-        //TODO: This does not need work
-        public const String TodoComment = "Comment Task - ToDo";
+		//TODO: This does not need work
+		public const String TodoComment = "Comment Task - ToDo";
 		//NOTE: Watch-out!
 		public const String NoteComment = "Comment Task - Note";
 		//Hack: B-)
@@ -61,13 +61,18 @@ namespace Codist
 		//--- heading 6
 		public const string Heading6Comment = "Comment: Heading 6";
 
+		public const string ReturnKeyword = "Keyword: Return";
+		public const string ThrowKeyword = "Keyword: Throw";
+
 		public static readonly Color CommentColor = Colors.Green;
-        public static readonly Color QuestionColor = Colors.MediumPurple;
-        public static readonly Color ExclaimationColor = Colors.IndianRed;
-        public static readonly Color DeletionColor = Colors.Gray;
-        public static readonly Color ToDoColor = Colors.DarkBlue;
-        public static readonly Color NoteColor = Colors.Orange;
-        public static readonly Color HackColor = Colors.Black;
+		public static readonly Color QuestionColor = Colors.MediumPurple;
+		public static readonly Color ExclaimationColor = Colors.IndianRed;
+		public static readonly Color DeletionColor = Colors.Gray;
+		public static readonly Color ToDoColor = Colors.DarkBlue;
+		public static readonly Color NoteColor = Colors.Orange;
+		public static readonly Color HackColor = Colors.Black;
+		public static readonly Color ThrowColor = Colors.Red;
+		public static readonly Color ReturnColor = Colors.Blue;
 	}
 
 	enum CommentStyle
@@ -106,7 +111,8 @@ namespace Codist
 		Heading6
 	}
 
-	enum CommentStyleApplication {
+	enum CommentStyleApplication
+	{
 		Content,
 		Tag,
 		TagAndContent

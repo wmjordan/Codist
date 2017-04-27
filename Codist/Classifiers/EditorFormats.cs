@@ -6,9 +6,36 @@ using Microsoft.VisualStudio.Utilities;
 namespace Codist.Classifiers
 {
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.ReturnKeyword)]
+	[Name(Constants.ReturnKeyword)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	public sealed class ReturnKeywordFormat : ClassificationFormatDefinition
+	{
+		public ReturnKeywordFormat() {
+			DisplayName = Constants.ReturnKeyword;
+			ForegroundColor = Constants.ReturnColor;
+			IsBold = true;
+		}
+	}
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.ThrowKeyword)]
+	[Name(Constants.ThrowKeyword)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	public sealed class ThrowKeywordFormat : ClassificationFormatDefinition
+	{
+		public ThrowKeywordFormat() {
+			DisplayName = Constants.ReturnKeyword;
+			ForegroundColor = Constants.ThrowColor;
+			IsBold = true;
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.EmphasisComment)]
 	[Name(Constants.EmphasisComment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class EmphasisCommentFormat : ClassificationFormatDefinition
 	{
@@ -22,7 +49,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.QuestionComment)]
 	[Name(Constants.QuestionComment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class QuestionCommentFormat : ClassificationFormatDefinition
 	{
@@ -35,7 +62,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.ExclaimationComment)]
 	[Name(Constants.ExclaimationComment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class ExclaimationCommentFormat : ClassificationFormatDefinition
 	{
@@ -48,7 +75,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.DeletionComment)]
 	[Name(Constants.DeletionComment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class DeletionCommentFormat : ClassificationFormatDefinition
 	{
@@ -61,7 +88,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.TodoComment)]
 	[Name(Constants.TodoComment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class ToDoCommentFormat : ClassificationFormatDefinition
 	{
@@ -75,7 +102,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.NoteComment)]
 	[Name(Constants.NoteComment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class NoteCommentFormat : ClassificationFormatDefinition
 	{
@@ -89,7 +116,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.HackComment)]
 	[Name(Constants.HackComment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class HackCommentFormat : ClassificationFormatDefinition
 	{
@@ -103,7 +130,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.Heading1Comment)]
 	[Name(Constants.Heading1Comment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class Heading1CommentFormat : ClassificationFormatDefinition
 	{
@@ -117,7 +144,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.Heading2Comment)]
 	[Name(Constants.Heading2Comment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class Heading2CommentFormat : ClassificationFormatDefinition
 	{
@@ -131,7 +158,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.Heading3Comment)]
 	[Name(Constants.Heading3Comment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class Heading3CommentFormat : ClassificationFormatDefinition
 	{
@@ -145,7 +172,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.Heading4Comment)]
 	[Name(Constants.Heading4Comment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class Heading4CommentFormat : ClassificationFormatDefinition
 	{
@@ -158,7 +185,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.Heading5Comment)]
 	[Name(Constants.Heading5Comment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class Heading5CommentFormat : ClassificationFormatDefinition
 	{
@@ -171,7 +198,7 @@ namespace Codist.Classifiers
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.Heading6Comment)]
 	[Name(Constants.Heading6Comment)]
-	[UserVisible(true)]
+	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class Heading6CommentFormat : ClassificationFormatDefinition
 	{

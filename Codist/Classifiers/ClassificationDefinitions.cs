@@ -8,7 +8,17 @@ namespace Codist.Classifiers
 	public static class ClassificationDefinitions
     {
 #pragma warning disable 649
-        [Export(typeof(ClassificationTypeDefinition))]
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition("Keyword")]
+		[Name(Constants.ReturnKeyword)]
+		internal static ClassificationTypeDefinition ReturnKeywordClassificationType;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition("Keyword")]
+		[Name(Constants.ThrowKeyword)]
+		internal static ClassificationTypeDefinition ThrowKeywordClassificationType;
+
+		[Export(typeof(ClassificationTypeDefinition))]
         [BaseDefinition("Comment")]
         [Name(Constants.EmphasisComment)]
         internal static ClassificationTypeDefinition EmphasisCommentClassificationType;
