@@ -62,7 +62,7 @@ namespace Codist
 		public const string Heading6Comment = "Comment: Heading 6";
 
 		public const string ReturnKeyword = "Keyword: Return";
-		public const string ThrowKeyword = "Keyword: Throw";
+		public const string ExitKeyword = "Keyword: Exit";
 
 		public static readonly Color CommentColor = Colors.Green;
 		public static readonly Color QuestionColor = Colors.MediumPurple;
@@ -71,7 +71,7 @@ namespace Codist
 		public static readonly Color ToDoColor = Colors.DarkBlue;
 		public static readonly Color NoteColor = Colors.Orange;
 		public static readonly Color HackColor = Colors.Black;
-		public static readonly Color ThrowColor = Colors.Red;
+		public static readonly Color ExitColor = Colors.MediumBlue;
 		public static readonly Color ReturnColor = Colors.Blue;
 	}
 

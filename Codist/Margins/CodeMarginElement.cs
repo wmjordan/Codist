@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,22 +26,23 @@ namespace Codist.Margins
 		readonly static Brush ToDoBrush = new SolidColorBrush(Constants.ToDoColor);
 		readonly static Brush NoteBrush = new SolidColorBrush(Constants.NoteColor);
 		readonly static Brush HackBrush = new SolidColorBrush(Constants.HackColor);
-		readonly static Brush ClassNameBrush = Brushes.Blue;
+		readonly static Brush KeywordBrush = Brushes.Blue;
 		readonly static Brush PreProcessorBrush = Brushes.Gray;
-		readonly static Brush ThrowKeywordBrush = Brushes.Red;
-		readonly static Brush ReturnKeywordBrush = Brushes.Blue;
+		//readonly static Brush ThrowKeywordBrush = Brushes.Red;
+		//readonly static Brush ReturnKeywordBrush = Brushes.Blue;
 		readonly static Dictionary<string, Brush> ClassificationBrushMapper = new Dictionary<string, Brush> {
 			{ Constants.EmphasisComment, EmphasisBrush },
 			{ Constants.TodoComment, ToDoBrush },
 			{ Constants.NoteComment, NoteBrush },
 			{ Constants.HackComment, HackBrush },
-			{ Constants.ClassName, ClassNameBrush },
-			{ Constants.StructName, ClassNameBrush },
-			{ Constants.InterfaceName, ClassNameBrush },
-			{ Constants.EnumName, ClassNameBrush },
+			{ Constants.ClassName, KeywordBrush },
+			{ Constants.StructName, KeywordBrush },
+			{ Constants.InterfaceName, KeywordBrush },
+			{ Constants.EnumName, KeywordBrush },
+			{ Constants.Keyword, KeywordBrush },
 			{ Constants.PreProcessorKeyword, PreProcessorBrush },
-			{ Constants.ThrowKeyword, ThrowKeywordBrush },
-			{ Constants.ReturnKeyword, ReturnKeywordBrush },
+			//{ Constants.ThrowKeyword, ThrowKeywordBrush },
+			//{ Constants.ReturnKeyword, ReturnKeywordBrush },
 		};
 		bool _hasEvents;
 		bool _optionsChanging;
@@ -63,8 +65,13 @@ namespace Codist.Margins
 			_textView.Options.OptionChanged += OnOptionChanged;
 			//subscribe to change events and use them to update the markers
 			_textView.TextBuffer.Changed += (s, args) => {
+				if (args.Changes.Count == 0) {
+					return;
+				}
+				Debug.WriteLine($"snapshot version: {args.AfterVersion.VersionNumber}");
 				var tags = _tags.Tags;
 				foreach (var change in args.Changes) {
+					Debug.WriteLine($"change:{change.OldPosition}->{change.NewPosition}");
 					for (int i = tags.Count - 1; i >= 0; i--) {
 						var t = tags[i];
 						if (!(t.Start > change.OldEnd || t.End < change.OldPosition)) {
@@ -77,7 +84,17 @@ namespace Codist.Margins
 						}
 					}
 				}
-				_tags.LastParsed = args.Before.GetLineFromPosition(args.Changes[0].OldPosition).Start.Position;
+				try {
+					_tags.Version = args.AfterVersion.VersionNumber;
+					_tags.LastParsed = args.Before.GetLineFromPosition(args.Changes[0].OldPosition).Start.Position;
+				}
+				catch (ArgumentOutOfRangeException) {
+					MessageBox.Show(String.Join("\n",
+						"Code margin exception:", args.Changes[0].OldPosition,
+						"Before length:", args.Before.Length,
+						"After length:", args.After.Length
+					));
+				}
 				InvalidateVisual();
 			};
 			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
@@ -197,12 +214,12 @@ namespace Codist.Margins
 					continue;
 				}
 				lastY = y;
-				if (b == ClassNameBrush || b == PreProcessorBrush) {
+				if (b == KeywordBrush || b == PreProcessorBrush) {
 					DrawDeclarationMark(drawingContext, b, y);
 				}
-				else if (b == ThrowKeywordBrush) {
-					DrawKeywordMark(drawingContext, b, y);
-				}
+				//else if (b == ThrowKeywordBrush) {
+				//	DrawKeywordMark(drawingContext, b, y);
+				//}
 				else {
 					DrawCommentMark(drawingContext, b, y);
 				}
@@ -213,10 +230,10 @@ namespace Codist.Margins
 			dc.DrawRectangle(brush, MarkerPen, new Rect(MarkPadding, y - HalfMarkSize, Width - MarkPadding - MarkPadding, MarkSize));
 		}
 		void DrawDeclarationMark(DrawingContext dc, Brush brush, double y) {
-			dc.DrawEllipse(brush, null, new Point(Width * 0.5, y + HalfMarkSize), MarkSize, MarkSize);
+			dc.DrawEllipse(brush, null, new Point(Width * 0.5, y - HalfMarkSize), MarkSize, MarkSize);
 		}
 		void DrawKeywordMark(DrawingContext dc, Brush brush, double y) {
-			dc.DrawEllipse(brush, null, new Point(Width * 0.5, y + HalfMarkSize), HalfMarkSize, HalfMarkSize);
+			dc.DrawEllipse(brush, null, new Point(Width * 0.5, y - HalfMarkSize * 0.5), HalfMarkSize, HalfMarkSize);
 		}
 	}
 }

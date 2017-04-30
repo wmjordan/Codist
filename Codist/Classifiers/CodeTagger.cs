@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
+using System.Diagnostics;
+using System.Windows;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
@@ -42,7 +43,7 @@ namespace Codist.Classifiers
 	class CodeTagger : ITagger<ClassificationTag>
     {
 		static ClassificationTag[] _commentClassifications;
-		static ClassificationTag _throwClassification;
+		static ClassificationTag _exitClassification;
 		readonly ITagAggregator<IClassificationTag> _aggregator;
 		readonly TaggerResult _tags;
 		readonly CodeType _codeType;
@@ -70,7 +71,7 @@ namespace Codist.Classifiers
 					_commentClassifications[(int)f.GetValue(null)] = new ClassificationTag(ct);
 				}
 			}
-			_throwClassification = new ClassificationTag(registry.GetClassificationType(Constants.ThrowKeyword));
+			_exitClassification = new ClassificationTag(registry.GetClassificationType(Constants.ExitKeyword));
 
             _aggregator = aggregator;
 			_tags = tags;
@@ -97,6 +98,7 @@ namespace Codist.Classifiers
 			else {
 				var start = spans[0].Start;
 				var end = spans[spans.Count - 1].End;
+				Debug.WriteLine($"Get tag [{start.Position}..{end.Position})");
 
 				for (int i = _tags.Tags.Count - 1; i >= 0; i--) {
 					var t = _tags.Tags[i];
@@ -110,6 +112,7 @@ namespace Codist.Classifiers
 						}
 						// return cached tags if spans are within parsed tags
 						else {
+							Debug.WriteLine($"reuse cache {snapshot.GetText(t.Start, t.Length)} {t.Tag.ClassificationType.Classification}");
 							yield return new TagSpan<ClassificationTag>(new SnapshotSpan(snapshot, t.Start, t.Length), t.Tag);
 						}
 					}
@@ -117,8 +120,9 @@ namespace Codist.Classifiers
 
 				// parse the updated part
 				if (end > _tags.LastParsed) {
+					Debug.WriteLine($"parse updated {snapshot.GetText(_tags.LastParsed, end.Position - _tags.LastParsed)}");
 					tagSpans = _aggregator.GetTags(new SnapshotSpan(snapshot, _tags.LastParsed, end.Position - _tags.LastParsed));
-					_tags.LastParsed = end;
+					_tags.LastParsed = end.Position;
 				}
 				else {
 					yield break;
@@ -127,26 +131,28 @@ namespace Codist.Classifiers
 
 			foreach (var tagSpan in tagSpans) {
 				var className = tagSpan.Tag.ClassificationType.Classification;
+				var ss = tagSpan.Span.GetSpans(snapshot)[0];
 				if (_codeType == CodeType.CSharp) {
 					switch (className) {
-						case Constants.ClassName:
-						case Constants.InterfaceName:
-						case Constants.StructName:
-						case Constants.EnumName:
-							yield return _tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
-							continue;
+						//case Constants.ClassName:
+						//case Constants.InterfaceName:
+						//case Constants.StructName:
+						//case Constants.EnumName:
+						//	Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
+						//	yield return _tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
+						//	continue;
 						case Constants.PreProcessorKeyword:
-							var ss = tagSpan.Span.GetSpans(snapshot)[0];
-							var t = ss.GetText();
-							if (t == "region" || t == "pragma") {
+							if (Matches(ss, "region") || Matches(ss, "pragma")) {
 								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
 							}
 							continue;
 						case Constants.Keyword:
-							ss = tagSpan.Span.GetSpans(snapshot)[0];
-							t = ss.GetText();
-							if (t == "throw") {
-								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, _throwClassification));
+							if (Matches(ss, "class") || Matches(ss, "interface") || Matches(ss, "enum") || Matches(ss, "struct")) {
+								Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
+								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
+							}
+							else if (Matches(ss, "throw") || Matches(ss, "return")) {
+								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, _exitClassification));
 							}
 							continue;
 						default:
@@ -154,32 +160,20 @@ namespace Codist.Classifiers
 					}
 				}
 				
-				var c = TagComments(className, snapshot, tagSpan);
+				var c = TagComments(className, ss, tagSpan);
 				if (c != null) {
 					yield return _tags.Add(c);
 				}
 			}
         }
 
-		TagSpan<ClassificationTag> TagComments(string className, ITextSnapshot snapshot, IMappingTagSpan<IClassificationTag> tagSpan) {
+		TagSpan<ClassificationTag> TagComments(string className, SnapshotSpan snapshotSpan, IMappingTagSpan<IClassificationTag> tagSpan) {
 			// find spans that the language service has already classified as comments ...
 			if (className.IndexOf("Comment", StringComparison.OrdinalIgnoreCase) == -1) {
 				return null;
 			}
 
-			var ss = tagSpan.Span.GetSpans(snapshot);
-			if (ss.Count == 0) {
-				return null;
-			}
-
-			// ... and from those, ones that match our comment strings
-			var snapshotSpan = ss[0];
-
 			var text = snapshotSpan.GetText();
-			if (String.IsNullOrWhiteSpace(text)) {
-				return null;
-			}
-
 			//NOTE: markup comment span does not include comment start token
 			var endOfCommentToken = 0;
 			foreach (string t in _codeType == CodeType.CSharp ? CSharpComments : Comments) {
@@ -289,6 +283,30 @@ namespace Codist.Classifiers
 				: contentType.IsOfType("html") || contentType.IsOfType("htmlx") || contentType.IsOfType("XAML") || contentType.IsOfType("XML") ? CodeType.Markup
 				: CodeType.None;
         }
+
+		static bool Matches(SnapshotSpan span, string text) {
+			if (span.Length < text.Length) {
+				return false;
+			}
+			int start = span.Start;
+			int end = span.End;
+			var s = span.Snapshot;
+			// the span can contain white spaces at the start or at the end, skip them
+			while (Char.IsWhiteSpace(s[--end]) && end > 0) {
+			}
+			while (Char.IsWhiteSpace(s[start]) && start < end) {
+				start++;
+			}
+			if (++end - start != text.Length) {
+				return false;
+			}
+			for (int i = start, ti = 0; i < end; i++, ti++) {
+				if (s[i] != text[ti]) {
+					return false;
+				}
+			}
+			return true;
+		}
     }
 
 }

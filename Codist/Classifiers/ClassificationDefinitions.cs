@@ -15,7 +15,7 @@ namespace Codist.Classifiers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition("Keyword")]
-		[Name(Constants.ThrowKeyword)]
+		[Name(Constants.ExitKeyword)]
 		internal static ClassificationTypeDefinition ThrowKeywordClassificationType;
 
 		[Export(typeof(ClassificationTypeDefinition))]

@@ -19,15 +19,15 @@ namespace Codist.Classifiers
 		}
 	}
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.ThrowKeyword)]
-	[Name(Constants.ThrowKeyword)]
+	[ClassificationType(ClassificationTypeNames = Constants.ExitKeyword)]
+	[Name(Constants.ExitKeyword)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class ThrowKeywordFormat : ClassificationFormatDefinition
+	public sealed class ExitKeywordFormat : ClassificationFormatDefinition
 	{
-		public ThrowKeywordFormat() {
-			DisplayName = Constants.ReturnKeyword;
-			ForegroundColor = Constants.ThrowColor;
+		public ExitKeywordFormat() {
+			DisplayName = Constants.ExitKeyword;
+			ForegroundColor = Constants.ExitColor;
 			IsBold = true;
 		}
 	}
