@@ -20,6 +20,7 @@ namespace Codist.Margins
 		readonly IEditorFormatMap _editorFormatMap;
 		readonly IVerticalScrollBar _scrollBar;
 		readonly TaggerResult _tags;
+
 		//ToDo: Change brush colors according to user settings
 		readonly static Pen MarkerPen = new Pen(Brushes.LightGreen, 1);
 		readonly static Brush EmphasisBrush = new SolidColorBrush(Constants.CommentColor);
@@ -76,6 +77,7 @@ namespace Codist.Margins
 						var t = tags[i];
 						if (!(t.Start > change.OldEnd || t.End < change.OldPosition)) {
 							// remove tags within the updated range
+							Debug.WriteLine($"Removed [{t.Start}..{t.End}) {t.Tag.ClassificationType}");
 							tags.RemoveAt(i);
 						}
 						else if (t.Start > change.OldEnd) {
@@ -97,6 +99,7 @@ namespace Codist.Margins
 				}
 				InvalidateVisual();
 			};
+			_tags.Tagger.Margin = this;
 			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 			_textView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 

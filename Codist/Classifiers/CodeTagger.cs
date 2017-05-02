@@ -16,13 +16,11 @@ namespace Codist.Classifiers
     [TagType(typeof(ClassificationTag))]
     public class CodeTaggerProvider : IViewTaggerProvider
     {
-#pragma warning disable 649
 		[Import]
-		internal IClassificationTypeRegistryService ClassificationRegistry;
+		internal IClassificationTypeRegistryService ClassificationRegistry = null;
 
 		[Import]
-		internal IBufferTagAggregatorFactoryService Aggregator;
-#pragma warning restore 649
+		internal IBufferTagAggregatorFactoryService Aggregator = null;
 
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
@@ -76,9 +74,40 @@ namespace Codist.Classifiers
             _aggregator = aggregator;
 			_tags = tags;
 			_codeType = codeType;
+			_aggregator.TagsChanged += (s, args) => {
+				ReparseChanged(args.Span);
+			};
+			_aggregator.BatchedTagsChanged += (s, args) => {
+				if (Margin != null) {
+					Margin.InvalidateVisual();
+				}
+			};
 		}
 
-        public IEnumerable<ITagSpan<ClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
+		internal FrameworkElement Margin { get; set; }
+
+		void ReparseChanged(IMappingSpan span) {
+			foreach (var tagSpan in _aggregator.GetTags(span)) {
+				var className = tagSpan.Tag.ClassificationType.Classification;
+				if (_codeType == CodeType.CSharp) {
+					switch (className) {
+						case Constants.ClassName:
+						case Constants.InterfaceName:
+						case Constants.StructName:
+						case Constants.EnumName:
+							var start = tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position;
+							var end = tagSpan.Span.End.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position;
+							Debug.WriteLine($"tag changed add def: {className} [{start}..{end})");
+							if (end > start) {
+								_tags.Add(start, end, (ClassificationTag)tagSpan.Tag);
+							}
+							continue;
+					}
+				};
+			}
+		}
+
+		public IEnumerable<ITagSpan<ClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {
             if (spans.Count == 0) {
 				yield break;
@@ -92,6 +121,7 @@ namespace Codist.Classifiers
 			IEnumerable<IMappingTagSpan<IClassificationTag>> tagSpans;
 			if (_tags.LastParsed == 0) {
 				// perform a full parse for the first time
+				Debug.WriteLine("Full parse");
 				tagSpans = _aggregator.GetTags(new SnapshotSpan(snapshot, 0, snapshot.Length));
 				_tags.LastParsed = snapshot.Length;
 			}
@@ -102,9 +132,9 @@ namespace Codist.Classifiers
 
 				for (int i = _tags.Tags.Count - 1; i >= 0; i--) {
 					var t = _tags.Tags[i];
-					if (start <= t.Start && t.Start <= end
-						|| start <= t.End && t.End <= end
-						|| t.Start <= start && end <= t.End) {
+					if (start <= t.Start && t.Start < end
+						|| start <= t.End && t.End < end
+						|| t.Start <= start && end < t.End) {
 
 						// remove suspicious tags within parsing range
 						if (t.Start >= _tags.LastParsed) {
@@ -112,7 +142,7 @@ namespace Codist.Classifiers
 						}
 						// return cached tags if spans are within parsed tags
 						else {
-							Debug.WriteLine($"reuse cache {snapshot.GetText(t.Start, t.Length)} {t.Tag.ClassificationType.Classification}");
+							Debug.WriteLine($"reuse cache [{t.Start}..{t.End}) {snapshot.GetText(t.Start, t.Length)} {t.Tag.ClassificationType.Classification}");
 							yield return new TagSpan<ClassificationTag>(new SnapshotSpan(snapshot, t.Start, t.Length), t.Tag);
 						}
 					}
@@ -134,24 +164,24 @@ namespace Codist.Classifiers
 				var ss = tagSpan.Span.GetSpans(snapshot)[0];
 				if (_codeType == CodeType.CSharp) {
 					switch (className) {
-						//case Constants.ClassName:
-						//case Constants.InterfaceName:
-						//case Constants.StructName:
-						//case Constants.EnumName:
-						//	Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
-						//	yield return _tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
-						//	continue;
+						case Constants.ClassName:
+						case Constants.InterfaceName:
+						case Constants.StructName:
+						case Constants.EnumName:
+							Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
+							yield return _tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
+							continue;
 						case Constants.PreProcessorKeyword:
 							if (Matches(ss, "region") || Matches(ss, "pragma")) {
 								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
 							}
 							continue;
 						case Constants.Keyword:
-							if (Matches(ss, "class") || Matches(ss, "interface") || Matches(ss, "enum") || Matches(ss, "struct")) {
-								Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
-								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
-							}
-							else if (Matches(ss, "throw") || Matches(ss, "return")) {
+							//if (Matches(ss, "class") || Matches(ss, "interface") || Matches(ss, "enum") || Matches(ss, "struct")) {
+							//	Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
+							//	yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
+							//}
+							if (Matches(ss, "throw") || Matches(ss, "return")) {
 								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, _exitClassification));
 							}
 							continue;
@@ -293,6 +323,9 @@ namespace Codist.Classifiers
 			var s = span.Snapshot;
 			// the span can contain white spaces at the start or at the end, skip them
 			while (Char.IsWhiteSpace(s[--end]) && end > 0) {
+			}
+			if (s[end - 1] == ';') {
+				--end;
 			}
 			while (Char.IsWhiteSpace(s[start]) && start < end) {
 				start++;

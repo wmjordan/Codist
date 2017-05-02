@@ -12,6 +12,12 @@ namespace Codist.Views
 	{
 		static Dictionary<string, CommentStyleOption> _classifications;
 
+		readonly IClassificationFormatMap map;
+
+		readonly IClassificationTypeRegistryService regService;
+
+		bool isDecorating;
+
 		public CommentViewDecorator(ITextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service) {
 			view.GotAggregateFocus += this.TextView_GotAggregateFocus;
 			//Config.Instance.ConfigUpdated += this.SettingsSaved;
@@ -46,16 +52,6 @@ namespace Codist.Views
 		//	}
 		//}
 
-		private void TextView_GotAggregateFocus(object sender, EventArgs e) {
-			ITextView view;
-			if ((view = (sender as ITextView)) != null) {
-				view.GotAggregateFocus -= this.TextView_GotAggregateFocus;
-			}
-			if (!this.isDecorating) {
-				this.Decorate();
-			}
-		}
-
 		private void Decorate() {
 			try {
 				this.isDecorating = true;
@@ -83,6 +79,10 @@ namespace Codist.Views
 					map.SetExplicitTextProperties(item, SetProperties(p, style));
 				}
 			}
+		}
+
+		private double GetEditorTextSize() {
+			return this.map.GetTextProperties(this.regService.GetClassificationType("text")).FontRenderingEmSize;
 		}
 
 		private TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, CommentStyleOption styleOption) {
@@ -123,15 +123,14 @@ namespace Codist.Views
 			return properties;
 		}
 
-		private double GetEditorTextSize() {
-			return this.map.GetTextProperties(this.regService.GetClassificationType("text")).FontRenderingEmSize;
+		private void TextView_GotAggregateFocus(object sender, EventArgs e) {
+			ITextView view;
+			if ((view = (sender as ITextView)) != null) {
+				view.GotAggregateFocus -= this.TextView_GotAggregateFocus;
+			}
+			if (!this.isDecorating) {
+				this.Decorate();
+			}
 		}
-
-		private bool isDecorating;
-
-		private readonly IClassificationFormatMap map;
-
-		private readonly IClassificationTypeRegistryService regService;
-
 	}
 }

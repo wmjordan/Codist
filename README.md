@@ -17,3 +17,6 @@ Acknowledgements to the following extensions:
 * CommentsPlus: https://marketplace.visualstudio.com/items?itemName=mhoumann.CommentsPlus
 * Match Margin: https://marketplace.visualstudio.com/items?itemName=VisualStudioProductTeam.MatchMargin
 * Inheritance Margin: https://marketplace.visualstudio.com/items?itemName=SamHarwell.InheritanceMargin
+* Font Sizer: https://marketplace.visualstudio.com/items?itemName=KarlShifflettkdawg.FontSizer
+* CodeBlockEndTag: https://marketplace.visualstudio.com/items?itemName=KhaosPrinz.CodeBlockEndTag
+* Remarker: https://marketplace.visualstudio.com/items?itemName=GilYoder.Remarker-18580

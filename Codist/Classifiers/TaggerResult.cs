@@ -18,6 +18,18 @@ namespace Codist.Classifiers
 		public List<SpanTag> Tags { get; set; } = new List<SpanTag>();
 		public CodeTagger Tagger { get; set; }
 
+		public void Add(int start, int end, ClassificationTag tag) {
+			if (start < Start) {
+				Start = start;
+			}
+			for (int i = Tags.Count - 1; i >= 0; i--) {
+				if (Tags[i].Contains(start)) {
+					Tags[i] = new SpanTag(start, end - start, tag);
+					return;
+				}
+			}
+			Tags.Add(new SpanTag(start, end - start, tag));
+		}
 		public TagSpan<ClassificationTag> Add(TagSpan<ClassificationTag> tag) {
 			var s = tag.Span;
 			if (s.Start < Start) {

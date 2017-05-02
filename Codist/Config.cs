@@ -92,6 +92,7 @@ namespace Codist
 				new CommentLabel("---", CommentStyle.Heading6),
 				new CommentLabel("TODO", CommentStyle.ToDo, true) { AllowPunctuationDelimiter = true },
 				new CommentLabel("TO-DO", CommentStyle.ToDo, true) { AllowPunctuationDelimiter = true },
+				new CommentLabel("undone", CommentStyle.ToDo, true) { AllowPunctuationDelimiter = true },
 				new CommentLabel("NOTE", CommentStyle.Note, true) { AllowPunctuationDelimiter = true },
 				new CommentLabel("HACK", CommentStyle.Hack, true) { AllowPunctuationDelimiter = true },
 			});
@@ -125,6 +126,8 @@ namespace Codist
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	class CommentStyleOption
 	{
+		Color _backColor, _foreColor;
+
 		public CommentStyleOption() {
 		}
 		public CommentStyleOption(CommentStyle styleID, Color foregroundColor) {
@@ -149,21 +152,32 @@ namespace Codist
 		/// <summary>Gets or sets the font size of the comment. Font size number is relative to the editor text size.</summary>
 		public double FontSize { get; set; }
 		/// <summary>Gets or sets the foreground color to render the comment text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
-		public string ForegroundColor { get; set; }
+		public string ForegroundColor {
+			get { return _foreColor.ToHexString(); }
+			set { _foreColor = Utilities.ParseColor(value); }
+		}
 		/// <summary>Gets or sets the foreground color to render the comment text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
-		public string BackgroundColor { get; set; }
+		public string BackgroundColor {
+			get { return _backColor.ToHexString(); }
+			set { _backColor = Utilities.ParseColor(value); }
+		}
 		/// <summary>Gets or sets whether the comment is marked on the scrollbar.</summary>
 		public bool UseScrollBarMarker { get; set; }
 		/// <summary>Gets or sets the font.</summary>
 		public string Font { get; internal set; }
 
 		internal Color ForeColor {
-			get { return Utilities.ParseColor(ForegroundColor); }
+			get { return _foreColor; }
+			set { _foreColor = value; }
 		}
 		internal Color BackColor {
-			get { return Utilities.ParseColor(BackgroundColor); }
+			get { return _backColor; }
+			set { _backColor = value; }
 		}
 
+		public CommentStyleOption Clone() {
+			return (CommentStyleOption)MemberwiseClone();
+		}
 	}
 
 	[DebuggerDisplay("{Label} IgnoreCase: {IgnoreCase} AllowPunctuationDelimiter: {AllowPunctuationDelimiter}")]
@@ -200,71 +214,9 @@ namespace Codist
 		internal StringComparison Comparison { get { return _stringComparison; } }
 		/// <summary>Gets or sets the comment style.</summary>
 		public CommentStyle StyleID { get; set; }
-	}
 
-	static class Utilities
-	{
-		public static Color ParseColor(string colorText) {
-			if (String.IsNullOrEmpty(colorText) || colorText[0] != '#' || colorText.Length != 7 && colorText.Length != 9) {
-				return Colors.Transparent;
-			}
-			try {
-				byte a = 0xFF, r, g, b;
-				if (colorText.Length == 7
-					&& ParseByte(colorText, 1, out r)
-					&& ParseByte(colorText, 3, out g)
-					&& ParseByte(colorText, 5, out b)) {
-					return Color.FromArgb(a, r, g, b);
-				}
-				if (colorText.Length == 9
-					&& ParseByte(colorText, 1, out a)
-					&& ParseByte(colorText, 3, out r)
-					&& ParseByte(colorText, 5, out g)
-					&& ParseByte(colorText, 7, out b)) {
-					return Color.FromArgb(a, r, g, b);
-				}
-			}
-			catch (Exception ex) {
-				Debug.WriteLine(ex);
-			}
-			return Colors.Transparent;
-		}
-
-		public static bool ParseByte(string text, int index, out byte value) {
-			var h = text[index];
-			var l = text[++index];
-			var b = 0;
-			if (h >= '0' && h <= '9') {
-				b = (h - '0') << 4;
-			}
-			else if (h >= 'A' && h <= 'F') {
-				b = (h - 'A' + 10) << 4;
-			}
-			else if (h >= 'a' && h <= 'f') {
-				b = (h - 'a' + 10) << 4;
-			}
-			else {
-				value = 0;
-				return false;
-			}
-			if (l >= '0' && l <= '9') {
-				b |= (l - '0');
-			}
-			else if (l >= 'A' && l <= 'F') {
-				b |= (l - 'A' + 10);
-			}
-			else if (l >= 'a' && l <= 'f') {
-				b |= (l - 'a' + 10);
-			}
-			else {
-				value = 0;
-				return false;
-			}
-			value = (byte)b;
-			return true;
-		}
-		public static string ToHexString(this Color color) {
-			return "#" + color.A.ToString("X2") + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
+		public CommentLabel Clone() {
+			return (CommentLabel)MemberwiseClone();
 		}
 	}
 }
