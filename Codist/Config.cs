@@ -9,6 +9,8 @@ namespace Codist
 {
 	class Config
 	{
+		static DateTime LastSaved;
+
 		public static readonly string Path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Codist\\Config.json";
 		public static readonly Config Instance = LoadConfig();
 
@@ -57,12 +59,17 @@ namespace Codist
 		}
 
 		public void SaveConfig() {
+			//HACK: prevent redundant save operations issued by configuration pages
+			if (LastSaved.AddSeconds(2) > DateTime.Now) {
+				return;
+			}
 			try {
 				var d = System.IO.Path.GetDirectoryName(Path);
 				if (Directory.Exists(d) == false) {
 					Directory.CreateDirectory(d);
 				}
 				File.WriteAllText(Path, JsonConvert.SerializeObject(this, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter()));
+				LastSaved = DateTime.Now;
 			}
 			catch (Exception ex) {
 				Debug.WriteLine(ex.ToString());

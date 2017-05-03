@@ -25,8 +25,8 @@ namespace Codist.Classifiers
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
 			var tagger = Aggregator.CreateTagAggregator<IClassificationTag>(buffer);
-			var tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
 			textView.Closed += (s, args) => { tagger.Dispose(); };
+			var tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
 			var codeTagger = new CodeTagger(ClassificationRegistry, tagger, tags, CodeTagger.GetCodeType(textView.TextBuffer.ContentType));
 			tags.Tagger = codeTagger;
 			return codeTagger as ITagger<T>;
@@ -74,9 +74,9 @@ namespace Codist.Classifiers
             _aggregator = aggregator;
 			_tags = tags;
 			_codeType = codeType;
-			_aggregator.TagsChanged += (s, args) => {
-				ReparseChanged(args.Span);
-			};
+			//_aggregator.TagsChanged += (s, args) => {
+			//	ReparseChanged(args.Span);
+			//};
 			_aggregator.BatchedTagsChanged += (s, args) => {
 				if (Margin != null) {
 					Margin.InvalidateVisual();
@@ -87,7 +87,8 @@ namespace Codist.Classifiers
 		internal FrameworkElement Margin { get; set; }
 
 		void ReparseChanged(IMappingSpan span) {
-			foreach (var tagSpan in _aggregator.GetTags(span)) {
+			Debug.WriteLine($"reparse changed [{span.Start.GetPoint(span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}..{span.End.GetPoint(span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position})");
+			foreach (var tagSpan in _aggregator.GetTags(span.GetSpans(span.AnchorBuffer))) {
 				var className = tagSpan.Tag.ClassificationType.Classification;
 				if (_codeType == CodeType.CSharp) {
 					switch (className) {
@@ -100,6 +101,16 @@ namespace Codist.Classifiers
 							Debug.WriteLine($"tag changed add def: {className} [{start}..{end})");
 							if (end > start) {
 								_tags.Add(start, end, (ClassificationTag)tagSpan.Tag);
+							}
+							continue;
+						case Constants.Keyword:
+							//if (Matches(ss, "class") || Matches(ss, "interface") || Matches(ss, "enum") || Matches(ss, "struct")) {
+							//	Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
+							//	yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
+							//}
+							var ss = tagSpan.Span.GetSpans(tagSpan.Span.AnchorBuffer)[0];
+							if (Matches(ss, "throw") || Matches(ss, "return")) {
+								_tags.Add(new TagSpan<ClassificationTag>(ss, _exitClassification));
 							}
 							continue;
 					}
@@ -130,33 +141,34 @@ namespace Codist.Classifiers
 				var end = spans[spans.Count - 1].End;
 				Debug.WriteLine($"Get tag [{start.Position}..{end.Position})");
 
-				for (int i = _tags.Tags.Count - 1; i >= 0; i--) {
-					var t = _tags.Tags[i];
-					if (start <= t.Start && t.Start < end
-						|| start <= t.End && t.End < end
-						|| t.Start <= start && end < t.End) {
+				tagSpans = _aggregator.GetTags(spans);
+				//for (int i = _tags.Tags.Count - 1; i >= 0; i--) {
+				//	var t = _tags.Tags[i];
+				//	if (start <= t.Start && t.Start < end
+				//		|| start <= t.End && t.End < end
+				//		|| t.Start <= start && end < t.End) {
 
-						// remove suspicious tags within parsing range
-						if (t.Start >= _tags.LastParsed) {
-							_tags.Tags.RemoveAt(i);
-						}
-						// return cached tags if spans are within parsed tags
-						else {
-							Debug.WriteLine($"reuse cache [{t.Start}..{t.End}) {snapshot.GetText(t.Start, t.Length)} {t.Tag.ClassificationType.Classification}");
-							yield return new TagSpan<ClassificationTag>(new SnapshotSpan(snapshot, t.Start, t.Length), t.Tag);
-						}
-					}
-				}
+				//		// remove suspicious tags within parsing range
+				//		if (t.Start >= _tags.LastParsed) {
+				//			_tags.Tags.RemoveAt(i);
+				//		}
+				//		// return cached tags if spans are within parsed tags
+				//		else {
+				//			Debug.WriteLine($"reuse cache [{t.Start}..{t.End}) {snapshot.GetText(t.Start, t.Length)} {t.Tag.ClassificationType.Classification}");
+				//			yield return new TagSpan<ClassificationTag>(new SnapshotSpan(snapshot, t.Start, t.Length), t.Tag);
+				//		}
+				//	}
+				//}
 
-				// parse the updated part
-				if (end > _tags.LastParsed) {
-					Debug.WriteLine($"parse updated {snapshot.GetText(_tags.LastParsed, end.Position - _tags.LastParsed)}");
-					tagSpans = _aggregator.GetTags(new SnapshotSpan(snapshot, _tags.LastParsed, end.Position - _tags.LastParsed));
-					_tags.LastParsed = end.Position;
-				}
-				else {
-					yield break;
-				}
+				//// parse the updated part
+				//if (end > _tags.LastParsed) {
+				//	Debug.WriteLine($"parse updated {snapshot.GetText(_tags.LastParsed, end.Position - _tags.LastParsed)}");
+				//	tagSpans = _aggregator.GetTags(new SnapshotSpan(snapshot, _tags.LastParsed, end.Position - _tags.LastParsed));
+				//	_tags.LastParsed = end.Position;
+				//}
+				//else {
+				//	yield break;
+				//}
 			}
 
 			foreach (var tagSpan in tagSpans) {
@@ -323,9 +335,6 @@ namespace Codist.Classifiers
 			var s = span.Snapshot;
 			// the span can contain white spaces at the start or at the end, skip them
 			while (Char.IsWhiteSpace(s[--end]) && end > 0) {
-			}
-			if (s[end - 1] == ';') {
-				--end;
 			}
 			while (Char.IsWhiteSpace(s[start]) && start < end) {
 				start++;

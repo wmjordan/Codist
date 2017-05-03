@@ -1,16 +1,22 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Forms;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Codist.Options
 {
 	public partial class CommentTaggerOptionControl : UserControl
 	{
+		readonly PageBase _service;
 		CommentLabel _activeLabel;
 		bool _uiLock;
 		bool _loaded;
 
 		public CommentTaggerOptionControl() {
 			InitializeComponent();
+		}
+		internal CommentTaggerOptionControl(PageBase service) : this() {
+			_service = service;
 		}
 
 		protected override void OnLoad(EventArgs e) {
@@ -25,14 +31,33 @@ namespace Codist.Options
 			foreach (var item in Enum.GetNames(typeof(CommentStyle))) {
 				_StyleBox.Items.Add(item);
 			}
-			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
+
 			_ApplyContentBox.CheckedChanged += StyleApplicationChanged;
 			_ApplyTagBox.CheckedChanged += StyleApplicationChanged;
 			_IgnoreCaseBox.CheckedChanged += (s, args) => { if (_uiLock == false) { _activeLabel.IgnoreCase = _IgnoreCaseBox.Checked; } };
 			_EndWithPunctuationBox.CheckedChanged += (s, args) => { if (_uiLock == false) { _activeLabel.AllowPunctuationDelimiter = _EndWithPunctuationBox.Checked; } };
 			_StyleBox.SelectedIndexChanged += (s, args) => { if (_uiLock == false) { _activeLabel.StyleID = (CommentStyle)_StyleBox.SelectedIndex; } };
 			_TagTextBox.TextChanged += (s, args) => { if (_uiLock == false) { _activeLabel.Label = _TagTextBox.Text; } };
+			foreach (var item in new Control[] { _StyleBox, _TagTextBox }) {
+				item.Click += MarkChanged;
+			}
+			foreach (var item in new[] { _ApplyContentBox, _ApplyTagBox,  }) {
+				item.CheckedChanged += MarkChanged;
+			}
+			foreach (var item in new[] { _IgnoreCaseBox, _EndWithPunctuationBox }) {
+				item.CheckStateChanged += MarkChanged;
+			}
+
+			_PreviewBox.SizeChanged += (s, args) => { UpdatePreview(); };
+			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
 			_loaded = true;
+		}
+
+		void MarkChanged(object sender, EventArgs args) {
+			if (_uiLock) {
+				return;
+			}
+			UpdatePreview();
 		}
 
 		void StyleApplicationChanged(object sender, EventArgs e) {
@@ -68,7 +93,33 @@ namespace Codist.Options
 		}
 
 		void UpdatePreview() {
+			if (_activeLabel == null) {
+				return;
+			}
+			var bmp = new Bitmap(_PreviewBox.Width, _PreviewBox.Height);
+			var fs = _service.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor));
+			var label = _activeLabel;
+			RenderPreview(bmp, fs, label);
+			_PreviewBox.Image = bmp;
+		}
 
+		static void RenderPreview(Bitmap bmp, FontInfo fs, CommentLabel label) {
+			var style = Config.Instance.Styles.Find(i => i.StyleID == label.StyleID);
+			if (style == null || String.IsNullOrEmpty(label.Label)) {
+				return;
+			}
+			using (var g = Graphics.FromImage(bmp))
+			using (var f = new Font(fs.bstrFaceName, (float)(fs.wPointSize + style.FontSize), PageBase.GetFontStyle(style)))
+			using (var b = new SolidBrush(style.ForeColor.ToGdiColor()))
+			using (var p = new SolidBrush(style.BackColor.ToGdiColor())) {
+				var t = label.StyleApplication == CommentStyleApplication.Tag ? label.Label : "Preview 01ioIOlLWM";
+				var m = g.MeasureString(t, f, bmp.Size);
+				g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+				g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+				g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+				g.FillRectangle(p, new Rectangle(0, 0, (int)m.Width, (int)m.Height));
+				g.DrawString(t, f, b, new RectangleF(PointF.Empty, bmp.PhysicalDimension));
+			}
 		}
 	}
 }

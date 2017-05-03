@@ -264,6 +264,7 @@
 			this._SyntaxListBox.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this._NameColumn});
 			this._SyntaxListBox.FullRowSelect = true;
+			this._SyntaxListBox.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
 			this._SyntaxListBox.HideSelection = false;
 			this._SyntaxListBox.Location = new System.Drawing.Point(16, 35);
 			this._SyntaxListBox.MultiSelect = false;

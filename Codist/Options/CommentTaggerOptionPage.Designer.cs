@@ -29,6 +29,7 @@
 			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this._PreviewBox = new System.Windows.Forms.PictureBox();
 			this._EndWithPunctuationBox = new System.Windows.Forms.CheckBox();
 			this._ApplyTagBox = new System.Windows.Forms.RadioButton();
 			this._ApplyContentBox = new System.Windows.Forms.RadioButton();
@@ -38,7 +39,6 @@
 			this._IgnoreCaseBox = new System.Windows.Forms.CheckBox();
 			this._TagTextBox = new System.Windows.Forms.TextBox();
 			this.label2 = new System.Windows.Forms.Label();
-			this._PreviewBox = new System.Windows.Forms.PictureBox();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._PreviewBox)).BeginInit();
 			this.SuspendLayout();
@@ -50,6 +50,7 @@
 			this._SyntaxListBox.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this._NameColumn});
 			this._SyntaxListBox.FullRowSelect = true;
+			this._SyntaxListBox.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
 			this._SyntaxListBox.HideSelection = false;
 			this._SyntaxListBox.Location = new System.Drawing.Point(16, 32);
 			this._SyntaxListBox.MultiSelect = false;
@@ -95,6 +96,18 @@
 			this.groupBox1.TabIndex = 4;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Tag Definition";
+			// 
+			// _PreviewBox
+			// 
+			this._PreviewBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this._PreviewBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this._PreviewBox.Location = new System.Drawing.Point(7, 184);
+			this._PreviewBox.Name = "_PreviewBox";
+			this._PreviewBox.Size = new System.Drawing.Size(298, 121);
+			this._PreviewBox.TabIndex = 8;
+			this._PreviewBox.TabStop = false;
 			// 
 			// _EndWithPunctuationBox
 			// 
@@ -184,18 +197,6 @@
 			this.label2.Size = new System.Drawing.Size(79, 15);
 			this.label2.TabIndex = 0;
 			this.label2.Text = "Tag text:";
-			// 
-			// _PreviewBox
-			// 
-			this._PreviewBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this._PreviewBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this._PreviewBox.Location = new System.Drawing.Point(7, 184);
-			this._PreviewBox.Name = "_PreviewBox";
-			this._PreviewBox.Size = new System.Drawing.Size(298, 121);
-			this._PreviewBox.TabIndex = 8;
-			this._PreviewBox.TabStop = false;
 			// 
 			// CommentTaggerOptionControl
 			// 

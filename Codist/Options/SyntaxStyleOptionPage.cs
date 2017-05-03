@@ -7,7 +7,7 @@ namespace Codist.Options
 {
 	public partial class SyntaxStyleOptionPage : UserControl
 	{
-		readonly SyntaxStyle _service;
+		readonly PageBase _service;
 		CommentStyleOption _activeStyle;
 		bool _uiLock;
 		bool _loaded;
@@ -15,7 +15,7 @@ namespace Codist.Options
 		public SyntaxStyleOptionPage() {
 			InitializeComponent();
 		}
-		internal SyntaxStyleOptionPage(SyntaxStyle service) : this() {
+		internal SyntaxStyleOptionPage(PageBase service) : this() {
 			_service = service;
 		}
 
@@ -45,8 +45,8 @@ namespace Codist.Options
 			foreach (var item in new []{ _BackColorTransBox, _BackColorTransBox, _FontSizeBox}) {
 				item.ValueChanged += MarkChanged;
 			}
-			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
 			_PreviewBox.SizeChanged += (s, args) => { UpdatePreview(); };
+			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
 			_loaded = true;
 		}
 
@@ -58,10 +58,16 @@ namespace Codist.Options
 		}
 
 		private void SetForeColor(object sender, EventArgs args) {
+			if (_uiLock) {
+				return;
+			}
 			_activeStyle.ForeColor = _ForeColorButton.SelectedColor.ChangeTrasparency((byte)_ForeColorTransBox.Value).ToWpfColor();
 		}
 
 		private void SetBackColor(object sender, EventArgs args) {
+			if (_uiLock) {
+				return;
+			}
 			_activeStyle.BackColor = _BackColorButton.SelectedColor.ChangeTrasparency((byte)_BackColorTransBox.Value).ToWpfColor();
 		}
 
@@ -107,34 +113,17 @@ namespace Codist.Options
 
 		static void RenderPreview(Bitmap bmp, FontInfo fs, CommentStyleOption style) {
 			using (var g = Graphics.FromImage(bmp))
-			using (var f = new Font(fs.bstrFaceName, (float)(fs.wPointSize + style.FontSize), GetFontStyle(style)))
+			using (var f = new Font(fs.bstrFaceName, (float)(fs.wPointSize + style.FontSize), PageBase.GetFontStyle(style)))
 			using (var b = new SolidBrush(style.ForeColor.ToGdiColor()))
 			using (var p = new SolidBrush(style.BackColor.ToGdiColor())) {
-				const string t = "Preview 01 io IO lL WM";
-				var m = g.MeasureString(t, f);
+				const string t = "Preview 01ioIOlLWM";
+				var m = g.MeasureString(t, f, bmp.Size);
 				g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 				g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 				g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-				g.FillRectangle(p, new Rectangle(0, 0, bmp.Width, (int)m.Height));
+				g.FillRectangle(p, new Rectangle(0, 0, (int)m.Width, (int)m.Height));
 				g.DrawString(t, f, b, new RectangleF(PointF.Empty, bmp.PhysicalDimension));
 			}
-		}
-
-		static FontStyle GetFontStyle(CommentStyleOption activeStyle) {
-			var f = FontStyle.Regular;
-			if (activeStyle.Bold == true) {
-				f |= FontStyle.Bold;
-			}
-			if (activeStyle.Italic == true) {
-				f |= FontStyle.Italic;
-			}
-			if (activeStyle.Underline == true) {
-				f |= FontStyle.Underline;
-			}
-			if (activeStyle.StrikeThrough == true) {
-				f |= FontStyle.Strikeout;
-			}
-			return f;
 		}
 
 		static CheckState ToCheckState(bool? value) {
