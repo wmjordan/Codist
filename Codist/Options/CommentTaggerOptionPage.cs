@@ -7,7 +7,7 @@ namespace Codist.Options
 {
 	public partial class CommentTaggerOptionControl : UserControl
 	{
-		readonly PageBase _service;
+		readonly CommentTagger _service;
 		CommentLabel _activeLabel;
 		bool _uiLock;
 		bool _loaded;
@@ -15,7 +15,7 @@ namespace Codist.Options
 		public CommentTaggerOptionControl() {
 			InitializeComponent();
 		}
-		internal CommentTaggerOptionControl(PageBase service) : this() {
+		internal CommentTaggerOptionControl(CommentTagger service) : this() {
 			_service = service;
 		}
 
@@ -28,7 +28,12 @@ namespace Codist.Options
 			foreach (var item in Config.Instance.Labels) {
 				_SyntaxListBox.Items.Add(new ListViewItem(item.Label) { Tag = item });
 			}
-			foreach (var item in Enum.GetNames(typeof(CommentStyle))) {
+			var t = typeof(CommentStyles);
+			foreach (var item in Enum.GetNames(t)) {
+				var d = t.GetEnumDescription(item);
+				if (d == null || d.StartsWith("Comment: ", StringComparison.Ordinal) == false) {
+					continue;
+				}
 				_StyleBox.Items.Add(item);
 			}
 
@@ -36,7 +41,7 @@ namespace Codist.Options
 			_ApplyTagBox.CheckedChanged += StyleApplicationChanged;
 			_IgnoreCaseBox.CheckedChanged += (s, args) => { if (_uiLock == false) { _activeLabel.IgnoreCase = _IgnoreCaseBox.Checked; } };
 			_EndWithPunctuationBox.CheckedChanged += (s, args) => { if (_uiLock == false) { _activeLabel.AllowPunctuationDelimiter = _EndWithPunctuationBox.Checked; } };
-			_StyleBox.SelectedIndexChanged += (s, args) => { if (_uiLock == false) { _activeLabel.StyleID = (CommentStyle)_StyleBox.SelectedIndex; } };
+			_StyleBox.SelectedIndexChanged += (s, args) => { if (_uiLock == false) { _activeLabel.StyleID = (CommentStyles)_StyleBox.SelectedIndex; } };
 			_TagTextBox.TextChanged += (s, args) => { if (_uiLock == false) { _activeLabel.Label = _TagTextBox.Text; } };
 			foreach (var item in new Control[] { _StyleBox, _TagTextBox }) {
 				item.Click += MarkChanged;

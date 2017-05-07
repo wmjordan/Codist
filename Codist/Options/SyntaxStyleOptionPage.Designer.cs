@@ -216,6 +216,7 @@
 			this._StrikeBox.Size = new System.Drawing.Size(133, 19);
 			this._StrikeBox.TabIndex = 4;
 			this._StrikeBox.Text = "Strikethrough";
+			this._StrikeBox.ThreeState = true;
 			this._StrikeBox.UseVisualStyleBackColor = true;
 			// 
 			// _UnderlineBox
@@ -226,6 +227,7 @@
 			this._UnderlineBox.Size = new System.Drawing.Size(101, 19);
 			this._UnderlineBox.TabIndex = 3;
 			this._UnderlineBox.Text = "Underline";
+			this._UnderlineBox.ThreeState = true;
 			this._UnderlineBox.UseVisualStyleBackColor = true;
 			// 
 			// _ItalicBox
@@ -236,6 +238,7 @@
 			this._ItalicBox.Size = new System.Drawing.Size(77, 19);
 			this._ItalicBox.TabIndex = 2;
 			this._ItalicBox.Text = "Italic";
+			this._ItalicBox.ThreeState = true;
 			this._ItalicBox.UseVisualStyleBackColor = true;
 			// 
 			// _BoldBox
@@ -246,6 +249,7 @@
 			this._BoldBox.Size = new System.Drawing.Size(61, 19);
 			this._BoldBox.TabIndex = 1;
 			this._BoldBox.Text = "Bold";
+			this._BoldBox.ThreeState = true;
 			this._BoldBox.UseVisualStyleBackColor = true;
 			// 
 			// label2

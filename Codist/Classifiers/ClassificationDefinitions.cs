@@ -15,7 +15,7 @@ namespace Codist.Classifiers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition("Keyword")]
-		[Name(Constants.ExitKeyword)]
+		[Name(Constants.CodeExitKeyword)]
 		internal static ClassificationTypeDefinition ThrowKeywordClassificationType;
 
 		[Export(typeof(ClassificationTypeDefinition))]
@@ -82,6 +82,51 @@ namespace Codist.Classifiers
 		[BaseDefinition("Comment")]
 		[Name(Constants.Heading6Comment)]
 		internal static ClassificationTypeDefinition Heading6CommentClassificationType;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition("Comment")]
+		[Name(Constants.Task1Comment)]
+		internal static ClassificationTypeDefinition Task1CommentClassificationType;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition("Comment")]
+		[Name(Constants.Task2Comment)]
+		internal static ClassificationTypeDefinition Task2CommentClassificationType;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition("Comment")]
+		[Name(Constants.Task3Comment)]
+		internal static ClassificationTypeDefinition Task3CommentClassificationType;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition("Comment")]
+		[Name(Constants.Task4Comment)]
+		internal static ClassificationTypeDefinition Task4CommentClassificationType;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition("Comment")]
+		[Name(Constants.Task5Comment)]
+		internal static ClassificationTypeDefinition Task5CommentClassificationType;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition("Comment")]
+		[Name(Constants.Task6Comment)]
+		internal static ClassificationTypeDefinition Task6CommentClassificationType;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition("Comment")]
+		[Name(Constants.Task7Comment)]
+		internal static ClassificationTypeDefinition Task7CommentClassificationType;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition("Comment")]
+		[Name(Constants.Task8Comment)]
+		internal static ClassificationTypeDefinition Task8CommentClassificationType;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition("Comment")]
+		[Name(Constants.Task9Comment)]
+		internal static ClassificationTypeDefinition Task9CommentClassificationType;
 #pragma warning restore 649
 	}
 }

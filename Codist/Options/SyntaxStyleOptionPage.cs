@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -8,15 +9,17 @@ namespace Codist.Options
 	public partial class SyntaxStyleOptionPage : UserControl
 	{
 		readonly PageBase _service;
-		CommentStyleOption _activeStyle;
+		readonly IEnumerable<StyleBase> _styles;
+		StyleBase _activeStyle;
 		bool _uiLock;
 		bool _loaded;
 
 		public SyntaxStyleOptionPage() {
 			InitializeComponent();
 		}
-		internal SyntaxStyleOptionPage(PageBase service) : this() {
+		internal SyntaxStyleOptionPage(PageBase service, IEnumerable<StyleBase> styles) : this() {
 			_service = service;
+			_styles = styles;
 		}
 
 		protected override void OnLoad(EventArgs e) {
@@ -24,8 +27,8 @@ namespace Codist.Options
 			if (_loaded) {
 				return;
 			}
-			foreach (var item in Config.Instance.Styles) {
-				_SyntaxListBox.Items.Add(new ListViewItem(item.StyleID.ToString()) { Tag = item });
+			foreach (var item in _styles) {
+				_SyntaxListBox.Items.Add(new ListViewItem(item.ToString()) { Tag = item });
 			}
 			_BackColorButton.Click += SetBackColor;
 			_BackColorTransBox.ValueChanged += SetBackColor;
@@ -75,7 +78,7 @@ namespace Codist.Options
 			if (e.ItemIndex == -1) {
 				return;
 			}
-			var i = e.Item.Tag as CommentStyleOption;
+			var i = e.Item.Tag as StyleBase;
 			if (i == null) {
 				return;
 			}
@@ -111,7 +114,7 @@ namespace Codist.Options
 			_PreviewBox.Image = bmp;
 		}
 
-		static void RenderPreview(Bitmap bmp, FontInfo fs, CommentStyleOption style) {
+		static void RenderPreview(Bitmap bmp, FontInfo fs, StyleBase style) {
 			using (var g = Graphics.FromImage(bmp))
 			using (var f = new Font(fs.bstrFaceName, (float)(fs.wPointSize + style.FontSize), PageBase.GetFontStyle(style)))
 			using (var b = new SolidBrush(style.ForeColor.ToGdiColor()))

@@ -38,7 +38,8 @@ namespace Codist
 	[PackageRegistration(UseManagedResourcesOnly = true)]
 	[InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
 	[Guid(PackageGuidString)]
-	[ProvideOptionPage(typeof(Options.SyntaxStyle), "Codist", "Syntax style", 0, 0, true)]
+	[ProvideOptionPage(typeof(Options.CodeStyle), "Codist", "Code style", 0, 0, true)]
+	[ProvideOptionPage(typeof(Options.CommentStyle), "Codist", "Comment style", 0, 0, true)]
 	[ProvideOptionPage(typeof(Options.CommentTagger), "Codist", "Comment tagger", 0, 0, true)]
 	[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
 	public sealed class CodistPackage : Package

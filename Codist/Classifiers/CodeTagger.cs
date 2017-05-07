@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Reflection;
 using System.Windows;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -56,20 +57,20 @@ namespace Codist.Classifiers
         internal CodeTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags, CodeType codeType)
         {
 			if (_commentClassifications == null) {
-				var t = typeof(CommentStyle);
+				var t = typeof(CommentStyles);
 				var styleNames = Enum.GetNames(t);
 				_commentClassifications = new ClassificationTag[styleNames.Length];
 				foreach (var styleName in styleNames) {
 					var f = t.GetField(styleName);
-					var d = f.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false);
-					if (d.Length == 0) {
+					var d = f.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>();
+					if (d == null) {
 						continue;
 					}
-					var ct = registry.GetClassificationType((d[0] as System.ComponentModel.DescriptionAttribute).Description);
+					var ct = registry.GetClassificationType(d.Description);
 					_commentClassifications[(int)f.GetValue(null)] = new ClassificationTag(ct);
 				}
 			}
-			_exitClassification = new ClassificationTag(registry.GetClassificationType(Constants.ExitKeyword));
+			_exitClassification = new ClassificationTag(registry.GetClassificationType(Constants.CodeExitKeyword));
 
             _aggregator = aggregator;
 			_tags = tags;
@@ -92,10 +93,10 @@ namespace Codist.Classifiers
 				var className = tagSpan.Tag.ClassificationType.Classification;
 				if (_codeType == CodeType.CSharp) {
 					switch (className) {
-						case Constants.ClassName:
-						case Constants.InterfaceName:
-						case Constants.StructName:
-						case Constants.EnumName:
+						case Constants.CodeClassName:
+						case Constants.CodeInterfaceName:
+						case Constants.CodeStructName:
+						case Constants.CodeEnumName:
 							var start = tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position;
 							var end = tagSpan.Span.End.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position;
 							Debug.WriteLine($"tag changed add def: {className} [{start}..{end})");
@@ -103,7 +104,7 @@ namespace Codist.Classifiers
 								_tags.Add(start, end, (ClassificationTag)tagSpan.Tag);
 							}
 							continue;
-						case Constants.Keyword:
+						case Constants.CodeKeyword:
 							//if (Matches(ss, "class") || Matches(ss, "interface") || Matches(ss, "enum") || Matches(ss, "struct")) {
 							//	Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
 							//	yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
@@ -176,24 +177,24 @@ namespace Codist.Classifiers
 				var ss = tagSpan.Span.GetSpans(snapshot)[0];
 				if (_codeType == CodeType.CSharp) {
 					switch (className) {
-						case Constants.ClassName:
-						case Constants.InterfaceName:
-						case Constants.StructName:
-						case Constants.EnumName:
+						case Constants.CodeClassName:
+						case Constants.CodeInterfaceName:
+						case Constants.CodeStructName:
+						case Constants.CodeEnumName:
 							Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
 							yield return _tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
 							continue;
-						case Constants.PreProcessorKeyword:
+						case Constants.CodePreprocessorKeyword:
 							if (Matches(ss, "region") || Matches(ss, "pragma")) {
 								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
 							}
 							continue;
-						case Constants.Keyword:
+						case Constants.CodeKeyword:
 							//if (Matches(ss, "class") || Matches(ss, "interface") || Matches(ss, "enum") || Matches(ss, "struct")) {
 							//	Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
 							//	yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
 							//}
-							if (Matches(ss, "throw") || Matches(ss, "return")) {
+							if (Matches(ss, "throw") || Matches(ss, "return") || Matches(ss, "yield")) {
 								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, _exitClassification));
 							}
 							continue;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Drawing;
@@ -7,6 +8,7 @@ using System.Windows.Forms;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.Options
@@ -29,7 +31,7 @@ namespace Codist.Options
 				storage.CloseCategory();
 			}
 		}
-		internal static FontStyle GetFontStyle(CommentStyleOption activeStyle) {
+		internal static FontStyle GetFontStyle(StyleBase activeStyle) {
 			var f = FontStyle.Regular;
 			if (activeStyle.Bold == true) {
 				f |= FontStyle.Bold;
@@ -55,18 +57,34 @@ namespace Codist.Options
 	}
 
 	[Guid("8ECD56D1-87C1-47E2-9FB0-742B0FF35FEF")]
-	class SyntaxStyle : PageBase
+	class CodeStyle : PageBase
 	{
 		SyntaxStyleOptionPage _control;
 
 		protected override IWin32Window Window {
 			get {
-				return _control ?? (_control = new SyntaxStyleOptionPage(this));
+				return _control ?? (_control = new SyntaxStyleOptionPage(this, Config.Instance.CodeStyles));
 			}
 		}
 		protected override void Dispose(bool disposing) {
-			base.Dispose(disposing);
 			_control.Dispose();
+			base.Dispose(disposing);
+		}
+	}
+
+	[Guid("4C16F280-BE29-4152-A6C5-58EEC5398FD4")]
+	class CommentStyle : PageBase
+	{
+		SyntaxStyleOptionPage _control;
+
+		protected override IWin32Window Window {
+			get {
+				return _control ?? (_control = new SyntaxStyleOptionPage(this, Config.Instance.Styles));
+			}
+		}
+		protected override void Dispose(bool disposing) {
+			_control.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -74,14 +92,15 @@ namespace Codist.Options
 	class CommentTagger : PageBase
 	{
 		CommentTaggerOptionControl _control;
+
 		protected override IWin32Window Window {
 			get {
 				return _control ?? (_control = new CommentTaggerOptionControl(this));
 			}
 		}
 		protected override void Dispose(bool disposing) {
-			base.Dispose(disposing);
 			_control.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 }

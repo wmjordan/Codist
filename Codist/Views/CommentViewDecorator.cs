@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Classification;
@@ -10,7 +11,7 @@ namespace Codist.Views
 {
 	internal sealed class CommentViewDecorator
 	{
-		static Dictionary<string, CommentStyleOption> _classifications;
+		static Dictionary<string, StyleBase> _classifications;
 
 		readonly IClassificationFormatMap map;
 
@@ -19,23 +20,38 @@ namespace Codist.Views
 		bool isDecorating;
 
 		public CommentViewDecorator(ITextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service) {
-			view.GotAggregateFocus += this.TextView_GotAggregateFocus;
-			//Config.Instance.ConfigUpdated += this.SettingsSaved;
+			view.GotAggregateFocus += TextView_GotAggregateFocus;
+			Config.Instance.ConfigUpdated += SettingsSaved;
 			this.map = map;
-			this.regService = service;
+			regService = service;
 
 			if (_classifications == null) {
-				var t = typeof(CommentStyle);
-				var styleNames = Enum.GetNames(t);
-				_classifications = new Dictionary<string, CommentStyleOption>(styleNames.Length);
+				var c = typeof(CommentStyles);
+				var styleNames = Enum.GetNames(c);
+				var cs = typeof(CodeStyles);
+				var codeStyles = Enum.GetNames(cs);
+				_classifications = new Dictionary<string, StyleBase>(styleNames.Length + codeStyles.Length);
 				foreach (var styleName in styleNames) {
-					var f = t.GetField(styleName);
+					var f = c.GetField(styleName);
 					var d = f.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false);
 					if (d.Length == 0) {
 						continue;
 					}
 					var ct = service.GetClassificationType((d[0] as System.ComponentModel.DescriptionAttribute).Description);
-					var cso = Config.Instance.Styles.Find(i => i.StyleID == (CommentStyle)f.GetValue(null));
+					var cso = Config.Instance.Styles.Find(i => i.StyleID == (CommentStyles)f.GetValue(null));
+					if (cso == null) {
+						continue;
+					}
+					_classifications[ct.Classification] = cso;
+				}
+				foreach (var styleName in codeStyles) {
+					var f = cs.GetField(styleName);
+					var d = f.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false);
+					if (d.Length == 0) {
+						continue;
+					}
+					var ct = service.GetClassificationType((d[0] as System.ComponentModel.DescriptionAttribute).Description);
+					var cso = Config.Instance.CodeStyles.Find(i => i.StyleID == (CodeStyles)f.GetValue(null));
 					if (cso == null) {
 						continue;
 					}
@@ -43,34 +59,41 @@ namespace Codist.Views
 				}
 			}
 
-			this.Decorate();
+			Decorate();
 		}
 
-		//private void SettingsSaved(object sender, EventArgs eventArgs) {
-		//	if (!this.isDecorating) {
-		//		this.Decorate();
-		//	}
-		//}
+		private void SettingsSaved(object sender, EventArgs eventArgs) {
+			if (!isDecorating) {
+				Decorate();
+			}
+		}
 
 		private void Decorate() {
 			try {
-				this.isDecorating = true;
-				this.DecorateClassificationTypes();
+				isDecorating = true;
+				DecorateClassificationTypes();
 			}
 			catch (Exception) {
 			}
 			finally {
-				this.isDecorating = false;
+				isDecorating = false;
 			}
 		}
 
 		private void DecorateClassificationTypes() {
+			map.BeginBatchUpdate();
 			foreach (var item in map.CurrentPriorityOrder) {
 				if (item == null) {
 					continue;
 				}
-				System.Diagnostics.Debug.WriteLine(item.Classification);
-				CommentStyleOption style;
+				Debug.Write(item.Classification);
+				Debug.Write(' ');
+				foreach (var type in item.BaseTypes) {
+					Debug.Write('/');
+					Debug.Write(type.Classification);
+				}
+				Debug.WriteLine('/');
+				StyleBase style;
 				if (_classifications.TryGetValue(item.Classification, out style)) {
 					var p = map.GetExplicitTextProperties(item);
 					if (p == null) {
@@ -79,15 +102,16 @@ namespace Codist.Views
 					map.SetExplicitTextProperties(item, SetProperties(p, style));
 				}
 			}
+			map.EndBatchUpdate();
 		}
 
 		private double GetEditorTextSize() {
-			return this.map.GetTextProperties(this.regService.GetClassificationType("text")).FontRenderingEmSize;
+			return map.GetTextProperties(regService.GetClassificationType("text")).FontRenderingEmSize;
 		}
 
-		private TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, CommentStyleOption styleOption) {
+		private TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption) {
 			var settings = styleOption;
-			double fontSize = this.GetEditorTextSize() + settings.FontSize;
+			double fontSize = GetEditorTextSize() + settings.FontSize;
 			if (string.IsNullOrWhiteSpace(settings.Font) == false) {
 				properties = properties.SetTypeface(new Typeface(settings.Font));
 			}
@@ -126,10 +150,10 @@ namespace Codist.Views
 		private void TextView_GotAggregateFocus(object sender, EventArgs e) {
 			ITextView view;
 			if ((view = (sender as ITextView)) != null) {
-				view.GotAggregateFocus -= this.TextView_GotAggregateFocus;
+				view.GotAggregateFocus -= TextView_GotAggregateFocus;
 			}
-			if (!this.isDecorating) {
-				this.Decorate();
+			if (!isDecorating) {
+				Decorate();
 			}
 		}
 	}

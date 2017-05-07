@@ -19,14 +19,14 @@ namespace Codist.Classifiers
 		}
 	}
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.ExitKeyword)]
-	[Name(Constants.ExitKeyword)]
+	[ClassificationType(ClassificationTypeNames = Constants.CodeExitKeyword)]
+	[Name(Constants.CodeExitKeyword)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
 	public sealed class ExitKeywordFormat : ClassificationFormatDefinition
 	{
 		public ExitKeywordFormat() {
-			DisplayName = Constants.ExitKeyword;
+			DisplayName = Constants.CodeExitKeyword;
 			ForegroundColor = Constants.ExitColor;
 			IsBold = true;
 		}
@@ -206,6 +206,87 @@ namespace Codist.Classifiers
 			DisplayName = Constants.Heading6Comment + " (//---)";
 			ForegroundColor = Constants.CommentColor;
 		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.Task1Comment)]
+	[Name(Constants.Task1Comment)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	public sealed class Task1CommentFormat : ClassificationFormatDefinition
+	{
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.Task2Comment)]
+	[Name(Constants.Task2Comment)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	public sealed class Task2CommentFormat : ClassificationFormatDefinition
+	{
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.Task3Comment)]
+	[Name(Constants.Task3Comment)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	public sealed class Task3CommentFormat : ClassificationFormatDefinition
+	{
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.Task4Comment)]
+	[Name(Constants.Task4Comment)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	public sealed class Task4CommentFormat : ClassificationFormatDefinition
+	{
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.Task5Comment)]
+	[Name(Constants.Task5Comment)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	public sealed class Task5CommentFormat : ClassificationFormatDefinition
+	{
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.Task6Comment)]
+	[Name(Constants.Task6Comment)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	public sealed class Task6CommentFormat : ClassificationFormatDefinition
+	{
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.Task7Comment)]
+	[Name(Constants.Task7Comment)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	public sealed class Task7CommentFormat : ClassificationFormatDefinition
+	{
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.Task8Comment)]
+	[Name(Constants.Task8Comment)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	public sealed class Task8CommentFormat : ClassificationFormatDefinition
+	{
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.Task9Comment)]
+	[Name(Constants.Task9Comment)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	public sealed class Task9CommentFormat : ClassificationFormatDefinition
+	{
 	}
 
 }

@@ -36,7 +36,9 @@ namespace Codist.Margins
 		/// </returns>
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 			var scrollBarContainer = marginContainer as IVerticalScrollBar;
-			return scrollBarContainer != null ? new CodeMargin(wpfTextViewHost, scrollBarContainer, this) : null;
+			return scrollBarContainer != null && wpfTextViewHost.TextView.TextBuffer.ContentType.IsOfType("CSharp")
+				? new CodeMargin(wpfTextViewHost, scrollBarContainer, this)
+				: null;
 		}
 
 		#endregion

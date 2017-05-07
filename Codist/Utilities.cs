@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Reflection;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using GdiColor = System.Drawing.Color;
@@ -8,6 +9,12 @@ namespace Codist
 {
 	static class Utilities
 	{
+		public static string GetEnumDescription(this Type type, string field) {
+			var f = type.GetField(field);
+			var d = f.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>();
+			return d?.Description;
+		}
+
 		public static GdiColor ChangeTrasparency(this GdiColor color, byte alpha) {
 			return GdiColor.FromArgb(alpha, color.R, color.G, color.B);
 		}
