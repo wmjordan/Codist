@@ -87,37 +87,37 @@ namespace Codist.Classifiers
 
 		internal FrameworkElement Margin { get; set; }
 
-		void ReparseChanged(IMappingSpan span) {
-			Debug.WriteLine($"reparse changed [{span.Start.GetPoint(span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}..{span.End.GetPoint(span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position})");
-			foreach (var tagSpan in _aggregator.GetTags(span.GetSpans(span.AnchorBuffer))) {
-				var className = tagSpan.Tag.ClassificationType.Classification;
-				if (_codeType == CodeType.CSharp) {
-					switch (className) {
-						case Constants.CodeClassName:
-						case Constants.CodeInterfaceName:
-						case Constants.CodeStructName:
-						case Constants.CodeEnumName:
-							var start = tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position;
-							var end = tagSpan.Span.End.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position;
-							Debug.WriteLine($"tag changed add def: {className} [{start}..{end})");
-							if (end > start) {
-								_tags.Add(start, end, (ClassificationTag)tagSpan.Tag);
-							}
-							continue;
-						case Constants.CodeKeyword:
-							//if (Matches(ss, "class") || Matches(ss, "interface") || Matches(ss, "enum") || Matches(ss, "struct")) {
-							//	Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
-							//	yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
-							//}
-							var ss = tagSpan.Span.GetSpans(tagSpan.Span.AnchorBuffer)[0];
-							if (Matches(ss, "throw") || Matches(ss, "return")) {
-								_tags.Add(new TagSpan<ClassificationTag>(ss, _exitClassification));
-							}
-							continue;
-					}
-				};
-			}
-		}
+		//void ReparseChanged(IMappingSpan span) {
+		//	Debug.WriteLine($"reparse changed [{span.Start.GetPoint(span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}..{span.End.GetPoint(span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position})");
+		//	foreach (var tagSpan in _aggregator.GetTags(span.GetSpans(span.AnchorBuffer))) {
+		//		var className = tagSpan.Tag.ClassificationType.Classification;
+		//		if (_codeType == CodeType.CSharp) {
+		//			switch (className) {
+		//				case Constants.CodeClassName:
+		//				case Constants.CodeInterfaceName:
+		//				case Constants.CodeStructName:
+		//				case Constants.CodeEnumName:
+		//					var start = tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position;
+		//					var end = tagSpan.Span.End.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position;
+		//					Debug.WriteLine($"tag changed add def: {className} [{start}..{end})");
+		//					if (end > start) {
+		//						_tags.Add(start, end, (ClassificationTag)tagSpan.Tag);
+		//					}
+		//					continue;
+		//				case Constants.CodeKeyword:
+		//					//if (Matches(ss, "class") || Matches(ss, "interface") || Matches(ss, "enum") || Matches(ss, "struct")) {
+		//					//	Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
+		//					//	yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
+		//					//}
+		//					var ss = tagSpan.Span.GetSpans(tagSpan.Span.AnchorBuffer)[0];
+		//					if (Matches(ss, "throw") || Matches(ss, "return")) {
+		//						_tags.Add(new TagSpan<ClassificationTag>(ss, _exitClassification));
+		//					}
+		//					continue;
+		//			}
+		//		};
+		//	}
+		//}
 
 		public IEnumerable<ITagSpan<ClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans)
         {

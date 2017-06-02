@@ -209,10 +209,18 @@ namespace Codist
 		Punctuation,
 		[Description(Constants.CodeUrl)]
 		Url,
+		[Description(Constants.CodeComment)]
+		Comment,
 		[Description(Constants.XmlDocComment)]
 		XmlDocComment,
 		[Description(Constants.XmlDocTag)]
 		XmlDocTag,
+		[Description(Constants.XmlDocAttributeName)]
+		XmlDocAttributeName,
+		[Description(Constants.XmlDocAttributeValue)]
+		XmlDocAttributeValue,
+		[Description(Constants.XmlDocDelimiter)]
+		XmlDocDelimiter,
 	}
 	enum CommentStyleApplication
 	{

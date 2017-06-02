@@ -27,7 +27,10 @@ namespace Codist.Margins
 		readonly static Brush ToDoBrush = new SolidColorBrush(Constants.ToDoColor);
 		readonly static Brush NoteBrush = new SolidColorBrush(Constants.NoteColor);
 		readonly static Brush HackBrush = new SolidColorBrush(Constants.HackColor);
-		readonly static Brush KeywordBrush = Brushes.Blue;
+		readonly static Brush ClassNameBrush = Brushes.Blue;
+		readonly static Brush StructNameBrush = Brushes.Teal;
+		readonly static Brush InterfaceNameBrush = Brushes.DeepSkyBlue;
+		readonly static Brush EnumNameBrush = Brushes.Tomato;
 		readonly static Brush PreProcessorBrush = Brushes.Gray;
 		//readonly static Brush ThrowKeywordBrush = Brushes.Red;
 		//readonly static Brush ReturnKeywordBrush = Brushes.Blue;
@@ -36,11 +39,11 @@ namespace Codist.Margins
 			{ Constants.TodoComment, ToDoBrush },
 			{ Constants.NoteComment, NoteBrush },
 			{ Constants.HackComment, HackBrush },
-			{ Constants.CodeClassName, KeywordBrush },
-			{ Constants.CodeStructName, KeywordBrush },
-			{ Constants.CodeInterfaceName, KeywordBrush },
-			{ Constants.CodeEnumName, KeywordBrush },
-			{ Constants.CodeKeyword, KeywordBrush },
+			{ Constants.CodeClassName, ClassNameBrush },
+			{ Constants.CodeStructName, StructNameBrush },
+			{ Constants.CodeInterfaceName, InterfaceNameBrush },
+			{ Constants.CodeEnumName, EnumNameBrush },
+			{ Constants.CodeKeyword, ClassNameBrush },
 			{ Constants.CodePreprocessorKeyword, PreProcessorBrush },
 			//{ Constants.ThrowKeyword, ThrowKeywordBrush },
 			//{ Constants.ReturnKeyword, ReturnKeywordBrush },
@@ -217,7 +220,7 @@ namespace Codist.Margins
 					continue;
 				}
 				lastY = y;
-				if (b == KeywordBrush || b == PreProcessorBrush) {
+				if (b == ClassNameBrush || b == InterfaceNameBrush || b == StructNameBrush || b == EnumNameBrush || b == PreProcessorBrush) {
 					DrawDeclarationMark(drawingContext, b, y);
 				}
 				//else if (b == ThrowKeywordBrush) {
