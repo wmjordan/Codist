@@ -185,7 +185,7 @@ namespace Codist.Classifiers
 							yield return _tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
 							continue;
 						case Constants.CodePreprocessorKeyword:
-							if (Matches(ss, "region") || Matches(ss, "pragma")) {
+							if (Matches(ss, "region") || Matches(ss, "pragma") || Matches(ss, "if") || Matches(ss, "else")) {
 								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
 							}
 							continue;
