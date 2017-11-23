@@ -7,13 +7,27 @@ using Newtonsoft.Json;
 
 namespace Codist
 {
-	class Config
+	sealed class Config
 	{
 		static DateTime LastSaved;
 
 		public static readonly string Path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Codist\\Config.json";
 		public static readonly Config Instance = LoadConfig();
 
+		public bool MarkAbstractions { get; set; } = true;
+		public bool MarkComments { get; set; } = true;
+		public bool MarkDeclarations { get; set; } = true;
+		public bool MarkDirectives { get; set; } = true;
+
+		public double TopSpace {
+			get => LineTransformers.LineHeightTransformProvider.TopSpace;
+			set => LineTransformers.LineHeightTransformProvider.TopSpace = value;
+		}
+		public double BottomSpace {
+			get => LineTransformers.LineHeightTransformProvider.BottomSpace;
+			set => LineTransformers.LineHeightTransformProvider.BottomSpace = value;
+		}
+		public bool NoSpaceBetweenWrappedLines { get; set; }
 		public List<CommentLabel> Labels { get; private set; } = new List<CommentLabel>();
 		public List<CommentStyle> Styles { get; private set; } = new List<CommentStyle>();
 		public List<CodeStyle> CodeStyles { get; private set; } = new List<CodeStyle>();
@@ -209,7 +223,7 @@ namespace Codist
 
 	}
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
-	class CommentStyle : StyleBase
+	sealed class CommentStyle : StyleBase
 	{
 		public CommentStyle() {
 		}
@@ -235,7 +249,7 @@ namespace Codist
 	}
 
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
-	class CodeStyle : StyleBase
+	sealed class CodeStyle : StyleBase
 	{
 		/// <summary>Gets or sets the code style.</summary>
 		public CodeStyles StyleID { get; set; }
@@ -250,7 +264,7 @@ namespace Codist
 	}
 
 	[DebuggerDisplay("{Label} IgnoreCase: {IgnoreCase} AllowPunctuationDelimiter: {AllowPunctuationDelimiter}")]
-	class CommentLabel
+	sealed class CommentLabel
 	{
 		string _label;
 		int _labelLength;
@@ -273,14 +287,14 @@ namespace Codist
 
 		/// <summary>Gets or sets the label to identifier the comment type.</summary>
 		public string Label { get { return _label; } set { _label = value; _labelLength = (value ?? String.Empty).Length; } }
-		internal int LabelLength { get { return _labelLength; } }
+		internal int LabelLength => _labelLength;
 		/// <summary>Gets or sets whether the label is case-sensitive.</summary>
 		public bool IgnoreCase {
-			get { return _stringComparison == StringComparison.OrdinalIgnoreCase; }
-			set { _stringComparison = value ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal; }
+			get => _stringComparison == StringComparison.OrdinalIgnoreCase;
+			set => _stringComparison = value ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 		}
 		public CommentStyleApplication StyleApplication { get; set; }
-		internal StringComparison Comparison { get { return _stringComparison; } }
+		internal StringComparison Comparison => _stringComparison;
 		/// <summary>Gets or sets the comment style.</summary>
 		public CommentStyles StyleID { get; set; }
 

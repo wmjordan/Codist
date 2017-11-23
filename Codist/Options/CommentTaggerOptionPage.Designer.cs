@@ -1,6 +1,6 @@
 ﻿namespace Codist.Options
 {
-	partial class CommentTaggerOptionControl
+	partial class CommentTaggerOptionPage
 	{
 		/// <summary> 
 		/// 必需的设计器变量。

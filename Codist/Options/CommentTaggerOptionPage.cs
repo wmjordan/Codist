@@ -5,23 +5,23 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Codist.Options
 {
-	public partial class CommentTaggerOptionControl : UserControl
+	public partial class CommentTaggerOptionPage : UserControl
 	{
-		readonly CommentTagger _service;
-		CommentLabel _activeLabel;
-		bool _uiLock;
-		bool _loaded;
+		readonly CommentTagger _Service;
+		CommentLabel _ActiveLabel;
+		bool _UiLock;
+		bool _Loaded;
 
-		public CommentTaggerOptionControl() {
+		public CommentTaggerOptionPage() {
 			InitializeComponent();
 		}
-		internal CommentTaggerOptionControl(CommentTagger service) : this() {
-			_service = service;
+		internal CommentTaggerOptionPage(CommentTagger service) : this() {
+			_Service = service;
 		}
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
-			if (_loaded) {
+			if (_Loaded) {
 				return;
 			}
 
@@ -39,10 +39,10 @@ namespace Codist.Options
 
 			_ApplyContentBox.CheckedChanged += StyleApplicationChanged;
 			_ApplyTagBox.CheckedChanged += StyleApplicationChanged;
-			_IgnoreCaseBox.CheckedChanged += (s, args) => { if (_uiLock == false) { _activeLabel.IgnoreCase = _IgnoreCaseBox.Checked; } };
-			_EndWithPunctuationBox.CheckedChanged += (s, args) => { if (_uiLock == false) { _activeLabel.AllowPunctuationDelimiter = _EndWithPunctuationBox.Checked; } };
-			_StyleBox.SelectedIndexChanged += (s, args) => { if (_uiLock == false) { _activeLabel.StyleID = (CommentStyles)_StyleBox.SelectedIndex; } };
-			_TagTextBox.TextChanged += (s, args) => { if (_uiLock == false) { _activeLabel.Label = _TagTextBox.Text; } };
+			_IgnoreCaseBox.CheckedChanged += (s, args) => { if (_UiLock == false) { _ActiveLabel.IgnoreCase = _IgnoreCaseBox.Checked; } };
+			_EndWithPunctuationBox.CheckedChanged += (s, args) => { if (_UiLock == false) { _ActiveLabel.AllowPunctuationDelimiter = _EndWithPunctuationBox.Checked; } };
+			_StyleBox.SelectedIndexChanged += (s, args) => { if (_UiLock == false) { _ActiveLabel.StyleID = (CommentStyles)_StyleBox.SelectedIndex; } };
+			_TagTextBox.TextChanged += (s, args) => { if (_UiLock == false) { _ActiveLabel.Label = _TagTextBox.Text; } };
 			foreach (var item in new Control[] { _StyleBox, _TagTextBox }) {
 				item.Click += MarkChanged;
 			}
@@ -55,25 +55,25 @@ namespace Codist.Options
 
 			_PreviewBox.SizeChanged += (s, args) => { UpdatePreview(); };
 			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
-			_loaded = true;
+			_Loaded = true;
 		}
 
 		void MarkChanged(object sender, EventArgs args) {
-			if (_uiLock) {
+			if (_UiLock) {
 				return;
 			}
 			UpdatePreview();
 		}
 
 		void StyleApplicationChanged(object sender, EventArgs e) {
-			if (_uiLock) {
+			if (_UiLock) {
 				return;
 			}
 			if (_ApplyContentBox.Checked) {
-				_activeLabel.StyleApplication = CommentStyleApplication.Content;
+				_ActiveLabel.StyleApplication = CommentStyleApplication.Content;
 			}
 			else if (_ApplyTagBox.Checked) {
-				_activeLabel.StyleApplication = CommentStyleApplication.Tag;
+				_ActiveLabel.StyleApplication = CommentStyleApplication.Tag;
 			}
 		}
 
@@ -85,8 +85,8 @@ namespace Codist.Options
 			if (i == null) {
 				return;
 			}
-			_uiLock = true;
-			_activeLabel = i;
+			_UiLock = true;
+			_ActiveLabel = i;
 			_ApplyContentBox.Checked = i.StyleApplication == CommentStyleApplication.Content;
 			_ApplyTagBox.Checked = i.StyleApplication == CommentStyleApplication.Tag;
 			_EndWithPunctuationBox.Checked = i.AllowPunctuationDelimiter;
@@ -94,16 +94,16 @@ namespace Codist.Options
 			_StyleBox.SelectedIndex = (int)i.StyleID;
 			_TagTextBox.Text = i.Label;
 			UpdatePreview();
-			_uiLock = false;
+			_UiLock = false;
 		}
 
 		void UpdatePreview() {
-			if (_activeLabel == null) {
+			if (_ActiveLabel == null) {
 				return;
 			}
 			var bmp = new Bitmap(_PreviewBox.Width, _PreviewBox.Height);
-			var fs = _service.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor));
-			var label = _activeLabel;
+			var fs = _Service.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor));
+			var label = _ActiveLabel;
 			RenderPreview(bmp, fs, label);
 			_PreviewBox.Image = bmp;
 		}

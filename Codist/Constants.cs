@@ -25,7 +25,7 @@ namespace Codist
 		public const string CodeKeyword = "Keyword";
 		public const string CodeComment = "Comment";
 
-		public const string ReturnKeyword = "Keyword: Return";
+		public const string CodeAbstractionKeyword = "Keyword: Abstraction";
 		public const string CodeExitKeyword = "Keyword: Exit";
 
 		public const string CodeClassName = "class name";
@@ -109,7 +109,7 @@ namespace Codist
 		public static readonly Color NoteColor = Colors.Orange;
 		public static readonly Color HackColor = Colors.Black;
 		public static readonly Color ExitColor = Colors.MediumBlue;
-		public static readonly Color ReturnColor = Colors.Blue;
+		public static readonly Color AbstractionColor = Colors.DarkOrange;
 	}
 
 	enum CommentStyles
@@ -183,6 +183,8 @@ namespace Codist
 		Keyword,
 		[Description(Constants.CodeExitKeyword)]
 		ExitKeyword,
+		[Description(Constants.CodeAbstractionKeyword)]
+		AbstractionKeyword,
 		[Description(Constants.CodeExcluded)]
 		ExcludedCode,
 		[Description(Constants.CodeUnnecessary)]

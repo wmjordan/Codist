@@ -11,26 +11,26 @@ namespace Codist.Views
 {
 	internal sealed class CommentViewDecorator
 	{
-		static Dictionary<string, StyleBase> _classifications;
+		static Dictionary<string, StyleBase> __Styles;
 
-		readonly IClassificationFormatMap map;
+		readonly IClassificationFormatMap _Map;
 
-		readonly IClassificationTypeRegistryService regService;
+		readonly IClassificationTypeRegistryService _RegService;
 
 		bool isDecorating;
 
 		public CommentViewDecorator(ITextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service) {
 			view.GotAggregateFocus += TextView_GotAggregateFocus;
 			Config.Instance.ConfigUpdated += SettingsSaved;
-			this.map = map;
-			regService = service;
+			_Map = map;
+			_RegService = service;
 
-			if (_classifications == null) {
+			if (__Styles == null) {
 				var c = typeof(CommentStyles);
 				var styleNames = Enum.GetNames(c);
 				var cs = typeof(CodeStyles);
 				var codeStyles = Enum.GetNames(cs);
-				_classifications = new Dictionary<string, StyleBase>(styleNames.Length + codeStyles.Length);
+				__Styles = new Dictionary<string, StyleBase>(styleNames.Length + codeStyles.Length);
 				foreach (var styleName in styleNames) {
 					var f = c.GetField(styleName);
 					var d = f.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false);
@@ -42,7 +42,7 @@ namespace Codist.Views
 					if (cso == null) {
 						continue;
 					}
-					_classifications[ct.Classification] = cso;
+					__Styles[ct.Classification] = cso;
 				}
 				foreach (var styleName in codeStyles) {
 					var f = cs.GetField(styleName);
@@ -55,7 +55,7 @@ namespace Codist.Views
 					if (cso == null) {
 						continue;
 					}
-					_classifications[ct.Classification] = cso;
+					__Styles[ct.Classification] = cso;
 				}
 			}
 
@@ -81,8 +81,8 @@ namespace Codist.Views
 		}
 
 		private void DecorateClassificationTypes() {
-			map.BeginBatchUpdate();
-			foreach (var item in map.CurrentPriorityOrder) {
+			_Map.BeginBatchUpdate();
+			foreach (var item in _Map.CurrentPriorityOrder) {
 				if (item == null) {
 					continue;
 				}
@@ -94,19 +94,19 @@ namespace Codist.Views
 				}
 				Debug.WriteLine('/');
 				StyleBase style;
-				if (_classifications.TryGetValue(item.Classification, out style)) {
-					var p = map.GetExplicitTextProperties(item);
+				if (__Styles.TryGetValue(item.Classification, out style)) {
+					var p = _Map.GetExplicitTextProperties(item);
 					if (p == null) {
 						continue;
 					}
-					map.SetExplicitTextProperties(item, SetProperties(p, style));
+					_Map.SetExplicitTextProperties(item, SetProperties(p, style));
 				}
 			}
-			map.EndBatchUpdate();
+			_Map.EndBatchUpdate();
 		}
 
 		private double GetEditorTextSize() {
-			return map.GetTextProperties(regService.GetClassificationType("text")).FontRenderingEmSize;
+			return _Map.GetTextProperties(_RegService.GetClassificationType("text")).FontRenderingEmSize;
 		}
 
 		private TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption) {
@@ -127,9 +127,9 @@ namespace Codist.Views
 			}
 			if (settings.BackColor.A > 0) {
 				properties = properties.SetBackgroundOpacity(settings.BackColor.A / 255.0);
-				properties = properties.SetBackground(settings.BackColor);
-				//? have some fun with background color
-				//properties = properties.SetBackgroundBrush(new LinearGradientBrush(Colors.White, settings.BackColor, 90));
+				//properties = properties.SetBackground(settings.BackColor);
+				//note: have some fun with background color
+				properties = properties.SetBackgroundBrush(new LinearGradientBrush(Colors.Transparent, settings.BackColor, 90));
 			}
 			if (settings.Bold.HasValue) {
 				properties = properties.SetBold(settings.Bold.Value);

@@ -6,16 +6,16 @@ using Microsoft.VisualStudio.Utilities;
 namespace Codist.Classifiers
 {
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.ReturnKeyword)]
-	[Name(Constants.ReturnKeyword)]
+	[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
+	[Name(Constants.CodeAbstractionKeyword)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class ReturnKeywordFormat : ClassificationFormatDefinition
+	public sealed class AbstractKeywordFormat : ClassificationFormatDefinition
 	{
-		public ReturnKeywordFormat() {
-			DisplayName = Constants.ReturnKeyword;
-			ForegroundColor = Constants.ReturnColor;
-			IsBold = true;
+		public AbstractKeywordFormat() {
+			DisplayName = Constants.CodeAbstractionKeyword;
+			//ForegroundColor = Constants.AbstractionColor;
+			//IsBold = true;
 		}
 	}
 	[Export(typeof(EditorFormatDefinition))]

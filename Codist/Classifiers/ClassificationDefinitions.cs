@@ -10,7 +10,7 @@ namespace Codist.Classifiers
 #pragma warning disable 649
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition("Keyword")]
-		[Name(Constants.ReturnKeyword)]
+		[Name(Constants.CodeAbstractionKeyword)]
 		internal static ClassificationTypeDefinition ReturnKeywordClassificationType;
 
 		[Export(typeof(ClassificationTypeDefinition))]

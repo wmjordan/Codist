@@ -75,15 +75,15 @@ namespace Codist.Options
 	[Guid("4C16F280-BE29-4152-A6C5-58EEC5398FD4")]
 	class CommentStyle : PageBase
 	{
-		SyntaxStyleOptionPage _control;
+		SyntaxStyleOptionPage _Control;
 
 		protected override IWin32Window Window {
 			get {
-				return _control ?? (_control = new SyntaxStyleOptionPage(this, Config.Instance.Styles));
+				return _Control ?? (_Control = new SyntaxStyleOptionPage(this, Config.Instance.Styles));
 			}
 		}
 		protected override void Dispose(bool disposing) {
-			_control.Dispose();
+			_Control.Dispose();
 			base.Dispose(disposing);
 		}
 	}
@@ -91,15 +91,31 @@ namespace Codist.Options
 	[Guid("1EB954DF-37FE-4849-B63A-58EC43088856")]
 	class CommentTagger : PageBase
 	{
-		CommentTaggerOptionControl _control;
+		CommentTaggerOptionPage _Control;
 
 		protected override IWin32Window Window {
 			get {
-				return _control ?? (_control = new CommentTaggerOptionControl(this));
+				return _Control ?? (_Control = new CommentTaggerOptionPage(this));
 			}
 		}
 		protected override void Dispose(bool disposing) {
-			_control.Dispose();
+			_Control.Dispose();
+			base.Dispose(disposing);
+		}
+	}
+
+	[Guid("DFC9C0E7-73A1-4DE9-8E94-161111266D38")]
+	class Misc : PageBase
+	{
+		MiscPage _Control;
+
+		protected override IWin32Window Window {
+			get {
+				return _Control ?? (_Control = new MiscPage(this));
+			}
+		}
+		protected override void Dispose(bool disposing) {
+			_Control.Dispose();
 			base.Dispose(disposing);
 		}
 	}

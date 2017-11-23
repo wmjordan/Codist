@@ -41,6 +41,7 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.CodeStyle), "Codist", "Code style", 0, 0, true)]
 	[ProvideOptionPage(typeof(Options.CommentStyle), "Codist", "Comment style", 0, 0, true)]
 	[ProvideOptionPage(typeof(Options.CommentTagger), "Codist", "Comment tagger", 0, 0, true)]
+	[ProvideOptionPage(typeof(Options.Misc), "Codist", "Misc", 0, 0, true)]
 	[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
 	public sealed class CodistPackage : Package
 	{

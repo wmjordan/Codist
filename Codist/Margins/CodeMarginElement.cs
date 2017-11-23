@@ -14,27 +14,28 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Margins
 {
-	class CodeMarginElement : FrameworkElement
+	sealed class CodeMarginElement : FrameworkElement
 	{
-		readonly IWpfTextView _textView;
-		readonly IEditorFormatMap _editorFormatMap;
-		readonly IVerticalScrollBar _scrollBar;
-		readonly TaggerResult _tags;
+		readonly IWpfTextView _TextView;
+		readonly IEditorFormatMap _EditorFormatMap;
+		readonly IVerticalScrollBar _ScrollBar;
+		readonly TaggerResult _Tags;
 
 		//ToDo: Change brush colors according to user settings
-		readonly static Pen MarkerPen = new Pen(Brushes.LightGreen, 1);
-		readonly static Brush EmphasisBrush = new SolidColorBrush(Constants.CommentColor);
-		readonly static Brush ToDoBrush = new SolidColorBrush(Constants.ToDoColor);
-		readonly static Brush NoteBrush = new SolidColorBrush(Constants.NoteColor);
-		readonly static Brush HackBrush = new SolidColorBrush(Constants.HackColor);
-		readonly static Brush ClassNameBrush = Brushes.Blue;
-		readonly static Brush StructNameBrush = Brushes.Teal;
-		readonly static Brush InterfaceNameBrush = Brushes.DeepSkyBlue;
-		readonly static Brush EnumNameBrush = Brushes.Tomato;
-		readonly static Brush PreProcessorBrush = Brushes.Gray;
+		static readonly Pen CommentPen = new Pen(Brushes.LightGreen, 1);
+		static readonly Brush EmphasisBrush = new SolidColorBrush(Constants.CommentColor);
+		static readonly Brush ToDoBrush = new SolidColorBrush(Constants.ToDoColor);
+		static readonly Brush NoteBrush = new SolidColorBrush(Constants.NoteColor);
+		static readonly Brush HackBrush = new SolidColorBrush(Constants.HackColor);
+		static readonly Brush ClassNameBrush = Brushes.Blue;
+		static readonly Brush StructNameBrush = Brushes.Teal;
+		static readonly Brush InterfaceNameBrush = Brushes.DeepSkyBlue;
+		static readonly Brush EnumNameBrush = Brushes.Purple;
+		static readonly Brush PreProcessorBrush = Brushes.Gray;
+		static readonly Brush AbstractionBrush = Brushes.DarkOrange;
 		//readonly static Brush ThrowKeywordBrush = Brushes.Red;
 		//readonly static Brush ReturnKeywordBrush = Brushes.Blue;
-		readonly static Dictionary<string, Brush> ClassificationBrushMapper = new Dictionary<string, Brush> {
+		static readonly Dictionary<string, Brush> ClassificationBrushMapper = new Dictionary<string, Brush> {
 			{ Constants.EmphasisComment, EmphasisBrush },
 			{ Constants.TodoComment, ToDoBrush },
 			{ Constants.NoteComment, NoteBrush },
@@ -45,35 +46,36 @@ namespace Codist.Margins
 			{ Constants.CodeEnumName, EnumNameBrush },
 			{ Constants.CodeKeyword, ClassNameBrush },
 			{ Constants.CodePreprocessorKeyword, PreProcessorBrush },
+			{ Constants.CodeAbstractionKeyword, AbstractionBrush },
 			//{ Constants.ThrowKeyword, ThrowKeywordBrush },
 			//{ Constants.ReturnKeyword, ReturnKeywordBrush },
 		};
-		bool _hasEvents;
-		bool _optionsChanging;
-		bool _isMarginEnabled;
+		bool _HasEvents;
+		bool _OptionsChanging;
+		bool _IsMarginEnabled;
 		const double MarkPadding = 1.0;
 		const double MarkSize = 4.0;
-		const double HalfMarkSize = MarkSize / 2;
+		const double HalfMarkSize = MarkSize / 2 + MarkPadding;
 
 		public CodeMarginElement(IWpfTextView textView, CodeMarginFactory factory, ITagAggregator<ClassificationTag> tagger, IVerticalScrollBar verticalScrollbar) {
-			_textView = textView;
+			_TextView = textView;
 
 			IsHitTestVisible = false;
 
-			_scrollBar = verticalScrollbar;
-			_tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
-			_editorFormatMap = factory.EditorFormatMapService.GetEditorFormatMap(textView);
+			_ScrollBar = verticalScrollbar;
+			_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
+			_EditorFormatMap = factory.EditorFormatMapService.GetEditorFormatMap(textView);
 
-			Width = 6.0;
+			Width = MarkSize + MarkPadding + MarkPadding + /*extra padding*/ 2 * MarkPadding;
 
-			_textView.Options.OptionChanged += OnOptionChanged;
+			_TextView.Options.OptionChanged += OnOptionChanged;
 			//subscribe to change events and use them to update the markers
-			_textView.TextBuffer.Changed += (s, args) => {
+			_TextView.TextBuffer.Changed += (s, args) => {
 				if (args.Changes.Count == 0) {
 					return;
 				}
 				Debug.WriteLine($"snapshot version: {args.AfterVersion.VersionNumber}");
-				var tags = _tags.Tags;
+				var tags = _Tags.Tags;
 				foreach (var change in args.Changes) {
 					Debug.WriteLine($"change:{change.OldPosition}->{change.NewPosition}");
 					for (int i = tags.Count - 1; i >= 0; i--) {
@@ -90,8 +92,8 @@ namespace Codist.Margins
 					}
 				}
 				try {
-					_tags.Version = args.AfterVersion.VersionNumber;
-					_tags.LastParsed = args.Before.GetLineFromPosition(args.Changes[0].OldPosition).Start.Position;
+					_Tags.Version = args.AfterVersion.VersionNumber;
+					_Tags.LastParsed = args.Before.GetLineFromPosition(args.Changes[0].OldPosition).Start.Position;
 				}
 				catch (ArgumentOutOfRangeException) {
 					MessageBox.Show(String.Join("\n",
@@ -102,9 +104,9 @@ namespace Codist.Margins
 				}
 				InvalidateVisual();
 			};
-			_tags.Tagger.Margin = this;
+			_Tags.Tagger.Margin = this;
 			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
-			_textView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
+			_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 
 			OnOptionChanged(null, null);
 		}
@@ -115,7 +117,7 @@ namespace Codist.Margins
 			//
 			//It is possible this will get called twice in quick succession (when the tab containing the host is made visible, the view and the margin
 			//will get visibility changed events).
-			if (!_optionsChanging) {
+			if (!_OptionsChanging) {
 				UpdateEventHandlers(true);
 			}
 		}
@@ -149,7 +151,7 @@ namespace Codist.Margins
 		}
 
 		private Brush GetBrush(string name, string resource) {
-			var rd = _editorFormatMap.GetProperties(name);
+			var rd = _EditorFormatMap.GetProperties(name);
 
 			if (rd.Contains(resource)) {
 				return rd[resource] as Brush;
@@ -159,26 +161,26 @@ namespace Codist.Margins
 		}
 
 		private bool UpdateEventHandlers(bool checkEvents) {
-			bool needEvents = checkEvents && _textView.VisualElement.IsVisible;
+			bool needEvents = checkEvents && _TextView.VisualElement.IsVisible;
 
-			if (needEvents != _hasEvents) {
-				_hasEvents = needEvents;
+			if (needEvents != _HasEvents) {
+				_HasEvents = needEvents;
 				if (needEvents) {
-					_editorFormatMap.FormatMappingChanged += OnFormatMappingChanged;
+					_EditorFormatMap.FormatMappingChanged += OnFormatMappingChanged;
 					//_textView.LayoutChanged += OnLayoutChanged;
 					//_textView.Selection.SelectionChanged += OnPositionChanged;
 					//_scrollBar.Map.MappingChanged += OnMappingChanged;
-					_scrollBar.TrackSpanChanged += OnMappingChanged;
+					_ScrollBar.TrackSpanChanged += OnMappingChanged;
 					OnFormatMappingChanged(null, null);
 
 					return true;
 				}
 				else {
-					_editorFormatMap.FormatMappingChanged -= OnFormatMappingChanged;
+					_EditorFormatMap.FormatMappingChanged -= OnFormatMappingChanged;
 					//_textView.LayoutChanged -= OnLayoutChanged;
 					//_textView.Selection.SelectionChanged -= OnPositionChanged;
 					//_scrollBar.Map.MappingChanged -= OnMappingChanged;
-					_scrollBar.TrackSpanChanged -= OnMappingChanged;
+					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 					//if (_search != null) {
 					//	_search.Abort();
 					//	_search = null;
@@ -202,26 +204,35 @@ namespace Codist.Margins
 		/// <param name="drawingContext">The <see cref="DrawingContext"/> used to render the margin.</param>
 		protected override void OnRender(DrawingContext drawingContext) {
 			base.OnRender(drawingContext);
-			if (_textView.IsClosed) {
+			if (_TextView.IsClosed) {
 				return;
 			}
-			var lastY = double.MinValue;
-			var tags = new List<SpanTag>(_tags.Tags);
-			tags.Sort((x, y) => { return x.Start - y.Start; });
+			var lastY = 0.0;
+			Brush lastBrush = null;
+			var tags = new List<SpanTag>(_Tags.Tags);
+			tags.Sort((x, y) => x.Start - y.Start);
 			foreach (var tag in tags) {
 				var c = tag.Tag.ClassificationType.Classification;
 				Brush b;
 				if (ClassificationBrushMapper.TryGetValue(c, out b) == false) {
 					continue;
 				}
-				var y = _scrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(_textView.TextSnapshot, tag.Start));
-				if (y + MarkSize < lastY) {
+				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(_TextView.TextSnapshot, tag.Start));
+				if (lastY + HalfMarkSize > y && lastBrush == b) {
 					// avoid drawing too many closed markers
 					continue;
 				}
-				lastY = y;
-				if (b == ClassNameBrush || b == InterfaceNameBrush || b == StructNameBrush || b == EnumNameBrush || b == PreProcessorBrush) {
-					DrawDeclarationMark(drawingContext, b, y);
+				if (b == ClassNameBrush || b == InterfaceNameBrush || b == StructNameBrush || b == EnumNameBrush) {
+					if (tag.Length > 0) {
+						DrawDeclarationMark(drawingContext, b, y, c, _TextView.TextSnapshot.GetText(tag.Start, tag.Length));
+					}
+					continue;
+				}
+				else if (b == AbstractionBrush) {
+					DrawMark(drawingContext, b, y, 1);
+				}
+				else if (b == PreProcessorBrush) {
+					DrawMark(drawingContext, b, y, 0);
 				}
 				//else if (b == ThrowKeywordBrush) {
 				//	DrawKeywordMark(drawingContext, b, y);
@@ -229,17 +240,51 @@ namespace Codist.Margins
 				else {
 					DrawCommentMark(drawingContext, b, y);
 				}
+				lastY = y;
+				lastBrush = b;
 			}
 		}
 
-		void DrawCommentMark(DrawingContext dc, Brush brush, double y) {
-			dc.DrawRectangle(brush, MarkerPen, new Rect(MarkPadding, y - HalfMarkSize, Width - MarkPadding - MarkPadding, MarkSize));
+		static void DrawCommentMark(DrawingContext dc, Brush brush, double y) {
+			dc.DrawRectangle(brush, CommentPen, new Rect(MarkPadding, y - HalfMarkSize, MarkSize, MarkSize));
 		}
-		void DrawDeclarationMark(DrawingContext dc, Brush brush, double y) {
-			dc.DrawEllipse(brush, null, new Point(Width * 0.5, y - HalfMarkSize), MarkSize, MarkSize);
+
+		static void DrawDeclarationMark(DrawingContext dc, Brush brush, double y, string type, string typeName) {
+			//dc.DrawEllipse(brush, null, new Point(HalfMarkSize, y - HalfMarkSize), MarkSize, MarkSize);
+			string t = null;
+			for (int i = 1; i < typeName.Length; i++) {
+				var ch = typeName[i];
+				if (!char.IsUpper(ch)) {
+					continue;
+				}
+				char[] c = new char[2];
+				c[0] = typeName[0];
+				c[1] = ch;
+				t = new string(c);
+				break;
+			}
+			if (t == null) {
+				t = typeName[0].ToString();
+			}
+			var ft = new FormattedText(t, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, SystemFonts.StatusFontFamily.GetTypefaces().First(), 9, brush);
+			ft.SetFontWeight(FontWeight.FromOpenTypeWeight(800));
+			dc.DrawText(ft, new Point(0, y - ft.Height / 2));
+			//dc.DrawText(new FormattedText(type.Substring(0, 1), System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, SystemFonts.StatusFontFamily.GetTypefaces().First(), 12, Brushes.White), new Point(HalfMarkSize, y - HalfMarkSize));
 		}
-		void DrawKeywordMark(DrawingContext dc, Brush brush, double y) {
-			dc.DrawEllipse(brush, null, new Point(Width * 0.5, y - HalfMarkSize * 0.5), HalfMarkSize, HalfMarkSize);
+
+		static void DrawMark(DrawingContext dc, Brush brush, double y, int style) {
+			switch (style) {
+				case 0:
+					dc.DrawEllipse(brush, null, new Point(HalfMarkSize, y - HalfMarkSize), MarkSize, MarkSize);
+					break;
+				default:
+					dc.DrawRectangle(brush, null, new Rect(MarkPadding, y - HalfMarkSize, MarkSize, MarkSize));
+					break;
+			}
+		}
+
+		static void DrawKeywordMark(DrawingContext dc, Brush brush, double y) {
+			dc.DrawEllipse(brush, null, new Point(HalfMarkSize, y - HalfMarkSize * 0.5), HalfMarkSize, HalfMarkSize);
 		}
 	}
 }
