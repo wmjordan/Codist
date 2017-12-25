@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Classification;
@@ -9,36 +10,36 @@ using Microsoft.VisualStudio.Text.Formatting;
 
 namespace Codist.Views
 {
-	internal sealed class CommentViewDecorator
+	sealed class CodeViewDecorator
 	{
+		static readonly Dictionary<string, TextFormattingRunProperties> __InitialProperties = new Dictionary<string, TextFormattingRunProperties>(30);
 		static Dictionary<string, StyleBase> __Styles;
 
 		readonly IClassificationFormatMap _Map;
-
 		readonly IClassificationTypeRegistryService _RegService;
 
 		bool isDecorating;
 
-		public CommentViewDecorator(ITextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service) {
+		public CodeViewDecorator(ITextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service) {
 			view.GotAggregateFocus += TextView_GotAggregateFocus;
 			Config.Instance.ConfigUpdated += SettingsSaved;
 			_Map = map;
 			_RegService = service;
 
 			if (__Styles == null) {
-				var c = typeof(CommentStyles);
+				var c = typeof(CommentStyleTypes);
 				var styleNames = Enum.GetNames(c);
-				var cs = typeof(CodeStyles);
+				var cs = typeof(CodeStyleTypes);
 				var codeStyles = Enum.GetNames(cs);
 				__Styles = new Dictionary<string, StyleBase>(styleNames.Length + codeStyles.Length);
 				foreach (var styleName in styleNames) {
 					var f = c.GetField(styleName);
-					var d = f.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false);
-					if (d.Length == 0) {
+					var d = f.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>(false);
+					if (d == null || String.IsNullOrWhiteSpace(d.Description)) {
 						continue;
 					}
-					var ct = service.GetClassificationType((d[0] as System.ComponentModel.DescriptionAttribute).Description);
-					var cso = Config.Instance.Styles.Find(i => i.StyleID == (CommentStyles)f.GetValue(null));
+					var ct = service.GetClassificationType(d.Description);
+					var cso = Config.Instance.CommentStyles.Find(i => i.StyleID == (CommentStyleTypes)f.GetValue(null));
 					if (cso == null) {
 						continue;
 					}
@@ -46,12 +47,12 @@ namespace Codist.Views
 				}
 				foreach (var styleName in codeStyles) {
 					var f = cs.GetField(styleName);
-					var d = f.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false);
-					if (d.Length == 0) {
+					var d = f.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>(false);
+					if (d == null || String.IsNullOrWhiteSpace(d.Description)) {
 						continue;
 					}
-					var ct = service.GetClassificationType((d[0] as System.ComponentModel.DescriptionAttribute).Description);
-					var cso = Config.Instance.CodeStyles.Find(i => i.StyleID == (CodeStyles)f.GetValue(null));
+					var ct = service.GetClassificationType(d.Description);
+					var cso = Config.Instance.CodeStyles.Find(i => i.StyleID == (CodeStyleTypes)f.GetValue(null));
 					if (cso == null) {
 						continue;
 					}
@@ -73,7 +74,9 @@ namespace Codist.Views
 				isDecorating = true;
 				DecorateClassificationTypes();
 			}
-			catch (Exception) {
+			catch (Exception ex) {
+				Debug.WriteLine("Decorator exception: ");
+				Debug.WriteLine(ex);
 			}
 			finally {
 				isDecorating = false;
@@ -86,6 +89,7 @@ namespace Codist.Views
 				if (item == null) {
 					continue;
 				}
+#if DEBUG
 				Debug.Write(item.Classification);
 				Debug.Write(' ');
 				foreach (var type in item.BaseTypes) {
@@ -93,13 +97,18 @@ namespace Codist.Views
 					Debug.Write(type.Classification);
 				}
 				Debug.WriteLine('/');
+#endif
 				StyleBase style;
 				if (__Styles.TryGetValue(item.Classification, out style)) {
-					var p = _Map.GetExplicitTextProperties(item);
-					if (p == null) {
-						continue;
+					TextFormattingRunProperties initialProperty;
+					if (__InitialProperties.TryGetValue(item.Classification, out initialProperty) == false) {
+						var p = _Map.GetExplicitTextProperties(item);
+						if (p == null) {
+							continue;
+						}
+						__InitialProperties[item.Classification] = initialProperty = p;
 					}
-					_Map.SetExplicitTextProperties(item, SetProperties(p, style));
+					_Map.SetTextProperties(item, SetProperties(initialProperty, style));
 				}
 			}
 			_Map.EndBatchUpdate();
@@ -121,26 +130,45 @@ namespace Codist.Views
 			if (settings.Italic.HasValue) {
 				properties = properties.SetItalic(settings.Italic.Value);
 			}
-			if (settings.ForeColor.A > 0 /* fore color is not transparent */) {
+			if (settings.ForeColor.A > 0) {
 				properties = properties.SetForegroundOpacity(settings.ForeColor.A / 255.0);
 				properties = properties.SetForeground(settings.ForeColor);
 			}
 			if (settings.BackColor.A > 0) {
 				properties = properties.SetBackgroundOpacity(settings.BackColor.A / 255.0);
-				//properties = properties.SetBackground(settings.BackColor);
-				//note: have some fun with background color
-				properties = properties.SetBackgroundBrush(new LinearGradientBrush(Colors.Transparent, settings.BackColor, 90));
+				switch (settings.BackgroundEffect) {
+					case BrushEffect.Solid:
+						properties = properties.SetBackground(settings.BackColor);
+						break;
+					case BrushEffect.ToBottom:
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(Colors.Transparent, settings.BackColor, 90));
+						break;
+					case BrushEffect.ToTop:
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(settings.BackColor, Colors.Transparent, 90));
+						break;
+					case BrushEffect.ToRight:
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(Colors.Transparent, settings.BackColor, 0));
+						break;
+					case BrushEffect.ToLeft:
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(settings.BackColor, Colors.Transparent, 0));
+						break;
+					default:
+						break;
+				}
 			}
 			if (settings.Bold.HasValue) {
 				properties = properties.SetBold(settings.Bold.Value);
 			}
-			if (settings.Underline.HasValue || settings.StrikeThrough.HasValue) {
+			if (settings.Underline.HasValue || settings.StrikeThrough.HasValue || settings.OverLine.HasValue) {
 				var tdc = new TextDecorationCollection();
-				if (settings.Underline.HasValue && settings.Underline.Value) {
+				if (settings.Underline.GetValueOrDefault()) {
 					tdc.Add(TextDecorations.Underline);
 				}
-				if (settings.StrikeThrough.HasValue && settings.StrikeThrough.Value) {
+				if (settings.StrikeThrough.GetValueOrDefault()) {
 					tdc.Add(TextDecorations.Strikethrough);
+				}
+				if (settings.OverLine.GetValueOrDefault()) {
+					tdc.Add(TextDecorations.OverLine);
 				}
 				properties = properties.SetTextDecorations(tdc);
 			}

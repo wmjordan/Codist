@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Media;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace Codist
 {
@@ -11,7 +13,7 @@ namespace Codist
 	{
 		static DateTime LastSaved;
 
-		public static readonly string Path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Codist\\Config.json";
+		public static readonly string ConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Codist\\Config.json";
 		public static readonly Config Instance = LoadConfig();
 
 		public bool MarkAbstractions { get; set; } = true;
@@ -29,7 +31,7 @@ namespace Codist
 		}
 		public bool NoSpaceBetweenWrappedLines { get; set; }
 		public List<CommentLabel> Labels { get; private set; } = new List<CommentLabel>();
-		public List<CommentStyle> Styles { get; private set; } = new List<CommentStyle>();
+		public List<CommentStyle> CommentStyles { get; private set; } = new List<CommentStyle>();
 		public List<CodeStyle> CodeStyles { get; private set; } = new List<CodeStyle>();
 
 		public event EventHandler ConfigUpdated;
@@ -37,13 +39,17 @@ namespace Codist
 		public static Config LoadConfig() {
 			//AppHelpers.LogHelper.UseLogMethod(i => Debug.WriteLine(i));
 			Config config;
-			if (File.Exists(Path) == false) {
+			if (File.Exists(ConfigPath) == false) {
 				config = GetDefaultConfig();
-				config.SaveConfig();
+				config.SaveConfig(ConfigPath);
 				return config;
 			}
 			try {
-				config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(Path));
+				config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(ConfigPath), new JsonSerializerSettings {
+					Error = (sender, args) => {
+						args.ErrorContext.Handled = true; // ignore json error
+					}
+				});
 				var l = config.Labels;
 				for (int i = l.Count - 1; i >= 0; i--) {
 					if (String.IsNullOrWhiteSpace(l[i].Label)) {
@@ -53,16 +59,16 @@ namespace Codist
 				if (l.Count == 0) {
 					InitDefaultLabels(l);
 				}
-				var s = config.Styles;
+				var s = config.CommentStyles;
 				for (int i = s.Count - 1; i >= 0; i--) {
-					if (s[i].StyleID < CommentStyles.Default || s[i].StyleID > CommentStyles.Task9) {
+					if (s[i] == null || Enum.IsDefined(typeof(CommentStyleTypes), s[i].StyleID) == false) {
 						s.RemoveAt(i);
 					}
 				}
 				MergeDefaultStyles(s);
 				var cs = config.CodeStyles;
 				for (int i = cs.Count - 1; i >= 0; i--) {
-					if (cs[i].StyleID < Codist.CodeStyles.None || cs[i].StyleID > Codist.CodeStyles.XmlDocTag) {
+					if (cs[i] == null || Enum.IsDefined (typeof(CodeStyleTypes), cs[i].StyleID) == false) {
 						cs.RemoveAt(i);
 					}
 				}
@@ -78,26 +84,27 @@ namespace Codist
 		public void Reset() {
 			Labels.Clear();
 			InitDefaultLabels(Labels);
-			Styles.Clear();
-			Styles.AddRange(GetDefaultStyles());
+			CommentStyles.Clear();
+			CommentStyles.AddRange(GetDefaultCommentStyles());
 			CodeStyles.Clear();
 			CodeStyles.AddRange(GetDefaultCodeStyles());
 		}
 
-		public void SaveConfig() {
+		public void SaveConfig(string path) {
 			//HACK: prevent redundant save operations issued by configuration pages
 			if (LastSaved.AddSeconds(2) > DateTime.Now) {
 				return;
 			}
+			path = path ?? ConfigPath;
 			try {
-				var d = System.IO.Path.GetDirectoryName(Path);
+				var d = Path.GetDirectoryName(path);
 				if (Directory.Exists(d) == false) {
 					Directory.CreateDirectory(d);
 				}
-				File.WriteAllText(Path, JsonConvert.SerializeObject(this, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter()));
-				LastSaved = DateTime.Now;
-				if (ConfigUpdated != null) {
-					ConfigUpdated(this, EventArgs.Empty);
+				File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter()));
+				if (path == ConfigPath) {
+					LastSaved = DateTime.Now;
+					ConfigUpdated?.Invoke(this, EventArgs.Empty);
 				}
 			}
 			catch (Exception ex) {
@@ -108,34 +115,34 @@ namespace Codist
 		static Config GetDefaultConfig() {
 			var c = new Config();
 			InitDefaultLabels(c.Labels);
-			c.Styles.AddRange(GetDefaultStyles());
+			c.CommentStyles.AddRange(GetDefaultCommentStyles());
 			c.CodeStyles.AddRange(GetDefaultCodeStyles());
 			return c;
 		}
 
 		static void InitDefaultLabels(List<CommentLabel> labels) {
 			labels.AddRange (new CommentLabel[] {
-				new CommentLabel("!", CommentStyles.Emphasis),
-				new CommentLabel("#", CommentStyles.Emphasis),
-				new CommentLabel("?", CommentStyles.Question),
-				new CommentLabel("!?", CommentStyles.Exclaimation),
-				new CommentLabel("x", CommentStyles.Deletion, true),
-				new CommentLabel("+++", CommentStyles.Heading1),
-				new CommentLabel("!!", CommentStyles.Heading1),
-				new CommentLabel("++", CommentStyles.Heading2),
-				new CommentLabel("+", CommentStyles.Heading3),
-				new CommentLabel("-", CommentStyles.Heading4),
-				new CommentLabel("--", CommentStyles.Heading5),
-				new CommentLabel("---", CommentStyles.Heading6),
-				new CommentLabel("TODO", CommentStyles.ToDo, true) { AllowPunctuationDelimiter = true },
-				new CommentLabel("TO-DO", CommentStyles.ToDo, true) { AllowPunctuationDelimiter = true },
-				new CommentLabel("undone", CommentStyles.ToDo, true) { AllowPunctuationDelimiter = true },
-				new CommentLabel("NOTE", CommentStyles.Note, true) { AllowPunctuationDelimiter = true },
-				new CommentLabel("HACK", CommentStyles.Hack, true) { AllowPunctuationDelimiter = true },
+				new CommentLabel("!", CommentStyleTypes.Emphasis),
+				new CommentLabel("#", CommentStyleTypes.Emphasis),
+				new CommentLabel("?", CommentStyleTypes.Question),
+				new CommentLabel("!?", CommentStyleTypes.Exclaimation),
+				new CommentLabel("x", CommentStyleTypes.Deletion, true),
+				new CommentLabel("+++", CommentStyleTypes.Heading1),
+				new CommentLabel("!!", CommentStyleTypes.Heading1),
+				new CommentLabel("++", CommentStyleTypes.Heading2),
+				new CommentLabel("+", CommentStyleTypes.Heading3),
+				new CommentLabel("-", CommentStyleTypes.Heading4),
+				new CommentLabel("--", CommentStyleTypes.Heading5),
+				new CommentLabel("---", CommentStyleTypes.Heading6),
+				new CommentLabel("TODO", CommentStyleTypes.ToDo, true) { AllowPunctuationDelimiter = true },
+				new CommentLabel("TO-DO", CommentStyleTypes.ToDo, true) { AllowPunctuationDelimiter = true },
+				new CommentLabel("undone", CommentStyleTypes.ToDo, true) { AllowPunctuationDelimiter = true },
+				new CommentLabel("NOTE", CommentStyleTypes.Note, true) { AllowPunctuationDelimiter = true },
+				new CommentLabel("HACK", CommentStyleTypes.Hack, true) { AllowPunctuationDelimiter = true },
 			});
 		}
 		static void MergeDefaultStyles(List<CommentStyle> styles) {
-			foreach (var s in GetDefaultStyles()) {
+			foreach (var s in GetDefaultCommentStyles()) {
 				if (styles.FindIndex(i=> i.StyleID == s.StyleID) == -1) {
 					styles.Add(s);
 				}
@@ -148,36 +155,36 @@ namespace Codist
 				}
 			}
 		}
-		static CommentStyle[] GetDefaultStyles() {
+		internal static CommentStyle[] GetDefaultCommentStyles() {
 			return new CommentStyle[] {
-				new CommentStyle(CommentStyles.Emphasis, Constants.CommentColor) { Bold = true, FontSize = 10 },
-				new CommentStyle(CommentStyles.Exclaimation, Constants.ExclaimationColor),
-				new CommentStyle(CommentStyles.Question, Constants.QuestionColor),
-				new CommentStyle(CommentStyles.Deletion, Constants.DeletionColor) { StrikeThrough = true },
-				new CommentStyle(CommentStyles.ToDo, Colors.White) { BackgroundColor = Constants.ToDoColor.ToHexString(), UseScrollBarMarker = true },
-				new CommentStyle(CommentStyles.Note, Colors.White) { BackgroundColor = Constants.NoteColor.ToHexString(), UseScrollBarMarker = true },
-				new CommentStyle(CommentStyles.Hack, Colors.White) { BackgroundColor = Constants.HackColor.ToHexString(), UseScrollBarMarker = true },
-				new CommentStyle(CommentStyles.Heading1, Constants.CommentColor) { FontSize = 12 },
-				new CommentStyle(CommentStyles.Heading2, Constants.CommentColor) { FontSize = 8 },
-				new CommentStyle(CommentStyles.Heading3, Constants.CommentColor) { FontSize = 4 },
-				new CommentStyle(CommentStyles.Heading4, Constants.CommentColor) { FontSize = -1 },
-				new CommentStyle(CommentStyles.Heading5, Constants.CommentColor) { FontSize = -2 },
-				new CommentStyle(CommentStyles.Heading6, Constants.CommentColor) { FontSize = -3 },
-				new CommentStyle(CommentStyles.Task1, Constants.CommentColor),
-				new CommentStyle(CommentStyles.Task2, Constants.CommentColor),
-				new CommentStyle(CommentStyles.Task3, Constants.CommentColor),
-				new CommentStyle(CommentStyles.Task4, Constants.CommentColor),
-				new CommentStyle(CommentStyles.Task5, Constants.CommentColor),
-				new CommentStyle(CommentStyles.Task6, Constants.CommentColor),
-				new CommentStyle(CommentStyles.Task7, Constants.CommentColor),
-				new CommentStyle(CommentStyles.Task8, Constants.CommentColor),
-				new CommentStyle(CommentStyles.Task9, Constants.CommentColor),
+				new CommentStyle(CommentStyleTypes.Emphasis, Constants.CommentColor) { Bold = true, FontSize = 10 },
+				new CommentStyle(CommentStyleTypes.Exclaimation, Constants.ExclaimationColor),
+				new CommentStyle(CommentStyleTypes.Question, Constants.QuestionColor),
+				new CommentStyle(CommentStyleTypes.Deletion, Constants.DeletionColor) { StrikeThrough = true },
+				new CommentStyle(CommentStyleTypes.ToDo, Colors.White) { BackgroundColor = Constants.ToDoColor.ToHexString(), UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.Note, Colors.White) { BackgroundColor = Constants.NoteColor.ToHexString(), UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.Hack, Colors.White) { BackgroundColor = Constants.HackColor.ToHexString(), UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.Heading1, Constants.CommentColor) { FontSize = 12 },
+				new CommentStyle(CommentStyleTypes.Heading2, Constants.CommentColor) { FontSize = 8 },
+				new CommentStyle(CommentStyleTypes.Heading3, Constants.CommentColor) { FontSize = 4 },
+				new CommentStyle(CommentStyleTypes.Heading4, Constants.CommentColor) { FontSize = -1 },
+				new CommentStyle(CommentStyleTypes.Heading5, Constants.CommentColor) { FontSize = -2 },
+				new CommentStyle(CommentStyleTypes.Heading6, Constants.CommentColor) { FontSize = -3 },
+				new CommentStyle(CommentStyleTypes.Task1, Constants.CommentColor),
+				new CommentStyle(CommentStyleTypes.Task2, Constants.CommentColor),
+				new CommentStyle(CommentStyleTypes.Task3, Constants.CommentColor),
+				new CommentStyle(CommentStyleTypes.Task4, Constants.CommentColor),
+				new CommentStyle(CommentStyleTypes.Task5, Constants.CommentColor),
+				new CommentStyle(CommentStyleTypes.Task6, Constants.CommentColor),
+				new CommentStyle(CommentStyleTypes.Task7, Constants.CommentColor),
+				new CommentStyle(CommentStyleTypes.Task8, Constants.CommentColor),
+				new CommentStyle(CommentStyleTypes.Task9, Constants.CommentColor),
 			};
 		}
-		static CodeStyle[] GetDefaultCodeStyles() {
-			var r = new CodeStyle[(int)Codist.CodeStyles.XmlDocTag + 1];
+		internal static CodeStyle[] GetDefaultCodeStyles() {
+			var r = new CodeStyle[Enum.GetValues(typeof(CodeStyleTypes)).Length];
 			for (int i = 0; i < r.Length; i++) {
-				r[i] = new CodeStyle { StyleID = (Codist.CodeStyles)i };
+				r[i] = new CodeStyle { StyleID = (CodeStyleTypes)i };
 			}
 			return r;
 		}
@@ -186,31 +193,35 @@ namespace Codist
 	abstract class StyleBase
 	{
 		Color _backColor, _foreColor;
-
+		public abstract int Id { get; }
 		/// <summary>Gets or sets whether the content rendered in bold.</summary>
 		public bool? Bold { get; set; }
 		/// <summary>Gets or sets whether the content rendered in italic.</summary>
 		public bool? Italic { get; set; }
 		/// <summary>Gets or sets whether the content rendered stricken-through.</summary>
+		public bool? OverLine { get; set; }
+		/// <summary>Gets or sets whether the content rendered stricken-through.</summary>
 		public bool? StrikeThrough { get; set; }
 		/// <summary>Gets or sets whether the content rendered with underline.</summary>
 		public bool? Underline { get; set; }
-		/// <summary>Gets or sets the font size of the comment. Font size number is relative to the editor text size.</summary>
+		/// <summary>Gets or sets the font size. Font size number is relative to the editor text size.</summary>
 		public double FontSize { get; set; }
-		/// <summary>Gets or sets the foreground color to render the comment text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
+		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		public string ForegroundColor {
 			get { return _foreColor.ToHexString(); }
 			set { _foreColor = Utilities.ParseColor(value); }
 		}
-		/// <summary>Gets or sets the foreground color to render the comment text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
+		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		public string BackgroundColor {
 			get { return _backColor.ToHexString(); }
 			set { _backColor = Utilities.ParseColor(value); }
 		}
-		/// <summary>Gets or sets whether the comment is marked on the scrollbar.</summary>
+		/// <summary>Gets or sets the brush effect to draw the background color.</summary>
+		public BrushEffect BackgroundEffect { get; set; }
+		/// <summary>Gets or sets whether the denoted element is marked on the scrollbar.</summary>
 		public bool UseScrollBarMarker { get; set; }
 		/// <summary>Gets or sets the font.</summary>
-		public string Font { get; internal set; }
+		public string Font { get; set; }
 
 		internal Color ForeColor {
 			get { return _foreColor; }
@@ -221,25 +232,33 @@ namespace Codist
 			set { _backColor = value; }
 		}
 
+		internal StyleBase Clone() {
+			return (StyleBase)MemberwiseClone();
+		}
+		public abstract string Category { get; }
 	}
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class CommentStyle : StyleBase
 	{
 		public CommentStyle() {
 		}
-		public CommentStyle(CommentStyles styleID, Color foregroundColor) {
+		public CommentStyle(CommentStyleTypes styleID, Color foregroundColor) {
 			StyleID = styleID;
 			ForegroundColor = foregroundColor.ToHexString();
 		}
-		public CommentStyle(CommentStyles styleID, string foregroundColor) {
+		public CommentStyle(CommentStyleTypes styleID, string foregroundColor) {
 			StyleID = styleID;
 			ForegroundColor = foregroundColor;
 		}
 
-		/// <summary>Gets or sets the comment style.</summary>
-		public CommentStyles StyleID { get; set; }
+		public override int Id => (int)StyleID;
 
-		public CommentStyle Clone() {
+		/// <summary>Gets or sets the comment style.</summary>
+		public CommentStyleTypes StyleID { get; set; }
+
+		public override string Category => Constants.SyntaxCategory.Comment;
+
+		internal new CommentStyle Clone() {
 			return (CommentStyle)MemberwiseClone();
 		}
 
@@ -251,15 +270,36 @@ namespace Codist
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class CodeStyle : StyleBase
 	{
-		/// <summary>Gets or sets the code style.</summary>
-		public CodeStyles StyleID { get; set; }
+		static readonly Regex __FriendlyReadPattern = new Regex(@"([a-z])([A-Z])", RegexOptions.Singleline);
+		string _Category;
 
-		public CodeStyle Clone() {
+		public override int Id => (int)StyleID;
+
+		/// <summary>Gets or sets the code style.</summary>
+		public CodeStyleTypes StyleID { get; set; }
+
+		public override string Category {
+			get {
+				if (_Category != null) {
+					return _Category;
+				}
+				var f = typeof(CodeStyleTypes).GetField(StyleID.ToString());
+				if (f == null) {
+					return _Category = String.Empty;
+				}
+				var c = f.GetCustomAttribute<System.ComponentModel.CategoryAttribute>(false);
+				if (c == null) {
+					return _Category = String.Empty;
+				}
+				return _Category = c.Category;
+			}
+		}
+		internal new CodeStyle Clone() {
 			return (CodeStyle)MemberwiseClone();
 		}
 
 		public override string ToString() {
-			return StyleID.ToString();
+			return __FriendlyReadPattern.Replace(StyleID.ToString(), "$1 $2");
 		}
 	}
 
@@ -273,11 +313,11 @@ namespace Codist
 		public CommentLabel() {
 		}
 
-		public CommentLabel(string label, CommentStyles styleID) {
+		public CommentLabel(string label, CommentStyleTypes styleID) {
 			Label = label;
 			StyleID = styleID;
 		}
-		public CommentLabel(string label, CommentStyles styleID, bool ignoreCase) {
+		public CommentLabel(string label, CommentStyleTypes styleID, bool ignoreCase) {
 			Label = label;
 			StyleID = styleID;
 			IgnoreCase = ignoreCase;
@@ -296,10 +336,19 @@ namespace Codist
 		public CommentStyleApplication StyleApplication { get; set; }
 		internal StringComparison Comparison => _stringComparison;
 		/// <summary>Gets or sets the comment style.</summary>
-		public CommentStyles StyleID { get; set; }
+		public CommentStyleTypes StyleID { get; set; }
 
 		public CommentLabel Clone() {
 			return (CommentLabel)MemberwiseClone();
 		}
+	}
+
+	public enum BrushEffect
+	{
+		Solid,
+		ToBottom,
+		ToTop,
+		ToRight,
+		ToLeft
 	}
 }

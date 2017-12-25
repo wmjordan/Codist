@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell.Interop;
+using System.Drawing.Drawing2D;
 
 namespace Codist.Options
 {
@@ -28,7 +29,7 @@ namespace Codist.Options
 			foreach (var item in Config.Instance.Labels) {
 				_SyntaxListBox.Items.Add(new ListViewItem(item.Label) { Tag = item });
 			}
-			var t = typeof(CommentStyles);
+			var t = typeof(CommentStyleTypes);
 			foreach (var item in Enum.GetNames(t)) {
 				var d = t.GetEnumDescription(item);
 				if (d == null || d.StartsWith("Comment: ", StringComparison.Ordinal) == false) {
@@ -36,17 +37,58 @@ namespace Codist.Options
 				}
 				_StyleBox.Items.Add(item);
 			}
+			_StyleBox.SelectedIndex = 0;
 
-			_ApplyContentBox.CheckedChanged += StyleApplicationChanged;
-			_ApplyTagBox.CheckedChanged += StyleApplicationChanged;
-			_IgnoreCaseBox.CheckedChanged += (s, args) => { if (_UiLock == false) { _ActiveLabel.IgnoreCase = _IgnoreCaseBox.Checked; } };
-			_EndWithPunctuationBox.CheckedChanged += (s, args) => { if (_UiLock == false) { _ActiveLabel.AllowPunctuationDelimiter = _EndWithPunctuationBox.Checked; } };
-			_StyleBox.SelectedIndexChanged += (s, args) => { if (_UiLock == false) { _ActiveLabel.StyleID = (CommentStyles)_StyleBox.SelectedIndex; } };
-			_TagTextBox.TextChanged += (s, args) => { if (_UiLock == false) { _ActiveLabel.Label = _TagTextBox.Text; } };
-			foreach (var item in new Control[] { _StyleBox, _TagTextBox }) {
+			_AddTagButton.Click += (s, args) => {
+				var label = new CommentLabel(_TagTextBox.Text.Length > 0 ? _TagTextBox.Text : "tag", (CommentStyleTypes)Enum.Parse(typeof(CommentStyleTypes), _StyleBox.Text));
+				Config.Instance.Labels.Add(label);
+				_SyntaxListBox.Items.Add(new ListViewItem(label.Label) { Tag = label, Selected = true });
+				_ActiveLabel = label;
+			};
+			_RemoveTagButton.Click += (s, args) => {
+				if (_ActiveLabel == null) {
+					return;
+				}
+				var i = Config.Instance.Labels.IndexOf(_ActiveLabel);
+				if (i == -1) {
+					return;
+				}
+				Config.Instance.Labels.RemoveAt(i);
+				_SyntaxListBox.Items.RemoveAt(i);
+				_ActiveLabel = null;
+			};
+			_IgnoreCaseBox.CheckedChanged += (s, args) => {
+				if (_UiLock == false && _ActiveLabel != null) {
+					_ActiveLabel.IgnoreCase = _IgnoreCaseBox.Checked;
+				}
+			};
+			_EndWithPunctuationBox.CheckedChanged += (s, args) => {
+				if (_UiLock == false && _ActiveLabel != null) {
+					_ActiveLabel.AllowPunctuationDelimiter = _EndWithPunctuationBox.Checked;
+				}
+			};
+			_StyleBox.SelectedIndexChanged += (s, args) => {
+				if (_UiLock || _ActiveLabel == null) {
+					return;
+				}
+				_ActiveLabel.StyleID = (CommentStyleTypes)Enum.Parse(typeof(CommentStyleTypes), _StyleBox.Text);
+				MarkChanged(s, args);
+			};
+			_TagTextBox.TextChanged += (s, args) => {
+				if (_UiLock == false && _ActiveLabel != null) {
+					_ActiveLabel.Label = _TagTextBox.Text;
+					foreach (ListViewItem item in _SyntaxListBox.Items) {
+						if (item.Tag == _ActiveLabel) {
+							item.Text = _TagTextBox.Text;
+						}
+					}
+				}
+			};
+			foreach (var item in new Control[] { _TagTextBox }) {
 				item.Click += MarkChanged;
 			}
-			foreach (var item in new[] { _ApplyContentBox, _ApplyTagBox,  }) {
+			foreach (var item in new[] { _ApplyContentBox, _ApplyTagBox, _ApplyContentTagBox  }) {
+				item.CheckedChanged += StyleApplicationChanged;
 				item.CheckedChanged += MarkChanged;
 			}
 			foreach (var item in new[] { _IgnoreCaseBox, _EndWithPunctuationBox }) {
@@ -59,14 +101,14 @@ namespace Codist.Options
 		}
 
 		void MarkChanged(object sender, EventArgs args) {
-			if (_UiLock) {
+			if (_UiLock || _ActiveLabel == null) {
 				return;
 			}
 			UpdatePreview();
 		}
 
 		void StyleApplicationChanged(object sender, EventArgs e) {
-			if (_UiLock) {
+			if (_UiLock || _ActiveLabel == null) {
 				return;
 			}
 			if (_ApplyContentBox.Checked) {
@@ -74,6 +116,9 @@ namespace Codist.Options
 			}
 			else if (_ApplyTagBox.Checked) {
 				_ActiveLabel.StyleApplication = CommentStyleApplication.Tag;
+			}
+			else if (_ApplyContentTagBox.Checked) {
+				_ActiveLabel.StyleApplication = CommentStyleApplication.TagAndContent;
 			}
 		}
 
@@ -89,9 +134,16 @@ namespace Codist.Options
 			_ActiveLabel = i;
 			_ApplyContentBox.Checked = i.StyleApplication == CommentStyleApplication.Content;
 			_ApplyTagBox.Checked = i.StyleApplication == CommentStyleApplication.Tag;
+			_ApplyContentTagBox.Checked = i.StyleApplication == CommentStyleApplication.TagAndContent;
 			_EndWithPunctuationBox.Checked = i.AllowPunctuationDelimiter;
 			_IgnoreCaseBox.Checked = i.IgnoreCase;
-			_StyleBox.SelectedIndex = (int)i.StyleID;
+			var s = i.StyleID.ToString();
+			for (int n = 0; n < _StyleBox.Items.Count; n++) {
+				if ((string)_StyleBox.Items[n] == s) {
+					_StyleBox.SelectedIndex = n;
+					break;
+				}
+			}
 			_TagTextBox.Text = i.Label;
 			UpdatePreview();
 			_UiLock = false;
@@ -109,20 +161,21 @@ namespace Codist.Options
 		}
 
 		static void RenderPreview(Bitmap bmp, FontInfo fs, CommentLabel label) {
-			var style = Config.Instance.Styles.Find(i => i.StyleID == label.StyleID);
+			var style = Config.Instance.CommentStyles.Find(i => i.StyleID == label.StyleID);
 			if (style == null || String.IsNullOrEmpty(label.Label)) {
 				return;
 			}
 			using (var g = Graphics.FromImage(bmp))
-			using (var f = new Font(fs.bstrFaceName, (float)(fs.wPointSize + style.FontSize), PageBase.GetFontStyle(style)))
-			using (var b = new SolidBrush(style.ForeColor.ToGdiColor()))
-			using (var p = new SolidBrush(style.BackColor.ToGdiColor())) {
+			using (var f = new Font(fs.bstrFaceName, (float)(fs.wPointSize + style.FontSize), ConfigPage.GetFontStyle(style)))
+			using (var b = style.ForeColor.A == 0 ? (Brush)Brushes.Black.Clone() : new SolidBrush(style.ForeColor.ToGdiColor())) {
 				var t = label.StyleApplication == CommentStyleApplication.Tag ? label.Label : "Preview 01ioIOlLWM";
 				var m = g.MeasureString(t, f, bmp.Size);
-				g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+				g.SmoothingMode = SmoothingMode.HighQuality;
 				g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-				g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-				g.FillRectangle(p, new Rectangle(0, 0, (int)m.Width, (int)m.Height));
+				g.CompositingQuality = CompositingQuality.HighQuality;
+				using (var bb = ConfigPage.GetPreviewBrush(style.BackgroundEffect, style.BackColor, ref m)) {
+					g.FillRectangle(bb, new Rectangle(0, 0, (int)m.Width, (int)m.Height));
+				}
 				g.DrawString(t, f, b, new RectangleF(PointF.Empty, bmp.PhysicalDimension));
 			}
 		}

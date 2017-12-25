@@ -30,12 +30,14 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this._NoSpaceBetweenWrappedLinesBox = new System.Windows.Forms.CheckBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this._DirectivesBox = new System.Windows.Forms.CheckBox();
 			this._SpecialCommentsBox = new System.Windows.Forms.CheckBox();
 			this._CodeAbstractionsBox = new System.Windows.Forms.CheckBox();
 			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
-			this._NoSpaceBetweenWrappedLinesBox = new System.Windows.Forms.CheckBox();
+			this._SaveConfigButton = new System.Windows.Forms.Button();
+			this._LoadConfigButton = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this.groupBox1.SuspendLayout();
@@ -87,6 +89,16 @@
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Extra line margins";
+			// 
+			// _NoSpaceBetweenWrappedLinesBox
+			// 
+			this._NoSpaceBetweenWrappedLinesBox.AutoSize = true;
+			this._NoSpaceBetweenWrappedLinesBox.Location = new System.Drawing.Point(9, 50);
+			this._NoSpaceBetweenWrappedLinesBox.Name = "_NoSpaceBetweenWrappedLinesBox";
+			this._NoSpaceBetweenWrappedLinesBox.Size = new System.Drawing.Size(277, 19);
+			this._NoSpaceBetweenWrappedLinesBox.TabIndex = 4;
+			this._NoSpaceBetweenWrappedLinesBox.Text = "No margin between wrapped lines";
+			this._NoSpaceBetweenWrappedLinesBox.UseVisualStyleBackColor = true;
 			// 
 			// groupBox2
 			// 
@@ -141,20 +153,30 @@
 			this._TypeDeclarationBox.Text = "Type declarations";
 			this._TypeDeclarationBox.UseVisualStyleBackColor = true;
 			// 
-			// _NoSpaceBetweenWrappedLinesBox
+			// _SaveConfigButton
 			// 
-			this._NoSpaceBetweenWrappedLinesBox.AutoSize = true;
-			this._NoSpaceBetweenWrappedLinesBox.Location = new System.Drawing.Point(9, 50);
-			this._NoSpaceBetweenWrappedLinesBox.Name = "_NoSpaceBetweenWrappedLinesBox";
-			this._NoSpaceBetweenWrappedLinesBox.Size = new System.Drawing.Size(277, 19);
-			this._NoSpaceBetweenWrappedLinesBox.TabIndex = 4;
-			this._NoSpaceBetweenWrappedLinesBox.Text = "No margin between wrapped lines";
-			this._NoSpaceBetweenWrappedLinesBox.UseVisualStyleBackColor = true;
+			this._SaveConfigButton.Location = new System.Drawing.Point(12, 179);
+			this._SaveConfigButton.Name = "_SaveConfigButton";
+			this._SaveConfigButton.Size = new System.Drawing.Size(173, 23);
+			this._SaveConfigButton.TabIndex = 2;
+			this._SaveConfigButton.Text = "&Save configs...";
+			this._SaveConfigButton.UseVisualStyleBackColor = true;
+			// 
+			// _LoadConfigButton
+			// 
+			this._LoadConfigButton.Location = new System.Drawing.Point(202, 179);
+			this._LoadConfigButton.Name = "_LoadConfigButton";
+			this._LoadConfigButton.Size = new System.Drawing.Size(173, 23);
+			this._LoadConfigButton.TabIndex = 2;
+			this._LoadConfigButton.Text = "&Load configs...";
+			this._LoadConfigButton.UseVisualStyleBackColor = true;
 			// 
 			// MiscPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this._LoadConfigButton);
+			this.Controls.Add(this._SaveConfigButton);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
 			this.Name = "MiscPage";
@@ -183,5 +205,7 @@
 		private System.Windows.Forms.CheckBox _TypeDeclarationBox;
 		private System.Windows.Forms.CheckBox _DirectivesBox;
 		private System.Windows.Forms.CheckBox _NoSpaceBetweenWrappedLinesBox;
+		private System.Windows.Forms.Button _SaveConfigButton;
+		private System.Windows.Forms.Button _LoadConfigButton;
 	}
 }

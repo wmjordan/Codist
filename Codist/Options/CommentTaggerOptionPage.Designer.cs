@@ -29,6 +29,7 @@
 			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this._ApplyContentTagBox = new System.Windows.Forms.RadioButton();
 			this._PreviewBox = new System.Windows.Forms.PictureBox();
 			this._EndWithPunctuationBox = new System.Windows.Forms.CheckBox();
 			this._ApplyTagBox = new System.Windows.Forms.RadioButton();
@@ -39,6 +40,8 @@
 			this._IgnoreCaseBox = new System.Windows.Forms.CheckBox();
 			this._TagTextBox = new System.Windows.Forms.TextBox();
 			this.label2 = new System.Windows.Forms.Label();
+			this._AddTagButton = new System.Windows.Forms.Button();
+			this._RemoveTagButton = new System.Windows.Forms.Button();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._PreviewBox)).BeginInit();
 			this.SuspendLayout();
@@ -57,7 +60,7 @@
 			this._SyntaxListBox.Name = "_SyntaxListBox";
 			this._SyntaxListBox.ShowGroups = false;
 			this._SyntaxListBox.Size = new System.Drawing.Size(239, 293);
-			this._SyntaxListBox.TabIndex = 3;
+			this._SyntaxListBox.TabIndex = 1;
 			this._SyntaxListBox.UseCompatibleStateImageBehavior = false;
 			this._SyntaxListBox.View = System.Windows.Forms.View.Details;
 			// 
@@ -72,7 +75,7 @@
 			this.label1.Location = new System.Drawing.Point(13, 14);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(111, 15);
-			this.label1.TabIndex = 2;
+			this.label1.TabIndex = 0;
 			this.label1.Text = "Comment Tags:";
 			// 
 			// groupBox1
@@ -80,6 +83,7 @@
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox1.Controls.Add(this._ApplyContentTagBox);
 			this.groupBox1.Controls.Add(this._PreviewBox);
 			this.groupBox1.Controls.Add(this._EndWithPunctuationBox);
 			this.groupBox1.Controls.Add(this._ApplyTagBox);
@@ -93,9 +97,20 @@
 			this.groupBox1.Location = new System.Drawing.Point(261, 14);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(311, 311);
-			this.groupBox1.TabIndex = 4;
+			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Tag Definition";
+			// 
+			// _ApplyContentTagBox
+			// 
+			this._ApplyContentTagBox.AutoSize = true;
+			this._ApplyContentTagBox.Location = new System.Drawing.Point(89, 159);
+			this._ApplyContentTagBox.Name = "_ApplyContentTagBox";
+			this._ApplyContentTagBox.Size = new System.Drawing.Size(148, 19);
+			this._ApplyContentTagBox.TabIndex = 9;
+			this._ApplyContentTagBox.TabStop = true;
+			this._ApplyContentTagBox.Text = "Tag and content";
+			this._ApplyContentTagBox.UseVisualStyleBackColor = true;
 			// 
 			// _PreviewBox
 			// 
@@ -115,17 +130,17 @@
 			this._EndWithPunctuationBox.Location = new System.Drawing.Point(89, 80);
 			this._EndWithPunctuationBox.Name = "_EndWithPunctuationBox";
 			this._EndWithPunctuationBox.Size = new System.Drawing.Size(189, 19);
-			this._EndWithPunctuationBox.TabIndex = 7;
+			this._EndWithPunctuationBox.TabIndex = 3;
 			this._EndWithPunctuationBox.Text = "End with punctuation";
 			this._EndWithPunctuationBox.UseVisualStyleBackColor = true;
 			// 
 			// _ApplyTagBox
 			// 
 			this._ApplyTagBox.AutoSize = true;
-			this._ApplyTagBox.Location = new System.Drawing.Point(89, 159);
+			this._ApplyTagBox.Location = new System.Drawing.Point(89, 134);
 			this._ApplyTagBox.Name = "_ApplyTagBox";
 			this._ApplyTagBox.Size = new System.Drawing.Size(52, 19);
-			this._ApplyTagBox.TabIndex = 6;
+			this._ApplyTagBox.TabIndex = 7;
 			this._ApplyTagBox.TabStop = true;
 			this._ApplyTagBox.Text = "Tag";
 			this._ApplyTagBox.UseVisualStyleBackColor = true;
@@ -133,12 +148,12 @@
 			// _ApplyContentBox
 			// 
 			this._ApplyContentBox.AutoSize = true;
-			this._ApplyContentBox.Location = new System.Drawing.Point(89, 134);
+			this._ApplyContentBox.Location = new System.Drawing.Point(147, 134);
 			this._ApplyContentBox.Name = "_ApplyContentBox";
-			this._ApplyContentBox.Size = new System.Drawing.Size(148, 19);
-			this._ApplyContentBox.TabIndex = 6;
+			this._ApplyContentBox.Size = new System.Drawing.Size(84, 19);
+			this._ApplyContentBox.TabIndex = 8;
 			this._ApplyContentBox.TabStop = true;
-			this._ApplyContentBox.Text = "Comment content";
+			this._ApplyContentBox.Text = "Content";
 			this._ApplyContentBox.UseVisualStyleBackColor = true;
 			// 
 			// label4
@@ -147,7 +162,7 @@
 			this.label4.Location = new System.Drawing.Point(4, 136);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(79, 15);
-			this.label4.TabIndex = 5;
+			this.label4.TabIndex = 6;
 			this.label4.Text = "Apply on:";
 			// 
 			// _StyleBox
@@ -159,7 +174,7 @@
 			this._StyleBox.Location = new System.Drawing.Point(89, 105);
 			this._StyleBox.Name = "_StyleBox";
 			this._StyleBox.Size = new System.Drawing.Size(216, 23);
-			this._StyleBox.TabIndex = 4;
+			this._StyleBox.TabIndex = 5;
 			// 
 			// label3
 			// 
@@ -167,7 +182,7 @@
 			this.label3.Location = new System.Drawing.Point(6, 105);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(55, 15);
-			this.label3.TabIndex = 3;
+			this.label3.TabIndex = 4;
 			this.label3.Text = "Style:";
 			// 
 			// _IgnoreCaseBox
@@ -198,14 +213,34 @@
 			this.label2.TabIndex = 0;
 			this.label2.Text = "Tag text:";
 			// 
-			// CommentTaggerOptionControl
+			// _AddTagButton
+			// 
+			this._AddTagButton.Location = new System.Drawing.Point(130, 14);
+			this._AddTagButton.Name = "_AddTagButton";
+			this._AddTagButton.Size = new System.Drawing.Size(54, 23);
+			this._AddTagButton.TabIndex = 3;
+			this._AddTagButton.Text = "Add";
+			this._AddTagButton.UseVisualStyleBackColor = true;
+			// 
+			// _RemoveTagButton
+			// 
+			this._RemoveTagButton.Location = new System.Drawing.Point(190, 14);
+			this._RemoveTagButton.Name = "_RemoveTagButton";
+			this._RemoveTagButton.Size = new System.Drawing.Size(65, 23);
+			this._RemoveTagButton.TabIndex = 3;
+			this._RemoveTagButton.Text = "Remove";
+			this._RemoveTagButton.UseVisualStyleBackColor = true;
+			// 
+			// CommentTaggerOptionPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this._RemoveTagButton);
+			this.Controls.Add(this._AddTagButton);
 			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this._SyntaxListBox);
 			this.Controls.Add(this.label1);
-			this.Name = "CommentTaggerOptionControl";
+			this.Name = "CommentTaggerOptionPage";
 			this.Size = new System.Drawing.Size(575, 328);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
@@ -231,5 +266,8 @@
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.CheckBox _EndWithPunctuationBox;
 		private System.Windows.Forms.PictureBox _PreviewBox;
+		private System.Windows.Forms.RadioButton _ApplyContentTagBox;
+		private System.Windows.Forms.Button _AddTagButton;
+		private System.Windows.Forms.Button _RemoveTagButton;
 	}
 }

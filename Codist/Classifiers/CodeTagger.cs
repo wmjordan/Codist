@@ -42,7 +42,7 @@ namespace Codist.Classifiers
 	sealed class CodeTagger : ITagger<ClassificationTag>
     {
 		static ClassificationTag[] _commentClassifications;
-		static ClassificationTag _exitClassification;
+		//static ClassificationTag _exitClassification;
 		static ClassificationTag _abstractionClassification;
 		readonly ITagAggregator<IClassificationTag> _aggregator;
 		readonly TaggerResult _tags;
@@ -58,7 +58,7 @@ namespace Codist.Classifiers
         internal CodeTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags, CodeType codeType)
         {
 			if (_commentClassifications == null) {
-				var t = typeof(CommentStyles);
+				var t = typeof(CommentStyleTypes);
 				var styleNames = Enum.GetNames(t);
 				_commentClassifications = new ClassificationTag[styleNames.Length];
 				foreach (var styleName in styleNames) {
@@ -71,7 +71,7 @@ namespace Codist.Classifiers
 					_commentClassifications[(int)f.GetValue(null)] = new ClassificationTag(ct);
 				}
 			}
-			_exitClassification = new ClassificationTag(registry.GetClassificationType(Constants.CodeExitKeyword));
+			//_exitClassification = new ClassificationTag(registry.GetClassificationType(Constants.CodeReturnKeyword));
 			_abstractionClassification = new ClassificationTag(registry.GetClassificationType(Constants.CodeAbstractionKeyword));
 
             _aggregator = aggregator;
@@ -134,9 +134,9 @@ namespace Codist.Classifiers
 							}
 							continue;
 						case Constants.CodeKeyword:
-							if (Matches(ss, "throw") || Matches(ss, "return") || Matches(ss, "yield")) {
-								yield return _tags.Add(new TagSpan<ClassificationTag>(ss, _exitClassification));
-							}
+							//if (Matches(ss, "throw") || Matches(ss, "return") || Matches(ss, "yield")) {
+							//	yield return _tags.Add(new TagSpan<ClassificationTag>(ss, _exitClassification));
+							//}
 							if (Config.Instance.MarkAbstractions) {
 								if (Matches(ss, "abstract") || Matches(ss, "override") || Matches(ss, "virtual")) {
 									yield return _tags.Add(new TagSpan<ClassificationTag>(ss, _abstractionClassification));
@@ -250,7 +250,7 @@ namespace Codist.Classifiers
 				? new SnapshotSpan(snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, label.LabelLength)
 				: label.StyleApplication == CommentStyleApplication.Content
 				? new SnapshotSpan(snapshotSpan.Snapshot, snapshotSpan.Start + startOfContent, endOfContent - startOfContent)
-				: new SnapshotSpan(snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, endOfCommentToken - commentStart);
+				: new SnapshotSpan(snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, endOfContent - commentStart);
 			return new TagSpan<ClassificationTag>(span, ctag);
 		}
 

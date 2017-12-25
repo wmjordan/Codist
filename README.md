@@ -1,15 +1,16 @@
 # Codist
-A visual studio extension which displays comments and type definitions with customizable style on the editor and scrollbar margin.
+Codist is a visual studio extension which provides advanced syntax highlighting and tagged comments for C# code, and spots important information on the scrollbar margin.
 
 # What it does?
 Currently Codist can:
-* Highlight comments (actually all editor styles) to your specific styles, enlarge or shrink document fonts, change background and foreground colors, make semitransparent.
+* Highlight C# code, with various styles and font settings, changing font style asizes, changing background and foreground colors, making text semitransparent.
+* Highlight comments (actually all editor styles) to your specific styles.
 * Spot C# class/struct/interface/enum declarations and regions on the scrollbar margin.
 
 # Customization
-1. Edit the _%APPDATA%\Codist\Config.json_ and change the styles as you like.
-1. Restart Visual Studio to see the new effects.
-1. If you screwd up the style file, remove it and restart Visual Studio. A new one with default settings will be recreated.
+1. Open the Codist section in the Tools->Options dialog.
+1. By default, Codist does not make many changes to your syntax   .
+1. Change the settings according to your preferences and click the OK button.
 
 # Acknowledgements
 Acknowledgements to the following extensions:
@@ -20,3 +21,4 @@ Acknowledgements to the following extensions:
 * Font Sizer: https://marketplace.visualstudio.com/items?itemName=KarlShifflettkdawg.FontSizer
 * CodeBlockEndTag: https://marketplace.visualstudio.com/items?itemName=KhaosPrinz.CodeBlockEndTag
 * Remarker: https://marketplace.visualstudio.com/items?itemName=GilYoder.Remarker-18580
+* CoCo: https://marketplace.visualstudio.com/items?itemName=GeorgeAleksandria.CoCo-19226

@@ -47,7 +47,7 @@ namespace Codist.LineTransformers
 			return new LineHeightTransform();
 		}
 
-		class LineHeightTransform : ILineTransformSource
+		sealed class LineHeightTransform : ILineTransformSource
 		{
 			// todo: refresh after settings are changed
 			public LineTransform GetLineTransform(ITextViewLine line, double yPosition, ViewRelativePosition placement) {

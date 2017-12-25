@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Classifiers
 {
+
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
 	[Name(Constants.CodeAbstractionKeyword)]
@@ -14,20 +15,18 @@ namespace Codist.Classifiers
 	{
 		public AbstractKeywordFormat() {
 			DisplayName = Constants.CodeAbstractionKeyword;
-			//ForegroundColor = Constants.AbstractionColor;
-			//IsBold = true;
 		}
 	}
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CodeExitKeyword)]
-	[Name(Constants.CodeExitKeyword)]
+	[ClassificationType(ClassificationTypeNames = Constants.CodeReturnKeyword)]
+	[Name(Constants.CodeReturnKeyword)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class ExitKeywordFormat : ClassificationFormatDefinition
+	public sealed class ReturnKeywordFormat : ClassificationFormatDefinition
 	{
-		public ExitKeywordFormat() {
-			DisplayName = Constants.CodeExitKeyword;
-			ForegroundColor = Constants.ExitColor;
+		public ReturnKeywordFormat() {
+			DisplayName = Constants.CodeReturnKeyword;
+			ForegroundColor = Constants.ReturnColor;
 			IsBold = true;
 		}
 	}

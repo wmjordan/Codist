@@ -28,6 +28,10 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SyntaxStyleOptionPage));
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this._BackgroundEffectBox = new System.Windows.Forms.ComboBox();
+			this._FontBox = new System.Windows.Forms.ComboBox();
+			this.label8 = new System.Windows.Forms.Label();
 			this._PreviewBox = new System.Windows.Forms.PictureBox();
 			this.label6 = new System.Windows.Forms.Label();
 			this._BackColorButton = new Codist.Options.PickColorButton();
@@ -43,7 +47,6 @@
 			this._UnderlineBox = new System.Windows.Forms.CheckBox();
 			this._ItalicBox = new System.Windows.Forms.CheckBox();
 			this._BoldBox = new System.Windows.Forms.CheckBox();
-			this.label2 = new System.Windows.Forms.Label();
 			this._SyntaxListBox = new System.Windows.Forms.ListView();
 			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this._PicColorBox = new System.Windows.Forms.ColorDialog();
@@ -68,6 +71,10 @@
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox1.Controls.Add(this.label2);
+			this.groupBox1.Controls.Add(this._BackgroundEffectBox);
+			this.groupBox1.Controls.Add(this._FontBox);
+			this.groupBox1.Controls.Add(this.label8);
 			this.groupBox1.Controls.Add(this._PreviewBox);
 			this.groupBox1.Controls.Add(this.label6);
 			this.groupBox1.Controls.Add(this._BackColorButton);
@@ -83,13 +90,48 @@
 			this.groupBox1.Controls.Add(this._UnderlineBox);
 			this.groupBox1.Controls.Add(this._ItalicBox);
 			this.groupBox1.Controls.Add(this._BoldBox);
-			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Location = new System.Drawing.Point(261, 14);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(258, 372);
+			this.groupBox1.Size = new System.Drawing.Size(258, 406);
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Advanced Syntax Highlight";
+			this.groupBox1.Text = "Syntax style";
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(6, 257);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(63, 15);
+			this.label2.TabIndex = 19;
+			this.label2.Text = "Effect:";
+			// 
+			// _BackgroundEffectBox
+			// 
+			this._BackgroundEffectBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this._BackgroundEffectBox.FormattingEnabled = true;
+			this._BackgroundEffectBox.Location = new System.Drawing.Point(122, 254);
+			this._BackgroundEffectBox.Name = "_BackgroundEffectBox";
+			this._BackgroundEffectBox.Size = new System.Drawing.Size(121, 23);
+			this._BackgroundEffectBox.TabIndex = 18;
+			// 
+			// _FontBox
+			// 
+			this._FontBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this._FontBox.FormattingEnabled = true;
+			this._FontBox.Location = new System.Drawing.Point(66, 21);
+			this._FontBox.Name = "_FontBox";
+			this._FontBox.Size = new System.Drawing.Size(186, 23);
+			this._FontBox.TabIndex = 17;
+			// 
+			// label8
+			// 
+			this.label8.AutoSize = true;
+			this.label8.Location = new System.Drawing.Point(6, 24);
+			this.label8.Name = "label8";
+			this.label8.Size = new System.Drawing.Size(47, 15);
+			this.label8.TabIndex = 16;
+			this.label8.Text = "Font:";
 			// 
 			// _PreviewBox
 			// 
@@ -97,25 +139,25 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._PreviewBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this._PreviewBox.Location = new System.Drawing.Point(7, 244);
+			this._PreviewBox.Location = new System.Drawing.Point(7, 283);
 			this._PreviewBox.Name = "_PreviewBox";
-			this._PreviewBox.Size = new System.Drawing.Size(236, 122);
+			this._PreviewBox.Size = new System.Drawing.Size(236, 117);
 			this._PreviewBox.TabIndex = 15;
 			this._PreviewBox.TabStop = false;
 			// 
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(6, 213);
+			this.label6.Location = new System.Drawing.Point(6, 225);
 			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(111, 15);
+			this.label6.Size = new System.Drawing.Size(71, 15);
 			this.label6.TabIndex = 13;
-			this.label6.Text = "Transparency:";
+			this.label6.Text = "Opacity:";
 			// 
 			// _BackColorButton
 			// 
 			this._BackColorButton.Image = ((System.Drawing.Image)(resources.GetObject("_BackColorButton.Image")));
-			this._BackColorButton.Location = new System.Drawing.Point(123, 182);
+			this._BackColorButton.Location = new System.Drawing.Point(123, 194);
 			this._BackColorButton.Name = "_BackColorButton";
 			this._BackColorButton.SelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
 			this._BackColorButton.Size = new System.Drawing.Size(120, 23);
@@ -126,7 +168,12 @@
 			// 
 			// _BackColorTransBox
 			// 
-			this._BackColorTransBox.Location = new System.Drawing.Point(123, 211);
+			this._BackColorTransBox.Increment = new decimal(new int[] {
+            16,
+            0,
+            0,
+            0});
+			this._BackColorTransBox.Location = new System.Drawing.Point(123, 223);
 			this._BackColorTransBox.Maximum = new decimal(new int[] {
             255,
             0,
@@ -139,7 +186,7 @@
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(6, 186);
+			this.label7.Location = new System.Drawing.Point(6, 198);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(95, 15);
 			this.label7.TabIndex = 11;
@@ -148,16 +195,16 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(6, 153);
+			this.label5.Location = new System.Drawing.Point(6, 165);
 			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(111, 15);
+			this.label5.Size = new System.Drawing.Size(71, 15);
 			this.label5.TabIndex = 9;
-			this.label5.Text = "Transparency:";
+			this.label5.Text = "Opacity:";
 			// 
 			// _ForeColorButton
 			// 
 			this._ForeColorButton.Image = ((System.Drawing.Image)(resources.GetObject("_ForeColorButton.Image")));
-			this._ForeColorButton.Location = new System.Drawing.Point(123, 122);
+			this._ForeColorButton.Location = new System.Drawing.Point(123, 134);
 			this._ForeColorButton.Name = "_ForeColorButton";
 			this._ForeColorButton.SelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
 			this._ForeColorButton.Size = new System.Drawing.Size(120, 23);
@@ -168,7 +215,12 @@
 			// 
 			// _ForeColorTransBox
 			// 
-			this._ForeColorTransBox.Location = new System.Drawing.Point(123, 151);
+			this._ForeColorTransBox.Increment = new decimal(new int[] {
+            16,
+            0,
+            0,
+            0});
+			this._ForeColorTransBox.Location = new System.Drawing.Point(123, 163);
 			this._ForeColorTransBox.Maximum = new decimal(new int[] {
             255,
             0,
@@ -180,7 +232,7 @@
 			// 
 			// _FontSizeBox
 			// 
-			this._FontSizeBox.Location = new System.Drawing.Point(123, 89);
+			this._FontSizeBox.Location = new System.Drawing.Point(123, 53);
 			this._FontSizeBox.Minimum = new decimal(new int[] {
             10,
             0,
@@ -193,7 +245,7 @@
 			// label4
 			// 
 			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(6, 91);
+			this.label4.Location = new System.Drawing.Point(6, 55);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(87, 15);
 			this.label4.TabIndex = 5;
@@ -202,7 +254,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(6, 126);
+			this.label3.Location = new System.Drawing.Point(6, 138);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(95, 15);
 			this.label3.TabIndex = 7;
@@ -211,7 +263,7 @@
 			// _StrikeBox
 			// 
 			this._StrikeBox.AutoSize = true;
-			this._StrikeBox.Location = new System.Drawing.Point(123, 64);
+			this._StrikeBox.Location = new System.Drawing.Point(123, 109);
 			this._StrikeBox.Name = "_StrikeBox";
 			this._StrikeBox.Size = new System.Drawing.Size(133, 19);
 			this._StrikeBox.TabIndex = 4;
@@ -222,7 +274,7 @@
 			// _UnderlineBox
 			// 
 			this._UnderlineBox.AutoSize = true;
-			this._UnderlineBox.Location = new System.Drawing.Point(6, 64);
+			this._UnderlineBox.Location = new System.Drawing.Point(6, 109);
 			this._UnderlineBox.Name = "_UnderlineBox";
 			this._UnderlineBox.Size = new System.Drawing.Size(101, 19);
 			this._UnderlineBox.TabIndex = 3;
@@ -233,7 +285,7 @@
 			// _ItalicBox
 			// 
 			this._ItalicBox.AutoSize = true;
-			this._ItalicBox.Location = new System.Drawing.Point(123, 39);
+			this._ItalicBox.Location = new System.Drawing.Point(123, 84);
 			this._ItalicBox.Name = "_ItalicBox";
 			this._ItalicBox.Size = new System.Drawing.Size(77, 19);
 			this._ItalicBox.TabIndex = 2;
@@ -244,22 +296,13 @@
 			// _BoldBox
 			// 
 			this._BoldBox.AutoSize = true;
-			this._BoldBox.Location = new System.Drawing.Point(6, 39);
+			this._BoldBox.Location = new System.Drawing.Point(6, 84);
 			this._BoldBox.Name = "_BoldBox";
 			this._BoldBox.Size = new System.Drawing.Size(61, 19);
 			this._BoldBox.TabIndex = 1;
 			this._BoldBox.Text = "Bold";
 			this._BoldBox.ThreeState = true;
 			this._BoldBox.UseVisualStyleBackColor = true;
-			// 
-			// label2
-			// 
-			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(6, 21);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(239, 15);
-			this.label2.TabIndex = 0;
-			this.label2.Text = "<< Select an item on the left";
 			// 
 			// _SyntaxListBox
 			// 
@@ -273,8 +316,7 @@
 			this._SyntaxListBox.Location = new System.Drawing.Point(16, 35);
 			this._SyntaxListBox.MultiSelect = false;
 			this._SyntaxListBox.Name = "_SyntaxListBox";
-			this._SyntaxListBox.ShowGroups = false;
-			this._SyntaxListBox.Size = new System.Drawing.Size(239, 351);
+			this._SyntaxListBox.Size = new System.Drawing.Size(239, 385);
 			this._SyntaxListBox.TabIndex = 1;
 			this._SyntaxListBox.UseCompatibleStateImageBehavior = false;
 			this._SyntaxListBox.View = System.Windows.Forms.View.Details;
@@ -292,7 +334,7 @@
 			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.label1);
 			this.Name = "SyntaxStyleOptionPage";
-			this.Size = new System.Drawing.Size(522, 389);
+			this.Size = new System.Drawing.Size(522, 423);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this._PreviewBox)).EndInit();
@@ -324,8 +366,11 @@
 		private System.Windows.Forms.CheckBox _BoldBox;
 		private System.Windows.Forms.ListView _SyntaxListBox;
 		private System.Windows.Forms.ColumnHeader _NameColumn;
-		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.ColorDialog _PicColorBox;
 		private System.Windows.Forms.PictureBox _PreviewBox;
+		private System.Windows.Forms.ComboBox _FontBox;
+		private System.Windows.Forms.Label label8;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.ComboBox _BackgroundEffectBox;
 	}
 }

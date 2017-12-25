@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Classifiers
 {
-	class TaggerResult
+	sealed class TaggerResult
 	{
 		/// <summary>The snapshot version.</summary>
 		public int Version { get; set; }
@@ -52,11 +52,11 @@ namespace Codist.Classifiers
 	}
 
 	[DebuggerDisplay("{Start}..{End} {Tag.ClassificationType}")]
-	class SpanTag
+	sealed class SpanTag
 	{
 		public int Start { get; set; }
 		public int Length { get; set; }
-		public int End { get { return Start + Length; } }
+		public int End => Start + Length;
 		public ClassificationTag Tag { get; set; }
 		public SpanTag (TagSpan<ClassificationTag> tagSpan) {
 			Start = tagSpan.Span.Start;

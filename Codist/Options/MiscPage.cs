@@ -15,7 +15,7 @@ namespace Codist.Options
 		public MiscPage() {
 			InitializeComponent();
 		}
-		internal MiscPage(PageBase page) : this() {
+		internal MiscPage(ConfigPage page) : this() {
 
 		}
 		private void MiscPage_Load(object sender, EventArgs e) {
@@ -35,6 +35,39 @@ namespace Codist.Options
 			_TopMarginBox.ValueChanged += (s, args) => LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value;
 			_BottomMarginBox.ValueChanged += (s, args) => LineTransformers.LineHeightTransformProvider.BottomSpace = (double)_BottomMarginBox.Value;
 			_NoSpaceBetweenWrappedLinesBox.CheckedChanged += (s, args) => Config.Instance.NoSpaceBetweenWrappedLines = _NoSpaceBetweenWrappedLinesBox.Checked;
+			_SaveConfigButton.Click += (s, args) => {
+				using (var d = new SaveFileDialog {
+					Title = "Save Codist configuration file...",
+					FileName = "Codist.json",
+					DefaultExt = "json",
+					Filter = "Codist configuration file|*.json"
+				}) {
+					if (d.ShowDialog() != DialogResult.OK) {
+						return;
+					}
+					Config.Instance.SaveConfig(d.FileName);
+				}
+			};
+			_LoadConfigButton.Click += (s, args) => {
+				using (var d = new OpenFileDialog {
+					Title = "Load Codist configuration file...",
+					FileName = "Codist.json",
+					DefaultExt = "json",
+					Filter = "Codist configuration file|*.json"
+				}) {
+					if (d.ShowDialog() != DialogResult.OK) {
+						return;
+					}
+					try {
+						System.IO.File.Copy(d.FileName, Config.ConfigPath, true);
+						Config.LoadConfig();
+						MessageBox.Show("Configurations were loaded successfully. Restart Visual Studio to make it effective.");
+					}
+					catch (Exception ex) {
+						MessageBox.Show("Error occured while loading config file: " + ex.Message, "Codist");
+					}
+				}
+			};
 		}
 	}
 }

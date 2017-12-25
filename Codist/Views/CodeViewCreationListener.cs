@@ -8,15 +8,15 @@ namespace Codist.Views
 {
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType("code")]
-	[TextViewRole("DOCUMENT")]
-	internal sealed class CommentViewCreationListener : IWpfTextViewCreationListener
+	[TextViewRole(PredefinedTextViewRoles.Document)]
+	internal sealed class CodeViewCreationListener : IWpfTextViewCreationListener
 	{
 		public void TextViewCreated(IWpfTextView textView) {
 			textView.Properties.GetOrCreateSingletonProperty(() => CreateDecorator(textView));
 		}
 
-		public CommentViewDecorator CreateDecorator(IWpfTextView textView) {
-			return new CommentViewDecorator(textView, formatMapService.GetClassificationFormatMap(textView), typeRegistryService);
+		public CodeViewDecorator CreateDecorator(IWpfTextView textView) {
+			return new CodeViewDecorator(textView, formatMapService.GetClassificationFormatMap(textView), typeRegistryService);
 		}
 
 #pragma warning disable 649

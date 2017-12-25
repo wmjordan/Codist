@@ -21,6 +21,7 @@ namespace Codist.Margins
 		readonly IVerticalScrollBar _ScrollBar;
 		readonly TaggerResult _Tags;
 
+		//ToDo: Configurable marker styles
 		//ToDo: Change brush colors according to user settings
 		static readonly Pen CommentPen = new Pen(Brushes.LightGreen, 1);
 		static readonly Brush EmphasisBrush = new SolidColorBrush(Constants.CommentColor);
@@ -204,27 +205,32 @@ namespace Codist.Margins
 		/// <param name="drawingContext">The <see cref="DrawingContext"/> used to render the margin.</param>
 		protected override void OnRender(DrawingContext drawingContext) {
 			base.OnRender(drawingContext);
-			if (_TextView.IsClosed) {
+			if (_TextView.IsClosed || _Tags.Tags.Count == 0) {
 				return;
 			}
 			var lastY = 0.0;
 			Brush lastBrush = null;
 			var tags = new List<SpanTag>(_Tags.Tags);
 			tags.Sort((x, y) => x.Start - y.Start);
+			var snapshot = _TextView.TextSnapshot;
+			var snapshotLength = snapshot.Length;
 			foreach (var tag in tags) {
+				if (tag.End >= snapshotLength || tag.Start >= snapshotLength) {
+					continue;
+				}
 				var c = tag.Tag.ClassificationType.Classification;
 				Brush b;
 				if (ClassificationBrushMapper.TryGetValue(c, out b) == false) {
 					continue;
 				}
-				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(_TextView.TextSnapshot, tag.Start));
+				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, tag.Start));
 				if (lastY + HalfMarkSize > y && lastBrush == b) {
 					// avoid drawing too many closed markers
 					continue;
 				}
 				if (b == ClassNameBrush || b == InterfaceNameBrush || b == StructNameBrush || b == EnumNameBrush) {
 					if (tag.Length > 0) {
-						DrawDeclarationMark(drawingContext, b, y, c, _TextView.TextSnapshot.GetText(tag.Start, tag.Length));
+						DrawDeclarationMark(drawingContext, b, y, c, snapshot.GetText(tag.Start, tag.Length));
 					}
 					continue;
 				}
