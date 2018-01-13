@@ -115,7 +115,8 @@ namespace Codist.Classifiers
 			// NOTE: Workspace can be null for "Using directive is unnecessary". Also workspace can
 			// be null when solution/project failed to load and VS gave some reasons of it or when
 			// try to open a file doesn't contained in the current solution
-			var workspace = span.Snapshot.TextBuffer.GetWorkspace();
+			var snapshot = span.Snapshot;
+			var workspace = snapshot.TextBuffer.GetWorkspace();
 			if (workspace == null) {
 				// TODO: Add supporting a files that doesn't included to the current solution
 				return new ClassificationSpan[0];
@@ -145,7 +146,7 @@ namespace Codist.Classifiers
 							case SyntaxKind.YieldReturnStatement:
 							case SyntaxKind.YieldBreakStatement:
 							case SyntaxKind.ThrowStatement:
-								result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _returnKeywordType));
+								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _returnKeywordType));
 								return false;
 						}
 					}
@@ -160,7 +161,8 @@ namespace Codist.Classifiers
 				});
 
 			foreach (var item in classifiedSpans) {
-				var node = unitCompilation.FindNode(item.TextSpan, true);
+				var itemSpan = item.TextSpan;
+				var node = unitCompilation.FindNode(itemSpan, true);
 
 				// NOTE: Some kind of nodes, for example ArgumentSyntax, should are handled with a
 				// specific way
@@ -172,26 +174,28 @@ namespace Codist.Classifiers
 					if (symbol == null) {
 						// NOTE: handle alias in using directive
 						if ((node.Parent as NameEqualsSyntax)?.Parent is UsingDirectiveSyntax) {
-							result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _aliasNamespaceType));
+							result.Add(CreateClassificationSpan(snapshot, itemSpan, _aliasNamespaceType));
 						}
-
-						// TODO: Log information about a node and semantic model, because semantic model
-						// didn't retrive information from node in this case
-						//_logger.ConditionalInfo("Nothing is found. Span start at {0} and end at {1}", span.Start.Position, span.End.Position);
-						//_logger.ConditionalInfo("Node is {0} {1}", node.Kind(), node.RawKind);
+						else if (node is AttributeArgumentSyntax) {
+							symbol = semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol;
+							if (symbol != null && symbol.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
+								result.Add(CreateClassificationSpan(snapshot, itemSpan, _constFieldType));
+								result.Add(CreateClassificationSpan(snapshot, itemSpan, _staticMemberType));
+							}
+						}
 						continue;
 					}
 					switch (symbol.Kind) {
 						case SymbolKind.NamedType:
-							result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, symbol.ContainingType != null ? _nestedDeclarationType : _declarationType));
+							result.Add(CreateClassificationSpan(snapshot, itemSpan, symbol.ContainingType != null ? _nestedDeclarationType : _declarationType));
 							break;
 						case SymbolKind.Event:
 						case SymbolKind.Method:
-							result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _declarationType));
+							result.Add(CreateClassificationSpan(snapshot, itemSpan, _declarationType));
 							break;
 						case SymbolKind.Property:
 							if (symbol.ContainingType.IsAnonymousType == false) {
-								result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _declarationType));
+								result.Add(CreateClassificationSpan(snapshot, itemSpan, _declarationType));
 							}
 							break;
 					}
@@ -208,41 +212,40 @@ namespace Codist.Classifiers
 					case SymbolKind.RangeVariable:
 					case SymbolKind.Preprocessing:
 						//case SymbolKind.Discard:
-						//_logger.ConditionalInfo("Symbol kind={0} was on position [{1}..{2}]", symbol.Kind, item.TextSpan.Start, item.TextSpan.End);
-						//_logger.ConditionalInfo("Text was: {0}", node.GetText().ToString());
 						break;
 
 					case SymbolKind.Label:
-						result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _labelType));
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, _labelType));
 						break;
 
 					case SymbolKind.TypeParameter:
-						result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _typeParameterType));
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, _typeParameterType));
 						break;
 
 					case SymbolKind.Field:
 						var fieldSymbol = (symbol as IFieldSymbol);
-						result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, fieldSymbol.IsConst ? _constFieldType : fieldSymbol.IsReadOnly ? _readonlyFieldType : _fieldType));
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, fieldSymbol.IsConst ? _constFieldType : fieldSymbol.IsReadOnly ? _readonlyFieldType : _fieldType));
 						break;
 
 					case SymbolKind.Property:
-						result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _propertyType));
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, _propertyType));
 						break;
 
 					case SymbolKind.Event:
-						result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _eventType));
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, _eventType));
 						break;
 
 					case SymbolKind.Local:
-						result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _localFieldType));
+						var localSymbol = (symbol as ILocalSymbol);
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, localSymbol.IsConst ? _constFieldType : _localFieldType));
 						break;
 
 					case SymbolKind.Namespace:
-						result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _namespaceType));
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, _namespaceType));
 						break;
 
 					case SymbolKind.Parameter:
-						result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _parameterType));
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, _parameterType));
 						break;
 
 					case SymbolKind.Method:
@@ -250,16 +253,16 @@ namespace Codist.Classifiers
 						switch (methodSymbol.MethodKind) {
 							case MethodKind.Constructor:
 								result.Add(CreateClassificationSpan(
-									span.Snapshot,
-									item.TextSpan,
+									snapshot,
+									itemSpan,
 									node is AttributeSyntax || node.Parent is AttributeSyntax || node.Parent?.Parent is AttributeSyntax ? _attributeNotationType : _constructorMethodType));
 								break;
 							case MethodKind.Destructor:
 							case MethodKind.StaticConstructor:
-								result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _constructorMethodType));
+								result.Add(CreateClassificationSpan(snapshot, itemSpan, _constructorMethodType));
 								break;
 							default:
-								result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, methodSymbol.IsExtensionMethod ? _extensionMethodType : methodSymbol.IsExtern ? _externMethodType : _methodType));
+								result.Add(CreateClassificationSpan(snapshot, itemSpan, methodSymbol.IsExtensionMethod ? _extensionMethodType : methodSymbol.IsExtern ? _externMethodType : _methodType));
 								break;
 						}
 						break;
@@ -270,20 +273,20 @@ namespace Codist.Classifiers
 
 				if (symbol.IsStatic) {
 					if (symbol.Kind != SymbolKind.Namespace) {
-						result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _staticMemberType));
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, _staticMemberType));
 					}
 				}
 				else if (symbol.IsOverride) {
-					result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _overrideMemberType));
+					result.Add(CreateClassificationSpan(snapshot, itemSpan, _overrideMemberType));
 				}
 				else if (symbol.IsVirtual) {
-					result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _virtualMemberType));
+					result.Add(CreateClassificationSpan(snapshot, itemSpan, _virtualMemberType));
 				}
 				else if (symbol.IsAbstract) {
-					result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _abstractMemberType));
+					result.Add(CreateClassificationSpan(snapshot, itemSpan, _abstractMemberType));
 				}
 				else if (symbol.IsSealed) {
-					result.Add(CreateClassificationSpan(span.Snapshot, item.TextSpan, _sealedType));
+					result.Add(CreateClassificationSpan(snapshot, itemSpan, _sealedType));
 				}
 			}
 
@@ -311,8 +314,8 @@ namespace Codist.Classifiers
 			}
 		}
 
-		static ClassificationSpan CreateClassificationSpan(ITextSnapshot snapshot, TextSpan span, IClassificationType type) {
-			return new ClassificationSpan(new SnapshotSpan(snapshot, span.Start, span.Length), type);
+		static ClassificationSpan CreateClassificationSpan(ITextSnapshot snapshotSpan, TextSpan span, IClassificationType type) {
+			return new ClassificationSpan(new SnapshotSpan(snapshotSpan, span.Start, span.Length), type);
 		}
 	}
 }

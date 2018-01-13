@@ -12,6 +12,8 @@ namespace Codist.Options
 {
 	public partial class MiscPage : UserControl
 	{
+		bool _Loaded;
+
 		public MiscPage() {
 			InitializeComponent();
 		}
@@ -19,6 +21,9 @@ namespace Codist.Options
 
 		}
 		private void MiscPage_Load(object sender, EventArgs e) {
+			if (_Loaded) {
+				return;
+			}
 			_TopMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.TopSpace;
 			_BottomMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.BottomSpace;
 			_NoSpaceBetweenWrappedLinesBox.Checked = Config.Instance.NoSpaceBetweenWrappedLines;
@@ -31,6 +36,8 @@ namespace Codist.Options
 			_SpecialCommentsBox.CheckedChanged += (s, args) => Config.Instance.MarkComments = _SpecialCommentsBox.Checked;
 			_TypeDeclarationBox.Checked = Config.Instance.MarkDeclarations;
 			_TypeDeclarationBox.CheckedChanged += (s, args) => Config.Instance.MarkDeclarations = _TypeDeclarationBox.Checked;
+			_LineNumbersBox.Checked = Config.Instance.MarkLineNumbers;
+			_LineNumbersBox.CheckedChanged += (s, args) => Config.Instance.MarkLineNumbers = _LineNumbersBox.Checked;
 
 			_TopMarginBox.ValueChanged += (s, args) => LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value;
 			_BottomMarginBox.ValueChanged += (s, args) => LineTransformers.LineHeightTransformProvider.BottomSpace = (double)_BottomMarginBox.Value;
@@ -60,14 +67,16 @@ namespace Codist.Options
 					}
 					try {
 						System.IO.File.Copy(d.FileName, Config.ConfigPath, true);
+						//todo: avoid restarting VS
 						Config.LoadConfig();
-						MessageBox.Show("Configurations were loaded successfully. Restart Visual Studio to make it effective.");
+						MessageBox.Show("Configurations were loaded successfully. Restart Visual Studio to make it effective.", "Codist");
 					}
 					catch (Exception ex) {
 						MessageBox.Show("Error occured while loading config file: " + ex.Message, "Codist");
 					}
 				}
 			};
+			_Loaded = true;
 		}
 	}
 }

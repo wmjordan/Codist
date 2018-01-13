@@ -20,6 +20,7 @@ namespace Codist
 		public bool MarkComments { get; set; } = true;
 		public bool MarkDeclarations { get; set; } = true;
 		public bool MarkDirectives { get; set; } = true;
+		public bool MarkLineNumbers { get; set; } = true;
 
 		public double TopSpace {
 			get => LineTransformers.LineHeightTransformProvider.TopSpace;

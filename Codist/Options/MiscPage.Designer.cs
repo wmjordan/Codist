@@ -38,6 +38,7 @@
 			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
 			this._SaveConfigButton = new System.Windows.Forms.Button();
 			this._LoadConfigButton = new System.Windows.Forms.Button();
+			this._LineNumbersBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this.groupBox1.SuspendLayout();
@@ -103,12 +104,13 @@
 			// groupBox2
 			// 
 			this.groupBox2.Controls.Add(this._DirectivesBox);
+			this.groupBox2.Controls.Add(this._LineNumbersBox);
 			this.groupBox2.Controls.Add(this._SpecialCommentsBox);
 			this.groupBox2.Controls.Add(this._CodeAbstractionsBox);
 			this.groupBox2.Controls.Add(this._TypeDeclarationBox);
 			this.groupBox2.Location = new System.Drawing.Point(3, 93);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(407, 80);
+			this.groupBox2.Size = new System.Drawing.Size(407, 118);
 			this.groupBox2.TabIndex = 1;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Scrollbar markers";
@@ -155,21 +157,31 @@
 			// 
 			// _SaveConfigButton
 			// 
-			this._SaveConfigButton.Location = new System.Drawing.Point(12, 179);
+			this._SaveConfigButton.Location = new System.Drawing.Point(12, 217);
 			this._SaveConfigButton.Name = "_SaveConfigButton";
 			this._SaveConfigButton.Size = new System.Drawing.Size(173, 23);
-			this._SaveConfigButton.TabIndex = 2;
+			this._SaveConfigButton.TabIndex = 0;
 			this._SaveConfigButton.Text = "&Save configs...";
 			this._SaveConfigButton.UseVisualStyleBackColor = true;
 			// 
 			// _LoadConfigButton
 			// 
-			this._LoadConfigButton.Location = new System.Drawing.Point(202, 179);
+			this._LoadConfigButton.Location = new System.Drawing.Point(202, 217);
 			this._LoadConfigButton.Name = "_LoadConfigButton";
 			this._LoadConfigButton.Size = new System.Drawing.Size(173, 23);
-			this._LoadConfigButton.TabIndex = 2;
+			this._LoadConfigButton.TabIndex = 1;
 			this._LoadConfigButton.Text = "&Load configs...";
 			this._LoadConfigButton.UseVisualStyleBackColor = true;
+			// 
+			// _LineNumbersBox
+			// 
+			this._LineNumbersBox.AutoSize = true;
+			this._LineNumbersBox.Location = new System.Drawing.Point(9, 83);
+			this._LineNumbersBox.Name = "_LineNumbersBox";
+			this._LineNumbersBox.Size = new System.Drawing.Size(125, 19);
+			this._LineNumbersBox.TabIndex = 4;
+			this._LineNumbersBox.Text = "Line numbers";
+			this._LineNumbersBox.UseVisualStyleBackColor = true;
 			// 
 			// MiscPage
 			// 
@@ -180,7 +192,7 @@
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
 			this.Name = "MiscPage";
-			this.Size = new System.Drawing.Size(572, 217);
+			this.Size = new System.Drawing.Size(572, 306);
 			this.Load += new System.EventHandler(this.MiscPage_Load);
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).EndInit();
@@ -207,5 +219,6 @@
 		private System.Windows.Forms.CheckBox _NoSpaceBetweenWrappedLinesBox;
 		private System.Windows.Forms.Button _SaveConfigButton;
 		private System.Windows.Forms.Button _LoadConfigButton;
+		private System.Windows.Forms.CheckBox _LineNumbersBox;
 	}
 }

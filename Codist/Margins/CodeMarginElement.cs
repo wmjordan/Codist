@@ -24,6 +24,8 @@ namespace Codist.Margins
 		//ToDo: Configurable marker styles
 		//ToDo: Change brush colors according to user settings
 		static readonly Pen CommentPen = new Pen(Brushes.LightGreen, 1);
+		static readonly Brush LineNumberBrush = Brushes.DarkGray;
+		static readonly Pen LineNumberPen = new Pen(LineNumberBrush, 1) { DashStyle = DashStyles.Dash };
 		static readonly Brush EmphasisBrush = new SolidColorBrush(Constants.CommentColor);
 		static readonly Brush ToDoBrush = new SolidColorBrush(Constants.ToDoColor);
 		static readonly Brush NoteBrush = new SolidColorBrush(Constants.NoteColor);
@@ -205,9 +207,30 @@ namespace Codist.Margins
 		/// <param name="drawingContext">The <see cref="DrawingContext"/> used to render the margin.</param>
 		protected override void OnRender(DrawingContext drawingContext) {
 			base.OnRender(drawingContext);
-			if (_TextView.IsClosed || _Tags.Tags.Count == 0) {
+			if (_TextView.IsClosed) {
 				return;
 			}
+			if (Config.Instance.MarkLineNumbers) {
+				DrawLineNumbers(drawingContext);
+			}
+			if (_Tags.Tags.Count > 0) {
+				DrawMarkers(drawingContext);
+			}
+		}
+
+		private void DrawLineNumbers(DrawingContext drawingContext) {
+			var snapshot = _TextView.TextSnapshot;
+			var lc = snapshot.LineCount;
+			var step = lc < 500 ? 50 : lc < 1000 ? 100 : lc < 5000 ? 500 : 1000;
+			for (int i = step; i < lc; i += step) {
+				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, snapshot.GetLineFromLineNumber(i - 1).Start));
+				drawingContext.DrawLine(LineNumberPen, new Point(-100, y), new Point(100, y));
+				var t = new FormattedText((i).ToString(), System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, SystemFonts.StatusFontFamily.GetTypefaces().First(), 9, LineNumberBrush);
+				drawingContext.DrawText(t, new Point(0, y));
+			}
+		}
+
+		private void DrawMarkers(DrawingContext drawingContext) {
 			var lastY = 0.0;
 			Brush lastBrush = null;
 			var tags = new List<SpanTag>(_Tags.Tags);
