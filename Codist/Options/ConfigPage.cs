@@ -108,6 +108,22 @@ namespace Codist.Options
 		}
 	}
 
+	[Guid("2E07AC20-D62F-4D78-8750-2A464CC011AE")]
+	sealed class XmlCodeStyle : ConfigPage
+	{
+		SyntaxStyleOptionPage _Control;
+
+		protected override IWin32Window Window {
+			get {
+				return _Control ?? (_Control = new SyntaxStyleOptionPage(this, Config.Instance.XmlCodeStyles, Config.GetDefaultXmlCodeStyles()));
+			}
+		}
+		protected override void Dispose(bool disposing) {
+			_Control.Dispose();
+			base.Dispose(disposing);
+		}
+	}
+
 	[Guid("1EB954DF-37FE-4849-B63A-58EC43088856")]
 	sealed class CommentTagger : ConfigPage
 	{

@@ -4,15 +4,16 @@ using System.Reflection;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using GdiColor = System.Drawing.Color;
+using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist
 {
 	static class Utilities
 	{
-		public static string GetEnumDescription(this Type type, string field) {
+		public static string GetClassificationType(this Type type, string field) {
 			var f = type.GetField(field);
-			var d = f.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>();
-			return d?.Description;
+			var d = f.GetCustomAttribute<ClassificationTypeAttribute>();
+			return d?.ClassificationTypeNames;
 		}
 
 		public static GdiColor ChangeTrasparency(this GdiColor color, byte alpha) {

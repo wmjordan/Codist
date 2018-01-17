@@ -14,7 +14,7 @@ namespace Codist.Classifiers
 	internal sealed class LocalFieldFormat : ClassificationFormatDefinition
 	{
 		public LocalFieldFormat() {
-			DisplayName = "Codist: local field";
+			DisplayName = Constants.NameOfMe + ": local field";
 		}
 	}
 
@@ -26,7 +26,7 @@ namespace Codist.Classifiers
 	internal sealed class ConstFieldFormat : ClassificationFormatDefinition
 	{
 		public ConstFieldFormat() {
-			DisplayName = "Codist: const field";
+			DisplayName = Constants.NameOfMe + ": const field";
 		}
 	}
 
@@ -38,7 +38,7 @@ namespace Codist.Classifiers
 	internal sealed class ReadOnlyFieldFormat : ClassificationFormatDefinition
 	{
 		public ReadOnlyFieldFormat() {
-			DisplayName = "Codist: readonly field";
+			DisplayName = Constants.NameOfMe + ": readonly field";
 		}
 	}
 
@@ -50,7 +50,7 @@ namespace Codist.Classifiers
 	internal sealed class ParameterFormat : ClassificationFormatDefinition
 	{
 		public ParameterFormat() {
-			DisplayName = "Codist: parameter";
+			DisplayName = Constants.NameOfMe + ": parameter";
 			IsItalic = true;
 			ForegroundColor = System.Windows.Media.Colors.MediumPurple;
 		}
@@ -64,7 +64,7 @@ namespace Codist.Classifiers
 	internal sealed class TypeParameterFormat : ClassificationFormatDefinition
 	{
 		public TypeParameterFormat() {
-			DisplayName = "Codist: type parameter";
+			DisplayName = Constants.NameOfMe + ": type parameter";
 		}
 	}
 
@@ -76,7 +76,7 @@ namespace Codist.Classifiers
 	internal sealed class NamespaceFormat : ClassificationFormatDefinition
 	{
 		public NamespaceFormat() {
-			DisplayName = "Codist: namespace";
+			DisplayName = Constants.NameOfMe + ": namespace";
 		}
 	}
 
@@ -88,7 +88,7 @@ namespace Codist.Classifiers
 	internal sealed class ExtensionMethodFormat : ClassificationFormatDefinition
 	{
 		public ExtensionMethodFormat() {
-			DisplayName = "Codist: extension method";
+			DisplayName = Constants.NameOfMe + ": extension method";
 			IsItalic = true;
 		}
 	}
@@ -101,7 +101,7 @@ namespace Codist.Classifiers
 	internal sealed class ExternMethodFormat : ClassificationFormatDefinition
 	{
 		public ExternMethodFormat() {
-			DisplayName = "Codist: extern method";
+			DisplayName = Constants.NameOfMe + ": extern method";
 		}
 	}
 
@@ -113,7 +113,7 @@ namespace Codist.Classifiers
 	internal sealed class MethodFormat : ClassificationFormatDefinition
 	{
 		public MethodFormat() {
-			DisplayName = "Codist: method";
+			DisplayName = Constants.NameOfMe + ": method";
 		}
 	}
 
@@ -125,7 +125,7 @@ namespace Codist.Classifiers
 	internal sealed class EventFormat : ClassificationFormatDefinition
 	{
 		public EventFormat() {
-			DisplayName = "Codist: event";
+			DisplayName = Constants.NameOfMe + ": event";
 		}
 	}
 
@@ -137,7 +137,7 @@ namespace Codist.Classifiers
 	internal sealed class PropertyFormat : ClassificationFormatDefinition
 	{
 		public PropertyFormat() {
-			DisplayName = "Codist: property";
+			DisplayName = Constants.NameOfMe + ": property";
 		}
 	}
 
@@ -149,7 +149,7 @@ namespace Codist.Classifiers
 	internal sealed class FieldFormat : ClassificationFormatDefinition
 	{
 		public FieldFormat() {
-			DisplayName = "Codist: field";
+			DisplayName = Constants.NameOfMe + ": field";
 		}
 	}
 
@@ -161,7 +161,7 @@ namespace Codist.Classifiers
 	internal sealed class AliasNamespaceFormat : ClassificationFormatDefinition
 	{
 		public AliasNamespaceFormat() {
-			DisplayName = "Codist: alias namespace";
+			DisplayName = Constants.NameOfMe + ": alias namespace";
 		}
 	}
 
@@ -173,7 +173,7 @@ namespace Codist.Classifiers
 	internal sealed class ConstructorMethodFormat : ClassificationFormatDefinition
 	{
 		public ConstructorMethodFormat() {
-			DisplayName = "Codist: constructor method";
+			DisplayName = Constants.NameOfMe + ": constructor method";
 		}
 	}
 
@@ -185,7 +185,7 @@ namespace Codist.Classifiers
 	internal sealed class DeclarationFormat : ClassificationFormatDefinition
 	{
 		public DeclarationFormat() {
-			DisplayName = "Codist: declaration";
+			DisplayName = Constants.NameOfMe + ": declaration";
 			FontRenderingSize = 20;
 		}
 	}
@@ -198,7 +198,7 @@ namespace Codist.Classifiers
 	internal sealed class NestedDeclarationFormat : ClassificationFormatDefinition
 	{
 		public NestedDeclarationFormat() {
-			DisplayName = "Codist: nested declaration";
+			DisplayName = Constants.NameOfMe + ": nested declaration";
 			FontRenderingSize = 16;
 		}
 	}
@@ -211,7 +211,7 @@ namespace Codist.Classifiers
 	internal sealed class StaticMemberFormat : ClassificationFormatDefinition
 	{
 		public StaticMemberFormat() {
-			DisplayName = "Codist: static member";
+			DisplayName = Constants.NameOfMe + ": static member";
 			TextDecorations = new TextDecorationCollection(System.Windows.TextDecorations.Underline);
 		}
 	}
@@ -224,7 +224,7 @@ namespace Codist.Classifiers
 	internal sealed class OverrideMemberFormat : ClassificationFormatDefinition
 	{
 		public OverrideMemberFormat() {
-			DisplayName = "Codist: override member";
+			DisplayName = Constants.NameOfMe + ": override member";
 		}
 	}
 
@@ -236,7 +236,7 @@ namespace Codist.Classifiers
 	internal sealed class AbstractMemberFormat : ClassificationFormatDefinition
 	{
 		public AbstractMemberFormat() {
-			DisplayName = "Codist: abstract member";
+			DisplayName = Constants.NameOfMe + ": abstract member";
 		}
 	}
 
@@ -248,7 +248,7 @@ namespace Codist.Classifiers
 	internal sealed class VirtualMemberFormat : ClassificationFormatDefinition
 	{
 		public VirtualMemberFormat() {
-			DisplayName = "Codist: virtual member";
+			DisplayName = Constants.NameOfMe + ": virtual member";
 		}
 	}
 
@@ -260,7 +260,7 @@ namespace Codist.Classifiers
 	internal sealed class SealedClassFormat : ClassificationFormatDefinition
 	{
 		public SealedClassFormat() {
-			DisplayName = "Codist: sealed class";
+			DisplayName = Constants.NameOfMe + ": sealed class";
 		}
 	}
 
@@ -272,7 +272,7 @@ namespace Codist.Classifiers
 	internal sealed class LabelFormat : ClassificationFormatDefinition
 	{
 		public LabelFormat() {
-			DisplayName = "Codist: label";
+			DisplayName = Constants.NameOfMe + ": label";
 		}
 	}
 
@@ -284,7 +284,7 @@ namespace Codist.Classifiers
 	internal sealed class AttributeNotationFormat : ClassificationFormatDefinition
 	{
 		public AttributeNotationFormat() {
-			DisplayName = "Codist: attribute notation";
+			DisplayName = Constants.NameOfMe + ": attribute notation";
 		}
 	}
 }

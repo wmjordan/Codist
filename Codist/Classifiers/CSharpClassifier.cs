@@ -14,7 +14,7 @@ namespace Codist.Classifiers
 	/// <summary>
 	/// Classifier that classifies all text as an instance of the "EditorClassifier" classification type.
 	/// </summary>
-	internal sealed class CodeClassifier : IClassifier
+	internal sealed class CSharpClassifier : IClassifier
 	{
 		readonly IClassificationType _localFieldType;
 		readonly IClassificationType _namespaceType;
@@ -39,20 +39,20 @@ namespace Codist.Classifiers
 		readonly IClassificationType _externMethodType;
 		readonly IClassificationType _labelType;
 		readonly IClassificationType _attributeNotationType;
+		readonly IClassificationType _controlFlowKeywordType;
 
-		readonly IClassificationType _returnKeywordType;
 		readonly ITextBuffer _textBuffer;
 		readonly ITextDocumentFactoryService _textDocumentFactoryService;
 
 		SemanticModel _semanticModel;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="CodeClassifier"/> class.
+		/// Initializes a new instance of the <see cref="CSharpClassifier"/> class.
 		/// </summary>
 		/// <param name="registry"></param>
 		/// <param name="textDocumentFactoryService"></param>
 		/// <param name="buffer"></param>
-		internal CodeClassifier(
+		internal CSharpClassifier(
 			IClassificationTypeRegistryService registry,
 			ITextDocumentFactoryService textDocumentFactoryService,
 			ITextBuffer buffer) {
@@ -79,8 +79,7 @@ namespace Codist.Classifiers
 			_typeParameterType = registry.GetClassificationType(Constants.CSharpTypeParameterName);
 			_labelType = registry.GetClassificationType(Constants.CSharpLabel);
 			_attributeNotationType = registry.GetClassificationType(Constants.CSharpAttributeNotation);
-
-			_returnKeywordType = registry.GetClassificationType(Constants.CodeReturnKeyword);
+			_controlFlowKeywordType = registry.GetClassificationType(Constants.CodeControlFlowKeyword);
 			_textDocumentFactoryService = textDocumentFactoryService;
 			_textBuffer = buffer;
 
@@ -119,9 +118,9 @@ namespace Codist.Classifiers
 			var workspace = snapshot.TextBuffer.GetWorkspace();
 			if (workspace == null) {
 				// TODO: Add supporting a files that doesn't included to the current solution
-				return new ClassificationSpan[0];
+				return Array.Empty<ClassificationSpan>();
 			}
-			var result = new List<ClassificationSpan>();
+			var result = new List<ClassificationSpan>(16);
 			var semanticModel = _semanticModel ?? (_semanticModel = GetDocument(workspace, span).GetSemanticModelAsync().Result);
 
 			var textSpan = new TextSpan(span.Start.Position, span.Length);
@@ -146,7 +145,7 @@ namespace Codist.Classifiers
 							case SyntaxKind.YieldReturnStatement:
 							case SyntaxKind.YieldBreakStatement:
 							case SyntaxKind.ThrowStatement:
-								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _returnKeywordType));
+								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _controlFlowKeywordType));
 								return false;
 						}
 					}

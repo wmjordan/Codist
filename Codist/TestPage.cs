@@ -27,17 +27,20 @@ namespace Codist.Fake
 	{
 		private int _field;
 		private readonly int _readonlyField;
-		static int _staticField;
+		static int _staticField = (int)DateTime.Now.Ticks; // static and instance field
 		static readonly int _staticReadonlyField = 10;
 		const string ConstantField = "literal constant";
 		delegate void Clone<T>(T text);
 		event EventHandler<EventArgs> MyEvent;
 
+		/// <summary>
+		/// Creates a new instance of <see cref="TestPage"/>.
+		/// </summary>
+		/// <param name="fieldId">The field.</param>
+		/// <example><![CDATA[var t = new TestPage(1);]]></example>
 		public TestPage(int fieldId) {
 			const int A = 1;
-			_field = fieldId;
-			_staticField = (int)DateTime.Now.Ticks; // static and instance property
-
+			var localField = fieldId;
 			@"Multiline
 text".Log();
 			$"Test page {fieldId} is initialized".Log();
@@ -50,8 +53,8 @@ text".Log();
 				default:
 					throw new NotImplementedException(fieldId.ToString() + " is not supported");
 			}
-			for (int i = 0; i < fieldId; i++) {
-				if (i == 0) {
+			for (int i = 0; i < _staticField; i++) {
+				if (i == localField) {
 					continue;
 				}
 				else if (i > A) {

@@ -38,6 +38,7 @@ namespace Codist.Margins
 		static readonly Brush AbstractionBrush = Brushes.DarkOrange;
 		//readonly static Brush ThrowKeywordBrush = Brushes.Red;
 		//readonly static Brush ReturnKeywordBrush = Brushes.Blue;
+		//todo: customizable marker style
 		static readonly Dictionary<string, Brush> ClassificationBrushMapper = new Dictionary<string, Brush> {
 			{ Constants.EmphasisComment, EmphasisBrush },
 			{ Constants.TodoComment, ToDoBrush },
@@ -107,7 +108,6 @@ namespace Codist.Margins
 				}
 				InvalidateVisual();
 			};
-			_Tags.Tagger.Margin = this;
 			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 			_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 
@@ -241,6 +241,7 @@ namespace Codist.Margins
 				if (tag.End >= snapshotLength || tag.Start >= snapshotLength) {
 					continue;
 				}
+				//todo: customizable marker style
 				var c = tag.Tag.ClassificationType.Classification;
 				Brush b;
 				if (ClassificationBrushMapper.TryGetValue(c, out b) == false) {

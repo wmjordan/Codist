@@ -18,60 +18,58 @@ namespace Codist.Views
 		readonly IClassificationFormatMap _Map;
 		readonly IClassificationTypeRegistryService _RegService;
 
-		bool isDecorating;
+		bool _IsDecorating;
 
 		public CodeViewDecorator(ITextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service) {
-			view.GotAggregateFocus += TextView_GotAggregateFocus;
-			Config.Instance.ConfigUpdated += SettingsSaved;
+			view.Closed += (s, args) => Config.ConfigUpdated -= SettingsSaved;
+			//view.GotAggregateFocus += TextView_GotAggregateFocus;
+			Config.ConfigUpdated += SettingsSaved;
 			_Map = map;
 			_RegService = service;
 
 			if (__Styles == null) {
-				var c = typeof(CommentStyleTypes);
-				var styleNames = Enum.GetNames(c);
-				var cs = typeof(CodeStyleTypes);
-				var codeStyles = Enum.GetNames(cs);
-				__Styles = new Dictionary<string, StyleBase>(styleNames.Length + codeStyles.Length);
-				foreach (var styleName in styleNames) {
-					var f = c.GetField(styleName);
-					var d = f.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>(false);
-					if (d == null || String.IsNullOrWhiteSpace(d.Description)) {
-						continue;
-					}
-					var ct = service.GetClassificationType(d.Description);
-					var cso = Config.Instance.CommentStyles.Find(i => i.StyleID == (CommentStyleTypes)f.GetValue(null));
-					if (cso == null) {
-						continue;
-					}
-					__Styles[ct.Classification] = cso;
-				}
-				foreach (var styleName in codeStyles) {
-					var f = cs.GetField(styleName);
-					var d = f.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>(false);
-					if (d == null || String.IsNullOrWhiteSpace(d.Description)) {
-						continue;
-					}
-					var ct = service.GetClassificationType(d.Description);
-					var cso = Config.Instance.CodeStyles.Find(i => i.StyleID == (CodeStyleTypes)f.GetValue(null));
-					if (cso == null) {
-						continue;
-					}
-					__Styles[ct.Classification] = cso;
-				}
+				__Styles = new Dictionary<string, StyleBase>(47);
+				InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(service, Config.Instance.CommentStyles);
+				InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(service, Config.Instance.CodeStyles);
+				InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(service, Config.Instance.XmlCodeStyles);
 			}
 
 			Decorate();
 		}
 
+		static void InitStyleClassificationCache<TStyleEnum, TCodeStyle>(IClassificationTypeRegistryService service, List<TCodeStyle> styles)
+			where TCodeStyle : StyleBase {
+			var cs = typeof(TStyleEnum);
+			var codeStyles = Enum.GetNames(cs);
+			foreach (var styleName in codeStyles) {
+				var f = cs.GetField(styleName);
+				var cso = styles.Find(i => i.Id == (int)f.GetValue(null));
+				if (cso == null) {
+					continue;
+				}
+				var cts = f.GetCustomAttributes<ClassificationTypeAttribute>(false);
+				foreach (var item in cts) {
+					var n = item.ClassificationTypeNames;
+					if (String.IsNullOrWhiteSpace(n)) {
+						continue;
+					}
+					var ct = service.GetClassificationType(n);
+					if (ct != null) {
+						__Styles[ct.Classification] = cso;
+					}
+				}
+			}
+		}
+
 		private void SettingsSaved(object sender, EventArgs eventArgs) {
-			if (!isDecorating) {
+			if (!_IsDecorating) {
 				Decorate();
 			}
 		}
 
 		private void Decorate() {
 			try {
-				isDecorating = true;
+				_IsDecorating = true;
 				DecorateClassificationTypes();
 			}
 			catch (Exception ex) {
@@ -79,7 +77,7 @@ namespace Codist.Views
 				Debug.WriteLine(ex);
 			}
 			finally {
-				isDecorating = false;
+				_IsDecorating = false;
 			}
 		}
 
@@ -176,11 +174,11 @@ namespace Codist.Views
 		}
 
 		private void TextView_GotAggregateFocus(object sender, EventArgs e) {
-			ITextView view;
-			if ((view = (sender as ITextView)) != null) {
-				view.GotAggregateFocus -= TextView_GotAggregateFocus;
-			}
-			if (!isDecorating) {
+			//ITextView view;
+			//if ((view = (sender as ITextView)) != null) {
+			//	view.GotAggregateFocus -= TextView_GotAggregateFocus;
+			//}
+			if (!_IsDecorating) {
 				Decorate();
 			}
 		}

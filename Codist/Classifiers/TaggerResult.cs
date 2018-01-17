@@ -16,20 +16,20 @@ namespace Codist.Classifiers
 		public int LastParsed { get; set; }
 		/// <summary>The parsed tags.</summary>
 		public List<SpanTag> Tags { get; set; } = new List<SpanTag>();
-		public CodeTagger Tagger { get; set; }
 
-		public void Add(int start, int end, ClassificationTag tag) {
-			if (start < Start) {
-				Start = start;
-			}
-			for (int i = Tags.Count - 1; i >= 0; i--) {
-				if (Tags[i].Contains(start)) {
-					Tags[i] = new SpanTag(start, end - start, tag);
-					return;
-				}
-			}
-			Tags.Add(new SpanTag(start, end - start, tag));
-		}
+		//public void Add(int start, int end, ClassificationTag tag) {
+		//	if (start < Start) {
+		//		Start = start;
+		//	}
+		//	for (int i = Tags.Count - 1; i >= 0; i--) {
+		//		if (Tags[i].Contains(start)) {
+		//			Tags[i] = new SpanTag(start, end - start, tag);
+		//			return;
+		//		}
+		//	}
+		//	Tags.Add(new SpanTag(start, end - start, tag));
+		//}
+
 		public TagSpan<ClassificationTag> Add(TagSpan<ClassificationTag> tag) {
 			var s = tag.Span;
 			if (s.Start < Start) {
@@ -57,6 +57,7 @@ namespace Codist.Classifiers
 		public int Start { get; set; }
 		public int Length { get; set; }
 		public int End => Start + Length;
+		//todo: customizable marker style
 		public ClassificationTag Tag { get; set; }
 		public SpanTag (TagSpan<ClassificationTag> tagSpan) {
 			Start = tagSpan.Span.Start;

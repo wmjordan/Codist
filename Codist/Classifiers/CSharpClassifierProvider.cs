@@ -10,25 +10,20 @@ namespace Codist.Classifiers
     /// </summary>
     [Export(typeof(IClassifierProvider))]
     [ContentType("CSharp")]
-    internal sealed class CodeClassifierProvider : IClassifierProvider
+    internal sealed class CSharpClassifierProvider : IClassifierProvider
     {
-        // Disable "Field is never assigned to..." compiler's warning. The field is assigned by MEF.
-#pragma warning disable 649
-
         /// <summary>
         /// Classification registry to be used for getting a reference to the custom classification
         /// type later.
         /// </summary>
         [Import]
-        private IClassificationTypeRegistryService _classificationRegistry;
+        private IClassificationTypeRegistryService _classificationRegistry = null;
 
         /// <summary>
         /// Text document factory to be used for getting a event of text document disposed.
         /// </summary>
         [Import]
-        private ITextDocumentFactoryService _textDocumentFactoryService;
-
-#pragma warning restore 649
+        private ITextDocumentFactoryService _textDocumentFactoryService = null;
 
         /// <summary>
         /// Gets a classifier for the given text buffer.
@@ -40,7 +35,7 @@ namespace Codist.Classifiers
         public IClassifier GetClassifier(ITextBuffer textBuffer)
         {
             return textBuffer.Properties.GetOrCreateSingletonProperty(() =>
-                new CodeClassifier(_classificationRegistry, _textDocumentFactoryService, textBuffer));
+                new CSharpClassifier(_classificationRegistry, _textDocumentFactoryService, textBuffer));
         }
     }
 }

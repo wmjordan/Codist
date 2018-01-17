@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Media;
+using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist
 {
@@ -9,6 +10,8 @@ namespace Codist
 	/// </summary>
 	static partial class Constants
 	{
+		public const string NameOfMe = nameof(Codist);
+
 		public static class SyntaxCategory
 		{
 			public const string Keyword = nameof(Keyword);
@@ -19,13 +22,14 @@ namespace Codist
 			public const string Declaration = nameof(Declaration);
 			public const string TypeDefinition = "Type Definition";
 			public const string Member = nameof(Member);
+			public const string Xml = "XML";
 		}
 
 		public const string CodeKeyword = "Keyword";
 		public const string CodeComment = "Comment";
 
 		public const string CodeAbstractionKeyword = "Keyword: Abstraction";
-		public const string CodeReturnKeyword = "Keyword: return, throw";
+		public const string CodeControlFlowKeyword = "Keyword: Control flow";
 
 		public const string CodeClassName = "class name";
 		public const string CodeStructName = "struct name";
@@ -85,6 +89,42 @@ namespace Codist
 		public const string CSharpAttributeNotation = "C#: Attribute notation";
 		public const string CSharpLabel = "C#: Label";
 
+		public const string CppFunction = "cppFunction";
+		public const string CppClassTemplate = "cppClassTemplate";
+		public const string CppFunctionTemplate = "cppFunctionTemplate";
+		public const string CppEvent = "cppEvent";
+		public const string CppGenericType = "cppGenericType";
+		public const string CppGlobalVariable = "cppGlobalVariable";
+		public const string CppLabel = "cppLabel";
+		public const string CppLocalVariable = "cppLocalVariable";
+		public const string CppMacro = "cppMacro"; // not mapped
+		public const string CppMemberField = "cppMemberField";
+		public const string CppMemberFunction = "cppMemberFunction";
+		public const string CppMemberOperator = "cppMemberOperator";
+		public const string CppNamespace = "cppNamespace";
+		public const string CppNewDelete = "cppNewDelete"; // not mapped
+		public const string CppParameter = "cppParameter";
+		public const string CppOperator = "cppOperator";
+		public const string CppProperty = "cppProperty";
+		public const string CppRefType = "cppRefType"; // not mapped
+		public const string CppStaticMemberField = "cppStaticMemberField"; // not mapped
+		public const string CppStaticMemberFunction = "cppStaticMemberFunction"; // not mapped
+		public const string CppType = "cppType";
+		public const string CppUserDefinedLiteralNumber = "cppUserDefinedLiteralNumber"; // not mapped
+		public const string CppUserDefinedLiteralRaw = "cppUserDefinedLiteralRaw"; // not mapped
+		public const string CppUserDefinedLiteralString = "cppUserDefinedLiteralString"; // not mapped
+		public const string CppValueType = "cppValueType";
+
+		public const string XmlAttributeName = "XML Attribute";
+		public const string XmlAttributeQuotes = "XML Attribute Quotes";
+		public const string XmlAttributeValue = "XML Attribute Value";
+		public const string XmlCData = "XML CData Section";
+		public const string XmlComment = "XML Comment";
+		public const string XmlDelimiter = "XML Delimiter";
+		public const string XmlName = "XML Name";
+		public const string XmlProcessingInstruction = "XML Processing Instruction";
+		public const string XmlText = "XML Text";
+
 		//public const string EditorIntellisense = "intellisense";
 		//public const string EditorSigHelp = "sighelp";
 		//public const string EditorSigHelpDoc = "sighelp-doc";
@@ -136,57 +176,57 @@ namespace Codist
 		public static readonly Color ToDoColor = Colors.DarkBlue;
 		public static readonly Color NoteColor = Colors.Orange;
 		public static readonly Color HackColor = Colors.Black;
-		public static readonly Color ReturnColor = Colors.MediumBlue;
+		public static readonly Color ControlFlowColor = Colors.MediumBlue;
 		public static readonly Color AbstractionColor = Colors.DarkOrange;
 	}
 
 	enum CommentStyleTypes
 	{
-		[Description(Constants.CodeComment)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeComment)]
 		Default,
-		[Description(Constants.EmphasisComment)]
+		[ClassificationType(ClassificationTypeNames = Constants.EmphasisComment)]
 		Emphasis,
-		[Description(Constants.QuestionComment)]
+		[ClassificationType(ClassificationTypeNames = Constants.QuestionComment)]
 		Question,
-		[Description(Constants.ExclaimationComment)]
+		[ClassificationType(ClassificationTypeNames = Constants.ExclaimationComment)]
 		Exclaimation,
-		[Description(Constants.DeletionComment)]
+		[ClassificationType(ClassificationTypeNames = Constants.DeletionComment)]
 		Deletion,
-		[Description(Constants.TodoComment)]
+		[ClassificationType(ClassificationTypeNames = Constants.TodoComment)]
 		ToDo,
-		[Description(Constants.NoteComment)]
+		[ClassificationType(ClassificationTypeNames = Constants.NoteComment)]
 		Note,
-		[Description(Constants.HackComment)]
+		[ClassificationType(ClassificationTypeNames = Constants.HackComment)]
 		Hack,
-		[Description(Constants.Heading1Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Heading1Comment)]
 		Heading1,
-		[Description(Constants.Heading2Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Heading2Comment)]
 		Heading2,
-		[Description(Constants.Heading3Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Heading3Comment)]
 		Heading3,
-		[Description(Constants.Heading4Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Heading4Comment)]
 		Heading4,
-		[Description(Constants.Heading5Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Heading5Comment)]
 		Heading5,
-		[Description(Constants.Heading6Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Heading6Comment)]
 		Heading6,
-		[Description(Constants.Task1Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Task1Comment)]
 		Task1,
-		[Description(Constants.Task2Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Task2Comment)]
 		Task2,
-		[Description(Constants.Task3Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Task3Comment)]
 		Task3,
-		[Description(Constants.Task4Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Task4Comment)]
 		Task4,
-		[Description(Constants.Task5Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Task5Comment)]
 		Task5,
-		[Description(Constants.Task6Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Task6Comment)]
 		Task6,
-		[Description(Constants.Task7Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Task7Comment)]
 		Task7,
-		[Description(Constants.Task8Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Task8Comment)]
 		Task8,
-		[Description(Constants.Task9Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.Task9Comment)]
 		Task9,
 	}
 
@@ -194,158 +234,214 @@ namespace Codist
 	{
 		None,
 		[Category(Constants.SyntaxCategory.Keyword)]
-		[Description(Constants.CodeKeyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeKeyword)]
 		Keyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
-		[Description(Constants.CodeReturnKeyword)]
-		MethodReturnKeyword,
+		[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
+		ControlFlowKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
-		[Description(Constants.CodeAbstractionKeyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
 		AbstractionKeyword,
-		//[Description(Constants.CodeSymbolDefinition)]
+		//[ClassificationType(ClassificationTypeNames = Constants.CodeSymbolDefinition)]
 		//SymbolDefinition,
-		//[Description(Constants.CodeSymbolReference)]
+		//[ClassificationType(ClassificationTypeNames = Constants.CodeSymbolReference)]
 		//SymbolReference,
 
 		[Category(Constants.SyntaxCategory.Declaration)]
-		[Description(Constants.CSharpDeclarationName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationName)]
 		TypeDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
-		[Description(Constants.CSharpNestedDeclarationName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpNestedDeclarationName)]
 		NestedTypeDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
-		[Description(Constants.CSharpStaticMemberName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpStaticMemberName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppGlobalVariable)]
 		StaticMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
-		[Description(Constants.CSharpOverrideMemberName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpOverrideMemberName)]
 		OverrideMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
-		[Description(Constants.CSharpAbstractMemberName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpAbstractMemberName)]
 		AbstractMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
-		[Description(Constants.CSharpVirtualMemberName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpVirtualMemberName)]
 		VirtualMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
-		[Description(Constants.CSharpAttributeNotation)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeNotation)]
 		AttributeNotation,
 
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[Description(Constants.CSharpNamespaceName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppNamespace)]
 		NamespaceName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[Description(Constants.CodeClassName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppType)]
 		ClassName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[Description(Constants.CSharpSealedClassName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpSealedClassName)]
 		SealedClassName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[Description(Constants.CodeStructName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeStructName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppValueType)]
 		StructName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[Description(Constants.CodeInterfaceName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeInterfaceName)]
 		InterfaceName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[Description(Constants.CodeEnumName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumName)]
 		EnumName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[Description(Constants.CodeDelegateName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeDelegateName)]
 		DelegateName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[Description(Constants.CSharpEventName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppEvent)]
 		EventName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[Description(Constants.CSharpTypeParameterName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeParameterName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppClassTemplate)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppFunctionTemplate)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppGenericType)]
 		TypeParameterName,
 
-		//[Description(Constants.CodeModuleName)]
+		//[ClassificationType(ClassificationTypeNames = Constants.CodeModuleName)]
 		//ModuleDeclaration,
 		[Category(Constants.SyntaxCategory.Member)]
-		[Description(Constants.CSharpConstructorMethodName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstructorMethodName)]
 		ConstructorMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
-		[Description(Constants.CSharpFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppMemberField)]
 		FieldName,
 		[Category(Constants.SyntaxCategory.Member)]
-		[Description(Constants.CSharpLocalFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppLocalVariable)]
 		LocalFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
-		[Description(Constants.CSharpConstFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstFieldName)]
 		ConstFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
-		[Description(Constants.CSharpReadOnlyFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpReadOnlyFieldName)]
 		ReadOnlyFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
-		[Description(Constants.CSharpPropertyName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppProperty)]
 		PropertyName,
 		[Category(Constants.SyntaxCategory.Member)]
-		[Description(Constants.CSharpMethodName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpMethodName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppFunction)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppMemberFunction)]
 		MethodName,
 		[Category(Constants.SyntaxCategory.Member)]
-		[Description(Constants.CSharpExtensionMethodName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpExtensionMethodName)]
 		ExtensionMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
-		[Description(Constants.CSharpExternMethodName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpExternMethodName)]
 		ExternMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
-		[Description(Constants.CSharpParameterName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppParameter)]
 		ParameterName,
 
 		[Category(Constants.SyntaxCategory.General)]
-		[Description(Constants.CodeIdentifier)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeIdentifier)]
 		Identifier,
 		[Category(Constants.SyntaxCategory.General)]
-		[Description(Constants.CodeNumber)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeNumber)]
 		Number,
 		[Category(Constants.SyntaxCategory.General)]
-		[Description(Constants.CodeString)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeString)]
 		String,
 		[Category(Constants.SyntaxCategory.General)]
-		[Description(Constants.CodeStringVerbatim)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeStringVerbatim)]
 		StringVerbatim,
 		[Category(Constants.SyntaxCategory.General)]
-		[Description(Constants.CodeOperator)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeOperator)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppMemberOperator)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppOperator)]
 		Operator,
 		[Category(Constants.SyntaxCategory.General)]
-		[Description(Constants.CodePunctuation)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodePunctuation)]
 		Punctuation,
 		[Category(Constants.SyntaxCategory.General)]
-		[Description(Constants.CodeUrl)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeUrl)]
 		Url,
 		[Category(Constants.SyntaxCategory.General)]
-		[Description(Constants.CSharpLabel)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpLabel)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppLabel)]
 		Label,
 		[Category(Constants.SyntaxCategory.Preprocessor)]
-		[Description(Constants.CodePreprocessorText)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodePreprocessorText)]
 		PreprocessorText,
 		[Category(Constants.SyntaxCategory.Preprocessor)]
-		[Description(Constants.CodePreprocessorKeyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodePreprocessorKeyword)]
 		PreprocessorKeyword,
 		[Category(Constants.SyntaxCategory.Comment)]
-		[Description(Constants.CodeComment)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeComment)]
 		Comment,
 		[Category(Constants.SyntaxCategory.Comment)]
-		[Description(Constants.XmlDocComment)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlDocComment)]
 		XmlDocComment,
 		[Category(Constants.SyntaxCategory.Comment)]
-		[Description(Constants.XmlDocTag)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlDocTag)]
 		XmlDocTag,
 		[Category(Constants.SyntaxCategory.Comment)]
-		[Description(Constants.XmlDocAttributeName)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlDocAttributeName)]
 		XmlDocAttributeName,
 		[Category(Constants.SyntaxCategory.Comment)]
-		[Description(Constants.XmlDocAttributeValue)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlDocAttributeValue)]
 		XmlDocAttributeValue,
 		[Category(Constants.SyntaxCategory.Comment)]
-		[Description(Constants.XmlDocDelimiter)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlDocDelimiter)]
 		XmlDocDelimiter,
+		[Category(Constants.SyntaxCategory.Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlDocCData)]
+		XmlDocCData,
 		[Category(Constants.SyntaxCategory.CompilerMarked)]
-		[Description(Constants.CodeExcluded)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeExcluded)]
 		ExcludedCode,
-		//[Description(Constants.CodeBraceMatching)]
+		//[ClassificationType(ClassificationTypeNames = Constants.CodeBraceMatching)]
 		//BraceMatching,
 		[Category(Constants.SyntaxCategory.CompilerMarked)]
-		[Description(Constants.CodeUnnecessary)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeUnnecessary)]
 		UnnecessaryCode,
+
+	}
+
+	enum XmlStyleTypes
+	{
+		None,
+		[Category(Constants.SyntaxCategory.Xml)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlAttributeName)]
+		XmlAttributeName,
+		[Category(Constants.SyntaxCategory.Xml)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlAttributeQuotes)]
+		XmlAttributeQuotes,
+		[Category(Constants.SyntaxCategory.Xml)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlAttributeValue)]
+		XmlAttributeValue,
+		[Category(Constants.SyntaxCategory.Xml)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlCData)]
+		XmlCData,
+		[Category(Constants.SyntaxCategory.Xml)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlComment)]
+		XmlComment,
+		[Category(Constants.SyntaxCategory.Xml)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlDelimiter)]
+		XmlDelimiter,
+		//[Category(Constants.SyntaxCategory.Xml)]
+		//[ClassificationType(ClassificationTypeNames = Constants.XmlEntityReference)]
+		//XmlEntityReference,
+		[Category(Constants.SyntaxCategory.Xml)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlName)]
+		XmlName,
+		[Category(Constants.SyntaxCategory.Xml)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlProcessingInstruction)]
+		XmlProcessingInstruction,
+		[Category(Constants.SyntaxCategory.Xml)]
+		[ClassificationType(ClassificationTypeNames = Constants.XmlText)]
+		XmlText,
 	}
 	enum CommentStyleApplication
 	{

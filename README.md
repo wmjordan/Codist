@@ -1,19 +1,45 @@
 # Codist
-Codist is a visual studio extension which provides advanced syntax highlighting and tagged comments for C# code, and spots important information on the scrollbar margin.
+*Codist* is a visual studio extension which strives to provide better coding experience for C# programmers.
+* advanced syntax highlighting
+* C# comment tagger
+* scrollbar marker for
+  * special comment tags
+  * C# type declarations
+  * C# directives
+  * line numbers
+* increased margin between lines
 
-# What it does?
-Currently Codist can:
-* Highlight C# code, with various styles and font settings, changing font style asizes, changing background and foreground colors, making text semitransparent.
-* Highlight comments (actually all editor styles) to your specific styles.
-* Spot C# class/struct/interface/enum declarations and regions on the scrollbar margin.
+# Features and screenshots
+
+## Advanced C# syntax highlight
+* The advanced syntax highlight function highlight every aspect of C# language elements with various styles and font settings, changing font style sizes, changing background and foreground colors, making text semitransparent.
+  ![Syntax highlight](doc/syntax_highlight.png)
+
+## Customized comment styles
+* The comment tagger highlights comments (actually all editor styles) to your specific styles.
+  ![Comment syntax highlight](doc/syntax_highlight2.png)
+* The syntax style of C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines.
+  ![XML Comment syntax highlight](doc/xml_comment.png)
+
+## Markers on the Scrollbar Margin
+
+The scrollbar can mark...
+
+* C# `class`/`struct`/`interface`/`enum` **declarations**
+* C# instructions (`#if`, `#else`, `#region`, `#pragma`)
+* **Line numbers**
+  ![Scrollbar margin and line numbers](doc/scroll_margin.png)
 
 # Customization
-1. Open the Codist section in the Tools->Options dialog.
-1. By default, Codist does not make many changes to your syntax   .
+1. Open the *Codist* section in the *Tools->Options* dialog.
+1. By default, *Codist* does not make many changes to your syntax.
 1. Change the settings according to your preferences and click the OK button.
+  ![Style customization](doc/customize.png)
+1. It is also possible to increase line heights to make code text more readable.
+  ![Style customization](doc/customize4.png)
 
 # Acknowledgements
-Acknowledgements to the following extensions:
+I have learned a lot from the following extension projects.
 * Better comments: https://marketplace.visualstudio.com/items?itemName=OmarRwemi.BetterComments
 * CommentsPlus: https://marketplace.visualstudio.com/items?itemName=mhoumann.CommentsPlus
 * Match Margin: https://marketplace.visualstudio.com/items?itemName=VisualStudioProductTeam.MatchMargin

@@ -13,7 +13,7 @@ namespace Codist
 	{
 		static DateTime LastSaved;
 
-		public static readonly string ConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Codist\\Config.json";
+		public static readonly string ConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.NameOfMe + "\\Config.json";
 		public static readonly Config Instance = LoadConfig();
 
 		public bool MarkAbstractions { get; set; } = true;
@@ -33,9 +33,10 @@ namespace Codist
 		public bool NoSpaceBetweenWrappedLines { get; set; }
 		public List<CommentLabel> Labels { get; private set; } = new List<CommentLabel>();
 		public List<CommentStyle> CommentStyles { get; private set; } = new List<CommentStyle>();
+		public List<XmlCodeStyle> XmlCodeStyles { get; private set; } = new List<XmlCodeStyle>();
 		public List<CodeStyle> CodeStyles { get; private set; } = new List<CodeStyle>();
 
-		public event EventHandler ConfigUpdated;
+		public static event EventHandler ConfigUpdated;
 
 		public static Config LoadConfig() {
 			//AppHelpers.LogHelper.UseLogMethod(i => Debug.WriteLine(i));
@@ -74,6 +75,13 @@ namespace Codist
 					}
 				}
 				MergeDefaultCodeStyles(cs);
+				var xcs = config.XmlCodeStyles;
+				for (int i = xcs.Count - 1; i >= 0; i--) {
+					if (xcs[i] == null || Enum.IsDefined(typeof(XmlStyleTypes), xcs[i].StyleID) == false) {
+						xcs.RemoveAt(i);
+					}
+				}
+				MergeDefaultXmlCodeStyles(xcs);
 				return config;
 			}
 			catch (Exception ex) {
@@ -89,6 +97,8 @@ namespace Codist
 			CommentStyles.AddRange(GetDefaultCommentStyles());
 			CodeStyles.Clear();
 			CodeStyles.AddRange(GetDefaultCodeStyles());
+			XmlCodeStyles.Clear();
+			XmlCodeStyles.AddRange(GetDefaultXmlCodeStyles());
 		}
 
 		public void SaveConfig(string path) {
@@ -118,6 +128,7 @@ namespace Codist
 			InitDefaultLabels(c.Labels);
 			c.CommentStyles.AddRange(GetDefaultCommentStyles());
 			c.CodeStyles.AddRange(GetDefaultCodeStyles());
+			c.XmlCodeStyles.AddRange(GetDefaultXmlCodeStyles());
 			return c;
 		}
 
@@ -156,6 +167,13 @@ namespace Codist
 				}
 			}
 		}
+		static void MergeDefaultXmlCodeStyles(List<XmlCodeStyle> styles) {
+			foreach (var s in GetDefaultXmlCodeStyles()) {
+				if (styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
+					styles.Add(s);
+				}
+			}
+		}
 		internal static CommentStyle[] GetDefaultCommentStyles() {
 			return new CommentStyle[] {
 				new CommentStyle(CommentStyleTypes.Emphasis, Constants.CommentColor) { Bold = true, FontSize = 10 },
@@ -189,10 +207,18 @@ namespace Codist
 			}
 			return r;
 		}
+		internal static XmlCodeStyle[] GetDefaultXmlCodeStyles() {
+			var r = new XmlCodeStyle[Enum.GetValues(typeof(XmlStyleTypes)).Length];
+			for (int i = 0; i < r.Length; i++) {
+				r[i] = new XmlCodeStyle { StyleID = (XmlStyleTypes)i };
+			}
+			return r;
+		}
 	}
 
 	abstract class StyleBase
 	{
+		static protected readonly Regex FriendlyNamePattern = new Regex(@"([a-z])([A-Z])", RegexOptions.Singleline);
 		Color _backColor, _foreColor;
 		public abstract int Id { get; }
 		/// <summary>Gets or sets whether the content rendered in bold.</summary>
@@ -238,6 +264,7 @@ namespace Codist
 		}
 		public abstract string Category { get; }
 	}
+
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class CommentStyle : StyleBase
 	{
@@ -269,9 +296,38 @@ namespace Codist
 	}
 
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
+	sealed class XmlCodeStyle : StyleBase
+	{
+		public XmlCodeStyle() {
+		}
+		public XmlCodeStyle(XmlStyleTypes styleID, Color foregroundColor) {
+			StyleID = styleID;
+			ForegroundColor = foregroundColor.ToHexString();
+		}
+		public XmlCodeStyle(XmlStyleTypes styleID, string foregroundColor) {
+			StyleID = styleID;
+			ForegroundColor = foregroundColor;
+		}
+
+		public override int Id => (int)StyleID;
+
+		/// <summary>Gets or sets the comment style.</summary>
+		public XmlStyleTypes StyleID { get; set; }
+
+		public override string Category => Constants.SyntaxCategory.Xml;
+
+		internal new CommentStyle Clone() {
+			return (CommentStyle)MemberwiseClone();
+		}
+
+		public override string ToString() {
+			return FriendlyNamePattern.Replace(StyleID.ToString(), "$1 $2");
+		}
+	}
+
+	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class CodeStyle : StyleBase
 	{
-		static readonly Regex __FriendlyReadPattern = new Regex(@"([a-z])([A-Z])", RegexOptions.Singleline);
 		string _Category;
 
 		public override int Id => (int)StyleID;
@@ -300,7 +356,7 @@ namespace Codist
 		}
 
 		public override string ToString() {
-			return __FriendlyReadPattern.Replace(StyleID.ToString(), "$1 $2");
+			return FriendlyNamePattern.Replace(StyleID.ToString(), "$1 $2");
 		}
 	}
 

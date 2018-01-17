@@ -29,7 +29,6 @@ namespace Codist.Classifiers
 			textView.Closed += (s, args) => { tagger.Dispose(); };
 			var tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
 			var codeTagger = new CodeTagger(ClassificationRegistry, tagger, tags, CodeTagger.GetCodeType(textView.TextBuffer.ContentType));
-			tags.Tagger = codeTagger;
 			return codeTagger as ITagger<T>;
         }
     }
@@ -41,15 +40,17 @@ namespace Codist.Classifiers
 
 	sealed class CodeTagger : ITagger<ClassificationTag>
     {
-		static ClassificationTag[] _commentClassifications;
+		static ClassificationTag[] __CommentClassifications;
 		//static ClassificationTag _exitClassification;
 		static ClassificationTag _abstractionClassification;
-		readonly ITagAggregator<IClassificationTag> _aggregator;
-		readonly TaggerResult _tags;
-		readonly CodeType _codeType;
-
-		static readonly string[] CSharpComments = { "//", "/*" };
-		static readonly string[] Comments = { "//", "/*", "'", "#", "<!--" };
+		readonly ITagAggregator<IClassificationTag> _Aggregator;
+		readonly TaggerResult _Tags;
+		readonly CodeType _CodeType;
+#if DEBUG
+		readonly HashSet<string> _ClassificationTypes = new HashSet<string>();
+#endif
+		static readonly string[] __CSharpComments = { "//", "/*" };
+		static readonly string[] __Comments = { "//", "/*", "'", "#", "<!--" };
 
 #pragma warning disable 67
         public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
@@ -57,27 +58,27 @@ namespace Codist.Classifiers
 
         internal CodeTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags, CodeType codeType)
         {
-			if (_commentClassifications == null) {
+			if (__CommentClassifications == null) {
 				var t = typeof(CommentStyleTypes);
 				var styleNames = Enum.GetNames(t);
-				_commentClassifications = new ClassificationTag[styleNames.Length];
+				__CommentClassifications = new ClassificationTag[styleNames.Length];
 				foreach (var styleName in styleNames) {
 					var f = t.GetField(styleName);
-					var d = f.GetCustomAttribute<System.ComponentModel.DescriptionAttribute>();
+					var d = f.GetCustomAttribute<ClassificationTypeAttribute>();
 					if (d == null) {
 						continue;
 					}
-					var ct = registry.GetClassificationType(d.Description);
-					_commentClassifications[(int)f.GetValue(null)] = new ClassificationTag(ct);
+					var ct = registry.GetClassificationType(d.ClassificationTypeNames);
+					__CommentClassifications[(int)f.GetValue(null)] = new ClassificationTag(ct);
 				}
 			}
 			//_exitClassification = new ClassificationTag(registry.GetClassificationType(Constants.CodeReturnKeyword));
 			_abstractionClassification = new ClassificationTag(registry.GetClassificationType(Constants.CodeAbstractionKeyword));
 
-            _aggregator = aggregator;
-			_tags = tags;
-			_codeType = codeType;
-			_aggregator.BatchedTagsChanged += (s, args) => {
+            _Aggregator = aggregator;
+			_Tags = tags;
+			_CodeType = codeType;
+			_Aggregator.BatchedTagsChanged += (s, args) => {
 				if (Margin != null) {
 					Margin.InvalidateVisual();
 				}
@@ -98,24 +99,29 @@ namespace Codist.Classifiers
 				yield break;
 			}
 			IEnumerable<IMappingTagSpan<IClassificationTag>> tagSpans;
-			if (_tags.LastParsed == 0) {
+			if (_Tags.LastParsed == 0) {
 				// perform a full parse for the first time
 				Debug.WriteLine("Full parse");
-				tagSpans = _aggregator.GetTags(new SnapshotSpan(snapshot, 0, snapshot.Length));
-				_tags.LastParsed = snapshot.Length;
+				tagSpans = _Aggregator.GetTags(new SnapshotSpan(snapshot, 0, snapshot.Length));
+				_Tags.LastParsed = snapshot.Length;
 			}
 			else {
 				var start = spans[0].Start;
 				var end = spans[spans.Count - 1].End;
 				Debug.WriteLine($"Get tag [{start.Position}..{end.Position})");
 
-				tagSpans = _aggregator.GetTags(spans);
+				tagSpans = _Aggregator.GetTags(spans);
 			}
 
 			foreach (var tagSpan in tagSpans) {
 				var className = tagSpan.Tag.ClassificationType.Classification;
+#if DEBUG
+				if (_ClassificationTypes.Add(className)) {
+					Debug.WriteLine("Classification type: " + className);
+				}
+#endif
 				var ss = tagSpan.Span.GetSpans(snapshot)[0];
-				if (_codeType == CodeType.CSharp) {
+				if (_CodeType == CodeType.CSharp) {
 					switch (className) {
 						case Constants.CodeClassName:
 						case Constants.CodeInterfaceName:
@@ -123,13 +129,13 @@ namespace Codist.Classifiers
 						case Constants.CodeEnumName:
 							if (Config.Instance.MarkDeclarations) {
 								Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
-								yield return _tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
+								yield return _Tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
 							}
 							continue;
 						case Constants.CodePreprocessorKeyword:
 							if (Config.Instance.MarkDirectives) {
 								if (Matches(ss, "region") || Matches(ss, "pragma") || Matches(ss, "if") || Matches(ss, "else")) {
-									yield return _tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
+									yield return _Tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
 								}
 							}
 							continue;
@@ -139,7 +145,7 @@ namespace Codist.Classifiers
 							//}
 							if (Config.Instance.MarkAbstractions) {
 								if (Matches(ss, "abstract") || Matches(ss, "override") || Matches(ss, "virtual")) {
-									yield return _tags.Add(new TagSpan<ClassificationTag>(ss, _abstractionClassification));
+									yield return _Tags.Add(new TagSpan<ClassificationTag>(ss, _abstractionClassification));
 								}
 							}
 							continue;
@@ -151,7 +157,7 @@ namespace Codist.Classifiers
 				if (Config.Instance.MarkComments) {
 					var c = TagComments(className, ss, tagSpan);
 					if (c != null) {
-						yield return _tags.Add(c);
+						yield return _Tags.Add(c);
 					}
 				}
 			}
@@ -166,14 +172,14 @@ namespace Codist.Classifiers
 			var text = snapshotSpan.GetText();
 			//NOTE: markup comment span does not include comment start token
 			var endOfCommentToken = 0;
-			foreach (string t in _codeType == CodeType.CSharp ? CSharpComments : Comments) {
+			foreach (string t in _CodeType == CodeType.CSharp ? __CSharpComments : __Comments) {
 				if (text.StartsWith(t, StringComparison.OrdinalIgnoreCase)) {
 					endOfCommentToken = t.Length;
 					break;
 				}
 			}
 
-			if (endOfCommentToken == 0 && _codeType != CodeType.Markup) {
+			if (endOfCommentToken == 0 && _CodeType != CodeType.Markup) {
 				return null;
 			}
 
@@ -190,7 +196,7 @@ namespace Codist.Classifiers
 
 			//TODO: code type context-awared end of comment
 			var endOfContent = tl;
-			if (_codeType == CodeType.Markup && commentStart > 0) {
+			if (_CodeType == CodeType.Markup && commentStart > 0) {
 				if (!text.EndsWith("-->", StringComparison.Ordinal)) {
 					return null;
 				}
@@ -219,7 +225,7 @@ namespace Codist.Classifiers
 					continue;
 				}
 
-				ctag = _commentClassifications[(int)item.StyleID];
+				ctag = __CommentClassifications[(int)item.StyleID];
 				label = item;
 				break;
 			}

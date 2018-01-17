@@ -31,7 +31,7 @@ namespace Codist.Options
 			}
 			var t = typeof(CommentStyleTypes);
 			foreach (var item in Enum.GetNames(t)) {
-				var d = t.GetEnumDescription(item);
+				var d = t.GetClassificationType(item);
 				if (d == null || d.StartsWith("Comment: ", StringComparison.Ordinal) == false) {
 					continue;
 				}

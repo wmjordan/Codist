@@ -3,6 +3,7 @@
   "MarkComments": true,
   "MarkDeclarations": true,
   "MarkDirectives": true,
+  "MarkLineNumbers": true,
   "TopSpace": 1.0,
   "BottomSpace": 0.0,
   "NoSpaceBetweenWrappedLines": true,
@@ -102,7 +103,7 @@
       "AllowPunctuationDelimiter": true,
       "Label": "TO-DO",
       "IgnoreCase": true,
-      "StyleApplication": "Tag",
+      "StyleApplication": "Content",
       "StyleID": "ToDo"
     },
     {
@@ -118,6 +119,13 @@
       "IgnoreCase": true,
       "StyleApplication": "TagAndContent",
       "StyleID": "Hack"
+    },
+    {
+      "AllowPunctuationDelimiter": false,
+      "Label": "!TODO",
+      "IgnoreCase": true,
+      "StyleApplication": "Content",
+      "StyleID": "Task1"
     }
   ],
   "CommentStyles": [
@@ -338,10 +346,10 @@
       "OverLine": null,
       "StrikeThrough": null,
       "Underline": null,
-      "FontSize": 0.0,
+      "FontSize": 10.0,
       "ForegroundColor": "#FF008000",
-      "BackgroundColor": "#00000000",
-      "BackgroundEffect": "Solid",
+      "BackgroundColor": "#FF00FF80",
+      "BackgroundEffect": "ToTop",
       "UseScrollBarMarker": false,
       "Font": null
     },
@@ -672,7 +680,7 @@
       "StyleID": "String",
       "Category": "General",
       "Bold": null,
-      "Italic": true,
+      "Italic": null,
       "OverLine": null,
       "StrikeThrough": null,
       "Underline": null,
@@ -681,7 +689,7 @@
       "BackgroundColor": "#00000000",
       "BackgroundEffect": "Solid",
       "UseScrollBarMarker": false,
-      "Font": null
+      "Font": "DejaVu Sans Mono"
     },
     {
       "Id": 33,
@@ -697,7 +705,7 @@
       "BackgroundColor": "#00000000",
       "BackgroundEffect": "Solid",
       "UseScrollBarMarker": false,
-      "Font": null
+      "Font": "DejaVu Sans Mono"
     },
     {
       "Id": 34,
@@ -981,7 +989,7 @@
       "StrikeThrough": null,
       "Underline": null,
       "FontSize": 0.0,
-      "ForegroundColor": "#FFACAC00",
+      "ForegroundColor": "#FF808000",
       "BackgroundColor": "#00000000",
       "BackgroundEffect": "Solid",
       "UseScrollBarMarker": false,
@@ -1040,7 +1048,7 @@
       "StyleID": "LocalFieldName",
       "Category": "Member",
       "Bold": null,
-      "Italic": null,
+      "Italic": true,
       "OverLine": null,
       "StrikeThrough": null,
       "Underline": null,
@@ -1173,7 +1181,7 @@
       "StrikeThrough": null,
       "Underline": null,
       "FontSize": 0.0,
-      "ForegroundColor": "#00000000",
+      "ForegroundColor": "#FF008080",
       "BackgroundColor": "#00000000",
       "BackgroundEffect": "Solid",
       "UseScrollBarMarker": false,
@@ -1244,9 +1252,9 @@
       "Font": null
     },
     {
-      "Id": 2,
-      "StyleID": "MethodReturnKeyword",
-      "Category": "Keyword",
+      "Id": 0,
+      "StyleID": "None",
+      "Category": "",
       "Bold": null,
       "Italic": true,
       "OverLine": null,
@@ -1264,7 +1272,7 @@
       "StyleID": "AttributeNotation",
       "Category": "Declaration",
       "Bold": null,
-      "Italic": null,
+      "Italic": true,
       "OverLine": null,
       "StrikeThrough": null,
       "Underline": null,
@@ -1351,7 +1359,7 @@
       "FontSize": 0.0,
       "ForegroundColor": "#00000000",
       "BackgroundColor": "#00C0C0C0",
-      "BackgroundEffect": "ToBottom",
+      "BackgroundEffect": "Solid",
       "UseScrollBarMarker": false,
       "Font": null
     },
@@ -1366,8 +1374,8 @@
       "Underline": null,
       "FontSize": 0.0,
       "ForegroundColor": "#00000000",
-      "BackgroundColor": "#00000000",
-      "BackgroundEffect": "Solid",
+      "BackgroundColor": "#FFFFCF9F",
+      "BackgroundEffect": "ToBottom",
       "UseScrollBarMarker": false,
       "Font": ""
     },
@@ -1477,7 +1485,7 @@
       "StrikeThrough": null,
       "Underline": null,
       "FontSize": 0.0,
-      "ForegroundColor": "#FF808000",
+      "ForegroundColor": "#FFB9B900",
       "BackgroundColor": "#00000000",
       "BackgroundEffect": "Solid",
       "UseScrollBarMarker": false,
@@ -1498,6 +1506,22 @@
       "BackgroundEffect": "Solid",
       "UseScrollBarMarker": false,
       "Font": "思源宋体 Heavy"
+    },
+    {
+      "Id": 2,
+      "StyleID": "ControlFlowKeyword",
+      "Category": "Keyword",
+      "Bold": true,
+      "Italic": true,
+      "OverLine": null,
+      "StrikeThrough": null,
+      "Underline": null,
+      "FontSize": 2.0,
+      "ForegroundColor": "#00000000",
+      "BackgroundColor": "#00000000",
+      "BackgroundEffect": "Solid",
+      "UseScrollBarMarker": false,
+      "Font": "IBM Plex Mono"
     }
   ]
 }

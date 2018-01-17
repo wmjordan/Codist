@@ -4,19 +4,19 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Classifiers
 {
-	/// <summary>Classification type definition export for <see cref="CodeClassifier"/>.</summary>
-	static class CodeClassifierDefinition
+	/// <summary>Classification type definition export for <see cref="CSharpClassifier"/>.</summary>
+	static class CSharpClassifierDefinition
 	{
 #pragma warning disable 169
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
 		[Name(Constants.CodeAbstractionKeyword)]
-		static ClassificationTypeDefinition ReturnKeyword;
+		static ClassificationTypeDefinition AbstractionKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
-		[Name(Constants.CodeReturnKeyword)]
-		static ClassificationTypeDefinition ThrowKeyword;
+		[Name(Constants.CodeControlFlowKeyword)]
+		static ClassificationTypeDefinition ControlFlowKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
