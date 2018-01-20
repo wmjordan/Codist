@@ -36,13 +36,13 @@ namespace Codist
 	/// </para>
 	/// </remarks>
 	[PackageRegistration(UseManagedResourcesOnly = true)]
-	[InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
+	[InstalledProductRegistration("#110", "#112", "2", IconResourceID = 400)] // Info on this package for Help/About
 	[Guid(PackageGuidString)]
-	[ProvideOptionPage(typeof(Options.CodeStyle), Constants.NameOfMe, "C# & C++ Code style", 0, 0, true)]
-	[ProvideOptionPage(typeof(Options.XmlCodeStyle), Constants.NameOfMe, "XML Code style", 0, 0, true)]
-	[ProvideOptionPage(typeof(Options.CommentStyle), Constants.NameOfMe, "Comment style", 0, 0, true)]
-	[ProvideOptionPage(typeof(Options.CommentTagger), Constants.NameOfMe, "Comment tagger", 0, 0, true)]
-	[ProvideOptionPage(typeof(Options.Misc), Constants.NameOfMe, "Misc", 0, 0, true)]
+	[ProvideOptionPage(typeof(Options.Misc), Constants.NameOfMe, "General", 0, 0, true)]
+	[ProvideOptionPage(typeof(Options.CodeStyle), Constants.NameOfMe, "CodeEx (C# & C++)", 0, 0, true)]
+	[ProvideOptionPage(typeof(Options.XmlCodeStyle), Constants.NameOfMe, "CodeEx (XML)", 0, 0, true)]
+	[ProvideOptionPage(typeof(Options.CommentStyle), Constants.NameOfMe, "CodeEx (Comment)", 0, 0, true)]
+	[ProvideOptionPage(typeof(Options.CommentTagger), Constants.NameOfMe, "Tagger (Comment)", 0, 0, true)]
 	public sealed class CodistPackage : Package
 	{
 		/// <summary>

@@ -14,8 +14,9 @@ namespace Codist
 		static DateTime LastSaved;
 
 		public static readonly string ConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.NameOfMe + "\\Config.json";
-		public static readonly Config Instance = LoadConfig();
+		public static Config Instance = InitConfig();
 
+		public bool HighlightXmlDocCData { get; set; }
 		public bool MarkAbstractions { get; set; } = true;
 		public bool MarkComments { get; set; } = true;
 		public bool MarkDeclarations { get; set; } = true;
@@ -38,56 +39,64 @@ namespace Codist
 
 		public static event EventHandler ConfigUpdated;
 
-		public static Config LoadConfig() {
+		public static Config InitConfig() {
 			//AppHelpers.LogHelper.UseLogMethod(i => Debug.WriteLine(i));
-			Config config;
 			if (File.Exists(ConfigPath) == false) {
-				config = GetDefaultConfig();
+				Config config = GetDefaultConfig();
 				config.SaveConfig(ConfigPath);
 				return config;
 			}
 			try {
-				config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(ConfigPath), new JsonSerializerSettings {
-					Error = (sender, args) => {
-						args.ErrorContext.Handled = true; // ignore json error
-					}
-				});
-				var l = config.Labels;
-				for (int i = l.Count - 1; i >= 0; i--) {
-					if (String.IsNullOrWhiteSpace(l[i].Label)) {
-						l.RemoveAt(i);
-					}
-				}
-				if (l.Count == 0) {
-					InitDefaultLabels(l);
-				}
-				var s = config.CommentStyles;
-				for (int i = s.Count - 1; i >= 0; i--) {
-					if (s[i] == null || Enum.IsDefined(typeof(CommentStyleTypes), s[i].StyleID) == false) {
-						s.RemoveAt(i);
-					}
-				}
-				MergeDefaultStyles(s);
-				var cs = config.CodeStyles;
-				for (int i = cs.Count - 1; i >= 0; i--) {
-					if (cs[i] == null || Enum.IsDefined (typeof(CodeStyleTypes), cs[i].StyleID) == false) {
-						cs.RemoveAt(i);
-					}
-				}
-				MergeDefaultCodeStyles(cs);
-				var xcs = config.XmlCodeStyles;
-				for (int i = xcs.Count - 1; i >= 0; i--) {
-					if (xcs[i] == null || Enum.IsDefined(typeof(XmlStyleTypes), xcs[i].StyleID) == false) {
-						xcs.RemoveAt(i);
-					}
-				}
-				MergeDefaultXmlCodeStyles(xcs);
-				return config;
+				return InternalLoadConfig(ConfigPath);
 			}
 			catch (Exception ex) {
 				Debug.WriteLine(ex.ToString());
 				return GetDefaultConfig();
 			}
+		}
+
+		public static void LoadConfig(string configPath) {
+			Instance = InternalLoadConfig(configPath);
+			ConfigUpdated?.Invoke(Instance, EventArgs.Empty);
+		}
+
+		static Config InternalLoadConfig(string configPath) {
+			Config config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configPath), new JsonSerializerSettings {
+				Error = (sender, args) => {
+					args.ErrorContext.Handled = true; // ignore json error
+				}
+			});
+			var l = config.Labels;
+			for (int i = l.Count - 1; i >= 0; i--) {
+				if (String.IsNullOrWhiteSpace(l[i].Label)) {
+					l.RemoveAt(i);
+				}
+			}
+			if (l.Count == 0) {
+				InitDefaultLabels(l);
+			}
+			var s = config.CommentStyles;
+			for (int i = s.Count - 1; i >= 0; i--) {
+				if (s[i] == null || Enum.IsDefined(typeof(CommentStyleTypes), s[i].StyleID) == false) {
+					s.RemoveAt(i);
+				}
+			}
+			MergeDefaultStyles(s);
+			var cs = config.CodeStyles;
+			for (int i = cs.Count - 1; i >= 0; i--) {
+				if (cs[i] == null || Enum.IsDefined(typeof(CodeStyleTypes), cs[i].StyleID) == false) {
+					cs.RemoveAt(i);
+				}
+			}
+			MergeDefaultCodeStyles(cs);
+			var xcs = config.XmlCodeStyles;
+			for (int i = xcs.Count - 1; i >= 0; i--) {
+				if (xcs[i] == null || Enum.IsDefined(typeof(XmlStyleTypes), xcs[i].StyleID) == false) {
+					xcs.RemoveAt(i);
+				}
+			}
+			MergeDefaultXmlCodeStyles(xcs);
+			return config;
 		}
 
 		public void Reset() {

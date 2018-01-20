@@ -81,11 +81,7 @@ namespace Codist.Options
 	{
 		SyntaxStyleOptionPage _control;
 
-		protected override IWin32Window Window {
-			get {
-				return _control ?? (_control = new SyntaxStyleOptionPage(this, Config.Instance.CodeStyles, Config.GetDefaultCodeStyles()));
-			}
-		}
+		protected override IWin32Window Window => _control ?? (_control = new SyntaxStyleOptionPage(this, () => Config.Instance.CodeStyles, Config.GetDefaultCodeStyles));
 		protected override void Dispose(bool disposing) {
 			_control.Dispose();
 			base.Dispose(disposing);
@@ -97,11 +93,7 @@ namespace Codist.Options
 	{
 		SyntaxStyleOptionPage _Control;
 
-		protected override IWin32Window Window {
-			get {
-				return _Control ?? (_Control = new SyntaxStyleOptionPage(this, Config.Instance.CommentStyles, Config.GetDefaultCommentStyles()));
-			}
-		}
+		protected override IWin32Window Window => _Control ?? (_Control = new SyntaxStyleOptionPage(this, () => Config.Instance.CommentStyles, Config.GetDefaultCommentStyles));
 		protected override void Dispose(bool disposing) {
 			_Control.Dispose();
 			base.Dispose(disposing);
@@ -113,11 +105,7 @@ namespace Codist.Options
 	{
 		SyntaxStyleOptionPage _Control;
 
-		protected override IWin32Window Window {
-			get {
-				return _Control ?? (_Control = new SyntaxStyleOptionPage(this, Config.Instance.XmlCodeStyles, Config.GetDefaultXmlCodeStyles()));
-			}
-		}
+		protected override IWin32Window Window => _Control ?? (_Control = new SyntaxStyleOptionPage(this, () => Config.Instance.XmlCodeStyles, Config.GetDefaultXmlCodeStyles));
 		protected override void Dispose(bool disposing) {
 			_Control.Dispose();
 			base.Dispose(disposing);
@@ -129,11 +117,7 @@ namespace Codist.Options
 	{
 		CommentTaggerOptionPage _Control;
 
-		protected override IWin32Window Window {
-			get {
-				return _Control ?? (_Control = new CommentTaggerOptionPage(this));
-			}
-		}
+		protected override IWin32Window Window => _Control ?? (_Control = new CommentTaggerOptionPage(this));
 		protected override void Dispose(bool disposing) {
 			_Control.Dispose();
 			base.Dispose(disposing);
@@ -145,11 +129,7 @@ namespace Codist.Options
 	{
 		MiscPage _Control;
 
-		protected override IWin32Window Window {
-			get {
-				return _Control ?? (_Control = new MiscPage(this));
-			}
-		}
+		protected override IWin32Window Window => _Control ?? (_Control = new MiscPage(this));
 		protected override void Dispose(bool disposing) {
 			_Control.Dispose();
 			base.Dispose(disposing);

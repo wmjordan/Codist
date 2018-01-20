@@ -28,13 +28,17 @@ namespace Codist.Views
 			_RegService = service;
 
 			if (__Styles == null) {
-				__Styles = new Dictionary<string, StyleBase>(47);
-				InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(service, Config.Instance.CommentStyles);
-				InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(service, Config.Instance.CodeStyles);
-				InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(service, Config.Instance.XmlCodeStyles);
+				CacheStyles(service);
 			}
 
 			Decorate();
+		}
+
+		static void CacheStyles(IClassificationTypeRegistryService service) {
+			__Styles = new Dictionary<string, StyleBase>(47);
+			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(service, Config.Instance.CommentStyles);
+			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(service, Config.Instance.CodeStyles);
+			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(service, Config.Instance.XmlCodeStyles);
 		}
 
 		static void InitStyleClassificationCache<TStyleEnum, TCodeStyle>(IClassificationTypeRegistryService service, List<TCodeStyle> styles)
@@ -63,6 +67,7 @@ namespace Codist.Views
 
 		private void SettingsSaved(object sender, EventArgs eventArgs) {
 			if (!_IsDecorating) {
+				CacheStyles(_RegService);
 				Decorate();
 			}
 		}

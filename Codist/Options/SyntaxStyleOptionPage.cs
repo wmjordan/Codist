@@ -12,8 +12,8 @@ namespace Codist.Options
 	public partial class SyntaxStyleOptionPage : UserControl
 	{
 		readonly ConfigPage _service;
-		readonly IEnumerable<StyleBase> _styles;
-		readonly IEnumerable<StyleBase> _defaultStyles;
+		readonly Func<IEnumerable<StyleBase>> _styleLoader;
+		readonly Func<IEnumerable<StyleBase>> _defaultStyleLoader;
 		StyleBase _activeStyle;
 		bool _uiLock;
 		bool _loaded;
@@ -22,10 +22,10 @@ namespace Codist.Options
 			InitializeComponent();
 			_BackgroundEffectBox.Items.AddRange(new[] { "Solid", "Paint bottom", "Paint top", "Paint right", "Paint left" });
 		}
-		internal SyntaxStyleOptionPage(ConfigPage service, IEnumerable<StyleBase> styles, IEnumerable<StyleBase> defaultStyles) : this() {
+		internal SyntaxStyleOptionPage(ConfigPage service, Func<IEnumerable<StyleBase>> styleLoader, Func<IEnumerable<StyleBase>> defaultStyleLoader) : this() {
 			_service = service;
-			_styles = styles;
-			_defaultStyles = defaultStyles;
+			_styleLoader = styleLoader;
+			_defaultStyleLoader = defaultStyleLoader;
 		}
 
 		protected override void OnLoad(EventArgs e) {
@@ -33,24 +33,7 @@ namespace Codist.Options
 			if (_loaded) {
 				return;
 			}
-			var groups = new List<ListViewGroup>(5);
-
-			foreach (var item in _defaultStyles) {
-				if (groups.FirstOrDefault(i=>i.Header == item.Category) != null) {
-					continue;
-				}
-				groups.Add(new ListViewGroup(item.Category, HorizontalAlignment.Center));
-			}
-			_SyntaxListBox.Groups.AddRange(groups.ToArray());
-			foreach (var item in _defaultStyles) {
-				if (item.Category.Length == 0) {
-					continue;
-				}
-				_SyntaxListBox.Items.Add(new ListViewItem(item.ToString()) {
-					Tag = _styles.FirstOrDefault(i => i.Id == item.Id) ?? item,
-					Group = groups.FirstOrDefault(i => i.Header == item.Category)
-				});
-			}
+			LoadStyleList();
 			_BackColorButton.Click += SetBackColor;
 			_BackColorTransBox.ValueChanged += SetBackColor;
 			_ForeColorButton.Click += SetForeColor;
@@ -74,15 +57,42 @@ namespace Codist.Options
 			foreach (var item in new Control[] { _BackColorButton, _ForeColorButton }) {
 				item.Click += MarkChanged;
 			}
-			foreach (var item in new [] { _BoldBox, _ItalicBox, _UnderlineBox, _StrikeBox }) {
+			foreach (var item in new[] { _BoldBox, _ItalicBox, _UnderlineBox, _StrikeBox }) {
 				item.CheckStateChanged += MarkChanged;
 			}
-			foreach (var item in new []{ _BackColorTransBox, _BackColorTransBox, _FontSizeBox }) {
+			foreach (var item in new[] { _BackColorTransBox, _BackColorTransBox, _FontSizeBox }) {
 				item.ValueChanged += MarkChanged;
 			}
-			_PreviewBox.SizeChanged += (s, args) => { UpdatePreview(); };
+			_PreviewBox.SizeChanged += (s, args) => UpdatePreview();
 			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
+			Config.ConfigUpdated += (s, args) => { _activeStyle = null; LoadStyleList(); };
 			_loaded = true;
+		}
+
+		void LoadStyleList() {
+			_uiLock = true;
+			_SyntaxListBox.Items.Clear();
+			_SyntaxListBox.Groups.Clear();
+			var groups = new List<ListViewGroup>(5);
+			var defaultStyles = _defaultStyleLoader();
+			var styles = _styleLoader();
+			foreach (var item in defaultStyles) {
+				if (groups.FirstOrDefault(i => i.Header == item.Category) != null) {
+					continue;
+				}
+				groups.Add(new ListViewGroup(item.Category, HorizontalAlignment.Center));
+			}
+			_SyntaxListBox.Groups.AddRange(groups.ToArray());
+			foreach (var item in defaultStyles) {
+				if (item.Category.Length == 0) {
+					continue;
+				}
+				_SyntaxListBox.Items.Add(new ListViewItem(item.ToString()) {
+					Tag = styles.FirstOrDefault(i => i.Id == item.Id) ?? item,
+					Group = groups.FirstOrDefault(i => i.Header == item.Category)
+				});
+			}
+			_uiLock = false;
 		}
 
 		private ListViewItem GetListItemForStyle(string category, ListViewItem vi) {

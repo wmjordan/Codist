@@ -37,7 +37,7 @@ namespace Codist.Fake
 		/// Creates a new instance of <see cref="TestPage"/>.
 		/// </summary>
 		/// <param name="fieldId">The field.</param>
-		/// <example><![CDATA[var t = new TestPage(1);]]></example>
+		/// <example><![CDATA[System.Console.WriteLine(Codist.Constants.NameOfMe);]]></example>
 		public TestPage(int fieldId) {
 			const int A = 1;
 			var localField = fieldId;

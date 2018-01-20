@@ -9,8 +9,8 @@ namespace Codist.Options
 	public partial class CommentTaggerOptionPage : UserControl
 	{
 		readonly CommentTagger _Service;
+		readonly UiLock _UI = new UiLock();
 		CommentLabel _ActiveLabel;
-		bool _UiLock;
 		bool _Loaded;
 
 		public CommentTaggerOptionPage() {
@@ -26,18 +26,7 @@ namespace Codist.Options
 				return;
 			}
 
-			foreach (var item in Config.Instance.Labels) {
-				_SyntaxListBox.Items.Add(new ListViewItem(item.Label) { Tag = item });
-			}
-			var t = typeof(CommentStyleTypes);
-			foreach (var item in Enum.GetNames(t)) {
-				var d = t.GetClassificationType(item);
-				if (d == null || d.StartsWith("Comment: ", StringComparison.Ordinal) == false) {
-					continue;
-				}
-				_StyleBox.Items.Add(item);
-			}
-			_StyleBox.SelectedIndex = 0;
+			LoadStyleLists();
 
 			_AddTagButton.Click += (s, args) => {
 				var label = new CommentLabel(_TagTextBox.Text.Length > 0 ? _TagTextBox.Text : "tag", (CommentStyleTypes)Enum.Parse(typeof(CommentStyleTypes), _StyleBox.Text));
@@ -57,25 +46,25 @@ namespace Codist.Options
 				_SyntaxListBox.Items.RemoveAt(i);
 				_ActiveLabel = null;
 			};
-			_IgnoreCaseBox.CheckedChanged += (s, args) => {
-				if (_UiLock == false && _ActiveLabel != null) {
+			_IgnoreCaseBox.CheckedChanged += _UI.HandleEvent(() => {
+				if (_ActiveLabel != null) {
 					_ActiveLabel.IgnoreCase = _IgnoreCaseBox.Checked;
 				}
-			};
-			_EndWithPunctuationBox.CheckedChanged += (s, args) => {
-				if (_UiLock == false && _ActiveLabel != null) {
+			});
+			_EndWithPunctuationBox.CheckedChanged += _UI.HandleEvent(() => {
+				if (_ActiveLabel != null) {
 					_ActiveLabel.AllowPunctuationDelimiter = _EndWithPunctuationBox.Checked;
 				}
-			};
-			_StyleBox.SelectedIndexChanged += (s, args) => {
-				if (_UiLock || _ActiveLabel == null) {
+			});
+			_StyleBox.SelectedIndexChanged += _UI.HandleEvent(() => {
+				if (_ActiveLabel == null) {
 					return;
 				}
 				_ActiveLabel.StyleID = (CommentStyleTypes)Enum.Parse(typeof(CommentStyleTypes), _StyleBox.Text);
-				MarkChanged(s, args);
-			};
-			_TagTextBox.TextChanged += (s, args) => {
-				if (_UiLock == false && _ActiveLabel != null) {
+				MarkChanged(_StyleBox, EventArgs.Empty);
+			});
+			_TagTextBox.TextChanged += _UI.HandleEvent(() => {
+				if (_ActiveLabel != null) {
 					_ActiveLabel.Label = _TagTextBox.Text;
 					foreach (ListViewItem item in _SyntaxListBox.Items) {
 						if (item.Tag == _ActiveLabel) {
@@ -83,11 +72,11 @@ namespace Codist.Options
 						}
 					}
 				}
-			};
+			});
 			foreach (var item in new Control[] { _TagTextBox }) {
 				item.Click += MarkChanged;
 			}
-			foreach (var item in new[] { _ApplyContentBox, _ApplyTagBox, _ApplyContentTagBox  }) {
+			foreach (var item in new[] { _ApplyContentBox, _ApplyTagBox, _ApplyContentTagBox }) {
 				item.CheckedChanged += StyleApplicationChanged;
 				item.CheckedChanged += MarkChanged;
 			}
@@ -97,18 +86,38 @@ namespace Codist.Options
 
 			_PreviewBox.SizeChanged += (s, args) => { UpdatePreview(); };
 			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
+			Config.ConfigUpdated += (s, args) => { LoadStyleLists(); };
 			_Loaded = true;
 		}
 
+		private void LoadStyleLists() {
+			_UI.Lock();
+			_SyntaxListBox.Items.Clear();
+			foreach (var item in Config.Instance.Labels) {
+				_SyntaxListBox.Items.Add(new ListViewItem(item.Label) { Tag = item });
+			}
+			_StyleBox.Items.Clear();
+			var t = typeof(CommentStyleTypes);
+			foreach (var item in Enum.GetNames(t)) {
+				var d = t.GetClassificationType(item);
+				if (d == null || d.StartsWith("Comment: ", StringComparison.Ordinal) == false) {
+					continue;
+				}
+				_StyleBox.Items.Add(item);
+			}
+			_StyleBox.SelectedIndex = 0;
+			_UI.Unlock();
+		}
+
 		void MarkChanged(object sender, EventArgs args) {
-			if (_UiLock || _ActiveLabel == null) {
+			if (_UI.IsLocked || _ActiveLabel == null) {
 				return;
 			}
 			UpdatePreview();
 		}
 
 		void StyleApplicationChanged(object sender, EventArgs e) {
-			if (_UiLock || _ActiveLabel == null) {
+			if (_UI.IsLocked || _ActiveLabel == null) {
 				return;
 			}
 			if (_ApplyContentBox.Checked) {
@@ -130,23 +139,23 @@ namespace Codist.Options
 			if (i == null) {
 				return;
 			}
-			_UiLock = true;
-			_ActiveLabel = i;
-			_ApplyContentBox.Checked = i.StyleApplication == CommentStyleApplication.Content;
-			_ApplyTagBox.Checked = i.StyleApplication == CommentStyleApplication.Tag;
-			_ApplyContentTagBox.Checked = i.StyleApplication == CommentStyleApplication.TagAndContent;
-			_EndWithPunctuationBox.Checked = i.AllowPunctuationDelimiter;
-			_IgnoreCaseBox.Checked = i.IgnoreCase;
-			var s = i.StyleID.ToString();
-			for (int n = 0; n < _StyleBox.Items.Count; n++) {
-				if ((string)_StyleBox.Items[n] == s) {
-					_StyleBox.SelectedIndex = n;
-					break;
+			_UI.DoWithLock(() => {
+				_ActiveLabel = i;
+				_ApplyContentBox.Checked = i.StyleApplication == CommentStyleApplication.Content;
+				_ApplyTagBox.Checked = i.StyleApplication == CommentStyleApplication.Tag;
+				_ApplyContentTagBox.Checked = i.StyleApplication == CommentStyleApplication.TagAndContent;
+				_EndWithPunctuationBox.Checked = i.AllowPunctuationDelimiter;
+				_IgnoreCaseBox.Checked = i.IgnoreCase;
+				var s = i.StyleID.ToString();
+				for (int n = 0; n < _StyleBox.Items.Count; n++) {
+					if ((string)_StyleBox.Items[n] == s) {
+						_StyleBox.SelectedIndex = n;
+						break;
+					}
 				}
-			}
-			_TagTextBox.Text = i.Label;
-			UpdatePreview();
-			_UiLock = false;
+				_TagTextBox.Text = i.Label;
+				UpdatePreview();
+			});
 		}
 
 		void UpdatePreview() {

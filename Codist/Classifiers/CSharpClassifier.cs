@@ -41,10 +41,11 @@ namespace Codist.Classifiers
 		readonly IClassificationType _attributeNotationType;
 		readonly IClassificationType _controlFlowKeywordType;
 
-		readonly ITextBuffer _textBuffer;
-		readonly ITextDocumentFactoryService _textDocumentFactoryService;
+		readonly ITextBuffer _TextBuffer;
+		readonly IClassificationTypeRegistryService _TypeRegistryService;
+		readonly ITextDocumentFactoryService _TextDocumentFactoryService;
 
-		SemanticModel _semanticModel;
+		SemanticModel _SemanticModel;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CSharpClassifier"/> class.
@@ -80,11 +81,11 @@ namespace Codist.Classifiers
 			_labelType = registry.GetClassificationType(Constants.CSharpLabel);
 			_attributeNotationType = registry.GetClassificationType(Constants.CSharpAttributeNotation);
 			_controlFlowKeywordType = registry.GetClassificationType(Constants.CodeControlFlowKeyword);
-			_textDocumentFactoryService = textDocumentFactoryService;
-			_textBuffer = buffer;
-
-			_textBuffer.Changed += OnTextBufferChanged;
-			_textDocumentFactoryService.TextDocumentDisposed += OnTextDocumentDisposed;
+			_TextDocumentFactoryService = textDocumentFactoryService;
+			_TextBuffer = buffer;
+			_TypeRegistryService = registry;
+			_TextBuffer.Changed += OnTextBufferChanged;
+			_TextDocumentFactoryService.TextDocumentDisposed += OnTextDocumentDisposed;
 		}
 
 		/// <summary>
@@ -121,7 +122,7 @@ namespace Codist.Classifiers
 				return Array.Empty<ClassificationSpan>();
 			}
 			var result = new List<ClassificationSpan>(16);
-			var semanticModel = _semanticModel ?? (_semanticModel = GetDocument(workspace, span).GetSemanticModelAsync().Result);
+			var semanticModel = _SemanticModel ?? (_SemanticModel = GetDocument(workspace, span).GetSemanticModelAsync().Result);
 
 			var textSpan = new TextSpan(span.Start.Position, span.Length);
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
@@ -136,7 +137,7 @@ namespace Codist.Classifiers
 								if (node.Parent is SwitchSectionSyntax == false) {
 									goto case SyntaxKind.ReturnStatement;
 								}
-								break;
+								return false;
 							case SyntaxKind.ReturnKeyword:
 							case SyntaxKind.GotoCaseStatement:
 							case SyntaxKind.GotoDefaultStatement:
@@ -148,148 +149,191 @@ namespace Codist.Classifiers
 								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _controlFlowKeywordType));
 								return false;
 						}
+						return false;
 					}
-					//System.Diagnostics.Debug.WriteLine(ct);
-					return ct == "identifier"
-						|| ct == "class name"
-						|| ct == "struct name"
-						|| ct == "interface name"
-						|| ct == "enum name"
-						|| ct == "type parameter name"
-						|| ct == "delegate name";
+					if (Config.Instance.HighlightXmlDocCData && ct == Constants.XmlDocCData) {
+						var start = item.TextSpan.Start;
+						SyntaxNode root;
+						var sourceText = span.Snapshot.AsText();
+						var docId = DocumentId.CreateNewId(workspace.GetDocumentIdInCurrentContext(sourceText.Container).ProjectId);
+						//var solution = workspace.CurrentSolution.WithProjectCompilationOptions(docId.ProjectId, new CSharpCompilationOptions(OutputKind.ConsoleApplication, usings: new[] { "Codist" }));
+						var document = workspace.CurrentSolution
+							.AddDocument(docId, "xmlDocCData.cs", snapshot.GetText(item.TextSpan.Start, item.TextSpan.Length))
+							.WithDocumentSourceCodeKind(docId, SourceCodeKind.Script)
+							.GetDocument(docId);
+						var model = document.GetSemanticModelAsync().Result;
+						var compilation = model.SyntaxTree.GetCompilationUnitRoot();
+						if (document
+							.GetSyntaxTreeAsync().Result
+							.TryGetRoot(out root)) {
+							foreach (var spanItem in Classifier.GetClassifiedSpans(model, new TextSpan(0, item.TextSpan.Length), workspace)) {
+								ct = spanItem.ClassificationType;
+								if (ct == Constants.CodeIdentifier
+									|| ct == Constants.CodeClassName
+									|| ct == Constants.CodeStructName
+									|| ct == Constants.CodeInterfaceName
+									|| ct == Constants.CodeEnumName
+									|| ct == Constants.CodeTypeParameterName
+									|| ct == Constants.CodeDelegateName) {
+
+									var node = compilation.FindNode(spanItem.TextSpan, true);
+
+									foreach (var type in GetClassificationType(node, model)) {
+										result.Add(CreateClassificationSpan(snapshot, new TextSpan(start + spanItem.TextSpan.Start, spanItem.TextSpan.Length), type));
+									}
+								}
+								else {
+									result.Add(CreateClassificationSpan(snapshot, new TextSpan(start + spanItem.TextSpan.Start, spanItem.TextSpan.Length), _TypeRegistryService.GetClassificationType(ct)));
+								}
+							}
+						}
+						return false;
+					}
+
+					return ct == Constants.CodeIdentifier
+						|| ct == Constants.CodeClassName
+						|| ct == Constants.CodeStructName
+						|| ct == Constants.CodeInterfaceName
+						|| ct == Constants.CodeEnumName
+						|| ct == Constants.CodeTypeParameterName
+						|| ct == Constants.CodeDelegateName;
 				});
 
 			foreach (var item in classifiedSpans) {
 				var itemSpan = item.TextSpan;
 				var node = unitCompilation.FindNode(itemSpan, true);
 
-				// NOTE: Some kind of nodes, for example ArgumentSyntax, should are handled with a
-				// specific way
-				node = node.Kind() == SyntaxKind.Argument ? (node as ArgumentSyntax).Expression : node;
-				//System.Diagnostics.Debug.WriteLine(node.GetType().Name + node.Span.ToString());
-				var symbol = semanticModel.GetSymbolInfo(node).Symbol;
-				if (symbol == null) {
-					symbol = semanticModel.GetDeclaredSymbol(node);
-					if (symbol == null) {
-						// NOTE: handle alias in using directive
-						if ((node.Parent as NameEqualsSyntax)?.Parent is UsingDirectiveSyntax) {
-							result.Add(CreateClassificationSpan(snapshot, itemSpan, _aliasNamespaceType));
-						}
-						else if (node is AttributeArgumentSyntax) {
-							symbol = semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol;
-							if (symbol != null && symbol.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
-								result.Add(CreateClassificationSpan(snapshot, itemSpan, _constFieldType));
-								result.Add(CreateClassificationSpan(snapshot, itemSpan, _staticMemberType));
-							}
-						}
-						continue;
-					}
-					switch (symbol.Kind) {
-						case SymbolKind.NamedType:
-							result.Add(CreateClassificationSpan(snapshot, itemSpan, symbol.ContainingType != null ? _nestedDeclarationType : _declarationType));
-							break;
-						case SymbolKind.Event:
-						case SymbolKind.Method:
-							result.Add(CreateClassificationSpan(snapshot, itemSpan, _declarationType));
-							break;
-						case SymbolKind.Property:
-							if (symbol.ContainingType.IsAnonymousType == false) {
-								result.Add(CreateClassificationSpan(snapshot, itemSpan, _declarationType));
-							}
-							break;
-					}
-				}
-				switch (symbol.Kind) {
-					case SymbolKind.Alias:
-					case SymbolKind.ArrayType:
-					case SymbolKind.Assembly:
-					case SymbolKind.DynamicType:
-					case SymbolKind.ErrorType:
-					case SymbolKind.NetModule:
-					case SymbolKind.NamedType:
-					case SymbolKind.PointerType:
-					case SymbolKind.RangeVariable:
-					case SymbolKind.Preprocessing:
-						//case SymbolKind.Discard:
-						break;
-
-					case SymbolKind.Label:
-						result.Add(CreateClassificationSpan(snapshot, itemSpan, _labelType));
-						break;
-
-					case SymbolKind.TypeParameter:
-						result.Add(CreateClassificationSpan(snapshot, itemSpan, _typeParameterType));
-						break;
-
-					case SymbolKind.Field:
-						var fieldSymbol = (symbol as IFieldSymbol);
-						result.Add(CreateClassificationSpan(snapshot, itemSpan, fieldSymbol.IsConst ? _constFieldType : fieldSymbol.IsReadOnly ? _readonlyFieldType : _fieldType));
-						break;
-
-					case SymbolKind.Property:
-						result.Add(CreateClassificationSpan(snapshot, itemSpan, _propertyType));
-						break;
-
-					case SymbolKind.Event:
-						result.Add(CreateClassificationSpan(snapshot, itemSpan, _eventType));
-						break;
-
-					case SymbolKind.Local:
-						var localSymbol = (symbol as ILocalSymbol);
-						result.Add(CreateClassificationSpan(snapshot, itemSpan, localSymbol.IsConst ? _constFieldType : _localFieldType));
-						break;
-
-					case SymbolKind.Namespace:
-						result.Add(CreateClassificationSpan(snapshot, itemSpan, _namespaceType));
-						break;
-
-					case SymbolKind.Parameter:
-						result.Add(CreateClassificationSpan(snapshot, itemSpan, _parameterType));
-						break;
-
-					case SymbolKind.Method:
-						var methodSymbol = symbol as IMethodSymbol;
-						switch (methodSymbol.MethodKind) {
-							case MethodKind.Constructor:
-								result.Add(CreateClassificationSpan(
-									snapshot,
-									itemSpan,
-									node is AttributeSyntax || node.Parent is AttributeSyntax || node.Parent?.Parent is AttributeSyntax ? _attributeNotationType : _constructorMethodType));
-								break;
-							case MethodKind.Destructor:
-							case MethodKind.StaticConstructor:
-								result.Add(CreateClassificationSpan(snapshot, itemSpan, _constructorMethodType));
-								break;
-							default:
-								result.Add(CreateClassificationSpan(snapshot, itemSpan, methodSymbol.IsExtensionMethod ? _extensionMethodType : methodSymbol.IsExtern ? _externMethodType : _methodType));
-								break;
-						}
-						break;
-
-					default:
-						break;
-				}
-
-				if (symbol.IsStatic) {
-					if (symbol.Kind != SymbolKind.Namespace) {
-						result.Add(CreateClassificationSpan(snapshot, itemSpan, _staticMemberType));
-					}
-				}
-				else if (symbol.IsOverride) {
-					result.Add(CreateClassificationSpan(snapshot, itemSpan, _overrideMemberType));
-				}
-				else if (symbol.IsVirtual) {
-					result.Add(CreateClassificationSpan(snapshot, itemSpan, _virtualMemberType));
-				}
-				else if (symbol.IsAbstract) {
-					result.Add(CreateClassificationSpan(snapshot, itemSpan, _abstractMemberType));
-				}
-				else if (symbol.IsSealed) {
-					result.Add(CreateClassificationSpan(snapshot, itemSpan, _sealedType));
+				foreach (var type in GetClassificationType(node, semanticModel)) {
+					result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 				}
 			}
 
 			return result;
+		}
+
+		private IEnumerable<IClassificationType> GetClassificationType(SyntaxNode node, SemanticModel semanticModel) {
+			// NOTE: Some kind of nodes, for example ArgumentSyntax, should are handled with a
+			// specific way
+			node = node.Kind() == SyntaxKind.Argument ? (node as ArgumentSyntax).Expression : node;
+			//System.Diagnostics.Debug.WriteLine(node.GetType().Name + node.Span.ToString());
+			var symbol = semanticModel.GetSymbolInfo(node).Symbol;
+			if (symbol == null) {
+				symbol = semanticModel.GetDeclaredSymbol(node);
+				if (symbol == null) {
+					// NOTE: handle alias in using directive
+					if ((node.Parent as NameEqualsSyntax)?.Parent is UsingDirectiveSyntax) {
+						yield return _aliasNamespaceType;
+					}
+					else if (node is AttributeArgumentSyntax) {
+						symbol = semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol;
+						if (symbol != null && symbol.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
+							yield return _constFieldType;
+							yield return _staticMemberType;
+						}
+					}
+					yield break;
+				}
+				switch (symbol.Kind) {
+					case SymbolKind.NamedType:
+						yield return symbol.ContainingType != null ? _nestedDeclarationType : _declarationType;
+						break;
+					case SymbolKind.Event:
+					case SymbolKind.Method:
+						yield return _declarationType;
+						break;
+					case SymbolKind.Property:
+						if (symbol.ContainingType.IsAnonymousType == false) {
+							yield return _declarationType;
+						}
+						break;
+				}
+			}
+			switch (symbol.Kind) {
+				case SymbolKind.Alias:
+				case SymbolKind.ArrayType:
+				case SymbolKind.Assembly:
+				case SymbolKind.DynamicType:
+				case SymbolKind.ErrorType:
+				case SymbolKind.NetModule:
+				case SymbolKind.NamedType:
+				case SymbolKind.PointerType:
+				case SymbolKind.RangeVariable:
+				case SymbolKind.Preprocessing:
+					//case SymbolKind.Discard:
+					break;
+
+				case SymbolKind.Label:
+					yield return _labelType;
+					break;
+
+				case SymbolKind.TypeParameter:
+					yield return _typeParameterType;
+					break;
+
+				case SymbolKind.Field:
+					var fieldSymbol = (symbol as IFieldSymbol);
+					yield return fieldSymbol.IsConst ? _constFieldType : fieldSymbol.IsReadOnly ? _readonlyFieldType : _fieldType;
+					break;
+
+				case SymbolKind.Property:
+					yield return _propertyType;
+					break;
+
+				case SymbolKind.Event:
+					yield return _eventType;
+					break;
+
+				case SymbolKind.Local:
+					var localSymbol = (symbol as ILocalSymbol);
+					yield return localSymbol.IsConst ? _constFieldType : _localFieldType;
+					break;
+
+				case SymbolKind.Namespace:
+					yield return _namespaceType;
+					break;
+
+				case SymbolKind.Parameter:
+					yield return _parameterType;
+					break;
+
+				case SymbolKind.Method:
+					var methodSymbol = symbol as IMethodSymbol;
+					switch (methodSymbol.MethodKind) {
+						case MethodKind.Constructor:
+							yield return
+								node is AttributeSyntax || node.Parent is AttributeSyntax || node.Parent?.Parent is AttributeSyntax ? _attributeNotationType : _constructorMethodType;
+							break;
+						case MethodKind.Destructor:
+						case MethodKind.StaticConstructor:
+							yield return _constructorMethodType;
+							break;
+						default:
+							yield return methodSymbol.IsExtensionMethod ? _extensionMethodType : methodSymbol.IsExtern ? _externMethodType : _methodType;
+							break;
+					}
+					break;
+
+				default:
+					break;
+			}
+
+			if (symbol.IsStatic) {
+				if (symbol.Kind != SymbolKind.Namespace) {
+					yield return _staticMemberType;
+				}
+			}
+			else if (symbol.IsOverride) {
+				yield return _overrideMemberType;
+			}
+			else if (symbol.IsVirtual) {
+				yield return _virtualMemberType;
+			}
+			else if (symbol.IsAbstract) {
+				yield return _abstractMemberType;
+			}
+			else if (symbol.IsSealed) {
+				yield return _sealedType;
+			}
 		}
 
 		static Document GetDocument(Workspace workspace, SnapshotSpan span) {
@@ -301,15 +345,15 @@ namespace Codist.Classifiers
 				: solution.WithDocumentText(docId, sourceText, PreservationMode.PreserveIdentity).GetDocument(docId);
 		}
 
-		void OnTextBufferChanged(object sender, TextContentChangedEventArgs e) => _semanticModel = null;
+		void OnTextBufferChanged(object sender, TextContentChangedEventArgs e) => _SemanticModel = null;
 
 		// TODO: it's not good idea subscribe on text document disposed. Try to subscribe on text
 		// document closed.
 		void OnTextDocumentDisposed(object sender, TextDocumentEventArgs e) {
-			if (e.TextDocument.TextBuffer == _textBuffer) {
-				_semanticModel = null;
-				_textBuffer.Changed -= OnTextBufferChanged;
-				_textDocumentFactoryService.TextDocumentDisposed -= OnTextDocumentDisposed;
+			if (e.TextDocument.TextBuffer == _TextBuffer) {
+				_SemanticModel = null;
+				_TextBuffer.Changed -= OnTextBufferChanged;
+				_TextDocumentFactoryService.TextDocumentDisposed -= OnTextDocumentDisposed;
 			}
 		}
 

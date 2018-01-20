@@ -12,6 +12,7 @@ namespace Codist.Options
 {
 	public partial class MiscPage : UserControl
 	{
+		readonly UiLock _UI = new UiLock();
 		bool _Loaded;
 
 		public MiscPage() {
@@ -26,22 +27,17 @@ namespace Codist.Options
 			}
 			_TopMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.TopSpace;
 			_BottomMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.BottomSpace;
-			_NoSpaceBetweenWrappedLinesBox.Checked = Config.Instance.NoSpaceBetweenWrappedLines;
+			LoadConfig(Config.Instance);
 
-			_CodeAbstractionsBox.Checked = Config.Instance.MarkAbstractions;
-			_CodeAbstractionsBox.CheckedChanged += (s, args) => Config.Instance.MarkAbstractions = _CodeAbstractionsBox.Checked;
-			_DirectivesBox.Checked = Config.Instance.MarkDirectives;
-			_DirectivesBox.CheckedChanged += (s, args) => Config.Instance.MarkAbstractions = _DirectivesBox.Checked;
-			_SpecialCommentsBox.Checked = Config.Instance.MarkComments;
-			_SpecialCommentsBox.CheckedChanged += (s, args) => Config.Instance.MarkComments = _SpecialCommentsBox.Checked;
-			_TypeDeclarationBox.Checked = Config.Instance.MarkDeclarations;
-			_TypeDeclarationBox.CheckedChanged += (s, args) => Config.Instance.MarkDeclarations = _TypeDeclarationBox.Checked;
-			_LineNumbersBox.Checked = Config.Instance.MarkLineNumbers;
-			_LineNumbersBox.CheckedChanged += (s, args) => Config.Instance.MarkLineNumbers = _LineNumbersBox.Checked;
+			_CodeAbstractionsBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkAbstractions = _CodeAbstractionsBox.Checked);
+			_DirectivesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkAbstractions = _DirectivesBox.Checked);
+			_SpecialCommentsBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkComments = _SpecialCommentsBox.Checked);
+			_TypeDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkDeclarations = _TypeDeclarationBox.Checked);
+			_LineNumbersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkLineNumbers = _LineNumbersBox.Checked);
 
-			_TopMarginBox.ValueChanged += (s, args) => LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value;
-			_BottomMarginBox.ValueChanged += (s, args) => LineTransformers.LineHeightTransformProvider.BottomSpace = (double)_BottomMarginBox.Value;
-			_NoSpaceBetweenWrappedLinesBox.CheckedChanged += (s, args) => Config.Instance.NoSpaceBetweenWrappedLines = _NoSpaceBetweenWrappedLinesBox.Checked;
+			_TopMarginBox.ValueChanged += _UI.HandleEvent(() => LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value);
+			_BottomMarginBox.ValueChanged += _UI.HandleEvent(() => LineTransformers.LineHeightTransformProvider.BottomSpace = (double)_BottomMarginBox.Value);
+			_NoSpaceBetweenWrappedLinesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.NoSpaceBetweenWrappedLines = _NoSpaceBetweenWrappedLinesBox.Checked);
 			_SaveConfigButton.Click += (s, args) => {
 				using (var d = new SaveFileDialog {
 					Title = "Save Codist configuration file...",
@@ -66,17 +62,27 @@ namespace Codist.Options
 						return;
 					}
 					try {
+						Config.LoadConfig(d.FileName);
 						System.IO.File.Copy(d.FileName, Config.ConfigPath, true);
-						//todo: avoid restarting VS
-						Config.LoadConfig();
-						MessageBox.Show("Configurations were loaded successfully. Restart Visual Studio to make it effective.", "Codist");
 					}
 					catch (Exception ex) {
 						MessageBox.Show("Error occured while loading config file: " + ex.Message, "Codist");
 					}
 				}
 			};
+			Config.ConfigUpdated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
+		}
+
+		void LoadConfig(Config config) {
+			_UI.DoWithLock(() => {
+				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
+				_CodeAbstractionsBox.Checked = config.MarkAbstractions;
+				_DirectivesBox.Checked = config.MarkDirectives;
+				_SpecialCommentsBox.Checked = config.MarkComments;
+				_TypeDeclarationBox.Checked = config.MarkDeclarations;
+				_LineNumbersBox.Checked = config.MarkLineNumbers;
+			});
 		}
 	}
 }
