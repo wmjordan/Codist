@@ -26,18 +26,18 @@
   * Control flow related keywords (`return`, `throw`, `break`, `continue`, `yield` and `goto`) are highlighted with a different style.
   * All the above effects are customizable.
  
-  ![Syntax highlight](doc/shot1.png)
-  ![Syntax highlight](doc/shot2.png)
-  ![Syntax highlight](doc/shot3.png)
+  ![Syntax highlight](doc/highlight1.png)
+  ![Syntax highlight](doc/highlight2.png)
+  ![Syntax highlight](doc/highlight3.png)
 
 ## Customized comment styles
 * The comment tagger highlights comments (actually all editor styles) to your specific styles.
 
-  ![Comment syntax highlight](doc/comment-tagger.png)
+  ![Comment syntax highlight](doc/comment-tagger-options.png)
 
   Here's the effect of the highlighted comments.
 
-  ![Comment syntax highlight](doc/comment-styles.png)
+  ![Comment syntax highlight](doc/syntax-highlight-comments.png)
 
 * The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* value of the corresponding syntax parts.
 
@@ -87,11 +87,11 @@ The scrollbar can mark...
 1. In the *General* option page, you can add extra margin between lines to make code text more readable.
 2. You can also save your preferred settings or load certain settings that come with *Codist*.
 
-  ![General customization](doc/general.png)
+  ![General customization](doc/general-options.png)
 
 1. Go to the *C#* options page to change C# related settings.
 
-  ![C# customization](doc/csharp.png)
+  ![C# customization](doc/csharp-options.png)
 
 1. Go to the *Syntax color* options page to change the syntax highlight settings according to your preferences.
 
