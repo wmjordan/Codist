@@ -31,18 +31,11 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this._NoSpaceBetweenWrappedLinesBox = new System.Windows.Forms.CheckBox();
-			this.groupBox2 = new System.Windows.Forms.GroupBox();
-			this._DirectivesBox = new System.Windows.Forms.CheckBox();
-			this._SpecialCommentsBox = new System.Windows.Forms.CheckBox();
-			this._CodeAbstractionsBox = new System.Windows.Forms.CheckBox();
-			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
 			this._SaveConfigButton = new System.Windows.Forms.Button();
 			this._LoadConfigButton = new System.Windows.Forms.Button();
-			this._LineNumbersBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this.groupBox1.SuspendLayout();
-			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// _BottomMarginBox
@@ -84,10 +77,10 @@
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Controls.Add(this._TopMarginBox);
 			this.groupBox1.Controls.Add(this.label1);
-			this.groupBox1.Location = new System.Drawing.Point(3, 3);
+			this.groupBox1.Location = new System.Drawing.Point(3, 32);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(407, 84);
-			this.groupBox1.TabIndex = 0;
+			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Extra line margins";
 			// 
@@ -101,63 +94,9 @@
 			this._NoSpaceBetweenWrappedLinesBox.Text = "No margin between wrapped lines";
 			this._NoSpaceBetweenWrappedLinesBox.UseVisualStyleBackColor = true;
 			// 
-			// groupBox2
-			// 
-			this.groupBox2.Controls.Add(this._DirectivesBox);
-			this.groupBox2.Controls.Add(this._LineNumbersBox);
-			this.groupBox2.Controls.Add(this._SpecialCommentsBox);
-			this.groupBox2.Controls.Add(this._CodeAbstractionsBox);
-			this.groupBox2.Controls.Add(this._TypeDeclarationBox);
-			this.groupBox2.Location = new System.Drawing.Point(3, 93);
-			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(407, 118);
-			this.groupBox2.TabIndex = 1;
-			this.groupBox2.TabStop = false;
-			this.groupBox2.Text = "Scrollbar markers";
-			// 
-			// _DirectivesBox
-			// 
-			this._DirectivesBox.AutoSize = true;
-			this._DirectivesBox.Location = new System.Drawing.Point(9, 49);
-			this._DirectivesBox.Name = "_DirectivesBox";
-			this._DirectivesBox.Size = new System.Drawing.Size(181, 19);
-			this._DirectivesBox.TabIndex = 2;
-			this._DirectivesBox.Text = "Compiler directives";
-			this._DirectivesBox.UseVisualStyleBackColor = true;
-			// 
-			// _SpecialCommentsBox
-			// 
-			this._SpecialCommentsBox.AutoSize = true;
-			this._SpecialCommentsBox.Location = new System.Drawing.Point(199, 49);
-			this._SpecialCommentsBox.Name = "_SpecialCommentsBox";
-			this._SpecialCommentsBox.Size = new System.Drawing.Size(157, 19);
-			this._SpecialCommentsBox.TabIndex = 3;
-			this._SpecialCommentsBox.Text = "Special comments";
-			this._SpecialCommentsBox.UseVisualStyleBackColor = true;
-			// 
-			// _CodeAbstractionsBox
-			// 
-			this._CodeAbstractionsBox.AutoSize = true;
-			this._CodeAbstractionsBox.Location = new System.Drawing.Point(199, 24);
-			this._CodeAbstractionsBox.Name = "_CodeAbstractionsBox";
-			this._CodeAbstractionsBox.Size = new System.Drawing.Size(165, 19);
-			this._CodeAbstractionsBox.TabIndex = 1;
-			this._CodeAbstractionsBox.Text = "Code abstractions";
-			this._CodeAbstractionsBox.UseVisualStyleBackColor = true;
-			// 
-			// _TypeDeclarationBox
-			// 
-			this._TypeDeclarationBox.AutoSize = true;
-			this._TypeDeclarationBox.Location = new System.Drawing.Point(9, 24);
-			this._TypeDeclarationBox.Name = "_TypeDeclarationBox";
-			this._TypeDeclarationBox.Size = new System.Drawing.Size(165, 19);
-			this._TypeDeclarationBox.TabIndex = 0;
-			this._TypeDeclarationBox.Text = "Type declarations";
-			this._TypeDeclarationBox.UseVisualStyleBackColor = true;
-			// 
 			// _SaveConfigButton
 			// 
-			this._SaveConfigButton.Location = new System.Drawing.Point(12, 217);
+			this._SaveConfigButton.Location = new System.Drawing.Point(12, 3);
 			this._SaveConfigButton.Name = "_SaveConfigButton";
 			this._SaveConfigButton.Size = new System.Drawing.Size(173, 23);
 			this._SaveConfigButton.TabIndex = 0;
@@ -166,22 +105,12 @@
 			// 
 			// _LoadConfigButton
 			// 
-			this._LoadConfigButton.Location = new System.Drawing.Point(202, 217);
+			this._LoadConfigButton.Location = new System.Drawing.Point(202, 3);
 			this._LoadConfigButton.Name = "_LoadConfigButton";
 			this._LoadConfigButton.Size = new System.Drawing.Size(173, 23);
 			this._LoadConfigButton.TabIndex = 1;
 			this._LoadConfigButton.Text = "&Load configs...";
 			this._LoadConfigButton.UseVisualStyleBackColor = true;
-			// 
-			// _LineNumbersBox
-			// 
-			this._LineNumbersBox.AutoSize = true;
-			this._LineNumbersBox.Location = new System.Drawing.Point(9, 83);
-			this._LineNumbersBox.Name = "_LineNumbersBox";
-			this._LineNumbersBox.Size = new System.Drawing.Size(125, 19);
-			this._LineNumbersBox.TabIndex = 4;
-			this._LineNumbersBox.Text = "Line numbers";
-			this._LineNumbersBox.UseVisualStyleBackColor = true;
 			// 
 			// MiscPage
 			// 
@@ -189,17 +118,14 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this._LoadConfigButton);
 			this.Controls.Add(this._SaveConfigButton);
-			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
 			this.Name = "MiscPage";
-			this.Size = new System.Drawing.Size(572, 306);
+			this.Size = new System.Drawing.Size(575, 328);
 			this.Load += new System.EventHandler(this.MiscPage_Load);
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).EndInit();
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
-			this.groupBox2.ResumeLayout(false);
-			this.groupBox2.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -211,14 +137,8 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.GroupBox groupBox1;
-		private System.Windows.Forms.GroupBox groupBox2;
-		private System.Windows.Forms.CheckBox _SpecialCommentsBox;
-		private System.Windows.Forms.CheckBox _CodeAbstractionsBox;
-		private System.Windows.Forms.CheckBox _TypeDeclarationBox;
-		private System.Windows.Forms.CheckBox _DirectivesBox;
 		private System.Windows.Forms.CheckBox _NoSpaceBetweenWrappedLinesBox;
 		private System.Windows.Forms.Button _SaveConfigButton;
 		private System.Windows.Forms.Button _LoadConfigButton;
-		private System.Windows.Forms.CheckBox _LineNumbersBox;
 	}
 }

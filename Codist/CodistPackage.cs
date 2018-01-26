@@ -1,20 +1,6 @@
-﻿//------------------------------------------------------------------------------
-// <copyright file="CodistPackage.cs" company="Company">
-//     Copyright (c) Company.  All rights reserved.
-// </copyright>
-//------------------------------------------------------------------------------
-
-using System;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+﻿using System;
 using System.Runtime.InteropServices;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Win32;
 
 namespace Codist
 {
@@ -39,10 +25,11 @@ namespace Codist
 	[InstalledProductRegistration("#110", "#112", "2", IconResourceID = 400)] // Info on this package for Help/About
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.Misc), Constants.NameOfMe, "General", 0, 0, true)]
-	[ProvideOptionPage(typeof(Options.CodeStyle), Constants.NameOfMe, "CodeEx (C# & C++)", 0, 0, true)]
-	[ProvideOptionPage(typeof(Options.XmlCodeStyle), Constants.NameOfMe, "CodeEx (XML)", 0, 0, true)]
-	[ProvideOptionPage(typeof(Options.CommentStyle), Constants.NameOfMe, "CodeEx (Comment)", 0, 0, true)]
-	[ProvideOptionPage(typeof(Options.CommentTagger), Constants.NameOfMe, "Tagger (Comment)", 0, 0, true)]
+	[ProvideOptionPage(typeof(Options.CSharp), Constants.NameOfMe, "C#", 0, 0, true, Sort = 10)]
+	[ProvideOptionPage(typeof(Options.CodeStyle), Constants.NameOfMe , "Syntax color (C# & C++)", 0, 0, true, Sort = 110)]
+	[ProvideOptionPage(typeof(Options.XmlCodeStyle), Constants.NameOfMe, "Syntax color (XML)", 0, 0, true, Sort = 120)]
+	[ProvideOptionPage(typeof(Options.CommentStyle), Constants.NameOfMe, "Syntax color (Comment)", 0, 0, true, Sort = 130)]
+	[ProvideOptionPage(typeof(Options.CommentTagger), Constants.NameOfMe + "\\Syntax color (Comment)", "Tagger (Comment)", 0, 0, true, Sort = 131)]
 	public sealed class CodistPackage : Package
 	{
 		/// <summary>

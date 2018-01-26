@@ -1,11 +1,13 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell.Interop;
-using System.Drawing.Drawing2D;
 
 namespace Codist.Options
 {
+	[Browsable(false)]
 	public partial class CommentTaggerOptionPage : UserControl
 	{
 		readonly CommentTagger _Service;
@@ -86,7 +88,7 @@ namespace Codist.Options
 
 			_PreviewBox.SizeChanged += (s, args) => { UpdatePreview(); };
 			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
-			Config.ConfigUpdated += (s, args) => { LoadStyleLists(); };
+			Config.ConfigLoaded += (s, args) => { LoadStyleLists(); };
 			_Loaded = true;
 		}
 

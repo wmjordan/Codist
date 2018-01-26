@@ -118,7 +118,7 @@ namespace Codist.Views
 		}
 
 		private double GetEditorTextSize() {
-			return _Map.GetTextProperties(_RegService.GetClassificationType("text")).FontRenderingEmSize;
+			return _Map.DefaultTextProperties.FontRenderingEmSize;
 		}
 
 		private TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption) {

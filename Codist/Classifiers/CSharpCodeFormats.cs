@@ -51,8 +51,6 @@ namespace Codist.Classifiers
 	{
 		public ParameterFormat() {
 			DisplayName = Constants.NameOfMe + ": parameter";
-			IsItalic = true;
-			ForegroundColor = System.Windows.Media.Colors.MediumPurple;
 		}
 	}
 
@@ -89,7 +87,6 @@ namespace Codist.Classifiers
 	{
 		public ExtensionMethodFormat() {
 			DisplayName = Constants.NameOfMe + ": extension method";
-			IsItalic = true;
 		}
 	}
 
@@ -186,7 +183,6 @@ namespace Codist.Classifiers
 	{
 		public DeclarationFormat() {
 			DisplayName = Constants.NameOfMe + ": declaration";
-			FontRenderingSize = 20;
 		}
 	}
 
@@ -199,7 +195,6 @@ namespace Codist.Classifiers
 	{
 		public NestedDeclarationFormat() {
 			DisplayName = Constants.NameOfMe + ": nested declaration";
-			FontRenderingSize = 16;
 		}
 	}
 

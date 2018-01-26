@@ -122,7 +122,7 @@ namespace Codist.Classifiers
 				return Array.Empty<ClassificationSpan>();
 			}
 			var result = new List<ClassificationSpan>(16);
-			var semanticModel = _SemanticModel ?? (_SemanticModel = GetDocument(workspace, span).GetSemanticModelAsync().Result);
+			var semanticModel = _SemanticModel ?? (_SemanticModel = workspace.GetDocument(span).GetSemanticModelAsync().Result);
 
 			var textSpan = new TextSpan(span.Start.Position, span.Length);
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
@@ -334,15 +334,6 @@ namespace Codist.Classifiers
 			else if (symbol.IsSealed) {
 				yield return _sealedType;
 			}
-		}
-
-		static Document GetDocument(Workspace workspace, SnapshotSpan span) {
-			var solution = workspace.CurrentSolution;
-			var sourceText = span.Snapshot.AsText();
-			var docId = workspace.GetDocumentIdInCurrentContext(sourceText.Container);
-			return solution.ContainsDocument(docId)
-				? solution.GetDocument(docId)
-				: solution.WithDocumentText(docId, sourceText, PreservationMode.PreserveIdentity).GetDocument(docId);
 		}
 
 		void OnTextBufferChanged(object sender, TextContentChangedEventArgs e) => _SemanticModel = null;

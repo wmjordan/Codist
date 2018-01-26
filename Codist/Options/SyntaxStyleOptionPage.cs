@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
@@ -9,6 +10,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Codist.Options
 {
+	[Browsable(false)]
 	public partial class SyntaxStyleOptionPage : UserControl
 	{
 		readonly ConfigPage _service;
@@ -65,7 +67,7 @@ namespace Codist.Options
 			}
 			_PreviewBox.SizeChanged += (s, args) => UpdatePreview();
 			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
-			Config.ConfigUpdated += (s, args) => { _activeStyle = null; LoadStyleList(); };
+			Config.ConfigLoaded += (s, args) => { _activeStyle = null; LoadStyleList(); };
 			_loaded = true;
 		}
 

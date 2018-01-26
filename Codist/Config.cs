@@ -6,6 +6,7 @@ using System.Windows.Media;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using System.ComponentModel;
 
 namespace Codist
 {
@@ -16,12 +17,35 @@ namespace Codist
 		public static readonly string ConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.NameOfMe + "\\Config.json";
 		public static Config Instance = InitConfig();
 
+		[DefaultValue(false)]
 		public bool HighlightXmlDocCData { get; set; }
-		public bool MarkAbstractions { get; set; } = true;
+		[DefaultValue(false)]
+		public bool MarkAbstractions { get; set; }
+		[DefaultValue(true)]
 		public bool MarkComments { get; set; } = true;
+		[DefaultValue(true)]
 		public bool MarkDeclarations { get; set; } = true;
+		[DefaultValue(true)]
 		public bool MarkDirectives { get; set; } = true;
+		[DefaultValue(true)]
 		public bool MarkLineNumbers { get; set; } = true;
+		public bool ShowQuickInfo => ShowAttributesQuickInfo || ShowBaseTypeQuickInfo || ShowExtensionMethodQuickInfo || ShowInterfacesQuickInfo || ShowNumericQuickInfo || ShowStringQuickInfo;
+		[DefaultValue(true)]
+		public bool ShowAttributesQuickInfo { get; set; } = true;
+		[DefaultValue(true)]
+		public bool ShowBaseTypeQuickInfo { get; set; } = true;
+		[DefaultValue(true)]
+		public bool ShowBaseTypeInheritenceQuickInfo { get; set; } = true;
+		[DefaultValue(false)]
+		public bool ShowExtensionMethodQuickInfo { get; set; }
+		[DefaultValue(false)]
+		public bool ShowInterfacesQuickInfo { get; set; }
+		[DefaultValue(false)]
+		public bool ShowInterfacesInheritenceQuickInfo { get; set; }
+		[DefaultValue(true)]
+		public bool ShowNumericQuickInfo { get; set; } = true;
+		[DefaultValue(true)]
+		public bool ShowStringQuickInfo { get; set; } = true;
 
 		public double TopSpace {
 			get => LineTransformers.LineHeightTransformProvider.TopSpace;
@@ -37,6 +61,7 @@ namespace Codist
 		public List<XmlCodeStyle> XmlCodeStyles { get; private set; } = new List<XmlCodeStyle>();
 		public List<CodeStyle> CodeStyles { get; private set; } = new List<CodeStyle>();
 
+		public static event EventHandler ConfigLoaded;
 		public static event EventHandler ConfigUpdated;
 
 		public static Config InitConfig() {
@@ -57,6 +82,7 @@ namespace Codist
 
 		public static void LoadConfig(string configPath) {
 			Instance = InternalLoadConfig(configPath);
+			ConfigLoaded?.Invoke(Instance, EventArgs.Empty);
 			ConfigUpdated?.Invoke(Instance, EventArgs.Empty);
 		}
 

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.Composition;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
@@ -9,11 +7,10 @@ using System.Windows.Forms;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Text.Classification;
-using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.Options
 {
+	[Browsable(false)]
 	class ConfigPage : DialogPage
 	{
 		internal FontInfo GetFontSettings(Guid category) {
@@ -76,6 +73,7 @@ namespace Codist.Options
 		}
 	}
 
+	[Browsable(false)]
 	[Guid("8ECD56D1-87C1-47E2-9FB0-742B0FF35FEF")]
 	sealed class CodeStyle : ConfigPage
 	{
@@ -88,6 +86,7 @@ namespace Codist.Options
 		}
 	}
 
+	[Browsable(false)]
 	[Guid("4C16F280-BE29-4152-A6C5-58EEC5398FD4")]
 	sealed class CommentStyle : ConfigPage
 	{
@@ -100,6 +99,7 @@ namespace Codist.Options
 		}
 	}
 
+	[Browsable(false)]
 	[Guid("2E07AC20-D62F-4D78-8750-2A464CC011AE")]
 	sealed class XmlCodeStyle : ConfigPage
 	{
@@ -112,6 +112,7 @@ namespace Codist.Options
 		}
 	}
 
+	[Browsable(false)]
 	[Guid("1EB954DF-37FE-4849-B63A-58EC43088856")]
 	sealed class CommentTagger : ConfigPage
 	{
@@ -124,12 +125,26 @@ namespace Codist.Options
 		}
 	}
 
+	[Browsable(false)]
 	[Guid("DFC9C0E7-73A1-4DE9-8E94-161111266D38")]
 	sealed class Misc : ConfigPage
 	{
 		MiscPage _Control;
 
 		protected override IWin32Window Window => _Control ?? (_Control = new MiscPage(this));
+		protected override void Dispose(bool disposing) {
+			_Control.Dispose();
+			base.Dispose(disposing);
+		}
+	}
+
+	[Browsable(false)]
+	[Guid("6B92F305-BEAD-49E3-9277-28E1829D7B57")]
+	sealed class CSharp : ConfigPage
+	{
+		CSharpPage _Control;
+
+		protected override IWin32Window Window => _Control ?? (_Control = new CSharpPage(this));
 		protected override void Dispose(bool disposing) {
 			_Control.Dispose();
 			base.Dispose(disposing);
