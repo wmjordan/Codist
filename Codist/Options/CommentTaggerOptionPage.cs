@@ -176,8 +176,12 @@ namespace Codist.Options
 			if (style == null || String.IsNullOrEmpty(label.Label)) {
 				return;
 			}
+			var fontSize = (float)(fs.wPointSize + style.FontSize);
+			if (fontSize < 2) {
+				return;
+			}
 			using (var g = Graphics.FromImage(bmp))
-			using (var f = new Font(fs.bstrFaceName, (float)(fs.wPointSize + style.FontSize), ConfigPage.GetFontStyle(style)))
+			using (var f = new Font(fs.bstrFaceName, fontSize, ConfigPage.GetFontStyle(style)))
 			using (var b = style.ForeColor.A == 0 ? (Brush)Brushes.Black.Clone() : new SolidBrush(style.ForeColor.ToGdiColor())) {
 				var t = label.StyleApplication == CommentStyleApplication.Tag ? label.Label : "Preview 01ioIOlLWM";
 				var m = g.MeasureString(t, f, bmp.Size);

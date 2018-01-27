@@ -12,13 +12,6 @@ namespace Codist.Views
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	internal sealed class CodeViewCreationListener : IWpfTextViewCreationListener
 	{
-		const string EditorTextViewBackground = "TextView Background";
-		const string EditorCaret = "Caret";
-		const string EditorOverwriteCaret = "Overwrite Caret";
-		const string EditorSelectedText = "Selected Text";
-		const string EditorInactiveSelectedText = "Inactive Selected Text";
-		const string EditorVisibleWhitespace = "Visible Whitespace";
-
 		public void TextViewCreated(IWpfTextView textView) {
 			textView.Properties.GetOrCreateSingletonProperty(() => CreateDecorator(textView));
 			//IEditorFormatMap formatMap = _EditorFormatMapService.GetEditorFormatMap(textView);
@@ -26,7 +19,7 @@ namespace Codist.Views
 		}
 
 		public CodeViewDecorator CreateDecorator(IWpfTextView textView) {
-			return new CodeViewDecorator(textView, _FormatMapService.GetClassificationFormatMap(textView), _TypeRegistryService);
+			return new CodeViewDecorator(textView, _FormatMapService.GetClassificationFormatMap(textView), _TypeRegistryService, _EditorFormatMapService.GetEditorFormatMap(textView));
 		}
 
 		static void ChangeEditorFormat(IEditorFormatMap formatMap, string propertyId, Action<System.Windows.ResourceDictionary> changer) {

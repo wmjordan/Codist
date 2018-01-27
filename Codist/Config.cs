@@ -158,6 +158,9 @@ namespace Codist
 			}
 		}
 
+		internal void FireConfigChangedEvent() {
+			ConfigUpdated?.Invoke(this, EventArgs.Empty);
+		}
 		static Config GetDefaultConfig() {
 			var c = new Config();
 			InitDefaultLabels(c.Labels);

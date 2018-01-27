@@ -219,7 +219,23 @@ namespace Codist.Classifiers
 			var symbol = semanticModel.GetSymbolInfo(node).Symbol;
 			if (symbol == null) {
 				symbol = semanticModel.GetDeclaredSymbol(node);
-				if (symbol == null) {
+				if (symbol != null) {
+					switch (symbol.Kind) {
+						case SymbolKind.NamedType:
+							yield return symbol.ContainingType != null ? _nestedDeclarationType : _declarationType;
+							break;
+						case SymbolKind.Event:
+						case SymbolKind.Method:
+							yield return _declarationType;
+							break;
+						case SymbolKind.Property:
+							if (symbol.ContainingType.IsAnonymousType == false) {
+								yield return _declarationType;
+							}
+							break;
+					}
+				}
+				else {
 					// NOTE: handle alias in using directive
 					if ((node.Parent as NameEqualsSyntax)?.Parent is UsingDirectiveSyntax) {
 						yield return _aliasNamespaceType;
@@ -231,21 +247,14 @@ namespace Codist.Classifiers
 							yield return _staticMemberType;
 						}
 					}
-					yield break;
-				}
-				switch (symbol.Kind) {
-					case SymbolKind.NamedType:
-						yield return symbol.ContainingType != null ? _nestedDeclarationType : _declarationType;
-						break;
-					case SymbolKind.Event:
-					case SymbolKind.Method:
-						yield return _declarationType;
-						break;
-					case SymbolKind.Property:
-						if (symbol.ContainingType.IsAnonymousType == false) {
-							yield return _declarationType;
-						}
-						break;
+					symbol = node.Parent is MemberAccessExpressionSyntax
+						? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
+						: node.Parent is ArgumentSyntax
+						? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
+						: null;
+					if (symbol == null) {
+						yield break;
+					}
 				}
 			}
 			switch (symbol.Kind) {

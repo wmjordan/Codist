@@ -105,6 +105,9 @@ namespace Codist.Views
 			var typeSymbol = symbol as INamedTypeSymbol;
 			if (typeSymbol != null) {
 				if (Config.Instance.ShowBaseTypeQuickInfo) {
+					if (typeSymbol.TypeKind == TypeKind.Enum) {
+						ShowEnumInfo(qiContent, node, typeSymbol, true);
+					}
 					ShowBaseType(qiContent, typeSymbol, node.SpanStart);
 				}
 				if (Config.Instance.ShowInterfacesQuickInfo) {
@@ -129,7 +132,7 @@ namespace Codist.Views
 					var s = ShowNumericForms(field.ConstantValue, NumericForm.None);
 					if (s != null) {
 						qiContent.Add(s);
-						ShowEnumValueUnderlyingType(qiContent, node, symbol);
+						ShowEnumInfo(qiContent, node, symbol.ContainingType, false);
 					}
 				}
 			}
@@ -168,6 +171,12 @@ namespace Codist.Views
 						: null)
 					?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax
 						? semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true)).Symbol
+						: null)
+					?? (node.Parent is MemberAccessExpressionSyntax
+						? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
+						: null)
+					?? (node.Parent is ArgumentSyntax
+						? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
 						: null);
 		}
 
@@ -348,12 +357,7 @@ namespace Codist.Views
 		}
 
 		void ShowBaseType(IList<object> qiContent, INamedTypeSymbol typeSymbol, int position) {
-			var baseType = typeSymbol.EnumUnderlyingType;
-			if (baseType != null) {
-				qiContent.Add(ToUIText(baseType.ToMinimalDisplayParts(_SemanticModel, position), "Underlying type: ", true));
-				return;
-			}
-			baseType = typeSymbol.BaseType;
+			var baseType = typeSymbol.BaseType;
 			if (baseType != null) {
 				var name = baseType.Name;
 				if (IsCommonClassName(name) == false) {
@@ -369,11 +373,59 @@ namespace Codist.Views
 			}
 		}
 
-		void ShowEnumValueUnderlyingType(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
+		void ShowEnumInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol type, bool fromEnum) {
 			if (Config.Instance.ShowBaseTypeQuickInfo) {
-				var enumType = symbol.ContainingType.EnumUnderlyingType;
-				if (enumType != null) {
-					ShowBaseType(qiContent, symbol.ContainingType, node.SpanStart);
+				var t = type.EnumUnderlyingType;
+				if (t != null) {
+					var s = new StackPanel()
+						.Add(ToUIText(t.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Underlying type: ", true));
+					if (fromEnum == false) {
+						qiContent.Add(s);
+						return;
+					}
+					var c = 0;
+					object min = null, max = null, bits = null;
+					ISymbol minName = null, maxName = null;
+					var p = 0L;
+					foreach (var m in type.GetMembers()) {
+						var f = m as IFieldSymbol;
+						if (f == null) {
+							continue;
+						}
+						++c;
+						var v = f.ConstantValue;
+						if (min == null) {
+							min = max = bits = v;
+							minName = maxName = f;
+							continue;
+						}
+						if (AppHelpers.UnsafeArithmeticHelper.IsGreaterThan(v, max)) {
+							max = v;
+							maxName = f;
+						}
+						if (AppHelpers.UnsafeArithmeticHelper.IsLessThan(v, min)) {
+							min = v;
+							minName = f;
+						}
+						bits = AppHelpers.UnsafeArithmeticHelper.Or(v, bits);
+					}
+					s.Add(new StackPanel().MakeHorizontal().AddText("Enum fields: ", true).AddText(c.ToString()));
+					s.Add(new StackPanel()
+						.MakeHorizontal()
+						.AddText("Min: ", true)
+						.AddText(min.ToString() + "(")
+						.AddText(minName.Name, _EnumBrush)
+						.AddText(")"));
+					s.Add(new StackPanel()
+						.MakeHorizontal()
+						.AddText("Max: ", true)
+						.AddText(max.ToString() + "(")
+						.AddText(maxName.Name, _EnumBrush)
+						.AddText(")"));
+					if (type.GetAttributes().FirstOrDefault(a=>a.AttributeClass.ToDisplayString() == "System.FlagsAttribute") != null) {
+						s.Add(new StackPanel().MakeHorizontal().AddText("All flags: ", true).AddText(Convert.ToString(Convert.ToInt64(bits), 2)));
+					}
+					qiContent.Add(s);
 				}
 			}
 		}

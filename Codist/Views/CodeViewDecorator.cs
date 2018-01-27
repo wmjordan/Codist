@@ -17,15 +17,18 @@ namespace Codist.Views
 
 		readonly IClassificationFormatMap _Map;
 		readonly IClassificationTypeRegistryService _RegService;
+		readonly IEditorFormatMap _FormatMap;
 
+		Color _BackColor, _ForeColor;
 		bool _IsDecorating;
 
-		public CodeViewDecorator(ITextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service) {
+		public CodeViewDecorator(ITextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service, IEditorFormatMap formatMap) {
 			view.Closed += (s, args) => Config.ConfigUpdated -= SettingsSaved;
 			//view.GotAggregateFocus += TextView_GotAggregateFocus;
 			Config.ConfigUpdated += SettingsSaved;
 			_Map = map;
 			_RegService = service;
+			_FormatMap = formatMap;
 
 			if (__Styles == null) {
 				CacheStyles(service);
@@ -75,6 +78,15 @@ namespace Codist.Views
 		private void Decorate() {
 			try {
 				_IsDecorating = true;
+				var c = _FormatMap.GetProperties(Constants.EditorProperties.Text)?[EditorFormatDefinition.ForegroundColorId];
+				if (c is Color) {
+					_ForeColor = (Color)c;
+				}
+				c = _FormatMap.GetProperties(Constants.EditorProperties.TextViewBackground)?[EditorFormatDefinition.BackgroundColorId];
+				if (c is Color) {
+					_BackColor = (Color)c;
+					_BackColor = Color.FromArgb(0x00, _BackColor.R, _BackColor.G, _BackColor.B);
+				}
 				DecorateClassificationTypes();
 			}
 			catch (Exception ex) {
@@ -118,12 +130,15 @@ namespace Codist.Views
 		}
 
 		private double GetEditorTextSize() {
-			return _Map.DefaultTextProperties.FontRenderingEmSize;
+			return _Map.GetTextProperties(_RegService.GetClassificationType("text")).FontRenderingEmSize;
 		}
 
 		private TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption) {
 			var settings = styleOption;
-			double fontSize = GetEditorTextSize() + settings.FontSize;
+			var fontSize = GetEditorTextSize() + settings.FontSize;
+			if (fontSize < 2) {
+				fontSize = 1;
+			}
 			if (string.IsNullOrWhiteSpace(settings.Font) == false) {
 				properties = properties.SetTypeface(new Typeface(settings.Font));
 			}
@@ -144,16 +159,16 @@ namespace Codist.Views
 						properties = properties.SetBackground(settings.BackColor);
 						break;
 					case BrushEffect.ToBottom:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(Colors.Transparent, settings.BackColor, 90));
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, settings.BackColor, 90));
 						break;
 					case BrushEffect.ToTop:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(settings.BackColor, Colors.Transparent, 90));
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(settings.BackColor, _BackColor, 90));
 						break;
 					case BrushEffect.ToRight:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(Colors.Transparent, settings.BackColor, 0));
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, settings.BackColor, 0));
 						break;
 					case BrushEffect.ToLeft:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(settings.BackColor, Colors.Transparent, 0));
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(settings.BackColor, _BackColor, 0));
 						break;
 					default:
 						break;

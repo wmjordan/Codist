@@ -25,6 +25,17 @@ namespace Codist
 			public const string Xml = "XML";
 		}
 
+		public static class EditorProperties
+		{
+			public const string TextViewBackground = "TextView Background";
+			public const string Text = "Text";
+			public const string Caret = "Caret";
+			public const string OverwriteCaret = "Overwrite Caret";
+			public const string SelectedText = "Selected Text";
+			public const string InactiveSelectedText = "Inactive Selected Text";
+			public const string VisibleWhitespace = "Visible Whitespace";
+		}
+
 		public const string CodeKeyword = "Keyword";
 		public const string CodeComment = "Comment";
 
