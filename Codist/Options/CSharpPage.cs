@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AppHelpers;
 
 namespace Codist.Options
 {
@@ -33,14 +34,15 @@ namespace Codist.Options
 			_SpecialCommentsBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkComments = _SpecialCommentsBox.Checked);
 			_TypeDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkDeclarations = _TypeDeclarationBox.Checked);
 			_LineNumbersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkLineNumbers = _LineNumbersBox.Checked);
-			_CSharpAttributesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.ShowAttributesQuickInfo = _CSharpAttributesQuickInfoBox.Checked);
-			_CSharpBaseTypeQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => _CSharpBaseTypeInheritenceQuickInfoBox.Enabled = Config.Instance.ShowBaseTypeQuickInfo = _CSharpBaseTypeQuickInfoBox.Checked);
-			_CSharpBaseTypeInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.ShowBaseTypeInheritenceQuickInfo = _CSharpBaseTypeInheritenceQuickInfoBox.Checked);
-			_CSharpExtensionMethodQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.ShowExtensionMethodQuickInfo = _CSharpExtensionMethodQuickInfoBox.Checked);
-			_CSharpInterfacesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => _CSharpInterfaceInheritenceQuickInfoBox.Enabled = Config.Instance.ShowInterfacesQuickInfo = _CSharpInterfacesQuickInfoBox.Checked);
-			_CSharpInterfaceInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.ShowInterfacesInheritenceQuickInfo = _CSharpInterfaceInheritenceQuickInfoBox.Checked);
-			_CSharpNumberQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.ShowNumericQuickInfo = _CSharpNumberQuickInfoBox.Checked);
-			_CSharpStringQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.ShowStringQuickInfo = _CSharpStringQuickInfoBox.Checked);
+			_CSharpAttributesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Attributes, _CSharpAttributesQuickInfoBox.Checked));
+			_CSharpBaseTypeQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseType, _CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked));
+			_CSharpBaseTypeInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseTypeInheritence, _CSharpBaseTypeInheritenceQuickInfoBox.Checked));
+			_CSharpDeclarationQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Declaration, _CSharpDeclarationQuickInfoBox.Checked));
+			_CSharpExtensionMethodQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.ExtensionMethod, _CSharpExtensionMethodQuickInfoBox.Checked));
+			_CSharpInterfacesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Interfaces, _CSharpInterfaceInheritenceQuickInfoBox.Enabled = _CSharpInterfacesQuickInfoBox.Checked));
+			_CSharpInterfaceInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.InterfacesInheritence, _CSharpInterfaceInheritenceQuickInfoBox.Checked));
+			_CSharpNumberQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.NumericValues,  _CSharpNumberQuickInfoBox.Checked));
+			_CSharpStringQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.String, _CSharpStringQuickInfoBox.Checked));
 
 			Config.ConfigUpdated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
@@ -53,14 +55,15 @@ namespace Codist.Options
 				_SpecialCommentsBox.Checked = config.MarkComments;
 				_TypeDeclarationBox.Checked = config.MarkDeclarations;
 				_LineNumbersBox.Checked = config.MarkLineNumbers;
-				_CSharpAttributesQuickInfoBox.Checked = config.ShowAttributesQuickInfo;
-				_CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked = config.ShowBaseTypeQuickInfo;
-				_CSharpBaseTypeInheritenceQuickInfoBox.Checked = config.ShowBaseTypeInheritenceQuickInfo;
-				_CSharpInterfaceInheritenceQuickInfoBox.Enabled = _CSharpInterfacesQuickInfoBox.Checked = config.ShowInterfacesQuickInfo;
-				_CSharpInterfaceInheritenceQuickInfoBox.Checked = config.ShowInterfacesInheritenceQuickInfo;
-				_CSharpExtensionMethodQuickInfoBox.Checked = config.ShowExtensionMethodQuickInfo;
-				_CSharpNumberQuickInfoBox.Checked = config.ShowNumericQuickInfo;
-				_CSharpStringQuickInfoBox.Checked = config.ShowStringQuickInfo;
+				_CSharpAttributesQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes);
+				_CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType);
+				_CSharpBaseTypeInheritenceQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence);
+				_CSharpDeclarationQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration);
+				_CSharpInterfaceInheritenceQuickInfoBox.Enabled = _CSharpInterfacesQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces);
+				_CSharpInterfaceInheritenceQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
+				_CSharpExtensionMethodQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod);
+				_CSharpNumberQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues);
+				_CSharpStringQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.String);
 			});
 		}
 	}

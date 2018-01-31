@@ -29,23 +29,9 @@ namespace Codist
 		public bool MarkDirectives { get; set; } = true;
 		[DefaultValue(true)]
 		public bool MarkLineNumbers { get; set; } = true;
-		public bool ShowQuickInfo => ShowAttributesQuickInfo || ShowBaseTypeQuickInfo || ShowExtensionMethodQuickInfo || ShowInterfacesQuickInfo || ShowNumericQuickInfo || ShowStringQuickInfo;
+
 		[DefaultValue(true)]
-		public bool ShowAttributesQuickInfo { get; set; } = true;
-		[DefaultValue(true)]
-		public bool ShowBaseTypeQuickInfo { get; set; } = true;
-		[DefaultValue(true)]
-		public bool ShowBaseTypeInheritenceQuickInfo { get; set; } = true;
-		[DefaultValue(false)]
-		public bool ShowExtensionMethodQuickInfo { get; set; }
-		[DefaultValue(false)]
-		public bool ShowInterfacesQuickInfo { get; set; }
-		[DefaultValue(false)]
-		public bool ShowInterfacesInheritenceQuickInfo { get; set; }
-		[DefaultValue(true)]
-		public bool ShowNumericQuickInfo { get; set; } = true;
-		[DefaultValue(true)]
-		public bool ShowStringQuickInfo { get; set; } = true;
+		public QuickInfoOptions QuickInfoOptions { get; set; } = QuickInfoOptions.Attributes | QuickInfoOptions.BaseType | QuickInfoOptions.Interfaces | QuickInfoOptions.NumericValues;
 
 		public double TopSpace {
 			get => LineTransformers.LineHeightTransformProvider.TopSpace;
@@ -252,6 +238,9 @@ namespace Codist
 			}
 			return r;
 		}
+		internal void Set(QuickInfoOptions options, bool set) {
+			QuickInfoOptions = AppHelpers.EnumHelper.SetFlags(QuickInfoOptions, options, set);
+		}
 	}
 
 	abstract class StyleBase
@@ -445,5 +434,20 @@ namespace Codist
 		ToTop,
 		ToRight,
 		ToLeft
+	}
+
+	[Flags]
+	public enum QuickInfoOptions
+	{
+		None,
+		Attributes = 1,
+		BaseType = 1 << 1,
+		BaseTypeInheritence = 1 << 2,
+		Declaration = 1 << 3,
+		ExtensionMethod = 1 << 4,
+		Interfaces = 1 << 5,
+		InterfacesInheritence = 1 << 6,
+		NumericValues = 1 << 7,
+		String = 1 << 8
 	}
 }

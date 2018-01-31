@@ -32,6 +32,7 @@
 			this._CodeAbstractionsBox = new System.Windows.Forms.CheckBox();
 			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this._CSharpStringQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpNumberQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpInterfaceInheritenceQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpBaseTypeInheritenceQuickInfoBox = new System.Windows.Forms.CheckBox();
@@ -39,7 +40,7 @@
 			this._CSharpInterfacesQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpBaseTypeQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpAttributesQuickInfoBox = new System.Windows.Forms.CheckBox();
-			this._CSharpStringQuickInfoBox = new System.Windows.Forms.CheckBox();
+			this._CSharpDeclarationQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			this.SuspendLayout();
@@ -110,6 +111,7 @@
 			// 
 			// groupBox3
 			// 
+			this.groupBox3.Controls.Add(this._CSharpDeclarationQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpStringQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpNumberQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpInterfaceInheritenceQuickInfoBox);
@@ -120,10 +122,20 @@
 			this.groupBox3.Controls.Add(this._CSharpAttributesQuickInfoBox);
 			this.groupBox3.Location = new System.Drawing.Point(209, 3);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(200, 237);
+			this.groupBox3.Size = new System.Drawing.Size(200, 258);
 			this.groupBox3.TabIndex = 1;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Super Quick info";
+			// 
+			// _CSharpStringQuickInfoBox
+			// 
+			this._CSharpStringQuickInfoBox.AutoSize = true;
+			this._CSharpStringQuickInfoBox.Location = new System.Drawing.Point(9, 199);
+			this._CSharpStringQuickInfoBox.Name = "_CSharpStringQuickInfoBox";
+			this._CSharpStringQuickInfoBox.Size = new System.Drawing.Size(181, 19);
+			this._CSharpStringQuickInfoBox.TabIndex = 7;
+			this._CSharpStringQuickInfoBox.Text = "String length, hash";
+			this._CSharpStringQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpNumberQuickInfoBox
 			// 
@@ -195,15 +207,15 @@
 			this._CSharpAttributesQuickInfoBox.Text = "Attributes";
 			this._CSharpAttributesQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
-			// _CSharpStringQuickInfoBox
+			// _CSharpDeclarationQuickInfoBox
 			// 
-			this._CSharpStringQuickInfoBox.AutoSize = true;
-			this._CSharpStringQuickInfoBox.Location = new System.Drawing.Point(9, 199);
-			this._CSharpStringQuickInfoBox.Name = "_CSharpStringQuickInfoBox";
-			this._CSharpStringQuickInfoBox.Size = new System.Drawing.Size(189, 19);
-			this._CSharpStringQuickInfoBox.TabIndex = 7;
-			this._CSharpStringQuickInfoBox.Text = "Encoding / hash code";
-			this._CSharpStringQuickInfoBox.UseVisualStyleBackColor = true;
+			this._CSharpDeclarationQuickInfoBox.AutoSize = true;
+			this._CSharpDeclarationQuickInfoBox.Location = new System.Drawing.Point(9, 224);
+			this._CSharpDeclarationQuickInfoBox.Name = "_CSharpDeclarationQuickInfoBox";
+			this._CSharpDeclarationQuickInfoBox.Size = new System.Drawing.Size(189, 19);
+			this._CSharpDeclarationQuickInfoBox.TabIndex = 8;
+			this._CSharpDeclarationQuickInfoBox.Text = "Declaration keywords";
+			this._CSharpDeclarationQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpPage
 			// 
@@ -238,5 +250,6 @@
 		private System.Windows.Forms.CheckBox _CSharpBaseTypeInheritenceQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpNumberQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpStringQuickInfoBox;
+		private System.Windows.Forms.CheckBox _CSharpDeclarationQuickInfoBox;
 	}
 }

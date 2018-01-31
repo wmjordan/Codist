@@ -18,6 +18,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
+using AppHelpers;
 
 namespace Codist.Views
 {
@@ -73,10 +74,14 @@ namespace Codist.Views
 			var symbol = GetSymbol(node, semanticModel);
 			if (symbol == null) {
 				UIElement infoBox = null;
-				if (Config.Instance.ShowNumericQuickInfo && node.Kind() == SyntaxKind.NumericLiteralExpression) {
+				var nodeKind = node.Kind();
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && nodeKind == SyntaxKind.NumericLiteralExpression) {
 					infoBox = ShowNumericForm(node);
 				}
-				else if (Config.Instance.ShowStringQuickInfo) {
+				else if (nodeKind == SyntaxKind.SwitchStatement) {
+					infoBox = new TextBlock { Text = (node as SwitchStatementSyntax).Sections.Count + " sections" };
+				}
+				else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
 					var token = node.GetFirstToken();
 					if (token.Kind() == SyntaxKind.StringLiteralToken) {
 						infoBox = ShowStringInfo(token.ValueText);
@@ -96,7 +101,7 @@ namespace Codist.Views
 				UpdateSyntaxHighlights(formatMap);
 			}
 
-			if (Config.Instance.ShowAttributesQuickInfo) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
 				var attrs = symbol.GetAttributes();
 				if (attrs.Length > 0) {
 					qiContent.Add(ShowAttributes(attrs, node.SpanStart));
@@ -104,35 +109,54 @@ namespace Codist.Views
 			}
 			var typeSymbol = symbol as INamedTypeSymbol;
 			if (typeSymbol != null) {
-				if (Config.Instance.ShowBaseTypeQuickInfo) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
 					if (typeSymbol.TypeKind == TypeKind.Enum) {
 						ShowEnumInfo(qiContent, node, typeSymbol, true);
 					}
 					ShowBaseType(qiContent, typeSymbol, node.SpanStart);
 				}
-				if (Config.Instance.ShowInterfacesQuickInfo) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces)) {
 					ShowInterfaces(qiContent, typeSymbol, node.SpanStart);
+				}
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+					&& typeSymbol.TypeKind == TypeKind.Class
+					&& (typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
+					ShowClassDeclaration(qiContent, typeSymbol);
 				}
 				goto RETURN;
 			}
 			var method = symbol as IMethodSymbol;
-			if (method != null && Config.Instance.ShowExtensionMethodQuickInfo && method.IsExtensionMethod) {
-				ShowExtensionMethod(qiContent, method, node.SpanStart);
+			if (method != null) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+					&& (method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern)
+					&& method.ContainingType.TypeKind != TypeKind.Interface) {
+					ShowMethodDeclaration(qiContent, method);
+				}
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod) && method.IsExtensionMethod) {
+					ShowExtensionMethod(qiContent, method, node.SpanStart);
+				}
 				goto RETURN;
 			}
 			var field = symbol as IFieldSymbol;
-			if (field != null && field.HasConstantValue) {
-				var sv = field.ConstantValue as string;
-				if (sv != null) {
-					if (Config.Instance.ShowStringQuickInfo) {
-						qiContent.Add(ShowStringInfo(sv));
-					}
+			if (field != null) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+					&& (field.IsReadOnly || field.IsVolatile || field.IsStatic)
+					&& field.ContainingType.TypeKind != TypeKind.Enum) {
+					ShowFieldDeclaration(qiContent, field);
 				}
-				else if (Config.Instance.ShowNumericQuickInfo) {
-					var s = ShowNumericForms(field.ConstantValue, NumericForm.None);
-					if (s != null) {
-						qiContent.Add(s);
-						ShowEnumInfo(qiContent, node, symbol.ContainingType, false);
+				if (field.HasConstantValue) {
+					var sv = field.ConstantValue as string;
+					if (sv != null) {
+						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
+							qiContent.Add(ShowStringInfo(sv));
+						}
+					}
+					else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
+						var s = ShowNumericForms(field.ConstantValue, NumericForm.None);
+						if (s != null) {
+							qiContent.Add(s);
+							ShowEnumInfo(qiContent, node, symbol.ContainingType, false);
+						}
 					}
 				}
 			}
@@ -141,6 +165,54 @@ namespace Codist.Views
 			return;
 			EXIT:
 			applicableToSpan = null;
+		}
+
+		static void ShowFieldDeclaration(IList<object> qiContent, IFieldSymbol field) {
+			var info = new StackPanel().MakeHorizontal().AddText("Field declaration: ", true);
+			if (field.IsVolatile) {
+				info.AddText("volatile ", _KeywordBrush);
+			}
+			if (field.IsStatic) {
+				info.AddText("static ", _KeywordBrush);
+			}
+			if (field.IsReadOnly) {
+				info.AddText("readonly ", _KeywordBrush);
+			}
+			qiContent.Add(info);
+		}
+
+		static void ShowClassDeclaration(IList<object> qiContent, INamedTypeSymbol typeSymbol) {
+			var info = new StackPanel().MakeHorizontal().AddText("Class declaration: ", true);
+			if (typeSymbol.IsAbstract) {
+				info.AddText("abstract ", _KeywordBrush);
+			}
+			else if (typeSymbol.IsStatic) {
+				info.AddText("static ", _KeywordBrush);
+			}
+			else if (typeSymbol.IsSealed) {
+				info.AddText("sealed ", _KeywordBrush);
+			}
+			qiContent.Add(info);
+		}
+
+		static void ShowMethodDeclaration(IList<object> qiContent, IMethodSymbol method) {
+			var info = new StackPanel().MakeHorizontal().AddText("Method declaration: ", true);
+			if (method.IsAbstract) {
+				info.AddText("abstract ", _KeywordBrush);
+			}
+			if (method.IsStatic) {
+				info.AddText("static ", _KeywordBrush);
+			}
+			else if (method.IsVirtual) {
+				info.AddText("virtual ", _KeywordBrush);
+			}
+			else if (method.IsOverride) {
+				info.AddText("override ", _KeywordBrush);
+			}
+			if (method.IsExtern) {
+				info.AddText("extern ", _KeywordBrush);
+			}
+			qiContent.Add(info);
 		}
 
 		private static StackPanel ShowStringInfo(string sv) {
@@ -362,7 +434,7 @@ namespace Codist.Views
 				var name = baseType.Name;
 				if (IsCommonClassName(name) == false) {
 					var info = ToUIText(baseType.ToMinimalDisplayParts(_SemanticModel, position), "Base type: ", true);
-					while (Config.Instance.ShowBaseTypeInheritenceQuickInfo && (baseType = baseType.BaseType) != null) {
+					while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
 						name = baseType.Name;
 						if (IsCommonClassName(name) == false) {
 							info.AddText(" - ").AddText(name, _ClassBrush);
@@ -374,7 +446,7 @@ namespace Codist.Views
 		}
 
 		void ShowEnumInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol type, bool fromEnum) {
-			if (Config.Instance.ShowBaseTypeQuickInfo) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
 				var t = type.EnumUnderlyingType;
 				if (t != null) {
 					var s = new StackPanel()
@@ -399,30 +471,33 @@ namespace Codist.Views
 							minName = maxName = f;
 							continue;
 						}
-						if (AppHelpers.UnsafeArithmeticHelper.IsGreaterThan(v, max)) {
+						if (UnsafeArithmeticHelper.IsGreaterThan(v, max)) {
 							max = v;
 							maxName = f;
 						}
-						if (AppHelpers.UnsafeArithmeticHelper.IsLessThan(v, min)) {
+						if (UnsafeArithmeticHelper.IsLessThan(v, min)) {
 							min = v;
 							minName = f;
 						}
-						bits = AppHelpers.UnsafeArithmeticHelper.Or(v, bits);
+						bits = UnsafeArithmeticHelper.Or(v, bits);
 					}
-					s.Add(new StackPanel().MakeHorizontal().AddText("Enum fields: ", true).AddText(c.ToString()));
-					s.Add(new StackPanel()
-						.MakeHorizontal()
-						.AddText("Min: ", true)
-						.AddText(min.ToString() + "(")
-						.AddText(minName.Name, _EnumBrush)
-						.AddText(")"));
-					s.Add(new StackPanel()
-						.MakeHorizontal()
-						.AddText("Max: ", true)
-						.AddText(max.ToString() + "(")
-						.AddText(maxName.Name, _EnumBrush)
-						.AddText(")"));
-					if (type.GetAttributes().FirstOrDefault(a=>a.AttributeClass.ToDisplayString() == "System.FlagsAttribute") != null) {
+					if (min == null) {
+						return;
+					}
+					s.Add(new StackPanel().MakeHorizontal().AddText("Enum fields: ", true).AddText(c.ToString()))
+						.Add(new StackPanel()
+							.MakeHorizontal()
+							.AddText("Min: ", true)
+							.AddText(min.ToString() + "(")
+							.AddText(minName.Name, _EnumBrush)
+							.AddText(")"))
+						.Add(new StackPanel()
+							.MakeHorizontal()
+							.AddText("Max: ", true)
+							.AddText(max.ToString() + "(")
+							.AddText(maxName.Name, _EnumBrush)
+							.AddText(")"));
+					if (type.GetAttributes().FirstOrDefault(a => a.AttributeClass.ToDisplayString() == "System.FlagsAttribute") != null) {
 						s.Add(new StackPanel().MakeHorizontal().AddText("All flags: ", true).AddText(Convert.ToString(Convert.ToInt64(bits), 2)));
 					}
 					qiContent.Add(s);
@@ -431,7 +506,7 @@ namespace Codist.Views
 		}
 		void ShowInterfaces(IList<object> output, ITypeSymbol type, int position) {
 			const string SystemDisposable = "IDisposable";
-			var showAll = Config.Instance.ShowInterfacesInheritenceQuickInfo;
+			var showAll = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
 			var interfaces = showAll ? type.AllInterfaces : type.Interfaces;
 			if (interfaces.Length == 0) {
 				return;
@@ -466,7 +541,25 @@ namespace Codist.Views
 					break;
 				case TypedConstantKind.Enum:
 					var en = v.ToCSharpString();
-					attrStack.AddText(v.Type.Name + en.Substring(en.LastIndexOf('.')), _EnumBrush);
+					if (en.IndexOf('|') != -1) {
+						var items = v.Type.GetMembers().Where(i => {
+							var field = i as IFieldSymbol;
+							if (field == null || field.HasConstantValue == false) {
+								return false;
+							}
+							return UnsafeArithmeticHelper.Equals(UnsafeArithmeticHelper.And(v.Value, field.ConstantValue), field.ConstantValue) && UnsafeArithmeticHelper.IsZero(field.ConstantValue) == false;
+						});
+						var flags = items.ToArray();
+						for (int i = 0; i < flags.Length; i++) {
+							if (i > 0) {
+								attrStack.AddText("| ");
+							}
+							attrStack.AddText(v.Type.Name + "." + flags[i].Name, _EnumBrush);
+						}
+					}
+					else {
+						attrStack.AddText(v.Type.Name + en.Substring(en.LastIndexOf('.')), _EnumBrush);
+					}
 					break;
 				case TypedConstantKind.Type:
 					attrStack.AddText("typeof(");
@@ -527,7 +620,7 @@ namespace Codist.Views
 			}
 
 			private void OnTextViewMouseHover(object sender, MouseHoverEventArgs e) {
-				if (Config.Instance.ShowQuickInfo == false) {
+				if (Config.Instance.QuickInfoOptions != QuickInfoOptions.None) {
 					return;
 				}
 				//find the mouse position by mapping down to the subject buffer
