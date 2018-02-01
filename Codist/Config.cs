@@ -286,10 +286,17 @@ namespace Codist
 			set { _backColor = value; }
 		}
 
+		public abstract string Category { get; }
 		internal StyleBase Clone() {
 			return (StyleBase)MemberwiseClone();
 		}
-		public abstract string Category { get; }
+		internal void Reset() {
+			Bold = Italic = OverLine = Underline = StrikeThrough = null;
+			FontSize = 0;
+			BackgroundEffect = BrushEffect.Solid;
+			Font = null;
+			_foreColor = _backColor = default(Color);
+		}
 	}
 
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
@@ -371,7 +378,7 @@ namespace Codist
 				if (f == null) {
 					return _Category = String.Empty;
 				}
-				var c = f.GetCustomAttribute<System.ComponentModel.CategoryAttribute>(false);
+				var c = f.GetCustomAttribute<CategoryAttribute>(false);
 				if (c == null) {
 					return _Category = String.Empty;
 				}

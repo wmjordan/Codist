@@ -13,13 +13,12 @@ namespace Codist.Options
 	[Browsable(false)]
 	public partial class SyntaxStyleOptionPage : UserControl
 	{
+		readonly Func<IEnumerable<StyleBase>> _defaultStyleLoader;
 		readonly ConfigPage _service;
 		readonly Func<IEnumerable<StyleBase>> _styleLoader;
-		readonly Func<IEnumerable<StyleBase>> _defaultStyleLoader;
 		StyleBase _activeStyle;
-		bool _uiLock;
 		bool _loaded;
-
+		bool _uiLock;
 		public SyntaxStyleOptionPage() {
 			InitializeComponent();
 			_BackgroundEffectBox.Items.AddRange(new[] { "Solid", "Paint bottom", "Paint top", "Paint right", "Paint left" });
@@ -71,6 +70,92 @@ namespace Codist.Options
 			_loaded = true;
 		}
 
+		static void RenderPreview(Bitmap bmp, FontInfo fs, StyleBase style) {
+			var fontSize = (float)(fs.wPointSize + style.FontSize);
+			if (fontSize < 2) {
+				return;
+			}
+			using (var g = Graphics.FromImage(bmp))
+			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fs.bstrFaceName : style.Font, fontSize, ConfigPage.GetFontStyle(style)))
+			using (var b = style.ForeColor.A == 0 ? (Brush)Brushes.Black.Clone() : new SolidBrush(style.ForeColor.ToGdiColor())) {
+				const string t = "Preview 01ioIOlLWM";
+				var m = g.MeasureString(t, f, bmp.Size);
+				g.SmoothingMode = SmoothingMode.HighQuality;
+				g.TextRenderingHint = TextRenderingHint.AntiAlias;
+				g.CompositingQuality = CompositingQuality.HighQuality;
+				using (var bb = ConfigPage.GetPreviewBrush(style.BackgroundEffect, style.BackColor, ref m)) {
+					g.FillRectangle(bb, new Rectangle(0, 0, (int)m.Width, (int)m.Height));
+				}
+				g.DrawString(t, f, b, new RectangleF(PointF.Empty, bmp.PhysicalDimension));
+			}
+		}
+
+		static bool? ToBool(CheckState state) {
+			switch (state) {
+				case CheckState.Unchecked: return false;
+				case CheckState.Checked: return true;
+				default: return null;
+			}
+		}
+
+		static CheckState ToCheckState(bool? value) {
+			return value.HasValue == false
+				? CheckState.Indeterminate
+				: value.Value
+				? CheckState.Checked
+				: CheckState.Unchecked;
+		}
+
+		static Color ToColor(System.Windows.Media.Color color) {
+			return Color.FromArgb(255, color.R, color.G, color.B);
+		}
+
+		void _SyntaxListBox_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e) {
+			if (e.ItemIndex == -1) {
+				return;
+			}
+			var i = e.Item.Tag as StyleBase;
+			if (i == null) {
+				return;
+			}
+			_uiLock = true;
+			_activeStyle = i;
+			UpdateUIControls(i);
+
+			UpdatePreview();
+			_uiLock = false;
+		}
+
+		void UpdateUIControls(StyleBase style) {
+			_BoldBox.CheckState = ToCheckState(style.Bold);
+			_ItalicBox.CheckState = ToCheckState(style.Italic);
+			_StrikeBox.CheckState = ToCheckState(style.StrikeThrough);
+			_UnderlineBox.CheckState = ToCheckState(style.Underline);
+			_BackgroundEffectBox.SelectedIndex = (int)style.BackgroundEffect;
+
+			_FontBox.Text = style.Font;
+			_FontSizeBox.Value = style.FontSize > 100 ? 100m : style.FontSize < -10 ? -10m : (decimal)style.FontSize;
+			_ForeColorTransBox.Value = style.ForeColor.A;
+			_BackColorTransBox.Value = style.BackColor.A;
+			_ForeColorButton.SelectedColor = ToColor(style.ForeColor);
+			_BackColorButton.SelectedColor = ToColor(style.BackColor);
+		}
+
+		private ListViewItem GetListItemForStyle(string category, ListViewItem vi) {
+			vi.Text = category;
+			vi.IndentCount = 1;
+			switch (category) {
+				case Constants.SyntaxCategory.Comment: vi.BackColor = Color.LightGreen; vi.ForeColor = Color.Black; break;
+				case Constants.SyntaxCategory.CompilerMarked: vi.BackColor = Color.LightGray; vi.ForeColor = Color.Black; break;
+				case Constants.SyntaxCategory.Declaration: vi.BackColor = Color.LightCyan; vi.ForeColor = Color.Black; break;
+				case Constants.SyntaxCategory.Keyword: vi.BackColor = Color.LightBlue; vi.ForeColor = Color.Black; break;
+				case Constants.SyntaxCategory.Preprocessor: vi.BackColor = Color.Gray; vi.ForeColor = Color.Black; break;
+				case Constants.SyntaxCategory.Member: vi.BackColor = Color.LightCoral; vi.ForeColor = Color.Black; break;
+				case Constants.SyntaxCategory.TypeDefinition: vi.BackColor = Color.LightYellow; vi.ForeColor = Color.Black; break;
+			}
+			return vi;
+		}
+
 		void LoadStyleList() {
 			_uiLock = true;
 			_SyntaxListBox.Items.Clear();
@@ -96,22 +181,6 @@ namespace Codist.Options
 			}
 			_uiLock = false;
 		}
-
-		private ListViewItem GetListItemForStyle(string category, ListViewItem vi) {
-			vi.Text = category;
-			vi.IndentCount = 1;
-			switch (category) {
-				case Constants.SyntaxCategory.Comment: vi.BackColor = Color.LightGreen; vi.ForeColor = Color.Black; break;
-				case Constants.SyntaxCategory.CompilerMarked: vi.BackColor = Color.LightGray; vi.ForeColor = Color.Black; break;
-				case Constants.SyntaxCategory.Declaration: vi.BackColor = Color.LightCyan; vi.ForeColor = Color.Black; break;
-				case Constants.SyntaxCategory.Keyword: vi.BackColor = Color.LightBlue; vi.ForeColor = Color.Black; break;
-				case Constants.SyntaxCategory.Preprocessor: vi.BackColor = Color.Gray; vi.ForeColor = Color.Black; break;
-				case Constants.SyntaxCategory.Member: vi.BackColor = Color.LightCoral; vi.ForeColor = Color.Black; break;
-				case Constants.SyntaxCategory.TypeDefinition: vi.BackColor = Color.LightYellow; vi.ForeColor = Color.Black; break;
-			}
-			return vi;
-		}
-
 		void MarkChanged(object sender, EventArgs args) {
 			if (_uiLock || _activeStyle == null) {
 				return;
@@ -120,14 +189,16 @@ namespace Codist.Options
 			Config.Instance.FireConfigChangedEvent();
 		}
 
-		private void SetForeColor(object sender, EventArgs args) {
-			if (_uiLock || _activeStyle == null) {
+		void ResetButton_Click(object sender, EventArgs e) {
+			if (_activeStyle == null) {
 				return;
 			}
-			if (sender == _ForeColorButton && _ForeColorTransBox.Value == 0) {
-				_ForeColorTransBox.Value = 255;
-			}
-			_activeStyle.ForeColor = _ForeColorButton.SelectedColor.ChangeTrasparency((byte)_ForeColorTransBox.Value).ToWpfColor();
+			_uiLock = true;
+			_activeStyle.Reset();
+			UpdateUIControls(_activeStyle);
+			UpdatePreview();
+			Config.Instance.FireConfigChangedEvent();
+			_uiLock = false;
 		}
 
 		private void SetBackColor(object sender, EventArgs args) {
@@ -140,37 +211,15 @@ namespace Codist.Options
 			_activeStyle.BackColor = _BackColorButton.SelectedColor.ChangeTrasparency((byte)_BackColorTransBox.Value).ToWpfColor();
 		}
 
-		void _SyntaxListBox_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e) {
-			if (e.ItemIndex == -1) {
+		private void SetForeColor(object sender, EventArgs args) {
+			if (_uiLock || _activeStyle == null) {
 				return;
 			}
-			var i = e.Item.Tag as StyleBase;
-			if (i == null) {
-				return;
+			if (sender == _ForeColorButton && _ForeColorTransBox.Value == 0) {
+				_ForeColorTransBox.Value = 255;
 			}
-			_uiLock = true;
-			_activeStyle = i;
-			_BoldBox.CheckState = ToCheckState(i.Bold);
-			_ItalicBox.CheckState = ToCheckState(i.Italic);
-			_StrikeBox.CheckState = ToCheckState(i.StrikeThrough);
-			_UnderlineBox.CheckState = ToCheckState(i.Underline);
-			_BackgroundEffectBox.SelectedIndex = (int)i.BackgroundEffect;
-
-			_FontBox.Text = i.Font;
-			_FontSizeBox.Value = i.FontSize > 100 ? 100m : i.FontSize < -10 ? -10m : (decimal)i.FontSize;
-			_ForeColorTransBox.Value = i.ForeColor.A;
-			_BackColorTransBox.Value = i.BackColor.A;
-			_ForeColorButton.SelectedColor = ToColor(i.ForeColor);
-			_BackColorButton.SelectedColor = ToColor(i.BackColor);
-			
-			UpdatePreview();
-			_uiLock = false;
+			_activeStyle.ForeColor = _ForeColorButton.SelectedColor.ChangeTrasparency((byte)_ForeColorTransBox.Value).ToWpfColor();
 		}
-
-		static Color ToColor(System.Windows.Media.Color color) {
-			return Color.FromArgb(255, color.R, color.G, color.B);
-		}
-
 		void UpdatePreview() {
 			if (_activeStyle == null) {
 				return;
@@ -181,47 +230,10 @@ namespace Codist.Options
 			RenderPreview(bmp, fs, style);
 			_PreviewBox.Image = bmp;
 		}
-
-		static void RenderPreview(Bitmap bmp, FontInfo fs, StyleBase style) {
-			var fontSize = (float)(fs.wPointSize + style.FontSize);
-			if (fontSize < 2) {
-				return;
-			}
-			using (var g = Graphics.FromImage(bmp))
-			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fs.bstrFaceName : style.Font, fontSize, ConfigPage.GetFontStyle(style)))
-			using (var b = style.ForeColor.A == 0 ? (Brush)Brushes.Black.Clone() : new SolidBrush(style.ForeColor.ToGdiColor())) {
-				const string t = "Preview 01ioIOlLWM";
-				var m = g.MeasureString(t, f, bmp.Size);
-				g.SmoothingMode = SmoothingMode.HighQuality;
-				g.TextRenderingHint = TextRenderingHint.AntiAlias;
-				g.CompositingQuality = CompositingQuality.HighQuality;
-				using (var bb = ConfigPage.GetPreviewBrush(style.BackgroundEffect, style.BackColor, ref m)) {
-					g.FillRectangle(bb, new Rectangle(0, 0, (int)m.Width, (int)m.Height));
-				}
-				g.DrawString(t, f, b, new RectangleF(PointF.Empty, bmp.PhysicalDimension));
-			}
-		}
-
-		static CheckState ToCheckState(bool? value) {
-			return value.HasValue == false
-				? CheckState.Indeterminate
-				: value.Value
-				? CheckState.Checked
-				: CheckState.Unchecked;
-		}
-		static bool? ToBool(CheckState state) {
-			switch (state) {
-				case CheckState.Unchecked: return false;
-				case CheckState.Checked: return true;
-				default: return null;
-			}
-		}
-
 		struct FontFamilyItem
 		{
-			internal readonly string Name;
 			internal readonly FontFamily FontFamily;
-
+			internal readonly string Name;
 			public FontFamilyItem(FontFamily fontFamily) {
 				Name = fontFamily.GetName(0);
 				FontFamily = fontFamily;

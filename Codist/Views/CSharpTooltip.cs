@@ -36,7 +36,8 @@ namespace Codist.Views
 			_QuickInfoSourceProvider = provider;
 			_TextBuffer = subjectBuffer;
 			_FormatMapService = formatMapService;
-			_TextBuffer.Changing += _TextBuffer_Changing;
+			_TextBuffer.Changing += TextBuffer_Changing;
+			Config.ConfigUpdated += _ConfigUpdated;
 		}
 
 		public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {
@@ -130,7 +131,7 @@ namespace Codist.Views
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 					&& (method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern)
 					&& method.ContainingType.TypeKind != TypeKind.Interface) {
-					ShowMethodDeclaration(qiContent, method);
+					ShowMethodDeclaration(qiContent, method, node.SpanStart);
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod) && method.IsExtensionMethod) {
 					ShowExtensionMethod(qiContent, method, node.SpanStart);
@@ -159,6 +160,14 @@ namespace Codist.Views
 						}
 					}
 				}
+				goto RETURN;
+			}
+			var property = symbol as IPropertySymbol;
+			if (property != null) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+					&& (property.IsAbstract || property.IsStatic || property.IsOverride || property.IsVirtual)) {
+					ShowPropertyDeclaration(qiContent, property, node.SpanStart);
+				}
 			}
 			RETURN:
 			applicableToSpan = currentSnapshot.CreateTrackingSpan(extent.Span.Start, extent.Span.Length, SpanTrackingMode.EdgeInclusive);
@@ -167,65 +176,10 @@ namespace Codist.Views
 			applicableToSpan = null;
 		}
 
-		static void ShowFieldDeclaration(IList<object> qiContent, IFieldSymbol field) {
-			var info = new StackPanel().MakeHorizontal().AddText("Field declaration: ", true);
-			if (field.IsVolatile) {
-				info.AddText("volatile ", _KeywordBrush);
-			}
-			if (field.IsStatic) {
-				info.AddText("static ", _KeywordBrush);
-			}
-			if (field.IsReadOnly) {
-				info.AddText("readonly ", _KeywordBrush);
-			}
-			qiContent.Add(info);
-		}
-
-		static void ShowClassDeclaration(IList<object> qiContent, INamedTypeSymbol typeSymbol) {
-			var info = new StackPanel().MakeHorizontal().AddText("Class declaration: ", true);
-			if (typeSymbol.IsAbstract) {
-				info.AddText("abstract ", _KeywordBrush);
-			}
-			else if (typeSymbol.IsStatic) {
-				info.AddText("static ", _KeywordBrush);
-			}
-			else if (typeSymbol.IsSealed) {
-				info.AddText("sealed ", _KeywordBrush);
-			}
-			qiContent.Add(info);
-		}
-
-		static void ShowMethodDeclaration(IList<object> qiContent, IMethodSymbol method) {
-			var info = new StackPanel().MakeHorizontal().AddText("Method declaration: ", true);
-			if (method.IsAbstract) {
-				info.AddText("abstract ", _KeywordBrush);
-			}
-			if (method.IsStatic) {
-				info.AddText("static ", _KeywordBrush);
-			}
-			else if (method.IsVirtual) {
-				info.AddText("virtual ", _KeywordBrush);
-			}
-			else if (method.IsOverride) {
-				info.AddText("override ", _KeywordBrush);
-			}
-			if (method.IsExtern) {
-				info.AddText("extern ", _KeywordBrush);
-			}
-			qiContent.Add(info);
-		}
-
-		private static StackPanel ShowStringInfo(string sv) {
-			return new StackPanel()
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.Length.ToString()).AddText("chars", true))
-				//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.UTF8.GetByteCount(sv).ToString()).AddText("UTF-8 bytes", true))
-				//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.Default.GetByteCount(sv).ToString()).AddText("System bytes", true))
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).AddText("Hash code", true));
-		}
-
 		void IDisposable.Dispose() {
 			if (!_IsDisposed) {
-				_TextBuffer.Changing -= _TextBuffer_Changing;
+				_TextBuffer.Changing -= TextBuffer_Changing;
+				Config.ConfigUpdated -= _ConfigUpdated; ;
 				GC.SuppressFinalize(this);
 				_IsDisposed = true;
 			}
@@ -256,12 +210,61 @@ namespace Codist.Views
 			return name == "Object" || name == "ValueType" || name == "Enum" || name == "MulticastDelegate";
 		}
 
+		static void ShowClassDeclaration(IList<object> qiContent, INamedTypeSymbol typeSymbol) {
+			var info = new StackPanel().MakeHorizontal().AddText("Class declaration: ", true);
+			if (typeSymbol.IsAbstract) {
+				info.AddText("abstract ", _KeywordBrush);
+			}
+			else if (typeSymbol.IsStatic) {
+				info.AddText("static ", _KeywordBrush);
+			}
+			else if (typeSymbol.IsSealed) {
+				info.AddText("sealed ", _KeywordBrush);
+			}
+			qiContent.Add(info);
+		}
+
 		static void ShowExtensionMethod(IList<object> qiContent, IMethodSymbol method, int position) {
 			var info = ToUIText(method.ContainingType.ToDisplayParts(), "Defined in: ", true);
 			string asmName = method.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
 				?? method.ContainingAssembly?.Name;
 			if (asmName != null) {
 				info.AddText(" (" + asmName + ")");
+			}
+			qiContent.Add(info);
+		}
+
+		static void ShowFieldDeclaration(IList<object> qiContent, IFieldSymbol field) {
+			var info = new StackPanel().MakeHorizontal().AddText("Field declaration: ", true);
+			if (field.IsVolatile) {
+				info.AddText("volatile ", _KeywordBrush);
+			}
+			if (field.IsStatic) {
+				info.AddText("static ", _KeywordBrush);
+			}
+			if (field.IsReadOnly) {
+				info.AddText("readonly ", _KeywordBrush);
+			}
+			qiContent.Add(info);
+		}
+
+		void ShowMethodDeclaration(IList<object> qiContent, IMethodSymbol method, int position) {
+			var info = new StackPanel().MakeHorizontal().AddText("Method declaration: ", true);
+			if (method.IsAbstract) {
+				info.AddText("abstract ", _KeywordBrush);
+			}
+			if (method.IsStatic) {
+				info.AddText("static ", _KeywordBrush);
+			}
+			else if (method.IsVirtual) {
+				info.AddText("virtual ", _KeywordBrush);
+			}
+			else if (method.IsOverride) {
+				info.AddText("override ", _KeywordBrush)
+					.Add(ToUIText(method.OverriddenMethod.ContainingType.ToMinimalDisplayParts(_SemanticModel, position)));
+			}
+			if (method.IsExtern) {
+				info.AddText("extern ", _KeywordBrush);
 			}
 			qiContent.Add(info);
 		}
@@ -311,6 +314,32 @@ namespace Codist.Views
 				return ToUIText(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
 			}
 			return null;
+		}
+
+		void ShowPropertyDeclaration(IList<object> qiContent, IPropertySymbol property, int position) {
+			var info = new StackPanel().MakeHorizontal().AddText("Property declaration: ", true);
+			if (property.IsAbstract) {
+				info.AddText("abstract ", _KeywordBrush);
+			}
+			else if (property.IsStatic) {
+				info.AddText("static ", _KeywordBrush);
+			}
+			else if (property.IsOverride) {
+				info.AddText("override ", _KeywordBrush)
+					.Add(ToUIText(property.OverriddenProperty.ContainingType.ToMinimalDisplayParts(_SemanticModel, position)));
+			}
+			else if (property.IsVirtual) {
+				info.AddText("virtual ", _KeywordBrush);
+			}
+			qiContent.Add(info);
+		}
+
+		private static StackPanel ShowStringInfo(string sv) {
+			return new StackPanel()
+				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.Length.ToString()).AddText("chars", true))
+				//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.UTF8.GetByteCount(sv).ToString()).AddText("UTF-8 bytes", true))
+				//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.Default.GetByteCount(sv).ToString()).AddText("System bytes", true))
+				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).AddText("Hash code", true));
 		}
 
 		static string ToBinString(byte[] bytes) {
@@ -393,10 +422,9 @@ namespace Codist.Views
 			_KeywordBrush = GetFormatBrush(Constants.CodeKeyword, formatMap);
 		}
 
-		void _TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {
-			_SemanticModel = null;
+		private void _ConfigUpdated(object sender, EventArgs e) {
+			UpdateSyntaxHighlights(_FormatMap);
 		}
-
 		StackPanel ShowAttributes(ImmutableArray<AttributeData> attrs, int position) {
 			var stack = new StackPanel();
 			stack.AddText(attrs.Length > 1 ? "Attributes:" : "Attribute:", true);
@@ -457,7 +485,7 @@ namespace Codist.Views
 					}
 					var c = 0;
 					object min = null, max = null, bits = null;
-					ISymbol minName = null, maxName = null;
+					IFieldSymbol minName = null, maxName = null;
 					var p = 0L;
 					foreach (var m in type.GetMembers()) {
 						var f = m as IFieldSymbol;
@@ -504,6 +532,7 @@ namespace Codist.Views
 				}
 			}
 		}
+
 		void ShowInterfaces(IList<object> output, ITypeSymbol type, int position) {
 			const string SystemDisposable = "IDisposable";
 			var showAll = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
@@ -534,6 +563,10 @@ namespace Codist.Views
 			}
 			output.Add(stack);
 		}
+
+		void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {
+			_SemanticModel = null;
+		}
 		void ToUIText(StackPanel attrStack, TypedConstant v, int position) {
 			switch (v.Kind) {
 				case TypedConstantKind.Primitive:
@@ -552,7 +585,7 @@ namespace Codist.Views
 						var flags = items.ToArray();
 						for (int i = 0; i < flags.Length; i++) {
 							if (i > 0) {
-								attrStack.AddText("| ");
+								attrStack.AddText(" | ");
 							}
 							attrStack.AddText(v.Type.Name + "." + flags[i].Name, _EnumBrush);
 						}

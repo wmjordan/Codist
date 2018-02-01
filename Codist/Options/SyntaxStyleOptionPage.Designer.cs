@@ -28,6 +28,7 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SyntaxStyleOptionPage));
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this._ResetButton = new System.Windows.Forms.Button();
 			this.label2 = new System.Windows.Forms.Label();
 			this._BackgroundEffectBox = new System.Windows.Forms.ComboBox();
 			this._FontBox = new System.Windows.Forms.ComboBox();
@@ -71,6 +72,7 @@
 			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox1.Controls.Add(this._ResetButton);
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Controls.Add(this._BackgroundEffectBox);
 			this.groupBox1.Controls.Add(this._FontBox);
@@ -96,6 +98,17 @@
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Syntax style";
+			// 
+			// _ResetButton
+			// 
+			this._ResetButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this._ResetButton.Location = new System.Drawing.Point(177, 0);
+			this._ResetButton.Name = "_ResetButton";
+			this._ResetButton.Size = new System.Drawing.Size(75, 23);
+			this._ResetButton.TabIndex = 20;
+			this._ResetButton.Text = "Reset";
+			this._ResetButton.UseVisualStyleBackColor = true;
+			this._ResetButton.Click += new System.EventHandler(this.ResetButton_Click);
 			// 
 			// label2
 			// 
@@ -372,5 +385,6 @@
 		private System.Windows.Forms.Label label8;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.ComboBox _BackgroundEffectBox;
+		private System.Windows.Forms.Button _ResetButton;
 	}
 }
