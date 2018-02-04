@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Margins
 {
-	sealed class CodeMarginElement : FrameworkElement
+	sealed class CodeMarginElement : FrameworkElement, IDisposable
 	{
 		readonly IWpfTextView _TextView;
 		readonly IEditorFormatMap _EditorFormatMap;
@@ -74,44 +74,46 @@ namespace Codist.Margins
 
 			_TextView.Options.OptionChanged += OnOptionChanged;
 			//subscribe to change events and use them to update the markers
-			_TextView.TextBuffer.Changed += (s, args) => {
-				if (args.Changes.Count == 0) {
-					return;
-				}
-				Debug.WriteLine($"snapshot version: {args.AfterVersion.VersionNumber}");
-				var tags = _Tags.Tags;
-				foreach (var change in args.Changes) {
-					Debug.WriteLine($"change:{change.OldPosition}->{change.NewPosition}");
-					for (int i = tags.Count - 1; i >= 0; i--) {
-						var t = tags[i];
-						if (!(t.Start > change.OldEnd || t.End < change.OldPosition)) {
-							// remove tags within the updated range
-							Debug.WriteLine($"Removed [{t.Start}..{t.End}) {t.Tag.ClassificationType}");
-							tags.RemoveAt(i);
-						}
-						else if (t.Start > change.OldEnd) {
-							// shift positions of remained items
-							t.Start += change.Delta;
-						}
-					}
-				}
-				try {
-					_Tags.Version = args.AfterVersion.VersionNumber;
-					_Tags.LastParsed = args.Before.GetLineFromPosition(args.Changes[0].OldPosition).Start.Position;
-				}
-				catch (ArgumentOutOfRangeException) {
-					MessageBox.Show(String.Join("\n",
-						"Code margin exception:", args.Changes[0].OldPosition,
-						"Before length:", args.Before.Length,
-						"After length:", args.After.Length
-					));
-				}
-				InvalidateVisual();
-			};
+			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
 			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 			_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 
 			OnOptionChanged(null, null);
+		}
+
+		private void TextView_TextBufferChanged(object sender, TextContentChangedEventArgs args) {
+			if (args.Changes.Count == 0) {
+				return;
+			}
+			Debug.WriteLine($"snapshot version: {args.AfterVersion.VersionNumber}");
+			var tags = _Tags.Tags;
+			foreach (var change in args.Changes) {
+				Debug.WriteLine($"change:{change.OldPosition}->{change.NewPosition}");
+				for (int i = tags.Count - 1; i >= 0; i--) {
+					var t = tags[i];
+					if (!(t.Start > change.OldEnd || t.End < change.OldPosition)) {
+						// remove tags within the updated range
+						Debug.WriteLine($"Removed [{t.Start}..{t.End}) {t.Tag.ClassificationType}");
+						tags.RemoveAt(i);
+					}
+					else if (t.Start > change.OldEnd) {
+						// shift positions of remained items
+						t.Start += change.Delta;
+					}
+				}
+			}
+			try {
+				_Tags.Version = args.AfterVersion.VersionNumber;
+				_Tags.LastParsed = args.Before.GetLineFromPosition(args.Changes[0].OldPosition).Start.Position;
+			}
+			catch (ArgumentOutOfRangeException) {
+				MessageBox.Show(String.Join("\n",
+					"Code margin exception:", args.Changes[0].OldPosition,
+					"Before length:", args.Before.Length,
+					"After length:", args.After.Length
+				));
+			}
+			InvalidateVisual();
 		}
 
 		private void OnViewOrMarginVisiblityChanged(object sender, DependencyPropertyChangedEventArgs e) {
@@ -316,5 +318,39 @@ namespace Codist.Margins
 		static void DrawKeywordMark(DrawingContext dc, Brush brush, double y) {
 			dc.DrawEllipse(brush, null, new Point(HalfMarkSize, y - HalfMarkSize * 0.5), HalfMarkSize, HalfMarkSize);
 		}
+
+		#region IDisposable Support
+		private bool disposedValue = false; // 要检测冗余调用
+
+		void Dispose(bool disposing) {
+			if (!disposedValue) {
+				if (disposing) {
+					_TextView.Options.OptionChanged -= OnOptionChanged;
+					_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
+					IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
+					_TextView.VisualElement.IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
+				}
+
+				// TODO: 释放未托管的资源(未托管的对象)并在以下内容中替代终结器。
+				// TODO: 将大型字段设置为 null。
+
+				disposedValue = true;
+			}
+		}
+
+		// TODO: 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
+		// ~CodeMarginElement() {
+		//   // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+		//   Dispose(false);
+		// }
+
+		// 添加此代码以正确实现可处置模式。
+		public void Dispose() {
+			// 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+			Dispose(true);
+			// TODO: 如果在以上内容中替代了终结器，则取消注释以下行。
+			// GC.SuppressFinalize(this);
+		}
+		#endregion
 	}
 }

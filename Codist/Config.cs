@@ -7,12 +7,14 @@ using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.ComponentModel;
+using System.Threading;
 
 namespace Codist
 {
 	sealed class Config
 	{
-		static DateTime LastSaved;
+		static DateTime _LastSaved, _LastLoaded;
+		static int _LoadingConfig;
 
 		public static readonly string ConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.NameOfMe + "\\Config.json";
 		public static Config Instance = InitConfig();
@@ -30,7 +32,7 @@ namespace Codist
 		[DefaultValue(true)]
 		public bool MarkLineNumbers { get; set; } = true;
 
-		[DefaultValue(true)]
+		[DefaultValue(QuickInfoOptions.Attributes | QuickInfoOptions.BaseType | QuickInfoOptions.Interfaces | QuickInfoOptions.NumericValues)]
 		public QuickInfoOptions QuickInfoOptions { get; set; } = QuickInfoOptions.Attributes | QuickInfoOptions.BaseType | QuickInfoOptions.Interfaces | QuickInfoOptions.NumericValues;
 
 		public double TopSpace {
@@ -67,9 +69,23 @@ namespace Codist
 		}
 
 		public static void LoadConfig(string configPath) {
-			Instance = InternalLoadConfig(configPath);
-			ConfigLoaded?.Invoke(Instance, EventArgs.Empty);
-			ConfigUpdated?.Invoke(Instance, EventArgs.Empty);
+			//HACK: prevent redundant load operations issued by configuration pages
+			if (_LastLoaded.AddSeconds(2) > DateTime.Now
+				|| Interlocked.Exchange(ref _LoadingConfig, 1) != 0) {
+				return;
+			}
+			try {
+				Instance = InternalLoadConfig(configPath);
+				ConfigLoaded?.Invoke(Instance, EventArgs.Empty);
+				ConfigUpdated?.Invoke(Instance, EventArgs.Empty);
+			}
+			catch(Exception ex) {
+				Debug.WriteLine(ex.ToString());
+				Instance = GetDefaultConfig();
+			}
+			finally {
+				_LoadingConfig = 0;
+			}
 		}
 
 		static Config InternalLoadConfig(string configPath) {
@@ -108,6 +124,8 @@ namespace Codist
 				}
 			}
 			MergeDefaultXmlCodeStyles(xcs);
+			_LastLoaded = DateTime.Now;
+			Debug.WriteLine("Config loaded");
 			return config;
 		}
 
@@ -124,7 +142,7 @@ namespace Codist
 
 		public void SaveConfig(string path) {
 			//HACK: prevent redundant save operations issued by configuration pages
-			if (LastSaved.AddSeconds(2) > DateTime.Now) {
+			if (_LastSaved.AddSeconds(2) > DateTime.Now) {
 				return;
 			}
 			path = path ?? ConfigPath;
@@ -135,7 +153,8 @@ namespace Codist
 				}
 				File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter()));
 				if (path == ConfigPath) {
-					LastSaved = DateTime.Now;
+					_LastSaved = _LastLoaded = DateTime.Now;
+					Debug.WriteLine("Config saved");
 					ConfigUpdated?.Invoke(this, EventArgs.Empty);
 				}
 			}
@@ -148,6 +167,7 @@ namespace Codist
 			ConfigUpdated?.Invoke(this, EventArgs.Empty);
 		}
 		static Config GetDefaultConfig() {
+			_LastLoaded = DateTime.Now;
 			var c = new Config();
 			InitDefaultLabels(c.Labels);
 			c.CommentStyles.AddRange(GetDefaultCommentStyles());
@@ -289,6 +309,18 @@ namespace Codist
 		public abstract string Category { get; }
 		internal StyleBase Clone() {
 			return (StyleBase)MemberwiseClone();
+		}
+		internal void CopyTo(StyleBase style) {
+			style.Bold = Bold;
+			style.Italic = Italic;
+			style.OverLine = OverLine;
+			style.Underline = Underline;
+			style.StrikeThrough = StrikeThrough;
+			style.FontSize = FontSize;
+			style.BackgroundEffect = BackgroundEffect;
+			style.Font = Font;
+			style._foreColor = _foreColor;
+			style._backColor = _backColor;
 		}
 		internal void Reset() {
 			Bold = Italic = OverLine = Underline = StrikeThrough = null;
@@ -432,6 +464,14 @@ namespace Codist
 		public CommentLabel Clone() {
 			return (CommentLabel)MemberwiseClone();
 		}
+		public void CopyTo(CommentLabel label) {
+			label.AllowPunctuationDelimiter = AllowPunctuationDelimiter;
+			label.StyleApplication = StyleApplication;
+			label.StyleID = StyleID;
+			label._label = _label;
+			label._labelLength = _labelLength;
+			label._stringComparison = _stringComparison;
+		}
 	}
 
 	public enum BrushEffect
@@ -455,6 +495,7 @@ namespace Codist
 		Interfaces = 1 << 5,
 		InterfacesInheritence = 1 << 6,
 		NumericValues = 1 << 7,
-		String = 1 << 8
+		String = 1 << 8,
+		Parameter = 1 << 9
 	}
 }

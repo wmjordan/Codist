@@ -24,7 +24,7 @@ namespace Codist.Views
 {
 	sealed class CSharpQuickInfoSource : IQuickInfoSource
 	{
-		static Brush _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush;
+		static Brush _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _ParameterBrush;
 		readonly IEditorFormatMapService _FormatMapService;
 		IEditorFormatMap _FormatMap;
 
@@ -66,10 +66,13 @@ namespace Codist.Views
 
 			//look for occurrences of our QuickInfo words in the span
 			var navigator = _QuickInfoSourceProvider.NavigatorService.GetTextStructureNavigator(_TextBuffer);
-			var extent = navigator.GetExtentOfWord(subjectTriggerPoint.Value);
-			var node = unitCompilation.FindNode(new Microsoft.CodeAnalysis.Text.TextSpan(extent.Span.Start, extent.Span.Length), true);
-			if (node == null) {
+			var extent = navigator.GetSpanOfEnclosing(new SnapshotSpan(subjectTriggerPoint.Value, 0));
+			var node = unitCompilation.FindNode(new Microsoft.CodeAnalysis.Text.TextSpan(extent.Span.Start, extent.Span.Length), false, true);
+			if (node == null || node.Span.Contains(subjectTriggerPoint.Value.Position) == false) {
 				goto EXIT;
+			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
+				ShowParameterInfo(qiContent, node);
 			}
 			node = node.Kind() == SyntaxKind.Argument ? (node as ArgumentSyntax).Expression : node;
 			var symbol = GetSymbol(node, semanticModel);
@@ -82,11 +85,8 @@ namespace Codist.Views
 				else if (nodeKind == SyntaxKind.SwitchStatement) {
 					infoBox = new TextBlock { Text = (node as SwitchStatementSyntax).Sections.Count + " sections" };
 				}
-				else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
-					var token = node.GetFirstToken();
-					if (token.Kind() == SyntaxKind.StringLiteralToken) {
-						infoBox = ShowStringInfo(token.ValueText);
-					}
+				else if (nodeKind == SyntaxKind.StringLiteralExpression) {
+					infoBox = ShowStringInfo(node.ToString());
 				}
 				if (infoBox != null) {
 					qiContent.Add(infoBox);
@@ -96,6 +96,9 @@ namespace Codist.Views
 				goto EXIT;
 			}
 
+			if (node is PredefinedTypeSyntax) {
+				goto EXIT;
+			}
 			var formatMap = _FormatMapService.GetEditorFormatMap(session.TextView);
 			if (_FormatMap != formatMap) {
 				_FormatMap = formatMap;
@@ -186,7 +189,7 @@ namespace Codist.Views
 		}
 
 		static Brush GetFormatBrush(string name, IEditorFormatMap formatMap) {
-			return formatMap.GetProperties(name)[EditorFormatDefinition.ForegroundBrushId] as Brush;
+			return formatMap.GetProperties(name)?[EditorFormatDefinition.ForegroundBrushId] as Brush;
 		}
 
 		static ISymbol GetSymbol(SyntaxNode node, SemanticModel semanticModel) {
@@ -316,6 +319,32 @@ namespace Codist.Views
 			return null;
 		}
 
+		void ShowParameterInfo(IList<object> qiContent, SyntaxNode node) {
+			var argument = node;
+			int depth = 0;
+			do {
+				var n = argument as ArgumentSyntax;
+				if (n != null) {
+					var al = n.Parent as BaseArgumentListSyntax;
+					var ap = al.Arguments.IndexOf(n);
+					if (ap != -1) {
+						var symbol = _SemanticModel.GetSymbolInfo(al.Parent).Symbol;
+						if (symbol == null) {
+							qiContent.Add("Argument " + ap);
+						}
+						else {
+							qiContent.Add(ToUIText(symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Argument of ", false, ap));
+						}
+					}
+					return;
+				}
+				else if (depth > 3) {
+					return;
+				}
+				++depth;
+			} while ((argument = argument.Parent) != null);
+		}
+
 		void ShowPropertyDeclaration(IList<object> qiContent, IPropertySymbol property, int position) {
 			var info = new StackPanel().MakeHorizontal().AddText("Property declaration: ", true);
 			if (property.IsAbstract) {
@@ -382,10 +411,12 @@ namespace Codist.Views
 		}
 
 		static StackPanel ToUIText(ImmutableArray<SymbolDisplayPart> parts) {
-			return ToUIText(parts, null, false);
+			return ToUIText(parts, null, false, Int32.MinValue);
 		}
-
 		static StackPanel ToUIText(ImmutableArray<SymbolDisplayPart> parts, string title, bool bold) {
+			return ToUIText(parts, title, bold, Int32.MinValue);
+		}
+		static StackPanel ToUIText(ImmutableArray<SymbolDisplayPart> parts, string title, bool bold, int argumentIndex) {
 			var stack = new StackPanel { Orientation = Orientation.Horizontal };
 			if (title != null) {
 				stack.AddText(title, bold);
@@ -393,10 +424,27 @@ namespace Codist.Views
 			foreach (var part in parts) {
 				switch (part.Kind) {
 					case SymbolDisplayPartKind.ClassName:
-						stack.AddText(part.Symbol.Name, true, false, _ClassBrush);
+						stack.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _ClassBrush);
+						break;
+					case SymbolDisplayPartKind.EnumName:
+						stack.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _EnumBrush);
 						break;
 					case SymbolDisplayPartKind.InterfaceName:
-						stack.AddText(part.Symbol.Name, true, false, _InterfaceBrush);
+						stack.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _InterfaceBrush);
+						break;
+					case SymbolDisplayPartKind.MethodName:
+						stack.AddText(part.Symbol.Name, argumentIndex != Int32.MinValue, false, _MethodBrush);
+						break;
+					case SymbolDisplayPartKind.ParameterName:
+						if ((part.Symbol as IParameterSymbol).Ordinal == argumentIndex) {
+							stack.AddText(part.Symbol.Name, true, true, _ParameterBrush);
+						}
+						else {
+							stack.AddText(part.Symbol.Name, false, false, _ParameterBrush);
+						}
+						break;
+					case SymbolDisplayPartKind.StructName:
+						stack.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _StructBrush);
 						break;
 					case SymbolDisplayPartKind.StringLiteral:
 						stack.AddText(part.ToString(), false, false, _TextBrush);
@@ -420,6 +468,8 @@ namespace Codist.Views
 			_NumberBrush = GetFormatBrush(Constants.CodeNumber, formatMap);
 			_StructBrush = GetFormatBrush(Constants.CodeStructName, formatMap);
 			_KeywordBrush = GetFormatBrush(Constants.CodeKeyword, formatMap);
+			_MethodBrush = GetFormatBrush(Constants.CSharpMethodName, formatMap);
+			_ParameterBrush = GetFormatBrush(Constants.CSharpParameterName, formatMap);
 		}
 
 		private void _ConfigUpdated(object sender, EventArgs e) {
@@ -570,17 +620,22 @@ namespace Codist.Views
 		void ToUIText(StackPanel attrStack, TypedConstant v, int position) {
 			switch (v.Kind) {
 				case TypedConstantKind.Primitive:
-					attrStack.AddText(v.ToCSharpString(), _NumberBrush);
+					if (v.Value is bool) {
+						attrStack.AddText((bool)v.Value ? "true" : "false", _KeywordBrush);
+					}
+					else {
+						attrStack.AddText(v.ToCSharpString(), _NumberBrush);
+					}
 					break;
 				case TypedConstantKind.Enum:
 					var en = v.ToCSharpString();
 					if (en.IndexOf('|') != -1) {
 						var items = v.Type.GetMembers().Where(i => {
 							var field = i as IFieldSymbol;
-							if (field == null || field.HasConstantValue == false) {
-								return false;
-							}
-							return UnsafeArithmeticHelper.Equals(UnsafeArithmeticHelper.And(v.Value, field.ConstantValue), field.ConstantValue) && UnsafeArithmeticHelper.IsZero(field.ConstantValue) == false;
+							return field != null
+								&& field.HasConstantValue != false
+								&& UnsafeArithmeticHelper.Equals(UnsafeArithmeticHelper.And(v.Value, field.ConstantValue), field.ConstantValue)
+								&& UnsafeArithmeticHelper.IsZero(field.ConstantValue) == false;
 						});
 						var flags = items.ToArray();
 						for (int i = 0; i < flags.Length; i++) {
@@ -595,7 +650,7 @@ namespace Codist.Views
 					}
 					break;
 				case TypedConstantKind.Type:
-					attrStack.AddText("typeof(");
+					attrStack.AddText("typeof", _KeywordBrush).AddText("(");
 					attrStack.Children.Add(ToUIText((v.Value as ITypeSymbol).ToMinimalDisplayParts(_SemanticModel, position)));
 					attrStack.AddText(")");
 					break;

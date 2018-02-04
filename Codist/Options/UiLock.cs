@@ -11,6 +11,7 @@ namespace Codist.Options
 		int _locked;
 
 		public bool IsLocked => _locked != 0;
+		public Action CommonAction { get; set; }
 		public bool Lock() {
 			return Interlocked.CompareExchange(ref _locked, 1, 0) == 0;
 		}
@@ -21,6 +22,7 @@ namespace Codist.Options
 			return (sender, args) => {
 				if (Lock()) {
 					try {
+						CommonAction();
 						action();
 					}
 					finally {

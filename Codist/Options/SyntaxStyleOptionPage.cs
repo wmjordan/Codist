@@ -70,13 +70,13 @@ namespace Codist.Options
 			_loaded = true;
 		}
 
-		static void RenderPreview(Bitmap bmp, FontInfo fs, StyleBase style) {
-			var fontSize = (float)(fs.wPointSize + style.FontSize);
+		static void RenderPreview(Bitmap bmp, FontInfo fontInfo, StyleBase style) {
+			var fontSize = (float)(fontInfo.wPointSize + style.FontSize);
 			if (fontSize < 2) {
 				return;
 			}
 			using (var g = Graphics.FromImage(bmp))
-			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fs.bstrFaceName : style.Font, fontSize, ConfigPage.GetFontStyle(style)))
+			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontInfo.bstrFaceName : style.Font, fontSize, ConfigPage.GetFontStyle(style)))
 			using (var b = style.ForeColor.A == 0 ? (Brush)Brushes.Black.Clone() : new SolidBrush(style.ForeColor.ToGdiColor())) {
 				const string t = "Preview 01ioIOlLWM";
 				var m = g.MeasureString(t, f, bmp.Size);

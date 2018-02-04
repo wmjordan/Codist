@@ -13,6 +13,14 @@ namespace Codist.Options
 	[Browsable(false)]
 	class ConfigPage : DialogPage
 	{
+		int _version, _oldVersion;
+
+		protected override void OnActivate(CancelEventArgs e) {
+			base.OnActivate(e);
+			_oldVersion = _version;
+			Config.ConfigUpdated += UpdateVersion;
+		}
+
 		internal FontInfo GetFontSettings(Guid category) {
 			var storage = (IVsFontAndColorStorage)GetService(typeof(SVsFontAndColorStorage));
 			var pLOGFONT = new LOGFONTW[1];
@@ -63,13 +71,24 @@ namespace Codist.Options
 			}
 		}
 
-
+		protected override void OnClosed(EventArgs e) {
+			base.OnClosed(e);
+			if (_version != _oldVersion) {
+				Config.LoadConfig(Config.ConfigPath);
+				_oldVersion = _version;
+				Config.ConfigUpdated -= UpdateVersion;
+			}
+		}
 
 		protected override void OnApply(PageApplyEventArgs e) {
 			base.OnApply(e);
 			if (e.ApplyBehavior == ApplyKind.Apply) {
 				Config.Instance.SaveConfig(null);
 			}
+		}
+
+		void UpdateVersion(object sender, EventArgs e) {
+			_version++;
 		}
 	}
 

@@ -20,6 +20,7 @@ namespace Codist.Views
 		readonly IEditorFormatMap _FormatMap;
 
 		Color _BackColor, _ForeColor;
+		TextFormattingRunProperties _EditorTextProperties;
 		bool _IsDecorating;
 
 		public CodeViewDecorator(ITextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service, IEditorFormatMap formatMap) {
@@ -68,14 +69,14 @@ namespace Codist.Views
 			}
 		}
 
-		private void SettingsSaved(object sender, EventArgs eventArgs) {
+		void SettingsSaved(object sender, EventArgs eventArgs) {
 			if (!_IsDecorating) {
 				CacheStyles(_RegService);
 				Decorate();
 			}
 		}
 
-		private void Decorate() {
+		void Decorate() {
 			try {
 				_IsDecorating = true;
 				var c = _FormatMap.GetProperties(Constants.EditorProperties.Text)?[EditorFormatDefinition.ForegroundColorId];
@@ -98,8 +99,9 @@ namespace Codist.Views
 			}
 		}
 
-		private void DecorateClassificationTypes() {
+		void DecorateClassificationTypes() {
 			_Map.BeginBatchUpdate();
+			_EditorTextProperties = _Map.GetTextProperties(_RegService.GetClassificationType("text"));
 			foreach (var item in _Map.CurrentPriorityOrder) {
 				if (item == null) {
 					continue;
@@ -129,28 +131,27 @@ namespace Codist.Views
 			_Map.EndBatchUpdate();
 		}
 
-		private double GetEditorTextSize() {
-			return _Map.GetTextProperties(_RegService.GetClassificationType("text")).FontRenderingEmSize;
-		}
-
-		private TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption) {
+		TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption) {
 			var settings = styleOption;
-			var fontSize = GetEditorTextSize() + settings.FontSize;
+			var fontSize = _EditorTextProperties.FontRenderingEmSize + settings.FontSize;
 			if (fontSize < 2) {
 				fontSize = 1;
 			}
 			if (string.IsNullOrWhiteSpace(settings.Font) == false) {
 				properties = properties.SetTypeface(new Typeface(settings.Font));
 			}
-			if (Math.Abs(fontSize - properties.FontRenderingEmSize) > 0.0) {
+			if (settings.FontSize != 0) {
 				properties = properties.SetFontRenderingEmSize(fontSize);
+			}
+			if (settings.Bold.HasValue) {
+				properties = properties.SetBold(settings.Bold.Value);
 			}
 			if (settings.Italic.HasValue) {
 				properties = properties.SetItalic(settings.Italic.Value);
 			}
 			if (settings.ForeColor.A > 0) {
-				properties = properties.SetForegroundOpacity(settings.ForeColor.A / 255.0);
-				properties = properties.SetForeground(settings.ForeColor);
+				properties = properties.SetForegroundOpacity(settings.ForeColor.A / 255.0)
+					.SetForeground(settings.ForeColor);
 			}
 			if (settings.BackColor.A > 0) {
 				properties = properties.SetBackgroundOpacity(settings.BackColor.A / 255.0);
@@ -173,9 +174,6 @@ namespace Codist.Views
 					default:
 						break;
 				}
-			}
-			if (settings.Bold.HasValue) {
-				properties = properties.SetBold(settings.Bold.Value);
 			}
 			if (settings.Underline.HasValue || settings.StrikeThrough.HasValue || settings.OverLine.HasValue) {
 				var tdc = new TextDecorationCollection();

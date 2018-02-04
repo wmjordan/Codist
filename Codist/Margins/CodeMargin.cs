@@ -17,8 +17,9 @@ namespace Codist.Margins
 		/// </summary>
 		public const string MarginName = nameof(CodeMargin);
 
-		readonly CodeMarginElement _commentMarginElement;
-		readonly ITagAggregator<ClassificationTag> _commentTagAggregator;
+		readonly CodeMarginElement _CodeMarginElement;
+		readonly ITagAggregator<ClassificationTag> _CodeTagAggregator;
+		readonly IWpfTextViewHost _TextView;
 		bool isDisposed;
 
 		/// <summary>
@@ -26,14 +27,15 @@ namespace Codist.Margins
 		/// </summary>
 		/// <param name="textView">The <see cref="IWpfTextView"/> to attach the margin to.</param>
 		public CodeMargin(IWpfTextViewHost textView, IVerticalScrollBar scrollBar, CodeMarginFactory container) {
-			if (textView == null)
-				throw new ArgumentNullException("textView");
+			_TextView = textView ?? throw new ArgumentNullException("textView");
+			_CodeTagAggregator = container.ViewTagAggregatorFactoryService.CreateTagAggregator<ClassificationTag>(textView.TextView);
+			_CodeMarginElement = new CodeMarginElement(textView.TextView, container, _CodeTagAggregator, scrollBar);
+			textView.Closed += TextView_Closed;
+		}
 
-			_commentTagAggregator = container.ViewTagAggregatorFactoryService.CreateTagAggregator<ClassificationTag>(textView.TextView);
-			_commentMarginElement = new CodeMarginElement(textView.TextView, container, _commentTagAggregator, scrollBar);
-			textView.Closed += (sender, e) => {
-				_commentTagAggregator.Dispose();
-			};
+		private void TextView_Closed(object sender, EventArgs e) {
+			_CodeTagAggregator.Dispose();
+			_CodeMarginElement.Dispose();
 		}
 
 		#region IWpfTextViewMargin
@@ -46,7 +48,7 @@ namespace Codist.Margins
 			// the margin.
 			get {
 				ThrowIfDisposed();
-				return _commentMarginElement;
+				return _CodeMarginElement;
 			}
 		}
 
@@ -68,7 +70,7 @@ namespace Codist.Margins
 			get {
 				ThrowIfDisposed();
 
-				return _commentMarginElement.ActualHeight;
+				return _CodeMarginElement.ActualHeight;
 			}
 		}
 
@@ -104,6 +106,7 @@ namespace Codist.Margins
 		/// </summary>
 		public void Dispose() {
 			if (!isDisposed) {
+				_TextView.Closed -= TextView_Closed;
 				GC.SuppressFinalize(this);
 				isDisposed = true;
 			}

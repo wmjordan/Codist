@@ -32,6 +32,7 @@
 			this._CodeAbstractionsBox = new System.Windows.Forms.CheckBox();
 			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this._CSharpDeclarationQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpStringQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpNumberQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpInterfaceInheritenceQuickInfoBox = new System.Windows.Forms.CheckBox();
@@ -40,7 +41,7 @@
 			this._CSharpInterfacesQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpBaseTypeQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpAttributesQuickInfoBox = new System.Windows.Forms.CheckBox();
-			this._CSharpDeclarationQuickInfoBox = new System.Windows.Forms.CheckBox();
+			this._CSharpParameterQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			this.SuspendLayout();
@@ -52,10 +53,10 @@
 			this.groupBox2.Controls.Add(this._SpecialCommentsBox);
 			this.groupBox2.Controls.Add(this._CodeAbstractionsBox);
 			this.groupBox2.Controls.Add(this._TypeDeclarationBox);
-			this.groupBox2.Location = new System.Drawing.Point(3, 3);
+			this.groupBox2.Location = new System.Drawing.Point(3, 162);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(200, 237);
-			this.groupBox2.TabIndex = 0;
+			this.groupBox2.Size = new System.Drawing.Size(495, 134);
+			this.groupBox2.TabIndex = 1;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Scrollbar markers";
 			// 
@@ -72,7 +73,7 @@
 			// _LineNumbersBox
 			// 
 			this._LineNumbersBox.AutoSize = true;
-			this._LineNumbersBox.Location = new System.Drawing.Point(9, 136);
+			this._LineNumbersBox.Location = new System.Drawing.Point(220, 24);
 			this._LineNumbersBox.Name = "_LineNumbersBox";
 			this._LineNumbersBox.Size = new System.Drawing.Size(125, 19);
 			this._LineNumbersBox.TabIndex = 4;
@@ -111,6 +112,7 @@
 			// 
 			// groupBox3
 			// 
+			this.groupBox3.Controls.Add(this._CSharpParameterQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpDeclarationQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpStringQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpNumberQuickInfoBox);
@@ -120,17 +122,27 @@
 			this.groupBox3.Controls.Add(this._CSharpInterfacesQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpBaseTypeQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpAttributesQuickInfoBox);
-			this.groupBox3.Location = new System.Drawing.Point(209, 3);
+			this.groupBox3.Location = new System.Drawing.Point(3, 3);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(200, 258);
-			this.groupBox3.TabIndex = 1;
+			this.groupBox3.Size = new System.Drawing.Size(495, 153);
+			this.groupBox3.TabIndex = 0;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Super Quick info";
+			// 
+			// _CSharpDeclarationQuickInfoBox
+			// 
+			this._CSharpDeclarationQuickInfoBox.AutoSize = true;
+			this._CSharpDeclarationQuickInfoBox.Location = new System.Drawing.Point(220, 99);
+			this._CSharpDeclarationQuickInfoBox.Name = "_CSharpDeclarationQuickInfoBox";
+			this._CSharpDeclarationQuickInfoBox.Size = new System.Drawing.Size(197, 19);
+			this._CSharpDeclarationQuickInfoBox.TabIndex = 8;
+			this._CSharpDeclarationQuickInfoBox.Text = "Declaration modifiers";
+			this._CSharpDeclarationQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpStringQuickInfoBox
 			// 
 			this._CSharpStringQuickInfoBox.AutoSize = true;
-			this._CSharpStringQuickInfoBox.Location = new System.Drawing.Point(9, 199);
+			this._CSharpStringQuickInfoBox.Location = new System.Drawing.Point(220, 74);
 			this._CSharpStringQuickInfoBox.Name = "_CSharpStringQuickInfoBox";
 			this._CSharpStringQuickInfoBox.Size = new System.Drawing.Size(181, 19);
 			this._CSharpStringQuickInfoBox.TabIndex = 7;
@@ -140,7 +152,7 @@
 			// _CSharpNumberQuickInfoBox
 			// 
 			this._CSharpNumberQuickInfoBox.AutoSize = true;
-			this._CSharpNumberQuickInfoBox.Location = new System.Drawing.Point(9, 174);
+			this._CSharpNumberQuickInfoBox.Location = new System.Drawing.Point(220, 49);
 			this._CSharpNumberQuickInfoBox.Name = "_CSharpNumberQuickInfoBox";
 			this._CSharpNumberQuickInfoBox.Size = new System.Drawing.Size(133, 19);
 			this._CSharpNumberQuickInfoBox.TabIndex = 6;
@@ -170,11 +182,11 @@
 			// _CSharpExtensionMethodQuickInfoBox
 			// 
 			this._CSharpExtensionMethodQuickInfoBox.AutoSize = true;
-			this._CSharpExtensionMethodQuickInfoBox.Location = new System.Drawing.Point(9, 149);
+			this._CSharpExtensionMethodQuickInfoBox.Location = new System.Drawing.Point(220, 24);
 			this._CSharpExtensionMethodQuickInfoBox.Name = "_CSharpExtensionMethodQuickInfoBox";
-			this._CSharpExtensionMethodQuickInfoBox.Size = new System.Drawing.Size(157, 19);
+			this._CSharpExtensionMethodQuickInfoBox.Size = new System.Drawing.Size(229, 19);
 			this._CSharpExtensionMethodQuickInfoBox.TabIndex = 5;
-			this._CSharpExtensionMethodQuickInfoBox.Text = "Extension method";
+			this._CSharpExtensionMethodQuickInfoBox.Text = "Extension method location";
 			this._CSharpExtensionMethodQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpInterfacesQuickInfoBox
@@ -207,15 +219,15 @@
 			this._CSharpAttributesQuickInfoBox.Text = "Attributes";
 			this._CSharpAttributesQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
-			// _CSharpDeclarationQuickInfoBox
+			// _CSharpParameterQuickInfoBox
 			// 
-			this._CSharpDeclarationQuickInfoBox.AutoSize = true;
-			this._CSharpDeclarationQuickInfoBox.Location = new System.Drawing.Point(9, 224);
-			this._CSharpDeclarationQuickInfoBox.Name = "_CSharpDeclarationQuickInfoBox";
-			this._CSharpDeclarationQuickInfoBox.Size = new System.Drawing.Size(189, 19);
-			this._CSharpDeclarationQuickInfoBox.TabIndex = 8;
-			this._CSharpDeclarationQuickInfoBox.Text = "Declaration keywords";
-			this._CSharpDeclarationQuickInfoBox.UseVisualStyleBackColor = true;
+			this._CSharpParameterQuickInfoBox.AutoSize = true;
+			this._CSharpParameterQuickInfoBox.Location = new System.Drawing.Point(220, 124);
+			this._CSharpParameterQuickInfoBox.Name = "_CSharpParameterQuickInfoBox";
+			this._CSharpParameterQuickInfoBox.Size = new System.Drawing.Size(101, 19);
+			this._CSharpParameterQuickInfoBox.TabIndex = 9;
+			this._CSharpParameterQuickInfoBox.Text = "Parameter";
+			this._CSharpParameterQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpPage
 			// 
@@ -251,5 +263,6 @@
 		private System.Windows.Forms.CheckBox _CSharpNumberQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpStringQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpDeclarationQuickInfoBox;
+		private System.Windows.Forms.CheckBox _CSharpParameterQuickInfoBox;
 	}
 }

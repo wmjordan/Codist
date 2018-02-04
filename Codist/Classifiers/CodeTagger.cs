@@ -23,14 +23,25 @@ namespace Codist.Classifiers
 		[Import]
 		internal IBufferTagAggregatorFactoryService Aggregator = null;
 
+		ITagAggregator<IClassificationTag> _Tagger;
+		ITextView _TextView;
+		CodeTagger _CodeTagger;
+
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag
         {
-			var tagger = Aggregator.CreateTagAggregator<IClassificationTag>(buffer);
-			textView.Closed += (s, args) => { tagger.Dispose(); };
+			_Tagger = Aggregator.CreateTagAggregator<IClassificationTag>(buffer);
+			_TextView = textView;
+			textView.Closed += TextViewClosed;
 			var tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
-			var codeTagger = new CodeTagger(ClassificationRegistry, tagger, tags, CodeTagger.GetCodeType(textView.TextBuffer.ContentType));
-			return codeTagger as ITagger<T>;
+			_CodeTagger = new CodeTagger(ClassificationRegistry, _Tagger, tags, CodeTagger.GetCodeType(textView.TextBuffer.ContentType));
+			return _CodeTagger as ITagger<T>;
         }
+
+		void TextViewClosed(object sender, EventArgs args) {
+			_Tagger.Dispose();
+			_TextView.Closed -= TextViewClosed;
+			_CodeTagger.Dispose();
+		}
     }
 
 	enum CodeType
@@ -38,7 +49,7 @@ namespace Codist.Classifiers
 		None, CSharp, Markup
 	}
 
-	sealed class CodeTagger : ITagger<ClassificationTag>
+	sealed class CodeTagger : ITagger<ClassificationTag>, IDisposable
     {
 		static ClassificationTag[] __CommentClassifications;
 		//static ClassificationTag _exitClassification;
@@ -78,11 +89,7 @@ namespace Codist.Classifiers
             _Aggregator = aggregator;
 			_Tags = tags;
 			_CodeType = codeType;
-			_Aggregator.BatchedTagsChanged += (s, args) => {
-				if (Margin != null) {
-					Margin.InvalidateVisual();
-				}
-			};
+			_Aggregator.BatchedTagsChanged += AggregateorBatchedTagsChanged;
 		}
 
 		internal FrameworkElement Margin { get; set; }
@@ -290,6 +297,29 @@ namespace Codist.Classifiers
 			}
 			return true;
 		}
-    }
+
+		void AggregateorBatchedTagsChanged(object sender, EventArgs args) {
+			if (Margin != null) {
+				Margin.InvalidateVisual();
+			}
+		}
+
+		#region IDisposable Support
+		private bool disposedValue = false;
+
+		void Dispose(bool disposing) {
+			if (!disposedValue) {
+				if (disposing) {
+					_Aggregator.BatchedTagsChanged -= AggregateorBatchedTagsChanged;
+				}
+				disposedValue = true;
+			}
+		}
+
+		public void Dispose() {
+			Dispose(true);
+		}
+		#endregion
+	}
 
 }
