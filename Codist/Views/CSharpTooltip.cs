@@ -24,7 +24,7 @@ namespace Codist.Views
 {
 	sealed class CSharpQuickInfoSource : IQuickInfoSource
 	{
-		static Brush _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _ParameterBrush;
+		static Brush _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush;
 		readonly IEditorFormatMapService _FormatMapService;
 		IEditorFormatMap _FormatMap;
 
@@ -67,7 +67,7 @@ namespace Codist.Views
 			//look for occurrences of our QuickInfo words in the span
 			var navigator = _QuickInfoSourceProvider.NavigatorService.GetTextStructureNavigator(_TextBuffer);
 			var extent = navigator.GetSpanOfEnclosing(new SnapshotSpan(subjectTriggerPoint.Value, 0));
-			var node = unitCompilation.FindNode(new Microsoft.CodeAnalysis.Text.TextSpan(extent.Span.Start, extent.Span.Length), false, true);
+			var node = unitCompilation.FindNode(new Microsoft.CodeAnalysis.Text.TextSpan(extent.Span.Start, extent.Span.Length), true, true);
 			if (node == null || node.Span.Contains(subjectTriggerPoint.Value.Position) == false) {
 				goto EXIT;
 			}
@@ -86,17 +86,15 @@ namespace Codist.Views
 					infoBox = new TextBlock { Text = (node as SwitchStatementSyntax).Sections.Count + " sections" };
 				}
 				else if (nodeKind == SyntaxKind.StringLiteralExpression) {
-					infoBox = ShowStringInfo(node.ToString());
+					infoBox = ShowStringInfo(node.GetFirstToken().ValueText);
 				}
 				if (infoBox != null) {
 					qiContent.Add(infoBox);
-					applicableToSpan = currentSnapshot.CreateTrackingSpan(extent.Span.Start, extent.Span.Length, SpanTrackingMode.EdgeInclusive);
-					return;
 				}
-				goto EXIT;
+				goto RETURN;
 			}
 
-			if (node is PredefinedTypeSyntax) {
+			if (node is PredefinedTypeSyntax/* void */) {
 				goto EXIT;
 			}
 			var formatMap = _FormatMapService.GetEditorFormatMap(session.TextView);
@@ -173,7 +171,9 @@ namespace Codist.Views
 				}
 			}
 			RETURN:
-			applicableToSpan = currentSnapshot.CreateTrackingSpan(extent.Span.Start, extent.Span.Length, SpanTrackingMode.EdgeInclusive);
+			applicableToSpan = qiContent.Count > 0
+				? currentSnapshot.CreateTrackingSpan(extent.Span.Start, extent.Span.Length, SpanTrackingMode.EdgeInclusive)
+				: null;
 			return;
 			EXIT:
 			applicableToSpan = null;
@@ -321,6 +321,9 @@ namespace Codist.Views
 
 		void ShowParameterInfo(IList<object> qiContent, SyntaxNode node) {
 			var argument = node;
+			if (node.Kind() == SyntaxKind.NullLiteralExpression) {
+				argument = node.Parent;
+			}
 			int depth = 0;
 			do {
 				var n = argument as ArgumentSyntax;
@@ -446,6 +449,9 @@ namespace Codist.Views
 					case SymbolDisplayPartKind.StructName:
 						stack.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _StructBrush);
 						break;
+					case SymbolDisplayPartKind.DelegateName:
+						stack.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _DelegateBrush);
+						break;
 					case SymbolDisplayPartKind.StringLiteral:
 						stack.AddText(part.ToString(), false, false, _TextBrush);
 						break;
@@ -465,6 +471,7 @@ namespace Codist.Views
 			_ClassBrush = GetFormatBrush(Constants.CodeClassName, formatMap);
 			_TextBrush = GetFormatBrush(Constants.CodeString, formatMap);
 			_EnumBrush = GetFormatBrush(Constants.CodeEnumName, formatMap);
+			_DelegateBrush = GetFormatBrush(Constants.CodeDelegateName, formatMap);
 			_NumberBrush = GetFormatBrush(Constants.CodeNumber, formatMap);
 			_StructBrush = GetFormatBrush(Constants.CodeStructName, formatMap);
 			_KeywordBrush = GetFormatBrush(Constants.CodeKeyword, formatMap);
