@@ -467,6 +467,7 @@ namespace Codist.Views
 		}
 
 		static void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {
+			System.Diagnostics.Trace.Assert(formatMap != null, "format map is null");
 			_InterfaceBrush = GetFormatBrush(Constants.CodeInterfaceName, formatMap);
 			_ClassBrush = GetFormatBrush(Constants.CodeClassName, formatMap);
 			_TextBrush = GetFormatBrush(Constants.CodeString, formatMap);
@@ -480,7 +481,9 @@ namespace Codist.Views
 		}
 
 		private void _ConfigUpdated(object sender, EventArgs e) {
-			UpdateSyntaxHighlights(_FormatMap);
+			if (_FormatMap != null) {
+				UpdateSyntaxHighlights(_FormatMap);
+			}
 		}
 		StackPanel ShowAttributes(ImmutableArray<AttributeData> attrs, int position) {
 			var stack = new StackPanel();

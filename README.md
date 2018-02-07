@@ -30,17 +30,6 @@
   ![Syntax highlight](doc/highlight2.png)
   ![Syntax highlight](doc/highlight3.png)
 
-## Customized comment styles
-* The comment tagger highlights comments (actually all editor styles) to your specific styles.
-
-  ![Comment syntax highlight](doc/comment-tagger-options.png)
-
-  Here's the effect of the highlighted comments.
-
-  ![Comment syntax highlight](doc/syntax-highlight-comments.png)
-
-* The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* value of the corresponding syntax parts.
-
 ## Super Quick Info
 
 The quick info (the tooltip shown when you hover your mouse pointer to language elements) can be enhanced by *Codist*.
@@ -68,6 +57,17 @@ The quick info (the tooltip shown when you hover your mouse pointer to language 
 * **Base types and interfaces** of types
 
   ![Super Quick Info 6](doc/super-quick-info-6.png)
+
+## Customized comment styles
+* The comment tagger highlights comments to your specific styles.
+
+  ![Comment syntax highlight](doc/comment-tagger-options.png)
+
+  Here's the effect of the highlighted comments.
+
+  ![Comment syntax highlight](doc/syntax-highlight-comments.png)
+
+* The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* value of the corresponding syntax parts.
 
 ## Markers on the Scrollbar Margin
 

@@ -256,6 +256,7 @@ namespace Codist.Margins
 				}
 				if (b == ClassNameBrush || b == InterfaceNameBrush || b == StructNameBrush || b == EnumNameBrush) {
 					if (tag.Length > 0) {
+						// the tag could be zero-lengthed, so we have to check
 						DrawDeclarationMark(drawingContext, b, y, c, snapshot.GetText(tag.Start, tag.Length));
 					}
 					continue;

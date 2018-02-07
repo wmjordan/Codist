@@ -106,18 +106,25 @@ namespace Codist.Classifiers
 				yield break;
 			}
 			IEnumerable<IMappingTagSpan<IClassificationTag>> tagSpans;
-			if (_Tags.LastParsed == 0) {
-				// perform a full parse for the first time
-				Debug.WriteLine("Full parse");
-				tagSpans = _Aggregator.GetTags(new SnapshotSpan(snapshot, 0, snapshot.Length));
-				_Tags.LastParsed = snapshot.Length;
-			}
-			else {
-				var start = spans[0].Start;
-				var end = spans[spans.Count - 1].End;
-				Debug.WriteLine($"Get tag [{start.Position}..{end.Position})");
+			try {
+				if (_Tags.LastParsed == 0) {
+					// perform a full parse for the first time
+					Debug.WriteLine("Full parse");
+					tagSpans = _Aggregator.GetTags(new SnapshotSpan(snapshot, 0, snapshot.Length));
+					_Tags.LastParsed = snapshot.Length;
+				}
+				else {
+					var start = spans[0].Start;
+					var end = spans[spans.Count - 1].End;
+					Debug.WriteLine($"Get tag [{start.Position}..{end.Position})");
 
-				tagSpans = _Aggregator.GetTags(spans);
+					tagSpans = _Aggregator.GetTags(spans);
+				}
+			}
+			catch (ObjectDisposedException ex) {
+				// HACK: TagAggregator could be disposed during editing, to be investigated further
+				Debug.WriteLine(ex.Message);
+				yield break;
 			}
 
 			foreach (var tagSpan in tagSpans) {
