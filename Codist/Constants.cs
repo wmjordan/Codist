@@ -99,6 +99,7 @@ namespace Codist
 		public const string CSharpSealedClassName = "C#: Sealed class";
 		public const string CSharpAttributeNotation = "C#: Attribute notation";
 		public const string CSharpLabel = "C#: Label";
+		public const string CSharpDeclarationBrace = "C#: Declaration brace";
 
 		public const string CppFunction = "cppFunction";
 		public const string CppClassTemplate = "cppClassTemplate";
@@ -187,6 +188,7 @@ namespace Codist
 		public static readonly Color ToDoColor = Colors.DarkBlue;
 		public static readonly Color NoteColor = Colors.Orange;
 		public static readonly Color HackColor = Colors.Black;
+		public static readonly Color TaskColor = Colors.Red;
 		public static readonly Color ControlFlowColor = Colors.MediumBlue;
 		public static readonly Color AbstractionColor = Colors.DarkOrange;
 	}
@@ -280,6 +282,9 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeNotation)]
 		AttributeNotation,
+		[Category(Constants.SyntaxCategory.Declaration)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationBrace)]
+		DeclarationBrace,
 
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName)]

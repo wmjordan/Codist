@@ -26,10 +26,10 @@ namespace Codist
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.Misc), Constants.NameOfMe, "General", 0, 0, true)]
 	[ProvideOptionPage(typeof(Options.CSharp), Constants.NameOfMe, "C#", 0, 0, true, Sort = 10)]
-	[ProvideOptionPage(typeof(Options.CodeStyle), Constants.NameOfMe , "Syntax color (C# & C++)", 0, 0, true, Sort = 110)]
-	[ProvideOptionPage(typeof(Options.XmlCodeStyle), Constants.NameOfMe, "Syntax color (XML)", 0, 0, true, Sort = 120)]
-	[ProvideOptionPage(typeof(Options.CommentStyle), Constants.NameOfMe, "Syntax color (Comment)", 0, 0, true, Sort = 130)]
-	[ProvideOptionPage(typeof(Options.CommentTagger), Constants.NameOfMe + "\\Syntax color (Comment)", "Tagger (Comment)", 0, 0, true, Sort = 131)]
+	[ProvideOptionPage(typeof(Options.CodeStyle), Constants.NameOfMe , "Syntax highlight (C# & C++)", 0, 0, true, Sort = 110)]
+	[ProvideOptionPage(typeof(Options.XmlCodeStyle), Constants.NameOfMe, "Syntax highlight (XML)", 0, 0, true, Sort = 120)]
+	[ProvideOptionPage(typeof(Options.CommentStyle), Constants.NameOfMe, "Syntax highlight (Comment)", 0, 0, true, Sort = 130)]
+	[ProvideOptionPage(typeof(Options.CommentTagger), Constants.NameOfMe + "\\Syntax highlight (Comment)", "Tagger (Comment)", 0, 0, true, Sort = 131)]
 	public sealed class CodistPackage : Package
 	{
 		/// <summary>

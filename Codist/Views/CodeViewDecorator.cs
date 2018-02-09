@@ -175,12 +175,12 @@ namespace Codist.Views
 						break;
 				}
 			}
-			if (settings.Underline.HasValue || settings.StrikeThrough.HasValue || settings.OverLine.HasValue) {
+			if (settings.Underline.HasValue || settings.Strikethrough.HasValue || settings.OverLine.HasValue) {
 				var tdc = new TextDecorationCollection();
 				if (settings.Underline.GetValueOrDefault()) {
 					tdc.Add(TextDecorations.Underline);
 				}
-				if (settings.StrikeThrough.GetValueOrDefault()) {
+				if (settings.Strikethrough.GetValueOrDefault()) {
 					tdc.Add(TextDecorations.Strikethrough);
 				}
 				if (settings.OverLine.GetValueOrDefault()) {

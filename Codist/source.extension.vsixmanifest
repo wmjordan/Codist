@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="2.4.2.443" Language="en-US" Publisher="WMJ" />
+        <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="2.4.3.478" Language="en-US" Publisher="WMJ" />
         <DisplayName>Codist</DisplayName>
         <Description xml:space="preserve">A plugin which enhances coding experience with advanced syntax highlighting and scrollbar marking.
 		
@@ -10,7 +10,7 @@ It features:
 2, adding extra styles to type definitions and XML documentations
 3, marking type definitions (class, interface, struct and enum), abstractive members, important code comments, line numbers onto the vertical scrollbar
 4, adding extra space between lines (increasing line height) in the editor
-5, C# super quick info showing member attributes, base types, interfaces, extension method declaration locations, numeric presentations, etc.</Description>
+5, C# super quick info showing member attributes, base types, interfaces, extension method declaration locations, numeric presentations, arguments, etc.</Description>
         <ReleaseNotes></ReleaseNotes>
         <Icon>icon.png</Icon>
         <PreviewImage>preview.png</PreviewImage>

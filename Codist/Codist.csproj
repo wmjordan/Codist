@@ -52,6 +52,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Classifiers\Classifications.cs" />
     <Compile Include="Classifiers\CSharpClassifierDefinition.cs" />
     <Compile Include="Classifiers\CSharpClassifierProvider.cs" />
     <Compile Include="Classifiers\CommentClassificationDefinitions.cs" />

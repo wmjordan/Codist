@@ -15,7 +15,7 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal CSharpPage(ConfigPage page) : this() {
-			_UI.CommonAction += Config.Instance.FireConfigChangedEvent;
+			_UI.CommonEventAction += Config.Instance.FireConfigChangedEvent;
 		}
 		private void CSharpPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {
@@ -23,11 +23,10 @@ namespace Codist.Options
 			}
 			LoadConfig(Config.Instance);
 
-			_CodeAbstractionsBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkAbstractions = _CodeAbstractionsBox.Checked);
-			_DirectivesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkAbstractions = _DirectivesBox.Checked);
-			_SpecialCommentsBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkComments = _SpecialCommentsBox.Checked);
-			_TypeDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkDeclarations = _TypeDeclarationBox.Checked);
-			_LineNumbersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.MarkLineNumbers = _LineNumbersBox.Checked);
+			_DirectivesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.CompilerDirective, _DirectivesBox.Checked));
+			_SpecialCommentsBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.SpecialComment, _SpecialCommentsBox.Checked));
+			_TypeDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.TypeDeclaration, _TypeDeclarationBox.Checked));
+			_LineNumbersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.LineNumber, _LineNumbersBox.Checked));
 			_CSharpAttributesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Attributes, _CSharpAttributesQuickInfoBox.Checked));
 			_CSharpBaseTypeQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseType, _CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked));
 			_CSharpBaseTypeInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseTypeInheritence, _CSharpBaseTypeInheritenceQuickInfoBox.Checked));
@@ -38,6 +37,7 @@ namespace Codist.Options
 			_CSharpNumberQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.NumericValues,  _CSharpNumberQuickInfoBox.Checked));
 			_CSharpStringQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.String, _CSharpStringQuickInfoBox.Checked));
 			_CSharpParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Parameter, _CSharpParameterQuickInfoBox.Checked));
+			_HighlightDeclarationBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.DeclarationBrace, _HighlightDeclarationBracesBox.Checked));
 
 			Config.ConfigUpdated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
@@ -45,11 +45,10 @@ namespace Codist.Options
 
 		void LoadConfig(Config config) {
 			_UI.DoWithLock(() => {
-				_CodeAbstractionsBox.Checked = config.MarkAbstractions;
-				_DirectivesBox.Checked = config.MarkDirectives;
-				_SpecialCommentsBox.Checked = config.MarkComments;
-				_TypeDeclarationBox.Checked = config.MarkDeclarations;
-				_LineNumbersBox.Checked = config.MarkLineNumbers;
+				_DirectivesBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective);
+				_SpecialCommentsBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment);
+				_TypeDeclarationBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration);
+				_LineNumbersBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
 				_CSharpAttributesQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes);
 				_CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType);
 				_CSharpBaseTypeInheritenceQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence);
@@ -60,6 +59,7 @@ namespace Codist.Options
 				_CSharpNumberQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues);
 				_CSharpStringQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.String);
 				_CSharpParameterQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter);
+				_HighlightDeclarationBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace);
 			});
 		}
 	}

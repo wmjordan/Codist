@@ -161,6 +161,28 @@ namespace Codist
 			panel.Orientation = Orientation.Horizontal;
 			return panel;
 		}
+		public static string GetText<TPanel>(this TPanel panel)
+			where TPanel : Panel {
+			var sb = new System.Text.StringBuilder(50);
+			GetText(panel, sb);
+			return sb.ToString();
+		}
+
+		static void GetText<TPanel>(TPanel panel, System.Text.StringBuilder sb)
+			where TPanel : Panel {
+			foreach (var item in panel.Children) {
+				var t = item as TextBlock;
+				if (t != null) {
+					sb.Append(t.Text);
+				}
+				else {
+					var p = item as Panel;
+					if (p != null) {
+						GetText(p, sb);
+					}
+				}
+			}
+		}
 
 		public static void GoToSymbol(this ISymbol symbol) {
 			if (symbol.Locations.Length > 0) {

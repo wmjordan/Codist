@@ -45,11 +45,11 @@ namespace Codist.Options
 			foreach (var item in ff) {
 				_FontBox.Items.Add(new FontFamilyItem(item));
 			}
-			_FontBox.SelectedIndexChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.Font = _FontBox.Text; } };
+			_FontBox.SelectedIndexChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.Font = _FontBox.Text.Length == 0 ? null : _FontBox.Text; } };
 			_BoldBox.CheckStateChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.Bold = ToBool(_BoldBox.CheckState); } };
 			_ItalicBox.CheckStateChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.Italic = ToBool(_ItalicBox.CheckState); } };
 			_UnderlineBox.CheckStateChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.Underline = ToBool(_UnderlineBox.CheckState); } };
-			_StrikeBox.CheckStateChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.StrikeThrough = ToBool(_StrikeBox.CheckState); } };
+			_StrikeBox.CheckStateChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.Strikethrough = ToBool(_StrikeBox.CheckState); } };
 			_BackgroundEffectBox.SelectedIndexChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.BackgroundEffect = (BrushEffect)_BackgroundEffectBox.SelectedIndex; } };
 			_FontSizeBox.ValueChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.FontSize = (double)_FontSizeBox.Value; } };
 			foreach (var item in new[] { _FontBox, _BackgroundEffectBox }) {
@@ -129,7 +129,7 @@ namespace Codist.Options
 		void UpdateUIControls(StyleBase style) {
 			_BoldBox.CheckState = ToCheckState(style.Bold);
 			_ItalicBox.CheckState = ToCheckState(style.Italic);
-			_StrikeBox.CheckState = ToCheckState(style.StrikeThrough);
+			_StrikeBox.CheckState = ToCheckState(style.Strikethrough);
 			_UnderlineBox.CheckState = ToCheckState(style.Underline);
 			_BackgroundEffectBox.SelectedIndex = (int)style.BackgroundEffect;
 
@@ -141,7 +141,7 @@ namespace Codist.Options
 			_BackColorButton.SelectedColor = ToColor(style.BackColor);
 		}
 
-		private ListViewItem GetListItemForStyle(string category, ListViewItem vi) {
+		static ListViewItem GetListItemForStyle(string category, ListViewItem vi) {
 			vi.Text = category;
 			vi.IndentCount = 1;
 			switch (category) {

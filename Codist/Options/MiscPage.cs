@@ -19,7 +19,7 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal MiscPage(ConfigPage page) : this() {
-			_UI.CommonAction += Config.Instance.FireConfigChangedEvent;
+			_UI.CommonEventAction += Config.Instance.FireConfigChangedEvent;
 		}
 		private void MiscPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {

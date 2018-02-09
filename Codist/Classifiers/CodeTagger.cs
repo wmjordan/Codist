@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Reflection;
 using System.Windows;
+using AppHelpers;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
@@ -141,34 +142,31 @@ namespace Codist.Classifiers
 						case Constants.CodeInterfaceName:
 						case Constants.CodeStructName:
 						case Constants.CodeEnumName:
-							if (Config.Instance.MarkDeclarations) {
+							if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration)) {
 								Debug.WriteLine($"find def: {className} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
 								yield return _Tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
 							}
 							continue;
 						case Constants.CodePreprocessorKeyword:
-							if (Config.Instance.MarkDirectives) {
+							if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)) {
 								if (Matches(ss, "region") || Matches(ss, "pragma") || Matches(ss, "if") || Matches(ss, "else")) {
 									yield return _Tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
 								}
 							}
 							continue;
-						case Constants.CodeKeyword:
-							//if (Matches(ss, "throw") || Matches(ss, "return") || Matches(ss, "yield")) {
-							//	yield return _tags.Add(new TagSpan<ClassificationTag>(ss, _exitClassification));
-							//}
-							if (Config.Instance.MarkAbstractions) {
-								if (Matches(ss, "abstract") || Matches(ss, "override") || Matches(ss, "virtual")) {
-									yield return _Tags.Add(new TagSpan<ClassificationTag>(ss, _abstractionClassification));
-								}
-							}
-							continue;
+						//case Constants.CodeKeyword:
+						//	if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Declaration)) {
+						//		if (Matches(ss, "abstract") || Matches(ss, "override") || Matches(ss, "virtual")) {
+						//			yield return _Tags.Add(new TagSpan<ClassificationTag>(ss, _abstractionClassification));
+						//		}
+						//	}
+						//	continue;
 						default:
 							break;
 					}
 				}
 
-				if (Config.Instance.MarkComments) {
+				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
 					var c = TagComments(className, ss, tagSpan);
 					if (c != null) {
 						yield return _Tags.Add(c);

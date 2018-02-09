@@ -1,8 +1,7 @@
 ﻿using System.ComponentModel.Composition;
-using Microsoft.VisualStudio.Language.StandardClassification;
+using System.Windows;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
-using System.Windows;
 
 namespace Codist.Classifiers
 {
@@ -183,6 +182,18 @@ namespace Codist.Classifiers
 	{
 		public DeclarationFormat() {
 			DisplayName = Constants.NameOfMe + ": declaration";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationBrace)]
+	[Name(Constants.CSharpDeclarationBrace)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	internal sealed class DeclarationBraceFormat : ClassificationFormatDefinition
+	{
+		public DeclarationBraceFormat() {
+			DisplayName = Constants.NameOfMe + ": declaration brace";
 		}
 	}
 

@@ -48,7 +48,7 @@ namespace Codist.Options
 			if (activeStyle.Underline == true) {
 				f |= FontStyle.Underline;
 			}
-			if (activeStyle.StrikeThrough == true) {
+			if (activeStyle.Strikethrough == true) {
 				f |= FontStyle.Strikeout;
 			}
 			return f;

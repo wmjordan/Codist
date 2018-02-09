@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Media;
 using Newtonsoft.Json;
-using System.Text.RegularExpressions;
-using System.Reflection;
-using System.ComponentModel;
-using System.Threading;
 
 namespace Codist
 {
@@ -19,18 +19,11 @@ namespace Codist
 		public static readonly string ConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.NameOfMe + "\\Config.json";
 		public static Config Instance = InitConfig();
 
-		[DefaultValue(false)]
-		public bool HighlightXmlDocCData { get; set; }
-		[DefaultValue(false)]
-		public bool MarkAbstractions { get; set; }
-		[DefaultValue(true)]
-		public bool MarkComments { get; set; } = true;
-		[DefaultValue(true)]
-		public bool MarkDeclarations { get; set; } = true;
-		[DefaultValue(true)]
-		public bool MarkDirectives { get; set; } = true;
-		[DefaultValue(true)]
-		public bool MarkLineNumbers { get; set; } = true;
+		[DefaultValue(SpecialHighlightOptions.None)]
+		public SpecialHighlightOptions SpecialHighlightOptions { get; set; }
+
+		[DefaultValue(MarkerOptions.SpecialComment | MarkerOptions.TypeDeclaration | MarkerOptions.CompilerDirective | MarkerOptions.LineNumber)]
+		public MarkerOptions MarkerOptions { get; set; }
 
 		[DefaultValue(QuickInfoOptions.Attributes | QuickInfoOptions.BaseType | QuickInfoOptions.Interfaces | QuickInfoOptions.NumericValues)]
 		public QuickInfoOptions QuickInfoOptions { get; set; } = QuickInfoOptions.Attributes | QuickInfoOptions.BaseType | QuickInfoOptions.Interfaces | QuickInfoOptions.NumericValues;
@@ -90,6 +83,8 @@ namespace Codist
 
 		static Config InternalLoadConfig(string configPath) {
 			Config config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configPath), new JsonSerializerSettings {
+				DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+				NullValueHandling = NullValueHandling.Ignore,
 				Error = (sender, args) => {
 					args.ErrorContext.Handled = true; // ignore json error
 				}
@@ -151,7 +146,14 @@ namespace Codist
 				if (Directory.Exists(d) == false) {
 					Directory.CreateDirectory(d);
 				}
-				File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented, new Newtonsoft.Json.Converters.StringEnumConverter()));
+				File.WriteAllText(path, JsonConvert.SerializeObject(
+					this,
+					Formatting.Indented,
+					new JsonSerializerSettings {
+						DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
+						NullValueHandling = NullValueHandling.Ignore,
+						Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
+					}));
 				if (path == ConfigPath) {
 					_LastSaved = _LastLoaded = DateTime.Now;
 					Debug.WriteLine("Config saved");
@@ -223,7 +225,7 @@ namespace Codist
 				new CommentStyle(CommentStyleTypes.Emphasis, Constants.CommentColor) { Bold = true, FontSize = 10 },
 				new CommentStyle(CommentStyleTypes.Exclaimation, Constants.ExclaimationColor),
 				new CommentStyle(CommentStyleTypes.Question, Constants.QuestionColor),
-				new CommentStyle(CommentStyleTypes.Deletion, Constants.DeletionColor) { StrikeThrough = true },
+				new CommentStyle(CommentStyleTypes.Deletion, Constants.DeletionColor) { Strikethrough = true },
 				new CommentStyle(CommentStyleTypes.ToDo, Colors.White) { BackgroundColor = Constants.ToDoColor.ToHexString(), UseScrollBarMarker = true },
 				new CommentStyle(CommentStyleTypes.Note, Colors.White) { BackgroundColor = Constants.NoteColor.ToHexString(), UseScrollBarMarker = true },
 				new CommentStyle(CommentStyleTypes.Hack, Colors.White) { BackgroundColor = Constants.HackColor.ToHexString(), UseScrollBarMarker = true },
@@ -233,15 +235,15 @@ namespace Codist
 				new CommentStyle(CommentStyleTypes.Heading4, Constants.CommentColor) { FontSize = -1 },
 				new CommentStyle(CommentStyleTypes.Heading5, Constants.CommentColor) { FontSize = -2 },
 				new CommentStyle(CommentStyleTypes.Heading6, Constants.CommentColor) { FontSize = -3 },
-				new CommentStyle(CommentStyleTypes.Task1, Constants.CommentColor),
-				new CommentStyle(CommentStyleTypes.Task2, Constants.CommentColor),
-				new CommentStyle(CommentStyleTypes.Task3, Constants.CommentColor),
-				new CommentStyle(CommentStyleTypes.Task4, Constants.CommentColor),
-				new CommentStyle(CommentStyleTypes.Task5, Constants.CommentColor),
-				new CommentStyle(CommentStyleTypes.Task6, Constants.CommentColor),
-				new CommentStyle(CommentStyleTypes.Task7, Constants.CommentColor),
-				new CommentStyle(CommentStyleTypes.Task8, Constants.CommentColor),
-				new CommentStyle(CommentStyleTypes.Task9, Constants.CommentColor),
+				new CommentStyle(CommentStyleTypes.Task1, Constants.CommentColor) { UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.Task2, Constants.CommentColor) { UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.Task3, Constants.CommentColor) { UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.Task4, Constants.CommentColor) { UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.Task5, Constants.CommentColor) { UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.Task6, Constants.CommentColor) { UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.Task7, Constants.CommentColor) { UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.Task8, Constants.CommentColor) { UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.Task9, Constants.CommentColor) { UseScrollBarMarker = true },
 			};
 		}
 		internal static CodeStyle[] GetDefaultCodeStyles() {
@@ -261,6 +263,12 @@ namespace Codist
 		internal void Set(QuickInfoOptions options, bool set) {
 			QuickInfoOptions = AppHelpers.EnumHelper.SetFlags(QuickInfoOptions, options, set);
 		}
+		internal void Set(MarkerOptions options, bool set) {
+			MarkerOptions = AppHelpers.EnumHelper.SetFlags(MarkerOptions, options, set);
+		}
+		internal void Set(SpecialHighlightOptions options, bool set) {
+			SpecialHighlightOptions = AppHelpers.EnumHelper.SetFlags(SpecialHighlightOptions, options, set);
+		}
 	}
 
 	abstract class StyleBase
@@ -272,10 +280,10 @@ namespace Codist
 		public bool? Bold { get; set; }
 		/// <summary>Gets or sets whether the content rendered in italic.</summary>
 		public bool? Italic { get; set; }
-		/// <summary>Gets or sets whether the content rendered stricken-through.</summary>
+		/// <summary>Gets or sets whether the content rendered with overline.</summary>
 		public bool? OverLine { get; set; }
 		/// <summary>Gets or sets whether the content rendered stricken-through.</summary>
-		public bool? StrikeThrough { get; set; }
+		public bool? Strikethrough { get; set; }
 		/// <summary>Gets or sets whether the content rendered with underline.</summary>
 		public bool? Underline { get; set; }
 		/// <summary>Gets or sets the font size. Font size number is relative to the editor text size.</summary>
@@ -315,7 +323,7 @@ namespace Codist
 			style.Italic = Italic;
 			style.OverLine = OverLine;
 			style.Underline = Underline;
-			style.StrikeThrough = StrikeThrough;
+			style.Strikethrough = Strikethrough;
 			style.FontSize = FontSize;
 			style.BackgroundEffect = BackgroundEffect;
 			style.Font = Font;
@@ -323,7 +331,7 @@ namespace Codist
 			style._backColor = _backColor;
 		}
 		internal void Reset() {
-			Bold = Italic = OverLine = Underline = StrikeThrough = null;
+			Bold = Italic = OverLine = Underline = Strikethrough = null;
 			FontSize = 0;
 			BackgroundEffect = BrushEffect.Solid;
 			Font = null;
@@ -339,10 +347,6 @@ namespace Codist
 		public CommentStyle(CommentStyleTypes styleID, Color foregroundColor) {
 			StyleID = styleID;
 			ForegroundColor = foregroundColor.ToHexString();
-		}
-		public CommentStyle(CommentStyleTypes styleID, string foregroundColor) {
-			StyleID = styleID;
-			ForegroundColor = foregroundColor;
 		}
 
 		public override int Id => (int)StyleID;
@@ -369,10 +373,6 @@ namespace Codist
 		public XmlCodeStyle(XmlStyleTypes styleID, Color foregroundColor) {
 			StyleID = styleID;
 			ForegroundColor = foregroundColor.ToHexString();
-		}
-		public XmlCodeStyle(XmlStyleTypes styleID, string foregroundColor) {
-			StyleID = styleID;
-			ForegroundColor = foregroundColor;
 		}
 
 		public override int Id => (int)StyleID;
@@ -497,5 +497,23 @@ namespace Codist
 		NumericValues = 1 << 7,
 		String = 1 << 8,
 		Parameter = 1 << 9
+	}
+
+	[Flags]
+	public enum SpecialHighlightOptions
+	{
+		None,
+		XmlDocCode = 1,
+		DeclarationBrace = 1 << 1
+	}
+
+	[Flags]
+	public enum MarkerOptions
+	{
+		None,
+		SpecialComment = 1,
+		TypeDeclaration = 1 << 1,
+		CompilerDirective = 1 << 2,
+		LineNumber = 1 << 3
 	}
 }

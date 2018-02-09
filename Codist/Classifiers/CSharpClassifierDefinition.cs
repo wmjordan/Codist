@@ -90,6 +90,11 @@ namespace Codist.Classifiers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpDeclarationBrace)]
+		private static ClassificationTypeDefinition DeclarationBrace;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpNestedDeclarationName)]
 		private static ClassificationTypeDefinition NestedDeclaration;
 

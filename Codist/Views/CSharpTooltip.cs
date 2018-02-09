@@ -41,10 +41,6 @@ namespace Codist.Views
 		}
 
 		public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {
-			//if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.None) {
-			//	goto EXIT;
-			//}
-
 			// Map the trigger point down to our buffer.
 			var subjectTriggerPoint = session.GetTriggerPoint(_TextBuffer.CurrentSnapshot);
 			if (!subjectTriggerPoint.HasValue) {
@@ -77,16 +73,25 @@ namespace Codist.Views
 			node = node.Kind() == SyntaxKind.Argument ? (node as ArgumentSyntax).Expression : node;
 			var symbol = GetSymbol(node, semanticModel);
 			if (symbol == null) {
-				UIElement infoBox = null;
+				StackPanel infoBox = null;
 				var nodeKind = node.Kind();
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && nodeKind == SyntaxKind.NumericLiteralExpression) {
 					infoBox = ShowNumericForm(node);
 				}
 				else if (nodeKind == SyntaxKind.SwitchStatement) {
-					infoBox = new TextBlock { Text = (node as SwitchStatementSyntax).Sections.Count + " sections" };
+					qiContent.Add((node as SwitchStatementSyntax).Sections.Count + " sections");
 				}
 				else if (nodeKind == SyntaxKind.StringLiteralExpression) {
 					infoBox = ShowStringInfo(node.GetFirstToken().ValueText);
+				}
+				else if (node.Kind() == SyntaxKind.Block) {
+					var lines = currentSnapshot.GetLineNumberFromPosition(node.Span.End) - currentSnapshot.GetLineNumberFromPosition(node.SpanStart) + 1;
+					if (lines > 100) {
+						qiContent.Add(new TextBlock { Text = lines + " lines", FontWeight = FontWeight.FromOpenTypeWeight(800) });
+					}
+					else if (lines > 10) {
+						qiContent.Add(lines + " lines");
+					}
 				}
 				if (infoBox != null) {
 					qiContent.Add(infoBox);
@@ -115,7 +120,9 @@ namespace Codist.Views
 					if (typeSymbol.TypeKind == TypeKind.Enum) {
 						ShowEnumInfo(qiContent, node, typeSymbol, true);
 					}
-					ShowBaseType(qiContent, typeSymbol, node.SpanStart);
+					else {
+						ShowBaseType(qiContent, typeSymbol, node.SpanStart);
+					}
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces)) {
 					ShowInterfaces(qiContent, typeSymbol, node.SpanStart);
@@ -123,7 +130,7 @@ namespace Codist.Views
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 					&& typeSymbol.TypeKind == TypeKind.Class
 					&& (typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
-					ShowClassDeclaration(qiContent, typeSymbol);
+					ShowDeclarationModifier(qiContent, typeSymbol, "Class", node.SpanStart);
 				}
 				goto RETURN;
 			}
@@ -132,7 +139,7 @@ namespace Codist.Views
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 					&& (method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern)
 					&& method.ContainingType.TypeKind != TypeKind.Interface) {
-					ShowMethodDeclaration(qiContent, method, node.SpanStart);
+					ShowDeclarationModifier(qiContent, method, "Method", node.SpanStart);
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod) && method.IsExtensionMethod) {
 					ShowExtensionMethod(qiContent, method, node.SpanStart);
@@ -167,9 +174,37 @@ namespace Codist.Views
 			if (property != null) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 					&& (property.IsAbstract || property.IsStatic || property.IsOverride || property.IsVirtual)) {
-					ShowPropertyDeclaration(qiContent, property, node.SpanStart);
+					ShowDeclarationModifier(qiContent, property, "Property", node.SpanStart);
 				}
+				goto RETURN;
 			}
+			var ev = symbol as IEventSymbol;
+			if (ev != null) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
+					if (ev.IsAbstract || ev.IsStatic || ev.IsOverride || ev.IsVirtual) {
+						ShowDeclarationModifier(qiContent, ev, "Event", node.SpanStart);
+					}
+					var invoke = ev.Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
+					if (invoke != null && invoke.Parameters.Length == 2) {
+						qiContent.Add(new StackPanel().MakeHorizontal().Add(ToUIText(invoke.Parameters[1].Type.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Event argument: ", true)));
+					}
+				}
+				goto RETURN;
+			}
+			//var loc = symbol as ILocalSymbol;
+			//if (loc != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
+			//	ShowBaseType(qiContent, loc.Type, node.SpanStart);
+			//	ShowAttributes(loc.Type.GetAttributes(), node.SpanStart);
+			//	ShowInterfaces(qiContent, loc.Type, node.SpanStart);
+			//	goto RETURN;
+			//}
+			//var param = symbol as IParameterSymbol;
+			//if (param != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
+			//	ShowBaseType(qiContent, param.Type, node.SpanStart);
+			//	ShowAttributes(param.Type.GetAttributes(), node.SpanStart);
+			//	ShowInterfaces(qiContent, param.Type, node.SpanStart);
+			//	goto RETURN;
+			//}
 			RETURN:
 			applicableToSpan = qiContent.Count > 0
 				? currentSnapshot.CreateTrackingSpan(extent.Span.Start, extent.Span.Length, SpanTrackingMode.EdgeInclusive)
@@ -213,20 +248,6 @@ namespace Codist.Views
 			return name == "Object" || name == "ValueType" || name == "Enum" || name == "MulticastDelegate";
 		}
 
-		static void ShowClassDeclaration(IList<object> qiContent, INamedTypeSymbol typeSymbol) {
-			var info = new StackPanel().MakeHorizontal().AddText("Class declaration: ", true);
-			if (typeSymbol.IsAbstract) {
-				info.AddText("abstract ", _KeywordBrush);
-			}
-			else if (typeSymbol.IsStatic) {
-				info.AddText("static ", _KeywordBrush);
-			}
-			else if (typeSymbol.IsSealed) {
-				info.AddText("sealed ", _KeywordBrush);
-			}
-			qiContent.Add(info);
-		}
-
 		static void ShowExtensionMethod(IList<object> qiContent, IMethodSymbol method, int position) {
 			var info = ToUIText(method.ContainingType.ToDisplayParts(), "Defined in: ", true);
 			string asmName = method.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
@@ -247,27 +268,6 @@ namespace Codist.Views
 			}
 			if (field.IsReadOnly) {
 				info.AddText("readonly ", _KeywordBrush);
-			}
-			qiContent.Add(info);
-		}
-
-		void ShowMethodDeclaration(IList<object> qiContent, IMethodSymbol method, int position) {
-			var info = new StackPanel().MakeHorizontal().AddText("Method declaration: ", true);
-			if (method.IsAbstract) {
-				info.AddText("abstract ", _KeywordBrush);
-			}
-			if (method.IsStatic) {
-				info.AddText("static ", _KeywordBrush);
-			}
-			else if (method.IsVirtual) {
-				info.AddText("virtual ", _KeywordBrush);
-			}
-			else if (method.IsOverride) {
-				info.AddText("override ", _KeywordBrush)
-					.Add(ToUIText(method.OverriddenMethod.ContainingType.ToMinimalDisplayParts(_SemanticModel, position)));
-			}
-			if (method.IsExtern) {
-				info.AddText("extern ", _KeywordBrush);
 			}
 			qiContent.Add(info);
 		}
@@ -317,53 +317,6 @@ namespace Codist.Views
 				return ToUIText(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
 			}
 			return null;
-		}
-
-		void ShowParameterInfo(IList<object> qiContent, SyntaxNode node) {
-			var argument = node;
-			if (node.Kind() == SyntaxKind.NullLiteralExpression) {
-				argument = node.Parent;
-			}
-			int depth = 0;
-			do {
-				var n = argument as ArgumentSyntax;
-				if (n != null) {
-					var al = n.Parent as BaseArgumentListSyntax;
-					var ap = al.Arguments.IndexOf(n);
-					if (ap != -1) {
-						var symbol = _SemanticModel.GetSymbolInfo(al.Parent).Symbol;
-						if (symbol == null) {
-							qiContent.Add("Argument " + ap);
-						}
-						else {
-							qiContent.Add(ToUIText(symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Argument of ", false, ap));
-						}
-					}
-					return;
-				}
-				else if (depth > 3) {
-					return;
-				}
-				++depth;
-			} while ((argument = argument.Parent) != null);
-		}
-
-		void ShowPropertyDeclaration(IList<object> qiContent, IPropertySymbol property, int position) {
-			var info = new StackPanel().MakeHorizontal().AddText("Property declaration: ", true);
-			if (property.IsAbstract) {
-				info.AddText("abstract ", _KeywordBrush);
-			}
-			else if (property.IsStatic) {
-				info.AddText("static ", _KeywordBrush);
-			}
-			else if (property.IsOverride) {
-				info.AddText("override ", _KeywordBrush)
-					.Add(ToUIText(property.OverriddenProperty.ContainingType.ToMinimalDisplayParts(_SemanticModel, position)));
-			}
-			else if (property.IsVirtual) {
-				info.AddText("virtual ", _KeywordBrush);
-			}
-			qiContent.Add(info);
 		}
 
 		private static StackPanel ShowStringInfo(string sv) {
@@ -416,9 +369,11 @@ namespace Codist.Views
 		static StackPanel ToUIText(ImmutableArray<SymbolDisplayPart> parts) {
 			return ToUIText(parts, null, false, Int32.MinValue);
 		}
+
 		static StackPanel ToUIText(ImmutableArray<SymbolDisplayPart> parts, string title, bool bold) {
 			return ToUIText(parts, title, bold, Int32.MinValue);
 		}
+
 		static StackPanel ToUIText(ImmutableArray<SymbolDisplayPart> parts, string title, bool bold, int argumentIndex) {
 			var stack = new StackPanel { Orientation = Orientation.Horizontal };
 			if (title != null) {
@@ -485,6 +440,7 @@ namespace Codist.Views
 				UpdateSyntaxHighlights(_FormatMap);
 			}
 		}
+
 		StackPanel ShowAttributes(ImmutableArray<AttributeData> attrs, int position) {
 			var stack = new StackPanel();
 			stack.AddText(attrs.Length > 1 ? "Attributes:" : "Attribute:", true);
@@ -516,7 +472,7 @@ namespace Codist.Views
 			return stack;
 		}
 
-		void ShowBaseType(IList<object> qiContent, INamedTypeSymbol typeSymbol, int position) {
+		void ShowBaseType(IList<object> qiContent, ITypeSymbol typeSymbol, int position) {
 			var baseType = typeSymbol.BaseType;
 			if (baseType != null) {
 				var name = baseType.Name;
@@ -622,6 +578,64 @@ namespace Codist.Views
 				stack.Children.Insert(1, ToUIText(disposable.ToMinimalDisplayParts(_SemanticModel, position)));
 			}
 			output.Add(stack);
+		}
+
+		void ShowDeclarationModifier(IList<object> qiContent, ISymbol symbol, string type, int position) {
+			var info = new StackPanel().MakeHorizontal().AddText(type, true).AddText(" declaration: ");
+			if (symbol.IsAbstract) {
+				info.AddText("abstract ", _KeywordBrush);
+			}
+			else if (symbol.IsStatic) {
+				info.AddText("static ", _KeywordBrush);
+			}
+			else if (symbol.IsVirtual) {
+				info.AddText("virtual ", _KeywordBrush);
+			}
+			else if (symbol.IsOverride) {
+				info.AddText("override ", _KeywordBrush);
+				var t = ((symbol as IMethodSymbol) ?? (symbol as IPropertySymbol) ?? (ISymbol)(symbol as IEventSymbol))?.ContainingType;
+				if (t != null) {
+					info.Add(ToUIText(t.ToMinimalDisplayParts(_SemanticModel, position)));
+				}
+			}
+			else if (symbol.IsSealed) {
+				info.AddText("sealed ", _KeywordBrush);
+			}
+			if (symbol.IsExtern) {
+				info.AddText("extern ", _KeywordBrush);
+			}
+			qiContent.Add(info);
+		}
+		void ShowParameterInfo(IList<object> qiContent, SyntaxNode node) {
+			var argument = node;
+			if (node.Kind() == SyntaxKind.NullLiteralExpression) {
+				argument = node.Parent;
+			}
+			int depth = 0;
+			do {
+				var n = argument as ArgumentSyntax;
+				if (n != null) {
+					var al = n.Parent as BaseArgumentListSyntax;
+					var ap = al.Arguments.IndexOf(n);
+					if (ap != -1) {
+						var symbol = _SemanticModel.GetSymbolInfo(al.Parent);
+						if (symbol.Symbol != null) {
+							qiContent.Add(ToUIText(symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Argument of ", false, ap));
+						}
+						else if (symbol.CandidateSymbols.Length > 0) {
+							qiContent.Add(ToUIText(symbol.CandidateSymbols[0].ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Maybe argument of ", false, ap));
+						}
+						else {
+							qiContent.Add("Argument " + ap);
+						}
+					}
+					return;
+				}
+				else if (depth > 3) {
+					return;
+				}
+				++depth;
+			} while ((argument = argument.Parent) != null);
 		}
 
 		void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {

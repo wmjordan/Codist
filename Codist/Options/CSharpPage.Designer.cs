@@ -29,9 +29,9 @@
 			this._DirectivesBox = new System.Windows.Forms.CheckBox();
 			this._LineNumbersBox = new System.Windows.Forms.CheckBox();
 			this._SpecialCommentsBox = new System.Windows.Forms.CheckBox();
-			this._CodeAbstractionsBox = new System.Windows.Forms.CheckBox();
 			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this._CSharpParameterQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpDeclarationQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpStringQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpNumberQuickInfoBox = new System.Windows.Forms.CheckBox();
@@ -41,9 +41,11 @@
 			this._CSharpInterfacesQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpBaseTypeQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpAttributesQuickInfoBox = new System.Windows.Forms.CheckBox();
-			this._CSharpParameterQuickInfoBox = new System.Windows.Forms.CheckBox();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this._HighlightDeclarationBracesBox = new System.Windows.Forms.CheckBox();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
+			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// groupBox2
@@ -51,29 +53,28 @@
 			this.groupBox2.Controls.Add(this._DirectivesBox);
 			this.groupBox2.Controls.Add(this._LineNumbersBox);
 			this.groupBox2.Controls.Add(this._SpecialCommentsBox);
-			this.groupBox2.Controls.Add(this._CodeAbstractionsBox);
 			this.groupBox2.Controls.Add(this._TypeDeclarationBox);
 			this.groupBox2.Location = new System.Drawing.Point(3, 162);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(495, 134);
+			this.groupBox2.Size = new System.Drawing.Size(236, 137);
 			this.groupBox2.TabIndex = 1;
 			this.groupBox2.TabStop = false;
-			this.groupBox2.Text = "Scrollbar markers";
+			this.groupBox2.Text = "Scrollbar marker";
 			// 
 			// _DirectivesBox
 			// 
 			this._DirectivesBox.AutoSize = true;
-			this._DirectivesBox.Location = new System.Drawing.Point(9, 74);
+			this._DirectivesBox.Location = new System.Drawing.Point(9, 49);
 			this._DirectivesBox.Name = "_DirectivesBox";
-			this._DirectivesBox.Size = new System.Drawing.Size(181, 19);
+			this._DirectivesBox.Size = new System.Drawing.Size(173, 19);
 			this._DirectivesBox.TabIndex = 2;
-			this._DirectivesBox.Text = "Compiler directives";
+			this._DirectivesBox.Text = "Compiler directive";
 			this._DirectivesBox.UseVisualStyleBackColor = true;
 			// 
 			// _LineNumbersBox
 			// 
 			this._LineNumbersBox.AutoSize = true;
-			this._LineNumbersBox.Location = new System.Drawing.Point(220, 24);
+			this._LineNumbersBox.Location = new System.Drawing.Point(9, 110);
 			this._LineNumbersBox.Name = "_LineNumbersBox";
 			this._LineNumbersBox.Size = new System.Drawing.Size(125, 19);
 			this._LineNumbersBox.TabIndex = 4;
@@ -83,31 +84,21 @@
 			// _SpecialCommentsBox
 			// 
 			this._SpecialCommentsBox.AutoSize = true;
-			this._SpecialCommentsBox.Location = new System.Drawing.Point(9, 99);
+			this._SpecialCommentsBox.Location = new System.Drawing.Point(9, 74);
 			this._SpecialCommentsBox.Name = "_SpecialCommentsBox";
-			this._SpecialCommentsBox.Size = new System.Drawing.Size(157, 19);
+			this._SpecialCommentsBox.Size = new System.Drawing.Size(149, 19);
 			this._SpecialCommentsBox.TabIndex = 3;
-			this._SpecialCommentsBox.Text = "Special comments";
+			this._SpecialCommentsBox.Text = "Special comment";
 			this._SpecialCommentsBox.UseVisualStyleBackColor = true;
-			// 
-			// _CodeAbstractionsBox
-			// 
-			this._CodeAbstractionsBox.AutoSize = true;
-			this._CodeAbstractionsBox.Location = new System.Drawing.Point(9, 49);
-			this._CodeAbstractionsBox.Name = "_CodeAbstractionsBox";
-			this._CodeAbstractionsBox.Size = new System.Drawing.Size(165, 19);
-			this._CodeAbstractionsBox.TabIndex = 1;
-			this._CodeAbstractionsBox.Text = "Code abstractions";
-			this._CodeAbstractionsBox.UseVisualStyleBackColor = true;
 			// 
 			// _TypeDeclarationBox
 			// 
 			this._TypeDeclarationBox.AutoSize = true;
 			this._TypeDeclarationBox.Location = new System.Drawing.Point(9, 24);
 			this._TypeDeclarationBox.Name = "_TypeDeclarationBox";
-			this._TypeDeclarationBox.Size = new System.Drawing.Size(165, 19);
+			this._TypeDeclarationBox.Size = new System.Drawing.Size(157, 19);
 			this._TypeDeclarationBox.TabIndex = 0;
-			this._TypeDeclarationBox.Text = "Type declarations";
+			this._TypeDeclarationBox.Text = "Type declaration";
 			this._TypeDeclarationBox.UseVisualStyleBackColor = true;
 			// 
 			// groupBox3
@@ -129,10 +120,20 @@
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Super Quick info";
 			// 
+			// _CSharpParameterQuickInfoBox
+			// 
+			this._CSharpParameterQuickInfoBox.AutoSize = true;
+			this._CSharpParameterQuickInfoBox.Location = new System.Drawing.Point(250, 124);
+			this._CSharpParameterQuickInfoBox.Name = "_CSharpParameterQuickInfoBox";
+			this._CSharpParameterQuickInfoBox.Size = new System.Drawing.Size(101, 19);
+			this._CSharpParameterQuickInfoBox.TabIndex = 9;
+			this._CSharpParameterQuickInfoBox.Text = "Parameter";
+			this._CSharpParameterQuickInfoBox.UseVisualStyleBackColor = true;
+			// 
 			// _CSharpDeclarationQuickInfoBox
 			// 
 			this._CSharpDeclarationQuickInfoBox.AutoSize = true;
-			this._CSharpDeclarationQuickInfoBox.Location = new System.Drawing.Point(220, 99);
+			this._CSharpDeclarationQuickInfoBox.Location = new System.Drawing.Point(250, 99);
 			this._CSharpDeclarationQuickInfoBox.Name = "_CSharpDeclarationQuickInfoBox";
 			this._CSharpDeclarationQuickInfoBox.Size = new System.Drawing.Size(197, 19);
 			this._CSharpDeclarationQuickInfoBox.TabIndex = 8;
@@ -142,7 +143,7 @@
 			// _CSharpStringQuickInfoBox
 			// 
 			this._CSharpStringQuickInfoBox.AutoSize = true;
-			this._CSharpStringQuickInfoBox.Location = new System.Drawing.Point(220, 74);
+			this._CSharpStringQuickInfoBox.Location = new System.Drawing.Point(250, 74);
 			this._CSharpStringQuickInfoBox.Name = "_CSharpStringQuickInfoBox";
 			this._CSharpStringQuickInfoBox.Size = new System.Drawing.Size(181, 19);
 			this._CSharpStringQuickInfoBox.TabIndex = 7;
@@ -152,7 +153,7 @@
 			// _CSharpNumberQuickInfoBox
 			// 
 			this._CSharpNumberQuickInfoBox.AutoSize = true;
-			this._CSharpNumberQuickInfoBox.Location = new System.Drawing.Point(220, 49);
+			this._CSharpNumberQuickInfoBox.Location = new System.Drawing.Point(250, 49);
 			this._CSharpNumberQuickInfoBox.Name = "_CSharpNumberQuickInfoBox";
 			this._CSharpNumberQuickInfoBox.Size = new System.Drawing.Size(133, 19);
 			this._CSharpNumberQuickInfoBox.TabIndex = 6;
@@ -182,7 +183,7 @@
 			// _CSharpExtensionMethodQuickInfoBox
 			// 
 			this._CSharpExtensionMethodQuickInfoBox.AutoSize = true;
-			this._CSharpExtensionMethodQuickInfoBox.Location = new System.Drawing.Point(220, 24);
+			this._CSharpExtensionMethodQuickInfoBox.Location = new System.Drawing.Point(250, 24);
 			this._CSharpExtensionMethodQuickInfoBox.Name = "_CSharpExtensionMethodQuickInfoBox";
 			this._CSharpExtensionMethodQuickInfoBox.Size = new System.Drawing.Size(229, 19);
 			this._CSharpExtensionMethodQuickInfoBox.TabIndex = 5;
@@ -219,20 +220,31 @@
 			this._CSharpAttributesQuickInfoBox.Text = "Attributes";
 			this._CSharpAttributesQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
-			// _CSharpParameterQuickInfoBox
+			// groupBox1
 			// 
-			this._CSharpParameterQuickInfoBox.AutoSize = true;
-			this._CSharpParameterQuickInfoBox.Location = new System.Drawing.Point(220, 124);
-			this._CSharpParameterQuickInfoBox.Name = "_CSharpParameterQuickInfoBox";
-			this._CSharpParameterQuickInfoBox.Size = new System.Drawing.Size(101, 19);
-			this._CSharpParameterQuickInfoBox.TabIndex = 9;
-			this._CSharpParameterQuickInfoBox.Text = "Parameter";
-			this._CSharpParameterQuickInfoBox.UseVisualStyleBackColor = true;
+			this.groupBox1.Controls.Add(this._HighlightDeclarationBracesBox);
+			this.groupBox1.Location = new System.Drawing.Point(245, 162);
+			this.groupBox1.Name = "groupBox1";
+			this.groupBox1.Size = new System.Drawing.Size(253, 137);
+			this.groupBox1.TabIndex = 2;
+			this.groupBox1.TabStop = false;
+			this.groupBox1.Text = "Special syntax highlight";
+			// 
+			// _HighlightDeclarationBracesBox
+			// 
+			this._HighlightDeclarationBracesBox.AutoSize = true;
+			this._HighlightDeclarationBracesBox.Location = new System.Drawing.Point(8, 24);
+			this._HighlightDeclarationBracesBox.Name = "_HighlightDeclarationBracesBox";
+			this._HighlightDeclarationBracesBox.Size = new System.Drawing.Size(173, 19);
+			this._HighlightDeclarationBracesBox.TabIndex = 0;
+			this._HighlightDeclarationBracesBox.Text = "Declaration braces";
+			this._HighlightDeclarationBracesBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this.groupBox1);
 			this.Controls.Add(this.groupBox3);
 			this.Controls.Add(this.groupBox2);
 			this.Name = "CSharpPage";
@@ -242,6 +254,8 @@
 			this.groupBox2.PerformLayout();
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();
+			this.groupBox1.ResumeLayout(false);
+			this.groupBox1.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -249,7 +263,6 @@
 		#endregion
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.CheckBox _SpecialCommentsBox;
-		private System.Windows.Forms.CheckBox _CodeAbstractionsBox;
 		private System.Windows.Forms.CheckBox _TypeDeclarationBox;
 		private System.Windows.Forms.CheckBox _DirectivesBox;
 		private System.Windows.Forms.CheckBox _LineNumbersBox;
@@ -264,5 +277,7 @@
 		private System.Windows.Forms.CheckBox _CSharpStringQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpDeclarationQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpParameterQuickInfoBox;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.CheckBox _HighlightDeclarationBracesBox;
 	}
 }

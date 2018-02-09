@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
+using AppHelpers;
 
 namespace Codist.Classifiers
 {
@@ -16,30 +17,7 @@ namespace Codist.Classifiers
 	/// </summary>
 	internal sealed class CSharpClassifier : IClassifier
 	{
-		readonly IClassificationType _localFieldType;
-		readonly IClassificationType _namespaceType;
-		readonly IClassificationType _parameterType;
-		readonly IClassificationType _extensionMethodType;
-		readonly IClassificationType _methodType;
-		readonly IClassificationType _eventType;
-		readonly IClassificationType _propertyType;
-		readonly IClassificationType _fieldType;
-		readonly IClassificationType _constFieldType;
-		readonly IClassificationType _readonlyFieldType;
-		readonly IClassificationType _aliasNamespaceType;
-		readonly IClassificationType _constructorMethodType;
-		readonly IClassificationType _declarationType;
-		readonly IClassificationType _nestedDeclarationType;
-		readonly IClassificationType _typeParameterType;
-		readonly IClassificationType _staticMemberType;
-		readonly IClassificationType _overrideMemberType;
-		readonly IClassificationType _virtualMemberType;
-		readonly IClassificationType _abstractMemberType;
-		readonly IClassificationType _sealedType;
-		readonly IClassificationType _externMethodType;
-		readonly IClassificationType _labelType;
-		readonly IClassificationType _attributeNotationType;
-		readonly IClassificationType _controlFlowKeywordType;
+		static CSharpClassifications _Classifications;
 
 		readonly ITextBuffer _TextBuffer;
 		readonly IClassificationTypeRegistryService _TypeRegistryService;
@@ -57,30 +35,9 @@ namespace Codist.Classifiers
 			IClassificationTypeRegistryService registry,
 			ITextDocumentFactoryService textDocumentFactoryService,
 			ITextBuffer buffer) {
-			_localFieldType = registry.GetClassificationType(Constants.CSharpLocalFieldName);
-			_namespaceType = registry.GetClassificationType(Constants.CSharpNamespaceName);
-			_parameterType = registry.GetClassificationType(Constants.CSharpParameterName);
-			_extensionMethodType = registry.GetClassificationType(Constants.CSharpExtensionMethodName);
-			_externMethodType = registry.GetClassificationType(Constants.CSharpExternMethodName);
-			_methodType = registry.GetClassificationType(Constants.CSharpMethodName);
-			_eventType = registry.GetClassificationType(Constants.CSharpEventName);
-			_propertyType = registry.GetClassificationType(Constants.CSharpPropertyName);
-			_fieldType = registry.GetClassificationType(Constants.CSharpFieldName);
-			_constFieldType = registry.GetClassificationType(Constants.CSharpConstFieldName);
-			_readonlyFieldType = registry.GetClassificationType(Constants.CSharpReadOnlyFieldName);
-			_aliasNamespaceType = registry.GetClassificationType(Constants.CSharpAliasNamespaceName);
-			_constructorMethodType = registry.GetClassificationType(Constants.CSharpConstructorMethodName);
-			_declarationType = registry.GetClassificationType(Constants.CSharpDeclarationName);
-			_nestedDeclarationType = registry.GetClassificationType(Constants.CSharpNestedDeclarationName);
-			_staticMemberType = registry.GetClassificationType(Constants.CSharpStaticMemberName);
-			_overrideMemberType = registry.GetClassificationType(Constants.CSharpOverrideMemberName);
-			_virtualMemberType = registry.GetClassificationType(Constants.CSharpVirtualMemberName);
-			_abstractMemberType = registry.GetClassificationType(Constants.CSharpAbstractMemberName);
-			_sealedType = registry.GetClassificationType(Constants.CSharpSealedClassName);
-			_typeParameterType = registry.GetClassificationType(Constants.CSharpTypeParameterName);
-			_labelType = registry.GetClassificationType(Constants.CSharpLabel);
-			_attributeNotationType = registry.GetClassificationType(Constants.CSharpAttributeNotation);
-			_controlFlowKeywordType = registry.GetClassificationType(Constants.CodeControlFlowKeyword);
+			if (_Classifications == null) {
+				_Classifications = new CSharpClassifications(registry);
+			}
 			_TextDocumentFactoryService = textDocumentFactoryService;
 			_TextBuffer = buffer;
 			_TypeRegistryService = registry;
@@ -146,45 +103,35 @@ namespace Codist.Classifiers
 							case SyntaxKind.YieldReturnStatement:
 							case SyntaxKind.YieldBreakStatement:
 							case SyntaxKind.ThrowStatement:
-								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _controlFlowKeywordType));
+								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ControlFlowKeyword));
 								return false;
 						}
 						return false;
 					}
-					if (Config.Instance.HighlightXmlDocCData && ct == Constants.XmlDocCData) {
-						var start = item.TextSpan.Start;
-						SyntaxNode root;
-						var sourceText = span.Snapshot.AsText();
-						var docId = DocumentId.CreateNewId(workspace.GetDocumentIdInCurrentContext(sourceText.Container).ProjectId);
-						//var solution = workspace.CurrentSolution.WithProjectCompilationOptions(docId.ProjectId, new CSharpCompilationOptions(OutputKind.ConsoleApplication, usings: new[] { "Codist" }));
-						var document = workspace.CurrentSolution
-							.AddDocument(docId, "xmlDocCData.cs", snapshot.GetText(item.TextSpan.Start, item.TextSpan.Length))
-							.WithDocumentSourceCodeKind(docId, SourceCodeKind.Script)
-							.GetDocument(docId);
-						var model = document.GetSemanticModelAsync().Result;
-						var compilation = model.SyntaxTree.GetCompilationUnitRoot();
-						if (document
-							.GetSyntaxTreeAsync().Result
-							.TryGetRoot(out root)) {
-							foreach (var spanItem in Classifier.GetClassifiedSpans(model, new TextSpan(0, item.TextSpan.Length), workspace)) {
-								ct = spanItem.ClassificationType;
-								if (ct == Constants.CodeIdentifier
-									|| ct == Constants.CodeClassName
-									|| ct == Constants.CodeStructName
-									|| ct == Constants.CodeInterfaceName
-									|| ct == Constants.CodeEnumName
-									|| ct == Constants.CodeTypeParameterName
-									|| ct == Constants.CodeDelegateName) {
-
-									var node = compilation.FindNode(spanItem.TextSpan, true);
-
-									foreach (var type in GetClassificationType(node, model)) {
-										result.Add(CreateClassificationSpan(snapshot, new TextSpan(start + spanItem.TextSpan.Start, spanItem.TextSpan.Length), type));
-									}
+					if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.XmlDocCode)
+						&& ct == Constants.XmlDocCData) {
+						ct = HighlightXmlDocCData(span, item, workspace, result, ct);
+						return false;
+					}
+					if (ct == "punctuation" && item.TextSpan.Length == 1) {
+						var s = snapshot.GetText(item.TextSpan.Start, item.TextSpan.Length)[0];
+						if (s == '{' || s == '}') {
+							var node = unitCompilation.FindNode(item.TextSpan);
+							IClassificationType type = null;
+							switch (node is BaseTypeDeclarationSyntax ? node.Kind() : node.Parent.Kind()) {
+								case SyntaxKind.MethodDeclaration: type = _Classifications.Method; break;
+								case SyntaxKind.ConstructorDeclaration: type = _Classifications.ConstructorMethod; break;
+								case SyntaxKind.PropertyDeclaration: type = _Classifications.Property; break;
+								case SyntaxKind.ClassDeclaration: type = _Classifications.ClassName; break;
+								case SyntaxKind.InterfaceDeclaration: type = _Classifications.InterfaceName; break;
+								case SyntaxKind.EnumDeclaration: type = _Classifications.EnumName; break;
+								case SyntaxKind.StructDeclaration: type = _Classifications.StructName; break;
+							}
+							if (type != null) {
+								if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace)) {
+									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
 								}
-								else {
-									result.Add(CreateClassificationSpan(snapshot, new TextSpan(start + spanItem.TextSpan.Start, spanItem.TextSpan.Length), _TypeRegistryService.GetClassificationType(ct)));
-								}
+								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.DeclarationBrace));
 							}
 						}
 						return false;
@@ -211,7 +158,48 @@ namespace Codist.Classifiers
 			return result;
 		}
 
-		private IEnumerable<IClassificationType> GetClassificationType(SyntaxNode node, SemanticModel semanticModel) {
+		private string HighlightXmlDocCData(SnapshotSpan span, ClassifiedSpan item, Workspace workspace, List<ClassificationSpan> result, string ct) {
+			var snapshot = span.Snapshot;
+			var start = item.TextSpan.Start;
+			SyntaxNode root;
+			var sourceText = snapshot.AsText();
+			var docId = DocumentId.CreateNewId(workspace.GetDocumentIdInCurrentContext(sourceText.Container).ProjectId);
+			//var solution = workspace.CurrentSolution.WithProjectCompilationOptions(docId.ProjectId, new CSharpCompilationOptions(OutputKind.ConsoleApplication, usings: new[] { "Codist" }));
+			var document = workspace.CurrentSolution
+				.AddDocument(docId, "xmlDocCData.cs", snapshot.GetText(item.TextSpan.Start, item.TextSpan.Length))
+				.WithDocumentSourceCodeKind(docId, SourceCodeKind.Script)
+				.GetDocument(docId);
+			var model = document.GetSemanticModelAsync().Result;
+			var compilation = model.SyntaxTree.GetCompilationUnitRoot();
+			if (document
+				.GetSyntaxTreeAsync().Result
+				.TryGetRoot(out root)) {
+				foreach (var spanItem in Classifier.GetClassifiedSpans(model, new TextSpan(0, item.TextSpan.Length), workspace)) {
+					ct = spanItem.ClassificationType;
+					if (ct == Constants.CodeIdentifier
+						|| ct == Constants.CodeClassName
+						|| ct == Constants.CodeStructName
+						|| ct == Constants.CodeInterfaceName
+						|| ct == Constants.CodeEnumName
+						|| ct == Constants.CodeTypeParameterName
+						|| ct == Constants.CodeDelegateName) {
+
+						var node = compilation.FindNode(spanItem.TextSpan, true);
+
+						foreach (var type in GetClassificationType(node, model)) {
+							result.Add(CreateClassificationSpan(snapshot, new TextSpan(start + spanItem.TextSpan.Start, spanItem.TextSpan.Length), type));
+						}
+					}
+					else {
+						result.Add(CreateClassificationSpan(snapshot, new TextSpan(start + spanItem.TextSpan.Start, spanItem.TextSpan.Length), _TypeRegistryService.GetClassificationType(ct)));
+					}
+				}
+			}
+
+			return ct;
+		}
+
+		static IEnumerable<IClassificationType> GetClassificationType(SyntaxNode node, SemanticModel semanticModel) {
 			// NOTE: Some kind of nodes, for example ArgumentSyntax, should are handled with a
 			// specific way
 			node = node.Kind() == SyntaxKind.Argument ? (node as ArgumentSyntax).Expression : node;
@@ -222,15 +210,15 @@ namespace Codist.Classifiers
 				if (symbol != null) {
 					switch (symbol.Kind) {
 						case SymbolKind.NamedType:
-							yield return symbol.ContainingType != null ? _nestedDeclarationType : _declarationType;
+							yield return symbol.ContainingType != null ? _Classifications.NestedDeclaration : _Classifications.Declaration;
 							break;
 						case SymbolKind.Event:
 						case SymbolKind.Method:
-							yield return _declarationType;
+							yield return _Classifications.Declaration;
 							break;
 						case SymbolKind.Property:
 							if (symbol.ContainingType.IsAnonymousType == false) {
-								yield return _declarationType;
+								yield return _Classifications.Declaration;
 							}
 							break;
 					}
@@ -238,13 +226,13 @@ namespace Codist.Classifiers
 				else {
 					// NOTE: handle alias in using directive
 					if ((node.Parent as NameEqualsSyntax)?.Parent is UsingDirectiveSyntax) {
-						yield return _aliasNamespaceType;
+						yield return _Classifications.AliasNamespace;
 					}
 					else if (node is AttributeArgumentSyntax) {
 						symbol = semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol;
 						if (symbol != null && symbol.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
-							yield return _constFieldType;
-							yield return _staticMemberType;
+							yield return _Classifications.ConstField;
+							yield return _Classifications.StaticMember;
 						}
 					}
 					symbol = node.Parent is MemberAccessExpressionSyntax
@@ -272,37 +260,37 @@ namespace Codist.Classifiers
 					break;
 
 				case SymbolKind.Label:
-					yield return _labelType;
+					yield return _Classifications.Label;
 					break;
 
 				case SymbolKind.TypeParameter:
-					yield return _typeParameterType;
+					yield return _Classifications.TypeParameter;
 					break;
 
 				case SymbolKind.Field:
 					var fieldSymbol = (symbol as IFieldSymbol);
-					yield return fieldSymbol.IsConst ? _constFieldType : fieldSymbol.IsReadOnly ? _readonlyFieldType : _fieldType;
+					yield return fieldSymbol.IsConst ? _Classifications.ConstField : fieldSymbol.IsReadOnly ? _Classifications.ReadonlyField : _Classifications.Field;
 					break;
 
 				case SymbolKind.Property:
-					yield return _propertyType;
+					yield return _Classifications.Property;
 					break;
 
 				case SymbolKind.Event:
-					yield return _eventType;
+					yield return _Classifications.Event;
 					break;
 
 				case SymbolKind.Local:
 					var localSymbol = (symbol as ILocalSymbol);
-					yield return localSymbol.IsConst ? _constFieldType : _localFieldType;
+					yield return localSymbol.IsConst ? _Classifications.ConstField : _Classifications.LocalField;
 					break;
 
 				case SymbolKind.Namespace:
-					yield return _namespaceType;
+					yield return _Classifications.Namespace;
 					break;
 
 				case SymbolKind.Parameter:
-					yield return _parameterType;
+					yield return _Classifications.Parameter;
 					break;
 
 				case SymbolKind.Method:
@@ -310,14 +298,14 @@ namespace Codist.Classifiers
 					switch (methodSymbol.MethodKind) {
 						case MethodKind.Constructor:
 							yield return
-								node is AttributeSyntax || node.Parent is AttributeSyntax || node.Parent?.Parent is AttributeSyntax ? _attributeNotationType : _constructorMethodType;
+								node is AttributeSyntax || node.Parent is AttributeSyntax || node.Parent?.Parent is AttributeSyntax ? _Classifications.AttributeNotation : _Classifications.ConstructorMethod;
 							break;
 						case MethodKind.Destructor:
 						case MethodKind.StaticConstructor:
-							yield return _constructorMethodType;
+							yield return _Classifications.ConstructorMethod;
 							break;
 						default:
-							yield return methodSymbol.IsExtensionMethod ? _extensionMethodType : methodSymbol.IsExtern ? _externMethodType : _methodType;
+							yield return methodSymbol.IsExtensionMethod ? _Classifications.ExtensionMethod : methodSymbol.IsExtern ? _Classifications.ExternMethod : _Classifications.Method;
 							break;
 					}
 					break;
@@ -328,20 +316,20 @@ namespace Codist.Classifiers
 
 			if (symbol.IsStatic) {
 				if (symbol.Kind != SymbolKind.Namespace) {
-					yield return _staticMemberType;
+					yield return _Classifications.StaticMember;
 				}
 			}
 			else if (symbol.IsOverride) {
-				yield return _overrideMemberType;
+				yield return _Classifications.OverrideMember;
 			}
 			else if (symbol.IsVirtual) {
-				yield return _virtualMemberType;
+				yield return _Classifications.VirtualMember;
 			}
 			else if (symbol.IsAbstract) {
-				yield return _abstractMemberType;
+				yield return _Classifications.AbstractMember;
 			}
 			else if (symbol.IsSealed) {
-				yield return _sealedType;
+				yield return _Classifications.SealedMember;
 			}
 		}
 
