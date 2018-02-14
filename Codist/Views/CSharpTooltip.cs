@@ -62,11 +62,11 @@ namespace Codist.Views
 
 			//look for occurrences of our QuickInfo words in the span
 			var navigator = _QuickInfoSourceProvider.NavigatorService.GetTextStructureNavigator(_TextBuffer);
-			var extent = navigator.GetSpanOfEnclosing(new SnapshotSpan(subjectTriggerPoint.Value, 0));
-			var node = unitCompilation.FindNode(new Microsoft.CodeAnalysis.Text.TextSpan(extent.Span.Start, extent.Span.Length), true, true);
+			var node = unitCompilation.FindNode(new Microsoft.CodeAnalysis.Text.TextSpan(querySpan.Start, querySpan.Length), true, true);
 			if (node == null || node.Span.Contains(subjectTriggerPoint.Value.Position) == false) {
 				goto EXIT;
 			}
+			var extent = navigator.GetExtentOfWord(querySpan.Start).Span;
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowParameterInfo(qiContent, node);
 			}
@@ -154,19 +154,7 @@ namespace Codist.Views
 					ShowFieldDeclaration(qiContent, field);
 				}
 				if (field.HasConstantValue) {
-					var sv = field.ConstantValue as string;
-					if (sv != null) {
-						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
-							qiContent.Add(ShowStringInfo(sv));
-						}
-					}
-					else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
-						var s = ShowNumericForms(field.ConstantValue, NumericForm.None);
-						if (s != null) {
-							qiContent.Add(s);
-							ShowEnumInfo(qiContent, node, symbol.ContainingType, false);
-						}
-					}
+					ShowConstValueInfo(qiContent, node, symbol, field.ConstantValue);
 				}
 				goto RETURN;
 			}
@@ -191,13 +179,13 @@ namespace Codist.Views
 				}
 				goto RETURN;
 			}
-			//var loc = symbol as ILocalSymbol;
-			//if (loc != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
-			//	ShowBaseType(qiContent, loc.Type, node.SpanStart);
-			//	ShowAttributes(loc.Type.GetAttributes(), node.SpanStart);
-			//	ShowInterfaces(qiContent, loc.Type, node.SpanStart);
-			//	goto RETURN;
-			//}
+			var loc = symbol as ILocalSymbol;
+			if (loc != null) {
+				if (loc.HasConstantValue) {
+					ShowConstValueInfo(qiContent, node, symbol, loc.ConstantValue);
+				}
+				goto RETURN;
+			}
 			//var param = symbol as IParameterSymbol;
 			//if (param != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
 			//	ShowBaseType(qiContent, param.Type, node.SpanStart);
@@ -207,11 +195,27 @@ namespace Codist.Views
 			//}
 			RETURN:
 			applicableToSpan = qiContent.Count > 0
-				? currentSnapshot.CreateTrackingSpan(extent.Span.Start, extent.Span.Length, SpanTrackingMode.EdgeInclusive)
+				? currentSnapshot.CreateTrackingSpan(extent.Start, extent.Length, SpanTrackingMode.EdgeInclusive)
 				: null;
 			return;
 			EXIT:
 			applicableToSpan = null;
+		}
+
+		private void ShowConstValueInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol, object value) {
+			var sv = value as string;
+			if (sv != null) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
+					qiContent.Add(ShowStringInfo(sv));
+				}
+			}
+			else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
+				var s = ShowNumericForms(value, NumericForm.None);
+				if (s != null) {
+					qiContent.Add(s);
+					ShowEnumInfo(qiContent, node, symbol.ContainingType, false);
+				}
+			}
 		}
 
 		void IDisposable.Dispose() {

@@ -116,9 +116,13 @@ namespace Codist.Classifiers
 					if (ct == "punctuation" && item.TextSpan.Length == 1) {
 						var s = snapshot.GetText(item.TextSpan.Start, item.TextSpan.Length)[0];
 						if (s == '{' || s == '}') {
-							var node = unitCompilation.FindNode(item.TextSpan);
+							var node = unitCompilation.FindNode(item.TextSpan, true, true);
+							if (node is BaseTypeDeclarationSyntax == false
+								&& (node = node.Parent) == null) {
+								return false;
+							}
 							IClassificationType type = null;
-							switch (node is BaseTypeDeclarationSyntax ? node.Kind() : node.Parent.Kind()) {
+							switch (node.Kind()) {
 								case SyntaxKind.MethodDeclaration: type = _Classifications.Method; break;
 								case SyntaxKind.ConstructorDeclaration: type = _Classifications.ConstructorMethod; break;
 								case SyntaxKind.PropertyDeclaration: type = _Classifications.Property; break;
