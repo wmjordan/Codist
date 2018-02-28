@@ -26,6 +26,7 @@ namespace Codist.Options
 			_DirectivesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.CompilerDirective, _DirectivesBox.Checked));
 			_SpecialCommentsBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.SpecialComment, _SpecialCommentsBox.Checked));
 			_TypeDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.TypeDeclaration, _TypeDeclarationBox.Checked));
+			_LongMethodBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.LongMemberDeclaration, _LongMethodBox.Checked));
 			_LineNumbersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.LineNumber, _LineNumbersBox.Checked));
 			_CSharpAttributesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Attributes, _CSharpAttributesQuickInfoBox.Checked));
 			_CSharpBaseTypeQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseType, _CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked));
@@ -33,6 +34,7 @@ namespace Codist.Options
 			_CSharpDeclarationQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Declaration, _CSharpDeclarationQuickInfoBox.Checked));
 			_CSharpExtensionMethodQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.ExtensionMethod, _CSharpExtensionMethodQuickInfoBox.Checked));
 			_CSharpInterfacesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Interfaces, _CSharpInterfaceInheritenceQuickInfoBox.Enabled = _CSharpInterfacesQuickInfoBox.Checked));
+			_CSharpInterfaceImplementationsQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.InterfaceImplementations, _CSharpInterfaceImplementationsQuickInfoBox.Checked));
 			_CSharpInterfaceInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.InterfacesInheritence, _CSharpInterfaceInheritenceQuickInfoBox.Checked));
 			_CSharpNumberQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.NumericValues,  _CSharpNumberQuickInfoBox.Checked));
 			_CSharpStringQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.String, _CSharpStringQuickInfoBox.Checked));
@@ -48,6 +50,7 @@ namespace Codist.Options
 				_DirectivesBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective);
 				_SpecialCommentsBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment);
 				_TypeDeclarationBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration);
+				_LongMethodBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration);
 				_LineNumbersBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
 				_CSharpAttributesQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes);
 				_CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType);
@@ -55,6 +58,7 @@ namespace Codist.Options
 				_CSharpDeclarationQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration);
 				_CSharpInterfaceInheritenceQuickInfoBox.Enabled = _CSharpInterfacesQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces);
 				_CSharpInterfaceInheritenceQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
+				_CSharpInterfaceImplementationsQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations);
 				_CSharpExtensionMethodQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod);
 				_CSharpNumberQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues);
 				_CSharpStringQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.String);

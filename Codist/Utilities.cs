@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Classification;
+using GdiColor = System.Drawing.Color;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
-using GdiColor = System.Drawing.Color;
-using Microsoft.VisualStudio.Text.Classification;
-using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Text;
-using Microsoft.CodeAnalysis.Text;
-using System.Windows.Controls;
-using System.Windows;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio;
+using WpfText = System.Windows.Media.FormattedText;
 
 namespace Codist
 {
@@ -109,6 +109,16 @@ namespace Codist
 		}
 		public static WpfColor ToWpfColor (this GdiColor color) {
 			return WpfColor.FromArgb(color.A, color.R, color.G, color.B);
+		}
+		public static WpfColor Alpha(this WpfColor color, byte a) {
+			return WpfColor.FromArgb(a, color.R, color.G, color.B);
+		}
+		public static TBrush Alpha<TBrush>(this TBrush brush, double opacity)
+			where TBrush : WpfBrush {
+			if (brush != null) {
+				brush.Opacity = opacity;
+			}
+			return brush;
 		}
 		public static TPanel Add<TPanel>(this TPanel panel, UIElement control)
 			where TPanel : Panel {
@@ -211,6 +221,34 @@ namespace Codist
 			//}
 		}
 
+		public static WpfBrush GetBrush(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundBrushId) {
+			var p = map.GetProperties(formatName);
+			return p != null && p.Contains(resourceId)
+				? (p[resourceId] as WpfBrush).Clone()
+				: null;
+		}
 
+		static readonly System.Windows.Media.Typeface StatusText = SystemFonts.StatusFontFamily.GetTypefaces().First();
+		public static WpfText ToFormattedText(string text, double size, WpfBrush brush) {
+			return new WpfText(text, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, StatusText, size, brush);
+		}
+		public static WpfText SetItalic(this WpfText text) {
+			text.SetFontStyle(FontStyles.Italic);
+			return text;
+		}
+		public static WpfText SetBold(this WpfText text) {
+			text.SetFontWeight(FontWeight.FromOpenTypeWeight(800));
+			return text;
+		}
+		public static void ScreenShot(FrameworkElement control, string path) {
+			var s = (control).RenderSize;
+			var bmp = new System.Windows.Media.Imaging.RenderTargetBitmap((int)s.Width, (int)s.Height, 96, 96, System.Windows.Media.PixelFormats.Default);
+			bmp.Render(control);
+			var enc = new System.Windows.Media.Imaging.PngBitmapEncoder();
+			enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmp));
+			using (var f = System.IO.File.Create(path)) {
+				enc.Save(f);
+			}
+		}
 	}
 }

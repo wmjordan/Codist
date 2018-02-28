@@ -5,8 +5,8 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
+using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,22 +16,21 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
-using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
-using AppHelpers;
 
 namespace Codist.Views
 {
 	sealed class CSharpQuickInfoSource : IQuickInfoSource
 	{
 		static Brush _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush;
-		readonly IEditorFormatMapService _FormatMapService;
-		IEditorFormatMap _FormatMap;
 
-		private bool _IsDisposed;
-		CSharpQuickInfoSourceProvider _QuickInfoSourceProvider;
+		readonly IEditorFormatMapService _FormatMapService;
+		readonly CSharpQuickInfoSourceProvider _QuickInfoSourceProvider;
+		IEditorFormatMap _FormatMap;
+		bool _IsDisposed;
 		SemanticModel _SemanticModel;
 		ITextBuffer _TextBuffer;
+
 		public CSharpQuickInfoSource(CSharpQuickInfoSourceProvider provider, ITextBuffer subjectBuffer, IEditorFormatMapService formatMapService) {
 			_QuickInfoSourceProvider = provider;
 			_TextBuffer = subjectBuffer;
@@ -42,18 +41,19 @@ namespace Codist.Views
 
 		public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {
 			// Map the trigger point down to our buffer.
-			var subjectTriggerPoint = session.GetTriggerPoint(_TextBuffer.CurrentSnapshot);
-			if (!subjectTriggerPoint.HasValue) {
-				goto EXIT;
+			var subjectTriggerPoint = session.GetTriggerPoint(_TextBuffer.CurrentSnapshot).GetValueOrDefault();
+			if (subjectTriggerPoint.Snapshot == null) {
+				applicableToSpan = null;
+				return;
 			}
 
-			var currentSnapshot = subjectTriggerPoint.Value.Snapshot;
+			var currentSnapshot = subjectTriggerPoint.Snapshot;
 			var workspace = currentSnapshot.TextBuffer.GetWorkspace();
 			if (workspace == null) {
 				goto EXIT;
 			}
 
-			var querySpan = new SnapshotSpan(subjectTriggerPoint.Value, 0);
+			var querySpan = new SnapshotSpan(subjectTriggerPoint, 0);
 			var semanticModel = _SemanticModel;
 			if (semanticModel == null) {
 				_SemanticModel = semanticModel = workspace.GetDocument(querySpan).GetSemanticModelAsync().Result;
@@ -61,9 +61,9 @@ namespace Codist.Views
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 
 			//look for occurrences of our QuickInfo words in the span
-			var navigator = _QuickInfoSourceProvider.NavigatorService.GetTextStructureNavigator(_TextBuffer);
-			var node = unitCompilation.FindNode(new Microsoft.CodeAnalysis.Text.TextSpan(querySpan.Start, querySpan.Length), true, true);
-			if (node == null || node.Span.Contains(subjectTriggerPoint.Value.Position) == false) {
+			var navigator = _QuickInfoSourceProvider._NavigatorService.GetTextStructureNavigator(_TextBuffer);
+			var node = unitCompilation.FindNode(new TextSpan(querySpan.Start, querySpan.Length), true, true);
+			if (node == null || node.Span.Contains(subjectTriggerPoint.Position) == false) {
 				goto EXIT;
 			}
 			var extent = navigator.GetExtentOfWord(querySpan.Start).Span;
@@ -114,95 +114,136 @@ namespace Codist.Views
 					qiContent.Add(ShowAttributes(attrs, node.SpanStart));
 				}
 			}
-			var typeSymbol = symbol as INamedTypeSymbol;
-			if (typeSymbol != null) {
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
-					if (typeSymbol.TypeKind == TypeKind.Enum) {
-						ShowEnumInfo(qiContent, node, typeSymbol, true);
+			switch (symbol.Kind) {
+				case SymbolKind.Event:
+					ShowEventInfo(qiContent, node, symbol as IEventSymbol);
+					break;
+				case SymbolKind.Field:
+					ShowFieldInfo(qiContent, node, symbol as IFieldSymbol);
+					break;
+				case SymbolKind.Local:
+					var loc = symbol as ILocalSymbol;
+					if (loc.HasConstantValue) {
+						ShowConstInfo(qiContent, node, symbol, loc.ConstantValue);
 					}
-					else {
-						ShowBaseType(qiContent, typeSymbol, node.SpanStart);
-					}
-				}
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces)) {
-					ShowInterfaces(qiContent, typeSymbol, node.SpanStart);
-				}
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-					&& typeSymbol.TypeKind == TypeKind.Class
-					&& (typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
-					ShowDeclarationModifier(qiContent, typeSymbol, "Class", node.SpanStart);
-				}
-				goto RETURN;
+					break;
+				case SymbolKind.Method:
+					ShowMethodInfo(qiContent, node, symbol as IMethodSymbol);
+					break;
+				case SymbolKind.NamedType:
+					ShowTypeInfo(qiContent, node, symbol as INamedTypeSymbol);
+					break;
+				case SymbolKind.Property:
+					ShowPropertyInfo(qiContent, node, symbol as IPropertySymbol);
+					break;
 			}
-			var method = symbol as IMethodSymbol;
-			if (method != null) {
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-					&& (method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern)
-					&& method.ContainingType.TypeKind != TypeKind.Interface) {
-					ShowDeclarationModifier(qiContent, method, "Method", node.SpanStart);
-				}
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod) && method.IsExtensionMethod) {
-					ShowExtensionMethod(qiContent, method, node.SpanStart);
-				}
-				goto RETURN;
-			}
-			var field = symbol as IFieldSymbol;
-			if (field != null) {
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-					&& (field.IsReadOnly || field.IsVolatile || field.IsStatic)
-					&& field.ContainingType.TypeKind != TypeKind.Enum) {
-					ShowFieldDeclaration(qiContent, field);
-				}
-				if (field.HasConstantValue) {
-					ShowConstValueInfo(qiContent, node, symbol, field.ConstantValue);
-				}
-				goto RETURN;
-			}
-			var property = symbol as IPropertySymbol;
-			if (property != null) {
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-					&& (property.IsAbstract || property.IsStatic || property.IsOverride || property.IsVirtual)) {
-					ShowDeclarationModifier(qiContent, property, "Property", node.SpanStart);
-				}
-				goto RETURN;
-			}
-			var ev = symbol as IEventSymbol;
-			if (ev != null) {
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
-					if (ev.IsAbstract || ev.IsStatic || ev.IsOverride || ev.IsVirtual) {
-						ShowDeclarationModifier(qiContent, ev, "Event", node.SpanStart);
-					}
-					var invoke = ev.Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
-					if (invoke != null && invoke.Parameters.Length == 2) {
-						qiContent.Add(new StackPanel().MakeHorizontal().Add(ToUIText(invoke.Parameters[1].Type.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Event argument: ", true)));
-					}
-				}
-				goto RETURN;
-			}
-			var loc = symbol as ILocalSymbol;
-			if (loc != null) {
-				if (loc.HasConstantValue) {
-					ShowConstValueInfo(qiContent, node, symbol, loc.ConstantValue);
-				}
-				goto RETURN;
-			}
-			//var param = symbol as IParameterSymbol;
-			//if (param != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
-			//	ShowBaseType(qiContent, param.Type, node.SpanStart);
-			//	ShowAttributes(param.Type.GetAttributes(), node.SpanStart);
-			//	ShowInterfaces(qiContent, param.Type, node.SpanStart);
-			//	goto RETURN;
-			//}
 			RETURN:
+			ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
 			applicableToSpan = qiContent.Count > 0
 				? currentSnapshot.CreateTrackingSpan(extent.Start, extent.Length, SpanTrackingMode.EdgeInclusive)
 				: null;
 			return;
 			EXIT:
-			applicableToSpan = null;
+			ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
+			applicableToSpan = qiContent.Count > 0
+				? currentSnapshot.CreateTrackingSpan(session.TextView.GetTextElementSpan(subjectTriggerPoint), SpanTrackingMode.EdgeInclusive)
+				: null;
 		}
 
-		private void ShowConstValueInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol, object value) {
+		private static void ShowSelectionInfo(IQuickInfoSession session, IList<object> qiContent, SnapshotPoint point) {
+			var selection = session.TextView.Selection;
+			if (selection.IsEmpty != false) {
+				return;
+			}
+			var p1 = selection.Start.Position;
+			var p2 = selection.End.Position;
+			if (p1 <= point && point <= p2) {
+				var c = 0;
+				foreach (var item in selection.SelectedSpans) {
+					c += item.Length;
+				}
+				var y1 = point.Snapshot.GetLineNumberFromPosition(p1);
+				var y2 = point.Snapshot.GetLineNumberFromPosition(p2) + 1;
+				qiContent.Add(String.Join(
+					" ",
+					"Selection:",
+					c.ToString(),
+					(c > 1 ? "characters, " : "character, "),
+					(y2 - y1).ToString(),
+					(y2 - y1 > 1 ? "lines" : "line")));
+			}
+		}
+
+		void ShowPropertyInfo(IList<object> qiContent, SyntaxNode node, IPropertySymbol property) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+								&& (property.DeclaredAccessibility != Accessibility.Public || property.IsAbstract || property.IsStatic || property.IsOverride || property.IsVirtual)) {
+				ShowDeclarationModifier(qiContent, property, "Property", node.SpanStart);
+			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
+				ShowInterfaceImplementation(qiContent, node, property, property.ExplicitInterfaceImplementations.Select(i => i.Type), m => m.Type, m => m.Parameters);
+			}
+		}
+
+		void ShowEventInfo(IList<object> qiContent, SyntaxNode node, IEventSymbol ev) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
+				if (ev.DeclaredAccessibility != Accessibility.Public || ev.IsAbstract || ev.IsStatic || ev.IsOverride || ev.IsVirtual) {
+					ShowDeclarationModifier(qiContent, ev, "Event", node.SpanStart);
+				}
+				var invoke = ev.Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
+				if (invoke != null && invoke.Parameters.Length == 2) {
+					qiContent.Add(new StackPanel().MakeHorizontal().Add(ToUIText(invoke.Parameters[1].Type.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Event argument: ", true)));
+				}
+			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
+				ShowInterfaceImplementation(qiContent, node, ev, ev.ExplicitInterfaceImplementations.Select(i => i.Type), m => m.Type, m => m.AddMethod.Parameters);
+			}
+		}
+
+		void ShowFieldInfo(IList<object> qiContent, SyntaxNode node, IFieldSymbol field) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+								&& (field.DeclaredAccessibility != Accessibility.Public || field.IsReadOnly || field.IsVolatile || field.IsStatic)
+								&& field.ContainingType.TypeKind != TypeKind.Enum) {
+				ShowFieldDeclaration(qiContent, field);
+			}
+			if (field.HasConstantValue) {
+				ShowConstInfo(qiContent, node, field, field.ConstantValue);
+			}
+		}
+
+		void ShowMethodInfo(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+								&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern)
+								&& method.ContainingType.TypeKind != TypeKind.Interface) {
+				ShowDeclarationModifier(qiContent, method, "Method", node.SpanStart);
+			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod) && method.IsExtensionMethod) {
+				ShowExtensionMethod(qiContent, method, node.SpanStart);
+			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
+				ShowInterfaceImplementation(qiContent, node, method, method.ExplicitInterfaceImplementations.Select(i => i.ReturnType), m => m.ReturnType, m => m.Parameters);
+			}
+		}
+
+		void ShowTypeInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol typeSymbol) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
+				if (typeSymbol.TypeKind == TypeKind.Enum) {
+					ShowEnumInfo(qiContent, node, typeSymbol, true);
+				}
+				else {
+					ShowBaseType(qiContent, typeSymbol, node.SpanStart);
+				}
+			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces)) {
+				ShowInterfaces(qiContent, typeSymbol, node.SpanStart);
+			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+				&& typeSymbol.TypeKind == TypeKind.Class
+				&& (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
+				ShowDeclarationModifier(qiContent, typeSymbol, "Class", node.SpanStart);
+			}
+		}
+
+		void ShowConstInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol, object value) {
 			var sv = value as string;
 			if (sv != null) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
@@ -215,6 +256,72 @@ namespace Codist.Views
 					qiContent.Add(s);
 					ShowEnumInfo(qiContent, node, symbol.ContainingType, false);
 				}
+			}
+		}
+
+		void ShowInterfaceImplementation<TSymbol>(IList<object> qiContent, SyntaxNode node, TSymbol symbol, IEnumerable<ITypeSymbol> explicitImplementations, Func<TSymbol, ITypeSymbol> returnTypeGetter, Func<TSymbol, ImmutableArray<IParameterSymbol>> parameterGetter)
+			where TSymbol : class, ISymbol {
+			if (symbol.IsStatic || symbol.DeclaredAccessibility != Accessibility.Public) {
+				return;
+			}
+			var interfaces = symbol.ContainingType.AllInterfaces;
+			if (interfaces.Length == 0) {
+				return;
+			}
+			List<ITypeSymbol> types = new List<ITypeSymbol>();
+			StackPanel info = null;
+			var returnType = returnTypeGetter(symbol);
+			var parameters = parameterGetter(symbol);
+			foreach (var intf in interfaces) {
+				foreach (var member in intf.GetMembers()) {
+					if (member.Kind != symbol.Kind || member.DeclaredAccessibility != Accessibility.Public || member.Name != symbol.Name) {
+						continue;
+					}
+
+					var memberSymbol = member as TSymbol;
+					if (returnType != null && returnType.Equals(returnTypeGetter(memberSymbol)) == false) {
+						continue;
+					}
+					var memberParameters = parameterGetter(memberSymbol);
+					if (memberParameters.Length != parameters.Length) {
+						continue;
+					}
+					for (int i = parameters.Length - 1; i >= 0; i--) {
+						var pi = parameters[i];
+						var mi = memberParameters[i];
+						if (pi.Type.Equals(mi.Type) == false
+							|| pi.RefKind != mi.RefKind) {
+							goto NEXT;
+						}
+					}
+					types.Add(intf);
+					break;
+					NEXT:;
+				}
+			}
+			if (types.Count > 0) {
+				var p = new StackPanel().AddText("Implements:", true);
+				foreach (var item in types) {
+					p.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
+				}
+				info = new StackPanel().Add(p);
+			}
+			if (explicitImplementations != null) {
+				types.Clear();
+				types.AddRange(explicitImplementations);
+				if (types.Count > 0) {
+					if (info == null) {
+						info = new StackPanel();
+					}
+					var p = new StackPanel().AddText("Explicit implements:", true);
+					foreach (var item in types) {
+						p.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
+					}
+					info.Add(p);
+				}
+			}
+			if (info != null) {
+				qiContent.Add(info);
 			}
 		}
 
@@ -264,6 +371,7 @@ namespace Codist.Views
 
 		static void ShowFieldDeclaration(IList<object> qiContent, IFieldSymbol field) {
 			var info = new StackPanel().MakeHorizontal().AddText("Field declaration: ", true);
+			ShowAccessibilityInfo(field, info);
 			if (field.IsVolatile) {
 				info.AddText("volatile ", _KeywordBrush);
 			}
@@ -586,6 +694,7 @@ namespace Codist.Views
 
 		void ShowDeclarationModifier(IList<object> qiContent, ISymbol symbol, string type, int position) {
 			var info = new StackPanel().MakeHorizontal().AddText(type, true).AddText(" declaration: ");
+			ShowAccessibilityInfo(symbol, info);
 			if (symbol.IsAbstract) {
 				info.AddText("abstract ", _KeywordBrush);
 			}
@@ -596,7 +705,7 @@ namespace Codist.Views
 				info.AddText("virtual ", _KeywordBrush);
 			}
 			else if (symbol.IsOverride) {
-				info.AddText("override ", _KeywordBrush);
+				info.AddText(symbol.IsSealed ? "sealed override " : "override ", _KeywordBrush);
 				var t = ((symbol as IMethodSymbol) ?? (symbol as IPropertySymbol) ?? (ISymbol)(symbol as IEventSymbol))?.ContainingType;
 				if (t != null) {
 					info.Add(ToUIText(t.ToMinimalDisplayParts(_SemanticModel, position)));
@@ -610,6 +719,17 @@ namespace Codist.Views
 			}
 			qiContent.Add(info);
 		}
+
+		private static void ShowAccessibilityInfo(ISymbol symbol, StackPanel info) {
+			switch (symbol.DeclaredAccessibility) {
+				case Accessibility.Private: info.AddText("private ", _KeywordBrush); break;
+				case Accessibility.ProtectedAndInternal: info.AddText("protected internal ", _KeywordBrush); break;
+				case Accessibility.Protected: info.AddText("protected ", _KeywordBrush); break;
+				case Accessibility.Internal: info.AddText("internal ", _KeywordBrush); break;
+				case Accessibility.ProtectedOrInternal: info.AddText("protected or internal ", _KeywordBrush); break;
+			}
+		}
+
 		void ShowParameterInfo(IList<object> qiContent, SyntaxNode node) {
 			var argument = node;
 			if (node.Kind() == SyntaxKind.NullLiteralExpression) {
@@ -710,25 +830,25 @@ namespace Codist.Views
 
 		internal sealed class CSharpQuickInfoController : IIntellisenseController
 		{
-			private CSharpQuickInfoControllerProvider m_provider;
-			private IQuickInfoSession m_session;
-			private IList<ITextBuffer> m_subjectBuffers;
-			private ITextView m_textView;
-			internal CSharpQuickInfoController(ITextView textView, IList<ITextBuffer> subjectBuffers, CSharpQuickInfoControllerProvider provider) {
-				m_textView = textView;
-				m_subjectBuffers = subjectBuffers;
-				m_provider = provider;
+			CSharpQuickInfoControllerProvider _Provider;
+			IQuickInfoSession _Session;
+			IList<ITextBuffer> _SubjectBuffers;
+			ITextView _TextView;
 
-				m_textView.MouseHover += this.OnTextViewMouseHover;
+			internal CSharpQuickInfoController(ITextView textView, IList<ITextBuffer> subjectBuffers, CSharpQuickInfoControllerProvider provider) {
+				_TextView = textView;
+				_SubjectBuffers = subjectBuffers;
+				_Provider = provider;
+				_TextView.MouseHover += OnTextViewMouseHover;
 			}
 
 			public void ConnectSubjectBuffer(ITextBuffer subjectBuffer) {
 			}
 
 			public void Detach(ITextView textView) {
-				if (m_textView == textView) {
-					m_textView.MouseHover -= this.OnTextViewMouseHover;
-					m_textView = null;
+				if (_TextView == textView) {
+					_TextView.MouseHover -= OnTextViewMouseHover;
+					_TextView = null;
 				}
 			}
 
@@ -740,15 +860,15 @@ namespace Codist.Views
 					return;
 				}
 				//find the mouse position by mapping down to the subject buffer
-				SnapshotPoint? point = m_textView.BufferGraph.MapDownToFirstMatch
-					 (new SnapshotPoint(m_textView.TextSnapshot, e.Position),
+				SnapshotPoint? point = _TextView.BufferGraph.MapDownToFirstMatch
+					 (new SnapshotPoint(_TextView.TextSnapshot, e.Position),
 					PointTrackingMode.Positive,
-					snapshot => m_subjectBuffers.Contains(snapshot.TextBuffer),
+					snapshot => _SubjectBuffers.Contains(snapshot.TextBuffer),
 					PositionAffinity.Predecessor);
 
-				if (point != null && !m_provider.QuickInfoBroker.IsQuickInfoActive(m_textView)) {
+				if (point != null && !_Provider.QuickInfoBroker.IsQuickInfoActive(_TextView)) {
 					var triggerPoint = point.Value.Snapshot.CreateTrackingPoint(point.Value.Position, PointTrackingMode.Positive);
-					m_session = m_provider.QuickInfoBroker.TriggerQuickInfo(m_textView, triggerPoint, true);
+					_Session = _Provider.QuickInfoBroker.TriggerQuickInfo(_TextView, triggerPoint, true);
 				}
 			}
 		}
@@ -776,9 +896,10 @@ namespace Codist.Views
 			IEditorFormatMapService _EditorFormatMapService = null;
 
 			[Import]
-			internal ITextStructureNavigatorSelectorService NavigatorService { get; set; }
+			internal ITextStructureNavigatorSelectorService _NavigatorService = null;
 			[Import]
-			internal ITextBufferFactoryService TextBufferFactoryService { get; set; }
+			internal ITextBufferFactoryService _TextBufferFactoryService = null;
+
 			public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 				return new CSharpQuickInfoSource(this, textBuffer, _EditorFormatMapService);
 			}

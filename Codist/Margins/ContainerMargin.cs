@@ -3,52 +3,54 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Margins
 {
 	/// <summary>
 	/// Margin's canvas and visual definition including both size and content
 	/// </summary>
-	sealed class CodeMargin : Canvas, IWpfTextViewMargin
+	internal class ContainerMargin : Canvas, IWpfTextViewMargin
 	{
 		/// <summary>
 		/// Margin name.
 		/// </summary>
-		public const string MarginName = nameof(CodeMargin);
-
-		readonly CodeMarginElement _CodeMarginElement;
-		readonly ITagAggregator<ClassificationTag> _CodeTagAggregator;
-		readonly IWpfTextViewHost _TextView;
-		bool isDisposed;
+		public const string MarginName = "ContainerMargin";
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="CodeMargin"/> class for a given <paramref name="textView"/>.
+		/// A value indicating whether the object is disposed.
+		/// </summary>
+		private bool isDisposed;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ContainerMargin"/> class for a given <paramref name="textView"/>.
 		/// </summary>
 		/// <param name="textView">The <see cref="IWpfTextView"/> to attach the margin to.</param>
-		public CodeMargin(IWpfTextViewHost textView, IVerticalScrollBar scrollBar, CodeMarginFactory container) {
-			_TextView = textView ?? throw new ArgumentNullException("textView");
-			_CodeTagAggregator = container.ViewTagAggregatorFactoryService.CreateTagAggregator<ClassificationTag>(textView.TextView);
-			_CodeMarginElement = new CodeMarginElement(textView.TextView, container, _CodeTagAggregator, scrollBar);
-			textView.Closed += TextView_Closed;
-		}
+		public ContainerMargin(IWpfTextView textView) {
+			this.Height = 20; // Margin height sufficient to have the label
+			this.ClipToBounds = true;
+			this.Background = new SolidColorBrush(Colors.LightGreen);
 
-		private void TextView_Closed(object sender, EventArgs e) {
-			_CodeTagAggregator.Dispose();
-			_CodeMarginElement.Dispose();
+			// Add a green colored label that says "Hello ContainerMargin"
+			var label = new Label {
+				Background = new SolidColorBrush(Colors.LightGreen),
+				Content = "Hello ContainerMargin",
+			};
+
+			this.Children.Add(label);
 		}
 
 		#region IWpfTextViewMargin
+
 		/// <summary>
-		/// Gets the <see cref="FrameworkElement"/> that implements the visual representation of the margin.
+		/// Gets the <see cref="Sytem.Windows.FrameworkElement"/> that implements the visual representation of the margin.
 		/// </summary>
 		/// <exception cref="ObjectDisposedException">The margin is disposed.</exception>
 		public FrameworkElement VisualElement {
 			// Since this margin implements Canvas, this is the object which renders
 			// the margin.
 			get {
-				ThrowIfDisposed();
-				return _CodeMarginElement;
+				this.ThrowIfDisposed();
+				return this;
 			}
 		}
 
@@ -68,9 +70,11 @@ namespace Codist.Margins
 		/// <exception cref="ObjectDisposedException">The margin is disposed.</exception>
 		public double MarginSize {
 			get {
-				ThrowIfDisposed();
+				this.ThrowIfDisposed();
 
-				return _CodeMarginElement.ActualWidth;
+				// Since this is a horizontal margin, its width will be bound to the width of the text view.
+				// Therefore, its size is its height.
+				return this.ActualHeight;
 			}
 		}
 
@@ -80,7 +84,7 @@ namespace Codist.Margins
 		/// <exception cref="ObjectDisposedException">The margin is disposed.</exception>
 		public bool Enabled {
 			get {
-				ThrowIfDisposed();
+				this.ThrowIfDisposed();
 
 				// The margin should always be enabled
 				return true;
@@ -98,17 +102,16 @@ namespace Codist.Margins
 		/// </remarks>
 		/// <exception cref="ArgumentNullException"><paramref name="marginName"/> is null.</exception>
 		public ITextViewMargin GetTextViewMargin(string marginName) {
-			return string.Equals(marginName, MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
+			return string.Equals(marginName, ContainerMargin.MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
 		}
 
 		/// <summary>
-		/// Disposes an instance of <see cref="CodeMargin"/> class.
+		/// Disposes an instance of <see cref="ContainerMargin"/> class.
 		/// </summary>
 		public void Dispose() {
-			if (!isDisposed) {
-				_TextView.Closed -= TextView_Closed;
+			if (!this.isDisposed) {
 				GC.SuppressFinalize(this);
-				isDisposed = true;
+				this.isDisposed = true;
 			}
 		}
 
@@ -118,7 +121,7 @@ namespace Codist.Margins
 		/// Checks and throws <see cref="ObjectDisposedException"/> if the object is disposed.
 		/// </summary>
 		private void ThrowIfDisposed() {
-			if (isDisposed) {
+			if (this.isDisposed) {
 				throw new ObjectDisposedException(MarginName);
 			}
 		}

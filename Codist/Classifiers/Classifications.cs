@@ -9,128 +9,132 @@ namespace Codist.Classifiers
 {
 	sealed class CSharpClassifications
 	{
-		readonly IClassificationType _localFieldType;
-		readonly IClassificationType _namespaceType;
-		readonly IClassificationType _parameterType;
-		readonly IClassificationType _extensionMethodType;
-		readonly IClassificationType _methodType;
-		readonly IClassificationType _eventType;
-		readonly IClassificationType _propertyType;
-		readonly IClassificationType _fieldType;
-		readonly IClassificationType _constFieldType;
-		readonly IClassificationType _readonlyFieldType;
-		readonly IClassificationType _aliasNamespaceType;
-		readonly IClassificationType _constructorMethodType;
-		readonly IClassificationType _declarationType;
-		readonly IClassificationType _nestedDeclarationType;
-		readonly IClassificationType _typeParameterType;
-		readonly IClassificationType _staticMemberType;
-		readonly IClassificationType _overrideMemberType;
-		readonly IClassificationType _virtualMemberType;
-		readonly IClassificationType _abstractMemberType;
-		readonly IClassificationType _sealedType;
-		readonly IClassificationType _externMethodType;
-		readonly IClassificationType _labelType;
-		readonly IClassificationType _attributeNotationType;
-		readonly IClassificationType _controlFlowKeywordType;
-		readonly IClassificationType _classNameType;
-		readonly IClassificationType _structNameType;
-		readonly IClassificationType _interfaceNameType;
-		readonly IClassificationType _delegateNameType;
-		readonly IClassificationType _enumNameType;
-		readonly IClassificationType _declarationBraceType;
+		readonly IClassificationType _localField;
+		readonly IClassificationType _namespace;
+		readonly IClassificationType _parameter;
+		readonly IClassificationType _extensionMethod;
+		readonly IClassificationType _method;
+		readonly IClassificationType _event;
+		readonly IClassificationType _property;
+		readonly IClassificationType _field;
+		readonly IClassificationType _constField;
+		readonly IClassificationType _readonlyField;
+		readonly IClassificationType _aliasNamespace;
+		readonly IClassificationType _constructorMethod;
+		readonly IClassificationType _declaration;
+		readonly IClassificationType _nestedDeclaration;
+		readonly IClassificationType _typeParameter;
+		readonly IClassificationType _staticMember;
+		readonly IClassificationType _overrideMember;
+		readonly IClassificationType _virtualMember;
+		readonly IClassificationType _abstractMember;
+		readonly IClassificationType _sealed;
+		readonly IClassificationType _externMethod;
+		readonly IClassificationType _label;
+		readonly IClassificationType _attributeNotation;
+		readonly IClassificationType _controlFlowKeyword;
+		readonly IClassificationType _className;
+		readonly IClassificationType _structName;
+		readonly IClassificationType _interfaceName;
+		readonly IClassificationType _delegateName;
+		readonly IClassificationType _enumName;
+		readonly IClassificationType _declarationBrace;
+		//readonly IClassificationType _methodBody;
 
-		public IClassificationType LocalField => _localFieldType;
+		public IClassificationType LocalField => _localField;
 
-		public IClassificationType Namespace => _namespaceType;
+		public IClassificationType Namespace => _namespace;
 
-		public IClassificationType Parameter => _parameterType;
+		public IClassificationType Parameter => _parameter;
 
-		public IClassificationType ExtensionMethod => _extensionMethodType;
+		public IClassificationType ExtensionMethod => _extensionMethod;
 
-		public IClassificationType Method => _methodType;
+		public IClassificationType Method => _method;
 
-		public IClassificationType Event => _eventType;
+		public IClassificationType Event => _event;
 
-		public IClassificationType Property => _propertyType;
+		public IClassificationType Property => _property;
 
-		public IClassificationType Field => _fieldType;
+		public IClassificationType Field => _field;
 
-		public IClassificationType ConstField => _constFieldType;
+		public IClassificationType ConstField => _constField;
 
-		public IClassificationType ReadonlyField => _readonlyFieldType;
+		public IClassificationType ReadonlyField => _readonlyField;
 
-		public IClassificationType AliasNamespace => _aliasNamespaceType;
+		public IClassificationType AliasNamespace => _aliasNamespace;
 
-		public IClassificationType ConstructorMethod => _constructorMethodType;
+		public IClassificationType ConstructorMethod => _constructorMethod;
 
-		public IClassificationType Declaration => _declarationType;
+		public IClassificationType Declaration => _declaration;
 
-		public IClassificationType NestedDeclaration => _nestedDeclarationType;
+		public IClassificationType NestedDeclaration => _nestedDeclaration;
 
-		public IClassificationType TypeParameter => _typeParameterType;
+		public IClassificationType TypeParameter => _typeParameter;
 
-		public IClassificationType StaticMember => _staticMemberType;
+		public IClassificationType StaticMember => _staticMember;
 
-		public IClassificationType OverrideMember => _overrideMemberType;
+		public IClassificationType OverrideMember => _overrideMember;
 
-		public IClassificationType VirtualMember => _virtualMemberType;
+		public IClassificationType VirtualMember => _virtualMember;
 
-		public IClassificationType AbstractMember => _abstractMemberType;
+		public IClassificationType AbstractMember => _abstractMember;
 
-		public IClassificationType SealedMember => _sealedType;
+		public IClassificationType SealedMember => _sealed;
 
-		public IClassificationType ExternMethod => _externMethodType;
+		public IClassificationType ExternMethod => _externMethod;
 
-		public IClassificationType Label => _labelType;
+		public IClassificationType Label => _label;
 
-		public IClassificationType AttributeNotation => _attributeNotationType;
+		public IClassificationType AttributeNotation => _attributeNotation;
 
-		public IClassificationType ControlFlowKeyword => _controlFlowKeywordType;
+		public IClassificationType ControlFlowKeyword => _controlFlowKeyword;
 
-		public IClassificationType ClassName => _classNameType;
+		public IClassificationType ClassName => _className;
 
-		public IClassificationType StructName => _structNameType;
+		public IClassificationType StructName => _structName;
 
-		public IClassificationType InterfaceName => _interfaceNameType;
+		public IClassificationType InterfaceName => _interfaceName;
 
-		public IClassificationType DelegateName => _delegateNameType;
+		public IClassificationType DelegateName => _delegateName;
 
-		public IClassificationType EnumName => _enumNameType;
+		public IClassificationType EnumName => _enumName;
 
-		public IClassificationType DeclarationBrace => _declarationBraceType;
+		public IClassificationType DeclarationBrace => _declarationBrace;
+
+		//public IClassificationType MethodBody => _methodBody;
 
 		public CSharpClassifications(IClassificationTypeRegistryService registry) {
-			_localFieldType = registry.GetClassificationType(Constants.CSharpLocalFieldName);
-			_namespaceType = registry.GetClassificationType(Constants.CSharpNamespaceName);
-			_parameterType = registry.GetClassificationType(Constants.CSharpParameterName);
-			_extensionMethodType = registry.GetClassificationType(Constants.CSharpExtensionMethodName);
-			_externMethodType = registry.GetClassificationType(Constants.CSharpExternMethodName);
-			_methodType = registry.GetClassificationType(Constants.CSharpMethodName);
-			_eventType = registry.GetClassificationType(Constants.CSharpEventName);
-			_propertyType = registry.GetClassificationType(Constants.CSharpPropertyName);
-			_fieldType = registry.GetClassificationType(Constants.CSharpFieldName);
-			_constFieldType = registry.GetClassificationType(Constants.CSharpConstFieldName);
-			_readonlyFieldType = registry.GetClassificationType(Constants.CSharpReadOnlyFieldName);
-			_aliasNamespaceType = registry.GetClassificationType(Constants.CSharpAliasNamespaceName);
-			_constructorMethodType = registry.GetClassificationType(Constants.CSharpConstructorMethodName);
-			_declarationType = registry.GetClassificationType(Constants.CSharpDeclarationName);
-			_nestedDeclarationType = registry.GetClassificationType(Constants.CSharpNestedDeclarationName);
-			_staticMemberType = registry.GetClassificationType(Constants.CSharpStaticMemberName);
-			_overrideMemberType = registry.GetClassificationType(Constants.CSharpOverrideMemberName);
-			_virtualMemberType = registry.GetClassificationType(Constants.CSharpVirtualMemberName);
-			_abstractMemberType = registry.GetClassificationType(Constants.CSharpAbstractMemberName);
-			_sealedType = registry.GetClassificationType(Constants.CSharpSealedClassName);
-			_typeParameterType = registry.GetClassificationType(Constants.CSharpTypeParameterName);
-			_labelType = registry.GetClassificationType(Constants.CSharpLabel);
-			_attributeNotationType = registry.GetClassificationType(Constants.CSharpAttributeNotation);
-			_controlFlowKeywordType = registry.GetClassificationType(Constants.CodeControlFlowKeyword);
-			_classNameType = registry.GetClassificationType(Constants.CodeClassName);
-			_structNameType = registry.GetClassificationType(Constants.CodeStructName);
-			_interfaceNameType = registry.GetClassificationType(Constants.CodeInterfaceName);
-			_delegateNameType = registry.GetClassificationType(Constants.CodeDelegateName);
-			_enumNameType = registry.GetClassificationType(Constants.CodeEnumName);
-			_declarationBraceType = registry.GetClassificationType(Constants.CSharpDeclarationBrace);
+			_localField = registry.GetClassificationType(Constants.CSharpLocalFieldName);
+			_namespace = registry.GetClassificationType(Constants.CSharpNamespaceName);
+			_parameter = registry.GetClassificationType(Constants.CSharpParameterName);
+			_extensionMethod = registry.GetClassificationType(Constants.CSharpExtensionMethodName);
+			_externMethod = registry.GetClassificationType(Constants.CSharpExternMethodName);
+			_method = registry.GetClassificationType(Constants.CSharpMethodName);
+			_event = registry.GetClassificationType(Constants.CSharpEventName);
+			_property = registry.GetClassificationType(Constants.CSharpPropertyName);
+			_field = registry.GetClassificationType(Constants.CSharpFieldName);
+			_constField = registry.GetClassificationType(Constants.CSharpConstFieldName);
+			_readonlyField = registry.GetClassificationType(Constants.CSharpReadOnlyFieldName);
+			_aliasNamespace = registry.GetClassificationType(Constants.CSharpAliasNamespaceName);
+			_constructorMethod = registry.GetClassificationType(Constants.CSharpConstructorMethodName);
+			_declaration = registry.GetClassificationType(Constants.CSharpDeclarationName);
+			_nestedDeclaration = registry.GetClassificationType(Constants.CSharpNestedDeclarationName);
+			_staticMember = registry.GetClassificationType(Constants.CSharpStaticMemberName);
+			_overrideMember = registry.GetClassificationType(Constants.CSharpOverrideMemberName);
+			_virtualMember = registry.GetClassificationType(Constants.CSharpVirtualMemberName);
+			_abstractMember = registry.GetClassificationType(Constants.CSharpAbstractMemberName);
+			_sealed = registry.GetClassificationType(Constants.CSharpSealedClassName);
+			_typeParameter = registry.GetClassificationType(Constants.CSharpTypeParameterName);
+			_label = registry.GetClassificationType(Constants.CSharpLabel);
+			_attributeNotation = registry.GetClassificationType(Constants.CSharpAttributeNotation);
+			_controlFlowKeyword = registry.GetClassificationType(Constants.CodeControlFlowKeyword);
+			_className = registry.GetClassificationType(Constants.CodeClassName);
+			_structName = registry.GetClassificationType(Constants.CodeStructName);
+			_interfaceName = registry.GetClassificationType(Constants.CodeInterfaceName);
+			_delegateName = registry.GetClassificationType(Constants.CodeDelegateName);
+			_enumName = registry.GetClassificationType(Constants.CodeEnumName);
+			_declarationBrace = registry.GetClassificationType(Constants.CSharpDeclarationBrace);
+			//_methodBody = registry.GetClassificationType(Constants.CSharpMethodBody);
 		}
 	}
 }

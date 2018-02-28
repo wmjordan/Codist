@@ -32,14 +32,12 @@ namespace Codist.Margins
 		static readonly Brush NoteBrush = new SolidColorBrush(Constants.NoteColor);
 		static readonly Brush HackBrush = new SolidColorBrush(Constants.HackColor);
 		static readonly Brush TaskBrush = new SolidColorBrush(Constants.TaskColor);
-		static readonly Brush ClassNameBrush = Brushes.Blue;
-		static readonly Brush StructNameBrush = Brushes.Teal;
-		static readonly Brush InterfaceNameBrush = Brushes.DeepSkyBlue;
-		static readonly Brush EnumNameBrush = Brushes.Purple;
+		//static readonly Brush ClassNameBrush = Brushes.Blue;
+		//static readonly Brush StructNameBrush = Brushes.Teal;
+		//static readonly Brush InterfaceNameBrush = Brushes.DeepSkyBlue;
+		//static readonly Brush EnumNameBrush = Brushes.Purple;
 		static readonly Brush PreProcessorBrush = Brushes.Gray;
-		static readonly Brush AbstractionBrush = Brushes.DarkOrange;
-		//readonly static Brush ThrowKeywordBrush = Brushes.Red;
-		//readonly static Brush ReturnKeywordBrush = Brushes.Blue;
+		//static readonly Brush AbstractionBrush = Brushes.DarkOrange;
 		//todo: customizable marker style
 		//note: this dictionary determines which style has a scrollbar marker
 		static readonly Dictionary<string, Brush> ClassificationBrushMapper = new Dictionary<string, Brush> {
@@ -56,13 +54,14 @@ namespace Codist.Margins
 			{ Constants.Task7Comment, TaskBrush },
 			{ Constants.Task8Comment, TaskBrush },
 			{ Constants.Task9Comment, TaskBrush },
-			{ Constants.CodeClassName, ClassNameBrush },
-			{ Constants.CodeStructName, StructNameBrush },
-			{ Constants.CodeInterfaceName, InterfaceNameBrush },
-			{ Constants.CodeEnumName, EnumNameBrush },
-			{ Constants.CodeKeyword, ClassNameBrush },
+			//{ Constants.CodeClassName, ClassNameBrush },
+			//{ Constants.CodeStructName, StructNameBrush },
+			//{ Constants.CodeInterfaceName, InterfaceNameBrush },
+			//{ Constants.CodeEnumName, EnumNameBrush },
+			//{ Constants.CodeKeyword, ClassNameBrush },
 			{ Constants.CodePreprocessorKeyword, PreProcessorBrush },
-			{ Constants.CodeAbstractionKeyword, AbstractionBrush },
+			//{ Constants.CodeAbstractionKeyword, AbstractionBrush },
+			//{ Constants.CSharpMethodBody, MethodBodyBrush },
 			//{ Constants.ThrowKeyword, ThrowKeywordBrush },
 			//{ Constants.ReturnKeyword, ReturnKeywordBrush },
 		};
@@ -94,25 +93,27 @@ namespace Codist.Margins
 			_ScrollBar.TrackSpanChanged += OnMappingChanged;
 		}
 
-		private void Config_Updated(object sender, EventArgs e) {
+		void Config_Updated(object sender, EventArgs e) {
 			var op = Config.Instance.MarkerOptions;
-			if (_MarkerOptions != op) {
-				if (op == MarkerOptions.None) {
-					Visibility = Visibility.Collapsed;
-					_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
-					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
-				}
-				else if (_MarkerOptions == MarkerOptions.None) {
-					Visibility = Visibility.Visible;
-					_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
-					_ScrollBar.TrackSpanChanged += OnMappingChanged;
-				}
-				_MarkerOptions = op;
-				InvalidateVisual();
+			if (_MarkerOptions == op) {
+				return;
 			}
+
+			if (op == MarkerOptions.None) {
+				Visibility = Visibility.Collapsed;
+				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
+				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
+			}
+			else if (_MarkerOptions == MarkerOptions.None) {
+				Visibility = Visibility.Visible;
+				_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
+				_ScrollBar.TrackSpanChanged += OnMappingChanged;
+			}
+			_MarkerOptions = op;
+			InvalidateVisual();
 		}
 
-		private void TextView_TextBufferChanged(object sender, TextContentChangedEventArgs args) {
+		void TextView_TextBufferChanged(object sender, TextContentChangedEventArgs args) {
 			if (args.Changes.Count == 0) {
 				return;
 			}
@@ -147,7 +148,7 @@ namespace Codist.Margins
 			InvalidateVisual();
 		}
 
-		private void OnViewOrMarginVisiblityChanged(object sender, DependencyPropertyChangedEventArgs e) {
+		void OnViewOrMarginVisiblityChanged(object sender, DependencyPropertyChangedEventArgs e) {
 			//There is no need to update event handlers if the visibility change is the result of an options change (since we will
 			//update the event handlers after changing all the options).
 			//
@@ -158,21 +159,16 @@ namespace Codist.Margins
 			}
 		}
 
-		private void OnFormatMappingChanged(object sender, FormatItemsEventArgs e) {
+		void OnFormatMappingChanged(object sender, FormatItemsEventArgs e) {
 			//_marginBrush = this.GetBrush(nameof(CommentMargin), EditorFormatDefinition.ForegroundBrushId);
 		}
 
-		private Brush GetBrush(string name, string resource) {
+		Brush GetBrush(string name, string resource) {
 			var rd = _EditorFormatMap.GetProperties(name);
-
-			if (rd.Contains(resource)) {
-				return rd[resource] as Brush;
-			}
-
-			return null;
+			return rd.Contains(resource) ? rd[resource] as Brush : null;
 		}
 
-		private bool UpdateEventHandlers(bool checkEvents) {
+		bool UpdateEventHandlers(bool checkEvents) {
 			bool needEvents = checkEvents && _TextView.VisualElement.IsVisible;
 
 			if (needEvents != _HasEvents) {
@@ -206,7 +202,7 @@ namespace Codist.Margins
 		/// <summary>
 		/// Handler for the scrollbar changing its coordinate mapping.
 		/// </summary>
-		private void OnMappingChanged(object sender, EventArgs e) {
+		void OnMappingChanged(object sender, EventArgs e) {
 			//Simply invalidate the visual: the positions of the various highlights haven't changed.
 			InvalidateVisual();
 		}
@@ -227,19 +223,19 @@ namespace Codist.Margins
 			}
 		}
 
-		private void DrawLineNumbers(DrawingContext drawingContext) {
+		//todo Extract line number margin
+		void DrawLineNumbers(DrawingContext drawingContext) {
 			var snapshot = _TextView.TextSnapshot;
 			var lc = snapshot.LineCount;
 			var step = lc < 500 ? 50 : lc < 1000 ? 100 : lc < 5000 ? 500 : 1000;
 			for (int i = step; i < lc; i += step) {
 				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, snapshot.GetLineFromLineNumber(i - 1).Start));
 				drawingContext.DrawLine(LineNumberPen, new Point(-100, y), new Point(100, y));
-				var t = new FormattedText((i).ToString(), System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, SystemFonts.StatusFontFamily.GetTypefaces().First(), 9, LineNumberBrush);
-				drawingContext.DrawText(t, new Point(0, y));
+				drawingContext.DrawText(Utilities.ToFormattedText((i).ToString(), 9, LineNumberBrush), new Point(0, y));
 			}
 		}
 
-		private void DrawMarkers(DrawingContext drawingContext) {
+		void DrawMarkers(DrawingContext drawingContext) {
 			var lastY = 0.0;
 			Brush lastBrush = null;
 			var tags = new List<SpanTag>(_Tags.Tags);
@@ -261,17 +257,20 @@ namespace Codist.Margins
 					// avoid drawing too many closed markers
 					continue;
 				}
-				if (b == ClassNameBrush || b == InterfaceNameBrush || b == StructNameBrush || b == EnumNameBrush) {
-					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Length > 0) {
-						// the tag could be zero-lengthed, so we have to check
-						var t = snapshot.GetText(tag.Start, tag.Length);
-						if (t.Length == 1 && (t[0] == '{' || t[0] == '}')) {
-							continue;
-						}
-						DrawDeclarationMark(drawingContext, b, y, c, t);
-					}
-					continue;
-				}
+				//if (b == ClassNameBrush || b == InterfaceNameBrush || b == StructNameBrush || b == EnumNameBrush) {
+				//	if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Length > 0) {
+				//		// the tag could be zero-lengthed, so we have to check
+				//		var t = snapshot.GetText(tag.Start, tag.Length);
+				//		if (t.Length == 1 && (t[0] == '{' || t[0] == '}')) {
+				//			continue;
+				//		}
+				//		DrawDeclarationMark(drawingContext, b, y, c, t);
+				//	}
+				//	continue;
+				//}
+				//else if (b == MethodBodyBrush) {
+				//	DrawMethodBody(drawingContext, b, y, _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, tag.Start + tag.Length)));
+				//}
 				//else if (b == AbstractionBrush) {
 				//	DrawMark(drawingContext, b, y, 1);
 				//}
@@ -284,21 +283,17 @@ namespace Codist.Margins
 					}
 				}
 				else if (b == TaskBrush) {
-					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
-						//note the text relies on the last character of Constants.Task1Comment, etc.
-						DrawTaskMark(drawingContext, b, y, c[c.Length - 1].ToString());
-					}
-					else {
+					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
 						continue;
 					}
+					//note the text relies on the last character of Constants.Task1Comment, etc.
+					DrawTaskMark(drawingContext, b, y, c[c.Length - 1].ToString());
 				}
 				else {
-					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
-						DrawCommentMark(drawingContext, b, y);
-					}
-					else {
+					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
 						continue;
 					}
+					DrawCommentMark(drawingContext, b, y);
 				}
 				lastY = y;
 				lastBrush = b;
@@ -306,8 +301,7 @@ namespace Codist.Margins
 		}
 
 		static void DrawTaskMark(DrawingContext dc, Brush brush, double y, string taskName) {
-			var ft = new FormattedText(taskName, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, SystemFonts.StatusFontFamily.GetTypefaces().First(), 9, Brushes.White);
-			ft.SetFontWeight(FontWeight.FromOpenTypeWeight(800));
+			var ft = Utilities.ToFormattedText(taskName, 9, Brushes.White).SetBold();
 			dc.DrawRectangle(brush, EmptyPen, new Rect(0, y - ft.Height / 2, ft.Width, ft.Height));
 			dc.DrawText(ft, new Point(0, y - ft.Height / 2));
 		}
@@ -316,27 +310,26 @@ namespace Codist.Margins
 			dc.DrawRectangle(brush, CommentPen, new Rect(MarkPadding, y - HalfMarkSize, MarkSize, MarkSize));
 		}
 
-		static void DrawDeclarationMark(DrawingContext dc, Brush brush, double y, string type, string typeName) {
-			//dc.DrawEllipse(brush, null, new Point(HalfMarkSize, y - HalfMarkSize), MarkSize, MarkSize);
-			string t = null;
-			for (int i = 1; i < typeName.Length; i++) {
-				var ch = typeName[i];
-				if (!char.IsUpper(ch)) {
-					continue;
-				}
-				char[] c = new char[2];
-				c[0] = typeName[0];
-				c[1] = ch;
-				t = new string(c);
-				break;
-			}
-			if (t == null) {
-				t = typeName[0].ToString();
-			}
-			var ft = new FormattedText(t, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, SystemFonts.StatusFontFamily.GetTypefaces().First(), 9, brush);
-			ft.SetFontWeight(FontWeight.FromOpenTypeWeight(800));
-			dc.DrawText(ft, new Point(0, y - ft.Height / 2));
-		}
+		//static void DrawDeclarationMark(DrawingContext dc, Brush brush, double y, string type, string typeName) {
+		//	//dc.DrawEllipse(brush, null, new Point(HalfMarkSize, y - HalfMarkSize), MarkSize, MarkSize);
+		//	string t = null;
+		//	for (int i = 1; i < typeName.Length; i++) {
+		//		var ch = typeName[i];
+		//		if (!char.IsUpper(ch)) {
+		//			continue;
+		//		}
+		//		char[] c = new char[2];
+		//		c[0] = typeName[0];
+		//		c[1] = ch;
+		//		t = new string(c);
+		//		break;
+		//	}
+		//	if (t == null) {
+		//		t = typeName[0].ToString();
+		//	}
+		//	var ft = Utilities.ToFormattedText(t, 9, brush).SetBold();
+		//	dc.DrawText(ft, new Point(0, y - ft.Height / 2));
+		//}
 
 		static void DrawMark(DrawingContext dc, Brush brush, double y, int style) {
 			switch (style) {
@@ -349,12 +342,12 @@ namespace Codist.Margins
 			}
 		}
 
-		static void DrawKeywordMark(DrawingContext dc, Brush brush, double y) {
-			dc.DrawEllipse(brush, null, new Point(HalfMarkSize, y - HalfMarkSize * 0.5), HalfMarkSize, HalfMarkSize);
-		}
+		//static void DrawKeywordMark(DrawingContext dc, Brush brush, double y) {
+		//	dc.DrawEllipse(brush, null, new Point(HalfMarkSize, y - HalfMarkSize * 0.5), HalfMarkSize, HalfMarkSize);
+		//}
 
 		#region IDisposable Support
-		private bool disposedValue = false;
+		bool disposedValue = false;
 
 		void Dispose(bool disposing) {
 			if (!disposedValue) {

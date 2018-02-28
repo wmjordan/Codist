@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Classification;
@@ -20,11 +21,14 @@ namespace Codist.Views
 		readonly IEditorFormatMap _FormatMap;
 
 		Color _BackColor, _ForeColor;
-		TextFormattingRunProperties _EditorTextProperties;
-		bool _IsDecorating;
+		int _IsDecorating;
 
 		public CodeViewDecorator(ITextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service, IEditorFormatMap formatMap) {
-			view.Closed += (s, args) => Config.ConfigUpdated -= SettingsSaved;
+			view.Closed += (s, args) => {
+				Config.ConfigUpdated -= SettingsSaved;
+				_Map.ClassificationFormatMappingChanged -= SettingsSaved;
+			};
+			map.ClassificationFormatMappingChanged += SettingsSaved;
 			//view.GotAggregateFocus += TextView_GotAggregateFocus;
 			Config.ConfigUpdated += SettingsSaved;
 			_Map = map;
@@ -39,7 +43,7 @@ namespace Codist.Views
 		}
 
 		static void CacheStyles(IClassificationTypeRegistryService service) {
-			__Styles = new Dictionary<string, StyleBase>(47);
+			__Styles = new Dictionary<string, StyleBase>(100);
 			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(service, Config.Instance.CommentStyles);
 			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(service, Config.Instance.CodeStyles);
 			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(service, Config.Instance.XmlCodeStyles);
@@ -70,15 +74,17 @@ namespace Codist.Views
 		}
 
 		void SettingsSaved(object sender, EventArgs eventArgs) {
-			if (!_IsDecorating) {
+			if (_IsDecorating == 0) {
 				CacheStyles(_RegService);
 				Decorate();
 			}
 		}
 
 		void Decorate() {
+			if (Interlocked.CompareExchange(ref _IsDecorating, 1, 0) != 0) {
+				return;
+			}
 			try {
-				_IsDecorating = true;
 				var c = _FormatMap.GetProperties(Constants.EditorProperties.Text)?[EditorFormatDefinition.ForegroundColorId];
 				if (c is Color) {
 					_ForeColor = (Color)c;
@@ -95,13 +101,16 @@ namespace Codist.Views
 				Debug.WriteLine(ex);
 			}
 			finally {
-				_IsDecorating = false;
+				_IsDecorating = 0;
 			}
 		}
 
 		void DecorateClassificationTypes() {
+			if (_Map.IsInBatchUpdate) {
+				return;
+			}
 			_Map.BeginBatchUpdate();
-			_EditorTextProperties = _Map.GetTextProperties(_RegService.GetClassificationType("text"));
+			var textProperty = _Map.GetTextProperties(_RegService.GetClassificationType("text"));
 			foreach (var item in _Map.CurrentPriorityOrder) {
 				if (item == null) {
 					continue;
@@ -125,15 +134,15 @@ namespace Codist.Views
 						}
 						__InitialProperties[item.Classification] = initialProperty = p;
 					}
-					_Map.SetTextProperties(item, SetProperties(initialProperty, style));
+					_Map.SetTextProperties(item, SetProperties(initialProperty, style, textProperty.FontRenderingEmSize));
 				}
 			}
 			_Map.EndBatchUpdate();
 		}
 
-		TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption) {
+		TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption, double textSize) {
 			var settings = styleOption;
-			var fontSize = _EditorTextProperties.FontRenderingEmSize + settings.FontSize;
+			var fontSize = textSize + settings.FontSize;
 			if (fontSize < 2) {
 				fontSize = 1;
 			}
@@ -196,7 +205,7 @@ namespace Codist.Views
 			//if ((view = (sender as ITextView)) != null) {
 			//	view.GotAggregateFocus -= TextView_GotAggregateFocus;
 			//}
-			if (!_IsDecorating) {
+			if (_IsDecorating == 0) {
 				Decorate();
 			}
 		}

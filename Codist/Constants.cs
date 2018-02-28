@@ -100,6 +100,7 @@ namespace Codist
 		public const string CSharpAttributeNotation = "C#: Attribute notation";
 		public const string CSharpLabel = "C#: Label";
 		public const string CSharpDeclarationBrace = "C#: Declaration brace";
+		public const string CSharpMethodBody = "C#: Method body";
 
 		public const string CppFunction = "cppFunction";
 		public const string CppClassTemplate = "cppClassTemplate";

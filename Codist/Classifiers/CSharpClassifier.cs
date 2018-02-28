@@ -68,14 +68,9 @@ namespace Codist.Classifiers
 		/// A list of ClassificationSpans that represent spans identified to be of this classification.
 		/// </returns>
 		public IList<ClassificationSpan> GetClassificationSpans(SnapshotSpan span) {
-
-			// NOTE: Workspace can be null for "Using directive is unnecessary". Also workspace can
-			// be null when solution/project failed to load and VS gave some reasons of it or when
-			// try to open a file doesn't contained in the current solution
 			var snapshot = span.Snapshot;
 			var workspace = snapshot.TextBuffer.GetWorkspace();
 			if (workspace == null) {
-				// TODO: Add supporting a files that doesn't included to the current solution
 				return Array.Empty<ClassificationSpan>();
 			}
 			var result = new List<ClassificationSpan>(16);
@@ -88,7 +83,8 @@ namespace Codist.Classifiers
 					var ct = item.ClassificationType;
 					if (ct == "keyword") {
 						// highlights: return, yield return, yield break, throw and continue
-						var node = unitCompilation.FindNode(item.TextSpan);
+						var node = unitCompilation.FindNode(item.TextSpan, true, true);
+						const SyntaxKind ThrowExpression = (SyntaxKind)9052;
 						switch (node.Kind()) {
 							case SyntaxKind.BreakStatement:
 								if (node.Parent is SwitchSectionSyntax == false) {
@@ -103,6 +99,7 @@ namespace Codist.Classifiers
 							case SyntaxKind.YieldReturnStatement:
 							case SyntaxKind.YieldBreakStatement:
 							case SyntaxKind.ThrowStatement:
+							case ThrowExpression:
 								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ControlFlowKeyword));
 								return false;
 						}
@@ -135,6 +132,12 @@ namespace Codist.Classifiers
 								if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace)) {
 									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
 								}
+								//if (type == _Classifications.Method && node.Span.Length > 150) {
+								//	var l = snapshot.GetLineNumberFromPosition(node.Span.End) - snapshot.GetLineNumberFromPosition(node.Span.Start);
+								//	if (l >= 50) {
+								//		result.Add(CreateClassificationSpan(snapshot, node.FullSpan, _Classifications.MethodBody));
+								//	}
+								//}
 								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.DeclarationBrace));
 							}
 						}
@@ -214,9 +217,9 @@ namespace Codist.Classifiers
 				if (symbol != null) {
 					switch (symbol.Kind) {
 						case SymbolKind.NamedType:
+						case SymbolKind.Event:
 							yield return symbol.ContainingType != null ? _Classifications.NestedDeclaration : _Classifications.Declaration;
 							break;
-						case SymbolKind.Event:
 						case SymbolKind.Method:
 							yield return _Classifications.Declaration;
 							break;
@@ -261,15 +264,15 @@ namespace Codist.Classifiers
 				case SymbolKind.RangeVariable:
 				case SymbolKind.Preprocessing:
 					//case SymbolKind.Discard:
-					break;
+					yield break;
 
 				case SymbolKind.Label:
 					yield return _Classifications.Label;
-					break;
+					yield break;
 
 				case SymbolKind.TypeParameter:
 					yield return _Classifications.TypeParameter;
-					break;
+					yield break;
 
 				case SymbolKind.Field:
 					var fieldSymbol = (symbol as IFieldSymbol);
@@ -291,7 +294,7 @@ namespace Codist.Classifiers
 
 				case SymbolKind.Namespace:
 					yield return _Classifications.Namespace;
-					break;
+					yield break;
 
 				case SymbolKind.Parameter:
 					yield return _Classifications.Parameter;
@@ -315,7 +318,7 @@ namespace Codist.Classifiers
 					break;
 
 				default:
-					break;
+					yield break;
 			}
 
 			if (symbol.IsStatic) {

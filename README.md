@@ -99,14 +99,14 @@ The scrollbar can mark...
 
 # Acknowledgements
 I have learned a lot from the following extension projects.
-* Better comments: https://marketplace.visualstudio.com/items?itemName=OmarRwemi.BetterComments
-* CommentsPlus: https://marketplace.visualstudio.com/items?itemName=mhoumann.CommentsPlus
-* Match Margin: https://marketplace.visualstudio.com/items?itemName=VisualStudioProductTeam.MatchMargin
-* Inheritance Margin: https://marketplace.visualstudio.com/items?itemName=SamHarwell.InheritanceMargin
+* Visual Studio Productivity Power Tools: https://github.com/Microsoft/VS-PPT
+* CoCo: https://github.com/GeorgeAlexandria/CoCo
+* Better comments: https://github.com/omsharp/BetterComments
+* CommentsPlus: https://github.com/mhoumann/CommentsPlus
+* Inheritance Margin: https://github.com/tunnelvisionlabs/InheritanceMargin
 * Font Sizer: https://marketplace.visualstudio.com/items?itemName=KarlShifflettkdawg.FontSizer
-* CodeBlockEndTag: https://marketplace.visualstudio.com/items?itemName=KhaosPrinz.CodeBlockEndTag
-* Remarker: https://marketplace.visualstudio.com/items?itemName=GilYoder.Remarker-18580
-* CoCo: https://marketplace.visualstudio.com/items?itemName=GeorgeAleksandria.CoCo-19226
+* CodeBlockEndTag: https://github.com/KhaosCoders/VSCodeBlockEndTag
+* Remarker: https://github.com/jgyo/remarker
 
 # Bugs and suggestions
 Please post New Issue in the GitHub project if you find any bugs or have any suggestions.

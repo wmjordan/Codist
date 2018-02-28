@@ -64,11 +64,6 @@ namespace Codist.Classifiers
 			Length = tagSpan.Span.Length;
 			Tag = tagSpan.Tag;
 		}
-		public SpanTag(int start, int length, ClassificationTag tag) {
-			Start = start;
-			Length = length;
-			Tag = tag;
-		}
 		public bool Contains(int position) {
 			return position >= Start && position < Start + Length;
 		}

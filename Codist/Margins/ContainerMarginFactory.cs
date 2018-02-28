@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.Composition;
-using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Margins
@@ -10,20 +8,13 @@ namespace Codist.Margins
 	/// Export a <see cref="IWpfTextViewMarginProvider"/>, which returns an instance of the margin for the editor to use.
 	/// </summary>
 	[Export(typeof(IWpfTextViewMarginProvider))]
-	[Name(CodeMargin.MarginName)]
-	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = PredefinedMarginNames.OverviewMark)]
-	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
-	[ContentType("CSharp")]
-    [TextViewRole(PredefinedTextViewRoles.Interactive)]
-	sealed class CodeMarginFactory : IWpfTextViewMarginProvider
+	[Name(ContainerMargin.MarginName)]
+	[Order(After = PredefinedMarginNames.HorizontalScrollBar)]  // Ensure that the margin occurs below the horizontal scrollbar
+	[MarginContainer(PredefinedMarginNames.Bottom)]             // Set the container to the bottom of the editor window
+	[ContentType("text")]                                       // Show this margin for all text-based types
+	[TextViewRole(PredefinedTextViewRoles.Interactive)]
+	internal sealed class ContainerMarginFactory : IWpfTextViewMarginProvider
 	{
-#pragma warning disable 649
-		[Import]
-		internal IEditorFormatMapService EditorFormatMapService;
-		[Import]
-		internal IViewTagAggregatorFactoryService ViewTagAggregatorFactoryService;
-#pragma warning restore 649
-
 		#region IWpfTextViewMarginProvider
 
 		/// <summary>
@@ -35,10 +26,7 @@ namespace Codist.Margins
 		/// The value may be null if this <see cref="IWpfTextViewMarginProvider"/> does not participate for this context.
 		/// </returns>
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
-			var scrollBarContainer = marginContainer as IVerticalScrollBar;
-			return scrollBarContainer != null
-				? new CodeMargin(wpfTextViewHost, scrollBarContainer, this)
-				: null;
+			return new ContainerMargin(wpfTextViewHost.TextView);
 		}
 
 		#endregion

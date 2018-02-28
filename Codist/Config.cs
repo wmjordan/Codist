@@ -22,11 +22,11 @@ namespace Codist
 		[DefaultValue(SpecialHighlightOptions.None)]
 		public SpecialHighlightOptions SpecialHighlightOptions { get; set; }
 
-		[DefaultValue(MarkerOptions.SpecialComment | MarkerOptions.TypeDeclaration | MarkerOptions.CompilerDirective | MarkerOptions.LineNumber)]
-		public MarkerOptions MarkerOptions { get; set; }
+		[DefaultValue(MarkerOptions.Default)]
+		public MarkerOptions MarkerOptions { get; set; } = MarkerOptions.Default;
 
-		[DefaultValue(QuickInfoOptions.Attributes | QuickInfoOptions.BaseType | QuickInfoOptions.Interfaces | QuickInfoOptions.NumericValues)]
-		public QuickInfoOptions QuickInfoOptions { get; set; } = QuickInfoOptions.Attributes | QuickInfoOptions.BaseType | QuickInfoOptions.Interfaces | QuickInfoOptions.NumericValues;
+		[DefaultValue(QuickInfoOptions.Default)]
+		public QuickInfoOptions QuickInfoOptions { get; set; } = QuickInfoOptions.Default;
 
 		public double TopSpace {
 			get => LineTransformers.LineHeightTransformProvider.TopSpace;
@@ -37,10 +37,10 @@ namespace Codist
 			set => LineTransformers.LineHeightTransformProvider.BottomSpace = value;
 		}
 		public bool NoSpaceBetweenWrappedLines { get; set; }
-		public List<CommentLabel> Labels { get; private set; } = new List<CommentLabel>();
-		public List<CommentStyle> CommentStyles { get; private set; } = new List<CommentStyle>();
-		public List<XmlCodeStyle> XmlCodeStyles { get; private set; } = new List<XmlCodeStyle>();
-		public List<CodeStyle> CodeStyles { get; private set; } = new List<CodeStyle>();
+		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
+		public List<CommentStyle> CommentStyles { get; } = new List<CommentStyle>();
+		public List<XmlCodeStyle> XmlCodeStyles { get; } = new List<XmlCodeStyle>();
+		public List<CodeStyle> CodeStyles { get; } = new List<CodeStyle>();
 
 		public static event EventHandler ConfigLoaded;
 		public static event EventHandler ConfigUpdated;
@@ -496,7 +496,9 @@ namespace Codist
 		InterfacesInheritence = 1 << 6,
 		NumericValues = 1 << 7,
 		String = 1 << 8,
-		Parameter = 1 << 9
+		Parameter = 1 << 9,
+		InterfaceImplementations = 1 << 10,
+		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations
 	}
 
 	[Flags]
@@ -514,6 +516,9 @@ namespace Codist
 		SpecialComment = 1,
 		TypeDeclaration = 1 << 1,
 		CompilerDirective = 1 << 2,
-		LineNumber = 1 << 3
+		LineNumber = 1 << 3,
+		CodeRange = 1 << 4,
+		LongMemberDeclaration = 1 << 5,
+		Default = SpecialComment | TypeDeclaration | LineNumber | CodeRange | LongMemberDeclaration
 	}
 }
