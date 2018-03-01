@@ -73,29 +73,7 @@ namespace Codist.Views
 			node = node.Kind() == SyntaxKind.Argument ? (node as ArgumentSyntax).Expression : node;
 			var symbol = GetSymbol(node, semanticModel);
 			if (symbol == null) {
-				StackPanel infoBox = null;
-				var nodeKind = node.Kind();
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && nodeKind == SyntaxKind.NumericLiteralExpression) {
-					infoBox = ShowNumericForm(node);
-				}
-				else if (nodeKind == SyntaxKind.SwitchStatement) {
-					qiContent.Add((node as SwitchStatementSyntax).Sections.Count + " sections");
-				}
-				else if (nodeKind == SyntaxKind.StringLiteralExpression) {
-					infoBox = ShowStringInfo(node.GetFirstToken().ValueText);
-				}
-				else if (node.Kind() == SyntaxKind.Block) {
-					var lines = currentSnapshot.GetLineNumberFromPosition(node.Span.End) - currentSnapshot.GetLineNumberFromPosition(node.SpanStart) + 1;
-					if (lines > 100) {
-						qiContent.Add(new TextBlock { Text = lines + " lines", FontWeight = FontWeight.FromOpenTypeWeight(800) });
-					}
-					else if (lines > 10) {
-						qiContent.Add(lines + " lines");
-					}
-				}
-				if (infoBox != null) {
-					qiContent.Add(infoBox);
-				}
+				ShowMiscInfo(qiContent, currentSnapshot, node);
 				goto RETURN;
 			}
 
@@ -109,10 +87,7 @@ namespace Codist.Views
 			}
 
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
-				var attrs = symbol.GetAttributes();
-				if (attrs.Length > 0) {
-					qiContent.Add(ShowAttributes(attrs, node.SpanStart));
-				}
+				ShowAttributesInfo(qiContent, node, symbol);
 			}
 			switch (symbol.Kind) {
 				case SymbolKind.Event:
@@ -129,6 +104,12 @@ namespace Codist.Views
 					break;
 				case SymbolKind.Method:
 					ShowMethodInfo(qiContent, node, symbol as IMethodSymbol);
+					if (node.Parent.IsKind(SyntaxKind.Attribute)) {
+						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
+							ShowAttributesInfo(qiContent, node, symbol.ContainingType);
+						}
+						ShowTypeInfo(qiContent, node.Parent, symbol.ContainingType as INamedTypeSymbol);
+					}
 					break;
 				case SymbolKind.NamedType:
 					ShowTypeInfo(qiContent, node, symbol as INamedTypeSymbol);
@@ -150,7 +131,40 @@ namespace Codist.Views
 				: null;
 		}
 
-		private static void ShowSelectionInfo(IQuickInfoSession session, IList<object> qiContent, SnapshotPoint point) {
+		static void ShowMiscInfo(IList<object> qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
+			StackPanel infoBox = null;
+			var nodeKind = node.Kind();
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && nodeKind == SyntaxKind.NumericLiteralExpression) {
+				infoBox = ShowNumericForm(node);
+			}
+			else if (nodeKind == SyntaxKind.SwitchStatement) {
+				qiContent.Add((node as SwitchStatementSyntax).Sections.Count + " sections");
+			}
+			else if (nodeKind == SyntaxKind.StringLiteralExpression) {
+				infoBox = ShowStringInfo(node.GetFirstToken().ValueText);
+			}
+			else if (node.Kind() == SyntaxKind.Block) {
+				var lines = currentSnapshot.GetLineNumberFromPosition(node.Span.End) - currentSnapshot.GetLineNumberFromPosition(node.SpanStart) + 1;
+				if (lines > 100) {
+					qiContent.Add(new TextBlock { Text = lines + " lines", FontWeight = FontWeight.FromOpenTypeWeight(800) });
+				}
+				else if (lines > 10) {
+					qiContent.Add(lines + " lines");
+				}
+			}
+			if (infoBox != null) {
+				qiContent.Add(infoBox);
+			}
+		}
+
+		void ShowAttributesInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
+			var attrs = symbol.GetAttributes();
+			if (attrs.Length > 0) {
+				qiContent.Add(ShowAttributes(attrs, node.SpanStart));
+			}
+		}
+
+		static void ShowSelectionInfo(IQuickInfoSession session, IList<object> qiContent, SnapshotPoint point) {
 			var selection = session.TextView.Selection;
 			if (selection.IsEmpty != false) {
 				return;
@@ -431,7 +445,7 @@ namespace Codist.Views
 			return null;
 		}
 
-		private static StackPanel ShowStringInfo(string sv) {
+		static StackPanel ShowStringInfo(string sv) {
 			return new StackPanel()
 				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.Length.ToString()).AddText("chars", true))
 				//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.UTF8.GetByteCount(sv).ToString()).AddText("UTF-8 bytes", true))
@@ -547,7 +561,7 @@ namespace Codist.Views
 			_ParameterBrush = GetFormatBrush(Constants.CSharpParameterName, formatMap);
 		}
 
-		private void _ConfigUpdated(object sender, EventArgs e) {
+		void _ConfigUpdated(object sender, EventArgs e) {
 			if (_FormatMap != null) {
 				UpdateSyntaxHighlights(_FormatMap);
 			}
@@ -720,9 +734,9 @@ namespace Codist.Views
 			qiContent.Add(info);
 		}
 
-		private static void ShowAccessibilityInfo(ISymbol symbol, StackPanel info) {
+		static void ShowAccessibilityInfo(ISymbol symbol, StackPanel info) {
 			switch (symbol.DeclaredAccessibility) {
-				case Accessibility.Private: info.AddText("private ", _KeywordBrush); break;
+				case Accessibility.Private: info.AddText("", _KeywordBrush); break;
 				case Accessibility.ProtectedAndInternal: info.AddText("protected internal ", _KeywordBrush); break;
 				case Accessibility.Protected: info.AddText("protected ", _KeywordBrush); break;
 				case Accessibility.Internal: info.AddText("internal ", _KeywordBrush); break;
@@ -855,7 +869,7 @@ namespace Codist.Views
 			public void DisconnectSubjectBuffer(ITextBuffer subjectBuffer) {
 			}
 
-			private void OnTextViewMouseHover(object sender, MouseHoverEventArgs e) {
+			void OnTextViewMouseHover(object sender, MouseHoverEventArgs e) {
 				if (Config.Instance.QuickInfoOptions != QuickInfoOptions.None) {
 					return;
 				}
