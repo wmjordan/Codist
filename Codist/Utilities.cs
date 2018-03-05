@@ -136,6 +136,30 @@ namespace Codist
 			});
 			return panel;
 		}
+		public static TextBlock AddText(this TextBlock block, string text) {
+			block.Inlines.Add(new System.Windows.Documents.Run(text));
+			return block;
+		}
+		public static TextBlock AddText(this TextBlock block, string text, bool bold) {
+			return block.AddText(text, bold, false, null);
+		}
+		public static TextBlock AddText(this TextBlock block, string text, WpfBrush brush) {
+			return block.AddText(text, false, false, brush);
+		}
+		public static TextBlock AddText(this TextBlock block, string text, bool bold, bool italic, WpfBrush brush) {
+			var run = new System.Windows.Documents.Run(text);
+			if (bold) {
+				run.FontWeight = FontWeights.Bold;
+			}
+			if (italic) {
+				run.FontStyle = FontStyles.Italic;
+			}
+			if (brush != null) {
+				run.Foreground = brush;
+			}
+			block.Inlines.Add(run);
+			return block;
+		}
 		public static TPanel AddText<TPanel>(this TPanel parent, string text)
 			where TPanel : Panel {
 			return parent.AddText(text, false, false, null);
@@ -237,7 +261,7 @@ namespace Codist
 			return text;
 		}
 		public static WpfText SetBold(this WpfText text) {
-			text.SetFontWeight(FontWeight.FromOpenTypeWeight(800));
+			text.SetFontWeight(FontWeights.Bold);
 			return text;
 		}
 		public static void ScreenShot(FrameworkElement control, string path) {

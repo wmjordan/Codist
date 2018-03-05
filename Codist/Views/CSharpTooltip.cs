@@ -146,7 +146,7 @@ namespace Codist.Views
 			else if (node.Kind() == SyntaxKind.Block) {
 				var lines = currentSnapshot.GetLineNumberFromPosition(node.Span.End) - currentSnapshot.GetLineNumberFromPosition(node.SpanStart) + 1;
 				if (lines > 100) {
-					qiContent.Add(new TextBlock { Text = lines + " lines", FontWeight = FontWeight.FromOpenTypeWeight(800) });
+					qiContent.Add(new TextBlock { Text = lines + " lines", FontWeight = FontWeights.Bold });
 				}
 				else if (lines > 10) {
 					qiContent.Add(lines + " lines");
@@ -205,7 +205,7 @@ namespace Codist.Views
 				}
 				var invoke = ev.Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
 				if (invoke != null && invoke.Parameters.Length == 2) {
-					qiContent.Add(new StackPanel().MakeHorizontal().Add(ToUIText(invoke.Parameters[1].Type.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Event argument: ", true)));
+					qiContent.Add(ToUIText(new TextBlock().AddText("Event argument: ", true), invoke.Parameters[1].Type.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
@@ -215,8 +215,8 @@ namespace Codist.Views
 
 		void ShowFieldInfo(IList<object> qiContent, SyntaxNode node, IFieldSymbol field) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-								&& (field.DeclaredAccessibility != Accessibility.Public || field.IsReadOnly || field.IsVolatile || field.IsStatic)
-								&& field.ContainingType.TypeKind != TypeKind.Enum) {
+				&& (field.DeclaredAccessibility != Accessibility.Public || field.IsReadOnly || field.IsVolatile || field.IsStatic)
+				&& field.ContainingType.TypeKind != TypeKind.Enum) {
 				ShowFieldDeclaration(qiContent, field);
 			}
 			if (field.HasConstantValue) {
@@ -226,8 +226,8 @@ namespace Codist.Views
 
 		void ShowMethodInfo(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-								&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern)
-								&& method.ContainingType.TypeKind != TypeKind.Interface) {
+				&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern)
+				&& method.ContainingType.TypeKind != TypeKind.Interface) {
 				ShowDeclarationModifier(qiContent, method, "Method", node.SpanStart);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod) && method.IsExtensionMethod) {
@@ -314,11 +314,10 @@ namespace Codist.Views
 				}
 			}
 			if (types.Count > 0) {
-				var p = new StackPanel().AddText("Implements:", true);
+				info = new StackPanel().AddText("Implements:", true);
 				foreach (var item in types) {
-					p.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
+					info.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
 				}
-				info = new StackPanel().Add(p);
 			}
 			if (explicitImplementations != null) {
 				types.Clear();
@@ -374,7 +373,7 @@ namespace Codist.Views
 		}
 
 		static void ShowExtensionMethod(IList<object> qiContent, IMethodSymbol method, int position) {
-			var info = ToUIText(method.ContainingType.ToDisplayParts(), "Defined in: ", true);
+			var info = ToUIText(new TextBlock().AddText("Defined in: ", true), method.ContainingType.ToDisplayParts());
 			string asmName = method.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
 				?? method.ContainingAssembly?.Name;
 			if (asmName != null) {
@@ -384,7 +383,7 @@ namespace Codist.Views
 		}
 
 		static void ShowFieldDeclaration(IList<object> qiContent, IFieldSymbol field) {
-			var info = new StackPanel().MakeHorizontal().AddText("Field declaration: ", true);
+			var info = new TextBlock().AddText("Field declaration: ", true);
 			ShowAccessibilityInfo(field, info);
 			if (field.IsVolatile) {
 				info.AddText("volatile ", _KeywordBrush);
@@ -492,59 +491,54 @@ namespace Codist.Views
 			return s;
 		}
 
-		static StackPanel ToUIText(ImmutableArray<SymbolDisplayPart> parts) {
-			return ToUIText(parts, null, false, Int32.MinValue);
+		static TextBlock ToUIText(ImmutableArray<SymbolDisplayPart> parts) {
+			return ToUIText(new TextBlock(), parts, Int32.MinValue);
+		}
+		static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts) {
+			return ToUIText(block, parts, Int32.MinValue);
 		}
 
-		static StackPanel ToUIText(ImmutableArray<SymbolDisplayPart> parts, string title, bool bold) {
-			return ToUIText(parts, title, bold, Int32.MinValue);
-		}
-
-		static StackPanel ToUIText(ImmutableArray<SymbolDisplayPart> parts, string title, bool bold, int argumentIndex) {
-			var stack = new StackPanel { Orientation = Orientation.Horizontal };
-			if (title != null) {
-				stack.AddText(title, bold);
-			}
+		static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, int argumentIndex) {
 			foreach (var part in parts) {
 				switch (part.Kind) {
 					case SymbolDisplayPartKind.ClassName:
-						stack.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _ClassBrush);
+						block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _ClassBrush);
 						break;
 					case SymbolDisplayPartKind.EnumName:
-						stack.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _EnumBrush);
+						block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _EnumBrush);
 						break;
 					case SymbolDisplayPartKind.InterfaceName:
-						stack.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _InterfaceBrush);
+						block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _InterfaceBrush);
 						break;
 					case SymbolDisplayPartKind.MethodName:
-						stack.AddText(part.Symbol.Name, argumentIndex != Int32.MinValue, false, _MethodBrush);
+						block.AddText(part.Symbol.Name, argumentIndex != Int32.MinValue, false, _MethodBrush);
 						break;
 					case SymbolDisplayPartKind.ParameterName:
 						if ((part.Symbol as IParameterSymbol).Ordinal == argumentIndex) {
-							stack.AddText(part.Symbol.Name, true, true, _ParameterBrush);
+							block.AddText(part.Symbol.Name, true, true, _ParameterBrush);
 						}
 						else {
-							stack.AddText(part.Symbol.Name, false, false, _ParameterBrush);
+							block.AddText(part.Symbol.Name, false, false, _ParameterBrush);
 						}
 						break;
 					case SymbolDisplayPartKind.StructName:
-						stack.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _StructBrush);
+						block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _StructBrush);
 						break;
 					case SymbolDisplayPartKind.DelegateName:
-						stack.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _DelegateBrush);
+						block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _DelegateBrush);
 						break;
 					case SymbolDisplayPartKind.StringLiteral:
-						stack.AddText(part.ToString(), false, false, _TextBrush);
+						block.AddText(part.ToString(), false, false, _TextBrush);
 						break;
 					case SymbolDisplayPartKind.Keyword:
-						stack.AddText(part.ToString(), false, false, _KeywordBrush);
+						block.AddText(part.ToString(), false, false, _KeywordBrush);
 						break;
 					default:
-						stack.AddText(part.ToString());
+						block.AddText(part.ToString());
 						break;
 				}
 			}
-			return stack;
+			return block;
 		}
 
 		static void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {
@@ -572,8 +566,7 @@ namespace Codist.Views
 			stack.AddText(attrs.Length > 1 ? "Attributes:" : "Attribute:", true);
 			foreach (var item in attrs) {
 				var a = item.AttributeClass.Name;
-				var attrStack = new StackPanel()
-					.MakeHorizontal()
+				var attrStack = new TextBlock()
 					.AddText("[")
 					.AddText(a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, _ClassBrush)
 					.AddText("(");
@@ -589,7 +582,7 @@ namespace Codist.Views
 					if (++i > 1) {
 						attrStack.AddText(", ");
 					}
-					attrStack.AddText(arg.Key + "=", false, true);
+					attrStack.AddText(arg.Key + "=", false, true, null);
 					ToUIText(attrStack, arg.Value, position);
 				}
 				attrStack.AddText(")]");
@@ -603,7 +596,7 @@ namespace Codist.Views
 			if (baseType != null) {
 				var name = baseType.Name;
 				if (IsCommonClassName(name) == false) {
-					var info = ToUIText(baseType.ToMinimalDisplayParts(_SemanticModel, position), "Base type: ", true);
+					var info = ToUIText(new TextBlock().AddText("Base type: ", true), baseType.ToMinimalDisplayParts(_SemanticModel, position));
 					while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
 						name = baseType.Name;
 						if (IsCommonClassName(name) == false) {
@@ -620,7 +613,7 @@ namespace Codist.Views
 				var t = type.EnumUnderlyingType;
 				if (t != null) {
 					var s = new StackPanel()
-						.Add(ToUIText(t.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Underlying type: ", true));
+						.Add(ToUIText(new TextBlock().AddText("Underlying type: ", true), t.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
 					if (fromEnum == false) {
 						qiContent.Add(s);
 						return;
@@ -654,21 +647,21 @@ namespace Codist.Views
 					if (min == null) {
 						return;
 					}
-					s.Add(new StackPanel().MakeHorizontal().AddText("Enum fields: ", true).AddText(c.ToString()))
-						.Add(new StackPanel()
-							.MakeHorizontal()
+					s.Add(new TextBlock().AddText("Enum fields: ", true).AddText(c.ToString()))
+						.Add(new TextBlock()
 							.AddText("Min: ", true)
 							.AddText(min.ToString() + "(")
 							.AddText(minName.Name, _EnumBrush)
 							.AddText(")"))
-						.Add(new StackPanel()
-							.MakeHorizontal()
+						.Add(new TextBlock()
 							.AddText("Max: ", true)
 							.AddText(max.ToString() + "(")
 							.AddText(maxName.Name, _EnumBrush)
 							.AddText(")"));
 					if (type.GetAttributes().FirstOrDefault(a => a.AttributeClass.ToDisplayString() == "System.FlagsAttribute") != null) {
-						s.Add(new StackPanel().MakeHorizontal().AddText("All flags: ", true).AddText(Convert.ToString(Convert.ToInt64(bits), 2)));
+						s.Add(new TextBlock()
+							.AddText("All flags: ", true)
+							.AddText(Convert.ToString(Convert.ToInt64(bits), 2)));
 					}
 					qiContent.Add(s);
 				}
@@ -707,7 +700,7 @@ namespace Codist.Views
 		}
 
 		void ShowDeclarationModifier(IList<object> qiContent, ISymbol symbol, string type, int position) {
-			var info = new StackPanel().MakeHorizontal().AddText(type, true).AddText(" declaration: ");
+			var info = new TextBlock().AddText(type, true).AddText(" declaration: ");
 			ShowAccessibilityInfo(symbol, info);
 			if (symbol.IsAbstract) {
 				info.AddText("abstract ", _KeywordBrush);
@@ -722,7 +715,7 @@ namespace Codist.Views
 				info.AddText(symbol.IsSealed ? "sealed override " : "override ", _KeywordBrush);
 				var t = ((symbol as IMethodSymbol) ?? (symbol as IPropertySymbol) ?? (ISymbol)(symbol as IEventSymbol))?.ContainingType;
 				if (t != null) {
-					info.Add(ToUIText(t.ToMinimalDisplayParts(_SemanticModel, position)));
+					ToUIText(info, t.ToMinimalDisplayParts(_SemanticModel, position));
 				}
 			}
 			else if (symbol.IsSealed) {
@@ -734,9 +727,9 @@ namespace Codist.Views
 			qiContent.Add(info);
 		}
 
-		static void ShowAccessibilityInfo(ISymbol symbol, StackPanel info) {
+		static void ShowAccessibilityInfo(ISymbol symbol, TextBlock info) {
 			switch (symbol.DeclaredAccessibility) {
-				case Accessibility.Private: info.AddText("", _KeywordBrush); break;
+				case Accessibility.Private: info.AddText("private ", _KeywordBrush); break;
 				case Accessibility.ProtectedAndInternal: info.AddText("protected internal ", _KeywordBrush); break;
 				case Accessibility.Protected: info.AddText("protected ", _KeywordBrush); break;
 				case Accessibility.Internal: info.AddText("internal ", _KeywordBrush); break;
@@ -758,10 +751,10 @@ namespace Codist.Views
 					if (ap != -1) {
 						var symbol = _SemanticModel.GetSymbolInfo(al.Parent);
 						if (symbol.Symbol != null) {
-							qiContent.Add(ToUIText(symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Argument of ", false, ap));
+							qiContent.Add(ToUIText(new TextBlock().AddText("Argument of ", false), symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), ap));
 						}
 						else if (symbol.CandidateSymbols.Length > 0) {
-							qiContent.Add(ToUIText(symbol.CandidateSymbols[0].ToMinimalDisplayParts(_SemanticModel, node.SpanStart), "Maybe argument of ", false, ap));
+							qiContent.Add(ToUIText(new TextBlock().AddText("Maybe argument of ", false),  symbol.CandidateSymbols[0].ToMinimalDisplayParts(_SemanticModel, node.SpanStart), ap));
 						}
 						else {
 							qiContent.Add("Argument " + ap);
@@ -779,14 +772,14 @@ namespace Codist.Views
 		void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {
 			_SemanticModel = null;
 		}
-		void ToUIText(StackPanel attrStack, TypedConstant v, int position) {
+		void ToUIText(TextBlock block, TypedConstant v, int position) {
 			switch (v.Kind) {
 				case TypedConstantKind.Primitive:
 					if (v.Value is bool) {
-						attrStack.AddText((bool)v.Value ? "true" : "false", _KeywordBrush);
+						block.AddText((bool)v.Value ? "true" : "false", _KeywordBrush);
 					}
 					else {
-						attrStack.AddText(v.ToCSharpString(), _NumberBrush);
+						block.AddText(v.ToCSharpString(), _NumberBrush);
 					}
 					break;
 				case TypedConstantKind.Enum:
@@ -802,36 +795,36 @@ namespace Codist.Views
 						var flags = items.ToArray();
 						for (int i = 0; i < flags.Length; i++) {
 							if (i > 0) {
-								attrStack.AddText(" | ");
+								block.AddText(" | ");
 							}
-							attrStack.AddText(v.Type.Name + "." + flags[i].Name, _EnumBrush);
+							block.AddText(v.Type.Name + "." + flags[i].Name, _EnumBrush);
 						}
 					}
 					else {
-						attrStack.AddText(v.Type.Name + en.Substring(en.LastIndexOf('.')), _EnumBrush);
+						block.AddText(v.Type.Name + en.Substring(en.LastIndexOf('.')), _EnumBrush);
 					}
 					break;
 				case TypedConstantKind.Type:
-					attrStack.AddText("typeof", _KeywordBrush).AddText("(");
-					attrStack.Children.Add(ToUIText((v.Value as ITypeSymbol).ToMinimalDisplayParts(_SemanticModel, position)));
-					attrStack.AddText(")");
+					block.AddText("typeof", _KeywordBrush).AddText("(");
+					ToUIText(block, (v.Value as ITypeSymbol).ToMinimalDisplayParts(_SemanticModel, position));
+					block.AddText(")");
 					break;
 				case TypedConstantKind.Array:
-					attrStack.AddText("{");
+					block.AddText("{");
 					bool c = false;
 					foreach (var item in v.Values) {
 						if (c == false) {
 							c = true;
 						}
 						else {
-							attrStack.AddText(", ");
+							block.AddText(", ");
 						}
-						ToUIText(attrStack, item, position);
+						ToUIText(block, item, position);
 					}
-					attrStack.AddText("}");
+					block.AddText("}");
 					break;
 				default:
-					attrStack.AddText(v.ToCSharpString());
+					block.AddText(v.ToCSharpString());
 					break;
 			}
 		}
