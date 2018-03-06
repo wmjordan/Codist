@@ -12,7 +12,7 @@ namespace Codist.Margins
 {
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
 	/// <summary>
-	/// Helper class to handle the rendering of the structure margin.
+	/// Helper class to handle the rendering of the members margin.
 	/// </summary>
 	sealed class CSharpMembersMarginElement : FrameworkElement
 	{
@@ -30,7 +30,7 @@ namespace Codist.Margins
 		readonly Pen _EmptyPen = new Pen();
 
 		/// <summary>
-		/// Constructor for the StructureMarginElement.
+		/// Constructor for the <see cref="CSharpMembersMarginElement"/>.
 		/// </summary>
 		/// <param name="textView">ITextView to which this StructureMargenElement will be attacheded.</param>
 		/// <param name="verticalScrollbar">Vertical scrollbar of the ITextViewHost that contains <paramref name="textView"/>.</param>
@@ -62,9 +62,9 @@ namespace Codist.Margins
 
 		private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
 			if ((bool)e.NewValue) {
-				//Hook up to the various events we need to keep the caret margin current.
-				_scrollBar.TrackSpanChanged += OnMappingChanged;
-				//_scrollBar.Map.MappingChanged += OnMappingChanged;
+				//todo refresh the margin when format mapping or syntax highlight style is changed
+				//Hook up to the various events we need to keep the margin current.
+				_scrollBar.TrackSpanChanged += OnTagsChanged;
 
 				//todo cache opaque brushes
 				_ClassPen = new Pen(_formatMap.GetBrush(Constants.CodeClassName).Alpha(TypeAlpha), TypeLineSize);
@@ -85,8 +85,7 @@ namespace Codist.Margins
 				InvalidateVisual();
 			}
 			else {
-				//_scrollBar.Map.MappingChanged -= OnMappingChanged;
-				_scrollBar.TrackSpanChanged -= OnMappingChanged;
+				_scrollBar.TrackSpanChanged -= OnTagsChanged;
 
 				_tagger.BatchedTagsChanged -= OnTagsChanged;
 				_tagger.Dispose();
@@ -100,11 +99,6 @@ namespace Codist.Margins
 		}
 
 		private void OnTagsChanged(object sender, EventArgs e) {
-			InvalidateVisual();
-		}
-
-		private void OnMappingChanged(object sender, EventArgs e) {
-			//Force the visual to invalidate since the we'll need to redraw all the structure markings
 			InvalidateVisual();
 		}
 

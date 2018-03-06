@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Classifiers
 {
-	public sealed class CSharpBlockTagger : ITagger<ICodeMemberTag>
+	sealed class CSharpBlockTagger : ITagger<ICodeMemberTag>
 	{
 		ITextBuffer _buffer;
 		int _refCount;
@@ -22,6 +22,18 @@ namespace Codist.Classifiers
 		}
 
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
+
+		public static async Task<CodeBlock> ParseAsync(ITextSnapshot snapshot, CancellationToken token) {
+			CodeBlock parentCodeBlockNode = null;
+			try {
+				parentCodeBlockNode = await GetAndParseSyntaxNodeAsync(snapshot, token);
+			}
+			catch (TaskCanceledException) {
+				//ignore the exception.
+			}
+
+			return parentCodeBlockNode;
+		}
 
 		public void AddRef() {
 			if (++_refCount == 1) {
@@ -64,7 +76,7 @@ namespace Codist.Classifiers
 			}
 		}
 
-		private static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
+		static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
 			while (oldVersion != currentVersion) {
 				if (oldVersion.Changes.Count > 0) {
 					return true;
@@ -74,52 +86,6 @@ namespace Codist.Classifiers
 			}
 
 			return false;
-		}
-
-		static IEnumerable<ITagSpan<ICodeMemberTag>> GetTags(CodeBlock block, NormalizedSnapshotSpanCollection spans) {
-			if (spans.IntersectsWith(new NormalizedSnapshotSpanCollection(block.Span))) {
-				yield return new TagSpan<ICodeMemberTag>(block.Span, block);
-
-				foreach (var child in block.Children) {
-					foreach (var tag in GetTags(child, spans)) {
-						yield return tag;
-					}
-				}
-			}
-		}
-
-		private void OnChanged(object sender, TextContentChangedEventArgs e) {
-			if (AnyTextChanges(e.Before.Version, e.After.Version)) {
-				ScanBuffer(e.After);
-			}
-		}
-
-		private void ScanBuffer(ITextSnapshot snapshot) {
-			if (_scan != null) {
-				//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
-				_scan.Cancel();
-				_scan = null;
-			}
-
-			//The underlying buffer could be very large, meaning that doing the scan for all matches on the UI thread
-			//is a bad idea. Do the scan on the background thread and use a callback to raise the changed event when
-			//the entire scan has completed.
-			_scan = new BackgroundScan(snapshot, (CodeBlock newRoot) => {
-				//This delegate is executed on a background thread.
-				_root = newRoot;
-				TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, 0, snapshot.Length)));
-			});
-		}
-		public static async Task<CodeBlock> ParseAsync(ITextSnapshot snapshot, CancellationToken token) {
-			CodeBlock parentCodeBlockNode = null;
-			try {
-				parentCodeBlockNode = await GetAndParseSyntaxNodeAsync(snapshot, token);
-			}
-			catch (TaskCanceledException) {
-				//ignore the exception.
-			}
-
-			return parentCodeBlockNode;
 		}
 
 		static async Task<CodeBlock> GetAndParseSyntaxNodeAsync(ITextSnapshot snapshot, CancellationToken token) {
@@ -132,23 +98,14 @@ namespace Codist.Classifiers
 			return root;
 		}
 
-		static void ParseSyntaxNode(ITextSnapshot snapshot, SyntaxNode parentSyntaxNode, CodeBlock parentCodeBlockNode, int level, CancellationToken token) {
-			if (token.IsCancellationRequested) {
-				throw new TaskCanceledException();
-			}
+		static IEnumerable<ITagSpan<ICodeMemberTag>> GetTags(CodeBlock block, NormalizedSnapshotSpanCollection spans) {
+			if (spans.IntersectsWith(new NormalizedSnapshotSpanCollection(block.Span))) {
+				yield return new TagSpan<ICodeMemberTag>(block.Span, block);
 
-			foreach (var node in parentSyntaxNode.ChildNodes()) {
-				CodeMemberType type = MatchDeclaration(node);
-				if (type != CodeMemberType.Unknown) {
-					var name = ((node as Microsoft.CodeAnalysis.CSharp.Syntax.BaseTypeDeclarationSyntax)?.Identifier ?? (node as Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax)?.Identifier);
-					var child = new CodeBlock(parentCodeBlockNode, type, name?.Text, new SnapshotSpan(snapshot, node.SpanStart, node.Span.Length), level + 1);
-					if (type > CodeMemberType.Type) {
-						continue;
+				foreach (var child in block.Children) {
+					foreach (var tag in GetTags(child, spans)) {
+						yield return tag;
 					}
-					ParseSyntaxNode(snapshot, node, child, level + 1, token);
-				}
-				else {
-					ParseSyntaxNode(snapshot, node, parentCodeBlockNode, level, token);
 				}
 			}
 		}
@@ -185,6 +142,49 @@ namespace Codist.Classifiers
 			}
 		}
 
+		static void ParseSyntaxNode(ITextSnapshot snapshot, SyntaxNode parentSyntaxNode, CodeBlock parentCodeBlockNode, int level, CancellationToken token) {
+			if (token.IsCancellationRequested) {
+				throw new TaskCanceledException();
+			}
+
+			foreach (var node in parentSyntaxNode.ChildNodes()) {
+				CodeMemberType type = MatchDeclaration(node);
+				if (type != CodeMemberType.Unknown) {
+					var name = ((node as Microsoft.CodeAnalysis.CSharp.Syntax.BaseTypeDeclarationSyntax)?.Identifier ?? (node as Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax)?.Identifier);
+					var child = new CodeBlock(parentCodeBlockNode, type, name?.Text, new SnapshotSpan(snapshot, node.SpanStart, node.Span.Length), level + 1);
+					if (type > CodeMemberType.Type) {
+						continue;
+					}
+					ParseSyntaxNode(snapshot, node, child, level + 1, token);
+				}
+				else {
+					ParseSyntaxNode(snapshot, node, parentCodeBlockNode, level, token);
+				}
+			}
+		}
+
+		void OnChanged(object sender, TextContentChangedEventArgs e) {
+			if (AnyTextChanges(e.Before.Version, e.After.Version)) {
+				ScanBuffer(e.After);
+			}
+		}
+
+		void ScanBuffer(ITextSnapshot snapshot) {
+			if (_scan != null) {
+				//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
+				_scan.Cancel();
+				_scan = null;
+			}
+
+			//The underlying buffer could be very large, meaning that doing the scan for all matches on the UI thread
+			//is a bad idea. Do the scan on the background thread and use a callback to raise the changed event when
+			//the entire scan has completed.
+			_scan = new BackgroundScan(snapshot, (CodeBlock newRoot) => {
+				//This delegate is executed on a background thread.
+				_root = newRoot;
+				TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, 0, snapshot.Length)));
+			});
+		}
 		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
 		sealed class BackgroundScan
 		{

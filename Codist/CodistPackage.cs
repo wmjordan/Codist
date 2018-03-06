@@ -30,7 +30,7 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.XmlCodeStyle), Constants.NameOfMe, "Syntax highlight (XML)", 0, 0, true, Sort = 120)]
 	[ProvideOptionPage(typeof(Options.CommentStyle), Constants.NameOfMe, "Syntax highlight (Comment)", 0, 0, true, Sort = 130)]
 	[ProvideOptionPage(typeof(Options.CommentTagger), Constants.NameOfMe + "\\Syntax highlight (Comment)", "Tagger (Comment)", 0, 0, true, Sort = 131)]
-	public sealed class CodistPackage : Package
+	sealed class CodistPackage : Package
 	{
 		/// <summary>
 		/// CodistPackage GUID string.

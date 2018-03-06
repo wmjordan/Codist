@@ -902,6 +902,7 @@ namespace Codist.Views
 			[Import]
 			IEditorFormatMapService _EditorFormatMapService = null;
 
+			//note although the following two services are not used, they are still required to make the quickinfo work
 			[Import]
 			internal ITextStructureNavigatorSelectorService _NavigatorService = null;
 			[Import]

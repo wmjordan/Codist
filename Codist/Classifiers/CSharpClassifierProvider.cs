@@ -10,20 +10,20 @@ namespace Codist.Classifiers
     /// </summary>
     [Export(typeof(IClassifierProvider))]
     [ContentType("CSharp")]
-    internal sealed class CSharpClassifierProvider : IClassifierProvider
+    sealed class CSharpClassifierProvider : IClassifierProvider
     {
         /// <summary>
         /// Classification registry to be used for getting a reference to the custom classification
         /// type later.
         /// </summary>
         [Import]
-        private IClassificationTypeRegistryService _classificationRegistry = null;
+        IClassificationTypeRegistryService _classificationRegistry = null;
 
         /// <summary>
         /// Text document factory to be used for getting a event of text document disposed.
         /// </summary>
         [Import]
-        private ITextDocumentFactoryService _textDocumentFactoryService = null;
+        ITextDocumentFactoryService _textDocumentFactoryService = null;
 
         /// <summary>
         /// Gets a classifier for the given text buffer.

@@ -16,7 +16,7 @@ namespace Codist.Classifiers
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType("code")]
 	[TagType(typeof(ClassificationTag))]
-	public class CodeTaggerProvider : IViewTaggerProvider
+	sealed class CodeTaggerProvider : IViewTaggerProvider
 	{
 		[Import]
 		internal IClassificationTypeRegistryService ClassificationRegistry = null;
@@ -48,10 +48,9 @@ namespace Codist.Classifiers
 			None, CSharp, Markup
 		}
 
-		sealed class CodeTagger : ITagger<ClassificationTag>, IDisposable
+		class CodeTagger : ITagger<ClassificationTag>, IDisposable
 		{
 			static ClassificationTag[] __CommentClassifications;
-			//static ClassificationTag _exitClassification;
 			static ClassificationTag _abstractionClassification;
 			readonly ITagAggregator<IClassificationTag> _Aggregator;
 			readonly TaggerResult _Tags;
@@ -153,13 +152,6 @@ namespace Codist.Classifiers
 							case Constants.CSharpMethodBody:
 								_Tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
 								continue;
-							//case Constants.CodeKeyword:
-							//	if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Declaration)) {
-							//		if (Matches(ss, "abstract") || Matches(ss, "override") || Matches(ss, "virtual")) {
-							//			yield return _Tags.Add(new TagSpan<ClassificationTag>(ss, _abstractionClassification));
-							//		}
-							//	}
-							//	continue;
 							default:
 								break;
 						}

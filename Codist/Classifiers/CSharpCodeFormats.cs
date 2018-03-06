@@ -10,7 +10,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpLocalFieldName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class LocalFieldFormat : ClassificationFormatDefinition
+	sealed class LocalFieldFormat : ClassificationFormatDefinition
 	{
 		public LocalFieldFormat() {
 			DisplayName = Constants.NameOfMe + ": local field";
@@ -22,7 +22,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpConstFieldName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class ConstFieldFormat : ClassificationFormatDefinition
+	sealed class ConstFieldFormat : ClassificationFormatDefinition
 	{
 		public ConstFieldFormat() {
 			DisplayName = Constants.NameOfMe + ": const field";
@@ -34,7 +34,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpReadOnlyFieldName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class ReadOnlyFieldFormat : ClassificationFormatDefinition
+	sealed class ReadOnlyFieldFormat : ClassificationFormatDefinition
 	{
 		public ReadOnlyFieldFormat() {
 			DisplayName = Constants.NameOfMe + ": readonly field";
@@ -46,7 +46,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpParameterName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class ParameterFormat : ClassificationFormatDefinition
+	sealed class ParameterFormat : ClassificationFormatDefinition
 	{
 		public ParameterFormat() {
 			DisplayName = Constants.NameOfMe + ": parameter";
@@ -58,7 +58,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpTypeParameterName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class TypeParameterFormat : ClassificationFormatDefinition
+	sealed class TypeParameterFormat : ClassificationFormatDefinition
 	{
 		public TypeParameterFormat() {
 			DisplayName = Constants.NameOfMe + ": type parameter";
@@ -70,7 +70,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpNamespaceName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class NamespaceFormat : ClassificationFormatDefinition
+	sealed class NamespaceFormat : ClassificationFormatDefinition
 	{
 		public NamespaceFormat() {
 			DisplayName = Constants.NameOfMe + ": namespace";
@@ -82,7 +82,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpExtensionMethodName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class ExtensionMethodFormat : ClassificationFormatDefinition
+	sealed class ExtensionMethodFormat : ClassificationFormatDefinition
 	{
 		public ExtensionMethodFormat() {
 			DisplayName = Constants.NameOfMe + ": extension method";
@@ -94,7 +94,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpExternMethodName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class ExternMethodFormat : ClassificationFormatDefinition
+	sealed class ExternMethodFormat : ClassificationFormatDefinition
 	{
 		public ExternMethodFormat() {
 			DisplayName = Constants.NameOfMe + ": extern method";
@@ -106,7 +106,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpMethodName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class MethodFormat : ClassificationFormatDefinition
+	sealed class MethodFormat : ClassificationFormatDefinition
 	{
 		public MethodFormat() {
 			DisplayName = Constants.NameOfMe + ": method";
@@ -118,7 +118,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpEventName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class EventFormat : ClassificationFormatDefinition
+	sealed class EventFormat : ClassificationFormatDefinition
 	{
 		public EventFormat() {
 			DisplayName = Constants.NameOfMe + ": event";
@@ -130,7 +130,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpPropertyName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class PropertyFormat : ClassificationFormatDefinition
+	sealed class PropertyFormat : ClassificationFormatDefinition
 	{
 		public PropertyFormat() {
 			DisplayName = Constants.NameOfMe + ": property";
@@ -142,7 +142,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpFieldName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class FieldFormat : ClassificationFormatDefinition
+	sealed class FieldFormat : ClassificationFormatDefinition
 	{
 		public FieldFormat() {
 			DisplayName = Constants.NameOfMe + ": field";
@@ -154,7 +154,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpAliasNamespaceName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class AliasNamespaceFormat : ClassificationFormatDefinition
+	sealed class AliasNamespaceFormat : ClassificationFormatDefinition
 	{
 		public AliasNamespaceFormat() {
 			DisplayName = Constants.NameOfMe + ": alias namespace";
@@ -166,7 +166,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpConstructorMethodName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class ConstructorMethodFormat : ClassificationFormatDefinition
+	sealed class ConstructorMethodFormat : ClassificationFormatDefinition
 	{
 		public ConstructorMethodFormat() {
 			DisplayName = Constants.NameOfMe + ": constructor method";
@@ -178,7 +178,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpDeclarationName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class DeclarationFormat : ClassificationFormatDefinition
+	sealed class DeclarationFormat : ClassificationFormatDefinition
 	{
 		public DeclarationFormat() {
 			DisplayName = Constants.NameOfMe + ": declaration";
@@ -190,7 +190,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpDeclarationBrace)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class DeclarationBraceFormat : ClassificationFormatDefinition
+	sealed class DeclarationBraceFormat : ClassificationFormatDefinition
 	{
 		public DeclarationBraceFormat() {
 			DisplayName = Constants.NameOfMe + ": declaration brace";
@@ -202,7 +202,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpNestedDeclarationName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class NestedDeclarationFormat : ClassificationFormatDefinition
+	sealed class NestedDeclarationFormat : ClassificationFormatDefinition
 	{
 		public NestedDeclarationFormat() {
 			DisplayName = Constants.NameOfMe + ": nested declaration";
@@ -214,7 +214,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpStaticMemberName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class StaticMemberFormat : ClassificationFormatDefinition
+	sealed class StaticMemberFormat : ClassificationFormatDefinition
 	{
 		public StaticMemberFormat() {
 			DisplayName = Constants.NameOfMe + ": static member";
@@ -227,7 +227,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpOverrideMemberName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class OverrideMemberFormat : ClassificationFormatDefinition
+	sealed class OverrideMemberFormat : ClassificationFormatDefinition
 	{
 		public OverrideMemberFormat() {
 			DisplayName = Constants.NameOfMe + ": override member";
@@ -239,7 +239,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpAbstractMemberName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class AbstractMemberFormat : ClassificationFormatDefinition
+	sealed class AbstractMemberFormat : ClassificationFormatDefinition
 	{
 		public AbstractMemberFormat() {
 			DisplayName = Constants.NameOfMe + ": abstract member";
@@ -251,7 +251,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpVirtualMemberName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class VirtualMemberFormat : ClassificationFormatDefinition
+	sealed class VirtualMemberFormat : ClassificationFormatDefinition
 	{
 		public VirtualMemberFormat() {
 			DisplayName = Constants.NameOfMe + ": virtual member";
@@ -263,7 +263,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpSealedClassName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class SealedClassFormat : ClassificationFormatDefinition
+	sealed class SealedClassFormat : ClassificationFormatDefinition
 	{
 		public SealedClassFormat() {
 			DisplayName = Constants.NameOfMe + ": sealed class";
@@ -275,7 +275,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpLabel)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class LabelFormat : ClassificationFormatDefinition
+	sealed class LabelFormat : ClassificationFormatDefinition
 	{
 		public LabelFormat() {
 			DisplayName = Constants.NameOfMe + ": label";
@@ -287,7 +287,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpAttributeNotation)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	internal sealed class AttributeNotationFormat : ClassificationFormatDefinition
+	sealed class AttributeNotationFormat : ClassificationFormatDefinition
 	{
 		public AttributeNotationFormat() {
 			DisplayName = Constants.NameOfMe + ": attribute notation";

@@ -11,7 +11,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CodeAbstractionKeyword)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class AbstractKeywordFormat : ClassificationFormatDefinition
+	sealed class AbstractKeywordFormat : ClassificationFormatDefinition
 	{
 		public AbstractKeywordFormat() {
 			DisplayName = Constants.CodeAbstractionKeyword;
@@ -22,7 +22,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CodeControlFlowKeyword)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class ControlFlowKeywordFormat : ClassificationFormatDefinition
+	sealed class ControlFlowKeywordFormat : ClassificationFormatDefinition
 	{
 		public ControlFlowKeywordFormat() {
 			DisplayName = Constants.CodeControlFlowKeyword;
@@ -36,7 +36,7 @@ namespace Codist.Classifiers
 	[Name(Constants.EmphasisComment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class EmphasisCommentFormat : ClassificationFormatDefinition
+	sealed class EmphasisCommentFormat : ClassificationFormatDefinition
 	{
 		public EmphasisCommentFormat() {
 			DisplayName = Constants.EmphasisComment + " (//!)";
@@ -50,7 +50,7 @@ namespace Codist.Classifiers
 	[Name(Constants.QuestionComment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class QuestionCommentFormat : ClassificationFormatDefinition
+	sealed class QuestionCommentFormat : ClassificationFormatDefinition
 	{
 		public QuestionCommentFormat() {
 			DisplayName = Constants.QuestionComment + " (//?)";
@@ -63,7 +63,7 @@ namespace Codist.Classifiers
 	[Name(Constants.ExclaimationComment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class ExclaimationCommentFormat : ClassificationFormatDefinition
+	sealed class ExclaimationCommentFormat : ClassificationFormatDefinition
 	{
 		public ExclaimationCommentFormat() {
 			DisplayName = Constants.ExclaimationComment + " (//!?)";
@@ -76,7 +76,7 @@ namespace Codist.Classifiers
 	[Name(Constants.DeletionComment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class DeletionCommentFormat : ClassificationFormatDefinition
+	sealed class DeletionCommentFormat : ClassificationFormatDefinition
 	{
 		public DeletionCommentFormat() {
 			DisplayName = Constants.DeletionComment + " (//x)";
@@ -89,7 +89,7 @@ namespace Codist.Classifiers
 	[Name(Constants.TodoComment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class ToDoCommentFormat : ClassificationFormatDefinition
+	sealed class ToDoCommentFormat : ClassificationFormatDefinition
 	{
 		public ToDoCommentFormat() {
 			DisplayName = Constants.TodoComment + " (//ToDo)";
@@ -103,7 +103,7 @@ namespace Codist.Classifiers
 	[Name(Constants.NoteComment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class NoteCommentFormat : ClassificationFormatDefinition
+	sealed class NoteCommentFormat : ClassificationFormatDefinition
 	{
 		public NoteCommentFormat() {
 			DisplayName = Constants.NoteComment + " (//Note)";
@@ -117,7 +117,7 @@ namespace Codist.Classifiers
 	[Name(Constants.HackComment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class HackCommentFormat : ClassificationFormatDefinition
+	sealed class HackCommentFormat : ClassificationFormatDefinition
 	{
 		public HackCommentFormat() {
 			DisplayName = Constants.HackComment + " (//Hack)";
@@ -131,7 +131,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Heading1Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Heading1CommentFormat : ClassificationFormatDefinition
+	sealed class Heading1CommentFormat : ClassificationFormatDefinition
 	{
 		public Heading1CommentFormat() {
 			DisplayName = Constants.Heading1Comment + " (//+++)";
@@ -145,7 +145,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Heading2Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Heading2CommentFormat : ClassificationFormatDefinition
+	sealed class Heading2CommentFormat : ClassificationFormatDefinition
 	{
 		public Heading2CommentFormat() {
 			DisplayName = Constants.Heading2Comment + " (//++)";
@@ -159,7 +159,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Heading3Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Heading3CommentFormat : ClassificationFormatDefinition
+	sealed class Heading3CommentFormat : ClassificationFormatDefinition
 	{
 		public Heading3CommentFormat() {
 			DisplayName = Constants.Heading3Comment + " (//+)";
@@ -173,7 +173,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Heading4Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Heading4CommentFormat : ClassificationFormatDefinition
+	sealed class Heading4CommentFormat : ClassificationFormatDefinition
 	{
 		public Heading4CommentFormat() {
 			DisplayName = Constants.Heading4Comment + " (//-)";
@@ -186,7 +186,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Heading5Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Heading5CommentFormat : ClassificationFormatDefinition
+	sealed class Heading5CommentFormat : ClassificationFormatDefinition
 	{
 		public Heading5CommentFormat() {
 			DisplayName = Constants.Heading5Comment + " (//--)";
@@ -199,7 +199,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Heading6Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Heading6CommentFormat : ClassificationFormatDefinition
+	sealed class Heading6CommentFormat : ClassificationFormatDefinition
 	{
 		public Heading6CommentFormat() {
 			DisplayName = Constants.Heading6Comment + " (//---)";
@@ -212,7 +212,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Task1Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Task1CommentFormat : ClassificationFormatDefinition
+	sealed class Task1CommentFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -221,7 +221,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Task2Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Task2CommentFormat : ClassificationFormatDefinition
+	sealed class Task2CommentFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -230,7 +230,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Task3Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Task3CommentFormat : ClassificationFormatDefinition
+	sealed class Task3CommentFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -239,7 +239,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Task4Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Task4CommentFormat : ClassificationFormatDefinition
+	sealed class Task4CommentFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -248,7 +248,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Task5Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Task5CommentFormat : ClassificationFormatDefinition
+	sealed class Task5CommentFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -257,7 +257,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Task6Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Task6CommentFormat : ClassificationFormatDefinition
+	sealed class Task6CommentFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -266,7 +266,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Task7Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Task7CommentFormat : ClassificationFormatDefinition
+	sealed class Task7CommentFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -275,7 +275,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Task8Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Task8CommentFormat : ClassificationFormatDefinition
+	sealed class Task8CommentFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -284,7 +284,7 @@ namespace Codist.Classifiers
 	[Name(Constants.Task9Comment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class Task9CommentFormat : ClassificationFormatDefinition
+	sealed class Task9CommentFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -293,7 +293,7 @@ namespace Codist.Classifiers
 	[Name(Constants.XmlName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class XmlNameFormat : ClassificationFormatDefinition
+	sealed class XmlNameFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -302,7 +302,7 @@ namespace Codist.Classifiers
 	[Name(Constants.XmlAttributeName)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class XmlAttributeNameFormat : ClassificationFormatDefinition
+	sealed class XmlAttributeNameFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -311,7 +311,7 @@ namespace Codist.Classifiers
 	[Name(Constants.XmlAttributeQuotes)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class XmlAttributeQuotesFormat : ClassificationFormatDefinition
+	sealed class XmlAttributeQuotesFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -320,7 +320,7 @@ namespace Codist.Classifiers
 	[Name(Constants.XmlAttributeValue)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class XmlAttributeValueFormat : ClassificationFormatDefinition
+	sealed class XmlAttributeValueFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -329,7 +329,7 @@ namespace Codist.Classifiers
 	[Name(Constants.XmlCData)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class XmlCDataFormat : ClassificationFormatDefinition
+	sealed class XmlCDataFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -338,7 +338,7 @@ namespace Codist.Classifiers
 	[Name(Constants.XmlComment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class XmlCommentFormat : ClassificationFormatDefinition
+	sealed class XmlCommentFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -347,7 +347,7 @@ namespace Codist.Classifiers
 	[Name(Constants.XmlDelimiter)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class XmlDelimiterFormat : ClassificationFormatDefinition
+	sealed class XmlDelimiterFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -356,7 +356,7 @@ namespace Codist.Classifiers
 	[Name(Constants.XmlProcessingInstruction)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class XmlProcessingInstructionFormat : ClassificationFormatDefinition
+	sealed class XmlProcessingInstructionFormat : ClassificationFormatDefinition
 	{
 	}
 
@@ -365,7 +365,7 @@ namespace Codist.Classifiers
 	[Name(Constants.XmlText)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	public sealed class XmlTextFormat : ClassificationFormatDefinition
+	sealed class XmlTextFormat : ClassificationFormatDefinition
 	{
 	}
 

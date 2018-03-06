@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist
 {
-	public interface ICodeMemberTag : ITag
+	interface ICodeMemberTag : ITag
     {
         SnapshotSpan Span { get; }
 		CodeMemberType Type { get; }
@@ -13,7 +13,7 @@ namespace Codist
 		string Name { get; }
 	}
 
-	public class CodeBlock : ICodeMemberTag
+	sealed class CodeBlock : ICodeMemberTag
 	{
 		readonly SnapshotSpan _Span;
 		readonly CodeBlock _Parent;
@@ -42,7 +42,7 @@ namespace Codist
 		public string Name => _Name;
 	}
 
-	public enum CodeMemberType
+	enum CodeMemberType
     {
         Root, Class, Interface, Struct, Type = Struct, Enum, Delegate, Member, Constructor, Property, Method, Field, Event, Other, Unknown
     }

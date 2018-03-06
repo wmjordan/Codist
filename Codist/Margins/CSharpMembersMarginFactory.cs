@@ -14,7 +14,7 @@ namespace Codist.Margins
 	[ContentType("CSharp")]
 	[TextViewRole(PredefinedTextViewRoles.EmbeddedPeekTextView)]
 	[TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
-	internal sealed class CSharpMembersMarginFactory : IWpfTextViewMarginProvider
+	sealed class CSharpMembersMarginFactory : IWpfTextViewMarginProvider
 	{
 		[Import]
 		internal IViewTagAggregatorFactoryService TagAggregatorFactoryService { get; set; }

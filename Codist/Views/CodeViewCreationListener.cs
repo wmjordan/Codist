@@ -10,7 +10,7 @@ namespace Codist.Views
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType("code")]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
-	internal sealed class CodeViewCreationListener : IWpfTextViewCreationListener
+	sealed class CodeViewCreationListener : IWpfTextViewCreationListener
 	{
 		public void TextViewCreated(IWpfTextView textView) {
 			textView.Properties.GetOrCreateSingletonProperty(() => {

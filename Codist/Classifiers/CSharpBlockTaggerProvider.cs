@@ -10,7 +10,7 @@ namespace Codist.Classifiers
 	[Export(typeof(ITaggerProvider))]
 	[ContentType("CSharp")]
 	[TagType(typeof(ICodeMemberTag))]
-	internal sealed class CSharpBlockTaggerProvider : ITaggerProvider
+	sealed class CSharpBlockTaggerProvider : ITaggerProvider
 	{
 		public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag {
 			if (typeof(T) != typeof(ICodeMemberTag)) {
@@ -26,16 +26,16 @@ namespace Codist.Classifiers
 	}
 
 
-	internal sealed class DisposableTagger : ITagger<ICodeMemberTag>, IDisposable
+	sealed class DisposableTagger : ITagger<ICodeMemberTag>, IDisposable
 	{
-		private CSharpBlockTagger _tagger;
+		CSharpBlockTagger _tagger;
 		public DisposableTagger(CSharpBlockTagger tagger) {
 			_tagger = tagger;
 			_tagger.AddRef();
 			_tagger.TagsChanged += OnTagsChanged;
 		}
 
-		private void OnTagsChanged(object sender, SnapshotSpanEventArgs e) {
+		void OnTagsChanged(object sender, SnapshotSpanEventArgs e) {
 			TagsChanged?.Invoke(sender, e);
 		}
 

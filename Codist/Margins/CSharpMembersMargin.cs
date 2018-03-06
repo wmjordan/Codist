@@ -7,17 +7,13 @@ namespace Codist.Margins
 	/// <summary>
 	/// Implementation of a margin that show the structure of a code file.
 	/// </summary>
-	internal sealed class CSharpMembersMargin : IWpfTextViewMargin
+	sealed class CSharpMembersMargin : IWpfTextViewMargin
 	{
 		public const string Name = "CodeMembers";
 
 		readonly CSharpMembersMarginElement _structureMarginElement;
 		bool _isDisposed;
 
-		/// <summary>
-		/// Constructor for the StructureMargin.
-		/// </summary>
-		/// <param name="textViewHost">The IWpfTextViewHost in which this margin will be displayed.</param>
 		public CSharpMembersMargin(IWpfTextViewHost textViewHost, IVerticalScrollBar scrollBar, CSharpMembersMarginFactory factory) {
 			_structureMarginElement = new CSharpMembersMarginElement(textViewHost.TextView, scrollBar, factory);
 		}

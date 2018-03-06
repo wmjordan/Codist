@@ -15,7 +15,7 @@ namespace Codist.Classifiers
 	/// <summary>
 	/// Classifier that classifies all text as an instance of the "EditorClassifier" classification type.
 	/// </summary>
-	internal sealed class CSharpClassifier : IClassifier
+	sealed class CSharpClassifier : IClassifier
 	{
 		static CSharpClassifications _Classifications;
 
@@ -132,12 +132,6 @@ namespace Codist.Classifiers
 								if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace)) {
 									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
 								}
-								//if (type == _Classifications.Method && node.Span.Length > 150) {
-								//	var l = snapshot.GetLineNumberFromPosition(node.Span.End) - snapshot.GetLineNumberFromPosition(node.Span.Start);
-								//	if (l >= 50) {
-								//		result.Add(CreateClassificationSpan(snapshot, node.FullSpan, _Classifications.MethodBody));
-								//	}
-								//}
 								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.DeclarationBrace));
 							}
 						}
@@ -171,7 +165,6 @@ namespace Codist.Classifiers
 			SyntaxNode root;
 			var sourceText = snapshot.AsText();
 			var docId = DocumentId.CreateNewId(workspace.GetDocumentIdInCurrentContext(sourceText.Container).ProjectId);
-			//var solution = workspace.CurrentSolution.WithProjectCompilationOptions(docId.ProjectId, new CSharpCompilationOptions(OutputKind.ConsoleApplication, usings: new[] { "Codist" }));
 			var document = workspace.CurrentSolution
 				.AddDocument(docId, "xmlDocCData.cs", snapshot.GetText(item.TextSpan.Start, item.TextSpan.Length))
 				.WithDocumentSourceCodeKind(docId, SourceCodeKind.Script)
