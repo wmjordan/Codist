@@ -16,30 +16,45 @@ namespace Codist.Views
 		static readonly Dictionary<string, TextFormattingRunProperties> __InitialProperties = new Dictionary<string, TextFormattingRunProperties>(30);
 		static Dictionary<string, StyleBase> __Styles;
 
+		readonly IWpfTextView _TextView;
 		readonly IClassificationFormatMap _Map;
 		readonly IClassificationTypeRegistryService _RegService;
 		readonly IEditorFormatMap _FormatMap;
 
 		Color _BackColor, _ForeColor;
-		int _IsDecorating;
+		volatile int _IsDecorating;
+		//bool _PendingRefresh;
 
-		public CodeViewDecorator(ITextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service, IEditorFormatMap formatMap) {
-			view.Closed += (s, args) => {
-				Config.ConfigUpdated -= SettingsSaved;
-				_Map.ClassificationFormatMappingChanged -= SettingsSaved;
-			};
+		public CodeViewDecorator(IWpfTextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service, IEditorFormatMap formatMap) {
+			view.Closed += View_Closed;
+			//view.VisualElement.IsVisibleChanged += VisualElement_IsVisibleChanged;
 			map.ClassificationFormatMappingChanged += SettingsSaved;
 			//view.GotAggregateFocus += TextView_GotAggregateFocus;
 			Config.ConfigUpdated += SettingsSaved;
+
 			_Map = map;
 			_RegService = service;
 			_FormatMap = formatMap;
+			_TextView = view;
 
 			if (__Styles == null) {
 				CacheStyles(service);
 			}
 
 			Decorate();
+		}
+
+		//void VisualElement_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+		//	if (_PendingRefresh && _TextView.VisualElement.IsVisible) {
+		//		SettingsSaved(sender, EventArgs.Empty);
+		//	}
+		//}
+
+		void View_Closed(object sender, EventArgs e) {
+			Config.ConfigUpdated -= SettingsSaved;
+			_Map.ClassificationFormatMappingChanged -= SettingsSaved;
+			//_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
+			_TextView.Closed -= View_Closed;
 		}
 
 		static void CacheStyles(IClassificationTypeRegistryService service) {
@@ -74,10 +89,21 @@ namespace Codist.Views
 		}
 
 		void SettingsSaved(object sender, EventArgs eventArgs) {
-			if (_IsDecorating == 0) {
-				CacheStyles(_RegService);
-				Decorate();
+			if (_IsDecorating != 0) {
+				return;
 			}
+			if (_TextView.VisualElement.IsVisible) {
+				//if (_PendingRefresh) {
+					CacheStyles(_RegService);
+					Decorate();
+					//_PendingRefresh = false;
+					Debug.WriteLine("Unset pending refresh");
+				//}
+			}
+			//else {
+			//	_PendingRefresh = true;
+			//	Debug.WriteLine("Set pending refresh");
+			//}
 		}
 
 		void Decorate() {
@@ -200,14 +226,14 @@ namespace Codist.Views
 			return properties;
 		}
 
-		private void TextView_GotAggregateFocus(object sender, EventArgs e) {
-			//ITextView view;
-			//if ((view = (sender as ITextView)) != null) {
-			//	view.GotAggregateFocus -= TextView_GotAggregateFocus;
-			//}
-			if (_IsDecorating == 0) {
-				Decorate();
-			}
-		}
+		//void TextView_GotAggregateFocus(object sender, EventArgs e) {
+		//	//ITextView view;
+		//	//if ((view = (sender as ITextView)) != null) {
+		//	//	view.GotAggregateFocus -= TextView_GotAggregateFocus;
+		//	//}
+		//	if (_IsDecorating == 0) {
+		//		Decorate();
+		//	}
+		//}
 	}
 }

@@ -113,7 +113,7 @@ namespace Codist.Classifiers
 					else {
 						var start = spans[0].Start;
 						var end = spans[spans.Count - 1].End;
-						Debug.WriteLine($"Get tag [{start.Position}..{end.Position})");
+						//Debug.WriteLine($"Get tag [{start.Position}..{end.Position})");
 
 						tagSpans = _Aggregator.GetTags(spans);
 					}

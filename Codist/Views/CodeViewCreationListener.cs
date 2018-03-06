@@ -13,13 +13,15 @@ namespace Codist.Views
 	internal sealed class CodeViewCreationListener : IWpfTextViewCreationListener
 	{
 		public void TextViewCreated(IWpfTextView textView) {
-			textView.Properties.GetOrCreateSingletonProperty(() => CreateDecorator(textView));
+			textView.Properties.GetOrCreateSingletonProperty(() => {
+				return new CodeViewDecorator(
+					textView,
+					_FormatMapService.GetClassificationFormatMap(textView),
+					_TypeRegistryService,
+					_EditorFormatMapService.GetEditorFormatMap(textView));
+			});
 			//IEditorFormatMap formatMap = _EditorFormatMapService.GetEditorFormatMap(textView);
 			//ChangeEditorFormat(formatMap, EditorTextViewBackground, m => m[EditorFormatDefinition.BackgroundBrushId] = Brushes.LightYellow);
-		}
-
-		public CodeViewDecorator CreateDecorator(IWpfTextView textView) {
-			return new CodeViewDecorator(textView, _FormatMapService.GetClassificationFormatMap(textView), _TypeRegistryService, _EditorFormatMapService.GetEditorFormatMap(textView));
 		}
 
 		static void ChangeEditorFormat(IEditorFormatMap formatMap, string propertyId, Action<System.Windows.ResourceDictionary> changer) {
@@ -39,7 +41,6 @@ namespace Codist.Views
 
 		[Import]
 		IEditorFormatMapService _EditorFormatMapService;
-
 #pragma warning restore 649
 	}
 }

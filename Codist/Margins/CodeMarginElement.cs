@@ -54,16 +54,7 @@ namespace Codist.Margins
 			{ Constants.Task7Comment, TaskBrush },
 			{ Constants.Task8Comment, TaskBrush },
 			{ Constants.Task9Comment, TaskBrush },
-			//{ Constants.CodeClassName, ClassNameBrush },
-			//{ Constants.CodeStructName, StructNameBrush },
-			//{ Constants.CodeInterfaceName, InterfaceNameBrush },
-			//{ Constants.CodeEnumName, EnumNameBrush },
-			//{ Constants.CodeKeyword, ClassNameBrush },
 			{ Constants.CodePreprocessorKeyword, PreProcessorBrush },
-			//{ Constants.CodeAbstractionKeyword, AbstractionBrush },
-			//{ Constants.CSharpMethodBody, MethodBodyBrush },
-			//{ Constants.ThrowKeyword, ThrowKeywordBrush },
-			//{ Constants.ReturnKeyword, ReturnKeywordBrush },
 		};
 		bool _HasEvents;
 		bool _OptionsChanging;
@@ -89,7 +80,7 @@ namespace Codist.Margins
 			//subscribe to change events and use them to update the markers
 			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
 			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
-			_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
+			//_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 			_ScrollBar.TrackSpanChanged += OnMappingChanged;
 		}
 
@@ -154,6 +145,7 @@ namespace Codist.Margins
 			//
 			//It is possible this will get called twice in quick succession (when the tab containing the host is made visible, the view and the margin
 			//will get visibility changed events).
+			Debug.WriteLine(e.Property + " changed: " + e.OldValue + " -> " + e.NewValue);
 			if (!_OptionsChanging) {
 				UpdateEventHandlers(true);
 			}
@@ -175,9 +167,6 @@ namespace Codist.Margins
 				_HasEvents = needEvents;
 				if (needEvents) {
 					_EditorFormatMap.FormatMappingChanged += OnFormatMappingChanged;
-					//_textView.LayoutChanged += OnLayoutChanged;
-					//_textView.Selection.SelectionChanged += OnPositionChanged;
-					//_scrollBar.Map.MappingChanged += OnMappingChanged;
 					_ScrollBar.TrackSpanChanged += OnMappingChanged;
 					OnFormatMappingChanged(null, null);
 
@@ -185,14 +174,7 @@ namespace Codist.Margins
 				}
 				else {
 					_EditorFormatMap.FormatMappingChanged -= OnFormatMappingChanged;
-					//_textView.LayoutChanged -= OnLayoutChanged;
-					//_textView.Selection.SelectionChanged -= OnPositionChanged;
-					//_scrollBar.Map.MappingChanged -= OnMappingChanged;
 					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
-					//if (_search != null) {
-					//	_search.Abort();
-					//	_search = null;
-					//}
 				}
 			}
 
@@ -203,7 +185,6 @@ namespace Codist.Margins
 		/// Handler for the scrollbar changing its coordinate mapping.
 		/// </summary>
 		void OnMappingChanged(object sender, EventArgs e) {
-			//Simply invalidate the visual: the positions of the various highlights haven't changed.
 			InvalidateVisual();
 		}
 		/// <summary>
@@ -257,23 +238,6 @@ namespace Codist.Margins
 					// avoid drawing too many closed markers
 					continue;
 				}
-				//if (b == ClassNameBrush || b == InterfaceNameBrush || b == StructNameBrush || b == EnumNameBrush) {
-				//	if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Length > 0) {
-				//		// the tag could be zero-lengthed, so we have to check
-				//		var t = snapshot.GetText(tag.Start, tag.Length);
-				//		if (t.Length == 1 && (t[0] == '{' || t[0] == '}')) {
-				//			continue;
-				//		}
-				//		DrawDeclarationMark(drawingContext, b, y, c, t);
-				//	}
-				//	continue;
-				//}
-				//else if (b == MethodBodyBrush) {
-				//	DrawMethodBody(drawingContext, b, y, _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, tag.Start + tag.Length)));
-				//}
-				//else if (b == AbstractionBrush) {
-				//	DrawMark(drawingContext, b, y, 1);
-				//}
 				else if (b == PreProcessorBrush) {
 					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)) {
 						DrawMark(drawingContext, b, y, 0);
@@ -310,27 +274,6 @@ namespace Codist.Margins
 			dc.DrawRectangle(brush, CommentPen, new Rect(MarkPadding, y - HalfMarkSize, MarkSize, MarkSize));
 		}
 
-		//static void DrawDeclarationMark(DrawingContext dc, Brush brush, double y, string type, string typeName) {
-		//	//dc.DrawEllipse(brush, null, new Point(HalfMarkSize, y - HalfMarkSize), MarkSize, MarkSize);
-		//	string t = null;
-		//	for (int i = 1; i < typeName.Length; i++) {
-		//		var ch = typeName[i];
-		//		if (!char.IsUpper(ch)) {
-		//			continue;
-		//		}
-		//		char[] c = new char[2];
-		//		c[0] = typeName[0];
-		//		c[1] = ch;
-		//		t = new string(c);
-		//		break;
-		//	}
-		//	if (t == null) {
-		//		t = typeName[0].ToString();
-		//	}
-		//	var ft = Utilities.ToFormattedText(t, 9, brush).SetBold();
-		//	dc.DrawText(ft, new Point(0, y - ft.Height / 2));
-		//}
-
 		static void DrawMark(DrawingContext dc, Brush brush, double y, int style) {
 			switch (style) {
 				case 0:
@@ -342,10 +285,6 @@ namespace Codist.Margins
 			}
 		}
 
-		//static void DrawKeywordMark(DrawingContext dc, Brush brush, double y) {
-		//	dc.DrawEllipse(brush, null, new Point(HalfMarkSize, y - HalfMarkSize * 0.5), HalfMarkSize, HalfMarkSize);
-		//}
-
 		#region IDisposable Support
 		bool disposedValue = false;
 
@@ -354,7 +293,7 @@ namespace Codist.Margins
 				if (disposing) {
 					_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
 					IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
-					_TextView.VisualElement.IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
+					//_TextView.VisualElement.IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
 					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 				}
 
