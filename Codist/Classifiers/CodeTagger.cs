@@ -24,23 +24,24 @@ namespace Codist.Classifiers
 		[Import]
 		internal IBufferTagAggregatorFactoryService Aggregator = null;
 
-		ITagAggregator<IClassificationTag> _Tagger;
-		ITextView _TextView;
-		CodeTagger _CodeTagger;
-
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
-			_Tagger = Aggregator.CreateTagAggregator<IClassificationTag>(buffer);
-			_TextView = textView;
+			var codeType = CodeTagger.GetCodeType(textView.TextBuffer.ContentType);
+			if (codeType == CodeType.None) {
+				return null;
+			}
+			var vp = textView.Properties;
+			var tagger = vp.GetOrCreateSingletonProperty(() => Aggregator.CreateTagAggregator<IClassificationTag>(buffer));
+			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
+			var codeTagger = vp.GetOrCreateSingletonProperty(() => new CodeTagger(ClassificationRegistry, tagger, tags, codeType));
 			textView.Closed += TextViewClosed;
-			var tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
-			_CodeTagger = new CodeTagger(ClassificationRegistry, _Tagger, tags, CodeTagger.GetCodeType(textView.TextBuffer.ContentType));
-			return _CodeTagger as ITagger<T>;
+			return codeTagger as ITagger<T>;
 		}
 
 		void TextViewClosed(object sender, EventArgs args) {
-			_Tagger.Dispose();
-			_TextView.Closed -= TextViewClosed;
-			_CodeTagger.Dispose();
+			var textView = sender as ITextView;
+			textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>(typeof(ITagAggregator<IClassificationTag>))?.Dispose();
+			textView.Properties.GetProperty<CodeTagger>(typeof(CodeTagger))?.Dispose();
+			textView.Closed -= TextViewClosed;
 		}
 
 		enum CodeType
@@ -48,7 +49,7 @@ namespace Codist.Classifiers
 			None, CSharp, Markup
 		}
 
-		class CodeTagger : ITagger<ClassificationTag>, IDisposable
+		sealed class CodeTagger : ITagger<ClassificationTag>, IDisposable
 		{
 			static ClassificationTag[] __CommentClassifications;
 			static ClassificationTag _abstractionClassification;

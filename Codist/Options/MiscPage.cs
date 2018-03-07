@@ -46,6 +46,14 @@ namespace Codist.Options
 				}
 			};
 			_LoadConfigButton.Click += (s, args) => {
+				_ThemeMenu.Show(_LoadConfigButton, new Point(0, _LoadConfigButton.Height));
+			};
+			_ThemeMenu.ItemClicked += (s, args) => {
+				switch (args.ClickedItem.Tag) {
+					case "Light": Config.LoadConfig(Config.LightTheme); return;
+					case "Dark": Config.LoadConfig(Config.DarkTheme); return;
+				}
+				_ThemeMenu.Hide();
 				using (var d = new OpenFileDialog {
 					Title = "Load Codist configuration file...",
 					FileName = "Codist.json",

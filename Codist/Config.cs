@@ -13,6 +13,9 @@ namespace Codist
 {
 	sealed class Config
 	{
+		const string ThemePrefix = "res:";
+		internal const string LightTheme = ThemePrefix + "Light", DarkTheme = ThemePrefix + "Dark";
+
 		static DateTime _LastSaved, _LastLoaded;
 		static int _LoadingConfig;
 
@@ -82,7 +85,11 @@ namespace Codist
 		}
 
 		static Config InternalLoadConfig(string configPath) {
-			Config config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(configPath), new JsonSerializerSettings {
+			var configContent = configPath == LightTheme ? Properties.Resources.Light
+				: configPath == DarkTheme ? Properties.Resources.Dark
+				: File.ReadAllText(configPath);
+			var removeFontNames = configPath.StartsWith(ThemePrefix, StringComparison.Ordinal);
+			Config config = JsonConvert.DeserializeObject<Config>(configContent, new JsonSerializerSettings {
 				DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
 				NullValueHandling = NullValueHandling.Ignore,
 				Error = (sender, args) => {
@@ -99,6 +106,7 @@ namespace Codist
 				InitDefaultLabels(l);
 			}
 			var s = config.CommentStyles;
+			CleanUpStyleEntry(s, removeFontNames);
 			for (int i = s.Count - 1; i >= 0; i--) {
 				if (s[i] == null || Enum.IsDefined(typeof(CommentStyleTypes), s[i].StyleID) == false) {
 					s.RemoveAt(i);
@@ -106,6 +114,7 @@ namespace Codist
 			}
 			MergeDefaultStyles(s);
 			var cs = config.CodeStyles;
+			CleanUpStyleEntry(cs, removeFontNames);
 			for (int i = cs.Count - 1; i >= 0; i--) {
 				if (cs[i] == null || Enum.IsDefined(typeof(CodeStyleTypes), cs[i].StyleID) == false) {
 					cs.RemoveAt(i);
@@ -113,6 +122,7 @@ namespace Codist
 			}
 			MergeDefaultCodeStyles(cs);
 			var xcs = config.XmlCodeStyles;
+			CleanUpStyleEntry(xcs, removeFontNames);
 			for (int i = xcs.Count - 1; i >= 0; i--) {
 				if (xcs[i] == null || Enum.IsDefined(typeof(XmlStyleTypes), xcs[i].StyleID) == false) {
 					xcs.RemoveAt(i);
@@ -168,6 +178,16 @@ namespace Codist
 		internal void FireConfigChangedEvent() {
 			ConfigUpdated?.Invoke(this, EventArgs.Empty);
 		}
+
+		static void CleanUpStyleEntry<TStyle> (List<TStyle> styles, bool removeFontNames)
+			where TStyle : StyleBase {
+			styles.RemoveAll(i => i.Id < 1);
+			styles.Sort((x, y) => x.Id - y.Id);
+			if (removeFontNames) {
+				styles.ForEach(i => i.Font = null);
+			}
+		}
+
 		static Config GetDefaultConfig() {
 			_LastLoaded = DateTime.Now;
 			var c = new Config();
@@ -201,21 +221,21 @@ namespace Codist
 		}
 		static void MergeDefaultStyles(List<CommentStyle> styles) {
 			foreach (var s in GetDefaultCommentStyles()) {
-				if (styles.FindIndex(i=> i.StyleID == s.StyleID) == -1) {
+				if (s.Id > 0 && styles.FindIndex(i=> i.StyleID == s.StyleID) == -1) {
 					styles.Add(s);
 				}
 			}
 		}
 		static void MergeDefaultCodeStyles(List<CodeStyle> styles) {
 			foreach (var s in GetDefaultCodeStyles()) {
-				if (styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
+				if (s.Id > 0 && styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
 					styles.Add(s);
 				}
 			}
 		}
 		static void MergeDefaultXmlCodeStyles(List<XmlCodeStyle> styles) {
 			foreach (var s in GetDefaultXmlCodeStyles()) {
-				if (styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
+				if (s.Id > 0 && styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
 					styles.Add(s);
 				}
 			}
@@ -274,7 +294,7 @@ namespace Codist
 	abstract class StyleBase
 	{
 		static protected readonly Regex FriendlyNamePattern = new Regex(@"([a-z])([A-Z])", RegexOptions.Singleline);
-		Color _backColor, _foreColor;
+
 		public abstract int Id { get; }
 		/// <summary>Gets or sets whether the content rendered in bold.</summary>
 		public bool? Bold { get; set; }
@@ -290,13 +310,13 @@ namespace Codist
 		public double FontSize { get; set; }
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		public string ForegroundColor {
-			get { return _foreColor.ToHexString(); }
-			set { _foreColor = Utilities.ParseColor(value); }
+			get { return ForeColor.ToHexString(); }
+			set { ForeColor = Utilities.ParseColor(value); }
 		}
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		public string BackgroundColor {
-			get { return _backColor.ToHexString(); }
-			set { _backColor = Utilities.ParseColor(value); }
+			get { return BackColor.ToHexString(); }
+			set { BackColor = Utilities.ParseColor(value); }
 		}
 		/// <summary>Gets or sets the brush effect to draw the background color.</summary>
 		public BrushEffect BackgroundEffect { get; set; }
@@ -305,14 +325,8 @@ namespace Codist
 		/// <summary>Gets or sets the font.</summary>
 		public string Font { get; set; }
 
-		internal Color ForeColor {
-			get { return _foreColor; }
-			set { _foreColor = value; }
-		}
-		internal Color BackColor {
-			get { return _backColor; }
-			set { _backColor = value; }
-		}
+		internal Color ForeColor { get; set; }
+		internal Color BackColor { get; set; }
 
 		public abstract string Category { get; }
 		internal StyleBase Clone() {
@@ -327,15 +341,15 @@ namespace Codist
 			style.FontSize = FontSize;
 			style.BackgroundEffect = BackgroundEffect;
 			style.Font = Font;
-			style._foreColor = _foreColor;
-			style._backColor = _backColor;
+			style.ForeColor = ForeColor;
+			style.BackColor = BackColor;
 		}
 		internal void Reset() {
 			Bold = Italic = OverLine = Underline = Strikethrough = null;
 			FontSize = 0;
 			BackgroundEffect = BrushEffect.Solid;
 			Font = null;
-			_foreColor = _backColor = default(Color);
+			ForeColor = BackColor = default(Color);
 		}
 	}
 

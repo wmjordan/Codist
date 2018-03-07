@@ -778,6 +778,9 @@ namespace Codist.Views
 					if (v.Value is bool) {
 						block.AddText((bool)v.Value ? "true" : "false", _KeywordBrush);
 					}
+					else if (v.Value is string) {
+						block.AddText(v.ToCSharpString(), _TextBrush);
+					}
 					else {
 						block.AddText(v.ToCSharpString(), _NumberBrush);
 					}

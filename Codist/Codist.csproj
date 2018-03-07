@@ -108,6 +108,11 @@
     <Compile Include="Options\UiLock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Classifiers\TaggerResult.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="TestPage.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Views\CSharpTooltip.cs" />
@@ -120,6 +125,8 @@
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Resources\Dark Codist.json" />
+    <None Include="Resources\Light Codist.json" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -372,6 +379,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Options\SyntaxStyleOptionPage.resx">
       <DependentUpon>SyntaxStyleOptionPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="VSPackage.resx">
       <MergeWithCTO>true</MergeWithCTO>
