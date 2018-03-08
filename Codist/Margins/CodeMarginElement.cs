@@ -76,7 +76,7 @@ namespace Codist.Margins
 
 			_MarkerOptions = Config.Instance.MarkerOptions;
 			Visibility = _MarkerOptions != MarkerOptions.None ? Visibility.Visible : Visibility.Collapsed;
-			Config.ConfigUpdated += Config_Updated;
+			Config.Updated += Config_Updated;
 			//subscribe to change events and use them to update the markers
 			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
 			IsVisibleChanged += OnViewOrMarginVisiblityChanged;

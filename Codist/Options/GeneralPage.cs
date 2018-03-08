@@ -1,24 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Codist.Options
 {
-	public partial class MiscPage : UserControl
+	public partial class GeneralPage : UserControl
 	{
 		readonly UiLock _UI = new UiLock();
 		bool _Loaded;
 
-		public MiscPage() {
+		public GeneralPage() {
 			InitializeComponent();
 		}
-		internal MiscPage(ConfigPage page) : this() {
+		internal GeneralPage(ConfigPage page) : this() {
 			_UI.CommonEventAction += Config.Instance.FireConfigChangedEvent;
 		}
 		private void MiscPage_Load(object sender, EventArgs e) {
@@ -48,6 +42,11 @@ namespace Codist.Options
 			_LoadConfigButton.Click += (s, args) => {
 				_ThemeMenu.Show(_LoadConfigButton, new Point(0, _LoadConfigButton.Height));
 			};
+			_ResetConfigButton.Click += (s, args) => {
+				if (MessageBox.Show("Do you want to reset the syntax highlight settings to default?", nameof(Codist), MessageBoxButtons.YesNo) == DialogResult.Yes) {
+					Config.ResetStyles();
+				}
+			};
 			_ThemeMenu.ItemClicked += (s, args) => {
 				switch (args.ClickedItem.Tag) {
 					case "Light": Config.LoadConfig(Config.LightTheme); return;
@@ -68,11 +67,11 @@ namespace Codist.Options
 						System.IO.File.Copy(d.FileName, Config.ConfigPath, true);
 					}
 					catch (Exception ex) {
-						MessageBox.Show("Error occured while loading config file: " + ex.Message, "Codist");
+						MessageBox.Show("Error occured while loading config file: " + ex.Message, nameof(Codist));
 					}
 				}
 			};
-			Config.ConfigUpdated += (s, args) => LoadConfig(s as Config);
+			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
 

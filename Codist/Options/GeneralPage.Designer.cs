@@ -1,6 +1,6 @@
 ﻿namespace Codist.Options
 {
-	partial class MiscPage
+	partial class GeneralPage
 	{
 		/// <summary> 
 		/// 必需的设计器变量。
@@ -35,6 +35,7 @@
 			this._SaveConfigButton = new System.Windows.Forms.Button();
 			this._LoadConfigButton = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this._ResetConfigButton = new System.Windows.Forms.Button();
 			this._ThemeMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this._LightThemeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this._DarkThemeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -122,6 +123,7 @@
 			// 
 			// groupBox2
 			// 
+			this.groupBox2.Controls.Add(this._ResetConfigButton);
 			this.groupBox2.Controls.Add(this._SaveConfigButton);
 			this.groupBox2.Controls.Add(this._LoadConfigButton);
 			this.groupBox2.Location = new System.Drawing.Point(3, 3);
@@ -129,7 +131,16 @@
 			this.groupBox2.Size = new System.Drawing.Size(407, 66);
 			this.groupBox2.TabIndex = 3;
 			this.groupBox2.TabStop = false;
-			this.groupBox2.Text = "Configuration and presets";
+			this.groupBox2.Text = "Super syntax highlight settings";
+			// 
+			// _ResetConfigButton
+			// 
+			this._ResetConfigButton.Location = new System.Drawing.Point(242, 24);
+			this._ResetConfigButton.Name = "_ResetConfigButton";
+			this._ResetConfigButton.Size = new System.Drawing.Size(111, 23);
+			this._ResetConfigButton.TabIndex = 2;
+			this._ResetConfigButton.Text = "Reset...";
+			this._ResetConfigButton.UseVisualStyleBackColor = true;
 			// 
 			// _ThemeMenu
 			// 
@@ -161,13 +172,13 @@
 			this._CustomThemeMenuItem.Size = new System.Drawing.Size(255, 24);
 			this._CustomThemeMenuItem.Text = "&Custom configurations...";
 			// 
-			// MiscPage
+			// GeneralPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
-			this.Name = "MiscPage";
+			this.Name = "GeneralPage";
 			this.Size = new System.Drawing.Size(575, 328);
 			this.Load += new System.EventHandler(this.MiscPage_Load);
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).EndInit();
@@ -195,5 +206,6 @@
 		private System.Windows.Forms.ToolStripMenuItem _LightThemeMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem _DarkThemeMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem _CustomThemeMenuItem;
+		private System.Windows.Forms.Button _ResetConfigButton;
 	}
 }

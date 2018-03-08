@@ -45,8 +45,8 @@ namespace Codist
 		public List<XmlCodeStyle> XmlCodeStyles { get; } = new List<XmlCodeStyle>();
 		public List<CodeStyle> CodeStyles { get; } = new List<CodeStyle>();
 
-		public static event EventHandler ConfigLoaded;
-		public static event EventHandler ConfigUpdated;
+		public static event EventHandler Loaded;
+		public static event EventHandler Updated;
 
 		public static Config InitConfig() {
 			//AppHelpers.LogHelper.UseLogMethod(i => Debug.WriteLine(i));
@@ -72,8 +72,8 @@ namespace Codist
 			}
 			try {
 				Instance = InternalLoadConfig(configPath);
-				ConfigLoaded?.Invoke(Instance, EventArgs.Empty);
-				ConfigUpdated?.Invoke(Instance, EventArgs.Empty);
+				Loaded?.Invoke(Instance, EventArgs.Empty);
+				Updated?.Invoke(Instance, EventArgs.Empty);
 			}
 			catch(Exception ex) {
 				Debug.WriteLine(ex.ToString());
@@ -88,7 +88,7 @@ namespace Codist
 			var configContent = configPath == LightTheme ? Properties.Resources.Light
 				: configPath == DarkTheme ? Properties.Resources.Dark
 				: File.ReadAllText(configPath);
-			var removeFontNames = configPath.StartsWith(ThemePrefix, StringComparison.Ordinal);
+			var loadFromTheme = configPath.StartsWith(ThemePrefix, StringComparison.Ordinal);
 			Config config = JsonConvert.DeserializeObject<Config>(configContent, new JsonSerializerSettings {
 				DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
 				NullValueHandling = NullValueHandling.Ignore,
@@ -106,7 +106,7 @@ namespace Codist
 				InitDefaultLabels(l);
 			}
 			var s = config.CommentStyles;
-			CleanUpStyleEntry(s, removeFontNames);
+			CleanUpStyleEntry(s, loadFromTheme);
 			for (int i = s.Count - 1; i >= 0; i--) {
 				if (s[i] == null || Enum.IsDefined(typeof(CommentStyleTypes), s[i].StyleID) == false) {
 					s.RemoveAt(i);
@@ -114,7 +114,7 @@ namespace Codist
 			}
 			MergeDefaultStyles(s);
 			var cs = config.CodeStyles;
-			CleanUpStyleEntry(cs, removeFontNames);
+			CleanUpStyleEntry(cs, loadFromTheme);
 			for (int i = cs.Count - 1; i >= 0; i--) {
 				if (cs[i] == null || Enum.IsDefined(typeof(CodeStyleTypes), cs[i].StyleID) == false) {
 					cs.RemoveAt(i);
@@ -122,27 +122,31 @@ namespace Codist
 			}
 			MergeDefaultCodeStyles(cs);
 			var xcs = config.XmlCodeStyles;
-			CleanUpStyleEntry(xcs, removeFontNames);
+			CleanUpStyleEntry(xcs, loadFromTheme);
 			for (int i = xcs.Count - 1; i >= 0; i--) {
 				if (xcs[i] == null || Enum.IsDefined(typeof(XmlStyleTypes), xcs[i].StyleID) == false) {
 					xcs.RemoveAt(i);
 				}
 			}
 			MergeDefaultXmlCodeStyles(xcs);
+			if (loadFromTheme) {
+				// don't override other settings if loaded from predefined themes
+				ResetCodeStyle(Instance.CommentStyles, config.CommentStyles);
+				ResetCodeStyle(Instance.CodeStyles, config.CodeStyles);
+				ResetCodeStyle(Instance.XmlCodeStyles, config.XmlCodeStyles);
+				_LastLoaded = DateTime.Now;
+				return Instance;
+			}
 			_LastLoaded = DateTime.Now;
 			Debug.WriteLine("Config loaded");
 			return config;
 		}
 
-		public void Reset() {
-			Labels.Clear();
-			InitDefaultLabels(Labels);
-			CommentStyles.Clear();
-			CommentStyles.AddRange(GetDefaultCommentStyles());
-			CodeStyles.Clear();
-			CodeStyles.AddRange(GetDefaultCodeStyles());
-			XmlCodeStyles.Clear();
-			XmlCodeStyles.AddRange(GetDefaultXmlCodeStyles());
+		public static void ResetStyles() {
+			ResetCodeStyle(Instance.CommentStyles, GetDefaultCommentStyles());
+			ResetCodeStyle(Instance.CodeStyles, GetDefaultCodeStyles());
+			ResetCodeStyle(Instance.XmlCodeStyles, GetDefaultXmlCodeStyles());
+			Updated?.Invoke(Instance, EventArgs.Empty);
 		}
 
 		public void SaveConfig(string path) {
@@ -167,7 +171,7 @@ namespace Codist
 				if (path == ConfigPath) {
 					_LastSaved = _LastLoaded = DateTime.Now;
 					Debug.WriteLine("Config saved");
-					ConfigUpdated?.Invoke(this, EventArgs.Empty);
+					Updated?.Invoke(this, EventArgs.Empty);
 				}
 			}
 			catch (Exception ex) {
@@ -176,7 +180,7 @@ namespace Codist
 		}
 
 		internal void FireConfigChangedEvent() {
-			ConfigUpdated?.Invoke(this, EventArgs.Empty);
+			Updated?.Invoke(this, EventArgs.Empty);
 		}
 
 		static void CleanUpStyleEntry<TStyle> (List<TStyle> styles, bool removeFontNames)
@@ -239,6 +243,10 @@ namespace Codist
 					styles.Add(s);
 				}
 			}
+		}
+		static void ResetCodeStyle<TStyle>(List<TStyle> source, IEnumerable<TStyle> target) {
+			source.Clear();
+			source.AddRange(target);
 		}
 		internal static CommentStyle[] GetDefaultCommentStyles() {
 			return new CommentStyle[] {

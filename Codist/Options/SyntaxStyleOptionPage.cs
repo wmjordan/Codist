@@ -45,13 +45,41 @@ namespace Codist.Options
 			foreach (var item in ff) {
 				_FontBox.Items.Add(new FontFamilyItem(item));
 			}
-			_FontBox.SelectedIndexChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.Font = _FontBox.Text.Length == 0 ? null : _FontBox.Text; } };
-			_BoldBox.CheckStateChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.Bold = ToBool(_BoldBox.CheckState); } };
-			_ItalicBox.CheckStateChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.Italic = ToBool(_ItalicBox.CheckState); } };
-			_UnderlineBox.CheckStateChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.Underline = ToBool(_UnderlineBox.CheckState); } };
-			_StrikeBox.CheckStateChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.Strikethrough = ToBool(_StrikeBox.CheckState); } };
-			_BackgroundEffectBox.SelectedIndexChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.BackgroundEffect = (BrushEffect)_BackgroundEffectBox.SelectedIndex; } };
-			_FontSizeBox.ValueChanged += (s, args) => { if (_uiLock == false && _activeStyle != null) { _activeStyle.FontSize = (double)_FontSizeBox.Value; } };
+			_FontBox.SelectedIndexChanged += (s, args) => {
+				if (_uiLock == false && _activeStyle != null) {
+					_activeStyle.Font = _FontBox.Text.Length == 0 ? null : _FontBox.Text;
+				}
+			};
+			_BoldBox.CheckStateChanged += (s, args) => {
+				if (_uiLock == false && _activeStyle != null) {
+					_activeStyle.Bold = ToBool(_BoldBox.CheckState);
+				}
+			};
+			_ItalicBox.CheckStateChanged += (s, args) => {
+				if (_uiLock == false && _activeStyle != null) {
+					_activeStyle.Italic = ToBool(_ItalicBox.CheckState);
+				}
+			};
+			_UnderlineBox.CheckStateChanged += (s, args) => {
+				if (_uiLock == false && _activeStyle != null) {
+					_activeStyle.Underline = ToBool(_UnderlineBox.CheckState);
+				}
+			};
+			_StrikeBox.CheckStateChanged += (s, args) => {
+				if (_uiLock == false && _activeStyle != null) {
+					_activeStyle.Strikethrough = ToBool(_StrikeBox.CheckState);
+				}
+			};
+			_BackgroundEffectBox.SelectedIndexChanged += (s, args) => {
+				if (_uiLock == false && _activeStyle != null) {
+					_activeStyle.BackgroundEffect = (BrushEffect)_BackgroundEffectBox.SelectedIndex;
+				}
+			};
+			_FontSizeBox.ValueChanged += (s, args) => {
+				if (_uiLock == false && _activeStyle != null) {
+					_activeStyle.FontSize = (double)_FontSizeBox.Value;
+				}
+			};
 			foreach (var item in new[] { _FontBox, _BackgroundEffectBox }) {
 				item.SelectedIndexChanged += MarkChanged;
 			}
@@ -66,7 +94,7 @@ namespace Codist.Options
 			}
 			_PreviewBox.SizeChanged += (s, args) => UpdatePreview();
 			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
-			Config.ConfigLoaded += (s, args) => { _activeStyle = null; LoadStyleList(); };
+			Config.Loaded += (s, args) => { _activeStyle = null; LoadStyleList(); };
 			_loaded = true;
 		}
 

@@ -36,7 +36,7 @@ namespace Codist.Views
 			_TextBuffer = subjectBuffer;
 			_FormatMapService = formatMapService;
 			_TextBuffer.Changing += TextBuffer_Changing;
-			Config.ConfigUpdated += _ConfigUpdated;
+			Config.Updated += _ConfigUpdated;
 		}
 
 		public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {
@@ -341,7 +341,7 @@ namespace Codist.Views
 		void IDisposable.Dispose() {
 			if (!_IsDisposed) {
 				_TextBuffer.Changing -= TextBuffer_Changing;
-				Config.ConfigUpdated -= _ConfigUpdated; ;
+				Config.Updated -= _ConfigUpdated; ;
 				GC.SuppressFinalize(this);
 				_IsDisposed = true;
 			}

@@ -41,7 +41,7 @@ namespace Codist.Options
 			_CSharpParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Parameter, _CSharpParameterQuickInfoBox.Checked));
 			_HighlightDeclarationBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.DeclarationBrace, _HighlightDeclarationBracesBox.Checked));
 
-			Config.ConfigUpdated += (s, args) => LoadConfig(s as Config);
+			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
 

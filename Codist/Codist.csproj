@@ -90,11 +90,11 @@
     <Compile Include="Options\CSharpPage.Designer.cs">
       <DependentUpon>CSharpPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="Options\MiscPage.cs">
+    <Compile Include="Options\GeneralPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Options\MiscPage.Designer.cs">
-      <DependentUpon>MiscPage.cs</DependentUpon>
+    <Compile Include="Options\GeneralPage.Designer.cs">
+      <DependentUpon>GeneralPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Options\PickColorButton.cs">
       <SubType>Component</SubType>
@@ -374,8 +374,8 @@
     <EmbeddedResource Include="Options\CSharpPage.resx">
       <DependentUpon>CSharpPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Options\MiscPage.resx">
-      <DependentUpon>MiscPage.cs</DependentUpon>
+    <EmbeddedResource Include="Options\GeneralPage.resx">
+      <DependentUpon>GeneralPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Options\SyntaxStyleOptionPage.resx">
       <DependentUpon>SyntaxStyleOptionPage.cs</DependentUpon>

@@ -30,7 +30,7 @@ namespace Codist.Views
 			//view.VisualElement.IsVisibleChanged += VisualElement_IsVisibleChanged;
 			map.ClassificationFormatMappingChanged += SettingsSaved;
 			//view.GotAggregateFocus += TextView_GotAggregateFocus;
-			Config.ConfigUpdated += SettingsSaved;
+			Config.Updated += SettingsSaved;
 
 			_Map = map;
 			_RegService = service;
@@ -51,7 +51,7 @@ namespace Codist.Views
 		//}
 
 		void View_Closed(object sender, EventArgs e) {
-			Config.ConfigUpdated -= SettingsSaved;
+			Config.Updated -= SettingsSaved;
 			_Map.ClassificationFormatMappingChanged -= SettingsSaved;
 			//_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
 			_TextView.Closed -= View_Closed;

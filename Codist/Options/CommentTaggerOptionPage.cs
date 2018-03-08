@@ -88,7 +88,7 @@ namespace Codist.Options
 
 			_PreviewBox.SizeChanged += (s, args) => { UpdatePreview(); };
 			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
-			Config.ConfigLoaded += (s, args) => { LoadStyleLists(); };
+			Config.Loaded += (s, args) => { LoadStyleLists(); };
 			_Loaded = true;
 		}
 

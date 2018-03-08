@@ -18,7 +18,7 @@ namespace Codist.Options
 		protected override void OnActivate(CancelEventArgs e) {
 			base.OnActivate(e);
 			_oldVersion = _version;
-			Config.ConfigUpdated += UpdateVersion;
+			Config.Updated += UpdateVersion;
 		}
 
 		internal FontInfo GetFontSettings(Guid category) {
@@ -76,7 +76,7 @@ namespace Codist.Options
 			if (_version != _oldVersion) {
 				Config.LoadConfig(Config.ConfigPath);
 				_oldVersion = _version;
-				Config.ConfigUpdated -= UpdateVersion;
+				Config.Updated -= UpdateVersion;
 			}
 		}
 
@@ -148,9 +148,9 @@ namespace Codist.Options
 	[Guid("DFC9C0E7-73A1-4DE9-8E94-161111266D38")]
 	sealed class Misc : ConfigPage
 	{
-		MiscPage _Control;
+		GeneralPage _Control;
 
-		protected override IWin32Window Window => _Control ?? (_Control = new MiscPage(this));
+		protected override IWin32Window Window => _Control ?? (_Control = new GeneralPage(this));
 		protected override void Dispose(bool disposing) {
 			_Control.Dispose();
 			base.Dispose(disposing);
