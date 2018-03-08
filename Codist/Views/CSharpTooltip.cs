@@ -148,7 +148,7 @@ namespace Codist.Views
 				if (lines > 100) {
 					qiContent.Add(new TextBlock { Text = lines + " lines", FontWeight = FontWeights.Bold });
 				}
-				else if (lines > 10) {
+				else if (lines > 1) {
 					qiContent.Add(lines + " lines");
 				}
 			}
@@ -514,7 +514,8 @@ namespace Codist.Views
 						block.AddText(part.Symbol.Name, argumentIndex != Int32.MinValue, false, _MethodBrush);
 						break;
 					case SymbolDisplayPartKind.ParameterName:
-						if ((part.Symbol as IParameterSymbol).Ordinal == argumentIndex) {
+						var p = part.Symbol as IParameterSymbol;
+						if (p.Ordinal == argumentIndex || p.IsParams && argumentIndex > p.Ordinal) {
 							block.AddText(part.Symbol.Name, true, true, _ParameterBrush);
 						}
 						else {
@@ -609,63 +610,70 @@ namespace Codist.Views
 		}
 
 		void ShowEnumInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol type, bool fromEnum) {
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
-				var t = type.EnumUnderlyingType;
-				if (t != null) {
-					var s = new StackPanel()
-						.Add(ToUIText(new TextBlock().AddText("Underlying type: ", true), t.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
-					if (fromEnum == false) {
-						qiContent.Add(s);
-						return;
-					}
-					var c = 0;
-					object min = null, max = null, bits = null;
-					IFieldSymbol minName = null, maxName = null;
-					var p = 0L;
-					foreach (var m in type.GetMembers()) {
-						var f = m as IFieldSymbol;
-						if (f == null) {
-							continue;
-						}
-						++c;
-						var v = f.ConstantValue;
-						if (min == null) {
-							min = max = bits = v;
-							minName = maxName = f;
-							continue;
-						}
-						if (UnsafeArithmeticHelper.IsGreaterThan(v, max)) {
-							max = v;
-							maxName = f;
-						}
-						if (UnsafeArithmeticHelper.IsLessThan(v, min)) {
-							min = v;
-							minName = f;
-						}
-						bits = UnsafeArithmeticHelper.Or(v, bits);
-					}
-					if (min == null) {
-						return;
-					}
-					s.Add(new TextBlock().AddText("Enum fields: ", true).AddText(c.ToString()))
-						.Add(new TextBlock()
-							.AddText("Min: ", true)
-							.AddText(min.ToString() + "(")
-							.AddText(minName.Name, _EnumBrush)
-							.AddText(")"))
-						.Add(new TextBlock()
-							.AddText("Max: ", true)
-							.AddText(max.ToString() + "(")
-							.AddText(maxName.Name, _EnumBrush)
-							.AddText(")"));
-					if (type.GetAttributes().FirstOrDefault(a => a.AttributeClass.ToDisplayString() == "System.FlagsAttribute") != null) {
-						s.Add(new TextBlock()
-							.AddText("All flags: ", true)
-							.AddText(Convert.ToString(Convert.ToInt64(bits), 2)));
-					}
-					qiContent.Add(s);
-				}
+			if (!Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
+				return;
 			}
+
+			var t = type.EnumUnderlyingType;
+			if (t == null) {
+				return;
+			}
+			var s = new StackPanel()
+				.Add(ToUIText(new TextBlock().AddText("Enum underlying type: ", true), t.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
+			if (fromEnum == false) {
+				qiContent.Add(s);
+				return;
+			}
+			var c = 0;
+			object min = null, max = null, bits = null;
+			IFieldSymbol minName = null, maxName = null;
+			var p = 0L;
+			foreach (var m in type.GetMembers()) {
+				var f = m as IFieldSymbol;
+				if (f == null) {
+					continue;
+				}
+				++c;
+				var v = f.ConstantValue;
+				if (min == null) {
+					min = max = bits = v;
+					minName = maxName = f;
+					continue;
+				}
+				if (UnsafeArithmeticHelper.IsGreaterThan(v, max)) {
+					max = v;
+					maxName = f;
+				}
+				if (UnsafeArithmeticHelper.IsLessThan(v, min)) {
+					min = v;
+					minName = f;
+				}
+				bits = UnsafeArithmeticHelper.Or(v, bits);
+			}
+			if (min == null) {
+				return;
+			}
+			s.Add(new TextBlock().AddText("Field count: ", true).AddText(c.ToString()))
+				.Add(new TextBlock()
+					.AddText("Min: ", true)
+					.AddText(min.ToString() + "(")
+					.AddText(minName.Name, _EnumBrush)
+					.AddText(")"))
+				.Add(new TextBlock()
+					.AddText("Max: ", true)
+					.AddText(max.ToString() + "(")
+					.AddText(maxName.Name, _EnumBrush)
+					.AddText(")"));
+			if (type.GetAttributes().FirstOrDefault(a => a.AttributeClass.ToDisplayString() == "System.FlagsAttribute") != null) {
+				var d = Convert.ToString(Convert.ToInt64(bits), 2);
+				s.Add(new TextBlock()
+					.AddText("All flags: ", true)
+					.AddText(d)
+					.AddText(" (")
+					.AddText(d.Length.ToString())
+					.AddText(d.Length > 1 ? " bits)" : " bit)"));
+			}
+			qiContent.Add(s);
 		}
 
 		void ShowInterfaces(IList<object> output, ITypeSymbol type, int position) {

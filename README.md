@@ -104,7 +104,7 @@ I have learned a lot from the following extension projects.
 * Better comments: https://github.com/omsharp/BetterComments
 * CommentsPlus: https://github.com/mhoumann/CommentsPlus
 * Inheritance Margin: https://github.com/tunnelvisionlabs/InheritanceMargin
-* Font Sizer: https://marketplace.visualstudio.com/items?itemName=KarlShifflettkdawg.FontSizer
+* Font Sizer: https://github.com/Oceanware/FontSizer
 * CodeBlockEndTag: https://github.com/KhaosCoders/VSCodeBlockEndTag
 * Remarker: https://github.com/jgyo/remarker
 
