@@ -160,6 +160,10 @@ namespace Codist
 			block.Inlines.Add(run);
 			return block;
 		}
+		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, SemanticModel model, int position) {
+			//todo add symbol to textblock with brush
+			return block;
+		}
 		public static TPanel AddText<TPanel>(this TPanel parent, string text)
 			where TPanel : Panel {
 			return parent.AddText(text, false, false, null);

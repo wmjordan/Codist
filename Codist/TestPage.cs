@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq; // unnccessary code
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Codist.Fake
 {
@@ -23,24 +20,24 @@ namespace Codist.Fake
 	{
 		const short Constant = ushort.MaxValue ^ 0xF0F0; // const field
 		const string ConstantString = "literal string"; // const string
-		public readonly static DateTime StartDate = DateTime.Now; // static field
-		private static int _static = (int)DateTime.Now.Ticks; // static instance field
+		public readonly static DateTime StartDate = DateTime.Now; // public readonly static field
+		private static int _static = (int)DateTime.Now.Ticks; // static field
 		static readonly int _staticReadonly = Int32.MinValue; // static readonly field
-		private readonly int _readonly; // readonly field
-		private int _instance; // field
+		private int _instanceField; // field
+		private readonly int _readonlyField; // readonly field
 	}
 	abstract class AbstractClass : IInterface
 	{
-		protected abstract int Property { get; set; }
-		protected abstract int AbstractMethod();
-		public virtual void VirtualMethod() { }
-		int IInterface.Property { get; set; }
+		protected abstract int Property { get; set; } // protected abstract property
+		protected abstract int AbstractMethod(); // abstract method
+		public virtual void VirtualMethod() { } // virtual method
+		int IInterface.Property { get; set; } // explicit interface implementation
 	}
 	static class ExtensionClass // static class
 	{
 		public static void Log(this string text) { } // static method
 	}
-	class ConcreteClass : AbstractClass
+	sealed class ConcreteClass : AbstractClass
 	{
 		delegate void Clone<T>(T text);
 		event EventHandler<EventArgs> MyEvent;
@@ -55,7 +52,7 @@ namespace Codist.Fake
 			var localField = fieldId; // local field
 			@"Multiline
 text".Log(); // multiline string (string verbatim)
-			$"Test page {fieldId} is initialized"
+			$"Test page {fieldId} is initialized" // interpolated string
 				.Log(); // calling extension method
 
 			switch ((MyEnum)fieldId) {
@@ -94,10 +91,10 @@ text".Log(); // multiline string (string verbatim)
 
 		protected override int Property { get; set; }
 
-		public void Method<TGeneric>() {
+		public void Method<TGeneric>() { //type parameter
 			// unnecessary code
 			Codist.Fake.ExtensionClass.Log(typeof(TGeneric).Name); // extension method
-			NativeMethods.Print(IntPtr.Zero); // extern method
+			NativeMethods.ExternMethod(IntPtr.Zero); // extern method
 			AbstractMethod(); // abstract method
 			VirtualMethod(); // overridden method
 			base.VirtualMethod(); // base virtual method
@@ -115,7 +112,7 @@ text".Log(); // multiline string (string verbatim)
 		static class NativeMethods
 		{
 			[DllImport("dummy.dll", EntryPoint = "DummyFunction", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-			public static extern void Print(IntPtr ptr);
+			public static extern void ExternMethod(IntPtr ptr);
 		}
 	}
 #else

@@ -9,6 +9,17 @@
     <UseCodebase>true</UseCodebase>
     <TargetFrameworkProfile />
     <ApplicationVersion>2.5.0.0</ApplicationVersion>
+    <ShouldCreateLogs>False</ShouldCreateLogs>
+    <AdvancedSettingsExpanded>False</AdvancedSettingsExpanded>
+    <UpdateAssemblyVersion>False</UpdateAssemblyVersion>
+    <UpdateAssemblyFileVersion>True</UpdateAssemblyFileVersion>
+    <UpdateAssemblyInfoVersion>False</UpdateAssemblyInfoVersion>
+    <UpdatePackageVersion>False</UpdatePackageVersion>
+    <AssemblyInfoVersionType>SettingsVersion</AssemblyInfoVersionType>
+    <InheritWinAppVersionFrom>None</InheritWinAppVersionFrom>
+    <AssemblyInfoVersionSettings>
+    </AssemblyInfoVersionSettings>
+    <AssemblyFileVersionSettings>None.None.None.Increment</AssemblyFileVersionSettings>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -115,9 +126,10 @@
     </Compile>
     <Compile Include="TestPage.cs" />
     <Compile Include="Utilities.cs" />
-    <Compile Include="Views\CSharpTooltip.cs" />
+    <Compile Include="Views\CSharpQuickInfoControllerProvider.cs" />
     <Compile Include="Views\CodeViewCreationListener.cs" />
     <Compile Include="Views\CodeViewDecorator.cs" />
+    <Compile Include="Views\CSharpQuickInfoSourceProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
