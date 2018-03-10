@@ -45,6 +45,7 @@
 			this._CSharpAttributesQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this._HighlightDeclarationBracesBox = new System.Windows.Forms.CheckBox();
+			this._CSharpTypeParameterQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			this.groupBox1.SuspendLayout();
@@ -116,6 +117,7 @@
 			// 
 			// groupBox3
 			// 
+			this.groupBox3.Controls.Add(this._CSharpTypeParameterQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpParameterQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpDeclarationQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpStringQuickInfoBox);
@@ -129,7 +131,7 @@
 			this.groupBox3.Controls.Add(this._CSharpAttributesQuickInfoBox);
 			this.groupBox3.Location = new System.Drawing.Point(3, 3);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(256, 314);
+			this.groupBox3.Size = new System.Drawing.Size(256, 339);
 			this.groupBox3.TabIndex = 0;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Super Quick info";
@@ -139,9 +141,9 @@
 			this._CSharpParameterQuickInfoBox.AutoSize = true;
 			this._CSharpParameterQuickInfoBox.Location = new System.Drawing.Point(9, 274);
 			this._CSharpParameterQuickInfoBox.Name = "_CSharpParameterQuickInfoBox";
-			this._CSharpParameterQuickInfoBox.Size = new System.Drawing.Size(101, 19);
+			this._CSharpParameterQuickInfoBox.Size = new System.Drawing.Size(109, 19);
 			this._CSharpParameterQuickInfoBox.TabIndex = 10;
-			this._CSharpParameterQuickInfoBox.Text = "Parameter";
+			this._CSharpParameterQuickInfoBox.Text = "Parameters";
 			this._CSharpParameterQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpDeclarationQuickInfoBox
@@ -264,6 +266,16 @@
 			this._HighlightDeclarationBracesBox.Text = "Declaration braces";
 			this._HighlightDeclarationBracesBox.UseVisualStyleBackColor = true;
 			// 
+			// _CSharpTypeParameterQuickInfoBox
+			// 
+			this._CSharpTypeParameterQuickInfoBox.AutoSize = true;
+			this._CSharpTypeParameterQuickInfoBox.Location = new System.Drawing.Point(9, 299);
+			this._CSharpTypeParameterQuickInfoBox.Name = "_CSharpTypeParameterQuickInfoBox";
+			this._CSharpTypeParameterQuickInfoBox.Size = new System.Drawing.Size(149, 19);
+			this._CSharpTypeParameterQuickInfoBox.TabIndex = 11;
+			this._CSharpTypeParameterQuickInfoBox.Text = "Type parameters";
+			this._CSharpTypeParameterQuickInfoBox.UseVisualStyleBackColor = true;
+			// 
 			// CSharpPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -272,7 +284,7 @@
 			this.Controls.Add(this.groupBox3);
 			this.Controls.Add(this.groupBox2);
 			this.Name = "CSharpPage";
-			this.Size = new System.Drawing.Size(575, 328);
+			this.Size = new System.Drawing.Size(575, 355);
 			this.Load += new System.EventHandler(this.CSharpPage_Load);
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
@@ -305,5 +317,6 @@
 		private System.Windows.Forms.CheckBox _HighlightDeclarationBracesBox;
 		private System.Windows.Forms.CheckBox _CSharpInterfaceImplementationsQuickInfoBox;
 		private System.Windows.Forms.CheckBox _LongMethodBox;
+		private System.Windows.Forms.CheckBox _CSharpTypeParameterQuickInfoBox;
 	}
 }

@@ -42,7 +42,7 @@ namespace Codist.Views
 		sealed class QuickInfoSource : IQuickInfoSource
 		{
 			//todo extract brushes
-			static Brush _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush;
+			static Brush _NamespaceBrush, _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush, _TypeParameterBrush;
 
 			readonly IEditorFormatMapService _FormatMapService;
 			readonly ITextStructureNavigatorSelectorService _NavigatorService;
@@ -253,12 +253,27 @@ namespace Codist.Views
 					&& method.ContainingType.TypeKind != TypeKind.Interface) {
 					ShowDeclarationModifier(qiContent, method, "Method", node.SpanStart);
 				}
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod) && method.IsExtensionMethod) {
-					ShowExtensionMethod(qiContent, method, node.SpanStart);
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && method.TypeArguments.Length > 0) {
+					ShowMethodTypeArguments(qiContent, node, method);
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
 					ShowInterfaceImplementation(qiContent, node, method, method.ExplicitInterfaceImplementations.Select(i => i.ReturnType), m => m.ReturnType, m => m.Parameters);
 				}
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod) && method.IsExtensionMethod) {
+					ShowExtensionMethod(qiContent, method, node.SpanStart);
+				}
+			}
+
+			void ShowMethodTypeArguments(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
+				var info = new StackPanel();
+				var l = method.TypeArguments.Length;
+				info.AddText(l > 1 ? "Type arguments:" : "Type argument:", true);
+				for (int i = 0; i < l; i++) {
+					var argInfo = new TextBlock();
+					ShowTypeParameterInfo(method.TypeParameters[i], method.TypeArguments[i], argInfo, node.SpanStart);
+					info.Add(argInfo);
+				}
+				qiContent.Add(info);
 			}
 
 			void ShowTypeInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol typeSymbol) {
@@ -397,12 +412,11 @@ namespace Codist.Views
 
 			void ShowExtensionMethod(IList<object> qiContent, IMethodSymbol method, int position) {
 				var info = new StackPanel();
-				var extType = method.ConstructedFrom.ReceiverType as ITypeSymbol;
+				var extType = method.ConstructedFrom.ReceiverType;
 				var extTypeParameter = extType as ITypeParameterSymbol;
 				if (extTypeParameter != null && (extTypeParameter.HasConstructorConstraint || extTypeParameter.HasReferenceTypeConstraint || extTypeParameter.HasValueTypeConstraint || extTypeParameter.ConstraintTypes.Length > 0)) {
 					var ext = new TextBlock().AddText("Extending: ", true).AddText(extType.Name, _ClassBrush).AddText(" with ");
 					ToUIText(ext, method.ReceiverType.ToMinimalDisplayParts(_SemanticModel, position));
-					ShowTypeParameterInfo(extTypeParameter, ext, position);
 					info.Add(ext);
 				}
 				var def = ToUIText(new TextBlock().AddText("Defined in: ", true), method.ContainingType.ToDisplayParts());
@@ -415,8 +429,13 @@ namespace Codist.Views
 				qiContent.Add(info);
 			}
 
-			void ShowTypeParameterInfo(ITypeParameterSymbol typeParameter, TextBlock textBlock, int position) {
-				textBlock.AddText(" where ", _KeywordBrush).AddText(typeParameter.Name, _ClassBrush).AddText(" : ");
+			void ShowTypeParameterInfo(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument, TextBlock textBlock, int position) {
+				textBlock.AddText(typeParameter.Name, _TypeParameterBrush).AddText(" is ");
+				ToUIText(textBlock, typeArgument.ToMinimalDisplayParts(_SemanticModel, position));
+				if (typeParameter.HasConstructorConstraint == false && typeParameter.HasReferenceTypeConstraint == false && typeParameter.HasValueTypeConstraint == false && typeParameter.ConstraintTypes.Length == 0) {
+					return;
+				}
+				textBlock.AddText(" where ", _KeywordBrush).AddText(typeParameter.Name, _TypeParameterBrush).AddText(" : ");
 				var i = 0;
 				if (typeParameter.HasReferenceTypeConstraint) {
 					textBlock.AddText("class", _KeywordBrush);
@@ -572,7 +591,6 @@ namespace Codist.Views
 				foreach (var part in parts) {
 					switch (part.Kind) {
 						case SymbolDisplayPartKind.ClassName:
-						case SymbolDisplayPartKind.TypeParameterName:
 							block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _ClassBrush);
 							break;
 						case SymbolDisplayPartKind.EnumName:
@@ -605,6 +623,12 @@ namespace Codist.Views
 						case SymbolDisplayPartKind.Keyword:
 							block.AddText(part.ToString(), false, false, _KeywordBrush);
 							break;
+						case SymbolDisplayPartKind.NamespaceName:
+							block.AddText(part.Symbol.Name, _NamespaceBrush);
+							break;
+						case SymbolDisplayPartKind.TypeParameterName:
+							block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _TypeParameterBrush);
+							break;
 						default:
 							block.AddText(part.ToString());
 							break;
@@ -623,8 +647,10 @@ namespace Codist.Views
 				_NumberBrush = formatMap.GetBrush(Constants.CodeNumber);
 				_StructBrush = formatMap.GetBrush(Constants.CodeStructName);
 				_KeywordBrush = formatMap.GetBrush(Constants.CodeKeyword);
+				_NamespaceBrush = formatMap.GetBrush(Constants.CSharpNamespaceName);
 				_MethodBrush = formatMap.GetBrush(Constants.CSharpMethodName);
 				_ParameterBrush = formatMap.GetBrush(Constants.CSharpParameterName);
+				_TypeParameterBrush = formatMap.GetBrush(Constants.CSharpTypeParameterName);
 			}
 
 			void _ConfigUpdated(object sender, EventArgs e) {

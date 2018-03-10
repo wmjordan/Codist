@@ -15,7 +15,7 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal CSharpPage(ConfigPage page) : this() {
-			_UI.CommonEventAction += Config.Instance.FireConfigChangedEvent;
+			//_UI.CommonEventAction += Config.Instance.FireConfigChangedEvent;
 		}
 		private void CSharpPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {
@@ -39,9 +39,10 @@ namespace Codist.Options
 			_CSharpNumberQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.NumericValues,  _CSharpNumberQuickInfoBox.Checked));
 			_CSharpStringQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.String, _CSharpStringQuickInfoBox.Checked));
 			_CSharpParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Parameter, _CSharpParameterQuickInfoBox.Checked));
+			_CSharpTypeParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.TypeParameters, _CSharpTypeParameterQuickInfoBox.Checked));
 			_HighlightDeclarationBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.DeclarationBrace, _HighlightDeclarationBracesBox.Checked));
 
-			Config.Updated += (s, args) => LoadConfig(s as Config);
+			Config.Loaded += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
 
@@ -63,6 +64,7 @@ namespace Codist.Options
 				_CSharpNumberQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues);
 				_CSharpStringQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.String);
 				_CSharpParameterQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter);
+				_CSharpTypeParameterQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters);
 				_HighlightDeclarationBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace);
 			});
 		}

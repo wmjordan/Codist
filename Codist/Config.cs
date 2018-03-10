@@ -520,7 +520,8 @@ namespace Codist
 		String = 1 << 8,
 		Parameter = 1 << 9,
 		InterfaceImplementations = 1 << 10,
-		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations
+		TypeParameters = 1 << 11,
+		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations,
 	}
 
 	[Flags]

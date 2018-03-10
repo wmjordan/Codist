@@ -130,10 +130,10 @@ namespace Codist.Margins
 				}
 				// check line counts of the member and draw marker line if longer than predefined length
 				var span = tag.Tag.Span;
-				var end = new SnapshotPoint(snapshot, span.End);
-				if (end >= snapshotLength) {
+				if (span.End >= snapshotLength) {
 					continue;
 				}
+				var end = new SnapshotPoint(snapshot, span.End);
 				var start = new SnapshotPoint(snapshot, span.Start);
 				var level = tag.Tag.Level;
 				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration) && end - start > 150) {
