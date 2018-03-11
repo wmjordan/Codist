@@ -194,21 +194,23 @@ namespace Codist.Views
 				}
 				var p1 = selection.Start.Position;
 				var p2 = selection.End.Position;
-				if (p1 <= point && point <= p2) {
-					var c = 0;
-					foreach (var item in selection.SelectedSpans) {
-						c += item.Length;
-					}
-					var y1 = point.Snapshot.GetLineNumberFromPosition(p1);
-					var y2 = point.Snapshot.GetLineNumberFromPosition(p2) + 1;
-					qiContent.Add(String.Join(
-						" ",
-						"Selection:",
-						c.ToString(),
-						(c > 1 ? "characters, " : "character, "),
-						(y2 - y1).ToString(),
-						(y2 - y1 > 1 ? "lines" : "line")));
+				if (p1 > point || point > p2) {
+					return;
 				}
+				var c = 0;
+				foreach (var item in selection.SelectedSpans) {
+					c += item.Length;
+				}
+				if (c < 2) {
+					return;
+				}
+				var y1 = point.Snapshot.GetLineNumberFromPosition(p1);
+				var y2 = point.Snapshot.GetLineNumberFromPosition(p2) + 1;
+				var info = new TextBlock().AddText("Selection: ", true).AddText(c.ToString()).AddText(" characters");
+				if (y2 - y1 > 1) {
+					info.AddText(", " + (y2 - y1).ToString() + " lines");
+				}
+				qiContent.Add(info);
 			}
 
 			void ShowPropertyInfo(IList<object> qiContent, SyntaxNode node, IPropertySymbol property) {
@@ -419,7 +421,7 @@ namespace Codist.Views
 					ToUIText(ext, method.ReceiverType.ToMinimalDisplayParts(_SemanticModel, position));
 					info.Add(ext);
 				}
-				var def = ToUIText(new TextBlock().AddText("Defined in: ", true), method.ContainingType.ToDisplayParts());
+				var def = ToUIText(new TextBlock().AddText("Extended by: ", true), method.ContainingType.ToDisplayParts());
 				string asmName = method.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
 					?? method.ContainingAssembly?.Name;
 				if (asmName != null) {
@@ -778,7 +780,7 @@ namespace Codist.Views
 			}
 
 			void ShowInterfaces(IList<object> output, ITypeSymbol type, int position) {
-				const string SystemDisposable = "IDisposable";
+				const string Disposable = "IDisposable";
 				var showAll = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
 				var interfaces = showAll ? type.AllInterfaces : type.Interfaces;
 				if (interfaces.Length == 0) {
@@ -788,7 +790,7 @@ namespace Codist.Views
 				stack.AddText(interfaces.Length > 1 ? "Interfaces:" : "Interface:", true);
 				INamedTypeSymbol disposable = null;
 				foreach (var item in interfaces) {
-					if (item.Name == SystemDisposable) {
+					if (item.Name == Disposable) {
 						disposable = item;
 						continue;
 					}
@@ -796,7 +798,7 @@ namespace Codist.Views
 				}
 				if (disposable == null && showAll == false) {
 					foreach (var item in type.AllInterfaces) {
-						if (item.Name == SystemDisposable) {
+						if (item.Name == Disposable) {
 							disposable = item;
 							break;
 						}
@@ -838,6 +840,7 @@ namespace Codist.Views
 
 			static void ShowAccessibilityInfo(ISymbol symbol, TextBlock info) {
 				switch (symbol.DeclaredAccessibility) {
+					case Accessibility.Public: info.AddText("public ", _KeywordBrush); break;
 					case Accessibility.Private: info.AddText("private ", _KeywordBrush); break;
 					case Accessibility.ProtectedAndInternal: info.AddText("protected internal ", _KeywordBrush); break;
 					case Accessibility.Protected: info.AddText("protected ", _KeywordBrush); break;
