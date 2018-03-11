@@ -80,8 +80,11 @@
     <Compile Include="Classifiers\CodeTagger.cs" />
     <Compile Include="Classifiers\EditorFormats.cs" />
     <Compile Include="LineTransformers\LineHeightTransform.cs" />
+    <Compile Include="Margins\LineNumberMargin.cs" />
     <Compile Include="Margins\CodeMargin.cs" />
+    <Compile Include="Margins\LineNumberMarginElement.cs" />
     <Compile Include="Margins\CodeMarginElement.cs" />
+    <Compile Include="Margins\LineNumberMarginFactory.cs" />
     <Compile Include="Margins\CodeMarginFactory.cs" />
     <Compile Include="Margins\CSharpMembersMargin.cs" />
     <Compile Include="Margins\CSharpMembersMarginElement.cs" />

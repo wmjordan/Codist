@@ -537,11 +537,12 @@ namespace Codist
 	{
 		None,
 		SpecialComment = 1,
-		TypeDeclaration = 1 << 1,
-		CompilerDirective = 1 << 2,
-		LineNumber = 1 << 3,
-		CodeRange = 1 << 4,
-		LongMemberDeclaration = 1 << 5,
-		Default = SpecialComment | TypeDeclaration | LineNumber | CodeRange | LongMemberDeclaration
+		MemberDeclaration = 1 << 1,
+		LongMemberDeclaration = 1 << 2,
+		CompilerDirective = 1 << 3,
+		LineNumber = 1 << 4,
+		CodeMarginMask = SpecialComment | CompilerDirective,
+		MemberMarginMask = MemberDeclaration | LongMemberDeclaration,
+		Default = SpecialComment | MemberDeclaration | LineNumber | LongMemberDeclaration
 	}
 }

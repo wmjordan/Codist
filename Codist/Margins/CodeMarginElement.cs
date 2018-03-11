@@ -19,7 +19,6 @@ namespace Codist.Margins
 		readonly IEditorFormatMap _EditorFormatMap;
 		readonly IVerticalScrollBar _ScrollBar;
 		readonly TaggerResult _Tags;
-		MarkerOptions _MarkerOptions;
 
 		//ToDo: Configurable marker styles
 		//ToDo: Change brush colors according to user settings
@@ -57,8 +56,6 @@ namespace Codist.Margins
 			{ Constants.CodePreprocessorKeyword, PreProcessorBrush },
 		};
 		bool _HasEvents;
-		bool _OptionsChanging;
-		bool _IsMarginEnabled;
 		const double MarkPadding = 1.0;
 		const double MarkSize = 4.0;
 		const double HalfMarkSize = MarkSize / 2 + MarkPadding;
@@ -74,8 +71,7 @@ namespace Codist.Margins
 
 			Width = MarkSize + MarkPadding + MarkPadding + /*extra padding*/ 2 * MarkPadding;
 
-			_MarkerOptions = Config.Instance.MarkerOptions;
-			Visibility = _MarkerOptions != MarkerOptions.None ? Visibility.Visible : Visibility.Collapsed;
+			Visibility = Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.CodeMarginMask) ? Visibility.Visible : Visibility.Collapsed;
 			Config.Updated += Config_Updated;
 			//subscribe to change events and use them to update the markers
 			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
@@ -85,23 +81,20 @@ namespace Codist.Margins
 		}
 
 		void Config_Updated(object sender, EventArgs e) {
-			var op = Config.Instance.MarkerOptions;
-			if (_MarkerOptions == op) {
-				return;
-			}
-
-			if (op == MarkerOptions.None) {
+			var setVisible = Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.CodeMarginMask);
+			var visible = Visibility == Visibility.Visible;
+			if (setVisible == false && visible) {
 				Visibility = Visibility.Collapsed;
 				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
 				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
+				InvalidateVisual();
 			}
-			else if (_MarkerOptions == MarkerOptions.None) {
+			else if (setVisible && visible == false) {
 				Visibility = Visibility.Visible;
 				_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
 				_ScrollBar.TrackSpanChanged += OnMappingChanged;
+				InvalidateVisual();
 			}
-			_MarkerOptions = op;
-			InvalidateVisual();
 		}
 
 		void TextView_TextBufferChanged(object sender, TextContentChangedEventArgs args) {
@@ -146,9 +139,7 @@ namespace Codist.Margins
 			//It is possible this will get called twice in quick succession (when the tab containing the host is made visible, the view and the margin
 			//will get visibility changed events).
 			Debug.WriteLine(e.Property + " changed: " + e.OldValue + " -> " + e.NewValue);
-			if (!_OptionsChanging) {
-				UpdateEventHandlers(true);
-			}
+			UpdateEventHandlers(true);
 		}
 
 		void OnFormatMappingChanged(object sender, FormatItemsEventArgs e) {
@@ -196,23 +187,8 @@ namespace Codist.Margins
 			if (_TextView.IsClosed) {
 				return;
 			}
-			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LineNumber)) {
-				DrawLineNumbers(drawingContext);
-			}
 			if (_Tags.Tags.Count > 0) {
 				DrawMarkers(drawingContext);
-			}
-		}
-
-		//todo Extract line number margin
-		void DrawLineNumbers(DrawingContext drawingContext) {
-			var snapshot = _TextView.TextSnapshot;
-			var lc = snapshot.LineCount;
-			var step = lc < 500 ? 50 : lc < 1000 ? 100 : lc < 5000 ? 500 : 1000;
-			for (int i = step; i < lc; i += step) {
-				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, snapshot.GetLineFromLineNumber(i - 1).Start));
-				drawingContext.DrawLine(LineNumberPen, new Point(-100, y), new Point(100, y));
-				drawingContext.DrawText(Utilities.ToFormattedText((i).ToString(), 9, LineNumberBrush), new Point(0, y));
 			}
 		}
 
@@ -291,6 +267,7 @@ namespace Codist.Margins
 		void Dispose(bool disposing) {
 			if (!disposedValue) {
 				if (disposing) {
+					Config.Updated -= Config_Updated;
 					_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
 					IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
 					//_TextView.VisualElement.IsVisibleChanged -= OnViewOrMarginVisiblityChanged;

@@ -138,7 +138,7 @@ namespace Codist.Classifiers
 							case Constants.CodeInterfaceName:
 							case Constants.CodeStructName:
 							case Constants.CodeEnumName:
-								if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration)) {
+								if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration)) {
 									Debug.WriteLine($"find def: {c} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
 									yield return _Tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
 								}

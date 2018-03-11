@@ -160,7 +160,7 @@ namespace Codist.Views
 				else if (nodeKind == SyntaxKind.SwitchStatement) {
 					var s = (node as SwitchStatementSyntax).Sections.Count;
 					if (s > 1) {
-						qiContent.Add(s + " sections");
+						qiContent.Add(s + " switch sections");
 					}
 				}
 				else if (nodeKind == SyntaxKind.StringLiteralExpression) {

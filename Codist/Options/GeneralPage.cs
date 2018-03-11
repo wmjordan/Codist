@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using AppHelpers;
 
 namespace Codist.Options
 {
@@ -26,6 +27,7 @@ namespace Codist.Options
 			_TopMarginBox.ValueChanged += _UI.HandleEvent(() => LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value);
 			_BottomMarginBox.ValueChanged += _UI.HandleEvent(() => LineTransformers.LineHeightTransformProvider.BottomSpace = (double)_BottomMarginBox.Value);
 			_NoSpaceBetweenWrappedLinesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.NoSpaceBetweenWrappedLines = _NoSpaceBetweenWrappedLinesBox.Checked);
+			_LineNumbersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.LineNumber, _LineNumbersBox.Checked));
 			_SaveConfigButton.Click += (s, args) => {
 				using (var d = new SaveFileDialog {
 					Title = "Save Codist configuration file...",
@@ -78,6 +80,7 @@ namespace Codist.Options
 		void LoadConfig(Config config) {
 			_UI.DoWithLock(() => {
 				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
+				_LineNumbersBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
 			});
 		}
 	}

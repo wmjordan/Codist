@@ -40,11 +40,14 @@
 			this._LightThemeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this._DarkThemeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this._CustomThemeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this._LineNumbersBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this._ThemeMenu.SuspendLayout();
+			this.groupBox3.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// _BottomMarginBox
@@ -150,7 +153,7 @@
             this._DarkThemeMenuItem,
             this._CustomThemeMenuItem});
 			this._ThemeMenu.Name = "_ThemeMenu";
-			this._ThemeMenu.Size = new System.Drawing.Size(256, 104);
+			this._ThemeMenu.Size = new System.Drawing.Size(256, 76);
 			// 
 			// _LightThemeMenuItem
 			// 
@@ -172,10 +175,31 @@
 			this._CustomThemeMenuItem.Size = new System.Drawing.Size(255, 24);
 			this._CustomThemeMenuItem.Text = "&Custom configurations...";
 			// 
+			// groupBox3
+			// 
+			this.groupBox3.Controls.Add(this._LineNumbersBox);
+			this.groupBox3.Location = new System.Drawing.Point(3, 165);
+			this.groupBox3.Name = "groupBox3";
+			this.groupBox3.Size = new System.Drawing.Size(407, 61);
+			this.groupBox3.TabIndex = 4;
+			this.groupBox3.TabStop = false;
+			this.groupBox3.Text = "Misc";
+			// 
+			// _LineNumbersBox
+			// 
+			this._LineNumbersBox.AutoSize = true;
+			this._LineNumbersBox.Location = new System.Drawing.Point(9, 24);
+			this._LineNumbersBox.Name = "_LineNumbersBox";
+			this._LineNumbersBox.Size = new System.Drawing.Size(229, 19);
+			this._LineNumbersBox.TabIndex = 0;
+			this._LineNumbersBox.Text = "Line numbers on scrollbar";
+			this._LineNumbersBox.UseVisualStyleBackColor = true;
+			// 
 			// GeneralPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this.groupBox3);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
 			this.Name = "GeneralPage";
@@ -187,6 +211,8 @@
 			this.groupBox1.PerformLayout();
 			this.groupBox2.ResumeLayout(false);
 			this._ThemeMenu.ResumeLayout(false);
+			this.groupBox3.ResumeLayout(false);
+			this.groupBox3.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -207,5 +233,7 @@
 		private System.Windows.Forms.ToolStripMenuItem _DarkThemeMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem _CustomThemeMenuItem;
 		private System.Windows.Forms.Button _ResetConfigButton;
+		private System.Windows.Forms.GroupBox groupBox3;
+		private System.Windows.Forms.CheckBox _LineNumbersBox;
 	}
 }

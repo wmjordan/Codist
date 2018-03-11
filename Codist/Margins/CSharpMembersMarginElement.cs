@@ -46,21 +46,24 @@ namespace Codist.Margins
 			SnapsToDevicePixels = true;
 			Width = Padding + MarkerSize;
 
-			textView.Options.OptionChanged += OnOptionChanged;
-
+			Config.Updated += Config_Updated;
 			IsVisibleChanged += OnIsVisibleChanged;
 
-			OnOptionChanged(null, null);
+			Config_Updated(null, null);
 		}
 
 		public bool Enabled => _enabled;
 
 		public void Dispose() {
 			IsVisibleChanged -= OnIsVisibleChanged;
-			_textView.Options.OptionChanged -= OnOptionChanged;
+			Config.Updated -= Config_Updated;
+			_scrollBar.TrackSpanChanged -= OnTagsChanged;
+			if (_tagger != null) {
+				_tagger.BatchedTagsChanged -= OnTagsChanged;
+			}
 		}
 
-		private void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+		void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
 			if ((bool)e.NewValue) {
 				//todo refresh the margin when format mapping or syntax highlight style is changed
 				//Hook up to the various events we need to keep the margin current.
@@ -86,19 +89,26 @@ namespace Codist.Margins
 			}
 			else {
 				_scrollBar.TrackSpanChanged -= OnTagsChanged;
-
 				_tagger.BatchedTagsChanged -= OnTagsChanged;
 				_tagger.Dispose();
 				_tagger = null;
 			}
 		}
 
-		private void OnOptionChanged(object sender, EditorOptionChangedEventArgs e) {
-			_enabled = true;// Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CodeRange);
-			Visibility = _enabled ? Visibility.Visible : Visibility.Collapsed;
+		void Config_Updated(object sender, EventArgs e) {
+			var setVisible = Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.MemberMarginMask);
+			var visible = Visibility == Visibility.Visible;
+			if (setVisible == false && visible) {
+				Visibility = Visibility.Collapsed;
+				InvalidateVisual();
+			}
+			else if (setVisible && visible == false) {
+				Visibility = Visibility.Visible;
+				InvalidateVisual();
+			}
 		}
 
-		private void OnTagsChanged(object sender, EventArgs e) {
+		void OnTagsChanged(object sender, EventArgs e) {
 			InvalidateVisual();
 		}
 
@@ -111,10 +121,9 @@ namespace Codist.Margins
 
 			base.OnRender(drawingContext);
 
-			if (_textView.IsClosed || _tagger == null || ActualHeight == 0) {
+			if (_textView.IsClosed || _tagger == null || ActualHeight == 0 || Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.MemberMarginMask) == false) {
 				return;
 			}
-
 			var snapshot = _textView.TextSnapshot;
 			var snapshotLength = snapshot.Length;
 			//todo cache previous results and update modified regions behind changed position only
@@ -168,7 +177,7 @@ namespace Codist.Margins
 					var pen = GetPenForCodeMemberType(tagType);
 					var yTop = _scrollBar.GetYCoordinateOfBufferPosition(start);
 					var yBottom = _scrollBar.GetYCoordinateOfBufferPosition(end);
-					if (yBottom - yTop > 9 && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Tag.Name != null) {
+					if (yBottom - yTop > 9 && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration) && tag.Tag.Name != null) {
 						// draw type name
 						var text = Utilities.ToFormattedText(tag.Tag.Name, 9, pen.Brush.Clone().Alpha(1))
 							.SetBold();
