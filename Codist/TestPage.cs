@@ -18,13 +18,14 @@ namespace Codist.Fake
 	[System.ComponentModel.Description("demo")]
 	struct MyStruct // struct declaration
 	{
-		const short Constant = ushort.MaxValue ^ 0xF0F0; // const field
-		const string ConstantString = "literal string"; // const string
-		public readonly static DateTime StartDate = DateTime.Now; // public readonly static field
+		private const short Constant = ushort.MaxValue ^ 0xF0F0; // const field
+		private const string ConstantString = "literal string"; // const string
 		private static int _static = (int)DateTime.Now.Ticks; // static field
-		static readonly int _staticReadonly = Int32.MinValue; // static readonly field
+		private static readonly int _staticReadonly = Int32.MinValue; // static readonly field
 		private int _instanceField; // field
 		private readonly int _readonlyField; // readonly field
+
+		public readonly static DateTime StartDate = DateTime.Now; // public readonly static field
 	}
 	abstract class AbstractClass : IInterface
 	{

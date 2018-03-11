@@ -736,8 +736,12 @@ namespace Codist.Views
 					if (f == null) {
 						continue;
 					}
-					++c;
 					var v = f.ConstantValue;
+					if (v == null) {
+						// hack: the value could somehow be null, if the semantic model is not completely loaded
+						continue;
+					}
+					++c;
 					if (min == null) {
 						min = max = bits = v;
 						minName = maxName = f;
