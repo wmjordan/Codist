@@ -541,8 +541,8 @@ namespace Codist
 		LongMemberDeclaration = 1 << 2,
 		CompilerDirective = 1 << 3,
 		LineNumber = 1 << 4,
+		TypeDeclaration = 1 << 5,
 		CodeMarginMask = SpecialComment | CompilerDirective,
-		MemberMarginMask = MemberDeclaration | LongMemberDeclaration,
 		Default = SpecialComment | MemberDeclaration | LineNumber | LongMemberDeclaration
 	}
 }

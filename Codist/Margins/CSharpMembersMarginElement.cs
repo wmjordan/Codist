@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using AppHelpers;
@@ -96,7 +95,7 @@ namespace Codist.Margins
 		}
 
 		void Config_Updated(object sender, EventArgs e) {
-			var setVisible = Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.MemberMarginMask);
+			var setVisible = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration);
 			var visible = Visibility == Visibility.Visible;
 			if (setVisible == false && visible) {
 				Visibility = Visibility.Collapsed;
@@ -121,7 +120,7 @@ namespace Codist.Margins
 
 			base.OnRender(drawingContext);
 
-			if (_textView.IsClosed || _tagger == null || ActualHeight == 0 || Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.MemberMarginMask) == false) {
+			if (_textView.IsClosed || _tagger == null || ActualHeight == 0 || Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration) == false) {
 				return;
 			}
 			var snapshot = _textView.TextSnapshot;
@@ -177,7 +176,7 @@ namespace Codist.Margins
 					var pen = GetPenForCodeMemberType(tagType);
 					var yTop = _scrollBar.GetYCoordinateOfBufferPosition(start);
 					var yBottom = _scrollBar.GetYCoordinateOfBufferPosition(end);
-					if (yBottom - yTop > 9 && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration) && tag.Tag.Name != null) {
+					if (yBottom - yTop > 9 && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Tag.Name != null) {
 						// draw type name
 						var text = Utilities.ToFormattedText(tag.Tag.Name, 9, pen.Brush.Clone().Alpha(1))
 							.SetBold();

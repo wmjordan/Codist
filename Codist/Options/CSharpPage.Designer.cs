@@ -29,7 +29,7 @@
 			this._DirectivesBox = new System.Windows.Forms.CheckBox();
 			this._SpecialCommentsBox = new System.Windows.Forms.CheckBox();
 			this._LongMethodBox = new System.Windows.Forms.CheckBox();
-			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
+			this._MemberDeclarationBox = new System.Windows.Forms.CheckBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this._CSharpTypeParameterQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpParameterQuickInfoBox = new System.Windows.Forms.CheckBox();
@@ -45,6 +45,7 @@
 			this._CSharpAttributesQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this._HighlightDeclarationBracesBox = new System.Windows.Forms.CheckBox();
+			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			this.groupBox1.SuspendLayout();
@@ -54,8 +55,9 @@
 			// 
 			this.groupBox2.Controls.Add(this._DirectivesBox);
 			this.groupBox2.Controls.Add(this._SpecialCommentsBox);
-			this.groupBox2.Controls.Add(this._LongMethodBox);
 			this.groupBox2.Controls.Add(this._TypeDeclarationBox);
+			this.groupBox2.Controls.Add(this._LongMethodBox);
+			this.groupBox2.Controls.Add(this._MemberDeclarationBox);
 			this.groupBox2.Location = new System.Drawing.Point(265, 3);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(236, 151);
@@ -86,22 +88,22 @@
 			// _LongMethodBox
 			// 
 			this._LongMethodBox.AutoSize = true;
-			this._LongMethodBox.Location = new System.Drawing.Point(9, 49);
+			this._LongMethodBox.Location = new System.Drawing.Point(30, 49);
 			this._LongMethodBox.Name = "_LongMethodBox";
-			this._LongMethodBox.Size = new System.Drawing.Size(117, 19);
+			this._LongMethodBox.Size = new System.Drawing.Size(157, 19);
 			this._LongMethodBox.TabIndex = 1;
-			this._LongMethodBox.Text = "Long method";
+			this._LongMethodBox.Text = "Long method name";
 			this._LongMethodBox.UseVisualStyleBackColor = true;
 			// 
-			// _TypeDeclarationBox
+			// _MemberDeclarationBox
 			// 
-			this._TypeDeclarationBox.AutoSize = true;
-			this._TypeDeclarationBox.Location = new System.Drawing.Point(9, 24);
-			this._TypeDeclarationBox.Name = "_TypeDeclarationBox";
-			this._TypeDeclarationBox.Size = new System.Drawing.Size(157, 19);
-			this._TypeDeclarationBox.TabIndex = 0;
-			this._TypeDeclarationBox.Text = "Type declaration";
-			this._TypeDeclarationBox.UseVisualStyleBackColor = true;
+			this._MemberDeclarationBox.AutoSize = true;
+			this._MemberDeclarationBox.Location = new System.Drawing.Point(9, 24);
+			this._MemberDeclarationBox.Name = "_MemberDeclarationBox";
+			this._MemberDeclarationBox.Size = new System.Drawing.Size(213, 19);
+			this._MemberDeclarationBox.TabIndex = 0;
+			this._MemberDeclarationBox.Text = "Member declaration line";
+			this._MemberDeclarationBox.UseVisualStyleBackColor = true;
 			// 
 			// groupBox3
 			// 
@@ -264,6 +266,16 @@
 			this._HighlightDeclarationBracesBox.Text = "Declaration braces";
 			this._HighlightDeclarationBracesBox.UseVisualStyleBackColor = true;
 			// 
+			// _TypeDeclarationBox
+			// 
+			this._TypeDeclarationBox.AutoSize = true;
+			this._TypeDeclarationBox.Location = new System.Drawing.Point(30, 74);
+			this._TypeDeclarationBox.Name = "_TypeDeclarationBox";
+			this._TypeDeclarationBox.Size = new System.Drawing.Size(101, 19);
+			this._TypeDeclarationBox.TabIndex = 1;
+			this._TypeDeclarationBox.Text = "Type name";
+			this._TypeDeclarationBox.UseVisualStyleBackColor = true;
+			// 
 			// CSharpPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -287,7 +299,7 @@
 		#endregion
 		private System.Windows.Forms.GroupBox groupBox2;
 		private System.Windows.Forms.CheckBox _SpecialCommentsBox;
-		private System.Windows.Forms.CheckBox _TypeDeclarationBox;
+		private System.Windows.Forms.CheckBox _MemberDeclarationBox;
 		private System.Windows.Forms.CheckBox _DirectivesBox;
 		private System.Windows.Forms.GroupBox groupBox3;
 		private System.Windows.Forms.CheckBox _CSharpBaseTypeQuickInfoBox;
@@ -305,5 +317,6 @@
 		private System.Windows.Forms.CheckBox _CSharpInterfaceImplementationsQuickInfoBox;
 		private System.Windows.Forms.CheckBox _LongMethodBox;
 		private System.Windows.Forms.CheckBox _CSharpTypeParameterQuickInfoBox;
+		private System.Windows.Forms.CheckBox _TypeDeclarationBox;
 	}
 }

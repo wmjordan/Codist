@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using AppHelpers;
@@ -31,13 +30,7 @@ namespace Codist.Margins
 		static readonly Brush NoteBrush = new SolidColorBrush(Constants.NoteColor);
 		static readonly Brush HackBrush = new SolidColorBrush(Constants.HackColor);
 		static readonly Brush TaskBrush = new SolidColorBrush(Constants.TaskColor);
-		//static readonly Brush ClassNameBrush = Brushes.Blue;
-		//static readonly Brush StructNameBrush = Brushes.Teal;
-		//static readonly Brush InterfaceNameBrush = Brushes.DeepSkyBlue;
-		//static readonly Brush EnumNameBrush = Brushes.Purple;
 		static readonly Brush PreProcessorBrush = Brushes.Gray;
-		//static readonly Brush AbstractionBrush = Brushes.DarkOrange;
-		//todo: customizable marker style
 		//note: this dictionary determines which style has a scrollbar marker
 		static readonly Dictionary<string, Brush> ClassificationBrushMapper = new Dictionary<string, Brush> {
 			{ Constants.EmphasisComment, EmphasisBrush },
@@ -142,10 +135,6 @@ namespace Codist.Margins
 			UpdateEventHandlers(true);
 		}
 
-		void OnFormatMappingChanged(object sender, FormatItemsEventArgs e) {
-			//_marginBrush = this.GetBrush(nameof(CommentMargin), EditorFormatDefinition.ForegroundBrushId);
-		}
-
 		Brush GetBrush(string name, string resource) {
 			var rd = _EditorFormatMap.GetProperties(name);
 			return rd.Contains(resource) ? rd[resource] as Brush : null;
@@ -157,14 +146,10 @@ namespace Codist.Margins
 			if (needEvents != _HasEvents) {
 				_HasEvents = needEvents;
 				if (needEvents) {
-					_EditorFormatMap.FormatMappingChanged += OnFormatMappingChanged;
 					_ScrollBar.TrackSpanChanged += OnMappingChanged;
-					OnFormatMappingChanged(null, null);
-
 					return true;
 				}
 				else {
-					_EditorFormatMap.FormatMappingChanged -= OnFormatMappingChanged;
 					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 				}
 			}
@@ -270,7 +255,6 @@ namespace Codist.Margins
 					Config.Updated -= Config_Updated;
 					_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
 					IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
-					//_TextView.VisualElement.IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
 					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 				}
 

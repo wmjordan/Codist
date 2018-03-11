@@ -25,8 +25,9 @@ namespace Codist.Options
 
 			_DirectivesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.CompilerDirective, _DirectivesBox.Checked));
 			_SpecialCommentsBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.SpecialComment, _SpecialCommentsBox.Checked));
-			_TypeDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.MemberDeclaration, _TypeDeclarationBox.Checked));
+			_MemberDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.MemberDeclaration, _LongMethodBox.Enabled = _TypeDeclarationBox.Enabled = _MemberDeclarationBox.Checked));
 			_LongMethodBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.LongMemberDeclaration, _LongMethodBox.Checked));
+			_TypeDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.TypeDeclaration, _TypeDeclarationBox.Checked));
 			_CSharpAttributesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Attributes, _CSharpAttributesQuickInfoBox.Checked));
 			_CSharpBaseTypeQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseType, _CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked));
 			_CSharpBaseTypeInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseTypeInheritence, _CSharpBaseTypeInheritenceQuickInfoBox.Checked));
@@ -49,8 +50,9 @@ namespace Codist.Options
 			_UI.DoWithLock(() => {
 				_DirectivesBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective);
 				_SpecialCommentsBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment);
-				_TypeDeclarationBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration);
+				_MemberDeclarationBox.Checked = _LongMethodBox.Enabled = config.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration);
 				_LongMethodBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration);
+				_TypeDeclarationBox.Checked = _LongMethodBox.Enabled = config.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration);
 				_CSharpAttributesQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes);
 				_CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType);
 				_CSharpBaseTypeInheritenceQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence);
