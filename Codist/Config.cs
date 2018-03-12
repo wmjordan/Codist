@@ -402,7 +402,7 @@ namespace Codist
 		/// <summary>Gets or sets the comment style.</summary>
 		public XmlStyleTypes StyleID { get; set; }
 
-		public override string Category => Constants.SyntaxCategory.Xml;
+		public override string Category => StyleID != XmlStyleTypes.None ? Constants.SyntaxCategory.Xml : String.Empty;
 
 		internal new CommentStyle Clone() {
 			return (CommentStyle)MemberwiseClone();
