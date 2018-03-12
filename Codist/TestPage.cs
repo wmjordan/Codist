@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 namespace Codist.Fake
 {
 #if DEBUG
-	interface IInterface // interface declaration
+	interface IInterface : IDisposable // interface declaration
 	{
 		[System.ComponentModel.DefaultValue(MyEnum.OK | MyEnum.Sad)]
-		int Property { get; set; }
+		MyEnum Property { get; set; }
 	}
 	[Flags]
 	enum MyEnum : ushort // enum declaration
@@ -30,9 +30,11 @@ namespace Codist.Fake
 	abstract class AbstractClass : IInterface
 	{
 		protected abstract int Property { get; set; } // protected abstract property
+		MyEnum IInterface.Property { get; set; } // explicit interface implementation
+
 		protected abstract int AbstractMethod(); // abstract method
 		public virtual void VirtualMethod() { } // virtual method
-		int IInterface.Property { get; set; } // explicit interface implementation
+		void IDisposable.Dispose() { } // explicit interface implementation
 	}
 	static class ExtensionClass // static class
 	{
@@ -96,10 +98,10 @@ text".Log(); // multiline string (string verbatim)
 			// unnecessary code
 			Codist.Fake.ExtensionClass.Log(typeof(TGeneric).Name); // extension method
 			NativeMethods.ExternMethod(IntPtr.Zero); // extern method
-			AbstractMethod(); // abstract method
-			VirtualMethod(); // overridden method
+			AbstractMethod(); // overridden abstract method
+			VirtualMethod(); // overridden virtual method
 			base.VirtualMethod(); // base virtual method
-			MyEvent(this, EventArgs.Empty); // invoke event
+			MyEvent(this, EventArgs.Empty); // event
 		}
 
 		protected override int AbstractMethod() { // overridden method

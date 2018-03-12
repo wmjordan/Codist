@@ -252,7 +252,6 @@ namespace Codist.Classifiers
 				case SymbolKind.DynamicType:
 				case SymbolKind.ErrorType:
 				case SymbolKind.NetModule:
-				case SymbolKind.NamedType:
 				case SymbolKind.PointerType:
 				case SymbolKind.RangeVariable:
 				case SymbolKind.Preprocessing:
@@ -310,6 +309,9 @@ namespace Codist.Classifiers
 					}
 					break;
 
+				case SymbolKind.NamedType:
+					break;
+
 				default:
 					yield break;
 			}
@@ -319,6 +321,12 @@ namespace Codist.Classifiers
 					yield return _Classifications.StaticMember;
 				}
 			}
+			else if (symbol.IsSealed) {
+				if (symbol.Kind == SymbolKind.NamedType && (symbol as ITypeSymbol).TypeKind != TypeKind.Class) {
+					yield break;
+				}
+				yield return _Classifications.SealedMember;
+			}
 			else if (symbol.IsOverride) {
 				yield return _Classifications.OverrideMember;
 			}
@@ -327,9 +335,6 @@ namespace Codist.Classifiers
 			}
 			else if (symbol.IsAbstract) {
 				yield return _Classifications.AbstractMember;
-			}
-			else if (symbol.IsSealed) {
-				yield return _Classifications.SealedMember;
 			}
 		}
 
