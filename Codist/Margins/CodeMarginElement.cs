@@ -185,7 +185,7 @@ namespace Codist.Margins
 			var snapshot = _TextView.TextSnapshot;
 			var snapshotLength = snapshot.Length;
 			foreach (var tag in tags) {
-				if (tag.End >= snapshotLength || tag.Start >= snapshotLength) {
+				if (tag.End >= snapshotLength) {
 					continue;
 				}
 				//todo: customizable marker style
@@ -200,12 +200,10 @@ namespace Codist.Margins
 					continue;
 				}
 				else if (b == PreProcessorBrush) {
-					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)) {
-						DrawMark(drawingContext, b, y, 0);
-					}
-					else {
+					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)) {
 						continue;
 					}
+					DrawMark(drawingContext, b, y, 0);
 				}
 				else if (b == TaskBrush) {
 					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {

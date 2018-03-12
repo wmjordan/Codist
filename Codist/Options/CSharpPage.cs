@@ -41,6 +41,7 @@ namespace Codist.Options
 			_CSharpParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Parameter, _CSharpParameterQuickInfoBox.Checked));
 			_CSharpTypeParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.TypeParameters, _CSharpTypeParameterQuickInfoBox.Checked));
 			_HighlightDeclarationBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.DeclarationBrace, _HighlightDeclarationBracesBox.Checked));
+			_SpecialCommentsHighlightBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.SpecialComment, _SpecialCommentsHighlightBox.Checked));
 
 			Config.Loaded += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
@@ -66,6 +67,7 @@ namespace Codist.Options
 				_CSharpParameterQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter);
 				_CSharpTypeParameterQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters);
 				_HighlightDeclarationBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace);
+				_SpecialCommentsHighlightBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment);
 			});
 		}
 	}

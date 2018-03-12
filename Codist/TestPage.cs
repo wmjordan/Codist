@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 namespace Codist.Fake
 {
 #if DEBUG
+	//todo: Move types into separated files
 	interface IInterface : IDisposable // interface declaration
 	{
 		[System.ComponentModel.DefaultValue(MyEnum.OK | MyEnum.Sad)]
@@ -18,6 +19,7 @@ namespace Codist.Fake
 	[System.ComponentModel.Description("demo")]
 	struct MyStruct // struct declaration
 	{
+		//note hover on Constant to see its value
 		private const short Constant = ushort.MaxValue ^ 0xF0F0; // const field
 		private const string ConstantString = "literal string"; // const string
 		private static int _static = (int)DateTime.Now.Ticks; // static field
@@ -50,6 +52,7 @@ namespace Codist.Fake
 		/// </summary>
 		/// <param name="fieldId">The field.</param>
 		/// <example><code><![CDATA[System.Console.WriteLine(Codist.Constants.NameOfMe);]]></code></example>
+		// Todo++ hover on the "{" below to see line count of this method block
 		public ConcreteClass(int fieldId) {
 			const int A = 1; // local constant
 			var localField = fieldId; // local field

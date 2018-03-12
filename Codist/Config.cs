@@ -528,8 +528,9 @@ namespace Codist
 	public enum SpecialHighlightOptions
 	{
 		None,
-		XmlDocCode = 1,
-		DeclarationBrace = 1 << 1
+		SpecialComment = 1,
+		DeclarationBrace = 1 << 1,
+		XmlDocCode = 1 << 2,
 	}
 
 	[Flags]

@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Classifiers
 {
+	//todo++ Extract comment tagger logic for various content types
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType("code")]
 	[TagType(typeof(ClassificationTag))]
@@ -158,7 +159,7 @@ namespace Codist.Classifiers
 						}
 					}
 
-					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
+					if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment)) {
 						var ts = TagComments(c, ss, tagSpan);
 						if (ts != null) {
 							yield return _Tags.Add(ts);

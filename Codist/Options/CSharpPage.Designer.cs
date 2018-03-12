@@ -28,6 +28,7 @@
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this._DirectivesBox = new System.Windows.Forms.CheckBox();
 			this._SpecialCommentsBox = new System.Windows.Forms.CheckBox();
+			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
 			this._LongMethodBox = new System.Windows.Forms.CheckBox();
 			this._MemberDeclarationBox = new System.Windows.Forms.CheckBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
@@ -45,7 +46,7 @@
 			this._CSharpAttributesQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this._HighlightDeclarationBracesBox = new System.Windows.Forms.CheckBox();
-			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
+			this._SpecialCommentsHighlightBox = new System.Windows.Forms.CheckBox();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
 			this.groupBox1.SuspendLayout();
@@ -68,7 +69,7 @@
 			// _DirectivesBox
 			// 
 			this._DirectivesBox.AutoSize = true;
-			this._DirectivesBox.Location = new System.Drawing.Point(9, 99);
+			this._DirectivesBox.Location = new System.Drawing.Point(6, 99);
 			this._DirectivesBox.Name = "_DirectivesBox";
 			this._DirectivesBox.Size = new System.Drawing.Size(173, 19);
 			this._DirectivesBox.TabIndex = 2;
@@ -78,12 +79,22 @@
 			// _SpecialCommentsBox
 			// 
 			this._SpecialCommentsBox.AutoSize = true;
-			this._SpecialCommentsBox.Location = new System.Drawing.Point(9, 124);
+			this._SpecialCommentsBox.Location = new System.Drawing.Point(6, 126);
 			this._SpecialCommentsBox.Name = "_SpecialCommentsBox";
 			this._SpecialCommentsBox.Size = new System.Drawing.Size(149, 19);
 			this._SpecialCommentsBox.TabIndex = 3;
 			this._SpecialCommentsBox.Text = "Special comment";
 			this._SpecialCommentsBox.UseVisualStyleBackColor = true;
+			// 
+			// _TypeDeclarationBox
+			// 
+			this._TypeDeclarationBox.AutoSize = true;
+			this._TypeDeclarationBox.Location = new System.Drawing.Point(30, 74);
+			this._TypeDeclarationBox.Name = "_TypeDeclarationBox";
+			this._TypeDeclarationBox.Size = new System.Drawing.Size(101, 19);
+			this._TypeDeclarationBox.TabIndex = 1;
+			this._TypeDeclarationBox.Text = "Type name";
+			this._TypeDeclarationBox.UseVisualStyleBackColor = true;
 			// 
 			// _LongMethodBox
 			// 
@@ -98,7 +109,7 @@
 			// _MemberDeclarationBox
 			// 
 			this._MemberDeclarationBox.AutoSize = true;
-			this._MemberDeclarationBox.Location = new System.Drawing.Point(9, 24);
+			this._MemberDeclarationBox.Location = new System.Drawing.Point(6, 24);
 			this._MemberDeclarationBox.Name = "_MemberDeclarationBox";
 			this._MemberDeclarationBox.Size = new System.Drawing.Size(213, 19);
 			this._MemberDeclarationBox.TabIndex = 0;
@@ -248,10 +259,11 @@
 			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this._SpecialCommentsHighlightBox);
 			this.groupBox1.Controls.Add(this._HighlightDeclarationBracesBox);
 			this.groupBox1.Location = new System.Drawing.Point(265, 160);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(236, 61);
+			this.groupBox1.Size = new System.Drawing.Size(236, 86);
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Special syntax highlight";
@@ -259,22 +271,22 @@
 			// _HighlightDeclarationBracesBox
 			// 
 			this._HighlightDeclarationBracesBox.AutoSize = true;
-			this._HighlightDeclarationBracesBox.Location = new System.Drawing.Point(8, 24);
+			this._HighlightDeclarationBracesBox.Location = new System.Drawing.Point(6, 24);
 			this._HighlightDeclarationBracesBox.Name = "_HighlightDeclarationBracesBox";
 			this._HighlightDeclarationBracesBox.Size = new System.Drawing.Size(173, 19);
 			this._HighlightDeclarationBracesBox.TabIndex = 0;
 			this._HighlightDeclarationBracesBox.Text = "Declaration braces";
 			this._HighlightDeclarationBracesBox.UseVisualStyleBackColor = true;
 			// 
-			// _TypeDeclarationBox
+			// _SpecialCommentsHighlightBox
 			// 
-			this._TypeDeclarationBox.AutoSize = true;
-			this._TypeDeclarationBox.Location = new System.Drawing.Point(30, 74);
-			this._TypeDeclarationBox.Name = "_TypeDeclarationBox";
-			this._TypeDeclarationBox.Size = new System.Drawing.Size(101, 19);
-			this._TypeDeclarationBox.TabIndex = 1;
-			this._TypeDeclarationBox.Text = "Type name";
-			this._TypeDeclarationBox.UseVisualStyleBackColor = true;
+			this._SpecialCommentsHighlightBox.AutoSize = true;
+			this._SpecialCommentsHighlightBox.Location = new System.Drawing.Point(6, 49);
+			this._SpecialCommentsHighlightBox.Name = "_SpecialCommentsHighlightBox";
+			this._SpecialCommentsHighlightBox.Size = new System.Drawing.Size(149, 19);
+			this._SpecialCommentsHighlightBox.TabIndex = 0;
+			this._SpecialCommentsHighlightBox.Text = "Special comment";
+			this._SpecialCommentsHighlightBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpPage
 			// 
@@ -318,5 +330,6 @@
 		private System.Windows.Forms.CheckBox _LongMethodBox;
 		private System.Windows.Forms.CheckBox _CSharpTypeParameterQuickInfoBox;
 		private System.Windows.Forms.CheckBox _TypeDeclarationBox;
+		private System.Windows.Forms.CheckBox _SpecialCommentsHighlightBox;
 	}
 }
