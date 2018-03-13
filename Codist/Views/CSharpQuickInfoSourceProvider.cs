@@ -124,7 +124,7 @@ namespace Codist.Views
 						break;
 					case SymbolKind.Method:
 						ShowMethodInfo(qiContent, node, symbol as IMethodSymbol);
-						if (node.Parent.IsKind(SyntaxKind.Attribute)) {
+						if (node.Parent.IsKind(SyntaxKind.Attribute) || node.Parent.Parent.IsKind(SyntaxKind.Attribute)) {
 							if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
 								ShowAttributesInfo(qiContent, node, symbol.ContainingType);
 							}
@@ -219,7 +219,7 @@ namespace Codist.Views
 					ShowDeclarationModifier(qiContent, property, "Property", node.SpanStart);
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
-					ShowInterfaceImplementation(qiContent, node, property, property.ExplicitInterfaceImplementations.Select(i => i.Type), m => m.Type, m => m.Parameters);
+					ShowInterfaceImplementation(qiContent, node, property, property.ExplicitInterfaceImplementations, m => m.Type, m => m.Parameters);
 				}
 			}
 
@@ -234,7 +234,7 @@ namespace Codist.Views
 					}
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
-					ShowInterfaceImplementation(qiContent, node, ev, ev.ExplicitInterfaceImplementations.Select(i => i.Type), m => m.Type, m => m.AddMethod.Parameters);
+					ShowInterfaceImplementation(qiContent, node, ev, ev.ExplicitInterfaceImplementations, m => m.Type, m => m.AddMethod.Parameters);
 				}
 			}
 
@@ -259,7 +259,7 @@ namespace Codist.Views
 					ShowMethodTypeArguments(qiContent, node, method);
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
-					ShowInterfaceImplementation(qiContent, node, method, method.ExplicitInterfaceImplementations.Select(i => i.ReturnType), m => m.ReturnType, m => m.Parameters);
+					ShowInterfaceImplementation(qiContent, node, method, method.ExplicitInterfaceImplementations, m => m.ReturnType, m => m.Parameters);
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod) && method.IsExtensionMethod) {
 					ShowExtensionMethod(qiContent, method, node.SpanStart);
@@ -313,16 +313,16 @@ namespace Codist.Views
 				}
 			}
 
-			void ShowInterfaceImplementation<TSymbol>(IList<object> qiContent, SyntaxNode node, TSymbol symbol, IEnumerable<ITypeSymbol> explicitImplementations, Func<TSymbol, ITypeSymbol> returnTypeGetter, Func<TSymbol, ImmutableArray<IParameterSymbol>> parameterGetter)
+			void ShowInterfaceImplementation<TSymbol>(IList<object> qiContent, SyntaxNode node, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations, Func<TSymbol, ITypeSymbol> returnTypeGetter, Func<TSymbol, ImmutableArray<IParameterSymbol>> parameterGetter)
 				where TSymbol : class, ISymbol {
-				if (symbol.IsStatic || symbol.DeclaredAccessibility != Accessibility.Public) {
+				if (symbol.IsStatic || symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.FirstOrDefault() == null) {
 					return;
 				}
 				var interfaces = symbol.ContainingType.AllInterfaces;
 				if (interfaces.Length == 0) {
 					return;
 				}
-				List<ITypeSymbol> types = new List<ITypeSymbol>();
+				var types = new List<ITypeSymbol>();
 				StackPanel info = null;
 				var returnType = returnTypeGetter(symbol);
 				var parameters = parameterGetter(symbol);
@@ -361,7 +361,7 @@ namespace Codist.Views
 				}
 				if (explicitImplementations != null) {
 					types.Clear();
-					types.AddRange(explicitImplementations);
+					types.AddRange(explicitImplementations.Select(i => i.ContainingType));
 					if (types.Count > 0) {
 						if (info == null) {
 							info = new StackPanel();
@@ -469,7 +469,7 @@ namespace Codist.Views
 			}
 
 			static void ShowFieldDeclaration(IList<object> qiContent, IFieldSymbol field) {
-				var info = new TextBlock().AddText("Field declaration: ", true);
+				var info = new TextBlock().AddText("Field", true).AddText(" declaration: ");
 				ShowAccessibilityInfo(field, info);
 				if (field.IsConst) {
 					info.AddText("const ", _KeywordBrush);

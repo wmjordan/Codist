@@ -33,7 +33,7 @@ namespace Codist.Fake
 	{
 		protected abstract int Property { get; set; } // protected abstract property
 		MyEnum IInterface.Property { get; set; } // explicit interface implementation
-
+		public void Method() { Property++; }
 		protected abstract int AbstractMethod(); // abstract method
 		public virtual void VirtualMethod() { } // virtual method
 		void IDisposable.Dispose() { } // explicit interface implementation
@@ -96,6 +96,8 @@ text".Log(); // multiline string (string verbatim)
 		}
 
 		protected override int Property { get; set; }
+
+		public new void Method() { Property--; }
 
 		public void Method<TGeneric>() { //type parameter
 			// unnecessary code
