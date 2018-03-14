@@ -31,10 +31,6 @@ namespace Codist.Views
 		[Import]
 		internal ITextStructureNavigatorSelectorService _NavigatorService = null;
 
-		//note although the following service is not used, it is still required to make the quickinfo work
-		[Import]
-		internal ITextBufferFactoryService _TextBufferFactoryService = null;
-
 		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return new QuickInfoSource(textBuffer, _EditorFormatMapService, _NavigatorService);
 		}
@@ -60,6 +56,9 @@ namespace Codist.Views
 			}
 
 			public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.HideOriginalQuickInfo)) {
+					qiContent.Clear();
+				}
 				// Map the trigger point down to our buffer.
 				var subjectTriggerPoint = session.GetTriggerPoint(_TextBuffer.CurrentSnapshot).GetValueOrDefault();
 				if (subjectTriggerPoint.Snapshot == null) {
@@ -109,6 +108,30 @@ namespace Codist.Views
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
 					ShowAttributesInfo(qiContent, node, symbol);
 				}
+				ShowSymbolInfo(qiContent, node, symbol);
+				RETURN:
+				ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
+				applicableToSpan = qiContent.Count > 0
+					? currentSnapshot.CreateTrackingSpan(extent.Start, extent.Length, SpanTrackingMode.EdgeInclusive)
+					: null;
+				return;
+				EXIT:
+				ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
+				applicableToSpan = qiContent.Count > 0
+					? currentSnapshot.CreateTrackingSpan(session.TextView.GetTextElementSpan(subjectTriggerPoint), SpanTrackingMode.EdgeInclusive)
+					: null;
+			}
+
+			void IDisposable.Dispose() {
+				if (!_IsDisposed) {
+					_TextBuffer.Changing -= TextBuffer_Changing;
+					Config.Updated -= _ConfigUpdated; ;
+					GC.SuppressFinalize(this);
+					_IsDisposed = true;
+				}
+			}
+
+			void ShowSymbolInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
 				switch (symbol.Kind) {
 					case SymbolKind.Event:
 						ShowEventInfo(qiContent, node, symbol as IEventSymbol);
@@ -124,7 +147,9 @@ namespace Codist.Views
 						break;
 					case SymbolKind.Method:
 						ShowMethodInfo(qiContent, node, symbol as IMethodSymbol);
-						if (node.Parent.IsKind(SyntaxKind.Attribute) || node.Parent.Parent.IsKind(SyntaxKind.Attribute)) {
+						if (node.Parent.IsKind(SyntaxKind.Attribute)
+							|| node.Parent.Parent.IsKind(SyntaxKind.Attribute) // qualified attribute annotation
+							) {
 							if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
 								ShowAttributesInfo(qiContent, node, symbol.ContainingType);
 							}
@@ -138,17 +163,6 @@ namespace Codist.Views
 						ShowPropertyInfo(qiContent, node, symbol as IPropertySymbol);
 						break;
 				}
-				RETURN:
-				ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
-				applicableToSpan = qiContent.Count > 0
-					? currentSnapshot.CreateTrackingSpan(extent.Start, extent.Length, SpanTrackingMode.EdgeInclusive)
-					: null;
-				return;
-				EXIT:
-				ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
-				applicableToSpan = qiContent.Count > 0
-					? currentSnapshot.CreateTrackingSpan(session.TextView.GetTextElementSpan(subjectTriggerPoint), SpanTrackingMode.EdgeInclusive)
-					: null;
 			}
 
 			static void ShowMiscInfo(IList<object> qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
@@ -215,7 +229,7 @@ namespace Codist.Views
 
 			void ShowPropertyInfo(IList<object> qiContent, SyntaxNode node, IPropertySymbol property) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-									&& (property.DeclaredAccessibility != Accessibility.Public || property.IsAbstract || property.IsStatic || property.IsOverride || property.IsVirtual)) {
+					&& (property.DeclaredAccessibility != Accessibility.Public || property.IsAbstract || property.IsStatic || property.IsOverride || property.IsVirtual)) {
 					ShowDeclarationModifier(qiContent, property, "Property", node.SpanStart);
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
@@ -251,7 +265,7 @@ namespace Codist.Views
 
 			void ShowMethodInfo(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-					&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern)
+					&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern || method.IsSealed)
 					&& method.ContainingType.TypeKind != TypeKind.Interface) {
 					ShowDeclarationModifier(qiContent, method, "Method", node.SpanStart);
 				}
@@ -375,15 +389,6 @@ namespace Codist.Views
 				}
 				if (info != null) {
 					qiContent.Add(info);
-				}
-			}
-
-			void IDisposable.Dispose() {
-				if (!_IsDisposed) {
-					_TextBuffer.Changing -= TextBuffer_Changing;
-					Config.Updated -= _ConfigUpdated; ;
-					GC.SuppressFinalize(this);
-					_IsDisposed = true;
 				}
 			}
 

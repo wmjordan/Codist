@@ -133,6 +133,7 @@
     <Compile Include="Views\CodeViewCreationListener.cs" />
     <Compile Include="Views\CodeViewDecorator.cs" />
     <Compile Include="Views\CSharpQuickInfoSourceProvider.cs" />
+    <Compile Include="Views\QuickInfoVisibilityControllerProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

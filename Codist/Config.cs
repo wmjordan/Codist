@@ -254,24 +254,24 @@ namespace Codist
 				new CommentStyle(CommentStyleTypes.Exclaimation, Constants.ExclaimationColor),
 				new CommentStyle(CommentStyleTypes.Question, Constants.QuestionColor),
 				new CommentStyle(CommentStyleTypes.Deletion, Constants.DeletionColor) { Strikethrough = true },
-				new CommentStyle(CommentStyleTypes.ToDo, Colors.White) { BackgroundColor = Constants.ToDoColor.ToHexString(), UseScrollBarMarker = true },
-				new CommentStyle(CommentStyleTypes.Note, Colors.White) { BackgroundColor = Constants.NoteColor.ToHexString(), UseScrollBarMarker = true },
-				new CommentStyle(CommentStyleTypes.Hack, Colors.White) { BackgroundColor = Constants.HackColor.ToHexString(), UseScrollBarMarker = true },
-				new CommentStyle(CommentStyleTypes.Heading1, Constants.CommentColor) { FontSize = 12 },
-				new CommentStyle(CommentStyleTypes.Heading2, Constants.CommentColor) { FontSize = 8 },
-				new CommentStyle(CommentStyleTypes.Heading3, Constants.CommentColor) { FontSize = 4 },
-				new CommentStyle(CommentStyleTypes.Heading4, Constants.CommentColor) { FontSize = -1 },
-				new CommentStyle(CommentStyleTypes.Heading5, Constants.CommentColor) { FontSize = -2 },
-				new CommentStyle(CommentStyleTypes.Heading6, Constants.CommentColor) { FontSize = -3 },
-				new CommentStyle(CommentStyleTypes.Task1, Constants.CommentColor) { UseScrollBarMarker = true },
-				new CommentStyle(CommentStyleTypes.Task2, Constants.CommentColor) { UseScrollBarMarker = true },
-				new CommentStyle(CommentStyleTypes.Task3, Constants.CommentColor) { UseScrollBarMarker = true },
-				new CommentStyle(CommentStyleTypes.Task4, Constants.CommentColor) { UseScrollBarMarker = true },
-				new CommentStyle(CommentStyleTypes.Task5, Constants.CommentColor) { UseScrollBarMarker = true },
-				new CommentStyle(CommentStyleTypes.Task6, Constants.CommentColor) { UseScrollBarMarker = true },
-				new CommentStyle(CommentStyleTypes.Task7, Constants.CommentColor) { UseScrollBarMarker = true },
-				new CommentStyle(CommentStyleTypes.Task8, Constants.CommentColor) { UseScrollBarMarker = true },
-				new CommentStyle(CommentStyleTypes.Task9, Constants.CommentColor) { UseScrollBarMarker = true },
+				new CommentStyle(CommentStyleTypes.ToDo, Colors.White) { BackgroundColor = Constants.ToDoColor.ToHexString(), ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new CommentStyle(CommentStyleTypes.Note, Colors.White) { BackgroundColor = Constants.NoteColor.ToHexString(), ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new CommentStyle(CommentStyleTypes.Hack, Colors.White) { BackgroundColor = Constants.HackColor.ToHexString(), ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new CommentStyle(CommentStyleTypes.Heading1) { FontSize = 12 },
+				new CommentStyle(CommentStyleTypes.Heading2) { FontSize = 8 },
+				new CommentStyle(CommentStyleTypes.Heading3) { FontSize = 4 },
+				new CommentStyle(CommentStyleTypes.Heading4) { FontSize = -1 },
+				new CommentStyle(CommentStyleTypes.Heading5) { FontSize = -2 },
+				new CommentStyle(CommentStyleTypes.Heading6) { FontSize = -3 },
+				new CommentStyle(CommentStyleTypes.Task1) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number1 },
+				new CommentStyle(CommentStyleTypes.Task2) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number2 },
+				new CommentStyle(CommentStyleTypes.Task3) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number3 },
+				new CommentStyle(CommentStyleTypes.Task4) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number4 },
+				new CommentStyle(CommentStyleTypes.Task5) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number5 },
+				new CommentStyle(CommentStyleTypes.Task6) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number6 },
+				new CommentStyle(CommentStyleTypes.Task7) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number7 },
+				new CommentStyle(CommentStyleTypes.Task8) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number8 },
+				new CommentStyle(CommentStyleTypes.Task9) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number9 },
 			};
 		}
 		internal static CodeStyle[] GetDefaultCodeStyles() {
@@ -327,9 +327,11 @@ namespace Codist
 			set { BackColor = Utilities.ParseColor(value); }
 		}
 		/// <summary>Gets or sets the brush effect to draw the background color.</summary>
+		[DefaultValue(BrushEffect.Solid)]
 		public BrushEffect BackgroundEffect { get; set; }
-		/// <summary>Gets or sets whether the denoted element is marked on the scrollbar.</summary>
-		public bool UseScrollBarMarker { get; set; }
+		/// <summary>Gets or sets the style of marker on the scrollbar.</summary>
+		[DefaultValue(ScrollbarMarkerStyle.None)]
+		public ScrollbarMarkerStyle ScrollBarMarkerStyle { get; set; }
 		/// <summary>Gets or sets the font.</summary>
 		public string Font { get; set; }
 
@@ -365,6 +367,9 @@ namespace Codist
 	sealed class CommentStyle : StyleBase
 	{
 		public CommentStyle() {
+		}
+		public CommentStyle(CommentStyleTypes styleID) {
+			StyleID = styleID;
 		}
 		public CommentStyle(CommentStyleTypes styleID, Color foregroundColor) {
 			StyleID = styleID;
@@ -521,6 +526,8 @@ namespace Codist
 		Parameter = 1 << 9,
 		InterfaceImplementations = 1 << 10,
 		TypeParameters = 1 << 11,
+		CtrlQuickInfo = 1 << 29,
+		HideOriginalQuickInfo = 1 << 30,
 		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations,
 	}
 
@@ -545,5 +552,21 @@ namespace Codist
 		TypeDeclaration = 1 << 5,
 		CodeMarginMask = SpecialComment | CompilerDirective,
 		Default = SpecialComment | MemberDeclaration | LineNumber | LongMemberDeclaration
+	}
+
+	public enum ScrollbarMarkerStyle
+	{
+		None,
+		Square,
+		Circle,
+		Number1,
+		Number2,
+		Number3,
+		Number4,
+		Number5,
+		Number6,
+		Number7,
+		Number8,
+		Number9,
 	}
 }

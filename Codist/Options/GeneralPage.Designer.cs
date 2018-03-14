@@ -42,6 +42,7 @@
 			this._CustomThemeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this._LineNumbersBox = new System.Windows.Forms.CheckBox();
+			this._ControlQuickInfoBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this.groupBox1.SuspendLayout();
@@ -177,10 +178,11 @@
 			// 
 			// groupBox3
 			// 
+			this.groupBox3.Controls.Add(this._ControlQuickInfoBox);
 			this.groupBox3.Controls.Add(this._LineNumbersBox);
 			this.groupBox3.Location = new System.Drawing.Point(3, 165);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(407, 61);
+			this.groupBox3.Size = new System.Drawing.Size(407, 82);
 			this.groupBox3.TabIndex = 4;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Misc";
@@ -194,6 +196,16 @@
 			this._LineNumbersBox.TabIndex = 0;
 			this._LineNumbersBox.Text = "Line numbers on scrollbar";
 			this._LineNumbersBox.UseVisualStyleBackColor = true;
+			// 
+			// _ControlQuickInfoBox
+			// 
+			this._ControlQuickInfoBox.AutoSize = true;
+			this._ControlQuickInfoBox.Location = new System.Drawing.Point(9, 49);
+			this._ControlQuickInfoBox.Name = "_ControlQuickInfoBox";
+			this._ControlQuickInfoBox.Size = new System.Drawing.Size(333, 19);
+			this._ControlQuickInfoBox.TabIndex = 1;
+			this._ControlQuickInfoBox.Text = "Hide quick info until Shift is pressed";
+			this._ControlQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// GeneralPage
 			// 
@@ -235,5 +247,6 @@
 		private System.Windows.Forms.Button _ResetConfigButton;
 		private System.Windows.Forms.GroupBox groupBox3;
 		private System.Windows.Forms.CheckBox _LineNumbersBox;
+		private System.Windows.Forms.CheckBox _ControlQuickInfoBox;
 	}
 }

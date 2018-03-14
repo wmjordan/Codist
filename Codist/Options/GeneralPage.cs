@@ -14,7 +14,6 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal GeneralPage(ConfigPage page) : this() {
-			_UI.CommonEventAction += Config.Instance.FireConfigChangedEvent;
 		}
 		private void MiscPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {
@@ -24,10 +23,20 @@ namespace Codist.Options
 			_BottomMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.BottomSpace;
 			LoadConfig(Config.Instance);
 
-			_TopMarginBox.ValueChanged += _UI.HandleEvent(() => LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value);
-			_BottomMarginBox.ValueChanged += _UI.HandleEvent(() => LineTransformers.LineHeightTransformProvider.BottomSpace = (double)_BottomMarginBox.Value);
-			_NoSpaceBetweenWrappedLinesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.NoSpaceBetweenWrappedLines = _NoSpaceBetweenWrappedLinesBox.Checked);
+			_TopMarginBox.ValueChanged += _UI.HandleEvent(() => {
+				LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value;
+				Config.Instance.FireConfigChangedEvent();
+			});
+			_BottomMarginBox.ValueChanged += _UI.HandleEvent(() => {
+				LineTransformers.LineHeightTransformProvider.BottomSpace = (double)_BottomMarginBox.Value;
+				Config.Instance.FireConfigChangedEvent();
+			});
+			_NoSpaceBetweenWrappedLinesBox.CheckedChanged += _UI.HandleEvent(() => {
+				Config.Instance.NoSpaceBetweenWrappedLines = _NoSpaceBetweenWrappedLinesBox.Checked;
+				Config.Instance.FireConfigChangedEvent();
+			});
 			_LineNumbersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.LineNumber, _LineNumbersBox.Checked));
+			_ControlQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.CtrlQuickInfo, _ControlQuickInfoBox.Checked));
 			_SaveConfigButton.Click += (s, args) => {
 				using (var d = new SaveFileDialog {
 					Title = "Save Codist configuration file...",
@@ -81,6 +90,7 @@ namespace Codist.Options
 			_UI.DoWithLock(() => {
 				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
 				_LineNumbersBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
+				_ControlQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlQuickInfo);
 			});
 		}
 	}
