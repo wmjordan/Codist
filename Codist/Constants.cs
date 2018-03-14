@@ -191,7 +191,6 @@ namespace Codist
 		public static readonly Color HackColor = Colors.Black;
 		public static readonly Color TaskColor = Colors.Red;
 		public static readonly Color ControlFlowColor = Colors.MediumBlue;
-		public static readonly Color AbstractionColor = Colors.DarkOrange;
 	}
 
 	enum CommentStyleTypes
@@ -253,14 +252,6 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
 		ControlFlowKeyword,
-		[Category(Constants.SyntaxCategory.Keyword)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
-		AbstractionKeyword,
-		//[ClassificationType(ClassificationTypeNames = Constants.CodeSymbolDefinition)]
-		//SymbolDefinition,
-		//[ClassificationType(ClassificationTypeNames = Constants.CodeSymbolReference)]
-		//SymbolReference,
-
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationName)]
 		TypeDeclaration,

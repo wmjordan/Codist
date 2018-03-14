@@ -26,7 +26,7 @@ namespace Codist.Classifiers
 		internal IBufferTagAggregatorFactoryService Aggregator = null;
 
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
-			var codeType = CodeTagger.GetCodeType(textView.TextBuffer.ContentType);
+			var codeType = GetCodeType(textView.TextBuffer.ContentType);
 			if (codeType == CodeType.None) {
 				return null;
 			}
@@ -36,6 +36,12 @@ namespace Codist.Classifiers
 			var codeTagger = vp.GetOrCreateSingletonProperty(() => new CodeTagger(ClassificationRegistry, tagger, tags, codeType));
 			textView.Closed += TextViewClosed;
 			return codeTagger as ITagger<T>;
+		}
+
+		static CodeType GetCodeType(IContentType contentType) {
+			return contentType.IsOfType("CSharp") ? CodeType.CSharp
+				: contentType.IsOfType("html") || contentType.IsOfType("htmlx") || contentType.IsOfType("XAML") || contentType.IsOfType("XML") ? CodeType.Markup
+				: CodeType.None;
 		}
 
 		void TextViewClosed(object sender, EventArgs args) {
@@ -82,8 +88,6 @@ namespace Codist.Classifiers
 						__CommentClassifications[(int)f.GetValue(null)] = new ClassificationTag(ct);
 					}
 				}
-				//_exitClassification = new ClassificationTag(registry.GetClassificationType(Constants.CodeReturnKeyword));
-				_abstractionClassification = new ClassificationTag(registry.GetClassificationType(Constants.CodeAbstractionKeyword));
 
 				_Aggregator = aggregator;
 				_Tags = tags;
@@ -263,12 +267,6 @@ namespace Codist.Classifiers
 					? new SnapshotSpan(snapshotSpan.Snapshot, snapshotSpan.Start + startOfContent, endOfContent - startOfContent)
 					: new SnapshotSpan(snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, endOfContent - commentStart);
 				return new TagSpan<ClassificationTag>(span, ctag);
-			}
-
-			internal static CodeType GetCodeType(IContentType contentType) {
-				return contentType.IsOfType("CSharp") ? CodeType.CSharp
-					: contentType.IsOfType("html") || contentType.IsOfType("htmlx") || contentType.IsOfType("XAML") || contentType.IsOfType("XML") ? CodeType.Markup
-					: CodeType.None;
 			}
 
 			static bool Matches(SnapshotSpan span, string text) {

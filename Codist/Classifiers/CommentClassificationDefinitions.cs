@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Classifiers
 {
-	/// <summary>Classification type definition export for <see cref="CodeTagger"/>.</summary>
+	/// <summary>Classification type definition export for code tagger.</summary>
 	static class CommentClassificationDefinitions
     {
 #pragma warning disable 169
@@ -32,7 +32,7 @@ namespace Codist.Classifiers
         [Export(typeof(ClassificationTypeDefinition))]
         [BaseDefinition(Constants.CodeComment)]
         [Name(Constants.TodoComment)]
-        static ClassificationTypeDefinition TaskComment;
+        static ClassificationTypeDefinition TodoComment;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeComment)]

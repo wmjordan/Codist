@@ -7,17 +7,6 @@ namespace Codist.Classifiers
 {
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
-	[Name(Constants.CodeAbstractionKeyword)]
-	[UserVisible(false)]
-	[Order(After = Priority.High)]
-	sealed class AbstractKeywordFormat : ClassificationFormatDefinition
-	{
-		public AbstractKeywordFormat() {
-			DisplayName = Constants.CodeAbstractionKeyword;
-		}
-	}
-	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
 	[Name(Constants.CodeControlFlowKeyword)]
 	[UserVisible(false)]

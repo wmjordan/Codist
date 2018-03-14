@@ -14,134 +14,130 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition AbstractionKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpAbstractMemberName)]
+		static ClassificationTypeDefinition AbstractMember;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpAliasNamespaceName)]
+		static ClassificationTypeDefinition AliasNamespace;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpAttributeNotation)]
+		static ClassificationTypeDefinition AttributeNotation;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpConstFieldName)]
+		static ClassificationTypeDefinition ConstField;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpConstructorMethodName)]
+		static ClassificationTypeDefinition ConstructorMethod;
+
+		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
 		[Name(Constants.CodeControlFlowKeyword)]
 		static ClassificationTypeDefinition ControlFlowKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpNamespaceName)]
-		private static ClassificationTypeDefinition Namespace;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpParameterName)]
-		private static ClassificationTypeDefinition Parameter;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpExtensionMethodName)]
-		private static ClassificationTypeDefinition ExtensionMethod;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpExternMethodName)]
-		private static ClassificationTypeDefinition ExternMethod;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpMethodName)]
-		private static ClassificationTypeDefinition Method;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpEventName)]
-		private static ClassificationTypeDefinition Event;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpPropertyName)]
-		private static ClassificationTypeDefinition Property;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpFieldName)]
-		private static ClassificationTypeDefinition Field;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpLocalFieldName)]
-		private static ClassificationTypeDefinition LocalField;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpConstFieldName)]
-		private static ClassificationTypeDefinition ConstField;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpReadOnlyFieldName)]
-		private static ClassificationTypeDefinition ReadOnlyField;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpAliasNamespaceName)]
-		private static ClassificationTypeDefinition AliasNamespace;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpConstructorMethodName)]
-		private static ClassificationTypeDefinition ConstructorMethod;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpDeclarationName)]
-		private static ClassificationTypeDefinition Declaration;
+		static ClassificationTypeDefinition Declaration;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpDeclarationBrace)]
-		private static ClassificationTypeDefinition DeclarationBrace;
+		static ClassificationTypeDefinition DeclarationBrace;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpMethodBody)]
-		private static ClassificationTypeDefinition MethodBody;
+		[Name(Constants.CSharpEventName)]
+		static ClassificationTypeDefinition Event;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpNestedDeclarationName)]
-		private static ClassificationTypeDefinition NestedDeclaration;
+		[Name(Constants.CSharpExtensionMethodName)]
+		static ClassificationTypeDefinition ExtensionMethod;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpStaticMemberName)]
-		private static ClassificationTypeDefinition StaticMember;
+		[Name(Constants.CSharpExternMethodName)]
+		static ClassificationTypeDefinition ExternMethod;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpOverrideMemberName)]
-		private static ClassificationTypeDefinition OverrideMember;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpAbstractMemberName)]
-		private static ClassificationTypeDefinition AbstractMember;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpVirtualMemberName)]
-		private static ClassificationTypeDefinition VirtualMember;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpSealedClassName)]
-		private static ClassificationTypeDefinition SealedClass;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpTypeParameterName)]
-		private static ClassificationTypeDefinition TypeParameter;
+		[Name(Constants.CSharpFieldName)]
+		static ClassificationTypeDefinition Field;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpLabel)]
-		private static ClassificationTypeDefinition Label;
+		static ClassificationTypeDefinition Label;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpAttributeNotation)]
-		private static ClassificationTypeDefinition AttributeNotation;
+		[Name(Constants.CSharpLocalFieldName)]
+		static ClassificationTypeDefinition LocalField;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpMethodName)]
+		static ClassificationTypeDefinition Method;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpMethodBody)]
+		static ClassificationTypeDefinition MethodBody;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpNamespaceName)]
+		static ClassificationTypeDefinition Namespace;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpNestedDeclarationName)]
+		static ClassificationTypeDefinition NestedDeclaration;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpOverrideMemberName)]
+		static ClassificationTypeDefinition OverrideMember;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpParameterName)]
+		static ClassificationTypeDefinition Parameter;
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpPropertyName)]
+		static ClassificationTypeDefinition Property;
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpReadOnlyFieldName)]
+		static ClassificationTypeDefinition ReadOnlyField;
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpSealedClassName)]
+		static ClassificationTypeDefinition SealedClass;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpStaticMemberName)]
+		static ClassificationTypeDefinition StaticMember;
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpTypeParameterName)]
+		static ClassificationTypeDefinition TypeParameter;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpVirtualMemberName)]
+		static ClassificationTypeDefinition VirtualMember;
 #pragma warning restore 169
 	}
 }
