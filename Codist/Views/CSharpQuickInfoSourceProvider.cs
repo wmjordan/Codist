@@ -588,41 +588,41 @@ namespace Codist.Views
 			}
 
 			static TextBlock ToUIText(ImmutableArray<SymbolDisplayPart> parts) {
-				return ToUIText(new TextBlock(), parts, Int32.MinValue);
+				return ToUIText(new TextBlock(), parts, null, Int32.MinValue);
 			}
 			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts) {
-				return ToUIText(block, parts, Int32.MinValue);
+				return ToUIText(block, parts, null, Int32.MinValue);
 			}
 
-			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, int argumentIndex) {
+			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, string argName, int argIndex) {
 				foreach (var part in parts) {
 					switch (part.Kind) {
 						case SymbolDisplayPartKind.ClassName:
-							block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _ClassBrush);
+							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _ClassBrush);
 							break;
 						case SymbolDisplayPartKind.EnumName:
-							block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _EnumBrush);
+							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _EnumBrush);
 							break;
 						case SymbolDisplayPartKind.InterfaceName:
-							block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _InterfaceBrush);
+							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _InterfaceBrush);
 							break;
 						case SymbolDisplayPartKind.MethodName:
-							block.AddText(part.Symbol.Name, argumentIndex != Int32.MinValue, false, _MethodBrush);
+							block.AddText(part.Symbol.Name, argIndex != Int32.MinValue, false, _MethodBrush);
 							break;
 						case SymbolDisplayPartKind.ParameterName:
 							var p = part.Symbol as IParameterSymbol;
-							if (p.Ordinal == argumentIndex || p.IsParams && argumentIndex > p.Ordinal) {
-								block.AddText(part.Symbol.Name, true, true, _ParameterBrush);
+							if (p.Ordinal == argIndex || p.IsParams && argIndex > p.Ordinal || p.Name == argName) {
+								block.AddText(p.Name, true, true, _ParameterBrush);
 							}
 							else {
-								block.AddText(part.Symbol.Name, false, false, _ParameterBrush);
+								block.AddText(p.Name, false, false, _ParameterBrush);
 							}
 							break;
 						case SymbolDisplayPartKind.StructName:
-							block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _StructBrush);
+							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _StructBrush);
 							break;
 						case SymbolDisplayPartKind.DelegateName:
-							block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _DelegateBrush);
+							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _DelegateBrush);
 							break;
 						case SymbolDisplayPartKind.StringLiteral:
 							block.AddText(part.ToString(), false, false, _TextBrush);
@@ -634,7 +634,7 @@ namespace Codist.Views
 							block.AddText(part.Symbol.Name, _NamespaceBrush);
 							break;
 						case SymbolDisplayPartKind.TypeParameterName:
-							block.AddText(part.Symbol.Name, argumentIndex == Int32.MinValue, false, _TypeParameterBrush);
+							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _TypeParameterBrush);
 							break;
 						default:
 							block.AddText(part.ToString());
@@ -867,27 +867,32 @@ namespace Codist.Views
 				do {
 					var n = argument as ArgumentSyntax;
 					if (n != null) {
-						var al = n.Parent as BaseArgumentListSyntax;
-						var ap = al.Arguments.IndexOf(n);
-						if (ap != -1) {
-							var symbol = _SemanticModel.GetSymbolInfo(al.Parent);
-							if (symbol.Symbol != null) {
-								qiContent.Add(ToUIText(new TextBlock().AddText("Argument of ", false), symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), ap));
-							}
-							else if (symbol.CandidateSymbols.Length > 0) {
-								qiContent.Add(ToUIText(new TextBlock().AddText("Maybe argument of ", false), symbol.CandidateSymbols[0].ToMinimalDisplayParts(_SemanticModel, node.SpanStart), ap));
-							}
-							else {
-								qiContent.Add("Argument " + ap);
-							}
+						ShowParameterInfo(qiContent, node, n);
+						return;
+					}
+				} while ((argument = argument.Parent) != null && ++depth < 4);
+			}
+
+			void ShowParameterInfo(IList<object> qiContent, SyntaxNode node, ArgumentSyntax argument) {
+				var al = argument.Parent as BaseArgumentListSyntax;
+				var ap = al.Arguments.IndexOf(argument);
+				if (ap != -1) {
+					var symbol = _SemanticModel.GetSymbolInfo(al.Parent);
+					var argName = argument.NameColon?.Name.ToString();
+					if (symbol.Symbol != null) {
+						qiContent.Add(ToUIText(new TextBlock().AddText("Argument of "), symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
+					}
+					else if (symbol.CandidateSymbols.Length > 0) {
+						var info = new StackPanel();
+						foreach (var candidate in symbol.CandidateSymbols) {
+							info.Add(ToUIText(new TextBlock().AddText("Maybe", true).AddText(" argument of "), candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
 						}
-						return;
+						qiContent.Add(info);
 					}
-					else if (depth > 3) {
-						return;
+					else {
+						qiContent.Add("Argument " + ap);
 					}
-					++depth;
-				} while ((argument = argument.Parent) != null);
+				}
 			}
 
 			void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {

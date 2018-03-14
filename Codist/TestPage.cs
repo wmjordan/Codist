@@ -102,7 +102,7 @@ text".Log(); // multiline string (string verbatim)
 		public void Method<TGeneric>() { //type parameter
 			// unnecessary code
 			Codist.Fake.ExtensionClass.Log(typeof(TGeneric).Name); // extension method
-			NativeMethods.ExternMethod(IntPtr.Zero); // extern method
+			NativeMethods.ExternMethod(name: "none", ptr: IntPtr.Zero); // extern method
 			AbstractMethod(); // overridden abstract method
 			VirtualMethod(); // overridden virtual method
 			base.VirtualMethod(); // base virtual method
@@ -120,7 +120,7 @@ text".Log(); // multiline string (string verbatim)
 		static class NativeMethods
 		{
 			[DllImport("dummy.dll", EntryPoint = "DummyFunction", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-			public static extern void ExternMethod(IntPtr ptr);
+			public static extern void ExternMethod(IntPtr ptr, string name);
 		}
 	}
 #else
