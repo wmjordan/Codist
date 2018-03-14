@@ -83,7 +83,7 @@ namespace Codist.Classifiers
 		public ToDoCommentFormat() {
 			DisplayName = Constants.TodoComment + " (//ToDo)";
 			BackgroundColor = Constants.ToDoColor;
-			ForegroundColor = Colors.LightYellow;
+			ForegroundColor = Colors.White;
 		}
 	}
 
@@ -97,7 +97,7 @@ namespace Codist.Classifiers
 		public NoteCommentFormat() {
 			DisplayName = Constants.NoteComment + " (//Note)";
 			BackgroundColor = Constants.NoteColor;
-			ForegroundColor = Colors.LightYellow;
+			ForegroundColor = Colors.Black;
 		}
 	}
 

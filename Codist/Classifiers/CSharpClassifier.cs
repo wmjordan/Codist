@@ -297,7 +297,9 @@ namespace Codist.Classifiers
 					switch (methodSymbol.MethodKind) {
 						case MethodKind.Constructor:
 							yield return
-								node is AttributeSyntax || node.Parent is AttributeSyntax || node.Parent?.Parent is AttributeSyntax ? _Classifications.AttributeNotation : _Classifications.ConstructorMethod;
+								node is AttributeSyntax || node.Parent is AttributeSyntax || node.Parent?.Parent is AttributeSyntax
+									? _Classifications.AttributeNotation
+									: _Classifications.ConstructorMethod;
 							break;
 						case MethodKind.Destructor:
 						case MethodKind.StaticConstructor:
