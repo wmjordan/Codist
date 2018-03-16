@@ -38,7 +38,7 @@ namespace Codist.Views
 		sealed class QuickInfoSource : IQuickInfoSource
 		{
 			//todo extract brushes
-			static Brush _NamespaceBrush, _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush, _TypeParameterBrush;
+			static Brush _NamespaceBrush, _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush, _TypeParameterBrush, _PropertyBrush, _FieldBrush;
 
 			readonly IEditorFormatMapService _FormatMapService;
 			readonly ITextStructureNavigatorSelectorService _NavigatorService;
@@ -658,6 +658,8 @@ namespace Codist.Views
 				_MethodBrush = formatMap.GetBrush(Constants.CSharpMethodName);
 				_ParameterBrush = formatMap.GetBrush(Constants.CSharpParameterName);
 				_TypeParameterBrush = formatMap.GetBrush(Constants.CSharpTypeParameterName);
+				_PropertyBrush = formatMap.GetBrush(Constants.CSharpPropertyName);
+				_FieldBrush = formatMap.GetBrush(Constants.CSharpFieldName);
 			}
 
 			void _ConfigUpdated(object sender, EventArgs e) {
@@ -667,37 +669,44 @@ namespace Codist.Views
 			}
 
 			StackPanel ShowAttributes(ImmutableArray<AttributeData> attrs, int position) {
-				var stack = new StackPanel();
-				stack.AddText(attrs.Length > 1 ? "Attributes:" : "Attribute:", true);
+				var info = new StackPanel();
+				info.AddText(attrs.Length > 1 ? "Attributes:" : "Attribute:", true);
 				foreach (var item in attrs) {
 					var a = item.AttributeClass.Name;
-					var attrStack = new TextBlock()
+					var attrDef = new TextBlock()
 						.AddText("[")
 						.AddText(a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, _ClassBrush);
 					if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
-						attrStack.AddText("]");
-						stack.Add(attrStack);
+						attrDef.AddText("]");
+						info.Add(attrDef);
 						continue;
 					}
-					attrStack.AddText("(");
+					attrDef.AddText("(");
 					int i = 0;
 					foreach (var arg in item.ConstructorArguments) {
 						if (++i > 1) {
-							attrStack.AddText(", ");
+							attrDef.AddText(", ");
 						}
-						ToUIText(attrStack, arg, position);
+						ToUIText(attrDef, arg, position);
 					}
 					foreach (var arg in item.NamedArguments) {
 						if (++i > 1) {
-							attrStack.AddText(", ");
+							attrDef.AddText(", ");
 						}
-						attrStack.AddText(arg.Key + "=", false, true, null);
-						ToUIText(attrStack, arg.Value, position);
+						var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property);
+						if (attrMember == null) {
+							attrDef.AddText(arg.Key, false, true, null);
+						}
+						else {
+							attrDef.AddText(arg.Key, attrMember.Kind == SymbolKind.Property ? _PropertyBrush : _FieldBrush);
+						}
+						attrDef.AddText("=");
+						ToUIText(attrDef, arg.Value, position);
 					}
-					attrStack.AddText(")]");
-					stack.Children.Add(attrStack);
+					attrDef.AddText(")]");
+					info.Children.Add(attrDef);
 				}
-				return stack;
+				return info;
 			}
 
 			void ShowBaseType(IList<object> qiContent, ITypeSymbol typeSymbol, int position) {
@@ -876,22 +885,23 @@ namespace Codist.Views
 			void ShowParameterInfo(IList<object> qiContent, SyntaxNode node, ArgumentSyntax argument) {
 				var al = argument.Parent as BaseArgumentListSyntax;
 				var ap = al.Arguments.IndexOf(argument);
-				if (ap != -1) {
-					var symbol = _SemanticModel.GetSymbolInfo(al.Parent);
-					var argName = argument.NameColon?.Name.ToString();
-					if (symbol.Symbol != null) {
-						qiContent.Add(ToUIText(new TextBlock().AddText("Argument of "), symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
+				if (ap == -1) {
+					return;
+				}
+				var symbol = _SemanticModel.GetSymbolInfo(al.Parent);
+				var argName = argument.NameColon?.Name.ToString();
+				if (symbol.Symbol != null) {
+					qiContent.Add(ToUIText(new TextBlock().AddText("Argument of "), symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
+				}
+				else if (symbol.CandidateSymbols.Length > 0) {
+					var info = new StackPanel();
+					foreach (var candidate in symbol.CandidateSymbols) {
+						info.Add(ToUIText(new TextBlock().AddText("Maybe", true).AddText(" argument of "), candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
 					}
-					else if (symbol.CandidateSymbols.Length > 0) {
-						var info = new StackPanel();
-						foreach (var candidate in symbol.CandidateSymbols) {
-							info.Add(ToUIText(new TextBlock().AddText("Maybe", true).AddText(" argument of "), candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
-						}
-						qiContent.Add(info);
-					}
-					else {
-						qiContent.Add("Argument " + ap);
-					}
+					qiContent.Add(info);
+				}
+				else {
+					qiContent.Add("Argument " + ap);
 				}
 			}
 

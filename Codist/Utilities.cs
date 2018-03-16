@@ -116,6 +116,9 @@ namespace Codist
 		public static TBrush Alpha<TBrush>(this TBrush brush, double opacity)
 			where TBrush : WpfBrush {
 			if (brush != null) {
+				if (brush.IsFrozen) {
+					brush = brush.Clone() as TBrush;
+				}
 				brush.Opacity = opacity;
 			}
 			return brush;
@@ -248,7 +251,7 @@ namespace Codist
 		public static WpfBrush GetBrush(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundBrushId) {
 			var p = map.GetProperties(formatName);
 			return p != null && p.Contains(resourceId)
-				? (p[resourceId] as WpfBrush).Clone()
+				? (p[resourceId] as WpfBrush)
 				: null;
 		}
 

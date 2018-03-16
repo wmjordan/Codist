@@ -40,7 +40,12 @@ namespace Codist.Fake
 	}
 	static class ExtensionClass // static class
 	{
-		public static void Log(this string text) { } // static method
+		public static void Log(this string text) {
+			var cc = new ConcreteClass(0);
+			cc.VirtualMethod(); // call overriden method
+			var ac = cc as AbstractClass;
+			ac.VirtualMethod(); // call virtual method
+		} // static method
 	}
 	sealed class ConcreteClass : AbstractClass
 	{
@@ -102,7 +107,7 @@ text".Log(); // multiline string (string verbatim)
 		public void Method<TGeneric>() { //type parameter
 			// unnecessary code
 			Codist.Fake.ExtensionClass.Log(typeof(TGeneric).Name); // extension method
-			NativeMethods.ExternMethod(name: "none", ptr: IntPtr.Zero); // extern method
+			NativeMethods.ExternMethod(value: 1, ptr: IntPtr.Zero); // extern method
 			AbstractMethod(); // overridden abstract method
 			VirtualMethod(); // overridden virtual method
 			base.VirtualMethod(); // base virtual method
@@ -120,7 +125,7 @@ text".Log(); // multiline string (string verbatim)
 		static class NativeMethods
 		{
 			[DllImport("dummy.dll", EntryPoint = "DummyFunction", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-			public static extern void ExternMethod(IntPtr ptr, string name);
+			public static extern void ExternMethod(IntPtr ptr, int value);
 		}
 	}
 #else
