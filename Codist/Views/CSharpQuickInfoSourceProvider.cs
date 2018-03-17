@@ -905,10 +905,14 @@ namespace Codist.Views
 					qiContent.Add(info);
 				}
 				else if (al.Parent.IsKind(SyntaxKind.InvocationExpression)) {
-					qiContent.Add("Argument " + ap + " of " + (al.Parent as InvocationExpressionSyntax).Expression.ToString());
+					var methodName = (al.Parent as InvocationExpressionSyntax).Expression.ToString();
+					if (methodName == "nameof" && al.Arguments.Count == 1) {
+						return;
+					}
+					qiContent.Add(new TextBlock().AddText("Argument " + ++ap + " of ").AddText(methodName, true));
 				}
 				else {
-					qiContent.Add("Argument " + ap);
+					qiContent.Add("Argument " + ++ap);
 				}
 			}
 
