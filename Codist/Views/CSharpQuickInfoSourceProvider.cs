@@ -885,6 +885,9 @@ namespace Codist.Views
 
 			void ShowParameterInfo(IList<object> qiContent, SyntaxNode node, ArgumentSyntax argument) {
 				var al = argument.Parent as BaseArgumentListSyntax;
+				if (al == null) {
+					return;
+				}
 				var ap = al.Arguments.IndexOf(argument);
 				if (ap == -1) {
 					return;
@@ -900,6 +903,9 @@ namespace Codist.Views
 						info.Add(ToUIText(new TextBlock().AddText("Maybe", true).AddText(" argument of "), candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
 					}
 					qiContent.Add(info);
+				}
+				else if (al.Parent.IsKind(SyntaxKind.InvocationExpression)) {
+					qiContent.Add("Argument " + ap + " of " + (al.Parent as InvocationExpressionSyntax).Expression.ToString());
 				}
 				else {
 					qiContent.Add("Argument " + ap);

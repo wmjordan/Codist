@@ -12,9 +12,7 @@ using AppHelpers;
 
 namespace Codist.Classifiers
 {
-	/// <summary>
-	/// Classifier that classifies all text as an instance of the "EditorClassifier" classification type.
-	/// </summary>
+	/// <summary>A classifier for C# code syntax highlight.</summary>
 	sealed class CSharpClassifier : IClassifier
 	{
 		static CSharpClassifications _Classifications;
@@ -28,9 +26,6 @@ namespace Codist.Classifiers
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CSharpClassifier"/> class.
 		/// </summary>
-		/// <param name="registry"></param>
-		/// <param name="textDocumentFactoryService"></param>
-		/// <param name="buffer"></param>
 		internal CSharpClassifier(
 			IClassificationTypeRegistryService registry,
 			ITextDocumentFactoryService textDocumentFactoryService,
@@ -200,8 +195,6 @@ namespace Codist.Classifiers
 		}
 
 		static IEnumerable<IClassificationType> GetClassificationType(SyntaxNode node, SemanticModel semanticModel) {
-			// NOTE: Some kind of nodes, for example ArgumentSyntax, should are handled with a
-			// specific way
 			node = node.Kind() == SyntaxKind.Argument ? (node as ArgumentSyntax).Expression : node;
 			//System.Diagnostics.Debug.WriteLine(node.GetType().Name + node.Span.ToString());
 			var symbol = semanticModel.GetSymbolInfo(node).Symbol;
