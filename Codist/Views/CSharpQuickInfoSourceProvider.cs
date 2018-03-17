@@ -22,7 +22,7 @@ namespace Codist.Views
 	[Export(typeof(IQuickInfoSourceProvider))]
 	[Name("C# QuickInfo Source")]
 	[Order(After = "Default Quick Info Presenter")]
-	[ContentType("CSharp")]
+	[ContentType(Constants.CodeTypes.CSharp)]
 	sealed class CSharpQuickInfoSourceProvider : IQuickInfoSourceProvider
 	{
 		[Import]
@@ -208,7 +208,8 @@ namespace Codist.Views
 				}
 				var p1 = selection.Start.Position;
 				var p2 = selection.End.Position;
-				if (p1 > point || point > p2) {
+				if (p1.Snapshot != point.Snapshot // in the C# Interactive window, the snapshots could be different ones
+					|| p1 > point || point > p2) {
 					return;
 				}
 				var c = 0;

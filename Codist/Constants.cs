@@ -12,6 +12,13 @@ namespace Codist
 	{
 		public const string NameOfMe = nameof(Codist);
 
+		public static class CodeTypes
+		{
+			public const string Code = nameof(Code);
+			public const string CSharp = nameof(CSharp);
+			public const string Text = nameof(Text);
+		}
+
 		public static class SyntaxCategory
 		{
 			public const string Keyword = nameof(Keyword);

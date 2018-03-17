@@ -24,7 +24,6 @@ namespace Codist.Margins
 		ITagAggregator<ICodeMemberTag> _tagger;
 		IEditorFormatMap _formatMap;
 		CSharpMembersMarginFactory _factory;
-		bool _enabled;
 		Pen _ClassPen, _InterfacePen, _StructPen, _EnumPen, _EventPen, _DelegatePen, _ConstructorPen, _MethodPen, _PropertyPen, _FieldPen;
 		readonly Pen _EmptyPen = new Pen();
 
@@ -51,7 +50,7 @@ namespace Codist.Margins
 			Config_Updated(null, null);
 		}
 
-		public bool Enabled => _enabled;
+		public bool Enabled => IsVisible;
 
 		public void Dispose() {
 			IsVisibleChanged -= OnIsVisibleChanged;

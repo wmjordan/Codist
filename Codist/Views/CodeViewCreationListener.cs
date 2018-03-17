@@ -1,17 +1,28 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Views
 {
+	/// <summary>
+	/// Applies customized syntax highlight styles to editor.
+	/// </summary>
 	[Export(typeof(IWpfTextViewCreationListener))]
-	[ContentType("code")]
+	[ContentType(Constants.CodeTypes.Code)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	sealed class CodeViewCreationListener : IWpfTextViewCreationListener
 	{
+		[Import]
+		IEditorFormatMapService _EditorFormatMapService = null;
+
+		[Import]
+		IClassificationFormatMapService _FormatMapService = null;
+
+		[Import]
+		IClassificationTypeRegistryService _TypeRegistryService = null;
+
 		public void TextViewCreated(IWpfTextView textView) {
 			textView.Properties.GetOrCreateSingletonProperty(() => {
 				return new CodeViewDecorator(
@@ -32,15 +43,5 @@ namespace Codist.Views
 			formatMap.SetProperties(propertyId, m);
 		}
 
-#pragma warning disable 649
-		[Import]
-		IClassificationFormatMapService _FormatMapService;
-
-		[Import]
-		IClassificationTypeRegistryService _TypeRegistryService;
-
-		[Import]
-		IEditorFormatMapService _EditorFormatMapService;
-#pragma warning restore 649
 	}
 }

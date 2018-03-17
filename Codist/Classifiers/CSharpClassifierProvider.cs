@@ -9,7 +9,7 @@ namespace Codist.Classifiers
     /// Classifier provider. It adds the classifier to the set of classifiers.
     /// </summary>
     [Export(typeof(IClassifierProvider))]
-    [ContentType("CSharp")]
+    [ContentType(Constants.CodeTypes.CSharp)]
     sealed class CSharpClassifierProvider : IClassifierProvider
     {
         /// <summary>

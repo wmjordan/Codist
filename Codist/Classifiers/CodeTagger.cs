@@ -15,7 +15,7 @@ namespace Codist.Classifiers
 {
 	//todo++ Extract comment tagger logic for various content types
 	[Export(typeof(IViewTaggerProvider))]
-	[ContentType("code")]
+	[ContentType(Constants.CodeTypes.Code)]
 	[TagType(typeof(ClassificationTag))]
 	sealed class CodeTaggerProvider : IViewTaggerProvider
 	{
@@ -39,7 +39,7 @@ namespace Codist.Classifiers
 		}
 
 		static CodeType GetCodeType(IContentType contentType) {
-			return contentType.IsOfType("CSharp") ? CodeType.CSharp
+			return contentType.IsOfType(Constants.CodeTypes.CSharp) ? CodeType.CSharp
 				: contentType.IsOfType("html") || contentType.IsOfType("htmlx") || contentType.IsOfType("XAML") || contentType.IsOfType("XML") ? CodeType.Markup
 				: CodeType.None;
 		}
@@ -59,7 +59,6 @@ namespace Codist.Classifiers
 		sealed class CodeTagger : ITagger<ClassificationTag>, IDisposable
 		{
 			static ClassificationTag[] __CommentClassifications;
-			static ClassificationTag _abstractionClassification;
 			readonly ITagAggregator<IClassificationTag> _Aggregator;
 			readonly TaggerResult _Tags;
 			readonly CodeType _CodeType;
@@ -104,7 +103,7 @@ namespace Codist.Classifiers
 
 				var snapshot = spans[0].Snapshot;
 				var contentType = snapshot.TextBuffer.ContentType;
-				if (!contentType.IsOfType("code")) {
+				if (!contentType.IsOfType(Constants.CodeTypes.Code)) {
 					yield break;
 				}
 				IEnumerable<IMappingTagSpan<IClassificationTag>> tagSpans;

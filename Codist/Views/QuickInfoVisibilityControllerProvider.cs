@@ -9,10 +9,13 @@ using AppHelpers;
 
 namespace Codist.Views
 {
+	/// <summary>
+	/// Controls whether quick info should be displayed. When activated, quick info would not be displayed unless Shift key is pressed.
+	/// </summary>
 	[Export(typeof(IQuickInfoSourceProvider))]
 	[Name("Quick Info Visibility Controller")]
 	[Order(Before = "Default Quick Info Presenter")]
-	[ContentType("Code")]
+	[ContentType(Constants.CodeTypes.Code)]
 	internal sealed class QuickInfoVisibilityControllerProvider : IQuickInfoSourceProvider
 	{
 		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {

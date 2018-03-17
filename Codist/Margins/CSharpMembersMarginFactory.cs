@@ -11,7 +11,7 @@ namespace Codist.Margins
 	[Name(CSharpMembersMargin.Name)]
 	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = CodeMargin.MarginName)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
-	[ContentType("CSharp")]
+	[ContentType(Constants.CodeTypes.CSharp)]
 	[TextViewRole(PredefinedTextViewRoles.EmbeddedPeekTextView)]
 	[TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
 	sealed class CSharpMembersMarginFactory : IWpfTextViewMarginProvider

@@ -13,7 +13,7 @@ namespace Codist.Margins
 	[Name(CodeMargin.MarginName)]
 	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = PredefinedMarginNames.OverviewMark)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
-	[ContentType("CSharp")]
+	[ContentType(Constants.CodeTypes.CSharp)]
     [TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class CodeMarginFactory : IWpfTextViewMarginProvider
 	{

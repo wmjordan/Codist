@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.Text.Differencing;
 namespace Codist.LineTransformers
 {
 	[Export(typeof(ILineTransformSourceProvider))]
-	[ContentType("Text")]
+	[ContentType(Constants.CodeTypes.Text)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	sealed class LineHeightTransformProvider : ILineTransformSourceProvider
 	{

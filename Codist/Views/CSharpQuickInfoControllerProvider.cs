@@ -10,7 +10,7 @@ namespace Codist.Views
 {
 	[Export(typeof(IIntellisenseControllerProvider))]
 	[Name("C# QuickInfo Controller")]
-	[ContentType("CSharp")]
+	[ContentType(Constants.CodeTypes.CSharp)]
 	sealed class CSharpQuickInfoControllerProvider : IIntellisenseControllerProvider
 	{
 		[Import]

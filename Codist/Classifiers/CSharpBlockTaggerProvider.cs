@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Utilities;
 namespace Codist.Classifiers
 {
 	[Export(typeof(ITaggerProvider))]
-	[ContentType("CSharp")]
+	[ContentType(Constants.CodeTypes.CSharp)]
 	[TagType(typeof(ICodeMemberTag))]
 	sealed class CSharpBlockTaggerProvider : ITaggerProvider
 	{

@@ -6,6 +6,7 @@ namespace Codist.Classifiers
 {
 	static class XmlClassificationDefinitions
 	{
+#pragma warning disable 169
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.XmlName)]
@@ -50,5 +51,6 @@ namespace Codist.Classifiers
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.XmlText)]
 		static ClassificationTypeDefinition XmlText;
+#pragma warning restore 169
 	}
 }
