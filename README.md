@@ -11,9 +11,9 @@
 ## Advanced C# syntax highlight
 * The advanced syntax highlight function highlight every aspect of C# language elements with various styles and font settings, changing font style sizes, changing background and foreground colors, making text semitransparent.
 
-  Initially Codist makes few changes to the syntax highlight.
+  **NOTE**: To quickly get started with advanced syntax highlight, click the *Load...* button in the *options* dialog, select *Light theme* or *Dark theme* from the pop-up menu to see them in effect. Don't forget to click the *OK* button to confirm the change.
 
-  To quickly get started with advanced syntax highlight, load the *Light Codist.json* (for light color themes) or *Dark Codist.json* (for dark color themes) file with the *Load Configs* button in the *options* dialog to see them in effect.
+  ![Load Theme](doc/load-theme.png)
 
   The following screenshots of the `TestPage.cs` file in the source code project demonstrates possible syntax highlight effects.
 

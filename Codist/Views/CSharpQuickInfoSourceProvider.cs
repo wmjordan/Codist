@@ -599,7 +599,7 @@ namespace Codist.Views
 				foreach (var part in parts) {
 					switch (part.Kind) {
 						case SymbolDisplayPartKind.ClassName:
-							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _ClassBrush);
+							block.AddText((part.Symbol as INamedTypeSymbol).IsAnonymousType ? "?" : part.Symbol.Name, argIndex == Int32.MinValue, false, _ClassBrush);
 							break;
 						case SymbolDisplayPartKind.EnumName:
 							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _EnumBrush);
