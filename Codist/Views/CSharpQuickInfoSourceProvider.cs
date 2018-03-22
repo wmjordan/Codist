@@ -813,7 +813,11 @@ namespace Codist.Views
 						disposable = item;
 						continue;
 					}
-					stack.Children.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, position)));
+					var t = ToUIText(item.ToMinimalDisplayParts(_SemanticModel, position));
+					if (showAll && type.Interfaces.Contains(item) == false) {
+						t.AddText(" (inherited)");
+					}
+					stack.Children.Add(t);
 				}
 				if (disposable == null && showAll == false) {
 					foreach (var item in type.AllInterfaces) {
