@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.Composition;
+using AppHelpers;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
@@ -34,8 +35,9 @@ namespace Codist.Classifiers
         /// </returns>
         public IClassifier GetClassifier(ITextBuffer textBuffer)
         {
-            return textBuffer.Properties.GetOrCreateSingletonProperty(() =>
-                new CSharpClassifier(_classificationRegistry, _textDocumentFactoryService, textBuffer));
+            return Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
+				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new CSharpClassifier(_classificationRegistry, _textDocumentFactoryService, textBuffer))
+				: null;
         }
     }
 }

@@ -1,20 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="2.6.0.692" Language="en-US" Publisher="WMJ" />
+        <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="2.6.0.696" Language="en-US" Publisher="WMJ" />
         <DisplayName>Codist</DisplayName>
-        <Description xml:space="preserve">A plugin which enhances coding experience with advanced syntax highlighting and scrollbar marking.
-		
-It features:
-1, tagging and styling special comments
-2, adding extra styles to type definitions and XML documentations
-3, marking type definitions (class, interface, struct and enum), member ranges, long methods, important code comments, line numbers onto the vertical scrollbar
-4, adding extra space between lines (increasing line height) in the editor
-5, C# super quick info showing member attributes, base types, interfaces, extension method declaration locations, numeric presentations, arguments, selection length, etc.</Description>
+        <Description xml:space="preserve">A plugin which enhances coding experience with advanced syntax highlighting, scrollbar marking and Super Quick Info for C# programmers.</Description>
         <ReleaseNotes></ReleaseNotes>
         <Icon>icon.png</Icon>
         <PreviewImage>preview.png</PreviewImage>
-        <Tags>quick info, syntax highlight, comment, tag, scrollbar, C#, C, C++, html, line height</Tags>
+        <Tags>syntax highlight, quick info, comment, tag, line number, scrollbar, C#, C, C++, html, line height</Tags>
     </Metadata>
     <Installation>
         <InstallationTarget Version="[15.0,16.0)" Id="Microsoft.VisualStudio.Pro" />

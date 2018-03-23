@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
+using AppHelpers;
 
 namespace Codist.Views
 {
@@ -24,6 +25,9 @@ namespace Codist.Views
 		IClassificationTypeRegistryService _TypeRegistryService = null;
 
 		public void TextViewCreated(IWpfTextView textView) {
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false) {
+				return;
+			}
 			textView.Properties.GetOrCreateSingletonProperty(() => {
 				return new CodeViewDecorator(
 					textView,

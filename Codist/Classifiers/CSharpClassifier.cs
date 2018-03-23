@@ -110,24 +110,39 @@ namespace Codist.Classifiers
 						if (s == '{' || s == '}') {
 							var node = unitCompilation.FindNode(item.TextSpan, true, true);
 							if (node is BaseTypeDeclarationSyntax == false
+								&& node is ExpressionSyntax == false
 								&& (node = node.Parent) == null) {
 								return false;
 							}
 							IClassificationType type = null;
 							switch (node.Kind()) {
-								case SyntaxKind.MethodDeclaration: type = _Classifications.Method; break;
-								case SyntaxKind.ConstructorDeclaration: type = _Classifications.ConstructorMethod; break;
+								case SyntaxKind.MethodDeclaration:
+								case SyntaxKind.AnonymousMethodExpression:
+								case SyntaxKind.SimpleLambdaExpression:
+								case SyntaxKind.ParenthesizedLambdaExpression:
+									type = _Classifications.Method;
+									break;
+								case SyntaxKind.ConstructorDeclaration:
+								case SyntaxKind.AnonymousObjectCreationExpression:
+								case SyntaxKind.ObjectInitializerExpression:
+								case SyntaxKind.CollectionInitializerExpression:
+								case SyntaxKind.ArrayInitializerExpression:
+									type = _Classifications.ConstructorMethod;
+									break;
 								case SyntaxKind.PropertyDeclaration: type = _Classifications.Property; break;
 								case SyntaxKind.ClassDeclaration: type = _Classifications.ClassName; break;
 								case SyntaxKind.InterfaceDeclaration: type = _Classifications.InterfaceName; break;
 								case SyntaxKind.EnumDeclaration: type = _Classifications.EnumName; break;
 								case SyntaxKind.StructDeclaration: type = _Classifications.StructName; break;
+								//case SyntaxKind.InterpolatedStringExpression: type = _Classifications.ConstField; break;
 							}
 							if (type != null) {
+								if (node is ExpressionSyntax == false) {
+									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.DeclarationBrace));
+								}
 								if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace)) {
 									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
 								}
-								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.DeclarationBrace));
 							}
 						}
 						return false;

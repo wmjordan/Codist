@@ -26,6 +26,9 @@ namespace Codist.Classifiers
 		internal IBufferTagAggregatorFactoryService Aggregator = null;
 
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false) {
+				return null;
+			}
 			var codeType = GetCodeType(textView.TextBuffer.ContentType);
 			if (codeType == CodeType.None) {
 				return null;

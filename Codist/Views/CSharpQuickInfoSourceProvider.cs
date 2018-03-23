@@ -146,7 +146,11 @@ namespace Codist.Views
 						}
 						break;
 					case SymbolKind.Method:
-						ShowMethodInfo(qiContent, node, symbol as IMethodSymbol);
+						var m = symbol as IMethodSymbol;
+						if (m.MethodKind == MethodKind.AnonymousFunction) {
+							return;
+						}
+						ShowMethodInfo(qiContent, node, m);
 						if (node.Parent.IsKind(SyntaxKind.Attribute)
 							|| node.Parent.Parent.IsKind(SyntaxKind.Attribute) // qualified attribute annotation
 							) {
@@ -178,7 +182,9 @@ namespace Codist.Views
 					}
 				}
 				else if (nodeKind == SyntaxKind.StringLiteralExpression) {
-					infoBox = ShowStringInfo(node.GetFirstToken().ValueText);
+					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
+						infoBox = ShowStringInfo(node.GetFirstToken().ValueText);
+					}
 				}
 				else if (node.Kind() == SyntaxKind.Block) {
 					var lines = currentSnapshot.GetLineNumberFromPosition(node.Span.End) - currentSnapshot.GetLineNumberFromPosition(node.SpanStart) + 1;

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.Composition;
+using AppHelpers;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
@@ -25,7 +26,7 @@ namespace Codist.Margins
 
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 			var scrollBarContainer = marginContainer as IVerticalScrollBar;
-			return scrollBarContainer != null
+			return Config.Instance.Features.MatchFlags(Features.ScrollbarMargins) && scrollBarContainer != null
 				? new LineNumberMargin(wpfTextViewHost, scrollBarContainer, this)
 				: null;
 		}

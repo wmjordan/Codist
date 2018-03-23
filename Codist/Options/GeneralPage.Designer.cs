@@ -41,8 +41,10 @@
 			this._DarkThemeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this._CustomThemeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
-			this._LineNumbersBox = new System.Windows.Forms.CheckBox();
 			this._ControlQuickInfoBox = new System.Windows.Forms.CheckBox();
+			this._LineNumbersBox = new System.Windows.Forms.CheckBox();
+			this._GlobalFeatureBox = new System.Windows.Forms.CheckBox();
+			this.label3 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this.groupBox1.SuspendLayout();
@@ -90,10 +92,10 @@
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Controls.Add(this._TopMarginBox);
 			this.groupBox1.Controls.Add(this.label1);
-			this.groupBox1.Location = new System.Drawing.Point(3, 75);
+			this.groupBox1.Location = new System.Drawing.Point(3, 153);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(407, 84);
-			this.groupBox1.TabIndex = 2;
+			this.groupBox1.TabIndex = 3;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Extra line margins";
 			// 
@@ -130,10 +132,10 @@
 			this.groupBox2.Controls.Add(this._ResetConfigButton);
 			this.groupBox2.Controls.Add(this._SaveConfigButton);
 			this.groupBox2.Controls.Add(this._LoadConfigButton);
-			this.groupBox2.Location = new System.Drawing.Point(3, 3);
+			this.groupBox2.Location = new System.Drawing.Point(3, 81);
 			this.groupBox2.Name = "groupBox2";
 			this.groupBox2.Size = new System.Drawing.Size(407, 66);
-			this.groupBox2.TabIndex = 3;
+			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Super syntax highlight settings";
 			// 
@@ -180,22 +182,12 @@
 			// 
 			this.groupBox3.Controls.Add(this._ControlQuickInfoBox);
 			this.groupBox3.Controls.Add(this._LineNumbersBox);
-			this.groupBox3.Location = new System.Drawing.Point(3, 165);
+			this.groupBox3.Location = new System.Drawing.Point(3, 243);
 			this.groupBox3.Name = "groupBox3";
 			this.groupBox3.Size = new System.Drawing.Size(407, 82);
 			this.groupBox3.TabIndex = 4;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Misc";
-			// 
-			// _LineNumbersBox
-			// 
-			this._LineNumbersBox.AutoSize = true;
-			this._LineNumbersBox.Location = new System.Drawing.Point(9, 24);
-			this._LineNumbersBox.Name = "_LineNumbersBox";
-			this._LineNumbersBox.Size = new System.Drawing.Size(229, 19);
-			this._LineNumbersBox.TabIndex = 0;
-			this._LineNumbersBox.Text = "Line numbers on scrollbar";
-			this._LineNumbersBox.UseVisualStyleBackColor = true;
 			// 
 			// _ControlQuickInfoBox
 			// 
@@ -207,10 +199,42 @@
 			this._ControlQuickInfoBox.Text = "Hide quick info until Shift is pressed";
 			this._ControlQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
+			// _LineNumbersBox
+			// 
+			this._LineNumbersBox.AutoSize = true;
+			this._LineNumbersBox.Location = new System.Drawing.Point(9, 24);
+			this._LineNumbersBox.Name = "_LineNumbersBox";
+			this._LineNumbersBox.Size = new System.Drawing.Size(325, 19);
+			this._LineNumbersBox.TabIndex = 0;
+			this._LineNumbersBox.Text = "Draw line numbers on editor scrollbar";
+			this._LineNumbersBox.UseVisualStyleBackColor = true;
+			// 
+			// _GlobalFeatureBox
+			// 
+			this._GlobalFeatureBox.AutoSize = true;
+			this._GlobalFeatureBox.Location = new System.Drawing.Point(12, 3);
+			this._GlobalFeatureBox.Name = "_GlobalFeatureBox";
+			this._GlobalFeatureBox.Size = new System.Drawing.Size(133, 19);
+			this._GlobalFeatureBox.TabIndex = 0;
+			this._GlobalFeatureBox.Text = "Enable Codist";
+			this._GlobalFeatureBox.UseVisualStyleBackColor = true;
+			// 
+			// label3
+			// 
+			this.label3.AutoSize = true;
+			this.label3.Location = new System.Drawing.Point(30, 48);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(519, 30);
+			this.label3.TabIndex = 1;
+			this.label3.Text = "(It takes effect on new document windows.\r\nYou can disable Codist to save power w" +
+    "hen running with battery.)";
+			// 
 			// GeneralPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this.label3);
+			this.Controls.Add(this._GlobalFeatureBox);
 			this.Controls.Add(this.groupBox3);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
@@ -226,6 +250,7 @@
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -248,5 +273,7 @@
 		private System.Windows.Forms.GroupBox groupBox3;
 		private System.Windows.Forms.CheckBox _LineNumbersBox;
 		private System.Windows.Forms.CheckBox _ControlQuickInfoBox;
+		private System.Windows.Forms.CheckBox _GlobalFeatureBox;
+		private System.Windows.Forms.Label label3;
 	}
 }

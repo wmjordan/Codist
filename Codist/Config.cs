@@ -22,6 +22,9 @@ namespace Codist
 		public static readonly string ConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.NameOfMe + "\\Config.json";
 		public static Config Instance = InitConfig();
 
+		[DefaultValue(Features.All)]
+		public Features Features { get; set; }
+
 		[DefaultValue(SpecialHighlightOptions.None)]
 		public SpecialHighlightOptions SpecialHighlightOptions { get; set; }
 
@@ -508,6 +511,16 @@ namespace Codist
 		ToTop,
 		ToRight,
 		ToLeft
+	}
+
+	[Flags]
+	public enum Features
+	{
+		None,
+		SyntaxHighlight = 1,
+		ScrollbarMargins = 1 << 1,
+		SuperTooltip = 1 << 2,
+		All = SyntaxHighlight | ScrollbarMargins | SuperTooltip
 	}
 
 	[Flags]

@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
+using AppHelpers;
 
 namespace Codist.Margins
 {
@@ -36,7 +37,7 @@ namespace Codist.Margins
 		/// </returns>
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 			var scrollBarContainer = marginContainer as IVerticalScrollBar;
-			return scrollBarContainer != null
+			return Config.Instance.Features.MatchFlags(Features.ScrollbarMargins) && scrollBarContainer != null
 				? new CodeMargin(wpfTextViewHost, scrollBarContainer, this)
 				: null;
 		}

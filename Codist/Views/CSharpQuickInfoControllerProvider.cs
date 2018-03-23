@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
@@ -17,6 +18,9 @@ namespace Codist.Views
 		internal IQuickInfoBroker QuickInfoBroker { get; set; }
 
 		public IIntellisenseController TryCreateIntellisenseController(ITextView textView, IList<ITextBuffer> subjectBuffers) {
+			if (Config.Instance.Features.MatchFlags(Features.SuperTooltip) == false) {
+				return null;
+			}
 			return new QuickInfoController(textView, subjectBuffers, this);
 		}
 

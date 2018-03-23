@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using AppHelpers;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
@@ -13,7 +14,7 @@ namespace Codist.Classifiers
 	sealed class CSharpBlockTaggerProvider : ITaggerProvider
 	{
 		public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag {
-			if (typeof(T) != typeof(ICodeMemberTag)) {
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false || typeof(T) != typeof(ICodeMemberTag)) {
 				return null;
 			}
 

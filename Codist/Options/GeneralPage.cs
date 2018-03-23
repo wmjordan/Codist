@@ -23,6 +23,8 @@ namespace Codist.Options
 			_BottomMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.BottomSpace;
 			LoadConfig(Config.Instance);
 
+			_GlobalFeatureBox.Font = new Font(_GlobalFeatureBox.Font.FontFamily, _GlobalFeatureBox.Font.Size * 1.5f);
+			_GlobalFeatureBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Features = _GlobalFeatureBox.Checked ? Features.All : Features.None);
 			_TopMarginBox.ValueChanged += _UI.HandleEvent(() => {
 				LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value;
 				Config.Instance.FireConfigChangedEvent();
@@ -88,6 +90,7 @@ namespace Codist.Options
 
 		void LoadConfig(Config config) {
 			_UI.DoWithLock(() => {
+				_GlobalFeatureBox.Checked = config.Features != Features.None;
 				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
 				_LineNumbersBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
 				_ControlQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlQuickInfo);
