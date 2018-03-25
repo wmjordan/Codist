@@ -4,9 +4,14 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
+using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using GdiColor = System.Drawing.Color;
@@ -149,8 +154,19 @@ namespace Codist
 		public static TextBlock AddText(this TextBlock block, string text, WpfBrush brush) {
 			return block.AddText(text, false, false, brush);
 		}
+		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, bool bold, WpfBrush brush) {
+			var run = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)
+				? symbol.CreateLink()
+				: new Run(block.Name);
+			if (bold) {
+				run.FontWeight = FontWeights.Bold;
+			}
+			run.Foreground = brush;
+			block.Inlines.Add(run);
+			return block;
+		}
 		public static TextBlock AddText(this TextBlock block, string text, bool bold, bool italic, WpfBrush brush) {
-			var run = new System.Windows.Documents.Run(text);
+			var run = new Run(text);
 			if (bold) {
 				run.FontWeight = FontWeights.Bold;
 			}
@@ -221,19 +237,22 @@ namespace Codist
 			}
 		}
 
+		public static Run CreateLink(this ISymbol symbol) {
+			return new SymbolLink(symbol);
+		}
+
 		public static void GoToSymbol(this ISymbol symbol) {
-			if (symbol.Locations.Length > 0) {
-				var openDoc = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
-				var loc = symbol.Locations[0];
-				var path = loc.SourceTree?.FilePath;
+			if (symbol != null && symbol.DeclaringSyntaxReferences.Length > 0) {
+				var loc = symbol.DeclaringSyntaxReferences[0];
+				var path = loc.SyntaxTree?.FilePath;
 				if (path == null) {
 					return;
 				}
-				var pos = loc.GetLineSpan().StartLinePosition;
-				openDoc.OpenFile(path, pos.Line + 1, pos.Character + 1);
+				var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
+				var openDoc = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
+				openDoc.OpenFile(path, pos.StartLinePosition.Line + 1, pos.StartLinePosition.Character + 1);
 			}
 		}
-		// not used at this moment. It is weird that __VSNEWDOCUMENTSTATE was not discovered by the compiler
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
 			if (file == null) {
 				return;
@@ -242,10 +261,10 @@ namespace Codist
 			if (System.IO.File.Exists(file) == false) {
 				return;
 			}
-			//using (new NewDocumentStateScope(__VSNEWDOCUMENTSTATE.NDS_Provisional | __VSNEWDOCUMENTSTATE.NDS_NoActivate, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
+			using (new NewDocumentStateScope(__VSNEWDOCUMENTSTATE.NDS_Provisional, VSConstants.NewDocumentStateReason.Navigation)) {
 				dte.ItemOperations.OpenFile(file);
-				((EnvDTE.TextSelection)dte.ActiveDocument.Selection).MoveTo(line, column);
-			//}
+				((EnvDTE.TextSelection)dte.ActiveDocument.Selection).MoveToLineAndOffset(line, column);
+			}
 		}
 
 		public static WpfBrush GetBrush(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundBrushId) {
@@ -277,5 +296,58 @@ namespace Codist
 				enc.Save(f);
 			}
 		}
+		public static TElement LimitSize<TElement>(this TElement element)
+			where TElement : FrameworkElement {
+			if (element == null) {
+				return null;
+			}
+			if (Config.Instance.QuickInfoMaxHeight > 0) {
+				element.MaxHeight = Config.Instance.QuickInfoMaxHeight;
+			}
+			if (Config.Instance.QuickInfoMaxWidth > 0) {
+				element.MaxWidth = Config.Instance.QuickInfoMaxWidth;
+			}
+			return element;
+		}
 	}
+
+	sealed class SymbolLink : Run
+	{
+		ISymbol _Symbol;
+		public SymbolLink(ISymbol symbol) {
+			Text = symbol.Name;
+			_Symbol = symbol;
+			if (IsDefinedInCodeFile(symbol)) {
+				Cursor = Cursors.Hand;
+				MouseEnter += Highlight;
+				MouseLeave += Leave;
+				MouseLeftButtonUp += GotoSymbol;
+				Unloaded += UnloadMe;
+			}
+		}
+
+		internal static bool IsDefinedInCodeFile(ISymbol symbol) {
+			return symbol != null && symbol.DeclaringSyntaxReferences.Length > 0 && symbol.DeclaringSyntaxReferences[0].SyntaxTree.FilePath != null;
+		}
+
+		void Highlight(object sender, MouseEventArgs e) {
+			Background = SystemColors.HighlightBrush.Alpha(0.3);
+		}
+		void Leave(object sender, MouseEventArgs e) {
+			Background = WpfBrushes.Transparent;
+		}
+
+		void UnloadMe(object sender, RoutedEventArgs e) {
+			MouseEnter -= Highlight;
+			MouseLeave -= Leave;
+			MouseLeftButtonUp -= GotoSymbol;
+			Unloaded -= UnloadMe;
+			_Symbol = null;
+		}
+
+		void GotoSymbol(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+			_Symbol.GoToSymbol();
+		}
+	}
+
 }

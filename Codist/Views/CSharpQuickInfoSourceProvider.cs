@@ -5,6 +5,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
@@ -110,13 +111,17 @@ namespace Codist.Views
 				}
 				ShowSymbolInfo(qiContent, node, symbol);
 				RETURN:
-				ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
+				QuickInfoOverrider.ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)) {
+					QuickInfoOverrider.ApplyClickAndGoFeature(qiContent, symbol);
+				}
+				QuickInfoOverrider.LimitQuickInfoSize(qiContent);
 				applicableToSpan = qiContent.Count > 0
 					? currentSnapshot.CreateTrackingSpan(extent.Start, extent.Length, SpanTrackingMode.EdgeInclusive)
 					: null;
 				return;
 				EXIT:
-				ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
+				QuickInfoOverrider.ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
 				applicableToSpan = qiContent.Count > 0
 					? currentSnapshot.CreateTrackingSpan(session.TextView.GetTextElementSpan(subjectTriggerPoint), SpanTrackingMode.EdgeInclusive)
 					: null;
@@ -205,33 +210,6 @@ namespace Codist.Views
 				if (attrs.Length > 0) {
 					qiContent.Add(ShowAttributes(attrs, node.SpanStart));
 				}
-			}
-
-			static void ShowSelectionInfo(IQuickInfoSession session, IList<object> qiContent, SnapshotPoint point) {
-				var selection = session.TextView.Selection;
-				if (selection.IsEmpty != false) {
-					return;
-				}
-				var p1 = selection.Start.Position;
-				var p2 = selection.End.Position;
-				if (p1.Snapshot != point.Snapshot // in the C# Interactive window, the snapshots could be different ones
-					|| p1 > point || point > p2) {
-					return;
-				}
-				var c = 0;
-				foreach (var item in selection.SelectedSpans) {
-					c += item.Length;
-				}
-				if (c < 2) {
-					return;
-				}
-				var y1 = point.Snapshot.GetLineNumberFromPosition(p1);
-				var y2 = point.Snapshot.GetLineNumberFromPosition(p2) + 1;
-				var info = new TextBlock().AddText("Selection: ", true).AddText(c.ToString()).AddText(" characters");
-				if (y2 - y1 > 1) {
-					info.AddText(", " + (y2 - y1).ToString() + " lines");
-				}
-				qiContent.Add(info);
 			}
 
 			void ShowPropertyInfo(IList<object> qiContent, SyntaxNode node, IPropertySymbol property) {
@@ -429,7 +407,7 @@ namespace Codist.Views
 				var extType = method.ConstructedFrom.ReceiverType;
 				var extTypeParameter = extType as ITypeParameterSymbol;
 				if (extTypeParameter != null && (extTypeParameter.HasConstructorConstraint || extTypeParameter.HasReferenceTypeConstraint || extTypeParameter.HasValueTypeConstraint || extTypeParameter.ConstraintTypes.Length > 0)) {
-					var ext = new TextBlock().AddText("Extending: ", true).AddText(extType.Name, _ClassBrush).AddText(" with ");
+					var ext = new TextBlock().AddText("Extending: ", true).AddSymbol(extType, true, _ClassBrush).AddText(" with ");
 					ToUIText(ext, method.ReceiverType.ToMinimalDisplayParts(_SemanticModel, position));
 					info.Add(ext);
 				}
@@ -443,38 +421,38 @@ namespace Codist.Views
 				qiContent.Add(info);
 			}
 
-			void ShowTypeParameterInfo(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument, TextBlock textBlock, int position) {
-				textBlock.AddText(typeParameter.Name, _TypeParameterBrush).AddText(" is ");
-				ToUIText(textBlock, typeArgument.ToMinimalDisplayParts(_SemanticModel, position));
+			void ShowTypeParameterInfo(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument, TextBlock text, int position) {
+				text.AddText(typeParameter.Name, _TypeParameterBrush).AddText(" is ");
+				ToUIText(text, typeArgument.ToMinimalDisplayParts(_SemanticModel, position));
 				if (typeParameter.HasConstructorConstraint == false && typeParameter.HasReferenceTypeConstraint == false && typeParameter.HasValueTypeConstraint == false && typeParameter.ConstraintTypes.Length == 0) {
 					return;
 				}
-				textBlock.AddText(" where ", _KeywordBrush).AddText(typeParameter.Name, _TypeParameterBrush).AddText(" : ");
+				text.AddText(" where ", _KeywordBrush).AddText(typeParameter.Name, _TypeParameterBrush).AddText(" : ");
 				var i = 0;
 				if (typeParameter.HasReferenceTypeConstraint) {
-					textBlock.AddText("class", _KeywordBrush);
+					text.AddText("class", _KeywordBrush);
 					++i;
 				}
 				if (typeParameter.HasValueTypeConstraint) {
 					if (i > 0) {
-						textBlock.AddText(", ");
+						text.AddText(", ");
 					}
-					textBlock.AddText("struct", _KeywordBrush);
+					text.AddText("struct", _KeywordBrush);
 					++i;
 				}
 				if (typeParameter.HasConstructorConstraint) {
 					if (i > 0) {
-						textBlock.AddText(", ");
+						text.AddText(", ");
 					}
-					textBlock.AddText("new", _KeywordBrush).AddText("()");
+					text.AddText("new", _KeywordBrush).AddText("()");
 					++i;
 				}
 				if (typeParameter.ConstraintTypes.Length > 0) {
 					foreach (var constraint in typeParameter.ConstraintTypes) {
 						if (i > 0) {
-							textBlock.AddText(", ");
+							text.AddText(", ");
 						}
-						ToUIText(textBlock, constraint.ToMinimalDisplayParts(_SemanticModel, position));
+						ToUIText(text, constraint.ToMinimalDisplayParts(_SemanticModel, position));
 						++i;
 					}
 				}
@@ -605,16 +583,21 @@ namespace Codist.Views
 				foreach (var part in parts) {
 					switch (part.Kind) {
 						case SymbolDisplayPartKind.ClassName:
-							block.AddText((part.Symbol as INamedTypeSymbol).IsAnonymousType ? "?" : part.Symbol.Name, argIndex == Int32.MinValue, false, _ClassBrush);
+							if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
+								block.AddText("?", _ClassBrush);
+							}
+							else {
+								block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _ClassBrush);
+							}
 							break;
 						case SymbolDisplayPartKind.EnumName:
-							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _EnumBrush);
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _EnumBrush);
 							break;
 						case SymbolDisplayPartKind.InterfaceName:
-							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _InterfaceBrush);
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _InterfaceBrush);
 							break;
 						case SymbolDisplayPartKind.MethodName:
-							block.AddText(part.Symbol.Name, argIndex != Int32.MinValue, false, _MethodBrush);
+							block.AddSymbol(part.Symbol, argIndex != Int32.MinValue, _MethodBrush);
 							break;
 						case SymbolDisplayPartKind.ParameterName:
 							var p = part.Symbol as IParameterSymbol;
@@ -626,10 +609,10 @@ namespace Codist.Views
 							}
 							break;
 						case SymbolDisplayPartKind.StructName:
-							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _StructBrush);
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _StructBrush);
 							break;
 						case SymbolDisplayPartKind.DelegateName:
-							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _DelegateBrush);
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _DelegateBrush);
 							break;
 						case SymbolDisplayPartKind.StringLiteral:
 							block.AddText(part.ToString(), false, false, _TextBrush);
@@ -711,6 +694,7 @@ namespace Codist.Views
 						ToUIText(attrDef, arg.Value, position);
 					}
 					attrDef.AddText(")]");
+					attrDef.TextWrapping = TextWrapping.Wrap;
 					info.Children.Add(attrDef);
 				}
 				return info;
@@ -723,9 +707,8 @@ namespace Codist.Views
 					if (IsCommonClassName(name) == false) {
 						var info = ToUIText(new TextBlock().AddText("Base type: ", true), baseType.ToMinimalDisplayParts(_SemanticModel, position));
 						while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
-							name = baseType.Name;
-							if (IsCommonClassName(name) == false) {
-								info.AddText(" - ").AddText(name, _ClassBrush);
+							if (IsCommonClassName(baseType.Name) == false) {
+								info.AddText(" - ").AddSymbol(baseType, false, _ClassBrush);
 							}
 						}
 						qiContent.Add(info);
@@ -909,8 +892,9 @@ namespace Codist.Views
 				}
 				else if (symbol.CandidateSymbols.Length > 0) {
 					var info = new StackPanel();
+					info.Add(new TextBlock().AddText("Maybe", true).AddText(" argument of"));
 					foreach (var candidate in symbol.CandidateSymbols) {
-						info.Add(ToUIText(new TextBlock().AddText("Maybe", true).AddText(" argument of "), candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
+						info.Add(ToUIText(new TextBlock(), candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
 					}
 					qiContent.Add(info);
 				}

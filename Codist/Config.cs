@@ -42,6 +42,8 @@ namespace Codist
 			get => LineTransformers.LineHeightTransformProvider.BottomSpace;
 			set => LineTransformers.LineHeightTransformProvider.BottomSpace = value;
 		}
+		public double QuickInfoMaxWidth { get; set; }
+		public double QuickInfoMaxHeight { get; set; }
 		public bool NoSpaceBetweenWrappedLines { get; set; }
 		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
 		public List<CommentStyle> CommentStyles { get; } = new List<CommentStyle>();
@@ -539,9 +541,10 @@ namespace Codist
 		Parameter = 1 << 9,
 		InterfaceImplementations = 1 << 10,
 		TypeParameters = 1 << 11,
+		ClickAndGo = 1 << 28,
 		CtrlQuickInfo = 1 << 29,
 		HideOriginalQuickInfo = 1 << 30,
-		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations,
+		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | ClickAndGo,
 	}
 
 	[Flags]

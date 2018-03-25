@@ -58,6 +58,10 @@ The quick info (the tooltip shown when you hover your mouse pointer to language 
 
   ![Super Quick Info 6](doc/super-quick-info-6.png)
 
+* **Click and go** of symbols
+
+	If a symbol is defined in your source code, you can click and go to its definition.
+
 ## Customized comment styles
 * The comment tagger highlights comments to your specific styles.
 
