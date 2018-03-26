@@ -133,7 +133,7 @@
 			this.groupBox3.Controls.Add(this._CSharpAttributesQuickInfoBox);
 			this.groupBox3.Location = new System.Drawing.Point(6, 31);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(546, 180);
+			this.groupBox3.Size = new System.Drawing.Size(506, 180);
 			this.groupBox3.TabIndex = 2;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Info item";
@@ -141,7 +141,7 @@
 			// _CSharpTypeParameterQuickInfoBox
 			// 
 			this._CSharpTypeParameterQuickInfoBox.AutoSize = true;
-			this._CSharpTypeParameterQuickInfoBox.Location = new System.Drawing.Point(276, 149);
+			this._CSharpTypeParameterQuickInfoBox.Location = new System.Drawing.Point(249, 149);
 			this._CSharpTypeParameterQuickInfoBox.Name = "_CSharpTypeParameterQuickInfoBox";
 			this._CSharpTypeParameterQuickInfoBox.Size = new System.Drawing.Size(141, 19);
 			this._CSharpTypeParameterQuickInfoBox.TabIndex = 11;
@@ -151,7 +151,7 @@
 			// _CSharpParameterQuickInfoBox
 			// 
 			this._CSharpParameterQuickInfoBox.AutoSize = true;
-			this._CSharpParameterQuickInfoBox.Location = new System.Drawing.Point(276, 124);
+			this._CSharpParameterQuickInfoBox.Location = new System.Drawing.Point(249, 124);
 			this._CSharpParameterQuickInfoBox.Name = "_CSharpParameterQuickInfoBox";
 			this._CSharpParameterQuickInfoBox.Size = new System.Drawing.Size(181, 19);
 			this._CSharpParameterQuickInfoBox.TabIndex = 10;
@@ -161,7 +161,7 @@
 			// _CSharpDeclarationQuickInfoBox
 			// 
 			this._CSharpDeclarationQuickInfoBox.AutoSize = true;
-			this._CSharpDeclarationQuickInfoBox.Location = new System.Drawing.Point(276, 99);
+			this._CSharpDeclarationQuickInfoBox.Location = new System.Drawing.Point(249, 99);
 			this._CSharpDeclarationQuickInfoBox.Name = "_CSharpDeclarationQuickInfoBox";
 			this._CSharpDeclarationQuickInfoBox.Size = new System.Drawing.Size(189, 19);
 			this._CSharpDeclarationQuickInfoBox.TabIndex = 9;
@@ -171,7 +171,7 @@
 			// _CSharpStringQuickInfoBox
 			// 
 			this._CSharpStringQuickInfoBox.AutoSize = true;
-			this._CSharpStringQuickInfoBox.Location = new System.Drawing.Point(276, 74);
+			this._CSharpStringQuickInfoBox.Location = new System.Drawing.Point(249, 74);
 			this._CSharpStringQuickInfoBox.Name = "_CSharpStringQuickInfoBox";
 			this._CSharpStringQuickInfoBox.Size = new System.Drawing.Size(181, 19);
 			this._CSharpStringQuickInfoBox.TabIndex = 8;
@@ -181,7 +181,7 @@
 			// _CSharpNumberQuickInfoBox
 			// 
 			this._CSharpNumberQuickInfoBox.AutoSize = true;
-			this._CSharpNumberQuickInfoBox.Location = new System.Drawing.Point(276, 49);
+			this._CSharpNumberQuickInfoBox.Location = new System.Drawing.Point(249, 49);
 			this._CSharpNumberQuickInfoBox.Name = "_CSharpNumberQuickInfoBox";
 			this._CSharpNumberQuickInfoBox.Size = new System.Drawing.Size(133, 19);
 			this._CSharpNumberQuickInfoBox.TabIndex = 7;
@@ -211,7 +211,7 @@
 			// _CSharpExtensionMethodQuickInfoBox
 			// 
 			this._CSharpExtensionMethodQuickInfoBox.AutoSize = true;
-			this._CSharpExtensionMethodQuickInfoBox.Location = new System.Drawing.Point(276, 24);
+			this._CSharpExtensionMethodQuickInfoBox.Location = new System.Drawing.Point(249, 24);
 			this._CSharpExtensionMethodQuickInfoBox.Name = "_CSharpExtensionMethodQuickInfoBox";
 			this._CSharpExtensionMethodQuickInfoBox.Size = new System.Drawing.Size(229, 19);
 			this._CSharpExtensionMethodQuickInfoBox.TabIndex = 6;
@@ -288,7 +288,7 @@
 			this.groupBox4.Controls.Add(this._QuickInfoMaxWidthBox);
 			this.groupBox4.Location = new System.Drawing.Point(6, 217);
 			this.groupBox4.Name = "groupBox4";
-			this.groupBox4.Size = new System.Drawing.Size(546, 59);
+			this.groupBox4.Size = new System.Drawing.Size(506, 59);
 			this.groupBox4.TabIndex = 0;
 			this.groupBox4.TabStop = false;
 			this.groupBox4.Text = "Quick info window size (0: unlimited)";
@@ -300,7 +300,7 @@
             0,
             0,
             0});
-			this._QuickInfoMaxHeightBox.Location = new System.Drawing.Point(377, 16);
+			this._QuickInfoMaxHeightBox.Location = new System.Drawing.Point(350, 16);
 			this._QuickInfoMaxHeightBox.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -313,7 +313,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(273, 21);
+			this.label2.Location = new System.Drawing.Point(246, 21);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(95, 15);
 			this.label2.TabIndex = 2;
@@ -356,7 +356,7 @@
 			this._OptionTabs.Location = new System.Drawing.Point(3, 3);
 			this._OptionTabs.Name = "_OptionTabs";
 			this._OptionTabs.SelectedIndex = 0;
-			this._OptionTabs.Size = new System.Drawing.Size(572, 349);
+			this._OptionTabs.Size = new System.Drawing.Size(532, 349);
 			this._OptionTabs.TabIndex = 0;
 			// 
 			// tabPage1
@@ -367,7 +367,7 @@
 			this.tabPage1.Location = new System.Drawing.Point(4, 25);
 			this.tabPage1.Name = "tabPage1";
 			this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPage1.Size = new System.Drawing.Size(564, 320);
+			this.tabPage1.Size = new System.Drawing.Size(524, 320);
 			this.tabPage1.TabIndex = 0;
 			this.tabPage1.Text = "Super Quick Info";
 			this.tabPage1.UseVisualStyleBackColor = true;
@@ -377,9 +377,9 @@
 			this._ClickAndGoBox.AutoSize = true;
 			this._ClickAndGoBox.Location = new System.Drawing.Point(15, 6);
 			this._ClickAndGoBox.Name = "_ClickAndGoBox";
-			this._ClickAndGoBox.Size = new System.Drawing.Size(405, 19);
+			this._ClickAndGoBox.Size = new System.Drawing.Size(413, 19);
 			this._ClickAndGoBox.TabIndex = 1;
-			this._ClickAndGoBox.Text = "Click to go to source code of symbol definition";
+			this._ClickAndGoBox.Text = "Click and go to source code of symbol definition";
 			this._ClickAndGoBox.UseVisualStyleBackColor = true;
 			// 
 			// tabPage2
@@ -392,7 +392,7 @@
 			this.tabPage2.Location = new System.Drawing.Point(4, 25);
 			this.tabPage2.Name = "tabPage2";
 			this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPage2.Size = new System.Drawing.Size(564, 320);
+			this.tabPage2.Size = new System.Drawing.Size(524, 320);
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Scrollbar marker";
 			this.tabPage2.UseVisualStyleBackColor = true;
@@ -404,7 +404,7 @@
 			this.tabPage3.Location = new System.Drawing.Point(4, 25);
 			this.tabPage3.Name = "tabPage3";
 			this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPage3.Size = new System.Drawing.Size(564, 320);
+			this.tabPage3.Size = new System.Drawing.Size(524, 320);
 			this.tabPage3.TabIndex = 2;
 			this.tabPage3.Text = "Additional highlight";
 			this.tabPage3.UseVisualStyleBackColor = true;
@@ -415,7 +415,7 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this._OptionTabs);
 			this.Name = "CSharpPage";
-			this.Size = new System.Drawing.Size(575, 355);
+			this.Size = new System.Drawing.Size(535, 355);
 			this.Load += new System.EventHandler(this.CSharpPage_Load);
 			this.groupBox3.ResumeLayout(false);
 			this.groupBox3.PerformLayout();

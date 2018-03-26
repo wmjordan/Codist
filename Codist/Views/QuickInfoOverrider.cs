@@ -81,26 +81,73 @@ namespace Codist.Views
 		/// Limits the displaying size of the quick info items by moving them into a <see cref="ScrollViewer"/>.
 		/// </summary>
 		public static void LimitQuickInfoSize(IList<object> qiContent) {
+			//qiContent.Add(new QuickInfoContainer());
 			if (Config.Instance.QuickInfoMaxHeight <= 0 && Config.Instance.QuickInfoMaxWidth <= 0 || qiContent.Count == 0) {
 				return;
 			}
-			var scrollViewer = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto }.LimitSize();
-			var stack = new StackPanel();
-			foreach (var item in qiContent) {
-				if (stack.Children.Count > 0) {
-					stack.Children.Add(new System.Windows.Shapes.Rectangle { Height = 10 });
+			for (int i = 0; i < qiContent.Count; i++) {
+				var item = qiContent[i];
+				var t = item as FrameworkElement;
+				if (t != null) {
+					t.LimitSize();
+					continue;
 				}
-				var e = item as UIElement ?? new TextBlock { Text = item.ToString() };
-				var t = e as TextBlock;
-				if (t != null && t.TextWrapping == TextWrapping.NoWrap) {
-					t.TextWrapping = TextWrapping.Wrap;
+				var s = item as string;
+				if (s != null) {
+					qiContent[i] = new TextBlock { Text = s }.LimitSize();
+					continue;
 				}
-				stack.Children.Add(e);
 			}
-			scrollViewer.Content = stack;
-			qiContent.Clear();
-			qiContent.Add(scrollViewer);
+			//const string CodistQuickInfo = nameof(CodistQuickInfo);
+			//var scrollViewer = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto }.LimitSize();
+			//var stack = new QuickInfoContainer() { Name = CodistQuickInfo };
+			//foreach (var item in qiContent) {
+			//	if (stack.Children.Count > 0) {
+			//		stack.Children.Add(new System.Windows.Shapes.Rectangle { Height = 10 });
+			//	}
+			//	var e = item as UIElement ?? new TextBlock { Text = item.ToString() };
+			//	var t = e as TextBlock;
+			//	if (t != null && t.TextWrapping == TextWrapping.NoWrap) {
+			//		t.TextWrapping = TextWrapping.Wrap;
+			//	}
+			//	stack.Children.Add(e);
+			//}
+			//scrollViewer.Content = stack;
+			//qiContent.Clear();
+			//qiContent.Add(scrollViewer);
 		}
 
+		//static T FindAncestorOrSelf<T>(DependencyObject obj) where T : DependencyObject {
+		//	while (obj != null) {
+		//		T t = obj as T;
+		//		if (t != null) {
+		//			return t;
+		//		}
+		//		obj = VisualTreeHelper.GetParent(obj);
+		//	}
+		//	return null;
+		//}
+
+		//sealed class QuickInfoContainer : StackPanel
+		//{
+		//	protected override void OnVisualParentChanged(DependencyObject oldParent) {
+		//		base.OnVisualParentChanged(oldParent);
+
+		//		var p = VisualParent;
+		//		ItemsControl items = FindAncestorOrSelf<ItemsControl>(VisualParent);
+		//		if (items != null) {
+		//			var cc = items.Parent as ContentControl;
+		//			if (cc != null) {
+		//				var popup = cc.Parent as System.Windows.Controls.Primitives.Popup;
+		//				if (popup != null) {
+		//					var scrollViewer = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto }.LimitSize();
+		//					scrollViewer.Content = cc;
+		//					popup.Child = scrollViewer;
+		//				}
+		//			}
+		//		}
+		//	}
+
+		//}
 	}
 }

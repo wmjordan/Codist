@@ -127,7 +127,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="TestPage.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Views\CSharpQuickInfoControllerProvider.cs" />
     <Compile Include="Views\CodeViewCreationListener.cs" />

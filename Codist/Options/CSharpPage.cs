@@ -17,7 +17,8 @@ namespace Codist.Options
 		internal CSharpPage(ConfigPage page) : this() {
 			//_UI.CommonEventAction += Config.Instance.FireConfigChangedEvent;
 		}
-		private void CSharpPage_Load(object sender, EventArgs e) {
+
+		void CSharpPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {
 				return;
 			}

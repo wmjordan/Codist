@@ -2,33 +2,8 @@
 using System.Linq; // unnccessary code
 using System.Runtime.InteropServices;
 
-namespace Codist.Fake
+namespace TestProject
 {
-#if DEBUG
-	//todo: Move types into separated files
-	interface IInterface : IDisposable // interface declaration
-	{
-		[System.ComponentModel.DefaultValue(MyEnum.OK | MyEnum.Sad)]
-		MyEnum Property { get; set; }
-	}
-	[Flags]
-	enum MyEnum : ushort // enum declaration
-	{
-		None = 0, OK = 1, Happy = 1 << 1, Sad = 1 << 2, Composite = OK | Happy, Unknown = 0xFFFF
-	}
-	[System.ComponentModel.Description("demo")]
-	struct MyStruct // struct declaration
-	{
-		//note hover on Constant to see its value
-		private const short Constant = ushort.MaxValue ^ 0xF0F0; // const field
-		private const string ConstantString = "literal string"; // const string
-		private static int _static = (int)DateTime.Now.Ticks; // static field
-		private static readonly int _staticReadonly = Int32.MinValue; // static readonly field
-		private int _instanceField; // field
-		private readonly int _readonlyField; // readonly field
-
-		public readonly static DateTime StartDate = DateTime.Now; // public readonly static field
-	}
 	abstract class AbstractClass : IInterface
 	{
 		protected abstract int Property { get; set; } // protected abstract property
@@ -38,26 +13,17 @@ namespace Codist.Fake
 		public virtual void VirtualMethod() { } // virtual method
 		void IDisposable.Dispose() { } // explicit interface implementation
 	}
-	static class ExtensionClass // static class
-	{
-		public static void Log(this string text) {
-			var cc = new ConcreteClass(0);
-			cc.VirtualMethod(); // call overriden method
-			var ac = cc as AbstractClass;
-			ac.VirtualMethod(); // call virtual method
-		} // static method
-	}
 	sealed class ConcreteClass : AbstractClass
 	{
 		delegate void Clone<T>(T text);
 		event EventHandler<EventArgs> MyEvent;
 
+		// note hover on the "{" below to see line count of this method block
 		/// <summary>
 		/// Creates a new instance of <see cref="ConcreteClass"/>.
 		/// </summary>
 		/// <param name="fieldId">The field.</param>
 		/// <example><code><![CDATA[System.Console.WriteLine(Codist.Constants.NameOfMe);]]></code></example>
-		// Todo++ hover on the "{" below to see line count of this method block
 		public ConcreteClass(int fieldId) {
 			const int A = 1; // local constant
 			var localField = fieldId; // local field
@@ -106,7 +72,7 @@ text".Log(); // multiline string (string verbatim)
 
 		public void Method<TGeneric>() { //type parameter
 			// unnecessary code
-			Codist.Fake.ExtensionClass.Log(typeof(TGeneric).Name); // extension method
+			TestProject.ExtensionClass.Log(typeof(TGeneric).Name); // extension method
 			NativeMethods.ExternMethod(value: 1, ptr: IntPtr.Zero); // extern method
 			AbstractMethod(); // overridden abstract method
 			VirtualMethod(); // overridden virtual method
@@ -128,10 +94,4 @@ text".Log(); // multiline string (string verbatim)
 			public static extern void ExternMethod(IntPtr ptr, int value);
 		}
 	}
-#else
-	// Excluded code here
-	class Unused
-	{
-	}
-#endif
 }
