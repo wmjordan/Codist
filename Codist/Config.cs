@@ -534,7 +534,7 @@ namespace Codist
 		BaseType = 1 << 1,
 		BaseTypeInheritence = 1 << 2,
 		Declaration = 1 << 3,
-		ExtensionMethod = 1 << 4,
+		SymbolLocation = 1 << 4,
 		Interfaces = 1 << 5,
 		InterfacesInheritence = 1 << 6,
 		NumericValues = 1 << 7,

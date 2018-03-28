@@ -136,6 +136,10 @@ namespace Codist.Views
 				}
 			}
 
+			static bool CanAccess(ISymbol symbol) {
+				return symbol.DeclaredAccessibility == Accessibility.Public || symbol.DeclaredAccessibility == Accessibility.NotApplicable || symbol.Locations.Any(l => l.IsInSource);
+			}
+
 			void ShowSymbolInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
 				switch (symbol.Kind) {
 					case SymbolKind.Event:
@@ -171,6 +175,13 @@ namespace Codist.Views
 					case SymbolKind.Property:
 						ShowPropertyInfo(qiContent, node, symbol as IPropertySymbol);
 						break;
+				}
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation)) {
+					string asmName = symbol.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
+							?? symbol.ContainingAssembly?.Name;
+					if (asmName != null) {
+						qiContent.Add(new TextBlock().AddText("Assembly: ", true).AddText(asmName));
+					}
 				}
 			}
 
@@ -208,7 +219,7 @@ namespace Codist.Views
 			void ShowAttributesInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
 				var attrs = symbol.GetAttributes();
 				if (attrs.Length > 0) {
-					qiContent.Add(ShowAttributes(attrs, node.SpanStart));
+					ShowAttributes(qiContent, attrs, node.SpanStart);
 				}
 			}
 
@@ -260,7 +271,7 @@ namespace Codist.Views
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
 					ShowInterfaceImplementation(qiContent, node, method, method.ExplicitInterfaceImplementations, m => m.ReturnType, m => m.Parameters);
 				}
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExtensionMethod) && method.IsExtensionMethod) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) && method.IsExtensionMethod) {
 					ShowExtensionMethod(qiContent, method, node.SpanStart);
 				}
 			}
@@ -412,11 +423,6 @@ namespace Codist.Views
 					info.Add(ext);
 				}
 				var def = ToUIText(new TextBlock().AddText("Extended by: ", true), method.ContainingType.ToDisplayParts());
-				string asmName = method.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
-					?? method.ContainingAssembly?.Name;
-				if (asmName != null) {
-					def.AddText(" (" + asmName + ")");
-				}
 				info.Add(def);
 				qiContent.Add(info);
 			}
@@ -658,10 +664,13 @@ namespace Codist.Views
 				}
 			}
 
-			StackPanel ShowAttributes(ImmutableArray<AttributeData> attrs, int position) {
+			void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs, int position) {
 				var info = new StackPanel();
-				info.AddText(attrs.Length > 1 ? "Attributes:" : "Attribute:", true);
+				info.AddText("Attribute:", true);
 				foreach (var item in attrs) {
+					if (CanAccess(item.AttributeClass) == false) {
+						continue;
+					}
 					var a = item.AttributeClass.Name;
 					var attrDef = new TextBlock()
 						.AddText("[")
@@ -697,7 +706,9 @@ namespace Codist.Views
 					attrDef.TextWrapping = TextWrapping.Wrap;
 					info.Children.Add(attrDef);
 				}
-				return info;
+				if (info.Children.Count > 1) {
+					qiContent.Add(info);
+				}
 			}
 
 			void ShowBaseType(IList<object> qiContent, ITypeSymbol typeSymbol, int position) {
@@ -707,7 +718,7 @@ namespace Codist.Views
 					if (IsCommonClassName(name) == false) {
 						var info = ToUIText(new TextBlock().AddText("Base type: ", true), baseType.ToMinimalDisplayParts(_SemanticModel, position));
 						while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
-							if (IsCommonClassName(baseType.Name) == false) {
+							if (CanAccess(baseType) && IsCommonClassName(baseType.Name) == false) {
 								info.AddText(" - ").AddSymbol(baseType, false, _ClassBrush);
 							}
 						}
@@ -790,34 +801,54 @@ namespace Codist.Views
 			void ShowInterfaces(IList<object> output, ITypeSymbol type, int position) {
 				const string Disposable = "IDisposable";
 				var showAll = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
-				var interfaces = showAll ? type.AllInterfaces : type.Interfaces;
-				if (interfaces.Length == 0) {
+				var interfaces = type.Interfaces;
+				if (interfaces.Length == 0 && showAll == false) {
 					return;
 				}
-				var stack = new StackPanel();
-				stack.AddText(interfaces.Length > 1 ? "Interfaces:" : "Interface:", true);
+				var declaredInterfaces = new List<INamedTypeSymbol>(interfaces.Length);
+				var inheritedInterfaces = new List<INamedTypeSymbol>(5);
 				INamedTypeSymbol disposable = null;
 				foreach (var item in interfaces) {
 					if (item.Name == Disposable) {
 						disposable = item;
 						continue;
 					}
-					var t = ToUIText(item.ToMinimalDisplayParts(_SemanticModel, position));
-					if (showAll && type.Interfaces.Contains(item) == false) {
+					if (item.DeclaredAccessibility == Accessibility.Public || item.Locations.Any(l => l.IsInSource)) {
+						declaredInterfaces.Add(item);
+					}
+				}
+				foreach (var item in type.AllInterfaces) {
+					if (interfaces.Contains(item)) {
+						continue;
+					}
+					if (item.Name == Disposable) {
+						disposable = item;
+						continue;
+					}
+					if (showAll
+						&& (item.DeclaredAccessibility == Accessibility.Public || item.Locations.Any(l => l.IsInSource))) {
+						inheritedInterfaces.Add(item);
+					}
+				}
+				if (declaredInterfaces.Count == 0 && inheritedInterfaces.Count == 0 && disposable == null) {
+					return;
+				}
+				var stack = new StackPanel().AddText("Interface:", true);
+				if (disposable != null) {
+					var t = ToUIText(disposable.ToMinimalDisplayParts(_SemanticModel, position));
+					if (interfaces.Contains(disposable) == false) {
 						t.AddText(" (inherited)");
 					}
-					stack.Children.Add(t);
+					stack.Add(t);
 				}
-				if (disposable == null && showAll == false) {
-					foreach (var item in type.AllInterfaces) {
-						if (item.Name == Disposable) {
-							disposable = item;
-							break;
-						}
+				foreach (var item in declaredInterfaces) {
+					if (item == disposable) {
+						continue;
 					}
+					stack.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, position)));
 				}
-				if (disposable != null) {
-					stack.Children.Insert(1, ToUIText(disposable.ToMinimalDisplayParts(_SemanticModel, position)));
+				foreach (var item in inheritedInterfaces) {
+					stack.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, position)).AddText(" (inherited)"));
 				}
 				output.Add(stack);
 			}

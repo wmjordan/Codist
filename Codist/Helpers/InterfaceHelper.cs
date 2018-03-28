@@ -242,6 +242,7 @@ namespace Codist.Helpers
 			}
 			if (Config.Instance.QuickInfoMaxHeight > 0) {
 				element.MaxHeight = Config.Instance.QuickInfoMaxHeight;
+				element.MouseLeftButtonUp += (s, args) => (s as TElement).MaxHeight = Double.PositiveInfinity;
 			}
 			if (Config.Instance.QuickInfoMaxWidth > 0) {
 				element.MaxWidth = Config.Instance.QuickInfoMaxWidth;
