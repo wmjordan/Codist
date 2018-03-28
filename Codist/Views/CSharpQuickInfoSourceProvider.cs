@@ -5,7 +5,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
@@ -17,6 +16,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
+using Codist.Helpers;
 
 namespace Codist.Views
 {
@@ -112,17 +112,17 @@ namespace Codist.Views
 				ShowSymbolInfo(qiContent, node, symbol);
 				RETURN:
 				QuickInfoOverrider.ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo) /*&& node is MemberDeclarationSyntax == false && node.Kind() != SyntaxKind.VariableDeclarator && node.Kind() != SyntaxKind.Parameter*/) {
 					QuickInfoOverrider.ApplyClickAndGoFeature(qiContent, symbol);
 				}
 				QuickInfoOverrider.LimitQuickInfoSize(qiContent);
-				applicableToSpan = qiContent.Count > 0
+				applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == subjectTriggerPoint.Snapshot
 					? currentSnapshot.CreateTrackingSpan(extent.Start, extent.Length, SpanTrackingMode.EdgeInclusive)
 					: null;
 				return;
 				EXIT:
 				QuickInfoOverrider.ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
-				applicableToSpan = qiContent.Count > 0
+				applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == subjectTriggerPoint.Snapshot
 					? currentSnapshot.CreateTrackingSpan(session.TextView.GetTextElementSpan(subjectTriggerPoint), SpanTrackingMode.EdgeInclusive)
 					: null;
 			}

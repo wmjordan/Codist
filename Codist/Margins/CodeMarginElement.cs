@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
+using Codist.Helpers;
 
 namespace Codist.Margins
 {
@@ -224,7 +225,7 @@ namespace Codist.Margins
 		}
 
 		static void DrawTaskMark(DrawingContext dc, Brush brush, double y, string taskName) {
-			var ft = Utilities.ToFormattedText(taskName, 9, Brushes.White).SetBold();
+			var ft = InterfaceHelper.ToFormattedText(taskName, 9, Brushes.White).SetBold();
 			dc.DrawRectangle(brush, EmptyPen, new Rect(0, y - ft.Height / 2, ft.Width, ft.Height));
 			dc.DrawText(ft, new Point(0, y - ft.Height / 2));
 		}

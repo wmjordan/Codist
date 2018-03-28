@@ -21,25 +21,17 @@ using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using WpfText = System.Windows.Media.FormattedText;
 
-namespace Codist
+namespace Codist.Helpers
 {
-	static class Utilities
+	static class InterfaceHelper
 	{
 		public static string GetClassificationType(this Type type, string field) {
 			var f = type.GetField(field);
 			var d = f.GetCustomAttribute<ClassificationTypeAttribute>();
 			return d?.ClassificationTypeNames;
 		}
-		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
-			var solution = workspace.CurrentSolution;
-			var sourceText = span.Snapshot.AsText();
-			var docId = workspace.GetDocumentIdInCurrentContext(sourceText.Container);
-			return solution.ContainsDocument(docId)
-				? solution.GetDocument(docId)
-				: solution.WithDocumentText(docId, sourceText, PreservationMode.PreserveIdentity).GetDocument(docId);
-		}
 
-		public static GdiColor ChangeTrasparency(this GdiColor color, byte alpha) {
+		public static GdiColor Alpha(this GdiColor color, byte alpha) {
 			return GdiColor.FromArgb(alpha, color.R, color.G, color.B);
 		}
 
@@ -69,7 +61,7 @@ namespace Codist
 			return WpfColors.Transparent;
 		}
 
-		public static bool ParseByte(string text, int index, out byte value) {
+		static bool ParseByte(string text, int index, out byte value) {
 			var h = text[index];
 			var l = text[++index];
 			var b = 0;
@@ -145,7 +137,7 @@ namespace Codist
 			return panel;
 		}
 		public static TextBlock AddText(this TextBlock block, string text) {
-			block.Inlines.Add(new System.Windows.Documents.Run(text));
+			block.Inlines.Add(new Run(text));
 			return block;
 		}
 		public static TextBlock AddText(this TextBlock block, string text, bool bold) {
@@ -156,7 +148,7 @@ namespace Codist
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, bool bold, WpfBrush brush) {
 			var run = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)
-				? symbol.CreateLink()
+				? new SymbolLink(symbol)
 				: new Run(block.Name);
 			if (bold) {
 				run.FontWeight = FontWeights.Bold;
@@ -214,59 +206,6 @@ namespace Codist
 			panel.Orientation = Orientation.Horizontal;
 			return panel;
 		}
-		public static string GetText<TPanel>(this TPanel panel)
-			where TPanel : Panel {
-			var sb = new System.Text.StringBuilder(50);
-			GetText(panel, sb);
-			return sb.ToString();
-		}
-
-		static void GetText<TPanel>(TPanel panel, System.Text.StringBuilder sb)
-			where TPanel : Panel {
-			foreach (var item in panel.Children) {
-				var t = item as TextBlock;
-				if (t != null) {
-					sb.Append(t.Text);
-				}
-				else {
-					var p = item as Panel;
-					if (p != null) {
-						GetText(p, sb);
-					}
-				}
-			}
-		}
-
-		public static Run CreateLink(this ISymbol symbol) {
-			return new SymbolLink(symbol);
-		}
-
-		public static void GoToSymbol(this ISymbol symbol) {
-			if (symbol != null && symbol.DeclaringSyntaxReferences.Length > 0) {
-				var loc = symbol.DeclaringSyntaxReferences[0];
-				var path = loc.SyntaxTree?.FilePath;
-				if (path == null) {
-					return;
-				}
-				var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
-				var openDoc = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
-				openDoc.OpenFile(path, pos.StartLinePosition.Line + 1, pos.StartLinePosition.Character + 1);
-			}
-		}
-		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
-			if (file == null) {
-				return;
-			}
-			file = System.IO.Path.GetFullPath(file);
-			if (System.IO.File.Exists(file) == false) {
-				return;
-			}
-			using (new NewDocumentStateScope(__VSNEWDOCUMENTSTATE.NDS_Provisional, VSConstants.NewDocumentStateReason.Navigation)) {
-				dte.ItemOperations.OpenFile(file);
-				((EnvDTE.TextSelection)dte.ActiveDocument.Selection).MoveToLineAndOffset(line, column);
-			}
-		}
-
 		public static WpfBrush GetBrush(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundBrushId) {
 			var p = map.GetProperties(formatName);
 			return p != null && p.Contains(resourceId)
@@ -309,44 +248,35 @@ namespace Codist
 			}
 			return element;
 		}
-	}
 
-	sealed class SymbolLink : Run
-	{
-		ISymbol _Symbol;
-		public SymbolLink(ISymbol symbol) {
-			Text = symbol.Name;
-			_Symbol = symbol;
-			if (IsDefinedInCodeFile(symbol)) {
-				Cursor = Cursors.Hand;
-				MouseEnter += Highlight;
-				MouseLeave += Leave;
-				MouseLeftButtonUp += GotoSymbol;
-				Unloaded += UnloadMe;
+		sealed class SymbolLink : Run
+		{
+			ISymbol _Symbol;
+			public SymbolLink(ISymbol symbol) {
+				Text = symbol.Name;
+				_Symbol = symbol;
+				if (IsDefinedInCodeFile(symbol)) {
+					Cursor = Cursors.Hand;
+					MouseEnter += Highlight;
+					MouseLeave += Leave;
+					MouseLeftButtonUp += GotoSymbol;
+				}
 			}
-		}
 
-		internal static bool IsDefinedInCodeFile(ISymbol symbol) {
-			return symbol != null && symbol.DeclaringSyntaxReferences.Length > 0 && symbol.DeclaringSyntaxReferences[0].SyntaxTree.FilePath != null;
-		}
+			internal static bool IsDefinedInCodeFile(ISymbol symbol) {
+				return symbol != null && symbol.DeclaringSyntaxReferences.Length > 0 && symbol.DeclaringSyntaxReferences[0].SyntaxTree.FilePath != null;
+			}
 
-		void Highlight(object sender, MouseEventArgs e) {
-			Background = SystemColors.HighlightBrush.Alpha(0.3);
-		}
-		void Leave(object sender, MouseEventArgs e) {
-			Background = WpfBrushes.Transparent;
-		}
+			void Highlight(object sender, MouseEventArgs e) {
+				Background = SystemColors.HighlightBrush.Alpha(0.3);
+			}
+			void Leave(object sender, MouseEventArgs e) {
+				Background = WpfBrushes.Transparent;
+			}
 
-		void UnloadMe(object sender, RoutedEventArgs e) {
-			MouseEnter -= Highlight;
-			MouseLeave -= Leave;
-			MouseLeftButtonUp -= GotoSymbol;
-			Unloaded -= UnloadMe;
-			_Symbol = null;
-		}
-
-		void GotoSymbol(object sender, System.Windows.Input.MouseButtonEventArgs e) {
-			_Symbol.GoToSymbol();
+			void GotoSymbol(object sender, MouseButtonEventArgs e) {
+				_Symbol.GoToSymbol();
+			}
 		}
 	}
 

@@ -7,6 +7,7 @@ using System.Drawing.Text;
 using System.Linq;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell.Interop;
+using Codist.Helpers;
 
 namespace Codist.Options
 {
@@ -236,7 +237,7 @@ namespace Codist.Options
 			if (sender == _BackColorButton && _BackColorTransBox.Value == 0) {
 				_BackColorTransBox.Value = 255;
 			}
-			_activeStyle.BackColor = _BackColorButton.SelectedColor.ChangeTrasparency((byte)_BackColorTransBox.Value).ToWpfColor();
+			_activeStyle.BackColor = _BackColorButton.SelectedColor.Alpha((byte)_BackColorTransBox.Value).ToWpfColor();
 		}
 
 		private void SetForeColor(object sender, EventArgs args) {
@@ -246,7 +247,7 @@ namespace Codist.Options
 			if (sender == _ForeColorButton && _ForeColorTransBox.Value == 0) {
 				_ForeColorTransBox.Value = 255;
 			}
-			_activeStyle.ForeColor = _ForeColorButton.SelectedColor.ChangeTrasparency((byte)_ForeColorTransBox.Value).ToWpfColor();
+			_activeStyle.ForeColor = _ForeColorButton.SelectedColor.Alpha((byte)_ForeColorTransBox.Value).ToWpfColor();
 		}
 		void UpdatePreview() {
 			if (_activeStyle == null) {

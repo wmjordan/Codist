@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Media;
+using Codist.Helpers;
 using Newtonsoft.Json;
 
 namespace Codist
@@ -324,12 +325,12 @@ namespace Codist
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		public string ForegroundColor {
 			get { return ForeColor.ToHexString(); }
-			set { ForeColor = Utilities.ParseColor(value); }
+			set { ForeColor = InterfaceHelper.ParseColor(value); }
 		}
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		public string BackgroundColor {
 			get { return BackColor.ToHexString(); }
-			set { BackColor = Utilities.ParseColor(value); }
+			set { BackColor = InterfaceHelper.ParseColor(value); }
 		}
 		/// <summary>Gets or sets the brush effect to draw the background color.</summary>
 		[DefaultValue(BrushEffect.Solid)]

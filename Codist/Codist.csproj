@@ -79,6 +79,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Classifiers\CodeTagger.cs" />
     <Compile Include="Classifiers\EditorFormats.cs" />
+    <Compile Include="Helpers\CodeAnalysisHelper.cs" />
     <Compile Include="LineTransformers\LineHeightTransform.cs" />
     <Compile Include="Margins\LineNumberMargin.cs" />
     <Compile Include="Margins\CodeMargin.cs" />
@@ -127,7 +128,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Utilities.cs" />
+    <Compile Include="Helpers\InterfaceHelper.cs" />
     <Compile Include="Views\CSharpQuickInfoControllerProvider.cs" />
     <Compile Include="Views\CodeViewCreationListener.cs" />
     <Compile Include="Views\CodeViewDecorator.cs" />

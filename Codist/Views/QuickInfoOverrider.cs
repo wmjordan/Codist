@@ -6,6 +6,7 @@ using System.Windows.Media;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
+using Codist.Helpers;
 
 namespace Codist.Views
 {
@@ -15,14 +16,16 @@ namespace Codist.Views
 		/// Displays selection character count and line count in quick info.
 		/// </summary>
 		public static void ShowSelectionInfo(IQuickInfoSession session, IList<object> qiContent, SnapshotPoint point) {
+			if (session.TextView.TextSnapshot != point.Snapshot) { // in the C# Interactive window, the snapshots could be different ones
+				return;
+			}
 			var selection = session.TextView.Selection;
-			if (selection.IsEmpty != false) {
+			if (selection.IsEmpty) {
 				return;
 			}
 			var p1 = selection.Start.Position;
 			var p2 = selection.End.Position;
-			if (p1.Snapshot != point.Snapshot // in the C# Interactive window, the snapshots could be different ones
-				|| p1 > point || point > p2) {
+			if (p1 > point || point > p2) {
 				return;
 			}
 			var c = 0;
@@ -63,15 +66,16 @@ namespace Codist.Views
 					MouseButtonEventHandler m = (s, args) => symbol.GoToSymbol();
 					MouseEventHandler hover = (s, args) => title.Background = SystemColors.HighlightBrush.Alpha(0.3);
 					MouseEventHandler leave = (s, args) => title.Background = Brushes.Transparent;
-					RoutedEventHandler unload = (s, args) => {
-						title.MouseEnter -= hover;
-						title.MouseLeave -= leave;
-						title.MouseLeftButtonUp -= m;
-					};
+					//RoutedEventHandler unload = (s, args) => {
+					//	title.MouseEnter -= hover;
+					//	title.MouseLeave -= leave;
+					//	title.MouseLeftButtonUp -= m;
+					//	args.Handled = true;
+					//};
 					title.MouseEnter += hover;
 					title.MouseLeave += leave;
 					title.MouseLeftButtonUp += m;
-					title.Unloaded += unload;
+					//title.Unloaded += unload;
 					return;
 				}
 			}
@@ -81,20 +85,23 @@ namespace Codist.Views
 		/// Limits the displaying size of the quick info items by moving them into a <see cref="ScrollViewer"/>.
 		/// </summary>
 		public static void LimitQuickInfoSize(IList<object> qiContent) {
-			//qiContent.Add(new QuickInfoContainer());
 			if (Config.Instance.QuickInfoMaxHeight <= 0 && Config.Instance.QuickInfoMaxWidth <= 0 || qiContent.Count == 0) {
 				return;
 			}
 			for (int i = 0; i < qiContent.Count; i++) {
 				var item = qiContent[i];
-				var t = item as FrameworkElement;
-				if (t != null) {
-					t.LimitSize();
+				var e = item as FrameworkElement;
+				if (e != null) {
+					e.LimitSize();
+					var t = e as TextBlock;
+					if (t != null && t.TextWrapping == TextWrapping.NoWrap) {
+						t.TextWrapping = TextWrapping.Wrap;
+					}
 					continue;
 				}
 				var s = item as string;
 				if (s != null) {
-					qiContent[i] = new TextBlock { Text = s }.LimitSize();
+					qiContent[i] = new TextBlock { Text = s, TextWrapping = TextWrapping.Wrap }.LimitSize();
 					continue;
 				}
 			}
@@ -117,37 +124,5 @@ namespace Codist.Views
 			//qiContent.Add(scrollViewer);
 		}
 
-		//static T FindAncestorOrSelf<T>(DependencyObject obj) where T : DependencyObject {
-		//	while (obj != null) {
-		//		T t = obj as T;
-		//		if (t != null) {
-		//			return t;
-		//		}
-		//		obj = VisualTreeHelper.GetParent(obj);
-		//	}
-		//	return null;
-		//}
-
-		//sealed class QuickInfoContainer : StackPanel
-		//{
-		//	protected override void OnVisualParentChanged(DependencyObject oldParent) {
-		//		base.OnVisualParentChanged(oldParent);
-
-		//		var p = VisualParent;
-		//		ItemsControl items = FindAncestorOrSelf<ItemsControl>(VisualParent);
-		//		if (items != null) {
-		//			var cc = items.Parent as ContentControl;
-		//			if (cc != null) {
-		//				var popup = cc.Parent as System.Windows.Controls.Primitives.Popup;
-		//				if (popup != null) {
-		//					var scrollViewer = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto }.LimitSize();
-		//					scrollViewer.Content = cc;
-		//					popup.Child = scrollViewer;
-		//				}
-		//			}
-		//		}
-		//	}
-
-		//}
 	}
 }
