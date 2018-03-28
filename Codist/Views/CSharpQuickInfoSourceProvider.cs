@@ -136,8 +136,57 @@ namespace Codist.Views
 				}
 			}
 
+			void _ConfigUpdated(object sender, EventArgs e) {
+				if (_FormatMap != null) {
+					UpdateSyntaxHighlights(_FormatMap);
+				}
+			}
+
 			static bool CanAccess(ISymbol symbol) {
 				return symbol.DeclaredAccessibility == Accessibility.Public || symbol.DeclaredAccessibility == Accessibility.NotApplicable || symbol.Locations.Any(l => l.IsInSource);
+			}
+
+			static ISymbol GetSymbol(SyntaxNode node, SemanticModel semanticModel) {
+				return semanticModel.GetSymbolInfo(node).Symbol
+						?? semanticModel.GetDeclaredSymbol(node)
+						?? (node is AttributeArgumentSyntax
+							? semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol
+							: null)
+						?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax
+							? semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true)).Symbol
+							: null)
+						?? (node.Parent is MemberAccessExpressionSyntax
+							? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
+							: null)
+						?? (node.Parent is ArgumentSyntax
+							? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
+							: null);
+			}
+
+			static bool IsCommonClassName(string name) {
+				return name == "Object" || name == "ValueType" || name == "Enum" || name == "MulticastDelegate";
+			}
+
+			static void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {
+				System.Diagnostics.Trace.Assert(formatMap != null, "format map is null");
+				_InterfaceBrush = formatMap.GetBrush(Constants.CodeInterfaceName);
+				_ClassBrush = formatMap.GetBrush(Constants.CodeClassName);
+				_TextBrush = formatMap.GetBrush(Constants.CodeString);
+				_EnumBrush = formatMap.GetBrush(Constants.CodeEnumName);
+				_DelegateBrush = formatMap.GetBrush(Constants.CodeDelegateName);
+				_NumberBrush = formatMap.GetBrush(Constants.CodeNumber);
+				_StructBrush = formatMap.GetBrush(Constants.CodeStructName);
+				_KeywordBrush = formatMap.GetBrush(Constants.CodeKeyword);
+				_NamespaceBrush = formatMap.GetBrush(Constants.CSharpNamespaceName);
+				_MethodBrush = formatMap.GetBrush(Constants.CSharpMethodName);
+				_ParameterBrush = formatMap.GetBrush(Constants.CSharpParameterName);
+				_TypeParameterBrush = formatMap.GetBrush(Constants.CSharpTypeParameterName);
+				_PropertyBrush = formatMap.GetBrush(Constants.CSharpPropertyName);
+				_FieldBrush = formatMap.GetBrush(Constants.CSharpFieldName);
+			}
+
+			void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {
+				_SemanticModel = null;
 			}
 
 			void ShowSymbolInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
@@ -387,32 +436,6 @@ namespace Codist.Views
 					qiContent.Add(info);
 				}
 			}
-
-			static Brush GetFormatBrush(IEditorFormatMap formatMap, string name) {
-				return formatMap.GetProperties(name)?[EditorFormatDefinition.ForegroundBrushId] as Brush;
-			}
-
-			static ISymbol GetSymbol(SyntaxNode node, SemanticModel semanticModel) {
-				return semanticModel.GetSymbolInfo(node).Symbol
-						?? semanticModel.GetDeclaredSymbol(node)
-						?? (node is AttributeArgumentSyntax
-							? semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol
-							: null)
-						?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax
-							? semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true)).Symbol
-							: null)
-						?? (node.Parent is MemberAccessExpressionSyntax
-							? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
-							: null)
-						?? (node.Parent is ArgumentSyntax
-							? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
-							: null);
-			}
-
-			static bool IsCommonClassName(string name) {
-				return name == "Object" || name == "ValueType" || name == "Enum" || name == "MulticastDelegate";
-			}
-
 			void ShowExtensionMethod(IList<object> qiContent, IMethodSymbol method, int position) {
 				var info = new StackPanel();
 				var extType = method.ConstructedFrom.ReceiverType;
@@ -538,132 +561,6 @@ namespace Codist.Views
 					//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.Default.GetByteCount(sv).ToString()).AddText("System bytes", true))
 					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).AddText("Hash code", true));
 			}
-
-			static string ToBinString(byte[] bytes) {
-				using (var sbr = ReusableStringBuilder.AcquireDefault((bytes.Length << 3) + bytes.Length)) {
-					var sb = sbr.Resource;
-					for (int i = 0; i < bytes.Length; i++) {
-						ref var b = ref bytes[i];
-						if (b == 0 && sb.Length == 0) {
-							continue;
-						}
-						if (sb.Length > 0) {
-							sb.Append(' ');
-						}
-						sb.Append(Convert.ToString(b, 2).PadLeft(8, '0'));
-					}
-					return sb.Length == 0 ? "00000000" : sb.ToString();
-				}
-			}
-
-			static string ToHexString(byte[] bytes) {
-				switch (bytes.Length) {
-					case 1: return bytes[0].ToString("X2");
-					case 2: return bytes[0].ToString("X2") + bytes[1].ToString("X2");
-					case 4:
-						return bytes[0].ToString("X2") + bytes[1].ToString("X2") + " " + bytes[2].ToString("X2") + bytes[3].ToString("X2");
-					case 8:
-						return bytes[0].ToString("X2") + bytes[1].ToString("X2") + " " + bytes[2].ToString("X2") + bytes[3].ToString("X2") + " "
-							+ bytes[4].ToString("X2") + bytes[5].ToString("X2") + " " + bytes[6].ToString("X2") + bytes[7].ToString("X2");
-					default:
-						return string.Empty;
-				}
-			}
-
-			static StackPanel ToUIText(string dec, byte[] bytes) {
-				var s = new StackPanel()
-					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(dec).AddText(" DEC", true))
-					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToHexString(bytes)).AddText(" HEX", true))
-					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToBinString(bytes)).AddText(" BIN", true));
-				return s;
-			}
-
-			static TextBlock ToUIText(ImmutableArray<SymbolDisplayPart> parts) {
-				return ToUIText(new TextBlock(), parts, null, Int32.MinValue);
-			}
-			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts) {
-				return ToUIText(block, parts, null, Int32.MinValue);
-			}
-
-			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, string argName, int argIndex) {
-				foreach (var part in parts) {
-					switch (part.Kind) {
-						case SymbolDisplayPartKind.ClassName:
-							if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
-								block.AddText("?", _ClassBrush);
-							}
-							else {
-								block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _ClassBrush);
-							}
-							break;
-						case SymbolDisplayPartKind.EnumName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _EnumBrush);
-							break;
-						case SymbolDisplayPartKind.InterfaceName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _InterfaceBrush);
-							break;
-						case SymbolDisplayPartKind.MethodName:
-							block.AddSymbol(part.Symbol, argIndex != Int32.MinValue, _MethodBrush);
-							break;
-						case SymbolDisplayPartKind.ParameterName:
-							var p = part.Symbol as IParameterSymbol;
-							if (p.Ordinal == argIndex || p.IsParams && argIndex > p.Ordinal || p.Name == argName) {
-								block.AddText(p.Name, true, true, _ParameterBrush);
-							}
-							else {
-								block.AddText(p.Name, false, false, _ParameterBrush);
-							}
-							break;
-						case SymbolDisplayPartKind.StructName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _StructBrush);
-							break;
-						case SymbolDisplayPartKind.DelegateName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _DelegateBrush);
-							break;
-						case SymbolDisplayPartKind.StringLiteral:
-							block.AddText(part.ToString(), false, false, _TextBrush);
-							break;
-						case SymbolDisplayPartKind.Keyword:
-							block.AddText(part.ToString(), false, false, _KeywordBrush);
-							break;
-						case SymbolDisplayPartKind.NamespaceName:
-							block.AddText(part.Symbol.Name, _NamespaceBrush);
-							break;
-						case SymbolDisplayPartKind.TypeParameterName:
-							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _TypeParameterBrush);
-							break;
-						default:
-							block.AddText(part.ToString());
-							break;
-					}
-				}
-				return block;
-			}
-
-			static void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {
-				System.Diagnostics.Trace.Assert(formatMap != null, "format map is null");
-				_InterfaceBrush = formatMap.GetBrush(Constants.CodeInterfaceName);
-				_ClassBrush = formatMap.GetBrush(Constants.CodeClassName);
-				_TextBrush = formatMap.GetBrush(Constants.CodeString);
-				_EnumBrush = formatMap.GetBrush(Constants.CodeEnumName);
-				_DelegateBrush = formatMap.GetBrush(Constants.CodeDelegateName);
-				_NumberBrush = formatMap.GetBrush(Constants.CodeNumber);
-				_StructBrush = formatMap.GetBrush(Constants.CodeStructName);
-				_KeywordBrush = formatMap.GetBrush(Constants.CodeKeyword);
-				_NamespaceBrush = formatMap.GetBrush(Constants.CSharpNamespaceName);
-				_MethodBrush = formatMap.GetBrush(Constants.CSharpMethodName);
-				_ParameterBrush = formatMap.GetBrush(Constants.CSharpParameterName);
-				_TypeParameterBrush = formatMap.GetBrush(Constants.CSharpTypeParameterName);
-				_PropertyBrush = formatMap.GetBrush(Constants.CSharpPropertyName);
-				_FieldBrush = formatMap.GetBrush(Constants.CSharpFieldName);
-			}
-
-			void _ConfigUpdated(object sender, EventArgs e) {
-				if (_FormatMap != null) {
-					UpdateSyntaxHighlights(_FormatMap);
-				}
-			}
-
 			void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs, int position) {
 				var info = new StackPanel();
 				info.AddText("Attribute:", true);
@@ -940,9 +837,106 @@ namespace Codist.Views
 					qiContent.Add("Argument " + ++ap);
 				}
 			}
+			static string ToBinString(byte[] bytes) {
+				using (var sbr = ReusableStringBuilder.AcquireDefault((bytes.Length << 3) + bytes.Length)) {
+					var sb = sbr.Resource;
+					for (int i = 0; i < bytes.Length; i++) {
+						ref var b = ref bytes[i];
+						if (b == 0 && sb.Length == 0) {
+							continue;
+						}
+						if (sb.Length > 0) {
+							sb.Append(' ');
+						}
+						sb.Append(Convert.ToString(b, 2).PadLeft(8, '0'));
+					}
+					return sb.Length == 0 ? "00000000" : sb.ToString();
+				}
+			}
 
-			void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {
-				_SemanticModel = null;
+			static string ToHexString(byte[] bytes) {
+				switch (bytes.Length) {
+					case 1: return bytes[0].ToString("X2");
+					case 2: return bytes[0].ToString("X2") + bytes[1].ToString("X2");
+					case 4:
+						return bytes[0].ToString("X2") + bytes[1].ToString("X2") + " " + bytes[2].ToString("X2") + bytes[3].ToString("X2");
+					case 8:
+						return bytes[0].ToString("X2") + bytes[1].ToString("X2") + " " + bytes[2].ToString("X2") + bytes[3].ToString("X2") + " "
+							+ bytes[4].ToString("X2") + bytes[5].ToString("X2") + " " + bytes[6].ToString("X2") + bytes[7].ToString("X2");
+					default:
+						return string.Empty;
+				}
+			}
+
+			static StackPanel ToUIText(string dec, byte[] bytes) {
+				var s = new StackPanel()
+					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(dec).AddText(" DEC", true))
+					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToHexString(bytes)).AddText(" HEX", true))
+					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToBinString(bytes)).AddText(" BIN", true));
+				return s;
+			}
+
+			static TextBlock ToUIText(ImmutableArray<SymbolDisplayPart> parts) {
+				return ToUIText(new TextBlock(), parts, null, Int32.MinValue);
+			}
+
+			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts) {
+				return ToUIText(block, parts, null, Int32.MinValue);
+			}
+
+			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, string argName, int argIndex) {
+				foreach (var part in parts) {
+					switch (part.Kind) {
+						case SymbolDisplayPartKind.ClassName:
+							if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
+								block.AddText("?", _ClassBrush);
+							}
+							else {
+								block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _ClassBrush);
+							}
+							break;
+						case SymbolDisplayPartKind.EnumName:
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _EnumBrush);
+							break;
+						case SymbolDisplayPartKind.InterfaceName:
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _InterfaceBrush);
+							break;
+						case SymbolDisplayPartKind.MethodName:
+							block.AddSymbol(part.Symbol, argIndex != Int32.MinValue, _MethodBrush);
+							break;
+						case SymbolDisplayPartKind.ParameterName:
+							var p = part.Symbol as IParameterSymbol;
+							if (p.Ordinal == argIndex || p.IsParams && argIndex > p.Ordinal || p.Name == argName) {
+								block.AddText(p.Name, true, true, _ParameterBrush);
+							}
+							else {
+								block.AddText(p.Name, false, false, _ParameterBrush);
+							}
+							break;
+						case SymbolDisplayPartKind.StructName:
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _StructBrush);
+							break;
+						case SymbolDisplayPartKind.DelegateName:
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _DelegateBrush);
+							break;
+						case SymbolDisplayPartKind.StringLiteral:
+							block.AddText(part.ToString(), false, false, _TextBrush);
+							break;
+						case SymbolDisplayPartKind.Keyword:
+							block.AddText(part.ToString(), false, false, _KeywordBrush);
+							break;
+						case SymbolDisplayPartKind.NamespaceName:
+							block.AddText(part.Symbol.Name, _NamespaceBrush);
+							break;
+						case SymbolDisplayPartKind.TypeParameterName:
+							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _TypeParameterBrush);
+							break;
+						default:
+							block.AddText(part.ToString());
+							break;
+					}
+				}
+				return block;
 			}
 			void ToUIText(TextBlock block, TypedConstant v, int position) {
 				switch (v.Kind) {
