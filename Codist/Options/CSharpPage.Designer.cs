@@ -38,7 +38,7 @@
 			this._CSharpNumberQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpInterfaceInheritenceQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpBaseTypeInheritenceQuickInfoBox = new System.Windows.Forms.CheckBox();
-			this._CSharpExtensionMethodQuickInfoBox = new System.Windows.Forms.CheckBox();
+			this._CSharpSymbolLocationQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpInterfaceImplementationsQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpInterfacesQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpBaseTypeQuickInfoBox = new System.Windows.Forms.CheckBox();
@@ -126,7 +126,7 @@
 			this.groupBox3.Controls.Add(this._CSharpNumberQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpInterfaceInheritenceQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpBaseTypeInheritenceQuickInfoBox);
-			this.groupBox3.Controls.Add(this._CSharpExtensionMethodQuickInfoBox);
+			this.groupBox3.Controls.Add(this._CSharpSymbolLocationQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpInterfaceImplementationsQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpInterfacesQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpBaseTypeQuickInfoBox);
@@ -193,9 +193,9 @@
 			this._CSharpInterfaceInheritenceQuickInfoBox.AutoSize = true;
 			this._CSharpInterfaceInheritenceQuickInfoBox.Location = new System.Drawing.Point(34, 124);
 			this._CSharpInterfaceInheritenceQuickInfoBox.Name = "_CSharpInterfaceInheritenceQuickInfoBox";
-			this._CSharpInterfaceInheritenceQuickInfoBox.Size = new System.Drawing.Size(141, 19);
+			this._CSharpInterfaceInheritenceQuickInfoBox.Size = new System.Drawing.Size(189, 19);
 			this._CSharpInterfaceInheritenceQuickInfoBox.TabIndex = 4;
-			this._CSharpInterfaceInheritenceQuickInfoBox.Text = "Show ancestors";
+			this._CSharpInterfaceInheritenceQuickInfoBox.Text = "Inherited interfaces";
 			this._CSharpInterfaceInheritenceQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpBaseTypeInheritenceQuickInfoBox
@@ -203,20 +203,20 @@
 			this._CSharpBaseTypeInheritenceQuickInfoBox.AutoSize = true;
 			this._CSharpBaseTypeInheritenceQuickInfoBox.Location = new System.Drawing.Point(34, 74);
 			this._CSharpBaseTypeInheritenceQuickInfoBox.Name = "_CSharpBaseTypeInheritenceQuickInfoBox";
-			this._CSharpBaseTypeInheritenceQuickInfoBox.Size = new System.Drawing.Size(141, 19);
+			this._CSharpBaseTypeInheritenceQuickInfoBox.Size = new System.Drawing.Size(173, 19);
 			this._CSharpBaseTypeInheritenceQuickInfoBox.TabIndex = 2;
-			this._CSharpBaseTypeInheritenceQuickInfoBox.Text = "Show ancestors";
+			this._CSharpBaseTypeInheritenceQuickInfoBox.Text = "All ancestor types";
 			this._CSharpBaseTypeInheritenceQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
-			// _CSharpExtensionMethodQuickInfoBox
+			// _CSharpSymbolLocationQuickInfoBox
 			// 
-			this._CSharpExtensionMethodQuickInfoBox.AutoSize = true;
-			this._CSharpExtensionMethodQuickInfoBox.Location = new System.Drawing.Point(249, 24);
-			this._CSharpExtensionMethodQuickInfoBox.Name = "_CSharpExtensionMethodQuickInfoBox";
-			this._CSharpExtensionMethodQuickInfoBox.Size = new System.Drawing.Size(229, 19);
-			this._CSharpExtensionMethodQuickInfoBox.TabIndex = 6;
-			this._CSharpExtensionMethodQuickInfoBox.Text = "Extension method location";
-			this._CSharpExtensionMethodQuickInfoBox.UseVisualStyleBackColor = true;
+			this._CSharpSymbolLocationQuickInfoBox.AutoSize = true;
+			this._CSharpSymbolLocationQuickInfoBox.Location = new System.Drawing.Point(249, 24);
+			this._CSharpSymbolLocationQuickInfoBox.Name = "_CSharpSymbolLocationQuickInfoBox";
+			this._CSharpSymbolLocationQuickInfoBox.Size = new System.Drawing.Size(149, 19);
+			this._CSharpSymbolLocationQuickInfoBox.TabIndex = 6;
+			this._CSharpSymbolLocationQuickInfoBox.Text = "Symbol location";
+			this._CSharpSymbolLocationQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpInterfaceImplementationsQuickInfoBox
 			// 
@@ -291,7 +291,7 @@
 			this.groupBox4.Size = new System.Drawing.Size(506, 59);
 			this.groupBox4.TabIndex = 0;
 			this.groupBox4.TabStop = false;
-			this.groupBox4.Text = "Quick info window size (0: unlimited)";
+			this.groupBox4.Text = "Quick info item size (0: unlimited)";
 			// 
 			// _QuickInfoMaxHeightBox
 			// 
@@ -442,7 +442,7 @@
 		private System.Windows.Forms.CheckBox _CSharpBaseTypeQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpAttributesQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpInterfacesQuickInfoBox;
-		private System.Windows.Forms.CheckBox _CSharpExtensionMethodQuickInfoBox;
+		private System.Windows.Forms.CheckBox _CSharpSymbolLocationQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpInterfaceInheritenceQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpBaseTypeInheritenceQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpNumberQuickInfoBox;
