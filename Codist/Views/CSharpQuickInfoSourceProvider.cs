@@ -115,7 +115,7 @@ namespace Codist.Views
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo) /*&& node is MemberDeclarationSyntax == false && node.Kind() != SyntaxKind.VariableDeclarator && node.Kind() != SyntaxKind.Parameter*/) {
 					QuickInfoOverrider.ApplyClickAndGoFeature(qiContent, symbol);
 				}
-				QuickInfoOverrider.LimitQuickInfoSize(qiContent);
+				QuickInfoOverrider.LimitQuickInfoItemSize(qiContent);
 				applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == subjectTriggerPoint.Snapshot
 					? currentSnapshot.CreateTrackingSpan(extent.Start, extent.Length, SpanTrackingMode.EdgeInclusive)
 					: null;
@@ -328,7 +328,7 @@ namespace Codist.Views
 			void ShowMethodTypeArguments(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
 				var info = new StackPanel();
 				var l = method.TypeArguments.Length;
-				info.AddText(l > 1 ? "Type arguments:" : "Type argument:", true);
+				info.AddText("Type argument:", true);
 				for (int i = 0; i < l; i++) {
 					var argInfo = new TextBlock();
 					ShowTypeParameterInfo(method.TypeParameters[i], method.TypeArguments[i], argInfo, node.SpanStart);
@@ -930,6 +930,9 @@ namespace Codist.Views
 							break;
 						case SymbolDisplayPartKind.TypeParameterName:
 							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _TypeParameterBrush);
+							break;
+						case SymbolDisplayPartKind.FieldName:
+							block.AddText(part.Symbol.Name, _FieldBrush);
 							break;
 						default:
 							block.AddText(part.ToString());

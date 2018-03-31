@@ -82,21 +82,22 @@ namespace Codist.Views
 		}
 
 		/// <summary>
-		/// Limits the displaying size of the quick info items by moving them into a <see cref="ScrollViewer"/>.
+		/// Limits the displaying size of the quick info items.
 		/// </summary>
-		public static void LimitQuickInfoSize(IList<object> qiContent) {
+		public static void LimitQuickInfoItemSize(IList<object> qiContent) {
 			if (Config.Instance.QuickInfoMaxHeight <= 0 && Config.Instance.QuickInfoMaxWidth <= 0 || qiContent.Count == 0) {
 				return;
 			}
 			for (int i = 0; i < qiContent.Count; i++) {
 				var item = qiContent[i];
-				var e = item as FrameworkElement;
-				if (e != null) {
-					e.LimitSize();
-					var t = e as TextBlock;
-					if (t != null && t.TextWrapping == TextWrapping.NoWrap) {
-						t.TextWrapping = TextWrapping.Wrap;
+				var p = item as Panel;
+				if (p != null) {
+					foreach (var pi in p.Children) {
+						LimitSize(pi as FrameworkElement);
 					}
+					continue;
+				}
+				if (LimitSize(item as FrameworkElement)) {
 					continue;
 				}
 				var s = item as string;
@@ -124,5 +125,16 @@ namespace Codist.Views
 			//qiContent.Add(scrollViewer);
 		}
 
+		static bool LimitSize(FrameworkElement item) {
+			if (item != null) {
+				item.LimitSize();
+				var t = item as TextBlock;
+				if (t != null && t.TextWrapping == TextWrapping.NoWrap) {
+					t.TextWrapping = TextWrapping.Wrap;
+				}
+				return true;
+			}
+			return false;
+		}
 	}
 }

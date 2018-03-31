@@ -17,9 +17,9 @@ namespace Codist.Views
 		static Dictionary<string, StyleBase> __Styles;
 
 		readonly IWpfTextView _TextView;
-		readonly IClassificationFormatMap _Map;
+		readonly IClassificationFormatMap _ClassificationFormatMap;
 		readonly IClassificationTypeRegistryService _RegService;
-		readonly IEditorFormatMap _FormatMap;
+		readonly IEditorFormatMap _EditorFormatMap;
 
 		Color _BackColor, _ForeColor;
 		volatile int _IsDecorating;
@@ -32,9 +32,9 @@ namespace Codist.Views
 			//view.GotAggregateFocus += TextView_GotAggregateFocus;
 			Config.Updated += SettingsSaved;
 
-			_Map = map;
+			_ClassificationFormatMap = map;
 			_RegService = service;
-			_FormatMap = formatMap;
+			_EditorFormatMap = formatMap;
 			_TextView = view;
 
 			if (__Styles == null) {
@@ -52,7 +52,7 @@ namespace Codist.Views
 
 		void View_Closed(object sender, EventArgs e) {
 			Config.Updated -= SettingsSaved;
-			_Map.ClassificationFormatMappingChanged -= SettingsSaved;
+			_ClassificationFormatMap.ClassificationFormatMappingChanged -= SettingsSaved;
 			//_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
 			_TextView.Closed -= View_Closed;
 		}
@@ -111,11 +111,11 @@ namespace Codist.Views
 				return;
 			}
 			try {
-				var c = _FormatMap.GetProperties(Constants.EditorProperties.Text)?[EditorFormatDefinition.ForegroundColorId];
+				var c = _EditorFormatMap.GetProperties(Constants.EditorProperties.Text)?[EditorFormatDefinition.ForegroundColorId];
 				if (c is Color) {
 					_ForeColor = (Color)c;
 				}
-				c = _FormatMap.GetProperties(Constants.EditorProperties.TextViewBackground)?[EditorFormatDefinition.BackgroundColorId];
+				c = _EditorFormatMap.GetProperties(Constants.EditorProperties.TextViewBackground)?[EditorFormatDefinition.BackgroundColorId];
 				if (c is Color) {
 					_BackColor = (Color)c;
 					_BackColor = Color.FromArgb(0x00, _BackColor.R, _BackColor.G, _BackColor.B);
@@ -132,12 +132,12 @@ namespace Codist.Views
 		}
 
 		void DecorateClassificationTypes() {
-			if (_Map.IsInBatchUpdate) {
+			if (_ClassificationFormatMap.IsInBatchUpdate) {
 				return;
 			}
-			_Map.BeginBatchUpdate();
-			var textProperty = _Map.GetTextProperties(_RegService.GetClassificationType("text"));
-			foreach (var item in _Map.CurrentPriorityOrder) {
+			_ClassificationFormatMap.BeginBatchUpdate();
+			var textProperty = _ClassificationFormatMap.GetTextProperties(_RegService.GetClassificationType("text"));
+			foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
 				if (item == null) {
 					continue;
 				}
@@ -154,16 +154,16 @@ namespace Codist.Views
 				if (__Styles.TryGetValue(item.Classification, out style)) {
 					TextFormattingRunProperties initialProperty;
 					if (__InitialProperties.TryGetValue(item.Classification, out initialProperty) == false) {
-						var p = _Map.GetExplicitTextProperties(item);
+						var p = _ClassificationFormatMap.GetExplicitTextProperties(item);
 						if (p == null) {
 							continue;
 						}
 						__InitialProperties[item.Classification] = initialProperty = p;
 					}
-					_Map.SetTextProperties(item, SetProperties(initialProperty, style, textProperty.FontRenderingEmSize));
+					_ClassificationFormatMap.SetTextProperties(item, SetProperties(initialProperty, style, textProperty.FontRenderingEmSize));
 				}
 			}
-			_Map.EndBatchUpdate();
+			_ClassificationFormatMap.EndBatchUpdate();
 		}
 
 		TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption, double textSize) {
