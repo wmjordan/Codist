@@ -764,7 +764,12 @@ namespace Codist.Views
 				}
 				else if (symbol.IsOverride) {
 					info.AddText(symbol.IsSealed ? "sealed override " : "override ", _KeywordBrush);
-					var t = ((symbol as IMethodSymbol) ?? (symbol as IPropertySymbol) ?? (ISymbol)(symbol as IEventSymbol))?.ContainingType;
+					INamedTypeSymbol t = null;
+					switch (symbol.Kind) {
+						case SymbolKind.Method: t = ((IMethodSymbol)symbol).OverriddenMethod.ContainingType; break;
+						case SymbolKind.Property: t = ((IPropertySymbol)symbol).OverriddenProperty.ContainingType; break;
+						case SymbolKind.Event: t = ((IEventSymbol)symbol).OverriddenEvent.ContainingType; break;
+					}
 					if (t != null) {
 						ToUIText(info, t.ToMinimalDisplayParts(_SemanticModel, position));
 					}

@@ -81,7 +81,7 @@ namespace Codist.Classifiers
 	sealed class ToDoCommentFormat : ClassificationFormatDefinition
 	{
 		public ToDoCommentFormat() {
-			DisplayName = Constants.TodoComment + " (//ToDo)";
+			DisplayName = Constants.TodoComment;
 			BackgroundColor = Constants.ToDoColor;
 			ForegroundColor = Colors.White;
 		}
@@ -95,7 +95,7 @@ namespace Codist.Classifiers
 	sealed class NoteCommentFormat : ClassificationFormatDefinition
 	{
 		public NoteCommentFormat() {
-			DisplayName = Constants.NoteComment + " (//Note)";
+			DisplayName = Constants.NoteComment;
 			BackgroundColor = Constants.NoteColor;
 			ForegroundColor = Colors.Black;
 		}
@@ -109,9 +109,23 @@ namespace Codist.Classifiers
 	sealed class HackCommentFormat : ClassificationFormatDefinition
 	{
 		public HackCommentFormat() {
-			DisplayName = Constants.HackComment + " (//Hack)";
+			DisplayName = Constants.HackComment;
 			BackgroundColor = Constants.HackColor;
 			ForegroundColor = Colors.LightGreen;
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.UndoneComment)]
+	[Name(Constants.UndoneComment)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	sealed class UndoneCommentFormat : ClassificationFormatDefinition
+	{
+		public UndoneCommentFormat() {
+			DisplayName = Constants.UndoneComment;
+			BackgroundColor = Constants.UndoneColor;
+			ForegroundColor = Color.FromRgb(164, 175, 209);
 		}
 	}
 

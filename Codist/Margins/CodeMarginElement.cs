@@ -30,6 +30,7 @@ namespace Codist.Margins
 		static readonly Brush ToDoBrush = new SolidColorBrush(Constants.ToDoColor);
 		static readonly Brush NoteBrush = new SolidColorBrush(Constants.NoteColor);
 		static readonly Brush HackBrush = new SolidColorBrush(Constants.HackColor);
+		static readonly Brush UndoneBrush = new SolidColorBrush(Constants.UndoneColor);
 		static readonly Brush TaskBrush = new SolidColorBrush(Constants.TaskColor);
 		static readonly Brush PreProcessorBrush = Brushes.Gray;
 		//note: this dictionary determines which style has a scrollbar marker
@@ -38,6 +39,7 @@ namespace Codist.Margins
 			{ Constants.TodoComment, ToDoBrush },
 			{ Constants.NoteComment, NoteBrush },
 			{ Constants.HackComment, HackBrush },
+			{ Constants.UndoneComment, UndoneBrush },
 			{ Constants.Task1Comment, TaskBrush },
 			{ Constants.Task2Comment, TaskBrush },
 			{ Constants.Task3Comment, TaskBrush },

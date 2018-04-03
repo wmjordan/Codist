@@ -165,6 +165,8 @@ namespace Codist
 		public const String NoteComment = "Comment: Task - Note";
 		//Hack: B-) We are in the Matrix now!!!
 		public const String HackComment = "Comment: Task - Hack";
+		//Undone: The revolution has not yet succeeded. Comrades still need to strive hard.
+		public const String UndoneComment = "Comment: Task - Undone";
 
 		//+++ heading 1
 		public const string Heading1Comment = "Comment: Heading 1";
@@ -196,6 +198,7 @@ namespace Codist
 		public static readonly Color ToDoColor = Colors.DarkBlue;
 		public static readonly Color NoteColor = Colors.Orange;
 		public static readonly Color HackColor = Colors.Black;
+		public static readonly Color UndoneColor = Color.FromRgb(113, 65, 54);
 		public static readonly Color TaskColor = Colors.Red;
 		public static readonly Color ControlFlowColor = Colors.MediumBlue;
 	}
@@ -218,6 +221,8 @@ namespace Codist
 		Note,
 		[ClassificationType(ClassificationTypeNames = Constants.HackComment)]
 		Hack,
+		[ClassificationType(ClassificationTypeNames = Constants.UndoneComment)]
+		Undone,
 		[ClassificationType(ClassificationTypeNames = Constants.Heading1Comment)]
 		Heading1,
 		[ClassificationType(ClassificationTypeNames = Constants.Heading2Comment)]

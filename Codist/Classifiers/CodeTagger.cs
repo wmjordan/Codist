@@ -236,9 +236,10 @@ namespace Codist.Classifiers
 						continue;
 					}
 
-					ctag = __CommentClassifications[(int)item.StyleID];
-					label = item;
-					break;
+					if (label == null || label.LabelLength < item.LabelLength) {
+						ctag = __CommentClassifications[(int)item.StyleID];
+						label = item;
+					}
 				}
 
 				if (startOfContent == 0 || ctag == null) {

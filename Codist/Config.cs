@@ -263,6 +263,7 @@ namespace Codist
 				new CommentStyle(CommentStyleTypes.ToDo, Colors.White) { BackgroundColor = Constants.ToDoColor.ToHexString(), ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
 				new CommentStyle(CommentStyleTypes.Note, Colors.White) { BackgroundColor = Constants.NoteColor.ToHexString(), ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
 				new CommentStyle(CommentStyleTypes.Hack, Colors.White) { BackgroundColor = Constants.HackColor.ToHexString(), ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new CommentStyle(CommentStyleTypes.Undone, Color.FromRgb(164, 175, 209)) { BackgroundColor = Constants.UndoneColor.ToHexString(), ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
 				new CommentStyle(CommentStyleTypes.Heading1) { FontSize = 12 },
 				new CommentStyle(CommentStyleTypes.Heading2) { FontSize = 8 },
 				new CommentStyle(CommentStyleTypes.Heading3) { FontSize = 4 },
@@ -482,7 +483,14 @@ namespace Codist
 		public bool AllowPunctuationDelimiter { get; set; }
 
 		/// <summary>Gets or sets the label to identifier the comment type.</summary>
-		public string Label { get { return _label; } set { _label = value; _labelLength = (value ?? String.Empty).Length; } }
+		public string Label {
+			get { return _label; }
+			set {
+				value = value != null ? value.Trim() : String.Empty;
+				_label = value;
+				_labelLength = value.Length;
+			}
+		}
 		internal int LabelLength => _labelLength;
 		/// <summary>Gets or sets whether the label is case-sensitive.</summary>
 		public bool IgnoreCase {

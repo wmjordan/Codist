@@ -46,6 +46,11 @@ namespace Codist.Classifiers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeComment)]
+		[Name(Constants.UndoneComment)]
+		static ClassificationTypeDefinition UndoneComment;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeComment)]
 		[Name(Constants.Heading1Comment)]
 		static ClassificationTypeDefinition Heading1Comment;
 
