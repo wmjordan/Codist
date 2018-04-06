@@ -17,6 +17,7 @@ namespace Codist.Classifiers
 	sealed class CSharpClassifier : IClassifier
 	{
 		static CSharpClassifications _Classifications;
+		static GeneralClassifications _GeneralClassifications;
 
 		readonly ITextBuffer _TextBuffer;
 		readonly IClassificationTypeRegistryService _TypeRegistryService;
@@ -33,6 +34,9 @@ namespace Codist.Classifiers
 			ITextBuffer buffer) {
 			if (_Classifications == null) {
 				_Classifications = new CSharpClassifications(registry);
+			}
+			if (_GeneralClassifications == null) {
+				_GeneralClassifications = new GeneralClassifications(registry);
 			}
 			_TextDocumentFactoryService = textDocumentFactoryService;
 			_TextBuffer = buffer;
@@ -106,46 +110,8 @@ namespace Codist.Classifiers
 						ct = HighlightXmlDocCData(span, item, workspace, result, ct);
 						return false;
 					}
-					if (ct == "punctuation" && item.TextSpan.Length == 1) {
-						var s = snapshot.GetText(item.TextSpan.Start, item.TextSpan.Length)[0];
-						if (s == '{' || s == '}') {
-							var node = unitCompilation.FindNode(item.TextSpan, true, true);
-							if (node is BaseTypeDeclarationSyntax == false
-								&& node is ExpressionSyntax == false
-								&& (node = node.Parent) == null) {
-								return false;
-							}
-							IClassificationType type = null;
-							switch (node.Kind()) {
-								case SyntaxKind.MethodDeclaration:
-								case SyntaxKind.AnonymousMethodExpression:
-								case SyntaxKind.SimpleLambdaExpression:
-								case SyntaxKind.ParenthesizedLambdaExpression:
-									type = _Classifications.Method;
-									break;
-								case SyntaxKind.ConstructorDeclaration:
-								case SyntaxKind.AnonymousObjectCreationExpression:
-								case SyntaxKind.ObjectInitializerExpression:
-								case SyntaxKind.CollectionInitializerExpression:
-								case SyntaxKind.ArrayInitializerExpression:
-									type = _Classifications.ConstructorMethod;
-									break;
-								case SyntaxKind.PropertyDeclaration: type = _Classifications.Property; break;
-								case SyntaxKind.ClassDeclaration: type = _Classifications.ClassName; break;
-								case SyntaxKind.InterfaceDeclaration: type = _Classifications.InterfaceName; break;
-								case SyntaxKind.EnumDeclaration: type = _Classifications.EnumName; break;
-								case SyntaxKind.StructDeclaration: type = _Classifications.StructName; break;
-								//case SyntaxKind.InterpolatedStringExpression: type = _Classifications.ConstField; break;
-							}
-							if (type != null) {
-								if (node is ExpressionSyntax == false) {
-									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.DeclarationBrace));
-								}
-								if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace)) {
-									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
-								}
-							}
-						}
+					if (ct == Constants.CodePunctuation && item.TextSpan.Length == 1) {
+						HighlightPunctuation(item, snapshot, result, semanticModel, unitCompilation);
 						return false;
 					}
 
@@ -170,7 +136,97 @@ namespace Codist.Classifiers
 			return result;
 		}
 
-		private string HighlightXmlDocCData(SnapshotSpan span, ClassifiedSpan item, Workspace workspace, List<ClassificationSpan> result, string ct) {
+		static void HighlightPunctuation(ClassifiedSpan item, ITextSnapshot snapshot, List<ClassificationSpan> result, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
+			var s = snapshot.GetText(item.TextSpan.Start, item.TextSpan.Length)[0];
+			if (s == '{' || s == '}') {
+				var node = unitCompilation.FindNode(item.TextSpan, true, true);
+				if (node is BaseTypeDeclarationSyntax == false
+					&& node is ExpressionSyntax == false
+					&& (node = node.Parent) == null) {
+					return;
+				}
+				var type = ClassifySyntaxNode(node);
+				if (type != null) {
+					if (node is ExpressionSyntax == false) {
+						result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.DeclarationBrace));
+					}
+					if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace)) {
+						result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
+					}
+				}
+			}
+			else if ((s == '(' || s == ')')
+					&& Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ParameterBrace)) {
+				var node = unitCompilation.FindNode(item.TextSpan, true, true);
+				if (node.Kind() == SyntaxKind.CastExpression) {
+					var symbol = semanticModel.GetSymbolInfo((node as CastExpressionSyntax).Type).Symbol;
+					if (symbol == null) {
+						return;
+					}
+					IClassificationType type = null;
+					switch (symbol.Kind) {
+						case SymbolKind.NamedType:
+							switch((symbol as INamedTypeSymbol).TypeKind) {
+								case TypeKind.Class: type = _Classifications.ClassName; break;
+								case TypeKind.Interface: type = _Classifications.InterfaceName; break;
+								case TypeKind.Struct: type = _Classifications.StructName; break;
+								case TypeKind.Delegate: type = _Classifications.DelegateName; break;
+								case TypeKind.Enum: type = _Classifications.EnumName; break;
+							}
+							break;
+						case SymbolKind.TypeParameter:
+							type = _Classifications.TypeParameter; break;
+					}
+					if (type != null) {
+						result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
+					}
+				}
+				node = (node as BaseArgumentListSyntax
+					?? node as BaseParameterListSyntax
+					?? (CSharpSyntaxNode)(node as CastExpressionSyntax)
+					)?.Parent;
+				if (node != null) {
+					var type = ClassifySyntaxNode(node);
+					if (type != null) {
+						result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
+					}
+				}
+			}
+			return;
+		}
+
+		static IClassificationType ClassifySyntaxNode(SyntaxNode node) {
+			IClassificationType type = null;
+			switch (node.Kind()) {
+				case SyntaxKind.MethodDeclaration:
+				case SyntaxKind.AnonymousMethodExpression:
+				case SyntaxKind.SimpleLambdaExpression:
+				case SyntaxKind.ParenthesizedLambdaExpression:
+				case SyntaxKind.InvocationExpression:
+					type = _Classifications.Method;
+					break;
+				case SyntaxKind.ConstructorDeclaration:
+				case SyntaxKind.AnonymousObjectCreationExpression:
+				case SyntaxKind.ObjectInitializerExpression:
+				case SyntaxKind.ObjectCreationExpression:
+				case SyntaxKind.CollectionInitializerExpression:
+				case SyntaxKind.ArrayInitializerExpression:
+				case SyntaxKind.ThisConstructorInitializer:
+					type = _Classifications.ConstructorMethod;
+					break;
+				case SyntaxKind.PropertyDeclaration: type = _Classifications.Property; break;
+				case SyntaxKind.ClassDeclaration: type = _Classifications.ClassName; break;
+				case SyntaxKind.InterfaceDeclaration: type = _Classifications.InterfaceName; break;
+				case SyntaxKind.EnumDeclaration: type = _Classifications.EnumName; break;
+				case SyntaxKind.StructDeclaration: type = _Classifications.StructName; break;
+				case SyntaxKind.Attribute: type = _Classifications.AttributeNotation; break;
+					//case SyntaxKind.InterpolatedStringExpression: type = _Classifications.ConstField; break;
+			}
+
+			return type;
+		}
+
+		string HighlightXmlDocCData(SnapshotSpan span, ClassifiedSpan item, Workspace workspace, List<ClassificationSpan> result, string ct) {
 			var snapshot = span.Snapshot;
 			var start = item.TextSpan.Start;
 			SyntaxNode root;

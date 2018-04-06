@@ -3,6 +3,23 @@ using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist.Classifiers
 {
+	sealed class GeneralClassifications
+	{
+		readonly IClassificationType _identifier;
+		readonly IClassificationType _punctuation;
+		readonly IClassificationType _keyword;
+
+		public GeneralClassifications(IClassificationTypeRegistryService registry) {
+			_identifier = registry.GetClassificationType(Constants.CodeIdentifier);
+			_punctuation = registry.GetClassificationType(Constants.CodePunctuation);
+			_keyword = registry.GetClassificationType(Constants.CodeKeyword);
+		}
+
+		public IClassificationType Identifier => _identifier;
+		public IClassificationType Punctuation => _punctuation;
+		public IClassificationType Keyword => _keyword;
+	}
+
 	sealed class CSharpClassifications
 	{
 		readonly IClassificationType _abstractMember;

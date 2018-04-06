@@ -55,6 +55,7 @@
 			this._ClickAndGoBox = new System.Windows.Forms.CheckBox();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this.tabPage3 = new System.Windows.Forms.TabPage();
+			this._HighlightParameterBracesBox = new System.Windows.Forms.CheckBox();
 			this.groupBox3.SuspendLayout();
 			this.groupBox4.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._QuickInfoMaxHeightBox)).BeginInit();
@@ -71,7 +72,7 @@
 			this._DirectivesBox.Location = new System.Drawing.Point(15, 81);
 			this._DirectivesBox.Name = "_DirectivesBox";
 			this._DirectivesBox.Size = new System.Drawing.Size(173, 19);
-			this._DirectivesBox.TabIndex = 2;
+			this._DirectivesBox.TabIndex = 3;
 			this._DirectivesBox.Text = "Compiler directive";
 			this._DirectivesBox.UseVisualStyleBackColor = true;
 			// 
@@ -81,7 +82,7 @@
 			this._SpecialCommentsBox.Location = new System.Drawing.Point(15, 108);
 			this._SpecialCommentsBox.Name = "_SpecialCommentsBox";
 			this._SpecialCommentsBox.Size = new System.Drawing.Size(149, 19);
-			this._SpecialCommentsBox.TabIndex = 3;
+			this._SpecialCommentsBox.TabIndex = 4;
 			this._SpecialCommentsBox.Text = "Special comment";
 			this._SpecialCommentsBox.UseVisualStyleBackColor = true;
 			// 
@@ -91,7 +92,7 @@
 			this._TypeDeclarationBox.Location = new System.Drawing.Point(39, 56);
 			this._TypeDeclarationBox.Name = "_TypeDeclarationBox";
 			this._TypeDeclarationBox.Size = new System.Drawing.Size(101, 19);
-			this._TypeDeclarationBox.TabIndex = 1;
+			this._TypeDeclarationBox.TabIndex = 2;
 			this._TypeDeclarationBox.Text = "Type name";
 			this._TypeDeclarationBox.UseVisualStyleBackColor = true;
 			// 
@@ -261,10 +262,10 @@
 			// _HighlightSpecialCommentBox
 			// 
 			this._HighlightSpecialCommentBox.AutoSize = true;
-			this._HighlightSpecialCommentBox.Location = new System.Drawing.Point(15, 31);
+			this._HighlightSpecialCommentBox.Location = new System.Drawing.Point(15, 56);
 			this._HighlightSpecialCommentBox.Name = "_HighlightSpecialCommentBox";
 			this._HighlightSpecialCommentBox.Size = new System.Drawing.Size(149, 19);
-			this._HighlightSpecialCommentBox.TabIndex = 1;
+			this._HighlightSpecialCommentBox.TabIndex = 2;
 			this._HighlightSpecialCommentBox.Text = "Special comment";
 			this._HighlightSpecialCommentBox.UseVisualStyleBackColor = true;
 			// 
@@ -325,7 +326,7 @@
 			this.label1.Location = new System.Drawing.Point(6, 21);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(87, 15);
-			this.label1.TabIndex = 1;
+			this.label1.TabIndex = 0;
 			this.label1.Text = "Max width:";
 			// 
 			// _QuickInfoMaxWidthBox
@@ -343,7 +344,7 @@
             0});
 			this._QuickInfoMaxWidthBox.Name = "_QuickInfoMaxWidthBox";
 			this._QuickInfoMaxWidthBox.Size = new System.Drawing.Size(120, 25);
-			this._QuickInfoMaxWidthBox.TabIndex = 0;
+			this._QuickInfoMaxWidthBox.TabIndex = 1;
 			// 
 			// _OptionTabs
 			// 
@@ -399,6 +400,7 @@
 			// 
 			// tabPage3
 			// 
+			this.tabPage3.Controls.Add(this._HighlightParameterBracesBox);
 			this.tabPage3.Controls.Add(this._HighlightSpecialCommentBox);
 			this.tabPage3.Controls.Add(this._HighlightDeclarationBracesBox);
 			this.tabPage3.Location = new System.Drawing.Point(4, 25);
@@ -408,6 +410,16 @@
 			this.tabPage3.TabIndex = 2;
 			this.tabPage3.Text = "Additional highlight";
 			this.tabPage3.UseVisualStyleBackColor = true;
+			// 
+			// _HighlightParameterBracesBox
+			// 
+			this._HighlightParameterBracesBox.AutoSize = true;
+			this._HighlightParameterBracesBox.Location = new System.Drawing.Point(15, 31);
+			this._HighlightParameterBracesBox.Name = "_HighlightParameterBracesBox";
+			this._HighlightParameterBracesBox.Size = new System.Drawing.Size(157, 19);
+			this._HighlightParameterBracesBox.TabIndex = 1;
+			this._HighlightParameterBracesBox.Text = "Parameter braces";
+			this._HighlightParameterBracesBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpPage
 			// 
@@ -465,5 +477,6 @@
 		private System.Windows.Forms.TabPage tabPage2;
 		private System.Windows.Forms.TabPage tabPage3;
 		private System.Windows.Forms.CheckBox _ClickAndGoBox;
+		private System.Windows.Forms.CheckBox _HighlightParameterBracesBox;
 	}
 }

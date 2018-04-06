@@ -562,7 +562,8 @@ namespace Codist
 		None,
 		SpecialComment = 1,
 		DeclarationBrace = 1 << 1,
-		XmlDocCode = 1 << 2,
+		ParameterBrace = 1 << 2,
+		XmlDocCode = 1 << 3,
 	}
 
 	[Flags]
