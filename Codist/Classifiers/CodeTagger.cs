@@ -222,15 +222,15 @@ namespace Codist.Classifiers
 				CommentLabel label = null;
 				var startOfContent = 0;
 				foreach (var item in Config.Instance.Labels) {
-					startOfContent = commentStart + item.LabelLength;
-					if (startOfContent >= tl
+					var c = commentStart + item.LabelLength;
+					if (c >= tl
 						|| text.IndexOf(item.Label, commentStart, item.Comparison) != commentStart) {
 						continue;
 					}
 
-					var followingChar = text[commentStart + item.LabelLength];
+					var followingChar = text[c];
 					if (item.AllowPunctuationDelimiter && Char.IsPunctuation(followingChar)) {
-						startOfContent++;
+						c++;
 					}
 					else if (!Char.IsWhiteSpace(followingChar)) {
 						continue;
@@ -239,6 +239,7 @@ namespace Codist.Classifiers
 					if (label == null || label.LabelLength < item.LabelLength) {
 						ctag = __CommentClassifications[(int)item.StyleID];
 						label = item;
+						startOfContent = c;
 					}
 				}
 
