@@ -14,6 +14,18 @@ namespace Codist.Helpers
 {
 	static class CodeAnalysisHelper
 	{
+		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
+			while (oldVersion != currentVersion) {
+				if (oldVersion.Changes.Count > 0) {
+					return true;
+				}
+
+				oldVersion = oldVersion.Next;
+			}
+
+			return false;
+		}
+
 		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
 			var solution = workspace.CurrentSolution;
 			var sourceText = span.Snapshot.AsText();

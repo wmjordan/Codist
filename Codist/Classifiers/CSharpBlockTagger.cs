@@ -1,39 +1,49 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
+using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
+using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Classifiers
 {
-	sealed class CSharpBlockTagger : ITagger<ICodeMemberTag>
+	[Export(typeof(ITaggerProvider))]
+	[ContentType(Constants.CodeTypes.CSharp)]
+	[TagType(typeof(ICodeMemberTag))]
+	sealed class CSharpBlockTaggerProvider : ITaggerProvider
+	{
+		public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag {
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false || typeof(T) != typeof(ICodeMemberTag)) {
+				return null;
+			}
+
+			var tagger = buffer.Properties.GetOrCreateSingletonProperty(
+				typeof(CSharpBlockTaggerProvider),
+				() => new CSharpBlockTagger(buffer)
+			);
+			return new DisposableTagger<CSharpBlockTagger, ICodeMemberTag>(tagger) as ITagger<T>;
+		}
+	}
+
+	sealed class CSharpBlockTagger : ITagger<ICodeMemberTag>, IReuseableTagger
 	{
 		ITextBuffer _buffer;
 		int _refCount;
 		CodeBlock _root;
-		BackgroundScan _scan;
+		BackgroundScan<CodeBlock> _scanner;
 
 		internal CSharpBlockTagger(ITextBuffer buffer) {
 			_buffer = buffer;
 		}
 
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
-
-		public static async Task<CodeBlock> ParseAsync(ITextSnapshot snapshot, CancellationToken token) {
-			CodeBlock parentCodeBlockNode = null;
-			try {
-				parentCodeBlockNode = await GetAndParseSyntaxNodeAsync(snapshot, token);
-			}
-			catch (TaskCanceledException) {
-				//ignore the exception.
-			}
-
-			return parentCodeBlockNode;
-		}
 
 		public void AddRef() {
 			if (++_refCount == 1) {
@@ -67,25 +77,25 @@ namespace Codist.Classifiers
 			if (--_refCount == 0) {
 				_buffer.Changed -= OnChanged;
 
-				if (_scan != null) {
+				if (_scanner != null) {
 					//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
-					_scan.Cancel();
-					_scan = null;
+					_scanner.Cancel();
+					_scanner = null;
 				}
 				_root = null; //Allow the old root to be GC'd
 			}
 		}
 
-		static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
-			while (oldVersion != currentVersion) {
-				if (oldVersion.Changes.Count > 0) {
-					return true;
-				}
-
-				oldVersion = oldVersion.Next;
+		async Task<CodeBlock> ParseAsync(ITextSnapshot snapshot, CancellationToken token) {
+			CodeBlock parentCodeBlockNode = null;
+			try {
+				parentCodeBlockNode = await GetAndParseSyntaxNodeAsync(snapshot, token);
+			}
+			catch (TaskCanceledException) {
+				//ignore the exception.
 			}
 
-			return false;
+			return parentCodeBlockNode;
 		}
 
 		static async Task<CodeBlock> GetAndParseSyntaxNodeAsync(ITextSnapshot snapshot, CancellationToken token) {
@@ -150,7 +160,7 @@ namespace Codist.Classifiers
 			foreach (var node in parentSyntaxNode.ChildNodes()) {
 				CodeMemberType type = MatchDeclaration(node);
 				if (type != CodeMemberType.Unknown) {
-					var name = ((node as Microsoft.CodeAnalysis.CSharp.Syntax.BaseTypeDeclarationSyntax)?.Identifier ?? (node as Microsoft.CodeAnalysis.CSharp.Syntax.MethodDeclarationSyntax)?.Identifier);
+					var name = ((node as BaseTypeDeclarationSyntax)?.Identifier ?? (node as MethodDeclarationSyntax)?.Identifier);
 					var child = new CodeBlock(parentCodeBlockNode, type, name?.Text, new SnapshotSpan(snapshot, node.SpanStart, node.Span.Length), level + 1);
 					if (type > CodeMemberType.Type) {
 						continue;
@@ -164,57 +174,26 @@ namespace Codist.Classifiers
 		}
 
 		void OnChanged(object sender, TextContentChangedEventArgs e) {
-			if (AnyTextChanges(e.Before.Version, e.After.Version)) {
+			if (Helpers.CodeAnalysisHelper.AnyTextChanges(e.Before.Version, e.After.Version)) {
 				ScanBuffer(e.After);
 			}
 		}
 
 		void ScanBuffer(ITextSnapshot snapshot) {
-			if (_scan != null) {
+			if (_scanner != null) {
 				//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
-				_scan.Cancel();
-				_scan = null;
+				_scanner.Cancel();
+				_scanner = null;
 			}
 
 			//The underlying buffer could be very large, meaning that doing the scan for all matches on the UI thread
 			//is a bad idea. Do the scan on the background thread and use a callback to raise the changed event when
 			//the entire scan has completed.
-			_scan = new BackgroundScan(snapshot, (CodeBlock newRoot) => {
+			_scanner = new BackgroundScan<CodeBlock>(snapshot, ParseAsync, (CodeBlock newRoot) => {
 				//This delegate is executed on a background thread.
 				_root = newRoot;
 				TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, 0, snapshot.Length)));
 			});
-		}
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
-		sealed class BackgroundScan
-		{
-			public CancellationTokenSource CancellationSource = new CancellationTokenSource();
-
-			/// <summary>
-			/// Does a background scan in <paramref name="snapshot"/>. Call
-			/// <paramref name="completionCallback"/> once the scan has completed.
-			/// </summary>
-			/// <param name="snapshot">Text snapshot in which to scan.</param>
-			/// <param name="completionCallback">Delegate to call if the scan is completed (will be called on the UI thread).</param>
-			/// <remarks>The constructor must be called from the UI thread.</remarks>
-			public BackgroundScan(ITextSnapshot snapshot, CompletionCallback completionCallback) {
-				Task.Run(async delegate {
-					CodeBlock newRoot = await ParseAsync(snapshot, CancellationSource.Token);
-
-					if ((newRoot != null) && !CancellationSource.Token.IsCancellationRequested) {
-						completionCallback(newRoot);
-					}
-				});
-			}
-
-			public delegate void CompletionCallback(CodeBlock root);
-
-			public void Cancel() {
-				if (CancellationSource != null) {
-					CancellationSource.Cancel();
-					CancellationSource.Dispose();
-				}
-			}
 		}
 	}
 }

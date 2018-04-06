@@ -64,15 +64,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Classifiers\BackgroundScan.cs" />
     <Compile Include="Classifiers\Classifications.cs" />
     <Compile Include="Classifiers\CSharpBlockTagger.cs" />
-    <Compile Include="Classifiers\CSharpBlockTaggerProvider.cs" />
     <Compile Include="Classifiers\CSharpClassifierDefinition.cs" />
     <Compile Include="Classifiers\CSharpClassifierProvider.cs" />
     <Compile Include="Classifiers\CommentClassificationDefinitions.cs" />
     <Compile Include="Classifiers\CSharpCodeFormats.cs" />
     <Compile Include="Classifiers\CSharpClassifier.cs" />
+    <Compile Include="Classifiers\DisposableTagger.cs" />
     <Compile Include="Classifiers\ICodeMemberTag.cs" />
+    <Compile Include="Classifiers\IReuseableTagger.cs" />
     <Compile Include="Classifiers\XmlClassificationDefinitions.cs" />
     <Compile Include="CodistPackage.cs" />
     <Compile Include="Config.cs" />
