@@ -65,7 +65,7 @@ namespace Codist.Options
 					case "Light": Config.LoadConfig(Config.LightTheme); return;
 					case "Dark": Config.LoadConfig(Config.DarkTheme); return;
 				}
-				_ThemeMenu.Hide();
+				_ThemeMenu.Close();
 				using (var d = new OpenFileDialog {
 					Title = "Load Codist configuration file...",
 					FileName = "Codist.json",
