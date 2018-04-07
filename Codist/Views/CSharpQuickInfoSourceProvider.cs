@@ -21,11 +21,13 @@ using Codist.Helpers;
 namespace Codist.Views
 {
 	[Export(typeof(IQuickInfoSourceProvider))]
-	[Name("C# QuickInfo Source")]
+	[Name(Name)]
 	[Order(After = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.CSharp)]
 	sealed class CSharpQuickInfoSourceProvider : IQuickInfoSourceProvider
 	{
+		internal const string Name = nameof(CSharpQuickInfoSourceProvider);
+
 		[Import]
 		IEditorFormatMapService _EditorFormatMapService = null;
 
@@ -61,14 +63,14 @@ namespace Codist.Views
 					qiContent.Clear();
 				}
 				// Map the trigger point down to our buffer.
-				var subjectTriggerPoint = session.GetTriggerPoint(_TextBuffer.CurrentSnapshot).GetValueOrDefault();
+				var currentSnapshot = _TextBuffer.CurrentSnapshot;
+				var subjectTriggerPoint = session.GetTriggerPoint(currentSnapshot).GetValueOrDefault();
 				if (subjectTriggerPoint.Snapshot == null) {
 					applicableToSpan = null;
 					return;
 				}
 
-				var currentSnapshot = subjectTriggerPoint.Snapshot;
-				var workspace = currentSnapshot.TextBuffer.GetWorkspace();
+				var workspace = _TextBuffer.GetWorkspace();
 				if (workspace == null) {
 					goto EXIT;
 				}
@@ -111,20 +113,26 @@ namespace Codist.Views
 				}
 				ShowSymbolInfo(qiContent, node, symbol);
 				RETURN:
-				QuickInfoOverrider.ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
+				//if (session.TextView.TextSnapshot != subjectTriggerPoint.Snapshot) {
+				//	var p = session.TextView.BufferGraph.MapUpToSnapshot(subjectTriggerPoint, PointTrackingMode.Positive, PositionAffinity.Predecessor, session.TextView.TextSnapshot).GetValueOrDefault();
+				//	if (p.Snapshot != null) {
+				//		subjectTriggerPoint = p;
+				//		p = session.TextView.BufferGraph.MapUpToSnapshot(extent.Start, PointTrackingMode.Positive, PositionAffinity.Predecessor, session.TextView.TextSnapshot).GetValueOrDefault();
+				//		if (p.Snapshot != null) {
+				//			extent = new SnapshotSpan(p, extent.Length);
+				//		}
+				//	}
+				//}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo) /*&& node is MemberDeclarationSyntax == false && node.Kind() != SyntaxKind.VariableDeclarator && node.Kind() != SyntaxKind.Parameter*/) {
 					QuickInfoOverrider.ApplyClickAndGoFeature(qiContent, symbol);
 				}
 				QuickInfoOverrider.LimitQuickInfoItemSize(qiContent);
-				applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == subjectTriggerPoint.Snapshot
+				applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
 					? currentSnapshot.CreateTrackingSpan(extent.Start, extent.Length, SpanTrackingMode.EdgeInclusive)
 					: null;
 				return;
 				EXIT:
-				QuickInfoOverrider.ShowSelectionInfo(session, qiContent, subjectTriggerPoint);
-				applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == subjectTriggerPoint.Snapshot
-					? currentSnapshot.CreateTrackingSpan(session.TextView.GetTextElementSpan(subjectTriggerPoint), SpanTrackingMode.EdgeInclusive)
-					: null;
+				applicableToSpan = null;
 			}
 
 			void IDisposable.Dispose() {
