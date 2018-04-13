@@ -35,7 +35,9 @@ namespace Codist.Views
 		internal ITextStructureNavigatorSelectorService _NavigatorService = null;
 
 		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
-			return new QuickInfoSource(textBuffer, _EditorFormatMapService, _NavigatorService);
+			return Config.Instance.Features.MatchFlags(Features.SuperTooltip)
+				? new QuickInfoSource(textBuffer, _EditorFormatMapService, _NavigatorService)
+				: null;
 		}
 
 		sealed class QuickInfoSource : IQuickInfoSource

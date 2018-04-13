@@ -131,11 +131,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Helpers\InterfaceHelper.cs" />
-    <Compile Include="Views\CSharpQuickInfoControllerProvider.cs" />
     <Compile Include="Views\CodeViewCreationListener.cs" />
     <Compile Include="Views\CodeViewDecorator.cs" />
     <Compile Include="Views\CSharpQuickInfoSourceProvider.cs" />
     <Compile Include="Views\QuickInfoOverrider.cs" />
+    <Compile Include="Views\SelectionQuickInfoProvider.cs" />
     <Compile Include="Views\QuickInfoVisibilityControllerProvider.cs" />
   </ItemGroup>
   <ItemGroup>
