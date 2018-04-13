@@ -24,7 +24,7 @@ namespace Codist.Views
 	[Name(Name)]
 	[Order(After = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.CSharp)]
-	sealed class CSharpQuickInfoSourceProvider : IQuickInfoSourceProvider
+	public sealed class CSharpQuickInfoSourceProvider : IQuickInfoSourceProvider
 	{
 		internal const string Name = nameof(CSharpQuickInfoSourceProvider);
 
@@ -247,7 +247,7 @@ namespace Codist.Views
 			static void ShowMiscInfo(IList<object> qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
 				StackPanel infoBox = null;
 				var nodeKind = node.Kind();
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && nodeKind == SyntaxKind.NumericLiteralExpression) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && (nodeKind == SyntaxKind.NumericLiteralExpression || nodeKind == SyntaxKind.CharacterLiteralExpression)) {
 					infoBox = ShowNumericForm(node);
 				}
 				else if (nodeKind == SyntaxKind.SwitchStatement) {
@@ -261,7 +261,7 @@ namespace Codist.Views
 						infoBox = ShowStringInfo(node.GetFirstToken().ValueText);
 					}
 				}
-				else if (node.Kind() == SyntaxKind.Block) {
+				else if (nodeKind == SyntaxKind.Block) {
 					var lines = currentSnapshot.GetLineNumberFromPosition(node.Span.End) - currentSnapshot.GetLineNumberFromPosition(node.SpanStart) + 1;
 					if (lines > 100) {
 						qiContent.Add(new TextBlock { Text = lines + " lines", FontWeight = FontWeights.Bold });
@@ -548,6 +548,11 @@ namespace Codist.Views
 					}
 					var bytes = new byte[] { (byte)(v >> 8), (byte)v };
 					return ToUIText(form == NumericForm.Unsigned ? ((ushort)v).ToString() : v.ToString(), bytes);
+				}
+				else if (value is char) {
+					var v = (char)value;
+					var bytes = new byte[] { (byte)(v >> 8), (byte)v };
+					return ToUIText(((ushort)v).ToString(), bytes);
 				}
 				else if (value is uint) {
 					return ShowNumericForms((int)(uint)value, NumericForm.Unsigned);
