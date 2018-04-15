@@ -6,7 +6,6 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
-using Codist.Helpers;
 
 namespace Codist.Margins
 {
@@ -160,7 +159,7 @@ namespace Codist.Margins
 							if (pen == null) {
 								pen = GetPenForCodeMemberType(tagType);
 							}
-							drawingContext.DrawText(InterfaceHelper.ToFormattedText(tag.Tag.Name, 9, pen.Brush.Clone().Alpha((y2 - y1) * 10 / ActualHeight)), new Point(level, y1));
+							drawingContext.DrawText(UIHelper.ToFormattedText(tag.Tag.Name, 9, pen.Brush.Clone().Alpha((y2 - y1) * 10 / ActualHeight)), new Point(level, y1));
 						}
 					}
 				}
@@ -178,7 +177,7 @@ namespace Codist.Margins
 					var yBottom = _scrollBar.GetYCoordinateOfBufferPosition(end);
 					if (yBottom - yTop > 9 && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Tag.Name != null) {
 						// draw type name
-						var text = InterfaceHelper.ToFormattedText(tag.Tag.Name, 9, pen.Brush.Clone().Alpha(1))
+						var text = UIHelper.ToFormattedText(tag.Tag.Name, 9, pen.Brush.Clone().Alpha(1))
 							.SetBold();
 						if (level != 1) {
 							text.SetFontStyle(FontStyles.Italic);

@@ -9,7 +9,6 @@ using AppHelpers;
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Controls.Primitives;
-using Codist.Helpers;
 
 namespace Codist.Views
 {
@@ -20,13 +19,13 @@ namespace Codist.Views
 	[Name("Quick Info Visibility Controller")]
 	[Order(Before = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.Code)]
-	internal sealed class QuickInfoVisibilityControllerProvider : IQuickInfoSourceProvider
+	sealed class QuickInfoVisibilityControllerProvider : IQuickInfoSourceProvider
 	{
 		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return new QuickInfoVisibilityController();
 		}
 
-		internal sealed class QuickInfoVisibilityController : IQuickInfoSource
+		sealed class QuickInfoVisibilityController : IQuickInfoSource
 		{
 			public void AugmentQuickInfoSession(IQuickInfoSession session, IList<Object> qiContent, out ITrackingSpan applicableToSpan) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlQuickInfo)

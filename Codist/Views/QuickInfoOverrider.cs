@@ -3,15 +3,17 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Codist.Helpers;
 using Microsoft.CodeAnalysis;
 
 namespace Codist.Views
 {
 	static class QuickInfoOverrider
 	{
-		/// <summary>Provides click and go feature for symbols.</summary>
+		/// <summary>Hack into the default QuickInfo panel and provides click and go feature for symbols.</summary>
 		public static void ApplyClickAndGoFeature(IList<object> qiContent, ISymbol symbol) {
+			if (symbol == null || symbol.DeclaringSyntaxReferences.Length <= 0 || symbol.DeclaringSyntaxReferences[0].SyntaxTree.FilePath == null) {
+				return;
+			}
 			for (int i = 0; i < qiContent.Count; i++) {
 				var o = qiContent[i] as Panel;
 				if (o == null || o.GetType().Name != "QuickInfoDisplayPanel") {
@@ -19,9 +21,6 @@ namespace Codist.Views
 				}
 				//(o.GetType().GetProperty("Documentation", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(o) as TextBlock)
 				//		.TextAlignment = TextAlignment.Justify;
-				if (symbol == null || symbol.DeclaringSyntaxReferences.Length <= 0 || symbol.DeclaringSyntaxReferences[0].SyntaxTree.FilePath == null) {
-					continue;
-				}
 				foreach (var item in o.Children) {
 					var title = item as DockPanel;
 					if (title == null) {

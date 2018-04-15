@@ -7,7 +7,6 @@ using System.Drawing.Text;
 using System.Linq;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell.Interop;
-using Codist.Helpers;
 
 namespace Codist.Options
 {

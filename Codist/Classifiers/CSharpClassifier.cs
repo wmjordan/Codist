@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using AppHelpers;
-using Codist.Helpers;
 
 namespace Codist.Classifiers
 {

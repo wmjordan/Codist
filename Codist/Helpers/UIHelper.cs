@@ -8,11 +8,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using GdiColor = System.Drawing.Color;
 using WpfBrush = System.Windows.Media.Brush;
@@ -21,9 +16,9 @@ using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using WpfText = System.Windows.Media.FormattedText;
 
-namespace Codist.Helpers
+namespace Codist
 {
-	static class InterfaceHelper
+	static class UIHelper
 	{
 		public static string GetClassificationType(this Type type, string field) {
 			var f = type.GetField(field);

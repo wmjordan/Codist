@@ -16,7 +16,6 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
-using Codist.Helpers;
 
 namespace Codist.Views
 {
@@ -24,7 +23,7 @@ namespace Codist.Views
 	[Name(Name)]
 	[Order(After = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.CSharp)]
-	public sealed class CSharpQuickInfoSourceProvider : IQuickInfoSourceProvider
+	sealed class CSharpQuickInfoSourceProvider : IQuickInfoSourceProvider
 	{
 		internal const string Name = nameof(CSharpQuickInfoSourceProvider);
 
@@ -94,8 +93,20 @@ namespace Codist.Views
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 					ShowParameterInfo(qiContent, node);
 				}
-				node = node.Kind() == SyntaxKind.Argument ? (node as ArgumentSyntax).Expression : node;
-				var symbol = GetSymbol(node, semanticModel);
+				if (node.Kind() == SyntaxKind.Argument) {
+					node = (node as ArgumentSyntax).Expression;
+				}
+				var symbolInfo = semanticModel.GetSymbolInfo(node);
+				ISymbol symbol = symbolInfo.Symbol;
+				if (symbol == null) {
+					if (symbolInfo.CandidateReason != CandidateReason.None) {
+						ShowCandidateInfo(qiContent, symbolInfo, node);
+						goto RETURN;
+					}
+					else {
+						symbol = node.IsDeclaration() ? semanticModel.GetDeclaredSymbol(node) : GetExtSymbol(node, semanticModel);
+					}
+				}
 				if (symbol == null) {
 					ShowMiscInfo(qiContent, currentSnapshot, node);
 					goto RETURN;
@@ -115,16 +126,6 @@ namespace Codist.Views
 				}
 				ShowSymbolInfo(qiContent, node, symbol);
 				RETURN:
-				//if (session.TextView.TextSnapshot != subjectTriggerPoint.Snapshot) {
-				//	var p = session.TextView.BufferGraph.MapUpToSnapshot(subjectTriggerPoint, PointTrackingMode.Positive, PositionAffinity.Predecessor, session.TextView.TextSnapshot).GetValueOrDefault();
-				//	if (p.Snapshot != null) {
-				//		subjectTriggerPoint = p;
-				//		p = session.TextView.BufferGraph.MapUpToSnapshot(extent.Start, PointTrackingMode.Positive, PositionAffinity.Predecessor, session.TextView.TextSnapshot).GetValueOrDefault();
-				//		if (p.Snapshot != null) {
-				//			extent = new SnapshotSpan(p, extent.Length);
-				//		}
-				//	}
-				//}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo) /*&& node is MemberDeclarationSyntax == false && node.Kind() != SyntaxKind.VariableDeclarator && node.Kind() != SyntaxKind.Parameter*/) {
 					QuickInfoOverrider.ApplyClickAndGoFeature(qiContent, symbol);
 				}
@@ -152,14 +153,20 @@ namespace Codist.Views
 				}
 			}
 
+			void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo, SyntaxNode node) {
+				var info = new StackPanel().AddText("Maybe...", true);
+				foreach (var item in symbolInfo.CandidateSymbols) {
+					info.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
+				}
+				qiContent.Add(info);
+			}
+
 			static bool CanAccess(ISymbol symbol) {
 				return symbol.DeclaredAccessibility == Accessibility.Public || symbol.DeclaredAccessibility == Accessibility.NotApplicable || symbol.Locations.Any(l => l.IsInSource);
 			}
 
-			static ISymbol GetSymbol(SyntaxNode node, SemanticModel semanticModel) {
-				return semanticModel.GetSymbolInfo(node).Symbol
-						?? semanticModel.GetDeclaredSymbol(node)
-						?? (node is AttributeArgumentSyntax
+			static ISymbol GetExtSymbol(SyntaxNode node, SemanticModel semanticModel) {
+				return (node is AttributeArgumentSyntax
 							? semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol
 							: null)
 						?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax
@@ -953,6 +960,12 @@ namespace Codist.Views
 							break;
 						case SymbolDisplayPartKind.FieldName:
 							block.AddText(part.Symbol.Name, _FieldBrush);
+							break;
+						case SymbolDisplayPartKind.PropertyName:
+							block.AddText(part.Symbol.Name, _PropertyBrush);
+							break;
+						case SymbolDisplayPartKind.EventName:
+							block.AddText(part.Symbol.Name, _DelegateBrush);
 							break;
 						default:
 							block.AddText(part.ToString());

@@ -4,13 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 
-namespace Codist.Helpers
+namespace Codist
 {
 	static class CodeAnalysisHelper
 	{
@@ -62,5 +63,30 @@ namespace Codist.Helpers
 			}
 		}
 
+		public static bool IsDeclaration(this SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.ClassDeclaration:
+				case SyntaxKind.ConstructorDeclaration:
+				case SyntaxKind.ConversionOperatorDeclaration:
+				case SyntaxKind.DelegateDeclaration:
+				case SyntaxKind.DestructorDeclaration:
+				case SyntaxKind.EnumDeclaration:
+				case SyntaxKind.EnumMemberDeclaration:
+				case SyntaxKind.EventDeclaration:
+				case SyntaxKind.EventFieldDeclaration:
+				case SyntaxKind.FieldDeclaration:
+				case SyntaxKind.IndexerDeclaration:
+				case SyntaxKind.InterfaceDeclaration:
+				case SyntaxKind.LocalDeclarationStatement:
+				case SyntaxKind.MethodDeclaration:
+				case SyntaxKind.NamespaceDeclaration:
+				case SyntaxKind.OperatorDeclaration:
+				case SyntaxKind.PropertyDeclaration:
+				case SyntaxKind.StructDeclaration:
+				case SyntaxKind.VariableDeclaration:
+					return true;
+			}
+			return false;
+		}
 	}
 }

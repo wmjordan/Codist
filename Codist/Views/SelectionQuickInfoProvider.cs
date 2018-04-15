@@ -4,7 +4,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows.Controls;
 using AppHelpers;
-using Codist.Helpers;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Utilities;
@@ -16,7 +15,7 @@ namespace Codist.Views
 	[Name(Name)]
 	[Order(After = CSharpQuickInfoSourceProvider.Name)]
 	[ContentType(Constants.CodeTypes.Text)]
-	internal sealed class SelectionQuickInfoProvider : IQuickInfoSourceProvider
+	sealed class SelectionQuickInfoProvider : IQuickInfoSourceProvider
 	{
 		const string Name = nameof(SelectionQuickInfoProvider);
 		const string QuickInfoName = "SelectionInfo";
