@@ -39,6 +39,7 @@ namespace Codist.Options
 			});
 			_LineNumbersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.LineNumber, _LineNumbersBox.Checked));
 			_ControlQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.CtrlQuickInfo, _ControlQuickInfoBox.Checked));
+			_SelectionQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Selection, _SelectionQuickInfoBox.Checked));
 			_SaveConfigButton.Click += (s, args) => {
 				using (var d = new SaveFileDialog {
 					Title = "Save Codist configuration file...",
@@ -94,6 +95,7 @@ namespace Codist.Options
 				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
 				_LineNumbersBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
 				_ControlQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlQuickInfo);
+				_SelectionQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Selection);
 			});
 		}
 	}

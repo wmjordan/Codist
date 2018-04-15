@@ -29,6 +29,10 @@ namespace Codist.Views
 		internal sealed class SelectionQuickInfoController : IQuickInfoSource
 		{
 			public void AugmentQuickInfoSession(IQuickInfoSession session, IList<Object> qiContent, out ITrackingSpan applicableToSpan) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Selection) == false) {
+					applicableToSpan = null;
+					return;
+				}
 				var textSnapshot = session.TextView.TextSnapshot;
 				var triggerPoint = session.GetTriggerPoint(textSnapshot).GetValueOrDefault();
 				if (qiContent.FirstOrDefault(i => (i as TextBlock)?.Name == QuickInfoName) != null) {
