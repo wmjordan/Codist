@@ -95,7 +95,7 @@
 			this.groupBox1.Controls.Add(this.label1);
 			this.groupBox1.Location = new System.Drawing.Point(3, 153);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(546, 84);
+			this.groupBox1.Size = new System.Drawing.Size(499, 84);
 			this.groupBox1.TabIndex = 3;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Extra line margins";
@@ -135,7 +135,7 @@
 			this.groupBox2.Controls.Add(this._LoadConfigButton);
 			this.groupBox2.Location = new System.Drawing.Point(3, 81);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(546, 66);
+			this.groupBox2.Size = new System.Drawing.Size(499, 66);
 			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Super syntax highlight settings";
@@ -186,7 +186,7 @@
 			this.groupBox3.Controls.Add(this._LineNumbersBox);
 			this.groupBox3.Location = new System.Drawing.Point(3, 243);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(546, 82);
+			this.groupBox3.Size = new System.Drawing.Size(499, 82);
 			this.groupBox3.TabIndex = 4;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Misc";
@@ -236,9 +236,9 @@
 			this._SelectionQuickInfoBox.AutoSize = true;
 			this._SelectionQuickInfoBox.Location = new System.Drawing.Point(348, 49);
 			this._SelectionQuickInfoBox.Name = "_SelectionQuickInfoBox";
-			this._SelectionQuickInfoBox.Size = new System.Drawing.Size(189, 19);
+			this._SelectionQuickInfoBox.Size = new System.Drawing.Size(141, 19);
 			this._SelectionQuickInfoBox.TabIndex = 2;
-			this._SelectionQuickInfoBox.Text = "Selection Quick Info";
+			this._SelectionQuickInfoBox.Text = "Selection Info";
 			this._SelectionQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// GeneralPage

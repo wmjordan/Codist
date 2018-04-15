@@ -301,7 +301,7 @@
             0,
             0,
             0});
-			this._QuickInfoMaxHeightBox.Location = new System.Drawing.Point(350, 16);
+			this._QuickInfoMaxHeightBox.Location = new System.Drawing.Point(347, 19);
 			this._QuickInfoMaxHeightBox.Maximum = new decimal(new int[] {
             1000,
             0,
