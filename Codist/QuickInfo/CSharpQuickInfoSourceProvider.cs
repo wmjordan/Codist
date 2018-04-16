@@ -326,6 +326,7 @@ namespace Codist.QuickInfo
 			}
 
 			void ShowMethodInfo(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
+				var overloads = _SemanticModel.GetMemberGroup(node);
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 					&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern || method.IsSealed)
 					&& method.ContainingType.TypeKind != TypeKind.Interface) {
@@ -339,6 +340,18 @@ namespace Codist.QuickInfo
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) && method.IsExtensionMethod) {
 					ShowExtensionMethod(qiContent, method, node.SpanStart);
+				}
+				if (overloads.Length > 1) {
+					var overloadInfo = new StackPanel().AddText("Method overload:", true);
+					foreach (var item in overloads) {
+						if (item.Equals(method)) {
+							continue;
+						}
+						overloadInfo.Add(ToUIText(new TextBlock(), item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), null, -1));
+					}
+					if (overloadInfo.Children.Count > 1) {
+						qiContent.Add(overloadInfo);
+					}
 				}
 			}
 
