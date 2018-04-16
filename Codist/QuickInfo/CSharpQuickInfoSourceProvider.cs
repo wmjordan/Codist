@@ -17,7 +17,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Codist.Views
+namespace Codist.QuickInfo
 {
 	[Export(typeof(IQuickInfoSourceProvider))]
 	[Name(Name)]

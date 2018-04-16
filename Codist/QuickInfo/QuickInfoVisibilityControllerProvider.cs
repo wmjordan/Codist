@@ -10,7 +10,7 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 
-namespace Codist.Views
+namespace Codist.QuickInfo
 {
 	/// <summary>
 	/// Controls whether quick info should be displayed. When activated, quick info would not be displayed unless Shift key is pressed.

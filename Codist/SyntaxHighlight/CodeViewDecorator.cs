@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
 
-namespace Codist.Views
+namespace Codist.SyntaxHighlight
 {
 	sealed class CodeViewDecorator
 	{

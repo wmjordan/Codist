@@ -131,12 +131,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Views\CodeViewCreationListener.cs" />
-    <Compile Include="Views\CodeViewDecorator.cs" />
-    <Compile Include="Views\CSharpQuickInfoSourceProvider.cs" />
-    <Compile Include="Views\QuickInfoOverrider.cs" />
-    <Compile Include="Views\SelectionQuickInfoProvider.cs" />
-    <Compile Include="Views\QuickInfoVisibilityControllerProvider.cs" />
+    <Compile Include="SyntaxHighlight\CodeViewCreationListener.cs" />
+    <Compile Include="SyntaxHighlight\CodeViewDecorator.cs" />
+    <Compile Include="QuickInfo\CSharpQuickInfoSourceProvider.cs" />
+    <Compile Include="QuickInfo\QuickInfoOverrider.cs" />
+    <Compile Include="QuickInfo\SelectionQuickInfoProvider.cs" />
+    <Compile Include="QuickInfo\QuickInfoVisibilityControllerProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

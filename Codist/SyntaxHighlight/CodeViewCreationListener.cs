@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 using AppHelpers;
 
-namespace Codist.Views
+namespace Codist.SyntaxHighlight
 {
 	/// <summary>
 	/// Applies customized syntax highlight styles to editor.

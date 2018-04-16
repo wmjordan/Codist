@@ -5,7 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.CodeAnalysis;
 
-namespace Codist.Views
+namespace Codist.QuickInfo
 {
 	static class QuickInfoOverrider
 	{

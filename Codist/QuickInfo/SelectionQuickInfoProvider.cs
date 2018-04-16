@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Codist.Views
+namespace Codist.QuickInfo
 {
 	/// <summary>Shows information about selections.</summary>
 	[Export(typeof(IQuickInfoSourceProvider))]
