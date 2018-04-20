@@ -33,33 +33,41 @@ namespace Codist.QuickInfo
 		[Import]
 		internal ITextStructureNavigatorSelectorService _NavigatorService = null;
 
+		[Import]
+		IGlyphService _GlyphService = null;
+
 		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperTooltip)
-				? new QuickInfoSource(textBuffer, _EditorFormatMapService, _NavigatorService)
+				? new CSharpQuickInfo(textBuffer, _EditorFormatMapService, _GlyphService, _NavigatorService)
 				: null;
 		}
 
-		sealed class QuickInfoSource : IQuickInfoSource
+		sealed class CSharpQuickInfo : IQuickInfoSource
 		{
 			//todo extract brushes
 			static Brush _NamespaceBrush, _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush, _TypeParameterBrush, _PropertyBrush, _FieldBrush;
 
 			readonly IEditorFormatMapService _FormatMapService;
 			readonly ITextStructureNavigatorSelectorService _NavigatorService;
+			readonly IGlyphService _GlyphService;
 			IEditorFormatMap _FormatMap;
 			bool _IsDisposed;
 			SemanticModel _SemanticModel;
 			ITextBuffer _TextBuffer;
 
-			public QuickInfoSource(ITextBuffer subjectBuffer, IEditorFormatMapService formatMapService, ITextStructureNavigatorSelectorService navigatorService) {
+			public CSharpQuickInfo(ITextBuffer subjectBuffer, IEditorFormatMapService formatMapService, IGlyphService glyphService, ITextStructureNavigatorSelectorService navigatorService) {
 				_TextBuffer = subjectBuffer;
 				_FormatMapService = formatMapService;
+				_GlyphService = glyphService;
 				_TextBuffer.Changing += TextBuffer_Changing;
 				Config.Updated += _ConfigUpdated;
 				_NavigatorService = navigatorService;
 			}
 
 			public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {
+				if (qiContent.Count == 0) {
+					goto EXIT;
+				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.HideOriginalQuickInfo)) {
 					qiContent.Clear();
 				}
@@ -67,8 +75,7 @@ namespace Codist.QuickInfo
 				var currentSnapshot = _TextBuffer.CurrentSnapshot;
 				var subjectTriggerPoint = session.GetTriggerPoint(currentSnapshot).GetValueOrDefault();
 				if (subjectTriggerPoint.Snapshot == null) {
-					applicableToSpan = null;
-					return;
+					goto EXIT;
 				}
 
 				var workspace = _TextBuffer.GetWorkspace();
@@ -156,7 +163,7 @@ namespace Codist.QuickInfo
 			void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo, SyntaxNode node) {
 				var info = new StackPanel().AddText("Maybe...", true);
 				foreach (var item in symbolInfo.CandidateSymbols) {
-					info.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
+					info.Add(ToUIText(item, node.SpanStart));
 				}
 				qiContent.Add(info);
 			}
@@ -283,6 +290,7 @@ namespace Codist.QuickInfo
 			}
 
 			void ShowAttributesInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
+				// todo: show inherited attributes
 				var attrs = symbol.GetAttributes();
 				if (attrs.Length > 0) {
 					ShowAttributes(qiContent, attrs, node.SpanStart);
@@ -326,7 +334,6 @@ namespace Codist.QuickInfo
 			}
 
 			void ShowMethodInfo(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
-				var overloads = _SemanticModel.GetMemberGroup(node);
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 					&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern || method.IsSealed)
 					&& method.ContainingType.TypeKind != TypeKind.Interface) {
@@ -341,17 +348,25 @@ namespace Codist.QuickInfo
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) && method.IsExtensionMethod) {
 					ShowExtensionMethod(qiContent, method, node.SpanStart);
 				}
-				if (overloads.Length > 1) {
-					var overloadInfo = new StackPanel().AddText("Method overload:", true);
-					foreach (var item in overloads) {
-						if (item.Equals(method)) {
-							continue;
-						}
-						overloadInfo.Add(ToUIText(new TextBlock(), item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), null, -1));
+				ShowOverloadsInfo(qiContent, node, method);
+			}
+
+			void ShowOverloadsInfo(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
+				var overloads = node.Kind() == SyntaxKind.MethodDeclaration
+					? method.ContainingType.GetMembers(method.Name)
+					: _SemanticModel.GetMemberGroup(node);
+				if (overloads.Length < 2) {
+					return;
+				}
+				var overloadInfo = new StackPanel().AddText("Method overload:", true);
+				foreach (var item in overloads) {
+					if (item.Equals(method) || item.Kind != SymbolKind.Method) {
+						continue;
 					}
-					if (overloadInfo.Children.Count > 1) {
-						qiContent.Add(overloadInfo);
-					}
+					overloadInfo.Add(ToUIText(new TextBlock { TextWrapping = TextWrapping.Wrap }.SetGlyph(_GlyphService.GetGlyph(item.GetGlyphGroup(), item.GetGlyphItem())), item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), null, -1));
+				}
+				if (overloadInfo.Children.Count > 1) {
+					qiContent.Add(overloadInfo.Scrollable());
 				}
 			}
 
@@ -383,6 +398,10 @@ namespace Codist.QuickInfo
 					&& typeSymbol.TypeKind == TypeKind.Class
 					&& (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
 					ShowDeclarationModifier(qiContent, typeSymbol, "Class", node.SpanStart);
+				}
+				if (node.Parent.Kind() == SyntaxKind.ObjectCreationExpression) {
+					var method = _SemanticModel.GetSymbolInfo(node.Parent).Symbol as IMethodSymbol;
+					ShowOverloadsInfo(qiContent, node.Parent, method);
 				}
 			}
 
@@ -445,7 +464,7 @@ namespace Codist.QuickInfo
 				if (types.Count > 0) {
 					info = new StackPanel().AddText("Implements:", true);
 					foreach (var item in types) {
-						info.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
+						info.Add(ToUIText(item, node.SpanStart));
 					}
 				}
 				if (explicitImplementations != null) {
@@ -457,7 +476,7 @@ namespace Codist.QuickInfo
 						}
 						var p = new StackPanel().AddText("Explicit implements:", true);
 						foreach (var item in types) {
-							p.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
+							p.Add(ToUIText(item, node.SpanStart));
 						}
 						info.Add(p);
 					}
@@ -597,8 +616,7 @@ namespace Codist.QuickInfo
 					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).AddText("Hash code", true));
 			}
 			void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs, int position) {
-				var info = new StackPanel();
-				info.AddText("Attribute:", true);
+				var info = new StackPanel().AddText("Attribute:", true);
 				foreach (var item in attrs) {
 					if (CanAccess(item.AttributeClass) == false) {
 						continue;
@@ -639,7 +657,7 @@ namespace Codist.QuickInfo
 					info.Children.Add(attrDef);
 				}
 				if (info.Children.Count > 1) {
-					qiContent.Add(info);
+					qiContent.Add(info.Scrollable());
 				}
 			}
 
@@ -767,7 +785,7 @@ namespace Codist.QuickInfo
 				}
 				var stack = new StackPanel().AddText("Interface:", true);
 				if (disposable != null) {
-					var t = ToUIText(disposable.ToMinimalDisplayParts(_SemanticModel, position));
+					var t = ToUIText(disposable, position);
 					if (interfaces.Contains(disposable) == false) {
 						t.AddText(" (inherited)");
 					}
@@ -777,12 +795,12 @@ namespace Codist.QuickInfo
 					if (item == disposable) {
 						continue;
 					}
-					stack.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, position)));
+					stack.Add(ToUIText(item, position));
 				}
 				foreach (var item in inheritedInterfaces) {
-					stack.Add(ToUIText(item.ToMinimalDisplayParts(_SemanticModel, position)).AddText(" (inherited)"));
+					stack.Add(ToUIText(item, position).AddText(" (inherited)"));
 				}
-				output.Add(stack);
+				output.Add(stack.Scrollable());
 			}
 
 			void ShowDeclarationModifier(IList<object> qiContent, ISymbol symbol, string type, int position) {
@@ -801,9 +819,9 @@ namespace Codist.QuickInfo
 					info.AddText(symbol.IsSealed ? "sealed override " : "override ", _KeywordBrush);
 					INamedTypeSymbol t = null;
 					switch (symbol.Kind) {
-						case SymbolKind.Method: t = ((IMethodSymbol)symbol).OverriddenMethod.ContainingType; break;
-						case SymbolKind.Property: t = ((IPropertySymbol)symbol).OverriddenProperty.ContainingType; break;
-						case SymbolKind.Event: t = ((IEventSymbol)symbol).OverriddenEvent.ContainingType; break;
+						case SymbolKind.Method: t = ((IMethodSymbol)symbol).OverriddenMethod?.ContainingType; break;
+						case SymbolKind.Property: t = ((IPropertySymbol)symbol).OverriddenProperty?.ContainingType; break;
+						case SymbolKind.Event: t = ((IEventSymbol)symbol).OverriddenEvent?.ContainingType; break;
 					}
 					if (t != null) {
 						ToUIText(info, t.ToMinimalDisplayParts(_SemanticModel, position));
@@ -864,7 +882,7 @@ namespace Codist.QuickInfo
 					foreach (var candidate in symbol.CandidateSymbols) {
 						info.Add(ToUIText(new TextBlock(), candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
 					}
-					qiContent.Add(info);
+					qiContent.Add(info.Scrollable());
 				}
 				else if (al.Parent.IsKind(SyntaxKind.InvocationExpression)) {
 					var methodName = (al.Parent as InvocationExpressionSyntax).Expression.ToString();
@@ -916,8 +934,12 @@ namespace Codist.QuickInfo
 				return s;
 			}
 
-			static TextBlock ToUIText(ImmutableArray<SymbolDisplayPart> parts) {
-				return ToUIText(new TextBlock(), parts, null, Int32.MinValue);
+			TextBlock ToUIText(ISymbol symbol, int position) {
+				return ToUIText(
+					new TextBlock().SetGlyph(_GlyphService.GetGlyph(symbol.GetGlyphGroup(), symbol.GetGlyphItem())),
+					symbol.ToMinimalDisplayParts(_SemanticModel, position),
+					null,
+					Int32.MinValue);
 			}
 
 			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts) {
@@ -927,6 +949,9 @@ namespace Codist.QuickInfo
 			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, string argName, int argIndex) {
 				foreach (var part in parts) {
 					switch (part.Kind) {
+						case SymbolDisplayPartKind.AliasName:
+							//todo resolve alias type
+							goto default;
 						case SymbolDisplayPartKind.ClassName:
 							if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
 								block.AddText("?", _ClassBrush);

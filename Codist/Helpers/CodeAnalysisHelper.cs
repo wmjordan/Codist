@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
@@ -84,9 +85,64 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.VariableDeclaration:
+				case SyntaxKind.VariableDeclarator:
 					return true;
 			}
 			return false;
+		}
+
+		public static StandardGlyphGroup GetGlyphGroup(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Alias: return StandardGlyphGroup.GlyphForwardType;
+				case SymbolKind.Assembly: return StandardGlyphGroup.GlyphAssembly;
+				case SymbolKind.DynamicType: return StandardGlyphGroup.GlyphGroupType;
+				case SymbolKind.ErrorType: return StandardGlyphGroup.GlyphGroupError;
+				case SymbolKind.Event: return StandardGlyphGroup.GlyphGroupEvent;
+				case SymbolKind.Field:
+					return (symbol as IFieldSymbol).IsConst
+						? StandardGlyphGroup.GlyphGroupConstant
+						: StandardGlyphGroup.GlyphGroupField;
+				case SymbolKind.Label: return StandardGlyphGroup.GlyphArrow;
+				case SymbolKind.Local: return StandardGlyphGroup.GlyphGroupVariable;
+				case SymbolKind.Method:
+					return (symbol as IMethodSymbol).IsExtensionMethod
+						? StandardGlyphGroup.GlyphExtensionMethod
+						: StandardGlyphGroup.GlyphGroupMethod;
+				case SymbolKind.NetModule: return StandardGlyphGroup.GlyphGroupModule;
+				case SymbolKind.NamedType:
+					switch ((symbol as INamedTypeSymbol).TypeKind) {
+						case TypeKind.Unknown: return StandardGlyphGroup.GlyphGroupUnknown;
+						case TypeKind.Array:
+						case TypeKind.Dynamic:
+						case TypeKind.Class:
+							return StandardGlyphGroup.GlyphGroupClass;
+						case TypeKind.Delegate: return StandardGlyphGroup.GlyphGroupDelegate;
+						case TypeKind.Enum: return StandardGlyphGroup.GlyphGroupEnum;
+						case TypeKind.Error: return StandardGlyphGroup.GlyphGroupError;
+						case TypeKind.Interface: return StandardGlyphGroup.GlyphGroupInterface;
+						case TypeKind.Module: return StandardGlyphGroup.GlyphGroupModule;
+						case TypeKind.Pointer:
+						case TypeKind.Struct: return StandardGlyphGroup.GlyphGroupStruct;
+					}
+					return StandardGlyphGroup.GlyphGroupType;
+				case SymbolKind.Namespace: return StandardGlyphGroup.GlyphGroupNamespace;
+				case SymbolKind.Parameter: return StandardGlyphGroup.GlyphGroupVariable;
+				case SymbolKind.Property: return StandardGlyphGroup.GlyphGroupProperty;
+				case SymbolKind.TypeParameter: return StandardGlyphGroup.GlyphGroupType;
+				default: return StandardGlyphGroup.GlyphGroupUnknown;
+			}
+		}
+
+		public static StandardGlyphItem GetGlyphItem(this ISymbol symbol) {
+			switch (symbol.DeclaredAccessibility) {
+				case Accessibility.Private: return StandardGlyphItem.GlyphItemPrivate;
+				case Accessibility.ProtectedAndInternal:
+				case Accessibility.Protected: return StandardGlyphItem.GlyphItemProtected;
+				case Accessibility.Internal: return StandardGlyphItem.GlyphItemInternal;
+				case Accessibility.ProtectedOrInternal: return StandardGlyphItem.GlyphItemFriend;
+				case Accessibility.Public: return StandardGlyphItem.GlyphItemPublic;
+				default: return StandardGlyphItem.TotalGlyphItems;
+			}
 		}
 	}
 }

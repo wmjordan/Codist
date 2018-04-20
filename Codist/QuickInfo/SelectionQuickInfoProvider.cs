@@ -22,11 +22,11 @@ namespace Codist.QuickInfo
 
 		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperTooltip)
-				? new SelectionQuickInfoController()
+				? new SelectionQuickInfo()
 				: null;
 		}
 
-		internal sealed class SelectionQuickInfoController : IQuickInfoSource
+		internal sealed class SelectionQuickInfo : IQuickInfoSource
 		{
 			public void AugmentQuickInfoSession(IQuickInfoSession session, IList<Object> qiContent, out ITrackingSpan applicableToSpan) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Selection) == false) {

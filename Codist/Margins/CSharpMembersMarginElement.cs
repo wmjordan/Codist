@@ -115,7 +115,7 @@ namespace Codist.Margins
 		/// all of the markers 
 		/// </summary>
 		protected override void OnRender(DrawingContext drawingContext) {
-			const int showMemberDeclarationThredshold = 30, longDeclarationLines = 50;
+			const int showMemberDeclarationThredshold = 30, longDeclarationLines = 50, labelSize = 9;
 
 			base.OnRender(drawingContext);
 
@@ -128,6 +128,7 @@ namespace Codist.Margins
 			var tags = _tagger.GetTags(new SnapshotSpan(snapshot, 0, snapshotLength));
 			var memberLevel = 0;
 			var memberType = CodeMemberType.Root;
+			var lastLabel = Double.MinValue;
 			SnapshotPoint rangeFrom = default(SnapshotPoint), rangeTo = default(SnapshotPoint);
 
 			foreach (var tag in tags) {
@@ -143,7 +144,7 @@ namespace Codist.Margins
 				var end = new SnapshotPoint(snapshot, span.End);
 				var start = new SnapshotPoint(snapshot, span.Start);
 				var level = tag.Tag.Level;
-				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration) && end - start > 150) {
+				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration) && span.Length > 150) {
 					var lineCount = snapshot.GetLineNumberFromPosition(end) - snapshot.GetLineNumberFromPosition(start);
 					var y1 = _scrollBar.GetYCoordinateOfBufferPosition(start);
 					Pen pen = null;
@@ -155,11 +156,12 @@ namespace Codist.Margins
 							drawingContext.DrawLine(pen, new Point(level, y1), new Point(level, y2));
 							drawingContext.DrawLine(pen, new Point(level, y2), new Point(ActualWidth, y2));
 						}
-						if (y2 - y1 > showMemberDeclarationThredshold && tag.Tag.Name != null) {
+						if (y2 - y1 > showMemberDeclarationThredshold && y1 - labelSize > lastLabel && tag.Tag.Name != null) {
 							if (pen == null) {
 								pen = GetPenForCodeMemberType(tagType);
 							}
-							drawingContext.DrawText(UIHelper.ToFormattedText(tag.Tag.Name, 9, pen.Brush.Clone().Alpha((y2 - y1) * 10 / ActualHeight)), new Point(level, y1));
+							drawingContext.DrawText(UIHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Clone().Alpha((y2 - y1) * 10 / ActualHeight)), new Point(level, y1));
+							lastLabel = y1 + labelSize;
 						}
 					}
 				}
@@ -175,14 +177,15 @@ namespace Codist.Margins
 					var pen = GetPenForCodeMemberType(tagType);
 					var yTop = _scrollBar.GetYCoordinateOfBufferPosition(start);
 					var yBottom = _scrollBar.GetYCoordinateOfBufferPosition(end);
-					if (yBottom - yTop > 9 && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Tag.Name != null) {
+					if (yTop - labelSize > lastLabel && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Tag.Name != null) {
 						// draw type name
-						var text = UIHelper.ToFormattedText(tag.Tag.Name, 9, pen.Brush.Clone().Alpha(1))
+						var text = UIHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Clone().Alpha(1))
 							.SetBold();
 						if (level != 1) {
 							text.SetFontStyle(FontStyles.Italic);
 						}
 						drawingContext.DrawText(text, new Point(level + 1, yTop - text.Height / 2));
+						lastLabel = yTop + labelSize;
 					}
 					drawingContext.DrawRectangle(pen.Brush.Clone().Alpha(1), pen, new Rect(level - (MarkerSize / 2), yTop - (MarkerSize / 2), MarkerSize, MarkerSize));
 					drawingContext.DrawLine(pen, new Point(level, yTop), new Point(level, yBottom));

@@ -20,6 +20,7 @@ namespace Codist
 {
 	static class UIHelper
 	{
+		static readonly Thickness GlyphMargin = new Thickness(0, 0, 5, 0);
 		public static string GetClassificationType(this Type type, string field) {
 			var f = type.GetField(field);
 			var d = f.GetCustomAttribute<ClassificationTypeAttribute>();
@@ -131,6 +132,17 @@ namespace Codist
 			});
 			return panel;
 		}
+		public static TextBlock SetGlyph(this TextBlock block, System.Windows.Media.ImageSource image) {
+			var first = block.Inlines.FirstInline;
+			var glyph = new InlineUIContainer(new Image { Source = image, Width = image.Width, Margin = GlyphMargin }) { BaselineAlignment = BaselineAlignment.TextTop };
+			if (first != null) {
+				block.Inlines.InsertBefore(first, glyph);
+			}
+			else {
+				block.Inlines.Add(glyph);
+			}
+			return block;
+		}
 		public static TextBlock AddText(this TextBlock block, string text) {
 			block.Inlines.Add(new Run(text));
 			return block;
@@ -237,12 +249,37 @@ namespace Codist
 			}
 			if (Config.Instance.QuickInfoMaxHeight > 0) {
 				element.MaxHeight = Config.Instance.QuickInfoMaxHeight;
-				element.MouseLeftButtonUp += (s, args) => (s as TElement).MaxHeight = Double.PositiveInfinity;
+				//element.MouseLeftButtonUp += (s, args) => (s as TElement).MaxHeight = Double.PositiveInfinity;
 			}
 			if (Config.Instance.QuickInfoMaxWidth > 0) {
 				element.MaxWidth = Config.Instance.QuickInfoMaxWidth;
+				var t = element as TextBlock;
+				if (t != null && t.TextWrapping == TextWrapping.NoWrap) {
+					t.TextWrapping = TextWrapping.Wrap;
+				}
 			}
 			return element;
+		}
+		public static ScrollViewer Scrollable<TElement>(this TElement element) {
+			return new ScrollViewer { Content = element, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+		}
+		public static DependencyObject GetVisualParent(this DependencyObject obj) {
+			return System.Windows.Media.VisualTreeHelper.GetParent(obj);
+		}
+		public static TParent GetVisualParent<TParent>(this DependencyObject obj)
+			where TParent : DependencyObject {
+			DependencyObject p = obj;
+			TParent r;
+			while ((p = p.GetVisualParent()) != null) {
+				r = p as TParent;
+				if (r != null) {
+					return r;
+				}
+			}
+			return null;
+		}
+		public static DependencyObject GetLogicalParent(this DependencyObject obj) {
+			return LogicalTreeHelper.GetParent(obj);
 		}
 
 		sealed class SymbolLink : Run
