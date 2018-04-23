@@ -46,7 +46,6 @@ namespace Codist.QuickInfo
 		{
 			//todo extract brushes
 			static Brush _NamespaceBrush, _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush, _TypeParameterBrush, _PropertyBrush, _FieldBrush;
-
 			readonly IEditorFormatMapService _FormatMapService;
 			readonly ITextStructureNavigatorSelectorService _NavigatorService;
 			readonly IGlyphService _GlyphService;
@@ -165,7 +164,7 @@ namespace Codist.QuickInfo
 				foreach (var item in symbolInfo.CandidateSymbols) {
 					info.Add(ToUIText(item, node.SpanStart));
 				}
-				qiContent.Add(info);
+				qiContent.Add(info.Scrollable());
 			}
 
 			static bool CanAccess(ISymbol symbol) {
@@ -430,7 +429,7 @@ namespace Codist.QuickInfo
 				if (interfaces.Length == 0) {
 					return;
 				}
-				var types = new List<ITypeSymbol>();
+				var types = new List<ITypeSymbol>(3);
 				StackPanel info = null;
 				var returnType = returnTypeGetter(symbol);
 				var parameters = parameterGetter(symbol);
@@ -567,7 +566,7 @@ namespace Codist.QuickInfo
 						v = -v;
 					}
 					var bytes = new byte[] { (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v };
-					return ToUIText(form == NumericForm.Unsigned ? ((uint)v).ToString() : v.ToString(), bytes);
+					return ShowNumericForms(form == NumericForm.Unsigned ? ((uint)v).ToString() : v.ToString(), bytes);
 				}
 				else if (value is long) {
 					var v = (long)value;
@@ -575,10 +574,10 @@ namespace Codist.QuickInfo
 						v = -v;
 					}
 					var bytes = new byte[] { (byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v };
-					return ToUIText(form == NumericForm.Unsigned ? ((ulong)v).ToString() : v.ToString(), bytes);
+					return ShowNumericForms(form == NumericForm.Unsigned ? ((ulong)v).ToString() : v.ToString(), bytes);
 				}
 				else if (value is byte) {
-					return ToUIText(((byte)value).ToString(), new byte[] { (byte)value });
+					return ShowNumericForms(((byte)value).ToString(), new byte[] { (byte)value });
 				}
 				else if (value is short) {
 					var v = (short)value;
@@ -586,12 +585,12 @@ namespace Codist.QuickInfo
 						v = (short)-v;
 					}
 					var bytes = new byte[] { (byte)(v >> 8), (byte)v };
-					return ToUIText(form == NumericForm.Unsigned ? ((ushort)v).ToString() : v.ToString(), bytes);
+					return ShowNumericForms(form == NumericForm.Unsigned ? ((ushort)v).ToString() : v.ToString(), bytes);
 				}
 				else if (value is char) {
 					var v = (char)value;
 					var bytes = new byte[] { (byte)(v >> 8), (byte)v };
-					return ToUIText(((ushort)v).ToString(), bytes);
+					return ShowNumericForms(((ushort)v).ToString(), bytes);
 				}
 				else if (value is uint) {
 					return ShowNumericForms((int)(uint)value, NumericForm.Unsigned);
@@ -603,7 +602,7 @@ namespace Codist.QuickInfo
 					return ShowNumericForms((short)(ushort)value, NumericForm.Unsigned);
 				}
 				else if (value is sbyte) {
-					return ToUIText(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
+					return ShowNumericForms(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
 				}
 				return null;
 			}
@@ -926,7 +925,7 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			static StackPanel ToUIText(string dec, byte[] bytes) {
+			static StackPanel ShowNumericForms(string dec, byte[] bytes) {
 				var s = new StackPanel()
 					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(dec).AddText(" DEC", true))
 					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToHexString(bytes)).AddText(" HEX", true))
@@ -936,7 +935,7 @@ namespace Codist.QuickInfo
 
 			TextBlock ToUIText(ISymbol symbol, int position) {
 				return ToUIText(
-					new TextBlock().SetGlyph(_GlyphService.GetGlyph(symbol.GetGlyphGroup(), symbol.GetGlyphItem())),
+					new TextBlock() { TextWrapping = TextWrapping.Wrap }.SetGlyph(_GlyphService.GetGlyph(symbol.GetGlyphGroup(), symbol.GetGlyphItem())),
 					symbol.ToMinimalDisplayParts(_SemanticModel, position),
 					null,
 					Int32.MinValue);
