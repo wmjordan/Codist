@@ -144,5 +144,11 @@ namespace Codist
 				default: return StandardGlyphItem.TotalGlyphItems;
 			}
 		}
+		public static bool IsType(this CodeMemberType type) {
+			return type > CodeMemberType.Root && type < CodeMemberType.Member;
+		}
+		public static bool IsMember(this CodeMemberType type) {
+			return type > CodeMemberType.Member && type < CodeMemberType.Other;
+		}
 	}
 }

@@ -148,7 +148,7 @@ namespace Codist.Margins
 					var lineCount = snapshot.GetLineNumberFromPosition(end) - snapshot.GetLineNumberFromPosition(start);
 					var y1 = _scrollBar.GetYCoordinateOfBufferPosition(start);
 					Pen pen = null;
-					if (tagType >= CodeMemberType.Member) {
+					if (tagType.IsMember()) {
 						var y2 = _scrollBar.GetYCoordinateOfBufferPosition(end);
 						if (lineCount >= longDeclarationLines) {
 							pen = GetPenForCodeMemberType(tagType);
@@ -166,8 +166,8 @@ namespace Codist.Margins
 					}
 				}
 
-				if (tagType < CodeMemberType.Member) {
-					if (memberType > CodeMemberType.Member) {
+				if (tagType.IsType()) {
+					if (memberType.IsMember()) {
 						// draw range for previous grouped members
 						var y1 = _scrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
 						var y2 = _scrollBar.GetYCoordinateOfBufferPosition(rangeTo);
@@ -198,7 +198,7 @@ namespace Codist.Margins
 					rangeTo = end;
 				}
 				else {
-					if (memberType > CodeMemberType.Member) {
+					if (memberType.IsMember()) {
 						// draw range for previous grouped members
 						var y1 = _scrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
 						var y2 = _scrollBar.GetYCoordinateOfBufferPosition(rangeTo);
@@ -210,7 +210,7 @@ namespace Codist.Margins
 					memberLevel = level;
 				}
 			}
-			if (memberType > CodeMemberType.Member) {
+			if (memberType.IsMember()) {
 				// draw range for previous grouped members
 				var y1 = _scrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
 				var y2 = _scrollBar.GetYCoordinateOfBufferPosition(rangeTo);
@@ -218,7 +218,7 @@ namespace Codist.Margins
 			}
 		}
 
-		private Pen GetPenForCodeMemberType(CodeMemberType memberType) {
+		Pen GetPenForCodeMemberType(CodeMemberType memberType) {
 			switch (memberType) {
 				case CodeMemberType.Class: return _ClassPen;
 				case CodeMemberType.Interface: return _InterfacePen;

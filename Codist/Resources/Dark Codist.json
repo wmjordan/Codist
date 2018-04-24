@@ -115,7 +115,7 @@
       "StyleID": "ToDo",
       "Category": "Comment",
       "Bold": true,
-      "ForegroundColor": "#FF000000",
+      "ForegroundColor": "#FFCCCCCC",
       "BackgroundColor": "#800000A0",
       "UseScrollBarMarker": true
     },
