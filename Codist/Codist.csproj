@@ -83,6 +83,7 @@
     <Compile Include="Classifiers\EditorFormats.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.cs" />
     <Compile Include="Helpers\UIHelper.cs" />
+    <Compile Include="Helpers\XmlDocParser.cs" />
     <Compile Include="LineTransformers\LineHeightTransform.cs" />
     <Compile Include="Margins\LineNumberMargin.cs" />
     <Compile Include="Margins\CodeMargin.cs" />
@@ -131,6 +132,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="QuickInfo\SymbolFormatter.cs" />
     <Compile Include="SyntaxHighlight\CodeViewCreationListener.cs" />
     <Compile Include="SyntaxHighlight\CodeViewDecorator.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfoSourceProvider.cs" />

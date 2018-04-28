@@ -31,6 +31,7 @@
 			this._LongMethodBox = new System.Windows.Forms.CheckBox();
 			this._MemberDeclarationBox = new System.Windows.Forms.CheckBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this._CSharpDocumentationBaseTypeBox = new System.Windows.Forms.CheckBox();
 			this._CSharpTypeParameterQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpParameterQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpDeclarationQuickInfoBox = new System.Windows.Forms.CheckBox();
@@ -56,6 +57,7 @@
 			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this.tabPage3 = new System.Windows.Forms.TabPage();
 			this._HighlightParameterBracesBox = new System.Windows.Forms.CheckBox();
+			this._CSharpOverrideDefaultXmlDocBox = new System.Windows.Forms.CheckBox();
 			this.groupBox3.SuspendLayout();
 			this.groupBox4.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._QuickInfoMaxHeightBox)).BeginInit();
@@ -120,6 +122,8 @@
 			// 
 			this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox3.Controls.Add(this._CSharpOverrideDefaultXmlDocBox);
+			this.groupBox3.Controls.Add(this._CSharpDocumentationBaseTypeBox);
 			this.groupBox3.Controls.Add(this._CSharpTypeParameterQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpParameterQuickInfoBox);
 			this.groupBox3.Controls.Add(this._CSharpDeclarationQuickInfoBox);
@@ -134,10 +138,20 @@
 			this.groupBox3.Controls.Add(this._CSharpAttributesQuickInfoBox);
 			this.groupBox3.Location = new System.Drawing.Point(6, 31);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(506, 180);
+			this.groupBox3.Size = new System.Drawing.Size(506, 208);
 			this.groupBox3.TabIndex = 2;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Info item";
+			// 
+			// _CSharpDocumentationBaseTypeBox
+			// 
+			this._CSharpDocumentationBaseTypeBox.AutoSize = true;
+			this._CSharpDocumentationBaseTypeBox.Location = new System.Drawing.Point(9, 174);
+			this._CSharpDocumentationBaseTypeBox.Name = "_CSharpDocumentationBaseTypeBox";
+			this._CSharpDocumentationBaseTypeBox.Size = new System.Drawing.Size(149, 19);
+			this._CSharpDocumentationBaseTypeBox.TabIndex = 12;
+			this._CSharpDocumentationBaseTypeBox.Text = "Inherit XML Doc";
+			this._CSharpDocumentationBaseTypeBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpTypeParameterQuickInfoBox
 			// 
@@ -287,7 +301,7 @@
 			this.groupBox4.Controls.Add(this.label2);
 			this.groupBox4.Controls.Add(this.label1);
 			this.groupBox4.Controls.Add(this._QuickInfoMaxWidthBox);
-			this.groupBox4.Location = new System.Drawing.Point(6, 217);
+			this.groupBox4.Location = new System.Drawing.Point(6, 245);
 			this.groupBox4.Name = "groupBox4";
 			this.groupBox4.Size = new System.Drawing.Size(506, 59);
 			this.groupBox4.TabIndex = 0;
@@ -421,6 +435,16 @@
 			this._HighlightParameterBracesBox.Text = "Parameter braces";
 			this._HighlightParameterBracesBox.UseVisualStyleBackColor = true;
 			// 
+			// _CSharpOverrideDefaultXmlDocBox
+			// 
+			this._CSharpOverrideDefaultXmlDocBox.AutoSize = true;
+			this._CSharpOverrideDefaultXmlDocBox.Location = new System.Drawing.Point(249, 174);
+			this._CSharpOverrideDefaultXmlDocBox.Name = "_CSharpOverrideDefaultXmlDocBox";
+			this._CSharpOverrideDefaultXmlDocBox.Size = new System.Drawing.Size(221, 19);
+			this._CSharpOverrideDefaultXmlDocBox.TabIndex = 13;
+			this._CSharpOverrideDefaultXmlDocBox.Text = "Override default XML Doc";
+			this._CSharpOverrideDefaultXmlDocBox.UseVisualStyleBackColor = true;
+			// 
 			// CSharpPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -478,5 +502,7 @@
 		private System.Windows.Forms.TabPage tabPage3;
 		private System.Windows.Forms.CheckBox _ClickAndGoBox;
 		private System.Windows.Forms.CheckBox _HighlightParameterBracesBox;
+		private System.Windows.Forms.CheckBox _CSharpDocumentationBaseTypeBox;
+		private System.Windows.Forms.CheckBox _CSharpOverrideDefaultXmlDocBox;
 	}
 }

@@ -116,6 +116,11 @@ namespace Codist
 			}
 			return brush;
 		}
+		public static TPanel Add<TPanel>(this TPanel panel, string text)
+			where TPanel : Panel {
+			panel.Children.Add(new TextBlock() { Text = text });
+			return panel;
+		}
 		public static TPanel Add<TPanel>(this TPanel panel, UIElement control)
 			where TPanel : Panel {
 			panel.Children.Add(control);
@@ -143,6 +148,10 @@ namespace Codist
 			}
 			return block;
 		}
+		public static TextBlock Add(this TextBlock block, Inline inline) {
+			block.Inlines.Add(inline);
+			return block;
+		}
 		public static TextBlock AddText(this TextBlock block, string text) {
 			block.Inlines.Add(new Run(text));
 			return block;
@@ -161,6 +170,7 @@ namespace Codist
 				run.FontWeight = FontWeights.Bold;
 			}
 			run.Foreground = brush;
+			run.ToolTip = symbol.ToString();
 			block.Inlines.Add(run);
 			return block;
 		}
@@ -268,6 +278,9 @@ namespace Codist
 		}
 		public static TParent GetVisualParent<TParent>(this DependencyObject obj)
 			where TParent : DependencyObject {
+			if (obj == null) {
+				return null;
+			}
 			DependencyObject p = obj;
 			TParent r;
 			while ((p = p.GetVisualParent()) != null) {

@@ -549,6 +549,8 @@ namespace Codist
 		Parameter = 1 << 9,
 		InterfaceImplementations = 1 << 10,
 		TypeParameters = 1 << 11,
+		OverrideDefaultDocumentation = 1 << 20,
+		DocumentationFromBaseType = 1 << 21,
 		Selection = 1 << 27,
 		ClickAndGo = 1 << 28,
 		CtrlQuickInfo = 1 << 29,

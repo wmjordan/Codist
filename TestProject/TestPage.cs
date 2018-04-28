@@ -10,6 +10,10 @@ namespace TestProject
 		MyEnum IInterface.Property { get; set; } // explicit interface implementation
 		public void Method() { Property++; }
 		protected abstract int AbstractMethod(); // abstract method
+		/// <summary>
+		/// The virtual method does nothing by default.
+		/// <para>See also: <see cref="Property"/>.</para>
+		/// </summary>
 		public virtual void VirtualMethod() { } // virtual method
 		void IDisposable.Dispose() { } // explicit interface implementation
 	}

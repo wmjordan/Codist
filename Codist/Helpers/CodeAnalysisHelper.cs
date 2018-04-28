@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -133,6 +134,11 @@ namespace Codist
 			}
 		}
 
+		public static string GetAssemblyModuleName(this ISymbol symbol) {
+			return symbol.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
+					?? symbol.ContainingAssembly?.Name;
+		}
+
 		public static StandardGlyphItem GetGlyphItem(this ISymbol symbol) {
 			switch (symbol.DeclaredAccessibility) {
 				case Accessibility.Private: return StandardGlyphItem.GlyphItemPrivate;
@@ -143,6 +149,63 @@ namespace Codist
 				case Accessibility.Public: return StandardGlyphItem.GlyphItemPublic;
 				default: return StandardGlyphItem.TotalGlyphItems;
 			}
+		}
+		public static ITypeSymbol GetReturnType(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Event: return (symbol as IEventSymbol).RaiseMethod.ReturnType;
+				case SymbolKind.Field: return (symbol as IFieldSymbol).Type;
+				case SymbolKind.Local: return (symbol as ILocalSymbol).Type;
+				case SymbolKind.Method: return (symbol as IMethodSymbol).ReturnType;
+				case SymbolKind.Parameter: return (symbol as IParameterSymbol).Type;
+				case SymbolKind.Property: return (symbol as IPropertySymbol).Type;
+			}
+			return null;
+		}
+		public static ImmutableArray<IParameterSymbol> GetParameters(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Method: return (symbol as IMethodSymbol).Parameters;
+				case SymbolKind.Event: return (symbol as IEventSymbol).AddMethod.Parameters;
+				case SymbolKind.Property: return (symbol as IPropertySymbol).Parameters;
+			}
+			return default(ImmutableArray<IParameterSymbol>);
+		}
+		/// <summary>
+		/// Checks whether the given symbol has the given <paramref name="kind"/>, <paramref name="returnType"/> and <paramref name="parameters"/>.
+		/// </summary>
+		/// <param name="symbol">The symbol to be checked.</param>
+		/// <param name="kind">The <see cref="SymbolKind"/> the symbol should have.</param>
+		/// <param name="returnType">The type that the symbol should return.</param>
+		/// <param name="parameters">The parameters the symbol should take.</param>
+		public static bool MatchSignature(this ISymbol symbol, SymbolKind kind, ITypeSymbol returnType, ImmutableArray<IParameterSymbol> parameters) {
+			if (symbol.Kind != kind
+				|| symbol.GetReturnType() != returnType) {
+				return false;
+			}
+			var method = kind == SymbolKind.Method ? symbol as IMethodSymbol
+				: kind == SymbolKind.Event ? (symbol as IEventSymbol).RaiseMethod
+				: null;
+			if (method != null && parameters.IsDefault == false) {
+				var memberParameters = method.Parameters;
+				if (memberParameters.Length != parameters.Length) {
+					return false;
+				}
+				for (int i = parameters.Length - 1; i >= 0; i--) {
+					var pi = parameters[i];
+					var mi = memberParameters[i];
+					if (pi.Type.Equals(mi.Type) == false
+						|| pi.RefKind != mi.RefKind) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+		public static bool IsCommonClass(this ISymbol symbol) {
+			if (symbol.Kind == SymbolKind.NamedType) {
+				var name = symbol.Name;
+				return name == "Object" || name == "ValueType" || name == "Enum" || name == "MulticastDelegate";
+			}
+			return false;
 		}
 		public static bool IsType(this CodeMemberType type) {
 			return type > CodeMemberType.Root && type < CodeMemberType.Member;

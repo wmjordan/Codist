@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Xml.Linq;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -44,8 +45,7 @@ namespace Codist.QuickInfo
 
 		sealed class CSharpQuickInfo : IQuickInfoSource
 		{
-			//todo extract brushes
-			static Brush _NamespaceBrush, _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush, _TypeParameterBrush, _PropertyBrush, _FieldBrush;
+			static readonly SymbolFormatter _SymbolFormatter = new SymbolFormatter();
 			readonly IEditorFormatMapService _FormatMapService;
 			readonly ITextStructureNavigatorSelectorService _NavigatorService;
 			readonly IGlyphService _GlyphService;
@@ -64,9 +64,9 @@ namespace Codist.QuickInfo
 			}
 
 			public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {
-				if (qiContent.Count == 0) {
-					goto EXIT;
-				}
+				//if (qiContent.Count == 0) {
+				//	goto EXIT;
+				//}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.HideOriginalQuickInfo)) {
 					qiContent.Clear();
 				}
@@ -102,6 +102,9 @@ namespace Codist.QuickInfo
 				if (node.Kind() == SyntaxKind.Argument) {
 					node = (node as ArgumentSyntax).Expression;
 				}
+				DefaultQuickInfoPanelWrapper w = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationFromBaseType | QuickInfoOptions.OverrideDefaultDocumentation) || Config.Instance.QuickInfoMaxWidth > 0 || Config.Instance.QuickInfoMaxHeight > 0
+					? new DefaultQuickInfoPanelWrapper(QuickInfoOverrider.FindDefaultQuickInfoPanel(qiContent))
+					: null;
 				var symbolInfo = semanticModel.GetSymbolInfo(node);
 				ISymbol symbol = symbolInfo.Symbol;
 				if (symbol == null) {
@@ -121,10 +124,27 @@ namespace Codist.QuickInfo
 				if (node is PredefinedTypeSyntax/* void */) {
 					goto EXIT;
 				}
+				if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationFromBaseType | QuickInfoOptions.OverrideDefaultDocumentation)) {
+					var doc = symbol.GetXmlDocForSymbol();
+					if (doc == null) {
+						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
+							var baseDocs = new StackPanel();
+							if (GetBaseTypeDocumentation(baseDocs, symbol, symbol, node)) {
+								w.OverrideDocumentation(baseDocs);
+							}
+						}
+					}
+					else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
+						var desc = doc.ToUIText(RenderXmlDocSymbol);
+						if (desc != null) {
+							w.OverrideDocumentation(desc);
+						}
+					}
+				}
 				var formatMap = _FormatMapService.GetEditorFormatMap(session.TextView);
 				if (_FormatMap != formatMap) {
 					_FormatMap = formatMap;
-					UpdateSyntaxHighlights(formatMap);
+					_SymbolFormatter.UpdateSyntaxHighlights(formatMap);
 				}
 
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
@@ -133,15 +153,46 @@ namespace Codist.QuickInfo
 				ShowSymbolInfo(qiContent, node, symbol);
 				RETURN:
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo) /*&& node is MemberDeclarationSyntax == false && node.Kind() != SyntaxKind.VariableDeclarator && node.Kind() != SyntaxKind.Parameter*/) {
-					QuickInfoOverrider.ApplyClickAndGoFeature(qiContent, symbol);
+					w.ApplyClickAndGo(symbol);
 				}
-				QuickInfoOverrider.LimitQuickInfoItemSize(qiContent);
+				QuickInfoOverrider.LimitQuickInfoItemSize(qiContent, w);
 				applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
 					? currentSnapshot.CreateTrackingSpan(extent.Start, extent.Length, SpanTrackingMode.EdgeInclusive)
 					: null;
 				return;
 				EXIT:
 				applicableToSpan = null;
+			}
+
+			bool GetBaseTypeDocumentation(StackPanel baseDocs, ISymbol symbol, ISymbol querySymbol, SyntaxNode node) {
+				var t = symbol.Kind == SymbolKind.NamedType ? symbol as INamedTypeSymbol : symbol.ContainingType;
+				if (t == null
+					|| t.TypeKind != TypeKind.Interface && (t = t.BaseType) == null // go to the base type
+					) {
+					return false;
+				}
+				var member = t.GetMembers(querySymbol.Name).FirstOrDefault(i => i.MatchSignature(querySymbol.Kind, querySymbol.GetReturnType(), querySymbol.GetParameters()));
+				if (member != null) {
+					var desc = member.GetXmlDoc().GetSummary().ToUIText(RenderXmlDocSymbol);
+					if (desc != null) {
+						baseDocs.Add(ToUIText(new TextBlock { TextWrapping = TextWrapping.Wrap }.AddText("Documentation from "), member.ContainingType.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)).AddText(":"));
+						baseDocs.Add(desc);
+						return true;
+					}
+				}
+				if (t.TypeKind != TypeKind.Interface && GetBaseTypeDocumentation(baseDocs, t, querySymbol, node)) {
+					return true;
+				}
+				else if (symbol.Kind != SymbolKind.NamedType
+					&& symbol == querySymbol
+					&& (t = symbol.ContainingType) != null) {
+					foreach (var item in t.Interfaces) {
+						if (GetBaseTypeDocumentation(baseDocs, item, querySymbol, node)) {
+							return true;
+						}
+					}
+				}
+				return false;
 			}
 
 			void IDisposable.Dispose() {
@@ -155,8 +206,36 @@ namespace Codist.QuickInfo
 
 			void _ConfigUpdated(object sender, EventArgs e) {
 				if (_FormatMap != null) {
-					UpdateSyntaxHighlights(_FormatMap);
+					_SymbolFormatter.UpdateSyntaxHighlights(_FormatMap);
 				}
+			}
+
+			void RenderXmlDocSymbol(string symbol, TextBlock tb, SymbolKind symbolKind) {
+				switch (symbolKind) {
+					case SymbolKind.Parameter: tb.AddText(symbol, _SymbolFormatter.Parameter); return;
+					case SymbolKind.TypeParameter: tb.AddText(symbol, _SymbolFormatter.TypeParameter); return;
+				}
+				var rs = DocumentationCommentId.GetFirstSymbolForDeclarationId(symbol, _SemanticModel.Compilation);
+				if (rs == null) {
+					if (symbol.Length > 2 && symbol[1] == ':') {
+						switch (symbol[0]) {
+							case 'T':
+								tb.AddText(symbol.Substring(2), false, true, _SymbolFormatter.Class);
+								break;
+							case 'M':
+								tb.AddText(symbol.Substring(2), false, true, _SymbolFormatter.Method);
+								break;
+							case '!':
+								tb.AddText(symbol.Substring(2), true, true, null);
+								break;
+						}
+					}
+					else {
+						tb.AddText(symbol);
+					}
+					return;
+				}
+				ToUIText(tb, rs);
 			}
 
 			void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo, SyntaxNode node) {
@@ -183,29 +262,8 @@ namespace Codist.QuickInfo
 							: null)
 						?? (node.Parent is ArgumentSyntax
 							? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
-							: null);
-			}
-
-			static bool IsCommonClassName(string name) {
-				return name == "Object" || name == "ValueType" || name == "Enum" || name == "MulticastDelegate";
-			}
-
-			static void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {
-				System.Diagnostics.Trace.Assert(formatMap != null, "format map is null");
-				_InterfaceBrush = formatMap.GetBrush(Constants.CodeInterfaceName);
-				_ClassBrush = formatMap.GetBrush(Constants.CodeClassName);
-				_TextBrush = formatMap.GetBrush(Constants.CodeString);
-				_EnumBrush = formatMap.GetBrush(Constants.CodeEnumName);
-				_DelegateBrush = formatMap.GetBrush(Constants.CodeDelegateName);
-				_NumberBrush = formatMap.GetBrush(Constants.CodeNumber);
-				_StructBrush = formatMap.GetBrush(Constants.CodeStructName);
-				_KeywordBrush = formatMap.GetBrush(Constants.CodeKeyword);
-				_NamespaceBrush = formatMap.GetBrush(Constants.CSharpNamespaceName);
-				_MethodBrush = formatMap.GetBrush(Constants.CSharpMethodName);
-				_ParameterBrush = formatMap.GetBrush(Constants.CSharpParameterName);
-				_TypeParameterBrush = formatMap.GetBrush(Constants.CSharpTypeParameterName);
-				_PropertyBrush = formatMap.GetBrush(Constants.CSharpPropertyName);
-				_FieldBrush = formatMap.GetBrush(Constants.CSharpFieldName);
+							: null)
+						?? (node is TypeParameterSyntax || node is ParameterSyntax ? semanticModel.GetDeclaredSymbol(node) : null);
 			}
 
 			void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {
@@ -249,8 +307,7 @@ namespace Codist.QuickInfo
 						break;
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation)) {
-					string asmName = symbol.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
-							?? symbol.ContainingAssembly?.Name;
+					string asmName = symbol.GetAssemblyModuleName();
 					if (asmName != null) {
 						qiContent.Add(new TextBlock().AddText("Assembly: ", true).AddText(asmName));
 					}
@@ -302,7 +359,7 @@ namespace Codist.QuickInfo
 					ShowDeclarationModifier(qiContent, property, "Property", node.SpanStart);
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
-					ShowInterfaceImplementation(qiContent, node, property, property.ExplicitInterfaceImplementations, m => m.Type, m => m.Parameters);
+					ShowInterfaceImplementation(qiContent, node, property, property.ExplicitInterfaceImplementations);
 				}
 			}
 
@@ -317,7 +374,7 @@ namespace Codist.QuickInfo
 					}
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
-					ShowInterfaceImplementation(qiContent, node, ev, ev.ExplicitInterfaceImplementations, m => m.Type, m => m.AddMethod.Parameters);
+					ShowInterfaceImplementation(qiContent, node, ev, ev.ExplicitInterfaceImplementations);
 				}
 			}
 
@@ -342,7 +399,7 @@ namespace Codist.QuickInfo
 					ShowMethodTypeArguments(qiContent, node, method);
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
-					ShowInterfaceImplementation(qiContent, node, method, method.ExplicitInterfaceImplementations, m => m.ReturnType, m => m.Parameters);
+					ShowInterfaceImplementation(qiContent, node, method, method.ExplicitInterfaceImplementations);
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) && method.IsExtensionMethod) {
 					ShowExtensionMethod(qiContent, method, node.SpanStart);
@@ -362,7 +419,7 @@ namespace Codist.QuickInfo
 					if (item.Equals(method) || item.Kind != SymbolKind.Method) {
 						continue;
 					}
-					overloadInfo.Add(ToUIText(new TextBlock { TextWrapping = TextWrapping.Wrap }.SetGlyph(_GlyphService.GetGlyph(item.GetGlyphGroup(), item.GetGlyphItem())), item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), null, -1));
+					overloadInfo.Add(ToUIText(new TextBlock { TextWrapping = TextWrapping.Wrap }.SetGlyph(_GlyphService.GetGlyph(item.GetGlyphGroup(), item.GetGlyphItem())), item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), -1));
 				}
 				if (overloadInfo.Children.Count > 1) {
 					qiContent.Add(overloadInfo.Scrollable());
@@ -420,7 +477,7 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void ShowInterfaceImplementation<TSymbol>(IList<object> qiContent, SyntaxNode node, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations, Func<TSymbol, ITypeSymbol> returnTypeGetter, Func<TSymbol, ImmutableArray<IParameterSymbol>> parameterGetter)
+			void ShowInterfaceImplementation<TSymbol>(IList<object> qiContent, SyntaxNode node, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations)
 				where TSymbol : class, ISymbol {
 				if (symbol.IsStatic || symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.FirstOrDefault() == null) {
 					return;
@@ -429,52 +486,35 @@ namespace Codist.QuickInfo
 				if (interfaces.Length == 0) {
 					return;
 				}
-				var types = new List<ITypeSymbol>(3);
+				var explicitIntfs = new List<ITypeSymbol>(3);
 				StackPanel info = null;
-				var returnType = returnTypeGetter(symbol);
-				var parameters = parameterGetter(symbol);
+				var returnType = symbol.GetReturnType();
+				var parameters = symbol.GetParameters();
 				foreach (var intf in interfaces) {
 					foreach (var member in intf.GetMembers()) {
-						if (member.Kind != symbol.Kind || member.DeclaredAccessibility != Accessibility.Public || member.Name != symbol.Name) {
-							continue;
+						if (member.Kind == symbol.Kind
+							&& member.DeclaredAccessibility == Accessibility.Public
+							&& member.Name == symbol.Name
+							&& member.MatchSignature(symbol.Kind, returnType, parameters)) {
+							explicitIntfs.Add(intf);
 						}
-
-						var memberSymbol = member as TSymbol;
-						if (returnType != null && returnType.Equals(returnTypeGetter(memberSymbol)) == false) {
-							continue;
-						}
-						var memberParameters = parameterGetter(memberSymbol);
-						if (memberParameters.Length != parameters.Length) {
-							continue;
-						}
-						for (int i = parameters.Length - 1; i >= 0; i--) {
-							var pi = parameters[i];
-							var mi = memberParameters[i];
-							if (pi.Type.Equals(mi.Type) == false
-								|| pi.RefKind != mi.RefKind) {
-								goto NEXT;
-							}
-						}
-						types.Add(intf);
-						break;
-						NEXT:;
 					}
 				}
-				if (types.Count > 0) {
+				if (explicitIntfs.Count > 0) {
 					info = new StackPanel().AddText("Implements:", true);
-					foreach (var item in types) {
+					foreach (var item in explicitIntfs) {
 						info.Add(ToUIText(item, node.SpanStart));
 					}
 				}
 				if (explicitImplementations != null) {
-					types.Clear();
-					types.AddRange(explicitImplementations.Select(i => i.ContainingType));
-					if (types.Count > 0) {
+					explicitIntfs.Clear();
+					explicitIntfs.AddRange(explicitImplementations.Select(i => i.ContainingType));
+					if (explicitIntfs.Count > 0) {
 						if (info == null) {
 							info = new StackPanel();
 						}
 						var p = new StackPanel().AddText("Explicit implements:", true);
-						foreach (var item in types) {
+						foreach (var item in explicitIntfs) {
 							p.Add(ToUIText(item, node.SpanStart));
 						}
 						info.Add(p);
@@ -489,7 +529,7 @@ namespace Codist.QuickInfo
 				var extType = method.ConstructedFrom.ReceiverType;
 				var extTypeParameter = extType as ITypeParameterSymbol;
 				if (extTypeParameter != null && (extTypeParameter.HasConstructorConstraint || extTypeParameter.HasReferenceTypeConstraint || extTypeParameter.HasValueTypeConstraint || extTypeParameter.ConstraintTypes.Length > 0)) {
-					var ext = new TextBlock().AddText("Extending: ", true).AddSymbol(extType, true, _ClassBrush).AddText(" with ");
+					var ext = new TextBlock().AddText("Extending: ", true).AddSymbol(extType, true, _SymbolFormatter.Class).AddText(" with ");
 					ToUIText(ext, method.ReceiverType.ToMinimalDisplayParts(_SemanticModel, position));
 					info.Add(ext);
 				}
@@ -499,29 +539,29 @@ namespace Codist.QuickInfo
 			}
 
 			void ShowTypeParameterInfo(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument, TextBlock text, int position) {
-				text.AddText(typeParameter.Name, _TypeParameterBrush).AddText(" is ");
+				text.AddText(typeParameter.Name, _SymbolFormatter.TypeParameter).AddText(" is ");
 				ToUIText(text, typeArgument.ToMinimalDisplayParts(_SemanticModel, position));
 				if (typeParameter.HasConstructorConstraint == false && typeParameter.HasReferenceTypeConstraint == false && typeParameter.HasValueTypeConstraint == false && typeParameter.ConstraintTypes.Length == 0) {
 					return;
 				}
-				text.AddText(" where ", _KeywordBrush).AddText(typeParameter.Name, _TypeParameterBrush).AddText(" : ");
+				text.AddText(" where ", _SymbolFormatter.Keyword).AddText(typeParameter.Name, _SymbolFormatter.TypeParameter).AddText(" : ");
 				var i = 0;
 				if (typeParameter.HasReferenceTypeConstraint) {
-					text.AddText("class", _KeywordBrush);
+					text.AddText("class", _SymbolFormatter.Keyword);
 					++i;
 				}
 				if (typeParameter.HasValueTypeConstraint) {
 					if (i > 0) {
 						text.AddText(", ");
 					}
-					text.AddText("struct", _KeywordBrush);
+					text.AddText("struct", _SymbolFormatter.Keyword);
 					++i;
 				}
 				if (typeParameter.HasConstructorConstraint) {
 					if (i > 0) {
 						text.AddText(", ");
 					}
-					text.AddText("new", _KeywordBrush).AddText("()");
+					text.AddText("new", _SymbolFormatter.Keyword).AddText("()");
 					++i;
 				}
 				if (typeParameter.ConstraintTypes.Length > 0) {
@@ -539,17 +579,17 @@ namespace Codist.QuickInfo
 				var info = new TextBlock().AddText("Field", true).AddText(" declaration: ");
 				ShowAccessibilityInfo(field, info);
 				if (field.IsConst) {
-					info.AddText("const ", _KeywordBrush);
+					info.AddText("const ", _SymbolFormatter.Keyword);
 				}
 				else {
 					if (field.IsStatic) {
-						info.AddText("static ", _KeywordBrush);
+						info.AddText("static ", _SymbolFormatter.Keyword);
 					}
 					if (field.IsReadOnly) {
-						info.AddText("readonly ", _KeywordBrush);
+						info.AddText("readonly ", _SymbolFormatter.Keyword);
 					}
 					else if (field.IsVolatile) {
-						info.AddText("volatile ", _KeywordBrush);
+						info.AddText("volatile ", _SymbolFormatter.Keyword);
 					}
 				}
 				qiContent.Add(info);
@@ -623,7 +663,7 @@ namespace Codist.QuickInfo
 					var a = item.AttributeClass.Name;
 					var attrDef = new TextBlock()
 						.AddText("[")
-						.AddText(a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, _ClassBrush);
+						.AddText(a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, _SymbolFormatter.Class);
 					if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
 						attrDef.AddText("]");
 						info.Add(attrDef);
@@ -646,7 +686,7 @@ namespace Codist.QuickInfo
 							attrDef.AddText(arg.Key, false, true, null);
 						}
 						else {
-							attrDef.AddText(arg.Key, attrMember.Kind == SymbolKind.Property ? _PropertyBrush : _FieldBrush);
+							attrDef.AddText(arg.Key, attrMember.Kind == SymbolKind.Property ? _SymbolFormatter.Property : _SymbolFormatter.Field);
 						}
 						attrDef.AddText("=");
 						ToUIText(attrDef, arg.Value, position);
@@ -663,12 +703,11 @@ namespace Codist.QuickInfo
 			void ShowBaseType(IList<object> qiContent, ITypeSymbol typeSymbol, int position) {
 				var baseType = typeSymbol.BaseType;
 				if (baseType != null) {
-					var name = baseType.Name;
-					if (IsCommonClassName(name) == false) {
+					if (baseType.IsCommonClass() == false) {
 						var info = ToUIText(new TextBlock().AddText("Base type: ", true), baseType.ToMinimalDisplayParts(_SemanticModel, position));
 						while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
-							if (CanAccess(baseType) && IsCommonClassName(baseType.Name) == false) {
-								info.AddText(" - ").AddSymbol(baseType, false, _ClassBrush);
+							if (CanAccess(baseType) && baseType.IsCommonClass() == false) {
+								info.AddText(" - ").AddSymbol(baseType, false, _SymbolFormatter.Class);
 							}
 						}
 						qiContent.Add(info);
@@ -728,12 +767,12 @@ namespace Codist.QuickInfo
 					.Add(new TextBlock()
 						.AddText("Min: ", true)
 						.AddText(min.ToString() + "(")
-						.AddText(minName.Name, _EnumBrush)
+						.AddText(minName.Name, _SymbolFormatter.Enum)
 						.AddText(")"))
 					.Add(new TextBlock()
 						.AddText("Max: ", true)
 						.AddText(max.ToString() + "(")
-						.AddText(maxName.Name, _EnumBrush)
+						.AddText(maxName.Name, _SymbolFormatter.Enum)
 						.AddText(")"));
 				if (type.GetAttributes().FirstOrDefault(a => a.AttributeClass.ToDisplayString() == "System.FlagsAttribute") != null) {
 					var d = Convert.ToString(Convert.ToInt64(bits), 2);
@@ -806,16 +845,16 @@ namespace Codist.QuickInfo
 				var info = new TextBlock().AddText(type, true).AddText(" declaration: ");
 				ShowAccessibilityInfo(symbol, info);
 				if (symbol.IsAbstract) {
-					info.AddText("abstract ", _KeywordBrush);
+					info.AddText("abstract ", _SymbolFormatter.Keyword);
 				}
 				else if (symbol.IsStatic) {
-					info.AddText("static ", _KeywordBrush);
+					info.AddText("static ", _SymbolFormatter.Keyword);
 				}
 				else if (symbol.IsVirtual) {
-					info.AddText("virtual ", _KeywordBrush);
+					info.AddText("virtual ", _SymbolFormatter.Keyword);
 				}
 				else if (symbol.IsOverride) {
-					info.AddText(symbol.IsSealed ? "sealed override " : "override ", _KeywordBrush);
+					info.AddText(symbol.IsSealed ? "sealed override " : "override ", _SymbolFormatter.Keyword);
 					INamedTypeSymbol t = null;
 					switch (symbol.Kind) {
 						case SymbolKind.Method: t = ((IMethodSymbol)symbol).OverriddenMethod?.ContainingType; break;
@@ -827,22 +866,22 @@ namespace Codist.QuickInfo
 					}
 				}
 				else if (symbol.IsSealed) {
-					info.AddText("sealed ", _KeywordBrush);
+					info.AddText("sealed ", _SymbolFormatter.Keyword);
 				}
 				if (symbol.IsExtern) {
-					info.AddText("extern ", _KeywordBrush);
+					info.AddText("extern ", _SymbolFormatter.Keyword);
 				}
 				qiContent.Add(info);
 			}
 
 			static void ShowAccessibilityInfo(ISymbol symbol, TextBlock info) {
 				switch (symbol.DeclaredAccessibility) {
-					case Accessibility.Public: info.AddText("public ", _KeywordBrush); break;
-					case Accessibility.Private: info.AddText("private ", _KeywordBrush); break;
-					case Accessibility.ProtectedAndInternal: info.AddText("protected internal ", _KeywordBrush); break;
-					case Accessibility.Protected: info.AddText("protected ", _KeywordBrush); break;
-					case Accessibility.Internal: info.AddText("internal ", _KeywordBrush); break;
-					case Accessibility.ProtectedOrInternal: info.AddText("protected or internal ", _KeywordBrush); break;
+					case Accessibility.Public: info.AddText("public ", _SymbolFormatter.Keyword); break;
+					case Accessibility.Private: info.AddText("private ", _SymbolFormatter.Keyword); break;
+					case Accessibility.ProtectedAndInternal: info.AddText("protected internal ", _SymbolFormatter.Keyword); break;
+					case Accessibility.Protected: info.AddText("protected ", _SymbolFormatter.Keyword); break;
+					case Accessibility.Internal: info.AddText("internal ", _SymbolFormatter.Keyword); break;
+					case Accessibility.ProtectedOrInternal: info.AddText("protected or internal ", _SymbolFormatter.Keyword); break;
 				}
 			}
 
@@ -873,13 +912,36 @@ namespace Codist.QuickInfo
 				var symbol = _SemanticModel.GetSymbolInfo(al.Parent);
 				var argName = argument.NameColon?.Name.ToString();
 				if (symbol.Symbol != null) {
-					qiContent.Add(ToUIText(new TextBlock().AddText("Argument of "), symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
+					if (argName != null) {
+						var mp = (symbol.Symbol as IMethodSymbol).Parameters;
+						for (int i = 0; i < mp.Length; i++) {
+							if (mp[i].Name == argName) {
+								ap = i;
+							}
+						}
+					}
+					else if (ap != -1) {
+						var mp = (symbol.Symbol as IMethodSymbol).Parameters;
+						if (ap < mp.Length) {
+							argName = mp[ap].Name;
+						}
+						else if (mp.Length > 1 && mp[mp.Length-1].IsParams) {
+							argName = mp[mp.Length - 1].Name;
+						}
+					}
+					var doc = argName != null ? symbol.Symbol.GetXmlDoc().GetNamedDocItem("param", argName) : null;
+					var info = ToUIText(new TextBlock().AddText("Argument of "), symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), ap);
+					if (doc != null) {
+						info.AddText("\n" + argName, true).AddText(": ");
+						doc.ToUIText(info, RenderXmlDocSymbol);
+					}
+					qiContent.Add(info);
 				}
 				else if (symbol.CandidateSymbols.Length > 0) {
 					var info = new StackPanel();
 					info.Add(new TextBlock().AddText("Maybe", true).AddText(" argument of"));
 					foreach (var candidate in symbol.CandidateSymbols) {
-						info.Add(ToUIText(new TextBlock(), candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName, argName == null ? ap : Int32.MinValue));
+						info.Add(ToUIText(new TextBlock(), candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName == null ? ap : Int32.MinValue));
 					}
 					qiContent.Add(info.Scrollable());
 				}
@@ -937,15 +999,47 @@ namespace Codist.QuickInfo
 				return ToUIText(
 					new TextBlock() { TextWrapping = TextWrapping.Wrap }.SetGlyph(_GlyphService.GetGlyph(symbol.GetGlyphGroup(), symbol.GetGlyphItem())),
 					symbol.ToMinimalDisplayParts(_SemanticModel, position),
-					null,
 					Int32.MinValue);
 			}
 
 			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts) {
-				return ToUIText(block, parts, null, Int32.MinValue);
+				return ToUIText(block, parts, Int32.MinValue);
 			}
 
-			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, string argName, int argIndex) {
+			static TextBlock ToUIText(TextBlock block, ISymbol symbol) {
+				switch (symbol.Kind) {
+					case SymbolKind.Event: return block.AddSymbol(symbol, false, _SymbolFormatter.Delegate);
+					case SymbolKind.Field: return block.AddSymbol(symbol, false, _SymbolFormatter.Field);
+					case SymbolKind.Method: return block.AddSymbol(symbol, false, _SymbolFormatter.Method);
+					case SymbolKind.NamedType:
+						var type = symbol as INamedTypeSymbol;
+						switch (type.TypeKind) {
+							case TypeKind.Class:
+								return block.AddSymbol(symbol, false, _SymbolFormatter.Class);
+							case TypeKind.Delegate:
+								return block.AddSymbol(symbol, false, _SymbolFormatter.Delegate);
+							case TypeKind.Dynamic:
+								return block.AddText(symbol.Name, _SymbolFormatter.Keyword);
+							case TypeKind.Enum:
+								return block.AddSymbol(symbol, false, _SymbolFormatter.Enum);
+							case TypeKind.Interface:
+								return block.AddSymbol(symbol, false, _SymbolFormatter.Interface);
+							case TypeKind.Struct:
+								return block.AddSymbol(symbol, false, _SymbolFormatter.Struct);
+							case TypeKind.TypeParameter:
+								return block.AddText(symbol.Name, _SymbolFormatter.TypeParameter);
+							default:
+								return block.AddText(symbol.MetadataName, _SymbolFormatter.Class);
+						}
+					case SymbolKind.Namespace: return block.AddText(symbol.Name, _SymbolFormatter.Namespace);
+					case SymbolKind.Parameter: return block.AddText(symbol.Name, _SymbolFormatter.Parameter);
+					case SymbolKind.Property: return block.AddSymbol(symbol, false, _SymbolFormatter.Property);
+					case SymbolKind.TypeParameter: return block.AddText(symbol.Name, _SymbolFormatter.TypeParameter);
+					default: return block.AddText(symbol.Name);
+				}
+			}
+
+			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, int argIndex) {
 				foreach (var part in parts) {
 					switch (part.Kind) {
 						case SymbolDisplayPartKind.AliasName:
@@ -953,56 +1047,56 @@ namespace Codist.QuickInfo
 							goto default;
 						case SymbolDisplayPartKind.ClassName:
 							if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
-								block.AddText("?", _ClassBrush);
+								block.AddText("?", _SymbolFormatter.Class);
 							}
 							else {
-								block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _ClassBrush);
+								block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _SymbolFormatter.Class);
 							}
 							break;
 						case SymbolDisplayPartKind.EnumName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _EnumBrush);
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _SymbolFormatter.Enum);
 							break;
 						case SymbolDisplayPartKind.InterfaceName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _InterfaceBrush);
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _SymbolFormatter.Interface);
 							break;
 						case SymbolDisplayPartKind.MethodName:
-							block.AddSymbol(part.Symbol, argIndex != Int32.MinValue, _MethodBrush);
+							block.AddSymbol(part.Symbol, argIndex != Int32.MinValue, _SymbolFormatter.Method);
 							break;
 						case SymbolDisplayPartKind.ParameterName:
 							var p = part.Symbol as IParameterSymbol;
-							if (p.Ordinal == argIndex || p.IsParams && argIndex > p.Ordinal || p.Name == argName) {
-								block.AddText(p.Name, true, true, _ParameterBrush);
+							if (p.Ordinal == argIndex || p.IsParams && argIndex > p.Ordinal) {
+								block.AddText(p.Name, true, true, _SymbolFormatter.Parameter);
 							}
 							else {
-								block.AddText(p.Name, false, false, _ParameterBrush);
+								block.AddText(p.Name, false, false, _SymbolFormatter.Parameter);
 							}
 							break;
 						case SymbolDisplayPartKind.StructName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _StructBrush);
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _SymbolFormatter.Struct);
 							break;
 						case SymbolDisplayPartKind.DelegateName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _DelegateBrush);
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _SymbolFormatter.Delegate);
 							break;
 						case SymbolDisplayPartKind.StringLiteral:
-							block.AddText(part.ToString(), false, false, _TextBrush);
+							block.AddText(part.ToString(), false, false, _SymbolFormatter.Text);
 							break;
 						case SymbolDisplayPartKind.Keyword:
-							block.AddText(part.ToString(), false, false, _KeywordBrush);
+							block.AddText(part.ToString(), false, false, _SymbolFormatter.Keyword);
 							break;
 						case SymbolDisplayPartKind.NamespaceName:
-							block.AddText(part.Symbol.Name, _NamespaceBrush);
+							block.AddText(part.Symbol.Name, _SymbolFormatter.Namespace);
 							break;
 						case SymbolDisplayPartKind.TypeParameterName:
-							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _TypeParameterBrush);
+							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _SymbolFormatter.TypeParameter);
 							break;
 						case SymbolDisplayPartKind.FieldName:
-							block.AddText(part.Symbol.Name, _FieldBrush);
+							block.AddText(part.Symbol.Name, _SymbolFormatter.Field);
 							break;
 						case SymbolDisplayPartKind.PropertyName:
-							block.AddText(part.Symbol.Name, _PropertyBrush);
+							block.AddText(part.Symbol.Name, _SymbolFormatter.Property);
 							break;
 						case SymbolDisplayPartKind.EventName:
-							block.AddText(part.Symbol.Name, _DelegateBrush);
+							block.AddText(part.Symbol.Name, _SymbolFormatter.Delegate);
 							break;
 						default:
 							block.AddText(part.ToString());
@@ -1015,13 +1109,13 @@ namespace Codist.QuickInfo
 				switch (v.Kind) {
 					case TypedConstantKind.Primitive:
 						if (v.Value is bool) {
-							block.AddText((bool)v.Value ? "true" : "false", _KeywordBrush);
+							block.AddText((bool)v.Value ? "true" : "false", _SymbolFormatter.Keyword);
 						}
 						else if (v.Value is string) {
-							block.AddText(v.ToCSharpString(), _TextBrush);
+							block.AddText(v.ToCSharpString(), _SymbolFormatter.Text);
 						}
 						else {
-							block.AddText(v.ToCSharpString(), _NumberBrush);
+							block.AddText(v.ToCSharpString(), _SymbolFormatter.Number);
 						}
 						break;
 					case TypedConstantKind.Enum:
@@ -1039,15 +1133,15 @@ namespace Codist.QuickInfo
 								if (i > 0) {
 									block.AddText(" | ");
 								}
-								block.AddText(v.Type.Name + "." + flags[i].Name, _EnumBrush);
+								block.AddText(v.Type.Name + "." + flags[i].Name, _SymbolFormatter.Enum);
 							}
 						}
 						else {
-							block.AddText(v.Type.Name + en.Substring(en.LastIndexOf('.')), _EnumBrush);
+							block.AddText(v.Type.Name + en.Substring(en.LastIndexOf('.')), _SymbolFormatter.Enum);
 						}
 						break;
 					case TypedConstantKind.Type:
-						block.AddText("typeof", _KeywordBrush).AddText("(");
+						block.AddText("typeof", _SymbolFormatter.Keyword).AddText("(");
 						ToUIText(block, (v.Value as ITypeSymbol).ToMinimalDisplayParts(_SemanticModel, position));
 						block.AddText(")");
 						break;
