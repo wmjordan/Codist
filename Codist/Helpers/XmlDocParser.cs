@@ -86,10 +86,10 @@ namespace Codist
 							case "see":
 								var see = e.Attribute("cref");
 								if (see != null) {
-									symbolRenderer(see.Value, text, SymbolKind.DynamicType);
+									symbolRenderer(see.Value, text, SymbolKind.Alias);
 								}
 								else if ((see = e.Attribute("langword")) !=null) {
-									text.AddText(see.Value, true);
+									symbolRenderer(see.Value, text, SymbolKind.DynamicType);
 								}
 								break;
 							case "paramref":

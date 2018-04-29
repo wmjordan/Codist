@@ -136,6 +136,11 @@ namespace Codist.QuickInfo
 					}
 					else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 						var desc = doc.ToUIText(RenderXmlDocSymbol);
+						var returns = doc.Parent.GetReturns();
+						if (returns != null) {
+							desc.AddText("\nReturns", true).AddText(": ");
+							returns.ToUIText(desc, RenderXmlDocSymbol);
+						}
 						if (desc != null) {
 							w.OverrideDocumentation(desc);
 						}
@@ -214,6 +219,10 @@ namespace Codist.QuickInfo
 				switch (symbolKind) {
 					case SymbolKind.Parameter: tb.AddText(symbol, _SymbolFormatter.Parameter); return;
 					case SymbolKind.TypeParameter: tb.AddText(symbol, _SymbolFormatter.TypeParameter); return;
+					case SymbolKind.DynamicType:
+						// highlight keywords
+						tb.AddText(symbol, _SymbolFormatter.Keyword);
+						return;
 				}
 				var rs = DocumentationCommentId.GetFirstSymbolForDeclarationId(symbol, _SemanticModel.Compilation);
 				if (rs == null) {
@@ -235,7 +244,7 @@ namespace Codist.QuickInfo
 					}
 					return;
 				}
-				ToUIText(tb, rs);
+				_SymbolFormatter.ToUIText(tb, rs);
 			}
 
 			void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo, SyntaxNode node) {
@@ -1004,39 +1013,6 @@ namespace Codist.QuickInfo
 
 			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts) {
 				return ToUIText(block, parts, Int32.MinValue);
-			}
-
-			static TextBlock ToUIText(TextBlock block, ISymbol symbol) {
-				switch (symbol.Kind) {
-					case SymbolKind.Event: return block.AddSymbol(symbol, false, _SymbolFormatter.Delegate);
-					case SymbolKind.Field: return block.AddSymbol(symbol, false, _SymbolFormatter.Field);
-					case SymbolKind.Method: return block.AddSymbol(symbol, false, _SymbolFormatter.Method);
-					case SymbolKind.NamedType:
-						var type = symbol as INamedTypeSymbol;
-						switch (type.TypeKind) {
-							case TypeKind.Class:
-								return block.AddSymbol(symbol, false, _SymbolFormatter.Class);
-							case TypeKind.Delegate:
-								return block.AddSymbol(symbol, false, _SymbolFormatter.Delegate);
-							case TypeKind.Dynamic:
-								return block.AddText(symbol.Name, _SymbolFormatter.Keyword);
-							case TypeKind.Enum:
-								return block.AddSymbol(symbol, false, _SymbolFormatter.Enum);
-							case TypeKind.Interface:
-								return block.AddSymbol(symbol, false, _SymbolFormatter.Interface);
-							case TypeKind.Struct:
-								return block.AddSymbol(symbol, false, _SymbolFormatter.Struct);
-							case TypeKind.TypeParameter:
-								return block.AddText(symbol.Name, _SymbolFormatter.TypeParameter);
-							default:
-								return block.AddText(symbol.MetadataName, _SymbolFormatter.Class);
-						}
-					case SymbolKind.Namespace: return block.AddText(symbol.Name, _SymbolFormatter.Namespace);
-					case SymbolKind.Parameter: return block.AddText(symbol.Name, _SymbolFormatter.Parameter);
-					case SymbolKind.Property: return block.AddSymbol(symbol, false, _SymbolFormatter.Property);
-					case SymbolKind.TypeParameter: return block.AddText(symbol.Name, _SymbolFormatter.TypeParameter);
-					default: return block.AddText(symbol.Name);
-				}
 			}
 
 			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, int argIndex) {

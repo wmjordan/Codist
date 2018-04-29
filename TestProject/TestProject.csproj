@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comments.cs" />
     <Compile Include="ExtensionClass.cs" />
     <Compile Include="IInterface.cs" />
     <Compile Include="MyEnum.cs" />
