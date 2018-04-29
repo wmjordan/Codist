@@ -4,8 +4,10 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Language.Intellisense;
@@ -36,6 +38,23 @@ namespace Codist
 			return solution.ContainsDocument(docId)
 				? solution.GetDocument(docId)
 				: solution.WithDocumentText(docId, sourceText, PreservationMode.PreserveIdentity).GetDocument(docId);
+		}
+
+		public static ISymbol GetSymbolExt(this SemanticModel semanticModel, SyntaxNode node) {
+			return node.IsDeclaration() ? semanticModel.GetDeclaredSymbol(node) :
+					(node is AttributeArgumentSyntax
+						? semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol
+						: null)
+					?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax
+						? semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true)).Symbol
+						: null)
+					?? (node.Parent is MemberAccessExpressionSyntax
+						? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
+						: null)
+					?? (node.Parent is ArgumentSyntax
+						? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
+						: null)
+					?? (node is TypeParameterSyntax || node is ParameterSyntax ? semanticModel.GetDeclaredSymbol(node) : null);
 		}
 
 		public static void GoToSymbol(this ISymbol symbol) {
@@ -213,5 +232,40 @@ namespace Codist
 		public static bool IsMember(this CodeMemberType type) {
 			return type > CodeMemberType.Member && type < CodeMemberType.Other;
 		}
+		public static XElement GetBaseTypeDocumentation(this ISymbol symbol, out ISymbol baseType) {
+			return GetBaseTypeDocumentation(symbol, symbol, out baseType);
+		}
+		static XElement GetBaseTypeDocumentation(ISymbol symbol, ISymbol querySymbol, out ISymbol baseType) {
+			var t = symbol.Kind == SymbolKind.NamedType ? symbol as INamedTypeSymbol : symbol.ContainingType;
+			if (t == null
+				// go to the base type if not querying interface
+				|| t.TypeKind != TypeKind.Interface && (t = t.BaseType) == null
+				) {
+				baseType = null;
+				return null;
+			}
+			XElement doc;
+			var member = t.GetMembers(querySymbol.Name).FirstOrDefault(i => i.MatchSignature(querySymbol.Kind, querySymbol.GetReturnType(), querySymbol.GetParameters()));
+			if (member != null && (doc = member.GetXmlDoc().GetSummary()) != null) {
+				baseType = member;
+				return doc;
+			}
+			if (t.TypeKind != TypeKind.Interface && (doc = GetBaseTypeDocumentation(t, querySymbol, out baseType)) != null) {
+				return doc;
+			}
+			else if (symbol.Kind != SymbolKind.NamedType
+				&& symbol == querySymbol
+				&& (t = symbol.ContainingType) != null) {
+				foreach (var item in t.Interfaces) {
+					if ((doc = GetBaseTypeDocumentation(item, querySymbol, out baseType)) != null) {
+						return doc;
+					}
+				}
+			}
+			baseType = null;
+			return null;
+		}
+
+
 	}
 }

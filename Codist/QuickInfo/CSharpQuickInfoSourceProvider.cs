@@ -113,7 +113,7 @@ namespace Codist.QuickInfo
 						goto RETURN;
 					}
 					else {
-						symbol = node.IsDeclaration() ? semanticModel.GetDeclaredSymbol(node) : GetExtSymbol(node, semanticModel);
+						symbol = semanticModel.GetSymbolExt(node);
 					}
 				}
 				if (symbol == null) {
@@ -125,26 +125,7 @@ namespace Codist.QuickInfo
 					goto EXIT;
 				}
 				if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationFromBaseType | QuickInfoOptions.OverrideDefaultDocumentation)) {
-					var doc = symbol.GetXmlDocForSymbol();
-					if (doc == null) {
-						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
-							var baseDocs = new StackPanel();
-							if (GetBaseTypeDocumentation(baseDocs, symbol, symbol, node)) {
-								w.OverrideDocumentation(baseDocs);
-							}
-						}
-					}
-					else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
-						var desc = doc.ToUIText(RenderXmlDocSymbol);
-						var returns = doc.Parent.GetReturns();
-						if (returns != null) {
-							desc.AddText("\nReturns", true).AddText(": ");
-							returns.ToUIText(desc, RenderXmlDocSymbol);
-						}
-						if (desc != null) {
-							w.OverrideDocumentation(desc);
-						}
-					}
+					OverrideDocumentation(node, w, symbol);
 				}
 				var formatMap = _FormatMapService.GetEditorFormatMap(session.TextView);
 				if (_FormatMap != formatMap) {
@@ -169,35 +150,28 @@ namespace Codist.QuickInfo
 				applicableToSpan = null;
 			}
 
-			bool GetBaseTypeDocumentation(StackPanel baseDocs, ISymbol symbol, ISymbol querySymbol, SyntaxNode node) {
-				var t = symbol.Kind == SymbolKind.NamedType ? symbol as INamedTypeSymbol : symbol.ContainingType;
-				if (t == null
-					|| t.TypeKind != TypeKind.Interface && (t = t.BaseType) == null // go to the base type
-					) {
-					return false;
-				}
-				var member = t.GetMembers(querySymbol.Name).FirstOrDefault(i => i.MatchSignature(querySymbol.Kind, querySymbol.GetReturnType(), querySymbol.GetParameters()));
-				if (member != null) {
-					var desc = member.GetXmlDoc().GetSummary().ToUIText(RenderXmlDocSymbol);
-					if (desc != null) {
-						baseDocs.Add(ToUIText(new TextBlock { TextWrapping = TextWrapping.Wrap }.AddText("Documentation from "), member.ContainingType.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)).AddText(":"));
-						baseDocs.Add(desc);
-						return true;
-					}
-				}
-				if (t.TypeKind != TypeKind.Interface && GetBaseTypeDocumentation(baseDocs, t, querySymbol, node)) {
-					return true;
-				}
-				else if (symbol.Kind != SymbolKind.NamedType
-					&& symbol == querySymbol
-					&& (t = symbol.ContainingType) != null) {
-					foreach (var item in t.Interfaces) {
-						if (GetBaseTypeDocumentation(baseDocs, item, querySymbol, node)) {
-							return true;
+			void OverrideDocumentation(SyntaxNode node, DefaultQuickInfoPanelWrapper qiWrapper, ISymbol symbol) {
+				var doc = symbol.GetXmlDocForSymbol();
+				if (doc != null) {
+					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
+						var desc = doc.ToUIText(RenderXmlDocSymbol);
+						if (desc != null) {
+							RenderXmlReturnsDoc(symbol, doc.Parent, desc);
+							qiWrapper.OverrideDocumentation(desc);
 						}
 					}
 				}
-				return false;
+				else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
+					ISymbol baseMember;
+					var baseDocs = symbol.GetBaseTypeDocumentation(out baseMember);
+					if (baseDocs != null) {
+						var info = new TextBlock { TextWrapping = TextWrapping.Wrap }.AddText("Documentation from ");
+						ToUIText(info, baseMember.ContainingType.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)).AddText(":");
+						baseDocs.ToUIText(info, RenderXmlDocSymbol);
+						RenderXmlReturnsDoc(baseMember, baseDocs.Parent, info);
+						qiWrapper.OverrideDocumentation(info);
+					}
+				}
 			}
 
 			void IDisposable.Dispose() {
@@ -247,6 +221,16 @@ namespace Codist.QuickInfo
 				_SymbolFormatter.ToUIText(tb, rs);
 			}
 
+			void RenderXmlReturnsDoc(ISymbol symbol, XElement doc, TextBlock desc) {
+				if (symbol.Kind == SymbolKind.Method) {
+					var returns = doc.GetReturns();
+					if (returns != null) {
+						desc.AddText("\nReturns", true).AddText(": ");
+						returns.ToUIText(desc, RenderXmlDocSymbol);
+					}
+				}
+			}
+
 			void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo, SyntaxNode node) {
 				var info = new StackPanel().AddText("Maybe...", true);
 				foreach (var item in symbolInfo.CandidateSymbols) {
@@ -257,22 +241,6 @@ namespace Codist.QuickInfo
 
 			static bool CanAccess(ISymbol symbol) {
 				return symbol.DeclaredAccessibility == Accessibility.Public || symbol.DeclaredAccessibility == Accessibility.NotApplicable || symbol.Locations.Any(l => l.IsInSource);
-			}
-
-			static ISymbol GetExtSymbol(SyntaxNode node, SemanticModel semanticModel) {
-				return (node is AttributeArgumentSyntax
-							? semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol
-							: null)
-						?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax
-							? semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true)).Symbol
-							: null)
-						?? (node.Parent is MemberAccessExpressionSyntax
-							? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
-							: null)
-						?? (node.Parent is ArgumentSyntax
-							? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
-							: null)
-						?? (node is TypeParameterSyntax || node is ParameterSyntax ? semanticModel.GetDeclaredSymbol(node) : null);
 			}
 
 			void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {
