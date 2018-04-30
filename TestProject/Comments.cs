@@ -19,6 +19,7 @@ namespace TestProject
 	/// is accessible, like <see cref="MyEnum"/>, <see cref="MyStruct._instanceField"/>,
 	/// <see cref="ConcreteClass.Method"/>, or <see cref="ConcreteClass.Method{TGeneric}"/>.</para>
 	/// <para>The "para" elements no longer generate empty lines.</para>
+	/// <para>You can style your comment with <b>bold</b>, <i>italic</i> and <u>underline</u>, or <b><i><u>combinations of them</u></i></b>.</para>
 	/// </summary>
 	class Comments
 	{

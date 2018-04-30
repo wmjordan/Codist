@@ -47,12 +47,12 @@ namespace Codist
 			_FieldBrush = formatMap.GetBrush(Constants.CSharpFieldName);
 		}
 
-		internal void ToUIText(TextBlock text, ISymbol symbol) {
+		internal void ToUIText(System.Windows.Documents.InlineCollection text, ISymbol symbol) {
 			switch (symbol.Kind) {
-				case SymbolKind.Event: text.AddSymbol(symbol, false, _DelegateBrush); return;
-				case SymbolKind.Field: text.AddSymbol(symbol, false, _FieldBrush); return;
+				case SymbolKind.Event: text.Add(symbol.Render(_DelegateBrush)); return;
+				case SymbolKind.Field: text.Add(symbol.Render(_FieldBrush)); return;
 				case SymbolKind.Method:
-					text.AddSymbol(symbol, false, _MethodBrush);
+					text.Add(symbol.Render(_MethodBrush));
 					var method = symbol as IMethodSymbol;
 					if (method.IsGenericMethod) {
 						var arguments = method.TypeParameters;
@@ -63,44 +63,44 @@ namespace Codist
 					var type = symbol as INamedTypeSymbol;
 					switch (type.TypeKind) {
 						case TypeKind.Class:
-							text.AddSymbol(symbol, false, _ClassBrush); break;
+							text.Add(symbol.Render(_ClassBrush)); break;
 						case TypeKind.Delegate:
-							text.AddSymbol(symbol, false, _DelegateBrush); return;
+							text.Add(symbol.Render(_DelegateBrush)); return;
 						case TypeKind.Dynamic:
-							text.AddText(symbol.Name, _KeywordBrush); return;
+							text.Add(symbol.Name.Render(_KeywordBrush)); return;
 						case TypeKind.Enum:
-							text.AddSymbol(symbol, false, _EnumBrush); return;
+							text.Add(symbol.Render(_EnumBrush)); return;
 						case TypeKind.Interface:
-							text.AddSymbol(symbol, false, _InterfaceBrush); break;
+							text.Add(symbol.Render(_InterfaceBrush)); break;
 						case TypeKind.Struct:
-							text.AddSymbol(symbol, false, _StructBrush); break;
+							text.Add(symbol.Render(_StructBrush)); break;
 						case TypeKind.TypeParameter:
-							text.AddText(symbol.Name, _TypeParameterBrush); return;
+							text.Add(symbol.Name.Render(_TypeParameterBrush)); return;
 						default:
-							text.AddText(symbol.MetadataName, _ClassBrush); return;
+							text.Add(symbol.MetadataName.Render(_ClassBrush)); return;
 					}
 					if (type.IsGenericType) {
 						var arguments = type.TypeParameters;
 						AddTypeArguments(text, arguments);
 					}
 					return;
-				case SymbolKind.Namespace: text.AddText(symbol.Name, _NamespaceBrush); return;
-				case SymbolKind.Parameter: text.AddText(symbol.Name, _ParameterBrush); return;
-				case SymbolKind.Property: text.AddSymbol(symbol, false, _PropertyBrush); return;
-				case SymbolKind.TypeParameter: text.AddText(symbol.Name, _TypeParameterBrush); return;
-				default: text.AddText(symbol.Name); return;
+				case SymbolKind.Namespace: text.Add(symbol.Name.Render(_NamespaceBrush)); return;
+				case SymbolKind.Parameter: text.Add(symbol.Name.Render(_ParameterBrush)); return;
+				case SymbolKind.Property: text.Add(symbol.Render(_PropertyBrush)); return;
+				case SymbolKind.TypeParameter: text.Add(symbol.Name.Render(_TypeParameterBrush)); return;
+				default: text.Add(symbol.Name); return;
 			}
 		}
 
-		void AddTypeArguments(TextBlock text, System.Collections.Immutable.ImmutableArray<ITypeParameterSymbol> arguments) {
-			text.AddText("<");
+		void AddTypeArguments(System.Windows.Documents.InlineCollection text, System.Collections.Immutable.ImmutableArray<ITypeParameterSymbol> arguments) {
+			text.Add("<");
 			for (int i = 0; i < arguments.Length; i++) {
 				if (i > 0) {
-					text.AddText(", ");
+					text.Add(", ");
 				}
-				text.AddText(arguments[i].Name, _TypeParameterBrush);
+				text.Add(arguments[i].Name.Render(_TypeParameterBrush));
 			}
-			text.AddText(">");
+			text.Add(">");
 		}
 	}
 }

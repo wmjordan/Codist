@@ -167,7 +167,7 @@ namespace Codist.QuickInfo
 					if (baseDocs != null) {
 						var info = new TextBlock { TextWrapping = TextWrapping.Wrap }.AddText("Documentation from ");
 						ToUIText(info, baseMember.ContainingType.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)).AddText(":");
-						baseDocs.ToUIText(info, RenderXmlDocSymbol);
+						baseDocs.ToUIText(info.Inlines, RenderXmlDocSymbol);
 						RenderXmlReturnsDoc(baseMember, baseDocs.Parent, info);
 						qiWrapper.OverrideDocumentation(info);
 					}
@@ -189,13 +189,13 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void RenderXmlDocSymbol(string symbol, TextBlock tb, SymbolKind symbolKind) {
+			void RenderXmlDocSymbol(string symbol, System.Windows.Documents.InlineCollection tb, SymbolKind symbolKind) {
 				switch (symbolKind) {
-					case SymbolKind.Parameter: tb.AddText(symbol, _SymbolFormatter.Parameter); return;
-					case SymbolKind.TypeParameter: tb.AddText(symbol, _SymbolFormatter.TypeParameter); return;
+					case SymbolKind.Parameter: tb.Add(symbol.Render(_SymbolFormatter.Parameter)); return;
+					case SymbolKind.TypeParameter: tb.Add(symbol.Render(_SymbolFormatter.TypeParameter)); return;
 					case SymbolKind.DynamicType:
 						// highlight keywords
-						tb.AddText(symbol, _SymbolFormatter.Keyword);
+						tb.Add(symbol.Render(_SymbolFormatter.Keyword));
 						return;
 				}
 				var rs = DocumentationCommentId.GetFirstSymbolForDeclarationId(symbol, _SemanticModel.Compilation);
@@ -203,18 +203,18 @@ namespace Codist.QuickInfo
 					if (symbol.Length > 2 && symbol[1] == ':') {
 						switch (symbol[0]) {
 							case 'T':
-								tb.AddText(symbol.Substring(2), false, true, _SymbolFormatter.Class);
+								tb.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Class));
 								break;
 							case 'M':
-								tb.AddText(symbol.Substring(2), false, true, _SymbolFormatter.Method);
+								tb.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Method));
 								break;
 							case '!':
-								tb.AddText(symbol.Substring(2), true, true, null);
+								tb.Add(symbol.Substring(2).Render(true, true, null));
 								break;
 						}
 					}
 					else {
-						tb.AddText(symbol);
+						tb.Add(symbol);
 					}
 					return;
 				}
@@ -226,7 +226,7 @@ namespace Codist.QuickInfo
 					var returns = doc.GetReturns();
 					if (returns != null) {
 						desc.AddText("\nReturns", true).AddText(": ");
-						returns.ToUIText(desc, RenderXmlDocSymbol);
+						returns.ToUIText(desc.Inlines, RenderXmlDocSymbol);
 					}
 				}
 			}
@@ -910,7 +910,7 @@ namespace Codist.QuickInfo
 					var info = ToUIText(new TextBlock().AddText("Argument of "), symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), ap);
 					if (doc != null) {
 						info.AddText("\n" + argName, true).AddText(": ");
-						doc.ToUIText(info, RenderXmlDocSymbol);
+						doc.ToUIText(info.Inlines, RenderXmlDocSymbol);
 					}
 					qiContent.Add(info);
 				}

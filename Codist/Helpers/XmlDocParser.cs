@@ -57,16 +57,16 @@ namespace Codist
 		public static IEnumerable<XElement> GetExceptions(this XElement doc) {
 			return doc?.Elements("exception");
 		}
-		public static TextBlock ToUIText(this XElement content, Action<string, TextBlock, SymbolKind> symbolRenderer) {
+		public static TextBlock ToUIText(this XElement content, Action<string, InlineCollection, SymbolKind> symbolRenderer) {
 			if (content == null || content.HasElements == false && content.IsEmpty) {
 				return null;
 			}
 			var text = new TextBlock { TextWrapping = TextWrapping.Wrap };
-			ToUIText(content, text, symbolRenderer);
+			ToUIText(content, text.Inlines, symbolRenderer);
 			return text.Inlines.FirstInline != null ? text : null;
 		}
 
-		public static void ToUIText(this XContainer content, TextBlock text, Action<string, TextBlock, SymbolKind> symbolRenderer) {
+		public static void ToUIText(this XContainer content, InlineCollection text, Action<string, InlineCollection, SymbolKind> symbolRenderer) {
 			foreach (var item in content.Nodes()) {
 				switch (item.NodeType) {
 					case XmlNodeType.Element:
@@ -104,9 +104,19 @@ namespace Codist
 									symbolRenderer(typeParamName.Value, text, SymbolKind.TypeParameter);
 								}
 								break;
-							case "list":
-							case "description":
-							case "c":
+							case "b":
+								StyleInner(e, text, new Bold(), symbolRenderer);
+								break;
+							case "i":
+								StyleInner(e, text, new Italic(), symbolRenderer);
+								break;
+							case "u":
+								StyleInner(e, text, new Underline(), symbolRenderer);
+								break;
+							//case "list":
+							//case "description":
+							//case "c":
+							default:
 								ToUIText(e, text, symbolRenderer);
 								break;
 						}
@@ -115,7 +125,7 @@ namespace Codist
 						string t = (item as XText).Value;
 						if (item.Parent.Name != "code") {
 							var previous = (item.PreviousNode as XElement)?.Name;
-							if (previous == null || previous != "see" && previous != "paramref" && previous != "typeparamref" && previous != "c") {
+							if (previous == null || previous != "see" && previous != "paramref" && previous != "typeparamref" && previous != "c" && previous != "b" && previous != "i" && previous != "u") {
 								t = item.NextNode == null ? t.Trim() : t.TrimStart();
 							}
 							else if (item.NextNode == null) {
@@ -123,17 +133,22 @@ namespace Codist
 							}
 							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
 						}
-						text.AddText(t);
+						text.Add(new Run(t));
 						break;
 					case XmlNodeType.CDATA:
-						text.AddText((item as XText).Value);
+						text.Add(new Run((item as XText).Value));
 						break;
 					case XmlNodeType.EntityReference:
 					case XmlNodeType.Entity:
-						text.AddText(item.ToString());
+						text.Add(new Run(item.ToString()));
 						break;
 				}
 			}
+		}
+
+		static void StyleInner(XElement element, InlineCollection text, Span span, Action<string, InlineCollection, SymbolKind> symbolRenderer) {
+			text.Add(span);
+			ToUIText(element, span.Inlines, symbolRenderer);
 		}
 	}
 }

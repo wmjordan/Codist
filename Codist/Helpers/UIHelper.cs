@@ -163,18 +163,33 @@ namespace Codist
 			return block.AddText(text, false, false, brush);
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, bool bold, WpfBrush brush) {
+			block.Inlines.Add(Render(symbol, bold, brush));
+			return block;
+		}
+
+		public static Run Render(this ISymbol symbol, WpfBrush brush) {
+			return symbol.Render(false, brush);
+		}
+		public static Run Render(this ISymbol symbol, bool bold, WpfBrush brush) {
 			var run = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)
-				? new SymbolLink(symbol)
-				: new Run(block.Name);
+							? new SymbolLink(symbol)
+							: new Run(symbol.Name);
 			if (bold) {
 				run.FontWeight = FontWeights.Bold;
 			}
 			run.Foreground = brush;
 			run.ToolTip = symbol.ToString();
-			block.Inlines.Add(run);
+			return run;
+		}
+
+		public static TextBlock AddText(this TextBlock block, string text, bool bold, bool italic, WpfBrush brush) {
+			block.Inlines.Add(Render(text, bold, italic, brush));
 			return block;
 		}
-		public static TextBlock AddText(this TextBlock block, string text, bool bold, bool italic, WpfBrush brush) {
+		public static Run Render(this string text, WpfBrush brush) {
+			return text.Render(false, false, brush);
+		}
+		public static Run Render(this string text, bool bold, bool italic, WpfBrush brush) {
 			var run = new Run(text);
 			if (bold) {
 				run.FontWeight = FontWeights.Bold;
@@ -185,9 +200,9 @@ namespace Codist
 			if (brush != null) {
 				run.Foreground = brush;
 			}
-			block.Inlines.Add(run);
-			return block;
+			return run;
 		}
+
 		public static TPanel AddText<TPanel>(this TPanel parent, string text)
 			where TPanel : Panel {
 			return parent.AddText(text, false, false, null);
