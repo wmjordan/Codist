@@ -165,8 +165,12 @@ namespace Codist.QuickInfo
 					ISymbol baseMember;
 					var baseDocs = symbol.GetBaseTypeDocumentation(out baseMember);
 					if (baseDocs != null) {
-						var info = new TextBlock { TextWrapping = TextWrapping.Wrap }.AddText("Documentation from ");
-						ToUIText(info, baseMember.ContainingType.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)).AddText(":");
+						var info = new TextBlock { TextWrapping = TextWrapping.Wrap }
+							.AddText("Documentation from ")
+							.AddSymbolDisplayParts(baseMember.ContainingType.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter)
+							.AddText(".")
+							.AddSymbol(baseMember, _SymbolFormatter)
+							.AddText(": ");
 						baseDocs.ToUIText(info.Inlines, RenderXmlDocSymbol);
 						RenderXmlReturnsDoc(baseMember, baseDocs.Parent, info);
 						qiWrapper.OverrideDocumentation(info);
@@ -189,13 +193,13 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void RenderXmlDocSymbol(string symbol, System.Windows.Documents.InlineCollection tb, SymbolKind symbolKind) {
+			void RenderXmlDocSymbol(string symbol, System.Windows.Documents.InlineCollection inlines, SymbolKind symbolKind) {
 				switch (symbolKind) {
-					case SymbolKind.Parameter: tb.Add(symbol.Render(_SymbolFormatter.Parameter)); return;
-					case SymbolKind.TypeParameter: tb.Add(symbol.Render(_SymbolFormatter.TypeParameter)); return;
+					case SymbolKind.Parameter: inlines.Add(symbol.Render(_SymbolFormatter.Parameter)); return;
+					case SymbolKind.TypeParameter: inlines.Add(symbol.Render(_SymbolFormatter.TypeParameter)); return;
 					case SymbolKind.DynamicType:
 						// highlight keywords
-						tb.Add(symbol.Render(_SymbolFormatter.Keyword));
+						inlines.Add(symbol.Render(_SymbolFormatter.Keyword));
 						return;
 				}
 				var rs = DocumentationCommentId.GetFirstSymbolForDeclarationId(symbol, _SemanticModel.Compilation);
@@ -203,28 +207,26 @@ namespace Codist.QuickInfo
 					if (symbol.Length > 2 && symbol[1] == ':') {
 						switch (symbol[0]) {
 							case 'T':
-								tb.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Class));
-								break;
+								inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Class));
+								return;
 							case 'M':
-								tb.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Method));
-								break;
+								inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Method));
+								return;
 							case '!':
-								tb.Add(symbol.Substring(2).Render(true, true, null));
-								break;
+								inlines.Add(symbol.Substring(2).Render(true, true, null));
+								return;
 						}
 					}
-					else {
-						tb.Add(symbol);
-					}
+					inlines.Add(symbol);
 					return;
 				}
-				_SymbolFormatter.ToUIText(tb, rs);
+				_SymbolFormatter.ToUIText(inlines, rs);
 			}
 
 			void RenderXmlReturnsDoc(ISymbol symbol, XElement doc, TextBlock desc) {
 				if (symbol.Kind == SymbolKind.Method) {
 					var returns = doc.GetReturns();
-					if (returns != null) {
+					if (returns != null && returns.FirstNode != null) {
 						desc.AddText("\nReturns", true).AddText(": ");
 						returns.ToUIText(desc.Inlines, RenderXmlDocSymbol);
 					}
@@ -322,7 +324,7 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void ShowAttributesInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
+			static void ShowAttributesInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
 				// todo: show inherited attributes
 				var attrs = symbol.GetAttributes();
 				if (attrs.Length > 0) {
@@ -347,7 +349,10 @@ namespace Codist.QuickInfo
 					}
 					var invoke = ev.Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
 					if (invoke != null && invoke.Parameters.Length == 2) {
-						qiContent.Add(ToUIText(new TextBlock().AddText("Event argument: ", true), invoke.Parameters[1].Type.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
+						qiContent.Add(new TextBlock { TextWrapping = TextWrapping.Wrap }
+							.AddText("Event argument: ", true)
+							.AddSymbolDisplayParts(invoke.Parameters[1].Type.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter)
+						);
 					}
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
@@ -396,7 +401,10 @@ namespace Codist.QuickInfo
 					if (item.Equals(method) || item.Kind != SymbolKind.Method) {
 						continue;
 					}
-					overloadInfo.Add(ToUIText(new TextBlock { TextWrapping = TextWrapping.Wrap }.SetGlyph(_GlyphService.GetGlyph(item.GetGlyphGroup(), item.GetGlyphItem())), item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), -1));
+					overloadInfo.Add(new TextBlock { TextWrapping = TextWrapping.Wrap }
+						.SetGlyph(_GlyphService.GetGlyph(item.GetGlyphGroup(), item.GetGlyphItem()))
+						.AddSymbolDisplayParts(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter)
+					);
 				}
 				if (overloadInfo.Children.Count > 1) {
 					qiContent.Add(overloadInfo.Scrollable());
@@ -506,18 +514,21 @@ namespace Codist.QuickInfo
 				var extType = method.ConstructedFrom.ReceiverType;
 				var extTypeParameter = extType as ITypeParameterSymbol;
 				if (extTypeParameter != null && (extTypeParameter.HasConstructorConstraint || extTypeParameter.HasReferenceTypeConstraint || extTypeParameter.HasValueTypeConstraint || extTypeParameter.ConstraintTypes.Length > 0)) {
-					var ext = new TextBlock().AddText("Extending: ", true).AddSymbol(extType, true, _SymbolFormatter.Class).AddText(" with ");
-					ToUIText(ext, method.ReceiverType.ToMinimalDisplayParts(_SemanticModel, position));
+					var ext = new TextBlock { TextWrapping = TextWrapping.Wrap }
+						.AddText("Extending: ", true).AddSymbol(extType, true, _SymbolFormatter.Class).AddText(" with ")
+						.AddSymbolDisplayParts(method.ReceiverType.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
 					info.Add(ext);
 				}
-				var def = ToUIText(new TextBlock().AddText("Extended by: ", true), method.ContainingType.ToDisplayParts());
+				var def = new TextBlock { TextWrapping = TextWrapping.Wrap }
+					.AddText("Extended by: ", true)
+					.AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), _SymbolFormatter);
 				info.Add(def);
 				qiContent.Add(info);
 			}
 
 			void ShowTypeParameterInfo(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument, TextBlock text, int position) {
-				text.AddText(typeParameter.Name, _SymbolFormatter.TypeParameter).AddText(" is ");
-				ToUIText(text, typeArgument.ToMinimalDisplayParts(_SemanticModel, position));
+				text.AddText(typeParameter.Name, _SymbolFormatter.TypeParameter).AddText(" is ")
+					.AddSymbolDisplayParts(typeArgument.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
 				if (typeParameter.HasConstructorConstraint == false && typeParameter.HasReferenceTypeConstraint == false && typeParameter.HasValueTypeConstraint == false && typeParameter.ConstraintTypes.Length == 0) {
 					return;
 				}
@@ -546,7 +557,7 @@ namespace Codist.QuickInfo
 						if (i > 0) {
 							text.AddText(", ");
 						}
-						ToUIText(text, constraint.ToMinimalDisplayParts(_SemanticModel, position));
+						text.AddSymbolDisplayParts(constraint.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
 						++i;
 					}
 				}
@@ -631,14 +642,15 @@ namespace Codist.QuickInfo
 					//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.Default.GetByteCount(sv).ToString()).AddText("System bytes", true))
 					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).AddText("Hash code", true));
 			}
-			void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs, int position) {
+
+			static void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs, int position) {
 				var info = new StackPanel().AddText("Attribute:", true);
 				foreach (var item in attrs) {
 					if (CanAccess(item.AttributeClass) == false) {
 						continue;
 					}
 					var a = item.AttributeClass.Name;
-					var attrDef = new TextBlock()
+					var attrDef = new TextBlock { TextWrapping = TextWrapping.Wrap }
 						.AddText("[")
 						.AddText(a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, _SymbolFormatter.Class);
 					if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
@@ -652,7 +664,7 @@ namespace Codist.QuickInfo
 						if (++i > 1) {
 							attrDef.AddText(", ");
 						}
-						ToUIText(attrDef, arg, position);
+						_SymbolFormatter.ToUIText(attrDef, arg);
 					}
 					foreach (var arg in item.NamedArguments) {
 						if (++i > 1) {
@@ -666,7 +678,7 @@ namespace Codist.QuickInfo
 							attrDef.AddText(arg.Key, attrMember.Kind == SymbolKind.Property ? _SymbolFormatter.Property : _SymbolFormatter.Field);
 						}
 						attrDef.AddText("=");
-						ToUIText(attrDef, arg.Value, position);
+						_SymbolFormatter.ToUIText(attrDef, arg.Value);
 					}
 					attrDef.AddText(")]");
 					attrDef.TextWrapping = TextWrapping.Wrap;
@@ -681,7 +693,9 @@ namespace Codist.QuickInfo
 				var baseType = typeSymbol.BaseType;
 				if (baseType != null) {
 					if (baseType.IsCommonClass() == false) {
-						var info = ToUIText(new TextBlock().AddText("Base type: ", true), baseType.ToMinimalDisplayParts(_SemanticModel, position));
+						var info = new TextBlock()
+							.AddText("Base type: ", true)
+							.AddSymbolDisplayParts(baseType.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
 						while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
 							if (CanAccess(baseType) && baseType.IsCommonClass() == false) {
 								info.AddText(" - ").AddSymbol(baseType, false, _SymbolFormatter.Class);
@@ -702,7 +716,7 @@ namespace Codist.QuickInfo
 					return;
 				}
 				var s = new StackPanel()
-					.Add(ToUIText(new TextBlock().AddText("Enum underlying type: ", true), t.ToMinimalDisplayParts(_SemanticModel, node.SpanStart)));
+					.Add(new TextBlock().AddText("Enum underlying type: ", true).AddSymbolDisplayParts(t.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter));
 				if (fromEnum == false) {
 					qiContent.Add(s);
 					return;
@@ -839,7 +853,7 @@ namespace Codist.QuickInfo
 						case SymbolKind.Event: t = ((IEventSymbol)symbol).OverriddenEvent?.ContainingType; break;
 					}
 					if (t != null) {
-						ToUIText(info, t.ToMinimalDisplayParts(_SemanticModel, position));
+						info.AddSymbolDisplayParts(t.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
 					}
 				}
 				else if (symbol.IsSealed) {
@@ -882,8 +896,8 @@ namespace Codist.QuickInfo
 				if (al == null) {
 					return;
 				}
-				var ap = al.Arguments.IndexOf(argument);
-				if (ap == -1) {
+				var ai = al.Arguments.IndexOf(argument);
+				if (ai == -1) {
 					return;
 				}
 				var symbol = _SemanticModel.GetSymbolInfo(al.Parent);
@@ -893,21 +907,21 @@ namespace Codist.QuickInfo
 						var mp = (symbol.Symbol as IMethodSymbol).Parameters;
 						for (int i = 0; i < mp.Length; i++) {
 							if (mp[i].Name == argName) {
-								ap = i;
+								ai = i;
 							}
 						}
 					}
-					else if (ap != -1) {
+					else if (ai != -1) {
 						var mp = (symbol.Symbol as IMethodSymbol).Parameters;
-						if (ap < mp.Length) {
-							argName = mp[ap].Name;
+						if (ai < mp.Length) {
+							argName = mp[ai].Name;
 						}
 						else if (mp.Length > 1 && mp[mp.Length-1].IsParams) {
 							argName = mp[mp.Length - 1].Name;
 						}
 					}
 					var doc = argName != null ? symbol.Symbol.GetXmlDoc().GetNamedDocItem("param", argName) : null;
-					var info = ToUIText(new TextBlock().AddText("Argument of "), symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), ap);
+					var info = new TextBlock().AddText("Argument of ").AddSymbolDisplayParts(symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, ai);
 					if (doc != null) {
 						info.AddText("\n" + argName, true).AddText(": ");
 						doc.ToUIText(info.Inlines, RenderXmlDocSymbol);
@@ -918,7 +932,7 @@ namespace Codist.QuickInfo
 					var info = new StackPanel();
 					info.Add(new TextBlock().AddText("Maybe", true).AddText(" argument of"));
 					foreach (var candidate in symbol.CandidateSymbols) {
-						info.Add(ToUIText(new TextBlock(), candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), argName == null ? ap : Int32.MinValue));
+						info.Add(new TextBlock { TextWrapping = TextWrapping.Wrap }.AddSymbolDisplayParts(candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argName == null ? ai : Int32.MinValue));
 					}
 					qiContent.Add(info.Scrollable());
 				}
@@ -927,10 +941,10 @@ namespace Codist.QuickInfo
 					if (methodName == "nameof" && al.Arguments.Count == 1) {
 						return;
 					}
-					qiContent.Add(new TextBlock().AddText("Argument " + ++ap + " of ").AddText(methodName, true));
+					qiContent.Add(new TextBlock().AddText("Argument " + ++ai + " of ").AddText(methodName, true));
 				}
 				else {
-					qiContent.Add("Argument " + ++ap);
+					qiContent.Add("Argument " + ++ai);
 				}
 			}
 			static string ToBinString(byte[] bytes) {
@@ -973,141 +987,12 @@ namespace Codist.QuickInfo
 			}
 
 			TextBlock ToUIText(ISymbol symbol, int position) {
-				return ToUIText(
+				return _SymbolFormatter.ToUIText(
 					new TextBlock() { TextWrapping = TextWrapping.Wrap }.SetGlyph(_GlyphService.GetGlyph(symbol.GetGlyphGroup(), symbol.GetGlyphItem())),
 					symbol.ToMinimalDisplayParts(_SemanticModel, position),
 					Int32.MinValue);
 			}
 
-			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts) {
-				return ToUIText(block, parts, Int32.MinValue);
-			}
-
-			static TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, int argIndex) {
-				foreach (var part in parts) {
-					switch (part.Kind) {
-						case SymbolDisplayPartKind.AliasName:
-							//todo resolve alias type
-							goto default;
-						case SymbolDisplayPartKind.ClassName:
-							if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
-								block.AddText("?", _SymbolFormatter.Class);
-							}
-							else {
-								block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _SymbolFormatter.Class);
-							}
-							break;
-						case SymbolDisplayPartKind.EnumName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _SymbolFormatter.Enum);
-							break;
-						case SymbolDisplayPartKind.InterfaceName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _SymbolFormatter.Interface);
-							break;
-						case SymbolDisplayPartKind.MethodName:
-							block.AddSymbol(part.Symbol, argIndex != Int32.MinValue, _SymbolFormatter.Method);
-							break;
-						case SymbolDisplayPartKind.ParameterName:
-							var p = part.Symbol as IParameterSymbol;
-							if (p.Ordinal == argIndex || p.IsParams && argIndex > p.Ordinal) {
-								block.AddText(p.Name, true, true, _SymbolFormatter.Parameter);
-							}
-							else {
-								block.AddText(p.Name, false, false, _SymbolFormatter.Parameter);
-							}
-							break;
-						case SymbolDisplayPartKind.StructName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _SymbolFormatter.Struct);
-							break;
-						case SymbolDisplayPartKind.DelegateName:
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _SymbolFormatter.Delegate);
-							break;
-						case SymbolDisplayPartKind.StringLiteral:
-							block.AddText(part.ToString(), false, false, _SymbolFormatter.Text);
-							break;
-						case SymbolDisplayPartKind.Keyword:
-							block.AddText(part.ToString(), false, false, _SymbolFormatter.Keyword);
-							break;
-						case SymbolDisplayPartKind.NamespaceName:
-							block.AddText(part.Symbol.Name, _SymbolFormatter.Namespace);
-							break;
-						case SymbolDisplayPartKind.TypeParameterName:
-							block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _SymbolFormatter.TypeParameter);
-							break;
-						case SymbolDisplayPartKind.FieldName:
-							block.AddText(part.Symbol.Name, _SymbolFormatter.Field);
-							break;
-						case SymbolDisplayPartKind.PropertyName:
-							block.AddText(part.Symbol.Name, _SymbolFormatter.Property);
-							break;
-						case SymbolDisplayPartKind.EventName:
-							block.AddText(part.Symbol.Name, _SymbolFormatter.Delegate);
-							break;
-						default:
-							block.AddText(part.ToString());
-							break;
-					}
-				}
-				return block;
-			}
-			void ToUIText(TextBlock block, TypedConstant v, int position) {
-				switch (v.Kind) {
-					case TypedConstantKind.Primitive:
-						if (v.Value is bool) {
-							block.AddText((bool)v.Value ? "true" : "false", _SymbolFormatter.Keyword);
-						}
-						else if (v.Value is string) {
-							block.AddText(v.ToCSharpString(), _SymbolFormatter.Text);
-						}
-						else {
-							block.AddText(v.ToCSharpString(), _SymbolFormatter.Number);
-						}
-						break;
-					case TypedConstantKind.Enum:
-						var en = v.ToCSharpString();
-						if (en.IndexOf('|') != -1) {
-							var items = v.Type.GetMembers().Where(i => {
-								var field = i as IFieldSymbol;
-								return field != null
-									&& field.HasConstantValue != false
-									&& UnsafeArithmeticHelper.Equals(UnsafeArithmeticHelper.And(v.Value, field.ConstantValue), field.ConstantValue)
-									&& UnsafeArithmeticHelper.IsZero(field.ConstantValue) == false;
-							});
-							var flags = items.ToArray();
-							for (int i = 0; i < flags.Length; i++) {
-								if (i > 0) {
-									block.AddText(" | ");
-								}
-								block.AddText(v.Type.Name + "." + flags[i].Name, _SymbolFormatter.Enum);
-							}
-						}
-						else {
-							block.AddText(v.Type.Name + en.Substring(en.LastIndexOf('.')), _SymbolFormatter.Enum);
-						}
-						break;
-					case TypedConstantKind.Type:
-						block.AddText("typeof", _SymbolFormatter.Keyword).AddText("(");
-						ToUIText(block, (v.Value as ITypeSymbol).ToMinimalDisplayParts(_SemanticModel, position));
-						block.AddText(")");
-						break;
-					case TypedConstantKind.Array:
-						block.AddText("{");
-						bool c = false;
-						foreach (var item in v.Values) {
-							if (c == false) {
-								c = true;
-							}
-							else {
-								block.AddText(", ");
-							}
-							ToUIText(block, item, position);
-						}
-						block.AddText("}");
-						break;
-					default:
-						block.AddText(v.ToCSharpString());
-						break;
-				}
-			}
 		}
 
 		enum NumericForm

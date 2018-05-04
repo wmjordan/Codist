@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
+using AppHelpers;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist
@@ -92,7 +95,134 @@ namespace Codist
 			}
 		}
 
-		void AddTypeArguments(System.Windows.Documents.InlineCollection text, System.Collections.Immutable.ImmutableArray<ITypeParameterSymbol> arguments) {
+		internal TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, int argIndex) {
+			foreach (var part in parts) {
+				switch (part.Kind) {
+					case SymbolDisplayPartKind.AliasName:
+						//todo resolve alias type
+						goto default;
+					case SymbolDisplayPartKind.ClassName:
+						if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
+							block.AddText("?", _ClassBrush);
+						}
+						else {
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _ClassBrush);
+						}
+						break;
+					case SymbolDisplayPartKind.EnumName:
+						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _EnumBrush);
+						break;
+					case SymbolDisplayPartKind.InterfaceName:
+						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _InterfaceBrush);
+						break;
+					case SymbolDisplayPartKind.MethodName:
+						block.AddSymbol(part.Symbol, argIndex != Int32.MinValue, _MethodBrush);
+						break;
+					case SymbolDisplayPartKind.ParameterName:
+						var p = part.Symbol as IParameterSymbol;
+						if (p.Ordinal == argIndex || p.IsParams && argIndex > p.Ordinal) {
+							block.AddText(p.Name, true, true, _ParameterBrush);
+						}
+						else {
+							block.AddText(p.Name, false, false, _ParameterBrush);
+						}
+						break;
+					case SymbolDisplayPartKind.StructName:
+						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _StructBrush);
+						break;
+					case SymbolDisplayPartKind.DelegateName:
+						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _DelegateBrush);
+						break;
+					case SymbolDisplayPartKind.StringLiteral:
+						block.AddText(part.ToString(), false, false, _TextBrush);
+						break;
+					case SymbolDisplayPartKind.Keyword:
+						block.AddText(part.ToString(), false, false, _KeywordBrush);
+						break;
+					case SymbolDisplayPartKind.NamespaceName:
+						block.AddText(part.Symbol.Name, _NamespaceBrush);
+						break;
+					case SymbolDisplayPartKind.TypeParameterName:
+						block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _TypeParameterBrush);
+						break;
+					case SymbolDisplayPartKind.FieldName:
+						block.AddText(part.Symbol.Name, _FieldBrush);
+						break;
+					case SymbolDisplayPartKind.PropertyName:
+						block.AddText(part.Symbol.Name, _PropertyBrush);
+						break;
+					case SymbolDisplayPartKind.EventName:
+						block.AddText(part.Symbol.Name, _DelegateBrush);
+						break;
+					default:
+						block.AddText(part.ToString());
+						break;
+				}
+			}
+			return block;
+		}
+
+		internal void ToUIText(TextBlock block, TypedConstant constant) {
+			switch (constant.Kind) {
+				case TypedConstantKind.Primitive:
+					if (constant.Value is bool) {
+						block.AddText((bool)constant.Value ? "true" : "false", _KeywordBrush);
+					}
+					else if (constant.Value is string) {
+						block.AddText(constant.ToCSharpString(), _TextBrush);
+					}
+					else {
+						block.AddText(constant.ToCSharpString(), _NumberBrush);
+					}
+					break;
+				case TypedConstantKind.Enum:
+					var en = constant.ToCSharpString();
+					if (en.IndexOf('|') != -1) {
+						var items = constant.Type.GetMembers().Where(i => {
+							var field = i as IFieldSymbol;
+							return field != null
+								&& field.HasConstantValue != false
+								&& UnsafeArithmeticHelper.Equals(UnsafeArithmeticHelper.And(constant.Value, field.ConstantValue), field.ConstantValue)
+								&& UnsafeArithmeticHelper.IsZero(field.ConstantValue) == false;
+						});
+						var flags = items.ToArray();
+						for (int i = 0; i < flags.Length; i++) {
+							if (i > 0) {
+								block.AddText(" | ");
+							}
+							block.AddText(constant.Type.Name + "." + flags[i].Name, _EnumBrush);
+						}
+					}
+					else {
+						block.AddText(constant.Type.Name + en.Substring(en.LastIndexOf('.')), _EnumBrush);
+					}
+					break;
+				case TypedConstantKind.Type:
+					block.AddText("typeof", _KeywordBrush).AddText("(")
+						.AddSymbol((constant.Value as ITypeSymbol), this)
+						.AddText(")");
+					break;
+				case TypedConstantKind.Array:
+					block.AddText("{");
+					bool c = false;
+					foreach (var item in constant.Values) {
+						if (c == false) {
+							c = true;
+						}
+						else {
+							block.AddText(", ");
+						}
+						ToUIText(block, item);
+					}
+					block.AddText("}");
+					break;
+				default:
+					block.AddText(constant.ToCSharpString());
+					break;
+			}
+		}
+
+		void AddTypeArguments(System.Windows.Documents.InlineCollection text, ImmutableArray<ITypeParameterSymbol> arguments) {
 			text.Add("<");
 			for (int i = 0; i < arguments.Length; i++) {
 				if (i > 0) {

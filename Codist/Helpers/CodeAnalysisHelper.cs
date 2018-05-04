@@ -171,7 +171,6 @@ namespace Codist
 		}
 		public static ITypeSymbol GetReturnType(this ISymbol symbol) {
 			switch (symbol.Kind) {
-				case SymbolKind.Event: return (symbol as IEventSymbol).RaiseMethod.ReturnType;
 				case SymbolKind.Field: return (symbol as IFieldSymbol).Type;
 				case SymbolKind.Local: return (symbol as ILocalSymbol).Type;
 				case SymbolKind.Method: return (symbol as IMethodSymbol).ReturnType;

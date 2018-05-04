@@ -162,6 +162,16 @@ namespace Codist
 		public static TextBlock AddText(this TextBlock block, string text, WpfBrush brush) {
 			return block.AddText(text, false, false, brush);
 		}
+		public static TextBlock AddSymbolDisplayParts(this TextBlock block, System.Collections.Immutable.ImmutableArray<SymbolDisplayPart> parts, SymbolFormatter formatter) {
+			return formatter.ToUIText(block, parts, Int32.MinValue);
+		}
+		public static TextBlock AddSymbolDisplayParts(this TextBlock block, System.Collections.Immutable.ImmutableArray<SymbolDisplayPart> parts, SymbolFormatter formatter, int argIndex) {
+			return formatter.ToUIText(block, parts, argIndex);
+		}
+		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, SymbolFormatter formatter) {
+			formatter.ToUIText(block.Inlines, symbol);
+			return block;
+		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, bool bold, WpfBrush brush) {
 			block.Inlines.Add(Render(symbol, bold, brush));
 			return block;
