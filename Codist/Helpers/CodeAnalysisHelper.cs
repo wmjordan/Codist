@@ -231,37 +231,63 @@ namespace Codist
 		public static bool IsMember(this CodeMemberType type) {
 			return type > CodeMemberType.Member && type < CodeMemberType.Other;
 		}
-		public static XElement GetBaseTypeDocumentation(this ISymbol symbol, out ISymbol baseType) {
-			return GetBaseTypeDocumentation(symbol, symbol, out baseType);
+		public static XElement InheritDocumentation(this ISymbol symbol, out ISymbol baseMember) {
+			return InheritDocumentation(symbol, symbol, out baseMember);
 		}
-		static XElement GetBaseTypeDocumentation(ISymbol symbol, ISymbol querySymbol, out ISymbol baseType) {
+		static XElement InheritDocumentation(ISymbol symbol, ISymbol querySymbol, out ISymbol baseMember) {
 			var t = symbol.Kind == SymbolKind.NamedType ? symbol as INamedTypeSymbol : symbol.ContainingType;
 			if (t == null
 				// go to the base type if not querying interface
 				|| t.TypeKind != TypeKind.Interface && (t = t.BaseType) == null
 				) {
-				baseType = null;
+				baseMember = null;
 				return null;
 			}
 			XElement doc;
 			var member = t.GetMembers(querySymbol.Name).FirstOrDefault(i => i.MatchSignature(querySymbol.Kind, querySymbol.GetReturnType(), querySymbol.GetParameters()));
 			if (member != null && (doc = member.GetXmlDoc().GetSummary()) != null) {
-				baseType = member;
+				baseMember = member;
 				return doc;
 			}
-			if (t.TypeKind != TypeKind.Interface && (doc = GetBaseTypeDocumentation(t, querySymbol, out baseType)) != null) {
+			if (t.TypeKind != TypeKind.Interface && (doc = InheritDocumentation(t, querySymbol, out baseMember)) != null) {
 				return doc;
 			}
-			else if (symbol.Kind != SymbolKind.NamedType
-				&& symbol == querySymbol
+			else if (symbol == querySymbol
+				&& symbol.Kind != SymbolKind.NamedType
 				&& (t = symbol.ContainingType) != null) {
 				foreach (var item in t.Interfaces) {
-					if ((doc = GetBaseTypeDocumentation(item, querySymbol, out baseType)) != null) {
+					if ((doc = InheritDocumentation(item, querySymbol, out baseMember)) != null) {
 						return doc;
 					}
 				}
+				switch (symbol.Kind) {
+					case SymbolKind.Method:
+						foreach (var item in (symbol as IMethodSymbol).ExplicitInterfaceImplementations) {
+							if ((doc = item.GetXmlDoc().GetSummary()) != null) {
+								baseMember = item;
+								return doc;
+							}
+						}
+						break;
+					case SymbolKind.Property:
+						foreach (var item in (symbol as IPropertySymbol).ExplicitInterfaceImplementations) {
+							if ((doc = item.GetXmlDoc().GetSummary()) != null) {
+								baseMember = item;
+								return doc;
+							}
+						}
+						break;
+					case SymbolKind.Event:
+						foreach (var item in (symbol as IEventSymbol).ExplicitInterfaceImplementations) {
+							if ((doc = item.GetXmlDoc().GetSummary()) != null) {
+								baseMember = item;
+								return doc;
+							}
+						}
+						break;
+				}
 			}
-			baseType = null;
+			baseMember = null;
 			return null;
 		}
 

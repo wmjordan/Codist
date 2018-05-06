@@ -5,7 +5,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Xml.Linq;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
@@ -90,12 +89,10 @@ namespace Codist.QuickInfo
 				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 
 				//look for occurrences of our QuickInfo words in the span
-				var navigator = _NavigatorService.GetTextStructureNavigator(_TextBuffer);
 				var node = unitCompilation.FindNode(new TextSpan(querySpan.Start, querySpan.Length), true, true);
 				if (node == null || node.Span.Contains(subjectTriggerPoint.Position) == false) {
 					goto EXIT;
 				}
-				var extent = navigator.GetExtentOfWord(querySpan.Start).Span;
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 					ShowParameterInfo(qiContent, node);
 				}
@@ -142,6 +139,8 @@ namespace Codist.QuickInfo
 					w.ApplyClickAndGo(symbol);
 				}
 				QuickInfoOverrider.LimitQuickInfoItemSize(qiContent, w);
+				var navigator = _NavigatorService.GetTextStructureNavigator(_TextBuffer);
+				var extent = navigator.GetExtentOfWord(querySpan.Start).Span;
 				applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
 					? currentSnapshot.CreateTrackingSpan(extent.Start, extent.Length, SpanTrackingMode.EdgeInclusive)
 					: null;
@@ -163,7 +162,7 @@ namespace Codist.QuickInfo
 				}
 				else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
 					ISymbol baseMember;
-					var baseDocs = symbol.GetBaseTypeDocumentation(out baseMember);
+					var baseDocs = symbol.InheritDocumentation(out baseMember);
 					if (baseDocs != null) {
 						var info = new TextBlock { TextWrapping = TextWrapping.Wrap }
 							.AddText("Documentation from ")
