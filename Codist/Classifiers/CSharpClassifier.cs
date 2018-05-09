@@ -77,61 +77,56 @@ namespace Codist.Classifiers
 
 			var textSpan = new TextSpan(span.Start.Position, span.Length);
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
-			var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace)
-				.Where(item => {
-					var ct = item.ClassificationType;
-					if (ct == "keyword") {
-						// highlights: return, yield return, yield break, throw and continue
-						var node = unitCompilation.FindNode(item.TextSpan, true, true);
-						const SyntaxKind ThrowExpression = (SyntaxKind)9052;
-						switch (node.Kind()) {
-							case SyntaxKind.BreakStatement:
-								if (node.Parent is SwitchSectionSyntax == false) {
-									goto case SyntaxKind.ReturnStatement;
-								}
-								return false;
-							case SyntaxKind.ReturnKeyword:
-							case SyntaxKind.GotoCaseStatement:
-							case SyntaxKind.GotoDefaultStatement:
-							case SyntaxKind.ContinueStatement:
-							case SyntaxKind.ReturnStatement:
-							case SyntaxKind.YieldReturnStatement:
-							case SyntaxKind.YieldBreakStatement:
-							case SyntaxKind.ThrowStatement:
-							case ThrowExpression:
-								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ControlFlowKeyword));
-								return false;
-						}
-						return false;
-					}
-					if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.XmlDocCode)
-						&& ct == Constants.XmlDocCData) {
-						ct = HighlightXmlDocCData(span, item, workspace, result, ct);
-						return false;
-					}
-					if (ct == Constants.CodePunctuation && item.TextSpan.Length == 1) {
-						HighlightPunctuation(item, snapshot, result, semanticModel, unitCompilation);
-						return false;
-					}
-
-					return ct == Constants.CodeIdentifier
-						|| ct == Constants.CodeClassName
-						|| ct == Constants.CodeStructName
-						|| ct == Constants.CodeInterfaceName
-						|| ct == Constants.CodeEnumName
-						|| ct == Constants.CodeTypeParameterName
-						|| ct == Constants.CodeDelegateName;
-				});
-
+			var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace);
 			foreach (var item in classifiedSpans) {
-				var itemSpan = item.TextSpan;
-				var node = unitCompilation.FindNode(itemSpan, true);
-
-				foreach (var type in GetClassificationType(node, semanticModel)) {
-					result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
+				var ct = item.ClassificationType;
+				switch (ct) {
+					case "keyword": {
+							// highlights: return, yield return, yield break, throw and continue
+							var node = unitCompilation.FindNode(item.TextSpan, true, true);
+							const SyntaxKind ThrowExpression = (SyntaxKind)9052;
+							switch (node.Kind()) {
+								case SyntaxKind.BreakStatement:
+									if (node.Parent is SwitchSectionSyntax == false) {
+										goto case SyntaxKind.ReturnStatement;
+									}
+									continue;
+								case SyntaxKind.ReturnKeyword:
+								case SyntaxKind.GotoCaseStatement:
+								case SyntaxKind.GotoDefaultStatement:
+								case SyntaxKind.ContinueStatement:
+								case SyntaxKind.ReturnStatement:
+								case SyntaxKind.YieldReturnStatement:
+								case SyntaxKind.YieldBreakStatement:
+								case SyntaxKind.ThrowStatement:
+								case ThrowExpression:
+									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ControlFlowKeyword));
+									continue;
+							}
+						}
+						continue;
+					case Constants.XmlDocCData:
+						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.XmlDocCode)) {
+							ct = HighlightXmlDocCData(span, item, workspace, result, ct);
+						}
+						continue;
+					case Constants.CodePunctuation:
+						if (item.TextSpan.Length == 1) {
+							HighlightPunctuation(item, snapshot, result, semanticModel, unitCompilation);
+						}
+						continue;
+					default: if (ct == Constants.CodeIdentifier
+							|| ct.EndsWith("name", StringComparison.Ordinal))
+						{
+							var itemSpan = item.TextSpan;
+							var node = unitCompilation.FindNode(itemSpan, true);
+							foreach (var type in GetClassificationType(node, semanticModel)) {
+								result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
+							}
+						}
+						break;
 				}
 			}
-
 			return result;
 		}
 
