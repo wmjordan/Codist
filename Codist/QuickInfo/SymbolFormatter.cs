@@ -15,22 +15,23 @@ namespace Codist
 {
 	sealed class SymbolFormatter
 	{
-		Brush _NamespaceBrush, _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush, _TypeParameterBrush, _PropertyBrush, _FieldBrush;
+		Brush _NamespaceBrush, _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush, _TypeParameterBrush, _PropertyBrush, _FieldBrush, _ConstBrush;
 
-		public Brush Namespace { get => _NamespaceBrush; }
-		public Brush Interface { get => _InterfaceBrush; }
-		public Brush Class { get => _ClassBrush; }
-		public Brush Struct { get => _StructBrush; }
-		public Brush Text { get => _TextBrush; }
-		public Brush Number { get => _NumberBrush; }
-		public Brush Enum { get => _EnumBrush; }
-		public Brush Keyword { get => _KeywordBrush; }
-		public Brush Method { get => _MethodBrush; }
-		public Brush Delegate { get => _DelegateBrush; }
-		public Brush Parameter { get => _ParameterBrush; }
-		public Brush TypeParameter { get => _TypeParameterBrush; }
-		public Brush Property { get => _PropertyBrush; }
-		public Brush Field { get => _FieldBrush; }
+		public Brush Namespace => _NamespaceBrush;
+		public Brush Interface => _InterfaceBrush;
+		public Brush Class => _ClassBrush;
+		public Brush Struct => _StructBrush;
+		public Brush Text => _TextBrush;
+		public Brush Number => _NumberBrush;
+		public Brush Enum => _EnumBrush;
+		public Brush Keyword => _KeywordBrush;
+		public Brush Method => _MethodBrush;
+		public Brush Delegate => _DelegateBrush;
+		public Brush Parameter => _ParameterBrush;
+		public Brush TypeParameter => _TypeParameterBrush;
+		public Brush Property => _PropertyBrush;
+		public Brush Field => _FieldBrush;
+		public Brush Const => _ConstBrush;
 
 		internal void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {
 			System.Diagnostics.Trace.Assert(formatMap != null, "format map is null");
@@ -48,12 +49,15 @@ namespace Codist
 			_TypeParameterBrush = formatMap.GetBrush(Constants.CSharpTypeParameterName);
 			_PropertyBrush = formatMap.GetBrush(Constants.CSharpPropertyName);
 			_FieldBrush = formatMap.GetBrush(Constants.CSharpFieldName);
+			_ConstBrush = formatMap.GetBrush(Constants.CSharpConstFieldName);
 		}
 
 		internal void ToUIText(System.Windows.Documents.InlineCollection text, ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event: text.Add(symbol.Render(_DelegateBrush)); return;
-				case SymbolKind.Field: text.Add(symbol.Render(_FieldBrush)); return;
+				case SymbolKind.Field:
+					text.Add(symbol.Render((symbol as IFieldSymbol).IsConst ? _ConstBrush : _FieldBrush));
+					return;
 				case SymbolKind.Method:
 					text.Add(symbol.Render(_MethodBrush));
 					var method = symbol as IMethodSymbol;

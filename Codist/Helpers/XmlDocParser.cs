@@ -31,7 +31,12 @@ namespace Codist
 		public static XElement GetXmlDocForSymbol(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Parameter:
-					return (symbol as IParameterSymbol).ContainingSymbol.GetXmlDoc().GetNamedDocItem("param", symbol.Name);
+					var p = (symbol as IParameterSymbol);
+					if (p.IsThis) {
+						return null;
+					}
+					var m = p.ContainingSymbol as IMethodSymbol;
+					return (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", symbol.Name);
 				case SymbolKind.TypeParameter:
 					var tps = symbol as ITypeParameterSymbol;
 					switch (tps.TypeParameterKind) {

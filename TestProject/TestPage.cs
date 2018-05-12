@@ -19,7 +19,11 @@ namespace TestProject
 	}
 	sealed class ConcreteClass : AbstractClass
 	{
-		delegate void Clone<T>(T text);
+		/// <summary>A generic delegate with a parameter.</summary>
+		/// <typeparam name="T">The generic type parameter of the delegate.</typeparam>
+		/// <param name="obj">The method parameter of type <typeparamref name="T"/>.</param>
+		/// <returns>Returns an instance of the generic type parameter.</returns>
+		delegate T Clone<T>(T obj);
 		event EventHandler<EventArgs> MyEvent;
 
 		// note hover on the "{" below to see line count of this method block
@@ -82,6 +86,7 @@ text".Log(); // multiline string (string verbatim)
 			VirtualMethod(); // overridden virtual method
 			base.VirtualMethod(); // base virtual method
 			MyEvent(this, EventArgs.Empty); // event
+			this.Method(); // qualified invocation
 		}
 
 		protected override int AbstractMethod() { // overridden method
@@ -90,6 +95,10 @@ text".Log(); // multiline string (string verbatim)
 
 		public override void VirtualMethod() { // overridden method
 			base.VirtualMethod();
+		}
+
+		ConcreteClass InvokeDelegateParameter(Clone<ConcreteClass> clone) {
+			return clone(this); // invoking delegate
 		}
 
 		static class NativeMethods

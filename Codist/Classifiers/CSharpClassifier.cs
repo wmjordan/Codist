@@ -136,6 +136,7 @@ namespace Codist.Classifiers
 				var node = unitCompilation.FindNode(item.TextSpan, true, true);
 				if (node is BaseTypeDeclarationSyntax == false
 					&& node is ExpressionSyntax == false
+					&& node is NamespaceDeclarationSyntax == false
 					&& (node = node.Parent) == null) {
 					return;
 				}
@@ -186,7 +187,6 @@ namespace Codist.Classifiers
 					}
 				}
 			}
-			return;
 		}
 
 		static IClassificationType ClassifySyntaxNode(SyntaxNode node) {
@@ -214,6 +214,9 @@ namespace Codist.Classifiers
 				case SyntaxKind.EnumDeclaration: type = _Classifications.EnumName; break;
 				case SyntaxKind.StructDeclaration: type = _Classifications.StructName; break;
 				case SyntaxKind.Attribute: type = _Classifications.AttributeNotation; break;
+				case SyntaxKind.NamespaceDeclaration:
+					type = _Classifications.Namespace;
+					break;
 					//case SyntaxKind.InterpolatedStringExpression: type = _Classifications.ConstField; break;
 			}
 

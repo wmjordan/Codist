@@ -296,7 +296,11 @@ namespace Codist
 			return element;
 		}
 		public static ScrollViewer Scrollable<TElement>(this TElement element) {
-			return new ScrollViewer { Content = element, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, Padding = new Thickness(0, 0, 3, 0) };
+			return new ScrollViewer {
+				Content = element,
+				VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+				Padding = new Thickness(0, 0, 3, 0)
+			};
 		}
 		public static DependencyObject GetVisualParent(this DependencyObject obj) {
 			return System.Windows.Media.VisualTreeHelper.GetParent(obj);

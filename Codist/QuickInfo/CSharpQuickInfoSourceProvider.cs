@@ -290,6 +290,15 @@ namespace Codist.QuickInfo
 						qiContent.Add(new TextBlock().AddText("Assembly: ", true).AddText(asmName));
 					}
 				}
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
+					var st = symbol.GetReturnType();
+					if (st != null && st.TypeKind == TypeKind.Delegate) {
+						qiContent.Add(new TextBlock()
+							.AddText("Delegate signature:\n", true)
+							.AddSymbolDisplayParts((st as INamedTypeSymbol).DelegateInvokeMethod.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, Int32.MinValue));
+					}
+				}
+
 			}
 
 			static void ShowMiscInfo(IList<object> qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
@@ -301,7 +310,11 @@ namespace Codist.QuickInfo
 				else if (nodeKind == SyntaxKind.SwitchStatement) {
 					var s = (node as SwitchStatementSyntax).Sections.Count;
 					if (s > 1) {
-						qiContent.Add(s + " switch sections");
+						var cases = 0;
+						foreach (SwitchSectionSyntax section in (node as SwitchStatementSyntax).Sections) {
+							cases += section.Labels.Count;
+						}
+						qiContent.Add(s + " switch sections, " + cases + " cases");
 					}
 				}
 				else if (nodeKind == SyntaxKind.StringLiteralExpression) {
@@ -514,7 +527,9 @@ namespace Codist.QuickInfo
 				var extTypeParameter = extType as ITypeParameterSymbol;
 				if (extTypeParameter != null && (extTypeParameter.HasConstructorConstraint || extTypeParameter.HasReferenceTypeConstraint || extTypeParameter.HasValueTypeConstraint || extTypeParameter.ConstraintTypes.Length > 0)) {
 					var ext = new TextBlock { TextWrapping = TextWrapping.Wrap }
-						.AddText("Extending: ", true).AddSymbol(extType, true, _SymbolFormatter.Class).AddText(" with ")
+						.AddText("Extending: ", true)
+						.AddSymbol(extType, true, _SymbolFormatter.Class)
+						.AddText(" with ")
 						.AddSymbolDisplayParts(method.ReceiverType.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
 					info.Add(ext);
 				}
@@ -902,8 +917,12 @@ namespace Codist.QuickInfo
 				var symbol = _SemanticModel.GetSymbolInfo(al.Parent);
 				var argName = argument.NameColon?.Name.ToString();
 				if (symbol.Symbol != null) {
+					var m = symbol.Symbol as IMethodSymbol;
+					if (m == null) { // in a very rare case m can be null
+						return;
+					}
 					if (argName != null) {
-						var mp = (symbol.Symbol as IMethodSymbol).Parameters;
+						var mp = m.Parameters;
 						for (int i = 0; i < mp.Length; i++) {
 							if (mp[i].Name == argName) {
 								ai = i;
@@ -911,7 +930,7 @@ namespace Codist.QuickInfo
 						}
 					}
 					else if (ai != -1) {
-						var mp = (symbol.Symbol as IMethodSymbol).Parameters;
+						var mp = m.Parameters;
 						if (ai < mp.Length) {
 							argName = mp[ai].Name;
 						}
@@ -919,7 +938,7 @@ namespace Codist.QuickInfo
 							argName = mp[mp.Length - 1].Name;
 						}
 					}
-					var doc = argName != null ? symbol.Symbol.GetXmlDoc().GetNamedDocItem("param", argName) : null;
+					var doc = argName != null ? (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", argName) : null;
 					var info = new TextBlock().AddText("Argument of ").AddSymbolDisplayParts(symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, ai);
 					if (doc != null) {
 						info.AddText("\n" + argName, true).AddText(": ");
