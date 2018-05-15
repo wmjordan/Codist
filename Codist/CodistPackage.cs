@@ -22,16 +22,25 @@ namespace Codist
 	/// </para>
 	/// </remarks>
 	[PackageRegistration(UseManagedResourcesOnly = true)]
-	[InstalledProductRegistration("#110", "#112", "2.8", IconResourceID = 400)] // Information on this package for Help/About
+	[InstalledProductRegistration("#110", "#112", "2.9", IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.Misc), Constants.NameOfMe, "General", 0, 0, true)]
-	[ProvideOptionPage(typeof(Options.CSharp), Constants.NameOfMe, "C#", 0, 0, true, Sort = 10)]
-	[ProvideOptionPage(typeof(Options.CodeStyle), Constants.NameOfMe , "Syntax highlight (C# & C++)", 0, 0, true, Sort = 110)]
-	[ProvideOptionPage(typeof(Options.XmlCodeStyle), Constants.NameOfMe, "Syntax highlight (XML)", 0, 0, true, Sort = 120)]
-	[ProvideOptionPage(typeof(Options.CommentStyle), Constants.NameOfMe, "Syntax highlight (Comment)", 0, 0, true, Sort = 130)]
-	[ProvideOptionPage(typeof(Options.CommentTagger), Constants.NameOfMe + "\\Syntax highlight (Comment)", "Tagger (Comment)", 0, 0, true, Sort = 131)]
+	[ProvideOptionPage(typeof(Options.SuperQuickInfo), CategorySuperQuickInfo, "General", 0, 0, true, Sort = 10)]
+	[ProvideOptionPage(typeof(Options.CSharpSuperQuickInfo), CategorySuperQuickInfo, "C#", 0, 0, true, Sort = 20)]
+	[ProvideOptionPage(typeof(Options.ScrollbarMarker), CategoryScrollbarMarker, "General", 0, 0, true, Sort = 50)]
+	[ProvideOptionPage(typeof(Options.CSharpScrollbarMarker), CategoryScrollbarMarker, "C#", 0, 0, true, Sort = 50)]
+	[ProvideOptionPage(typeof(Options.SyntaxHighlight), CategorySyntaxHighlight, "General", 0, 0, true, Sort = 100)]
+	[ProvideOptionPage(typeof(Options.CodeStyle), CategorySyntaxHighlight, "Common styles", 0, 0, true, Sort = 10)]
+	[ProvideOptionPage(typeof(Options.CSharpStyle), CategorySyntaxHighlight, "C# & C++ styles", 0, 0, true, Sort = 20)]
+	[ProvideOptionPage(typeof(Options.CSharpSpecialHighlight), CategorySyntaxHighlight, "C# Special highlight", 0, 0, true, Sort = 30)]
+	[ProvideOptionPage(typeof(Options.XmlCodeStyle), CategorySyntaxHighlight, "XML styles", 0, 0, true, Sort = 40)]
+	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment styles", 0, 0, true, Sort = 50)]
+	[ProvideOptionPage(typeof(Options.CommentTagger), CategorySyntaxHighlight, "Comment Tagger", 0, 0, true, Sort = 60)]
 	sealed class CodistPackage : Package
 	{
+		const string CategorySuperQuickInfo = Constants.NameOfMe + "\\Super Quick Info";
+		const string CategoryScrollbarMarker = Constants.NameOfMe + "\\Scrollbar Marker";
+		const string CategorySyntaxHighlight = Constants.NameOfMe + "\\Syntax Highlight";
 		/// <summary>
 		/// CodistPackage GUID string.
 		/// </summary>

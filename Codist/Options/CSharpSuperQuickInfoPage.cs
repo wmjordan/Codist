@@ -6,34 +6,29 @@ using AppHelpers;
 namespace Codist.Options
 {
 	[Browsable(false)]
-	public partial class CSharpPage : UserControl
+	public partial class CSharpSuperQuickInfoPage : UserControl
 	{
 		readonly UiLock _UI = new UiLock();
 		bool _Loaded;
 
-		public CSharpPage() {
+		public CSharpSuperQuickInfoPage() {
 			InitializeComponent();
 		}
-		internal CSharpPage(ConfigPage page) : this() {
+		internal CSharpSuperQuickInfoPage(ConfigPage page) : this() {
 			//_UI.CommonEventAction += Config.Instance.FireConfigChangedEvent;
 		}
 
-		void CSharpPage_Load(object sender, EventArgs e) {
+		void CSharpSuperQuickInfoPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {
 				return;
 			}
 			LoadConfig(Config.Instance);
 
-			_DirectivesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.CompilerDirective, _DirectivesBox.Checked));
-			_SpecialCommentsBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.SpecialComment, _SpecialCommentsBox.Checked));
-			_MemberDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.MemberDeclaration, _LongMethodBox.Enabled = _TypeDeclarationBox.Enabled = _MemberDeclarationBox.Checked));
-			_LongMethodBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.LongMemberDeclaration, _LongMethodBox.Checked));
-			_TypeDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.TypeDeclaration, _TypeDeclarationBox.Checked));
 			_ClickAndGoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.ClickAndGo, _ClickAndGoBox.Checked));
 			_CSharpAttributesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Attributes, _CSharpAttributesQuickInfoBox.Checked));
 			_CSharpBaseTypeQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseType, _CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked));
 			_CSharpBaseTypeInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseTypeInheritence, _CSharpBaseTypeInheritenceQuickInfoBox.Checked));
-			_CSharpOverrideDefaultXmlDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.OverrideDefaultDocumentation, _CSharpOverrideDefaultXmlDocBox.Checked));
+			_CSharpOverrideDefaultXmlDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.OverrideDefaultDocumentation, _CSharpDocumentationBaseTypeBox.Enabled = _CSharpTextOnlyDocBox.Enabled = _CSharpReturnsDocBox.Enabled = _CSharpOverrideDefaultXmlDocBox.Checked));
 			_CSharpDeclarationQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Declaration, _CSharpDeclarationQuickInfoBox.Checked));
 			_CSharpSymbolLocationQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.SymbolLocation, _CSharpSymbolLocationQuickInfoBox.Checked));
 			_CSharpInterfacesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Interfaces, _CSharpInterfaceInheritenceQuickInfoBox.Enabled = _CSharpInterfacesQuickInfoBox.Checked));
@@ -44,9 +39,8 @@ namespace Codist.Options
 			_CSharpParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Parameter, _CSharpParameterQuickInfoBox.Checked));
 			_CSharpTypeParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.TypeParameters, _CSharpTypeParameterQuickInfoBox.Checked));
 			_CSharpDocumentationBaseTypeBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.DocumentationFromBaseType, _CSharpDocumentationBaseTypeBox.Checked));
-			_HighlightDeclarationBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.DeclarationBrace, _HighlightDeclarationBracesBox.Checked));
-			_HighlightParameterBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.ParameterBrace, _HighlightParameterBracesBox.Checked));
-			_HighlightSpecialCommentBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.SpecialComment, _HighlightSpecialCommentBox.Checked));
+			_CSharpReturnsDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.ReturnsDoc, _CSharpReturnsDocBox.Checked));
+			_CSharpTextOnlyDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.TextOnlyDoc, _CSharpTextOnlyDocBox.Checked));
 			_QuickInfoMaxWidthBox.ValueChanged += _UI.HandleEvent(() => Config.Instance.QuickInfoMaxWidth = (double)_QuickInfoMaxWidthBox.Value);
 			_QuickInfoMaxHeightBox.ValueChanged += _UI.HandleEvent(() => Config.Instance.QuickInfoMaxHeight = (double)_QuickInfoMaxHeightBox.Value);
 
@@ -56,29 +50,22 @@ namespace Codist.Options
 
 		void LoadConfig(Config config) {
 			_UI.DoWithLock(() => {
-				_DirectivesBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective);
-				_SpecialCommentsBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment);
-				_MemberDeclarationBox.Checked = _LongMethodBox.Enabled = config.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration);
-				_LongMethodBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration);
-				_TypeDeclarationBox.Checked = _LongMethodBox.Enabled = config.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration);
 				_ClickAndGoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo);
 				_CSharpAttributesQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes);
-				_CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType);
+				_CSharpBaseTypeQuickInfoBox.Checked = _CSharpBaseTypeInheritenceQuickInfoBox.Enabled = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType);
 				_CSharpBaseTypeInheritenceQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence);
 				_CSharpDeclarationQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration);
-				_CSharpInterfaceInheritenceQuickInfoBox.Enabled = _CSharpInterfacesQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces);
+				_CSharpInterfacesQuickInfoBox.Checked = _CSharpInterfaceInheritenceQuickInfoBox.Enabled = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces);
 				_CSharpInterfaceInheritenceQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
 				_CSharpInterfaceImplementationsQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations);
 				_CSharpSymbolLocationQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation);
-				_CSharpOverrideDefaultXmlDocBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation);
+				_CSharpOverrideDefaultXmlDocBox.Checked = _CSharpDocumentationBaseTypeBox.Enabled = _CSharpTextOnlyDocBox.Enabled = _CSharpReturnsDocBox.Enabled = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation);
 				_CSharpNumberQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues);
 				_CSharpStringQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.String);
 				_CSharpParameterQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter);
 				_CSharpTypeParameterQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters);
 				_CSharpDocumentationBaseTypeBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType);
-				_HighlightDeclarationBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace);
-				_HighlightParameterBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ParameterBrace);
-				_HighlightSpecialCommentBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment);
+				_CSharpTextOnlyDocBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc);
 				_QuickInfoMaxWidthBox.Value = (decimal)(config.QuickInfoMaxWidth >= 0 && config.QuickInfoMaxWidth < (double)_QuickInfoMaxWidthBox.Maximum ? config.QuickInfoMaxWidth : 0);
 				_QuickInfoMaxHeightBox.Value = (decimal)(config.QuickInfoMaxHeight >= 0 && config.QuickInfoMaxHeight < (double)_QuickInfoMaxHeightBox.Maximum ? config.QuickInfoMaxHeight : 0);
 			});

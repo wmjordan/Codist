@@ -99,7 +99,7 @@ namespace Codist.QuickInfo
 				if (node.Kind() == SyntaxKind.Argument) {
 					node = (node as ArgumentSyntax).Expression;
 				}
-				DefaultQuickInfoPanelWrapper w = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationFromBaseType | QuickInfoOptions.OverrideDefaultDocumentation) || Config.Instance.QuickInfoMaxWidth > 0 || Config.Instance.QuickInfoMaxHeight > 0
+				var qiWrapper = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride) || Config.Instance.QuickInfoMaxWidth > 0 || Config.Instance.QuickInfoMaxHeight > 0
 					? new DefaultQuickInfoPanelWrapper(QuickInfoOverrider.FindDefaultQuickInfoPanel(qiContent))
 					: null;
 				var symbolInfo = semanticModel.GetSymbolInfo(node);
@@ -121,8 +121,8 @@ namespace Codist.QuickInfo
 				if (node is PredefinedTypeSyntax/* void */) {
 					goto EXIT;
 				}
-				if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationFromBaseType | QuickInfoOptions.OverrideDefaultDocumentation)) {
-					OverrideDocumentation(node, w, symbol);
+				if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)) {
+					OverrideDocumentation(node, qiWrapper, symbol);
 				}
 				var formatMap = _FormatMapService.GetEditorFormatMap(session.TextView);
 				if (_FormatMap != formatMap) {
@@ -136,9 +136,9 @@ namespace Codist.QuickInfo
 				ShowSymbolInfo(qiContent, node, symbol);
 				RETURN:
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo) /*&& node is MemberDeclarationSyntax == false && node.Kind() != SyntaxKind.VariableDeclarator && node.Kind() != SyntaxKind.Parameter*/) {
-					w.ApplyClickAndGo(symbol);
+					qiWrapper.ApplyClickAndGo(symbol);
 				}
-				QuickInfoOverrider.LimitQuickInfoItemSize(qiContent, w);
+				QuickInfoOverrider.LimitQuickInfoItemSize(qiContent, qiWrapper);
 				var navigator = _NavigatorService.GetTextStructureNavigator(_TextBuffer);
 				var extent = navigator.GetExtentOfWord(querySpan.Start).Span;
 				applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
@@ -152,26 +152,36 @@ namespace Codist.QuickInfo
 			void OverrideDocumentation(SyntaxNode node, DefaultQuickInfoPanelWrapper qiWrapper, ISymbol symbol) {
 				var doc = symbol.GetXmlDocForSymbol();
 				if (doc != null) {
+					if (doc.Name.LocalName == XmlDocParser.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {
+						return;
+					}
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
-						var desc = doc.ToUIText(RenderXmlDocSymbol);
-						if (desc != null) {
-							RenderXmlReturnsDoc(symbol, doc.Parent, desc);
-							qiWrapper.OverrideDocumentation(desc);
+						var info = doc.ToUIText(RenderXmlDocSymbol);
+						if (info != null) {
+							if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
+								RenderXmlReturnsDoc(symbol, doc.Parent, info);
+							}
+							qiWrapper.OverrideDocumentation(info);
 						}
 					}
 				}
 				else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
 					ISymbol baseMember;
-					var baseDocs = symbol.InheritDocumentation(out baseMember);
-					if (baseDocs != null) {
+					doc = symbol.InheritDocumentation(out baseMember);
+					if (doc != null) {
+						if (doc.Name.LocalName == XmlDocParser.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {
+							return;
+						}
 						var info = new TextBlock { TextWrapping = TextWrapping.Wrap }
 							.AddText("Documentation from ")
 							.AddSymbolDisplayParts(baseMember.ContainingType.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter)
 							.AddText(".")
 							.AddSymbol(baseMember, _SymbolFormatter)
 							.AddText(": ");
-						baseDocs.ToUIText(info.Inlines, RenderXmlDocSymbol);
-						RenderXmlReturnsDoc(baseMember, baseDocs.Parent, info);
+						doc.ToUIText(info.Inlines, RenderXmlDocSymbol);
+						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
+							RenderXmlReturnsDoc(baseMember, doc.Parent, info);
+						}
 						qiWrapper.OverrideDocumentation(info);
 					}
 				}
@@ -238,10 +248,6 @@ namespace Codist.QuickInfo
 					info.Add(ToUIText(item, node.SpanStart));
 				}
 				qiContent.Add(info.Scrollable());
-			}
-
-			static bool CanAccess(ISymbol symbol) {
-				return symbol.DeclaredAccessibility == Accessibility.Public || symbol.DeclaredAccessibility == Accessibility.NotApplicable || symbol.Locations.Any(l => l.IsInSource);
 			}
 
 			void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {
@@ -311,7 +317,7 @@ namespace Codist.QuickInfo
 					var s = (node as SwitchStatementSyntax).Sections.Count;
 					if (s > 1) {
 						var cases = 0;
-						foreach (SwitchSectionSyntax section in (node as SwitchStatementSyntax).Sections) {
+						foreach (var section in (node as SwitchStatementSyntax).Sections) {
 							cases += section.Labels.Count;
 						}
 						qiContent.Add(s + " switch sections, " + cases + " cases");
@@ -415,7 +421,7 @@ namespace Codist.QuickInfo
 					}
 					overloadInfo.Add(new TextBlock { TextWrapping = TextWrapping.Wrap }
 						.SetGlyph(_GlyphService.GetGlyph(item.GetGlyphGroup(), item.GetGlyphItem()))
-						.AddSymbolDisplayParts(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter)
+						.AddSymbolDisplayParts(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, Int32.MinValue)
 					);
 				}
 				if (overloadInfo.Children.Count > 1) {
@@ -660,7 +666,7 @@ namespace Codist.QuickInfo
 			static void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs, int position) {
 				var info = new StackPanel().AddText("Attribute:", true);
 				foreach (var item in attrs) {
-					if (CanAccess(item.AttributeClass) == false) {
+					if (item.AttributeClass.IsAccessible() == false) {
 						continue;
 					}
 					var a = item.AttributeClass.Name;
@@ -711,7 +717,7 @@ namespace Codist.QuickInfo
 							.AddText("Base type: ", true)
 							.AddSymbolDisplayParts(baseType.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
 						while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
-							if (CanAccess(baseType) && baseType.IsCommonClass() == false) {
+							if (baseType.IsAccessible() && baseType.IsCommonClass() == false) {
 								info.AddText(" - ").AddSymbol(baseType, false, _SymbolFormatter.Class);
 							}
 						}

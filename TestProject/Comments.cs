@@ -23,6 +23,7 @@ namespace TestProject
 	/// </summary>
 	class Comments
 	{
+		/** text only XML doc */
 		void Test() {
 			// hover on Comments to see overriden XML Doc
 			var c = new Comments();

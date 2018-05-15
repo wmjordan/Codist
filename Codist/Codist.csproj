@@ -103,11 +103,41 @@
     <Compile Include="Options\ConfigPage.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Options\CSharpPage.cs">
+    <Compile Include="Options\CSharpSpecialHighlightPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Options\CSharpPage.Designer.cs">
-      <DependentUpon>CSharpPage.cs</DependentUpon>
+    <Compile Include="Options\CSharpSpecialHighlightPage.Designer.cs">
+      <DependentUpon>CSharpSpecialHighlightPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options\CSharpScrollbarMarkerPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\CSharpScrollbarMarkerPage.Designer.cs">
+      <DependentUpon>CSharpScrollbarMarkerPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options\CSharpSuperQuickInfoPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\CSharpSuperQuickInfoPage.Designer.cs">
+      <DependentUpon>CSharpSuperQuickInfoPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options\SyntaxHighlightPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\SyntaxHighlightPage.Designer.cs">
+      <DependentUpon>SyntaxHighlightPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options\ScrollbarMarkerPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\ScrollbarMarkerPage.Designer.cs">
+      <DependentUpon>ScrollbarMarkerPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options\SuperQuickInfoPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\SuperQuickInfoPage.Designer.cs">
+      <DependentUpon>SuperQuickInfoPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Options\GeneralPage.cs">
       <SubType>UserControl</SubType>
@@ -402,8 +432,23 @@
     <EmbeddedResource Include="Options\CommentTaggerOptionPage.resx">
       <DependentUpon>CommentTaggerOptionPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Options\CSharpPage.resx">
-      <DependentUpon>CSharpPage.cs</DependentUpon>
+    <EmbeddedResource Include="Options\CSharpSpecialHighlightPage.resx">
+      <DependentUpon>CSharpSpecialHighlightPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\CSharpScrollbarMarkerPage.resx">
+      <DependentUpon>CSharpScrollbarMarkerPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\CSharpSuperQuickInfoPage.resx">
+      <DependentUpon>CSharpSuperQuickInfoPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\SyntaxHighlightPage.resx">
+      <DependentUpon>SyntaxHighlightPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\ScrollbarMarkerPage.resx">
+      <DependentUpon>ScrollbarMarkerPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\SuperQuickInfoPage.resx">
+      <DependentUpon>SuperQuickInfoPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Options\GeneralPage.resx">
       <DependentUpon>GeneralPage.cs</DependentUpon>

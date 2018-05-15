@@ -93,12 +93,38 @@ namespace Codist.Options
 	}
 
 	[Browsable(false)]
-	[Guid("8ECD56D1-87C1-47E2-9FB0-742B0FF35FEF")]
+	[Guid("8BF03E86-FF38-4AB4-8D23-1AC70E74806C")]
+	sealed class SyntaxHighlight : ConfigPage
+	{
+		SyntaxHighlightPage _control;
+
+		protected override IWin32Window Window => _control ?? (_control = new SyntaxHighlightPage(this));
+		protected override void Dispose(bool disposing) {
+			_control.Dispose();
+			base.Dispose(disposing);
+		}
+	}
+
+	[Browsable(false)]
+	[Guid("0077CDB9-8304-4322-A40E-342B7C5605E9")]
 	sealed class CodeStyle : ConfigPage
 	{
 		SyntaxStyleOptionPage _control;
 
-		protected override IWin32Window Window => _control ?? (_control = new SyntaxStyleOptionPage(this, () => Config.Instance.CodeStyles, Config.GetDefaultCodeStyles));
+		protected override IWin32Window Window => _control ?? (_control = new SyntaxStyleOptionPage(this, () => Config.Instance.GeneralStyles, Config.GetDefaultCodeStyles));
+		protected override void Dispose(bool disposing) {
+			_control.Dispose();
+			base.Dispose(disposing);
+		}
+	}
+
+	[Browsable(false)]
+	[Guid("8ECD56D1-87C1-47E2-9FB0-742B0FF35FEF")]
+	sealed class CSharpStyle : ConfigPage
+	{
+		SyntaxStyleOptionPage _control;
+
+		protected override IWin32Window Window => _control ?? (_control = new SyntaxStyleOptionPage(this, () => Config.Instance.CodeStyles, Config.GetDefaultCSharpStyles));
 		protected override void Dispose(bool disposing) {
 			_control.Dispose();
 			base.Dispose(disposing);
@@ -159,11 +185,63 @@ namespace Codist.Options
 
 	[Browsable(false)]
 	[Guid("6B92F305-BEAD-49E3-9277-28E1829D7B57")]
-	sealed class CSharp : ConfigPage
+	sealed class CSharpSuperQuickInfo : ConfigPage
 	{
-		CSharpPage _Control;
+		CSharpSuperQuickInfoPage _Control;
 
-		protected override IWin32Window Window => _Control ?? (_Control = new CSharpPage(this));
+		protected override IWin32Window Window => _Control ?? (_Control = new CSharpSuperQuickInfoPage(this));
+		protected override void Dispose(bool disposing) {
+			_Control.Dispose();
+			base.Dispose(disposing);
+		}
+	}
+
+	[Browsable(false)]
+	[Guid("EE62CE13-5B5B-4EA0-A3FE-4D1F68FD2685")]
+	sealed class SuperQuickInfo : ConfigPage
+	{
+		SuperQuickInfoPage _Control;
+
+		protected override IWin32Window Window => _Control ?? (_Control = new SuperQuickInfoPage(this));
+		protected override void Dispose(bool disposing) {
+			_Control.Dispose();
+			base.Dispose(disposing);
+		}
+	}
+
+	[Browsable(false)]
+	[Guid("23785D62-BD49-448B-A943-839DA27E8197")]
+	sealed class ScrollbarMarker : ConfigPage
+	{
+		ScrollbarMarkerPage _Control;
+
+		protected override IWin32Window Window => _Control ?? (_Control = new ScrollbarMarkerPage(this));
+		protected override void Dispose(bool disposing) {
+			_Control.Dispose();
+			base.Dispose(disposing);
+		}
+	}
+
+	[Browsable(false)]
+	[Guid("E676D973-8A9A-461A-9085-DF69A54743A5")]
+	sealed class CSharpScrollbarMarker : ConfigPage
+	{
+		CSharpScrollbarMarkerPage _Control;
+
+		protected override IWin32Window Window => _Control ?? (_Control = new CSharpScrollbarMarkerPage(this));
+		protected override void Dispose(bool disposing) {
+			_Control.Dispose();
+			base.Dispose(disposing);
+		}
+	}
+
+	[Browsable(false)]
+	[Guid("31356507-E11A-4E61-B0C2-C9A6584632DB")]
+	sealed class CSharpSpecialHighlight : ConfigPage
+	{
+		CSharpSpecialHighlightPage _Control;
+
+		protected override IWin32Window Window => _Control ?? (_Control = new CSharpSpecialHighlightPage(this));
 		protected override void Dispose(bool disposing) {
 			_Control.Dispose();
 			base.Dispose(disposing);

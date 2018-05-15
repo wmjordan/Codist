@@ -14,6 +14,8 @@ namespace Codist
 	static class XmlDocParser
 	{
 		static readonly Regex _FixWhitespaces = new Regex(@" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+		static readonly Regex _FixTextOnlyDoc = new Regex(@"([^\n])[ \t\r\n]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+		internal const string XmlDocNodeName = "member";
 
 		public static XElement GetXmlDoc(this ISymbol symbol) {
 			if (symbol == null) {
@@ -51,7 +53,12 @@ namespace Codist
 			}
 		}
 		public static XElement GetSummary(this XElement doc) {
-			return doc?.Element("summary");
+			if (doc == null) {
+				return null;
+			}
+			return doc.Element("summary")
+				?? (doc.FirstNode != null && doc.FirstNode.NodeType == XmlNodeType.Text && doc.LastNode.NodeType == XmlNodeType.Text ? doc : null) // text only XML doc
+				;
 		}
 		public static XElement GetReturns(this XElement doc) {
 			return doc?.Element("returns");
@@ -128,15 +135,22 @@ namespace Codist
 						break;
 					case XmlNodeType.Text:
 						string t = (item as XText).Value;
-						if (item.Parent.Name != "code") {
-							var previous = (item.PreviousNode as XElement)?.Name;
-							if (previous == null || previous != "see" && previous != "paramref" && previous != "typeparamref" && previous != "c" && previous != "b" && previous != "i" && previous != "u") {
-								t = item.NextNode == null ? t.Trim() : t.TrimStart();
+						var parentName = item.Parent.Name.LocalName;
+						if (parentName != "code") {
+							if (parentName != XmlDocNodeName) {
+								var previous = (item.PreviousNode as XElement)?.Name?.LocalName;
+								if (previous == null || previous != "see" && previous != "paramref" && previous != "typeparamref" && previous != "c" && previous != "b" && previous != "i" && previous != "u") {
+									t = item.NextNode == null ? t.Trim() : t.TrimStart();
+								}
+								else if (item.NextNode == null) {
+									t = t.TrimEnd();
+								}
+								t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
 							}
-							else if (item.NextNode == null) {
-								t = t.TrimEnd();
+							else {
+								// fix whitespace for text only XML doc
+								t = _FixTextOnlyDoc.Replace(t, "$1");
 							}
-							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
 						}
 						text.Add(new Run(t));
 						break;

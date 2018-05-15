@@ -16,19 +16,18 @@ namespace Codist.QuickInfo
 		static Type _QuickInfoPanelType;
 		static Func<StackPanel, TextBlock> _GetMainDescription;
 		static Func<StackPanel, TextBlock> _GetDocumentation;
-		readonly StackPanel _Panel;
 
 		public DefaultQuickInfoPanelWrapper(StackPanel panel) {
-			_Panel = panel;
+			Panel = panel;
 			if (_QuickInfoPanelType == null && panel != null) {
 				_QuickInfoPanelType = panel.GetType();
 				_GetMainDescription = CreateGetInfoPartMethod(panel, "MainDescription");
 				_GetDocumentation = CreateGetInfoPartMethod(panel, "Documentation");
 			}
 		}
-		public StackPanel Panel => _Panel;
-		public TextBlock MainDesciption => _Panel != null ? _GetMainDescription(_Panel) : null;
-		public TextBlock Documentation => _Panel != null ? _GetDocumentation(_Panel) : null;
+		public StackPanel Panel { get; }
+		public TextBlock MainDesciption => Panel != null ? _GetMainDescription(Panel) : null;
+		public TextBlock Documentation => Panel != null ? _GetDocumentation(Panel) : null;
 
 		/// <summary>Hack into the default QuickInfo panel and provides click and go feature for symbols.</summary>
 		public void ApplyClickAndGo(ISymbol symbol) {
@@ -53,16 +52,14 @@ namespace Codist.QuickInfo
 			description.MouseLeftButtonUp += (s, args) => symbol.GoToSymbol();
 			return;
 		}
-		/// <summary>
-		/// overrides default doc summary
-		/// </summary>
-		/// <param name="newDoc"></param>
-		/// 
+
+		/// <summary>overrides default doc summary</summary>
+		/// <param name="newDoc">The overriding doc element.</param>
 		public void OverrideDocumentation(UIElement newDoc) {
 			var doc = Documentation;
 			if (doc != null) {
 				doc.Visibility = Visibility.Collapsed;
-				_Panel.Children.Insert(_Panel.Children.IndexOf(doc), newDoc);
+				Panel.Children.Insert(Panel.Children.IndexOf(doc), newDoc);
 			}
 		}
 

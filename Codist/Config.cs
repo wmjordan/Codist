@@ -48,7 +48,8 @@ namespace Codist
 		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
 		public List<CommentStyle> CommentStyles { get; } = new List<CommentStyle>();
 		public List<XmlCodeStyle> XmlCodeStyles { get; } = new List<XmlCodeStyle>();
-		public List<CodeStyle> CodeStyles { get; } = new List<CodeStyle>();
+		public List<CSharpStyle> CodeStyles { get; } = new List<CSharpStyle>();
+		public List<CodeStyle> GeneralStyles { get; } = new List<CodeStyle>();
 
 		public static event EventHandler Loaded;
 		public static event EventHandler Updated;
@@ -110,15 +111,7 @@ namespace Codist
 			if (l.Count == 0) {
 				InitDefaultLabels(l);
 			}
-			var s = config.CommentStyles;
-			CleanUpStyleEntry(s, loadFromTheme);
-			for (int i = s.Count - 1; i >= 0; i--) {
-				if (s[i] == null || Enum.IsDefined(typeof(CommentStyleTypes), s[i].StyleID) == false) {
-					s.RemoveAt(i);
-				}
-			}
-			MergeDefaultStyles(s);
-			var cs = config.CodeStyles;
+			var cs = config.GeneralStyles;
 			CleanUpStyleEntry(cs, loadFromTheme);
 			for (int i = cs.Count - 1; i >= 0; i--) {
 				if (cs[i] == null || Enum.IsDefined(typeof(CodeStyleTypes), cs[i].StyleID) == false) {
@@ -126,6 +119,22 @@ namespace Codist
 				}
 			}
 			MergeDefaultCodeStyles(cs);
+			var s = config.CommentStyles;
+			CleanUpStyleEntry(s, loadFromTheme);
+			for (int i = s.Count - 1; i >= 0; i--) {
+				if (s[i] == null || Enum.IsDefined(typeof(CommentStyleTypes), s[i].StyleID) == false) {
+					s.RemoveAt(i);
+				}
+			}
+			MergeDefaultCommentStyles(s);
+			var css = config.CodeStyles;
+			CleanUpStyleEntry(css, loadFromTheme);
+			for (int i = css.Count - 1; i >= 0; i--) {
+				if (css[i] == null || Enum.IsDefined(typeof(CSharpStyleTypes), css[i].StyleID) == false) {
+					css.RemoveAt(i);
+				}
+			}
+			MergeDefaultCSharpStyles(css);
 			var xcs = config.XmlCodeStyles;
 			CleanUpStyleEntry(xcs, loadFromTheme);
 			for (int i = xcs.Count - 1; i >= 0; i--) {
@@ -149,7 +158,7 @@ namespace Codist
 
 		public static void ResetStyles() {
 			ResetCodeStyle(Instance.CommentStyles, GetDefaultCommentStyles());
-			ResetCodeStyle(Instance.CodeStyles, GetDefaultCodeStyles());
+			ResetCodeStyle(Instance.CodeStyles, GetDefaultCSharpStyles());
 			ResetCodeStyle(Instance.XmlCodeStyles, GetDefaultXmlCodeStyles());
 			Updated?.Invoke(Instance, EventArgs.Empty);
 		}
@@ -201,8 +210,9 @@ namespace Codist
 			_LastLoaded = DateTime.Now;
 			var c = new Config();
 			InitDefaultLabels(c.Labels);
+			c.GeneralStyles.AddRange(GetDefaultCodeStyles());
 			c.CommentStyles.AddRange(GetDefaultCommentStyles());
-			c.CodeStyles.AddRange(GetDefaultCodeStyles());
+			c.CodeStyles.AddRange(GetDefaultCSharpStyles());
 			c.XmlCodeStyles.AddRange(GetDefaultXmlCodeStyles());
 			return c;
 		}
@@ -228,15 +238,22 @@ namespace Codist
 				new CommentLabel("HACK", CommentStyleTypes.Hack, true) { AllowPunctuationDelimiter = true },
 			});
 		}
-		static void MergeDefaultStyles(List<CommentStyle> styles) {
+		static void MergeDefaultCodeStyles(List<CodeStyle> styles) {
+			foreach (var s in GetDefaultCodeStyles()) {
+				if (s.Id > 0 && styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
+					styles.Add(s);
+				}
+			}
+		}
+		static void MergeDefaultCommentStyles(List<CommentStyle> styles) {
 			foreach (var s in GetDefaultCommentStyles()) {
 				if (s.Id > 0 && styles.FindIndex(i=> i.StyleID == s.StyleID) == -1) {
 					styles.Add(s);
 				}
 			}
 		}
-		static void MergeDefaultCodeStyles(List<CodeStyle> styles) {
-			foreach (var s in GetDefaultCodeStyles()) {
+		static void MergeDefaultCSharpStyles(List<CSharpStyle> styles) {
+			foreach (var s in GetDefaultCSharpStyles()) {
 				if (s.Id > 0 && styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
 					styles.Add(s);
 				}
@@ -284,6 +301,13 @@ namespace Codist
 			var r = new CodeStyle[Enum.GetValues(typeof(CodeStyleTypes)).Length];
 			for (int i = 0; i < r.Length; i++) {
 				r[i] = new CodeStyle { StyleID = (CodeStyleTypes)i };
+			}
+			return r;
+		}
+		internal static CSharpStyle[] GetDefaultCSharpStyles() {
+			var r = new CSharpStyle[Enum.GetValues(typeof(CSharpStyleTypes)).Length];
+			for (int i = 0; i < r.Length; i++) {
+				r[i] = new CSharpStyle { StyleID = (CSharpStyleTypes)i };
 			}
 			return r;
 		}
@@ -370,6 +394,41 @@ namespace Codist
 	}
 
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
+	sealed class CodeStyle : StyleBase
+	{
+		string _Category;
+
+		public override int Id => (int)StyleID;
+
+		/// <summary>Gets or sets the code style.</summary>
+		public CodeStyleTypes StyleID { get; set; }
+
+		public override string Category {
+			get {
+				if (_Category != null) {
+					return _Category;
+				}
+				var f = typeof(CodeStyleTypes).GetField(StyleID.ToString());
+				if (f == null) {
+					return _Category = String.Empty;
+				}
+				var c = f.GetCustomAttribute<CategoryAttribute>(false);
+				if (c == null) {
+					return _Category = String.Empty;
+				}
+				return _Category = c.Category;
+			}
+		}
+		internal new CodeStyle Clone() {
+			return (CodeStyle)MemberwiseClone();
+		}
+
+		public override string ToString() {
+			return FriendlyNamePattern.Replace(StyleID.ToString(), "$1 $2");
+		}
+	}
+
+	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class CommentStyle : StyleBase
 	{
 		public CommentStyle() {
@@ -399,6 +458,41 @@ namespace Codist
 	}
 
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
+	sealed class CSharpStyle : StyleBase
+	{
+		string _Category;
+
+		public override int Id => (int)StyleID;
+
+		/// <summary>Gets or sets the code style.</summary>
+		public CSharpStyleTypes StyleID { get; set; }
+
+		public override string Category {
+			get {
+				if (_Category != null) {
+					return _Category;
+				}
+				var f = typeof(CSharpStyleTypes).GetField(StyleID.ToString());
+				if (f == null) {
+					return _Category = String.Empty;
+				}
+				var c = f.GetCustomAttribute<CategoryAttribute>(false);
+				if (c == null) {
+					return _Category = String.Empty;
+				}
+				return _Category = c.Category;
+			}
+		}
+		internal new CSharpStyle Clone() {
+			return (CSharpStyle)MemberwiseClone();
+		}
+
+		public override string ToString() {
+			return FriendlyNamePattern.Replace(StyleID.ToString(), "$1 $2");
+		}
+	}
+
+	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class XmlCodeStyle : StyleBase
 	{
 		public XmlCodeStyle() {
@@ -417,41 +511,6 @@ namespace Codist
 
 		internal new CommentStyle Clone() {
 			return (CommentStyle)MemberwiseClone();
-		}
-
-		public override string ToString() {
-			return FriendlyNamePattern.Replace(StyleID.ToString(), "$1 $2");
-		}
-	}
-
-	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
-	sealed class CodeStyle : StyleBase
-	{
-		string _Category;
-
-		public override int Id => (int)StyleID;
-
-		/// <summary>Gets or sets the code style.</summary>
-		public CodeStyleTypes StyleID { get; set; }
-
-		public override string Category {
-			get {
-				if (_Category != null) {
-					return _Category;
-				}
-				var f = typeof(CodeStyleTypes).GetField(StyleID.ToString());
-				if (f == null) {
-					return _Category = String.Empty;
-				}
-				var c = f.GetCustomAttribute<CategoryAttribute>(false);
-				if (c == null) {
-					return _Category = String.Empty;
-				}
-				return _Category = c.Category;
-			}
-		}
-		internal new CodeStyle Clone() {
-			return (CodeStyle)MemberwiseClone();
 		}
 
 		public override string ToString() {
@@ -551,10 +610,13 @@ namespace Codist
 		TypeParameters = 1 << 11,
 		OverrideDefaultDocumentation = 1 << 20,
 		DocumentationFromBaseType = 1 << 21,
+		TextOnlyDoc = 1 << 22,
+		ReturnsDoc = 1 << 23,
 		Selection = 1 << 27,
 		ClickAndGo = 1 << 28,
 		CtrlQuickInfo = 1 << 29,
 		HideOriginalQuickInfo = 1 << 30,
+		QuickInfoOverride = OverrideDefaultDocumentation | DocumentationFromBaseType,
 		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | ClickAndGo,
 	}
 

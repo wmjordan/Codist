@@ -160,7 +160,9 @@ namespace Codist.Margins
 							if (pen == null) {
 								pen = GetPenForCodeMemberType(tagType);
 							}
-							drawingContext.DrawText(UIHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Clone().Alpha((y2 - y1) * 10 / ActualHeight)), new Point(level, y1));
+							if (pen.Brush != null) {
+								drawingContext.DrawText(UIHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Clone().Alpha((y2 - y1) * 10 / ActualHeight)), new Point(level, y1));
+							}
 							lastLabel = y1 + labelSize;
 						}
 					}

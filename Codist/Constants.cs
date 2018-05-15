@@ -261,6 +261,72 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeKeyword)]
 		Keyword,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppNamespace)]
+		NamespaceName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppType)]
+		ClassName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeStructName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppValueType)]
+		StructName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeInterfaceName)]
+		InterfaceName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumName)]
+		EnumName,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeIdentifier)]
+		Identifier,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeNumber)]
+		Number,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeString)]
+		String,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeStringVerbatim)]
+		StringVerbatim,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeOperator)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppMemberOperator)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppOperator)]
+		Operator,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodePunctuation)]
+		Punctuation,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeUrl)]
+		Url,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpLabel)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppLabel)]
+		Label,
+		[Category(Constants.SyntaxCategory.Preprocessor)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodePreprocessorText)]
+		PreprocessorText,
+		[Category(Constants.SyntaxCategory.Preprocessor)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodePreprocessorKeyword)]
+		PreprocessorKeyword,
+		[Category(Constants.SyntaxCategory.Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeComment)]
+		Comment,
+		[Category(Constants.SyntaxCategory.CompilerMarked)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeExcluded)]
+		ExcludedCode,
+		//[ClassificationType(ClassificationTypeNames = Constants.CodeBraceMatching)]
+		//BraceMatching,
+		[Category(Constants.SyntaxCategory.CompilerMarked)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeUnnecessary)]
+		UnnecessaryCode,
+	}
+	enum CSharpStyleTypes
+	{
+		None,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
 		ControlFlowKeyword,
@@ -291,26 +357,8 @@ namespace Codist
 		DeclarationBrace,
 
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppNamespace)]
-		NamespaceName,
-		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppType)]
-		ClassName,
-		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpSealedClassName)]
 		SealedClassName,
-		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeStructName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppValueType)]
-		StructName,
-		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeInterfaceName)]
-		InterfaceName,
-		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumName)]
-		EnumName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeDelegateName)]
 		DelegateName,
@@ -364,42 +412,6 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CppParameter)]
 		ParameterName,
 
-		[Category(Constants.SyntaxCategory.General)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeIdentifier)]
-		Identifier,
-		[Category(Constants.SyntaxCategory.General)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeNumber)]
-		Number,
-		[Category(Constants.SyntaxCategory.General)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeString)]
-		String,
-		[Category(Constants.SyntaxCategory.General)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeStringVerbatim)]
-		StringVerbatim,
-		[Category(Constants.SyntaxCategory.General)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeOperator)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppMemberOperator)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppOperator)]
-		Operator,
-		[Category(Constants.SyntaxCategory.General)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodePunctuation)]
-		Punctuation,
-		[Category(Constants.SyntaxCategory.General)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeUrl)]
-		Url,
-		[Category(Constants.SyntaxCategory.General)]
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpLabel)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppLabel)]
-		Label,
-		[Category(Constants.SyntaxCategory.Preprocessor)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodePreprocessorText)]
-		PreprocessorText,
-		[Category(Constants.SyntaxCategory.Preprocessor)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodePreprocessorKeyword)]
-		PreprocessorKeyword,
-		[Category(Constants.SyntaxCategory.Comment)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeComment)]
-		Comment,
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlDocComment)]
 		XmlDocComment,
@@ -418,15 +430,6 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlDocCData)]
 		XmlDocCData,
-		[Category(Constants.SyntaxCategory.CompilerMarked)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeExcluded)]
-		ExcludedCode,
-		//[ClassificationType(ClassificationTypeNames = Constants.CodeBraceMatching)]
-		//BraceMatching,
-		[Category(Constants.SyntaxCategory.CompilerMarked)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeUnnecessary)]
-		UnnecessaryCode,
-
 	}
 
 	enum XmlStyleTypes

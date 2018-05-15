@@ -4,9 +4,23 @@ using System.Runtime.InteropServices;
 
 namespace TestProject
 {
+	struct Struct
+	{
+		public readonly int X, Y; // readonly fields
+		public Struct(int x, int y) {
+			X = x;
+			Y = y;
+		}
+	}
+	/// <summary>
+	/// An abstract class
+	/// </summary>
 	abstract class AbstractClass : IInterface
 	{
 		protected abstract int Property { get; set; } // protected abstract property
+		// This property does not have an XML doc, however, the interface member has.
+		// If we enables "Inherit from base type or interfaces" option in the "Super Quick Info" option page,
+		// hover on the property you will read "Documentation from IInterface.Property".
 		MyEnum IInterface.Property { get; set; } // explicit interface implementation
 		public void Method() { Property++; }
 		protected abstract int AbstractMethod(); // abstract method
@@ -20,10 +34,10 @@ namespace TestProject
 	sealed class ConcreteClass : AbstractClass
 	{
 		/// <summary>A generic delegate with a parameter.</summary>
-		/// <typeparam name="T">The generic type parameter of the delegate.</typeparam>
-		/// <param name="obj">The method parameter of type <typeparamref name="T"/>.</param>
+		/// <typeparam name="TObject">The generic type parameter of the delegate.</typeparam>
+		/// <param name="obj">The method parameter of type <typeparamref name="TObject"/>.</param>
 		/// <returns>Returns an instance of the generic type parameter.</returns>
-		delegate T Clone<T>(T obj);
+		delegate TObject Clone<TObject>(TObject obj);
 		event EventHandler<EventArgs> MyEvent;
 
 		// note hover on the "{" below to see line count of this method block
@@ -101,6 +115,9 @@ text".Log(); // multiline string (string verbatim)
 			return clone(this); // invoking delegate
 		}
 
+		/// <summary>
+		/// Nested class
+		/// </summary>
 		static class NativeMethods
 		{
 			[DllImport("dummy.dll", EntryPoint = "DummyFunction", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]

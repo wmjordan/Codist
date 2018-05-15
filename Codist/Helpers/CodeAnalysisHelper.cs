@@ -218,6 +218,10 @@ namespace Codist
 			}
 			return true;
 		}
+		public static bool IsAccessible(this ISymbol symbol) {
+			return symbol.DeclaredAccessibility == Accessibility.Public || symbol.DeclaredAccessibility == Accessibility.NotApplicable || symbol.Locations.Any(l => l.IsInSource);
+		}
+
 		public static bool IsCommonClass(this ISymbol symbol) {
 			if (symbol.Kind == SymbolKind.NamedType) {
 				var name = symbol.Name;

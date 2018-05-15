@@ -59,8 +59,9 @@ namespace Codist.SyntaxHighlight
 
 		static void CacheStyles(IClassificationTypeRegistryService service) {
 			__Styles = new Dictionary<string, StyleBase>(100);
+			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(service, Config.Instance.GeneralStyles);
 			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(service, Config.Instance.CommentStyles);
-			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(service, Config.Instance.CodeStyles);
+			InitStyleClassificationCache<CSharpStyleTypes, CSharpStyle>(service, Config.Instance.CodeStyles);
 			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(service, Config.Instance.XmlCodeStyles);
 		}
 
