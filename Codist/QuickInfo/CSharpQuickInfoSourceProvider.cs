@@ -89,7 +89,46 @@ namespace Codist.QuickInfo
 				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 
 				//look for occurrences of our QuickInfo words in the span
-				var node = unitCompilation.FindNode(new TextSpan(querySpan.Start, querySpan.Length), true, true);
+				var token = unitCompilation.FindToken(subjectTriggerPoint, true);
+				ISymbol symbol;
+				switch (token.Kind()) {
+					case SyntaxKind.WhitespaceTrivia:
+					case SyntaxKind.SingleLineCommentTrivia:
+					case SyntaxKind.MultiLineCommentTrivia:
+						goto EXIT;
+					case SyntaxKind.OpenBraceToken:
+					case SyntaxKind.CloseBraceToken:
+					case SyntaxKind.SwitchKeyword:
+						break;
+					case SyntaxKind.ReturnKeyword:
+						var statement = unitCompilation.FindNode(token.Span);
+						if (statement != null) {
+							while ((statement = statement.Parent) != null) {
+								var name = statement.GetDeclarationSignature();
+								if (name != null) {
+									symbol = semanticModel.GetSymbolInfo(statement).Symbol ?? semanticModel.GetDeclaredSymbol(statement);
+									var tb = new TextBlock().AddText("Return for ");
+									if (symbol != null) {
+										tb.AddSymbol(symbol, name, _SymbolFormatter);
+									}
+									else {
+										tb.AddText(name);
+									}
+									qiContent.Add(tb);
+									applicableToSpan = currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive);
+									return;
+								}
+							}
+						}
+						goto EXIT;
+					default:
+						if (token.Span.Contains(subjectTriggerPoint) == false
+							|| token.IsReservedKeyword()) {
+							goto EXIT;
+						}
+						break;
+				}
+				var node = unitCompilation.FindNode(token.Span, true, true);
 				if (node == null || node.Span.Contains(subjectTriggerPoint.Position) == false) {
 					goto EXIT;
 				}
@@ -103,7 +142,7 @@ namespace Codist.QuickInfo
 					? new DefaultQuickInfoPanelWrapper(QuickInfoOverrider.FindDefaultQuickInfoPanel(qiContent))
 					: null;
 				var symbolInfo = semanticModel.GetSymbolInfo(node);
-				ISymbol symbol = symbolInfo.Symbol;
+				symbol = symbolInfo.Symbol;
 				if (symbol == null) {
 					if (symbolInfo.CandidateReason != CandidateReason.None) {
 						ShowCandidateInfo(qiContent, symbolInfo, node);
@@ -176,7 +215,7 @@ namespace Codist.QuickInfo
 							.AddText("Documentation from ")
 							.AddSymbolDisplayParts(baseMember.ContainingType.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter)
 							.AddText(".")
-							.AddSymbol(baseMember, _SymbolFormatter)
+							.AddSymbol(baseMember, null, _SymbolFormatter)
 							.AddText(": ");
 						doc.ToUIText(info.Inlines, RenderXmlDocSymbol);
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
@@ -229,7 +268,7 @@ namespace Codist.QuickInfo
 					inlines.Add(symbol);
 					return;
 				}
-				_SymbolFormatter.ToUIText(inlines, rs);
+				_SymbolFormatter.ToUIText(inlines, rs, null);
 			}
 
 			void RenderXmlReturnsDoc(ISymbol symbol, XElement doc, TextBlock desc) {
@@ -421,7 +460,7 @@ namespace Codist.QuickInfo
 					}
 					overloadInfo.Add(new TextBlock { TextWrapping = TextWrapping.Wrap }
 						.SetGlyph(_GlyphService.GetGlyph(item.GetGlyphGroup(), item.GetGlyphItem()))
-						.AddSymbolDisplayParts(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, Int32.MinValue)
+						.AddSymbolDisplayParts(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, -1)
 					);
 				}
 				if (overloadInfo.Children.Count > 1) {
@@ -947,7 +986,7 @@ namespace Codist.QuickInfo
 					var doc = argName != null ? (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", argName) : null;
 					var info = new TextBlock().AddText("Argument of ").AddSymbolDisplayParts(symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, ai);
 					if (doc != null) {
-						info.AddText("\n" + argName, true).AddText(": ");
+						info.AddText("\n" + argName, true, true, _SymbolFormatter.Parameter).AddText(": ");
 						doc.ToUIText(info.Inlines, RenderXmlDocSymbol);
 					}
 					qiContent.Add(info);

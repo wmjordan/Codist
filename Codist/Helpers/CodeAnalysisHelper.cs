@@ -111,6 +111,26 @@ namespace Codist
 			return false;
 		}
 
+		public static string GetDeclarationSignature(this SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.ClassDeclaration:
+				case SyntaxKind.EnumDeclaration:
+				case SyntaxKind.StructDeclaration:
+				case SyntaxKind.InterfaceDeclaration:
+					return (node as BaseTypeDeclarationSyntax).Identifier.Text;
+				case SyntaxKind.ConstructorDeclaration: return (node as ConstructorDeclarationSyntax).Identifier.Text;
+				case SyntaxKind.ConversionOperatorDeclaration: return (node as ConversionOperatorDeclarationSyntax).OperatorKeyword.Text;
+				case SyntaxKind.DestructorDeclaration: return (node as DestructorDeclarationSyntax).Identifier.Text;
+				case SyntaxKind.IndexerDeclaration: return "Indexer";
+				case SyntaxKind.MethodDeclaration: return (node as MethodDeclarationSyntax).Identifier.Text;
+				case SyntaxKind.OperatorDeclaration: return (node as OperatorDeclarationSyntax).OperatorKeyword.Text;
+				case SyntaxKind.PropertyDeclaration: return (node as PropertyDeclarationSyntax).Identifier.Text;
+				case SyntaxKind.SimpleLambdaExpression: return "(" + (node as SimpleLambdaExpressionSyntax).Parameter.ToString() + ")";
+				case SyntaxKind.ParenthesizedLambdaExpression: return (node as ParenthesizedLambdaExpressionSyntax).ParameterList.ToString();
+			}
+			return null;
+		}
+
 		public static StandardGlyphGroup GetGlyphGroup(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Alias: return StandardGlyphGroup.GlyphForwardType;
@@ -196,7 +216,7 @@ namespace Codist
 		/// <param name="parameters">The parameters the symbol should take.</param>
 		public static bool MatchSignature(this ISymbol symbol, SymbolKind kind, ITypeSymbol returnType, ImmutableArray<IParameterSymbol> parameters) {
 			if (symbol.Kind != kind
-				|| symbol.GetReturnType() != returnType) {
+				|| symbol.GetReturnType().Equals(returnType) == false) {
 				return false;
 			}
 			var method = kind == SymbolKind.Method ? symbol as IMethodSymbol

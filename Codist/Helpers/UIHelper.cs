@@ -168,26 +168,28 @@ namespace Codist
 		public static TextBlock AddSymbolDisplayParts(this TextBlock block, System.Collections.Immutable.ImmutableArray<SymbolDisplayPart> parts, SymbolFormatter formatter, int argIndex) {
 			return formatter.ToUIText(block, parts, argIndex);
 		}
-		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, SymbolFormatter formatter) {
-			formatter.ToUIText(block.Inlines, symbol);
+		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, SymbolFormatter formatter) {
+			formatter.ToUIText(block.Inlines, symbol, alias);
 			return block;
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, bool bold, WpfBrush brush) {
-			block.Inlines.Add(Render(symbol, bold, brush));
+			block.Inlines.Add(symbol.Render(null, bold, brush));
 			return block;
 		}
 
-		public static Run Render(this ISymbol symbol, WpfBrush brush) {
-			return symbol.Render(false, brush);
+		public static Run Render(this ISymbol symbol, string alias, WpfBrush brush) {
+			return symbol.Render(alias, false, brush);
 		}
-		public static Run Render(this ISymbol symbol, bool bold, WpfBrush brush) {
+		public static Run Render(this ISymbol symbol, string alias, bool bold, WpfBrush brush) {
 			var run = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)
-							? new SymbolLink(symbol)
-							: new Run(symbol.Name);
+							? new SymbolLink(symbol, alias)
+							: new Run(alias ?? symbol.Name);
 			if (bold) {
 				run.FontWeight = FontWeights.Bold;
 			}
-			run.Foreground = brush;
+			if (brush != null) {
+				run.Foreground = brush;
+			}
 			run.ToolTip = symbol.ToString();
 			return run;
 		}
@@ -327,8 +329,8 @@ namespace Codist
 		sealed class SymbolLink : Run
 		{
 			ISymbol _Symbol;
-			public SymbolLink(ISymbol symbol) {
-				Text = symbol.Name;
+			public SymbolLink(ISymbol symbol, string alias) {
+				Text = alias ?? symbol.Name;
 				_Symbol = symbol;
 				if (IsDefinedInCodeFile(symbol)) {
 					Cursor = Cursors.Hand;

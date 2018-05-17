@@ -94,6 +94,7 @@ namespace Codist.Classifiers
 								case SyntaxKind.ReturnKeyword:
 								case SyntaxKind.GotoCaseStatement:
 								case SyntaxKind.GotoDefaultStatement:
+								case SyntaxKind.GotoStatement:
 								case SyntaxKind.ContinueStatement:
 								case SyntaxKind.ReturnStatement:
 								case SyntaxKind.YieldReturnStatement:

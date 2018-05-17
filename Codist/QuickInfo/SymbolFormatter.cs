@@ -15,51 +15,30 @@ namespace Codist
 {
 	sealed class SymbolFormatter
 	{
-		Brush _NamespaceBrush, _InterfaceBrush, _ClassBrush, _StructBrush, _TextBrush, _NumberBrush, _EnumBrush, _KeywordBrush, _MethodBrush, _DelegateBrush, _ParameterBrush, _TypeParameterBrush, _PropertyBrush, _FieldBrush, _ConstBrush;
+		public Brush Class { get; private set; }
+		public Brush Const { get; private set; }
+		public Brush Delegate { get; private set; }
+		public Brush Enum { get; private set; }
+		public Brush Field { get; private set; }
+		public Brush Interface { get; private set; }
+		public Brush Keyword { get; private set; }
+		public Brush Method { get; private set; }
+		public Brush Namespace { get; private set; }
+		public Brush Number { get; private set; }
+		public Brush Parameter { get; private set; }
+		public Brush Property { get; private set; }
+		public Brush Struct { get; private set; }
+		public Brush Text { get; private set; }
+		public Brush TypeParameter { get; private set; }
 
-		public Brush Namespace => _NamespaceBrush;
-		public Brush Interface => _InterfaceBrush;
-		public Brush Class => _ClassBrush;
-		public Brush Struct => _StructBrush;
-		public Brush Text => _TextBrush;
-		public Brush Number => _NumberBrush;
-		public Brush Enum => _EnumBrush;
-		public Brush Keyword => _KeywordBrush;
-		public Brush Method => _MethodBrush;
-		public Brush Delegate => _DelegateBrush;
-		public Brush Parameter => _ParameterBrush;
-		public Brush TypeParameter => _TypeParameterBrush;
-		public Brush Property => _PropertyBrush;
-		public Brush Field => _FieldBrush;
-		public Brush Const => _ConstBrush;
-
-		internal void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {
-			System.Diagnostics.Trace.Assert(formatMap != null, "format map is null");
-			_InterfaceBrush = formatMap.GetBrush(Constants.CodeInterfaceName);
-			_ClassBrush = formatMap.GetBrush(Constants.CodeClassName);
-			_TextBrush = formatMap.GetBrush(Constants.CodeString);
-			_EnumBrush = formatMap.GetBrush(Constants.CodeEnumName);
-			_DelegateBrush = formatMap.GetBrush(Constants.CodeDelegateName);
-			_NumberBrush = formatMap.GetBrush(Constants.CodeNumber);
-			_StructBrush = formatMap.GetBrush(Constants.CodeStructName);
-			_KeywordBrush = formatMap.GetBrush(Constants.CodeKeyword);
-			_NamespaceBrush = formatMap.GetBrush(Constants.CSharpNamespaceName);
-			_MethodBrush = formatMap.GetBrush(Constants.CSharpMethodName);
-			_ParameterBrush = formatMap.GetBrush(Constants.CSharpParameterName);
-			_TypeParameterBrush = formatMap.GetBrush(Constants.CSharpTypeParameterName);
-			_PropertyBrush = formatMap.GetBrush(Constants.CSharpPropertyName);
-			_FieldBrush = formatMap.GetBrush(Constants.CSharpFieldName);
-			_ConstBrush = formatMap.GetBrush(Constants.CSharpConstFieldName);
-		}
-
-		internal void ToUIText(System.Windows.Documents.InlineCollection text, ISymbol symbol) {
+		internal void ToUIText(System.Windows.Documents.InlineCollection text, ISymbol symbol, string alias) {
 			switch (symbol.Kind) {
-				case SymbolKind.Event: text.Add(symbol.Render(_DelegateBrush)); return;
+				case SymbolKind.Event: text.Add(symbol.Render(alias, Delegate)); return;
 				case SymbolKind.Field:
-					text.Add(symbol.Render((symbol as IFieldSymbol).IsConst ? _ConstBrush : _FieldBrush));
+					text.Add(symbol.Render(alias, (symbol as IFieldSymbol).IsConst ? Const : Field));
 					return;
 				case SymbolKind.Method:
-					text.Add(symbol.Render(_MethodBrush));
+					text.Add(symbol.Render(alias, Method));
 					var method = symbol as IMethodSymbol;
 					if (method.IsGenericMethod) {
 						var arguments = method.TypeParameters;
@@ -70,31 +49,31 @@ namespace Codist
 					var type = symbol as INamedTypeSymbol;
 					switch (type.TypeKind) {
 						case TypeKind.Class:
-							text.Add(symbol.Render(_ClassBrush)); break;
+							text.Add(symbol.Render(alias, Class)); break;
 						case TypeKind.Delegate:
-							text.Add(symbol.Render(_DelegateBrush)); return;
+							text.Add(symbol.Render(alias, Delegate)); return;
 						case TypeKind.Dynamic:
-							text.Add(symbol.Name.Render(_KeywordBrush)); return;
+							text.Add(symbol.Render(alias ?? symbol.Name, Keyword)); return;
 						case TypeKind.Enum:
-							text.Add(symbol.Render(_EnumBrush)); return;
+							text.Add(symbol.Render(alias, Enum)); return;
 						case TypeKind.Interface:
-							text.Add(symbol.Render(_InterfaceBrush)); break;
+							text.Add(symbol.Render(alias, Interface)); break;
 						case TypeKind.Struct:
-							text.Add(symbol.Render(_StructBrush)); break;
+							text.Add(symbol.Render(alias, Struct)); break;
 						case TypeKind.TypeParameter:
-							text.Add(symbol.Name.Render(_TypeParameterBrush)); return;
+							text.Add(symbol.Render(alias ?? symbol.Name, TypeParameter)); return;
 						default:
-							text.Add(symbol.MetadataName.Render(_ClassBrush)); return;
+							text.Add(symbol.MetadataName.Render(Class)); return;
 					}
 					if (type.IsGenericType) {
 						var arguments = type.TypeParameters;
 						AddTypeArguments(text, arguments);
 					}
 					return;
-				case SymbolKind.Namespace: text.Add(symbol.Name.Render(_NamespaceBrush)); return;
-				case SymbolKind.Parameter: text.Add(symbol.Name.Render(_ParameterBrush)); return;
-				case SymbolKind.Property: text.Add(symbol.Render(_PropertyBrush)); return;
-				case SymbolKind.TypeParameter: text.Add(symbol.Name.Render(_TypeParameterBrush)); return;
+				case SymbolKind.Namespace: text.Add(symbol.Name.Render(Namespace)); return;
+				case SymbolKind.Parameter: text.Add(symbol.Name.Render(Parameter)); return;
+				case SymbolKind.Property: text.Add(symbol.Render(alias, Property)); return;
+				case SymbolKind.TypeParameter: text.Add(symbol.Name.Render(TypeParameter)); return;
 				default: text.Add(symbol.Name); return;
 			}
 		}
@@ -107,56 +86,56 @@ namespace Codist
 						goto default;
 					case SymbolDisplayPartKind.ClassName:
 						if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
-							block.AddText("?", _ClassBrush);
+							block.AddText("?", Class);
 						}
 						else {
-							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _ClassBrush);
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, Class);
 						}
 						break;
 					case SymbolDisplayPartKind.EnumName:
-						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _EnumBrush);
+						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, Enum);
 						break;
 					case SymbolDisplayPartKind.InterfaceName:
-						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _InterfaceBrush);
+						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, Interface);
 						break;
 					case SymbolDisplayPartKind.MethodName:
-						block.AddSymbol(part.Symbol, argIndex != Int32.MinValue, _MethodBrush);
+						block.AddSymbol(part.Symbol, argIndex != Int32.MinValue, Method);
 						break;
 					case SymbolDisplayPartKind.ParameterName:
 						var p = part.Symbol as IParameterSymbol;
 						if (p.Ordinal == argIndex || p.IsParams && argIndex > p.Ordinal) {
-							block.AddText(p.Name, true, true, _ParameterBrush);
+							block.AddText(p.Name, true, true, Parameter);
 						}
 						else {
-							block.AddText(p.Name, false, false, _ParameterBrush);
+							block.AddText(p.Name, false, false, Parameter);
 						}
 						break;
 					case SymbolDisplayPartKind.StructName:
-						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _StructBrush);
+						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, Struct);
 						break;
 					case SymbolDisplayPartKind.DelegateName:
-						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, _DelegateBrush);
+						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, Delegate);
 						break;
 					case SymbolDisplayPartKind.StringLiteral:
-						block.AddText(part.ToString(), false, false, _TextBrush);
+						block.AddText(part.ToString(), false, false, Text);
 						break;
 					case SymbolDisplayPartKind.Keyword:
-						block.AddText(part.ToString(), false, false, _KeywordBrush);
+						block.AddText(part.ToString(), false, false, Keyword);
 						break;
 					case SymbolDisplayPartKind.NamespaceName:
-						block.AddText(part.Symbol.Name, _NamespaceBrush);
+						block.AddText(part.Symbol.Name, Namespace);
 						break;
 					case SymbolDisplayPartKind.TypeParameterName:
-						block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, _TypeParameterBrush);
+						block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, TypeParameter);
 						break;
 					case SymbolDisplayPartKind.FieldName:
-						block.AddText(part.Symbol.Name, _FieldBrush);
+						block.AddText(part.Symbol.Name, Field);
 						break;
 					case SymbolDisplayPartKind.PropertyName:
-						block.AddText(part.Symbol.Name, _PropertyBrush);
+						block.AddText(part.Symbol.Name, Property);
 						break;
 					case SymbolDisplayPartKind.EventName:
-						block.AddText(part.Symbol.Name, _DelegateBrush);
+						block.AddText(part.Symbol.Name, Delegate);
 						break;
 					default:
 						block.AddText(part.ToString());
@@ -170,13 +149,13 @@ namespace Codist
 			switch (constant.Kind) {
 				case TypedConstantKind.Primitive:
 					if (constant.Value is bool) {
-						block.AddText((bool)constant.Value ? "true" : "false", _KeywordBrush);
+						block.AddText((bool)constant.Value ? "true" : "false", Keyword);
 					}
 					else if (constant.Value is string) {
-						block.AddText(constant.ToCSharpString(), _TextBrush);
+						block.AddText(constant.ToCSharpString(), Text);
 					}
 					else {
-						block.AddText(constant.ToCSharpString(), _NumberBrush);
+						block.AddText(constant.ToCSharpString(), Number);
 					}
 					break;
 				case TypedConstantKind.Enum:
@@ -194,16 +173,16 @@ namespace Codist
 							if (i > 0) {
 								block.AddText(" | ");
 							}
-							block.AddText(constant.Type.Name + "." + flags[i].Name, _EnumBrush);
+							block.AddText(constant.Type.Name + "." + flags[i].Name, Enum);
 						}
 					}
 					else {
-						block.AddText(constant.Type.Name + en.Substring(en.LastIndexOf('.')), _EnumBrush);
+						block.AddText(constant.Type.Name + en.Substring(en.LastIndexOf('.')), Enum);
 					}
 					break;
 				case TypedConstantKind.Type:
-					block.AddText("typeof", _KeywordBrush).AddText("(")
-						.AddSymbol((constant.Value as ITypeSymbol), this)
+					block.AddText("typeof", Keyword).AddText("(")
+						.AddSymbol((constant.Value as ITypeSymbol), null, this)
 						.AddText(")");
 					break;
 				case TypedConstantKind.Array:
@@ -226,13 +205,32 @@ namespace Codist
 			}
 		}
 
+		internal void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {
+			System.Diagnostics.Trace.Assert(formatMap != null, "format map is null");
+			Interface = formatMap.GetBrush(Constants.CodeInterfaceName);
+			Class = formatMap.GetBrush(Constants.CodeClassName);
+			Text = formatMap.GetBrush(Constants.CodeString);
+			Enum = formatMap.GetBrush(Constants.CodeEnumName);
+			Delegate = formatMap.GetBrush(Constants.CodeDelegateName);
+			Number = formatMap.GetBrush(Constants.CodeNumber);
+			Struct = formatMap.GetBrush(Constants.CodeStructName);
+			Keyword = formatMap.GetBrush(Constants.CodeKeyword);
+			Namespace = formatMap.GetBrush(Constants.CSharpNamespaceName);
+			Method = formatMap.GetBrush(Constants.CSharpMethodName);
+			Parameter = formatMap.GetBrush(Constants.CSharpParameterName);
+			TypeParameter = formatMap.GetBrush(Constants.CSharpTypeParameterName);
+			Property = formatMap.GetBrush(Constants.CSharpPropertyName);
+			Field = formatMap.GetBrush(Constants.CSharpFieldName);
+			Const = formatMap.GetBrush(Constants.CSharpConstFieldName);
+		}
+
 		void AddTypeArguments(System.Windows.Documents.InlineCollection text, ImmutableArray<ITypeParameterSymbol> arguments) {
 			text.Add("<");
 			for (int i = 0; i < arguments.Length; i++) {
 				if (i > 0) {
 					text.Add(", ");
 				}
-				text.Add(arguments[i].Name.Render(_TypeParameterBrush));
+				text.Add(arguments[i].Name.Render(TypeParameter));
 			}
 			text.Add(">");
 		}
