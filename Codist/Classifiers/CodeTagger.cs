@@ -13,7 +13,7 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Classifiers
 {
-	//todo++ Extract comment tagger logic for various content types
+	//todo Extract comment tagger logic for various content types
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.Code)]
 	[TagType(typeof(ClassificationTag))]

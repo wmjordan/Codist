@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using AppHelpers;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -11,14 +12,57 @@ using Microsoft.VisualStudio.Shell.Interop;
 namespace Codist.Options
 {
 	[Browsable(false)]
-	class ConfigPage : DialogPage
+	abstract class ConfigPage : DialogPage
 	{
 		int _version, _oldVersion;
+		Control _disabledNotice;
+
+		protected abstract Features Feature { get; }
+		protected UserControl Control { get; set; }
 
 		protected override void OnActivate(CancelEventArgs e) {
 			base.OnActivate(e);
 			_oldVersion = _version;
+			if (Feature != Features.None) {
+				if (Control.Enabled = Config.Instance.Features.MatchFlags(Feature)) {
+					if (_disabledNotice != null) {
+						_disabledNotice.Visible = false;
+					}
+				}
+				else {
+					if (_disabledNotice == null) {
+						_disabledNotice = CreateDisabledNotice(Feature);
+						Control.Controls.Add(_disabledNotice);
+						_disabledNotice.BringToFront();
+					}
+				}
+			}
 			Config.Updated += UpdateVersion;
+		}
+
+		protected override void OnClosed(EventArgs e) {
+			base.OnClosed(e);
+			if (_version != _oldVersion) {
+				Config.LoadConfig(Config.ConfigPath);
+				_oldVersion = _version;
+				Config.Updated -= UpdateVersion;
+			}
+		}
+
+		protected override void OnApply(PageApplyEventArgs e) {
+			base.OnApply(e);
+			if (e.ApplyBehavior == ApplyKind.Apply) {
+				Config.Instance.SaveConfig(null);
+			}
+		}
+
+		protected override void OnDeactivate(CancelEventArgs e) {
+			base.OnDeactivate(e);
+		}
+
+		protected override void Dispose(bool disposing) {
+			Control?.Dispose();
+			base.Dispose(disposing);
 		}
 
 		internal FontInfo GetFontSettings(Guid category) {
@@ -71,24 +115,19 @@ namespace Codist.Options
 			}
 		}
 
-		protected override void OnClosed(EventArgs e) {
-			base.OnClosed(e);
-			if (_version != _oldVersion) {
-				Config.LoadConfig(Config.ConfigPath);
-				_oldVersion = _version;
-				Config.Updated -= UpdateVersion;
-			}
-		}
-
-		protected override void OnApply(PageApplyEventArgs e) {
-			base.OnApply(e);
-			if (e.ApplyBehavior == ApplyKind.Apply) {
-				Config.Instance.SaveConfig(null);
-			}
-		}
-
 		void UpdateVersion(object sender, EventArgs e) {
 			_version++;
+		}
+
+		static Label CreateDisabledNotice(Features feature) {
+			return new Label() {
+				Dock = DockStyle.Top,
+				BackColor = SystemColors.ActiveCaption,
+				ForeColor = SystemColors.ActiveCaptionText,
+				BorderStyle = BorderStyle.FixedSingle,
+				Text = feature.ToString() + " is disabled. Enable it in the General page.",
+				TextAlign = ContentAlignment.MiddleCenter
+			};
 		}
 	}
 
@@ -96,155 +135,95 @@ namespace Codist.Options
 	[Guid("8BF03E86-FF38-4AB4-8D23-1AC70E74806C")]
 	sealed class SyntaxHighlight : ConfigPage
 	{
-		SyntaxHighlightPage _control;
-
-		protected override IWin32Window Window => _control ?? (_control = new SyntaxHighlightPage(this));
-		protected override void Dispose(bool disposing) {
-			_control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new SyntaxHighlightPage(this));
 	}
 
 	[Browsable(false)]
 	[Guid("0077CDB9-8304-4322-A40E-342B7C5605E9")]
 	sealed class CodeStyle : ConfigPage
 	{
-		SyntaxStyleOptionPage _control;
-
-		protected override IWin32Window Window => _control ?? (_control = new SyntaxStyleOptionPage(this, () => Config.Instance.GeneralStyles, Config.GetDefaultCodeStyles));
-		protected override void Dispose(bool disposing) {
-			_control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.GeneralStyles, Config.GetDefaultCodeStyles));
 	}
 
 	[Browsable(false)]
 	[Guid("8ECD56D1-87C1-47E2-9FB0-742B0FF35FEF")]
 	sealed class CSharpStyle : ConfigPage
 	{
-		SyntaxStyleOptionPage _control;
-
-		protected override IWin32Window Window => _control ?? (_control = new SyntaxStyleOptionPage(this, () => Config.Instance.CodeStyles, Config.GetDefaultCSharpStyles));
-		protected override void Dispose(bool disposing) {
-			_control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.CodeStyles, Config.GetDefaultCSharpStyles));
 	}
 
 	[Browsable(false)]
 	[Guid("4C16F280-BE29-4152-A6C5-58EEC5398FD4")]
 	sealed class CommentStyle : ConfigPage
 	{
-		SyntaxStyleOptionPage _Control;
-
-		protected override IWin32Window Window => _Control ?? (_Control = new SyntaxStyleOptionPage(this, () => Config.Instance.CommentStyles, Config.GetDefaultCommentStyles));
-		protected override void Dispose(bool disposing) {
-			_Control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.CommentStyles, Config.GetDefaultCommentStyles));
 	}
 
 	[Browsable(false)]
 	[Guid("2E07AC20-D62F-4D78-8750-2A464CC011AE")]
 	sealed class XmlCodeStyle : ConfigPage
 	{
-		SyntaxStyleOptionPage _Control;
-
-		protected override IWin32Window Window => _Control ?? (_Control = new SyntaxStyleOptionPage(this, () => Config.Instance.XmlCodeStyles, Config.GetDefaultXmlCodeStyles));
-		protected override void Dispose(bool disposing) {
-			_Control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.XmlCodeStyles, Config.GetDefaultXmlCodeStyles));
 	}
 
 	[Browsable(false)]
 	[Guid("1EB954DF-37FE-4849-B63A-58EC43088856")]
 	sealed class CommentTagger : ConfigPage
 	{
-		CommentTaggerOptionPage _Control;
-
-		protected override IWin32Window Window => _Control ?? (_Control = new CommentTaggerOptionPage(this));
-		protected override void Dispose(bool disposing) {
-			_Control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new CommentTaggerOptionPage(this));
 	}
 
 	[Browsable(false)]
 	[Guid("DFC9C0E7-73A1-4DE9-8E94-161111266D38")]
-	sealed class Misc : ConfigPage
+	sealed class General : ConfigPage
 	{
-		GeneralPage _Control;
-
-		protected override IWin32Window Window => _Control ?? (_Control = new GeneralPage(this));
-		protected override void Dispose(bool disposing) {
-			_Control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.None;
+		protected override IWin32Window Window => Control ?? (Control = new GeneralPage(this));
 	}
 
 	[Browsable(false)]
 	[Guid("6B92F305-BEAD-49E3-9277-28E1829D7B57")]
 	sealed class CSharpSuperQuickInfo : ConfigPage
 	{
-		CSharpSuperQuickInfoPage _Control;
-
-		protected override IWin32Window Window => _Control ?? (_Control = new CSharpSuperQuickInfoPage(this));
-		protected override void Dispose(bool disposing) {
-			_Control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.SuperQuickInfo;
+		protected override IWin32Window Window => Control ?? (Control = new CSharpSuperQuickInfoPage(this));
 	}
 
 	[Browsable(false)]
 	[Guid("EE62CE13-5B5B-4EA0-A3FE-4D1F68FD2685")]
 	sealed class SuperQuickInfo : ConfigPage
 	{
-		SuperQuickInfoPage _Control;
-
-		protected override IWin32Window Window => _Control ?? (_Control = new SuperQuickInfoPage(this));
-		protected override void Dispose(bool disposing) {
-			_Control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.SuperQuickInfo;
+		protected override IWin32Window Window => Control ?? (Control = new SuperQuickInfoPage(this));
 	}
 
 	[Browsable(false)]
 	[Guid("23785D62-BD49-448B-A943-839DA27E8197")]
 	sealed class ScrollbarMarker : ConfigPage
 	{
-		ScrollbarMarkerPage _Control;
-
-		protected override IWin32Window Window => _Control ?? (_Control = new ScrollbarMarkerPage(this));
-		protected override void Dispose(bool disposing) {
-			_Control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.ScrollbarMarkers;
+		protected override IWin32Window Window => Control ?? (Control = new ScrollbarMarkerPage(this));
 	}
 
 	[Browsable(false)]
 	[Guid("E676D973-8A9A-461A-9085-DF69A54743A5")]
 	sealed class CSharpScrollbarMarker : ConfigPage
 	{
-		CSharpScrollbarMarkerPage _Control;
-
-		protected override IWin32Window Window => _Control ?? (_Control = new CSharpScrollbarMarkerPage(this));
-		protected override void Dispose(bool disposing) {
-			_Control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.ScrollbarMarkers;
+		protected override IWin32Window Window => Control ?? (Control = new CSharpScrollbarMarkerPage(this));
 	}
 
 	[Browsable(false)]
 	[Guid("31356507-E11A-4E61-B0C2-C9A6584632DB")]
 	sealed class CSharpSpecialHighlight : ConfigPage
 	{
-		CSharpSpecialHighlightPage _Control;
-
-		protected override IWin32Window Window => _Control ?? (_Control = new CSharpSpecialHighlightPage(this));
-		protected override void Dispose(bool disposing) {
-			_Control.Dispose();
-			base.Dispose(disposing);
-		}
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new CSharpSpecialHighlightPage(this));
 	}
 }

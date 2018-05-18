@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using AppHelpers;
 
 namespace Codist.Options
 {
@@ -18,6 +19,7 @@ namespace Codist.Options
 			if (_Loaded) {
 				return;
 			}
+			LoadConfig(Config.Instance);
 
 			_SaveConfigButton.Click += (s, args) => {
 				using (var d = new SaveFileDialog {
@@ -64,8 +66,11 @@ namespace Codist.Options
 					}
 				}
 			};
+			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
 
+		void LoadConfig(Config config) {
+		}
 	}
 }

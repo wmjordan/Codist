@@ -145,6 +145,7 @@ namespace Codist
 			MergeDefaultXmlCodeStyles(xcs);
 			if (loadFromTheme) {
 				// don't override other settings if loaded from predefined themes
+				ResetCodeStyle(Instance.GeneralStyles, config.GeneralStyles);
 				ResetCodeStyle(Instance.CommentStyles, config.CommentStyles);
 				ResetCodeStyle(Instance.CodeStyles, config.CodeStyles);
 				ResetCodeStyle(Instance.XmlCodeStyles, config.XmlCodeStyles);
@@ -317,6 +318,9 @@ namespace Codist
 				r[i] = new XmlCodeStyle { StyleID = (XmlStyleTypes)i };
 			}
 			return r;
+		}
+		internal void Set(Features options, bool set) {
+			Features = AppHelpers.EnumHelper.SetFlags(Features, options, set);
 		}
 		internal void Set(QuickInfoOptions options, bool set) {
 			QuickInfoOptions = AppHelpers.EnumHelper.SetFlags(QuickInfoOptions, options, set);
@@ -587,9 +591,9 @@ namespace Codist
 	{
 		None,
 		SyntaxHighlight = 1,
-		ScrollbarMargins = 1 << 1,
-		SuperTooltip = 1 << 2,
-		All = SyntaxHighlight | ScrollbarMargins | SuperTooltip
+		ScrollbarMarkers = 1 << 1,
+		SuperQuickInfo = 1 << 2,
+		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo
 	}
 
 	[Flags]

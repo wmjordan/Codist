@@ -29,7 +29,7 @@ namespace Codist.Margins
 		/// <param name="containerMargin">The margin that will contain the newly-created margin.</param>
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost textViewHost, IWpfTextViewMargin containerMargin) {
 			var scrollBar = containerMargin as IVerticalScrollBar;
-			return Config.Instance.Features.MatchFlags(Features.ScrollbarMargins) && scrollBar != null ? new CSharpMembersMargin(textViewHost, scrollBar, this) : null;
+			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers) && scrollBar != null ? new CSharpMembersMargin(textViewHost, scrollBar, this) : null;
 		}
 	}
 }

@@ -31,11 +31,15 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this._NoSpaceBetweenWrappedLinesBox = new System.Windows.Forms.CheckBox();
-			this._GlobalFeatureBox = new System.Windows.Forms.CheckBox();
+			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this._ScrollbarMarkerBox = new System.Windows.Forms.CheckBox();
+			this._SuperQuickInfoBox = new System.Windows.Forms.CheckBox();
+			this._SyntaxHighlightBox = new System.Windows.Forms.CheckBox();
 			this.label3 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this.groupBox1.SuspendLayout();
+			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// _BottomMarginBox
@@ -77,7 +81,7 @@
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Controls.Add(this._TopMarginBox);
 			this.groupBox1.Controls.Add(this.label1);
-			this.groupBox1.Location = new System.Drawing.Point(3, 81);
+			this.groupBox1.Location = new System.Drawing.Point(12, 168);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(499, 84);
 			this.groupBox1.TabIndex = 3;
@@ -94,32 +98,64 @@
 			this._NoSpaceBetweenWrappedLinesBox.Text = "No margin between wrapped lines";
 			this._NoSpaceBetweenWrappedLinesBox.UseVisualStyleBackColor = true;
 			// 
-			// _GlobalFeatureBox
+			// groupBox2
 			// 
-			this._GlobalFeatureBox.AutoSize = true;
-			this._GlobalFeatureBox.Location = new System.Drawing.Point(12, 3);
-			this._GlobalFeatureBox.Name = "_GlobalFeatureBox";
-			this._GlobalFeatureBox.Size = new System.Drawing.Size(133, 19);
-			this._GlobalFeatureBox.TabIndex = 0;
-			this._GlobalFeatureBox.Text = "Enable Codist";
-			this._GlobalFeatureBox.UseVisualStyleBackColor = true;
+			this.groupBox2.Controls.Add(this._ScrollbarMarkerBox);
+			this.groupBox2.Controls.Add(this._SuperQuickInfoBox);
+			this.groupBox2.Controls.Add(this._SyntaxHighlightBox);
+			this.groupBox2.Controls.Add(this.label3);
+			this.groupBox2.Location = new System.Drawing.Point(12, 3);
+			this.groupBox2.Name = "groupBox2";
+			this.groupBox2.Size = new System.Drawing.Size(499, 159);
+			this.groupBox2.TabIndex = 0;
+			this.groupBox2.TabStop = false;
+			this.groupBox2.Text = "Feature controllers";
+			// 
+			// _ScrollbarMarkerBox
+			// 
+			this._ScrollbarMarkerBox.AutoSize = true;
+			this._ScrollbarMarkerBox.Location = new System.Drawing.Point(9, 74);
+			this._ScrollbarMarkerBox.Name = "_ScrollbarMarkerBox";
+			this._ScrollbarMarkerBox.Size = new System.Drawing.Size(157, 19);
+			this._ScrollbarMarkerBox.TabIndex = 2;
+			this._ScrollbarMarkerBox.Text = "Scrollbar Marker";
+			this._ScrollbarMarkerBox.UseVisualStyleBackColor = true;
+			// 
+			// _SuperQuickInfoBox
+			// 
+			this._SuperQuickInfoBox.AutoSize = true;
+			this._SuperQuickInfoBox.Location = new System.Drawing.Point(9, 49);
+			this._SuperQuickInfoBox.Name = "_SuperQuickInfoBox";
+			this._SuperQuickInfoBox.Size = new System.Drawing.Size(157, 19);
+			this._SuperQuickInfoBox.TabIndex = 1;
+			this._SuperQuickInfoBox.Text = "Super Quick Info";
+			this._SuperQuickInfoBox.UseVisualStyleBackColor = true;
+			// 
+			// _SyntaxHighlightBox
+			// 
+			this._SyntaxHighlightBox.AutoSize = true;
+			this._SyntaxHighlightBox.Location = new System.Drawing.Point(9, 24);
+			this._SyntaxHighlightBox.Name = "_SyntaxHighlightBox";
+			this._SyntaxHighlightBox.Size = new System.Drawing.Size(157, 19);
+			this._SyntaxHighlightBox.TabIndex = 0;
+			this._SyntaxHighlightBox.Text = "Syntax Highlight";
+			this._SyntaxHighlightBox.UseVisualStyleBackColor = true;
 			// 
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(30, 48);
+			this.label3.Location = new System.Drawing.Point(25, 111);
 			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(519, 30);
-			this.label3.TabIndex = 1;
-			this.label3.Text = "(It takes effect on new document windows.\r\nYou can disable Codist to save power w" +
-    "hen running with battery.)";
+			this.label3.Size = new System.Drawing.Size(439, 30);
+			this.label3.TabIndex = 3;
+			this.label3.Text = "* Changes will be applied on new document windows.\r\nTip: Turning off some feature" +
+    "s can save battery power.";
 			// 
 			// GeneralPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.Controls.Add(this.label3);
-			this.Controls.Add(this._GlobalFeatureBox);
+			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
 			this.Name = "GeneralPage";
 			this.Size = new System.Drawing.Size(575, 328);
@@ -128,8 +164,9 @@
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).EndInit();
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
+			this.groupBox2.ResumeLayout(false);
+			this.groupBox2.PerformLayout();
 			this.ResumeLayout(false);
-			this.PerformLayout();
 
 		}
 
@@ -141,7 +178,10 @@
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.CheckBox _NoSpaceBetweenWrappedLinesBox;
-		private System.Windows.Forms.CheckBox _GlobalFeatureBox;
+		private System.Windows.Forms.GroupBox groupBox2;
+		private System.Windows.Forms.CheckBox _ScrollbarMarkerBox;
+		private System.Windows.Forms.CheckBox _SuperQuickInfoBox;
+		private System.Windows.Forms.CheckBox _SyntaxHighlightBox;
 		private System.Windows.Forms.Label label3;
 	}
 }

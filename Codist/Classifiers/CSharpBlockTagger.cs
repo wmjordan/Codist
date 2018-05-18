@@ -20,7 +20,7 @@ namespace Codist.Classifiers
 	sealed class CSharpBlockTaggerProvider : ITaggerProvider
 	{
 		public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag {
-			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false || typeof(T) != typeof(ICodeMemberTag)) {
+			if (typeof(T) != typeof(ICodeMemberTag)) {
 				return null;
 			}
 

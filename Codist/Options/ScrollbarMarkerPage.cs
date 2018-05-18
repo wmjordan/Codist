@@ -15,7 +15,8 @@ namespace Codist.Options
 		}
 		internal ScrollbarMarkerPage(ConfigPage page) : this() {
 		}
-		private void ScrollbarMarkerPage_Load(object sender, EventArgs e) {
+
+		void ScrollbarMarkerPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {
 				return;
 			}

@@ -24,18 +24,20 @@ namespace Codist
 	[PackageRegistration(UseManagedResourcesOnly = true)]
 	[InstalledProductRegistration("#110", "#112", "2.9", IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
-	[ProvideOptionPage(typeof(Options.Misc), Constants.NameOfMe, "General", 0, 0, true)]
+	[ProvideOptionPage(typeof(Options.General), Constants.NameOfMe, "General", 0, 0, true)]
 	[ProvideOptionPage(typeof(Options.SuperQuickInfo), CategorySuperQuickInfo, "General", 0, 0, true, Sort = 10)]
 	[ProvideOptionPage(typeof(Options.CSharpSuperQuickInfo), CategorySuperQuickInfo, "C#", 0, 0, true, Sort = 20)]
+
 	[ProvideOptionPage(typeof(Options.ScrollbarMarker), CategoryScrollbarMarker, "General", 0, 0, true, Sort = 50)]
 	[ProvideOptionPage(typeof(Options.CSharpScrollbarMarker), CategoryScrollbarMarker, "C#", 0, 0, true, Sort = 50)]
+
 	[ProvideOptionPage(typeof(Options.SyntaxHighlight), CategorySyntaxHighlight, "General", 0, 0, true, Sort = 100)]
 	[ProvideOptionPage(typeof(Options.CodeStyle), CategorySyntaxHighlight, "Common styles", 0, 0, true, Sort = 10)]
 	[ProvideOptionPage(typeof(Options.CSharpStyle), CategorySyntaxHighlight, "C# & C++ styles", 0, 0, true, Sort = 20)]
-	[ProvideOptionPage(typeof(Options.CSharpSpecialHighlight), CategorySyntaxHighlight, "C# Special highlight", 0, 0, true, Sort = 30)]
+	[ProvideOptionPage(typeof(Options.CSharpSpecialHighlight), CategorySyntaxHighlight, "C# special highlight", 0, 0, true, Sort = 30)]
 	[ProvideOptionPage(typeof(Options.XmlCodeStyle), CategorySyntaxHighlight, "XML styles", 0, 0, true, Sort = 40)]
 	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment styles", 0, 0, true, Sort = 50)]
-	[ProvideOptionPage(typeof(Options.CommentTagger), CategorySyntaxHighlight, "Comment Tagger", 0, 0, true, Sort = 60)]
+	[ProvideOptionPage(typeof(Options.CommentTagger), CategorySyntaxHighlight, "Comment tagger", 0, 0, true, Sort = 60)]
 	sealed class CodistPackage : Package
 	{
 		const string CategorySuperQuickInfo = Constants.NameOfMe + "\\Super Quick Info";

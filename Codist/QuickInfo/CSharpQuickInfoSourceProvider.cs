@@ -37,7 +37,7 @@ namespace Codist.QuickInfo
 		IGlyphService _GlyphService = null;
 
 		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
-			return Config.Instance.Features.MatchFlags(Features.SuperTooltip)
+			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
 				? new CSharpQuickInfo(textBuffer, _EditorFormatMapService, _GlyphService, _NavigatorService)
 				: null;
 		}
@@ -711,7 +711,7 @@ namespace Codist.QuickInfo
 					var a = item.AttributeClass.Name;
 					var attrDef = new TextBlock { TextWrapping = TextWrapping.Wrap }
 						.AddText("[")
-						.AddText(a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, _SymbolFormatter.Class);
+						.AddSymbol(item.AttributeConstructor, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, _SymbolFormatter.Class);
 					if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
 						attrDef.AddText("]");
 						info.Add(attrDef);
@@ -730,11 +730,11 @@ namespace Codist.QuickInfo
 							attrDef.AddText(", ");
 						}
 						var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property);
-						if (attrMember == null) {
-							attrDef.AddText(arg.Key, false, true, null);
+						if (attrMember != null) {
+							attrDef.AddText(arg.Key, attrMember.Kind == SymbolKind.Property ? _SymbolFormatter.Property : _SymbolFormatter.Field);
 						}
 						else {
-							attrDef.AddText(arg.Key, attrMember.Kind == SymbolKind.Property ? _SymbolFormatter.Property : _SymbolFormatter.Field);
+							attrDef.AddText(arg.Key, false, true, null);
 						}
 						attrDef.AddText("=");
 						_SymbolFormatter.ToUIText(attrDef, arg.Value);
@@ -750,19 +750,18 @@ namespace Codist.QuickInfo
 
 			void ShowBaseType(IList<object> qiContent, ITypeSymbol typeSymbol, int position) {
 				var baseType = typeSymbol.BaseType;
-				if (baseType != null) {
-					if (baseType.IsCommonClass() == false) {
-						var info = new TextBlock()
-							.AddText("Base type: ", true)
-							.AddSymbolDisplayParts(baseType.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
-						while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
-							if (baseType.IsAccessible() && baseType.IsCommonClass() == false) {
-								info.AddText(" - ").AddSymbol(baseType, false, _SymbolFormatter.Class);
-							}
-						}
-						qiContent.Add(info);
+				if (baseType == null || baseType.IsCommonClass() != false) {
+					return;
+				}
+				var info = new TextBlock()
+					.AddText("Base type: ", true)
+					.AddSymbolDisplayParts(baseType.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
+				while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
+					if (baseType.IsAccessible() && baseType.IsCommonClass() == false) {
+						info.AddText(" - ").AddSymbol(baseType, false, _SymbolFormatter.Class);
 					}
 				}
+				qiContent.Add(info);
 			}
 
 			void ShowEnumInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol type, bool fromEnum) {

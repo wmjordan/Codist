@@ -172,6 +172,10 @@ namespace Codist
 			formatter.ToUIText(block.Inlines, symbol, alias);
 			return block;
 		}
+		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, WpfBrush brush) {
+			block.Inlines.Add(symbol.Render(alias, false, brush));
+			return block;
+		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, bool bold, WpfBrush brush) {
 			block.Inlines.Add(symbol.Render(null, bold, brush));
 			return block;

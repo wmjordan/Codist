@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using AppHelpers;
 
 namespace Codist.Options
 {
@@ -22,8 +23,10 @@ namespace Codist.Options
 			_BottomMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.BottomSpace;
 			LoadConfig(Config.Instance);
 
-			_GlobalFeatureBox.Font = new Font(_GlobalFeatureBox.Font.FontFamily, _GlobalFeatureBox.Font.Size * 1.5f);
-			_GlobalFeatureBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Features = _GlobalFeatureBox.Checked ? Features.All : Features.None);
+			_SuperQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SuperQuickInfo, _SuperQuickInfoBox.Checked));
+			_SyntaxHighlightBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SyntaxHighlight, _SyntaxHighlightBox.Checked));
+			_ScrollbarMarkerBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.ScrollbarMarkers, _ScrollbarMarkerBox.Checked));
+
 			_TopMarginBox.ValueChanged += _UI.HandleEvent(() => {
 				LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value;
 				Config.Instance.FireConfigChangedEvent();
@@ -42,7 +45,9 @@ namespace Codist.Options
 
 		void LoadConfig(Config config) {
 			_UI.DoWithLock(() => {
-				_GlobalFeatureBox.Checked = config.Features != Features.None;
+				_ScrollbarMarkerBox.Checked = config.Features.MatchFlags(Features.ScrollbarMarkers);
+				_SuperQuickInfoBox.Checked = config.Features.MatchFlags(Features.SuperQuickInfo);
+				_SyntaxHighlightBox.Checked = config.Features.MatchFlags(Features.SyntaxHighlight);
 				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
 			});
 		}

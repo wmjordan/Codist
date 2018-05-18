@@ -23,6 +23,7 @@ namespace Codist.Options
 
 			_ControlQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.CtrlQuickInfo, _ControlQuickInfoBox.Checked));
 			_SelectionQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Selection, _SelectionQuickInfoBox.Checked));
+
 			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
