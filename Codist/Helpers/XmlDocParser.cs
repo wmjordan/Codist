@@ -13,10 +13,6 @@ namespace Codist
 {
 	static class XmlDocParser
 	{
-		static readonly Regex _FixWhitespaces = new Regex(@" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-		static readonly Regex _FixTextOnlyDoc = new Regex(@"([^\n])[ \t\r\n]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-		internal const string XmlDocNodeName = "member";
-
 		public static XElement GetXmlDoc(this ISymbol symbol) {
 			if (symbol == null) {
 				return null;
@@ -32,6 +28,13 @@ namespace Codist
 		}
 		public static XElement GetXmlDocForSymbol(this ISymbol symbol) {
 			switch (symbol.Kind) {
+				case SymbolKind.Alias:
+				case SymbolKind.Event:
+				case SymbolKind.Field:
+				case SymbolKind.Method:
+				case SymbolKind.NamedType:
+				case SymbolKind.Property:
+					return symbol.GetXmlDoc().GetSummary();
 				case SymbolKind.Parameter:
 					var p = (symbol as IParameterSymbol);
 					if (p.IsThis) {
@@ -49,7 +52,7 @@ namespace Codist
 					}
 					return null;
 				default:
-					return symbol.GetXmlDoc().GetSummary();
+					return null;
 			}
 		}
 		public static XElement GetSummary(this XElement doc) {
@@ -69,105 +72,77 @@ namespace Codist
 		public static IEnumerable<XElement> GetExceptions(this XElement doc) {
 			return doc?.Elements("exception");
 		}
-		public static TextBlock ToUIText(this XElement content, Action<string, InlineCollection, SymbolKind> symbolRenderer) {
-			if (content == null || content.HasElements == false && content.IsEmpty) {
-				return null;
-			}
-			var text = new TextBlock { TextWrapping = TextWrapping.Wrap };
-			ToUIText(content, text.Inlines, symbolRenderer);
-			return text.Inlines.FirstInline != null ? text : null;
-		}
+	}
 
-		public static void ToUIText(this XContainer content, InlineCollection text, Action<string, InlineCollection, SymbolKind> symbolRenderer) {
-			foreach (var item in content.Nodes()) {
-				switch (item.NodeType) {
-					case XmlNodeType.Element:
-						var e = item as XElement;
-						switch (e.Name.LocalName) {
-							case "para":
-							case "listheader":
-							case "item":
-								if (e.PreviousNode != null && (e.PreviousNode as XElement)?.Name != "para") {
-									text.Add(new LineBreak());
-								}
-								ToUIText(e, text, symbolRenderer);
-								if (e.NextNode != null) {
-									text.Add(new LineBreak());
-								}
-								break;
-							case "see":
-								var see = e.Attribute("cref");
-								if (see != null) {
-									symbolRenderer(see.Value, text, SymbolKind.Alias);
-								}
-								else if ((see = e.Attribute("langword")) !=null) {
-									symbolRenderer(see.Value, text, SymbolKind.DynamicType);
-								}
-								break;
-							case "paramref":
-								var paramName = e.Attribute("name");
-								if (paramName != null) {
-									symbolRenderer(paramName.Value, text, SymbolKind.Parameter);
-								}
-								break;
-							case "typeparamref":
-								var typeParamName = e.Attribute("name");
-								if (typeParamName != null) {
-									symbolRenderer(typeParamName.Value, text, SymbolKind.TypeParameter);
-								}
-								break;
-							case "b":
-								StyleInner(e, text, new Bold(), symbolRenderer);
-								break;
-							case "i":
-								StyleInner(e, text, new Italic(), symbolRenderer);
-								break;
-							case "u":
-								StyleInner(e, text, new Underline(), symbolRenderer);
-								break;
-							//case "list":
-							//case "description":
-							//case "c":
-							default:
-								ToUIText(e, text, symbolRenderer);
-								break;
+	sealed class XmlDoc
+	{
+		internal readonly XElement Summary;
+		internal readonly XElement Returns;
+		internal readonly List<XElement> Exceptions;
+		internal readonly bool IsPreliminary;
+
+		public XmlDoc(ISymbol symbol) {
+			XElement doc;
+			switch (symbol.Kind) {
+				case SymbolKind.Event:
+				case SymbolKind.Field:
+				case SymbolKind.NamedType:
+					doc = symbol.GetXmlDoc();
+					if (doc == null) {
+						return;
+					}
+					foreach (var item in doc.Elements()) {
+						switch (item.Name.LocalName) {
+							case "summary": Summary = item; break;
+							case "preliminary": IsPreliminary = true; break;
 						}
-						break;
-					case XmlNodeType.Text:
-						string t = (item as XText).Value;
-						var parentName = item.Parent.Name.LocalName;
-						if (parentName != "code") {
-							if (parentName != XmlDocNodeName) {
-								var previous = (item.PreviousNode as XElement)?.Name?.LocalName;
-								if (previous == null || previous != "see" && previous != "paramref" && previous != "typeparamref" && previous != "c" && previous != "b" && previous != "i" && previous != "u") {
-									t = item.NextNode == null ? t.Trim() : t.TrimStart();
-								}
-								else if (item.NextNode == null) {
-									t = t.TrimEnd();
-								}
-								t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
-							}
-							else {
-								// fix whitespace for text only XML doc
-								t = _FixTextOnlyDoc.Replace(t, "$1");
-							}
+					}
+					if (Summary == null) {
+						Summary = AsTextOnlySummary(doc);
+					}
+					return;
+				case SymbolKind.Method:
+				case SymbolKind.Property:
+					doc = symbol.GetXmlDoc();
+					if (doc == null) {
+						return;
+					}
+					foreach (var item in doc.Elements()) {
+						switch (item.Name.LocalName) {
+							case "summary": Summary = item; break;
+							case "returns": Returns = item; break;
+							case "exception": (Exceptions ?? (Exceptions = new List<XElement>())).Add(item); break;
+							case "preliminary": IsPreliminary = true; break;
 						}
-						text.Add(new Run(t));
-						break;
-					case XmlNodeType.CDATA:
-						text.Add(new Run((item as XText).Value));
-						break;
-					case XmlNodeType.EntityReference:
-					case XmlNodeType.Entity:
-						text.Add(new Run(item.ToString()));
-						break;
-				}
+					}
+					if (Summary == null) {
+						Summary = AsTextOnlySummary(doc);
+					}
+					break;
+				case SymbolKind.Parameter:
+					var p = (symbol as IParameterSymbol);
+					if (p.IsThis) {
+						return;
+					}
+					var m = p.ContainingSymbol as IMethodSymbol;
+					Summary = (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", symbol.Name);
+					break;
+				case SymbolKind.TypeParameter:
+					var tps = symbol as ITypeParameterSymbol;
+					switch (tps.TypeParameterKind) {
+						case TypeParameterKind.Type:
+							Summary = symbol.ContainingType.GetXmlDoc().GetNamedDocItem("typeparam", symbol.Name);
+							break;
+						case TypeParameterKind.Method:
+							Summary = tps.DeclaringMethod.GetXmlDoc().GetNamedDocItem("typeparam", symbol.Name);
+							break;
+					}
+					break;
 			}
 		}
 
-		static void StyleInner(XElement element, InlineCollection text, Span span, Action<string, InlineCollection, SymbolKind> symbolRenderer) {
-			text.Add(span);
-			ToUIText(element, span.Inlines, symbolRenderer);
+		static XElement AsTextOnlySummary(XElement doc) {
+			return (doc.FirstNode != null && doc.FirstNode.NodeType == XmlNodeType.Text && doc.LastNode.NodeType == XmlNodeType.Text ? doc : null);
 		}
 	}
 }

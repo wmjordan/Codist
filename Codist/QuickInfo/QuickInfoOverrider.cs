@@ -12,17 +12,15 @@ namespace Codist.QuickInfo
 {
 	sealed class DefaultQuickInfoPanelWrapper
 	{
-		static readonly Func<StackPanel, TextBlock> _DummyGetter = (s) => null;
-		static Type _QuickInfoPanelType;
 		static Func<StackPanel, TextBlock> _GetMainDescription;
 		static Func<StackPanel, TextBlock> _GetDocumentation;
 
 		public DefaultQuickInfoPanelWrapper(StackPanel panel) {
 			Panel = panel;
-			if (_QuickInfoPanelType == null && panel != null) {
-				_QuickInfoPanelType = panel.GetType();
-				_GetMainDescription = CreateGetInfoPartMethod(panel, "MainDescription");
-				_GetDocumentation = CreateGetInfoPartMethod(panel, "Documentation");
+			if (_GetMainDescription == null && panel != null) {
+				var t = panel.GetType();
+				_GetMainDescription = t.CreateGetPropertyMethod<StackPanel, TextBlock>("MainDescription");
+				_GetDocumentation = t.CreateGetPropertyMethod<StackPanel, TextBlock>("Documentation");
 			}
 		}
 		public StackPanel Panel { get; }
@@ -63,19 +61,6 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static Func<StackPanel, TextBlock> CreateGetInfoPartMethod(StackPanel panel, string name) {
-			var p = _QuickInfoPanelType.GetProperty(name, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-			if (p != null) {
-				var m = new DynamicMethod("Get" + name, typeof(TextBlock), new[] { typeof(StackPanel) }, true);
-				var il = m.GetILGenerator();
-				il.Emit(OpCodes.Ldarg_0);
-				il.Emit(OpCodes.Castclass, _QuickInfoPanelType);
-				il.Emit(OpCodes.Callvirt, p.GetGetMethod(true));
-				il.Emit(OpCodes.Ret);
-				return m.CreateDelegate<Func<StackPanel, TextBlock>>();
-			}
-			return _DummyGetter;
-		}
 	}
 	static class QuickInfoOverrider
 	{

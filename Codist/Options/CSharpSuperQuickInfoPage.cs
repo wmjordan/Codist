@@ -59,6 +59,7 @@ namespace Codist.Options
 				_CSharpInterfaceInheritenceQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
 				_CSharpInterfaceImplementationsQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations);
 				_CSharpSymbolLocationQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation);
+				_CSharpReturnsDocBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc);
 				_CSharpOverrideDefaultXmlDocBox.Checked = _CSharpDocumentationBaseTypeBox.Enabled = _CSharpTextOnlyDocBox.Enabled = _CSharpReturnsDocBox.Enabled = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation);
 				_CSharpNumberQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues);
 				_CSharpStringQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.String);

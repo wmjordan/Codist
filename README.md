@@ -1,17 +1,15 @@
 # Codist
 *Codist* is a visual studio extension which strives to provide better coding experience for C# programmers. It features:
-* Advanced syntax highlighting
-* Super Quick Info
-* C# comment tagger
+* Advanced syntax highlight with comment tagger
+* Super Quick Info with *Click and Go* to source code
 * Scrollbar markers
-* Increased margin between lines
-* 
+* Extra margin between lines
   ![Feature overview](doc/preview.png)
 
 # Features and screenshots
 
 ## Advanced C# syntax highlight
-* The advanced syntax highlight function highlight every aspect of C# language elements with various styles and font settings, changing font style sizes, changing background and foreground colors, making text semitransparent.
+* The advanced syntax highlight function highlights every aspect of C# language elements with various styles and font settings, changing font style sizes, changing background and foreground colors, making text semitransparent.
 
   **NOTE**: To quickly get started with advanced syntax highlight, click the *Load...* button in the *options* dialog, select *Light theme* or *Dark theme* from the pop-up menu to see them in effect. Don't forget to click the *OK* button to confirm the change.
 
@@ -147,4 +145,6 @@ I have learned a lot from the following extension projects.
 * Remarker: https://github.com/jgyo/remarker
 
 # Bugs and suggestions
-Please post New Issue in the GitHub project if you find any bugs or have any suggestions.
+Please [post New Issue](https://github.com/wmjordan/Codist/issues) in the [GitHub project](https://github.com/wmjordan/Codist) if you find any bug or have any suggestion.
+
+Your vote and feedback on the [Visual Studio Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=wmj.Codist) are also welcomed.

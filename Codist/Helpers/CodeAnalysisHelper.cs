@@ -131,6 +131,53 @@ namespace Codist
 			return null;
 		}
 
+		public static string GetAccessibility(this ISymbol symbol) {
+			switch (symbol.DeclaredAccessibility) {
+				case Accessibility.Public: return "public ";
+				case Accessibility.Private: return "private ";
+				case Accessibility.ProtectedAndInternal: return "protected internal ";
+				case Accessibility.Protected: return "protected ";
+				case Accessibility.Internal: return "internal ";
+				case Accessibility.ProtectedOrInternal: return "protected or internal ";
+				default: return String.Empty;
+			}
+		}
+
+		public static string GetTypeName(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Event: return "event";
+				case SymbolKind.Field:
+					return "field";
+				case SymbolKind.Label: return "label";
+				case SymbolKind.Local:
+					return (symbol as ILocalSymbol).IsConst
+						? "local const"
+						: "local";
+				case SymbolKind.Method:
+					return (symbol as IMethodSymbol).IsExtensionMethod
+						? "extension"
+						: "method";
+				case SymbolKind.NamedType:
+					switch ((symbol as INamedTypeSymbol).TypeKind) {
+						case TypeKind.Array: return "array";
+						case TypeKind.Dynamic: return "dynamic";
+						case TypeKind.Class: return "class";
+						case TypeKind.Delegate: return "delegate";
+						case TypeKind.Enum: return "enum";
+						case TypeKind.Interface: return "interface";
+						case TypeKind.Struct: return "struct";
+						case TypeKind.TypeParameter: return "type parameter";
+					}
+					return "type";
+				case SymbolKind.Namespace: return "namespace";
+				case SymbolKind.Parameter: return "parameter";
+				case SymbolKind.Property: return "property";
+				case SymbolKind.TypeParameter: return "type parameter";
+				default:
+					return symbol.Kind.ToString();
+			}
+		}
+
 		public static StandardGlyphGroup GetGlyphGroup(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Alias: return StandardGlyphGroup.GlyphForwardType;
