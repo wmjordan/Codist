@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -329,23 +330,31 @@ namespace Codist
 		public static DependencyObject GetLogicalParent(this DependencyObject obj) {
 			return LogicalTreeHelper.GetParent(obj);
 		}
+		public static ContextMenu CreateContextMenuForSourceLocations(ImmutableArray<SyntaxReference> refs) {
+			var menu = new ContextMenu();
+			foreach (var loc in refs) {
+				var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
+				var item = new MenuItem { Header = System.IO.Path.GetFileName(loc.SyntaxTree.FilePath) + "(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", Tag = loc };
+				item.Click += (s, args) => ((SyntaxReference)((MenuItem)s).Tag).GoToSource();
+				menu.Items.Add(item);
+			}
+			return menu;
+		}
 
 		sealed class SymbolLink : Run
 		{
-			ISymbol _Symbol;
+			readonly ISymbol _Symbol;
+			readonly ImmutableArray<SyntaxReference> _References;
 			public SymbolLink(ISymbol symbol, string alias) {
 				Text = alias ?? symbol.Name;
 				_Symbol = symbol;
-				if (IsDefinedInCodeFile(symbol)) {
+				_References = symbol.GetSourceLocations();
+				if (_References.Length > 0) {
 					Cursor = Cursors.Hand;
 					MouseEnter += Highlight;
 					MouseLeave += Leave;
 					MouseLeftButtonUp += GotoSymbol;
 				}
-			}
-
-			internal static bool IsDefinedInCodeFile(ISymbol symbol) {
-				return symbol != null && symbol.DeclaringSyntaxReferences.Length > 0 && symbol.DeclaringSyntaxReferences[0].SyntaxTree.FilePath != null;
 			}
 
 			void Highlight(object sender, MouseEventArgs e) {
@@ -356,8 +365,17 @@ namespace Codist
 			}
 
 			void GotoSymbol(object sender, MouseButtonEventArgs e) {
-				_Symbol.GoToSymbol();
+				if (_References.Length == 1) {
+					_References[0].GoToSource();
+				}
+				else {
+					if (ContextMenu == null) {
+						ContextMenu = CreateContextMenuForSourceLocations(_References);
+					}
+					ContextMenu.IsOpen = true;
+				}
 			}
+
 		}
 	}
 

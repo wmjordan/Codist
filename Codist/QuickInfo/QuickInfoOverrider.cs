@@ -36,7 +36,8 @@ namespace Codist.QuickInfo
 			if (description == null) {
 				return;
 			}
-			if (symbol.DeclaringSyntaxReferences.Length == 0 || symbol.DeclaringSyntaxReferences[0].SyntaxTree == null) {
+			var locs = symbol.GetSourceLocations();
+			if (locs.Length == 0) {
 				var asm = symbol.GetAssemblyModuleName();
 				if (asm != null) {
 					description.ToolTip = symbol.Name + " is defined in " + asm;
@@ -47,8 +48,19 @@ namespace Codist.QuickInfo
 			description.Cursor = Cursors.Hand;
 			description.MouseEnter += (s, args) => (s as TextBlock).Background = SystemColors.HighlightBrush.Alpha(0.3);
 			description.MouseLeave += (s, args) => (s as TextBlock).Background = Brushes.Transparent;
-			description.MouseLeftButtonUp += (s, args) => symbol.GoToSymbol();
-			return;
+			if (locs.Length == 1) {
+				description.MouseLeftButtonUp += (s, args) => symbol.GoToSource();
+				return;
+			}
+			else {
+				description.MouseLeftButtonUp += (s, args) => {
+					var tb = (s as TextBlock);
+					if (tb.ContextMenu == null) {
+						tb.ContextMenu = UIHelper.CreateContextMenuForSourceLocations(locs);
+					}
+					tb.ContextMenu.IsOpen = true;
+				};
+			}
 		}
 
 		/// <summary>overrides default doc summary</summary>

@@ -57,17 +57,22 @@ namespace Codist
 					?? (node is TypeParameterSyntax || node is ParameterSyntax ? semanticModel.GetDeclaredSymbol(node) : null);
 		}
 
-		public static void GoToSymbol(this ISymbol symbol) {
+		public static void GoToSource(this ISymbol symbol) {
 			if (symbol != null && symbol.DeclaringSyntaxReferences.Length > 0) {
 				var loc = symbol.DeclaringSyntaxReferences[0];
 				var path = loc.SyntaxTree?.FilePath;
 				if (path == null) {
 					return;
 				}
-				var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
-				var openDoc = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE;
-				openDoc.OpenFile(path, pos.StartLinePosition.Line + 1, pos.StartLinePosition.Character + 1);
+				loc.GoToSource();
 			}
+		}
+
+		public static void GoToSource(this SyntaxReference loc) {
+			var path = loc.SyntaxTree.FilePath;
+			var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
+			(ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE)
+				.OpenFile(path, pos.StartLinePosition.Line + 1, pos.StartLinePosition.Character + 1);
 		}
 
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
@@ -254,6 +259,13 @@ namespace Codist
 			}
 			return default(ImmutableArray<IParameterSymbol>);
 		}
+
+		public static ImmutableArray<SyntaxReference> GetSourceLocations(this ISymbol symbol) {
+			return symbol == null || symbol.DeclaringSyntaxReferences.Length == 0
+				? ImmutableArray<SyntaxReference>.Empty
+				: symbol.DeclaringSyntaxReferences.RemoveAll(i => i.SyntaxTree.FilePath == null);
+		}
+
 		/// <summary>
 		/// Checks whether the given symbol has the given <paramref name="kind"/>, <paramref name="returnType"/> and <paramref name="parameters"/>.
 		/// </summary>
