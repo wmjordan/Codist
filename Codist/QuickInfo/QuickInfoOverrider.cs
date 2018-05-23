@@ -1,31 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection.Emit;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using AppHelpers;
 using Microsoft.CodeAnalysis;
 
 namespace Codist.QuickInfo
 {
 	sealed class DefaultQuickInfoPanelWrapper
 	{
-		static Func<StackPanel, TextBlock> _GetMainDescription;
-		static Func<StackPanel, TextBlock> _GetDocumentation;
+		static Func<StackPanel, TextBlock> __GetMainDescription;
+		static Func<StackPanel, TextBlock> __GetDocumentation;
+		static readonly SolidColorBrush __HighlightBrush = SystemColors.HighlightBrush.Alpha(0.3);
 
 		public DefaultQuickInfoPanelWrapper(StackPanel panel) {
 			Panel = panel;
-			if (_GetMainDescription == null && panel != null) {
+			if (__GetMainDescription == null && panel != null) {
 				var t = panel.GetType();
-				_GetMainDescription = t.CreateGetPropertyMethod<StackPanel, TextBlock>("MainDescription");
-				_GetDocumentation = t.CreateGetPropertyMethod<StackPanel, TextBlock>("Documentation");
+				__GetMainDescription = t.CreateGetPropertyMethod<StackPanel, TextBlock>("MainDescription");
+				__GetDocumentation = t.CreateGetPropertyMethod<StackPanel, TextBlock>("Documentation");
 			}
 		}
 		public StackPanel Panel { get; }
-		public TextBlock MainDesciption => Panel != null ? _GetMainDescription(Panel) : null;
-		public TextBlock Documentation => Panel != null ? _GetDocumentation(Panel) : null;
+		public TextBlock MainDesciption => Panel != null ? __GetMainDescription(Panel) : null;
+		public TextBlock Documentation => Panel != null ? __GetDocumentation(Panel) : null;
 
 		/// <summary>Hack into the default QuickInfo panel and provides click and go feature for symbols.</summary>
 		public void ApplyClickAndGo(ISymbol symbol) {
@@ -46,7 +45,7 @@ namespace Codist.QuickInfo
 			}
 			description.ToolTip = symbol.Name + " is defined in " + System.IO.Path.GetFileName(symbol.DeclaringSyntaxReferences[0].SyntaxTree.FilePath);
 			description.Cursor = Cursors.Hand;
-			description.MouseEnter += (s, args) => (s as TextBlock).Background = SystemColors.HighlightBrush.Alpha(0.3);
+			description.MouseEnter += (s, args) => (s as TextBlock).Background = __HighlightBrush;
 			description.MouseLeave += (s, args) => (s as TextBlock).Background = Brushes.Transparent;
 			if (locs.Length == 1) {
 				description.MouseLeftButtonUp += (s, args) => symbol.GoToSource();

@@ -275,7 +275,8 @@ namespace Codist
 		/// <param name="parameters">The parameters the symbol should take.</param>
 		public static bool MatchSignature(this ISymbol symbol, SymbolKind kind, ITypeSymbol returnType, ImmutableArray<IParameterSymbol> parameters) {
 			if (symbol.Kind != kind
-				|| symbol.GetReturnType().Equals(returnType) == false) {
+				|| returnType == null && symbol.GetReturnType() != null
+				|| returnType != null && returnType.Equals(symbol.GetReturnType()) == false) {
 				return false;
 			}
 			var method = kind == SymbolKind.Method ? symbol as IMethodSymbol
