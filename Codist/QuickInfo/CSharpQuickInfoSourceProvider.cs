@@ -163,7 +163,8 @@ namespace Codist.QuickInfo
 					goto EXIT;
 				}
 				if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)) {
-					OverrideDocumentation(node, qiWrapper, symbol);
+					var ctor = node.Parent as ObjectCreationExpressionSyntax;
+					OverrideDocumentation(node, qiWrapper, ctor == null || ctor.Type != node ? symbol : semanticModel.GetSymbolInfo(ctor).Symbol);
 				}
 				var formatMap = _FormatMapService.GetEditorFormatMap(session.TextView);
 				if (_FormatMap != formatMap) {
@@ -249,7 +250,8 @@ namespace Codist.QuickInfo
 			}
 
 			static void RenderXmlReturnsDoc(ISymbol symbol, XElement doc, TextBlock desc, XmlDocRenderer docRenderer) {
-				if (symbol.Kind == SymbolKind.Method) {
+				if (symbol.Kind == SymbolKind.Method
+					|| symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Delegate) {
 					var returns = doc.GetReturns();
 					if (returns != null && returns.FirstNode != null) {
 						desc.AddText("\nReturns", true).AddText(": ");
@@ -828,7 +830,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(s);
 			}
 
-			void ShowInterfaces(IList<object> output, ITypeSymbol type, int position) {
+			void ShowInterfaces(IList<object> qiContent, ITypeSymbol type, int position) {
 				const string Disposable = "IDisposable";
 				var showAll = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
 				var interfaces = type.Interfaces;
@@ -880,7 +882,7 @@ namespace Codist.QuickInfo
 				foreach (var item in inheritedInterfaces) {
 					stack.Add(ToUIText(item, position).AddText(" (inherited)"));
 				}
-				output.Add(stack.Scrollable());
+				qiContent.Add(stack.Scrollable());
 			}
 
 			static void ShowDeclarationModifier(IList<object> qiContent, ISymbol symbol) {
@@ -946,7 +948,7 @@ namespace Codist.QuickInfo
 						if (argIndex < mp.Length) {
 							argName = mp[argIndex].Name;
 						}
-						else if (mp.Length > 1 && mp[mp.Length-1].IsParams) {
+						else if (mp.Length > 1 && mp[mp.Length - 1].IsParams) {
 							argName = mp[mp.Length - 1].Name;
 						}
 					}
@@ -956,7 +958,7 @@ namespace Codist.QuickInfo
 						info.AddText("\n" + argName, true, true, _SymbolFormatter.Parameter).AddText(": ");
 						new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter).Render(doc, info.Inlines);
 					}
-					qiContent.Add(info);
+					qiContent.Add(info.Scrollable());
 				}
 				else if (symbol.CandidateSymbols.Length > 0) {
 					var info = new StackPanel();

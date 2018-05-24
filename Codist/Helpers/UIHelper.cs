@@ -303,6 +303,10 @@ namespace Codist
 			return element;
 		}
 		public static ScrollViewer Scrollable<TElement>(this TElement element) {
+			var t = element as TextBlock;
+			if (t != null && t.TextWrapping == TextWrapping.NoWrap) {
+				t.TextWrapping = TextWrapping.Wrap;
+			}
 			return new ScrollViewer {
 				Content = element,
 				VerticalScrollBarVisibility = ScrollBarVisibility.Auto,

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Media;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
@@ -104,6 +105,9 @@ namespace Codist
 									RenderXmlDocSymbol(typeParamName.Value, text, SymbolKind.TypeParameter);
 								}
 								break;
+							case "c":
+								StyleInner(e, text, new Bold() { Background = Brushes.LightGray });
+								break;
 							case "b":
 								StyleInner(e, text, new Bold());
 								break;
@@ -115,7 +119,6 @@ namespace Codist
 								break;
 							//case "list":
 							//case "description":
-							//case "c":
 							default:
 								Render(e, text);
 								break;
