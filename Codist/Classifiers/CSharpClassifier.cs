@@ -82,8 +82,22 @@ namespace Codist.Classifiers
 				var ct = item.ClassificationType;
 				switch (ct) {
 					case "keyword": {
-							// highlights: return, yield return, yield break, throw and continue
 							var node = unitCompilation.FindNode(item.TextSpan, true, true);
+							if (node is MemberDeclarationSyntax) {
+								var token = unitCompilation.FindToken(item.TextSpan.Start);
+								if (token != null) {
+									switch (token.Kind()) {
+									case SyntaxKind.SealedKeyword:
+									case SyntaxKind.OverrideKeyword:
+									case SyntaxKind.AbstractKeyword:
+									case SyntaxKind.VirtualKeyword:
+									case SyntaxKind.NewKeyword:
+										result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.AbstractionKeyword));
+										continue;
+									}
+								}
+								continue;
+							}
 							const SyntaxKind ThrowExpression = (SyntaxKind)9052;
 							switch (node.Kind()) {
 								case SyntaxKind.BreakStatement:
@@ -91,6 +105,7 @@ namespace Codist.Classifiers
 										goto case SyntaxKind.ReturnStatement;
 									}
 									continue;
+								// highlights: return, yield return, yield break, throw and continue
 								case SyntaxKind.ReturnKeyword:
 								case SyntaxKind.GotoCaseStatement:
 								case SyntaxKind.GotoDefaultStatement:

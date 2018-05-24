@@ -23,7 +23,7 @@ namespace TestProject
 	/// </summary>
 	class Comments
 	{
-		/** text only XML doc */
+		/** hover on <see cref="Test"/> to see its text only XML doc, if "Allow text only XML Doc option" is turned on */
 		void Test() {
 			// hover on Comments to see overriden XML Doc
 			var c = new Comments();

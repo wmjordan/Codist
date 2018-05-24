@@ -7,20 +7,6 @@ namespace Codist.Classifiers
 {
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
-	[Name(Constants.CodeControlFlowKeyword)]
-	[UserVisible(false)]
-	[Order(After = Priority.High)]
-	sealed class ControlFlowKeywordFormat : ClassificationFormatDefinition
-	{
-		public ControlFlowKeywordFormat() {
-			DisplayName = Constants.CodeControlFlowKeyword;
-			ForegroundColor = Constants.ControlFlowColor;
-			IsBold = true;
-		}
-	}
-
-	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.EmphasisComment)]
 	[Name(Constants.EmphasisComment)]
 	[UserVisible(false)]

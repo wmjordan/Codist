@@ -330,6 +330,9 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
 		ControlFlowKeyword,
+		[Category(Constants.SyntaxCategory.Keyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
+		AbstractionKeyword,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationName)]
 		TypeDeclaration,

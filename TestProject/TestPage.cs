@@ -109,10 +109,18 @@ text".Log(); // multiline string (string verbatim)
 
 		public override void VirtualMethod() { // overridden method
 			base.VirtualMethod();
+			List(1, "abc", null, String.Empty);
 		}
 
 		ConcreteClass InvokeDelegateParameter(Clone<ConcreteClass> clone) {
 			return clone(this); // invoking delegate
+		}
+
+		static string[] List(int value, params string[] text) {
+			return Array.ConvertAll(
+				Array.FindAll(text, t => t != null),
+				s => { return (value++).ToString() + "." + text[value - 1]; }
+			);
 		}
 
 		/// <summary>

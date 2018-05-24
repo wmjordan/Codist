@@ -166,6 +166,7 @@
     <Compile Include="QuickInfo\SymbolFormatter.cs" />
     <Compile Include="Helpers\XmlDocRenderer.cs" />
     <Compile Include="QuickInfo\SymbolInfoRenderer.cs" />
+    <Compile Include="StyleBase.cs" />
     <Compile Include="SyntaxHighlight\CodeViewCreationListener.cs" />
     <Compile Include="SyntaxHighlight\CodeViewDecorator.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfoSourceProvider.cs" />

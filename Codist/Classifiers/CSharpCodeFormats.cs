@@ -6,6 +6,32 @@ using Microsoft.VisualStudio.Utilities;
 namespace Codist.Classifiers
 {
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
+	[Name(Constants.CodeControlFlowKeyword)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	sealed class ControlFlowKeywordFormat : ClassificationFormatDefinition
+	{
+		public ControlFlowKeywordFormat() {
+			DisplayName = Constants.CodeControlFlowKeyword;
+			ForegroundColor = Constants.ControlFlowColor;
+			IsBold = true;
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
+	[Name(Constants.CodeAbstractionKeyword)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	sealed class AbstractionKeywordFormat : ClassificationFormatDefinition
+	{
+		public AbstractionKeywordFormat() {
+			DisplayName = Constants.CodeAbstractionKeyword;
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalFieldName)]
 	[Name(Constants.CSharpLocalFieldName)]
 	[UserVisible(false)]
