@@ -99,30 +99,27 @@ namespace Codist.QuickInfo
 					case SyntaxKind.OpenBraceToken:
 					case SyntaxKind.CloseBraceToken:
 					case SyntaxKind.SwitchKeyword: // switch info
+						break;
 					case SyntaxKind.ThisKeyword: // can be argument
 					case SyntaxKind.NullKeyword:
 					case SyntaxKind.TrueKeyword:
 					case SyntaxKind.FalseKeyword:
 					case SyntaxKind.NewKeyword:
-						break;
+						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
+							break;
+						}
+						else {
+							goto EXIT;
+						}
 					case SyntaxKind.ReturnKeyword:
 						var statement = unitCompilation.FindNode(token.Span);
-						if (statement != null) {
-							while ((statement = statement.Parent) != null) {
-								var name = statement.GetDeclarationSignature();
-								if (name != null) {
-									symbol = semanticModel.GetSymbolInfo(statement).Symbol ?? semanticModel.GetDeclaredSymbol(statement);
-									var tb = new TextBlock().AddText("Return for ");
-									if (symbol != null) {
-										tb.AddSymbol(symbol, name, _SymbolFormatter);
-									}
-									else {
-										tb.AddText(name);
-									}
-									qiContent.Add(tb);
-									applicableToSpan = currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive);
-									return;
-								}
+						var retStatement = statement as ReturnStatementSyntax;
+						if (statement != null && retStatement != null) {
+							var tb = ShowReturnInfo(statement, retStatement, token);
+							if (tb != null) {
+								qiContent.Add(tb);
+								applicableToSpan = currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive);
+								return;
 							}
 						}
 						goto EXIT;
@@ -192,7 +189,7 @@ namespace Codist.QuickInfo
 				EXIT:
 				applicableToSpan = null;
 			}
-			
+
 			void OverrideDocumentation(SyntaxNode node, DefaultQuickInfoPanelWrapper qiWrapper, ISymbol symbol) {
 				var doc = symbol.GetXmlDocForSymbol();
 				if (doc != null) {
@@ -360,6 +357,41 @@ namespace Codist.QuickInfo
 				if (infoBox != null) {
 					qiContent.Add(infoBox);
 				}
+			}
+
+			TextBlock ShowReturnInfo(SyntaxNode statement, ReturnStatementSyntax retStatement, SyntaxToken token) {
+				var retSymbol = retStatement.Expression != null 
+					? _SemanticModel.GetSymbolInfo(retStatement.Expression).Symbol
+					: null;
+				while ((statement = statement.Parent) != null) {
+					var name = statement.GetDeclarationSignature();
+					if (name != null) {
+						var symbol = _SemanticModel.GetSymbolInfo(statement).Symbol ?? _SemanticModel.GetDeclaredSymbol(statement);
+						var tb = new TextBlock();
+						if (retSymbol != null) {
+							tb.AddText("Return ")
+								.AddSymbol(retSymbol.GetReturnType(), null, _SymbolFormatter)
+								.AddText(" for ");
+						}
+						//else if (retStatement.Expression.Kind() == SyntaxKind.NullLiteralExpression) {
+						//	tb.AddText("Return ").AddText("null", _SymbolFormatter.Keyword).AddText(" for ");
+						//}
+						else {
+							tb.AddText("Return for ");
+						}
+						if (symbol != null) {
+							if (statement is LambdaExpressionSyntax) {
+								tb.AddText("lambda expression");
+							}
+							tb.AddSymbol(symbol, name, _SymbolFormatter);
+						}
+						else {
+							tb.AddText(name);
+						}
+						return tb;
+					}
+				}
+				return null;
 			}
 
 			static void ShowAttributesInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
@@ -862,7 +894,7 @@ namespace Codist.QuickInfo
 				}
 				int depth = 0;
 				do {
-					var n = argument as ArgumentSyntax;
+					var n = argument as ArgumentSyntax ?? (SyntaxNode)(argument as AttributeArgumentSyntax);
 					if (n != null) {
 						ShowParameterInfo(qiContent, node, n);
 						return;
@@ -870,17 +902,32 @@ namespace Codist.QuickInfo
 				} while ((argument = argument.Parent) != null && ++depth < 4);
 			}
 
-			void ShowParameterInfo(IList<object> qiContent, SyntaxNode node, ArgumentSyntax argument) {
-				var al = argument.Parent as BaseArgumentListSyntax;
-				if (al == null) {
+			void ShowParameterInfo(IList<object> qiContent, SyntaxNode node, SyntaxNode argument) {
+				var argList = argument.Parent;
+				SeparatedSyntaxList<ArgumentSyntax> arguments;
+				int argIndex, argCount;
+				string argName;
+				switch (argList.Kind()) {
+					case SyntaxKind.ArgumentList:
+						arguments = (argList as ArgumentListSyntax).Arguments;
+						argIndex = arguments.IndexOf(argument as ArgumentSyntax);
+						argCount = arguments.Count;
+						argName = (argument as ArgumentSyntax).NameColon?.Name.ToString();
+						break;
+					//case SyntaxKind.BracketedArgumentList: arguments = (argList as BracketedArgumentListSyntax).Arguments; break;
+					case SyntaxKind.AttributeArgumentList:
+						var aa = (argument.Parent as AttributeArgumentListSyntax).Arguments;
+						argIndex = aa.IndexOf(argument as AttributeArgumentSyntax);
+						argCount = aa.Count;
+						argName = (argument as AttributeArgumentSyntax).NameColon?.Name.ToString();
+						break;
+					default:
+						return;
+				}
+				if (argIndex == -1) {
 					return;
 				}
-				var ai = al.Arguments.IndexOf(argument);
-				if (ai == -1) {
-					return;
-				}
-				var symbol = _SemanticModel.GetSymbolInfo(al.Parent);
-				var argName = argument.NameColon?.Name.ToString();
+				var symbol = _SemanticModel.GetSymbolInfo(argList.Parent);
 				if (symbol.Symbol != null) {
 					var m = symbol.Symbol as IMethodSymbol;
 					if (m == null) { // in a very rare case m can be null
@@ -890,21 +937,21 @@ namespace Codist.QuickInfo
 						var mp = m.Parameters;
 						for (int i = 0; i < mp.Length; i++) {
 							if (mp[i].Name == argName) {
-								ai = i;
+								argIndex = i;
 							}
 						}
 					}
-					else if (ai != -1) {
+					else if (argIndex != -1) {
 						var mp = m.Parameters;
-						if (ai < mp.Length) {
-							argName = mp[ai].Name;
+						if (argIndex < mp.Length) {
+							argName = mp[argIndex].Name;
 						}
 						else if (mp.Length > 1 && mp[mp.Length-1].IsParams) {
 							argName = mp[mp.Length - 1].Name;
 						}
 					}
 					var doc = argName != null ? (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", argName) : null;
-					var info = new TextBlock().AddText("Argument of ").AddSymbolDisplayParts(symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, ai);
+					var info = new TextBlock().AddText("Argument of ").AddSymbolDisplayParts(symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argIndex);
 					if (doc != null) {
 						info.AddText("\n" + argName, true, true, _SymbolFormatter.Parameter).AddText(": ");
 						new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter).Render(doc, info.Inlines);
@@ -915,19 +962,19 @@ namespace Codist.QuickInfo
 					var info = new StackPanel();
 					info.Add(new TextBlock().AddText("Maybe", true).AddText(" argument of"));
 					foreach (var candidate in symbol.CandidateSymbols) {
-						info.Add(new TextBlock { TextWrapping = TextWrapping.Wrap }.AddSymbolDisplayParts(candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argName == null ? ai : Int32.MinValue));
+						info.Add(new TextBlock { TextWrapping = TextWrapping.Wrap }.AddSymbolDisplayParts(candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argName == null ? argIndex : Int32.MinValue));
 					}
 					qiContent.Add(info.Scrollable());
 				}
-				else if (al.Parent.IsKind(SyntaxKind.InvocationExpression)) {
-					var methodName = (al.Parent as InvocationExpressionSyntax).Expression.ToString();
-					if (methodName == "nameof" && al.Arguments.Count == 1) {
+				else if (argList.Parent.IsKind(SyntaxKind.InvocationExpression)) {
+					var methodName = (argList.Parent as InvocationExpressionSyntax).Expression.ToString();
+					if (methodName == "nameof" && argCount == 1) {
 						return;
 					}
-					qiContent.Add(new TextBlock().AddText("Argument " + ++ai + " of ").AddText(methodName, true));
+					qiContent.Add(new TextBlock().AddText("Argument " + ++argIndex + " of ").AddText(methodName, true));
 				}
 				else {
-					qiContent.Add("Argument " + ++ai);
+					qiContent.Add("Argument " + ++argIndex);
 				}
 			}
 			static string ToBinString(byte[] bytes) {

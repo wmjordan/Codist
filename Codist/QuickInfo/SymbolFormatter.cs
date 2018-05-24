@@ -33,6 +33,12 @@ namespace Codist
 
 		internal void ToUIText(System.Windows.Documents.InlineCollection text, ISymbol symbol, string alias) {
 			switch (symbol.Kind) {
+				case SymbolKind.ArrayType:
+					ToUIText(text, (symbol as IArrayTypeSymbol).ElementType, alias);
+					if (alias == null) {
+						text.Add("[]");
+					}
+					return;
 				case SymbolKind.Event: text.Add(symbol.Render(alias, Delegate)); return;
 				case SymbolKind.Field:
 					text.Add(symbol.Render(alias, (symbol as IFieldSymbol).IsConst ? Const : Field));
