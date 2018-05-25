@@ -291,7 +291,6 @@ namespace Codist
 			}
 			if (Config.Instance.QuickInfoMaxHeight > 0) {
 				element.MaxHeight = Config.Instance.QuickInfoMaxHeight;
-				//element.MouseLeftButtonUp += (s, args) => (s as TElement).MaxHeight = Double.PositiveInfinity;
 			}
 			if (Config.Instance.QuickInfoMaxWidth > 0) {
 				element.MaxWidth = Config.Instance.QuickInfoMaxWidth;
@@ -334,8 +333,9 @@ namespace Codist
 		public static DependencyObject GetLogicalParent(this DependencyObject obj) {
 			return LogicalTreeHelper.GetParent(obj);
 		}
-		public static ContextMenu CreateContextMenuForSourceLocations(ImmutableArray<SyntaxReference> refs) {
+		public static ContextMenu CreateContextMenuForSourceLocations(string symbolName, ImmutableArray<SyntaxReference> refs) {
 			var menu = new ContextMenu();
+			menu.Items.Add(new MenuItem { Header = symbolName + " is defined in " + refs.Length.ToString() + " places", IsEnabled = false });
 			foreach (var loc in refs) {
 				var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
 				var item = new MenuItem { Header = System.IO.Path.GetFileName(loc.SyntaxTree.FilePath) + "(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", Tag = loc };
@@ -374,7 +374,7 @@ namespace Codist
 				}
 				else {
 					if (ContextMenu == null) {
-						ContextMenu = CreateContextMenuForSourceLocations(_References);
+						ContextMenu = CreateContextMenuForSourceLocations(_Symbol.MetadataName, _References);
 					}
 					ContextMenu.IsOpen = true;
 				}

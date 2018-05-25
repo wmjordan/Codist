@@ -221,10 +221,10 @@ namespace Codist.QuickInfo
 						var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter);
 						var info = new TextBlock { TextWrapping = TextWrapping.Wrap }
 							.AddText("Documentation from ")
-							.AddSymbolDisplayParts(baseMember.ContainingType.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter)
+							.AddSymbol(baseMember.ContainingType, null, _SymbolFormatter)
 							.AddText(".")
 							.AddSymbol(baseMember, null, _SymbolFormatter)
-							.AddText(": ");
+							.AddText(":\n");
 						docRenderer.Render(doc, info.Inlines);
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
 							RenderXmlReturnsDoc(baseMember, doc.Parent, info, docRenderer);
@@ -743,20 +743,20 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void ShowBaseType(IList<object> qiContent, ITypeSymbol typeSymbol, int position) {
+			static void ShowBaseType(IList<object> qiContent, ITypeSymbol typeSymbol, int position) {
 				var baseType = typeSymbol.BaseType;
 				if (baseType == null || baseType.IsCommonClass() != false) {
 					return;
 				}
 				var info = new TextBlock()
 					.AddText("Base type: ", true)
-					.AddSymbolDisplayParts(baseType.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
+					.AddSymbol(baseType, null, _SymbolFormatter.Class);
 				while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
 					if (baseType.IsAccessible() && baseType.IsCommonClass() == false) {
-						info.AddText(" - ").AddSymbol(baseType, false, _SymbolFormatter.Class);
+						info.AddText(" - ").AddSymbol(baseType, null, _SymbolFormatter.Class);
 					}
 				}
-				qiContent.Add(info);
+				qiContent.Add(info.LimitSize());
 			}
 
 			void ShowEnumInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol type, bool fromEnum) {
