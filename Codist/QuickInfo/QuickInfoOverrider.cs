@@ -39,11 +39,11 @@ namespace Codist.QuickInfo
 			if (locs.Length == 0) {
 				var asm = symbol.GetAssemblyModuleName();
 				if (asm != null) {
-					description.ToolTip = symbol.Name + " is defined in " + asm;
+					description.ToolTip = ShowSymbolLocation(symbol, asm);
 				}
 				return;
 			}
-			description.ToolTip = symbol.Name + " is defined in " + System.IO.Path.GetFileName(symbol.DeclaringSyntaxReferences[0].SyntaxTree.FilePath);
+			description.ToolTip = ShowSymbolLocation(symbol, System.IO.Path.GetFileName(symbol.DeclaringSyntaxReferences[0].SyntaxTree.FilePath));
 			description.Cursor = Cursors.Hand;
 			description.MouseEnter += (s, args) => (s as TextBlock).Background = __HighlightBrush;
 			description.MouseLeave += (s, args) => (s as TextBlock).Background = Brushes.Transparent;
@@ -60,6 +60,15 @@ namespace Codist.QuickInfo
 					tb.ContextMenu.IsOpen = true;
 				};
 			}
+		}
+
+		static TextBlock ShowSymbolLocation(ISymbol symbol, string loc) {
+			return new TextBlock()
+				.LimitSize()
+				.AddText(symbol.IsMember() && symbol.ContainingNamespace != null ? symbol.ContainingNamespace.ToDisplayString() + "." : String.Empty)
+				.AddText(symbol.Name, true)
+				.AddText("\ndefined in ")
+				.AddText(loc, true);
 		}
 
 		/// <summary>overrides default doc summary</summary>

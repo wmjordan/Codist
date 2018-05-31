@@ -50,6 +50,12 @@ namespace Codist
 					case 'M':
 						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Method));
 						return;
+					case 'P':
+						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Property));
+						return;
+					case 'F':
+						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Field));
+						return;
 					case '!':
 						inlines.Add(symbol.Substring(2).Render(true, true, null));
 						return;

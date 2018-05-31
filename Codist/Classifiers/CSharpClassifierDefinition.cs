@@ -25,6 +25,11 @@ namespace Codist.Classifiers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpAttributeName)]
+		static ClassificationTypeDefinition AttributeName;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpAttributeNotation)]
 		static ClassificationTypeDefinition AttributeNotation;
 
@@ -138,6 +143,11 @@ namespace Codist.Classifiers
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpVirtualMemberName)]
 		static ClassificationTypeDefinition VirtualMember;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpXmlDoc)]
+		static ClassificationTypeDefinition XmlDoc;
 #pragma warning restore 169
 	}
 }

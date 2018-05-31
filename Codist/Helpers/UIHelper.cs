@@ -255,6 +255,23 @@ namespace Codist
 			panel.Orientation = Orientation.Horizontal;
 			return panel;
 		}
+		public static ToolBar HideOverflow(this ToolBar toolBar) {
+			toolBar.Loaded -= ToolBarLoaded;
+			toolBar.Loaded += ToolBarLoaded;
+			void ToolBarLoaded(object sender, RoutedEventArgs args) {
+				var b = sender as ToolBar;
+				var overflow = b.Template.FindName("OverflowGrid", toolBar) as FrameworkElement;
+				if (overflow != null) {
+					overflow.Visibility = Visibility.Collapsed;
+				}
+				var mainPanelBorder = b.Template.FindName("MainPanelBorder", toolBar) as FrameworkElement;
+				if (mainPanelBorder != null) {
+					mainPanelBorder.Margin = new Thickness(0);
+				}
+				b.Loaded -= ToolBarLoaded;
+			}
+			return toolBar;
+		}
 		public static WpfBrush GetBrush(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundBrushId) {
 			var p = map.GetProperties(formatName);
 			return p != null && p.Contains(resourceId)
@@ -343,6 +360,29 @@ namespace Codist
 				menu.Items.Add(item);
 			}
 			return menu;
+		}
+		public static bool IsMultilineSelected(Microsoft.VisualStudio.Text.Editor.IWpfTextView textView) {
+			var s = textView.Selection;
+			if (s.IsEmpty || s.SelectedSpans.Count < 1) {
+				return false;
+			}
+			var buffer = textView.TextViewLines;
+			Microsoft.VisualStudio.Text.Formatting.IWpfTextViewLine line = null, line2;
+			foreach (var item in s.SelectedSpans) {
+				line2 = buffer.GetTextViewLineContainingBufferPosition(item.Start);
+				if (line == null) {
+					line = line2;
+					continue;
+				}
+				if (line2 != line) {
+					return true;
+				}
+				line2 = buffer.GetTextViewLineContainingBufferPosition(item.End);
+				if (line2 != line) {
+					return true;
+				}
+			}
+			return false;
 		}
 
 		sealed class SymbolLink : Run

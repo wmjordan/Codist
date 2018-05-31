@@ -32,6 +32,10 @@ namespace Codist.QuickInfo
 					&& Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift) == false) {
 					session.Dismiss();
 				}
+				// do not show Quick Info when user is hovering on the smart bar
+				if (session.TextView.Properties.ContainsProperty(nameof(SmartBars.SmartBar))) {
+					session.Dismiss();
+				}
 				//if (Config.Instance.QuickInfoMaxHeight > 0 || Config.Instance.QuickInfoMaxWidth > 0) {
 				//	qiContent.Add(new QuickInfoContainer());
 				//}

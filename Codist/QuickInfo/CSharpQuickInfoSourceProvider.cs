@@ -192,6 +192,9 @@ namespace Codist.QuickInfo
 			}
 
 			void OverrideDocumentation(SyntaxNode node, DefaultQuickInfoPanelWrapper qiWrapper, ISymbol symbol) {
+				if (symbol == null) {
+					return;
+				}
 				var doc = symbol.GetXmlDocForSymbol();
 				if (doc != null) {
 					if (doc.Name.LocalName == XmlDocRenderer.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {

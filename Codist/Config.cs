@@ -403,6 +403,7 @@ namespace Codist
 		SyntaxHighlight = 1,
 		ScrollbarMarkers = 1 << 1,
 		SuperQuickInfo = 1 << 2,
+		SmartBar = 1 << 3,
 		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo
 	}
 
@@ -430,7 +431,7 @@ namespace Codist
 		ClickAndGo = 1 << 28,
 		CtrlQuickInfo = 1 << 29,
 		HideOriginalQuickInfo = 1 << 30,
-		QuickInfoOverride = OverrideDefaultDocumentation | DocumentationFromBaseType,
+		QuickInfoOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | ClickAndGo,
 		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | ClickAndGo,
 	}
 
@@ -454,6 +455,7 @@ namespace Codist
 		CompilerDirective = 1 << 3,
 		LineNumber = 1 << 4,
 		TypeDeclaration = 1 << 5,
+		MethodDeclaration = 1 << 6,
 		CodeMarginMask = SpecialComment | CompilerDirective,
 		Default = SpecialComment | MemberDeclaration | LineNumber | LongMemberDeclaration
 	}

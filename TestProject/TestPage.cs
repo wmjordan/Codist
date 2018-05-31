@@ -128,6 +128,8 @@ text".Log(); // multiline string (string verbatim)
 		/// </summary>
 		static class NativeMethods
 		{
+			[Obsolete]
+			[System.ComponentModel.Description("An extern method")]
 			[DllImport("dummy.dll", EntryPoint = "DummyFunction", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
 			public static extern void ExternMethod(IntPtr ptr, int value);
 		}

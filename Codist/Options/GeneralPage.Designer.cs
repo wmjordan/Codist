@@ -36,6 +36,7 @@
 			this._SuperQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._SyntaxHighlightBox = new System.Windows.Forms.CheckBox();
 			this.label3 = new System.Windows.Forms.Label();
+			this._SmartBarBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this.groupBox1.SuspendLayout();
@@ -100,6 +101,7 @@
 			// 
 			// groupBox2
 			// 
+			this.groupBox2.Controls.Add(this._SmartBarBox);
 			this.groupBox2.Controls.Add(this._ScrollbarMarkerBox);
 			this.groupBox2.Controls.Add(this._SuperQuickInfoBox);
 			this.groupBox2.Controls.Add(this._SyntaxHighlightBox);
@@ -146,10 +148,20 @@
 			this.label3.AutoSize = true;
 			this.label3.Location = new System.Drawing.Point(25, 111);
 			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(439, 30);
+			this.label3.Size = new System.Drawing.Size(455, 30);
 			this.label3.TabIndex = 3;
 			this.label3.Text = "* Changes will be applied on new document windows.\r\nTip: Turning off some feature" +
-    "s can save battery power.";
+    "s might save battery power.";
+			// 
+			// _SmartBarBox
+			// 
+			this._SmartBarBox.AutoSize = true;
+			this._SmartBarBox.Location = new System.Drawing.Point(251, 24);
+			this._SmartBarBox.Name = "_SmartBarBox";
+			this._SmartBarBox.Size = new System.Drawing.Size(221, 19);
+			this._SmartBarBox.TabIndex = 4;
+			this._SmartBarBox.Text = "Smart Bar (experimental)";
+			this._SmartBarBox.UseVisualStyleBackColor = true;
 			// 
 			// GeneralPage
 			// 
@@ -183,5 +195,6 @@
 		private System.Windows.Forms.CheckBox _SuperQuickInfoBox;
 		private System.Windows.Forms.CheckBox _SyntaxHighlightBox;
 		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.CheckBox _SmartBarBox;
 	}
 }

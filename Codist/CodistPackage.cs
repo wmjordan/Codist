@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
 
 namespace Codist
@@ -22,7 +23,7 @@ namespace Codist
 	/// </para>
 	/// </remarks>
 	[PackageRegistration(UseManagedResourcesOnly = true)]
-	[InstalledProductRegistration("#110", "#112", "2.9", IconResourceID = 400)] // Information on this package for Help/About
+	[InstalledProductRegistration("#110", "#112", "3.0", IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.General), Constants.NameOfMe, "General", 0, 0, true)]
 	[ProvideOptionPage(typeof(Options.SuperQuickInfo), CategorySuperQuickInfo, "General", 0, 0, true, Sort = 10)]
@@ -47,6 +48,7 @@ namespace Codist
 		/// CodistPackage GUID string.
 		/// </summary>
 		public const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
+		static EnvDTE.DTE _dte;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CodistPackage"/> class.
@@ -57,6 +59,8 @@ namespace Codist
 			// not sited yet inside Visual Studio environment. The place to do all the other
 			// initialization is the Initialize method.
 		}
+
+		public static EnvDTE.DTE DTE => _dte ?? (_dte = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE);
 
 		#region Package Members
 

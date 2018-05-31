@@ -143,6 +143,7 @@ I have learned a lot from the following extension projects.
 * Font Sizer: https://github.com/Oceanware/FontSizer
 * CodeBlockEndTag: https://github.com/KhaosCoders/VSCodeBlockEndTag
 * Remarker: https://github.com/jgyo/remarker
+* UntabifyReplacement: https://github.com/cpmcgrath/UntabifyReplacement
 
 # Bugs and suggestions
 Please [post New Issue](https://github.com/wmjordan/Codist/issues) in the [GitHub project](https://github.com/wmjordan/Codist) if you find any bug or have any suggestion.

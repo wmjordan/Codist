@@ -309,6 +309,18 @@ namespace Codist.Classifiers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeName)]
+	[Name(Constants.CSharpAttributeName)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	sealed class AttributeNameFormat : ClassificationFormatDefinition
+	{
+		public AttributeNameFormat() {
+			DisplayName = Constants.NameOfMe + ": attribute name";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeNotation)]
 	[Name(Constants.CSharpAttributeNotation)]
 	[UserVisible(false)]
@@ -317,6 +329,18 @@ namespace Codist.Classifiers
 	{
 		public AttributeNotationFormat() {
 			DisplayName = Constants.NameOfMe + ": attribute notation";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpXmlDoc)]
+	[Name(Constants.CSharpXmlDoc)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	sealed class XmlDocFormat : ClassificationFormatDefinition
+	{
+		public XmlDocFormat() {
+			DisplayName = Constants.NameOfMe + ": xml doc";
 		}
 	}
 }

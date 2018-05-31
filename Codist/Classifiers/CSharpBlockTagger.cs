@@ -174,7 +174,7 @@ namespace Codist.Classifiers
 		}
 
 		void OnChanged(object sender, TextContentChangedEventArgs e) {
-			if (CodeAnalysisHelper.AnyTextChanges(e.Before.Version, e.After.Version)) {
+			if (TextEditorHelper.AnyTextChanges(e.Before.Version, e.After.Version)) {
 				ScanBuffer(e.After);
 			}
 		}

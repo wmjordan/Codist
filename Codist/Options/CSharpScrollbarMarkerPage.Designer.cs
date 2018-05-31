@@ -32,6 +32,7 @@
 			this._MemberDeclarationBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this._MethodDeclarationBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
@@ -39,20 +40,20 @@
 			// _DirectivesBox
 			// 
 			this._DirectivesBox.AutoSize = true;
-			this._DirectivesBox.Location = new System.Drawing.Point(15, 81);
+			this._DirectivesBox.Location = new System.Drawing.Point(15, 106);
 			this._DirectivesBox.Name = "_DirectivesBox";
 			this._DirectivesBox.Size = new System.Drawing.Size(173, 19);
-			this._DirectivesBox.TabIndex = 3;
+			this._DirectivesBox.TabIndex = 4;
 			this._DirectivesBox.Text = "Compiler directive";
 			this._DirectivesBox.UseVisualStyleBackColor = true;
 			// 
 			// _SpecialCommentsBox
 			// 
 			this._SpecialCommentsBox.AutoSize = true;
-			this._SpecialCommentsBox.Location = new System.Drawing.Point(15, 108);
+			this._SpecialCommentsBox.Location = new System.Drawing.Point(15, 133);
 			this._SpecialCommentsBox.Name = "_SpecialCommentsBox";
 			this._SpecialCommentsBox.Size = new System.Drawing.Size(149, 19);
-			this._SpecialCommentsBox.TabIndex = 4;
+			this._SpecialCommentsBox.TabIndex = 5;
 			this._SpecialCommentsBox.Text = "Special comment";
 			this._SpecialCommentsBox.UseVisualStyleBackColor = true;
 			// 
@@ -100,6 +101,7 @@
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this._MethodDeclarationBox);
 			this.tabPage2.Controls.Add(this._DirectivesBox);
 			this.tabPage2.Controls.Add(this._SpecialCommentsBox);
 			this.tabPage2.Controls.Add(this._MemberDeclarationBox);
@@ -112,6 +114,16 @@
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Scrollbar marker";
 			this.tabPage2.UseVisualStyleBackColor = true;
+			// 
+			// _MethodDeclarationBox
+			// 
+			this._MethodDeclarationBox.AutoSize = true;
+			this._MethodDeclarationBox.Location = new System.Drawing.Point(39, 81);
+			this._MethodDeclarationBox.Name = "_MethodDeclarationBox";
+			this._MethodDeclarationBox.Size = new System.Drawing.Size(173, 19);
+			this._MethodDeclarationBox.TabIndex = 3;
+			this._MethodDeclarationBox.Text = "Method declaration";
+			this._MethodDeclarationBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpScrollbarMarkerPage
 			// 
@@ -136,5 +148,6 @@
 		private System.Windows.Forms.CheckBox _TypeDeclarationBox;
 		private System.Windows.Forms.TabControl _OptionTabs;
 		private System.Windows.Forms.TabPage tabPage2;
+		private System.Windows.Forms.CheckBox _MethodDeclarationBox;
 	}
 }

@@ -78,6 +78,7 @@ namespace Codist.Classifiers
 			var textSpan = new TextSpan(span.Start.Position, span.Length);
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 			var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace);
+			var lastTriviaSpan = default(TextSpan);
 			foreach (var item in classifiedSpans) {
 				var ct = item.ClassificationType;
 				switch (ct) {
@@ -131,7 +132,24 @@ namespace Codist.Classifiers
 							HighlightPunctuation(item, snapshot, result, semanticModel, unitCompilation);
 						}
 						continue;
-					default: if (ct == Constants.CodeIdentifier
+					default:
+						if (ct == Constants.XmlDocDelimiter) {
+							if (lastTriviaSpan.Contains(item.TextSpan)) {
+								continue;
+							}
+							var node = unitCompilation.FindTrivia(item.TextSpan.Start);
+							if (node != null) {
+								switch (node.Kind()) {
+									case SyntaxKind.SingleLineDocumentationCommentTrivia:
+									case SyntaxKind.MultiLineDocumentationCommentTrivia:
+									case SyntaxKind.DocumentationCommentExteriorTrivia:
+										lastTriviaSpan = node.FullSpan;
+										result.Add(CreateClassificationSpan(snapshot, lastTriviaSpan, _Classifications.XmlDoc));
+										continue;
+								}
+							}
+						}
+						else if (ct == Constants.CodeIdentifier
 							|| ct.EndsWith("name", StringComparison.Ordinal))
 						{
 							var itemSpan = item.TextSpan;
@@ -203,6 +221,13 @@ namespace Codist.Classifiers
 					}
 				}
 			}
+			else if (s == '[') {
+				// highlight attribute annotation
+				var node = unitCompilation.FindNode(item.TextSpan, true, true);
+				if (node is AttributeListSyntax) {
+					result.Add(CreateClassificationSpan(snapshot, node.Span, _Classifications.AttributeNotation));
+				}
+			}
 		}
 
 		static IClassificationType ClassifySyntaxNode(SyntaxNode node) {
@@ -229,7 +254,7 @@ namespace Codist.Classifiers
 				case SyntaxKind.InterfaceDeclaration: type = _Classifications.InterfaceName; break;
 				case SyntaxKind.EnumDeclaration: type = _Classifications.EnumName; break;
 				case SyntaxKind.StructDeclaration: type = _Classifications.StructName; break;
-				case SyntaxKind.Attribute: type = _Classifications.AttributeNotation; break;
+				case SyntaxKind.Attribute: type = _Classifications.AttributeName; break;
 				case SyntaxKind.NamespaceDeclaration:
 					type = _Classifications.Namespace;
 					break;
@@ -376,7 +401,7 @@ namespace Codist.Classifiers
 						case MethodKind.Constructor:
 							yield return
 								node is AttributeSyntax || node.Parent is AttributeSyntax || node.Parent?.Parent is AttributeSyntax
-									? _Classifications.AttributeNotation
+									? _Classifications.AttributeName
 									: _Classifications.ConstructorMethod;
 							break;
 						case MethodKind.Destructor:

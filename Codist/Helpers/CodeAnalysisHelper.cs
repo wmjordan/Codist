@@ -19,18 +19,6 @@ namespace Codist
 {
 	static class CodeAnalysisHelper
 	{
-		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
-			while (oldVersion != currentVersion) {
-				if (oldVersion.Changes.Count > 0) {
-					return true;
-				}
-
-				oldVersion = oldVersion.Next;
-			}
-
-			return false;
-		}
-
 		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
 			var solution = workspace.CurrentSolution;
 			var sourceText = span.Snapshot.AsText();
@@ -69,10 +57,8 @@ namespace Codist
 		}
 
 		public static void GoToSource(this SyntaxReference loc) {
-			var path = loc.SyntaxTree.FilePath;
-			var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
-			(ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE)
-				.OpenFile(path, pos.StartLinePosition.Line + 1, pos.StartLinePosition.Character + 1);
+			var pos = loc.SyntaxTree.GetLineSpan(loc.Span).StartLinePosition;
+			CodistPackage.DTE.OpenFile(loc.SyntaxTree.FilePath, pos.Line + 1, pos.Character + 1);
 		}
 
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
@@ -110,7 +96,36 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.VariableDeclaration:
-				case SyntaxKind.VariableDeclarator:
+				//case SyntaxKind.VariableDeclarator:
+					return true;
+			}
+			return false;
+		}
+
+		public static bool IsSyntaxBlock(this SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.ArgumentList:
+				case SyntaxKind.AttributeArgumentList:
+				//case SyntaxKind.Block:
+				case SyntaxKind.DoStatement:
+				case SyntaxKind.FixedStatement:
+				case SyntaxKind.ForEachStatement:
+				case SyntaxKind.ForStatement:
+				case SyntaxKind.IfStatement:
+				case SyntaxKind.LockStatement:
+				case SyntaxKind.SwitchStatement:
+				case SyntaxKind.SwitchSection:
+				case SyntaxKind.TryStatement:
+				case SyntaxKind.UsingStatement:
+				case SyntaxKind.WhileStatement:
+				case SyntaxKind.ParameterList:
+				case SyntaxKind.ParenthesizedExpression:
+				case SyntaxKind.ParenthesizedLambdaExpression:
+				case SyntaxKind.SimpleLambdaExpression:
+				case SyntaxKind.UnsafeStatement:
+				case SyntaxKind.XmlElement:
+				case SyntaxKind.XmlEmptyElement:
+				case SyntaxKind.XmlComment:
 					return true;
 			}
 			return false;
@@ -136,6 +151,14 @@ namespace Codist
 			return null;
 		}
 
+		public static bool IsLineComment(this SyntaxTrivia trivia) {
+			switch (trivia.Kind()) {
+				case SyntaxKind.MultiLineCommentTrivia:
+				case SyntaxKind.SingleLineCommentTrivia:
+					return true;
+			}
+			return false;
+		}
 		public static string GetAccessibility(this ISymbol symbol) {
 			switch (symbol.DeclaredAccessibility) {
 				case Accessibility.Public: return "public ";
@@ -146,6 +169,17 @@ namespace Codist
 				case Accessibility.ProtectedOrInternal: return "protected or internal ";
 				default: return String.Empty;
 			}
+		}
+
+		public static bool IsMember(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Event:
+				case SymbolKind.Field:
+				case SymbolKind.Method:
+				case SymbolKind.Property:
+					return true;
+			}
+			return false;
 		}
 
 		public static string GetTypeName(this ISymbol symbol) {

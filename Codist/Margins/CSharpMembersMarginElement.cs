@@ -115,7 +115,7 @@ namespace Codist.Margins
 		/// all of the markers 
 		/// </summary>
 		protected override void OnRender(DrawingContext drawingContext) {
-			const int showMemberDeclarationThredshold = 30, longDeclarationLines = 50, labelSize = 9;
+			const int showMemberDeclarationThredshold = 30, longDeclarationLines = 50, labelSize = 8;
 
 			base.OnRender(drawingContext);
 
@@ -156,12 +156,14 @@ namespace Codist.Margins
 							drawingContext.DrawLine(pen, new Point(level, y1), new Point(level, y2));
 							drawingContext.DrawLine(pen, new Point(level, y2), new Point(ActualWidth, y2));
 						}
-						if (y2 - y1 > showMemberDeclarationThredshold && y1 - labelSize > lastLabel && tag.Tag.Name != null) {
+						if (y2 - y1 > showMemberDeclarationThredshold && y1 > lastLabel && tag.Tag.Name != null) {
 							if (pen == null) {
 								pen = GetPenForCodeMemberType(tagType);
 							}
 							if (pen.Brush != null) {
-								drawingContext.DrawText(UIHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Clone().Alpha((y2 - y1) * 10 / ActualHeight)), new Point(level, y1));
+								var text = UIHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Clone().Alpha((y2 - y1) * 20 / ActualHeight));
+								y1 -= text.Height / 2;
+								drawingContext.DrawText(text, new Point(level + 2, y1));
 							}
 							lastLabel = y1 + labelSize;
 						}
@@ -179,23 +181,29 @@ namespace Codist.Margins
 					var pen = GetPenForCodeMemberType(tagType);
 					var yTop = _scrollBar.GetYCoordinateOfBufferPosition(start);
 					var yBottom = _scrollBar.GetYCoordinateOfBufferPosition(end);
-					if (yTop - labelSize > lastLabel && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Tag.Name != null) {
+					drawingContext.DrawRectangle(pen.Brush.Clone().Alpha(1), pen, new Rect(level - (MarkerSize / 2), yTop - (MarkerSize / 2), MarkerSize, MarkerSize));
+					drawingContext.DrawLine(pen, new Point(level, yTop), new Point(level, yBottom));
+					if (yTop > lastLabel && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Tag.Name != null) {
 						// draw type name
 						var text = UIHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Clone().Alpha(1))
 							.SetBold();
 						if (level != 1) {
 							text.SetFontStyle(FontStyles.Italic);
 						}
-						drawingContext.DrawText(text, new Point(level + 1, yTop - text.Height / 2));
-						lastLabel = yTop + labelSize;
+						yTop -= text.Height / 2;
+						drawingContext.DrawText(text, new Point(level + 1, yTop));
+						lastLabel = yTop + text.Height;
 					}
-					drawingContext.DrawRectangle(pen.Brush.Clone().Alpha(1), pen, new Rect(level - (MarkerSize / 2), yTop - (MarkerSize / 2), MarkerSize, MarkerSize));
-					drawingContext.DrawLine(pen, new Point(level, yTop), new Point(level, yBottom));
 					// mark the beginning of the range
 					memberType = tagType;
 					rangeFrom = start;
+					continue;
 				}
-				else if (tagType == memberType) {
+				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MethodDeclaration)
+					&& tagType == CodeMemberType.Method) {
+					drawingContext.DrawRectangle(_MethodPen.Brush.Clone().Alpha(1), _MethodPen, new Rect(level - (MarkerSize / 2), _scrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
+				}
+				if (tagType == memberType) {
 					// expand the range to the end of the tag
 					rangeTo = end;
 				}

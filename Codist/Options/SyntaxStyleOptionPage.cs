@@ -89,7 +89,7 @@ namespace Codist.Options
 			foreach (var item in new[] { _BoldBox, _ItalicBox, _UnderlineBox, _StrikeBox }) {
 				item.CheckStateChanged += MarkChanged;
 			}
-			foreach (var item in new[] { _BackColorTransBox, _BackColorTransBox, _FontSizeBox }) {
+			foreach (var item in new[] { _BackColorTransBox, _ForeColorTransBox, _FontSizeBox }) {
 				item.ValueChanged += MarkChanged;
 			}
 			_PreviewBox.SizeChanged += (s, args) => UpdatePreview();

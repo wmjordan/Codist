@@ -26,6 +26,7 @@ namespace Codist.Options
 			_SuperQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SuperQuickInfo, _SuperQuickInfoBox.Checked));
 			_SyntaxHighlightBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SyntaxHighlight, _SyntaxHighlightBox.Checked));
 			_ScrollbarMarkerBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.ScrollbarMarkers, _ScrollbarMarkerBox.Checked));
+			_SmartBarBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SmartBar, _SmartBarBox.Checked));
 
 			_TopMarginBox.ValueChanged += _UI.HandleEvent(() => {
 				LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value;
@@ -48,6 +49,7 @@ namespace Codist.Options
 				_ScrollbarMarkerBox.Checked = config.Features.MatchFlags(Features.ScrollbarMarkers);
 				_SuperQuickInfoBox.Checked = config.Features.MatchFlags(Features.SuperQuickInfo);
 				_SyntaxHighlightBox.Checked = config.Features.MatchFlags(Features.SyntaxHighlight);
+				_SmartBarBox.Checked = config.Features.MatchFlags(Features.SmartBar);
 				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
 			});
 		}

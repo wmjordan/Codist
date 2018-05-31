@@ -9,6 +9,7 @@ namespace Codist.Classifiers
 			AbstractMember = registry.GetClassificationType(Constants.CSharpAbstractMemberName);
 			AbstractionKeyword = registry.GetClassificationType(Constants.CodeAbstractionKeyword);
 			AliasNamespace = registry.GetClassificationType(Constants.CSharpAliasNamespaceName);
+			AttributeName = registry.GetClassificationType(Constants.CSharpAttributeName);
 			AttributeNotation = registry.GetClassificationType(Constants.CSharpAttributeNotation);
 			ClassName = registry.GetClassificationType(Constants.CodeClassName);
 			ConstField = registry.GetClassificationType(Constants.CSharpConstFieldName);
@@ -37,6 +38,7 @@ namespace Codist.Classifiers
 			StructName = registry.GetClassificationType(Constants.CodeStructName);
 			TypeParameter = registry.GetClassificationType(Constants.CSharpTypeParameterName);
 			VirtualMember = registry.GetClassificationType(Constants.CSharpVirtualMemberName);
+			XmlDoc = registry.GetClassificationType(Constants.CSharpXmlDoc);
 		}
 
 		public IClassificationType AbstractMember { get; }
@@ -44,6 +46,8 @@ namespace Codist.Classifiers
 		public IClassificationType AbstractionKeyword { get; }
 
 		public IClassificationType AliasNamespace { get; }
+
+		public IClassificationType AttributeName { get; }
 
 		public IClassificationType AttributeNotation { get; }
 
@@ -100,6 +104,8 @@ namespace Codist.Classifiers
 		public IClassificationType TypeParameter { get; }
 
 		public IClassificationType VirtualMember { get; }
+
+		public IClassificationType XmlDoc { get; }
 	}
 
 	sealed class GeneralClassifications

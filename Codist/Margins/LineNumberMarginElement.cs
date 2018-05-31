@@ -83,7 +83,7 @@ namespace Codist.Margins
 		void DrawLineNumbers(DrawingContext drawingContext) {
 			var snapshot = _TextView.TextSnapshot;
 			var lc = snapshot.LineCount;
-			var step = lc < 500 ? 50 : lc < 1000 ? 100 : lc < 5000 ? 500 : lc < 20000 ? 1000 : lc < 100000 ? 5000 : 10000;
+			var step = lc < 500 ? 50 : lc < 2000 ? 100 : lc < 3000 ? 200 : lc < 5000 ? 500 : lc < 20000 ? 1000 : lc < 100000 ? 5000 : 10000;
 			for (int i = step; i < lc; i += step) {
 				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, snapshot.GetLineFromLineNumber(i - 1).Start));
 				drawingContext.DrawLine(LineNumberPen, new Point(-100, y), new Point(100, y));

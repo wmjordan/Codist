@@ -104,10 +104,12 @@ namespace Codist
 		public const string CSharpVirtualMemberName = "C#: Virtual member";
 		public const string CSharpAbstractMemberName = "C#: Abstract member";
 		public const string CSharpSealedClassName = "C#: Sealed class";
+		public const string CSharpAttributeName = "C#: Attribute name";
 		public const string CSharpAttributeNotation = "C#: Attribute notation";
 		public const string CSharpLabel = "C#: Label";
 		public const string CSharpDeclarationBrace = "C#: Declaration brace";
 		public const string CSharpMethodBody = "C#: Method body";
+		public const string CSharpXmlDoc = "C#: XML Doc";
 
 		public const string CppFunction = "cppFunction";
 		public const string CppClassTemplate = "cppClassTemplate";
@@ -353,6 +355,9 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpVirtualMemberName)]
 		VirtualMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeName)]
+		AttributeName,
+		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeNotation)]
 		AttributeNotation,
 		[Category(Constants.SyntaxCategory.Declaration)]
@@ -415,6 +420,9 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CppParameter)]
 		ParameterName,
 
+		[Category(Constants.SyntaxCategory.Comment)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpXmlDoc)]
+		XmlDoc,
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlDocComment)]
 		XmlDocComment,
