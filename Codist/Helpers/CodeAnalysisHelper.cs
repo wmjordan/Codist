@@ -29,7 +29,7 @@ namespace Codist
 		}
 
 		public static ISymbol GetSymbolExt(this SemanticModel semanticModel, SyntaxNode node) {
-			return node.IsDeclaration() ? semanticModel.GetDeclaredSymbol(node) :
+			return node.IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator ? semanticModel.GetDeclaredSymbol(node) :
 					(node is AttributeArgumentSyntax
 						? semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol
 						: null)

@@ -4,42 +4,20 @@ using System.Runtime.InteropServices;
 
 namespace TestProject
 {
-	struct Struct
-	{
-		public readonly int X, Y; // readonly fields
-		public Struct(int x, int y) {
-			X = x;
-			Y = y;
-		}
-	}
-	/// <summary>
-	/// An abstract class
-	/// </summary>
-	abstract class AbstractClass : IInterface
+	abstract partial class AbstractClass : IInterface
 	{
 		protected abstract int Property { get; set; } // protected abstract property
-		// This property does not have an XML doc, however, the interface member has.
-		// If we enables "Inherit from base type or interfaces" option in the "Super Quick Info" option page,
-		// hover on the property you will read "Documentation from IInterface.Property".
-		MyEnum IInterface.Property { get; set; } // explicit interface implementation
 		public void Method() { Property++; }
 		protected abstract int AbstractMethod(); // abstract method
 		/// <summary>
 		/// The virtual method does nothing by default.
-		/// <para>See also: <see cref="Property"/>.</para>
+		/// <para>Nor does <see cref="Property"/> do anything.</para>
 		/// </summary>
 		public virtual void VirtualMethod() { } // virtual method
 		void IDisposable.Dispose() { } // explicit interface implementation
 	}
 	sealed class ConcreteClass : AbstractClass
 	{
-		/// <summary>A generic delegate with a parameter.</summary>
-		/// <typeparam name="TObject">The generic type parameter of the delegate.</typeparam>
-		/// <param name="obj">The method parameter of type <typeparamref name="TObject"/>.</param>
-		/// <returns>Returns an instance of the generic type parameter.</returns>
-		delegate TObject Clone<TObject>(TObject obj);
-		event EventHandler<EventArgs> MyEvent;
-
 		// note hover on the "{" below to see line count of this method block
 		/// <summary>
 		/// Creates a new instance of <see cref="ConcreteClass"/>.
@@ -122,6 +100,13 @@ text".Log(); // multiline string (string verbatim)
 				s => { return (value++).ToString() + "." + text[value - 1]; }
 			);
 		}
+
+		/// <summary>A generic delegate with a parameter.</summary>
+		/// <typeparam name="TObject">The generic type parameter of the delegate.</typeparam>
+		/// <param name="obj">The method parameter of type <typeparamref name="TObject"/>.</param>
+		/// <returns>Returns an instance of the generic type parameter.</returns>
+		delegate TObject Clone<TObject>(TObject obj);
+		event EventHandler<EventArgs> MyEvent;
 
 		/// <summary>
 		/// Nested class

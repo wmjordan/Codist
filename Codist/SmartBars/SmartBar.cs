@@ -180,7 +180,7 @@ namespace Codist.SmartBars
 			}
 			AddEditorCommand(ToolBar, "Edit.Delete", KnownMonikers.Cancel, "Delete selected text");
 			AddEditorCommand(ToolBar, "Edit.FindNextSelected", KnownMonikers.FindNext, "Find next selected text");
-			AddEditorCommand(ToolBar, "Edit.Capitalize", KnownMonikers.ASerif, "Capitalize");
+			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownMonikers.ASerif, "Capitalize");
 			AddEditorCommand(ToolBar, "Edit.FormatSelection", KnownMonikers.FormatSelection, "Format selected text");
 		}
 

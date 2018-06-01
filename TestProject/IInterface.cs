@@ -17,6 +17,8 @@ namespace TestProject
 		/// </summary>
 		[System.ComponentModel.DefaultValue(MyEnum.OK | MyEnum.Sad)]
 		MyEnum Property { get; set; }
+
+		void VirtualMethod();
 	}
 #else
 	// Excluded code here
@@ -24,4 +26,12 @@ namespace TestProject
 	{
 	}
 #endif
+
+	partial class AbstractClass
+	{
+		// This property does not have an XML doc, however, the interface member has.
+		// If we enables "Inherit from base type or interfaces" option in the "Super Quick Info" option page,
+		// hover on the property you will read "Documentation from IInterface.Property".
+		MyEnum IInterface.Property { get; set; } // explicit interface implementation
+	}
 }
