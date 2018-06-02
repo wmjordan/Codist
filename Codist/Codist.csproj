@@ -77,6 +77,7 @@
     <Compile Include="Classifiers\IReuseableTagger.cs" />
     <Compile Include="Classifiers\XmlClassificationDefinitions.cs" />
     <Compile Include="CodistPackage.cs" />
+    <Compile Include="Classifiers\CommentLabel.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Classifiers\CodeTagger.cs" />
@@ -170,7 +171,7 @@
     <Compile Include="SmartBars\CSharpSmartBar.cs" />
     <Compile Include="SmartBars\SmartBar.cs" />
     <Compile Include="SmartBars\SmartBarTextViewCreationListener.cs" />
-    <Compile Include="StyleBase.cs" />
+    <Compile Include="SyntaxHighlight\StyleBase.cs" />
     <Compile Include="SyntaxHighlight\CodeViewCreationListener.cs" />
     <Compile Include="SyntaxHighlight\CodeViewDecorator.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfoSourceProvider.cs" />

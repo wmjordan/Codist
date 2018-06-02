@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
 
-namespace Codist
+namespace Codist.SyntaxHighlight
 {
 	/// <summary>The base style for syntax highlight elements.</summary>
 	abstract class StyleBase

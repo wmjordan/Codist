@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using Codist.Classifiers;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Codist.Options

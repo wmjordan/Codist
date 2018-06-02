@@ -6,6 +6,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Linq;
 using System.Windows.Forms;
+using Codist.SyntaxHighlight;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Codist.Options
