@@ -75,19 +75,23 @@ namespace Codist.Margins
 			_ScrollBar.TrackSpanChanged += OnMappingChanged;
 		}
 
-		void Config_Updated(object sender, EventArgs e) {
+		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
+			if (e.UpdatedFeature.HasAnyFlag(Features.SyntaxHighlight | Features.ScrollbarMarkers) == false) {
+				return;
+			}
 			var setVisible = Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.CodeMarginMask);
 			var visible = Visibility == Visibility.Visible;
 			if (setVisible == false && visible) {
 				Visibility = Visibility.Collapsed;
 				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
 				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
-				InvalidateVisual();
 			}
 			else if (setVisible && visible == false) {
 				Visibility = Visibility.Visible;
 				_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
 				_ScrollBar.TrackSpanChanged += OnMappingChanged;
+			}
+			if (Visibility == Visibility.Visible) {
 				InvalidateVisual();
 			}
 		}

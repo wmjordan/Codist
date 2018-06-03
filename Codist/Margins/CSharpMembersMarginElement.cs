@@ -30,7 +30,7 @@ namespace Codist.Margins
 		/// <summary>
 		/// Constructor for the <see cref="CSharpMembersMarginElement"/>.
 		/// </summary>
-		/// <param name="textView">ITextView to which this StructureMargenElement will be attacheded.</param>
+		/// <param name="textView">ITextView to which this <see cref="CSharpMembersMarginElement"/> will be attacheded.</param>
 		/// <param name="verticalScrollbar">Vertical scrollbar of the ITextViewHost that contains <paramref name="textView"/>.</param>
 		/// <param name="factory">MEF tag factory.</param>
 		public CSharpMembersMarginElement(IWpfTextView textView, IVerticalScrollBar verticalScrollbar, CSharpMembersMarginFactory factory) {
@@ -47,7 +47,7 @@ namespace Codist.Margins
 			Config.Updated += Config_Updated;
 			IsVisibleChanged += OnIsVisibleChanged;
 
-			Config_Updated(null, null);
+			Config_Updated(null, new ConfigUpdatedEventArgs(Features.ScrollbarMarkers));
 		}
 
 		public bool Enabled => IsVisible;
@@ -93,15 +93,19 @@ namespace Codist.Margins
 			}
 		}
 
-		void Config_Updated(object sender, EventArgs e) {
+		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
+			if (e.UpdatedFeature.HasAnyFlag(Features.SyntaxHighlight | Features.ScrollbarMarkers) == false) {
+				return;
+			}
 			var setVisible = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration);
 			var visible = Visibility == Visibility.Visible;
 			if (setVisible == false && visible) {
 				Visibility = Visibility.Collapsed;
-				InvalidateVisual();
 			}
 			else if (setVisible && visible == false) {
 				Visibility = Visibility.Visible;
+			}
+			if (Visibility == Visibility.Visible) {
 				InvalidateVisual();
 			}
 		}

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
+using AppHelpers;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
@@ -28,7 +29,7 @@ namespace Codist.SyntaxHighlight
 		public CodeViewDecorator(IWpfTextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service, IEditorFormatMap formatMap) {
 			view.Closed += View_Closed;
 			//view.VisualElement.IsVisibleChanged += VisualElement_IsVisibleChanged;
-			map.ClassificationFormatMappingChanged += SettingsSaved;
+			map.ClassificationFormatMappingChanged += FormatUpdated;
 			//view.GotAggregateFocus += TextView_GotAggregateFocus;
 			Config.Updated += SettingsSaved;
 
@@ -52,7 +53,7 @@ namespace Codist.SyntaxHighlight
 
 		void View_Closed(object sender, EventArgs e) {
 			Config.Updated -= SettingsSaved;
-			_ClassificationFormatMap.ClassificationFormatMappingChanged -= SettingsSaved;
+			_ClassificationFormatMap.ClassificationFormatMappingChanged -= FormatUpdated;
 			//_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
 			_TextView.Closed -= View_Closed;
 		}
@@ -89,16 +90,23 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
-		void SettingsSaved(object sender, EventArgs eventArgs) {
+		void SettingsSaved(object sender, ConfigUpdatedEventArgs eventArgs) {
+			if (eventArgs.UpdatedFeature.MatchFlags(Features.SyntaxHighlight) == false) {
+				return;
+			}
+			FormatUpdated(sender, eventArgs);
+		}
+
+		void FormatUpdated(object sender, EventArgs e) {
 			if (_IsDecorating != 0) {
 				return;
 			}
 			if (_TextView.VisualElement.IsVisible) {
 				//if (_PendingRefresh) {
-					CacheStyles(_RegService);
-					Decorate();
-					//_PendingRefresh = false;
-					Debug.WriteLine("Unset pending refresh");
+				CacheStyles(_RegService);
+				Decorate();
+				//_PendingRefresh = false;
+				Debug.WriteLine("Unset pending refresh");
 				//}
 			}
 			//else {

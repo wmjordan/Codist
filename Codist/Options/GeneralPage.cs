@@ -30,16 +30,17 @@ namespace Codist.Options
 
 			_TopMarginBox.ValueChanged += _UI.HandleEvent(() => {
 				LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value;
-				Config.Instance.FireConfigChangedEvent();
+				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			});
 			_BottomMarginBox.ValueChanged += _UI.HandleEvent(() => {
 				LineTransformers.LineHeightTransformProvider.BottomSpace = (double)_BottomMarginBox.Value;
-				Config.Instance.FireConfigChangedEvent();
+				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			});
 			_NoSpaceBetweenWrappedLinesBox.CheckedChanged += _UI.HandleEvent(() => {
 				Config.Instance.NoSpaceBetweenWrappedLines = _NoSpaceBetweenWrappedLinesBox.Checked;
-				Config.Instance.FireConfigChangedEvent();
+				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			});
+			//todo distinguish syntax theme loading and config file loading
 			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}

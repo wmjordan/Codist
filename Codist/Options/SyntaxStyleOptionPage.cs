@@ -215,7 +215,7 @@ namespace Codist.Options
 				return;
 			}
 			UpdatePreview();
-			Config.Instance.FireConfigChangedEvent();
+			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 
 		void ResetButton_Click(object sender, EventArgs e) {
@@ -226,7 +226,7 @@ namespace Codist.Options
 			_activeStyle.Reset();
 			UpdateUIControls(_activeStyle);
 			UpdatePreview();
-			Config.Instance.FireConfigChangedEvent();
+			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			_uiLock = false;
 		}
 

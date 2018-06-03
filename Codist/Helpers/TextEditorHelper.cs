@@ -30,10 +30,10 @@ namespace Codist
 			return token.Contains(start) && (token.Contains(end) || inclusive && token.End == end);
 		}
 
-		public static void ExecuteEditorCommand(string command) {
+		public static void TryExecuteCommand(this EnvDTE.DTE dte, string command) {
 			try {
-				if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
-					CodistPackage.DTE.ExecuteCommand(command);
+				if (dte.Commands.Item(command).IsAvailable) {
+					dte.ExecuteCommand(command);
 				}
 			}
 			catch (System.Runtime.InteropServices.COMException ex) {
@@ -42,6 +42,11 @@ namespace Codist
 					System.Diagnostics.Debugger.Break();
 				}
 			}
+			
+		}
+
+		public static void ExecuteEditorCommand(string command) {
+			CodistPackage.DTE.TryExecuteCommand(command);
 		}
 
 	}

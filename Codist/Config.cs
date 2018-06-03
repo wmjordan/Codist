@@ -53,7 +53,7 @@ namespace Codist
 		public List<CodeStyle> GeneralStyles { get; } = new List<CodeStyle>();
 
 		public static event EventHandler Loaded;
-		public static event EventHandler Updated;
+		public static event EventHandler<ConfigUpdatedEventArgs> Updated;
 
 		public static Config InitConfig() {
 			//AppHelpers.LogHelper.UseLogMethod(i => Debug.WriteLine(i));
@@ -80,7 +80,7 @@ namespace Codist
 			try {
 				Instance = InternalLoadConfig(configPath);
 				Loaded?.Invoke(Instance, EventArgs.Empty);
-				Updated?.Invoke(Instance, EventArgs.Empty);
+				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.All));
 			}
 			catch(Exception ex) {
 				Debug.WriteLine(ex.ToString());
@@ -162,7 +162,7 @@ namespace Codist
 			ResetCodeStyle(Instance.CommentStyles, GetDefaultCommentStyles());
 			ResetCodeStyle(Instance.CodeStyles, GetDefaultCSharpStyles());
 			ResetCodeStyle(Instance.XmlCodeStyles, GetDefaultXmlCodeStyles());
-			Updated?.Invoke(Instance, EventArgs.Empty);
+			Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.SyntaxHighlight));
 		}
 
 		public void SaveConfig(string path) {
@@ -187,7 +187,7 @@ namespace Codist
 				if (path == ConfigPath) {
 					_LastSaved = _LastLoaded = DateTime.Now;
 					Debug.WriteLine("Config saved");
-					Updated?.Invoke(this, EventArgs.Empty);
+					//Updated?.Invoke(this, EventArgs.Empty);
 				}
 			}
 			catch (Exception ex) {
@@ -195,8 +195,8 @@ namespace Codist
 			}
 		}
 
-		internal void FireConfigChangedEvent() {
-			Updated?.Invoke(this, EventArgs.Empty);
+		internal void FireConfigChangedEvent(Features updatedFeature) {
+			Updated?.Invoke(this, new ConfigUpdatedEventArgs(updatedFeature));
 		}
 
 		static void CleanUpStyleEntry<TStyle> (List<TStyle> styles, bool removeFontNames)
@@ -328,10 +328,21 @@ namespace Codist
 		}
 		internal void Set(MarkerOptions options, bool set) {
 			MarkerOptions = AppHelpers.EnumHelper.SetFlags(MarkerOptions, options, set);
+			FireConfigChangedEvent(Features.ScrollbarMarkers);
 		}
 		internal void Set(SpecialHighlightOptions options, bool set) {
 			SpecialHighlightOptions = AppHelpers.EnumHelper.SetFlags(SpecialHighlightOptions, options, set);
+			FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
+	}
+
+	sealed class ConfigUpdatedEventArgs : EventArgs
+	{
+		public ConfigUpdatedEventArgs(Features updatedFeature) {
+			UpdatedFeature = updatedFeature;
+		}
+
+		public Features UpdatedFeature { get; }
 	}
 
 	public enum BrushEffect

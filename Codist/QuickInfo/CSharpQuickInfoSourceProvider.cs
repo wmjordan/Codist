@@ -246,7 +246,10 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void _ConfigUpdated(object sender, EventArgs e) {
+			void _ConfigUpdated(object sender, ConfigUpdatedEventArgs e) {
+				if (e.UpdatedFeature.MatchFlags(Features.SyntaxHighlight) == false) {
+					return;
+				}
 				if (_FormatMap != null) {
 					_SymbolFormatter.UpdateSyntaxHighlights(_FormatMap);
 				}

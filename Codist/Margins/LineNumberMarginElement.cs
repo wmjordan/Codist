@@ -36,7 +36,10 @@ namespace Codist.Margins
 			_ScrollBar.TrackSpanChanged += OnMappingChanged;
 		}
 
-		void Config_Updated(object sender, EventArgs e) {
+		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
+			if (e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers) == false) {
+				return;
+			}
 			var setVisible = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
 			var visible = Visibility == Visibility.Visible;
 			if (setVisible == false && visible) {
