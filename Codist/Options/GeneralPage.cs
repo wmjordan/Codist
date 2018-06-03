@@ -19,9 +19,10 @@ namespace Codist.Options
 			if (_Loaded) {
 				return;
 			}
+			LoadConfig(Config.Instance);
+
 			_TopMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.TopSpace;
 			_BottomMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.BottomSpace;
-			LoadConfig(Config.Instance);
 
 			_SuperQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SuperQuickInfo, _SuperQuickInfoBox.Checked));
 			_SyntaxHighlightBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SyntaxHighlight, _SyntaxHighlightBox.Checked));
