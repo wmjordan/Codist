@@ -67,17 +67,7 @@ namespace Codist.Margins
 				//Hook up to the various events we need to keep the margin current.
 				_scrollBar.TrackSpanChanged += OnTagsChanged;
 
-				//todo cache opaque brushes
-				_ClassPen = new Pen(_formatMap.GetBrush(Constants.CodeClassName).Alpha(TypeAlpha), TypeLineSize);
-				_ConstructorPen = new Pen(_formatMap.GetBrush(Constants.CSharpConstructorMethodName).Alpha(MemberAlpha), LineSize);
-				_DelegatePen = new Pen(_formatMap.GetBrush(Constants.CodeDelegateName).Alpha(MemberAlpha), LineSize);
-				_EnumPen = new Pen(_formatMap.GetBrush(Constants.CodeEnumName).Alpha(TypeAlpha), TypeLineSize);
-				_EventPen = new Pen(_formatMap.GetBrush(Constants.CSharpEventName).Alpha(MemberAlpha), LineSize);
-				_FieldPen = new Pen(_formatMap.GetBrush(Constants.CSharpFieldName).Alpha(MemberAlpha), LineSize);
-				_InterfacePen = new Pen(_formatMap.GetBrush(Constants.CodeInterfaceName).Alpha(TypeAlpha), TypeLineSize);
-				_MethodPen = new Pen(_formatMap.GetBrush(Constants.CSharpMethodName).Alpha(MemberAlpha), LineSize);
-				_PropertyPen = new Pen(_formatMap.GetBrush(Constants.CSharpPropertyName).Alpha(MemberAlpha), LineSize);
-				_StructPen = new Pen(_formatMap.GetBrush(Constants.CodeStructName).Alpha(TypeAlpha), TypeLineSize);
+				UpdateSyntaxColors();
 
 				_tagger = _factory.TagAggregatorFactoryService.CreateTagAggregator<ICodeMemberTag>(_textView);
 				_tagger.BatchedTagsChanged += OnTagsChanged;
@@ -93,6 +83,20 @@ namespace Codist.Margins
 			}
 		}
 
+		void UpdateSyntaxColors() {
+			//todo cache opaque brushes
+			_ClassPen = new Pen(_formatMap.GetBrush(Constants.CodeClassName).Alpha(TypeAlpha), TypeLineSize);
+			_ConstructorPen = new Pen(_formatMap.GetBrush(Constants.CSharpConstructorMethodName).Alpha(MemberAlpha), LineSize);
+			_DelegatePen = new Pen(_formatMap.GetBrush(Constants.CodeDelegateName).Alpha(MemberAlpha), LineSize);
+			_EnumPen = new Pen(_formatMap.GetBrush(Constants.CodeEnumName).Alpha(TypeAlpha), TypeLineSize);
+			_EventPen = new Pen(_formatMap.GetBrush(Constants.CSharpEventName).Alpha(MemberAlpha), LineSize);
+			_FieldPen = new Pen(_formatMap.GetBrush(Constants.CSharpFieldName).Alpha(MemberAlpha), LineSize);
+			_InterfacePen = new Pen(_formatMap.GetBrush(Constants.CodeInterfaceName).Alpha(TypeAlpha), TypeLineSize);
+			_MethodPen = new Pen(_formatMap.GetBrush(Constants.CSharpMethodName).Alpha(MemberAlpha), LineSize);
+			_PropertyPen = new Pen(_formatMap.GetBrush(Constants.CSharpPropertyName).Alpha(MemberAlpha), LineSize);
+			_StructPen = new Pen(_formatMap.GetBrush(Constants.CodeStructName).Alpha(TypeAlpha), TypeLineSize);
+		}
+
 		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.HasAnyFlag(Features.SyntaxHighlight | Features.ScrollbarMarkers) == false) {
 				return;
@@ -106,6 +110,9 @@ namespace Codist.Margins
 				Visibility = Visibility.Visible;
 			}
 			if (Visibility == Visibility.Visible) {
+				if (e.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)) {
+					UpdateSyntaxColors();
+				}
 				InvalidateVisual();
 			}
 		}

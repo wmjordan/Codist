@@ -741,7 +741,6 @@ namespace Codist.QuickInfo
 						_SymbolFormatter.ToUIText(attrDef, arg.Value);
 					}
 					attrDef.AddText(")]");
-					attrDef.TextWrapping = TextWrapping.Wrap;
 					info.Children.Add(attrDef);
 				}
 				if (info.Children.Count > 1) {

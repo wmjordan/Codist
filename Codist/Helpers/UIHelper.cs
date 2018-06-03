@@ -170,15 +170,21 @@ namespace Codist
 			return formatter.ToUIText(block, parts, argIndex);
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, SymbolFormatter formatter) {
-			formatter.ToUIText(block.Inlines, symbol, alias);
+			if (symbol != null) {
+				formatter.ToUIText(block.Inlines, symbol, alias);
+			}
 			return block;
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, WpfBrush brush) {
-			block.Inlines.Add(symbol.Render(alias, false, brush));
+			if (symbol != null) {
+				block.Inlines.Add(symbol.Render(alias, false, brush));
+			}
 			return block;
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, bool bold, WpfBrush brush) {
-			block.Inlines.Add(symbol.Render(null, bold, brush));
+			if (symbol != null) {
+				block.Inlines.Add(symbol.Render(null, bold, brush));
+			}
 			return block;
 		}
 
