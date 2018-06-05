@@ -25,10 +25,12 @@ namespace Codist.SmartBars
 		public CSharpSmartBar(IWpfTextView view) : base(view, 16) {
 		}
 
+		ToolBar MyToolBar => ToolBar2;
+
 		protected override void AddCommands() {
 			UpdateSemanticModel();
 			AddCommandsForNode();
-			ToolBar.Items.Add(new Separator());
+			//MyToolBar.Items.Add(new Separator());
 			base.AddCommands();
 		}
 
@@ -59,35 +61,35 @@ namespace Codist.SmartBars
 					&& (_Node is TypeSyntax || _Node is MemberDeclarationSyntax || _Node is VariableDeclaratorSyntax || _Node is ParameterSyntax)
 					&& _Token.Kind() == SyntaxKind.IdentifierToken) {
 					if (_Node is IdentifierNameSyntax) {
-						AddEditorCommand(ToolBar, "Edit.GoToDefinition", KnownMonikers.GoToDefinition, "Go to definition");
+						AddEditorCommand(MyToolBar, "Edit.GoToDefinition", KnownMonikers.GoToDefinition, "Go to definition");
 					}
-					AddEditorCommand(ToolBar, "Edit.FindAllReferences", KnownMonikers.ReferencedDimension, "Find all references");
-					AddEditorCommand(ToolBar, "Refactor.Rename", KnownMonikers.Rename, "Rename symbol");
+					AddEditorCommand(MyToolBar, "Edit.FindAllReferences", KnownMonikers.ReferencedDimension, "Find all references");
+					AddEditorCommand(MyToolBar, "Refactor.Rename", KnownMonikers.Rename, "Rename symbol");
 					if (_Node is ParameterSyntax && _Node.Parent is ParameterListSyntax) {
-						AddEditorCommand(ToolBar, "Refactor.ReorderParameters", KnownMonikers.ReorderParameters, "Reorder parameters");
+						AddEditorCommand(MyToolBar, "Refactor.ReorderParameters", KnownMonikers.ReorderParameters, "Reorder parameters");
 					}
 				}
 				else if (_Token.Kind() == SyntaxKind.StringLiteralToken) {
-					AddEditorCommand(ToolBar, "Edit.FindAllReferences", KnownMonikers.ReferencedDimension, "Find all references");
+					AddEditorCommand(MyToolBar, "Edit.FindAllReferences", KnownMonikers.ReferencedDimension, "Find all references");
 				}
 				if (_Node.IsDeclaration() == false) {
-					AddEditorCommand(ToolBar, "Refactor.ExtractMethod", KnownMonikers.ExtractMethod, "Extract Method");
+					AddEditorCommand(MyToolBar, "Refactor.ExtractMethod", KnownMonikers.ExtractMethod, "Extract Method");
 				}
 			}
 			if (_Trivia.IsLineComment()) {
-				AddEditorCommand(ToolBar, "Edit.UncommentSelection", KnownMonikers.UncommentCode, "Uncomment selection");
+				AddEditorCommand(MyToolBar, "Edit.UncommentSelection", KnownMonikers.UncommentCode, "Uncomment selection");
 			}
 			else {
-				AddEditorCommand(ToolBar, "Edit.CommentSelection", KnownMonikers.CommentCode, "Comment selection");
+				AddEditorCommand(MyToolBar, "Edit.CommentSelection", KnownMonikers.CommentCode, "Comment selection");
 			}
-			//AddEditorCommand(ToolBar, "Edit.ExpandSelection", KnownMonikers.ExpandScope, "Expand selection");
-			AddCommand(ToolBar, KnownMonikers.SelectFrame, "Expand selection", (s, args) => {
+			//AddEditorCommand(MyToolBar, "Edit.ExpandSelection", KnownMonikers.ExpandScope, "Expand selection");
+			AddCommand(MyToolBar, KnownMonikers.SelectFrame, "Expand selection", (s, args) => {
 				ExpandSelection();
 			});
 		}
 
 		void AddCommand(ImageMoniker moniker, string tooltip, Action<ITextEdit> editCommand) {
-			AddCommand(ToolBar, moniker, tooltip, (s, args) => {
+			AddCommand(MyToolBar, moniker, tooltip, (s, args) => {
 				if (UpdateSemanticModel()) {
 					using (var edit = View.TextSnapshot.TextBuffer.CreateEdit()) {
 						editCommand(edit);

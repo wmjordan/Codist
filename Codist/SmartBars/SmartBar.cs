@@ -36,13 +36,11 @@ namespace Codist.SmartBars
 			_IconSize = iconSize;
 			_ToolBarLayer = view.GetAdornmentLayer(nameof(SmartBar));
 			View.Selection.SelectionChanged += ViewSelectionChanged;
-			//View.VisualElement.MouseLeftButtonUp += ViewSelectionChanged;
-			//View.LayoutChanged += ViewLayoutChanged;
 			View.Closed += ViewClosed;
 			ToolBar = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 1, IsOverflowOpen = false }.HideOverflow();
-			//ToolBar2 = new ToolBar { BorderThickness = new System.Windows.Thickness(1), BorderBrush = Brushes.Gray, Band = 1 }.HideOverflow();
+			ToolBar2 = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 2, IsOverflowOpen = false }.HideOverflow();
 			_ToolBarTray = new ToolBarTray() {
-				ToolBars = { ToolBar },
+				ToolBars = { ToolBar, ToolBar2 },
 				IsLocked = true,
 				Cursor = Cursors.Arrow,
 				Background = Brushes.Transparent,
@@ -59,9 +57,13 @@ namespace Codist.SmartBars
 		protected IWpfTextView View { get; }
 
 		protected ToolBar ToolBar { get; }
-		//protected ToolBar ToolBar2 { get; }
+		protected ToolBar ToolBar2 { get; }
 
 		#region Event handlers
+		void ToolBarSizeChanged(object sender, SizeChangedEventArgs e) {
+			SetToolBarPosition();
+			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
+		}
 		void ViewMouseMove(object sender, MouseEventArgs e) {
 			if (_ToolBarTray.IsVisible == false) {
 				return;
@@ -91,10 +93,8 @@ namespace Codist.SmartBars
 		}
 		void ViewSelectionChanged(object sender, EventArgs e) {
 			if (View.Selection.IsEmpty) {
-				//_ToolBarLayer.RemoveAllAdornments();
 				_ToolBarTray.Visibility = Visibility.Hidden;
 				View.VisualElement.MouseMove -= ViewMouseMove;
-				////View.VisualElement.MouseLeftButtonUp -= ViewSelectionChanged;
 				_CreateToolBarTimer.Change(Timeout.Infinite, Timeout.Infinite);
 				_TimerStatus = 0;
 				return;
@@ -115,7 +115,6 @@ namespace Codist.SmartBars
 			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
 			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
 			View.Selection.SelectionChanged -= ViewSelectionChanged;
-			//View.VisualElement.MouseLeftButtonUp -= ViewSelectionChanged;
 			View.VisualElement.MouseMove -= ViewMouseMove;
 			//View.LayoutChanged -= ViewLayoutChanged;
 			View.Closed -= ViewClosed;
@@ -145,13 +144,13 @@ namespace Codist.SmartBars
 			if (View.Selection.IsEmpty || Interlocked.Exchange(ref _TimerStatus, Working) != Selecting) {
 				goto EXIT;
 			}
-			//_ToolBarLayer.RemoveAllAdornments();
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			ToolBar.Items.Clear();
-			//ToolBar2.Items.Clear();
+			ToolBar2.Items.Clear();
 			AddCommands();
 			SetToolBarPosition();
 			_ToolBarTray.Opacity = 1;
+			_ToolBarTray.SizeChanged += ToolBarSizeChanged;
 			View.VisualElement.MouseMove += ViewMouseMove;
 
 			EXIT:
@@ -162,12 +161,13 @@ namespace Codist.SmartBars
 			// keep tool bar position when the selection is restored and the tool bar reappears after executing command
 			if (DateTime.Now > _LastExecute.AddSeconds(1)) {
 				var pos = Mouse.GetPosition(View.VisualElement);
+				var rs = _ToolBarTray.RenderSize;
 				var x = pos.X - 20;
-				var y = pos.Y - 50;
+				var y = pos.Y - rs.Height - 20;
 				Canvas.SetLeft(_ToolBarTray, x < View.ViewportLeft ? View.ViewportLeft
-					: x + _ToolBarTray.RenderSize.Width < View.ViewportRight ? x
-					: View.ViewportRight - _ToolBarTray.RenderSize.Width);
-				Canvas.SetTop(_ToolBarTray, (y < 0 ? y + 80 : y) + View.ViewportTop);
+					: x + rs.Width < View.ViewportRight ? x
+					: View.ViewportRight - rs.Width);
+				Canvas.SetTop(_ToolBarTray, (y < 0 ? y + rs.Height + 40 : y) + View.ViewportTop);
 			}
 			_ToolBarTray.Visibility = Visibility.Visible;
 		}
@@ -209,9 +209,7 @@ namespace Codist.SmartBars
 		}
 		void HideToolBar(object sender, RoutedEventArgs e) {
 			_ToolBarTray.Visibility = Visibility.Hidden;
-			//_ToolBarLayer.RemoveAllAdornments();
 			View.VisualElement.MouseMove -= ViewMouseMove;
-			//_ToolBarTray.IsEnabled = true;
 		}
 
 		static System.Windows.Media.Imaging.BitmapSource GetImage(ImageMoniker moniker, int iconSize) {
