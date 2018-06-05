@@ -7,7 +7,7 @@ namespace Codist.Options
 {
 	public partial class SyntaxHighlightPage : UserControl
 	{
-		readonly UiLock _UI = new UiLock();
+		//readonly UiLock _UI = new UiLock();
 		bool _Loaded;
 
 		public SyntaxHighlightPage() {
@@ -19,58 +19,24 @@ namespace Codist.Options
 			if (_Loaded) {
 				return;
 			}
-			LoadConfig(Config.Instance);
+			//LoadConfig(Config.Instance);
 
-			_SaveConfigButton.Click += (s, args) => {
-				using (var d = new SaveFileDialog {
-					Title = "Save Codist configuration file...",
-					FileName = "Codist.json",
-					DefaultExt = "json",
-					Filter = "Codist configuration file|*.json"
-				}) {
-					if (d.ShowDialog() != DialogResult.OK) {
-						return;
-					}
-					Config.Instance.SaveConfig(d.FileName);
-				}
+			_DarkThemeButton.Click += (s, args) => {
+				Config.LoadConfig(Config.DarkTheme);
 			};
-			_LoadConfigButton.Click += (s, args) => {
-				_ThemeMenu.Show(_LoadConfigButton, new Point(0, _LoadConfigButton.Height));
+			_LightThemeButton.Click += (s, args) => {
+				Config.LoadConfig(Config.LightTheme);
 			};
-			_ResetConfigButton.Click += (s, args) => {
+			_ResetThemeButton.Click += (s, args) => {
 				if (MessageBox.Show("Do you want to reset the syntax highlight settings to default?", nameof(Codist), MessageBoxButtons.YesNo) == DialogResult.Yes) {
 					Config.ResetStyles();
 				}
 			};
-			_ThemeMenu.ItemClicked += (s, args) => {
-				switch (args.ClickedItem.Tag) {
-					case "Light": Config.LoadConfig(Config.LightTheme); return;
-					case "Dark": Config.LoadConfig(Config.DarkTheme); return;
-				}
-				_ThemeMenu.Close();
-				using (var d = new OpenFileDialog {
-					Title = "Load Codist configuration file...",
-					FileName = "Codist.json",
-					DefaultExt = "json",
-					Filter = "Codist configuration file|*.json"
-				}) {
-					if (d.ShowDialog() != DialogResult.OK) {
-						return;
-					}
-					try {
-						Config.LoadConfig(d.FileName);
-						System.IO.File.Copy(d.FileName, Config.ConfigPath, true);
-					}
-					catch (Exception ex) {
-						MessageBox.Show("Error occured while loading config file: " + ex.Message, nameof(Codist));
-					}
-				}
-			};
-			Config.Updated += (s, args) => LoadConfig(s as Config);
+			//Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
 
-		void LoadConfig(Config config) {
-		}
+		//void LoadConfig(Config config) {
+		//}
 	}
 }

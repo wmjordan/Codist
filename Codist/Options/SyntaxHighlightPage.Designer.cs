@@ -25,87 +25,65 @@
 		/// 使用代码编辑器修改此方法的内容。
 		/// </summary>
 		private void InitializeComponent() {
-			this.components = new System.ComponentModel.Container();
-			this._SaveConfigButton = new System.Windows.Forms.Button();
-			this._LoadConfigButton = new System.Windows.Forms.Button();
+			this._LightThemeButton = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
-			this._ResetConfigButton = new System.Windows.Forms.Button();
-			this._ThemeMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this._LightThemeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this._DarkThemeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this._CustomThemeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.label1 = new System.Windows.Forms.Label();
+			this._ResetThemeButton = new System.Windows.Forms.Button();
+			this._DarkThemeButton = new System.Windows.Forms.Button();
 			this.groupBox2.SuspendLayout();
-			this._ThemeMenu.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// _SaveConfigButton
+			// _LightThemeButton
 			// 
-			this._SaveConfigButton.Location = new System.Drawing.Point(125, 24);
-			this._SaveConfigButton.Name = "_SaveConfigButton";
-			this._SaveConfigButton.Size = new System.Drawing.Size(111, 23);
-			this._SaveConfigButton.TabIndex = 0;
-			this._SaveConfigButton.Text = "&Save...";
-			this._SaveConfigButton.UseVisualStyleBackColor = true;
-			// 
-			// _LoadConfigButton
-			// 
-			this._LoadConfigButton.Location = new System.Drawing.Point(9, 24);
-			this._LoadConfigButton.Name = "_LoadConfigButton";
-			this._LoadConfigButton.Size = new System.Drawing.Size(110, 23);
-			this._LoadConfigButton.TabIndex = 1;
-			this._LoadConfigButton.Text = "&Load...";
-			this._LoadConfigButton.UseVisualStyleBackColor = true;
+			this._LightThemeButton.Location = new System.Drawing.Point(9, 24);
+			this._LightThemeButton.Name = "_LightThemeButton";
+			this._LightThemeButton.Size = new System.Drawing.Size(110, 23);
+			this._LightThemeButton.TabIndex = 1;
+			this._LightThemeButton.Text = "&Light theme";
+			this._LightThemeButton.UseVisualStyleBackColor = true;
 			// 
 			// groupBox2
 			// 
-			this.groupBox2.Controls.Add(this._ResetConfigButton);
-			this.groupBox2.Controls.Add(this._SaveConfigButton);
-			this.groupBox2.Controls.Add(this._LoadConfigButton);
+			this.groupBox2.Controls.Add(this.label1);
+			this.groupBox2.Controls.Add(this._ResetThemeButton);
+			this.groupBox2.Controls.Add(this._DarkThemeButton);
+			this.groupBox2.Controls.Add(this._LightThemeButton);
 			this.groupBox2.Location = new System.Drawing.Point(15, 6);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(378, 66);
+			this.groupBox2.Size = new System.Drawing.Size(464, 146);
 			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
-			this.groupBox2.Text = "Super syntax highlight settings";
+			this.groupBox2.Text = "Super syntax highlight presets";
 			// 
-			// _ResetConfigButton
+			// label1
 			// 
-			this._ResetConfigButton.Location = new System.Drawing.Point(242, 24);
-			this._ResetConfigButton.Name = "_ResetConfigButton";
-			this._ResetConfigButton.Size = new System.Drawing.Size(111, 23);
-			this._ResetConfigButton.TabIndex = 2;
-			this._ResetConfigButton.Text = "Reset...";
-			this._ResetConfigButton.UseVisualStyleBackColor = true;
+			this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.label1.Location = new System.Drawing.Point(6, 61);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(452, 69);
+			this.label1.TabIndex = 3;
+			this.label1.Text = "Tip: you can quickly load or reset syntax theme by pressing the buttons above.\r\nO" +
+    "pen a C# code file to see effects immediately.";
 			// 
-			// _ThemeMenu
+			// _ResetThemeButton
 			// 
-			this._ThemeMenu.ImageScalingSize = new System.Drawing.Size(20, 20);
-			this._ThemeMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this._LightThemeMenuItem,
-            this._DarkThemeMenuItem,
-            this._CustomThemeMenuItem});
-			this._ThemeMenu.Name = "_ThemeMenu";
-			this._ThemeMenu.Size = new System.Drawing.Size(256, 76);
+			this._ResetThemeButton.Location = new System.Drawing.Point(242, 24);
+			this._ResetThemeButton.Name = "_ResetThemeButton";
+			this._ResetThemeButton.Size = new System.Drawing.Size(111, 23);
+			this._ResetThemeButton.TabIndex = 2;
+			this._ResetThemeButton.Text = "Reset...";
+			this._ResetThemeButton.UseVisualStyleBackColor = true;
 			// 
-			// _LightThemeMenuItem
+			// _DarkThemeButton
 			// 
-			this._LightThemeMenuItem.Name = "_LightThemeMenuItem";
-			this._LightThemeMenuItem.Size = new System.Drawing.Size(255, 24);
-			this._LightThemeMenuItem.Tag = "Light";
-			this._LightThemeMenuItem.Text = "&Light theme";
-			// 
-			// _DarkThemeMenuItem
-			// 
-			this._DarkThemeMenuItem.Name = "_DarkThemeMenuItem";
-			this._DarkThemeMenuItem.Size = new System.Drawing.Size(255, 24);
-			this._DarkThemeMenuItem.Tag = "Dark";
-			this._DarkThemeMenuItem.Text = "&Dark theme";
-			// 
-			// _CustomThemeMenuItem
-			// 
-			this._CustomThemeMenuItem.Name = "_CustomThemeMenuItem";
-			this._CustomThemeMenuItem.Size = new System.Drawing.Size(255, 24);
-			this._CustomThemeMenuItem.Text = "&Custom configurations...";
+			this._DarkThemeButton.Location = new System.Drawing.Point(125, 24);
+			this._DarkThemeButton.Name = "_DarkThemeButton";
+			this._DarkThemeButton.Size = new System.Drawing.Size(111, 23);
+			this._DarkThemeButton.TabIndex = 0;
+			this._DarkThemeButton.Text = "&Dark theme";
+			this._DarkThemeButton.UseVisualStyleBackColor = true;
 			// 
 			// SyntaxHighlightPage
 			// 
@@ -116,19 +94,15 @@
 			this.Size = new System.Drawing.Size(575, 328);
 			this.Load += new System.EventHandler(this.SyntaxHighlightPage_Load);
 			this.groupBox2.ResumeLayout(false);
-			this._ThemeMenu.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
 
 		#endregion
-		private System.Windows.Forms.Button _SaveConfigButton;
-		private System.Windows.Forms.Button _LoadConfigButton;
+		private System.Windows.Forms.Button _LightThemeButton;
 		private System.Windows.Forms.GroupBox groupBox2;
-		private System.Windows.Forms.ContextMenuStrip _ThemeMenu;
-		private System.Windows.Forms.ToolStripMenuItem _LightThemeMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem _DarkThemeMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem _CustomThemeMenuItem;
-		private System.Windows.Forms.Button _ResetConfigButton;
+		private System.Windows.Forms.Button _ResetThemeButton;
+		private System.Windows.Forms.Button _DarkThemeButton;
+		private System.Windows.Forms.Label label1;
 	}
 }

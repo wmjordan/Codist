@@ -32,15 +32,19 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this._NoSpaceBetweenWrappedLinesBox = new System.Windows.Forms.CheckBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this._SmartBarBox = new System.Windows.Forms.CheckBox();
 			this._ScrollbarMarkerBox = new System.Windows.Forms.CheckBox();
 			this._SuperQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._SyntaxHighlightBox = new System.Windows.Forms.CheckBox();
 			this.label3 = new System.Windows.Forms.Label();
-			this._SmartBarBox = new System.Windows.Forms.CheckBox();
+			this.groupBox3 = new System.Windows.Forms.GroupBox();
+			this._SaveConfigButton = new System.Windows.Forms.Button();
+			this._LoadConfigButton = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
+			this.groupBox3.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// _BottomMarginBox
@@ -82,10 +86,10 @@
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Controls.Add(this._TopMarginBox);
 			this.groupBox1.Controls.Add(this.label1);
-			this.groupBox1.Location = new System.Drawing.Point(12, 168);
+			this.groupBox1.Location = new System.Drawing.Point(12, 232);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(499, 84);
-			this.groupBox1.TabIndex = 3;
+			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Extra line margins";
 			// 
@@ -112,6 +116,16 @@
 			this.groupBox2.TabIndex = 0;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Feature controllers";
+			// 
+			// _SmartBarBox
+			// 
+			this._SmartBarBox.AutoSize = true;
+			this._SmartBarBox.Location = new System.Drawing.Point(251, 24);
+			this._SmartBarBox.Name = "_SmartBarBox";
+			this._SmartBarBox.Size = new System.Drawing.Size(221, 19);
+			this._SmartBarBox.TabIndex = 4;
+			this._SmartBarBox.Text = "Smart Bar (experimental)";
+			this._SmartBarBox.UseVisualStyleBackColor = true;
 			// 
 			// _ScrollbarMarkerBox
 			// 
@@ -153,20 +167,40 @@
 			this.label3.Text = "* Changes will be applied on new document windows.\r\nTip: Turning off some feature" +
     "s might save battery power.";
 			// 
-			// _SmartBarBox
+			// groupBox3
 			// 
-			this._SmartBarBox.AutoSize = true;
-			this._SmartBarBox.Location = new System.Drawing.Point(251, 24);
-			this._SmartBarBox.Name = "_SmartBarBox";
-			this._SmartBarBox.Size = new System.Drawing.Size(221, 19);
-			this._SmartBarBox.TabIndex = 4;
-			this._SmartBarBox.Text = "Smart Bar (experimental)";
-			this._SmartBarBox.UseVisualStyleBackColor = true;
+			this.groupBox3.Controls.Add(this._SaveConfigButton);
+			this.groupBox3.Controls.Add(this._LoadConfigButton);
+			this.groupBox3.Location = new System.Drawing.Point(12, 168);
+			this.groupBox3.Name = "groupBox3";
+			this.groupBox3.Size = new System.Drawing.Size(499, 58);
+			this.groupBox3.TabIndex = 1;
+			this.groupBox3.TabStop = false;
+			this.groupBox3.Text = "Configuration file";
+			// 
+			// _SaveConfigButton
+			// 
+			this._SaveConfigButton.Location = new System.Drawing.Point(251, 24);
+			this._SaveConfigButton.Name = "_SaveConfigButton";
+			this._SaveConfigButton.Size = new System.Drawing.Size(111, 23);
+			this._SaveConfigButton.TabIndex = 0;
+			this._SaveConfigButton.Text = "&Save...";
+			this._SaveConfigButton.UseVisualStyleBackColor = true;
+			// 
+			// _LoadConfigButton
+			// 
+			this._LoadConfigButton.Location = new System.Drawing.Point(9, 24);
+			this._LoadConfigButton.Name = "_LoadConfigButton";
+			this._LoadConfigButton.Size = new System.Drawing.Size(110, 23);
+			this._LoadConfigButton.TabIndex = 1;
+			this._LoadConfigButton.Text = "&Load...";
+			this._LoadConfigButton.UseVisualStyleBackColor = true;
 			// 
 			// GeneralPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.Controls.Add(this.groupBox3);
 			this.Controls.Add(this.groupBox2);
 			this.Controls.Add(this.groupBox1);
 			this.Name = "GeneralPage";
@@ -178,6 +212,7 @@
 			this.groupBox1.PerformLayout();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
+			this.groupBox3.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -196,5 +231,8 @@
 		private System.Windows.Forms.CheckBox _SyntaxHighlightBox;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.CheckBox _SmartBarBox;
+		private System.Windows.Forms.GroupBox groupBox3;
+		private System.Windows.Forms.Button _SaveConfigButton;
+		private System.Windows.Forms.Button _LoadConfigButton;
 	}
 }

@@ -41,6 +41,38 @@ namespace Codist.Options
 				Config.Instance.NoSpaceBetweenWrappedLines = _NoSpaceBetweenWrappedLinesBox.Checked;
 				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			});
+			_SaveConfigButton.Click += (s, args) => {
+				using (var d = new SaveFileDialog {
+					Title = "Save Codist configuration file...",
+					FileName = "Codist.json",
+					DefaultExt = "json",
+					Filter = "Codist configuration file|*.json"
+				}) {
+					if (d.ShowDialog() != DialogResult.OK) {
+						return;
+					}
+					Config.Instance.SaveConfig(d.FileName);
+				}
+			};
+			_LoadConfigButton.Click += (s, args) => {
+				using (var d = new OpenFileDialog {
+					Title = "Load Codist configuration file...",
+					FileName = "Codist.json",
+					DefaultExt = "json",
+					Filter = "Codist configuration file|*.json"
+				}) {
+					if (d.ShowDialog() != DialogResult.OK) {
+						return;
+					}
+					try {
+						Config.LoadConfig(d.FileName);
+						System.IO.File.Copy(d.FileName, Config.ConfigPath, true);
+					}
+					catch (Exception ex) {
+						MessageBox.Show("Error occured while loading config file: " + ex.Message, nameof(Codist));
+					}
+				}
+			};
 			//todo distinguish syntax theme loading and config file loading
 			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
@@ -53,6 +85,8 @@ namespace Codist.Options
 				_SyntaxHighlightBox.Checked = config.Features.MatchFlags(Features.SyntaxHighlight);
 				_SmartBarBox.Checked = config.Features.MatchFlags(Features.SmartBar);
 				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
+				_TopMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.TopSpace;
+				_BottomMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.BottomSpace;
 			});
 		}
 	}
