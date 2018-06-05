@@ -149,6 +149,13 @@ namespace Codist.SmartBars
 			ToolBar2.Items.Clear();
 			AddCommands();
 			SetToolBarPosition();
+			if (ToolBar2.Items.Count == 0) {
+				ToolBar2.Visibility = Visibility.Collapsed;
+			}
+			else if (ToolBar2.Visibility == Visibility.Collapsed) {
+				ToolBar2.Visibility = Visibility.Visible;
+				ToolBar2.HideOverflow();
+			}
 			_ToolBarTray.Opacity = 1;
 			_ToolBarTray.SizeChanged += ToolBarSizeChanged;
 			View.VisualElement.MouseMove += ViewMouseMove;
@@ -163,11 +170,11 @@ namespace Codist.SmartBars
 				var pos = Mouse.GetPosition(View.VisualElement);
 				var rs = _ToolBarTray.RenderSize;
 				var x = pos.X - 20;
-				var y = pos.Y - rs.Height - 20;
+				var y = pos.Y - rs.Height - 10;
 				Canvas.SetLeft(_ToolBarTray, x < View.ViewportLeft ? View.ViewportLeft
 					: x + rs.Width < View.ViewportRight ? x
 					: View.ViewportRight - rs.Width);
-				Canvas.SetTop(_ToolBarTray, (y < 0 ? y + rs.Height + 40 : y) + View.ViewportTop);
+				Canvas.SetTop(_ToolBarTray, (y < 0 ? y + rs.Height + 30 : y) + View.ViewportTop);
 			}
 			_ToolBarTray.Visibility = Visibility.Visible;
 		}

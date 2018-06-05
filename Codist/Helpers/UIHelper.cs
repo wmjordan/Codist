@@ -262,21 +262,28 @@ namespace Codist
 			return panel;
 		}
 		public static ToolBar HideOverflow(this ToolBar toolBar) {
+			if (toolBar.IsLoaded) {
+				HideOverflowInternal(toolBar);
+				return toolBar;
+			}
 			toolBar.Loaded -= ToolBarLoaded;
 			toolBar.Loaded += ToolBarLoaded;
+			return toolBar;
 			void ToolBarLoaded(object sender, RoutedEventArgs args) {
 				var b = sender as ToolBar;
-				var overflow = b.Template.FindName("OverflowGrid", toolBar) as FrameworkElement;
+				HideOverflowInternal(b);
+				b.Loaded -= ToolBarLoaded;
+			}
+			void HideOverflowInternal(ToolBar b) {
+				var overflow = b.Template.FindName("OverflowGrid", b) as FrameworkElement;
 				if (overflow != null) {
 					overflow.Visibility = Visibility.Collapsed;
 				}
-				var mainPanelBorder = b.Template.FindName("MainPanelBorder", toolBar) as FrameworkElement;
+				var mainPanelBorder = b.Template.FindName("MainPanelBorder", b) as FrameworkElement;
 				if (mainPanelBorder != null) {
 					mainPanelBorder.Margin = new Thickness(0);
 				}
-				b.Loaded -= ToolBarLoaded;
 			}
-			return toolBar;
 		}
 		public static WpfBrush GetBrush(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundBrushId) {
 			var p = map.GetProperties(formatName);

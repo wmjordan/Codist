@@ -123,6 +123,8 @@ namespace Codist.QuickInfo
 							}
 						}
 						goto EXIT;
+					case SyntaxKind.BaseKeyword:
+						break;
 					default:
 						if (token.Span.Contains(subjectTriggerPoint) == false
 							|| token.IsReservedKeyword()) {

@@ -53,14 +53,17 @@ namespace Codist.QuickInfo
 			}
 			else if (symbol.IsOverride) {
 				info.AddText(symbol.IsSealed ? "sealed override " : "override ", formatter.Keyword);
-				INamedTypeSymbol t = null;
+				ISymbol o = null;
 				switch (symbol.Kind) {
-					case SymbolKind.Method: t = ((IMethodSymbol)symbol).OverriddenMethod?.ContainingType; break;
-					case SymbolKind.Property: t = ((IPropertySymbol)symbol).OverriddenProperty?.ContainingType; break;
-					case SymbolKind.Event: t = ((IEventSymbol)symbol).OverriddenEvent?.ContainingType; break;
+					case SymbolKind.Method: o = ((IMethodSymbol)symbol).OverriddenMethod; break;
+					case SymbolKind.Property: o = ((IPropertySymbol)symbol).OverriddenProperty; break;
+					case SymbolKind.Event: o = ((IEventSymbol)symbol).OverriddenEvent; break;
 				}
-				if (t != null && t.IsCommonClass() == false) {
-					info.AddSymbol(t, null, formatter).AddText(" ");
+				if (o != null) {
+					INamedTypeSymbol t = o.ContainingType;
+					if (t != null && t.IsCommonClass() == false) {
+						info.AddSymbol(t, null, formatter).AddText(".").AddSymbol(o, null, formatter).AddText(" ");
+					}
 				}
 			}
 			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {

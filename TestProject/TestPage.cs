@@ -6,6 +6,9 @@ namespace TestProject
 {
 	abstract partial class AbstractClass : IInterface
 	{
+		protected AbstractClass(int property) {
+			Property = property;
+		}
 		protected abstract int Property { get; set; } // protected abstract property
 		public void Method() { Property++; }
 		protected abstract int AbstractMethod(); // abstract method
@@ -24,7 +27,7 @@ namespace TestProject
 		/// </summary>
 		/// <param name="fieldId">The field.</param>
 		/// <example><code><![CDATA[System.Console.WriteLine(Codist.Constants.NameOfMe);]]></code></example>
-		public ConcreteClass(int fieldId) {
+		public ConcreteClass(int fieldId) : base(0) {
 			const int A = 1; // local constant
 			var localField = fieldId; // local field
 			@"Multiline
