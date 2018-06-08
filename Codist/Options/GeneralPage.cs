@@ -21,20 +21,17 @@ namespace Codist.Options
 			}
 			LoadConfig(Config.Instance);
 
-			_TopMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.TopSpace;
-			_BottomMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.BottomSpace;
-
 			_SuperQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SuperQuickInfo, _SuperQuickInfoBox.Checked));
 			_SyntaxHighlightBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SyntaxHighlight, _SyntaxHighlightBox.Checked));
 			_ScrollbarMarkerBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.ScrollbarMarkers, _ScrollbarMarkerBox.Checked));
 			_SmartBarBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SmartBar, _SmartBarBox.Checked));
 
 			_TopMarginBox.ValueChanged += _UI.HandleEvent(() => {
-				LineTransformers.LineHeightTransformProvider.TopSpace = (double)_TopMarginBox.Value;
+				Config.Instance.TopSpace = (double)_TopMarginBox.Value;
 				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			});
 			_BottomMarginBox.ValueChanged += _UI.HandleEvent(() => {
-				LineTransformers.LineHeightTransformProvider.BottomSpace = (double)_BottomMarginBox.Value;
+				Config.Instance.BottomSpace = (double)_BottomMarginBox.Value;
 				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			});
 			_NoSpaceBetweenWrappedLinesBox.CheckedChanged += _UI.HandleEvent(() => {
@@ -85,8 +82,8 @@ namespace Codist.Options
 				_SyntaxHighlightBox.Checked = config.Features.MatchFlags(Features.SyntaxHighlight);
 				_SmartBarBox.Checked = config.Features.MatchFlags(Features.SmartBar);
 				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
-				_TopMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.TopSpace;
-				_BottomMarginBox.Value = (decimal)LineTransformers.LineHeightTransformProvider.BottomSpace;
+				_TopMarginBox.Value = (decimal)config.TopSpace;
+				_BottomMarginBox.Value = (decimal)config.BottomSpace;
 			});
 		}
 	}

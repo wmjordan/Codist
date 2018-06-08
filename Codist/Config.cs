@@ -35,14 +35,8 @@ namespace Codist
 		[DefaultValue(QuickInfoOptions.Default)]
 		public QuickInfoOptions QuickInfoOptions { get; set; } = QuickInfoOptions.Default;
 
-		public double TopSpace {
-			get => LineTransformers.LineHeightTransformProvider.TopSpace;
-			set => LineTransformers.LineHeightTransformProvider.TopSpace = value;
-		}
-		public double BottomSpace {
-			get => LineTransformers.LineHeightTransformProvider.BottomSpace;
-			set => LineTransformers.LineHeightTransformProvider.BottomSpace = value;
-		}
+		public double TopSpace { get; set; }
+		public double BottomSpace { get; set; }
 		public double QuickInfoMaxWidth { get; set; }
 		public double QuickInfoMaxHeight { get; set; }
 		public bool NoSpaceBetweenWrappedLines { get; set; }
@@ -362,7 +356,7 @@ namespace Codist
 		ScrollbarMarkers = 1 << 1,
 		SuperQuickInfo = 1 << 2,
 		SmartBar = 1 << 3,
-		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo
+		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo /*| SmartBar*/
 	}
 
 	[Flags]

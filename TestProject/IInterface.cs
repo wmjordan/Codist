@@ -29,6 +29,9 @@ namespace TestProject
 
 	partial class AbstractClass
 	{
+		protected AbstractClass(int property) {
+			(this as IInterface).Property = (MyEnum)property;
+		}
 		// This property does not have an XML doc, however, the interface member has.
 		// If we enables "Inherit from base type or interfaces" option in the "Super Quick Info" option page,
 		// hover on the property you will read "Documentation from IInterface.Property".

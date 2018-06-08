@@ -52,6 +52,7 @@ namespace Codist.SmartBars
 				_ImageService = ServiceProvider.GlobalProvider.GetService(typeof(SVsImageService)) as IVsImageService2;
 			}
 			_ToolBarLayer.AddAdornment(AdornmentPositioningBehavior.ViewportRelative, null, null, _ToolBarTray, null);
+			_ToolBarTray.Visibility = Visibility.Hidden;
 		}
 
 		protected IWpfTextView View { get; }

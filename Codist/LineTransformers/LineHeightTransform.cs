@@ -8,6 +8,7 @@ using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Utilities;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Differencing;
+using AppHelpers;
 
 namespace Codist.LineTransformers
 {
@@ -16,25 +17,7 @@ namespace Codist.LineTransformers
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	sealed class LineHeightTransformProvider : ILineTransformSourceProvider
 	{
-		static readonly LineTransform __DefaultLineTransform = new LineTransform(1);
-		static LineTransform __LineTransform = new LineTransform(1);
-		static LineTransform __FirstWrappedLineTransform = new LineTransform(1);
-		static LineTransform __LastWrappedLineTransform = new LineTransform(1);
-
-		public static double TopSpace {
-			get => __LineTransform.TopSpace;
-			set {
-				__LineTransform = new LineTransform(value < 0 ? 0 : value > 100 ? 100 : value, BottomSpace, 1);
-				__FirstWrappedLineTransform = new LineTransform(value < 0 ? 0 : value > 100 ? 100 : value, 0, 1);
-			}
-		}
-		public static double BottomSpace {
-			get => __LineTransform.BottomSpace;
-			set {
-				__LineTransform = new LineTransform(TopSpace, value < 0 ? 0 : value > 100 ? 100 : value, 1);
-				__LastWrappedLineTransform = new LineTransform(0, value < 0 ? 0 : value > 100 ? 100 : value, 1);
-			}
-		}
+		static LineHeightTransform __Transform;
 
 		public ILineTransformSource Create(IWpfTextView textView) {
 			if (textView.Roles.Contains(DifferenceViewerRoles.LeftViewTextViewRole)
@@ -44,11 +27,43 @@ namespace Codist.LineTransformers
 				return null;
 			}
 
-			return new LineHeightTransform();
+			return __Transform ?? (__Transform = new LineHeightTransform());
 		}
 
 		sealed class LineHeightTransform : ILineTransformSource
 		{
+			static readonly LineTransform __DefaultLineTransform = new LineTransform(1);
+			LineTransform __LineTransform = new LineTransform(1);
+			LineTransform __FirstWrappedLineTransform = new LineTransform(1);
+			LineTransform __LastWrappedLineTransform = new LineTransform(1);
+
+			public double TopSpace {
+				get => __LineTransform.TopSpace;
+				set {
+					__LineTransform = new LineTransform(value < 0 ? 0 : value > 100 ? 100 : value, BottomSpace, 1);
+					__FirstWrappedLineTransform = new LineTransform(value < 0 ? 0 : value > 100 ? 100 : value, 0, 1);
+				}
+			}
+			public double BottomSpace {
+				get => __LineTransform.BottomSpace;
+				set {
+					__LineTransform = new LineTransform(TopSpace, value < 0 ? 0 : value > 100 ? 100 : value, 1);
+					__LastWrappedLineTransform = new LineTransform(0, value < 0 ? 0 : value > 100 ? 100 : value, 1);
+				}
+			}
+
+			public LineHeightTransform() {
+				TopSpace = Config.Instance.TopSpace;
+				BottomSpace = Config.Instance.BottomSpace;
+
+				Config.Updated += (s, args) => {
+					if (args.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)) {
+						TopSpace = Config.Instance.TopSpace;
+						BottomSpace = Config.Instance.BottomSpace;
+					}
+				};
+			}
+
 			// todo: refresh after settings are changed
 			public LineTransform GetLineTransform(ITextViewLine line, double yPosition, ViewRelativePosition placement) {
 				if (Config.Instance.NoSpaceBetweenWrappedLines == false) {

@@ -6,9 +6,6 @@ namespace TestProject
 {
 	abstract partial class AbstractClass : IInterface
 	{
-		protected AbstractClass(int property) {
-			Property = property;
-		}
 		protected abstract int Property { get; set; } // protected abstract property
 		public void Method() { Property++; }
 		protected abstract int AbstractMethod(); // abstract method
