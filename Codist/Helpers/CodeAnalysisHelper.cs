@@ -171,12 +171,13 @@ namespace Codist
 			}
 		}
 
-		public static bool IsMember(this ISymbol symbol) {
+		public static bool IsMemberOrType(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event:
 				case SymbolKind.Field:
 				case SymbolKind.Method:
 				case SymbolKind.Property:
+				case SymbolKind.NamedType:
 					return true;
 			}
 			return false;

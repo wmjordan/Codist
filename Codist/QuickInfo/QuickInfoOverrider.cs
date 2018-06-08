@@ -63,12 +63,15 @@ namespace Codist.QuickInfo
 		}
 
 		static TextBlock ShowSymbolLocation(ISymbol symbol, string loc) {
-			return new TextBlock()
+			var t = new TextBlock()
 				.LimitSize()
-				.AddText(symbol.IsMember() && symbol.ContainingNamespace != null ? symbol.ContainingNamespace.ToDisplayString() + "." : String.Empty)
 				.AddText(symbol.Name, true)
 				.AddText("\ndefined in ")
 				.AddText(loc, true);
+			if (symbol.IsMemberOrType() && symbol.ContainingNamespace != null) {
+				t.AddText("\nnamespace: ").AddText(symbol.ContainingNamespace.ToDisplayString());
+			}
+			return t;
 		}
 
 		/// <summary>overrides default doc summary</summary>
