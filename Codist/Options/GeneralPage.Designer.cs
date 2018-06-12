@@ -122,9 +122,9 @@
 			this._SmartBarBox.AutoSize = true;
 			this._SmartBarBox.Location = new System.Drawing.Point(251, 24);
 			this._SmartBarBox.Name = "_SmartBarBox";
-			this._SmartBarBox.Size = new System.Drawing.Size(221, 19);
+			this._SmartBarBox.Size = new System.Drawing.Size(101, 19);
 			this._SmartBarBox.TabIndex = 4;
-			this._SmartBarBox.Text = "Smart Bar (experimental)";
+			this._SmartBarBox.Text = "Smart Bar";
 			this._SmartBarBox.UseVisualStyleBackColor = true;
 			// 
 			// _ScrollbarMarkerBox
