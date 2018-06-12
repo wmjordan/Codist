@@ -62,7 +62,7 @@ namespace Codist
 		}
 
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
-			if (file == null) {
+			if (String.IsNullOrEmpty(file)) {
 				return;
 			}
 			file = System.IO.Path.GetFullPath(file);

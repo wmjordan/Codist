@@ -36,7 +36,7 @@ namespace Codist.QuickInfo
 				return;
 			}
 			var locs = symbol.GetSourceLocations();
-			if (locs.Length == 0) {
+			if (locs.Length == 0 || String.IsNullOrEmpty(locs[0].SyntaxTree.FilePath)) {
 				var asm = symbol.GetAssemblyModuleName();
 				if (asm != null) {
 					description.ToolTip = ShowSymbolLocation(symbol, asm);
@@ -65,9 +65,10 @@ namespace Codist.QuickInfo
 		static TextBlock ShowSymbolLocation(ISymbol symbol, string loc) {
 			var t = new TextBlock()
 				.LimitSize()
-				.AddText(symbol.Name, true)
-				.AddText("\ndefined in ")
-				.AddText(loc, true);
+				.AddText(symbol.Name, true);
+			if (String.IsNullOrEmpty(loc) == false) {
+				t.AddText("\ndefined in ").AddText(loc, true);
+			}
 			if (symbol.IsMemberOrType() && symbol.ContainingNamespace != null) {
 				t.AddText("\nnamespace: ").AddText(symbol.ContainingNamespace.ToDisplayString());
 			}
