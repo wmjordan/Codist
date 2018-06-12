@@ -72,7 +72,12 @@ namespace Codist.SmartBars
 				else if (_Token.Kind() == SyntaxKind.StringLiteralToken) {
 					AddEditorCommand(MyToolBar, "Edit.FindAllReferences", KnownMonikers.ReferencedDimension, "Find all references");
 				}
-				if (_Node.IsDeclaration() == false) {
+				if (_Node.IsDeclaration()) {
+					if (_Node is TypeDeclarationSyntax || _Node is MemberDeclarationSyntax || _Node is ParameterListSyntax) {
+						AddEditorCommand(MyToolBar, "Edit.InsertComment", KnownMonikers.AddComment, "Insert comment");
+					}
+				}
+				else {
 					AddEditorCommand(MyToolBar, "Refactor.ExtractMethod", KnownMonikers.ExtractMethod, "Extract Method");
 				}
 			}
