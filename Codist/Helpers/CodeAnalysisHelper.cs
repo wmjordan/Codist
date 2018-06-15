@@ -61,7 +61,7 @@ namespace Codist
 			CodistPackage.DTE.OpenFile(loc.SyntaxTree.FilePath, pos.Line + 1, pos.Character + 1);
 		}
 
-		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
+		static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
 			if (String.IsNullOrEmpty(file)) {
 				return;
 			}

@@ -351,13 +351,16 @@ namespace Codist
 		}
 		public static ContextMenu CreateContextMenuForSourceLocations(string symbolName, ImmutableArray<SyntaxReference> refs) {
 			var menu = new ContextMenu();
-			menu.Items.Add(new MenuItem { Header = symbolName + " is defined in " + refs.Length.ToString() + " places", IsEnabled = false });
-			foreach (var loc in refs) {
-				var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
-				var item = new MenuItem { Header = System.IO.Path.GetFileName(loc.SyntaxTree.FilePath) + "(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", Tag = loc };
-				item.Click += (s, args) => ((SyntaxReference)((MenuItem)s).Tag).GoToSource();
-				menu.Items.Add(item);
-			}
+			menu.Opened += (sender, e) => {
+				var m = sender as ContextMenu;
+				m.Items.Add(new MenuItem { Header = symbolName + " is defined in " + refs.Length.ToString() + " places", IsEnabled = false });
+				foreach (var loc in refs) {
+					var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
+					var item = new MenuItem { Header = System.IO.Path.GetFileName(loc.SyntaxTree.FilePath) + "(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", Tag = loc };
+					item.Click += (s, args) => ((SyntaxReference)((MenuItem)s).Tag).GoToSource();
+					m.Items.Add(item);
+				}
+			};
 			return menu;
 		}
 
