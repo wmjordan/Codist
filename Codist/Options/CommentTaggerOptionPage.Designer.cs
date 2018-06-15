@@ -42,8 +42,12 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this._AddTagButton = new System.Windows.Forms.Button();
 			this._RemoveTagButton = new System.Windows.Forms.Button();
+			this._CommentTaggerTabs = new System.Windows.Forms.TabControl();
+			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._PreviewBox)).BeginInit();
+			this._CommentTaggerTabs.SuspendLayout();
+			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// _SyntaxListBox
@@ -55,11 +59,11 @@
 			this._SyntaxListBox.FullRowSelect = true;
 			this._SyntaxListBox.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
 			this._SyntaxListBox.HideSelection = false;
-			this._SyntaxListBox.Location = new System.Drawing.Point(16, 32);
+			this._SyntaxListBox.Location = new System.Drawing.Point(9, 24);
 			this._SyntaxListBox.MultiSelect = false;
 			this._SyntaxListBox.Name = "_SyntaxListBox";
 			this._SyntaxListBox.ShowGroups = false;
-			this._SyntaxListBox.Size = new System.Drawing.Size(239, 293);
+			this._SyntaxListBox.Size = new System.Drawing.Size(239, 263);
 			this._SyntaxListBox.TabIndex = 1;
 			this._SyntaxListBox.UseCompatibleStateImageBehavior = false;
 			this._SyntaxListBox.View = System.Windows.Forms.View.Details;
@@ -72,7 +76,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(13, 14);
+			this.label1.Location = new System.Drawing.Point(6, 6);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(111, 15);
 			this.label1.TabIndex = 0;
@@ -94,9 +98,9 @@
 			this.groupBox1.Controls.Add(this._IgnoreCaseBox);
 			this.groupBox1.Controls.Add(this._TagTextBox);
 			this.groupBox1.Controls.Add(this.label2);
-			this.groupBox1.Location = new System.Drawing.Point(261, 14);
+			this.groupBox1.Location = new System.Drawing.Point(254, 6);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(311, 311);
+			this.groupBox1.Size = new System.Drawing.Size(311, 281);
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Tag Definition";
@@ -120,7 +124,7 @@
 			this._PreviewBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this._PreviewBox.Location = new System.Drawing.Point(7, 184);
 			this._PreviewBox.Name = "_PreviewBox";
-			this._PreviewBox.Size = new System.Drawing.Size(298, 121);
+			this._PreviewBox.Size = new System.Drawing.Size(294, 91);
 			this._PreviewBox.TabIndex = 8;
 			this._PreviewBox.TabStop = false;
 			// 
@@ -173,7 +177,7 @@
 			this._StyleBox.FormattingEnabled = true;
 			this._StyleBox.Location = new System.Drawing.Point(89, 105);
 			this._StyleBox.Name = "_StyleBox";
-			this._StyleBox.Size = new System.Drawing.Size(216, 23);
+			this._StyleBox.Size = new System.Drawing.Size(212, 23);
 			this._StyleBox.TabIndex = 5;
 			// 
 			// label3
@@ -201,7 +205,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this._TagTextBox.Location = new System.Drawing.Point(89, 24);
 			this._TagTextBox.Name = "_TagTextBox";
-			this._TagTextBox.Size = new System.Drawing.Size(216, 25);
+			this._TagTextBox.Size = new System.Drawing.Size(212, 25);
 			this._TagTextBox.TabIndex = 1;
 			// 
 			// label2
@@ -215,7 +219,7 @@
 			// 
 			// _AddTagButton
 			// 
-			this._AddTagButton.Location = new System.Drawing.Point(130, 14);
+			this._AddTagButton.Location = new System.Drawing.Point(123, 6);
 			this._AddTagButton.Name = "_AddTagButton";
 			this._AddTagButton.Size = new System.Drawing.Size(54, 23);
 			this._AddTagButton.TabIndex = 3;
@@ -224,29 +228,54 @@
 			// 
 			// _RemoveTagButton
 			// 
-			this._RemoveTagButton.Location = new System.Drawing.Point(190, 14);
+			this._RemoveTagButton.Location = new System.Drawing.Point(183, 6);
 			this._RemoveTagButton.Name = "_RemoveTagButton";
 			this._RemoveTagButton.Size = new System.Drawing.Size(65, 23);
 			this._RemoveTagButton.TabIndex = 3;
 			this._RemoveTagButton.Text = "Remove";
 			this._RemoveTagButton.UseVisualStyleBackColor = true;
 			// 
+			// _CommentTaggerTabs
+			// 
+			this._CommentTaggerTabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this._CommentTaggerTabs.Controls.Add(this.tabPage2);
+			this._CommentTaggerTabs.Location = new System.Drawing.Point(3, 3);
+			this._CommentTaggerTabs.Name = "_CommentTaggerTabs";
+			this._CommentTaggerTabs.SelectedIndex = 0;
+			this._CommentTaggerTabs.Size = new System.Drawing.Size(569, 322);
+			this._CommentTaggerTabs.TabIndex = 5;
+			// 
+			// tabPage2
+			// 
+			this.tabPage2.Controls.Add(this._RemoveTagButton);
+			this.tabPage2.Controls.Add(this.groupBox1);
+			this.tabPage2.Controls.Add(this._AddTagButton);
+			this.tabPage2.Controls.Add(this.label1);
+			this.tabPage2.Controls.Add(this._SyntaxListBox);
+			this.tabPage2.Location = new System.Drawing.Point(4, 25);
+			this.tabPage2.Name = "tabPage2";
+			this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+			this.tabPage2.Size = new System.Drawing.Size(561, 293);
+			this.tabPage2.TabIndex = 1;
+			this.tabPage2.Text = "Tags";
+			this.tabPage2.UseVisualStyleBackColor = true;
+			// 
 			// CommentTaggerOptionPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.Controls.Add(this._RemoveTagButton);
-			this.Controls.Add(this._AddTagButton);
-			this.Controls.Add(this.groupBox1);
-			this.Controls.Add(this._SyntaxListBox);
-			this.Controls.Add(this.label1);
+			this.Controls.Add(this._CommentTaggerTabs);
 			this.Name = "CommentTaggerOptionPage";
 			this.Size = new System.Drawing.Size(575, 328);
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this._PreviewBox)).EndInit();
+			this._CommentTaggerTabs.ResumeLayout(false);
+			this.tabPage2.ResumeLayout(false);
+			this.tabPage2.PerformLayout();
 			this.ResumeLayout(false);
-			this.PerformLayout();
 
 		}
 
@@ -269,5 +298,7 @@
 		private System.Windows.Forms.RadioButton _ApplyContentTagBox;
 		private System.Windows.Forms.Button _AddTagButton;
 		private System.Windows.Forms.Button _RemoveTagButton;
+		private System.Windows.Forms.TabControl _CommentTaggerTabs;
+		private System.Windows.Forms.TabPage tabPage2;
 	}
 }

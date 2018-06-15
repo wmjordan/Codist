@@ -73,10 +73,7 @@ namespace Codist.Options
 
 			ErrorHandler.ThrowOnFailure(storage.OpenCategory(category, (uint)(__FCSTORAGEFLAGS.FCSF_LOADDEFAULTS | __FCSTORAGEFLAGS.FCSF_PROPAGATECHANGES)));
 			try {
-				if (!ErrorHandler.Succeeded(storage.GetFont(pLOGFONT, pInfo))) {
-					return default(FontInfo);
-				}
-				return pInfo[0];
+				return ErrorHandler.Succeeded(storage.GetFont(pLOGFONT, pInfo)) ? pInfo[0] : default(FontInfo);
 			}
 			finally {
 				storage.CloseCategory();
@@ -141,32 +138,8 @@ namespace Codist.Options
 	}
 
 	[Browsable(false)]
-	[Guid("0077CDB9-8304-4322-A40E-342B7C5605E9")]
-	sealed class CodeStyle : ConfigPage
-	{
-		protected override Features Feature => Features.SyntaxHighlight;
-		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.GeneralStyles, Config.GetDefaultCodeStyles));
-	}
-
-	[Browsable(false)]
-	[Guid("8ECD56D1-87C1-47E2-9FB0-742B0FF35FEF")]
-	sealed class CSharpStyle : ConfigPage
-	{
-		protected override Features Feature => Features.SyntaxHighlight;
-		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.CodeStyles, Config.GetDefaultCSharpStyles));
-	}
-
-	[Browsable(false)]
-	[Guid("4C16F280-BE29-4152-A6C5-58EEC5398FD4")]
-	sealed class CommentStyle : ConfigPage
-	{
-		protected override Features Feature => Features.SyntaxHighlight;
-		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.CommentStyles, Config.GetDefaultCommentStyles));
-	}
-
-	[Browsable(false)]
 	[Guid("2E07AC20-D62F-4D78-8750-2A464CC011AE")]
-	sealed class XmlCodeStyle : ConfigPage
+	sealed class XmlStyle : ConfigPage
 	{
 		protected override Features Feature => Features.SyntaxHighlight;
 		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.XmlCodeStyles, Config.GetDefaultXmlCodeStyles));
@@ -174,10 +147,18 @@ namespace Codist.Options
 
 	[Browsable(false)]
 	[Guid("1EB954DF-37FE-4849-B63A-58EC43088856")]
-	sealed class CommentTagger : ConfigPage
+	sealed class CommentStyle : ConfigPage
 	{
 		protected override Features Feature => Features.SyntaxHighlight;
 		protected override IWin32Window Window => Control ?? (Control = new CommentTaggerOptionPage(this));
+	}
+
+	[Browsable(false)]
+	[Guid("31356507-E11A-4E61-B0C2-C9A6584632DB")]
+	sealed class CSharpStyle : ConfigPage
+	{
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new CSharpSyntaxHighlightPage(this));
 	}
 
 	[Browsable(false)]
@@ -218,13 +199,5 @@ namespace Codist.Options
 	{
 		protected override Features Feature => Features.ScrollbarMarkers;
 		protected override IWin32Window Window => Control ?? (Control = new CSharpScrollbarMarkerPage(this));
-	}
-
-	[Browsable(false)]
-	[Guid("31356507-E11A-4E61-B0C2-C9A6584632DB")]
-	sealed class CSharpSpecialHighlight : ConfigPage
-	{
-		protected override Features Feature => Features.SyntaxHighlight;
-		protected override IWin32Window Window => Control ?? (Control = new CSharpSpecialHighlightPage(this));
 	}
 }

@@ -11,7 +11,7 @@ namespace Codist.Options
 	[Browsable(false)]
 	public partial class CommentTaggerOptionPage : UserControl
 	{
-		readonly CommentTagger _Service;
+		readonly CommentStyle _ServicePage;
 		readonly UiLock _UI = new UiLock();
 		CommentLabel _ActiveLabel;
 		bool _Loaded;
@@ -19,8 +19,8 @@ namespace Codist.Options
 		public CommentTaggerOptionPage() {
 			InitializeComponent();
 		}
-		internal CommentTaggerOptionPage(CommentTagger service) : this() {
-			_Service = service;
+		internal CommentTaggerOptionPage(CommentStyle service) : this() {
+			_ServicePage = service;
 		}
 
 		protected override void OnLoad(EventArgs e) {
@@ -28,6 +28,8 @@ namespace Codist.Options
 			if (_Loaded) {
 				return;
 			}
+
+			_CommentTaggerTabs.AddPage("Comment Syntax", new SyntaxStyleOptionPage(_ServicePage, () => Config.Instance.CommentStyles, Config.GetDefaultCommentStyles), true);
 
 			LoadStyleLists();
 
@@ -166,7 +168,7 @@ namespace Codist.Options
 				return;
 			}
 			var bmp = new Bitmap(_PreviewBox.Width, _PreviewBox.Height);
-			var fs = _Service.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor));
+			var fs = _ServicePage.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor));
 			var label = _ActiveLabel;
 			RenderPreview(bmp, fs, label);
 			_PreviewBox.Image = bmp;

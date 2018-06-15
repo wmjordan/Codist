@@ -90,7 +90,7 @@ namespace Codist.Margins
 			for (int i = step; i < lc; i += step) {
 				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, snapshot.GetLineFromLineNumber(i - 1).Start));
 				drawingContext.DrawLine(LineNumberPen, new Point(-100, y), new Point(100, y));
-				drawingContext.DrawText(UIHelper.ToFormattedText((i).ToString(), 9, LineNumberBrush), new Point(0, y));
+				drawingContext.DrawText(WpfHelper.ToFormattedText((i).ToString(), 9, LineNumberBrush), new Point(0, y));
 			}
 		}
 

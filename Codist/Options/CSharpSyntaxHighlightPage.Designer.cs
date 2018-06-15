@@ -1,6 +1,6 @@
 ﻿namespace Codist.Options
 {
-	partial class CSharpSpecialHighlightPage
+	partial class CSharpSyntaxHighlightPage
 	{
 		/// <summary> 
 		/// 必需的设计器变量。

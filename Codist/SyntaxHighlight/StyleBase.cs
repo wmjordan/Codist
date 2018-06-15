@@ -28,12 +28,12 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		public string ForegroundColor {
 			get { return ForeColor.ToHexString(); }
-			set { ForeColor = UIHelper.ParseColor(value); }
+			set { ForeColor = WpfHelper.ParseColor(value); }
 		}
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		public string BackgroundColor {
 			get { return BackColor.ToHexString(); }
-			set { BackColor = UIHelper.ParseColor(value); }
+			set { BackColor = WpfHelper.ParseColor(value); }
 		}
 		/// <summary>Gets or sets the brush effect to draw the background color.</summary>
 		[DefaultValue(BrushEffect.Solid)]

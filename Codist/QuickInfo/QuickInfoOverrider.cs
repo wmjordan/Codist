@@ -55,7 +55,7 @@ namespace Codist.QuickInfo
 				description.MouseLeftButtonUp += (s, args) => {
 					var tb = (s as TextBlock);
 					if (tb.ContextMenu == null) {
-						tb.ContextMenu = UIHelper.CreateContextMenuForSourceLocations(symbol.MetadataName, locs);
+						tb.ContextMenu = WpfHelper.CreateContextMenuForSourceLocations(symbol.MetadataName, locs);
 					}
 					tb.ContextMenu.IsOpen = true;
 				};

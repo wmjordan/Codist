@@ -5,22 +5,10 @@ using Microsoft.VisualStudio.Shell;
 
 namespace Codist
 {
-	/// <summary>
-	/// This is the class that implements the package exposed by this assembly.
-	/// </summary>
+	/// <summary>This is the class that implements the package exposed by this assembly.</summary>
 	/// <remarks>
-	/// <para>
-	/// The minimum requirement for a class to be considered a valid package for Visual Studio
-	/// is to implement the IVsPackage interface and register itself with the shell.
-	/// This package uses the helper classes defined inside the Managed Package Framework (MPF)
-	/// to do it: it derives from the Package class that provides the implementation of the
-	/// IVsPackage interface and uses the registration attributes defined in the framework to
-	/// register itself and its components with the shell. These attributes tell the pkgdef creation
-	/// utility what data to put into .pkgdef file.
-	/// </para>
-	/// <para>
-	/// To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.
-	/// </para>
+	/// <para>The minimum requirement for a class to be considered a valid package for Visual Studio is to implement the IVsPackage interface and register itself with the shell. This package uses the helper classes defined inside the Managed Package Framework (MPF) to do it: it derives from the Package class that provides the implementation of the IVsPackage interface and uses the registration attributes defined in the framework to register itself and its components with the shell. These attributes tell the pkgdef creation utility what data to put into .pkgdef file.</para>
+	/// <para>To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.</para>
 	/// </remarks>
 	[PackageRegistration(UseManagedResourcesOnly = true)]
 	[InstalledProductRegistration("#110", "#112", "3.0", IconResourceID = 400)] // Information on this package for Help/About
@@ -33,12 +21,9 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.CSharpScrollbarMarker), CategoryScrollbarMarker, "C#", 0, 0, true, Sort = 50)]
 
 	[ProvideOptionPage(typeof(Options.SyntaxHighlight), CategorySyntaxHighlight, "General", 0, 0, true, Sort = 100)]
-	[ProvideOptionPage(typeof(Options.CodeStyle), CategorySyntaxHighlight, "Common styles", 0, 0, true, Sort = 10)]
-	[ProvideOptionPage(typeof(Options.CSharpStyle), CategorySyntaxHighlight, "C# & C++ styles", 0, 0, true, Sort = 20)]
-	[ProvideOptionPage(typeof(Options.CSharpSpecialHighlight), CategorySyntaxHighlight, "C# special highlight", 0, 0, true, Sort = 30)]
-	[ProvideOptionPage(typeof(Options.XmlCodeStyle), CategorySyntaxHighlight, "XML styles", 0, 0, true, Sort = 40)]
-	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment styles", 0, 0, true, Sort = 50)]
-	[ProvideOptionPage(typeof(Options.CommentTagger), CategorySyntaxHighlight, "Comment tagger", 0, 0, true, Sort = 60)]
+	[ProvideOptionPage(typeof(Options.CSharpStyle), CategorySyntaxHighlight, "C#", 0, 0, true, Sort = 10)]
+	[ProvideOptionPage(typeof(Options.XmlStyle), CategorySyntaxHighlight, "XML", 0, 0, true, Sort = 30)]
+	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment", 0, 0, true, Sort = 60)]
 	sealed class CodistPackage : Package
 	{
 		const string CategorySuperQuickInfo = Constants.NameOfMe + "\\Super Quick Info";

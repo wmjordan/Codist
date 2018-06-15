@@ -1,25 +1,26 @@
 ﻿using System;
-using System.Drawing;
 using System.Windows.Forms;
-using AppHelpers;
 
 namespace Codist.Options
 {
 	public partial class SyntaxHighlightPage : UserControl
 	{
 		//readonly UiLock _UI = new UiLock();
+		readonly ConfigPage _servicePage;
 		bool _Loaded;
 
 		public SyntaxHighlightPage() {
 			InitializeComponent();
 		}
 		internal SyntaxHighlightPage(ConfigPage page) : this() {
+			_servicePage = page;
 		}
 		private void SyntaxHighlightPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {
 				return;
 			}
 			//LoadConfig(Config.Instance);
+			_SyntaxHighlightTabs.AddPage("Common Syntax", new SyntaxStyleOptionPage(_servicePage, () => Config.Instance.CodeStyles, Config.GetDefaultCSharpStyles), false);
 
 			_DarkThemeButton.Click += (s, args) => {
 				Config.LoadConfig(Config.DarkTheme);

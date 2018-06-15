@@ -30,7 +30,11 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this._ResetThemeButton = new System.Windows.Forms.Button();
 			this._DarkThemeButton = new System.Windows.Forms.Button();
+			this._SyntaxHighlightTabs = new System.Windows.Forms.TabControl();
+			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this.groupBox2.SuspendLayout();
+			this._SyntaxHighlightTabs.SuspendLayout();
+			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// _LightThemeButton
@@ -44,13 +48,15 @@
 			// 
 			// groupBox2
 			// 
+			this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox2.Controls.Add(this.label1);
 			this.groupBox2.Controls.Add(this._ResetThemeButton);
 			this.groupBox2.Controls.Add(this._DarkThemeButton);
 			this.groupBox2.Controls.Add(this._LightThemeButton);
-			this.groupBox2.Location = new System.Drawing.Point(15, 6);
+			this.groupBox2.Location = new System.Drawing.Point(6, 6);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(464, 146);
+			this.groupBox2.Size = new System.Drawing.Size(549, 132);
 			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Super syntax highlight presets";
@@ -62,7 +68,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.label1.Location = new System.Drawing.Point(6, 61);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(452, 69);
+			this.label1.Size = new System.Drawing.Size(537, 55);
 			this.label1.TabIndex = 3;
 			this.label1.Text = "Tip: you can quickly load or reset syntax theme by pressing the buttons above.\r\nO" +
     "pen a C# code file to see effects immediately.";
@@ -85,15 +91,40 @@
 			this._DarkThemeButton.Text = "&Dark theme";
 			this._DarkThemeButton.UseVisualStyleBackColor = true;
 			// 
+			// _SyntaxHighlightTabs
+			// 
+			this._SyntaxHighlightTabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this._SyntaxHighlightTabs.Controls.Add(this.tabPage2);
+			this._SyntaxHighlightTabs.Location = new System.Drawing.Point(3, 3);
+			this._SyntaxHighlightTabs.Name = "_SyntaxHighlightTabs";
+			this._SyntaxHighlightTabs.SelectedIndex = 0;
+			this._SyntaxHighlightTabs.Size = new System.Drawing.Size(569, 322);
+			this._SyntaxHighlightTabs.TabIndex = 4;
+			// 
+			// tabPage2
+			// 
+			this.tabPage2.Controls.Add(this.groupBox2);
+			this.tabPage2.Location = new System.Drawing.Point(4, 25);
+			this.tabPage2.Name = "tabPage2";
+			this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+			this.tabPage2.Size = new System.Drawing.Size(561, 293);
+			this.tabPage2.TabIndex = 1;
+			this.tabPage2.Text = "General";
+			this.tabPage2.UseVisualStyleBackColor = true;
+			// 
 			// SyntaxHighlightPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.Controls.Add(this.groupBox2);
+			this.Controls.Add(this._SyntaxHighlightTabs);
 			this.Name = "SyntaxHighlightPage";
 			this.Size = new System.Drawing.Size(575, 328);
 			this.Load += new System.EventHandler(this.SyntaxHighlightPage_Load);
 			this.groupBox2.ResumeLayout(false);
+			this._SyntaxHighlightTabs.ResumeLayout(false);
+			this.tabPage2.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -104,5 +135,7 @@
 		private System.Windows.Forms.Button _ResetThemeButton;
 		private System.Windows.Forms.Button _DarkThemeButton;
 		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.TabControl _SyntaxHighlightTabs;
+		private System.Windows.Forms.TabPage tabPage2;
 	}
 }

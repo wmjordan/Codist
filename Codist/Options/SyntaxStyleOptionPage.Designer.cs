@@ -59,11 +59,11 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(13, 14);
+			this.label1.Location = new System.Drawing.Point(0, 3);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(159, 15);
 			this.label1.TabIndex = 0;
-			this.label1.Text = "Syntax Definitions:";
+			this.label1.Text = "Syntax definitions:";
 			// 
 			// groupBox1
 			// 
@@ -88,9 +88,9 @@
 			this.groupBox1.Controls.Add(this._UnderlineBox);
 			this.groupBox1.Controls.Add(this._ItalicBox);
 			this.groupBox1.Controls.Add(this._BoldBox);
-			this.groupBox1.Location = new System.Drawing.Point(261, 14);
+			this.groupBox1.Location = new System.Drawing.Point(248, 3);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(258, 406);
+			this.groupBox1.Size = new System.Drawing.Size(271, 417);
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Syntax style";
@@ -98,7 +98,7 @@
 			// _ResetButton
 			// 
 			this._ResetButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this._ResetButton.Location = new System.Drawing.Point(177, 0);
+			this._ResetButton.Location = new System.Drawing.Point(190, 0);
 			this._ResetButton.Name = "_ResetButton";
 			this._ResetButton.Size = new System.Drawing.Size(75, 23);
 			this._ResetButton.TabIndex = 20;
@@ -150,7 +150,7 @@
 			this._PreviewBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this._PreviewBox.Location = new System.Drawing.Point(7, 225);
 			this._PreviewBox.Name = "_PreviewBox";
-			this._PreviewBox.Size = new System.Drawing.Size(236, 175);
+			this._PreviewBox.Size = new System.Drawing.Size(249, 186);
 			this._PreviewBox.TabIndex = 15;
 			this._PreviewBox.TabStop = false;
 			// 
@@ -304,10 +304,10 @@
 			this._SyntaxListBox.FullRowSelect = true;
 			this._SyntaxListBox.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
 			this._SyntaxListBox.HideSelection = false;
-			this._SyntaxListBox.Location = new System.Drawing.Point(16, 35);
+			this._SyntaxListBox.Location = new System.Drawing.Point(3, 24);
 			this._SyntaxListBox.MultiSelect = false;
 			this._SyntaxListBox.Name = "_SyntaxListBox";
-			this._SyntaxListBox.Size = new System.Drawing.Size(239, 385);
+			this._SyntaxListBox.Size = new System.Drawing.Size(239, 396);
 			this._SyntaxListBox.TabIndex = 1;
 			this._SyntaxListBox.UseCompatibleStateImageBehavior = false;
 			this._SyntaxListBox.View = System.Windows.Forms.View.Details;

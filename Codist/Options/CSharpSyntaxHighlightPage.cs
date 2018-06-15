@@ -6,16 +6,17 @@ using AppHelpers;
 namespace Codist.Options
 {
 	[Browsable(false)]
-	public partial class CSharpSpecialHighlightPage : UserControl
+	public partial class CSharpSyntaxHighlightPage : UserControl
 	{
 		readonly UiLock _UI = new UiLock();
+		readonly ConfigPage _ServicePage;
 		bool _Loaded;
 
-		public CSharpSpecialHighlightPage() {
+		public CSharpSyntaxHighlightPage() {
 			InitializeComponent();
 		}
-		internal CSharpSpecialHighlightPage(ConfigPage page) : this() {
-			//_UI.CommonEventAction += Config.Instance.FireConfigChangedEvent;
+		internal CSharpSyntaxHighlightPage(ConfigPage page) : this() {
+			_ServicePage = page;
 		}
 
 		void CSharpSpecialHighlightPage_Load(object sender, EventArgs e) {
@@ -23,6 +24,8 @@ namespace Codist.Options
 				return;
 			}
 			LoadConfig(Config.Instance);
+
+			_OptionTabs.AddPage("C# Syntax", new SyntaxStyleOptionPage(_ServicePage, () => Config.Instance.CodeStyles, Config.GetDefaultCSharpStyles), true);
 
 			_HighlightDeclarationBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.DeclarationBrace, _HighlightDeclarationBracesBox.Checked));
 			_HighlightParameterBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.ParameterBrace, _HighlightParameterBracesBox.Checked));

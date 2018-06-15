@@ -230,7 +230,7 @@ namespace Codist.Margins
 		}
 
 		static void DrawTaskMark(DrawingContext dc, Brush brush, double y, string taskName) {
-			var ft = UIHelper.ToFormattedText(taskName, 9, Brushes.White).SetBold();
+			var ft = WpfHelper.ToFormattedText(taskName, 9, Brushes.White).SetBold();
 			dc.DrawRectangle(brush, EmptyPen, new Rect(0, y - ft.Height / 2, ft.Width, ft.Height));
 			dc.DrawText(ft, new Point(0, y - ft.Height / 2));
 		}
