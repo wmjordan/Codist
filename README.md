@@ -23,17 +23,21 @@
   * Unnecessary code is marked strike-through.
   * Control flow related keywords (`return`, `throw`, `break`, `continue`, `yield` and `goto`) are highlighted with a different style.
   * Abstraction related keywords (`sealed`, `override`, `virtual`, etc) can be highlighted with an other style.
-  * All the above effects are customizable.
+  * All the above styles are customizable.
  
   ![Syntax highlight](doc/highlight1.png)
   ![Syntax highlight](doc/highlight2.png)
   ![Syntax highlight](doc/highlight3.png)
 
-  **NOTE**: To quickly get started with advanced syntax highlight, navigate to the *Syntax Highlight* section, click the *Load...* button in the *options* dialog, select *Light theme* or *Dark theme* from the pop-up menu to see them in effect. Don't forget to click the *OK* button to confirm the change.
+  **NOTE**: To quickly get started with advanced syntax highlight, navigate to the *Syntax Highlight* section, click the *Light theme* or *Dark theme* button in the *options* dialog and see them in effect. Don't forget to click the *OK* button to confirm the change.
+
+  You can see the syntax theme changed on an opened document window when you click the theme buttons.
 
   ![Load Theme](doc/load-theme.png)
 
-  To customize and tweak the syntax highlight effects, click the sub sections inside the *Syntax Highlight* section to change individual styles. While you change the setting in the dialog, you can see how the style looks in the code document window.
+  To customize and tweak the syntax highlight effects, click the *common syntax* tab in the *syntax highlight* section, or click the sub sections inside the *Syntax Highlight* section to change individual styles, accordingly.
+
+  While you change the setting in the dialog, you can see how the style looks in the code document window.
 
   ![Style customization](doc/syntax-highlight.png)
 
@@ -47,6 +51,7 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
   1. Size restriction
   2. Click and go to symbols
   3. XML Documentation override, with XML Doc inheritance, `<return>` exposure
+  4. Hide Quick Info until Shift is pressed
 
 * **Size restriction** 
 
@@ -56,7 +61,7 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
 * **Click and go** to symbols
 
-	If a symbol is defined in your source code, you can click and go to its definition.
+	If a symbol is defined in your source code, you can click and go to its definition. It also tells you where the symbol is defined.
 
   ![Super Quick Info 8](doc/super-quick-info-8.png)
 
@@ -117,9 +122,7 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
   ![Super Quick Info 9](doc/super-quick-info-9.png)
 
 ## Comment tagger and styles
-* The comment tagger highlights comments to your specific styles.
-
-  ![Comment syntax highlight](doc/comment-tagger-options.png)
+* The comment tagger highlights comments to your specific styles, according to the first token inside the comment.
 
   Here's the effect of the highlighted comments.
 
@@ -128,6 +131,10 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 * The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* or the *Font size* value of the corresponding syntax parts.
 
   ![Comment syntax XML Doc](doc/csharp-options-xmldoc.png)
+
+  To configure the comment tags, click the *Tags* tab, in the *Comment* sub-section of the *Syntax Highlight* section, where you can add, remove or modify comment tags. 
+
+  ![Comment syntax highlight](doc/comment-tagger-options.png)
 
 ## Markers on the Scrollbar Margin
 
@@ -142,13 +149,13 @@ The scrollbar can mark...
 
 ## Smart Bar
 
-The *Smart Bar* is a context-aware tool bar displayed when you select some text.
+The *Smart Bar* is a context-aware tool bar appeared automatically when you select some text.
 
-It brings commonly used operations for contextual symbols.
+It brings commonly used operations for the selection.
 
   ![Smart Bar](doc/smart-bar.png)
 
-Buttons on the *Smart Bar* are variable according to the selection.
+Buttons on the *Smart Bar* changes from contexts.
 
   ![Smart Bar](doc/smart-bar-2.png)
 
@@ -164,12 +171,6 @@ Buttons on the *Smart Bar* are variable according to the selection.
    This option works with subsequently opened new document windows. Existing document windows won't be affected.
 
 2. Within the *Extra line margins* group box, you can adjust margins between lines to make code text more readable.
-
-4. In the *Misc* section you can control whether line numbers are drawn on the editor scrollbar.
-
-   Someone who hates Quick Info can check the *Hide Quick Info until Shift is Pressed*, so Quick Info would not pop up until we pressed Shift key and hover the mouse cursor on to the code.
-
-   *Selection info* will show you how many characters and lines are selected.
 
 # Acknowledgements
 I have learned a lot from the following extension projects.
