@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
-using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -158,18 +157,18 @@ namespace Codist.Classifiers
 			}
 
 			foreach (var node in parentSyntaxNode.ChildNodes()) {
-				CodeMemberType type = MatchDeclaration(node);
-				if (type != CodeMemberType.Unknown) {
-					var name = ((node as BaseTypeDeclarationSyntax)?.Identifier ?? (node as MethodDeclarationSyntax)?.Identifier);
-					var child = new CodeBlock(parentCodeBlockNode, type, name?.Text, new SnapshotSpan(snapshot, node.SpanStart, node.Span.Length), level + 1);
-					if (type > CodeMemberType.Type) {
-						continue;
-					}
-					ParseSyntaxNode(snapshot, node, child, level + 1, token);
-				}
-				else {
+				var type = MatchDeclaration(node);
+				if (type == CodeMemberType.Unknown) {
 					ParseSyntaxNode(snapshot, node, parentCodeBlockNode, level, token);
+					continue;
 				}
+
+				var name = ((node as BaseTypeDeclarationSyntax)?.Identifier ?? (node as MethodDeclarationSyntax)?.Identifier);
+				var child = new CodeBlock(parentCodeBlockNode, type, name?.Text, new SnapshotSpan(snapshot, node.SpanStart, node.Span.Length), level + 1);
+				if (type > CodeMemberType.Type) {
+					continue;
+				}
+				ParseSyntaxNode(snapshot, node, child, level + 1, token);
 			}
 		}
 

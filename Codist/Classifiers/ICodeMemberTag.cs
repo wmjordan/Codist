@@ -15,31 +15,25 @@ namespace Codist
 
 	sealed class CodeBlock : ICodeMemberTag
 	{
-		readonly SnapshotSpan _Span;
-		readonly CodeBlock _Parent;
-		readonly List<CodeBlock> _Children = new List<CodeBlock>();
-		readonly CodeMemberType _MemberType;
-		readonly string _Name;
-		readonly int _Level;
-
 		public CodeBlock(CodeBlock parent, CodeMemberType type, string name, SnapshotSpan span, int level) {
-			_Parent = parent;
+			Parent = parent;
 			if (parent != null) {
-				parent._Children.Add(this);
+				parent.Children.Add(this);
 			}
-			_MemberType = type;
-			_Name = name;
-			_Span = span;
-			_Level = level;
+			Type = type;
+			Name = name;
+			Span = span;
+			Level = level;
 		}
 
-		public CodeBlock Parent => _Parent;
-		public IList<CodeBlock> Children => _Children;
-		public SnapshotSpan Span => _Span;
-		public CodeMemberType Type => _MemberType;
-		ICodeMemberTag ICodeMemberTag.Parent => _Parent;
-		public int Level => _Level;
-		public string Name => _Name;
+		public CodeBlock Parent { get; }
+		ICodeMemberTag ICodeMemberTag.Parent => Parent;
+		public IList<CodeBlock> Children { get; } = new List<CodeBlock>();
+		public SnapshotSpan Span { get; }
+		public CodeMemberType Type { get; }
+		public int Level { get; }
+
+		public string Name { get; }
 	}
 
 	enum CodeMemberType
