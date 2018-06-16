@@ -1,11 +1,13 @@
 # Codist
 *Codist* is a visual studio extension which strives to provide better coding experience for C# programmers. It features:
+
 * Advanced syntax highlight with *comment tagger*
 * Super Quick Info with *Click and Go* to source code
 * Smart Bar (**new in version 3.0**)
 * Scrollbar markers
 * Extra margin between lines
-  ![Feature overview](doc/preview.png)
+
+![Feature overview](doc/preview.png)
 
 # Features and screenshots
 
@@ -31,15 +33,13 @@
 
   **NOTE**: To quickly get started with advanced syntax highlight, navigate to the *Syntax Highlight* section, click the *Light theme* or *Dark theme* button in the *options* dialog and see them in effect. Don't forget to click the *OK* button to confirm the change.
 
-  You can see the syntax theme changed on an opened document window when you click the theme buttons.
-
   ![Load Theme](doc/load-theme.png)
 
   To customize and tweak the syntax highlight effects, click the *common syntax* tab in the *syntax highlight* section, or click the sub sections inside the *Syntax Highlight* section to change individual styles, accordingly.
 
-  While you change the setting in the dialog, you can see how the style looks in the code document window.
-
   ![Style customization](doc/syntax-highlight.png)
+
+  **TIP**: Open a document window before you change the syntax theme or tweak the syntax highlight settings, while you change theme, you can see how the styles change in the code document window simultaneously.
 
 ## Super Quick Info
 
@@ -128,13 +128,13 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
   ![Comment syntax highlight](doc/syntax-highlight-comments.png)
 
-* The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* or the *Font size* value of the corresponding syntax parts.
-
-  ![Comment syntax XML Doc](doc/csharp-options-xmldoc.png)
-
   To configure the comment tags, click the *Tags* tab, in the *Comment* sub-section of the *Syntax Highlight* section, where you can add, remove or modify comment tags. 
 
   ![Comment syntax highlight](doc/comment-tagger-options.png)
+
+* The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* or the *Font size* value of the corresponding syntax parts.
+
+  ![Comment syntax XML Doc](doc/csharp-options-xmldoc.png)
 
 ## Markers on the Scrollbar Margin
 
@@ -168,9 +168,11 @@ Buttons on the *Smart Bar* changes from contexts.
 
    It is useful when your laptop are running on battery. Disabling *Codist* may help it sustain a little bit longer.
 
-   This option works with subsequently opened new document windows. Existing document windows won't be affected.
+   Someone who does not like the syntax highlight or use another syntax highlighter can also turn off the *Syntax Highlight* feature individually here.
 
-2. Within the *Extra line margins* group box, you can adjust margins between lines to make code text more readable.
+   These options affects new document windows. Existing document windows won't be affected.
+
+2. Within the *Extra line margins* group box, you can adjust margins between lines to make code lines more readable.
 
 # Acknowledgements
 I have learned a lot from the following extension projects.
@@ -183,6 +185,7 @@ I have learned a lot from the following extension projects.
 * CodeBlockEndTag: https://github.com/KhaosCoders/VSCodeBlockEndTag
 * Remarker: https://github.com/jgyo/remarker
 * UntabifyReplacement: https://github.com/cpmcgrath/UntabifyReplacement
+* Extensiblity Tools: https://github.com/madskristensen/ExtensibilityTools
 
 # Bugs and suggestions
 Please [post New Issue](https://github.com/wmjordan/Codist/issues) in the [GitHub project](https://github.com/wmjordan/Codist) if you find any bug or have any suggestion.
