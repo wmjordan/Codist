@@ -379,9 +379,15 @@ namespace Codist.QuickInfo
 						var symbol = _SemanticModel.GetSymbolInfo(statement).Symbol ?? _SemanticModel.GetDeclaredSymbol(statement);
 						var tb = new TextBlock();
 						if (retSymbol != null) {
-							tb.AddText("Return ")
-								.AddSymbol(retSymbol.GetReturnType(), null, _SymbolFormatter)
-								.AddText(" for ");
+							var m = retSymbol as IMethodSymbol;
+							if (m != null && m.MethodKind == MethodKind.AnonymousFunction) {
+								tb.AddText("Return anonymous function for ");
+							}
+							else {
+								tb.AddText("Return ")
+									.AddSymbol(retSymbol.GetReturnType(), null, _SymbolFormatter)
+									.AddText(" for ");
+							}
 						}
 						//else if (retStatement.Expression.Kind() == SyntaxKind.NullLiteralExpression) {
 						//	tb.AddText("Return ").AddText("null", _SymbolFormatter.Keyword).AddText(" for ");
