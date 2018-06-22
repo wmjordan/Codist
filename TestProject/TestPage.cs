@@ -115,7 +115,10 @@ text".Log(); // multiline string (string verbatim)
 		{
 			[Obsolete]
 			[System.ComponentModel.Description("An extern method")]
-			[DllImport("dummy.dll", EntryPoint = "DummyFunction", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
+			[DllImport("dummy.dll",
+				EntryPoint = "DummyFunction",
+				CallingConvention = CallingConvention.Cdecl,
+				SetLastError = false)]
 			public static extern void ExternMethod(IntPtr ptr, int value);
 		}
 	}

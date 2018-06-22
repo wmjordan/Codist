@@ -79,6 +79,13 @@ namespace Codist.Classifiers
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 			var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace);
 			var lastTriviaSpan = default(TextSpan);
+			var spanNode = unitCompilation.FindNode(textSpan);
+			switch (spanNode.Kind()) {
+				case SyntaxKind.AttributeList:
+				case SyntaxKind.AttributeArgumentList:
+					result.Add(CreateClassificationSpan(snapshot, textSpan, _Classifications.AttributeNotation));
+					break;
+			}
 			foreach (var item in classifiedSpans) {
 				var ct = item.ClassificationType;
 				switch (ct) {
@@ -221,13 +228,13 @@ namespace Codist.Classifiers
 					}
 				}
 			}
-			else if (s == '[') {
-				// highlight attribute annotation
-				var node = unitCompilation.FindNode(item.TextSpan, true, true);
-				if (node is AttributeListSyntax) {
-					result.Add(CreateClassificationSpan(snapshot, node.Span, _Classifications.AttributeNotation));
-				}
-			}
+			//else if (s == '[') {
+			//	// highlight attribute annotation
+			//	var node = unitCompilation.FindNode(item.TextSpan, true, true);
+			//	if (node is AttributeListSyntax) {
+			//		result.Add(CreateClassificationSpan(snapshot, node.Span, _Classifications.AttributeNotation));
+			//	}
+			//}
 		}
 
 		static IClassificationType ClassifySyntaxNode(SyntaxNode node) {
