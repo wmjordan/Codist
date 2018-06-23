@@ -78,6 +78,7 @@
     <Compile Include="Classifiers\XmlClassificationDefinitions.cs" />
     <Compile Include="CodistPackage.cs" />
     <Compile Include="Classifiers\CommentLabel.cs" />
+    <Compile Include="Commands\ScreenshotCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Classifiers\CodeTagger.cs" />
@@ -194,6 +195,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppHelpers.Ext.dll" />
+    <VSCTCompile Include="Commands\CodistPackage.vsct">
+      <ResourceName>Menus.ctmenu</ResourceName>
+    </VSCTCompile>
     <Content Include="icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>

@@ -38,7 +38,7 @@ namespace Codist.SmartBars
 			if (_Node == null) {
 				return;
 			}
-			if (_Node is XmlTextSyntax) {
+			if (CodistPackage.DebuggerStatus == DebuggerStatus.Design && _Node is XmlTextSyntax) {
 				AddCommand(KnownMonikers.MarkupTag, "Tag XML Doc with <c>", edit => {
 					foreach (var item in View.Selection.SelectedSpans) {
 						edit.Replace(item, "<c>" + item.GetText() + "</c>");
@@ -64,28 +64,34 @@ namespace Codist.SmartBars
 						AddEditorCommand(MyToolBar, "Edit.GoToDefinition", KnownMonikers.GoToDefinition, "Go to definition");
 					}
 					AddEditorCommand(MyToolBar, "Edit.FindAllReferences", KnownMonikers.ReferencedDimension, "Find all references");
-					AddEditorCommand(MyToolBar, "Refactor.Rename", KnownMonikers.Rename, "Rename symbol");
-					if (_Node is ParameterSyntax && _Node.Parent is ParameterListSyntax) {
-						AddEditorCommand(MyToolBar, "Refactor.ReorderParameters", KnownMonikers.ReorderParameters, "Reorder parameters");
+					if (CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
+						AddEditorCommand(MyToolBar, "Refactor.Rename", KnownMonikers.Rename, "Rename symbol");
+						if (_Node is ParameterSyntax && _Node.Parent is ParameterListSyntax) {
+							AddEditorCommand(MyToolBar, "Refactor.ReorderParameters", KnownMonikers.ReorderParameters, "Reorder parameters");
+						}
 					}
 				}
 				else if (_Token.Kind() == SyntaxKind.StringLiteralToken) {
 					AddEditorCommand(MyToolBar, "Edit.FindAllReferences", KnownMonikers.ReferencedDimension, "Find all references");
 				}
-				if (_Node.IsDeclaration()) {
-					if (_Node is TypeDeclarationSyntax || _Node is MemberDeclarationSyntax || _Node is ParameterListSyntax) {
-						AddEditorCommand(MyToolBar, "Edit.InsertComment", KnownMonikers.AddComment, "Insert comment");
+				if (CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
+					if (_Node.IsDeclaration()) {
+						if (_Node is TypeDeclarationSyntax || _Node is MemberDeclarationSyntax || _Node is ParameterListSyntax) {
+							AddEditorCommand(MyToolBar, "Edit.InsertComment", KnownMonikers.AddComment, "Insert comment");
+						}
+					}
+					else {
+						AddEditorCommand(MyToolBar, "Refactor.ExtractMethod", KnownMonikers.ExtractMethod, "Extract Method");
 					}
 				}
-				else {
-					AddEditorCommand(MyToolBar, "Refactor.ExtractMethod", KnownMonikers.ExtractMethod, "Extract Method");
+			}
+			if (CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
+				if (_Trivia.IsLineComment()) {
+					AddEditorCommand(MyToolBar, "Edit.UncommentSelection", KnownMonikers.UncommentCode, "Uncomment selection");
 				}
-			}
-			if (_Trivia.IsLineComment()) {
-				AddEditorCommand(MyToolBar, "Edit.UncommentSelection", KnownMonikers.UncommentCode, "Uncomment selection");
-			}
-			else {
-				AddEditorCommand(MyToolBar, "Edit.CommentSelection", KnownMonikers.CommentCode, "Comment selection");
+				else {
+					AddEditorCommand(MyToolBar, "Edit.CommentSelection", KnownMonikers.CommentCode, "Comment selection");
+				}
 			}
 			//AddEditorCommand(MyToolBar, "Edit.ExpandSelection", KnownMonikers.ExpandScope, "Expand selection");
 			AddCommand(MyToolBar, KnownMonikers.SelectFrame, "Expand selection", (s, args) => {
@@ -107,21 +113,22 @@ namespace Codist.SmartBars
 		}
 
 		void ExpandSelection() {
-			if (UpdateSemanticModel()) {
-				do {
-					if (_Node.FullSpan.Contains(View.Selection, false)
-						&& (_Node.IsSyntaxBlock() || _Node.IsDeclaration())) {
-						if ((_Node.HasLeadingTrivia || _Node.HasTrailingTrivia)
-							&& _Node.Span.Contains(View.Selection, false)) {
-							View.Selection.Select(new SnapshotSpan(View.TextSnapshot, _Node.Span.Start, _Node.Span.Length), false);
-						}
-						else {
-							View.Selection.Select(new SnapshotSpan(View.TextSnapshot, _Node.FullSpan.Start, _Node.FullSpan.Length), false);
-						}
-						return;
-					}
-				} while ((_Node = _Node.Parent) != null);
+			if (UpdateSemanticModel() == false) {
+				return;
 			}
+			do {
+				if (_Node.FullSpan.Contains(View.Selection, false)
+					&& (_Node.IsSyntaxBlock() || _Node.IsDeclaration())) {
+					if ((_Node.HasLeadingTrivia || _Node.HasTrailingTrivia)
+						&& _Node.Span.Contains(View.Selection, false)) {
+						View.Selection.Select(new SnapshotSpan(View.TextSnapshot, _Node.Span.Start, _Node.Span.Length), false);
+					}
+					else {
+						View.Selection.Select(new SnapshotSpan(View.TextSnapshot, _Node.FullSpan.Start, _Node.FullSpan.Length), false);
+					}
+					return;
+				}
+			} while ((_Node = _Node.Parent) != null);
 		}
 
 		bool UpdateSemanticModel() {

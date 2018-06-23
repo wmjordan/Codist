@@ -292,6 +292,7 @@ namespace Codist
 		}
 		public static void ScreenShot(FrameworkElement control, string path) {
 			var s = (control).RenderSize;
+			var b = System.Windows.Media.VisualTreeHelper.GetDescendantBounds(control);
 			var bmp = new System.Windows.Media.Imaging.RenderTargetBitmap((int)s.Width, (int)s.Height, 96, 96, System.Windows.Media.PixelFormats.Default);
 			bmp.Render(control);
 			var enc = new System.Windows.Media.Imaging.PngBitmapEncoder();

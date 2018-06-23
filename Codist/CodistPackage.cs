@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Codist
 {
@@ -24,8 +25,9 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.CSharpStyle), CategorySyntaxHighlight, "C#", 0, 0, true, Sort = 10)]
 	[ProvideOptionPage(typeof(Options.XmlStyle), CategorySyntaxHighlight, "XML", 0, 0, true, Sort = 30)]
 	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment", 0, 0, true, Sort = 60)]
-	sealed class CodistPackage : Package
-	{
+	[ProvideMenuResource("Menus.ctmenu", 1)]
+	[ProvideAutoLoad(UIContextGuids.SolutionExists)]
+	sealed class CodistPackage : Package {
 		const string CategorySuperQuickInfo = Constants.NameOfMe + "\\Super Quick Info";
 		const string CategoryScrollbarMarker = Constants.NameOfMe + "\\Scrollbar Marker";
 		const string CategorySyntaxHighlight = Constants.NameOfMe + "\\Syntax Highlight";
@@ -34,6 +36,7 @@ namespace Codist
 		/// </summary>
 		public const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
 		static EnvDTE.DTE _dte;
+		//static VsDebugger _Debugger;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CodistPackage"/> class.
@@ -47,6 +50,18 @@ namespace Codist
 
 		public static EnvDTE.DTE DTE => _dte ?? (_dte = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE);
 
+		public static DebuggerStatus DebuggerStatus {
+			get {
+				switch (DTE.Debugger.CurrentMode) {
+					case EnvDTE.dbgDebugMode.dbgBreakMode: return DebuggerStatus.Break;
+					case EnvDTE.dbgDebugMode.dbgDesignMode: return DebuggerStatus.Design;
+					case EnvDTE.dbgDebugMode.dbgRunMode: return DebuggerStatus.Running;
+				}
+				return DebuggerStatus.Design;
+			}
+		}
+
+
 		#region Package Members
 
 		/// <summary>
@@ -55,9 +70,38 @@ namespace Codist
 		/// </summary>
 		protected override void Initialize() {
             base.Initialize();
+			Commands.ScreenshotCommand.Initialize(this);
+			//if (_Debugger == null) {
+			//	_Debugger = new VsDebugger(GetGlobalService(typeof(IVsDebugger)) as IVsDebugger);
+			//}
 		}
 
 		#endregion
 
+		sealed class VsDebugger : IVsDebuggerEvents
+		{
+			readonly IVsDebugger _Debugger;
+			readonly uint _Cookie;
+			public DebuggerStatus Status { get; private set; }
+			
+			public VsDebugger(IVsDebugger debugger) {
+				_Debugger = debugger;
+				_Debugger.AdviseDebuggerEvents(this, out _Cookie);
+			}
+
+			public int OnModeChange(DBGMODE dbgmodeNew) {
+				switch (dbgmodeNew) {
+					case DBGMODE.DBGMODE_Design: Status = DebuggerStatus.Design; break;
+					case DBGMODE.DBGMODE_Break: Status = DebuggerStatus.Break; break;
+					case DBGMODE.DBGMODE_Run: Status = DebuggerStatus.Running; break;
+					case DBGMODE.DBGMODE_Enc: Status = DebuggerStatus.EditAndContinue; break;
+					case DBGMODE.DBGMODE_EncMask:
+						break;
+					default:
+						break;
+				}
+				return Microsoft.VisualStudio.VSConstants.S_OK;
+			}
+		}
 	}
 }

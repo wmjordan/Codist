@@ -483,4 +483,11 @@ namespace Codist
 		Tag,
 		TagAndContent
 	}
+	enum DebuggerStatus
+	{
+		Design,
+		Running,
+		Break,
+		EditAndContinue
+	}
 }

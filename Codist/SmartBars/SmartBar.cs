@@ -181,21 +181,29 @@ namespace Codist.SmartBars
 		}
 
 		protected virtual void AddCommands() {
-			AddEditorCommand(ToolBar, "Edit.Cut", KnownMonikers.Cut, "Cut selected text");
-			AddEditorCommand(ToolBar, "Edit.Copy", KnownMonikers.Copy, "Copy selected text");
-			if (Clipboard.ContainsText()) {
-				AddEditorCommand(ToolBar, "Edit.Paste", KnownMonikers.Paste, "Paste text from clipboard");
+			if (CodistPackage.DebuggerStatus == DebuggerStatus.Break) {
+				AddEditorCommand(ToolBar, "Edit.QuickInfo", KnownMonikers.ToolTip, "Show quick info");
 			}
-			AddEditorCommand(ToolBar, "Edit.Delete", KnownMonikers.Cancel, "Delete selected text");
+			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
+				AddEditorCommand(ToolBar, "Edit.Cut", KnownMonikers.Cut, "Cut selected text");
+			}
+			AddEditorCommand(ToolBar, "Edit.Copy", KnownMonikers.Copy, "Copy selected text");
+			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
+				if (Clipboard.ContainsText()) {
+					AddEditorCommand(ToolBar, "Edit.Paste", KnownMonikers.Paste, "Paste text from clipboard");
+				}
+				AddEditorCommand(ToolBar, "Edit.Delete", KnownMonikers.Cancel, "Delete selected text");
+				AddEditorCommand(ToolBar, "Edit.FormatSelection", KnownMonikers.FormatSelection, "Format selected text");
+			}
 			AddEditorCommand(ToolBar, "Edit.FindNextSelected", KnownMonikers.FindNext, "Find next selected text");
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownMonikers.ASerif, "Capitalize");
-			AddEditorCommand(ToolBar, "Edit.FormatSelection", KnownMonikers.FormatSelection, "Format selected text");
 		}
 
 		protected void AddEditorCommand(ToolBar toolBar, string command, ImageMoniker moniker, string tooltip) {
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
 				AddCommand(toolBar, moniker, tooltip, (s, args) => {
 					TextEditorHelper.ExecuteEditorCommand(command);
+					View.Selection.Clear();
 				});
 			}
 		}
