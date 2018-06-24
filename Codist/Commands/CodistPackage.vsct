@@ -61,6 +61,7 @@
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<Strings>
           <ButtonText>Screenshot code &amp;window</ButtonText>
+					<ToolTipText>Take a screenshot for the active code window</ToolTipText>
         </Strings>
       </Button>
     </Buttons>

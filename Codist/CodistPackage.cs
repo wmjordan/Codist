@@ -71,37 +71,8 @@ namespace Codist
 		protected override void Initialize() {
             base.Initialize();
 			Commands.ScreenshotCommand.Initialize(this);
-			//if (_Debugger == null) {
-			//	_Debugger = new VsDebugger(GetGlobalService(typeof(IVsDebugger)) as IVsDebugger);
-			//}
 		}
 
 		#endregion
-
-		sealed class VsDebugger : IVsDebuggerEvents
-		{
-			readonly IVsDebugger _Debugger;
-			readonly uint _Cookie;
-			public DebuggerStatus Status { get; private set; }
-			
-			public VsDebugger(IVsDebugger debugger) {
-				_Debugger = debugger;
-				_Debugger.AdviseDebuggerEvents(this, out _Cookie);
-			}
-
-			public int OnModeChange(DBGMODE dbgmodeNew) {
-				switch (dbgmodeNew) {
-					case DBGMODE.DBGMODE_Design: Status = DebuggerStatus.Design; break;
-					case DBGMODE.DBGMODE_Break: Status = DebuggerStatus.Break; break;
-					case DBGMODE.DBGMODE_Run: Status = DebuggerStatus.Running; break;
-					case DBGMODE.DBGMODE_Enc: Status = DebuggerStatus.EditAndContinue; break;
-					case DBGMODE.DBGMODE_EncMask:
-						break;
-					default:
-						break;
-				}
-				return Microsoft.VisualStudio.VSConstants.S_OK;
-			}
-		}
 	}
 }

@@ -526,9 +526,10 @@ namespace Codist.QuickInfo
 					&& (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
 					ShowDeclarationModifier(qiContent, typeSymbol);
 				}
-				if (node.Parent.Kind() == SyntaxKind.ObjectCreationExpression) {
-					var method = _SemanticModel.GetSymbolInfo(node.Parent).Symbol as IMethodSymbol;
-					ShowOverloadsInfo(qiContent, node.Parent, method);
+				var pk = (node = node.Parent).Kind();
+				if (pk == SyntaxKind.ObjectCreationExpression || pk == SyntaxKind.QualifiedName && (node = node.Parent) != null && node.Kind() == SyntaxKind.ObjectCreationExpression) {
+					var method = _SemanticModel.GetSymbolInfo(node).Symbol as IMethodSymbol;
+					ShowOverloadsInfo(qiContent, node, method);
 				}
 			}
 
