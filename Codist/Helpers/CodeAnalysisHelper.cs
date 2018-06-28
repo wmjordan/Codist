@@ -10,6 +10,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Imaging;
+using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -130,6 +132,87 @@ namespace Codist
 			}
 			return false;
 		}
+		public static ImageMoniker GetSyntaxMoniker(this SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.ClassDeclaration: return KnownMonikers.Class;
+				case SyntaxKind.EnumDeclaration: return KnownMonikers.Enumeration;
+				case SyntaxKind.StructDeclaration: return KnownMonikers.Structure;
+				case SyntaxKind.InterfaceDeclaration: return KnownMonikers.Interface;
+				case SyntaxKind.ConstructorDeclaration: return KnownMonikers.NewItem;
+				case SyntaxKind.ConversionOperatorDeclaration: return KnownMonikers.ConvertPartition;
+				case SyntaxKind.DestructorDeclaration: return KnownMonikers.DeleteListItem;
+				case SyntaxKind.IndexerDeclaration: return KnownMonikers.ClusteredIndex;
+				case SyntaxKind.MethodDeclaration: return KnownMonikers.Method;
+				case SyntaxKind.OperatorDeclaration: return KnownMonikers.Operator;
+				case SyntaxKind.PropertyDeclaration: return KnownMonikers.Property;
+				case SyntaxKind.FieldDeclaration: return KnownMonikers.Field;
+				case SyntaxKind.VariableDeclaration: return KnownMonikers.LocalVariable;
+				case SyntaxKind.NamespaceDeclaration: return KnownMonikers.Namespace;
+				case SyntaxKind.ArgumentList:
+				case SyntaxKind.AttributeArgumentList: return KnownMonikers.Parameter;
+				case SyntaxKind.DoStatement: return KnownMonikers.DoWhile;
+				case SyntaxKind.FixedStatement: return KnownMonikers.Pin;
+				case SyntaxKind.ForEachStatement:
+				case SyntaxKind.ForStatement: return KnownMonikers.ForEachLoop;
+				case SyntaxKind.IfStatement: return KnownMonikers.If;
+				case SyntaxKind.LockStatement: return KnownMonikers.Lock;
+				case SyntaxKind.SwitchStatement: return KnownMonikers.FlowSwitch;
+				case SyntaxKind.SwitchSection: return KnownMonikers.FlowDecision;
+				case SyntaxKind.TryStatement: return KnownMonikers.TryCatch;
+				case SyntaxKind.UsingStatement: return KnownMonikers.Entry;
+				case SyntaxKind.WhileStatement: return KnownMonikers.While;
+				case SyntaxKind.ParameterList: return KnownMonikers.Parameter;
+				case SyntaxKind.ParenthesizedExpression:
+				case SyntaxKind.ParenthesizedLambdaExpression:
+				case SyntaxKind.SimpleLambdaExpression: return KnownMonikers.NamedSet;
+				case SyntaxKind.UnsafeStatement: return KnownMonikers.HotSpot;
+				case SyntaxKind.XmlElement:
+				case SyntaxKind.XmlEmptyElement: return KnownMonikers.XMLElement;
+				case SyntaxKind.XmlComment: return KnownMonikers.XMLCommentTag;
+			}
+			return KnownMonikers.UnknownMember;
+		}
+		public static string GetSyntaxBrief(this SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.ClassDeclaration: return "class";
+				case SyntaxKind.EnumDeclaration: return "enum";
+				case SyntaxKind.StructDeclaration: return "struct";
+				case SyntaxKind.InterfaceDeclaration: return "interface";
+				case SyntaxKind.ConstructorDeclaration: return "constructor";
+				case SyntaxKind.ConversionOperatorDeclaration: return "conversion operator";
+				case SyntaxKind.DestructorDeclaration: return "destructor";
+				case SyntaxKind.IndexerDeclaration: return "property";
+				case SyntaxKind.MethodDeclaration: return "method";
+				case SyntaxKind.OperatorDeclaration: return "operator";
+				case SyntaxKind.PropertyDeclaration: return "property";
+				case SyntaxKind.FieldDeclaration: return "field";
+				case SyntaxKind.NamespaceDeclaration: return "namespace";
+				case SyntaxKind.ArgumentList:
+				case SyntaxKind.AttributeArgumentList: return "argument list";
+				case SyntaxKind.DoStatement: return "do loop";
+				case SyntaxKind.FixedStatement: return "fixed";
+				case SyntaxKind.ForEachStatement: return "foreach loop";
+				case SyntaxKind.ForStatement: return "for loop";
+				case SyntaxKind.IfStatement: return "if statement";
+				case SyntaxKind.LocalDeclarationStatement: return "local";
+				case SyntaxKind.LockStatement: return "lock statement";
+				case SyntaxKind.SwitchStatement: return "switch";
+				case SyntaxKind.SwitchSection: return "switch section";
+				case SyntaxKind.TryStatement: return "try catch";
+				case SyntaxKind.UsingStatement: return "using statement";
+				case SyntaxKind.WhileStatement: return "while loop";
+				case SyntaxKind.ParameterList: return "parameter list";
+				case SyntaxKind.ParenthesizedExpression:
+				case SyntaxKind.ParenthesizedLambdaExpression:
+				case SyntaxKind.SimpleLambdaExpression: return "expression";
+				case SyntaxKind.UnsafeStatement: return "unsafe";
+				case SyntaxKind.VariableDeclarator: return "variable";
+				case SyntaxKind.XmlElement:
+				case SyntaxKind.XmlEmptyElement: return "xml element";
+				case SyntaxKind.XmlComment: return "xml comment";
+			}
+			return null;
+		}
 
 		public static string GetDeclarationSignature(this SyntaxNode node) {
 			switch (node.Kind()) {
@@ -147,6 +230,10 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration: return (node as PropertyDeclarationSyntax).Identifier.Text;
 				case SyntaxKind.SimpleLambdaExpression: return "(" + (node as SimpleLambdaExpressionSyntax).Parameter.ToString() + ")";
 				case SyntaxKind.ParenthesizedLambdaExpression: return (node as ParenthesizedLambdaExpressionSyntax).ParameterList.ToString();
+				case SyntaxKind.NamespaceDeclaration: return ((node as NamespaceDeclarationSyntax).Name as IdentifierNameSyntax)?.Identifier.Text;
+				case SyntaxKind.VariableDeclarator: return (node as VariableDeclaratorSyntax).Identifier.Text;
+				case SyntaxKind.LocalDeclarationStatement:
+				case SyntaxKind.VariableDeclaration: return "Variables";
 			}
 			return null;
 		}

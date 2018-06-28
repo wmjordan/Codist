@@ -94,8 +94,19 @@ namespace Codist.SmartBars
 				}
 			}
 			//AddEditorCommand(MyToolBar, "Edit.ExpandSelection", KnownMonikers.ExpandScope, "Expand selection");
-			AddCommand(MyToolBar, KnownMonikers.SelectFrame, "Expand selection", (s, args) => {
-				ExpandSelection();
+			AddCommands(MyToolBar, KnownMonikers.SelectFrame, "Expand selection", () => {
+				var r = new List<CommandItem>();
+				while (_Node != null) {
+					if (_Node.FullSpan.Contains(View.Selection, false)
+						&& (_Node.IsSyntaxBlock() || _Node.IsDeclaration())) {
+						var n = _Node;
+						r.Add(new CommandItem("Select " + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), null, CodeAnalysisHelper.GetSyntaxMoniker(n), () => {
+							View.SelectNode(n, System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Shift || n.Span.Contains(View.Selection, false) == false);
+						}));
+					}
+					_Node = _Node.Parent;
+				}
+				return r;
 			});
 		}
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -220,6 +221,42 @@ namespace Codist.SmartBars
 			toolBar.Items.Add(b);
 		}
 
+		protected void AddCommands(ToolBar toolBar, ImageMoniker moniker, string tooltip, params CommandItem[] items) {
+			AddCommands(toolBar, moniker, tooltip, () => items);
+		}
+
+		protected void AddCommands(ToolBar toolBar, ImageMoniker moniker, string tooltip, Func<IEnumerable<CommandItem>> items) {
+			var b = new Button {
+				Content = new Image { Source = GetImage(moniker, _IconSize) },
+				ToolTip = tooltip,
+				ContextMenu = new ContextMenu()
+			};
+			b.Click += (s, args) => {
+				var btn = s as Button;
+				var m = btn.ContextMenu;
+				m.IsEnabled = true;
+				m.PlacementTarget = btn;
+				m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+				m.IsOpen = true;
+				if (m.Items.Count == 0) {
+					foreach (var item in items()) {
+						var mi = new MenuItem {
+							Icon = new Image { Source = GetImage(item.Moniker, _IconSize) },
+							Header = item.Name,
+							ToolTip = item.Tooltip
+						};
+						mi.Click += (sender, e) => {
+							HideToolBar(sender, e);
+							//SetLastExecuteTime(sender, e);
+							item.Action();
+						};
+						m.Items.Add(mi);
+					}
+				}
+			};
+			toolBar.Items.Add(b);
+		}
+
 		void SetLastExecuteTime(object sender, RoutedEventArgs e) {
 			_LastExecute = DateTime.Now;
 		}
@@ -240,6 +277,21 @@ namespace Codist.SmartBars
 			Object data;
 			_ImageService.GetImage(moniker, imageAttributes).get_Data(out data);
 			return data as System.Windows.Media.Imaging.BitmapSource;
+		}
+
+		protected sealed class CommandItem
+		{
+			public CommandItem(string name, string tooltip, ImageMoniker moniker, Action action) {
+				Name = name;
+				Tooltip = tooltip;
+				Moniker = moniker;
+				Action = action;
+			}
+
+			public string Name { get; }
+			public string Tooltip { get; }
+			public ImageMoniker Moniker { get; }
+			public Action Action { get; }
 		}
 	}
 }
