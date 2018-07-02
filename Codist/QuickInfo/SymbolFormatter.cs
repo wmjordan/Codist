@@ -57,7 +57,7 @@ namespace Codist
 						case TypeKind.Class:
 							text.Add(symbol.Render(alias, Class)); break;
 						case TypeKind.Delegate:
-							text.Add(symbol.Render(alias, Delegate)); return;
+							text.Add(symbol.Render(alias, Delegate)); break;
 						case TypeKind.Dynamic:
 							text.Add(symbol.Render(alias ?? symbol.Name, Keyword)); return;
 						case TypeKind.Enum:

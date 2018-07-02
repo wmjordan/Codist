@@ -7,6 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codist", "Codist\Codist.csp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{CA2E0B7E-1C8C-4CEC-9FBD-774C4FFF7E76}"
 	ProjectSection(SolutionItems) = preProject
+		EditorCommands.txt = EditorCommands.txt
 		README.md = README.md
 	EndProjectSection
 EndProject

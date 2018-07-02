@@ -316,6 +316,9 @@ namespace Codist.QuickInfo
 					case SymbolKind.Property:
 						ShowPropertyInfo(qiContent, node, symbol as IPropertySymbol);
 						break;
+					case SymbolKind.Namespace:
+						ShowNamespaceInfo(qiContent, node, symbol as INamespaceSymbol);
+						break;
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation)) {
 					string asmName = symbol.GetAssemblyModuleName();
@@ -507,6 +510,37 @@ namespace Codist.QuickInfo
 					info.Add(argInfo);
 				}
 				qiContent.Add(info);
+			}
+
+			void ShowNamespaceInfo(IList<object> qiContent, SyntaxNode node, INamespaceSymbol nsSymbol) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NamespaceTypes) == false) {
+					return;
+				}
+				var namespaces = nsSymbol.GetNamespaceMembers().ToImmutableArray().Sort(Comparer<INamespaceSymbol>.Create((x, y) => String.Compare(x.Name, y.Name)));
+				if (namespaces.Length > 0) {
+					var info = new StackPanel();
+					info.AddText("Namespace:", true);
+					foreach (var ns in namespaces) {
+						info.Add(new TextBlock()
+							.SetGlyph(_GlyphService.GetGlyph(StandardGlyphGroup.GlyphGroupNamespace, StandardGlyphItem.GlyphItemPublic))
+							.AddText(ns.Name, _SymbolFormatter.Namespace)
+							);
+					}
+					qiContent.Add(info.Scrollable());
+				}
+
+				var members = nsSymbol.GetTypeMembers().Sort(Comparer<INamedTypeSymbol>.Create((x, y) => String.Compare(x.Name, y.Name)));
+				if (members.Length > 0) {
+					var info = new StackPanel();
+					info.AddText("Type:", true);
+					foreach (var type in members) {
+						var t = new TextBlock().SetGlyph(_GlyphService.GetGlyph(type.GetGlyphGroup(), type.GetGlyphItem()));
+						SymbolInfoRenderer.ShowSymbolDeclaration(t, type, _SymbolFormatter, true, true);
+						t.AddSymbol(type, null, _SymbolFormatter);
+						info.Add(t);
+					}
+					qiContent.Add(info.Scrollable());
+				}
 			}
 
 			void ShowTypeInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol typeSymbol) {
@@ -900,7 +934,7 @@ namespace Codist.QuickInfo
 			}
 
 			static void ShowDeclarationModifier(IList<object> qiContent, ISymbol symbol) {
-				qiContent.Add(SymbolInfoRenderer.ShowSymbolDeclaration(symbol, _SymbolFormatter));
+				qiContent.Add(SymbolInfoRenderer.ShowSymbolDeclaration(new TextBlock(), symbol, _SymbolFormatter, true, false));
 			}
 
 			void ShowParameterInfo(IList<object> qiContent, SyntaxNode node) {

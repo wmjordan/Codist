@@ -10,17 +10,19 @@ namespace Codist.QuickInfo
 {
 	static class SymbolInfoRenderer
 	{
-		public static TextBlock ShowSymbolDeclaration(ISymbol symbol, SymbolFormatter formatter) {
-			var info = new TextBlock()
-				.AddText(symbol.GetAccessibility(), formatter.Keyword);
+		public static TextBlock ShowSymbolDeclaration(TextBlock info, ISymbol symbol, SymbolFormatter formatter, bool defaultPublic, bool hideTypeKind) {
+			if (defaultPublic == false || symbol.DeclaredAccessibility != Accessibility.Public) {
+				info.AddText(symbol.GetAccessibility(), formatter.Keyword);
+			}
 			if (symbol.Kind == SymbolKind.Field) {
 				ShowFieldDeclaration(symbol as IFieldSymbol, formatter, info);
 			}
 			else {
 				ShowSymbolDeclaration(symbol, formatter, info);
 			}
-			info.AddText(symbol.GetTypeName(), symbol.Kind == SymbolKind.NamedType ? formatter.Keyword : null)
-				.AddText(" ");
+			if (hideTypeKind == false) {
+				info.AddText(symbol.GetSymbolKindName(), symbol.Kind == SymbolKind.NamedType ? formatter.Keyword : null).AddText(" ");
+			}
 			return info;
 		}
 

@@ -35,6 +35,9 @@ namespace Codist
 		[DefaultValue(QuickInfoOptions.Default)]
 		public QuickInfoOptions QuickInfoOptions { get; set; } = QuickInfoOptions.Default;
 
+		[DefaultValue(SmartBarOptions.Default)]
+		public SmartBarOptions SmartBarOptions { get; set; } = SmartBarOptions.Default;
+
 		public double TopSpace { get; set; }
 		public double BottomSpace { get; set; }
 		public double QuickInfoMaxWidth { get; set; }
@@ -375,6 +378,7 @@ namespace Codist
 		Parameter = 1 << 9,
 		InterfaceImplementations = 1 << 10,
 		TypeParameters = 1 << 11,
+		NamespaceTypes = 1 << 12,
 		OverrideDefaultDocumentation = 1 << 20,
 		DocumentationFromBaseType = 1 << 21,
 		TextOnlyDoc = 1 << 22,
@@ -385,6 +389,14 @@ namespace Codist
 		HideOriginalQuickInfo = 1 << 30,
 		QuickInfoOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | ClickAndGo,
 		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | ClickAndGo,
+	}
+
+	[Flags]
+	public enum SmartBarOptions
+	{
+		None,
+		IncludeTrivia = 1 << 1,
+		Default = IncludeTrivia
 	}
 
 	[Flags]

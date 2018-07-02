@@ -183,41 +183,71 @@ namespace Codist.SmartBars
 
 		protected virtual void AddCommands() {
 			if (CodistPackage.DebuggerStatus == DebuggerStatus.Break) {
-				AddEditorCommand(ToolBar, "Edit.QuickInfo", KnownMonikers.ToolTip, "Show quick info");
+				AddEditorCommand(ToolBar, KnownMonikers.ToolTip, "Edit.QuickInfo", "Show quick info");
 			}
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
-				AddEditorCommand(ToolBar, "Edit.Cut", KnownMonikers.Cut, "Cut selected text");
+				AddCommand(ToolBar, KnownMonikers.Cut, "Cut selected text\nRight click: Cut line", ctx => {
+					if (ctx.RightClick) {
+						View.ExpandSelectionToLine();
+					}
+					TextEditorHelper.ExecuteEditorCommand("Edit.Cut");
+				});
 			}
-			AddEditorCommand(ToolBar, "Edit.Copy", KnownMonikers.Copy, "Copy selected text");
+			AddCommand(ToolBar, KnownMonikers.Copy, "Copy selected text\nRight click: Copy line", ctx => {
+				if (ctx.RightClick) {
+					View.ExpandSelectionToLine();
+				}
+				TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
+			});
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
 				if (Clipboard.ContainsText()) {
-					AddEditorCommand(ToolBar, "Edit.Paste", KnownMonikers.Paste, "Paste text from clipboard");
+					AddEditorCommand(ToolBar, KnownMonikers.Paste, "Edit.Paste", "Paste text from clipboard");
 				}
-				AddEditorCommand(ToolBar, "Edit.Delete", KnownMonikers.Cancel, "Delete selected text");
-				AddEditorCommand(ToolBar, "Edit.FormatSelection", KnownMonikers.FormatSelection, "Format selected text");
+				AddCommand(ToolBar, KnownMonikers.Cancel, "Delete selected text\nRight click: Delete line", ctx => {
+					if (ctx.RightClick) {
+						View.ExpandSelectionToLine();
+					}
+					TextEditorHelper.ExecuteEditorCommand("Edit.Delete");
+				});
+				AddEditorCommand(ToolBar, KnownMonikers.FormatSelection, "Edit.FormatSelection", "Format selected text\nRight click: Format document", "Edit.FormatDocument");
 			}
-			AddEditorCommand(ToolBar, "Edit.FindNextSelected", KnownMonikers.FindNext, "Find next selected text");
+			AddEditorCommand(ToolBar, KnownMonikers.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownMonikers.ASerif, "Capitalize");
 		}
 
-		protected void AddEditorCommand(ToolBar toolBar, string command, ImageMoniker moniker, string tooltip) {
+		protected void AddEditorCommand(ToolBar toolBar, ImageMoniker moniker, string command, string tooltip) {
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
-				AddCommand(toolBar, moniker, tooltip, (s, args) => {
+				AddCommand(toolBar, moniker, tooltip, (ctx) => {
 					TextEditorHelper.ExecuteEditorCommand(command);
 					View.Selection.Clear();
 				});
 			}
 		}
+		protected void AddEditorCommand(ToolBar toolBar, ImageMoniker moniker, string command, string tooltip, string command2) {
+			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
+				AddCommand(toolBar, moniker, tooltip, (ctx) => {
+					TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? command2 : command);
+					View.Selection.Clear();
+				});
+			}
+		}
 
-		protected void AddCommand(ToolBar toolBar, ImageMoniker moniker, string tooltip, RoutedEventHandler handler) {
+		protected void AddCommand(ToolBar toolBar, ImageMoniker moniker, string tooltip, Action<CommandContext> handler) {
 			var b = new Button {
 				Content = new Image { Source = GetImage(moniker, _IconSize) },
 				ToolTip = tooltip,
 				Cursor = Cursors.Hand
 			};
-			b.Click += HideToolBar;
-			b.Click += SetLastExecuteTime;
-			b.Click += handler;
+			b.Click += (s, args) => {
+				HideToolBar(s, args);
+				SetLastExecuteTime(s, args);
+				handler(new CommandContext());
+			};
+			b.MouseRightButtonUp += (s, args) => {
+				HideToolBar(s, args);
+				handler(new CommandContext(true));
+				args.Handled = true;
+			};
 			toolBar.Items.Add(b);
 		}
 
@@ -248,7 +278,7 @@ namespace Codist.SmartBars
 						mi.Click += (sender, e) => {
 							HideToolBar(sender, e);
 							//SetLastExecuteTime(sender, e);
-							item.Action();
+							item.Action(new CommandContext());
 						};
 						m.Items.Add(mi);
 					}
@@ -281,7 +311,7 @@ namespace Codist.SmartBars
 
 		protected sealed class CommandItem
 		{
-			public CommandItem(string name, string tooltip, ImageMoniker moniker, Action action) {
+			public CommandItem(string name, ImageMoniker moniker, string tooltip, Action<CommandContext> action) {
 				Name = name;
 				Tooltip = tooltip;
 				Moniker = moniker;
@@ -291,7 +321,17 @@ namespace Codist.SmartBars
 			public string Name { get; }
 			public string Tooltip { get; }
 			public ImageMoniker Moniker { get; }
-			public Action Action { get; }
+			public Action<CommandContext> Action { get; }
+		}
+
+		protected sealed class CommandContext
+		{
+			public bool RightClick { get; }
+			public CommandContext() {
+			}
+			public CommandContext(bool rightClick) {
+				RightClick = rightClick;
+			}
 		}
 	}
 }

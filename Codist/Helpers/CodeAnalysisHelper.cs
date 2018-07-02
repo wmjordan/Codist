@@ -270,7 +270,7 @@ namespace Codist
 			return false;
 		}
 
-		public static string GetTypeName(this ISymbol symbol) {
+		public static string GetSymbolKindName(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event: return "event";
 				case SymbolKind.Field:

@@ -35,6 +35,18 @@ namespace Codist
 			return token.Contains(start) && (token.Contains(end) || inclusive && token.End == end);
 		}
 
+		public static void ExpandSelectionToLine(this IWpfTextView view) {
+			var lines = view.TextViewLines;
+			var start = lines.GetTextViewLineContainingBufferPosition(view.Selection.Start.Position).Start;
+			var end = view.Selection.End.Position;
+			var endLine = lines.GetTextViewLineContainingBufferPosition(end);
+			if (endLine.Start != end) {
+				// if selection not ended in line break, expand to line break
+				end = endLine.EndIncludingLineBreak;
+			}
+			view.Selection.Select(new SnapshotSpan(start, end), false);
+		}
+
 		public static void SelectNode(this IWpfTextView view, Microsoft.CodeAnalysis.SyntaxNode node, bool includeTrivia) {
 			if (includeTrivia) {
 				view.Selection.Select(new SnapshotSpan(view.TextSnapshot, node.FullSpan.Start, node.FullSpan.Length), false);

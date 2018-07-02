@@ -12,6 +12,8 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using AppHelpers;
+using System.Windows.Input;
 
 namespace Codist.SmartBars
 {
@@ -61,36 +63,36 @@ namespace Codist.SmartBars
 					&& (_Node is TypeSyntax || _Node is MemberDeclarationSyntax || _Node is VariableDeclaratorSyntax || _Node is ParameterSyntax)
 					&& _Token.Kind() == SyntaxKind.IdentifierToken) {
 					if (_Node is IdentifierNameSyntax) {
-						AddEditorCommand(MyToolBar, "Edit.GoToDefinition", KnownMonikers.GoToDefinition, "Go to definition");
+						AddEditorCommand(MyToolBar, KnownMonikers.GoToDefinition, "Edit.GoToDefinition", "Go to definition");
 					}
-					AddEditorCommand(MyToolBar, "Edit.FindAllReferences", KnownMonikers.ReferencedDimension, "Find all references");
+					AddEditorCommand(MyToolBar, KnownMonikers.ReferencedDimension, "Edit.FindAllReferences", "Find all references");
 					if (CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
-						AddEditorCommand(MyToolBar, "Refactor.Rename", KnownMonikers.Rename, "Rename symbol");
+						AddEditorCommand(MyToolBar, KnownMonikers.Rename, "Refactor.Rename", "Rename symbol");
 						if (_Node is ParameterSyntax && _Node.Parent is ParameterListSyntax) {
-							AddEditorCommand(MyToolBar, "Refactor.ReorderParameters", KnownMonikers.ReorderParameters, "Reorder parameters");
+							AddEditorCommand(MyToolBar, KnownMonikers.ReorderParameters, "Refactor.ReorderParameters", "Reorder parameters");
 						}
 					}
 				}
 				else if (_Token.Kind() == SyntaxKind.StringLiteralToken) {
-					AddEditorCommand(MyToolBar, "Edit.FindAllReferences", KnownMonikers.ReferencedDimension, "Find all references");
+					AddEditorCommand(MyToolBar, KnownMonikers.ReferencedDimension, "Edit.FindAllReferences", "Find all references");
 				}
 				if (CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
 					if (_Node.IsDeclaration()) {
 						if (_Node is TypeDeclarationSyntax || _Node is MemberDeclarationSyntax || _Node is ParameterListSyntax) {
-							AddEditorCommand(MyToolBar, "Edit.InsertComment", KnownMonikers.AddComment, "Insert comment");
+							AddEditorCommand(MyToolBar, KnownMonikers.AddComment, "Edit.InsertComment", "Insert comment");
 						}
 					}
 					else {
-						AddEditorCommand(MyToolBar, "Refactor.ExtractMethod", KnownMonikers.ExtractMethod, "Extract Method");
+						AddEditorCommand(MyToolBar, KnownMonikers.ExtractMethod, "Refactor.ExtractMethod", "Extract Method");
 					}
 				}
 			}
 			if (CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
 				if (_Trivia.IsLineComment()) {
-					AddEditorCommand(MyToolBar, "Edit.UncommentSelection", KnownMonikers.UncommentCode, "Uncomment selection");
+					AddEditorCommand(MyToolBar, KnownMonikers.UncommentCode, "Edit.UncommentSelection", "Uncomment selection");
 				}
 				else {
-					AddEditorCommand(MyToolBar, "Edit.CommentSelection", KnownMonikers.CommentCode, "Comment selection");
+					AddEditorCommand(MyToolBar, KnownMonikers.CommentCode, "Edit.CommentSelection", "Comment selection");
 				}
 			}
 			//AddEditorCommand(MyToolBar, "Edit.ExpandSelection", KnownMonikers.ExpandScope, "Expand selection");
@@ -100,8 +102,11 @@ namespace Codist.SmartBars
 					if (_Node.FullSpan.Contains(View.Selection, false)
 						&& (_Node.IsSyntaxBlock() || _Node.IsDeclaration())) {
 						var n = _Node;
-						r.Add(new CommandItem("Select " + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), null, CodeAnalysisHelper.GetSyntaxMoniker(n), () => {
-							View.SelectNode(n, System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Shift || n.Span.Contains(View.Selection, false) == false);
+						r.Add(new CommandItem("Select " + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), CodeAnalysisHelper.GetSyntaxMoniker(n), null, (ctx) => {
+							View.SelectNode(n, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.IncludeTrivia) || n.Span.Contains(View.Selection, false) == false);
+							if (Keyboard.Modifiers == ModifierKeys.Control) {
+								TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
+							}
 						}));
 					}
 					_Node = _Node.Parent;
@@ -111,7 +116,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddCommand(ImageMoniker moniker, string tooltip, Action<ITextEdit> editCommand) {
-			AddCommand(MyToolBar, moniker, tooltip, (s, args) => {
+			AddCommand(MyToolBar, moniker, tooltip, (ctx) => {
 				if (UpdateSemanticModel()) {
 					using (var edit = View.TextSnapshot.TextBuffer.CreateEdit()) {
 						editCommand(edit);
