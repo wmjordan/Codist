@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Imaging.Interop;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
@@ -25,7 +26,8 @@ namespace Codist.SmartBars
 		readonly ToolBarTray _ToolBarTray;
 		/// <summary>The layer for the smart bar adornment.</summary>
 		readonly IAdornmentLayer _ToolBarLayer;
-		private readonly int _IconSize;
+		readonly int _IconSize;
+		ImageAttributes _ImageAttributes;
 		DateTime _LastExecute;
 
 		/// <summary>
@@ -39,7 +41,7 @@ namespace Codist.SmartBars
 			View.Selection.SelectionChanged += ViewSelectionChanged;
 			View.Closed += ViewClosed;
 			ToolBar = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 1, IsOverflowOpen = false }.HideOverflow();
-			ToolBar2 = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 2, IsOverflowOpen = false }.HideOverflow();
+			ToolBar2 = new ToolBar { BorderThickness = new Thickness(1), Background = Brushes.LightGray, BorderBrush = Brushes.Gray, Band = 2, IsOverflowOpen = false }.HideOverflow();
 			_ToolBarTray = new ToolBarTray() {
 				ToolBars = { ToolBar, ToolBar2 },
 				IsLocked = true,
@@ -54,6 +56,8 @@ namespace Codist.SmartBars
 			}
 			_ToolBarLayer.AddAdornment(AdornmentPositioningBehavior.ViewportRelative, null, null, _ToolBarTray, null);
 			_ToolBarTray.Visibility = Visibility.Hidden;
+			VSColorTheme.ThemeChanged += ThemeChanged;
+			LoadThemeColor();
 		}
 
 		protected IWpfTextView View { get; }
@@ -62,9 +66,29 @@ namespace Codist.SmartBars
 		protected ToolBar ToolBar2 { get; }
 
 		#region Event handlers
+		void ThemeChanged(ThemeChangedEventArgs args) {
+			LoadThemeColor();
+		}
 		void ToolBarSizeChanged(object sender, SizeChangedEventArgs e) {
 			SetToolBarPosition();
 			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
+		}
+		void LoadThemeColor() {
+			var c = CodistPackage.TitleBackgroundColor;
+			var b = new SolidColorBrush(c.ToWpfColor());
+			b.Freeze();
+			ToolBar.Background = b;
+			ToolBar2.Background = b;
+			var v = c.ToArgb();
+			_ImageAttributes = new ImageAttributes {
+				Flags = unchecked((uint)(_ImageAttributesFlags.IAF_RequiredFlags | _ImageAttributesFlags.IAF_Background)),
+				ImageType = (uint)_UIImageType.IT_Bitmap,
+				Format = (uint)_UIDataFormat.DF_WPF,
+				StructSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ImageAttributes)),
+				LogicalHeight = _IconSize,
+				LogicalWidth = _IconSize,
+				Background = (uint)(v & 0xFFFFFF << 8 | v & 0xFF)
+			};
 		}
 		void ViewMouseMove(object sender, MouseEventArgs e) {
 			if (_ToolBarTray.IsVisible == false) {
@@ -120,6 +144,7 @@ namespace Codist.SmartBars
 			View.VisualElement.MouseMove -= ViewMouseMove;
 			//View.LayoutChanged -= ViewLayoutChanged;
 			View.Closed -= ViewClosed;
+			VSColorTheme.ThemeChanged -= ThemeChanged;
 		}
 
 		void ToolBarMouseEnter(object sender, EventArgs e) {
@@ -171,7 +196,7 @@ namespace Codist.SmartBars
 			if (DateTime.Now > _LastExecute.AddSeconds(1)) {
 				var pos = Mouse.GetPosition(View.VisualElement);
 				var rs = _ToolBarTray.RenderSize;
-				var x = pos.X - 20;
+				var x = pos.X - 35;
 				var y = pos.Y - rs.Height - 10;
 				Canvas.SetLeft(_ToolBarTray, x < View.ViewportLeft ? View.ViewportLeft
 					: x + rs.Width < View.ViewportRight ? x
@@ -217,6 +242,14 @@ namespace Codist.SmartBars
 					TextEditorHelper.ExecuteEditorCommand("Edit.Delete");
 				});
 				AddEditorCommand(ToolBar, KnownMonikers.FormatSelection, "Edit.FormatSelection", "Format selected text\nRight click: Format document", "Edit.FormatDocument");
+				//var selection = View.Selection;
+				//if (View.Selection.Mode == TextSelectionMode.Stream && View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.Start.Position) != View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.End.Position)) {
+				//	AddCommand(ToolBar, KnownMonikers.Join, "Join lines", ctx => {
+				//		var span = View.Selection.SelectedSpans[0];
+				//		var t = span.GetText();
+				//		View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(t, @"[ \t]*\r?\n[ \t]*", " "));
+				//	});
+				//}
 			}
 			AddEditorCommand(ToolBar, KnownMonikers.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownMonikers.ASerif, "Capitalize");
@@ -226,7 +259,7 @@ namespace Codist.SmartBars
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
 				AddCommand(toolBar, moniker, tooltip, (ctx) => {
 					TextEditorHelper.ExecuteEditorCommand(command);
-					View.Selection.Clear();
+					//View.Selection.Clear();
 				});
 			}
 		}
@@ -241,7 +274,7 @@ namespace Codist.SmartBars
 
 		protected void AddCommand(ToolBar toolBar, ImageMoniker moniker, string tooltip, Action<CommandContext> handler) {
 			var b = new Button {
-				Content = new Image { Source = GetImage(moniker, _IconSize) },
+				Content = new Image { Source = GetImage(moniker) },
 				ToolTip = tooltip,
 				Cursor = Cursors.Hand
 			};
@@ -259,7 +292,7 @@ namespace Codist.SmartBars
 
 		protected void AddCommands(ToolBar toolBar, ImageMoniker moniker, string tooltip, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
 			var b = new Button {
-				Content = new Image { Source = GetImage(moniker, _IconSize) },
+				Content = new Image { Source = GetImage(moniker) },
 				ToolTip = tooltip,
 				ContextMenu = new ContextMenu()
 			};
@@ -273,7 +306,7 @@ namespace Codist.SmartBars
 					m.Items.Clear();
 					foreach (var item in getItemsHandler(ctx)) {
 						var mi = new MenuItem {
-							Icon = new Image { Source = GetImage(item.Moniker, _IconSize) },
+							Icon = new Image { Source = GetImage(item.Moniker) },
 							Header = item.Name,
 							ToolTip = item.Tooltip
 						};
@@ -305,17 +338,9 @@ namespace Codist.SmartBars
 			View.VisualElement.MouseMove -= ViewMouseMove;
 		}
 
-		static System.Windows.Media.Imaging.BitmapSource GetImage(ImageMoniker moniker, int iconSize) {
-			var imageAttributes = new ImageAttributes {
-				Flags = (uint)_ImageAttributesFlags.IAF_RequiredFlags,
-				ImageType = (uint)_UIImageType.IT_Bitmap,
-				Format = (uint)_UIDataFormat.DF_WPF,
-				StructSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ImageAttributes)),
-				LogicalHeight = iconSize,
-				LogicalWidth = iconSize,
-			};
+		System.Windows.Media.Imaging.BitmapSource GetImage(ImageMoniker moniker) {
 			Object data;
-			_ImageService.GetImage(moniker, imageAttributes).get_Data(out data);
+			_ImageService.GetImage(moniker, _ImageAttributes).get_Data(out data);
 			return data as System.Windows.Media.Imaging.BitmapSource;
 		}
 

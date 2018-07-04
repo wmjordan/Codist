@@ -92,25 +92,29 @@ namespace Codist.SmartBars
 					AddEditorCommand(MyToolBar, KnownMonikers.UncommentCode, "Edit.UncommentSelection", "Uncomment selection");
 				}
 				else {
-					AddEditorCommand(MyToolBar, KnownMonikers.CommentCode, "Edit.CommentSelection", "Comment selection");
+					AddCommand(MyToolBar, KnownMonikers.CommentCode, "Comment selection\nRight click: Comment line", ctx => {
+						if (ctx.RightClick) {
+							TextEditorHelper.ExpandSelectionToLine(View);
+						}
+						TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
+					});
 				}
 			}
-			//AddEditorCommand(MyToolBar, "Edit.ExpandSelection", KnownMonikers.ExpandScope, "Expand selection");
-			AddCommands(MyToolBar, KnownMonikers.SelectFrame, "Expand selection\nRight click: Expand and copy selection", (ctx) => {
+			AddCommands(MyToolBar, KnownMonikers.SelectFrame, "Expand selection\nRight click: Duplicate\nCtrl click: Copy", (ctx) => {
 				var r = new List<CommandItem>();
-				var copy = ctx.RightClick;
+				var duplicate = ctx.RightClick;
 				var node = _Node;
 				while (node != null) {
 					if (node.FullSpan.Contains(View.Selection, false)
 						&& (node.IsSyntaxBlock() || node.IsDeclaration())) {
 						var n = node;
-						r.Add(new CommandItem((copy ? "Copy " : "Select ") + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), CodeAnalysisHelper.GetSyntaxMoniker(n), null, _ => {
+						r.Add(new CommandItem((duplicate ? "Duplicate " : "Select ") + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), CodeAnalysisHelper.GetSyntaxMoniker(n), null, _ => {
 							View.SelectNode(n, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ExpansionIncludeTrivia) || n.Span.Contains(View.Selection, false) == false);
 							if (Keyboard.Modifiers == ModifierKeys.Control) {
-								TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
-							}
-							if (copy) {
 								TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
+							}
+							if (duplicate) {
+								TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
 							}
 						}));
 					}

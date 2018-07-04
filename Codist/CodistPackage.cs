@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using EnvDTE80;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -49,6 +50,8 @@ namespace Codist
 		}
 
 		public static EnvDTE.DTE DTE => _dte ?? (_dte = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE);
+		public static System.Drawing.Color ToolWindowBackgroundColor { get; private set; }
+		public static System.Drawing.Color TitleBackgroundColor { get; private set; }
 
 		public static DebuggerStatus DebuggerStatus {
 			get {
@@ -71,6 +74,15 @@ namespace Codist
 		protected override void Initialize() {
             base.Initialize();
 			Commands.ScreenshotCommand.Initialize(this);
+			LoadThemeColors();
+			VSColorTheme.ThemeChanged += (args) => {
+				LoadThemeColors();
+			};
+		}
+
+		static void LoadThemeColors() {
+			ToolWindowBackgroundColor = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowBackgroundColorKey);
+			TitleBackgroundColor = VSColorTheme.GetThemedColor(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 
 		#endregion
