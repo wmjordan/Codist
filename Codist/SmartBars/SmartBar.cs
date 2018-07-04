@@ -203,6 +203,13 @@ namespace Codist.SmartBars
 				if (Clipboard.ContainsText()) {
 					AddEditorCommand(ToolBar, KnownMonikers.Paste, "Edit.Paste", "Paste text from clipboard");
 				}
+				AddCommand(ToolBar, KnownMonikers.CopyItem, "Duplicate selection\nRight click: Duplicate line", ctx => {
+					if (ctx.RightClick) {
+						View.ExpandSelectionToLine();
+					}
+					TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
+					KeepToolbar();
+				});
 				AddCommand(ToolBar, KnownMonikers.Cancel, "Delete selected text\nRight click: Delete line", ctx => {
 					if (ctx.RightClick) {
 						View.ExpandSelectionToLine();
@@ -240,7 +247,6 @@ namespace Codist.SmartBars
 			};
 			b.Click += (s, args) => {
 				HideToolBar(s, args);
-				SetLastExecuteTime(s, args);
 				handler(new CommandContext());
 			};
 			b.MouseRightButtonUp += (s, args) => {
@@ -251,25 +257,21 @@ namespace Codist.SmartBars
 			toolBar.Items.Add(b);
 		}
 
-		protected void AddCommands(ToolBar toolBar, ImageMoniker moniker, string tooltip, params CommandItem[] items) {
-			AddCommands(toolBar, moniker, tooltip, () => items);
-		}
-
-		protected void AddCommands(ToolBar toolBar, ImageMoniker moniker, string tooltip, Func<IEnumerable<CommandItem>> items) {
+		protected void AddCommands(ToolBar toolBar, ImageMoniker moniker, string tooltip, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
 			var b = new Button {
 				Content = new Image { Source = GetImage(moniker, _IconSize) },
 				ToolTip = tooltip,
 				ContextMenu = new ContextMenu()
 			};
-			b.Click += (s, args) => {
-				var btn = s as Button;
+			void ButtonEventHandler(Button btn, CommandContext ctx) {
 				var m = btn.ContextMenu;
 				m.IsEnabled = true;
 				m.PlacementTarget = btn;
 				m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
 				m.IsOpen = true;
-				if (m.Items.Count == 0) {
-					foreach (var item in items()) {
+				if (m.Tag == null || (bool)m.Tag != ctx.RightClick) {
+					m.Items.Clear();
+					foreach (var item in getItemsHandler(ctx)) {
 						var mi = new MenuItem {
 							Icon = new Image { Source = GetImage(item.Moniker, _IconSize) },
 							Header = item.Name,
@@ -282,12 +284,20 @@ namespace Codist.SmartBars
 						};
 						m.Items.Add(mi);
 					}
+					m.Tag = ctx.RightClick;
 				}
+			}
+			b.Click += (s, args) => {
+				ButtonEventHandler(s as Button, new CommandContext());
+			};
+			b.MouseRightButtonUp += (s, args) => {
+				ButtonEventHandler(s as Button, new CommandContext(true));
+				args.Handled = true;
 			};
 			toolBar.Items.Add(b);
 		}
 
-		void SetLastExecuteTime(object sender, RoutedEventArgs e) {
+		void KeepToolbar() {
 			_LastExecute = DateTime.Now;
 		}
 		void HideToolBar(object sender, RoutedEventArgs e) {

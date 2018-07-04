@@ -395,8 +395,8 @@ namespace Codist
 	public enum SmartBarOptions
 	{
 		None,
-		IncludeTrivia = 1 << 1,
-		Default = IncludeTrivia
+		ExpansionIncludeTrivia = 1 << 1,
+		Default = ExpansionIncludeTrivia
 	}
 
 	[Flags]

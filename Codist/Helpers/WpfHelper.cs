@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Text.Classification;
@@ -291,7 +292,7 @@ namespace Codist
 			return text;
 		}
 		public static void ScreenShot(FrameworkElement control, string path, int width, int height) {
-			var bmp = new System.Windows.Media.Imaging.RenderTargetBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Default);
+			var bmp = new RenderTargetBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Default);
 			//var sourceBrush = new System.Windows.Media.VisualBrush(control) { Stretch = System.Windows.Media.Stretch.None };
 			//var drawingVisual = new System.Windows.Media.DrawingVisual();
 			//using (var dc = drawingVisual.RenderOpen()) {
@@ -300,8 +301,8 @@ namespace Codist
 			//}
 			//bmp.Render(drawingVisual);
 			bmp.Render(control);
-			var enc = new System.Windows.Media.Imaging.PngBitmapEncoder();
-			enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmp));
+			var enc = new PngBitmapEncoder();
+			enc.Frames.Add(BitmapFrame.Create(bmp));
 			using (var f = System.IO.File.Create(path)) {
 				enc.Save(f);
 			}

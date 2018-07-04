@@ -96,20 +96,25 @@ namespace Codist.SmartBars
 				}
 			}
 			//AddEditorCommand(MyToolBar, "Edit.ExpandSelection", KnownMonikers.ExpandScope, "Expand selection");
-			AddCommands(MyToolBar, KnownMonikers.SelectFrame, "Expand selection", () => {
+			AddCommands(MyToolBar, KnownMonikers.SelectFrame, "Expand selection\nRight click: Expand and copy selection", (ctx) => {
 				var r = new List<CommandItem>();
-				while (_Node != null) {
-					if (_Node.FullSpan.Contains(View.Selection, false)
-						&& (_Node.IsSyntaxBlock() || _Node.IsDeclaration())) {
-						var n = _Node;
-						r.Add(new CommandItem("Select " + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), CodeAnalysisHelper.GetSyntaxMoniker(n), null, (ctx) => {
-							View.SelectNode(n, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.IncludeTrivia) || n.Span.Contains(View.Selection, false) == false);
+				var copy = ctx.RightClick;
+				var node = _Node;
+				while (node != null) {
+					if (node.FullSpan.Contains(View.Selection, false)
+						&& (node.IsSyntaxBlock() || node.IsDeclaration())) {
+						var n = node;
+						r.Add(new CommandItem((copy ? "Copy " : "Select ") + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), CodeAnalysisHelper.GetSyntaxMoniker(n), null, _ => {
+							View.SelectNode(n, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ExpansionIncludeTrivia) || n.Span.Contains(View.Selection, false) == false);
 							if (Keyboard.Modifiers == ModifierKeys.Control) {
+								TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
+							}
+							if (copy) {
 								TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
 							}
 						}));
 					}
-					_Node = _Node.Parent;
+					node = node.Parent;
 				}
 				return r;
 			});
