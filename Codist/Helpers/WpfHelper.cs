@@ -292,12 +292,14 @@ namespace Codist
 		}
 		public static void ScreenShot(FrameworkElement control, string path, int width, int height) {
 			var bmp = new System.Windows.Media.Imaging.RenderTargetBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Default);
-			var sourceBrush = new System.Windows.Media.VisualBrush(control);
-			var drawingVisual = new System.Windows.Media.DrawingVisual();
-			using (var dc = drawingVisual.RenderOpen()) {
-				dc.DrawRectangle(sourceBrush, null, new Rect(0, 0, width, height));
-			}
-			bmp.Render(drawingVisual);
+			//var sourceBrush = new System.Windows.Media.VisualBrush(control) { Stretch = System.Windows.Media.Stretch.None };
+			//var drawingVisual = new System.Windows.Media.DrawingVisual();
+			//using (var dc = drawingVisual.RenderOpen()) {
+			//	dc.DrawRectangle(sourceBrush, null, new Rect(0, 0, width, height));
+			//	dc.Close();
+			//}
+			//bmp.Render(drawingVisual);
+			bmp.Render(control);
 			var enc = new System.Windows.Media.Imaging.PngBitmapEncoder();
 			enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmp));
 			using (var f = System.IO.File.Create(path)) {
