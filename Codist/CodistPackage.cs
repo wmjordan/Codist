@@ -13,7 +13,7 @@ namespace Codist
 	/// <para>To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.</para>
 	/// </remarks>
 	[PackageRegistration(UseManagedResourcesOnly = true)]
-	[InstalledProductRegistration("#110", "#112", "3.0", IconResourceID = 400)] // Information on this package for Help/About
+	[InstalledProductRegistration("#110", "#112", "3.3", IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.General), Constants.NameOfMe, "General", 0, 0, true)]
 	[ProvideOptionPage(typeof(Options.SuperQuickInfo), CategorySuperQuickInfo, "General", 0, 0, true, Sort = 10)]
