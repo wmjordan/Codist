@@ -94,7 +94,7 @@ namespace Codist.SmartBars
 				else {
 					AddCommand(MyToolBar, KnownMonikers.CommentCode, "Comment selection\nRight click: Comment line", ctx => {
 						if (ctx.RightClick) {
-							TextEditorHelper.ExpandSelectionToLine(View);
+							View.ExpandSelectionToLine();
 						}
 						TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
 					});
@@ -135,25 +135,6 @@ namespace Codist.SmartBars
 					}
 				}
 			});
-		}
-
-		void ExpandSelection() {
-			if (UpdateSemanticModel() == false) {
-				return;
-			}
-			do {
-				if (_Node.FullSpan.Contains(View.Selection, false)
-					&& (_Node.IsSyntaxBlock() || _Node.IsDeclaration())) {
-					if ((_Node.HasLeadingTrivia || _Node.HasTrailingTrivia)
-						&& _Node.Span.Contains(View.Selection, false)) {
-						View.Selection.Select(new SnapshotSpan(View.TextSnapshot, _Node.Span.Start, _Node.Span.Length), false);
-					}
-					else {
-						View.Selection.Select(new SnapshotSpan(View.TextSnapshot, _Node.FullSpan.Start, _Node.FullSpan.Length), false);
-					}
-					return;
-				}
-			} while ((_Node = _Node.Parent) != null);
 		}
 
 		bool UpdateSemanticModel() {

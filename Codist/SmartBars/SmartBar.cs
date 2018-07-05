@@ -41,7 +41,7 @@ namespace Codist.SmartBars
 			View.Selection.SelectionChanged += ViewSelectionChanged;
 			View.Closed += ViewClosed;
 			ToolBar = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 1, IsOverflowOpen = false }.HideOverflow();
-			ToolBar2 = new ToolBar { BorderThickness = new Thickness(1), Background = Brushes.LightGray, BorderBrush = Brushes.Gray, Band = 2, IsOverflowOpen = false }.HideOverflow();
+			ToolBar2 = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 2, IsOverflowOpen = false }.HideOverflow();
 			_ToolBarTray = new ToolBarTray() {
 				ToolBars = { ToolBar, ToolBar2 },
 				IsLocked = true,
@@ -267,7 +267,7 @@ namespace Codist.SmartBars
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
 				AddCommand(toolBar, moniker, tooltip, (ctx) => {
 					TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? command2 : command);
-					View.Selection.Clear();
+					//View.Selection.Clear();
 				});
 			}
 		}
