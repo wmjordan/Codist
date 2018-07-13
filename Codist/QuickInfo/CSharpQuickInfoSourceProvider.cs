@@ -180,7 +180,8 @@ namespace Codist.QuickInfo
 				ShowSymbolInfo(qiContent, node, symbol);
 				RETURN:
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo) /*&& node is MemberDeclarationSyntax == false && node.Kind() != SyntaxKind.VariableDeclarator && node.Kind() != SyntaxKind.Parameter*/) {
-					qiWrapper.ApplyClickAndGo(symbol);
+					var ctor = node.Parent as ObjectCreationExpressionSyntax;
+					qiWrapper.ApplyClickAndGo(ctor == null || ctor.Type != node ? symbol : semanticModel.GetSymbolInfo(ctor).Symbol);
 				}
 				QuickInfoOverrider.LimitQuickInfoItemSize(qiContent, qiWrapper);
 				var navigator = _NavigatorService.GetTextStructureNavigator(_TextBuffer);
