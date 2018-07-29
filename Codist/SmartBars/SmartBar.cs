@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -42,7 +43,7 @@ namespace Codist.SmartBars
 			View.Closed += ViewClosed;
 			ToolBar = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 1, IsOverflowOpen = false }.HideOverflow();
 			ToolBar2 = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 2, IsOverflowOpen = false }.HideOverflow();
-			_ToolBarTray = new ToolBarTray() {
+			_ToolBarTray = new ToolBarTray {
 				ToolBars = { ToolBar, ToolBar2 },
 				IsLocked = true,
 				Cursor = Cursors.Arrow,
@@ -190,7 +191,6 @@ namespace Codist.SmartBars
 			EXIT:
 			_TimerStatus = 0;
 		}
-
 		void SetToolBarPosition() {
 			// keep tool bar position when the selection is restored and the tool bar reappears after executing command
 			if (DateTime.Now > _LastExecute.AddSeconds(1)) {
@@ -226,7 +226,13 @@ namespace Codist.SmartBars
 			});
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
 				if (Clipboard.ContainsText()) {
-					AddEditorCommand(ToolBar, KnownMonikers.Paste, "Edit.Paste", "Paste text from clipboard");
+					AddCommand(ToolBar, KnownMonikers.Paste, "Paste text from clipboard\nRight click: Paste over line", ctx => {
+						if (ctx.RightClick) {
+							View.ExpandSelectionToLine(false);
+						}
+						TextEditorHelper.ExecuteEditorCommand("Edit.Paste");
+						KeepToolbar();
+					});
 				}
 				AddCommand(ToolBar, KnownMonikers.CopyItem, "Duplicate selection\nRight click: Duplicate line", ctx => {
 					if (ctx.RightClick) {
@@ -367,6 +373,19 @@ namespace Codist.SmartBars
 			public CommandContext(bool rightClick) {
 				RightClick = rightClick;
 			}
+		}
+
+		sealed class DocumentInfo
+		{
+			[Category("Document")]
+			[Description("Number of lines in active document")]
+			[DisplayName("Line count")]
+			public int LineCount { get; set; }
+
+			[Category("Document")]
+			[Description("Number of characters in active document")]
+			[DisplayName("Char count")]
+			public int CharCount { get; set; }
 		}
 	}
 }
