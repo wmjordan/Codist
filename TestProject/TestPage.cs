@@ -91,7 +91,12 @@ text".Log(); // multiline string (string verbatim)
 		}
 
 		ConcreteClass InvokeDelegateParameter(Clone<ConcreteClass> clone) {
-			return clone(this); // invoking delegate
+			try {
+				return clone(this); // invoking delegate
+			}
+			catch (Exception ex) {
+				throw new InvalidOperationException(ex);
+			}
 		}
 
 		static string[] List(int value, params string[] text) {

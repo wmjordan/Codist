@@ -17,6 +17,9 @@ using System.Windows.Input;
 
 namespace Codist.SmartBars
 {
+	/// <summary>
+	/// An extended <see cref="SmartBar"/> for C# content type.
+	/// </summary>
 	sealed class CSharpSmartBar : SmartBar {
 		SemanticModel _SemanticModel;
 		CompilationUnitSyntax _Compilation;
