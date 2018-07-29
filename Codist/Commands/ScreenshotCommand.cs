@@ -52,10 +52,6 @@ namespace Codist.Commands
 		/// </summary>
 		/// <param name="package">Owner package, not null.</param>
 		public static void Initialize(Package package) {
-			// Verify the current thread is the UI thread - the call to AddCommand in ScreenshotCommand's constructor requires
-			// the UI thread.
-			ThreadHelper.ThrowIfNotOnUIThread();
-
 			var commandService = (package as IServiceProvider).GetService((typeof(IMenuCommandService))) as OleMenuCommandService;
 			Instance = new ScreenshotCommand(package, commandService);
 		}
