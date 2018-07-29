@@ -126,20 +126,19 @@ namespace Codist.Classifiers
 								case ThrowExpression:
 									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ControlFlowKeyword));
 									continue;
-								case SyntaxKind.IfStatement:
-								case SyntaxKind.ElseClause:
-								case SyntaxKind.SwitchStatement:
-								case SyntaxKind.TryStatement:
-								case SyntaxKind.CatchClause:
-								case SyntaxKind.CatchFilterClause:
-								case SyntaxKind.FinallyClause:
+								case SyntaxKind.IfKeyword:
+								case SyntaxKind.ElseKeyword:
+								case SyntaxKind.SwitchKeyword:
+								case SyntaxKind.TryKeyword:
+								case SyntaxKind.CatchKeyword:
+								case SyntaxKind.FinallyKeyword:
 									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.BranchingKeyword));
 									continue;
-								case SyntaxKind.ForStatement:
-								case SyntaxKind.ForEachStatement:
-								case SyntaxKind.WhileStatement:
-								case SyntaxKind.DoStatement:
-								case SyntaxKind.SelectClause:
+								case SyntaxKind.ForKeyword:
+								case SyntaxKind.ForEachKeyword:
+								case SyntaxKind.WhileKeyword:
+								case SyntaxKind.DoKeyword:
+								case SyntaxKind.SelectKeyword:
 									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.LoopKeyword));
 									continue;
 							}

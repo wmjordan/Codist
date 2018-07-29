@@ -15,7 +15,9 @@ using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.SmartBars
 {
-	/// <summary>The contextual toolbar.</summary>
+	/// <summary>
+	/// Adornment class that draws a square box in the top right hand corner of the viewport
+	/// </summary>
 	internal class SmartBar
 	{
 		const int Selecting = 1, Working = 2;
@@ -182,7 +184,7 @@ namespace Codist.SmartBars
 				ToolBar2.Visibility = Visibility.Visible;
 				ToolBar2.HideOverflow();
 			}
-			_ToolBarTray.Opacity = 0.3;
+			_ToolBarTray.Opacity = 1;
 			_ToolBarTray.SizeChanged += ToolBarSizeChanged;
 			View.VisualElement.MouseMove += ViewMouseMove;
 
