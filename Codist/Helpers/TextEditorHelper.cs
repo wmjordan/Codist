@@ -36,13 +36,15 @@ namespace Codist
 		}
 
 		public static void ExpandSelectionToLine(this IWpfTextView view) {
-			var lines = view.TextViewLines;
-			var start = lines.GetTextViewLineContainingBufferPosition(view.Selection.Start.Position).Start;
+			view.ExpandSelectionToLine(true);
+		}
+		public static void ExpandSelectionToLine(this IWpfTextView view, bool includeLineBreak) {
+			var start = view.TextSnapshot.GetLineFromPosition(view.Selection.Start.Position).Start;
 			var end = view.Selection.End.Position;
-			var endLine = lines.GetTextViewLineContainingBufferPosition(end);
+			var endLine = view.TextSnapshot.GetLineFromPosition(end);
 			if (endLine.Start != end) {
 				// if selection not ended in line break, expand to line break
-				end = endLine.EndIncludingLineBreak;
+				end = includeLineBreak ? endLine.EndIncludingLineBreak : endLine.End;
 			}
 			view.Selection.Select(new SnapshotSpan(start, end), false);
 		}
@@ -85,10 +87,6 @@ namespace Codist
 		}
 
 		static VsTextView GetIVsTextView(IServiceProvider service, string filePath) {
-			var dte2 = (EnvDTE80.DTE2)Package.GetGlobalService(typeof(SDTE));
-			var sp = (Microsoft.VisualStudio.OLE.Interop.IServiceProvider)dte2;
-			var serviceProvider = new ServiceProvider(sp);
-
 			IVsWindowFrame windowFrame;
 			return VsShellUtilities.IsDocumentOpen(service, filePath, Guid.Empty, out IVsUIHierarchy uiHierarchy, out uint itemID, out windowFrame)
 				? VsShellUtilities.GetTextView(windowFrame)
