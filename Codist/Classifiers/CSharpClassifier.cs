@@ -95,13 +95,13 @@ namespace Codist.Classifiers
 								var token = unitCompilation.FindToken(item.TextSpan.Start);
 								if (token != null) {
 									switch (token.Kind()) {
-									case SyntaxKind.SealedKeyword:
-									case SyntaxKind.OverrideKeyword:
-									case SyntaxKind.AbstractKeyword:
-									case SyntaxKind.VirtualKeyword:
-									case SyntaxKind.NewKeyword:
-										result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.AbstractionKeyword));
-										continue;
+										case SyntaxKind.SealedKeyword:
+										case SyntaxKind.OverrideKeyword:
+										case SyntaxKind.AbstractKeyword:
+										case SyntaxKind.VirtualKeyword:
+										case SyntaxKind.NewKeyword:
+											result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.AbstractionKeyword));
+											continue;
 									}
 								}
 								continue;
@@ -125,6 +125,21 @@ namespace Codist.Classifiers
 								case SyntaxKind.ThrowStatement:
 								case ThrowExpression:
 									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ControlFlowKeyword));
+									continue;
+								case SyntaxKind.IfKeyword:
+								case SyntaxKind.ElseKeyword:
+								case SyntaxKind.SwitchKeyword:
+								case SyntaxKind.TryKeyword:
+								case SyntaxKind.CatchKeyword:
+								case SyntaxKind.FinallyKeyword:
+									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.BranchingKeyword));
+									continue;
+								case SyntaxKind.ForKeyword:
+								case SyntaxKind.ForEachKeyword:
+								case SyntaxKind.WhileKeyword:
+								case SyntaxKind.DoKeyword:
+								case SyntaxKind.SelectKeyword:
+									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.LoopKeyword));
 									continue;
 							}
 						}
@@ -391,7 +406,7 @@ namespace Codist.Classifiers
 
 				case SymbolKind.Local:
 					var localSymbol = (symbol as ILocalSymbol);
-					yield return localSymbol.IsConst ? _Classifications.ConstField : _Classifications.LocalField;
+					yield return localSymbol.IsConst ? _Classifications.ConstField : _Classifications.LocalVariable;
 					break;
 
 				case SymbolKind.Namespace:

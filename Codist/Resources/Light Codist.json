@@ -480,7 +480,7 @@
     },
     {
       "Id": 16,
-      "StyleID": "LocalFieldName",
+      "StyleID": "LocalVariableName",
       "Category": "Member",
       "Italic": true,
       "ForegroundColor": "#00000000",

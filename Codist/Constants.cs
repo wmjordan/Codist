@@ -47,7 +47,9 @@ namespace Codist
 		public const string CodeComment = "Comment";
 
 		public const string CodeAbstractionKeyword = "Keyword: Abstraction";
+		public const string CodeBranchingKeyword = "Keyword: Branching";
 		public const string CodeControlFlowKeyword = "Keyword: Control flow";
+		public const string CodeLoopKeyword = "Keyword: Loop";
 
 		public const string CodeClassName = "class name";
 		public const string CodeStructName = "struct name";
@@ -83,7 +85,7 @@ namespace Codist
 		public const string XmlDocEntity = "xml doc comment - entity reference";
 		public const string XmlDocTag = "xml doc comment - name";
 
-		public const string CSharpLocalFieldName = "C#: Local field";
+		public const string CSharpLocalVariableName = "C#: Local field";
 		public const string CSharpParameterName = "C#: Parameter";
 		public const string CSharpNamespaceName = "C#: Namespace";
 		public const string CSharpExtensionMethodName = "C#: Extension method";
@@ -335,6 +337,12 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
 		AbstractionKeyword,
+		[Category(Constants.SyntaxCategory.Keyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeBranchingKeyword)]
+		BranchingKeyword,
+		[Category(Constants.SyntaxCategory.Keyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeLoopKeyword)]
+		LoopKeyword,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationName)]
 		TypeDeclaration,
@@ -354,6 +362,10 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpVirtualMemberName)]
 		VirtualMemberName,
+		[Category(Constants.SyntaxCategory.Declaration)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalVariableName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppLocalVariable)]
+		LocalVariableName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeName)]
 		AttributeName,
@@ -390,10 +402,6 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName)]
 		[ClassificationType(ClassificationTypeNames = Constants.CppMemberField)]
 		FieldName,
-		[Category(Constants.SyntaxCategory.Member)]
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalFieldName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppLocalVariable)]
-		LocalFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstFieldName)]
 		ConstFieldName,

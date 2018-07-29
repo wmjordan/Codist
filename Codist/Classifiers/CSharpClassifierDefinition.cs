@@ -34,6 +34,11 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition AttributeNotation;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeKeyword)]
+		[Name(Constants.CodeBranchingKeyword)]
+		static ClassificationTypeDefinition BranchingKeyword;
+
+		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpConstFieldName)]
 		static ClassificationTypeDefinition ConstField;
@@ -85,8 +90,13 @@ namespace Codist.Classifiers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpLocalFieldName)]
-		static ClassificationTypeDefinition LocalField;
+		[Name(Constants.CSharpLocalVariableName)]
+		static ClassificationTypeDefinition LocalVariable;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeKeyword)]
+		[Name(Constants.CodeLoopKeyword)]
+		static ClassificationTypeDefinition LoopKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]

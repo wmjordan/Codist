@@ -11,6 +11,7 @@ namespace Codist.Classifiers
 			AliasNamespace = registry.GetClassificationType(Constants.CSharpAliasNamespaceName);
 			AttributeName = registry.GetClassificationType(Constants.CSharpAttributeName);
 			AttributeNotation = registry.GetClassificationType(Constants.CSharpAttributeNotation);
+			BranchingKeyword = registry.GetClassificationType(Constants.CodeBranchingKeyword);
 			ClassName = registry.GetClassificationType(Constants.CodeClassName);
 			ConstField = registry.GetClassificationType(Constants.CSharpConstFieldName);
 			ConstructorMethod = registry.GetClassificationType(Constants.CSharpConstructorMethodName);
@@ -25,7 +26,8 @@ namespace Codist.Classifiers
 			Field = registry.GetClassificationType(Constants.CSharpFieldName);
 			InterfaceName = registry.GetClassificationType(Constants.CodeInterfaceName);
 			Label = registry.GetClassificationType(Constants.CSharpLabel);
-			LocalField = registry.GetClassificationType(Constants.CSharpLocalFieldName);
+			LocalVariable = registry.GetClassificationType(Constants.CSharpLocalVariableName);
+			LoopKeyword = registry.GetClassificationType(Constants.CodeLoopKeyword);
 			Method = registry.GetClassificationType(Constants.CSharpMethodName);
 			Namespace = registry.GetClassificationType(Constants.CSharpNamespaceName);
 			NestedDeclaration = registry.GetClassificationType(Constants.CSharpNestedDeclarationName);
@@ -50,6 +52,8 @@ namespace Codist.Classifiers
 		public IClassificationType AttributeName { get; }
 
 		public IClassificationType AttributeNotation { get; }
+
+		public IClassificationType BranchingKeyword { get; }
 
 		public IClassificationType ClassName { get; }
 
@@ -79,7 +83,9 @@ namespace Codist.Classifiers
 
 		public IClassificationType Label { get; }
 
-		public IClassificationType LocalField { get; }
+		public IClassificationType LocalVariable { get; }
+
+		public IClassificationType LoopKeyword { get; }
 
 		public IClassificationType Method { get; }
 

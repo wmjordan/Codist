@@ -32,14 +32,38 @@ namespace Codist.Classifiers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalFieldName)]
-	[Name(Constants.CSharpLocalFieldName)]
+	[ClassificationType(ClassificationTypeNames = Constants.CodeBranchingKeyword)]
+	[Name(Constants.CodeBranchingKeyword)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	sealed class LocalFieldFormat : ClassificationFormatDefinition
+	sealed class BranchingKeywordFormat : ClassificationFormatDefinition
 	{
-		public LocalFieldFormat() {
-			DisplayName = Constants.NameOfMe + ": local field";
+		public BranchingKeywordFormat() {
+			DisplayName = Constants.CodeBranchingKeyword;
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CodeLoopKeyword)]
+	[Name(Constants.CodeLoopKeyword)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	sealed class LoopKeywordFormat : ClassificationFormatDefinition
+	{
+		public LoopKeywordFormat() {
+			DisplayName = Constants.CodeLoopKeyword;
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalVariableName)]
+	[Name(Constants.CSharpLocalVariableName)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	sealed class LocalVariableFormat : ClassificationFormatDefinition
+	{
+		public LocalVariableFormat() {
+			DisplayName = Constants.NameOfMe + ": local variable";
 		}
 	}
 

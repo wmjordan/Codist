@@ -468,9 +468,10 @@
     },
     {
       "Id": 16,
-      "StyleID": "LocalFieldName",
+      "StyleID": "LocalVariableName",
       "Category": "Member",
-      "ForegroundColor": "#00000000",
+      "Italic": true,
+			"ForegroundColor": "#00000000",
       "BackgroundColor": "#00000000"
     },
     {
