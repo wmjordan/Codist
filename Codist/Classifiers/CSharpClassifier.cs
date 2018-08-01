@@ -129,10 +129,6 @@ namespace Codist.Classifiers
 								case SyntaxKind.IfStatement:
 								case SyntaxKind.ElseClause:
 								case SyntaxKind.SwitchStatement:
-								case SyntaxKind.TryStatement:
-								case SyntaxKind.CatchClause:
-								case SyntaxKind.CatchFilterClause:
-								case SyntaxKind.FinallyClause:
 									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.BranchingKeyword));
 									continue;
 								case SyntaxKind.ForStatement:
@@ -145,6 +141,11 @@ namespace Codist.Classifiers
 								case SyntaxKind.UsingStatement:
 								case SyntaxKind.FixedStatement:
 								case SyntaxKind.LockStatement:
+								case SyntaxKind.UnsafeStatement:
+								case SyntaxKind.TryStatement:
+								case SyntaxKind.CatchClause:
+								case SyntaxKind.CatchFilterClause:
+								case SyntaxKind.FinallyClause:
 									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword));
 									continue;
 							}
@@ -288,6 +289,11 @@ namespace Codist.Classifiers
 					case SyntaxKind.UsingStatement:
 					case SyntaxKind.FixedStatement:
 					case SyntaxKind.LockStatement:
+					case SyntaxKind.UnsafeStatement:
+					case SyntaxKind.TryStatement:
+					case SyntaxKind.CatchClause:
+					case SyntaxKind.CatchFilterClause:
+					case SyntaxKind.FinallyClause:
 						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
 							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.SpecialPunctuation));
 						}
@@ -306,7 +312,9 @@ namespace Codist.Classifiers
 						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
 							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.SpecialPunctuation));
 						}
-						result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
+						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ParameterBrace)) {
+							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
+						}
 					}
 				}
 			}
@@ -362,6 +370,11 @@ namespace Codist.Classifiers
 				case SyntaxKind.UsingStatement:
 				case SyntaxKind.LockStatement:
 				case SyntaxKind.FixedStatement:
+				case SyntaxKind.UnsafeStatement:
+				case SyntaxKind.TryStatement:
+				case SyntaxKind.CatchClause:
+				case SyntaxKind.CatchFilterClause:
+				case SyntaxKind.FinallyClause:
 					type = _Classifications.ResourceKeyword;
 					break;
 					//case SyntaxKind.InterpolatedStringExpression: type = _Classifications.ConstField; break;

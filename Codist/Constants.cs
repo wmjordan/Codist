@@ -335,7 +335,7 @@ namespace Codist
 		None,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
-		ControlFlowKeyword,
+		BreakAndReturnKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
 		AbstractionKeyword,
@@ -347,7 +347,7 @@ namespace Codist
 		LoopKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpResourceKeyword)]
-		ResourceKeyword,
+		ResourceAndExceptionKeyword,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationName)]
 		TypeDeclaration,

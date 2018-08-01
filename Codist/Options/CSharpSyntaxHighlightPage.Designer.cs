@@ -30,10 +30,10 @@
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this.tabPage3 = new System.Windows.Forms.TabPage();
 			this._HighlightParameterBracesBox = new System.Windows.Forms.CheckBox();
+			this._MarkSpecialPunctuationBox = new System.Windows.Forms.CheckBox();
 			this._HighlightResourceBracesBox = new System.Windows.Forms.CheckBox();
 			this._HighlightLoopBracesBox = new System.Windows.Forms.CheckBox();
 			this._HighlightBranchBracesBox = new System.Windows.Forms.CheckBox();
-			this._MarkSpecialPunctuationBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage3.SuspendLayout();
 			this.SuspendLayout();
@@ -97,14 +97,24 @@
 			this._HighlightParameterBracesBox.Text = "Parameter parentheses ()";
 			this._HighlightParameterBracesBox.UseVisualStyleBackColor = true;
 			// 
+			// _MarkSpecialPunctuationBox
+			// 
+			this._MarkSpecialPunctuationBox.AutoSize = true;
+			this._MarkSpecialPunctuationBox.Location = new System.Drawing.Point(15, 6);
+			this._MarkSpecialPunctuationBox.Name = "_MarkSpecialPunctuationBox";
+			this._MarkSpecialPunctuationBox.Size = new System.Drawing.Size(237, 19);
+			this._MarkSpecialPunctuationBox.TabIndex = 5;
+			this._MarkSpecialPunctuationBox.Text = "Make following braces bold";
+			this._MarkSpecialPunctuationBox.UseVisualStyleBackColor = true;
+			// 
 			// _HighlightResourceBracesBox
 			// 
 			this._HighlightResourceBracesBox.AutoSize = true;
 			this._HighlightResourceBracesBox.Location = new System.Drawing.Point(15, 143);
 			this._HighlightResourceBracesBox.Name = "_HighlightResourceBracesBox";
-			this._HighlightResourceBracesBox.Size = new System.Drawing.Size(277, 19);
+			this._HighlightResourceBracesBox.Size = new System.Drawing.Size(389, 19);
 			this._HighlightResourceBracesBox.TabIndex = 5;
-			this._HighlightResourceBracesBox.Text = "Resource braces and parentheses";
+			this._HighlightResourceBracesBox.Text = "Resource and exception braces and parentheses";
 			this._HighlightResourceBracesBox.UseVisualStyleBackColor = true;
 			// 
 			// _HighlightLoopBracesBox
@@ -126,16 +136,6 @@
 			this._HighlightBranchBracesBox.TabIndex = 3;
 			this._HighlightBranchBracesBox.Text = "Branch braces and parentheses";
 			this._HighlightBranchBracesBox.UseVisualStyleBackColor = true;
-			// 
-			// _MarkSpecialPunctuationBox
-			// 
-			this._MarkSpecialPunctuationBox.AutoSize = true;
-			this._MarkSpecialPunctuationBox.Location = new System.Drawing.Point(15, 6);
-			this._MarkSpecialPunctuationBox.Name = "_MarkSpecialPunctuationBox";
-			this._MarkSpecialPunctuationBox.Size = new System.Drawing.Size(237, 19);
-			this._MarkSpecialPunctuationBox.TabIndex = 5;
-			this._MarkSpecialPunctuationBox.Text = "Make following braces bold";
-			this._MarkSpecialPunctuationBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpSyntaxHighlightPage
 			// 
