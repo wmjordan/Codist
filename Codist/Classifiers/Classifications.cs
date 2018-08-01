@@ -11,11 +11,9 @@ namespace Codist.Classifiers
 			AliasNamespace = registry.GetClassificationType(Constants.CSharpAliasNamespaceName);
 			AttributeName = registry.GetClassificationType(Constants.CSharpAttributeName);
 			AttributeNotation = registry.GetClassificationType(Constants.CSharpAttributeNotation);
-			BranchingKeyword = registry.GetClassificationType(Constants.CodeBranchingKeyword);
 			ClassName = registry.GetClassificationType(Constants.CodeClassName);
 			ConstField = registry.GetClassificationType(Constants.CSharpConstFieldName);
 			ConstructorMethod = registry.GetClassificationType(Constants.CSharpConstructorMethodName);
-			ControlFlowKeyword = registry.GetClassificationType(Constants.CodeControlFlowKeyword);
 			Declaration = registry.GetClassificationType(Constants.CSharpDeclarationName);
 			DeclarationBrace = registry.GetClassificationType(Constants.CSharpDeclarationBrace);
 			DelegateName = registry.GetClassificationType(Constants.CodeDelegateName);
@@ -27,7 +25,6 @@ namespace Codist.Classifiers
 			InterfaceName = registry.GetClassificationType(Constants.CodeInterfaceName);
 			Label = registry.GetClassificationType(Constants.CSharpLabel);
 			LocalVariable = registry.GetClassificationType(Constants.CSharpLocalVariableName);
-			LoopKeyword = registry.GetClassificationType(Constants.CodeLoopKeyword);
 			Method = registry.GetClassificationType(Constants.CSharpMethodName);
 			Namespace = registry.GetClassificationType(Constants.CSharpNamespaceName);
 			NestedDeclaration = registry.GetClassificationType(Constants.CSharpNestedDeclarationName);
@@ -35,6 +32,7 @@ namespace Codist.Classifiers
 			Parameter = registry.GetClassificationType(Constants.CSharpParameterName);
 			Property = registry.GetClassificationType(Constants.CSharpPropertyName);
 			ReadonlyField = registry.GetClassificationType(Constants.CSharpReadOnlyFieldName);
+			ResourceKeyword = registry.GetClassificationType(Constants.CSharpResourceKeyword);
 			SealedMember = registry.GetClassificationType(Constants.CSharpSealedClassName);
 			StaticMember = registry.GetClassificationType(Constants.CSharpStaticMemberName);
 			StructName = registry.GetClassificationType(Constants.CodeStructName);
@@ -53,15 +51,11 @@ namespace Codist.Classifiers
 
 		public IClassificationType AttributeNotation { get; }
 
-		public IClassificationType BranchingKeyword { get; }
-
 		public IClassificationType ClassName { get; }
 
 		public IClassificationType ConstField { get; }
 
 		public IClassificationType ConstructorMethod { get; }
-
-		public IClassificationType ControlFlowKeyword { get; }
 
 		public IClassificationType Declaration { get; }
 
@@ -85,8 +79,6 @@ namespace Codist.Classifiers
 
 		public IClassificationType LocalVariable { get; }
 
-		public IClassificationType LoopKeyword { get; }
-
 		public IClassificationType Method { get; }
 
 		public IClassificationType Namespace { get; }
@@ -100,6 +92,8 @@ namespace Codist.Classifiers
 		public IClassificationType Property { get; }
 
 		public IClassificationType ReadonlyField { get; }
+
+		public IClassificationType ResourceKeyword { get; }
 
 		public IClassificationType SealedMember { get; }
 
@@ -117,13 +111,21 @@ namespace Codist.Classifiers
 	sealed class GeneralClassifications
 	{
 		public GeneralClassifications(IClassificationTypeRegistryService registry) {
+			BranchingKeyword = registry.GetClassificationType(Constants.CodeBranchingKeyword);
+			ControlFlowKeyword = registry.GetClassificationType(Constants.CodeControlFlowKeyword);
 			Identifier = registry.GetClassificationType(Constants.CodeIdentifier);
+			LoopKeyword = registry.GetClassificationType(Constants.CodeLoopKeyword);
 			Punctuation = registry.GetClassificationType(Constants.CodePunctuation);
 			Keyword = registry.GetClassificationType(Constants.CodeKeyword);
+			SpecialPunctuation = registry.GetClassificationType(Constants.CodeSpecialPuctuation);
 		}
 
+		public IClassificationType BranchingKeyword { get; }
+		public IClassificationType ControlFlowKeyword { get; }
 		public IClassificationType Identifier { get; }
+		public IClassificationType LoopKeyword { get; }
 		public IClassificationType Keyword { get; }
 		public IClassificationType Punctuation { get; }
+		public IClassificationType SpecialPunctuation { get; }
 	}
 }

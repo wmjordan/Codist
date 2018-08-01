@@ -50,6 +50,7 @@ namespace Codist
 		public const string CodeBranchingKeyword = "Keyword: Branching";
 		public const string CodeControlFlowKeyword = "Keyword: Control flow";
 		public const string CodeLoopKeyword = "Keyword: Loop";
+		public const string CodeSpecialPuctuation = "Special Puctuation";
 
 		public const string CodeClassName = "class name";
 		public const string CodeStructName = "struct name";
@@ -96,6 +97,7 @@ namespace Codist
 		public const string CSharpFieldName = "C#: Field";
 		public const string CSharpConstFieldName = "C#: Const field";
 		public const string CSharpReadOnlyFieldName = "C#: Read-only field";
+		public const string CSharpResourceKeyword = "C#: Resource keyword";
 		public const string CSharpAliasNamespaceName = "C#: Alias namespace";
 		public const string CSharpConstructorMethodName = "C#: Constructor method";
 		public const string CSharpDeclarationName = "C#: Type declaration";
@@ -343,6 +345,9 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeLoopKeyword)]
 		LoopKeyword,
+		[Category(Constants.SyntaxCategory.Keyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpResourceKeyword)]
+		ResourceKeyword,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationName)]
 		TypeDeclaration,

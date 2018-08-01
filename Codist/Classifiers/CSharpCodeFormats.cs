@@ -56,6 +56,31 @@ namespace Codist.Classifiers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpResourceKeyword)]
+	[Name(Constants.CSharpResourceKeyword)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	sealed class ResourceKeywordFormat : ClassificationFormatDefinition
+	{
+		public ResourceKeywordFormat() {
+			DisplayName = Constants.CSharpResourceKeyword;
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CodeSpecialPuctuation)]
+	[Name(Constants.CodeSpecialPuctuation)]
+	[UserVisible(false)]
+	[Order(After = Priority.High)]
+	sealed class SpecialPuctuationFormat : ClassificationFormatDefinition
+	{
+		public SpecialPuctuationFormat() {
+			DisplayName = Constants.CodeSpecialPuctuation;
+			IsBold = true;
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalVariableName)]
 	[Name(Constants.CSharpLocalVariableName)]
 	[UserVisible(false)]

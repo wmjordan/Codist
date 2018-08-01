@@ -407,6 +407,10 @@ namespace Codist
 		DeclarationBrace = 1 << 1,
 		ParameterBrace = 1 << 2,
 		XmlDocCode = 1 << 3,
+		BranchBrace = 1 << 4,
+		LoopBrace = 1 << 5,
+		ResourceBrace = 1 << 6,
+		SpecialPunctuation = 1 << 7
 	}
 
 	[Flags]

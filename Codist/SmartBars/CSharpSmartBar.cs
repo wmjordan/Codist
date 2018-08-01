@@ -103,7 +103,7 @@ namespace Codist.SmartBars
 					});
 				}
 			}
-			AddCommands(MyToolBar, KnownMonikers.SelectFrame, "Expand selection\nRight click: Duplicate\nCtrl click: Copy", (ctx) => {
+			AddCommands(MyToolBar, KnownMonikers.SelectFrame, "Expand selection\nRight click: Duplicate\nCtrl click item: Copy", (ctx) => {
 				var r = new List<CommandItem>();
 				var duplicate = ctx.RightClick;
 				var node = _Node;

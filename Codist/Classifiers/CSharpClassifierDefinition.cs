@@ -135,6 +135,12 @@ namespace Codist.Classifiers
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpReadOnlyFieldName)]
 		static ClassificationTypeDefinition ReadOnlyField;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeKeyword)]
+		[Name(Constants.CSharpResourceKeyword)]
+		static ClassificationTypeDefinition ResourceKeyword;
+
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpSealedClassName)]
@@ -144,6 +150,7 @@ namespace Codist.Classifiers
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpStaticMemberName)]
 		static ClassificationTypeDefinition StaticMember;
+
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpTypeParameterName)]
@@ -158,6 +165,11 @@ namespace Codist.Classifiers
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpXmlDoc)]
 		static ClassificationTypeDefinition XmlDoc;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodePunctuation)]
+		[Name(Constants.CodeSpecialPuctuation)]
+		static ClassificationTypeDefinition SpecialPunctuation;
 #pragma warning restore 169
 	}
 }

@@ -95,7 +95,7 @@ text".Log(); // multiline string (string verbatim)
 				return clone(this); // invoking delegate
 			}
 			catch (Exception ex) {
-				throw new InvalidOperationException(ex);
+				throw new InvalidOperationException("Error when calling delegate", ex);
 			}
 		}
 
