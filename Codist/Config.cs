@@ -410,7 +410,8 @@ namespace Codist
 		BranchBrace = 1 << 4,
 		LoopBrace = 1 << 5,
 		ResourceBrace = 1 << 6,
-		SpecialPunctuation = 1 << 7
+		SpecialPunctuation = 1 << 7,
+		AllBraces = DeclarationBrace | ParameterBrace | BranchBrace | LoopBrace | ResourceBrace | SpecialPunctuation
 	}
 
 	[Flags]

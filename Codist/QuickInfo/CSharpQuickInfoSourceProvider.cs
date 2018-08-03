@@ -139,7 +139,7 @@ namespace Codist.QuickInfo
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 					ShowParameterInfo(qiContent, node);
 				}
-				if (node.Kind() == SyntaxKind.Argument) {
+				if (node.IsKind(SyntaxKind.Argument)) {
 					node = (node as ArgumentSyntax).Expression;
 				}
 				var qiWrapper = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride) || Config.Instance.QuickInfoMaxWidth > 0 || Config.Instance.QuickInfoMaxHeight > 0
@@ -165,6 +165,9 @@ namespace Codist.QuickInfo
 					goto EXIT;
 				}
 				if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)) {
+					if (node.Parent.IsKind(SyntaxKind.QualifiedName)) {
+						node = node.Parent;
+					}
 					var ctor = node.Parent as ObjectCreationExpressionSyntax;
 					OverrideDocumentation(node, qiWrapper, ctor == null || ctor.Type != node ? symbol : semanticModel.GetSymbolInfo(ctor).Symbol);
 				}
@@ -180,6 +183,9 @@ namespace Codist.QuickInfo
 				ShowSymbolInfo(qiContent, node, symbol);
 				RETURN:
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo) /*&& node is MemberDeclarationSyntax == false && node.Kind() != SyntaxKind.VariableDeclarator && node.Kind() != SyntaxKind.Parameter*/) {
+					if (node.Parent.IsKind(SyntaxKind.QualifiedName)) {
+						node = node.Parent;
+					}
 					var ctor = node.Parent as ObjectCreationExpressionSyntax;
 					qiWrapper.ApplyClickAndGo(ctor == null || ctor.Type != node ? symbol : semanticModel.GetSymbolInfo(ctor).Symbol);
 				}

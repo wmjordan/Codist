@@ -111,9 +111,9 @@
 			this.label2.AutoSize = true;
 			this.label2.Location = new System.Drawing.Point(6, 199);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(63, 15);
+			this.label2.Size = new System.Drawing.Size(95, 15);
 			this.label2.TabIndex = 19;
-			this.label2.Text = "Effect:";
+			this.label2.Text = "Background:";
 			// 
 			// _BackgroundEffectBox
 			// 
@@ -121,7 +121,7 @@
 			this._BackgroundEffectBox.FormattingEnabled = true;
 			this._BackgroundEffectBox.Location = new System.Drawing.Point(122, 196);
 			this._BackgroundEffectBox.Name = "_BackgroundEffectBox";
-			this._BackgroundEffectBox.Size = new System.Drawing.Size(121, 23);
+			this._BackgroundEffectBox.Size = new System.Drawing.Size(130, 23);
 			this._BackgroundEffectBox.TabIndex = 18;
 			// 
 			// _FontBox
@@ -239,7 +239,7 @@
             0,
             -2147483648});
 			this._FontSizeBox.Name = "_FontSizeBox";
-			this._FontSizeBox.Size = new System.Drawing.Size(120, 25);
+			this._FontSizeBox.Size = new System.Drawing.Size(129, 25);
 			this._FontSizeBox.TabIndex = 6;
 			// 
 			// label4

@@ -22,7 +22,7 @@ namespace Codist.Options
 		bool _uiLock;
 		public SyntaxStyleOptionPage() {
 			InitializeComponent();
-			_BackgroundEffectBox.Items.AddRange(new[] { "Solid", "Paint bottom", "Paint top", "Paint right", "Paint left" });
+			_BackgroundEffectBox.Items.AddRange(new[] { "Solid", "Bottom gradient", "Top gradient", "Right gradient", "Left gradient" });
 		}
 		internal SyntaxStyleOptionPage(ConfigPage service, Func<IEnumerable<StyleBase>> styleLoader, Func<IEnumerable<StyleBase>> defaultStyleLoader) : this() {
 			_service = service;

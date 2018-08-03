@@ -158,7 +158,7 @@ namespace Codist.Classifiers
 						continue;
 					case Constants.CodePunctuation:
 						if (item.TextSpan.Length == 1) {
-							ClassifyPunctuation(item, snapshot, result, semanticModel, unitCompilation);
+							ClassifyPunctuation(item.TextSpan, snapshot, result, semanticModel, unitCompilation);
 						}
 						continue;
 					default:
@@ -193,10 +193,13 @@ namespace Codist.Classifiers
 			return result;
 		}
 
-		static void ClassifyPunctuation(ClassifiedSpan item, ITextSnapshot snapshot, List<ClassificationSpan> result, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
-			var s = snapshot.GetText(item.TextSpan.Start, item.TextSpan.Length)[0];
+		static void ClassifyPunctuation(TextSpan itemSpan, ITextSnapshot snapshot, List<ClassificationSpan> result, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
+			if (Config.Instance.SpecialHighlightOptions.HasAnyFlag(SpecialHighlightOptions.AllBraces) == false) {
+				return;
+			}
+			var s = snapshot.GetText(itemSpan.Start, itemSpan.Length)[0];
 			if (s == '{' || s == '}') {
-				var node = unitCompilation.FindNode(item.TextSpan, true, true);
+				var node = unitCompilation.FindNode(itemSpan, true, true);
 				if (node is BaseTypeDeclarationSyntax == false
 					&& node is ExpressionSyntax == false
 					&& node is NamespaceDeclarationSyntax == false
@@ -206,36 +209,36 @@ namespace Codist.Classifiers
 				var type = ClassifySyntaxNode(node);
 				if (type != null) {
 					if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
-						result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.SpecialPunctuation));
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation));
 					}
 					if (type == _GeneralClassifications.BranchingKeyword) {
 						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.BranchBrace)) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
+							result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 						}
 						return;
 					}
 					if (type == _GeneralClassifications.LoopKeyword) {
 						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.LoopBrace)) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
+							result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 						}
 						return;
 					}
 					if (type == _Classifications.ResourceKeyword) {
 						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ResourceBrace)) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
+							result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 						}
 						return;
 					}
 					if (node is ExpressionSyntax == false) {
-						result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.DeclarationBrace));
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, _Classifications.DeclarationBrace));
 					}
 					if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace)) {
-						result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
+						result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 					}
 				}
 			}
 			else if ((s == '(' || s == ')') && Config.Instance.SpecialHighlightOptions.HasAnyFlag(SpecialHighlightOptions.ParameterBrace | SpecialHighlightOptions.BranchBrace | SpecialHighlightOptions.LoopBrace | SpecialHighlightOptions.ResourceBrace)) {
-				var node = unitCompilation.FindNode(item.TextSpan, true, true);
+				var node = unitCompilation.FindNode(itemSpan, true, true);
 				switch (node.Kind()) {
 					case SyntaxKind.CastExpression:
 						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ParameterBrace) == false) {
@@ -260,7 +263,7 @@ namespace Codist.Classifiers
 								type = _Classifications.TypeParameter; break;
 						}
 						if (type != null) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
+							result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 							return;
 						}
 						break;
@@ -268,23 +271,13 @@ namespace Codist.Classifiers
 					case SyntaxKind.SwitchSection:
 					case SyntaxKind.IfStatement:
 					case SyntaxKind.ElseClause:
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.SpecialPunctuation));
-						}
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.BranchBrace)) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.BranchingKeyword));
-						}
+						MarkClassificationTypeForBrace(itemSpan, snapshot, result, _GeneralClassifications.BranchingKeyword, SpecialHighlightOptions.BranchBrace);
 						return;
 					case SyntaxKind.ForStatement:
 					case SyntaxKind.ForEachStatement:
 					case SyntaxKind.WhileStatement:
 					case SyntaxKind.DoStatement:
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.SpecialPunctuation));
-						}
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.LoopBrace)) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.LoopKeyword));
-						}
+						MarkClassificationTypeForBrace(itemSpan, snapshot, result, _GeneralClassifications.LoopKeyword, SpecialHighlightOptions.LoopBrace);
 						return;
 					case SyntaxKind.UsingStatement:
 					case SyntaxKind.FixedStatement:
@@ -294,12 +287,7 @@ namespace Codist.Classifiers
 					case SyntaxKind.CatchClause:
 					case SyntaxKind.CatchFilterClause:
 					case SyntaxKind.FinallyClause:
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.SpecialPunctuation));
-						}
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ResourceBrace)) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword));
-						}
+						MarkClassificationTypeForBrace(itemSpan, snapshot, result, _Classifications.ResourceKeyword, SpecialHighlightOptions.ResourceBrace);
 						return;
 				}
 				node = (node as BaseArgumentListSyntax
@@ -309,12 +297,7 @@ namespace Codist.Classifiers
 				if (node != null) {
 					var type = ClassifySyntaxNode(node);
 					if (type != null) {
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.SpecialPunctuation));
-						}
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ParameterBrace)) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, type));
-						}
+						MarkClassificationTypeForBrace(itemSpan, snapshot, result, type, SpecialHighlightOptions.ParameterBrace);
 					}
 				}
 			}
@@ -325,6 +308,15 @@ namespace Codist.Classifiers
 			//		result.Add(CreateClassificationSpan(snapshot, node.Span, _Classifications.AttributeNotation));
 			//	}
 			//}
+		}
+
+		private static void MarkClassificationTypeForBrace(TextSpan itemSpan, ITextSnapshot snapshot, List<ClassificationSpan> result, IClassificationType type, SpecialHighlightOptions options) {
+			if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
+				result.Add(CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation));
+			}
+			if (Config.Instance.SpecialHighlightOptions.MatchFlags(options)) {
+				result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
+			}
 		}
 
 		static IClassificationType ClassifySyntaxNode(SyntaxNode node) {

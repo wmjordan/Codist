@@ -35,6 +35,9 @@ namespace Codist.QuickInfo
 			if (description == null) {
 				return;
 			}
+			if (symbol.IsImplicitlyDeclared) {
+				symbol = symbol.ContainingType;
+			}
 			var locs = symbol.GetSourceLocations();
 			if (locs.Length == 0 || String.IsNullOrEmpty(locs[0].SyntaxTree.FilePath)) {
 				var asm = symbol.GetAssemblyModuleName();
