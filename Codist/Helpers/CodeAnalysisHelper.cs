@@ -22,9 +22,24 @@ namespace Codist
 	static class CodeAnalysisHelper
 	{
 		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
+			if (workspace == null) {
+				throw new ArgumentNullException("workspace");
+			}
 			var solution = workspace.CurrentSolution;
+			if (solution == null) {
+				throw new InvalidOperationException("solution is null");
+			}
+			if (span.Snapshot == null) {
+				throw new InvalidOperationException("snapshot is null");
+			}
 			var sourceText = span.Snapshot.AsText();
+			if (sourceText == null) {
+				throw new InvalidOperationException("sourceText is null");
+			}
 			var docId = workspace.GetDocumentIdInCurrentContext(sourceText.Container);
+			if (docId == null) {
+				throw new InvalidOperationException("docId is null");
+			}
 			return solution.ContainsDocument(docId)
 				? solution.GetDocument(docId)
 				: solution.WithDocumentText(docId, sourceText, PreservationMode.PreserveIdentity).GetDocument(docId);

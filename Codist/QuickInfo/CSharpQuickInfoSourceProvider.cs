@@ -359,6 +359,12 @@ namespace Codist.QuickInfo
 						}
 						qiContent.Add(s + " switch sections, " + cases + " cases");
 					}
+					else {
+						var cases = (node as SwitchStatementSyntax).Sections.Count;
+						if (cases > 1) {
+							qiContent.Add("1 switch section, " + cases + " cases");
+						}
+					}
 				}
 				else if (nodeKind == SyntaxKind.StringLiteralExpression) {
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {

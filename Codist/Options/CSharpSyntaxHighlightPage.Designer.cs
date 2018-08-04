@@ -44,7 +44,7 @@
 			this._HighlightSpecialCommentBox.Location = new System.Drawing.Point(15, 180);
 			this._HighlightSpecialCommentBox.Name = "_HighlightSpecialCommentBox";
 			this._HighlightSpecialCommentBox.Size = new System.Drawing.Size(149, 19);
-			this._HighlightSpecialCommentBox.TabIndex = 2;
+			this._HighlightSpecialCommentBox.TabIndex = 6;
 			this._HighlightSpecialCommentBox.Text = "Special comment";
 			this._HighlightSpecialCommentBox.UseVisualStyleBackColor = true;
 			// 
@@ -54,7 +54,7 @@
 			this._HighlightDeclarationBracesBox.Location = new System.Drawing.Point(15, 43);
 			this._HighlightDeclarationBracesBox.Name = "_HighlightDeclarationBracesBox";
 			this._HighlightDeclarationBracesBox.Size = new System.Drawing.Size(197, 19);
-			this._HighlightDeclarationBracesBox.TabIndex = 0;
+			this._HighlightDeclarationBracesBox.TabIndex = 1;
 			this._HighlightDeclarationBracesBox.Text = "Declaration braces {}";
 			this._HighlightDeclarationBracesBox.UseVisualStyleBackColor = true;
 			// 
@@ -93,7 +93,7 @@
 			this._HighlightParameterBracesBox.Location = new System.Drawing.Point(15, 68);
 			this._HighlightParameterBracesBox.Name = "_HighlightParameterBracesBox";
 			this._HighlightParameterBracesBox.Size = new System.Drawing.Size(221, 19);
-			this._HighlightParameterBracesBox.TabIndex = 1;
+			this._HighlightParameterBracesBox.TabIndex = 2;
 			this._HighlightParameterBracesBox.Text = "Parameter parentheses ()";
 			this._HighlightParameterBracesBox.UseVisualStyleBackColor = true;
 			// 
@@ -103,7 +103,7 @@
 			this._MarkSpecialPunctuationBox.Location = new System.Drawing.Point(15, 6);
 			this._MarkSpecialPunctuationBox.Name = "_MarkSpecialPunctuationBox";
 			this._MarkSpecialPunctuationBox.Size = new System.Drawing.Size(237, 19);
-			this._MarkSpecialPunctuationBox.TabIndex = 5;
+			this._MarkSpecialPunctuationBox.TabIndex = 0;
 			this._MarkSpecialPunctuationBox.Text = "Make following braces bold";
 			this._MarkSpecialPunctuationBox.UseVisualStyleBackColor = true;
 			// 
