@@ -48,7 +48,34 @@ namespace Codist
 			}
 			view.Selection.Select(new SnapshotSpan(start, end), false);
 		}
-
+		public static TokenType GetSelectedTokenType(this ITextView view) {
+			if (view.Selection.IsEmpty || view.Selection.SelectedSpans.Count > 1) {
+				return TokenType.None;
+			}
+			var selection = view.Selection.SelectedSpans[0];
+			if (selection.Length >= 128) {
+				return TokenType.None;
+			}
+			var t = TokenType.None;
+			foreach (var c in selection.GetText()) {
+				if (c >= '0' && c <= '9') {
+					t |= TokenType.Digit;
+				}
+				else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+					t |= TokenType.Letter;
+				}
+				else if (c == '_') {
+					t |= TokenType.Underscore;
+				}
+				else if (c == '.') {
+					t |= TokenType.Dot;
+				}
+				else {
+					return TokenType.None;
+				}
+			}
+			return t;
+		}
 		public static void SelectNode(this IWpfTextView view, Microsoft.CodeAnalysis.SyntaxNode node, bool includeTrivia) {
 			if (includeTrivia) {
 				view.Selection.Select(new SnapshotSpan(view.TextSnapshot, node.FullSpan.Start, node.FullSpan.Length), false);
@@ -101,5 +128,15 @@ namespace Codist
 			userData.GetData(ref guidViewHost, out object holder);
 			return ((IWpfTextViewHost)holder).TextView;
 		}
+	}
+
+	[Flags]
+	public enum TokenType
+	{
+		None,
+		Letter = 1,
+		Digit = 2,
+		Dot = 4,
+		Underscore = 8
 	}
 }

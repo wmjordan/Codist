@@ -320,15 +320,17 @@ namespace Codist.Classifiers
 		}
 
 		static IClassificationType ClassifySyntaxNode(SyntaxNode node) {
-			IClassificationType type = null;
 			switch (node.Kind()) {
 				case SyntaxKind.MethodDeclaration:
 				case SyntaxKind.AnonymousMethodExpression:
 				case SyntaxKind.SimpleLambdaExpression:
 				case SyntaxKind.ParenthesizedLambdaExpression:
+					return _Classifications.Method;
 				case SyntaxKind.InvocationExpression:
-					type = _Classifications.Method;
-					break;
+					if (((node as InvocationExpressionSyntax).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") {
+						return null;
+					}
+					return _Classifications.Method;
 				case SyntaxKind.ConstructorDeclaration:
 				case SyntaxKind.AnonymousObjectCreationExpression:
 				case SyntaxKind.ObjectInitializerExpression:
@@ -336,29 +338,25 @@ namespace Codist.Classifiers
 				case SyntaxKind.CollectionInitializerExpression:
 				case SyntaxKind.ArrayInitializerExpression:
 				case SyntaxKind.ThisConstructorInitializer:
-					type = _Classifications.ConstructorMethod;
-					break;
-				case SyntaxKind.PropertyDeclaration: type = _Classifications.Property; break;
-				case SyntaxKind.ClassDeclaration: type = _Classifications.ClassName; break;
-				case SyntaxKind.InterfaceDeclaration: type = _Classifications.InterfaceName; break;
-				case SyntaxKind.EnumDeclaration: type = _Classifications.EnumName; break;
-				case SyntaxKind.StructDeclaration: type = _Classifications.StructName; break;
-				case SyntaxKind.Attribute: type = _Classifications.AttributeName; break;
+					return _Classifications.ConstructorMethod;
+				case SyntaxKind.PropertyDeclaration: return _Classifications.Property;
+				case SyntaxKind.ClassDeclaration: return _Classifications.ClassName;
+				case SyntaxKind.InterfaceDeclaration: return _Classifications.InterfaceName;
+				case SyntaxKind.EnumDeclaration: return _Classifications.EnumName;
+				case SyntaxKind.StructDeclaration: return _Classifications.StructName;
+				case SyntaxKind.Attribute: return _Classifications.AttributeName;
 				case SyntaxKind.NamespaceDeclaration:
-					type = _Classifications.Namespace;
-					break;
+					return _Classifications.Namespace;
 				case SyntaxKind.IfStatement:
 				case SyntaxKind.ElseClause:
 				case SyntaxKind.SwitchStatement:
 				case SyntaxKind.SwitchSection:
-					type = _GeneralClassifications.BranchingKeyword;
-					break;
+					return _GeneralClassifications.BranchingKeyword;
 				case SyntaxKind.ForStatement:
 				case SyntaxKind.ForEachStatement:
 				case SyntaxKind.WhileStatement:
 				case SyntaxKind.DoStatement:
-					type = _GeneralClassifications.LoopKeyword;
-					break;
+					return _GeneralClassifications.LoopKeyword;
 				case SyntaxKind.UsingStatement:
 				case SyntaxKind.LockStatement:
 				case SyntaxKind.FixedStatement:
@@ -367,12 +365,9 @@ namespace Codist.Classifiers
 				case SyntaxKind.CatchClause:
 				case SyntaxKind.CatchFilterClause:
 				case SyntaxKind.FinallyClause:
-					type = _Classifications.ResourceKeyword;
-					break;
-					//case SyntaxKind.InterpolatedStringExpression: type = _Classifications.ConstField; break;
+					return _Classifications.ResourceKeyword;
 			}
-
-			return type;
+			return null;
 		}
 
 		string HighlightXmlDocCData(SnapshotSpan span, ClassifiedSpan item, Workspace workspace, List<ClassificationSpan> result, string ct) {

@@ -42,7 +42,7 @@ namespace Codist.SmartBars
 				new CSharpSmartBar(textView);
 			}
 			else {
-				new SmartBar(textView, 16);
+				new SmartBar(textView);
 			}
 		}
 	}

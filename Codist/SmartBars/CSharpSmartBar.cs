@@ -27,7 +27,7 @@ namespace Codist.SmartBars
 		SyntaxTrivia _Trivia;
 		SyntaxNode _Node;
 
-		public CSharpSmartBar(IWpfTextView view) : base(view, 16) {
+		public CSharpSmartBar(IWpfTextView view) : base(view) {
 		}
 
 		ToolBar MyToolBar => ToolBar2;
@@ -68,6 +68,7 @@ namespace Codist.SmartBars
 					if (_Node is IdentifierNameSyntax) {
 						AddEditorCommand(MyToolBar, KnownMonikers.GoToDefinition, "Edit.GoToDefinition", "Go to definition");
 					}
+					// todo+ replace it with SymbolFinder.FindReferencesAsync
 					AddEditorCommand(MyToolBar, KnownMonikers.ReferencedDimension, "Edit.FindAllReferences", "Find all references");
 					if (CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
 						AddEditorCommand(MyToolBar, KnownMonikers.Rename, "Refactor.Rename", "Rename symbol");
@@ -97,22 +98,22 @@ namespace Codist.SmartBars
 				else {
 					AddCommand(MyToolBar, KnownMonikers.CommentCode, "Comment selection\nRight click: Comment line", ctx => {
 						if (ctx.RightClick) {
-							View.ExpandSelectionToLine();
+							ctx.View.ExpandSelectionToLine();
 						}
 						TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
 					});
 				}
 			}
-			AddCommands(MyToolBar, KnownMonikers.SelectFrame, "Expand selection\nRight click: Duplicate\nCtrl click item: Copy", (ctx) => {
+			AddCommands(MyToolBar, KnownMonikers.SelectFrame, "Expand selection\nRight click: Duplicate\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", ctx => {
 				var r = new List<CommandItem>();
 				var duplicate = ctx.RightClick;
 				var node = _Node;
 				while (node != null) {
-					if (node.FullSpan.Contains(View.Selection, false)
+					if (node.FullSpan.Contains(ctx.View.Selection, false)
 						&& (node.IsSyntaxBlock() || node.IsDeclaration())) {
 						var n = node;
-						r.Add(new CommandItem((duplicate ? "Duplicate " : "Select ") + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), CodeAnalysisHelper.GetSyntaxMoniker(n), null, _ => {
-							View.SelectNode(n, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ExpansionIncludeTrivia) || n.Span.Contains(View.Selection, false) == false);
+						r.Add(new CommandItem((duplicate ? "Duplicate " : "Select ") + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), CodeAnalysisHelper.GetSyntaxMoniker(n), null, ctx2 => {
+							ctx2.View.SelectNode(n, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ExpansionIncludeTrivia) || n.Span.Contains(ctx2.View.Selection, false) == false);
 							if (Keyboard.Modifiers == ModifierKeys.Control) {
 								TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
 							}
@@ -128,9 +129,11 @@ namespace Codist.SmartBars
 		}
 
 		void AddCommand(ImageMoniker moniker, string tooltip, Action<ITextEdit> editCommand) {
-			AddCommand(MyToolBar, moniker, tooltip, (ctx) => {
+			AddCommand(MyToolBar, moniker, tooltip, ctx => {
+				// before executing the command, updates the semantic model,
+				// for it could be modified by external editor commands or duplicated document windows
 				if (UpdateSemanticModel()) {
-					using (var edit = View.TextSnapshot.TextBuffer.CreateEdit()) {
+					using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
 						editCommand(edit);
 						if (edit.HasEffectiveChanges) {
 							edit.Apply();
@@ -141,8 +144,8 @@ namespace Codist.SmartBars
 		}
 
 		bool UpdateSemanticModel() {
-			var workspace = View.TextBuffer.GetWorkspace();
-			_SemanticModel = workspace.GetDocument(View.Selection.SelectedSpans[0]).GetSemanticModelAsync().Result;
+			Document document = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]);
+			_SemanticModel = document.GetSemanticModelAsync().Result;
 			_Compilation = _SemanticModel.SyntaxTree.GetCompilationUnitRoot();
 			int pos = View.Selection.Start.Position;
 			try {

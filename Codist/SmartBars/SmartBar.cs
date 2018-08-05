@@ -25,7 +25,7 @@ namespace Codist.SmartBars
 		readonly ToolBarTray _ToolBarTray;
 		/// <summary>The layer for the smart bar adornment.</summary>
 		readonly IAdornmentLayer _ToolBarLayer;
-		readonly int _IconSize;
+		readonly int _IconSize = 16;
 		ImageAttributes _ImageAttributes;
 		DateTime _LastExecute;
 
@@ -33,9 +33,8 @@ namespace Codist.SmartBars
 		/// Initializes a new instance of the <see cref="SmartBar"/> class.
 		/// </summary>
 		/// <param name="view">The <see cref="IWpfTextView"/> upon which the adornment will be drawn</param>
-		public SmartBar(IWpfTextView view, int iconSize) {
+		public SmartBar(IWpfTextView view) {
 			View = view ?? throw new ArgumentNullException(nameof(view));
-			_IconSize = iconSize;
 			_ToolBarLayer = view.GetAdornmentLayer(nameof(SmartBar));
 			View.Selection.SelectionChanged += ViewSelectionChanged;
 			View.Closed += ViewClosed;
@@ -211,14 +210,14 @@ namespace Codist.SmartBars
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
 				AddCommand(ToolBar, KnownMonikers.Cut, "Cut selected text\nRight click: Cut line", ctx => {
 					if (ctx.RightClick) {
-						View.ExpandSelectionToLine();
+						ctx.View.ExpandSelectionToLine();
 					}
 					TextEditorHelper.ExecuteEditorCommand("Edit.Cut");
 				});
 			}
 			AddCommand(ToolBar, KnownMonikers.Copy, "Copy selected text\nRight click: Copy line", ctx => {
 				if (ctx.RightClick) {
-					View.ExpandSelectionToLine();
+					ctx.View.ExpandSelectionToLine();
 				}
 				TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
 			});
@@ -226,26 +225,47 @@ namespace Codist.SmartBars
 				if (Clipboard.ContainsText()) {
 					AddCommand(ToolBar, KnownMonikers.Paste, "Paste text from clipboard\nRight click: Paste over line", ctx => {
 						if (ctx.RightClick) {
-							View.ExpandSelectionToLine(false);
+							ctx.View.ExpandSelectionToLine(false);
 						}
 						TextEditorHelper.ExecuteEditorCommand("Edit.Paste");
-						KeepToolbar();
+						ctx.KeepToolbar();
 					});
 				}
 				AddCommand(ToolBar, KnownMonikers.CopyItem, "Duplicate selection\nRight click: Duplicate line", ctx => {
 					if (ctx.RightClick) {
-						View.ExpandSelectionToLine();
+						ctx.View.ExpandSelectionToLine();
 					}
 					TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
-					KeepToolbar();
+					ctx.KeepToolbar();
 				});
 				AddCommand(ToolBar, KnownMonikers.Cancel, "Delete selected text\nRight click: Delete line", ctx => {
 					if (ctx.RightClick) {
-						View.ExpandSelectionToLine();
+						ctx.View.ExpandSelectionToLine();
 					}
 					TextEditorHelper.ExecuteEditorCommand("Edit.Delete");
 				});
-				AddEditorCommand(ToolBar, KnownMonikers.FormatSelection, "Edit.FormatSelection", "Format selected text\nRight click: Format document", "Edit.FormatDocument");
+				switch (View.GetSelectedTokenType()) {
+					case TokenType.None:
+						AddEditorCommand(ToolBar, KnownMonikers.FormatSelection, "Edit.FormatSelection", "Format selected text\nRight click: Format document", "Edit.FormatDocument");
+						break;
+					case TokenType.Digit:
+						AddCommand(ToolBar, KnownMonikers.Counter, "Increment number", ctx => {
+							var span = ctx.View.Selection.SelectedSpans[0];
+							var t = span.GetText();
+							long l;
+							if (long.TryParse(t, out l)) {
+								using (var ed = ctx.View.TextBuffer.CreateEdit()) {
+									t = (++l).ToString(System.Globalization.CultureInfo.InvariantCulture);
+									if (ed.Replace(span.Span, t)) {
+										ed.Apply();
+										ctx.View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
+										ctx.KeepToolbar();
+									}
+								}
+							}
+						});
+						break;
+				}
 				//var selection = View.Selection;
 				//if (View.Selection.Mode == TextSelectionMode.Stream && View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.Start.Position) != View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.End.Position)) {
 				//	AddCommand(ToolBar, KnownMonikers.Join, "Join lines", ctx => {
@@ -284,11 +304,11 @@ namespace Codist.SmartBars
 			};
 			b.Click += (s, args) => {
 				HideToolBar(s, args);
-				handler(new CommandContext());
+				handler(new CommandContext(this));
 			};
 			b.MouseRightButtonUp += (s, args) => {
 				HideToolBar(s, args);
-				handler(new CommandContext(true));
+				handler(new CommandContext(this, true));
 				args.Handled = true;
 			};
 			toolBar.Items.Add(b);
@@ -317,7 +337,7 @@ namespace Codist.SmartBars
 						mi.Click += (sender, e) => {
 							HideToolBar(sender, e);
 							//SetLastExecuteTime(sender, e);
-							item.Action(new CommandContext());
+							item.Action(new CommandContext(this));
 						};
 						m.Items.Add(mi);
 					}
@@ -325,10 +345,10 @@ namespace Codist.SmartBars
 				}
 			}
 			b.Click += (s, args) => {
-				ButtonEventHandler(s as Button, new CommandContext());
+				ButtonEventHandler(s as Button, new CommandContext(this));
 			};
 			b.MouseRightButtonUp += (s, args) => {
-				ButtonEventHandler(s as Button, new CommandContext(true));
+				ButtonEventHandler(s as Button, new CommandContext(this, true));
 				args.Handled = true;
 			};
 			toolBar.Items.Add(b);
@@ -365,11 +385,18 @@ namespace Codist.SmartBars
 
 		protected sealed class CommandContext
 		{
-			public bool RightClick { get; }
-			public CommandContext() {
+			readonly SmartBar _Bar;
+			public CommandContext(SmartBar bar) {
+				View = bar.View;
+				_Bar = bar;
 			}
-			public CommandContext(bool rightClick) {
+			public CommandContext(SmartBar bar, bool rightClick) : this(bar) {
 				RightClick = rightClick;
+			}
+			public bool RightClick { get; }
+			public IWpfTextView View { get; }
+			public void KeepToolbar() {
+				_Bar.KeepToolbar();
 			}
 		}
 
