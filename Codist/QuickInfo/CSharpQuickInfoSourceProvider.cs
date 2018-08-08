@@ -187,7 +187,7 @@ namespace Codist.QuickInfo
 						node = node.Parent;
 					}
 					var ctor = node.Parent as ObjectCreationExpressionSyntax;
-					qiWrapper.ApplyClickAndGo(ctor == null || ctor.Type != node ? symbol : semanticModel.GetSymbolInfo(ctor).Symbol);
+					qiWrapper.ApplyClickAndGo(ctor == null || ctor.Type != node ? symbol : semanticModel.GetSymbolOrFirstCandidate(ctor));
 				}
 				QuickInfoOverrider.LimitQuickInfoItemSize(qiContent, qiWrapper);
 				var navigator = _NavigatorService.GetTextStructureNavigator(_TextBuffer);
@@ -575,8 +575,10 @@ namespace Codist.QuickInfo
 				}
 				var pk = (node = node.Parent).Kind();
 				if (pk == SyntaxKind.ObjectCreationExpression || pk == SyntaxKind.QualifiedName && (node = node.Parent) != null && node.Kind() == SyntaxKind.ObjectCreationExpression) {
-					var method = _SemanticModel.GetSymbolInfo(node).Symbol as IMethodSymbol;
-					ShowOverloadsInfo(qiContent, node, method);
+					var method = _SemanticModel.GetSymbolOrFirstCandidate(node) as IMethodSymbol;
+					if (method != null) {
+						ShowOverloadsInfo(qiContent, node, method);
+					}
 				}
 			}
 

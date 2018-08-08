@@ -62,6 +62,12 @@ namespace Codist
 					?? (node is TypeParameterSyntax || node is ParameterSyntax ? semanticModel.GetDeclaredSymbol(node) : null);
 		}
 
+		public static ISymbol GetSymbolOrFirstCandidate(this SemanticModel semanticModel, SyntaxNode node) {
+			var info = semanticModel.GetSymbolInfo(node);
+			return info.Symbol
+				?? (info.CandidateSymbols.Length > 0 ? info.CandidateSymbols[0] : null);
+		}
+
 		public static void GoToSource(this ISymbol symbol) {
 			if (symbol != null && symbol.DeclaringSyntaxReferences.Length > 0) {
 				var loc = symbol.DeclaringSyntaxReferences[0];
