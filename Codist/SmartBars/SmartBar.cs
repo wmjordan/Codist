@@ -48,6 +48,7 @@ namespace Codist.SmartBars
 			};
 			_ToolBarTray.MouseEnter += ToolBarMouseEnter;
 			_ToolBarTray.MouseLeave += ToolBarMouseLeave;
+			_ToolBarTray.DragEnter += HideToolBar;
 			_CreateToolBarTimer = new Timer(CreateToolBar);
 			if (_ImageService == null) {
 				_ImageService = ServiceProvider.GlobalProvider.GetService(typeof(SVsImageService)) as IVsImageService2;
