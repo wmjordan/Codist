@@ -124,6 +124,7 @@ namespace Codist.SmartBars
 					}
 					node = node.Parent;
 				}
+				r.Add(new CommandItem("Select all", KnownMonikers.SelectAll, "Select all text", ctx2 => TextEditorHelper.ExecuteEditorCommand("Edit.SelectAll")));
 				return r;
 			});
 		}
