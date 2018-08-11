@@ -224,13 +224,7 @@ namespace Codist.SmartBars
 			});
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
 				if (Clipboard.ContainsText()) {
-					AddCommand(ToolBar, KnownMonikers.Paste, "Paste text from clipboard\nRight click: Paste over line", ctx => {
-						if (ctx.RightClick) {
-							ctx.View.ExpandSelectionToLine(false);
-						}
-						TextEditorHelper.ExecuteEditorCommand("Edit.Paste");
-						ctx.KeepToolbar();
-					});
+					AddCommand(ToolBar, KnownMonikers.Paste, "Paste text from clipboard\nRight click: Paste over line\nCtrl click: Paste and select next", ctx => ExecuteAndFind(ctx, "Edit.Paste"));
 				}
 				AddCommand(ToolBar, KnownMonikers.CopyItem, "Duplicate selection\nRight click: Duplicate line", ctx => {
 					if (ctx.RightClick) {
@@ -239,12 +233,7 @@ namespace Codist.SmartBars
 					TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
 					ctx.KeepToolbar();
 				});
-				AddCommand(ToolBar, KnownMonikers.Cancel, "Delete selected text\nRight click: Delete line", ctx => {
-					if (ctx.RightClick) {
-						ctx.View.ExpandSelectionToLine();
-					}
-					TextEditorHelper.ExecuteEditorCommand("Edit.Delete");
-				});
+				AddCommand(ToolBar, KnownMonikers.Cancel, "Delete selected text\nRight click: Delete line\nCtrl click: Delete and select next", ctx => ExecuteAndFind(ctx, "Edit.Delete"));
 				switch (View.GetSelectedTokenType()) {
 					case TokenType.None:
 						AddEditorCommand(ToolBar, KnownMonikers.FormatSelection, "Edit.FormatSelection", "Format selected text\nRight click: Format document", "Edit.FormatDocument");
@@ -278,6 +267,23 @@ namespace Codist.SmartBars
 			}
 			AddEditorCommand(ToolBar, KnownMonikers.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownMonikers.ASerif, "Capitalize");
+		}
+
+		static void ExecuteAndFind(CommandContext ctx, string command) {
+			if (ctx.RightClick) {
+				ctx.View.ExpandSelectionToLine(false);
+			}
+			string t = null;
+			if (Keyboard.Modifiers == ModifierKeys.Control && ctx.View.Selection.IsEmpty == false) {
+				t = ctx.View.TextSnapshot.GetText(ctx.View.Selection.SelectedSpans[0]);
+			}
+			TextEditorHelper.ExecuteEditorCommand(command);
+			if (t != null) {
+				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
+				if (p != null && p.FindText(t, 0)) {
+					ctx.KeepToolbar();
+				}
+			}
 		}
 
 		protected void AddEditorCommand(ToolBar toolBar, ImageMoniker moniker, string command, string tooltip) {

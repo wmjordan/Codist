@@ -186,6 +186,7 @@ I have learned a lot from the following extension projects.
 * Remarker: https://github.com/jgyo/remarker
 * UntabifyReplacement: https://github.com/cpmcgrath/UntabifyReplacement
 * Extensiblity Tools: https://github.com/madskristensen/ExtensibilityTools
+* CodeMaid: https://github.com/codecadwallader/codemaid
 
 # Bugs and suggestions
 Please [post New Issue](https://github.com/wmjordan/Codist/issues) in the [GitHub project](https://github.com/wmjordan/Codist) if you find any bug or have any suggestion.
