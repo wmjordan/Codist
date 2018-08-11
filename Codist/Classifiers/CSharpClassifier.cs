@@ -22,8 +22,6 @@ namespace Codist.Classifiers
 		readonly IClassificationTypeRegistryService _TypeRegistryService;
 		readonly ITextDocumentFactoryService _TextDocumentFactoryService;
 
-		SemanticModel _SemanticModel;
-
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CSharpClassifier"/> class.
 		/// </summary>
@@ -40,8 +38,6 @@ namespace Codist.Classifiers
 			_TextDocumentFactoryService = textDocumentFactoryService;
 			_TextBuffer = buffer;
 			_TypeRegistryService = registry;
-			_TextBuffer.Changed += OnTextBufferChanged;
-			_TextDocumentFactoryService.TextDocumentDisposed += OnTextDocumentDisposed;
 		}
 
 		/// <summary>
@@ -73,7 +69,7 @@ namespace Codist.Classifiers
 				return Array.Empty<ClassificationSpan>();
 			}
 			var result = new List<ClassificationSpan>(16);
-			var semanticModel = _SemanticModel ?? (_SemanticModel = workspace.GetDocument(span).GetSemanticModelAsync().Result);
+			var semanticModel = workspace.GetDocument(span).GetSemanticModelAsync().Result;
 
 			var textSpan = new TextSpan(span.Start.Position, span.Length);
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
@@ -546,18 +542,6 @@ namespace Codist.Classifiers
 			}
 			else if (symbol.IsAbstract) {
 				yield return _Classifications.AbstractMember;
-			}
-		}
-
-		void OnTextBufferChanged(object sender, TextContentChangedEventArgs e) => _SemanticModel = null;
-
-		// TODO: it's not good idea subscribe on text document disposed. Try to subscribe on text
-		// document closed.
-		void OnTextDocumentDisposed(object sender, TextDocumentEventArgs e) {
-			if (e.TextDocument.TextBuffer == _TextBuffer) {
-				_SemanticModel = null;
-				_TextBuffer.Changed -= OnTextBufferChanged;
-				_TextDocumentFactoryService.TextDocumentDisposed -= OnTextDocumentDisposed;
 			}
 		}
 
