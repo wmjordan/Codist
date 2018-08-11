@@ -519,7 +519,7 @@ namespace Codist.QuickInfo
 				info.AddText("Type argument:", true);
 				for (int i = 0; i < l; i++) {
 					var argInfo = new TextBlock();
-					ShowTypeParameterInfo(method.TypeParameters[i], method.TypeArguments[i], argInfo, node.SpanStart);
+					ShowTypeParameterInfo(method.TypeParameters[i], method.TypeArguments[i], argInfo);
 					info.Add(argInfo);
 				}
 				qiContent.Add(info);
@@ -664,9 +664,9 @@ namespace Codist.QuickInfo
 				qiContent.Add(info);
 			}
 
-			void ShowTypeParameterInfo(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument, TextBlock text, int position) {
+			static void ShowTypeParameterInfo(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument, TextBlock text) {
 				text.AddText(typeParameter.Name, _SymbolFormatter.TypeParameter).AddText(" is ")
-					.AddSymbolDisplayParts(typeArgument.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
+					.AddSymbol(typeArgument, null, _SymbolFormatter);
 				if (typeParameter.HasConstructorConstraint == false && typeParameter.HasReferenceTypeConstraint == false && typeParameter.HasValueTypeConstraint == false && typeParameter.ConstraintTypes.Length == 0) {
 					return;
 				}
@@ -695,7 +695,7 @@ namespace Codist.QuickInfo
 						if (i > 0) {
 							text.AddText(", ");
 						}
-						text.AddSymbolDisplayParts(constraint.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
+						text.AddSymbol(constraint, null, _SymbolFormatter);
 						++i;
 					}
 				}
@@ -998,6 +998,7 @@ namespace Codist.QuickInfo
 					if (m == null) { // in a very rare case m can be null
 						return;
 					}
+					m = m.OriginalDefinition;
 					if (argName != null) {
 						var mp = m.Parameters;
 						for (int i = 0; i < mp.Length; i++) {
@@ -1016,7 +1017,14 @@ namespace Codist.QuickInfo
 						}
 					}
 					var doc = argName != null ? (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", argName) : null;
-					var info = new TextBlock().AddText("Argument of ").AddSymbolDisplayParts(symbol.Symbol.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argIndex);
+					var info = new TextBlock().AddText("Argument of ").AddSymbolDisplayParts(m.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argIndex);
+					m = symbol.Symbol as IMethodSymbol;
+					if (m.IsGenericMethod) {
+						for (int i = 0; i < m.TypeArguments.Length; i++) {
+							info.AddText("\n");
+							ShowTypeParameterInfo(m.TypeParameters[i], m.TypeArguments[i], info);
+						}
+					}
 					if (doc != null) {
 						info.AddText("\n" + argName, true, true, _SymbolFormatter.Parameter).AddText(": ");
 						new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter).Render(doc, info.Inlines);
