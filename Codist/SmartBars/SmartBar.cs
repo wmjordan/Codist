@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.PlatformUI;
@@ -19,14 +21,11 @@ namespace Codist.SmartBars
 	internal class SmartBar
 	{
 		const int Selecting = 1, Working = 2;
-		static IVsImageService2 _ImageService;
 		readonly Timer _CreateToolBarTimer;
 		int _TimerStatus;
 		readonly ToolBarTray _ToolBarTray;
 		/// <summary>The layer for the smart bar adornment.</summary>
 		readonly IAdornmentLayer _ToolBarLayer;
-		readonly int _IconSize = 16;
-		ImageAttributes _ImageAttributes;
 		DateTime _LastExecute;
 
 		/// <summary>
@@ -50,9 +49,6 @@ namespace Codist.SmartBars
 			_ToolBarTray.MouseLeave += ToolBarMouseLeave;
 			_ToolBarTray.DragEnter += HideToolBar;
 			_CreateToolBarTimer = new Timer(CreateToolBar);
-			if (_ImageService == null) {
-				_ImageService = ServiceProvider.GlobalProvider.GetService(typeof(SVsImageService)) as IVsImageService2;
-			}
 			_ToolBarLayer.AddAdornment(AdornmentPositioningBehavior.ViewportRelative, null, null, _ToolBarTray, null);
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			VSColorTheme.ThemeChanged += ThemeChanged;
@@ -78,16 +74,6 @@ namespace Codist.SmartBars
 			b.Freeze();
 			ToolBar.Background = b;
 			ToolBar2.Background = b;
-			var v = c.ToArgb();
-			_ImageAttributes = new ImageAttributes {
-				Flags = unchecked((uint)(_ImageAttributesFlags.IAF_RequiredFlags | _ImageAttributesFlags.IAF_Background)),
-				ImageType = (uint)_UIImageType.IT_Bitmap,
-				Format = (uint)_UIDataFormat.DF_WPF,
-				StructSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(ImageAttributes)),
-				LogicalHeight = _IconSize,
-				LogicalWidth = _IconSize,
-				Background = (uint)(v & 0xFFFFFF << 8 | v & 0xFF)
-			};
 		}
 		void ViewMouseMove(object sender, MouseEventArgs e) {
 			if (_ToolBarTray.IsVisible == false) {
@@ -206,17 +192,17 @@ namespace Codist.SmartBars
 
 		protected virtual void AddCommands() {
 			if (CodistPackage.DebuggerStatus == DebuggerStatus.Break) {
-				AddEditorCommand(ToolBar, KnownMonikers.ToolTip, "Edit.QuickInfo", "Show quick info");
+				AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");
 			}
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
-				AddCommand(ToolBar, KnownMonikers.Cut, "Cut selected text\nRight click: Cut line", ctx => {
+				AddCommand(ToolBar, KnownImageIds.Cut, "Cut selected text\nRight click: Cut line", ctx => {
 					if (ctx.RightClick) {
 						ctx.View.ExpandSelectionToLine();
 					}
 					TextEditorHelper.ExecuteEditorCommand("Edit.Cut");
 				});
 			}
-			AddCommand(ToolBar, KnownMonikers.Copy, "Copy selected text\nRight click: Copy line", ctx => {
+			AddCommand(ToolBar, KnownImageIds.Copy, "Copy selected text\nRight click: Copy line", ctx => {
 				if (ctx.RightClick) {
 					ctx.View.ExpandSelectionToLine();
 				}
@@ -224,22 +210,22 @@ namespace Codist.SmartBars
 			});
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
 				if (Clipboard.ContainsText()) {
-					AddCommand(ToolBar, KnownMonikers.Paste, "Paste text from clipboard\nRight click: Paste over line\nCtrl click: Paste and select next", ctx => ExecuteAndFind(ctx, "Edit.Paste"));
+					AddCommand(ToolBar, KnownImageIds.Paste, "Paste text from clipboard\nRight click: Paste over line\nCtrl click: Paste and select next", ctx => ExecuteAndFind(ctx, "Edit.Paste"));
 				}
-				AddCommand(ToolBar, KnownMonikers.CopyItem, "Duplicate selection\nRight click: Duplicate line", ctx => {
+				AddCommand(ToolBar, KnownImageIds.CopyItem, "Duplicate selection\nRight click: Duplicate line", ctx => {
 					if (ctx.RightClick) {
 						ctx.View.ExpandSelectionToLine();
 					}
 					TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
 					ctx.KeepToolbar();
 				});
-				AddCommand(ToolBar, KnownMonikers.Cancel, "Delete selected text\nRight click: Delete line\nCtrl click: Delete and select next", ctx => ExecuteAndFind(ctx, "Edit.Delete"));
+				AddCommand(ToolBar, KnownImageIds.Cancel, "Delete selected text\nRight click: Delete line\nCtrl click: Delete and select next", ctx => ExecuteAndFind(ctx, "Edit.Delete"));
 				switch (View.GetSelectedTokenType()) {
 					case TokenType.None:
-						AddEditorCommand(ToolBar, KnownMonikers.FormatSelection, "Edit.FormatSelection", "Format selected text\nRight click: Format document", "Edit.FormatDocument");
+						AddEditorCommand(ToolBar, KnownImageIds.FormatSelection, "Edit.FormatSelection", "Format selected text\nRight click: Format document", "Edit.FormatDocument");
 						break;
 					case TokenType.Digit:
-						AddCommand(ToolBar, KnownMonikers.Counter, "Increment number", ctx => {
+						AddCommand(ToolBar, KnownImageIds.Counter, "Increment number", ctx => {
 							var span = ctx.View.Selection.SelectedSpans[0];
 							var t = span.GetText();
 							long l;
@@ -258,15 +244,15 @@ namespace Codist.SmartBars
 				}
 				//var selection = View.Selection;
 				//if (View.Selection.Mode == TextSelectionMode.Stream && View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.Start.Position) != View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.End.Position)) {
-				//	AddCommand(ToolBar, KnownMonikers.Join, "Join lines", ctx => {
+				//	AddCommand(ToolBar, KnownImageIds.Join, "Join lines", ctx => {
 				//		var span = View.Selection.SelectedSpans[0];
 				//		var t = span.GetText();
 				//		View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(t, @"[ \t]*\r?\n[ \t]*", " "));
 				//	});
 				//}
 			}
-			AddEditorCommand(ToolBar, KnownMonikers.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
-			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownMonikers.ASerif, "Capitalize");
+			AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
+			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
 		}
 
 		static void ExecuteAndFind(CommandContext ctx, string command) {
@@ -286,44 +272,50 @@ namespace Codist.SmartBars
 			}
 		}
 
-		protected void AddEditorCommand(ToolBar toolBar, ImageMoniker moniker, string command, string tooltip) {
+		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip) {
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
-				AddCommand(toolBar, moniker, tooltip, (ctx) => {
+				AddCommand(toolBar, imageId, tooltip, (ctx) => {
 					TextEditorHelper.ExecuteEditorCommand(command);
 					//View.Selection.Clear();
 				});
 			}
 		}
-		protected void AddEditorCommand(ToolBar toolBar, ImageMoniker moniker, string command, string tooltip, string command2) {
+		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip, string command2) {
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
-				AddCommand(toolBar, moniker, tooltip, (ctx) => {
+				AddCommand(toolBar, imageId, tooltip, (ctx) => {
 					TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? command2 : command);
 					//View.Selection.Clear();
 				});
 			}
 		}
 
-		protected void AddCommand(ToolBar toolBar, ImageMoniker moniker, string tooltip, Action<CommandContext> handler) {
+		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
 			var b = new Button {
-				Content = new Image { Source = GetImage(moniker) },
+				Content = new Image { Source = CodistPackage.GetImage(imageId) },
 				ToolTip = tooltip,
 				Cursor = Cursors.Hand
 			};
 			b.Click += (s, args) => {
-				HideToolBar(s, args);
-				handler(new CommandContext(this));
+				var ctx = new CommandContext(this, s as Control, args);
+				handler(ctx);
+				if (ctx.KeepToolbarOnClick == false) {
+					HideToolBar(s, args);
+				}
 			};
 			b.MouseRightButtonUp += (s, args) => {
-				HideToolBar(s, args);
-				handler(new CommandContext(this, true));
+				var ctx = new CommandContext(this, s as Control, args, true);
+				handler(ctx);
+				if (ctx.KeepToolbarOnClick == false) {
+					HideToolBar(s, args);
+				}
 				args.Handled = true;
 			};
 			toolBar.Items.Add(b);
 		}
 
-		protected void AddCommands(ToolBar toolBar, ImageMoniker moniker, string tooltip, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
+		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
 			var b = new Button {
-				Content = new Image { Source = GetImage(moniker) },
+				Content = new Image { Source = CodistPackage.GetImage(imageId) },
 				ToolTip = tooltip,
 				ContextMenu = new ContextMenu()
 			};
@@ -336,29 +328,35 @@ namespace Codist.SmartBars
 				if (m.Tag == null || (bool)m.Tag != ctx.RightClick) {
 					m.Items.Clear();
 					foreach (var item in getItemsHandler(ctx)) {
-						var mi = new MenuItem {
-							Icon = new Image { Source = GetImage(item.Moniker) },
-							Header = item.Name,
-							ToolTip = item.Tooltip
-						};
-						mi.Click += (sender, e) => {
-							HideToolBar(sender, e);
-							//SetLastExecuteTime(sender, e);
-							item.Action(new CommandContext(this));
-						};
-						m.Items.Add(mi);
+						m.Items.Add(ToMenuItem(item));
 					}
 					m.Tag = ctx.RightClick;
 				}
 			}
 			b.Click += (s, args) => {
-				ButtonEventHandler(s as Button, new CommandContext(this));
+				ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args));
 			};
 			b.MouseRightButtonUp += (s, args) => {
-				ButtonEventHandler(s as Button, new CommandContext(this, true));
+				ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args, true));
 				args.Handled = true;
 			};
 			toolBar.Items.Add(b);
+		}
+
+		protected MenuItem ToMenuItem(CommandItem item) {
+			var mi = new MenuItem {
+				Icon = new Image { Source = CodistPackage.GetImage(item.ImageId) },
+				Header = new TextBlock { Text = item.Name }
+			};
+			item.ControlInitializer?.Invoke(mi);
+			mi.Click += (s, e) => {
+				var ctx2 = new CommandContext(this, s as Control, e);
+				item.Action?.Invoke(ctx2);
+				if (ctx2.KeepToolbarOnClick == false) {
+					HideToolBar(s, e);
+				}
+			};
+			return mi;
 		}
 
 		void KeepToolbar() {
@@ -369,39 +367,64 @@ namespace Codist.SmartBars
 			View.VisualElement.MouseMove -= ViewMouseMove;
 		}
 
-		System.Windows.Media.Imaging.BitmapSource GetImage(ImageMoniker moniker) {
-			Object data;
-			_ImageService.GetImage(moniker, _ImageAttributes).get_Data(out data);
-			return data as System.Windows.Media.Imaging.BitmapSource;
-		}
-
 		protected sealed class CommandItem
 		{
-			public CommandItem(string name, ImageMoniker moniker, string tooltip, Action<CommandContext> action) {
+			public CommandItem(ISymbol symbol, string alias, IEnumerable<Location> locations) {
+				Name = alias;
+				ImageId = symbol.GetImageId();
+				Locations = locations;
+				Symbol = symbol;
+				//todo compatible with symbols having more than 1 locations
+				var hasSource = symbol.GetSourceLocations().Length > 0;
+				if (hasSource) {
+					Action = ctx => GotoLocation();
+					ControlInitializer += c => c.ToolTip = symbol.GetSourceLocations()[0].SyntaxTree.FilePath;
+				}
+			}
+
+			public CommandItem(string name, int imageId, Action<Control> controlInitializer, Action<CommandContext> action) {
 				Name = name;
-				Tooltip = tooltip;
-				Moniker = moniker;
+				ImageId = imageId;
+				ControlInitializer = controlInitializer;
 				Action = action;
 			}
 
 			public string Name { get; }
-			public string Tooltip { get; }
-			public ImageMoniker Moniker { get; }
+			public int ImageId { get; }
+			public Action<Control> ControlInitializer { get; }
 			public Action<CommandContext> Action { get; }
+			public ISymbol Symbol { get; }
+			public IEnumerable<Location> Locations { get; }
+
+			void GotoLocation() {
+				if (Locations != null) {
+					var loc = Locations.FirstOrDefault();
+					if (loc != null) {
+						var p = loc.GetLineSpan();
+						CodistPackage.DTE.OpenFile(loc.SourceTree.FilePath, p.StartLinePosition.Line + 1, p.StartLinePosition.Character + 1);
+					}
+				}
+			}
 		}
 
 		protected sealed class CommandContext
 		{
 			readonly SmartBar _Bar;
-			public CommandContext(SmartBar bar) {
+
+			public CommandContext(SmartBar bar, Control control, RoutedEventArgs eventArgs) {
 				View = bar.View;
 				_Bar = bar;
+				Sender = control;
+				EventArgs = eventArgs;
 			}
-			public CommandContext(SmartBar bar, bool rightClick) : this(bar) {
+			public CommandContext(SmartBar bar, Control control, RoutedEventArgs eventArgs, bool rightClick) : this(bar, control, eventArgs) {
 				RightClick = rightClick;
 			}
+			public RoutedEventArgs EventArgs { get; }
 			public bool RightClick { get; }
+			public Control Sender { get; }
 			public IWpfTextView View { get; }
+			public bool KeepToolbarOnClick { get; set; }
 			public void KeepToolbar() {
 				_Bar.KeepToolbar();
 			}

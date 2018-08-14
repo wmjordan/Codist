@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -84,7 +83,16 @@ namespace Codist
 			CodistPackage.DTE.OpenFile(loc.SyntaxTree.FilePath, pos.Line + 1, pos.Character + 1);
 		}
 
-		static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
+		/// <summary>Returns whether a symbol could have override.</summary>
+		public static bool MayHaveOverride(this ISymbol symbol) {
+			return symbol.IsStatic == false
+				&& symbol.IsSealed == false
+				&& symbol.DeclaredAccessibility != Accessibility.Private
+				&& (symbol.Kind == SymbolKind.Method && (symbol as IMethodSymbol).IsExtensionMethod == false || symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
+				&& symbol.ContainingType?.TypeKind == TypeKind.Class;
+		}
+
+		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
 			if (String.IsNullOrEmpty(file)) {
 				return;
 			}
@@ -153,45 +161,149 @@ namespace Codist
 			}
 			return false;
 		}
-		public static ImageMoniker GetSyntaxMoniker(this SyntaxNode node) {
+		public static int GetImageId(this SyntaxNode node) {
 			switch (node.Kind()) {
-				case SyntaxKind.ClassDeclaration: return KnownMonikers.Class;
-				case SyntaxKind.EnumDeclaration: return KnownMonikers.Enumeration;
-				case SyntaxKind.StructDeclaration: return KnownMonikers.Structure;
-				case SyntaxKind.InterfaceDeclaration: return KnownMonikers.Interface;
-				case SyntaxKind.ConstructorDeclaration: return KnownMonikers.NewItem;
-				case SyntaxKind.ConversionOperatorDeclaration: return KnownMonikers.ConvertPartition;
-				case SyntaxKind.DestructorDeclaration: return KnownMonikers.DeleteListItem;
-				case SyntaxKind.IndexerDeclaration: return KnownMonikers.ClusteredIndex;
-				case SyntaxKind.MethodDeclaration: return KnownMonikers.Method;
-				case SyntaxKind.OperatorDeclaration: return KnownMonikers.Operator;
-				case SyntaxKind.PropertyDeclaration: return KnownMonikers.Property;
-				case SyntaxKind.FieldDeclaration: return KnownMonikers.Field;
-				case SyntaxKind.VariableDeclaration: return KnownMonikers.LocalVariable;
-				case SyntaxKind.NamespaceDeclaration: return KnownMonikers.Namespace;
+				case SyntaxKind.ClassDeclaration: return KnownImageIds.Class;
+				case SyntaxKind.EnumDeclaration: return KnownImageIds.Enumeration;
+				case SyntaxKind.StructDeclaration: return KnownImageIds.Structure;
+				case SyntaxKind.InterfaceDeclaration: return KnownImageIds.Interface;
+				case SyntaxKind.ConstructorDeclaration: return KnownImageIds.NewItem;
+				case SyntaxKind.ConversionOperatorDeclaration: return KnownImageIds.ConvertPartition;
+				case SyntaxKind.DestructorDeclaration: return KnownImageIds.DeleteListItem;
+				case SyntaxKind.IndexerDeclaration: return KnownImageIds.ClusteredIndex;
+				case SyntaxKind.MethodDeclaration: return KnownImageIds.Method;
+				case SyntaxKind.OperatorDeclaration: return KnownImageIds.Operator;
+				case SyntaxKind.PropertyDeclaration: return KnownImageIds.Property;
+				case SyntaxKind.FieldDeclaration: return KnownImageIds.Field;
+				case SyntaxKind.VariableDeclaration: return KnownImageIds.LocalVariable;
+				case SyntaxKind.NamespaceDeclaration: return KnownImageIds.Namespace;
 				case SyntaxKind.ArgumentList:
-				case SyntaxKind.AttributeArgumentList: return KnownMonikers.Parameter;
-				case SyntaxKind.DoStatement: return KnownMonikers.DoWhile;
-				case SyntaxKind.FixedStatement: return KnownMonikers.Pin;
+				case SyntaxKind.AttributeArgumentList: return KnownImageIds.Parameter;
+				case SyntaxKind.DoStatement: return KnownImageIds.DoWhile;
+				case SyntaxKind.FixedStatement: return KnownImageIds.Pin;
 				case SyntaxKind.ForEachStatement:
-				case SyntaxKind.ForStatement: return KnownMonikers.ForEachLoop;
-				case SyntaxKind.IfStatement: return KnownMonikers.If;
-				case SyntaxKind.LockStatement: return KnownMonikers.Lock;
-				case SyntaxKind.SwitchStatement: return KnownMonikers.FlowSwitch;
-				case SyntaxKind.SwitchSection: return KnownMonikers.FlowDecision;
-				case SyntaxKind.TryStatement: return KnownMonikers.TryCatch;
-				case SyntaxKind.UsingStatement: return KnownMonikers.Entry;
-				case SyntaxKind.WhileStatement: return KnownMonikers.While;
-				case SyntaxKind.ParameterList: return KnownMonikers.Parameter;
+				case SyntaxKind.ForStatement: return KnownImageIds.ForEachLoop;
+				case SyntaxKind.IfStatement: return KnownImageIds.If;
+				case SyntaxKind.LockStatement: return KnownImageIds.Lock;
+				case SyntaxKind.SwitchStatement: return KnownImageIds.FlowSwitch;
+				case SyntaxKind.SwitchSection: return KnownImageIds.FlowDecision;
+				case SyntaxKind.TryStatement: return KnownImageIds.TryCatch;
+				case SyntaxKind.UsingStatement: return KnownImageIds.Entry;
+				case SyntaxKind.WhileStatement: return KnownImageIds.While;
+				case SyntaxKind.ParameterList: return KnownImageIds.Parameter;
 				case SyntaxKind.ParenthesizedExpression:
 				case SyntaxKind.ParenthesizedLambdaExpression:
-				case SyntaxKind.SimpleLambdaExpression: return KnownMonikers.NamedSet;
-				case SyntaxKind.UnsafeStatement: return KnownMonikers.HotSpot;
+				case SyntaxKind.SimpleLambdaExpression: return KnownImageIds.NamedSet;
+				case SyntaxKind.UnsafeStatement: return KnownImageIds.HotSpot;
 				case SyntaxKind.XmlElement:
-				case SyntaxKind.XmlEmptyElement: return KnownMonikers.XMLElement;
-				case SyntaxKind.XmlComment: return KnownMonikers.XMLCommentTag;
+				case SyntaxKind.XmlEmptyElement: return KnownImageIds.XMLElement;
+				case SyntaxKind.XmlComment: return KnownImageIds.XMLCommentTag;
 			}
-			return KnownMonikers.UnknownMember;
+			return KnownImageIds.UnknownMember;
+		}
+		public static int GetImageId(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Assembly: return KnownImageIds.Assembly;
+				case SymbolKind.DynamicType: return KnownImageIds.Dynamic;
+				case SymbolKind.Event:
+					var ev = symbol as IEventSymbol;
+					switch (ev.DeclaredAccessibility) {
+						case Accessibility.Public: return KnownImageIds.EventPublic;
+						case Accessibility.Protected: return KnownImageIds.EventProtected;
+						case Accessibility.Private: return KnownImageIds.EventPrivate;
+						case Accessibility.Internal: return KnownImageIds.EventInternal;
+						default: return KnownImageIds.Event;
+					}
+				case SymbolKind.Field:
+					var f = symbol as IFieldSymbol;
+					if (f.IsConst) {
+						switch (f.DeclaredAccessibility) {
+							case Accessibility.Public: return KnownImageIds.ConstantPublic;
+							case Accessibility.Protected: return KnownImageIds.ConstantProtected;
+							case Accessibility.Private: return KnownImageIds.ConstantPrivate;
+							case Accessibility.Internal: return KnownImageIds.ConstantInternal;
+							default: return KnownImageIds.Constant;
+						}
+					}
+					switch (f.DeclaredAccessibility) {
+						case Accessibility.Public: return KnownImageIds.FieldPublic;
+						case Accessibility.Protected: return KnownImageIds.FieldProtected;
+						case Accessibility.Private: return KnownImageIds.FieldPrivate;
+						case Accessibility.Internal: return KnownImageIds.FieldInternal;
+						default: return KnownImageIds.Field;
+					}
+				case SymbolKind.Label: return KnownImageIds.Label;
+				case SymbolKind.Local: return KnownImageIds.LocalVariable;
+				case SymbolKind.Method:
+					var m = symbol as IMethodSymbol;
+					if (m.IsExtensionMethod) {
+						return KnownImageIds.ExtensionMethod;
+					}
+					switch (m.DeclaredAccessibility) {
+						case Accessibility.Public: return KnownImageIds.MethodPublic;
+						case Accessibility.Protected: return KnownImageIds.MethodProtected;
+						case Accessibility.Private: return KnownImageIds.MethodPrivate;
+						case Accessibility.Internal: return KnownImageIds.MethodInternal;
+						default: return KnownImageIds.Method;
+					}
+				case SymbolKind.NamedType:
+					var t = symbol as INamedTypeSymbol;
+					switch (t.TypeKind) {
+						case TypeKind.Class:
+							switch (t.DeclaredAccessibility) {
+								case Accessibility.Public: return KnownImageIds.ClassPublic;
+								case Accessibility.Protected: return KnownImageIds.ClassProtected;
+								case Accessibility.Private: return KnownImageIds.ClassPrivate;
+								case Accessibility.Internal: return KnownImageIds.ClassInternal;
+								default: return KnownImageIds.Class;
+							}
+						case TypeKind.Delegate:
+							switch (t.DeclaredAccessibility) {
+								case Accessibility.Public: return KnownImageIds.DelegatePublic;
+								case Accessibility.Protected: return KnownImageIds.DelegateProtected;
+								case Accessibility.Private: return KnownImageIds.DelegatePrivate;
+								case Accessibility.Internal: return KnownImageIds.DelegateInternal;
+								default: return KnownImageIds.Delegate;
+							}
+						case TypeKind.Enum:
+							switch (t.DeclaredAccessibility) {
+								case Accessibility.Public: return KnownImageIds.EnumerationPublic;
+								case Accessibility.Protected: return KnownImageIds.EnumerationProtected;
+								case Accessibility.Private: return KnownImageIds.EnumerationPrivate;
+								case Accessibility.Internal: return KnownImageIds.EnumerationInternal;
+								default: return KnownImageIds.Enumeration;
+							}
+						case TypeKind.Interface:
+							switch (t.DeclaredAccessibility) {
+								case Accessibility.Public: return KnownImageIds.InterfacePublic;
+								case Accessibility.Protected: return KnownImageIds.InterfaceProtected;
+								case Accessibility.Private: return KnownImageIds.InterfacePrivate;
+								case Accessibility.Internal: return KnownImageIds.InterfaceInternal;
+								default: return KnownImageIds.Interface;
+							}
+						case TypeKind.Struct:
+							switch (t.DeclaredAccessibility) {
+								case Accessibility.Public: return KnownImageIds.StructurePublic;
+								case Accessibility.Protected: return KnownImageIds.StructureProtected;
+								case Accessibility.Private: return KnownImageIds.StructurePrivate;
+								case Accessibility.Internal: return KnownImageIds.StructureInternal;
+								default: return KnownImageIds.Structure;
+							}
+						case TypeKind.TypeParameter:
+						default: return KnownImageIds.Type;
+					}
+				case SymbolKind.Namespace: return KnownImageIds.Namespace;
+				case SymbolKind.Parameter: return KnownImageIds.Parameter;
+				case SymbolKind.Property:
+					switch ((symbol as IPropertySymbol).DeclaredAccessibility) {
+						case Accessibility.Public: return KnownImageIds.PropertyPublic;
+						case Accessibility.Protected: return KnownImageIds.PropertyProtected;
+						case Accessibility.Private: return KnownImageIds.PropertyPrivate;
+						case Accessibility.Internal: return KnownImageIds.PropertyInternal;
+						default: return KnownImageIds.Property;
+					}
+				default: return KnownImageIds.Item;
+			}
 		}
 		public static string GetSyntaxBrief(this SyntaxNode node) {
 			switch (node.Kind()) {

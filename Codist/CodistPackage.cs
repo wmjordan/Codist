@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using EnvDTE80;
+using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -36,7 +37,11 @@ namespace Codist
 		/// CodistPackage GUID string.
 		/// </summary>
 		public const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
+		static readonly int _IconSize = 16;
 		static EnvDTE.DTE _dte;
+		static ImageAttributes _ImageAttributes;
+		static IVsImageService2 _ImageService;
+
 		//static VsDebugger _Debugger;
 
 		/// <summary>
@@ -64,6 +69,13 @@ namespace Codist
 			}
 		}
 
+		public static System.Windows.Media.Imaging.BitmapSource GetImage(int monikerId) {
+			var moniker = new ImageMoniker() { Guid = Microsoft.VisualStudio.Imaging.KnownImageIds.ImageCatalogGuid, Id = monikerId };
+			Object data;
+			(_ImageService ?? (_ImageService = ServiceProvider.GlobalProvider.GetService(typeof(SVsImageService)) as IVsImageService2)).GetImage(moniker, _ImageAttributes).get_Data(out data);
+			return data as System.Windows.Media.Imaging.BitmapSource;
+		}
+
 
 		#region Package Members
 
@@ -83,6 +95,16 @@ namespace Codist
 		static void LoadThemeColors() {
 			ToolWindowBackgroundColor = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowBackgroundColorKey);
 			TitleBackgroundColor = VSColorTheme.GetThemedColor(EnvironmentColors.MainWindowActiveCaptionColorKey);
+			var v = TitleBackgroundColor.ToArgb();
+			_ImageAttributes = new ImageAttributes {
+				Flags = unchecked((uint)(_ImageAttributesFlags.IAF_RequiredFlags | _ImageAttributesFlags.IAF_Background)),
+				ImageType = (uint)_UIImageType.IT_Bitmap,
+				Format = (uint)_UIDataFormat.DF_WPF,
+				StructSize = Marshal.SizeOf(typeof(ImageAttributes)),
+				LogicalHeight = _IconSize,
+				LogicalWidth = _IconSize,
+				Background = (uint)(v & 0xFFFFFF << 8 | v & 0xFF)
+			};
 		}
 
 		#endregion

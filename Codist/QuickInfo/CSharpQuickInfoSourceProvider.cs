@@ -574,7 +574,7 @@ namespace Codist.QuickInfo
 					ShowDeclarationModifier(qiContent, typeSymbol);
 				}
 				var pk = (node = node.Parent).Kind();
-				if (pk == SyntaxKind.ObjectCreationExpression || pk == SyntaxKind.QualifiedName && (node = node.Parent) != null && node.Kind() == SyntaxKind.ObjectCreationExpression) {
+				if (pk == SyntaxKind.ObjectCreationExpression || pk == SyntaxKind.QualifiedName && (node = node.Parent).Kind() == SyntaxKind.ObjectCreationExpression) {
 					var method = _SemanticModel.GetSymbolOrFirstCandidate(node) as IMethodSymbol;
 					if (method != null) {
 						ShowOverloadsInfo(qiContent, node, method);
