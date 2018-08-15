@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using EnvDTE80;
 using Microsoft.VisualStudio.Imaging.Interop;
@@ -14,7 +15,7 @@ namespace Codist
 	/// <para>To get loaded into VS, the package must be referred by &lt;Asset Type="Microsoft.VisualStudio.VsPackage" ...&gt; in .vsixmanifest file.</para>
 	/// </remarks>
 	[PackageRegistration(UseManagedResourcesOnly = true)]
-	[InstalledProductRegistration("#110", "#112", "3.3", IconResourceID = 400)] // Information on this package for Help/About
+	[InstalledProductRegistration("#110", "#112", "3.4", IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.General), Constants.NameOfMe, "General", 0, 0, true)]
 	[ProvideOptionPage(typeof(Options.SuperQuickInfo), CategorySuperQuickInfo, "General", 0, 0, true, Sort = 10)]
@@ -55,8 +56,10 @@ namespace Codist
 		}
 
 		public static EnvDTE.DTE DTE => _dte ?? (_dte = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE);
-		public static System.Drawing.Color ToolWindowBackgroundColor { get; private set; }
-		public static System.Drawing.Color TitleBackgroundColor { get; private set; }
+		public static Color ToolWindowBackgroundColor { get; private set; }
+		public static Color TitleBackgroundColor { get; private set; }
+		public static Color TooltipTextColor { get; private set; }
+		public static Color TooltipBackgroundColor { get; private set; }
 
 		public static DebuggerStatus DebuggerStatus {
 			get {
@@ -95,6 +98,8 @@ namespace Codist
 		static void LoadThemeColors() {
 			ToolWindowBackgroundColor = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowBackgroundColorKey);
 			TitleBackgroundColor = VSColorTheme.GetThemedColor(EnvironmentColors.MainWindowActiveCaptionColorKey);
+			TooltipTextColor = VSColorTheme.GetThemedColor(EnvironmentColors.ToolTipTextColorKey);
+			TooltipBackgroundColor = VSColorTheme.GetThemedColor(EnvironmentColors.ToolTipColorKey);
 			var v = TitleBackgroundColor.ToArgb();
 			_ImageAttributes = new ImageAttributes {
 				Flags = unchecked((uint)(_ImageAttributesFlags.IAF_RequiredFlags | _ImageAttributesFlags.IAF_Background)),

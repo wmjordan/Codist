@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using AppHelpers;
@@ -44,8 +41,10 @@ namespace Codist.SmartBars
 			if (_Node == null) {
 				return;
 			}
+
 			// anti-pattern for a small margin of performance
-			if (CodistPackage.DebuggerStatus == DebuggerStatus.Design && _Node is XmlTextSyntax) {
+			bool isDesignMode = CodistPackage.DebuggerStatus == DebuggerStatus.Design;
+			if (isDesignMode && _Node is XmlTextSyntax) {
 				AddCommand(KnownImageIds.MarkupTag, "Tag XML Doc with <c>", edit => {
 					foreach (var item in View.Selection.SelectedSpans) {
 						edit.Replace(item, "<c>" + item.GetText() + "</c>");
@@ -72,8 +71,11 @@ namespace Codist.SmartBars
 					}
 					AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Find references", GetReferenceCommands);
 
-					if (CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
-						AddEditorCommand(MyToolBar, KnownImageIds.Rename, "Refactor.Rename", "Rename symbol");
+					if (isDesignMode) {
+						AddCommand(MyToolBar, KnownImageIds.Rename, "Refactor.Rename", ctx => {
+							TextEditorHelper.ExecuteEditorCommand("Rename symbol");
+							ctx.KeepToolbarOnClick = true;
+						});
 						if (_Node is ParameterSyntax && _Node.Parent is ParameterListSyntax) {
 							AddEditorCommand(MyToolBar, KnownImageIds.ReorderParameters, "Refactor.ReorderParameters", "Reorder parameters");
 						}
@@ -82,7 +84,7 @@ namespace Codist.SmartBars
 				else if (_Token.RawKind >= (int)SyntaxKind.StringLiteralToken && _Token.RawKind <= (int)SyntaxKind.NumericLiteralToken) {
 					AddEditorCommand(MyToolBar, KnownImageIds.ReferencedDimension, "Edit.FindAllReferences", "Find all references");
 				}
-				if (CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
+				if (isDesignMode) {
 					if (_Node.IsDeclaration()) {
 						if (_Node is TypeDeclarationSyntax || _Node is MemberDeclarationSyntax || _Node is ParameterListSyntax) {
 							AddEditorCommand(MyToolBar, KnownImageIds.AddComment, "Edit.InsertComment", "Insert comment");
@@ -93,7 +95,7 @@ namespace Codist.SmartBars
 					}
 				}
 			}
-			if (CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
+			if (isDesignMode) {
 				if (_Trivia.IsLineComment()) {
 					AddEditorCommand(MyToolBar, KnownImageIds.UncommentCode, "Edit.UncommentSelection", "Uncomment selection");
 				}
@@ -187,29 +189,22 @@ namespace Codist.SmartBars
 				if (callers.Count < 10) {
 					foreach (var caller in callers) {
 						var s = caller.CallingSymbol;
-						var item = ToMenuItem(new CommandItem(s, s.Name, caller.Locations));
-						item.Header = new TextBlock().AddText(s.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).AddText(s.Name);
-						item.ToolTip = s.ToDisplayString() + "\nnamespace: " + s.ContainingNamespace?.ToDisplayString();
-						menuItem.Items.Add(item);
+						menuItem.Items.Add(new SymbolMenuItem(this, s, caller.Locations) {
+							Header = new TextBlock().AddText(s.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).AddText(s.Name)
+						});
 					}
 				}
 				else {
-					MenuItem container = null;
+					MenuItem subMenu = null;
 					INamedTypeSymbol typeSymbol = null;
 					foreach (var caller in callers) {
 						var s = caller.CallingSymbol;
 						if (typeSymbol == null || typeSymbol != s.ContainingType) {
 							typeSymbol = s.ContainingType;
-							container = new MenuItem {
-								Header = new TextBlock() { Text = typeSymbol.Name },
-								Icon = new Image { Source = CodistPackage.GetImage(typeSymbol.GetImageId()) },
-								ToolTip = typeSymbol.ToDisplayString() + "\nnamespace: " + typeSymbol.ContainingNamespace?.ToDisplayString()
-							};
-							menuItem.Items.Add(container);
+							subMenu = new SymbolMenuItem(this, typeSymbol, null);
+							menuItem.Items.Add(subMenu);
 						}
-						var item = ToMenuItem(new CommandItem(s, s.Name, caller.Locations));
-						item.ToolTip = s.ToDisplayString() + "\nnamespace: " + s.ContainingNamespace?.ToDisplayString();
-						container.Items.Add(item);
+						subMenu.Items.Add(new SymbolMenuItem(this, s, caller.Locations));
 					}
 				}
 				if (menuItem.Items.Count == 0) {
@@ -234,22 +229,19 @@ namespace Codist.SmartBars
 				});
 				if (refs.Count < 10) {
 					foreach (var item in refs) {
-						menuItem.Items.Add(ToMenuItem(new CommandItem(item.Definition, item.Definition.ContainingType.Name + "." + item.Definition.Name, null)));
+						menuItem.Items.Add(new SymbolMenuItem(this, item.Definition, item.Definition.ContainingType.Name + "." + item.Definition.Name, null));
 					}
 				}
 				else {
-					MenuItem container = null;
+					SymbolMenuItem subMenu = null;
 					INamedTypeSymbol typeSymbol = null;
 					foreach (var item in refs) {
 						if (typeSymbol == null || typeSymbol != item.Definition.ContainingType) {
 							typeSymbol = item.Definition.ContainingType;
-							container = new MenuItem {
-								Header = new TextBlock() { Text = typeSymbol.Name },
-								Icon = new Image { Source = CodistPackage.GetImage(typeSymbol.GetImageId()) }
-							};
-							menuItem.Items.Add(container);
+							subMenu = new SymbolMenuItem(this, typeSymbol, null);
+							menuItem.Items.Add(subMenu);
 						}
-						container.Items.Add(ToMenuItem(new CommandItem(item.Definition, item.Definition.Name, null)));
+						subMenu.Items.Add(new SymbolMenuItem(this, item.Definition, null));
 					}
 				}
 				if (menuItem.Items.Count == 0) {
@@ -267,10 +259,10 @@ namespace Codist.SmartBars
 				}
 				ctx.KeepToolbarOnClick = true;
 				foreach (var ov in SymbolFinder.FindOverridesAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
-					menuItem.Items.Add(ToMenuItem(new CommandItem(ov, ov.ContainingType.Name, ov.Locations)));
+					menuItem.Items.Add(new SymbolMenuItem(this, ov, ov.ContainingType.Name, ov.Locations));
 				}
 				if (menuItem.Items.Count == 0) {
-					menuItem.Items.Add(new MenuItem { Header = "No overrider found", IsEnabled = false });
+					menuItem.Items.Add(new MenuItem { Header = "No override found", IsEnabled = false });
 				}
 				menuItem.IsSubmenuOpen = true;
 			});
@@ -284,8 +276,7 @@ namespace Codist.SmartBars
 				}
 				ctx.KeepToolbarOnClick = true;
 				foreach (var derived in SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
-					var item = ToMenuItem(new CommandItem(derived, derived.Name, derived.Locations));
-					item.ToolTip = "namespace: " + derived.ContainingNamespace?.ToDisplayString();
+					var item = new SymbolMenuItem(this, derived, derived.Locations);
 					if (derived.GetSourceLocations().Length == 0) {
 						(item.Header as TextBlock).Foreground = System.Windows.Media.Brushes.Gray;
 					}
@@ -306,7 +297,7 @@ namespace Codist.SmartBars
 				}
 				ctx.KeepToolbarOnClick = true;
 				foreach (var impl in SymbolFinder.FindImplementationsAsync(symbol as INamedTypeSymbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
-					menuItem.Items.Add(ToMenuItem(new CommandItem(impl, impl.Name, null)));
+					menuItem.Items.Add(new SymbolMenuItem(this, impl, null));
 				}
 				if (menuItem.Items.Count == 0) {
 					menuItem.Items.Add(new MenuItem { Header = "No implementation found", IsEnabled = false });
@@ -358,6 +349,37 @@ namespace Codist.SmartBars
 			   : default(SyntaxTrivia);
 			_Node = _Compilation.FindNode(_Token.Span, true, true);
 			return true;
+		}
+
+		sealed class SymbolMenuItem : CommandMenuItem
+		{
+			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.Name, locations) { }
+			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
+				Locations = locations;
+				Symbol = symbol;
+				//todo compatible with symbols having more than 1 locations
+				if (locations != null && locations.Any(l => l.SourceTree.FilePath != null)) {
+					Click += GotoLocation;
+				}
+				if (Symbol != null) {
+					ToolTip = "";
+					ToolTipOpening += ShowToolTip;
+				}
+			}
+			public ISymbol Symbol { get; }
+			public IEnumerable<Location> Locations { get; }
+
+			void GotoLocation(object sender, System.Windows.RoutedEventArgs args) {
+				var loc = Locations.FirstOrDefault();
+				if (loc != null) {
+					var p = loc.GetLineSpan();
+					CodistPackage.DTE.OpenFile(loc.SourceTree.FilePath, p.StartLinePosition.Line + 1, p.StartLinePosition.Character + 1);
+				}
+			}
+			void ShowToolTip(object sender, ToolTipEventArgs args) {
+				ToolTip = new TextBlock().AddText(Symbol.GetSingatureString()).AddText("\nnamespace: " + Symbol.ContainingNamespace?.ToString());
+				ToolTipOpening -= ShowToolTip;
+			}
 		}
 	}
 }

@@ -9,10 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.PlatformUI;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.SmartBars
@@ -328,7 +325,7 @@ namespace Codist.SmartBars
 				if (m.Tag == null || (bool)m.Tag != ctx.RightClick) {
 					m.Items.Clear();
 					foreach (var item in getItemsHandler(ctx)) {
-						m.Items.Add(ToMenuItem(item));
+						m.Items.Add(new CommandMenuItem(this, item));
 					}
 					m.Tag = ctx.RightClick;
 				}
@@ -343,22 +340,6 @@ namespace Codist.SmartBars
 			toolBar.Items.Add(b);
 		}
 
-		protected MenuItem ToMenuItem(CommandItem item) {
-			var mi = new MenuItem {
-				Icon = new Image { Source = CodistPackage.GetImage(item.ImageId) },
-				Header = new TextBlock { Text = item.Name }
-			};
-			item.ControlInitializer?.Invoke(mi);
-			mi.Click += (s, e) => {
-				var ctx2 = new CommandContext(this, s as Control, e);
-				item.Action?.Invoke(ctx2);
-				if (ctx2.KeepToolbarOnClick == false) {
-					HideToolBar(s, e);
-				}
-			};
-			return mi;
-		}
-
 		void KeepToolbar() {
 			_LastExecute = DateTime.Now;
 		}
@@ -367,19 +348,37 @@ namespace Codist.SmartBars
 			View.VisualElement.MouseMove -= ViewMouseMove;
 		}
 
+		protected class CommandMenuItem : MenuItem
+		{
+			SmartBar _SmartBar;
+			public CommandMenuItem(SmartBar bar, CommandItem item) {
+				_SmartBar = bar;
+				CommandItem = item;
+				Icon = new Image { Source = CodistPackage.GetImage(item.ImageId) };
+				Header = new TextBlock { Text = item.Name };
+				item.ControlInitializer?.Invoke(this);
+				// the action is installed only when called by this method
+				if (item.Action != null) {
+					Click += ClickHandler;
+				}
+			}
+
+			public CommandItem CommandItem { get; }
+
+			void ClickHandler(object s, RoutedEventArgs e) {
+				var ctx2 = new CommandContext(_SmartBar, s as Control, e);
+				CommandItem.Action(ctx2);
+				if (ctx2.KeepToolbarOnClick == false) {
+					_SmartBar.HideToolBar(s, e);
+				}
+			}
+		}
+
 		protected sealed class CommandItem
 		{
-			public CommandItem(ISymbol symbol, string alias, IEnumerable<Location> locations) {
+			public CommandItem(ISymbol symbol, string alias) {
 				Name = alias;
 				ImageId = symbol.GetImageId();
-				Locations = locations;
-				Symbol = symbol;
-				//todo compatible with symbols having more than 1 locations
-				var hasSource = symbol.GetSourceLocations().Length > 0;
-				if (hasSource) {
-					Action = ctx => GotoLocation();
-					ControlInitializer += c => c.ToolTip = symbol.GetSourceLocations()[0].SyntaxTree.FilePath;
-				}
 			}
 
 			public CommandItem(string name, int imageId, Action<Control> controlInitializer, Action<CommandContext> action) {
@@ -393,18 +392,6 @@ namespace Codist.SmartBars
 			public int ImageId { get; }
 			public Action<Control> ControlInitializer { get; }
 			public Action<CommandContext> Action { get; }
-			public ISymbol Symbol { get; }
-			public IEnumerable<Location> Locations { get; }
-
-			void GotoLocation() {
-				if (Locations != null) {
-					var loc = Locations.FirstOrDefault();
-					if (loc != null) {
-						var p = loc.GetLineSpan();
-						CodistPackage.DTE.OpenFile(loc.SourceTree.FilePath, p.StartLinePosition.Line + 1, p.StartLinePosition.Character + 1);
-					}
-				}
-			}
 		}
 
 		protected sealed class CommandContext

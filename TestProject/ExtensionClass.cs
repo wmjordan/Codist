@@ -1,4 +1,6 @@
-﻿namespace TestProject
+﻿using System.Collections.Generic;
+
+namespace TestProject
 {
 	static class ExtensionClass // static class
 	{
@@ -8,5 +10,9 @@
 			var ac = cc as AbstractClass;
 			ac.VirtualMethod(); // call virtual method
 		} // static method
+
+		public static void MethodWithGenericTypeArguments(this List<string> list, List<List<string>> lists) {
+			lists.Add(list);
+		}
 	}
 }

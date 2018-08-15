@@ -15,6 +15,7 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Utilities;
 
 namespace Codist
 {
@@ -83,13 +84,16 @@ namespace Codist
 			CodistPackage.DTE.OpenFile(loc.SyntaxTree.FilePath, pos.Line + 1, pos.Character + 1);
 		}
 
-		/// <summary>Returns whether a symbol could have override.</summary>
+		/// <summary>Returns whether a symbol could have an override.</summary>
 		public static bool MayHaveOverride(this ISymbol symbol) {
-			return symbol.IsStatic == false
+			var type = symbol.ContainingType;
+			return type != null && symbol.IsStatic == false
 				&& symbol.IsSealed == false
 				&& symbol.DeclaredAccessibility != Accessibility.Private
-				&& (symbol.Kind == SymbolKind.Method && (symbol as IMethodSymbol).IsExtensionMethod == false || symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
-				&& symbol.ContainingType?.TypeKind == TypeKind.Class;
+				&& (symbol.Kind == SymbolKind.Method && (symbol as IMethodSymbol).MethodKind == MethodKind.Ordinary || symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
+				&& type.TypeKind == TypeKind.Class
+				&& type.DeclaredAccessibility != Accessibility.Private
+				&& type.IsSealed == false;
 		}
 
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
@@ -345,6 +349,84 @@ namespace Codist
 				case SyntaxKind.XmlComment: return "xml comment";
 			}
 			return null;
+		}
+
+		public static string GetSingatureString(this ISymbol symbol) {
+			if (symbol.Kind != SymbolKind.Method) {
+				return symbol.Name;
+			}
+			using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
+				var sb = sbr.Resource;
+				var m = symbol as IMethodSymbol;
+				sb.Append(m.Name);
+				if (m.IsGenericMethod) {
+					sb.Append('<');
+					var s = false;
+					foreach (var item in m.TypeParameters) {
+						if (s) {
+							sb.Append(", ");
+						}
+						else {
+							s = true;
+						}
+						sb.Append(item.Name);
+					}
+					sb.Append('>');
+				}
+				sb.Append('(');
+				var p = false;
+				foreach (var item in m.Parameters) {
+					if (p) {
+						sb.Append(", ");
+					}
+					else {
+						p = true;
+					}
+					GetTypeName(item.Type, sb);
+				}
+				sb.Append(')');
+				return sb.ToString();
+
+				void GetTypeName(ITypeSymbol type, StringBuilder output) {
+					switch (type.TypeKind) {
+						case TypeKind.Array:
+							GetTypeName((type as IArrayTypeSymbol).ElementType, output);
+							output.Append("[]");
+							return;
+						case TypeKind.Dynamic:
+							output.Append('?'); return;
+						case TypeKind.Module:
+						case TypeKind.TypeParameter:
+						case TypeKind.Enum:
+						case TypeKind.Error:
+							output.Append(type.Name); return;
+						case TypeKind.Pointer:
+							GetTypeName((type as IPointerTypeSymbol).PointedAtType, output);
+							output.Append('*');
+							return;
+					}
+					output.Append(type.Name);
+					var nt = type as INamedTypeSymbol;
+					if (nt == null) {
+						return;
+					}
+					if (nt.IsGenericType == false) {
+						return;
+					}
+					var s = false;
+					output.Append('<');
+					foreach (var item in nt.TypeArguments) {
+						if (s) {
+							output.Append(", ");
+						}
+						else {
+							s = true;
+						}
+						GetTypeName(item, output);
+					}
+					output.Append('>');
+				}
+			}
 		}
 
 		public static string GetDeclarationSignature(this SyntaxNode node) {
