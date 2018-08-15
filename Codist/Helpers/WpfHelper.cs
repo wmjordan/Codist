@@ -16,6 +16,7 @@ using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using WpfText = System.Windows.Media.FormattedText;
+using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
 
 namespace Codist
 {
@@ -336,7 +337,10 @@ namespace Codist
 			};
 		}
 		public static DependencyObject GetVisualParent(this DependencyObject obj) {
-			return System.Windows.Media.VisualTreeHelper.GetParent(obj);
+			return VisualTreeHelper.GetParent(obj);
+		}
+		public static DependencyObject GetFirstVisualChild(this DependencyObject obj) {
+			return VisualTreeHelper.GetChild(obj, 0);
 		}
 		public static TParent GetVisualParent<TParent>(this DependencyObject obj)
 			where TParent : DependencyObject {
@@ -349,6 +353,24 @@ namespace Codist
 				r = p as TParent;
 				if (r != null) {
 					return r;
+				}
+			}
+			return null;
+		}
+		public static TChild GetFirstVisualChild<TChild>(this DependencyObject obj)
+			where TChild : DependencyObject {
+			var count = VisualTreeHelper.GetChildrenCount(obj);
+			for (int i = 0; i < count; i++) {
+				var c = VisualTreeHelper.GetChild(obj, i);
+				var r = c as TChild;
+				if (r != null) {
+					return r;
+				}
+				else {
+					r = GetFirstVisualChild<TChild>(c);
+					if (r != null) {
+						return r;
+					}
 				}
 			}
 			return null;

@@ -90,6 +90,7 @@ namespace Codist
 			return type != null && symbol.IsStatic == false
 				&& symbol.IsSealed == false
 				&& symbol.DeclaredAccessibility != Accessibility.Private
+				&& (symbol.IsAbstract || symbol.IsVirtual || symbol.IsOverride)
 				&& (symbol.Kind == SymbolKind.Method && (symbol as IMethodSymbol).MethodKind == MethodKind.Ordinary || symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
 				&& type.TypeKind == TypeKind.Class
 				&& type.DeclaredAccessibility != Accessibility.Private
@@ -351,7 +352,7 @@ namespace Codist
 			return null;
 		}
 
-		public static string GetSingatureString(this ISymbol symbol) {
+		public static string GetSignatureString(this ISymbol symbol) {
 			if (symbol.Kind != SymbolKind.Method) {
 				return symbol.Name;
 			}
@@ -427,6 +428,29 @@ namespace Codist
 					output.Append('>');
 				}
 			}
+		}
+
+		/// <summary>
+		/// Returns the object creation syntax node from an named type identifier node.
+		/// </summary>
+		/// <param name="node"></param>
+		/// <returns>Returns the constructor node if <paramref name="node"/>'s parent is <see cref="SyntaxKind.ObjectCreationExpression"/>, otherwise, <see langword="null"/> is returned.</returns>
+		public static SyntaxNode GetObjectCreationNode(this SyntaxNode node) {
+			node = node.Parent;
+			if (node == null) {
+				return null;
+			}
+			var kind = node.Kind();
+			if (kind == SyntaxKind.ObjectCreationExpression) {
+				return node;
+			}
+			if (kind == SyntaxKind.QualifiedName) {
+				node = node.Parent;
+				if (node.IsKind(SyntaxKind.ObjectCreationExpression)) {
+					return node;
+				}
+			}
+			return null;
 		}
 
 		public static string GetDeclarationSignature(this SyntaxNode node) {

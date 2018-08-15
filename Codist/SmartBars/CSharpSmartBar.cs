@@ -72,8 +72,8 @@ namespace Codist.SmartBars
 					AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Find references", GetReferenceCommands);
 
 					if (isDesignMode) {
-						AddCommand(MyToolBar, KnownImageIds.Rename, "Refactor.Rename", ctx => {
-							TextEditorHelper.ExecuteEditorCommand("Rename symbol");
+						AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
+							TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
 							ctx.KeepToolbarOnClick = true;
 						});
 						if (_Node is ParameterSyntax && _Node.Parent is ParameterListSyntax) {
@@ -81,7 +81,7 @@ namespace Codist.SmartBars
 						}
 					}
 				}
-				else if (_Token.RawKind >= (int)SyntaxKind.StringLiteralToken && _Token.RawKind <= (int)SyntaxKind.NumericLiteralToken) {
+				else if (_Token.RawKind >= (int)SyntaxKind.NumericLiteralToken && _Token.RawKind <= (int)SyntaxKind.StringLiteralToken) {
 					AddEditorCommand(MyToolBar, KnownImageIds.ReferencedDimension, "Edit.FindAllReferences", "Find all references");
 				}
 				if (isDesignMode) {
@@ -136,21 +136,15 @@ namespace Codist.SmartBars
 
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
-					r.Add(CreateFindCallersCommand(symbol));
-					if (symbol.MayHaveOverride()) {
-						r.Add(CreateFindOverridesCommand(symbol));
-					}
-					break;
 				case SymbolKind.Property:
-					r.Add(CreateFindCallersCommand(symbol));
-					if (symbol.MayHaveOverride()) {
-						r.Add(CreateFindOverridesCommand(symbol));
-					}
-					break;
 				case SymbolKind.Event:
 					r.Add(CreateFindCallersCommand(symbol));
 					if (symbol.MayHaveOverride()) {
 						r.Add(CreateFindOverridesCommand(symbol));
+					}
+					var st = symbol.ContainingType as INamedTypeSymbol;
+					if (st != null && st.TypeKind == TypeKind.Interface) {
+						r.Add(CreateFindImplementationsCommand(symbol));
 					}
 					break;
 				case SymbolKind.Field:
@@ -158,6 +152,15 @@ namespace Codist.SmartBars
 					break;
 				case SymbolKind.NamedType:
 					var t = symbol as INamedTypeSymbol;
+					if (t.TypeKind == TypeKind.Class) {
+						var ctor = _Node.GetObjectCreationNode();
+						if (ctor != null) {
+							var s = _SemanticModel.GetSymbolOrFirstCandidate(ctor);
+							if (s != null) {
+								r.Add(CreateFindCallersCommand(s));
+							}
+						}
+					}
 					if (t.IsStatic || t.IsSealed) {
 						break;
 					}
@@ -296,8 +299,15 @@ namespace Codist.SmartBars
 					return;
 				}
 				ctx.KeepToolbarOnClick = true;
-				foreach (var impl in SymbolFinder.FindImplementationsAsync(symbol as INamedTypeSymbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
-					menuItem.Items.Add(new SymbolMenuItem(this, impl, null));
+				if (symbol.Kind == SymbolKind.NamedType) {
+					foreach (var impl in SymbolFinder.FindImplementationsAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
+						menuItem.Items.Add(new SymbolMenuItem(this, impl, impl.Locations));
+					}
+				}
+				else {
+					foreach (var impl in SymbolFinder.FindImplementationsAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
+						menuItem.Items.Add(new SymbolMenuItem(this, impl.ContainingSymbol, impl.Locations));
+					}
 				}
 				if (menuItem.Items.Count == 0) {
 					menuItem.Items.Add(new MenuItem { Header = "No implementation found", IsEnabled = false });
@@ -358,7 +368,7 @@ namespace Codist.SmartBars
 				Locations = locations;
 				Symbol = symbol;
 				//todo compatible with symbols having more than 1 locations
-				if (locations != null && locations.Any(l => l.SourceTree.FilePath != null)) {
+				if (locations != null && locations.Any(l => l.SourceTree?.FilePath != null)) {
 					Click += GotoLocation;
 				}
 				if (Symbol != null) {
@@ -377,7 +387,7 @@ namespace Codist.SmartBars
 				}
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
-				ToolTip = new TextBlock().AddText(Symbol.GetSingatureString()).AddText("\nnamespace: " + Symbol.ContainingNamespace?.ToString());
+				ToolTip = new TextBlock().AddText(Symbol.GetSignatureString()).AddText("\nnamespace: " + Symbol.ContainingNamespace?.ToString());
 				ToolTipOpening -= ShowToolTip;
 			}
 		}

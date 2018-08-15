@@ -143,7 +143,7 @@ namespace Codist.QuickInfo
 					node = (node as ArgumentSyntax).Expression;
 				}
 				var qiWrapper = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride) || Config.Instance.QuickInfoMaxWidth > 0 || Config.Instance.QuickInfoMaxHeight > 0
-					? new DefaultQuickInfoPanelWrapper(QuickInfoOverrider.FindDefaultQuickInfoPanel(qiContent))
+					? QuickInfoOverrider.CreateOverrider(qiContent)
 					: null;
 				var symbolInfo = semanticModel.GetSymbolInfo(node);
 				symbol = symbolInfo.Symbol;
@@ -169,7 +169,12 @@ namespace Codist.QuickInfo
 						node = node.Parent;
 					}
 					var ctor = node.Parent as ObjectCreationExpressionSyntax;
-					OverrideDocumentation(node, qiWrapper, ctor == null || ctor.Type != node ? symbol : semanticModel.GetSymbolInfo(ctor).Symbol);
+					if (ctor != null && ctor.Type == node) {
+						OverrideDocumentation(node, qiWrapper, semanticModel.GetSymbolInfo(ctor).Symbol);
+					}
+					else {
+						OverrideDocumentation(node, qiWrapper, symbol);
+					}
 				}
 				var formatMap = _FormatMapService.GetEditorFormatMap(session.TextView);
 				if (_FormatMap != formatMap) {
@@ -187,9 +192,12 @@ namespace Codist.QuickInfo
 						node = node.Parent;
 					}
 					var ctor = node.Parent as ObjectCreationExpressionSyntax;
-					qiWrapper.ApplyClickAndGo(ctor == null || ctor.Type != node ? symbol : semanticModel.GetSymbolOrFirstCandidate(ctor));
+					if (ctor != null && ctor.Type == node) {
+						symbol = semanticModel.GetSymbolOrFirstCandidate(ctor);
+					}
+					qiWrapper.ApplyClickAndGo(symbol);
 				}
-				QuickInfoOverrider.LimitQuickInfoItemSize(qiContent, qiWrapper);
+				qiWrapper.LimitQuickInfoItemSize(qiContent);
 				var navigator = _NavigatorService.GetTextStructureNavigator(_TextBuffer);
 				var extent = navigator.GetExtentOfWord(querySpan.Start).Span;
 				applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
@@ -200,7 +208,7 @@ namespace Codist.QuickInfo
 				applicableToSpan = null;
 			}
 
-			void OverrideDocumentation(SyntaxNode node, DefaultQuickInfoPanelWrapper qiWrapper, ISymbol symbol) {
+			void OverrideDocumentation(SyntaxNode node, IQuickInfoOverrider qiWrapper, ISymbol symbol) {
 				if (symbol == null) {
 					return;
 				}
@@ -573,8 +581,10 @@ namespace Codist.QuickInfo
 					&& (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
 					ShowDeclarationModifier(qiContent, typeSymbol);
 				}
-				var pk = (node = node.Parent).Kind();
-				if (pk == SyntaxKind.ObjectCreationExpression || pk == SyntaxKind.QualifiedName && (node = node.Parent).Kind() == SyntaxKind.ObjectCreationExpression) {
+				//var pk = (node = node.Parent).Kind();
+				//if (pk == SyntaxKind.ObjectCreationExpression || pk == SyntaxKind.QualifiedName && (node = node.Parent).IsKind(SyntaxKind.ObjectCreationExpression)) {
+				node = node.GetObjectCreationNode();
+				if (node != null) {
 					var method = _SemanticModel.GetSymbolOrFirstCandidate(node) as IMethodSymbol;
 					if (method != null) {
 						ShowOverloadsInfo(qiContent, node, method);

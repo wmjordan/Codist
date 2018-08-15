@@ -188,9 +188,6 @@ namespace Codist.SmartBars
 		}
 
 		protected virtual void AddCommands() {
-			if (CodistPackage.DebuggerStatus == DebuggerStatus.Break) {
-				AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");
-			}
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
 				AddCommand(ToolBar, KnownImageIds.Cut, "Cut selected text\nRight click: Cut line", ctx => {
 					if (ctx.RightClick) {
@@ -247,6 +244,9 @@ namespace Codist.SmartBars
 				//		View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(t, @"[ \t]*\r?\n[ \t]*", " "));
 				//	});
 				//}
+			}
+			if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
+				AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");
 			}
 			AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
