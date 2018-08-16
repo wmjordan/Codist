@@ -74,18 +74,18 @@ namespace Codist.QuickInfo
 			}
 			if (c == 1) {
 				var ch = point.Snapshot.GetText(p1, 1);
-				qiContent.Add(new TextBlock { Name = QuickInfoName }
-					.AddText("Selected character: \"", true)
-					.AddText(ch)
-					.AddText("\" (Unicode: 0x" + ((int)ch[0]).ToString("X2") + ")")
+				qiContent.Add(new ToolTipText { Name = QuickInfoName }
+					.Append("Selected character: \"", true)
+					.Append(ch)
+					.Append("\" (Unicode: 0x" + ((int)ch[0]).ToString("X2") + ")")
 				);
 				return activeSpan;
 			}
 			var y1 = point.Snapshot.GetLineNumberFromPosition(p1);
 			var y2 = point.Snapshot.GetLineNumberFromPosition(p2) + 1;
-			var info = new TextBlock() { Name = QuickInfoName }.AddText("Selection: ", true).AddText(c.ToString()).AddText(" characters");
+			var info = new ToolTipText() { Name = QuickInfoName }.Append("Selection: ", true).Append(c.ToString()).Append(" characters");
 			if (y2 - y1 > 1) {
-				info.AddText(", " + (y2 - y1).ToString() + " lines");
+				info.Append(", " + (y2 - y1).ToString() + " lines");
 			}
 			qiContent.Add(info);
 			return activeSpan;

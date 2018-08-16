@@ -219,8 +219,9 @@ namespace Codist.QuickInfo
 					}
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 						var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter);
-						var info = docRenderer.Render(doc);
-						if (info != null) {
+						var info = new ToolTipText();
+						docRenderer.Render(doc, info);
+						if (info.Inlines.FirstInline != null) {
 							if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
 								RenderXmlReturnsDoc(symbol, doc.Parent, info, docRenderer);
 							}
@@ -239,12 +240,11 @@ namespace Codist.QuickInfo
 							return;
 						}
 						var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter);
-						var info = new TextBlock { TextWrapping = TextWrapping.Wrap }
-							.AddText("Documentation from ")
+						var info = new ToolTipText("Documentation from ")
 							.AddSymbol(baseMember.ContainingType, null, _SymbolFormatter)
-							.AddText(".")
+							.Append(".")
 							.AddSymbol(baseMember, null, _SymbolFormatter)
-							.AddText(":\n");
+							.Append(":\n");
 						docRenderer.Render(doc, info.Inlines);
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
 							RenderXmlReturnsDoc(baseMember, doc.Parent, info, docRenderer);
@@ -277,7 +277,7 @@ namespace Codist.QuickInfo
 					|| symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Delegate) {
 					var returns = doc.GetReturns();
 					if (returns != null && returns.FirstNode != null) {
-						desc.AddText("\nReturns", true).AddText(": ");
+						desc.Append("\nReturns", true).Append(": ");
 						docRenderer.Render(returns, desc.Inlines);
 					}
 				}
@@ -285,7 +285,7 @@ namespace Codist.QuickInfo
 
 
 			void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo, SyntaxNode node) {
-				var info = new StackPanel().AddText("Maybe...", true);
+				var info = new StackPanel().Add(new ToolTipText("Maybe...", true));
 				foreach (var item in symbolInfo.CandidateSymbols) {
 					info.Add(ToUIText(item, node.SpanStart));
 				}
@@ -338,14 +338,13 @@ namespace Codist.QuickInfo
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation)) {
 					string asmName = symbol.GetAssemblyModuleName();
 					if (asmName != null) {
-						qiContent.Add(new TextBlock().AddText("Assembly: ", true).AddText(asmName));
+						qiContent.Add(new ToolTipText("Assembly: ", true).Append(asmName));
 					}
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
 					var st = symbol.GetReturnType();
 					if (st != null && st.TypeKind == TypeKind.Delegate) {
-						qiContent.Add(new TextBlock()
-							.AddText("Delegate signature:\n", true)
+						qiContent.Add(new ToolTipText("Delegate signature:\n", true)
 							.AddSymbolDisplayParts((st as INamedTypeSymbol).DelegateInvokeMethod.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, Int32.MinValue));
 					}
 				}
@@ -382,7 +381,7 @@ namespace Codist.QuickInfo
 				else if (nodeKind == SyntaxKind.Block) {
 					var lines = currentSnapshot.GetLineNumberFromPosition(node.Span.End) - currentSnapshot.GetLineNumberFromPosition(node.SpanStart) + 1;
 					if (lines > 100) {
-						qiContent.Add(new TextBlock { Text = lines + " lines", FontWeight = FontWeights.Bold });
+						qiContent.Add(new ToolTipText { Text = lines + " lines", FontWeight = FontWeights.Bold });
 					}
 					else if (lines > 1) {
 						qiContent.Add(lines + " lines");
@@ -401,32 +400,32 @@ namespace Codist.QuickInfo
 					var name = statement.GetDeclarationSignature();
 					if (name != null) {
 						var symbol = _SemanticModel.GetSymbolInfo(statement).Symbol ?? _SemanticModel.GetDeclaredSymbol(statement);
-						var tb = new TextBlock();
+						var tb = new ToolTipText();
 						if (retSymbol != null) {
 							var m = retSymbol as IMethodSymbol;
 							if (m != null && m.MethodKind == MethodKind.AnonymousFunction) {
-								tb.AddText("Return anonymous function for ");
+								tb.Append("Return anonymous function for ");
 							}
 							else {
-								tb.AddText("Return ")
+								tb.Append("Return ")
 									.AddSymbol(retSymbol.GetReturnType(), null, _SymbolFormatter)
-									.AddText(" for ");
+									.Append(" for ");
 							}
 						}
 						//else if (retStatement.Expression.Kind() == SyntaxKind.NullLiteralExpression) {
 						//	tb.AddText("Return ").AddText("null", _SymbolFormatter.Keyword).AddText(" for ");
 						//}
 						else {
-							tb.AddText("Return for ");
+							tb.Append("Return for ");
 						}
 						if (symbol != null) {
 							if (statement is LambdaExpressionSyntax) {
-								tb.AddText("lambda expression");
+								tb.Append("lambda expression");
 							}
 							tb.AddSymbol(symbol, name, _SymbolFormatter);
 						}
 						else {
-							tb.AddText(name);
+							tb.Append(name);
 						}
 						return tb;
 					}
@@ -459,8 +458,8 @@ namespace Codist.QuickInfo
 					}
 					var invoke = ev.Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
 					if (invoke != null && invoke.Parameters.Length == 2) {
-						qiContent.Add(new TextBlock { TextWrapping = TextWrapping.Wrap }
-							.AddText("Event argument: ", true)
+						qiContent.Add(
+							new ToolTipText("Event argument: ", true)
 							.AddSymbolDisplayParts(invoke.Parameters[1].Type.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter)
 						);
 					}
@@ -506,12 +505,12 @@ namespace Codist.QuickInfo
 				if (overloads.Length < 2) {
 					return;
 				}
-				var overloadInfo = new StackPanel().AddText("Method overload:", true);
+				var overloadInfo = new StackPanel().Add(new ToolTipText("Method overload:", true));
 				foreach (var item in overloads) {
 					if (item.Equals(method) || item.Kind != SymbolKind.Method) {
 						continue;
 					}
-					overloadInfo.Add(new TextBlock { TextWrapping = TextWrapping.Wrap }
+					overloadInfo.Add(new ToolTipText()
 						.SetGlyph(_GlyphService.GetGlyph(item.GetGlyphGroup(), item.GetGlyphItem()))
 						.AddSymbolDisplayParts(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, -1)
 					);
@@ -521,12 +520,12 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void ShowMethodTypeArguments(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
+			static void ShowMethodTypeArguments(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
 				var info = new StackPanel();
 				var l = method.TypeArguments.Length;
-				info.AddText("Type argument:", true);
+				info.Add(new ToolTipText("Type argument:", true));
 				for (int i = 0; i < l; i++) {
-					var argInfo = new TextBlock();
+					var argInfo = new ToolTipText();
 					ShowTypeParameterInfo(method.TypeParameters[i], method.TypeArguments[i], argInfo);
 					info.Add(argInfo);
 				}
@@ -540,11 +539,11 @@ namespace Codist.QuickInfo
 				var namespaces = nsSymbol.GetNamespaceMembers().ToImmutableArray().Sort(Comparer<INamespaceSymbol>.Create((x, y) => String.Compare(x.Name, y.Name)));
 				if (namespaces.Length > 0) {
 					var info = new StackPanel();
-					info.AddText("Namespace:", true);
+					info.Add(new ToolTipText("Namespace:", true));
 					foreach (var ns in namespaces) {
-						info.Add(new TextBlock()
+						info.Add(new ToolTipText()
 							.SetGlyph(_GlyphService.GetGlyph(StandardGlyphGroup.GlyphGroupNamespace, StandardGlyphItem.GlyphItemPublic))
-							.AddText(ns.Name, _SymbolFormatter.Namespace)
+							.Append(ns.Name, _SymbolFormatter.Namespace)
 							);
 					}
 					qiContent.Add(info.Scrollable());
@@ -553,9 +552,9 @@ namespace Codist.QuickInfo
 				var members = nsSymbol.GetTypeMembers().Sort(Comparer<INamedTypeSymbol>.Create((x, y) => String.Compare(x.Name, y.Name)));
 				if (members.Length > 0) {
 					var info = new StackPanel();
-					info.AddText("Type:", true);
+					info.Add(new ToolTipText("Type:", true));
 					foreach (var type in members) {
-						var t = new TextBlock().SetGlyph(_GlyphService.GetGlyph(type.GetGlyphGroup(), type.GetGlyphItem()));
+						var t = new ToolTipText().SetGlyph(_GlyphService.GetGlyph(type.GetGlyphGroup(), type.GetGlyphItem()));
 						SymbolInfoRenderer.ShowSymbolDeclaration(t, type, _SymbolFormatter, true, true);
 						t.AddSymbol(type, null, _SymbolFormatter);
 						info.Add(t);
@@ -632,7 +631,7 @@ namespace Codist.QuickInfo
 					}
 				}
 				if (explicitIntfs.Count > 0) {
-					info = new StackPanel().AddText("Implements:", true);
+					info = new StackPanel().Add(new ToolTipText("Implements:", true));
 					foreach (var item in explicitIntfs) {
 						info.Add(ToUIText(item, node.SpanStart));
 					}
@@ -644,7 +643,7 @@ namespace Codist.QuickInfo
 						if (info == null) {
 							info = new StackPanel();
 						}
-						var p = new StackPanel().AddText("Explicit implements:", true);
+						var p = new StackPanel().Add(new ToolTipText("Explicit implements:", true));
 						foreach (var item in explicitIntfs) {
 							p.Add(ToUIText(item, node.SpanStart));
 						}
@@ -660,50 +659,48 @@ namespace Codist.QuickInfo
 				var extType = method.ConstructedFrom.ReceiverType;
 				var extTypeParameter = extType as ITypeParameterSymbol;
 				if (extTypeParameter != null && (extTypeParameter.HasConstructorConstraint || extTypeParameter.HasReferenceTypeConstraint || extTypeParameter.HasValueTypeConstraint || extTypeParameter.ConstraintTypes.Length > 0)) {
-					var ext = new TextBlock { TextWrapping = TextWrapping.Wrap }
-						.AddText("Extending: ", true)
+					var ext = new ToolTipText("Extending: ", true)
 						.AddSymbol(extType, true, _SymbolFormatter.Class)
-						.AddText(" with ")
+						.Append(" with ")
 						.AddSymbolDisplayParts(method.ReceiverType.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
 					info.Add(ext);
 				}
-				var def = new TextBlock { TextWrapping = TextWrapping.Wrap }
-					.AddText("Extended by: ", true)
+				var def = new ToolTipText("Extended by: ", true)
 					.AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), _SymbolFormatter);
 				info.Add(def);
 				qiContent.Add(info);
 			}
 
 			static void ShowTypeParameterInfo(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument, TextBlock text) {
-				text.AddText(typeParameter.Name, _SymbolFormatter.TypeParameter).AddText(" is ")
+				text.Append(typeParameter.Name, _SymbolFormatter.TypeParameter).Append(" is ")
 					.AddSymbol(typeArgument, null, _SymbolFormatter);
 				if (typeParameter.HasConstructorConstraint == false && typeParameter.HasReferenceTypeConstraint == false && typeParameter.HasValueTypeConstraint == false && typeParameter.ConstraintTypes.Length == 0) {
 					return;
 				}
-				text.AddText(" where ", _SymbolFormatter.Keyword).AddText(typeParameter.Name, _SymbolFormatter.TypeParameter).AddText(" : ");
+				text.Append(" where ", _SymbolFormatter.Keyword).Append(typeParameter.Name, _SymbolFormatter.TypeParameter).Append(" : ");
 				var i = 0;
 				if (typeParameter.HasReferenceTypeConstraint) {
-					text.AddText("class", _SymbolFormatter.Keyword);
+					text.Append("class", _SymbolFormatter.Keyword);
 					++i;
 				}
 				if (typeParameter.HasValueTypeConstraint) {
 					if (i > 0) {
-						text.AddText(", ");
+						text.Append(", ");
 					}
-					text.AddText("struct", _SymbolFormatter.Keyword);
+					text.Append("struct", _SymbolFormatter.Keyword);
 					++i;
 				}
 				if (typeParameter.HasConstructorConstraint) {
 					if (i > 0) {
-						text.AddText(", ");
+						text.Append(", ");
 					}
-					text.AddText("new", _SymbolFormatter.Keyword).AddText("()");
+					text.Append("new", _SymbolFormatter.Keyword).Append("()");
 					++i;
 				}
 				if (typeParameter.ConstraintTypes.Length > 0) {
 					foreach (var constraint in typeParameter.ConstraintTypes) {
 						if (i > 0) {
-							text.AddText(", ");
+							text.Append(", ");
 						}
 						text.AddSymbol(constraint, null, _SymbolFormatter);
 						++i;
@@ -765,50 +762,49 @@ namespace Codist.QuickInfo
 
 			static StackPanel ShowStringInfo(string sv) {
 				return new StackPanel()
-					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.Length.ToString()).AddText("chars", true))
+					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.Length.ToString()).Add(new ToolTipText("chars", true)))
 					//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.UTF8.GetByteCount(sv).ToString()).AddText("UTF-8 bytes", true))
 					//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.Default.GetByteCount(sv).ToString()).AddText("System bytes", true))
-					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).AddText("Hash code", true));
+					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).Add(new ToolTipText("Hash code", true)));
 			}
 
 			static void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs, int position) {
-				var info = new StackPanel().AddText("Attribute:", true);
+				var info = new StackPanel().Add(new ToolTipText("Attribute:", true));
 				foreach (var item in attrs) {
 					if (item.AttributeClass.IsAccessible() == false) {
 						continue;
 					}
 					var a = item.AttributeClass.Name;
-					var attrDef = new TextBlock { TextWrapping = TextWrapping.Wrap }
-						.AddText("[")
+					var attrDef = new ToolTipText("[")
 						.AddSymbol(item.AttributeConstructor, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, _SymbolFormatter.Class);
 					if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
-						attrDef.AddText("]");
+						attrDef.Append("]");
 						info.Add(attrDef);
 						continue;
 					}
-					attrDef.AddText("(");
+					attrDef.Append("(");
 					int i = 0;
 					foreach (var arg in item.ConstructorArguments) {
 						if (++i > 1) {
-							attrDef.AddText(", ");
+							attrDef.Append(", ");
 						}
 						_SymbolFormatter.ToUIText(attrDef, arg);
 					}
 					foreach (var arg in item.NamedArguments) {
 						if (++i > 1) {
-							attrDef.AddText(", ");
+							attrDef.Append(", ");
 						}
 						var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property);
 						if (attrMember != null) {
-							attrDef.AddText(arg.Key, attrMember.Kind == SymbolKind.Property ? _SymbolFormatter.Property : _SymbolFormatter.Field);
+							attrDef.Append(arg.Key, attrMember.Kind == SymbolKind.Property ? _SymbolFormatter.Property : _SymbolFormatter.Field);
 						}
 						else {
-							attrDef.AddText(arg.Key, false, true, null);
+							attrDef.Append(arg.Key, false, true, null);
 						}
-						attrDef.AddText("=");
+						attrDef.Append("=");
 						_SymbolFormatter.ToUIText(attrDef, arg.Value);
 					}
-					attrDef.AddText(")]");
+					attrDef.Append(")]");
 					info.Children.Add(attrDef);
 				}
 				if (info.Children.Count > 1) {
@@ -821,12 +817,11 @@ namespace Codist.QuickInfo
 				if (baseType == null || baseType.IsCommonClass() != false) {
 					return;
 				}
-				var info = new TextBlock()
-					.AddText("Base type: ", true)
+				var info = new ToolTipText("Base type: ", true)
 					.AddSymbol(baseType, null, _SymbolFormatter.Class);
 				while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
 					if (baseType.IsAccessible() && baseType.IsCommonClass() == false) {
-						info.AddText(" - ").AddSymbol(baseType, null, _SymbolFormatter.Class);
+						info.Append(" - ").AddSymbol(baseType, null, _SymbolFormatter.Class);
 					}
 				}
 				qiContent.Add(info.LimitSize());
@@ -842,7 +837,7 @@ namespace Codist.QuickInfo
 					return;
 				}
 				var s = new StackPanel()
-					.Add(new TextBlock().AddText("Enum underlying type: ", true).AddSymbolDisplayParts(t.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter));
+					.Add(new ToolTipText("Enum underlying type: ", true).AddSymbolDisplayParts(t.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter));
 				if (fromEnum == false) {
 					qiContent.Add(s);
 					return;
@@ -880,25 +875,22 @@ namespace Codist.QuickInfo
 				if (min == null) {
 					return;
 				}
-				s.Add(new TextBlock().AddText("Field count: ", true).AddText(c.ToString()))
-					.Add(new TextBlock()
-						.AddText("Min: ", true)
-						.AddText(min.ToString() + "(")
-						.AddText(minName.Name, _SymbolFormatter.Enum)
-						.AddText(")"))
-					.Add(new TextBlock()
-						.AddText("Max: ", true)
-						.AddText(max.ToString() + "(")
-						.AddText(maxName.Name, _SymbolFormatter.Enum)
-						.AddText(")"));
+				s.Add(new ToolTipText("Field count: ", true).Append(c.ToString()))
+					.Add(new ToolTipText("Min: ", true)
+						.Append(min.ToString() + "(")
+						.Append(minName.Name, _SymbolFormatter.Enum)
+						.Append(")"))
+					.Add(new ToolTipText("Max: ", true)
+						.Append(max.ToString() + "(")
+						.Append(maxName.Name, _SymbolFormatter.Enum)
+						.Append(")"));
 				if (type.GetAttributes().FirstOrDefault(a => a.AttributeClass.ToDisplayString() == "System.FlagsAttribute") != null) {
 					var d = Convert.ToString(Convert.ToInt64(bits), 2);
-					s.Add(new TextBlock()
-						.AddText("All flags: ", true)
-						.AddText(d)
-						.AddText(" (")
-						.AddText(d.Length.ToString())
-						.AddText(d.Length > 1 ? " bits)" : " bit)"));
+					s.Add(new ToolTipText("All flags: ", true)
+						.Append(d)
+						.Append(" (")
+						.Append(d.Length.ToString())
+						.Append(d.Length > 1 ? " bits)" : " bit)"));
 				}
 				qiContent.Add(s);
 			}
@@ -938,11 +930,11 @@ namespace Codist.QuickInfo
 				if (declaredInterfaces.Count == 0 && inheritedInterfaces.Count == 0 && disposable == null) {
 					return;
 				}
-				var stack = new StackPanel().AddText("Interface:", true);
+				var stack = new StackPanel().Add(new ToolTipText("Interface:", true));
 				if (disposable != null) {
 					var t = ToUIText(disposable, position);
 					if (interfaces.Contains(disposable) == false) {
-						t.AddText(" (inherited)");
+						t.Append(" (inherited)");
 					}
 					stack.Add(t);
 				}
@@ -953,13 +945,13 @@ namespace Codist.QuickInfo
 					stack.Add(ToUIText(item, position));
 				}
 				foreach (var item in inheritedInterfaces) {
-					stack.Add(ToUIText(item, position).AddText(" (inherited)"));
+					stack.Add(ToUIText(item, position).Append(" (inherited)"));
 				}
 				qiContent.Add(stack.Scrollable());
 			}
 
 			static void ShowDeclarationModifier(IList<object> qiContent, ISymbol symbol) {
-				qiContent.Add(SymbolInfoRenderer.ShowSymbolDeclaration(new TextBlock(), symbol, _SymbolFormatter, true, false));
+				qiContent.Add(SymbolInfoRenderer.ShowSymbolDeclaration(new ToolTipText(), symbol, _SymbolFormatter, true, false));
 			}
 
 			void ShowParameterInfo(IList<object> qiContent, SyntaxNode node) {
@@ -1027,25 +1019,31 @@ namespace Codist.QuickInfo
 						}
 					}
 					var doc = argName != null ? (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", argName) : null;
-					var info = new TextBlock().AddText("Argument of ").AddSymbolDisplayParts(m.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argIndex);
+					var info = new ToolTipText("Argument of ").AddSymbolDisplayParts(m.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argIndex);
 					m = symbol.Symbol as IMethodSymbol;
 					if (m.IsGenericMethod) {
 						for (int i = 0; i < m.TypeArguments.Length; i++) {
-							info.AddText("\n");
+							info.Append("\n");
 							ShowTypeParameterInfo(m.TypeParameters[i], m.TypeArguments[i], info);
 						}
 					}
 					if (doc != null) {
-						info.AddText("\n" + argName, true, true, _SymbolFormatter.Parameter).AddText(": ");
+						info.Append("\n" + argName, true, true, _SymbolFormatter.Parameter).Append(": ");
 						new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter).Render(doc, info.Inlines);
 					}
+					foreach (var item in info.Inlines) {
+						if (item.Foreground == null) {
+							item.Foreground = ThemeHelper.ToolTipTextBrush;
+						}
+					}
+
 					qiContent.Add(info.Scrollable());
 				}
 				else if (symbol.CandidateSymbols.Length > 0) {
 					var info = new StackPanel();
-					info.Add(new TextBlock().AddText("Maybe", true).AddText(" argument of"));
+					info.Add(new ToolTipText("Maybe", true).Append(" argument of"));
 					foreach (var candidate in symbol.CandidateSymbols) {
-						info.Add(new TextBlock { TextWrapping = TextWrapping.Wrap }.AddSymbolDisplayParts(candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argName == null ? argIndex : Int32.MinValue));
+						info.Add(new ToolTipText().AddSymbolDisplayParts(candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argName == null ? argIndex : Int32.MinValue));
 					}
 					qiContent.Add(info.Scrollable());
 				}
@@ -1054,7 +1052,7 @@ namespace Codist.QuickInfo
 					if (methodName == "nameof" && argCount == 1) {
 						return;
 					}
-					qiContent.Add(new TextBlock().AddText("Argument " + ++argIndex + " of ").AddText(methodName, true));
+					qiContent.Add(new ToolTipText("Argument " + ++argIndex + " of ").Append(methodName, true));
 				}
 				else {
 					qiContent.Add("Argument " + ++argIndex);
@@ -1093,15 +1091,15 @@ namespace Codist.QuickInfo
 
 			static StackPanel ShowNumericForms(string dec, byte[] bytes) {
 				var s = new StackPanel()
-					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(dec).AddText(" DEC", true))
-					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToHexString(bytes)).AddText(" HEX", true))
-					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToBinString(bytes)).AddText(" BIN", true));
+					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(dec).Add(new ToolTipText(" DEC", true)))
+					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToHexString(bytes)).Add(new ToolTipText(" HEX", true)))
+					.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToBinString(bytes)).Add(new ToolTipText(" BIN", true)));
 				return s;
 			}
 
 			TextBlock ToUIText(ISymbol symbol, int position) {
 				return _SymbolFormatter.ToUIText(
-					new TextBlock() { TextWrapping = TextWrapping.Wrap }
+					new ToolTipText()
 						.SetGlyph(_GlyphService.GetGlyph(symbol.GetGlyphGroup(), symbol.GetGlyphItem())),
 					symbol.ToMinimalDisplayParts(_SemanticModel, position),
 					-1);

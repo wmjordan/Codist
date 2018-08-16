@@ -66,7 +66,7 @@ namespace Codist.SmartBars
 			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
 		}
 		void LoadThemeColor() {
-			var c = CodistPackage.TitleBackgroundColor;
+			var c = ThemeHelper.TitleBackgroundColor;
 			var b = new SolidColorBrush(c.ToWpfColor());
 			b.Freeze();
 			ToolBar.Background = b;
@@ -288,7 +288,7 @@ namespace Codist.SmartBars
 
 		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
 			var b = new Button {
-				Content = new Image { Source = CodistPackage.GetImage(imageId) },
+				Content = new Image { Source = ThemeHelper.GetImage(imageId) },
 				ToolTip = tooltip,
 				Cursor = Cursors.Hand
 			};
@@ -312,7 +312,7 @@ namespace Codist.SmartBars
 
 		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
 			var b = new Button {
-				Content = new Image { Source = CodistPackage.GetImage(imageId) },
+				Content = new Image { Source = ThemeHelper.GetImage(imageId) },
 				ToolTip = tooltip,
 				ContextMenu = new ContextMenu()
 			};
@@ -354,7 +354,7 @@ namespace Codist.SmartBars
 			public CommandMenuItem(SmartBar bar, CommandItem item) {
 				_SmartBar = bar;
 				CommandItem = item;
-				Icon = new Image { Source = CodistPackage.GetImage(item.ImageId) };
+				Icon = new Image { Source = ThemeHelper.GetImage(item.ImageId) };
 				Header = new TextBlock { Text = item.Name };
 				item.ControlInitializer?.Invoke(this);
 				// the action is installed only when called by this method

@@ -27,7 +27,7 @@ namespace Codist.Margins
 		/// </summary>
 		/// <param name="textView">The <see cref="IWpfTextView"/> to attach the margin to.</param>
 		public CodeMargin(IWpfTextViewHost textView, IVerticalScrollBar scrollBar, CodeMarginFactory container) {
-			_TextView = textView ?? throw new ArgumentNullException("textView");
+			_TextView = textView ?? throw new ArgumentNullException(nameof(textView));
 			_CodeTagAggregator = container.ViewTagAggregatorFactoryService.CreateTagAggregator<ClassificationTag>(textView.TextView);
 			_CodeMarginElement = new CodeMarginElement(textView.TextView, container, _CodeTagAggregator, scrollBar);
 			textView.Closed += TextView_Closed;

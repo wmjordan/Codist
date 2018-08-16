@@ -54,12 +54,12 @@ namespace Codist.QuickInfo
 		static TextBlock ShowSymbolLocation(ISymbol symbol, string loc) {
 			var t = new TextBlock()
 				.LimitSize()
-				.AddText(symbol.Name, true);
+				.Append(symbol.Name, true);
 			if (String.IsNullOrEmpty(loc) == false) {
-				t.AddText("\ndefined in ").AddText(loc, true);
+				t.Append("\ndefined in ").Append(loc, true);
 			}
 			if (symbol.IsMemberOrType() && symbol.ContainingNamespace != null) {
-				t.AddText("\nnamespace: ").AddText(symbol.ContainingNamespace.ToDisplayString());
+				t.Append("\nnamespace: ").Append(symbol.ContainingNamespace.ToDisplayString());
 			}
 			return t;
 		}
@@ -174,10 +174,8 @@ namespace Codist.QuickInfo
 						if (o == null) {
 							var s = c as string;
 							if (s != null) {
-								cp.Content = new TextBlock {
-									Text = s,
-									TextWrapping = TextWrapping.Wrap,
-									Foreground = CodistPackage.TooltipTextBrush
+								cp.Content = new ToolTipText {
+									Text = s
 								}.Scrollable().LimitSize();
 							}
 							continue;

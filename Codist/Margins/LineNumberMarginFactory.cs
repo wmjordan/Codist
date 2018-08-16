@@ -12,7 +12,7 @@ namespace Codist.Margins
 	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = PredefinedMarginNames.OverviewMark)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType("text")]
-    [TextViewRole(PredefinedTextViewRoles.Interactive)]
+	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class LineNumberMarginFactory : IWpfTextViewMarginProvider
 	{
 #pragma warning disable 649

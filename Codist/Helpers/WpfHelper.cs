@@ -133,19 +133,23 @@ namespace Codist
 			}
 			return block;
 		}
-		public static TextBlock Add(this TextBlock block, Inline inline) {
+		public static TextBlock Append(this TextBlock block, Inline inline) {
 			block.Inlines.Add(inline);
 			return block;
 		}
-		public static TextBlock AddText(this TextBlock block, string text) {
+		public static TextBlock Append(this TextBlock block, string text) {
 			block.Inlines.Add(new Run(text));
 			return block;
 		}
-		public static TextBlock AddText(this TextBlock block, string text, bool bold) {
-			return block.AddText(text, bold, false, null);
+		public static TextBlock Append(this TextBlock block, string text, bool bold) {
+			return block.Append(text, bold, false, null);
 		}
-		public static TextBlock AddText(this TextBlock block, string text, WpfBrush brush) {
-			return block.AddText(text, false, false, brush);
+		public static TextBlock Append(this TextBlock block, string text, WpfBrush brush) {
+			return block.Append(text, false, false, brush);
+		}
+		public static TextBlock Append(this TextBlock block, string text, bool bold, bool italic, WpfBrush brush) {
+			block.Inlines.Add(Render(text, bold, italic, brush));
+			return block;
 		}
 		public static TextBlock AddSymbolDisplayParts(this TextBlock block, ImmutableArray<SymbolDisplayPart> parts, SymbolFormatter formatter) {
 			return formatter.ToUIText(block, parts, Int32.MinValue);
@@ -159,6 +163,7 @@ namespace Codist
 			}
 			return block;
 		}
+
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, WpfBrush brush) {
 			if (symbol != null) {
 				block.Inlines.Add(symbol.Render(alias, false, brush));
@@ -188,11 +193,6 @@ namespace Codist
 			run.ToolTip = symbol.ToString();
 			return run;
 		}
-
-		public static TextBlock AddText(this TextBlock block, string text, bool bold, bool italic, WpfBrush brush) {
-			block.Inlines.Add(Render(text, bold, italic, brush));
-			return block;
-		}
 		public static Run Render(this string text, WpfBrush brush) {
 			return text.Render(false, false, brush);
 		}
@@ -210,37 +210,6 @@ namespace Codist
 			return run;
 		}
 
-		public static TPanel AddText<TPanel>(this TPanel parent, string text)
-			where TPanel : Panel {
-			return parent.AddText(text, false, false, null);
-		}
-		public static TPanel AddText<TPanel>(this TPanel parent, string text, bool bold)
-			where TPanel : Panel {
-			return parent.AddText(text, bold, false, null);
-		}
-		public static TPanel AddText<TPanel>(this TPanel parent, string text, bool bold, bool italic)
-			where TPanel : Panel {
-			return parent.AddText(text, bold, italic, null);
-		}
-		public static TPanel AddText<TPanel>(this TPanel parent, string text, WpfBrush brush)
-			where TPanel : Panel {
-			return parent.AddText(text, false, false, brush);
-		}
-		public static TPanel AddText<TPanel>(this TPanel parent, string text, bool bold, bool italic, WpfBrush foregroundBrush)
-			where TPanel : Panel {
-			var t = new TextBlock { Text = text };
-			if (bold) {
-				t.FontWeight = FontWeight.FromOpenTypeWeight(bold ? 800 : 400);
-			}
-			if (italic) {
-				t.FontStyle = FontStyles.Italic;
-			}
-			if (foregroundBrush != null) {
-				t.Foreground = foregroundBrush;
-			}
-			parent.Children.Add(t);
-			return parent;
-		}
 		public static StackPanel MakeHorizontal(this StackPanel panel) {
 			panel.Orientation = Orientation.Horizontal;
 			return panel;
@@ -380,13 +349,13 @@ namespace Codist
 			menu.Opened += (sender, e) => {
 				var m = sender as ContextMenu;
 				m.Items.Add(new MenuItem {
-					Header = new TextBlock().AddText(symbolName, true).AddText(" is defined in ").AddText(refs.Length.ToString(), true).AddText(" places"),
+					Header = new TextBlock().Append(symbolName, true).Append(" is defined in ").Append(refs.Length.ToString(), true).Append(" places"),
 					IsEnabled = false
 				});
 				foreach (var loc in refs) {
 					var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
 					var item = new MenuItem {
-						Header = new TextBlock().AddText(System.IO.Path.GetFileName(loc.SyntaxTree.FilePath)).AddText("(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", WpfBrushes.Gray),
+						Header = new TextBlock().Append(System.IO.Path.GetFileName(loc.SyntaxTree.FilePath)).Append("(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", WpfBrushes.Gray),
 						Tag = loc
 					};
 					item.Click += (s, args) => ((SyntaxReference)((MenuItem)s).Tag).GoToSource();

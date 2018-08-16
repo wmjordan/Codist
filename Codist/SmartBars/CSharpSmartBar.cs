@@ -193,7 +193,7 @@ namespace Codist.SmartBars
 					foreach (var caller in callers) {
 						var s = caller.CallingSymbol;
 						menuItem.Items.Add(new SymbolMenuItem(this, s, caller.Locations) {
-							Header = new TextBlock().AddText(s.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).AddText(s.Name)
+							Header = new TextBlock().Append(s.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).Append(s.Name)
 						});
 					}
 				}
@@ -387,7 +387,7 @@ namespace Codist.SmartBars
 				}
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
-				ToolTip = new TextBlock().AddText(Symbol.GetSignatureString()).AddText("\nnamespace: " + Symbol.ContainingNamespace?.ToString());
+				ToolTip = new TextBlock().Append(Symbol.GetSignatureString()).Append("\nnamespace: " + Symbol.ContainingNamespace?.ToString());
 				ToolTipOpening -= ShowToolTip;
 			}
 		}

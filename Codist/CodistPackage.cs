@@ -2,11 +2,9 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
 using EnvDTE80;
-using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using WpfBrush = System.Windows.Media.SolidColorBrush;
 
 namespace Codist
 {
@@ -39,11 +37,7 @@ namespace Codist
 		/// CodistPackage GUID string.
 		/// </summary>
 		public const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
-		static readonly int _IconSize = 16;
 		static EnvDTE.DTE _dte;
-		static IVsUIShell5 _VsUIShell5;
-		static ImageAttributes _ImageAttributes;
-		static IVsImageService2 _ImageService;
 
 		//static VsDebugger _Debugger;
 
@@ -58,11 +52,6 @@ namespace Codist
 		}
 
 		public static EnvDTE.DTE DTE => _dte ?? (_dte = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE);
-		public static IVsUIShell5 VsShell5 => _VsUIShell5 ?? (_VsUIShell5 = ServiceProvider.GlobalProvider.GetService(typeof(SVsUIShell)) as IVsUIShell5);
-		public static Color ToolWindowBackgroundColor { get; private set; }
-		public static Color TitleBackgroundColor { get; private set; }
-		public static WpfBrush TooltipTextBrush { get; private set; }
-		public static WpfBrush TooltipBackgroundBrush { get; private set; }
 
 		public static DebuggerStatus DebuggerStatus {
 			get {
@@ -75,14 +64,6 @@ namespace Codist
 			}
 		}
 
-		public static System.Windows.Media.Imaging.BitmapSource GetImage(int monikerId) {
-			var moniker = new ImageMoniker() { Guid = Microsoft.VisualStudio.Imaging.KnownImageIds.ImageCatalogGuid, Id = monikerId };
-			Object data;
-			(_ImageService ?? (_ImageService = ServiceProvider.GlobalProvider.GetService(typeof(SVsImageService)) as IVsImageService2)).GetImage(moniker, _ImageAttributes).get_Data(out data);
-			return data as System.Windows.Media.Imaging.BitmapSource;
-		}
-
-
 		#region Package Members
 
 		/// <summary>
@@ -92,26 +73,9 @@ namespace Codist
 		protected override void Initialize() {
             base.Initialize();
 			Commands.ScreenshotCommand.Initialize(this);
-			LoadThemeColors();
+			ThemeHelper.Refresh();
 			VSColorTheme.ThemeChanged += (args) => {
-				LoadThemeColors();
-			};
-		}
-
-		static void LoadThemeColors() {
-			ToolWindowBackgroundColor = VSColorTheme.GetThemedColor(EnvironmentColors.ToolWindowBackgroundColorKey);
-			TitleBackgroundColor = VSColorTheme.GetThemedColor(EnvironmentColors.MainWindowActiveCaptionColorKey);
-			TooltipTextBrush = new WpfBrush(VsColors.GetThemedWPFColor(VsShell5, EnvironmentColors.ToolTipTextBrushKey));
-			TooltipBackgroundBrush = new WpfBrush(VsColors.GetThemedWPFColor(VsShell5, EnvironmentColors.ToolTipBrushKey));
-			var v = TitleBackgroundColor.ToArgb();
-			_ImageAttributes = new ImageAttributes {
-				Flags = unchecked((uint)(_ImageAttributesFlags.IAF_RequiredFlags | _ImageAttributesFlags.IAF_Background)),
-				ImageType = (uint)_UIImageType.IT_Bitmap,
-				Format = (uint)_UIDataFormat.DF_WPF,
-				StructSize = Marshal.SizeOf(typeof(ImageAttributes)),
-				LogicalHeight = _IconSize,
-				LogicalWidth = _IconSize,
-				Background = (uint)(v & 0xFFFFFF << 8 | v & 0xFF)
+				ThemeHelper.Refresh();
 			};
 		}
 

@@ -7,32 +7,32 @@ namespace Codist.Classifiers
 {
 	/// <summary>Classification type definition export for code tagger.</summary>
 	static class CommentClassificationDefinitions
-    {
+	{
 #pragma warning disable 169
 		[Export(typeof(ClassificationTypeDefinition))]
-        [BaseDefinition(Constants.CodeComment)]
-        [Name(Constants.EmphasisComment)]
-        static ClassificationTypeDefinition EmphasisComment;
+		[BaseDefinition(Constants.CodeComment)]
+		[Name(Constants.EmphasisComment)]
+		static ClassificationTypeDefinition EmphasisComment;
 
-        [Export(typeof(ClassificationTypeDefinition))]
-        [BaseDefinition(Constants.CodeComment)]
-        [Name(Constants.QuestionComment)]
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeComment)]
+		[Name(Constants.QuestionComment)]
 		static ClassificationTypeDefinition QuestionComment;
 
-        [Export(typeof(ClassificationTypeDefinition))]
-        [BaseDefinition(Constants.CodeComment)]
-        [Name(Constants.ExclaimationComment)]
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeComment)]
+		[Name(Constants.ExclaimationComment)]
 		static ClassificationTypeDefinition ExclaimationComment;
 
-        [Export(typeof(ClassificationTypeDefinition))]
-        [BaseDefinition(Constants.CodeComment)]
-        [Name(Constants.DeletionComment)]
-        static ClassificationTypeDefinition DeletionComment;
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeComment)]
+		[Name(Constants.DeletionComment)]
+		static ClassificationTypeDefinition DeletionComment;
 
-        [Export(typeof(ClassificationTypeDefinition))]
-        [BaseDefinition(Constants.CodeComment)]
-        [Name(Constants.TodoComment)]
-        static ClassificationTypeDefinition TodoComment;
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeComment)]
+		[Name(Constants.TodoComment)]
+		static ClassificationTypeDefinition TodoComment;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeComment)]

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -97,7 +93,6 @@ namespace Codist
 					System.Diagnostics.Debugger.Break();
 				}
 			}
-			
 		}
 
 		public static void ExecuteEditorCommand(string command) {

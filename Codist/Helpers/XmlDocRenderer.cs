@@ -64,13 +64,11 @@ namespace Codist
 			inlines.Add(symbol);
 		}
 
-		public TextBlock Render(XElement content) {
+		public void Render(XElement content, TextBlock text) {
 			if (content == null || content.HasElements == false && content.IsEmpty) {
-				return null;
+				return;
 			}
-			var text = new TextBlock { TextWrapping = TextWrapping.Wrap };
 			Render(content, text.Inlines);
-			return text.Inlines.FirstInline != null ? text : null;
 		}
 
 		public void Render(XContainer content, InlineCollection text) {

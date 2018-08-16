@@ -89,7 +89,7 @@ namespace Codist
 						goto default;
 					case SymbolDisplayPartKind.ClassName:
 						if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
-							block.AddText("?", Class);
+							block.Append("?", Class);
 						}
 						else {
 							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, Class);
@@ -107,10 +107,10 @@ namespace Codist
 					case SymbolDisplayPartKind.ParameterName:
 						var p = part.Symbol as IParameterSymbol;
 						if (p.Ordinal == argIndex || p.IsParams && argIndex > p.Ordinal) {
-							block.AddText(p.Name, true, true, Parameter);
+							block.Append(p.Name, true, true, Parameter);
 						}
 						else {
-							block.AddText(p.Name, false, false, Parameter);
+							block.Append(p.Name, false, false, Parameter);
 						}
 						break;
 					case SymbolDisplayPartKind.StructName:
@@ -120,28 +120,28 @@ namespace Codist
 						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, Delegate);
 						break;
 					case SymbolDisplayPartKind.StringLiteral:
-						block.AddText(part.ToString(), false, false, Text);
+						block.Append(part.ToString(), false, false, Text);
 						break;
 					case SymbolDisplayPartKind.Keyword:
-						block.AddText(part.ToString(), false, false, Keyword);
+						block.Append(part.ToString(), false, false, Keyword);
 						break;
 					case SymbolDisplayPartKind.NamespaceName:
-						block.AddText(part.Symbol.Name, Namespace);
+						block.Append(part.Symbol.Name, Namespace);
 						break;
 					case SymbolDisplayPartKind.TypeParameterName:
-						block.AddText(part.Symbol.Name, argIndex == Int32.MinValue, false, TypeParameter);
+						block.Append(part.Symbol.Name, argIndex == Int32.MinValue, false, TypeParameter);
 						break;
 					case SymbolDisplayPartKind.FieldName:
-						block.AddText(part.Symbol.Name, Field);
+						block.Append(part.Symbol.Name, Field);
 						break;
 					case SymbolDisplayPartKind.PropertyName:
-						block.AddText(part.Symbol.Name, Property);
+						block.Append(part.Symbol.Name, Property);
 						break;
 					case SymbolDisplayPartKind.EventName:
-						block.AddText(part.Symbol.Name, Delegate);
+						block.Append(part.Symbol.Name, Delegate);
 						break;
 					default:
-						block.AddText(part.ToString());
+						block.Append(part.ToString());
 						break;
 				}
 			}
@@ -152,13 +152,13 @@ namespace Codist
 			switch (constant.Kind) {
 				case TypedConstantKind.Primitive:
 					if (constant.Value is bool) {
-						block.AddText((bool)constant.Value ? "true" : "false", Keyword);
+						block.Append((bool)constant.Value ? "true" : "false", Keyword);
 					}
 					else if (constant.Value is string) {
-						block.AddText(constant.ToCSharpString(), Text);
+						block.Append(constant.ToCSharpString(), Text);
 					}
 					else {
-						block.AddText(constant.ToCSharpString(), Number);
+						block.Append(constant.ToCSharpString(), Number);
 					}
 					break;
 				case TypedConstantKind.Enum:
@@ -174,36 +174,36 @@ namespace Codist
 						var flags = items.ToArray();
 						for (int i = 0; i < flags.Length; i++) {
 							if (i > 0) {
-								block.AddText(" | ");
+								block.Append(" | ");
 							}
-							block.AddText(constant.Type.Name + "." + flags[i].Name, Enum);
+							block.Append(constant.Type.Name + "." + flags[i].Name, Enum);
 						}
 					}
 					else {
-						block.AddText(constant.Type.Name + en.Substring(en.LastIndexOf('.')), Enum);
+						block.Append(constant.Type.Name + en.Substring(en.LastIndexOf('.')), Enum);
 					}
 					break;
 				case TypedConstantKind.Type:
-					block.AddText("typeof", Keyword).AddText("(")
+					block.Append("typeof", Keyword).Append("(")
 						.AddSymbol((constant.Value as ITypeSymbol), null, this)
-						.AddText(")");
+						.Append(")");
 					break;
 				case TypedConstantKind.Array:
-					block.AddText("{");
+					block.Append("{");
 					bool c = false;
 					foreach (var item in constant.Values) {
 						if (c == false) {
 							c = true;
 						}
 						else {
-							block.AddText(", ");
+							block.Append(", ");
 						}
 						ToUIText(block, item);
 					}
-					block.AddText("}");
+					block.Append("}");
 					break;
 				default:
-					block.AddText(constant.ToCSharpString());
+					block.Append(constant.ToCSharpString());
 					break;
 			}
 		}
