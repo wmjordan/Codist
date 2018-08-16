@@ -95,20 +95,16 @@ namespace Codist
 		public static WpfColor Alpha(this WpfColor color, byte a) {
 			return WpfColor.FromArgb(a, color.R, color.G, color.B);
 		}
+		/// <summary>
+		/// Returns a new clone of <see cref="WpfBrush"/> which has a new <paramref name="opacity"/> as <see cref="WpfBrush.Opacity"/>.
+		/// </summary>
 		public static TBrush Alpha<TBrush>(this TBrush brush, double opacity)
 			where TBrush : WpfBrush {
 			if (brush != null) {
-				if (brush.IsFrozen) {
-					brush = brush.Clone() as TBrush;
-				}
+				brush = brush.Clone() as TBrush;
 				brush.Opacity = opacity;
 			}
 			return brush;
-		}
-		public static TPanel Add<TPanel>(this TPanel panel, string text)
-			where TPanel : Panel {
-			panel.Children.Add(new TextBlock() { Text = text });
-			return panel;
 		}
 		public static TPanel Add<TPanel>(this TPanel panel, UIElement control)
 			where TPanel : Panel {
@@ -325,7 +321,8 @@ namespace Codist
 			}
 			return element;
 		}
-		public static ScrollViewer Scrollable<TElement>(this TElement element) {
+		public static ScrollViewer Scrollable<TElement>(this TElement element)
+			where TElement : DependencyObject {
 			var t = element as TextBlock;
 			if (t != null && t.TextWrapping == TextWrapping.NoWrap) {
 				t.TextWrapping = TextWrapping.Wrap;

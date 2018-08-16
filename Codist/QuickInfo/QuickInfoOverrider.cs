@@ -82,17 +82,6 @@ namespace Codist.QuickInfo
 			public void LimitQuickInfoItemSize(IList<object> qiContent) {
 				if (Config.Instance.QuickInfoMaxHeight > 0 && Config.Instance.QuickInfoMaxWidth > 0 || qiContent.Count > 0) {
 					_Overrider.LimitItemSize = true;
-					for (int i = 0; i < qiContent.Count; i++) {
-						var s = qiContent[i] as string;
-						if (s != null) {
-							qiContent[i] = new TextBlock { Text = s, TextWrapping = TextWrapping.Wrap }.Scrollable().LimitSize();
-							continue;
-						}
-						// todo: make other elements scrollable
-						if ((qiContent[i] as FrameworkElement).LimitSize() == null) {
-							continue;
-						}
-					}
 				}
 				if (qiContent.Count > 0) {
 					qiContent.Add(_Overrider);
@@ -111,7 +100,13 @@ namespace Codist.QuickInfo
 
 				protected override void OnVisualParentChanged(DependencyObject oldParent) {
 					base.OnVisualParentChanged(oldParent);
-					FixQuickInfo();
+					if (DocElement != null || ClickAndGoSymbol != null || LimitItemSize) {
+						FixQuickInfo();
+					}
+					if (LimitItemSize) {
+						ApplySizeLimit(this.GetVisualParent<StackPanel>());
+					}
+
 					// hides the parent container from taking excessive space in the quick info window
 					var c = this.GetVisualParent<Border>();
 					if (c != null) {
@@ -120,7 +115,6 @@ namespace Codist.QuickInfo
 				}
 
 				void FixQuickInfo() {
-					// makes the default quick info panel scrollable and size limited
 					var p = this.GetVisualParent<StackPanel>();
 					if (p == null) {
 						return;
@@ -153,13 +147,43 @@ namespace Codist.QuickInfo
 							wrapPanel.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 10;
 						}
+					}
+				}
 
-						// make the doc scrollable and limit its size
-						var container = doc.GetVisualParent() as ContentPresenter;
-						if (container != null && LimitItemSize) {
-							container.Content = null;
-							container.Content = doc.Scrollable().LimitSize();
+				static void ApplySizeLimit(StackPanel quickInfoPanel) {
+					if (quickInfoPanel == null) {
+						return;
+					}
+					foreach (var item in quickInfoPanel.Children) {
+						var o = item as DependencyObject;
+						if (o == null) {
+							continue;
 						}
+						var cp = o.GetFirstVisualChild<ContentPresenter>();
+						if (cp == null) {
+							continue;
+						}
+						cp.LimitSize();
+						var c = cp.Content;
+						if (c is ScrollViewer || c is Overrider
+							|| (c is Microsoft.VisualStudio.Language.Intellisense.IInteractiveQuickInfoContent && c.GetType().Name == "LightBulbQuickInfoPlaceHolder")) {
+							// skip already scrollable content and the light bulb
+							continue;
+						}
+						o = c as DependencyObject;
+						if (o == null) {
+							var s = c as string;
+							if (s != null) {
+								cp.Content = new TextBlock {
+									Text = s,
+									TextWrapping = TextWrapping.Wrap,
+									Foreground = CodistPackage.TooltipTextBrush
+								}.Scrollable().LimitSize();
+							}
+							continue;
+						}
+						cp.Content = null;
+						cp.Content = o.Scrollable().LimitSize();
 					}
 				}
 			}

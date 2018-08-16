@@ -172,7 +172,7 @@ namespace Codist.Margins
 								pen = GetPenForCodeMemberType(tagType);
 							}
 							if (pen.Brush != null) {
-								var text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Clone().Alpha((y2 - y1) * 20 / ActualHeight));
+								var text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Alpha((y2 - y1) * 20 / ActualHeight));
 								y1 -= text.Height / 2;
 								drawingContext.DrawText(text, new Point(level + 2, y1));
 							}
