@@ -87,6 +87,7 @@ namespace Codist.SmartBars
 				if (isDesignMode) {
 					if (_Node.IsDeclaration()) {
 						if (_Node is TypeDeclarationSyntax || _Node is MemberDeclarationSyntax || _Node is ParameterListSyntax) {
+							//todo clear selection after executing command
 							AddEditorCommand(MyToolBar, KnownImageIds.AddComment, "Edit.InsertComment", "Insert comment");
 						}
 					}
@@ -152,7 +153,7 @@ namespace Codist.SmartBars
 					break;
 				case SymbolKind.NamedType:
 					var t = symbol as INamedTypeSymbol;
-					if (t.TypeKind == TypeKind.Class) {
+					if (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct) {
 						var ctor = _Node.GetObjectCreationNode();
 						if (ctor != null) {
 							var s = _SemanticModel.GetSymbolOrFirstCandidate(ctor);
