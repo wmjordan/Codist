@@ -12,6 +12,9 @@ using AppHelpers;
 
 namespace Codist.LineTransformers
 {
+	/// <summary>
+	/// Adds extra margin to lines.
+	/// </summary>
 	[Export(typeof(ILineTransformSourceProvider))]
 	[ContentType(Constants.CodeTypes.Text)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]

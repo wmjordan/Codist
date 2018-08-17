@@ -140,6 +140,7 @@ namespace Codist.SmartBars
 		}
 
 		#endregion
+
 		void CreateToolBar(object dummy) {
 			if (ToolBar.Dispatcher.Thread != Thread.CurrentThread) {
 				ToolBar.Dispatcher.Invoke(() => CreateToolBar(null));
@@ -288,7 +289,7 @@ namespace Codist.SmartBars
 
 		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
 			var b = new Button {
-				Content = new Image { Source = ThemeHelper.GetImage(imageId) },
+				Content = ThemeHelper.GetImage(imageId),
 				ToolTip = tooltip,
 				Cursor = Cursors.Hand
 			};
@@ -312,7 +313,7 @@ namespace Codist.SmartBars
 
 		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
 			var b = new Button {
-				Content = new Image { Source = ThemeHelper.GetImage(imageId) },
+				Content = ThemeHelper.GetImage(imageId),
 				ToolTip = tooltip,
 				ContextMenu = new ContextMenu()
 			};
@@ -354,7 +355,7 @@ namespace Codist.SmartBars
 			public CommandMenuItem(SmartBar bar, CommandItem item) {
 				_SmartBar = bar;
 				CommandItem = item;
-				Icon = new Image { Source = ThemeHelper.GetImage(item.ImageId) };
+				Icon = ThemeHelper.GetImage(item.ImageId);
 				Header = new TextBlock { Text = item.Name };
 				item.ControlInitializer?.Invoke(this);
 				// the action is installed only when called by this method

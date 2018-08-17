@@ -1019,7 +1019,9 @@ namespace Codist.QuickInfo
 						}
 					}
 					var doc = argName != null ? (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", argName) : null;
-					var info = new ToolTipText("Argument of ").AddSymbolDisplayParts(m.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argIndex);
+					var info = new ToolTipText("Argument", true)
+						.Append(" of ")
+						.AddSymbolDisplayParts(m.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argIndex);
 					m = symbol.Symbol as IMethodSymbol;
 					if (m.IsGenericMethod) {
 						for (int i = 0; i < m.TypeArguments.Length; i++) {

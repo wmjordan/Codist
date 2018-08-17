@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
@@ -33,14 +29,17 @@ namespace Codist
 		}
 
 		/// <summary>
-		/// Gets a themed <see cref="System.Windows.Media.Imaging.BitmapSource"/> from a value defined in <see cref="Microsoft.VisualStudio.Imaging.KnownImageIds"/>
+		/// Gets a themed <see cref="System.Windows.Controls.Image"/> from a value defined in <see cref="Microsoft.VisualStudio.Imaging.KnownImageIds"/>
 		/// </summary>
 		/// <param name="imageId">The image id.</param>
-		public static System.Windows.Media.Imaging.BitmapSource GetImage(int imageId) {
-			var moniker = new ImageMoniker() { Guid = Microsoft.VisualStudio.Imaging.KnownImageIds.ImageCatalogGuid, Id = imageId };
+		public static System.Windows.Controls.Image GetImage(int imageId) {
+			var moniker = new ImageMoniker {
+				Guid = Microsoft.VisualStudio.Imaging.KnownImageIds.ImageCatalogGuid,
+				Id = imageId
+			};
 			object data;
 			(_ImageService ?? (_ImageService = ServiceProvider.GlobalProvider.GetService(typeof(SVsImageService)) as IVsImageService2)).GetImage(moniker, _ImageAttributes).get_Data(out data);
-			return data as System.Windows.Media.Imaging.BitmapSource;
+			return new System.Windows.Controls.Image { Source = data as System.Windows.Media.Imaging.BitmapSource };
 		}
 
 

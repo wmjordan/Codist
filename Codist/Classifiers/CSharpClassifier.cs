@@ -125,6 +125,8 @@ namespace Codist.Classifiers
 								case SyntaxKind.IfStatement:
 								case SyntaxKind.ElseClause:
 								case SyntaxKind.SwitchStatement:
+								case SyntaxKind.CaseSwitchLabel:
+								case SyntaxKind.DefaultSwitchLabel:
 									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.BranchingKeyword));
 									continue;
 								case SyntaxKind.ForStatement:
