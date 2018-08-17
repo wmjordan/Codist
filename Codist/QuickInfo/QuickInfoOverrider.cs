@@ -19,8 +19,8 @@ namespace Codist.QuickInfo
 	{
 		static readonly SolidColorBrush __HighlightBrush = SystemColors.HighlightBrush.Alpha(0.3);
 		public static IQuickInfoOverrider CreateOverrider(IList<object> qiContent) {
-			var o = new LegacyQuickInfoOverrider(qiContent);
-			return o.Panel != null ? o : (IQuickInfoOverrider)new QuickInfoOverrider2(qiContent);
+			var o = new Legacy(qiContent);
+			return o.Panel != null ? o : (IQuickInfoOverrider)new Default(qiContent);
 		}
 
 		static void ApplyClickAndGo(ISymbol symbol, TextBlock description) {
@@ -67,11 +67,11 @@ namespace Codist.QuickInfo
 		/// <summary>
 		/// The overrider for VS 15.8 and above versions.
 		/// </summary>
-		sealed class QuickInfoOverrider2 : IQuickInfoOverrider
+		sealed class Default : IQuickInfoOverrider
 		{
 			Overrider _Overrider;
 
-			public QuickInfoOverrider2(IList<object> qiContent) {
+			public Default(IList<object> qiContent) {
 				_Overrider = new Overrider();
 			}
 
@@ -192,12 +192,12 @@ namespace Codist.QuickInfo
 		/// From version 15.8 on, VS no longer creates WPF elements for the Quick Info immediately,
 		/// thus, we can't hack into the qiContent for the Quick Info panel.
 		/// </summary>
-		sealed class LegacyQuickInfoOverrider : IQuickInfoOverrider
+		sealed class Legacy : IQuickInfoOverrider
 		{
 			static Func<StackPanel, TextBlock> __GetMainDescription;
 			static Func<StackPanel, TextBlock> __GetDocumentation;
 
-			public LegacyQuickInfoOverrider(IList<object> qiContent) {
+			public Legacy(IList<object> qiContent) {
 				Panel = FindDefaultQuickInfoPanel(qiContent);
 				if (__GetMainDescription == null && Panel != null) {
 					var t = Panel.GetType();

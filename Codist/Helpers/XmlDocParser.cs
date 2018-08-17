@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
@@ -36,7 +32,7 @@ namespace Codist
 				case SymbolKind.Property:
 					return symbol.GetXmlDoc().GetSummary();
 				case SymbolKind.Parameter:
-					var p = (symbol as IParameterSymbol);
+					var p = symbol as IParameterSymbol;
 					if (p.IsThis) {
 						return null;
 					}
@@ -120,7 +116,7 @@ namespace Codist
 					}
 					break;
 				case SymbolKind.Parameter:
-					var p = (symbol as IParameterSymbol);
+					var p = symbol as IParameterSymbol;
 					if (p.IsThis) {
 						return;
 					}
@@ -142,7 +138,7 @@ namespace Codist
 		}
 
 		static XElement AsTextOnlySummary(XElement doc) {
-			return (doc.FirstNode != null && doc.FirstNode.NodeType == XmlNodeType.Text && doc.LastNode.NodeType == XmlNodeType.Text ? doc : null);
+			return doc.FirstNode != null && doc.FirstNode.NodeType == XmlNodeType.Text && doc.LastNode.NodeType == XmlNodeType.Text ? doc : null;
 		}
 	}
 }
