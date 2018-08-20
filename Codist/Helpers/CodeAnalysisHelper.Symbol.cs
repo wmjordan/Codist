@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
@@ -24,6 +26,28 @@ namespace Codist
 				case Accessibility.Internal: return "internal ";
 				case Accessibility.ProtectedOrInternal: return "protected or internal ";
 				default: return String.Empty;
+			}
+		}
+
+		public static IEnumerable<INamedTypeSymbol> GetAllTypes(this INamespaceSymbol namespaceSymbol, CancellationToken cancellationToken = default(CancellationToken)) {
+			var stack = new Stack<INamespaceOrTypeSymbol>();
+			stack.Push(namespaceSymbol);
+			while (stack.Count > 0) {
+				cancellationToken.ThrowIfCancellationRequested();
+				var namespaceOrTypeSymbol = stack.Pop();
+				var namespaceSymbol2 = namespaceOrTypeSymbol as INamespaceSymbol;
+				if (namespaceSymbol2 != null) {
+					foreach (var ns in namespaceSymbol2.GetMembers()) {
+						stack.Push(ns);
+					}
+				}
+				else {
+					var namedTypeSymbol = (INamedTypeSymbol)namespaceOrTypeSymbol;
+					foreach (var item in namedTypeSymbol.GetTypeMembers()) {
+						stack.Push(item);
+					}
+					yield return namedTypeSymbol;
+				}
 			}
 		}
 

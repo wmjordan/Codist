@@ -161,7 +161,7 @@ namespace Codist.SmartBars
 						if (ctor != null) {
 							var s = _SemanticModel.GetSymbolOrFirstCandidate(ctor);
 							if (s != null) {
-								r.Add(CreateCommandMenu("Find callers...", KnownImageIds.ShowCallerGraph, symbol, "No caller was found", FindCallers));
+								r.Add(CreateCommandMenu("Find callers...", KnownImageIds.ShowCallerGraph, s, "No caller was found", FindCallers));
 							}
 						}
 					}
@@ -276,18 +276,45 @@ namespace Codist.SmartBars
 
 		void FindInstanceProducer(MenuItem menuItem, ISymbol source) {
 			var type = source as ITypeSymbol;
-			foreach (var project in View.TextBuffer.GetWorkspace().CurrentSolution.Projects) {
-				foreach (var member in project.GetCompilationAsync().Result.GetSymbolsWithName(_ => true, SymbolFilter.Member)) {
+			var project = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]).Project;
+			var compilation = project.GetCompilationAsync().Result;
+			//todo cache types
+			var members = new List<ISymbol>(10);
+			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes()) {
+				foreach (var member in typeSymbol.GetMembers()) {
 					ITypeSymbol mt;
 					if (member.Kind != SymbolKind.Field
+						&& member.CanBeReferencedByName
 						&& ((mt = member.GetReturnType()) != null && mt.CanConvertTo(type)
 							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None))) {
-						menuItem.Items.Add(new SymbolMenuItem(this, member, member.Locations) {
-							Header = new TextBlock().Append(member.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).Append(member.Name)
-						});
+						members.Add(member);
 					}
 				}
 			}
+			members.Sort((a, b) => {
+				var s = a.ContainingType.Name.CompareTo(b.ContainingType.Name);
+				return s != 0 ? s : a.Name.CompareTo(b.Name);
+			});
+			if (members.Count < 10) {
+				foreach (var member in members) {
+					menuItem.Items.Add(new SymbolMenuItem(this, member, member.Locations) {
+						Header = new TextBlock().Append(member.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).Append(member.Name)
+					});
+				}
+			}
+			else {
+				SymbolMenuItem subMenu = null;
+				INamedTypeSymbol typeSymbol = null;
+				foreach (var member in members) {
+					if (typeSymbol == null || typeSymbol != member.ContainingType) {
+						typeSymbol = member.ContainingType;
+						subMenu = new SymbolMenuItem(this, typeSymbol, null);
+						menuItem.Items.Add(subMenu);
+					}
+					subMenu.Items.Add(new SymbolMenuItem(this, member, member.Locations));
+				}
+			}
+
 		}
 
 		void FindReferences(MenuItem menuItem, ISymbol source) {
