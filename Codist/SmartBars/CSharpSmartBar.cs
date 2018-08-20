@@ -170,6 +170,7 @@ namespace Codist.SmartBars
 						break;
 					}
 					r.Add(CreateCommandMenu("Find instance producer...", KnownImageIds.NewItem, t, "No instance creator was found", FindInstanceProducer));
+					r.Add(CreateCommandMenu("Find instance as parameter...", KnownImageIds.Parameter, t, "No instance as parameter was found", FindInstanceAsParameter));
 					if (t.IsSealed) {
 						break;
 					}
@@ -275,46 +276,15 @@ namespace Codist.SmartBars
 		}
 
 		void FindInstanceProducer(MenuItem menuItem, ISymbol source) {
-			var type = source as ITypeSymbol;
 			var project = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]).Project;
-			var compilation = project.GetCompilationAsync().Result;
-			//todo cache types
-			var members = new List<ISymbol>(10);
-			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes()) {
-				foreach (var member in typeSymbol.GetMembers()) {
-					ITypeSymbol mt;
-					if (member.Kind != SymbolKind.Field
-						&& member.CanBeReferencedByName
-						&& ((mt = member.GetReturnType()) != null && mt.CanConvertTo(type)
-							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None))) {
-						members.Add(member);
-					}
-				}
-			}
-			members.Sort((a, b) => {
-				var s = a.ContainingType.Name.CompareTo(b.ContainingType.Name);
-				return s != 0 ? s : a.Name.CompareTo(b.Name);
-			});
-			if (members.Count < 10) {
-				foreach (var member in members) {
-					menuItem.Items.Add(new SymbolMenuItem(this, member, member.Locations) {
-						Header = new TextBlock().Append(member.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).Append(member.Name)
-					});
-				}
-			}
-			else {
-				SymbolMenuItem subMenu = null;
-				INamedTypeSymbol typeSymbol = null;
-				foreach (var member in members) {
-					if (typeSymbol == null || typeSymbol != member.ContainingType) {
-						typeSymbol = member.ContainingType;
-						subMenu = new SymbolMenuItem(this, typeSymbol, null);
-						menuItem.Items.Add(subMenu);
-					}
-					subMenu.Items.Add(new SymbolMenuItem(this, member, member.Locations));
-				}
-			}
+			var members = (source as ITypeSymbol).FindSymbolInstanceProducer(project);
+			SortAndGroupSymbolByClass(menuItem, members);
+		}
 
+		void FindInstanceAsParameter(MenuItem menuItem, ISymbol source) {
+			var project = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]).Project;
+			var members = (source as ITypeSymbol).FindInstanceAsParameter(project);
+			SortAndGroupSymbolByClass(menuItem, members);
 		}
 
 		void FindReferences(MenuItem menuItem, ISymbol source) {
@@ -419,8 +389,34 @@ namespace Codist.SmartBars
 			return r;
 		}
 
+		void SortAndGroupSymbolByClass(MenuItem menuItem, List<ISymbol> members) {
+			members.Sort((a, b) => {
+				var s = a.ContainingType.Name.CompareTo(b.ContainingType.Name);
+				return s != 0 ? s : a.Name.CompareTo(b.Name);
+			});
+			if (members.Count < 10) {
+				foreach (var member in members) {
+					menuItem.Items.Add(new SymbolMenuItem(this, member, member.Locations) {
+						Header = new TextBlock().Append(member.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).Append(member.Name)
+					});
+				}
+			}
+			else {
+				SymbolMenuItem subMenu = null;
+				INamedTypeSymbol typeSymbol = null;
+				foreach (var member in members) {
+					if (typeSymbol == null || typeSymbol != member.ContainingType) {
+						typeSymbol = member.ContainingType;
+						subMenu = new SymbolMenuItem(this, typeSymbol, null);
+						menuItem.Items.Add(subMenu);
+					}
+					subMenu.Items.Add(new SymbolMenuItem(this, member, member.Locations));
+				}
+			}
+		}
+
 		bool UpdateSemanticModel() {
-			Document document = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]);
+			var document = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]);
 			_SemanticModel = document.GetSemanticModelAsync().Result;
 			_Compilation = _SemanticModel.SyntaxTree.GetCompilationUnitRoot();
 			int pos = View.Selection.Start.Position;
@@ -442,7 +438,9 @@ namespace Codist.SmartBars
 
 		sealed class SymbolMenuItem : CommandMenuItem
 		{
-			static readonly SymbolDisplayFormat __ClassNameFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes);
+			static readonly SymbolDisplayFormat __ClassNameFormat = new SymbolDisplayFormat(
+				typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+				parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets);
 
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.Name, locations) { }
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
@@ -473,6 +471,10 @@ namespace Codist.SmartBars
 					.Append("\nnamespace: " + Symbol.ContainingNamespace?.ToString());
 				if (Symbol.ContainingType != null) {
 					text.Append("\nclass: " + Symbol.ContainingType.ToDisplayString(__ClassNameFormat));
+				}
+				var returnType = Symbol.GetReturnType();
+				if (returnType != null) {
+					text.Append("\ntype: " + returnType.ToDisplayString(__ClassNameFormat));
 				}
 				ToolTip = text;
 				ToolTipOpening -= ShowToolTip;

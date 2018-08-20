@@ -13,6 +13,48 @@ namespace Codist
 {
 	static partial class CodeAnalysisHelper
 	{
+		/// <summary>
+		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
+		/// </summary>
+		public static List<ISymbol> FindInstanceAsParameter(this ITypeSymbol type, Project project) {
+			var compilation = project.GetCompilationAsync().Result;
+			//todo cache types
+			var members = new List<ISymbol>(10);
+			ImmutableArray<IParameterSymbol> parameters;
+			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes()) {
+				foreach (var member in typeSymbol.GetMembers()) {
+					if (member.Kind != SymbolKind.Field
+						&& member.CanBeReferencedByName
+						&& (parameters = member.GetParameters()).IsDefaultOrEmpty == false
+						&& parameters.Any(p => type.CanConvertTo(p.Type) && p.Type.IsCommonClass() == false)) {
+						members.Add(member);
+					}
+				}
+			}
+			return members;
+		}
+
+		/// <summary>
+		/// Finds all members defined or referenced in <paramref name="project"/> which may return an instance of <paramref name="type"/>.
+		/// </summary>
+		public static List<ISymbol> FindSymbolInstanceProducer(this ITypeSymbol type, Project project) {
+			var compilation = project.GetCompilationAsync().Result;
+			//todo cache types
+			var members = new List<ISymbol>(10);
+			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes()) {
+				foreach (var member in typeSymbol.GetMembers()) {
+					ITypeSymbol mt;
+					if (member.Kind != SymbolKind.Field
+						&& member.CanBeReferencedByName
+						&& ((mt = member.GetReturnType()) != null && mt.CanConvertTo(type)
+							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None))) {
+						members.Add(member);
+					}
+				}
+			}
+			return members;
+		}
+
 		public static Location FirstSourceLocation(this ISymbol symbol) {
 			return symbol?.Locations.FirstOrDefault(loc => loc.IsInSource);
 		}

@@ -83,7 +83,7 @@ namespace Codist
 		}
 
 		static XElement InheritDocumentation(ISymbol symbol, ISymbol querySymbol, out ISymbol baseMember) {
-			INamedTypeSymbol t = symbol.Kind == SymbolKind.NamedType ? symbol as INamedTypeSymbol : symbol.ContainingType;
+			var t = symbol.Kind == SymbolKind.NamedType ? symbol as INamedTypeSymbol : symbol.ContainingType;
 			if (t == null
 				// go to the base type if not querying interface
 				|| t.TypeKind != TypeKind.Interface && (t = t.BaseType) == null
@@ -92,7 +92,8 @@ namespace Codist
 				return null;
 			}
 			XElement doc;
-			ISymbol member = t.GetMembers(querySymbol.Name).FirstOrDefault(i => i.MatchSignature(querySymbol.Kind, querySymbol.GetReturnType(), querySymbol.GetParameters()));
+			var member = t.GetMembers(querySymbol.Name)
+				.FirstOrDefault(i => i.MatchSignature(querySymbol.Kind, querySymbol.GetReturnType(), querySymbol.GetParameters()));
 			if (member != null && (doc = member.GetXmlDoc().GetSummary()) != null) {
 				baseMember = member;
 				return doc;
