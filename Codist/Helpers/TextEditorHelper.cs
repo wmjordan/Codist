@@ -18,10 +18,8 @@ namespace Codist
 				if (oldVersion.Changes.Count > 0) {
 					return true;
 				}
-
 				oldVersion = oldVersion.Next;
 			}
-
 			return false;
 		}
 

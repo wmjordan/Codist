@@ -176,7 +176,21 @@ namespace Codist
 			}
 			return block;
 		}
-
+		/// <summary>
+		/// Gets the <see cref="TextBlock.Text"/> of a <see cref="TextBlock"/>, or the concatenated <see cref="Run.Text"/> of <see cref="Run"/> instances in the <see cref="TextBlock.Inlines"/>.
+		/// </summary>
+		public static string GetText(this TextBlock block) {
+			if (block.Inlines.Count == 0) {
+				return block.Text;
+			}
+			using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(50)) {
+				var sb = sbr.Resource;
+				foreach (var inline in block.Inlines) {
+					sb.Append((inline as Run)?.Text);
+				}
+				return sb.ToString();
+			}
+		}
 		public static Run Render(this ISymbol symbol, string alias, WpfBrush brush) {
 			return symbol.Render(alias, false, brush);
 		}

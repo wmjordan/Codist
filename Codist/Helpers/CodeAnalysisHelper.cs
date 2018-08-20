@@ -68,17 +68,20 @@ namespace Codist
 				?? (info.CandidateSymbols.Length > 0 ? info.CandidateSymbols[0] : null);
 		}
 
-		public static void GoToSource(this ISymbol symbol) {
-			if (symbol != null && symbol.DeclaringSyntaxReferences.Length > 0) {
-				var loc = symbol.DeclaringSyntaxReferences[0];
-				var path = loc.SyntaxTree?.FilePath;
-				if (path == null) {
-					return;
-				}
-				loc.GoToSource();
-			}
+		public static Location FirstSourceLocation(this ISymbol symbol) {
+			return symbol?.Locations.FirstOrDefault(loc => loc.IsInSource);
 		}
 
+		public static void GoToSource(this ISymbol symbol) {
+			symbol.FirstSourceLocation().GoToSource();
+		}
+
+		public static void GoToSource(this Location loc) {
+			if (loc != null) {
+				var pos = loc.GetLineSpan().StartLinePosition;
+				CodistPackage.DTE.OpenFile(loc.SourceTree.FilePath, pos.Line + 1, pos.Character + 1);
+			}
+		}
 		public static void GoToSource(this SyntaxReference loc) {
 			var pos = loc.SyntaxTree.GetLineSpan(loc.Span).StartLinePosition;
 			CodistPackage.DTE.OpenFile(loc.SyntaxTree.FilePath, pos.Line + 1, pos.Character + 1);

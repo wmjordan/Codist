@@ -351,7 +351,7 @@ namespace Codist.SmartBars
 
 		protected class CommandMenuItem : MenuItem
 		{
-			SmartBar _SmartBar;
+			readonly SmartBar _SmartBar;
 			public CommandMenuItem(SmartBar bar, CommandItem item) {
 				_SmartBar = bar;
 				CommandItem = item;
