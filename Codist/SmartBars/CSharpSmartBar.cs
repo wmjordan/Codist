@@ -16,6 +16,7 @@ using System.Windows;
 
 namespace Codist.SmartBars
 {
+	//todo Make commands async and cancellable
 	/// <summary>
 	/// An extended <see cref="SmartBar"/> for C# content type.
 	/// </summary>
@@ -165,7 +166,11 @@ namespace Codist.SmartBars
 						}
 					}
 					r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, t, "No member was found", FindMembers));
-					if (t.IsStatic || t.IsSealed) {
+					if (t.IsStatic) {
+						break;
+					}
+					r.Add(CreateCommandMenu("Find instance producer...", KnownImageIds.NewItem, t, "No instance creator was found", FindInstanceProducer));
+					if (t.IsSealed) {
 						break;
 					}
 					if (t.TypeKind == TypeKind.Class) {
@@ -265,6 +270,22 @@ namespace Codist.SmartBars
 						menuItem.Items.Add(subMenu);
 					}
 					subMenu.Items.Add(new SymbolMenuItem(this, s, caller.Locations));
+				}
+			}
+		}
+
+		void FindInstanceProducer(MenuItem menuItem, ISymbol source) {
+			var type = source as ITypeSymbol;
+			foreach (var project in View.TextBuffer.GetWorkspace().CurrentSolution.Projects) {
+				foreach (var member in project.GetCompilationAsync().Result.GetSymbolsWithName(_ => true, SymbolFilter.Member)) {
+					ITypeSymbol mt;
+					if (member.Kind != SymbolKind.Field
+						&& ((mt = member.GetReturnType()) != null && mt.CanConvertTo(type)
+							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None))) {
+						menuItem.Items.Add(new SymbolMenuItem(this, member, member.Locations) {
+							Header = new TextBlock().Append(member.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).Append(member.Name)
+						});
+					}
 				}
 			}
 		}
@@ -394,6 +415,8 @@ namespace Codist.SmartBars
 
 		sealed class SymbolMenuItem : CommandMenuItem
 		{
+			static readonly SymbolDisplayFormat __ClassNameFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes);
+
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.Name, locations) { }
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
 				Locations = locations;
@@ -410,7 +433,7 @@ namespace Codist.SmartBars
 			public ISymbol Symbol { get; }
 			public IEnumerable<Location> Locations { get; }
 
-			void GotoLocation(object sender, System.Windows.RoutedEventArgs args) {
+			void GotoLocation(object sender, RoutedEventArgs args) {
 				var loc = Locations.FirstOrDefault();
 				if (loc != null) {
 					var p = loc.GetLineSpan();
@@ -418,7 +441,13 @@ namespace Codist.SmartBars
 				}
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
-				ToolTip = new TextBlock().Append(Symbol.GetSignatureString()).Append("\nnamespace: " + Symbol.ContainingNamespace?.ToString());
+				var text = new TextBlock()
+					.Append(Symbol.GetSignatureString(), true)
+					.Append("\nnamespace: " + Symbol.ContainingNamespace?.ToString());
+				if (Symbol.ContainingType != null) {
+					text.Append("\nclass: " + Symbol.ContainingType.ToDisplayString(__ClassNameFormat));
+				}
+				ToolTip = text;
 				ToolTipOpening -= ShowToolTip;
 			}
 		}
