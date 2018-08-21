@@ -211,7 +211,8 @@ namespace Codist.Margins
 					continue;
 				}
 				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MethodDeclaration)
-					&& tagType == CodeMemberType.Method) {
+					&& tagType == CodeMemberType.Method
+					&& _MethodPen.Brush != null) {
 					drawingContext.DrawRectangle(_MethodPen.Brush.Clone().Alpha(1), _MethodPen, new Rect(level - (MarkerSize / 2), _scrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
 				}
 				if (tagType == memberType) {
