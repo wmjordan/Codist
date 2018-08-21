@@ -47,7 +47,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   使用此强类型资源类，为所有资源查找
+        ///   重写当前线程的 CurrentUICulture 属性
         ///   重写当前线程的 CurrentUICulture 属性。
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -62,8 +62,6 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   查找类似 {
-        ///  &quot;TopSpace&quot;: 1.0,
-        ///  &quot;NoSpaceBetweenWrappedLines&quot;: true,
         ///  &quot;Labels&quot;: [
         ///    {
         ///      &quot;Label&quot;: &quot;!&quot;,
@@ -91,6 +89,9 @@ namespace Codist.Properties {
         ///      &quot;StyleID&quot;: &quot;Heading1&quot;
         ///    },
         ///    {
+        ///      &quot;Label&quot;: &quot;!!&quot;,
+        ///      &quot;StyleID&quot;: &quot;Heading1&quot;
+        ///    },
         ///     [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string Dark {
@@ -101,10 +102,6 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   查找类似 {
-        ///  &quot;SpecialHighlightOptions&quot;: &quot;DeclarationBrace&quot;,
-        ///  &quot;MarkerOptions&quot;: &quot;SpecialComment, TypeDeclaration, LineNumber, CodeRange&quot;,
-        ///  &quot;TopSpace&quot;: 2.0,
-        ///  &quot;NoSpaceBetweenWrappedLines&quot;: true,
         ///  &quot;Labels&quot;: [
         ///    {
         ///      &quot;Label&quot;: &quot;!&quot;,
@@ -124,11 +121,62 @@ namespace Codist.Properties {
         ///    },
         ///    {
         ///      &quot;Label&quot;: &quot;x&quot;,
-        ///      &quot;IgnoreC [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///      &quot;IgnoreCase&quot;: true,
+        ///      &quot;StyleID&quot;: &quot;Deletion&quot;
+        ///    },
+        ///    {
+        ///      &quot;Label&quot;: &quot;+++&quot;,
+        ///      &quot;StyleID&quot;: &quot;Heading1&quot;
+        ///    },
+        ///    {
+        ///      &quot;Label&quot;: &quot;!!&quot;,
+        ///      &quot;StyleID&quot;: &quot;Heading1&quot;
+        ///    },
+        ///     [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string Light {
             get {
                 return ResourceManager.GetString("Light", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {
+        ///  &quot;Labels&quot;: [
+        ///    {
+        ///      &quot;Label&quot;: &quot;!&quot;,
+        ///      &quot;StyleID&quot;: &quot;Emphasis&quot;
+        ///    },
+        ///    {
+        ///      &quot;Label&quot;: &quot;#&quot;,
+        ///      &quot;StyleID&quot;: &quot;Emphasis&quot;
+        ///    },
+        ///    {
+        ///      &quot;Label&quot;: &quot;?&quot;,
+        ///      &quot;StyleID&quot;: &quot;Question&quot;
+        ///    },
+        ///    {
+        ///      &quot;Label&quot;: &quot;!?&quot;,
+        ///      &quot;StyleID&quot;: &quot;Exclaimation&quot;
+        ///    },
+        ///    {
+        ///      &quot;Label&quot;: &quot;x&quot;,
+        ///      &quot;IgnoreCase&quot;: true,
+        ///      &quot;StyleID&quot;: &quot;Deletion&quot;
+        ///    },
+        ///    {
+        ///      &quot;Label&quot;: &quot;+++&quot;,
+        ///      &quot;StyleID&quot;: &quot;Heading1&quot;
+        ///    },
+        ///    {
+        ///      &quot;Label&quot;: &quot;!!&quot;,
+        ///      &quot;StyleID&quot;: &quot;Heading1&quot;
+        ///    },
+        ///     [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string Simple {
+            get {
+                return ResourceManager.GetString("Simple", resourceCulture);
             }
         }
     }

@@ -26,11 +26,13 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the font size. Font size number is relative to the editor text size.</summary>
 		public double FontSize { get; set; }
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
+		[DefaultValue("#00000000")]
 		public string ForegroundColor {
 			get { return ForeColor.ToHexString(); }
 			set { ForeColor = WpfHelper.ParseColor(value); }
 		}
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
+		[DefaultValue("#00000000")]
 		public string BackgroundColor {
 			get { return BackColor.ToHexString(); }
 			set { BackColor = WpfHelper.ParseColor(value); }
@@ -48,9 +50,11 @@ namespace Codist.SyntaxHighlight
 		internal Color BackColor { get; set; }
 
 		/// <summary>The category used in option pages to group style items</summary>
+		[Newtonsoft.Json.JsonIgnore]
 		public abstract string Category { get; }
 
 		/// <summary>Returns whether any option in this style is set.</summary>
+		[Newtonsoft.Json.JsonIgnore]
 		public bool IsSet => Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || String.IsNullOrEmpty(Font) == false || ForeColor.A > 0 || BackColor.A > 0;
 
 		internal StyleBase Clone() {

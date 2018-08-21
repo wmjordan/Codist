@@ -124,4 +124,7 @@
   <data name="Light" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Light Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="Simple" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Simple Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;gb2312</value>
+  </data>
 </root>

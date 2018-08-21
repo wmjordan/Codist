@@ -32,6 +32,7 @@
 			this._DarkThemeButton = new System.Windows.Forms.Button();
 			this._SyntaxHighlightTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this._SimpleThemeButton = new System.Windows.Forms.Button();
 			this.groupBox2.SuspendLayout();
 			this._SyntaxHighlightTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
@@ -52,6 +53,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.groupBox2.Controls.Add(this.label1);
 			this.groupBox2.Controls.Add(this._ResetThemeButton);
+			this.groupBox2.Controls.Add(this._SimpleThemeButton);
 			this.groupBox2.Controls.Add(this._DarkThemeButton);
 			this.groupBox2.Controls.Add(this._LightThemeButton);
 			this.groupBox2.Location = new System.Drawing.Point(6, 6);
@@ -75,7 +77,7 @@
 			// 
 			// _ResetThemeButton
 			// 
-			this._ResetThemeButton.Location = new System.Drawing.Point(242, 24);
+			this._ResetThemeButton.Location = new System.Drawing.Point(373, 24);
 			this._ResetThemeButton.Name = "_ResetThemeButton";
 			this._ResetThemeButton.Size = new System.Drawing.Size(111, 23);
 			this._ResetThemeButton.TabIndex = 2;
@@ -114,6 +116,15 @@
 			this.tabPage2.Text = "General";
 			this.tabPage2.UseVisualStyleBackColor = true;
 			// 
+			// _SimpleThemeButton
+			// 
+			this._SimpleThemeButton.Location = new System.Drawing.Point(242, 24);
+			this._SimpleThemeButton.Name = "_SimpleThemeButton";
+			this._SimpleThemeButton.Size = new System.Drawing.Size(111, 23);
+			this._SimpleThemeButton.TabIndex = 0;
+			this._SimpleThemeButton.Text = "&Simple theme";
+			this._SimpleThemeButton.UseVisualStyleBackColor = true;
+			// 
 			// SyntaxHighlightPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -137,5 +148,6 @@
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.TabControl _SyntaxHighlightTabs;
 		private System.Windows.Forms.TabPage tabPage2;
+		private System.Windows.Forms.Button _SimpleThemeButton;
 	}
 }

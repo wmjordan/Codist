@@ -15,7 +15,7 @@ namespace Codist
 	sealed class Config
 	{
 		const string ThemePrefix = "res:";
-		internal const string LightTheme = ThemePrefix + "Light", DarkTheme = ThemePrefix + "Dark";
+		internal const string LightTheme = ThemePrefix + "Light", DarkTheme = ThemePrefix + "Dark", SimpleTheme = ThemePrefix + "Simple";
 
 		static DateTime _LastSaved, _LastLoaded;
 		static int _LoadingConfig;
@@ -91,6 +91,7 @@ namespace Codist
 		static Config InternalLoadConfig(string configPath) {
 			var configContent = configPath == LightTheme ? Properties.Resources.Light
 				: configPath == DarkTheme ? Properties.Resources.Dark
+				: configPath == SimpleTheme ? Properties.Resources.Simple
 				: File.ReadAllText(configPath);
 			var loadFromTheme = configPath.StartsWith(ThemePrefix, StringComparison.Ordinal);
 			Config config = JsonConvert.DeserializeObject<Config>(configContent, new JsonSerializerSettings {

@@ -1,0 +1,525 @@
+{
+  "Labels": [
+    {
+      "Label": "!",
+      "StyleID": "Emphasis"
+    },
+    {
+      "Label": "#",
+      "StyleID": "Emphasis"
+    },
+    {
+      "Label": "?",
+      "StyleID": "Question"
+    },
+    {
+      "Label": "!?",
+      "StyleID": "Exclaimation"
+    },
+    {
+      "Label": "x",
+      "IgnoreCase": true,
+      "StyleID": "Deletion"
+    },
+    {
+      "Label": "+++",
+      "StyleID": "Heading1"
+    },
+    {
+      "Label": "!!",
+      "StyleID": "Heading1"
+    },
+    {
+      "Label": "++",
+      "StyleID": "Heading2"
+    },
+    {
+      "Label": "+",
+      "StyleID": "Heading3"
+    },
+    {
+      "Label": "-",
+      "StyleID": "Heading4"
+    },
+    {
+      "Label": "--",
+      "StyleID": "Heading5"
+    },
+    {
+      "Label": "---",
+      "StyleID": "Heading6"
+    },
+    {
+      "AllowPunctuationDelimiter": true,
+      "Label": "TODO",
+      "IgnoreCase": true,
+      "StyleID": "ToDo"
+    },
+    {
+      "AllowPunctuationDelimiter": true,
+      "Label": "TO-DO",
+      "IgnoreCase": true,
+      "StyleID": "ToDo"
+    },
+    {
+      "AllowPunctuationDelimiter": true,
+      "Label": "NOTE",
+      "IgnoreCase": true,
+      "StyleApplication": "Tag",
+      "StyleID": "Note"
+    },
+    {
+      "AllowPunctuationDelimiter": true,
+      "Label": "HACK",
+      "IgnoreCase": true,
+      "StyleApplication": "TagAndContent",
+      "StyleID": "Hack"
+    },
+    {
+      "Label": "TODO++",
+      "IgnoreCase": true,
+      "StyleID": "Task1"
+    },
+    {
+      "Label": "TODO+",
+      "IgnoreCase": true,
+      "StyleID": "Task2"
+    },
+    {
+      "Label": "WARN",
+      "IgnoreCase": true,
+      "StyleID": "Task3"
+    },
+    {
+      "Label": "REVISE",
+      "IgnoreCase": true,
+      "StyleID": "Task4"
+    },
+    {
+      "Label": "INFO",
+      "IgnoreCase": true,
+      "StyleID": "Task5"
+    },
+    {
+      "Label": "UNDONE",
+      "IgnoreCase": true,
+      "StyleID": "Undone"
+    },
+    {
+      "AllowPunctuationDelimiter": true,
+      "Label": "BUG",
+      "IgnoreCase": true,
+      "StyleID": "Task3"
+    }
+  ],
+  "CommentStyles": [
+    {
+      "Id": 1,
+      "StyleID": "Emphasis",
+      "Bold": true,
+      "FontSize": 10.0,
+      "ForegroundColor": "#FF008000"
+    },
+    {
+      "Id": 2,
+      "StyleID": "Question",
+      "ForegroundColor": "#FF9370DB"
+    },
+    {
+      "Id": 3,
+      "StyleID": "Exclaimation",
+      "ForegroundColor": "#FFCD5C5C"
+    },
+    {
+      "Id": 4,
+      "StyleID": "Deletion",
+      "Strikethrough": true,
+      "ForegroundColor": "#FF808080"
+    },
+    {
+      "Id": 5,
+      "StyleID": "ToDo",
+      "ForegroundColor": "#FFFFFFFF",
+      "BackgroundColor": "#FF00008B",
+      "ScrollBarMarkerStyle": "Square"
+    },
+    {
+      "Id": 6,
+      "StyleID": "Note",
+      "ForegroundColor": "#FFFFFFFF",
+      "BackgroundColor": "#FFFFA500",
+      "ScrollBarMarkerStyle": "Square"
+    },
+    {
+      "Id": 7,
+      "StyleID": "Hack",
+      "ForegroundColor": "#FFFFFFFF",
+      "BackgroundColor": "#FF000000",
+      "ScrollBarMarkerStyle": "Square"
+    },
+    {
+      "Id": 8,
+      "StyleID": "Undone",
+      "ForegroundColor": "#FFA4AFD1",
+      "BackgroundColor": "#FF714136",
+      "ScrollBarMarkerStyle": "Square"
+    },
+    {
+      "Id": 9,
+      "StyleID": "Heading1",
+      "FontSize": 12.0
+    },
+    {
+      "Id": 10,
+      "StyleID": "Heading2",
+      "FontSize": 8.0
+    },
+    {
+      "Id": 11,
+      "StyleID": "Heading3",
+      "FontSize": 4.0
+    },
+    {
+      "Id": 12,
+      "StyleID": "Heading4",
+      "FontSize": -1.0
+    },
+    {
+      "Id": 13,
+      "StyleID": "Heading5",
+      "FontSize": -2.0
+    },
+    {
+      "Id": 14,
+      "StyleID": "Heading6",
+      "FontSize": -3.0
+    },
+    {
+      "Id": 15,
+      "StyleID": "Task1",
+      "ScrollBarMarkerStyle": "Number1"
+    },
+    {
+      "Id": 16,
+      "StyleID": "Task2",
+      "ScrollBarMarkerStyle": "Number2"
+    },
+    {
+      "Id": 17,
+      "StyleID": "Task3",
+      "ScrollBarMarkerStyle": "Number3"
+    },
+    {
+      "Id": 18,
+      "StyleID": "Task4",
+      "ScrollBarMarkerStyle": "Number4"
+    },
+    {
+      "Id": 19,
+      "StyleID": "Task5",
+      "ScrollBarMarkerStyle": "Number5"
+    },
+    {
+      "Id": 20,
+      "StyleID": "Task6",
+      "ScrollBarMarkerStyle": "Number6"
+    },
+    {
+      "Id": 21,
+      "StyleID": "Task7",
+      "ScrollBarMarkerStyle": "Number7"
+    },
+    {
+      "Id": 22,
+      "StyleID": "Task8",
+      "ScrollBarMarkerStyle": "Number8"
+    },
+    {
+      "Id": 23,
+      "StyleID": "Task9",
+      "ScrollBarMarkerStyle": "Number9"
+    }
+  ],
+  "XmlCodeStyles": [
+    {
+      "Id": 1,
+      "StyleID": "XmlAttributeName"
+    },
+    {
+      "Id": 2,
+      "StyleID": "XmlAttributeQuotes"
+    },
+    {
+      "Id": 3,
+      "StyleID": "XmlAttributeValue"
+    },
+    {
+      "Id": 4,
+      "StyleID": "XmlCData"
+    },
+    {
+      "Id": 5,
+      "StyleID": "XmlComment"
+    },
+    {
+      "Id": 6,
+      "StyleID": "XmlDelimiter"
+    },
+    {
+      "Id": 7,
+      "StyleID": "XmlName"
+    },
+    {
+      "Id": 8,
+      "StyleID": "XmlProcessingInstruction"
+    },
+    {
+      "Id": 9,
+      "StyleID": "XmlText"
+    }
+  ],
+  "CodeStyles": [
+    {
+      "Id": 1,
+      "StyleID": "BreakAndReturnKeyword"
+    },
+    {
+      "Id": 2,
+      "StyleID": "AbstractionKeyword"
+    },
+    {
+      "Id": 3,
+      "StyleID": "BranchingKeyword"
+    },
+    {
+      "Id": 4,
+      "StyleID": "LoopKeyword"
+    },
+    {
+      "Id": 5,
+      "StyleID": "ResourceAndExceptionKeyword"
+    },
+    {
+      "Id": 6,
+      "StyleID": "TypeDeclaration",
+      "Bold": true
+    },
+    {
+      "Id": 7,
+      "StyleID": "NestedTypeDeclaration",
+      "Bold": true
+    },
+    {
+      "Id": 8,
+      "StyleID": "StaticMemberName",
+      "Underline": true
+    },
+    {
+      "Id": 9,
+      "StyleID": "OverrideMemberName"
+    },
+    {
+      "Id": 10,
+      "StyleID": "AbstractMemberName"
+    },
+    {
+      "Id": 11,
+      "StyleID": "VirtualMemberName"
+    },
+    {
+      "Id": 12,
+      "StyleID": "LocalVariableName",
+      "Italic": true
+    },
+    {
+      "Id": 13,
+      "StyleID": "AttributeName"
+    },
+    {
+      "Id": 14,
+      "StyleID": "AttributeNotation"
+    },
+    {
+      "Id": 15,
+      "StyleID": "DeclarationBrace"
+    },
+    {
+      "Id": 16,
+      "StyleID": "SealedClassName"
+    },
+    {
+      "Id": 17,
+      "StyleID": "DelegateName"
+    },
+    {
+      "Id": 18,
+      "StyleID": "EventName"
+    },
+    {
+      "Id": 19,
+      "StyleID": "TypeParameterName"
+    },
+    {
+      "Id": 20,
+      "StyleID": "ConstructorMethodName"
+    },
+    {
+      "Id": 21,
+      "StyleID": "FieldName"
+    },
+    {
+      "Id": 22,
+      "StyleID": "ConstFieldName"
+    },
+    {
+      "Id": 23,
+      "StyleID": "ReadOnlyFieldName"
+    },
+    {
+      "Id": 24,
+      "StyleID": "PropertyName"
+    },
+    {
+      "Id": 25,
+      "StyleID": "MethodName"
+    },
+    {
+      "Id": 26,
+      "StyleID": "ExtensionMethodName",
+      "Italic": true,
+      "Underline": true
+    },
+    {
+      "Id": 27,
+      "StyleID": "ExternMethodName"
+    },
+    {
+      "Id": 28,
+      "StyleID": "ParameterName",
+      "Italic": true
+    },
+    {
+      "Id": 29,
+      "StyleID": "XmlDoc"
+    },
+    {
+      "Id": 30,
+      "StyleID": "XmlDocComment"
+    },
+    {
+      "Id": 31,
+      "StyleID": "XmlDocTag"
+    },
+    {
+      "Id": 32,
+      "StyleID": "XmlDocAttributeName"
+    },
+    {
+      "Id": 33,
+      "StyleID": "XmlDocAttributeValue"
+    },
+    {
+      "Id": 34,
+      "StyleID": "XmlDocDelimiter"
+    },
+    {
+      "Id": 35,
+      "StyleID": "XmlDocCData"
+    }
+  ],
+  "GeneralStyles": [
+    {
+      "Id": 1,
+      "StyleID": "Keyword"
+    },
+    {
+      "Id": 2,
+      "StyleID": "NamespaceName",
+      "ForegroundColor": "#FF808080"
+    },
+    {
+      "Id": 3,
+      "StyleID": "ClassName"
+    },
+    {
+      "Id": 4,
+      "StyleID": "StructName",
+      "ForegroundColor": "#FF008080"
+    },
+    {
+      "Id": 5,
+      "StyleID": "InterfaceName",
+      "ForegroundColor": "#FF0080C0"
+    },
+    {
+      "Id": 6,
+      "StyleID": "EnumName",
+      "ForegroundColor": "#FF800080"
+    },
+    {
+      "Id": 7,
+      "StyleID": "Identifier"
+    },
+    {
+      "Id": 8,
+      "StyleID": "Number",
+      "Bold": true
+    },
+    {
+      "Id": 9,
+      "StyleID": "String",
+      "ForegroundColor": "#FF000000"
+    },
+    {
+      "Id": 10,
+      "StyleID": "StringVerbatim",
+      "ForegroundColor": "#FF000000"
+    },
+    {
+      "Id": 11,
+      "StyleID": "Operator"
+    },
+    {
+      "Id": 12,
+      "StyleID": "Punctuation"
+    },
+    {
+      "Id": 13,
+      "StyleID": "Url"
+    },
+    {
+      "Id": 14,
+      "StyleID": "Label",
+      "Bold": true,
+      "ForegroundColor": "#FFFFFFFF",
+      "BackgroundColor": "#FF0000FF"
+    },
+    {
+      "Id": 15,
+      "StyleID": "PreprocessorText",
+      "Bold": true
+    },
+    {
+      "Id": 16,
+      "StyleID": "PreprocessorKeyword",
+      "ForegroundColor": "#FF000000",
+      "BackgroundColor": "#FF0080FF",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "Id": 17,
+      "StyleID": "Comment",
+      "Italic": true,
+      "ForegroundColor": "#DF008000"
+    },
+    {
+      "Id": 18,
+      "StyleID": "ExcludedCode"
+    },
+    {
+      "Id": 19,
+      "StyleID": "UnnecessaryCode",
+      "Strikethrough": true
+    }
+  ]
+}

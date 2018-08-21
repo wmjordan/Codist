@@ -28,6 +28,9 @@ namespace Codist.Options
 			_LightThemeButton.Click += (s, args) => {
 				Config.LoadConfig(Config.LightTheme);
 			};
+			_SimpleThemeButton.Click += (s, args) => {
+				Config.LoadConfig(Config.SimpleTheme);
+			};
 			_ResetThemeButton.Click += (s, args) => {
 				if (MessageBox.Show("Do you want to reset the syntax highlight settings to default?", nameof(Codist), MessageBoxButtons.YesNo) == DialogResult.Yes) {
 					Config.ResetStyles();

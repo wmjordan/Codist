@@ -9,10 +9,10 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Margins
 {
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
 	/// <summary>
 	/// Helper class to handle the rendering of the members margin.
 	/// </summary>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
 	sealed class CSharpMembersMarginElement : FrameworkElement
 	{
 		//todo user customizable opacity of markers
