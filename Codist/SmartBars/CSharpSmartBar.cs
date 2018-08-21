@@ -68,6 +68,7 @@ namespace Codist.SmartBars
 				if (_Token.Span.Contains(View.Selection, true)
 					&& _Token.Kind() == SyntaxKind.IdentifierToken
 					&& (_Node is TypeSyntax || _Node is MemberDeclarationSyntax || _Node is VariableDeclaratorSyntax || _Node is ParameterSyntax)) {
+					// selection is within a symbol
 					if (_Node is IdentifierNameSyntax) {
 						AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition");
 					}
@@ -111,6 +112,9 @@ namespace Codist.SmartBars
 					});
 				}
 			}
+			else {
+				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger", GetDebugCommands);
+			}
 			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection\nRight click: Duplicate\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", GetExpandSelectionCommands);
 		}
 
@@ -127,6 +131,13 @@ namespace Codist.SmartBars
 					}
 				}
 			});
+		}
+
+		CommandItem[] GetDebugCommands(CommandContext ctx) {
+			return new CommandItem[] {
+				new CommandItem("Toggle breakpoint", KnownImageIds.BreakpointEnabled, c => c.ToolTip = "Toggle breakpoint", c => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint")),
+				new CommandItem("Delete breakpoints", KnownImageIds.DeleteBreakpoint, c => c.ToolTip = "Delete all breakpoints", c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
+			};
 		}
 
 		List<CommandItem> GetReferenceCommands(CommandContext ctx) {
