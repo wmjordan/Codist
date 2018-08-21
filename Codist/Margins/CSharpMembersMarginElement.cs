@@ -192,11 +192,11 @@ namespace Codist.Margins
 					var pen = GetPenForCodeMemberType(tagType);
 					var yTop = _scrollBar.GetYCoordinateOfBufferPosition(start);
 					var yBottom = _scrollBar.GetYCoordinateOfBufferPosition(end);
-					drawingContext.DrawRectangle(pen.Brush.Clone().Alpha(1), pen, new Rect(level - (MarkerSize / 2), yTop - (MarkerSize / 2), MarkerSize, MarkerSize));
+					drawingContext.DrawRectangle(pen.Brush.Alpha(1), pen, new Rect(level - (MarkerSize / 2), yTop - (MarkerSize / 2), MarkerSize, MarkerSize));
 					drawingContext.DrawLine(pen, new Point(level, yTop), new Point(level, yBottom));
 					if (yTop > lastLabel && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Tag.Name != null) {
 						// draw type name
-						var text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Clone().Alpha(1))
+						var text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Alpha(1))
 							.SetBold();
 						if (level != 1) {
 							text.SetFontStyle(FontStyles.Italic);
@@ -211,8 +211,9 @@ namespace Codist.Margins
 					continue;
 				}
 				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MethodDeclaration)
-					&& tagType == CodeMemberType.Method) {
-					drawingContext.DrawRectangle(_MethodPen.Brush.Clone().Alpha(1), _MethodPen, new Rect(level - (MarkerSize / 2), _scrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
+					&& tagType == CodeMemberType.Method
+					&& _MethodPen.Brush != null) {
+					drawingContext.DrawRectangle(_MethodPen.Brush.Alpha(1), _MethodPen, new Rect(level - (MarkerSize / 2), _scrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
 				}
 				if (tagType == memberType) {
 					// expand the range to the end of the tag
