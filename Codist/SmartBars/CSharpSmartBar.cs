@@ -21,12 +21,11 @@ namespace Codist.SmartBars
 	/// An extended <see cref="SmartBar"/> for C# content type.
 	/// </summary>
 	sealed class CSharpSmartBar : SmartBar {
-		SemanticModel _SemanticModel;
 		CompilationUnitSyntax _Compilation;
+		SyntaxNode _Node;
+		SemanticModel _SemanticModel;
 		SyntaxToken _Token;
 		SyntaxTrivia _Trivia;
-		SyntaxNode _Node;
-
 		public CSharpSmartBar(IWpfTextView view) : base(view) {
 		}
 
@@ -37,6 +36,80 @@ namespace Codist.SmartBars
 			AddCommandsForNode();
 			//MyToolBar.Items.Add(new Separator());
 			base.AddCommands();
+		}
+
+		static CommandItem CreateCommandMenu(string title, int imageId, ISymbol symbol, string emptyMenuTitle, Action<MenuItem, ISymbol> itemPopulator) {
+			return new CommandItem(title, imageId, ctrl => (ctrl as MenuItem).StaysOpenOnClick = true, ctx => {
+				var menuItem = ctx.Sender as MenuItem;
+				if (menuItem.Items.Count > 0) {
+					return;
+				}
+				ctx.KeepToolbarOnClick = true;
+				itemPopulator(menuItem, symbol);
+				if (menuItem.Items.Count == 0) {
+					menuItem.Items.Add(new MenuItem { Header = emptyMenuTitle, IsEnabled = false });
+				}
+				else {
+					CreateItemsFilter(menuItem);
+				}
+				menuItem.IsSubmenuOpen = true;
+			});
+		}
+
+		static void CreateItemsFilter(MenuItem menuItem) {
+			TextBox filterBox;
+			menuItem.Items.Insert(0, new MenuItem {
+				Icon = ThemeHelper.GetImage(KnownImageIds.Filter),
+				Header = filterBox = new TextBox {
+					Width = 150,
+					HorizontalAlignment = HorizontalAlignment.Stretch,
+					BorderThickness = new Thickness(0, 0, 0, 1),
+				},
+				StaysOpenOnClick = true
+			});
+			filterBox.TextChanged += (s, args) => {
+				var t = (s as TextBox).Text;
+				foreach (MenuItem item in menuItem.Items) {
+					var b = item.Header as TextBlock;
+					if (b == null) {
+						continue;
+					}
+					if (b.GetText().IndexOf(t, StringComparison.OrdinalIgnoreCase) == -1) {
+						if (item.HasItems) {
+							foreach (MenuItem sub in item.Items) {
+								b = sub.Header as TextBlock;
+								if (b == null) {
+									continue;
+								}
+								if (b.GetText().IndexOf(t, StringComparison.OrdinalIgnoreCase) != -1) {
+									item.Visibility = Visibility.Visible;
+									goto NEXT;
+								}
+							}
+						}
+						item.Visibility = Visibility.Collapsed;
+					}
+					else {
+						item.Visibility = Visibility.Visible;
+					}
+					NEXT:;
+				}
+			};
+		}
+
+		void AddCommand(int moniker, string tooltip, Action<ITextEdit> editCommand) {
+			AddCommand(MyToolBar, moniker, tooltip, ctx => {
+				// updates the semantic model before executing the command,
+				// for it could be modified by external editor commands or duplicated document windows
+				if (UpdateSemanticModel()) {
+					using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
+						editCommand(edit);
+						if (edit.HasEffectiveChanges) {
+							edit.Apply();
+						}
+					}
+				}
+			});
 		}
 
 		void AddCommandsForNode() {
@@ -118,19 +191,123 @@ namespace Codist.SmartBars
 			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection\nRight click: Duplicate\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", GetExpandSelectionCommands);
 		}
 
-		void AddCommand(int moniker, string tooltip, Action<ITextEdit> editCommand) {
-			AddCommand(MyToolBar, moniker, tooltip, ctx => {
-				// updates the semantic model before executing the command,
-				// for it could be modified by external editor commands or duplicated document windows
-				if (UpdateSemanticModel()) {
-					using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
-						editCommand(edit);
-						if (edit.HasEffectiveChanges) {
-							edit.Apply();
-						}
-					}
-				}
+		void FindCallers(MenuItem menuItem, ISymbol source) {
+			var callers = new List<SymbolCallerInfo>(SymbolFinder.FindCallersAsync(source, View.TextBuffer.GetWorkspace().CurrentSolution).Result);
+			callers.Sort((a, b) => {
+				var s = a.CallingSymbol.ContainingType.Name.CompareTo(b.CallingSymbol.ContainingType.Name);
+				return s != 0 ? s : a.CallingSymbol.Name.CompareTo(b.CallingSymbol.Name);
 			});
+			if (callers.Count < 10) {
+				foreach (var caller in callers) {
+					var s = caller.CallingSymbol;
+					menuItem.Items.Add(new SymbolMenuItem(this, s, caller.Locations) {
+						Header = new TextBlock().Append(s.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).Append(s.Name)
+					});
+				}
+			}
+			else {
+				SymbolMenuItem subMenu = null;
+				INamedTypeSymbol typeSymbol = null;
+				foreach (var caller in callers) {
+					var s = caller.CallingSymbol;
+					if (typeSymbol == null || typeSymbol != s.ContainingType) {
+						typeSymbol = s.ContainingType;
+						subMenu = new SymbolMenuItem(this, typeSymbol, null);
+						menuItem.Items.Add(subMenu);
+					}
+					subMenu.Items.Add(new SymbolMenuItem(this, s, caller.Locations));
+				}
+			}
+		}
+
+		void FindDerivedClasses(MenuItem menuItem, ISymbol symbol) {
+			foreach (var derived in SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
+				var item = new SymbolMenuItem(this, derived, derived.Locations);
+				if (derived.GetSourceLocations().Length == 0) {
+					(item.Header as TextBlock).Foreground = System.Windows.Media.Brushes.Gray;
+				}
+				menuItem.Items.Add(item);
+			}
+		}
+
+		void FindImplementations(MenuItem menuItem, ISymbol symbol) {
+			if (symbol.Kind == SymbolKind.NamedType) {
+				foreach (var impl in SymbolFinder.FindImplementationsAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
+					menuItem.Items.Add(new SymbolMenuItem(this, impl, impl.Locations));
+				}
+			}
+			else {
+				foreach (var impl in SymbolFinder.FindImplementationsAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
+					menuItem.Items.Add(new SymbolMenuItem(this, impl.ContainingSymbol, impl.Locations));
+				}
+			}
+		}
+
+		void FindInstanceAsParameter(MenuItem menuItem, ISymbol source) {
+			var project = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]).Project;
+			var members = (source as ITypeSymbol).FindInstanceAsParameter(project);
+			SortAndGroupSymbolByClass(menuItem, members);
+		}
+
+		void FindInstanceProducer(MenuItem menuItem, ISymbol source) {
+			var project = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]).Project;
+			var members = (source as ITypeSymbol).FindSymbolInstanceProducer(project);
+			SortAndGroupSymbolByClass(menuItem, members);
+		}
+
+		void FindMembers(MenuItem menuItem, ISymbol symbol) {
+			var members = (symbol as INamedTypeSymbol).GetMembers().RemoveAll(m => m.CanBeReferencedByName == false).Sort(Comparer<ISymbol>.Create((a, b) => {
+				int s;
+				if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first
+					|| (s = a.Kind - b.Kind) != 0) { // then by member kind
+					return s;
+				}
+				return a.Name.CompareTo(b.Name);
+			}));
+			foreach (var item in members) {
+				menuItem.Items.Add(new SymbolMenuItem(this, item, item.Locations));
+			}
+		}
+
+		void FindOverrides(MenuItem menuItem, ISymbol symbol) {
+			foreach (var ov in SymbolFinder.FindOverridesAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
+				menuItem.Items.Add(new SymbolMenuItem(this, ov, ov.ContainingType.Name, ov.Locations));
+			}
+		}
+
+		void FindReferences(MenuItem menuItem, ISymbol source) {
+			var refs = new List<ReferencedSymbol>(SymbolFinder.FindReferencesAsync(source, View.TextBuffer.GetWorkspace().CurrentSolution).Result);
+			refs.Sort((a, b) => {
+				int s;
+				return 0 != (s = a.Definition.ContainingType.Name.CompareTo(b.Definition.ContainingType.Name)) ? s :
+					0 != (s = b.Definition.DeclaredAccessibility - a.Definition.DeclaredAccessibility) ? s
+					: a.Definition.Name.CompareTo(b.Definition.Name);
+			});
+			if (refs.Count < 10) {
+				foreach (var item in refs) {
+					menuItem.Items.Add(new SymbolMenuItem(this, item.Definition, item.Definition.ContainingType?.Name + "." + item.Definition.Name, null));
+				}
+			}
+			else {
+				SymbolMenuItem subMenu = null;
+				INamedTypeSymbol typeSymbol = null;
+				foreach (var item in refs) {
+					if (typeSymbol == null || typeSymbol != item.Definition.ContainingType) {
+						typeSymbol = item.Definition.ContainingType;
+						subMenu = new SymbolMenuItem(this, typeSymbol, null);
+						menuItem.Items.Add(subMenu);
+					}
+					subMenu.Items.Add(new SymbolMenuItem(this, item.Definition, null));
+				}
+			}
+		}
+
+		void FindSimilarSymbols(MenuItem menuItem, ISymbol symbol) {
+			foreach (var project in View.TextBuffer.GetWorkspace().CurrentSolution.Projects) {
+				foreach (var ss in SymbolFinder.FindSimilarSymbols(symbol, project.GetCompilationAsync().Result)) {
+					menuItem.Items.Add(new SymbolMenuItem(this, ss, ss.Locations));
+				}
+			}
 		}
 
 		CommandItem[] GetDebugCommands(CommandContext ctx) {
@@ -138,6 +315,30 @@ namespace Codist.SmartBars
 				new CommandItem("Toggle breakpoint", KnownImageIds.BreakpointEnabled, c => c.ToolTip = "Toggle breakpoint", c => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint")),
 				new CommandItem("Delete breakpoints", KnownImageIds.DeleteBreakpoint, c => c.ToolTip = "Delete all breakpoints", c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
 			};
+		}
+
+		List<CommandItem> GetExpandSelectionCommands(CommandContext ctx) {
+			var r = new List<CommandItem>();
+			var duplicate = ctx.RightClick;
+			var node = _Node;
+			while (node != null) {
+				if (node.FullSpan.Contains(ctx.View.Selection, false)
+					&& (node.IsSyntaxBlock() || node.IsDeclaration())) {
+					var n = node;
+					r.Add(new CommandItem((duplicate ? "Duplicate " : "Select ") + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), CodeAnalysisHelper.GetImageId(n), null, ctx2 => {
+						ctx2.View.SelectNode(n, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ExpansionIncludeTrivia) || n.Span.Contains(ctx2.View.Selection, false) == false);
+						if (Keyboard.Modifiers == ModifierKeys.Control) {
+							TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
+						}
+						if (duplicate) {
+							TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
+						}
+					}));
+				}
+				node = node.Parent;
+			}
+			r.Add(new CommandItem("Select all", KnownImageIds.SelectAll, ctrl => ctrl.ToolTip = "Select all text", ctx2 => TextEditorHelper.ExecuteEditorCommand("Edit.SelectAll")));
+			return r;
 		}
 
 		List<CommandItem> GetReferenceCommands(CommandContext ctx) {
@@ -197,209 +398,6 @@ namespace Codist.SmartBars
 			r.Add(new CommandItem("Find all references", KnownImageIds.ReferencedDimension, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences")));
 			return r;
 		}
-		
-		static CommandItem CreateCommandMenu(string title, int imageId, ISymbol symbol, string emptyMenuTitle, Action<MenuItem, ISymbol> itemPopulator) {
-			return new CommandItem(title, imageId, ctrl => (ctrl as MenuItem).StaysOpenOnClick = true, ctx => {
-				var menuItem = ctx.Sender as MenuItem;
-				if (menuItem.Items.Count > 0) {
-					return;
-				}
-				ctx.KeepToolbarOnClick = true;
-				itemPopulator(menuItem, symbol);
-				if (menuItem.Items.Count == 0) {
-					menuItem.Items.Add(new MenuItem { Header = emptyMenuTitle, IsEnabled = false });
-				}
-				else {
-					CreateItemsFilter(menuItem);
-				}
-				menuItem.IsSubmenuOpen = true;
-			});
-		}
-
-		static void CreateItemsFilter(MenuItem menuItem) {
-			TextBox filterBox;
-			menuItem.Items.Insert(0, new MenuItem {
-				Icon = ThemeHelper.GetImage(KnownImageIds.Filter),
-				Header = filterBox = new TextBox {
-							Width = 150,
-							HorizontalAlignment = HorizontalAlignment.Stretch,
-							BorderThickness = new Thickness(0, 0, 0, 1),
-						},
-				StaysOpenOnClick = true
-			});
-			filterBox.TextChanged += (s, args) => {
-				var t = (s as TextBox).Text;
-				foreach (MenuItem item in menuItem.Items) {
-					var b = item.Header as TextBlock;
-					if (b == null) {
-						continue;
-					}
-					if (b.GetText().IndexOf(t, StringComparison.OrdinalIgnoreCase) == -1) {
-						if (item.HasItems) {
-							foreach (MenuItem sub in item.Items) {
-								b = sub.Header as TextBlock;
-								if (b == null) {
-									continue;
-								}
-								if (b.GetText().IndexOf(t, StringComparison.OrdinalIgnoreCase) != -1) {
-									item.Visibility = Visibility.Visible;
-									goto NEXT;
-								}
-							}
-						}
-						item.Visibility = Visibility.Collapsed;
-					}
-					else {
-						item.Visibility = Visibility.Visible;
-					}
-					NEXT:;
-				}
-			};
-		}
-
-		void FindCallers(MenuItem menuItem, ISymbol source) {
-			var callers = new List<SymbolCallerInfo>(SymbolFinder.FindCallersAsync(source, View.TextBuffer.GetWorkspace().CurrentSolution).Result);
-			callers.Sort((a, b) => {
-				var s = a.CallingSymbol.ContainingType.Name.CompareTo(b.CallingSymbol.ContainingType.Name);
-				return s != 0 ? s : a.CallingSymbol.Name.CompareTo(b.CallingSymbol.Name);
-			});
-			if (callers.Count < 10) {
-				foreach (var caller in callers) {
-					var s = caller.CallingSymbol;
-					menuItem.Items.Add(new SymbolMenuItem(this, s, caller.Locations) {
-						Header = new TextBlock().Append(s.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).Append(s.Name)
-					});
-				}
-			}
-			else {
-				SymbolMenuItem subMenu = null;
-				INamedTypeSymbol typeSymbol = null;
-				foreach (var caller in callers) {
-					var s = caller.CallingSymbol;
-					if (typeSymbol == null || typeSymbol != s.ContainingType) {
-						typeSymbol = s.ContainingType;
-						subMenu = new SymbolMenuItem(this, typeSymbol, null);
-						menuItem.Items.Add(subMenu);
-					}
-					subMenu.Items.Add(new SymbolMenuItem(this, s, caller.Locations));
-				}
-			}
-		}
-
-		void FindInstanceProducer(MenuItem menuItem, ISymbol source) {
-			var project = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]).Project;
-			var members = (source as ITypeSymbol).FindSymbolInstanceProducer(project);
-			SortAndGroupSymbolByClass(menuItem, members);
-		}
-
-		void FindInstanceAsParameter(MenuItem menuItem, ISymbol source) {
-			var project = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]).Project;
-			var members = (source as ITypeSymbol).FindInstanceAsParameter(project);
-			SortAndGroupSymbolByClass(menuItem, members);
-		}
-
-		void FindReferences(MenuItem menuItem, ISymbol source) {
-			var refs = new List<ReferencedSymbol>(SymbolFinder.FindReferencesAsync(source, View.TextBuffer.GetWorkspace().CurrentSolution).Result);
-			refs.Sort((a, b) => {
-				int s;
-				return 0 != (s = a.Definition.ContainingType.Name.CompareTo(b.Definition.ContainingType.Name)) ? s : 
-					0 != (s = b.Definition.DeclaredAccessibility - a.Definition.DeclaredAccessibility) ? s
-					: a.Definition.Name.CompareTo(b.Definition.Name);
-			});
-			if (refs.Count < 10) {
-				foreach (var item in refs) {
-					menuItem.Items.Add(new SymbolMenuItem(this, item.Definition, item.Definition.ContainingType?.Name + "." + item.Definition.Name, null));
-				}
-			}
-			else {
-				SymbolMenuItem subMenu = null;
-				INamedTypeSymbol typeSymbol = null;
-				foreach (var item in refs) {
-					if (typeSymbol == null || typeSymbol != item.Definition.ContainingType) {
-						typeSymbol = item.Definition.ContainingType;
-						subMenu = new SymbolMenuItem(this, typeSymbol, null);
-						menuItem.Items.Add(subMenu);
-					}
-					subMenu.Items.Add(new SymbolMenuItem(this, item.Definition, null));
-				}
-			}
-		}
-
-		void FindOverrides(MenuItem menuItem, ISymbol symbol) {
-			foreach (var ov in SymbolFinder.FindOverridesAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
-				menuItem.Items.Add(new SymbolMenuItem(this, ov, ov.ContainingType.Name, ov.Locations));
-			}
-		}
-
-		void FindSimilarSymbols(MenuItem menuItem, ISymbol symbol) {
-			foreach (var project in View.TextBuffer.GetWorkspace().CurrentSolution.Projects) {
-				foreach (var ss in SymbolFinder.FindSimilarSymbols(symbol, project.GetCompilationAsync().Result)) {
-					menuItem.Items.Add(new SymbolMenuItem(this, ss, ss.Locations));
-				}
-			}
-		}
-
-		void FindDerivedClasses(MenuItem menuItem, ISymbol symbol) {
-			foreach (var derived in SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
-				var item = new SymbolMenuItem(this, derived, derived.Locations);
-				if (derived.GetSourceLocations().Length == 0) {
-					(item.Header as TextBlock).Foreground = System.Windows.Media.Brushes.Gray;
-				}
-				menuItem.Items.Add(item);
-			}
-		}
-
-		void FindImplementations(MenuItem menuItem, ISymbol symbol) {
-			if (symbol.Kind == SymbolKind.NamedType) {
-				foreach (var impl in SymbolFinder.FindImplementationsAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
-					menuItem.Items.Add(new SymbolMenuItem(this, impl, impl.Locations));
-				}
-			}
-			else {
-				foreach (var impl in SymbolFinder.FindImplementationsAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
-					menuItem.Items.Add(new SymbolMenuItem(this, impl.ContainingSymbol, impl.Locations));
-				}
-			}
-		}
-
-		void FindMembers(MenuItem menuItem, ISymbol symbol) {
-			var members = (symbol as INamedTypeSymbol).GetMembers().RemoveAll(m => m.CanBeReferencedByName == false).Sort(Comparer<ISymbol>.Create((a, b) => {
-				int s;
-				if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first
-					|| (s = a.Kind - b.Kind) != 0) { // then by member kind
-					return s;
-				}
-				return a.Name.CompareTo(b.Name);
-			}));
-			foreach (var item in members) {
-				menuItem.Items.Add(new SymbolMenuItem(this, item, item.Locations));
-			}
-		}
-
-		List<CommandItem> GetExpandSelectionCommands(CommandContext ctx) {
-			var r = new List<CommandItem>();
-			var duplicate = ctx.RightClick;
-			var node = _Node;
-			while (node != null) {
-				if (node.FullSpan.Contains(ctx.View.Selection, false)
-					&& (node.IsSyntaxBlock() || node.IsDeclaration())) {
-					var n = node;
-					r.Add(new CommandItem((duplicate ? "Duplicate " : "Select ") + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), CodeAnalysisHelper.GetImageId(n), null, ctx2 => {
-						ctx2.View.SelectNode(n, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ExpansionIncludeTrivia) || n.Span.Contains(ctx2.View.Selection, false) == false);
-						if (Keyboard.Modifiers == ModifierKeys.Control) {
-							TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
-						}
-						if (duplicate) {
-							TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
-						}
-					}));
-				}
-				node = node.Parent;
-			}
-			r.Add(new CommandItem("Select all", KnownImageIds.SelectAll, ctrl => ctrl.ToolTip = "Select all text", ctx2 => TextEditorHelper.ExecuteEditorCommand("Edit.SelectAll")));
-			return r;
-		}
-
 		void SortAndGroupSymbolByClass(MenuItem menuItem, List<ISymbol> members) {
 			members.Sort((a, b) => {
 				var s = a.ContainingType.Name.CompareTo(b.ContainingType.Name);
@@ -466,9 +464,8 @@ namespace Codist.SmartBars
 					ToolTipOpening += ShowToolTip;
 				}
 			}
-			public ISymbol Symbol { get; }
 			public IEnumerable<Location> Locations { get; }
-
+			public ISymbol Symbol { get; }
 			void GotoLocation(object sender, RoutedEventArgs args) {
 				var loc = Locations.FirstOrDefault();
 				if (loc != null) {
