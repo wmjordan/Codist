@@ -154,6 +154,13 @@ namespace Codist.SmartBars
 			if (View.Selection.IsEmpty || Interlocked.Exchange(ref _TimerStatus, Working) != Selecting) {
 				goto EXIT;
 			}
+			CreateToolBar();
+
+			EXIT:
+			_TimerStatus = 0;
+		}
+
+		void CreateToolBar() {
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			ToolBar.Items.Clear();
 			ToolBar2.Items.Clear();
@@ -166,13 +173,12 @@ namespace Codist.SmartBars
 				ToolBar2.Visibility = Visibility.Visible;
 				ToolBar2.HideOverflow();
 			}
+			_ToolBarTray.Visibility = Visibility.Visible;
 			_ToolBarTray.Opacity = 0.3;
 			_ToolBarTray.SizeChanged += ToolBarSizeChanged;
 			View.VisualElement.MouseMove += ViewMouseMove;
-
-			EXIT:
-			_TimerStatus = 0;
 		}
+
 		void SetToolBarPosition() {
 			// keep tool bar position when the selection is restored and the tool bar reappears after executing command
 			if (DateTime.Now > _LastExecute.AddSeconds(1)) {
@@ -185,7 +191,6 @@ namespace Codist.SmartBars
 					: View.ViewportRight - rs.Width);
 				Canvas.SetTop(_ToolBarTray, (y < 0 ? y + rs.Height + 30 : y) + View.ViewportTop);
 			}
-			_ToolBarTray.Visibility = Visibility.Visible;
 		}
 
 		protected virtual void AddCommands() {
