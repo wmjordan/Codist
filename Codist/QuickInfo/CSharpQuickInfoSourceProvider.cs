@@ -76,15 +76,10 @@ namespace Codist.QuickInfo
 					goto EXIT;
 				}
 
-				var workspace = _TextBuffer.GetWorkspace();
-				if (workspace == null) {
-					goto EXIT;
-				}
-
 				var querySpan = new SnapshotSpan(subjectTriggerPoint, 0);
 				var semanticModel = _SemanticModel;
 				if (semanticModel == null) {
-					_SemanticModel = semanticModel = workspace.GetDocument(querySpan).GetSemanticModelAsync().Result;
+					_SemanticModel = semanticModel = currentSnapshot.GetOpenDocumentInCurrentContextWithChanges().GetSemanticModelAsync().Result;
 				}
 				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 
@@ -555,7 +550,7 @@ namespace Codist.QuickInfo
 					info.Add(new ToolTipText("Type:", true));
 					foreach (var type in members) {
 						var t = new ToolTipText().SetGlyph(_GlyphService.GetGlyph(type.GetGlyphGroup(), type.GetGlyphItem()));
-						SymbolInfoRenderer.ShowSymbolDeclaration(t, type, _SymbolFormatter, true, true);
+						_SymbolFormatter.ShowSymbolDeclaration(type, t, true, true);
 						t.AddSymbol(type, null, _SymbolFormatter);
 						info.Add(t);
 					}
@@ -951,7 +946,7 @@ namespace Codist.QuickInfo
 			}
 
 			static void ShowDeclarationModifier(IList<object> qiContent, ISymbol symbol) {
-				qiContent.Add(SymbolInfoRenderer.ShowSymbolDeclaration(new ToolTipText(), symbol, _SymbolFormatter, true, false));
+				qiContent.Add(_SymbolFormatter.ShowSymbolDeclaration(symbol, new ToolTipText(), true, false));
 			}
 
 			void ShowParameterInfo(IList<object> qiContent, SyntaxNode node) {

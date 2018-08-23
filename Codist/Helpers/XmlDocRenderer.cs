@@ -25,8 +25,8 @@ namespace Codist
 
 		internal void RenderXmlDocSymbol(string symbol, InlineCollection inlines, SymbolKind symbolKind) {
 			switch (symbolKind) {
-				case SymbolKind.Parameter: inlines.Add(symbol.Render(_SymbolFormatter.Parameter)); return;
-				case SymbolKind.TypeParameter: inlines.Add(symbol.Render(_SymbolFormatter.TypeParameter)); return;
+				case SymbolKind.Parameter: inlines.Add(symbol.Render(false, _SymbolFormatter.Parameter == null, _SymbolFormatter.Parameter)); return;
+				case SymbolKind.TypeParameter: inlines.Add(symbol.Render(_SymbolFormatter.TypeParameter == null, false, _SymbolFormatter.TypeParameter)); return;
 				case SymbolKind.DynamicType:
 					// highlight keywords
 					inlines.Add(symbol.Render(_SymbolFormatter.Keyword));
@@ -50,6 +50,9 @@ namespace Codist
 						return;
 					case 'F':
 						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Field));
+						return;
+					case 'E':
+						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Delegate));
 						return;
 					case '!':
 						inlines.Add(symbol.Substring(2).Render(true, true, null));

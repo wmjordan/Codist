@@ -351,9 +351,8 @@ namespace Codist.SmartBars
 
 		protected class CommandMenuItem : MenuItem
 		{
-			readonly SmartBar _SmartBar;
 			public CommandMenuItem(SmartBar bar, CommandItem item) {
-				_SmartBar = bar;
+				SmartBar = bar;
 				CommandItem = item;
 				Icon = ThemeHelper.GetImage(item.ImageId);
 				Header = new TextBlock { Text = item.Name };
@@ -365,12 +364,13 @@ namespace Codist.SmartBars
 			}
 
 			public CommandItem CommandItem { get; }
+			protected SmartBar SmartBar { get; }
 
 			void ClickHandler(object s, RoutedEventArgs e) {
-				var ctx2 = new CommandContext(_SmartBar, s as Control, e);
+				var ctx2 = new CommandContext(SmartBar, s as Control, e);
 				CommandItem.Action(ctx2);
 				if (ctx2.KeepToolbarOnClick == false) {
-					_SmartBar.HideToolBar(s, e);
+					SmartBar.HideToolBar(s, e);
 				}
 			}
 		}

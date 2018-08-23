@@ -172,7 +172,6 @@
     </Compile>
     <Compile Include="QuickInfo\SymbolFormatter.cs" />
     <Compile Include="Helpers\XmlDocRenderer.cs" />
-    <Compile Include="QuickInfo\SymbolInfoRenderer.cs" />
     <Compile Include="QuickInfo\ToolTipText.cs" />
     <Compile Include="SmartBars\CSharpSmartBar.cs" />
     <Compile Include="SmartBars\SmartBar.cs" />

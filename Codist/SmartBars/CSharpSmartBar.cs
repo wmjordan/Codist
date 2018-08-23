@@ -22,6 +22,7 @@ namespace Codist.SmartBars
 	/// </summary>
 	sealed class CSharpSmartBar : SmartBar {
 		CompilationUnitSyntax _Compilation;
+		Document _Document;
 		SyntaxNode _Node;
 		SemanticModel _SemanticModel;
 		SyntaxToken _Token;
@@ -32,8 +33,9 @@ namespace Codist.SmartBars
 		ToolBar MyToolBar => ToolBar2;
 
 		protected override void AddCommands() {
-			UpdateSemanticModel();
-			AddCommandsForNode();
+			if (UpdateSemanticModel()) {
+				AddContextualCommands();
+			}
 			//MyToolBar.Items.Add(new Separator());
 			base.AddCommands();
 		}
@@ -112,7 +114,7 @@ namespace Codist.SmartBars
 			});
 		}
 
-		void AddCommandsForNode() {
+		void AddContextualCommands() {
 			if (_Node == null) {
 				return;
 			}
@@ -192,12 +194,12 @@ namespace Codist.SmartBars
 		}
 
 		void FindCallers(MenuItem menuItem, ISymbol source) {
-			var callers = new List<SymbolCallerInfo>(SymbolFinder.FindCallersAsync(source, View.TextBuffer.GetWorkspace().CurrentSolution).Result);
-			callers.Sort((a, b) => {
+			var callers = SymbolFinder.FindCallersAsync(source, View.TextBuffer.GetWorkspace().CurrentSolution).Result.ToArray();
+			Array.Sort(callers, (a, b) => {
 				var s = a.CallingSymbol.ContainingType.Name.CompareTo(b.CallingSymbol.ContainingType.Name);
 				return s != 0 ? s : a.CallingSymbol.Name.CompareTo(b.CallingSymbol.Name);
 			});
-			if (callers.Count < 10) {
+			if (callers.Length < 10) {
 				foreach (var caller in callers) {
 					var s = caller.CallingSymbol;
 					menuItem.Items.Add(new SymbolMenuItem(this, s, caller.Locations) {
@@ -221,7 +223,9 @@ namespace Codist.SmartBars
 		}
 
 		void FindDerivedClasses(MenuItem menuItem, ISymbol symbol) {
-			foreach (var derived in SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
+			var classes = SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result.ToArray();
+			Array.Sort(classes, (a, b) => a.Name.CompareTo(b.Name));
+			foreach (var derived in classes) {
 				var item = new SymbolMenuItem(this, derived, derived.Locations);
 				if (derived.GetSourceLocations().Length == 0) {
 					(item.Header as TextBlock).Foreground = System.Windows.Media.Brushes.Gray;
@@ -244,14 +248,12 @@ namespace Codist.SmartBars
 		}
 
 		void FindInstanceAsParameter(MenuItem menuItem, ISymbol source) {
-			var project = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]).Project;
-			var members = (source as ITypeSymbol).FindInstanceAsParameter(project);
+			var members = (source as ITypeSymbol).FindInstanceAsParameter(_Document.Project);
 			SortAndGroupSymbolByClass(menuItem, members);
 		}
 
 		void FindInstanceProducer(MenuItem menuItem, ISymbol source) {
-			var project = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]).Project;
-			var members = (source as ITypeSymbol).FindSymbolInstanceProducer(project);
+			var members = (source as ITypeSymbol).FindSymbolInstanceProducer(_Document.Project);
 			SortAndGroupSymbolByClass(menuItem, members);
 		}
 
@@ -276,14 +278,14 @@ namespace Codist.SmartBars
 		}
 
 		void FindReferences(MenuItem menuItem, ISymbol source) {
-			var refs = new List<ReferencedSymbol>(SymbolFinder.FindReferencesAsync(source, View.TextBuffer.GetWorkspace().CurrentSolution).Result);
-			refs.Sort((a, b) => {
+			var refs = SymbolFinder.FindReferencesAsync(source, View.TextBuffer.GetWorkspace().CurrentSolution).Result.ToArray();
+			Array.Sort(refs, (a, b) => {
 				int s;
 				return 0 != (s = a.Definition.ContainingType.Name.CompareTo(b.Definition.ContainingType.Name)) ? s :
 					0 != (s = b.Definition.DeclaredAccessibility - a.Definition.DeclaredAccessibility) ? s
 					: a.Definition.Name.CompareTo(b.Definition.Name);
 			});
-			if (refs.Count < 10) {
+			if (refs.Length < 10) {
 				foreach (var item in refs) {
 					menuItem.Items.Add(new SymbolMenuItem(this, item.Definition, item.Definition.ContainingType?.Name + "." + item.Definition.Name, null));
 				}
@@ -343,8 +345,7 @@ namespace Codist.SmartBars
 
 		List<CommandItem> GetReferenceCommands(CommandContext ctx) {
 			var r = new List<CommandItem>();
-			var node = _Node;
-			var symbol = _SemanticModel.GetSymbolInfo(node).Symbol ?? _SemanticModel.GetDeclaredSymbol(_Node);
+			var symbol = SymbolFinder.FindSymbolAtPositionAsync(_Document, View.Caret.Position.BufferPosition).Result;
 			if (symbol == null) {
 				return r;
 			}
@@ -425,8 +426,8 @@ namespace Codist.SmartBars
 		}
 
 		bool UpdateSemanticModel() {
-			var document = View.TextBuffer.GetWorkspace().GetDocument(View.Selection.SelectedSpans[0]);
-			_SemanticModel = document.GetSemanticModelAsync().Result;
+			_Document = View.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
+			_SemanticModel = _Document.GetSemanticModelAsync().Result;
 			_Compilation = _SemanticModel.SyntaxTree.GetCompilationUnitRoot();
 			int pos = View.Selection.Start.Position;
 			try {
@@ -447,11 +448,13 @@ namespace Codist.SmartBars
 
 		sealed class SymbolMenuItem : CommandMenuItem
 		{
-			static readonly SymbolDisplayFormat __ClassNameFormat = new SymbolDisplayFormat(
+			static readonly SymbolFormatter __Formatter = new SymbolFormatter();
+			static readonly SymbolDisplayFormat __MemberNameFormat = new SymbolDisplayFormat(
 				typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-				parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets);
+				parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
+				genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters);
 
-			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.Name, locations) { }
+			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(__MemberNameFormat), locations) { }
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
 				Locations = locations;
 				Symbol = symbol;
@@ -474,17 +477,31 @@ namespace Codist.SmartBars
 				}
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
-				var text = new TextBlock()
+				var tip = new TextBlock()
+					.Append(Symbol.GetAccessibility() + Symbol.GetAbstractionModifier() + Symbol.GetSymbolKindName() + " ")
 					.Append(Symbol.GetSignatureString(), true)
 					.Append("\nnamespace: " + Symbol.ContainingNamespace?.ToString());
-				if (Symbol.ContainingType != null) {
-					text.Append("\nclass: " + Symbol.ContainingType.ToDisplayString(__ClassNameFormat));
+				ITypeSymbol t = Symbol.ContainingType;
+				if (t != null) {
+					tip.Append("\n" + t.GetSymbolKindName() + ": ")
+						.Append(t.ToDisplayString(__MemberNameFormat));
 				}
-				var returnType = Symbol.GetReturnType();
-				if (returnType != null) {
-					text.Append("\ntype: " + returnType.ToDisplayString(__ClassNameFormat));
+				t = Symbol.GetReturnType();
+				if (t != null) {
+					tip.Append("\nreturn value: " + t.ToDisplayString(__MemberNameFormat));
 				}
-				ToolTip = text;
+				tip.Append("\nassembly: " + Symbol.GetAssemblyModuleName());
+				var f = Symbol as IFieldSymbol;
+				if (f != null && f.IsConst) {
+					tip.Append("\nconst: " + f.ConstantValue.ToString());
+				}
+				var doc = Symbol.GetXmlDocForSymbol();
+				if (doc != null) {
+					new XmlDocRenderer((SmartBar as CSharpSmartBar)._SemanticModel.Compilation, __Formatter).Render(doc, tip.Append("\n\n").Inlines);
+					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
+				}
+				tip.TextWrapping = TextWrapping.Wrap;
+				ToolTip = tip;
 				ToolTipOpening -= ShowToolTip;
 			}
 		}

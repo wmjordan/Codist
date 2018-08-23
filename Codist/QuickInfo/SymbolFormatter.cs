@@ -28,6 +28,73 @@ namespace Codist
 		public Brush Text { get; private set; }
 		public Brush TypeParameter { get; private set; }
 
+		public TextBlock ShowSymbolDeclaration(ISymbol symbol, TextBlock info, bool defaultPublic, bool hideTypeKind) {
+			if (defaultPublic == false || symbol.DeclaredAccessibility != Accessibility.Public) {
+				info.Append(symbol.GetAccessibility(), Keyword);
+			}
+			if (symbol.Kind == SymbolKind.Field) {
+				ShowFieldDeclaration(symbol as IFieldSymbol, info);
+			}
+			else {
+				ShowSymbolDeclaration(symbol, info);
+			}
+			if (hideTypeKind == false) {
+				info.Append(symbol.GetSymbolKindName(), symbol.Kind == SymbolKind.NamedType ? Keyword : null).Append(" ");
+			}
+			return info;
+		}
+
+		void ShowFieldDeclaration(IFieldSymbol field, TextBlock info) {
+			if (field.IsConst) {
+				info.Append("const ", Keyword);
+			}
+			else {
+				if (field.IsStatic) {
+					info.Append("static ", Keyword);
+				}
+				if (field.IsReadOnly) {
+					info.Append("readonly ", Keyword);
+				}
+				else if (field.IsVolatile) {
+					info.Append("volatile ", Keyword);
+				}
+			}
+		}
+
+		void ShowSymbolDeclaration(ISymbol symbol, TextBlock info) {
+			if (symbol.IsAbstract) {
+				info.Append("abstract ", Keyword);
+			}
+			else if (symbol.IsStatic) {
+				info.Append("static ", Keyword);
+			}
+			else if (symbol.IsVirtual) {
+				info.Append("virtual ", Keyword);
+			}
+			else if (symbol.IsOverride) {
+				info.Append(symbol.IsSealed ? "sealed override " : "override ", Keyword);
+				ISymbol o = null;
+				switch (symbol.Kind) {
+					case SymbolKind.Method: o = ((IMethodSymbol)symbol).OverriddenMethod; break;
+					case SymbolKind.Property: o = ((IPropertySymbol)symbol).OverriddenProperty; break;
+					case SymbolKind.Event: o = ((IEventSymbol)symbol).OverriddenEvent; break;
+				}
+				if (o != null) {
+					var t = o.ContainingType;
+					if (t != null && t.IsCommonClass() == false) {
+						info.AddSymbol(t, null, this).Append(".").AddSymbol(o, null, this).Append(" ");
+					}
+				}
+			}
+			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
+				info.Append("sealed ", Keyword);
+			}
+			if (symbol.IsExtern) {
+				info.Append("extern ", Keyword);
+			}
+		}
+
+
 		internal void ToUIText(System.Windows.Documents.InlineCollection text, ISymbol symbol, string alias) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:

@@ -21,12 +21,14 @@ namespace Codist
 			//todo cache types
 			var members = new List<ISymbol>(10);
 			ImmutableArray<IParameterSymbol> parameters;
+			var assembly = compilation.Assembly;
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes()) {
 				foreach (var member in typeSymbol.GetMembers()) {
 					if (member.Kind != SymbolKind.Field
 						&& member.CanBeReferencedByName
 						&& (parameters = member.GetParameters()).IsDefaultOrEmpty == false
-						&& parameters.Any(p => type.CanConvertTo(p.Type) && p.Type.IsCommonClass() == false)) {
+						&& parameters.Any(p => type.CanConvertTo(p.Type) && p.Type.IsCommonClass() == false)
+						&& type.CanAccess(member, assembly)) {
 						members.Add(member);
 					}
 				}
@@ -39,6 +41,7 @@ namespace Codist
 		/// </summary>
 		public static List<ISymbol> FindSymbolInstanceProducer(this ITypeSymbol type, Project project) {
 			var compilation = project.GetCompilationAsync().Result;
+			var assembly = compilation.Assembly;
 			//todo cache types
 			var members = new List<ISymbol>(10);
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes()) {
@@ -47,7 +50,8 @@ namespace Codist
 					if (member.Kind != SymbolKind.Field
 						&& member.CanBeReferencedByName
 						&& ((mt = member.GetReturnType()) != null && mt.CanConvertTo(type)
-							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None))) {
+							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None))
+						&& type.CanAccess(member, assembly)) {
 						members.Add(member);
 					}
 				}
@@ -59,14 +63,33 @@ namespace Codist
 			return symbol?.Locations.FirstOrDefault(loc => loc.IsInSource);
 		}
 
+		public static string GetAbstractionModifier(this ISymbol symbol) {
+			if (symbol.IsAbstract) {
+				return "abstract ";
+			}
+			else if (symbol.IsStatic) {
+				return "static ";
+			}
+			else if (symbol.IsVirtual) {
+				return "virtual ";
+			}
+			else if (symbol.IsOverride) {
+				return symbol.IsSealed ? "sealed override " : "override ";
+			}
+			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
+				return "sealed ";
+			}
+			return String.Empty;
+		}
+
 		public static string GetAccessibility(this ISymbol symbol) {
 			switch (symbol.DeclaredAccessibility) {
 				case Accessibility.Public: return "public ";
 				case Accessibility.Private: return "private ";
-				case Accessibility.ProtectedAndInternal: return "protected internal ";
+				case Accessibility.ProtectedAndInternal: return "internal protected ";
 				case Accessibility.Protected: return "protected ";
 				case Accessibility.Internal: return "internal ";
-				case Accessibility.ProtectedOrInternal: return "protected or internal ";
+				case Accessibility.ProtectedOrInternal: return "protected internal ";
 				default: return String.Empty;
 			}
 		}
@@ -277,6 +300,7 @@ namespace Codist
 				case SymbolKind.Method: return (symbol as IMethodSymbol).ReturnType;
 				case SymbolKind.Parameter: return (symbol as IParameterSymbol).Type;
 				case SymbolKind.Property: return (symbol as IPropertySymbol).Type;
+				case SymbolKind.Alias: return (symbol as IAliasSymbol).Target as ITypeSymbol;
 			}
 			return null;
 		}
@@ -422,7 +446,60 @@ namespace Codist
 		}
 
 		public static bool IsAccessible(this ISymbol symbol) {
-			return symbol.DeclaredAccessibility == Accessibility.Public || symbol.DeclaredAccessibility == Accessibility.NotApplicable || symbol.Locations.Any(l => l.IsInSource);
+			return symbol != null
+				&& (symbol.DeclaredAccessibility == Accessibility.Public
+					|| symbol.DeclaredAccessibility == Accessibility.Protected
+					|| symbol.DeclaredAccessibility == Accessibility.ProtectedOrInternal
+					|| symbol.Locations.Any(l => l.IsInSource));
+		}
+
+		/// <summary>
+		/// Returns whether a given type <paramref name="from"/> can access symbol <paramref name="target"/>.
+		/// </summary>
+		public static bool CanAccess(this ITypeSymbol from, ISymbol target, IAssemblySymbol assembly) {
+			if (target == null) {
+				return false;
+			}
+			switch (target.DeclaredAccessibility) {
+				case Accessibility.Public:
+					return true && (target.ContainingType == null || from.CanAccess(target.ContainingType, assembly));
+				case Accessibility.Private:
+					return target.ContainingType.Equals(from) || target.FirstSourceLocation() != null;
+				case Accessibility.Internal:
+					return target.ContainingAssembly.GivesAccessTo(assembly) &&
+						(target.ContainingType == null || from.CanAccess(target.ContainingType, assembly));
+				case Accessibility.ProtectedOrInternal:
+					if (target.ContainingAssembly.GivesAccessTo(assembly)) {
+						return true;
+					}
+					goto case Accessibility.Protected;
+				case Accessibility.Protected:
+					target = target.ContainingType;
+					if (target.ContainingType != null && from.CanAccess(target.ContainingType, assembly) == false) {
+						return false;
+					}
+					do {
+						if (from.Equals(target)) {
+							return true;
+						}
+					} while ((from = from.BaseType) != null);
+					return false;
+				case Accessibility.ProtectedAndInternal:
+					if (target.ContainingAssembly.GivesAccessTo(assembly)) {
+						target = target.ContainingType;
+						if (target.ContainingType != null && from.CanAccess(target.ContainingType, null) == false) {
+							return false;
+						}
+						do {
+							if (from.Equals(target)) {
+								return true;
+							}
+						} while ((from = from.BaseType) != null);
+						return false;
+					}
+					return false;
+			}
+			return false;
 		}
 
 		public static bool CanConvertTo(this ITypeSymbol symbol, ITypeSymbol target) {
@@ -443,9 +520,17 @@ namespace Codist
 		}
 
 		public static bool IsCommonClass(this ISymbol symbol) {
-			if (symbol.Kind == SymbolKind.NamedType) {
-				var name = symbol.Name;
-				return name == "Object" || name == "ValueType" || name == "Enum" || name == "MulticastDelegate";
+			var type = symbol as ITypeSymbol;
+			if (type == null) {
+				return false;
+			}
+			switch (type.SpecialType) {
+				case SpecialType.System_Object:
+				case SpecialType.System_ValueType:
+				case SpecialType.System_Enum:
+				case SpecialType.System_MulticastDelegate:
+				case SpecialType.System_Delegate:
+					return true;
 			}
 			return false;
 		}
@@ -495,15 +580,9 @@ namespace Codist
 
 		/// <summary>Returns whether a symbol could have an override.</summary>
 		public static bool MayHaveOverride(this ISymbol symbol) {
-			var type = symbol.ContainingType;
-			return type != null && symbol.IsStatic == false
-				&& symbol.IsSealed == false
-				&& symbol.DeclaredAccessibility != Accessibility.Private
-				&& (symbol.IsAbstract || symbol.IsVirtual || symbol.IsOverride)
-				&& (symbol.Kind == SymbolKind.Method && (symbol as IMethodSymbol).MethodKind == MethodKind.Ordinary || symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
-				&& type.TypeKind == TypeKind.Class
-				&& type.DeclaredAccessibility != Accessibility.Private
-				&& type.IsSealed == false;
+			return symbol?.ContainingType?.TypeKind == TypeKind.Class &&
+				   (symbol.IsVirtual || symbol.IsAbstract || symbol.IsOverride) &&
+				   symbol.IsSealed == false;
 		}
 	}
 }

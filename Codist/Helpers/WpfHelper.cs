@@ -192,13 +192,13 @@ namespace Codist
 			}
 		}
 		public static Run Render(this ISymbol symbol, string alias, WpfBrush brush) {
-			return symbol.Render(alias, false, brush);
+			return symbol.Render(alias, brush == null, brush);
 		}
 		public static Run Render(this ISymbol symbol, string alias, bool bold, WpfBrush brush) {
 			var run = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)
 							? new SymbolLink(symbol, alias)
 							: new Run(alias ?? symbol.Name);
-			if (bold) {
+			if (bold || brush == null) {
 				run.FontWeight = FontWeights.Bold;
 			}
 			if (brush != null) {
