@@ -46,6 +46,9 @@ namespace Codist
 					?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax
 						? semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true)).Symbol
 						: null)
+					?? (node is ArgumentListSyntax
+						? semanticModel.GetSymbolInfo(node.Parent).Symbol
+						: null)
 					?? (node.Parent is MemberAccessExpressionSyntax
 						? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
 						: null)

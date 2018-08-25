@@ -354,6 +354,10 @@ namespace Codist.SmartBars
 
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
+					if ((symbol as IMethodSymbol).MethodKind == MethodKind.Constructor) {
+						r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, symbol.ContainingType, "No member was found", FindMembers));
+					}
+					goto case SymbolKind.Property;
 				case SymbolKind.Property:
 				case SymbolKind.Event:
 					r.Add(CreateCommandMenu("Find callers...", KnownImageIds.ShowCallerGraph, symbol, "No caller was found", FindCallers));
