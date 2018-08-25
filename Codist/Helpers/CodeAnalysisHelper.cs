@@ -55,6 +55,9 @@ namespace Codist
 					?? (node.Parent is ArgumentSyntax
 						? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
 						: null)
+					?? (node is AccessorDeclarationSyntax
+						? semanticModel.GetDeclaredSymbol(node.Parent.Parent)
+						: null)
 					?? (node is TypeParameterSyntax || node is ParameterSyntax ? semanticModel.GetDeclaredSymbol(node) : null);
 		}
 
@@ -99,7 +102,7 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.VariableDeclaration:
-					//case SyntaxKind.VariableDeclarator:
+				//case SyntaxKind.VariableDeclarator:
 					return true;
 			}
 			return false;
