@@ -163,7 +163,15 @@ namespace Codist.SmartBars
 					AddEditorCommand(MyToolBar, KnownImageIds.ReferencedDimension, "Edit.FindAllReferences", "Find all references");
 				}
 				if (isDesignMode) {
-					if (_Node.IsDeclaration()) {
+					if (_Node.IsKind(SyntaxKind.VariableDeclarator)) {
+						if (_Node?.Parent?.Parent is MemberDeclarationSyntax) {
+							AddCommand(MyToolBar, KnownImageIds.AddComment, "Insert comment", ctx => {
+								TextEditorHelper.ExecuteEditorCommand("Edit.InsertComment");
+								ctx.View.Selection.Clear();
+							});
+						}
+					}
+					else if (_Node.IsDeclaration()) {
 						if (_Node is TypeDeclarationSyntax || _Node is MemberDeclarationSyntax || _Node is ParameterListSyntax) {
 							AddCommand(MyToolBar, KnownImageIds.AddComment, "Insert comment", ctx => {
 								TextEditorHelper.ExecuteEditorCommand("Edit.InsertComment");
@@ -176,7 +184,7 @@ namespace Codist.SmartBars
 					}
 				}
 			}
-			if (isDesignMode) {
+			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
 				if (_Trivia.IsLineComment()) {
 					AddEditorCommand(MyToolBar, KnownImageIds.UncommentCode, "Edit.UncommentSelection", "Uncomment selection");
 				}
@@ -189,7 +197,7 @@ namespace Codist.SmartBars
 					});
 				}
 			}
-			else {
+			if (isDesignMode == false) {
 				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger", GetDebugCommands);
 			}
 			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection\nRight click: Duplicate\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", GetExpandSelectionCommands);

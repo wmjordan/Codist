@@ -80,7 +80,11 @@ namespace Codist.QuickInfo
 				var querySpan = new SnapshotSpan(subjectTriggerPoint, 0);
 				var semanticModel = _SemanticModel;
 				if (semanticModel == null) {
-					_SemanticModel = semanticModel = currentSnapshot.GetOpenDocumentInCurrentContextWithChanges().GetSemanticModelAsync().Result;
+					var doc = currentSnapshot.GetOpenDocumentInCurrentContextWithChanges();
+					if (doc == null) {
+						goto EXIT;
+					}
+					_SemanticModel = semanticModel = doc.GetSemanticModelAsync().Result;
 				}
 				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 
@@ -465,7 +469,7 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void ShowFieldInfo(IList<object> qiContent, SyntaxNode node, IFieldSymbol field) {
+			static void ShowFieldInfo(IList<object> qiContent, SyntaxNode node, IFieldSymbol field) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 					&& (field.DeclaredAccessibility != Accessibility.Public || field.IsReadOnly || field.IsVolatile || field.IsStatic)
 					&& field.ContainingType.TypeKind != TypeKind.Enum) {
@@ -587,7 +591,7 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void ShowConstInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol, object value) {
+			static void ShowConstInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol, object value) {
 				var sv = value as string;
 				if (sv != null) {
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
