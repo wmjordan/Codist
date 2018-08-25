@@ -14,6 +14,12 @@ namespace Codist
 				return null;
 			}
 			string s = symbol.GetDocumentationCommentXml(null, true);
+			if (symbol.Kind == SymbolKind.Method) {
+				var m = symbol as IMethodSymbol;
+				if (m.MethodKind == MethodKind.Constructor) {
+					s = m.ContainingType.GetDocumentationCommentXml(null, true);
+				}
+			}
 			try {
 				return String.IsNullOrEmpty(s) == false ? XElement.Parse(s, LoadOptions.None) : null;
 			}
