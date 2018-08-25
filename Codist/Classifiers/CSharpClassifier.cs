@@ -76,11 +76,13 @@ namespace Codist.Classifiers
 			var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace);
 			var lastTriviaSpan = default(TextSpan);
 			var spanNode = unitCompilation.FindNode(textSpan);
-			switch (spanNode.Kind()) {
-				case SyntaxKind.AttributeList:
-				case SyntaxKind.AttributeArgumentList:
-					result.Add(CreateClassificationSpan(snapshot, textSpan, _Classifications.AttributeNotation));
-					break;
+			if (spanNode.HasLeadingTrivia == false || spanNode.GetLeadingTrivia().FullSpan.Contains(textSpan) == false) {
+				switch (spanNode.Kind()) {
+					case SyntaxKind.AttributeList:
+					case SyntaxKind.AttributeArgumentList:
+						result.Add(CreateClassificationSpan(snapshot, textSpan, _Classifications.AttributeNotation));
+						break;
+				}
 			}
 			foreach (var item in classifiedSpans) {
 				var ct = item.ClassificationType;
