@@ -26,12 +26,22 @@ namespace Codist.QuickInfo
 		static void ApplyClickAndGo(ISymbol symbol, TextBlock description) {
 			var locs = symbol.GetSourceLocations();
 			if (locs.Length == 0 || String.IsNullOrEmpty(locs[0].SyntaxTree.FilePath)) {
+				if (symbol.ContainingType != null) {
+					// if the symbol is implicitly declared but its containing type is in source,
+					// navigate to the containing type
+					locs = symbol.ContainingType.GetSourceLocations();
+					if (locs.Length != 0) {
+						symbol = symbol.ContainingType;
+						goto ClickAndGo;
+					}
+				}
 				var asm = symbol.GetAssemblyModuleName();
 				if (asm != null) {
 					description.ToolTip = ShowSymbolLocation(symbol, asm);
 				}
 				return;
 			}
+			ClickAndGo:
 			description.ToolTip = ShowSymbolLocation(symbol, System.IO.Path.GetFileName(symbol.DeclaringSyntaxReferences[0].SyntaxTree.FilePath));
 			description.Cursor = Cursors.Hand;
 			description.MouseEnter += (s, args) => (s as TextBlock).Background = __HighlightBrush;
@@ -42,7 +52,7 @@ namespace Codist.QuickInfo
 			}
 			else {
 				description.MouseLeftButtonUp += (s, args) => {
-					var tb = (s as TextBlock);
+					var tb = s as TextBlock;
 					if (tb.ContextMenu == null) {
 						tb.ContextMenu = WpfHelper.CreateContextMenuForSourceLocations(symbol.MetadataName, locs);
 					}

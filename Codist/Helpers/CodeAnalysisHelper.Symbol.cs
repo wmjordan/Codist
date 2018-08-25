@@ -297,7 +297,8 @@ namespace Codist
 			switch (symbol.Kind) {
 				case SymbolKind.Field: return (symbol as IFieldSymbol).Type;
 				case SymbolKind.Local: return (symbol as ILocalSymbol).Type;
-				case SymbolKind.Method: return (symbol as IMethodSymbol).ReturnType;
+				case SymbolKind.Method: var m = symbol as IMethodSymbol;
+					return m.MethodKind != MethodKind.Constructor ? m.ReturnType : m.ContainingType;
 				case SymbolKind.Parameter: return (symbol as IParameterSymbol).Type;
 				case SymbolKind.Property: return (symbol as IPropertySymbol).Type;
 				case SymbolKind.Alias: return (symbol as IAliasSymbol).Target as ITypeSymbol;

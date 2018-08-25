@@ -45,6 +45,7 @@ namespace Codist.QuickInfo
 		sealed class CSharpQuickInfo : IQuickInfoSource
 		{
 			static readonly SymbolFormatter _SymbolFormatter = new SymbolFormatter();
+
 			readonly IEditorFormatMapService _FormatMapService;
 			readonly ITextStructureNavigatorSelectorService _NavigatorService;
 			readonly IGlyphService _GlyphService;
@@ -340,7 +341,7 @@ namespace Codist.QuickInfo
 					var st = symbol.GetReturnType();
 					if (st != null && st.TypeKind == TypeKind.Delegate) {
 						qiContent.Add(new ToolTipText("Delegate signature:\n", true)
-							.AddSymbolDisplayParts((st as INamedTypeSymbol).DelegateInvokeMethod.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, Int32.MinValue));
+							.AddSymbolDisplayParts((st as INamedTypeSymbol).DelegateInvokeMethod.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter));
 					}
 				}
 
@@ -387,7 +388,7 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			TextBlock ShowReturnInfo(SyntaxNode statement, ReturnStatementSyntax retStatement, SyntaxToken token) {
+			ToolTipText ShowReturnInfo(SyntaxNode statement, ReturnStatementSyntax retStatement, SyntaxToken token) {
 				var retSymbol = retStatement.Expression != null 
 					? _SemanticModel.GetSymbolInfo(retStatement.Expression).Symbol
 					: null;
@@ -455,7 +456,7 @@ namespace Codist.QuickInfo
 					if (invoke != null && invoke.Parameters.Length == 2) {
 						qiContent.Add(
 							new ToolTipText("Event argument: ", true)
-							.AddSymbolDisplayParts(invoke.Parameters[1].Type.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter)
+							.AddSymbolDisplayParts(invoke.Parameters[1].Type.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter)
 						);
 					}
 				}
@@ -488,7 +489,7 @@ namespace Codist.QuickInfo
 					ShowInterfaceImplementation(qiContent, node, method, method.ExplicitInterfaceImplementations);
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) && method.IsExtensionMethod) {
-					ShowExtensionMethod(qiContent, method, node.SpanStart);
+					ShowExtensionMethod(qiContent, method);
 				}
 				ShowOverloadsInfo(qiContent, node, method);
 			}
@@ -507,7 +508,7 @@ namespace Codist.QuickInfo
 					}
 					overloadInfo.Add(new ToolTipText()
 						.SetGlyph(_GlyphService.GetGlyph(item.GetGlyphGroup(), item.GetGlyphItem()))
-						.AddSymbolDisplayParts(item.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, -1)
+						.AddSymbolDisplayParts(item.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1)
 					);
 				}
 				if (overloadInfo.Children.Count > 1) {
@@ -649,7 +650,7 @@ namespace Codist.QuickInfo
 					qiContent.Add(info);
 				}
 			}
-			void ShowExtensionMethod(IList<object> qiContent, IMethodSymbol method, int position) {
+			static void ShowExtensionMethod(IList<object> qiContent, IMethodSymbol method) {
 				var info = new StackPanel();
 				var extType = method.ConstructedFrom.ReceiverType;
 				var extTypeParameter = extType as ITypeParameterSymbol;
@@ -657,7 +658,7 @@ namespace Codist.QuickInfo
 					var ext = new ToolTipText("Extending: ", true)
 						.AddSymbol(extType, true, _SymbolFormatter.Class)
 						.Append(" with ")
-						.AddSymbolDisplayParts(method.ReceiverType.ToMinimalDisplayParts(_SemanticModel, position), _SymbolFormatter);
+						.AddSymbolDisplayParts(method.ReceiverType.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter);
 					info.Add(ext);
 				}
 				var def = new ToolTipText("Extended by: ", true)
@@ -822,7 +823,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(info.LimitSize());
 			}
 
-			void ShowEnumInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol type, bool fromEnum) {
+			static void ShowEnumInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol type, bool fromEnum) {
 				if (!Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
 					return;
 				}
@@ -832,7 +833,7 @@ namespace Codist.QuickInfo
 					return;
 				}
 				var s = new StackPanel()
-					.Add(new ToolTipText("Enum underlying type: ", true).AddSymbolDisplayParts(t.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter));
+					.Add(new ToolTipText("Enum underlying type: ", true).AddSymbolDisplayParts(t.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter));
 				if (fromEnum == false) {
 					qiContent.Add(s);
 					return;
@@ -1016,7 +1017,7 @@ namespace Codist.QuickInfo
 					var doc = argName != null ? (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", argName) : null;
 					var info = new ToolTipText("Argument", true)
 						.Append(" of ")
-						.AddSymbolDisplayParts(m.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argIndex);
+						.AddSymbolDisplayParts(m.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, argIndex);
 					m = symbol.Symbol as IMethodSymbol;
 					if (m.IsGenericMethod) {
 						for (int i = 0; i < m.TypeArguments.Length; i++) {
@@ -1040,7 +1041,7 @@ namespace Codist.QuickInfo
 					var info = new StackPanel();
 					info.Add(new ToolTipText("Maybe", true).Append(" argument of"));
 					foreach (var candidate in symbol.CandidateSymbols) {
-						info.Add(new ToolTipText().AddSymbolDisplayParts(candidate.ToMinimalDisplayParts(_SemanticModel, node.SpanStart), _SymbolFormatter, argName == null ? argIndex : Int32.MinValue));
+						info.Add(new ToolTipText().AddSymbolDisplayParts(candidate.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, argName == null ? argIndex : Int32.MinValue));
 					}
 					qiContent.Add(info.Scrollable());
 				}
@@ -1095,11 +1096,9 @@ namespace Codist.QuickInfo
 			}
 
 			TextBlock ToUIText(ISymbol symbol, int position) {
-				return _SymbolFormatter.ToUIText(
-					new ToolTipText()
-						.SetGlyph(_GlyphService.GetGlyph(symbol.GetGlyphGroup(), symbol.GetGlyphItem())),
-					symbol.ToMinimalDisplayParts(_SemanticModel, position),
-					-1);
+				return new ToolTipText()
+					.SetGlyph(_GlyphService.GetGlyph(symbol.GetGlyphGroup(), symbol.GetGlyphItem()))
+					.AddSymbolDisplayParts(symbol.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
 			}
 
 		}

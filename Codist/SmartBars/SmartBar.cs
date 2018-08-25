@@ -100,6 +100,9 @@ namespace Codist.SmartBars
 			_ToolBarTray.Opacity = (SensibleRange - op) / SensibleRange;
 		}
 		void ViewSelectionChanged(object sender, EventArgs e) {
+			if (AppHelpers.EnumHelper.HasAnyFlag(Keyboard.Modifiers, ModifierKeys.Shift)) {
+				return;
+			}
 			if (View.Selection.IsEmpty) {
 				_ToolBarTray.Visibility = Visibility.Hidden;
 				View.VisualElement.MouseMove -= ViewMouseMove;

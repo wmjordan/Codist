@@ -165,8 +165,10 @@ namespace Codist.SmartBars
 				if (isDesignMode) {
 					if (_Node.IsDeclaration()) {
 						if (_Node is TypeDeclarationSyntax || _Node is MemberDeclarationSyntax || _Node is ParameterListSyntax) {
-							//todo clear selection after executing command
-							AddEditorCommand(MyToolBar, KnownImageIds.AddComment, "Edit.InsertComment", "Insert comment");
+							AddCommand(MyToolBar, KnownImageIds.AddComment, "Insert comment", ctx => {
+								TextEditorHelper.ExecuteEditorCommand("Edit.InsertComment");
+								ctx.View.Selection.Clear();
+							});
 						}
 					}
 					else {
@@ -452,7 +454,8 @@ namespace Codist.SmartBars
 			static readonly SymbolDisplayFormat __MemberNameFormat = new SymbolDisplayFormat(
 				typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
 				parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
-				genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters);
+				genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+				miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(__MemberNameFormat), locations) { }
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
@@ -479,8 +482,7 @@ namespace Codist.SmartBars
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
 				var tip = new TextBlock()
 					.Append(Symbol.GetAccessibility() + Symbol.GetAbstractionModifier() + Symbol.GetSymbolKindName() + " ")
-					.Append(Symbol.GetSignatureString(), true)
-					.Append("\nnamespace: " + Symbol.ContainingNamespace?.ToString());
+					.Append(Symbol.GetSignatureString(), true);
 				ITypeSymbol t = Symbol.ContainingType;
 				if (t != null) {
 					tip.Append("\n" + t.GetSymbolKindName() + ": ")
@@ -490,7 +492,8 @@ namespace Codist.SmartBars
 				if (t != null) {
 					tip.Append("\nreturn value: " + t.ToDisplayString(__MemberNameFormat));
 				}
-				tip.Append("\nassembly: " + Symbol.GetAssemblyModuleName());
+				tip.Append("\nnamespace: " + Symbol.ContainingNamespace?.ToString())
+					.Append("\nassembly: " + Symbol.GetAssemblyModuleName());
 				var f = Symbol as IFieldSymbol;
 				if (f != null && f.IsConst) {
 					tip.Append("\nconst: " + f.ConstantValue.ToString());

@@ -23,6 +23,14 @@ namespace Codist
 	static class WpfHelper
 	{
 		static readonly Thickness GlyphMargin = new Thickness(0, 0, 5, 0);
+		internal static readonly SymbolDisplayFormat QuickInfoSymbolDisplayFormat = new SymbolDisplayFormat(
+			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+			parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
+			memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType | SymbolDisplayMemberOptions.IncludeContainingType,
+			delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
+			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+
 		public static WpfColor ParseColor(string colorText) {
 			if (String.IsNullOrEmpty(colorText) || colorText[0] != '#' || colorText.Length != 7 && colorText.Length != 9) {
 				return WpfColors.Transparent;
@@ -195,18 +203,16 @@ namespace Codist
 			return symbol.Render(alias, brush == null, brush);
 		}
 		public static Run Render(this ISymbol symbol, string alias, bool bold, WpfBrush brush) {
-			var run = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)
-							? new SymbolLink(symbol, alias)
-							: new Run(alias ?? symbol.Name);
+			var run = new SymbolLink(symbol, alias, Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo));
 			if (bold || brush == null) {
 				run.FontWeight = FontWeights.Bold;
 			}
 			if (brush != null) {
 				run.Foreground = brush;
 			}
-			run.ToolTip = symbol.ToString();
 			return run;
 		}
+
 		public static Run Render(this string text, WpfBrush brush) {
 			return text.Render(false, false, brush);
 		}
@@ -366,7 +372,9 @@ namespace Codist
 					Header = new TextBlock().Append(symbolName, true).Append(" is defined in ").Append(refs.Length.ToString(), true).Append(" places"),
 					IsEnabled = false
 				});
-				foreach (var loc in refs) {
+				foreach (var loc in refs.Sort(System.Collections.Generic.Comparer<SyntaxReference>.Create((a,b) => {
+					return String.Compare(System.IO.Path.GetFileName(a.SyntaxTree.FilePath), System.IO.Path.GetFileName(b.SyntaxTree.FilePath), StringComparison.OrdinalIgnoreCase);
+				}))) {
 					var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
 					var item = new MenuItem {
 						Header = new TextBlock().Append(System.IO.Path.GetFileName(loc.SyntaxTree.FilePath)).Append("(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", WpfBrushes.Gray),
@@ -382,13 +390,24 @@ namespace Codist
 		sealed class SymbolLink : Run
 		{
 			readonly ISymbol _Symbol;
-			readonly ImmutableArray<SyntaxReference> _References;
-			public SymbolLink(ISymbol symbol, string alias) {
+			ImmutableArray<SyntaxReference> _References;
+			public SymbolLink(ISymbol symbol, string alias, bool clickAndGo) {
 				Text = alias ?? symbol.Name;
 				_Symbol = symbol;
-				_References = symbol.GetSourceLocations();
+				if (clickAndGo) {
+					MouseEnter += InitInteraction;
+				}
+				ToolTipOpening += ShowSymbolToolTip;
+				ToolTip = String.Empty;
+			}
+
+			void InitInteraction(object sender, MouseEventArgs e) {
+				MouseEnter -= InitInteraction;
+
+				_References = _Symbol.GetSourceLocations();
 				if (_References.Length > 0) {
 					Cursor = Cursors.Hand;
+					Highlight(sender, e);
 					MouseEnter += Highlight;
 					MouseLeave += Leave;
 					MouseLeftButtonUp += GotoSymbol;
@@ -412,6 +431,31 @@ namespace Codist
 					}
 					ContextMenu.IsOpen = true;
 				}
+			}
+
+			void ShowSymbolToolTip(object sender, ToolTipEventArgs e) {
+				var tip = new TextBlock()
+					.Append(_Symbol.GetAccessibility() + _Symbol.GetAbstractionModifier() + _Symbol.GetSymbolKindName() + " ")
+					.Append(_Symbol.GetSignatureString(), true);
+				ITypeSymbol t = _Symbol.ContainingType;
+				if (t != null) {
+					tip.Append("\n" + t.GetSymbolKindName() + ": ")
+						.Append(t.ToDisplayString(QuickInfoSymbolDisplayFormat));
+				}
+				t = _Symbol.GetReturnType();
+				if (t != null) {
+					tip.Append("\nreturn value: " + t.ToDisplayString(QuickInfoSymbolDisplayFormat));
+				}
+				tip.Append("\nnamespace: " + _Symbol.ContainingNamespace?.ToString())
+					.Append("\nassembly: " + _Symbol.GetAssemblyModuleName());
+				var f = _Symbol as IFieldSymbol;
+				if (f != null && f.IsConst) {
+					tip.Append("\nconst: " + f.ConstantValue.ToString());
+				}
+
+				tip.TextWrapping = TextWrapping.Wrap;
+				ToolTip = tip;
+				ToolTipOpening -= ShowSymbolToolTip;
 			}
 
 		}
