@@ -345,7 +345,7 @@ namespace Codist.QuickInfo
 					var st = symbol.GetReturnType();
 					if (st != null && st.TypeKind == TypeKind.Delegate) {
 						qiContent.Add(new ToolTipText("Delegate signature:\n", true)
-							.AddSymbolDisplayParts((st as INamedTypeSymbol).DelegateInvokeMethod.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter));
+							.AddSymbolDisplayParts((st as INamedTypeSymbol).DelegateInvokeMethod.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1));
 					}
 				}
 
@@ -460,7 +460,7 @@ namespace Codist.QuickInfo
 					if (invoke != null && invoke.Parameters.Length == 2) {
 						qiContent.Add(
 							new ToolTipText("Event argument: ", true)
-							.AddSymbolDisplayParts(invoke.Parameters[1].Type.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter)
+							.AddSymbolDisplayParts(invoke.Parameters[1].Type.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1)
 						);
 					}
 				}
@@ -662,11 +662,11 @@ namespace Codist.QuickInfo
 					var ext = new ToolTipText("Extending: ", true)
 						.AddSymbol(extType, true, _SymbolFormatter.Class)
 						.Append(" with ")
-						.AddSymbolDisplayParts(method.ReceiverType.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter);
+						.AddSymbolDisplayParts(method.ReceiverType.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
 					info.Add(ext);
 				}
 				var def = new ToolTipText("Extended by: ", true)
-					.AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), _SymbolFormatter);
+					.AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), _SymbolFormatter, -1);
 				info.Add(def);
 				qiContent.Add(info);
 			}

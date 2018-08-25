@@ -26,10 +26,12 @@ namespace Codist
 				foreach (var member in typeSymbol.GetMembers()) {
 					if (member.Kind != SymbolKind.Field
 						&& member.CanBeReferencedByName
-						&& (parameters = member.GetParameters()).IsDefaultOrEmpty == false
-						&& parameters.Any(p => type.CanConvertTo(p.Type) && p.Type.IsCommonClass() == false)
-						&& type.CanAccess(member, assembly)) {
-						members.Add(member);
+						&& (parameters = member.GetParameters()).IsDefaultOrEmpty == false) {
+						if (parameters.Any(p => type.CanConvertTo(p.Type) && p.Type.IsCommonClass() == false)
+							&& type.CanAccess(member, assembly)) {
+
+							members.Add(member);
+						}
 					}
 				}
 			}
@@ -430,6 +432,14 @@ namespace Codist
 			}
 		}
 
+		public static ImmutableArray<ITypeParameterSymbol> GetTypeParameters(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Method: return (symbol as IMethodSymbol).TypeParameters;
+				case SymbolKind.NamedType: return (symbol as INamedTypeSymbol).TypeParameters;
+				default: return ImmutableArray<ITypeParameterSymbol>.Empty;
+			}
+		}
+
 		public static void GoToSource(this ISymbol symbol) {
 			symbol.FirstSourceLocation().GoToSource();
 		}
@@ -506,6 +516,24 @@ namespace Codist
 		public static bool CanConvertTo(this ITypeSymbol symbol, ITypeSymbol target) {
 			if (symbol.Equals(target)) {
 				return true;
+			}
+			if (target.TypeKind == TypeKind.TypeParameter) {
+				var param = target as ITypeParameterSymbol;
+				foreach (var item in param.ConstraintTypes) {
+					if (item.CanConvertTo(symbol)) {
+						return true;
+					}
+				}
+				return false;
+			}
+			if (symbol.TypeKind == TypeKind.TypeParameter) {
+				var param = symbol as ITypeParameterSymbol;
+				foreach (var item in param.ConstraintTypes) {
+					if (item.CanConvertTo(target)) {
+						return true;
+					}
+				}
+				return false;
 			}
 			foreach (var item in symbol.Interfaces) {
 				if (item.CanConvertTo(target)) {

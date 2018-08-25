@@ -393,7 +393,7 @@ namespace Codist.SmartBars
 						}
 					}
 					r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, t, "No member was found", FindMembers));
-					if (t.IsStatic) {
+					if (t.IsStatic || t.SpecialType != SpecialType.None) {
 						break;
 					}
 					r.Add(CreateCommandMenu("Find instance producer...", KnownImageIds.NewItem, t, "No instance creator was found", FindInstanceProducer));

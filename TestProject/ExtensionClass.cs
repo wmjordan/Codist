@@ -11,6 +11,11 @@ namespace TestProject
 			ac.VirtualMethod(); // call virtual method
 		} // static method
 
+		public static TType ExtensionWithConstraint<TType>(this TType type)
+			where TType : IInterface {
+			return type;
+		}
+
 		public static void MethodWithGenericTypeArguments(this List<string> list, List<List<string>> lists) {
 			lists.Add(list);
 		}
