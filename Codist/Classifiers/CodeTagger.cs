@@ -94,13 +94,14 @@ namespace Codist.Classifiers
 				_Aggregator = aggregator;
 				_Tags = tags;
 				_CodeType = codeType;
-				_Aggregator.BatchedTagsChanged += AggregateorBatchedTagsChanged;
+				_Aggregator.BatchedTagsChanged += AggregatorBatchedTagsChanged;
 			}
 
 			internal FrameworkElement Margin { get; set; }
 
 			public IEnumerable<ITagSpan<ClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
-				if (spans.Count == 0) {
+				if (spans.Count == 0
+				|| Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment) == false) {
 					yield break;
 				}
 
@@ -141,15 +142,6 @@ namespace Codist.Classifiers
 					var ss = tagSpan.Span.GetSpans(snapshot)[0];
 					if (_CodeType == CodeType.CSharp) {
 						switch (c) {
-							case Constants.CodeClassName:
-							case Constants.CodeInterfaceName:
-							case Constants.CodeStructName:
-							case Constants.CodeEnumName:
-								if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration)) {
-									Debug.WriteLine($"find def: {c} at {tagSpan.Span.Start.GetPoint(tagSpan.Span.AnchorBuffer, PositionAffinity.Predecessor).Value.Position}");
-									yield return _Tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
-								}
-								continue;
 							case Constants.CodePreprocessorKeyword:
 								if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)) {
 									if (Matches(ss, "region") || Matches(ss, "pragma") || Matches(ss, "if") || Matches(ss, "else")) {
@@ -157,19 +149,14 @@ namespace Codist.Classifiers
 									}
 								}
 								continue;
-							case Constants.CSharpMethodBody:
-								_Tags.Add(new TagSpan<ClassificationTag>(tagSpan.Span.GetSpans(snapshot)[0], (ClassificationTag)tagSpan.Tag));
-								continue;
 							default:
 								break;
 						}
 					}
 
-					if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment)) {
-						var ts = TagComments(c, ss, tagSpan);
-						if (ts != null) {
-							yield return _Tags.Add(ts);
-						}
+					var ts = TagComments(c, ss, tagSpan);
+					if (ts != null) {
+						yield return _Tags.Add(ts);
 					}
 				}
 			}
@@ -297,7 +284,7 @@ namespace Codist.Classifiers
 				return true;
 			}
 
-			void AggregateorBatchedTagsChanged(object sender, EventArgs args) {
+			void AggregatorBatchedTagsChanged(object sender, EventArgs args) {
 				if (Margin != null) {
 					Margin.InvalidateVisual();
 				}
@@ -309,7 +296,7 @@ namespace Codist.Classifiers
 			void Dispose(bool disposing) {
 				if (!disposedValue) {
 					if (disposing) {
-						_Aggregator.BatchedTagsChanged -= AggregateorBatchedTagsChanged;
+						_Aggregator.BatchedTagsChanged -= AggregatorBatchedTagsChanged;
 					}
 					disposedValue = true;
 				}

@@ -343,47 +343,46 @@ namespace Codist
 				}
 				sb.Append(')');
 				return sb.ToString();
-
-				void GetTypeName(ITypeSymbol type, StringBuilder output) {
-					switch (type.TypeKind) {
-						case TypeKind.Array:
-							GetTypeName((type as IArrayTypeSymbol).ElementType, output);
-							output.Append("[]");
-							return;
-
-						case TypeKind.Dynamic:
-							output.Append('?'); return;
-						case TypeKind.Module:
-						case TypeKind.TypeParameter:
-						case TypeKind.Enum:
-						case TypeKind.Error:
-							output.Append(type.Name); return;
-						case TypeKind.Pointer:
-							GetTypeName((type as IPointerTypeSymbol).PointedAtType, output);
-							output.Append('*');
-							return;
-					}
-					output.Append(type.Name);
-					var nt = type as INamedTypeSymbol;
-					if (nt == null) {
+			}
+			void GetTypeName(ITypeSymbol type, StringBuilder output) {
+				switch (type.TypeKind) {
+					case TypeKind.Array:
+						GetTypeName((type as IArrayTypeSymbol).ElementType, output);
+						output.Append("[]");
 						return;
-					}
-					if (nt.IsGenericType == false) {
+
+					case TypeKind.Dynamic:
+						output.Append('?'); return;
+					case TypeKind.Module:
+					case TypeKind.TypeParameter:
+					case TypeKind.Enum:
+					case TypeKind.Error:
+						output.Append(type.Name); return;
+					case TypeKind.Pointer:
+						GetTypeName((type as IPointerTypeSymbol).PointedAtType, output);
+						output.Append('*');
 						return;
-					}
-					var s = false;
-					output.Append('<');
-					foreach (var item in nt.TypeArguments) {
-						if (s) {
-							output.Append(", ");
-						}
-						else {
-							s = true;
-						}
-						GetTypeName(item, output);
-					}
-					output.Append('>');
 				}
+				output.Append(type.Name);
+				var nt = type as INamedTypeSymbol;
+				if (nt == null) {
+					return;
+				}
+				if (nt.IsGenericType == false) {
+					return;
+				}
+				var s = false;
+				output.Append('<');
+				foreach (var item in nt.TypeArguments) {
+					if (s) {
+						output.Append(", ");
+					}
+					else {
+						s = true;
+					}
+					GetTypeName(item, output);
+				}
+				output.Append('>');
 			}
 		}
 

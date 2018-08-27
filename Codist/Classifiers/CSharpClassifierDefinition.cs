@@ -105,11 +105,6 @@ namespace Codist.Classifiers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
-		[Name(Constants.CSharpMethodBody)]
-		static ClassificationTypeDefinition MethodBody;
-
-		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpNamespaceName)]
 		static ClassificationTypeDefinition Namespace;
 

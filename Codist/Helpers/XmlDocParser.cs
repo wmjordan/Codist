@@ -9,6 +9,9 @@ namespace Codist
 {
 	static class XmlDocParser
 	{
+		/// <summary>
+		/// Gets the XML Doc for a <see cref="ISymbol"/>. For constructors which do not have XML Doc, the XML Doc of its containing type is used.
+		/// </summary>
 		public static XElement GetXmlDoc(this ISymbol symbol) {
 			if (symbol == null) {
 				return null;
@@ -111,14 +114,14 @@ namespace Codist
 			else if (symbol == querySymbol
 				&& symbol.Kind != SymbolKind.NamedType
 				&& (t = symbol.ContainingType) != null) {
-				foreach (INamedTypeSymbol item in t.Interfaces) {
+				foreach (var item in t.Interfaces) {
 					if ((doc = InheritDocumentation(item, querySymbol, out baseMember)) != null) {
 						return doc;
 					}
 				}
 				switch (symbol.Kind) {
 					case SymbolKind.Method:
-						foreach (IMethodSymbol item in (symbol as IMethodSymbol).ExplicitInterfaceImplementations) {
+						foreach (var item in (symbol as IMethodSymbol).ExplicitInterfaceImplementations) {
 							if ((doc = item.GetXmlDoc().GetSummary()) != null) {
 								baseMember = item;
 								return doc;
@@ -127,7 +130,7 @@ namespace Codist
 						break;
 
 					case SymbolKind.Property:
-						foreach (IPropertySymbol item in (symbol as IPropertySymbol).ExplicitInterfaceImplementations) {
+						foreach (var item in (symbol as IPropertySymbol).ExplicitInterfaceImplementations) {
 							if ((doc = item.GetXmlDoc().GetSummary()) != null) {
 								baseMember = item;
 								return doc;
@@ -136,7 +139,7 @@ namespace Codist
 						break;
 
 					case SymbolKind.Event:
-						foreach (IEventSymbol item in (symbol as IEventSymbol).ExplicitInterfaceImplementations) {
+						foreach (var item in (symbol as IEventSymbol).ExplicitInterfaceImplementations) {
 							if ((doc = item.GetXmlDoc().GetSummary()) != null) {
 								baseMember = item;
 								return doc;
@@ -147,82 +150,6 @@ namespace Codist
 			}
 			baseMember = null;
 			return null;
-		}
-	}
-
-	sealed class XmlDoc
-	{
-		internal readonly XElement Summary;
-		internal readonly XElement Returns;
-		internal readonly List<XElement> Exceptions;
-		internal readonly bool IsPreliminary;
-
-		public XmlDoc(ISymbol symbol) {
-			XElement doc;
-			switch (symbol.Kind) {
-				case SymbolKind.Event:
-				case SymbolKind.Field:
-				case SymbolKind.NamedType:
-					doc = symbol.GetXmlDoc();
-					if (doc == null) {
-						return;
-					}
-					foreach (XElement item in doc.Elements()) {
-						switch (item.Name.LocalName) {
-							case "summary": Summary = item; break;
-							case "preliminary": IsPreliminary = true; break;
-						}
-					}
-					if (Summary == null) {
-						Summary = AsTextOnlySummary(doc);
-					}
-					return;
-
-				case SymbolKind.Method:
-				case SymbolKind.Property:
-					doc = symbol.GetXmlDoc();
-					if (doc == null) {
-						return;
-					}
-					foreach (XElement item in doc.Elements()) {
-						switch (item.Name.LocalName) {
-							case "summary": Summary = item; break;
-							case "returns": Returns = item; break;
-							case "exception": (Exceptions ?? (Exceptions = new List<XElement>())).Add(item); break;
-							case "preliminary": IsPreliminary = true; break;
-						}
-					}
-					if (Summary == null) {
-						Summary = AsTextOnlySummary(doc);
-					}
-					break;
-
-				case SymbolKind.Parameter:
-					IParameterSymbol p = symbol as IParameterSymbol;
-					if (p.IsThis) {
-						return;
-					}
-					IMethodSymbol m = p.ContainingSymbol as IMethodSymbol;
-					Summary = (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", symbol.Name);
-					break;
-
-				case SymbolKind.TypeParameter:
-					ITypeParameterSymbol tps = symbol as ITypeParameterSymbol;
-					switch (tps.TypeParameterKind) {
-						case TypeParameterKind.Type:
-							Summary = symbol.ContainingType.GetXmlDoc().GetNamedDocItem("typeparam", symbol.Name);
-							break;
-
-						case TypeParameterKind.Method:
-							Summary = tps.DeclaringMethod.GetXmlDoc().GetNamedDocItem("typeparam", symbol.Name);
-							break;
-					}
-					break;
-			}
-		}
-
-		static XElement AsTextOnlySummary(XElement doc) {
-			return doc.FirstNode != null && doc.FirstNode.NodeType == XmlNodeType.Text && doc.LastNode.NodeType == XmlNodeType.Text ? doc : null;
 		}
 	}
 }
