@@ -17,7 +17,7 @@ namespace Codist.Classifiers
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.Code)]
 	[TagType(typeof(ClassificationTag))]
-	sealed class CodeTaggerProvider : IViewTaggerProvider
+	sealed class CommentTaggerProvider : IViewTaggerProvider
 	{
 		[Import]
 		internal IClassificationTypeRegistryService ClassificationRegistry = null;
@@ -36,7 +36,7 @@ namespace Codist.Classifiers
 			var vp = textView.Properties;
 			var tagger = vp.GetOrCreateSingletonProperty(() => Aggregator.CreateTagAggregator<IClassificationTag>(buffer));
 			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
-			var codeTagger = vp.GetOrCreateSingletonProperty(() => new CodeTagger(ClassificationRegistry, tagger, tags, codeType));
+			var codeTagger = vp.GetOrCreateSingletonProperty(() => new CommentTagger(ClassificationRegistry, tagger, tags, codeType));
 			textView.Closed += TextViewClosed;
 			return codeTagger as ITagger<T>;
 		}
@@ -50,7 +50,7 @@ namespace Codist.Classifiers
 		void TextViewClosed(object sender, EventArgs args) {
 			var textView = sender as ITextView;
 			textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>(typeof(ITagAggregator<IClassificationTag>))?.Dispose();
-			textView.Properties.GetProperty<CodeTagger>(typeof(CodeTagger))?.Dispose();
+			textView.Properties.GetProperty<CommentTagger>(typeof(CommentTagger))?.Dispose();
 			textView.Closed -= TextViewClosed;
 		}
 
@@ -59,7 +59,7 @@ namespace Codist.Classifiers
 			None, CSharp, Markup
 		}
 
-		sealed class CodeTagger : ITagger<ClassificationTag>, IDisposable
+		sealed class CommentTagger : ITagger<ClassificationTag>, IDisposable
 		{
 			static ClassificationTag[] __CommentClassifications;
 			readonly ITagAggregator<IClassificationTag> _Aggregator;
@@ -75,7 +75,7 @@ namespace Codist.Classifiers
 			public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 #pragma warning restore 67
 
-			internal CodeTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags, CodeType codeType) {
+			internal CommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags, CodeType codeType) {
 				if (__CommentClassifications == null) {
 					var t = typeof(CommentStyleTypes);
 					var styleNames = Enum.GetNames(t);
