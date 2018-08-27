@@ -268,7 +268,7 @@ namespace Codist.SmartBars
 		}
 
 		void FindMembers(MenuItem menuItem, ISymbol symbol) {
-			var members = (symbol as INamedTypeSymbol).GetMembers().RemoveAll(m => m.CanBeReferencedByName == false).Sort(Comparer<ISymbol>.Create((a, b) => {
+			var members = (symbol as INamespaceOrTypeSymbol).GetMembers().RemoveAll(m => m.CanBeReferencedByName == false).Sort(Comparer<ISymbol>.Create((a, b) => {
 				int s;
 				if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first
 					|| (s = a.Kind - b.Kind) != 0) { // then by member kind
@@ -376,10 +376,14 @@ namespace Codist.SmartBars
 					if (st != null && st.TypeKind == TypeKind.Interface) {
 						r.Add(CreateCommandMenu("Find implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
 					}
+					if (symbol.Kind != SymbolKind.Event) {
+						CreateFindMemberForReturnTypeCommand(symbol, r);
+					}
 					//r.Add(CreateCommandMenu("Find similar...", KnownImageIds.DropShadow, symbol, "No similar symbol was found", FindSimilarSymbols));
 					break;
 				case SymbolKind.Field:
 				case SymbolKind.Local:
+					CreateFindMemberForReturnTypeCommand(symbol, r);
 					break;
 				case SymbolKind.NamedType:
 					var t = symbol as INamedTypeSymbol;
@@ -408,11 +412,22 @@ namespace Codist.SmartBars
 						r.Add(CreateCommandMenu("Find implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
 					}
 					break;
+				case SymbolKind.Namespace:
+					r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, symbol, "No member was found", FindMembers));
+					break;
 			}
 			//r.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, symbol, "No reference found", FindReferences));
 			r.Add(new CommandItem("Find all references", KnownImageIds.ReferencedDimension, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences")));
 			return r;
 		}
+
+		void CreateFindMemberForReturnTypeCommand(ISymbol symbol, List<CommandItem> list) {
+			var type = symbol.GetReturnType();
+			if (type != null && type.SpecialType == SpecialType.None) {
+				list.Add(CreateCommandMenu("Find members of " + type.GetSignatureString() + "...", KnownImageIds.ListMembers, type, "No member was found", FindMembers));
+			}
+		}
+
 		void SortAndGroupSymbolByClass(MenuItem menuItem, List<ISymbol> members) {
 			members.Sort((a, b) => {
 				var s = a.ContainingType.Name.CompareTo(b.ContainingType.Name);
