@@ -55,7 +55,7 @@ namespace Codist
 		public static Config InitConfig() {
 			//AppHelpers.LogHelper.UseLogMethod(i => Debug.WriteLine(i));
 			if (File.Exists(ConfigPath) == false) {
-				Config config = GetDefaultConfig();
+				var config = GetDefaultConfig();
 				config.SaveConfig(ConfigPath);
 				return config;
 			}
@@ -94,7 +94,7 @@ namespace Codist
 				: configPath == SimpleTheme ? Properties.Resources.Simple
 				: File.ReadAllText(configPath);
 			var loadFromTheme = configPath.StartsWith(ThemePrefix, StringComparison.Ordinal);
-			Config config = JsonConvert.DeserializeObject<Config>(configContent, new JsonSerializerSettings {
+			var config = JsonConvert.DeserializeObject<Config>(configContent, new JsonSerializerSettings {
 				DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
 				NullValueHandling = NullValueHandling.Ignore,
 				Error = (sender, args) => {
@@ -102,7 +102,7 @@ namespace Codist
 				}
 			});
 			var l = config.Labels;
-			for (int i = l.Count - 1; i >= 0; i--) {
+			for (var i = l.Count - 1; i >= 0; i--) {
 				if (String.IsNullOrWhiteSpace(l[i].Label)) {
 					l.RemoveAt(i);
 				}
@@ -112,7 +112,7 @@ namespace Codist
 			}
 			var cs = config.GeneralStyles;
 			CleanUpStyleEntry(cs, loadFromTheme);
-			for (int i = cs.Count - 1; i >= 0; i--) {
+			for (var i = cs.Count - 1; i >= 0; i--) {
 				if (cs[i] == null || Enum.IsDefined(typeof(CodeStyleTypes), cs[i].StyleID) == false) {
 					cs.RemoveAt(i);
 				}
@@ -120,7 +120,7 @@ namespace Codist
 			MergeDefaultCodeStyles(cs);
 			var s = config.CommentStyles;
 			CleanUpStyleEntry(s, loadFromTheme);
-			for (int i = s.Count - 1; i >= 0; i--) {
+			for (var i = s.Count - 1; i >= 0; i--) {
 				if (s[i] == null || Enum.IsDefined(typeof(CommentStyleTypes), s[i].StyleID) == false) {
 					s.RemoveAt(i);
 				}
@@ -128,7 +128,7 @@ namespace Codist
 			MergeDefaultCommentStyles(s);
 			var css = config.CodeStyles;
 			CleanUpStyleEntry(css, loadFromTheme);
-			for (int i = css.Count - 1; i >= 0; i--) {
+			for (var i = css.Count - 1; i >= 0; i--) {
 				if (css[i] == null || Enum.IsDefined(typeof(CSharpStyleTypes), css[i].StyleID) == false) {
 					css.RemoveAt(i);
 				}
@@ -136,7 +136,7 @@ namespace Codist
 			MergeDefaultCSharpStyles(css);
 			var xcs = config.XmlCodeStyles;
 			CleanUpStyleEntry(xcs, loadFromTheme);
-			for (int i = xcs.Count - 1; i >= 0; i--) {
+			for (var i = xcs.Count - 1; i >= 0; i--) {
 				if (xcs[i] == null || Enum.IsDefined(typeof(XmlStyleTypes), xcs[i].StyleID) == false) {
 					xcs.RemoveAt(i);
 				}
@@ -299,21 +299,21 @@ namespace Codist
 		}
 		internal static CodeStyle[] GetDefaultCodeStyles() {
 			var r = new CodeStyle[Enum.GetValues(typeof(CodeStyleTypes)).Length];
-			for (int i = 0; i < r.Length; i++) {
+			for (var i = 0; i < r.Length; i++) {
 				r[i] = new CodeStyle { StyleID = (CodeStyleTypes)i };
 			}
 			return r;
 		}
 		internal static CSharpStyle[] GetDefaultCSharpStyles() {
 			var r = new CSharpStyle[Enum.GetValues(typeof(CSharpStyleTypes)).Length];
-			for (int i = 0; i < r.Length; i++) {
+			for (var i = 0; i < r.Length; i++) {
 				r[i] = new CSharpStyle { StyleID = (CSharpStyleTypes)i };
 			}
 			return r;
 		}
 		internal static XmlCodeStyle[] GetDefaultXmlCodeStyles() {
 			var r = new XmlCodeStyle[Enum.GetValues(typeof(XmlStyleTypes)).Length];
-			for (int i = 0; i < r.Length; i++) {
+			for (var i = 0; i < r.Length; i++) {
 				r[i] = new XmlCodeStyle { StyleID = (XmlStyleTypes)i };
 			}
 			return r;
@@ -384,6 +384,7 @@ namespace Codist
 		DocumentationFromBaseType = 1 << 21,
 		TextOnlyDoc = 1 << 22,
 		ReturnsDoc = 1 << 23,
+		RemarksDoc = 1 << 24,
 		Selection = 1 << 27,
 		ClickAndGo = 1 << 28,
 		CtrlQuickInfo = 1 << 29,

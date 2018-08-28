@@ -40,6 +40,7 @@ namespace Codist.Options
 			_CSharpTypeParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.TypeParameters, _CSharpTypeParameterQuickInfoBox.Checked));
 			_CSharpDocumentationBaseTypeBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.DocumentationFromBaseType, _CSharpDocumentationBaseTypeBox.Checked));
 			_CSharpReturnsDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.ReturnsDoc, _CSharpReturnsDocBox.Checked));
+			_CSharpRemarksDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.RemarksDoc, _CSharpRemarksDocBox.Checked));
 			_CSharpTextOnlyDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.TextOnlyDoc, _CSharpTextOnlyDocBox.Checked));
 			_QuickInfoMaxWidthBox.ValueChanged += _UI.HandleEvent(() => Config.Instance.QuickInfoMaxWidth = (double)_QuickInfoMaxWidthBox.Value);
 			_QuickInfoMaxHeightBox.ValueChanged += _UI.HandleEvent(() => Config.Instance.QuickInfoMaxHeight = (double)_QuickInfoMaxHeightBox.Value);
@@ -60,6 +61,7 @@ namespace Codist.Options
 				_CSharpInterfaceImplementationsQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations);
 				_CSharpSymbolLocationQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation);
 				_CSharpReturnsDocBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc);
+				_CSharpRemarksDocBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc);
 				_CSharpOverrideDefaultXmlDocBox.Checked = _CSharpDocumentationBaseTypeBox.Enabled = _CSharpTextOnlyDocBox.Enabled = _CSharpReturnsDocBox.Enabled = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation);
 				_CSharpNumberQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues);
 				_CSharpStringQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.String);

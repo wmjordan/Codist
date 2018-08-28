@@ -225,6 +225,9 @@ namespace Codist.QuickInfo
 							if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
 								RenderXmlReturnsDoc(symbol, doc.Parent, info, docRenderer);
 							}
+							if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc)) {
+								RenderXmlRemarksDoc(symbol, doc.Parent, info, docRenderer);
+							}
 							//if (doc.Parent.Element("preliminary") != null) {
 							//	info.AddText("\npreliminary", true, true, System.Windows.Media.Brushes.Red);
 							//}
@@ -280,6 +283,14 @@ namespace Codist.QuickInfo
 						desc.Append("\nReturns", true).Append(": ");
 						docRenderer.Render(returns, desc.Inlines);
 					}
+				}
+			}
+
+			static void RenderXmlRemarksDoc(ISymbol symbol, XElement doc, TextBlock desc, XmlDocRenderer docRenderer) {
+				var remarks = doc.GetRemarks();
+				if (remarks != null && remarks.FirstNode != null) {
+					desc.Append("\nRemarks", true).Append(": ");
+					docRenderer.Render(remarks, desc.Inlines);
 				}
 			}
 

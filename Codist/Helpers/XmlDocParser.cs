@@ -80,6 +80,10 @@ namespace Codist
 			return doc?.Element("returns");
 		}
 
+		public static XElement GetRemarks(this XElement doc) {
+			return doc?.Element("remarks");
+		}
+
 		public static XElement GetNamedDocItem(this XElement doc, string element, string name) {
 			return doc?.Elements(element)?.FirstOrDefault(i => i.Attribute("name")?.Value == name);
 		}
