@@ -25,7 +25,6 @@
 		/// 使用代码编辑器修改此方法的内容。
 		/// </summary>
 		private void InitializeComponent() {
-			this._HighlightSpecialCommentBox = new System.Windows.Forms.CheckBox();
 			this._HighlightDeclarationBracesBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this.tabPage3 = new System.Windows.Forms.TabPage();
@@ -37,16 +36,6 @@
 			this._OptionTabs.SuspendLayout();
 			this.tabPage3.SuspendLayout();
 			this.SuspendLayout();
-			// 
-			// _HighlightSpecialCommentBox
-			// 
-			this._HighlightSpecialCommentBox.AutoSize = true;
-			this._HighlightSpecialCommentBox.Location = new System.Drawing.Point(15, 180);
-			this._HighlightSpecialCommentBox.Name = "_HighlightSpecialCommentBox";
-			this._HighlightSpecialCommentBox.Size = new System.Drawing.Size(149, 19);
-			this._HighlightSpecialCommentBox.TabIndex = 6;
-			this._HighlightSpecialCommentBox.Text = "Special comment";
-			this._HighlightSpecialCommentBox.UseVisualStyleBackColor = true;
 			// 
 			// _HighlightDeclarationBracesBox
 			// 
@@ -73,7 +62,6 @@
 			// tabPage3
 			// 
 			this.tabPage3.Controls.Add(this._HighlightParameterBracesBox);
-			this.tabPage3.Controls.Add(this._HighlightSpecialCommentBox);
 			this.tabPage3.Controls.Add(this._MarkSpecialPunctuationBox);
 			this.tabPage3.Controls.Add(this._HighlightResourceBracesBox);
 			this.tabPage3.Controls.Add(this._HighlightLoopBracesBox);
@@ -154,7 +142,6 @@
 
 		#endregion
 		private System.Windows.Forms.CheckBox _HighlightDeclarationBracesBox;
-		private System.Windows.Forms.CheckBox _HighlightSpecialCommentBox;
 		private System.Windows.Forms.TabControl _OptionTabs;
 		private System.Windows.Forms.TabPage tabPage3;
 		private System.Windows.Forms.CheckBox _HighlightParameterBracesBox;

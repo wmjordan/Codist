@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Windows.Forms;
+using AppHelpers;
 
 namespace Codist.Options
 {
 	public partial class SyntaxHighlightPage : UserControl
 	{
-		//readonly UiLock _UI = new UiLock();
+		readonly UiLock _UI = new UiLock();
 		readonly ConfigPage _servicePage;
 		bool _Loaded;
 
@@ -19,7 +20,7 @@ namespace Codist.Options
 			if (_Loaded) {
 				return;
 			}
-			//LoadConfig(Config.Instance);
+			LoadConfig(Config.Instance);
 			_SyntaxHighlightTabs.AddPage("Common Syntax", new SyntaxStyleOptionPage(_servicePage, () => Config.Instance.GeneralStyles, Config.GetDefaultCodeStyles), false);
 
 			_DarkThemeButton.Click += (s, args) => {
@@ -36,11 +37,15 @@ namespace Codist.Options
 					Config.ResetStyles();
 				}
 			};
-			//Config.Updated += (s, args) => LoadConfig(s as Config);
+			_HighlightSpecialCommentBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.SpecialComment, _HighlightSpecialCommentBox.Checked));
+			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
 
-		//void LoadConfig(Config config) {
-		//}
+		void LoadConfig(Config config) {
+			_UI.DoWithLock(() => {
+				_HighlightSpecialCommentBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment);
+			});
+		}
 	}
 }

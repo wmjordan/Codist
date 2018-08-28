@@ -29,10 +29,11 @@
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this._ResetThemeButton = new System.Windows.Forms.Button();
+			this._SimpleThemeButton = new System.Windows.Forms.Button();
 			this._DarkThemeButton = new System.Windows.Forms.Button();
 			this._SyntaxHighlightTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
-			this._SimpleThemeButton = new System.Windows.Forms.Button();
+			this._HighlightSpecialCommentBox = new System.Windows.Forms.CheckBox();
 			this.groupBox2.SuspendLayout();
 			this._SyntaxHighlightTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
@@ -84,6 +85,15 @@
 			this._ResetThemeButton.Text = "Reset...";
 			this._ResetThemeButton.UseVisualStyleBackColor = true;
 			// 
+			// _SimpleThemeButton
+			// 
+			this._SimpleThemeButton.Location = new System.Drawing.Point(242, 24);
+			this._SimpleThemeButton.Name = "_SimpleThemeButton";
+			this._SimpleThemeButton.Size = new System.Drawing.Size(111, 23);
+			this._SimpleThemeButton.TabIndex = 0;
+			this._SimpleThemeButton.Text = "&Simple theme";
+			this._SimpleThemeButton.UseVisualStyleBackColor = true;
+			// 
 			// _DarkThemeButton
 			// 
 			this._DarkThemeButton.Location = new System.Drawing.Point(125, 24);
@@ -107,6 +117,7 @@
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this._HighlightSpecialCommentBox);
 			this.tabPage2.Controls.Add(this.groupBox2);
 			this.tabPage2.Location = new System.Drawing.Point(4, 25);
 			this.tabPage2.Name = "tabPage2";
@@ -116,14 +127,15 @@
 			this.tabPage2.Text = "General";
 			this.tabPage2.UseVisualStyleBackColor = true;
 			// 
-			// _SimpleThemeButton
+			// _HighlightSpecialCommentBox
 			// 
-			this._SimpleThemeButton.Location = new System.Drawing.Point(242, 24);
-			this._SimpleThemeButton.Name = "_SimpleThemeButton";
-			this._SimpleThemeButton.Size = new System.Drawing.Size(111, 23);
-			this._SimpleThemeButton.TabIndex = 0;
-			this._SimpleThemeButton.Text = "&Simple theme";
-			this._SimpleThemeButton.UseVisualStyleBackColor = true;
+			this._HighlightSpecialCommentBox.AutoSize = true;
+			this._HighlightSpecialCommentBox.Location = new System.Drawing.Point(15, 144);
+			this._HighlightSpecialCommentBox.Name = "_HighlightSpecialCommentBox";
+			this._HighlightSpecialCommentBox.Size = new System.Drawing.Size(189, 19);
+			this._HighlightSpecialCommentBox.TabIndex = 7;
+			this._HighlightSpecialCommentBox.Text = "Tag special comments";
+			this._HighlightSpecialCommentBox.UseVisualStyleBackColor = true;
 			// 
 			// SyntaxHighlightPage
 			// 
@@ -136,6 +148,7 @@
 			this.groupBox2.ResumeLayout(false);
 			this._SyntaxHighlightTabs.ResumeLayout(false);
 			this.tabPage2.ResumeLayout(false);
+			this.tabPage2.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -149,5 +162,6 @@
 		private System.Windows.Forms.TabControl _SyntaxHighlightTabs;
 		private System.Windows.Forms.TabPage tabPage2;
 		private System.Windows.Forms.Button _SimpleThemeButton;
+		private System.Windows.Forms.CheckBox _HighlightSpecialCommentBox;
 	}
 }
