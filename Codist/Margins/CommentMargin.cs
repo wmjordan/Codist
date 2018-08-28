@@ -10,26 +10,26 @@ namespace Codist.Margins
 	/// <summary>
 	/// Margin's canvas and visual definition including both size and content
 	/// </summary>
-	sealed class CodeMargin : Canvas, IWpfTextViewMargin
+	sealed class CommentMargin : Canvas, IWpfTextViewMargin
 	{
 		/// <summary>
 		/// Margin name.
 		/// </summary>
-		public const string MarginName = nameof(CodeMargin);
+		public const string MarginName = nameof(CommentMargin);
 
-		readonly CodeMarginElement _CodeMarginElement;
+		readonly CommentMarginElement _CodeMarginElement;
 		readonly ITagAggregator<ClassificationTag> _CodeTagAggregator;
 		readonly IWpfTextViewHost _TextView;
 		bool isDisposed;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="CodeMargin"/> class for a given <paramref name="textView"/>.
+		/// Initializes a new instance of the <see cref="CommentMargin"/> class for a given <paramref name="textView"/>.
 		/// </summary>
 		/// <param name="textView">The <see cref="IWpfTextView"/> to attach the margin to.</param>
-		public CodeMargin(IWpfTextViewHost textView, IVerticalScrollBar scrollBar, CodeMarginFactory container) {
+		public CommentMargin(IWpfTextViewHost textView, IVerticalScrollBar scrollBar, CommentMarginFactory container) {
 			_TextView = textView ?? throw new ArgumentNullException(nameof(textView));
 			_CodeTagAggregator = container.ViewTagAggregatorFactoryService.CreateTagAggregator<ClassificationTag>(textView.TextView);
-			_CodeMarginElement = new CodeMarginElement(textView.TextView, container, _CodeTagAggregator, scrollBar);
+			_CodeMarginElement = new CommentMarginElement(textView.TextView, container, _CodeTagAggregator, scrollBar);
 			textView.Closed += TextView_Closed;
 		}
 
@@ -102,7 +102,7 @@ namespace Codist.Margins
 		}
 
 		/// <summary>
-		/// Disposes an instance of <see cref="CodeMargin"/> class.
+		/// Disposes an instance of <see cref="CommentMargin"/> class.
 		/// </summary>
 		public void Dispose() {
 			if (!isDisposed) {

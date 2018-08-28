@@ -11,12 +11,12 @@ namespace Codist.Margins
 	/// Export a <see cref="IWpfTextViewMarginProvider"/>, which returns an instance of the margin for the editor to use.
 	/// </summary>
 	[Export(typeof(IWpfTextViewMarginProvider))]
-	[Name(CodeMargin.MarginName)]
+	[Name(CommentMargin.MarginName)]
 	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = PredefinedMarginNames.OverviewMark)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.CSharp)]
     [TextViewRole(PredefinedTextViewRoles.Interactive)]
-	sealed class CodeMarginFactory : IWpfTextViewMarginProvider
+	sealed class CommentMarginFactory : IWpfTextViewMarginProvider
 	{
 #pragma warning disable 649
 		[Import]
@@ -38,7 +38,7 @@ namespace Codist.Margins
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 			var scrollBarContainer = marginContainer as IVerticalScrollBar;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers) && scrollBarContainer != null
-				? new CodeMargin(wpfTextViewHost, scrollBarContainer, this)
+				? new CommentMargin(wpfTextViewHost, scrollBarContainer, this)
 				: null;
 		}
 

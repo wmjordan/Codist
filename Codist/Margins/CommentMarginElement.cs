@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Margins
 {
-	sealed class CodeMarginElement : FrameworkElement, IDisposable
+	sealed class CommentMarginElement : FrameworkElement, IDisposable
 	{
 		readonly IWpfTextView _TextView;
 		readonly IEditorFormatMap _EditorFormatMap;
@@ -55,7 +55,7 @@ namespace Codist.Margins
 		const double MarkSize = 4.0;
 		const double HalfMarkSize = MarkSize / 2 + MarkPadding;
 
-		public CodeMarginElement(IWpfTextView textView, CodeMarginFactory factory, ITagAggregator<ClassificationTag> tagger, IVerticalScrollBar verticalScrollbar) {
+		public CommentMarginElement(IWpfTextView textView, CommentMarginFactory factory, ITagAggregator<ClassificationTag> tagger, IVerticalScrollBar verticalScrollbar) {
 			_TextView = textView;
 
 			IsHitTestVisible = false;

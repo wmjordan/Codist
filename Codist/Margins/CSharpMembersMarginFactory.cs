@@ -10,7 +10,7 @@ namespace Codist.Margins
 {
 	[Export(typeof(IWpfTextViewMarginProvider))]
 	[Name(CSharpMembersMargin.Name)]
-	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = CodeMargin.MarginName)]
+	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = CommentMargin.MarginName)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.CSharp)]
 	[TextViewRole(PredefinedTextViewRoles.EmbeddedPeekTextView)]
