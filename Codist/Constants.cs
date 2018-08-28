@@ -155,47 +155,48 @@ namespace Codist
 		//public const string EditorSigHelp = "sighelp";
 		//public const string EditorSigHelpDoc = "sighelp-doc";
 
+		internal const string CommentPrefix = "CdstComment: ";
 		//! Important
 		//# Notice
-		public const String EmphasisComment = "Comment: Emphasis";
+		public const string EmphasisComment = CommentPrefix + "Emphasis";
 		//? Question
-		public const String QuestionComment = "Comment: Question";
+		public const string QuestionComment = CommentPrefix + "Question";
 		//!? Exclaimation
-		public const String ExclaimationComment = "Comment: Exclaimation";
+		public const string ExclaimationComment = CommentPrefix + "Exclaimation";
 		//x Removed
-		public const String DeletionComment = "Comment: Deletion";
+		public const string DeletionComment = CommentPrefix + "Deletion";
 
 		//TODO: This does not need work
-		public const String TodoComment = "Comment: Task - ToDo";
+		public const string TodoComment = CommentPrefix + "Task - ToDo";
 		//NOTE: Watch-out!
-		public const String NoteComment = "Comment: Task - Note";
+		public const string NoteComment = CommentPrefix + "Task - Note";
 		//Hack: B-) We are in the Matrix now!!!
-		public const String HackComment = "Comment: Task - Hack";
+		public const string HackComment = CommentPrefix + "Task - Hack";
 		//Undone: The revolution has not yet succeeded. Comrades still need to strive hard.
-		public const String UndoneComment = "Comment: Task - Undone";
+		public const string UndoneComment = CommentPrefix + "Task - Undone";
 
 		//+++ heading 1
-		public const string Heading1Comment = "Comment: Heading 1";
+		public const string Heading1Comment = CommentPrefix + "Heading 1";
 		//++ heading 2
-		public const string Heading2Comment = "Comment: Heading 2";
+		public const string Heading2Comment = CommentPrefix + "Heading 2";
 		//+ heading 3
-		public const string Heading3Comment = "Comment: Heading 3";
+		public const string Heading3Comment = CommentPrefix + "Heading 3";
 		//- heading 4
-		public const string Heading4Comment = "Comment: Heading 4";
+		public const string Heading4Comment = CommentPrefix + "Heading 4";
 		//-- heading 5
-		public const string Heading5Comment = "Comment: Heading 5";
+		public const string Heading5Comment = CommentPrefix + "Heading 5";
 		//--- heading 6
-		public const string Heading6Comment = "Comment: Heading 6";
+		public const string Heading6Comment = CommentPrefix + "Heading 6";
 
-		public const string Task1Comment = "Comment: Task 1";
-		public const string Task2Comment = "Comment: Task 2";
-		public const string Task3Comment = "Comment: Task 3";
-		public const string Task4Comment = "Comment: Task 4";
-		public const string Task5Comment = "Comment: Task 5";
-		public const string Task6Comment = "Comment: Task 6";
-		public const string Task7Comment = "Comment: Task 7";
-		public const string Task8Comment = "Comment: Task 8";
-		public const string Task9Comment = "Comment: Task 9";
+		public const string Task1Comment = CommentPrefix + "Task 1";
+		public const string Task2Comment = CommentPrefix + "Task 2";
+		public const string Task3Comment = CommentPrefix + "Task 3";
+		public const string Task4Comment = CommentPrefix + "Task 4";
+		public const string Task5Comment = CommentPrefix + "Task 5";
+		public const string Task6Comment = CommentPrefix + "Task 6";
+		public const string Task7Comment = CommentPrefix + "Task 7";
+		public const string Task8Comment = CommentPrefix + "Task 8";
+		public const string Task9Comment = CommentPrefix + "Task 9";
 
 		public static readonly Color CommentColor = Colors.Green;
 		public static readonly Color QuestionColor = Colors.MediumPurple;

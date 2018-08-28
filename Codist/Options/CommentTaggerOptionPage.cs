@@ -105,7 +105,7 @@ namespace Codist.Options
 			var t = typeof(CommentStyleTypes);
 			foreach (var item in Enum.GetNames(t)) {
 				var d = t.GetClassificationType(item);
-				if (d == null || d.StartsWith("Comment: ", StringComparison.Ordinal) == false) {
+				if (d == null || d.StartsWith(Constants.CommentPrefix, StringComparison.Ordinal) == false) {
 					continue;
 				}
 				_StyleBox.Items.Add(item);
