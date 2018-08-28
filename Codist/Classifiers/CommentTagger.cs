@@ -13,7 +13,6 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Classifiers
 {
-	//todo Extract comment tagger logic for various content types
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.Code)]
 	[TagType(typeof(ClassificationTag))]
@@ -36,7 +35,7 @@ namespace Codist.Classifiers
 			var vp = textView.Properties;
 			var tagger = vp.GetOrCreateSingletonProperty(() => Aggregator.CreateTagAggregator<IClassificationTag>(buffer));
 			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
-			var codeTagger = vp.GetOrCreateSingletonProperty(() => new CommentTagger(ClassificationRegistry, tagger, tags, codeType));
+			var codeTagger = vp.GetOrCreateSingletonProperty(() => CommentTagger.Create(ClassificationRegistry, tagger, tags, codeType));
 			textView.Closed += TextViewClosed;
 			return codeTagger as ITagger<T>;
 		}
@@ -44,6 +43,9 @@ namespace Codist.Classifiers
 		static CodeType GetCodeType(IContentType contentType) {
 			return contentType.IsOfType(Constants.CodeTypes.CSharp) ? CodeType.CSharp
 				: contentType.IsOfType("html") || contentType.IsOfType("htmlx") || contentType.IsOfType("XAML") || contentType.IsOfType("XML") ? CodeType.Markup
+				: contentType.IsOfType("code++.css") ? CodeType.Css
+				: contentType.IsOfType("TypeScript") ? CodeType.Js
+				: contentType.IsOfType("C/C++") ? CodeType.C
 				: CodeType.None;
 		}
 
@@ -56,15 +58,14 @@ namespace Codist.Classifiers
 
 		enum CodeType
 		{
-			None, CSharp, Markup
+			None, CSharp, Markup, C, Css, Js
 		}
 
-		sealed class CommentTagger : ITagger<ClassificationTag>, IDisposable
+		abstract class CommentTagger : ITagger<ClassificationTag>, IDisposable
 		{
 			static ClassificationTag[] __CommentClassifications;
 			readonly ITagAggregator<IClassificationTag> _Aggregator;
 			readonly TaggerResult _Tags;
-			readonly CodeType _CodeType;
 #if DEBUG
 			readonly HashSet<string> _ClassificationTypes = new HashSet<string>();
 #endif
@@ -75,7 +76,7 @@ namespace Codist.Classifiers
 			public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 #pragma warning restore 67
 
-			internal CommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags, CodeType codeType) {
+			protected CommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) {
 				if (__CommentClassifications == null) {
 					var t = typeof(CommentStyleTypes);
 					var styleNames = Enum.GetNames(t);
@@ -93,11 +94,24 @@ namespace Codist.Classifiers
 
 				_Aggregator = aggregator;
 				_Tags = tags;
-				_CodeType = codeType;
 				_Aggregator.BatchedTagsChanged += AggregatorBatchedTagsChanged;
 			}
 
 			internal FrameworkElement Margin { get; set; }
+
+			protected abstract int GetCommentStartIndex(string comment);
+			protected abstract int GetCommentEndIndex(string comment);
+
+			public static CommentTagger Create(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags, CodeType type) {
+				switch (type) {
+					case CodeType.CSharp: return new CSharpCommentTagger(registry, aggregator, tags);
+					case CodeType.Markup: return new MarkupCommentTagger(registry, aggregator, tags);
+					case CodeType.C: return new CCommentTagger(registry, aggregator, tags);
+					case CodeType.Css: return new CssCommentTagger(registry, aggregator, tags);
+					case CodeType.Js: return new JsCommentTagger(registry, aggregator, tags);
+				}
+				return null;
+			}
 
 			public IEnumerable<ITagSpan<ClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
 				if (spans.Count == 0
@@ -106,10 +120,6 @@ namespace Codist.Classifiers
 				}
 
 				var snapshot = spans[0].Snapshot;
-				var contentType = snapshot.TextBuffer.ContentType;
-				if (!contentType.IsOfType(Constants.CodeTypes.Code)) {
-					yield break;
-				}
 				IEnumerable<IMappingTagSpan<IClassificationTag>> tagSpans;
 				try {
 					if (_Tags.LastParsed == 0) {
@@ -139,29 +149,14 @@ namespace Codist.Classifiers
 						Debug.WriteLine("Classification type: " + c);
 					}
 #endif
-					var ss = tagSpan.Span.GetSpans(snapshot)[0];
-					if (_CodeType == CodeType.CSharp) {
-						switch (c) {
-							case Constants.CodePreprocessorKeyword:
-								if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)) {
-									if (Matches(ss, "region") || Matches(ss, "pragma") || Matches(ss, "if") || Matches(ss, "else")) {
-										yield return _Tags.Add(new TagSpan<ClassificationTag>(ss, (ClassificationTag)tagSpan.Tag));
-									}
-								}
-								continue;
-							default:
-								break;
-						}
-					}
-
-					var ts = TagComments(c, ss, tagSpan);
+					var ts = TagComments(c, tagSpan.Span.GetSpans(snapshot)[0], tagSpan);
 					if (ts != null) {
 						yield return _Tags.Add(ts);
 					}
 				}
 			}
 
-			TagSpan<ClassificationTag> TagComments(string className, SnapshotSpan snapshotSpan, IMappingTagSpan<IClassificationTag> tagSpan) {
+			protected virtual TagSpan<ClassificationTag> TagComments(string className, SnapshotSpan snapshotSpan, IMappingTagSpan<IClassificationTag> tagSpan) {
 				// find spans that the language service has already classified as comments ...
 				if (className.IndexOf("Comment", StringComparison.OrdinalIgnoreCase) == -1) {
 					return null;
@@ -169,20 +164,12 @@ namespace Codist.Classifiers
 
 				var text = snapshotSpan.GetText();
 				//NOTE: markup comment span does not include comment start token
-				var endOfCommentToken = 0;
-				foreach (string t in _CodeType == CodeType.CSharp ? __CSharpComments : __Comments) {
-					if (text.StartsWith(t, StringComparison.OrdinalIgnoreCase)) {
-						endOfCommentToken = t.Length;
-						break;
-					}
-				}
-
-				if (endOfCommentToken == 0 && _CodeType != CodeType.Markup) {
+				var endOfCommentStartToken = GetCommentStartIndex(text);
+				if (endOfCommentStartToken < 0) {
 					return null;
 				}
-
 				var tl = text.Length;
-				var commentStart = endOfCommentToken;
+				var commentStart = endOfCommentStartToken;
 				while (commentStart < tl) {
 					if (Char.IsWhiteSpace(text[commentStart])) {
 						++commentStart;
@@ -192,18 +179,7 @@ namespace Codist.Classifiers
 					}
 				}
 
-				//TODO: code type context-awared end of comment
-				var endOfContent = tl;
-				if (_CodeType == CodeType.Markup && commentStart > 0) {
-					if (!text.EndsWith("-->", StringComparison.Ordinal)) {
-						return null;
-					}
-
-					endOfContent -= 3;
-				}
-				else if (text.StartsWith("/*", StringComparison.Ordinal)) {
-					endOfContent -= 2;
-				}
+				var endOfContent = GetCommentEndIndex(text);
 
 				ClassificationTag ctag = null;
 				CommentLabel label = null;
@@ -260,7 +236,7 @@ namespace Codist.Classifiers
 				return new TagSpan<ClassificationTag>(span, ctag);
 			}
 
-			static bool Matches(SnapshotSpan span, string text) {
+			protected static bool Matches(SnapshotSpan span, string text) {
 				if (span.Length < text.Length) {
 					return false;
 				}
@@ -306,6 +282,85 @@ namespace Codist.Classifiers
 				Dispose(true);
 			}
 			#endregion
+		}
+
+		sealed class CCommentTagger : CommentTagger
+		{
+			public CCommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) : base(registry, aggregator, tags) {
+			}
+
+			protected override int GetCommentStartIndex(string comment) {
+				if (comment.Length > 2 && comment[0] == '/' && (comment[1] == '/' || comment[1] == '*')) {
+					return 2;
+				}
+				return -1;
+			}
+			protected override int GetCommentEndIndex(string comment) {
+				return comment.EndsWith("*/", StringComparison.Ordinal) ? comment.Length - 2 : comment.Length;
+			}
+		}
+
+		sealed class CssCommentTagger : CommentTagger
+		{
+			public CssCommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) : base(registry, aggregator, tags) {
+			}
+
+			protected override int GetCommentStartIndex(string comment) {
+				return 0;
+			}
+			protected override int GetCommentEndIndex(string comment) {
+				return comment == "*/" ? 0 : comment.Length;
+			}
+		}
+
+		sealed class CSharpCommentTagger : CommentTagger
+		{
+			public CSharpCommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) : base(registry, aggregator, tags) {
+			}
+			protected override TagSpan<ClassificationTag> TagComments(string className, SnapshotSpan snapshotSpan, IMappingTagSpan<IClassificationTag> tagSpan) {
+				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)) {
+					if (Matches(snapshotSpan, "region") || Matches(snapshotSpan, "pragma") || Matches(snapshotSpan, "if") || Matches(snapshotSpan, "else")) {
+						return new TagSpan<ClassificationTag>(snapshotSpan, (ClassificationTag)tagSpan.Tag);
+					}
+				}
+				return base.TagComments(className, snapshotSpan, tagSpan);
+			}
+			protected override int GetCommentStartIndex(string comment) {
+				if (comment.Length > 2 && comment[0] == '/' && (comment[1] == '/' || comment[1] == '*')) {
+					return 2;
+				}
+				return -1;
+			}
+			protected override int GetCommentEndIndex(string comment) {
+				return comment[1] == '*' ? comment.Length - 2 : comment.Length;
+			}
+		}
+
+		sealed class JsCommentTagger : CommentTagger
+		{
+			public JsCommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) : base(registry, aggregator, tags) {
+			}
+
+			protected override int GetCommentStartIndex(string comment) {
+				return 0;
+			}
+			protected override int GetCommentEndIndex(string comment) {
+				return comment.EndsWith("*/", StringComparison.Ordinal) ? comment.Length - 2 : comment.Length;
+			}
+		}
+
+		sealed class MarkupCommentTagger : CommentTagger
+		{
+			public MarkupCommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) : base(registry, aggregator, tags) {
+			}
+
+			protected override int GetCommentEndIndex(string comment) {
+				return comment.EndsWith("-->", StringComparison.Ordinal) ? comment.Length - 3 : comment.Length;
+			}
+
+			protected override int GetCommentStartIndex(string comment) {
+				return 0;
+			}
 		}
 	}
 }

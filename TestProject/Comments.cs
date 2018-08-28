@@ -21,6 +21,9 @@ namespace TestProject
 	/// <para>The "para" elements no longer generate empty lines.</para>
 	/// <para>You can style your comment with <b>bold</b>, <i>italic</i> and <u>underline</u>, or <b><i><u>combinations of them</u></i></b>.</para>
 	/// </summary>
+	/// <remarks>
+	/// <para>Enable Show &lt;remarks&gt; XML Doc option to read remarks for symbols.</para>
+	/// </remarks>
 	class Comments
 	{
 		/** hover on <see cref="Test"/> to see its text only XML doc, if "Allow text only XML Doc option" is turned on */

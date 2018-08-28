@@ -124,7 +124,6 @@ namespace Codist.Classifiers
 	{
 		public Heading1CommentFormat() {
 			DisplayName = Constants.Heading1Comment + " (//+++)";
-			ForegroundColor = Constants.CommentColor;
 			IsBold = true;
 		}
 	}
@@ -138,7 +137,6 @@ namespace Codist.Classifiers
 	{
 		public Heading2CommentFormat() {
 			DisplayName = Constants.Heading2Comment + " (//++)";
-			ForegroundColor = Constants.CommentColor;
 			IsBold = true;
 		}
 	}
@@ -152,7 +150,6 @@ namespace Codist.Classifiers
 	{
 		public Heading3CommentFormat() {
 			DisplayName = Constants.Heading3Comment + " (//+)";
-			ForegroundColor = Constants.CommentColor;
 			IsBold = true;
 		}
 	}
@@ -166,7 +163,6 @@ namespace Codist.Classifiers
 	{
 		public Heading4CommentFormat() {
 			DisplayName = Constants.Heading4Comment + " (//-)";
-			ForegroundColor = Constants.CommentColor;
 		}
 	}
 
@@ -179,7 +175,6 @@ namespace Codist.Classifiers
 	{
 		public Heading5CommentFormat() {
 			DisplayName = Constants.Heading5Comment + " (//--)";
-			ForegroundColor = Constants.CommentColor;
 		}
 	}
 
@@ -192,7 +187,6 @@ namespace Codist.Classifiers
 	{
 		public Heading6CommentFormat() {
 			DisplayName = Constants.Heading6Comment + " (//---)";
-			ForegroundColor = Constants.CommentColor;
 		}
 	}
 

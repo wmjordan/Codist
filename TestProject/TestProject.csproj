@@ -47,5 +47,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestPage.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Test.css" />
+    <Content Include="Test.js" />
+    <Content Include="Test.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

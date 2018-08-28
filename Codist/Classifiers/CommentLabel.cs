@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using System.Threading;
-using System.Windows.Media;
-using Newtonsoft.Json;
 
 namespace Codist.Classifiers
 {
@@ -15,8 +8,6 @@ namespace Codist.Classifiers
 	sealed class CommentLabel
 	{
 		string _label;
-		int _labelLength;
-		StringComparison _stringComparison;
 
 		public CommentLabel() {
 		}
@@ -39,17 +30,17 @@ namespace Codist.Classifiers
 			set {
 				value = value != null ? value.Trim() : String.Empty;
 				_label = value;
-				_labelLength = value.Length;
+				LabelLength = value.Length;
 			}
 		}
-		internal int LabelLength => _labelLength;
+		internal int LabelLength { get; private set; }
 		/// <summary>Gets or sets whether the label is case-sensitive.</summary>
 		public bool IgnoreCase {
-			get => _stringComparison == StringComparison.OrdinalIgnoreCase;
-			set => _stringComparison = value ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+			get => Comparison == StringComparison.OrdinalIgnoreCase;
+			set => Comparison = value ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 		}
 		public CommentStyleApplication StyleApplication { get; set; }
-		internal StringComparison Comparison => _stringComparison;
+		internal StringComparison Comparison { get; private set; }
 		/// <summary>Gets or sets the comment style.</summary>
 		public CommentStyleTypes StyleID { get; set; }
 
@@ -61,8 +52,8 @@ namespace Codist.Classifiers
 			label.StyleApplication = StyleApplication;
 			label.StyleID = StyleID;
 			label._label = _label;
-			label._labelLength = _labelLength;
-			label._stringComparison = _stringComparison;
+			label.LabelLength = LabelLength;
+			label.Comparison = Comparison;
 		}
 	}
 }
