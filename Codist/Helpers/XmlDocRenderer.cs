@@ -109,7 +109,7 @@ namespace Codist
 								}
 								break;
 							case "c":
-								StyleInner(e, text, new Bold() { Background = Brushes.LightGray });
+								StyleInner(e, text, new Bold() { Background = ThemeHelper.ToolWindowBackgroundBrush, Foreground = ThemeHelper.ToolWindowTextBrush });
 								break;
 							case "b":
 								StyleInner(e, text, new Bold());

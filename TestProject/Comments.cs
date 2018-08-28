@@ -18,11 +18,15 @@ namespace TestProject
 	/// <para>You can click and go to the definition of the type, if source code
 	/// is accessible, like <see cref="MyEnum"/>, <see cref="MyStruct._instanceField"/>,
 	/// <see cref="ConcreteClass.Method"/>, or <see cref="ConcreteClass.Method{TGeneric}"/>.</para>
-	/// <para>The "para" elements no longer generate empty lines.</para>
+	/// <para>The "<c>para</c>" elements no longer generate empty lines.</para>
 	/// <para>You can style your comment with <b>bold</b>, <i>italic</i> and <u>underline</u>, or <b><i><u>combinations of them</u></i></b>.</para>
 	/// </summary>
 	/// <remarks>
-	/// <para>Enable Show &lt;remarks&gt; XML Doc option to read remarks for symbols.</para>
+	/// <para>Enable Show <c>&lt;remarks&gt;</c> XML Doc option to read remarks for symbols.</para>
+	/// <code><![CDATA[
+	/// Console.WriteLine("some time &amp; some life");
+	/// Console.ReadKey();
+	/// ]]></code>
 	/// </remarks>
 	class Comments
 	{
