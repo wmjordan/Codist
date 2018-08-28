@@ -78,6 +78,7 @@ namespace Codist
 							case "para":
 							case "listheader":
 							case "item":
+							case "code":
 								if (e.PreviousNode != null && (e.PreviousNode as XElement)?.Name != "para") {
 									text.Add(new LineBreak());
 								}
