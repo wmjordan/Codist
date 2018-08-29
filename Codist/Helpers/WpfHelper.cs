@@ -126,7 +126,9 @@ namespace Codist
 				IsReadOnly = true,
 				TextAlignment = TextAlignment.Right,
 				MinWidth = 180,
-				BorderBrush = WpfBrushes.Transparent
+				BorderBrush = WpfBrushes.Transparent,
+				Foreground = ThemeHelper.ToolWindowTextBrush,
+				Background = ThemeHelper.ToolWindowBackgroundBrush
 			});
 			return panel;
 		}
@@ -139,6 +141,10 @@ namespace Codist
 			else {
 				block.Inlines.Add(glyph);
 			}
+			return block;
+		}
+		public static TextBlock AppendLine(this TextBlock block) {
+			block.Inlines.Add(new LineBreak());
 			return block;
 		}
 		public static TextBlock Append(this TextBlock block, Inline inline) {

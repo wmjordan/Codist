@@ -22,6 +22,9 @@ namespace Codist
 		public static WpfBrush ToolTipBackgroundBrush { get; private set; }
 		public static WpfBrush ToolWindowTextBrush { get; private set; }
 		public static WpfBrush ToolWindowBackgroundBrush { get; private set; }
+		public static WpfBrush MenuTextBrush { get; private set; }
+		public static WpfBrush MenuBackgroundBrush { get; private set; }
+		public static WpfBrush MenuGlyphBackgroundBrush { get; private set; }
 
 		public static GdiColor ToThemedGdiColor(this ThemeResourceKey resourceKey) {
 			return VSColorTheme.GetThemedColor(resourceKey);
@@ -53,6 +56,9 @@ namespace Codist
 			ToolTipBackgroundBrush = new WpfBrush(EnvironmentColors.ToolTipBrushKey.ToThemedWpfColor());
 			ToolWindowTextBrush = new WpfBrush(EnvironmentColors.ToolWindowTextBrushKey.ToThemedWpfColor());
 			ToolWindowBackgroundBrush = new WpfBrush(EnvironmentColors.ToolWindowBackgroundBrushKey.ToThemedWpfColor());
+			MenuTextBrush = new WpfBrush(EnvironmentColors.SystemMenuTextBrushKey.ToThemedWpfColor());
+			MenuBackgroundBrush = new WpfBrush(EnvironmentColors.SystemMenuBrushKey.ToThemedWpfColor());
+			MenuGlyphBackgroundBrush = new WpfBrush(EnvironmentColors.CommandBarMenuGlyphBrushKey.ToThemedWpfColor());
 			var v = TitleBackgroundColor.ToArgb();
 			_ImageAttributes = new ImageAttributes {
 				Flags = unchecked((uint)(_ImageAttributesFlags.IAF_RequiredFlags | _ImageAttributesFlags.IAF_Background)),
