@@ -14,7 +14,6 @@ namespace Codist
 		internal const string XmlDocNodeName = "member";
 
 		static readonly Regex _FixWhitespaces = new Regex(@" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
-		static readonly Regex _FixTextOnlyDoc = new Regex(@"([^\n])[ \t\r\n]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 		readonly Compilation _Compilation;
 		readonly SymbolFormatter _SymbolFormatter;
 
@@ -131,20 +130,14 @@ namespace Codist
 						string t = (item as XText).Value;
 						var parentName = item.Parent.Name.LocalName;
 						if (parentName != "code") {
-							if (parentName != XmlDocNodeName) {
-								var previous = (item.PreviousNode as XElement)?.Name?.LocalName;
-								if (previous == null || previous != "see" && previous != "paramref" && previous != "typeparamref" && previous != "c" && previous != "b" && previous != "i" && previous != "u") {
-									t = item.NextNode == null ? t.Trim() : t.TrimStart();
-								}
-								else if (item.NextNode == null) {
-									t = t.TrimEnd();
-								}
-								t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
+							var previous = (item.PreviousNode as XElement)?.Name?.LocalName;
+							if (previous == null || previous != "see" && previous != "paramref" && previous != "typeparamref" && previous != "c" && previous != "b" && previous != "i" && previous != "u") {
+								t = item.NextNode == null ? t.Trim() : t.TrimStart();
 							}
-							else {
-								// fix whitespace for text only XML doc
-								t = _FixTextOnlyDoc.Replace(t, "$1");
+							else if (item.NextNode == null) {
+								t = t.TrimEnd();
 							}
+							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
 						}
 						text.Add(new Run(t));
 						break;

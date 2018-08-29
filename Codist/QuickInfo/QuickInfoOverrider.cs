@@ -141,9 +141,14 @@ namespace Codist.QuickInfo
 					var signature = p.GetFirstVisualChild<TextBlock>();
 
 					// replace the default XML doc
-					if (DocElement != null && doc.Children.Count > 1 && doc.Children[1] is TextBlock) {
-						doc.Children.RemoveAt(1);
-						doc.Children.Insert(1, DocElement);
+					if (DocElement != null) {
+						if (doc.Children.Count > 1 && doc.Children[1] is TextBlock) {
+							doc.Children.RemoveAt(1);
+							doc.Children.Insert(1, DocElement);
+						}
+						else {
+							doc.Children.Add(DocElement);
+						}
 					}
 
 					if (icon != null && signature != null) {

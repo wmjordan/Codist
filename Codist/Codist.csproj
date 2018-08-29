@@ -66,24 +66,25 @@
   <ItemGroup>
     <Compile Include="Classifiers\BackgroundScan.cs" />
     <Compile Include="Classifiers\Classifications.cs" />
+    <Compile Include="Classifiers\CommentFormats.cs" />
+    <Compile Include="Classifiers\CommentTagger.cs" />
+    <Compile Include="Classifiers\CommentClassificationDefinitions.cs" />
+    <Compile Include="Classifiers\CommentLabel.cs" />
     <Compile Include="Classifiers\CSharpBlockTagger.cs" />
+    <Compile Include="Classifiers\CSharpClassifier.cs" />
     <Compile Include="Classifiers\CSharpClassifierDefinition.cs" />
     <Compile Include="Classifiers\CSharpClassifierProvider.cs" />
-    <Compile Include="Classifiers\CommentClassificationDefinitions.cs" />
     <Compile Include="Classifiers\CSharpCodeFormats.cs" />
-    <Compile Include="Classifiers\CSharpClassifier.cs" />
     <Compile Include="Classifiers\DisposableTagger.cs" />
     <Compile Include="Classifiers\ICodeMemberTag.cs" />
     <Compile Include="Classifiers\IReuseableTagger.cs" />
+    <Compile Include="Classifiers\TaggerResult.cs" />
     <Compile Include="Classifiers\XmlClassificationDefinitions.cs" />
     <Compile Include="Classifiers\XmlFormats.cs" />
     <Compile Include="CodistPackage.cs" />
-    <Compile Include="Classifiers\CommentLabel.cs" />
     <Compile Include="Commands\ScreenshotCommand.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Classifiers\CodeTagger.cs" />
-    <Compile Include="Classifiers\CommentFormats.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.Symbol.cs" />
     <Compile Include="Helpers\ReflectionHelper.cs" />
@@ -93,12 +94,12 @@
     <Compile Include="Helpers\WpfHelper.cs" />
     <Compile Include="Helpers\XmlDocParser.cs" />
     <Compile Include="LineTransformers\LineHeightTransform.cs" />
+    <Compile Include="Margins\CommentMargin.cs" />
     <Compile Include="Margins\LineNumberMargin.cs" />
-    <Compile Include="Margins\CodeMargin.cs" />
     <Compile Include="Margins\LineNumberMarginElement.cs" />
-    <Compile Include="Margins\CodeMarginElement.cs" />
+    <Compile Include="Margins\CommentMarginElement.cs" />
     <Compile Include="Margins\LineNumberMarginFactory.cs" />
-    <Compile Include="Margins\CodeMarginFactory.cs" />
+    <Compile Include="Margins\CommentMarginFactory.cs" />
     <Compile Include="Margins\CSharpMembersMargin.cs" />
     <Compile Include="Margins\CSharpMembersMarginElement.cs" />
     <Compile Include="Margins\CSharpMembersMarginFactory.cs" />
@@ -164,7 +165,6 @@
     </Compile>
     <Compile Include="Options\UiLock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Classifiers\TaggerResult.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
