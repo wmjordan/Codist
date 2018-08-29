@@ -289,7 +289,7 @@ namespace Codist.QuickInfo
 			static void RenderXmlRemarksDoc(ISymbol symbol, XElement doc, TextBlock desc, XmlDocRenderer docRenderer) {
 				var remarks = doc.GetRemarks();
 				if (remarks != null && remarks.FirstNode != null) {
-					desc.Append("\nRemarks", true).Append(": ");
+					desc.AppendLine().AppendLine().Append("Remarks", true).Append(": ").AppendLine();
 					docRenderer.Render(remarks, desc.Inlines);
 				}
 			}

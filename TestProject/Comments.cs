@@ -22,7 +22,7 @@ namespace TestProject
 	/// <para>You can style your comment with <b>bold</b>, <i>italic</i> and <u>underline</u>, or <b><i><u>combinations of them</u></i></b>.</para>
 	/// </summary>
 	/// <remarks>
-	/// <para>Enable Show <c>&lt;remarks&gt;</c> XML Doc option to read remarks for symbols.</para>
+	/// <para>Enable <i>Show <c>&lt;remarks&gt;</c> XML Doc</i> option to read remarks for symbols.</para>
 	/// <code><![CDATA[
 	/// Console.WriteLine("some time &amp; some life");
 	/// Console.ReadKey();
@@ -30,7 +30,8 @@ namespace TestProject
 	/// </remarks>
 	class Comments
 	{
-		/** hover on <see cref="Test"/> to see its text only XML doc, if "Allow text only XML Doc option" is turned on */
+		/** hover on <see cref="Test"/> to see its text only XML doc, 
+		 * if "Allow text only XML Doc option" is turned on */
 		void Test() {
 			// hover on Comments to see overriden XML Doc
 			var c = new Comments();
