@@ -34,29 +34,5 @@ namespace Codist
 			var d = f.GetCustomAttribute<ClassificationTypeAttribute>();
 			return d?.ClassificationTypeNames;
 		}
-
-		public static bool IsMultilineSelected(Microsoft.VisualStudio.Text.Editor.IWpfTextView textView) {
-			var s = textView.Selection;
-			if (s.IsEmpty || s.SelectedSpans.Count < 1) {
-				return false;
-			}
-			var buffer = textView.TextViewLines;
-			Microsoft.VisualStudio.Text.Formatting.IWpfTextViewLine line = null, line2;
-			foreach (var item in s.SelectedSpans) {
-				line2 = buffer.GetTextViewLineContainingBufferPosition(item.Start);
-				if (line == null) {
-					line = line2;
-					continue;
-				}
-				if (line2 != line) {
-					return true;
-				}
-				line2 = buffer.GetTextViewLineContainingBufferPosition(item.End);
-				if (line2 != line) {
-					return true;
-				}
-			}
-			return false;
-		}
 	}
 }

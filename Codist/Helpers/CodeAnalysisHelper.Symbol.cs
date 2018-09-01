@@ -4,7 +4,9 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Utilities;
@@ -16,13 +18,13 @@ namespace Codist
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 		/// </summary>
-		public static List<ISymbol> FindInstanceAsParameter(this ITypeSymbol type, Project project) {
-			var compilation = project.GetCompilationAsync().Result;
+		public static List<ISymbol> FindInstanceAsParameter(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default(CancellationToken)) {
+			var compilation = project.GetCompilationAsync(cancellationToken).Result;
 			//todo cache types
 			var members = new List<ISymbol>(10);
 			ImmutableArray<IParameterSymbol> parameters;
 			var assembly = compilation.Assembly;
-			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes()) {
+			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				foreach (var member in typeSymbol.GetMembers()) {
 					if (member.Kind != SymbolKind.Field
 						&& member.CanBeReferencedByName
@@ -41,12 +43,12 @@ namespace Codist
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may return an instance of <paramref name="type"/>.
 		/// </summary>
-		public static List<ISymbol> FindSymbolInstanceProducer(this ITypeSymbol type, Project project) {
-			var compilation = project.GetCompilationAsync().Result;
+		public static List<ISymbol> FindSymbolInstanceProducer(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default(CancellationToken)) {
+			var compilation = project.GetCompilationAsync(cancellationToken).Result;
 			var assembly = compilation.Assembly;
 			//todo cache types
 			var members = new List<ISymbol>(10);
-			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes()) {
+			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				foreach (var member in typeSymbol.GetMembers()) {
 					ITypeSymbol mt;
 					if (member.Kind != SymbolKind.Field

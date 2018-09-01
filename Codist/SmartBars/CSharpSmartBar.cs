@@ -204,7 +204,8 @@ namespace Codist.SmartBars
 		}
 
 		void FindCallers(MenuItem menuItem, ISymbol source) {
-			var callers = SymbolFinder.FindCallersAsync(source, View.TextBuffer.GetWorkspace().CurrentSolution).Result.ToArray();
+			var docs = System.Collections.Immutable.ImmutableHashSet.CreateRange(_Document.Project.GetRelatedDocuments());
+			var callers = SymbolFinder.FindCallersAsync(source, _Document.Project.Solution, docs).Result.ToArray();
 			Array.Sort(callers, (a, b) => {
 				var s = a.CallingSymbol.ContainingType.Name.CompareTo(b.CallingSymbol.ContainingType.Name);
 				return s != 0 ? s : a.CallingSymbol.Name.CompareTo(b.CallingSymbol.Name);
@@ -233,7 +234,7 @@ namespace Codist.SmartBars
 		}
 
 		void FindDerivedClasses(MenuItem menuItem, ISymbol symbol) {
-			var classes = SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result.ToArray();
+			var classes = SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, _Document.Project.Solution).Result.ToArray();
 			Array.Sort(classes, (a, b) => a.Name.CompareTo(b.Name));
 			foreach (var derived in classes) {
 				var item = new SymbolMenuItem(this, derived, derived.Locations);
@@ -245,13 +246,15 @@ namespace Codist.SmartBars
 		}
 
 		void FindImplementations(MenuItem menuItem, ISymbol symbol) {
+			var implementations = new List<ISymbol>(SymbolFinder.FindImplementationsAsync(symbol, _Document.Project.Solution).Result);
+			implementations.Sort((a, b) => a.Name.CompareTo(b.Name));
 			if (symbol.Kind == SymbolKind.NamedType) {
-				foreach (var impl in SymbolFinder.FindImplementationsAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
+				foreach (var impl in implementations) {
 					menuItem.Items.Add(new SymbolMenuItem(this, impl, impl.Locations));
 				}
 			}
 			else {
-				foreach (var impl in SymbolFinder.FindImplementationsAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
+				foreach (var impl in implementations) {
 					menuItem.Items.Add(new SymbolMenuItem(this, impl.ContainingSymbol, impl.Locations));
 				}
 			}
@@ -282,13 +285,13 @@ namespace Codist.SmartBars
 		}
 
 		void FindOverrides(MenuItem menuItem, ISymbol symbol) {
-			foreach (var ov in SymbolFinder.FindOverridesAsync(symbol, View.TextBuffer.GetWorkspace().CurrentSolution).Result) {
+			foreach (var ov in SymbolFinder.FindOverridesAsync(symbol, _Document.Project.Solution).Result) {
 				menuItem.Items.Add(new SymbolMenuItem(this, ov, ov.ContainingType.Name, ov.Locations));
 			}
 		}
 
 		void FindReferences(MenuItem menuItem, ISymbol source) {
-			var refs = SymbolFinder.FindReferencesAsync(source, View.TextBuffer.GetWorkspace().CurrentSolution).Result.ToArray();
+			var refs = SymbolFinder.FindReferencesAsync(source, _Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.CreateRange(_Document.Project.GetRelatedDocuments())).Result.ToArray();
 			Array.Sort(refs, (a, b) => {
 				int s;
 				return 0 != (s = a.Definition.ContainingType.Name.CompareTo(b.Definition.ContainingType.Name)) ? s :
@@ -315,7 +318,7 @@ namespace Codist.SmartBars
 		}
 
 		void FindSimilarSymbols(MenuItem menuItem, ISymbol symbol) {
-			foreach (var project in View.TextBuffer.GetWorkspace().CurrentSolution.Projects) {
+			foreach (var project in _Document.Project.Solution.Projects) {
 				foreach (var ss in SymbolFinder.FindSimilarSymbols(symbol, project.GetCompilationAsync().Result)) {
 					menuItem.Items.Add(new SymbolMenuItem(this, ss, ss.Locations));
 				}
@@ -383,6 +386,7 @@ namespace Codist.SmartBars
 					break;
 				case SymbolKind.Field:
 				case SymbolKind.Local:
+				case SymbolKind.Parameter:
 					CreateFindMemberForReturnTypeCommand(symbol, r);
 					break;
 				case SymbolKind.NamedType:
@@ -532,6 +536,7 @@ namespace Codist.SmartBars
 				}
 				tip.TextWrapping = TextWrapping.Wrap;
 				ToolTip = tip;
+				ToolTipService.SetShowDuration(this, 15000);
 				ToolTipOpening -= ShowToolTip;
 			}
 		}

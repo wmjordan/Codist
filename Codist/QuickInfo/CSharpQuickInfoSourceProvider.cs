@@ -1017,6 +1017,7 @@ namespace Codist.QuickInfo
 						for (int i = 0; i < mp.Length; i++) {
 							if (mp[i].Name == argName) {
 								argIndex = i;
+								break;
 							}
 						}
 					}

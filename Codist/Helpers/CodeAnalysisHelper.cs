@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -36,6 +37,42 @@ namespace Codist
 			return solution.ContainsDocument(docId)
 				? solution.GetDocument(docId)
 				: solution.WithDocumentText(docId, sourceText, PreservationMode.PreserveIdentity).GetDocument(docId);
+		}
+
+		public static IEnumerable<Document> GetRelatedDocuments(this Project project) {
+			var projects = GetRelatedProjects(project);
+			foreach (var proj in projects) {
+				foreach (var doc in proj.Documents) {
+					yield return doc;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets a collection containing <paramref name="project"/> itself, and projects referenced by <paramref name="project"/> or referencing <paramref name="project"/>.
+		/// </summary>
+		/// <param name="project">The project to be examined.</param>
+		static HashSet<Project> GetRelatedProjects(this Project project) {
+			var projects = new HashSet<Project>();
+			GetRelatedProjects(project, projects);
+			foreach (var proj in project.Solution.Projects) {
+				if (projects.Contains(proj) == false
+					&& proj.AllProjectReferences.Any(p => p.ProjectId == project.Id)) {
+					projects.Add(proj);
+				}
+			}
+
+			return projects;
+		}
+
+		static void GetRelatedProjects(Project project, HashSet<Project> projects) {
+			if (project == null) {
+				return;
+			}
+			projects.Add(project);
+			foreach (var pr in project.AllProjectReferences) {
+				GetRelatedProjects(project.Solution.GetProject(pr.ProjectId), projects);
+			}
 		}
 
 		public static ISymbol GetSymbolExt(this SemanticModel semanticModel, SyntaxNode node) {
