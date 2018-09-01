@@ -4,12 +4,11 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Classifiers
 {
-
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.XmlName)]
 	[Name(Constants.XmlName)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(Before = Priority.Default)]
 	sealed class XmlNameFormat : ClassificationFormatDefinition
 	{
 	}
@@ -18,7 +17,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.XmlAttributeName)]
 	[Name(Constants.XmlAttributeName)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(Before = Priority.Default)]
 	sealed class XmlAttributeNameFormat : ClassificationFormatDefinition
 	{
 	}
@@ -27,7 +26,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.XmlAttributeQuotes)]
 	[Name(Constants.XmlAttributeQuotes)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(Before = Priority.Default)]
 	sealed class XmlAttributeQuotesFormat : ClassificationFormatDefinition
 	{
 	}
@@ -36,7 +35,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.XmlAttributeValue)]
 	[Name(Constants.XmlAttributeValue)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(Before = Priority.Default)]
 	sealed class XmlAttributeValueFormat : ClassificationFormatDefinition
 	{
 	}
@@ -45,7 +44,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.XmlCData)]
 	[Name(Constants.XmlCData)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(Before = Priority.Default)]
 	sealed class XmlCDataFormat : ClassificationFormatDefinition
 	{
 	}
@@ -54,7 +53,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.XmlComment)]
 	[Name(Constants.XmlComment)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(Before = Priority.Default)]
 	sealed class XmlCommentFormat : ClassificationFormatDefinition
 	{
 	}
@@ -63,7 +62,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.XmlDelimiter)]
 	[Name(Constants.XmlDelimiter)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(Before = Priority.Default)]
 	sealed class XmlDelimiterFormat : ClassificationFormatDefinition
 	{
 	}
@@ -72,7 +71,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.XmlProcessingInstruction)]
 	[Name(Constants.XmlProcessingInstruction)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(Before = Priority.Default)]
 	sealed class XmlProcessingInstructionFormat : ClassificationFormatDefinition
 	{
 	}
@@ -81,7 +80,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.XmlText)]
 	[Name(Constants.XmlText)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(Before = Priority.Default)]
 	sealed class XmlTextFormat : ClassificationFormatDefinition
 	{
 	}

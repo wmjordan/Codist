@@ -1,4 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
+<?pi processing instruction ?>
 <root>
 	<!--note: error-->
+	<text id="1">abc def</text>
+	<text id="2"><![CDATA[multiline
+	string
+values]]></text>
 </root>
