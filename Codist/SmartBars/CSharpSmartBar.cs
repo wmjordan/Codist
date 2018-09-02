@@ -76,25 +76,27 @@ namespace Codist.SmartBars
 					if (b == null) {
 						continue;
 					}
-					if (b.GetText().IndexOf(t, StringComparison.OrdinalIgnoreCase) == -1) {
-						if (item.HasItems) {
-							foreach (MenuItem sub in item.Items) {
-								b = sub.Header as TextBlock;
-								if (b == null) {
-									continue;
-								}
-								if (b.GetText().IndexOf(t, StringComparison.OrdinalIgnoreCase) != -1) {
-									item.Visibility = Visibility.Visible;
-									goto NEXT;
-								}
+					if (b.GetText().IndexOf(t, StringComparison.OrdinalIgnoreCase) != -1) {
+						item.Visibility = Visibility.Visible;
+						continue;
+					}
+					var matchedSubItem = false;
+					if (item.HasItems) {
+						foreach (MenuItem sub in item.Items) {
+							b = sub.Header as TextBlock;
+							if (b == null) {
+								continue;
+							}
+							if (b.GetText().IndexOf(t, StringComparison.OrdinalIgnoreCase) != -1) {
+								matchedSubItem = true;
+								sub.Visibility = Visibility.Visible;
+							}
+							else {
+								sub.Visibility = Visibility.Collapsed;
 							}
 						}
-						item.Visibility = Visibility.Collapsed;
 					}
-					else {
-						item.Visibility = Visibility.Visible;
-					}
-					NEXT:;
+					item.Visibility = matchedSubItem ? Visibility.Visible : Visibility.Collapsed;
 				}
 			};
 		}
