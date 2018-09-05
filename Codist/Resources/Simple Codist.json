@@ -467,13 +467,11 @@
     },
     {
       "Id": 9,
-      "StyleID": "String",
-      "ForegroundColor": "#FF000000"
+      "StyleID": "String"
     },
     {
       "Id": 10,
-      "StyleID": "StringVerbatim",
-      "ForegroundColor": "#FF000000"
+      "StyleID": "StringVerbatim"
     },
     {
       "Id": 11,
