@@ -26,7 +26,7 @@ namespace Codist.SmartBars
 		SyntaxNode _Node;
 		SemanticModel _SemanticModel;
 		SyntaxToken _Token;
-		SyntaxTrivia _Trivia;
+		SyntaxTrivia _Trivia, _LineComment;
 		public CSharpSmartBar(IWpfTextView view) : base(view) {
 		}
 
@@ -187,7 +187,7 @@ namespace Codist.SmartBars
 				}
 			}
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
-				if (_Trivia.IsLineComment()) {
+				if (_LineComment.RawKind != 0) {
 					AddEditorCommand(MyToolBar, KnownImageIds.UncommentCode, "Edit.UncommentSelection", "Uncomment selection");
 				}
 				else {
@@ -472,11 +472,17 @@ namespace Codist.SmartBars
 				_Node = null;
 				_Token = default(SyntaxToken);
 				_Trivia = default(SyntaxTrivia);
+				_LineComment = default(SyntaxTrivia);
 				return false;
 			}
-			_Trivia = _Token.HasLeadingTrivia && _Token.LeadingTrivia.Span.Contains(pos) ? _Token.LeadingTrivia.FirstOrDefault(i => i.Span.Contains(pos))
-			   : _Token.HasTrailingTrivia && _Token.TrailingTrivia.Span.Contains(pos) ? _Token.TrailingTrivia.FirstOrDefault(i => i.Span.Contains(pos))
-			   : default(SyntaxTrivia);
+			var triviaList = _Token.HasLeadingTrivia ? _Token.LeadingTrivia : _Token.HasTrailingTrivia ? _Token.TrailingTrivia : default(SyntaxTriviaList);
+			if (triviaList.Equals(SyntaxTriviaList.Empty) == false && triviaList.FullSpan.Contains(pos)) {
+				_Trivia = triviaList.FirstOrDefault(i => i.Span.Contains(pos));
+				_LineComment = triviaList.FirstOrDefault(i => i.IsLineComment());
+			}
+			else {
+				_Trivia = _LineComment = default(SyntaxTrivia);
+			}
 			_Node = _Compilation.FindNode(_Token.Span, true, true);
 			return true;
 		}
