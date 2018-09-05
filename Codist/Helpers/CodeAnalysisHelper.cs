@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -75,31 +76,31 @@ namespace Codist
 			}
 		}
 
-		public static ISymbol GetSymbolExt(this SemanticModel semanticModel, SyntaxNode node) {
-			return node.IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator ? semanticModel.GetDeclaredSymbol(node) :
+		public static ISymbol GetSymbolExt(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default(CancellationToken)) {
+			return node.IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator ? semanticModel.GetDeclaredSymbol(node, cancellationToken) :
 					(node is AttributeArgumentSyntax
-						? semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol
+						? semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression, cancellationToken).Symbol
 						: null)
 					?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax
-						? semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true)).Symbol
+						? semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true), cancellationToken).Symbol
 						: null)
 					?? (node is ArgumentListSyntax
-						? semanticModel.GetSymbolInfo(node.Parent).Symbol
+						? semanticModel.GetSymbolInfo(node.Parent, cancellationToken).Symbol
 						: null)
 					?? (node.Parent is MemberAccessExpressionSyntax
-						? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
+						? semanticModel.GetSymbolInfo(node.Parent, cancellationToken).CandidateSymbols.FirstOrDefault()
 						: null)
 					?? (node.Parent is ArgumentSyntax
-						? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
+						? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression, cancellationToken).CandidateSymbols.FirstOrDefault()
 						: null)
 					?? (node is AccessorDeclarationSyntax
-						? semanticModel.GetDeclaredSymbol(node.Parent.Parent)
+						? semanticModel.GetDeclaredSymbol(node.Parent.Parent, cancellationToken)
 						: null)
-					?? (node is TypeParameterSyntax || node is ParameterSyntax ? semanticModel.GetDeclaredSymbol(node) : null);
+					?? (node is TypeParameterSyntax || node is ParameterSyntax ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null);
 		}
 
-		public static ISymbol GetSymbolOrFirstCandidate(this SemanticModel semanticModel, SyntaxNode node) {
-			var info = semanticModel.GetSymbolInfo(node);
+		public static ISymbol GetSymbolOrFirstCandidate(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default(CancellationToken)) {
+			var info = semanticModel.GetSymbolInfo(node, cancellationToken);
 			return info.Symbol
 				?? (info.CandidateSymbols.Length > 0 ? info.CandidateSymbols[0] : null);
 		}

@@ -25,7 +25,7 @@ namespace Codist.QuickInfo
 
 		static void ApplyClickAndGo(ISymbol symbol, TextBlock description) {
 			var locs = symbol.GetSourceLocations();
-			if (locs.Length == 0 || String.IsNullOrEmpty(locs[0].SyntaxTree.FilePath)) {
+			if (locs.IsDefaultOrEmpty || String.IsNullOrEmpty(locs[0].SourceTree.FilePath)) {
 				if (symbol.ContainingType != null) {
 					// if the symbol is implicitly declared but its containing type is in source,
 					// navigate to the containing type
@@ -42,7 +42,7 @@ namespace Codist.QuickInfo
 				return;
 			}
 			ClickAndGo:
-			description.ToolTip = ShowSymbolLocation(symbol, System.IO.Path.GetFileName(symbol.DeclaringSyntaxReferences[0].SyntaxTree.FilePath));
+			description.ToolTip = ShowSymbolLocation(symbol, System.IO.Path.GetFileName(locs[0].SourceTree.FilePath));
 			description.Cursor = Cursors.Hand;
 			description.MouseEnter += (s, args) => (s as TextBlock).Background = __HighlightBrush;
 			description.MouseLeave += (s, args) => (s as TextBlock).Background = Brushes.Transparent;
@@ -61,12 +61,12 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static TextBlock ShowSymbolLocation(ISymbol symbol, string loc) {
+		static TextBlock ShowSymbolLocation(ISymbol symbol, string path) {
 			var t = new TextBlock()
 				.LimitSize()
 				.Append(symbol.Name, true);
-			if (String.IsNullOrEmpty(loc) == false) {
-				t.Append("\ndefined in ").Append(loc, true);
+			if (String.IsNullOrEmpty(path) == false) {
+				t.Append("\ndefined in ").Append(path, true);
 			}
 			if (symbol.IsMemberOrType() && symbol.ContainingNamespace != null) {
 				t.Append("\nnamespace: ").Append(symbol.ContainingNamespace.ToDisplayString());

@@ -388,10 +388,10 @@ namespace Codist
 			}
 		}
 
-		public static ImmutableArray<SyntaxReference> GetSourceLocations(this ISymbol symbol) {
-			return symbol == null || symbol.DeclaringSyntaxReferences.Length == 0
-				? ImmutableArray<SyntaxReference>.Empty
-				: symbol.DeclaringSyntaxReferences.RemoveAll(i => i.SyntaxTree.FilePath == null);
+		public static ImmutableArray<Location> GetSourceLocations(this ISymbol symbol) {
+			return symbol == null || symbol.Locations.Length == 0
+				? ImmutableArray<Location>.Empty
+				: symbol.Locations.RemoveAll(i => i.IsInSource == false);
 		}
 
 		public static string GetSymbolKindName(this ISymbol symbol) {

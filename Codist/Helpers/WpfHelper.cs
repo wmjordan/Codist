@@ -191,7 +191,7 @@ namespace Codist
 			return block;
 		}
 		/// <summary>
-		/// Gets the <see cref="TextBlock.Text"/> of a <see cref="TextBlock"/>, or the concatenated <see cref="Run.Text"/> of <see cref="Run"/> instances in the <see cref="TextBlock.Inlines"/>.
+		/// Gets the <see cref="TextBlock.Text"/> of a <see cref="TextBlock"/>, or the concatenated <see cref="Run.Text"/>s of <see cref="Run"/> instances in the <see cref="TextBlock.Inlines"/>.
 		/// </summary>
 		public static string GetText(this TextBlock block) {
 			if (block.Inlines.Count == 0) {
@@ -370,7 +370,7 @@ namespace Codist
 		public static DependencyObject GetLogicalParent(this DependencyObject obj) {
 			return LogicalTreeHelper.GetParent(obj);
 		}
-		public static ContextMenu CreateContextMenuForSourceLocations(string symbolName, ImmutableArray<SyntaxReference> refs) {
+		public static ContextMenu CreateContextMenuForSourceLocations(string symbolName, ImmutableArray<Location> refs) {
 			var menu = new ContextMenu();
 			menu.Opened += (sender, e) => {
 				var m = sender as ContextMenu;
@@ -378,12 +378,12 @@ namespace Codist
 					Header = new TextBlock().Append(symbolName, true).Append(" is defined in ").Append(refs.Length.ToString(), true).Append(" places"),
 					IsEnabled = false
 				});
-				foreach (var loc in refs.Sort(System.Collections.Generic.Comparer<SyntaxReference>.Create((a,b) => {
-					return String.Compare(System.IO.Path.GetFileName(a.SyntaxTree.FilePath), System.IO.Path.GetFileName(b.SyntaxTree.FilePath), StringComparison.OrdinalIgnoreCase);
+				foreach (var loc in refs.Sort(System.Collections.Generic.Comparer<Location>.Create((a,b) => {
+					return String.Compare(System.IO.Path.GetFileName(a.SourceTree.FilePath), System.IO.Path.GetFileName(b.SourceTree.FilePath), StringComparison.OrdinalIgnoreCase);
 				}))) {
-					var pos = loc.SyntaxTree.GetLineSpan(loc.Span);
+					var pos = loc.SourceTree.GetLineSpan(loc.SourceSpan);
 					var item = new MenuItem {
-						Header = new TextBlock().Append(System.IO.Path.GetFileName(loc.SyntaxTree.FilePath)).Append("(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", WpfBrushes.Gray),
+						Header = new TextBlock().Append(System.IO.Path.GetFileName(loc.SourceTree.FilePath)).Append("(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", WpfBrushes.Gray),
 						Tag = loc
 					};
 					item.Click += (s, args) => ((SyntaxReference)((MenuItem)s).Tag).GoToSource();
@@ -396,7 +396,7 @@ namespace Codist
 		sealed class SymbolLink : Run
 		{
 			readonly ISymbol _Symbol;
-			ImmutableArray<SyntaxReference> _References;
+			ImmutableArray<Location> _References;
 			public SymbolLink(ISymbol symbol, string alias, bool clickAndGo) {
 				Text = alias ?? symbol.Name;
 				_Symbol = symbol;
