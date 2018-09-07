@@ -149,7 +149,7 @@ namespace Codist.SmartBars
 					if (_Node is IdentifierNameSyntax) {
 						AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition");
 					}
-					AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Find references", GetReferenceCommands);
+					AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze references...", GetReferenceCommands);
 
 					if (isDesignMode) {
 						AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
@@ -200,9 +200,9 @@ namespace Codist.SmartBars
 				}
 			}
 			if (isDesignMode == false) {
-				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger", GetDebugCommands);
+				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger...", GetDebugCommands);
 			}
-			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection\nRight click: Duplicate\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", GetExpandSelectionCommands);
+			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection...\nRight click: Duplicate...\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", GetExpandSelectionCommands);
 		}
 
 		void FindCallers(MenuItem menuItem, ISymbol source) {

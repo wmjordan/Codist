@@ -330,8 +330,9 @@ namespace Codist.SmartBars
 			var b = new Button {
 				Content = ThemeHelper.GetImage(imageId),
 				ToolTip = tooltip,
-				ContextMenu = new ContextMenu()
+				ContextMenu = new ContextMenu().SetStyleResourceProperty("EditorContextMenu")
 			};
+			
 			ImageThemingUtilities.SetImageBackgroundColor(b, ThemeHelper.TitleBackgroundColor);
 			void ButtonEventHandler(Button btn, CommandContext ctx) {
 				var m = btn.ContextMenu;

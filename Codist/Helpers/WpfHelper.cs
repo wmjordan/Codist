@@ -9,15 +9,15 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Classification;
 using GdiColor = System.Drawing.Color;
+using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using WpfText = System.Windows.Media.FormattedText;
-using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
-using Microsoft.VisualStudio.Shell;
 
 namespace Codist
 {
@@ -349,7 +349,7 @@ namespace Codist
 			if (obj == null) {
 				return null;
 			}
-			DependencyObject p = obj;
+			var p = obj;
 			TParent r;
 			while ((p = p.GetVisualParent()) != null) {
 				r = p as TParent;
@@ -381,7 +381,7 @@ namespace Codist
 			return LogicalTreeHelper.GetParent(obj);
 		}
 		public static ContextMenu CreateContextMenuForSourceLocations(string symbolName, ImmutableArray<Location> refs) {
-			var menu = new ContextMenu().SetStyleResourceProperty("ContextMenuStyleKey");
+			var menu = new ContextMenu().SetStyleResourceProperty("EditorContextMenu");
 			menu.Opened += (sender, e) => {
 				var m = sender as ContextMenu;
 				m.Items.Add(new MenuItem {
