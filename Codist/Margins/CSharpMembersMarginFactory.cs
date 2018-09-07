@@ -17,12 +17,6 @@ namespace Codist.Margins
 	[TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
 	sealed class CSharpMembersMarginFactory : IWpfTextViewMarginProvider
 	{
-		[Import]
-		internal IViewTagAggregatorFactoryService TagAggregatorFactoryService { get; set; }
-
-		[Import]
-		internal IEditorFormatMapService EditorFormatMapService { get; set; }
-
 		/// <summary>Creates an <see cref="IWpfTextViewMargin" /> for the given <see cref="IWpfTextViewHost" />.</summary>
 		/// <returns>The <see cref="IWpfTextViewMargin" />. </returns>
 		/// <param name="textViewHost">The <see cref="IWpfTextViewHost" /> for which to create the <see cref="IWpfTextViewMargin" />.</param>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading;
 using EnvDTE80;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
@@ -12,7 +13,7 @@ namespace Codist
 	/// <para>This is the class that implements the package exposed by <see cref="Codist"/>.</para>
 	/// <para>The project consists of the following namespace: <see cref="SyntaxHighlight"/> backed by <see cref="Classifiers"/>, <see cref="SmartBars"/>, <see cref="QuickInfo"/>, <see cref="Margins"/>, etc.</para>
 	/// </summary>
-	[PackageRegistration(UseManagedResourcesOnly = true)]
+	[PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 	[InstalledProductRegistration("#110", "#112", "3.7", IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.General), Constants.NameOfMe, "General", 0, 0, true)]
@@ -28,7 +29,9 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment", 0, 0, true, Sort = 60)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	[ProvideAutoLoad(UIContextGuids.SolutionExists)]
-	sealed class CodistPackage : Package {
+	[ProvideToolWindow(typeof(Codist.Commands.SymbolFinderWindow))]
+	sealed class CodistPackage : AsyncPackage
+	{
 		/// <summary>CodistPackage GUID string.</summary>
 		const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
 
@@ -53,6 +56,7 @@ namespace Codist
 
 		public static DebuggerStatus DebuggerStatus {
 			get {
+				ThreadHelper.ThrowIfNotOnUIThread(nameof(DebuggerStatus));
 				switch (DTE.Debugger.CurrentMode) {
 					case EnvDTE.dbgDebugMode.dbgBreakMode: return DebuggerStatus.Break;
 					case EnvDTE.dbgDebugMode.dbgDesignMode: return DebuggerStatus.Design;
@@ -64,16 +68,25 @@ namespace Codist
 
 		#region Package Members
 
+
 		/// <summary>
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
 		/// where you can put all the initialization code that rely on services provided by VisualStudio.
 		/// </summary>
-		protected override void Initialize() {
-            base.Initialize();
-			Commands.ScreenshotCommand.Initialize(this);
-			ThemeHelper.Refresh();
+		/// <param name="cancellationToken">A cancellation token to monitor for initialization cancellation, which can occur when VS is shutting down.</param>
+		/// <param name="progress">A provider for progress updates.</param>
+		/// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
+		protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress) {
+			await base.InitializeAsync(cancellationToken, progress);
+
+			// When initialized asynchronously, the current thread may be a background thread at this point.
+			// Do any initialization that requires the UI thread after switching to the UI thread.
+			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
+			await Commands.ScreenshotCommand.InitializeAsync(this);
+			ThemeHelper.RefreshThemeCache();
 			VSColorTheme.ThemeChanged += (args) => {
-				ThemeHelper.Refresh();
+				ThemeHelper.RefreshThemeCache();
 			};
 		}
 

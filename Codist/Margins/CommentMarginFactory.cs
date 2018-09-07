@@ -15,16 +15,9 @@ namespace Codist.Margins
 	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = PredefinedMarginNames.OverviewMark)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.CSharp)]
-    [TextViewRole(PredefinedTextViewRoles.Interactive)]
+	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class CommentMarginFactory : IWpfTextViewMarginProvider
 	{
-#pragma warning disable 649
-		[Import]
-		internal IEditorFormatMapService EditorFormatMapService;
-		[Import]
-		internal IViewTagAggregatorFactoryService ViewTagAggregatorFactoryService;
-#pragma warning restore 649
-
 		#region IWpfTextViewMarginProvider
 
 		/// <summary>
@@ -38,7 +31,7 @@ namespace Codist.Margins
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 			var scrollBarContainer = marginContainer as IVerticalScrollBar;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers) && scrollBarContainer != null
-				? new CommentMargin(wpfTextViewHost, scrollBarContainer, this)
+				? new CommentMargin(wpfTextViewHost, scrollBarContainer)
 				: null;
 		}
 

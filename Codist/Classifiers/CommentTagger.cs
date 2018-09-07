@@ -18,12 +18,6 @@ namespace Codist.Classifiers
 	[TagType(typeof(ClassificationTag))]
 	sealed class CommentTaggerProvider : IViewTaggerProvider
 	{
-		[Import]
-		internal IClassificationTypeRegistryService ClassificationRegistry = null;
-
-		[Import]
-		internal IBufferTagAggregatorFactoryService Aggregator = null;
-
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false) {
 				return null;
@@ -33,9 +27,9 @@ namespace Codist.Classifiers
 				return null;
 			}
 			var vp = textView.Properties;
-			var tagger = vp.GetOrCreateSingletonProperty(() => Aggregator.CreateTagAggregator<IClassificationTag>(buffer));
+			var tagger = vp.GetOrCreateSingletonProperty(() => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
 			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
-			var codeTagger = vp.GetOrCreateSingletonProperty(() => CommentTagger.Create(ClassificationRegistry, tagger, tags, codeType));
+			var codeTagger = vp.GetOrCreateSingletonProperty(() => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, tagger, tags, codeType));
 			textView.Closed += TextViewClosed;
 			return codeTagger as ITagger<T>;
 		}

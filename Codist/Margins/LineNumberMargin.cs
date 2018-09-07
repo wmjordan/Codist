@@ -26,7 +26,7 @@ namespace Codist.Margins
 		/// </summary>
 		/// <param name="textView">The <see cref="IWpfTextView"/> to attach the margin to.</param>
 		public LineNumberMargin(IWpfTextViewHost textView, IVerticalScrollBar scrollBar, LineNumberMarginFactory container) {
-			_LineNumberMarginElement = new LineNumberMarginElement(textView.TextView, container, scrollBar);
+			_LineNumberMarginElement = new LineNumberMarginElement(textView.TextView, scrollBar);
 			textView.Closed += TextView_Closed;
 			_TextView = textView;
 		}

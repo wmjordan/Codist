@@ -4,11 +4,8 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Codist
@@ -123,64 +120,6 @@ namespace Codist
 		public static string GetAssemblyModuleName(this ISymbol symbol) {
 			return symbol.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
 					?? symbol.ContainingAssembly?.Name;
-		}
-
-		public static StandardGlyphGroup GetGlyphGroup(this ISymbol symbol) {
-			switch (symbol.Kind) {
-				case SymbolKind.Alias: return StandardGlyphGroup.GlyphForwardType;
-				case SymbolKind.Assembly: return StandardGlyphGroup.GlyphAssembly;
-				case SymbolKind.DynamicType: return StandardGlyphGroup.GlyphGroupType;
-				case SymbolKind.ErrorType: return StandardGlyphGroup.GlyphGroupError;
-				case SymbolKind.Event: return StandardGlyphGroup.GlyphGroupEvent;
-				case SymbolKind.Field:
-					return (symbol as IFieldSymbol).IsConst
-						? StandardGlyphGroup.GlyphGroupConstant
-						: StandardGlyphGroup.GlyphGroupField;
-
-				case SymbolKind.Label: return StandardGlyphGroup.GlyphArrow;
-				case SymbolKind.Local: return StandardGlyphGroup.GlyphGroupVariable;
-				case SymbolKind.Method:
-					return (symbol as IMethodSymbol).IsExtensionMethod
-						? StandardGlyphGroup.GlyphExtensionMethod
-						: StandardGlyphGroup.GlyphGroupMethod;
-
-				case SymbolKind.NetModule: return StandardGlyphGroup.GlyphGroupModule;
-				case SymbolKind.NamedType:
-					switch ((symbol as INamedTypeSymbol).TypeKind) {
-						case TypeKind.Unknown: return StandardGlyphGroup.GlyphGroupUnknown;
-						case TypeKind.Array:
-						case TypeKind.Dynamic:
-						case TypeKind.Class:
-							return StandardGlyphGroup.GlyphGroupClass;
-
-						case TypeKind.Delegate: return StandardGlyphGroup.GlyphGroupDelegate;
-						case TypeKind.Enum: return StandardGlyphGroup.GlyphGroupEnum;
-						case TypeKind.Error: return StandardGlyphGroup.GlyphGroupError;
-						case TypeKind.Interface: return StandardGlyphGroup.GlyphGroupInterface;
-						case TypeKind.Module: return StandardGlyphGroup.GlyphGroupModule;
-						case TypeKind.Pointer:
-						case TypeKind.Struct: return StandardGlyphGroup.GlyphGroupStruct;
-					}
-					return StandardGlyphGroup.GlyphGroupType;
-
-				case SymbolKind.Namespace: return StandardGlyphGroup.GlyphGroupNamespace;
-				case SymbolKind.Parameter: return StandardGlyphGroup.GlyphGroupVariable;
-				case SymbolKind.Property: return StandardGlyphGroup.GlyphGroupProperty;
-				case SymbolKind.TypeParameter: return StandardGlyphGroup.GlyphGroupType;
-				default: return StandardGlyphGroup.GlyphGroupUnknown;
-			}
-		}
-
-		public static StandardGlyphItem GetGlyphItem(this ISymbol symbol) {
-			switch (symbol.DeclaredAccessibility) {
-				case Accessibility.Private: return StandardGlyphItem.GlyphItemPrivate;
-				case Accessibility.ProtectedAndInternal:
-				case Accessibility.Protected: return StandardGlyphItem.GlyphItemProtected;
-				case Accessibility.Internal: return StandardGlyphItem.GlyphItemInternal;
-				case Accessibility.ProtectedOrInternal: return StandardGlyphItem.GlyphItemFriend;
-				case Accessibility.Public: return StandardGlyphItem.GlyphItemPublic;
-				default: return StandardGlyphItem.TotalGlyphItems;
-			}
 		}
 
 		public static int GetImageId(this ISymbol symbol) {

@@ -9,19 +9,12 @@ namespace Codist.Margins
 {
 	[Export(typeof(IWpfTextViewMarginProvider))]
 	[Name(LineNumberMargin.MarginName)]
-	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = PredefinedMarginNames.OverviewMark)]
+	[Order(Before = PredefinedMarginNames.OverviewChangeTracking)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType("text")]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class LineNumberMarginFactory : IWpfTextViewMarginProvider
 	{
-#pragma warning disable 649
-		[Import]
-		internal IEditorFormatMapService EditorFormatMapService;
-		[Import]
-		internal IViewTagAggregatorFactoryService ViewTagAggregatorFactoryService;
-#pragma warning restore 649
-
 		#region IWpfTextViewMarginProvider
 
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {

@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.CodeAnalysis;
+using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Codist.QuickInfo
 {
@@ -79,7 +80,7 @@ namespace Codist.QuickInfo
 		/// </summary>
 		sealed class Default : IQuickInfoOverrider
 		{
-			Overrider _Overrider;
+			readonly Overrider _Overrider;
 
 			public Default(IList<object> qiContent) {
 				_Overrider = new Overrider();
@@ -110,13 +111,20 @@ namespace Codist.QuickInfo
 
 				protected override void OnVisualParentChanged(DependencyObject oldParent) {
 					base.OnVisualParentChanged(oldParent);
+					var p = this.GetVisualParent<StackPanel>();
+					if (p == null) {
+						goto EXIT;
+					}
+					if (p.Children.Count > 1) {
+						AddGlyphForDiagnosticInfo(p);
+					}
 					if (DocElement != null || ClickAndGoSymbol != null || LimitItemSize) {
-						FixQuickInfo();
+						FixQuickInfo(p);
 					}
 					if (LimitItemSize) {
 						ApplySizeLimit(this.GetVisualParent<StackPanel>());
 					}
-
+					EXIT:
 					// hides the parent container from taking excessive space in the quick info window
 					var c = this.GetVisualParent<Border>();
 					if (c != null) {
@@ -124,24 +132,47 @@ namespace Codist.QuickInfo
 					}
 				}
 
-				void FixQuickInfo() {
-					var p = this.GetVisualParent<StackPanel>();
-					if (p == null) {
-						return;
+				static void AddGlyphForDiagnosticInfo(StackPanel p) {
+					var infoPanel = p.Children[1].GetFirstVisualChild<ItemsControl>()?.GetFirstVisualChild<StackPanel>();
+					if (infoPanel == null) {
+						// try the first item (symbol title may be absent)
+						infoPanel = p.Children[0].GetFirstVisualChild<ItemsControl>()?.GetFirstVisualChild<StackPanel>();
+						if (infoPanel?.GetFirstVisualChild<WrapPanel>() != null) {
+							return;
+						}
 					}
-					var doc = p.GetFirstVisualChild<StackPanel>();
+					if (infoPanel != null) {
+						foreach (var item in infoPanel.Children) {
+							var cp = (item as UIElement).GetFirstVisualChild<TextBlock>();
+							if (cp?.GetType() == typeof(TextBlock)) {
+								cp.SetGlyph(ServicesHelper.Instance.Glyph.GetGlyph(StandardGlyphGroup.GlyphInformation, StandardGlyphItem.GlyphItemPublic));
+							}
+						}
+					}
+				}
+
+				void FixQuickInfo(StackPanel infoPanel) {
+					var doc = infoPanel.GetFirstVisualChild<StackPanel>();
 					if (doc == null) {
 						return;
 					}
-					var wrapPanel = p.GetFirstVisualChild<WrapPanel>();
+					var wrapPanel = infoPanel.GetFirstVisualChild<WrapPanel>();
 					if (wrapPanel == null) {
 						return;
 					}
-					var icon = p.GetFirstVisualChild<Microsoft.VisualStudio.Imaging.CrispImage>();
-					var signature = p.GetFirstVisualChild<TextBlock>();
+					var icon = infoPanel.GetFirstVisualChild<Microsoft.VisualStudio.Imaging.CrispImage>();
+					var signature = infoPanel.GetFirstVisualChild<TextBlock>();
 
 					// replace the default XML doc
 					if (DocElement != null) {
+						// todo: apply decoratives lines between doc and other parts with a WPF template
+						//DocElement = new StackPanel {
+						//	Children = {
+						//		CreateDecorativeLine(doc),
+						//		DocElement,
+						//		CreateDecorativeLine(doc)
+						//	}
+						//};
 						if (doc.Children.Count > 1 && doc.Children[1] is TextBlock) {
 							doc.Children.RemoveAt(1);
 							doc.Children.Insert(1, DocElement);
@@ -150,6 +181,7 @@ namespace Codist.QuickInfo
 							doc.Children.Add(DocElement);
 						}
 					}
+
 
 					if (icon != null && signature != null) {
 						// apply click and go feature
@@ -163,6 +195,20 @@ namespace Codist.QuickInfo
 							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 10;
 						}
 					}
+					System.Windows.Shapes.Line CreateDecorativeLine(StackPanel docPanel) {
+						return new System.Windows.Shapes.Line {
+							Stroke = ThemeHelper.MenuGlyphBackgroundBrush,
+							StrokeThickness = 1,
+							StrokeDashArray = new DoubleCollection { 4, 2 },
+							X1 = 0,
+							X2 = docPanel.DesiredSize.Width,
+							Y1 = 3,
+							Y2 = 3,
+							Height = 5,
+							MaxWidth = Config.Instance.QuickInfoMaxWidth
+						};
+					}
+
 				}
 
 				static void ApplySizeLimit(StackPanel quickInfoPanel) {

@@ -11,9 +11,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Text.Editor;
+using AppHelpers;
 
 namespace Codist.SmartBars
 {
+	//todo Make this class async
 	/// <summary>The contextual toolbar.</summary>
 	internal class SmartBar
 	{
@@ -66,8 +68,7 @@ namespace Codist.SmartBars
 			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
 		}
 		void LoadThemeColor() {
-			var c = ThemeHelper.TitleBackgroundColor;
-			var b = new SolidColorBrush(c.ToWpfColor());
+			var b = new SolidColorBrush(ThemeHelper.TitleBackgroundColor);
 			b.Freeze();
 			ToolBar.Background = b;
 			ToolBar2.Background = b;
@@ -100,7 +101,8 @@ namespace Codist.SmartBars
 			_ToolBarTray.Opacity = (SensibleRange - op) / SensibleRange;
 		}
 		void ViewSelectionChanged(object sender, EventArgs e) {
-			if (AppHelpers.EnumHelper.HasAnyFlag(Keyboard.Modifiers, ModifierKeys.Shift)) {
+			if (Config.Instance.SmartBarOptions.HasAnyFlag(SmartBarOptions.ShiftSuppression)
+				&& Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Shift)) {
 				return;
 			}
 			if (View.Selection.IsEmpty) {
@@ -197,7 +199,8 @@ namespace Codist.SmartBars
 		}
 
 		protected virtual void AddCommands() {
-			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
+			var readOnly = View.IsCaretInReadOnlyRegion();
+			if (readOnly == false) {
 				AddCommand(ToolBar, KnownImageIds.Cut, "Cut selected text\nRight click: Cut line", ctx => {
 					if (ctx.RightClick) {
 						ctx.View.ExpandSelectionToLine();
@@ -211,7 +214,7 @@ namespace Codist.SmartBars
 				}
 				TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
 			});
-			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
+			if (readOnly == false) {
 				if (Clipboard.ContainsText()) {
 					AddCommand(ToolBar, KnownImageIds.Paste, "Paste text from clipboard\nRight click: Paste over line\nCtrl click: Paste and select next", ctx => ExecuteAndFind(ctx, "Edit.Paste"));
 				}
@@ -262,6 +265,7 @@ namespace Codist.SmartBars
 		}
 
 		static void ExecuteAndFind(CommandContext ctx, string command) {
+			Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 			if (ctx.RightClick) {
 				ctx.View.ExpandSelectionToLine(false);
 			}
@@ -279,6 +283,7 @@ namespace Codist.SmartBars
 		}
 
 		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip) {
+			Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
 				AddCommand(toolBar, imageId, tooltip, (ctx) => {
 					TextEditorHelper.ExecuteEditorCommand(command);
@@ -287,6 +292,7 @@ namespace Codist.SmartBars
 			}
 		}
 		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip, string command2) {
+			Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
 				AddCommand(toolBar, imageId, tooltip, (ctx) => {
 					TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? command2 : command);
@@ -301,6 +307,7 @@ namespace Codist.SmartBars
 				ToolTip = tooltip,
 				Cursor = Cursors.Hand
 			};
+			ImageThemingUtilities.SetImageBackgroundColor(b, ThemeHelper.TitleBackgroundColor);
 			b.Click += (s, args) => {
 				var ctx = new CommandContext(this, s as Control, args);
 				handler(ctx);
@@ -325,8 +332,10 @@ namespace Codist.SmartBars
 				ToolTip = tooltip,
 				ContextMenu = new ContextMenu()
 			};
+			ImageThemingUtilities.SetImageBackgroundColor(b, ThemeHelper.TitleBackgroundColor);
 			void ButtonEventHandler(Button btn, CommandContext ctx) {
 				var m = btn.ContextMenu;
+				ImageThemingUtilities.SetImageBackgroundColor(m, ThemeHelper.TitleBackgroundColor);
 				m.IsEnabled = true;
 				m.PlacementTarget = btn;
 				m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
@@ -424,19 +433,6 @@ namespace Codist.SmartBars
 			public void KeepToolbar() {
 				_Bar.KeepToolbar();
 			}
-		}
-
-		sealed class DocumentInfo
-		{
-			[Category("Document")]
-			[Description("Number of lines in active document")]
-			[DisplayName("Line count")]
-			public int LineCount { get; set; }
-
-			[Category("Document")]
-			[Description("Number of characters in active document")]
-			[DisplayName("Char count")]
-			public int CharCount { get; set; }
 		}
 	}
 }

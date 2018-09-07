@@ -17,6 +17,7 @@ using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using WpfText = System.Windows.Media.FormattedText;
 using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
+using Microsoft.VisualStudio.Shell;
 
 namespace Codist
 {
@@ -125,16 +126,25 @@ namespace Codist
 				Text = text,
 				IsReadOnly = true,
 				TextAlignment = TextAlignment.Right,
-				MinWidth = 180,
-				BorderBrush = WpfBrushes.Transparent,
-				Foreground = ThemeHelper.ToolWindowTextBrush,
-				Background = ThemeHelper.ToolWindowBackgroundBrush
-			});
+				MinWidth = 180
+			}.SetStyleResourceProperty(VsResourceKeys.TextBoxStyleKey));
 			return panel;
 		}
 		public static TextBlock SetGlyph(this TextBlock block, System.Windows.Media.ImageSource image) {
 			var first = block.Inlines.FirstInline;
 			var glyph = new InlineUIContainer(new Image { Source = image, Width = image.Width, Margin = GlyphMargin }) { BaselineAlignment = BaselineAlignment.TextTop };
+			if (first != null) {
+				block.Inlines.InsertBefore(first, glyph);
+			}
+			else {
+				block.Inlines.Add(glyph);
+			}
+			return block;
+		}
+		public static TextBlock SetGlyph(this TextBlock block, Image image) {
+			var first = block.Inlines.FirstInline;
+			image.Margin = GlyphMargin;
+			var glyph = new InlineUIContainer(image) { BaselineAlignment = BaselineAlignment.TextTop };
 			if (first != null) {
 				block.Inlines.InsertBefore(first, glyph);
 			}
@@ -326,7 +336,7 @@ namespace Codist
 				Content = element,
 				VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
 				Padding = new Thickness(0, 0, 3, 0)
-			};
+			}.SetStyleResourceProperty(VsResourceKeys.GetScrollViewerStyleKey(true));
 		}
 		public static DependencyObject GetVisualParent(this DependencyObject obj) {
 			return VisualTreeHelper.GetParent(obj);
@@ -371,7 +381,7 @@ namespace Codist
 			return LogicalTreeHelper.GetParent(obj);
 		}
 		public static ContextMenu CreateContextMenuForSourceLocations(string symbolName, ImmutableArray<Location> refs) {
-			var menu = new ContextMenu();
+			var menu = new ContextMenu().SetStyleResourceProperty("ContextMenuStyleKey");
 			menu.Opened += (sender, e) => {
 				var m = sender as ContextMenu;
 				m.Items.Add(new MenuItem {
@@ -386,11 +396,17 @@ namespace Codist
 						Header = new TextBlock().Append(System.IO.Path.GetFileName(loc.SourceTree.FilePath)).Append("(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", WpfBrushes.Gray),
 						Tag = loc
 					};
-					item.Click += (s, args) => ((SyntaxReference)((MenuItem)s).Tag).GoToSource();
+					item.Click += (s, args) => ((Location)((MenuItem)s).Tag).GoToSource();
 					m.Items.Add(item);
 				}
 			};
 			return menu;
+		}
+
+		public static TControl SetStyleResourceProperty<TControl>(this TControl control, object resourceKey)
+			where TControl : FrameworkElement {
+			control.SetResourceReference(FrameworkElement.StyleProperty, resourceKey);
+			return control;
 		}
 
 		sealed class SymbolLink : Run

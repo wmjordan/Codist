@@ -14,7 +14,6 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
-using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.QuickInfo
@@ -27,18 +26,9 @@ namespace Codist.QuickInfo
 	{
 		internal const string Name = nameof(CSharpQuickInfoSourceProvider);
 
-		[Import]
-		IEditorFormatMapService _EditorFormatMapService = null;
-
-		[Import]
-		internal ITextStructureNavigatorSelectorService _NavigatorService = null;
-
-		[Import]
-		IGlyphService _GlyphService = null;
-
 		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? new CSharpQuickInfo(textBuffer, _EditorFormatMapService, _GlyphService, _NavigatorService)
+				? new CSharpQuickInfo(textBuffer, ServicesHelper.Instance.EditorFormatMap)
 				: null;
 		}
 
@@ -47,20 +37,16 @@ namespace Codist.QuickInfo
 			static readonly SymbolFormatter _SymbolFormatter = new SymbolFormatter();
 
 			readonly IEditorFormatMapService _FormatMapService;
-			readonly ITextStructureNavigatorSelectorService _NavigatorService;
-			readonly IGlyphService _GlyphService;
 			IEditorFormatMap _FormatMap;
 			bool _IsDisposed;
 			SemanticModel _SemanticModel;
 			ITextBuffer _TextBuffer;
 
-			public CSharpQuickInfo(ITextBuffer subjectBuffer, IEditorFormatMapService formatMapService, IGlyphService glyphService, ITextStructureNavigatorSelectorService navigatorService) {
+			public CSharpQuickInfo(ITextBuffer subjectBuffer, IEditorFormatMapService formatMapService) {
 				_TextBuffer = subjectBuffer;
 				_FormatMapService = formatMapService;
-				_GlyphService = glyphService;
 				_TextBuffer.Changing += TextBuffer_Changing;
 				Config.Updated += _ConfigUpdated;
-				_NavigatorService = navigatorService;
 			}
 
 			public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {
@@ -70,6 +56,9 @@ namespace Codist.QuickInfo
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.HideOriginalQuickInfo)) {
 					qiContent.Clear();
 				}
+				var qiWrapper = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride) || Config.Instance.QuickInfoMaxWidth > 0 || Config.Instance.QuickInfoMaxHeight > 0
+					? QuickInfoOverrider.CreateOverrider(qiContent)
+					: null;
 				// Map the trigger point down to our buffer.
 				var currentSnapshot = _TextBuffer.CurrentSnapshot;
 				var subjectTriggerPoint = session.GetTriggerPoint(currentSnapshot).GetValueOrDefault();
@@ -142,9 +131,6 @@ namespace Codist.QuickInfo
 				if (node.IsKind(SyntaxKind.Argument)) {
 					node = (node as ArgumentSyntax).Expression;
 				}
-				var qiWrapper = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride) || Config.Instance.QuickInfoMaxWidth > 0 || Config.Instance.QuickInfoMaxHeight > 0
-					? QuickInfoOverrider.CreateOverrider(qiContent)
-					: null;
 				var symbolInfo = semanticModel.GetSymbolInfo(node);
 				symbol = symbolInfo.Symbol;
 				if (symbol == null) {
@@ -198,13 +184,14 @@ namespace Codist.QuickInfo
 					qiWrapper.ApplyClickAndGo(symbol);
 				}
 				qiWrapper.LimitQuickInfoItemSize(qiContent);
-				var navigator = _NavigatorService.GetTextStructureNavigator(_TextBuffer);
-				var extent = navigator.GetExtentOfWord(querySpan.Start).Span;
 				applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
-					? currentSnapshot.CreateTrackingSpan(extent.Start, extent.Length, SpanTrackingMode.EdgeInclusive)
+					? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeExclusive)
 					: null;
 				return;
 				EXIT:
+				if (qiWrapper != null) {
+					qiWrapper.LimitQuickInfoItemSize(qiContent);
+				}
 				applicableToSpan = null;
 			}
 
@@ -295,10 +282,10 @@ namespace Codist.QuickInfo
 			}
 
 
-			void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo, SyntaxNode node) {
+			static void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo, SyntaxNode node) {
 				var info = new StackPanel().Add(new ToolTipText("Maybe...", true));
 				foreach (var item in symbolInfo.CandidateSymbols) {
-					info.Add(ToUIText(item, node.SpanStart));
+					info.Add(ToUIText(item));
 				}
 				qiContent.Add(info.Scrollable());
 			}
@@ -452,7 +439,7 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void ShowPropertyInfo(IList<object> qiContent, SyntaxNode node, IPropertySymbol property) {
+			static void ShowPropertyInfo(IList<object> qiContent, SyntaxNode node, IPropertySymbol property) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 					&& (property.DeclaredAccessibility != Accessibility.Public || property.IsAbstract || property.IsStatic || property.IsOverride || property.IsVirtual)) {
 					ShowDeclarationModifier(qiContent, property);
@@ -462,7 +449,7 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void ShowEventInfo(IList<object> qiContent, SyntaxNode node, IEventSymbol ev) {
+			static void ShowEventInfo(IList<object> qiContent, SyntaxNode node, IEventSymbol ev) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
 					if (ev.DeclaredAccessibility != Accessibility.Public || ev.IsAbstract || ev.IsStatic || ev.IsOverride || ev.IsVirtual) {
 						ShowDeclarationModifier(qiContent, ev);
@@ -522,7 +509,7 @@ namespace Codist.QuickInfo
 						continue;
 					}
 					overloadInfo.Add(new ToolTipText()
-						.SetGlyph(_GlyphService.GetGlyph(item.GetGlyphGroup(), item.GetGlyphItem()))
+						.SetGlyph(ThemeHelper.GetImage(item.GetImageId()))
 						.AddSymbolDisplayParts(item.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1)
 					);
 				}
@@ -543,7 +530,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(info);
 			}
 
-			void ShowNamespaceInfo(IList<object> qiContent, SyntaxNode node, INamespaceSymbol nsSymbol) {
+			static void ShowNamespaceInfo(IList<object> qiContent, SyntaxNode node, INamespaceSymbol nsSymbol) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NamespaceTypes) == false) {
 					return;
 				}
@@ -553,7 +540,7 @@ namespace Codist.QuickInfo
 					info.Add(new ToolTipText("Namespace:", true));
 					foreach (var ns in namespaces) {
 						info.Add(new ToolTipText()
-							.SetGlyph(_GlyphService.GetGlyph(StandardGlyphGroup.GlyphGroupNamespace, StandardGlyphItem.GlyphItemPublic))
+							.SetGlyph(ThemeHelper.GetImage(Microsoft.VisualStudio.Imaging.KnownImageIds.Namespace))
 							.Append(ns.Name, _SymbolFormatter.Namespace)
 							);
 					}
@@ -565,7 +552,7 @@ namespace Codist.QuickInfo
 					var info = new StackPanel();
 					info.Add(new ToolTipText("Type:", true));
 					foreach (var type in members) {
-						var t = new ToolTipText().SetGlyph(_GlyphService.GetGlyph(type.GetGlyphGroup(), type.GetGlyphItem()));
+						var t = new ToolTipText().SetGlyph(ThemeHelper.GetImage(type.GetImageId()));
 						_SymbolFormatter.ShowSymbolDeclaration(type, t, true, true);
 						t.AddSymbol(type, null, _SymbolFormatter);
 						info.Add(t);
@@ -618,7 +605,7 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			void ShowInterfaceImplementation<TSymbol>(IList<object> qiContent, SyntaxNode node, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations)
+			static void ShowInterfaceImplementation<TSymbol>(IList<object> qiContent, SyntaxNode node, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations)
 				where TSymbol : class, ISymbol {
 				if (symbol.IsStatic || symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.FirstOrDefault() == null) {
 					return;
@@ -644,7 +631,7 @@ namespace Codist.QuickInfo
 				if (explicitIntfs.Count > 0) {
 					info = new StackPanel().Add(new ToolTipText("Implements:", true));
 					foreach (var item in explicitIntfs) {
-						info.Add(ToUIText(item, node.SpanStart));
+						info.Add(ToUIText(item));
 					}
 				}
 				if (explicitImplementations != null) {
@@ -656,7 +643,7 @@ namespace Codist.QuickInfo
 						}
 						var p = new StackPanel().Add(new ToolTipText("Explicit implements:", true));
 						foreach (var item in explicitIntfs) {
-							p.Add(ToUIText(item, node.SpanStart));
+							p.Add(ToUIText(item));
 						}
 						info.Add(p);
 					}
@@ -906,7 +893,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(s);
 			}
 
-			void ShowInterfaces(IList<object> qiContent, ITypeSymbol type, int position) {
+			static void ShowInterfaces(IList<object> qiContent, ITypeSymbol type, int position) {
 				const string Disposable = "IDisposable";
 				var showAll = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
 				var interfaces = type.Interfaces;
@@ -943,7 +930,7 @@ namespace Codist.QuickInfo
 				}
 				var stack = new StackPanel().Add(new ToolTipText("Interface:", true));
 				if (disposable != null) {
-					var t = ToUIText(disposable, position);
+					var t = ToUIText(disposable);
 					if (interfaces.Contains(disposable) == false) {
 						t.Append(" (inherited)");
 					}
@@ -953,10 +940,10 @@ namespace Codist.QuickInfo
 					if (item == disposable) {
 						continue;
 					}
-					stack.Add(ToUIText(item, position));
+					stack.Add(ToUIText(item));
 				}
 				foreach (var item in inheritedInterfaces) {
-					stack.Add(ToUIText(item, position).Append(" (inherited)"));
+					stack.Add(ToUIText(item).Append(" (inherited)"));
 				}
 				qiContent.Add(stack.Scrollable());
 			}
@@ -1111,9 +1098,9 @@ namespace Codist.QuickInfo
 				return s;
 			}
 
-			TextBlock ToUIText(ISymbol symbol, int position) {
+			static TextBlock ToUIText(ISymbol symbol) {
 				return new ToolTipText()
-					.SetGlyph(_GlyphService.GetGlyph(symbol.GetGlyphGroup(), symbol.GetGlyphItem()))
+					.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 					.AddSymbolDisplayParts(symbol.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
 			}
 

@@ -2,6 +2,7 @@
 using System.ComponentModel.Design;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Task = System.Threading.Tasks.Task;
 
 namespace Codist.Commands
 {
@@ -51,8 +52,12 @@ namespace Codist.Commands
 		/// Initializes the singleton instance of the command.
 		/// </summary>
 		/// <param name="package">Owner package, not null.</param>
-		public static void Initialize(Package package) {
-			var commandService = (package as IServiceProvider).GetService((typeof(IMenuCommandService))) as OleMenuCommandService;
+		public static async Task InitializeAsync(AsyncPackage package) {
+			// Switch to the main thread - the call to AddCommand in SymbolFinderWindowCommand's constructor requires
+			// the UI thread.
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
+
+			var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
 			Instance = new ScreenshotCommand(package, commandService);
 		}
 
@@ -92,7 +97,6 @@ namespace Codist.Commands
 							OLEMSGICON.OLEMSGICON_INFO,
 							OLEMSGBUTTON.OLEMSGBUTTON_OK,
 							OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-
 					}
 				}
 			}

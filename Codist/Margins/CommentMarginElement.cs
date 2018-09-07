@@ -55,14 +55,14 @@ namespace Codist.Margins
 		const double MarkSize = 4.0;
 		const double HalfMarkSize = MarkSize / 2 + MarkPadding;
 
-		public CommentMarginElement(IWpfTextView textView, CommentMarginFactory factory, ITagAggregator<ClassificationTag> tagger, IVerticalScrollBar verticalScrollbar) {
+		public CommentMarginElement(IWpfTextView textView, ITagAggregator<ClassificationTag> tagger, IVerticalScrollBar verticalScrollbar) {
 			_TextView = textView;
 
 			IsHitTestVisible = false;
 
 			_ScrollBar = verticalScrollbar;
 			_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
-			_EditorFormatMap = factory.EditorFormatMapService.GetEditorFormatMap(textView);
+			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 
 			Width = MarkSize + MarkPadding + MarkPadding + /*extra padding*/ 2 * MarkPadding;
 

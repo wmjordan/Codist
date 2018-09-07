@@ -5,17 +5,17 @@ using Microsoft.VisualStudio.Text.Editor;
 namespace Codist.Margins
 {
 	/// <summary>
-	/// Implementation of a margin that show the structure of a code file.
+	/// Implementation of a margin that show the member declaration spots within a C# code file.
 	/// </summary>
 	sealed class CSharpMembersMargin : IWpfTextViewMargin
 	{
-		public const string Name = "CodeMembers";
+		public const string Name = nameof(CSharpMembersMargin);
 
-		readonly CSharpMembersMarginElement _structureMarginElement;
-		bool _isDisposed;
+		readonly CSharpMembersMarginElement _MemberMarginElement;
+		bool _IsDisposed;
 
 		public CSharpMembersMargin(IWpfTextViewHost textViewHost, IVerticalScrollBar scrollBar, CSharpMembersMarginFactory factory) {
-			_structureMarginElement = new CSharpMembersMarginElement(textViewHost.TextView, scrollBar, factory);
+			_MemberMarginElement = new CSharpMembersMarginElement(textViewHost.TextView, scrollBar, factory);
 		}
 
 		#region IWpfTextViewMargin Members
@@ -25,7 +25,7 @@ namespace Codist.Margins
 		public FrameworkElement VisualElement {
 			get {
 				ThrowIfDisposed();
-				return _structureMarginElement;
+				return _MemberMarginElement;
 			}
 		}
 		#endregion
@@ -34,14 +34,14 @@ namespace Codist.Margins
 		public double MarginSize {
 			get {
 				ThrowIfDisposed();
-				return _structureMarginElement.ActualWidth;
+				return _MemberMarginElement.ActualWidth;
 			}
 		}
 
 		public bool Enabled {
 			get {
 				ThrowIfDisposed();
-				return _structureMarginElement.Enabled;
+				return _MemberMarginElement.Enabled;
 			}
 		}
 
@@ -50,16 +50,16 @@ namespace Codist.Margins
 		}
 
 		public void Dispose() {
-			if (!_isDisposed) {
-				_structureMarginElement.Dispose();
+			if (!_IsDisposed) {
+				_MemberMarginElement.Dispose();
 				GC.SuppressFinalize(this);
-				_isDisposed = true;
+				_IsDisposed = true;
 			}
 		}
 		#endregion
 
 		private void ThrowIfDisposed() {
-			if (_isDisposed) {
+			if (_IsDisposed) {
 				throw new ObjectDisposedException(Name);
 			}
 		}

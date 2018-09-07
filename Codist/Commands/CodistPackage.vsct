@@ -13,13 +13,13 @@
         it is possible to define includes and macros with the same syntax used
         in C++ files. Using this ability of the compiler here, we include some files
         defining some of the constants that we will use inside the file. -->
-	<Include href="KnownImageIds.vsct"/>
+	<Include href="KnownImageIds.vsct" />
 	
   <!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
-  <Extern href="stdidcmd.h"/>
+  <Extern href="stdidcmd.h" />
 
   <!--This header contains the command ids for the menus provided by the shell. -->
-  <Extern href="vsshlids.h"/>
+  <Extern href="vsshlids.h" />
 
   <!--The Commands section is where commands, menus, and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
@@ -38,7 +38,10 @@
          must be a menu. -->
     <Groups>
       <Group guid="guidCodistPackageCmdSet" id="CodistMenuGroup" priority="0x0600">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_FILE"/>
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_FILE" />
+      </Group>
+      <Group guid="guidCodistPackageCmdSet2" id="IDG_VS_VIEW_DEFINEVIEWS" priority="0x0800">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_VIEW" />
       </Group>
     </Groups>
 
@@ -60,10 +63,20 @@
 				<CommandFlag>DynamicItemStart</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<Strings>
-          <ButtonText>Screenshot code &amp;window</ButtonText>
+          <ButtonText>Save code &amp;window screenshot</ButtonText>
 					<ToolTipText>Take a screenshot for the active code window</ToolTipText>
         </Strings>
       </Button>
+      <!--<Button guid="guidCodistPackageCmdSet2" id="SymbolFinderWindowCommandId" priority="0x0800" type="Button">
+				<Parent guid="guidCodistPackageCmdSet2" id="IDG_VS_VIEW_DEFINEVIEWS" />
+				<Icon guid="ImageCatalogGuid" id="FindSymbol" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<CommandFlag>DynamicItemStart</CommandFlag>
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<Strings>
+          <ButtonText>Symbol finder</ButtonText>
+        </Strings>
+      </Button>-->
     </Buttons>
 
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -87,13 +100,10 @@
       <IDSymbol name="ScreenshotCommandId" value="0x0100" />
     </GuidSymbol>
 
-    <!--<GuidSymbol name="guidImages" value="{351df574-6d35-4137-a882-927c15ca5e9b}" >
-      <IDSymbol name="bmpPic1" value="1" />
-      <IDSymbol name="bmpPic2" value="2" />
-      <IDSymbol name="bmpPicSearch" value="3" />
-      <IDSymbol name="bmpPicX" value="4" />
-      <IDSymbol name="bmpPicArrows" value="5" />
-      <IDSymbol name="bmpPicStrikethrough" value="6" />
-    </GuidSymbol>-->
+    <!-- This is the guid used to group the menu commands together -->
+    <GuidSymbol name="guidCodistPackageCmdSet2" value="{0CEFE689-7B5C-450C-921D-BA0C74D65D9C}">
+			<IDSymbol name="IDG_VS_VIEW_DEFINEVIEWS" value="0x1020" />
+			<IDSymbol name="SymbolFinderWindowCommandId" value="4129" />
+    </GuidSymbol>
   </Symbols>
 </CommandTable>

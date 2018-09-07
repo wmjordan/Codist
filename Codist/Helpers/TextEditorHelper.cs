@@ -71,6 +71,10 @@ namespace Codist
 			return t;
 		}
 
+		public static bool IsCaretInReadOnlyRegion(this IWpfTextView textView) {
+			return textView.TextBuffer.IsReadOnly(textView.Caret.Position.BufferPosition);
+		}
+
 		public static bool IsMultilineSelected(this IWpfTextView textView) {
 			var s = textView.Selection;
 			if (s.IsEmpty || s.SelectedSpans.Count < 1) {

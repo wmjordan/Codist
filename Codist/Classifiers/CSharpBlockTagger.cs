@@ -76,11 +76,8 @@ namespace Codist.Classifiers
 			if (--_refCount == 0) {
 				_buffer.Changed -= OnChanged;
 
-				if (_scanner != null) {
-					//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
-					_scanner.Cancel();
-					_scanner = null;
-				}
+				//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
+				Interlocked.Exchange(ref _scanner, null)?.Cancel();
 				_root = null; //Allow the old root to be GC'd
 			}
 		}
@@ -179,11 +176,8 @@ namespace Codist.Classifiers
 		}
 
 		void ScanBuffer(ITextSnapshot snapshot) {
-			if (_scanner != null) {
-				//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
-				_scanner.Cancel();
-				_scanner = null;
-			}
+			//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
+			Interlocked.Exchange(ref _scanner, null)?.Cancel();
 
 			//The underlying buffer could be very large, meaning that doing the scan for all matches on the UI thread
 			//is a bad idea. Do the scan on the background thread and use a callback to raise the changed event when

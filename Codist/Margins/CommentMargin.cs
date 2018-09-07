@@ -26,10 +26,10 @@ namespace Codist.Margins
 		/// Initializes a new instance of the <see cref="CommentMargin"/> class for a given <paramref name="textView"/>.
 		/// </summary>
 		/// <param name="textView">The <see cref="IWpfTextView"/> to attach the margin to.</param>
-		public CommentMargin(IWpfTextViewHost textView, IVerticalScrollBar scrollBar, CommentMarginFactory container) {
+		public CommentMargin(IWpfTextViewHost textView, IVerticalScrollBar scrollBar) {
 			_TextView = textView ?? throw new ArgumentNullException(nameof(textView));
-			_CodeTagAggregator = container.ViewTagAggregatorFactoryService.CreateTagAggregator<ClassificationTag>(textView.TextView);
-			_CodeMarginElement = new CommentMarginElement(textView.TextView, container, _CodeTagAggregator, scrollBar);
+			_CodeTagAggregator = ServicesHelper.Instance.ViewTagAggregatorFactory.CreateTagAggregator<ClassificationTag>(textView.TextView);
+			_CodeMarginElement = new CommentMarginElement(textView.TextView, _CodeTagAggregator, scrollBar);
 			textView.Closed += TextView_Closed;
 		}
 

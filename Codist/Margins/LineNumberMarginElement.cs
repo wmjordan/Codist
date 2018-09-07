@@ -16,17 +16,17 @@ namespace Codist.Margins
 		readonly IVerticalScrollBar _ScrollBar;
 		readonly TaggerResult _Tags;
 
-		static readonly Brush LineNumberBrush = Brushes.DarkGray;
+		static readonly SolidColorBrush LineNumberBrush = Brushes.DarkGray;
 		static readonly Pen LineNumberPen = new Pen(LineNumberBrush, 1) { DashStyle = DashStyles.Dash };
 
-		public LineNumberMarginElement(IWpfTextView textView, LineNumberMarginFactory factory, IVerticalScrollBar verticalScrollbar) {
+		public LineNumberMarginElement(IWpfTextView textView, IVerticalScrollBar verticalScrollbar) {
 			_TextView = textView;
 
 			IsHitTestVisible = false;
 
 			_ScrollBar = verticalScrollbar;
 			_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
-			_EditorFormatMap = factory.EditorFormatMapService.GetEditorFormatMap(textView);
+			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 
 			Width = 0;
 

@@ -491,6 +491,11 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.XmlText)]
 		XmlText,
 	}
+	enum MarkerStyleTypes
+	{
+		None,
+		SymbolReference,
+	}
 	enum CommentStyleApplication
 	{
 		Content,

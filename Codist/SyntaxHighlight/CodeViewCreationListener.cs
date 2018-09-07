@@ -15,15 +15,6 @@ namespace Codist.SyntaxHighlight
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	sealed class CodeViewCreationListener : IWpfTextViewCreationListener
 	{
-		[Import]
-		IEditorFormatMapService _EditorFormatMapService = null;
-
-		[Import]
-		IClassificationFormatMapService _FormatMapService = null;
-
-		[Import]
-		IClassificationTypeRegistryService _TypeRegistryService = null;
-
 		public void TextViewCreated(IWpfTextView textView) {
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false) {
 				return;
@@ -31,9 +22,9 @@ namespace Codist.SyntaxHighlight
 			textView.Properties.GetOrCreateSingletonProperty(() => {
 				return new CodeViewDecorator(
 					textView,
-					_FormatMapService.GetClassificationFormatMap(textView),
-					_TypeRegistryService,
-					_EditorFormatMapService.GetEditorFormatMap(textView));
+					ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(textView),
+					ServicesHelper.Instance.ClassificationTypeRegistry,
+					ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView));
 			});
 			//IEditorFormatMap formatMap = _EditorFormatMapService.GetEditorFormatMap(textView);
 			//ChangeEditorFormat(formatMap, EditorTextViewBackground, m => m[EditorFormatDefinition.BackgroundBrushId] = Brushes.LightYellow);

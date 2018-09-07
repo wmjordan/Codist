@@ -9,9 +9,32 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using AppHelpers;
+using Microsoft.VisualStudio.Utilities;
+using System.ComponentModel.Composition;
 
 namespace Codist.Classifiers
 {
+	/// <summary>
+	/// Classifier provider. It adds the classifier to the set of classifiers.
+	/// </summary>
+	[Export(typeof(IClassifierProvider))]
+	[ContentType(Constants.CodeTypes.CSharp)]
+	sealed class CSharpClassifierProvider : IClassifierProvider
+	{
+		/// <summary>
+		/// Gets a classifier for the given text buffer.
+		/// </summary>
+		/// <param name="textBuffer">The <see cref="ITextBuffer"/> to classify.</param>
+		/// <returns>
+		/// A classifier for the text buffer, or null if the provider cannot do so in its current state.
+		/// </returns>
+		public IClassifier GetClassifier(ITextBuffer textBuffer) {
+			return Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
+				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new CSharpClassifier(ServicesHelper.Instance.ClassificationTypeRegistry, textBuffer))
+				: null;
+		}
+	}
+
 	/// <summary>A classifier for C# code syntax highlight.</summary>
 	sealed class CSharpClassifier : IClassifier
 	{
@@ -20,14 +43,12 @@ namespace Codist.Classifiers
 
 		readonly ITextBuffer _TextBuffer;
 		readonly IClassificationTypeRegistryService _TypeRegistryService;
-		readonly ITextDocumentFactoryService _TextDocumentFactoryService;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CSharpClassifier"/> class.
 		/// </summary>
 		internal CSharpClassifier(
 			IClassificationTypeRegistryService registry,
-			ITextDocumentFactoryService textDocumentFactoryService,
 			ITextBuffer buffer) {
 			if (_Classifications == null) {
 				_Classifications = new CSharpClassifications(registry);
@@ -35,7 +56,6 @@ namespace Codist.Classifiers
 			if (_GeneralClassifications == null) {
 				_GeneralClassifications = new GeneralClassifications(registry);
 			}
-			_TextDocumentFactoryService = textDocumentFactoryService;
 			_TextBuffer = buffer;
 			_TypeRegistryService = registry;
 		}

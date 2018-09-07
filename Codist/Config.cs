@@ -9,6 +9,7 @@ using System.Windows.Media;
 using Newtonsoft.Json;
 using Codist.Classifiers;
 using Codist.SyntaxHighlight;
+using Codist.Margins;
 
 namespace Codist
 {
@@ -48,6 +49,7 @@ namespace Codist
 		public List<XmlCodeStyle> XmlCodeStyles { get; } = new List<XmlCodeStyle>();
 		public List<CSharpStyle> CodeStyles { get; } = new List<CSharpStyle>();
 		public List<CodeStyle> GeneralStyles { get; } = new List<CodeStyle>();
+		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
 
 		public static event EventHandler Loaded;
 		public static event EventHandler<ConfigUpdatedEventArgs> Updated;
@@ -148,6 +150,7 @@ namespace Codist
 				ResetCodeStyle(Instance.CommentStyles, config.CommentStyles);
 				ResetCodeStyle(Instance.CodeStyles, config.CodeStyles);
 				ResetCodeStyle(Instance.XmlCodeStyles, config.XmlCodeStyles);
+				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
 				_LastLoaded = DateTime.Now;
 				return Instance;
 			}
@@ -160,6 +163,7 @@ namespace Codist
 			ResetCodeStyle(Instance.CommentStyles, GetDefaultCommentStyles());
 			ResetCodeStyle(Instance.CodeStyles, GetDefaultCSharpStyles());
 			ResetCodeStyle(Instance.XmlCodeStyles, GetDefaultXmlCodeStyles());
+			ResetCodeStyle(Instance.MarkerSettings, GetDefaultMarkerStyles());
 			Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.SyntaxHighlight));
 		}
 
@@ -214,6 +218,7 @@ namespace Codist
 			c.CommentStyles.AddRange(GetDefaultCommentStyles());
 			c.CodeStyles.AddRange(GetDefaultCSharpStyles());
 			c.XmlCodeStyles.AddRange(GetDefaultXmlCodeStyles());
+			c.MarkerSettings.AddRange(GetDefaultMarkerStyles());
 			return c;
 		}
 
@@ -261,6 +266,13 @@ namespace Codist
 		}
 		static void MergeDefaultXmlCodeStyles(List<XmlCodeStyle> styles) {
 			foreach (var s in GetDefaultXmlCodeStyles()) {
+				if (s.Id > 0 && styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
+					styles.Add(s);
+				}
+			}
+		}
+		static void MergeDefaultMarkerStyles(List<MarkerStyle> styles) {
+			foreach (var s in GetDefaultMarkerStyles()) {
 				if (s.Id > 0 && styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
 					styles.Add(s);
 				}
@@ -317,6 +329,11 @@ namespace Codist
 				r[i] = new XmlCodeStyle { StyleID = (XmlStyleTypes)i };
 			}
 			return r;
+		}
+		internal static MarkerStyle[] GetDefaultMarkerStyles() {
+			return new MarkerStyle[] {
+				new MarkerStyle(MarkerStyleTypes.SymbolReference, Colors.LightGreen)
+			};
 		}
 		internal void Set(Features options, bool set) {
 			Features = AppHelpers.EnumHelper.SetFlags(Features, options, set);
@@ -398,6 +415,7 @@ namespace Codist
 	{
 		None,
 		ExpansionIncludeTrivia = 1 << 1,
+		ShiftSuppression = 1 << 2,
 		Default = ExpansionIncludeTrivia
 	}
 
@@ -427,8 +445,10 @@ namespace Codist
 		LineNumber = 1 << 4,
 		TypeDeclaration = 1 << 5,
 		MethodDeclaration = 1 << 6,
+		SymbolReference = 1 << 7,
 		CodeMarginMask = SpecialComment | CompilerDirective,
-		Default = SpecialComment | MemberDeclaration | LineNumber | LongMemberDeclaration
+		MemberMarginMask = MemberDeclaration | SymbolReference,
+		Default = SpecialComment | MemberDeclaration | LineNumber | LongMemberDeclaration | SymbolReference
 	}
 
 	public enum ScrollbarMarkerStyle

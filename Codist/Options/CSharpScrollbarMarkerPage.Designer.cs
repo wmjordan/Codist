@@ -25,6 +25,7 @@
 		/// 使用代码编辑器修改此方法的内容。
 		/// </summary>
 		private void InitializeComponent() {
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CSharpScrollbarMarkerPage));
 			this._DirectivesBox = new System.Windows.Forms.CheckBox();
 			this._SpecialCommentsBox = new System.Windows.Forms.CheckBox();
 			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
@@ -32,7 +33,9 @@
 			this._MemberDeclarationBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this._SymbolReferenceColorButton = new Codist.Options.PickColorButton();
 			this._MethodDeclarationBox = new System.Windows.Forms.CheckBox();
+			this._SymbolReferenceBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
@@ -50,7 +53,7 @@
 			// _SpecialCommentsBox
 			// 
 			this._SpecialCommentsBox.AutoSize = true;
-			this._SpecialCommentsBox.Location = new System.Drawing.Point(15, 133);
+			this._SpecialCommentsBox.Location = new System.Drawing.Point(15, 131);
 			this._SpecialCommentsBox.Name = "_SpecialCommentsBox";
 			this._SpecialCommentsBox.Size = new System.Drawing.Size(149, 19);
 			this._SpecialCommentsBox.TabIndex = 5;
@@ -101,8 +104,10 @@
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this._SymbolReferenceColorButton);
 			this.tabPage2.Controls.Add(this._MethodDeclarationBox);
 			this.tabPage2.Controls.Add(this._DirectivesBox);
+			this.tabPage2.Controls.Add(this._SymbolReferenceBox);
 			this.tabPage2.Controls.Add(this._SpecialCommentsBox);
 			this.tabPage2.Controls.Add(this._MemberDeclarationBox);
 			this.tabPage2.Controls.Add(this._TypeDeclarationBox);
@@ -115,6 +120,18 @@
 			this.tabPage2.Text = "Scrollbar marker";
 			this.tabPage2.UseVisualStyleBackColor = true;
 			// 
+			// _SymbolReferenceColorButton
+			// 
+			this._SymbolReferenceColorButton.Image = ((System.Drawing.Image)(resources.GetObject("_SymbolReferenceColorButton.Image")));
+			this._SymbolReferenceColorButton.Location = new System.Drawing.Point(178, 153);
+			this._SymbolReferenceColorButton.Name = "_SymbolReferenceColorButton";
+			this._SymbolReferenceColorButton.SelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+			this._SymbolReferenceColorButton.Size = new System.Drawing.Size(100, 23);
+			this._SymbolReferenceColorButton.TabIndex = 7;
+			this._SymbolReferenceColorButton.Text = "Marker";
+			this._SymbolReferenceColorButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+			this._SymbolReferenceColorButton.UseVisualStyleBackColor = true;
+			// 
 			// _MethodDeclarationBox
 			// 
 			this._MethodDeclarationBox.AutoSize = true;
@@ -124,6 +141,16 @@
 			this._MethodDeclarationBox.TabIndex = 3;
 			this._MethodDeclarationBox.Text = "Method declaration";
 			this._MethodDeclarationBox.UseVisualStyleBackColor = true;
+			// 
+			// _SymbolReferenceBox
+			// 
+			this._SymbolReferenceBox.AutoSize = true;
+			this._SymbolReferenceBox.Location = new System.Drawing.Point(15, 156);
+			this._SymbolReferenceBox.Name = "_SymbolReferenceBox";
+			this._SymbolReferenceBox.Size = new System.Drawing.Size(157, 19);
+			this._SymbolReferenceBox.TabIndex = 6;
+			this._SymbolReferenceBox.Text = "Symbol reference";
+			this._SymbolReferenceBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpScrollbarMarkerPage
 			// 
@@ -149,5 +176,7 @@
 		private System.Windows.Forms.TabControl _OptionTabs;
 		private System.Windows.Forms.TabPage tabPage2;
 		private System.Windows.Forms.CheckBox _MethodDeclarationBox;
+		private System.Windows.Forms.CheckBox _SymbolReferenceBox;
+		private PickColorButton _SymbolReferenceColorButton;
 	}
 }
