@@ -302,12 +302,7 @@ namespace Codist.SmartBars
 		}
 
 		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
-			var b = new Button {
-				Content = ThemeHelper.GetImage(imageId),
-				ToolTip = tooltip,
-				Cursor = Cursors.Hand
-			};
-			ImageThemingUtilities.SetImageBackgroundColor(b, ThemeHelper.TitleBackgroundColor);
+			var b = CreateButton(imageId, tooltip);
 			b.Click += (s, args) => {
 				var ctx = new CommandContext(this, s as Control, args);
 				handler(ctx);
@@ -326,14 +321,19 @@ namespace Codist.SmartBars
 			toolBar.Items.Add(b);
 		}
 
-		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
+		static Button CreateButton(int imageId, string tooltip) {
 			var b = new Button {
-				Content = ThemeHelper.GetImage(imageId),
+				Content = ThemeHelper.GetImage(imageId, Config.Instance.SmartBarButtonSize),
 				ToolTip = tooltip,
-				ContextMenu = new ContextMenu().SetStyleResourceProperty("EditorContextMenu")
+				Cursor = Cursors.Hand
 			};
-			
 			ImageThemingUtilities.SetImageBackgroundColor(b, ThemeHelper.TitleBackgroundColor);
+			return b;
+		}
+
+		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
+			var b = CreateButton(imageId, tooltip);
+			b.ContextMenu = new ContextMenu().SetStyleResourceProperty("EditorContextMenu");
 			void ButtonEventHandler(Button btn, CommandContext ctx) {
 				var m = btn.ContextMenu;
 				ImageThemingUtilities.SetImageBackgroundColor(m, ThemeHelper.TitleBackgroundColor);

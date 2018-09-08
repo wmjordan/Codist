@@ -16,6 +16,7 @@ namespace Codist
 	sealed class Config
 	{
 		const string ThemePrefix = "res:";
+		const int DefaultIconSize = 16;
 		internal const string LightTheme = ThemePrefix + "Light", DarkTheme = ThemePrefix + "Dark", SimpleTheme = ThemePrefix + "Simple";
 
 		static DateTime _LastSaved, _LastLoaded;
@@ -44,6 +45,7 @@ namespace Codist
 		public double QuickInfoMaxWidth { get; set; }
 		public double QuickInfoMaxHeight { get; set; }
 		public bool NoSpaceBetweenWrappedLines { get; set; }
+		public int SmartBarButtonSize { get; set; } = DefaultIconSize;
 		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
 		public List<CommentStyle> CommentStyles { get; } = new List<CommentStyle>();
 		public List<XmlCodeStyle> XmlCodeStyles { get; } = new List<XmlCodeStyle>();
