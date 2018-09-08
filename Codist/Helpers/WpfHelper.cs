@@ -11,19 +11,18 @@ using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Classification;
-using GdiColor = System.Drawing.Color;
 using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
-using WpfColor = System.Windows.Media.Color;
-using WpfColors = System.Windows.Media.Colors;
 using WpfText = System.Windows.Media.FormattedText;
 
 namespace Codist
 {
 	static class WpfHelper
 	{
-		static readonly Thickness GlyphMargin = new Thickness(0, 0, 5, 0);
+		internal static readonly Thickness NoMargin = new Thickness(0);
+		internal static readonly Thickness GlyphMargin = new Thickness(0, 0, 5, 0);
+		internal static readonly Thickness ScrollerMargin = new Thickness(0, 0, 3, 0);
 		internal static readonly SymbolDisplayFormat QuickInfoSymbolDisplayFormat = new SymbolDisplayFormat(
 			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
@@ -32,89 +31,6 @@ namespace Codist
 			delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
 
-		public static WpfColor ParseColor(string colorText) {
-			if (String.IsNullOrEmpty(colorText) || colorText[0] != '#' || colorText.Length != 7 && colorText.Length != 9) {
-				return WpfColors.Transparent;
-			}
-			try {
-				byte a = 0xFF, r, g, b;
-				if (colorText.Length == 7
-					&& ParseByte(colorText, 1, out r)
-					&& ParseByte(colorText, 3, out g)
-					&& ParseByte(colorText, 5, out b)) {
-					return WpfColor.FromArgb(a, r, g, b);
-				}
-				if (colorText.Length == 9
-					&& ParseByte(colorText, 1, out a)
-					&& ParseByte(colorText, 3, out r)
-					&& ParseByte(colorText, 5, out g)
-					&& ParseByte(colorText, 7, out b)) {
-					return WpfColor.FromArgb(a, r, g, b);
-				}
-			}
-			catch (Exception ex) {
-				Debug.WriteLine(ex);
-			}
-			return WpfColors.Transparent;
-		}
-
-		static bool ParseByte(string text, int index, out byte value) {
-			var h = text[index];
-			var l = text[++index];
-			var b = 0;
-			if (h >= '0' && h <= '9') {
-				b = (h - '0') << 4;
-			}
-			else if (h >= 'A' && h <= 'F') {
-				b = (h - ('A' - 10)) << 4;
-			}
-			else if (h >= 'a' && h <= 'f') {
-				b = (h - ('a' - 10)) << 4;
-			}
-			else {
-				value = 0;
-				return false;
-			}
-			if (l >= '0' && l <= '9') {
-				b |= (l - '0');
-			}
-			else if (l >= 'A' && l <= 'F') {
-				b |= (l - ('A' - 10));
-			}
-			else if (l >= 'a' && l <= 'f') {
-				b |= (l - ('a' - 10));
-			}
-			else {
-				value = 0;
-				return false;
-			}
-			value = (byte)b;
-			return true;
-		}
-
-		public static string ToHexString(this WpfColor color) {
-			return "#" + (color.A == 0xFF ? null : color.A.ToString("X2")) + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
-		}
-		public static GdiColor ToGdiColor(this WpfColor color) {
-			return GdiColor.FromArgb(color.A, color.R, color.G, color.B);
-		}
-		public static WpfColor ToWpfColor (this GdiColor color) {
-			return WpfColor.FromArgb(color.A, color.R, color.G, color.B);
-		}
-		public static WpfColor Alpha(this WpfColor color, byte a) {
-			return WpfColor.FromArgb(a, color.R, color.G, color.B);
-		}
-		/// <summary>
-		/// Returns a new clone of <see cref="WpfBrush"/> which has a new <paramref name="opacity"/> as <see cref="WpfBrush.Opacity"/>.
-		/// </summary>
-		public static TBrush Alpha<TBrush>(this TBrush brush, double opacity)
-			where TBrush : WpfBrush {
-			if (brush != null) {
-				brush = brush.Clone() as TBrush;
-				brush.Opacity = opacity;
-			}
-			return brush;
-		}
 		public static TPanel Add<TPanel>(this TPanel panel, UIElement control)
 			where TPanel : Panel {
 			panel.Children.Add(control);
@@ -270,7 +186,7 @@ namespace Codist
 				}
 				var mainPanelBorder = b.FindTemplateElement<FrameworkElement>("MainPanelBorder");
 				if (mainPanelBorder != null) {
-					mainPanelBorder.Margin = new Thickness(0);
+					mainPanelBorder.Margin = NoMargin;
 				}
 			}
 		}
@@ -335,7 +251,7 @@ namespace Codist
 			return new ScrollViewer {
 				Content = element,
 				VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-				Padding = new Thickness(0, 0, 3, 0)
+				Padding = ScrollerMargin
 			}.SetStyleResourceProperty(VsResourceKeys.GetScrollViewerStyleKey(true));
 		}
 		public static DependencyObject GetVisualParent(this DependencyObject obj) {

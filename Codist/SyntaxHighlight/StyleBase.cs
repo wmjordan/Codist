@@ -29,13 +29,13 @@ namespace Codist.SyntaxHighlight
 		[DefaultValue("#00000000")]
 		public string ForegroundColor {
 			get => ForeColor.ToHexString();
-			set => ForeColor = WpfHelper.ParseColor(value);
+			set => ForeColor = UIHelper.ParseColor(value);
 		}
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		[DefaultValue("#00000000")]
 		public string BackgroundColor {
 			get => BackColor.ToHexString();
-			set => BackColor = WpfHelper.ParseColor(value);
+			set => BackColor = UIHelper.ParseColor(value);
 		}
 		/// <summary>Gets or sets the brush effect to draw the background color.</summary>
 		[DefaultValue(BrushEffect.Solid)]

@@ -44,7 +44,7 @@ namespace Codist.QuickInfo
 				var navigator = _NavigatorService.GetTextStructureNavigator(buffer);
 				var extent = navigator.GetExtentOfWord(session.GetTriggerPoint(session.TextView.TextSnapshot).GetValueOrDefault()).Span;
 				var word = session.TextView.TextSnapshot.GetText(extent);
-				var brush = NamedColorCache.TryGetBrush(word);
+				var brush = UIHelper.GetBrush(word);
 				if (brush != null) {
 					qiContent.Add(GetColorInfo(brush));
 					applicableToSpan = session.TextView.TextSnapshot.CreateTrackingSpan(extent.Span, SpanTrackingMode.EdgeExclusive);
@@ -70,11 +70,12 @@ namespace Codist.QuickInfo
 						}.MakeHorizontal(),
 						new StackPanel {
 							Children = {
-									new TextBox { Text = SAMPLE, BorderBrush = Brushes.Black, Foreground = brush, Background = Brushes.Black, IsReadOnly = true },
-									new TextBox { Text = SAMPLE, BorderBrush = Brushes.Black, Background = brush, Foreground = Brushes.Black, IsReadOnly = true },
-									new TextBox { Text = SAMPLE, BorderBrush = Brushes.Black, Foreground = brush, Background = Brushes.Gray, IsReadOnly = true },
-									new TextBox { Text = SAMPLE, BorderBrush = Brushes.Black, Background = brush, Foreground = Brushes.White, IsReadOnly = true },
-									new TextBox { Text = SAMPLE, BorderBrush = Brushes.Black, Foreground = brush, Background = Brushes.White, IsReadOnly = true },
+									new TextBlock { Background = brush, Margin = WpfHelper.GlyphMargin, Width = 16 },
+									new TextBox { Text = SAMPLE, BorderBrush = Brushes.Black, Foreground = brush, Background = Brushes.Black },
+									new TextBox { Text = SAMPLE, BorderBrush = Brushes.Black, Background = brush, Foreground = Brushes.Black },
+									new TextBox { Text = SAMPLE, BorderBrush = Brushes.Black, Foreground = brush, Background = Brushes.Gray },
+									new TextBox { Text = SAMPLE, BorderBrush = Brushes.Black, Background = brush, Foreground = Brushes.White },
+									new TextBox { Text = SAMPLE, BorderBrush = Brushes.Black, Foreground = brush, Background = Brushes.White },
 							}
 						}.MakeHorizontal()
 					}
@@ -82,26 +83,6 @@ namespace Codist.QuickInfo
 			}
 
 			void IDisposable.Dispose() {}
-
-			static class NamedColorCache
-			{
-				static readonly Dictionary<string, SolidColorBrush> __Cache = GetBrushes();
-				internal static SolidColorBrush TryGetBrush (string name) {
-					var c = WpfHelper.ParseColor(name);
-					return 
-						c != Colors.Transparent ? new SolidColorBrush(c)
-						: (name.Length >= 3 && name.Length <= 20) ? __Cache.TryGetValue(name, out var brush) ? brush : null
-						: null;
-				}
-				static Dictionary<string, SolidColorBrush> GetBrushes() {
-					var c = Array.FindAll(typeof(Brushes).GetProperties(), p => p.PropertyType == typeof(SolidColorBrush));
-					var d = new Dictionary<string, SolidColorBrush>(c.Length, StringComparer.OrdinalIgnoreCase);
-					foreach (var item in c) {
-						d.Add(item.Name, item.GetValue(null) as SolidColorBrush);
-					}
-					return d;
-				}
-			}
 		}
 	}
 
