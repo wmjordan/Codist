@@ -404,6 +404,7 @@ namespace Codist
 		TextOnlyDoc = 1 << 22,
 		ReturnsDoc = 1 << 23,
 		RemarksDoc = 1 << 24,
+		Color = 1 << 26,
 		Selection = 1 << 27,
 		ClickAndGo = 1 << 28,
 		CtrlQuickInfo = 1 << 29,

@@ -93,7 +93,7 @@ namespace Codist
 		}
 
 		public static string ToHexString(this WpfColor color) {
-			return "#" + color.A.ToString("X2") + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
+			return "#" + (color.A == 0xFF ? null : color.A.ToString("X2")) + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
 		}
 		public static GdiColor ToGdiColor(this WpfColor color) {
 			return GdiColor.FromArgb(color.A, color.R, color.G, color.B);
@@ -264,11 +264,11 @@ namespace Codist
 				b.Loaded -= ToolBarLoaded;
 			}
 			void HideOverflowInternal(ToolBar b) {
-				var overflow = b.Template.FindName("OverflowGrid", b) as FrameworkElement;
+				var overflow = b.FindTemplateElement<FrameworkElement>("OverflowGrid");
 				if (overflow != null) {
 					overflow.Visibility = Visibility.Collapsed;
 				}
-				var mainPanelBorder = b.Template.FindName("MainPanelBorder", b) as FrameworkElement;
+				var mainPanelBorder = b.FindTemplateElement<FrameworkElement>("MainPanelBorder");
 				if (mainPanelBorder != null) {
 					mainPanelBorder.Margin = new Thickness(0);
 				}
@@ -358,6 +358,10 @@ namespace Codist
 				}
 			}
 			return null;
+		}
+		public static TElement FindTemplateElement<TElement>(this Control control, string name)
+			where TElement : FrameworkElement {
+			return control.Template.FindName(name, control) as TElement;
 		}
 		public static TChild GetFirstVisualChild<TChild>(this DependencyObject obj)
 			where TChild : DependencyObject {

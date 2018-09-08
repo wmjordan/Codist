@@ -39,6 +39,7 @@
 			this._CSharpAttributesQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this._DefaultPage = new System.Windows.Forms.TabPage();
+			this._CSharpRemarksDocBox = new System.Windows.Forms.CheckBox();
 			this._CSharpReturnsDocBox = new System.Windows.Forms.CheckBox();
 			this._CSharpTextOnlyDocBox = new System.Windows.Forms.CheckBox();
 			this._CSharpDocumentationBaseTypeBox = new System.Windows.Forms.CheckBox();
@@ -50,7 +51,6 @@
 			this._CSharpOverrideDefaultXmlDocBox = new System.Windows.Forms.CheckBox();
 			this._ClickAndGoBox = new System.Windows.Forms.CheckBox();
 			this._AdditionalItemsPage = new System.Windows.Forms.TabPage();
-			this._CSharpRemarksDocBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this._DefaultPage.SuspendLayout();
 			this.groupBox4.SuspendLayout();
@@ -209,6 +209,16 @@
 			this._DefaultPage.Text = "Default";
 			this._DefaultPage.UseVisualStyleBackColor = true;
 			// 
+			// _CSharpRemarksDocBox
+			// 
+			this._CSharpRemarksDocBox.AutoSize = true;
+			this._CSharpRemarksDocBox.Location = new System.Drawing.Point(32, 131);
+			this._CSharpRemarksDocBox.Name = "_CSharpRemarksDocBox";
+			this._CSharpRemarksDocBox.Size = new System.Drawing.Size(205, 19);
+			this._CSharpRemarksDocBox.TabIndex = 5;
+			this._CSharpRemarksDocBox.Text = "Show <remarks> XML Doc";
+			this._CSharpRemarksDocBox.UseVisualStyleBackColor = true;
+			// 
 			// _CSharpReturnsDocBox
 			// 
 			this._CSharpReturnsDocBox.AutoSize = true;
@@ -347,16 +357,6 @@
 			this._AdditionalItemsPage.TabIndex = 0;
 			this._AdditionalItemsPage.Text = "Additional Items";
 			this._AdditionalItemsPage.UseVisualStyleBackColor = true;
-			// 
-			// _CSharpRemarksDocBox
-			// 
-			this._CSharpRemarksDocBox.AutoSize = true;
-			this._CSharpRemarksDocBox.Location = new System.Drawing.Point(32, 131);
-			this._CSharpRemarksDocBox.Name = "_CSharpRemarksDocBox";
-			this._CSharpRemarksDocBox.Size = new System.Drawing.Size(205, 19);
-			this._CSharpRemarksDocBox.TabIndex = 5;
-			this._CSharpRemarksDocBox.Text = "Show <remarks> XML Doc";
-			this._CSharpRemarksDocBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpSuperQuickInfoPage
 			// 

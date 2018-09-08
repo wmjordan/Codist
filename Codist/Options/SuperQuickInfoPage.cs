@@ -23,6 +23,7 @@ namespace Codist.Options
 
 			_ControlQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.CtrlQuickInfo, _ControlQuickInfoBox.Checked));
 			_SelectionQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Selection, _SelectionQuickInfoBox.Checked));
+			_ColorQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Color, _ColorQuickInfoBox.Checked));
 
 			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
@@ -32,6 +33,7 @@ namespace Codist.Options
 			_UI.DoWithLock(() => {
 				_ControlQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlQuickInfo);
 				_SelectionQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Selection);
+				_ColorQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color);
 			});
 		}
 	}

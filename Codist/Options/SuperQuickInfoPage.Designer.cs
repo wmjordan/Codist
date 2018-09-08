@@ -29,6 +29,7 @@
 			this._ControlQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._SuperQuickInfoTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this._ColorQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._SuperQuickInfoTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
@@ -67,6 +68,7 @@
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this._ColorQuickInfoBox);
 			this.tabPage2.Controls.Add(this._ControlQuickInfoBox);
 			this.tabPage2.Controls.Add(this._SelectionQuickInfoBox);
 			this.tabPage2.Location = new System.Drawing.Point(4, 25);
@@ -76,6 +78,16 @@
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "General";
 			this.tabPage2.UseVisualStyleBackColor = true;
+			// 
+			// _ColorQuickInfoBox
+			// 
+			this._ColorQuickInfoBox.AutoSize = true;
+			this._ColorQuickInfoBox.Location = new System.Drawing.Point(15, 56);
+			this._ColorQuickInfoBox.Name = "_ColorQuickInfoBox";
+			this._ColorQuickInfoBox.Size = new System.Drawing.Size(197, 19);
+			this._ColorQuickInfoBox.TabIndex = 3;
+			this._ColorQuickInfoBox.Text = "Show info about color";
+			this._ColorQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// SuperQuickInfoPage
 			// 
@@ -97,5 +109,6 @@
 		private System.Windows.Forms.CheckBox _SelectionQuickInfoBox;
 		private System.Windows.Forms.TabControl _SuperQuickInfoTabs;
 		private System.Windows.Forms.TabPage tabPage2;
+		private System.Windows.Forms.CheckBox _ColorQuickInfoBox;
 	}
 }
