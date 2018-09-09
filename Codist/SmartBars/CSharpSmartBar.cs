@@ -21,6 +21,7 @@ namespace Codist.SmartBars
 	/// An extended <see cref="SmartBar"/> for C# content type.
 	/// </summary>
 	sealed class CSharpSmartBar : SmartBar {
+		static readonly Thickness __FilterBorderThickness = new Thickness(0, 0, 0, 1);
 		CompilationUnitSyntax _Compilation;
 		Document _Document;
 		SyntaxNode _Node;
@@ -65,8 +66,8 @@ namespace Codist.SmartBars
 				Header = filterBox = new TextBox {
 					Width = 150,
 					HorizontalAlignment = HorizontalAlignment.Stretch,
-					BorderThickness = new Thickness(0, 0, 0, 1),
-				},
+					BorderThickness = __FilterBorderThickness,
+				}.SetStyleResourceProperty(Microsoft.VisualStudio.Shell.VsResourceKeys.TextBoxStyleKey),
 				StaysOpenOnClick = true
 			});
 			filterBox.TextChanged += (s, args) => {
@@ -273,14 +274,17 @@ namespace Codist.SmartBars
 		}
 
 		void FindMembers(MenuItem menuItem, ISymbol symbol) {
-			var members = (symbol as INamespaceOrTypeSymbol).GetMembers().RemoveAll(m => m.CanBeReferencedByName == false).Sort(Comparer<ISymbol>.Create((a, b) => {
-				int s;
-				if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first
-					|| (s = a.Kind - b.Kind) != 0) { // then by member kind
-					return s;
-				}
-				return a.Name.CompareTo(b.Name);
-			}));
+			var members = (symbol as INamespaceOrTypeSymbol)
+				.GetMembers()
+				.RemoveAll(m => m.CanBeReferencedByName == false)
+				.Sort(Comparer<ISymbol>.Create((a, b) => {
+					int s;
+					if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first
+						|| (s = a.Kind - b.Kind) != 0) { // then by member kind
+						return s;
+					}
+					return a.Name.CompareTo(b.Name);
+				}));
 			foreach (var item in members) {
 				menuItem.Items.Add(new SymbolMenuItem(this, item, item.Locations));
 			}
@@ -364,7 +368,7 @@ namespace Codist.SmartBars
 			if (symbol == null) {
 				return r;
 			}
-
+			symbol = symbol.GetAliasTarget();
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
 					if ((symbol as IMethodSymbol).MethodKind == MethodKind.Constructor) {
@@ -500,6 +504,11 @@ namespace Codist.SmartBars
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
 				Locations = locations;
 				Symbol = symbol;
+				var b = UIHelper.GetBrush(Symbol.Name, true);
+				if (b != null) {
+					var h = Header as TextBlock;
+					h.Inlines.InsertBefore(h.Inlines.FirstInline, new System.Windows.Documents.InlineUIContainer(new System.Windows.Shapes.Rectangle { Height = 16, Width = 16, Fill = b, Margin = WpfHelper.GlyphMargin }) { BaselineAlignment = BaselineAlignment.TextTop });
+				}
 				//todo compatible with symbols having more than 1 locations
 				if (locations != null && locations.Any(l => l.SourceTree?.FilePath != null)) {
 					Click += GotoLocation;

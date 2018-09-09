@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Text.Editor;
 using AppHelpers;
+using Microsoft.VisualStudio.Shell;
 
 namespace Codist.SmartBars
 {
@@ -337,6 +338,7 @@ namespace Codist.SmartBars
 			void ButtonEventHandler(Button btn, CommandContext ctx) {
 				var m = btn.ContextMenu;
 				ImageThemingUtilities.SetImageBackgroundColor(m, ThemeHelper.TitleBackgroundColor);
+				m.Foreground = ThemeHelper.ToolWindowTextBrush;
 				m.IsEnabled = true;
 				m.PlacementTarget = btn;
 				m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
@@ -383,6 +385,23 @@ namespace Codist.SmartBars
 
 			public CommandItem CommandItem { get; }
 			protected SmartBar SmartBar { get; }
+
+			protected override void OnSubmenuOpened(RoutedEventArgs e) {
+				base.OnSubmenuOpened(e);
+			}
+			public override void OnApplyTemplate() {
+				base.OnApplyTemplate();
+				var p = this.GetTemplateChild("PART_Popup") as System.Windows.Controls.Primitives.Popup;
+				if (p != null) {
+					var b = p.Child as Border;
+					if (b != null) {
+						b.SetResourceReference(ForegroundProperty, VsBrushes.MenuTextKey);
+						b.SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientBeginKey);
+						b.SetResourceReference(BorderBrushProperty, VsBrushes.CommandBarMenuBorderKey);
+						(b.Child as FrameworkElement).MaxHeight = SmartBar.View.ViewportHeight / 2;
+					}
+				}
+			}
 
 			void ClickHandler(object s, RoutedEventArgs e) {
 				var ctx2 = new CommandContext(SmartBar, s as Control, e);
