@@ -21,40 +21,24 @@ namespace Codist
 		public static string ToHexString(this GdiColor color) {
 			return "#" + color.A.ToString("X2") + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
 		}
-		public static SolidColorBrush GetBrush(string color) {
-			return NamedColorCache.GetBrush(color);
+		public static SolidColorBrush GetBrush(string color, bool parseSystemColor) {
+			return NamedColorCache.GetBrush(color, parseSystemColor);
 		}
 		public static WpfColor ParseColor(string colorText) {
-			if (String.IsNullOrEmpty(colorText)) {
+			if (String.IsNullOrEmpty(colorText) || Char.IsPunctuation(colorText[0]) == false) {
 				return WpfColors.Transparent;
 			}
 			var l = colorText.Length;
-			if (l < 6 || l > 9
-				|| (l == 7 || l == 9) && Char.IsPunctuation(colorText[0]) == false) {
+			if (l != 7 && l != 9) {
 				return WpfColors.Transparent;
 			}
 			try {
 				byte a = 0xFF, r, g, b;
-				switch (colorText.Length) {
-					case 6:
-						if (ParseByte(colorText, 0, out r)
-							&& ParseByte(colorText, 2, out g)
-							&& ParseByte(colorText, 4, out b)) {
-							return WpfColor.FromArgb(a, r, g, b);
-						}
-						break;
+				switch (l) {
 					case 7:
 						if (ParseByte(colorText, 1, out r)
 							&& ParseByte(colorText, 3, out g)
 							&& ParseByte(colorText, 5, out b)) {
-							return WpfColor.FromArgb(a, r, g, b);
-						}
-						break;
-					case 8:
-						if (ParseByte(colorText, 0, out a)
-							&& ParseByte(colorText, 2, out r)
-							&& ParseByte(colorText, 4, out g)
-							&& ParseByte(colorText, 6, out b)) {
 							return WpfColor.FromArgb(a, r, g, b);
 						}
 						break;
@@ -155,14 +139,23 @@ namespace Codist
 		{
 			static readonly Dictionary<string, SolidColorBrush> __Cache = GetBrushes();
 			static readonly Dictionary<string, Func<SolidColorBrush>> __SystemColors = GetSystemColors();
-			internal static SolidColorBrush GetBrush(string name) {
+			internal static SolidColorBrush GetBrush(string name, bool parseSystemColor) {
 				var c = ParseColor(name);
-				SolidColorBrush brush;
-				return
-					c != WpfColors.Transparent ? new SolidColorBrush(c)
-					: (name.Length >= 3 && name.Length <= 20) ? __Cache.TryGetValue(name, out brush) ? brush : null
-					: (name.Length >= 12 && name.Length <= 35) ? __SystemColors.TryGetValue(name, out var func) ? func() : null
-					: null;
+				if (c != WpfColors.Transparent) {
+					return new SolidColorBrush(c);
+				}
+				var l = name.Length;
+				if (l >= 3 && l <= 20) {
+					if (__Cache.TryGetValue(name, out var brush)) {
+						return brush;
+					}
+				}
+				if (parseSystemColor && l >= 9 && l <= 35) {
+					if (__SystemColors.TryGetValue(name, out var func)) {
+						return func();
+					}
+				}
+				return null;
 			}
 			static Dictionary<string, SolidColorBrush> GetBrushes() {
 				var c = Array.FindAll(typeof(WpfBrushes).GetProperties(), p => p.PropertyType == typeof(SolidColorBrush));
@@ -173,10 +166,16 @@ namespace Codist
 				return d;
 			}
 			static Dictionary<string, Func<SolidColorBrush>> GetSystemColors() {
-				var c = Array.FindAll(typeof(System.Windows.SystemColors).GetProperties(), p => p.PropertyType == typeof(SolidColorBrush));
+				var c = Array.FindAll(typeof(System.Windows.SystemColors).GetProperties(), p => p.PropertyType == typeof(SolidColorBrush) || p.PropertyType == typeof(WpfColor));
 				var d = new Dictionary<string, Func<SolidColorBrush>>(c.Length, StringComparer.OrdinalIgnoreCase);
 				foreach (var item in c) {
-					d.Add(item.Name, (Func<SolidColorBrush>)item.GetGetMethod(false).CreateDelegate(typeof(Func<SolidColorBrush>)));
+					if (item.PropertyType == typeof(SolidColorBrush)) {
+						d.Add(item.Name, (Func<SolidColorBrush>)item.GetGetMethod(false).CreateDelegate(typeof(Func<SolidColorBrush>)));
+					}
+					else {
+						var getColor = (Func<WpfColor>)item.GetGetMethod(false).CreateDelegate(typeof(Func<WpfColor>));
+						d.Add(item.Name, () => new SolidColorBrush(getColor()));
+					}
 				}
 				return d;
 			}

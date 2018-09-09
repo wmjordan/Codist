@@ -77,6 +77,10 @@ namespace Codist
 			block.Inlines.Add(inline);
 			return block;
 		}
+		public static TextBlock Append(this TextBlock block, UIElement element) {
+			block.Inlines.Add(new InlineUIContainer(element) { BaselineAlignment = BaselineAlignment.TextTop });
+			return block;
+		}
 		public static TextBlock Append(this TextBlock block, string text) {
 			block.Inlines.Add(new Run(text));
 			return block;
