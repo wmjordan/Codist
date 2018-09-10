@@ -349,12 +349,17 @@ namespace Codist.Margins
 					return;
 				}
 				var snapshot = _View.TextSnapshot;
+				var snapshotLength = snapshot.Length;
 				foreach (var item in refs) {
 					if (_Element._Cancellation.IsCancellationRequested) {
 						break;
 					}
 					foreach (var loc in item.Locations) {
-						var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, loc.Location.SourceSpan.Start));
+						var start = loc.Location.SourceSpan.Start;
+						if (start > snapshotLength) {
+							continue;
+						}
+						var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, start));
 						drawingContext.DrawRectangle(_MarkerBrush, null, new Rect(MarkerMargin, y - (MarkerSize / 2), MarkerSize, MarkerSize));
 					}
 					if (item.Definition.CanBeReferencedByName == false) {
@@ -367,7 +372,11 @@ namespace Codist.Margins
 					// draws the definition marker
 					foreach (var loc in locs) {
 						if (loc.SourceTree == _DocSyntax) {
-							var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, loc.SourceSpan.Start));
+							var start = loc.SourceSpan.Start;
+							if (start > snapshotLength) {
+								continue;
+							}
+							var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, start));
 							drawingContext.DrawRectangle(_MarkerBrush, _DefinitionMarkerPen, new Rect(0, y - (MarkerSize / 2), MarkerSize + MarkerMargin, MarkerSize + MarkerMargin));
 						}
 					}
