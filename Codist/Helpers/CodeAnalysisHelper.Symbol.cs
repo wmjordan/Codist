@@ -95,6 +95,10 @@ namespace Codist
 			}
 		}
 
+		public static ISymbol GetAliasTarget(this ISymbol symbol) {
+			return symbol.Kind == SymbolKind.Alias ? (symbol as IAliasSymbol).Target : symbol;
+		}
+
 		public static IEnumerable<INamedTypeSymbol> GetAllTypes(this INamespaceSymbol namespaceSymbol, CancellationToken cancellationToken = default(CancellationToken)) {
 			var stack = new Stack<INamespaceOrTypeSymbol>();
 			stack.Push(namespaceSymbol);

@@ -28,17 +28,14 @@ namespace Codist.QuickInfo
 		sealed class QuickInfoVisibilityController : IQuickInfoSource
 		{
 			public void AugmentQuickInfoSession(IQuickInfoSession session, IList<Object> qiContent, out ITrackingSpan applicableToSpan) {
+				// don't show Quick Info when CtrlQuickInfo option is on and shift is not pressed
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlQuickInfo)
-					&& Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift) == false) {
-					session.Dismiss();
-				}
+					&& Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift) == false
 				// do not show Quick Info when user is hovering on the smart bar
-				if (session.TextView.Properties.ContainsProperty(nameof(SmartBars.SmartBar))) {
+					|| session.TextView.Properties.ContainsProperty(nameof(SmartBars.SmartBar))
+					) {
 					session.Dismiss();
 				}
-				//if (Config.Instance.QuickInfoMaxHeight > 0 || Config.Instance.QuickInfoMaxWidth > 0) {
-				//	qiContent.Add(new QuickInfoContainer());
-				//}
 				applicableToSpan = null;
 			}
 
@@ -63,15 +60,9 @@ namespace Codist.QuickInfo
 					if (ic.Parent is StackPanel) {
 						return;
 					}
-					//var cc = items.Parent as ContentControl;
-					//if (cc != null) {
-					//var d = items as Decorator;
-					//var c = d.Child as FrameworkElement; // wpftooltip
 					var scrollViewer = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto }.LimitSize();
-					//d.Child = scrollViewer;
 					(ic.Parent as UserControl).Content = scrollViewer;
 					scrollViewer.Content = ic;
-					//}
 				}
 			}
 			static DependencyObject FindLogicalRoot(DependencyObject obj) {

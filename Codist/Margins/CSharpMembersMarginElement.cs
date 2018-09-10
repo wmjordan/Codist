@@ -320,7 +320,7 @@ namespace Codist.Margins
 			readonly IWpfTextView _View;
 			readonly IVerticalScrollBar _ScrollBar;
 			readonly CSharpMembersMarginElement _Element;
-			readonly Brush _MarkerBrush = Brushes.Orange;
+			readonly Brush _MarkerBrush = Brushes.Aqua;
 			readonly Pen _DefinitionMarkerPen = new Pen(ThemeHelper.ToolWindowTextBrush, MarkerMargin);
 			IEnumerable<ReferencedSymbol> _ReferencePoints;
 			SyntaxTree _DocSyntax;
@@ -414,7 +414,7 @@ namespace Codist.Margins
 				var symbol = model.GetSymbolOrFirstCandidate(node, token) ?? model.GetSymbolExt(node, token);
 				if (symbol != null) {
 					if (Interlocked.Exchange(ref _Node, node) != node) {
-						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol, doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), token);
+						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), token);
 						_Element.InvalidateVisual();
 					}
 				}

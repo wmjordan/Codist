@@ -224,11 +224,13 @@ namespace Codist.QuickInfo
 						if (cp == null) {
 							continue;
 						}
-						cp.LimitSize();
 						var c = cp.Content;
-						if (c is ScrollViewer || c is Overrider
+						if (c is Overrider
 							|| (c is Microsoft.VisualStudio.Language.Intellisense.IInteractiveQuickInfoContent && c.GetType().Name == "LightBulbQuickInfoPlaceHolder")) {
-							// skip already scrollable content and the light bulb
+							continue;
+						}
+						cp.LimitSize();
+						if (c is ScrollViewer) {
 							continue;
 						}
 						o = c as DependencyObject;

@@ -176,6 +176,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="QuickInfo\ColorQuickInfo.cs" />
     <Compile Include="QuickInfo\SymbolFormatter.cs" />
     <Compile Include="Helpers\XmlDocRenderer.cs" />
     <Compile Include="QuickInfo\ToolTipText.cs" />
