@@ -79,6 +79,11 @@ namespace Codist.SmartBars
 					}
 					if (b.GetText().IndexOf(t, StringComparison.OrdinalIgnoreCase) != -1) {
 						item.Visibility = Visibility.Visible;
+						if (item.HasItems) {
+							foreach (MenuItem sub in item.Items) {
+								sub.Visibility = Visibility.Visible;
+							}
+						}
 						continue;
 					}
 					var matchedSubItem = false;
