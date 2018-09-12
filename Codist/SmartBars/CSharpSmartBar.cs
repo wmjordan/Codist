@@ -22,6 +22,11 @@ namespace Codist.SmartBars
 	/// </summary>
 	sealed class CSharpSmartBar : SmartBar {
 		static readonly Thickness __FilterBorderThickness = new Thickness(0, 0, 0, 1);
+		static readonly SymbolDisplayFormat __MemberNameFormat = new SymbolDisplayFormat(
+			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+			parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
+			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 		CompilationUnitSyntax _Compilation;
 		Document _Document;
 		SyntaxNode _Node;
@@ -150,7 +155,7 @@ namespace Codist.SmartBars
 			else if (_Trivia.RawKind == 0) {
 				if (_Token.Span.Contains(View.Selection, true)
 					&& _Token.Kind() == SyntaxKind.IdentifierToken
-					&& (_Node is TypeSyntax || _Node is MemberDeclarationSyntax || _Node is VariableDeclaratorSyntax || _Node is ParameterSyntax)) {
+					&& (_Node.IsDeclaration() || _Node is ParameterSyntax)) {
 					// selection is within a symbol
 					if (_Node is IdentifierNameSyntax) {
 						AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition");
@@ -294,19 +299,31 @@ namespace Codist.SmartBars
 		}
 
 		void FindMembers(MenuItem menuItem, ISymbol symbol) {
-			var members = (symbol as INamespaceOrTypeSymbol)
-				.GetMembers()
-				.RemoveAll(m => m.CanBeReferencedByName == false)
-				.Sort(Comparer<ISymbol>.Create((a, b) => {
-					int s;
-					if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first
-						|| (s = a.Kind - b.Kind) != 0) { // then by member kind
-						return s;
-					}
-					return a.Name.CompareTo(b.Name);
-				}));
-			foreach (var item in members) {
-				menuItem.Items.Add(new SymbolMenuItem(this, item, item.Locations));
+			var type = symbol as INamedTypeSymbol;
+			if (type != null && type.TypeKind == TypeKind.Class) {
+				while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
+					var baseTypeItem = new SymbolMenuItem(this, type, type.ToDisplayString(__MemberNameFormat) + " (base class)", type.Locations);
+					menuItem.Items.Add(baseTypeItem);
+					AddSymbolMembers(this, baseTypeItem, type);
+				}
+			}
+			AddSymbolMembers(this, menuItem, symbol);
+			void AddSymbolMembers(SmartBar bar, MenuItem menu, ISymbol source) {
+				var nsOrType = source as INamespaceOrTypeSymbol;
+				var members = nsOrType
+					.GetMembers()
+					.RemoveAll(m => m.CanBeReferencedByName == false)
+					.Sort(Comparer<ISymbol>.Create((a, b) => {
+						int s;
+						if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first
+							|| (s = a.Kind - b.Kind) != 0) { // then by member kind
+							return s;
+						}
+						return a.Name.CompareTo(b.Name);
+					}));
+				foreach (var item in members) {
+					menu.Items.Add(new SymbolMenuItem(bar, item, item.Locations));
+				}
 			}
 		}
 
@@ -517,11 +534,6 @@ namespace Codist.SmartBars
 		sealed class SymbolMenuItem : CommandMenuItem
 		{
 			static readonly SymbolFormatter __Formatter = new SymbolFormatter();
-			static readonly SymbolDisplayFormat __MemberNameFormat = new SymbolDisplayFormat(
-				typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-				parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
-				genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-				miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(__MemberNameFormat), locations) { }
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
