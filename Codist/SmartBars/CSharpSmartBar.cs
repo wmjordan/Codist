@@ -213,7 +213,22 @@ namespace Codist.SmartBars
 
 		void FindCallers(MenuItem menuItem, ISymbol source) {
 			var docs = System.Collections.Immutable.ImmutableHashSet.CreateRange(_Document.Project.GetRelatedDocuments());
-			var callers = SymbolFinder.FindCallersAsync(source, _Document.Project.Solution, docs).Result.ToArray();
+			SymbolCallerInfo[] callers;
+			if (source.Kind == SymbolKind.Method) {
+				callers = SymbolFinder.FindCallersAsync(source, _Document.Project.Solution, docs).Result.ToArray();
+			}
+			else if (source.Kind == SymbolKind.NamedType) {
+				var tempResults = new HashSet<SymbolCallerInfo>(SymbolCallerInfoComparer.Instance);
+				foreach (var item in (source as INamedTypeSymbol).InstanceConstructors) {
+					foreach (var c in SymbolFinder.FindCallersAsync(item, _Document.Project.Solution, docs).Result) {
+						tempResults.Add(c);
+					}
+				}
+				tempResults.CopyTo(callers = new SymbolCallerInfo[tempResults.Count]);
+			}
+			else {
+				return;
+			}
 			Array.Sort(callers, (a, b) => {
 				var s = a.CallingSymbol.ContainingType.Name.CompareTo(b.CallingSymbol.ContainingType.Name);
 				return s != 0 ? s : a.CallingSymbol.Name.CompareTo(b.CallingSymbol.Name);
@@ -410,6 +425,9 @@ namespace Codist.SmartBars
 								r.Add(CreateCommandMenu("Find callers...", KnownImageIds.ShowCallerGraph, s, "No caller was found", FindCallers));
 							}
 						}
+						else if (t.InstanceConstructors.Length > 0) {
+							r.Add(CreateCommandMenu("Find constructor callers...", KnownImageIds.ShowCallerGraph, t, "No caller was found", FindCallers));
+						}
 					}
 					r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, t, "No member was found", FindMembers));
 					if (t.IsStatic || t.SpecialType != SpecialType.None) {
@@ -560,6 +578,19 @@ namespace Codist.SmartBars
 				ToolTip = tip;
 				ToolTipService.SetShowDuration(this, 15000);
 				ToolTipOpening -= ShowToolTip;
+			}
+		}
+
+		sealed class SymbolCallerInfoComparer : IEqualityComparer<SymbolCallerInfo>
+		{
+			internal static readonly SymbolCallerInfoComparer Instance = new SymbolCallerInfoComparer();
+
+			public bool Equals(SymbolCallerInfo x, SymbolCallerInfo y) {
+				return x.CallingSymbol == y.CallingSymbol;
+			}
+
+			public int GetHashCode(SymbolCallerInfo obj) {
+				return obj.CallingSymbol.GetHashCode();
 			}
 		}
 	}
