@@ -16,6 +16,8 @@ namespace Codist
 {
 	static partial class CodeAnalysisHelper
 	{
+		const SyntaxKind LocalFunction = (SyntaxKind)8830;
+
 		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
 			if (workspace == null) {
 				throw new ArgumentNullException("workspace");
@@ -140,6 +142,7 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.VariableDeclaration:
+				case LocalFunction:
 				//case SyntaxKind.VariableDeclarator:
 					return true;
 			}
@@ -212,6 +215,7 @@ namespace Codist
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement: return KnownImageIds.XMLElement;
 				case SyntaxKind.XmlComment: return KnownImageIds.XMLCommentTag;
+				case LocalFunction: return KnownImageIds.MethodPrivate;
 			}
 			return KnownImageIds.UnknownMember;
 		}
@@ -254,6 +258,7 @@ namespace Codist
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement: return "xml element";
 				case SyntaxKind.XmlComment: return "xml comment";
+				case LocalFunction: return "local function";
 			}
 			return null;
 		}
