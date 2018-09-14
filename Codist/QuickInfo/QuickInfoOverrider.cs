@@ -72,6 +72,12 @@ namespace Codist.QuickInfo
 			if (symbol.IsMemberOrType() && symbol.ContainingNamespace != null) {
 				t.Append("\nnamespace: ").Append(symbol.ContainingNamespace.ToDisplayString());
 			}
+			if (symbol.Kind == SymbolKind.Method) {
+				var m = (symbol as IMethodSymbol).ReducedFrom;
+				if (m != null) {
+					t.Append("\nclass: ").Append(m.ContainingType.Name);
+				}
+			}
 			return t;
 		}
 
