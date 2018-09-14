@@ -173,12 +173,17 @@ namespace Codist.QuickInfo
 						//		CreateDecorativeLine(doc)
 						//	}
 						//};
-						if (doc.Children.Count > 1 && doc.Children[1] is TextBlock) {
-							doc.Children.RemoveAt(1);
-							doc.Children.Insert(1, DocElement);
+						try {
+							if (doc.Children.Count > 1 && doc.Children[1] is TextBlock) {
+								doc.Children.RemoveAt(1);
+								doc.Children.Insert(1, DocElement);
+							}
+							else {
+								doc.Children.Add(DocElement);
+							}
 						}
-						else {
-							doc.Children.Add(DocElement);
+						catch (InvalidOperationException) {
+							// ignore exception: doc.Children was changed by another thread
 						}
 					}
 
