@@ -128,4 +128,28 @@ namespace Codist.Classifiers
 		public IClassificationType Punctuation { get; }
 		public IClassificationType SpecialPunctuation { get; }
 	}
+
+	sealed class HighlightClassifications
+	{
+		public HighlightClassifications(IClassificationTypeRegistryService registry) {
+			Highlight1 = registry.GetClassificationType(Constants.Highlight1);
+			Highlight2 = registry.GetClassificationType(Constants.Highlight2);
+			Highlight3 = registry.GetClassificationType(Constants.Highlight3);
+			Highlight4 = registry.GetClassificationType(Constants.Highlight4);
+			Highlight5 = registry.GetClassificationType(Constants.Highlight5);
+			Highlight6 = registry.GetClassificationType(Constants.Highlight6);
+			Highlight7 = registry.GetClassificationType(Constants.Highlight7);
+			Highlight8 = registry.GetClassificationType(Constants.Highlight8);
+			Highlight9 = registry.GetClassificationType(Constants.Highlight9);
+		}
+		public IClassificationType Highlight1 { get; }
+		public IClassificationType Highlight2 { get; }
+		public IClassificationType Highlight3 { get; }
+		public IClassificationType Highlight4 { get; }
+		public IClassificationType Highlight5 { get; }
+		public IClassificationType Highlight6 { get; }
+		public IClassificationType Highlight7 { get; }
+		public IClassificationType Highlight8 { get; }
+		public IClassificationType Highlight9 { get; }
+	}
 }

@@ -39,7 +39,7 @@ namespace Codist
 		const string CategoryScrollbarMarker = Constants.NameOfMe + "\\Scrollbar Marker";
 		const string CategorySyntaxHighlight = Constants.NameOfMe + "\\Syntax Highlight";
 		static EnvDTE.DTE _dte;
-
+		static EnvDTE.SolutionEvents _SolutionEvents;
 		//static VsDebugger _Debugger;
 
 		/// <summary>
@@ -53,7 +53,6 @@ namespace Codist
 		}
 
 		public static EnvDTE.DTE DTE => _dte ?? (_dte = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE);
-
 		public static DebuggerStatus DebuggerStatus {
 			get {
 				ThreadHelper.ThrowIfNotOnUIThread(nameof(DebuggerStatus));
@@ -87,6 +86,10 @@ namespace Codist
 			ThemeHelper.RefreshThemeCache();
 			VSColorTheme.ThemeChanged += (args) => {
 				ThemeHelper.RefreshThemeCache();
+			};
+			_SolutionEvents = DTE.Events.SolutionEvents;
+			_SolutionEvents.Opened += () => {
+				Classifiers.SymbolMarkManager.Clear();
 			};
 		}
 

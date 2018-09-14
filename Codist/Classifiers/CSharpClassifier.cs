@@ -42,7 +42,6 @@ namespace Codist.Classifiers
 		static GeneralClassifications _GeneralClassifications;
 
 		readonly ITextBuffer _TextBuffer;
-		readonly IClassificationTypeRegistryService _TypeRegistryService;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CSharpClassifier"/> class.
@@ -57,7 +56,6 @@ namespace Codist.Classifiers
 				_GeneralClassifications = new GeneralClassifications(registry);
 			}
 			_TextBuffer = buffer;
-			_TypeRegistryService = registry;
 		}
 
 		/// <summary>
@@ -422,7 +420,7 @@ namespace Codist.Classifiers
 						}
 					}
 					else {
-						result.Add(CreateClassificationSpan(snapshot, new TextSpan(start + spanItem.TextSpan.Start, spanItem.TextSpan.Length), _TypeRegistryService.GetClassificationType(ct)));
+						result.Add(CreateClassificationSpan(snapshot, new TextSpan(start + spanItem.TextSpan.Start, spanItem.TextSpan.Length), ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(ct)));
 					}
 				}
 			}
@@ -496,7 +494,7 @@ namespace Codist.Classifiers
 					yield break;
 
 				case SymbolKind.Field:
-					var fieldSymbol = (symbol as IFieldSymbol);
+					var fieldSymbol = symbol as IFieldSymbol;
 					yield return fieldSymbol.IsConst ? _Classifications.ConstField : fieldSymbol.IsReadOnly ? _Classifications.ReadonlyField : _Classifications.Field;
 					break;
 
@@ -545,6 +543,11 @@ namespace Codist.Classifiers
 
 				default:
 					yield break;
+			}
+
+			var markerStyle = SymbolMarkManager.GetSymbolMarkerStyle(symbol);
+			if (markerStyle != null) {
+				yield return markerStyle;
 			}
 
 			if (symbol.IsStatic) {

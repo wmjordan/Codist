@@ -56,7 +56,6 @@ namespace Codist
 		/// </summary>
 		/// <param name="project">The project to be examined.</param>
 		static HashSet<Project> GetRelatedProjects(this Project project) {
-			project.Solution.GetProjectDependencyGraph().GetProjectsThatThisProjectTransitivelyDependsOn(project.Id);
 			var projects = new HashSet<Project>();
 			GetRelatedProjects(project, projects);
 			foreach (var proj in project.Solution.Projects) {

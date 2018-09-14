@@ -155,48 +155,58 @@ namespace Codist
 		//public const string EditorSigHelp = "sighelp";
 		//public const string EditorSigHelpDoc = "sighelp-doc";
 
-		internal const string CommentPrefix = "CdstComment: ";
+		internal const string CodistPrefix = "Codist: ";
 		//! Important
 		//# Notice
-		public const string EmphasisComment = CommentPrefix + "Emphasis";
+		public const string EmphasisComment = CodistPrefix + "Emphasis";
 		//? Question
-		public const string QuestionComment = CommentPrefix + "Question";
+		public const string QuestionComment = CodistPrefix + "Question";
 		//!? Exclaimation
-		public const string ExclaimationComment = CommentPrefix + "Exclaimation";
+		public const string ExclaimationComment = CodistPrefix + "Exclaimation";
 		//x Removed
-		public const string DeletionComment = CommentPrefix + "Deletion";
+		public const string DeletionComment = CodistPrefix + "Deletion";
 
 		//TODO: This does not need work
-		public const string TodoComment = CommentPrefix + "Task - ToDo";
+		public const string TodoComment = CodistPrefix + "Task - ToDo";
 		//NOTE: Watch-out!
-		public const string NoteComment = CommentPrefix + "Task - Note";
+		public const string NoteComment = CodistPrefix + "Task - Note";
 		//Hack: B-) We are in the Matrix now!!!
-		public const string HackComment = CommentPrefix + "Task - Hack";
+		public const string HackComment = CodistPrefix + "Task - Hack";
 		//Undone: The revolution has not yet succeeded. Comrades still need to strive hard.
-		public const string UndoneComment = CommentPrefix + "Task - Undone";
+		public const string UndoneComment = CodistPrefix + "Task - Undone";
 
 		//+++ heading 1
-		public const string Heading1Comment = CommentPrefix + "Heading 1";
+		public const string Heading1Comment = CodistPrefix + "Heading 1";
 		//++ heading 2
-		public const string Heading2Comment = CommentPrefix + "Heading 2";
+		public const string Heading2Comment = CodistPrefix + "Heading 2";
 		//+ heading 3
-		public const string Heading3Comment = CommentPrefix + "Heading 3";
+		public const string Heading3Comment = CodistPrefix + "Heading 3";
 		//- heading 4
-		public const string Heading4Comment = CommentPrefix + "Heading 4";
+		public const string Heading4Comment = CodistPrefix + "Heading 4";
 		//-- heading 5
-		public const string Heading5Comment = CommentPrefix + "Heading 5";
+		public const string Heading5Comment = CodistPrefix + "Heading 5";
 		//--- heading 6
-		public const string Heading6Comment = CommentPrefix + "Heading 6";
+		public const string Heading6Comment = CodistPrefix + "Heading 6";
 
-		public const string Task1Comment = CommentPrefix + "Task 1";
-		public const string Task2Comment = CommentPrefix + "Task 2";
-		public const string Task3Comment = CommentPrefix + "Task 3";
-		public const string Task4Comment = CommentPrefix + "Task 4";
-		public const string Task5Comment = CommentPrefix + "Task 5";
-		public const string Task6Comment = CommentPrefix + "Task 6";
-		public const string Task7Comment = CommentPrefix + "Task 7";
-		public const string Task8Comment = CommentPrefix + "Task 8";
-		public const string Task9Comment = CommentPrefix + "Task 9";
+		public const string Task1Comment = CodistPrefix + "Task 1";
+		public const string Task2Comment = CodistPrefix + "Task 2";
+		public const string Task3Comment = CodistPrefix + "Task 3";
+		public const string Task4Comment = CodistPrefix + "Task 4";
+		public const string Task5Comment = CodistPrefix + "Task 5";
+		public const string Task6Comment = CodistPrefix + "Task 6";
+		public const string Task7Comment = CodistPrefix + "Task 7";
+		public const string Task8Comment = CodistPrefix + "Task 8";
+		public const string Task9Comment = CodistPrefix + "Task 9";
+
+		public const string Highlight1 = CodistPrefix + "Highlight 1";
+		public const string Highlight2 = CodistPrefix + "Highlight 2";
+		public const string Highlight3 = CodistPrefix + "Highlight 3";
+		public const string Highlight4 = CodistPrefix + "Highlight 4";
+		public const string Highlight5 = CodistPrefix + "Highlight 5";
+		public const string Highlight6 = CodistPrefix + "Highlight 6";
+		public const string Highlight7 = CodistPrefix + "Highlight 7";
+		public const string Highlight8 = CodistPrefix + "Highlight 8";
+		public const string Highlight9 = CodistPrefix + "Highlight 9";
 
 		public static readonly Color CommentColor = Colors.Green;
 		public static readonly Color QuestionColor = Colors.MediumPurple;

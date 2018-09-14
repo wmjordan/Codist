@@ -376,7 +376,7 @@ namespace Codist.SmartBars
 				CommandItem = item;
 				Icon = ThemeHelper.GetImage(item.ImageId);
 				Header = new TextBlock { Text = item.Name };
-				item.ControlInitializer?.Invoke(this);
+				item.ItemInitializer?.Invoke(this);
 				// the action is installed only when called by this method
 				if (item.Action != null) {
 					Click += ClickHandler;
@@ -419,16 +419,16 @@ namespace Codist.SmartBars
 				ImageId = symbol.GetImageId();
 			}
 
-			public CommandItem(string name, int imageId, Action<Control> controlInitializer, Action<CommandContext> action) {
+			public CommandItem(string name, int imageId, Action<MenuItem> controlInitializer, Action<CommandContext> action) {
 				Name = name;
 				ImageId = imageId;
-				ControlInitializer = controlInitializer;
+				ItemInitializer = controlInitializer;
 				Action = action;
 			}
 
 			public string Name { get; }
 			public int ImageId { get; }
-			public Action<Control> ControlInitializer { get; }
+			public Action<MenuItem> ItemInitializer { get; }
 			public Action<CommandContext> Action { get; }
 		}
 

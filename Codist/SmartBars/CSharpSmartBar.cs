@@ -22,6 +22,7 @@ namespace Codist.SmartBars
 	/// </summary>
 	sealed class CSharpSmartBar : SmartBar {
 		static readonly Thickness __FilterBorderThickness = new Thickness(0, 0, 0, 1);
+		static readonly Classifiers.HighlightClassifications __HighlightClassifications = new Classifiers.HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 		static readonly SymbolDisplayFormat __MemberNameFormat = new SymbolDisplayFormat(
 			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
 			parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
@@ -30,6 +31,7 @@ namespace Codist.SmartBars
 		CompilationUnitSyntax _Compilation;
 		Document _Document;
 		SyntaxNode _Node;
+		ISymbol _Symbol;
 		SemanticModel _SemanticModel;
 		SyntaxToken _Token;
 		SyntaxTrivia _Trivia, _LineComment;
@@ -155,20 +157,26 @@ namespace Codist.SmartBars
 			else if (_Trivia.RawKind == 0) {
 				if (_Token.Span.Contains(View.Selection, true)
 					&& _Token.Kind() == SyntaxKind.IdentifierToken
-					&& (_Node.IsDeclaration() || _Node is TypeSyntax || _Node is ParameterSyntax)) {
+					&& (_Node.IsDeclaration() || _Node is TypeSyntax || _Node is ParameterSyntax || _Node.IsKind(SyntaxKind.VariableDeclarator))) {
 					// selection is within a symbol
-					if (_Node is IdentifierNameSyntax) {
-						AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition");
-					}
-					AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze references...", GetReferenceCommands);
+					_Symbol = SymbolFinder.FindSymbolAtPositionAsync(_Document, View.Selection.Start.Position).Result;
+					if (_Symbol != null) {
+						if (_Node is IdentifierNameSyntax) {
+							AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition");
+						}
+						AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze references...", GetReferenceCommands);
+						if (Classifiers.SymbolMarkManager.CanBookmark(_Symbol)) {
+							AddCommands(MyToolBar, KnownImageIds.FlagGroup, "Mark symbol...", GetMarkerCommands);
+						}
 
-					if (isDesignMode) {
-						AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
-							TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
-							ctx.KeepToolbarOnClick = true;
-						});
-						if (_Node is ParameterSyntax && _Node.Parent is ParameterListSyntax) {
-							AddEditorCommand(MyToolBar, KnownImageIds.ReorderParameters, "Refactor.ReorderParameters", "Reorder parameters");
+						if (isDesignMode) {
+							AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
+								TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
+								ctx.KeepToolbarOnClick = true;
+							});
+							if (_Node is ParameterSyntax && _Node.Parent is ParameterListSyntax) {
+								AddEditorCommand(MyToolBar, KnownImageIds.ReorderParameters, "Refactor.ReorderParameters", "Reorder parameters");
+							}
 						}
 					}
 				}
@@ -216,23 +224,54 @@ namespace Codist.SmartBars
 			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection...\nRight click: Duplicate...\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", GetExpandSelectionCommands);
 		}
 
+		CommandItem[] GetMarkerCommands(CommandContext arg) {
+			return new CommandItem[] {
+				new CommandItem("Mark symbol " + _Symbol.Name, KnownImageIds.Flag, ctrl => {
+					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Red", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight1, ctx => SetSymbolMark(ctx.Sender.Tag))));
+					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Orange", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight2, ctx => SetSymbolMark(ctx.Sender.Tag))));
+					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Yellow", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight3, ctx => SetSymbolMark(ctx.Sender.Tag))));
+					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Green", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight4, ctx => SetSymbolMark(ctx.Sender.Tag))));
+					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Cyan", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight5, ctx => SetSymbolMark(ctx.Sender.Tag))));
+					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Blue", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight6, ctx => SetSymbolMark(ctx.Sender.Tag))));
+					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Violet", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight7, ctx => SetSymbolMark(ctx.Sender.Tag))));
+				}, null),
+				CreateCommandMenu("Remove symbol mark...", KnownImageIds.FlagOutline, null, "No symbol marked", (m, s) => {
+					foreach (var item in Classifiers.SymbolMarkManager.MarkedSymbols) {
+						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.ToDisplayString(__MemberNameFormat), item.GetImageId(), null, ctx => {
+							Classifiers.SymbolMarkManager.Remove(item);
+						})));
+					}
+				})
+			};
+		}
+
+		void SetSymbolMark(object tag) {
+			if (_Symbol == null) {
+				return;
+			}
+			Classifiers.SymbolMarkManager.Update(_Symbol, tag as Microsoft.VisualStudio.Text.Classification.IClassificationType);
+			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+		}
+
 		void FindCallers(MenuItem menuItem, ISymbol source) {
 			var docs = System.Collections.Immutable.ImmutableHashSet.CreateRange(_Document.Project.GetRelatedDocuments());
 			SymbolCallerInfo[] callers;
-			if (source.Kind == SymbolKind.Method) {
-				callers = SymbolFinder.FindCallersAsync(source, _Document.Project.Solution, docs).Result.ToArray();
-			}
-			else if (source.Kind == SymbolKind.NamedType) {
-				var tempResults = new HashSet<SymbolCallerInfo>(SymbolCallerInfoComparer.Instance);
-				foreach (var item in (source as INamedTypeSymbol).InstanceConstructors) {
-					foreach (var c in SymbolFinder.FindCallersAsync(item, _Document.Project.Solution, docs).Result) {
-						tempResults.Add(c);
+			switch (source.Kind) {
+				case SymbolKind.Method:
+				case SymbolKind.Property:
+				case SymbolKind.Event:
+					callers = SymbolFinder.FindCallersAsync(source, _Document.Project.Solution, docs).Result.ToArray();
+					break;
+				case SymbolKind.NamedType:
+					var tempResults = new HashSet<SymbolCallerInfo>(SymbolCallerInfoComparer.Instance);
+					foreach (var item in (source as INamedTypeSymbol).InstanceConstructors) {
+						foreach (var c in SymbolFinder.FindCallersAsync(item, _Document.Project.Solution, docs).Result) {
+							tempResults.Add(c);
+						}
 					}
-				}
-				tempResults.CopyTo(callers = new SymbolCallerInfo[tempResults.Count]);
-			}
-			else {
-				return;
+					tempResults.CopyTo(callers = new SymbolCallerInfo[tempResults.Count]);
+					break;
+				default: return;
 			}
 			Array.Sort(callers, (a, b) => {
 				var s = a.CallingSymbol.ContainingType.Name.CompareTo(b.CallingSymbol.ContainingType.Name);
@@ -530,7 +569,6 @@ namespace Codist.SmartBars
 			_Node = _Compilation.FindNode(_Token.Span, true, true);
 			return true;
 		}
-
 		sealed class SymbolMenuItem : CommandMenuItem
 		{
 			static readonly SymbolFormatter __Formatter = new SymbolFormatter();
