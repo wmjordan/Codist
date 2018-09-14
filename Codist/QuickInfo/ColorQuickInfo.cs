@@ -8,7 +8,6 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 using AppHelpers;
-using Microsoft.VisualStudio.Shell;
 
 namespace Codist.QuickInfo
 {
@@ -47,10 +46,13 @@ namespace Codist.QuickInfo
 				var navigator = _NavigatorService.GetTextStructureNavigator(buffer);
 				var extent = navigator.GetExtentOfWord(session.GetTriggerPoint(snapshot).GetValueOrDefault()).Span;
 				var word = snapshot.GetText(extent);
-				if ((extent.Length == 6 || extent.Length == 8) && extent.Span.Start > 0 && Char.IsPunctuation(snapshot.GetText(extent.Span.Start - 1, 1)[0])) {
-					word = "#" + word;
-				}
 				var brush = UIHelper.GetBrush(word, _IsCSharp);
+				if (brush == null) {
+					if ((extent.Length == 6 || extent.Length == 8) && extent.Span.Start > 0 && Char.IsPunctuation(snapshot.GetText(extent.Span.Start - 1, 1)[0])) {
+						word = "#" + word;
+					}
+					brush = UIHelper.GetBrush(word, _IsCSharp);
+				}
 				if (brush != null) {
 					qiContent.Add(GetColorInfo(brush));
 					applicableToSpan = snapshot.CreateTrackingSpan(extent.Span, SpanTrackingMode.EdgeExclusive);
