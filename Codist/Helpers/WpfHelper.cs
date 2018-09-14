@@ -380,27 +380,39 @@ namespace Codist
 			}
 
 			void ShowSymbolToolTip(object sender, ToolTipEventArgs e) {
-				var tip = new TextBlock()
+				var title = new TextBlock {
+					HorizontalAlignment = HorizontalAlignment.Stretch,
+					Background = WpfBrushes.Gray,
+					Foreground = WpfBrushes.White,
+					TextWrapping = TextWrapping.Wrap
+				}
 					.Append(_Symbol.GetAccessibility() + _Symbol.GetAbstractionModifier() + _Symbol.GetSymbolKindName() + " ")
 					.Append(_Symbol.GetSignatureString(), true);
+
+
+				var content = new TextBlock { TextWrapping = TextWrapping.Wrap }
+					.Append("namespace: " + _Symbol.ContainingNamespace?.ToString())
+					.Append("\nassembly: " + _Symbol.GetAssemblyModuleName());
 				ITypeSymbol t = _Symbol.ContainingType;
 				if (t != null) {
-					tip.Append("\n" + t.GetSymbolKindName() + ": ")
+					content.Append("\n" + t.GetSymbolKindName() + ": ")
 						.Append(t.ToDisplayString(QuickInfoSymbolDisplayFormat));
-				}
+				};
 				t = _Symbol.GetReturnType();
 				if (t != null) {
-					tip.Append("\nreturn value: " + t.ToDisplayString(QuickInfoSymbolDisplayFormat));
+					content.Append("\nreturn value: ").Append(t.ToDisplayString(QuickInfoSymbolDisplayFormat), true);
 				}
-				tip.Append("\nnamespace: " + _Symbol.ContainingNamespace?.ToString())
-					.Append("\nassembly: " + _Symbol.GetAssemblyModuleName());
 				var f = _Symbol as IFieldSymbol;
 				if (f != null && f.IsConst) {
-					tip.Append("\nconst: " + f.ConstantValue.ToString());
+					content.Append("\nconst: " + f.ConstantValue.ToString());
 				}
-
-				tip.TextWrapping = TextWrapping.Wrap;
-				ToolTip = tip;
+				var panel = new StackPanel {
+					Children = {
+						title,
+						content
+					}
+				};
+				ToolTip = panel;
 				ToolTipOpening -= ShowSymbolToolTip;
 			}
 

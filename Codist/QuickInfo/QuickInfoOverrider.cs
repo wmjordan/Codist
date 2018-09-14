@@ -62,13 +62,10 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static TextBlock ShowSymbolLocation(ISymbol symbol, string path) {
+		static StackPanel ShowSymbolLocation(ISymbol symbol, string path) {
 			var t = new TextBlock()
-				.LimitSize()
-				.Append(symbol.Name, true);
-			if (String.IsNullOrEmpty(path) == false) {
-				t.Append("\ndefined in ").Append(path, true);
-			}
+				.Append("defined in ")
+				.Append(String.IsNullOrEmpty(path) ? "?" : path, true);
 			if (symbol.IsMemberOrType() && symbol.ContainingNamespace != null) {
 				t.Append("\nnamespace: ").Append(symbol.ContainingNamespace.ToDisplayString());
 			}
@@ -78,7 +75,12 @@ namespace Codist.QuickInfo
 					t.Append("\nclass: ").Append(m.ContainingType.Name);
 				}
 			}
-			return t;
+			return new StackPanel {
+				Children = {
+					new TextBlock { HorizontalAlignment = HorizontalAlignment.Stretch, Background = Brushes.Gray, Foreground = Brushes.White }.Append(symbol.Name, true),
+					t
+				}
+			};
 		}
 
 		/// <summary>
