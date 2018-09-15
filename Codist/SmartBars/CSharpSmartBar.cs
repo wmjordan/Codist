@@ -344,7 +344,7 @@ namespace Codist.SmartBars
 			var type = symbol as INamedTypeSymbol;
 			if (type != null && type.TypeKind == TypeKind.Class) {
 				while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
-					var baseTypeItem = new SymbolMenuItem(this, type, type.ToDisplayString(__MemberNameFormat) + " (base class)", type.Locations);
+					var baseTypeItem = new SymbolMenuItem(this, type, type.ToDisplayString(__MemberNameFormat) + " (base class)", null);
 					menuItem.Items.Add(baseTypeItem);
 					AddSymbolMembers(this, baseTypeItem, type);
 				}
