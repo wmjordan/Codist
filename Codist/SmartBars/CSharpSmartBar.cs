@@ -226,30 +226,33 @@ namespace Codist.SmartBars
 
 		CommandItem[] GetMarkerCommands(CommandContext arg) {
 			return new CommandItem[] {
-				new CommandItem("Mark symbol " + _Symbol.Name, KnownImageIds.Flag, ctrl => {
-					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Red", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight1, ctx => SetSymbolMark(ctx.Sender.Tag))));
-					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Orange", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight2, ctx => SetSymbolMark(ctx.Sender.Tag))));
-					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Yellow", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight3, ctx => SetSymbolMark(ctx.Sender.Tag))));
-					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Green", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight4, ctx => SetSymbolMark(ctx.Sender.Tag))));
-					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Cyan", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight5, ctx => SetSymbolMark(ctx.Sender.Tag))));
-					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Blue", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight6, ctx => SetSymbolMark(ctx.Sender.Tag))));
-					ctrl.Items.Add(new CommandMenuItem(this, new CommandItem("Violet", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight7, ctx => SetSymbolMark(ctx.Sender.Tag))));
-				}, null),
+				new CommandItem("Mark symbol " + _Symbol.Name, KnownImageIds.Flag, AddHighlightMenuItems, null),
 				CreateCommandMenu("Remove symbol mark...", KnownImageIds.FlagOutline, null, "No symbol marked", (m, s) => {
 					foreach (var item in Classifiers.SymbolMarkManager.MarkedSymbols) {
 						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.ToDisplayString(__MemberNameFormat), item.GetImageId(), null, ctx => {
 							Classifiers.SymbolMarkManager.Remove(item);
+							Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 						})));
 					}
 				})
 			};
 		}
 
-		void SetSymbolMark(object tag) {
+		void AddHighlightMenuItems(MenuItem menuItem) {
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Red", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight1, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Orange", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight2, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Yellow", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight3, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Green", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight4, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Cyan", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight5, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Blue", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight6, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Violet", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight7, SetSymbolMark)));
+		}
+
+		void SetSymbolMark(CommandContext context) {
 			if (_Symbol == null) {
 				return;
 			}
-			Classifiers.SymbolMarkManager.Update(_Symbol, tag as Microsoft.VisualStudio.Text.Classification.IClassificationType);
+			Classifiers.SymbolMarkManager.Update(_Symbol, context.Sender.Tag as Microsoft.VisualStudio.Text.Classification.IClassificationType);
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 

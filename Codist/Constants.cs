@@ -30,6 +30,7 @@ namespace Codist
 			public const string TypeDefinition = "Type Definition";
 			public const string Member = nameof(Member);
 			public const string Xml = "XML";
+			public const string Highlight = nameof(Highlight);
 		}
 
 		public static class EditorProperties
@@ -501,6 +502,29 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.XmlText)]
 		XmlText,
 	}
+	enum SymbolMarkerStyleTypes
+	{
+		None,
+		[ClassificationType(ClassificationTypeNames = Constants.Highlight1)]
+		Highlight1,
+		[ClassificationType(ClassificationTypeNames = Constants.Highlight2)]
+		Highlight2,
+		[ClassificationType(ClassificationTypeNames = Constants.Highlight3)]
+		Highlight3,
+		[ClassificationType(ClassificationTypeNames = Constants.Highlight4)]
+		Highlight4,
+		[ClassificationType(ClassificationTypeNames = Constants.Highlight5)]
+		Highlight5,
+		[ClassificationType(ClassificationTypeNames = Constants.Highlight6)]
+		Highlight6,
+		[ClassificationType(ClassificationTypeNames = Constants.Highlight7)]
+		Highlight7,
+		[ClassificationType(ClassificationTypeNames = Constants.Highlight8)]
+		Highlight8,
+		[ClassificationType(ClassificationTypeNames = Constants.Highlight9)]
+		Highlight9,
+	}
+
 	enum MarkerStyleTypes
 	{
 		None,

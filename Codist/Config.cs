@@ -10,13 +10,14 @@ using Newtonsoft.Json;
 using Codist.Classifiers;
 using Codist.SyntaxHighlight;
 using Codist.Margins;
+using AppHelpers;
 
 namespace Codist
 {
 	sealed class Config
 	{
 		const string ThemePrefix = "res:";
-		const int DefaultIconSize = 16;
+		const int DefaultIconSize = 20;
 		internal const string LightTheme = ThemePrefix + "Light", DarkTheme = ThemePrefix + "Dark", SimpleTheme = ThemePrefix + "Simple";
 
 		static DateTime _LastSaved, _LastLoaded;
@@ -45,12 +46,14 @@ namespace Codist
 		public double QuickInfoMaxWidth { get; set; }
 		public double QuickInfoMaxHeight { get; set; }
 		public bool NoSpaceBetweenWrappedLines { get; set; }
+		[DefaultValue(DefaultIconSize)]
 		public int SmartBarButtonSize { get; set; } = DefaultIconSize;
 		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
 		public List<CommentStyle> CommentStyles { get; } = new List<CommentStyle>();
 		public List<XmlCodeStyle> XmlCodeStyles { get; } = new List<XmlCodeStyle>();
 		public List<CSharpStyle> CodeStyles { get; } = new List<CSharpStyle>();
 		public List<CodeStyle> GeneralStyles { get; } = new List<CodeStyle>();
+		public List<SymbolMarkerStyle> SymbolMarkerStyles { get; } = new List<SymbolMarkerStyle>();
 		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
 
 		public static event EventHandler Loaded;
@@ -114,44 +117,18 @@ namespace Codist
 			if (l.Count == 0) {
 				InitDefaultLabels(l);
 			}
-			var cs = config.GeneralStyles;
-			CleanUpStyleEntry(cs, loadFromTheme);
-			for (var i = cs.Count - 1; i >= 0; i--) {
-				if (cs[i] == null || Enum.IsDefined(typeof(CodeStyleTypes), cs[i].StyleID) == false) {
-					cs.RemoveAt(i);
-				}
-			}
-			MergeDefaultCodeStyles(cs);
-			var s = config.CommentStyles;
-			CleanUpStyleEntry(s, loadFromTheme);
-			for (var i = s.Count - 1; i >= 0; i--) {
-				if (s[i] == null || Enum.IsDefined(typeof(CommentStyleTypes), s[i].StyleID) == false) {
-					s.RemoveAt(i);
-				}
-			}
-			MergeDefaultCommentStyles(s);
-			var css = config.CodeStyles;
-			CleanUpStyleEntry(css, loadFromTheme);
-			for (var i = css.Count - 1; i >= 0; i--) {
-				if (css[i] == null || Enum.IsDefined(typeof(CSharpStyleTypes), css[i].StyleID) == false) {
-					css.RemoveAt(i);
-				}
-			}
-			MergeDefaultCSharpStyles(css);
-			var xcs = config.XmlCodeStyles;
-			CleanUpStyleEntry(xcs, loadFromTheme);
-			for (var i = xcs.Count - 1; i >= 0; i--) {
-				if (xcs[i] == null || Enum.IsDefined(typeof(XmlStyleTypes), xcs[i].StyleID) == false) {
-					xcs.RemoveAt(i);
-				}
-			}
-			MergeDefaultXmlCodeStyles(xcs);
+			LoadStyleEntries<CodeStyle, CodeStyleTypes>(config.GeneralStyles, loadFromTheme);
+			LoadStyleEntries<CommentStyle, CommentStyleTypes>(config.CommentStyles, loadFromTheme);
+			LoadStyleEntries<CSharpStyle, CSharpStyleTypes>(config.CodeStyles, loadFromTheme);
+			LoadStyleEntries<XmlCodeStyle, XmlStyleTypes>(config.XmlCodeStyles, loadFromTheme);
+			LoadStyleEntries<SymbolMarkerStyle, SymbolMarkerStyleTypes>(config.SymbolMarkerStyles, loadFromTheme);
 			if (loadFromTheme) {
 				// don't override other settings if loaded from predefined themes
 				ResetCodeStyle(Instance.GeneralStyles, config.GeneralStyles);
 				ResetCodeStyle(Instance.CommentStyles, config.CommentStyles);
 				ResetCodeStyle(Instance.CodeStyles, config.CodeStyles);
 				ResetCodeStyle(Instance.XmlCodeStyles, config.XmlCodeStyles);
+				ResetCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
 				_LastLoaded = DateTime.Now;
 				return Instance;
@@ -162,9 +139,11 @@ namespace Codist
 		}
 
 		public static void ResetStyles() {
+			ResetCodeStyle(Instance.GeneralStyles, GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>());
 			ResetCodeStyle(Instance.CommentStyles, GetDefaultCommentStyles());
-			ResetCodeStyle(Instance.CodeStyles, GetDefaultCSharpStyles());
-			ResetCodeStyle(Instance.XmlCodeStyles, GetDefaultXmlCodeStyles());
+			ResetCodeStyle(Instance.CodeStyles, GetDefaultCodeStyles<CSharpStyle, CSharpStyleTypes>());
+			ResetCodeStyle(Instance.XmlCodeStyles, GetDefaultCodeStyles<XmlCodeStyle, XmlStyleTypes>());
+			ResetCodeStyle(Instance.SymbolMarkerStyles, GetDefaultCodeStyles<SymbolMarkerStyle, SymbolMarkerStyleTypes>());
 			ResetCodeStyle(Instance.MarkerSettings, GetDefaultMarkerStyles());
 			Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.SyntaxHighlight));
 		}
@@ -203,23 +182,31 @@ namespace Codist
 			Updated?.Invoke(this, new ConfigUpdatedEventArgs(updatedFeature));
 		}
 
-		static void CleanUpStyleEntry<TStyle> (List<TStyle> styles, bool removeFontNames)
-			where TStyle : StyleBase {
+		static void LoadStyleEntries<TStyle, TStyleType> (List<TStyle> styles, bool removeFontNames)
+			where TStyle : StyleBase<TStyleType>, new()
+			where TStyleType : struct, Enum {
 			styles.RemoveAll(i => i.Id < 1);
 			styles.Sort((x, y) => x.Id - y.Id);
 			if (removeFontNames) {
 				styles.ForEach(i => i.Font = null);
 			}
+			for (var i = styles.Count - 1; i >= 0; i--) {
+				if (styles[i] == null || EnumHelper.IsDefined(styles[i].StyleID) == false) {
+					styles.RemoveAt(i);
+				}
+			}
+			MergeDefaultCodeStyles<TStyle, TStyleType>(styles);
 		}
 
 		static Config GetDefaultConfig() {
 			_LastLoaded = DateTime.Now;
 			var c = new Config();
 			InitDefaultLabels(c.Labels);
-			c.GeneralStyles.AddRange(GetDefaultCodeStyles());
-			c.CommentStyles.AddRange(GetDefaultCommentStyles());
-			c.CodeStyles.AddRange(GetDefaultCSharpStyles());
-			c.XmlCodeStyles.AddRange(GetDefaultXmlCodeStyles());
+			c.GeneralStyles.AddRange(GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>());
+			c.CommentStyles.AddRange(GetDefaultCodeStyles<CommentStyle, CommentStyleTypes>());
+			c.CodeStyles.AddRange(GetDefaultCodeStyles<CSharpStyle, CSharpStyleTypes>());
+			c.XmlCodeStyles.AddRange(GetDefaultCodeStyles<XmlCodeStyle, XmlStyleTypes>());
+			c.SymbolMarkerStyles.AddRange(GetDefaultCodeStyles<SymbolMarkerStyle, SymbolMarkerStyleTypes>());
 			c.MarkerSettings.AddRange(GetDefaultMarkerStyles());
 			return c;
 		}
@@ -245,37 +232,11 @@ namespace Codist
 				new CommentLabel("HACK", CommentStyleTypes.Hack, true) { AllowPunctuationDelimiter = true },
 			});
 		}
-		static void MergeDefaultCodeStyles(List<CodeStyle> styles) {
-			foreach (var s in GetDefaultCodeStyles()) {
-				if (s.Id > 0 && styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
-					styles.Add(s);
-				}
-			}
-		}
-		static void MergeDefaultCommentStyles(List<CommentStyle> styles) {
-			foreach (var s in GetDefaultCommentStyles()) {
-				if (s.Id > 0 && styles.FindIndex(i=> i.StyleID == s.StyleID) == -1) {
-					styles.Add(s);
-				}
-			}
-		}
-		static void MergeDefaultCSharpStyles(List<CSharpStyle> styles) {
-			foreach (var s in GetDefaultCSharpStyles()) {
-				if (s.Id > 0 && styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
-					styles.Add(s);
-				}
-			}
-		}
-		static void MergeDefaultXmlCodeStyles(List<XmlCodeStyle> styles) {
-			foreach (var s in GetDefaultXmlCodeStyles()) {
-				if (s.Id > 0 && styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
-					styles.Add(s);
-				}
-			}
-		}
-		static void MergeDefaultMarkerStyles(List<MarkerStyle> styles) {
-			foreach (var s in GetDefaultMarkerStyles()) {
-				if (s.Id > 0 && styles.FindIndex(i => i.StyleID == s.StyleID) == -1) {
+		static void MergeDefaultCodeStyles<TStyle, TStyleType> (List<TStyle> styles)
+			where TStyle : StyleBase<TStyleType>, new()
+			where TStyleType : struct, Enum {
+			foreach (var s in GetDefaultCodeStyles<TStyle, TStyleType>()) {
+				if (s.Id > 0 && styles.FindIndex(i => ClrHacker.DirectCompare(i.StyleID, s.StyleID)) == -1) {
 					styles.Add(s);
 				}
 			}
@@ -311,44 +272,32 @@ namespace Codist
 				new CommentStyle(CommentStyleTypes.Task9) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number9 },
 			};
 		}
-		internal static CodeStyle[] GetDefaultCodeStyles() {
-			var r = new CodeStyle[Enum.GetValues(typeof(CodeStyleTypes)).Length];
+		internal static TStyle[] GetDefaultCodeStyles<TStyle, TStyleType>()
+			where TStyle : StyleBase<TStyleType>, new()
+			where TStyleType : struct, Enum {
+			var r = new TStyle[Enum.GetValues(typeof(TStyleType)).Length];
 			for (var i = 0; i < r.Length; i++) {
-				r[i] = new CodeStyle { StyleID = (CodeStyleTypes)i };
-			}
-			return r;
-		}
-		internal static CSharpStyle[] GetDefaultCSharpStyles() {
-			var r = new CSharpStyle[Enum.GetValues(typeof(CSharpStyleTypes)).Length];
-			for (var i = 0; i < r.Length; i++) {
-				r[i] = new CSharpStyle { StyleID = (CSharpStyleTypes)i };
-			}
-			return r;
-		}
-		internal static XmlCodeStyle[] GetDefaultXmlCodeStyles() {
-			var r = new XmlCodeStyle[Enum.GetValues(typeof(XmlStyleTypes)).Length];
-			for (var i = 0; i < r.Length; i++) {
-				r[i] = new XmlCodeStyle { StyleID = (XmlStyleTypes)i };
+				r[i] = new TStyle { StyleID = ClrHacker.DirectCast<int, TStyleType>(i) };
 			}
 			return r;
 		}
 		internal static MarkerStyle[] GetDefaultMarkerStyles() {
 			return new MarkerStyle[] {
-				new MarkerStyle(MarkerStyleTypes.SymbolReference, Colors.LightGreen)
+				new MarkerStyle(MarkerStyleTypes.SymbolReference, Colors.Cyan)
 			};
 		}
 		internal void Set(Features options, bool set) {
-			Features = AppHelpers.EnumHelper.SetFlags(Features, options, set);
+			Features = EnumHelper.SetFlags(Features, options, set);
 		}
 		internal void Set(QuickInfoOptions options, bool set) {
-			QuickInfoOptions = AppHelpers.EnumHelper.SetFlags(QuickInfoOptions, options, set);
+			QuickInfoOptions = EnumHelper.SetFlags(QuickInfoOptions, options, set);
 		}
 		internal void Set(MarkerOptions options, bool set) {
-			MarkerOptions = AppHelpers.EnumHelper.SetFlags(MarkerOptions, options, set);
+			MarkerOptions = EnumHelper.SetFlags(MarkerOptions, options, set);
 			FireConfigChangedEvent(Features.ScrollbarMarkers);
 		}
 		internal void Set(SpecialHighlightOptions options, bool set) {
-			SpecialHighlightOptions = AppHelpers.EnumHelper.SetFlags(SpecialHighlightOptions, options, set);
+			SpecialHighlightOptions = EnumHelper.SetFlags(SpecialHighlightOptions, options, set);
 			FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 	}

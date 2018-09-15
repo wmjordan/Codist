@@ -21,7 +21,7 @@ namespace Codist.Options
 				return;
 			}
 			LoadConfig(Config.Instance);
-			_SyntaxHighlightTabs.AddPage("Common Syntax", new SyntaxStyleOptionPage(_servicePage, () => Config.Instance.GeneralStyles, Config.GetDefaultCodeStyles), false);
+			_SyntaxHighlightTabs.AddPage("Common Syntax", new SyntaxStyleOptionPage(_servicePage, () => Config.Instance.GeneralStyles, Config.GetDefaultCodeStyles<Codist.SyntaxHighlight.CodeStyle, CodeStyleTypes >), false);
 
 			_DarkThemeButton.Click += (s, args) => {
 				Config.LoadConfig(Config.DarkTheme);

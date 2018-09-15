@@ -64,6 +64,7 @@ namespace Codist.SyntaxHighlight
 			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(service, Config.Instance.CommentStyles);
 			InitStyleClassificationCache<CSharpStyleTypes, CSharpStyle>(service, Config.Instance.CodeStyles);
 			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(service, Config.Instance.XmlCodeStyles);
+			InitStyleClassificationCache<SymbolMarkerStyleTypes, SymbolMarkerStyle>(service, Config.Instance.SymbolMarkerStyles);
 		}
 
 		static void InitStyleClassificationCache<TStyleEnum, TCodeStyle>(IClassificationTypeRegistryService service, List<TCodeStyle> styles)

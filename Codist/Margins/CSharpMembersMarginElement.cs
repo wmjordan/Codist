@@ -404,11 +404,11 @@ namespace Codist.Margins
 			}
 
 			async Task UpdateReferencesAsync() {
-				var token = _Element._Cancellation.Token;
+				var cancellation = _Element._Cancellation.Token;
 				var doc = _View.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
-				var model = await doc.GetSemanticModelAsync(token);
+				var model = await doc.GetSemanticModelAsync(cancellation);
 				_DocSyntax = model.SyntaxTree;
-				var node = (await _DocSyntax.GetRootAsync(token)).FindNode(new TextSpan(_View.Selection.ActivePoint.Position, 0));
+				var node = (await _DocSyntax.GetRootAsync(cancellation)).FindNode(new TextSpan(_View.Selection.ActivePoint.Position, 0));
 				if (node.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.Argument)) {
 					node = (node as Microsoft.CodeAnalysis.CSharp.Syntax.ArgumentSyntax).Expression;
 				}
@@ -420,10 +420,11 @@ namespace Codist.Margins
 					}
 					return;
 				}
-				var symbol = model.GetSymbolOrFirstCandidate(node, token) ?? model.GetSymbolExt(node, token);
+				var symbol = model.GetSymbolOrFirstCandidate(node, cancellation) ?? model.GetSymbolExt(node, cancellation);
 				if (symbol != null) {
 					if (Interlocked.Exchange(ref _Node, node) != node) {
-						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), token);
+						// todo show marked symbols on scrollbar margin
+						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), cancellation);
 						_Element.InvalidateVisual();
 					}
 				}

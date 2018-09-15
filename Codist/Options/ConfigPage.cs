@@ -142,7 +142,7 @@ namespace Codist.Options
 	sealed class XmlStyle : ConfigPage
 	{
 		protected override Features Feature => Features.SyntaxHighlight;
-		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.XmlCodeStyles, Config.GetDefaultXmlCodeStyles));
+		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.XmlCodeStyles, Config.GetDefaultCodeStyles<XmlCodeStyle, XmlStyleTypes>));
 	}
 
 	[Browsable(false)]

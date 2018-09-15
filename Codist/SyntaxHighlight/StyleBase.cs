@@ -10,7 +10,7 @@ namespace Codist.SyntaxHighlight
 	/// <summary>The base style for syntax highlight elements.</summary>
 	abstract class StyleBase
 	{
-		static protected readonly Regex FriendlyNamePattern = new Regex(@"([a-z])([A-Z])", RegexOptions.Singleline);
+		static protected readonly Regex FriendlyNamePattern = new Regex(@"([a-z])([A-Z0-9])", RegexOptions.Singleline);
 
 		public abstract int Id { get; }
 		/// <summary>Gets or sets whether the content rendered in bold.</summary>
@@ -77,19 +77,23 @@ namespace Codist.SyntaxHighlight
 			FontSize = 0;
 			BackgroundEffect = BrushEffect.Solid;
 			Font = null;
-			ForeColor = BackColor = default(Color);
+			ForeColor = BackColor = default;
 		}
+	}
+	abstract class StyleBase<TStyle> : StyleBase where TStyle : struct
+	{
+		public abstract TStyle StyleID { get; set; }
 	}
 
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
-	sealed class CodeStyle : StyleBase
+	sealed class CodeStyle : StyleBase<CodeStyleTypes>
 	{
 		string _Category;
 
 		public override int Id => (int)StyleID;
 
 		/// <summary>Gets or sets the code style.</summary>
-		public CodeStyleTypes StyleID { get; set; }
+		public override CodeStyleTypes StyleID { get; set; }
 
 		public override string Category {
 			get {
@@ -117,7 +121,7 @@ namespace Codist.SyntaxHighlight
 	}
 
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
-	sealed class CommentStyle : StyleBase
+	sealed class CommentStyle : StyleBase<CommentStyleTypes>
 	{
 		public CommentStyle() {
 		}
@@ -132,7 +136,7 @@ namespace Codist.SyntaxHighlight
 		public override int Id => (int)StyleID;
 
 		/// <summary>Gets or sets the comment style.</summary>
-		public CommentStyleTypes StyleID { get; set; }
+		public override CommentStyleTypes StyleID { get; set; }
 
 		public override string Category => Constants.SyntaxCategory.Comment;
 
@@ -141,19 +145,19 @@ namespace Codist.SyntaxHighlight
 		}
 
 		public override string ToString() {
-			return StyleID.ToString();
+			return FriendlyNamePattern.Replace(StyleID.ToString(), "$1 $2");
 		}
 	}
 
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
-	sealed class CSharpStyle : StyleBase
+	sealed class CSharpStyle : StyleBase<CSharpStyleTypes>
 	{
 		string _Category;
 
 		public override int Id => (int)StyleID;
 
 		/// <summary>Gets or sets the code style.</summary>
-		public CSharpStyleTypes StyleID { get; set; }
+		public override CSharpStyleTypes StyleID { get; set; }
 
 		public override string Category {
 			get {
@@ -181,7 +185,7 @@ namespace Codist.SyntaxHighlight
 	}
 
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
-	sealed class XmlCodeStyle : StyleBase
+	sealed class XmlCodeStyle : StyleBase<XmlStyleTypes>
 	{
 		public XmlCodeStyle() {
 		}
@@ -193,9 +197,34 @@ namespace Codist.SyntaxHighlight
 		public override int Id => (int)StyleID;
 
 		/// <summary>Gets or sets the comment style.</summary>
-		public XmlStyleTypes StyleID { get; set; }
+		public override XmlStyleTypes StyleID { get; set; }
 
 		public override string Category => StyleID != XmlStyleTypes.None ? Constants.SyntaxCategory.Xml : String.Empty;
+
+		internal new CommentStyle Clone() {
+			return (CommentStyle)MemberwiseClone();
+		}
+
+		public override string ToString() {
+			return FriendlyNamePattern.Replace(StyleID.ToString(), "$1 $2");
+		}
+	}
+	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
+	sealed class SymbolMarkerStyle : StyleBase<SymbolMarkerStyleTypes>
+	{
+		public SymbolMarkerStyle() {
+		}
+		public SymbolMarkerStyle(SymbolMarkerStyleTypes styleID, Color foregroundColor) {
+			StyleID = styleID;
+			ForegroundColor = foregroundColor.ToHexString();
+		}
+
+		public override int Id => (int)StyleID;
+
+		/// <summary>Gets or sets the comment style.</summary>
+		public override SymbolMarkerStyleTypes StyleID { get; set; }
+
+		public override string Category => StyleID != SymbolMarkerStyleTypes.None ? Constants.SyntaxCategory.Highlight : String.Empty;
 
 		internal new CommentStyle Clone() {
 			return (CommentStyle)MemberwiseClone();
