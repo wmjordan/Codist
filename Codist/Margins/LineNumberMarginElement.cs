@@ -11,10 +11,12 @@ namespace Codist.Margins
 {
 	sealed class LineNumberMarginElement : FrameworkElement, IDisposable
 	{
+		const double LineNumberRenderPadding = -3;
 		readonly IWpfTextView _TextView;
 		readonly IEditorFormatMap _EditorFormatMap;
 		readonly IVerticalScrollBar _ScrollBar;
 		readonly TaggerResult _Tags;
+		double scrollbarSize;
 
 		static readonly SolidColorBrush LineNumberBrush = Brushes.DarkGray;
 		static readonly Pen LineNumberPen = new Pen(LineNumberBrush, 1) { DashStyle = DashStyles.Dash };
@@ -83,6 +85,11 @@ namespace Codist.Margins
 			}
 		}
 
+		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
+			base.OnRenderSizeChanged(sizeInfo);
+			scrollbarSize = (_ScrollBar as FrameworkElement).ActualWidth + LineNumberRenderPadding;
+		}
+
 		void DrawLineNumbers(DrawingContext drawingContext) {
 			var snapshot = _TextView.TextSnapshot;
 			var lc = snapshot.LineCount;
@@ -90,7 +97,8 @@ namespace Codist.Margins
 			for (int i = step; i < lc; i += step) {
 				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, snapshot.GetLineFromLineNumber(i - 1).Start));
 				drawingContext.DrawLine(LineNumberPen, new Point(-100, y), new Point(100, y));
-				drawingContext.DrawText(WpfHelper.ToFormattedText((i).ToString(), 9, LineNumberBrush), new Point(0, y));
+				var t = WpfHelper.ToFormattedText(i.ToString(), 9, LineNumberBrush);
+				drawingContext.DrawText(t, new Point(scrollbarSize - t.Width, y));
 			}
 		}
 
