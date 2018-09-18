@@ -450,10 +450,10 @@ namespace Codist.SmartBars
 			symbol = symbol.GetAliasTarget();
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
-					if ((symbol as IMethodSymbol).MethodKind == MethodKind.Constructor) {
-						r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, symbol.ContainingType, "No member was found", FindMembers));
-					}
-					goto case SymbolKind.Property;
+					//if ((symbol as IMethodSymbol).MethodKind == MethodKind.Constructor) {
+					//	r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, symbol.ContainingType, "No member was found", FindMembers));
+					//}
+					//goto case SymbolKind.Property;
 				case SymbolKind.Property:
 				case SymbolKind.Event:
 					r.Add(CreateCommandMenu("Find callers...", KnownImageIds.ShowCallerGraph, symbol, "No caller was found", FindCallers));
@@ -547,27 +547,36 @@ namespace Codist.SmartBars
 		}
 
 		bool UpdateSemanticModel() {
-			_Document = View.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
-			_SemanticModel = _Document.GetSemanticModelAsync().Result;
-			_Compilation = _SemanticModel.SyntaxTree.GetCompilationUnitRoot();
+			try {
+				_Document = View.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
+				_SemanticModel = _Document.GetSemanticModelAsync().Result;
+				_Compilation = _SemanticModel.SyntaxTree.GetCompilationUnitRoot();
+			}
+			catch (NullReferenceException) {
+				_Node = null;
+				_Token = default;
+				_Trivia = default;
+				_LineComment = default;
+				return false;
+			}
 			int pos = View.Selection.Start.Position;
 			try {
 				_Token = _Compilation.FindToken(pos, true);
 			}
 			catch (ArgumentOutOfRangeException) {
 				_Node = null;
-				_Token = default(SyntaxToken);
-				_Trivia = default(SyntaxTrivia);
-				_LineComment = default(SyntaxTrivia);
+				_Token = default;
+				_Trivia = default;
+				_LineComment = default;
 				return false;
 			}
-			var triviaList = _Token.HasLeadingTrivia ? _Token.LeadingTrivia : _Token.HasTrailingTrivia ? _Token.TrailingTrivia : default(SyntaxTriviaList);
+			var triviaList = _Token.HasLeadingTrivia ? _Token.LeadingTrivia : _Token.HasTrailingTrivia ? _Token.TrailingTrivia : default;
 			if (triviaList.Equals(SyntaxTriviaList.Empty) == false && triviaList.FullSpan.Contains(pos)) {
 				_Trivia = triviaList.FirstOrDefault(i => i.Span.Contains(pos));
 				_LineComment = triviaList.FirstOrDefault(i => i.IsLineComment());
 			}
 			else {
-				_Trivia = _LineComment = default(SyntaxTrivia);
+				_Trivia = _LineComment = default;
 			}
 			_Node = _Compilation.FindNode(_Token.Span, true, true);
 			return true;
