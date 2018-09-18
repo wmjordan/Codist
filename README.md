@@ -1,15 +1,15 @@
 # Codist
-*Codist* is a visual studio extension which strives to provide better coding experience for C# programmers. It features:
+*Codist* is a visual studio extension which strives to provide better coding experience for C# programmers.
+
+# Features and screenshots
 
 * Advanced syntax highlight with *comment tagger*
 * Super Quick Info with *Click and Go* to source code
-* Smart Bar (**new in version 3.0**)
+* Smart Bar (**new in version 3.0**) with symbol reference analyzers
 * Scrollbar markers
 * Extra margin between lines
 
 ![Feature overview](doc/preview.png)
-
-# Features and screenshots
 
 ## Advanced C# syntax highlight
 
@@ -18,24 +18,21 @@
   The following screenshots of the `TestPage.cs` file in the source code project demonstrates possible syntax highlight effects.
 
   * The font size of type and member declarations can be enlarged, so it is much easier to spot them.
-  * Interface, Class, Struct and Enum names have different colors.
-  * Some elements, such as `Enum` names, `virtual` or `override` members, can be painted with specific style, indicating that they are special.
-  * The attribute declarations can be dimmed.
-  * Static fields have underlines.
+  * Syntax highlight can be applied to braces and parentheses.
+  * Various syntax identifiers have different styles.
+  * Comment content can be tagged.
   * Unnecessary code is marked strike-through.
-  * Control flow related keywords (`return`, `throw`, `break`, `continue`, `yield` and `goto`) are highlighted with a different style.
-  * Abstraction related keywords (`sealed`, `override`, `virtual`, etc) can be highlighted with an other style.
+  * Keywords are categorized and highlighted with various styles.
+  * Overriding methods (such as `ToString`) can be painted with gradient background color.
   * All the above styles are customizable.
  
-  ![Syntax highlight](doc/highlight1.png)
-  ![Syntax highlight](doc/highlight2.png)
-  ![Syntax highlight](doc/highlight3.png)
+  ![Syntax highlight](doc/highlight1.png) 
 
   **NOTE**: To quickly get started with advanced syntax highlight, navigate to the *Syntax Highlight* section, click the *Light theme* or *Dark theme* button in the *options* dialog and see them in effect. Don't forget to click the *OK* button to confirm the change.
 
   ![Load Theme](doc/load-theme.png)
 
-  To customize and tweak the syntax highlight effects, click the *common syntax* tab in the *syntax highlight* section, or click the sub sections inside the *Syntax Highlight* section to change individual styles, accordingly.
+  To customize and tweak the syntax highlight styles, click the *common syntax* tab in the *syntax highlight* section, or click the sub sections inside the *Syntax Highlight* section to change individual styles, accordingly.
 
   ![Style customization](doc/syntax-highlight.png)
 
@@ -50,8 +47,9 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
   The default quick info built in Visual Studio can be enhanced with:
   1. Size restriction
   2. Click and go to symbols
-  3. XML Documentation override, with XML Doc inheritance, `<return>` exposure
-  4. Hide Quick Info until Shift is pressed
+  3. XML Documentation override, with XML Doc inheritance, `<return>` and `<remarks>` displayed
+  4. More info like selection length, color preview, etc.
+  5. Hide Quick Info until Shift is pressed
 
 * **Size restriction** 
 
@@ -81,7 +79,7 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
   ![Super Quick Info 12](doc/super-quick-info-12.png)
 
-    It is possible to show documentation about the `<return>` values.
+    It is possible to show documentation about the `<returns>` and `<remarks>` content.
 
   ![Super Quick Info 13](doc/super-quick-info-13.png)
 
@@ -121,6 +119,10 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
   ![Super Quick Info 9](doc/super-quick-info-9.png)
 
+* **Color info** shows colors as you hover on a name that might be predefined color values.
+
+  ![Super Quick Info - Color](doc/super-quick-info-color.png)
+
 ## Comment tagger and styles
 * The comment tagger highlights comments to your specific styles, according to the first token inside the comment.
 
@@ -140,7 +142,8 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
 The scrollbar can mark...
 
-* C# `class`/`struct`/`interface`/`enum` **declarations** (marked with the first two capitalized characters in their names)
+* C# `class`/`struct`/`interface`/`enum` **declarations** (marked with a square and their names)
+* C# symbol references (marked with an aqua square)
 * C# instructions (`#if`, `#else`, `#region`, `#pragma`) (marked with a gray spot)
 * **Line numbers** (marked with gray dashed lines and numbers)
 * Special comments (marked with small squares)
@@ -158,6 +161,10 @@ It brings commonly used operations for the selection.
 Buttons on the *Smart Bar* changes from contexts.
 
   ![Smart Bar](doc/smart-bar-2.png)
+
+From version 3.7 on, when you select a symbol and click the *Analyze references...* button, a menu will pop up showing possible symbol reference analysis commands.
+
+  ![Smart Bar Symbol Analysis](doc/smart-bar-symbol-analysis.png)
 
 # Feature control
   Open the *Codist* section in the *Tools->Options* dialog. In the *General* section you can toggle features of *Codist*.

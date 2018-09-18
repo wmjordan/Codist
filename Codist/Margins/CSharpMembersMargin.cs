@@ -215,7 +215,7 @@ namespace Codist.Margins
 				var memberLevel = 0;
 				var memberType = CodeMemberType.Root;
 				var lastLabel = Double.MinValue;
-				SnapshotPoint rangeFrom = default(SnapshotPoint), rangeTo = default(SnapshotPoint);
+				SnapshotPoint rangeFrom = default, rangeTo = default;
 
 				foreach (var tag in tags) {
 					if (_Element._Cancellation.IsCancellationRequested) {

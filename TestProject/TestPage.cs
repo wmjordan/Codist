@@ -16,7 +16,7 @@ namespace TestProject
 		public virtual void VirtualMethod() { } // virtual method
 		void IDisposable.Dispose() { } // explicit interface implementation
 	}
-	sealed class ConcreteClass : AbstractClass
+	sealed class ConcreteClass : AbstractClass, IInterface
 	{
 		// note hover on the "{" below to see line count of this method block
 		/// <summary>
