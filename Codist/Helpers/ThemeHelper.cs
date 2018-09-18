@@ -4,7 +4,6 @@ using System.Windows.Media;
 using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using GdiColor = System.Drawing.Color;
 using WpfBrush = System.Windows.Media.SolidColorBrush;
 using WpfColor = System.Windows.Media.Color;
@@ -14,6 +13,10 @@ namespace Codist
 {
 	static class ThemeHelper
 	{
+		static ThemeHelper() {
+			RefreshThemeCache();
+		}
+
 		public static GdiColor ToolWindowBackgroundColor { get; private set; }
 		public static WpfColor TitleBackgroundColor { get; private set; }
 		public static WpfBrush ToolTipTextBrush { get; private set; }

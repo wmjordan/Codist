@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
-using EnvDTE80;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Shell.Events;
 
 namespace Codist
 {
@@ -28,8 +26,8 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.XmlStyle), CategorySyntaxHighlight, "XML", 0, 0, true, Sort = 30)]
 	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment", 0, 0, true, Sort = 60)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
-	[ProvideAutoLoad(UIContextGuids.SolutionExists)]
-	[ProvideToolWindow(typeof(Codist.Commands.SymbolFinderWindow))]
+	[ProvideToolWindow(typeof(Commands.SymbolFinderWindow))]
+	[ProvideAutoLoad(Microsoft.VisualStudio.VSConstants.UICONTEXT.SolutionExists_string, PackageAutoLoadFlags.BackgroundLoad)]
 	sealed class CodistPackage : AsyncPackage
 	{
 		/// <summary>CodistPackage GUID string.</summary>
@@ -39,7 +37,6 @@ namespace Codist
 		const string CategoryScrollbarMarker = Constants.NameOfMe + "\\Scrollbar Marker";
 		const string CategorySyntaxHighlight = Constants.NameOfMe + "\\Syntax Highlight";
 		static EnvDTE.DTE _dte;
-		static EnvDTE.SolutionEvents _SolutionEvents;
 		//static VsDebugger _Debugger;
 
 		/// <summary>
@@ -87,8 +84,7 @@ namespace Codist
 			VSColorTheme.ThemeChanged += (args) => {
 				ThemeHelper.RefreshThemeCache();
 			};
-			_SolutionEvents = DTE.Events.SolutionEvents;
-			_SolutionEvents.Opened += () => {
+			SolutionEvents.OnAfterOpenSolution += (s, args) => {
 				Classifiers.SymbolMarkManager.Clear();
 			};
 		}

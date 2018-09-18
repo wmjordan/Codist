@@ -38,7 +38,9 @@ namespace Codist.SmartBars
 			View.Selection.SelectionChanged += ViewSelectionChanged;
 			View.Closed += ViewClosed;
 			ToolBar = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 1, IsOverflowOpen = false }.HideOverflow();
+			ToolBar.SetResourceReference(Control.BackgroundProperty, VsBrushes.CommandBarGradientBeginKey);
 			ToolBar2 = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 2, IsOverflowOpen = false }.HideOverflow();
+			ToolBar2.SetResourceReference(Control.BackgroundProperty, VsBrushes.CommandBarGradientBeginKey);
 			_ToolBarTray = new ToolBarTray {
 				ToolBars = { ToolBar, ToolBar2 },
 				IsLocked = true,
@@ -51,8 +53,6 @@ namespace Codist.SmartBars
 			_CreateToolBarTimer = new Timer(CreateToolBar);
 			_ToolBarLayer.AddAdornment(AdornmentPositioningBehavior.ViewportRelative, null, null, _ToolBarTray, null);
 			_ToolBarTray.Visibility = Visibility.Hidden;
-			VSColorTheme.ThemeChanged += ThemeChanged;
-			LoadThemeColor();
 		}
 
 		protected IWpfTextView View { get; }
@@ -61,18 +61,9 @@ namespace Codist.SmartBars
 		protected ToolBar ToolBar2 { get; }
 
 		#region Event handlers
-		void ThemeChanged(ThemeChangedEventArgs args) {
-			LoadThemeColor();
-		}
 		void ToolBarSizeChanged(object sender, SizeChangedEventArgs e) {
 			SetToolBarPosition();
 			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
-		}
-		void LoadThemeColor() {
-			var b = new SolidColorBrush(ThemeHelper.TitleBackgroundColor);
-			b.Freeze();
-			ToolBar.Background = b;
-			ToolBar2.Background = b;
 		}
 		void ViewMouseMove(object sender, MouseEventArgs e) {
 			if (_ToolBarTray.IsVisible == false) {
@@ -132,7 +123,6 @@ namespace Codist.SmartBars
 			View.VisualElement.MouseMove -= ViewMouseMove;
 			//View.LayoutChanged -= ViewLayoutChanged;
 			View.Closed -= ViewClosed;
-			VSColorTheme.ThemeChanged -= ThemeChanged;
 		}
 
 		void ToolBarMouseEnter(object sender, EventArgs e) {
@@ -266,7 +256,7 @@ namespace Codist.SmartBars
 		}
 
 		static void ExecuteAndFind(CommandContext ctx, string command) {
-			Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+			ThreadHelper.ThrowIfNotOnUIThread();
 			if (ctx.RightClick) {
 				ctx.View.ExpandSelectionToLine(false);
 			}
@@ -284,7 +274,7 @@ namespace Codist.SmartBars
 		}
 
 		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip) {
-			Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+			ThreadHelper.ThrowIfNotOnUIThread();
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
 				AddCommand(toolBar, imageId, tooltip, (ctx) => {
 					TextEditorHelper.ExecuteEditorCommand(command);
@@ -293,7 +283,7 @@ namespace Codist.SmartBars
 			}
 		}
 		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip, string command2) {
-			Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+			ThreadHelper.ThrowIfNotOnUIThread();
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
 				AddCommand(toolBar, imageId, tooltip, (ctx) => {
 					TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? command2 : command);

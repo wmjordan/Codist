@@ -25,7 +25,7 @@ namespace Codist.SmartBars
 		[Export(typeof(AdornmentLayerDefinition))]
 		[Name(nameof(SmartBar))]
 		[Order(After = PredefinedAdornmentLayers.Caret)]
-		AdornmentLayerDefinition editorAdornmentLayer;
+		AdornmentLayerDefinition _EditorAdornmentLayer;
 
 #pragma warning restore 649, 169
 

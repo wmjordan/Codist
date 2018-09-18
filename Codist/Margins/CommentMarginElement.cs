@@ -278,10 +278,6 @@ namespace Codist.Margins
 		public void Dispose() {
 			Dispose(true);
 		}
-
-		void IDisposable.Dispose() {
-			throw new NotImplementedException();
-		}
 		#endregion
 	}
 }
