@@ -8,12 +8,13 @@ using Codist.Classifiers;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Margins
 {
-	sealed class CommentMarginElement : FrameworkElement, IDisposable
+	sealed class CommentMargin : FrameworkElement, IWpfTextViewMargin
 	{
+		public const string MarginName = nameof(CommentMargin);
+
 		readonly IWpfTextView _TextView;
 		readonly IEditorFormatMap _EditorFormatMap;
 		readonly IVerticalScrollBar _ScrollBar;
@@ -55,7 +56,7 @@ namespace Codist.Margins
 		const double MarkSize = 4.0;
 		const double HalfMarkSize = MarkSize / 2 + MarkPadding;
 
-		public CommentMarginElement(IWpfTextView textView, ITagAggregator<ClassificationTag> tagger, IVerticalScrollBar verticalScrollbar) {
+		public CommentMargin(IWpfTextView textView, IVerticalScrollBar verticalScrollbar) {
 			_TextView = textView;
 
 			IsHitTestVisible = false;
@@ -73,6 +74,14 @@ namespace Codist.Margins
 			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 			//_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 			_ScrollBar.TrackSpanChanged += OnMappingChanged;
+		}
+
+		FrameworkElement IWpfTextViewMargin.VisualElement => this;
+		double ITextViewMargin.MarginSize => ActualWidth;
+		bool ITextViewMargin.Enabled => true;
+
+		ITextViewMargin ITextViewMargin.GetTextViewMargin(string marginName) {
+			return string.Equals(marginName, MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
 		}
 
 		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
@@ -268,6 +277,10 @@ namespace Codist.Margins
 
 		public void Dispose() {
 			Dispose(true);
+		}
+
+		void IDisposable.Dispose() {
+			throw new NotImplementedException();
 		}
 		#endregion
 	}
