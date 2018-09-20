@@ -6,8 +6,9 @@ namespace Codist.Options
 {
 	public partial class PickColorButton : Button
 	{
+		Color _SelectedColor;
 		public Color SelectedColor {
-			get { return ((Bitmap)Image).GetPixel(1, 1); }
+			get { return _SelectedColor; }
 			set { if (value != SelectedColor) { SetColor(value); } }
 		}
 
@@ -18,9 +19,10 @@ namespace Codist.Options
 		}
 
 		void SetColor(Color color) {
+			_SelectedColor = color;
 			var bmp = Image as Bitmap;
 			using (var g = Graphics.FromImage(bmp))
-			using (var b = new SolidBrush(color)) {
+			using (var b = new SolidBrush(color.A == 0 ? SystemColors.Control : color)) {
 				g.DrawRectangle(Pens.DarkGray, 0, 0, bmp.Width - 1, bmp.Height - 1);
 				g.FillRectangle(b, 1, 1, bmp.Width - 2, bmp.Height - 2);
 			}

@@ -8,6 +8,7 @@ using GdiColor = System.Drawing.Color;
 using WpfBrush = System.Windows.Media.SolidColorBrush;
 using WpfColor = System.Windows.Media.Color;
 using Microsoft.VisualStudio.Imaging;
+using System.Drawing;
 
 namespace Codist
 {
@@ -17,6 +18,8 @@ namespace Codist
 			RefreshThemeCache();
 		}
 
+		public static GdiColor DocumentPageColor { get; private set; }
+		public static GdiColor DocumentTextColor { get; private set; }
 		public static GdiColor ToolWindowBackgroundColor { get; private set; }
 		public static WpfColor TitleBackgroundColor { get; private set; }
 		public static WpfBrush ToolTipTextBrush { get; private set; }
@@ -61,6 +64,8 @@ namespace Codist
 		}
 
 		internal static void RefreshThemeCache() {
+			DocumentPageColor = CommonDocumentColors.PageColorKey.ToThemedGdiColor();
+			DocumentTextColor = CommonDocumentColors.PageTextColorKey.ToThemedGdiColor();
 			ToolWindowBackgroundColor = EnvironmentColors.ToolWindowBackgroundColorKey.ToThemedGdiColor();
 			TitleBackgroundColor = EnvironmentColors.MainWindowActiveCaptionColorKey.ToThemedWpfColor();
 			ToolTipTextBrush = new WpfBrush(EnvironmentColors.ButtonTextBrushKey.ToThemedWpfColor());

@@ -25,13 +25,14 @@ namespace Codist.Options
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
+			_SyntaxListBox.Theme();
 			if (_Loaded) {
 				return;
 			}
 
 			_CommentTaggerTabs.AddPage("Comment Syntax", new SyntaxStyleOptionPage(_ServicePage, () => Config.Instance.CommentStyles, Config.GetDefaultCommentStyles), true);
 
-			LoadStyleLists();
+			LoadStyleList();
 
 			_AddTagButton.Click += (s, args) => {
 				var label = new CommentLabel(_TagTextBox.Text.Length > 0 ? _TagTextBox.Text : "tag", (CommentStyleTypes)Enum.Parse(typeof(CommentStyleTypes), _StyleBox.Text));
@@ -91,15 +92,15 @@ namespace Codist.Options
 
 			_PreviewBox.SizeChanged += (s, args) => { UpdatePreview(); };
 			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
-			Config.Loaded += (s, args) => { LoadStyleLists(); };
+			Config.Loaded += (s, args) => { LoadStyleList(); };
 			_Loaded = true;
 		}
 
-		private void LoadStyleLists() {
+		private void LoadStyleList() {
 			_UI.Lock();
 			_SyntaxListBox.Items.Clear();
 			foreach (var item in Config.Instance.Labels) {
-				_SyntaxListBox.Items.Add(new ListViewItem(item.Label) { Tag = item });
+				_SyntaxListBox.Items.Add(new ListViewItem(item.Label) { Tag = item }.Theme());
 			}
 			_StyleBox.Items.Clear();
 			var t = typeof(CommentStyleTypes);
@@ -118,7 +119,9 @@ namespace Codist.Options
 			if (_UI.IsLocked || _ActiveLabel == null) {
 				return;
 			}
+			_SyntaxListBox.FocusedItem.Theme();
 			UpdatePreview();
+			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 
 		void StyleApplicationChanged(object sender, EventArgs e) {
@@ -185,7 +188,9 @@ namespace Codist.Options
 			}
 			using (var g = Graphics.FromImage(bmp))
 			using (var f = new Font(fs.bstrFaceName, fontSize, ConfigPage.GetFontStyle(style)))
-			using (var b = style.ForeColor.A == 0 ? (Brush)Brushes.Black.Clone() : new SolidBrush(style.ForeColor.ToGdiColor())) {
+			using (var b = new SolidBrush(style.ForeColor.A == 0 ? ThemeHelper.DocumentTextColor : style.ForeColor.ToGdiColor()))
+			using (var bg = new SolidBrush(ThemeHelper.DocumentPageColor)) {
+				g.FillRectangle(bg, 0, 0, bmp.Width, bmp.Height);
 				var t = label.StyleApplication == CommentStyleApplication.Tag ? label.Label
 					: label.StyleApplication == CommentStyleApplication.TagAndContent ? label.Label + " Preview 01ioIOlLWM"
 					: "Preview 01ioIOlLWM";

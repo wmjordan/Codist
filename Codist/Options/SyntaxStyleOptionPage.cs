@@ -32,6 +32,7 @@ namespace Codist.Options
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
+			_SyntaxListBox.Theme();
 			if (_loaded) {
 				return;
 			}
@@ -106,7 +107,9 @@ namespace Codist.Options
 			}
 			using (var g = Graphics.FromImage(bmp))
 			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontInfo.bstrFaceName : style.Font, fontSize, ConfigPage.GetFontStyle(style)))
-			using (var b = style.ForeColor.A == 0 ? (Brush)Brushes.Black.Clone() : new SolidBrush(style.ForeColor.ToGdiColor())) {
+			using (var b = new SolidBrush(style.ForeColor.A == 0 ? ThemeHelper.DocumentTextColor : style.ForeColor.ToGdiColor()))
+			using (var bg = new SolidBrush(ThemeHelper.DocumentPageColor)) {
+				g.FillRectangle(bg, 0, 0, bmp.Width, bmp.Height);
 				const string t = "Preview 01ioIOlLWM";
 				var m = g.MeasureString(t, f, bmp.Size);
 				g.SmoothingMode = SmoothingMode.HighQuality;
@@ -133,10 +136,6 @@ namespace Codist.Options
 				: value.Value
 				? CheckState.Checked
 				: CheckState.Unchecked;
-		}
-
-		static Color ToColor(System.Windows.Media.Color color) {
-			return Color.FromArgb(255, color.R, color.G, color.B);
 		}
 
 		void _SyntaxListBox_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e) {
@@ -166,8 +165,8 @@ namespace Codist.Options
 			_FontSizeBox.Value = style.FontSize > 100 ? 100m : style.FontSize < -10 ? -10m : (decimal)style.FontSize;
 			_ForeColorTransBox.Value = style.ForeColor.A;
 			_BackColorTransBox.Value = style.BackColor.A;
-			_ForeColorButton.SelectedColor = ToColor(style.ForeColor);
-			_BackColorButton.SelectedColor = ToColor(style.BackColor);
+			_ForeColorButton.SelectedColor = style.ForeColor.ToGdiColor();
+			_BackColorButton.SelectedColor = style.BackColor.ToGdiColor();
 		}
 
 		static ListViewItem GetListItemForStyle(string category, ListViewItem vi) {
@@ -203,18 +202,22 @@ namespace Codist.Options
 				if (item.Category.Length == 0) {
 					continue;
 				}
+				var style = styles.FirstOrDefault(i => i.Id == item.Id) ?? item;
 				_SyntaxListBox.Items.Add(new ListViewItem(item.ToString()) {
-					Tag = styles.FirstOrDefault(i => i.Id == item.Id) ?? item,
-					Group = groups.FirstOrDefault(i => i.Header == item.Category)
-				});
+					Tag = style,
+					Group = groups.FirstOrDefault(i => i.Header == item.Category),
+					Font = new Font(_SyntaxListBox.Font, ConfigPage.GetFontStyle(style))
+				}.Theme());
 			}
 			_uiLock = false;
 		}
+
 		void MarkChanged(object sender, EventArgs args) {
 			if (_uiLock || _activeStyle == null) {
 				return;
 			}
 			UpdatePreview();
+			_SyntaxListBox.FocusedItem.Theme();
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 

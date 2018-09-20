@@ -135,6 +135,28 @@ namespace Codist
 			return d?.ClassificationTypeNames;
 		}
 
+		internal static void Theme(this ListView styleBox) {
+			styleBox.BackColor = ThemeHelper.DocumentPageColor;
+			styleBox.ForeColor = ThemeHelper.DocumentTextColor;
+			foreach (ListViewItem item in styleBox.Items) {
+				item.Theme();
+			}
+		}
+
+		internal static ListViewItem Theme(this ListViewItem item) {
+			var style = item.Tag as SyntaxHighlight.StyleBase;
+			if (style == null) {
+				var styleId = (item.Tag as Classifiers.CommentLabel).StyleID;
+				style = Config.Instance.CommentStyles.Find(i => i.StyleID == styleId);
+				if (style == null) {
+					return item;
+				}
+			}
+			item.ForeColor = style.ForeColor.A != 0 ? style.ForeColor.ToGdiColor() : ThemeHelper.DocumentTextColor;
+			item.BackColor = style.BackColor.A != 0 ? style.BackColor.ToGdiColor() : ThemeHelper.DocumentPageColor;
+			return item;
+		}
+
 		static class NamedColorCache
 		{
 			static readonly Dictionary<string, SolidColorBrush> __Cache = GetBrushes();

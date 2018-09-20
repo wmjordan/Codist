@@ -78,7 +78,7 @@ namespace Codist
 			}
 		}
 
-		public static XElement GetSummary(this XElement doc) {
+		static XElement GetSummary(this XElement doc) {
 			if (doc == null) {
 				return null;
 			}

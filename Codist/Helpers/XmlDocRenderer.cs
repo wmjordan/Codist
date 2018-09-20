@@ -16,10 +16,12 @@ namespace Codist
 		static readonly Regex _FixWhitespaces = new Regex(@" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 		readonly Compilation _Compilation;
 		readonly SymbolFormatter _SymbolFormatter;
+		readonly ISymbol _Symbol;
 
-		public XmlDocRenderer(Compilation compilation, SymbolFormatter symbolFormatter) {
+		public XmlDocRenderer(Compilation compilation, SymbolFormatter symbolFormatter, ISymbol symbol) {
 			_Compilation = compilation;
 			_SymbolFormatter = symbolFormatter;
+			_Symbol = symbol;
 		}
 
 		internal void RenderXmlDocSymbol(string symbol, InlineCollection inlines, SymbolKind symbolKind) {
