@@ -10,11 +10,22 @@ namespace Codist
 	static class XmlDocParser
 	{
 		/// <summary>
-		/// Gets the XML Doc for a <see cref="ISymbol"/>. For constructors which do not have XML Doc, the XML Doc of its containing type is used.
+		/// Gets the XML Doc for an <see cref="ISymbol"/>. For constructors which do not have XML Doc, the XML Doc of its containing type is used.
 		/// </summary>
 		public static XElement GetXmlDoc(this ISymbol symbol) {
 			if (symbol == null) {
 				return null;
+			}
+			symbol = symbol.GetAliasTarget();
+			switch (symbol.Kind) {
+				case SymbolKind.Event:
+				case SymbolKind.Field:
+				case SymbolKind.Method:
+				case SymbolKind.NamedType:
+				case SymbolKind.Property:
+					break;
+				default:
+					return null;
 			}
 			string s = symbol.GetDocumentationCommentXml(null, true);
 			if (String.IsNullOrEmpty(s) && symbol.Kind == SymbolKind.Method) {
@@ -32,10 +43,10 @@ namespace Codist
 			}
 		}
 
-		public static XElement GetXmlDocForSymbol(this ISymbol symbol) {
+		public static XElement GetXmlDocSummaryForSymbol(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Alias:
-					return (symbol as IAliasSymbol).Target.GetXmlDocForSymbol();
+					return (symbol as IAliasSymbol).Target.GetXmlDocSummaryForSymbol();
 				case SymbolKind.Event:
 				case SymbolKind.Field:
 				case SymbolKind.Method:
@@ -106,8 +117,11 @@ namespace Codist
 				return null;
 			}
 			XElement doc;
+			var kind = querySymbol.Kind;
+			var returnType = querySymbol.GetReturnType();
+			var parameters = querySymbol.GetParameters();
 			var member = t.GetMembers(querySymbol.Name)
-				.FirstOrDefault(i => i.MatchSignature(querySymbol.Kind, querySymbol.GetReturnType(), querySymbol.GetParameters()));
+				.FirstOrDefault(i => i.MatchSignature(kind, returnType, parameters));
 			if (member != null && (doc = member.GetXmlDoc().GetSummary()) != null) {
 				baseMember = member;
 				return doc;

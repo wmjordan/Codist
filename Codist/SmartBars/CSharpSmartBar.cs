@@ -631,7 +631,7 @@ namespace Codist.SmartBars
 				if (f != null && f.IsConst) {
 					tip.Append("\nconst: " + f.ConstantValue.ToString());
 				}
-				var doc = Symbol.GetXmlDocForSymbol();
+				var doc = Symbol.GetXmlDocSummaryForSymbol();
 				if (doc != null) {
 					new XmlDocRenderer((SmartBar as CSharpSmartBar)._SemanticModel.Compilation, __Formatter).Render(doc, tip.Append("\n\n").Inlines);
 					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;

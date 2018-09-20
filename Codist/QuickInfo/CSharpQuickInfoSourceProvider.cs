@@ -199,21 +199,21 @@ namespace Codist.QuickInfo
 				if (symbol == null) {
 					return;
 				}
-				var doc = symbol.GetXmlDocForSymbol();
-				if (doc != null) {
-					if (doc.Name.LocalName == XmlDocRenderer.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {
+				var summary = symbol.GetXmlDocSummaryForSymbol();
+				if (summary != null) {
+					if (summary.Name.LocalName == XmlDocRenderer.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {
 						return;
 					}
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 						var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter);
 						var info = new ToolTipText();
-						docRenderer.Render(doc, info);
+						docRenderer.Render(summary, info);
 						if (info.Inlines.FirstInline != null) {
 							if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
-								RenderXmlReturnsDoc(symbol, doc.Parent, info, docRenderer);
+								RenderXmlReturnsDoc(symbol, summary.Parent, info, docRenderer);
 							}
 							if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc)) {
-								RenderXmlRemarksDoc(symbol, doc.Parent, info, docRenderer);
+								RenderXmlRemarksDoc(symbol, summary.Parent, info, docRenderer);
 							}
 							//if (doc.Parent.Element("preliminary") != null) {
 							//	info.AddText("\npreliminary", true, true, System.Windows.Media.Brushes.Red);
@@ -224,9 +224,9 @@ namespace Codist.QuickInfo
 				}
 				else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
 					ISymbol baseMember;
-					doc = symbol.InheritDocumentation(out baseMember);
-					if (doc != null) {
-						if (doc.Name.LocalName == XmlDocRenderer.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {
+					summary = symbol.InheritDocumentation(out baseMember);
+					if (summary != null) {
+						if (summary.Name.LocalName == XmlDocRenderer.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {
 							return;
 						}
 						var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter);
@@ -235,9 +235,9 @@ namespace Codist.QuickInfo
 							.Append(".")
 							.AddSymbol(baseMember, null, _SymbolFormatter)
 							.Append(":\n");
-						docRenderer.Render(doc, info.Inlines);
+						docRenderer.Render(summary, info.Inlines);
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
-							RenderXmlReturnsDoc(baseMember, doc.Parent, info, docRenderer);
+							RenderXmlReturnsDoc(baseMember, summary.Parent, info, docRenderer);
 						}
 						qiWrapper.OverrideDocumentation(info);
 					}

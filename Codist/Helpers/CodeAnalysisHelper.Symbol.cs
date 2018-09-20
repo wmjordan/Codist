@@ -526,9 +526,11 @@ namespace Codist
 		/// <param name="returnType">The type that the symbol should return.</param>
 		/// <param name="parameters">The parameters the symbol should take.</param>
 		public static bool MatchSignature(this ISymbol symbol, SymbolKind kind, ITypeSymbol returnType, ImmutableArray<IParameterSymbol> parameters) {
-			if (symbol.Kind != kind
-				|| returnType == null && symbol.GetReturnType() != null
-				|| returnType != null && returnType.Equals(symbol.GetReturnType()) == false) {
+			if (symbol.Kind != kind) {
+				return false;
+			}
+			if (returnType == null && symbol.GetReturnType() != null
+				|| returnType != null && returnType.CanConvertTo(symbol.GetReturnType()) == false) {
 				return false;
 			}
 			var method = kind == SymbolKind.Method ? symbol as IMethodSymbol
