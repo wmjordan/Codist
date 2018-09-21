@@ -8,6 +8,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Codist.SyntaxHighlight;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist.Options
 {
@@ -17,6 +18,7 @@ namespace Codist.Options
 		readonly Func<IEnumerable<StyleBase>> _defaultStyleLoader;
 		readonly ConfigPage _service;
 		readonly Func<IEnumerable<StyleBase>> _styleLoader;
+		readonly IEditorFormatMap _FormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap("text");
 		StyleBase _activeStyle;
 		bool _loaded;
 		bool _uiLock;
@@ -105,9 +107,10 @@ namespace Codist.Options
 			if (fontSize < 2) {
 				return;
 			}
+			UIHelper.MixStyle(style, out var fs, out var fc, out var bc);
 			using (var g = Graphics.FromImage(bmp))
-			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontInfo.bstrFaceName : style.Font, fontSize, ConfigPage.GetFontStyle(style)))
-			using (var b = new SolidBrush(style.ForeColor.A == 0 ? ThemeHelper.DocumentTextColor : style.ForeColor.ToGdiColor()))
+			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontInfo.bstrFaceName : style.Font, fontSize, fs))
+			using (var b = new SolidBrush(fc))
 			using (var bg = new SolidBrush(ThemeHelper.DocumentPageColor)) {
 				g.FillRectangle(bg, 0, 0, bmp.Width, bmp.Height);
 				const string t = "Preview 01ioIOlLWM";
@@ -115,7 +118,7 @@ namespace Codist.Options
 				g.SmoothingMode = SmoothingMode.HighQuality;
 				g.TextRenderingHint = TextRenderingHint.AntiAlias;
 				g.CompositingQuality = CompositingQuality.HighQuality;
-				using (var bb = ConfigPage.GetPreviewBrush(style.BackgroundEffect, style.BackColor, ref m)) {
+				using (var bb = ConfigPage.GetPreviewBrush(style.BackgroundEffect, bc, ref m)) {
 					g.FillRectangle(bb, new Rectangle(0, 0, (int)m.Width, (int)m.Height));
 				}
 				g.DrawString(t, f, b, new RectangleF(PointF.Empty, bmp.PhysicalDimension));
@@ -206,7 +209,7 @@ namespace Codist.Options
 				_SyntaxListBox.Items.Add(new ListViewItem(item.ToString()) {
 					Tag = style,
 					Group = groups.FirstOrDefault(i => i.Header == item.Category),
-					Font = new Font(_SyntaxListBox.Font, ConfigPage.GetFontStyle(style))
+					Font = new Font(_SyntaxListBox.Font, style.GetFontStyle())
 				}.ApplyTheme());
 			}
 			_uiLock = false;

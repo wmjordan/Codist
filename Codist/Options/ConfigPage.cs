@@ -79,35 +79,19 @@ namespace Codist.Options
 				storage.CloseCategory();
 			}
 		}
-		internal static FontStyle GetFontStyle(StyleBase activeStyle) {
-			var f = FontStyle.Regular;
-			if (activeStyle.Bold == true) {
-				f |= FontStyle.Bold;
-			}
-			if (activeStyle.Italic == true) {
-				f |= FontStyle.Italic;
-			}
-			if (activeStyle.Underline == true) {
-				f |= FontStyle.Underline;
-			}
-			if (activeStyle.Strikethrough == true) {
-				f |= FontStyle.Strikeout;
-			}
-			return f;
-		}
 
-		internal static Brush GetPreviewBrush(BrushEffect effect, System.Windows.Media.Color color, ref SizeF previewRegion) {
+		internal static Brush GetPreviewBrush(BrushEffect effect, Color color, ref SizeF previewRegion) {
 			switch (effect) {
 				case BrushEffect.Solid:
-					return new SolidBrush(color.ToGdiColor());
+					return new SolidBrush(color);
 				case BrushEffect.ToBottom:
-					return new LinearGradientBrush(new PointF(0, 0), new PointF(0, previewRegion.Height), Color.Transparent, color.ToGdiColor());
+					return new LinearGradientBrush(new PointF(0, 0), new PointF(0, previewRegion.Height), Color.Transparent, color);
 				case BrushEffect.ToTop:
-					return new LinearGradientBrush(new PointF(0, previewRegion.Height), new PointF(0, 0), Color.Transparent, color.ToGdiColor());
+					return new LinearGradientBrush(new PointF(0, previewRegion.Height), new PointF(0, 0), Color.Transparent, color);
 				case BrushEffect.ToRight:
-					return new LinearGradientBrush(new PointF(0, 0), new PointF(previewRegion.Width, 0), Color.Transparent, color.ToGdiColor());
+					return new LinearGradientBrush(new PointF(0, 0), new PointF(previewRegion.Width, 0), Color.Transparent, color);
 				case BrushEffect.ToLeft:
-					return new LinearGradientBrush(new PointF(previewRegion.Width, 0), new PointF(0, 0), Color.Transparent, color.ToGdiColor());
+					return new LinearGradientBrush(new PointF(previewRegion.Width, 0), new PointF(0, 0), Color.Transparent, color);
 				default:
 					goto case BrushEffect.Solid;
 			}

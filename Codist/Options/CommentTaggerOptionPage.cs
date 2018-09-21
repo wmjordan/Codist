@@ -178,18 +178,19 @@ namespace Codist.Options
 			_PreviewBox.Image = bmp;
 		}
 
-		static void RenderPreview(Bitmap bmp, FontInfo fs, CommentLabel label) {
+		static void RenderPreview(Bitmap bmp, FontInfo fontInfo, CommentLabel label) {
 			var style = Config.Instance.CommentStyles.Find(i => i.StyleID == label.StyleID);
 			if (style == null || String.IsNullOrEmpty(label.Label)) {
 				return;
 			}
-			var fontSize = (float)(fs.wPointSize + style.FontSize);
+			var fontSize = (float)(fontInfo.wPointSize + style.FontSize);
 			if (fontSize < 2) {
 				return;
 			}
+			UIHelper.MixStyle(style, out var fs, out var fc, out var bc);
 			using (var g = Graphics.FromImage(bmp))
-			using (var f = new Font(fs.bstrFaceName, fontSize, ConfigPage.GetFontStyle(style)))
-			using (var b = new SolidBrush(style.ForeColor.A == 0 ? ThemeHelper.DocumentTextColor : style.ForeColor.ToGdiColor()))
+			using (var f = new Font(fontInfo.bstrFaceName, fontSize, fs))
+			using (var b = new SolidBrush(fc))
 			using (var bg = new SolidBrush(ThemeHelper.DocumentPageColor)) {
 				g.FillRectangle(bg, 0, 0, bmp.Width, bmp.Height);
 				var t = label.StyleApplication == CommentStyleApplication.Tag ? label.Label
@@ -199,7 +200,7 @@ namespace Codist.Options
 				g.SmoothingMode = SmoothingMode.HighQuality;
 				g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 				g.CompositingQuality = CompositingQuality.HighQuality;
-				using (var bb = ConfigPage.GetPreviewBrush(style.BackgroundEffect, style.BackColor, ref m)) {
+				using (var bb = ConfigPage.GetPreviewBrush(style.BackgroundEffect, bc, ref m)) {
 					g.FillRectangle(bb, new Rectangle(0, 0, (int)m.Width, (int)m.Height));
 				}
 				g.DrawString(t, f, b, new RectangleF(PointF.Empty, bmp.PhysicalDimension));

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist.Classifiers
 {
@@ -43,6 +44,7 @@ namespace Codist.Classifiers
 		internal StringComparison Comparison { get; private set; }
 		/// <summary>Gets or sets the comment style.</summary>
 		public CommentStyleTypes StyleID { get; set; }
+		internal IClassificationType ClassificationType { get; private set; }
 
 		public CommentLabel Clone() {
 			return (CommentLabel)MemberwiseClone();
@@ -54,6 +56,7 @@ namespace Codist.Classifiers
 			label._label = _label;
 			label.LabelLength = LabelLength;
 			label.Comparison = Comparison;
+			label.ClassificationType = ClassificationType;
 		}
 	}
 }

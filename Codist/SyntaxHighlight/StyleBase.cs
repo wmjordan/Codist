@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
+using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist.SyntaxHighlight
 {
@@ -57,6 +59,8 @@ namespace Codist.SyntaxHighlight
 		[Newtonsoft.Json.JsonIgnore]
 		public bool IsSet => Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || String.IsNullOrEmpty(Font) == false || ForeColor.A > 0 || BackColor.A > 0;
 
+		internal abstract string ClassificationType { get; }
+
 		internal StyleBase Clone() {
 			return (StyleBase)MemberwiseClone();
 		}
@@ -82,7 +86,23 @@ namespace Codist.SyntaxHighlight
 	}
 	abstract class StyleBase<TStyle> : StyleBase where TStyle : struct
 	{
+		string _ClassficationType;
+
 		public abstract TStyle StyleID { get; set; }
+
+		internal override string ClassificationType => _ClassficationType ?? (_ClassficationType = GetClassificationType());
+
+		protected string GetCategory() {
+			return typeof(TStyle).GetField(StyleID.ToString())
+				?.GetCustomAttribute<CategoryAttribute>(false)
+				?.Category ?? String.Empty;
+		}
+		string GetClassificationType() {
+			return typeof(TStyle).GetField(StyleID.ToString())
+				?.GetCustomAttributes<ClassificationTypeAttribute>(false)
+				?.FirstOrDefault()
+				?.ClassificationTypeNames;
+		}
 	}
 
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
@@ -95,22 +115,8 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the code style.</summary>
 		public override CodeStyleTypes StyleID { get; set; }
 
-		public override string Category {
-			get {
-				if (_Category != null) {
-					return _Category;
-				}
-				var f = typeof(CodeStyleTypes).GetField(StyleID.ToString());
-				if (f == null) {
-					return _Category = String.Empty;
-				}
-				var c = f.GetCustomAttribute<CategoryAttribute>(false);
-				if (c == null) {
-					return _Category = String.Empty;
-				}
-				return _Category = c.Category;
-			}
-		}
+		public override string Category => _Category ?? (_Category = GetCategory());
+
 		internal new CodeStyle Clone() {
 			return (CodeStyle)MemberwiseClone();
 		}
@@ -159,22 +165,8 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the code style.</summary>
 		public override CSharpStyleTypes StyleID { get; set; }
 
-		public override string Category {
-			get {
-				if (_Category != null) {
-					return _Category;
-				}
-				var f = typeof(CSharpStyleTypes).GetField(StyleID.ToString());
-				if (f == null) {
-					return _Category = String.Empty;
-				}
-				var c = f.GetCustomAttribute<CategoryAttribute>(false);
-				if (c == null) {
-					return _Category = String.Empty;
-				}
-				return _Category = c.Category;
-			}
-		}
+		public override string Category => _Category ?? (_Category = GetCategory());
+
 		internal new CSharpStyle Clone() {
 			return (CSharpStyle)MemberwiseClone();
 		}

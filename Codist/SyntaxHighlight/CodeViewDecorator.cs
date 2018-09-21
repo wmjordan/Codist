@@ -148,23 +148,26 @@ namespace Codist.SyntaxHighlight
 				properties = properties.SetForegroundOpacity(settings.ForeColor.A / 255.0)
 					.SetForeground(settings.ForeColor);
 			}
-			if (settings.BackColor.A > 0) {
-				properties = properties.SetBackgroundOpacity(settings.BackColor.A / 255.0);
+			var bc = settings.BackColor.A > 0 ? settings.BackColor
+				: properties.BackgroundBrushEmpty == false && properties.BackgroundBrush is SolidColorBrush ? (properties.BackgroundBrush as SolidColorBrush).Color
+				: Colors.Transparent;
+			if (bc.A > 0) {
+				properties = properties.SetBackgroundOpacity(bc.A / 255.0);
 				switch (settings.BackgroundEffect) {
 					case BrushEffect.Solid:
-						properties = properties.SetBackground(settings.BackColor);
+						properties = properties.SetBackground(bc);
 						break;
 					case BrushEffect.ToBottom:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, settings.BackColor, 90));
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 90));
 						break;
 					case BrushEffect.ToTop:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(settings.BackColor, _BackColor, 90));
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 90));
 						break;
 					case BrushEffect.ToRight:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, settings.BackColor, 0));
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 0));
 						break;
 					case BrushEffect.ToLeft:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(settings.BackColor, _BackColor, 0));
+						properties = properties.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 0));
 						break;
 					default:
 						break;

@@ -63,7 +63,7 @@
 				<CommandFlag>DynamicItemStart</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<Strings>
-          <ButtonText>Save code &amp;window screenshot</ButtonText>
+          <ButtonText>Save code &amp;window screenshot...</ButtonText>
 					<ToolTipText>Take a screenshot for the active code window</ToolTipText>
         </Strings>
       </Button>

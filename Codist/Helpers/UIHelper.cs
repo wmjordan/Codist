@@ -9,6 +9,7 @@ using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
+using FontStyle = System.Drawing.FontStyle;
 
 namespace Codist
 {
@@ -143,6 +144,50 @@ namespace Codist
 			}
 		}
 
+		internal static void MixStyle(SyntaxHighlight.StyleBase style, out FontStyle fontStyle, out GdiColor foreground, out GdiColor background) {
+			foreground = ThemeHelper.DocumentTextColor;
+			background = ThemeHelper.DocumentPageColor;
+			fontStyle = style.GetFontStyle();
+			if (style.ClassificationType != null
+				&& TextEditorHelper.BackupFormattings.TryGetValue(style.ClassificationType, out var p)) {
+				SolidColorBrush colorBrush;
+				if (style.ForeColor.A == 0) {
+					colorBrush = p.ForegroundBrushEmpty == false ? p.ForegroundBrush as SolidColorBrush : null;
+					if (colorBrush != null) {
+						foreground = colorBrush.Color.ToGdiColor();
+					}
+				}
+				else {
+					foreground = style.ForeColor.ToGdiColor();
+				}
+				if (style.BackColor.A == 0) {
+					colorBrush = p.BackgroundBrushEmpty == false ? p.BackgroundBrush as SolidColorBrush : null;
+					if (colorBrush != null) {
+						background = colorBrush.Color.ToGdiColor();
+					}
+				}
+				else {
+					background = style.BackColor.ToGdiColor();
+				}
+				if (p.BoldEmpty == false && p.Bold && style.Bold != false) {
+					fontStyle |= FontStyle.Bold;
+				}
+				if (p.ItalicEmpty == false && p.Italic && style.Italic != false) {
+					fontStyle |= FontStyle.Italic;
+				}
+				if (p.TextDecorationsEmpty == false) {
+					foreach (var decoration in p.TextDecorations) {
+						if (decoration.Location == System.Windows.TextDecorationLocation.Underline && style.Underline != false) {
+							fontStyle |= FontStyle.Underline;
+						}
+						else if (decoration.Location == System.Windows.TextDecorationLocation.Strikethrough && style.Strikethrough != false) {
+							fontStyle |= FontStyle.Strikeout;
+						}
+					}
+				}
+			}
+		}
+
 		internal static ListViewItem ApplyTheme(this ListViewItem item) {
 			var style = item.Tag as SyntaxHighlight.StyleBase;
 			if (style == null) {
@@ -152,9 +197,28 @@ namespace Codist
 					return item;
 				}
 			}
-			item.ForeColor = style.ForeColor.A != 0 ? style.ForeColor.ToGdiColor() : ThemeHelper.DocumentTextColor;
-			item.BackColor = style.BackColor.A != 0 ? style.BackColor.ToGdiColor() : ThemeHelper.DocumentPageColor;
+			MixStyle(style, out var s, out var fg, out var bg);
+			item.Font = new System.Drawing.Font(item.Font, style.GetFontStyle() | s);
+			item.ForeColor = style.ForeColor.A != 0 ? style.ForeColor.ToGdiColor() : fg;
+			item.BackColor = style.BackColor.A != 0 ? style.BackColor.ToGdiColor() : bg;
 			return item;
+		}
+
+		internal static FontStyle GetFontStyle(this SyntaxHighlight.StyleBase activeStyle) {
+			var f = FontStyle.Regular;
+			if (activeStyle.Bold == true) {
+				f |= FontStyle.Bold;
+			}
+			if (activeStyle.Italic == true) {
+				f |= FontStyle.Italic;
+			}
+			if (activeStyle.Underline == true) {
+				f |= FontStyle.Underline;
+			}
+			if (activeStyle.Strikethrough == true) {
+				f |= FontStyle.Strikeout;
+			}
+			return f;
 		}
 
 		static class NamedColorCache
