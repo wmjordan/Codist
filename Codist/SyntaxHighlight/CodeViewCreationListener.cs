@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 using AppHelpers;
+using System.Windows.Media;
 
 namespace Codist.SyntaxHighlight
 {
@@ -19,15 +20,9 @@ namespace Codist.SyntaxHighlight
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false) {
 				return;
 			}
-			textView.Properties.GetOrCreateSingletonProperty(() => {
-				return new CodeViewDecorator(
-					textView,
-					ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(textView),
-					ServicesHelper.Instance.ClassificationTypeRegistry,
-					ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView));
-			});
-			//IEditorFormatMap formatMap = _EditorFormatMapService.GetEditorFormatMap(textView);
-			//ChangeEditorFormat(formatMap, EditorTextViewBackground, m => m[EditorFormatDefinition.BackgroundBrushId] = Brushes.LightYellow);
+			textView.Properties.GetOrCreateSingletonProperty(() => new CodeViewDecorator(textView));
+			//var formatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
+			//ChangeEditorFormat(formatMap, "TextView Background", m => m[EditorFormatDefinition.BackgroundBrushId] = Brushes.LightGreen);
 		}
 
 		static void ChangeEditorFormat(IEditorFormatMap formatMap, string propertyId, Action<System.Windows.ResourceDictionary> changer) {

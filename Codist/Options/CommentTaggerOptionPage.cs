@@ -25,7 +25,7 @@ namespace Codist.Options
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
-			_SyntaxListBox.Theme();
+			_SyntaxListBox.ApplyTheme();
 			if (_Loaded) {
 				return;
 			}
@@ -100,7 +100,7 @@ namespace Codist.Options
 			_UI.Lock();
 			_SyntaxListBox.Items.Clear();
 			foreach (var item in Config.Instance.Labels) {
-				_SyntaxListBox.Items.Add(new ListViewItem(item.Label) { Tag = item }.Theme());
+				_SyntaxListBox.Items.Add(new ListViewItem(item.Label) { Tag = item }.ApplyTheme());
 			}
 			_StyleBox.Items.Clear();
 			var t = typeof(CommentStyleTypes);
@@ -119,7 +119,10 @@ namespace Codist.Options
 			if (_UI.IsLocked || _ActiveLabel == null) {
 				return;
 			}
-			_SyntaxListBox.FocusedItem.Theme();
+			if (_SyntaxListBox.FocusedItem == null) {
+				_SyntaxListBox.FocusedItem = _SyntaxListBox.SelectedItems[0];
+			}
+			_SyntaxListBox.FocusedItem.ApplyTheme();
 			UpdatePreview();
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
@@ -171,9 +174,7 @@ namespace Codist.Options
 				return;
 			}
 			var bmp = new Bitmap(_PreviewBox.Width, _PreviewBox.Height);
-			var fs = _ServicePage.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor));
-			var label = _ActiveLabel;
-			RenderPreview(bmp, fs, label);
+			RenderPreview(bmp, _ServicePage.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor)), _ActiveLabel);
 			_PreviewBox.Image = bmp;
 		}
 

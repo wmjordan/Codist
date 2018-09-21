@@ -32,7 +32,7 @@ namespace Codist.Options
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
-			_SyntaxListBox.Theme();
+			_SyntaxListBox.ApplyTheme();
 			if (_loaded) {
 				return;
 			}
@@ -207,7 +207,7 @@ namespace Codist.Options
 					Tag = style,
 					Group = groups.FirstOrDefault(i => i.Header == item.Category),
 					Font = new Font(_SyntaxListBox.Font, ConfigPage.GetFontStyle(style))
-				}.Theme());
+				}.ApplyTheme());
 			}
 			_uiLock = false;
 		}
@@ -217,7 +217,10 @@ namespace Codist.Options
 				return;
 			}
 			UpdatePreview();
-			_SyntaxListBox.FocusedItem.Theme();
+			if (_SyntaxListBox.FocusedItem == null) {
+				_SyntaxListBox.FocusedItem = _SyntaxListBox.SelectedItems[0];
+			}
+			_SyntaxListBox.FocusedItem.ApplyTheme();
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 

@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Codist.SyntaxHighlight;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Formatting;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
 
@@ -12,6 +17,9 @@ namespace Codist
 	static class TextEditorHelper
 	{
 		static /*readonly*/ Guid guidIWpfTextViewHost = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476");
+		internal static readonly Dictionary<string, StyleBase> SyntaxStyleCache = InitSyntaxStyleCache();
+		internal static readonly Dictionary<string, TextFormattingRunProperties> BackupFormattings = new Dictionary<string, TextFormattingRunProperties>(30);
+		internal static TextFormattingRunProperties DefaultFormatting;
 
 		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
 			while (oldVersion != currentVersion) {
@@ -81,7 +89,7 @@ namespace Codist
 				return false;
 			}
 			var buffer = textView.TextViewLines;
-			Microsoft.VisualStudio.Text.Formatting.IWpfTextViewLine line = null, line2;
+			IWpfTextViewLine line = null, line2;
 			foreach (var item in s.SelectedSpans) {
 				line2 = buffer.GetTextViewLineContainingBufferPosition(item.Start);
 				if (line == null) {
@@ -137,7 +145,7 @@ namespace Codist
 
 		static VsTextView GetIVsTextView(IServiceProvider service, string filePath) {
 			IVsWindowFrame windowFrame;
-			return VsShellUtilities.IsDocumentOpen(service, filePath, Guid.Empty, out IVsUIHierarchy uiHierarchy, out uint itemID, out windowFrame)
+			return VsShellUtilities.IsDocumentOpen(service, filePath, Guid.Empty, out var uiHierarchy, out uint itemID, out windowFrame)
 				? VsShellUtilities.GetTextView(windowFrame)
 				: null;
 		}
@@ -149,6 +157,48 @@ namespace Codist
 			var guidViewHost = guidIWpfTextViewHost;
 			userData.GetData(ref guidViewHost, out object holder);
 			return ((IWpfTextViewHost)holder).TextView;
+		}
+		static Dictionary<string, StyleBase> InitSyntaxStyleCache() {
+			var r = new Dictionary<string, StyleBase>(100);
+			LoadSyntaxStyleCache(r);
+			Config.Loaded += (s, args) => {
+				SyntaxStyleCache.Clear();
+				LoadSyntaxStyleCache(SyntaxStyleCache);
+			};
+			return r;
+		}
+
+		static void LoadSyntaxStyleCache(Dictionary<string, StyleBase> r) {
+			var service = ServicesHelper.Instance.ClassificationTypeRegistry;
+			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(r, service, Config.Instance.GeneralStyles);
+			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(r, service, Config.Instance.CommentStyles);
+			InitStyleClassificationCache<CSharpStyleTypes, CSharpStyle>(r, service, Config.Instance.CodeStyles);
+			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(r, service, Config.Instance.XmlCodeStyles);
+			InitStyleClassificationCache<SymbolMarkerStyleTypes, SymbolMarkerStyle>(r, service, Config.Instance.SymbolMarkerStyles);
+		}
+
+		static void InitStyleClassificationCache<TStyleEnum, TCodeStyle>(Dictionary<string, StyleBase> styleCache, IClassificationTypeRegistryService service, List<TCodeStyle> styles)
+			where TCodeStyle : StyleBase {
+			var cs = typeof(TStyleEnum);
+			var codeStyles = Enum.GetNames(cs);
+			foreach (var styleName in codeStyles) {
+				var f = cs.GetField(styleName);
+				var cso = styles.Find(i => i.Id == (int)f.GetValue(null));
+				if (cso == null) {
+					continue;
+				}
+				var cts = f.GetCustomAttributes<ClassificationTypeAttribute>(false);
+				foreach (var item in cts) {
+					var n = item.ClassificationTypeNames;
+					if (String.IsNullOrWhiteSpace(n)) {
+						continue;
+					}
+					var ct = service.GetClassificationType(n);
+					if (ct != null) {
+						styleCache[ct.Classification] = cso;
+					}
+				}
+			}
 		}
 	}
 

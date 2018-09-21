@@ -26,8 +26,12 @@ namespace Codist
 
 		internal void RenderXmlDocSymbol(string symbol, InlineCollection inlines, SymbolKind symbolKind) {
 			switch (symbolKind) {
-				case SymbolKind.Parameter: inlines.Add(symbol.Render(false, _SymbolFormatter.Parameter == null, _SymbolFormatter.Parameter)); return;
-				case SymbolKind.TypeParameter: inlines.Add(symbol.Render(_SymbolFormatter.TypeParameter == null, false, _SymbolFormatter.TypeParameter)); return;
+				case SymbolKind.Parameter:
+					inlines.Add(symbol.Render(false, _SymbolFormatter.Parameter == null, _SymbolFormatter.Parameter));
+					return;
+				case SymbolKind.TypeParameter:
+					inlines.Add(symbol.Render(_SymbolFormatter.TypeParameter == null, false, _SymbolFormatter.TypeParameter));
+					return;
 				case SymbolKind.DynamicType:
 					// highlight keywords
 					inlines.Add(symbol.Render(_SymbolFormatter.Keyword));

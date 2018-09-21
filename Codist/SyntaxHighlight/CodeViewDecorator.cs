@@ -14,9 +14,6 @@ namespace Codist.SyntaxHighlight
 {
 	sealed class CodeViewDecorator
 	{
-		static readonly Dictionary<string, TextFormattingRunProperties> __InitialProperties = new Dictionary<string, TextFormattingRunProperties>(30);
-		static Dictionary<string, StyleBase> __Styles;
-
 		readonly IWpfTextView _TextView;
 		readonly IClassificationFormatMap _ClassificationFormatMap;
 		readonly IClassificationTypeRegistryService _RegService;
@@ -26,21 +23,17 @@ namespace Codist.SyntaxHighlight
 		volatile int _IsDecorating;
 		//bool _PendingRefresh;
 
-		public CodeViewDecorator(IWpfTextView view, IClassificationFormatMap map, IClassificationTypeRegistryService service, IEditorFormatMap formatMap) {
+		public CodeViewDecorator(IWpfTextView view) {
 			view.Closed += View_Closed;
 			//view.VisualElement.IsVisibleChanged += VisualElement_IsVisibleChanged;
-			map.ClassificationFormatMappingChanged += FormatUpdated;
 			//view.GotAggregateFocus += TextView_GotAggregateFocus;
 			Config.Updated += SettingsSaved;
 
-			_ClassificationFormatMap = map;
-			_RegService = service;
-			_EditorFormatMap = formatMap;
+			_ClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(view);
+			_ClassificationFormatMap.ClassificationFormatMappingChanged += FormatUpdated;
+			_RegService = ServicesHelper.Instance.ClassificationTypeRegistry;
+			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(view);
 			_TextView = view;
-
-			if (__Styles == null) {
-				CacheStyles(service);
-			}
 
 			Decorate();
 		}
@@ -58,39 +51,6 @@ namespace Codist.SyntaxHighlight
 			_TextView.Closed -= View_Closed;
 		}
 
-		static void CacheStyles(IClassificationTypeRegistryService service) {
-			__Styles = new Dictionary<string, StyleBase>(100);
-			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(service, Config.Instance.GeneralStyles);
-			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(service, Config.Instance.CommentStyles);
-			InitStyleClassificationCache<CSharpStyleTypes, CSharpStyle>(service, Config.Instance.CodeStyles);
-			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(service, Config.Instance.XmlCodeStyles);
-			InitStyleClassificationCache<SymbolMarkerStyleTypes, SymbolMarkerStyle>(service, Config.Instance.SymbolMarkerStyles);
-		}
-
-		static void InitStyleClassificationCache<TStyleEnum, TCodeStyle>(IClassificationTypeRegistryService service, List<TCodeStyle> styles)
-			where TCodeStyle : StyleBase {
-			var cs = typeof(TStyleEnum);
-			var codeStyles = Enum.GetNames(cs);
-			foreach (var styleName in codeStyles) {
-				var f = cs.GetField(styleName);
-				var cso = styles.Find(i => i.Id == (int)f.GetValue(null));
-				if (cso == null) {
-					continue;
-				}
-				var cts = f.GetCustomAttributes<ClassificationTypeAttribute>(false);
-				foreach (var item in cts) {
-					var n = item.ClassificationTypeNames;
-					if (String.IsNullOrWhiteSpace(n)) {
-						continue;
-					}
-					var ct = service.GetClassificationType(n);
-					if (ct != null) {
-						__Styles[ct.Classification] = cso;
-					}
-				}
-			}
-		}
-
 		void SettingsSaved(object sender, ConfigUpdatedEventArgs eventArgs) {
 			if (eventArgs.UpdatedFeature.MatchFlags(Features.SyntaxHighlight) == false) {
 				return;
@@ -103,17 +63,8 @@ namespace Codist.SyntaxHighlight
 				return;
 			}
 			if (_TextView.VisualElement.IsVisible) {
-				//if (_PendingRefresh) {
-				CacheStyles(_RegService);
 				Decorate();
-				//_PendingRefresh = false;
-				Debug.WriteLine("Unset pending refresh");
-				//}
 			}
-			//else {
-			//	_PendingRefresh = true;
-			//	Debug.WriteLine("Set pending refresh");
-			//}
 		}
 
 		void Decorate() {
@@ -127,8 +78,7 @@ namespace Codist.SyntaxHighlight
 				}
 				c = _EditorFormatMap.GetProperties(Constants.EditorProperties.TextViewBackground)?[EditorFormatDefinition.BackgroundColorId];
 				if (c is Color) {
-					_BackColor = (Color)c;
-					_BackColor = Color.FromArgb(0x00, _BackColor.R, _BackColor.G, _BackColor.B);
+					_BackColor = ((Color)c).Alpha(0);
 				}
 				DecorateClassificationTypes();
 			}
@@ -146,34 +96,34 @@ namespace Codist.SyntaxHighlight
 				return;
 			}
 			_ClassificationFormatMap.BeginBatchUpdate();
-			var textProperty = _ClassificationFormatMap.GetTextProperties(_RegService.GetClassificationType("text"));
+			var defaultFormat = _ClassificationFormatMap.DefaultTextProperties;
+			if (TextEditorHelper.DefaultFormatting == null) {
+				TextEditorHelper.DefaultFormatting = defaultFormat;
+			}
+			else if (TextEditorHelper.DefaultFormatting.ForegroundBrushSame(defaultFormat.ForegroundBrush) == false) {
+				// theme changed
+				TextEditorHelper.BackupFormattings.Clear();
+				TextEditorHelper.DefaultFormatting = defaultFormat;
+			}
 			foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
 				if (item == null) {
 					continue;
 				}
-#if DEBUG
-				Debug.Write(item.Classification);
-				Debug.Write(' ');
-				foreach (var type in item.BaseTypes) {
-					Debug.Write('/');
-					Debug.Write(type.Classification);
-				}
-				Debug.WriteLine('/');
-#endif
 				StyleBase style;
-				if (__Styles.TryGetValue(item.Classification, out style)) {
-					TextFormattingRunProperties initialProperty;
-					if (__InitialProperties.TryGetValue(item.Classification, out initialProperty) == false) {
+				if (TextEditorHelper.SyntaxStyleCache.TryGetValue(item.Classification, out style)) {
+					TextFormattingRunProperties cached;
+					if (TextEditorHelper.BackupFormattings.TryGetValue(item.Classification, out cached) == false) {
 						var p = _ClassificationFormatMap.GetExplicitTextProperties(item);
 						if (p == null) {
 							continue;
 						}
-						__InitialProperties[item.Classification] = initialProperty = p;
+						TextEditorHelper.BackupFormattings[item.Classification] = cached = p;
 					}
-					_ClassificationFormatMap.SetTextProperties(item, SetProperties(initialProperty, style, textProperty.FontRenderingEmSize));
+					_ClassificationFormatMap.SetTextProperties(item, SetProperties(cached, style, defaultFormat.FontRenderingEmSize));
 				}
 			}
 			_ClassificationFormatMap.EndBatchUpdate();
+			Debug.WriteLine("Decorated");
 		}
 
 		TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption, double textSize) {

@@ -16,7 +16,7 @@ namespace Codist.Options
 	abstract class ConfigPage : DialogPage
 	{
 		int _version, _oldVersion;
-		Control _disabledNotice;
+		Label _DisabledNotice;
 
 		protected abstract Features Feature { get; }
 		protected UserControl Control { get; set; }
@@ -26,15 +26,15 @@ namespace Codist.Options
 			_oldVersion = _version;
 			if (Feature != Features.None) {
 				if (Control.Enabled = Config.Instance.Features.MatchFlags(Feature)) {
-					if (_disabledNotice != null) {
-						_disabledNotice.Visible = false;
+					if (_DisabledNotice != null) {
+						_DisabledNotice.Visible = false;
 					}
 				}
 				else {
-					if (_disabledNotice == null) {
-						_disabledNotice = CreateDisabledNotice(Feature);
-						Control.Controls.Add(_disabledNotice);
-						_disabledNotice.BringToFront();
+					if (_DisabledNotice == null) {
+						_DisabledNotice = CreateDisabledNotice(Feature);
+						Control.Controls.Add(_DisabledNotice);
+						_DisabledNotice.BringToFront();
 					}
 				}
 			}
@@ -44,9 +44,9 @@ namespace Codist.Options
 		protected override void OnClosed(EventArgs e) {
 			base.OnClosed(e);
 			if (_version != _oldVersion) {
+				Config.Updated -= UpdateVersion;
 				Config.LoadConfig(Config.ConfigPath);
 				_oldVersion = _version;
-				Config.Updated -= UpdateVersion;
 			}
 		}
 
@@ -73,7 +73,7 @@ namespace Codist.Options
 
 			ErrorHandler.ThrowOnFailure(storage.OpenCategory(category, (uint)(__FCSTORAGEFLAGS.FCSF_LOADDEFAULTS | __FCSTORAGEFLAGS.FCSF_PROPAGATECHANGES)));
 			try {
-				return ErrorHandler.Succeeded(storage.GetFont(pLOGFONT, pInfo)) ? pInfo[0] : default(FontInfo);
+				return ErrorHandler.Succeeded(storage.GetFont(pLOGFONT, pInfo)) ? pInfo[0] : default;
 			}
 			finally {
 				storage.CloseCategory();

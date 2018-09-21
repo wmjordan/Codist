@@ -20,6 +20,7 @@ namespace Codist
 
 		public static GdiColor DocumentPageColor { get; private set; }
 		public static GdiColor DocumentTextColor { get; private set; }
+		public static WpfBrush DocumentTextBrush { get; private set; }
 		public static GdiColor ToolWindowBackgroundColor { get; private set; }
 		public static WpfColor TitleBackgroundColor { get; private set; }
 		public static WpfBrush ToolTipTextBrush { get; private set; }
@@ -66,6 +67,7 @@ namespace Codist
 		internal static void RefreshThemeCache() {
 			DocumentPageColor = CommonDocumentColors.PageColorKey.ToThemedGdiColor();
 			DocumentTextColor = CommonDocumentColors.PageTextColorKey.ToThemedGdiColor();
+			DocumentTextBrush = new WpfBrush(CommonDocumentColors.PageTextColorKey.ToThemedWpfColor());
 			ToolWindowBackgroundColor = EnvironmentColors.ToolWindowBackgroundColorKey.ToThemedGdiColor();
 			TitleBackgroundColor = EnvironmentColors.MainWindowActiveCaptionColorKey.ToThemedWpfColor();
 			ToolTipTextBrush = new WpfBrush(EnvironmentColors.ButtonTextBrushKey.ToThemedWpfColor());

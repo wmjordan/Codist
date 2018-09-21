@@ -135,15 +135,15 @@ namespace Codist
 			return d?.ClassificationTypeNames;
 		}
 
-		internal static void Theme(this ListView styleBox) {
+		internal static void ApplyTheme(this ListView styleBox) {
 			styleBox.BackColor = ThemeHelper.DocumentPageColor;
 			styleBox.ForeColor = ThemeHelper.DocumentTextColor;
 			foreach (ListViewItem item in styleBox.Items) {
-				item.Theme();
+				item.ApplyTheme();
 			}
 		}
 
-		internal static ListViewItem Theme(this ListViewItem item) {
+		internal static ListViewItem ApplyTheme(this ListViewItem item) {
 			var style = item.Tag as SyntaxHighlight.StyleBase;
 			if (style == null) {
 				var styleId = (item.Tag as Classifiers.CommentLabel).StyleID;

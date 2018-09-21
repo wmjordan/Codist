@@ -80,8 +80,8 @@ namespace Codist
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
 			await Commands.ScreenshotCommand.InitializeAsync(this);
-			ThemeHelper.RefreshThemeCache();
 			VSColorTheme.ThemeChanged += (args) => {
+				System.Diagnostics.Debug.WriteLine("Theme changed.");
 				ThemeHelper.RefreshThemeCache();
 			};
 			SolutionEvents.OnAfterOpenSolution += (s, args) => {

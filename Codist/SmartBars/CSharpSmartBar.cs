@@ -633,7 +633,7 @@ namespace Codist.SmartBars
 				}
 				var doc = Symbol.GetXmlDocSummaryForSymbol();
 				if (doc != null) {
-					new XmlDocRenderer((SmartBar as CSharpSmartBar)._SemanticModel.Compilation, __Formatter).Render(doc, tip.Append("\n\n").Inlines);
+					new XmlDocRenderer((SmartBar as CSharpSmartBar)._SemanticModel.Compilation, __Formatter, Symbol).Render(doc, tip.Append("\n\n").Inlines);
 					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 				}
 				tip.TextWrapping = TextWrapping.Wrap;
