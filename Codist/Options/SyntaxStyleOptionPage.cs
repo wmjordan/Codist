@@ -234,6 +234,10 @@ namespace Codist.Options
 			_uiLock = true;
 			_activeStyle.Reset();
 			UpdateUIControls(_activeStyle);
+			if (_SyntaxListBox.FocusedItem == null) {
+				_SyntaxListBox.FocusedItem = _SyntaxListBox.SelectedItems[0];
+			}
+			_SyntaxListBox.FocusedItem.ApplyTheme();
 			UpdatePreview();
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			_uiLock = false;
