@@ -239,13 +239,13 @@ namespace Codist.SmartBars
 		}
 
 		void AddHighlightMenuItems(MenuItem menuItem) {
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Red", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight1, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Orange", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight2, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Yellow", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight3, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Green", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight4, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Cyan", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight5, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Blue", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight6, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Violet", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight7, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 1", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight1, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 2", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight2, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 3", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight3, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 4", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight4, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 5", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight5, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 6", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight6, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 7", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight7, SetSymbolMark)));
 		}
 
 		void SetSymbolMark(CommandContext context) {
@@ -450,10 +450,6 @@ namespace Codist.SmartBars
 			symbol = symbol.GetAliasTarget();
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
-					//if ((symbol as IMethodSymbol).MethodKind == MethodKind.Constructor) {
-					//	r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, symbol.ContainingType, "No member was found", FindMembers));
-					//}
-					//goto case SymbolKind.Property;
 				case SymbolKind.Property:
 				case SymbolKind.Event:
 					r.Add(CreateCommandMenu("Find callers...", KnownImageIds.ShowCallerGraph, symbol, "No caller was found", FindCallers));
@@ -467,6 +463,9 @@ namespace Codist.SmartBars
 					if (symbol.Kind != SymbolKind.Event) {
 						CreateFindMemberForReturnTypeCommand(symbol, r);
 					}
+					if (symbol.Kind == SymbolKind.Method && (symbol as IMethodSymbol).MethodKind == MethodKind.Constructor) {
+						goto case SymbolKind.NamedType;
+					}
 					//r.Add(CreateCommandMenu("Find similar...", KnownImageIds.DropShadow, symbol, "No similar symbol was found", FindSimilarSymbols));
 					break;
 				case SymbolKind.Field:
@@ -476,32 +475,36 @@ namespace Codist.SmartBars
 					break;
 				case SymbolKind.NamedType:
 					var t = symbol as INamedTypeSymbol;
-					if (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct) {
-						var ctor = _Node.GetObjectCreationNode();
-						if (ctor != null) {
-							var s = _SemanticModel.GetSymbolOrFirstCandidate(ctor);
-							if (s != null) {
-								r.Add(CreateCommandMenu("Find callers...", KnownImageIds.ShowCallerGraph, s, "No caller was found", FindCallers));
+					if (symbol.Kind == SymbolKind.Method) { // from case Method
+						t = symbol.ContainingType as INamedTypeSymbol;
+					}
+					else {
+						if (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct) {
+							var ctor = _Node.GetObjectCreationNode();
+							if (ctor != null) {
+								var s = _SemanticModel.GetSymbolOrFirstCandidate(ctor);
+								if (s != null) {
+									r.Add(CreateCommandMenu("Find callers...", KnownImageIds.ShowCallerGraph, s, "No caller was found", FindCallers));
+								}
+							}
+							else if (t.InstanceConstructors.Length > 0) {
+								r.Add(CreateCommandMenu("Find constructor callers...", KnownImageIds.ShowCallerGraph, t, "No caller was found", FindCallers));
 							}
 						}
-						else if (t.InstanceConstructors.Length > 0) {
-							r.Add(CreateCommandMenu("Find constructor callers...", KnownImageIds.ShowCallerGraph, t, "No caller was found", FindCallers));
-						}
+						r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, t, "No member was found", FindMembers));
 					}
-					r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, t, "No member was found", FindMembers));
 					if (t.IsStatic || t.SpecialType != SpecialType.None) {
 						break;
 					}
 					r.Add(CreateCommandMenu("Find instance producer...", KnownImageIds.NewItem, t, "No instance creator was found", FindInstanceProducer));
 					r.Add(CreateCommandMenu("Find instance as parameter...", KnownImageIds.Parameter, t, "No instance as parameter was found", FindInstanceAsParameter));
-					if (t.IsSealed) {
-						break;
-					}
-					if (t.TypeKind == TypeKind.Class) {
-						r.Add(CreateCommandMenu("Find derived classes...", KnownImageIds.NewClass, symbol, "No derived class was found", FindDerivedClasses));
-					}
-					else if (t.TypeKind == TypeKind.Interface) {
-						r.Add(CreateCommandMenu("Find implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
+					if (t.IsSealed == false) {
+						if (t.TypeKind == TypeKind.Class) {
+							r.Add(CreateCommandMenu("Find derived classes...", KnownImageIds.NewClass, symbol, "No derived class was found", FindDerivedClasses));
+						}
+						else if (t.TypeKind == TypeKind.Interface) {
+							r.Add(CreateCommandMenu("Find implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
+						}
 					}
 					break;
 				case SymbolKind.Namespace:
@@ -583,8 +586,6 @@ namespace Codist.SmartBars
 		}
 		sealed class SymbolMenuItem : CommandMenuItem
 		{
-			static readonly SymbolFormatter __Formatter = new SymbolFormatter();
-
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(__MemberNameFormat), locations) { }
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
 				Locations = locations;
@@ -592,7 +593,16 @@ namespace Codist.SmartBars
 				var b = UIHelper.GetBrush(Symbol.Name, true);
 				if (b != null) {
 					var h = Header as TextBlock;
-					h.Inlines.InsertBefore(h.Inlines.FirstInline, new System.Windows.Documents.InlineUIContainer(new System.Windows.Shapes.Rectangle { Height = 16, Width = 16, Fill = b, Margin = WpfHelper.GlyphMargin }) { BaselineAlignment = BaselineAlignment.TextTop });
+					h.Inlines.InsertBefore(
+						h.Inlines.FirstInline,
+						new System.Windows.Documents.InlineUIContainer(new System.Windows.Shapes.Rectangle {
+							Height = 16,
+							Width = 16,
+							Fill = b,
+							Margin = WpfHelper.GlyphMargin
+						}) {
+							BaselineAlignment = BaselineAlignment.TextTop
+						});
 				}
 				//todo compatible with symbols having more than 1 locations
 				if (locations != null && locations.Any(l => l.SourceTree?.FilePath != null)) {
@@ -633,7 +643,7 @@ namespace Codist.SmartBars
 				}
 				var doc = Symbol.GetXmlDocSummaryForSymbol();
 				if (doc != null) {
-					new XmlDocRenderer((SmartBar as CSharpSmartBar)._SemanticModel.Compilation, __Formatter, Symbol).Render(doc, tip.Append("\n\n").Inlines);
+					new XmlDocRenderer((SmartBar as CSharpSmartBar)._SemanticModel.Compilation, SymbolFormatter.Empty, Symbol).Render(doc, tip.Append("\n\n").Inlines);
 					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 				}
 				tip.TextWrapping = TextWrapping.Wrap;

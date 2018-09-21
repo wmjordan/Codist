@@ -306,6 +306,7 @@ namespace Codist
 		}
 		public static ContextMenu CreateContextMenuForSourceLocations(string symbolName, ImmutableArray<Location> refs) {
 			var menu = new ContextMenu().SetStyleResourceProperty("EditorContextMenu");
+			menu.Foreground = ThemeHelper.MenuTextBrush;
 			menu.Opened += (sender, e) => {
 				var m = sender as ContextMenu;
 				m.Items.Add(new MenuItem {

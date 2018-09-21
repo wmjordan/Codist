@@ -24,17 +24,19 @@ namespace Codist.QuickInfo
 		internal ITextStructureNavigatorSelectorService _NavigatorService = null;
 
 		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
-			return new ColorQuickInfoController(_NavigatorService, textBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp));
+			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
+				? new ColorQuickInfoController(_NavigatorService, textBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp))
+				: null;
 		}
 
 		sealed class ColorQuickInfoController : IQuickInfoSource
 		{
 			readonly ITextStructureNavigatorSelectorService _NavigatorService;
-			readonly bool _IsCSharp;
+			readonly bool _ParseSystemColor;
 
-			public ColorQuickInfoController(ITextStructureNavigatorSelectorService navigatorService, bool isCSharp) {
+			public ColorQuickInfoController(ITextStructureNavigatorSelectorService navigatorService, bool parseSystemColor) {
 				_NavigatorService = navigatorService;
-				_IsCSharp = isCSharp;
+				//_ParseSystemColor = parseSystemColor;
 			}
 
 			public void AugmentQuickInfoSession(IQuickInfoSession session, IList<Object> qiContent, out ITrackingSpan applicableToSpan) {
@@ -46,12 +48,12 @@ namespace Codist.QuickInfo
 				var navigator = _NavigatorService.GetTextStructureNavigator(buffer);
 				var extent = navigator.GetExtentOfWord(session.GetTriggerPoint(snapshot).GetValueOrDefault()).Span;
 				var word = snapshot.GetText(extent);
-				var brush = UIHelper.GetBrush(word, _IsCSharp);
+				var brush = UIHelper.GetBrush(word, _ParseSystemColor);
 				if (brush == null) {
 					if ((extent.Length == 6 || extent.Length == 8) && extent.Span.Start > 0 && Char.IsPunctuation(snapshot.GetText(extent.Span.Start - 1, 1)[0])) {
 						word = "#" + word;
 					}
-					brush = UIHelper.GetBrush(word, _IsCSharp);
+					brush = UIHelper.GetBrush(word, _ParseSystemColor);
 				}
 				if (brush != null) {
 					qiContent.Add(GetColorInfo(brush));

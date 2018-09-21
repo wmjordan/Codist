@@ -34,7 +34,7 @@ namespace Codist.QuickInfo
 
 		sealed class CSharpQuickInfo : IQuickInfoSource
 		{
-			static readonly SymbolFormatter _SymbolFormatter = new SymbolFormatter();
+			static readonly SymbolFormatter _SymbolFormatter = SymbolFormatter.Instance;
 
 			readonly IEditorFormatMapService _FormatMapService;
 			IEditorFormatMap _FormatMap;
@@ -162,12 +162,6 @@ namespace Codist.QuickInfo
 						OverrideDocumentation(node, qiWrapper, symbol);
 					}
 				}
-				var formatMap = _FormatMapService.GetEditorFormatMap(session.TextView);
-				if (_FormatMap != formatMap) {
-					_FormatMap = formatMap;
-					_SymbolFormatter.UpdateSyntaxHighlights(formatMap);
-				}
-
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
 					ShowAttributesInfo(qiContent, node, symbol);
 				}
@@ -205,7 +199,7 @@ namespace Codist.QuickInfo
 						return;
 					}
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
-						var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, symbol);
+						var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
 						var info = new ToolTipText();
 						docRenderer.Render(summary, info);
 						if (info.Inlines.FirstInline != null) {
@@ -229,7 +223,7 @@ namespace Codist.QuickInfo
 						if (summary.Name.LocalName == XmlDocRenderer.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {
 							return;
 						}
-						var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, baseMember);
+						var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, baseMember);
 						var info = new ToolTipText("Documentation from ")
 							.AddSymbol(baseMember.ContainingType, null, _SymbolFormatter)
 							.Append(".")
@@ -1033,7 +1027,7 @@ namespace Codist.QuickInfo
 					}
 					if (doc != null) {
 						info.Append("\n" + argName, true, true, _SymbolFormatter.Parameter).Append(": ");
-						new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, m).Render(doc, info.Inlines);
+						new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Empty, m).Render(doc, info.Inlines);
 					}
 					foreach (var item in info.Inlines) {
 						if (item.Foreground == null) {

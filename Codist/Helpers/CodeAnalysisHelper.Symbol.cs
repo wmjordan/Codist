@@ -48,8 +48,14 @@ namespace Codist
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				foreach (var member in typeSymbol.GetMembers()) {
 					ITypeSymbol mt;
-					if (member.Kind != SymbolKind.Field
-						&& member.CanBeReferencedByName
+					if (member.Kind == SymbolKind.Field) {
+						if (member.CanBeReferencedByName
+							&& (mt = member.GetReturnType()) != null && mt.CanConvertTo(type)
+							&& type.CanAccess(member, assembly)) {
+							members.Add(member);
+						}
+					}
+					else if (member.CanBeReferencedByName
 						&& ((mt = member.GetReturnType()) != null && mt.CanConvertTo(type)
 							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None))
 						&& type.CanAccess(member, assembly)) {

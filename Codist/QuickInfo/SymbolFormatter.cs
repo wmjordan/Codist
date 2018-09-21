@@ -12,6 +12,16 @@ namespace Codist
 {
 	sealed class SymbolFormatter
 	{
+		private SymbolFormatter(IEditorFormatMap formatMap) {
+			if (formatMap != null) {
+				UpdateSyntaxHighlights(formatMap);
+				formatMap.FormatMappingChanged += (s, args) => UpdateSyntaxHighlights(s as IEditorFormatMap);
+			}
+		}
+
+		internal static SymbolFormatter Instance = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap("text"));
+		internal static SymbolFormatter Empty = new SymbolFormatter(null);
+
 		public Brush Class { get; private set; }
 		public Brush Const { get; private set; }
 		public Brush Delegate { get; private set; }
