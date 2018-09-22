@@ -117,6 +117,7 @@ namespace Codist
 		}
 
 		public static void TryExecuteCommand(this EnvDTE.DTE dte, string command) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			try {
 				if (dte.Commands.Item(command).IsAvailable) {
 					dte.ExecuteCommand(command);
@@ -135,6 +136,7 @@ namespace Codist
 		}
 
 		public static IWpfTextView GetActiveWpfDocumentView(this IServiceProvider service) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			var doc = CodistPackage.DTE.ActiveDocument;
 			if (doc == null) {
 				return null;
@@ -161,11 +163,13 @@ namespace Codist
 		static Dictionary<string, StyleBase> InitSyntaxStyleCache() {
 			var r = new Dictionary<string, StyleBase>(100);
 			LoadSyntaxStyleCache(r);
-			Config.Loaded += (s, args) => {
-				SyntaxStyleCache.Clear();
-				LoadSyntaxStyleCache(SyntaxStyleCache);
-			};
+			Config.Loaded += (s, args) => ResetStyleCache();
 			return r;
+		}
+
+		internal static void ResetStyleCache() {
+			SyntaxStyleCache.Clear();
+			LoadSyntaxStyleCache(SyntaxStyleCache);
 		}
 
 		static void LoadSyntaxStyleCache(Dictionary<string, StyleBase> r) {

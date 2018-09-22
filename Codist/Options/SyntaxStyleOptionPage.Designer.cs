@@ -46,7 +46,7 @@
 			this._UnderlineBox = new System.Windows.Forms.CheckBox();
 			this._ItalicBox = new System.Windows.Forms.CheckBox();
 			this._BoldBox = new System.Windows.Forms.CheckBox();
-			this._SyntaxListBox = new System.Windows.Forms.ListView();
+			this._SyntaxListBox = new SyntaxListView();
 			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this._PicColorBox = new System.Windows.Forms.ColorDialog();
 			this.groupBox1.SuspendLayout();
@@ -353,7 +353,7 @@
 		private System.Windows.Forms.CheckBox _UnderlineBox;
 		private System.Windows.Forms.CheckBox _ItalicBox;
 		private System.Windows.Forms.CheckBox _BoldBox;
-		private System.Windows.Forms.ListView _SyntaxListBox;
+		private SyntaxListView _SyntaxListBox;
 		private System.Windows.Forms.ColumnHeader _NameColumn;
 		private System.Windows.Forms.ColorDialog _PicColorBox;
 		private System.Windows.Forms.PictureBox _PreviewBox;

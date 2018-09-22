@@ -25,7 +25,6 @@ namespace Codist.Options
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
-			_SyntaxListBox.ApplyTheme();
 			if (_Loaded) {
 				return;
 			}
@@ -37,7 +36,7 @@ namespace Codist.Options
 			_AddTagButton.Click += (s, args) => {
 				var label = new CommentLabel(_TagTextBox.Text.Length > 0 ? _TagTextBox.Text : "tag", (CommentStyleTypes)Enum.Parse(typeof(CommentStyleTypes), _StyleBox.Text));
 				Config.Instance.Labels.Add(label);
-				_SyntaxListBox.Items.Add(new ListViewItem(label.Label) { Tag = label, Selected = true });
+				_SyntaxListBox.Items.Add(new CommentTaggerListViewItem(label.Label, label) { Selected = true });
 				_ActiveLabel = label;
 			};
 			_RemoveTagButton.Click += (s, args) => {
@@ -72,8 +71,8 @@ namespace Codist.Options
 			_TagTextBox.TextChanged += _UI.HandleEvent(() => {
 				if (_ActiveLabel != null) {
 					_ActiveLabel.Label = _TagTextBox.Text;
-					foreach (ListViewItem item in _SyntaxListBox.Items) {
-						if (item.Tag == _ActiveLabel) {
+					foreach (CommentTaggerListViewItem item in _SyntaxListBox.Items) {
+						if (item.CommentLabel == _ActiveLabel) {
 							item.Text = _TagTextBox.Text;
 						}
 					}
@@ -100,7 +99,7 @@ namespace Codist.Options
 			_UI.Lock();
 			_SyntaxListBox.Items.Clear();
 			foreach (var item in Config.Instance.Labels) {
-				_SyntaxListBox.Items.Add(new ListViewItem(item.Label) { Tag = item }.ApplyTheme());
+				_SyntaxListBox.Items.Add(new CommentTaggerListViewItem(item.Label, item));
 			}
 			_StyleBox.Items.Clear();
 			var t = typeof(CommentStyleTypes);
@@ -119,10 +118,6 @@ namespace Codist.Options
 			if (_UI.IsLocked || _ActiveLabel == null) {
 				return;
 			}
-			if (_SyntaxListBox.FocusedItem == null) {
-				_SyntaxListBox.FocusedItem = _SyntaxListBox.SelectedItems[0];
-			}
-			_SyntaxListBox.FocusedItem.ApplyTheme();
 			UpdatePreview();
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
@@ -146,7 +141,7 @@ namespace Codist.Options
 			if (e.ItemIndex == -1) {
 				return;
 			}
-			var i = e.Item.Tag as CommentLabel;
+			var i = (e.Item as CommentTaggerListViewItem)?.CommentLabel;
 			if (i == null) {
 				return;
 			}

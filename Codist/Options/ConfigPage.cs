@@ -67,6 +67,7 @@ namespace Codist.Options
 		}
 
 		internal FontInfo GetFontSettings(Guid category) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			var storage = (IVsFontAndColorStorage)GetService(typeof(SVsFontAndColorStorage));
 			var pLOGFONT = new LOGFONTW[1];
 			var pInfo = new FontInfo[1];

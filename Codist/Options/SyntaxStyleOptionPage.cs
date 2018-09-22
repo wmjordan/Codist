@@ -34,9 +34,17 @@ namespace Codist.Options
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
-			_SyntaxListBox.ApplyTheme();
 			if (_loaded) {
 				return;
+			}
+			if (TextEditorHelper.BackupFormattings.Count == 0) {
+				var m = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("text");
+				foreach (var item in m.CurrentPriorityOrder) {
+					if (item != null
+						&& TextEditorHelper.SyntaxStyleCache.ContainsKey(item.Classification)) {
+						TextEditorHelper.BackupFormattings[item.Classification] = m.GetExplicitTextProperties(item);
+					}
+				}
 			}
 			LoadStyleList();
 			_BackColorButton.Click += SetBackColor;
@@ -145,7 +153,7 @@ namespace Codist.Options
 			if (e.ItemIndex == -1) {
 				return;
 			}
-			var i = e.Item.Tag as StyleBase;
+			var i = (e.Item as SyntaxListViewItem)?.Style;
 			if (i == null) {
 				return;
 			}
@@ -206,11 +214,10 @@ namespace Codist.Options
 					continue;
 				}
 				var style = styles.FirstOrDefault(i => i.Id == item.Id) ?? item;
-				_SyntaxListBox.Items.Add(new ListViewItem(item.ToString()) {
-					Tag = style,
+				_SyntaxListBox.Items.Add(new SyntaxListViewItem(item.ToString(), style) {
 					Group = groups.FirstOrDefault(i => i.Header == item.Category),
 					Font = new Font(_SyntaxListBox.Font, style.GetFontStyle())
-				}.ApplyTheme());
+				});
 			}
 			_uiLock = false;
 		}
@@ -220,10 +227,6 @@ namespace Codist.Options
 				return;
 			}
 			UpdatePreview();
-			if (_SyntaxListBox.FocusedItem == null) {
-				_SyntaxListBox.FocusedItem = _SyntaxListBox.SelectedItems[0];
-			}
-			_SyntaxListBox.FocusedItem.ApplyTheme();
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 
@@ -234,10 +237,6 @@ namespace Codist.Options
 			_uiLock = true;
 			_activeStyle.Reset();
 			UpdateUIControls(_activeStyle);
-			if (_SyntaxListBox.FocusedItem == null) {
-				_SyntaxListBox.FocusedItem = _SyntaxListBox.SelectedItems[0];
-			}
-			_SyntaxListBox.FocusedItem.ApplyTheme();
 			UpdatePreview();
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			_uiLock = false;

@@ -15,7 +15,7 @@ namespace Codist
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 		/// </summary>
-		public static List<ISymbol> FindInstanceAsParameter(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default(CancellationToken)) {
+		public static List<ISymbol> FindInstanceAsParameter(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
 			var compilation = project.GetCompilationAsync(cancellationToken).Result;
 			//todo cache types
 			var members = new List<ISymbol>(10);
@@ -40,7 +40,7 @@ namespace Codist
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may return an instance of <paramref name="type"/>.
 		/// </summary>
-		public static List<ISymbol> FindSymbolInstanceProducer(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default(CancellationToken)) {
+		public static List<ISymbol> FindSymbolInstanceProducer(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
 			var compilation = project.GetCompilationAsync(cancellationToken).Result;
 			var assembly = compilation.Assembly;
 			//todo cache types
@@ -105,7 +105,7 @@ namespace Codist
 			return symbol.Kind == SymbolKind.Alias ? (symbol as IAliasSymbol).Target : symbol;
 		}
 
-		public static IEnumerable<INamedTypeSymbol> GetAllTypes(this INamespaceSymbol namespaceSymbol, CancellationToken cancellationToken = default(CancellationToken)) {
+		public static IEnumerable<INamedTypeSymbol> GetAllTypes(this INamespaceSymbol namespaceSymbol, CancellationToken cancellationToken = default) {
 			var stack = new Stack<INamespaceOrTypeSymbol>();
 			stack.Push(namespaceSymbol);
 			while (stack.Count > 0) {
@@ -243,7 +243,7 @@ namespace Codist
 				case SymbolKind.Event: return (symbol as IEventSymbol).AddMethod.Parameters;
 				case SymbolKind.Property: return (symbol as IPropertySymbol).Parameters;
 			}
-			return default(ImmutableArray<IParameterSymbol>);
+			return default;
 		}
 
 		public static ITypeSymbol GetReturnType(this ISymbol symbol) {

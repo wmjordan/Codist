@@ -101,6 +101,7 @@ namespace Codist.SyntaxHighlight
 				TextEditorHelper.DefaultFormatting = defaultFormat;
 			}
 			else if (TextEditorHelper.DefaultFormatting.ForegroundBrushSame(defaultFormat.ForegroundBrush) == false) {
+				Debug.WriteLine("DefaultFormatting Changed");
 				// theme changed
 				TextEditorHelper.BackupFormattings.Clear();
 				TextEditorHelper.DefaultFormatting = defaultFormat;

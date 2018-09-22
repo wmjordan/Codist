@@ -136,14 +136,6 @@ namespace Codist
 			return d?.ClassificationTypeNames;
 		}
 
-		internal static void ApplyTheme(this ListView styleBox) {
-			styleBox.BackColor = ThemeHelper.DocumentPageColor;
-			styleBox.ForeColor = ThemeHelper.DocumentTextColor;
-			foreach (ListViewItem item in styleBox.Items) {
-				item.ApplyTheme();
-			}
-		}
-
 		internal static void MixStyle(SyntaxHighlight.StyleBase style, out FontStyle fontStyle, out GdiColor foreground, out GdiColor background) {
 			foreground = ThemeHelper.DocumentTextColor;
 			background = ThemeHelper.DocumentPageColor;
@@ -186,22 +178,6 @@ namespace Codist
 					}
 				}
 			}
-		}
-
-		internal static ListViewItem ApplyTheme(this ListViewItem item) {
-			var style = item.Tag as SyntaxHighlight.StyleBase;
-			if (style == null) {
-				var styleId = (item.Tag as Classifiers.CommentLabel).StyleID;
-				style = Config.Instance.CommentStyles.Find(i => i.StyleID == styleId);
-				if (style == null) {
-					return item;
-				}
-			}
-			MixStyle(style, out var s, out var fg, out var bg);
-			item.Font = new System.Drawing.Font(item.Font, style.GetFontStyle() | s);
-			item.ForeColor = style.ForeColor.A != 0 ? style.ForeColor.ToGdiColor() : fg;
-			item.BackColor = style.BackColor.A != 0 ? style.BackColor.ToGdiColor() : bg;
-			return item;
 		}
 
 		internal static FontStyle GetFontStyle(this SyntaxHighlight.StyleBase activeStyle) {

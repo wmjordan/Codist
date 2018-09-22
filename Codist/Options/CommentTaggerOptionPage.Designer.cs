@@ -25,7 +25,7 @@
 		/// 使用代码编辑器修改此方法的内容。
 		/// </summary>
 		private void InitializeComponent() {
-			this._SyntaxListBox = new System.Windows.Forms.ListView();
+			this._SyntaxListBox = new SyntaxListView();
 			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -281,7 +281,7 @@
 
 		#endregion
 
-		private System.Windows.Forms.ListView _SyntaxListBox;
+		private SyntaxListView _SyntaxListBox;
 		private System.Windows.Forms.ColumnHeader _NameColumn;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.GroupBox groupBox1;

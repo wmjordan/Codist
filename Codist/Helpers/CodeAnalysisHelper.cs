@@ -108,6 +108,7 @@ namespace Codist
 		}
 
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			if (String.IsNullOrEmpty(file)) {
 				return;
 			}

@@ -78,12 +78,13 @@ namespace Codist
 		public static void LoadConfig(string configPath) {
 			//HACK: prevent redundant load operations issued by configuration pages
 			if (_LastLoaded.AddSeconds(2) > DateTime.Now
+				&& configPath.StartsWith(ThemePrefix, StringComparison.Ordinal) == false
 				|| Interlocked.Exchange(ref _LoadingConfig, 1) != 0) {
 				return;
 			}
 			try {
 				Instance = InternalLoadConfig(configPath);
-				Loaded?.Invoke(Instance, EventArgs.Empty);
+				TextEditorHelper.ResetStyleCache();
 				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.All));
 			}
 			catch(Exception ex) {
@@ -145,6 +146,7 @@ namespace Codist
 			ResetCodeStyle(Instance.XmlCodeStyles, GetDefaultCodeStyles<XmlCodeStyle, XmlStyleTypes>());
 			ResetCodeStyle(Instance.SymbolMarkerStyles, GetDefaultCodeStyles<SymbolMarkerStyle, SymbolMarkerStyleTypes>());
 			ResetCodeStyle(Instance.MarkerSettings, GetDefaultMarkerStyles());
+			Loaded?.Invoke(Instance, EventArgs.Empty);
 			Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.SyntaxHighlight));
 		}
 

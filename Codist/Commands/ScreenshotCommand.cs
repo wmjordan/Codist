@@ -37,6 +37,7 @@ namespace Codist.Commands
 			var menuCommandID = new CommandID(CommandSet, CommandId);
 			var menuItem = new OleMenuCommand(Execute, menuCommandID);
 			menuItem.BeforeQueryStatus += (s, args) => {
+				ThreadHelper.ThrowIfNotOnUIThread();
 				var c = s as OleMenuCommand;
 				c.Enabled = CodistPackage.DTE.ActiveDocument != null;
 			};

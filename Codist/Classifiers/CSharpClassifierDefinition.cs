@@ -44,7 +44,7 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition ConstField;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CSharpMethodName)]
 		[Name(Constants.CSharpConstructorMethodName)]
 		static ClassificationTypeDefinition ConstructorMethod;
 
@@ -69,12 +69,13 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition Event;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CSharpMethodName)]
+		[BaseDefinition(Constants.CSharpStaticMemberName)]
 		[Name(Constants.CSharpExtensionMethodName)]
 		static ClassificationTypeDefinition ExtensionMethod;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CSharpMethodName)]
 		[Name(Constants.CSharpExternMethodName)]
 		static ClassificationTypeDefinition ExternMethod;
 
@@ -109,7 +110,7 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition Namespace;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CSharpDeclarationName)]
 		[Name(Constants.CSharpNestedDeclarationName)]
 		static ClassificationTypeDefinition NestedDeclaration;
 
@@ -127,7 +128,7 @@ namespace Codist.Classifiers
 		[Name(Constants.CSharpPropertyName)]
 		static ClassificationTypeDefinition Property;
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CSharpFieldName)]
 		[Name(Constants.CSharpReadOnlyFieldName)]
 		static ClassificationTypeDefinition ReadOnlyField;
 
@@ -137,7 +138,7 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition ResourceKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeClassName)]
 		[Name(Constants.CSharpSealedClassName)]
 		static ClassificationTypeDefinition SealedClass;
 
@@ -162,6 +163,7 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition XmlDoc;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodePunctuation)]
 		[Name(Constants.CodeSpecialPuctuation)]
 		static ClassificationTypeDefinition SpecialPunctuation;
 #pragma warning restore 169
