@@ -138,6 +138,12 @@
     <Compile Include="Options\CSharpSuperQuickInfoPage.Designer.cs">
       <DependentUpon>CSharpSuperQuickInfoPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Options\SmartBarPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\SmartBarPage.Designer.cs">
+      <DependentUpon>SmartBarPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Options\SyntaxHighlightPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -482,6 +488,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Options\CSharpSuperQuickInfoPage.resx">
       <DependentUpon>CSharpSuperQuickInfoPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\SmartBarPage.resx">
+      <DependentUpon>SmartBarPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Options\SyntaxHighlightPage.resx">
       <DependentUpon>SyntaxHighlightPage.cs</DependentUpon>

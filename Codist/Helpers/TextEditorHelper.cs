@@ -58,8 +58,15 @@ namespace Codist
 			if (selection.Length >= 128) {
 				return TokenType.None;
 			}
+			string s = null;
+			if ((selection.Length == 36 || selection.Length == 38) && Guid.TryParse(s = selection.GetText(), out var result)) {
+				return TokenType.Guid;
+			}
+			if (selection.Length == 4 && (s = selection.GetText()).Equals("Guid", StringComparison.OrdinalIgnoreCase)) {
+				return TokenType.GuidPlaceHolder;
+			}
 			var t = TokenType.None;
-			foreach (var c in selection.GetText()) {
+			foreach (var c in s ?? (s = selection.GetText())) {
 				if (c >= '0' && c <= '9') {
 					t |= TokenType.Digit;
 				}
@@ -176,6 +183,7 @@ namespace Codist
 			var service = ServicesHelper.Instance.ClassificationTypeRegistry;
 			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(r, service, Config.Instance.GeneralStyles);
 			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(r, service, Config.Instance.CommentStyles);
+			InitStyleClassificationCache<CppStyleTypes, CppStyle>(r, service, Config.Instance.CppStyles);
 			InitStyleClassificationCache<CSharpStyleTypes, CSharpStyle>(r, service, Config.Instance.CodeStyles);
 			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(r, service, Config.Instance.XmlCodeStyles);
 			InitStyleClassificationCache<SymbolMarkerStyleTypes, SymbolMarkerStyle>(r, service, Config.Instance.SymbolMarkerStyles);
@@ -213,6 +221,8 @@ namespace Codist
 		Letter = 1,
 		Digit = 2,
 		Dot = 4,
-		Underscore = 8
+		Underscore = 8,
+		Guid = 16,
+		GuidPlaceHolder = 32
 	}
 }

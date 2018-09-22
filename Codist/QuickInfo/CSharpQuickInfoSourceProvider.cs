@@ -5,6 +5,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Xml.Linq;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
@@ -319,6 +320,9 @@ namespace Codist.QuickInfo
 							}
 							ShowTypeInfo(qiContent, node.Parent, symbol.ContainingType as INamedTypeSymbol);
 						}
+						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)) {
+							ShowColorInfo(qiContent, node, symbol as IMethodSymbol);
+						}
 						break;
 					case SymbolKind.NamedType:
 						ShowTypeInfo(qiContent, node, symbol as INamedTypeSymbol);
@@ -344,6 +348,16 @@ namespace Codist.QuickInfo
 					}
 				}
 
+			}
+
+			void ShowColorInfo(IList<object> qiContent, SyntaxNode node, IMethodSymbol methodSymbol) {
+				if (methodSymbol.ContainingType.Name != "Color") {
+					return;
+				}
+				var preview = ColorQuickInfo.PreviewColorMethodInvocation(_SemanticModel, node, methodSymbol);
+				if (preview != null) {
+					qiContent.Add(preview);
+				}
 			}
 
 			static void ShowMiscInfo(IList<object> qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {

@@ -15,16 +15,19 @@ namespace Codist
 	[InstalledProductRegistration("#110", "#112", "3.8", IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.General), Constants.NameOfMe, "General", 0, 0, true)]
-	[ProvideOptionPage(typeof(Options.SuperQuickInfo), CategorySuperQuickInfo, "General", 0, 0, true, Sort = 10)]
-	[ProvideOptionPage(typeof(Options.CSharpSuperQuickInfo), CategorySuperQuickInfo, "C#", 0, 0, true, Sort = 20)]
+	[ProvideOptionPage(typeof(Options.SuperQuickInfo), CategorySuperQuickInfo, "General", 0, 0, true, Sort = 0)]
+	[ProvideOptionPage(typeof(Options.CSharpSuperQuickInfo), CategorySuperQuickInfo, "C#", 0, 0, true, Sort = 10)]
 
 	[ProvideOptionPage(typeof(Options.ScrollbarMarker), CategoryScrollbarMarker, "General", 0, 0, true, Sort = 50)]
-	[ProvideOptionPage(typeof(Options.CSharpScrollbarMarker), CategoryScrollbarMarker, "C#", 0, 0, true, Sort = 50)]
+	[ProvideOptionPage(typeof(Options.CSharpScrollbarMarker), CategoryScrollbarMarker, "C#", 0, 0, true, Sort = 10)]
 
 	[ProvideOptionPage(typeof(Options.SyntaxHighlight), CategorySyntaxHighlight, "General", 0, 0, true, Sort = 100)]
 	[ProvideOptionPage(typeof(Options.CSharpStyle), CategorySyntaxHighlight, "C#", 0, 0, true, Sort = 10)]
+	[ProvideOptionPage(typeof(Options.CppStyle), CategorySyntaxHighlight, "C/C++", 0, 0, true, Sort = 20)]
 	[ProvideOptionPage(typeof(Options.XmlStyle), CategorySyntaxHighlight, "XML", 0, 0, true, Sort = 30)]
 	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment", 0, 0, true, Sort = 60)]
+
+	[ProvideOptionPage(typeof(Options.SmartBar), CategorySmartBar, "General", 0, 0, true, Sort = 200)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	[ProvideToolWindow(typeof(Commands.SymbolFinderWindow))]
 	[ProvideAutoLoad(Microsoft.VisualStudio.VSConstants.UICONTEXT.SolutionExists_string, PackageAutoLoadFlags.BackgroundLoad)]
@@ -36,6 +39,8 @@ namespace Codist
 		const string CategorySuperQuickInfo = Constants.NameOfMe + "\\Super Quick Info";
 		const string CategoryScrollbarMarker = Constants.NameOfMe + "\\Scrollbar Marker";
 		const string CategorySyntaxHighlight = Constants.NameOfMe + "\\Syntax Highlight";
+		const string CategorySmartBar = Constants.NameOfMe + "\\Smart Bar";
+
 		static EnvDTE.DTE _dte;
 		//static VsDebugger _Debugger;
 

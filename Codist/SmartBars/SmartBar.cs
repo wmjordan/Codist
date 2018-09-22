@@ -37,9 +37,19 @@ namespace Codist.SmartBars
 			_ToolBarLayer = view.GetAdornmentLayer(nameof(SmartBar));
 			View.Selection.SelectionChanged += ViewSelectionChanged;
 			View.Closed += ViewClosed;
-			ToolBar = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 1, IsOverflowOpen = false }.HideOverflow();
+			ToolBar = new ToolBar {
+				BorderThickness = new Thickness(1),
+				BorderBrush = Brushes.Gray,
+				Band = 1,
+				IsOverflowOpen = false
+			}.HideOverflow();
 			ToolBar.SetResourceReference(Control.BackgroundProperty, VsBrushes.CommandBarGradientBeginKey);
-			ToolBar2 = new ToolBar { BorderThickness = new Thickness(1), BorderBrush = Brushes.Gray, Band = 2, IsOverflowOpen = false }.HideOverflow();
+			ToolBar2 = new ToolBar {
+				BorderThickness = new Thickness(1),
+				BorderBrush = Brushes.Gray,
+				Band = 2,
+				IsOverflowOpen = false
+			}.HideOverflow();
 			ToolBar2.SetResourceReference(Control.BackgroundProperty, VsBrushes.CommandBarGradientBeginKey);
 			_ToolBarTray = new ToolBarTray {
 				ToolBars = { ToolBar, ToolBar2 },
@@ -93,8 +103,8 @@ namespace Codist.SmartBars
 			_ToolBarTray.Opacity = (SensibleRange - op) / SensibleRange;
 		}
 		void ViewSelectionChanged(object sender, EventArgs e) {
-			if (Config.Instance.SmartBarOptions.HasAnyFlag(SmartBarOptions.ShiftSuppression)
-				&& Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Shift)) {
+			if (Config.Instance.SmartBarOptions.HasAnyFlag(SmartBarOptions.DisplayOnShiftPressed)
+				&& Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Shift) == false) {
 				return;
 			}
 			if (View.Selection.IsEmpty) {
@@ -234,6 +244,20 @@ namespace Codist.SmartBars
 										ctx.View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
 										ctx.KeepToolbar();
 									}
+								}
+							}
+						});
+						break;
+					case TokenType.Guid:
+					case TokenType.GuidPlaceHolder:
+						AddCommand(ToolBar, KnownImageIds.NewNamedSet, "New GUID\nHint: To create a new GUID, type 'guid' (without quotes) and select it", ctx => {
+							var span = ctx.View.Selection.SelectedSpans[0];
+							using (var ed = ctx.View.TextBuffer.CreateEdit()) {
+								var t = Guid.NewGuid().ToString(span.Length == 36 || span.Length == 4 ? "D" : span.GetText()[0] == '(' ? "P" : "B").ToUpperInvariant();
+								if (ed.Replace(span, t)) {
+									ed.Apply();
+									ctx.View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
+									ctx.KeepToolbar();
 								}
 							}
 						});

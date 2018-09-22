@@ -156,6 +156,35 @@ namespace Codist.SyntaxHighlight
 	}
 
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
+	sealed class CppStyle : StyleBase<CppStyleTypes>
+	{
+		public CppStyle() {
+		}
+		public CppStyle(CppStyleTypes styleID) {
+			StyleID = styleID;
+		}
+		public CppStyle(CppStyleTypes styleID, Color foregroundColor) {
+			StyleID = styleID;
+			ForegroundColor = foregroundColor.ToHexString();
+		}
+
+		public override int Id => (int)StyleID;
+
+		/// <summary>Gets or sets the C++ style.</summary>
+		public override CppStyleTypes StyleID { get; set; }
+
+		public override string Category => StyleID != CppStyleTypes.None ? Constants.SyntaxCategory.General : String.Empty;
+
+		internal new CppStyle Clone() {
+			return (CppStyle)MemberwiseClone();
+		}
+
+		public override string ToString() {
+			return FriendlyNamePattern.Replace(StyleID.ToString(), "$1 $2");
+		}
+	}
+
+	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class CSharpStyle : StyleBase<CSharpStyleTypes>
 	{
 		string _Category;

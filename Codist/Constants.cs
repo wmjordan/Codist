@@ -342,6 +342,60 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CodeUnnecessary)]
 		UnnecessaryCode,
 	}
+	enum CppStyleTypes
+	{
+		None,
+		[ClassificationType(ClassificationTypeNames = Constants.CppFunction)]
+		Function,
+		[ClassificationType(ClassificationTypeNames = Constants.CppClassTemplate)]
+		ClassTemplate,
+		[ClassificationType(ClassificationTypeNames = Constants.CppFunctionTemplate)]
+		FunctionTemplate,
+		[ClassificationType(ClassificationTypeNames = Constants.CppEvent)]
+		Event,
+		[ClassificationType(ClassificationTypeNames = Constants.CppGenericType)]
+		GenericType,
+		[ClassificationType(ClassificationTypeNames = Constants.CppGlobalVariable)]
+		GlobalVariable,
+		[ClassificationType(ClassificationTypeNames = Constants.CppLabel)]
+		Label,
+		[ClassificationType(ClassificationTypeNames = Constants.CppLocalVariable)]
+		LocalVariable,
+		[ClassificationType(ClassificationTypeNames = Constants.CppMacro)]
+		Macro,
+		[ClassificationType(ClassificationTypeNames = Constants.CppMemberField)]
+		MemberField,
+		[ClassificationType(ClassificationTypeNames = Constants.CppMemberFunction)]
+		MemberFunction,
+		[ClassificationType(ClassificationTypeNames = Constants.CppMemberOperator)]
+		MemberOperator,
+		[ClassificationType(ClassificationTypeNames = Constants.CppNamespace)]
+		Namespace,
+		[ClassificationType(ClassificationTypeNames = Constants.CppNewDelete)]
+		NewDelete,
+		[ClassificationType(ClassificationTypeNames = Constants.CppParameter)]
+		Parameter,
+		[ClassificationType(ClassificationTypeNames = Constants.CppOperator)]
+		Operator,
+		[ClassificationType(ClassificationTypeNames = Constants.CppProperty)]
+		Property,
+		[ClassificationType(ClassificationTypeNames = Constants.CppRefType)]
+		RefType,
+		[ClassificationType(ClassificationTypeNames = Constants.CppStaticMemberField)]
+		StaticMemberField,
+		[ClassificationType(ClassificationTypeNames = Constants.CppStaticMemberFunction)]
+		StaticMemberFunction,
+		[ClassificationType(ClassificationTypeNames = Constants.CppType)]
+		Type,
+		[ClassificationType(ClassificationTypeNames = Constants.CppUserDefinedLiteralNumber)]
+		UserDefinedLiteralNumber,
+		[ClassificationType(ClassificationTypeNames = Constants.CppUserDefinedLiteralRaw)]
+		UserDefinedLiteralRaw,
+		[ClassificationType(ClassificationTypeNames = Constants.CppUserDefinedLiteralString)]
+		UserDefinedLiteralString,
+		[ClassificationType(ClassificationTypeNames = Constants.CppValueType)]
+		ValueType,
+	}
 	enum CSharpStyleTypes
 	{
 		None,
@@ -368,7 +422,6 @@ namespace Codist
 		NestedTypeDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpStaticMemberName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppGlobalVariable)]
 		StaticMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpOverrideMemberName)]
@@ -381,7 +434,6 @@ namespace Codist
 		VirtualMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalVariableName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppLocalVariable)]
 		LocalVariableName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeName)]
@@ -401,13 +453,9 @@ namespace Codist
 		DelegateName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppEvent)]
 		EventName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeParameterName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppClassTemplate)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppFunctionTemplate)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppGenericType)]
 		TypeParameterName,
 
 		//[ClassificationType(ClassificationTypeNames = Constants.CodeModuleName)]
@@ -417,7 +465,6 @@ namespace Codist
 		ConstructorMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppMemberField)]
 		FieldName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstFieldName)]
@@ -427,12 +474,9 @@ namespace Codist
 		ReadOnlyFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppProperty)]
 		PropertyName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpMethodName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppFunction)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppMemberFunction)]
 		MethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpExtensionMethodName)]
@@ -442,7 +486,6 @@ namespace Codist
 		ExternMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppParameter)]
 		ParameterName,
 
 		[Category(Constants.SyntaxCategory.Comment)]

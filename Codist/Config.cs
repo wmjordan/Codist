@@ -52,6 +52,7 @@ namespace Codist
 		public List<CommentStyle> CommentStyles { get; } = new List<CommentStyle>();
 		public List<XmlCodeStyle> XmlCodeStyles { get; } = new List<XmlCodeStyle>();
 		public List<CSharpStyle> CodeStyles { get; } = new List<CSharpStyle>();
+		public List<CppStyle> CppStyles { get; } = new List<CppStyle>();
 		public List<CodeStyle> GeneralStyles { get; } = new List<CodeStyle>();
 		public List<SymbolMarkerStyle> SymbolMarkerStyles { get; } = new List<SymbolMarkerStyle>();
 		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
@@ -120,6 +121,7 @@ namespace Codist
 			}
 			LoadStyleEntries<CodeStyle, CodeStyleTypes>(config.GeneralStyles, loadFromTheme);
 			LoadStyleEntries<CommentStyle, CommentStyleTypes>(config.CommentStyles, loadFromTheme);
+			LoadStyleEntries<CppStyle, CppStyleTypes>(config.CppStyles, loadFromTheme);
 			LoadStyleEntries<CSharpStyle, CSharpStyleTypes>(config.CodeStyles, loadFromTheme);
 			LoadStyleEntries<XmlCodeStyle, XmlStyleTypes>(config.XmlCodeStyles, loadFromTheme);
 			LoadStyleEntries<SymbolMarkerStyle, SymbolMarkerStyleTypes>(config.SymbolMarkerStyles, loadFromTheme);
@@ -128,6 +130,7 @@ namespace Codist
 				ResetCodeStyle(Instance.GeneralStyles, config.GeneralStyles);
 				ResetCodeStyle(Instance.CommentStyles, config.CommentStyles);
 				ResetCodeStyle(Instance.CodeStyles, config.CodeStyles);
+				ResetCodeStyle(Instance.CppStyles, config.CppStyles);
 				ResetCodeStyle(Instance.XmlCodeStyles, config.XmlCodeStyles);
 				ResetCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
@@ -143,6 +146,7 @@ namespace Codist
 			ResetCodeStyle(Instance.GeneralStyles, GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>());
 			ResetCodeStyle(Instance.CommentStyles, GetDefaultCommentStyles());
 			ResetCodeStyle(Instance.CodeStyles, GetDefaultCodeStyles<CSharpStyle, CSharpStyleTypes>());
+			ResetCodeStyle(Instance.CppStyles, GetDefaultCodeStyles<CppStyle, CppStyleTypes>());
 			ResetCodeStyle(Instance.XmlCodeStyles, GetDefaultCodeStyles<XmlCodeStyle, XmlStyleTypes>());
 			ResetCodeStyle(Instance.SymbolMarkerStyles, GetDefaultCodeStyles<SymbolMarkerStyle, SymbolMarkerStyleTypes>());
 			ResetCodeStyle(Instance.MarkerSettings, GetDefaultMarkerStyles());
@@ -207,6 +211,7 @@ namespace Codist
 			c.GeneralStyles.AddRange(GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>());
 			c.CommentStyles.AddRange(GetDefaultCodeStyles<CommentStyle, CommentStyleTypes>());
 			c.CodeStyles.AddRange(GetDefaultCodeStyles<CSharpStyle, CSharpStyleTypes>());
+			c.CppStyles.AddRange(GetDefaultCodeStyles<CppStyle, CppStyleTypes>());
 			c.XmlCodeStyles.AddRange(GetDefaultCodeStyles<XmlCodeStyle, XmlStyleTypes>());
 			c.SymbolMarkerStyles.AddRange(GetDefaultCodeStyles<SymbolMarkerStyle, SymbolMarkerStyleTypes>());
 			c.MarkerSettings.AddRange(GetDefaultMarkerStyles());
@@ -294,6 +299,9 @@ namespace Codist
 		internal void Set(QuickInfoOptions options, bool set) {
 			QuickInfoOptions = EnumHelper.SetFlags(QuickInfoOptions, options, set);
 		}
+		internal void Set(SmartBarOptions options, bool set) {
+			SmartBarOptions = EnumHelper.SetFlags(SmartBarOptions, options, set);
+		}
 		internal void Set(MarkerOptions options, bool set) {
 			MarkerOptions = EnumHelper.SetFlags(MarkerOptions, options, set);
 			FireConfigChangedEvent(Features.ScrollbarMarkers);
@@ -369,7 +377,7 @@ namespace Codist
 	{
 		None,
 		ExpansionIncludeTrivia = 1 << 1,
-		ShiftSuppression = 1 << 2,
+		DisplayOnShiftPressed = 1 << 2,
 		Default = ExpansionIncludeTrivia
 	}
 

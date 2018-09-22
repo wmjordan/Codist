@@ -139,6 +139,14 @@ namespace Codist.Options
 	}
 
 	[Browsable(false)]
+	[Guid("7CF06695-DFCC-441E-ACBF-5468F937A019")]
+	sealed class CppStyle : ConfigPage
+	{
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.CppStyles, Config.GetDefaultCodeStyles<Codist.SyntaxHighlight.CppStyle, CppStyleTypes>));
+	}
+
+	[Browsable(false)]
 	[Guid("31356507-E11A-4E61-B0C2-C9A6584632DB")]
 	sealed class CSharpStyle : ConfigPage
 	{
@@ -185,4 +193,13 @@ namespace Codist.Options
 		protected override Features Feature => Features.ScrollbarMarkers;
 		protected override IWin32Window Window => Control ?? (Control = new CSharpScrollbarMarkerPage(this));
 	}
+
+	[Browsable(false)]
+	[Guid("DA4EC893-7203-489C-9BCA-037D2686F89B")]
+	sealed class SmartBar : ConfigPage
+	{
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new SmartBarPage(this));
+	}
+
 }
