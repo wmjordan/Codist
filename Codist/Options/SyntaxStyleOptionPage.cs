@@ -38,7 +38,7 @@ namespace Codist.Options
 				return;
 			}
 			if (TextEditorHelper.BackupFormattings.Count == 0) {
-				var m = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("text");
+				var m = TextEditorHelper.DefaultClassificationFormatMap;
 				foreach (var item in m.CurrentPriorityOrder) {
 					if (item != null
 						&& TextEditorHelper.SyntaxStyleCache.ContainsKey(item.Classification)) {
@@ -226,8 +226,10 @@ namespace Codist.Options
 			if (_uiLock || _activeStyle == null) {
 				return;
 			}
+			_uiLock = true;
 			UpdatePreview();
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			_uiLock = false;
 		}
 
 		void ResetButton_Click(object sender, EventArgs e) {
@@ -249,7 +251,8 @@ namespace Codist.Options
 			if (sender == _BackColorButton && _BackColorTransBox.Value == 0) {
 				_BackColorTransBox.Value = 255;
 			}
-			_activeStyle.BackColor = _BackColorButton.SelectedColor.Alpha((byte)_BackColorTransBox.Value).ToWpfColor();
+			_BackColorButton.SelectedColor = _BackColorButton.SelectedColor.Alpha((byte)_BackColorTransBox.Value);
+			_activeStyle.BackColor = _BackColorButton.SelectedColor.ToWpfColor();
 		}
 
 		private void SetForeColor(object sender, EventArgs args) {
@@ -259,7 +262,8 @@ namespace Codist.Options
 			if (sender == _ForeColorButton && _ForeColorTransBox.Value == 0) {
 				_ForeColorTransBox.Value = 255;
 			}
-			_activeStyle.ForeColor = _ForeColorButton.SelectedColor.Alpha((byte)_ForeColorTransBox.Value).ToWpfColor();
+			_ForeColorButton.SelectedColor = _ForeColorButton.SelectedColor.Alpha((byte)_ForeColorTransBox.Value);
+			_activeStyle.ForeColor = _ForeColorButton.SelectedColor.ToWpfColor();
 		}
 		void UpdatePreview() {
 			if (_activeStyle == null) {
