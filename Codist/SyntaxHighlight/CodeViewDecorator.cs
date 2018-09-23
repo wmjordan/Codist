@@ -97,15 +97,6 @@ namespace Codist.SyntaxHighlight
 			}
 			_ClassificationFormatMap.BeginBatchUpdate();
 			var defaultFormat = _ClassificationFormatMap.DefaultTextProperties;
-			if (TextEditorHelper.DefaultFormatting == null) {
-				TextEditorHelper.DefaultFormatting = defaultFormat;
-			}
-			else if (TextEditorHelper.DefaultFormatting.ForegroundBrushSame(defaultFormat.ForegroundBrush) == false) {
-				Debug.WriteLine("DefaultFormatting Changed");
-				// theme changed
-				TextEditorHelper.BackupFormattings.Clear();
-				TextEditorHelper.DefaultFormatting = defaultFormat;
-			}
 			foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
 				if (item == null) {
 					continue;

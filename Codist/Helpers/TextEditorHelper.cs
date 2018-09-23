@@ -17,6 +17,7 @@ namespace Codist
 	static class TextEditorHelper
 	{
 		static /*readonly*/ Guid guidIWpfTextViewHost = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476");
+		internal static readonly IClassificationFormatMap DefaultClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("text");
 		internal static readonly Dictionary<string, StyleBase> SyntaxStyleCache = InitSyntaxStyleCache();
 		internal static readonly Dictionary<string, TextFormattingRunProperties> BackupFormattings = new Dictionary<string, TextFormattingRunProperties>(30);
 		internal static TextFormattingRunProperties DefaultFormatting;
@@ -171,12 +172,26 @@ namespace Codist
 			var r = new Dictionary<string, StyleBase>(100);
 			LoadSyntaxStyleCache(r);
 			Config.Loaded += (s, args) => ResetStyleCache();
+			DefaultClassificationFormatMap.ClassificationFormatMappingChanged += ResetStyleCacheIfThemeChanged;
 			return r;
 		}
 
 		internal static void ResetStyleCache() {
 			SyntaxStyleCache.Clear();
 			LoadSyntaxStyleCache(SyntaxStyleCache);
+		}
+
+		static void ResetStyleCacheIfThemeChanged(object sender, EventArgs args) {
+			var defaultFormat = DefaultClassificationFormatMap.DefaultTextProperties;
+			if (DefaultFormatting == null) {
+				DefaultFormatting = defaultFormat;
+			}
+			else if (DefaultFormatting.ForegroundBrushSame(defaultFormat.ForegroundBrush) == false) {
+				System.Diagnostics.Debug.WriteLine("DefaultFormatting Changed");
+				// theme changed
+				BackupFormattings.Clear();
+				DefaultFormatting = defaultFormat;
+			}
 		}
 
 		static void LoadSyntaxStyleCache(Dictionary<string, StyleBase> r) {
