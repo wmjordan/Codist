@@ -86,6 +86,7 @@ namespace Codist
 			try {
 				Instance = InternalLoadConfig(configPath);
 				TextEditorHelper.ResetStyleCache();
+				Loaded?.Invoke(Instance, EventArgs.Empty);
 				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.All));
 			}
 			catch(Exception ex) {
