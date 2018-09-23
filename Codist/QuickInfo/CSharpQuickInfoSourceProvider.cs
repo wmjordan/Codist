@@ -320,8 +320,11 @@ namespace Codist.QuickInfo
 							}
 							ShowTypeInfo(qiContent, node.Parent, symbol.ContainingType as INamedTypeSymbol);
 						}
-						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)) {
-							ShowColorInfo(qiContent, node, symbol as IMethodSymbol);
+						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) && m.ContainingType.Name == "Color") {
+							var preview = ColorQuickInfo.PreviewColorMethodInvocation(_SemanticModel, node, symbol as IMethodSymbol);
+							if (preview != null) {
+								qiContent.Add(preview);
+							}
 						}
 						break;
 					case SymbolKind.NamedType:
@@ -329,6 +332,12 @@ namespace Codist.QuickInfo
 						break;
 					case SymbolKind.Property:
 						ShowPropertyInfo(qiContent, node, symbol as IPropertySymbol);
+						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)) {
+							var preview = ColorQuickInfo.PreviewSystemColorProperties(symbol as IPropertySymbol);
+							if (preview != null) {
+								qiContent.Add(preview);
+							}
+						}
 						break;
 					case SymbolKind.Namespace:
 						ShowNamespaceInfo(qiContent, node, symbol as INamespaceSymbol);
@@ -348,16 +357,6 @@ namespace Codist.QuickInfo
 					}
 				}
 
-			}
-
-			void ShowColorInfo(IList<object> qiContent, SyntaxNode node, IMethodSymbol methodSymbol) {
-				if (methodSymbol.ContainingType.Name != "Color") {
-					return;
-				}
-				var preview = ColorQuickInfo.PreviewColorMethodInvocation(_SemanticModel, node, methodSymbol);
-				if (preview != null) {
-					qiContent.Add(preview);
-				}
 			}
 
 			static void ShowMiscInfo(IList<object> qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
