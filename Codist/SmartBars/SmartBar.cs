@@ -195,7 +195,7 @@ namespace Codist.SmartBars
 				Canvas.SetLeft(_ToolBarTray, x < View.ViewportLeft ? View.ViewportLeft
 					: x + rs.Width < View.ViewportRight ? x
 					: View.ViewportRight - rs.Width);
-				Canvas.SetTop(_ToolBarTray, (y < 0 ? y + rs.Height + 30 : y) + View.ViewportTop);
+				Canvas.SetTop(_ToolBarTray, (y < 0 || x < View.ViewportLeft && View.Selection.IsReversed == false ? y + rs.Height + 30 : y) + View.ViewportTop);
 			}
 		}
 
