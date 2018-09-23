@@ -82,7 +82,7 @@ namespace Codist.QuickInfo
 			return NamedColorCache.GetBrush(color);
 		}
 		public static StackPanel PreviewSystemColorProperties(IPropertySymbol symbol) {
-			switch (symbol.ContainingType.Name) {
+			switch (symbol.ContainingType?.Name) {
 				case nameof(System.Windows.SystemColors):
 				case nameof(System.Drawing.SystemBrushes):
 				case nameof(System.Drawing.KnownColor):
@@ -145,8 +145,8 @@ namespace Codist.QuickInfo
 			};
 		}
 
-		public static SolidColorBrush GetBrush(IPropertySymbol symbol) {
-			switch (symbol.ContainingType.Name) {
+		public static SolidColorBrush GetBrush(ISymbol symbol) {
+			switch (symbol.ContainingType?.Name) {
 				case nameof(System.Windows.SystemColors):
 				case nameof(System.Drawing.SystemBrushes):
 					return NamedColorCache.GetSystemBrush(symbol.Name);

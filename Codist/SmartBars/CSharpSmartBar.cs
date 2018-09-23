@@ -590,7 +590,7 @@ namespace Codist.SmartBars
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
 				Locations = locations;
 				Symbol = symbol;
-				var b = symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Field ? QuickInfo.ColorQuickInfo.GetBrush(symbol as IPropertySymbol) : null;
+				var b = symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Field ? QuickInfo.ColorQuickInfo.GetBrush(symbol) : null;
 				if (b != null) {
 					var h = Header as TextBlock;
 					h.Inlines.InsertBefore(
