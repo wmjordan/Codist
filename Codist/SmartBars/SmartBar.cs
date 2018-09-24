@@ -27,7 +27,7 @@ namespace Codist.SmartBars
 		/// <summary>The layer for the smart bar adornment.</summary>
 		readonly IAdornmentLayer _ToolBarLayer;
 		DateTime _LastExecute;
-		bool _SuppressShiftToggle = true;
+		DateTime _LastShiftHit;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SmartBar"/> class.
@@ -98,7 +98,12 @@ namespace Codist.SmartBars
 
 		void ViewKeyUp(object sender, KeyEventArgs e) {
 			if (e.Key != Key.LeftShift && e.Key != Key.RightShift) {
-				_SuppressShiftToggle = true;
+				_LastShiftHit = default;
+				return;
+			}
+			var now = DateTime.Now;
+			// ignore the shift hit after shift clicking a SmartBar button
+			if ((now - _LastExecute).Ticks < TimeSpan.TicksPerSecond) {
 				return;
 			}
 			e.Handled = true;
@@ -106,11 +111,11 @@ namespace Codist.SmartBars
 				HideToolBar(this, null);
 				return;
 			}
-			if (_SuppressShiftToggle) {
-				_SuppressShiftToggle = false;
+			if ((now - _LastShiftHit).Ticks < TimeSpan.TicksPerSecond) {
+				CreateToolBar();
 			}
 			else {
-				CreateToolBar();
+				_LastShiftHit = DateTime.Now;
 			}
 		}
 
@@ -450,7 +455,7 @@ namespace Codist.SmartBars
 		void HideToolBar() {
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			View.VisualElement.MouseMove -= ViewMouseMove;
-			_SuppressShiftToggle = true;
+			_LastShiftHit = default;
 		}
 		void HideToolBar(object sender, RoutedEventArgs e) {
 			HideToolBar();
