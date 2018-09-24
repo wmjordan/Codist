@@ -192,6 +192,7 @@
     <Compile Include="Helpers\XmlDocRenderer.cs" />
     <Compile Include="QuickInfo\ToolTipText.cs" />
     <Compile Include="SmartBars\CSharpSmartBar.cs" />
+    <Compile Include="SmartBars\SmartBar.CommonEdit.cs" />
     <Compile Include="SmartBars\SmartBar.cs" />
     <Compile Include="SmartBars\SmartBarTextViewCreationListener.cs" />
     <Compile Include="SyntaxHighlight\StyleBase.cs" />

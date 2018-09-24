@@ -96,23 +96,22 @@ namespace Codist.SyntaxHighlight
 				return;
 			}
 			_ClassificationFormatMap.BeginBatchUpdate();
-			var defaultFormat = _ClassificationFormatMap.DefaultTextProperties;
+			var defaultSize = _ClassificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
 			foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
-				if (item == null) {
+				if (item == null
+					|| TextEditorHelper.SyntaxStyleCache.TryGetValue(item.Classification, out var style) == false) {
 					continue;
 				}
-				StyleBase style;
-				if (TextEditorHelper.SyntaxStyleCache.TryGetValue(item.Classification, out style)) {
-					TextFormattingRunProperties cached;
-					if (TextEditorHelper.BackupFormattings.TryGetValue(item.Classification, out cached) == false) {
-						var p = _ClassificationFormatMap.GetExplicitTextProperties(item);
-						if (p == null) {
-							continue;
-						}
-						TextEditorHelper.BackupFormattings[item.Classification] = cached = p;
+
+				TextFormattingRunProperties cached;
+				if (TextEditorHelper.BackupFormattings.TryGetValue(item.Classification, out cached) == false) {
+					var p = _ClassificationFormatMap.GetExplicitTextProperties(item);
+					if (p == null) {
+						continue;
 					}
-					_ClassificationFormatMap.SetTextProperties(item, SetProperties(cached, style, defaultFormat.FontRenderingEmSize));
+					TextEditorHelper.BackupFormattings[item.Classification] = cached = p;
 				}
+				_ClassificationFormatMap.SetTextProperties(item, SetProperties(cached, style, defaultSize));
 			}
 			_ClassificationFormatMap.EndBatchUpdate();
 			Debug.WriteLine("Decorated");

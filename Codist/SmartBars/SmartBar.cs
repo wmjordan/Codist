@@ -22,12 +22,12 @@ namespace Codist.SmartBars
 	{
 		const int Selecting = 1, Working = 2;
 		readonly Timer _CreateToolBarTimer;
-		int _TimerStatus;
-		readonly ToolBarTray _ToolBarTray;
 		/// <summary>The layer for the smart bar adornment.</summary>
 		readonly IAdornmentLayer _ToolBarLayer;
+		readonly ToolBarTray _ToolBarTray;
 		DateTime _LastExecute;
 		DateTime _LastShiftHit;
+		int _TimerStatus;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SmartBar"/> class.
@@ -72,10 +72,9 @@ namespace Codist.SmartBars
 			_ToolBarTray.Visibility = Visibility.Hidden;
 		}
 
-		protected IWpfTextView View { get; }
-
 		protected ToolBar ToolBar { get; }
 		protected ToolBar ToolBar2 { get; }
+		protected IWpfTextView View { get; }
 
 		#region Event handlers
 		void ConfigUpdated(object sender, ConfigUpdatedEventArgs e) {
@@ -91,14 +90,38 @@ namespace Codist.SmartBars
 			}
 		}
 
+		void ToolBarMouseEnter(object sender, EventArgs e) {
+			View.VisualElement.MouseMove -= ViewMouseMove;
+			((ToolBarTray)sender).Opacity = 1;
+			View.Properties[nameof(SmartBar)] = true;
+		}
+
+		void ToolBarMouseLeave(object sender, EventArgs e) {
+			View.VisualElement.MouseMove += ViewMouseMove;
+			View.Properties.RemoveProperty(nameof(SmartBar));
+		}
+
 		void ToolBarSizeChanged(object sender, SizeChangedEventArgs e) {
 			SetToolBarPosition();
 			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
 		}
 
+		void ViewClosed(object sender, EventArgs e) {
+			_CreateToolBarTimer.Dispose();
+			_ToolBarTray.ToolBars.Clear();
+			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
+			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
+			View.Selection.SelectionChanged -= ViewSelectionChanged;
+			View.VisualElement.MouseMove -= ViewMouseMove;
+			View.VisualElement.PreviewKeyUp -= ViewKeyUp;
+			//View.LayoutChanged -= ViewLayoutChanged;
+			View.Closed -= ViewClosed;
+			Config.Updated -= ConfigUpdated;
+		}
+
 		void ViewKeyUp(object sender, KeyEventArgs e) {
 			if (e.Key != Key.LeftShift && e.Key != Key.RightShift) {
-				_LastShiftHit = default;
+				_LastShiftHit = DateTime.MinValue;
 				return;
 			}
 			var now = DateTime.Now;
@@ -117,6 +140,10 @@ namespace Codist.SmartBars
 			else {
 				_LastShiftHit = DateTime.Now;
 			}
+		}
+
+		void ViewLayoutChanged(object sender, EventArgs e) {
+			HideToolBar(sender, null);
 		}
 
 		void ViewMouseMove(object sender, MouseEventArgs e) {
@@ -160,35 +187,125 @@ namespace Codist.SmartBars
 			}
 			_CreateToolBarTimer.Change(400, Timeout.Infinite);
 		}
-
-		void ViewLayoutChanged(object sender, EventArgs e) {
-			HideToolBar(sender, null);
-		}
-
-		void ViewClosed(object sender, EventArgs e) {
-			_CreateToolBarTimer.Dispose();
-			_ToolBarTray.ToolBars.Clear();
-			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
-			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
-			View.Selection.SelectionChanged -= ViewSelectionChanged;
-			View.VisualElement.MouseMove -= ViewMouseMove;
-			View.VisualElement.PreviewKeyUp -= ViewKeyUp;
-			//View.LayoutChanged -= ViewLayoutChanged;
-			View.Closed -= ViewClosed;
-			Config.Updated -= ConfigUpdated;
-		}
-
-		void ToolBarMouseEnter(object sender, EventArgs e) {
-			View.VisualElement.MouseMove -= ViewMouseMove;
-			((ToolBarTray)sender).Opacity = 1;
-			View.Properties[nameof(SmartBar)] = true;
-		}
-		void ToolBarMouseLeave(object sender, EventArgs e) {
-			View.VisualElement.MouseMove += ViewMouseMove;
-			View.Properties.RemoveProperty(nameof(SmartBar));
-		}
-
 		#endregion
+
+		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
+			var b = CreateButton(imageId, tooltip);
+			b.Click += (s, args) => {
+				var ctx = new CommandContext(this, s as Control, args);
+				handler(ctx);
+				if (ctx.KeepToolBarOnClick == false) {
+					HideToolBar(s, args);
+				}
+			};
+			b.MouseRightButtonUp += (s, args) => {
+				var ctx = new CommandContext(this, s as Control, args, true);
+				handler(ctx);
+				if (ctx.KeepToolBarOnClick == false) {
+					HideToolBar(s, args);
+				}
+				args.Handled = true;
+			};
+			toolBar.Items.Add(b);
+		}
+
+		protected virtual void AddCommands() {
+			var readOnly = View.IsCaretInReadOnlyRegion();
+			if (readOnly == false) {
+				AddCutCommand();
+			}
+			AddCopyCommand();
+			if (readOnly == false) {
+				AddPasteCommand();
+				AddDuplicateCommand();
+				AddDeleteCommand();
+				AddSpecialDataFormatCommand();
+				//var selection = View.Selection;
+				//if (View.Selection.Mode == TextSelectionMode.Stream && View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.Start.Position) != View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.End.Position)) {
+				//	AddCommand(ToolBar, KnownImageIds.Join, "Join lines", ctx => {
+				//		var span = View.Selection.SelectedSpans[0];
+				//		var t = span.GetText();
+				//		View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(t, @"[ \t]*\r?\n[ \t]*", " "));
+				//	});
+				//}
+			}
+			if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
+				AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");
+			}
+			AddFindAndReplaceCommands();
+			//AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
+			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
+		}
+
+		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
+			AddCommands(toolBar, imageId, tooltip, null, getItemsHandler);
+		}
+
+		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> leftClickHandler, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
+			var b = CreateButton(imageId, tooltip);
+			b.ContextMenu = new ContextMenu().SetStyleResourceProperty("EditorContextMenu");
+			void ButtonEventHandler(Button btn, CommandContext ctx) {
+				var m = btn.ContextMenu;
+				ImageThemingUtilities.SetImageBackgroundColor(m, ThemeHelper.TitleBackgroundColor);
+				m.Foreground = ThemeHelper.ToolWindowTextBrush;
+				m.IsEnabled = true;
+				m.PlacementTarget = btn;
+				m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+				m.IsOpen = true;
+				if (m.Tag == null || (bool)m.Tag != ctx.RightClick) {
+					m.Items.Clear();
+					foreach (var item in getItemsHandler(ctx)) {
+						m.Items.Add(new CommandMenuItem(this, item));
+					}
+					m.Tag = ctx.RightClick;
+				}
+			}
+			if (leftClickHandler != null) {
+				b.Click += (s, args) => {
+					leftClickHandler(new CommandContext(this, s as Control, args));
+				};
+			}
+			else {
+				b.Click += (s, args) => {
+					ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args));
+				};
+			}
+			b.MouseRightButtonUp += (s, args) => {
+				ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args, true));
+				args.Handled = true;
+			};
+			toolBar.Items.Add(b);
+		}
+
+		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
+				AddCommand(toolBar, imageId, tooltip, (ctx) => {
+					TextEditorHelper.ExecuteEditorCommand(command);
+					//View.Selection.Clear();
+				});
+			}
+		}
+
+		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip, string command2) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
+				AddCommand(toolBar, imageId, tooltip, (ctx) => {
+					TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? command2 : command);
+					//View.Selection.Clear();
+				});
+			}
+		}
+
+		static Button CreateButton(int imageId, string tooltip) {
+			var b = new Button {
+				Content = ThemeHelper.GetImage(imageId, Config.Instance.SmartBarButtonSize),
+				ToolTip = tooltip,
+				Cursor = Cursors.Hand
+			};
+			ImageThemingUtilities.SetImageBackgroundColor(b, ThemeHelper.TitleBackgroundColor);
+			return b;
+		}
 
 		void CreateToolBar(object dummy) {
 			if (ToolBar.Dispatcher.Thread != Thread.CurrentThread) {
@@ -228,6 +345,20 @@ namespace Codist.SmartBars
 			View.VisualElement.MouseMove += ViewMouseMove;
 		}
 
+		void HideToolBar() {
+			_ToolBarTray.Visibility = Visibility.Hidden;
+			View.VisualElement.MouseMove -= ViewMouseMove;
+			_LastShiftHit = DateTime.MinValue;
+		}
+
+		void HideToolBar(object sender, RoutedEventArgs e) {
+			HideToolBar();
+		}
+
+		void KeepToolbar() {
+			_LastExecute = DateTime.Now;
+		}
+
 		void SetToolBarPosition() {
 			// keep tool bar position when the selection is restored and the tool bar reappears after executing command
 			if (DateTime.Now > _LastExecute.AddSeconds(1)) {
@@ -242,223 +373,54 @@ namespace Codist.SmartBars
 			}
 		}
 
-		protected virtual void AddCommands() {
-			var readOnly = View.IsCaretInReadOnlyRegion();
-			if (readOnly == false) {
-				AddCommand(ToolBar, KnownImageIds.Cut, "Cut selected text\nRight click: Cut line", ctx => {
-					if (ctx.RightClick) {
-						ctx.View.ExpandSelectionToLine();
-					}
-					TextEditorHelper.ExecuteEditorCommand("Edit.Cut");
-				});
-			}
-			AddCommand(ToolBar, KnownImageIds.Copy, "Copy selected text\nRight click: Copy line", ctx => {
-				if (ctx.RightClick) {
-					ctx.View.ExpandSelectionToLine();
-				}
-				TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
-			});
-			if (readOnly == false) {
-				if (Clipboard.ContainsText()) {
-					AddCommand(ToolBar, KnownImageIds.Paste, "Paste text from clipboard\nRight click: Paste over line\nCtrl click: Paste and select next", ctx => ExecuteAndFind(ctx, "Edit.Paste"));
-				}
-				AddCommand(ToolBar, KnownImageIds.CopyItem, "Duplicate selection\nRight click: Duplicate line", ctx => {
-					if (ctx.RightClick) {
-						ctx.View.ExpandSelectionToLine();
-					}
-					TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
-					ctx.KeepToolBar(true);
-				});
-				AddCommand(ToolBar, KnownImageIds.Cancel, "Delete selected text\nRight click: Delete line\nCtrl click: Delete and select next", ctx => ExecuteAndFind(ctx, "Edit.Delete"));
-				switch (View.GetSelectedTokenType()) {
-					case TokenType.None:
-						AddEditorCommand(ToolBar, KnownImageIds.FormatSelection, "Edit.FormatSelection", "Format selected text\nRight click: Format document", "Edit.FormatDocument");
-						break;
-					case TokenType.Digit:
-						AddCommand(ToolBar, KnownImageIds.Counter, "Increment number", ctx => {
-							var span = ctx.View.Selection.SelectedSpans[0];
-							var t = span.GetText();
-							long l;
-							if (long.TryParse(t, out l)) {
-								using (var ed = ctx.View.TextBuffer.CreateEdit()) {
-									t = (++l).ToString(System.Globalization.CultureInfo.InvariantCulture);
-									if (ed.Replace(span.Span, t)) {
-										ed.Apply();
-										ctx.View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-										ctx.KeepToolBar();
-									}
-								}
-							}
-						});
-						break;
-					case TokenType.Guid:
-					case TokenType.GuidPlaceHolder:
-						AddCommand(ToolBar, KnownImageIds.NewNamedSet, "New GUID\nHint: To create a new GUID, type 'guid' (without quotes) and select it", ctx => {
-							var span = ctx.View.Selection.SelectedSpans[0];
-							using (var ed = ctx.View.TextBuffer.CreateEdit()) {
-								var t = Guid.NewGuid().ToString(span.Length == 36 || span.Length == 4 ? "D" : span.GetText()[0] == '(' ? "P" : "B").ToUpperInvariant();
-								if (ed.Replace(span, t)) {
-									ed.Apply();
-									ctx.View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-									ctx.KeepToolBar();
-								}
-							}
-						});
-						break;
-				}
-				//var selection = View.Selection;
-				//if (View.Selection.Mode == TextSelectionMode.Stream && View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.Start.Position) != View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.End.Position)) {
-				//	AddCommand(ToolBar, KnownImageIds.Join, "Join lines", ctx => {
-				//		var span = View.Selection.SelectedSpans[0];
-				//		var t = span.GetText();
-				//		View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(t, @"[ \t]*\r?\n[ \t]*", " "));
-				//	});
-				//}
-			}
-			if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
-				AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");
-			}
-			AddCommands(ToolBar, KnownImageIds.FindNext, "Find next selected text\nCtrl click: Find match case\nRight click: Find and replace...", ctx => {
-				ThreadHelper.ThrowIfNotOnUIThread();
-				string t = ctx.View.Selection.IsEmpty == false
-					? ctx.View.TextSnapshot.GetText(ctx.View.Selection.SelectedSpans[0])
-					: null;
-				if (t == null) {
-					return;
-				}
-				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
-				var option = Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) ? EnvDTE.vsFindOptions.vsFindOptionsMatchCase : 0;
-				if (p != null && p.FindText(t, (int)option)) {
-					ctx.KeepToolBar(true);
-				}
-			}, ctx => {
-				return new CommandItem[] {
-					new CommandItem("Find...", KnownImageIds.QuickFind, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
-					new CommandItem("Replace...", KnownImageIds.QuickReplace, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
-					new CommandItem("Find in files...", KnownImageIds.FindInFile, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
-					new CommandItem("Replace in files...", KnownImageIds.ReplaceInFolder, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
-				};
-			});
-			//AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
-			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
-		}
+		protected sealed class CommandContext
+		{
+			readonly SmartBar _Bar;
 
-		static void ExecuteAndFind(CommandContext ctx, string command) {
-			ThreadHelper.ThrowIfNotOnUIThread();
-			if (ctx.RightClick) {
-				ctx.View.ExpandSelectionToLine(false);
+			public CommandContext(SmartBar bar, Control control, RoutedEventArgs eventArgs) {
+				View = bar.View;
+				_Bar = bar;
+				Sender = control;
+				EventArgs = eventArgs;
 			}
-			string t = null;
-			if (Keyboard.Modifiers == ModifierKeys.Control && ctx.View.Selection.IsEmpty == false) {
-				t = ctx.View.TextSnapshot.GetText(ctx.View.Selection.SelectedSpans[0]);
+			public CommandContext(SmartBar bar, Control control, RoutedEventArgs eventArgs, bool rightClick) : this(bar, control, eventArgs) {
+				RightClick = rightClick;
 			}
-			TextEditorHelper.ExecuteEditorCommand(command);
-			if (t != null) {
-				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
-				if (p != null && p.FindText(t, (int)(EnvDTE.vsFindOptions.vsFindOptionsMatchCase))) {
-					ctx.KeepToolBar(true);
+			public RoutedEventArgs EventArgs { get; }
+			public bool KeepToolBarOnClick { get; set; }
+			public bool RightClick { get; }
+			public Control Sender { get; }
+			public IWpfTextView View { get; }
+			public void KeepToolBar() {
+				KeepToolBar(false);
+			}
+			public void KeepToolBar(bool refresh) {
+				_Bar.KeepToolbar();
+				KeepToolBarOnClick = true;
+				if (refresh) {
+					_Bar.CreateToolBar();
 				}
 			}
 		}
 
-		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip) {
-			ThreadHelper.ThrowIfNotOnUIThread();
-			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
-				AddCommand(toolBar, imageId, tooltip, (ctx) => {
-					TextEditorHelper.ExecuteEditorCommand(command);
-					//View.Selection.Clear();
-				});
+		protected sealed class CommandItem
+		{
+			public CommandItem(ISymbol symbol, string alias) {
+				Name = alias;
+				ImageId = symbol.GetImageId();
 			}
-		}
-		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip, string command2) {
-			ThreadHelper.ThrowIfNotOnUIThread();
-			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
-				AddCommand(toolBar, imageId, tooltip, (ctx) => {
-					TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? command2 : command);
-					//View.Selection.Clear();
-				});
-			}
-		}
 
-		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
-			var b = CreateButton(imageId, tooltip);
-			b.Click += (s, args) => {
-				var ctx = new CommandContext(this, s as Control, args);
-				handler(ctx);
-				if (ctx.KeepToolBarOnClick == false) {
-					HideToolBar(s, args);
-				}
-			};
-			b.MouseRightButtonUp += (s, args) => {
-				var ctx = new CommandContext(this, s as Control, args, true);
-				handler(ctx);
-				if (ctx.KeepToolBarOnClick == false) {
-					HideToolBar(s, args);
-				}
-				args.Handled = true;
-			};
-			toolBar.Items.Add(b);
-		}
-
-		static Button CreateButton(int imageId, string tooltip) {
-			var b = new Button {
-				Content = ThemeHelper.GetImage(imageId, Config.Instance.SmartBarButtonSize),
-				ToolTip = tooltip,
-				Cursor = Cursors.Hand
-			};
-			ImageThemingUtilities.SetImageBackgroundColor(b, ThemeHelper.TitleBackgroundColor);
-			return b;
-		}
-
-		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
-			AddCommands(toolBar, imageId, tooltip, null, getItemsHandler);
-		}
-		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> leftClickHandler, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
-			var b = CreateButton(imageId, tooltip);
-			b.ContextMenu = new ContextMenu().SetStyleResourceProperty("EditorContextMenu");
-			void ButtonEventHandler(Button btn, CommandContext ctx) {
-				var m = btn.ContextMenu;
-				ImageThemingUtilities.SetImageBackgroundColor(m, ThemeHelper.TitleBackgroundColor);
-				m.Foreground = ThemeHelper.ToolWindowTextBrush;
-				m.IsEnabled = true;
-				m.PlacementTarget = btn;
-				m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-				m.IsOpen = true;
-				if (m.Tag == null || (bool)m.Tag != ctx.RightClick) {
-					m.Items.Clear();
-					foreach (var item in getItemsHandler(ctx)) {
-						m.Items.Add(new CommandMenuItem(this, item));
-					}
-					m.Tag = ctx.RightClick;
-				}
+			public CommandItem(string name, int imageId, Action<MenuItem> controlInitializer, Action<CommandContext> action) {
+				Name = name;
+				ImageId = imageId;
+				ItemInitializer = controlInitializer;
+				Action = action;
 			}
-			if (leftClickHandler != null) {
-				b.Click += (s, args) => {
-					leftClickHandler(new CommandContext(this, s as Control, args));
-				};
-			}
-			else {
-				b.Click += (s, args) => {
-					ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args));
-				};
-			}
-			b.MouseRightButtonUp += (s, args) => {
-				ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args, true));
-				args.Handled = true;
-			};
-			toolBar.Items.Add(b);
-		}
 
-		void KeepToolbar() {
-			_LastExecute = DateTime.Now;
-		}
-		void HideToolBar() {
-			_ToolBarTray.Visibility = Visibility.Hidden;
-			View.VisualElement.MouseMove -= ViewMouseMove;
-			_LastShiftHit = default;
-		}
-		void HideToolBar(object sender, RoutedEventArgs e) {
-			HideToolBar();
+			public Action<CommandContext> Action { get; }
+			public int ImageId { get; }
+			public Action<MenuItem> ItemInitializer { get; }
+			public string Name { get; }
 		}
 
 		protected class CommandMenuItem : MenuItem
@@ -478,12 +440,9 @@ namespace Codist.SmartBars
 			public CommandItem CommandItem { get; }
 			protected SmartBar SmartBar { get; }
 
-			protected override void OnSubmenuOpened(RoutedEventArgs e) {
-				base.OnSubmenuOpened(e);
-			}
 			public override void OnApplyTemplate() {
 				base.OnApplyTemplate();
-				var p = this.GetTemplateChild("PART_Popup") as System.Windows.Controls.Primitives.Popup;
+				var p = GetTemplateChild("PART_Popup") as System.Windows.Controls.Primitives.Popup;
 				if (p != null) {
 					var b = p.Child as Border;
 					if (b != null) {
@@ -495,61 +454,14 @@ namespace Codist.SmartBars
 				}
 			}
 
+			protected override void OnSubmenuOpened(RoutedEventArgs e) {
+				base.OnSubmenuOpened(e);
+			}
 			void ClickHandler(object s, RoutedEventArgs e) {
 				var ctx2 = new CommandContext(SmartBar, s as Control, e);
 				CommandItem.Action(ctx2);
 				if (ctx2.KeepToolBarOnClick == false) {
 					SmartBar.HideToolBar();
-				}
-			}
-		}
-
-		protected sealed class CommandItem
-		{
-			public CommandItem(ISymbol symbol, string alias) {
-				Name = alias;
-				ImageId = symbol.GetImageId();
-			}
-
-			public CommandItem(string name, int imageId, Action<MenuItem> controlInitializer, Action<CommandContext> action) {
-				Name = name;
-				ImageId = imageId;
-				ItemInitializer = controlInitializer;
-				Action = action;
-			}
-
-			public string Name { get; }
-			public int ImageId { get; }
-			public Action<MenuItem> ItemInitializer { get; }
-			public Action<CommandContext> Action { get; }
-		}
-
-		protected sealed class CommandContext
-		{
-			readonly SmartBar _Bar;
-
-			public CommandContext(SmartBar bar, Control control, RoutedEventArgs eventArgs) {
-				View = bar.View;
-				_Bar = bar;
-				Sender = control;
-				EventArgs = eventArgs;
-			}
-			public CommandContext(SmartBar bar, Control control, RoutedEventArgs eventArgs, bool rightClick) : this(bar, control, eventArgs) {
-				RightClick = rightClick;
-			}
-			public RoutedEventArgs EventArgs { get; }
-			public bool RightClick { get; }
-			public Control Sender { get; }
-			public IWpfTextView View { get; }
-			public bool KeepToolBarOnClick { get; set; }
-			public void KeepToolBar() {
-				KeepToolBar(false);
-			}
-			public void KeepToolBar(bool refresh) {
-				_Bar.KeepToolbar();
-				KeepToolBarOnClick = true;
-				if (refresh) {
-					_Bar.CreateToolBar();
 				}
 			}
 		}
