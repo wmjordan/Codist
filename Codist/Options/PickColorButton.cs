@@ -22,7 +22,7 @@ namespace Codist.Options
 			_SelectedColor = color;
 			var bmp = Image as Bitmap;
 			using (var g = Graphics.FromImage(bmp))
-			using (var b = new SolidBrush(color.A == 0 ? SystemColors.Control : color)) {
+			using (var b = new SolidBrush(color.A == 0 ? SystemColors.Control : color.Alpha(255))) {
 				g.DrawRectangle(Pens.DarkGray, 0, 0, bmp.Width - 1, bmp.Height - 1);
 				g.FillRectangle(b, 1, 1, bmp.Width - 2, bmp.Height - 2);
 			}

@@ -302,6 +302,7 @@ namespace Codist
 		}
 		internal void Set(SmartBarOptions options, bool set) {
 			SmartBarOptions = EnumHelper.SetFlags(SmartBarOptions, options, set);
+			FireConfigChangedEvent(Features.SmartBar);
 		}
 		internal void Set(MarkerOptions options, bool set) {
 			MarkerOptions = EnumHelper.SetFlags(MarkerOptions, options, set);
@@ -378,7 +379,8 @@ namespace Codist
 	{
 		None,
 		ExpansionIncludeTrivia = 1 << 1,
-		DisplayOnShiftPressed = 1 << 2,
+		ShiftToggleDisplay = 1 << 2,
+		ManualDisplaySmartBar = 1 << 3,
 		Default = ExpansionIncludeTrivia
 	}
 

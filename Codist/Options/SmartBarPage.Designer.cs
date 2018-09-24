@@ -25,22 +25,24 @@
 		/// 使用代码编辑器修改此方法的内容。
 		/// </summary>
 		private void InitializeComponent() {
-			this._ControlSmartBarBox = new System.Windows.Forms.CheckBox();
+			this._ToggleSmartBarBox = new System.Windows.Forms.CheckBox();
 			this._SuperQuickInfoTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this._AutoShowSmartBarBox = new System.Windows.Forms.CheckBox();
 			this._SuperQuickInfoTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
 			// 
-			// _ControlSmartBarBox
+			// _ToggleSmartBarBox
 			// 
-			this._ControlSmartBarBox.AutoSize = true;
-			this._ControlSmartBarBox.Location = new System.Drawing.Point(15, 6);
-			this._ControlSmartBarBox.Name = "_ControlSmartBarBox";
-			this._ControlSmartBarBox.Size = new System.Drawing.Size(357, 19);
-			this._ControlSmartBarBox.TabIndex = 1;
-			this._ControlSmartBarBox.Text = "Only show Smart Bar when Shift is pressed";
-			this._ControlSmartBarBox.UseVisualStyleBackColor = true;
+			this._ToggleSmartBarBox.AutoSize = true;
+			this._ToggleSmartBarBox.CheckAlign = System.Drawing.ContentAlignment.TopLeft;
+			this._ToggleSmartBarBox.Location = new System.Drawing.Point(15, 31);
+			this._ToggleSmartBarBox.Name = "_ToggleSmartBarBox";
+			this._ToggleSmartBarBox.Size = new System.Drawing.Size(349, 34);
+			this._ToggleSmartBarBox.TabIndex = 1;
+			this._ToggleSmartBarBox.Text = "Show/hide Smart Bar with Shift key\r\n* Double tap to show, single tap to hide";
+			this._ToggleSmartBarBox.UseVisualStyleBackColor = true;
 			// 
 			// _SuperQuickInfoTabs
 			// 
@@ -52,11 +54,12 @@
 			this._SuperQuickInfoTabs.Name = "_SuperQuickInfoTabs";
 			this._SuperQuickInfoTabs.SelectedIndex = 0;
 			this._SuperQuickInfoTabs.Size = new System.Drawing.Size(569, 322);
-			this._SuperQuickInfoTabs.TabIndex = 3;
+			this._SuperQuickInfoTabs.TabIndex = 0;
 			// 
 			// tabPage2
 			// 
-			this.tabPage2.Controls.Add(this._ControlSmartBarBox);
+			this.tabPage2.Controls.Add(this._AutoShowSmartBarBox);
+			this.tabPage2.Controls.Add(this._ToggleSmartBarBox);
 			this.tabPage2.Location = new System.Drawing.Point(4, 25);
 			this.tabPage2.Name = "tabPage2";
 			this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
@@ -64,6 +67,16 @@
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "General";
 			this.tabPage2.UseVisualStyleBackColor = true;
+			// 
+			// _AutoShowSmartBarBox
+			// 
+			this._AutoShowSmartBarBox.AutoSize = true;
+			this._AutoShowSmartBarBox.Location = new System.Drawing.Point(15, 6);
+			this._AutoShowSmartBarBox.Name = "_AutoShowSmartBarBox";
+			this._AutoShowSmartBarBox.Size = new System.Drawing.Size(349, 19);
+			this._AutoShowSmartBarBox.TabIndex = 2;
+			this._AutoShowSmartBarBox.Text = "Show Smart Bar when selection is changed";
+			this._AutoShowSmartBarBox.UseVisualStyleBackColor = true;
 			// 
 			// SmartBarPage
 			// 
@@ -81,8 +94,9 @@
 		}
 
 		#endregion
-		private System.Windows.Forms.CheckBox _ControlSmartBarBox;
+		private System.Windows.Forms.CheckBox _ToggleSmartBarBox;
 		private System.Windows.Forms.TabControl _SuperQuickInfoTabs;
 		private System.Windows.Forms.TabPage tabPage2;
+		private System.Windows.Forms.CheckBox _AutoShowSmartBarBox;
 	}
 }

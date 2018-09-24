@@ -54,7 +54,7 @@ namespace Codist.SmartBars
 				if (menuItem.Items.Count > 0) {
 					return;
 				}
-				ctx.KeepToolbarOnClick = true;
+				ctx.KeepToolBarOnClick = true;
 				itemPopulator(menuItem, symbol);
 				if (menuItem.Items.Count == 0) {
 					menuItem.Items.Add(new MenuItem { Header = emptyMenuTitle, IsEnabled = false });
@@ -162,7 +162,7 @@ namespace Codist.SmartBars
 					_Symbol = SymbolFinder.FindSymbolAtPositionAsync(_Document, View.Selection.Start.Position).Result;
 					if (_Symbol != null) {
 						if (_Node is IdentifierNameSyntax) {
-							AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition");
+							AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition\nRight click: Peek definition", "Edit.PeekDefinition");
 						}
 						AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze references...", GetReferenceCommands);
 						if (Classifiers.SymbolMarkManager.CanBookmark(_Symbol)) {
@@ -172,7 +172,7 @@ namespace Codist.SmartBars
 						if (isDesignMode) {
 							AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
 								TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
-								ctx.KeepToolbarOnClick = true;
+								ctx.KeepToolBarOnClick = true;
 							});
 							if (_Node is ParameterSyntax && _Node.Parent is ParameterListSyntax) {
 								AddEditorCommand(MyToolBar, KnownImageIds.ReorderParameters, "Refactor.ReorderParameters", "Reorder parameters");

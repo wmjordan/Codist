@@ -120,7 +120,7 @@
 			// _SmartBarBox
 			// 
 			this._SmartBarBox.AutoSize = true;
-			this._SmartBarBox.Location = new System.Drawing.Point(251, 24);
+			this._SmartBarBox.Location = new System.Drawing.Point(251, 69);
 			this._SmartBarBox.Name = "_SmartBarBox";
 			this._SmartBarBox.Size = new System.Drawing.Size(101, 19);
 			this._SmartBarBox.TabIndex = 4;
@@ -130,42 +130,42 @@
 			// _ScrollbarMarkerBox
 			// 
 			this._ScrollbarMarkerBox.AutoSize = true;
-			this._ScrollbarMarkerBox.Location = new System.Drawing.Point(9, 74);
+			this._ScrollbarMarkerBox.Location = new System.Drawing.Point(9, 119);
 			this._ScrollbarMarkerBox.Name = "_ScrollbarMarkerBox";
 			this._ScrollbarMarkerBox.Size = new System.Drawing.Size(157, 19);
-			this._ScrollbarMarkerBox.TabIndex = 2;
+			this._ScrollbarMarkerBox.TabIndex = 3;
 			this._ScrollbarMarkerBox.Text = "Scrollbar Marker";
 			this._ScrollbarMarkerBox.UseVisualStyleBackColor = true;
 			// 
 			// _SuperQuickInfoBox
 			// 
 			this._SuperQuickInfoBox.AutoSize = true;
-			this._SuperQuickInfoBox.Location = new System.Drawing.Point(9, 49);
+			this._SuperQuickInfoBox.Location = new System.Drawing.Point(9, 94);
 			this._SuperQuickInfoBox.Name = "_SuperQuickInfoBox";
 			this._SuperQuickInfoBox.Size = new System.Drawing.Size(157, 19);
-			this._SuperQuickInfoBox.TabIndex = 1;
+			this._SuperQuickInfoBox.TabIndex = 2;
 			this._SuperQuickInfoBox.Text = "Super Quick Info";
 			this._SuperQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// _SyntaxHighlightBox
 			// 
 			this._SyntaxHighlightBox.AutoSize = true;
-			this._SyntaxHighlightBox.Location = new System.Drawing.Point(9, 24);
+			this._SyntaxHighlightBox.Location = new System.Drawing.Point(9, 69);
 			this._SyntaxHighlightBox.Name = "_SyntaxHighlightBox";
 			this._SyntaxHighlightBox.Size = new System.Drawing.Size(157, 19);
-			this._SyntaxHighlightBox.TabIndex = 0;
+			this._SyntaxHighlightBox.TabIndex = 1;
 			this._SyntaxHighlightBox.Text = "Syntax Highlight";
 			this._SyntaxHighlightBox.UseVisualStyleBackColor = true;
 			// 
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(25, 111);
+			this.label3.Location = new System.Drawing.Point(6, 21);
 			this.label3.Name = "label3";
-			this.label3.Size = new System.Drawing.Size(455, 30);
-			this.label3.TabIndex = 3;
-			this.label3.Text = "* Changes will be applied on new document windows.\r\nTip: Turning off some feature" +
-    "s might save battery power.";
+			this.label3.Size = new System.Drawing.Size(439, 30);
+			this.label3.TabIndex = 0;
+			this.label3.Text = "NOTE: Changes will be applied on new document windows.\r\n* Turning off some featur" +
+    "es might save battery power.";
 			// 
 			// groupBox3
 			// 
@@ -183,7 +183,7 @@
 			this._SaveConfigButton.Location = new System.Drawing.Point(251, 24);
 			this._SaveConfigButton.Name = "_SaveConfigButton";
 			this._SaveConfigButton.Size = new System.Drawing.Size(111, 23);
-			this._SaveConfigButton.TabIndex = 0;
+			this._SaveConfigButton.TabIndex = 1;
 			this._SaveConfigButton.Text = "&Save...";
 			this._SaveConfigButton.UseVisualStyleBackColor = true;
 			// 
@@ -192,7 +192,7 @@
 			this._LoadConfigButton.Location = new System.Drawing.Point(9, 24);
 			this._LoadConfigButton.Name = "_LoadConfigButton";
 			this._LoadConfigButton.Size = new System.Drawing.Size(110, 23);
-			this._LoadConfigButton.TabIndex = 1;
+			this._LoadConfigButton.TabIndex = 0;
 			this._LoadConfigButton.Text = "&Load...";
 			this._LoadConfigButton.UseVisualStyleBackColor = true;
 			// 
