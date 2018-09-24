@@ -21,7 +21,8 @@ namespace Codist.Options
 			}
 			LoadConfig(Config.Instance);
 
-			_ControlSmartBarBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SmartBarOptions.DisplayOnShiftPressed, _ControlSmartBarBox.Checked));
+			_AutoShowSmartBarBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SmartBarOptions.ManualDisplaySmartBar, _AutoShowSmartBarBox.Checked == false));
+			_ToggleSmartBarBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SmartBarOptions.ShiftToggleDisplay, _ToggleSmartBarBox.Checked));
 
 			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
@@ -29,7 +30,8 @@ namespace Codist.Options
 
 		void LoadConfig(Config config) {
 			_UI.DoWithLock(() => {
-				_ControlSmartBarBox.Checked = config.SmartBarOptions.MatchFlags(SmartBarOptions.DisplayOnShiftPressed);
+				_AutoShowSmartBarBox.Checked = config.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false;
+				_ToggleSmartBarBox.Checked = config.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay);
 			});
 		}
 	}

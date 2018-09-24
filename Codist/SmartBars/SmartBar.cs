@@ -18,7 +18,7 @@ namespace Codist.SmartBars
 {
 	//todo Make this class async
 	/// <summary>The contextual toolbar.</summary>
-	internal class SmartBar
+	internal partial class SmartBar
 	{
 		const int Selecting = 1, Working = 2;
 		readonly Timer _CreateToolBarTimer;
@@ -27,6 +27,7 @@ namespace Codist.SmartBars
 		/// <summary>The layer for the smart bar adornment.</summary>
 		readonly IAdornmentLayer _ToolBarLayer;
 		DateTime _LastExecute;
+		bool _SuppressShiftToggle = true;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SmartBar"/> class.
@@ -35,7 +36,13 @@ namespace Codist.SmartBars
 		public SmartBar(IWpfTextView view) {
 			View = view ?? throw new ArgumentNullException(nameof(view));
 			_ToolBarLayer = view.GetAdornmentLayer(nameof(SmartBar));
-			View.Selection.SelectionChanged += ViewSelectionChanged;
+			Config.Updated += ConfigUpdated;
+			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
+				View.VisualElement.PreviewKeyUp += ViewKeyUp;
+			}
+			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false) {
+				View.Selection.SelectionChanged += ViewSelectionChanged;
+			}
 			View.Closed += ViewClosed;
 			ToolBar = new ToolBar {
 				BorderThickness = new Thickness(1),
@@ -71,10 +78,42 @@ namespace Codist.SmartBars
 		protected ToolBar ToolBar2 { get; }
 
 		#region Event handlers
+		void ConfigUpdated(object sender, ConfigUpdatedEventArgs e) {
+			if (e.UpdatedFeature.MatchFlags(Features.SmartBar)) {
+				View.VisualElement.PreviewKeyUp -= ViewKeyUp;
+				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
+					View.VisualElement.PreviewKeyUp += ViewKeyUp;
+				}
+				View.Selection.SelectionChanged -= ViewSelectionChanged;
+				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false) {
+					View.Selection.SelectionChanged += ViewSelectionChanged;
+				}
+			}
+		}
+
 		void ToolBarSizeChanged(object sender, SizeChangedEventArgs e) {
 			SetToolBarPosition();
 			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
 		}
+
+		void ViewKeyUp(object sender, KeyEventArgs e) {
+			if (e.Key != Key.LeftShift && e.Key != Key.RightShift) {
+				_SuppressShiftToggle = true;
+				return;
+			}
+			e.Handled = true;
+			if (_ToolBarTray.Visibility == Visibility.Visible) {
+				HideToolBar(this, null);
+				return;
+			}
+			if (_SuppressShiftToggle) {
+				_SuppressShiftToggle = false;
+			}
+			else {
+				CreateToolBar();
+			}
+		}
+
 		void ViewMouseMove(object sender, MouseEventArgs e) {
 			if (_ToolBarTray.IsVisible == false) {
 				return;
@@ -102,11 +141,8 @@ namespace Codist.SmartBars
 			}
 			_ToolBarTray.Opacity = (SensibleRange - op) / SensibleRange;
 		}
+
 		void ViewSelectionChanged(object sender, EventArgs e) {
-			if (Config.Instance.SmartBarOptions.HasAnyFlag(SmartBarOptions.DisplayOnShiftPressed)
-				&& Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Shift) == false) {
-				return;
-			}
 			if (View.Selection.IsEmpty) {
 				_ToolBarTray.Visibility = Visibility.Hidden;
 				View.VisualElement.MouseMove -= ViewMouseMove;
@@ -131,8 +167,10 @@ namespace Codist.SmartBars
 			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
 			View.Selection.SelectionChanged -= ViewSelectionChanged;
 			View.VisualElement.MouseMove -= ViewMouseMove;
+			View.VisualElement.PreviewKeyUp -= ViewKeyUp;
 			//View.LayoutChanged -= ViewLayoutChanged;
 			View.Closed -= ViewClosed;
+			Config.Updated -= ConfigUpdated;
 		}
 
 		void ToolBarMouseEnter(object sender, EventArgs e) {
@@ -224,7 +262,7 @@ namespace Codist.SmartBars
 						ctx.View.ExpandSelectionToLine();
 					}
 					TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
-					ctx.KeepToolbar();
+					ctx.KeepToolBar(true);
 				});
 				AddCommand(ToolBar, KnownImageIds.Cancel, "Delete selected text\nRight click: Delete line\nCtrl click: Delete and select next", ctx => ExecuteAndFind(ctx, "Edit.Delete"));
 				switch (View.GetSelectedTokenType()) {
@@ -242,7 +280,7 @@ namespace Codist.SmartBars
 									if (ed.Replace(span.Span, t)) {
 										ed.Apply();
 										ctx.View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-										ctx.KeepToolbar();
+										ctx.KeepToolBar();
 									}
 								}
 							}
@@ -257,7 +295,7 @@ namespace Codist.SmartBars
 								if (ed.Replace(span, t)) {
 									ed.Apply();
 									ctx.View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-									ctx.KeepToolbar();
+									ctx.KeepToolBar();
 								}
 							}
 						});
@@ -275,7 +313,28 @@ namespace Codist.SmartBars
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
 				AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");
 			}
-			AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
+			AddCommands(ToolBar, KnownImageIds.FindNext, "Find next selected text\nCtrl click: Find match case\nRight click: Find and replace...", ctx => {
+				ThreadHelper.ThrowIfNotOnUIThread();
+				string t = ctx.View.Selection.IsEmpty == false
+					? ctx.View.TextSnapshot.GetText(ctx.View.Selection.SelectedSpans[0])
+					: null;
+				if (t == null) {
+					return;
+				}
+				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
+				var option = Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) ? EnvDTE.vsFindOptions.vsFindOptionsMatchCase : 0;
+				if (p != null && p.FindText(t, (int)option)) {
+					ctx.KeepToolBar(true);
+				}
+			}, ctx => {
+				return new CommandItem[] {
+					new CommandItem("Find...", KnownImageIds.QuickFind, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
+					new CommandItem("Replace...", KnownImageIds.QuickReplace, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
+					new CommandItem("Find in files...", KnownImageIds.FindInFile, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
+					new CommandItem("Replace in files...", KnownImageIds.ReplaceInFolder, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
+				};
+			});
+			//AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
 		}
 
@@ -291,8 +350,8 @@ namespace Codist.SmartBars
 			TextEditorHelper.ExecuteEditorCommand(command);
 			if (t != null) {
 				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
-				if (p != null && p.FindText(t, 0)) {
-					ctx.KeepToolbar();
+				if (p != null && p.FindText(t, (int)(EnvDTE.vsFindOptions.vsFindOptionsMatchCase))) {
+					ctx.KeepToolBar(true);
 				}
 			}
 		}
@@ -321,14 +380,14 @@ namespace Codist.SmartBars
 			b.Click += (s, args) => {
 				var ctx = new CommandContext(this, s as Control, args);
 				handler(ctx);
-				if (ctx.KeepToolbarOnClick == false) {
+				if (ctx.KeepToolBarOnClick == false) {
 					HideToolBar(s, args);
 				}
 			};
 			b.MouseRightButtonUp += (s, args) => {
 				var ctx = new CommandContext(this, s as Control, args, true);
 				handler(ctx);
-				if (ctx.KeepToolbarOnClick == false) {
+				if (ctx.KeepToolBarOnClick == false) {
 					HideToolBar(s, args);
 				}
 				args.Handled = true;
@@ -347,6 +406,9 @@ namespace Codist.SmartBars
 		}
 
 		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
+			AddCommands(toolBar, imageId, tooltip, null, getItemsHandler);
+		}
+		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> leftClickHandler, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
 			var b = CreateButton(imageId, tooltip);
 			b.ContextMenu = new ContextMenu().SetStyleResourceProperty("EditorContextMenu");
 			void ButtonEventHandler(Button btn, CommandContext ctx) {
@@ -365,9 +427,16 @@ namespace Codist.SmartBars
 					m.Tag = ctx.RightClick;
 				}
 			}
-			b.Click += (s, args) => {
-				ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args));
-			};
+			if (leftClickHandler != null) {
+				b.Click += (s, args) => {
+					leftClickHandler(new CommandContext(this, s as Control, args));
+				};
+			}
+			else {
+				b.Click += (s, args) => {
+					ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args));
+				};
+			}
 			b.MouseRightButtonUp += (s, args) => {
 				ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args, true));
 				args.Handled = true;
@@ -378,9 +447,13 @@ namespace Codist.SmartBars
 		void KeepToolbar() {
 			_LastExecute = DateTime.Now;
 		}
-		void HideToolBar(object sender, RoutedEventArgs e) {
+		void HideToolBar() {
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			View.VisualElement.MouseMove -= ViewMouseMove;
+			_SuppressShiftToggle = true;
+		}
+		void HideToolBar(object sender, RoutedEventArgs e) {
+			HideToolBar();
 		}
 
 		protected class CommandMenuItem : MenuItem
@@ -420,8 +493,8 @@ namespace Codist.SmartBars
 			void ClickHandler(object s, RoutedEventArgs e) {
 				var ctx2 = new CommandContext(SmartBar, s as Control, e);
 				CommandItem.Action(ctx2);
-				if (ctx2.KeepToolbarOnClick == false) {
-					SmartBar.HideToolBar(s, e);
+				if (ctx2.KeepToolBarOnClick == false) {
+					SmartBar.HideToolBar();
 				}
 			}
 		}
@@ -463,9 +536,16 @@ namespace Codist.SmartBars
 			public bool RightClick { get; }
 			public Control Sender { get; }
 			public IWpfTextView View { get; }
-			public bool KeepToolbarOnClick { get; set; }
-			public void KeepToolbar() {
+			public bool KeepToolBarOnClick { get; set; }
+			public void KeepToolBar() {
+				KeepToolBar(false);
+			}
+			public void KeepToolBar(bool refresh) {
 				_Bar.KeepToolbar();
+				KeepToolBarOnClick = true;
+				if (refresh) {
+					_Bar.CreateToolBar();
+				}
 			}
 		}
 	}
