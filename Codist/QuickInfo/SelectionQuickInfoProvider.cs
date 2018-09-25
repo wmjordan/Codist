@@ -13,7 +13,7 @@ namespace Codist.QuickInfo
 	/// <summary>Shows information about selections.</summary>
 	[Export(typeof(IQuickInfoSourceProvider))]
 	[Name(Name)]
-	[Order(After = CSharpQuickInfoSourceProvider.Name)]
+	[Order(After = CSharpQuickInfo.Name)]
 	[ContentType(Constants.CodeTypes.Text)]
 	sealed class SelectionQuickInfoProvider : IQuickInfoSourceProvider
 	{

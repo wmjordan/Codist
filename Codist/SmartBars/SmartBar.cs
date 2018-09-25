@@ -76,119 +76,6 @@ namespace Codist.SmartBars
 		protected ToolBar ToolBar2 { get; }
 		protected IWpfTextView View { get; }
 
-		#region Event handlers
-		void ConfigUpdated(object sender, ConfigUpdatedEventArgs e) {
-			if (e.UpdatedFeature.MatchFlags(Features.SmartBar)) {
-				View.VisualElement.PreviewKeyUp -= ViewKeyUp;
-				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
-					View.VisualElement.PreviewKeyUp += ViewKeyUp;
-				}
-				View.Selection.SelectionChanged -= ViewSelectionChanged;
-				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false) {
-					View.Selection.SelectionChanged += ViewSelectionChanged;
-				}
-			}
-		}
-
-		void ToolBarMouseEnter(object sender, EventArgs e) {
-			View.VisualElement.MouseMove -= ViewMouseMove;
-			((ToolBarTray)sender).Opacity = 1;
-			View.Properties[nameof(SmartBar)] = true;
-		}
-
-		void ToolBarMouseLeave(object sender, EventArgs e) {
-			View.VisualElement.MouseMove += ViewMouseMove;
-			View.Properties.RemoveProperty(nameof(SmartBar));
-		}
-
-		void ToolBarSizeChanged(object sender, SizeChangedEventArgs e) {
-			SetToolBarPosition();
-			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
-		}
-
-		void ViewClosed(object sender, EventArgs e) {
-			_CreateToolBarTimer.Dispose();
-			_ToolBarTray.ToolBars.Clear();
-			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
-			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
-			View.Selection.SelectionChanged -= ViewSelectionChanged;
-			View.VisualElement.MouseMove -= ViewMouseMove;
-			View.VisualElement.PreviewKeyUp -= ViewKeyUp;
-			//View.LayoutChanged -= ViewLayoutChanged;
-			View.Closed -= ViewClosed;
-			Config.Updated -= ConfigUpdated;
-		}
-
-		void ViewKeyUp(object sender, KeyEventArgs e) {
-			if (e.Key != Key.LeftShift && e.Key != Key.RightShift) {
-				_LastShiftHit = DateTime.MinValue;
-				return;
-			}
-			var now = DateTime.Now;
-			// ignore the shift hit after shift clicking a SmartBar button
-			if ((now - _LastExecute).Ticks < TimeSpan.TicksPerSecond) {
-				return;
-			}
-			e.Handled = true;
-			if (_ToolBarTray.Visibility == Visibility.Visible) {
-				HideToolBar(this, null);
-				return;
-			}
-			if ((now - _LastShiftHit).Ticks < TimeSpan.TicksPerSecond) {
-				CreateToolBar();
-			}
-			else {
-				_LastShiftHit = DateTime.Now;
-			}
-		}
-
-		void ViewLayoutChanged(object sender, EventArgs e) {
-			HideToolBar(sender, null);
-		}
-
-		void ViewMouseMove(object sender, MouseEventArgs e) {
-			if (_ToolBarTray.IsVisible == false) {
-				return;
-			}
-			const double SensibleRange = 100;
-			var p = e.GetPosition(_ToolBarTray);
-			double x = p.X, y = p.Y;
-			var s = _ToolBarTray.RenderSize;
-			if (x > 0 && x <= s.Width) {
-				x = 0;
-			}
-			else if (x > s.Width) {
-				x -= s.Width;
-			}
-			if (y > 0 && y <= s.Height) {
-				y = 0;
-			}
-			else if (y > s.Height) {
-				y -= s.Height;
-			}
-			var op = Math.Abs(x) + Math.Abs(y);
-			if (op > SensibleRange) {
-				HideToolBar(this, null);
-				return;
-			}
-			_ToolBarTray.Opacity = (SensibleRange - op) / SensibleRange;
-		}
-
-		void ViewSelectionChanged(object sender, EventArgs e) {
-			if (View.Selection.IsEmpty) {
-				_ToolBarTray.Visibility = Visibility.Hidden;
-				View.VisualElement.MouseMove -= ViewMouseMove;
-				_CreateToolBarTimer.Change(Timeout.Infinite, Timeout.Infinite);
-				_TimerStatus = 0;
-				return;
-			}
-			if (Interlocked.CompareExchange(ref _TimerStatus, Selecting, 0) != 0) {
-				return;
-			}
-			_CreateToolBarTimer.Change(400, Timeout.Infinite);
-		}
-		#endregion
-
 		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
 			var b = CreateButton(imageId, tooltip);
 			b.Click += (s, args) => {
@@ -372,6 +259,119 @@ namespace Codist.SmartBars
 				Canvas.SetTop(_ToolBarTray, (y < 0 || x < View.ViewportLeft && View.Selection.IsReversed == false ? y + rs.Height + 30 : y) + View.ViewportTop);
 			}
 		}
+
+		#region Event handlers
+		void ConfigUpdated(object sender, ConfigUpdatedEventArgs e) {
+			if (e.UpdatedFeature.MatchFlags(Features.SmartBar)) {
+				View.VisualElement.PreviewKeyUp -= ViewKeyUp;
+				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
+					View.VisualElement.PreviewKeyUp += ViewKeyUp;
+				}
+				View.Selection.SelectionChanged -= ViewSelectionChanged;
+				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false) {
+					View.Selection.SelectionChanged += ViewSelectionChanged;
+				}
+			}
+		}
+
+		void ToolBarMouseEnter(object sender, EventArgs e) {
+			View.VisualElement.MouseMove -= ViewMouseMove;
+			((ToolBarTray)sender).Opacity = 1;
+			View.Properties[nameof(SmartBar)] = true;
+		}
+
+		void ToolBarMouseLeave(object sender, EventArgs e) {
+			View.VisualElement.MouseMove += ViewMouseMove;
+			View.Properties.RemoveProperty(nameof(SmartBar));
+		}
+
+		void ToolBarSizeChanged(object sender, SizeChangedEventArgs e) {
+			SetToolBarPosition();
+			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
+		}
+
+		void ViewClosed(object sender, EventArgs e) {
+			_CreateToolBarTimer.Dispose();
+			_ToolBarTray.ToolBars.Clear();
+			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
+			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
+			View.Selection.SelectionChanged -= ViewSelectionChanged;
+			View.VisualElement.MouseMove -= ViewMouseMove;
+			View.VisualElement.PreviewKeyUp -= ViewKeyUp;
+			//View.LayoutChanged -= ViewLayoutChanged;
+			View.Closed -= ViewClosed;
+			Config.Updated -= ConfigUpdated;
+		}
+
+		void ViewKeyUp(object sender, KeyEventArgs e) {
+			if (e.Key != Key.LeftShift && e.Key != Key.RightShift) {
+				_LastShiftHit = DateTime.MinValue;
+				return;
+			}
+			var now = DateTime.Now;
+			// ignore the shift hit after shift clicking a SmartBar button
+			if ((now - _LastExecute).Ticks < TimeSpan.TicksPerSecond) {
+				return;
+			}
+			e.Handled = true;
+			if (_ToolBarTray.Visibility == Visibility.Visible) {
+				HideToolBar(this, null);
+				return;
+			}
+			if ((now - _LastShiftHit).Ticks < TimeSpan.TicksPerSecond) {
+				CreateToolBar();
+			}
+			else {
+				_LastShiftHit = DateTime.Now;
+			}
+		}
+
+		void ViewLayoutChanged(object sender, EventArgs e) {
+			HideToolBar(sender, null);
+		}
+
+		void ViewMouseMove(object sender, MouseEventArgs e) {
+			if (_ToolBarTray.IsVisible == false) {
+				return;
+			}
+			const double SensibleRange = 100;
+			var p = e.GetPosition(_ToolBarTray);
+			double x = p.X, y = p.Y;
+			var s = _ToolBarTray.RenderSize;
+			if (x > 0 && x <= s.Width) {
+				x = 0;
+			}
+			else if (x > s.Width) {
+				x -= s.Width;
+			}
+			if (y > 0 && y <= s.Height) {
+				y = 0;
+			}
+			else if (y > s.Height) {
+				y -= s.Height;
+			}
+			var op = Math.Abs(x) + Math.Abs(y);
+			if (op > SensibleRange) {
+				HideToolBar(this, null);
+				return;
+			}
+			_ToolBarTray.Opacity = (SensibleRange - op) / SensibleRange;
+		}
+
+		void ViewSelectionChanged(object sender, EventArgs e) {
+			if (View.Selection.IsEmpty) {
+				_ToolBarTray.Visibility = Visibility.Hidden;
+				View.VisualElement.MouseMove -= ViewMouseMove;
+				_CreateToolBarTimer.Change(Timeout.Infinite, Timeout.Infinite);
+				_TimerStatus = 0;
+				return;
+			}
+			if (Interlocked.CompareExchange(ref _TimerStatus, Selecting, 0) != 0) {
+				return;
+			}
+			_CreateToolBarTimer.Change(400, Timeout.Infinite);
+		}
+		#endregion
 
 		protected sealed class CommandContext
 		{
