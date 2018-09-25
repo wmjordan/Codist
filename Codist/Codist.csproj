@@ -198,10 +198,10 @@
     <Compile Include="SyntaxHighlight\StyleBase.cs" />
     <Compile Include="SyntaxHighlight\CodeViewCreationListener.cs" />
     <Compile Include="SyntaxHighlight\CodeViewDecorator.cs" />
-    <Compile Include="QuickInfo\CSharpQuickInfoSourceProvider.cs" />
+    <Compile Include="QuickInfo\CSharpQuickInfo.cs" />
     <Compile Include="QuickInfo\QuickInfoOverrider.cs" />
-    <Compile Include="QuickInfo\SelectionQuickInfoProvider.cs" />
-    <Compile Include="QuickInfo\QuickInfoVisibilityControllerProvider.cs" />
+    <Compile Include="QuickInfo\SelectionQuickInfo.cs" />
+    <Compile Include="QuickInfo\QuickInfoVisibilityController.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
