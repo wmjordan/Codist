@@ -137,22 +137,7 @@ namespace Codist.SmartBars
 			// anti-pattern for a small margin of performance
 			bool isDesignMode = CodistPackage.DebuggerStatus == DebuggerStatus.Design;
 			if (isDesignMode && _Node is XmlTextSyntax) {
-				AddCommand(KnownImageIds.MarkupTag, "Tag XML Doc with <c>", edit => {
-					foreach (var item in View.Selection.SelectedSpans) {
-						edit.Replace(item, "<c>" + item.GetText() + "</c>");
-					}
-				});
-				AddCommand(KnownImageIds.GoToNext, "Tag XML Doc with <see>", edit => {
-					foreach (var item in View.Selection.SelectedSpans) {
-						var t = item.GetText();
-						edit.Replace(item, (SyntaxFacts.GetKeywordKind(t) != SyntaxKind.None ? "<see langword=\"" : "<see cref=\"") + t + "\"/>");
-					}
-				});
-				AddCommand(KnownImageIds.ParagraphHardReturn, "Tag XML Doc with <para>", edit => {
-					foreach (var item in View.Selection.SelectedSpans) {
-						edit.Replace(item, "<para>" + item.GetText() + "</para>");
-					}
-				});
+				AddXmlDocCommands();
 			}
 			else if (_Trivia.RawKind == 0) {
 				if (_Token.Span.Contains(View.Selection, true)
@@ -219,9 +204,28 @@ namespace Codist.SmartBars
 				}
 			}
 			if (isDesignMode == false) {
-				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger...", GetDebugCommands);
+				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger...\nLeft click: Toggle breakpoint\nRight click: Debugger menu...", ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), GetDebugCommands);
 			}
 			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection...\nRight click: Duplicate...\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", GetExpandSelectionCommands);
+		}
+
+		void AddXmlDocCommands() {
+			AddCommand(KnownImageIds.MarkupTag, "Tag XML Doc with <c>", edit => {
+				foreach (var item in View.Selection.SelectedSpans) {
+					edit.Replace(item, "<c>" + item.GetText() + "</c>");
+				}
+			});
+			AddCommand(KnownImageIds.GoToNext, "Tag XML Doc with <see>", edit => {
+				foreach (var item in View.Selection.SelectedSpans) {
+					var t = item.GetText();
+					edit.Replace(item, (SyntaxFacts.GetKeywordKind(t) != SyntaxKind.None ? "<see langword=\"" : "<see cref=\"") + t + "\"/>");
+				}
+			});
+			AddCommand(KnownImageIds.ParagraphHardReturn, "Tag XML Doc with <para>", edit => {
+				foreach (var item in View.Selection.SelectedSpans) {
+					edit.Replace(item, "<para>" + item.GetText() + "</para>");
+				}
+			});
 		}
 
 		CommandItem[] GetMarkerCommands(CommandContext arg) {
@@ -412,8 +416,9 @@ namespace Codist.SmartBars
 
 		CommandItem[] GetDebugCommands(CommandContext ctx) {
 			return new CommandItem[] {
-				new CommandItem("Toggle breakpoint", KnownImageIds.BreakpointEnabled, c => c.ToolTip = "Toggle breakpoint", c => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint")),
-				new CommandItem("Delete breakpoints", KnownImageIds.DeleteBreakpoint, c => c.ToolTip = "Delete all breakpoints", c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
+				new CommandItem("Add watch", KnownImageIds.Watch, null, c => TextEditorHelper.ExecuteEditorCommand("Debug.AddWatch")),
+				new CommandItem("Add parallel watch", KnownImageIds.Watch, null, c => TextEditorHelper.ExecuteEditorCommand("Debug.AddParallelWatch")),
+				new CommandItem("Delete all breakpoints", KnownImageIds.DeleteBreakpoint, null, c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
 			};
 		}
 

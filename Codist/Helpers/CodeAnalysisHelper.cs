@@ -293,6 +293,8 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 					return (node as BaseTypeDeclarationSyntax).Identifier.Text;
 
+				case SyntaxKind.ArgumentList:
+					return (((node as ArgumentListSyntax).Parent as InvocationExpressionSyntax)?.Expression as MemberAccessExpressionSyntax)?.Name.ToString();
 				case SyntaxKind.ConstructorDeclaration: return (node as ConstructorDeclarationSyntax).Identifier.Text;
 				case SyntaxKind.ConversionOperatorDeclaration: return (node as ConversionOperatorDeclarationSyntax).OperatorKeyword.Text;
 				case SyntaxKind.DestructorDeclaration: return (node as DestructorDeclarationSyntax).Identifier.Text;
