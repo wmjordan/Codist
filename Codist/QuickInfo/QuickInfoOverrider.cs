@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Language.Intellisense;
 
@@ -51,15 +52,13 @@ namespace Codist.QuickInfo
 				description.MouseLeftButtonUp += (s, args) => symbol.GoToSource();
 				return;
 			}
-			else {
-				description.MouseLeftButtonUp += (s, args) => {
-					var tb = s as TextBlock;
-					if (tb.ContextMenu == null) {
-						tb.ContextMenu = WpfHelper.CreateContextMenuForSourceLocations(symbol.MetadataName, locs);
-					}
-					tb.ContextMenu.IsOpen = true;
-				};
-			}
+			description.MouseLeftButtonUp += (s, args) => {
+				var tb = s as TextBlock;
+				if (tb.ContextMenu == null) {
+					tb.ContextMenu = WpfHelper.CreateContextMenuForSourceLocations(symbol.MetadataName, locs);
+				}
+				tb.ContextMenu.IsOpen = true;
+			};
 		}
 
 		static StackPanel ShowSymbolLocation(ISymbol symbol, string path) {
@@ -113,6 +112,12 @@ namespace Codist.QuickInfo
 
 			sealed class Overrider : UIElement
 			{
+				static readonly Thickness __DocPanelBorderMargin = new Thickness(-15, 0, -17, 0);
+				static readonly Thickness __TitlePanelMargin = new Thickness(-14, 0, -14, 3);
+				static readonly Thickness __DocMargin = new Thickness(14, 0, 14, 0);
+				static readonly Thickness __IconMargin = new Thickness(5, 0, 5, 0);
+				static readonly Thickness __SignatureMargin = new Thickness(0, 0, 14, 0);
+
 				public ISymbol ClickAndGoSymbol;
 				public bool LimitItemSize;
 				public UIElement DocElement;
@@ -164,12 +169,28 @@ namespace Codist.QuickInfo
 					if (doc == null) {
 						return;
 					}
-					var wrapPanel = infoPanel.GetFirstVisualChild<WrapPanel>();
-					if (wrapPanel == null) {
+					var titlePanel = infoPanel.GetFirstVisualChild<WrapPanel>();
+					if (titlePanel == null) {
 						return;
 					}
+					titlePanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+					doc.HorizontalAlignment = HorizontalAlignment.Stretch;
+
 					var icon = infoPanel.GetFirstVisualChild<Microsoft.VisualStudio.Imaging.CrispImage>();
 					var signature = infoPanel.GetFirstVisualChild<TextBlock>();
+
+					// beautify the title panel
+					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
+						var b = doc.GetVisualParent<Border>();
+						if (b != null && icon != null && signature != null) {
+							b.Margin = __DocPanelBorderMargin;
+							titlePanel.Margin = __TitlePanelMargin;
+							titlePanel.Background = ThemeHelper.ToolWindowBackgroundBrush.Alpha(0.5);
+							doc.Margin = __DocMargin;
+							icon.Margin = __IconMargin;
+							signature.Margin = __SignatureMargin;
+						}
+					}
 
 					// replace the default XML doc
 					if (DocElement != null) {
@@ -201,11 +222,11 @@ namespace Codist.QuickInfo
 						if (ClickAndGoSymbol != null) {
 							QuickInfoOverrider.ApplyClickAndGo(ClickAndGoSymbol, signature);
 						}
-
 						// fix the width of the signature part to prevent it from falling down to the next row
 						if (Config.Instance.QuickInfoMaxWidth > 0) {
-							wrapPanel.MaxWidth = Config.Instance.QuickInfoMaxWidth;
-							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 10;
+							//wrapPanel.MaxWidth = Config.Instance.QuickInfoMaxWidth;
+							//signature.HorizontalAlignment = HorizontalAlignment.Left;
+							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 45;
 						}
 					}
 					System.Windows.Shapes.Line CreateDecorativeLine(StackPanel docPanel) {
@@ -218,7 +239,8 @@ namespace Codist.QuickInfo
 							Y1 = 3,
 							Y2 = 3,
 							Height = 5,
-							MaxWidth = Config.Instance.QuickInfoMaxWidth
+							MaxWidth = Config.Instance.QuickInfoMaxWidth,
+							HorizontalAlignment = HorizontalAlignment.Stretch
 						};
 					}
 
@@ -227,6 +249,10 @@ namespace Codist.QuickInfo
 				static void ApplySizeLimit(StackPanel quickInfoPanel) {
 					if (quickInfoPanel == null) {
 						return;
+					}
+					var docPanel = quickInfoPanel.Children[0].GetFirstVisualChild<StackPanel>();
+					if (docPanel?.Margin != __DocMargin) {
+						docPanel = null;
 					}
 					foreach (var item in quickInfoPanel.Children) {
 						var o = item as DependencyObject;
@@ -239,10 +265,13 @@ namespace Codist.QuickInfo
 						}
 						var c = cp.Content;
 						if (c is Overrider
-							|| (c is Microsoft.VisualStudio.Language.Intellisense.IInteractiveQuickInfoContent && c.GetType().Name == "LightBulbQuickInfoPlaceHolder")) {
+							|| (c is IInteractiveQuickInfoContent && c.GetType().Name == "LightBulbQuickInfoPlaceHolder")) {
 							continue;
 						}
 						cp.LimitSize();
+						if (docPanel == c) {
+							cp.MaxWidth += 32;
+						}
 						if (c is ScrollViewer) {
 							continue;
 						}
@@ -252,12 +281,12 @@ namespace Codist.QuickInfo
 							if (s != null) {
 								cp.Content = new ToolTipText {
 									Text = s
-								}.Scrollable().LimitSize();
+								}.Scrollable();
 							}
 							continue;
 						}
 						cp.Content = null;
-						cp.Content = o.Scrollable().LimitSize();
+						cp.Content = o.Scrollable();
 					}
 				}
 			}

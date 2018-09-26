@@ -365,6 +365,7 @@ namespace Codist
 		TextOnlyDoc = 1 << 22,
 		ReturnsDoc = 1 << 23,
 		RemarksDoc = 1 << 24,
+		AlternativeStyle = 1 << 25,
 		Color = 1 << 26,
 		Selection = 1 << 27,
 		ClickAndGo = 1 << 28,
@@ -381,7 +382,7 @@ namespace Codist
 		ExpansionIncludeTrivia = 1 << 1,
 		ShiftToggleDisplay = 1 << 2,
 		ManualDisplaySmartBar = 1 << 3,
-		Default = ExpansionIncludeTrivia
+		Default = ExpansionIncludeTrivia | ShiftToggleDisplay
 	}
 
 	[Flags]

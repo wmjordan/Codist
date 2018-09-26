@@ -24,11 +24,12 @@ namespace Codist.Options
 			}
 			LoadConfig(Config.Instance);
 
+			_AlternativeStyleBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.AlternativeStyle, _AlternativeStyleBox.Checked));
 			_ClickAndGoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.ClickAndGo, _ClickAndGoBox.Checked));
 			_CSharpAttributesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Attributes, _CSharpAttributesQuickInfoBox.Checked));
 			_CSharpBaseTypeQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseType, _CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked));
 			_CSharpBaseTypeInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseTypeInheritence, _CSharpBaseTypeInheritenceQuickInfoBox.Checked));
-			_CSharpOverrideDefaultXmlDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.OverrideDefaultDocumentation, _CSharpDocumentationBaseTypeBox.Enabled = _CSharpTextOnlyDocBox.Enabled = _CSharpReturnsDocBox.Enabled = _CSharpOverrideDefaultXmlDocBox.Checked));
+			_CSharpOverrideDefaultXmlDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.OverrideDefaultDocumentation, _CSharpDocumentationBaseTypeBox.Enabled = _CSharpTextOnlyDocBox.Enabled = _CSharpReturnsDocBox.Enabled = _CSharpRemarksDocBox.Enabled = _CSharpOverrideDefaultXmlDocBox.Checked));
 			_CSharpDeclarationQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Declaration, _CSharpDeclarationQuickInfoBox.Checked));
 			_CSharpSymbolLocationQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.SymbolLocation, _CSharpSymbolLocationQuickInfoBox.Checked));
 			_CSharpInterfacesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Interfaces, _CSharpInterfaceInheritenceQuickInfoBox.Enabled = _CSharpInterfacesQuickInfoBox.Checked));
@@ -51,18 +52,28 @@ namespace Codist.Options
 
 		void LoadConfig(Config config) {
 			_UI.DoWithLock(() => {
+				_AlternativeStyleBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle);
 				_ClickAndGoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo);
 				_CSharpAttributesQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes);
-				_CSharpBaseTypeQuickInfoBox.Checked = _CSharpBaseTypeInheritenceQuickInfoBox.Enabled = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType);
+				_CSharpBaseTypeQuickInfoBox.Checked
+					= _CSharpBaseTypeInheritenceQuickInfoBox.Enabled
+					= config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType);
 				_CSharpBaseTypeInheritenceQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence);
 				_CSharpDeclarationQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration);
-				_CSharpInterfacesQuickInfoBox.Checked = _CSharpInterfaceInheritenceQuickInfoBox.Enabled = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces);
+				_CSharpInterfacesQuickInfoBox.Checked
+					= _CSharpInterfaceInheritenceQuickInfoBox.Enabled
+					= config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces);
 				_CSharpInterfaceInheritenceQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
 				_CSharpInterfaceImplementationsQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations);
 				_CSharpSymbolLocationQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation);
 				_CSharpReturnsDocBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc);
 				_CSharpRemarksDocBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc);
-				_CSharpOverrideDefaultXmlDocBox.Checked = _CSharpDocumentationBaseTypeBox.Enabled = _CSharpTextOnlyDocBox.Enabled = _CSharpReturnsDocBox.Enabled = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation);
+				_CSharpOverrideDefaultXmlDocBox.Checked
+					= _CSharpDocumentationBaseTypeBox.Enabled
+					= _CSharpTextOnlyDocBox.Enabled
+					= _CSharpReturnsDocBox.Enabled
+					= _CSharpRemarksDocBox.Enabled
+					= config.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation);
 				_CSharpNumberQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues);
 				_CSharpStringQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.String);
 				_CSharpParameterQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter);

@@ -51,6 +51,7 @@
 			this._CSharpOverrideDefaultXmlDocBox = new System.Windows.Forms.CheckBox();
 			this._ClickAndGoBox = new System.Windows.Forms.CheckBox();
 			this._AdditionalItemsPage = new System.Windows.Forms.TabPage();
+			this._AlternativeStyleBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this._DefaultPage.SuspendLayout();
 			this.groupBox4.SuspendLayout();
@@ -194,6 +195,7 @@
 			// 
 			// _DefaultPage
 			// 
+			this._DefaultPage.Controls.Add(this._AlternativeStyleBox);
 			this._DefaultPage.Controls.Add(this._CSharpRemarksDocBox);
 			this._DefaultPage.Controls.Add(this._CSharpReturnsDocBox);
 			this._DefaultPage.Controls.Add(this._CSharpTextOnlyDocBox);
@@ -257,7 +259,7 @@
 			this.groupBox4.Controls.Add(this.label2);
 			this.groupBox4.Controls.Add(this.label1);
 			this.groupBox4.Controls.Add(this._QuickInfoMaxWidthBox);
-			this.groupBox4.Location = new System.Drawing.Point(6, 171);
+			this.groupBox4.Location = new System.Drawing.Point(6, 193);
 			this.groupBox4.Name = "groupBox4";
 			this.groupBox4.Size = new System.Drawing.Size(506, 59);
 			this.groupBox4.TabIndex = 6;
@@ -358,6 +360,16 @@
 			this._AdditionalItemsPage.Text = "Additional Items";
 			this._AdditionalItemsPage.UseVisualStyleBackColor = true;
 			// 
+			// _AlternativeStyleBox
+			// 
+			this._AlternativeStyleBox.AutoSize = true;
+			this._AlternativeStyleBox.Location = new System.Drawing.Point(15, 156);
+			this._AlternativeStyleBox.Name = "_AlternativeStyleBox";
+			this._AlternativeStyleBox.Size = new System.Drawing.Size(197, 19);
+			this._AlternativeStyleBox.TabIndex = 7;
+			this._AlternativeStyleBox.Text = "Use alternative style";
+			this._AlternativeStyleBox.UseVisualStyleBackColor = true;
+			// 
 			// CSharpSuperQuickInfoPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -406,5 +418,6 @@
 		private System.Windows.Forms.CheckBox _CSharpTextOnlyDocBox;
 		private System.Windows.Forms.CheckBox _CSharpReturnsDocBox;
 		private System.Windows.Forms.CheckBox _CSharpRemarksDocBox;
+		private System.Windows.Forms.CheckBox _AlternativeStyleBox;
 	}
 }
