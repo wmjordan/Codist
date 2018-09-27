@@ -10,7 +10,6 @@ namespace Codist.Controls
 		public TextBlock Content { get; }
 
 		public SymbolToolTip() {
-			Margin = new Thickness(-6, -4, -6, -5);
 			Title = new TextBlock {
 				Padding = new Thickness(5),
 				HorizontalAlignment = HorizontalAlignment.Stretch,
@@ -24,6 +23,14 @@ namespace Codist.Controls
 			};
 			Children.Add(Title);
 			Children.Add(Content);
+		}
+
+		protected override void OnVisualParentChanged(DependencyObject oldParent) {
+			var c = this.GetVisualParent<ContentPresenter>();
+			if (c != null) {
+				c.Margin = WpfHelper.NoMargin;
+			}
+			base.OnVisualParentChanged(oldParent);
 		}
 	}
 }
