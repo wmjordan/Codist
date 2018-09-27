@@ -22,7 +22,9 @@ namespace Codist
 		public static GdiColor DocumentTextColor { get; private set; }
 		public static WpfBrush DocumentTextBrush { get; private set; }
 		public static GdiColor ToolWindowBackgroundColor { get; private set; }
+		public static WpfBrush TitleBackgroundBrush { get; private set; }
 		public static WpfColor TitleBackgroundColor { get; private set; }
+		public static WpfBrush TitleTextBrush { get; private set; }
 		public static WpfBrush ToolTipTextBrush { get; private set; }
 		public static WpfBrush ToolTipBackgroundBrush { get; private set; }
 		public static WpfBrush ToolWindowTextBrush { get; private set; }
@@ -70,6 +72,8 @@ namespace Codist
 			DocumentTextBrush = new WpfBrush(CommonDocumentColors.PageTextColorKey.ToThemedWpfColor());
 			ToolWindowBackgroundColor = EnvironmentColors.ToolWindowBackgroundColorKey.ToThemedGdiColor();
 			TitleBackgroundColor = EnvironmentColors.MainWindowActiveCaptionColorKey.ToThemedWpfColor();
+			TitleTextBrush = new WpfBrush(EnvironmentColors.MainWindowActiveCaptionTextBrushKey.ToThemedWpfColor());
+			TitleBackgroundBrush = new WpfBrush(TitleBackgroundColor);
 			ToolTipTextBrush = new WpfBrush(EnvironmentColors.ButtonTextBrushKey.ToThemedWpfColor());
 			ToolTipBackgroundBrush = new WpfBrush(EnvironmentColors.ToolTipBrushKey.ToThemedWpfColor());
 			ToolWindowTextBrush = new WpfBrush(EnvironmentColors.ToolWindowTextBrushKey.ToThemedWpfColor());

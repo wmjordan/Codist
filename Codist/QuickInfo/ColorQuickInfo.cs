@@ -16,6 +16,7 @@ using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
+using Codist.Controls;
 
 namespace Codist.QuickInfo
 {

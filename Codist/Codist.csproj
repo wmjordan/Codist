@@ -94,6 +94,7 @@
     </Compile>
     <Compile Include="Config.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Controls\SymbolToolTip.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.Symbol.cs" />
     <Compile Include="Helpers\ReflectionHelper.cs" />
@@ -190,7 +191,7 @@
     <Compile Include="QuickInfo\ColorQuickInfo.cs" />
     <Compile Include="QuickInfo\SymbolFormatter.cs" />
     <Compile Include="Helpers\XmlDocRenderer.cs" />
-    <Compile Include="QuickInfo\ToolTipText.cs" />
+    <Compile Include="Controls\ToolTipText.cs" />
     <Compile Include="SmartBars\CSharpSmartBar.cs" />
     <Compile Include="SmartBars\SmartBar.CommonEdit.cs" />
     <Compile Include="SmartBars\SmartBar.cs" />

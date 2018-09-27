@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using AppHelpers;
+using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Language.Intellisense;
 
@@ -27,6 +28,8 @@ namespace Codist.QuickInfo
 
 		static void ApplyClickAndGo(ISymbol symbol, TextBlock description) {
 			var locs = symbol.GetSourceLocations();
+			string path;
+			description.ToolTip = String.Empty;
 			if (locs.IsDefaultOrEmpty || String.IsNullOrEmpty(locs[0].SourceTree.FilePath)) {
 				if (symbol.ContainingType != null) {
 					// if the symbol is implicitly declared but its containing type is in source,
@@ -39,12 +42,14 @@ namespace Codist.QuickInfo
 				}
 				var asm = symbol.GetAssemblyModuleName();
 				if (asm != null) {
-					description.ToolTip = ShowSymbolLocation(symbol, asm);
+					path = asm;
+					description.ToolTipOpening += DescriptionShowToolTip;
 				}
 				return;
 			}
 			ClickAndGo:
-			description.ToolTip = ShowSymbolLocation(symbol, System.IO.Path.GetFileName(locs[0].SourceTree.FilePath));
+			path = System.IO.Path.GetFileName(locs[0].SourceTree.FilePath);
+			description.ToolTipOpening += DescriptionShowToolTip;
 			description.Cursor = Cursors.Hand;
 			description.MouseEnter += (s, args) => (s as TextBlock).Background = __HighlightBrush;
 			description.MouseLeave += (s, args) => (s as TextBlock).Background = Brushes.Transparent;
@@ -59,10 +64,17 @@ namespace Codist.QuickInfo
 				}
 				tb.ContextMenu.IsOpen = true;
 			};
+			void DescriptionShowToolTip(object sender, ToolTipEventArgs e) {
+				var d = sender as TextBlock;
+				d.ToolTip = ShowSymbolLocation(symbol, path);
+				d.ToolTipOpening -= DescriptionShowToolTip;
+			}
 		}
 
 		static StackPanel ShowSymbolLocation(ISymbol symbol, string path) {
-			var t = new TextBlock()
+			var tooltip = new SymbolToolTip();
+			tooltip.Title.Append(symbol.Name, true);
+			var t = tooltip.Content
 				.Append("defined in ")
 				.Append(String.IsNullOrEmpty(path) ? "?" : path, true);
 			if (symbol.IsMemberOrType() && symbol.ContainingNamespace != null) {
@@ -74,12 +86,7 @@ namespace Codist.QuickInfo
 					t.Append("\nclass: ").Append(m.ContainingType.Name);
 				}
 			}
-			return new StackPanel {
-				Children = {
-					new TextBlock { HorizontalAlignment = HorizontalAlignment.Stretch, Background = Brushes.Gray, Foreground = Brushes.White }.Append(symbol.Name, true),
-					t
-				}
-			};
+			return tooltip;
 		}
 
 		/// <summary>

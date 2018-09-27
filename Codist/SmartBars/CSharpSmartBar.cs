@@ -614,7 +614,7 @@ namespace Codist.SmartBars
 					Click += GotoLocation;
 				}
 				if (Symbol != null) {
-					ToolTip = "";
+					ToolTip = String.Empty;
 					ToolTipOpening += ShowToolTip;
 				}
 			}
@@ -628,30 +628,37 @@ namespace Codist.SmartBars
 				}
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
-				var tip = new TextBlock()
+				var tip = new Controls.SymbolToolTip();
+				tip.Title
 					.Append(Symbol.GetAccessibility() + Symbol.GetAbstractionModifier() + Symbol.GetSymbolKindName() + " ")
 					.Append(Symbol.GetSignatureString(), true);
 				ITypeSymbol t = Symbol.ContainingType;
+				var content = tip.Content;
 				if (t != null) {
-					tip.Append("\n" + t.GetSymbolKindName() + ": ")
+					content.Append(t.GetSymbolKindName() + ": ")
 						.Append(t.ToDisplayString(__MemberNameFormat));
 				}
 				t = Symbol.GetReturnType();
 				if (t != null) {
-					tip.Append("\nreturn value: " + t.ToDisplayString(__MemberNameFormat));
+					if (content.Inlines.FirstInline != null) {
+						content.AppendLine();
+					}
+					content.Append("return value: " + t.ToDisplayString(__MemberNameFormat));
 				}
-				tip.Append("\nnamespace: " + Symbol.ContainingNamespace?.ToString())
+				if (content.Inlines.FirstInline != null) {
+					content.AppendLine();
+				}
+				content.Append("namespace: " + Symbol.ContainingNamespace?.ToString())
 					.Append("\nassembly: " + Symbol.GetAssemblyModuleName());
 				var f = Symbol as IFieldSymbol;
 				if (f != null && f.IsConst) {
-					tip.Append("\nconst: " + f.ConstantValue.ToString());
+					content.Append("\nconst: " + f.ConstantValue.ToString());
 				}
 				var doc = Symbol.GetXmlDocSummaryForSymbol();
 				if (doc != null) {
-					new XmlDocRenderer((SmartBar as CSharpSmartBar)._SemanticModel.Compilation, SymbolFormatter.Empty, Symbol).Render(doc, tip.Append("\n\n").Inlines);
+					new XmlDocRenderer((SmartBar as CSharpSmartBar)._SemanticModel.Compilation, SymbolFormatter.Empty, Symbol).Render(doc, content.Append("\n\n").Inlines);
 					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 				}
-				tip.TextWrapping = TextWrapping.Wrap;
 				ToolTip = tip;
 				ToolTipService.SetShowDuration(this, 15000);
 				ToolTipOpening -= ShowToolTip;

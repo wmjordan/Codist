@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace Codist.QuickInfo
+namespace Codist.Controls
 {
 	sealed class ToolTipText : TextBlock
 	{

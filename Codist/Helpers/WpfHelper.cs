@@ -8,6 +8,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using AppHelpers;
+using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Classification;
@@ -381,17 +382,12 @@ namespace Codist
 			}
 
 			void ShowSymbolToolTip(object sender, ToolTipEventArgs e) {
-				var title = new TextBlock {
-					HorizontalAlignment = HorizontalAlignment.Stretch,
-					Background = WpfBrushes.Gray,
-					Foreground = WpfBrushes.White,
-					TextWrapping = TextWrapping.Wrap
-				}
+				var tooltip = new SymbolToolTip();
+				tooltip.Title
 					.Append(_Symbol.GetAccessibility() + _Symbol.GetAbstractionModifier() + _Symbol.GetSymbolKindName() + " ")
 					.Append(_Symbol.GetSignatureString(), true);
 
-
-				var content = new TextBlock { TextWrapping = TextWrapping.Wrap }
+				var content = tooltip.Content
 					.Append("namespace: " + _Symbol.ContainingNamespace?.ToString())
 					.Append("\nassembly: " + _Symbol.GetAssemblyModuleName());
 				ITypeSymbol t = _Symbol.ContainingType;
@@ -407,13 +403,7 @@ namespace Codist
 				if (f != null && f.IsConst) {
 					content.Append("\nconst: " + f.ConstantValue.ToString());
 				}
-				var panel = new StackPanel {
-					Children = {
-						title,
-						content
-					}
-				};
-				ToolTip = panel;
+				ToolTip = tooltip;
 				ToolTipOpening -= ShowSymbolToolTip;
 			}
 
