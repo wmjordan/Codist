@@ -253,6 +253,9 @@ namespace Codist.QuickInfo
 		}
 
 		static void RenderXmlRemarksDoc(ISymbol symbol, XElement doc, TextBlock desc, XmlDocRenderer docRenderer) {
+			if (symbol.Kind == SymbolKind.Parameter || symbol.Kind == SymbolKind.TypeParameter) {
+				return;
+			}
 			var remarks = doc.GetRemarks();
 			if (remarks != null && remarks.FirstNode != null) {
 				desc.AppendLine().AppendLine().Append("Remarks", true).Append(": ").AppendLine();
