@@ -378,7 +378,7 @@ namespace Codist
 		CtrlQuickInfo = 1 << 29,
 		HideOriginalQuickInfo = 1 << 30,
 		QuickInfoOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | ClickAndGo,
-		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | ClickAndGo,
+		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | ClickAndGo | OverrideDefaultDocumentation,
 	}
 
 	[Flags]

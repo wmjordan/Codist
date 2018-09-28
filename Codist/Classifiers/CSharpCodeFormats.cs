@@ -257,6 +257,7 @@ namespace Codist.Classifiers
 	{
 		public DeclarationFormat() {
 			DisplayName = Constants.NameOfMe + ": declaration";
+			IsBold = true;
 		}
 	}
 
@@ -281,6 +282,7 @@ namespace Codist.Classifiers
 	{
 		public NestedDeclarationFormat() {
 			DisplayName = Constants.NameOfMe + ": nested declaration";
+			IsBold = true;
 		}
 	}
 
@@ -293,7 +295,6 @@ namespace Codist.Classifiers
 	{
 		public StaticMemberFormat() {
 			DisplayName = Constants.NameOfMe + ": static member";
-			TextDecorations = new TextDecorationCollection(System.Windows.TextDecorations.Underline);
 		}
 	}
 
