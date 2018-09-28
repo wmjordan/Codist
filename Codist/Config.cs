@@ -29,8 +29,8 @@ namespace Codist
 		[DefaultValue(Features.All)]
 		public Features Features { get; set; } = Features.All;
 
-		[DefaultValue(SpecialHighlightOptions.None)]
-		public SpecialHighlightOptions SpecialHighlightOptions { get; set; }
+		[DefaultValue(SpecialHighlightOptions.Default)]
+		public SpecialHighlightOptions SpecialHighlightOptions { get; set; } = SpecialHighlightOptions.Default;
 
 		[DefaultValue(MarkerOptions.Default)]
 		public MarkerOptions MarkerOptions { get; set; } = MarkerOptions.Default;
@@ -207,13 +207,7 @@ namespace Codist
 
 		static Config GetDefaultConfig() {
 			_LastLoaded = DateTime.Now;
-			var c = new Config {
-				Features = Features.All,
-				MarkerOptions = MarkerOptions.Default,
-				QuickInfoOptions = QuickInfoOptions.Default,
-				SmartBarOptions = SmartBarOptions.Default
-			};
-
+			var c = new Config();
 			InitDefaultLabels(c.Labels);
 			c.GeneralStyles.AddRange(GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>());
 			c.CommentStyles.AddRange(GetDefaultCodeStyles<CommentStyle, CommentStyleTypes>());
@@ -403,6 +397,7 @@ namespace Codist
 		LoopBrace = 1 << 5,
 		ResourceBrace = 1 << 6,
 		SpecialPunctuation = 1 << 7,
+		Default = SpecialComment,
 		AllBraces = DeclarationBrace | ParameterBrace | BranchBrace | LoopBrace | ResourceBrace | SpecialPunctuation
 	}
 

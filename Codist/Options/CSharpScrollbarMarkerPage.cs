@@ -44,10 +44,10 @@ namespace Codist.Options
 				_DirectivesBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective);
 				_SpecialCommentsBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment);
 				_SymbolReferenceBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.SymbolReference);
-				_MemberDeclarationBox.Checked = _LongMethodBox.Enabled = config.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration);
+				_MemberDeclarationBox.Checked = _LongMethodBox.Enabled = _TypeDeclarationBox.Enabled = _MethodDeclarationBox.Enabled = config.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration);
 				_LongMethodBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration);
 				_MethodDeclarationBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.MethodDeclaration);
-				_TypeDeclarationBox.Checked = _LongMethodBox.Enabled = _MethodDeclarationBox.Enabled = config.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration);
+				_TypeDeclarationBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration);
 			});
 		}
 	}

@@ -14,7 +14,6 @@ namespace Codist.Classifiers
 	{
 		public ControlFlowKeywordFormat() {
 			DisplayName = Constants.CodeControlFlowKeyword;
-			ForegroundColor = Constants.ControlFlowColor;
 			IsBold = true;
 		}
 	}
