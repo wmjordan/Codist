@@ -28,9 +28,13 @@
  
   ![Syntax highlight](doc/highlight1.png) 
 
-  **NOTE**: To quickly get started with advanced syntax highlight, navigate to the *Syntax Highlight* section, click the *Light theme* or *Dark theme* button in the *options* dialog and see them in effect. Don't forget to click the *OK* button to confirm the change.
+### Default syntax highlight themes
+
+  To quickly get started with advanced syntax highlight, navigate to the *Syntax Highlight* section, click the *Light theme* or *Dark theme* button in the *options* dialog and see them in effect. Don't forget to click the *OK* button to confirm the change.
 
   ![Load Theme](doc/load-theme.png)
+
+### Customization of syntax highlight styles
 
   To customize and tweak the syntax highlight styles, click the *common syntax* tab in the *syntax highlight* section, or click the sub sections inside the *Syntax Highlight* section to change individual styles, accordingly.
 
@@ -152,7 +156,7 @@ The scrollbar can mark...
 
 ## Smart Bar
 
-The *Smart Bar* is a context-aware tool bar appeared automatically when you select some text.
+The *Smart Bar* is a context-aware tool bar appeared automatically when you select some text, or double tap the Shift key on your keyboard.
 
 It brings commonly used operations for the selection.
 
@@ -165,6 +169,30 @@ Buttons on the *Smart Bar* changes from contexts.
 From version 3.7 on, when you select a symbol and click the *Analyze references...* button, a menu will pop up showing possible symbol reference analysis commands.
 
   ![Smart Bar Symbol Analysis](doc/smart-bar-symbol-analysis.png)
+
+From version 3.9 on, you can change the behavior of the Smart Bar.
+
+  ![Smart Bar Options](doc/smart-bar-options.PNG)
+
+### Symbol markers
+
+  Symbol marker is a new feature introduced in version 3.8.
+
+  Typically, you can double click a symbol in the C# source code, select the *Mark Symbol* command on the *Smart Bar* and choose the desired highlight marker on the drop-down menu.
+
+  ![Symbol Marker](doc/symbolmarker.png)
+
+  After applying the command, all occurrences of the marked symbol will be marked with a different style.
+
+  ![Symbol Marker Effect](doc/symbolmarker-effect.png)
+
+  To remove symbol marker, click the *Remove symbol mark* command in the drop-down menu of the *Mark symbol* command.
+
+  Symbol markers will be cleared when the solution is unloaded.
+
+  The style of symbol markers can be customized in options page of the *Syntax highlight* feature.
+
+  ![Symbol marker Options](doc/symbolmarker-options.png)
 
 # Feature control
   Open the *Codist* section in the *Tools->Options* dialog. In the *General* section you can toggle features of *Codist*.

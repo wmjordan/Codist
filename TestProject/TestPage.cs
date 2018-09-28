@@ -109,6 +109,7 @@ text".Log(); // multiline string (string verbatim)
 		/// <summary>A generic delegate with a parameter.</summary>
 		/// <typeparam name="TObject">The generic type parameter of the delegate.</typeparam>
 		/// <param name="obj">The method parameter of type <typeparamref name="TObject"/>.</param>
+		/// <remarks>Don't take this too serious.</remarks>
 		/// <returns>Returns an instance of the generic type parameter.</returns>
 		delegate TObject Clone<TObject>(TObject obj);
 		event EventHandler<EventArgs> MyEvent;
