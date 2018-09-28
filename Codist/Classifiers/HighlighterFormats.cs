@@ -14,7 +14,7 @@ namespace Codist.Classifiers
 	sealed class Highlight1Format : ClassificationFormatDefinition
 	{
 		public Highlight1Format() {
-			BackgroundBrush = Brushes.Red.Alpha(0.5);
+			BackgroundBrush = Brushes.Salmon.Alpha(0.5);
 		}
 	}
 
@@ -50,7 +50,7 @@ namespace Codist.Classifiers
 	sealed class Highlight4Format : ClassificationFormatDefinition
 	{
 		public Highlight4Format() {
-			BackgroundBrush = Brushes.Green.Alpha(0.5);
+			BackgroundBrush = Brushes.LawnGreen.Alpha(0.5);
 		}
 	}
 
@@ -74,7 +74,7 @@ namespace Codist.Classifiers
 	sealed class Highlight6Format : ClassificationFormatDefinition
 	{
 		public Highlight6Format() {
-			BackgroundBrush = Brushes.Blue.Alpha(0.5);
+			BackgroundBrush = Brushes.SkyBlue.Alpha(0.5);
 		}
 	}
 
@@ -98,7 +98,7 @@ namespace Codist.Classifiers
 	sealed class Highlight8Format : ClassificationFormatDefinition
 	{
 		public Highlight8Format() {
-			BackgroundBrush = Brushes.Gray.Alpha(0.5);
+			BackgroundBrush = Brushes.DarkGray.Alpha(0.5);
 		}
 	}
 
