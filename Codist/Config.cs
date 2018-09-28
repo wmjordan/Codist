@@ -27,7 +27,7 @@ namespace Codist
 		public static Config Instance = InitConfig();
 
 		[DefaultValue(Features.All)]
-		public Features Features { get; set; }
+		public Features Features { get; set; } = Features.All;
 
 		[DefaultValue(SpecialHighlightOptions.None)]
 		public SpecialHighlightOptions SpecialHighlightOptions { get; set; }
@@ -207,7 +207,13 @@ namespace Codist
 
 		static Config GetDefaultConfig() {
 			_LastLoaded = DateTime.Now;
-			var c = new Config();
+			var c = new Config {
+				Features = Features.All,
+				MarkerOptions = MarkerOptions.Default,
+				QuickInfoOptions = QuickInfoOptions.Default,
+				SmartBarOptions = SmartBarOptions.Default
+			};
+
 			InitDefaultLabels(c.Labels);
 			c.GeneralStyles.AddRange(GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>());
 			c.CommentStyles.AddRange(GetDefaultCodeStyles<CommentStyle, CommentStyleTypes>());
