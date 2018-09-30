@@ -118,13 +118,18 @@ namespace Codist.QuickInfo
 			if (node.IsKind(SyntaxKind.Argument)) {
 				node = (node as ArgumentSyntax).Expression;
 			}
-			var symbolInfo = semanticModel.GetSymbolInfo(node);
-			if (symbolInfo.CandidateReason != CandidateReason.None) {
-				ShowCandidateInfo(qiContent, symbolInfo, node);
-				symbol = null;
-				goto RETURN;
+			if (node.IsKind(SyntaxKind.BaseExpression)) {
+				symbol = semanticModel.GetTypeInfo(node).ConvertedType;
 			}
-			symbol = symbolInfo.Symbol ?? semanticModel.GetSymbolExt(node);
+			else {
+				var symbolInfo = semanticModel.GetSymbolInfo(node);
+				if (symbolInfo.CandidateReason != CandidateReason.None) {
+					ShowCandidateInfo(qiContent, symbolInfo, node);
+					symbol = null;
+					goto RETURN;
+				}
+				symbol = symbolInfo.Symbol ?? semanticModel.GetSymbolExt(node);
+			}
 			if (symbol == null) {
 				ShowMiscInfo(qiContent, currentSnapshot, node);
 				goto RETURN;
