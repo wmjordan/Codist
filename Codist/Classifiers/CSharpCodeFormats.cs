@@ -391,4 +391,28 @@ namespace Codist.Classifiers
 			DisplayName = Constants.NameOfMe + ": xml doc";
 		}
 	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpMetadataSymbol)]
+	[Name(Constants.CSharpMetadataSymbol)]
+	[UserVisible(false)]
+	[Order(After = Constants.CodeFormalLanguage)]
+	sealed class MetadataSymbol : ClassificationFormatDefinition
+	{
+		public MetadataSymbol() {
+			DisplayName = Constants.NameOfMe + ": metadata symbol";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpUserSymbol)]
+	[Name(Constants.CSharpUserSymbol)]
+	[UserVisible(false)]
+	[Order(After = Constants.CodeFormalLanguage)]
+	sealed class UserSymbol : ClassificationFormatDefinition
+	{
+		public UserSymbol() {
+			DisplayName = Constants.NameOfMe + ": user symbol";
+		}
+	}
 }

@@ -39,6 +39,8 @@ namespace Codist.Classifiers
 			TypeParameter = registry.GetClassificationType(Constants.CSharpTypeParameterName);
 			VirtualMember = registry.GetClassificationType(Constants.CSharpVirtualMemberName);
 			XmlDoc = registry.GetClassificationType(Constants.CSharpXmlDoc);
+			UserSymbol = registry.GetClassificationType(Constants.CSharpUserSymbol);
+			MetadataSymbol = registry.GetClassificationType(Constants.CSharpMetadataSymbol);
 		}
 
 		public IClassificationType AbstractMember { get; }
@@ -81,6 +83,8 @@ namespace Codist.Classifiers
 
 		public IClassificationType Method { get; }
 
+		public IClassificationType MetadataSymbol { get; }
+
 		public IClassificationType Namespace { get; }
 
 		public IClassificationType NestedDeclaration { get; }
@@ -102,6 +106,8 @@ namespace Codist.Classifiers
 		public IClassificationType StructName { get; }
 
 		public IClassificationType TypeParameter { get; }
+
+		public IClassificationType UserSymbol { get; }
 
 		public IClassificationType VirtualMember { get; }
 

@@ -31,6 +31,7 @@ namespace Codist
 			public const string Member = nameof(Member);
 			public const string Xml = "XML";
 			public const string Highlight = nameof(Highlight);
+			public const string Location = nameof(Location);
 		}
 
 		public static class EditorProperties
@@ -115,6 +116,8 @@ namespace Codist
 		public const string CSharpDeclarationBrace = "C#: Declaration brace";
 		public const string CSharpMethodBody = "C#: Method body";
 		public const string CSharpXmlDoc = "C#: XML Doc";
+		public const string CSharpUserSymbol = "C#: User symbol";
+		public const string CSharpMetadataSymbol = "C#: Metadata symbol";
 
 		public const string CppFunction = "cppFunction";
 		public const string CppClassTemplate = "cppClassTemplate";
@@ -281,15 +284,12 @@ namespace Codist
 		Keyword,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppNamespace)]
 		NamespaceName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppType)]
 		ClassName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeStructName)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppValueType)]
 		StructName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeInterfaceName)]
@@ -299,6 +299,7 @@ namespace Codist
 		EnumName,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeIdentifier)]
+		[Description("A base style shared by type, property, method, field, event, etc.")]
 		Identifier,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeNumber)]
@@ -308,11 +309,10 @@ namespace Codist
 		String,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeStringVerbatim)]
+		[Description("Multiline string")]
 		StringVerbatim,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeOperator)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppMemberOperator)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppOperator)]
 		Operator,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodePunctuation)]
@@ -322,7 +322,6 @@ namespace Codist
 		Url,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLabel)]
-		[ClassificationType(ClassificationTypeNames = Constants.CppLabel)]
 		Label,
 		[Category(Constants.SyntaxCategory.Preprocessor)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodePreprocessorText)]
@@ -336,8 +335,6 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.CompilerMarked)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeExcluded)]
 		ExcludedCode,
-		//[ClassificationType(ClassificationTypeNames = Constants.CodeBraceMatching)]
-		//BraceMatching,
 		[Category(Constants.SyntaxCategory.CompilerMarked)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeUnnecessary)]
 		UnnecessaryCode,
@@ -401,27 +398,35 @@ namespace Codist
 		None,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
+		[Description("Keyword: break, continue, yield, return")]
 		BreakAndReturnKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
+		[Description("Keyword: abstract, override, sealed, virtual")]
 		AbstractionKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeBranchingKeyword)]
+		[Description("Keyword: switch, case, default, if, else")]
 		BranchingKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeLoopKeyword)]
+		[Description("Keyword: for, foreach, do, while")]
 		LoopKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpResourceKeyword)]
+		[Description("Keyword: using, lock, try, catch, finally, fixed, unsafe")]
 		ResourceAndExceptionKeyword,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationName)]
+		[Description("Type declarations")]
 		Declaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpNestedDeclarationName)]
+		[Description("Type memebers: property, method, event, delegate, nested type, etc. (Excluding fields)")]
 		NestedDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationBrace)]
+		[Description("Braces {} for declarations")]
 		DeclarationBrace,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpStaticMemberName)]
@@ -509,6 +514,13 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlDocCData)]
 		XmlDocCData,
+
+		[Category(Constants.SyntaxCategory.Location)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpUserSymbol)]
+		MyTypeAndMember,
+		[Category(Constants.SyntaxCategory.Location)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpMetadataSymbol)]
+		ReferencedTypeAndMember,
 	}
 
 	enum XmlStyleTypes

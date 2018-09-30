@@ -18,9 +18,12 @@ namespace Codist
 	{
 		static /*readonly*/ Guid guidIWpfTextViewHost = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476");
 		internal static readonly IClassificationFormatMap DefaultClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("text");
+		static bool _IdentifySymbolSource;
 		internal static readonly Dictionary<string, StyleBase> SyntaxStyleCache = InitSyntaxStyleCache();
 		internal static readonly Dictionary<string, TextFormattingRunProperties> BackupFormattings = new Dictionary<string, TextFormattingRunProperties>(30);
 		internal static TextFormattingRunProperties DefaultFormatting;
+
+		internal static bool IdentifySymbolSource => _IdentifySymbolSource;
 
 		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
 			while (oldVersion != currentVersion) {
@@ -176,16 +179,16 @@ namespace Codist
 			var r = new Dictionary<string, StyleBase>(100);
 			LoadSyntaxStyleCache(r);
 			Config.Loaded += (s, args) => ResetStyleCache();
-			DefaultClassificationFormatMap.ClassificationFormatMappingChanged += ResetStyleCacheIfThemeChanged;
+			DefaultClassificationFormatMap.ClassificationFormatMappingChanged += UpdateFormatCache;
 			return r;
 		}
 
-		internal static void ResetStyleCache() {
+		static void ResetStyleCache() {
 			SyntaxStyleCache.Clear();
 			LoadSyntaxStyleCache(SyntaxStyleCache);
 		}
 
-		static void ResetStyleCacheIfThemeChanged(object sender, EventArgs args) {
+		static void UpdateFormatCache(object sender, EventArgs args) {
 			var defaultFormat = DefaultClassificationFormatMap.DefaultTextProperties;
 			if (DefaultFormatting == null) {
 				DefaultFormatting = defaultFormat;
@@ -196,16 +199,24 @@ namespace Codist
 				BackupFormattings.Clear();
 				DefaultFormatting = defaultFormat;
 			}
+			UpdateIdentifySymbolSource(SyntaxStyleCache);
 		}
 
-		static void LoadSyntaxStyleCache(Dictionary<string, StyleBase> r) {
+		static void LoadSyntaxStyleCache(Dictionary<string, StyleBase> cache) {
 			var service = ServicesHelper.Instance.ClassificationTypeRegistry;
-			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(r, service, Config.Instance.GeneralStyles);
-			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(r, service, Config.Instance.CommentStyles);
-			InitStyleClassificationCache<CppStyleTypes, CppStyle>(r, service, Config.Instance.CppStyles);
-			InitStyleClassificationCache<CSharpStyleTypes, CSharpStyle>(r, service, Config.Instance.CodeStyles);
-			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(r, service, Config.Instance.XmlCodeStyles);
-			InitStyleClassificationCache<SymbolMarkerStyleTypes, SymbolMarkerStyle>(r, service, Config.Instance.SymbolMarkerStyles);
+			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(cache, service, Config.Instance.GeneralStyles);
+			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(cache, service, Config.Instance.CommentStyles);
+			InitStyleClassificationCache<CppStyleTypes, CppStyle>(cache, service, Config.Instance.CppStyles);
+			InitStyleClassificationCache<CSharpStyleTypes, CSharpStyle>(cache, service, Config.Instance.CodeStyles);
+			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(cache, service, Config.Instance.XmlCodeStyles);
+			InitStyleClassificationCache<SymbolMarkerStyleTypes, SymbolMarkerStyle>(cache, service, Config.Instance.SymbolMarkerStyles);
+			UpdateIdentifySymbolSource(cache);
+		}
+
+		static void UpdateIdentifySymbolSource(Dictionary<string, StyleBase> cache) {
+			StyleBase style;
+			_IdentifySymbolSource = cache.TryGetValue(Constants.CSharpMetadataSymbol, out style) && style.IsSet
+					|| cache.TryGetValue(Constants.CSharpUserSymbol, out style) && style.IsSet;
 		}
 
 		static void InitStyleClassificationCache<TStyleEnum, TCodeStyle>(Dictionary<string, StyleBase> styleCache, IClassificationTypeRegistryService service, List<TCodeStyle> styles)

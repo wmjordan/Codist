@@ -167,6 +167,16 @@ namespace Codist.Classifiers
 		[BaseDefinition(Constants.CodePunctuation)]
 		[Name(Constants.CodeSpecialPuctuation)]
 		static ClassificationTypeDefinition SpecialPunctuation;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeIdentifier)]
+		[Name(Constants.CSharpUserSymbol)]
+		static ClassificationTypeDefinition UserSymbol;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeIdentifier)]
+		[Name(Constants.CSharpMetadataSymbol)]
+		static ClassificationTypeDefinition MetadataSymbol;
 #pragma warning restore 169
 	}
 }

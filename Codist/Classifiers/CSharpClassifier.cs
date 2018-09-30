@@ -506,6 +506,13 @@ namespace Codist.Classifiers
 				}
 			}
 
+			if (TextEditorHelper.IdentifySymbolSource && symbol.IsMemberOrType() && symbol.ContainingAssembly != null) {
+				switch (AssemblyMarkManager.GetAssemblyMark(symbol.ContainingAssembly)) {
+					case AssemblyMarkManager.IsInMetadata: yield return _Classifications.MetadataSymbol; break;
+					case AssemblyMarkManager.IsInSource: yield return _Classifications.UserSymbol; break;
+				}
+			}
+
 			if (symbol.IsStatic) {
 				if (symbol.Kind != SymbolKind.Namespace) {
 					yield return _Classifications.StaticMember;
