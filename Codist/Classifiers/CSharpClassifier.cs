@@ -169,11 +169,6 @@ namespace Codist.Classifiers
 							}
 						}
 						continue;
-					case Constants.XmlDocCData:
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.XmlDocCode)) {
-							ct = HighlightXmlDocCData(span, item, workspace, result, ct);
-						}
-						continue;
 					case Constants.CodePunctuation:
 						if (item.TextSpan.Length == 1) {
 							ClassifyPunctuation(item.TextSpan, snapshot, result, semanticModel, unitCompilation);
@@ -345,10 +340,7 @@ namespace Codist.Classifiers
 				case SyntaxKind.ParenthesizedLambdaExpression:
 					return _Classifications.Method;
 				case SyntaxKind.InvocationExpression:
-					if (((node as InvocationExpressionSyntax).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") {
-						return null;
-					}
-					return _Classifications.Method;
+					return (((node as InvocationExpressionSyntax).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") ? null : _Classifications.Method;
 				case SyntaxKind.ConstructorDeclaration:
 				case SyntaxKind.AnonymousObjectCreationExpression:
 				case SyntaxKind.ObjectInitializerExpression:
@@ -388,46 +380,6 @@ namespace Codist.Classifiers
 			return null;
 		}
 
-		string HighlightXmlDocCData(SnapshotSpan span, ClassifiedSpan item, Workspace workspace, List<ClassificationSpan> result, string ct) {
-			var snapshot = span.Snapshot;
-			var start = item.TextSpan.Start;
-			SyntaxNode root;
-			var sourceText = snapshot.AsText();
-			var docId = DocumentId.CreateNewId(workspace.GetDocumentIdInCurrentContext(sourceText.Container).ProjectId);
-			var document = workspace.CurrentSolution
-				.AddDocument(docId, "xmlDocCData.cs", snapshot.GetText(item.TextSpan.Start, item.TextSpan.Length))
-				.WithDocumentSourceCodeKind(docId, SourceCodeKind.Script)
-				.GetDocument(docId);
-			var model = document.GetSemanticModelAsync().Result;
-			var compilation = model.SyntaxTree.GetCompilationUnitRoot();
-			if (document
-				.GetSyntaxTreeAsync().Result
-				.TryGetRoot(out root)) {
-				foreach (var spanItem in Classifier.GetClassifiedSpans(model, new TextSpan(0, item.TextSpan.Length), workspace)) {
-					ct = spanItem.ClassificationType;
-					if (ct == Constants.CodeIdentifier
-						|| ct == Constants.CodeClassName
-						|| ct == Constants.CodeStructName
-						|| ct == Constants.CodeInterfaceName
-						|| ct == Constants.CodeEnumName
-						|| ct == Constants.CodeTypeParameterName
-						|| ct == Constants.CodeDelegateName) {
-
-						var node = compilation.FindNode(spanItem.TextSpan, true);
-
-						foreach (var type in GetClassificationType(node, model)) {
-							result.Add(CreateClassificationSpan(snapshot, new TextSpan(start + spanItem.TextSpan.Start, spanItem.TextSpan.Length), type));
-						}
-					}
-					else {
-						result.Add(CreateClassificationSpan(snapshot, new TextSpan(start + spanItem.TextSpan.Start, spanItem.TextSpan.Length), ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(ct)));
-					}
-				}
-			}
-
-			return ct;
-		}
-
 		static IEnumerable<IClassificationType> GetClassificationType(SyntaxNode node, SemanticModel semanticModel) {
 			node = node.Kind() == SyntaxKind.Argument ? (node as ArgumentSyntax).Expression : node;
 			//System.Diagnostics.Debug.WriteLine(node.GetType().Name + node.Span.ToString());
@@ -437,15 +389,15 @@ namespace Codist.Classifiers
 				if (symbol != null) {
 					switch (symbol.Kind) {
 						case SymbolKind.NamedType:
-						case SymbolKind.Event:
 							yield return symbol.ContainingType != null ? _Classifications.NestedDeclaration : _Classifications.Declaration;
 							break;
+						case SymbolKind.Event:
 						case SymbolKind.Method:
-							yield return _Classifications.Declaration;
+							yield return _Classifications.NestedDeclaration;
 							break;
 						case SymbolKind.Property:
 							if (symbol.ContainingType.IsAnonymousType == false) {
-								yield return _Classifications.Declaration;
+								yield return _Classifications.NestedDeclaration;
 							}
 							break;
 					}
@@ -507,7 +459,7 @@ namespace Codist.Classifiers
 					break;
 
 				case SymbolKind.Local:
-					var localSymbol = (symbol as ILocalSymbol);
+					var localSymbol = symbol as ILocalSymbol;
 					yield return localSymbol.IsConst ? _Classifications.ConstField : _Classifications.LocalVariable;
 					break;
 
@@ -533,7 +485,9 @@ namespace Codist.Classifiers
 							yield return _Classifications.ConstructorMethod;
 							break;
 						default:
-							yield return methodSymbol.IsExtensionMethod ? _Classifications.ExtensionMethod : methodSymbol.IsExtern ? _Classifications.ExternMethod : _Classifications.Method;
+							yield return methodSymbol.IsExtensionMethod ? _Classifications.ExtensionMethod
+								: methodSymbol.IsExtern ? _Classifications.ExternMethod
+								: _Classifications.Method;
 							break;
 					}
 					break;
@@ -545,9 +499,11 @@ namespace Codist.Classifiers
 					yield break;
 			}
 
-			var markerStyle = SymbolMarkManager.GetSymbolMarkerStyle(symbol);
-			if (markerStyle != null) {
-				yield return markerStyle;
+			if (SymbolMarkManager.HasBookmark) {
+				var markerStyle = SymbolMarkManager.GetSymbolMarkerStyle(symbol);
+				if (markerStyle != null) {
+					yield return markerStyle;
+				}
 			}
 
 			if (symbol.IsStatic) {

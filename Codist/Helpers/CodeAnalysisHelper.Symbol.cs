@@ -50,13 +50,13 @@ namespace Codist
 					ITypeSymbol mt;
 					if (member.Kind == SymbolKind.Field) {
 						if (member.CanBeReferencedByName
-							&& (mt = member.GetReturnType()) != null && mt.CanConvertTo(type)
+							&& (mt = member.GetReturnType()) != null && (mt.CanConvertTo(type) || (mt as INamedTypeSymbol).ContainsTypeArgument(type))
 							&& type.CanAccess(member, assembly)) {
 							members.Add(member);
 						}
 					}
 					else if (member.CanBeReferencedByName
-						&& ((mt = member.GetReturnType()) != null && mt.CanConvertTo(type)
+						&& ((mt = member.GetReturnType()) != null && (mt.CanConvertTo(type) || (mt as INamedTypeSymbol).ContainsTypeArgument(type))
 							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None))
 						&& type.CanAccess(member, assembly)) {
 						members.Add(member);
@@ -346,20 +346,10 @@ namespace Codist
 		public static string GetSymbolKindName(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event: return "event";
-				case SymbolKind.Field:
-					return "field";
-
+				case SymbolKind.Field: return (symbol as IFieldSymbol).IsConst ? "const" : "field";
 				case SymbolKind.Label: return "label";
-				case SymbolKind.Local:
-					return (symbol as ILocalSymbol).IsConst
-						? "local const"
-						: "local";
-
-				case SymbolKind.Method:
-					return (symbol as IMethodSymbol).IsExtensionMethod
-						? "extension"
-						: "method";
-
+				case SymbolKind.Local: return (symbol as ILocalSymbol).IsConst ? "local const" : "local";
+				case SymbolKind.Method: return (symbol as IMethodSymbol).IsExtensionMethod ? "extension" : "method";
 				case SymbolKind.NamedType:
 					switch ((symbol as INamedTypeSymbol).TypeKind) {
 						case TypeKind.Array: return "array";
@@ -377,8 +367,7 @@ namespace Codist
 				case SymbolKind.Parameter: return "parameter";
 				case SymbolKind.Property: return "property";
 				case SymbolKind.TypeParameter: return "type parameter";
-				default:
-					return symbol.Kind.ToString();
+				default: return symbol.Kind.ToString();
 			}
 		}
 
@@ -492,6 +481,19 @@ namespace Codist
 			}
 			while ((symbol = symbol.BaseType) != null) {
 				if (symbol.CanConvertTo(target)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public static bool ContainsTypeArgument(this INamedTypeSymbol generic, ITypeSymbol target) {
+			if (generic == null || generic.IsGenericType == false || generic.IsUnboundGenericType) {
+				return false;
+			}
+			var types = generic.TypeArguments;
+			foreach (var item in types) {
+				if (item.CanConvertTo(target)) {
 					return true;
 				}
 			}

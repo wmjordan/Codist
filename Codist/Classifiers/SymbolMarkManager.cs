@@ -10,7 +10,7 @@ namespace Codist.Classifiers
 		static readonly ConcurrentDictionary<ISymbol, IClassificationType> _Bookmarks = new ConcurrentDictionary<ISymbol, IClassificationType>(new SymbolComparer());
 
 		internal static IEnumerable<ISymbol> MarkedSymbols => _Bookmarks.Keys;
-		internal static bool HasMark => _Bookmarks.IsEmpty == false;
+		internal static bool HasBookmark => _Bookmarks.IsEmpty == false;
 
 		internal static bool CanBookmark(ISymbol symbol) {
 			symbol = symbol.GetAliasTarget();
@@ -27,10 +27,7 @@ namespace Codist.Classifiers
 			return false;
 		}
 		internal static IClassificationType GetSymbolMarkerStyle(ISymbol symbol) {
-			if (_Bookmarks.IsEmpty == false && _Bookmarks.TryGetValue(symbol, out var result)) {
-				return result;
-			}
-			return null;
+			return _Bookmarks.TryGetValue(symbol, out var result) ? result : null;
 		}
 		internal static void Clear() {
 			_Bookmarks.Clear();

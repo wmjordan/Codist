@@ -23,6 +23,9 @@ namespace Codist.Controls
 			};
 			Children.Add(Title);
 			Children.Add(Content);
+			if (Config.Instance.QuickInfoMaxWidth > 0) {
+				MaxWidth = Config.Instance.QuickInfoMaxWidth;
+			}
 		}
 
 		protected override void OnVisualParentChanged(DependencyObject oldParent) {

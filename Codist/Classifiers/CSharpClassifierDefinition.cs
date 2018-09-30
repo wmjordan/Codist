@@ -24,12 +24,13 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition AliasNamespace;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CSharpAttributeNotation)]
+		[BaseDefinition(Constants.CodeClassName)]
 		[Name(Constants.CSharpAttributeName)]
 		static ClassificationTypeDefinition AttributeName;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpAttributeNotation)]
 		static ClassificationTypeDefinition AttributeNotation;
 

@@ -9,6 +9,7 @@ using System.Xml.Linq;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -156,6 +157,9 @@ namespace Codist.QuickInfo
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				if (ctor != null && ctor.Type == node) {
 					symbol = semanticModel.GetSymbolOrFirstCandidate(ctor);
+				}
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Diagnostics)) {
+					qiWrapper.SetDiagnostics(semanticModel.GetDiagnostics(token.Span));
 				}
 				qiWrapper.ApplyClickAndGo(symbol);
 			}
@@ -390,37 +394,38 @@ namespace Codist.QuickInfo
 				: null;
 			while ((statement = statement.Parent) != null) {
 				var name = statement.GetDeclarationSignature();
-				if (name != null) {
-					var symbol = _SemanticModel.GetSymbolInfo(statement).Symbol ?? _SemanticModel.GetDeclaredSymbol(statement);
-					var tb = new ToolTipText();
-					if (retSymbol != null) {
-						var m = retSymbol as IMethodSymbol;
-						if (m != null && m.MethodKind == MethodKind.AnonymousFunction) {
-							tb.Append("Return anonymous function for ");
-						}
-						else {
-							tb.Append("Return ")
-								.AddSymbol(retSymbol.GetReturnType(), null, _SymbolFormatter)
-								.Append(" for ");
-						}
-					}
-					//else if (retStatement.Expression.Kind() == SyntaxKind.NullLiteralExpression) {
-					//	tb.AddText("Return ").AddText("null", _SymbolFormatter.Keyword).AddText(" for ");
-					//}
-					else {
-						tb.Append("Return for ");
-					}
-					if (symbol != null) {
-						if (statement is LambdaExpressionSyntax) {
-							tb.Append("lambda expression");
-						}
-						tb.AddSymbol(symbol, name, _SymbolFormatter);
-					}
-					else {
-						tb.Append(name);
-					}
-					return tb;
+				if (name == null) {
+					continue;
 				}
+				var symbol = _SemanticModel.GetSymbolInfo(statement).Symbol ?? _SemanticModel.GetDeclaredSymbol(statement);
+				var t = new ToolTipText();
+				if (retSymbol != null) {
+					var m = retSymbol as IMethodSymbol;
+					if (m != null && m.MethodKind == MethodKind.AnonymousFunction) {
+						t.Append("Return anonymous function for ");
+					}
+					else {
+						t.Append("Return ")
+							.AddSymbol(retSymbol.GetReturnType(), null, _SymbolFormatter)
+							.Append(" for ");
+					}
+				}
+				//else if (retStatement.Expression.Kind() == SyntaxKind.NullLiteralExpression) {
+				//	tb.AddText("Return ").AddText("null", _SymbolFormatter.Keyword).AddText(" for ");
+				//}
+				else {
+					t.Append("Return for ");
+				}
+				if (symbol != null) {
+					if (statement is LambdaExpressionSyntax) {
+						t.Append("lambda expression");
+					}
+					t.AddSymbol(symbol, name, _SymbolFormatter);
+				}
+				else {
+					t.Append(name);
+				}
+				return t;
 			}
 			return null;
 		}

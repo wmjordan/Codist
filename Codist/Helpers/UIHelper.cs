@@ -21,7 +21,7 @@ namespace Codist
 			return "#" + color.A.ToString("X2") + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
 		}
 		public static WpfColor ParseColor(string colorText) {
-			if (String.IsNullOrEmpty(colorText) || Char.IsPunctuation(colorText[0]) == false) {
+			if (String.IsNullOrEmpty(colorText) || colorText[0] != '#') {
 				return WpfColors.Transparent;
 			}
 			var l = colorText.Length;

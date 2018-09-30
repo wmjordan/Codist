@@ -38,6 +38,10 @@ namespace Codist
 			return token.Contains(start) && (token.Contains(end) || inclusive && token.End == end);
 		}
 
+		public static TextFormattingRunProperties GetRunProperties(this IClassificationFormatMap formatMap, string classificationType) {
+			return formatMap.GetTextProperties(ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType));
+		}
+
 		public static void ExpandSelectionToLine(this IWpfTextView view) {
 			view.ExpandSelectionToLine(true);
 		}

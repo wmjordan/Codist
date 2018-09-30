@@ -26,16 +26,10 @@ namespace Codist.QuickInfo
 		[ContentType("CSharp")]
 		internal sealed class CompletionTooltipProvider : IUIElementProvider<Completion, ICompletionSession>
 		{
-			static readonly SymbolFormatter _SymbolFormatter = new SymbolFormatter();
 			static Type _CustomCommitCompletionType;
 			static Func<Completion, object> _GetCompletionItem;
 			static Func<object, ImmutableArray<string>> _GetTags;
 			static Func<object, Document> _GetDocument;
-
-			[Import]
-			IEditorFormatMapService _FormatMapService = null;
-
-			IEditorFormatMap _FormatMap;
 
 			public UIElement GetUIElement(Completion itemToRender, ICompletionSession context, UIElementType elementType) {
 				if (elementType != UIElementType.Tooltip) {
@@ -44,6 +38,7 @@ namespace Codist.QuickInfo
 				if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift) == false) {
 					return null;
 				}
+
 				var t = itemToRender.GetType();
 				if (_CustomCommitCompletionType == null) {
 					InitInternalMethods(t);
@@ -64,12 +59,8 @@ namespace Codist.QuickInfo
 				
 				// display symbol information
 				if (symbols.Length > 0) {
-					var formatMap = _FormatMapService.GetEditorFormatMap(context.TextView);
-					if (_FormatMap != formatMap) {
-						_FormatMap = formatMap;
-						_SymbolFormatter.UpdateSyntaxHighlights(formatMap);
-					}
-					return new CSharpCompletionTooltip(itemToRender, symbols, semanticModel, _SymbolFormatter).LimitSize().Scrollable();
+
+					return new CSharpCompletionTooltip(itemToRender, symbols, semanticModel).LimitSize().Scrollable();
 				}
 				return null;
 			}
@@ -90,21 +81,23 @@ namespace Codist.QuickInfo
 		}
 
 
-		internal CSharpCompletionTooltip(Completion completion, ImmutableArray<ISymbol> symbols, SemanticModel semanticModel, SymbolFormatter formatter) {
+		internal CSharpCompletionTooltip(Completion completion, ImmutableArray<ISymbol> symbols, SemanticModel semanticModel) {
 			var symbol = symbols[0];
-			var sign = SymbolInfoRenderer.ShowSymbolDeclaration(symbol, formatter);
+			var sign = SymbolFormatter.Instance.ShowSymbolDeclaration(symbol, new Controls.ToolTipText(), true, false);
 			var stype = symbol.GetReturnType();
 			if (stype != null) {
-				sign.AddText(" ").AddSymbol(stype, null, formatter).AddText(" ");
+				sign.Append(" ").AddSymbol(stype, null, SymbolFormatter.Instance).Append(" ");
 			}
-			formatter.ToUIText(sign, symbol.ToDisplayParts(), -1);
+			sign.AddSymbolDisplayParts(symbol.ToDisplayParts(), SymbolFormatter.Instance);
 			if (symbols.Length > 1) {
-				sign.AddText("(+" + (symbols.Length - 1).ToString() + " overloads)");
+				sign.Append("(+" + (symbols.Length - 1).ToString() + " overloads)");
 			}
 			this.Add(sign.LimitSize());
-			var doc = symbol.GetXmlDocForSymbol();
+			var doc = symbol.GetXmlDocSummaryForSymbol();
 			if (doc != null) {
-				this.Add(new XmlDocRenderer(semanticModel.Compilation, formatter).Render(doc));
+				var t = new Controls.ToolTipText();
+				new XmlDocRenderer(semanticModel.Compilation, SymbolFormatter.Instance, symbol).Render(doc, t);
+				this.Add(t);
 			}
 
 		}

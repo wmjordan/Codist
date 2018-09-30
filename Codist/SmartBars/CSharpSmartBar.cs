@@ -247,7 +247,7 @@ namespace Codist.SmartBars
 					}
 				}));
 			}
-			else if (Classifiers.SymbolMarkManager.HasMark) {
+			else if (Classifiers.SymbolMarkManager.HasBookmark) {
 				r.Add(CreateCommandMenu("Remove symbol mark...", KnownImageIds.FlagOutline, symbol, "No symbol marked", (m, s) => {
 					foreach (var item in Classifiers.SymbolMarkManager.MarkedSymbols) {
 						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.ToDisplayString(__MemberNameFormat), item.GetImageId(), null, ctx => {
@@ -658,18 +658,19 @@ namespace Codist.SmartBars
 				tip.Title
 					.Append(Symbol.GetAccessibility() + Symbol.GetAbstractionModifier() + Symbol.GetSymbolKindName() + " ")
 					.Append(Symbol.GetSignatureString(), true);
-				ITypeSymbol t = Symbol.ContainingType;
 				var content = tip.Content;
+				var t = Symbol.GetReturnType();
 				if (t != null) {
-					content.Append(t.GetSymbolKindName() + ": ")
-						.Append(t.ToDisplayString(__MemberNameFormat));
+					content.Append("member type: ")
+						.Append(t.ToDisplayString(__MemberNameFormat), true);
 				}
-				t = Symbol.GetReturnType();
+				t = Symbol.ContainingType;
 				if (t != null) {
 					if (content.Inlines.FirstInline != null) {
 						content.AppendLine();
 					}
-					content.Append("return value: " + t.ToDisplayString(__MemberNameFormat));
+					content.Append(t.GetSymbolKindName() + ": ")
+						.Append(t.ToDisplayString(__MemberNameFormat), true);
 				}
 				if (content.Inlines.FirstInline != null) {
 					content.AppendLine();

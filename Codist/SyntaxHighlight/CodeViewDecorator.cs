@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
@@ -12,6 +10,8 @@ using Microsoft.VisualStudio.Text.Formatting;
 
 namespace Codist.SyntaxHighlight
 {
+	// see: Microsoft.VisualStudio.Text.Classification.Implementation.ClassificationFormatMap
+	// see: Microsoft.VisualStudio.Text.Classification.Implementation.ViewSpecificFormatMap
 	sealed class CodeViewDecorator
 	{
 		readonly IWpfTextView _TextView;
@@ -120,7 +120,7 @@ namespace Codist.SyntaxHighlight
 		TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption, double textSize) {
 			var settings = styleOption;
 			var fontSize = textSize + settings.FontSize;
-			if (fontSize < 2) {
+			if (fontSize < 1) {
 				fontSize = 1;
 			}
 			if (string.IsNullOrWhiteSpace(settings.Font) == false) {
@@ -136,14 +136,21 @@ namespace Codist.SyntaxHighlight
 				properties = properties.SetItalic(settings.Italic.Value);
 			}
 			if (settings.ForeColor.A > 0) {
-				properties = properties.SetForegroundOpacity(settings.ForeColor.A / 255.0)
+				if (settings.ForeColor.A == 255 && properties.ForegroundOpacityEmpty) {
+					properties = properties.SetForeground(settings.ForeColor.Alpha(255));
+				}
+				else {
+					properties = properties.SetForegroundOpacity(settings.ForeColor.A / 255.0)
 					.SetForeground(settings.ForeColor);
+				}
 			}
-			var bc = settings.BackColor.A > 0 ? settings.BackColor
+			var bc = settings.BackColor.A > 0 ? settings.BackColor.Alpha(255)
 				: properties.BackgroundBrushEmpty == false && properties.BackgroundBrush is SolidColorBrush ? (properties.BackgroundBrush as SolidColorBrush).Color
 				: Colors.Transparent;
 			if (bc.A > 0) {
-				properties = properties.SetBackgroundOpacity(bc.A / 255.0);
+				if (settings.BackColor.A < 255 || properties.BackgroundOpacityEmpty == false) {
+					properties = properties.SetBackgroundOpacity(bc.A / 255.0);
+				}
 				switch (settings.BackgroundEffect) {
 					case BrushEffect.Solid:
 						properties = properties.SetBackground(bc);

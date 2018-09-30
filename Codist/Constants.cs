@@ -416,10 +416,13 @@ namespace Codist
 		ResourceAndExceptionKeyword,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationName)]
-		TypeDeclaration,
+		Declaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpNestedDeclarationName)]
-		NestedTypeDeclaration,
+		NestedDeclaration,
+		[Category(Constants.SyntaxCategory.Declaration)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationBrace)]
+		DeclarationBrace,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpStaticMemberName)]
 		StaticMemberName,
@@ -441,9 +444,6 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeNotation)]
 		AttributeNotation,
-		[Category(Constants.SyntaxCategory.Declaration)]
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationBrace)]
-		DeclarationBrace,
 
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpSealedClassName)]

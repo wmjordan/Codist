@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.Composition;
-using System.Windows;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 
@@ -373,7 +372,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeNotation)]
 	[Name(Constants.CSharpAttributeNotation)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(After = Constants.CodeFormalLanguage)]
 	sealed class AttributeNotationFormat : ClassificationFormatDefinition
 	{
 		public AttributeNotationFormat() {
@@ -385,7 +384,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpXmlDoc)]
 	[Name(Constants.CSharpXmlDoc)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(After = Constants.CodeFormalLanguage)]
 	sealed class XmlDocFormat : ClassificationFormatDefinition
 	{
 		public XmlDocFormat() {

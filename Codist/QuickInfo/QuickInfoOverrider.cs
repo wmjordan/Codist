@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -8,11 +9,13 @@ using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Imaging;
 
 namespace Codist.QuickInfo
 {
 	interface IQuickInfoOverrider
 	{
+		void SetDiagnostics(IList<Diagnostic> diagnostics);
 		void ApplyClickAndGo(ISymbol symbol);
 		void LimitQuickInfoItemSize(IList<object> qiContent);
 		void OverrideDocumentation(UIElement docElement);
@@ -117,6 +120,10 @@ namespace Codist.QuickInfo
 				_Overrider.DocElement = docElement;
 			}
 
+			public void SetDiagnostics(IList<Diagnostic> diagnostics) {
+				_Overrider.Diagnostics = diagnostics;
+			}
+
 			sealed class Overrider : UIElement
 			{
 				static readonly Thickness __DocPanelBorderMargin = new Thickness(-15, 0, -17, 0);
@@ -128,6 +135,7 @@ namespace Codist.QuickInfo
 				public ISymbol ClickAndGoSymbol;
 				public bool LimitItemSize;
 				public UIElement DocElement;
+				public IList<Diagnostic> Diagnostics;
 
 				protected override void OnVisualParentChanged(DependencyObject oldParent) {
 					base.OnVisualParentChanged(oldParent);
@@ -136,7 +144,7 @@ namespace Codist.QuickInfo
 						goto EXIT;
 					}
 					if (p.Children.Count > 1) {
-						AddGlyphForDiagnosticInfo(p);
+						OverrideDiagnosticInfo(p);
 					}
 					if (DocElement != null || ClickAndGoSymbol != null || LimitItemSize) {
 						FixQuickInfo(p);
@@ -152,22 +160,64 @@ namespace Codist.QuickInfo
 					}
 				}
 
-				static void AddGlyphForDiagnosticInfo(StackPanel p) {
-					var infoPanel = p.Children[1].GetFirstVisualChild<ItemsControl>()?.GetFirstVisualChild<StackPanel>();
+				void OverrideDiagnosticInfo(StackPanel panel) {
+					var infoPanel = panel.Children[1].GetFirstVisualChild<ItemsControl>()?.GetFirstVisualChild<StackPanel>();
 					if (infoPanel == null) {
 						// try the first item (symbol title may be absent)
-						infoPanel = p.Children[0].GetFirstVisualChild<ItemsControl>()?.GetFirstVisualChild<StackPanel>();
+						infoPanel = panel.Children[0].GetFirstVisualChild<ItemsControl>()?.GetFirstVisualChild<StackPanel>();
 						if (infoPanel?.GetFirstVisualChild<WrapPanel>() != null) {
 							return;
 						}
 					}
-					if (infoPanel != null) {
-						foreach (var item in infoPanel.Children) {
-							var cp = (item as UIElement).GetFirstVisualChild<TextBlock>();
-							if (cp?.GetType() == typeof(TextBlock)) {
-								cp.SetGlyph(ServicesHelper.Instance.Glyph.GetGlyph(StandardGlyphGroup.GlyphInformation, StandardGlyphItem.GlyphItemPublic));
+					if (infoPanel == null) {
+						return;
+					}
+					foreach (var item in infoPanel.Children) {
+						var cp = (item as UIElement).GetFirstVisualChild<TextBlock>();
+						if (cp == null) {
+							continue;
+						}
+						if (Diagnostics != null && Diagnostics.Count > 0) {
+							var t = cp.GetText();
+							var d = Diagnostics.FirstOrDefault(i => i.GetMessage() == t);
+							if (d != null) {
+								cp.ToolTip = String.Empty;
+								cp.Tag = d;
+								cp.SetGlyph(ThemeHelper.GetImage(GetGlyphForSeverity(d.Severity)));
+								cp.ToolTipOpening += ShowToolTipForDiagnostics;
 							}
 						}
+						else {
+							cp.SetGlyph(ThemeHelper.GetImage(KnownImageIds.StatusInformation));
+						}
+					}
+
+					int GetGlyphForSeverity(DiagnosticSeverity severity) {
+						switch (severity) {
+							case DiagnosticSeverity.Warning: return KnownImageIds.StatusWarning;
+							case DiagnosticSeverity.Error: return KnownImageIds.StatusError;
+							case DiagnosticSeverity.Hidden: return KnownImageIds.StatusHidden;
+							default: return KnownImageIds.StatusInformation;
+						}
+					}
+
+					void ShowToolTipForDiagnostics(object sender, ToolTipEventArgs e) {
+						var t = sender as TextBlock;
+						var d = t.Tag as Diagnostic;
+						var tip = new SymbolToolTip();
+						tip.Title.Append(d.Descriptor.Category + " (" + d.Id + ")", true);
+						tip.Content.Append(d.Descriptor.Title.ToString());
+						if (String.IsNullOrEmpty(d.Descriptor.HelpLinkUri) == false) {
+							tip.Content.AppendLine().Append("Help: " + d.Descriptor.HelpLinkUri);
+						}
+						if (d.IsSuppressed) {
+							tip.Content.AppendLine().Append("Suppressed");
+						}
+						if (d.IsWarningAsError) {
+							tip.Content.AppendLine().Append("Content as error");
+						}
+						t.ToolTip = tip;
+						t.ToolTipOpening -= ShowToolTipForDiagnostics;
 					}
 				}
 
@@ -372,6 +422,10 @@ namespace Codist.QuickInfo
 					doc.Visibility = Visibility.Collapsed;
 					Panel.Children.Insert(Panel.Children.IndexOf(doc), newDoc);
 				}
+			}
+
+			public void SetDiagnostics(IList<Diagnostic> diagnostics) {
+				// not implemented for versions before 15.8
 			}
 
 			static StackPanel FindDefaultQuickInfoPanel(IList<object> qiContent) {
