@@ -414,10 +414,10 @@ namespace Codist.Classifiers
 							yield return _Classifications.StaticMember;
 						}
 					}
-					symbol = node.Parent is MemberAccessExpressionSyntax
-						? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
-						: node.Parent is ArgumentSyntax
-						? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
+					symbol = node.Parent is MemberAccessExpressionSyntax ? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
+						: node.Parent.IsKind(SyntaxKind.Argument) ? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
+						: node.IsKind(SyntaxKind.SimpleBaseType) ? semanticModel.GetTypeInfo((node as SimpleBaseTypeSyntax).Type).Type
+						: node.IsKind(SyntaxKind.TypeConstraint) ? semanticModel.GetTypeInfo((node as TypeConstraintSyntax).Type).Type
 						: null;
 					if (symbol == null) {
 						yield break;
