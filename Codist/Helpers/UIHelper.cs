@@ -135,41 +135,45 @@ namespace Codist
 			foreground = ThemeHelper.DocumentTextColor;
 			background = ThemeHelper.DocumentPageColor;
 			fontStyle = style.GetFontStyle();
-			if (style.ClassificationType != null
-				&& TextEditorHelper.BackupFormattings.TryGetValue(style.ClassificationType, out var p)) {
-				SolidColorBrush colorBrush;
-				if (style.ForeColor.A == 0) {
-					colorBrush = p.ForegroundBrushEmpty == false ? p.ForegroundBrush as SolidColorBrush : null;
-					if (colorBrush != null) {
-						foreground = colorBrush.Color.ToGdiColor();
+			if (style.ClassificationType == null) {
+				return;
+			}
+			var p = TextEditorHelper.DefaultClassificationFormatMap.GetRunProperties(style.ClassificationType);
+			if (p == null) {
+				return;
+			}
+			SolidColorBrush colorBrush;
+			if (style.ForeColor.A == 0) {
+				colorBrush = p.ForegroundBrushEmpty == false ? p.ForegroundBrush as SolidColorBrush : null;
+				if (colorBrush != null) {
+					foreground = colorBrush.Color.ToGdiColor();
+				}
+			}
+			else {
+				foreground = style.ForeColor.ToGdiColor();
+			}
+			if (style.BackColor.A == 0) {
+				colorBrush = p.BackgroundBrushEmpty == false ? p.BackgroundBrush as SolidColorBrush : null;
+				if (colorBrush != null) {
+					background = colorBrush.Color.ToGdiColor();
+				}
+			}
+			else {
+				background = style.BackColor.ToGdiColor();
+			}
+			if (p.BoldEmpty == false && p.Bold && style.Bold != false) {
+				fontStyle |= FontStyle.Bold;
+			}
+			if (p.ItalicEmpty == false && p.Italic && style.Italic != false) {
+				fontStyle |= FontStyle.Italic;
+			}
+			if (p.TextDecorationsEmpty == false) {
+				foreach (var decoration in p.TextDecorations) {
+					if (decoration.Location == System.Windows.TextDecorationLocation.Underline && style.Underline != false) {
+						fontStyle |= FontStyle.Underline;
 					}
-				}
-				else {
-					foreground = style.ForeColor.ToGdiColor();
-				}
-				if (style.BackColor.A == 0) {
-					colorBrush = p.BackgroundBrushEmpty == false ? p.BackgroundBrush as SolidColorBrush : null;
-					if (colorBrush != null) {
-						background = colorBrush.Color.ToGdiColor();
-					}
-				}
-				else {
-					background = style.BackColor.ToGdiColor();
-				}
-				if (p.BoldEmpty == false && p.Bold && style.Bold != false) {
-					fontStyle |= FontStyle.Bold;
-				}
-				if (p.ItalicEmpty == false && p.Italic && style.Italic != false) {
-					fontStyle |= FontStyle.Italic;
-				}
-				if (p.TextDecorationsEmpty == false) {
-					foreach (var decoration in p.TextDecorations) {
-						if (decoration.Location == System.Windows.TextDecorationLocation.Underline && style.Underline != false) {
-							fontStyle |= FontStyle.Underline;
-						}
-						else if (decoration.Location == System.Windows.TextDecorationLocation.Strikethrough && style.Strikethrough != false) {
-							fontStyle |= FontStyle.Strikeout;
-						}
+					else if (decoration.Location == System.Windows.TextDecorationLocation.Strikethrough && style.Strikethrough != false) {
+						fontStyle |= FontStyle.Strikeout;
 					}
 				}
 			}

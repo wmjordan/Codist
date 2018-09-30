@@ -72,13 +72,13 @@ namespace Codist.SyntaxHighlight
 				return;
 			}
 			try {
-				var c = _EditorFormatMap.GetProperties(Constants.EditorProperties.Text)?[EditorFormatDefinition.ForegroundColorId];
-				if (c is Color) {
-					_ForeColor = (Color)c;
+				var c = _EditorFormatMap.GetColor(Constants.EditorProperties.Text, EditorFormatDefinition.ForegroundColorId);
+				if (c.A > 0) {
+					_ForeColor = c;
 				}
-				c = _EditorFormatMap.GetProperties(Constants.EditorProperties.TextViewBackground)?[EditorFormatDefinition.BackgroundColorId];
-				if (c is Color) {
-					_BackColor = ((Color)c).Alpha(0);
+				c = _EditorFormatMap.GetColor(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundColorId);
+				if (c.A > 0) {
+					_BackColor = c.Alpha(0);
 				}
 				DecorateClassificationTypes();
 			}

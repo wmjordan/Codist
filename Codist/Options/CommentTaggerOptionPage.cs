@@ -184,7 +184,7 @@ namespace Codist.Options
 			}
 			UIHelper.MixStyle(style, out var fs, out var fc, out var bc);
 			using (var g = Graphics.FromImage(bmp))
-			using (var f = new Font(fontInfo.bstrFaceName, fontSize, fs))
+			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontInfo.bstrFaceName : style.Font, fontSize, fs))
 			using (var b = new SolidBrush(fc))
 			using (var bg = new SolidBrush(ThemeHelper.DocumentPageColor)) {
 				g.FillRectangle(bg, 0, 0, bmp.Width, bmp.Height);

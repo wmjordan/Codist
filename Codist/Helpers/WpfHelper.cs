@@ -15,12 +15,14 @@ using Microsoft.VisualStudio.Text.Classification;
 using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
+using WpfColor = System.Windows.Media.Color;
 using WpfText = System.Windows.Media.FormattedText;
 
 namespace Codist
 {
 	static class WpfHelper
 	{
+		internal static readonly WpfColor EmptyColor = new WpfColor();
 		internal static readonly Thickness NoMargin = new Thickness(0);
 		internal static readonly Thickness GlyphMargin = new Thickness(0, 0, 5, 0);
 		internal static readonly Thickness ScrollerMargin = new Thickness(0, 0, 3, 0);
@@ -200,6 +202,12 @@ namespace Codist
 			return p != null && p.Contains(resourceId)
 				? (p[resourceId] as WpfBrush)
 				: null;
+		}
+		public static WpfColor GetColor(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundColorId) {
+			var p = map.GetProperties(formatName);
+			return p != null && p.Contains(resourceId) && (p[resourceId] is WpfColor color)
+				? color
+				: EmptyColor;
 		}
 
 		static readonly System.Windows.Media.Typeface StatusText = SystemFonts.StatusFontFamily.GetTypefaces().First();

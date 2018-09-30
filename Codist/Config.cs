@@ -78,14 +78,14 @@ namespace Codist
 
 		public static void LoadConfig(string configPath) {
 			//HACK: prevent redundant load operations issued by configuration pages
-			if (_LastLoaded.AddSeconds(2) > DateTime.Now
-				&& configPath.StartsWith(ThemePrefix, StringComparison.Ordinal) == false
-				|| Interlocked.Exchange(ref _LoadingConfig, 1) != 0) {
+			if (Interlocked.Exchange(ref _LoadingConfig, 1) != 0
+				|| _LastLoaded.AddSeconds(2) > DateTime.Now
+				&& configPath.StartsWith(ThemePrefix, StringComparison.Ordinal) == false) {
 				return;
 			}
 			try {
 				Instance = InternalLoadConfig(configPath);
-				TextEditorHelper.ResetStyleCache();
+				//TextEditorHelper.ResetStyleCache();
 				Loaded?.Invoke(Instance, EventArgs.Empty);
 				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.All));
 			}

@@ -60,6 +60,7 @@ namespace Codist.SyntaxHighlight
 		public bool IsSet => Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || String.IsNullOrEmpty(Font) == false || ForeColor.A > 0 || BackColor.A > 0;
 
 		internal abstract string ClassificationType { get; }
+		internal abstract string Description { get; }
 
 		internal StyleBase Clone() {
 			return (StyleBase)MemberwiseClone();
@@ -86,16 +87,24 @@ namespace Codist.SyntaxHighlight
 	}
 	abstract class StyleBase<TStyle> : StyleBase where TStyle : struct
 	{
-		string _ClassficationType;
+		string _ClassficationType, _Description;
 
 		public abstract TStyle StyleID { get; set; }
 
 		internal override string ClassificationType => _ClassficationType ?? (_ClassficationType = GetClassificationType());
+		internal override string Description => _Description ?? (_Description = GetDescription());
 
 		protected string GetCategory() {
 			return typeof(TStyle).GetField(StyleID.ToString())
 				?.GetCustomAttribute<CategoryAttribute>(false)
 				?.Category ?? String.Empty;
+		}
+
+		string GetDescription() {
+			return typeof(TStyle).GetField(StyleID.ToString())
+				?.GetCustomAttributes<DescriptionAttribute>(false)
+				?.FirstOrDefault()
+				?.Description;
 		}
 		string GetClassificationType() {
 			return typeof(TStyle).GetField(StyleID.ToString())

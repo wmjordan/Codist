@@ -13,6 +13,7 @@ namespace Codist.Options
 	{
 		public SyntaxListView() {
 			SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+			ShowItemToolTips = true;
 		}
 		protected override void WndProc(ref Message m) {
 			if (m.Msg == 0x0F) {
@@ -26,9 +27,17 @@ namespace Codist.Options
 		}
 	}
 
-	public class SyntaxListViewItem : ListViewItem
+	class SyntaxListViewItem : ListViewItem
 	{
-		internal StyleBase Style { get; set; }
+		StyleBase _Style;
+
+		internal StyleBase Style {
+			get => _Style;
+			private set {
+				_Style = value;
+				ToolTipText = _Style.Description;
+			}
+		}
 
 		public SyntaxListViewItem() : base() {
 		}
@@ -42,8 +51,8 @@ namespace Codist.Options
 				return;
 			}
 			UIHelper.MixStyle(Style, out var s, out var fg, out var bg);
-			if (Font.Style != s) {
-				Font = new Font(Font, s);
+			if (Font.Style != s || Style.Font != Font.OriginalFontName) {
+				Font = new Font(Style.Font, Font.Size, s, Font.Unit, Font.GdiCharSet);
 			}
 			fg = Style.ForeColor.A != 0 ? Style.ForeColor.ToGdiColor() : fg;
 			if (ForeColor != fg) {
@@ -54,9 +63,13 @@ namespace Codist.Options
 				BackColor = bg;
 			}
 		}
+
+		protected void SetStyle(StyleBase style) {
+			Style = style;
+		}
 	}
 
-	public class CommentTaggerListViewItem : SyntaxListViewItem
+	sealed class CommentTaggerListViewItem : SyntaxListViewItem
 	{
 		internal Classifiers.CommentLabel CommentLabel { get; }
 
@@ -71,7 +84,7 @@ namespace Codist.Options
 				return;
 			}
 			var styleId = CommentLabel.StyleID;
-			Style = Config.Instance.CommentStyles.Find(i => i.StyleID == styleId);
+			SetStyle(Config.Instance.CommentStyles.Find(i => i.StyleID == styleId));
 			if (Style == null) {
 				return;
 			}
