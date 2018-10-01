@@ -63,8 +63,6 @@ namespace Codist.Classifiers
 #if DEBUG
 			readonly HashSet<string> _ClassificationTypes = new HashSet<string>();
 #endif
-			static readonly string[] __CSharpComments = { "//", "/*" };
-			static readonly string[] __Comments = { "//", "/*", "'", "#", "<!--" };
 
 #pragma warning disable 67
 			public event EventHandler<SnapshotSpanEventArgs> TagsChanged;

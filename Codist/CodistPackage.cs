@@ -91,7 +91,6 @@ namespace Codist
 			};
 			SolutionEvents.OnAfterOpenSolution += (s, args) => {
 				Classifiers.SymbolMarkManager.Clear();
-				Classifiers.AssemblyMarkManager.Clear();
 			};
 		}
 

@@ -11,6 +11,8 @@ using Microsoft.VisualStudio.Text.Classification;
 using AppHelpers;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
+using System.Reflection.Emit;
+using System.Reflection;
 
 namespace Codist.Classifiers
 {
@@ -93,15 +95,11 @@ namespace Codist.Classifiers
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 			var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace);
 			var lastTriviaSpan = default(TextSpan);
-			var spanNode = unitCompilation.FindNode(textSpan);
-			if (spanNode.HasLeadingTrivia == false || spanNode.GetLeadingTrivia().FullSpan.Contains(textSpan) == false) {
-				switch (spanNode.Kind()) {
-					case SyntaxKind.AttributeList:
-					case SyntaxKind.AttributeArgumentList:
-						result.Add(CreateClassificationSpan(snapshot, textSpan, _Classifications.AttributeNotation));
-						break;
-				}
+			textSpan = GetAttributeNotationSpan(snapshot, result, textSpan, unitCompilation);
+			if (textSpan.IsEmpty == false) {
+				result.Add(CreateClassificationSpan(snapshot, textSpan, _Classifications.AttributeNotation));
 			}
+
 			foreach (var item in classifiedSpans) {
 				var ct = item.ClassificationType;
 				switch (ct) {
@@ -192,8 +190,7 @@ namespace Codist.Classifiers
 							}
 						}
 						else if (ct == Constants.CodeIdentifier
-							|| ct.EndsWith("name", StringComparison.Ordinal))
-						{
+							|| ct.EndsWith("name", StringComparison.Ordinal)) {
 							var itemSpan = item.TextSpan;
 							var node = unitCompilation.FindNode(itemSpan, true);
 							foreach (var type in GetClassificationType(node, semanticModel)) {
@@ -204,6 +201,40 @@ namespace Codist.Classifiers
 				}
 			}
 			return result;
+		}
+
+		private static TextSpan GetAttributeNotationSpan(ITextSnapshot snapshot, List<ClassificationSpan> result, TextSpan textSpan, CompilationUnitSyntax unitCompilation) {
+			var spanNode = unitCompilation.FindNode(textSpan);
+			if (spanNode.HasLeadingTrivia != false && spanNode.GetLeadingTrivia().FullSpan.Contains(textSpan) != false) {
+				return new TextSpan();
+			}
+			switch (spanNode.Kind()) {
+				case SyntaxKind.AttributeList:
+				case SyntaxKind.AttributeArgumentList:
+					return textSpan;
+				case SyntaxKind.MethodDeclaration:
+				case SyntaxKind.ConstructorDeclaration:
+				case SyntaxKind.DestructorDeclaration:
+				case SyntaxKind.OperatorDeclaration:
+				case SyntaxKind.ConversionOperatorDeclaration:
+					return (spanNode as BaseMethodDeclarationSyntax).AttributeLists.Span;
+				case SyntaxKind.ClassDeclaration:
+				case SyntaxKind.InterfaceDeclaration:
+				case SyntaxKind.EnumDeclaration:
+				case SyntaxKind.StructDeclaration:
+					return (spanNode as BaseTypeDeclarationSyntax).AttributeLists.Span;
+				case SyntaxKind.FieldDeclaration:
+				case SyntaxKind.EventFieldDeclaration:
+					return (spanNode as BaseFieldDeclarationSyntax).AttributeLists.Span;
+				case SyntaxKind.EventDeclaration:
+				case SyntaxKind.PropertyDeclaration:
+				case SyntaxKind.IndexerDeclaration:
+					return (spanNode as BasePropertyDeclarationSyntax).AttributeLists.Span;
+				case SyntaxKind.DelegateDeclaration:
+					return (spanNode as DelegateDeclarationSyntax).AttributeLists.Span;
+				default:
+					return new TextSpan();
+			}
 		}
 
 		static void ClassifyPunctuation(TextSpan itemSpan, ITextSnapshot snapshot, List<ClassificationSpan> result, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
@@ -507,10 +538,9 @@ namespace Codist.Classifiers
 			}
 
 			if (TextEditorHelper.IdentifySymbolSource && symbol.IsMemberOrType() && symbol.ContainingAssembly != null) {
-				switch (AssemblyMarkManager.GetAssemblyMark(symbol.ContainingAssembly)) {
-					case AssemblyMarkManager.IsInMetadata: yield return _Classifications.MetadataSymbol; break;
-					case AssemblyMarkManager.IsInSource: yield return _Classifications.UserSymbol; break;
-				}
+				yield return AssemblySourceReflector.GetSourceType(symbol.ContainingAssembly) == AssemblySourceReflector.MetadataAssembly
+					? _Classifications.MetadataSymbol
+					: _Classifications.UserSymbol;
 			}
 
 			if (symbol.IsStatic) {
@@ -537,6 +567,48 @@ namespace Codist.Classifiers
 
 		static ClassificationSpan CreateClassificationSpan(ITextSnapshot snapshotSpan, TextSpan span, IClassificationType type) {
 			return new ClassificationSpan(new SnapshotSpan(snapshotSpan, span.Start, span.Length), type);
+		}
+
+		static class AssemblySourceReflector
+		{
+			static readonly Func<IAssemblySymbol, byte> __getAssemblyType = CreateIsSourceAssemblyFunc();
+			public const byte SourceAssembly = 1, RetargetAssembly = 2, MetadataAssembly = 0;
+			public static byte GetSourceType(IAssemblySymbol assembly) {
+				return __getAssemblyType(assembly);
+			}
+
+			static Func<IAssemblySymbol, byte> CreateIsSourceAssemblyFunc() {
+				var m = new DynamicMethod("IsSourceAssembly", typeof(byte), new Type[] { typeof(IAssemblySymbol) }, true);
+				var il = m.GetILGenerator();
+				var isSource = il.DefineLabel();
+				var isRetargetSource = il.DefineLabel();
+				var a = Assembly.GetAssembly(typeof(Microsoft.CodeAnalysis.CSharp.CSharpExtensions));
+				var ts = a.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.SourceAssemblySymbol");
+				var tr = a.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting.RetargetingAssemblySymbol");
+				if (ts != null) {
+					il.Emit(OpCodes.Ldarg_0);
+					il.Emit(OpCodes.Isinst, ts);
+					il.Emit(OpCodes.Brtrue_S, isSource);
+				}
+				if (tr != null) {
+					il.Emit(OpCodes.Ldarg_0);
+					il.Emit(OpCodes.Isinst, tr);
+					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
+				}
+				il.Emit(OpCodes.Ldc_I4_0);
+				il.Emit(OpCodes.Ret);
+				if (ts != null) {
+					il.MarkLabel(isSource);
+					il.Emit(OpCodes.Ldc_I4_1);
+					il.Emit(OpCodes.Ret);
+				}
+				if (tr != null) {
+					il.MarkLabel(isRetargetSource);
+					il.Emit(OpCodes.Ldc_I4_2);
+					il.Emit(OpCodes.Ret);
+				}
+				return m.CreateDelegate(typeof(Func<IAssemblySymbol, byte>)) as Func<IAssemblySymbol, byte>;
+			}
 		}
 	}
 }

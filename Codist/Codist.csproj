@@ -66,7 +66,6 @@
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Classifiers\AssemblyMarkManager.cs" />
     <Compile Include="Classifiers\BackgroundScan.cs" />
     <Compile Include="Classifiers\Classifications.cs" />
     <Compile Include="Classifiers\CommentFormats.cs" />
