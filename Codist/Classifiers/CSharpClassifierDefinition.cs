@@ -14,7 +14,7 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition AbstractionKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpAbstractMemberName)]
 		static ClassificationTypeDefinition AbstractMember;
 
@@ -40,7 +40,7 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition BranchingKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CSharpReadOnlyFieldName)]
 		[Name(Constants.CSharpConstFieldName)]
 		static ClassificationTypeDefinition ConstField;
 
@@ -116,7 +116,7 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition NestedDeclaration;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpOverrideMemberName)]
 		static ClassificationTypeDefinition OverrideMember;
 
@@ -144,7 +144,7 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition SealedClass;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpStaticMemberName)]
 		static ClassificationTypeDefinition StaticMember;
 
@@ -154,7 +154,7 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition TypeParameter;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpVirtualMemberName)]
 		static ClassificationTypeDefinition VirtualMember;
 

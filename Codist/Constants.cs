@@ -283,9 +283,6 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CodeKeyword)]
 		Keyword,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName)]
-		NamespaceName,
-		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
 		ClassName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
@@ -299,17 +296,18 @@ namespace Codist
 		EnumName,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeIdentifier)]
-		[Description("A base style shared by type, property, method, field, event, etc.")]
+		[Description("A base style shared by type, type member, local, parameter, etc.")]
 		Identifier,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeNumber)]
 		Number,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeString)]
+		[Description("Literal string")]
 		String,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeStringVerbatim)]
-		[Description("Multiline string")]
+		[Description("Multiline literal string")]
 		StringVerbatim,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeOperator)]
@@ -320,9 +318,6 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeUrl)]
 		Url,
-		[Category(Constants.SyntaxCategory.General)]
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpLabel)]
-		Label,
 		[Category(Constants.SyntaxCategory.Preprocessor)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodePreprocessorText)]
 		PreprocessorText,
@@ -398,129 +393,156 @@ namespace Codist
 		None,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
-		[Description("Keyword: break, continue, yield, return")]
+		[Description("Keyword: break, continue, yield, return, inheriting from Keyword")]
 		BreakAndReturnKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
-		[Description("Keyword: abstract, override, sealed, virtual")]
+		[Description("Keyword: abstract, override, sealed, virtual, inheriting from Keyword")]
 		AbstractionKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeBranchingKeyword)]
-		[Description("Keyword: switch, case, default, if, else")]
+		[Description("Keyword: switch, case, default, if, else, inheriting from Keyword")]
 		BranchingKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeLoopKeyword)]
-		[Description("Keyword: for, foreach, do, while")]
+		[Description("Keyword: for, foreach in, do, while, inheriting from Keyword")]
 		LoopKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpResourceKeyword)]
-		[Description("Keyword: using, lock, try, catch, finally, fixed, unsafe")]
+		[Description("Keyword: using, lock, try catch finally, fixed, unsafe, inheriting from Keyword")]
 		ResourceAndExceptionKeyword,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationName)]
-		[Description("Type declarations")]
+		[Description("Declaration of non-nested type: class, struct, interface, enum, delegate and event, inheriting from Identifier")]
 		Declaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpNestedDeclarationName)]
-		[Description("Type memebers: property, method, event, delegate, nested type, etc. (Excluding fields)")]
-		NestedDeclaration,
+		[Description("Declaration of type memeber: property, method, event, delegate, nested type, etc. (excluding fields), inheriting from Declaration")]
+		MemberDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationBrace)]
-		[Description("Braces {} for declarations")]
+		[Description("Braces {} for declaration, inheriting from Punctuation")]
 		DeclarationBrace,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpStaticMemberName)]
+		[Description("Name of static member, inheriting from Identifier")]
 		StaticMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpOverrideMemberName)]
+		[Description("Name of overriding member, inheriting from Identifier")]
 		OverrideMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpAbstractMemberName)]
+		[Description("Name of abstract member, inheriting from Identifier")]
 		AbstractMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpVirtualMemberName)]
+		[Description("Name of virtual member, inheriting from Identifier")]
 		VirtualMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalVariableName)]
+		[Description("Name of local variable, inheriting from Identifier")]
 		LocalVariableName,
 		[Category(Constants.SyntaxCategory.Declaration)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpLabel)]
+		[Description("Name of label, inheriting from Identifier")]
+		Label,
+		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeName)]
+		[Description("Name of attribute annotation, inheriting from Class Name")]
 		AttributeName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpAttributeNotation)]
+		[Description("Whole region of attribute annotation")]
 		AttributeNotation,
 
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName)]
+		NamespaceName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpSealedClassName)]
+		[Description("Name of sealed class, inheriting from Class Name")]
 		SealedClassName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeDelegateName)]
+		[Description("Name of delegate, inheriting from Identifier")]
 		DelegateName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName)]
+		[Description("Name of event, inheriting from Identifier")]
 		EventName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeParameterName)]
+		[Description("Name of type parameter, inheriting from Identifier")]
 		TypeParameterName,
 
 		//[ClassificationType(ClassificationTypeNames = Constants.CodeModuleName)]
 		//ModuleDeclaration,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstructorMethodName)]
+		[Description("Name of constructor, inheriting from Method Name")]
 		ConstructorMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName)]
+		[Description("Name of field, inheriting from Identifier")]
 		FieldName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstFieldName)]
+		[Description("Name of constant field, inheriting from Read Only Field Name")]
 		ConstFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpReadOnlyFieldName)]
+		[Description("Name of read-only field, inheriting from Field Name")]
 		ReadOnlyFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName)]
+		[Description("Name of property, inheriting from Identifier")]
 		PropertyName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpMethodName)]
+		[Description("Name of method, inheriting from Identifier")]
 		MethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpExtensionMethodName)]
+		[Description("Name of extension method, inheriting from Method Name and Static Member Name")]
 		ExtensionMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpExternMethodName)]
+		[Description("Name of extern method, inheriting from Method Name")]
 		ExternMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName)]
+		[Description("Name of parameter, inheriting from Identifier")]
 		ParameterName,
 
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpXmlDoc)]
+		[Description("Whole region of XML Documentation")]
 		XmlDoc,
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlDocComment)]
+		[Description("Comment text of XML Documentation")]
 		XmlDocComment,
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlDocTag)]
+		[Description("Tag of XML Documentation")]
 		XmlDocTag,
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlDocAttributeName)]
+		[Description("Attribute name of XML Documentation")]
 		XmlDocAttributeName,
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlDocAttributeValue)]
+		[Description("Attribute value of XML Documentation")]
 		XmlDocAttributeValue,
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlDocDelimiter)]
+		[Description("Tag characters of XML Documentation")]
 		XmlDocDelimiter,
 		[Category(Constants.SyntaxCategory.Comment)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlDocCData)]
+		[Description("CData content of XML Documentation")]
 		XmlDocCData,
-
-		[Category(Constants.SyntaxCategory.Location)]
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpUserSymbol)]
-		MyTypeAndMember,
-		[Category(Constants.SyntaxCategory.Location)]
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpMetadataSymbol)]
-		ReferencedTypeAndMember,
 	}
 
 	enum XmlStyleTypes
@@ -560,24 +582,42 @@ namespace Codist
 	enum SymbolMarkerStyleTypes
 	{
 		None,
+		[Category(Constants.SyntaxCategory.Highlight)]
 		[ClassificationType(ClassificationTypeNames = Constants.Highlight1)]
 		Highlight1,
+		[Category(Constants.SyntaxCategory.Highlight)]
 		[ClassificationType(ClassificationTypeNames = Constants.Highlight2)]
 		Highlight2,
+		[Category(Constants.SyntaxCategory.Highlight)]
 		[ClassificationType(ClassificationTypeNames = Constants.Highlight3)]
 		Highlight3,
+		[Category(Constants.SyntaxCategory.Highlight)]
 		[ClassificationType(ClassificationTypeNames = Constants.Highlight4)]
 		Highlight4,
+		[Category(Constants.SyntaxCategory.Highlight)]
 		[ClassificationType(ClassificationTypeNames = Constants.Highlight5)]
 		Highlight5,
+		[Category(Constants.SyntaxCategory.Highlight)]
 		[ClassificationType(ClassificationTypeNames = Constants.Highlight6)]
 		Highlight6,
+		[Category(Constants.SyntaxCategory.Highlight)]
 		[ClassificationType(ClassificationTypeNames = Constants.Highlight7)]
 		Highlight7,
+		[Category(Constants.SyntaxCategory.Highlight)]
 		[ClassificationType(ClassificationTypeNames = Constants.Highlight8)]
 		Highlight8,
+		[Category(Constants.SyntaxCategory.Highlight)]
 		[ClassificationType(ClassificationTypeNames = Constants.Highlight9)]
 		Highlight9,
+
+		[Category(Constants.SyntaxCategory.Location)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpUserSymbol)]
+		[Description("Type and member defined in source code")]
+		MyTypeAndMember,
+		[Category(Constants.SyntaxCategory.Location)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpMetadataSymbol)]
+		[Description("Type and member imported via referencing assembly")]
+		ReferencedTypeAndMember,
 	}
 
 	enum MarkerStyleTypes

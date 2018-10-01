@@ -242,6 +242,8 @@ namespace Codist.SyntaxHighlight
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class SymbolMarkerStyle : StyleBase<SymbolMarkerStyleTypes>
 	{
+		string _Category;
+
 		public SymbolMarkerStyle() {
 		}
 		public SymbolMarkerStyle(SymbolMarkerStyleTypes styleID, Color foregroundColor) {
@@ -254,7 +256,7 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the comment style.</summary>
 		public override SymbolMarkerStyleTypes StyleID { get; set; }
 
-		public override string Category => StyleID != SymbolMarkerStyleTypes.None ? Constants.SyntaxCategory.Highlight : String.Empty;
+		public override string Category => _Category ?? (_Category = GetCategory());
 
 		internal new CommentStyle Clone() {
 			return (CommentStyle)MemberwiseClone();
