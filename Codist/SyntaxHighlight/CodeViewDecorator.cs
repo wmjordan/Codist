@@ -98,20 +98,14 @@ namespace Codist.SyntaxHighlight
 			_ClassificationFormatMap.BeginBatchUpdate();
 			var defaultSize = _ClassificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
 			foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
+				StyleBase style;
+				TextFormattingRunProperties textFormatting;
 				if (item == null
-					|| TextEditorHelper.SyntaxStyleCache.TryGetValue(item.Classification, out var style) == false) {
+					|| (style = TextEditorHelper.GetStyle(item.Classification)) == null
+					|| (textFormatting = TextEditorHelper.GetBackupFormatting(item.Classification)) == null) {
 					continue;
 				}
-
-				TextFormattingRunProperties cached;
-				if (TextEditorHelper.BackupFormattings.TryGetValue(item.Classification, out cached) == false) {
-					var p = _ClassificationFormatMap.GetExplicitTextProperties(item);
-					if (p == null) {
-						continue;
-					}
-					TextEditorHelper.BackupFormattings[item.Classification] = cached = p;
-				}
-				_ClassificationFormatMap.SetTextProperties(item, SetProperties(cached, style, defaultSize));
+				_ClassificationFormatMap.SetTextProperties(item, SetProperties(textFormatting, style, defaultSize));
 			}
 			_ClassificationFormatMap.EndBatchUpdate();
 			Debug.WriteLine("Decorated");

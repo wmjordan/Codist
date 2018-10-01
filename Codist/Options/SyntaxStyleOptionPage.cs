@@ -37,15 +37,6 @@ namespace Codist.Options
 			if (_loaded) {
 				return;
 			}
-			if (TextEditorHelper.BackupFormattings.Count == 0) {
-				var m = TextEditorHelper.DefaultClassificationFormatMap;
-				foreach (var item in m.CurrentPriorityOrder) {
-					if (item != null
-						&& TextEditorHelper.SyntaxStyleCache.ContainsKey(item.Classification)) {
-						TextEditorHelper.BackupFormattings[item.Classification] = m.GetExplicitTextProperties(item);
-					}
-				}
-			}
 			LoadStyleList();
 			_BackColorButton.Click += SetBackColor;
 			_BackColorTransBox.ValueChanged += SetBackColor;
@@ -227,8 +218,8 @@ namespace Codist.Options
 				return;
 			}
 			_uiLock = true;
-			UpdatePreview();
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			UpdatePreview();
 			_uiLock = false;
 		}
 
@@ -238,9 +229,9 @@ namespace Codist.Options
 			}
 			_uiLock = true;
 			_activeStyle.Reset();
+			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			UpdateUIControls(_activeStyle);
 			UpdatePreview();
-			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			_uiLock = false;
 		}
 
@@ -273,6 +264,7 @@ namespace Codist.Options
 			var fs = _service.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor));
 			var style = _activeStyle;
 			RenderPreview(bmp, fs, style);
+			(_SyntaxListBox.FocusedItem as SyntaxListViewItem)?.ApplyTheme();
 			_PreviewBox.Image = bmp;
 		}
 		struct FontFamilyItem

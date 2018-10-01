@@ -14,14 +14,18 @@ using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
 
 namespace Codist
 {
+	/// <summary>
+	/// This class assumes that the <see cref="IClassificationFormatMap"/> is shared among document editor instances and the "default" classification format map contains all needed formatting.
+	/// </summary>
 	static class TextEditorHelper
 	{
 		static /*readonly*/ Guid guidIWpfTextViewHost = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476");
+		static readonly object _syncRoot = new object();
 		internal static readonly IClassificationFormatMap DefaultClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("text");
 		static bool _IdentifySymbolSource;
-		internal static readonly Dictionary<string, StyleBase> SyntaxStyleCache = InitSyntaxStyleCache();
-		internal static readonly Dictionary<string, TextFormattingRunProperties> BackupFormattings = new Dictionary<string, TextFormattingRunProperties>(30);
-		internal static TextFormattingRunProperties DefaultFormatting;
+		static Dictionary<string, StyleBase> _SyntaxStyleCache = InitSyntaxStyleCache();
+		static Dictionary<string, TextFormattingRunProperties> _BackupFormattings = LoadFormattings(new Dictionary<string, TextFormattingRunProperties>(80));
+		static TextFormattingRunProperties _DefaultFormatting;
 
 		internal static bool IdentifySymbolSource => _IdentifySymbolSource;
 
@@ -41,8 +45,20 @@ namespace Codist
 			return token.Contains(start) && (token.Contains(end) || inclusive && token.End == end);
 		}
 
+		public static TextFormattingRunProperties GetBackupFormatting(string classificationType) {
+			lock (_syncRoot) {
+				return _BackupFormattings.TryGetValue(classificationType, out var r) ? r : null;
+			}
+		}
+
 		public static TextFormattingRunProperties GetRunProperties(this IClassificationFormatMap formatMap, string classificationType) {
 			return formatMap.GetTextProperties(ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType));
+		}
+
+		public static StyleBase GetStyle(string classificationType) {
+			lock (_syncRoot) {
+				return _SyntaxStyleCache.TryGetValue(classificationType, out var r) ? r : null;
+			}
 		}
 
 		public static void ExpandSelectionToLine(this IWpfTextView view) {
@@ -176,30 +192,49 @@ namespace Codist
 			return ((IWpfTextViewHost)holder).TextView;
 		}
 		static Dictionary<string, StyleBase> InitSyntaxStyleCache() {
-			var r = new Dictionary<string, StyleBase>(100);
-			LoadSyntaxStyleCache(r);
+			var cache = new Dictionary<string, StyleBase>(100);
+			LoadSyntaxStyleCache(cache);
 			Config.Loaded += (s, args) => ResetStyleCache();
 			DefaultClassificationFormatMap.ClassificationFormatMappingChanged += UpdateFormatCache;
-			return r;
+			return cache;
 		}
 
 		static void ResetStyleCache() {
-			SyntaxStyleCache.Clear();
-			LoadSyntaxStyleCache(SyntaxStyleCache);
+			lock (_syncRoot) {
+				var cache = new Dictionary<string, StyleBase>(_SyntaxStyleCache.Count);
+				LoadSyntaxStyleCache(cache);
+				_SyntaxStyleCache = cache;
+			}
 		}
 
 		static void UpdateFormatCache(object sender, EventArgs args) {
 			var defaultFormat = DefaultClassificationFormatMap.DefaultTextProperties;
-			if (DefaultFormatting == null) {
-				DefaultFormatting = defaultFormat;
+			if (_DefaultFormatting == null) {
+				_DefaultFormatting = defaultFormat;
 			}
-			else if (DefaultFormatting.ForegroundBrushSame(defaultFormat.ForegroundBrush) == false) {
+			else if (_DefaultFormatting.ForegroundBrushSame(defaultFormat.ForegroundBrush) == false) {
 				System.Diagnostics.Debug.WriteLine("DefaultFormatting Changed");
 				// theme changed
-				BackupFormattings.Clear();
-				DefaultFormatting = defaultFormat;
+				lock (_syncRoot) {
+					var formattings = new Dictionary<string, TextFormattingRunProperties>(_BackupFormattings.Count);
+					LoadFormattings(formattings);
+					_BackupFormattings = formattings;
+					_DefaultFormatting = defaultFormat;
+				}
 			}
-			UpdateIdentifySymbolSource(SyntaxStyleCache);
+			lock (_syncRoot) {
+				UpdateIdentifySymbolSource(_SyntaxStyleCache);
+			}
+		}
+
+		static Dictionary<string, TextFormattingRunProperties> LoadFormattings(Dictionary<string, TextFormattingRunProperties> formattings) {
+			var m = DefaultClassificationFormatMap;
+			foreach (var item in m.CurrentPriorityOrder) {
+				if (item != null && _SyntaxStyleCache.ContainsKey(item.Classification)) {
+					formattings[item.Classification] = m.GetExplicitTextProperties(item);
+				}
+			}
+			return formattings;
 		}
 
 		static void LoadSyntaxStyleCache(Dictionary<string, StyleBase> cache) {
