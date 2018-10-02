@@ -14,7 +14,7 @@ namespace Codist.SyntaxHighlight
 	{
 		static protected readonly Regex FriendlyNamePattern = new Regex(@"([a-z])([A-Z0-9])", RegexOptions.Singleline);
 
-		public abstract int Id { get; }
+		internal abstract int Id { get; }
 		/// <summary>Gets or sets whether the content rendered in bold.</summary>
 		public bool? Bold { get; set; }
 		/// <summary>Gets or sets whether the content rendered in italic.</summary>
@@ -119,7 +119,7 @@ namespace Codist.SyntaxHighlight
 	{
 		string _Category;
 
-		public override int Id => (int)StyleID;
+		internal override int Id => (int)StyleID;
 
 		/// <summary>Gets or sets the code style.</summary>
 		public override CodeStyleTypes StyleID { get; set; }
@@ -148,7 +148,7 @@ namespace Codist.SyntaxHighlight
 			ForegroundColor = foregroundColor.ToHexString();
 		}
 
-		public override int Id => (int)StyleID;
+		internal override int Id => (int)StyleID;
 
 		/// <summary>Gets or sets the comment style.</summary>
 		public override CommentStyleTypes StyleID { get; set; }
@@ -177,7 +177,7 @@ namespace Codist.SyntaxHighlight
 			ForegroundColor = foregroundColor.ToHexString();
 		}
 
-		public override int Id => (int)StyleID;
+		internal override int Id => (int)StyleID;
 
 		/// <summary>Gets or sets the C++ style.</summary>
 		public override CppStyleTypes StyleID { get; set; }
@@ -198,7 +198,7 @@ namespace Codist.SyntaxHighlight
 	{
 		string _Category;
 
-		public override int Id => (int)StyleID;
+		internal override int Id => (int)StyleID;
 
 		/// <summary>Gets or sets the code style.</summary>
 		public override CSharpStyleTypes StyleID { get; set; }
@@ -224,7 +224,7 @@ namespace Codist.SyntaxHighlight
 			ForegroundColor = foregroundColor.ToHexString();
 		}
 
-		public override int Id => (int)StyleID;
+		internal override int Id => (int)StyleID;
 
 		/// <summary>Gets or sets the comment style.</summary>
 		public override XmlStyleTypes StyleID { get; set; }
@@ -251,7 +251,7 @@ namespace Codist.SyntaxHighlight
 			ForegroundColor = foregroundColor.ToHexString();
 		}
 
-		public override int Id => (int)StyleID;
+		internal override int Id => (int)StyleID;
 
 		/// <summary>Gets or sets the comment style.</summary>
 		public override SymbolMarkerStyleTypes StyleID { get; set; }

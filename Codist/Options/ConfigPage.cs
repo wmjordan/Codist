@@ -139,6 +139,14 @@ namespace Codist.Options
 	}
 
 	[Browsable(false)]
+	[Guid("ACB2A2ED-9FEA-4E9F-9602-D9BEBA562F30")]
+	sealed class CommonStyle : ConfigPage
+	{
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.GeneralStyles, Config.GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>));
+	}
+
+	[Browsable(false)]
 	[Guid("7CF06695-DFCC-441E-ACBF-5468F937A019")]
 	sealed class CppStyle : ConfigPage
 	{

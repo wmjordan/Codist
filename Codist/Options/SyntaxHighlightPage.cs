@@ -21,20 +21,48 @@ namespace Codist.Options
 				return;
 			}
 			LoadConfig(Config.Instance);
-			_SyntaxHighlightTabs.AddPage("Common Syntax", new SyntaxStyleOptionPage(_servicePage, () => Config.Instance.GeneralStyles, Config.GetDefaultCodeStyles<Codist.SyntaxHighlight.CodeStyle, CodeStyleTypes >), false);
 
 			_DarkThemeButton.Click += (s, args) => {
-				Config.LoadConfig(Config.DarkTheme);
+				Config.LoadConfig(Config.DarkTheme, true);
 			};
 			_LightThemeButton.Click += (s, args) => {
-				Config.LoadConfig(Config.LightTheme);
+				Config.LoadConfig(Config.LightTheme, true);
 			};
 			_SimpleThemeButton.Click += (s, args) => {
-				Config.LoadConfig(Config.SimpleTheme);
+				Config.LoadConfig(Config.SimpleTheme, true);
 			};
 			_ResetThemeButton.Click += (s, args) => {
 				if (MessageBox.Show("Do you want to reset the syntax highlight settings to default?", nameof(Codist), MessageBoxButtons.YesNo) == DialogResult.Yes) {
 					Config.ResetStyles();
+				}
+			};
+			_LoadButton.Click += (s, args) => {
+				using (var d = new OpenFileDialog {
+					Title = "Load Codist syntax highlight setting file...",
+					FileName = "Codist.styles",
+					DefaultExt = "styles",
+					Filter = "Codist syntax highlight setting file|*.styles"
+				}) {
+					if (d.ShowDialog() == DialogResult.OK) {
+						try {
+							Config.LoadConfig(d.FileName, true);
+						}
+						catch (Exception ex) {
+							MessageBox.Show("Error occured while loading style file: " + ex.Message, nameof(Codist));
+						}
+					}
+				}
+			};
+			_SaveButton.Click += (s, args) => {
+				using (var d = new SaveFileDialog {
+					Title = "Save Codist syntax highlight setting file...",
+					FileName = "Codist.styles",
+					DefaultExt = "styles",
+					Filter = "Codist syntax highlight setting file|*.styles"
+				}) {
+					if (d.ShowDialog() == DialogResult.OK) {
+						Config.Instance.SaveConfig(d.FileName, true);
+					}
 				}
 			};
 			_HighlightSpecialCommentBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.SpecialComment, _HighlightSpecialCommentBox.Checked));

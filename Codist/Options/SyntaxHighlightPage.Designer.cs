@@ -33,7 +33,9 @@
 			this._DarkThemeButton = new System.Windows.Forms.Button();
 			this._SyntaxHighlightTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this._SaveButton = new System.Windows.Forms.Button();
 			this._HighlightSpecialCommentBox = new System.Windows.Forms.CheckBox();
+			this._LoadButton = new System.Windows.Forms.Button();
 			this.groupBox2.SuspendLayout();
 			this._SyntaxHighlightTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
@@ -52,6 +54,8 @@
 			// 
 			this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox2.Controls.Add(this._LoadButton);
+			this.groupBox2.Controls.Add(this._SaveButton);
 			this.groupBox2.Controls.Add(this.label1);
 			this.groupBox2.Controls.Add(this._ResetThemeButton);
 			this.groupBox2.Controls.Add(this._SimpleThemeButton);
@@ -59,7 +63,7 @@
 			this.groupBox2.Controls.Add(this._LightThemeButton);
 			this.groupBox2.Location = new System.Drawing.Point(6, 6);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(549, 132);
+			this.groupBox2.Size = new System.Drawing.Size(549, 157);
 			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Super syntax highlight presets";
@@ -71,7 +75,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.label1.Location = new System.Drawing.Point(6, 61);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(537, 55);
+			this.label1.Size = new System.Drawing.Size(537, 54);
 			this.label1.TabIndex = 3;
 			this.label1.Text = "Tip: you can quickly load or reset syntax theme by pressing the buttons above.\r\nO" +
     "pen a C# code file to see effects immediately.";
@@ -127,15 +131,33 @@
 			this.tabPage2.Text = "General";
 			this.tabPage2.UseVisualStyleBackColor = true;
 			// 
+			// _SaveButton
+			// 
+			this._SaveButton.Location = new System.Drawing.Point(125, 118);
+			this._SaveButton.Name = "_SaveButton";
+			this._SaveButton.Size = new System.Drawing.Size(111, 23);
+			this._SaveButton.TabIndex = 8;
+			this._SaveButton.Text = "Save...";
+			this._SaveButton.UseVisualStyleBackColor = true;
+			// 
 			// _HighlightSpecialCommentBox
 			// 
 			this._HighlightSpecialCommentBox.AutoSize = true;
-			this._HighlightSpecialCommentBox.Location = new System.Drawing.Point(15, 144);
+			this._HighlightSpecialCommentBox.Location = new System.Drawing.Point(15, 176);
 			this._HighlightSpecialCommentBox.Name = "_HighlightSpecialCommentBox";
 			this._HighlightSpecialCommentBox.Size = new System.Drawing.Size(189, 19);
 			this._HighlightSpecialCommentBox.TabIndex = 7;
 			this._HighlightSpecialCommentBox.Text = "Tag special comments";
 			this._HighlightSpecialCommentBox.UseVisualStyleBackColor = true;
+			// 
+			// _LoadButton
+			// 
+			this._LoadButton.Location = new System.Drawing.Point(9, 118);
+			this._LoadButton.Name = "_LoadButton";
+			this._LoadButton.Size = new System.Drawing.Size(111, 23);
+			this._LoadButton.TabIndex = 8;
+			this._LoadButton.Text = "Load...";
+			this._LoadButton.UseVisualStyleBackColor = true;
 			// 
 			// SyntaxHighlightPage
 			// 
@@ -163,5 +185,7 @@
 		private System.Windows.Forms.TabPage tabPage2;
 		private System.Windows.Forms.Button _SimpleThemeButton;
 		private System.Windows.Forms.CheckBox _HighlightSpecialCommentBox;
+		private System.Windows.Forms.Button _SaveButton;
+		private System.Windows.Forms.Button _LoadButton;
 	}
 }

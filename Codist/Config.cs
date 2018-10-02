@@ -61,14 +61,13 @@ namespace Codist
 		public static event EventHandler<ConfigUpdatedEventArgs> Updated;
 
 		public static Config InitConfig() {
-			//AppHelpers.LogHelper.UseLogMethod(i => Debug.WriteLine(i));
 			if (File.Exists(ConfigPath) == false) {
 				var config = GetDefaultConfig();
 				config.SaveConfig(ConfigPath);
 				return config;
 			}
 			try {
-				return InternalLoadConfig(ConfigPath);
+				return InternalLoadConfig(ConfigPath, false);
 			}
 			catch (Exception ex) {
 				Debug.WriteLine(ex.ToString());
@@ -76,18 +75,20 @@ namespace Codist
 			}
 		}
 
-		public static void LoadConfig(string configPath) {
+		public static void LoadConfig(string configPath, bool stylesOnly = false) {
 			//HACK: prevent redundant load operations issued by configuration pages
-			if (Interlocked.Exchange(ref _LoadingConfig, 1) != 0
-				|| _LastLoaded.AddSeconds(2) > DateTime.Now
-				&& configPath.StartsWith(ThemePrefix, StringComparison.Ordinal) == false) {
+			if (_LastLoaded.AddSeconds(2) > DateTime.Now && stylesOnly == false) {
 				return;
 			}
+			if (Interlocked.Exchange(ref _LoadingConfig, 1) != 0) {
+				return;
+			}
+			Debug.WriteLine("Load config: " + configPath);
 			try {
-				Instance = InternalLoadConfig(configPath);
+				Instance = InternalLoadConfig(configPath, stylesOnly);
 				//TextEditorHelper.ResetStyleCache();
 				Loaded?.Invoke(Instance, EventArgs.Empty);
-				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.All));
+				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(stylesOnly ? Features.SyntaxHighlight : Features.All));
 			}
 			catch(Exception ex) {
 				Debug.WriteLine(ex.ToString());
@@ -98,12 +99,11 @@ namespace Codist
 			}
 		}
 
-		static Config InternalLoadConfig(string configPath) {
+		static Config InternalLoadConfig(string configPath, bool stylesOnly) {
 			var configContent = configPath == LightTheme ? Properties.Resources.Light
 				: configPath == DarkTheme ? Properties.Resources.Dark
 				: configPath == SimpleTheme ? Properties.Resources.Simple
 				: File.ReadAllText(configPath);
-			var loadFromTheme = configPath.StartsWith(ThemePrefix, StringComparison.Ordinal);
 			var config = JsonConvert.DeserializeObject<Config>(configContent, new JsonSerializerSettings {
 				DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
 				NullValueHandling = NullValueHandling.Ignore,
@@ -117,17 +117,17 @@ namespace Codist
 					l.RemoveAt(i);
 				}
 			}
-			if (l.Count == 0) {
+			if (l.Count == 0 && stylesOnly == false) {
 				InitDefaultLabels(l);
 			}
-			LoadStyleEntries<CodeStyle, CodeStyleTypes>(config.GeneralStyles, loadFromTheme);
-			LoadStyleEntries<CommentStyle, CommentStyleTypes>(config.CommentStyles, loadFromTheme);
-			LoadStyleEntries<CppStyle, CppStyleTypes>(config.CppStyles, loadFromTheme);
-			LoadStyleEntries<CSharpStyle, CSharpStyleTypes>(config.CodeStyles, loadFromTheme);
-			LoadStyleEntries<XmlCodeStyle, XmlStyleTypes>(config.XmlCodeStyles, loadFromTheme);
-			LoadStyleEntries<SymbolMarkerStyle, SymbolMarkerStyleTypes>(config.SymbolMarkerStyles, loadFromTheme);
-			if (loadFromTheme) {
-				// don't override other settings if loaded from predefined themes
+			LoadStyleEntries<CodeStyle, CodeStyleTypes>(config.GeneralStyles, stylesOnly);
+			LoadStyleEntries<CommentStyle, CommentStyleTypes>(config.CommentStyles, stylesOnly);
+			LoadStyleEntries<CppStyle, CppStyleTypes>(config.CppStyles, stylesOnly);
+			LoadStyleEntries<CSharpStyle, CSharpStyleTypes>(config.CodeStyles, stylesOnly);
+			LoadStyleEntries<XmlCodeStyle, XmlStyleTypes>(config.XmlCodeStyles, stylesOnly);
+			LoadStyleEntries<SymbolMarkerStyle, SymbolMarkerStyleTypes>(config.SymbolMarkerStyles, stylesOnly);
+			if (stylesOnly) {
+				// don't override other settings if loaded from predefined themes or syntax config file
 				ResetCodeStyle(Instance.GeneralStyles, config.GeneralStyles);
 				ResetCodeStyle(Instance.CommentStyles, config.CommentStyles);
 				ResetCodeStyle(Instance.CodeStyles, config.CodeStyles);
@@ -155,7 +155,7 @@ namespace Codist
 			Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.SyntaxHighlight));
 		}
 
-		public void SaveConfig(string path) {
+		public void SaveConfig(string path, bool stylesOnly = false) {
 			//HACK: prevent redundant save operations issued by configuration pages
 			if (_LastSaved.AddSeconds(2) > DateTime.Now) {
 				return;
@@ -167,7 +167,7 @@ namespace Codist
 					Directory.CreateDirectory(d);
 				}
 				File.WriteAllText(path, JsonConvert.SerializeObject(
-					this,
+					stylesOnly ? (object)new StyleConfig(this) : this,
 					Formatting.Indented,
 					new JsonSerializerSettings {
 						DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
@@ -177,7 +177,6 @@ namespace Codist
 				if (path == ConfigPath) {
 					_LastSaved = _LastLoaded = DateTime.Now;
 					Debug.WriteLine("Config saved");
-					//Updated?.Invoke(this, EventArgs.Empty);
 				}
 			}
 			catch (Exception ex) {
@@ -187,6 +186,42 @@ namespace Codist
 
 		internal void FireConfigChangedEvent(Features updatedFeature) {
 			Updated?.Invoke(this, new ConfigUpdatedEventArgs(updatedFeature));
+		}
+		internal static TStyle[] GetDefaultCodeStyles<TStyle, TStyleType>()
+			where TStyle : StyleBase<TStyleType>, new()
+			where TStyleType : struct, Enum {
+			var r = new TStyle[Enum.GetValues(typeof(TStyleType)).Length];
+			for (var i = 0; i < r.Length; i++) {
+				r[i] = new TStyle { StyleID = ClrHacker.DirectCast<int, TStyleType>(i) };
+			}
+			return r;
+		}
+		internal static MarkerStyle[] GetDefaultMarkerStyles() {
+			return new MarkerStyle[] {
+				new MarkerStyle(MarkerStyleTypes.SymbolReference, Colors.Cyan)
+			};
+		}
+		internal static List<TStyle> GetDefinedStyles<TStyle>(List<TStyle> styles)
+			where TStyle : StyleBase {
+			return styles.FindAll(s => s.IsSet);
+		}
+		internal void Set(Features options, bool set) {
+			Features = EnumHelper.SetFlags(Features, options, set);
+		}
+		internal void Set(QuickInfoOptions options, bool set) {
+			QuickInfoOptions = EnumHelper.SetFlags(QuickInfoOptions, options, set);
+		}
+		internal void Set(SmartBarOptions options, bool set) {
+			SmartBarOptions = EnumHelper.SetFlags(SmartBarOptions, options, set);
+			FireConfigChangedEvent(Features.SmartBar);
+		}
+		internal void Set(MarkerOptions options, bool set) {
+			MarkerOptions = EnumHelper.SetFlags(MarkerOptions, options, set);
+			FireConfigChangedEvent(Features.ScrollbarMarkers);
+		}
+		internal void Set(SpecialHighlightOptions options, bool set) {
+			SpecialHighlightOptions = EnumHelper.SetFlags(SpecialHighlightOptions, options, set);
+			FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 
 		static void LoadStyleEntries<TStyle, TStyleType> (List<TStyle> styles, bool removeFontNames)
@@ -280,37 +315,21 @@ namespace Codist
 				new CommentStyle(CommentStyleTypes.Task9) { ScrollBarMarkerStyle = ScrollbarMarkerStyle.Number9 },
 			};
 		}
-		internal static TStyle[] GetDefaultCodeStyles<TStyle, TStyleType>()
-			where TStyle : StyleBase<TStyleType>, new()
-			where TStyleType : struct, Enum {
-			var r = new TStyle[Enum.GetValues(typeof(TStyleType)).Length];
-			for (var i = 0; i < r.Length; i++) {
-				r[i] = new TStyle { StyleID = ClrHacker.DirectCast<int, TStyleType>(i) };
+
+		sealed class StyleConfig
+		{
+			readonly Config _Config;
+
+			public StyleConfig(Config config) {
+				_Config = config;
 			}
-			return r;
-		}
-		internal static MarkerStyle[] GetDefaultMarkerStyles() {
-			return new MarkerStyle[] {
-				new MarkerStyle(MarkerStyleTypes.SymbolReference, Colors.Cyan)
-			};
-		}
-		internal void Set(Features options, bool set) {
-			Features = EnumHelper.SetFlags(Features, options, set);
-		}
-		internal void Set(QuickInfoOptions options, bool set) {
-			QuickInfoOptions = EnumHelper.SetFlags(QuickInfoOptions, options, set);
-		}
-		internal void Set(SmartBarOptions options, bool set) {
-			SmartBarOptions = EnumHelper.SetFlags(SmartBarOptions, options, set);
-			FireConfigChangedEvent(Features.SmartBar);
-		}
-		internal void Set(MarkerOptions options, bool set) {
-			MarkerOptions = EnumHelper.SetFlags(MarkerOptions, options, set);
-			FireConfigChangedEvent(Features.ScrollbarMarkers);
-		}
-		internal void Set(SpecialHighlightOptions options, bool set) {
-			SpecialHighlightOptions = EnumHelper.SetFlags(SpecialHighlightOptions, options, set);
-			FireConfigChangedEvent(Features.SyntaxHighlight);
+
+			public List<CommentStyle> CommentStyles => GetDefinedStyles(_Config.CommentStyles);
+			public List<XmlCodeStyle> XmlCodeStyles => GetDefinedStyles(_Config.XmlCodeStyles);
+			public List<CSharpStyle> CodeStyles => GetDefinedStyles(_Config.CodeStyles);
+			public List<CppStyle> CppStyles => GetDefinedStyles(_Config.CppStyles);
+			public List<CodeStyle> GeneralStyles => GetDefinedStyles(_Config.GeneralStyles);
+			public List<SymbolMarkerStyle> SymbolMarkerStyles => GetDefinedStyles(_Config.SymbolMarkerStyles);
 		}
 	}
 
