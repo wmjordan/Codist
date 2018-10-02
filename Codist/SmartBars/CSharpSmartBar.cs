@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using WpfBrushes = System.Windows.Media.Brushes;
 
 namespace Codist.SmartBars
 {
@@ -314,7 +315,7 @@ namespace Codist.SmartBars
 				foreach (var caller in callers) {
 					var s = caller.CallingSymbol;
 					menuItem.Items.Add(new SymbolMenuItem(this, s, caller.Locations) {
-						Header = new TextBlock().Append(s.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).Append(s.Name)
+						Header = new TextBlock().Append(s.ContainingType.Name + ".", WpfBrushes.Gray).Append(s.Name)
 					});
 				}
 			}
@@ -339,7 +340,7 @@ namespace Codist.SmartBars
 			foreach (var derived in classes) {
 				var item = new SymbolMenuItem(this, derived, derived.Locations);
 				if (derived.GetSourceLocations().Length == 0) {
-					(item.Header as TextBlock).Foreground = System.Windows.Media.Brushes.Gray;
+					(item.Header as TextBlock).Foreground = WpfBrushes.Gray;
 				}
 				menuItem.Items.Add(item);
 			}
@@ -506,7 +507,7 @@ namespace Codist.SmartBars
 					break;
 				case SymbolKind.NamedType:
 					var t = symbol as INamedTypeSymbol;
-					if (symbol.Kind == SymbolKind.Method) { // from case Method
+					if (symbol.Kind == SymbolKind.Method) { // from case SymbolKind.Method
 						t = symbol.ContainingType as INamedTypeSymbol;
 					}
 					else {
@@ -551,6 +552,9 @@ namespace Codist.SmartBars
 			var type = symbol.GetReturnType();
 			if (type != null && type.SpecialType == SpecialType.None) {
 				list.Add(CreateCommandMenu("Find members of " + type.GetSignatureString() + "...", KnownImageIds.ListMembers, type, "No member was found", FindMembers));
+				if (type.FirstSourceLocation() != null) {
+					list.Add(new CommandItem("Go to " + type.GetSignatureString(), KnownImageIds.GoToDeclaration, null, _ => type.GoToSource()));
+				}
 			}
 		}
 
@@ -562,7 +566,7 @@ namespace Codist.SmartBars
 			if (members.Count < 10) {
 				foreach (var member in members) {
 					menuItem.Items.Add(new SymbolMenuItem(this, member, member.Locations) {
-						Header = new TextBlock().Append(member.ContainingType.Name + ".", System.Windows.Media.Brushes.Gray).Append(member.Name)
+						Header = new TextBlock().Append(member.ContainingType.Name + ".", WpfBrushes.Gray).Append(member.Name)
 					});
 				}
 			}
