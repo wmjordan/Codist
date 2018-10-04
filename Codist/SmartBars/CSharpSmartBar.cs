@@ -24,11 +24,6 @@ namespace Codist.SmartBars
 	sealed class CSharpSmartBar : SmartBar {
 		static readonly Thickness __FilterBorderThickness = new Thickness(0, 0, 0, 1);
 		static readonly Classifiers.HighlightClassifications __HighlightClassifications = new Classifiers.HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
-		static readonly SymbolDisplayFormat __MemberNameFormat = new SymbolDisplayFormat(
-			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-			parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
-			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 		CompilationUnitSyntax _Compilation;
 		Document _Document;
 		SyntaxNode _Node;
@@ -238,9 +233,9 @@ namespace Codist.SmartBars
 					symbol = ctor.ContainingType;
 				}
 			}
-			r.Add(new CommandItem("Mark symbol " + symbol.Name, KnownImageIds.Flag, AddHighlightMenuItems, null));
+			r.Add(new CommandItem("Mark " + symbol.Name, KnownImageIds.Flag, AddHighlightMenuItems, null));
 			if (Classifiers.SymbolMarkManager.Contains(symbol)) {
-				r.Add(new CommandItem("Remove symbol mark for " + symbol.Name, KnownImageIds.FlagOutline, null, ctx => {
+				r.Add(new CommandItem("Unmark " + symbol.Name, KnownImageIds.FlagOutline, null, ctx => {
 					UpdateSemanticModel();
 					if (_Symbol != null && Classifiers.SymbolMarkManager.Remove(_Symbol)) {
 						Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
@@ -249,9 +244,9 @@ namespace Codist.SmartBars
 				}));
 			}
 			else if (Classifiers.SymbolMarkManager.HasBookmark) {
-				r.Add(CreateCommandMenu("Remove symbol mark...", KnownImageIds.FlagOutline, symbol, "No symbol marked", (m, s) => {
+				r.Add(CreateCommandMenu("Unmark symbol...", KnownImageIds.FlagOutline, symbol, "No symbol marked", (m, s) => {
 					foreach (var item in Classifiers.SymbolMarkManager.MarkedSymbols) {
-						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.ToDisplayString(__MemberNameFormat), item.GetImageId(), null, ctx => {
+						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.DisplayString, item.ImageId, null, ctx => {
 							Classifiers.SymbolMarkManager.Remove(item);
 							Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 						})));
@@ -375,7 +370,7 @@ namespace Codist.SmartBars
 			var type = symbol as INamedTypeSymbol;
 			if (type != null && type.TypeKind == TypeKind.Class) {
 				while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
-					var baseTypeItem = new SymbolMenuItem(this, type, type.ToDisplayString(__MemberNameFormat) + " (base class)", null);
+					var baseTypeItem = new SymbolMenuItem(this, type, type.ToDisplayString(WpfHelper.MemberNameFormat) + " (base class)", null);
 					menuItem.Items.Add(baseTypeItem);
 					AddSymbolMembers(this, baseTypeItem, type);
 				}
@@ -621,7 +616,7 @@ namespace Codist.SmartBars
 		}
 		sealed class SymbolMenuItem : CommandMenuItem
 		{
-			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(__MemberNameFormat), locations) { }
+			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(WpfHelper.MemberNameFormat), locations) { }
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
 				Locations = locations;
 				Symbol = symbol;
@@ -666,7 +661,7 @@ namespace Codist.SmartBars
 				var t = Symbol.GetReturnType();
 				if (t != null) {
 					content.Append("member type: ")
-						.Append(t.ToDisplayString(__MemberNameFormat), true);
+						.Append(t.ToDisplayString(WpfHelper.MemberNameFormat), true);
 				}
 				t = Symbol.ContainingType;
 				if (t != null) {
@@ -674,7 +669,7 @@ namespace Codist.SmartBars
 						content.AppendLine();
 					}
 					content.Append(t.GetSymbolKindName() + ": ")
-						.Append(t.ToDisplayString(__MemberNameFormat), true);
+						.Append(t.ToDisplayString(WpfHelper.MemberNameFormat), true);
 				}
 				if (content.Inlines.FirstInline != null) {
 					content.AppendLine();
@@ -691,6 +686,8 @@ namespace Codist.SmartBars
 					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 				}
 				ToolTip = tip;
+				ToolTipService.SetBetweenShowDelay(this, 1000);
+				ToolTipService.SetInitialShowDelay(this, 1000);
 				ToolTipService.SetShowDuration(this, 15000);
 				ToolTipOpening -= ShowToolTip;
 			}

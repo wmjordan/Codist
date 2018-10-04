@@ -57,7 +57,7 @@ namespace Codist.SyntaxHighlight
 
 		/// <summary>Returns whether any option in this style is set.</summary>
 		[Newtonsoft.Json.JsonIgnore]
-		public bool IsSet => Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || String.IsNullOrEmpty(Font) == false || ForeColor.A > 0 || BackColor.A > 0;
+		public bool IsSet => Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false || ForeColor.A > 0 || BackColor.A > 0;
 
 		internal abstract string ClassificationType { get; }
 		internal abstract string Description { get; }
