@@ -1,15 +1,32 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist.Classifiers
 {
+	interface IBookmarkedSymbol : IEquatable<IBookmarkedSymbol>
+	{
+		string Name { get; }
+		SymbolKind Kind { get; }
+		Accessibility Accessibility { get; }
+		IBookmarkedSymbolType ContainingType { get; }
+		IBookmarkedSymbolType MemberType { get; }
+		int ImageId { get; }
+		string DisplayString { get; }
+	}
+	interface IBookmarkedSymbolType
+	{
+		string Name { get; }
+		int Arity { get; }
+		TypeKind TypeKind { get; }
+	}
 	static class SymbolMarkManager
 	{
-		static readonly ConcurrentDictionary<ISymbol, IClassificationType> _Bookmarks = new ConcurrentDictionary<ISymbol, IClassificationType>(new SymbolComparer());
+		static readonly ConcurrentDictionary<IBookmarkedSymbol, IClassificationType> _Bookmarks = new ConcurrentDictionary<IBookmarkedSymbol, IClassificationType>(new SymbolComparer());
 
-		internal static IEnumerable<ISymbol> MarkedSymbols => _Bookmarks.Keys;
+		internal static IEnumerable<IBookmarkedSymbol> MarkedSymbols => _Bookmarks.Keys;
 		internal static bool HasBookmark => _Bookmarks.IsEmpty == false;
 
 		internal static bool CanBookmark(ISymbol symbol) {
@@ -27,97 +44,170 @@ namespace Codist.Classifiers
 			return false;
 		}
 		internal static IClassificationType GetSymbolMarkerStyle(ISymbol symbol) {
-			return _Bookmarks.TryGetValue(symbol, out var result) ? result : null;
+			return _Bookmarks.TryGetValue(new WrappedSymbol(symbol), out var result) ? result : null;
 		}
 		internal static void Clear() {
 			_Bookmarks.Clear();
 		}
 		internal static bool Contains(ISymbol symbol) {
-			return _Bookmarks.ContainsKey(symbol);
+			return _Bookmarks.ContainsKey(new WrappedSymbol(symbol));
 		}
 		internal static void Update(ISymbol symbol, IClassificationType classificationType) {
-			_Bookmarks[symbol] = classificationType;
+			_Bookmarks[new BookmarkedSymbol(symbol)] = classificationType;
 		}
-		internal static bool Remove(ISymbol symbol) {
+		internal static bool Remove(IBookmarkedSymbol symbol) {
 			return _Bookmarks.TryRemove(symbol, out var dummy);
 		}
+		internal static bool Remove(ISymbol symbol) {
+			return _Bookmarks.TryRemove(new WrappedSymbol(symbol), out var dummy);
+		}
 
+		static int GetHashCode(IBookmarkedSymbol symbol) {
+			const int M = 17, M2 = -1521134295;
+			var c = symbol.Name.GetHashCode() + ((int)symbol.Kind * M2);
+			c = c * M + (int)symbol.Accessibility * M2;
+			return c;
+		}
+		static int GetHashCode(IBookmarkedSymbolType symbol) {
+			return symbol.Name.GetHashCode() + ((int)symbol.TypeKind * 17);
+		}
+		sealed class BookmarkedSymbol : IBookmarkedSymbol, IEquatable<IBookmarkedSymbol>
+		{
+			public string Name { get; }
+			public SymbolKind Kind { get; }
+			public Accessibility Accessibility { get; }
+			public IBookmarkedSymbolType ContainingType { get; }
+			public IBookmarkedSymbolType MemberType { get; }
+			public int ImageId { get; }
+			public string DisplayString { get; }
+
+			public BookmarkedSymbol(ISymbol symbol) {
+				Name = symbol.Name;
+				Kind = symbol.Kind;
+				Accessibility = symbol.DeclaredAccessibility;
+				ContainingType = symbol.ContainingType != null ? new BookmarkedSymbolType(symbol.ContainingType) : EmptyBookmarkedSymbolType.Instance;
+				var rt = symbol.GetReturnType() as INamedTypeSymbol;
+				MemberType = rt != null ? new BookmarkedSymbolType(rt) : EmptyBookmarkedSymbolType.Instance;
+				ImageId = symbol.GetImageId();
+				DisplayString = symbol.ToDisplayString();
+			}
+
+			public bool Equals(IBookmarkedSymbol other) {
+				return other != null && other.Kind == Kind && other.Accessibility == Accessibility && other.Name == Name
+					&& (ContainingType == other.ContainingType || ContainingType != null && other.ContainingType != null && ContainingType.Equals(other.ContainingType))
+					&& (MemberType == other.MemberType || MemberType != null && other.MemberType != null && MemberType.Equals(other.MemberType));
+			}
+			public override bool Equals(object obj) {
+				return Equals(obj as IBookmarkedSymbol);
+			}
+			public override int GetHashCode() {
+				return SymbolMarkManager.GetHashCode(this);
+			}
+			public override string ToString() {
+				return DisplayString;
+			}
+		}
+		sealed class EmptyBookmarkedSymbolType : IBookmarkedSymbolType
+		{
+			public string Name => String.Empty;
+			public int Arity => 0;
+			public TypeKind TypeKind => TypeKind.Unknown;
+
+			public static readonly IBookmarkedSymbolType Instance = new EmptyBookmarkedSymbolType();
+			private EmptyBookmarkedSymbolType() {}
+		}
+		sealed class BookmarkedSymbolType : IEquatable<IBookmarkedSymbolType>, IBookmarkedSymbolType
+		{
+			public string Name { get; }
+			public int Arity { get; }
+			public TypeKind TypeKind { get; }
+
+			public BookmarkedSymbolType (INamedTypeSymbol symbol) {
+				Arity = symbol.Arity;
+				Name = symbol.Name;
+				TypeKind = symbol.TypeKind;
+			}
+
+			public bool Equals(IBookmarkedSymbolType other) {
+				return other != null && other.TypeKind == TypeKind && other.Arity == Arity && other.Name == Name;
+			}
+			public override bool Equals(object obj) {
+				return Equals(obj as IBookmarkedSymbolType);
+			}
+			public override int GetHashCode() {
+				return SymbolMarkManager.GetHashCode(this);
+			}
+			public override string ToString() {
+				return Name;
+			}
+		}
+
+		sealed class WrappedSymbol : IBookmarkedSymbol
+		{
+			readonly ISymbol _Symbol;
+			IBookmarkedSymbolType _ContainingType, _MemberType;
+
+			public WrappedSymbol(ISymbol symbol) {
+				_Symbol = symbol;
+			}
+
+			public string Name => _Symbol.Name;
+			public SymbolKind Kind => _Symbol.Kind;
+			public Accessibility Accessibility => _Symbol.DeclaredAccessibility;
+			public IBookmarkedSymbolType ContainingType => _ContainingType ?? (_ContainingType = _Symbol.ContainingType != null ? new WrappedSymbolType(_Symbol.ContainingType) : EmptyBookmarkedSymbolType.Instance);
+			public IBookmarkedSymbolType MemberType {
+				get {
+					if (_MemberType != null) {
+						return _MemberType;
+					}
+					var t = _Symbol.GetReturnType() as INamedTypeSymbol;
+					return _MemberType = (t != null ? new WrappedSymbolType(t) : EmptyBookmarkedSymbolType.Instance);
+				}
+			}
+			public int ImageId => _Symbol.GetImageId();
+			public string DisplayString => _Symbol.ToDisplayString(WpfHelper.MemberNameFormat);
+
+			public bool Equals(IBookmarkedSymbol other) {
+				return other != null && other.Kind == Kind && other.Accessibility == Accessibility && other.Name == Name
+					&& (ContainingType == other.ContainingType || ContainingType != null && other.ContainingType != null && ContainingType.Equals(other.ContainingType))
+					&& (MemberType == other.MemberType || MemberType != null && other.MemberType != null && MemberType.Equals(other.MemberType));
+			}
+
+			public override int GetHashCode() {
+				return SymbolMarkManager.GetHashCode(this);
+			}
+			public override string ToString() {
+				return "(" + DisplayString + ")";
+			}
+		}
+		sealed class WrappedSymbolType : IBookmarkedSymbolType
+		{
+			readonly INamedTypeSymbol _Symbol;
+
+			public WrappedSymbolType(INamedTypeSymbol symbol) {
+				_Symbol = symbol;
+			}
+
+			public string Name => _Symbol.Name;
+			public int Arity => _Symbol.Arity;
+			public TypeKind TypeKind => _Symbol.TypeKind;
+			public override int GetHashCode() {
+				return SymbolMarkManager.GetHashCode(this);
+			}
+			public override string ToString() {
+				return "(" + Name + ")";
+			}
+		}
 		/// <summary>
 		/// Implements a loose <see cref="IEqualityComparer{T}"/> of <see cref="ISymbol"/> which compares <see cref="ISymbol.Kind"/>, <see cref="ISymbol.DeclaredAccessibility"/>, <see cref="ISymbol.Name"/> and <see cref="ISymbol.ContainingType"/> only.
 		/// </summary>
-		sealed class SymbolComparer : IEqualityComparer<ISymbol>
+		sealed class SymbolComparer : IEqualityComparer<IBookmarkedSymbol>
 		{
-			public bool Equals(ISymbol x, ISymbol y) {
-				if (x == y) {
-					return true;
-				}
-				if (x.Kind != y.Kind || x.DeclaredAccessibility != y.DeclaredAccessibility
-					|| x.Name != y.Name
-					|| AreNamedTypesEqual(x.ContainingType, y.ContainingType) == false) {
-					return false;
-				}
-				switch (x.Kind) {
-					case SymbolKind.Field:
-						return AreNamedTypesEqual(((IFieldSymbol)x).Type as INamedTypeSymbol, ((IFieldSymbol)y).Type as INamedTypeSymbol);
-					case SymbolKind.Property:
-						return AreNamedTypesEqual(((IPropertySymbol)x).Type as INamedTypeSymbol, ((IPropertySymbol)y).Type as INamedTypeSymbol);
-					case SymbolKind.Local:
-						return AreNamedTypesEqual(((ILocalSymbol)x).Type as INamedTypeSymbol, ((ILocalSymbol)y).Type as INamedTypeSymbol);
-					case SymbolKind.Parameter:
-						return AreMethodsEqual(((IParameterSymbol)x).ContainingSymbol as IMethodSymbol, ((IParameterSymbol)y).ContainingSymbol as IMethodSymbol);
-					case SymbolKind.Method:
-						var mx = (IMethodSymbol)x;
-						var my = (IMethodSymbol)y;
-						return AreMethodsEqual(mx, my);
-				}
-				return true;
+			public bool Equals(IBookmarkedSymbol x, IBookmarkedSymbol y) {
+				return x.Equals(y);
 			}
-
-			static bool AreMethodsEqual(IMethodSymbol mx, IMethodSymbol my) {
-				if (AreNamedTypesEqual(mx.ReturnType as INamedTypeSymbol, my.ReturnType as INamedTypeSymbol) == false) {
-					return false;
-				}
-				var px = mx.Parameters;
-				var py = my.Parameters;
-				if (px.Length != py.Length) {
-					return false;
-				}
-				for (int i = px.Length - 1; i >= 0; i--) {
-					if (AreTypesEqual(px[i].Type, py[i].Type) == false) {
-						return false;
-					}
-				}
-				return true;
-			}
-
-			static bool AreTypesEqual(ITypeSymbol x, ITypeSymbol y) {
-				if (x == null || y == null) {
-					return x == y;
-				}
-				if (x.TypeKind != y.TypeKind
-					|| x.Name != y.Name) {
-					return false;
-				}
-				return true;
-			}
-			static bool AreNamedTypesEqual(INamedTypeSymbol x, INamedTypeSymbol y) {
-				if (x == null || y == null) {
-					return x == y;
-				}
-				if (x.TypeKind != y.TypeKind
-					|| x.IsGenericType != y.IsGenericType
-					|| x.Arity != y.Arity
-					|| x.Name != y.Name) {
-					return false;
-				}
-				return true;
-			}
-
-			public int GetHashCode(ISymbol obj) {
-				const int M = 17, M2 = -1521134295;
-				var c = obj.Name.GetHashCode() + ((int)obj.Kind * M2);
-				c = c * M + (int)obj.DeclaredAccessibility * M2;
-				return c;
+			public int GetHashCode(IBookmarkedSymbol obj) {
+				return SymbolMarkManager.GetHashCode(obj);
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
@@ -97,4 +98,22 @@ namespace Codist
 
 		#endregion
 	}
+
+	internal static class SharedDictionaryManager
+	{
+		internal static ResourceDictionary ContextMenu {
+			get {
+				if (_ContextMenu == null) {
+					// to get started with our own context menu styles, see this answer on StackOverflow
+					// https://stackoverflow.com/questions/3391742/wpf-submenu-styling?rq=1
+					var resourceLocater = new Uri("/Codist;component/controls/ContextMenu.xaml", UriKind.Relative);
+					_ContextMenu = (ResourceDictionary)Application.LoadComponent(resourceLocater);
+				}
+				return _ContextMenu;
+			}
+		}
+
+		private static ResourceDictionary _ContextMenu;
+	}
+
 }

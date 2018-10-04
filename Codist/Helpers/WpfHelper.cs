@@ -33,6 +33,11 @@ namespace Codist
 			memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType | SymbolDisplayMemberOptions.IncludeContainingType,
 			delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+		internal static readonly SymbolDisplayFormat MemberNameFormat = new SymbolDisplayFormat(
+			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+			parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
+			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 
 		public static TPanel Add<TPanel>(this TPanel panel, UIElement control)
 			where TPanel : Panel {
@@ -137,6 +142,15 @@ namespace Codist
 				}
 				return sb.ToString();
 			}
+		}
+		public static string GetTemplate(this Control element) {
+			if (element.Template == null) {
+				return String.Empty;
+			}
+			var str = new System.Text.StringBuilder(500);
+			using (var writer = new System.IO.StringWriter(str))
+				System.Windows.Markup.XamlWriter.Save(element.Template, writer);
+			return str.ToString();
 		}
 		public static Run Render(this ISymbol symbol, string alias, WpfBrush brush) {
 			return symbol.Render(alias, brush == null, brush);
@@ -314,8 +328,9 @@ namespace Codist
 			return LogicalTreeHelper.GetParent(obj);
 		}
 		public static ContextMenu CreateContextMenuForSourceLocations(string symbolName, ImmutableArray<Location> refs) {
-			var menu = new ContextMenu().SetStyleResourceProperty("EditorContextMenu");
-			menu.Foreground = ThemeHelper.MenuTextBrush;
+			var menu = new ContextMenu {
+				Resources = SharedDictionaryManager.ContextMenu
+			};
 			menu.Opened += (sender, e) => {
 				var m = sender as ContextMenu;
 				m.Items.Add(new MenuItem {
