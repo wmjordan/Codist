@@ -23,6 +23,8 @@ namespace Codist
 		static DateTime _LastSaved, _LastLoaded;
 		static int _LoadingConfig;
 
+		ConfigManager _ConfigManager;
+
 		public static readonly string ConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.NameOfMe + "\\Config.json";
 		public static Config Instance = InitConfig();
 
@@ -76,10 +78,6 @@ namespace Codist
 		}
 
 		public static void LoadConfig(string configPath, bool stylesOnly = false) {
-			//HACK: prevent redundant load operations issued by configuration pages
-			if (_LastLoaded.AddSeconds(2) > DateTime.Now && stylesOnly == false) {
-				return;
-			}
 			if (Interlocked.Exchange(ref _LoadingConfig, 1) != 0) {
 				return;
 			}
@@ -111,21 +109,24 @@ namespace Codist
 					args.ErrorContext.Handled = true; // ignore json error
 				}
 			});
-			var l = config.Labels;
-			for (var i = l.Count - 1; i >= 0; i--) {
-				if (String.IsNullOrWhiteSpace(l[i].Label)) {
-					l.RemoveAt(i);
+			if (stylesOnly == false) {
+				var l = config.Labels;
+				for (var i = l.Count - 1; i >= 0; i--) {
+					if (String.IsNullOrWhiteSpace(l[i].Label)) {
+						l.RemoveAt(i);
+					}
+				}
+				if (l.Count == 0) {
+					InitDefaultLabels(l);
 				}
 			}
-			if (l.Count == 0 && stylesOnly == false) {
-				InitDefaultLabels(l);
-			}
-			LoadStyleEntries<CodeStyle, CodeStyleTypes>(config.GeneralStyles, stylesOnly);
-			LoadStyleEntries<CommentStyle, CommentStyleTypes>(config.CommentStyles, stylesOnly);
-			LoadStyleEntries<CppStyle, CppStyleTypes>(config.CppStyles, stylesOnly);
-			LoadStyleEntries<CSharpStyle, CSharpStyleTypes>(config.CodeStyles, stylesOnly);
-			LoadStyleEntries<XmlCodeStyle, XmlStyleTypes>(config.XmlCodeStyles, stylesOnly);
-			LoadStyleEntries<SymbolMarkerStyle, SymbolMarkerStyleTypes>(config.SymbolMarkerStyles, stylesOnly);
+			var removeFontNames = System.Windows.Forms.Control.ModifierKeys == System.Windows.Forms.Keys.Control;
+			LoadStyleEntries<CodeStyle, CodeStyleTypes>(config.GeneralStyles, removeFontNames);
+			LoadStyleEntries<CommentStyle, CommentStyleTypes>(config.CommentStyles, removeFontNames);
+			LoadStyleEntries<CppStyle, CppStyleTypes>(config.CppStyles, removeFontNames);
+			LoadStyleEntries<CSharpStyle, CSharpStyleTypes>(config.CodeStyles, removeFontNames);
+			LoadStyleEntries<XmlCodeStyle, XmlStyleTypes>(config.XmlCodeStyles, removeFontNames);
+			LoadStyleEntries<SymbolMarkerStyle, SymbolMarkerStyleTypes>(config.SymbolMarkerStyles, removeFontNames);
 			if (stylesOnly) {
 				// don't override other settings if loaded from predefined themes or syntax config file
 				ResetCodeStyle(Instance.GeneralStyles, config.GeneralStyles);
@@ -156,10 +157,6 @@ namespace Codist
 		}
 
 		public void SaveConfig(string path, bool stylesOnly = false) {
-			//HACK: prevent redundant save operations issued by configuration pages
-			if (_LastSaved.AddSeconds(2) > DateTime.Now) {
-				return;
-			}
 			path = path ?? ConfigPath;
 			try {
 				var d = Path.GetDirectoryName(path);
@@ -184,6 +181,17 @@ namespace Codist
 			}
 		}
 
+		internal void BeginUpdate() {
+			if (_ConfigManager == null) {
+				_ConfigManager = new ConfigManager();
+			}
+		}
+		internal void EndUpdate(bool apply) {
+			var m = Interlocked.Exchange(ref _ConfigManager, null);
+			if (m != null) {
+				m.Quit(apply);
+			}
+		}
 		internal void FireConfigChangedEvent(Features updatedFeature) {
 			Updated?.Invoke(this, new ConfigUpdatedEventArgs(updatedFeature));
 		}
@@ -330,6 +338,32 @@ namespace Codist
 			public List<CppStyle> CppStyles => GetDefinedStyles(_Config.CppStyles);
 			public List<CodeStyle> GeneralStyles => GetDefinedStyles(_Config.GeneralStyles);
 			public List<SymbolMarkerStyle> SymbolMarkerStyles => GetDefinedStyles(_Config.SymbolMarkerStyles);
+		}
+
+		sealed class ConfigManager
+		{
+			int _version, _oldVersion;
+			public ConfigManager() {
+				Updated += MarkUpdated;
+			}
+			void MarkUpdated(object sender, ConfigUpdatedEventArgs e) {
+				++_version;
+			}
+			internal void Quit(bool apply) {
+				Updated -= MarkUpdated;
+				if (apply) {
+					if (_version != _oldVersion) {
+						Instance.SaveConfig(null);
+					}
+					_oldVersion = _version;
+				}
+				else {
+					if (_version != _oldVersion) {
+						LoadConfig(ConfigPath);
+						_version = _oldVersion;
+					}
+				}
+			}
 		}
 	}
 

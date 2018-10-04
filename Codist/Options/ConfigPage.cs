@@ -15,7 +15,6 @@ namespace Codist.Options
 	[Browsable(false)]
 	abstract class ConfigPage : DialogPage
 	{
-		int _version, _oldVersion;
 		Label _DisabledNotice;
 
 		protected abstract Features Feature { get; }
@@ -23,7 +22,6 @@ namespace Codist.Options
 
 		protected override void OnActivate(CancelEventArgs e) {
 			base.OnActivate(e);
-			_oldVersion = _version;
 			if (Feature != Features.None) {
 				if (Control.Enabled = Config.Instance.Features.MatchFlags(Feature)) {
 					if (_DisabledNotice != null) {
@@ -38,23 +36,17 @@ namespace Codist.Options
 					}
 				}
 			}
-			Config.Updated += UpdateVersion;
+			Config.Instance.BeginUpdate();
 		}
 
 		protected override void OnClosed(EventArgs e) {
 			base.OnClosed(e);
-			if (_version != _oldVersion) {
-				Config.Updated -= UpdateVersion;
-				Config.LoadConfig(Config.ConfigPath);
-				_oldVersion = _version;
-			}
+			Config.Instance.EndUpdate(false);
 		}
 
 		protected override void OnApply(PageApplyEventArgs e) {
 			base.OnApply(e);
-			if (e.ApplyBehavior == ApplyKind.Apply) {
-				Config.Instance.SaveConfig(null);
-			}
+			Config.Instance.EndUpdate(e.ApplyBehavior == ApplyKind.Apply);
 		}
 
 		protected override void OnDeactivate(CancelEventArgs e) {
@@ -96,10 +88,6 @@ namespace Codist.Options
 				default:
 					goto case BrushEffect.Solid;
 			}
-		}
-
-		void UpdateVersion(object sender, EventArgs e) {
-			_version++;
 		}
 
 		static Label CreateDisabledNotice(Features feature) {
