@@ -56,7 +56,13 @@ namespace Codist
 			// initialization is the Initialize method.
 		}
 
-		public static EnvDTE.DTE DTE => _dte ?? (_dte = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE);
+		public static EnvDTE.DTE DTE {
+			get {
+				ThreadHelper.ThrowIfNotOnUIThread();
+				return _dte ?? (_dte = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE);
+			}
+		}
+
 		public static DebuggerStatus DebuggerStatus {
 			get {
 				ThreadHelper.ThrowIfNotOnUIThread(nameof(DebuggerStatus));
@@ -82,11 +88,6 @@ namespace Codist
 		protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress) {
 			await base.InitializeAsync(cancellationToken, progress);
 
-			// When initialized asynchronously, the current thread may be a background thread at this point.
-			// Do any initialization that requires the UI thread after switching to the UI thread.
-			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
-			await Commands.ScreenshotCommand.InitializeAsync(this);
 			VSColorTheme.ThemeChanged += (args) => {
 				System.Diagnostics.Debug.WriteLine("Theme changed.");
 				ThemeHelper.RefreshThemeCache();
@@ -94,6 +95,12 @@ namespace Codist
 			SolutionEvents.OnAfterOpenSolution += (s, args) => {
 				Classifiers.SymbolMarkManager.Clear();
 			};
+
+			// When initialized asynchronously, the current thread may be a background thread at this point.
+			// Do any initialization that requires the UI thread after switching to the UI thread.
+			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
+			await Commands.ScreenshotCommand.InitializeAsync(this);
 		}
 
 		#endregion
