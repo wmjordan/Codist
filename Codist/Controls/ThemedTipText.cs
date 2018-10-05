@@ -3,16 +3,16 @@ using System.Windows.Controls;
 
 namespace Codist.Controls
 {
-	sealed class ToolTipText : TextBlock
+	sealed class ThemedTipText : TextBlock
 	{
-		public ToolTipText() {
+		public ThemedTipText() {
 			Foreground = ThemeHelper.ToolTipTextBrush;
 			TextWrapping = TextWrapping.Wrap;
 		}
-		public ToolTipText(string text) : this() {
+		public ThemedTipText(string text) : this() {
 			Inlines.Add(text);
 		}
-		public ToolTipText(string text, bool bold) : this() {
+		public ThemedTipText(string text, bool bold) : this() {
 			this.Append(text, true);
 		}
 	}

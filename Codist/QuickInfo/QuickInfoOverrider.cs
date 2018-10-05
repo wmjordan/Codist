@@ -75,7 +75,7 @@ namespace Codist.QuickInfo
 		}
 
 		static StackPanel ShowSymbolLocation(ISymbol symbol, string path) {
-			var tooltip = new SymbolToolTip();
+			var tooltip = new ThemedToolTip();
 			tooltip.Title.Append(symbol.Name, true);
 			var t = tooltip.Content
 				.Append("defined in ")
@@ -204,7 +204,7 @@ namespace Codist.QuickInfo
 					void ShowToolTipForDiagnostics(object sender, ToolTipEventArgs e) {
 						var t = sender as TextBlock;
 						var d = t.Tag as Diagnostic;
-						var tip = new SymbolToolTip();
+						var tip = new ThemedToolTip();
 						tip.Title.Append(d.Descriptor.Category + " (" + d.Id + ")", true);
 						tip.Content.Append(d.Descriptor.Title.ToString());
 						if (String.IsNullOrEmpty(d.Descriptor.HelpLinkUri) == false) {
@@ -336,7 +336,7 @@ namespace Codist.QuickInfo
 						if (o == null) {
 							var s = c as string;
 							if (s != null) {
-								cp.Content = new ToolTipText {
+								cp.Content = new ThemedTipText {
 									Text = s
 								}.Scrollable();
 							}

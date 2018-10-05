@@ -405,7 +405,7 @@ namespace Codist
 			}
 
 			void ShowSymbolToolTip(object sender, ToolTipEventArgs e) {
-				var tooltip = new SymbolToolTip();
+				var tooltip = new ThemedToolTip();
 				tooltip.Title
 					.Append(_Symbol.GetAccessibility() + _Symbol.GetAbstractionModifier() + _Symbol.GetSymbolKindName() + " ")
 					.Append(_Symbol.GetSignatureString(), true);

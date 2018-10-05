@@ -71,16 +71,18 @@ namespace Codist.SmartBars
 					HorizontalAlignment = HorizontalAlignment.Stretch,
 					BorderThickness = __FilterBorderThickness,
 				}.SetStyleResourceProperty(Microsoft.VisualStudio.Shell.VsResourceKeys.TextBoxStyleKey),
-				StaysOpenOnClick = true
+				StaysOpenOnClick = true,
+				ToolTip = new Controls.ThemedToolTip("Result filter", "Filter items in this menu.\nUse space to separate keywords.")
 			});
 			filterBox.TextChanged += (s, args) => {
-				var t = (s as TextBox).Text;
+				var t = (s as TextBox).Text.Split(' ');
 				foreach (MenuItem item in menuItem.Items) {
 					var b = item.Header as TextBlock;
 					if (b == null) {
 						continue;
 					}
-					if (b.GetText().IndexOf(t, StringComparison.OrdinalIgnoreCase) != -1) {
+					var it = b.GetText();
+					if (t.All(p => it.IndexOf(p, StringComparison.OrdinalIgnoreCase) != -1)) {
 						item.Visibility = Visibility.Visible;
 						if (item.HasItems) {
 							foreach (MenuItem sub in item.Items) {
@@ -96,7 +98,7 @@ namespace Codist.SmartBars
 							if (b == null) {
 								continue;
 							}
-							if (b.GetText().IndexOf(t, StringComparison.OrdinalIgnoreCase) != -1) {
+							if (t.All(p => it.IndexOf(p, StringComparison.OrdinalIgnoreCase) != -1)) {
 								matchedSubItem = true;
 								sub.Visibility = Visibility.Visible;
 							}
@@ -653,7 +655,7 @@ namespace Codist.SmartBars
 				}
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
-				var tip = new Controls.SymbolToolTip();
+				var tip = new Controls.ThemedToolTip();
 				tip.Title
 					.Append(Symbol.GetAccessibility() + Symbol.GetAbstractionModifier() + Symbol.GetSymbolKindName() + " ")
 					.Append(Symbol.GetSignatureString(), true);
