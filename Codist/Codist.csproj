@@ -85,6 +85,8 @@
     <Compile Include="Classifiers\TaggerResult.cs" />
     <Compile Include="Classifiers\XmlClassificationDefinitions.cs" />
     <Compile Include="Classifiers\XmlFormats.cs" />
+    <Compile Include="CodeBar\CSharpNaviBar.cs" />
+    <Compile Include="CodeBar\NaviBarFactory.cs" />
     <Compile Include="CodistPackage.cs" />
     <Compile Include="Commands\ScreenshotCommand.cs" />
     <Compile Include="Commands\SymbolFinderWindow.cs" />
@@ -99,11 +101,14 @@
     <Compile Include="Helpers\CodeAnalysisHelper.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.Symbol.cs" />
     <Compile Include="Helpers\ReflectionHelper.cs" />
+    <Compile Include="Helpers\SemanticContext.cs" />
     <Compile Include="Helpers\ServicesHelper.cs" />
     <Compile Include="Helpers\TextEditorHelper.cs" />
     <Compile Include="Helpers\ThemeHelper.cs" />
+    <Compile Include="Helpers\ToolTipFactory.cs" />
     <Compile Include="Helpers\UIHelper.cs" />
     <Compile Include="Helpers\WpfHelper.cs" />
+    <Compile Include="Helpers\WpfHelper.VS.cs" />
     <Compile Include="Helpers\XmlDocParser.cs" />
     <Compile Include="LineTransformers\LineHeightTransform.cs" />
     <Compile Include="Margins\CSharpMembersMargin.cs" />
@@ -530,6 +535,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Resource Include="Controls\Menu.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
     <Resource Include="Controls\ContextMenu.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Resource>

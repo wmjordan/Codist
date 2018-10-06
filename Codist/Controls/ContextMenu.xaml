@@ -14,8 +14,8 @@
 	</Style>
 	<!--Outer menu items-->
 	<Style TargetType="{x:Type MenuItem}">
-		<Setter Property="Background" Value="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}"></Setter>
-		<Setter Property="Foreground" Value="{DynamicResource VsBrush.CommandBarTextInactive}"></Setter>
+		<Setter Property="Background" Value="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}"/>
+		<Setter Property="Foreground" Value="{DynamicResource VsBrush.CommandBarTextInactive}"/>
 		<Style.Triggers>
 			<Trigger Property="IsHighlighted" Value="True">
 				<Setter Property="Background" Value="{DynamicResource VsBrush.CommandBarMouseOverBackgroundGradient}"></Setter>

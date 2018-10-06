@@ -108,19 +108,14 @@ namespace Codist
 
 	internal static class SharedDictionaryManager
 	{
-		internal static ResourceDictionary ContextMenu {
-			get {
-				if (_ContextMenu == null) {
-					// to get started with our own context menu styles, see this answer on StackOverflow
-					// https://stackoverflow.com/questions/3391742/wpf-submenu-styling?rq=1
-					var resourceLocater = new Uri("/Codist;component/controls/ContextMenu.xaml", UriKind.Relative);
-					_ContextMenu = (ResourceDictionary)Application.LoadComponent(resourceLocater);
-				}
-				return _ContextMenu;
-			}
-		}
+		static ResourceDictionary _Menu, _ContextMenu;
 
-		private static ResourceDictionary _ContextMenu;
+		// to get started with our own context menu styles, see this answer on StackOverflow
+		// https://stackoverflow.com/questions/3391742/wpf-submenu-styling?rq=1
+		internal static ResourceDictionary ContextMenu => _ContextMenu ?? (_ContextMenu = WpfHelper.LoadComponent("controls/ContextMenu.xaml"));
+
+		// for menu styles, see https://docs.microsoft.com/en-us/dotnet/framework/wpf/controls/menu-styles-and-templates
+		internal static ResourceDictionary Menu => _Menu ?? (_Menu = WpfHelper.LoadComponent("controls/Menu.xaml"));
 	}
 
 }
