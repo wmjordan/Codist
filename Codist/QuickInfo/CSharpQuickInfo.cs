@@ -27,7 +27,6 @@ namespace Codist.QuickInfo
 		static readonly SymbolFormatter _SymbolFormatter = SymbolFormatter.Instance;
 
 		readonly IEditorFormatMapService _FormatMapService;
-		IEditorFormatMap _FormatMap;
 		bool _IsDisposed;
 		SemanticModel _SemanticModel;
 		ITextBuffer _TextBuffer;
@@ -36,7 +35,6 @@ namespace Codist.QuickInfo
 			_TextBuffer = subjectBuffer;
 			_FormatMapService = formatMapService;
 			_TextBuffer.Changing += TextBuffer_Changing;
-			Config.Updated += _ConfigUpdated;
 		}
 
 		public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {
@@ -235,18 +233,8 @@ namespace Codist.QuickInfo
 		void IDisposable.Dispose() {
 			if (!_IsDisposed) {
 				_TextBuffer.Changing -= TextBuffer_Changing;
-				Config.Updated -= _ConfigUpdated; ;
 				GC.SuppressFinalize(this);
 				_IsDisposed = true;
-			}
-		}
-
-		void _ConfigUpdated(object sender, ConfigUpdatedEventArgs e) {
-			if (e.UpdatedFeature.MatchFlags(Features.SyntaxHighlight) == false) {
-				return;
-			}
-			if (_FormatMap != null) {
-				_SymbolFormatter.UpdateSyntaxHighlights(_FormatMap);
 			}
 		}
 

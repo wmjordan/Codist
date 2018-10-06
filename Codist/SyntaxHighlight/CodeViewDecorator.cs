@@ -74,6 +74,9 @@ namespace Codist.SyntaxHighlight
 			try {
 				var c = _EditorFormatMap.GetColor(Constants.EditorProperties.Text, EditorFormatDefinition.ForegroundColorId);
 				if (c.A > 0) {
+					if (c.Equals(_ForeColor) == false) {
+						Debug.WriteLine("Fore color changed: " + _ForeColor.ToString() + "->" + c.ToString());
+					}
 					_ForeColor = c;
 				}
 				c = _EditorFormatMap.GetColor(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundColorId);
