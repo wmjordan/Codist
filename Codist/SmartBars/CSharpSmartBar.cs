@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -24,6 +26,7 @@ namespace Codist.SmartBars
 	sealed class CSharpSmartBar : SmartBar {
 		static readonly Thickness __FilterBorderThickness = new Thickness(0, 0, 0, 1);
 		static readonly Classifiers.HighlightClassifications __HighlightClassifications = new Classifiers.HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
+		readonly SemanticContext _Context;
 		CompilationUnitSyntax _Compilation;
 		Document _Document;
 		SyntaxNode _Node;
@@ -32,26 +35,27 @@ namespace Codist.SmartBars
 		SyntaxToken _Token;
 		SyntaxTrivia _Trivia, _LineComment;
 		public CSharpSmartBar(IWpfTextView view) : base(view) {
+			_Context = new SemanticContext(view);
 		}
 
 		ToolBar MyToolBar => ToolBar2;
 
-		protected override void AddCommands() {
-			if (UpdateSemanticModel()) {
-				AddContextualCommands();
+		protected override async Task AddCommandsAsync(CancellationToken cancellationToken) {
+			if (UpdateSemanticModel() && _Node != null) {
+				await AddContextualCommandsAsync(cancellationToken);
 			}
 			//MyToolBar.Items.Add(new Separator());
-			base.AddCommands();
+			await base.AddCommandsAsync(cancellationToken);
 		}
 
-		static CommandItem CreateCommandMenu(string title, int imageId, ISymbol symbol, string emptyMenuTitle, Action<MenuItem, ISymbol> itemPopulator) {
+		static CommandItem CreateCommandMenu(string title, int imageId, ISymbol symbol, string emptyMenuTitle, Action<CommandContext, MenuItem, ISymbol> itemPopulator) {
 			return new CommandItem(title, imageId, ctrl => (ctrl as MenuItem).StaysOpenOnClick = true, ctx => {
 				var menuItem = ctx.Sender as MenuItem;
 				if (menuItem.Items.Count > 0) {
 					return;
 				}
 				ctx.KeepToolBarOnClick = true;
-				itemPopulator(menuItem, symbol);
+				itemPopulator(ctx, menuItem, symbol);
 				if (menuItem.Items.Count == 0) {
 					menuItem.Items.Add(new MenuItem { Header = emptyMenuTitle, IsEnabled = false });
 				}
@@ -98,6 +102,7 @@ namespace Codist.SmartBars
 							if (b == null) {
 								continue;
 							}
+							it = b.GetText();
 							if (t.All(p => it.IndexOf(p, StringComparison.OrdinalIgnoreCase) != -1)) {
 								matchedSubItem = true;
 								sub.Visibility = Visibility.Visible;
@@ -127,11 +132,7 @@ namespace Codist.SmartBars
 			});
 		}
 
-		void AddContextualCommands() {
-			if (_Node == null) {
-				return;
-			}
-
+		async Task AddContextualCommandsAsync(CancellationToken cancellationToken) {
 			// anti-pattern for a small margin of performance
 			bool isDesignMode = CodistPackage.DebuggerStatus == DebuggerStatus.Design;
 			if (isDesignMode && _Node is XmlTextSyntax) {
@@ -142,14 +143,14 @@ namespace Codist.SmartBars
 					&& _Token.Kind() == SyntaxKind.IdentifierToken
 					&& (_Node.IsDeclaration() || _Node is TypeSyntax || _Node is ParameterSyntax || _Node.IsKind(SyntaxKind.VariableDeclarator))) {
 					// selection is within a symbol
-					_Symbol = SymbolFinder.FindSymbolAtPositionAsync(_Document, View.Selection.Start.Position).Result;
+					_Symbol = await SymbolFinder.FindSymbolAtPositionAsync(_Document, View.Selection.Start.Position, cancellationToken);
 					if (_Symbol != null) {
 						if (_Node is IdentifierNameSyntax) {
 							AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition\nRight click: Peek definition", "Edit.PeekDefinition");
 						}
-						AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze references...", GetReferenceCommands);
+						AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze references...", GetReferenceCommandsAsync);
 						if (Classifiers.SymbolMarkManager.CanBookmark(_Symbol)) {
-							AddCommands(MyToolBar, KnownImageIds.FlagGroup, "Mark symbol...", GetMarkerCommands);
+							AddCommands(MyToolBar, KnownImageIds.FlagGroup, "Mark symbol...", null, GetMarkerCommands);
 						}
 
 						if (isDesignMode) {
@@ -189,7 +190,12 @@ namespace Codist.SmartBars
 				}
 			}
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
-				if (_LineComment.RawKind != 0) {
+				var triviaList = _Token.HasLeadingTrivia ? _Token.LeadingTrivia : _Token.HasTrailingTrivia ? _Token.TrailingTrivia : default;
+				var lineComment = new SyntaxTrivia();
+				if (triviaList.Equals(SyntaxTriviaList.Empty) == false && triviaList.FullSpan.Contains(View.Selection.Start.Position)) {
+					lineComment = triviaList.FirstOrDefault(i => i.IsLineComment());
+				}
+				if (lineComment.RawKind != 0) {
 					AddEditorCommand(MyToolBar, KnownImageIds.UncommentCode, "Edit.UncommentSelection", "Uncomment selection");
 				}
 				else {
@@ -204,7 +210,7 @@ namespace Codist.SmartBars
 			if (isDesignMode == false) {
 				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger...\nLeft click: Toggle breakpoint\nRight click: Debugger menu...", ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), GetDebugCommands);
 			}
-			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection...\nRight click: Duplicate...\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", GetExpandSelectionCommands);
+			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection...\nRight click: Duplicate...\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", null, GetExpandSelectionCommands);
 		}
 
 		void AddXmlDocCommands() {
@@ -246,9 +252,9 @@ namespace Codist.SmartBars
 				}));
 			}
 			else if (Classifiers.SymbolMarkManager.HasBookmark) {
-				r.Add(CreateCommandMenu("Unmark symbol...", KnownImageIds.FlagOutline, symbol, "No symbol marked", (m, s) => {
+				r.Add(CreateCommandMenu("Unmark symbol...", KnownImageIds.FlagOutline, symbol, "No symbol marked", (ctx, m, s) => {
 					foreach (var item in Classifiers.SymbolMarkManager.MarkedSymbols) {
-						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.DisplayString, item.ImageId, null, ctx => {
+						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.DisplayString, item.ImageId, null, _ => {
 							Classifiers.SymbolMarkManager.Remove(item);
 							Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 						})));
@@ -284,19 +290,19 @@ namespace Codist.SmartBars
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 
-		void FindCallers(MenuItem menuItem, ISymbol source) {
+		void FindCallers(CommandContext context, MenuItem menuItem, ISymbol source) {
 			var docs = System.Collections.Immutable.ImmutableHashSet.CreateRange(_Document.Project.GetRelatedDocuments());
 			SymbolCallerInfo[] callers;
 			switch (source.Kind) {
 				case SymbolKind.Method:
 				case SymbolKind.Property:
 				case SymbolKind.Event:
-					callers = SymbolFinder.FindCallersAsync(source, _Document.Project.Solution, docs).Result.ToArray();
+					callers = SymbolFinder.FindCallersAsync(source, _Document.Project.Solution, docs, context.CancellationToken).Result.ToArray();
 					break;
 				case SymbolKind.NamedType:
 					var tempResults = new HashSet<SymbolCallerInfo>(SymbolCallerInfoComparer.Instance);
 					foreach (var item in (source as INamedTypeSymbol).InstanceConstructors) {
-						foreach (var c in SymbolFinder.FindCallersAsync(item, _Document.Project.Solution, docs).Result) {
+						foreach (var c in SymbolFinder.FindCallersAsync(item, _Document.Project.Solution, docs, context.CancellationToken).Result) {
 							tempResults.Add(c);
 						}
 					}
@@ -331,8 +337,8 @@ namespace Codist.SmartBars
 			}
 		}
 
-		void FindDerivedClasses(MenuItem menuItem, ISymbol symbol) {
-			var classes = SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, _Document.Project.Solution).Result.ToArray();
+		void FindDerivedClasses(CommandContext context, MenuItem menuItem, ISymbol symbol) {
+			var classes = SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, _Document.Project.Solution, null, context.CancellationToken).Result.ToArray();
 			Array.Sort(classes, (a, b) => a.Name.CompareTo(b.Name));
 			foreach (var derived in classes) {
 				var item = new SymbolMenuItem(this, derived, derived.Locations);
@@ -343,8 +349,8 @@ namespace Codist.SmartBars
 			}
 		}
 
-		void FindImplementations(MenuItem menuItem, ISymbol symbol) {
-			var implementations = new List<ISymbol>(SymbolFinder.FindImplementationsAsync(symbol, _Document.Project.Solution).Result);
+		void FindImplementations(CommandContext context, MenuItem menuItem, ISymbol symbol) {
+			var implementations = new List<ISymbol>(SymbolFinder.FindImplementationsAsync(symbol, _Document.Project.Solution, null, context.CancellationToken).Result);
 			implementations.Sort((a, b) => a.Name.CompareTo(b.Name));
 			if (symbol.Kind == SymbolKind.NamedType) {
 				foreach (var impl in implementations) {
@@ -358,20 +364,23 @@ namespace Codist.SmartBars
 			}
 		}
 
-		void FindInstanceAsParameter(MenuItem menuItem, ISymbol source) {
-			var members = (source as ITypeSymbol).FindInstanceAsParameter(_Document.Project);
+		void FindInstanceAsParameter(CommandContext context, MenuItem menuItem, ISymbol source) {
+			var members = (source as ITypeSymbol).FindInstanceAsParameter(_Document.Project, context.CancellationToken);
 			SortAndGroupSymbolByClass(menuItem, members);
 		}
 
-		void FindInstanceProducer(MenuItem menuItem, ISymbol source) {
-			var members = (source as ITypeSymbol).FindSymbolInstanceProducer(_Document.Project);
+		void FindInstanceProducer(CommandContext context, MenuItem menuItem, ISymbol source) {
+			var members = (source as ITypeSymbol).FindSymbolInstanceProducer(_Document.Project, context.CancellationToken);
 			SortAndGroupSymbolByClass(menuItem, members);
 		}
 
-		void FindMembers(MenuItem menuItem, ISymbol symbol) {
+		void FindMembers(CommandContext context, MenuItem menuItem, ISymbol symbol) {
 			var type = symbol as INamedTypeSymbol;
 			if (type != null && type.TypeKind == TypeKind.Class) {
 				while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
+					if (context.CancellationToken.IsCancellationRequested) {
+						return;
+					}
 					var baseTypeItem = new SymbolMenuItem(this, type, type.ToDisplayString(WpfHelper.MemberNameFormat) + " (base class)", null);
 					menuItem.Items.Add(baseTypeItem);
 					AddSymbolMembers(this, baseTypeItem, type);
@@ -397,14 +406,14 @@ namespace Codist.SmartBars
 			}
 		}
 
-		void FindOverrides(MenuItem menuItem, ISymbol symbol) {
-			foreach (var ov in SymbolFinder.FindOverridesAsync(symbol, _Document.Project.Solution).Result) {
+		void FindOverrides(CommandContext context, MenuItem menuItem, ISymbol symbol) {
+			foreach (var ov in SymbolFinder.FindOverridesAsync(symbol, _Document.Project.Solution, null, context.CancellationToken).Result) {
 				menuItem.Items.Add(new SymbolMenuItem(this, ov, ov.ContainingType.Name, ov.Locations));
 			}
 		}
 
-		void FindReferences(MenuItem menuItem, ISymbol source) {
-			var refs = SymbolFinder.FindReferencesAsync(source, _Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.CreateRange(_Document.Project.GetRelatedDocuments())).Result.ToArray();
+		void FindReferences(CommandContext context, MenuItem menuItem, ISymbol source) {
+			var refs = SymbolFinder.FindReferencesAsync(source, _Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.CreateRange(_Document.Project.GetRelatedDocuments()), context.CancellationToken).Result.ToArray();
 			Array.Sort(refs, (a, b) => {
 				int s;
 				return 0 != (s = a.Definition.ContainingType.Name.CompareTo(b.Definition.ContainingType.Name)) ? s :
@@ -470,9 +479,9 @@ namespace Codist.SmartBars
 			return r;
 		}
 
-		List<CommandItem> GetReferenceCommands(CommandContext ctx) {
+		async Task<IEnumerable<CommandItem>> GetReferenceCommandsAsync(CommandContext ctx) {
 			var r = new List<CommandItem>();
-			var symbol = SymbolFinder.FindSymbolAtPositionAsync(_Document, View.Caret.Position.BufferPosition).Result;
+			var symbol = await SymbolFinder.FindSymbolAtPositionAsync(_Document, View.Caret.Position.BufferPosition, ctx.CancellationToken);
 			if (symbol == null) {
 				return r;
 			}
@@ -591,7 +600,6 @@ namespace Codist.SmartBars
 				_Node = null;
 				_Token = default;
 				_Trivia = default;
-				_LineComment = default;
 				return false;
 			}
 			int pos = View.Selection.Start.Position;
@@ -655,44 +663,10 @@ namespace Codist.SmartBars
 				}
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
-				var tip = new Controls.ThemedToolTip();
-				tip.Title
-					.Append(Symbol.GetAccessibility() + Symbol.GetAbstractionModifier() + Symbol.GetSymbolKindName() + " ")
-					.Append(Symbol.GetSignatureString(), true);
-				var content = tip.Content;
-				var t = Symbol.GetReturnType();
-				if (t != null) {
-					content.Append("member type: ")
-						.Append(t.ToDisplayString(WpfHelper.MemberNameFormat), true);
-				}
-				t = Symbol.ContainingType;
-				if (t != null) {
-					if (content.Inlines.FirstInline != null) {
-						content.AppendLine();
-					}
-					content.Append(t.GetSymbolKindName() + ": ")
-						.Append(t.ToDisplayString(WpfHelper.MemberNameFormat), true);
-				}
-				if (content.Inlines.FirstInline != null) {
-					content.AppendLine();
-				}
-				content.Append("namespace: " + Symbol.ContainingNamespace?.ToString())
-					.Append("\nassembly: " + Symbol.GetAssemblyModuleName());
-				var f = Symbol as IFieldSymbol;
-				if (f != null && f.IsConst) {
-					content.Append("\nconst: " + f.ConstantValue.ToString());
-				}
-				var doc = Symbol.GetXmlDocSummaryForSymbol();
-				if (doc != null) {
-					new XmlDocRenderer((SmartBar as CSharpSmartBar)._SemanticModel.Compilation, SymbolFormatter.Empty, Symbol).Render(doc, content.Append("\n\n").Inlines);
-					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
-				}
-				ToolTip = tip;
-				ToolTipService.SetBetweenShowDelay(this, 1000);
-				ToolTipService.SetInitialShowDelay(this, 1000);
-				ToolTipService.SetShowDuration(this, 15000);
+				ToolTip = ToolTipFactory.CreateToolTip(Symbol, (SmartBar as CSharpSmartBar)._SemanticModel.Compilation);
 				ToolTipOpening -= ShowToolTip;
 			}
+
 		}
 
 		sealed class SymbolCallerInfoComparer : IEqualityComparer<SymbolCallerInfo>

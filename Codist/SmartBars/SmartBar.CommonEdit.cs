@@ -4,6 +4,8 @@ using System.Windows.Input;
 using AppHelpers;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.SmartBars
 {
@@ -22,7 +24,7 @@ namespace Codist.SmartBars
 			if (t != null) {
 				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
 				if (p != null && p.FindText(t, (int)(EnvDTE.vsFindOptions.vsFindOptionsMatchCase))) {
-					ctx.KeepToolBar(true);
+					ctx.KeepToolBarAsync(true);
 				}
 			}
 		}
@@ -46,7 +48,20 @@ namespace Codist.SmartBars
 		}
 
 		void AddDeleteCommand() {
-			AddCommand(ToolBar, KnownImageIds.Cancel, "Delete selected text\nRight click: Delete line\nCtrl click: Delete and select next", ctx => ExecuteAndFind(ctx, "Edit.Delete"));
+			AddCommand(ToolBar, KnownImageIds.Cancel, "Delete selected text\nRight click: Delete line\nCtrl click: Delete and select next", ctx => {
+				var s = View.Selection;
+				if (s.Mode == TextSelectionMode.Stream && ctx.RightClick == false && Keyboard.Modifiers != ModifierKeys.Control && s.IsEmpty == false) {
+					var end = s.End.Position;
+					// remove a trailing space or tab
+					if (end < View.TextSnapshot.Length - 1) {
+						var trailer = View.TextSnapshot.GetText(end, 1)[0];
+						if (trailer == ' ' || trailer == '\t') {
+							s.Select(new SnapshotSpan(s.Start.Position, s.End.Position + 1), false);
+						}
+					}
+				}
+				ExecuteAndFind(ctx, "Edit.Delete");
+			});
 		}
 
 		void AddDuplicateCommand() {
@@ -55,7 +70,7 @@ namespace Codist.SmartBars
 					ctx.View.ExpandSelectionToLine();
 				}
 				TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
-				ctx.KeepToolBar(true);
+				ctx.KeepToolBarAsync(true);
 			});
 		}
 
@@ -71,7 +86,7 @@ namespace Codist.SmartBars
 				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
 				var option = Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) ? EnvDTE.vsFindOptions.vsFindOptionsMatchCase : 0;
 				if (p != null && p.FindText(t, (int)option)) {
-					ctx.KeepToolBar(true);
+					ctx.KeepToolBarAsync(true);
 				}
 			}, ctx => {
 				return new CommandItem[] {
@@ -104,7 +119,7 @@ namespace Codist.SmartBars
 								if (ed.Replace(span.Span, t)) {
 									ed.Apply();
 									ctx.View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-									ctx.KeepToolBar();
+									ctx.KeepToolBarAsync(false);
 								}
 							}
 						}
@@ -119,7 +134,7 @@ namespace Codist.SmartBars
 							if (ed.Replace(span, t)) {
 								ed.Apply();
 								ctx.View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-								ctx.KeepToolBar();
+								ctx.KeepToolBarAsync(false);
 							}
 						}
 					});
