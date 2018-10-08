@@ -66,7 +66,7 @@ namespace Codist
 			return false;
 		}
 
-		public async Task<bool> UpdateAsync(int position, CancellationToken cancellationToken) {
+		public async Task<bool> UpdateAsync(int position, bool includeTrivia, CancellationToken cancellationToken) {
 			if (await UpdateAsync(cancellationToken) == false) {
 				return false;
 			}
@@ -79,7 +79,7 @@ namespace Codist
 				Token = default;
 				return false;
 			}
-			Node = Compilation.FindNode(Token.Span, true, true);
+			Node = Compilation.FindNode(Token.Span, includeTrivia, true);
 			return true;
 		}
 	}

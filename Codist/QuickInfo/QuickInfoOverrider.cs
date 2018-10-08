@@ -283,7 +283,7 @@ namespace Codist.QuickInfo
 						if (Config.Instance.QuickInfoMaxWidth > 0) {
 							//wrapPanel.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 							//signature.HorizontalAlignment = HorizontalAlignment.Left;
-							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 45;
+							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 40;
 						}
 					}
 					System.Windows.Shapes.Line CreateDecorativeLine(StackPanel docPanel) {

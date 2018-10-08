@@ -96,6 +96,7 @@
     </Compile>
     <Compile Include="Config.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Controls\ThemedTextBox.cs" />
     <Compile Include="Controls\ThemedTipText.cs" />
     <Compile Include="Controls\ThemedToolTip.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.cs" />

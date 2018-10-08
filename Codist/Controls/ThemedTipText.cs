@@ -13,7 +13,7 @@ namespace Codist.Controls
 			Inlines.Add(text);
 		}
 		public ThemedTipText(string text, bool bold) : this() {
-			this.Append(text, true);
+			this.Append(text, bold);
 		}
 	}
 }

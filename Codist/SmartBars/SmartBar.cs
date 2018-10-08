@@ -240,7 +240,7 @@ namespace Codist.SmartBars
 
 		async Task CreateToolBarAsync(CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			while ((Mouse.LeftButton == MouseButtonState.Pressed || Keyboard.Modifiers != ModifierKeys.None)
+			while ((Mouse.LeftButton == MouseButtonState.Pressed || Keyboard.Modifiers == ModifierKeys.Shift)
 				&& cancellationToken.IsCancellationRequested == false) {
 				// postpone the even handler until the mouse button is released
 				await Task.Delay(100);
@@ -358,7 +358,12 @@ namespace Codist.SmartBars
 				return;
 			}
 			if ((now - _LastShiftHit).Ticks < TimeSpan.TicksPerSecond) {
-				CreateToolBar();
+				try {
+					CreateToolBar();
+				}
+				catch (OperationCanceledException) {
+					// ignore
+				}
 			}
 			else {
 				_LastShiftHit = DateTime.Now;
@@ -405,6 +410,7 @@ namespace Codist.SmartBars
 				_ToolBarTray.Visibility = Visibility.Hidden;
 				View.VisualElement.MouseMove -= ViewMouseMove;
 				_Cancellation.Cancel();
+				_Cancellation = new CancellationTokenSource();
 				_TimerStatus = 0;
 				return;
 			}
@@ -416,12 +422,12 @@ namespace Codist.SmartBars
 				try {
 					_Cancellation.Cancel();
 					_Cancellation = new CancellationTokenSource();
-					await Task.Delay(400);
+					await Task.Delay(400, _Cancellation.Token);
 					if (_Cancellation.IsCancellationRequested == false) {
 						await CreateToolBarAsync(_Cancellation.Token);
 					}
 				}
-				catch (TaskCanceledException) {
+				catch (OperationCanceledException) {
 					// ignore
 				}
 			}

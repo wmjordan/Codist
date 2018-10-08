@@ -52,10 +52,10 @@ namespace Codist.SmartBars
 				var s = View.Selection;
 				if (s.Mode == TextSelectionMode.Stream && ctx.RightClick == false && Keyboard.Modifiers != ModifierKeys.Control && s.IsEmpty == false) {
 					var end = s.End.Position;
-					// remove a trailing space or tab
+					// remove a trailing space
 					if (end < View.TextSnapshot.Length - 1) {
-						var trailer = View.TextSnapshot.GetText(end, 1)[0];
-						if (trailer == ' ' || trailer == '\t') {
+						var trailer = View.TextSnapshot.GetText(end - 1, 2);
+						if (Char.IsLetterOrDigit(trailer[0]) && trailer[1] == ' ') {
 							s.Select(new SnapshotSpan(s.Start.Position, s.End.Position + 1), false);
 						}
 					}
