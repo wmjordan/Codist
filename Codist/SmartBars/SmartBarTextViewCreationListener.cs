@@ -39,6 +39,7 @@ namespace Codist.SmartBars
 			}
 			// The toolbar will get wired to the text view events
 			if (String.Equals(Constants.CodeTypes.CSharp, textView.TextBuffer.ContentType.TypeName, StringComparison.OrdinalIgnoreCase)) {
+				textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
 				new CSharpSmartBar(textView);
 			}
 			else {

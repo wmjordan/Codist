@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using AppHelpers;
@@ -11,6 +13,9 @@ namespace Codist.SmartBars
 {
 	partial class SmartBar
 	{
+		static readonly CommandItem[] __FindAndReplaceCommands = GetFindAndReplaceCommands();
+		static readonly CommandItem[] __CaseCommands = GetCaseCommands();
+
 		static void ExecuteAndFind(CommandContext ctx, string command) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (ctx.RightClick) {
@@ -88,25 +93,19 @@ namespace Codist.SmartBars
 				if (p != null && p.FindText(t, (int)option)) {
 					ctx.KeepToolBarAsync(true);
 				}
-			}, ctx => {
-				return new CommandItem[] {
-					new CommandItem("Find...", KnownImageIds.QuickFind, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
-					new CommandItem("Replace...", KnownImageIds.QuickReplace, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
-					new CommandItem("Find in files...", KnownImageIds.FindInFile, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
-					new CommandItem("Replace in files...", KnownImageIds.ReplaceInFolder, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
-				};
-			});
+			}, ctx => __FindAndReplaceCommands);
 		}
+
 		void AddPasteCommand() {
 			if (Clipboard.ContainsText()) {
 				AddCommand(ToolBar, KnownImageIds.Paste, "Paste text from clipboard\nRight click: Paste over line\nCtrl click: Paste and select next", ctx => ExecuteAndFind(ctx, "Edit.Paste"));
 			}
 		}
 
-		void AddSpecialDataFormatCommand() {
+		void AddSpecialFormatCommand() {
 			switch (View.GetSelectedTokenType()) {
 				case TokenType.None:
-					AddEditorCommand(ToolBar, KnownImageIds.FormatSelection, "Edit.FormatSelection", "Format selected text\nRight click: Format document", "Edit.FormatDocument");
+					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Format selection...", null, GetFormatItems);
 					break;
 				case TokenType.Digit:
 					AddCommand(ToolBar, KnownImageIds.Counter, "Increment number", ctx => {
@@ -118,7 +117,7 @@ namespace Codist.SmartBars
 								t = (++l).ToString(System.Globalization.CultureInfo.InvariantCulture);
 								if (ed.Replace(span.Span, t)) {
 									ed.Apply();
-									ctx.View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
+									ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
 									ctx.KeepToolBarAsync(false);
 								}
 							}
@@ -133,13 +132,72 @@ namespace Codist.SmartBars
 							var t = Guid.NewGuid().ToString(span.Length == 36 || span.Length == 4 ? "D" : span.GetText()[0] == '(' ? "P" : "B").ToUpperInvariant();
 							if (ed.Replace(span, t)) {
 								ed.Apply();
-								ctx.View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
+								ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
 								ctx.KeepToolBarAsync(false);
 							}
 						}
 					});
+					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Formatting...", null, _ => __CaseCommands);
+					break;
+				default:
+					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Formatting...", null, _ => __CaseCommands);
 					break;
 			}
+		}
+
+		List<CommandItem> GetFormatItems(CommandContext arg) {
+			var r = new List<CommandItem>(7) {
+				new CommandItem(KnownImageIds.FormatSelection, "Format selection", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")),
+				new CommandItem(KnownImageIds.FormatDocument, "Format document", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatDocument")),
+			};
+			var selection = View.Selection;
+			if (selection.Mode == TextSelectionMode.Stream) {
+				if (View.IsMultilineSelected()) {
+					r.Add(new CommandItem(KnownImageIds.Join, "Join lines", null, _ => {
+						var span = View.Selection.SelectedSpans[0];
+						View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(span.GetText(), @"[ \t]*\r?\n[ \t]*", " "));
+					}));
+				}
+				var t = View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.Start.Position).Extent.GetText();
+				if (t.Length > 0 && (t[0] == ' ' || t[0] == '\t')) {
+					r.Add(new CommandItem(KnownImageIds.DecreaseIndent, "Unindent", null, ctx => {
+						ctx.KeepToolBarOnClick = true;
+						TextEditorHelper.ExecuteEditorCommand("Edit.DecreaseLineIndent");
+					}));
+				}
+				r.Add(new CommandItem(KnownImageIds.IncreaseIndent, "Indent", null, ctx => {
+					ctx.KeepToolBarOnClick = true;
+					TextEditorHelper.ExecuteEditorCommand("Edit.IncreaseLineIndent");
+				}));
+			}
+			r.AddRange(__CaseCommands);
+			return r;
+		}
+
+		static CommandItem[] GetFindAndReplaceCommands() {
+			return new CommandItem[] {
+					new CommandItem(KnownImageIds.QuickFind, "Find...", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
+					new CommandItem(KnownImageIds.QuickReplace, "Replace...", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
+					new CommandItem(KnownImageIds.FindInFile, "Find in files...", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
+					new CommandItem(KnownImageIds.ReplaceInFolder, "Replace in files...", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
+				};
+		}
+
+		static CommandItem[] GetCaseCommands() {
+			return new CommandItem[] {
+				new CommandItem(KnownImageIds.Font, "Capitalize", null, ctx => {
+					ctx.KeepToolBarOnClick = true;
+					TextEditorHelper.ExecuteEditorCommand("Edit.Capitalize");
+				}),
+				new CommandItem(KnownImageIds.Blank, "Uppercase", null, ctx => {
+					ctx.KeepToolBarOnClick = true;
+					TextEditorHelper.ExecuteEditorCommand("Edit.MakeUppercase");
+				}),
+				new CommandItem(KnownImageIds.Blank, "Lowercase", null, ctx => {
+					ctx.KeepToolBarOnClick = true;
+					TextEditorHelper.ExecuteEditorCommand("Edit.MakeLowercase");
+				}),
+			};
 		}
 	}
 }

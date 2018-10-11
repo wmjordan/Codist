@@ -6,8 +6,8 @@ namespace Codist.Controls
 	sealed class ThemedTipText : TextBlock
 	{
 		public ThemedTipText() {
-			Foreground = ThemeHelper.ToolTipTextBrush;
 			TextWrapping = TextWrapping.Wrap;
+			SetResourceReference(ForegroundProperty, Microsoft.VisualStudio.PlatformUI.EnvironmentColors.ButtonTextBrushKey);
 		}
 		public ThemedTipText(string text) : this() {
 			Inlines.Add(text);

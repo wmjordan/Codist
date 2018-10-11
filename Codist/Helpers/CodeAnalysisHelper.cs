@@ -58,9 +58,10 @@ namespace Codist
 		static HashSet<Project> GetRelatedProjects(this Project project) {
 			var projects = new HashSet<Project>();
 			GetRelatedProjects(project, projects);
+			var id = project.Id;
 			foreach (var proj in project.Solution.Projects) {
 				if (projects.Contains(proj) == false
-					&& proj.AllProjectReferences.Any(p => p.ProjectId == project.Id)) {
+					&& proj.AllProjectReferences.Any(p => p.ProjectId == id)) {
 					projects.Add(proj);
 				}
 			}
@@ -216,11 +217,11 @@ namespace Codist
 				case SyntaxKind.StructDeclaration: return GetStructIcon((StructDeclarationSyntax)node);
 				case SyntaxKind.InterfaceDeclaration: return GetInterfaceIcon((InterfaceDeclarationSyntax)node);
 				case SyntaxKind.ConstructorDeclaration: return KnownImageIds.NewItem;
-				case SyntaxKind.ConversionOperatorDeclaration: return KnownImageIds.ConvertPartition;
-				case SyntaxKind.IndexerDeclaration: return KnownImageIds.ClusteredIndex;
 				case SyntaxKind.MethodDeclaration: return GetMethodIcon((MethodDeclarationSyntax)node);
+				case SyntaxKind.PropertyDeclaration:
+				case SyntaxKind.IndexerDeclaration: return GetPropertyIcon((BasePropertyDeclarationSyntax)node);
 				case SyntaxKind.OperatorDeclaration: return GetOperatorIcon((OperatorDeclarationSyntax)node);
-				case SyntaxKind.PropertyDeclaration: return GetPropertyIcon((PropertyDeclarationSyntax)node);
+				case SyntaxKind.ConversionOperatorDeclaration: return KnownImageIds.ConvertPartition;
 				case SyntaxKind.FieldDeclaration: return GetFieldIcon((FieldDeclarationSyntax)node);
 				case SyntaxKind.EnumMemberDeclaration: return KnownImageIds.EnumerationItemPublic;
 				case SyntaxKind.VariableDeclarator: return node.Parent.Parent.GetImageId();
@@ -245,8 +246,8 @@ namespace Codist
 				case SyntaxKind.ParenthesizedLambdaExpression:
 				case SyntaxKind.SimpleLambdaExpression: return KnownImageIds.PartitionFunction;
 				case SyntaxKind.DelegateDeclaration: return GetDelegateIcon((DelegateDeclarationSyntax)node);
-				case SyntaxKind.EventDeclaration: return GetEventIcon((EventDeclarationSyntax)node);
-				case SyntaxKind.EventFieldDeclaration: return GetEventIcon((EventDeclarationSyntax)node.Parent);
+				case SyntaxKind.EventDeclaration: return GetEventIcon((BasePropertyDeclarationSyntax)node);
+				case SyntaxKind.EventFieldDeclaration: return GetEventFieldIcon((EventFieldDeclarationSyntax)node);
 				case SyntaxKind.UnsafeStatement: return KnownImageIds.HotSpot;
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement: return KnownImageIds.XMLElement;
@@ -297,7 +298,7 @@ namespace Codist
 				}
 				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.InterfaceInternal : KnownImageIds.InterfacePrivate;
 			}
-			int GetEventIcon(EventDeclarationSyntax syntax) {
+			int GetEventIcon(BasePropertyDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
 					switch (modifier.Text) {
 						case "public": return KnownImageIds.EventPublic;
@@ -307,6 +308,16 @@ namespace Codist
 					}
 				}
 				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.EventInternal : KnownImageIds.EventPrivate;
+			}
+			int GetEventFieldIcon(EventFieldDeclarationSyntax syntax) {
+				foreach (var modifier in syntax.Modifiers) {
+					switch (modifier.Text) {
+						case "public": return KnownImageIds.EventPublic;
+						case "internal": return KnownImageIds.EventInternal;
+						case "protected": return KnownImageIds.EventProtected;
+					}
+				}
+				return KnownImageIds.EventPrivate;
 			}
 			int GetDelegateIcon(DelegateDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -341,7 +352,7 @@ namespace Codist
 				}
 				return KnownImageIds.MethodPrivate;
 			}
-			int GetPropertyIcon(PropertyDeclarationSyntax syntax) {
+			int GetPropertyIcon(BasePropertyDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
 					switch (modifier.Text) {
 						case "public": return KnownImageIds.PropertyPublic;
@@ -428,7 +439,7 @@ namespace Codist
 			return null;
 		}
 
-		public static string GetDeclarationSignature(this SyntaxNode node) {
+		public static string GetDeclarationSignature(this SyntaxNode node, int position = 0) {
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration: return GetClassSignature(node as ClassDeclarationSyntax);
 				case SyntaxKind.StructDeclaration: return GetStructSignature(node as StructDeclarationSyntax);
@@ -440,8 +451,8 @@ namespace Codist
 				case SyntaxKind.ConversionOperatorDeclaration: return (node as ConversionOperatorDeclarationSyntax).OperatorKeyword.Text;
 				case SyntaxKind.DelegateDeclaration: return GetDelegateSignature(node as DelegateDeclarationSyntax);
 				case SyntaxKind.EventDeclaration: return (node as EventDeclarationSyntax).Identifier.Text;
-				case SyntaxKind.EventFieldDeclaration: return (node as EventFieldDeclarationSyntax).Declaration.Variables.FirstOrDefault()?.Identifier.Text;
-				case SyntaxKind.FieldDeclaration: return (node as FieldDeclarationSyntax).Declaration.Variables.FirstOrDefault()?.Identifier.Text;
+				case SyntaxKind.EventFieldDeclaration: return GetVariableSignature((node as EventFieldDeclarationSyntax).Declaration, position);
+				case SyntaxKind.FieldDeclaration: return GetVariableSignature((node as FieldDeclarationSyntax).Declaration, position);
 				case SyntaxKind.DestructorDeclaration: return (node as DestructorDeclarationSyntax).Identifier.Text;
 				case SyntaxKind.IndexerDeclaration: return "Indexer";
 				case SyntaxKind.OperatorDeclaration: return (node as OperatorDeclarationSyntax).OperatorKeyword.Text;
@@ -451,17 +462,17 @@ namespace Codist
 				case SyntaxKind.ParenthesizedLambdaExpression: return (node as ParenthesizedLambdaExpressionSyntax).ParameterList.ToString();
 				case SyntaxKind.NamespaceDeclaration: return GetNamespaceSignature(node as NamespaceDeclarationSyntax);
 				case SyntaxKind.VariableDeclarator: return (node as VariableDeclaratorSyntax).Identifier.Text;
-				case SyntaxKind.LocalDeclarationStatement: return (node as LocalDeclarationStatementSyntax).Declaration.Variables.FirstOrDefault()?.Identifier.Text;
-				case SyntaxKind.VariableDeclaration: return (node as VariableDeclarationSyntax).Variables.FirstOrDefault()?.Identifier.Text;
+				case SyntaxKind.LocalDeclarationStatement: return GetVariableSignature((node as LocalDeclarationStatementSyntax).Declaration, position);
+				case SyntaxKind.VariableDeclaration: return GetVariableSignature(node as VariableDeclarationSyntax, position);
 				case SyntaxKind.ForEachStatement: return (node as ForEachStatementSyntax).Identifier.Text;
-				case SyntaxKind.ForStatement: return (node as ForStatementSyntax).Declaration?.Variables.FirstOrDefault()?.Identifier.Text;
-				case SyntaxKind.IfStatement: return (node as IfStatementSyntax).Condition.GetFirstDescendantIdentifier()?.Identifier.Text;
+				case SyntaxKind.ForStatement: return GetVariableSignature((node as ForStatementSyntax).Declaration, position);
+				case SyntaxKind.IfStatement: return (node as IfStatementSyntax).Condition.GetFirstIdentifier()?.Identifier.Text;
 				case SyntaxKind.SwitchSection: return GetSwitchSignature(node as SwitchSectionSyntax);
-				case SyntaxKind.SwitchStatement: return (node as SwitchStatementSyntax).Expression.GetLastDescendantIdentifier()?.Identifier.Text;
-				case SyntaxKind.WhileStatement: return (node as WhileStatementSyntax).Condition.GetFirstDescendantIdentifier()?.Identifier.Text;
+				case SyntaxKind.SwitchStatement: return (node as SwitchStatementSyntax).Expression.GetLastIdentifier()?.Identifier.Text;
+				case SyntaxKind.WhileStatement: return (node as WhileStatementSyntax).Condition.GetFirstIdentifier()?.Identifier.Text;
 				case SyntaxKind.UsingStatement: return GetUsingSignature(node as UsingStatementSyntax);
-				case SyntaxKind.LockStatement: return (node as LockStatementSyntax).Statement.GetFirstDescendantIdentifier()?.Identifier.Text;
-				case SyntaxKind.DoStatement: return (node as DoStatementSyntax).Condition.GetFirstDescendantIdentifier()?.Identifier.Text;
+				case SyntaxKind.LockStatement: return (node as LockStatementSyntax).Statement.GetFirstIdentifier()?.Identifier.Text;
+				case SyntaxKind.DoStatement: return (node as DoStatementSyntax).Condition.GetFirstIdentifier()?.Identifier.Text;
 				case SyntaxKind.TryStatement: return (node as TryStatementSyntax).Catches.FirstOrDefault()?.Declaration?.Type.ToString();
 			}
 			return null;
@@ -488,10 +499,27 @@ namespace Codist
 			}
 			string GetUsingSignature(UsingStatementSyntax syntax) {
 				return syntax.Declaration?.Variables.FirstOrDefault()?.Identifier.Text
-					?? syntax.GetFirstDescendantIdentifier()?.Identifier.Text;
+					?? syntax.GetFirstIdentifier()?.Identifier.Text;
 			}
 			string GetGenericSignature(string name, int arity) {
 				return arity > 0 ? name + "<" + new string(',', arity - 1) + ">" : name;
+			}
+			string GetVariableSignature(VariableDeclarationSyntax syntax, int pos) {
+				if (syntax == null) {
+					return String.Empty;
+				}
+				var vars = syntax.Variables;
+				if (vars.Count == 0) {
+					return String.Empty;
+				}
+				if (pos > 0) {
+					foreach (var item in vars) {
+						if (item.FullSpan.Contains(pos)) {
+							return item.Identifier.Text;
+						}
+					}
+				}
+				return vars.Count > 1 ? vars[0].Identifier.Text + "..." : vars[0].Identifier.Text;
 			}
 		}
 
@@ -536,10 +564,10 @@ namespace Codist
 			}
 		}
 
-		public static IdentifierNameSyntax GetFirstDescendantIdentifier(this SyntaxNode node) {
+		public static IdentifierNameSyntax GetFirstIdentifier(this SyntaxNode node) {
 			return node.DescendantNodes().FirstOrDefault(i => i.IsKind(SyntaxKind.IdentifierName)) as IdentifierNameSyntax;
 		}
-		public static IdentifierNameSyntax GetLastDescendantIdentifier(this SyntaxNode node) {
+		public static IdentifierNameSyntax GetLastIdentifier(this SyntaxNode node) {
 			return node.DescendantNodes().LastOrDefault(i => i.IsKind(SyntaxKind.IdentifierName)) as IdentifierNameSyntax;
 		}
 

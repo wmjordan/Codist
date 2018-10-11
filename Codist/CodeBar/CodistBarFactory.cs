@@ -14,13 +14,24 @@ namespace Codist.CodeBar
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType(Constants.CodeTypes.CSharp)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
-	sealed partial class NaviBarFactory : IWpfTextViewCreationListener
+	sealed partial class CodistBarFactory : IWpfTextViewCreationListener
 	{
+#pragma warning disable 649, 169
+
+		/// <summary>
+		/// Defines the adornment layer for the item adornment.
+		/// </summary>
+		[Export(typeof(AdornmentLayerDefinition))]
+		[Name(nameof(CSharpBar))]
+		[Order(Before = PredefinedAdornmentLayers.TextMarker)]
+		AdornmentLayerDefinition _EditorAdornmentLayer;
+
+#pragma warning restore 649, 169
+
 		public void TextViewCreated(IWpfTextView textView) {
 			if (Config.Instance.Features.MatchFlags(Features.Breadcrumb)) {
-				var h = new Overrider(textView);
-				textView.VisualElement.Loaded += h.FindNaviBar;
-				textView.VisualElement.Unloaded += h.ViewUnloaded;
+				textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
+				new Overrider(textView);
 			}
 		}
 
@@ -30,28 +41,25 @@ namespace Codist.CodeBar
 
 			public Overrider(IWpfTextView view) {
 				_View = view;
+				view.VisualElement.Loaded += FindNaviBar;
+				view.VisualElement.Unloaded += ViewUnloaded;
 			}
 
-			public void ViewUnloaded(object sender, EventArgs e) {
-				_View.VisualElement.Loaded -= FindNaviBar;
-				_View.VisualElement.Unloaded -= ViewUnloaded;
-			}
-
-			public void FindNaviBar(object sender, RoutedEventArgs e) {
+			void FindNaviBar(object sender, RoutedEventArgs e) {
 				var view = sender as FrameworkElement;
 				var naviBar = view
 					?.GetVisualParent<Border>(b => b.Name == "PART_ContentPanel")
 					?.GetFirstVisualChild<Border>(b => b.Name == "DropDownBarMargin");
 				if (naviBar == null) {
-					return;
+					goto EXIT;
 				}
 				var dropDown1 = naviBar.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown1");
 				var dropDown2 = naviBar.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown2");
 				if (dropDown1 == null || dropDown2 == null) {
-					return;
+					goto EXIT;
 				}
 				var container = dropDown1.GetVisualParent<Grid>();
-				var bar = new CSharpNaviBar(_View) {
+				var bar = new CSharpBar(_View) {
 					MinWidth = 200
 				};
 				bar.SetCurrentValue(Grid.ColumnProperty, 2);
@@ -59,7 +67,17 @@ namespace Codist.CodeBar
 				container.Children.Add(bar);
 				dropDown1.Visibility = Visibility.Hidden;
 				dropDown2.Visibility = Visibility.Hidden;
-				view.Loaded -= FindNaviBar;
+				EXIT:
+				UnloadEvents();
+			}
+
+			void ViewUnloaded(object sender, EventArgs e) {
+				UnloadEvents();
+			}
+
+			void UnloadEvents() {
+				_View.VisualElement.Loaded -= FindNaviBar;
+				_View.VisualElement.Unloaded -= ViewUnloaded;
 			}
 		}
 	}

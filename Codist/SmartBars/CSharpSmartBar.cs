@@ -27,21 +27,17 @@ namespace Codist.SmartBars
 		static readonly Thickness __FilterBorderThickness = new Thickness(0, 0, 0, 1);
 		static readonly Classifiers.HighlightClassifications __HighlightClassifications = new Classifiers.HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 		readonly SemanticContext _Context;
-		CompilationUnitSyntax _Compilation;
-		Document _Document;
-		SyntaxNode _Node;
-		ISymbol _Symbol;
-		SemanticModel _SemanticModel;
-		SyntaxToken _Token;
 		SyntaxTrivia _Trivia, _LineComment;
+		ISymbol _Symbol;
+
 		public CSharpSmartBar(IWpfTextView view) : base(view) {
-			_Context = new SemanticContext(view);
+			_Context = view.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(view));
 		}
 
 		ToolBar MyToolBar => ToolBar2;
 
 		protected override async Task AddCommandsAsync(CancellationToken cancellationToken) {
-			if (UpdateSemanticModel() && _Node != null) {
+			if (UpdateSemanticModel() && _Context.NodeIncludeTrivia != null) {
 				await AddContextualCommandsAsync(cancellationToken);
 			}
 			//MyToolBar.Items.Add(new Separator());
@@ -49,7 +45,7 @@ namespace Codist.SmartBars
 		}
 
 		static CommandItem CreateCommandMenu(string title, int imageId, ISymbol symbol, string emptyMenuTitle, Action<CommandContext, MenuItem, ISymbol> itemPopulator) {
-			return new CommandItem(title, imageId, ctrl => (ctrl as MenuItem).StaysOpenOnClick = true, ctx => {
+			return new CommandItem(imageId, title, ctrl => (ctrl as MenuItem).StaysOpenOnClick = true, ctx => {
 				var menuItem = ctx.Sender as MenuItem;
 				if (menuItem.Items.Count > 0) {
 					return;
@@ -135,17 +131,21 @@ namespace Codist.SmartBars
 		async Task AddContextualCommandsAsync(CancellationToken cancellationToken) {
 			// anti-pattern for a small margin of performance
 			bool isDesignMode = CodistPackage.DebuggerStatus == DebuggerStatus.Design;
-			if (isDesignMode && _Node is XmlTextSyntax) {
+			var node = _Context.NodeIncludeTrivia;
+			if (isDesignMode && node is XmlTextSyntax) {
 				AddXmlDocCommands();
+				return;
 			}
-			else if (_Trivia.RawKind == 0) {
-				if (_Token.Span.Contains(View.Selection, true)
-					&& _Token.Kind() == SyntaxKind.IdentifierToken
-					&& (_Node.IsDeclaration() || _Node is TypeSyntax || _Node is ParameterSyntax || _Node.IsKind(SyntaxKind.VariableDeclarator))) {
+			var trivia = _Context.GetNodeTrivia();
+			if (trivia.RawKind == 0) {
+				var token = _Context.Token;
+				if (token.Span.Contains(View.Selection, true)
+					&& token.Kind() == SyntaxKind.IdentifierToken
+					&& (node.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || node.IsKind(SyntaxKind.VariableDeclarator))) {
 					// selection is within a symbol
-					_Symbol = await SymbolFinder.FindSymbolAtPositionAsync(_Document, View.Selection.Start.Position, cancellationToken);
+					_Symbol = await _Context.GetSymbolAsync(cancellationToken);
 					if (_Symbol != null) {
-						if (_Node is IdentifierNameSyntax) {
+						if (node is IdentifierNameSyntax) {
 							AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition\nRight click: Peek definition", "Edit.PeekDefinition");
 						}
 						AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze references...", GetReferenceCommandsAsync);
@@ -155,29 +155,32 @@ namespace Codist.SmartBars
 
 						if (isDesignMode) {
 							AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
-								TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
 								ctx.KeepToolBarOnClick = true;
+								TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
 							});
-							if (_Node is ParameterSyntax && _Node.Parent is ParameterListSyntax) {
+							if (node is ParameterSyntax && node.Parent is ParameterListSyntax) {
 								AddEditorCommand(MyToolBar, KnownImageIds.ReorderParameters, "Refactor.ReorderParameters", "Reorder parameters");
+							}
+							if (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(SyntaxKind.StructDeclaration)) {
+								AddEditorCommand(MyToolBar, KnownImageIds.ExtractInterface, "Refactor.ExtractInterface", "Extract interface");
 							}
 						}
 					}
 				}
-				else if (_Token.RawKind >= (int)SyntaxKind.NumericLiteralToken && _Token.RawKind <= (int)SyntaxKind.StringLiteralToken) {
+				else if (token.RawKind >= (int)SyntaxKind.NumericLiteralToken && token.RawKind <= (int)SyntaxKind.StringLiteralToken) {
 					AddEditorCommand(MyToolBar, KnownImageIds.ReferencedDimension, "Edit.FindAllReferences", "Find all references");
 				}
 				if (isDesignMode) {
-					if (_Node.IsKind(SyntaxKind.VariableDeclarator)) {
-						if (_Node?.Parent?.Parent is MemberDeclarationSyntax) {
+					if (node.IsKind(SyntaxKind.VariableDeclarator)) {
+						if (node?.Parent?.Parent is MemberDeclarationSyntax) {
 							AddCommand(MyToolBar, KnownImageIds.AddComment, "Insert comment", ctx => {
 								TextEditorHelper.ExecuteEditorCommand("Edit.InsertComment");
 								ctx.View.Selection.Clear();
 							});
 						}
 					}
-					else if (_Node.IsDeclaration()) {
-						if (_Node is TypeDeclarationSyntax || _Node is MemberDeclarationSyntax || _Node is ParameterListSyntax) {
+					else if (node.IsDeclaration()) {
+						if (node is TypeDeclarationSyntax || node is MemberDeclarationSyntax || node is ParameterListSyntax) {
 							AddCommand(MyToolBar, KnownImageIds.AddComment, "Insert comment", ctx => {
 								TextEditorHelper.ExecuteEditorCommand("Edit.InsertComment");
 								ctx.View.Selection.Clear();
@@ -190,7 +193,8 @@ namespace Codist.SmartBars
 				}
 			}
 			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
-				var triviaList = _Token.HasLeadingTrivia ? _Token.LeadingTrivia : _Token.HasTrailingTrivia ? _Token.TrailingTrivia : default;
+				var token = _Context.Token;
+				var triviaList = token.HasLeadingTrivia ? token.LeadingTrivia : token.HasTrailingTrivia ? token.TrailingTrivia : default;
 				var lineComment = new SyntaxTrivia();
 				if (triviaList.Equals(SyntaxTriviaList.Empty) == false && triviaList.FullSpan.Contains(View.Selection.Start.Position)) {
 					lineComment = triviaList.FirstOrDefault(i => i.IsLineComment());
@@ -241,9 +245,9 @@ namespace Codist.SmartBars
 					symbol = ctor.ContainingType;
 				}
 			}
-			r.Add(new CommandItem("Mark " + symbol.Name, KnownImageIds.Flag, AddHighlightMenuItems, null));
+			r.Add(new CommandItem(KnownImageIds.Flag, "Mark " + symbol.Name, AddHighlightMenuItems, null));
 			if (Classifiers.SymbolMarkManager.Contains(symbol)) {
-				r.Add(new CommandItem("Unmark " + symbol.Name, KnownImageIds.FlagOutline, null, ctx => {
+				r.Add(new CommandItem(KnownImageIds.FlagOutline, "Unmark " + symbol.Name, ctx => {
 					UpdateSemanticModel();
 					if (_Symbol != null && Classifiers.SymbolMarkManager.Remove(_Symbol)) {
 						Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
@@ -254,7 +258,7 @@ namespace Codist.SmartBars
 			else if (Classifiers.SymbolMarkManager.HasBookmark) {
 				r.Add(CreateCommandMenu("Unmark symbol...", KnownImageIds.FlagOutline, symbol, "No symbol marked", (ctx, m, s) => {
 					foreach (var item in Classifiers.SymbolMarkManager.MarkedSymbols) {
-						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.DisplayString, item.ImageId, null, _ => {
+						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.ImageId, item.DisplayString, _ => {
 							Classifiers.SymbolMarkManager.Remove(item);
 							Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 						})));
@@ -265,15 +269,15 @@ namespace Codist.SmartBars
 		}
 
 		void AddHighlightMenuItems(MenuItem menuItem) {
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 1", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight1, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 2", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight2, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 3", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight3, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 4", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight4, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 5", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight5, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 6", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight6, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 7", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight7, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 8", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight8, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem("Highlight 9", KnownImageIds.Flag, item => item.Tag = __HighlightClassifications.Highlight9, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(KnownImageIds.Flag, "Highlight 1", item => item.Tag = __HighlightClassifications.Highlight1, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(KnownImageIds.Flag, "Highlight 2", item => item.Tag = __HighlightClassifications.Highlight2, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(KnownImageIds.Flag, "Highlight 3", item => item.Tag = __HighlightClassifications.Highlight3, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(KnownImageIds.Flag, "Highlight 4", item => item.Tag = __HighlightClassifications.Highlight4, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(KnownImageIds.Flag, "Highlight 5", item => item.Tag = __HighlightClassifications.Highlight5, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(KnownImageIds.Flag, "Highlight 6", item => item.Tag = __HighlightClassifications.Highlight6, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(KnownImageIds.Flag, "Highlight 7", item => item.Tag = __HighlightClassifications.Highlight7, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(KnownImageIds.Flag, "Highlight 8", item => item.Tag = __HighlightClassifications.Highlight8, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(KnownImageIds.Flag, "Highlight 9", item => item.Tag = __HighlightClassifications.Highlight9, SetSymbolMark)));
 		}
 
 		void SetSymbolMark(CommandContext context) {
@@ -291,18 +295,19 @@ namespace Codist.SmartBars
 		}
 
 		void FindCallers(CommandContext context, MenuItem menuItem, ISymbol source) {
-			var docs = System.Collections.Immutable.ImmutableHashSet.CreateRange(_Document.Project.GetRelatedDocuments());
+			var doc = _Context.Document;
+			var docs = System.Collections.Immutable.ImmutableHashSet.CreateRange(doc.Project.GetRelatedDocuments());
 			SymbolCallerInfo[] callers;
 			switch (source.Kind) {
 				case SymbolKind.Method:
 				case SymbolKind.Property:
 				case SymbolKind.Event:
-					callers = SymbolFinder.FindCallersAsync(source, _Document.Project.Solution, docs, context.CancellationToken).Result.ToArray();
+					callers = SymbolFinder.FindCallersAsync(source, doc.Project.Solution, docs, context.CancellationToken).Result.ToArray();
 					break;
 				case SymbolKind.NamedType:
 					var tempResults = new HashSet<SymbolCallerInfo>(SymbolCallerInfoComparer.Instance);
 					foreach (var item in (source as INamedTypeSymbol).InstanceConstructors) {
-						foreach (var c in SymbolFinder.FindCallersAsync(item, _Document.Project.Solution, docs, context.CancellationToken).Result) {
+						foreach (var c in SymbolFinder.FindCallersAsync(item, doc.Project.Solution, docs, context.CancellationToken).Result) {
 							tempResults.Add(c);
 						}
 					}
@@ -338,7 +343,7 @@ namespace Codist.SmartBars
 		}
 
 		void FindDerivedClasses(CommandContext context, MenuItem menuItem, ISymbol symbol) {
-			var classes = SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, _Document.Project.Solution, null, context.CancellationToken).Result.ToArray();
+			var classes = SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, _Context.Document.Project.Solution, null, context.CancellationToken).Result.ToArray();
 			Array.Sort(classes, (a, b) => a.Name.CompareTo(b.Name));
 			foreach (var derived in classes) {
 				var item = new SymbolMenuItem(this, derived, derived.Locations);
@@ -350,7 +355,7 @@ namespace Codist.SmartBars
 		}
 
 		void FindImplementations(CommandContext context, MenuItem menuItem, ISymbol symbol) {
-			var implementations = new List<ISymbol>(SymbolFinder.FindImplementationsAsync(symbol, _Document.Project.Solution, null, context.CancellationToken).Result);
+			var implementations = new List<ISymbol>(SymbolFinder.FindImplementationsAsync(symbol, _Context.Document.Project.Solution, null, context.CancellationToken).Result);
 			implementations.Sort((a, b) => a.Name.CompareTo(b.Name));
 			if (symbol.Kind == SymbolKind.NamedType) {
 				foreach (var impl in implementations) {
@@ -365,12 +370,12 @@ namespace Codist.SmartBars
 		}
 
 		void FindInstanceAsParameter(CommandContext context, MenuItem menuItem, ISymbol source) {
-			var members = (source as ITypeSymbol).FindInstanceAsParameter(_Document.Project, context.CancellationToken);
+			var members = (source as ITypeSymbol).FindInstanceAsParameter(_Context.Document.Project, context.CancellationToken);
 			SortAndGroupSymbolByClass(menuItem, members);
 		}
 
 		void FindInstanceProducer(CommandContext context, MenuItem menuItem, ISymbol source) {
-			var members = (source as ITypeSymbol).FindSymbolInstanceProducer(_Document.Project, context.CancellationToken);
+			var members = (source as ITypeSymbol).FindSymbolInstanceProducer(_Context.Document.Project, context.CancellationToken);
 			SortAndGroupSymbolByClass(menuItem, members);
 		}
 
@@ -407,13 +412,13 @@ namespace Codist.SmartBars
 		}
 
 		void FindOverrides(CommandContext context, MenuItem menuItem, ISymbol symbol) {
-			foreach (var ov in SymbolFinder.FindOverridesAsync(symbol, _Document.Project.Solution, null, context.CancellationToken).Result) {
+			foreach (var ov in SymbolFinder.FindOverridesAsync(symbol, _Context.Document.Project.Solution, null, context.CancellationToken).Result) {
 				menuItem.Items.Add(new SymbolMenuItem(this, ov, ov.ContainingType.Name, ov.Locations));
 			}
 		}
 
 		void FindReferences(CommandContext context, MenuItem menuItem, ISymbol source) {
-			var refs = SymbolFinder.FindReferencesAsync(source, _Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.CreateRange(_Document.Project.GetRelatedDocuments()), context.CancellationToken).Result.ToArray();
+			var refs = SymbolFinder.FindReferencesAsync(source, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.CreateRange(_Context.Document.Project.GetRelatedDocuments()), context.CancellationToken).Result.ToArray();
 			Array.Sort(refs, (a, b) => {
 				int s;
 				return 0 != (s = a.Definition.ContainingType.Name.CompareTo(b.Definition.ContainingType.Name)) ? s :
@@ -440,7 +445,7 @@ namespace Codist.SmartBars
 		}
 
 		void FindSimilarSymbols(MenuItem menuItem, ISymbol symbol) {
-			foreach (var project in _Document.Project.Solution.Projects) {
+			foreach (var project in _Context.Document.Project.Solution.Projects) {
 				foreach (var ss in SymbolFinder.FindSimilarSymbols(symbol, project.GetCompilationAsync().Result)) {
 					menuItem.Items.Add(new SymbolMenuItem(this, ss, ss.Locations));
 				}
@@ -449,21 +454,22 @@ namespace Codist.SmartBars
 
 		CommandItem[] GetDebugCommands(CommandContext ctx) {
 			return new CommandItem[] {
-				new CommandItem("Add watch", KnownImageIds.Watch, null, c => TextEditorHelper.ExecuteEditorCommand("Debug.AddWatch")),
-				new CommandItem("Add parallel watch", KnownImageIds.Watch, null, c => TextEditorHelper.ExecuteEditorCommand("Debug.AddParallelWatch")),
-				new CommandItem("Delete all breakpoints", KnownImageIds.DeleteBreakpoint, null, c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
+				new CommandItem(KnownImageIds.Watch, "Add watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddWatch")),
+				new CommandItem(KnownImageIds.Watch, "Add parallel watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddParallelWatch")),
+				new CommandItem(KnownImageIds.DeleteBreakpoint, "Delete all breakpoints", c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
 			};
 		}
 
 		List<CommandItem> GetExpandSelectionCommands(CommandContext ctx) {
 			var r = new List<CommandItem>();
 			var duplicate = ctx.RightClick;
-			var node = _Node;
+			var node = _Context.NodeIncludeTrivia;
 			while (node != null) {
 				if (node.FullSpan.Contains(ctx.View.Selection, false)
-					&& (node.IsSyntaxBlock() || node.IsDeclaration())) {
+					&& (node.IsSyntaxBlock() || node.IsDeclaration() || node.IsKind(SyntaxKind.VariableDeclarator))
+					&& node.IsKind(SyntaxKind.VariableDeclaration) == false) {
 					var n = node;
-					r.Add(new CommandItem((duplicate ? "Duplicate " : "Select ") + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), CodeAnalysisHelper.GetImageId(n), null, ctx2 => {
+					r.Add(new CommandItem(CodeAnalysisHelper.GetImageId(n), (duplicate ? "Duplicate " : "Select ") + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), ctx2 => {
 						ctx2.View.SelectNode(n, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ExpansionIncludeTrivia) || n.Span.Contains(ctx2.View.Selection, false) == false);
 						if (Keyboard.Modifiers == ModifierKeys.Control) {
 							TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
@@ -475,13 +481,13 @@ namespace Codist.SmartBars
 				}
 				node = node.Parent;
 			}
-			r.Add(new CommandItem("Select all", KnownImageIds.SelectAll, ctrl => ctrl.ToolTip = "Select all text", ctx2 => TextEditorHelper.ExecuteEditorCommand("Edit.SelectAll")));
+			r.Add(new CommandItem(KnownImageIds.SelectAll, "Select all", ctrl => ctrl.ToolTip = "Select all text", ctx2 => TextEditorHelper.ExecuteEditorCommand("Edit.SelectAll")));
 			return r;
 		}
 
 		async Task<IEnumerable<CommandItem>> GetReferenceCommandsAsync(CommandContext ctx) {
 			var r = new List<CommandItem>();
-			var symbol = await SymbolFinder.FindSymbolAtPositionAsync(_Document, View.Caret.Position.BufferPosition, ctx.CancellationToken);
+			var symbol = await SymbolFinder.FindSymbolAtPositionAsync(_Context.Document, View.Caret.Position.BufferPosition, ctx.CancellationToken);
 			if (symbol == null) {
 				return r;
 			}
@@ -518,9 +524,9 @@ namespace Codist.SmartBars
 					}
 					else {
 						if (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct) {
-							var ctor = _Node.GetObjectCreationNode();
+							var ctor = _Context.NodeIncludeTrivia.GetObjectCreationNode();
 							if (ctor != null) {
-								var s = _SemanticModel.GetSymbolOrFirstCandidate(ctor);
+								var s = _Context.SemanticModel.GetSymbolOrFirstCandidate(ctor);
 								if (s != null) {
 									r.Add(CreateCommandMenu("Find callers...", KnownImageIds.ShowCallerGraph, s, "No caller was found", FindCallers));
 								}
@@ -550,7 +556,10 @@ namespace Codist.SmartBars
 					break;
 			}
 			//r.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, symbol, "No reference found", FindReferences));
-			r.Add(new CommandItem("Find all references", KnownImageIds.ReferencedDimension, null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences")));
+			r.Add(new CommandItem(KnownImageIds.ReferencedDimension, "Find all references", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences")));
+			r.Add(new CommandItem(KnownImageIds.ListMembers, "Go to member", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToMember")));
+			r.Add(new CommandItem(KnownImageIds.Type, "Go to type", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToType")));
+			r.Add(new CommandItem(KnownImageIds.FindSymbol, "Go to symbol", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToSymbol")));
 			return r;
 		}
 
@@ -559,7 +568,7 @@ namespace Codist.SmartBars
 			if (type != null && type.SpecialType == SpecialType.None) {
 				list.Add(CreateCommandMenu("Find members of " + type.GetSignatureString() + "...", KnownImageIds.ListMembers, type, "No member was found", FindMembers));
 				if (type.FirstSourceLocation() != null) {
-					list.Add(new CommandItem("Go to " + type.GetSignatureString(), KnownImageIds.GoToDeclaration, null, _ => type.GoToSource()));
+					list.Add(new CommandItem(KnownImageIds.GoToDeclaration, "Go to " + type.GetSignatureString(), _ => type.GoToSource()));
 				}
 			}
 		}
@@ -591,38 +600,8 @@ namespace Codist.SmartBars
 		}
 
 		bool UpdateSemanticModel() {
-			try {
-				_Document = View.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
-				_SemanticModel = _Document.GetSemanticModelAsync().Result;
-				_Compilation = _SemanticModel.SyntaxTree.GetCompilationUnitRoot();
-			}
-			catch (NullReferenceException) {
-				_Node = null;
-				_Token = default;
-				_Trivia = default;
-				return false;
-			}
 			int pos = View.Selection.Start.Position;
-			try {
-				_Token = _Compilation.FindToken(pos, true);
-			}
-			catch (ArgumentOutOfRangeException) {
-				_Node = null;
-				_Token = default;
-				_Trivia = default;
-				_LineComment = default;
-				return false;
-			}
-			var triviaList = _Token.HasLeadingTrivia ? _Token.LeadingTrivia : _Token.HasTrailingTrivia ? _Token.TrailingTrivia : default;
-			if (triviaList.Equals(SyntaxTriviaList.Empty) == false && triviaList.FullSpan.Contains(pos)) {
-				_Trivia = triviaList.FirstOrDefault(i => i.Span.Contains(pos));
-				_LineComment = triviaList.FirstOrDefault(i => i.IsLineComment());
-			}
-			else {
-				_Trivia = _LineComment = default;
-			}
-			_Node = _Compilation.FindNode(_Token.Span, true, true);
-			return true;
+			return _Context.UpdateAsync(pos, default).Result;
 		}
 		sealed class SymbolMenuItem : CommandMenuItem
 		{
@@ -663,7 +642,8 @@ namespace Codist.SmartBars
 				}
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
-				ToolTip = ToolTipFactory.CreateToolTip(Symbol, (SmartBar as CSharpSmartBar)._SemanticModel.Compilation);
+				ToolTip = ToolTipFactory.CreateToolTip(Symbol, (SmartBar as CSharpSmartBar)._Context.SemanticModel.Compilation);
+				this.SetTipOptions();
 				ToolTipOpening -= ShowToolTip;
 			}
 

@@ -12,25 +12,77 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using System.Windows;
+using Codist.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using Task = System.Threading.Tasks.Task;
 
 namespace Codist.CodeBar
 {
-	public sealed class CSharpNaviBar : Menu
+	public sealed class CSharpBar : Menu
 	{
 		readonly IWpfTextView _View;
+		readonly IAdornmentLayer _Adormnent;
 		readonly SemanticContext _SemanticContext;
 		CancellationTokenSource _cancellationSource = new CancellationTokenSource();
+		NaviItem _MouseHoverItem;
 
-		public CSharpNaviBar(IWpfTextView textView) {
+		public CSharpBar(IWpfTextView textView) {
 			_View = textView;
-			_View.Selection.SelectionChanged += Update;
-			_SemanticContext = new SemanticContext(textView);
-			ImageThemingUtilities.SetImageBackgroundColor(this, ThemeHelper.TitleBackgroundColor);
+			_Adormnent = _View.GetAdornmentLayer(nameof(CSharpBar));
+			_SemanticContext = textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
+			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			Resources = SharedDictionaryManager.Menu;
 			SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
 			SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextInactiveKey);
 			Items.Add(new RootItem(this));
+			_View.Selection.SelectionChanged += Update;
 			Update(this, EventArgs.Empty);
+		}
+
+		protected override void OnMouseMove(MouseEventArgs e) {
+			base.OnMouseMove(e);
+			if (_MouseHoverItem != null) {
+				var p = e.GetPosition(_MouseHoverItem);
+				if (p.X != 0 && p.Y != 0 && _MouseHoverItem.Contains(p)) {
+					return;
+				}
+			}
+			for (int i = Items.Count - 1; i >= 0; i--) {
+				var item = Items[i] as NaviItem;
+				if (item == null || item.Contains(e.GetPosition(item)) == false) {
+					continue;
+				}
+
+				if (_MouseHoverItem != item) {
+					_MouseHoverItem = item;
+					if (_Adormnent.IsEmpty == false) {
+						_Adormnent.RemoveAllAdornments();
+					}
+					var span = item.Node.Span.CreateSnapshotSpan(_View.TextSnapshot);
+					if (span.Length > 0) {
+						try {
+							_Adormnent.AddAdornment(span, null, new GeometryAdornment(EnvironmentColors.CommandBarMenuItemMouseOverColorKey.GetWpfColor(), _View.TextViewLines.GetMarkerGeometry(span)));
+						}
+						catch (ObjectDisposedException) {
+							// ignore
+							_MouseHoverItem = null;
+						}
+					}
+				}
+				return;
+			}
+			if (_Adormnent.IsEmpty == false) {
+				_Adormnent.RemoveAllAdornments();
+				_MouseHoverItem = null;
+			}
+		}
+		protected override void OnMouseLeave(MouseEventArgs e) {
+			base.OnMouseLeave(e);
+			if (_Adormnent.IsEmpty == false) {
+				_Adormnent.RemoveAllAdornments();
+				_MouseHoverItem = null;
+			}
 		}
 
 		async void Update(object sender, EventArgs e) {
@@ -56,7 +108,7 @@ namespace Codist.CodeBar
 		}
 
 		async Task<IEnumerable<SyntaxNode>> UpdateModelAsync(CancellationToken token) {
-			if (await _SemanticContext.UpdateAsync(_View.Selection.Start.Position, false, token) == false) {
+			if (await _SemanticContext.UpdateAsync(_View.Selection.Start.Position, token) == false) {
 				return Array.Empty<SyntaxNode>();
 			}
 			var node = _SemanticContext.Node;
@@ -82,10 +134,10 @@ namespace Codist.CodeBar
 					p = p.Parent;
 				}
 			}
-			var t = new Controls.ThemedTipText()
+			var t = new ThemedTipText()
 				.Append(title, child.FullSpan.Contains(_SemanticContext.Position));
 			if (child is BaseMethodDeclarationSyntax) {
-				t.Append(GetParameterListSignature((child as BaseMethodDeclarationSyntax).ParameterList), new System.Windows.Media.SolidColorBrush(EnvironmentColors.SystemGrayTextColorKey.ToThemedWpfColor()));
+				t.Append(GetParameterListSignature((child as BaseMethodDeclarationSyntax).ParameterList), new System.Windows.Media.SolidColorBrush(EnvironmentColors.SystemGrayTextColorKey.GetWpfColor()));
 			}
 			else if (child.IsKind(SyntaxKind.DelegateDeclaration)) {
 				t.Append(" " + GetParameterListSignature((child as DelegateDeclarationSyntax).ParameterList));
@@ -114,15 +166,38 @@ namespace Codist.CodeBar
 			}
 		}
 
-		sealed class MemberFinderBox : Controls.ThemedTextBox
+		static void AddItemPlaceHolder(MenuItem item) {
+			item.Items.Add(new MenuItem { Visibility = Visibility.Collapsed });
+		}
+
+		sealed class GeometryAdornment : UIElement
+		{
+			readonly DrawingVisual _child;
+
+			public GeometryAdornment(Color color, Geometry geometry) {
+				_child = new DrawingVisual();
+				using (var context = _child.RenderOpen()) {
+					context.DrawGeometry(new SolidColorBrush(color.Alpha(127)), new Pen(new SolidColorBrush(color), 1), geometry);
+					context.Close();
+				}
+				AddVisualChild(_child);
+			}
+
+			protected override int VisualChildrenCount => 1;
+
+			protected override Visual GetVisualChild(int index) {
+				return _child;
+			}
+		}
+
+		sealed class MemberFinderBox : ThemedTextBox
 		{
 			readonly ItemCollection _Items;
-			readonly CSharpNaviBar _Bar;
-			readonly int _FilterOffset;
+			readonly CSharpBar _Bar;
+			readonly int _FilterOffset = 0;
 
-			public MemberFinderBox(ItemCollection items, int filterOffset, CSharpNaviBar bar) {
+			public MemberFinderBox(ItemCollection items, CSharpBar bar) {
 				_Bar = bar;
-				_FilterOffset = filterOffset;
 				_Items = items;
 			}
 			protected override void OnTextChanged(TextChangedEventArgs e) {
@@ -142,10 +217,15 @@ namespace Codist.CodeBar
 				}
 			}
 		}
-		sealed class FilterBox : Controls.ThemedTextBox
+		sealed class FilterBox : ThemedTextBox
 		{
 			readonly ItemCollection _Items;
 			readonly int _FilterOffset;
+
+			public FilterBox(ItemCollection items) {
+				_Items = items;
+				_FilterOffset = 0;
+			}
 
 			public FilterBox(ItemCollection items, int filterOffset) {
 				_Items = items;
@@ -175,34 +255,45 @@ namespace Codist.CodeBar
 		}
 		sealed class RootItem : MenuItem
 		{
-			readonly CSharpNaviBar _Bar;
-			public RootItem(CSharpNaviBar bar) {
+			readonly CSharpBar _Bar;
+			readonly MemberFinderBox _FinderBox;
+			public RootItem(CSharpBar bar) {
 				_Bar = bar;
 				Icon = ThemeHelper.GetImage(KnownImageIds.CSProjectNode);
-				ImageThemingUtilities.SetImageBackgroundColor(this, ThemeHelper.TitleBackgroundColor);
+				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
-				Header = new Controls.ThemedTipText("//");
-				Items.Add(new MenuItem {
-					Icon = ThemeHelper.GetImage(KnownImageIds.FindSymbol),
-					MinWidth = 150,
-					Header = new StackPanel {
-						Children = {
-							new Controls.ThemedTipText("Find symbol in document:"),
-							new MemberFinderBox(Items, 0, _Bar),
+				Header = new ThemedTipText("//");
+				Tag = new StackPanel {
+					Margin = WpfHelper.MenuItemMargin,
+					Children = {
+						new StackPanel {
+							Children = {
+								ThemeHelper.GetImage(KnownImageIds.FindSymbol).WrapMargin(WpfHelper.GlyphMargin),
+								(_FinderBox = new MemberFinderBox(Items, _Bar) { MinWidth = 150 }),
+							},
+							Orientation = Orientation.Horizontal
+						},
+						new StackPanel {
+							Children = {
+								new ThemedTipText("Goto: "),
+								new ThemedButton(KnownImageIds.NextError, "Go to next error", () => TextEditorHelper.ExecuteEditorCommand("View.NextError")),
+								new ThemedButton(KnownImageIds.Task, "Go to next task", () => TextEditorHelper.ExecuteEditorCommand("View.NextTask")),
+							},
+							Orientation = Orientation.Horizontal
 						}
 					}
-				});
+				};
+				AddItemPlaceHolder(this);
 			}
 		}
 		sealed class NaviItem : MenuItem
 		{
-			readonly SyntaxNode _Node;
 			readonly Action<NaviItem> _ClickHandler;
-			readonly CSharpNaviBar _Bar;
+			readonly CSharpBar _Bar;
 
-			public NaviItem(CSharpNaviBar bar, SyntaxNode node) : this(bar, node, null, null) {}
-			public NaviItem(CSharpNaviBar bar, SyntaxNode node, Action<NaviItem> initializer, Action<NaviItem> clickHandler) {
-				_Node = node;
+			public NaviItem(CSharpBar bar, SyntaxNode node) : this(bar, node, null, null) {}
+			public NaviItem(CSharpBar bar, SyntaxNode node, Action<NaviItem> initializer, Action<NaviItem> clickHandler) {
+				Node = node;
 				_ClickHandler = clickHandler;
 				_Bar = bar;
 
@@ -214,16 +305,19 @@ namespace Codist.CodeBar
 					initializer(this);
 				}
 				ToolTip = String.Empty;
-				ImageThemingUtilities.SetImageBackgroundColor(this, ThemeHelper.TitleBackgroundColor);
+				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
 				ToolTipOpening += NaviItem_ToolTipOpening;
 			}
 
-			void NaviItem_ToolTipOpening(object sender, ToolTipEventArgs e) {
-				var symbol = _Bar._SemanticContext.SemanticModel.GetDeclaredSymbol(_Node, _Bar._cancellationSource.Token);
+			internal SyntaxNode Node { get; }
+
+			async void NaviItem_ToolTipOpening(object sender, ToolTipEventArgs e) {
+				var symbol = await _Bar._SemanticContext.GetSymbolAsync(Node.SpanStart, _Bar._cancellationSource.Token);
 				ToolTip = symbol != null
 					? ToolTipFactory.CreateToolTip(symbol, _Bar._SemanticContext.SemanticModel.Compilation)
-					: (object)_Node.GetSyntaxBrief();
+					: (object)Node.GetSyntaxBrief();
+				this.SetTipOptions();
 				ToolTipOpening -= NaviItem_ToolTipOpening;
 			}
 
@@ -232,14 +326,14 @@ namespace Codist.CodeBar
 					_ClickHandler(this);
 				}
 				else if (HasItems == false) {
-					AddItems(Items, _Node);
+					AddItems(Items, Node);
 					IsSubmenuOpen = true;
 				}
 				base.OnClick();
 			}
 
 			public void GoToLocation() {
-				_Node.GetLocation().GoToSource();
+				Node.GetLocation().GoToSource();
 			}
 
 			NaviItem SetHeader(SyntaxNode node) {
@@ -252,7 +346,7 @@ namespace Codist.CodeBar
 							p = p.Parent;
 						}
 					}
-					Header = new Controls.ThemedTipText(title, node.IsTypeDeclaration() || node.IsKind(SyntaxKind.NamespaceDeclaration) || node.IsKind(SyntaxKind.CompilationUnit));
+					Header = new ThemedTipText(title, node.IsTypeDeclaration() || node.IsKind(SyntaxKind.NamespaceDeclaration) || node.IsKind(SyntaxKind.CompilationUnit));
 				}
 				return this;
 			}
@@ -260,21 +354,35 @@ namespace Codist.CodeBar
 			void AddItems(ItemCollection items, SyntaxNode node) {
 				switch (node.Kind()) {
 					case SyntaxKind.NamespaceDeclaration:
-						Items.Add(new NaviItem(_Bar, node, null, i => i.GoToLocation()));
-						Items.Add(new Separator());
+						MaxHeight = _Bar._View.ViewportHeight / 2;
+						Tag = new StackPanel {
+							Children = {
+								new NaviItem(_Bar, node, null, i => i.GoToLocation()),
+								new Separator()
+							}
+						};
 						AddTypeDeclarations(node);
 						break;
 					case SyntaxKind.ClassDeclaration:
 					case SyntaxKind.StructDeclaration:
 					case SyntaxKind.InterfaceDeclaration:
 					case SyntaxKind.EnumDeclaration:
-						Items.Add(new NaviItem(_Bar, node, null, i => i.GoToLocation()));
-						Items.Add(new MenuItem {
-							Icon = ThemeHelper.GetImage(KnownImageIds.Filter),
-							MinWidth = 150,
-							Header = new FilterBox(Items, 2)
-						});
-						Items.Add(new Separator());
+						MaxHeight = _Bar._View.ViewportHeight / 2;
+						Tag = new StackPanel {
+							Children = {
+								new NaviItem(_Bar, node, null, i => i.GoToLocation()),
+								new StackPanel {
+									Margin = WpfHelper.MenuItemMargin,
+									Children = {
+										ThemeHelper.GetImage(KnownImageIds.Filter).WrapMargin(WpfHelper.GlyphMargin),
+										new FilterBox(Items) { MinWidth = 150 }
+									},
+									Orientation = Orientation.Horizontal
+								},
+								new Separator()
+							}
+						};
+						AddItemPlaceHolder(this);
 						AddMemberDeclarations(node);
 						break;
 					default:
@@ -286,9 +394,7 @@ namespace Codist.CodeBar
 			void SelectOrGoToSource(SyntaxNode node) {
 				var span = node.FullSpan;
 				if (span.Contains(_Bar._SemanticContext.Position)) {
-					if (_Bar._View.TextSnapshot.Length > span.End) {
-						_Bar._View.Selection.Select(new Microsoft.VisualStudio.Text.SnapshotSpan(_Bar._View.TextSnapshot, span.Start, span.Length), false);
-					}
+					_Bar._View.SelectNode(node, Keyboard.Modifiers != ModifierKeys.Control);
 				}
 				else {
 					node.GetLocation().GoToSource();
@@ -300,7 +406,7 @@ namespace Codist.CodeBar
 					if (child.IsTypeDeclaration() == false) {
 						continue;
 					}
-					Items.Add(new NaviItem(_Bar, child, i => i.Header = i._Bar.GetSignature(i._Node), i => i.SelectOrGoToSource(i._Node)));
+					Items.Add(new NaviItem(_Bar, child, i => i.Header = i._Bar.GetSignature(i.Node), i => i.SelectOrGoToSource(i.Node)));
 					AddTypeDeclarations(child);
 				}
 			}
@@ -310,8 +416,8 @@ namespace Codist.CodeBar
 					if (child.IsMemberDeclaration() == false && child.IsTypeDeclaration() == false) {
 						continue;
 					}
-					if (child.IsKind(SyntaxKind.FieldDeclaration)) {
-						AddVariables((child as FieldDeclarationSyntax).Declaration.Variables);
+					if (child.IsKind(SyntaxKind.FieldDeclaration) || child.IsKind(SyntaxKind.EventFieldDeclaration)) {
+						AddVariables((child as BaseFieldDeclarationSyntax).Declaration.Variables);
 					}
 					else {
 						Items.Add(new NaviItem(_Bar, child, i => i.Header = _Bar.GetSignature(child), i => i.GoToLocation()));

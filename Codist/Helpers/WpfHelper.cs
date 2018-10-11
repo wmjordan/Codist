@@ -18,6 +18,7 @@ namespace Codist
 		internal static readonly Thickness NoMargin = new Thickness(0);
 		internal static readonly Thickness GlyphMargin = new Thickness(0, 0, 5, 0);
 		internal static readonly Thickness ScrollerMargin = new Thickness(0, 0, 3, 0);
+		internal static readonly Thickness MenuItemMargin = new Thickness(6, 0, 6, 0);
 
 		public static TPanel Add<TPanel>(this TPanel panel, UIElement control)
 			where TPanel : Panel {
@@ -173,6 +174,10 @@ namespace Codist
 				enc.Save(f);
 			}
 		}
+		public static bool Contains(this FrameworkElement element, Point point) {
+			return point.X >= 0 && point.X <= element.ActualWidth
+				&& point.Y >= 0 && point.Y <= element.ActualHeight;
+		}
 		public static TElement LimitSize<TElement>(this TElement element)
 			where TElement : FrameworkElement {
 			if (element == null) {
@@ -189,6 +194,14 @@ namespace Codist
 				}
 			}
 			return element;
+		}
+		public static TElement WrapMargin<TElement>(this TElement element, Thickness thickness)
+			where TElement : FrameworkElement {
+			element.Margin = thickness;
+			return element;
+		}
+		public static Border WrapMargin(this UIElement element, Thickness thickness) {
+			return new Border { Margin = thickness, Child = element };
 		}
 		public static DependencyObject GetVisualParent(this DependencyObject obj) {
 			return VisualTreeHelper.GetParent(obj);

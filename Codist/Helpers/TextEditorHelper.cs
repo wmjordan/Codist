@@ -45,6 +45,13 @@ namespace Codist
 			return token.Contains(start) && (token.Contains(end) || inclusive && token.End == end);
 		}
 
+		public static SnapshotSpan CreateSnapshotSpan(this TextSpan span, ITextSnapshot snapshot) {
+			if (span.End < snapshot.Length) {
+				return new SnapshotSpan(snapshot, span.Start, span.Length);
+			}
+			return default;
+		}
+
 		public static TextFormattingRunProperties GetBackupFormatting(string classificationType) {
 			lock (_syncRoot) {
 				return _BackupFormattings.TryGetValue(classificationType, out var r) ? r : null;
@@ -119,39 +126,24 @@ namespace Codist
 			if (s.IsEmpty || s.SelectedSpans.Count < 1) {
 				return false;
 			}
-			var buffer = textView.TextViewLines;
-			IWpfTextViewLine line = null, line2;
-			foreach (var item in s.SelectedSpans) {
-				line2 = buffer.GetTextViewLineContainingBufferPosition(item.Start);
-				if (line == null) {
-					line = line2;
-					continue;
-				}
-				if (line2 != line) {
-					return true;
-				}
-				line2 = buffer.GetTextViewLineContainingBufferPosition(item.End);
-				if (line2 != line) {
-					return true;
-				}
-			}
-			return false;
+			var lines = textView.TextViewLines;
+			return lines.GetTextViewLineContainingBufferPosition(s.Start.Position) != lines.GetTextViewLineContainingBufferPosition(s.End.Position);
 		}
 
 		public static void SelectNode(this IWpfTextView view, Microsoft.CodeAnalysis.SyntaxNode node, bool includeTrivia) {
-			if (includeTrivia) {
-				view.Selection.Select(new SnapshotSpan(view.TextSnapshot, node.FullSpan.Start, node.FullSpan.Length), false);
-			}
-			else {
-				view.Selection.Select(new SnapshotSpan(view.TextSnapshot, node.Span.Start, node.Span.Length), false);
+			var span = includeTrivia ? node.FullSpan : node.Span;
+			if (view.TextSnapshot.Length > span.End) {
+				var ss = new SnapshotSpan(view.TextSnapshot, span.Start, span.Length);
+				view.Selection.Select(ss, false);
+				view.ViewScroller.EnsureSpanVisible(ss);
 			}
 		}
 
-		public static void TryExecuteCommand(this EnvDTE.DTE dte, string command) {
+		public static void TryExecuteCommand(this EnvDTE.DTE dte, string command, string args = "") {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			try {
 				if (dte.Commands.Item(command).IsAvailable) {
-					dte.ExecuteCommand(command);
+					dte.ExecuteCommand(command, args);
 				}
 			}
 			catch (System.Runtime.InteropServices.COMException ex) {
@@ -162,8 +154,8 @@ namespace Codist
 			}
 		}
 
-		public static void ExecuteEditorCommand(string command) {
-			CodistPackage.DTE.TryExecuteCommand(command);
+		public static void ExecuteEditorCommand(string command, string args = "") {
+			CodistPackage.DTE.TryExecuteCommand(command, args);
 		}
 
 		public static IWpfTextView GetActiveWpfDocumentView(this IServiceProvider service) {

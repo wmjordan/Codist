@@ -29,7 +29,7 @@ namespace Codist.SmartBars
 		CancellationTokenSource _Cancellation = new CancellationTokenSource();
 		DateTime _LastExecute;
 		DateTime _LastShiftHit;
-		private int _TimerStatus;
+		private int _SelectionStatus;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SmartBar"/> class.
@@ -107,15 +107,7 @@ namespace Codist.SmartBars
 				AddPasteCommand();
 				AddDuplicateCommand();
 				AddDeleteCommand();
-				AddSpecialDataFormatCommand();
-				//var selection = View.Selection;
-				//if (View.Selection.Mode == TextSelectionMode.Stream && View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.Start.Position) != View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.End.Position)) {
-				//	AddCommand(ToolBar, KnownImageIds.Join, "Join lines", ctx => {
-				//		var span = View.Selection.SelectedSpans[0];
-				//		var t = span.GetText();
-				//		View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(t, @"[ \t]*\r?\n[ \t]*", " "));
-				//	});
-				//}
+				AddSpecialFormatCommand();
 			}
 			//if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
 			//	AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");
@@ -204,7 +196,7 @@ namespace Codist.SmartBars
 				Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 				IsOpen = true
 			};
-			ImageThemingUtilities.SetImageBackgroundColor(m, ThemeHelper.TitleBackgroundColor);
+			m.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			return m;
 		}
 
@@ -234,7 +226,7 @@ namespace Codist.SmartBars
 				ToolTip = tooltip,
 				Cursor = Cursors.Hand
 			};
-			ImageThemingUtilities.SetImageBackgroundColor(b, ThemeHelper.TitleBackgroundColor);
+			b.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			return b;
 		}
 
@@ -245,12 +237,12 @@ namespace Codist.SmartBars
 				// postpone the even handler until the mouse button is released
 				await Task.Delay(100);
 			}
-			if (View.Selection.IsEmpty || Interlocked.Exchange(ref _TimerStatus, Working) != Selecting) {
+			if (View.Selection.IsEmpty || Interlocked.Exchange(ref _SelectionStatus, Working) != Selecting) {
 				goto EXIT;
 			}
 			await InternalCreateToolBarAsync(cancellationToken);
 			EXIT:
-			_TimerStatus = 0;
+			_SelectionStatus = 0;
 		}
 
 		async Task InternalCreateToolBarAsync(CancellationToken cancellationToken = default) {
@@ -411,10 +403,10 @@ namespace Codist.SmartBars
 				View.VisualElement.MouseMove -= ViewMouseMove;
 				_Cancellation.Cancel();
 				_Cancellation = new CancellationTokenSource();
-				_TimerStatus = 0;
+				_SelectionStatus = 0;
 				return;
 			}
-			if (Interlocked.CompareExchange(ref _TimerStatus, Selecting, 0) != 0) {
+			if (Interlocked.CompareExchange(ref _SelectionStatus, Selecting, 0) != 0) {
 				return;
 			}
 			CreateToolBar();
@@ -471,8 +463,9 @@ namespace Codist.SmartBars
 				Name = alias;
 				ImageId = symbol.GetImageId();
 			}
-
-			public CommandItem(string name, int imageId, Action<MenuItem> controlInitializer, Action<CommandContext> action) {
+			public CommandItem(int imageId, string name, Action<CommandContext> action)
+				: this(imageId, name, null, action) { }
+			public CommandItem(int imageId, string name, Action<MenuItem> controlInitializer, Action<CommandContext> action) {
 				Name = name;
 				ImageId = imageId;
 				ItemInitializer = controlInitializer;

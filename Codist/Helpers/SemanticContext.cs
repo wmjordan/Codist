@@ -16,6 +16,8 @@ namespace Codist
 	sealed class SemanticContext
 	{
 		readonly IWpfTextView _TextView;
+		VersionStamp _Version;
+		SyntaxNode _Node, _NodeIncludeTrivia;
 
 		public SemanticContext(IWpfTextView textView) {
 			_TextView = textView;
@@ -24,11 +26,43 @@ namespace Codist
 		public Document Document { get; private set; }
 		public SemanticModel SemanticModel { get; private set; }
 		public CompilationUnitSyntax Compilation { get; private set; }
-		public SyntaxNode Node { get; private set; }
+		public SyntaxNode Node => GetNode(Position, false);
+		public SyntaxNode NodeIncludeTrivia => GetNode(Position, true);
 		public SyntaxToken Token { get; private set; }
 		public ISymbol Symbol { get; private set; }
 		public int Position { get; set; }
 
+		public SyntaxNode GetNode(int position, bool includeTrivia) {
+			var node = includeTrivia ? _NodeIncludeTrivia : _Node;
+			if (node != null) {
+				return node;
+			}
+			if (node == null || node.Span.Contains(position) == false) {
+				node = Compilation.FindNode(Token.Span, includeTrivia, true);
+				SeparatedSyntaxList<VariableDeclaratorSyntax> variables;
+				if (node.IsKind(SyntaxKind.FieldDeclaration) || node.IsKind(SyntaxKind.EventFieldDeclaration)) {
+					variables = (node as BaseFieldDeclarationSyntax).Declaration.Variables;
+				}
+				else if (node.IsKind(SyntaxKind.VariableDeclaration)) {
+					variables = (node as VariableDeclarationSyntax).Variables;
+				}
+				else if (node.IsKind(SyntaxKind.LocalDeclarationStatement)) {
+					variables = (node as LocalDeclarationStatementSyntax).Declaration.Variables;
+				}
+				else {
+					return includeTrivia ? _NodeIncludeTrivia = node : _Node = node;
+				}
+				foreach (var variable in variables) {
+					if (variable.Span.Contains(position)) {
+						return includeTrivia ? _NodeIncludeTrivia = node : _Node = node;
+					}
+				}
+				if (node.FullSpan.Contains(position)) {
+					return node;
+				}
+			}
+			return null;
+		}
 		public SyntaxTrivia GetNodeTrivia() {
 			if (Node != null) {
 				var triviaList = Token.HasLeadingTrivia ? Token.LeadingTrivia
@@ -42,8 +76,8 @@ namespace Codist
 			return default;
 		}
 
-		public Task<ISymbol> GetSymbolAsync(SyntaxNode node, CancellationToken cancellationToken) {
-			return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSymbolAtPositionAsync(Document, node.SpanStart, cancellationToken);
+		public Task<ISymbol> GetSymbolAsync(int position, CancellationToken cancellationToken) {
+			return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSymbolAtPositionAsync(Document, position, cancellationToken);
 		}
 
 		public Task<ISymbol> GetSymbolAsync(CancellationToken cancellationToken) {
@@ -60,27 +94,44 @@ namespace Codist
 				return true;
 			}
 			catch (NullReferenceException) {
-				Node = null;
-				Token = default;
+				ResetNodeInfo();
 			}
 			return false;
 		}
 
-		public async Task<bool> UpdateAsync(int position, bool includeTrivia, CancellationToken cancellationToken) {
-			if (await UpdateAsync(cancellationToken) == false) {
+		public async Task<bool> UpdateAsync(int position, CancellationToken cancellationToken) {
+			bool versionChanged = false;
+			try {
+				Document = _TextView.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
+				var ver = await Document.GetTextVersionAsync(cancellationToken);
+				if (versionChanged = ver != _Version) {
+					_Version = ver;
+					SemanticModel = await Document.GetSemanticModelAsync(cancellationToken);
+					Compilation = SemanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
+					ResetNodeInfo();
+				}
+			}
+			catch (NullReferenceException) {
+				ResetNodeInfo();
 				return false;
 			}
 			Position = position;
 			try {
-				Token = Compilation.FindToken(position, true);
+				if (versionChanged || Token.Span.Contains(position) == false) {
+					Token = Compilation.FindToken(position, true);
+					_Node = _NodeIncludeTrivia = null;
+				}
 			}
 			catch (ArgumentOutOfRangeException) {
-				Node = null;
-				Token = default;
+				ResetNodeInfo();
 				return false;
 			}
-			Node = Compilation.FindNode(Token.Span, includeTrivia, true);
 			return true;
+		}
+
+		private void ResetNodeInfo() {
+			_Node = _NodeIncludeTrivia = null;
+			Token = default;
 		}
 	}
 }
