@@ -393,8 +393,8 @@ namespace Codist
 		ScrollbarMarkers = 1 << 1,
 		SuperQuickInfo = 1 << 2,
 		SmartBar = 1 << 3,
-		Breadcrumb = 1 << 4,
-		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | Breadcrumb
+		NaviBar = 1 << 4,
+		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar
 	}
 
 	[Flags]

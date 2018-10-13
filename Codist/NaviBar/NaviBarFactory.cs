@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 using AppHelpers;
 
-namespace Codist.CodeBar
+namespace Codist.NaviBar
 {
 	/// <summary>
 	/// Overrides default navigator to editor.
@@ -14,7 +14,7 @@ namespace Codist.CodeBar
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType(Constants.CodeTypes.CSharp)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
-	sealed partial class CodistBarFactory : IWpfTextViewCreationListener
+	sealed partial class NaviBarFactory : IWpfTextViewCreationListener
 	{
 #pragma warning disable 649, 169
 
@@ -29,7 +29,7 @@ namespace Codist.CodeBar
 #pragma warning restore 649, 169
 
 		public void TextViewCreated(IWpfTextView textView) {
-			if (Config.Instance.Features.MatchFlags(Features.Breadcrumb)) {
+			if (Config.Instance.Features.MatchFlags(Features.NaviBar)) {
 				textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
 				new Overrider(textView);
 			}

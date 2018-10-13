@@ -17,7 +17,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Task = System.Threading.Tasks.Task;
 
-namespace Codist.CodeBar
+namespace Codist.NaviBar
 {
 	public sealed class CSharpBar : Menu
 	{
@@ -37,6 +37,7 @@ namespace Codist.CodeBar
 			SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextInactiveKey);
 			Items.Add(new RootItem(this));
 			_View.Selection.SelectionChanged += Update;
+			_View.Closed += ViewClosed;
 			Update(this, EventArgs.Empty);
 		}
 
@@ -107,6 +108,13 @@ namespace Codist.CodeBar
 			}
 		}
 
+		void ViewClosed(object sender, EventArgs e) {
+			_cancellationSource.Cancel();
+			_cancellationSource.Dispose();
+			_View.Selection.SelectionChanged -= Update;
+			_View.Closed -= ViewClosed;
+		}
+
 		async Task<IEnumerable<SyntaxNode>> UpdateModelAsync(CancellationToken token) {
 			if (await _SemanticContext.UpdateAsync(_View.Selection.Start.Position, token) == false) {
 				return Array.Empty<SyntaxNode>();
@@ -114,7 +122,7 @@ namespace Codist.CodeBar
 			var node = _SemanticContext.Node;
 			var nodes = new List<SyntaxNode>(5);
 			while (node != null) {
-				if (node.FullSpan.Contains(_View.Selection, false)
+				if (node.FullSpan.Contains(_View.Selection, true)
 					&& node.IsKind(SyntaxKind.VariableDeclaration) == false
 					&& (node.IsSyntaxBlock() || node.IsDeclaration())) {
 					nodes.Add(node);
@@ -137,7 +145,7 @@ namespace Codist.CodeBar
 			var t = new ThemedTipText()
 				.Append(title, child.FullSpan.Contains(_SemanticContext.Position));
 			if (child is BaseMethodDeclarationSyntax) {
-				t.Append(GetParameterListSignature((child as BaseMethodDeclarationSyntax).ParameterList), new System.Windows.Media.SolidColorBrush(EnvironmentColors.SystemGrayTextColorKey.GetWpfColor()));
+				t.Append(GetParameterListSignature((child as BaseMethodDeclarationSyntax).ParameterList), new SolidColorBrush(EnvironmentColors.SystemGrayTextColorKey.GetWpfColor()));
 			}
 			else if (child.IsKind(SyntaxKind.DelegateDeclaration)) {
 				t.Append(" " + GetParameterListSignature((child as DelegateDeclarationSyntax).ParameterList));
@@ -312,8 +320,8 @@ namespace Codist.CodeBar
 
 			internal SyntaxNode Node { get; }
 
-			async void NaviItem_ToolTipOpening(object sender, ToolTipEventArgs e) {
-				var symbol = await _Bar._SemanticContext.GetSymbolAsync(Node.SpanStart, _Bar._cancellationSource.Token);
+			void NaviItem_ToolTipOpening(object sender, ToolTipEventArgs e) {
+				var symbol = _Bar._SemanticContext.GetSymbol(Node, _Bar._cancellationSource.Token);
 				ToolTip = symbol != null
 					? ToolTipFactory.CreateToolTip(symbol, _Bar._SemanticContext.SemanticModel.Compilation)
 					: (object)Node.GetSyntaxBrief();
@@ -322,6 +330,7 @@ namespace Codist.CodeBar
 			}
 
 			protected override void OnClick() {
+				base.OnClick();
 				if (_ClickHandler != null) {
 					_ClickHandler(this);
 				}
@@ -329,7 +338,6 @@ namespace Codist.CodeBar
 					AddItems(Items, Node);
 					IsSubmenuOpen = true;
 				}
-				base.OnClick();
 			}
 
 			public void GoToLocation() {
@@ -357,7 +365,7 @@ namespace Codist.CodeBar
 						MaxHeight = _Bar._View.ViewportHeight / 2;
 						Tag = new StackPanel {
 							Children = {
-								new NaviItem(_Bar, node, null, i => i.GoToLocation()),
+								new NaviItem(_Bar, node, null, i => i.SelectOrGoToSource()),
 								new Separator()
 							}
 						};
@@ -370,7 +378,7 @@ namespace Codist.CodeBar
 						MaxHeight = _Bar._View.ViewportHeight / 2;
 						Tag = new StackPanel {
 							Children = {
-								new NaviItem(_Bar, node, null, i => i.GoToLocation()),
+								new NaviItem(_Bar, node, null, i => i.SelectOrGoToSource()),
 								new StackPanel {
 									Margin = WpfHelper.MenuItemMargin,
 									Children = {
@@ -391,6 +399,9 @@ namespace Codist.CodeBar
 				}
 			}
 
+			void SelectOrGoToSource() {
+				SelectOrGoToSource(Node);
+			}
 			void SelectOrGoToSource(SyntaxNode node) {
 				var span = node.FullSpan;
 				if (span.Contains(_Bar._SemanticContext.Position)) {

@@ -25,6 +25,7 @@ namespace Codist.Options
 			_SyntaxHighlightBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SyntaxHighlight, _SyntaxHighlightBox.Checked));
 			_ScrollbarMarkerBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.ScrollbarMarkers, _ScrollbarMarkerBox.Checked));
 			_SmartBarBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SmartBar, _SmartBarBox.Checked));
+			_CodeBarBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.NaviBar, _CodeBarBox.Checked));
 
 			_TopMarginBox.ValueChanged += _UI.HandleEvent(() => {
 				Config.Instance.TopSpace = (double)_TopMarginBox.Value;
@@ -81,6 +82,7 @@ namespace Codist.Options
 				_SuperQuickInfoBox.Checked = config.Features.MatchFlags(Features.SuperQuickInfo);
 				_SyntaxHighlightBox.Checked = config.Features.MatchFlags(Features.SyntaxHighlight);
 				_SmartBarBox.Checked = config.Features.MatchFlags(Features.SmartBar);
+				_CodeBarBox.Checked = config.Features.MatchFlags(Features.NaviBar);
 				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
 				_TopMarginBox.Value = (decimal)config.TopSpace;
 				_BottomMarginBox.Value = (decimal)config.BottomSpace;

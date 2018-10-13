@@ -10,7 +10,7 @@ namespace Codist
 {
 	/// <summary>
 	/// <para>This is the class that implements the package exposed by <see cref="Codist"/>.</para>
-	/// <para>The project consists of the following namespace: <see cref="SyntaxHighlight"/> backed by <see cref="Classifiers"/>, <see cref="SmartBars"/>, <see cref="QuickInfo"/>, <see cref="Margins"/>, <see cref="CodeBar"/> etc.</para>
+	/// <para>The project consists of the following namespace: <see cref="SyntaxHighlight"/> backed by <see cref="Classifiers"/>, <see cref="SmartBars"/>, <see cref="QuickInfo"/>, <see cref="Margins"/>, <see cref="NaviBar"/> etc.</para>
 	/// </summary>
 	[PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 	[InstalledProductRegistration("#110", "#112", "3.9", IconResourceID = 400)] // Information on this package for Help/About

@@ -323,6 +323,8 @@ namespace Codist.SmartBars
 		}
 
 		void ViewClosed(object sender, EventArgs e) {
+			_Cancellation.Cancel();
+			_Cancellation.Dispose();
 			_ToolBarTray.ToolBars.Clear();
 			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
 			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;

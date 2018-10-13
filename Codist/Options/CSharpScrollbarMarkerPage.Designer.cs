@@ -35,7 +35,7 @@
 			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this._SymbolReferenceColorButton = new Codist.Options.PickColorButton();
 			this._MethodDeclarationBox = new System.Windows.Forms.CheckBox();
-			this._SymbolReferenceBox = new System.Windows.Forms.CheckBox();
+			this._MatchSymbolBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
@@ -107,7 +107,7 @@
 			this.tabPage2.Controls.Add(this._SymbolReferenceColorButton);
 			this.tabPage2.Controls.Add(this._MethodDeclarationBox);
 			this.tabPage2.Controls.Add(this._DirectivesBox);
-			this.tabPage2.Controls.Add(this._SymbolReferenceBox);
+			this.tabPage2.Controls.Add(this._MatchSymbolBox);
 			this.tabPage2.Controls.Add(this._SpecialCommentsBox);
 			this.tabPage2.Controls.Add(this._MemberDeclarationBox);
 			this.tabPage2.Controls.Add(this._TypeDeclarationBox);
@@ -144,13 +144,13 @@
 			// 
 			// _SymbolReferenceBox
 			// 
-			this._SymbolReferenceBox.AutoSize = true;
-			this._SymbolReferenceBox.Location = new System.Drawing.Point(15, 156);
-			this._SymbolReferenceBox.Name = "_SymbolReferenceBox";
-			this._SymbolReferenceBox.Size = new System.Drawing.Size(157, 19);
-			this._SymbolReferenceBox.TabIndex = 6;
-			this._SymbolReferenceBox.Text = "Symbol reference";
-			this._SymbolReferenceBox.UseVisualStyleBackColor = true;
+			this._MatchSymbolBox.AutoSize = true;
+			this._MatchSymbolBox.Location = new System.Drawing.Point(15, 156);
+			this._MatchSymbolBox.Name = "_SymbolReferenceBox";
+			this._MatchSymbolBox.Size = new System.Drawing.Size(125, 19);
+			this._MatchSymbolBox.TabIndex = 6;
+			this._MatchSymbolBox.Text = "Match symbol";
+			this._MatchSymbolBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpScrollbarMarkerPage
 			// 
@@ -176,7 +176,7 @@
 		private System.Windows.Forms.TabControl _OptionTabs;
 		private System.Windows.Forms.TabPage tabPage2;
 		private System.Windows.Forms.CheckBox _MethodDeclarationBox;
-		private System.Windows.Forms.CheckBox _SymbolReferenceBox;
+		private System.Windows.Forms.CheckBox _MatchSymbolBox;
 		private PickColorButton _SymbolReferenceColorButton;
 	}
 }

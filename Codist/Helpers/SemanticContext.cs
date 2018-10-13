@@ -38,7 +38,7 @@ namespace Codist
 				return node;
 			}
 			if (node == null || node.Span.Contains(position) == false) {
-				node = Compilation.FindNode(Token.Span, includeTrivia, true);
+				node = Compilation.FindNode(Token.Span, includeTrivia, false);
 				SeparatedSyntaxList<VariableDeclaratorSyntax> variables;
 				if (node.IsKind(SyntaxKind.FieldDeclaration) || node.IsKind(SyntaxKind.EventFieldDeclaration)) {
 					variables = (node as BaseFieldDeclarationSyntax).Declaration.Variables;
@@ -80,10 +80,26 @@ namespace Codist
 			return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSymbolAtPositionAsync(Document, position, cancellationToken);
 		}
 
+		public ISymbol GetSymbol(SyntaxNode node, CancellationToken cancellationToken) {
+			var info = SemanticModel.GetSymbolInfo(node, cancellationToken);
+			if (info.Symbol != null) {
+				return info.Symbol;
+			}
+			var symbol = SemanticModel.GetDeclaredSymbol(node, cancellationToken);
+			if (symbol != null) {
+				return symbol;
+			}
+			var type = SemanticModel.GetTypeInfo(node, cancellationToken);
+			if (type.Type != null) {
+				return type.Type;
+			}
+			return null;
+		}
+
 		public Task<ISymbol> GetSymbolAsync(CancellationToken cancellationToken) {
 			return Node == null
 				? Task.FromResult<ISymbol>(null)
-				: Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSymbolAtPositionAsync(Document, Position, cancellationToken);
+				: GetSymbolAsync(Position, cancellationToken);
 		}
 
 		public async Task<bool> UpdateAsync(CancellationToken cancellationToken) {

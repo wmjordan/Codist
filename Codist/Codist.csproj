@@ -85,8 +85,8 @@
     <Compile Include="Classifiers\TaggerResult.cs" />
     <Compile Include="Classifiers\XmlClassificationDefinitions.cs" />
     <Compile Include="Classifiers\XmlFormats.cs" />
-    <Compile Include="CodeBar\CodistBarFactory.cs" />
-    <Compile Include="CodeBar\CSharpBar.cs" />
+    <Compile Include="NaviBar\NaviBarFactory.cs" />
+    <Compile Include="NaviBar\CSharpBar.cs" />
     <Compile Include="CodistPackage.cs" />
     <Compile Include="Commands\ScreenshotCommand.cs" />
     <Compile Include="Commands\SymbolFinderWindow.cs" />

@@ -202,6 +202,10 @@ namespace Codist
 				case SyntaxKind.ParenthesizedLambdaExpression:
 				case SyntaxKind.SimpleLambdaExpression:
 				case SyntaxKind.UnsafeStatement:
+				case SyntaxKind.UncheckedStatement:
+				case SyntaxKind.CheckedStatement:
+				case SyntaxKind.ReturnStatement:
+				case SyntaxKind.ExpressionStatement:
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement:
 				case SyntaxKind.XmlComment:
@@ -253,6 +257,10 @@ namespace Codist
 				case SyntaxKind.XmlEmptyElement: return KnownImageIds.XMLElement;
 				case SyntaxKind.XmlComment: return KnownImageIds.XMLCommentTag;
 				case SyntaxKind.DestructorDeclaration: return KnownImageIds.DeleteListItem;
+				case SyntaxKind.UncheckedStatement: return KnownImageIds.CheckBoxUnchecked;
+				case SyntaxKind.CheckedStatement: return KnownImageIds.CheckBoxChecked;
+				case SyntaxKind.ReturnStatement: return KnownImageIds.Return;
+				case SyntaxKind.ExpressionStatement: return KnownImageIds.Action;
 				case LocalFunction: return KnownImageIds.MethodSnippet;
 			}
 			return KnownImageIds.UnknownMember;
@@ -410,6 +418,10 @@ namespace Codist
 				case SyntaxKind.SimpleLambdaExpression: return "expression";
 				case SyntaxKind.UnsafeStatement: return "unsafe";
 				case SyntaxKind.VariableDeclarator: return "variable";
+				case SyntaxKind.UncheckedStatement: return "unchecked";
+				case SyntaxKind.CheckedStatement: return "checked";
+				case SyntaxKind.ReturnStatement: return "return";
+				case SyntaxKind.ExpressionStatement: return "expression";
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement: return "xml element";
 				case SyntaxKind.XmlComment: return "xml comment";
@@ -471,9 +483,13 @@ namespace Codist
 				case SyntaxKind.SwitchStatement: return (node as SwitchStatementSyntax).Expression.GetLastIdentifier()?.Identifier.Text;
 				case SyntaxKind.WhileStatement: return (node as WhileStatementSyntax).Condition.GetFirstIdentifier()?.Identifier.Text;
 				case SyntaxKind.UsingStatement: return GetUsingSignature(node as UsingStatementSyntax);
-				case SyntaxKind.LockStatement: return (node as LockStatementSyntax).Statement.GetFirstIdentifier()?.Identifier.Text;
+				case SyntaxKind.LockStatement: return ((node as LockStatementSyntax).Expression as IdentifierNameSyntax)?.ToString();
 				case SyntaxKind.DoStatement: return (node as DoStatementSyntax).Condition.GetFirstIdentifier()?.Identifier.Text;
 				case SyntaxKind.TryStatement: return (node as TryStatementSyntax).Catches.FirstOrDefault()?.Declaration?.Type.ToString();
+				case SyntaxKind.UncheckedStatement:
+				case SyntaxKind.CheckedStatement: return (node as CheckedExpressionSyntax).Expression.GetFirstIdentifier()?.Identifier.Text;
+				case SyntaxKind.ReturnStatement: return (node as ReturnStatementSyntax).Expression.GetFirstIdentifier()?.Identifier.Text;
+				case SyntaxKind.ExpressionStatement: return (node as ExpressionStatementSyntax).Expression.GetFirstIdentifier()?.Identifier.Text;
 			}
 			return null;
 			string GetNamespaceSignature(NamespaceDeclarationSyntax syntax) {

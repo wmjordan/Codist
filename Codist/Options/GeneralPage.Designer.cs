@@ -40,6 +40,7 @@
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this._SaveConfigButton = new System.Windows.Forms.Button();
 			this._LoadConfigButton = new System.Windows.Forms.Button();
+			this._CodeBarBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this.groupBox1.SuspendLayout();
@@ -105,6 +106,7 @@
 			// 
 			// groupBox2
 			// 
+			this.groupBox2.Controls.Add(this._CodeBarBox);
 			this.groupBox2.Controls.Add(this._SmartBarBox);
 			this.groupBox2.Controls.Add(this._ScrollbarMarkerBox);
 			this.groupBox2.Controls.Add(this._SuperQuickInfoBox);
@@ -196,6 +198,16 @@
 			this._LoadConfigButton.Text = "&Load...";
 			this._LoadConfigButton.UseVisualStyleBackColor = true;
 			// 
+			// _CodeBarBox
+			// 
+			this._CodeBarBox.AutoSize = true;
+			this._CodeBarBox.Location = new System.Drawing.Point(251, 94);
+			this._CodeBarBox.Name = "_CodeBarBox";
+			this._CodeBarBox.Size = new System.Drawing.Size(101, 19);
+			this._CodeBarBox.TabIndex = 5;
+			this._CodeBarBox.Text = "Smart Bar";
+			this._CodeBarBox.UseVisualStyleBackColor = true;
+			// 
 			// GeneralPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -234,5 +246,6 @@
 		private System.Windows.Forms.GroupBox groupBox3;
 		private System.Windows.Forms.Button _SaveConfigButton;
 		private System.Windows.Forms.Button _LoadConfigButton;
+		private System.Windows.Forms.CheckBox _CodeBarBox;
 	}
 }

@@ -33,7 +33,7 @@ namespace Codist.Options
 			_LongMethodBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.LongMemberDeclaration, _LongMethodBox.Checked));
 			_TypeDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.TypeDeclaration, _TypeDeclarationBox.Checked));
 			_MethodDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.MethodDeclaration, _MethodDeclarationBox.Checked));
-			_SymbolReferenceBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.SymbolReference, _SymbolReferenceBox.Checked));
+			_MatchSymbolBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.SymbolReference, _MatchSymbolBox.Checked));
 
 			Config.Loaded += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
@@ -43,7 +43,7 @@ namespace Codist.Options
 			_UI.DoWithLock(() => {
 				_DirectivesBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective);
 				_SpecialCommentsBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment);
-				_SymbolReferenceBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.SymbolReference);
+				_MatchSymbolBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.SymbolReference);
 				_MemberDeclarationBox.Checked = _LongMethodBox.Enabled = _TypeDeclarationBox.Enabled = _MethodDeclarationBox.Enabled = config.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration);
 				_LongMethodBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration);
 				_MethodDeclarationBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.MethodDeclaration);

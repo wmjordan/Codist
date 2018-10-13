@@ -135,7 +135,7 @@ namespace Codist
 			if (view.TextSnapshot.Length > span.End) {
 				var ss = new SnapshotSpan(view.TextSnapshot, span.Start, span.Length);
 				view.Selection.Select(ss, false);
-				view.ViewScroller.EnsureSpanVisible(ss);
+				view.ViewScroller.EnsureSpanVisible(ss, EnsureSpanVisibleOptions.ShowStart);
 			}
 		}
 
