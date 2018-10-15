@@ -205,7 +205,11 @@ namespace Codist
 				case SyntaxKind.UncheckedStatement:
 				case SyntaxKind.CheckedStatement:
 				case SyntaxKind.ReturnStatement:
+				case SyntaxKind.YieldReturnStatement:
 				case SyntaxKind.ExpressionStatement:
+				case SyntaxKind.GotoStatement:
+				case SyntaxKind.GotoCaseStatement:
+				case SyntaxKind.GotoDefaultStatement:
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement:
 				case SyntaxKind.XmlComment:
@@ -260,7 +264,11 @@ namespace Codist
 				case SyntaxKind.UncheckedStatement: return KnownImageIds.CheckBoxUnchecked;
 				case SyntaxKind.CheckedStatement: return KnownImageIds.CheckBoxChecked;
 				case SyntaxKind.ReturnStatement: return KnownImageIds.Return;
-				case SyntaxKind.ExpressionStatement: return KnownImageIds.Action;
+				case SyntaxKind.ExpressionStatement: return GetImageId(((ExpressionStatementSyntax)node).Expression);
+				case SyntaxKind.YieldReturnStatement: return KnownImageIds.Yield;
+				case SyntaxKind.GotoStatement:
+				case SyntaxKind.GotoCaseStatement:
+				case SyntaxKind.GotoDefaultStatement: return KnownImageIds.GoToSourceCode;
 				case LocalFunction: return KnownImageIds.MethodSnippet;
 			}
 			return KnownImageIds.UnknownMember;
@@ -382,6 +390,15 @@ namespace Codist
 			}
 		}
 
+		public static int GetImageId(this ExpressionSyntax node) {
+			switch (node.Kind()) {
+				case SyntaxKind.InvocationExpression: return KnownImageIds.InvokeMethod;
+			}
+			return node is AssignmentExpressionSyntax ? KnownImageIds.Assign
+				: node is BinaryExpressionSyntax || node is PrefixUnaryExpressionSyntax || node is PostfixUnaryExpressionSyntax ? KnownImageIds.Operator
+				: KnownImageIds.Action;
+		}
+
 		public static string GetSyntaxBrief(this SyntaxNode node) {
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration: return "class";
@@ -422,6 +439,9 @@ namespace Codist
 				case SyntaxKind.CheckedStatement: return "checked";
 				case SyntaxKind.ReturnStatement: return "return";
 				case SyntaxKind.ExpressionStatement: return "expression";
+				case SyntaxKind.GotoStatement:
+				case SyntaxKind.GotoCaseStatement:
+				case SyntaxKind.GotoDefaultStatement: return "goto";
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement: return "xml element";
 				case SyntaxKind.XmlComment: return "xml comment";
@@ -478,18 +498,24 @@ namespace Codist
 				case SyntaxKind.VariableDeclaration: return GetVariableSignature(node as VariableDeclarationSyntax, position);
 				case SyntaxKind.ForEachStatement: return (node as ForEachStatementSyntax).Identifier.Text;
 				case SyntaxKind.ForStatement: return GetVariableSignature((node as ForStatementSyntax).Declaration, position);
-				case SyntaxKind.IfStatement: return (node as IfStatementSyntax).Condition.GetFirstIdentifier()?.Identifier.Text;
+				case SyntaxKind.IfStatement: return (node as IfStatementSyntax).Condition.GetExpressionSignature();
 				case SyntaxKind.SwitchSection: return GetSwitchSignature(node as SwitchSectionSyntax);
-				case SyntaxKind.SwitchStatement: return (node as SwitchStatementSyntax).Expression.GetLastIdentifier()?.Identifier.Text;
-				case SyntaxKind.WhileStatement: return (node as WhileStatementSyntax).Condition.GetFirstIdentifier()?.Identifier.Text;
+				case SyntaxKind.SwitchStatement: return (node as SwitchStatementSyntax).Expression.GetExpressionSignature();
+				case SyntaxKind.WhileStatement: return (node as WhileStatementSyntax).Condition.GetExpressionSignature();
 				case SyntaxKind.UsingStatement: return GetUsingSignature(node as UsingStatementSyntax);
-				case SyntaxKind.LockStatement: return ((node as LockStatementSyntax).Expression as IdentifierNameSyntax)?.ToString();
-				case SyntaxKind.DoStatement: return (node as DoStatementSyntax).Condition.GetFirstIdentifier()?.Identifier.Text;
+				case SyntaxKind.LockStatement: return (node as LockStatementSyntax).Expression.GetExpressionSignature();
+				case SyntaxKind.DoStatement: return (node as DoStatementSyntax).Condition.GetExpressionSignature();
 				case SyntaxKind.TryStatement: return (node as TryStatementSyntax).Catches.FirstOrDefault()?.Declaration?.Type.ToString();
 				case SyntaxKind.UncheckedStatement:
-				case SyntaxKind.CheckedStatement: return (node as CheckedExpressionSyntax).Expression.GetFirstIdentifier()?.Identifier.Text;
-				case SyntaxKind.ReturnStatement: return (node as ReturnStatementSyntax).Expression.GetFirstIdentifier()?.Identifier.Text;
-				case SyntaxKind.ExpressionStatement: return (node as ExpressionStatementSyntax).Expression.GetFirstIdentifier()?.Identifier.Text;
+				case SyntaxKind.CheckedStatement: return (node as CheckedStatementSyntax).Keyword.Text;
+				case SyntaxKind.ReturnStatement: return (node as ReturnStatementSyntax).Expression?.GetExpressionSignature();
+				case SyntaxKind.ParenthesizedExpression: return (node as ParenthesizedExpressionSyntax).Expression.GetExpressionSignature();
+				case SyntaxKind.ExpressionStatement: return (node as ExpressionStatementSyntax).Expression.GetExpressionSignature();
+				case SyntaxKind.YieldReturnStatement: return (node as YieldStatementSyntax).Expression.GetExpressionSignature();
+				case SyntaxKind.GotoStatement:
+				case SyntaxKind.GotoCaseStatement:
+				case SyntaxKind.GotoDefaultStatement:
+					return (node as GotoStatementSyntax).Expression.GetExpressionSignature();
 			}
 			return null;
 			string GetNamespaceSignature(NamespaceDeclarationSyntax syntax) {
@@ -539,6 +565,68 @@ namespace Codist
 			}
 		}
 
+		public static string GetExpressionSignature(this ExpressionSyntax expression) {
+			switch (expression.Kind()) {
+				case SyntaxKind.SimpleAssignmentExpression:
+				case SyntaxKind.AddAssignmentExpression:
+				case SyntaxKind.AndAssignmentExpression:
+				case SyntaxKind.DivideAssignmentExpression:
+				case SyntaxKind.ExclusiveOrAssignmentExpression:
+				case SyntaxKind.LeftShiftAssignmentExpression:
+				case SyntaxKind.ModuloAssignmentExpression:
+				case SyntaxKind.MultiplyAssignmentExpression:
+				case SyntaxKind.OrAssignmentExpression:
+				case SyntaxKind.RightShiftAssignmentExpression:
+				case SyntaxKind.SubtractAssignmentExpression:
+					return (expression as AssignmentExpressionSyntax).Left.GetExpressionSignature();
+				case SyntaxKind.GreaterThanExpression:
+				case SyntaxKind.GreaterThanOrEqualExpression:
+				case SyntaxKind.LessThanExpression:
+				case SyntaxKind.LessThanOrEqualExpression:
+				case SyntaxKind.EqualsExpression:
+				case SyntaxKind.NotEqualsExpression:
+				case SyntaxKind.CoalesceExpression:
+				case SyntaxKind.AsExpression:
+				case SyntaxKind.IsExpression:
+				case SyntaxKind.LogicalAndExpression:
+				case SyntaxKind.LogicalOrExpression:
+				case SyntaxKind.BitwiseAndExpression:
+				case SyntaxKind.BitwiseOrExpression:
+					return (expression as BinaryExpressionSyntax).Left.GetExpressionSignature();
+				case SyntaxKind.PreIncrementExpression:
+				case SyntaxKind.PreDecrementExpression:
+				case SyntaxKind.LogicalNotExpression:
+				case SyntaxKind.BitwiseNotExpression:
+					return (expression as PrefixUnaryExpressionSyntax).Operand.ToString();
+				case SyntaxKind.PostIncrementExpression:
+				case SyntaxKind.PostDecrementExpression:
+					return (expression as PostfixUnaryExpressionSyntax).Operand.ToString();
+				case SyntaxKind.ObjectCreationExpression:
+					return (expression as ObjectCreationExpressionSyntax).Type.GetExpressionSignature();
+				case SyntaxKind.TypeOfExpression: return (expression as TypeOfExpressionSyntax).Type.GetExpressionSignature();
+				case SyntaxKind.IdentifierName: return (expression as IdentifierNameSyntax).Identifier.Text;
+				case SyntaxKind.QualifiedName: return (expression as QualifiedNameSyntax).Right.Identifier.Text;
+				case SyntaxKind.AliasQualifiedName: return (expression as AliasQualifiedNameSyntax).Name.Identifier.Text;
+				case SyntaxKind.SimpleMemberAccessExpression: return (expression as MemberAccessExpressionSyntax).Name.Identifier.Text;
+				case SyntaxKind.PointerMemberAccessExpression: return (expression as MemberBindingExpressionSyntax).Name.Identifier.Text;
+				case SyntaxKind.MemberBindingExpression: return (expression as MemberBindingExpressionSyntax).Name.Identifier.Text;
+				case SyntaxKind.CastExpression:
+					return (expression as CastExpressionSyntax).Type.GetExpressionSignature();
+				case SyntaxKind.FalseLiteralExpression: return "false";
+				case SyntaxKind.TrueLiteralExpression: return "true";
+				case SyntaxKind.NullLiteralExpression: return "null";
+				case SyntaxKind.ThisExpression: return "this";
+				case SyntaxKind.BaseExpression: return "base";
+				case SyntaxKind.InvocationExpression: return (expression as InvocationExpressionSyntax).Expression.GetExpressionSignature();
+				case SyntaxKind.ConditionalAccessExpression: return (expression as ConditionalAccessExpressionSyntax).WhenNotNull.GetExpressionSignature();
+				case SyntaxKind.CharacterLiteralExpression:
+				case SyntaxKind.NumericLiteralExpression:
+				case SyntaxKind.StringLiteralExpression:
+					return (expression as LiteralExpressionSyntax).Token.ValueText;
+				case SyntaxKind.ConditionalExpression: return (expression as ConditionalExpressionSyntax).Condition.GetExpressionSignature() + "?:";
+				default: return expression.GetFirstIdentifier()?.Identifier.Text;
+			}
+		}
 		public static IEnumerable<SyntaxNode> GetDecendantDeclarations(this SyntaxNode root) {
 			foreach (var child in root.ChildNodes()) {
 				switch (child.Kind()) {
