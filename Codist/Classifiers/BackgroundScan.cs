@@ -12,7 +12,7 @@ namespace Codist.Classifiers
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
 	sealed class BackgroundScan<TProduct>
 	{
-		readonly CancellationTokenSource _cancellationSource = new CancellationTokenSource();
+		CancellationTokenSource _cancellationSource = new CancellationTokenSource();
 
 		/// <summary>
 		/// Does a background scan in <paramref name="snapshot"/>. Call
@@ -24,17 +24,17 @@ namespace Codist.Classifiers
 		/// <remarks>The constructor must be called from the UI thread.</remarks>
 		public BackgroundScan(ITextSnapshot snapshot, Func<ITextSnapshot, CancellationToken, Task<TProduct>> parser, Action<TProduct> completionCallback) {
 			Task.Run(async delegate {
-				TProduct newRoot = await parser(snapshot, _cancellationSource.Token);
+				var token = _cancellationSource.Token;
+				var newRoot = await parser(snapshot, token);
 
-				if ((newRoot != null) && !_cancellationSource.Token.IsCancellationRequested) {
+				if ((newRoot != null) && !token.IsCancellationRequested) {
 					completionCallback(newRoot);
 				}
 			});
 		}
 
 		public void Cancel() {
-			_cancellationSource.Cancel();
-			_cancellationSource.Dispose();
+			CancellationHelper.CancelAndDispose(ref _cancellationSource, false);
 		}
 	}
 }

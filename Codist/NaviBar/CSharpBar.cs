@@ -22,14 +22,15 @@ namespace Codist.NaviBar
 	public sealed class CSharpBar : Menu
 	{
 		readonly IWpfTextView _View;
-		readonly IAdornmentLayer _Adormnent;
+		readonly IAdornmentLayer _Adornment;
 		readonly SemanticContext _SemanticContext;
 		CancellationTokenSource _cancellationSource = new CancellationTokenSource();
 		NaviItem _MouseHoverItem;
+		static MemberFilterOptions _MemberFilterOptions;
 
 		public CSharpBar(IWpfTextView textView) {
 			_View = textView;
-			_Adormnent = _View.GetAdornmentLayer(nameof(CSharpBar));
+			_Adornment = _View.GetAdornmentLayer(nameof(CSharpBar));
 			_SemanticContext = textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			Resources = SharedDictionaryManager.Menu;
@@ -55,42 +56,47 @@ namespace Codist.NaviBar
 					continue;
 				}
 
-				if (_MouseHoverItem != item) {
-					_MouseHoverItem = item;
-					if (_Adormnent.IsEmpty == false) {
-						_Adormnent.RemoveAllAdornments();
+				_MouseHoverItem = item;
+				if (_Adornment.IsEmpty == false) {
+					_Adornment.RemoveAllAdornments();
+				}
+				var span = item.Node.Span.CreateSnapshotSpan(_View.TextSnapshot);
+				if (span.Length > 0) {
+					try {
+						_Adornment.AddAdornment(span, null, new GeometryAdornment(ThemeHelper.TitleBackgroundColor, _View.TextViewLines.GetMarkerGeometry(span)));
 					}
-					var span = item.Node.Span.CreateSnapshotSpan(_View.TextSnapshot);
-					if (span.Length > 0) {
-						try {
-							_Adormnent.AddAdornment(span, null, new GeometryAdornment(EnvironmentColors.CommandBarMenuItemMouseOverColorKey.GetWpfColor(), _View.TextViewLines.GetMarkerGeometry(span)));
-						}
-						catch (ObjectDisposedException) {
-							// ignore
-							_MouseHoverItem = null;
-						}
+					catch (ObjectDisposedException) {
+						// ignore
+						_MouseHoverItem = null;
 					}
 				}
 				return;
 			}
-			if (_Adormnent.IsEmpty == false) {
-				_Adormnent.RemoveAllAdornments();
+			if (_Adornment.IsEmpty == false) {
+				_Adornment.RemoveAllAdornments();
 				_MouseHoverItem = null;
 			}
 		}
 		protected override void OnMouseLeave(MouseEventArgs e) {
 			base.OnMouseLeave(e);
-			if (_Adormnent.IsEmpty == false) {
-				_Adormnent.RemoveAllAdornments();
+			if (_Adornment.IsEmpty == false) {
+				_Adornment.RemoveAllAdornments();
 				_MouseHoverItem = null;
 			}
 		}
 
 		async void Update(object sender, EventArgs e) {
-			_cancellationSource.Cancel();
-			_cancellationSource = new CancellationTokenSource();
-			var token = _cancellationSource.Token;
-			try {
+			CancellationHelper.CancelAndDispose(ref _cancellationSource, true);
+			var cs = _cancellationSource;
+			if (cs != null) {
+				try {
+					await Update(cs.Token);
+				}
+				catch (OperationCanceledException) {
+					// ignore
+				}
+			}
+			async Task Update(CancellationToken token) {
 				var nodes = await UpdateModelAsync(token);
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(token);
 				for (int i = Items.Count - 1; i > 0; i--) {
@@ -103,15 +109,11 @@ namespace Codist.NaviBar
 					Items.Add(new NaviItem(this, item));
 				}
 			}
-			catch (TaskCanceledException) {
-				// ignore
-			}
 		}
 
 		void ViewClosed(object sender, EventArgs e) {
-			_cancellationSource.Cancel();
-			_cancellationSource.Dispose();
 			_View.Selection.SelectionChanged -= Update;
+			CancellationHelper.CancelAndDispose(ref _cancellationSource, false);
 			_View.Closed -= ViewClosed;
 		}
 
@@ -178,6 +180,20 @@ namespace Codist.NaviBar
 			item.Items.Add(new MenuItem { Visibility = Visibility.Collapsed });
 		}
 
+		[Flags]
+		enum MemberFilterOptions
+		{
+			None,
+			Public = 1,
+			Private = 1 << 1,
+			Internal = 1 << 2,
+			Field = 1 << 3,
+			Property = 1 << 4,
+			Method = 1 << 5,
+			Delegate = 1 << 6,
+			All = Public | Private | Internal | Field | Property | Method | Delegate
+		}
+
 		sealed class GeometryAdornment : UIElement
 		{
 			readonly DrawingVisual _child;
@@ -185,7 +201,7 @@ namespace Codist.NaviBar
 			public GeometryAdornment(Color color, Geometry geometry) {
 				_child = new DrawingVisual();
 				using (var context = _child.RenderOpen()) {
-					context.DrawGeometry(new SolidColorBrush(color.Alpha(127)), new Pen(new SolidColorBrush(color), 1), geometry);
+					context.DrawGeometry(new SolidColorBrush(color.Alpha(192)), new Pen(new SolidColorBrush(color), 1), geometry);
 					context.Close();
 				}
 				AddVisualChild(_child);
@@ -265,6 +281,7 @@ namespace Codist.NaviBar
 		{
 			readonly CSharpBar _Bar;
 			readonly MemberFinderBox _FinderBox;
+			//todo update image when theme changed
 			public RootItem(CSharpBar bar) {
 				_Bar = bar;
 				Icon = ThemeHelper.GetImage(KnownImageIds.CSProjectNode);
@@ -281,14 +298,14 @@ namespace Codist.NaviBar
 							},
 							Orientation = Orientation.Horizontal
 						},
-						new StackPanel {
-							Children = {
-								new ThemedTipText("Goto: "),
-								new ThemedButton(KnownImageIds.NextError, "Go to next error", () => TextEditorHelper.ExecuteEditorCommand("View.NextError")),
-								new ThemedButton(KnownImageIds.Task, "Go to next task", () => TextEditorHelper.ExecuteEditorCommand("View.NextTask")),
-							},
-							Orientation = Orientation.Horizontal
-						}
+						//new StackPanel {
+						//	Children = {
+						//		new ThemedTipText("Goto: "),
+						//		new ThemedButton(KnownImageIds.NextError, "Go to next error", () => TextEditorHelper.ExecuteEditorCommand("View.NextError")),
+						//		new ThemedButton(KnownImageIds.Task, "Go to next task", () => TextEditorHelper.ExecuteEditorCommand("View.NextTask")),
+						//	},
+						//	Orientation = Orientation.Horizontal
+						//}
 					}
 				};
 				AddItemPlaceHolder(this);
@@ -321,7 +338,11 @@ namespace Codist.NaviBar
 			internal SyntaxNode Node { get; }
 
 			void NaviItem_ToolTipOpening(object sender, ToolTipEventArgs e) {
-				var symbol = _Bar._SemanticContext.GetSymbol(Node, _Bar._cancellationSource.Token);
+				var cs = _Bar._cancellationSource;
+				if (cs == null) {
+					return;
+				}
+				var symbol = _Bar._SemanticContext.GetSymbol(Node, cs.Token);
 				ToolTip = symbol != null
 					? ToolTipFactory.CreateToolTip(symbol, _Bar._SemanticContext.SemanticModel.Compilation)
 					: (object)Node.GetSyntaxBrief();
@@ -353,6 +374,9 @@ namespace Codist.NaviBar
 							title = "..." + title;
 							p = p.Parent;
 						}
+					}
+					if (title.Length > 32) {
+						title = title.Substring(0, 32) + "...";
 					}
 					Header = new ThemedTipText(title, node.IsTypeDeclaration() || node.IsKind(SyntaxKind.NamespaceDeclaration) || node.IsKind(SyntaxKind.CompilationUnit));
 				}

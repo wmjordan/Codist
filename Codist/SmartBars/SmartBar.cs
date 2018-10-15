@@ -20,8 +20,7 @@ namespace Codist.SmartBars
 {
 	//todo Make this class async
 	/// <summary>The contextual toolbar.</summary>
-	internal partial class SmartBar
-	{
+	internal partial class SmartBar {
 		const int Selecting = 1, Working = 2;
 		/// <summary>The layer for the smart bar adornment.</summary>
 		readonly IAdornmentLayer _ToolBarLayer;
@@ -76,6 +75,12 @@ namespace Codist.SmartBars
 		protected ToolBar ToolBar { get; }
 		protected ToolBar ToolBar2 { get; }
 		protected IWpfTextView View { get; }
+		protected CancellationToken CancellationToken {
+			get {
+				var c = _Cancellation;
+				return c != null ? c.Token : new CancellationToken(true);
+			}
+		}
 
 		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
 			var b = CreateButton(imageId, tooltip);
@@ -97,7 +102,7 @@ namespace Codist.SmartBars
 			toolBar.Items.Add(b);
 		}
 
-		protected virtual async Task AddCommandsAsync(CancellationToken cancellationToken) {
+		protected virtual Task AddCommandsAsync(CancellationToken cancellationToken) {
 			var readOnly = View.IsCaretInReadOnlyRegion();
 			if (readOnly == false) {
 				AddCutCommand();
@@ -115,6 +120,7 @@ namespace Codist.SmartBars
 			AddFindAndReplaceCommands();
 			//AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
+			return Task.CompletedTask;
 		}
 
 		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Func<CommandContext, Task<IEnumerable<CommandItem>>> getItemsHandler) {
@@ -323,8 +329,7 @@ namespace Codist.SmartBars
 		}
 
 		void ViewClosed(object sender, EventArgs e) {
-			_Cancellation.Cancel();
-			_Cancellation.Dispose();
+			CancellationHelper.CancelAndDispose(ref _Cancellation, false);
 			_ToolBarTray.ToolBars.Clear();
 			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
 			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
@@ -363,7 +368,7 @@ namespace Codist.SmartBars
 				_LastShiftHit = DateTime.Now;
 			}
 			async void CreateToolBar() {
-				await InternalCreateToolBarAsync(_Cancellation.Token);
+				await InternalCreateToolBarAsync(_Cancellation.GetToken());
 			}
 		}
 
@@ -403,22 +408,20 @@ namespace Codist.SmartBars
 			if (View.Selection.IsEmpty) {
 				_ToolBarTray.Visibility = Visibility.Hidden;
 				View.VisualElement.MouseMove -= ViewMouseMove;
-				_Cancellation.Cancel();
-				_Cancellation = new CancellationTokenSource();
+				CancellationHelper.CancelAndDispose(ref _Cancellation, true);
 				_SelectionStatus = 0;
 				return;
 			}
 			if (Interlocked.CompareExchange(ref _SelectionStatus, Selecting, 0) != 0) {
 				return;
 			}
-			CreateToolBar();
-			async void CreateToolBar (){
+			CancellationHelper.CancelAndDispose(ref _Cancellation, true);
+			CreateToolBar(_Cancellation.Token);
+			async void CreateToolBar(CancellationToken token) {
 				try {
-					_Cancellation.Cancel();
-					_Cancellation = new CancellationTokenSource();
-					await Task.Delay(400, _Cancellation.Token);
-					if (_Cancellation.IsCancellationRequested == false) {
-						await CreateToolBarAsync(_Cancellation.Token);
+					await Task.Delay(400, token);
+					if (token.IsCancellationRequested == false) {
+						await CreateToolBarAsync(token);
 					}
 				}
 				catch (OperationCanceledException) {
@@ -446,15 +449,12 @@ namespace Codist.SmartBars
 			public bool RightClick { get; }
 			public Control Sender { get; }
 			public IWpfTextView View { get; }
-			public CancellationToken CancellationToken => _Bar._Cancellation.Token;
-			public void CancelCommand() {
-				_Bar._Cancellation.Cancel();
-			}
+			public CancellationToken CancellationToken => _Bar._Cancellation.GetToken();
 			public async Task KeepToolBarAsync(bool refresh) {
 				_Bar.KeepToolbar();
 				KeepToolBarOnClick = true;
 				if (refresh) {
-					await _Bar.InternalCreateToolBarAsync();
+					await _Bar.InternalCreateToolBarAsync(CancellationToken);
 				}
 			}
 		}

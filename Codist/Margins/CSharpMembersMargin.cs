@@ -183,8 +183,8 @@ namespace Codist.Margins
 
 			async void OnTagsChanged(object sender, EventArgs e) {
 				try {
-					_Element._Cancellation.Cancel();
-					await Task.Run((Action)TagDocument, (_Element._Cancellation = new CancellationTokenSource()).Token);
+					CancellationHelper.CancelAndDispose(ref _Element._Cancellation, true);
+					await Task.Run((Action)TagDocument, _Element._Cancellation.GetToken());
 				}
 				catch (ObjectDisposedException) {
 					return;
@@ -218,7 +218,7 @@ namespace Codist.Margins
 				SnapshotPoint rangeFrom = default, rangeTo = default;
 
 				foreach (var tag in tags) {
-					if (_Element._Cancellation.IsCancellationRequested) {
+					if (_Element._Cancellation?.IsCancellationRequested != false) {
 						break;
 					}
 					var tagType = tag.Tag.Type;
@@ -356,7 +356,7 @@ namespace Codist.Margins
 				var snapshot = _View.TextSnapshot;
 				var snapshotLength = snapshot.Length;
 				foreach (var item in refs) {
-					if (_Element._Cancellation.IsCancellationRequested) {
+					if (_Element._Cancellation?.IsCancellationRequested != false) {
 						break;
 					}
 					foreach (var loc in item.Locations) {
@@ -390,8 +390,7 @@ namespace Codist.Margins
 
 			async void UpdateReferences(object sender, EventArgs e) {
 				try {
-					_Element._Cancellation.Cancel();
-					_Element._Cancellation = new CancellationTokenSource();
+					CancellationHelper.CancelAndDispose(ref _Element._Cancellation, true);
 					if (_View.Selection.IsEmpty == false) {
 						if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
 							_Element.InvalidateVisual();
@@ -409,7 +408,7 @@ namespace Codist.Margins
 			}
 
 			async Task UpdateReferencesAsync() {
-				var cancellation = _Element._Cancellation.Token;
+				var cancellation = _Element._Cancellation.GetToken();
 				var doc = _View.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
 				var model = await doc.GetSemanticModelAsync(cancellation);
 				_DocSyntax = model.SyntaxTree;
