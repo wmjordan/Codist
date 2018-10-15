@@ -85,6 +85,8 @@
     <Compile Include="Classifiers\TaggerResult.cs" />
     <Compile Include="Classifiers\XmlClassificationDefinitions.cs" />
     <Compile Include="Classifiers\XmlFormats.cs" />
+    <Compile Include="Controls\StateButton.cs" />
+    <Compile Include="Helpers\CancellationHelper.cs" />
     <Compile Include="NaviBar\NaviBarFactory.cs" />
     <Compile Include="NaviBar\CSharpBar.cs" />
     <Compile Include="CodistPackage.cs" />

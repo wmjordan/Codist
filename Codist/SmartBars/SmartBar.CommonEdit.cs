@@ -189,7 +189,7 @@ namespace Codist.SmartBars
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.Capitalize");
 				}),
-				new CommandItem(KnownImageIds.Blank, "Uppercase", null, ctx => {
+				new CommandItem(KnownImageIds.ASerif, "Uppercase", null, ctx => {
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.MakeUppercase");
 				}),

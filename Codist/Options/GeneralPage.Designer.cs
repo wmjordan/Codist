@@ -32,6 +32,7 @@
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this._NoSpaceBetweenWrappedLinesBox = new System.Windows.Forms.CheckBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this._CodeBarBox = new System.Windows.Forms.CheckBox();
 			this._SmartBarBox = new System.Windows.Forms.CheckBox();
 			this._ScrollbarMarkerBox = new System.Windows.Forms.CheckBox();
 			this._SuperQuickInfoBox = new System.Windows.Forms.CheckBox();
@@ -40,7 +41,6 @@
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
 			this._SaveConfigButton = new System.Windows.Forms.Button();
 			this._LoadConfigButton = new System.Windows.Forms.Button();
-			this._CodeBarBox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this.groupBox1.SuspendLayout();
@@ -118,6 +118,16 @@
 			this.groupBox2.TabIndex = 0;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Feature controllers";
+			// 
+			// _CodeBarBox
+			// 
+			this._CodeBarBox.AutoSize = true;
+			this._CodeBarBox.Location = new System.Drawing.Point(251, 94);
+			this._CodeBarBox.Name = "_CodeBarBox";
+			this._CodeBarBox.Size = new System.Drawing.Size(141, 19);
+			this._CodeBarBox.TabIndex = 5;
+			this._CodeBarBox.Text = "Navigation Bar";
+			this._CodeBarBox.UseVisualStyleBackColor = true;
 			// 
 			// _SmartBarBox
 			// 
@@ -197,16 +207,6 @@
 			this._LoadConfigButton.TabIndex = 0;
 			this._LoadConfigButton.Text = "&Load...";
 			this._LoadConfigButton.UseVisualStyleBackColor = true;
-			// 
-			// _CodeBarBox
-			// 
-			this._CodeBarBox.AutoSize = true;
-			this._CodeBarBox.Location = new System.Drawing.Point(251, 94);
-			this._CodeBarBox.Name = "_CodeBarBox";
-			this._CodeBarBox.Size = new System.Drawing.Size(101, 19);
-			this._CodeBarBox.TabIndex = 5;
-			this._CodeBarBox.Text = "Smart Bar";
-			this._CodeBarBox.UseVisualStyleBackColor = true;
 			// 
 			// GeneralPage
 			// 

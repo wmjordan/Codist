@@ -3,11 +3,14 @@
 
 # Features and screenshots
 
-* Advanced syntax highlight with *comment tagger*
-* Super Quick Info with *Click and Go* to source code
-* Smart Bar (**new in version 3.0**) with symbol reference analyzers
-* Scrollbar markers
+* [Advanced syntax highlight](#advanced-c-syntax-highlight) with [*comment tagger*](#comment-tagger-and-styles)
+* [Super Quick Info](#super-quick-info) with *Click and Go* to source code
+* [Smart Bar](#smart-bar) with symbol reference analyzers
+* [Scrollbar Marker](#scrollbar-marker)
+* [Symbol Marker](#symbol-marker)
+* [Navigation bar](#navigation-bar) (**new in version 4.0**)
 * Extra margin between lines
+* [Comprehensive options](#feature-control) are offered
 
 ![Feature overview](doc/preview.png)
 
@@ -24,6 +27,7 @@
   * Unnecessary code is marked strike-through.
   * Keywords are categorized and highlighted with various styles.
   * Overriding methods (such as `ToString`) can be painted with gradient background color.
+  * Imported symbols (from external assemblies) can be marked with a different style (bold here)
   * All the above styles are customizable.
  
   ![Syntax highlight](doc/highlight1.png) 
@@ -34,13 +38,40 @@
 
   ![Load Theme](doc/load-theme.png)
 
+  From version 4.0 on, it is possible to Save and Load your own syntax highlight to an individual file and share it with your workmates.
+
 ### Customization of syntax highlight styles
 
   To customize and tweak the syntax highlight styles, click the *common syntax* tab in the *syntax highlight* section, or click the sub sections inside the *Syntax Highlight* section to change individual styles, accordingly.
 
   ![Style customization](doc/syntax-highlight.png)
 
+  Syntax definitions under the _All languages_ section apply to all languages; those under _Comment_ section apply to comment taggers (see below), others apply to corresponding languages accordingly.
+
   **TIP**: Open a document window before you change the syntax theme or tweak the syntax highlight settings, while you change theme, you can see how the styles change in the code document window simultaneously.
+
+### My symbols and external symbols
+
+  From version 4.0 on, it is possible to identify symbols which are defined in your source code and which are imported from external assemblies.
+
+  You can customize this in the *Symbol Marker* tab of in the *C#* section of *Syntax Highlight*.
+
+  ![Symbolmarker Options 2](doc/symbolmarker-options-2.png)
+
+## Comment tagger and styles
+* The comment tagger highlights comments to your specific styles, according to the first token inside the comment.
+
+  Here's the effect of the highlighted comments.
+
+  ![Comment syntax highlight](doc/syntax-highlight-comments.png)
+
+  To configure the comment tags, click the *Tags* tab, in the *Comment* sub-section of the *Syntax Highlight* section, where you can add, remove or modify comment tags. 
+
+  ![Comment syntax highlight](doc/comment-tagger-options.png)
+
+* The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* or the *Font size* value of the corresponding syntax parts.
+
+  ![Comment syntax XML Doc](doc/csharp-options-xmldoc.png)
 
 ## Super Quick Info
 
@@ -127,33 +158,6 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
   ![Super Quick Info - Color](doc/super-quick-info-color.png)
 
-## Comment tagger and styles
-* The comment tagger highlights comments to your specific styles, according to the first token inside the comment.
-
-  Here's the effect of the highlighted comments.
-
-  ![Comment syntax highlight](doc/syntax-highlight-comments.png)
-
-  To configure the comment tags, click the *Tags* tab, in the *Comment* sub-section of the *Syntax Highlight* section, where you can add, remove or modify comment tags. 
-
-  ![Comment syntax highlight](doc/comment-tagger-options.png)
-
-* The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* or the *Font size* value of the corresponding syntax parts.
-
-  ![Comment syntax XML Doc](doc/csharp-options-xmldoc.png)
-
-## Markers on the Scrollbar Margin
-
-The scrollbar can mark...
-
-* C# `class`/`struct`/`interface`/`enum` **declarations** (marked with a square and their names)
-* C# symbol references (marked with an aqua square)
-* C# instructions (`#if`, `#else`, `#region`, `#pragma`) (marked with a gray spot)
-* **Line numbers** (marked with gray dashed lines and numbers)
-* Special comments (marked with small squares)
-
-  Please see screenshots in the above sections.
-
 ## Smart Bar
 
 The *Smart Bar* is a context-aware tool bar appeared automatically when you select some text, or double tap the Shift key on your keyboard.
@@ -174,7 +178,19 @@ From version 3.9 on, you can change the behavior of the Smart Bar.
 
   ![Smart Bar Options](doc/smart-bar-options.PNG)
 
-### Symbol markers
+## Scrollbar Marker
+
+The scrollbar can mark...
+
+* C# `class`/`struct`/`interface`/`enum` **declarations** (marked with a square and their names)
+* C# symbol match marker (matches symbol under the caret, marked with an aqua square)
+* C# instructions (`#if`, `#else`, `#region`, `#pragma`) (marked with a gray spot)
+* **Line numbers** (marked with gray dashed lines and numbers)
+* Special comments (marked with small squares)
+
+  Please see screenshots in the above sections.
+
+## Symbol Marker
 
   Symbol marker is a new feature introduced in version 3.8.
 
@@ -194,18 +210,40 @@ From version 3.9 on, you can change the behavior of the Smart Bar.
 
   ![Symbol marker Options](doc/symbolmarker-options.png)
 
-# Feature control
+## Navigation Bar
+
+  Navigation bar is a new feature introduced since version 4.0. It overrides the original navigation bar on the top of the document window.
+
+  It not only shows available types and declarations in the code window like the original navigation bar, but also syntax nodes containing the caret.
+
+  When you hover the mouse over the node on the bar, corresponding span of the node will be highlighted in the editor.
+
+  ![Navigation Bar Overview](doc/navigation-bar-overview.png)
+
+  Clicking on the syntax node on the navigation bar will select the corresponding span in the editor. If you have enabled _Smart Bar_ as well, _Smart bar_ will appear offering operations that can be performed against the syntax node.
+
+  Clicking on namespace or class definition syntax node will drop down a menu, showing members defined under it.
+
+  You can type in the text box nearby the funnel icon to filter members listed in the menu.
+
+  ![Navigation Bar Menu](doc/navigation-bar-menu.png)
+
+  Clicking on the "//" button at the left side of the navigation bar will pop up a text box. You can type in it and search for declarations defined in the active document code window.
+
+  ![Navigation Bar Search Declaration](doc/navigation-bar-search-declaration.png)
+
+# Feature Control
   Open the *Codist* section in the *Tools->Options* dialog. In the *General* section you can toggle features of *Codist*.
 
   ![General customization](doc/general-options.png)
 
 1. *Feature controllers* contains check boxes which can be used to enable/disable features of *Codist*.
 
-   It is useful when your laptop are running on battery. Disabling *Codist* may help it sustain a little bit longer.
+   When you are running on a laptop with battery. Disabling *Codist* may help it sustain a little bit longer.
 
    Someone who does not like the syntax highlight or use another syntax highlighter can also turn off the *Syntax Highlight* feature individually here.
 
-   These options affects new document windows. Existing document windows won't be affected.
+   These **options will take effect on new document windows**. Existing document windows won't be affected.
 
 2. Within the *Extra line margins* group box, you can adjust margins between lines to make code lines more readable.
 

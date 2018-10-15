@@ -5,7 +5,7 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type Menu}">
-					<StackPanel CanHorizontallyScroll="True" ClipToBounds="True" Orientation="Horizontal" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" IsItemsHost="True"/>
+					<StackPanel CanHorizontallyScroll="True" MaxHeight="22" ClipToBounds="True" Orientation="Horizontal" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" IsItemsHost="True"/>
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
