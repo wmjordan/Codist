@@ -248,8 +248,8 @@ namespace Codist.NaviBar
 				AddItemPlaceHolder(this);
 			}
 
-			protected override void OnClick() {
-				base.OnClick();
+			protected override void OnSubmenuOpened(RoutedEventArgs e) {
+				base.OnSubmenuOpened(e);
 				MaxHeight = _Bar._View.ViewportHeight / 2;
 			}
 
@@ -275,6 +275,7 @@ namespace Codist.NaviBar
 					if (s.Length == 0) {
 						return;
 					}
+					_Items.Add(new Separator());
 					try {
 						var cancellationToken = _Bar._cancellationSource.GetToken();
 						var members = _Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken);
@@ -283,9 +284,9 @@ namespace Codist.NaviBar
 								_Items.Add(new NaviItem(_Bar, item, i => i.Header = _Bar.GetSignature(item), i => i.GoToLocation()));
 							}
 						}
-						if (_Items.Count > _FilterOffset) {
-							_Items.Add(new Separator());
-						}
+						//if (_Items.Count > _FilterOffset) {
+						//	_Items.Add(new Separator());
+						//}
 						//if (s.Length < 2) {
 						//	return;
 						//}
