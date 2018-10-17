@@ -13,6 +13,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Imaging;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using WpfBrushes = System.Windows.Media.Brushes;
@@ -27,7 +28,6 @@ namespace Codist.SmartBars
 		static readonly Thickness __FilterBorderThickness = new Thickness(0, 0, 0, 1);
 		static readonly Classifiers.HighlightClassifications __HighlightClassifications = new Classifiers.HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 		readonly SemanticContext _Context;
-		SyntaxTrivia _Trivia, _LineComment;
 		ISymbol _Symbol;
 
 		public CSharpSmartBar(IWpfTextView view) : base(view) {
@@ -36,12 +36,12 @@ namespace Codist.SmartBars
 
 		ToolBar MyToolBar => ToolBar2;
 
-		protected override async Task AddCommandsAsync(CancellationToken cancellationToken) {
+		protected override void AddCommands(CancellationToken cancellationToken) {
 			if (UpdateSemanticModel() && _Context.NodeIncludeTrivia != null) {
-				await AddContextualCommandsAsync(cancellationToken);
+				AddContextualCommands(cancellationToken);
 			}
 			//MyToolBar.Items.Add(new Separator());
-			await base.AddCommandsAsync(cancellationToken);
+			base.AddCommands(cancellationToken);
 		}
 
 		static CommandItem CreateCommandMenu(string title, int imageId, ISymbol symbol, string emptyMenuTitle, Action<CommandContext, MenuItem, ISymbol> itemPopulator) {
@@ -128,7 +128,7 @@ namespace Codist.SmartBars
 			});
 		}
 
-		async Task AddContextualCommandsAsync(CancellationToken cancellationToken) {
+		void AddContextualCommands(CancellationToken cancellationToken) {
 			// anti-pattern for a small margin of performance
 			bool isDesignMode = CodistPackage.DebuggerStatus == DebuggerStatus.Design;
 			var node = _Context.NodeIncludeTrivia;
@@ -143,7 +143,7 @@ namespace Codist.SmartBars
 					&& token.Kind() == SyntaxKind.IdentifierToken
 					&& (node.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || node.IsKind(SyntaxKind.VariableDeclarator))) {
 					// selection is within a symbol
-					_Symbol = await _Context.GetSymbolAsync(cancellationToken);
+					_Symbol = ThreadHelper.JoinableTaskFactory.Run(() => _Context.GetSymbolAsync(cancellationToken));
 					if (_Symbol != null) {
 						if (node is IdentifierNameSyntax) {
 							AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition\nRight click: Peek definition", "Edit.PeekDefinition");
@@ -302,15 +302,17 @@ namespace Codist.SmartBars
 				case SymbolKind.Method:
 				case SymbolKind.Property:
 				case SymbolKind.Event:
-					callers = SymbolFinder.FindCallersAsync(source, doc.Project.Solution, docs, context.CancellationToken).Result.ToArray();
+					callers = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindCallersAsync(source, doc.Project.Solution, docs, context.CancellationToken)).ToArray();
 					break;
 				case SymbolKind.NamedType:
 					var tempResults = new HashSet<SymbolCallerInfo>(SymbolCallerInfoComparer.Instance);
-					foreach (var item in (source as INamedTypeSymbol).InstanceConstructors) {
-						foreach (var c in SymbolFinder.FindCallersAsync(item, doc.Project.Solution, docs, context.CancellationToken).Result) {
-							tempResults.Add(c);
+					ThreadHelper.JoinableTaskFactory.Run(async () => {
+						foreach (var item in (source as INamedTypeSymbol).InstanceConstructors) {
+							foreach (var c in await SymbolFinder.FindCallersAsync(item, doc.Project.Solution, docs, context.CancellationToken)) {
+								tempResults.Add(c);
+							}
 						}
-					}
+					});
 					tempResults.CopyTo(callers = new SymbolCallerInfo[tempResults.Count]);
 					break;
 				default: return;
@@ -343,7 +345,7 @@ namespace Codist.SmartBars
 		}
 
 		void FindDerivedClasses(CommandContext context, MenuItem menuItem, ISymbol symbol) {
-			var classes = SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, _Context.Document.Project.Solution, null, context.CancellationToken).Result.ToArray();
+			var classes = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, _Context.Document.Project.Solution, null, context.CancellationToken)).ToArray();
 			Array.Sort(classes, (a, b) => a.Name.CompareTo(b.Name));
 			foreach (var derived in classes) {
 				var item = new SymbolMenuItem(this, derived, derived.Locations);
@@ -355,7 +357,7 @@ namespace Codist.SmartBars
 		}
 
 		void FindImplementations(CommandContext context, MenuItem menuItem, ISymbol symbol) {
-			var implementations = new List<ISymbol>(SymbolFinder.FindImplementationsAsync(symbol, _Context.Document.Project.Solution, null, context.CancellationToken).Result);
+			var implementations = new List<ISymbol>(ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindImplementationsAsync(symbol, _Context.Document.Project.Solution, null, context.CancellationToken)));
 			implementations.Sort((a, b) => a.Name.CompareTo(b.Name));
 			if (symbol.Kind == SymbolKind.NamedType) {
 				foreach (var impl in implementations) {
@@ -370,13 +372,17 @@ namespace Codist.SmartBars
 		}
 
 		void FindInstanceAsParameter(CommandContext context, MenuItem menuItem, ISymbol source) {
-			var members = (source as ITypeSymbol).FindInstanceAsParameter(_Context.Document.Project, context.CancellationToken);
-			SortAndGroupSymbolByClass(menuItem, members);
+			ThreadHelper.JoinableTaskFactory.Run(async () => {
+				var members = await (source as ITypeSymbol).FindInstanceAsParameterAsync(_Context.Document.Project, context.CancellationToken);
+				SortAndGroupSymbolByClass(menuItem, members);
+			});
 		}
 
 		void FindInstanceProducer(CommandContext context, MenuItem menuItem, ISymbol source) {
-			var members = (source as ITypeSymbol).FindSymbolInstanceProducer(_Context.Document.Project, context.CancellationToken);
-			SortAndGroupSymbolByClass(menuItem, members);
+			ThreadHelper.JoinableTaskFactory.Run(async () => {
+				var members = await (source as ITypeSymbol).FindSymbolInstanceProducerAsync(_Context.Document.Project, context.CancellationToken);
+				SortAndGroupSymbolByClass(menuItem, members);
+			});
 		}
 
 		void FindMembers(CommandContext context, MenuItem menuItem, ISymbol symbol) {
@@ -412,13 +418,13 @@ namespace Codist.SmartBars
 		}
 
 		void FindOverrides(CommandContext context, MenuItem menuItem, ISymbol symbol) {
-			foreach (var ov in SymbolFinder.FindOverridesAsync(symbol, _Context.Document.Project.Solution, null, context.CancellationToken).Result) {
+			foreach (var ov in ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindOverridesAsync(symbol, _Context.Document.Project.Solution, null, context.CancellationToken))) {
 				menuItem.Items.Add(new SymbolMenuItem(this, ov, ov.ContainingType.Name, ov.Locations));
 			}
 		}
 
 		void FindReferences(CommandContext context, MenuItem menuItem, ISymbol source) {
-			var refs = SymbolFinder.FindReferencesAsync(source, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.CreateRange(_Context.Document.Project.GetRelatedDocuments()), context.CancellationToken).Result.ToArray();
+			var refs = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindReferencesAsync(source, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.CreateRange(_Context.Document.Project.GetRelatedDocuments()), context.CancellationToken)).ToArray();
 			Array.Sort(refs, (a, b) => {
 				int s;
 				return 0 != (s = a.Definition.ContainingType.Name.CompareTo(b.Definition.ContainingType.Name)) ? s :
@@ -440,14 +446,6 @@ namespace Codist.SmartBars
 						menuItem.Items.Add(subMenu);
 					}
 					subMenu.Items.Add(new SymbolMenuItem(this, item.Definition, null));
-				}
-			}
-		}
-
-		void FindSimilarSymbols(MenuItem menuItem, ISymbol symbol) {
-			foreach (var project in _Context.Document.Project.Solution.Projects) {
-				foreach (var ss in SymbolFinder.FindSimilarSymbols(symbol, project.GetCompilationAsync().Result)) {
-					menuItem.Items.Add(new SymbolMenuItem(this, ss, ss.Locations));
 				}
 			}
 		}
@@ -600,8 +598,7 @@ namespace Codist.SmartBars
 		}
 
 		bool UpdateSemanticModel() {
-			int pos = View.Selection.Start.Position;
-			return _Context.UpdateAsync(pos, default).Result;
+			return ThreadHelper.JoinableTaskFactory.Run(() => _Context.UpdateAsync(View.Selection.Start.Position, default));
 		}
 		sealed class SymbolMenuItem : CommandMenuItem
 		{

@@ -102,7 +102,7 @@ namespace Codist.SmartBars
 			toolBar.Items.Add(b);
 		}
 
-		protected virtual Task AddCommandsAsync(CancellationToken cancellationToken) {
+		protected virtual void AddCommands(CancellationToken cancellationToken) {
 			var readOnly = View.IsCaretInReadOnlyRegion();
 			if (readOnly == false) {
 				AddCutCommand();
@@ -120,7 +120,6 @@ namespace Codist.SmartBars
 			AddFindAndReplaceCommands();
 			//AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
-			return Task.CompletedTask;
 		}
 
 		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Func<CommandContext, Task<IEnumerable<CommandItem>>> getItemsHandler) {
@@ -246,16 +245,16 @@ namespace Codist.SmartBars
 			if (View.Selection.IsEmpty || Interlocked.Exchange(ref _SelectionStatus, Working) != Selecting) {
 				goto EXIT;
 			}
-			await InternalCreateToolBarAsync(cancellationToken);
+			InternalCreateToolBar(cancellationToken);
 			EXIT:
 			_SelectionStatus = 0;
 		}
 
-		async Task InternalCreateToolBarAsync(CancellationToken cancellationToken = default) {
+		void InternalCreateToolBar(CancellationToken cancellationToken = default) {
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			ToolBar.Items.Clear();
 			ToolBar2.Items.Clear();
-			await AddCommandsAsync(cancellationToken);
+			AddCommands(cancellationToken);
 			SetToolBarPosition();
 			if (ToolBar2.Items.Count == 0) {
 				ToolBar2.Visibility = Visibility.Collapsed;
@@ -358,7 +357,7 @@ namespace Codist.SmartBars
 			}
 			if ((now - _LastShiftHit).Ticks < TimeSpan.TicksPerSecond) {
 				try {
-					CreateToolBar();
+					InternalCreateToolBar(_Cancellation.GetToken());
 				}
 				catch (OperationCanceledException) {
 					// ignore
@@ -366,9 +365,6 @@ namespace Codist.SmartBars
 			}
 			else {
 				_LastShiftHit = DateTime.Now;
-			}
-			async void CreateToolBar() {
-				await InternalCreateToolBarAsync(_Cancellation.GetToken());
 			}
 		}
 
@@ -450,11 +446,11 @@ namespace Codist.SmartBars
 			public Control Sender { get; }
 			public IWpfTextView View { get; }
 			public CancellationToken CancellationToken => _Bar._Cancellation.GetToken();
-			public async Task KeepToolBarAsync(bool refresh) {
+			public void KeepToolBar(bool refresh) {
 				_Bar.KeepToolbar();
 				KeepToolBarOnClick = true;
 				if (refresh) {
-					await _Bar.InternalCreateToolBarAsync(CancellationToken);
+					_Bar.InternalCreateToolBar(CancellationToken);
 				}
 			}
 		}

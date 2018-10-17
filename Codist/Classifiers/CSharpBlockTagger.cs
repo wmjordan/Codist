@@ -36,7 +36,7 @@ namespace Codist.Classifiers
 		ITextBuffer _buffer;
 		int _refCount;
 		CodeBlock _root;
-		BackgroundScan<CodeBlock> _scanner;
+		CancellationTokenSource _Cancellation;
 
 		internal CSharpBlockTagger(ITextBuffer buffer) {
 			_buffer = buffer;
@@ -47,27 +47,28 @@ namespace Codist.Classifiers
 		public void AddRef() {
 			if (++_refCount == 1) {
 				_buffer.Changed += OnChanged;
-				ScanBuffer(_buffer.CurrentSnapshot);
+				ScanBufferAsync(_buffer.CurrentSnapshot);
 			}
 		}
 
 		public IEnumerable<ITagSpan<ICodeMemberTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
-			CodeBlock root = _root;  //this.root could be set on a background thread, so get a snapshot.
-			if (root != null) {
-				if (root.Span.Snapshot != spans[0].Snapshot) {
-					//There is a version skew between when the parse was done and what is being asked for.
-					var translatedSpans = new List<SnapshotSpan>(spans.Count);
-					foreach (var span in spans) {
-						translatedSpans.Add(span.TranslateTo(root.Span.Snapshot, SpanTrackingMode.EdgeInclusive));
-					}
+			var root = _root;  //this.root could be set on a background thread, so get a snapshot.
+			if (root == null) {
+				yield break;
+			}
 
-					spans = new NormalizedSnapshotSpanCollection(translatedSpans);
+			if (root.Span.Snapshot != spans[0].Snapshot) {
+				//There is a version skew between when the parse was done and what is being asked for.
+				var translatedSpans = new List<SnapshotSpan>(spans.Count);
+				foreach (var span in spans) {
+					translatedSpans.Add(span.TranslateTo(root.Span.Snapshot, SpanTrackingMode.EdgeInclusive));
 				}
+				spans = new NormalizedSnapshotSpanCollection(translatedSpans);
+			}
 
-				foreach (var child in root.Children) {
-					foreach (var tag in GetTags(child, spans)) {
-						yield return tag;
-					}
+			foreach (var child in root.Children) {
+				foreach (var tag in GetTags(child, spans)) {
+					yield return tag;
 				}
 			}
 		}
@@ -77,21 +78,19 @@ namespace Codist.Classifiers
 				_buffer.Changed -= OnChanged;
 
 				//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
-				Interlocked.Exchange(ref _scanner, null)?.Cancel();
+				CancellationHelper.CancelAndDispose(ref _Cancellation, false);
 				_root = null; //Allow the old root to be GC'd
 			}
 		}
 
-		async Task<CodeBlock> ParseAsync(ITextSnapshot snapshot, CancellationToken token) {
-			CodeBlock parentCodeBlockNode = null;
+		static async Task<CodeBlock> ParseAsync(ITextSnapshot snapshot, CancellationToken token) {
 			try {
-				parentCodeBlockNode = await GetAndParseSyntaxNodeAsync(snapshot, token);
+				return await GetAndParseSyntaxNodeAsync(snapshot, token);
 			}
 			catch (TaskCanceledException) {
 				//ignore the exception.
+				return null;
 			}
-
-			return parentCodeBlockNode;
 		}
 
 		static async Task<CodeBlock> GetAndParseSyntaxNodeAsync(ITextSnapshot snapshot, CancellationToken token) {
@@ -160,7 +159,7 @@ namespace Codist.Classifiers
 					continue;
 				}
 
-				var name = ((node as BaseTypeDeclarationSyntax)?.Identifier ?? (node as MethodDeclarationSyntax)?.Identifier);
+				var name = (node as BaseTypeDeclarationSyntax)?.Identifier ?? (node as MethodDeclarationSyntax)?.Identifier;
 				var child = new CodeBlock(parentCodeBlockNode, type, name?.Text, new SnapshotSpan(snapshot, node.SpanStart, node.Span.Length), level + 1);
 				if (type > CodeMemberType.Type) {
 					continue;
@@ -169,24 +168,29 @@ namespace Codist.Classifiers
 			}
 		}
 
-		void OnChanged(object sender, TextContentChangedEventArgs e) {
-			if (TextEditorHelper.AnyTextChanges(e.Before.Version, e.After.Version)) {
-				ScanBuffer(e.After);
+		async void OnChanged(object sender, TextContentChangedEventArgs e) {
+			try {
+				if (TextEditorHelper.AnyTextChanges(e.Before.Version, e.After.Version)) {
+					await ScanBufferAsync(e.After);
+				}
+			}
+			catch (OperationCanceledException) {
+				// ignores cancellation
 			}
 		}
 
-		void ScanBuffer(ITextSnapshot snapshot) {
+		async Task ScanBufferAsync(ITextSnapshot snapshot) {
 			//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
-			Interlocked.Exchange(ref _scanner, null)?.Cancel();
+			CancellationHelper.CancelAndDispose(ref _Cancellation, true);
+			var cancellationToken = _Cancellation.GetToken();
 
 			//The underlying buffer could be very large, meaning that doing the scan for all matches on the UI thread
 			//is a bad idea. Do the scan on the background thread and use a callback to raise the changed event when
 			//the entire scan has completed.
-			_scanner = new BackgroundScan<CodeBlock>(snapshot, ParseAsync, (CodeBlock newRoot) => {
-				//This delegate is executed on a background thread.
-				_root = newRoot;
-				TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, 0, snapshot.Length)));
-			});
+			_root = await ParseAsync(snapshot, cancellationToken);
+
+			//This delegate is executed on a background thread.
+			await Task.Run(() => TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, 0, snapshot.Length))), cancellationToken);
 		}
 	}
 }

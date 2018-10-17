@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
 using System.Reflection.Emit;
 using System.Reflection;
+using Microsoft.VisualStudio.Shell;
 
 namespace Codist.Classifiers
 {
@@ -89,7 +90,7 @@ namespace Codist.Classifiers
 				return Array.Empty<ClassificationSpan>();
 			}
 			var result = new List<ClassificationSpan>(16);
-			var semanticModel = workspace.GetDocument(span).GetSemanticModelAsync().Result;
+			var semanticModel = ThreadHelper.JoinableTaskFactory.Run(() => workspace.GetDocument(span).GetSemanticModelAsync());
 
 			var textSpan = new TextSpan(span.Start.Position, span.Length);
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();

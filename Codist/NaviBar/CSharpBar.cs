@@ -219,13 +219,16 @@ namespace Codist.NaviBar
 			readonly ItemCollection _Items;
 			readonly CSharpBar _Bar;
 			readonly int _FilterOffset = 0;
+			CancellationToken _CancellationToken;
 
 			public MemberFinderBox(ItemCollection items, CSharpBar bar) {
 				_Bar = bar;
 				_Items = items;
+				TextChanged += MemberFinderBox_TextChanged;
+				_CancellationToken = bar._cancellationSource.GetToken();
 			}
-			protected override void OnTextChanged(TextChangedEventArgs e) {
-				base.OnTextChanged(e);
+
+			async void MemberFinderBox_TextChanged(object sender, TextChangedEventArgs e) {
 				for (int i = _Items.Count - 1; i > _FilterOffset; i--) {
 					_Items.RemoveAt(i);
 				}
@@ -237,6 +240,12 @@ namespace Codist.NaviBar
 				foreach (var item in members) {
 					if (item.GetDeclarationSignature().IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1) {
 						_Items.Add(new NaviItem(_Bar, item, i => i.Header = _Bar.GetSignature(item), i => i.GoToLocation()));
+					}
+				}
+				await FindDeclarations(s, _Bar._cancellationSource.GetToken());
+				async Task FindDeclarations(string symbolName, CancellationToken token) {
+					foreach (var d in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(_Bar._SemanticContext.Document.Project, symbolName, true, token)) {
+						_Items.Add(new MenuItem { Header = d.GetSignatureString() });
 					}
 				}
 			}

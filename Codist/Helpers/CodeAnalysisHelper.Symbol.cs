@@ -4,8 +4,10 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Codist
@@ -15,14 +17,16 @@ namespace Codist
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 		/// </summary>
-		public static List<ISymbol> FindInstanceAsParameter(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
-			var compilation = project.GetCompilationAsync(cancellationToken).Result;
-			//todo cache types
+		public static async Task<List<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
+			var compilation = await project.GetCompilationAsync(cancellationToken);
 			var members = new List<ISymbol>(10);
 			ImmutableArray<IParameterSymbol> parameters;
 			var assembly = compilation.Assembly;
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				foreach (var member in typeSymbol.GetMembers()) {
+					if (cancellationToken.IsCancellationRequested) {
+						return members;
+					}
 					if (member.Kind != SymbolKind.Field
 						&& member.CanBeReferencedByName
 						&& (parameters = member.GetParameters()).IsDefaultOrEmpty == false) {
@@ -40,13 +44,16 @@ namespace Codist
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may return an instance of <paramref name="type"/>.
 		/// </summary>
-		public static List<ISymbol> FindSymbolInstanceProducer(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
-			var compilation = project.GetCompilationAsync(cancellationToken).Result;
+		public static async Task<List<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
+			var compilation = await project.GetCompilationAsync(cancellationToken);
 			var assembly = compilation.Assembly;
 			//todo cache types
 			var members = new List<ISymbol>(10);
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				foreach (var member in typeSymbol.GetMembers()) {
+					if (cancellationToken.IsCancellationRequested) {
+						return members;
+					}
 					ITypeSymbol mt;
 					if (member.Kind == SymbolKind.Field) {
 						if (member.CanBeReferencedByName

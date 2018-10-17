@@ -17,6 +17,7 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
+using Microsoft.VisualStudio.Shell;
 
 namespace Codist.QuickInfo
 {
@@ -62,7 +63,7 @@ namespace Codist.QuickInfo
 				if (doc == null) {
 					goto EXIT;
 				}
-				_SemanticModel = semanticModel = doc.GetSemanticModelAsync().Result;
+				_SemanticModel = semanticModel = ThreadHelper.JoinableTaskFactory.Run(() => doc.GetSemanticModelAsync());
 			}
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 
@@ -839,7 +840,6 @@ namespace Codist.QuickInfo
 			var c = 0;
 			object min = null, max = null, bits = null;
 			IFieldSymbol minName = null, maxName = null;
-			var p = 0L;
 			foreach (var m in type.GetMembers()) {
 				var f = m as IFieldSymbol;
 				if (f == null) {

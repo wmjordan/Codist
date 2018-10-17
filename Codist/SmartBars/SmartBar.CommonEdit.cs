@@ -28,8 +28,8 @@ namespace Codist.SmartBars
 			TextEditorHelper.ExecuteEditorCommand(command);
 			if (t != null) {
 				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
-				if (p != null && p.FindText(t, (int)(EnvDTE.vsFindOptions.vsFindOptionsMatchCase))) {
-					ctx.KeepToolBarAsync(true);
+				if (p != null && p.FindText(t, (int)EnvDTE.vsFindOptions.vsFindOptionsMatchCase)) {
+					ctx.KeepToolBar(true);
 				}
 			}
 		}
@@ -75,7 +75,7 @@ namespace Codist.SmartBars
 					ctx.View.ExpandSelectionToLine();
 				}
 				TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
-				ctx.KeepToolBarAsync(true);
+				ctx.KeepToolBar(true);
 			});
 		}
 
@@ -91,7 +91,7 @@ namespace Codist.SmartBars
 				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
 				var option = Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) ? EnvDTE.vsFindOptions.vsFindOptionsMatchCase : 0;
 				if (p != null && p.FindText(t, (int)option)) {
-					ctx.KeepToolBarAsync(true);
+					ctx.KeepToolBar(true);
 				}
 			}, ctx => __FindAndReplaceCommands);
 		}
@@ -118,7 +118,7 @@ namespace Codist.SmartBars
 								if (ed.Replace(span.Span, t)) {
 									ed.Apply();
 									ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-									ctx.KeepToolBarAsync(false);
+									ctx.KeepToolBar(false);
 								}
 							}
 						}
@@ -133,7 +133,7 @@ namespace Codist.SmartBars
 							if (ed.Replace(span, t)) {
 								ed.Apply();
 								ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-								ctx.KeepToolBarAsync(false);
+								ctx.KeepToolBar(false);
 							}
 						}
 					});

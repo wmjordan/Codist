@@ -36,17 +36,15 @@ namespace Codist.QuickInfo
 
 			public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 				return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-					? new ColorQuickInfoController(_NavigatorService, textBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp))
+					? new ColorQuickInfoController(_NavigatorService)
 					: null;
 			}
 		}
 
 		readonly ITextStructureNavigatorSelectorService _NavigatorService;
-		readonly bool _ParseSystemColor;
 
-		public ColorQuickInfoController(ITextStructureNavigatorSelectorService navigatorService, bool parseSystemColor) {
+		public ColorQuickInfoController(ITextStructureNavigatorSelectorService navigatorService) {
 			_NavigatorService = navigatorService;
-			//_ParseSystemColor = parseSystemColor;
 		}
 
 		public void AugmentQuickInfoSession(IQuickInfoSession session, IList<Object> qiContent, out ITrackingSpan applicableToSpan) {
