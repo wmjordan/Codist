@@ -147,7 +147,7 @@ namespace Codist.NaviBar
 			var t = new ThemedTipText()
 				.Append(title, child.FullSpan.Contains(_SemanticContext.Position));
 			if (child is BaseMethodDeclarationSyntax) {
-				t.Append(GetParameterListSignature((child as BaseMethodDeclarationSyntax).ParameterList), new SolidColorBrush(EnvironmentColors.SystemGrayTextColorKey.GetWpfColor()));
+				t.Append(GetParameterListSignature((child as BaseMethodDeclarationSyntax).ParameterList), ThemeHelper.SystemGrayTextBrush);
 			}
 			else if (child.IsKind(SyntaxKind.DelegateDeclaration)) {
 				t.Append(" " + GetParameterListSignature((child as DelegateDeclarationSyntax).ParameterList));
@@ -214,78 +214,6 @@ namespace Codist.NaviBar
 			}
 		}
 
-		sealed class MemberFinderBox : ThemedTextBox
-		{
-			readonly ItemCollection _Items;
-			readonly CSharpBar _Bar;
-			readonly int _FilterOffset = 0;
-			CancellationToken _CancellationToken;
-
-			public MemberFinderBox(ItemCollection items, CSharpBar bar) {
-				_Bar = bar;
-				_Items = items;
-				TextChanged += MemberFinderBox_TextChanged;
-				_CancellationToken = bar._cancellationSource.GetToken();
-			}
-
-			async void MemberFinderBox_TextChanged(object sender, TextChangedEventArgs e) {
-				for (int i = _Items.Count - 1; i > _FilterOffset; i--) {
-					_Items.RemoveAt(i);
-				}
-				var s = Text;
-				if (s.Length == 0) {
-					return;
-				}
-				var members = _Bar._SemanticContext.Compilation.GetDecendantDeclarations();
-				foreach (var item in members) {
-					if (item.GetDeclarationSignature().IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1) {
-						_Items.Add(new NaviItem(_Bar, item, i => i.Header = _Bar.GetSignature(item), i => i.GoToLocation()));
-					}
-				}
-				await FindDeclarations(s, _Bar._cancellationSource.GetToken());
-				async Task FindDeclarations(string symbolName, CancellationToken token) {
-					foreach (var d in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(_Bar._SemanticContext.Document.Project, symbolName, true, token)) {
-						_Items.Add(new MenuItem { Header = d.GetSignatureString() });
-					}
-				}
-			}
-		}
-		sealed class FilterBox : ThemedTextBox
-		{
-			readonly ItemCollection _Items;
-			readonly int _FilterOffset;
-
-			public FilterBox(ItemCollection items) {
-				_Items = items;
-				_FilterOffset = 0;
-			}
-
-			public FilterBox(ItemCollection items, int filterOffset) {
-				_Items = items;
-				_FilterOffset = filterOffset;
-			}
-
-			protected override void OnTextChanged(TextChangedEventArgs e) {
-				base.OnTextChanged(e);
-				var s = Text;
-				if (s.Length == 0) {
-					for (int i = _Items.Count - 1; i > _FilterOffset; i--) {
-						(_Items[i] as MenuItem).Visibility = Visibility.Visible;
-					}
-					return;
-				}
-				for (int i = _Items.Count - 1; i > _FilterOffset; i--) {
-					var item = _Items[i] as MenuItem;
-					var t = ((_Items[i] as MenuItem)?.Header as TextBlock)?.GetText();
-					if (t == null) {
-						continue;
-					}
-					item.Visibility = t.IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1
-						? Visibility.Visible
-						: Visibility.Collapsed;
-				}
-			}
-		}
 		sealed class RootItem : MenuItem
 		{
 			readonly CSharpBar _Bar;
@@ -319,6 +247,76 @@ namespace Codist.NaviBar
 				};
 				AddItemPlaceHolder(this);
 			}
+
+			protected override void OnClick() {
+				base.OnClick();
+				MaxHeight = _Bar._View.ViewportHeight / 2;
+			}
+
+			sealed class MemberFinderBox : ThemedTextBox
+			{
+				readonly ItemCollection _Items;
+				readonly CSharpBar _Bar;
+				readonly int _FilterOffset = 0;
+				CancellationToken _CancellationToken;
+
+				public MemberFinderBox(ItemCollection items, CSharpBar bar) {
+					_Bar = bar;
+					_Items = items;
+					TextChanged += MemberFinderBox_TextChanged;
+					_CancellationToken = bar._cancellationSource.GetToken();
+				}
+
+				async void MemberFinderBox_TextChanged(object sender, TextChangedEventArgs e) {
+					for (int i = _Items.Count - 1; i > _FilterOffset; i--) {
+						_Items.RemoveAt(i);
+					}
+					var s = Text;
+					if (s.Length == 0) {
+						return;
+					}
+					try {
+						var cancellationToken = _Bar._cancellationSource.GetToken();
+						var members = _Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken);
+						foreach (var item in members) {
+							if (item.GetDeclarationSignature().IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1) {
+								_Items.Add(new NaviItem(_Bar, item, i => i.Header = _Bar.GetSignature(item), i => i.GoToLocation()));
+							}
+						}
+						if (_Items.Count > _FilterOffset) {
+							_Items.Add(new Separator());
+						}
+						//if (s.Length < 2) {
+						//	return;
+						//}
+						//await FindDeclarations(s, cancellationToken);
+					}
+					catch (OperationCanceledException) {
+						// ignores cancellation
+					}
+					catch (ObjectDisposedException) { }
+
+					async Task FindDeclarations(string symbolName, CancellationToken token) {
+						var result = new SortedSet<ISymbol>(Comparer<ISymbol>.Create((x, y) => x.Name.Length - y.Name.Length));
+						int maxNameLength = 0;
+						foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(_Bar._SemanticContext.Document.Project, name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1, token)) {
+							if (result.Count < 50) {
+								result.Add(symbol);
+							}
+							else {
+								maxNameLength = result.Max.Name.Length;
+								if (symbol.Name.Length < maxNameLength) {
+									result.Remove(result.Max);
+									result.Add(symbol);
+								}
+							}
+						}
+						foreach (var item in result) {
+							_Items.Add(new SymbolItem(item));
+						}
+					}
+				}
+			}
 		}
 		sealed class NaviItem : MenuItem
 		{
@@ -351,10 +349,11 @@ namespace Codist.NaviBar
 				if (cs == null) {
 					return;
 				}
-				var symbol = _Bar._SemanticContext.GetSymbol(Node, cs.Token);
+				var node = Node.SyntaxTree.GetRoot() == _Bar._SemanticContext.Compilation ? Node : _Bar._SemanticContext.GetNode(Node.SpanStart, false);
+				var symbol = _Bar._SemanticContext.GetSymbol(node, cs.Token);
 				ToolTip = symbol != null
 					? ToolTipFactory.CreateToolTip(symbol, _Bar._SemanticContext.SemanticModel.Compilation)
-					: (object)Node.GetSyntaxBrief();
+					: (object)node.GetSyntaxBrief();
 				this.SetTipOptions();
 				ToolTipOpening -= NaviItem_ToolTipOpening;
 			}
@@ -445,6 +444,7 @@ namespace Codist.NaviBar
 				}
 			}
 
+			#region Drop down menu items
 			void AddTypeDeclarations(SyntaxNode node) {
 				foreach(var child in node.ChildNodes()) {
 					if (child.IsTypeDeclaration() == false) {
@@ -456,15 +456,47 @@ namespace Codist.NaviBar
 			}
 
 			void AddMemberDeclarations(SyntaxNode node) {
+				List<DirectiveTriviaSyntax> directives = null;
 				foreach (var child in node.ChildNodes()) {
 					if (child.IsMemberDeclaration() == false && child.IsTypeDeclaration() == false) {
 						continue;
+					}
+					if (child.HasLeadingTrivia) {
+						foreach (var item in child.GetLeadingTrivia()) {
+							if (item.IsDirective && item.HasStructure) {
+								var dir = (DirectiveTriviaSyntax)item.GetStructure();
+								if (dir.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+									Items.Add(new NaviItem(_Bar, dir, i => i.Header = _Bar.GetSignature(i.Node), i => i.GoToLocation()));
+									dir = dir.GetNextDirective(d => d.IsKind(SyntaxKind.EndRegionDirectiveTrivia));
+									if (directives == null) {
+										directives = new List<DirectiveTriviaSyntax>(1);
+									}
+									if (dir != null) {
+										directives.Add(dir);
+									}
+								}
+							}
+						}
+					}
+					if (directives != null) {
+						for (var d = 0; d < directives.Count; d++) {
+							if (directives[d].SpanStart < child.SpanStart) {
+								Items.Add(new NaviItem(_Bar, directives[d]));
+								directives.RemoveAt(d);
+								--d;
+							}
+						}
 					}
 					if (child.IsKind(SyntaxKind.FieldDeclaration) || child.IsKind(SyntaxKind.EventFieldDeclaration)) {
 						AddVariables((child as BaseFieldDeclarationSyntax).Declaration.Variables);
 					}
 					else {
-						Items.Add(new NaviItem(_Bar, child, i => i.Header = _Bar.GetSignature(child), i => i.GoToLocation()));
+						Items.Add(new NaviItem(_Bar, child, i => i.Header = _Bar.GetSignature(i.Node), i => i.GoToLocation()));
+					}
+				}
+				if (directives != null) {
+					foreach (var item in directives) {
+						Items.Add(new NaviItem(_Bar, item));
 					}
 				}
 			}
@@ -474,7 +506,59 @@ namespace Codist.NaviBar
 					Items.Add(new NaviItem(_Bar, item));
 				}
 			}
+			#endregion
 
+			sealed class FilterBox : ThemedTextBox
+			{
+				readonly ItemCollection _Items;
+				readonly int _FilterOffset;
+
+				public FilterBox(ItemCollection items) {
+					_Items = items;
+					_FilterOffset = 0;
+				}
+
+				public FilterBox(ItemCollection items, int filterOffset) {
+					_Items = items;
+					_FilterOffset = filterOffset;
+				}
+
+				protected override void OnTextChanged(TextChangedEventArgs e) {
+					base.OnTextChanged(e);
+					var s = Text;
+					if (s.Length == 0) {
+						for (int i = _Items.Count - 1; i > _FilterOffset; i--) {
+							(_Items[i] as MenuItem).Visibility = Visibility.Visible;
+						}
+						return;
+					}
+					for (int i = _Items.Count - 1; i > _FilterOffset; i--) {
+						var item = _Items[i] as MenuItem;
+						var t = ((_Items[i] as MenuItem)?.Header as TextBlock)?.GetText();
+						if (t == null) {
+							continue;
+						}
+						item.Visibility = t.IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1
+							? Visibility.Visible
+							: Visibility.Collapsed;
+					}
+				}
+			}
+		}
+
+		sealed class SymbolItem : MenuItem
+		{
+			public SymbolItem(ISymbol symbol) {
+				Icon = ThemeHelper.GetImage(symbol.GetImageId());
+				Header = new ThemedTipText(symbol.GetSignatureString());
+				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			}
+			public ISymbol Symbol { get; }
+
+			protected override void OnClick() {
+				base.OnClick();
+				Symbol?.GoToSource();
+			}
 		}
 	}
 }

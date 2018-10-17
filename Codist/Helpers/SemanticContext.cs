@@ -26,42 +26,41 @@ namespace Codist
 		public Document Document { get; private set; }
 		public SemanticModel SemanticModel { get; private set; }
 		public CompilationUnitSyntax Compilation { get; private set; }
-		public SyntaxNode Node => GetNode(Position, false);
-		public SyntaxNode NodeIncludeTrivia => GetNode(Position, true);
+		public SyntaxNode Node => _Node != null && _Node.Span.Contains(Position)
+			? _Node
+			: (_Node = GetNode(Position, false));
+		public SyntaxNode NodeIncludeTrivia {
+			get {
+				return _NodeIncludeTrivia != null && _NodeIncludeTrivia.Span.Contains(Position)
+					? _NodeIncludeTrivia
+					: (_NodeIncludeTrivia = GetNode(Position, true));
+			}
+		}
 		public SyntaxToken Token { get; private set; }
 		public ISymbol Symbol { get; private set; }
 		public int Position { get; set; }
 
 		public SyntaxNode GetNode(int position, bool includeTrivia) {
-			var node = includeTrivia ? _NodeIncludeTrivia : _Node;
-			if (node != null) {
+			SyntaxNode node = Compilation.FindNode(Token.Span, includeTrivia, false);
+			SeparatedSyntaxList<VariableDeclaratorSyntax> variables;
+			if (node.IsKind(SyntaxKind.FieldDeclaration) || node.IsKind(SyntaxKind.EventFieldDeclaration)) {
+				variables = (node as BaseFieldDeclarationSyntax).Declaration.Variables;
+			}
+			else if (node.IsKind(SyntaxKind.VariableDeclaration)) {
+				variables = (node as VariableDeclarationSyntax).Variables;
+			}
+			else if (node.IsKind(SyntaxKind.LocalDeclarationStatement)) {
+				variables = (node as LocalDeclarationStatementSyntax).Declaration.Variables;
+			}
+			else {
 				return node;
 			}
-			if (node == null || node.Span.Contains(position) == false) {
-				node = Compilation.FindNode(Token.Span, includeTrivia, false);
-				SeparatedSyntaxList<VariableDeclaratorSyntax> variables;
-				if (node.IsKind(SyntaxKind.FieldDeclaration) || node.IsKind(SyntaxKind.EventFieldDeclaration)) {
-					variables = (node as BaseFieldDeclarationSyntax).Declaration.Variables;
-				}
-				else if (node.IsKind(SyntaxKind.VariableDeclaration)) {
-					variables = (node as VariableDeclarationSyntax).Variables;
-				}
-				else if (node.IsKind(SyntaxKind.LocalDeclarationStatement)) {
-					variables = (node as LocalDeclarationStatementSyntax).Declaration.Variables;
-				}
-				else {
-					return includeTrivia ? _NodeIncludeTrivia = node : _Node = node;
-				}
-				foreach (var variable in variables) {
-					if (variable.Span.Contains(position)) {
-						return includeTrivia ? _NodeIncludeTrivia = node : _Node = node;
-					}
-				}
-				if (node.FullSpan.Contains(position)) {
+			foreach (var variable in variables) {
+				if (variable.Span.Contains(position)) {
 					return node;
 				}
 			}
-			return null;
+			return node.FullSpan.Contains(position) ? node : null;
 		}
 		public SyntaxTrivia GetNodeTrivia() {
 			if (Node != null) {

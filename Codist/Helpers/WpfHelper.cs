@@ -94,10 +94,11 @@ namespace Codist
 			if (element.Template == null) {
 				return String.Empty;
 			}
-			var str = new System.Text.StringBuilder(500);
-			using (var writer = new System.IO.StringWriter(str))
+			using (var r = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(30))
+			using (var writer = System.Xml.XmlWriter.Create(r.Resource, new System.Xml.XmlWriterSettings { Indent = true, IndentChars = "\t" })) {
 				System.Windows.Markup.XamlWriter.Save(element.Template, writer);
-			return str.ToString();
+				return r.Resource.ToString();
+			}
 		}
 
 		public static Run Render(this string text, WpfBrush brush) {

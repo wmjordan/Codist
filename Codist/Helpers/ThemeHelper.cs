@@ -37,6 +37,7 @@ namespace Codist
 		public static WpfBrush TextBoxBorderBrush { get; private set; }
 		public static WpfColor SystemButtonFaceColor { get; private set; }
 		public static WpfColor SystemThreeDFaceColor { get; private set; }
+		public static WpfBrush SystemGrayTextBrush { get; private set; }
 
 		public static GdiColor GetGdiColor(this ThemeResourceKey resourceKey) {
 			return VSColorTheme.GetThemedColor(resourceKey);
@@ -74,23 +75,24 @@ namespace Codist
 		internal static void RefreshThemeCache() {
 			DocumentPageColor = CommonDocumentColors.PageColorKey.GetGdiColor();
 			DocumentTextColor = CommonDocumentColors.PageTextColorKey.GetGdiColor();
-			DocumentTextBrush = new WpfBrush(CommonDocumentColors.PageTextColorKey.GetWpfColor());
+			DocumentTextBrush = CommonDocumentColors.PageTextColorKey.GetWpfBrush();
 			ToolWindowBackgroundColor = EnvironmentColors.ToolWindowBackgroundColorKey.GetGdiColor();
 			TitleBackgroundColor = EnvironmentColors.MainWindowActiveCaptionColorKey.GetWpfColor();
-			TitleTextBrush = new WpfBrush(EnvironmentColors.MainWindowActiveCaptionTextBrushKey.GetWpfColor());
+			TitleTextBrush = EnvironmentColors.MainWindowActiveCaptionTextBrushKey.GetWpfBrush();
 			TitleBackgroundBrush = new WpfBrush(TitleBackgroundColor);
-			ToolTipTextBrush = new WpfBrush(EnvironmentColors.ButtonTextBrushKey.GetWpfColor());
-			ToolTipBackgroundBrush = new WpfBrush(EnvironmentColors.ToolTipBrushKey.GetWpfColor());
-			ToolWindowTextBrush = new WpfBrush(EnvironmentColors.ToolWindowTextBrushKey.GetWpfColor());
-			ToolWindowBackgroundBrush = new WpfBrush(EnvironmentColors.ToolWindowBackgroundBrushKey.GetWpfColor());
-			MenuTextBrush = new WpfBrush(EnvironmentColors.SystemMenuTextBrushKey.GetWpfColor());
-			MenuBackgroundBrush = new WpfBrush(EnvironmentColors.SystemMenuBrushKey.GetWpfColor());
-			MenuGlyphBackgroundBrush = new WpfBrush(EnvironmentColors.CommandBarMenuGlyphBrushKey.GetWpfColor());
-			TextBoxBrush = new WpfBrush(CommonControlsColors.TextBoxTextBrushKey.GetWpfColor());
-			TextBoxBackgroundBrush = new WpfBrush(CommonControlsColors.TextBoxBackgroundBrushKey.GetWpfColor());
-			TextBoxBorderBrush = new WpfBrush(CommonControlsColors.TextBoxBorderBrushKey.GetWpfColor());
+			ToolTipTextBrush = EnvironmentColors.ButtonTextBrushKey.GetWpfBrush();
+			ToolTipBackgroundBrush = EnvironmentColors.ToolTipBrushKey.GetWpfBrush();
+			ToolWindowTextBrush = EnvironmentColors.ToolWindowTextBrushKey.GetWpfBrush();
+			ToolWindowBackgroundBrush = EnvironmentColors.ToolWindowBackgroundBrushKey.GetWpfBrush();
+			MenuTextBrush = EnvironmentColors.SystemMenuTextBrushKey.GetWpfBrush();
+			MenuBackgroundBrush = EnvironmentColors.SystemMenuBrushKey.GetWpfBrush();
+			MenuGlyphBackgroundBrush = EnvironmentColors.CommandBarMenuGlyphBrushKey.GetWpfBrush();
+			TextBoxBrush = CommonControlsColors.TextBoxTextBrushKey.GetWpfBrush();
+			TextBoxBackgroundBrush = CommonControlsColors.TextBoxBackgroundBrushKey.GetWpfBrush();
+			TextBoxBorderBrush = CommonControlsColors.TextBoxBorderBrushKey.GetWpfBrush();
 			SystemButtonFaceColor = EnvironmentColors.SystemButtonFaceColorKey.GetWpfColor();
 			SystemThreeDFaceColor = EnvironmentColors.SystemThreeDFaceColorKey.GetWpfColor();
+			SystemGrayTextBrush = EnvironmentColors.SystemGrayTextBrushKey.GetWpfBrush();
 		}
 	}
 }
