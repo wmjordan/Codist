@@ -23,11 +23,11 @@
   * The font size of type and member declarations can be enlarged, so it is much easier to spot them.
   * Syntax highlight can be applied to braces and parentheses.
   * Various syntax identifiers have different styles.
-  * Comment content can be tagged.
+  * Comment content can be tagged (e.g. _note_).
   * Unnecessary code is marked strike-through.
-  * Keywords are categorized and highlighted with various styles.
+  * Keywords are categorized and highlighted with various styles (e.g. `abstract` and `sealed`, `return` and `throw`, etc.).
   * Overriding methods (such as `ToString`) can be painted with gradient background color.
-  * Imported symbols (from external assemblies) can be marked with a different style (bold here)
+  * Imported symbols (from external assemblies, e.g. `NotImplementedException`, `ToString`) can be marked with a different style (bold here)
   * All the above styles are customizable.
  
   ![Syntax highlight](doc/highlight1.png) 
@@ -88,7 +88,7 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
 * **Size restriction** 
 
-    Sometimes the size of Quick Info can take up a lot of space. It is possible to limit its size with *Super Quick Info*.
+    Sometimes the Quick Info can take up a lot of space, covering almost half of the screen. It is possible to limit its size with *Super Quick Info*.
 
   ![Super Quick Info 7](doc/super-quick-info-7.png)
 
@@ -110,7 +110,7 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
   ![Super Quick Info 10](doc/super-quick-info-10.png)
 
-    The overridden Quick Info also provides the ability to inherite XML Doc descriptions from base types or interfaces.
+    The overridden Quick Info also provides the ability to inherite XML Doc descriptions from base `class`es or `interface`s.
 
   ![Super Quick Info 12](doc/super-quick-info-12.png)
 
@@ -142,7 +142,8 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
   ![Super Quick Info 2](doc/super-quick-info-2.png)
 
-* **String length and Hash codes** for string constants. (Hint: We can use Hash codes to quickly compare whether two strings that look alike are identical)
+* **String length and Hash codes** for string constants.
+  (Hint: We can use Hash codes to quickly compare whether two strings that look alike are identical)
 
   ![Super Quick Info 3](doc/super-quick-info-3.png)
 
@@ -150,7 +151,7 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
   ![Super Quick Info 4](doc/super-quick-info-param.png)
 
-* **Method overloads** shows possible overloads of a method that you may be interested in.
+* **Method overloads** shows possible overloads of a method (including applicable extension methods).
 
   ![Super Quick Info 9](doc/super-quick-info-9.png)
 
@@ -160,13 +161,13 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
 ## Smart Bar
 
-The *Smart Bar* is a context-aware tool bar appeared automatically when you select some text, or double tap the Shift key on your keyboard.
+The *Smart Bar* is a context-aware tool bar that appears automatically when you select some text, or double tap the _Shift_ key on your keyboard.
 
-It brings commonly used operations for the selection.
+It brings commonly used operations for the selection, such as editing operations like _Cut_, _Copy_, _Paste_,  _Delete_, _Duplicate_, _Find_, code analysis operations like _Go to defintion_, _Find references_, refactoring operations like _Rename_, _Extract method_, etc.
 
   ![Smart Bar](doc/smart-bar.png)
 
-Buttons on the *Smart Bar* changes from contexts.
+Buttons on the *Smart Bar* changes according to contexts.
 
   ![Smart Bar](doc/smart-bar-2.png)
 
