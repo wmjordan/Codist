@@ -16,6 +16,7 @@ using Codist.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Task = System.Threading.Tasks.Task;
+using System.Collections.Specialized;
 
 namespace Codist.NaviBar
 {
@@ -33,6 +34,7 @@ namespace Codist.NaviBar
 			_Adornment = _View.GetAdornmentLayer(nameof(CSharpBar));
 			_SemanticContext = textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			Name = nameof(CSharpBar);
 			Resources = SharedDictionaryManager.Menu;
 			SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
 			SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextInactiveKey);
@@ -176,10 +178,6 @@ namespace Codist.NaviBar
 			}
 		}
 
-		static void AddItemPlaceHolder(MenuItem item) {
-			item.Items.Add(new MenuItem { Visibility = Visibility.Collapsed });
-		}
-
 		[Flags]
 		enum MemberFilterOptions
 		{
@@ -214,7 +212,7 @@ namespace Codist.NaviBar
 			}
 		}
 
-		sealed class RootItem : MenuItem
+		sealed class RootItem : ThemedMenuItem
 		{
 			readonly CSharpBar _Bar;
 			readonly MemberFinderBox _FinderBox;
@@ -225,13 +223,13 @@ namespace Codist.NaviBar
 				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
 				Header = new ThemedTipText("//");
-				Tag = new StackPanel {
+				SubMenuHeader = new StackPanel {
 					Margin = WpfHelper.MenuItemMargin,
 					Children = {
 						new StackPanel {
 							Children = {
 								ThemeHelper.GetImage(KnownImageIds.FindSymbol).WrapMargin(WpfHelper.GlyphMargin),
-								(_FinderBox = new MemberFinderBox(Items, _Bar) { MinWidth = 150 }),
+								(_FinderBox = new MemberFinderBox(Items) { MinWidth = 150 }),
 							},
 							Orientation = Orientation.Horizontal
 						},
@@ -245,26 +243,43 @@ namespace Codist.NaviBar
 						//}
 					}
 				};
-				AddItemPlaceHolder(this);
+				_FinderBox.TextChanged += MemberFinderBox_TextChanged;
 			}
 
-			protected override void OnSubmenuOpened(RoutedEventArgs e) {
-				base.OnSubmenuOpened(e);
-				MaxHeight = _Bar._View.ViewportHeight / 2;
+			void MemberFinderBox_TextChanged(object sender, TextChangedEventArgs e) {
+				ClearItems();
+				var s = ((TextBox)sender).Text;
+				if (s.Length == 0) {
+					return;
+				}
+				try {
+					var cancellationToken = _Bar._cancellationSource.GetToken();
+					var members = _Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken);
+					foreach (var item in members) {
+						if (item.GetDeclarationSignature().IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1) {
+							Items.Add(new NaviItem(_Bar, item, i => i.Header = _Bar.GetSignature(item), i => i.GoToLocation()));
+						}
+					}
+					//if (_Items.Count > _FilterOffset) {
+					//	_Items.Add(new Separator());
+					//}
+					//if (s.Length < 2) {
+					//	return;
+					//}
+					//await FindDeclarations(s, cancellationToken);
+				}
+				catch (OperationCanceledException) {
+					// ignores cancellation
+				}
+				catch (ObjectDisposedException) { }
 			}
 
 			sealed class MemberFinderBox : ThemedTextBox
 			{
 				readonly ItemCollection _Items;
-				readonly CSharpBar _Bar;
-				readonly int _FilterOffset = 0;
-				CancellationToken _CancellationToken;
 
-				public MemberFinderBox(ItemCollection items, CSharpBar bar) {
-					_Bar = bar;
+				public MemberFinderBox(ItemCollection items) {
 					_Items = items;
-					TextChanged += MemberFinderBox_TextChanged;
-					_CancellationToken = bar._cancellationSource.GetToken();
 					PreviewKeyUp += ControlMenuSelection;
 				}
 
@@ -279,40 +294,9 @@ namespace Codist.NaviBar
 						}
 					}
 				}
-
-				void MemberFinderBox_TextChanged(object sender, TextChangedEventArgs e) {
-					for (int i = _Items.Count - 1; i > _FilterOffset; i--) {
-						_Items.RemoveAt(i);
-					}
-					var s = Text;
-					if (s.Length == 0) {
-						return;
-					}
-					_Items.Add(new Separator());
-					try {
-						var cancellationToken = _Bar._cancellationSource.GetToken();
-						var members = _Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken);
-						foreach (var item in members) {
-							if (item.GetDeclarationSignature().IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1) {
-								_Items.Add(new NaviItem(_Bar, item, i => i.Header = _Bar.GetSignature(item), i => i.GoToLocation()));
-							}
-						}
-						//if (_Items.Count > _FilterOffset) {
-						//	_Items.Add(new Separator());
-						//}
-						//if (s.Length < 2) {
-						//	return;
-						//}
-						//await FindDeclarations(s, cancellationToken);
-					}
-					catch (OperationCanceledException) {
-						// ignores cancellation
-					}
-					catch (ObjectDisposedException) { }
-				}
 			}
 		}
-		sealed class NaviItem : MenuItem
+		sealed class NaviItem : ThemedMenuItem
 		{
 			readonly Action<NaviItem> _ClickHandler;
 			readonly CSharpBar _Bar;
@@ -386,8 +370,8 @@ namespace Codist.NaviBar
 			void AddItems(ItemCollection items, SyntaxNode node) {
 				switch (node.Kind()) {
 					case SyntaxKind.NamespaceDeclaration:
-						MaxHeight = _Bar._View.ViewportHeight / 2;
-						Tag = new StackPanel {
+						SubMenuMaxHeight = _Bar._View.ViewportHeight / 2;
+						SubMenuHeader = new StackPanel {
 							Children = {
 								new NaviItem(_Bar, node, null, i => i.SelectOrGoToSource()),
 								new Separator()
@@ -399,8 +383,8 @@ namespace Codist.NaviBar
 					case SyntaxKind.StructDeclaration:
 					case SyntaxKind.InterfaceDeclaration:
 					case SyntaxKind.EnumDeclaration:
-						MaxHeight = _Bar._View.ViewportHeight / 2;
-						Tag = new StackPanel {
+						SubMenuMaxHeight = _Bar._View.ViewportHeight / 2;
+						SubMenuHeader = new StackPanel {
 							Children = {
 								new NaviItem(_Bar, node, null, i => i.SelectOrGoToSource()),
 								new StackPanel {
@@ -414,7 +398,6 @@ namespace Codist.NaviBar
 								new Separator()
 							}
 						};
-						AddItemPlaceHolder(this);
 						AddMemberDeclarations(node);
 						break;
 					default:
@@ -536,12 +519,11 @@ namespace Codist.NaviBar
 			}
 		}
 
-		sealed class SymbolItem : MenuItem
+		sealed class SymbolItem : ThemedMenuItem
 		{
 			public SymbolItem(ISymbol symbol) {
 				Icon = ThemeHelper.GetImage(symbol.GetImageId());
 				Header = new ThemedTipText(symbol.GetSignatureString());
-				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			}
 			public ISymbol Symbol { get; }
 

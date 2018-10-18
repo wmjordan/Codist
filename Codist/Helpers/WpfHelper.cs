@@ -18,6 +18,7 @@ namespace Codist
 		internal static readonly Thickness NoMargin = new Thickness(0);
 		internal static readonly Thickness GlyphMargin = new Thickness(0, 0, 5, 0);
 		internal static readonly Thickness ScrollerMargin = new Thickness(0, 0, 3, 0);
+		internal static readonly Thickness TopItemMargin = new Thickness(0, 3, 0, 0);
 		internal static readonly Thickness MenuItemMargin = new Thickness(6, 0, 6, 0);
 
 		public static TPanel Add<TPanel>(this TPanel panel, UIElement control)

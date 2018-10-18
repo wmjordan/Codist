@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
-using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.PlatformUI;
-using Microsoft.VisualStudio.Text.Editor;
 using AppHelpers;
+using Codist.Controls;
+using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text.Editor;
 using Task = System.Threading.Tasks.Task;
-using System.Threading.Tasks;
 
 namespace Codist.SmartBars
 {
@@ -476,7 +473,7 @@ namespace Codist.SmartBars
 			public string Name { get; }
 		}
 
-		protected class CommandMenuItem : MenuItem
+		protected class CommandMenuItem : ThemedMenuItem
 		{
 			public CommandMenuItem(SmartBar bar, CommandItem item) {
 				SmartBar = bar;

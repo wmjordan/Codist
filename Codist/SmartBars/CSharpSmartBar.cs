@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AppHelpers;
+using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -46,14 +47,14 @@ namespace Codist.SmartBars
 
 		static CommandItem CreateCommandMenu(string title, int imageId, ISymbol symbol, string emptyMenuTitle, Action<CommandContext, MenuItem, ISymbol> itemPopulator) {
 			return new CommandItem(imageId, title, ctrl => (ctrl as MenuItem).StaysOpenOnClick = true, ctx => {
-				var menuItem = ctx.Sender as MenuItem;
-				if (menuItem.Items.Count > 0) {
+				var menuItem = ctx.Sender as ThemedMenuItem;
+				if (menuItem.Items.Count > 0 || menuItem.SubMenuHeader != null) {
 					return;
 				}
 				ctx.KeepToolBarOnClick = true;
 				itemPopulator(ctx, menuItem, symbol);
 				if (menuItem.Items.Count == 0) {
-					menuItem.Items.Add(new MenuItem { Header = emptyMenuTitle, IsEnabled = false });
+					menuItem.Items.Add(new ThemedMenuItem { Header = emptyMenuTitle, IsEnabled = false });
 				}
 				else {
 					CreateItemsFilter(menuItem);
@@ -62,18 +63,25 @@ namespace Codist.SmartBars
 			});
 		}
 
-		static void CreateItemsFilter(MenuItem menuItem) {
-			TextBox filterBox;
-			menuItem.Items.Insert(0, new MenuItem {
-				Icon = ThemeHelper.GetImage(KnownImageIds.Filter),
-				Header = filterBox = new TextBox {
-					Width = 150,
-					HorizontalAlignment = HorizontalAlignment.Stretch,
-					BorderThickness = __FilterBorderThickness,
-				}.SetStyleResourceProperty(Microsoft.VisualStudio.Shell.VsResourceKeys.TextBoxStyleKey),
-				StaysOpenOnClick = true,
-				ToolTip = new Controls.ThemedToolTip("Result filter", "Filter items in this menu.\nUse space to separate keywords.")
-			});
+		static void CreateItemsFilter(ThemedMenuItem menuItem) {
+			ThemedTextBox filterBox;
+			menuItem.SubMenuHeader = new StackPanel {
+				Margin = WpfHelper.TopItemMargin,
+				Children = {
+					new StackPanel {
+						Margin = WpfHelper.MenuItemMargin,
+						Children = {
+							ThemeHelper.GetImage(KnownImageIds.Filter).WrapMargin(WpfHelper.GlyphMargin),
+							(filterBox = new ThemedTextBox() {
+								MinWidth = 150,
+								ToolTip = new ThemedToolTip("Result filter", "Filter items in this menu.\nUse space to separate keywords.")
+							})
+						},
+						Orientation = Orientation.Horizontal
+					},
+					new Separator()
+				}
+			};
 			filterBox.TextChanged += (s, args) => {
 				var t = (s as TextBox).Text.Split(' ');
 				foreach (MenuItem item in menuItem.Items) {
