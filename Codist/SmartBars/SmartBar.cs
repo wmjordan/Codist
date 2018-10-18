@@ -39,7 +39,7 @@ namespace Codist.SmartBars
 			_ToolBarLayer = view.GetAdornmentLayer(nameof(SmartBar));
 			Config.Updated += ConfigUpdated;
 			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
-				View.VisualElement.PreviewKeyUp += ViewKeyUpAsync;
+				View.VisualElement.PreviewKeyUp += ViewKeyUp;
 			}
 			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false) {
 				View.Selection.SelectionChanged += ViewSelectionChanged;
@@ -300,9 +300,9 @@ namespace Codist.SmartBars
 		#region Event handlers
 		void ConfigUpdated(object sender, ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.MatchFlags(Features.SmartBar)) {
-				View.VisualElement.PreviewKeyUp -= ViewKeyUpAsync;
+				View.VisualElement.PreviewKeyUp -= ViewKeyUp;
 				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
-					View.VisualElement.PreviewKeyUp += ViewKeyUpAsync;
+					View.VisualElement.PreviewKeyUp += ViewKeyUp;
 				}
 				View.Selection.SelectionChanged -= ViewSelectionChanged;
 				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false) {
@@ -334,13 +334,13 @@ namespace Codist.SmartBars
 			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
 			View.Selection.SelectionChanged -= ViewSelectionChanged;
 			View.VisualElement.MouseMove -= ViewMouseMove;
-			View.VisualElement.PreviewKeyUp -= ViewKeyUpAsync;
+			View.VisualElement.PreviewKeyUp -= ViewKeyUp;
 			//View.LayoutChanged -= ViewLayoutChanged;
 			View.Closed -= ViewClosed;
 			Config.Updated -= ConfigUpdated;
 		}
 
-		void ViewKeyUpAsync(object sender, KeyEventArgs e) {
+		void ViewKeyUp(object sender, KeyEventArgs e) {
 			if (e.Key != Key.LeftShift && e.Key != Key.RightShift) {
 				_LastShiftHit = DateTime.MinValue;
 				return;

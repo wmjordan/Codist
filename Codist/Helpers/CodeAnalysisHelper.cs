@@ -473,15 +473,6 @@ namespace Codist
 			return null;
 		}
 
-		public static string GetName(this SyntaxTrivia trivia) {
-			if (trivia.IsDirective) {
-				switch (trivia.Kind()) {
-					
-				}
-			}
-			return trivia.ToString();
-		}
-
 		public static string GetDeclarationSignature(this SyntaxNode node, int position = 0) {
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration: return GetClassSignature((ClassDeclarationSyntax)node);

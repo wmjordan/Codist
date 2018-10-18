@@ -9,16 +9,32 @@ namespace Codist
 {
 	static class CancellationHelper
 	{
-		public static CancellationTokenSource CancelAndDispose(ref CancellationTokenSource tokenSource, bool resurrectCts) {
-			var c = Interlocked.Exchange(ref tokenSource, resurrectCts ? new CancellationTokenSource() : null);
+		public static CancellationTokenSource CancelAndDispose(ref CancellationTokenSource tokenSource, bool resurrect) {
+			var c = Interlocked.Exchange(ref tokenSource, resurrect ? new CancellationTokenSource() : null);
 			if (c != null) {
-				c.Cancel();
+				try {
+					c.Cancel();
+				}
+				catch (ObjectDisposedException) {
+					// ignore
+				}
+				catch (AggregateException) {
+					// ignore
+				}
 				c.Dispose();
 			}
 			return tokenSource;
 		}
 		public static CancellationToken GetToken(this CancellationTokenSource tokenSource) {
-			return tokenSource != null ? tokenSource.Token : new CancellationToken(true);
+			if (tokenSource == null) {
+				return new CancellationToken(true);
+			}
+			try {
+				return tokenSource.Token;
+			}
+			catch (ObjectDisposedException) {
+				return new CancellationToken(true);
+			}
 		}
 	}
 }

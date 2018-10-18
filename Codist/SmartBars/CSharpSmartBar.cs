@@ -606,6 +606,29 @@ namespace Codist.SmartBars
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
 				Locations = locations;
 				Symbol = symbol;
+				SetColorPreviewIcon(symbol);
+				//todo deal with symbols with multiple locations
+				if (locations != null && locations.Any(l => l.SourceTree?.FilePath != null)) {
+					Click += GotoLocation;
+				}
+				if (Symbol != null) {
+					ToolTip = String.Empty;
+					ToolTipOpening += ShowToolTip;
+				}
+			}
+
+			public IEnumerable<Location> Locations { get; }
+			public ISymbol Symbol { get; }
+
+			void GotoLocation(object sender, RoutedEventArgs args) {
+				var loc = Locations.FirstOrDefault();
+				if (loc != null) {
+					var p = loc.GetLineSpan();
+					CodistPackage.DTE.OpenFile(loc.SourceTree.FilePath, p.StartLinePosition.Line + 1, p.StartLinePosition.Character + 1);
+				}
+			}
+
+			void SetColorPreviewIcon(ISymbol symbol) {
 				var b = symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Field ? QuickInfo.ColorQuickInfo.GetBrush(symbol) : null;
 				if (b != null) {
 					var h = Header as TextBlock;
@@ -620,24 +643,8 @@ namespace Codist.SmartBars
 							BaselineAlignment = BaselineAlignment.TextTop
 						});
 				}
-				//todo compatible with symbols having more than 1 locations
-				if (locations != null && locations.Any(l => l.SourceTree?.FilePath != null)) {
-					Click += GotoLocation;
-				}
-				if (Symbol != null) {
-					ToolTip = String.Empty;
-					ToolTipOpening += ShowToolTip;
-				}
 			}
-			public IEnumerable<Location> Locations { get; }
-			public ISymbol Symbol { get; }
-			void GotoLocation(object sender, RoutedEventArgs args) {
-				var loc = Locations.FirstOrDefault();
-				if (loc != null) {
-					var p = loc.GetLineSpan();
-					CodistPackage.DTE.OpenFile(loc.SourceTree.FilePath, p.StartLinePosition.Line + 1, p.StartLinePosition.Character + 1);
-				}
-			}
+
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
 				ToolTip = ToolTipFactory.CreateToolTip(Symbol, (SmartBar as CSharpSmartBar)._Context.SemanticModel.Compilation);
 				this.SetTipOptions();

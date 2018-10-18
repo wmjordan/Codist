@@ -6,22 +6,6 @@ using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist.Classifiers
 {
-	interface IBookmarkedSymbol : IEquatable<IBookmarkedSymbol>
-	{
-		string Name { get; }
-		SymbolKind Kind { get; }
-		Accessibility Accessibility { get; }
-		IBookmarkedSymbolType ContainingType { get; }
-		IBookmarkedSymbolType MemberType { get; }
-		int ImageId { get; }
-		string DisplayString { get; }
-	}
-	interface IBookmarkedSymbolType
-	{
-		string Name { get; }
-		int Arity { get; }
-		TypeKind TypeKind { get; }
-	}
 	static class SymbolMarkManager
 	{
 		static readonly ConcurrentDictionary<IBookmarkedSymbol, IClassificationType> _Bookmarks = new ConcurrentDictionary<IBookmarkedSymbol, IClassificationType>(new SymbolComparer());
@@ -63,10 +47,8 @@ namespace Codist.Classifiers
 		}
 
 		static int GetHashCode(IBookmarkedSymbol symbol) {
-			const int M = 17, M2 = -1521134295;
-			var c = symbol.Name.GetHashCode() + ((int)symbol.Kind * M2);
-			c = c * M + (int)symbol.Accessibility * M2;
-			return c;
+			const int M = -1521134295;
+			return symbol.Name.GetHashCode() + ((int)symbol.Kind * M);
 		}
 		static int GetHashCode(IBookmarkedSymbolType symbol) {
 			return symbol.Name.GetHashCode() + ((int)symbol.TypeKind * 17);
@@ -75,7 +57,6 @@ namespace Codist.Classifiers
 		{
 			public string Name { get; }
 			public SymbolKind Kind { get; }
-			public Accessibility Accessibility { get; }
 			public IBookmarkedSymbolType ContainingType { get; }
 			public IBookmarkedSymbolType MemberType { get; }
 			public int ImageId { get; }
@@ -84,7 +65,6 @@ namespace Codist.Classifiers
 			public BookmarkedSymbol(ISymbol symbol) {
 				Name = symbol.Name;
 				Kind = symbol.Kind;
-				Accessibility = symbol.DeclaredAccessibility;
 				ContainingType = symbol.ContainingType != null ? new BookmarkedSymbolType(symbol.ContainingType) : EmptyBookmarkedSymbolType.Instance;
 				var rt = symbol.GetReturnType() as INamedTypeSymbol;
 				MemberType = rt != null ? new BookmarkedSymbolType(rt) : EmptyBookmarkedSymbolType.Instance;
@@ -93,7 +73,7 @@ namespace Codist.Classifiers
 			}
 
 			public bool Equals(IBookmarkedSymbol other) {
-				return other != null && other.Kind == Kind && other.Accessibility == Accessibility && other.Name == Name
+				return other != null && other.Kind == Kind && other.Name == Name
 					&& (ContainingType == other.ContainingType || ContainingType != null && other.ContainingType != null && ContainingType.Equals(other.ContainingType))
 					&& (MemberType == other.MemberType || MemberType != null && other.MemberType != null && MemberType.Equals(other.MemberType));
 			}
@@ -161,14 +141,14 @@ namespace Codist.Classifiers
 						return _MemberType;
 					}
 					var t = _Symbol.GetReturnType() as INamedTypeSymbol;
-					return _MemberType = (t != null ? new WrappedSymbolType(t) : EmptyBookmarkedSymbolType.Instance);
+					return _MemberType = t != null ? new WrappedSymbolType(t) : EmptyBookmarkedSymbolType.Instance;
 				}
 			}
 			public int ImageId => _Symbol.GetImageId();
 			public string DisplayString => _Symbol.ToDisplayString(WpfHelper.MemberNameFormat);
 
 			public bool Equals(IBookmarkedSymbol other) {
-				return other != null && other.Kind == Kind && other.Accessibility == Accessibility && other.Name == Name
+				return other != null && other.Kind == Kind && other.Name == Name
 					&& (ContainingType == other.ContainingType || ContainingType != null && other.ContainingType != null && ContainingType.Equals(other.ContainingType))
 					&& (MemberType == other.MemberType || MemberType != null && other.MemberType != null && MemberType.Equals(other.MemberType));
 			}

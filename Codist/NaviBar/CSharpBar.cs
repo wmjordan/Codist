@@ -265,9 +265,22 @@ namespace Codist.NaviBar
 					_Items = items;
 					TextChanged += MemberFinderBox_TextChanged;
 					_CancellationToken = bar._cancellationSource.GetToken();
+					PreviewKeyUp += ControlMenuSelection;
 				}
 
-				async void MemberFinderBox_TextChanged(object sender, TextChangedEventArgs e) {
+				void ControlMenuSelection(object sender, KeyEventArgs e) {
+					if (e.Key == Key.Enter && _Items.Count > 1) {
+						foreach (var item in _Items) {
+							var nav = item as NaviItem;
+							if (nav != null) {
+								nav.RaiseEvent(new RoutedEventArgs(ClickEvent));
+								return;
+							}
+						}
+					}
+				}
+
+				void MemberFinderBox_TextChanged(object sender, TextChangedEventArgs e) {
 					for (int i = _Items.Count - 1; i > _FilterOffset; i--) {
 						_Items.RemoveAt(i);
 					}
@@ -341,6 +354,15 @@ namespace Codist.NaviBar
 				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
 				ToolTipOpening += NaviItem_ToolTipOpening;
+				Click += (s, args) => {
+					if (_ClickHandler != null) {
+						_ClickHandler(this);
+					}
+					else if (HasItems == false) {
+						AddItems(Items, Node);
+						IsSubmenuOpen = true;
+					}
+				};
 			}
 
 			internal SyntaxNode Node { get; }
@@ -357,17 +379,6 @@ namespace Codist.NaviBar
 					: (object)node.GetSyntaxBrief();
 				this.SetTipOptions();
 				ToolTipOpening -= NaviItem_ToolTipOpening;
-			}
-
-			protected override void OnClick() {
-				base.OnClick();
-				if (_ClickHandler != null) {
-					_ClickHandler(this);
-				}
-				else if (HasItems == false) {
-					AddItems(Items, Node);
-					IsSubmenuOpen = true;
-				}
 			}
 
 			public void GoToLocation() {
