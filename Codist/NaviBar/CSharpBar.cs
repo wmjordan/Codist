@@ -309,26 +309,6 @@ namespace Codist.NaviBar
 						// ignores cancellation
 					}
 					catch (ObjectDisposedException) { }
-
-					async Task FindDeclarations(string symbolName, CancellationToken token) {
-						var result = new SortedSet<ISymbol>(Comparer<ISymbol>.Create((x, y) => x.Name.Length - y.Name.Length));
-						int maxNameLength = 0;
-						foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(_Bar._SemanticContext.Document.Project, name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1, token)) {
-							if (result.Count < 50) {
-								result.Add(symbol);
-							}
-							else {
-								maxNameLength = result.Max.Name.Length;
-								if (symbol.Name.Length < maxNameLength) {
-									result.Remove(result.Max);
-									result.Add(symbol);
-								}
-							}
-						}
-						foreach (var item in result) {
-							_Items.Add(new SymbolItem(item));
-						}
-					}
 				}
 			}
 		}
@@ -466,7 +446,6 @@ namespace Codist.NaviBar
 					AddTypeDeclarations(child);
 				}
 			}
-
 			void AddMemberDeclarations(SyntaxNode node) {
 				List<DirectiveTriviaSyntax> directives = null;
 				foreach (var child in node.ChildNodes()) {
@@ -479,7 +458,7 @@ namespace Codist.NaviBar
 								var dir = (DirectiveTriviaSyntax)item.GetStructure();
 								if (dir.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
 									Items.Add(new NaviItem(_Bar, dir, i => i.Header = _Bar.GetSignature(i.Node), i => i.GoToLocation()));
-									dir = dir.GetNextDirective(d => d.IsKind(SyntaxKind.EndRegionDirectiveTrivia));
+									dir = ((RegionDirectiveTriviaSyntax)dir).GetEndRegion();
 									if (directives == null) {
 										directives = new List<DirectiveTriviaSyntax>(1);
 									}
@@ -512,7 +491,6 @@ namespace Codist.NaviBar
 					}
 				}
 			}
-
 			void AddVariables(SeparatedSyntaxList<VariableDeclaratorSyntax> fields) {
 				foreach (var item in fields) {
 					Items.Add(new NaviItem(_Bar, item));

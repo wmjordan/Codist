@@ -73,6 +73,27 @@ namespace Codist
 			return members;
 		}
 
+		/// <summary>
+		/// Finds symbol declarations matching <paramref name="symbolName"/> within given <paramref name="project"/>.
+		/// </summary>
+		public static async Task<IEnumerable<ISymbol>> FindDeclarationsAsync(Project project, string symbolName, int resultLimit, SymbolFilter filter = SymbolFilter.All, CancellationToken token = default) {
+			var symbols = new SortedSet<ISymbol>(Comparer<ISymbol>.Create((x, y) => x.Name.Length - y.Name.Length));
+			int maxNameLength = 0;
+			foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(project, name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1, token)) {
+				if (symbols.Count < resultLimit) {
+					symbols.Add(symbol);
+				}
+				else {
+					maxNameLength = symbols.Max.Name.Length;
+					if (symbol.Name.Length < maxNameLength) {
+						symbols.Remove(symbols.Max);
+						symbols.Add(symbol);
+					}
+				}
+			}
+			return symbols;
+		}
+
 		public static Location FirstSourceLocation(this ISymbol symbol) {
 			return symbol?.Locations.FirstOrDefault(loc => loc.IsInSource);
 		}

@@ -16,8 +16,6 @@ namespace Codist
 {
 	static partial class CodeAnalysisHelper
 	{
-		const SyntaxKind LocalFunction = (SyntaxKind)8830;
-
 		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
 			if (workspace == null) {
 				throw new ArgumentNullException("workspace");
@@ -144,7 +142,7 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.VariableDeclaration:
-				case LocalFunction:
+				case SyntaxKind.LocalFunctionStatement:
 				//case SyntaxKind.VariableDeclarator:
 					return true;
 			}
@@ -269,7 +267,7 @@ namespace Codist
 				case SyntaxKind.GotoStatement:
 				case SyntaxKind.GotoCaseStatement:
 				case SyntaxKind.GotoDefaultStatement: return KnownImageIds.GoToSourceCode;
-				case LocalFunction: return KnownImageIds.MethodSnippet;
+				case SyntaxKind.LocalFunctionStatement: return KnownImageIds.MethodSnippet;
 				case SyntaxKind.RegionDirectiveTrivia: return KnownImageIds.MarkupTag;
 				case SyntaxKind.EndRegionDirectiveTrivia: return KnownImageIds.HTMLEndTag;
 			}
@@ -447,7 +445,7 @@ namespace Codist
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement: return "xml element";
 				case SyntaxKind.XmlComment: return "xml comment";
-				case LocalFunction: return "local function";
+				case SyntaxKind.LocalFunctionStatement: return "local function";
 			}
 			return null;
 		}
@@ -494,6 +492,7 @@ namespace Codist
 				case SyntaxKind.EnumMemberDeclaration: return ((EnumMemberDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.SimpleLambdaExpression: return "(" + ((SimpleLambdaExpressionSyntax)node).Parameter.ToString() + ")";
 				case SyntaxKind.ParenthesizedLambdaExpression: return ((ParenthesizedLambdaExpressionSyntax)node).ParameterList.ToString();
+				case SyntaxKind.LocalFunctionStatement: return ((LocalFunctionStatementSyntax)node).Identifier.Text;
 				case SyntaxKind.NamespaceDeclaration: return GetNamespaceSignature((NamespaceDeclarationSyntax)node);
 				case SyntaxKind.VariableDeclarator: return ((VariableDeclaratorSyntax)node).Identifier.Text;
 				case SyntaxKind.LocalDeclarationStatement: return GetVariableSignature(((LocalDeclarationStatementSyntax)node).Declaration, position);
@@ -574,9 +573,38 @@ namespace Codist
 				return e.HasLeadingTrivia ? e.LeadingTrivia[0].ToString() : String.Empty;
 			}
 			string GetEndRegionSignature(EndRegionDirectiveTriviaSyntax syntax) {
-				var region = syntax.GetPreviousDirective() as RegionDirectiveTriviaSyntax;
-				return region != null ? GetRegionSignature(region) : String.Empty;
+				DirectiveTriviaSyntax region = syntax;
+				int c = 1;
+				while ((region = region.GetPreviousDirective()) != null) {
+					if (region.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+						--c;
+						if (c == 0) {
+							return GetRegionSignature(region as RegionDirectiveTriviaSyntax);
+						}
+					}
+					else if (region.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
+						++c;
+					}
+				}
+				return String.Empty;
 			}
+		}
+
+		public static EndRegionDirectiveTriviaSyntax GetEndRegion(this RegionDirectiveTriviaSyntax syntax) {
+			DirectiveTriviaSyntax region = syntax;
+			int c = 1;
+			while ((region = region.GetNextDirective()) != null) {
+				if (region.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
+					--c;
+					if (c == 0) {
+						return region as EndRegionDirectiveTriviaSyntax;
+					}
+				}
+				else if (region.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+					++c;
+				}
+			}
+			return null;
 		}
 
 		public static string GetExpressionSignature(this ExpressionSyntax expression) {
