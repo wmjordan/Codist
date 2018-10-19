@@ -184,7 +184,7 @@ namespace Codist.Margins
 			async void OnTagsChanged(object sender, EventArgs e) {
 				try {
 					CancellationHelper.CancelAndDispose(ref _Element._Cancellation, true);
-					await Task.Run((Action)TagDocument, _Element._Cancellation.GetToken());
+					await Task.Run(TagDocument, _Element._Cancellation.GetToken());
 				}
 				catch (ObjectDisposedException) {
 					return;

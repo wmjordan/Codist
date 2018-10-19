@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
@@ -12,7 +13,7 @@ namespace Codist
 		/// <summary>
 		/// Gets the XML Doc for an <see cref="ISymbol"/>. For constructors which do not have XML Doc, the XML Doc of its containing type is used.
 		/// </summary>
-		public static XElement GetXmlDoc(this ISymbol symbol) {
+		public static XElement GetXmlDoc(this ISymbol symbol, CancellationToken cancellationToken = default) {
 			if (symbol == null) {
 				return null;
 			}
@@ -27,11 +28,11 @@ namespace Codist
 				default:
 					return null;
 			}
-			string s = symbol.GetDocumentationCommentXml(null, true);
+			string s = symbol.GetDocumentationCommentXml(null, true, cancellationToken);
 			if (String.IsNullOrEmpty(s) && symbol.Kind == SymbolKind.Method) {
 				var m = symbol as IMethodSymbol;
 				if (m.MethodKind == MethodKind.Constructor) {
-					s = m.ContainingType.GetDocumentationCommentXml(null, true);
+					s = m.ContainingType.GetDocumentationCommentXml(null, true, cancellationToken);
 				}
 			}
 			try {
@@ -43,16 +44,16 @@ namespace Codist
 			}
 		}
 
-		public static XElement GetXmlDocSummaryForSymbol(this ISymbol symbol) {
+		public static XElement GetXmlDocSummaryForSymbol(this ISymbol symbol, CancellationToken cancellationToken = default) {
 			switch (symbol.Kind) {
 				case SymbolKind.Alias:
-					return (symbol as IAliasSymbol).Target.GetXmlDocSummaryForSymbol();
+					return (symbol as IAliasSymbol).Target.GetXmlDocSummaryForSymbol(cancellationToken);
 				case SymbolKind.Event:
 				case SymbolKind.Field:
 				case SymbolKind.Method:
 				case SymbolKind.NamedType:
 				case SymbolKind.Property:
-					return symbol.GetXmlDoc().GetSummary();
+					return symbol.GetXmlDoc(cancellationToken).GetSummary();
 
 				case SymbolKind.Parameter:
 					var p = symbol as IParameterSymbol;
@@ -60,16 +61,16 @@ namespace Codist
 						return null;
 					}
 					var m = p.ContainingSymbol as IMethodSymbol;
-					return (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", symbol.Name);
+					return (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc(cancellationToken).GetNamedDocItem("param", symbol.Name);
 
 				case SymbolKind.TypeParameter:
 					var tps = symbol as ITypeParameterSymbol;
 					switch (tps.TypeParameterKind) {
 						case TypeParameterKind.Type:
-							return symbol.ContainingType.GetXmlDoc().GetNamedDocItem("typeparam", symbol.Name);
+							return symbol.ContainingType.GetXmlDoc(cancellationToken).GetNamedDocItem("typeparam", symbol.Name);
 
 						case TypeParameterKind.Method:
-							return tps.DeclaringMethod.GetXmlDoc().GetNamedDocItem("typeparam", symbol.Name);
+							return tps.DeclaringMethod.GetXmlDoc(cancellationToken).GetNamedDocItem("typeparam", symbol.Name);
 					}
 					return null;
 
@@ -107,7 +108,7 @@ namespace Codist
 			return InheritDocumentation(symbol, symbol, out baseMember);
 		}
 
-		static XElement InheritDocumentation(ISymbol symbol, ISymbol querySymbol, out ISymbol baseMember) {
+		static XElement InheritDocumentation(ISymbol symbol, ISymbol querySymbol, out ISymbol baseMember, CancellationToken cancellationToken = default) {
 			var t = symbol.Kind == SymbolKind.NamedType ? symbol as INamedTypeSymbol : symbol.ContainingType;
 			if (t == null
 				// go to the base type if not querying interface
@@ -122,25 +123,25 @@ namespace Codist
 			var parameters = querySymbol.GetParameters();
 			var member = t.GetMembers(querySymbol.Name)
 				.FirstOrDefault(i => i.MatchSignature(kind, returnType, parameters));
-			if (member != null && (doc = member.GetXmlDoc().GetSummary()) != null) {
+			if (member != null && (doc = member.GetXmlDoc(cancellationToken).GetSummary()) != null) {
 				baseMember = member;
 				return doc;
 			}
-			if (t.TypeKind != TypeKind.Interface && (doc = InheritDocumentation(t, querySymbol, out baseMember)) != null) {
+			if (t.TypeKind != TypeKind.Interface && (doc = InheritDocumentation(t, querySymbol, out baseMember, cancellationToken)) != null) {
 				return doc;
 			}
 			else if (symbol == querySymbol
 				&& symbol.Kind != SymbolKind.NamedType
 				&& (t = symbol.ContainingType) != null) {
 				foreach (var item in t.Interfaces) {
-					if ((doc = InheritDocumentation(item, querySymbol, out baseMember)) != null) {
+					if ((doc = InheritDocumentation(item, querySymbol, out baseMember, cancellationToken)) != null) {
 						return doc;
 					}
 				}
 				switch (symbol.Kind) {
 					case SymbolKind.Method:
 						foreach (var item in (symbol as IMethodSymbol).ExplicitInterfaceImplementations) {
-							if ((doc = item.GetXmlDoc().GetSummary()) != null) {
+							if ((doc = item.GetXmlDoc(cancellationToken).GetSummary()) != null) {
 								baseMember = item;
 								return doc;
 							}
@@ -149,7 +150,7 @@ namespace Codist
 
 					case SymbolKind.Property:
 						foreach (var item in (symbol as IPropertySymbol).ExplicitInterfaceImplementations) {
-							if ((doc = item.GetXmlDoc().GetSummary()) != null) {
+							if ((doc = item.GetXmlDoc(cancellationToken).GetSummary()) != null) {
 								baseMember = item;
 								return doc;
 							}
@@ -158,7 +159,7 @@ namespace Codist
 
 					case SymbolKind.Event:
 						foreach (var item in (symbol as IEventSymbol).ExplicitInterfaceImplementations) {
-							if ((doc = item.GetXmlDoc().GetSummary()) != null) {
+							if ((doc = item.GetXmlDoc(cancellationToken).GetSummary()) != null) {
 								baseMember = item;
 								return doc;
 							}

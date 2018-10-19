@@ -6,6 +6,9 @@ namespace Codist.Controls
 {
 	sealed class ThemedToolTip : StackPanel
 	{
+		static Thickness _TitlePadding = new Thickness(5);
+		static Thickness _ContentPadding = new Thickness(10, 3, 10, 8);
+
 		public TextBlock Title { get; }
 		public TextBlock Content { get; }
 
@@ -13,7 +16,7 @@ namespace Codist.Controls
 		}
 		public ThemedToolTip(string title, string content) {
 			Title = new TextBlock {
-				Padding = new Thickness(5),
+				Padding = _TitlePadding,
 				HorizontalAlignment = HorizontalAlignment.Stretch,
 				Background = ThemeHelper.TitleBackgroundBrush,
 				Foreground = ThemeHelper.TitleTextBrush,
@@ -23,7 +26,7 @@ namespace Codist.Controls
 				Title.Text = title;
 			}
 			Content = new TextBlock {
-				Padding = new Thickness(10, 3, 10, 8),
+				Padding = _ContentPadding,
 				TextWrapping = TextWrapping.Wrap
 			};
 			if (content != null) {

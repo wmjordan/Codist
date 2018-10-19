@@ -2,21 +2,18 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
-using System.Windows;
-using Codist.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
 using Task = System.Threading.Tasks.Task;
-using System.Collections.Specialized;
 
 namespace Codist.NaviBar
 {
@@ -336,7 +333,7 @@ namespace Codist.NaviBar
 				if (cs == null) {
 					return;
 				}
-				var node = Node.SyntaxTree.GetRoot() == _Bar._SemanticContext.Compilation ? Node : _Bar._SemanticContext.GetNode(Node.SpanStart, false);
+				var node = Node.SyntaxTree == _Bar._SemanticContext.Compilation.SyntaxTree ? Node : _Bar._SemanticContext.GetNode(Node.SpanStart, false);
 				var symbol = _Bar._SemanticContext.GetSymbol(node, cs.Token);
 				ToolTip = symbol != null
 					? ToolTipFactory.CreateToolTip(symbol, _Bar._SemanticContext.SemanticModel.Compilation)
