@@ -133,7 +133,22 @@ namespace Codist
 		public static void SelectNode(this IWpfTextView view, Microsoft.CodeAnalysis.SyntaxNode node, bool includeTrivia) {
 			var span = includeTrivia ? node.FullSpan : node.Span;
 			if (view.TextSnapshot.Length > span.End) {
-				var ss = new SnapshotSpan(view.TextSnapshot, span.Start, span.Length);
+				SnapshotSpan ss;
+				if (includeTrivia && node.ContainsDirectives) {
+					var start = span.Start;
+					var end = span.End;
+					var trivias = node.GetLeadingTrivia();
+					for (int i = trivias.Count - 1; i >= 0; i--) {
+						if (trivias[i].IsDirective) {
+							start = trivias[i].FullSpan.End;
+							break;
+						}
+					}
+					ss = new SnapshotSpan(view.TextSnapshot, start, end - start);
+				}
+				else {
+					ss = new SnapshotSpan(view.TextSnapshot, span.Start, span.Length);
+				}
 				view.Selection.Select(ss, false);
 				view.ViewScroller.EnsureSpanVisible(ss, EnsureSpanVisibleOptions.ShowStart);
 			}
