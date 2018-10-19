@@ -656,6 +656,7 @@ namespace Codist.SmartBars
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
 				ToolTip = ToolTipFactory.CreateToolTip(Symbol, (SmartBar as CSharpSmartBar)._Context.SemanticModel.Compilation);
 				this.SetTipOptions();
+				ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Right);
 				ToolTipOpening -= ShowToolTip;
 			}
 

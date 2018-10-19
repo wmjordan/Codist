@@ -262,7 +262,7 @@ namespace Codist
 					break;
 				case TypedConstantKind.Type:
 					block.Append("typeof", Keyword).Append("(")
-						.AddSymbol((constant.Value as ITypeSymbol), null, this)
+						.AddSymbol(constant.Value as ITypeSymbol, null, this)
 						.Append(")");
 					break;
 				case TypedConstantKind.Array:
@@ -283,6 +283,39 @@ namespace Codist
 					block.Append(constant.ToCSharpString());
 					break;
 			}
+		}
+
+		internal TextBlock ToUIText(TextBlock block, AttributeData item) {
+			var a = item.AttributeClass.Name;
+			block.Append("[")
+				.AddSymbol(item.AttributeConstructor, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class);
+			if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
+				block.Append("]");
+				return block;
+			}
+			block.Append("(");
+			int i = 0;
+			foreach (var arg in item.ConstructorArguments) {
+				if (++i > 1) {
+					block.Append(", ");
+				}
+				ToUIText(block, arg);
+			}
+			foreach (var arg in item.NamedArguments) {
+				if (++i > 1) {
+					block.Append(", ");
+				}
+				var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property);
+				if (attrMember != null) {
+					block.Append(arg.Key, attrMember.Kind == SymbolKind.Property ? Property : Field);
+				}
+				else {
+					block.Append(arg.Key, false, true, null);
+				}
+				block.Append("=");
+				ToUIText(block, arg.Value);
+			}
+			return block.Append(")]");
 		}
 
 		internal void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {

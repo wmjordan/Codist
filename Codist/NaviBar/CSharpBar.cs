@@ -342,6 +342,9 @@ namespace Codist.NaviBar
 					? ToolTipFactory.CreateToolTip(symbol, _Bar._SemanticContext.SemanticModel.Compilation)
 					: (object)node.GetSyntaxBrief();
 				this.SetTipOptions();
+				if (Parent != _Bar) {
+					ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Right);
+				}
 				ToolTipOpening -= NaviItem_ToolTipOpening;
 			}
 

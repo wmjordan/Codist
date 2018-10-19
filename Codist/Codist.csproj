@@ -200,7 +200,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="QuickInfo\ColorQuickInfo.cs" />
-    <Compile Include="QuickInfo\SymbolFormatter.cs" />
+    <Compile Include="Helpers\SymbolFormatter.cs" />
     <Compile Include="Helpers\XmlDocRenderer.cs" />
     <Compile Include="SmartBars\CSharpSmartBar.cs" />
     <Compile Include="SmartBars\SmartBar.CommonEdit.cs" />

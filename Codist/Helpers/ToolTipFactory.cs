@@ -32,11 +32,15 @@ namespace Codist
 				.Append("\nassembly: " + symbol.GetAssemblyModuleName());
 			var f = symbol as IFieldSymbol;
 			if (f != null && f.IsConst) {
-				content.Append("\nconst: " + f.ConstantValue?.ToString());
+				content.Append("\nconst: " + f.ConstantValue?.ToString()); // somethings the constvalue could be null
+			}
+			foreach (var attr in symbol.GetAttributes()) {
+				SymbolFormatter.Empty.ToUIText(content.AppendLine(), attr);
 			}
 			var doc = symbol.GetXmlDocSummaryForSymbol();
 			if (doc != null) {
-				new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(doc, content.Append("\n\n").Inlines);
+				content.AppendLine().AppendLine();
+				new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(doc, content.Inlines);
 				tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 			}
 			return tip;
@@ -44,7 +48,7 @@ namespace Codist
 
 		internal static TTarget SetTipOptions<TTarget>(this TTarget target)
 			where TTarget : System.Windows.DependencyObject {
-			ToolTipService.SetBetweenShowDelay(target, 1000);
+			ToolTipService.SetBetweenShowDelay(target, 0);
 			ToolTipService.SetInitialShowDelay(target, 1000);
 			ToolTipService.SetShowDuration(target, 15000);
 			return target;

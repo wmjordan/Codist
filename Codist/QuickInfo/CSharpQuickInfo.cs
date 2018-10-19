@@ -769,38 +769,7 @@ namespace Codist.QuickInfo
 				if (item.AttributeClass.IsAccessible() == false) {
 					continue;
 				}
-				var a = item.AttributeClass.Name;
-				var attrDef = new ThemedTipText("[")
-					.AddSymbol(item.AttributeConstructor, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, _SymbolFormatter.Class);
-				if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
-					attrDef.Append("]");
-					info.Add(attrDef);
-					continue;
-				}
-				attrDef.Append("(");
-				int i = 0;
-				foreach (var arg in item.ConstructorArguments) {
-					if (++i > 1) {
-						attrDef.Append(", ");
-					}
-					_SymbolFormatter.ToUIText(attrDef, arg);
-				}
-				foreach (var arg in item.NamedArguments) {
-					if (++i > 1) {
-						attrDef.Append(", ");
-					}
-					var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property);
-					if (attrMember != null) {
-						attrDef.Append(arg.Key, attrMember.Kind == SymbolKind.Property ? _SymbolFormatter.Property : _SymbolFormatter.Field);
-					}
-					else {
-						attrDef.Append(arg.Key, false, true, null);
-					}
-					attrDef.Append("=");
-					_SymbolFormatter.ToUIText(attrDef, arg.Value);
-				}
-				attrDef.Append(")]");
-				info.Children.Add(attrDef);
+				info.Children.Add(_SymbolFormatter.ToUIText(new ThemedTipText(), item));
 			}
 			if (info.Children.Count > 1) {
 				qiContent.Add(info.Scrollable());
