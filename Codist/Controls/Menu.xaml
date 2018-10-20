@@ -75,7 +75,7 @@
 	</ControlTemplate>
 	<!-- SubmenuItem -->
 	<ControlTemplate x:Key="{x:Static MenuItem.SubmenuItemTemplateKey}" TargetType="{x:Type c:ThemedMenuItem}">
-		<Border x:Name="Border" BorderThickness="1">
+		<Border x:Name="Border" BorderThickness="1" Background="{TemplateBinding Background}">
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>

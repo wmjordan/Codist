@@ -349,6 +349,7 @@ namespace Codist.NaviBar
 				Node.GetLocation().GoToSource();
 			}
 
+			#region Helper methods
 			NaviItem SetHeader(SyntaxNode node) {
 				var title = node.GetDeclarationSignature();
 				if (title != null) {
@@ -418,6 +419,7 @@ namespace Codist.NaviBar
 					node.GetLocation().GoToSource();
 				}
 			}
+			#endregion
 
 			#region Drop down menu items
 			void AddTypeDeclarations(SyntaxNode node) {
@@ -431,34 +433,39 @@ namespace Codist.NaviBar
 			}
 			void AddMemberDeclarations(SyntaxNode node) {
 				List<DirectiveTriviaSyntax> directives = null;
+				if (node.ContainsDirectives) {
+					var region = node.GetFirstDirective(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia));
+					if (region != null) {
+						directives = new List<DirectiveTriviaSyntax>(4);
+						do {
+							directives.Add(region);
+							region = region.GetNextDirective(d => /*d.IsKind(SyntaxKind.EndRegionDirectiveTrivia) ||*/ d.IsKind(SyntaxKind.RegionDirectiveTrivia));
+						} while (region != null);
+					}
+				}
 				foreach (var child in node.ChildNodes()) {
 					if (child.IsMemberDeclaration() == false && child.IsTypeDeclaration() == false) {
 						continue;
 					}
-					if (child.HasLeadingTrivia) {
-						foreach (var item in child.GetLeadingTrivia()) {
-							if (item.IsDirective && item.HasStructure) {
-								var dir = (DirectiveTriviaSyntax)item.GetStructure();
+					if (directives != null) {
+						for (var i = 0; i < directives.Count; i++) {
+							var dir = directives[i];
+							if (dir.SpanStart < child.SpanStart) {
+								var item = new NaviItem(_Bar, dir);
 								if (dir.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
-									Items.Add(new NaviItem(_Bar, dir, i => i.Header = _Bar.GetSignature(i.Node), i => i.GoToLocation()));
-									dir = ((RegionDirectiveTriviaSyntax)dir).GetEndRegion();
-									if (directives == null) {
-										directives = new List<DirectiveTriviaSyntax>(1);
-									}
-									if (dir != null) {
-										directives.Add(dir);
-									}
+									(item.Header as TextBlock).TextAlignment = TextAlignment.Center;
+									item.Background = ThemeHelper.TitleBackgroundBrush.Alpha(0.5);
 								}
+								else if (dir.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
+									(item.Header as TextBlock).Text = String.Empty;
+								}
+								Items.Add(item);
+								directives.RemoveAt(i);
+								--i;
 							}
 						}
-					}
-					if (directives != null) {
-						for (var d = 0; d < directives.Count; d++) {
-							if (directives[d].SpanStart < child.SpanStart) {
-								Items.Add(new NaviItem(_Bar, directives[d]));
-								directives.RemoveAt(d);
-								--d;
-							}
+						if (directives.Count == 0) {
+							directives = null;
 						}
 					}
 					if (child.IsKind(SyntaxKind.FieldDeclaration) || child.IsKind(SyntaxKind.EventFieldDeclaration)) {
