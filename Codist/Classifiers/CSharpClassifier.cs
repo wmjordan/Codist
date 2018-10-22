@@ -334,6 +334,9 @@ namespace Codist.Classifiers
 					case SyntaxKind.FinallyClause:
 						MarkClassificationTypeForBrace(itemSpan, snapshot, result, _Classifications.ResourceKeyword, SpecialHighlightOptions.ResourceBrace);
 						return;
+					case SyntaxKind.TupleExpression:
+						MarkClassificationTypeForBrace(itemSpan, snapshot, result, _Classifications.ConstructorMethod, SpecialHighlightOptions.ParameterBrace);
+						return;
 				}
 				node = (node as BaseArgumentListSyntax
 					?? node as BaseParameterListSyntax
