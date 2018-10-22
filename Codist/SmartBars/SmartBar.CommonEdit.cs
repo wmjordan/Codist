@@ -14,7 +14,7 @@ namespace Codist.SmartBars
 	partial class SmartBar
 	{
 		static readonly CommandItem[] __FindAndReplaceCommands = GetFindAndReplaceCommands();
-		static readonly CommandItem[] __CaseCommands = GetCaseCommands();
+		static readonly CommandItem[] __SnippetAndCaseCommands = GetSnippetAndCaseCommands();
 
 		static void ExecuteAndFind(CommandContext ctx, string command) {
 			ThreadHelper.ThrowIfNotOnUIThread();
@@ -137,63 +137,83 @@ namespace Codist.SmartBars
 							}
 						}
 					});
-					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Formatting...", null, _ => __CaseCommands);
+					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Formatting...", null, _ => __SnippetAndCaseCommands);
 					break;
 				default:
-					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Formatting...", null, _ => __CaseCommands);
+					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Formatting...", null, _ => __SnippetAndCaseCommands);
 					break;
 			}
 		}
 
 		List<CommandItem> GetFormatItems(CommandContext arg) {
 			var r = new List<CommandItem>(7) {
-				new CommandItem(KnownImageIds.FormatSelection, "Format selection", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")),
-				new CommandItem(KnownImageIds.FormatDocument, "Format document", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatDocument")),
+				new CommandItem(KnownImageIds.FormatSelection, "Format selection", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")),
+				new CommandItem(KnownImageIds.FormatDocument, "Format document", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatDocument")),
 			};
 			var selection = View.Selection;
 			if (selection.Mode == TextSelectionMode.Stream) {
 				if (View.IsMultilineSelected()) {
-					r.Add(new CommandItem(KnownImageIds.Join, "Join lines", null, _ => {
+					r.Add(new CommandItem(KnownImageIds.Join, "Join lines", _ => {
 						var span = View.Selection.SelectedSpans[0];
 						View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(span.GetText(), @"[ \t]*\r?\n[ \t]*", " "));
 					}));
 				}
 				var t = View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.Start.Position).Extent.GetText();
 				if (t.Length > 0 && (t[0] == ' ' || t[0] == '\t')) {
-					r.Add(new CommandItem(KnownImageIds.DecreaseIndent, "Unindent", null, ctx => {
+					r.Add(new CommandItem(KnownImageIds.DecreaseIndent, "Unindent", ctx => {
 						ctx.KeepToolBarOnClick = true;
 						TextEditorHelper.ExecuteEditorCommand("Edit.DecreaseLineIndent");
 					}));
 				}
-				r.Add(new CommandItem(KnownImageIds.IncreaseIndent, "Indent", null, ctx => {
+				r.Add(new CommandItem(KnownImageIds.IncreaseIndent, "Indent", ctx => {
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.IncreaseLineIndent");
 				}));
 			}
-			r.AddRange(__CaseCommands);
+			r.AddRange(__SnippetAndCaseCommands);
 			return r;
 		}
 
 		static CommandItem[] GetFindAndReplaceCommands() {
 			return new CommandItem[] {
-					new CommandItem(KnownImageIds.QuickFind, "Find...", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
-					new CommandItem(KnownImageIds.QuickReplace, "Replace...", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
-					new CommandItem(KnownImageIds.FindInFile, "Find in files...", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
-					new CommandItem(KnownImageIds.ReplaceInFolder, "Replace in files...", null, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
+					new CommandItem(KnownImageIds.QuickFind, "Find...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
+					new CommandItem(KnownImageIds.QuickReplace, "Replace...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
+					new CommandItem(KnownImageIds.FindInFile, "Find in files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
+					new CommandItem(KnownImageIds.ReplaceInFolder, "Replace in files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
 				};
 		}
 
-		static CommandItem[] GetCaseCommands() {
+		static CommandItem[] GetSnippetAndCaseCommands() {
 			return new CommandItem[] {
-				new CommandItem(KnownImageIds.Font, "Capitalize", null, ctx => {
+				new CommandItem(KnownImageIds.AddSnippet, "Surround with...", ctx => {
+					TextEditorHelper.ExecuteEditorCommand("Edit.SurroundWith");
+				}),
+				new CommandItem(KnownImageIds.MaskedTextBox, "Toggle parentheses", ctx => {
+					var span = ctx.View.Selection.SelectedSpans[0];
+					using (var ed = ctx.View.TextBuffer.CreateEdit()) {
+						var t = span.GetText();
+						if (t.Length > 1 && t[0] == '(' && t[t.Length - 1] == ')') {
+							t = t.Substring(1, t.Length - 2);
+						}
+						else {
+							t = "(" + t + ")";
+						}
+						if (ed.Replace(span, t)) {
+							ed.Apply();
+							ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
+							ctx.KeepToolBar(false);
+						}
+					}
+				}),
+				new CommandItem(KnownImageIds.Font, "Capitalize", ctx => {
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.Capitalize");
 				}),
-				new CommandItem(KnownImageIds.ASerif, "Uppercase", null, ctx => {
+				new CommandItem(KnownImageIds.ASerif, "Uppercase", ctx => {
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.MakeUppercase");
 				}),
-				new CommandItem(KnownImageIds.Blank, "Lowercase", null, ctx => {
+				new CommandItem(KnownImageIds.Blank, "Lowercase", ctx => {
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.MakeLowercase");
 				}),
