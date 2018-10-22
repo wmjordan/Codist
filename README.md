@@ -1,7 +1,7 @@
 # Codist
-*Codist* is a visual studio extension which strives to provide better coding experience for C# programmers.
+*Codist* is a visual studio extension which strives to provide better coding experience and productivity for C# programmers.
 
-# Features and screenshots
+# Features
 
 * [Advanced syntax highlight](#advanced-c-syntax-highlight) with [*comment tagger*](#comment-tagger-and-styles)
 * [Super Quick Info](#super-quick-info) with *Click and Go* to source code
@@ -10,7 +10,8 @@
 * [Symbol Marker](#symbol-marker)
 * [Navigation bar](#navigation-bar) (**new in version 4.0**)
 * Extra margin between lines
-* [Comprehensive options](#feature-control) are offered
+* [Comprehensive configurations](#feature-control)
+* [License](#License), [Bugs and sugguestions](#bugs-and-suggestions)
 
 ![Feature overview](doc/preview.png)
 
@@ -262,7 +263,19 @@ I have learned a lot from the following extension projects.
 * Extensiblity Tools: https://github.com/madskristensen/ExtensibilityTools
 * CodeMaid: https://github.com/codecadwallader/codemaid
 
+# License
+
+_Codist_ comes from the open source community and it goes back to the community.
+
+_Codist_ is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see "https://www.gnu.org/licenses".
+
 # Bugs and suggestions
 Please [post New Issue](https://github.com/wmjordan/Codist/issues) in the [GitHub project](https://github.com/wmjordan/Codist) if you find any bug or have any suggestion.
 
 Your vote and feedback on the [Visual Studio Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=wmj.Codist) are also welcomed.
+
+If you want to support the future development of Codist, you can [donate to the author](http://paypal.me/wmzuo).
