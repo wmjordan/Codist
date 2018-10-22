@@ -45,6 +45,9 @@ namespace Codist
 			if (symbol.Kind == SymbolKind.Field) {
 				ShowFieldDeclaration(symbol as IFieldSymbol, info);
 			}
+			else if (symbol.Kind == SymbolKind.Local) {
+				ShowLocalDeclaration(symbol as ILocalSymbol, info);
+			}
 			else {
 				ShowSymbolDeclaration(symbol, info);
 			}
@@ -67,6 +70,23 @@ namespace Codist
 				}
 				else if (field.IsVolatile) {
 					info.Append("volatile ", Keyword);
+				}
+			}
+		}
+
+		void ShowLocalDeclaration(ILocalSymbol local, TextBlock info) {
+			if (local.IsConst) {
+				info.Append("const ", Keyword);
+			}
+			else {
+				if (local.IsStatic) {
+					info.Append("static ", Keyword);
+				}
+				if (local.IsRef) {
+					info.Append(local.RefKind == RefKind.RefReadOnly ? "ref readonly " : "ref", Keyword);
+				}
+				if (local.IsFixed) {
+					info.Append("fixed ", Keyword);
 				}
 			}
 		}
@@ -98,6 +118,18 @@ namespace Codist
 			}
 			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
 				info.Append("sealed ", Keyword);
+			}
+			if (symbol.Kind == SymbolKind.Method) {
+				var method = symbol as IMethodSymbol;
+				if (method.IsAsync) {
+					info.Append("async ");
+				}
+				if (method.ReturnsByRef) {
+					info.Append("ref ");
+				}
+				else if (method.ReturnsByRefReadonly) {
+					info.Append("ref readonly");
+				}
 			}
 			if (symbol.IsExtern) {
 				info.Append("extern ", Keyword);
