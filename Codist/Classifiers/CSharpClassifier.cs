@@ -432,6 +432,11 @@ namespace Codist.Classifiers
 								yield return _Classifications.NestedDeclaration;
 							}
 							break;
+						case SymbolKind.Field:
+							if (node.IsKind(SyntaxKind.TupleElement) && (node as TupleElementSyntax).Identifier.IsKind(SyntaxKind.None)) {
+								symbol = semanticModel.GetTypeInfo((node as TupleElementSyntax).Type).Type;
+							}
+							break;
 					}
 				}
 				else {
