@@ -717,7 +717,7 @@ namespace Codist
 			return node.DescendantNodes().LastOrDefault(i => i.IsKind(SyntaxKind.IdentifierName)) as IdentifierNameSyntax;
 		}
 		public static List<DirectiveTriviaSyntax> GetDirectives(this SyntaxNode node, Func<DirectiveTriviaSyntax, bool> predicate = null) {
-			if (node.ContainsDirectives) {
+			if (node.ContainsDirectives == false) {
 				return null;
 			}
 			var directive = node.GetFirstDirective(predicate);
