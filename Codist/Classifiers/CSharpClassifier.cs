@@ -334,15 +334,20 @@ namespace Codist.Classifiers
 					case SyntaxKind.FinallyClause:
 						MarkClassificationTypeForBrace(itemSpan, snapshot, result, _Classifications.ResourceKeyword, SpecialHighlightOptions.ResourceBrace);
 						return;
+					case SyntaxKind.TupleExpression:
+						MarkClassificationTypeForBrace(itemSpan, snapshot, result, _Classifications.ConstructorMethod, SpecialHighlightOptions.ParameterBrace);
+						return;
 				}
-				node = (node as BaseArgumentListSyntax
-					?? node as BaseParameterListSyntax
-					?? (CSharpSyntaxNode)(node as CastExpressionSyntax)
-					)?.Parent;
-				if (node != null) {
-					var type = ClassifySyntaxNode(node);
-					if (type != null) {
-						MarkClassificationTypeForBrace(itemSpan, snapshot, result, type, SpecialHighlightOptions.ParameterBrace);
+				if (Config.Instance.SpecialHighlightOptions.HasAnyFlag(SpecialHighlightOptions.SpecialPunctuation | SpecialHighlightOptions.ParameterBrace)) {
+					node = (node as BaseArgumentListSyntax
+				   ?? node as BaseParameterListSyntax
+				   ?? (CSharpSyntaxNode)(node as CastExpressionSyntax)
+				   )?.Parent;
+					if (node != null) {
+						var type = ClassifySyntaxNode(node);
+						if (type != null) {
+							MarkClassificationTypeForBrace(itemSpan, snapshot, result, type, SpecialHighlightOptions.ParameterBrace);
+						}
 					}
 				}
 			}
