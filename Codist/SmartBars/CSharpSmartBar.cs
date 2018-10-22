@@ -242,6 +242,12 @@ namespace Codist.SmartBars
 					edit.Replace(item, "<para>" + item.GetText() + "</para>");
 				}
 			});
+			AddCommand(MyToolBar, KnownImageIds.CommentCode, "Comment selection\nRight click: Comment line", ctx => {
+				if (ctx.RightClick) {
+					ctx.View.ExpandSelectionToLine();
+				}
+				TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
+			});
 		}
 
 		List<CommandItem> GetMarkerCommands(CommandContext arg) {
