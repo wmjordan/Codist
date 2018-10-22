@@ -432,31 +432,21 @@ namespace Codist.NaviBar
 				}
 			}
 			void AddMemberDeclarations(SyntaxNode node) {
-				List<DirectiveTriviaSyntax> directives = null;
-				if (node.ContainsDirectives) {
-					var region = node.GetFirstDirective(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia));
-					if (region != null) {
-						directives = new List<DirectiveTriviaSyntax>(4);
-						do {
-							directives.Add(region);
-							region = region.GetNextDirective(d => /*d.IsKind(SyntaxKind.EndRegionDirectiveTrivia) ||*/ d.IsKind(SyntaxKind.RegionDirectiveTrivia));
-						} while (region != null);
-					}
-				}
+				var directives = node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia));
 				foreach (var child in node.ChildNodes()) {
 					if (child.IsMemberDeclaration() == false && child.IsTypeDeclaration() == false) {
 						continue;
 					}
 					if (directives != null) {
 						for (var i = 0; i < directives.Count; i++) {
-							var dir = directives[i];
-							if (dir.SpanStart < child.SpanStart) {
-								var item = new NaviItem(_Bar, dir);
-								if (dir.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+							var d = directives[i];
+							if (d.SpanStart < child.SpanStart) {
+								var item = new NaviItem(_Bar, d);
+								if (d.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
 									(item.Header as TextBlock).TextAlignment = TextAlignment.Center;
 									item.Background = ThemeHelper.TitleBackgroundBrush.Alpha(0.5);
 								}
-								else if (dir.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
+								else if (d.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
 									(item.Header as TextBlock).Text = String.Empty;
 								}
 								Items.Add(item);
@@ -481,6 +471,7 @@ namespace Codist.NaviBar
 					}
 				}
 			}
+
 			void AddVariables(SeparatedSyntaxList<VariableDeclaratorSyntax> fields) {
 				foreach (var item in fields) {
 					Items.Add(new NaviItem(_Bar, item));

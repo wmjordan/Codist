@@ -63,7 +63,6 @@ namespace Codist
 					projects.Add(proj);
 				}
 			}
-
 			return projects;
 		}
 
@@ -717,6 +716,22 @@ namespace Codist
 		public static IdentifierNameSyntax GetLastIdentifier(this SyntaxNode node) {
 			return node.DescendantNodes().LastOrDefault(i => i.IsKind(SyntaxKind.IdentifierName)) as IdentifierNameSyntax;
 		}
+		public static List<DirectiveTriviaSyntax> GetDirectives(this SyntaxNode node, Func<DirectiveTriviaSyntax, bool> predicate = null) {
+			if (node.ContainsDirectives) {
+				return null;
+			}
+			var directive = node.GetFirstDirective(predicate);
+			if (directive == null) {
+				return null;
+			}
+			var directives = new List<DirectiveTriviaSyntax>(4);
+			do {
+				directives.Add(directive);
+				directive = directive.GetNextDirective(predicate);
+			} while (directive != null);
+			return directives;
+		}
+
 
 		public static bool IsLineComment(this SyntaxTrivia trivia) {
 			switch (trivia.Kind()) {
