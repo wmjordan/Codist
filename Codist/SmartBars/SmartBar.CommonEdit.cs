@@ -14,7 +14,9 @@ namespace Codist.SmartBars
 	partial class SmartBar
 	{
 		static readonly CommandItem[] __FindAndReplaceCommands = GetFindAndReplaceCommands();
-		static readonly CommandItem[] __SnippetAndCaseCommands = GetSnippetAndCaseCommands();
+		static readonly CommandItem[] __CaseCommands = GetCaseCommands();
+		static readonly CommandItem[] __SurroundingCommands = GetSurroundingCommands();
+		static readonly CommandItem[] __FormatCommands = GetFormatCommands();
 
 		static void ExecuteAndFind(CommandContext ctx, string command) {
 			ThreadHelper.ThrowIfNotOnUIThread();
@@ -137,21 +139,20 @@ namespace Codist.SmartBars
 							}
 						}
 					});
-					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Formatting...", null, _ => __SnippetAndCaseCommands);
+					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Formatting...", null, _ => __CaseCommands);
 					break;
 				default:
-					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Formatting...", null, _ => __SnippetAndCaseCommands);
+					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Formatting...", null, _ => __CaseCommands);
 					break;
 			}
 		}
 
 		List<CommandItem> GetFormatItems(CommandContext arg) {
-			var r = new List<CommandItem>(7) {
-				new CommandItem(KnownImageIds.FormatSelection, "Format selection", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")),
-				new CommandItem(KnownImageIds.FormatDocument, "Format document", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatDocument")),
-			};
+			var r = new List<CommandItem>(10);
 			var selection = View.Selection;
 			if (selection.Mode == TextSelectionMode.Stream) {
+				r.AddRange(__SurroundingCommands);
+				r.AddRange(__FormatCommands);
 				if (View.IsMultilineSelected()) {
 					r.Add(new CommandItem(KnownImageIds.Join, "Join lines", _ => {
 						var span = View.Selection.SelectedSpans[0];
@@ -170,10 +171,33 @@ namespace Codist.SmartBars
 					TextEditorHelper.ExecuteEditorCommand("Edit.IncreaseLineIndent");
 				}));
 			}
-			r.AddRange(__SnippetAndCaseCommands);
+			r.AddRange(__CaseCommands);
 			return r;
 		}
 
+
+		static CommandItem[] GetCaseCommands() {
+			return new CommandItem[] {
+				new CommandItem(KnownImageIds.Font, "Capitalize", ctx => {
+					ctx.KeepToolBarOnClick = true;
+					TextEditorHelper.ExecuteEditorCommand("Edit.Capitalize");
+				}),
+				new CommandItem(KnownImageIds.ASerif, "Uppercase", ctx => {
+					ctx.KeepToolBarOnClick = true;
+					TextEditorHelper.ExecuteEditorCommand("Edit.MakeUppercase");
+				}),
+				new CommandItem(KnownImageIds.Blank, "Lowercase", ctx => {
+					ctx.KeepToolBarOnClick = true;
+					TextEditorHelper.ExecuteEditorCommand("Edit.MakeLowercase");
+				}),
+			};
+		}
+		static CommandItem[] GetFormatCommands() {
+			return new CommandItem[] {
+				new CommandItem(KnownImageIds.FormatSelection, "Format selection", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")),
+				new CommandItem(KnownImageIds.FormatDocument, "Format document", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatDocument")),
+			};
+		}
 		static CommandItem[] GetFindAndReplaceCommands() {
 			return new CommandItem[] {
 					new CommandItem(KnownImageIds.QuickFind, "Find...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
@@ -182,8 +206,7 @@ namespace Codist.SmartBars
 					new CommandItem(KnownImageIds.ReplaceInFolder, "Replace in files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
 				};
 		}
-
-		static CommandItem[] GetSnippetAndCaseCommands() {
+		static CommandItem[] GetSurroundingCommands() {
 			return new CommandItem[] {
 				new CommandItem(KnownImageIds.AddSnippet, "Surround with...", ctx => {
 					TextEditorHelper.ExecuteEditorCommand("Edit.SurroundWith");
@@ -204,18 +227,6 @@ namespace Codist.SmartBars
 							ctx.KeepToolBar(false);
 						}
 					}
-				}),
-				new CommandItem(KnownImageIds.Font, "Capitalize", ctx => {
-					ctx.KeepToolBarOnClick = true;
-					TextEditorHelper.ExecuteEditorCommand("Edit.Capitalize");
-				}),
-				new CommandItem(KnownImageIds.ASerif, "Uppercase", ctx => {
-					ctx.KeepToolBarOnClick = true;
-					TextEditorHelper.ExecuteEditorCommand("Edit.MakeUppercase");
-				}),
-				new CommandItem(KnownImageIds.Blank, "Lowercase", ctx => {
-					ctx.KeepToolBarOnClick = true;
-					TextEditorHelper.ExecuteEditorCommand("Edit.MakeLowercase");
 				}),
 			};
 		}
