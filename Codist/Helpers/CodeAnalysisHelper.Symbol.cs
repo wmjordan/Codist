@@ -9,9 +9,29 @@ using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Utilities;
+using System.Reflection.Emit;
 
 namespace Codist
 {
+	/// <summary>
+	/// Denotes where an assembly is imported.
+	/// </summary>
+	public enum AssemblySource
+	{
+		/// <summary>
+		/// The assembly is an external one.
+		/// </summary>
+		Metadata,
+		/// <summary>
+		/// The assembly comes from source code.
+		/// </summary>
+		SourceCode,
+		/// <summary>
+		/// The assembly comes from other projects.
+		/// </summary>
+		Retarget
+	}
+
 	static partial class CodeAnalysisHelper
 	{
 		/// <summary>
@@ -365,6 +385,10 @@ namespace Codist
 			}
 		}
 
+		public static AssemblySource GetSourceType(this IAssemblySymbol assembly) {
+			return AssemblySourceReflector.GetSourceType(assembly);
+		}
+
 		public static ImmutableArray<Location> GetSourceLocations(this ISymbol symbol) {
 			return symbol == null || symbol.Locations.Length == 0
 				? ImmutableArray<Location>.Empty
@@ -594,6 +618,47 @@ namespace Codist
 			return symbol?.ContainingType?.TypeKind == TypeKind.Class &&
 				   (symbol.IsVirtual || symbol.IsAbstract || symbol.IsOverride) &&
 				   symbol.IsSealed == false;
+		}
+
+		static class AssemblySourceReflector
+		{
+			static readonly Func<IAssemblySymbol, byte> __getAssemblyType = CreateIsSourceAssemblyFunc();
+			public static AssemblySource GetSourceType(IAssemblySymbol assembly) {
+				return (AssemblySource)__getAssemblyType(assembly);
+			}
+
+			static Func<IAssemblySymbol, byte> CreateIsSourceAssemblyFunc() {
+				var m = new DynamicMethod("IsSourceAssembly", typeof(byte), new Type[] { typeof(IAssemblySymbol) }, true);
+				var il = m.GetILGenerator();
+				var isSource = il.DefineLabel();
+				var isRetargetSource = il.DefineLabel();
+				var a = System.Reflection.Assembly.GetAssembly(typeof(Microsoft.CodeAnalysis.CSharp.CSharpExtensions));
+				var ts = a.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.SourceAssemblySymbol");
+				var tr = a.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting.RetargetingAssemblySymbol");
+				if (ts != null) {
+					il.Emit(OpCodes.Ldarg_0);
+					il.Emit(OpCodes.Isinst, ts);
+					il.Emit(OpCodes.Brtrue_S, isSource);
+				}
+				if (tr != null) {
+					il.Emit(OpCodes.Ldarg_0);
+					il.Emit(OpCodes.Isinst, tr);
+					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
+				}
+				il.Emit(OpCodes.Ldc_I4_0);
+				il.Emit(OpCodes.Ret);
+				if (ts != null) {
+					il.MarkLabel(isSource);
+					il.Emit(OpCodes.Ldc_I4_1);
+					il.Emit(OpCodes.Ret);
+				}
+				if (tr != null) {
+					il.MarkLabel(isRetargetSource);
+					il.Emit(OpCodes.Ldc_I4_2);
+					il.Emit(OpCodes.Ret);
+				}
+				return m.CreateDelegate(typeof(Func<IAssemblySymbol, byte>)) as Func<IAssemblySymbol, byte>;
+			}
 		}
 	}
 }

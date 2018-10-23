@@ -161,10 +161,12 @@ namespace Codist.SmartBars
 						}
 
 						if (isDesignMode) {
-							AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
-								ctx.KeepToolBar(false);
-								TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
-							});
+							if (_Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
+								AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
+									ctx.KeepToolBar(false);
+									TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
+								});
+							}
 							if (node is ParameterSyntax && node.Parent is ParameterListSyntax) {
 								AddEditorCommand(MyToolBar, KnownImageIds.ReorderParameters, "Refactor.ReorderParameters", "Reorder parameters");
 							}

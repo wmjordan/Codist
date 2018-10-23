@@ -11,7 +11,6 @@ using Microsoft.VisualStudio.Text.Classification;
 using AppHelpers;
 using Microsoft.VisualStudio.Utilities;
 using System.ComponentModel.Composition;
-using System.Reflection.Emit;
 using System.Reflection;
 using Microsoft.VisualStudio.Shell;
 
@@ -549,7 +548,7 @@ namespace Codist.Classifiers
 			}
 
 			if (TextEditorHelper.IdentifySymbolSource && symbol.IsMemberOrType() && symbol.ContainingAssembly != null) {
-				yield return AssemblySourceReflector.GetSourceType(symbol.ContainingAssembly) == AssemblySourceReflector.MetadataAssembly
+				yield return symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata
 					? _Classifications.MetadataSymbol
 					: _Classifications.UserSymbol;
 			}
@@ -578,48 +577,6 @@ namespace Codist.Classifiers
 
 		static ClassificationSpan CreateClassificationSpan(ITextSnapshot snapshotSpan, TextSpan span, IClassificationType type) {
 			return new ClassificationSpan(new SnapshotSpan(snapshotSpan, span.Start, span.Length), type);
-		}
-
-		static class AssemblySourceReflector
-		{
-			static readonly Func<IAssemblySymbol, byte> __getAssemblyType = CreateIsSourceAssemblyFunc();
-			public const byte SourceAssembly = 1, RetargetAssembly = 2, MetadataAssembly = 0;
-			public static byte GetSourceType(IAssemblySymbol assembly) {
-				return __getAssemblyType(assembly);
-			}
-
-			static Func<IAssemblySymbol, byte> CreateIsSourceAssemblyFunc() {
-				var m = new DynamicMethod("IsSourceAssembly", typeof(byte), new Type[] { typeof(IAssemblySymbol) }, true);
-				var il = m.GetILGenerator();
-				var isSource = il.DefineLabel();
-				var isRetargetSource = il.DefineLabel();
-				var a = Assembly.GetAssembly(typeof(Microsoft.CodeAnalysis.CSharp.CSharpExtensions));
-				var ts = a.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.SourceAssemblySymbol");
-				var tr = a.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting.RetargetingAssemblySymbol");
-				if (ts != null) {
-					il.Emit(OpCodes.Ldarg_0);
-					il.Emit(OpCodes.Isinst, ts);
-					il.Emit(OpCodes.Brtrue_S, isSource);
-				}
-				if (tr != null) {
-					il.Emit(OpCodes.Ldarg_0);
-					il.Emit(OpCodes.Isinst, tr);
-					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
-				}
-				il.Emit(OpCodes.Ldc_I4_0);
-				il.Emit(OpCodes.Ret);
-				if (ts != null) {
-					il.MarkLabel(isSource);
-					il.Emit(OpCodes.Ldc_I4_1);
-					il.Emit(OpCodes.Ret);
-				}
-				if (tr != null) {
-					il.MarkLabel(isRetargetSource);
-					il.Emit(OpCodes.Ldc_I4_2);
-					il.Emit(OpCodes.Ret);
-				}
-				return m.CreateDelegate(typeof(Func<IAssemblySymbol, byte>)) as Func<IAssemblySymbol, byte>;
-			}
 		}
 	}
 }
