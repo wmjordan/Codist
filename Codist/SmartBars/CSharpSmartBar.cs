@@ -26,7 +26,6 @@ namespace Codist.SmartBars
 	/// An extended <see cref="SmartBar"/> for C# content type.
 	/// </summary>
 	sealed class CSharpSmartBar : SmartBar {
-		static readonly Thickness __FilterBorderThickness = new Thickness(0, 0, 0, 1);
 		static readonly Classifiers.HighlightClassifications __HighlightClassifications = new Classifiers.HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 		readonly SemanticContext _Context;
 		ISymbol _Symbol;

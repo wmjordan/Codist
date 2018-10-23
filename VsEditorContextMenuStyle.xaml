@@ -1,0 +1,10 @@
+<ControlTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<Grid>
+		<Border BorderThickness="1,1,1,1" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}">
+			<Border Background="{DynamicResource VsBrush.CommandBarMenuIconBackground}" Width="28" HorizontalAlignment="Left"/>
+		</Border>
+		<ScrollViewer CanContentScroll="True" Style="{DynamicResource {ComponentResourceKey TypeInTargetAssembly=FrameworkElement, ResourceId=MenuScrollViewer}}" Margin="3,3,3,3">
+			<ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.DirectionalNavigation="Cycle" Grid.IsSharedSizeScope="True"/>
+		</ScrollViewer>
+	</Grid>
+</ControlTemplate>
