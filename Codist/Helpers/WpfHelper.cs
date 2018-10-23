@@ -21,11 +21,7 @@ namespace Codist
 		internal static readonly Thickness TopItemMargin = new Thickness(0, 3, 0, 0);
 		internal static readonly Thickness MenuItemMargin = new Thickness(6, 0, 6, 0);
 
-		public static TPanel Add<TPanel>(this TPanel panel, UIElement control)
-			where TPanel : Panel {
-			panel.Children.Add(control);
-			return panel;
-		}
+		#region TextBlock and Run
 		public static TextBlock SetGlyph(this TextBlock block, System.Windows.Media.ImageSource image) {
 			var first = block.Inlines.FirstInline;
 			var glyph = new InlineUIContainer(new Image { Source = image, Width = image.Width, Margin = GlyphMargin }) { BaselineAlignment = BaselineAlignment.TextTop };
@@ -91,16 +87,6 @@ namespace Codist
 				return sb.ToString();
 			}
 		}
-		public static string GetTemplate(this Control element) {
-			if (element.Template == null) {
-				return String.Empty;
-			}
-			using (var r = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(30))
-			using (var writer = System.Xml.XmlWriter.Create(r.Resource, new System.Xml.XmlWriterSettings { Indent = true, IndentChars = "\t" })) {
-				System.Windows.Markup.XamlWriter.Save(element.Template, writer);
-				return r.Resource.ToString();
-			}
-		}
 
 		public static Run Render(this string text, WpfBrush brush) {
 			return text.Render(false, false, brush);
@@ -117,41 +103,10 @@ namespace Codist
 				run.Foreground = brush;
 			}
 			return run;
-		}
+		} 
+		#endregion
 
-		public static StackPanel MakeHorizontal(this StackPanel panel) {
-			panel.Orientation = Orientation.Horizontal;
-			return panel;
-		}
-		public static ToolBar HideOverflow(this ToolBar toolBar) {
-			if (toolBar.IsLoaded) {
-				HideOverflowInternal(toolBar);
-				return toolBar;
-			}
-			toolBar.Loaded -= ToolBarLoaded;
-			toolBar.Loaded += ToolBarLoaded;
-			return toolBar;
-			void ToolBarLoaded(object sender, RoutedEventArgs args) {
-				var b = sender as ToolBar;
-				HideOverflowInternal(b);
-				b.Loaded -= ToolBarLoaded;
-			}
-			void HideOverflowInternal(ToolBar b) {
-				var overflow = b.FindTemplateElement<FrameworkElement>("OverflowGrid");
-				if (overflow != null) {
-					overflow.Visibility = Visibility.Collapsed;
-				}
-				var mainPanelBorder = b.FindTemplateElement<FrameworkElement>("MainPanelBorder");
-				if (mainPanelBorder != null) {
-					mainPanelBorder.Margin = NoMargin;
-				}
-			}
-		}
-
-		static readonly System.Windows.Media.Typeface StatusText = SystemFonts.StatusFontFamily.GetTypefaces().First();
-		public static WpfText ToFormattedText(string text, double size, WpfBrush brush) {
-			return new WpfText(text, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, StatusText, size, brush);
-		}
+		#region FormattedText
 		public static WpfText SetItalic(this WpfText text) {
 			text.SetFontStyle(FontStyles.Italic);
 			return text;
@@ -160,22 +115,25 @@ namespace Codist
 			text.SetFontWeight(FontWeights.Bold);
 			return text;
 		}
-		public static void ScreenShot(FrameworkElement control, string path, int width, int height) {
-			var bmp = new RenderTargetBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Default);
-			//var sourceBrush = new System.Windows.Media.VisualBrush(control) { Stretch = System.Windows.Media.Stretch.None };
-			//var drawingVisual = new System.Windows.Media.DrawingVisual();
-			//using (var dc = drawingVisual.RenderOpen()) {
-			//	dc.DrawRectangle(sourceBrush, null, new Rect(0, 0, width, height));
-			//	dc.Close();
-			//}
-			//bmp.Render(drawingVisual);
-			bmp.Render(control);
-			var enc = new PngBitmapEncoder();
-			enc.Frames.Add(BitmapFrame.Create(bmp));
-			using (var f = System.IO.File.Create(path)) {
-				enc.Save(f);
-			}
+		static readonly System.Windows.Media.Typeface StatusText = SystemFonts.StatusFontFamily.GetTypefaces().First();
+		public static WpfText ToFormattedText(string text, double size, WpfBrush brush) {
+			return new WpfText(text, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, StatusText, size, brush);
 		}
+		#endregion
+
+		#region Panel
+		public static TPanel Add<TPanel>(this TPanel panel, UIElement control)
+			where TPanel : Panel {
+			panel.Children.Add(control);
+			return panel;
+		}
+		public static StackPanel MakeHorizontal(this StackPanel panel) {
+			panel.Orientation = Orientation.Horizontal;
+			return panel;
+		} 
+		#endregion
+
+		#region Margin and size
 		public static bool Contains(this FrameworkElement element, Point point) {
 			return point.X >= 0 && point.X <= element.ActualWidth
 				&& point.Y >= 0 && point.Y <= element.ActualHeight;
@@ -205,6 +163,8 @@ namespace Codist
 		public static Border WrapMargin(this UIElement element, Thickness thickness) {
 			return new Border { Margin = thickness, Child = element };
 		}
+		#endregion
+		#region WPF tree
 		public static DependencyObject GetVisualParent(this DependencyObject obj) {
 			return VisualTreeHelper.GetParent(obj);
 		}
@@ -225,13 +185,6 @@ namespace Codist
 				}
 			}
 			return null;
-		}
-		public static TElement FindTemplateElement<TElement>(this Control control, string name)
-			where TElement : FrameworkElement {
-			return control.Template.FindName(name, control) as TElement;
-		}
-		public static ResourceDictionary LoadComponent(string uri) {
-			return (ResourceDictionary)Application.LoadComponent(new Uri("/" + nameof(Codist) + ";component/" + uri, UriKind.Relative));
 		}
 		public static TChild GetFirstVisualChild<TChild>(this DependencyObject obj, Predicate<TChild> predicate = null)
 			where TChild : DependencyObject {
@@ -254,12 +207,77 @@ namespace Codist
 		public static DependencyObject GetLogicalParent(this DependencyObject obj) {
 			return LogicalTreeHelper.GetParent(obj);
 		}
+		#endregion
 
+		#region Template and style
+		public static string GetTemplate(this Control element) {
+			if (element.Template == null) {
+				return String.Empty;
+			}
+			using (var r = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(30))
+			using (var writer = System.Xml.XmlWriter.Create(r.Resource, new System.Xml.XmlWriterSettings { Indent = true, IndentChars = "\t" })) {
+				System.Windows.Markup.XamlWriter.Save(element.Template, writer);
+				return r.Resource.ToString();
+			}
+		}
+		public static TElement FindTemplateElement<TElement>(this Control control, string name)
+			where TElement : FrameworkElement {
+			return control.Template.FindName(name, control) as TElement;
+		}
+		public static ResourceDictionary LoadComponent(string uri) {
+			return (ResourceDictionary)Application.LoadComponent(new Uri("/" + nameof(Codist) + ";component/" + uri, UriKind.Relative));
+		} 
 		public static TControl SetStyleResourceProperty<TControl>(this TControl control, object resourceKey)
 			where TControl : FrameworkElement {
 			control.SetResourceReference(FrameworkElement.StyleProperty, resourceKey);
 			return control;
 		}
+		#endregion
+
+		#region Others
+		public static ToolBar HideOverflow(this ToolBar toolBar) {
+			if (toolBar.IsLoaded) {
+				HideOverflowInternal(toolBar);
+				return toolBar;
+			}
+			toolBar.Loaded -= ToolBarLoaded;
+			toolBar.Loaded += ToolBarLoaded;
+			return toolBar;
+			void ToolBarLoaded(object sender, RoutedEventArgs args) {
+				var b = sender as ToolBar;
+				HideOverflowInternal(b);
+				b.Loaded -= ToolBarLoaded;
+			}
+			void HideOverflowInternal(ToolBar b) {
+				var overflow = b.FindTemplateElement<FrameworkElement>("OverflowGrid");
+				if (overflow != null) {
+					overflow.Visibility = Visibility.Collapsed;
+				}
+				var mainPanelBorder = b.FindTemplateElement<FrameworkElement>("MainPanelBorder");
+				if (mainPanelBorder != null) {
+					mainPanelBorder.Margin = NoMargin;
+				}
+			}
+		}
+
+		public static void ScreenShot(FrameworkElement control, string path, int width, int height) {
+			var bmp = new RenderTargetBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Default);
+			//var sourceBrush = new System.Windows.Media.VisualBrush(control) { Stretch = System.Windows.Media.Stretch.None };
+			//var drawingVisual = new System.Windows.Media.DrawingVisual();
+			//using (var dc = drawingVisual.RenderOpen()) {
+			//	dc.DrawRectangle(sourceBrush, null, new Rect(0, 0, width, height));
+			//	dc.Close();
+			//}
+			//bmp.Render(drawingVisual);
+			bmp.Render(control);
+			var enc = new PngBitmapEncoder();
+			enc.Frames.Add(BitmapFrame.Create(bmp));
+			using (var f = System.IO.File.Create(path)) {
+				enc.Save(f);
+			}
+		}
+
+		#endregion
 	}
 
 }
