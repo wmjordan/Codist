@@ -38,12 +38,14 @@ namespace Codist.SmartBars
 				return;
 			}
 			// The toolbar will get wired to the text view events
-			if (String.Equals(Constants.CodeTypes.CSharp, textView.TextBuffer.ContentType.TypeName, StringComparison.OrdinalIgnoreCase)) {
+			var contentType = textView.TextBuffer.ContentType;
+			if (String.Equals(Constants.CodeTypes.CSharp, contentType.TypeName, StringComparison.OrdinalIgnoreCase)) {
 				textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
 				new CSharpSmartBar(textView);
 			}
-			else if (textView.TextBuffer.ContentType.IsOfType("code++.MarkDown")) {
-				new MarkDownSmartBar(textView);
+			else if (contentType.IsOfType("code++.Markdown")
+				|| contentType.TypeName.IndexOf("Markdown", StringComparison.OrdinalIgnoreCase) != -1) {
+				new MarkdownSmartBar(textView);
 			}
 			else {
 				new SmartBar(textView);

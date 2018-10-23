@@ -32,7 +32,7 @@ namespace Codist.SmartBars
 			FindNext(ctx, t);
 		}
 
-		static void FindNext(CommandContext ctx, string t) {
+		protected static void FindNext(CommandContext ctx, string t) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (t != null) {
 				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;

@@ -203,7 +203,7 @@
     <Compile Include="Helpers\SymbolFormatter.cs" />
     <Compile Include="Helpers\XmlDocRenderer.cs" />
     <Compile Include="SmartBars\CSharpSmartBar.cs" />
-    <Compile Include="SmartBars\MarkDownSmartBar.cs" />
+    <Compile Include="SmartBars\MarkdownSmartBar.cs" />
     <Compile Include="SmartBars\SmartBar.CommonEdit.cs" />
     <Compile Include="SmartBars\SmartBar.cs" />
     <Compile Include="SmartBars\SmartBarTextViewCreationListener.cs" />
