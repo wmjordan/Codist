@@ -261,7 +261,9 @@ namespace Codist.Options
 				return;
 			}
 			var bmp = new Bitmap(_PreviewBox.Width, _PreviewBox.Height);
-			RenderPreview(bmp, _service.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor)), _activeStyle);
+			var fs = _service.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor));
+			var style = _activeStyle;
+			RenderPreview(bmp, fs, style);
 			(_SyntaxListBox.FocusedItem as SyntaxListViewItem)?.ApplyTheme();
 			_PreviewBox.Image = bmp;
 		}

@@ -1,5 +1,0 @@
-<ControlTemplate TargetType="Menu" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<Border BorderThickness="{TemplateBinding Border.BorderThickness}" Padding="{TemplateBinding Control.Padding}" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}" SnapsToDevicePixels="True">
-		<ItemsPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
-	</Border>
-</ControlTemplate>
