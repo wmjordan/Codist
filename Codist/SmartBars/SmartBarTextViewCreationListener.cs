@@ -42,6 +42,9 @@ namespace Codist.SmartBars
 				textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
 				new CSharpSmartBar(textView);
 			}
+			else if (textView.TextBuffer.ContentType.IsOfType("code++.MarkDown")) {
+				new MarkDownSmartBar(textView);
+			}
 			else {
 				new SmartBar(textView);
 			}

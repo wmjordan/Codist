@@ -398,6 +398,10 @@ namespace Codist.SmartBars
 		}
 
 		void ViewSelectionChanged(object sender, EventArgs e) {
+			// suppress event handler if KeepToolBar
+			if (DateTime.Now < _LastExecute.AddSeconds(1)) {
+				return;
+			}
 			if (View.Selection.IsEmpty) {
 				_ToolBarTray.Visibility = Visibility.Hidden;
 				View.VisualElement.MouseMove -= ViewMouseMove;
