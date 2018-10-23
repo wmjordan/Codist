@@ -29,6 +29,11 @@ namespace Codist.SmartBars
 			}
 			ctx.KeepToolBar(false);
 			TextEditorHelper.ExecuteEditorCommand(command);
+			FindNext(ctx, t);
+		}
+
+		static void FindNext(CommandContext ctx, string t) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			if (t != null) {
 				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
 				if (p != null && p.FindText(t, (int)EnvDTE.vsFindOptions.vsFindOptionsMatchCase)) {
@@ -161,7 +166,7 @@ namespace Codist.SmartBars
 						View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(span.GetText(), @"[ \t]*\r?\n[ \t]*", " "));
 					}));
 				}
-				var t = View.TextViewLines.GetTextViewLineContainingBufferPosition(selection.Start.Position).Extent.GetText();
+				var t = View.GetTextViewLineContainingBufferPosition(selection.Start.Position).Extent.GetText();
 				if (t.Length > 0 && (t[0] == ' ' || t[0] == '\t')) {
 					r.Add(new CommandItem(KnownImageIds.DecreaseIndent, "Unindent", ctx => {
 						ctx.KeepToolBarOnClick = true;

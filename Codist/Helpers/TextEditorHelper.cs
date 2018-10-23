@@ -126,8 +126,7 @@ namespace Codist
 			if (s.IsEmpty || s.SelectedSpans.Count < 1) {
 				return false;
 			}
-			var lines = textView.TextViewLines;
-			return lines.GetTextViewLineContainingBufferPosition(s.Start.Position) != lines.GetTextViewLineContainingBufferPosition(s.End.Position);
+			return textView.GetTextViewLineContainingBufferPosition(s.Start.Position) != textView.GetTextViewLineContainingBufferPosition(s.End.Position);
 		}
 
 		public static void SelectNode(this IWpfTextView view, Microsoft.CodeAnalysis.SyntaxNode node, bool includeTrivia) {
