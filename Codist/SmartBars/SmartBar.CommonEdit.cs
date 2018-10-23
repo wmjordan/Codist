@@ -27,6 +27,7 @@ namespace Codist.SmartBars
 			if (Keyboard.Modifiers == ModifierKeys.Control && ctx.View.Selection.IsEmpty == false) {
 				t = ctx.View.TextSnapshot.GetText(ctx.View.Selection.SelectedSpans[0]);
 			}
+			ctx.KeepToolBar(false);
 			TextEditorHelper.ExecuteEditorCommand(command);
 			if (t != null) {
 				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
@@ -76,8 +77,8 @@ namespace Codist.SmartBars
 				if (ctx.RightClick) {
 					ctx.View.ExpandSelectionToLine();
 				}
-				TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
 				ctx.KeepToolBar(true);
+				TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
 			});
 		}
 
@@ -90,6 +91,7 @@ namespace Codist.SmartBars
 				if (t == null) {
 					return;
 				}
+				ctx.KeepToolBar(false);
 				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
 				var option = Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) ? EnvDTE.vsFindOptions.vsFindOptionsMatchCase : 0;
 				if (p != null && p.FindText(t, (int)option)) {

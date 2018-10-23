@@ -162,7 +162,7 @@ namespace Codist.SmartBars
 
 						if (isDesignMode) {
 							AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
-								ctx.KeepToolBarOnClick = true;
+								ctx.KeepToolBar(false);
 								TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
 							});
 							if (node is ParameterSyntax && node.Parent is ParameterListSyntax) {
