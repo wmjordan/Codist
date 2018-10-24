@@ -134,7 +134,7 @@ namespace Codist.NaviBar
 			return nodes;
 		}
 
-		TextBlock GetSignature(SyntaxNode child) {
+		TextBlock GetSignature(SyntaxNode child, bool isExternal) {
 			var title = child.GetDeclarationSignature();
 			if (child.IsTypeDeclaration()) {
 				var p = child.Parent;
@@ -144,15 +144,18 @@ namespace Codist.NaviBar
 				}
 			}
 			var t = new ThemedTipText()
-				.Append(title, child.FullSpan.Contains(_SemanticContext.Position));
+				.Append(title, isExternal == false && child.FullSpan.Contains(_SemanticContext.Position));
+			if (isExternal) {
+				t.Opacity = 0.7;
+			}
 			if (child is BaseMethodDeclarationSyntax) {
 				t.Append(GetParameterListSignature((child as BaseMethodDeclarationSyntax).ParameterList), ThemeHelper.SystemGrayTextBrush);
 			}
 			else if (child.IsKind(SyntaxKind.DelegateDeclaration)) {
-				t.Append(" " + GetParameterListSignature((child as DelegateDeclarationSyntax).ParameterList));
+				t.Append(GetParameterListSignature((child as DelegateDeclarationSyntax).ParameterList));
 			}
 			else if (child is OperatorDeclarationSyntax) {
-				t.Append(" " + GetParameterListSignature((child as OperatorDeclarationSyntax).ParameterList));
+				t.Append(GetParameterListSignature((child as OperatorDeclarationSyntax).ParameterList));
 			}
 			return t;
 		}
@@ -254,7 +257,7 @@ namespace Codist.NaviBar
 					var members = _Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken);
 					foreach (var item in members) {
 						if (item.GetDeclarationSignature().IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1) {
-							Items.Add(new NaviItem(_Bar, item, i => i.Header = _Bar.GetSignature(item), i => i.GoToLocation()));
+							Items.Add(new NaviItem(_Bar, item, i => i.Header = _Bar.GetSignature(item, false), i => i.GoToLocation()));
 						}
 					}
 					//if (_Items.Count > _FilterOffset) {
@@ -399,7 +402,8 @@ namespace Codist.NaviBar
 								new Separator()
 							}
 						};
-						AddMemberDeclarations(node);
+						AddMemberDeclarations(node, false);
+						AddPartialTypeDeclarations(node as BaseTypeDeclarationSyntax);
 						break;
 					default:
 						SelectOrGoToSource(node);
@@ -422,16 +426,39 @@ namespace Codist.NaviBar
 			#endregion
 
 			#region Drop down menu items
+			void AddPartialTypeDeclarations(BaseTypeDeclarationSyntax node) {
+				if (node.Modifiers.Any(SyntaxKind.PartialKeyword) == false) {
+					return;
+				}
+				var symbol = _Bar._SemanticContext.GetSymbol(node, default);
+				var current = node.SyntaxTree.GetLocation(node.Span);
+				foreach (var item in symbol.Locations) {
+					if (item.SourceTree == current.SourceTree) {
+						continue;
+					}
+					var extDoc = _Bar._SemanticContext.Document.Project.Solution.GetDocument(item.SourceTree);
+					if (extDoc == null) {
+						continue;
+					}
+					var partial = extDoc.GetSyntaxRootAsync(_Bar._cancellationSource.GetToken()).Result.FindNode(item.SourceSpan);
+					Items.Add(new NaviItem(_Bar, partial, i => {
+						i.Header = new ThemedTipText(System.IO.Path.GetFileName(item.SourceTree.FilePath), true) {
+							TextAlignment = TextAlignment.Center
+						}; },
+						i => i.GoToLocation()) { Background = ThemeHelper.TitleBackgroundBrush.Alpha(0.8) });
+					AddMemberDeclarations(partial, true);
+				}
+			}
 			void AddTypeDeclarations(SyntaxNode node) {
 				foreach(var child in node.ChildNodes()) {
 					if (child.IsTypeDeclaration() == false) {
 						continue;
 					}
-					Items.Add(new NaviItem(_Bar, child, i => i.Header = i._Bar.GetSignature(i.Node), i => i.SelectOrGoToSource(i.Node)));
+					Items.Add(new NaviItem(_Bar, child, i => i.Header = i._Bar.GetSignature(i.Node, false), i => i.SelectOrGoToSource(i.Node)));
 					AddTypeDeclarations(child);
 				}
 			}
-			void AddMemberDeclarations(SyntaxNode node) {
+			void AddMemberDeclarations(SyntaxNode node, bool isExternal) {
 				var directives = node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia));
 				foreach (var child in node.ChildNodes()) {
 					if (child.IsMemberDeclaration() == false && child.IsTypeDeclaration() == false) {
@@ -462,7 +489,7 @@ namespace Codist.NaviBar
 						AddVariables((child as BaseFieldDeclarationSyntax).Declaration.Variables);
 					}
 					else {
-						Items.Add(new NaviItem(_Bar, child, i => i.Header = _Bar.GetSignature(i.Node), i => i.GoToLocation()));
+						Items.Add(new NaviItem(_Bar, child, null, i => i.GoToLocation()) { Header = _Bar.GetSignature(child, isExternal) });
 					}
 				}
 				if (directives != null) {
