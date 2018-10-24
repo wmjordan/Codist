@@ -71,15 +71,15 @@ namespace Codist
 			menu.Opened += (sender, e) => {
 				var m = sender as ContextMenu;
 				m.Items.Add(new MenuItem {
-					Header = new TextBlock().Append(symbolName, true).Append(" is defined in ").Append(refs.Length.ToString(), true).Append(" places"),
+					Header = new ThemedTipText().Append(symbolName, true).Append(" is defined in ").Append(refs.Length.ToString(), true).Append(" places"),
 					IsEnabled = false
 				});
 				foreach (var loc in refs.Sort(System.Collections.Generic.Comparer<Location>.Create((a, b) => {
 					return String.Compare(System.IO.Path.GetFileName(a.SourceTree.FilePath), System.IO.Path.GetFileName(b.SourceTree.FilePath), StringComparison.OrdinalIgnoreCase);
 				}))) {
-					var pos = loc.SourceTree.GetLineSpan(loc.SourceSpan);
+					//var pos = loc.SourceTree.GetLineSpan(loc.SourceSpan);
 					var item = new MenuItem {
-						Header = new TextBlock().Append(System.IO.Path.GetFileName(loc.SourceTree.FilePath)).Append("(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", WpfBrushes.Gray),
+						Header = new ThemedTipText(System.IO.Path.GetFileName(loc.SourceTree.FilePath))/*.Append("(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", WpfBrushes.Gray)*/,
 						Tag = loc
 					};
 					item.Click += (s, args) => ((Location)((MenuItem)s).Tag).GoToSource();
