@@ -10,16 +10,62 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
-	<Style x:Key="{x:Type Separator}" TargetType="{x:Type Separator}">
-		<Setter Property="Height" Value="1"/>
-		<Setter Property="Margin" Value="0,4,0,4"/>
+	<Style TargetType="{x:Type Separator}">
+		<Setter Property="OverridesDefaultStyle" Value="True"/>
+		<Setter Property="Height" Value="16"/>
+		<Setter Property="Margin" Value="0,4,0,3"/>
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type Separator}">
-					<Border BorderThickness="1" BorderBrush="{DynamicResource VsBrush.CommandBarMenuSeparator}" />
+					<Border BorderThickness="0,0,0,1" BorderBrush="{DynamicResource VsBrush.CommandBarMenuSeparator}">
+						<ContentPresenter Name="Header" Content="{TemplateBinding Tag}" />
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="Tag" Value="{x:Null}">
+							<Setter TargetName="Header" Property="Visibility" Value="Collapsed"/>
+							<Setter Property="Height" Value="1"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
+	</Style>
+	<Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Separator}">
+					<Border Height="16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource VsBrush.CommandBarMenuSeparator}">
+						<ContentPresenter Name="Header" Content="{TemplateBinding Tag}" />
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="Tag" Value="{x:Null}">
+							<Setter TargetName="Header" Property="Visibility" Value="Collapsed"/>
+							<Setter Property="Height" Value="1"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<!-- MenuItem Style -->
+	<Style x:Key="{x:Type c:ThemedMenuItem}" TargetType="{x:Type c:ThemedMenuItem}">
+		<Setter Property="OverridesDefaultStyle" Value="True"/>
+		<Setter Property="Background" Value="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}"/>
+		<Setter Property="Foreground" Value="{DynamicResource VsBrush.CommandBarTextInactive}"/>
+		<Style.Triggers>
+			<Trigger Property="Role" Value="TopLevelHeader">
+				<Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelHeaderTemplateKey}}"/>
+			</Trigger>
+			<Trigger Property="Role" Value="TopLevelItem">
+				<Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelItemTemplateKey}}"/>
+			</Trigger>
+			<Trigger Property="Role" Value="SubmenuHeader">
+				<Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuHeaderTemplateKey}}"/>
+			</Trigger>
+			<Trigger Property="Role" Value="SubmenuItem">
+				<Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuItemTemplateKey}}"/>
+			</Trigger>
+		</Style.Triggers>
 	</Style>
 	<!-- TopLevelItem -->
 	<ControlTemplate x:Key="{x:Static MenuItem.TopLevelItemTemplateKey}" TargetType="{x:Type c:ThemedMenuItem}">
@@ -153,24 +199,4 @@
 			</Trigger>
 		</ControlTemplate.Triggers>
 	</ControlTemplate>
-	<!-- MenuItem Style -->
-	<Style x:Key="{x:Type c:ThemedMenuItem}" TargetType="{x:Type c:ThemedMenuItem}">
-		<Setter Property="OverridesDefaultStyle" Value="True"/>
-		<Setter Property="Background" Value="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}"/>
-		<Setter Property="Foreground" Value="{DynamicResource VsBrush.CommandBarTextInactive}"/>
-		<Style.Triggers>
-			<Trigger Property="Role" Value="TopLevelHeader">
-				<Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelHeaderTemplateKey}}"/>
-			</Trigger>
-			<Trigger Property="Role" Value="TopLevelItem">
-				<Setter Property="Template" Value="{StaticResource {x:Static MenuItem.TopLevelItemTemplateKey}}"/>
-			</Trigger>
-			<Trigger Property="Role" Value="SubmenuHeader">
-				<Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuHeaderTemplateKey}}"/>
-			</Trigger>
-			<Trigger Property="Role" Value="SubmenuItem">
-				<Setter Property="Template" Value="{StaticResource {x:Static MenuItem.SubmenuItemTemplateKey}}"/>
-			</Trigger>
-		</Style.Triggers>
-	</Style>
 </ResourceDictionary>

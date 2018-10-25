@@ -622,13 +622,13 @@ namespace Codist
 
 		static class AssemblySourceReflector
 		{
-			static readonly Func<IAssemblySymbol, byte> __getAssemblyType = CreateIsSourceAssemblyFunc();
+			static readonly Func<IAssemblySymbol, byte> __getAssemblyType = CreateAssemblySourceTypeFunc();
 			public static AssemblySource GetSourceType(IAssemblySymbol assembly) {
 				return (AssemblySource)__getAssemblyType(assembly);
 			}
 
-			static Func<IAssemblySymbol, byte> CreateIsSourceAssemblyFunc() {
-				var m = new DynamicMethod("IsSourceAssembly", typeof(byte), new Type[] { typeof(IAssemblySymbol) }, true);
+			static Func<IAssemblySymbol, byte> CreateAssemblySourceTypeFunc() {
+				var m = new DynamicMethod("GetAssemblySourceType", typeof(byte), new Type[] { typeof(IAssemblySymbol) }, true);
 				var il = m.GetILGenerator();
 				var isSource = il.DefineLabel();
 				var isRetargetSource = il.DefineLabel();

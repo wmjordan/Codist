@@ -125,7 +125,7 @@ namespace Codist.NaviBar
 			while (node != null) {
 				if (node.FullSpan.Contains(_View.Selection, true)
 					&& node.IsKind(SyntaxKind.VariableDeclaration) == false
-					&& (node.IsSyntaxBlock() || node.IsDeclaration())) {
+					&& (node.IsSyntaxBlock() || node.IsDeclaration() || node.IsKind(SyntaxKind.Attribute))) {
 					nodes.Add(node);
 				}
 				node = node.Parent;
@@ -336,11 +336,11 @@ namespace Codist.NaviBar
 				if (cs == null) {
 					return;
 				}
-				var node = Node.SyntaxTree == _Bar._SemanticContext.Compilation.SyntaxTree ? Node : _Bar._SemanticContext.GetNode(Node.SpanStart, false);
-				var symbol = _Bar._SemanticContext.GetSymbol(node, cs.Token);
+				// todo: handle updated syntax node for RootItem
+				var symbol = _Bar._SemanticContext.GetSymbol(Node, cs.Token);
 				ToolTip = symbol != null
 					? ToolTipFactory.CreateToolTip(symbol, _Bar._SemanticContext.SemanticModel.Compilation)
-					: (object)node.GetSyntaxBrief();
+					: (object)Node.GetSyntaxBrief();
 				this.SetTipOptions();
 				if (Parent != _Bar) {
 					ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Right);
@@ -431,18 +431,17 @@ namespace Codist.NaviBar
 					return;
 				}
 				var symbol = _Bar._SemanticContext.GetSymbol(node, default);
-				var current = node.SyntaxTree.GetLocation(node.Span);
-				foreach (var item in symbol.Locations) {
-					if (item.SourceTree == current.SourceTree) {
+				if (symbol == null) {
+					return;
+				}
+				var current = node.SyntaxTree;
+				foreach (var item in symbol.DeclaringSyntaxReferences) {
+					if (item.SyntaxTree == current) {
 						continue;
 					}
-					var extDoc = _Bar._SemanticContext.Document.Project.Solution.GetDocument(item.SourceTree);
-					if (extDoc == null) {
-						continue;
-					}
-					var partial = extDoc.GetSyntaxRootAsync(_Bar._cancellationSource.GetToken()).Result.FindNode(item.SourceSpan);
+					var partial = item.GetSyntax();
 					Items.Add(new NaviItem(_Bar, partial, i => {
-						i.Header = new ThemedTipText(System.IO.Path.GetFileName(item.SourceTree.FilePath), true) {
+						i.Header = new ThemedTipText(System.IO.Path.GetFileName(item.SyntaxTree.FilePath), true) {
 							TextAlignment = TextAlignment.Center
 						}; },
 						i => i.GoToLocation()) { Background = ThemeHelper.TitleBackgroundBrush.Alpha(0.8) });
@@ -459,7 +458,8 @@ namespace Codist.NaviBar
 				}
 			}
 			void AddMemberDeclarations(SyntaxNode node, bool isExternal) {
-				var directives = node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia));
+				var directives = node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia) || d.IsKind(SyntaxKind.EndRegionDirectiveTrivia));
+				bool regionJustStart = false;
 				foreach (var child in node.ChildNodes()) {
 					if (child.IsMemberDeclaration() == false && child.IsTypeDeclaration() == false) {
 						continue;
@@ -468,15 +468,26 @@ namespace Codist.NaviBar
 						for (var i = 0; i < directives.Count; i++) {
 							var d = directives[i];
 							if (d.SpanStart < child.SpanStart) {
-								var item = new NaviItem(_Bar, d);
 								if (d.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+									var item = new NaviItem(_Bar, d) {
+										Background = ThemeHelper.TitleBackgroundBrush.Alpha(0.5)
+									};
 									(item.Header as TextBlock).TextAlignment = TextAlignment.Center;
-									item.Background = ThemeHelper.TitleBackgroundBrush.Alpha(0.5);
+									Items.Add(item);
+									regionJustStart = true;
 								}
 								else if (d.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
-									(item.Header as TextBlock).Text = String.Empty;
+									if (regionJustStart == false) {
+										Items.Add(new Separator {
+											Tag = new ThemedTipText {
+												HorizontalAlignment = HorizontalAlignment.Right,
+												Foreground = ThemeHelper.SystemGrayTextBrush
+											}
+											.Append("#endregion ")
+											.Append(d.GetDeclarationSignature())
+										});
+									}
 								}
-								Items.Add(item);
 								directives.RemoveAt(i);
 								--i;
 							}
@@ -485,6 +496,7 @@ namespace Codist.NaviBar
 							directives = null;
 						}
 					}
+					regionJustStart = false;
 					if (child.IsKind(SyntaxKind.FieldDeclaration) || child.IsKind(SyntaxKind.EventFieldDeclaration)) {
 						AddVariables((child as BaseFieldDeclarationSyntax).Declaration.Variables);
 					}
@@ -494,7 +506,9 @@ namespace Codist.NaviBar
 				}
 				if (directives != null) {
 					foreach (var item in directives) {
-						Items.Add(new NaviItem(_Bar, item));
+						if (item.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+							Items.Add(new NaviItem(_Bar, item));
+						}
 					}
 				}
 			}

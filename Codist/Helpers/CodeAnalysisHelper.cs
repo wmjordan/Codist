@@ -262,13 +262,14 @@ namespace Codist
 				case SyntaxKind.CheckedStatement: return KnownImageIds.CheckBoxChecked;
 				case SyntaxKind.ReturnStatement: return KnownImageIds.Return;
 				case SyntaxKind.ExpressionStatement: return GetImageId(((ExpressionStatementSyntax)node).Expression);
+				case SyntaxKind.Attribute: return KnownImageIds.FormPostBodyParameterNode;
 				case SyntaxKind.YieldReturnStatement: return KnownImageIds.Yield;
 				case SyntaxKind.GotoStatement:
 				case SyntaxKind.GotoCaseStatement:
 				case SyntaxKind.GotoDefaultStatement: return KnownImageIds.GoToSourceCode;
 				case SyntaxKind.LocalFunctionStatement: return KnownImageIds.MethodSnippet;
-				case SyntaxKind.RegionDirectiveTrivia: return KnownImageIds.MarkupTag;
-				case SyntaxKind.EndRegionDirectiveTrivia: return KnownImageIds.HTMLEndTag;
+				case SyntaxKind.RegionDirectiveTrivia: return KnownImageIds.ToolstripPanelTop;
+				case SyntaxKind.EndRegionDirectiveTrivia: return KnownImageIds.ToolstripPanelBottom;
 			}
 			return KnownImageIds.UnknownMember;
 			int GetClassIcon(ClassDeclarationSyntax syntax) {
@@ -511,6 +512,8 @@ namespace Codist
 				case SyntaxKind.ReturnStatement: return ((ReturnStatementSyntax)node).Expression?.GetExpressionSignature();
 				case SyntaxKind.ParenthesizedExpression: return ((ParenthesizedExpressionSyntax)node).Expression.GetExpressionSignature();
 				case SyntaxKind.ExpressionStatement: return ((ExpressionStatementSyntax)node).Expression.GetExpressionSignature();
+				case SyntaxKind.Attribute: return ((AttributeSyntax)node).Name.ToString();
+				case SyntaxKind.AttributeArgumentList: return GetAttributeArgumentListSignature((AttributeArgumentListSyntax)node);
 				case SyntaxKind.YieldReturnStatement: return ((YieldStatementSyntax)node).Expression.GetExpressionSignature();
 				case SyntaxKind.GotoStatement:
 				case SyntaxKind.GotoCaseStatement:
@@ -532,10 +535,21 @@ namespace Codist
 			string GetMethodSignature(MethodDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
 			string GetDelegateSignature(DelegateDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
 			string GetArgumentListSignature(ArgumentListSyntax syntax) {
-				var exp = (node as ArgumentListSyntax).Parent;
-				exp = ((exp as InvocationExpressionSyntax)?.Expression as MemberAccessExpressionSyntax)?.Name
-					?? ((exp as InvocationExpressionSyntax)?.Expression as IdentifierNameSyntax)
-					?? (exp as ObjectCreationExpressionSyntax)?.Type;
+				var exp = syntax.Parent;
+				var ie = (exp as InvocationExpressionSyntax)?.Expression;
+				if (ie != null) {
+					exp = (ie as MemberAccessExpressionSyntax)?.Name
+						?? (ie as IdentifierNameSyntax)
+						?? (ie as MemberBindingExpressionSyntax)?.Name;
+				}
+				else {
+					exp = (exp as ObjectCreationExpressionSyntax)?.Type;
+				}
+				return (exp as IdentifierNameSyntax)?.ToString() ?? (exp as QualifiedNameSyntax)?.Right.ToString() ?? exp?.ToString();
+			}
+			string GetAttributeArgumentListSignature(AttributeArgumentListSyntax syntax) {
+				var exp = syntax.Parent;
+				exp = (exp as AttributeSyntax)?.Name;
 				return (exp as IdentifierNameSyntax)?.ToString() ?? (exp as QualifiedNameSyntax)?.Right.ToString() ?? exp?.ToString();
 			}
 			string GetSwitchSignature(SwitchSectionSyntax syntax) {

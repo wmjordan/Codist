@@ -80,15 +80,36 @@ namespace Codist
 		}
 
 		public ISymbol GetSymbol(SyntaxNode node, CancellationToken cancellationToken) {
-			var info = SemanticModel.GetSymbolInfo(node, cancellationToken);
+			var sm = SemanticModel;
+			if (node.SyntaxTree != sm.SyntaxTree) {
+				var doc = Document.Project.Solution.GetDocument(node.SyntaxTree);
+				if (doc == null) {
+					var nodeFilePath = node.SyntaxTree.FilePath;
+					doc = Document.FilePath == nodeFilePath ? Document : Document.Project.Documents.FirstOrDefault(d => d.FilePath == nodeFilePath);
+					if (doc == null) {
+						return null;
+					}
+					sm = doc.GetSemanticModelAsync(cancellationToken).Result;
+					var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(node.Span);
+					//todo find out the new node
+					if (newNode.IsKind(node.Kind())) {
+						node = newNode;
+					}
+					else {
+						return null;
+					}
+				}
+				sm = doc.GetSemanticModelAsync(cancellationToken).Result;
+			}
+			var info = sm.GetSymbolInfo(node, cancellationToken);
 			if (info.Symbol != null) {
 				return info.Symbol;
 			}
-			var symbol = SemanticModel.GetDeclaredSymbol(node, cancellationToken);
+			var symbol = sm.GetDeclaredSymbol(node, cancellationToken);
 			if (symbol != null) {
 				return symbol;
 			}
-			var type = SemanticModel.GetTypeInfo(node, cancellationToken);
+			var type = sm.GetTypeInfo(node, cancellationToken);
 			if (type.Type != null) {
 				return type.Type;
 			}

@@ -59,6 +59,9 @@ namespace Codist.NaviBar
 					goto EXIT;
 				}
 				var container = dropDown1.GetVisualParent<Grid>();
+				if (container == null) {
+					goto EXIT;
+				}
 				var bar = new CSharpBar(_View) {
 					MinWidth = 200
 				};
