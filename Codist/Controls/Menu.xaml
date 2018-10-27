@@ -10,7 +10,7 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
-	<Style TargetType="{x:Type Separator}">
+	<Style x:Key="{x:Type Separator}" TargetType="{x:Type Separator}">
 		<Setter Property="OverridesDefaultStyle" Value="True"/>
 		<Setter Property="Height" Value="16"/>
 		<Setter Property="Margin" Value="0,4,0,3"/>
@@ -121,7 +121,7 @@
 	</ControlTemplate>
 	<!-- SubmenuItem -->
 	<ControlTemplate x:Key="{x:Static MenuItem.SubmenuItemTemplateKey}" TargetType="{x:Type c:ThemedMenuItem}">
-		<Border x:Name="Border" BorderThickness="1" Background="{TemplateBinding Background}">
+		<Border x:Name="Border" BorderThickness="1" Background="{TemplateBinding Background}" Opacity="{TemplateBinding Opacity}">
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
@@ -159,7 +159,7 @@
 		</ControlTemplate.Triggers>
 	</ControlTemplate>
 	<ControlTemplate x:Key="{x:Static MenuItem.SubmenuHeaderTemplateKey}" TargetType="{x:Type c:ThemedMenuItem}">
-		<Border x:Name="Border" BorderThickness="1">
+		<Border x:Name="Border" BorderThickness="1" Background="{TemplateBinding Background}" Opacity="{TemplateBinding Opacity}">
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
@@ -169,7 +169,7 @@
 				</Grid.ColumnDefinitions>
 				<ContentPresenter x:Name="Icon" Margin="3,0,6,0" VerticalAlignment="Center" ContentSource="Icon"/>
 				<ContentPresenter x:Name="HeaderHost" Grid.Column="1" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="True"/>
-				<TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,2,2" DockPanel.Dock="Right"/>
+				<TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,0,2" DockPanel.Dock="Right"/>
 				<Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{DynamicResource VsBrush.CommandBarMenuSubmenuGlyph}" />
 				<Popup x:Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
 					<Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="1" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}">
