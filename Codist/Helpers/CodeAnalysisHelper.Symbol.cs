@@ -34,6 +34,7 @@ namespace Codist
 
 	static partial class CodeAnalysisHelper
 	{
+		#region Symbol finder
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 		/// </summary>
@@ -112,12 +113,39 @@ namespace Codist
 				}
 			}
 			return symbols;
+		} 
+		#endregion
+
+		#region Assembly and namespace
+		public static IEnumerable<INamedTypeSymbol> GetAllTypes(this INamespaceSymbol namespaceSymbol, CancellationToken cancellationToken = default) {
+			var stack = new Stack<INamespaceOrTypeSymbol>();
+			stack.Push(namespaceSymbol);
+			while (stack.Count > 0) {
+				cancellationToken.ThrowIfCancellationRequested();
+				var namespaceOrTypeSymbol = stack.Pop();
+				var namespaceSymbol2 = namespaceOrTypeSymbol as INamespaceSymbol;
+				if (namespaceSymbol2 != null) {
+					foreach (var ns in namespaceSymbol2.GetMembers()) {
+						stack.Push(ns);
+					}
+				}
+				else {
+					var namedTypeSymbol = (INamedTypeSymbol)namespaceOrTypeSymbol;
+					foreach (var item in namedTypeSymbol.GetTypeMembers()) {
+						stack.Push(item);
+					}
+					yield return namedTypeSymbol;
+				}
+			}
 		}
 
-		public static Location FirstSourceLocation(this ISymbol symbol) {
-			return symbol?.Locations.FirstOrDefault(loc => loc.IsInSource);
-		}
+		public static string GetAssemblyModuleName(this ISymbol symbol) {
+			return symbol.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
+					?? symbol.ContainingAssembly?.Name;
+		} 
+		#endregion
 
+		#region Symbol information
 		public static string GetAbstractionModifier(this ISymbol symbol) {
 			if (symbol.IsAbstract) {
 				return "abstract ";
@@ -151,33 +179,6 @@ namespace Codist
 
 		public static ISymbol GetAliasTarget(this ISymbol symbol) {
 			return symbol.Kind == SymbolKind.Alias ? (symbol as IAliasSymbol).Target : symbol;
-		}
-
-		public static IEnumerable<INamedTypeSymbol> GetAllTypes(this INamespaceSymbol namespaceSymbol, CancellationToken cancellationToken = default) {
-			var stack = new Stack<INamespaceOrTypeSymbol>();
-			stack.Push(namespaceSymbol);
-			while (stack.Count > 0) {
-				cancellationToken.ThrowIfCancellationRequested();
-				var namespaceOrTypeSymbol = stack.Pop();
-				var namespaceSymbol2 = namespaceOrTypeSymbol as INamespaceSymbol;
-				if (namespaceSymbol2 != null) {
-					foreach (var ns in namespaceSymbol2.GetMembers()) {
-						stack.Push(ns);
-					}
-				}
-				else {
-					var namedTypeSymbol = (INamedTypeSymbol)namespaceOrTypeSymbol;
-					foreach (var item in namedTypeSymbol.GetTypeMembers()) {
-						stack.Push(item);
-					}
-					yield return namedTypeSymbol;
-				}
-			}
-		}
-
-		public static string GetAssemblyModuleName(this ISymbol symbol) {
-			return symbol.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
-					?? symbol.ContainingAssembly?.Name;
 		}
 
 		public static int GetImageId(this ISymbol symbol) {
@@ -298,7 +299,8 @@ namespace Codist
 			switch (symbol.Kind) {
 				case SymbolKind.Field: return (symbol as IFieldSymbol).Type;
 				case SymbolKind.Local: return (symbol as ILocalSymbol).Type;
-				case SymbolKind.Method: var m = symbol as IMethodSymbol;
+				case SymbolKind.Method:
+					var m = symbol as IMethodSymbol;
 					return m.MethodKind != MethodKind.Constructor ? m.ReturnType : m.ContainingType;
 				case SymbolKind.Parameter: return (symbol as IParameterSymbol).Type;
 				case SymbolKind.Property: return (symbol as IPropertySymbol).Type;
@@ -307,41 +309,72 @@ namespace Codist
 			return null;
 		}
 
-		public static string GetSignatureString(this ISymbol symbol) {
-			if (symbol.Kind != SymbolKind.Method) {
-				return symbol.Name;
+		public static string GetSymbolParameters(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Property: return GetPropertyAccessors(symbol as IPropertySymbol);
+				case SymbolKind.Method: return GetMethodParameters(symbol as IMethodSymbol);
+				case SymbolKind.NamedType: return GetTypeParameters(symbol as INamedTypeSymbol);
+				default: return String.Empty;
 			}
-			using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
-				var sb = sbr.Resource;
-				var m = symbol as IMethodSymbol;
-				sb.Append(m.Name);
-				if (m.IsGenericMethod) {
-					sb.Append('<');
-					var s = false;
-					foreach (var item in m.TypeParameters) {
-						if (s) {
+			
+			string GetPropertyAccessors(IPropertySymbol p) {
+				using (var sbr = ReusableStringBuilder.AcquireDefault(30)) {
+					var sb = sbr.Resource;
+					sb.Append("{ ");
+					var m = p.GetMethod;
+					if (m != null) {
+						if (m.DeclaredAccessibility != Accessibility.Public) {
+							sb.Append(m.GetAccessibility());
+						}
+						sb.Append("get; ");
+					}
+					m = p.SetMethod;
+					if (m != null) {
+						if (m.DeclaredAccessibility != Accessibility.Public) {
+							sb.Append(m.GetAccessibility());
+						}
+						sb.Append("set; ");
+					}
+					return sb.Append('}').ToString();
+				}
+			}
+			string GetMethodParameters(IMethodSymbol m) {
+				using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
+					var sb = sbr.Resource;
+					if (m.IsGenericMethod) {
+						sb.Append('<');
+						var s = false;
+						foreach (var item in m.TypeParameters) {
+							if (s) {
+								sb.Append(", ");
+							}
+							else {
+								s = true;
+							}
+							sb.Append(item.Name);
+						}
+						sb.Append('>');
+					}
+					sb.Append('(');
+					var p = false;
+					foreach (var item in m.Parameters) {
+						if (p) {
 							sb.Append(", ");
 						}
 						else {
-							s = true;
+							p = true;
 						}
-						sb.Append(item.Name);
+						GetTypeName(item.Type, sb);
 					}
-					sb.Append('>');
+					sb.Append(')');
+					return sb.ToString();
 				}
-				sb.Append('(');
-				var p = false;
-				foreach (var item in m.Parameters) {
-					if (p) {
-						sb.Append(", ");
-					}
-					else {
-						p = true;
-					}
-					GetTypeName(item.Type, sb);
+			}
+			string GetTypeParameters(INamedTypeSymbol t) {
+				if (t.Arity == 0) {
+					return String.Empty;
 				}
-				sb.Append(')');
-				return sb.ToString();
+				return "<" + new string(',', t.Arity - 1) + ">";
 			}
 			void GetTypeName(ITypeSymbol type, StringBuilder output) {
 				switch (type.TypeKind) {
@@ -385,16 +418,6 @@ namespace Codist
 			}
 		}
 
-		public static AssemblySource GetSourceType(this IAssemblySymbol assembly) {
-			return AssemblySourceReflector.GetSourceType(assembly);
-		}
-
-		public static ImmutableArray<Location> GetSourceLocations(this ISymbol symbol) {
-			return symbol == null || symbol.Locations.Length == 0
-				? ImmutableArray<Location>.Empty
-				: symbol.Locations.RemoveAll(i => i.IsInSource == false);
-		}
-
 		public static string GetSymbolKindName(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event: return "event";
@@ -431,6 +454,52 @@ namespace Codist
 			}
 		}
 
+		public static bool IsCommonClass(this ISymbol symbol) {
+			var type = symbol as ITypeSymbol;
+			if (type == null) {
+				return false;
+			}
+			switch (type.SpecialType) {
+				case SpecialType.System_Object:
+				case SpecialType.System_ValueType:
+				case SpecialType.System_Enum:
+				case SpecialType.System_MulticastDelegate:
+				case SpecialType.System_Delegate:
+					return true;
+			}
+			return false;
+		}
+
+		public static bool IsMemberOrType(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Event:
+				case SymbolKind.Field:
+				case SymbolKind.Method:
+				case SymbolKind.Property:
+				case SymbolKind.NamedType:
+					return true;
+			}
+			return false;
+		}
+
+		#endregion
+
+		#region Source
+		public static Location FirstSourceLocation(this ISymbol symbol) {
+			return symbol?.Locations.FirstOrDefault(loc => loc.IsInSource);
+		}
+
+		public static AssemblySource GetSourceType(this IAssemblySymbol assembly) {
+			return AssemblySourceReflector.GetSourceType(assembly);
+		}
+
+		public static ImmutableArray<Location> GetSourceLocations(this ISymbol symbol) {
+			return symbol == null || symbol.Locations.Length == 0
+				? ImmutableArray<Location>.Empty
+				: symbol.Locations.RemoveAll(i => i.IsInSource == false);
+		}
+
+
 		public static void GoToSource(this ISymbol symbol) {
 			symbol.FirstSourceLocation().GoToSource();
 		}
@@ -452,9 +521,11 @@ namespace Codist
 				&& (symbol.DeclaredAccessibility == Accessibility.Public
 					|| symbol.DeclaredAccessibility == Accessibility.Protected
 					|| symbol.DeclaredAccessibility == Accessibility.ProtectedOrInternal
-					|| symbol.Locations.Any(l => l.IsInSource));
+					|| symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata);
 		}
+		#endregion
 
+		#region Symbol relationship
 		/// <summary>
 		/// Returns whether a given type <paramref name="from"/> can access symbol <paramref name="target"/>.
 		/// </summary>
@@ -552,34 +623,6 @@ namespace Codist
 			return false;
 		}
 
-		public static bool IsCommonClass(this ISymbol symbol) {
-			var type = symbol as ITypeSymbol;
-			if (type == null) {
-				return false;
-			}
-			switch (type.SpecialType) {
-				case SpecialType.System_Object:
-				case SpecialType.System_ValueType:
-				case SpecialType.System_Enum:
-				case SpecialType.System_MulticastDelegate:
-				case SpecialType.System_Delegate:
-					return true;
-			}
-			return false;
-		}
-
-		public static bool IsMemberOrType(this ISymbol symbol) {
-			switch (symbol.Kind) {
-				case SymbolKind.Event:
-				case SymbolKind.Field:
-				case SymbolKind.Method:
-				case SymbolKind.Property:
-				case SymbolKind.NamedType:
-					return true;
-			}
-			return false;
-		}
-
 		/// <summary>Checks whether the given symbol has the given <paramref name="kind"/>, <paramref name="returnType"/> and <paramref name="parameters"/>.</summary>
 		/// <param name="symbol">The symbol to be checked.</param>
 		/// <param name="kind">The <see cref="SymbolKind"/> the symbol should have.</param>
@@ -618,7 +661,8 @@ namespace Codist
 			return symbol?.ContainingType?.TypeKind == TypeKind.Class &&
 				   (symbol.IsVirtual || symbol.IsAbstract || symbol.IsOverride) &&
 				   symbol.IsSealed == false;
-		}
+		} 
+		#endregion
 
 		static class AssemblySourceReflector
 		{

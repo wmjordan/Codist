@@ -176,7 +176,8 @@ namespace Codist
 				var tooltip = new ThemedToolTip();
 				tooltip.Title
 					.Append(_Symbol.GetAccessibility() + _Symbol.GetAbstractionModifier() + _Symbol.GetSymbolKindName() + " ")
-					.Append(_Symbol.GetSignatureString(), true);
+					.Append(_Symbol.Name, true)
+					.Append(_Symbol.GetSymbolParameters());
 
 				var content = tooltip.Content
 					.Append("namespace: " + _Symbol.ContainingNamespace?.ToString())

@@ -10,7 +10,8 @@ namespace Codist
 			var tip = new Controls.ThemedToolTip();
 			tip.Title
 				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + symbol.GetSymbolKindName() + " ")
-				.Append(symbol.GetSignatureString(), true);
+				.Append(symbol.Name, true)
+				.Append(symbol.GetSymbolParameters());
 			var content = tip.Content;
 			var t = symbol.GetReturnType();
 			if (t != null) {
@@ -32,7 +33,7 @@ namespace Codist
 				.Append("\nassembly: " + symbol.GetAssemblyModuleName());
 			var f = symbol as IFieldSymbol;
 			if (f != null && f.IsConst) {
-				content.Append("\nconst: " + f.ConstantValue?.ToString()); // somethings the constvalue could be null
+				content.Append("\nconst: " + f.ConstantValue?.ToString()); // sometimes the const value could be null
 			}
 			foreach (var attr in symbol.GetAttributes()) {
 				SymbolFormatter.Empty.ToUIText(content.AppendLine(), attr);
