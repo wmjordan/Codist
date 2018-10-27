@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist
@@ -28,20 +25,20 @@ namespace Codist
 		public CompilationUnitSyntax Compilation { get; private set; }
 		public SyntaxNode Node => _Node != null && _Node.Span.Contains(Position)
 			? _Node
-			: (_Node = GetNode(Position, false));
+			: (_Node = GetNode(Position, false, false));
 		public SyntaxNode NodeIncludeTrivia {
 			get {
 				return _NodeIncludeTrivia != null && _NodeIncludeTrivia.Span.Contains(Position)
 					? _NodeIncludeTrivia
-					: (_NodeIncludeTrivia = GetNode(Position, true));
+					: (_NodeIncludeTrivia = GetNode(Position, true, true));
 			}
 		}
 		public SyntaxToken Token { get; private set; }
 		public ISymbol Symbol { get; private set; }
 		public int Position { get; set; }
 
-		public SyntaxNode GetNode(int position, bool includeTrivia) {
-			SyntaxNode node = Compilation.FindNode(Token.Span, includeTrivia, false);
+		public SyntaxNode GetNode(int position, bool includeTrivia, bool deep) {
+			SyntaxNode node = Compilation.FindNode(Token.Span, includeTrivia, deep);
 			SeparatedSyntaxList<VariableDeclaratorSyntax> variables;
 			if (node.IsKind(SyntaxKind.FieldDeclaration) || node.IsKind(SyntaxKind.EventFieldDeclaration)) {
 				variables = (node as BaseFieldDeclarationSyntax).Declaration.Variables;
@@ -75,11 +72,11 @@ namespace Codist
 			return default;
 		}
 
-		public Task<ISymbol> GetSymbolAsync(int position, CancellationToken cancellationToken) {
+		public Task<ISymbol> GetSymbolAsync(int position, CancellationToken cancellationToken = default) {
 			return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSymbolAtPositionAsync(Document, position, cancellationToken);
 		}
 
-		public ISymbol GetSymbol(SyntaxNode node, CancellationToken cancellationToken) {
+		public async Task<ISymbol> GetSymbolAsync(SyntaxNode node, CancellationToken cancellationToken = default) {
 			var sm = SemanticModel;
 			if (node.SyntaxTree != sm.SyntaxTree) {
 				var doc = Document.Project.Solution.GetDocument(node.SyntaxTree);
@@ -89,8 +86,11 @@ namespace Codist
 					if (doc == null) {
 						return null;
 					}
-					sm = doc.GetSemanticModelAsync(cancellationToken).Result;
-					var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(node.Span);
+					sm = await doc.GetSemanticModelAsync(cancellationToken);
+					if (node.SpanStart >= sm.SyntaxTree.Length) {
+						return null;
+					}
+					var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(node.Span.Start, 0));
 					//todo find out the new node
 					if (newNode.IsKind(node.Kind())) {
 						node = newNode;
@@ -99,7 +99,7 @@ namespace Codist
 						return null;
 					}
 				}
-				sm = doc.GetSemanticModelAsync(cancellationToken).Result;
+				sm = await doc.GetSemanticModelAsync(cancellationToken);
 			}
 			var info = sm.GetSymbolInfo(node, cancellationToken);
 			if (info.Symbol != null) {
@@ -116,17 +116,20 @@ namespace Codist
 			return null;
 		}
 
-		public Task<ISymbol> GetSymbolAsync(CancellationToken cancellationToken) {
+		public async Task<ISymbol> GetSymbolAsync(CancellationToken cancellationToken) {
 			return Node == null
-				? Task.FromResult<ISymbol>(null)
-				: GetSymbolAsync(Position, cancellationToken);
+				? null
+				: await GetSymbolAsync(Position, cancellationToken);
 		}
 
 		public async Task<bool> UpdateAsync(CancellationToken cancellationToken) {
 			try {
-				Document = _TextView.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
-				SemanticModel = await Document.GetSemanticModelAsync(cancellationToken);
-				Compilation = SemanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
+				var doc = _TextView.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
+				if (doc != Document) {
+					Document = doc;
+					SemanticModel = await Document.GetSemanticModelAsync(cancellationToken);
+					Compilation = SemanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
+				}
 				return true;
 			}
 			catch (NullReferenceException) {

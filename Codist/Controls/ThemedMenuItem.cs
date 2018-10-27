@@ -34,6 +34,8 @@ namespace Codist.Controls
 			set => SetValue(SubMenuMaxHeightProperty, value);
 		}
 
+		protected bool HasExplicitItems => HasItems && Items.Count > 1;
+
 		public void ClearItems() {
 			if (_SubMenuHeader == null) {
 				Items.Clear();

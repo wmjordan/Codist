@@ -120,6 +120,7 @@ namespace Codist
 			}
 		}
 
+		#region Node info
 		public static bool IsDeclaration(this SyntaxNode node) {
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration:
@@ -142,7 +143,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.VariableDeclaration:
 				case SyntaxKind.LocalFunctionStatement:
-				//case SyntaxKind.VariableDeclarator:
+					//case SyntaxKind.VariableDeclarator:
 					return true;
 			}
 			return false;
@@ -214,7 +215,9 @@ namespace Codist
 			}
 			return false;
 		}
+		#endregion
 
+		#region Node icon
 		public static int GetImageId(this SyntaxNode node) {
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration: return GetClassIcon((ClassDeclarationSyntax)node);
@@ -268,7 +271,7 @@ namespace Codist
 				case SyntaxKind.GotoCaseStatement:
 				case SyntaxKind.GotoDefaultStatement: return KnownImageIds.GoToSourceCode;
 				case SyntaxKind.LocalFunctionStatement: return KnownImageIds.MethodSnippet;
-				case SyntaxKind.RegionDirectiveTrivia: return KnownImageIds.ToolstripPanelTop;
+				case SyntaxKind.RegionDirectiveTrivia: return KnownImageIds.Numeric;
 				case SyntaxKind.EndRegionDirectiveTrivia: return KnownImageIds.ToolstripPanelBottom;
 			}
 			return KnownImageIds.UnknownMember;
@@ -397,7 +400,8 @@ namespace Codist
 			return node is AssignmentExpressionSyntax ? KnownImageIds.Assign
 				: node is BinaryExpressionSyntax || node is PrefixUnaryExpressionSyntax || node is PostfixUnaryExpressionSyntax ? KnownImageIds.Operator
 				: KnownImageIds.Action;
-		}
+		} 
+		#endregion
 
 		public static string GetSyntaxBrief(this SyntaxNode node) {
 			switch (node.Kind()) {
@@ -446,6 +450,7 @@ namespace Codist
 				case SyntaxKind.XmlEmptyElement: return "xml element";
 				case SyntaxKind.XmlComment: return "xml comment";
 				case SyntaxKind.LocalFunctionStatement: return "local function";
+				case SyntaxKind.RegionDirectiveTrivia: return "region";
 			}
 			return null;
 		}
