@@ -545,7 +545,7 @@ namespace Codist
 				var ie = (exp as InvocationExpressionSyntax)?.Expression;
 				if (ie != null) {
 					return ((ie as MemberAccessExpressionSyntax)?.Name
-						?? (ie as IdentifierNameSyntax)
+						?? (ie as NameSyntax)
 						?? (ie as MemberBindingExpressionSyntax)?.Name).GetName();
 				}
 				exp = (exp as ObjectCreationExpressionSyntax)?.Type;
@@ -736,6 +736,9 @@ namespace Codist
 			return node.DescendantNodes().LastOrDefault(i => i.IsKind(SyntaxKind.IdentifierName)) as IdentifierNameSyntax;
 		}
 		public static string GetName(this NameSyntax name) {
+			if (name == null) {
+				return null;
+			}
 			switch (name.Kind()) {
 				case SyntaxKind.IdentifierName:
 				case SyntaxKind.GenericName: return ((SimpleNameSyntax)name).Identifier.Text;
