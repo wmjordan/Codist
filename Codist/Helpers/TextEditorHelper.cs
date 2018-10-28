@@ -117,6 +117,10 @@ namespace Codist
 			return t;
 		}
 
+		public static SnapshotPoint GetCaretPosition(this IWpfTextView textView) {
+			return textView.Caret.Position.BufferPosition;
+		}
+
 		public static bool IsCaretInReadOnlyRegion(this IWpfTextView textView) {
 			return textView.TextBuffer.IsReadOnly(textView.Caret.Position.BufferPosition);
 		}

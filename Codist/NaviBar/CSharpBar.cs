@@ -182,26 +182,6 @@ namespace Codist.NaviBar
 			All = Public | Private | Internal | Field | Property | Method | Delegate
 		}
 
-		sealed class GeometryAdornment : UIElement
-		{
-			readonly DrawingVisual _child;
-
-			public GeometryAdornment(Color color, Geometry geometry) {
-				_child = new DrawingVisual();
-				using (var context = _child.RenderOpen()) {
-					context.DrawGeometry(new SolidColorBrush(color.Alpha(192)), new Pen(new SolidColorBrush(color), 1), geometry);
-					context.Close();
-				}
-				AddVisualChild(_child);
-			}
-
-			protected override int VisualChildrenCount => 1;
-
-			protected override Visual GetVisualChild(int index) {
-				return _child;
-			}
-		}
-
 		sealed class RootItem : ThemedMenuItem
 		{
 			readonly CSharpBar _Bar;
@@ -506,7 +486,7 @@ namespace Codist.NaviBar
 				}
 			}
 			async Task AddTypeDeclarationsAsync(SyntaxNode node) {
-				int pos = _Bar._View.Caret.Position.BufferPosition;
+				int pos = _Bar._View.GetCaretPosition();
 				foreach(var child in node.ChildNodes()) {
 					if (child.IsTypeDeclaration() == false) {
 						continue;
@@ -516,9 +496,10 @@ namespace Codist.NaviBar
 				}
 			}
 			void AddMemberDeclarations(SyntaxNode node, bool isExternal) {
+				const byte UNDEFINED = 0xFF, TRUE = 1, FALSE = 0;
 				var directives = node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia) || d.IsKind(SyntaxKind.EndRegionDirectiveTrivia));
-				bool regionJustStart = false;
-				int pos = _Bar._View.Caret.Position.BufferPosition;
+				byte regionJustStart = UNDEFINED; // undefined, prevent #endregion show up on top of menu items
+				int pos = _Bar._View.GetCaretPosition();
 				foreach (var child in node.ChildNodes()) {
 					if (child.IsMemberDeclaration() == false && child.IsTypeDeclaration() == false) {
 						continue;
@@ -535,11 +516,11 @@ namespace Codist.NaviBar
 									//(item.Header as TextBlock).TextAlignment = TextAlignment.Center;
 									(item.Header as TextBlock).FontWeight = FontWeights.Bold;
 									Items.Add(item);
-									regionJustStart = true;
+									regionJustStart = TRUE;
 								}
 								else if (d.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
 									// don't show #endregion if preceeding item is #region
-									if (regionJustStart == false) {
+									if (regionJustStart == FALSE) {
 										Items.Add(new Separator {
 											Tag = new ThemedTipText {
 												HorizontalAlignment = HorizontalAlignment.Right,
@@ -559,16 +540,17 @@ namespace Codist.NaviBar
 							directives = null;
 						}
 					}
-					// a member is added between #region and #endregion
-					regionJustStart = false;
 					if (child.IsKind(SyntaxKind.FieldDeclaration) || child.IsKind(SyntaxKind.EventFieldDeclaration)) {
 						AddVariables((child as BaseFieldDeclarationSyntax).Declaration.Variables);
 					}
 					else {
 						Items.Add(new NaviItem(_Bar, child, false, true) {
-							NodeIsExternal = isExternal
+							NodeIsExternal = isExternal,
+							ClickHandler = i => i.SelectOrGoToSource()
 						}.MarkEnclosingItem(pos));
 					}
+					// a member is added between #region and #endregion
+					regionJustStart = FALSE;
 				}
 				if (directives != null) {
 					foreach (var item in directives) {
@@ -625,6 +607,26 @@ namespace Codist.NaviBar
 							: Visibility.Collapsed;
 					}
 				}
+			}
+		}
+
+		sealed class GeometryAdornment : UIElement
+		{
+			readonly DrawingVisual _child;
+
+			public GeometryAdornment(Color color, Geometry geometry) {
+				_child = new DrawingVisual();
+				using (var context = _child.RenderOpen()) {
+					context.DrawGeometry(new SolidColorBrush(color.Alpha(192)), new Pen(new SolidColorBrush(color), 1), geometry);
+					context.Close();
+				}
+				AddVisualChild(_child);
+			}
+
+			protected override int VisualChildrenCount => 1;
+
+			protected override Visual GetVisualChild(int index) {
+				return _child;
 			}
 		}
 	}
