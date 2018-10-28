@@ -232,9 +232,22 @@ namespace Codist.SmartBars
 					edit.Replace(item, "<c>" + item.GetText() + "</c>");
 				}
 			});
-			AddCommand(KnownImageIds.GoToNext, "Tag XML Doc with <see>", edit => {
+			AddCommand(KnownImageIds.GoToNext, "Tag XML Doc with <see> or <paramref>", edit => {
 				foreach (var item in View.Selection.SelectedSpans) {
 					var t = item.GetText();
+					var d = _Context.Node.GetAncestorOrSelfDeclaration();
+					if (d != null) {
+						var mp = (d as BaseMethodDeclarationSyntax).FindParameter(t);
+						if (mp != null) {
+							edit.Replace(item, "<paramref name=\"" + t + "\"/>");
+							continue;
+						}
+						var tp = d.FindTypeParameter(t);
+						if (tp != null) {
+							edit.Replace(item, "<typeparamref name=\"" + t + "\"/>");
+							continue;
+						}
+					}
 					edit.Replace(item, (SyntaxFacts.GetKeywordKind(t) != SyntaxKind.None ? "<see langword=\"" : "<see cref=\"") + t + "\"/>");
 				}
 			});
@@ -500,7 +513,7 @@ namespace Codist.SmartBars
 
 		async Task<IEnumerable<CommandItem>> GetReferenceCommandsAsync(CommandContext ctx) {
 			var r = new List<CommandItem>();
-			var symbol = await SymbolFinder.FindSymbolAtPositionAsync(_Context.Document, View.Caret.Position.BufferPosition, ctx.CancellationToken);
+			var symbol = await SymbolFinder.FindSymbolAtPositionAsync(_Context.Document, View.GetCaretPosition(), ctx.CancellationToken);
 			if (symbol == null) {
 				return r;
 			}

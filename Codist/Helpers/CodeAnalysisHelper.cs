@@ -503,7 +503,7 @@ namespace Codist
 				case SyntaxKind.SimpleLambdaExpression: return "(" + ((SimpleLambdaExpressionSyntax)node).Parameter.ToString() + ")";
 				case SyntaxKind.ParenthesizedLambdaExpression: return ((ParenthesizedLambdaExpressionSyntax)node).ParameterList.ToString();
 				case SyntaxKind.LocalFunctionStatement: return ((LocalFunctionStatementSyntax)node).Identifier.Text;
-				case SyntaxKind.NamespaceDeclaration: return GetNamespaceSignature((NamespaceDeclarationSyntax)node);
+				case SyntaxKind.NamespaceDeclaration: return (node as NamespaceDeclarationSyntax).Name.GetName();
 				case SyntaxKind.VariableDeclarator: return ((VariableDeclaratorSyntax)node).Identifier.Text;
 				case SyntaxKind.LocalDeclarationStatement: return GetVariableSignature(((LocalDeclarationStatementSyntax)node).Declaration, position);
 				case SyntaxKind.VariableDeclaration: return GetVariableSignature((VariableDeclarationSyntax)node, position);
@@ -535,10 +535,6 @@ namespace Codist
 					return GetEndRegionSignature((EndRegionDirectiveTriviaSyntax)node);
 			}
 			return null;
-			string GetNamespaceSignature(NamespaceDeclarationSyntax syntax) {
-				var name = (syntax as NamespaceDeclarationSyntax).Name;
-				return (name as IdentifierNameSyntax)?.Identifier.Text ?? "..." + (name as QualifiedNameSyntax)?.Right.Identifier.Text;
-			}
 			string GetClassSignature(ClassDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
 			string GetStructSignature(StructDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
 			string GetInterfaceSignature(InterfaceDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
@@ -548,19 +544,15 @@ namespace Codist
 				var exp = syntax.Parent;
 				var ie = (exp as InvocationExpressionSyntax)?.Expression;
 				if (ie != null) {
-					exp = (ie as MemberAccessExpressionSyntax)?.Name
+					return ((ie as MemberAccessExpressionSyntax)?.Name
 						?? (ie as IdentifierNameSyntax)
-						?? (ie as MemberBindingExpressionSyntax)?.Name;
+						?? (ie as MemberBindingExpressionSyntax)?.Name).GetName();
 				}
-				else {
-					exp = (exp as ObjectCreationExpressionSyntax)?.Type;
-				}
-				return (exp as IdentifierNameSyntax)?.ToString() ?? (exp as QualifiedNameSyntax)?.Right.ToString() ?? exp?.ToString();
+				exp = (exp as ObjectCreationExpressionSyntax)?.Type;
+				return (exp as NameSyntax)?.GetName() ?? exp?.ToString();
 			}
 			string GetAttributeArgumentListSignature(AttributeArgumentListSyntax syntax) {
-				var exp = syntax.Parent;
-				exp = (exp as AttributeSyntax)?.Name;
-				return (exp as IdentifierNameSyntax)?.ToString() ?? (exp as QualifiedNameSyntax)?.Right.ToString() ?? exp?.ToString();
+				return (syntax.Parent as AttributeSyntax)?.Name.GetName();
 			}
 			string GetSwitchSignature(SwitchSectionSyntax syntax) {
 				var label = (syntax as SwitchSectionSyntax).Labels.LastOrDefault();
@@ -692,6 +684,9 @@ namespace Codist
 				default: return expression.GetFirstIdentifier()?.Identifier.Text;
 			}
 		}
+		public static SyntaxNode GetAncestorOrSelfDeclaration(this SyntaxNode node) {
+			return node.AncestorsAndSelf().FirstOrDefault(n => n is MemberDeclarationSyntax || n is BaseTypeDeclarationSyntax);
+		}
 		public static IEnumerable<SyntaxNode> GetDecendantDeclarations(this SyntaxNode root, CancellationToken cancellationToken = default) {
 			foreach (var child in root.ChildNodes()) {
 				cancellationToken.ThrowIfCancellationRequested();
@@ -740,6 +735,15 @@ namespace Codist
 		public static IdentifierNameSyntax GetLastIdentifier(this SyntaxNode node) {
 			return node.DescendantNodes().LastOrDefault(i => i.IsKind(SyntaxKind.IdentifierName)) as IdentifierNameSyntax;
 		}
+		public static string GetName(this NameSyntax name) {
+			switch (name.Kind()) {
+				case SyntaxKind.IdentifierName:
+				case SyntaxKind.GenericName: return ((SimpleNameSyntax)name).Identifier.Text;
+				case SyntaxKind.QualifiedName: return ((QualifiedNameSyntax)name).Right.Identifier.Text;
+				case SyntaxKind.AliasQualifiedName: return ((AliasQualifiedNameSyntax)name).Name.Identifier.Text;
+			}
+			return name.ToString();
+		}
 		public static List<DirectiveTriviaSyntax> GetDirectives(this SyntaxNode node, Func<DirectiveTriviaSyntax, bool> predicate = null) {
 			if (node.ContainsDirectives == false) {
 				return null;
@@ -755,8 +759,32 @@ namespace Codist
 			} while (directive != null);
 			return directives;
 		}
-
-
+		public static ParameterSyntax FindParameter(this BaseMethodDeclarationSyntax node, string name) {
+			return node?.ParameterList.Parameters.FirstOrDefault(p => p.Identifier.Text == name);
+		}
+		public static TypeParameterSyntax FindTypeParameter(this SyntaxNode node, string name) {
+			TypeParameterListSyntax tp;
+			var m = node as MethodDeclarationSyntax;
+			if (m != null && m.Arity > 0) {
+				tp = m.TypeParameterList;
+			}
+			else {
+				var t = node as TypeDeclarationSyntax;
+				if (t != null && t.Arity > 0) {
+					tp = t.TypeParameterList;
+				}
+				else {
+					var d = node as DelegateDeclarationSyntax;
+					if (d != null && d.Arity > 0) {
+						tp = d.TypeParameterList;
+					}
+					else {
+						tp = null;
+					}
+				}
+			}
+			return tp?.Parameters.FirstOrDefault(p => p.Identifier.Text == name);
+		}
 		public static bool IsLineComment(this SyntaxTrivia trivia) {
 			switch (trivia.Kind()) {
 				case SyntaxKind.MultiLineCommentTrivia:
