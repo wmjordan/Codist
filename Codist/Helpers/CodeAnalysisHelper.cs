@@ -116,7 +116,12 @@ namespace Codist
 			}
 			using (new NewDocumentStateScope(__VSNEWDOCUMENTSTATE.NDS_Provisional, VSConstants.NewDocumentStateReason.Navigation)) {
 				dte.ItemOperations.OpenFile(file);
-				((EnvDTE.TextSelection)dte.ActiveDocument.Selection).MoveToLineAndOffset(line, column);
+				try {
+					((EnvDTE.TextSelection)dte.ActiveDocument.Selection).MoveToLineAndOffset(line, column);
+				}
+				catch (ArgumentException) {
+					// ignore incorrect offset
+				}
 			}
 		}
 
