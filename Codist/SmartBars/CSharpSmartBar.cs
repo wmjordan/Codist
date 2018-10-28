@@ -120,21 +120,6 @@ namespace Codist.SmartBars
 			};
 		}
 
-		void AddCommand(int moniker, string tooltip, Action<ITextEdit> editCommand) {
-			AddCommand(MyToolBar, moniker, tooltip, ctx => {
-				// updates the semantic model before executing the command,
-				// for it could be modified by external editor commands or duplicated document windows
-				if (UpdateSemanticModel()) {
-					using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
-						editCommand(edit);
-						if (edit.HasEffectiveChanges) {
-							edit.Apply();
-						}
-					}
-				}
-			});
-		}
-
 		void AddContextualCommands(CancellationToken cancellationToken) {
 			// anti-pattern for a small margin of performance
 			bool isDesignMode = CodistPackage.DebuggerStatus == DebuggerStatus.Design;
@@ -227,34 +212,48 @@ namespace Codist.SmartBars
 		}
 
 		void AddXmlDocCommands() {
-			AddCommand(KnownImageIds.MarkupTag, "Tag XML Doc with <c>", edit => {
-				foreach (var item in View.Selection.SelectedSpans) {
-					edit.Replace(item, "<c>" + item.GetText() + "</c>");
-				}
+			AddCommand(MyToolBar, KnownImageIds.MarkupTag, "Tag XML Doc with <c>", ctx => {
+				SurroundWith(ctx, "<c>", "</c>", true);
 			});
-			AddCommand(KnownImageIds.GoToNext, "Tag XML Doc with <see> or <paramref>", edit => {
-				foreach (var item in View.Selection.SelectedSpans) {
-					var t = item.GetText();
-					var d = _Context.Node.GetAncestorOrSelfDeclaration();
-					if (d != null) {
-						var mp = (d as BaseMethodDeclarationSyntax).FindParameter(t);
-						if (mp != null) {
-							edit.Replace(item, "<paramref name=\"" + t + "\"/>");
-							continue;
+			AddCommand(MyToolBar, KnownImageIds.GoToNext, "Tag XML Doc with <see> or <paramref>", ctx => {
+				// updates the semantic model before executing the command,
+				// for it could be modified by external editor commands or duplicated document windows
+				if (UpdateSemanticModel()) {
+					using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
+						foreach (var item in View.Selection.SelectedSpans) {
+							var t = item.GetText();
+							var d = _Context.GetNode(item.Start, false, false).GetAncestorOrSelfDeclaration();
+							if (d != null) {
+								var mp = (d as BaseMethodDeclarationSyntax).FindParameter(t);
+								if (mp != null) {
+									edit.Replace(item, "<paramref name=\"" + t + "\"/>");
+									continue;
+								}
+								var tp = d.FindTypeParameter(t);
+								if (tp != null) {
+									edit.Replace(item, "<typeparamref name=\"" + t + "\"/>");
+									continue;
+								}
+							}
+							edit.Replace(item, (SyntaxFacts.GetKeywordKind(t) != SyntaxKind.None ? "<see langword=\"" : "<see cref=\"") + t + "\"/>");
 						}
-						var tp = d.FindTypeParameter(t);
-						if (tp != null) {
-							edit.Replace(item, "<typeparamref name=\"" + t + "\"/>");
-							continue;
+						if (edit.HasEffectiveChanges) {
+							edit.Apply();
 						}
 					}
-					edit.Replace(item, (SyntaxFacts.GetKeywordKind(t) != SyntaxKind.None ? "<see langword=\"" : "<see cref=\"") + t + "\"/>");
 				}
 			});
-			AddCommand(KnownImageIds.ParagraphHardReturn, "Tag XML Doc with <para>", edit => {
-				foreach (var item in View.Selection.SelectedSpans) {
-					edit.Replace(item, "<para>" + item.GetText() + "</para>");
-				}
+			AddCommand(MyToolBar, KnownImageIds.ParagraphHardReturn, "Tag XML Doc with <para>", ctx => {
+				SurroundWith(ctx, "<para>", "</para>", false);
+			});
+			AddCommand(MyToolBar, KnownImageIds.Bold, "Tag XML Doc with HTML <b>", ctx => {
+				SurroundWith(ctx, "<b>", "</b>", true);
+			});
+			AddCommand(MyToolBar, KnownImageIds.Italic, "Tag XML Doc with HTML <i>", ctx => {
+				SurroundWith(ctx, "<i>", "</i>", true);
+			});
+			AddCommand(MyToolBar, KnownImageIds.Underline, "Tag XML Doc with HTML <u>", ctx => {
+				SurroundWith(ctx, "<u>", "</u>", true);
 			});
 			AddCommand(MyToolBar, KnownImageIds.CommentCode, "Comment selection\nRight click: Comment line", ctx => {
 				if (ctx.RightClick) {

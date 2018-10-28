@@ -42,6 +42,45 @@ namespace Codist.SmartBars
 			}
 		}
 
+		/// <summary>Surround each span of the corrent selection with <paramref name="prefix"/> and <paramref name="suffix"/>, and optionally select the first modified span if <paramref name="selectModified"/> is <see langword="true"/>.</summary>
+		/// <returns>The new span after modification. If modification is unsuccessful, the default of <see cref="SnapshotSpan"/> is returned.</returns>
+		protected SnapshotSpan SurroundWith(CommandContext ctx, string prefix, string suffix, bool selectModified) {
+			var firstModified = new SnapshotSpan();
+			var psLength = prefix.Length + suffix.Length;
+			var removed = false;
+			string t = null;
+			ctx.KeepToolBar(false);
+			using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
+				foreach (var item in View.Selection.SelectedSpans) {
+					t = item.GetText();
+					if (t.StartsWith(prefix, StringComparison.Ordinal)
+						&& t.EndsWith(suffix, StringComparison.Ordinal)) {
+						if (edit.Replace(item, t.Substring(prefix.Length, t.Length - psLength))
+							&& firstModified.Snapshot == null) {
+							firstModified = item;
+							removed = true;
+						}
+					}
+					else if (edit.Replace(item, prefix + t + suffix) && firstModified.Snapshot == null) {
+						firstModified = item;
+					}
+				}
+				if (edit.HasEffectiveChanges) {
+					var snapsnot = edit.Apply();
+					firstModified = new SnapshotSpan(snapsnot, firstModified.Start, removed ? firstModified.Length - psLength : firstModified.Length + psLength);
+					if (t != null
+						&& Keyboard.Modifiers == ModifierKeys.Control) {
+						FindNext(ctx, t);
+					}
+					else if (selectModified) {
+						View.Selection.Select(firstModified, false);
+						View.Caret.MoveTo(firstModified.End);
+					}
+				}
+			}
+			return firstModified;
+		}
+
 		void AddCopyCommand() {
 			AddCommand(ToolBar, KnownImageIds.Copy, "Copy selected text\nRight click: Copy line", ctx => {
 				if (ctx.RightClick) {
