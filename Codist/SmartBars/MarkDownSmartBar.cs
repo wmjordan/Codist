@@ -36,6 +36,9 @@ namespace Codist.SmartBars
 					View.Caret.MoveTo(s.End - 1);
 				}
 			});
+			AddCommand(MyToolBar, KnownImageIds.StrikeThrough, "Toggle strike through\nCtrl click: toggle and select next", ctx => {
+				SurroundWith(ctx, "~~", "~~", true);
+			});
 			base.AddCommands(cancellationToken);
 		}
 	}
