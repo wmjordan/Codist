@@ -408,6 +408,74 @@ namespace Codist
 		} 
 		#endregion
 
+		public static bool MatchSignature(this MemberDeclarationSyntax node, SyntaxNode other) {
+			var k1 = node.Kind();
+			var k2 = other.Kind();
+			if (k1 != k2) {
+				return false;
+			}
+			switch (k1) {
+				case SyntaxKind.NamespaceDeclaration: return ((NamespaceDeclarationSyntax)node).Name.ToString() == ((NamespaceDeclarationSyntax)other).Name.ToString();
+				case SyntaxKind.ClassDeclaration:
+				case SyntaxKind.StructDeclaration:
+				case SyntaxKind.InterfaceDeclaration:
+					var t1 = (TypeDeclarationSyntax)node;
+					var t2 = (TypeDeclarationSyntax)other;
+					return t1.Arity == t2.Arity && t1.Identifier.Text == t2.Identifier.Text;
+				case SyntaxKind.EnumDeclaration: return ((EnumDeclarationSyntax)node).Identifier.Text == ((EnumDeclarationSyntax)other).Identifier.Text;
+				case SyntaxKind.ConstructorDeclaration:
+					return ((ConstructorDeclarationSyntax)node).Identifier.Text == ((ConstructorDeclarationSyntax)other).Identifier.Text && MatchParameterList(((ConstructorDeclarationSyntax)node).ParameterList, ((ConstructorDeclarationSyntax)other).ParameterList);
+				case SyntaxKind.DestructorDeclaration:
+					return ((DestructorDeclarationSyntax)node).Identifier.Text == ((DestructorDeclarationSyntax)other).Identifier.Text;
+				case SyntaxKind.MethodDeclaration:
+					var m1 = (MethodDeclarationSyntax)node;
+					var m2 = (MethodDeclarationSyntax)other;
+					return m1.Arity == m2.Arity && m1.Identifier.Text == m2.Identifier.Text && MatchExplicitInterfaceSpecifier(m1.ExplicitInterfaceSpecifier, m2.ExplicitInterfaceSpecifier);
+				case SyntaxKind.PropertyDeclaration:
+					var p1 = (PropertyDeclarationSyntax)node;
+					var p2 = (PropertyDeclarationSyntax)other;
+					return p1.Identifier.Text == p2.Identifier.Text && MatchExplicitInterfaceSpecifier(p1.ExplicitInterfaceSpecifier, p2.ExplicitInterfaceSpecifier);
+			}
+			return false;
+		}
+
+		public static bool MatchAncestorDeclaration(this MemberDeclarationSyntax node, SyntaxNode other) {
+			node = node.Parent as MemberDeclarationSyntax;
+			other = other.Parent as MemberDeclarationSyntax;
+			while (node != null && other != null) {
+				if (MatchSignature(node, other) == false) {
+					return false;
+				}
+				node = node.Parent as MemberDeclarationSyntax;
+				other = other.Parent as MemberDeclarationSyntax;
+			}
+			return node == other; // both null
+		}
+
+		public static bool MatchExplicitInterfaceSpecifier(ExplicitInterfaceSpecifierSyntax x, ExplicitInterfaceSpecifierSyntax y) {
+			if (x == y) {
+				return true;
+			}
+			if (x == null || y == null) {
+				return false;
+			}
+			return x.Name.GetName() == y.Name.GetName();
+		}
+
+		static bool MatchParameterList(ParameterListSyntax x, ParameterListSyntax y) {
+			var xp = x.Parameters;
+			var yp = y.Parameters;
+			if (xp.Count != yp.Count) {
+				return false;
+			}
+			for (int i = xp.Count - 1; i >= 0; i--) {
+				if (xp[i].Type.ToString() != yp[i].Type.ToString()) {
+					return false;
+				}
+			}
+			return true;
+		}
+
 		public static string GetSyntaxBrief(this SyntaxNode node) {
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration: return "class";
