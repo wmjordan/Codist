@@ -53,7 +53,8 @@ namespace Codist.SmartBars
 			using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
 				foreach (var item in View.Selection.SelectedSpans) {
 					t = item.GetText();
-					if (t.StartsWith(prefix, StringComparison.Ordinal)
+					if (t.Length > psLength
+						&& t.StartsWith(prefix, StringComparison.Ordinal)
 						&& t.EndsWith(suffix, StringComparison.Ordinal)) {
 						if (edit.Replace(item, t.Substring(prefix.Length, t.Length - psLength))
 							&& firstModified.Snapshot == null) {
@@ -261,7 +262,11 @@ namespace Codist.SmartBars
 					var span = ctx.View.Selection.SelectedSpans[0];
 					using (var ed = ctx.View.TextBuffer.CreateEdit()) {
 						var t = span.GetText();
-						if (t.Length > 1 && t[0] == '(' && t[t.Length - 1] == ')') {
+						if (t.Length > 1
+							&& t[0] == '(' && t[t.Length - 1] == ')'
+							&& t.IndexOf('(', 1, t.Length - 1) <= t.IndexOf(')', 1, t.Length - 2)
+							 /*avoid toggling "(1 + 1)* (2 + 2)" to "1 + 1) * (2 + 2" */
+							) {
 							t = t.Substring(1, t.Length - 2);
 						}
 						else {
