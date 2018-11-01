@@ -203,21 +203,14 @@ namespace Codist.NaviBar
 							},
 							Orientation = Orientation.Horizontal
 						},
-						//new StackPanel {
-						//	Children = {
-						//		new ThemedTipText("Goto: "),
-						//		new ThemedButton(KnownImageIds.NextError, "Go to next error", () => TextEditorHelper.ExecuteEditorCommand("View.NextError")),
-						//		new ThemedButton(KnownImageIds.Task, "Go to next task", () => TextEditorHelper.ExecuteEditorCommand("View.NextTask")),
-						//	},
-						//	Orientation = Orientation.Horizontal
-						//}
 					}
 				};
 				_FinderBox.TextChanged += MemberFinderBox_TextChanged;
 			}
 
-			void MemberFinderBox_TextChanged(object sender, TextChangedEventArgs e) {
+			private void MemberFinderBox_TextChanged(object sender, TextChangedEventArgs e) {
 				ClearItems();
+				CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
 				var s = _FinderBox.Text;
 				if (s.Length == 0) {
 					return;
@@ -227,21 +220,40 @@ namespace Codist.NaviBar
 					var members = _Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken);
 					foreach (var item in members) {
 						if (item.GetDeclarationSignature().IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1) {
-							Items.Add(new NaviItem(_Bar, item));
+							Items.Add(new NaviItem(_Bar, item, i => i.SetHeader(true), i => i.GoToLocation()));
 						}
 					}
-					//if (_Items.Count > _FilterOffset) {
-					//	_Items.Add(new Separator());
+					//if (HasExplicitItems) {
+					//	Items.Add(new Separator());
 					//}
 					//if (s.Length < 2) {
 					//	return;
 					//}
-					//await FindDeclarations(s, cancellationToken);
+					//await FindDeclarationsAsync(s, cancellationToken);
 				}
 				catch (OperationCanceledException) {
 					// ignores cancellation
 				}
 				catch (ObjectDisposedException) { }
+			}
+			async Task FindDeclarationsAsync(string symbolName, CancellationToken token) {
+				var result = new SortedSet<ISymbol>(Comparer<ISymbol>.Create((x, y) => x.Name.Length - y.Name.Length));
+				int maxNameLength = 0;
+				foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(_Bar._SemanticContext.Document.Project, name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1, token)) {
+					if (result.Count < 50) {
+						result.Add(symbol);
+					}
+					else {
+						maxNameLength = result.Max.Name.Length;
+						if (symbol.Name.Length < maxNameLength) {
+							result.Remove(result.Max);
+							result.Add(symbol);
+						}
+					}
+				}
+				foreach (var item in result) {
+					Items.Add(new SymbolItem(item));
+				}
 			}
 
 			sealed class MemberFinderBox : ThemedTextBox
@@ -273,7 +285,7 @@ namespace Codist.NaviBar
 
 			public NaviItem(CSharpBar bar, SyntaxNode node) : this (bar, node, false, false) { }
 			public NaviItem(CSharpBar bar, SyntaxNode node, bool highlightTypes, bool includeParameterList) : this(bar, node, null, null) {
-				SetHeader(node, highlightTypes, includeParameterList);
+				SetHeader(node, false, highlightTypes, includeParameterList);
 			}
 			public NaviItem(CSharpBar bar, SyntaxNode node, Action<NaviItem> initializer, Action<NaviItem> clickHandler) {
 				Node = node;
@@ -331,22 +343,32 @@ namespace Codist.NaviBar
 			}
 
 			#region Item methods
-			NaviItem SetHeader(SyntaxNode node, bool highlightTypes, bool includeParameterList) {
+			public void SetHeader(bool includeContainer) {
+				SetHeader(Node, includeContainer, true, true);
+			}
+			NaviItem SetHeader(SyntaxNode node, bool includeContainer, bool highlightTypes, bool includeParameterList) {
 				var title = node.GetDeclarationSignature();
 				if (title == null) {
 					return this;
 				}
-				if (node.IsTypeDeclaration()) {
+				if (includeContainer == false && node.IsTypeDeclaration()) {
 					var p = node.Parent;
 					while (p.IsTypeDeclaration()) {
 						title = "..." + title;
 						p = p.Parent;
 					}
 				}
-				if (title.Length > 32) {
-					title = title.Substring(0, 32) + "...";
+				//if (title.Length > 32) {
+				//	title = title.Substring(0, 32) + "...";
+				//}
+				var t = new ThemedTipText();
+				if (includeContainer) {
+					var p = node.Parent;
+					if (p is TypeDeclarationSyntax) {
+						t.Append((p as TypeDeclarationSyntax).Identifier.ValueText + ".", ThemeHelper.SystemGrayTextBrush);
+					}
 				}
-				var t = new ThemedTipText(title, highlightTypes && (node.IsTypeDeclaration() || node.IsKind(SyntaxKind.NamespaceDeclaration) || node.IsKind(SyntaxKind.CompilationUnit)));
+				t.Append(title, highlightTypes && (node.IsTypeDeclaration() || node.IsKind(SyntaxKind.NamespaceDeclaration) || node.IsKind(SyntaxKind.CompilationUnit)));
 				if (includeParameterList) {
 					if (node is BaseMethodDeclarationSyntax) {
 						t.Append(GetParameterListSignature((node as BaseMethodDeclarationSyntax).ParameterList), ThemeHelper.SystemGrayTextBrush);
@@ -446,13 +468,14 @@ namespace Codist.NaviBar
 
 			#region Helper methods
 			public void GoToLocation() {
-				Node.GetLocation().GoToSource();
+				_Bar._SemanticContext.RelocateDeclarationNode(Node)?.GetLocation().GoToSource();
 			}
 
 			void SelectOrGoToSource() {
 				SelectOrGoToSource(Node);
 			}
 			void SelectOrGoToSource(SyntaxNode node) {
+				node = _Bar._SemanticContext.RelocateDeclarationNode(node) ?? node;
 				var span = node.FullSpan;
 				if (span.Contains(_Bar._SemanticContext.Position)) {
 					_Bar._View.SelectNode(node, Keyboard.Modifiers != ModifierKeys.Control);
@@ -489,6 +512,9 @@ namespace Codist.NaviBar
 				int pos = _Bar._View.GetCaretPosition();
 				foreach(var child in node.ChildNodes()) {
 					if (child.IsTypeDeclaration() == false) {
+						if (child.IsKind(SyntaxKind.NamespaceDeclaration)) {
+							Items.Add(new NaviItem(_Bar, child) { ClickHandler = i => i.GoToLocation() }.MarkEnclosingItem(pos));
+						}
 						continue;
 					}
 					Items.Add(new NaviItem(_Bar, child) { ClickHandler = i => i.GoToLocation() }.MarkEnclosingItem(pos));
@@ -627,6 +653,21 @@ namespace Codist.NaviBar
 
 			protected override Visual GetVisualChild(int index) {
 				return _child;
+			}
+		}
+
+		sealed class SymbolItem : ThemedMenuItem
+		{
+			public SymbolItem(ISymbol symbol) {
+				Icon = ThemeHelper.GetImage(symbol.GetImageId());
+				Header = new ThemedTipText().Append(symbol.ContainingType != null ? symbol.ContainingType.Name + symbol.ContainingType.GetSymbolParameters() + "." : String.Empty, ThemeHelper.SystemGrayTextBrush).Append(symbol.Name).Append(symbol.GetSymbolParameters(), ThemeHelper.SystemGrayTextBrush);
+				Symbol = symbol;
+			}
+			public ISymbol Symbol { get; }
+
+			protected override void OnClick() {
+				base.OnClick();
+				Symbol?.GoToSource();
 			}
 		}
 	}

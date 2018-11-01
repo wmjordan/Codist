@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -74,6 +75,91 @@ namespace Codist
 
 		public Task<ISymbol> GetSymbolAsync(int position, CancellationToken cancellationToken = default) {
 			return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSymbolAtPositionAsync(Document, position, cancellationToken);
+		}
+
+		/// <summary>
+		/// Roughly finds a new <see cref="SyntaxNode"/> in updated semantic model corresponding to the member or type declaration node.
+		/// </summary>
+		/// <param name="node">The old node.</param>
+		/// <returns>The new node.</returns>
+		public SyntaxNode RelocateDeclarationNode(SyntaxNode node) {
+			if (node.SyntaxTree == SemanticModel.SyntaxTree) {
+				// the syntax tree is the same (not changed)
+				return node;
+			}
+			if (node.IsKind(SyntaxKind.VariableDeclarator)) {
+				node = node.Parent.Parent;
+			}
+			if (node is MemberDeclarationSyntax == false) {
+				return null;
+			}
+			var nodeFilePath = node.SyntaxTree.FilePath;
+			var root = Compilation;
+			if (String.Equals(nodeFilePath, SemanticModel.SyntaxTree.FilePath, StringComparison.OrdinalIgnoreCase) == false) {
+				// not the same document
+				if ((root = FindDocument(nodeFilePath)?.GetSemanticModelAsync().Result.SyntaxTree.GetCompilationUnitRoot()) == null) {
+					// document no longer exists
+					return null;
+				}
+			}
+			var matches = new List<MemberDeclarationSyntax>(3);
+			var s = node.GetDeclarationSignature(node.SpanStart);
+			foreach (var item in root.Members) {
+				MatchDeclarationNode(item, matches, s, node);
+			}
+			if (matches.Count == 1) {
+				return matches[0];
+			}
+			if (matches.Count == 0) {
+				return null;
+			}
+			var match = matches[0];
+			matches = matches.FindAll(i => i.MatchSignature(node));
+			if (matches.Count == 1) {
+				return matches[0];
+			}
+			if (matches.Count == 0) {
+				return match;
+			}
+			matches = matches.FindAll(i => i.MatchAncestorDeclaration(node));
+			if (matches.Count >= 1) {
+				return matches[0];
+			}
+			return match;
+		}
+
+		Document FindDocument(string docPath) {
+			foreach (var item in Document.Project.Documents) {
+				if (String.Equals(item.FilePath, docPath, StringComparison.OrdinalIgnoreCase)) {
+					return item;
+				}
+			}
+			return null;
+		}
+
+		static void MatchDeclarationNode(MemberDeclarationSyntax member, List<MemberDeclarationSyntax> matches, string signature, SyntaxNode node) {
+			if (member.Kind() == node.Kind()
+				&& member.GetDeclarationSignature() == signature) {
+				matches.Add(member);
+			}
+			if (member.IsKind(SyntaxKind.NamespaceDeclaration)) {
+				var ns = member as NamespaceDeclarationSyntax;
+				foreach (var item in ns.Members) {
+					MatchDeclarationNode(item, matches, signature, node);
+				}
+			}
+			else if (member is TypeDeclarationSyntax) {
+				var t = member as TypeDeclarationSyntax;
+				foreach (var item in t.Members) {
+					MatchDeclarationNode(item, matches, signature, node);
+				}
+			}
+			else if (node.IsKind(SyntaxKind.EnumMemberDeclaration) && member.IsKind(SyntaxKind.EnumDeclaration)) {
+				var e = member as EnumDeclarationSyntax;
+				foreach (var item in e.Members) {
+					MatchDeclarationNode(item, matches, signature, node);
+				}
+			}
 		}
 
 		public async Task<ISymbol> GetSymbolAsync(SyntaxNode node, CancellationToken cancellationToken = default) {
