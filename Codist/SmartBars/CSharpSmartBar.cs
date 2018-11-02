@@ -427,17 +427,14 @@ namespace Codist.SmartBars
 			AddSymbolMembers(this, menuItem, symbol);
 			void AddSymbolMembers(SmartBar bar, MenuItem menu, ISymbol source) {
 				var nsOrType = source as INamespaceOrTypeSymbol;
-				var members = nsOrType
-					.GetMembers()
-					.RemoveAll(m => m.CanBeReferencedByName == false)
-					.Sort(Comparer<ISymbol>.Create((a, b) => {
-						int s;
-						if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first
-							|| (s = a.Kind - b.Kind) != 0) { // then by member kind
-							return s;
-						}
-						return a.Name.CompareTo(b.Name);
-					}));
+				var members = nsOrType.GetMembers().RemoveAll(m => m.CanBeReferencedByName == false);
+				if (source.Kind == SymbolKind.NamedType && (source as INamedTypeSymbol).TypeKind == TypeKind.Enum) {
+					// sort enum members by value
+					members = members.Sort(CodeAnalysisHelper.CompareByFieldIntegerConst);
+				}
+				else {
+					members = members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
+				}
 				foreach (var item in members) {
 					menu.Items.Add(new SymbolMenuItem(bar, item, item.Locations));
 				}
@@ -629,10 +626,23 @@ namespace Codist.SmartBars
 		}
 		sealed class SymbolMenuItem : CommandMenuItem
 		{
-			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(WpfHelper.MemberNameFormat), locations) { }
+			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(WpfHelper.MemberNameFormat), locations) {
+			}
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
 				Locations = locations;
 				Symbol = symbol;
+				if (symbol.Kind == SymbolKind.Field) {
+					var f = symbol as IFieldSymbol;
+					if (f.HasConstantValue) {
+						InputGestureText = f.ConstantValue?.ToString();
+					}
+					//else {
+					//	InputGestureText = f.Type.Name;
+					//}
+				}
+				//else {
+				//	InputGestureText = symbol.GetReturnType()?.Name;
+				//}
 				SetColorPreviewIcon(symbol);
 				//todo deal with symbols with multiple locations
 				if (locations != null && locations.Any(l => l.SourceTree?.FilePath != null)) {

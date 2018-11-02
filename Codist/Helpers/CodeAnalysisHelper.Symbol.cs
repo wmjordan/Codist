@@ -610,6 +610,20 @@ namespace Codist
 			return false;
 		}
 
+		public static int CompareByAccessibilityKindName(ISymbol a, ISymbol b) {
+			int s;
+			if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first
+				|| (s = a.Kind - b.Kind) != 0) { // then by member kind
+				return s;
+			}
+			return a.Name.CompareTo(b.Name);
+		}
+
+		public static int CompareByFieldIntegerConst(ISymbol a, ISymbol b) {
+			IFieldSymbol fa = a as IFieldSymbol, fb = b as IFieldSymbol;
+			return fa == null ? -1 : fb == null ? 1 : Convert.ToInt64(fa.ConstantValue).CompareTo(Convert.ToInt64(fb.ConstantValue));
+		}
+
 		public static bool ContainsTypeArgument(this INamedTypeSymbol generic, ITypeSymbol target) {
 			if (generic == null || generic.IsGenericType == false || generic.IsUnboundGenericType) {
 				return false;
