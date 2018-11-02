@@ -75,17 +75,35 @@ namespace Codist
 		}
 
 		public void Render(XContainer content, InlineCollection text) {
+			const int LIST_UNDEFINED = -1, LIST_BULLET = -2, LIST_NOT_NUMERIC = -3;
+			var listNum = LIST_UNDEFINED;
 			foreach (var item in content.Nodes()) {
 				switch (item.NodeType) {
 					case XmlNodeType.Element:
 						var e = item as XElement;
-						switch (e.Name.LocalName) {
+						var name = e.Name.LocalName;
+						switch (name) {
 							case "para":
 							case "listheader":
 							case "item":
 							case "code":
-								if (e.PreviousNode != null && (e.PreviousNode as XElement)?.Name != "para") {
+								if (e.PreviousNode != null && IsBlockElementName((e.PreviousNode as XElement)?.Name.ToString()) == false) {
 									text.Add(new LineBreak());
+								}
+								if (name == "item") {
+									if (listNum == LIST_UNDEFINED) {
+										switch ((e.Parent as XElement).Attribute("type")?.Value) {
+											case "number": listNum = 0; break;
+											case "bullet": listNum = LIST_BULLET; break;
+											default: listNum = LIST_NOT_NUMERIC; break;
+										}
+									}
+									if (listNum >= 0) {
+										text.Add(new Run((++listNum).ToString() + ". ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
+									}
+									else if (listNum == LIST_BULLET) {
+										text.Add(new Run(" \u00B7 ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
+									}
 								}
 								Render(e, text);
 								if (e.NextNode != null) {
@@ -161,6 +179,16 @@ namespace Codist
 		void StyleInner(XElement element, InlineCollection text, Span span) {
 			text.Add(span);
 			Render(element, span.Inlines);
+		}
+
+		static bool IsBlockElementName(string name) {
+			switch (name) {
+				case "para":
+				case "listheader":
+				case "item":
+				case "code": return true;
+			}
+			return false;
 		}
 	}
 }
