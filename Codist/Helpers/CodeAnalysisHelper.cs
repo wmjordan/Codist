@@ -595,8 +595,9 @@ namespace Codist
 				case SyntaxKind.YieldReturnStatement: return ((YieldStatementSyntax)node).Expression.GetExpressionSignature();
 				case SyntaxKind.GotoStatement:
 				case SyntaxKind.GotoCaseStatement:
+					return ((GotoStatementSyntax)node).Expression?.GetExpressionSignature();
 				case SyntaxKind.GotoDefaultStatement:
-					return ((GotoStatementSyntax)node).Expression.GetExpressionSignature();
+					return "(default)";
 				case SyntaxKind.RegionDirectiveTrivia:
 					return GetRegionSignature((RegionDirectiveTriviaSyntax)node);
 				case SyntaxKind.EndRegionDirectiveTrivia:
