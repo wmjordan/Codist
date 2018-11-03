@@ -155,7 +155,7 @@ namespace Codist
 						var parentName = item.Parent.Name.LocalName;
 						if (parentName != "code") {
 							var previous = (item.PreviousNode as XElement)?.Name?.LocalName;
-							if (previous == null || previous != "see" && previous != "paramref" && previous != "typeparamref" && previous != "c" && previous != "b" && previous != "i" && previous != "u") {
+							if (previous == null || IsInlineElementName(previous) == false) {
 								t = item.NextNode == null ? t.Trim() : t.TrimStart();
 							}
 							else if (item.NextNode == null) {
@@ -163,7 +163,9 @@ namespace Codist
 							}
 							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
 						}
-						text.Add(new Run(t));
+						if (t.Length > 0) {
+							text.Add(new Run(t));
+						}
 						break;
 					case XmlNodeType.CDATA:
 						text.Add(new Run((item as XText).Value));
@@ -187,6 +189,18 @@ namespace Codist
 				case "listheader":
 				case "item":
 				case "code": return true;
+			}
+			return false;
+		}
+		static bool IsInlineElementName(string name) {
+			switch (name) {
+				case "see":
+				case "paramref":
+				case "typeparamref":
+				case "b":
+				case "i":
+				case "u":
+				case "c": return true;
 			}
 			return false;
 		}

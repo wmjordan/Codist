@@ -309,7 +309,7 @@ namespace Codist
 			return null;
 		}
 
-		public static string GetSymbolParameters(this ISymbol symbol) {
+		public static string GetParameterString(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Property: return GetPropertyAccessors(symbol as IPropertySymbol);
 				case SymbolKind.Method: return GetMethodParameters(symbol as IMethodSymbol);

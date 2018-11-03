@@ -11,7 +11,7 @@ namespace Codist
 			tip.Title
 				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + symbol.GetSymbolKindName() + " ")
 				.Append(symbol.Name, true)
-				.Append(symbol.GetSymbolParameters());
+				.Append(symbol.GetParameterString());
 			var content = tip.Content;
 			var t = symbol.GetReturnType();
 			if (t != null) {

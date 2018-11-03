@@ -588,9 +588,9 @@ namespace Codist.SmartBars
 		void CreateFindMemberForReturnTypeCommand(ISymbol symbol, List<CommandItem> list) {
 			var type = symbol.GetReturnType();
 			if (type != null && type.SpecialType == SpecialType.None) {
-				list.Add(CreateCommandMenu("Find members of " + type.Name + type.GetSymbolParameters() + "...", KnownImageIds.ListMembers, type, "No member was found", FindMembers));
+				list.Add(CreateCommandMenu("Find members of " + type.Name + type.GetParameterString() + "...", KnownImageIds.ListMembers, type, "No member was found", FindMembers));
 				if (type.FirstSourceLocation() != null) {
-					list.Add(new CommandItem(KnownImageIds.GoToDeclaration, "Go to " + type.Name + type.GetSymbolParameters(), _ => type.GoToSource()));
+					list.Add(new CommandItem(KnownImageIds.GoToDeclaration, "Go to " + type.Name + type.GetParameterString(), _ => type.GoToSource()));
 				}
 			}
 		}

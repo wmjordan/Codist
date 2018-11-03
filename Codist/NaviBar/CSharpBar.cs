@@ -660,7 +660,7 @@ namespace Codist.NaviBar
 		{
 			public SymbolItem(ISymbol symbol) {
 				Icon = ThemeHelper.GetImage(symbol.GetImageId());
-				Header = new ThemedTipText().Append(symbol.ContainingType != null ? symbol.ContainingType.Name + symbol.ContainingType.GetSymbolParameters() + "." : String.Empty, ThemeHelper.SystemGrayTextBrush).Append(symbol.Name).Append(symbol.GetSymbolParameters(), ThemeHelper.SystemGrayTextBrush);
+				Header = new ThemedTipText().Append(symbol.ContainingType != null ? symbol.ContainingType.Name + symbol.ContainingType.GetParameterString() + "." : String.Empty, ThemeHelper.SystemGrayTextBrush).Append(symbol.Name).Append(symbol.GetParameterString(), ThemeHelper.SystemGrayTextBrush);
 				Symbol = symbol;
 			}
 			public ISymbol Symbol { get; }
