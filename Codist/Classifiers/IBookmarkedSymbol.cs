@@ -10,6 +10,7 @@ namespace Codist.Classifiers
 	{
 		string Name { get; }
 		SymbolKind Kind { get; }
+		SyntaxReference Reference { get; }
 		IBookmarkedSymbolType ContainingType { get; }
 		IBookmarkedSymbolType MemberType { get; }
 		int ImageId { get; }
