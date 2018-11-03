@@ -72,7 +72,7 @@
 		<Border x:Name="Border" BorderThickness="1">
 			<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
 				<ContentPresenter Content="{TemplateBinding MenuItem.Icon}" ContentSource="Icon" Name="Icon" Width="16" Height="16" Margin="3,2,3,2" HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
-				<ContentPresenter RecognizesAccessKey="True" Content="{TemplateBinding HeaderedContentControl.Header}" ContentTemplate="{TemplateBinding HeaderedContentControl.HeaderTemplate}" ContentStringFormat="{TemplateBinding HeaderedItemsControl.HeaderStringFormat}" ContentSource="Header" Margin="0,0,3,0" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" VerticalAlignment="Center" Grid.Column="1"/>
+				<ContentPresenter RecognizesAccessKey="False" Content="{TemplateBinding HeaderedContentControl.Header}" ContentTemplate="{TemplateBinding HeaderedContentControl.HeaderTemplate}" ContentStringFormat="{TemplateBinding HeaderedItemsControl.HeaderStringFormat}" ContentSource="Header" Margin="0,0,3,0" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" VerticalAlignment="Center" Grid.Column="1"/>
 			</StackPanel>
 		</Border>
 		<ControlTemplate.Triggers>
@@ -90,7 +90,7 @@
 		<Border x:Name="Border" BorderThickness="1">
 			<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
 				<ContentPresenter Content="{TemplateBinding MenuItem.Icon}" ContentSource="Icon" Name="Icon" Width="16" Height="16" Margin="3,2,3,2" HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
-				<ContentPresenter RecognizesAccessKey="True" Content="{TemplateBinding HeaderedContentControl.Header}" ContentTemplate="{TemplateBinding HeaderedContentControl.HeaderTemplate}" ContentStringFormat="{TemplateBinding HeaderedItemsControl.HeaderStringFormat}" ContentSource="Header" Margin="0,0,3,0" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" VerticalAlignment="Center" Grid.Column="1"/>
+				<ContentPresenter RecognizesAccessKey="False" Content="{TemplateBinding HeaderedContentControl.Header}" ContentTemplate="{TemplateBinding HeaderedContentControl.HeaderTemplate}" ContentStringFormat="{TemplateBinding HeaderedItemsControl.HeaderStringFormat}" ContentSource="Header" Margin="0,0,3,0" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" VerticalAlignment="Center" Grid.Column="1"/>
 				<Popup x:Name="Popup" Placement="Bottom" HorizontalOffset="-1" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
 					<Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="1" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}">
 						<StackPanel Margin="3">
@@ -133,7 +133,7 @@
 				<Border x:Name="Check" Width="13" Height="13" Visibility="Collapsed" Margin="6,0,6,0" BorderThickness="1">
 					<Path x:Name="CheckMark" Width="7" Height="7" Visibility="Hidden" SnapsToDevicePixels="False" StrokeThickness="2" Data="M 0 0 L 7 7 M 0 7 L 7 0" Stroke="{DynamicResource VsBrush.CommandBarMenuSubmenuGlyph}"/>
 				</Border>
-				<ContentPresenter x:Name="HeaderHost" Grid.Column="1" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="True"/>
+				<ContentPresenter x:Name="HeaderHost" Grid.Column="1" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="False"/>
 				<TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,0,2" DockPanel.Dock="Right"/>
 			</Grid>
 		</Border>
@@ -168,7 +168,7 @@
 					<ColumnDefinition Width="13"/>
 				</Grid.ColumnDefinitions>
 				<ContentPresenter x:Name="Icon" Margin="3,0,6,0" VerticalAlignment="Center" ContentSource="Icon"/>
-				<ContentPresenter x:Name="HeaderHost" Grid.Column="1" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="True"/>
+				<ContentPresenter x:Name="HeaderHost" Grid.Column="1" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="False"/>
 				<TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,0,2" DockPanel.Dock="Right"/>
 				<Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{DynamicResource VsBrush.CommandBarMenuSubmenuGlyph}" />
 				<Popup x:Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">

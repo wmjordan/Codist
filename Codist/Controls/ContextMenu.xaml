@@ -55,8 +55,8 @@
 				<Border Name="Check" Width="16" Height="16" Visibility="Collapsed" Margin="6,0,6,0" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderThickness="1" BorderBrush="#5082a4">
 					<Path Name="CheckMark" Width="7" Height="7" Visibility="Hidden" SnapsToDevicePixels="False" Stroke="#5082a4" StrokeThickness="2" Data="M 0 0 L 7 7 M 0 7 L 7 0"/>
 				</Border>
-				<ContentPresenter Name="HeaderHost" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
-				<TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,0,2" DockPanel.Dock="Right"/>
+				<ContentPresenter Name="HeaderHost" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="False" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
+				<TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,0,2" VerticalAlignment="Center" DockPanel.Dock="Right" Foreground="{DynamicResource VsBrush.GrayText}"/>
 			</Grid>
 		</Border>
 		<ControlTemplate.Triggers>
@@ -89,7 +89,7 @@
 					<ColumnDefinition Width="13"/>
 				</Grid.ColumnDefinitions>
 				<ContentPresenter Name="Icon" Width="16" Height="16" Margin="3,3,8,3" VerticalAlignment="Center" ContentSource="Icon"/>
-				<ContentPresenter Name="HeaderHost" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
+				<ContentPresenter Name="HeaderHost" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="False" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
 				<TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,0,2" DockPanel.Dock="Right"/>
 				<Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{DynamicResource VsBrush.CommandBarMenuSubmenuGlyph}"/>
 				<Popup Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
