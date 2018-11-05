@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Media;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
@@ -22,49 +21,6 @@ namespace Codist
 			_Compilation = compilation;
 			_SymbolFormatter = symbolFormatter;
 			_Symbol = symbol;
-		}
-
-		internal void RenderXmlDocSymbol(string symbol, InlineCollection inlines, SymbolKind symbolKind) {
-			switch (symbolKind) {
-				case SymbolKind.Parameter:
-					inlines.Add(symbol.Render(false, _SymbolFormatter.Parameter == null, _SymbolFormatter.Parameter));
-					return;
-				case SymbolKind.TypeParameter:
-					inlines.Add(symbol.Render(_SymbolFormatter.TypeParameter == null, false, _SymbolFormatter.TypeParameter));
-					return;
-				case SymbolKind.DynamicType:
-					// highlight keywords
-					inlines.Add(symbol.Render(_SymbolFormatter.Keyword));
-					return;
-			}
-			var s = DocumentationCommentId.GetFirstSymbolForDeclarationId(symbol, _Compilation);
-			if (s != null) {
-				_SymbolFormatter.ToUIText(inlines, s, null);
-				return;
-			}
-			if (symbol.Length > 2 && symbol[1] == ':') {
-				switch (symbol[0]) {
-					case 'T':
-						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Class));
-						return;
-					case 'M':
-						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Method));
-						return;
-					case 'P':
-						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Property));
-						return;
-					case 'F':
-						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Field));
-						return;
-					case 'E':
-						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Delegate));
-						return;
-					case '!':
-						inlines.Add(symbol.Substring(2).Render(true, true, null));
-						return;
-				}
-			}
-			inlines.Add(symbol);
 		}
 
 		public void Render(XElement content, TextBlock text) {
@@ -176,6 +132,49 @@ namespace Codist
 						break;
 				}
 			}
+		}
+
+		internal void RenderXmlDocSymbol(string symbol, InlineCollection inlines, SymbolKind symbolKind) {
+			switch (symbolKind) {
+				case SymbolKind.Parameter:
+					inlines.Add(symbol.Render(false, _SymbolFormatter.Parameter == null, _SymbolFormatter.Parameter));
+					return;
+				case SymbolKind.TypeParameter:
+					inlines.Add(symbol.Render(_SymbolFormatter.TypeParameter == null, false, _SymbolFormatter.TypeParameter));
+					return;
+				case SymbolKind.DynamicType:
+					// highlight keywords
+					inlines.Add(symbol.Render(_SymbolFormatter.Keyword));
+					return;
+			}
+			var s = DocumentationCommentId.GetFirstSymbolForDeclarationId(symbol, _Compilation);
+			if (s != null) {
+				_SymbolFormatter.ToUIText(inlines, s, null);
+				return;
+			}
+			if (symbol.Length > 2 && symbol[1] == ':') {
+				switch (symbol[0]) {
+					case 'T':
+						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Class));
+						return;
+					case 'M':
+						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Method));
+						return;
+					case 'P':
+						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Property));
+						return;
+					case 'F':
+						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Field));
+						return;
+					case 'E':
+						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Delegate));
+						return;
+					case '!':
+						inlines.Add(symbol.Substring(2).Render(true, true, null));
+						return;
+				}
+			}
+			inlines.Add(symbol);
 		}
 
 		void StyleInner(XElement element, InlineCollection text, Span span) {
