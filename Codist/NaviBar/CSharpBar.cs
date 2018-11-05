@@ -281,7 +281,7 @@ namespace Codist.NaviBar
 		sealed class NaviItem : ThemedMenuItem
 		{
 			readonly CSharpBar _Bar;
-			bool _NodeIsExternal;
+			bool _NodeIsExternal, _ShowNodeDetail;
 
 			public NaviItem(CSharpBar bar, SyntaxNode node) : this (bar, node, false, false) { }
 			public NaviItem(CSharpBar bar, SyntaxNode node, bool highlightTypes, bool includeParameterList) : this(bar, node, null, null) {
@@ -306,6 +306,23 @@ namespace Codist.NaviBar
 				internal set {
 					_NodeIsExternal = value;
 					Opacity = value ? 0.7 : 1;
+				}
+			}
+			public bool ShowNodeDetail {
+				get => _ShowNodeDetail;
+				internal set {
+					_ShowNodeDetail = value;
+					if (value) {
+						if (Node.IsKind(SyntaxKind.VariableDeclarator)) {
+							InputGestureText = (Node as VariableDeclaratorSyntax).Initializer?.Value?.ToString();
+						}
+						else if (Node.IsKind(SyntaxKind.EnumMemberDeclaration)) {
+							InputGestureText = (Node as EnumMemberDeclarationSyntax).EqualsValue?.Value?.ToString();
+						}
+					}
+					else {
+						InputGestureText = null;
+					}
 				}
 			}
 			internal SyntaxNode Node { get; }
@@ -573,12 +590,13 @@ namespace Codist.NaviBar
 						}
 					}
 					if (child.IsKind(SyntaxKind.FieldDeclaration) || child.IsKind(SyntaxKind.EventFieldDeclaration)) {
-						AddVariables((child as BaseFieldDeclarationSyntax).Declaration.Variables);
+						AddVariables((child as BaseFieldDeclarationSyntax).Declaration.Variables, isExternal);
 					}
 					else {
 						Items.Add(new NaviItem(_Bar, child, false, true) {
 							NodeIsExternal = isExternal,
-							ClickHandler = i => i.SelectOrGoToSource()
+							ClickHandler = i => i.SelectOrGoToSource(),
+							ShowNodeDetail = child.IsKind(SyntaxKind.EnumMemberDeclaration)
 						}.MarkEnclosingItem(pos));
 					}
 					// a member is added between #region and #endregion
@@ -593,9 +611,9 @@ namespace Codist.NaviBar
 				}
 			}
 
-			void AddVariables(SeparatedSyntaxList<VariableDeclaratorSyntax> fields) {
+			void AddVariables(SeparatedSyntaxList<VariableDeclaratorSyntax> fields, bool isExternal) {
 				foreach (var item in fields) {
-					Items.Add(new NaviItem(_Bar, item));
+					Items.Add(new NaviItem(_Bar, item) { NodeIsExternal = isExternal, ShowNodeDetail = true });
 				}
 			}
 			#endregion
