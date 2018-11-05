@@ -364,6 +364,12 @@ namespace Codist.NaviBar
 				var t = new ThemedTipText();
 				if (includeContainer) {
 					var p = node.Parent;
+					if (node is VariableDeclaratorSyntax) {
+						p = p.Parent.Parent;
+					}
+					else if (node is EnumMemberDeclarationSyntax) {
+						p = p.Parent;
+					}
 					if (p is TypeDeclarationSyntax) {
 						t.Append((p as TypeDeclarationSyntax).Identifier.ValueText + ".", ThemeHelper.SystemGrayTextBrush);
 					}
