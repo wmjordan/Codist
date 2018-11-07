@@ -49,9 +49,9 @@
 			this._ControlQuickInfoBox.AutoSize = true;
 			this._ControlQuickInfoBox.Location = new System.Drawing.Point(15, 6);
 			this._ControlQuickInfoBox.Name = "_ControlQuickInfoBox";
-			this._ControlQuickInfoBox.Size = new System.Drawing.Size(333, 19);
+			this._ControlQuickInfoBox.Size = new System.Drawing.Size(365, 19);
 			this._ControlQuickInfoBox.TabIndex = 1;
-			this._ControlQuickInfoBox.Text = "Hide quick info until Shift is pressed";
+			this._ControlQuickInfoBox.Text = "Hide quick info until Shift key is pressed";
 			this._ControlQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// _SuperQuickInfoTabs

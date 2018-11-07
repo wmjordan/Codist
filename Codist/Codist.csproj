@@ -132,6 +132,12 @@
     <Compile Include="Options\ConfigPage.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Options\CSharpNaviBarPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\CSharpNaviBarPage.Designer.cs">
+      <DependentUpon>CSharpNaviBarPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Options\CSharpSyntaxHighlightPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -508,6 +514,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Options\CommentTaggerOptionPage.resx">
       <DependentUpon>CommentTaggerOptionPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\CSharpNaviBarPage.resx">
+      <DependentUpon>CSharpNaviBarPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Options\CSharpSyntaxHighlightPage.resx">
       <DependentUpon>CSharpSyntaxHighlightPage.cs</DependentUpon>

@@ -39,6 +39,7 @@
 			this._CSharpAttributesQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this._DefaultPage = new System.Windows.Forms.TabPage();
+			this._AlternativeStyleBox = new System.Windows.Forms.CheckBox();
 			this._CSharpRemarksDocBox = new System.Windows.Forms.CheckBox();
 			this._CSharpReturnsDocBox = new System.Windows.Forms.CheckBox();
 			this._CSharpTextOnlyDocBox = new System.Windows.Forms.CheckBox();
@@ -51,7 +52,6 @@
 			this._CSharpOverrideDefaultXmlDocBox = new System.Windows.Forms.CheckBox();
 			this._ClickAndGoBox = new System.Windows.Forms.CheckBox();
 			this._AdditionalItemsPage = new System.Windows.Forms.TabPage();
-			this._AlternativeStyleBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this._DefaultPage.SuspendLayout();
 			this.groupBox4.SuspendLayout();
@@ -211,6 +211,16 @@
 			this._DefaultPage.Text = "Default";
 			this._DefaultPage.UseVisualStyleBackColor = true;
 			// 
+			// _AlternativeStyleBox
+			// 
+			this._AlternativeStyleBox.AutoSize = true;
+			this._AlternativeStyleBox.Location = new System.Drawing.Point(15, 156);
+			this._AlternativeStyleBox.Name = "_AlternativeStyleBox";
+			this._AlternativeStyleBox.Size = new System.Drawing.Size(197, 19);
+			this._AlternativeStyleBox.TabIndex = 7;
+			this._AlternativeStyleBox.Text = "Use alternative style";
+			this._AlternativeStyleBox.UseVisualStyleBackColor = true;
+			// 
 			// _CSharpRemarksDocBox
 			// 
 			this._CSharpRemarksDocBox.AutoSize = true;
@@ -264,7 +274,7 @@
 			this.groupBox4.Size = new System.Drawing.Size(506, 59);
 			this.groupBox4.TabIndex = 6;
 			this.groupBox4.TabStop = false;
-			this.groupBox4.Text = "Quick info item size (0: unlimited)";
+			this.groupBox4.Text = "Quick Info Item Size (0: Unlimited)";
 			// 
 			// _QuickInfoMaxHeightBox
 			// 
@@ -359,16 +369,6 @@
 			this._AdditionalItemsPage.TabIndex = 0;
 			this._AdditionalItemsPage.Text = "Additional Items";
 			this._AdditionalItemsPage.UseVisualStyleBackColor = true;
-			// 
-			// _AlternativeStyleBox
-			// 
-			this._AlternativeStyleBox.AutoSize = true;
-			this._AlternativeStyleBox.Location = new System.Drawing.Point(15, 156);
-			this._AlternativeStyleBox.Name = "_AlternativeStyleBox";
-			this._AlternativeStyleBox.Size = new System.Drawing.Size(197, 19);
-			this._AlternativeStyleBox.TabIndex = 7;
-			this._AlternativeStyleBox.Text = "Use alternative style";
-			this._AlternativeStyleBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpSuperQuickInfoPage
 			// 

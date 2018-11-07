@@ -46,7 +46,7 @@
 			this._UnderlineBox = new System.Windows.Forms.CheckBox();
 			this._ItalicBox = new System.Windows.Forms.CheckBox();
 			this._BoldBox = new System.Windows.Forms.CheckBox();
-			this._SyntaxListBox = new SyntaxListView();
+			this._SyntaxListBox = new Codist.Options.SyntaxListView();
 			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this._PicColorBox = new System.Windows.Forms.ColorDialog();
 			this.groupBox1.SuspendLayout();
@@ -93,7 +93,7 @@
 			this.groupBox1.Size = new System.Drawing.Size(271, 417);
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Syntax style";
+			this.groupBox1.Text = "Syntax Style";
 			// 
 			// _ResetButton
 			// 
@@ -299,14 +299,17 @@
 			// 
 			this._SyntaxListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+			this._SyntaxListBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
 			this._SyntaxListBox.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this._NameColumn});
+			this._SyntaxListBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
 			this._SyntaxListBox.FullRowSelect = true;
 			this._SyntaxListBox.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
 			this._SyntaxListBox.HideSelection = false;
 			this._SyntaxListBox.Location = new System.Drawing.Point(3, 24);
 			this._SyntaxListBox.MultiSelect = false;
 			this._SyntaxListBox.Name = "_SyntaxListBox";
+			this._SyntaxListBox.ShowItemToolTips = true;
 			this._SyntaxListBox.Size = new System.Drawing.Size(239, 396);
 			this._SyntaxListBox.TabIndex = 1;
 			this._SyntaxListBox.UseCompatibleStateImageBehavior = false;

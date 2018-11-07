@@ -73,7 +73,7 @@ namespace Codist.SmartBars
 							ThemeHelper.GetImage(KnownImageIds.Filter).WrapMargin(WpfHelper.GlyphMargin),
 							(filterBox = new ThemedTextBox() {
 								MinWidth = 150,
-								ToolTip = new ThemedToolTip("Result filter", "Filter items in this menu.\nUse space to separate keywords.")
+								ToolTip = new ThemedToolTip("Result Filter", "Filter items in this menu.\nUse space to separate keywords.")
 							})
 						},
 						Orientation = Orientation.Horizontal
@@ -518,13 +518,13 @@ namespace Codist.SmartBars
 				case SymbolKind.Method:
 				case SymbolKind.Property:
 				case SymbolKind.Event:
-					r.Add(CreateCommandMenu("Find callers...", KnownImageIds.ShowCallerGraph, symbol, "No caller was found", FindCallers));
+					r.Add(CreateCommandMenu("Find Callers...", KnownImageIds.ShowCallerGraph, symbol, "No caller was found", FindCallers));
 					if (symbol.MayHaveOverride()) {
-						r.Add(CreateCommandMenu("Find overrides...", KnownImageIds.OverloadBehavior, symbol, "No override was found", FindOverrides));
+						r.Add(CreateCommandMenu("Find Overrides...", KnownImageIds.OverloadBehavior, symbol, "No override was found", FindOverrides));
 					}
 					var st = symbol.ContainingType as INamedTypeSymbol;
 					if (st != null && st.TypeKind == TypeKind.Interface) {
-						r.Add(CreateCommandMenu("Find implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
+						r.Add(CreateCommandMenu("Find Implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
 					}
 					if (symbol.Kind != SymbolKind.Event) {
 						CreateFindMemberForReturnTypeCommand(symbol, r);
@@ -550,11 +550,11 @@ namespace Codist.SmartBars
 							if (ctor != null) {
 								var s = _Context.SemanticModel.GetSymbolOrFirstCandidate(ctor);
 								if (s != null) {
-									r.Add(CreateCommandMenu("Find callers...", KnownImageIds.ShowCallerGraph, s, "No caller was found", FindCallers));
+									r.Add(CreateCommandMenu("Find Callers...", KnownImageIds.ShowCallerGraph, s, "No caller was found", FindCallers));
 								}
 							}
 							else if (t.InstanceConstructors.Length > 0) {
-								r.Add(CreateCommandMenu("Find constructor callers...", KnownImageIds.ShowCallerGraph, t, "No caller was found", FindCallers));
+								r.Add(CreateCommandMenu("Find Constructor Callers...", KnownImageIds.ShowCallerGraph, t, "No caller was found", FindCallers));
 							}
 						}
 						r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, t, "No member was found", FindMembers));
@@ -562,14 +562,14 @@ namespace Codist.SmartBars
 					if (t.IsStatic || t.SpecialType != SpecialType.None) {
 						break;
 					}
-					r.Add(CreateCommandMenu("Find instance producer...", KnownImageIds.NewItem, t, "No instance creator was found", FindInstanceProducer));
-					r.Add(CreateCommandMenu("Find instance as parameter...", KnownImageIds.Parameter, t, "No instance as parameter was found", FindInstanceAsParameter));
+					r.Add(CreateCommandMenu("Find Instance Producer...", KnownImageIds.NewItem, t, "No instance creator was found", FindInstanceProducer));
+					r.Add(CreateCommandMenu("Find Instance as Parameter...", KnownImageIds.Parameter, t, "No instance as parameter was found", FindInstanceAsParameter));
 					if (t.IsSealed == false) {
 						if (t.TypeKind == TypeKind.Class) {
-							r.Add(CreateCommandMenu("Find derived classes...", KnownImageIds.NewClass, symbol, "No derived class was found", FindDerivedClasses));
+							r.Add(CreateCommandMenu("Find Derived Classes...", KnownImageIds.NewClass, symbol, "No derived class was found", FindDerivedClasses));
 						}
 						else if (t.TypeKind == TypeKind.Interface) {
-							r.Add(CreateCommandMenu("Find implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
+							r.Add(CreateCommandMenu("Find Implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
 						}
 					}
 					break;
@@ -578,17 +578,17 @@ namespace Codist.SmartBars
 					break;
 			}
 			//r.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, symbol, "No reference found", FindReferences));
-			r.Add(new CommandItem(KnownImageIds.ReferencedDimension, "Find all references", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences")));
-			r.Add(new CommandItem(KnownImageIds.ListMembers, "Go to member", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToMember")));
-			r.Add(new CommandItem(KnownImageIds.Type, "Go to type", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToType")));
-			r.Add(new CommandItem(KnownImageIds.FindSymbol, "Go to symbol", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToSymbol")));
+			r.Add(new CommandItem(KnownImageIds.ReferencedDimension, "Find All References", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences")));
+			r.Add(new CommandItem(KnownImageIds.ListMembers, "Go to Member", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToMember")));
+			r.Add(new CommandItem(KnownImageIds.Type, "Go to Type", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToType")));
+			r.Add(new CommandItem(KnownImageIds.FindSymbol, "Go to Symbol", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToSymbol")));
 			return r;
 		}
 
 		void CreateFindMemberForReturnTypeCommand(ISymbol symbol, List<CommandItem> list) {
 			var type = symbol.GetReturnType();
 			if (type != null && type.SpecialType == SpecialType.None) {
-				list.Add(CreateCommandMenu("Find members of " + type.Name + type.GetParameterString() + "...", KnownImageIds.ListMembers, type, "No member was found", FindMembers));
+				list.Add(CreateCommandMenu("Find Members of " + type.Name + type.GetParameterString() + "...", KnownImageIds.ListMembers, type, "No member was found", FindMembers));
 				if (type.FirstSourceLocation() != null) {
 					list.Add(new CommandItem(KnownImageIds.GoToDeclaration, "Go to " + type.Name + type.GetParameterString(), _ => type.GoToSource()));
 				}

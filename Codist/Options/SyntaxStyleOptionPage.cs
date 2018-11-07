@@ -101,14 +101,14 @@ namespace Codist.Options
 			_loaded = true;
 		}
 
-		static void RenderPreview(Bitmap bmp, FontInfo fontInfo, StyleBase style) {
-			var fontSize = (float)(fontInfo.wPointSize + style.FontSize);
-			if (fontSize < 2) {
+		static void RenderPreview(Bitmap bmp, string fontName, int fontSize, StyleBase style) {
+			var size = (float)(fontSize + style.FontSize);
+			if (size < 2) {
 				return;
 			}
 			UIHelper.MixStyle(style, out var fs, out var fc, out var bc);
 			using (var g = Graphics.FromImage(bmp))
-			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontInfo.bstrFaceName : style.Font, fontSize, fs))
+			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontName : style.Font, size, fs))
 			using (var b = new SolidBrush(fc))
 			using (var bg = new SolidBrush(ThemeHelper.DocumentPageColor)) {
 				g.FillRectangle(bg, 0, 0, bmp.Width, bmp.Height);
@@ -261,7 +261,8 @@ namespace Codist.Options
 				return;
 			}
 			var bmp = new Bitmap(_PreviewBox.Width, _PreviewBox.Height);
-			RenderPreview(bmp, _service.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor)), _activeStyle);
+			ThemeHelper.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor), out var fontName, out var fontSize);
+			RenderPreview(bmp, fontName, fontSize, _activeStyle);
 			(_SyntaxListBox.FocusedItem as SyntaxListViewItem)?.ApplyTheme();
 			_PreviewBox.Image = bmp;
 		}

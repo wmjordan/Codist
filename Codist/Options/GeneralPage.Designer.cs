@@ -92,7 +92,7 @@
 			this.groupBox1.Size = new System.Drawing.Size(499, 84);
 			this.groupBox1.TabIndex = 2;
 			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Extra line margins";
+			this.groupBox1.Text = "Extra Line Margins";
 			// 
 			// _NoSpaceBetweenWrappedLinesBox
 			// 
@@ -117,7 +117,7 @@
 			this.groupBox2.Size = new System.Drawing.Size(499, 159);
 			this.groupBox2.TabIndex = 0;
 			this.groupBox2.TabStop = false;
-			this.groupBox2.Text = "Feature controllers";
+			this.groupBox2.Text = "Feature Controllers";
 			// 
 			// _CodeBarBox
 			// 
@@ -126,7 +126,7 @@
 			this._CodeBarBox.Name = "_CodeBarBox";
 			this._CodeBarBox.Size = new System.Drawing.Size(141, 19);
 			this._CodeBarBox.TabIndex = 5;
-			this._CodeBarBox.Text = "Navigation Bar";
+			this._CodeBarBox.Text = "Navigation bar";
 			this._CodeBarBox.UseVisualStyleBackColor = true;
 			// 
 			// _SmartBarBox
@@ -136,7 +136,7 @@
 			this._SmartBarBox.Name = "_SmartBarBox";
 			this._SmartBarBox.Size = new System.Drawing.Size(101, 19);
 			this._SmartBarBox.TabIndex = 4;
-			this._SmartBarBox.Text = "Smart Bar";
+			this._SmartBarBox.Text = "Smart bar";
 			this._SmartBarBox.UseVisualStyleBackColor = true;
 			// 
 			// _ScrollbarMarkerBox
@@ -146,7 +146,7 @@
 			this._ScrollbarMarkerBox.Name = "_ScrollbarMarkerBox";
 			this._ScrollbarMarkerBox.Size = new System.Drawing.Size(157, 19);
 			this._ScrollbarMarkerBox.TabIndex = 3;
-			this._ScrollbarMarkerBox.Text = "Scrollbar Marker";
+			this._ScrollbarMarkerBox.Text = "Scrollbar marker";
 			this._ScrollbarMarkerBox.UseVisualStyleBackColor = true;
 			// 
 			// _SuperQuickInfoBox
@@ -156,7 +156,7 @@
 			this._SuperQuickInfoBox.Name = "_SuperQuickInfoBox";
 			this._SuperQuickInfoBox.Size = new System.Drawing.Size(157, 19);
 			this._SuperQuickInfoBox.TabIndex = 2;
-			this._SuperQuickInfoBox.Text = "Super Quick Info";
+			this._SuperQuickInfoBox.Text = "Super quick info";
 			this._SuperQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// _SyntaxHighlightBox
@@ -166,7 +166,7 @@
 			this._SyntaxHighlightBox.Name = "_SyntaxHighlightBox";
 			this._SyntaxHighlightBox.Size = new System.Drawing.Size(157, 19);
 			this._SyntaxHighlightBox.TabIndex = 1;
-			this._SyntaxHighlightBox.Text = "Syntax Highlight";
+			this._SyntaxHighlightBox.Text = "Syntax highlight";
 			this._SyntaxHighlightBox.UseVisualStyleBackColor = true;
 			// 
 			// label3
@@ -188,7 +188,7 @@
 			this.groupBox3.Size = new System.Drawing.Size(499, 58);
 			this.groupBox3.TabIndex = 1;
 			this.groupBox3.TabStop = false;
-			this.groupBox3.Text = "Configuration file";
+			this.groupBox3.Text = "Configuration File";
 			// 
 			// _SaveConfigButton
 			// 

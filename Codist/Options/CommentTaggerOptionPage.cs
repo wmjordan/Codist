@@ -169,22 +169,23 @@ namespace Codist.Options
 				return;
 			}
 			var bmp = new Bitmap(_PreviewBox.Width, _PreviewBox.Height);
-			RenderPreview(bmp, _ServicePage.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor)), _ActiveLabel);
+			ThemeHelper.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor), out var fontName, out var fontSize);
+			RenderPreview(bmp, fontName, fontSize, _ActiveLabel);
 			_PreviewBox.Image = bmp;
 		}
 
-		static void RenderPreview(Bitmap bmp, FontInfo fontInfo, CommentLabel label) {
+		static void RenderPreview(Bitmap bmp, string fontName, int fontSize, CommentLabel label) {
 			var style = Config.Instance.CommentStyles.Find(i => i.StyleID == label.StyleID);
 			if (style == null || String.IsNullOrEmpty(label.Label)) {
 				return;
 			}
-			var fontSize = (float)(fontInfo.wPointSize + style.FontSize);
-			if (fontSize < 2) {
+			var size = (float)(fontSize + style.FontSize);
+			if (size < 2) {
 				return;
 			}
 			UIHelper.MixStyle(style, out var fs, out var fc, out var bc);
 			using (var g = Graphics.FromImage(bmp))
-			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontInfo.bstrFaceName : style.Font, fontSize, fs))
+			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontName : style.Font, size, fs))
 			using (var b = new SolidBrush(fc))
 			using (var bg = new SolidBrush(ThemeHelper.DocumentPageColor)) {
 				g.FillRectangle(bg, 0, 0, bmp.Width, bmp.Height);

@@ -25,7 +25,7 @@
 		/// 使用代码编辑器修改此方法的内容。
 		/// </summary>
 		private void InitializeComponent() {
-			this._SyntaxListBox = new SyntaxListView();
+			this._SyntaxListBox = new Codist.Options.SyntaxListView();
 			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -54,8 +54,10 @@
 			// 
 			this._SyntaxListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+			this._SyntaxListBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
 			this._SyntaxListBox.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this._NameColumn});
+			this._SyntaxListBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
 			this._SyntaxListBox.FullRowSelect = true;
 			this._SyntaxListBox.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
 			this._SyntaxListBox.HideSelection = false;
@@ -63,6 +65,7 @@
 			this._SyntaxListBox.MultiSelect = false;
 			this._SyntaxListBox.Name = "_SyntaxListBox";
 			this._SyntaxListBox.ShowGroups = false;
+			this._SyntaxListBox.ShowItemToolTips = true;
 			this._SyntaxListBox.Size = new System.Drawing.Size(239, 263);
 			this._SyntaxListBox.TabIndex = 1;
 			this._SyntaxListBox.UseCompatibleStateImageBehavior = false;
@@ -80,7 +83,7 @@
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(111, 15);
 			this.label1.TabIndex = 0;
-			this.label1.Text = "Comment Tags:";
+			this.label1.Text = "Comment tags:";
 			// 
 			// groupBox1
 			// 
@@ -221,16 +224,16 @@
 			// 
 			this._AddTagButton.Location = new System.Drawing.Point(123, 6);
 			this._AddTagButton.Name = "_AddTagButton";
-			this._AddTagButton.Size = new System.Drawing.Size(54, 23);
+			this._AddTagButton.Size = new System.Drawing.Size(42, 23);
 			this._AddTagButton.TabIndex = 3;
 			this._AddTagButton.Text = "Add";
 			this._AddTagButton.UseVisualStyleBackColor = true;
 			// 
 			// _RemoveTagButton
 			// 
-			this._RemoveTagButton.Location = new System.Drawing.Point(183, 6);
+			this._RemoveTagButton.Location = new System.Drawing.Point(171, 6);
 			this._RemoveTagButton.Name = "_RemoveTagButton";
-			this._RemoveTagButton.Size = new System.Drawing.Size(65, 23);
+			this._RemoveTagButton.Size = new System.Drawing.Size(77, 23);
 			this._RemoveTagButton.TabIndex = 3;
 			this._RemoveTagButton.Text = "Remove";
 			this._RemoveTagButton.UseVisualStyleBackColor = true;

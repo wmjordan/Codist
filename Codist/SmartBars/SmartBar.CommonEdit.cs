@@ -241,16 +241,16 @@ namespace Codist.SmartBars
 		}
 		static CommandItem[] GetFormatCommands() {
 			return new CommandItem[] {
-				new CommandItem(KnownImageIds.FormatSelection, "Format selection", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")),
-				new CommandItem(KnownImageIds.FormatDocument, "Format document", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatDocument")),
+				new CommandItem(KnownImageIds.FormatSelection, "Format Selection", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")),
+				new CommandItem(KnownImageIds.FormatDocument, "Format Document", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatDocument")),
 			};
 		}
 		static CommandItem[] GetFindAndReplaceCommands() {
 			return new CommandItem[] {
 					new CommandItem(KnownImageIds.QuickFind, "Find...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
 					new CommandItem(KnownImageIds.QuickReplace, "Replace...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
-					new CommandItem(KnownImageIds.FindInFile, "Find in files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
-					new CommandItem(KnownImageIds.ReplaceInFolder, "Replace in files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
+					new CommandItem(KnownImageIds.FindInFile, "Find in Files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
+					new CommandItem(KnownImageIds.ReplaceInFolder, "Replace in Files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
 				};
 		}
 		static CommandItem[] GetSurroundingCommands() {
@@ -258,7 +258,7 @@ namespace Codist.SmartBars
 				new CommandItem(KnownImageIds.AddSnippet, "Surround with...", ctx => {
 					TextEditorHelper.ExecuteEditorCommand("Edit.SurroundWith");
 				}),
-				new CommandItem(KnownImageIds.MaskedTextBox, "Toggle parentheses", ctx => {
+				new CommandItem(KnownImageIds.MaskedTextBox, "Toggle Parentheses", ctx => {
 					var span = ctx.View.Selection.SelectedSpans[0];
 					using (var ed = ctx.View.TextBuffer.CreateEdit()) {
 						var t = span.GetText();

@@ -72,7 +72,7 @@
 			this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
 			this.tabPage3.Size = new System.Drawing.Size(524, 320);
 			this.tabPage3.TabIndex = 2;
-			this.tabPage3.Text = "Additional highlight";
+			this.tabPage3.Text = "Additional Highlight";
 			this.tabPage3.UseVisualStyleBackColor = true;
 			// 
 			// _HighlightParameterBracesBox

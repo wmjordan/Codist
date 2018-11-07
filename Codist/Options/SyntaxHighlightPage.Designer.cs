@@ -27,15 +27,15 @@
 		private void InitializeComponent() {
 			this._LightThemeButton = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this._LoadButton = new System.Windows.Forms.Button();
+			this._SaveButton = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
 			this._ResetThemeButton = new System.Windows.Forms.Button();
 			this._SimpleThemeButton = new System.Windows.Forms.Button();
 			this._DarkThemeButton = new System.Windows.Forms.Button();
 			this._SyntaxHighlightTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
-			this._SaveButton = new System.Windows.Forms.Button();
 			this._HighlightSpecialCommentBox = new System.Windows.Forms.CheckBox();
-			this._LoadButton = new System.Windows.Forms.Button();
 			this.groupBox2.SuspendLayout();
 			this._SyntaxHighlightTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
@@ -66,7 +66,25 @@
 			this.groupBox2.Size = new System.Drawing.Size(549, 157);
 			this.groupBox2.TabIndex = 2;
 			this.groupBox2.TabStop = false;
-			this.groupBox2.Text = "Super syntax highlight presets";
+			this.groupBox2.Text = "Super Syntax Highlight Presets";
+			// 
+			// _LoadButton
+			// 
+			this._LoadButton.Location = new System.Drawing.Point(9, 118);
+			this._LoadButton.Name = "_LoadButton";
+			this._LoadButton.Size = new System.Drawing.Size(111, 23);
+			this._LoadButton.TabIndex = 8;
+			this._LoadButton.Text = "Load...";
+			this._LoadButton.UseVisualStyleBackColor = true;
+			// 
+			// _SaveButton
+			// 
+			this._SaveButton.Location = new System.Drawing.Point(125, 118);
+			this._SaveButton.Name = "_SaveButton";
+			this._SaveButton.Size = new System.Drawing.Size(111, 23);
+			this._SaveButton.TabIndex = 8;
+			this._SaveButton.Text = "Save...";
+			this._SaveButton.UseVisualStyleBackColor = true;
 			// 
 			// label1
 			// 
@@ -131,15 +149,6 @@
 			this.tabPage2.Text = "General";
 			this.tabPage2.UseVisualStyleBackColor = true;
 			// 
-			// _SaveButton
-			// 
-			this._SaveButton.Location = new System.Drawing.Point(125, 118);
-			this._SaveButton.Name = "_SaveButton";
-			this._SaveButton.Size = new System.Drawing.Size(111, 23);
-			this._SaveButton.TabIndex = 8;
-			this._SaveButton.Text = "Save...";
-			this._SaveButton.UseVisualStyleBackColor = true;
-			// 
 			// _HighlightSpecialCommentBox
 			// 
 			this._HighlightSpecialCommentBox.AutoSize = true;
@@ -149,15 +158,6 @@
 			this._HighlightSpecialCommentBox.TabIndex = 7;
 			this._HighlightSpecialCommentBox.Text = "Tag special comments";
 			this._HighlightSpecialCommentBox.UseVisualStyleBackColor = true;
-			// 
-			// _LoadButton
-			// 
-			this._LoadButton.Location = new System.Drawing.Point(9, 118);
-			this._LoadButton.Name = "_LoadButton";
-			this._LoadButton.Size = new System.Drawing.Size(111, 23);
-			this._LoadButton.TabIndex = 8;
-			this._LoadButton.Text = "Load...";
-			this._LoadButton.UseVisualStyleBackColor = true;
 			// 
 			// SyntaxHighlightPage
 			// 
