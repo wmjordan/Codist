@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using GdiColor = System.Drawing.Color;
 using WpfBrush = System.Windows.Media.SolidColorBrush;
 using WpfColor = System.Windows.Media.Color;
+using WpfFontFamily = System.Windows.Media.FontFamily;
 
 namespace Codist
 {
@@ -39,8 +40,8 @@ namespace Codist
 		public static WpfColor SystemButtonFaceColor { get; private set; }
 		public static WpfColor SystemThreeDFaceColor { get; private set; }
 		public static WpfBrush SystemGrayTextBrush { get; private set; }
-		public static string TextEditorFontName { get; private set; }
-		public static int TextEditorFontSize { get; private set; }
+		public static WpfFontFamily ToolTipFont { get; private set; }
+		public static double ToolTipFontSize { get; private set; }
 
 		public static GdiColor GetGdiColor(this ThemeResourceKey resourceKey) {
 			return VSColorTheme.GetThemedColor(resourceKey);
@@ -52,7 +53,7 @@ namespace Codist
 			return new WpfBrush(resourceKey.GetWpfColor());
 		}
 
-		public static void GetFontSettings(Guid category, out string fontName, out int fontSize) {
+		public static void GetFontSettings(string categoryGuid, out string fontName, out int fontSize) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var storage = (IVsFontAndColorStorage)ServiceProvider.GlobalProvider.GetService(typeof(SVsFontAndColorStorage));
 			if (storage == null) {
@@ -61,7 +62,7 @@ namespace Codist
 			var pLOGFONT = new LOGFONTW[1];
 			var pInfo = new FontInfo[1];
 
-			ErrorHandler.ThrowOnFailure(storage.OpenCategory(category, (uint)(__FCSTORAGEFLAGS.FCSF_LOADDEFAULTS | __FCSTORAGEFLAGS.FCSF_PROPAGATECHANGES)));
+			ErrorHandler.ThrowOnFailure(storage.OpenCategory(new Guid(categoryGuid), (uint)(__FCSTORAGEFLAGS.FCSF_LOADDEFAULTS | __FCSTORAGEFLAGS.FCSF_PROPAGATECHANGES)));
 			try {
 				if (ErrorHandler.Succeeded(storage.GetFont(pLOGFONT, pInfo))) {
 					fontName = pInfo[0].bstrFaceName;
@@ -122,6 +123,9 @@ namespace Codist
 			SystemButtonFaceColor = EnvironmentColors.SystemButtonFaceColorKey.GetWpfColor();
 			SystemThreeDFaceColor = EnvironmentColors.SystemThreeDFaceColorKey.GetWpfColor();
 			SystemGrayTextBrush = EnvironmentColors.SystemGrayTextBrushKey.GetWpfBrush();
+			var formatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("tooltip").DefaultTextProperties;
+			ToolTipFont = formatMap.Typeface.FontFamily;
+			ToolTipFontSize = formatMap.FontRenderingEmSize;
 		}
 
 	}

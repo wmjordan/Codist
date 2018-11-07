@@ -197,7 +197,7 @@ namespace Codist.NaviBar
 				Icon = ThemeHelper.GetImage(KnownImageIds.CSProjectNode);
 				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
-				Header = new ThemedTipText("//");
+				Header = new ThemedText("//");
 				SubMenuHeader = new StackPanel {
 					Margin = WpfHelper.MenuItemMargin,
 					Children = {
@@ -385,7 +385,7 @@ namespace Codist.NaviBar
 				//if (title.Length > 32) {
 				//	title = title.Substring(0, 32) + "...";
 				//}
-				var t = new ThemedTipText();
+				var t = new ThemedText();
 				if (includeContainer) {
 					var p = node.Parent;
 					if (node is VariableDeclaratorSyntax) {
@@ -532,7 +532,7 @@ namespace Codist.NaviBar
 					}
 					var partial = await item.GetSyntaxAsync(ct);
 					Items.Add(new NaviItem(_Bar, partial, i => {
-						i.Header = new ThemedTipText(System.IO.Path.GetFileName(item.SyntaxTree.FilePath), true) {
+						i.Header = new ThemedText(System.IO.Path.GetFileName(item.SyntaxTree.FilePath), true) {
 							TextAlignment = TextAlignment.Center
 						}; },
 						i => i.GoToLocation()) { Background = ThemeHelper.TitleBackgroundBrush.Alpha(0.8) });
@@ -581,7 +581,7 @@ namespace Codist.NaviBar
 									// don't show #endregion if preceeding item is #region
 									if (regionJustStart == FALSE) {
 										Items.Add(new Separator {
-											Tag = new ThemedTipText {
+											Tag = new ThemedText {
 												HorizontalAlignment = HorizontalAlignment.Right,
 												Foreground = ThemeHelper.SystemGrayTextBrush,
 												//Margin = new Thickness(0, 0, 17, 0)
@@ -694,7 +694,7 @@ namespace Codist.NaviBar
 		{
 			public SymbolItem(ISymbol symbol) {
 				Icon = ThemeHelper.GetImage(symbol.GetImageId());
-				Header = new ThemedTipText().Append(symbol.ContainingType != null ? symbol.ContainingType.Name + symbol.ContainingType.GetParameterString() + "." : String.Empty, ThemeHelper.SystemGrayTextBrush).Append(symbol.Name).Append(symbol.GetParameterString(), ThemeHelper.SystemGrayTextBrush);
+				Header = new ThemedText().Append(symbol.ContainingType != null ? symbol.ContainingType.Name + symbol.ContainingType.GetParameterString() + "." : String.Empty, ThemeHelper.SystemGrayTextBrush).Append(symbol.Name).Append(symbol.GetParameterString(), ThemeHelper.SystemGrayTextBrush);
 				Symbol = symbol;
 			}
 			public ISymbol Symbol { get; }

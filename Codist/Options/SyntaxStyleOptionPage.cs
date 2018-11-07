@@ -261,7 +261,7 @@ namespace Codist.Options
 				return;
 			}
 			var bmp = new Bitmap(_PreviewBox.Width, _PreviewBox.Height);
-			ThemeHelper.GetFontSettings(new Guid(FontsAndColorsCategory.TextEditor), out var fontName, out var fontSize);
+			ThemeHelper.GetFontSettings(FontsAndColorsCategory.TextEditor, out var fontName, out var fontSize);
 			RenderPreview(bmp, fontName, fontSize, _activeStyle);
 			(_SyntaxListBox.FocusedItem as SyntaxListViewItem)?.ApplyTheme();
 			_PreviewBox.Image = bmp;

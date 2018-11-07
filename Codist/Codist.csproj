@@ -101,7 +101,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Controls\ThemedButton.cs" />
     <Compile Include="Controls\ThemedTextBox.cs" />
-    <Compile Include="Controls\ThemedTipText.cs" />
+    <Compile Include="Controls\ThemedText.cs" />
     <Compile Include="Controls\ThemedToolTip.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.Symbol.cs" />

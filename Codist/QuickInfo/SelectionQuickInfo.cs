@@ -59,7 +59,7 @@ namespace Codist.QuickInfo
 			}
 			if (c == 1) {
 				var ch = point.Snapshot.GetText(p1, 1);
-				qiContent.Add(new ThemedTipText { Name = Name }
+				qiContent.Add(new ThemedText { Name = Name }
 					.Append("Selected character: \"", true)
 					.Append(ch)
 					.Append("\" (Unicode: 0x" + ((int)ch[0]).ToString("X2") + ")")
@@ -68,7 +68,7 @@ namespace Codist.QuickInfo
 			}
 			var y1 = point.Snapshot.GetLineNumberFromPosition(p1);
 			var y2 = point.Snapshot.GetLineNumberFromPosition(p2) + 1;
-			var info = new ThemedTipText() { Name = Name }.Append("Selection: ", true).Append(c.ToString()).Append(" characters");
+			var info = new ThemedText() { Name = Name }.Append("Selection: ", true).Append(c.ToString()).Append(" characters");
 			if (y2 - y1 > 1) {
 				info.Append(", " + (y2 - y1).ToString() + " lines");
 			}

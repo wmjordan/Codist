@@ -194,7 +194,7 @@ namespace Codist.QuickInfo
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 					var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
-					var info = new ThemedTipText();
+					var info = new ThemedText();
 					docRenderer.Render(summary, info);
 					if (info.Inlines.FirstInline != null) {
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
@@ -218,7 +218,7 @@ namespace Codist.QuickInfo
 						return;
 					}
 					var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, baseMember);
-					var info = new ThemedTipText("Documentation from ")
+					var info = new ThemedText("Documentation from ")
 						.AddSymbol(baseMember.ContainingType, null, _SymbolFormatter)
 						.Append(".")
 						.AddSymbol(baseMember, null, _SymbolFormatter)
@@ -267,7 +267,7 @@ namespace Codist.QuickInfo
 
 
 		static void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo, SyntaxNode node) {
-			var info = new StackPanel().Add(new ThemedTipText("Maybe...", true));
+			var info = new StackPanel().Add(new ThemedText("Maybe...", true));
 			foreach (var item in symbolInfo.CandidateSymbols) {
 				info.Add(ToUIText(item));
 			}
@@ -332,13 +332,13 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation)) {
 				string asmName = symbol.GetAssemblyModuleName();
 				if (asmName != null) {
-					qiContent.Add(new ThemedTipText("Assembly: ", true).Append(asmName));
+					qiContent.Add(new ThemedText("Assembly: ", true).Append(asmName));
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
 				var st = symbol.GetReturnType();
 				if (st != null && st.TypeKind == TypeKind.Delegate) {
-					qiContent.Add(new ThemedTipText("Delegate signature:\n", true)
+					qiContent.Add(new ThemedText("Delegate signature:\n", true)
 						.AddSymbolDisplayParts((st as INamedTypeSymbol).DelegateInvokeMethod.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1));
 				}
 			}
@@ -375,7 +375,7 @@ namespace Codist.QuickInfo
 			else if (nodeKind == SyntaxKind.Block) {
 				var lines = currentSnapshot.GetLineNumberFromPosition(node.Span.End) - currentSnapshot.GetLineNumberFromPosition(node.SpanStart) + 1;
 				if (lines > 100) {
-					qiContent.Add(new ThemedTipText { Text = lines + " lines", FontWeight = FontWeights.Bold });
+					qiContent.Add(new ThemedText { Text = lines + " lines", FontWeight = FontWeights.Bold });
 				}
 				else if (lines > 1) {
 					qiContent.Add(lines + " lines");
@@ -386,7 +386,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		ThemedTipText ShowReturnInfo(SyntaxNode statement, ReturnStatementSyntax retStatement, SyntaxToken token) {
+		ThemedText ShowReturnInfo(SyntaxNode statement, ReturnStatementSyntax retStatement, SyntaxToken token) {
 			var retSymbol = retStatement.Expression != null
 				? _SemanticModel.GetSymbolInfo(retStatement.Expression).Symbol
 				: null;
@@ -396,7 +396,7 @@ namespace Codist.QuickInfo
 					continue;
 				}
 				var symbol = _SemanticModel.GetSymbolInfo(statement).Symbol ?? _SemanticModel.GetDeclaredSymbol(statement);
-				var t = new ThemedTipText();
+				var t = new ThemedText();
 				if (retSymbol != null) {
 					var m = retSymbol as IMethodSymbol;
 					if (m != null && m.MethodKind == MethodKind.AnonymousFunction) {
@@ -454,7 +454,7 @@ namespace Codist.QuickInfo
 				var invoke = ev.Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
 				if (invoke != null && invoke.Parameters.Length == 2) {
 					qiContent.Add(
-						new ThemedTipText("Event argument: ", true)
+						new ThemedText("Event argument: ", true)
 						.AddSymbolDisplayParts(invoke.Parameters[1].Type.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1)
 					);
 				}
@@ -500,12 +500,12 @@ namespace Codist.QuickInfo
 			if (overloads.Length < 2) {
 				return;
 			}
-			var overloadInfo = new StackPanel().Add(new ThemedTipText("Method overload:", true));
+			var overloadInfo = new StackPanel().Add(new ThemedText("Method overload:", true));
 			foreach (var item in overloads) {
 				if (item.Equals(method) || item.Kind != SymbolKind.Method) {
 					continue;
 				}
-				overloadInfo.Add(new ThemedTipText()
+				overloadInfo.Add(new ThemedText()
 					.SetGlyph(ThemeHelper.GetImage(item.GetImageId()))
 					.AddSymbolDisplayParts(item.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1)
 				);
@@ -518,9 +518,9 @@ namespace Codist.QuickInfo
 		static void ShowMethodTypeArguments(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
 			var info = new StackPanel();
 			var l = method.TypeArguments.Length;
-			info.Add(new ThemedTipText("Type argument:", true));
+			info.Add(new ThemedText("Type argument:", true));
 			for (int i = 0; i < l; i++) {
-				var argInfo = new ThemedTipText();
+				var argInfo = new ThemedText();
 				ShowTypeParameterInfo(method.TypeParameters[i], method.TypeArguments[i], argInfo);
 				info.Add(argInfo);
 			}
@@ -534,9 +534,9 @@ namespace Codist.QuickInfo
 			var namespaces = nsSymbol.GetNamespaceMembers().ToImmutableArray().Sort(Comparer<INamespaceSymbol>.Create((x, y) => String.Compare(x.Name, y.Name)));
 			if (namespaces.Length > 0) {
 				var info = new StackPanel();
-				info.Add(new ThemedTipText("Namespace:", true));
+				info.Add(new ThemedText("Namespace:", true));
 				foreach (var ns in namespaces) {
-					info.Add(new ThemedTipText()
+					info.Add(new ThemedText()
 						.SetGlyph(ThemeHelper.GetImage(Microsoft.VisualStudio.Imaging.KnownImageIds.Namespace))
 						.Append(ns.Name, _SymbolFormatter.Namespace)
 						);
@@ -547,9 +547,9 @@ namespace Codist.QuickInfo
 			var members = nsSymbol.GetTypeMembers().Sort(Comparer<INamedTypeSymbol>.Create((x, y) => String.Compare(x.Name, y.Name)));
 			if (members.Length > 0) {
 				var info = new StackPanel();
-				info.Add(new ThemedTipText("Type:", true));
+				info.Add(new ThemedText("Type:", true));
 				foreach (var type in members) {
-					var t = new ThemedTipText().SetGlyph(ThemeHelper.GetImage(type.GetImageId()));
+					var t = new ThemedText().SetGlyph(ThemeHelper.GetImage(type.GetImageId()));
 					_SymbolFormatter.ShowSymbolDeclaration(type, t, true, true);
 					t.AddSymbol(type, null, _SymbolFormatter);
 					info.Add(t);
@@ -626,7 +626,7 @@ namespace Codist.QuickInfo
 				}
 			}
 			if (explicitIntfs.Count > 0) {
-				info = new StackPanel().Add(new ThemedTipText("Implements:", true));
+				info = new StackPanel().Add(new ThemedText("Implements:", true));
 				foreach (var item in explicitIntfs) {
 					info.Add(ToUIText(item));
 				}
@@ -638,7 +638,7 @@ namespace Codist.QuickInfo
 					if (info == null) {
 						info = new StackPanel();
 					}
-					var p = new StackPanel().Add(new ThemedTipText("Explicit implements:", true));
+					var p = new StackPanel().Add(new ThemedText("Explicit implements:", true));
 					foreach (var item in explicitIntfs) {
 						p.Add(ToUIText(item));
 					}
@@ -654,13 +654,13 @@ namespace Codist.QuickInfo
 			var extType = method.ConstructedFrom.ReceiverType;
 			var extTypeParameter = extType as ITypeParameterSymbol;
 			if (extTypeParameter != null && (extTypeParameter.HasConstructorConstraint || extTypeParameter.HasReferenceTypeConstraint || extTypeParameter.HasValueTypeConstraint || extTypeParameter.ConstraintTypes.Length > 0)) {
-				var ext = new ThemedTipText("Extending: ", true)
+				var ext = new ThemedText("Extending: ", true)
 					.AddSymbol(extType, true, _SymbolFormatter.Class)
 					.Append(" with ")
 					.AddSymbolDisplayParts(method.ReceiverType.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
 				info.Add(ext);
 			}
-			var def = new ThemedTipText("Extended by: ", true)
+			var def = new ThemedText("Extended by: ", true)
 				.AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), _SymbolFormatter, -1);
 			info.Add(def);
 			qiContent.Add(info);
@@ -757,19 +757,19 @@ namespace Codist.QuickInfo
 
 		static StackPanel ShowStringInfo(string sv) {
 			return new StackPanel()
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.Length.ToString()).Add(new ThemedTipText("chars", true)))
+				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.Length.ToString()).Add(new ThemedText("chars", true)))
 				//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.UTF8.GetByteCount(sv).ToString()).AddText("UTF-8 bytes", true))
 				//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.Default.GetByteCount(sv).ToString()).AddText("System bytes", true))
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).Add(new ThemedTipText("Hash code", true)));
+				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).Add(new ThemedText("Hash code", true)));
 		}
 
 		static void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs, int position) {
-			var info = new StackPanel().Add(new ThemedTipText("Attribute:", true));
+			var info = new StackPanel().Add(new ThemedText("Attribute:", true));
 			foreach (var item in attrs) {
 				if (item.AttributeClass.IsAccessible() == false) {
 					continue;
 				}
-				info.Children.Add(_SymbolFormatter.ToUIText(new ThemedTipText(), item));
+				info.Children.Add(_SymbolFormatter.ToUIText(new ThemedText(), item));
 			}
 			if (info.Children.Count > 1) {
 				qiContent.Add(info.Scrollable());
@@ -781,7 +781,7 @@ namespace Codist.QuickInfo
 			if (baseType == null || baseType.IsCommonClass() != false) {
 				return;
 			}
-			var info = new ThemedTipText("Base type: ", true)
+			var info = new ThemedText("Base type: ", true)
 				.AddSymbol(baseType, null, _SymbolFormatter.Class);
 			while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
 				if (baseType.IsAccessible() && baseType.IsCommonClass() == false) {
@@ -801,7 +801,7 @@ namespace Codist.QuickInfo
 				return;
 			}
 			var s = new StackPanel()
-				.Add(new ThemedTipText("Enum underlying type: ", true).AddSymbolDisplayParts(t.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter));
+				.Add(new ThemedText("Enum underlying type: ", true).AddSymbolDisplayParts(t.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter));
 			if (fromEnum == false) {
 				qiContent.Add(s);
 				return;
@@ -838,18 +838,18 @@ namespace Codist.QuickInfo
 			if (min == null) {
 				return;
 			}
-			s.Add(new ThemedTipText("Field count: ", true).Append(c.ToString()))
-				.Add(new ThemedTipText("Min: ", true)
+			s.Add(new ThemedText("Field count: ", true).Append(c.ToString()))
+				.Add(new ThemedText("Min: ", true)
 					.Append(min.ToString() + "(")
 					.Append(minName.Name, _SymbolFormatter.Enum)
 					.Append(")"))
-				.Add(new ThemedTipText("Max: ", true)
+				.Add(new ThemedText("Max: ", true)
 					.Append(max.ToString() + "(")
 					.Append(maxName.Name, _SymbolFormatter.Enum)
 					.Append(")"));
 			if (type.GetAttributes().FirstOrDefault(a => a.AttributeClass.ToDisplayString() == "System.FlagsAttribute") != null) {
 				var d = Convert.ToString(Convert.ToInt64(bits), 2);
-				s.Add(new ThemedTipText("All flags: ", true)
+				s.Add(new ThemedText("All flags: ", true)
 					.Append(d)
 					.Append(" (")
 					.Append(d.Length.ToString())
@@ -893,7 +893,7 @@ namespace Codist.QuickInfo
 			if (declaredInterfaces.Count == 0 && inheritedInterfaces.Count == 0 && disposable == null) {
 				return;
 			}
-			var stack = new StackPanel().Add(new ThemedTipText("Interface:", true));
+			var stack = new StackPanel().Add(new ThemedText("Interface:", true));
 			if (disposable != null) {
 				var t = ToUIText(disposable);
 				if (interfaces.Contains(disposable) == false) {
@@ -914,7 +914,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowDeclarationModifier(IList<object> qiContent, ISymbol symbol) {
-			qiContent.Add(_SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedTipText(), true, false));
+			qiContent.Add(_SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedText(), true, false));
 		}
 
 		void ShowParameterInfo(IList<object> qiContent, SyntaxNode node) {
@@ -983,7 +983,7 @@ namespace Codist.QuickInfo
 					}
 				}
 				var doc = argName != null ? (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", argName) : null;
-				var info = new ThemedTipText("Argument", true)
+				var info = new ThemedText("Argument", true)
 					.Append(" of ")
 					.AddSymbolDisplayParts(m.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, argIndex);
 				m = symbol.Symbol as IMethodSymbol;
@@ -1007,9 +1007,9 @@ namespace Codist.QuickInfo
 			}
 			else if (symbol.CandidateSymbols.Length > 0) {
 				var info = new StackPanel();
-				info.Add(new ThemedTipText("Maybe", true).Append(" argument of"));
+				info.Add(new ThemedText("Maybe", true).Append(" argument of"));
 				foreach (var candidate in symbol.CandidateSymbols) {
-					info.Add(new ThemedTipText().AddSymbolDisplayParts(candidate.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, argName == null ? argIndex : Int32.MinValue));
+					info.Add(new ThemedText().AddSymbolDisplayParts(candidate.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, argName == null ? argIndex : Int32.MinValue));
 				}
 				qiContent.Add(info.Scrollable());
 			}
@@ -1018,7 +1018,7 @@ namespace Codist.QuickInfo
 				if (methodName == "nameof" && argCount == 1) {
 					return;
 				}
-				qiContent.Add(new ThemedTipText("Argument " + ++argIndex + " of ").Append(methodName, true));
+				qiContent.Add(new ThemedText("Argument " + ++argIndex + " of ").Append(methodName, true));
 			}
 			else {
 				qiContent.Add("Argument " + ++argIndex);
@@ -1057,14 +1057,14 @@ namespace Codist.QuickInfo
 
 		static StackPanel ShowNumericForms(string dec, byte[] bytes) {
 			var s = new StackPanel()
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(dec).Add(new ThemedTipText(" DEC", true)))
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToHexString(bytes)).Add(new ThemedTipText(" HEX", true)))
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToBinString(bytes)).Add(new ThemedTipText(" BIN", true)));
+				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(dec).Add(new ThemedText(" DEC", true)))
+				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToHexString(bytes)).Add(new ThemedText(" HEX", true)))
+				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToBinString(bytes)).Add(new ThemedText(" BIN", true)));
 			return s;
 		}
 
 		static TextBlock ToUIText(ISymbol symbol) {
-			return new ThemedTipText()
+			return new ThemedText()
 				.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.AddSymbolDisplayParts(symbol.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
 		}

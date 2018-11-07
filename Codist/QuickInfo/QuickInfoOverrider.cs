@@ -145,6 +145,8 @@ namespace Codist.QuickInfo
 					}
 					if (p.Children.Count > 1) {
 						OverrideDiagnosticInfo(p);
+						p.SetValue(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont);
+						p.SetValue(TextBlock.FontSizeProperty, ThemeHelper.ToolTipFontSize);
 					}
 					if (DocElement != null || ClickAndGoSymbol != null || LimitItemSize) {
 						FixQuickInfo(p);
@@ -336,7 +338,7 @@ namespace Codist.QuickInfo
 						if (o == null) {
 							var s = c as string;
 							if (s != null) {
-								cp.Content = new ThemedTipText {
+								cp.Content = new ThemedText {
 									Text = s
 								}.Scrollable();
 							}
