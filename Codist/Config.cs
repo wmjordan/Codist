@@ -43,6 +43,9 @@ namespace Codist
 		[DefaultValue(SmartBarOptions.Default)]
 		public SmartBarOptions SmartBarOptions { get; set; } = SmartBarOptions.Default;
 
+		[DefaultValue(NaviBarOptions.Default)]
+		public NaviBarOptions NaviBarOptions { get; set; } = NaviBarOptions.Default;
+
 		public double TopSpace { get; set; }
 		public double BottomSpace { get; set; }
 		public double QuickInfoMaxWidth { get; set; }
@@ -218,6 +221,9 @@ namespace Codist
 		}
 		internal void Set(QuickInfoOptions options, bool set) {
 			QuickInfoOptions = EnumHelper.SetFlags(QuickInfoOptions, options, set);
+		}
+		internal void Set(NaviBarOptions options, bool set) {
+			NaviBarOptions = EnumHelper.SetFlags(NaviBarOptions, options, set);
 		}
 		internal void Set(SmartBarOptions options, bool set) {
 			SmartBarOptions = EnumHelper.SetFlags(SmartBarOptions, options, set);
@@ -471,6 +477,20 @@ namespace Codist
 		CodeMarginMask = SpecialComment | CompilerDirective,
 		MemberMarginMask = MemberDeclaration | SymbolReference,
 		Default = SpecialComment | MemberDeclaration | LineNumber | LongMemberDeclaration | SymbolReference
+	}
+
+	[Flags]
+	public enum NaviBarOptions
+	{
+		None,
+		SyntaxDetail = 1,
+		SymbolToolTip = 1 << 1,
+		RangeHighlight = 1 << 2,
+		ParameterList = 1 << 10,
+		FieldValue = 1 << 11,
+		PartialClassMember = 1 << 12,
+		Region = 1 << 13,
+		Default = SyntaxDetail | SymbolToolTip | RangeHighlight | ParameterList | FieldValue | PartialClassMember | Region
 	}
 
 	public enum ScrollbarMarkerStyle

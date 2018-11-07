@@ -30,6 +30,7 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment", 0, 0, true, Sort = 60)]
 
 	[ProvideOptionPage(typeof(Options.SmartBar), CategorySmartBar, "General", 0, 0, true, Sort = 200)]
+	[ProvideOptionPage(typeof(Options.NaviBar), CategoryNaviBar, "General", 0, 0, true, Sort = 250)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	//[ProvideToolWindow(typeof(Commands.SymbolFinderWindow))]
 	[ProvideAutoLoad(Microsoft.VisualStudio.VSConstants.UICONTEXT.SolutionExists_string, PackageAutoLoadFlags.BackgroundLoad)]
@@ -41,6 +42,7 @@ namespace Codist
 		const string CategorySuperQuickInfo = Constants.NameOfMe + "\\Super Quick Info";
 		const string CategoryScrollbarMarker = Constants.NameOfMe + "\\Scrollbar Marker";
 		const string CategorySyntaxHighlight = Constants.NameOfMe + "\\Syntax Highlight";
+		const string CategoryNaviBar = Constants.NameOfMe + "\\Navi Bar";
 		const string CategorySmartBar = Constants.NameOfMe + "\\Smart Bar";
 
 		static EnvDTE.DTE _dte;
@@ -99,6 +101,7 @@ namespace Codist
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow);
 			await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
 			await Commands.ScreenshotCommand.InitializeAsync(this);
 		}

@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using Task = System.Threading.Tasks.Task;
+using AppHelpers;
 
 namespace Codist.NaviBar
 {
@@ -44,6 +45,9 @@ namespace Codist.NaviBar
 
 		protected override void OnMouseMove(MouseEventArgs e) {
 			base.OnMouseMove(e);
+			if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RangeHighlight) == false) {
+				return;
+			}
 			if (_MouseHoverItem != null) {
 				var p = e.GetPosition(_MouseHoverItem);
 				if (p.X != 0 && p.Y != 0 && _MouseHoverItem.Contains(p)) {
@@ -138,10 +142,11 @@ namespace Codist.NaviBar
 			}
 			var node = _SemanticContext.Node;
 			var nodes = new List<SyntaxNode>(5);
+			var detail = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail);
 			while (node != null) {
 				if (node.FullSpan.Contains(_View.Selection, true)
 					&& node.IsKind(SyntaxKind.VariableDeclaration) == false
-					&& (node.IsSyntaxBlock() || node.IsDeclaration() || node.IsKind(SyntaxKind.Attribute))) {
+					&& (detail && node.IsSyntaxBlock() || node.IsDeclaration() || node.IsKind(SyntaxKind.Attribute))) {
 					nodes.Add(node);
 				}
 				node = node.Parent;
@@ -294,10 +299,12 @@ namespace Codist.NaviBar
 
 				Icon = ThemeHelper.GetImage(node.GetImageId());
 				initializer?.Invoke(this);
-				ToolTip = String.Empty;
 				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
-				ToolTipOpening += NaviItem_ToolTipOpening;
+				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SymbolToolTip)) {
+					ToolTip = String.Empty;
+					ToolTipOpening += NaviItem_ToolTipOpening;
+				}
 				Click += NaviItem_Click;
 			}
 
@@ -312,7 +319,7 @@ namespace Codist.NaviBar
 				get => _ShowNodeDetail;
 				internal set {
 					_ShowNodeDetail = value;
-					if (value) {
+					if (value && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.FieldValue)) {
 						if (Node.IsKind(SyntaxKind.VariableDeclarator)) {
 							InputGestureText = (Node as VariableDeclaratorSyntax).Initializer?.Value?.ToString();
 						}
@@ -392,7 +399,7 @@ namespace Codist.NaviBar
 					}
 				}
 				t.Append(title, highlightTypes && (node.IsTypeDeclaration() || node.IsKind(SyntaxKind.NamespaceDeclaration) || node.IsKind(SyntaxKind.CompilationUnit)));
-				if (includeParameterList) {
+				if (includeParameterList && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterList)) {
 					if (node is BaseMethodDeclarationSyntax) {
 						t.Append(GetParameterListSignature((node as BaseMethodDeclarationSyntax).ParameterList), ThemeHelper.SystemGrayTextBrush);
 					}
@@ -456,7 +463,8 @@ namespace Codist.NaviBar
 							}
 						};
 						AddMemberDeclarations(node, false);
-						if ((node as BaseTypeDeclarationSyntax).Modifiers.Any(SyntaxKind.PartialKeyword)) {
+						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember)
+							&& (node as BaseTypeDeclarationSyntax).Modifiers.Any(SyntaxKind.PartialKeyword)) {
 							await AddPartialTypeDeclarationsAsync(node as BaseTypeDeclarationSyntax);
 						}
 						break;
@@ -546,7 +554,9 @@ namespace Codist.NaviBar
 			}
 			void AddMemberDeclarations(SyntaxNode node, bool isExternal) {
 				const byte UNDEFINED = 0xFF, TRUE = 1, FALSE = 0;
-				var directives = node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia) || d.IsKind(SyntaxKind.EndRegionDirectiveTrivia));
+				var directives = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.Region)
+					? node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia) || d.IsKind(SyntaxKind.EndRegionDirectiveTrivia))
+					: null;
 				byte regionJustStart = UNDEFINED; // undefined, prevent #endregion show up on top of menu items
 				int pos = _Bar._View.GetCaretPosition();
 				foreach (var child in node.ChildNodes()) {
