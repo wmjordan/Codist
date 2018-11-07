@@ -37,6 +37,7 @@ namespace Codist.SmartBars
 			if (Config.Instance.Features.MatchFlags(Features.SmartBar) == false) {
 				return;
 			}
+			textView.VisualElement.Loaded += TextViewLoaded;
 			// The toolbar will get wired to the text view events
 			var contentType = textView.TextBuffer.ContentType;
 			if (String.Equals(Constants.CodeTypes.CSharp, contentType.TypeName, StringComparison.OrdinalIgnoreCase)) {
@@ -50,6 +51,12 @@ namespace Codist.SmartBars
 			else {
 				new SmartBar(textView);
 			}
+		}
+
+		static void TextViewLoaded(object sender, EventArgs args) {
+			var e = sender as System.Windows.FrameworkElement;
+			WpfHelper.SetUITextRenderOptions(e);
+			e.Loaded -= TextViewLoaded;
 		}
 	}
 }

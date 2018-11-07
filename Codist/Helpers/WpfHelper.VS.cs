@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
@@ -124,6 +125,12 @@ namespace Codist
 				VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
 				Padding = ScrollerMargin
 			}.SetStyleResourceProperty(VsResourceKeys.GetScrollViewerStyleKey(true));
+		}
+
+		public static void SetUITextRenderOptions(DependencyObject element) {
+			TextOptions.SetTextFormattingMode(element, TextFormattingMode.Ideal);
+			TextOptions.SetTextHintingMode(element, TextHintingMode.Fixed);
+			TextOptions.SetTextRenderingMode(element, TextRenderingMode.Aliased);
 		}
 
 		sealed class SymbolLink : Run

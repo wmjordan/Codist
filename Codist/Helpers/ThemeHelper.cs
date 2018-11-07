@@ -1,14 +1,15 @@
 ﻿using System;
+using System.Drawing;
 using System.Windows.Controls;
-using System.Windows.Media;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using GdiColor = System.Drawing.Color;
 using WpfBrush = System.Windows.Media.SolidColorBrush;
 using WpfColor = System.Windows.Media.Color;
-using Microsoft.VisualStudio.Imaging;
-using System.Drawing;
 
 namespace Codist
 {
@@ -38,6 +39,8 @@ namespace Codist
 		public static WpfColor SystemButtonFaceColor { get; private set; }
 		public static WpfColor SystemThreeDFaceColor { get; private set; }
 		public static WpfBrush SystemGrayTextBrush { get; private set; }
+		public static string TextEditorFontName { get; private set; }
+		public static int TextEditorFontSize { get; private set; }
 
 		public static GdiColor GetGdiColor(this ThemeResourceKey resourceKey) {
 			return VSColorTheme.GetThemedColor(resourceKey);
@@ -47,6 +50,32 @@ namespace Codist
 		}
 		public static WpfBrush GetWpfBrush(this ThemeResourceKey resourceKey) {
 			return new WpfBrush(resourceKey.GetWpfColor());
+		}
+
+		public static void GetFontSettings(Guid category, out string fontName, out int fontSize) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			var storage = (IVsFontAndColorStorage)ServiceProvider.GlobalProvider.GetService(typeof(SVsFontAndColorStorage));
+			if (storage == null) {
+				goto EXIT;
+			}
+			var pLOGFONT = new LOGFONTW[1];
+			var pInfo = new FontInfo[1];
+
+			ErrorHandler.ThrowOnFailure(storage.OpenCategory(category, (uint)(__FCSTORAGEFLAGS.FCSF_LOADDEFAULTS | __FCSTORAGEFLAGS.FCSF_PROPAGATECHANGES)));
+			try {
+				if (ErrorHandler.Succeeded(storage.GetFont(pLOGFONT, pInfo))) {
+					fontName = pInfo[0].bstrFaceName;
+					fontSize = pInfo[0].wPointSize;
+					return;
+				}
+			}
+			finally {
+				storage.CloseCategory();
+			}
+			EXIT:
+			fontName = null;
+			fontSize = 0;
+			return;
 		}
 		/// <summary>
 		/// Gets a themed <see cref="Image"/> from a value defined in <see cref="KnownImageIds"/>
@@ -94,5 +123,6 @@ namespace Codist
 			SystemThreeDFaceColor = EnvironmentColors.SystemThreeDFaceColorKey.GetWpfColor();
 			SystemGrayTextBrush = EnvironmentColors.SystemGrayTextBrushKey.GetWpfBrush();
 		}
+
 	}
 }

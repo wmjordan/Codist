@@ -58,21 +58,6 @@ namespace Codist.Options
 			base.Dispose(disposing);
 		}
 
-		internal FontInfo GetFontSettings(Guid category) {
-			ThreadHelper.ThrowIfNotOnUIThread();
-			var storage = (IVsFontAndColorStorage)GetService(typeof(SVsFontAndColorStorage));
-			var pLOGFONT = new LOGFONTW[1];
-			var pInfo = new FontInfo[1];
-
-			ErrorHandler.ThrowOnFailure(storage.OpenCategory(category, (uint)(__FCSTORAGEFLAGS.FCSF_LOADDEFAULTS | __FCSTORAGEFLAGS.FCSF_PROPAGATECHANGES)));
-			try {
-				return ErrorHandler.Succeeded(storage.GetFont(pLOGFONT, pInfo)) ? pInfo[0] : default;
-			}
-			finally {
-				storage.CloseCategory();
-			}
-		}
-
 		internal static Brush GetPreviewBrush(BrushEffect effect, Color color, ref SizeF previewRegion) {
 			switch (effect) {
 				case BrushEffect.Solid:
@@ -196,6 +181,14 @@ namespace Codist.Options
 	{
 		protected override Features Feature => Features.SyntaxHighlight;
 		protected override IWin32Window Window => Control ?? (Control = new SmartBarPage(this));
+	}
+
+	[Browsable(false)]
+	[Guid("B798A559-E242-4604-94D0-69FC599F8C11")]
+	sealed class NaviBar : ConfigPage
+	{
+		protected override Features Feature => Features.NaviBar;
+		protected override IWin32Window Window => Control ?? (Control = new CSharpNaviBarPage(this));
 	}
 
 }
