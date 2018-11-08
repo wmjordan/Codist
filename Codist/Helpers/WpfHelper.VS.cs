@@ -130,7 +130,7 @@ namespace Codist
 		public static void SetUITextRenderOptions(DependencyObject element) {
 			TextOptions.SetTextFormattingMode(element, TextFormattingMode.Ideal);
 			TextOptions.SetTextHintingMode(element, TextHintingMode.Fixed);
-			TextOptions.SetTextRenderingMode(element, TextRenderingMode.Aliased);
+			TextOptions.SetTextRenderingMode(element, TextRenderingMode.Grayscale);
 		}
 
 		sealed class SymbolLink : Run
