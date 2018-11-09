@@ -527,7 +527,7 @@ namespace Codist.NaviBar
 				}
 				var current = node.SyntaxTree;
 				foreach (var item in symbol.DeclaringSyntaxReferences) {
-					if (item.SyntaxTree == current) {
+					if (item.SyntaxTree == current || String.Equals(item.SyntaxTree.FilePath, current.FilePath, StringComparison.OrdinalIgnoreCase)) {
 						continue;
 					}
 					var partial = await item.GetSyntaxAsync(ct);
