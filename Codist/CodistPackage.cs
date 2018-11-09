@@ -101,7 +101,9 @@ namespace Codist
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow);
+			if ((Config.Instance.DisplayOptimizations & DisplayOptimizations.MainWindow) != 0) {
+				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, true);
+			}
 			await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
 			await Commands.ScreenshotCommand.InitializeAsync(this);
 		}

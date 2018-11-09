@@ -127,10 +127,10 @@ namespace Codist
 			}.SetStyleResourceProperty(VsResourceKeys.GetScrollViewerStyleKey(true));
 		}
 
-		public static void SetUITextRenderOptions(DependencyObject element) {
-			TextOptions.SetTextFormattingMode(element, TextFormattingMode.Ideal);
-			TextOptions.SetTextHintingMode(element, TextHintingMode.Fixed);
-			TextOptions.SetTextRenderingMode(element, TextRenderingMode.Grayscale);
+		public static void SetUITextRenderOptions(DependencyObject element, bool optimize) {
+			//TextOptions.SetTextFormattingMode(element, optimize ? TextFormattingMode.Ideal : TextFormattingMode.Display);
+			TextOptions.SetTextHintingMode(element, optimize ? TextHintingMode.Fixed : TextHintingMode.Auto);
+			TextOptions.SetTextRenderingMode(element, optimize ? TextRenderingMode.Grayscale : TextRenderingMode.Auto);
 		}
 
 		sealed class SymbolLink : Run

@@ -45,8 +45,8 @@
 			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this.customGroupBox1 = new Codist.Controls.CustomGroupBox();
-			this._OptimizeMainWindowBox = new System.Windows.Forms.CheckBox();
 			this._OptimizeCodeWindowBox = new System.Windows.Forms.CheckBox();
+			this._OptimizeMainWindowBox = new System.Windows.Forms.CheckBox();
 			this.groupBox3.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.groupBox1.SuspendLayout();
@@ -175,10 +175,10 @@
 			this.groupBox1.Controls.Add(this.label2);
 			this.groupBox1.Controls.Add(this._TopMarginBox);
 			this.groupBox1.Controls.Add(this.label1);
-			this.groupBox1.Location = new System.Drawing.Point(6, 67);
+			this.groupBox1.Location = new System.Drawing.Point(6, 6);
 			this.groupBox1.Name = "groupBox1";
 			this.groupBox1.Size = new System.Drawing.Size(552, 84);
-			this.groupBox1.TabIndex = 1;
+			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Extra Line Margins";
 			// 
@@ -267,22 +267,13 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.customGroupBox1.Controls.Add(this._OptimizeCodeWindowBox);
 			this.customGroupBox1.Controls.Add(this._OptimizeMainWindowBox);
-			this.customGroupBox1.Location = new System.Drawing.Point(6, 6);
+			this.customGroupBox1.Location = new System.Drawing.Point(6, 226);
 			this.customGroupBox1.Name = "customGroupBox1";
 			this.customGroupBox1.Size = new System.Drawing.Size(552, 55);
-			this.customGroupBox1.TabIndex = 0;
+			this.customGroupBox1.TabIndex = 1;
 			this.customGroupBox1.TabStop = false;
 			this.customGroupBox1.Text = "Font Rendering";
-			// 
-			// _OptimizeMainWindowBox
-			// 
-			this._OptimizeMainWindowBox.AutoSize = true;
-			this._OptimizeMainWindowBox.Location = new System.Drawing.Point(9, 24);
-			this._OptimizeMainWindowBox.Name = "_OptimizeMainWindowBox";
-			this._OptimizeMainWindowBox.Size = new System.Drawing.Size(189, 19);
-			this._OptimizeMainWindowBox.TabIndex = 0;
-			this._OptimizeMainWindowBox.Text = "Optimize main window";
-			this._OptimizeMainWindowBox.UseVisualStyleBackColor = true;
+			this.customGroupBox1.Visible = false;
 			// 
 			// _OptimizeCodeWindowBox
 			// 
@@ -293,6 +284,16 @@
 			this._OptimizeCodeWindowBox.TabIndex = 1;
 			this._OptimizeCodeWindowBox.Text = "Optimize document window";
 			this._OptimizeCodeWindowBox.UseVisualStyleBackColor = true;
+			// 
+			// _OptimizeMainWindowBox
+			// 
+			this._OptimizeMainWindowBox.AutoSize = true;
+			this._OptimizeMainWindowBox.Location = new System.Drawing.Point(9, 24);
+			this._OptimizeMainWindowBox.Name = "_OptimizeMainWindowBox";
+			this._OptimizeMainWindowBox.Size = new System.Drawing.Size(189, 19);
+			this._OptimizeMainWindowBox.TabIndex = 0;
+			this._OptimizeMainWindowBox.Text = "Optimize main window";
+			this._OptimizeMainWindowBox.UseVisualStyleBackColor = true;
 			// 
 			// GeneralPage
 			// 

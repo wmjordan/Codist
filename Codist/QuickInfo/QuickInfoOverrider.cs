@@ -143,7 +143,9 @@ namespace Codist.QuickInfo
 					if (p == null) {
 						goto EXIT;
 					}
-					WpfHelper.SetUITextRenderOptions(p);
+					if ((Config.Instance.DisplayOptimizations & DisplayOptimizations.CodeWindow) != 0) {
+						WpfHelper.SetUITextRenderOptions(p, true);
+					}
 					if (p.Children.Count > 1) {
 						OverrideDiagnosticInfo(p);
 						p.SetValue(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont);

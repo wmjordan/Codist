@@ -39,8 +39,13 @@ namespace Codist.Options
 				Config.Instance.NoSpaceBetweenWrappedLines = _NoSpaceBetweenWrappedLinesBox.Checked;
 				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			});
-			_OptimizeMainWindowBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(DisplayOptimizations.MainWindow, _OptimizeMainWindowBox.Checked));
-			_OptimizeCodeWindowBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(DisplayOptimizations.CodeWindow, _OptimizeCodeWindowBox.Checked));
+			_OptimizeMainWindowBox.CheckedChanged += _UI.HandleEvent(() => {
+				Config.Instance.Set(DisplayOptimizations.MainWindow, _OptimizeMainWindowBox.Checked);
+				WpfHelper.SetUITextRenderOptions(System.Windows.Application.Current.MainWindow, _OptimizeMainWindowBox.Checked);
+			});
+			_OptimizeCodeWindowBox.CheckedChanged += _UI.HandleEvent(() => {
+				Config.Instance.Set(DisplayOptimizations.CodeWindow, _OptimizeCodeWindowBox.Checked);
+			});
 
 			_SaveConfigButton.Click += (s, args) => {
 				using (var d = new SaveFileDialog {
