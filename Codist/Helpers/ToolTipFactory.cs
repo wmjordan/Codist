@@ -8,6 +8,7 @@ namespace Codist
 	{
 		public static Controls.ThemedToolTip CreateToolTip(ISymbol symbol, Compilation compilation) {
 			var tip = new Controls.ThemedToolTip();
+			WpfHelper.SetUITextRenderOptions(tip);
 			tip.Title
 				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + symbol.GetSymbolKindName() + " ")
 				.Append(symbol.Name, true)

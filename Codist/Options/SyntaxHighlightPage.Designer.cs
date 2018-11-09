@@ -26,7 +26,7 @@
 		/// </summary>
 		private void InitializeComponent() {
 			this._LightThemeButton = new System.Windows.Forms.Button();
-			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.groupBox2 = new Codist.Controls.CustomGroupBox();
 			this._LoadButton = new System.Windows.Forms.Button();
 			this._SaveButton = new System.Windows.Forms.Button();
 			this.label1 = new System.Windows.Forms.Label();
@@ -177,7 +177,7 @@
 
 		#endregion
 		private System.Windows.Forms.Button _LightThemeButton;
-		private System.Windows.Forms.GroupBox groupBox2;
+		private Codist.Controls.CustomGroupBox groupBox2;
 		private System.Windows.Forms.Button _ResetThemeButton;
 		private System.Windows.Forms.Button _DarkThemeButton;
 		private System.Windows.Forms.Label label1;

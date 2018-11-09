@@ -39,6 +39,9 @@ namespace Codist.Options
 				Config.Instance.NoSpaceBetweenWrappedLines = _NoSpaceBetweenWrappedLinesBox.Checked;
 				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			});
+			_OptimizeMainWindowBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(DisplayOptimizations.MainWindow, _OptimizeMainWindowBox.Checked));
+			_OptimizeCodeWindowBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(DisplayOptimizations.CodeWindow, _OptimizeCodeWindowBox.Checked));
+
 			_SaveConfigButton.Click += (s, args) => {
 				using (var d = new SaveFileDialog {
 					Title = "Save Codist configuration file...",
@@ -83,6 +86,8 @@ namespace Codist.Options
 				_SyntaxHighlightBox.Checked = config.Features.MatchFlags(Features.SyntaxHighlight);
 				_SmartBarBox.Checked = config.Features.MatchFlags(Features.SmartBar);
 				_CodeBarBox.Checked = config.Features.MatchFlags(Features.NaviBar);
+				_OptimizeMainWindowBox.Checked = config.DisplayOptimizations.MatchFlags(DisplayOptimizations.MainWindow);
+				_OptimizeCodeWindowBox.Checked = config.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow);
 				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
 				_TopMarginBox.Value = (decimal)config.TopSpace;
 				_BottomMarginBox.Value = (decimal)config.BottomSpace;

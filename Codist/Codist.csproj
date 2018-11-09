@@ -87,6 +87,9 @@
     <Compile Include="Classifiers\XmlFormats.cs" />
     <Compile Include="Controls\StateButton.cs" />
     <Compile Include="Controls\ThemedMenuItem.cs" />
+    <Compile Include="Controls\TitleLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Helpers\CancellationHelper.cs" />
     <Compile Include="NaviBar\NaviBarFactory.cs" />
     <Compile Include="NaviBar\CSharpBar.cs" />

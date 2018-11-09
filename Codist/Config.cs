@@ -31,6 +31,9 @@ namespace Codist
 		[DefaultValue(Features.All)]
 		public Features Features { get; set; } = Features.All;
 
+		[DefaultValue(DisplayOptimizations.None)]
+		public DisplayOptimizations DisplayOptimizations { get; set; } = DisplayOptimizations.None;
+
 		[DefaultValue(SpecialHighlightOptions.Default)]
 		public SpecialHighlightOptions SpecialHighlightOptions { get; set; } = SpecialHighlightOptions.Default;
 
@@ -219,6 +222,9 @@ namespace Codist
 		internal void Set(Features options, bool set) {
 			Features = EnumHelper.SetFlags(Features, options, set);
 		}
+		internal void Set(DisplayOptimizations options, bool set) {
+			DisplayOptimizations = EnumHelper.SetFlags(DisplayOptimizations, options, set);
+		}
 		internal void Set(QuickInfoOptions options, bool set) {
 			QuickInfoOptions = EnumHelper.SetFlags(QuickInfoOptions, options, set);
 		}
@@ -401,6 +407,14 @@ namespace Codist
 		SmartBar = 1 << 3,
 		NaviBar = 1 << 4,
 		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar
+	}
+
+	[Flags]
+	public enum DisplayOptimizations
+	{
+		None,
+		MainWindow,
+		CodeWindow,
 	}
 
 	[Flags]

@@ -27,13 +27,14 @@
 		private void InitializeComponent() {
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this._RangeHighlightBox = new System.Windows.Forms.CheckBox();
 			this._ParameterListBox = new System.Windows.Forms.CheckBox();
 			this._RegionBox = new System.Windows.Forms.CheckBox();
 			this._PartialClassBox = new System.Windows.Forms.CheckBox();
 			this._FieldValueBox = new System.Windows.Forms.CheckBox();
 			this._ToolTipBox = new System.Windows.Forms.CheckBox();
 			this._SyntaxNodesBox = new System.Windows.Forms.CheckBox();
-			this._RangeHighlightBox = new System.Windows.Forms.CheckBox();
+			this.titleLabel1 = new Codist.Controls.TitleLabel();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
@@ -52,6 +53,7 @@
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this.titleLabel1);
 			this.tabPage2.Controls.Add(this._RangeHighlightBox);
 			this.tabPage2.Controls.Add(this._ParameterListBox);
 			this.tabPage2.Controls.Add(this._RegionBox);
@@ -67,43 +69,53 @@
 			this.tabPage2.Text = "Navigation Bar";
 			this.tabPage2.UseVisualStyleBackColor = true;
 			// 
+			// _RangeHighlightBox
+			// 
+			this._RangeHighlightBox.AutoSize = true;
+			this._RangeHighlightBox.Location = new System.Drawing.Point(15, 56);
+			this._RangeHighlightBox.Name = "_RangeHighlightBox";
+			this._RangeHighlightBox.Size = new System.Drawing.Size(189, 19);
+			this._RangeHighlightBox.TabIndex = 2;
+			this._RangeHighlightBox.Text = "Code range highlight";
+			this._RangeHighlightBox.UseVisualStyleBackColor = true;
+			// 
 			// _ParameterListBox
 			// 
 			this._ParameterListBox.AutoSize = true;
-			this._ParameterListBox.Location = new System.Drawing.Point(15, 100);
+			this._ParameterListBox.Location = new System.Drawing.Point(15, 116);
 			this._ParameterListBox.Name = "_ParameterListBox";
 			this._ParameterListBox.Size = new System.Drawing.Size(157, 19);
-			this._ParameterListBox.TabIndex = 2;
+			this._ParameterListBox.TabIndex = 4;
 			this._ParameterListBox.Text = "Method parameter";
 			this._ParameterListBox.UseVisualStyleBackColor = true;
 			// 
 			// _RegionBox
 			// 
 			this._RegionBox.AutoSize = true;
-			this._RegionBox.Location = new System.Drawing.Point(15, 175);
+			this._RegionBox.Location = new System.Drawing.Point(15, 191);
 			this._RegionBox.Name = "_RegionBox";
 			this._RegionBox.Size = new System.Drawing.Size(165, 19);
-			this._RegionBox.TabIndex = 5;
+			this._RegionBox.TabIndex = 7;
 			this._RegionBox.Text = "#region directive";
 			this._RegionBox.UseVisualStyleBackColor = true;
 			// 
 			// _PartialClassBox
 			// 
 			this._PartialClassBox.AutoSize = true;
-			this._PartialClassBox.Location = new System.Drawing.Point(15, 150);
+			this._PartialClassBox.Location = new System.Drawing.Point(15, 166);
 			this._PartialClassBox.Name = "_PartialClassBox";
-			this._PartialClassBox.Size = new System.Drawing.Size(189, 19);
-			this._PartialClassBox.TabIndex = 4;
-			this._PartialClassBox.Text = "Partial class member";
+			this._PartialClassBox.Size = new System.Drawing.Size(197, 19);
+			this._PartialClassBox.TabIndex = 6;
+			this._PartialClassBox.Text = "Partial class members";
 			this._PartialClassBox.UseVisualStyleBackColor = true;
 			// 
 			// _FieldValueBox
 			// 
 			this._FieldValueBox.AutoSize = true;
-			this._FieldValueBox.Location = new System.Drawing.Point(15, 125);
+			this._FieldValueBox.Location = new System.Drawing.Point(15, 141);
 			this._FieldValueBox.Name = "_FieldValueBox";
 			this._FieldValueBox.Size = new System.Drawing.Size(117, 19);
-			this._FieldValueBox.TabIndex = 3;
+			this._FieldValueBox.TabIndex = 5;
 			this._FieldValueBox.Text = "Field value";
 			this._FieldValueBox.UseVisualStyleBackColor = true;
 			// 
@@ -127,15 +139,15 @@
 			this._SyntaxNodesBox.Text = "Syntax detail";
 			this._SyntaxNodesBox.UseVisualStyleBackColor = true;
 			// 
-			// _HighlightRangeBox
+			// titleLabel1
 			// 
-			this._RangeHighlightBox.AutoSize = true;
-			this._RangeHighlightBox.Location = new System.Drawing.Point(15, 56);
-			this._RangeHighlightBox.Name = "_HighlightRangeBox";
-			this._RangeHighlightBox.Size = new System.Drawing.Size(189, 19);
-			this._RangeHighlightBox.TabIndex = 6;
-			this._RangeHighlightBox.Text = "Code range highlight";
-			this._RangeHighlightBox.UseVisualStyleBackColor = true;
+			this.titleLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.titleLabel1.Location = new System.Drawing.Point(12, 89);
+			this.titleLabel1.Name = "titleLabel1";
+			this.titleLabel1.Size = new System.Drawing.Size(488, 15);
+			this.titleLabel1.TabIndex = 3;
+			this.titleLabel1.Text = "Drop-down Item";
 			// 
 			// CSharpNaviBarPage
 			// 
@@ -162,5 +174,6 @@
 		private System.Windows.Forms.CheckBox _ToolTipBox;
 		private System.Windows.Forms.CheckBox _RegionBox;
 		private System.Windows.Forms.CheckBox _RangeHighlightBox;
+		private Controls.TitleLabel titleLabel1;
 	}
 }

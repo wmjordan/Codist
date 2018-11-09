@@ -143,6 +143,7 @@ namespace Codist.QuickInfo
 					if (p == null) {
 						goto EXIT;
 					}
+					WpfHelper.SetUITextRenderOptions(p);
 					if (p.Children.Count > 1) {
 						OverrideDiagnosticInfo(p);
 						p.SetValue(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont);
@@ -253,14 +254,6 @@ namespace Codist.QuickInfo
 
 					// replace the default XML doc
 					if (DocElement != null) {
-						// todo: apply decoratives lines between doc and other parts with a WPF template
-						//DocElement = new StackPanel {
-						//	Children = {
-						//		CreateDecorativeLine(doc),
-						//		DocElement,
-						//		CreateDecorativeLine(doc)
-						//	}
-						//};
 						try {
 							if (doc.Children.Count > 1 && doc.Children[1] is TextBlock) {
 								doc.Children.RemoveAt(1);
@@ -288,21 +281,6 @@ namespace Codist.QuickInfo
 							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 40;
 						}
 					}
-					System.Windows.Shapes.Line CreateDecorativeLine(StackPanel docPanel) {
-						return new System.Windows.Shapes.Line {
-							Stroke = ThemeHelper.MenuGlyphBackgroundBrush,
-							StrokeThickness = 1,
-							StrokeDashArray = new DoubleCollection { 4, 2 },
-							X1 = 0,
-							X2 = docPanel.DesiredSize.Width,
-							Y1 = 3,
-							Y2 = 3,
-							Height = 5,
-							MaxWidth = Config.Instance.QuickInfoMaxWidth,
-							HorizontalAlignment = HorizontalAlignment.Stretch
-						};
-					}
-
 				}
 
 				static void ApplySizeLimit(StackPanel quickInfoPanel) {
