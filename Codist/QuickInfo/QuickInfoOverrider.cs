@@ -238,7 +238,7 @@ namespace Codist.QuickInfo
 					titlePanel.HorizontalAlignment = HorizontalAlignment.Stretch;
 					doc.HorizontalAlignment = HorizontalAlignment.Stretch;
 
-					var icon = infoPanel.GetFirstVisualChild<Microsoft.VisualStudio.Imaging.CrispImage>();
+					var icon = infoPanel.GetFirstVisualChild<CrispImage>();
 					var signature = infoPanel.GetFirstVisualChild<TextBlock>();
 
 					// beautify the title panel
@@ -318,7 +318,7 @@ namespace Codist.QuickInfo
 						if (o == null) {
 							var s = c as string;
 							if (s != null) {
-								cp.Content = new ThemedText {
+								cp.Content = new ThemedTipText {
 									Text = s
 								}.Scrollable();
 							}

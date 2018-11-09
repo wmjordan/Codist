@@ -127,10 +127,10 @@ namespace Codist.QuickInfo
 			var v = Microsoft.VisualStudio.Imaging.HslColor.FromColor(c);
 			return new StackPanel {
 				Children = {
-					new ThemedText().Append(new System.Windows.Shapes.Rectangle { Width = 16, Height = 16, Fill = brush }).Append("Color", true),
-					new StackPanel().AddReadOnlyTextBox($"{c.A}, {c.R}, {c.G}, {c.B}").Add(new ThemedText(" ARGB", true)).MakeHorizontal(),
-					new StackPanel().AddReadOnlyTextBox(c.ToHexString()).Add(new ThemedText(" HEX", true)).MakeHorizontal(),
-					new StackPanel().AddReadOnlyTextBox($"{v.Hue.ToString("0.###")}, {v.Saturation.ToString("0.###")}, {v.Luminosity.ToString("0.###")}").Add(new ThemedText(" HSL", true)).MakeHorizontal(),
+					new ThemedTipText().Append(new System.Windows.Shapes.Rectangle { Width = 16, Height = 16, Fill = brush }).Append("Color", true),
+					new StackPanel().AddReadOnlyTextBox($"{c.A}, {c.R}, {c.G}, {c.B}").Add(new ThemedTipText(" ARGB", true)).MakeHorizontal(),
+					new StackPanel().AddReadOnlyTextBox(c.ToHexString()).Add(new ThemedTipText(" HEX", true)).MakeHorizontal(),
+					new StackPanel().AddReadOnlyTextBox($"{v.Hue.ToString("0.###")}, {v.Saturation.ToString("0.###")}, {v.Luminosity.ToString("0.###")}").Add(new ThemedTipText(" HSL", true)).MakeHorizontal(),
 					new StackPanel {
 						Children = {
 							new TextBox { Text = SAMPLE, BorderBrush = WpfBrushes.Black, Foreground = brush, Background = WpfBrushes.Black },

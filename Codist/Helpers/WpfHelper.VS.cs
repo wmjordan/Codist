@@ -72,7 +72,7 @@ namespace Codist
 			menu.Opened += (sender, e) => {
 				var m = sender as ContextMenu;
 				m.Items.Add(new MenuItem {
-					Header = new ThemedText().Append(symbolName, true).Append(" is defined in ").Append(refs.Length.ToString(), true).Append(" places"),
+					Header = new ThemedMenuText().Append(symbolName, true).Append(" is defined in ").Append(refs.Length.ToString(), true).Append(" places"),
 					IsEnabled = false
 				});
 				foreach (var loc in refs.Sort(System.Collections.Generic.Comparer<Location>.Create((a, b) => {
@@ -80,7 +80,7 @@ namespace Codist
 				}))) {
 					//var pos = loc.SourceTree.GetLineSpan(loc.SourceSpan);
 					var item = new MenuItem {
-						Header = new ThemedText(System.IO.Path.GetFileName(loc.SourceTree.FilePath))/*.Append("(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", WpfBrushes.Gray)*/,
+						Header = new ThemedMenuText(System.IO.Path.GetFileName(loc.SourceTree.FilePath))/*.Append("(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", WpfBrushes.Gray)*/,
 						Tag = loc
 					};
 					item.Click += (s, args) => ((Location)((MenuItem)s).Tag).GoToSource();

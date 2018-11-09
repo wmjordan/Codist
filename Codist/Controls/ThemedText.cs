@@ -1,18 +1,40 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
 {
-	sealed class ThemedText : TextBlock
+	sealed class ThemedTipText : TextBlock
 	{
-		public ThemedText() {
+		public ThemedTipText() {
 			TextWrapping = TextWrapping.Wrap;
-			SetResourceReference(ForegroundProperty, Microsoft.VisualStudio.PlatformUI.EnvironmentColors.ButtonTextBrushKey);
+			SetResourceReference(ForegroundProperty, ThemeHelper.ToolTipTextBrush);
 		}
-		public ThemedText(string text) : this() {
+		public ThemedTipText(string text) : this() {
 			Inlines.Add(text);
 		}
-		public ThemedText(string text, bool bold) : this() {
+		public ThemedTipText(string text, bool bold) : this() {
+			this.Append(text, bold);
+		}
+	}
+	sealed class ThemedToolBarText : TextBlock
+	{
+		public ThemedToolBarText() {
+			SetResourceReference(ForegroundProperty, EnvironmentColors.SystemMenuTextBrushKey);
+		}
+		public ThemedToolBarText(string text) : this() {
+			Inlines.Add(text);
+		}
+	}
+	sealed class ThemedMenuText : TextBlock
+	{
+		public ThemedMenuText() {
+			SetResourceReference(ForegroundProperty, EnvironmentColors.SystemMenuTextBrushKey);
+		}
+		public ThemedMenuText(string text) : this() {
+			Inlines.Add(text);
+		}
+		public ThemedMenuText(string text, bool bold) : this() {
 			this.Append(text, bold);
 		}
 	}

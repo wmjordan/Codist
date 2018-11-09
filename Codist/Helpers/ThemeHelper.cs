@@ -110,7 +110,6 @@ namespace Codist
 			TitleBackgroundColor = EnvironmentColors.MainWindowActiveCaptionColorKey.GetWpfColor();
 			TitleTextBrush = EnvironmentColors.MainWindowActiveCaptionTextBrushKey.GetWpfBrush();
 			TitleBackgroundBrush = new WpfBrush(TitleBackgroundColor);
-			ToolTipTextBrush = EnvironmentColors.ButtonTextBrushKey.GetWpfBrush();
 			ToolTipBackgroundBrush = EnvironmentColors.ToolTipBrushKey.GetWpfBrush();
 			ToolWindowTextBrush = EnvironmentColors.ToolWindowTextBrushKey.GetWpfBrush();
 			ToolWindowBackgroundBrush = EnvironmentColors.ToolWindowBackgroundBrushKey.GetWpfBrush();
@@ -124,6 +123,7 @@ namespace Codist
 			SystemThreeDFaceColor = EnvironmentColors.SystemThreeDFaceColorKey.GetWpfColor();
 			SystemGrayTextBrush = EnvironmentColors.SystemGrayTextBrushKey.GetWpfBrush();
 			var formatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("tooltip").DefaultTextProperties;
+			ToolTipTextBrush = formatMap.ForegroundBrush as WpfBrush;
 			ToolTipFont = formatMap.Typeface.FontFamily;
 			ToolTipFontSize = formatMap.FontRenderingEmSize;
 		}
