@@ -456,7 +456,7 @@ namespace Codist.NaviBar
 									Margin = WpfHelper.MenuItemMargin,
 									Children = {
 										ThemeHelper.GetImage(KnownImageIds.Filter).WrapMargin(WpfHelper.GlyphMargin),
-										new FilterBox(Items) { MinWidth = 150 }
+										new FilterBox(this) { MinWidth = 150 }
 									},
 									Orientation = Orientation.Horizontal
 								},
@@ -631,42 +631,15 @@ namespace Codist.NaviBar
 
 			sealed class FilterBox : ThemedTextBox
 			{
-				readonly ItemCollection _Items;
-				readonly int _FilterOffset;
+				readonly ThemedMenuItem _Menu;
 
-				public FilterBox(ItemCollection items) {
-					_Items = items;
-					_FilterOffset = 0;
-				}
-
-				public FilterBox(ItemCollection items, int filterOffset) {
-					_Items = items;
-					_FilterOffset = filterOffset;
+				public FilterBox(ThemedMenuItem menu) {
+					_Menu = menu;
 				}
 
 				protected override void OnTextChanged(TextChangedEventArgs e) {
 					base.OnTextChanged(e);
-					var s = Text;
-					if (s.Length == 0) {
-						for (int i = _Items.Count - 1; i > _FilterOffset; i--) {
-							(_Items[i] as UIElement).Visibility = Visibility.Visible;
-						}
-						return;
-					}
-					for (int i = _Items.Count - 1; i > _FilterOffset; i--) {
-						var item = _Items[i] as MenuItem;
-						if (item == null) {
-							(_Items[i] as UIElement).Visibility = Visibility.Collapsed;
-							continue;
-						}
-						var t = (item.Header as TextBlock)?.GetText();
-						if (t == null) {
-							continue;
-						}
-						item.Visibility = t.IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1
-							? Visibility.Visible
-							: Visibility.Collapsed;
-					}
+					_Menu.Filter(Text.Split(' '));
 				}
 			}
 		}

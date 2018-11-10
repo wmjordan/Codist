@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -24,7 +25,7 @@ namespace Codist.Controls
 			set {
 				SetValue(SubMenuHeaderProperty, _SubMenuHeader = value);
 				if (_SubMenuHeader != null && HasItems == false) {
-					Items.Add(new Separator { Visibility = Visibility.Collapsed });
+					Items.Add(new SubMenuPlaceHolder());
 				}
 			}
 		}
@@ -39,11 +40,70 @@ namespace Codist.Controls
 		public void ClearItems() {
 			if (_SubMenuHeader == null) {
 				Items.Clear();
+				return;
 			}
-			else {
-				for (int i = Items.Count - 1; i > 0; i--) {
-					Items.RemoveAt(i);
+			for (int i = Items.Count - 1; i >= 0; i--) {
+				if (Items[i] is SubMenuPlaceHolder) {
+					continue;
 				}
+				Items.RemoveAt(i);
+			}
+		}
+
+		public void Filter(string[] keywords) {
+			if (keywords.Length == 0) {
+				foreach (UIElement item in Items) {
+					item.Visibility = item is SubMenuPlaceHolder ? Visibility.Collapsed : Visibility.Visible;
+				}
+				return;
+			}
+			foreach (UIElement item in Items) {
+				var menuItem = item as MenuItem;
+				if (menuItem == null) {
+					item.Visibility = Visibility.Collapsed;
+					continue;
+				}
+				var b = menuItem.Header as TextBlock;
+				if (b == null) {
+					continue;
+				}
+				if (FilterSignature(b.GetText(), keywords)) {
+					menuItem.Visibility = Visibility.Visible;
+					if (menuItem.HasItems) {
+						foreach (MenuItem sub in menuItem.Items) {
+							sub.Visibility = Visibility.Visible;
+						}
+					}
+					continue;
+				}
+				var matchedSubItem = false;
+				if (menuItem.HasItems) {
+					foreach (MenuItem sub in menuItem.Items) {
+						b = sub.Header as TextBlock;
+						if (b == null) {
+							continue;
+						}
+						if (FilterSignature(b.GetText(), keywords)) {
+							matchedSubItem = true;
+							sub.Visibility = Visibility.Visible;
+						}
+						else {
+							sub.Visibility = Visibility.Collapsed;
+						}
+					}
+				}
+				menuItem.Visibility = matchedSubItem ? Visibility.Visible : Visibility.Collapsed;
+			}
+
+			bool FilterSignature(string text, string[] words) {
+				return words.All(p => text.IndexOf(p, StringComparison.OrdinalIgnoreCase) != -1);
+			}
+		}
+
+		sealed class SubMenuPlaceHolder : Separator
+		{
+			public SubMenuPlaceHolder() {
+				Visibility = Visibility.Collapsed;
 			}
 		}
 	}

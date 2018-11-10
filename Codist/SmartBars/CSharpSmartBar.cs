@@ -82,41 +82,7 @@ namespace Codist.SmartBars
 				}
 			};
 			filterBox.TextChanged += (s, args) => {
-				var t = (s as TextBox).Text.Split(' ');
-				foreach (MenuItem item in menuItem.Items) {
-					var b = item.Header as TextBlock;
-					if (b == null) {
-						continue;
-					}
-					var it = b.GetText();
-					if (t.All(p => it.IndexOf(p, StringComparison.OrdinalIgnoreCase) != -1)) {
-						item.Visibility = Visibility.Visible;
-						if (item.HasItems) {
-							foreach (MenuItem sub in item.Items) {
-								sub.Visibility = Visibility.Visible;
-							}
-						}
-						continue;
-					}
-					var matchedSubItem = false;
-					if (item.HasItems) {
-						foreach (MenuItem sub in item.Items) {
-							b = sub.Header as TextBlock;
-							if (b == null) {
-								continue;
-							}
-							it = b.GetText();
-							if (t.All(p => it.IndexOf(p, StringComparison.OrdinalIgnoreCase) != -1)) {
-								matchedSubItem = true;
-								sub.Visibility = Visibility.Visible;
-							}
-							else {
-								sub.Visibility = Visibility.Collapsed;
-							}
-						}
-					}
-					item.Visibility = matchedSubItem ? Visibility.Visible : Visibility.Collapsed;
-				}
+				menuItem.Filter((s as TextBox).Text.Split(' '));
 			};
 		}
 
@@ -345,8 +311,7 @@ namespace Codist.SmartBars
 				default: return;
 			}
 			Array.Sort(callers, (a, b) => {
-				var s = a.CallingSymbol.ContainingType.Name.CompareTo(b.CallingSymbol.ContainingType.Name);
-				return s != 0 ? s : a.CallingSymbol.Name.CompareTo(b.CallingSymbol.Name);
+				return CompareSymbol(a.CallingSymbol, b.CallingSymbol);
 			});
 			if (callers.Length < 10) {
 				foreach (var caller in callers) {
@@ -483,9 +448,9 @@ namespace Codist.SmartBars
 
 		CommandItem[] GetDebugCommands(CommandContext ctx) {
 			return new CommandItem[] {
-				new CommandItem(KnownImageIds.Watch, "Add watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddWatch")),
-				new CommandItem(KnownImageIds.Watch, "Add parallel watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddParallelWatch")),
-				new CommandItem(KnownImageIds.DeleteBreakpoint, "Delete all breakpoints", c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
+				new CommandItem(KnownImageIds.Watch, "Add Watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddWatch")),
+				new CommandItem(KnownImageIds.Watch, "Add Parallel Watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddParallelWatch")),
+				new CommandItem(KnownImageIds.DeleteBreakpoint, "Delete All Breakpoints", c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
 			};
 		}
 
@@ -510,7 +475,7 @@ namespace Codist.SmartBars
 				}
 				node = node.Parent;
 			}
-			r.Add(new CommandItem(KnownImageIds.SelectAll, "Select all", ctrl => ctrl.ToolTip = "Select all text", ctx2 => TextEditorHelper.ExecuteEditorCommand("Edit.SelectAll")));
+			r.Add(new CommandItem(KnownImageIds.SelectAll, "Select All", ctrl => ctrl.ToolTip = "Select all text", ctx2 => TextEditorHelper.ExecuteEditorCommand("Edit.SelectAll")));
 			return r;
 		}
 
@@ -564,7 +529,7 @@ namespace Codist.SmartBars
 								r.Add(CreateCommandMenu("Find Constructor Callers...", KnownImageIds.ShowCallerGraph, t, "No caller was found", FindCallers));
 							}
 						}
-						r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, t, "No member was found", FindMembers));
+						r.Add(CreateCommandMenu("Find Members...", KnownImageIds.ListMembers, t, "No member was found", FindMembers));
 						if (t.IsStatic == false) {
 							r.Add(CreateCommandMenu("Find Extensions...", KnownImageIds.ListMembers, t, "No extension method was found", FindExtensionMethods));
 						}
@@ -584,7 +549,7 @@ namespace Codist.SmartBars
 					}
 					break;
 				case SymbolKind.Namespace:
-					r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, symbol, "No member was found", FindMembers));
+					r.Add(CreateCommandMenu("Find Members...", KnownImageIds.ListMembers, symbol, "No member was found", FindMembers));
 					break;
 			}
 			//r.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, symbol, "No reference found", FindReferences));
@@ -600,7 +565,7 @@ namespace Codist.SmartBars
 			if (type != null && type.SpecialType == SpecialType.None) {
 				list.Add(CreateCommandMenu("Find Members of " + type.Name + type.GetParameterString() + "...", KnownImageIds.ListMembers, type, "No member was found", FindMembers));
 				if (type.IsStatic == false) {
-					list.Add(CreateCommandMenu("Find Extensions for " + type.Name + type.GetParameterString() + "...", KnownImageIds.ListMembers, type, "No extension method was found", FindExtensionMethods));
+					list.Add(CreateCommandMenu("Find Extensions for " + type.Name + type.GetParameterString() + "...", KnownImageIds.ExtensionMethod, type, "No extension method was found", FindExtensionMethods));
 				}
 				if (type.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 					list.Add(new CommandItem(KnownImageIds.GoToDeclaration, "Go to " + type.Name + type.GetParameterString(), _ => type.GoToSource()));
@@ -609,17 +574,7 @@ namespace Codist.SmartBars
 		}
 
 		void SortAndGroupSymbolByClass(MenuItem menuItem, List<ISymbol> members) {
-			members.Sort((a, b) => {
-				var s = b.ContainingAssembly.GetSourceType().CompareTo(a.ContainingAssembly.GetSourceType());
-				INamedTypeSymbol ta, tb;
-				return s != 0 ? s
-					: (s = (tb = b.ContainingType).DeclaredAccessibility.CompareTo((ta = a.ContainingType).DeclaredAccessibility)) != 0 ? s
-					: (s = b.DeclaredAccessibility.CompareTo(a.DeclaredAccessibility)) != 0 ? s
-					: (s = ta.Name.CompareTo(tb.Name)) != 0 ? s
-					: (s = ta.GetHashCode().CompareTo(tb.GetHashCode())) != 0 ? s
-					: (s = a.Name.CompareTo(b.Name)) != 0 ? s
-					: 0;
-			});
+			members.Sort(CompareSymbol);
 			if (members.Count < 10) {
 				foreach (var member in members) {
 					menuItem.Items.Add(new SymbolMenuItem(this, member, member.Locations) {
@@ -639,6 +594,18 @@ namespace Codist.SmartBars
 					subMenu.Items.Add(new SymbolMenuItem(this, member, member.Locations));
 				}
 			}
+		}
+
+		static int CompareSymbol(ISymbol a, ISymbol b) {
+			var s = b.ContainingAssembly.GetSourceType().CompareTo(a.ContainingAssembly.GetSourceType());
+			INamedTypeSymbol ta, tb;
+			return s != 0 ? s
+				: (s = (tb = b.ContainingType).DeclaredAccessibility.CompareTo((ta = a.ContainingType).DeclaredAccessibility)) != 0 ? s
+				: (s = b.DeclaredAccessibility.CompareTo(a.DeclaredAccessibility)) != 0 ? s
+				: (s = ta.Name.CompareTo(tb.Name)) != 0 ? s
+				: (s = ta.GetHashCode().CompareTo(tb.GetHashCode())) != 0 ? s
+				: (s = a.Name.CompareTo(b.Name)) != 0 ? s
+				: 0;
 		}
 
 		bool UpdateSemanticModel() {
