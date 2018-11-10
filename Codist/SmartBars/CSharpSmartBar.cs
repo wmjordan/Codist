@@ -412,6 +412,13 @@ namespace Codist.SmartBars
 			});
 		}
 
+		void FindExtensionMethods(CommandContext context, MenuItem menuItem, ISymbol source) {
+			ThreadHelper.JoinableTaskFactory.Run(async () => {
+				var members = await (source as ITypeSymbol).FindExtensionMethodsAsync(_Context.Document.Project, context.CancellationToken);
+				SortAndGroupSymbolByClass(menuItem, members);
+			});
+		}
+
 		void FindMembers(CommandContext context, MenuItem menuItem, ISymbol symbol) {
 			var type = symbol as INamedTypeSymbol;
 			if (type != null && type.TypeKind == TypeKind.Class) {
@@ -527,7 +534,7 @@ namespace Codist.SmartBars
 						r.Add(CreateCommandMenu("Find Implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
 					}
 					if (symbol.Kind != SymbolKind.Event) {
-						CreateFindMemberForReturnTypeCommand(symbol, r);
+						CreateCommandsForReturnTypeCommand(symbol, r);
 					}
 					if (symbol.Kind == SymbolKind.Method && (symbol as IMethodSymbol).MethodKind == MethodKind.Constructor) {
 						goto case SymbolKind.NamedType;
@@ -537,7 +544,7 @@ namespace Codist.SmartBars
 				case SymbolKind.Field:
 				case SymbolKind.Local:
 				case SymbolKind.Parameter:
-					CreateFindMemberForReturnTypeCommand(symbol, r);
+					CreateCommandsForReturnTypeCommand(symbol, r);
 					break;
 				case SymbolKind.NamedType:
 					var t = symbol as INamedTypeSymbol;
@@ -558,6 +565,9 @@ namespace Codist.SmartBars
 							}
 						}
 						r.Add(CreateCommandMenu("Find members...", KnownImageIds.ListMembers, t, "No member was found", FindMembers));
+						if (t.IsStatic == false) {
+							r.Add(CreateCommandMenu("Find Extensions...", KnownImageIds.ListMembers, t, "No extension method was found", FindExtensionMethods));
+						}
 					}
 					if (t.IsStatic || t.SpecialType != SpecialType.None) {
 						break;
@@ -585,11 +595,14 @@ namespace Codist.SmartBars
 			return r;
 		}
 
-		void CreateFindMemberForReturnTypeCommand(ISymbol symbol, List<CommandItem> list) {
+		void CreateCommandsForReturnTypeCommand(ISymbol symbol, List<CommandItem> list) {
 			var type = symbol.GetReturnType();
 			if (type != null && type.SpecialType == SpecialType.None) {
 				list.Add(CreateCommandMenu("Find Members of " + type.Name + type.GetParameterString() + "...", KnownImageIds.ListMembers, type, "No member was found", FindMembers));
-				if (type.FirstSourceLocation() != null) {
+				if (type.IsStatic == false) {
+					list.Add(CreateCommandMenu("Find Extensions for " + type.Name + type.GetParameterString() + "...", KnownImageIds.ListMembers, type, "No extension method was found", FindExtensionMethods));
+				}
+				if (type.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 					list.Add(new CommandItem(KnownImageIds.GoToDeclaration, "Go to " + type.Name + type.GetParameterString(), _ => type.GoToSource()));
 				}
 			}
@@ -597,8 +610,15 @@ namespace Codist.SmartBars
 
 		void SortAndGroupSymbolByClass(MenuItem menuItem, List<ISymbol> members) {
 			members.Sort((a, b) => {
-				var s = a.ContainingType.Name.CompareTo(b.ContainingType.Name);
-				return s != 0 ? s : a.Name.CompareTo(b.Name);
+				var s = b.ContainingAssembly.GetSourceType().CompareTo(a.ContainingAssembly.GetSourceType());
+				INamedTypeSymbol ta, tb;
+				return s != 0 ? s
+					: (s = (tb = b.ContainingType).DeclaredAccessibility.CompareTo((ta = a.ContainingType).DeclaredAccessibility)) != 0 ? s
+					: (s = b.DeclaredAccessibility.CompareTo(a.DeclaredAccessibility)) != 0 ? s
+					: (s = ta.Name.CompareTo(tb.Name)) != 0 ? s
+					: (s = ta.GetHashCode().CompareTo(tb.GetHashCode())) != 0 ? s
+					: (s = a.Name.CompareTo(b.Name)) != 0 ? s
+					: 0;
 			});
 			if (members.Count < 10) {
 				foreach (var member in members) {
@@ -685,7 +705,7 @@ namespace Codist.SmartBars
 			void ShowToolTip(object sender, ToolTipEventArgs args) {
 				ToolTip = ToolTipFactory.CreateToolTip(Symbol, (SmartBar as CSharpSmartBar)._Context.SemanticModel.Compilation);
 				this.SetTipOptions();
-				ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Right);
+				ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Left);
 				ToolTipOpening -= ShowToolTip;
 			}
 

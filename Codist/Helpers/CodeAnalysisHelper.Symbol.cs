@@ -94,6 +94,53 @@ namespace Codist
 			return members;
 		}
 
+		public static async Task<List<ISymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
+			var compilation = await project.GetCompilationAsync(cancellationToken);
+			var members = new List<ISymbol>(10);
+			var isValueType = type.IsValueType;
+			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+				if (typeSymbol.IsStatic == false || typeSymbol.MightContainExtensionMethods == false) {
+					continue;
+				}
+				foreach (var member in typeSymbol.GetMembers()) {
+					if (cancellationToken.IsCancellationRequested) {
+						return members;
+					}
+					if (member.IsStatic == false || member.Kind != SymbolKind.Method) {
+						continue;
+					}
+					var m = member as IMethodSymbol;
+					if (m.IsExtensionMethod == false || m.CanBeReferencedByName == false) {
+						continue;
+					}
+					var p = m.Parameters[0];
+					if (type.CanConvertTo(p.Type)) {
+						members.Add(m);
+						continue;
+					}
+					if (m.IsGenericMethod == false || p.Type.TypeKind != TypeKind.TypeParameter) {
+						continue;
+					}
+					foreach (var item in m.TypeParameters) {
+						if (item != p.Type
+							|| item.HasValueTypeConstraint && isValueType == false
+							|| item.HasReferenceTypeConstraint && isValueType) {
+							continue;
+						}
+						if (item.HasConstructorConstraint) {
+
+						}
+						if (item.ConstraintTypes.Length > 0
+							&& item.ConstraintTypes.Any(i => i == type || type.CanConvertTo(i)) == false) {
+							continue;
+						}
+						members.Add(m);
+					}
+				}
+			}
+			return members;
+		}
+
 		/// <summary>
 		/// Finds symbol declarations matching <paramref name="symbolName"/> within given <paramref name="project"/>.
 		/// </summary>
@@ -113,7 +160,7 @@ namespace Codist
 				}
 			}
 			return symbols;
-		} 
+		}
 		#endregion
 
 		#region Assembly and namespace
