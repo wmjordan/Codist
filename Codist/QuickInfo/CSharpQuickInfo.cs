@@ -184,54 +184,58 @@ namespace Codist.QuickInfo
 		}
 
 		void OverrideDocumentation(SyntaxNode node, IQuickInfoOverrider qiWrapper, ISymbol symbol) {
-			if (symbol == null) {
+			if (symbol == null
+				|| Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) == false) {
 				return;
 			}
-			var summary = symbol.GetXmlDocSummaryForSymbol();
+			symbol = symbol.GetAliasTarget();
+			var doc = new XmlDoc(symbol, _SemanticModel.Compilation);
+			var info = new ThemedTipText();
+			var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
+			var summary = doc.GetDescription(symbol);
+			if (summary == null) {
+				var inheritDoc = doc.ExplicitInheritDoc;
+				if ((inheritDoc == null || (summary = inheritDoc.GetDescription(symbol)) == null)
+					&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
+					foreach (var item in doc.InheritedXmlDocs) {
+						if ((summary = inheritDoc.GetDescription(symbol)) != null) {
+							inheritDoc = item;
+							break;
+						}
+					}
+				}
+				if (inheritDoc != null && summary != null) {
+					info.Append("Documentation from ")
+					   .AddSymbol(inheritDoc.Symbol.ContainingType, null, _SymbolFormatter)
+					   .Append(".")
+					   .AddSymbol(inheritDoc.Symbol, null, _SymbolFormatter)
+					   .Append(":\n");
+				}
+			}
 			if (summary != null) {
 				if (summary.Name.LocalName == XmlDocRenderer.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {
 					return;
 				}
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
-					var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
-					var info = new ThemedTipText();
-					docRenderer.Render(summary, info);
-					if (info.Inlines.FirstInline != null) {
-						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
-							RenderXmlReturnsDoc(symbol, summary.Parent, info, docRenderer);
-						}
-						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc)) {
-							RenderXmlRemarksDoc(symbol, summary.Parent, info, docRenderer);
-						}
-						//if (doc.Parent.Element("preliminary") != null) {
-						//	info.AddText("\npreliminary", true, true, System.Windows.Media.Brushes.Red);
-						//}
-						qiWrapper.OverrideDocumentation(info);
-					}
+				docRenderer.Render(summary, info);
+			}
+			if (symbol.Kind == SymbolKind.Method
+				|| symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Delegate) {
+				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns;
+				if (returns != null && returns.FirstNode != null) {
+					info.AppendLine().Append("\n Returns: ", true);
+					docRenderer.Render(returns, info.Inlines);
 				}
 			}
-			else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
-				ISymbol baseMember;
-				summary = symbol.InheritDocumentation(out baseMember);
-				if (summary != null) {
-					if (summary.Name.LocalName == XmlDocRenderer.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {
-						return;
-					}
-					var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, baseMember);
-					var info = new ThemedTipText("Documentation from ")
-						.AddSymbol(baseMember.ContainingType, null, _SymbolFormatter)
-						.Append(".")
-						.AddSymbol(baseMember, null, _SymbolFormatter)
-						.Append(":\n");
-					docRenderer.Render(summary, info.Inlines);
-					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)) {
-						RenderXmlReturnsDoc(baseMember, summary.Parent, info, docRenderer);
-					}
-					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc)) {
-						RenderXmlRemarksDoc(baseMember, summary.Parent, info, docRenderer);
-					}
-					qiWrapper.OverrideDocumentation(info);
+			if (symbol.Kind != SymbolKind.Parameter && symbol.Kind != SymbolKind.TypeParameter) {
+				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks;
+				if (remarks != null && remarks.FirstNode != null) {
+					info.AppendLine().AppendLine().Append("Remarks", true).Append(": ").AppendLine();
+					docRenderer.Render(remarks, info.Inlines);
 				}
+			}
+
+			if (info.Inlines.FirstInline != null) {
+				qiWrapper.OverrideDocumentation(info);
 			}
 		}
 
@@ -242,29 +246,6 @@ namespace Codist.QuickInfo
 				_IsDisposed = true;
 			}
 		}
-
-		static void RenderXmlReturnsDoc(ISymbol symbol, XElement doc, TextBlock desc, XmlDocRenderer docRenderer) {
-			if (symbol.Kind == SymbolKind.Method
-				|| symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Delegate) {
-				var returns = doc.GetReturns();
-				if (returns != null && returns.FirstNode != null) {
-					desc.Append("\nReturns", true).Append(": ");
-					docRenderer.Render(returns, desc.Inlines);
-				}
-			}
-		}
-
-		static void RenderXmlRemarksDoc(ISymbol symbol, XElement doc, TextBlock desc, XmlDocRenderer docRenderer) {
-			if (symbol.Kind == SymbolKind.Parameter || symbol.Kind == SymbolKind.TypeParameter) {
-				return;
-			}
-			var remarks = doc.GetRemarks();
-			if (remarks != null && remarks.FirstNode != null) {
-				desc.AppendLine().AppendLine().Append("Remarks", true).Append(": ").AppendLine();
-				docRenderer.Render(remarks, desc.Inlines);
-			}
-		}
-
 
 		static void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo, SyntaxNode node) {
 			var info = new StackPanel().Add(new ThemedTipText("Maybe...", true));
@@ -982,7 +963,7 @@ namespace Codist.QuickInfo
 						argName = mp[mp.Length - 1].Name;
 					}
 				}
-				var doc = argName != null ? (m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m).GetXmlDoc().GetNamedDocItem("param", argName) : null;
+				var doc = argName != null ? new XmlDoc(m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m, _SemanticModel.Compilation).GetParameter(argName) : null;
 				var info = new ThemedTipText("Argument", true)
 					.Append(" of ")
 					.AddSymbolDisplayParts(m.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, argIndex);

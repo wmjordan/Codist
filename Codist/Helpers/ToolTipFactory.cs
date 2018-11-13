@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Controls;
+using AppHelpers;
 using Microsoft.CodeAnalysis;
 
 namespace Codist
@@ -41,10 +42,11 @@ namespace Codist
 			foreach (var attr in symbol.GetAttributes()) {
 				SymbolFormatter.Empty.ToUIText(content.AppendLine(), attr);
 			}
-			var doc = symbol.GetXmlDocSummaryForSymbol();
-			if (doc != null) {
+			var doc = new XmlDoc(symbol, compilation);
+			var summary = doc.Summary ?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.ExplicitInheritDoc?.Summary : null);
+			if (summary != null) {
 				content.AppendLine().AppendLine();
-				new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(doc, content.Inlines);
+				new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(summary, content.Inlines);
 				tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 			}
 			return tip;

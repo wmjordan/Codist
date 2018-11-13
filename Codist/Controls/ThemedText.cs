@@ -16,6 +16,16 @@ namespace Codist.Controls
 		public ThemedTipText(string text, bool bold) : this() {
 			this.Append(text, bold);
 		}
+		public ThemedTipText InvertLastRun() {
+			var last = Inlines.LastInline;
+			last.Background = ThemeHelper.ToolTipTextBrush;
+			last.Foreground = ThemeHelper.ToolTipBackgroundBrush;
+			return this;
+		}
+		public ThemedTipText UnderlineLastRun() {
+			Inlines.LastInline.TextDecorations = System.Windows.TextDecorations.Underline;
+			return this;
+		}
 	}
 	sealed class ThemedToolBarText : TextBlock
 	{

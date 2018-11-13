@@ -29,7 +29,14 @@ namespace Codist.Options
 			_CSharpAttributesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Attributes, _CSharpAttributesQuickInfoBox.Checked));
 			_CSharpBaseTypeQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseType, _CSharpBaseTypeInheritenceQuickInfoBox.Enabled = _CSharpBaseTypeQuickInfoBox.Checked));
 			_CSharpBaseTypeInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.BaseTypeInheritence, _CSharpBaseTypeInheritenceQuickInfoBox.Checked));
-			_CSharpOverrideDefaultXmlDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.OverrideDefaultDocumentation, _CSharpDocumentationBaseTypeBox.Enabled = _CSharpTextOnlyDocBox.Enabled = _CSharpReturnsDocBox.Enabled = _CSharpRemarksDocBox.Enabled = _CSharpOverrideDefaultXmlDocBox.Checked));
+			_CSharpOverrideDefaultXmlDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(
+				QuickInfoOptions.OverrideDefaultDocumentation,
+				_CSharpDocumentationBaseTypeBox.Enabled
+					= _CSharpInheritDocCrefBox.Enabled
+					= _CSharpTextOnlyDocBox.Enabled
+					= _CSharpReturnsDocBox.Enabled
+					= _CSharpRemarksDocBox.Enabled
+					= _CSharpOverrideDefaultXmlDocBox.Checked));
 			_CSharpDeclarationQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Declaration, _CSharpDeclarationQuickInfoBox.Checked));
 			_CSharpSymbolLocationQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.SymbolLocation, _CSharpSymbolLocationQuickInfoBox.Checked));
 			_CSharpInterfacesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Interfaces, _CSharpInterfaceInheritenceQuickInfoBox.Enabled = _CSharpInterfacesQuickInfoBox.Checked));
@@ -40,6 +47,7 @@ namespace Codist.Options
 			_CSharpParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Parameter, _CSharpParameterQuickInfoBox.Checked));
 			_CSharpTypeParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.TypeParameters, _CSharpTypeParameterQuickInfoBox.Checked));
 			_CSharpDocumentationBaseTypeBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.DocumentationFromBaseType, _CSharpDocumentationBaseTypeBox.Checked));
+			_CSharpInheritDocCrefBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.DocumentationFromInheritDoc, _CSharpInheritDocCrefBox.Checked));
 			_CSharpReturnsDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.ReturnsDoc, _CSharpReturnsDocBox.Checked));
 			_CSharpRemarksDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.RemarksDoc, _CSharpRemarksDocBox.Checked));
 			_CSharpTextOnlyDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.TextOnlyDoc, _CSharpTextOnlyDocBox.Checked));
@@ -70,6 +78,7 @@ namespace Codist.Options
 				_CSharpRemarksDocBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc);
 				_CSharpOverrideDefaultXmlDocBox.Checked
 					= _CSharpDocumentationBaseTypeBox.Enabled
+					= _CSharpInheritDocCrefBox.Enabled
 					= _CSharpTextOnlyDocBox.Enabled
 					= _CSharpReturnsDocBox.Enabled
 					= _CSharpRemarksDocBox.Enabled
@@ -79,6 +88,7 @@ namespace Codist.Options
 				_CSharpParameterQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter);
 				_CSharpTypeParameterQuickInfoBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters);
 				_CSharpDocumentationBaseTypeBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType);
+				_CSharpInheritDocCrefBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc);
 				_CSharpTextOnlyDocBox.Checked = config.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc);
 				_QuickInfoMaxWidthBox.Value = (decimal)(config.QuickInfoMaxWidth >= 0 && config.QuickInfoMaxWidth < (double)_QuickInfoMaxWidthBox.Maximum ? config.QuickInfoMaxWidth : 0);
 				_QuickInfoMaxHeightBox.Value = (decimal)(config.QuickInfoMaxHeight >= 0 && config.QuickInfoMaxHeight < (double)_QuickInfoMaxHeightBox.Maximum ? config.QuickInfoMaxHeight : 0);

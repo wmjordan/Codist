@@ -52,6 +52,7 @@
 			this._CSharpOverrideDefaultXmlDocBox = new System.Windows.Forms.CheckBox();
 			this._ClickAndGoBox = new System.Windows.Forms.CheckBox();
 			this._AdditionalItemsPage = new System.Windows.Forms.TabPage();
+			this._CSharpInheritDocCrefBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this._DefaultPage.SuspendLayout();
 			this.groupBox4.SuspendLayout();
@@ -199,6 +200,7 @@
 			this._DefaultPage.Controls.Add(this._CSharpRemarksDocBox);
 			this._DefaultPage.Controls.Add(this._CSharpReturnsDocBox);
 			this._DefaultPage.Controls.Add(this._CSharpTextOnlyDocBox);
+			this._DefaultPage.Controls.Add(this._CSharpInheritDocCrefBox);
 			this._DefaultPage.Controls.Add(this._CSharpDocumentationBaseTypeBox);
 			this._DefaultPage.Controls.Add(this.groupBox4);
 			this._DefaultPage.Controls.Add(this._CSharpOverrideDefaultXmlDocBox);
@@ -214,7 +216,7 @@
 			// _AlternativeStyleBox
 			// 
 			this._AlternativeStyleBox.AutoSize = true;
-			this._AlternativeStyleBox.Location = new System.Drawing.Point(15, 156);
+			this._AlternativeStyleBox.Location = new System.Drawing.Point(15, 181);
 			this._AlternativeStyleBox.Name = "_AlternativeStyleBox";
 			this._AlternativeStyleBox.Size = new System.Drawing.Size(197, 19);
 			this._AlternativeStyleBox.TabIndex = 7;
@@ -224,30 +226,30 @@
 			// _CSharpRemarksDocBox
 			// 
 			this._CSharpRemarksDocBox.AutoSize = true;
-			this._CSharpRemarksDocBox.Location = new System.Drawing.Point(32, 131);
+			this._CSharpRemarksDocBox.Location = new System.Drawing.Point(32, 156);
 			this._CSharpRemarksDocBox.Name = "_CSharpRemarksDocBox";
 			this._CSharpRemarksDocBox.Size = new System.Drawing.Size(205, 19);
-			this._CSharpRemarksDocBox.TabIndex = 5;
+			this._CSharpRemarksDocBox.TabIndex = 6;
 			this._CSharpRemarksDocBox.Text = "Show <remarks> XML Doc";
 			this._CSharpRemarksDocBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpReturnsDocBox
 			// 
 			this._CSharpReturnsDocBox.AutoSize = true;
-			this._CSharpReturnsDocBox.Location = new System.Drawing.Point(32, 106);
+			this._CSharpReturnsDocBox.Location = new System.Drawing.Point(32, 131);
 			this._CSharpReturnsDocBox.Name = "_CSharpReturnsDocBox";
 			this._CSharpReturnsDocBox.Size = new System.Drawing.Size(205, 19);
-			this._CSharpReturnsDocBox.TabIndex = 4;
+			this._CSharpReturnsDocBox.TabIndex = 5;
 			this._CSharpReturnsDocBox.Text = "Show <returns> XML Doc";
 			this._CSharpReturnsDocBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpTextOnlyDocBox
 			// 
 			this._CSharpTextOnlyDocBox.AutoSize = true;
-			this._CSharpTextOnlyDocBox.Location = new System.Drawing.Point(32, 81);
+			this._CSharpTextOnlyDocBox.Location = new System.Drawing.Point(32, 106);
 			this._CSharpTextOnlyDocBox.Name = "_CSharpTextOnlyDocBox";
 			this._CSharpTextOnlyDocBox.Size = new System.Drawing.Size(333, 19);
-			this._CSharpTextOnlyDocBox.TabIndex = 3;
+			this._CSharpTextOnlyDocBox.TabIndex = 4;
 			this._CSharpTextOnlyDocBox.Text = "Allow text only (no <summary>) XML Doc";
 			this._CSharpTextOnlyDocBox.UseVisualStyleBackColor = true;
 			// 
@@ -269,10 +271,10 @@
 			this.groupBox4.Controls.Add(this.label2);
 			this.groupBox4.Controls.Add(this.label1);
 			this.groupBox4.Controls.Add(this._QuickInfoMaxWidthBox);
-			this.groupBox4.Location = new System.Drawing.Point(6, 193);
+			this.groupBox4.Location = new System.Drawing.Point(6, 211);
 			this.groupBox4.Name = "groupBox4";
 			this.groupBox4.Size = new System.Drawing.Size(506, 59);
-			this.groupBox4.TabIndex = 6;
+			this.groupBox4.TabIndex = 8;
 			this.groupBox4.TabStop = false;
 			this.groupBox4.Text = "Quick Info Item Size (0: Unlimited)";
 			// 
@@ -370,6 +372,16 @@
 			this._AdditionalItemsPage.Text = "Additional Items";
 			this._AdditionalItemsPage.UseVisualStyleBackColor = true;
 			// 
+			// _CSharpInheritDocCrefBox
+			// 
+			this._CSharpInheritDocCrefBox.AutoSize = true;
+			this._CSharpInheritDocCrefBox.Location = new System.Drawing.Point(32, 81);
+			this._CSharpInheritDocCrefBox.Name = "_CSharpInheritDocCrefBox";
+			this._CSharpInheritDocCrefBox.Size = new System.Drawing.Size(357, 19);
+			this._CSharpInheritDocCrefBox.TabIndex = 3;
+			this._CSharpInheritDocCrefBox.Text = "Inherit from <inheritdoc cref=\"\"/> target";
+			this._CSharpInheritDocCrefBox.UseVisualStyleBackColor = true;
+			// 
 			// CSharpSuperQuickInfoPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -419,5 +431,6 @@
 		private System.Windows.Forms.CheckBox _CSharpReturnsDocBox;
 		private System.Windows.Forms.CheckBox _CSharpRemarksDocBox;
 		private System.Windows.Forms.CheckBox _AlternativeStyleBox;
+		private System.Windows.Forms.CheckBox _CSharpInheritDocCrefBox;
 	}
 }

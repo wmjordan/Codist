@@ -45,29 +45,36 @@ namespace Codist
 			}
 			return block;
 		}
-		public static TextBlock AppendLine(this TextBlock block) {
+		public static TTextBlock AppendLine<TTextBlock>(this TTextBlock block)
+			where TTextBlock : TextBlock {
 			block.Inlines.Add(new LineBreak());
 			return block;
 		}
-		public static TextBlock Append(this TextBlock block, Inline inline) {
+		public static TTextBlock Append<TTextBlock>(this TTextBlock block, Inline inline)
+			where TTextBlock : TextBlock {
 			block.Inlines.Add(inline);
 			return block;
 		}
-		public static TextBlock Append(this TextBlock block, UIElement element) {
+		public static TTextBlock Append<TTextBlock>(this TTextBlock block, UIElement element)
+			where TTextBlock : TextBlock {
 			block.Inlines.Add(new InlineUIContainer(element) { BaselineAlignment = BaselineAlignment.TextTop });
 			return block;
 		}
-		public static TextBlock Append(this TextBlock block, string text) {
+		public static TTextBlock Append<TTextBlock>(this TTextBlock block, string text)
+			where TTextBlock : TextBlock {
 			block.Inlines.Add(new Run(text));
 			return block;
 		}
-		public static TextBlock Append(this TextBlock block, string text, bool bold) {
+		public static TTextBlock Append<TTextBlock>(this TTextBlock block, string text, bool bold)
+			where TTextBlock : TextBlock {
 			return block.Append(text, bold, false, null);
 		}
-		public static TextBlock Append(this TextBlock block, string text, WpfBrush brush) {
+		public static TTextBlock Append<TTextBlock>(this TTextBlock block, string text, WpfBrush brush)
+			where TTextBlock : TextBlock {
 			return block.Append(text, false, false, brush);
 		}
-		public static TextBlock Append(this TextBlock block, string text, bool bold, bool italic, WpfBrush brush) {
+		public static TTextBlock Append<TTextBlock>(this TTextBlock block, string text, bool bold, bool italic, WpfBrush brush)
+			where TTextBlock : TextBlock {
 			block.Inlines.Add(Render(text, bold, italic, brush));
 			return block;
 		}
