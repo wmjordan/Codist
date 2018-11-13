@@ -198,7 +198,7 @@ namespace Codist.QuickInfo
 				if ((inheritDoc == null || (summary = inheritDoc.GetDescription(symbol)) == null)
 					&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
 					foreach (var item in doc.InheritedXmlDocs) {
-						if ((summary = inheritDoc.GetDescription(symbol)) != null) {
+						if ((summary = item.GetDescription(symbol)) != null) {
 							inheritDoc = item;
 							break;
 						}
