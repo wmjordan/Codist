@@ -281,26 +281,30 @@ namespace Codist
 			}
 			return KnownImageIds.UnknownMember;
 			int GetClassIcon(ClassDeclarationSyntax syntax) {
+				bool isPartial = false;
 				foreach (var modifier in syntax.Modifiers) {
 					switch (modifier.Text) {
 						case "public": return KnownImageIds.ClassPublic;
 						case "protected": return KnownImageIds.ClassProtected;
 						case "internal": return KnownImageIds.ClassInternal;
 						case "private": return KnownImageIds.ClassPrivate;
+						case "partial": isPartial = true; break;
 					}
 				}
-				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.ClassInternal : KnownImageIds.ClassPrivate;
+				return isPartial ? KnownImageIds.ClassShortcut : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.ClassInternal : KnownImageIds.ClassPrivate;
 			}
 			int GetStructIcon(StructDeclarationSyntax syntax) {
+				bool isPartial = false;
 				foreach (var modifier in syntax.Modifiers) {
 					switch (modifier.Text) {
 						case "public": return KnownImageIds.StructurePublic;
 						case "protected": return KnownImageIds.StructureProtected;
 						case "internal": return KnownImageIds.StructureInternal;
 						case "private": return KnownImageIds.StructurePrivate;
+						case "partial": isPartial = true; break;
 					}
 				}
-				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.StructureInternal : KnownImageIds.StructurePrivate;
+				return isPartial ? KnownImageIds.StructureShortcut : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.StructureInternal : KnownImageIds.StructurePrivate;
 			}
 			int GetEnumIcon(EnumDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -313,14 +317,16 @@ namespace Codist
 				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.EnumerationInternal : KnownImageIds.EnumerationPrivate;
 			}
 			int GetInterfaceIcon(InterfaceDeclarationSyntax syntax) {
+				bool isPartial = false;
 				foreach (var modifier in syntax.Modifiers) {
 					switch (modifier.Text) {
 						case "public": return KnownImageIds.InterfacePublic;
 						case "internal": return KnownImageIds.InterfaceInternal;
 						case "private": return KnownImageIds.InterfacePrivate;
+						case "partial": isPartial = true; break;
 					}
 				}
-				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.InterfaceInternal : KnownImageIds.InterfacePrivate;
+				return isPartial ? KnownImageIds.InterfaceSnippet : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.InterfaceInternal : KnownImageIds.InterfacePrivate;
 			}
 			int GetEventIcon(BasePropertyDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
