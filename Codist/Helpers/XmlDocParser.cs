@@ -87,6 +87,9 @@ namespace Codist
 		}
 
 		bool Parse(ISymbol symbol) {
+			if (symbol == null) {
+				return false;
+			}
 			string c = symbol.GetDocumentationCommentXml(null, true);
 			if (String.IsNullOrEmpty(c)) {
 				return false;
