@@ -386,18 +386,31 @@ namespace Codist.SmartBars
 
 		void FindMembers(CommandContext context, MenuItem menuItem, ISymbol symbol) {
 			var type = symbol as INamedTypeSymbol;
-			if (type != null && type.TypeKind == TypeKind.Class) {
-				while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
-					if (context.CancellationToken.IsCancellationRequested) {
-						return;
+			var ct = context.CancellationToken;
+			if (type != null) {
+				if (type.TypeKind == TypeKind.Class) {
+					while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
+						if (ct.IsCancellationRequested) {
+							return;
+						}
+						var baseTypeItem = new SymbolMenuItem(this, type, type.ToDisplayString(WpfHelper.MemberNameFormat) + " (base class)", null);
+						menuItem.Items.Add(baseTypeItem);
+						AddSymbolMembers(this, baseTypeItem, type, ct);
 					}
-					var baseTypeItem = new SymbolMenuItem(this, type, type.ToDisplayString(WpfHelper.MemberNameFormat) + " (base class)", null);
-					menuItem.Items.Add(baseTypeItem);
-					AddSymbolMembers(this, baseTypeItem, type);
+				}
+				else if (type.TypeKind == TypeKind.Interface) {
+					foreach (var item in type.AllInterfaces) {
+						if (ct.IsCancellationRequested) {
+							return;
+						}
+						var baseInterface = new SymbolMenuItem(this, item, item.ToDisplayString(WpfHelper.MemberNameFormat) + " (base interface)", null);
+						menuItem.Items.Add(baseInterface);
+						AddSymbolMembers(this, baseInterface, item, ct);
+					}
 				}
 			}
-			AddSymbolMembers(this, menuItem, symbol);
-			void AddSymbolMembers(SmartBar bar, MenuItem menu, ISymbol source) {
+			AddSymbolMembers(this, menuItem, symbol, ct);
+			void AddSymbolMembers(SmartBar bar, MenuItem menu, ISymbol source, CancellationToken token) {
 				var nsOrType = source as INamespaceOrTypeSymbol;
 				var members = nsOrType.GetMembers().RemoveAll(m => m.CanBeReferencedByName == false);
 				if (source.Kind == SymbolKind.NamedType && (source as INamedTypeSymbol).TypeKind == TypeKind.Enum) {
@@ -408,6 +421,9 @@ namespace Codist.SmartBars
 					members = members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
 				}
 				foreach (var item in members) {
+					if (token.IsCancellationRequested) {
+						break;
+					}
 					menu.Items.Add(new SymbolMenuItem(bar, item, item.Locations));
 				}
 			}
