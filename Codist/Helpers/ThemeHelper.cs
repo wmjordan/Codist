@@ -16,8 +16,10 @@ namespace Codist
 {
 	static class ThemeHelper
 	{
+		static readonly Microsoft.VisualStudio.Text.Classification.IClassificationFormatMap __ToolTipFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("tooltip");
 		static ThemeHelper() {
 			RefreshThemeCache();
+			__ToolTipFormatMap.ClassificationFormatMappingChanged += UpdateToolTipFormatMap;
 		}
 
 		public static GdiColor DocumentPageColor { get; private set; }
@@ -122,7 +124,10 @@ namespace Codist
 			SystemButtonFaceColor = EnvironmentColors.SystemButtonFaceColorKey.GetWpfColor();
 			SystemThreeDFaceColor = EnvironmentColors.SystemThreeDFaceColorKey.GetWpfColor();
 			SystemGrayTextBrush = EnvironmentColors.SystemGrayTextBrushKey.GetWpfBrush();
-			var formatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("tooltip").DefaultTextProperties;
+		}
+
+		static void UpdateToolTipFormatMap(object sender, EventArgs e) {
+			var formatMap = __ToolTipFormatMap.DefaultTextProperties;
 			ToolTipTextBrush = formatMap.ForegroundBrush as WpfBrush;
 			ToolTipFont = formatMap.Typeface.FontFamily;
 			ToolTipFontSize = formatMap.FontRenderingEmSize;
