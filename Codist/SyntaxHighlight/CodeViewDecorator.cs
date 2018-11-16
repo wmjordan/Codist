@@ -17,7 +17,6 @@ namespace Codist.SyntaxHighlight
 		readonly IWpfTextView _TextView;
 		readonly IClassificationFormatMap _ClassificationFormatMap;
 		readonly IClassificationTypeRegistryService _RegService;
-		readonly IEditorFormatMap _EditorFormatMap;
 
 		Color _BackColor, _ForeColor;
 		volatile int _IsDecorating;
@@ -32,7 +31,6 @@ namespace Codist.SyntaxHighlight
 			_ClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(view);
 			_ClassificationFormatMap.ClassificationFormatMappingChanged += FormatUpdated;
 			_RegService = ServicesHelper.Instance.ClassificationTypeRegistry;
-			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(view);
 			_TextView = view;
 
 			Decorate();
@@ -72,14 +70,14 @@ namespace Codist.SyntaxHighlight
 				return;
 			}
 			try {
-				var c = _EditorFormatMap.GetColor(Constants.EditorProperties.Text, EditorFormatDefinition.ForegroundColorId);
+				var c = TextEditorHelper.DefaultEditorFormatMap.GetColor(Constants.EditorProperties.Text, EditorFormatDefinition.ForegroundColorId);
 				if (c.A > 0) {
 					if (c.Equals(_ForeColor) == false) {
 						Debug.WriteLine("Fore color changed: " + _ForeColor.ToString() + "->" + c.ToString());
 					}
 					_ForeColor = c;
 				}
-				c = _EditorFormatMap.GetColor(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundColorId);
+				c = TextEditorHelper.DefaultEditorFormatMap.GetColor(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundColorId);
 				if (c.A > 0) {
 					_BackColor = c.Alpha(0);
 				}
