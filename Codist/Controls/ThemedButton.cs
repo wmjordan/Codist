@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.VisualStudio.PlatformUI;
-using Microsoft.VisualStudio.Shell;
 
 namespace Codist.Controls
 {
@@ -26,6 +24,17 @@ namespace Codist.Controls
 		private void ThemedButton_Click(object sender, RoutedEventArgs e) {
 			_clickHanler?.Invoke();
 			var t = this.GetTemplate();
+		}
+	}
+
+	public class ThemedToggleButton : System.Windows.Controls.Primitives.ToggleButton
+	{
+		public ThemedToggleButton(int imageId, string toolTip) {
+			Content = ThemeHelper.GetImage(imageId);
+			ToolTip = toolTip;
+			Margin = WpfHelper.NoMargin;
+			Background = System.Windows.Media.Brushes.Transparent;
+			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 		}
 	}
 }

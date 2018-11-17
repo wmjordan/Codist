@@ -89,11 +89,11 @@ namespace Codist
 			};
 			return menu;
 		}
+		public static TItem Get<TItem>(this IEditorFormatMap map, string formatName, string resourceId) {
+			return map.GetProperties(formatName).Get<TItem>(resourceId);
+		}
 		public static WpfBrush GetBrush(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundBrushId) {
-			var p = map.GetProperties(formatName);
-			return p != null && p.Contains(resourceId)
-				? (p[resourceId] as WpfBrush)
-				: null;
+			return map.Get<WpfBrush>(formatName, resourceId);
 		}
 		public static WpfColor GetColor(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundColorId) {
 			var p = map.GetProperties(formatName);

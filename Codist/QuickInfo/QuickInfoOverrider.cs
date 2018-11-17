@@ -139,7 +139,7 @@ namespace Codist.QuickInfo
 
 				protected override void OnVisualParentChanged(DependencyObject oldParent) {
 					base.OnVisualParentChanged(oldParent);
-					var p = this.GetVisualParent<StackPanel>();
+					var p = this.GetParent<StackPanel>();
 					if (p == null) {
 						goto EXIT;
 					}
@@ -155,11 +155,11 @@ namespace Codist.QuickInfo
 						FixQuickInfo(p);
 					}
 					if (LimitItemSize) {
-						ApplySizeLimit(this.GetVisualParent<StackPanel>());
+						ApplySizeLimit(this.GetParent<StackPanel>());
 					}
 					EXIT:
 					// hides the parent container from taking excessive space in the quick info window
-					var c = this.GetVisualParent<Border>();
+					var c = this.GetParent<Border>();
 					if (c != null) {
 						c.Visibility = Visibility.Collapsed;
 					}
@@ -243,7 +243,7 @@ namespace Codist.QuickInfo
 
 					// beautify the title panel
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
-						var b = doc.GetVisualParent<Border>();
+						var b = doc.GetParent<Border>();
 						if (b != null && icon != null && signature != null) {
 							b.Margin = __DocPanelBorderMargin;
 							titlePanel.Margin = __TitlePanelMargin;
@@ -433,13 +433,13 @@ namespace Codist.QuickInfo
 						return;
 					}
 					// makes the default quick info panel scrollable and size limited
-					var p = _QuickInfoPanel.GetVisualParent() as ContentPresenter;
+					var p = _QuickInfoPanel.GetParent() as ContentPresenter;
 					if (p != null) {
 						p.Content = null;
 						p.Content = _QuickInfoPanel.Scrollable().LimitSize();
 					}
 					// hides the parent container from taking excessive space in the quick info window
-					var c = this.GetVisualParent<Border>();
+					var c = this.GetParent<Border>();
 					if (c != null) {
 						c.Visibility = Visibility.Collapsed;
 					}

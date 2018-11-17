@@ -40,7 +40,7 @@ namespace Codist.Controls
 		}
 
 		protected override void OnVisualParentChanged(DependencyObject oldParent) {
-			var c = this.GetVisualParent<ContentPresenter>();
+			var c = this.GetParent<ContentPresenter>();
 			if (c != null) {
 				c.Margin = WpfHelper.NoMargin;
 			}

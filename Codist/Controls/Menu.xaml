@@ -91,7 +91,7 @@
 			<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
 				<ContentPresenter Content="{TemplateBinding MenuItem.Icon}" ContentSource="Icon" Name="Icon" Width="16" Height="16" Margin="3,2,3,2" HorizontalAlignment="Center" VerticalAlignment="Center" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
 				<ContentPresenter RecognizesAccessKey="False" Content="{TemplateBinding HeaderedContentControl.Header}" ContentTemplate="{TemplateBinding HeaderedContentControl.HeaderTemplate}" ContentStringFormat="{TemplateBinding HeaderedItemsControl.HeaderStringFormat}" ContentSource="Header" Margin="0,0,3,0" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" VerticalAlignment="Center" Grid.Column="1"/>
-				<Popup x:Name="Popup" Placement="Bottom" HorizontalOffset="-1" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
+				<Popup x:Name="Popup" Placement="Bottom" HorizontalOffset="-1" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}" StaysOpen="True">
 					<Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="1" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}">
 						<StackPanel Margin="3">
 							<ContentPresenter x:Name="PopupHeader" Content="{TemplateBinding SubMenuHeader}" ContentSource="Tag" Margin="0,0,0,3" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>

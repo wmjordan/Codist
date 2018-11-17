@@ -85,6 +85,7 @@
     <Compile Include="Classifiers\TaggerResult.cs" />
     <Compile Include="Classifiers\XmlClassificationDefinitions.cs" />
     <Compile Include="Classifiers\XmlFormats.cs" />
+    <Compile Include="Controls\MemberFilterBox.cs" />
     <Compile Include="Controls\StateButton.cs" />
     <Compile Include="Controls\ThemedMenuItem.cs" />
     <Compile Include="Controls\TitleLabel.cs">

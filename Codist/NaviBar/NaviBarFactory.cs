@@ -48,7 +48,7 @@ namespace Codist.NaviBar
 			void FindNaviBar(object sender, RoutedEventArgs e) {
 				var view = sender as FrameworkElement;
 				var naviBar = view
-					?.GetVisualParent<Border>(b => b.Name == "PART_ContentPanel")
+					?.GetParent<Border>(b => b.Name == "PART_ContentPanel")
 					?.GetFirstVisualChild<Border>(b => b.Name == "DropDownBarMargin");
 				if (naviBar == null) {
 					goto EXIT;
@@ -58,7 +58,7 @@ namespace Codist.NaviBar
 				if (dropDown1 == null || dropDown2 == null) {
 					goto EXIT;
 				}
-				var container = dropDown1.GetVisualParent<Grid>();
+				var container = dropDown1.GetParent<Grid>();
 				if (container == null) {
 					goto EXIT;
 				}

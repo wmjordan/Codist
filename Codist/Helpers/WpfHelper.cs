@@ -16,6 +16,9 @@ namespace Codist
 	{
 		internal static readonly WpfColor EmptyColor = new WpfColor();
 		internal static readonly Thickness NoMargin = new Thickness(0);
+		internal static readonly Thickness TinyMargin = new Thickness(1);
+		internal static readonly Thickness SmallMargin = new Thickness(3);
+		internal static readonly Thickness MiddleMargin = new Thickness(6);
 		internal static readonly Thickness GlyphMargin = new Thickness(0, 0, 5, 0);
 		internal static readonly Thickness ScrollerMargin = new Thickness(0, 0, 3, 0);
 		internal static readonly Thickness TopItemMargin = new Thickness(0, 3, 0, 0);
@@ -172,20 +175,20 @@ namespace Codist
 		}
 		#endregion
 		#region WPF tree
-		public static DependencyObject GetVisualParent(this DependencyObject obj) {
-			return VisualTreeHelper.GetParent(obj);
+		public static DependencyObject GetParent(this DependencyObject obj) {
+			return obj is System.Windows.Media.Visual ? VisualTreeHelper.GetParent(obj) : LogicalTreeHelper.GetParent(obj);
 		}
 		public static DependencyObject GetFirstVisualChild(this DependencyObject obj) {
 			return VisualTreeHelper.GetChild(obj, 0);
 		}
-		public static TParent GetVisualParent<TParent>(this DependencyObject obj, Predicate<TParent> predicate = null)
+		public static TParent GetParent<TParent>(this DependencyObject obj, Predicate<TParent> predicate = null)
 			where TParent : DependencyObject {
 			if (obj == null) {
 				return null;
 			}
 			var p = obj;
 			TParent r;
-			while ((p = p.GetVisualParent()) != null) {
+			while ((p = p.GetParent()) != null) {
 				r = p as TParent;
 				if (r != null && (predicate == null || predicate(r))) {
 					return r;
@@ -242,6 +245,11 @@ namespace Codist
 		#endregion
 
 		#region Others
+		public static TItem Get<TItem>(this ResourceDictionary items, object key) {
+			return (items != null && items.Contains(key) && items[key] is TItem item)
+				? item
+				: default;
+		}
 		public static ToolBar HideOverflow(this ToolBar toolBar) {
 			if (toolBar.IsLoaded) {
 				HideOverflowInternal(toolBar);

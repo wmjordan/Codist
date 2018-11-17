@@ -87,7 +87,7 @@ namespace Codist.Commands
 			}) {
 				if (f.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
 					try {
-						var g = docWindow.VisualElement.GetVisualParent<System.Windows.Controls.Grid>();
+						var g = docWindow.VisualElement.GetParent<System.Windows.Controls.Grid>();
 						WpfHelper.ScreenShot(g, f.FileName, (int)g.ActualWidth, (int)g.ActualHeight);
 					}
 					catch (Exception ex) {

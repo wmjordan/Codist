@@ -63,26 +63,12 @@ namespace Codist.SmartBars
 		}
 
 		static void CreateItemsFilter(ThemedMenuItem menuItem) {
-			ThemedTextBox filterBox;
 			menuItem.SubMenuHeader = new StackPanel {
 				Margin = WpfHelper.TopItemMargin,
 				Children = {
-					new StackPanel {
-						Margin = WpfHelper.MenuItemMargin,
-						Children = {
-							ThemeHelper.GetImage(KnownImageIds.Filter).WrapMargin(WpfHelper.GlyphMargin),
-							(filterBox = new ThemedTextBox() {
-								MinWidth = 150,
-								ToolTip = new ThemedToolTip("Result Filter", "Filter items in this menu.\nUse space to separate keywords.")
-							})
-						},
-						Orientation = Orientation.Horizontal
-					},
+					new MemberFilterBox(menuItem.Items),
 					new Separator()
 				}
-			};
-			filterBox.TextChanged += (s, args) => {
-				menuItem.Filter((s as TextBox).Text.Split(' '));
 			};
 		}
 
@@ -627,7 +613,7 @@ namespace Codist.SmartBars
 		bool UpdateSemanticModel() {
 			return ThreadHelper.JoinableTaskFactory.Run(() => _Context.UpdateAsync(View.Selection.Start.Position, default));
 		}
-		sealed class SymbolMenuItem : CommandMenuItem
+		sealed class SymbolMenuItem : CommandMenuItem, IMemberFilterable
 		{
 			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(WpfHelper.MemberNameFormat), locations) {
 			}
@@ -659,6 +645,10 @@ namespace Codist.SmartBars
 
 			public IEnumerable<Location> Locations { get; }
 			public ISymbol Symbol { get; }
+
+			bool IMemberFilterable.Filter(MemberFilterTypes filterTypes) {
+				return MemberFilterBox.FilterByImageId(filterTypes, CommandItem.ImageId);
+			}
 
 			void GotoLocation(object sender, RoutedEventArgs args) {
 				var loc = Locations.FirstOrDefault();

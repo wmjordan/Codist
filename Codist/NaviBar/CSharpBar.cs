@@ -284,10 +284,11 @@ namespace Codist.NaviBar
 				}
 			}
 		}
-		sealed class NaviItem : ThemedMenuItem
+		sealed class NaviItem : ThemedMenuItem, IMemberFilterable
 		{
 			readonly CSharpBar _Bar;
 			bool _NodeIsExternal, _ShowNodeDetail;
+			readonly int _ImageId;
 
 			public NaviItem(CSharpBar bar, SyntaxNode node) : this (bar, node, false, false) { }
 			public NaviItem(CSharpBar bar, SyntaxNode node, bool highlightTypes, bool includeParameterList) : this(bar, node, null, null) {
@@ -297,8 +298,8 @@ namespace Codist.NaviBar
 				Node = node;
 				ClickHandler = clickHandler;
 				_Bar = bar;
-
-				Icon = ThemeHelper.GetImage(node.GetImageId());
+				_ImageId = node.GetImageId();
+				Icon = ThemeHelper.GetImage(_ImageId);
 				initializer?.Invoke(this);
 				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
@@ -365,6 +366,10 @@ namespace Codist.NaviBar
 					ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Right);
 				}
 				ToolTipOpening -= NaviItem_ToolTipOpening;
+			}
+
+			bool IMemberFilterable.Filter(MemberFilterTypes filterTypes) {
+				return MemberFilterBox.FilterByImageId(filterTypes, _ImageId);
 			}
 
 			#region Item methods
@@ -451,15 +456,15 @@ namespace Codist.NaviBar
 						SubMenuMaxHeight = _Bar._View.ViewportHeight / 2;
 						SubMenuHeader = new StackPanel {
 							Children = {
-								new NaviItem(_Bar, node) { ClickHandler = i => i.GoToLocation() },
 								new StackPanel {
 									Margin = WpfHelper.MenuItemMargin,
 									Children = {
-										ThemeHelper.GetImage(KnownImageIds.Filter).WrapMargin(WpfHelper.GlyphMargin),
-										new FilterBox(this) { MinWidth = 150 }
+										ThemeHelper.GetImage(node.GetImageId()).WrapMargin(WpfHelper.GlyphMargin),
+										new ThemedMenuText(node.GetDeclarationSignature(), true)
 									},
 									Orientation = Orientation.Horizontal
 								},
+								new MemberFilterBox(Items),
 								new Separator()
 							}
 						};
@@ -628,20 +633,6 @@ namespace Codist.NaviBar
 				}
 			}
 			#endregion
-
-			sealed class FilterBox : ThemedTextBox
-			{
-				readonly ThemedMenuItem _Menu;
-
-				public FilterBox(ThemedMenuItem menu) {
-					_Menu = menu;
-				}
-
-				protected override void OnTextChanged(TextChangedEventArgs e) {
-					base.OnTextChanged(e);
-					_Menu.Filter(Text.Split(' '));
-				}
-			}
 		}
 
 		sealed class GeometryAdornment : UIElement
