@@ -8,7 +8,7 @@ namespace Codist.Controls
 	{
 		public ThemedTipText() {
 			TextWrapping = TextWrapping.Wrap;
-			SetResourceReference(ForegroundProperty, ThemeHelper.ToolTipTextBrush);
+			Foreground = ThemeHelper.ToolTipTextBrush;
 		}
 		public ThemedTipText(string text) : this() {
 			Inlines.Add(text);
