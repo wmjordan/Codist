@@ -51,17 +51,17 @@ namespace Codist.Controls
 			}
 			IMemberFilterable filterable;
 			foreach (UIElement item in _Items) {
+				var menuItem = item as MenuItem;
 				if (useModifierFilter) {
 					filterable = item as IMemberFilterable;
 					if (filterable != null) {
-						if (filterable.Filter(filters) == false) {
+						if (filterable.Filter(filters) == false && (menuItem == null || menuItem.HasItems == false)) {
 							item.Visibility = Visibility.Collapsed;
 							continue;
 						}
 						item.Visibility = Visibility.Visible;
 					}
 				}
-				var menuItem = item as MenuItem;
 				if (menuItem == null) {
 					item.Visibility = Visibility.Collapsed;
 					continue;
@@ -83,13 +83,13 @@ namespace Codist.Controls
 				if (menuItem.HasItems) {
 					foreach (MenuItem sub in menuItem.Items) {
 						if (useModifierFilter) {
-							filterable = item as IMemberFilterable;
+							filterable = sub as IMemberFilterable;
 							if (filterable != null) {
 								if (filterable.Filter(filters) == false) {
-									item.Visibility = Visibility.Collapsed;
+									sub.Visibility = Visibility.Collapsed;
 									continue;
 								}
-								item.Visibility = Visibility.Visible;
+								sub.Visibility = Visibility.Visible;
 							}
 						}
 						b = sub.Header as TextBlock;
@@ -119,59 +119,66 @@ namespace Codist.Controls
 				case KnownImageIds.InterfacePublic:
 				case KnownImageIds.StructurePublic:
 				case KnownImageIds.EnumerationPublic:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Public | MemberFilterTypes.NestedType);
+					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.NestedType);
 				case KnownImageIds.ClassPrivate:
 				case KnownImageIds.InterfacePrivate:
 				case KnownImageIds.StructurePrivate:
 				case KnownImageIds.EnumerationPrivate:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Private | MemberFilterTypes.NestedType);
+					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.NestedType);
 				case KnownImageIds.ClassProtected:
 				case KnownImageIds.InterfaceProtected:
 				case KnownImageIds.StructureProtected:
 				case KnownImageIds.EnumerationProtected:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Protected | MemberFilterTypes.NestedType);
+					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.NestedType);
 				case KnownImageIds.ClassInternal:
 				case KnownImageIds.InterfaceInternal:
 				case KnownImageIds.StructureInternal:
 				case KnownImageIds.EnumerationInternal:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Internal | MemberFilterTypes.NestedType);
+					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.NestedType);
 				case KnownImageIds.ClassShortcut:
 				case KnownImageIds.InterfaceShortcut:
 				case KnownImageIds.StructureShortcut:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.NestedType);
+					return filterTypes.MatchFlags(MemberFilterTypes.NestedType);
 				case KnownImageIds.MethodPublic:
-				case KnownImageIds.NewItem:
+				case KnownImageIds.TypePublic: // constructor
 				case KnownImageIds.OperatorPublic:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Public | MemberFilterTypes.Method);
+					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.Method);
 				case KnownImageIds.MethodProtected:
+				case KnownImageIds.TypeProtected: // constructor
 				case KnownImageIds.OperatorProtected:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Protected | MemberFilterTypes.Method);
+					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.Method);
 				case KnownImageIds.MethodInternal:
+				case KnownImageIds.TypeInternal: // constructor
 				case KnownImageIds.OperatorInternal:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Internal | MemberFilterTypes.Method);
+					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.Method);
 				case KnownImageIds.MethodPrivate:
+				case KnownImageIds.TypePrivate: // constructor
 				case KnownImageIds.OperatorPrivate:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Private | MemberFilterTypes.Method);
+					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.Method);
+				case KnownImageIds.DeleteListItem: // deconstructor
+					return filterTypes.MatchFlags(MemberFilterTypes.Method);
 				case KnownImageIds.FieldPublic:
 				case KnownImageIds.ConstantPublic:
 				case KnownImageIds.PropertyPublic:
 				case KnownImageIds.EventPublic:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Public | MemberFilterTypes.FieldAndProperty);
+					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.FieldAndProperty);
 				case KnownImageIds.FieldProtected:
 				case KnownImageIds.ConstantProtected:
 				case KnownImageIds.PropertyProtected:
 				case KnownImageIds.EventProtected:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Protected | MemberFilterTypes.FieldAndProperty);
+					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.FieldAndProperty);
 				case KnownImageIds.FieldInternal:
 				case KnownImageIds.ConstantInternal:
 				case KnownImageIds.PropertyInternal:
 				case KnownImageIds.EventInternal:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Internal | MemberFilterTypes.FieldAndProperty);
+					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.FieldAndProperty);
 				case KnownImageIds.FieldPrivate:
 				case KnownImageIds.ConstantPrivate:
 				case KnownImageIds.PropertyPrivate:
 				case KnownImageIds.EventPrivate:
-					return filterTypes.HasAnyFlag(MemberFilterTypes.Private | MemberFilterTypes.FieldAndProperty);
+					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.FieldAndProperty);
+				case KnownImageIds.Numeric: // #region
+					return filterTypes == MemberFilterTypes.All;
 			}
 			return true;
 		}
@@ -228,6 +235,9 @@ namespace Codist.Controls
 				if (_TypeFilter.IsChecked == true) {
 					f |= MemberFilterTypes.NestedType;
 				}
+				if (f.HasAnyFlag(MemberFilterTypes.AllMembers) == false) {
+					f |= MemberFilterTypes.AllMembers;
+				}
 				if (_PublicFilter.IsChecked == true) {
 					f |= MemberFilterTypes.Public;
 				}
@@ -240,8 +250,8 @@ namespace Codist.Controls
 				if (_InternalFilter.IsChecked == true) {
 					f |= MemberFilterTypes.Internal;
 				}
-				if (f == MemberFilterTypes.None) {
-					f = MemberFilterTypes.All;
+				if (f.HasAnyFlag(MemberFilterTypes.AllAccessibility) == false) {
+					f |= MemberFilterTypes.AllAccessibility;
 				}
 				if (Filters != f) {
 					Filters = f;
