@@ -229,8 +229,8 @@ namespace Codist
 				case SyntaxKind.EnumDeclaration: return GetEnumIcon((EnumDeclarationSyntax)node);
 				case SyntaxKind.StructDeclaration: return GetStructIcon((StructDeclarationSyntax)node);
 				case SyntaxKind.InterfaceDeclaration: return GetInterfaceIcon((InterfaceDeclarationSyntax)node);
-				case SyntaxKind.ConstructorDeclaration: return KnownImageIds.NewItem;
 				case SyntaxKind.MethodDeclaration: return GetMethodIcon((MethodDeclarationSyntax)node);
+				case SyntaxKind.ConstructorDeclaration: return GetConstructorIcon((ConstructorDeclarationSyntax)node);
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.IndexerDeclaration: return GetPropertyIcon((BasePropertyDeclarationSyntax)node);
 				case SyntaxKind.OperatorDeclaration: return GetOperatorIcon((OperatorDeclarationSyntax)node);
@@ -381,6 +381,17 @@ namespace Codist
 					}
 				}
 				return KnownImageIds.MethodPrivate;
+			}
+			int GetConstructorIcon(ConstructorDeclarationSyntax syntax) {
+				foreach (var modifier in syntax.Modifiers) {
+					switch (modifier.Text) {
+						case "public": return KnownImageIds.TypePublic;
+						case "internal": return KnownImageIds.TypeInternal;
+						case "protected": return KnownImageIds.TypeProtected;
+						case "private": return KnownImageIds.TypePrivate;
+					}
+				}
+				return KnownImageIds.TypePrivate;
 			}
 			int GetPropertyIcon(BasePropertyDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
