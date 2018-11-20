@@ -328,6 +328,7 @@ namespace Codist.Classifiers
 					case SyntaxKind.LockStatement:
 					case SyntaxKind.UnsafeStatement:
 					case SyntaxKind.TryStatement:
+					case SyntaxKind.CatchDeclaration:
 					case SyntaxKind.CatchClause:
 					case SyntaxKind.CatchFilterClause:
 					case SyntaxKind.FinallyClause:
