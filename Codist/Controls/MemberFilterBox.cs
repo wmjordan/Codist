@@ -186,7 +186,7 @@ namespace Codist.Controls
 		sealed class MemberFilterButtonGroup : UserControl
 		{
 			static readonly Thickness _Margin = new Thickness(3, 0, 3, 0);
-			readonly ThemedToggleButton _FieldFilter, _MethodFilter, _TypeFilter, _PublicFilter, _InternalFilter, _ProtectFilter, _PrivateFilter;
+			readonly ThemedToggleButton _FieldFilter, _MethodFilter, _TypeFilter, _PublicFilter, _PrivateFilter;
 			bool _uiLock;
 
 			public event EventHandler FilterChanged;
@@ -194,12 +194,10 @@ namespace Codist.Controls
 			public MemberFilterButtonGroup() {
 				_FieldFilter = CreateButton(KnownImageIds.Field, "Fields and properties");
 				_MethodFilter = CreateButton(KnownImageIds.Method, "Methods, delegates and events");
-				_TypeFilter = CreateButton(KnownImageIds.Type, "Nested types");
+				_TypeFilter = CreateButton(KnownImageIds.EntityContainer, "Nested types");
 
-				_PublicFilter = CreateButton(KnownImageIds.TypePublic, "Public members");
-				_InternalFilter = CreateButton(KnownImageIds.TypeInternal, "Internal members");
-				_ProtectFilter = CreateButton(KnownImageIds.TypeProtected, "Protected members");
-				_PrivateFilter = CreateButton(KnownImageIds.TypePrivate, "Private members");
+				_PublicFilter = CreateButton(KnownImageIds.ModulePublic, "Public and protected members");
+				_PrivateFilter = CreateButton(KnownImageIds.ModulePrivate, "Internal and private members");
 
 				Margin = _Margin;
 				Content = new Border {
@@ -208,11 +206,11 @@ namespace Codist.Controls
 					CornerRadius = new CornerRadius(3),
 					Child = new StackPanel {
 						Children = {
-							new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter) { Margin = WpfHelper.NoMargin, BorderThickness = WpfHelper.NoMargin },
+							_PublicFilter, _PrivateFilter,
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin, BorderBrush = ThemeHelper.TextBoxBorderBrush },
 							_FieldFilter, _MethodFilter, _TypeFilter,
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin, BorderBrush = ThemeHelper.TextBoxBorderBrush },
-							_PublicFilter, _InternalFilter, _ProtectFilter, _PrivateFilter
+							new ThemedButton(KnownImageIds.StopFilter, "Clear filter switches", ClearFilter) { Margin = WpfHelper.NoMargin, BorderThickness = WpfHelper.NoMargin },
 						},
 						Orientation = Orientation.Horizontal
 					}
@@ -239,16 +237,10 @@ namespace Codist.Controls
 					f |= MemberFilterTypes.AllMembers;
 				}
 				if (_PublicFilter.IsChecked == true) {
-					f |= MemberFilterTypes.Public;
-				}
-				if (_ProtectFilter.IsChecked == true) {
-					f |= MemberFilterTypes.Protected;
+					f |= MemberFilterTypes.Public | MemberFilterTypes.Protected;
 				}
 				if (_PrivateFilter.IsChecked == true) {
-					f |= MemberFilterTypes.Private;
-				}
-				if (_InternalFilter.IsChecked == true) {
-					f |= MemberFilterTypes.Internal;
+					f |= MemberFilterTypes.Internal | MemberFilterTypes.Private;
 				}
 				if (f.HasAnyFlag(MemberFilterTypes.AllAccessibility) == false) {
 					f |= MemberFilterTypes.AllAccessibility;
@@ -262,8 +254,7 @@ namespace Codist.Controls
 			void ClearFilter() {
 				_uiLock = true;
 				_FieldFilter.IsChecked = _MethodFilter.IsChecked = _TypeFilter.IsChecked
-					= _PublicFilter.IsChecked = _ProtectFilter.IsChecked = _PrivateFilter.IsChecked
-					= _InternalFilter.IsChecked = false;
+					= _PublicFilter.IsChecked = _PrivateFilter.IsChecked = false;
 				_uiLock = false;
 				if (Filters != MemberFilterTypes.All) {
 					Filters = MemberFilterTypes.All;
