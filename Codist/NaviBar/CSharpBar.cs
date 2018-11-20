@@ -25,7 +25,6 @@ namespace Codist.NaviBar
 		readonly SemanticContext _SemanticContext;
 		CancellationTokenSource _cancellationSource = new CancellationTokenSource();
 		NaviItem _MouseHoverItem;
-		static MemberFilterOptions _MemberFilterOptions;
 
 		public CSharpBar(IWpfTextView textView) {
 			_View = textView;
@@ -171,20 +170,6 @@ namespace Codist.NaviBar
 				sb.Append(')');
 				return sb.ToString();
 			}
-		}
-
-		[Flags]
-		enum MemberFilterOptions
-		{
-			None,
-			Public = 1,
-			Private = 1 << 1,
-			Internal = 1 << 2,
-			Field = 1 << 3,
-			Property = 1 << 4,
-			Method = 1 << 5,
-			Delegate = 1 << 6,
-			All = Public | Private | Internal | Field | Property | Method | Delegate
 		}
 
 		sealed class RootItem : ThemedMenuItem
@@ -456,14 +441,7 @@ namespace Codist.NaviBar
 						SubMenuMaxHeight = _Bar._View.ViewportHeight / 2;
 						SubMenuHeader = new StackPanel {
 							Children = {
-								new StackPanel {
-									Margin = WpfHelper.MenuItemMargin,
-									Children = {
-										ThemeHelper.GetImage(node.GetImageId()).WrapMargin(WpfHelper.GlyphMargin),
-										new ThemedMenuText(node.GetDeclarationSignature(), true)
-									},
-									Orientation = Orientation.Horizontal
-								},
+								new NaviItem(_Bar, node) { ClickHandler = i => i.GoToLocation() },
 								new MemberFilterBox(Items),
 								new Separator()
 							}

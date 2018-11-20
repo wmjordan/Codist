@@ -278,4 +278,6 @@ Please [post New Issue](https://github.com/wmjordan/Codist/issues) in the [GitHu
 
 Your vote and feedback on the [Visual Studio Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=wmj.Codist) are also welcomed.
 
-If you want to support the future development of Codist, you can [donate to the author](http://paypal.me/wmzuo).
+# Support Codist by donation
+
+If you like _Codist_ and want to support the future development of it, you can [donate to the author](http://paypal.me/wmzuo).
