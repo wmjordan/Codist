@@ -382,11 +382,8 @@ namespace Codist.NaviBar
 					if (node is VariableDeclaratorSyntax) {
 						p = p.Parent.Parent;
 					}
-					else if (node is EnumMemberDeclarationSyntax) {
-						p = p.Parent;
-					}
-					if (p is TypeDeclarationSyntax) {
-						t.Append((p as TypeDeclarationSyntax).Identifier.ValueText + ".", ThemeHelper.SystemGrayTextBrush);
+					if (p is BaseTypeDeclarationSyntax) {
+						t.Append((p as BaseTypeDeclarationSyntax).Identifier.ValueText + ".", ThemeHelper.SystemGrayTextBrush);
 					}
 				}
 				t.Append(title, highlightTypes && (node.IsTypeDeclaration() || node.IsKind(SyntaxKind.NamespaceDeclaration) || node.IsKind(SyntaxKind.CompilationUnit)));

@@ -236,8 +236,11 @@ namespace Codist
 					var ev = symbol as IEventSymbol;
 					switch (ev.DeclaredAccessibility) {
 						case Accessibility.Public: return KnownImageIds.EventPublic;
-						case Accessibility.Protected: return KnownImageIds.EventProtected;
+						case Accessibility.Protected:
+						case Accessibility.ProtectedAndInternal:
+							return KnownImageIds.EventProtected;
 						case Accessibility.Private: return KnownImageIds.EventPrivate;
+						case Accessibility.ProtectedOrInternal:
 						case Accessibility.Internal: return KnownImageIds.EventInternal;
 						default: return KnownImageIds.Event;
 					}
@@ -246,16 +249,22 @@ namespace Codist
 					if (f.IsConst) {
 						switch (f.DeclaredAccessibility) {
 							case Accessibility.Public: return KnownImageIds.ConstantPublic;
-							case Accessibility.Protected: return KnownImageIds.ConstantProtected;
+							case Accessibility.Protected:
+							case Accessibility.ProtectedAndInternal:
+								return KnownImageIds.ConstantProtected;
 							case Accessibility.Private: return KnownImageIds.ConstantPrivate;
+							case Accessibility.ProtectedOrInternal:
 							case Accessibility.Internal: return KnownImageIds.ConstantInternal;
 							default: return KnownImageIds.Constant;
 						}
 					}
 					switch (f.DeclaredAccessibility) {
 						case Accessibility.Public: return KnownImageIds.FieldPublic;
-						case Accessibility.Protected: return KnownImageIds.FieldProtected;
+						case Accessibility.Protected:
+						case Accessibility.ProtectedAndInternal:
+							return KnownImageIds.FieldProtected;
 						case Accessibility.Private: return KnownImageIds.FieldPrivate;
+						case Accessibility.ProtectedOrInternal:
 						case Accessibility.Internal: return KnownImageIds.FieldInternal;
 						default: return KnownImageIds.Field;
 					}
@@ -268,8 +277,11 @@ namespace Codist
 					}
 					switch (m.DeclaredAccessibility) {
 						case Accessibility.Public: return KnownImageIds.MethodPublic;
-						case Accessibility.Protected: return KnownImageIds.MethodProtected;
+						case Accessibility.Protected:
+						case Accessibility.ProtectedAndInternal:
+							return KnownImageIds.MethodProtected;
 						case Accessibility.Private: return KnownImageIds.MethodPrivate;
+						case Accessibility.ProtectedOrInternal:
 						case Accessibility.Internal: return KnownImageIds.MethodInternal;
 						default: return KnownImageIds.Method;
 					}
@@ -279,40 +291,55 @@ namespace Codist
 						case TypeKind.Class:
 							switch (t.DeclaredAccessibility) {
 								case Accessibility.Public: return KnownImageIds.ClassPublic;
-								case Accessibility.Protected: return KnownImageIds.ClassProtected;
+								case Accessibility.Protected:
+								case Accessibility.ProtectedAndInternal:
+									return KnownImageIds.ClassProtected;
 								case Accessibility.Private: return KnownImageIds.ClassPrivate;
+								case Accessibility.ProtectedOrInternal:
 								case Accessibility.Internal: return KnownImageIds.ClassInternal;
 								default: return KnownImageIds.Class;
 							}
 						case TypeKind.Delegate:
 							switch (t.DeclaredAccessibility) {
 								case Accessibility.Public: return KnownImageIds.DelegatePublic;
-								case Accessibility.Protected: return KnownImageIds.DelegateProtected;
+								case Accessibility.Protected:
+								case Accessibility.ProtectedAndInternal:
+									return KnownImageIds.DelegateProtected;
 								case Accessibility.Private: return KnownImageIds.DelegatePrivate;
+								case Accessibility.ProtectedOrInternal:
 								case Accessibility.Internal: return KnownImageIds.DelegateInternal;
 								default: return KnownImageIds.Delegate;
 							}
 						case TypeKind.Enum:
 							switch (t.DeclaredAccessibility) {
 								case Accessibility.Public: return KnownImageIds.EnumerationPublic;
-								case Accessibility.Protected: return KnownImageIds.EnumerationProtected;
+								case Accessibility.Protected:
+								case Accessibility.ProtectedAndInternal:
+									return KnownImageIds.EnumerationProtected;
 								case Accessibility.Private: return KnownImageIds.EnumerationPrivate;
+								case Accessibility.ProtectedOrInternal:
 								case Accessibility.Internal: return KnownImageIds.EnumerationInternal;
 								default: return KnownImageIds.Enumeration;
 							}
 						case TypeKind.Interface:
 							switch (t.DeclaredAccessibility) {
 								case Accessibility.Public: return KnownImageIds.InterfacePublic;
-								case Accessibility.Protected: return KnownImageIds.InterfaceProtected;
+								case Accessibility.Protected:
+								case Accessibility.ProtectedAndInternal:
+									return KnownImageIds.InterfaceProtected;
 								case Accessibility.Private: return KnownImageIds.InterfacePrivate;
+								case Accessibility.ProtectedOrInternal:
 								case Accessibility.Internal: return KnownImageIds.InterfaceInternal;
 								default: return KnownImageIds.Interface;
 							}
 						case TypeKind.Struct:
 							switch (t.DeclaredAccessibility) {
 								case Accessibility.Public: return KnownImageIds.StructurePublic;
-								case Accessibility.Protected: return KnownImageIds.StructureProtected;
+								case Accessibility.Protected:
+								case Accessibility.ProtectedAndInternal:
+									return KnownImageIds.StructureProtected;
 								case Accessibility.Private: return KnownImageIds.StructurePrivate;
+								case Accessibility.ProtectedOrInternal:
 								case Accessibility.Internal: return KnownImageIds.StructureInternal;
 								default: return KnownImageIds.Structure;
 							}
@@ -324,8 +351,11 @@ namespace Codist
 				case SymbolKind.Property:
 					switch ((symbol as IPropertySymbol).DeclaredAccessibility) {
 						case Accessibility.Public: return KnownImageIds.PropertyPublic;
-						case Accessibility.Protected: return KnownImageIds.PropertyProtected;
+						case Accessibility.Protected:
+						case Accessibility.ProtectedAndInternal:
+							return KnownImageIds.PropertyProtected;
 						case Accessibility.Private: return KnownImageIds.PropertyPrivate;
+						case Accessibility.ProtectedOrInternal:
 						case Accessibility.Internal: return KnownImageIds.PropertyInternal;
 						default: return KnownImageIds.Property;
 					}
