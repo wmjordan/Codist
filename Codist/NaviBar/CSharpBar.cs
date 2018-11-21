@@ -154,7 +154,7 @@ namespace Codist.NaviBar
 			return nodes;
 		}
 
-		static string GetParameterListSignature(ParameterListSyntax parameters) {
+		static string GetParameterListSignature(ParameterListSyntax parameters, bool useParamName) {
 			if (parameters.Parameters.Count == 0) {
 				return "()";
 			}
@@ -165,7 +165,7 @@ namespace Codist.NaviBar
 					if (sb.Length > 1) {
 						sb.Append(',');
 					}
-					sb.Append(item.Type.ToString());
+					sb.Append(useParamName ? item.Identifier.Text : item.Type.ToString());
 				}
 				sb.Append(')');
 				return sb.ToString();
@@ -388,14 +388,15 @@ namespace Codist.NaviBar
 				}
 				t.Append(title, highlightTypes && (node.IsTypeDeclaration() || node.IsKind(SyntaxKind.NamespaceDeclaration) || node.IsKind(SyntaxKind.CompilationUnit)));
 				if (includeParameterList && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterList)) {
+					var useParamName = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName);
 					if (node is BaseMethodDeclarationSyntax) {
-						t.Append(GetParameterListSignature((node as BaseMethodDeclarationSyntax).ParameterList), ThemeHelper.SystemGrayTextBrush);
+						t.Append(GetParameterListSignature((node as BaseMethodDeclarationSyntax).ParameterList, useParamName), ThemeHelper.SystemGrayTextBrush);
 					}
 					else if (node.IsKind(SyntaxKind.DelegateDeclaration)) {
-						t.Append(GetParameterListSignature((node as DelegateDeclarationSyntax).ParameterList));
+						t.Append(GetParameterListSignature((node as DelegateDeclarationSyntax).ParameterList, useParamName));
 					}
 					else if (node is OperatorDeclarationSyntax) {
-						t.Append(GetParameterListSignature((node as OperatorDeclarationSyntax).ParameterList));
+						t.Append(GetParameterListSignature((node as OperatorDeclarationSyntax).ParameterList, useParamName));
 					}
 				}
 				Header = t;

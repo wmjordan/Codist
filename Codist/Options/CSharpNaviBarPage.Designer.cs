@@ -27,6 +27,7 @@
 		private void InitializeComponent() {
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this.titleLabel1 = new Codist.Controls.TitleLabel();
 			this._RangeHighlightBox = new System.Windows.Forms.CheckBox();
 			this._ParameterListBox = new System.Windows.Forms.CheckBox();
 			this._RegionBox = new System.Windows.Forms.CheckBox();
@@ -34,7 +35,7 @@
 			this._FieldValueBox = new System.Windows.Forms.CheckBox();
 			this._ToolTipBox = new System.Windows.Forms.CheckBox();
 			this._SyntaxNodesBox = new System.Windows.Forms.CheckBox();
-			this.titleLabel1 = new Codist.Controls.TitleLabel();
+			this._ParameterListParamNameBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
@@ -53,6 +54,7 @@
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this._ParameterListParamNameBox);
 			this.tabPage2.Controls.Add(this.titleLabel1);
 			this.tabPage2.Controls.Add(this._RangeHighlightBox);
 			this.tabPage2.Controls.Add(this._ParameterListBox);
@@ -68,6 +70,16 @@
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Navigation Bar";
 			this.tabPage2.UseVisualStyleBackColor = true;
+			// 
+			// titleLabel1
+			// 
+			this.titleLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.titleLabel1.Location = new System.Drawing.Point(12, 89);
+			this.titleLabel1.Name = "titleLabel1";
+			this.titleLabel1.Size = new System.Drawing.Size(488, 15);
+			this.titleLabel1.TabIndex = 3;
+			this.titleLabel1.Text = "Drop-down Item";
 			// 
 			// _RangeHighlightBox
 			// 
@@ -92,7 +104,7 @@
 			// _RegionBox
 			// 
 			this._RegionBox.AutoSize = true;
-			this._RegionBox.Location = new System.Drawing.Point(15, 191);
+			this._RegionBox.Location = new System.Drawing.Point(15, 216);
 			this._RegionBox.Name = "_RegionBox";
 			this._RegionBox.Size = new System.Drawing.Size(165, 19);
 			this._RegionBox.TabIndex = 7;
@@ -102,7 +114,7 @@
 			// _PartialClassBox
 			// 
 			this._PartialClassBox.AutoSize = true;
-			this._PartialClassBox.Location = new System.Drawing.Point(15, 166);
+			this._PartialClassBox.Location = new System.Drawing.Point(15, 191);
 			this._PartialClassBox.Name = "_PartialClassBox";
 			this._PartialClassBox.Size = new System.Drawing.Size(197, 19);
 			this._PartialClassBox.TabIndex = 6;
@@ -112,7 +124,7 @@
 			// _FieldValueBox
 			// 
 			this._FieldValueBox.AutoSize = true;
-			this._FieldValueBox.Location = new System.Drawing.Point(15, 141);
+			this._FieldValueBox.Location = new System.Drawing.Point(15, 166);
 			this._FieldValueBox.Name = "_FieldValueBox";
 			this._FieldValueBox.Size = new System.Drawing.Size(117, 19);
 			this._FieldValueBox.TabIndex = 5;
@@ -139,15 +151,15 @@
 			this._SyntaxNodesBox.Text = "Syntax detail";
 			this._SyntaxNodesBox.UseVisualStyleBackColor = true;
 			// 
-			// titleLabel1
+			// _ParameterListParamNameBox
 			// 
-			this.titleLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.titleLabel1.Location = new System.Drawing.Point(12, 89);
-			this.titleLabel1.Name = "titleLabel1";
-			this.titleLabel1.Size = new System.Drawing.Size(488, 15);
-			this.titleLabel1.TabIndex = 3;
-			this.titleLabel1.Text = "Drop-down Item";
+			this._ParameterListParamNameBox.AutoSize = true;
+			this._ParameterListParamNameBox.Location = new System.Drawing.Point(31, 141);
+			this._ParameterListParamNameBox.Name = "_ParameterListParamNameBox";
+			this._ParameterListParamNameBox.Size = new System.Drawing.Size(173, 19);
+			this._ParameterListParamNameBox.TabIndex = 8;
+			this._ParameterListParamNameBox.Text = "Use parameter name";
+			this._ParameterListParamNameBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpNaviBarPage
 			// 
@@ -175,5 +187,6 @@
 		private System.Windows.Forms.CheckBox _RegionBox;
 		private System.Windows.Forms.CheckBox _RangeHighlightBox;
 		private Controls.TitleLabel titleLabel1;
+		private System.Windows.Forms.CheckBox _ParameterListParamNameBox;
 	}
 }

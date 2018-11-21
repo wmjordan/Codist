@@ -502,9 +502,10 @@ namespace Codist
 		SymbolToolTip = 1 << 1,
 		RangeHighlight = 1 << 2,
 		ParameterList = 1 << 10,
-		FieldValue = 1 << 11,
-		PartialClassMember = 1 << 12,
-		Region = 1 << 13,
+		ParameterListShowParamName = 1 << 11,
+		FieldValue = 1 << 12,
+		PartialClassMember = 1 << 13,
+		Region = 1 << 14,
 		Default = SyntaxDetail | SymbolToolTip | RangeHighlight | ParameterList | FieldValue | PartialClassMember | Region
 	}
 

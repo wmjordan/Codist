@@ -25,7 +25,8 @@ namespace Codist.Options
 			LoadConfig(Config.Instance);
 
 			_FieldValueBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.FieldValue, _FieldValueBox.Checked));
-			_ParameterListBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.ParameterList, _ParameterListBox.Checked));
+			_ParameterListBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.ParameterList, _ParameterListParamNameBox.Enabled = _ParameterListBox.Checked));
+			_ParameterListParamNameBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.ParameterListShowParamName, _ParameterListParamNameBox.Checked));
 			_PartialClassBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.PartialClassMember, _PartialClassBox.Checked));
 			_RangeHighlightBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.RangeHighlight, _RangeHighlightBox.Checked));
 			_RegionBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.Region, _RegionBox.Checked));
@@ -39,7 +40,8 @@ namespace Codist.Options
 		void LoadConfig(Config config) {
 			_UI.DoWithLock(() => {
 				_FieldValueBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.FieldValue);
-				_ParameterListBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterList);
+				_ParameterListBox.Checked = _ParameterListParamNameBox.Enabled = config.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterList);
+				_ParameterListParamNameBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName);
 				_PartialClassBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember);
 				_RangeHighlightBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.RangeHighlight);
 				_RegionBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.Region);
