@@ -124,6 +124,7 @@ namespace Codist
 			SystemButtonFaceColor = EnvironmentColors.SystemButtonFaceColorKey.GetWpfColor();
 			SystemThreeDFaceColor = EnvironmentColors.SystemThreeDFaceColorKey.GetWpfColor();
 			SystemGrayTextBrush = EnvironmentColors.SystemGrayTextBrushKey.GetWpfBrush();
+			UpdateToolTipFormatMap(null, EventArgs.Empty);
 		}
 
 		static void UpdateToolTipFormatMap(object sender, EventArgs e) {
