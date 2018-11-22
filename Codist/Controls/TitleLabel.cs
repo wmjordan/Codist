@@ -22,7 +22,7 @@ namespace Codist.Controls
 			var th = m.Height;
 			var tb = new RectangleF(8, 1, tw + 3, th + 2);
 			g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-			g.DrawString(Text, Font, SystemBrushes.ControlDark, tb);
+			g.DrawString(Text, Font, SystemBrushes.ControlText, tb);
 			tb.Offset(-1, 0);
 			g.DrawString(Text, Font, SystemBrushes.ControlText, tb);
 			g.DrawLine(SystemPens.ControlDark, 0, th + 1, Width, th + 1);
