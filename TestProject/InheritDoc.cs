@@ -14,4 +14,22 @@ namespace TestProject
 		  System.Runtime.Serialization.SerializationInfo info,
 		  System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 	}
+
+	class TestInheritDoc
+	{
+		/// <summary>
+		/// The description of method.
+		/// </summary>
+		/// <param name="param">The description of parameter.</param>
+		public static void Method(string param) {
+		}
+
+		// turn on <inheritdoc cref=""/> feature in the options page of Super Quick Info,
+		// hover on the following method to see it inherit doc from the above method
+		/// <inheritdoc cref="Method(string)"/>
+		/// <param name="value">The value of the method.</param>
+		public void InheritFromMethod(string param, string value) {
+
+		}
+	}
 }

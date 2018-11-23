@@ -1,5 +1,5 @@
 # Codist
-*Codist* is a visual studio extension which strives to provide better coding experience and productivity for C# programmers.
+*Codist* is a Visual Studio extension which strives to provide better coding experience and productivity for C# programmers.
 
 # Features
 
@@ -9,13 +9,13 @@
 * [Scrollbar Marker](#scrollbar-marker)
 * [Symbol Marker](#symbol-marker)
 * [Navigation bar](#navigation-bar) (**new in version 4.0**)
-* Extra margin between lines
+* [Display enhancements](#display-enhancements)
 * [Comprehensive configurations](#feature-control)
 * [License](#License), [Bugs and sugguestions](#bugs-and-suggestions)
 
 ![Feature overview](doc/preview.png)
 
-## Advanced C# syntax highlight
+## Advanced C# Syntax Highlight
 
   The advanced syntax highlight function highlights every aspect of C# language elements with various styles and font settings, changing font style sizes, changing background and foreground colors, making text semitransparent.
 
@@ -33,7 +33,7 @@
  
   ![Syntax highlight](doc/highlight1.png) 
 
-### Default syntax highlight themes
+### Default Syntax Highlight Themes
 
   To quickly get started with advanced syntax highlight, navigate to the *Syntax Highlight* section, click the *Light theme* or *Dark theme* button in the *options* dialog and see them in effect. Don't forget to click the *OK* button to confirm the change.
 
@@ -41,7 +41,7 @@
 
   From version 4.0 on, it is possible to Save and Load your own syntax highlight to an individual file and share it with your workmates.
 
-### Customization of syntax highlight styles
+### Customization of Syntax Highlight Styles
 
   To customize and tweak the syntax highlight styles, click the *common syntax* tab in the *syntax highlight* section, or click the sub sections inside the *Syntax Highlight* section to change individual styles, accordingly.
 
@@ -51,7 +51,7 @@
 
   **TIP**: Open a document window before you change the syntax theme or tweak the syntax highlight settings, while you change theme, you can see how the styles change in the code document window simultaneously.
 
-### My symbols and external symbols
+### My Symbols and External Symbols
 
   From version 4.0 on, it is possible to identify symbols which are defined in your source code and which are imported from external assemblies.
 
@@ -59,7 +59,7 @@
 
   ![Symbolmarker Options 2](doc/symbolmarker-options-2.png)
 
-## Comment tagger and styles
+## Comment Tagger and Styles
 * The comment tagger highlights comments to your specific styles, according to the first token inside the comment.
 
   Here's the effect of the highlighted comments.
@@ -115,6 +115,10 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
   ![Super Quick Info 12](doc/super-quick-info-12.png)
 
+    From version 4.2 on, it is possible to reuse documentations from specific members with the `<inheritdoc cref="MemberName"/>` syntax.
+
+   ![Super Quick Info Inheritdoc](doc/super-quick-info-inheritdoc.png)
+
     It is possible to show documentation about the `<returns>` and `<remarks>` content.
 
   ![Super Quick Info 13](doc/super-quick-info-13.png)
@@ -159,6 +163,12 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 * **Color info** shows colors as you hover on a name that might be predefined color values.
 
   ![Super Quick Info - Color](doc/super-quick-info-color.png)
+
+### Customization
+
+To customize the *Super Quick Info*, adjust the settings in the options page.
+
+  ![Super Quick Info Csharp Options](doc/super-quick-info-csharp-options.png)
 
 ## Smart Bar
 
@@ -226,13 +236,23 @@ The scrollbar can mark...
 
   Clicking on namespace or class definition syntax node will drop down a menu, showing members defined under it.
 
-  You can type in the text box nearby the funnel icon to filter members listed in the menu.
+  You can type in the text box nearby the funnel icon to filter members listed in the menu. The buttons to the right hand side of the text box can be used to further filter the results.
 
   ![Navigation Bar Menu](doc/navigation-bar-menu.png)
 
-  Clicking on the "//" button at the left side of the navigation bar will pop up a text box. You can type in it and search for declarations defined in the active document code window.
+  Clicking on the "//" button at the left side of the navigation bar will pop up a text box. You can type some text in it and search for declarations defined in the active document code window.
 
   ![Navigation Bar Search Declaration](doc/navigation-bar-search-declaration.png)
+
+## Display Enhancements
+
+In the *Display* tab of the *General* options page, several display enhancement options are offered.
+
+  ![General Options Display](doc/general-options-display.png)
+
+Within the *Extra line margins* group box, you can adjust margins between lines to make code lines more readable.
+
+Programmers who do not like *ClearType* rendering, which made text blurry and colorful, may want to try _Force Grayscale Text Rendering_ options.
 
 # Feature Control
   Open the *Codist* section in the *Tools->Options* dialog. In the *General* section you can toggle features of *Codist*.
@@ -247,7 +267,7 @@ The scrollbar can mark...
 
    These **options will take effect on new document windows**. Existing document windows won't be affected.
 
-2. Within the *Extra line margins* group box, you can adjust margins between lines to make code lines more readable.
+2. To share or backup your settings of Codist, you can use the *Save* and *Load* buttons.
 
 # Acknowledgements
 I have learned a lot from the following extension projects.
@@ -267,17 +287,19 @@ I have learned a lot from the following extension projects.
 
 _Codist_ comes from the open source community and it goes back to the community.
 
-_Codist_ is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+_Codist_ is **free** software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not, see "https://www.gnu.org/licenses".
 
-# Bugs and suggestions
+# Bugs and Suggestions
 Please [post New Issue](https://github.com/wmjordan/Codist/issues) in the [GitHub project](https://github.com/wmjordan/Codist) if you find any bug or have any suggestion.
 
 Your vote and feedback on the [Visual Studio Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=wmj.Codist) are also welcomed.
 
-# Support Codist by donation
+# Support Codist by Donation
 
 If you like _Codist_ and want to support the future development of it, you can [donate to the author](http://paypal.me/wmzuo).
+
+The recommended amount of donation is `$19.99`, nevertheless, any other amount of donations are appreciated.
