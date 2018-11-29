@@ -275,6 +275,18 @@ namespace Codist
 					if (m.IsExtensionMethod) {
 						return KnownImageIds.ExtensionMethod;
 					}
+					if (m.MethodKind == MethodKind.Constructor) {
+						switch (m.DeclaredAccessibility) {
+							case Accessibility.Public: return KnownImageIds.TypePublic;
+							case Accessibility.Protected:
+							case Accessibility.ProtectedAndInternal:
+								return KnownImageIds.TypeProtected;
+							case Accessibility.Private: return KnownImageIds.TypePrivate;
+							case Accessibility.ProtectedOrInternal:
+							case Accessibility.Internal: return KnownImageIds.TypeInternal;
+							default: return KnownImageIds.TypePrivate;
+						}
+					}
 					switch (m.DeclaredAccessibility) {
 						case Accessibility.Public: return KnownImageIds.MethodPublic;
 						case Accessibility.Protected:
