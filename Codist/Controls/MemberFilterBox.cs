@@ -36,16 +36,26 @@ namespace Codist.Controls
 		}
 
 		void FilterChanged(object sender, EventArgs e) {
-			Filter(_FilterBox.Text.Split(' '), _FilterButtons.Filters);
+			Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), _FilterButtons.Filters);
 		}
 		void Filter(string[] keywords, MemberFilterTypes filters) {
-			bool useModifierFilter = filters != MemberFilterTypes.None;
+			bool useModifierFilter = filters != MemberFilterTypes.All;
 			if (keywords.Length == 0) {
-				foreach (UIElement item in _Items) {
-					item.Visibility = item is ThemedMenuItem.MenuItemPlaceHolder 
-						|| (useModifierFilter && item is IMemberFilterable menuItem && menuItem.Filter(filters) == false)
-						? Visibility.Collapsed
-						: Visibility.Visible;
+				if (useModifierFilter) {
+					foreach (UIElement item in _Items) {
+						item.Visibility = item is ThemedMenuItem.MenuItemPlaceHolder == false
+							&& item is IMemberFilterable menuItem && menuItem.Filter(filters)
+							? Visibility.Visible
+							: Visibility.Collapsed;
+					}
+				}
+				else {
+					foreach (UIElement item in _Items) {
+						if (item is ThemedMenuItem.MenuItemPlaceHolder) {
+							continue;
+						}
+						item.Visibility = Visibility.Visible;
+					}
 				}
 				return;
 			}
