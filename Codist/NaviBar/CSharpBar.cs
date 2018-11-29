@@ -66,7 +66,7 @@ namespace Codist.NaviBar
 				var span = item.Node.Span.CreateSnapshotSpan(_View.TextSnapshot);
 				if (span.Length > 0) {
 					try {
-						_Adornment.AddAdornment(span, null, new GeometryAdornment(ThemeHelper.TitleBackgroundColor, _View.TextViewLines.GetMarkerGeometry(span)));
+						HighlightNodeRanges(item.Node, span);
 					}
 					catch (ObjectDisposedException) {
 						// ignore
@@ -80,6 +80,25 @@ namespace Codist.NaviBar
 				_MouseHoverItem = null;
 			}
 		}
+
+		void HighlightNodeRanges(SyntaxNode node, Microsoft.VisualStudio.Text.SnapshotSpan span) {
+			_Adornment.AddAdornment(span, null, new GeometryAdornment(ThemeHelper.MenuHoverBackgroundColor, _View.TextViewLines.GetMarkerGeometry(span), 3));
+			var p = _View.Caret.Position.BufferPosition;
+			if (span.Contains(p) == false) {
+				return;
+			}
+			var n = _SemanticContext.GetNode(p, false, false);
+			while (n != null && node.Contains(n)) {
+				if (n.Span.Start != span.Start
+					&& n.Span.Length != span.Length
+					&& n.IsKind(SyntaxKind.Block) == false) {
+					span = n.Span.CreateSnapshotSpan(_View.TextSnapshot);
+					_Adornment.AddAdornment(span, null, new GeometryAdornment(ThemeHelper.MenuHoverBackgroundColor, _View.TextViewLines.GetMarkerGeometry(span), n.IsSyntaxBlock() || n.IsDeclaration() ? 1 : 0));
+				}
+				n = n.Parent;
+			}
+		}
+
 		protected override void OnMouseLeave(MouseEventArgs e) {
 			base.OnMouseLeave(e);
 			if (_Adornment.IsEmpty == false) {
@@ -615,10 +634,10 @@ namespace Codist.NaviBar
 		{
 			readonly DrawingVisual _child;
 
-			public GeometryAdornment(Color color, Geometry geometry) {
+			public GeometryAdornment(Color color, Geometry geometry, double thickness) {
 				_child = new DrawingVisual();
 				using (var context = _child.RenderOpen()) {
-					context.DrawGeometry(new SolidColorBrush(color.Alpha(192)), new Pen(new SolidColorBrush(color), 1), geometry);
+					context.DrawGeometry(new SolidColorBrush(color.Alpha(90)), thickness < 0.1 ? null : new Pen(ThemeHelper.MenuHoverBorderBrush, thickness), geometry);
 					context.Close();
 				}
 				AddVisualChild(_child);

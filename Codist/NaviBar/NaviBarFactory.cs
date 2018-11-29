@@ -23,7 +23,7 @@ namespace Codist.NaviBar
 		/// </summary>
 		[Export(typeof(AdornmentLayerDefinition))]
 		[Name(nameof(CSharpBar))]
-		[Order(Before = PredefinedAdornmentLayers.TextMarker)]
+		[Order(After = PredefinedAdornmentLayers.CurrentLineHighlighter)]
 		AdornmentLayerDefinition _EditorAdornmentLayer;
 
 #pragma warning restore 649, 169

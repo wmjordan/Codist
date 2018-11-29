@@ -35,6 +35,9 @@ namespace Codist
 		public static WpfBrush ToolWindowBackgroundBrush { get; private set; }
 		public static WpfBrush MenuTextBrush { get; private set; }
 		public static WpfBrush MenuBackgroundBrush { get; private set; }
+		public static WpfBrush MenuHoverBorderBrush { get; private set; }
+		public static WpfBrush MenuHoverBackgroundBrush { get; private set; }
+		public static WpfColor MenuHoverBackgroundColor { get; private set; }
 		public static WpfBrush MenuGlyphBackgroundBrush { get; private set; }
 		public static WpfBrush TextBoxBrush { get; private set; }
 		public static WpfBrush TextBoxBackgroundBrush { get; private set; }
@@ -117,6 +120,9 @@ namespace Codist
 			ToolWindowBackgroundBrush = EnvironmentColors.ToolWindowBackgroundBrushKey.GetWpfBrush();
 			MenuTextBrush = EnvironmentColors.SystemMenuTextBrushKey.GetWpfBrush();
 			MenuBackgroundBrush = EnvironmentColors.SystemMenuBrushKey.GetWpfBrush();
+			MenuHoverBorderBrush = EnvironmentColors.CommandBarMenuItemMouseOverBrushKey.GetWpfBrush();
+			MenuHoverBackgroundBrush = EnvironmentColors.CommandBarMenuItemMouseOverBorderBrushKey.GetWpfBrush();
+			MenuHoverBackgroundColor = EnvironmentColors.CommandBarMenuItemMouseOverBorderColorKey.GetWpfColor();
 			MenuGlyphBackgroundBrush = EnvironmentColors.CommandBarMenuGlyphBrushKey.GetWpfBrush();
 			TextBoxBrush = CommonControlsColors.TextBoxTextBrushKey.GetWpfBrush();
 			TextBoxBackgroundBrush = CommonControlsColors.TextBoxBackgroundBrushKey.GetWpfBrush();
