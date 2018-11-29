@@ -222,7 +222,7 @@ namespace Codist.QuickInfo
 				|| symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Delegate) {
 				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns;
 				if (returns != null && returns.FirstNode != null) {
-					info.AppendLine().Append("\n Returns: ", true);
+					info.AppendLine().Append("\nReturns", true).Append(": ");
 					docRenderer.Render(returns, info.Inlines);
 				}
 			}

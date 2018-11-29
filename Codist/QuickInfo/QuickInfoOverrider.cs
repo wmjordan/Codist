@@ -280,7 +280,7 @@ namespace Codist.QuickInfo
 						if (Config.Instance.QuickInfoMaxWidth > 0) {
 							//wrapPanel.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 							//signature.HorizontalAlignment = HorizontalAlignment.Left;
-							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 40;
+							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 30;
 						}
 					}
 				}
