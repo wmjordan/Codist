@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist.Options
 {
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	public partial class SyntaxStyleOptionPage : UserControl
 	{
 		readonly Func<IEnumerable<StyleBase>> _defaultStyleLoader;

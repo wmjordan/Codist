@@ -14,6 +14,7 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal ScrollbarMarkerPage(ConfigPage page) : this() {
+			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
 		}
 
 		void ScrollbarMarkerPage_Load(object sender, EventArgs e) {

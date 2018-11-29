@@ -5,7 +5,7 @@ using AppHelpers;
 
 namespace Codist.Options
 {
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	public partial class CSharpSyntaxHighlightPage : UserControl
 	{
 		readonly UiLock _UI = new UiLock();
@@ -17,6 +17,7 @@ namespace Codist.Options
 		}
 		internal CSharpSyntaxHighlightPage(ConfigPage page) : this() {
 			_ServicePage = page;
+			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 
 		void CSharpSpecialHighlightPage_Load(object sender, EventArgs e) {

@@ -39,6 +39,7 @@
 			this._LoadConfigButton = new System.Windows.Forms.Button();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this.customGroupBox1 = new Codist.Controls.CustomGroupBox();
+			this.textBox1 = new System.Windows.Forms.TextBox();
 			this._OptimizeCodeWindowBox = new System.Windows.Forms.CheckBox();
 			this._OptimizeMainWindowBox = new System.Windows.Forms.CheckBox();
 			this.groupBox1 = new Codist.Controls.CustomGroupBox();
@@ -47,7 +48,6 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this._TopMarginBox = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
-			this.textBox1 = new System.Windows.Forms.TextBox();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
@@ -94,9 +94,9 @@
 			this.groupBox2.Controls.Add(this._SuperQuickInfoBox);
 			this.groupBox2.Controls.Add(this._SyntaxHighlightBox);
 			this.groupBox2.Controls.Add(this.label3);
-			this.groupBox2.Location = new System.Drawing.Point(3, 6);
+			this.groupBox2.Location = new System.Drawing.Point(6, 6);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(555, 151);
+			this.groupBox2.Size = new System.Drawing.Size(552, 151);
 			this.groupBox2.TabIndex = 0;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Feature Controllers";
@@ -218,6 +218,19 @@
 			this.customGroupBox1.TabStop = false;
 			this.customGroupBox1.Text = "Force Grayscale Text Rendering";
 			// 
+			// textBox1
+			// 
+			this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.textBox1.Location = new System.Drawing.Point(6, 49);
+			this.textBox1.Multiline = true;
+			this.textBox1.Name = "textBox1";
+			this.textBox1.ReadOnly = true;
+			this.textBox1.Size = new System.Drawing.Size(537, 65);
+			this.textBox1.TabIndex = 2;
+			this.textBox1.Text = "Note: For best text rendering effects, it is recommended to use MacType, which co" +
+    "uld be downloaded from: \r\nhttps://github.com/snowie2000/mactype/releases";
+			// 
 			// _OptimizeCodeWindowBox
 			// 
 			this._OptimizeCodeWindowBox.AutoSize = true;
@@ -295,19 +308,6 @@
 			this.label1.Size = new System.Drawing.Size(95, 15);
 			this.label1.TabIndex = 0;
 			this.label1.Text = "Top margin:";
-			// 
-			// textBox1
-			// 
-			this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.textBox1.Location = new System.Drawing.Point(6, 49);
-			this.textBox1.Multiline = true;
-			this.textBox1.Name = "textBox1";
-			this.textBox1.ReadOnly = true;
-			this.textBox1.Size = new System.Drawing.Size(537, 65);
-			this.textBox1.TabIndex = 2;
-			this.textBox1.Text = "Note: For best text rendering effects, it is recommended to use MacType, which co" +
-    "uld be downloaded from: \r\nhttps://github.com/snowie2000/mactype/releases";
 			// 
 			// GeneralPage
 			// 

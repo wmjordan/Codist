@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Codist.Options
 {
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	public partial class CommentTaggerOptionPage : UserControl
 	{
 		readonly CommentStyle _ServicePage;

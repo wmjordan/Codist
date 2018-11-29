@@ -5,7 +5,7 @@ using AppHelpers;
 
 namespace Codist.Options
 {
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	public partial class CSharpScrollbarMarkerPage : UserControl
 	{
 		readonly UiLock _UI = new UiLock();
@@ -15,7 +15,7 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal CSharpScrollbarMarkerPage(ConfigPage page) : this() {
-			//_UI.CommonEventAction += Config.Instance.FireConfigChangedEvent;
+			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
 		}
 
 		void CSharpScrollbarMarkerPage_Load(object sender, EventArgs e) {

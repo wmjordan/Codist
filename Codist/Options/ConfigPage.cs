@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Codist.Options
 {
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	abstract class ConfigPage : DialogPage
 	{
 		Label _DisabledNotice;
@@ -87,7 +87,7 @@ namespace Codist.Options
 		}
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("8BF03E86-FF38-4AB4-8D23-1AC70E74806C")]
 	sealed class SyntaxHighlight : ConfigPage
 	{
@@ -95,7 +95,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new SyntaxHighlightPage(this));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("2E07AC20-D62F-4D78-8750-2A464CC011AE")]
 	sealed class XmlStyle : ConfigPage
 	{
@@ -103,7 +103,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.XmlCodeStyles, Config.GetDefaultCodeStyles<XmlCodeStyle, XmlStyleTypes>));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("1EB954DF-37FE-4849-B63A-58EC43088856")]
 	sealed class CommentStyle : ConfigPage
 	{
@@ -111,7 +111,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new CommentTaggerOptionPage(this));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("ACB2A2ED-9FEA-4E9F-9602-D9BEBA562F30")]
 	sealed class CommonStyle : ConfigPage
 	{
@@ -119,7 +119,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.GeneralStyles, Config.GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("7CF06695-DFCC-441E-ACBF-5468F937A019")]
 	sealed class CppStyle : ConfigPage
 	{
@@ -127,7 +127,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new SyntaxStyleOptionPage(this, () => Config.Instance.CppStyles, Config.GetDefaultCodeStyles<Codist.SyntaxHighlight.CppStyle, CppStyleTypes>));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("31356507-E11A-4E61-B0C2-C9A6584632DB")]
 	sealed class CSharpStyle : ConfigPage
 	{
@@ -135,7 +135,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new CSharpSyntaxHighlightPage(this));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("DFC9C0E7-73A1-4DE9-8E94-161111266D38")]
 	sealed class General : ConfigPage
 	{
@@ -143,7 +143,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new GeneralPage(this));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("6B92F305-BEAD-49E3-9277-28E1829D7B57")]
 	sealed class CSharpSuperQuickInfo : ConfigPage
 	{
@@ -151,7 +151,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new CSharpSuperQuickInfoPage(this));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("EE62CE13-5B5B-4EA0-A3FE-4D1F68FD2685")]
 	sealed class SuperQuickInfo : ConfigPage
 	{
@@ -159,7 +159,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new SuperQuickInfoPage(this));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("23785D62-BD49-448B-A943-839DA27E8197")]
 	sealed class ScrollbarMarker : ConfigPage
 	{
@@ -167,7 +167,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new ScrollbarMarkerPage(this));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("E676D973-8A9A-461A-9085-DF69A54743A5")]
 	sealed class CSharpScrollbarMarker : ConfigPage
 	{
@@ -175,7 +175,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new CSharpScrollbarMarkerPage(this));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("DA4EC893-7203-489C-9BCA-037D2686F89B")]
 	sealed class SmartBar : ConfigPage
 	{
@@ -183,7 +183,7 @@ namespace Codist.Options
 		protected override IWin32Window Window => Control ?? (Control = new SmartBarPage(this));
 	}
 
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	[Guid("B798A559-E242-4604-94D0-69FC599F8C11")]
 	sealed class NaviBar : ConfigPage
 	{

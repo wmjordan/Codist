@@ -15,6 +15,7 @@ namespace Codist.Options
 		}
 		internal SyntaxHighlightPage(ConfigPage page) : this() {
 			_servicePage = page;
+			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 		private void SyntaxHighlightPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {

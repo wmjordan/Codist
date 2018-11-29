@@ -14,6 +14,7 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal GeneralPage(ConfigPage page) : this() {
+			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.None);
 		}
 		private void MiscPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {

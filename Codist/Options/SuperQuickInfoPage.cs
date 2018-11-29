@@ -14,6 +14,7 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal SuperQuickInfoPage(ConfigPage page) : this() {
+			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
 		}
 		private void SuperQuickInfoPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {

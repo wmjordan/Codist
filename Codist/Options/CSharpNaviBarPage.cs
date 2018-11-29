@@ -5,7 +5,7 @@ using AppHelpers;
 
 namespace Codist.Options
 {
-	[Browsable(false)]
+	[ToolboxItem(false)]
 	public partial class CSharpNaviBarPage : UserControl
 	{
 		readonly UiLock _UI = new UiLock();
@@ -15,7 +15,7 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal CSharpNaviBarPage(ConfigPage page) : this() {
-			//_UI.CommonEventAction += Config.Instance.FireConfigChangedEvent;
+			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.NaviBar);
 		}
 
 		void CSharpNaviBarPage_Load(object sender, EventArgs e) {
