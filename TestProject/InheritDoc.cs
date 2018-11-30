@@ -2,7 +2,6 @@
 
 namespace TestProject
 {
-
 	[Serializable]
 	public class MyException : Exception
 	{
@@ -15,7 +14,29 @@ namespace TestProject
 		  System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 	}
 
-	class TestInheritDoc
+	abstract class Base
+	{
+		/// <summary>
+		/// Do something.
+		/// </summary>
+		protected abstract void Do();
+	}
+	interface IRun
+	{
+		/// <summary>
+		/// Run for a while.
+		/// </summary>
+		void Run();
+	}
+	interface IWalk
+	{
+		/// <summary>
+		/// Walk a minute.
+		/// </summary>
+		void Walk();
+	}
+
+	class TestInheritDoc : Base, IRun, IWalk
 	{
 		/// <summary>
 		/// The description of method.
@@ -30,6 +51,25 @@ namespace TestProject
 		/// <param name="value">The value of the method.</param>
 		public void InheritFromMethod(string param, string value) {
 
+		}
+
+		// hover on Do to see its inherited documentation
+		protected override void Do() {
+		}
+
+		// hover on Run to see its inherited documentation
+		public void Run() {
+		}
+		// this does not inherited from documentation of IRun
+		public void Run(int mile) { }
+
+		// hover on Walk to see its inherited documentation
+		void IWalk.Walk() {
+		}
+
+		// hover on ToString to see its inherited documentation
+		public override string ToString() {
+			return "TEST";
 		}
 	}
 }

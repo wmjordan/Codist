@@ -159,25 +159,25 @@ namespace Codist
 
 		void InheritDocumentation(ISymbol symbol, ISymbol querySymbol) {
 			var t = symbol.Kind == SymbolKind.NamedType ? symbol as INamedTypeSymbol : symbol.ContainingType;
-			if (t == null
-				// go to the base type if not querying interface
-				|| t.TypeKind != TypeKind.Interface && (t = t.BaseType) == null
-				) {
+			if (t == null) {
 				return;
 			}
-			var kind = querySymbol.Kind;
-			var returnType = querySymbol.GetReturnType();
-			var parameters = querySymbol.GetParameters();
-			var member = t.GetMembers(querySymbol.Name)
-				.FirstOrDefault(i => i.MatchSignature(kind, returnType, parameters));
-			if (member != null && AddInheritedDocFromSymbol(member)) {
-				return;
+			if (t.TypeKind == TypeKind.Class && t.BaseType != null) {
+				InheritDocumentation(t.BaseType, querySymbol);
 			}
-			if (t.TypeKind != TypeKind.Interface) {
-				InheritDocumentation(t, querySymbol);
+			// inherit from base type
+			if (symbol != querySymbol) {
+				var kind = querySymbol.Kind;
+				var returnType = querySymbol.GetReturnType();
+				var parameters = querySymbol.GetParameters();
+				var member = t.GetMembers(querySymbol.Name)
+					.FirstOrDefault(i => i.MatchSignature(kind, returnType, parameters));
+				if (member != null && AddInheritedDocFromSymbol(member)) {
+					return;
+				}
 			}
-			else if (symbol == querySymbol
-				&& symbol.Kind != SymbolKind.NamedType
+			// inherit from implemented interfaces
+			if (symbol.Kind != SymbolKind.NamedType
 				&& (t = symbol.ContainingType) != null) {
 				switch (symbol.Kind) {
 					case SymbolKind.Method:
