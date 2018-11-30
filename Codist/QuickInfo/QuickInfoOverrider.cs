@@ -311,7 +311,9 @@ namespace Codist.QuickInfo
 						if (docPanel == c) {
 							cp.MaxWidth += 32;
 						}
-						if (c is ScrollViewer) {
+						if (c is ScrollViewer
+							|| c is Microsoft.VisualStudio.Text.Editor.IWpfTextView // skip snippet tooltip
+							) {
 							continue;
 						}
 						o = c as DependencyObject;
