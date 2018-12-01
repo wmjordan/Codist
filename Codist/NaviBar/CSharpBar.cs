@@ -190,82 +190,104 @@ namespace Codist.NaviBar
 				return sb.ToString();
 			}
 		}
-
 		sealed class RootItem : ThemedMenuItem
 		{
-			readonly CSharpBar _Bar;
-			readonly MemberFinderBox _FinderBox;
-			//todo update image when theme changed
 			public RootItem(CSharpBar bar) {
-				_Bar = bar;
 				Icon = ThemeHelper.GetImage(KnownImageIds.CSProjectNode);
 				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
 				Header = new ThemedToolBarText("//");
-				SubMenuHeader = new StackPanel {
-					Margin = WpfHelper.MenuItemMargin,
-					Children = {
-						new Separator { Tag = new ThemedMenuText("Search Symbol") },
-						new StackPanel {
-							Children = {
-								ThemeHelper.GetImage(KnownImageIds.FindSymbol).WrapMargin(WpfHelper.GlyphMargin),
-								(_FinderBox = new MemberFinderBox(Items) { MinWidth = 150 }),
-							},
-							Orientation = Orientation.Horizontal
-						},
-					}
-				};
-				_FinderBox.TextChanged += MemberFinderBox_TextChanged;
+				Items.Add(new SearchProjectDeclarationMenuItem(bar));
+				Items.Add(new SearchDocumentMemberMenuItem(bar));
 			}
-
-			private void MemberFinderBox_TextChanged(object sender, TextChangedEventArgs e) {
-				ClearItems();
-				CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
-				var s = _FinderBox.Text;
-				if (s.Length == 0) {
-					return;
+			sealed class SearchProjectDeclarationMenuItem : SearchMemberMenuItem
+			{
+				public SearchProjectDeclarationMenuItem(CSharpBar bar)
+					: base (bar, "Search Declaration in Project") {
 				}
-				try {
+				protected override void Find(string text) {
+					ThreadHelper.JoinableTaskFactory.Run(() => FindDeclarationsAsync(text, _Bar._cancellationSource.GetToken()));
+				}
+
+				async Task FindDeclarationsAsync(string symbolName, CancellationToken token) {
+					var result = new SortedSet<ISymbol>(Comparer<ISymbol>.Create((x, y) => x.Name.Length - y.Name.Length));
+					int maxNameLength = 0;
+					foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(_Bar._SemanticContext.Document.Project, name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1, token)) {
+						if (result.Count < 50) {
+							result.Add(symbol);
+						}
+						else {
+							maxNameLength = result.Max.Name.Length;
+							if (symbol.Name.Length < maxNameLength) {
+								result.Remove(result.Max);
+								result.Add(symbol);
+							}
+						}
+					}
+					foreach (var item in result) {
+						Items.Add(new SymbolItem(item));
+					}
+				}
+			}
+			sealed class SearchDocumentMemberMenuItem : SearchMemberMenuItem
+			{
+				public SearchDocumentMemberMenuItem(CSharpBar bar)
+					: base(bar, "Search Declaration in Document") {
+				}
+
+				protected override void Find(string text) {
 					var cancellationToken = _Bar._cancellationSource.GetToken();
 					var members = _Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken);
 					foreach (var item in members) {
-						if (item.GetDeclarationSignature().IndexOf(s, StringComparison.OrdinalIgnoreCase) != -1) {
+						if (item.GetDeclarationSignature().IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1) {
 							Items.Add(new NaviItem(_Bar, item, i => i.SetHeader(true), i => i.GoToLocation()));
 						}
 					}
-					//if (HasExplicitItems) {
-					//	Items.Add(new Separator());
-					//}
-					//if (s.Length < 2) {
-					//	return;
-					//}
-					//await FindDeclarationsAsync(s, cancellationToken);
 				}
-				catch (OperationCanceledException) {
-					// ignores cancellation
-				}
-				catch (ObjectDisposedException) { }
 			}
-			async Task FindDeclarationsAsync(string symbolName, CancellationToken token) {
-				var result = new SortedSet<ISymbol>(Comparer<ISymbol>.Create((x, y) => x.Name.Length - y.Name.Length));
-				int maxNameLength = 0;
-				foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(_Bar._SemanticContext.Document.Project, name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1, token)) {
-					if (result.Count < 50) {
-						result.Add(symbol);
-					}
-					else {
-						maxNameLength = result.Max.Name.Length;
-						if (symbol.Name.Length < maxNameLength) {
-							result.Remove(result.Max);
-							result.Add(symbol);
+			abstract class SearchMemberMenuItem : ThemedMenuItem
+			{
+				protected readonly CSharpBar _Bar;
+				readonly MemberFinderBox _FinderBox;
+				//todo update image when theme changed
+				protected SearchMemberMenuItem(CSharpBar bar, string title) {
+					_Bar = bar;
+					this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+					Header = new ThemedMenuText(title);
+					Icon = ThemeHelper.GetImage(KnownImageIds.FindSymbol);
+					SubMenuHeader = new StackPanel {
+						Margin = WpfHelper.MenuItemMargin,
+						Children = {
+							new StackPanel {
+								Children = {
+									ThemeHelper.GetImage(KnownImageIds.FindSymbol).WrapMargin(WpfHelper.GlyphMargin),
+									(_FinderBox = new MemberFinderBox(Items) { MinWidth = 150 }),
+								},
+								Orientation = Orientation.Horizontal
+							},
 						}
-					}
+					};
+					_FinderBox.TextChanged += MemberFinderBox_TextChanged;
 				}
-				foreach (var item in result) {
-					Items.Add(new SymbolItem(item));
+
+				protected abstract void Find(string text);
+
+				void MemberFinderBox_TextChanged(object sender, TextChangedEventArgs e) {
+					CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
+					ClearItems();
+					var s = _FinderBox.Text;
+					if (s.Length == 0) {
+						return;
+					}
+					try {
+						Find(s);
+					}
+					catch (OperationCanceledException) {
+						// ignores cancellation
+					}
+					catch (ObjectDisposedException) { }
 				}
 			}
-
 			sealed class MemberFinderBox : ThemedTextBox
 			{
 				readonly ItemCollection _Items;
@@ -280,7 +302,7 @@ namespace Codist.NaviBar
 						foreach (var item in _Items) {
 							var nav = item as NaviItem;
 							if (nav != null) {
-								nav.RaiseEvent(new RoutedEventArgs(ClickEvent));
+								nav.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
 								return;
 							}
 						}
@@ -637,7 +659,7 @@ namespace Codist.NaviBar
 			public GeometryAdornment(Color color, Geometry geometry, double thickness) {
 				_child = new DrawingVisual();
 				using (var context = _child.RenderOpen()) {
-					context.DrawGeometry(new SolidColorBrush(color.Alpha(90)), thickness < 0.1 ? null : new Pen(ThemeHelper.MenuHoverBorderBrush, thickness), geometry);
+					context.DrawGeometry(new SolidColorBrush(color.Alpha(25)), thickness < 0.1 ? null : new Pen(ThemeHelper.MenuHoverBorderBrush, thickness), geometry);
 					context.Close();
 				}
 				AddVisualChild(_child);
