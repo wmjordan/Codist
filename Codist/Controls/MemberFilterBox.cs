@@ -41,21 +41,11 @@ namespace Codist.Controls
 		void Filter(string[] keywords, MemberFilterTypes filters) {
 			bool useModifierFilter = filters != MemberFilterTypes.All;
 			if (keywords.Length == 0) {
-				if (useModifierFilter) {
-					foreach (UIElement item in _Items) {
-						item.Visibility = item is ThemedMenuItem.MenuItemPlaceHolder == false
-							&& item is IMemberFilterable menuItem && menuItem.Filter(filters)
-							? Visibility.Visible
-							: Visibility.Collapsed;
-					}
-				}
-				else {
-					foreach (UIElement item in _Items) {
-						if (item is ThemedMenuItem.MenuItemPlaceHolder) {
-							continue;
-						}
-						item.Visibility = Visibility.Visible;
-					}
+				foreach (UIElement item in _Items) {
+					item.Visibility = item is ThemedMenuItem.MenuItemPlaceHolder == false
+						&& (useModifierFilter == false || item is IMemberFilterable menuItem && menuItem.Filter(filters))
+						? Visibility.Visible
+						: Visibility.Collapsed;
 				}
 				return;
 			}
