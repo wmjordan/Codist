@@ -5,6 +5,7 @@ using AppHelpers;
 
 namespace Codist.Options
 {
+	[System.ComponentModel.ToolboxItem(false)]
 	public partial class ScrollbarMarkerPage : UserControl
 	{
 		readonly UiLock _UI = new UiLock();

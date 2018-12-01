@@ -4,6 +4,7 @@ using AppHelpers;
 
 namespace Codist.Options
 {
+	[System.ComponentModel.ToolboxItem(false)]
 	public partial class SyntaxHighlightPage : UserControl
 	{
 		readonly UiLock _UI = new UiLock();
