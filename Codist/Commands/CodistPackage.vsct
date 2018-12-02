@@ -43,6 +43,9 @@
       <Group guid="guidCodistPackageCmdSet2" id="IDG_VS_VIEW_DEFINEVIEWS" priority="0x0800">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_VIEW" />
       </Group>
+      <Group guid="guidCodistPackageCmdSet3" id="EDIT_PROJECT_GROUP_ID" priority="0x017F">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
+      </Group>
     </Groups>
 
     <!--Buttons section. -->
@@ -77,6 +80,17 @@
           <ButtonText>Symbol finder</ButtonText>
         </Strings>
       </Button>-->
+      <Button guid="guidCodistPackageCmdSet3" id="EDIT_VSIXMANIFEST_ID" priority="0x0100" type="Button">
+        <Parent guid="guidCodistPackageCmdSet3" id="EDIT_PROJECT_GROUP_ID" />
+        <Icon guid="ImageCatalogGuid" id="Counter" />
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>TextChanges</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+          <ButtonText>Increment version</ButtonText>
+        </Strings>
+      </Button>
     </Buttons>
 
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -105,5 +119,10 @@
 			<IDSymbol name="IDG_VS_VIEW_DEFINEVIEWS" value="0x1020" />
 			<IDSymbol name="SymbolFinderWindowCommandId" value="4129" />
     </GuidSymbol>
+  
+    <GuidSymbol value="{eb9f9d42-d000-4d82-874a-4688ddd26dbe}" name="guidCodistPackageCmdSet3">
+			<IDSymbol name="EDIT_PROJECT_GROUP_ID" value="0x1000" />
+      <IDSymbol value="4128" name="EDIT_VSIXMANIFEST_ID" />
+		</GuidSymbol>
   </Symbols>
 </CommandTable>

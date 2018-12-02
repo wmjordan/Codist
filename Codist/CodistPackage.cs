@@ -42,10 +42,12 @@ namespace Codist
 		const string CategorySuperQuickInfo = Constants.NameOfMe + "\\Super Quick Info";
 		const string CategoryScrollbarMarker = Constants.NameOfMe + "\\Scrollbar Marker";
 		const string CategorySyntaxHighlight = Constants.NameOfMe + "\\Syntax Highlight";
-		const string CategoryNaviBar = Constants.NameOfMe + "\\Navi Bar";
+		const string CategoryNaviBar = Constants.NameOfMe + "\\Navigation Bar";
 		const string CategorySmartBar = Constants.NameOfMe + "\\Smart Bar";
 
 		static EnvDTE.DTE _dte;
+		static EnvDTE80.DTE2 _dte2;
+		static OleMenuCommandService _menu;
 		//static VsDebugger _Debugger;
 
 		/// <summary>
@@ -58,10 +60,23 @@ namespace Codist
 			// initialization is the Initialize method.
 		}
 
+		public static CodistPackage Instance { get; private set; }
 		public static EnvDTE.DTE DTE {
 			get {
 				ThreadHelper.ThrowIfNotOnUIThread();
 				return _dte ?? (_dte = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE);
+			}
+		}
+		public static EnvDTE80.DTE2 DTE2 {
+			get {
+				ThreadHelper.ThrowIfNotOnUIThread();
+				return _dte2 ?? (_dte2 = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE80.DTE2);
+			}
+		}
+		public static OleMenuCommandService MenuService {
+			get {
+				ThreadHelper.ThrowIfNotOnUIThread();
+				return _menu ?? (_menu = Instance.GetService(typeof(System.ComponentModel.Design.IMenuCommandService)) as OleMenuCommandService);
 			}
 		}
 
@@ -78,8 +93,6 @@ namespace Codist
 		}
 
 		#region Package Members
-
-
 		/// <summary>
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
 		/// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -98,6 +111,7 @@ namespace Codist
 				Classifiers.SymbolMarkManager.Clear();
 			};
 
+			Instance = this;
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -105,7 +119,8 @@ namespace Codist
 				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, true);
 			}
 			await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
-			await Commands.ScreenshotCommand.InitializeAsync(this);
+			Commands.ScreenshotCommand.Initialize(this);
+			Commands.IncrementVsixVersionCommand.Initialize(this);
 		}
 
 		#endregion
