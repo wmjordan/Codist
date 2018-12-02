@@ -320,8 +320,12 @@ namespace Codist
 		internal TextBlock ToUIText(TextBlock block, AttributeData item) {
 			var a = item.AttributeClass.Name;
 			block.Append("[")
-				.AddSymbol(item.AttributeConstructor, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class);
+				.AddSymbol(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class);
 			if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
+				var node = item.ApplicationSyntaxReference?.GetSyntax() as Microsoft.CodeAnalysis.CSharp.Syntax.AttributeSyntax;
+				if (node != null && node.ArgumentList?.Arguments.Count > 0) {
+					block.Append(node.ArgumentList.ToString(), ThemeHelper.SystemGrayTextBrush);
+				}
 				block.Append("]");
 				return block;
 			}
