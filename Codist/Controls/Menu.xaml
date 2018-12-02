@@ -159,7 +159,7 @@
 		</ControlTemplate.Triggers>
 	</ControlTemplate>
 	<ControlTemplate x:Key="{x:Static MenuItem.SubmenuHeaderTemplateKey}" TargetType="{x:Type c:ThemedMenuItem}">
-		<Border x:Name="Border" BorderThickness="1" Background="{TemplateBinding Background}" Opacity="{TemplateBinding Opacity}">
+		<Border x:Name="Border" BorderThickness="1">
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
@@ -171,7 +171,7 @@
 				<ContentPresenter x:Name="HeaderHost" Grid.Column="1" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="False"/>
 				<TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" MaxWidth="200" TextTrimming="CharacterEllipsis" Margin="5,2,0,2" DockPanel.Dock="Right" VerticalAlignment="Center" Foreground="{DynamicResource VsBrush.GrayText}"/>
 				<Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{DynamicResource VsBrush.CommandBarMenuSubmenuGlyph}" />
-				<Popup x:Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+				<Popup x:Name="Popup" Placement="Right" HorizontalOffset="-1" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
 					<Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="1" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}">
 						<StackPanel Margin="3">
 							<ContentPresenter x:Name="PopupHeader" Content="{TemplateBinding SubMenuHeader}" ContentSource="Tag" Margin="0,0,0,3" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
@@ -192,7 +192,7 @@
 				<Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource VsBrush.CommandBarHoverOverSelectedIconBorder}"/>
 			</Trigger>
 			<Trigger SourceName="Popup" Property="AllowsTransparency" Value="True">
-				<Setter TargetName="SubmenuBorder" Property="CornerRadius" Value="4"/>
+				<Setter TargetName="SubmenuBorder" Property="CornerRadius" Value="0,0,4,4"/>
 			</Trigger>
 			<Trigger Property="IsEnabled" Value="false">
 				<Setter Property="Foreground" Value="Gray"/>

@@ -15,6 +15,56 @@ namespace Codist.Controls
 		bool Filter(MemberFilterTypes filterTypes);
 	}
 
+	sealed class SearchScopeBox : UserControl
+	{
+		readonly ThemedToggleButton _ProjectFilter, _DocumentFilter;
+		bool _uiLock;
+
+		public event EventHandler FilterChanged;
+
+		public SearchScopeBox() {
+			_ProjectFilter = CreateButton(KnownImageIds.CSProjectNode, "Current Project");
+			_DocumentFilter = CreateButton(KnownImageIds.CSSourceFile, "Current Document");
+			Margin = WpfHelper.SmallHorizontalMargin;
+			Content = new Border {
+				BorderThickness = WpfHelper.TinyMargin,
+				BorderBrush = ThemeHelper.TextBoxBorderBrush,
+				CornerRadius = new CornerRadius(3),
+				Child = new StackPanel {
+					Children = {
+						_DocumentFilter, _ProjectFilter
+					},
+					Orientation = Orientation.Horizontal
+				}
+			};
+			_DocumentFilter.IsChecked = true;
+		}
+
+		public ScopeType Filter { get; private set; }
+
+		ThemedToggleButton CreateButton(int imageId, string toolTip) {
+			var b = new ThemedToggleButton(imageId, toolTip) { BorderThickness = WpfHelper.NoMargin };
+			b.Checked += UpdateFilterValue;
+			return b;
+		}
+
+		void UpdateFilterValue(object sender, RoutedEventArgs eventArgs) {
+			if (_uiLock) {
+				return;
+			}
+			_uiLock = true;
+			_ProjectFilter.IsChecked = _DocumentFilter.IsChecked = false;
+			(sender as ThemedToggleButton).IsChecked = true;
+			_uiLock = false;
+			var f = sender == _DocumentFilter ? ScopeType.ActiveDocument
+				: sender == _ProjectFilter ? ScopeType.ActiveProject
+				: ScopeType.Undefined;
+			if (Filter != f) {
+				Filter = f;
+				FilterChanged?.Invoke(this, EventArgs.Empty);
+			}
+		}
+	}
 	sealed class MemberFilterBox : StackPanel
 	{
 		readonly ThemedTextBox _FilterBox;
@@ -185,7 +235,6 @@ namespace Codist.Controls
 
 		sealed class MemberFilterButtonGroup : UserControl
 		{
-			static readonly Thickness _Margin = new Thickness(3, 0, 3, 0);
 			readonly ThemedToggleButton _FieldFilter, _MethodFilter, _TypeFilter, _PublicFilter, _PrivateFilter;
 			bool _uiLock;
 
@@ -199,7 +248,7 @@ namespace Codist.Controls
 				_PublicFilter = CreateButton(KnownImageIds.ModulePublic, "Public and protected members");
 				_PrivateFilter = CreateButton(KnownImageIds.ModulePrivate, "Internal and private members");
 
-				Margin = _Margin;
+				Margin = WpfHelper.SmallHorizontalMargin;
 				Content = new Border {
 					BorderThickness = WpfHelper.TinyMargin,
 					BorderBrush = ThemeHelper.TextBoxBorderBrush,
@@ -285,5 +334,14 @@ namespace Codist.Controls
 		Private = 1 << 6,
 		AllAccessibility = Public | Protected | Private | Internal,
 		All = AllMembers | AllAccessibility
+	}
+
+	enum ScopeType
+	{
+		Undefined,
+		ActiveDocument,
+		ActiveProject,
+		Solution,
+		OpenedDocument
 	}
 }

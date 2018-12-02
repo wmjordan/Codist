@@ -78,6 +78,20 @@ namespace Codist
 		}
 
 		/// <summary>
+		/// Locate symbol in case when the semantic model has been changed.
+		/// </summary>
+		public async Task<ISymbol> RelocateSymbolAsync(ISymbol symbol, CancellationToken cancellationToken = default) {
+			if (symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
+				return symbol;
+			}
+			await UpdateAsync(cancellationToken);
+			var path = symbol.DeclaringSyntaxReferences.FirstOrDefault(r => r.SyntaxTree != null);
+			var doc = Document.Project.GetDocument(path.SyntaxTree.FilePath);
+			return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSimilarSymbols(symbol, (await doc.GetSemanticModelAsync(cancellationToken)).Compilation, cancellationToken)
+				.FirstOrDefault() ?? symbol;
+		}
+
+		/// <summary>
 		/// Roughly finds a new <see cref="SyntaxNode"/> in updated semantic model corresponding to the member or type declaration node.
 		/// </summary>
 		/// <param name="node">The old node.</param>
@@ -168,7 +182,7 @@ namespace Codist
 				var doc = Document.Project.Solution.GetDocument(node.SyntaxTree);
 				if (doc == null) {
 					var nodeFilePath = node.SyntaxTree.FilePath;
-					doc = Document.FilePath == nodeFilePath ? Document : Document.Project.Documents.FirstOrDefault(d => d.FilePath == nodeFilePath);
+					doc = Document.FilePath == nodeFilePath ? Document : Document.Project.Documents.FirstOrDefault(d => String.Equals(d.FilePath, nodeFilePath, StringComparison.OrdinalIgnoreCase));
 					if (doc == null) {
 						return null;
 					}
@@ -176,7 +190,7 @@ namespace Codist
 					if (node.SpanStart >= sm.SyntaxTree.Length) {
 						return null;
 					}
-					var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(node.Span.Start, 0));
+					var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(node.SpanStart, 0));
 					//todo find out the new node
 					if (newNode.IsKind(node.Kind())) {
 						node = newNode;

@@ -49,6 +49,10 @@ namespace Codist
 			}
 		}
 
+		public static Document GetDocument(this Project project, string filePath) {
+			return project.Documents.FirstOrDefault(d => String.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+		}
+
 		/// <summary>
 		/// Gets a collection containing <paramref name="project"/> itself, and projects referenced by <paramref name="project"/> or referencing <paramref name="project"/>.
 		/// </summary>
