@@ -375,6 +375,7 @@ namespace Codist.Classifiers
 				case SyntaxKind.AnonymousMethodExpression:
 				case SyntaxKind.SimpleLambdaExpression:
 				case SyntaxKind.ParenthesizedLambdaExpression:
+				case SyntaxKind.LocalFunctionStatement:
 					return _Classifications.Method;
 				case SyntaxKind.InvocationExpression:
 					return (((node as InvocationExpressionSyntax).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") ? null : _Classifications.Method;
