@@ -251,7 +251,10 @@ namespace Codist.NaviBar
 			}
 
 			async Task FindDeclarationsAsync(string symbolName, CancellationToken token) {
-				var result = new SortedSet<ISymbol>(Comparer<ISymbol>.Create((x, y) => x.Name.Length - y.Name.Length));
+				var result = new SortedSet<ISymbol>(Comparer<ISymbol>.Create((x, y) => {
+					var l = x.Name.Length - y.Name.Length;
+					return l != 0 ? l : x.GetHashCode() - y.GetHashCode();
+				}));
 				int maxNameLength = 0;
 				foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(_Bar._SemanticContext.Document.Project, name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1, token)) {
 					if (result.Count < 50) {
