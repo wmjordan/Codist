@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
 {
@@ -18,10 +19,10 @@ namespace Codist.Controls
 			Title = new TextBlock {
 				Padding = _TitlePadding,
 				HorizontalAlignment = HorizontalAlignment.Stretch,
-				Background = ThemeHelper.TitleBackgroundBrush,
-				Foreground = ThemeHelper.TitleTextBrush,
 				TextWrapping = TextWrapping.Wrap
-			};
+			}
+			.ReferenceProperty(TextBlock.BackgroundProperty, EnvironmentColors.MainWindowActiveCaptionBrushKey)
+			.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.MainWindowActiveCaptionTextBrushKey);
 			if (title != null) {
 				Title.Text = title;
 			}

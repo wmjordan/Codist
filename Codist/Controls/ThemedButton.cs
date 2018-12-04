@@ -18,12 +18,11 @@ namespace Codist.Controls
 			Background = System.Windows.Media.Brushes.Transparent;
 			_clickHanler = onClickHandler;
 			Click += ThemedButton_Click;
-			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			this.ReferenceCrispImageBackground(Microsoft.VisualStudio.PlatformUI.EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 
-		private void ThemedButton_Click(object sender, RoutedEventArgs e) {
+		void ThemedButton_Click(object sender, RoutedEventArgs e) {
 			_clickHanler?.Invoke();
-			var t = this.GetTemplate();
 		}
 	}
 
@@ -34,7 +33,7 @@ namespace Codist.Controls
 			ToolTip = toolTip;
 			Margin = WpfHelper.NoMargin;
 			Background = System.Windows.Media.Brushes.Transparent;
-			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			this.ReferenceCrispImageBackground(Microsoft.VisualStudio.PlatformUI.EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 	}
 }

@@ -38,7 +38,7 @@ namespace Codist
 				IsReadOnly = true,
 				TextAlignment = TextAlignment.Right,
 				MinWidth = 180
-			}.SetStyleResourceProperty(VsResourceKeys.TextBoxStyleKey));
+			}.ReferenceStyle(VsResourceKeys.TextBoxStyleKey));
 			return panel;
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, SymbolFormatter formatter) {
@@ -124,7 +124,7 @@ namespace Codist
 				Content = element,
 				VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
 				Padding = ScrollerMargin
-			}.SetStyleResourceProperty(VsResourceKeys.GetScrollViewerStyleKey(true));
+			}.ReferenceStyle(VsResourceKeys.GetScrollViewerStyleKey(true));
 		}
 
 		public static void SetUITextRenderOptions(DependencyObject element, bool optimize) {

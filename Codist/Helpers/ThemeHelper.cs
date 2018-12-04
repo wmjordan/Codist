@@ -106,6 +106,9 @@ namespace Codist
 		public static void SetBackgroundForCrispImage(this System.Windows.DependencyObject target, WpfColor color) {
 			ImageThemingUtilities.SetImageBackgroundColor(target, color);
 		}
+		public static void ReferenceCrispImageBackground(this System.Windows.FrameworkElement target, object colorKey) {
+			target.SetResourceReference(ImageThemingUtilities.ImageBackgroundColorProperty, colorKey);
+		}
 
 		internal static void RefreshThemeCache() {
 			DocumentPageColor = CommonDocumentColors.PageColorKey.GetGdiColor();

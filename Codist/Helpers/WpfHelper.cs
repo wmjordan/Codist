@@ -237,8 +237,13 @@ namespace Codist
 		}
 		public static ResourceDictionary LoadComponent(string uri) {
 			return (ResourceDictionary)Application.LoadComponent(new Uri("/" + nameof(Codist) + ";component/" + uri, UriKind.Relative));
-		} 
-		public static TControl SetStyleResourceProperty<TControl>(this TControl control, object resourceKey)
+		}
+		public static TControl ReferenceProperty<TControl>(this TControl control, DependencyProperty dependency, object resourceKey)
+			where TControl : FrameworkElement {
+			control.SetResourceReference(dependency, resourceKey);
+			return control;
+		}
+		public static TControl ReferenceStyle<TControl>(this TControl control, object resourceKey)
 			where TControl : FrameworkElement {
 			control.SetResourceReference(FrameworkElement.StyleProperty, resourceKey);
 			return control;

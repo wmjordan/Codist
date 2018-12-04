@@ -13,7 +13,7 @@ namespace Codist.Controls
 	{
 		public ThemedTextBox() {
 			BorderThickness = new Thickness(0, 0, 0, 1);
-			this.SetStyleResourceProperty(VsResourceKeys.TextBoxStyleKey);
+			this.ReferenceStyle(VsResourceKeys.TextBoxStyleKey);
 		}
 	}
 }

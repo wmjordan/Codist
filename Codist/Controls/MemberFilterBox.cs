@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.VisualStudio.Imaging;
 using AppHelpers;
+using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
 {
@@ -28,7 +29,6 @@ namespace Codist.Controls
 			Margin = WpfHelper.SmallHorizontalMargin;
 			Content = new Border {
 				BorderThickness = WpfHelper.TinyMargin,
-				BorderBrush = ThemeHelper.TextBoxBorderBrush,
 				CornerRadius = new CornerRadius(3),
 				Child = new StackPanel {
 					Children = {
@@ -36,7 +36,7 @@ namespace Codist.Controls
 					},
 					Orientation = Orientation.Horizontal
 				}
-			};
+			}.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey);
 			_DocumentFilter.IsChecked = true;
 		}
 
@@ -251,19 +251,18 @@ namespace Codist.Controls
 				Margin = WpfHelper.SmallHorizontalMargin;
 				Content = new Border {
 					BorderThickness = WpfHelper.TinyMargin,
-					BorderBrush = ThemeHelper.TextBoxBorderBrush,
 					CornerRadius = new CornerRadius(3),
 					Child = new StackPanel {
 						Children = {
 							_PublicFilter, _PrivateFilter,
-							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin, BorderBrush = ThemeHelper.TextBoxBorderBrush },
+							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
 							_FieldFilter, _MethodFilter, _TypeFilter,
-							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin, BorderBrush = ThemeHelper.TextBoxBorderBrush },
+							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
 							new ThemedButton(KnownImageIds.StopFilter, "Clear filter switches", ClearFilter) { Margin = WpfHelper.NoMargin, BorderThickness = WpfHelper.NoMargin },
 						},
 						Orientation = Orientation.Horizontal
 					}
-				};
+				}.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey);
 			}
 
 			public MemberFilterTypes Filters { get; private set; } = MemberFilterTypes.All;

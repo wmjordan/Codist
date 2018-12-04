@@ -15,6 +15,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using Task = System.Threading.Tasks.Task;
 using AppHelpers;
+using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.NaviBar
 {
@@ -198,7 +199,7 @@ namespace Codist.NaviBar
 			public RootItem(CSharpBar bar) {
 				_Bar = bar;
 				Icon = ThemeHelper.GetImage(KnownImageIds.CSProjectNode);
-				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+				this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
 				Header = new ThemedToolBarText("//");
 				SubMenuHeader = new StackPanel {
@@ -311,7 +312,7 @@ namespace Codist.NaviBar
 				_ImageId = node.GetImageId();
 				Icon = ThemeHelper.GetImage(_ImageId);
 				initializer?.Invoke(this);
-				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+				this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
 				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SymbolToolTip)) {
 					ToolTip = String.Empty;
@@ -433,14 +434,12 @@ namespace Codist.NaviBar
 					return this;
 				}
 				if (Node.FullSpan.Contains(position)) {
-					if (Background == Brushes.Transparent) {
-						Background = ThemeHelper.GetWpfBrush(Microsoft.VisualStudio.PlatformUI.EnvironmentColors.CommandBarMenuItemMouseOverBrushKey);
+					if (IsChecked == false) {
+						IsChecked = true;
 					}
 				}
-				else {
-					if (Background != Brushes.Transparent) {
-						Background = Brushes.Transparent;
-					}
+				else if (IsChecked) {
+					IsChecked = false;
 				}
 				return this;
 			}
