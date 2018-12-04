@@ -84,6 +84,21 @@ namespace Codist.Controls
 			_FilterButtons.FilterChanged += FilterChanged;
 			_FilterBox.TextChanged += FilterChanged;
 		}
+		public bool FocusTextBox() {
+			if (_FilterBox.IsVisible) {
+				return _FilterBox.Focus();
+			}
+			_FilterBox.IsVisibleChanged -= _FilterBox_IsVisibleChanged;
+			_FilterBox.IsVisibleChanged += _FilterBox_IsVisibleChanged;
+			return false;
+		}
+
+		void _FilterBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+			if (_FilterBox.IsVisible) {
+				_FilterBox.Focus();
+				_FilterBox.IsVisibleChanged -= _FilterBox_IsVisibleChanged;
+			}
+		}
 
 		void FilterChanged(object sender, EventArgs e) {
 			Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), _FilterButtons.Filters);

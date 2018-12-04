@@ -280,6 +280,12 @@ namespace Codist.NaviBar
 				public MemberFinderBox(ItemCollection items) {
 					_Items = items;
 					PreviewKeyUp += ControlMenuSelection;
+					IsVisibleChanged += (s, args) => {
+						var b = s as TextBox;
+						if (b.IsVisible) {
+							b.Focus();
+						}
+					};
 				}
 
 				void ControlMenuSelection(object sender, KeyEventArgs e) {
@@ -360,10 +366,12 @@ namespace Codist.NaviBar
 						SubmenuOpened += NaviItem_SubmenuOpened;
 					}
 				}
+				(SubMenuHeader as StackPanel)?.GetFirstVisualChild<MemberFilterBox>()?.FocusTextBox();
 			}
 
 			async void NaviItem_SubmenuOpened(object sender, RoutedEventArgs e) {
 				await RefreshItemsAsync(Items, Node);
+				(SubMenuHeader as StackPanel)?.GetFirstVisualChild<MemberFilterBox>()?.FocusTextBox();
 			}
 
 			async void NaviItem_ToolTipOpening(object sender, ToolTipEventArgs e) {
