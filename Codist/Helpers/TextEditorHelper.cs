@@ -59,6 +59,16 @@ namespace Codist
 			}
 		}
 
+		public static Span GetLineSpan(this SnapshotSpan span) {
+			return Span.FromBounds(span.Snapshot.GetLineNumberFromPosition(span.Start),
+				span.Snapshot.GetLineNumberFromPosition(span.End));
+		}
+
+		public static Span GetLineSpan(this ITextSnapshot snapshot, TextSpan span) {
+			return Span.FromBounds(snapshot.GetLineNumberFromPosition(span.Start),
+				snapshot.GetLineNumberFromPosition(span.End));
+		}
+
 		public static TextFormattingRunProperties GetRunProperties(this IClassificationFormatMap formatMap, string classificationType) {
 			return formatMap.GetTextProperties(ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType));
 		}

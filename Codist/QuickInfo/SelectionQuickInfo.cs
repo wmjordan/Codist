@@ -66,11 +66,10 @@ namespace Codist.QuickInfo
 				);
 				return activeSpan;
 			}
-			var y1 = point.Snapshot.GetLineNumberFromPosition(p1);
-			var y2 = point.Snapshot.GetLineNumberFromPosition(p2) + 1;
+			var lines = selection.StreamSelectionSpan.SnapshotSpan.GetLineSpan();
 			var info = new ThemedTipText() { Name = Name }.Append("Selection: ", true).Append(c.ToString()).Append(" characters");
-			if (y2 - y1 > 1) {
-				info.Append(", " + (y2 - y1).ToString() + " lines");
+			if (lines.Length > 0) {
+				info.Append(", " + (lines.Length + 1).ToString() + " lines");
 			}
 			qiContent.Add(info);
 			return activeSpan;

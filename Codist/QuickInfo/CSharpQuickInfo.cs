@@ -354,7 +354,7 @@ namespace Codist.QuickInfo
 				}
 			}
 			else if (nodeKind == SyntaxKind.Block) {
-				var lines = currentSnapshot.GetLineNumberFromPosition(node.Span.End) - currentSnapshot.GetLineNumberFromPosition(node.SpanStart) + 1;
+				var lines = currentSnapshot.GetLineSpan(node.Span).Length + 1;
 				if (lines > 100) {
 					qiContent.Add(new ThemedTipText { Text = lines + " lines", FontWeight = FontWeights.Bold });
 				}
