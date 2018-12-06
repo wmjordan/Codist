@@ -143,7 +143,12 @@ namespace Codist.NaviBar
 					if (token.IsCancellationRequested) {
 						return;
 					}
-					Items.Add(new NaviItem(this, nodes[i], true, false));
+					bool highlight = nodes[i].IsMemberDeclaration();
+					var newItem = new NaviItem(this, nodes[i], highlight, false);
+					if (highlight) {
+						newItem.IsChecked = true;
+					}
+					Items.Add(newItem);
 					++i;
 				}
 			}
@@ -308,8 +313,8 @@ namespace Codist.NaviBar
 			readonly int _ImageId;
 
 			public NaviItem(CSharpBar bar, SyntaxNode node) : this (bar, node, false, false) { }
-			public NaviItem(CSharpBar bar, SyntaxNode node, bool highlightTypes, bool includeParameterList) : this(bar, node, null, null) {
-				SetHeader(node, false, highlightTypes, includeParameterList);
+			public NaviItem(CSharpBar bar, SyntaxNode node, bool highlight, bool includeParameterList) : this(bar, node, null, null) {
+				SetHeader(node, false, highlight, includeParameterList);
 			}
 			public NaviItem(CSharpBar bar, SyntaxNode node, Action<NaviItem> initializer, Action<NaviItem> clickHandler) {
 				Node = node;
@@ -366,12 +371,12 @@ namespace Codist.NaviBar
 						SubmenuOpened += NaviItem_SubmenuOpened;
 					}
 				}
-				(SubMenuHeader as StackPanel)?.GetFirstVisualChild<MemberFilterBox>()?.FocusTextBox();
+				FocusFilterBox();
 			}
 
 			async void NaviItem_SubmenuOpened(object sender, RoutedEventArgs e) {
 				await RefreshItemsAsync(Items, Node);
-				(SubMenuHeader as StackPanel)?.GetFirstVisualChild<MemberFilterBox>()?.FocusTextBox();
+				FocusFilterBox();
 			}
 
 			async void NaviItem_ToolTipOpening(object sender, ToolTipEventArgs e) {
@@ -391,11 +396,15 @@ namespace Codist.NaviBar
 				return MemberFilterBox.FilterByImageId(filterTypes, _ImageId);
 			}
 
+			void FocusFilterBox() {
+				(SubMenuHeader as StackPanel)?.GetFirstVisualChild<MemberFilterBox>()?.FocusTextBox();
+			}
+
 			#region Item methods
 			public void SetHeader(bool includeContainer) {
-				SetHeader(Node, includeContainer, true, true);
+				SetHeader(Node, includeContainer, false, true);
 			}
-			NaviItem SetHeader(SyntaxNode node, bool includeContainer, bool highlightTypes, bool includeParameterList) {
+			NaviItem SetHeader(SyntaxNode node, bool includeContainer, bool highlight, bool includeParameterList) {
 				var title = node.GetDeclarationSignature();
 				if (title == null) {
 					return this;
@@ -420,7 +429,7 @@ namespace Codist.NaviBar
 						t.Append((p as BaseTypeDeclarationSyntax).Identifier.ValueText + ".", ThemeHelper.SystemGrayTextBrush);
 					}
 				}
-				t.Append(title, highlightTypes && (node.IsTypeDeclaration() || node.IsKind(SyntaxKind.NamespaceDeclaration) || node.IsKind(SyntaxKind.CompilationUnit)));
+				t.Append(title, highlight);
 				if (includeParameterList && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterList)) {
 					var useParamName = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName);
 					if (node is BaseMethodDeclarationSyntax) {
