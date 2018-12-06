@@ -372,6 +372,12 @@ namespace Codist.QuickInfo
 				? _SemanticModel.GetSymbolInfo(retStatement.Expression).Symbol
 				: null;
 			while ((statement = statement.Parent) != null) {
+				if (statement.IsMemberDeclaration() == false
+					&& statement.IsKind(SyntaxKind.SimpleLambdaExpression) == false
+					&& statement.IsKind(SyntaxKind.ParenthesizedLambdaExpression) == false
+					&& statement.IsKind(SyntaxKind.LocalFunctionStatement) == false) {
+					continue;
+				}
 				var name = statement.GetDeclarationSignature();
 				if (name == null) {
 					continue;
