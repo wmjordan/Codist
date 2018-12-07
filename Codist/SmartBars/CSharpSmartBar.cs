@@ -116,6 +116,11 @@ namespace Codist.SmartBars
 				else if (token.RawKind >= (int)SyntaxKind.NumericLiteralToken && token.RawKind <= (int)SyntaxKind.StringLiteralToken) {
 					AddEditorCommand(MyToolBar, KnownImageIds.ReferencedDimension, "Edit.FindAllReferences", "Find all references");
 				}
+				else if (token.IsKind(SyntaxKind.TrueKeyword) || token.IsKind(SyntaxKind.FalseKeyword)) {
+					AddCommand(MyToolBar, KnownImageIds.ToggleButton, "Toggle value", ctx => {
+						Replace(ctx, v => v == "true" ? "false" : "true", true);
+					});
+				}
 				if (isDesignMode) {
 					if (node.IsKind(SyntaxKind.VariableDeclarator)) {
 						if (node?.Parent?.Parent is MemberDeclarationSyntax) {
@@ -132,6 +137,9 @@ namespace Codist.SmartBars
 								ctx.View.Selection.Clear();
 							});
 						}
+					}
+					else if (IsInvertableOperation(node.Kind())) {
+						AddCommand(MyToolBar, KnownImageIds.Operator, "Invert operator", InvertOperator);
 					}
 					else {
 						AddEditorCommand(MyToolBar, KnownImageIds.ExtractMethod, "Refactor.ExtractMethod", "Extract Method");
@@ -573,6 +581,75 @@ namespace Codist.SmartBars
 					list.Add(new CommandItem(KnownImageIds.GoToDeclaration, "Go to " + type.Name + type.GetParameterString(), _ => type.GoToSource()));
 				}
 			}
+		}
+
+		static bool IsInvertableOperation(SyntaxKind kind) {
+			switch (kind) {
+				case SyntaxKind.BitwiseAndExpression:
+				case SyntaxKind.BitwiseOrExpression:
+				case SyntaxKind.EqualsExpression:
+				case SyntaxKind.NotEqualsExpression:
+				case SyntaxKind.GreaterThanExpression:
+				case SyntaxKind.GreaterThanOrEqualExpression:
+				case SyntaxKind.LessThanExpression:
+				case SyntaxKind.LessThanOrEqualExpression:
+				case SyntaxKind.PostDecrementExpression:
+				case SyntaxKind.PostIncrementExpression:
+				case SyntaxKind.PreIncrementExpression:
+				case SyntaxKind.PreDecrementExpression:
+				case SyntaxKind.AddExpression:
+				case SyntaxKind.SubtractExpression:
+				case SyntaxKind.MultiplyExpression:
+				case SyntaxKind.DivideExpression:
+				case SyntaxKind.UnaryPlusExpression:
+				case SyntaxKind.UnaryMinusExpression:
+				case SyntaxKind.LeftShiftExpression:
+				case SyntaxKind.RightShiftExpression:
+				case SyntaxKind.AddAssignmentExpression:
+				case SyntaxKind.SubtractAssignmentExpression:
+				case SyntaxKind.MultiplyAssignmentExpression:
+				case SyntaxKind.DivideAssignmentExpression:
+				case SyntaxKind.AndAssignmentExpression:
+				case SyntaxKind.OrAssignmentExpression:
+				case SyntaxKind.LeftShiftAssignmentExpression:
+				case SyntaxKind.RightShiftAssignmentExpression:
+					return true;
+			}
+			return false;
+		}
+
+		void InvertOperator(CommandContext ctx) {
+			Replace(ctx, input => {
+				switch (input) {
+					case "==": return "!=";
+					case "!=": return "==";
+					case "&&": return "||";
+					case "||": return "&&";
+					case "--": return "++";
+					case "++": return "--";
+					case "<": return ">=";
+					case ">": return "<=";
+					case "<=": return ">";
+					case ">=": return "<";
+					case "+": return "-";
+					case "-": return "+";
+					case "*": return "/";
+					case "/": return "*";
+					case "&": return "|";
+					case "|": return "&";
+					case "<<": return ">>";
+					case ">>": return "<<";
+					case "+=": return "-=";
+					case "-=": return "+=";
+					case "*=": return "/=";
+					case "/=": return "*=";
+					case "<<=": return ">>=";
+					case ">>=": return "<<=";
+					case "&=": return "|=";
+					case "|=": return "&=";
+				}
+				return null;
+			}, true);
 		}
 
 		void SortAndGroupSymbolByClass(MenuItem menuItem, List<ISymbol> members) {

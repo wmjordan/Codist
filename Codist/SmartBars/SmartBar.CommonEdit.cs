@@ -42,6 +42,38 @@ namespace Codist.SmartBars
 			}
 		}
 
+		protected SnapshotSpan Replace(CommandContext ctx, Func<string, string> replaceHandler, bool selectModified) {
+			var firstModified = new SnapshotSpan();
+			int length = 0;
+			string t = null;
+			ctx.KeepToolBar(false);
+			using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
+				foreach (var item in View.Selection.SelectedSpans) {
+					t = item.GetText();
+					var replacement = replaceHandler(t);
+					if (replacement != null
+						&& edit.Replace(item, replacement)
+						&& firstModified.Snapshot == null) {
+						firstModified = item;
+						length = replacement.Length;
+					}
+				}
+				if (edit.HasEffectiveChanges) {
+					var snapsnot = edit.Apply();
+					firstModified = new SnapshotSpan(snapsnot, firstModified.Start, length);
+					if (t != null
+						&& Keyboard.Modifiers == ModifierKeys.Control) {
+						FindNext(ctx, t);
+					}
+					else if (selectModified) {
+						View.Selection.Select(firstModified, false);
+						View.Caret.MoveTo(firstModified.End);
+					}
+				}
+			}
+			return firstModified;
+		}
+
 		/// <summary>Surround each span of the corrent selection with <paramref name="prefix"/> and <paramref name="suffix"/>, and optionally select the first modified span if <paramref name="selectModified"/> is <see langword="true"/>.</summary>
 		/// <returns>The new span after modification. If modification is unsuccessful, the default of <see cref="SnapshotSpan"/> is returned.</returns>
 		protected SnapshotSpan SurroundWith(CommandContext ctx, string prefix, string suffix, bool selectModified) {
