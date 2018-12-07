@@ -6,7 +6,7 @@ namespace TestProject
 {
 	abstract partial class AbstractClass : IInterface
 	{
-		protected abstract int Property { get; set; } // protected abstract property
+		protected abstract int Property { [DispId(1)] get; [DispId(2)] set; } // protected abstract property
 		public void Method() { Property++; }
 		protected abstract int AbstractMethod(); // abstract method
 		/// <summary>
@@ -125,7 +125,10 @@ text".Log(); // multiline string (string verbatim)
 				EntryPoint = "DummyFunction",
 				CallingConvention = CallingConvention.Cdecl,
 				SetLastError = false)]
-			public static extern void ExternMethod(IntPtr ptr, int value);
+			public static extern void ExternMethod(
+				[In, Out] IntPtr ptr,
+				[In] int value
+			);
 		}
 	}
 }

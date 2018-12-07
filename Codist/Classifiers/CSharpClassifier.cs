@@ -95,10 +95,7 @@ namespace Codist.Classifiers
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 			var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace);
 			var lastTriviaSpan = default(TextSpan);
-			textSpan = GetAttributeNotationSpan(snapshot, result, textSpan, unitCompilation);
-			if (textSpan.IsEmpty == false) {
-				result.Add(CreateClassificationSpan(snapshot, textSpan, _Classifications.AttributeNotation));
-			}
+			GetAttributeNotationSpan(snapshot, result, textSpan, unitCompilation);
 
 			foreach (var item in classifiedSpans) {
 				var ct = item.ClassificationType;
@@ -203,37 +200,55 @@ namespace Codist.Classifiers
 			return result;
 		}
 
-		private static TextSpan GetAttributeNotationSpan(ITextSnapshot snapshot, List<ClassificationSpan> result, TextSpan textSpan, CompilationUnitSyntax unitCompilation) {
-			var spanNode = unitCompilation.FindNode(textSpan);
+		private static void GetAttributeNotationSpan(ITextSnapshot snapshot, List<ClassificationSpan> result, TextSpan textSpan, CompilationUnitSyntax unitCompilation) {
+			var spanNode = unitCompilation.FindNode(textSpan, true, false);
 			if (spanNode.HasLeadingTrivia != false && spanNode.GetLeadingTrivia().FullSpan.Contains(textSpan) != false) {
-				return new TextSpan();
+				return;
 			}
 			switch (spanNode.Kind()) {
 				case SyntaxKind.AttributeList:
 				case SyntaxKind.AttributeArgumentList:
-					return textSpan;
-				case SyntaxKind.MethodDeclaration:
-				case SyntaxKind.ConstructorDeclaration:
-				case SyntaxKind.DestructorDeclaration:
-				case SyntaxKind.OperatorDeclaration:
-				case SyntaxKind.ConversionOperatorDeclaration:
-					return (spanNode as BaseMethodDeclarationSyntax).AttributeLists.Span;
-				case SyntaxKind.ClassDeclaration:
-				case SyntaxKind.InterfaceDeclaration:
-				case SyntaxKind.EnumDeclaration:
-				case SyntaxKind.StructDeclaration:
-					return (spanNode as BaseTypeDeclarationSyntax).AttributeLists.Span;
-				case SyntaxKind.FieldDeclaration:
-				case SyntaxKind.EventFieldDeclaration:
-					return (spanNode as BaseFieldDeclarationSyntax).AttributeLists.Span;
-				case SyntaxKind.EventDeclaration:
-				case SyntaxKind.PropertyDeclaration:
-				case SyntaxKind.IndexerDeclaration:
-					return (spanNode as BasePropertyDeclarationSyntax).AttributeLists.Span;
-				case SyntaxKind.DelegateDeclaration:
-					return (spanNode as DelegateDeclarationSyntax).AttributeLists.Span;
-				default:
-					return new TextSpan();
+					result.Add(CreateClassificationSpan(snapshot, textSpan, _Classifications.AttributeNotation));
+					return;
+				//case SyntaxKind.MethodDeclaration:
+				//case SyntaxKind.ConstructorDeclaration:
+				//case SyntaxKind.DestructorDeclaration:
+				//case SyntaxKind.OperatorDeclaration:
+				//case SyntaxKind.ConversionOperatorDeclaration:
+				//	var m = spanNode as BaseMethodDeclarationSyntax;
+				//	AddAttributeSpan(result, snapshot, m.AttributeLists);
+				//	foreach (var item in m.ParameterList.Parameters) {
+				//		AddAttributeSpan(result, snapshot, item.AttributeLists);
+				//	}
+				//	return;
+				//case SyntaxKind.ClassDeclaration:
+				//case SyntaxKind.InterfaceDeclaration:
+				//case SyntaxKind.EnumDeclaration:
+				//case SyntaxKind.StructDeclaration:
+				//	AddAttributeSpan(result, snapshot, (spanNode as BaseTypeDeclarationSyntax).AttributeLists);
+				//	return;
+				//case SyntaxKind.FieldDeclaration:
+				//case SyntaxKind.EventFieldDeclaration:
+				//	AddAttributeSpan(result, snapshot, (spanNode as BaseFieldDeclarationSyntax).AttributeLists);
+				//	return;
+				//case SyntaxKind.EventDeclaration:
+				//case SyntaxKind.PropertyDeclaration:
+				//case SyntaxKind.IndexerDeclaration:
+				//	var p = spanNode as BasePropertyDeclarationSyntax;
+				//	AddAttributeSpan(result, snapshot, p.AttributeLists);
+				//	foreach (var item in p.AccessorList.Accessors) {
+				//		AddAttributeSpan(result, snapshot, item.AttributeLists);
+				//	}
+				//	return;
+				//case SyntaxKind.DelegateDeclaration:
+				//	AddAttributeSpan(result, snapshot, (spanNode as DelegateDeclarationSyntax).AttributeLists);
+				//	return;
+			}
+
+			void AddAttributeSpan(List<ClassificationSpan> spans, ITextSnapshot textSnapshot, SyntaxList<AttributeListSyntax> attributeList) {
+				if (attributeList.Count > 0) {
+					spans.Add(CreateClassificationSpan(textSnapshot, attributeList.Span, _Classifications.AttributeNotation));
+				}
 			}
 		}
 
@@ -351,13 +366,13 @@ namespace Codist.Classifiers
 					}
 				}
 			}
-			//else if (s == '[') {
-			//	// highlight attribute annotation
-			//	var node = unitCompilation.FindNode(item.TextSpan, true, true);
-			//	if (node is AttributeListSyntax) {
-			//		result.Add(CreateClassificationSpan(snapshot, node.Span, _Classifications.AttributeNotation));
-			//	}
-			//}
+			else if (s == '[' || s == ']') {
+				// highlight attribute annotation
+				var node = unitCompilation.FindNode(itemSpan, true, false);
+				if (node.IsKind(SyntaxKind.AttributeList)) {
+					result.Add(CreateClassificationSpan(snapshot, node.Span, _Classifications.AttributeNotation));
+				}
+			}
 		}
 
 		private static void MarkClassificationTypeForBrace(TextSpan itemSpan, ITextSnapshot snapshot, List<ClassificationSpan> result, IClassificationType type, SpecialHighlightOptions options) {
