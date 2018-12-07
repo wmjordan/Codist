@@ -184,21 +184,25 @@ namespace Codist.Controls
 				case KnownImageIds.InterfacePublic:
 				case KnownImageIds.StructurePublic:
 				case KnownImageIds.EnumerationPublic:
+				case KnownImageIds.DelegatePublic:
 					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.NestedType);
 				case KnownImageIds.ClassPrivate:
 				case KnownImageIds.InterfacePrivate:
 				case KnownImageIds.StructurePrivate:
 				case KnownImageIds.EnumerationPrivate:
+				case KnownImageIds.DelegatePrivate:
 					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.NestedType);
 				case KnownImageIds.ClassProtected:
 				case KnownImageIds.InterfaceProtected:
 				case KnownImageIds.StructureProtected:
 				case KnownImageIds.EnumerationProtected:
+				case KnownImageIds.DelegateProtected:
 					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.NestedType);
 				case KnownImageIds.ClassInternal:
 				case KnownImageIds.InterfaceInternal:
 				case KnownImageIds.StructureInternal:
 				case KnownImageIds.EnumerationInternal:
+				case KnownImageIds.DelegateInternal:
 					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.NestedType);
 				case KnownImageIds.ClassShortcut:
 				case KnownImageIds.InterfaceShortcut:
@@ -207,6 +211,7 @@ namespace Codist.Controls
 				case KnownImageIds.MethodPublic:
 				case KnownImageIds.TypePublic: // constructor
 				case KnownImageIds.OperatorPublic:
+				case KnownImageIds.ConvertPartition: // conversion
 					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.Method);
 				case KnownImageIds.MethodProtected:
 				case KnownImageIds.TypeProtected: // constructor

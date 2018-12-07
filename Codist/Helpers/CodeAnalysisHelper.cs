@@ -579,14 +579,14 @@ namespace Codist
 				case SyntaxKind.MethodDeclaration: return GetMethodSignature((MethodDeclarationSyntax)node);
 				case SyntaxKind.ArgumentList: return GetArgumentListSignature((ArgumentListSyntax)node);
 				case SyntaxKind.ConstructorDeclaration: return ((ConstructorDeclarationSyntax)node).Identifier.Text;
-				case SyntaxKind.ConversionOperatorDeclaration: return ((ConversionOperatorDeclarationSyntax)node).OperatorKeyword.Text;
+				case SyntaxKind.ConversionOperatorDeclaration: return GetConversionSignature((ConversionOperatorDeclarationSyntax)node);
 				case SyntaxKind.DelegateDeclaration: return GetDelegateSignature((DelegateDeclarationSyntax)node);
 				case SyntaxKind.EventDeclaration: return ((EventDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.EventFieldDeclaration: return GetVariableSignature(((EventFieldDeclarationSyntax)node).Declaration, position);
 				case SyntaxKind.FieldDeclaration: return GetVariableSignature(((FieldDeclarationSyntax)node).Declaration, position);
 				case SyntaxKind.DestructorDeclaration: return ((DestructorDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.IndexerDeclaration: return "Indexer";
-				case SyntaxKind.OperatorDeclaration: return ((OperatorDeclarationSyntax)node).OperatorKeyword.Text;
+				case SyntaxKind.OperatorDeclaration: return ((OperatorDeclarationSyntax)node).OperatorToken.Text;
 				case SyntaxKind.PropertyDeclaration: return ((PropertyDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.EnumMemberDeclaration: return ((EnumMemberDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.SimpleLambdaExpression: return "(" + ((SimpleLambdaExpressionSyntax)node).Parameter.ToString() + ")";
@@ -643,6 +643,9 @@ namespace Codist
 			}
 			string GetAttributeArgumentListSignature(AttributeArgumentListSyntax syntax) {
 				return (syntax.Parent as AttributeSyntax)?.Name.GetName();
+			}
+			string GetConversionSignature(ConversionOperatorDeclarationSyntax syntax) {
+				return syntax.ImplicitOrExplicitKeyword.Text + " " + ((syntax.Type as NameSyntax)?.GetName() ?? syntax.Type.ToString());
 			}
 			string GetSwitchSignature(SwitchSectionSyntax syntax) {
 				var label = (syntax as SwitchSectionSyntax).Labels.LastOrDefault();
