@@ -361,21 +361,22 @@ namespace Codist.NaviBar
 			private Action<NaviItem> ClickHandler { get; set; }
 
 			async void NaviItem_Click(object sender, RoutedEventArgs e) {
+				CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
 				if (ClickHandler != null) {
 					ClickHandler(this);
 				}
 				else if (HasItems == false) {
-					await AddItemsAsync(Items, Node);
+					await AddItemsAsync(Items, Node, _Bar._cancellationSource.GetToken());
 					if (HasExplicitItems) {
 						IsSubmenuOpen = true;
 						SubmenuOpened += NaviItem_SubmenuOpened;
+						FocusFilterBox();
 					}
 				}
-				FocusFilterBox();
 			}
 
 			async void NaviItem_SubmenuOpened(object sender, RoutedEventArgs e) {
-				await RefreshItemsAsync(Items, Node);
+				await RefreshItemsAsync(Items, Node, _Bar._cancellationSource.GetToken());
 				FocusFilterBox();
 			}
 
@@ -461,7 +462,7 @@ namespace Codist.NaviBar
 				return this;
 			}
 
-			async Task AddItemsAsync(ItemCollection items, SyntaxNode node) {
+			async Task AddItemsAsync(ItemCollection items, SyntaxNode node, CancellationToken cancellationToken) {
 				switch (node.Kind()) {
 					case SyntaxKind.NamespaceDeclaration:
 						SubMenuMaxHeight = _Bar._View.ViewportHeight / 2;
@@ -471,7 +472,7 @@ namespace Codist.NaviBar
 								new Separator()
 							}
 						};
-						await AddTypeDeclarationsAsync(node);
+						await AddTypeDeclarationsAsync(node, cancellationToken);
 						break;
 					case SyntaxKind.ClassDeclaration:
 					case SyntaxKind.StructDeclaration:
@@ -488,7 +489,7 @@ namespace Codist.NaviBar
 						AddMemberDeclarations(node, false);
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember)
 							&& (node as BaseTypeDeclarationSyntax).Modifiers.Any(SyntaxKind.PartialKeyword)) {
-							await AddPartialTypeDeclarationsAsync(node as BaseTypeDeclarationSyntax);
+							await AddPartialTypeDeclarationsAsync(node as BaseTypeDeclarationSyntax, cancellationToken);
 						}
 						break;
 					default:
@@ -497,13 +498,12 @@ namespace Codist.NaviBar
 				}
 			}
 
-			async Task RefreshItemsAsync(ItemCollection items, SyntaxNode node) {
+			async Task RefreshItemsAsync(ItemCollection items, SyntaxNode node, CancellationToken cancellationToken) {
 				var sm = _Bar._SemanticContext.SemanticModel;
-				var ct = _Bar._cancellationSource.GetToken();
-				await _Bar._SemanticContext.UpdateAsync(ct);
+				await _Bar._SemanticContext.UpdateAsync(cancellationToken);
 				if (sm != _Bar._SemanticContext.SemanticModel) {
 					ClearItems();
-					await AddItemsAsync(items, node);
+					await AddItemsAsync(items, node, cancellationToken);
 					return;
 				}
 				var pos = _Bar._SemanticContext.Position;
@@ -512,7 +512,7 @@ namespace Codist.NaviBar
 					if (n == null) {
 						continue;
 					}
-					if (n.NodeIsExternal || ct.IsCancellationRequested) {
+					if (n.NodeIsExternal || cancellationToken.IsCancellationRequested) {
 						break;
 					}
 					n.MarkEnclosingItem(pos);
@@ -541,10 +541,9 @@ namespace Codist.NaviBar
 			#endregion
 
 			#region Drop down menu items
-			async Task AddPartialTypeDeclarationsAsync(BaseTypeDeclarationSyntax node) {
-				var ct = _Bar._cancellationSource.GetToken();
-				await _Bar._SemanticContext.UpdateAsync(ct);
-				var symbol = await _Bar._SemanticContext.GetSymbolAsync(node, ct);
+			async Task AddPartialTypeDeclarationsAsync(BaseTypeDeclarationSyntax node, CancellationToken cancellationToken) {
+				await _Bar._SemanticContext.UpdateAsync(cancellationToken);
+				var symbol = await _Bar._SemanticContext.GetSymbolAsync(node, cancellationToken);
 				if (symbol == null) {
 					return;
 				}
@@ -553,7 +552,7 @@ namespace Codist.NaviBar
 					if (item.SyntaxTree == current || String.Equals(item.SyntaxTree.FilePath, current.FilePath, StringComparison.OrdinalIgnoreCase)) {
 						continue;
 					}
-					var partial = await item.GetSyntaxAsync(ct);
+					var partial = await item.GetSyntaxAsync(cancellationToken);
 					Items.Add(new NaviItem(_Bar, partial, i => {
 						i.Header = new ThemedMenuText(System.IO.Path.GetFileName(item.SyntaxTree.FilePath), true) {
 							TextAlignment = TextAlignment.Center
@@ -562,9 +561,12 @@ namespace Codist.NaviBar
 					AddMemberDeclarations(partial, true);
 				}
 			}
-			async Task AddTypeDeclarationsAsync(SyntaxNode node) {
+			async Task AddTypeDeclarationsAsync(SyntaxNode node, CancellationToken cancellationToken) {
 				int pos = _Bar._View.GetCaretPosition();
 				foreach(var child in node.ChildNodes()) {
+					if (cancellationToken.IsCancellationRequested) {
+						break;
+					}
 					if (child.IsTypeDeclaration() == false) {
 						if (child.IsKind(SyntaxKind.NamespaceDeclaration)) {
 							Items.Add(new NaviItem(_Bar, child) { ClickHandler = i => i.GoToLocation() }.MarkEnclosingItem(pos));
@@ -572,7 +574,7 @@ namespace Codist.NaviBar
 						continue;
 					}
 					Items.Add(new NaviItem(_Bar, child) { ClickHandler = i => i.GoToLocation() }.MarkEnclosingItem(pos));
-					await AddTypeDeclarationsAsync(child);
+					await AddTypeDeclarationsAsync(child, cancellationToken);
 				}
 			}
 			void AddMemberDeclarations(SyntaxNode node, bool isExternal) {
