@@ -587,6 +587,8 @@ namespace Codist.SmartBars
 			switch (kind) {
 				case SyntaxKind.BitwiseAndExpression:
 				case SyntaxKind.BitwiseOrExpression:
+				case SyntaxKind.LogicalOrExpression:
+				case SyntaxKind.LogicalAndExpression:
 				case SyntaxKind.EqualsExpression:
 				case SyntaxKind.NotEqualsExpression:
 				case SyntaxKind.GreaterThanExpression:
