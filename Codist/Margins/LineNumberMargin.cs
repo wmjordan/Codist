@@ -16,7 +16,6 @@ namespace Codist.Margins
 		readonly IWpfTextView _TextView;
 		readonly IEditorFormatMap _EditorFormatMap;
 		readonly IVerticalScrollBar _ScrollBar;
-		readonly TaggerResult _Tags;
 
 		static readonly SolidColorBrush LineNumberBrush = Brushes.DarkGray;
 		static readonly Pen LineNumberPen = new Pen(LineNumberBrush, 1) { DashStyle = DashStyles.Dash };
@@ -29,7 +28,6 @@ namespace Codist.Margins
 			IsHitTestVisible = false;
 
 			_ScrollBar = scrollBar;
-			_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 
 			Width = 0;

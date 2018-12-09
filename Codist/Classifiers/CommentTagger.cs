@@ -34,11 +34,14 @@ namespace Codist.Classifiers
 			return codeTagger as ITagger<T>;
 		}
 
+		internal static bool IsCommentTaggable(ITextView view) {
+			return GetCodeType(view.TextBuffer.ContentType) != CodeType.None;
+		}
 		static CodeType GetCodeType(IContentType contentType) {
 			return contentType.IsOfType(Constants.CodeTypes.CSharp) ? CodeType.CSharp
 				: contentType.IsOfType("html") || contentType.IsOfType("htmlx") || contentType.IsOfType("XAML") || contentType.IsOfType("XML") ? CodeType.Markup
 				: contentType.IsOfType("code++.css") ? CodeType.Css
-				: contentType.IsOfType("TypeScript") ? CodeType.Js
+				: contentType.IsOfType("TypeScript") || contentType.IsOfType("JavaScript") ? CodeType.Js
 				: contentType.IsOfType("C/C++") ? CodeType.C
 				: CodeType.None;
 		}
