@@ -244,6 +244,10 @@ Scollbar Marker draws extra glyphs and shapes on the scrollbar for the following
 
   ![Navigation Bar Menu](doc/navigation-bar-menu.png)
 
+  From version 4.3 on, the drop-down menu shows member initial values for fields.
+
+  ![Navigation Bar Menu](doc/navigation-bar-fields.png)
+
   Clicking on the "//" button at the left side of the navigation bar will pop up a text box. You can type some text in it and search for declarations defined in the active document code window.
 
   From version 4.3 on, it is possible to expand the search scope to project-wide, by clicking the second button nearby the text box.
