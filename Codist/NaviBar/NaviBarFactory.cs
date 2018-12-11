@@ -12,7 +12,7 @@ namespace Codist.NaviBar
 	/// Overrides default navigator to editor.
 	/// </summary>
 	[Export(typeof(IWpfTextViewCreationListener))]
-	[ContentType(Constants.CodeTypes.CSharp)]
+	[ContentType(Constants.CodeTypes.Code)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	sealed partial class NaviBarFactory : IWpfTextViewCreationListener
 	{
@@ -30,8 +30,34 @@ namespace Codist.NaviBar
 
 		public void TextViewCreated(IWpfTextView textView) {
 			if (Config.Instance.Features.MatchFlags(Features.NaviBar)) {
-				textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
-				new Overrider(textView);
+				if (textView.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp)) {
+					textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
+					new Overrider(textView);
+				}
+#if DEBUG
+				else {
+					AssociateFileCodeModelOverrider();
+				}
+#endif
+			}
+		}
+
+		static void AssociateFileCodeModelOverrider() {
+			Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
+			var model = CodistPackage.DTE2.ActiveDocument?.ProjectItem.FileCodeModel; // the active document can be null
+			if (model == null) {
+				return;
+			}
+			var codeElements = model.CodeElements;
+			foreach (EnvDTE80.CodeElement2 item in codeElements) {
+				System.Diagnostics.Debug.WriteLine(item.Name + "," + item.Kind + "," + item.StartPoint.Line + "," + item.StartPoint.LineCharOffset);
+				if (item.IsCodeType && item.Kind != EnvDTE.vsCMElement.vsCMElementDelegate) {
+					var ct = (item as EnvDTE.CodeType).Members;
+					for (int i = 1; i <= ct.Count; i++) {
+						var member = ct.Item(i);
+						System.Diagnostics.Debug.WriteLine(member.Name + "," + member.Kind + "," + member.StartPoint.Line + "," + member.StartPoint.LineCharOffset);
+					}
+				}
 			}
 		}
 

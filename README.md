@@ -28,7 +28,7 @@
   * Unnecessary code is marked strike-through.
   * Keywords are categorized and highlighted with various styles (e.g. `abstract` and `sealed`, `return` and `throw`, etc.).
   * Overriding methods (such as `ToString`) can be painted with gradient background color.
-  * Imported symbols (from external assemblies, e.g. `NotImplementedException`, `ToString`) can be marked with a different style (bold here)
+  * Imported symbols (from external assemblies, e.g. `NotImplementedException`, `ToString`) can be marked with a different style (bold here) from symbols in your code, which are also possible to be styled.
   * All the above styles are customizable.
  
   ![Syntax highlight](doc/highlight1.png) 
@@ -55,7 +55,7 @@
 
   From version 4.0 on, it is possible to identify symbols which are defined in your source code and which are imported from external assemblies.
 
-  You can customize this in the *Symbol Marker* tab of in the *C#* section of *Syntax Highlight*.
+  You can customize them in the *Symbol Marker* tab of in the *C#* section of *Syntax Highlight*. Style _My Type and Member_ is used for symbols from your code, and _Referenced Type and Member_ is used for symbols imported from external assemblies.
 
   ![Symbolmarker Options 2](doc/symbolmarker-options-2.png)
 
@@ -69,6 +69,8 @@
   To configure the comment tags, click the *Tags* tab, in the *Comment* sub-section of the *Syntax Highlight* section, where you can add, remove or modify comment tags. 
 
   ![Comment syntax highlight](doc/comment-tagger-options.png)
+
+  To disable comment tagger, uncheck the check box of _Comment Tagger_ on the _Syntax Highlight_ option page.
 
 * The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* or the *Font size* value of the corresponding syntax parts.
 
@@ -178,7 +180,7 @@ It brings commonly used operations for the selection, such as editing operations
 
   ![Smart Bar](doc/smart-bar.png)
 
-Buttons on the *Smart Bar* changes according to contexts.
+Buttons on the *Smart Bar* changes according to your selection.
 
   ![Smart Bar](doc/smart-bar-2.png)
 
@@ -192,13 +194,13 @@ From version 3.9 on, you can change the behavior of the Smart Bar.
 
 ## Scrollbar Marker
 
-The scrollbar can mark...
+Scollbar Marker draws extra glyphs and shapes on the scrollbar for the following syntax elements:
 
 * C# `class`/`struct`/`interface`/`enum` **declarations** (marked with a square and their names)
 * C# symbol match marker (matches symbol under the caret, marked with an aqua square)
 * C# instructions (`#if`, `#else`, `#region`, `#pragma`) (marked with a gray spot)
 * **Line numbers** (marked with gray dashed lines and numbers)
-* Special comments (marked with small squares)
+* Special comments tagged by comment tagger (marked with small squares)
 
   Please see screenshots in the above sections.
 
@@ -218,7 +220,7 @@ The scrollbar can mark...
 
   Symbol markers will be cleared when the solution is unloaded.
 
-  The style of symbol markers can be customized in options page of the *Syntax highlight* feature.
+  The style of symbol markers can be customized in options page of the *Syntax highlight* feature. The default colors are listed below.
 
   ![Symbol marker Options](doc/symbolmarker-options.png)
 
@@ -234,6 +236,8 @@ The scrollbar can mark...
 
   Clicking on the syntax node on the navigation bar will select the corresponding span in the editor. If you have enabled _Smart Bar_ as well, _Smart bar_ will appear offering operations that can be performed against the syntax node.
 
+  ![Navigation Bar Menu](doc/navigation-bar-select.png)
+
   Clicking on namespace or class definition syntax node will drop down a menu, showing members defined under it.
 
   You can type in the text box nearby the funnel icon to filter members listed in the menu. The buttons to the right hand side of the text box can be used to further filter the results.
@@ -241,6 +245,8 @@ The scrollbar can mark...
   ![Navigation Bar Menu](doc/navigation-bar-menu.png)
 
   Clicking on the "//" button at the left side of the navigation bar will pop up a text box. You can type some text in it and search for declarations defined in the active document code window.
+
+  From version 4.3 on, it is possible to expand the search scope to project-wide, by clicking the second button nearby the text box.
 
   ![Navigation Bar Search Declaration](doc/navigation-bar-search-declaration.png)
 
@@ -302,4 +308,4 @@ Your vote and feedback on the [Visual Studio Extension Marketplace](https://mark
 
 If you like _Codist_ and want to support the future development of it, you can [donate to the author](http://paypal.me/wmzuo).
 
-The recommended amount of donation is `$19.99`, nevertheless, any other amount of donations are appreciated.
+You can donate any amount of money as you like. The recommended amount of donation is `$19.99`.

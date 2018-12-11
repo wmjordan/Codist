@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 using System.Windows.Media;
-using Newtonsoft.Json;
-using Codist.Classifiers;
-using Codist.SyntaxHighlight;
-using Codist.Margins;
 using AppHelpers;
+using Codist.Classifiers;
+using Codist.Margins;
+using Codist.SyntaxHighlight;
+using Newtonsoft.Json;
 
 namespace Codist
 {
