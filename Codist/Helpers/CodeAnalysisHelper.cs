@@ -366,13 +366,23 @@ namespace Codist
 			}
 			int GetFieldIcon(FieldDeclarationSyntax syntax) {
 				bool isConst = false;
+				var accessibility = Accessibility.Private;
 				foreach (var modifier in syntax.Modifiers) {
 					switch (modifier.Text) {
 						case "const": isConst = true; break;
-						case "public": return isConst ? KnownImageIds.ConstantPublic : KnownImageIds.FieldPublic;
-						case "internal": return isConst ? KnownImageIds.ConstantInternal : KnownImageIds.FieldInternal;
-						case "protected": return isConst ? KnownImageIds.ConstantProtected : KnownImageIds.FieldProtected;
+						case "public": accessibility = Accessibility.Public; break;
+						case "internal":
+							if (accessibility != Accessibility.Protected) {
+								accessibility = Accessibility.Internal;
+							}
+							break;
+						case "protected": accessibility = Accessibility.Protected; break;
 					}
+				}
+				switch (accessibility) {
+					case Accessibility.Public: return isConst ? KnownImageIds.ConstantPublic : KnownImageIds.FieldPublic;
+					case Accessibility.Internal: return isConst ? KnownImageIds.ConstantInternal : KnownImageIds.FieldInternal;
+					case Accessibility.Protected: return isConst ? KnownImageIds.ConstantProtected : KnownImageIds.FieldProtected;
 				}
 				return isConst ? KnownImageIds.ConstantPrivate : KnownImageIds.FieldPrivate;
 			}
