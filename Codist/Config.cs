@@ -503,8 +503,9 @@ namespace Codist
 		ParameterList = 1 << 10,
 		ParameterListShowParamName = 1 << 11,
 		FieldValue = 1 << 12,
-		PartialClassMember = 1 << 13,
-		Region = 1 << 14,
+		AutoPropertyAnnotation = 1 << 13,
+		PartialClassMember = 1 << 14,
+		Region = 1 << 15,
 		Default = SyntaxDetail | SymbolToolTip | RangeHighlight | ParameterList | FieldValue | PartialClassMember | Region
 	}
 

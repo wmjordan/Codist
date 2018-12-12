@@ -27,6 +27,7 @@
 		private void InitializeComponent() {
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this._ParameterListParamNameBox = new System.Windows.Forms.CheckBox();
 			this.titleLabel1 = new Codist.Controls.TitleLabel();
 			this._RangeHighlightBox = new System.Windows.Forms.CheckBox();
 			this._ParameterListBox = new System.Windows.Forms.CheckBox();
@@ -35,7 +36,8 @@
 			this._FieldValueBox = new System.Windows.Forms.CheckBox();
 			this._ToolTipBox = new System.Windows.Forms.CheckBox();
 			this._SyntaxNodesBox = new System.Windows.Forms.CheckBox();
-			this._ParameterListParamNameBox = new System.Windows.Forms.CheckBox();
+			this._AutoPropertyValueBox = new System.Windows.Forms.CheckBox();
+			this.label1 = new System.Windows.Forms.Label();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
@@ -54,6 +56,8 @@
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this.label1);
+			this.tabPage2.Controls.Add(this._AutoPropertyValueBox);
 			this.tabPage2.Controls.Add(this._ParameterListParamNameBox);
 			this.tabPage2.Controls.Add(this.titleLabel1);
 			this.tabPage2.Controls.Add(this._RangeHighlightBox);
@@ -70,6 +74,16 @@
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "Navigation Bar";
 			this.tabPage2.UseVisualStyleBackColor = true;
+			// 
+			// _ParameterListParamNameBox
+			// 
+			this._ParameterListParamNameBox.AutoSize = true;
+			this._ParameterListParamNameBox.Location = new System.Drawing.Point(31, 141);
+			this._ParameterListParamNameBox.Name = "_ParameterListParamNameBox";
+			this._ParameterListParamNameBox.Size = new System.Drawing.Size(173, 19);
+			this._ParameterListParamNameBox.TabIndex = 4;
+			this._ParameterListParamNameBox.Text = "Use parameter name";
+			this._ParameterListParamNameBox.UseVisualStyleBackColor = true;
 			// 
 			// titleLabel1
 			// 
@@ -97,27 +111,27 @@
 			this._ParameterListBox.Location = new System.Drawing.Point(15, 116);
 			this._ParameterListBox.Name = "_ParameterListBox";
 			this._ParameterListBox.Size = new System.Drawing.Size(157, 19);
-			this._ParameterListBox.TabIndex = 4;
+			this._ParameterListBox.TabIndex = 3;
 			this._ParameterListBox.Text = "Method parameter";
 			this._ParameterListBox.UseVisualStyleBackColor = true;
 			// 
 			// _RegionBox
 			// 
 			this._RegionBox.AutoSize = true;
-			this._RegionBox.Location = new System.Drawing.Point(15, 216);
+			this._RegionBox.Location = new System.Drawing.Point(15, 241);
 			this._RegionBox.Name = "_RegionBox";
 			this._RegionBox.Size = new System.Drawing.Size(165, 19);
-			this._RegionBox.TabIndex = 7;
+			this._RegionBox.TabIndex = 8;
 			this._RegionBox.Text = "#region directive";
 			this._RegionBox.UseVisualStyleBackColor = true;
 			// 
 			// _PartialClassBox
 			// 
 			this._PartialClassBox.AutoSize = true;
-			this._PartialClassBox.Location = new System.Drawing.Point(15, 191);
+			this._PartialClassBox.Location = new System.Drawing.Point(15, 216);
 			this._PartialClassBox.Name = "_PartialClassBox";
 			this._PartialClassBox.Size = new System.Drawing.Size(197, 19);
-			this._PartialClassBox.TabIndex = 6;
+			this._PartialClassBox.TabIndex = 7;
 			this._PartialClassBox.Text = "Partial class members";
 			this._PartialClassBox.UseVisualStyleBackColor = true;
 			// 
@@ -151,15 +165,24 @@
 			this._SyntaxNodesBox.Text = "Syntax detail";
 			this._SyntaxNodesBox.UseVisualStyleBackColor = true;
 			// 
-			// _ParameterListParamNameBox
+			// _AutoPropertyValueBox
 			// 
-			this._ParameterListParamNameBox.AutoSize = true;
-			this._ParameterListParamNameBox.Location = new System.Drawing.Point(31, 141);
-			this._ParameterListParamNameBox.Name = "_ParameterListParamNameBox";
-			this._ParameterListParamNameBox.Size = new System.Drawing.Size(173, 19);
-			this._ParameterListParamNameBox.TabIndex = 8;
-			this._ParameterListParamNameBox.Text = "Use parameter name";
-			this._ParameterListParamNameBox.UseVisualStyleBackColor = true;
+			this._AutoPropertyValueBox.AutoSize = true;
+			this._AutoPropertyValueBox.Location = new System.Drawing.Point(31, 191);
+			this._AutoPropertyValueBox.Name = "_AutoPropertyValueBox";
+			this._AutoPropertyValueBox.Size = new System.Drawing.Size(133, 19);
+			this._AutoPropertyValueBox.TabIndex = 6;
+			this._AutoPropertyValueBox.Text = "Auto property";
+			this._AutoPropertyValueBox.UseVisualStyleBackColor = true;
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(12, 279);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(391, 15);
+			this.label1.TabIndex = 9;
+			this.label1.Text = "Note: currently Navigation Bar works on C# only.";
 			// 
 			// CSharpNaviBarPage
 			// 
@@ -188,5 +211,7 @@
 		private System.Windows.Forms.CheckBox _RangeHighlightBox;
 		private Controls.TitleLabel titleLabel1;
 		private System.Windows.Forms.CheckBox _ParameterListParamNameBox;
+		private System.Windows.Forms.CheckBox _AutoPropertyValueBox;
+		private System.Windows.Forms.Label label1;
 	}
 }

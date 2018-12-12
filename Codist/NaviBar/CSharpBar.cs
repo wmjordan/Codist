@@ -339,23 +339,6 @@ namespace Codist.NaviBar
 					Opacity = value ? 0.7 : 1;
 				}
 			}
-			public bool ShowNodeDetail {
-				get => _ShowNodeDetail;
-				internal set {
-					_ShowNodeDetail = value;
-					if (value && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.FieldValue)) {
-						if (Node.IsKind(SyntaxKind.VariableDeclarator)) {
-							InputGestureText = (Node as VariableDeclaratorSyntax).Initializer?.Value?.ToString();
-						}
-						else if (Node.IsKind(SyntaxKind.EnumMemberDeclaration)) {
-							InputGestureText = (Node as EnumMemberDeclarationSyntax).EqualsValue?.Value?.ToString();
-						}
-					}
-					else {
-						InputGestureText = null;
-					}
-				}
-			}
 			internal SyntaxNode Node { get; }
 
 			private Action<NaviItem> ClickHandler { get; set; }
@@ -444,6 +427,42 @@ namespace Codist.NaviBar
 					}
 				}
 				Header = t;
+				return this;
+			}
+
+			NaviItem ShowNodeValue() {
+				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.FieldValue)) {
+					switch (Node.Kind()) {
+						case SyntaxKind.VariableDeclarator:
+							InputGestureText = (Node as VariableDeclaratorSyntax).Initializer?.Value?.ToString();
+							break;
+						case SyntaxKind.EnumMemberDeclaration:
+							InputGestureText = (Node as EnumMemberDeclarationSyntax).EqualsValue?.Value?.ToString();
+							break;
+						case SyntaxKind.PropertyDeclaration:
+							var p = Node as PropertyDeclarationSyntax;
+							if (p.Initializer != null) {
+								InputGestureText = p.Initializer.Value.ToString();
+							}
+							else if (p.ExpressionBody != null) {
+								InputGestureText = p.ExpressionBody.ToString();
+							}
+							else if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.AutoPropertyAnnotation)) {
+								var a = p.AccessorList.Accessors;
+								if (a.Count == 2) {
+									if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
+										InputGestureText = "{;;}";
+									}
+								}
+								else if (a.Count == 1) {
+									if (a[0].Body == null && a[0].ExpressionBody == null) {
+										InputGestureText = "{;}";
+									}
+								}
+							}
+							break;
+					}
+				}
 				return this;
 			}
 
@@ -630,9 +649,8 @@ namespace Codist.NaviBar
 					else {
 						Items.Add(new NaviItem(_Bar, child, false, true) {
 							NodeIsExternal = isExternal,
-							ClickHandler = i => i.SelectOrGoToSource(),
-							ShowNodeDetail = child.IsKind(SyntaxKind.EnumMemberDeclaration)
-						}.MarkEnclosingItem(pos));
+							ClickHandler = i => i.SelectOrGoToSource()
+						}.ShowNodeValue().MarkEnclosingItem(pos));
 					}
 					// a member is added between #region and #endregion
 					regionJustStart = FALSE;
@@ -648,7 +666,7 @@ namespace Codist.NaviBar
 
 			void AddVariables(SeparatedSyntaxList<VariableDeclaratorSyntax> fields, bool isExternal) {
 				foreach (var item in fields) {
-					Items.Add(new NaviItem(_Bar, item) { NodeIsExternal = isExternal, ShowNodeDetail = true });
+					Items.Add(new NaviItem(_Bar, item) { NodeIsExternal = isExternal }.ShowNodeValue());
 				}
 			}
 			#endregion

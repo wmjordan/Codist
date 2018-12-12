@@ -24,7 +24,8 @@ namespace Codist.Options
 			}
 			LoadConfig(Config.Instance);
 
-			_FieldValueBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.FieldValue, _FieldValueBox.Checked));
+			_FieldValueBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.FieldValue, _AutoPropertyValueBox.Enabled = _FieldValueBox.Checked));
+			_AutoPropertyValueBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.AutoPropertyAnnotation, _AutoPropertyValueBox.Checked));
 			_ParameterListBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.ParameterList, _ParameterListParamNameBox.Enabled = _ParameterListBox.Checked));
 			_ParameterListParamNameBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.ParameterListShowParamName, _ParameterListParamNameBox.Checked));
 			_PartialClassBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.PartialClassMember, _PartialClassBox.Checked));
@@ -39,14 +40,16 @@ namespace Codist.Options
 
 		void LoadConfig(Config config) {
 			_UI.DoWithLock(() => {
-				_FieldValueBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.FieldValue);
-				_ParameterListBox.Checked = _ParameterListParamNameBox.Enabled = config.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterList);
-				_ParameterListParamNameBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName);
-				_PartialClassBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember);
-				_RangeHighlightBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.RangeHighlight);
-				_RegionBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.Region);
-				_SyntaxNodesBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail);
-				_ToolTipBox.Checked = config.NaviBarOptions.MatchFlags(NaviBarOptions.SymbolToolTip);
+				var o = config.NaviBarOptions;
+				_FieldValueBox.Checked = _AutoPropertyValueBox.Enabled = o.MatchFlags(NaviBarOptions.FieldValue);
+				_AutoPropertyValueBox.Checked = o.MatchFlags(NaviBarOptions.AutoPropertyAnnotation);
+				_ParameterListBox.Checked = _ParameterListParamNameBox.Enabled = o.MatchFlags(NaviBarOptions.ParameterList);
+				_ParameterListParamNameBox.Checked = o.MatchFlags(NaviBarOptions.ParameterListShowParamName);
+				_PartialClassBox.Checked = o.MatchFlags(NaviBarOptions.PartialClassMember);
+				_RangeHighlightBox.Checked = o.MatchFlags(NaviBarOptions.RangeHighlight);
+				_RegionBox.Checked = o.MatchFlags(NaviBarOptions.Region);
+				_SyntaxNodesBox.Checked = o.MatchFlags(NaviBarOptions.SyntaxDetail);
+				_ToolTipBox.Checked = o.MatchFlags(NaviBarOptions.SymbolToolTip);
 			});
 		}
 	}

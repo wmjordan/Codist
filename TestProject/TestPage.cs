@@ -66,7 +66,8 @@ text".Log(); // multiline string (string verbatim)
 			};
 		}
 
-		protected override int Property { get; set; }
+		protected override int Property { get; set; } = 1;
+		public int PropertyAddOne => Property + 1;
 
 		public new void Method() { Property--; }
 
