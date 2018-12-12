@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.VisualStudio.Text.Operations;
 
 namespace Codist.SmartBars
 {
@@ -31,8 +32,9 @@ namespace Codist.SmartBars
 		/// Initializes a new instance of the <see cref="SmartBar"/> class.
 		/// </summary>
 		/// <param name="view">The <see cref="IWpfTextView"/> upon which the adornment will be drawn</param>
-		public SmartBar(IWpfTextView view) {
+		public SmartBar(IWpfTextView view, ITextSearchService2 textSearchService) {
 			View = view ?? throw new ArgumentNullException(nameof(view));
+			TextSearchService = textSearchService;
 			_ToolBarLayer = view.GetAdornmentLayer(nameof(SmartBar));
 			Config.Updated += ConfigUpdated;
 			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
@@ -72,6 +74,7 @@ namespace Codist.SmartBars
 		protected ToolBar ToolBar { get; }
 		protected ToolBar ToolBar2 { get; }
 		protected IWpfTextView View { get; }
+		protected ITextSearchService2 TextSearchService { get; }
 		protected CancellationToken CancellationToken {
 			get {
 				var c = _Cancellation;
@@ -433,7 +436,6 @@ namespace Codist.SmartBars
 			readonly SmartBar _Bar;
 
 			public CommandContext(SmartBar bar, Control control, RoutedEventArgs eventArgs) {
-				View = bar.View;
 				_Bar = bar;
 				Sender = control;
 				EventArgs = eventArgs;
@@ -445,8 +447,12 @@ namespace Codist.SmartBars
 			public bool KeepToolBarOnClick { get; set; }
 			public bool RightClick { get; }
 			public Control Sender { get; }
-			public IWpfTextView View { get; }
+			public IWpfTextView View => _Bar.View;
+			public ITextSearchService2 TextSearchService => _Bar.TextSearchService;
 			public CancellationToken CancellationToken => _Bar._Cancellation.GetToken();
+			public void HideToolBar() {
+				_Bar.HideToolBar();
+			}
 			public void KeepToolBar(bool refresh) {
 				_Bar.KeepToolbar();
 				KeepToolBarOnClick = true;

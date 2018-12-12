@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Operations;
 
 namespace Codist.SmartBars
 {
@@ -35,9 +36,12 @@ namespace Codist.SmartBars
 		protected static void FindNext(CommandContext ctx, string t) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (t != null) {
-				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
-				if (p != null && p.FindText(t, (int)EnvDTE.vsFindOptions.vsFindOptionsMatchCase)) {
-					ctx.KeepToolBar(true);
+				var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t, FindOptions.MatchCase);
+				if (r.HasValue) {
+					ctx.View.SelectSpan(r.Value);
+				}
+				else {
+					ctx.HideToolBar();
 				}
 			}
 		}
@@ -169,10 +173,13 @@ namespace Codist.SmartBars
 					return;
 				}
 				ctx.KeepToolBar(false);
-				var p = (CodistPackage.DTE.ActiveDocument.Object() as EnvDTE.TextDocument).Selection;
-				var option = Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) ? EnvDTE.vsFindOptions.vsFindOptionsMatchCase : 0;
-				if (p != null && p.FindText(t, (int)option)) {
+				var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t, Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) ? FindOptions.MatchCase : FindOptions.None);
+				if (r.HasValue) {
+					ctx.View.SelectSpan(r.Value);
 					ctx.KeepToolBar(true);
+				}
+				else {
+					ctx.HideToolBar();
 				}
 			}, ctx => __FindAndReplaceCommands);
 		}

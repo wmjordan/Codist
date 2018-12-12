@@ -30,7 +30,7 @@ namespace Codist.SmartBars
 		readonly SemanticContext _Context;
 		ISymbol _Symbol;
 
-		public CSharpSmartBar(IWpfTextView view) : base(view) {
+		public CSharpSmartBar(IWpfTextView view, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(view, textSearchService) {
 			_Context = view.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(view));
 		}
 

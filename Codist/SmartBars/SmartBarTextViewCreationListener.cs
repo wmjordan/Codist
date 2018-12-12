@@ -3,6 +3,7 @@ using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 using AppHelpers;
+using Microsoft.VisualStudio.Text.Operations;
 
 namespace Codist.SmartBars
 {
@@ -13,6 +14,7 @@ namespace Codist.SmartBars
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType(Constants.CodeTypes.Text)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
+	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	internal sealed class SmartBarTextViewCreationListener : IWpfTextViewCreationListener
 	{
 		// Disable "Field is never assigned to..." and "Field is never used" compiler's warnings. Justification: the field is used by MEF.
@@ -26,6 +28,9 @@ namespace Codist.SmartBars
 		[Name(nameof(SmartBar))]
 		[Order(After = PredefinedAdornmentLayers.Caret)]
 		AdornmentLayerDefinition _EditorAdornmentLayer;
+
+		[Import(typeof(ITextSearchService2))]
+		ITextSearchService2 _TextSearchService;
 
 #pragma warning restore 649, 169
 
@@ -42,14 +47,17 @@ namespace Codist.SmartBars
 			var contentType = textView.TextBuffer.ContentType;
 			if (String.Equals(Constants.CodeTypes.CSharp, contentType.TypeName, StringComparison.OrdinalIgnoreCase)) {
 				textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
-				new CSharpSmartBar(textView);
+				new CSharpSmartBar(textView, _TextSearchService);
 			}
 			else if (contentType.IsOfType("code++.Markdown")
 				|| contentType.TypeName.IndexOf("Markdown", StringComparison.OrdinalIgnoreCase) != -1) {
-				new MarkdownSmartBar(textView);
+				new MarkdownSmartBar(textView, _TextSearchService);
+			}
+			else if (contentType.IsOfType("output")) {
+				new OutputSmartBar(textView, _TextSearchService);
 			}
 			else {
-				new SmartBar(textView);
+				new SmartBar(textView, _TextSearchService);
 			}
 		}
 

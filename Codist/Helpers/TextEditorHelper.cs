@@ -92,6 +92,17 @@ namespace Codist
 			}
 			view.Selection.Select(new SnapshotSpan(start, end), false);
 		}
+		public static bool TryGetFirstSelectionSpan(this ITextView view, out SnapshotSpan span) {
+			if (view.Selection.IsEmpty || view.Selection.SelectedSpans.Count < 1) {
+				span = new SnapshotSpan();
+				return false;
+			}
+			else {
+				span = view.Selection.SelectedSpans[0];
+				return true;
+			}
+		}
+
 		public static TokenType GetSelectedTokenType(this ITextView view) {
 			if (view.Selection.IsEmpty || view.Selection.SelectedSpans.Count > 1) {
 				return TokenType.None;
@@ -163,9 +174,14 @@ namespace Codist
 				else {
 					ss = new SnapshotSpan(view.TextSnapshot, span.Start, span.Length);
 				}
-				view.Selection.Select(ss, false);
-				view.ViewScroller.EnsureSpanVisible(ss, EnsureSpanVisibleOptions.ShowStart);
+				view.SelectSpan(ss);
 			}
+		}
+
+		public static void SelectSpan(this IWpfTextView view, SnapshotSpan span) {
+			view.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.ShowStart);
+			view.Selection.Select(span, false);
+			view.Caret.MoveTo(span.End);
 		}
 
 		public static void TryExecuteCommand(this EnvDTE.DTE dte, string command, string args = "") {

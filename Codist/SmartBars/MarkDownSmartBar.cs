@@ -13,7 +13,7 @@ namespace Codist.SmartBars
 {
 	sealed class MarkdownSmartBar : SmartBar
 	{
-		public MarkdownSmartBar(IWpfTextView textView) : base(textView) {
+		public MarkdownSmartBar(IWpfTextView textView, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(textView, textSearchService) {
 		}
 
 		ToolBar MyToolBar => ToolBar2;
