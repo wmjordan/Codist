@@ -159,7 +159,6 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition VirtualMember;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpXmlDoc)]
 		static ClassificationTypeDefinition XmlDoc;
 

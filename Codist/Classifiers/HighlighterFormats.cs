@@ -10,7 +10,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.Highlight1)]
 	[Name(Constants.Highlight1)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(After = Constants.CodeFormalLanguage)]
 	sealed class Highlight1Format : ClassificationFormatDefinition
 	{
 		public Highlight1Format() {
@@ -22,7 +22,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.Highlight2)]
 	[Name(Constants.Highlight2)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(After = Constants.CodeFormalLanguage)]
 	sealed class Highlight2Format : ClassificationFormatDefinition
 	{
 		public Highlight2Format() {
@@ -34,7 +34,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.Highlight3)]
 	[Name(Constants.Highlight3)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(After = Constants.CodeFormalLanguage)]
 	sealed class Highlight3Format : ClassificationFormatDefinition
 	{
 		public Highlight3Format() {
@@ -46,7 +46,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.Highlight4)]
 	[Name(Constants.Highlight4)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(After = Constants.CodeFormalLanguage)]
 	sealed class Highlight4Format : ClassificationFormatDefinition
 	{
 		public Highlight4Format() {
@@ -58,7 +58,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.Highlight5)]
 	[Name(Constants.Highlight5)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(After = Constants.CodeFormalLanguage)]
 	sealed class Highlight5Format : ClassificationFormatDefinition
 	{
 		public Highlight5Format() {
@@ -70,7 +70,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.Highlight6)]
 	[Name(Constants.Highlight6)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(After = Constants.CodeFormalLanguage)]
 	sealed class Highlight6Format : ClassificationFormatDefinition
 	{
 		public Highlight6Format() {
@@ -82,7 +82,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.Highlight7)]
 	[Name(Constants.Highlight7)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(After = Constants.CodeFormalLanguage)]
 	sealed class Highlight7Format : ClassificationFormatDefinition
 	{
 		public Highlight7Format() {
@@ -94,7 +94,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.Highlight8)]
 	[Name(Constants.Highlight8)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(After = Constants.CodeFormalLanguage)]
 	sealed class Highlight8Format : ClassificationFormatDefinition
 	{
 		public Highlight8Format() {
@@ -106,7 +106,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.Highlight9)]
 	[Name(Constants.Highlight9)]
 	[UserVisible(false)]
-	[Order(After = Priority.High)]
+	[Order(After = Constants.CodeFormalLanguage)]
 	sealed class Highlight9Format : ClassificationFormatDefinition
 	{
 		public Highlight9Format() {
