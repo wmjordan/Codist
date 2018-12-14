@@ -46,6 +46,9 @@
       <Group guid="guidCodistPackageCmdSet3" id="EDIT_PROJECT_GROUP_ID" priority="0x017F">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
       </Group>
+      <Group guid="guidCodistPackageCmdSet4" id="IDG_VS_EDIT_GOTO" priority="0x0800">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_EDITOR_FIND_MENU" />
+      </Group>
     </Groups>
 
     <!--Buttons section. -->
@@ -88,7 +91,17 @@
 				<CommandFlag>TextChanges</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-          <ButtonText>Increment version</ButtonText>
+          <ButtonText>Increment Version</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="guidCodistPackageCmdSet4" id="NaviBarSearchDeclarationId" priority="0x0100" type="Button">
+        <Parent guid="guidCodistPackageCmdSet4" id="IDG_VS_EDIT_GOTO" />
+        <Icon guid="ImageCatalogGuid" id="SearchMember" />
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+          <ButtonText>Search Declaration</ButtonText>
+					<CanonicalName>CodistNaviBarSearchDeclaration</CanonicalName>
         </Strings>
       </Button>
     </Buttons>
@@ -103,7 +116,10 @@
       <Bitmap guid="guidImages" href="Resources\ScreenshotCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
     </Bitmaps>-->
   </Commands>
-
+	<KeyBindings>
+		<!--Bind NaviBar.SearchDeclaration to Ctrl + ` -->
+		<KeyBinding guid="guidCodistPackageCmdSet4" id="NaviBarSearchDeclarationId" editor="guidVSStd97" mod1="Control" key1="0xC0" />
+	</KeyBindings>
   <Symbols>
     <!-- This is the package guid. -->
     <GuidSymbol name="guidCodistPackage" value="{c7b93d20-621f-4b21-9d28-d51157ef0b94}" />
@@ -119,10 +135,15 @@
 			<IDSymbol name="IDG_VS_VIEW_DEFINEVIEWS" value="0x1020" />
 			<IDSymbol name="SymbolFinderWindowCommandId" value="4129" />
     </GuidSymbol>
-  
-    <GuidSymbol value="{eb9f9d42-d000-4d82-874a-4688ddd26dbe}" name="guidCodistPackageCmdSet3">
+
+		<GuidSymbol name="guidCodistPackageCmdSet3" value="{eb9f9d42-d000-4d82-874a-4688ddd26dbe}">
 			<IDSymbol name="EDIT_PROJECT_GROUP_ID" value="0x1000" />
-      <IDSymbol value="4128" name="EDIT_VSIXMANIFEST_ID" />
+      <IDSymbol name="EDIT_VSIXMANIFEST_ID" value="4128" />
 		</GuidSymbol>
+
+		<GuidSymbol name="guidCodistPackageCmdSet4" value="{5EF88028-C0FC-4849-9883-10F4BD2217B3}">
+      <IDSymbol name="NaviBarSearchDeclarationId" value="4130" />
+    </GuidSymbol>
+  
   </Symbols>
 </CommandTable>

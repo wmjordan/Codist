@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Design;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Codist.Commands
 {
@@ -50,13 +49,7 @@ namespace Codist.Commands
 						WpfHelper.ScreenShot(g, f.FileName, (int)g.ActualWidth, (int)g.ActualHeight);
 					}
 					catch (Exception ex) {
-						VsShellUtilities.ShowMessageBox(
-							CodistPackage.Instance,
-							"Failed to save screenshot for " + doc.Name + "\n" + ex.Message,
-							nameof(Codist),
-							OLEMSGICON.OLEMSGICON_INFO,
-							OLEMSGBUTTON.OLEMSGBUTTON_OK,
-							OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+						CodistPackage.ShowErrorMessageBox("Failed to save screenshot for " + doc.Name + "\n" + ex.Message, null, true);
 					}
 				}
 			}

@@ -17,7 +17,7 @@ namespace Codist.Commands
 		/// <summary>
 		/// Command menu group (command set GUID).
 		/// </summary>
-		public static readonly Guid CommandSet = new Guid("eb9f9d42-d000-4d82-874a-4688ddd26dbe");
+		public static readonly Guid CommandSet = new Guid("EB9F9D42-D000-4D82-874A-4688DDD26DBE");
 
 		public static void Initialize(AsyncPackage package) {
 			var menuItem = new OleMenuCommand(Execute, new CommandID(CommandSet, CommandId));
@@ -59,13 +59,7 @@ namespace Codist.Commands
 				error = true;
 			}
 
-			VsShellUtilities.ShowMessageBox(
-				CodistPackage.Instance,
-				message,
-				"Increment Version",
-				error ? OLEMSGICON.OLEMSGICON_WARNING : OLEMSGICON.OLEMSGICON_INFO,
-				OLEMSGBUTTON.OLEMSGBUTTON_OK,
-				OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+			CodistPackage.ShowErrorMessageBox(message, "Increment Version", error);
 		}
 
 		static ProjectItem GetSelectedProjectItem() {

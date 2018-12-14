@@ -32,6 +32,7 @@ namespace Codist.NaviBar
 			_Adornment = _View.GetAdornmentLayer(nameof(CSharpBar));
 			_SemanticContext = textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			textView.Properties.AddProperty(nameof(NaviBar), this);
 			Name = nameof(CSharpBar);
 			Resources = SharedDictionaryManager.Menu;
 			SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
@@ -80,6 +81,10 @@ namespace Codist.NaviBar
 				_Adornment.RemoveAllAdornments();
 				_MouseHoverItem = null;
 			}
+		}
+
+		internal void ShowRootItemMenu() {
+			(Items[0] as RootItem).IsSubmenuOpen = true;
 		}
 
 		void HighlightNodeRanges(SyntaxNode node, Microsoft.VisualStudio.Text.SnapshotSpan span) {
@@ -309,7 +314,7 @@ namespace Codist.NaviBar
 		sealed class NaviItem : ThemedMenuItem, IMemberFilterable
 		{
 			readonly CSharpBar _Bar;
-			bool _NodeIsExternal, _ShowNodeDetail;
+			bool _NodeIsExternal;
 			readonly int _ImageId;
 
 			public NaviItem(CSharpBar bar, SyntaxNode node) : this (bar, node, false, false) { }

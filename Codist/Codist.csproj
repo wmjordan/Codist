@@ -86,6 +86,7 @@
     <Compile Include="Classifiers\XmlClassificationDefinitions.cs" />
     <Compile Include="Classifiers\XmlFormats.cs" />
     <Compile Include="Commands\IncrementVsixVersionCommand.cs" />
+    <Compile Include="Commands\NaviBarSearchDeclarationCommand.cs" />
     <Compile Include="Controls\MemberFilterBox.cs" />
     <Compile Include="Controls\StateButton.cs" />
     <Compile Include="Controls\ThemedMenuItem.cs" />

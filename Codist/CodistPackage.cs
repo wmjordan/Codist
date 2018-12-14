@@ -5,6 +5,7 @@ using System.Windows;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Codist
 {
@@ -92,6 +93,16 @@ namespace Codist
 			}
 		}
 
+		public static void ShowErrorMessageBox(string message, string title, bool error) {
+			VsShellUtilities.ShowMessageBox(
+				Instance,
+				message,
+				title ?? nameof(Codist),
+				error ? OLEMSGICON.OLEMSGICON_WARNING : OLEMSGICON.OLEMSGICON_INFO,
+				OLEMSGBUTTON.OLEMSGBUTTON_OK,
+				OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+		}
+
 		#region Package Members
 		/// <summary>
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -121,6 +132,7 @@ namespace Codist
 			await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
 			Commands.ScreenshotCommand.Initialize(this);
 			Commands.IncrementVsixVersionCommand.Initialize(this);
+			Commands.NaviBarSearchDeclarationCommand.Initialize(this);
 		}
 
 		#endregion
