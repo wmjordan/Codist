@@ -53,7 +53,13 @@ namespace Codist.SmartBars
 				|| contentType.TypeName.IndexOf("Markdown", StringComparison.OrdinalIgnoreCase) != -1) {
 				new MarkdownSmartBar(textView, _TextSearchService);
 			}
-			else if (contentType.IsOfType("output")) {
+			else if (contentType.IsOfType("output")
+				|| contentType.IsOfType("FindResults")
+				|| contentType.IsOfType("Interactive Content")
+				|| contentType.IsOfType("DebugOutput")
+				|| contentType.IsOfType("Command")
+				|| contentType.IsOfType("PackageConsole")
+				) {
 				new OutputSmartBar(textView, _TextSearchService);
 			}
 			else {

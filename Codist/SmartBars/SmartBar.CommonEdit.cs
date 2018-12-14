@@ -70,8 +70,7 @@ namespace Codist.SmartBars
 						FindNext(ctx, t);
 					}
 					else if (selectModified) {
-						View.Selection.Select(firstModified, false);
-						View.Caret.MoveTo(firstModified.End);
+						View.SelectSpan(firstModified);
 					}
 				}
 			}
@@ -110,8 +109,7 @@ namespace Codist.SmartBars
 						FindNext(ctx, t);
 					}
 					else if (selectModified) {
-						View.Selection.Select(firstModified, false);
-						View.Caret.MoveTo(firstModified.End);
+						View.SelectSpan(firstModified);
 					}
 				}
 			}

@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
+using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using System.IO;
 
 namespace Codist.SmartBars
 {
@@ -21,21 +17,60 @@ namespace Codist.SmartBars
 
 		protected override void AddCommands(CancellationToken cancellationToken) {
 			base.AddCommands(cancellationToken);
-			try {
-				if (View.TryGetFirstSelectionSpan(out var span) && span.Length < 255) {
-					var t = View.TextSnapshot.GetText(span);
-					if (Path.IsPathRooted(t) && (File.Exists(t) || Directory.Exists(t))) {
-						AddCommand(MyToolBar, KnownImageIds.OpenFolder, "Open file in Windows Explorer", ctx => {
-							if (ctx.View.TryGetFirstSelectionSpan(out var s) && s.Length < 255) {
-								var p = View.TextSnapshot.GetText(s);
-								System.Diagnostics.Process.Start("Explorer.exe", "/select,\"" + t + "\"");
-							}
-						});
+			string t = TryGetPath(View);
+			if (t == null) {
+				return;
+			}
+			if (File.Exists(t)) {
+				AddCommand(MyToolBar, KnownImageIds.Open, "Open or execute file", ctx => {
+					TryRun(TryGetPath(View));
+				});
+				AddCommand(MyToolBar, KnownImageIds.OpenFolder, "Open folder", ctx => {
+					var s = TryGetPath(View);
+					if (s != null) {
+						Process.Start("Explorer.exe", "/select,\"" + s + "\"");
+					}
+				});
+				AddCommand(MyToolBar, KnownImageIds.VisualStudio, "Open file with Visual Studio", ctx => {
+					var s = TryGetPath(View);
+					if (s != null) {
+						CodistPackage.DTE.OpenFile(s, 1, 1);
+					}
+				});
+			}
+			else if (Directory.Exists(t)) {
+				AddCommand(MyToolBar, KnownImageIds.OpenFolder, "Open folder", ctx => {
+					TryRun(TryGetPath(View));
+				});
+			}
+
+			string TryGetPath(ITextView view) {
+				if (view.TryGetFirstSelectionSpan(out var span) && span.Length < 255) {
+					var text = view.TextSnapshot.GetText(span).TrimStart();
+					try {
+						if (Path.IsPathRooted(text)) {
+							return text.Replace(@"\\", @"\");
+						}
+					}
+					catch (ArgumentException) {
+						// ignore
 					}
 				}
+				return null;
 			}
-			catch (ArgumentException) {
-				// ignore
+			void TryRun(string path) {
+				if (path == null) {
+					return;
+				}
+				try {
+					Process.Start(path);
+				}
+				catch (System.ComponentModel.Win32Exception ex) {
+					CodistPackage.ShowErrorMessageBox(ex.Message, null, true);
+				}
+				catch (FileNotFoundException) {
+					// ignore
+				}
 			}
 		}
 	}
