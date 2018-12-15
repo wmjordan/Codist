@@ -34,6 +34,7 @@ namespace Codist.Options
 
 		protected override void OnLoad(EventArgs e) {
 			base.OnLoad(e);
+			_StyleSettingsBox.Enabled = _SyntaxListBox.SelectedIndices.Count > 0 && _SyntaxListBox.SelectedItems[0] is SyntaxListViewItem;
 			if (_loaded) {
 				return;
 			}
@@ -146,8 +147,11 @@ namespace Codist.Options
 			}
 			var i = (e.Item as SyntaxListViewItem)?.Style;
 			if (i == null) {
+				e.Item.Selected = false;
+				_StyleSettingsBox.Enabled = false;
 				return;
 			}
+			_StyleSettingsBox.Enabled = true;
 			_uiLock = true;
 			_activeStyle = i;
 			UpdateUIControls(i);
@@ -189,24 +193,30 @@ namespace Codist.Options
 		void LoadStyleList() {
 			_uiLock = true;
 			_SyntaxListBox.Items.Clear();
-			_SyntaxListBox.Groups.Clear();
-			var groups = new List<ListViewGroup>(5);
+			//_SyntaxListBox.Groups.Clear();
+			//var groups = new List<ListViewGroup>(5);
 			var defaultStyles = _defaultStyleLoader();
 			var styles = _styleLoader();
-			foreach (var item in defaultStyles) {
-				if (groups.FirstOrDefault(i => i.Header == item.Category) != null) {
-					continue;
-				}
-				groups.Add(new ListViewGroup(item.Category, HorizontalAlignment.Center));
-			}
-			_SyntaxListBox.Groups.AddRange(groups.ToArray());
+			//foreach (var item in defaultStyles) {
+			//	if (groups.FirstOrDefault(i => i.Header == item.Category) != null) {
+			//		continue;
+			//	}
+			//	groups.Add(new ListViewGroup(item.Category, HorizontalAlignment.Center));
+			//}
+			//_SyntaxListBox.Groups.AddRange(groups.ToArray());
+			string category = null;
 			foreach (var item in defaultStyles) {
 				if (item.Category.Length == 0) {
 					continue;
 				}
 				var style = styles.FirstOrDefault(i => i.Id == item.Id) ?? item;
+				if (item.Category != category) {
+					_SyntaxListBox.Items.Add(new ListViewItem("   - " + (category = item.Category) + " -") {
+						Font = new Font(_SyntaxListBox.Font, FontStyle.Bold)
+					});
+				}
 				_SyntaxListBox.Items.Add(new SyntaxListViewItem(item.ToString(), style) {
-					Group = groups.FirstOrDefault(i => i.Header == item.Category),
+					//Group = groups.FirstOrDefault(i => i.Header == item.Category),
 					Font = new Font(_SyntaxListBox.Font, style.GetFontStyle())
 				});
 			}

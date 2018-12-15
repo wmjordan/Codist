@@ -18,8 +18,8 @@ namespace Codist.Options
 			if (m.Msg == 0x0F) {
 				BackColor = ThemeHelper.DocumentPageColor;
 				ForeColor = ThemeHelper.DocumentTextColor;
-				foreach (SyntaxListViewItem item in Items) {
-					item.ApplyTheme();
+				foreach (var item in Items) {
+					(item as SyntaxListViewItem)?.ApplyTheme();
 				}
 			}
 			base.WndProc(ref m);

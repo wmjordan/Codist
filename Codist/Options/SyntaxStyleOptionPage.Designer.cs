@@ -27,7 +27,7 @@
 		private void InitializeComponent() {
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SyntaxStyleOptionPage));
 			this.label1 = new System.Windows.Forms.Label();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this._StyleSettingsBox = new System.Windows.Forms.GroupBox();
 			this._ResetButton = new System.Windows.Forms.Button();
 			this.label2 = new System.Windows.Forms.Label();
 			this._BackgroundEffectBox = new System.Windows.Forms.ComboBox();
@@ -49,7 +49,7 @@
 			this._SyntaxListBox = new Codist.Options.SyntaxListView();
 			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this._PicColorBox = new System.Windows.Forms.ColorDialog();
-			this.groupBox1.SuspendLayout();
+			this._StyleSettingsBox.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._PreviewBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._BackColorTransBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._ForeColorTransBox)).BeginInit();
@@ -65,35 +65,35 @@
 			this.label1.TabIndex = 0;
 			this.label1.Text = "Syntax definitions:";
 			// 
-			// groupBox1
+			// _StyleSettingsBox
 			// 
-			this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+			this._StyleSettingsBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.groupBox1.Controls.Add(this._ResetButton);
-			this.groupBox1.Controls.Add(this.label2);
-			this.groupBox1.Controls.Add(this._BackgroundEffectBox);
-			this.groupBox1.Controls.Add(this._FontBox);
-			this.groupBox1.Controls.Add(this.label8);
-			this.groupBox1.Controls.Add(this._PreviewBox);
-			this.groupBox1.Controls.Add(this.label6);
-			this.groupBox1.Controls.Add(this._BackColorButton);
-			this.groupBox1.Controls.Add(this._BackColorTransBox);
-			this.groupBox1.Controls.Add(this.label5);
-			this.groupBox1.Controls.Add(this._ForeColorButton);
-			this.groupBox1.Controls.Add(this._ForeColorTransBox);
-			this.groupBox1.Controls.Add(this._FontSizeBox);
-			this.groupBox1.Controls.Add(this.label4);
-			this.groupBox1.Controls.Add(this._StrikeBox);
-			this.groupBox1.Controls.Add(this._UnderlineBox);
-			this.groupBox1.Controls.Add(this._ItalicBox);
-			this.groupBox1.Controls.Add(this._BoldBox);
-			this.groupBox1.Location = new System.Drawing.Point(248, 3);
-			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(271, 417);
-			this.groupBox1.TabIndex = 2;
-			this.groupBox1.TabStop = false;
-			this.groupBox1.Text = "Syntax Style";
+			this._StyleSettingsBox.Controls.Add(this._ResetButton);
+			this._StyleSettingsBox.Controls.Add(this.label2);
+			this._StyleSettingsBox.Controls.Add(this._BackgroundEffectBox);
+			this._StyleSettingsBox.Controls.Add(this._FontBox);
+			this._StyleSettingsBox.Controls.Add(this.label8);
+			this._StyleSettingsBox.Controls.Add(this._PreviewBox);
+			this._StyleSettingsBox.Controls.Add(this.label6);
+			this._StyleSettingsBox.Controls.Add(this._BackColorButton);
+			this._StyleSettingsBox.Controls.Add(this._BackColorTransBox);
+			this._StyleSettingsBox.Controls.Add(this.label5);
+			this._StyleSettingsBox.Controls.Add(this._ForeColorButton);
+			this._StyleSettingsBox.Controls.Add(this._ForeColorTransBox);
+			this._StyleSettingsBox.Controls.Add(this._FontSizeBox);
+			this._StyleSettingsBox.Controls.Add(this.label4);
+			this._StyleSettingsBox.Controls.Add(this._StrikeBox);
+			this._StyleSettingsBox.Controls.Add(this._UnderlineBox);
+			this._StyleSettingsBox.Controls.Add(this._ItalicBox);
+			this._StyleSettingsBox.Controls.Add(this._BoldBox);
+			this._StyleSettingsBox.Location = new System.Drawing.Point(248, 3);
+			this._StyleSettingsBox.Name = "_StyleSettingsBox";
+			this._StyleSettingsBox.Size = new System.Drawing.Size(271, 417);
+			this._StyleSettingsBox.TabIndex = 2;
+			this._StyleSettingsBox.TabStop = false;
+			this._StyleSettingsBox.Text = "Syntax Style";
 			// 
 			// _ResetButton
 			// 
@@ -325,12 +325,12 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this._SyntaxListBox);
-			this.Controls.Add(this.groupBox1);
+			this.Controls.Add(this._StyleSettingsBox);
 			this.Controls.Add(this.label1);
 			this.Name = "SyntaxStyleOptionPage";
 			this.Size = new System.Drawing.Size(522, 423);
-			this.groupBox1.ResumeLayout(false);
-			this.groupBox1.PerformLayout();
+			this._StyleSettingsBox.ResumeLayout(false);
+			this._StyleSettingsBox.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this._PreviewBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this._BackColorTransBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this._ForeColorTransBox)).EndInit();
@@ -343,7 +343,7 @@
 		#endregion
 
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.GroupBox _StyleSettingsBox;
 		private System.Windows.Forms.Label label6;
 		private PickColorButton _BackColorButton;
 		private System.Windows.Forms.NumericUpDown _BackColorTransBox;
