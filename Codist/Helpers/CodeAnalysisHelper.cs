@@ -123,6 +123,7 @@ namespace Codist
 				try {
 					((EnvDTE.TextSelection)dte.ActiveDocument.Selection).MoveToLineAndOffset(line, column);
 				}
+				catch (NullReferenceException) { /* ignore */ }
 				catch (ArgumentException) {
 					// ignore incorrect offset
 				}
