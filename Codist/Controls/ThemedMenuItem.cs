@@ -26,6 +26,17 @@ namespace Codist.Controls
 				SetValue(SubMenuHeaderProperty, _SubMenuHeader = value);
 				if (_SubMenuHeader != null && HasItems == false) {
 					Items.Add(new MenuItemPlaceHolder());
+					(value as FrameworkElement).KeyUp += (s, args) => {
+						switch (args.Key) {
+							case System.Windows.Input.Key.Enter:
+								if (args.OriginalSource is TextBox) {
+									Items.GetFirst<ThemedMenuItem>(i => i.IsEnabled && i.IsVisible).PerformClick();
+								}
+								break;
+							case System.Windows.Input.Key.Down: Items.FocusFirst<MenuItem>(); break;
+							case System.Windows.Input.Key.Up: Items.FocusLast<MenuItem>(); break;
+						}
+					};
 				}
 			}
 		}
@@ -48,6 +59,10 @@ namespace Codist.Controls
 				}
 				Items.RemoveAt(i);
 			}
+		}
+
+		public void PerformClick() {
+			OnClick();
 		}
 
 		internal sealed class MenuItemPlaceHolder : Separator

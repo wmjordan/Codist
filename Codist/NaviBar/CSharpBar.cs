@@ -228,6 +228,9 @@ namespace Codist.NaviBar
 				};
 				_FinderBox.TextChanged += SearchCriteriaChanged;
 				_ScopeBox.FilterChanged += SearchCriteriaChanged;
+				_ScopeBox.FilterChanged += (s, args) => {
+					_FinderBox.Focus();
+				};
 			}
 
 			void SearchCriteriaChanged(object sender, EventArgs e) {
@@ -303,7 +306,7 @@ namespace Codist.NaviBar
 						foreach (var item in _Items) {
 							var nav = item as NaviItem;
 							if (nav != null) {
-								nav.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+								nav.RaiseEvent(new RoutedEventArgs(ClickEvent));
 								return;
 							}
 						}

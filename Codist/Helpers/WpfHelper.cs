@@ -251,6 +251,45 @@ namespace Codist
 		#endregion
 
 		#region Others
+		public static TItem GetFirst<TItem>(this ItemCollection items, Predicate<TItem> predicate)
+			where TItem : FrameworkElement {
+			foreach (var item in items) {
+				var i = item as TItem;
+				if (i != null && (predicate == null || predicate(i))) {
+					return i;
+				}
+			}
+			return null;
+		}
+		public static bool ClickFirstMenuItem<TItem>(this ItemCollection items)
+			where TItem : MenuItem {
+			foreach (var item in items) {
+				var i = item as TItem;
+				if (i != null && i.Visibility == Visibility.Visible && i.IsEnabled) {
+					i.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+					return true;
+				}
+			}
+			return false;
+		}
+		public static bool FocusFirst<TItem>(this ItemCollection items)
+			where TItem : FrameworkElement {
+			foreach (var item in items) {
+				if ((item as TItem)?.Focus() == true) {
+					return true;
+				}
+			}
+			return false;
+		}
+		public static bool FocusLast<TItem>(this ItemCollection items)
+			where TItem : FrameworkElement {
+			for (int i = items.Count - 1; i >= 0; i--) {
+				if ((items[i] as TItem)?.Focus() == true) {
+					return true;
+				}
+			}
+			return false;
+		}
 		public static TItem Get<TItem>(this ResourceDictionary items, object key) {
 			return (items != null && items.Contains(key) && items[key] is TItem item)
 				? item

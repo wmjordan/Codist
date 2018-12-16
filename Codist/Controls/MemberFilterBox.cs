@@ -102,6 +102,7 @@ namespace Codist.Controls
 
 		void FilterChanged(object sender, EventArgs e) {
 			Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), _FilterButtons.Filters);
+			FocusTextBox();
 		}
 		void Filter(string[] keywords, MemberFilterTypes filters) {
 			bool useModifierFilter = filters != MemberFilterTypes.All;
