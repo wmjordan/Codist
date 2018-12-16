@@ -31,12 +31,14 @@ namespace Codist.SmartBars
 						Process.Start("Explorer.exe", "/select,\"" + s + "\"");
 					}
 				});
-				AddCommand(MyToolBar, KnownImageIds.VisualStudio, "Open file with Visual Studio", ctx => {
-					var s = TryGetPath(View);
-					if (s != null) {
-						CodistPackage.DTE.OpenFile(s, 1, 1);
-					}
-				});
+				if (IsFileTypeRegisteredInVS(t)) {
+					AddCommand(MyToolBar, KnownImageIds.VisualStudio, "Open file with Visual Studio", ctx => {
+						var s = TryGetPath(View);
+						if (s != null && IsFileTypeRegisteredInVS(s)) {
+							CodistPackage.DTE.OpenFile(s, 1, 1);
+						}
+					});
+				}
 			}
 			else if (Directory.Exists(t)) {
 				AddCommand(MyToolBar, KnownImageIds.OpenFolder, "Open folder", ctx => {
@@ -70,6 +72,14 @@ namespace Codist.SmartBars
 				}
 				catch (FileNotFoundException) {
 					// ignore
+				}
+			}
+			bool IsFileTypeRegisteredInVS(string fileName) {
+				try {
+					return ServicesHelper.Instance.FileExtensionRegistry.GetContentTypeForExtension(Path.GetExtension(fileName)).TypeName != "UNKNOWN";
+				}
+				catch (ArgumentException) {
+					return false;
 				}
 			}
 		}

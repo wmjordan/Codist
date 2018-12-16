@@ -29,6 +29,9 @@ namespace Codist
 		public IClassificationTypeRegistryService ClassificationTypeRegistry { get; private set; }
 
 		[Import]
+		public Microsoft.VisualStudio.Utilities.IFileExtensionRegistryService FileExtensionRegistry { get; private set; }
+
+		[Import]
 		public IEditorFormatMapService EditorFormatMap { get; private set; }
 
 		[Import]
