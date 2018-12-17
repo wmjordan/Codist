@@ -92,7 +92,7 @@ namespace Codist.SmartBars
 						if (node is IdentifierNameSyntax) {
 							AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition\nRight click: Peek definition", "Edit.PeekDefinition");
 						}
-						AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze references...", GetReferenceCommandsAsync);
+						AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze symbol...", GetReferenceCommandsAsync);
 						if (Classifiers.SymbolMarkManager.CanBookmark(_Symbol)) {
 							AddCommands(MyToolBar, KnownImageIds.FlagGroup, "Mark symbol...", null, GetMarkerCommands);
 						}
@@ -283,7 +283,7 @@ namespace Codist.SmartBars
 
 		void FindCallers(CommandContext context, MenuItem menuItem, ISymbol source) {
 			var doc = _Context.Document;
-			var docs = System.Collections.Immutable.ImmutableHashSet.CreateRange(doc.Project.GetRelatedDocuments());
+			var docs = System.Collections.Immutable.ImmutableHashSet.CreateRange(doc.Project.GetRelatedProjectDocuments());
 			SymbolCallerInfo[] callers;
 			switch (source.Kind) {
 				case SymbolKind.Method:
@@ -430,7 +430,7 @@ namespace Codist.SmartBars
 		}
 
 		void FindReferences(CommandContext context, MenuItem menuItem, ISymbol source) {
-			var refs = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindReferencesAsync(source, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.CreateRange(_Context.Document.Project.GetRelatedDocuments()), context.CancellationToken)).ToArray();
+			var refs = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindReferencesAsync(source, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.CreateRange(_Context.Document.Project.GetRelatedProjectDocuments()), context.CancellationToken)).ToArray();
 			Array.Sort(refs, (a, b) => {
 				int s;
 				return 0 != (s = a.Definition.ContainingType.Name.CompareTo(b.Definition.ContainingType.Name)) ? s :
@@ -454,6 +454,11 @@ namespace Codist.SmartBars
 					subMenu.Items.Add(new SymbolMenuItem(this, item.Definition, null));
 				}
 			}
+		}
+
+		void FindSymbolWithName(CommandContext ctx, MenuItem menuItem, ISymbol source) {
+			var result = _Context.SemanticModel.Compilation.FindDeclarationMatchName(source.Name, Keyboard.Modifiers == ModifierKeys.Control, true, ctx.CancellationToken);
+			SortAndGroupSymbolByClass(menuItem, new List<ISymbol>(result));
 		}
 
 		CommandItem[] GetDebugCommands(CommandContext ctx) {
@@ -563,6 +568,7 @@ namespace Codist.SmartBars
 					break;
 			}
 			//r.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, symbol, "No reference found", FindReferences));
+			r.Add(CreateCommandMenu("Find Symbol Named " + symbol.Name + "...", KnownImageIds.FindSymbol, symbol, "No symbol was found", FindSymbolWithName));
 			r.Add(new CommandItem(KnownImageIds.ReferencedDimension, "Find All References", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences")));
 			r.Add(new CommandItem(KnownImageIds.ListMembers, "Go to Member", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToMember")));
 			r.Add(new CommandItem(KnownImageIds.Type, "Go to Type", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToType")));
@@ -668,9 +674,17 @@ namespace Codist.SmartBars
 				INamedTypeSymbol typeSymbol = null;
 				foreach (var member in members) {
 					if (typeSymbol == null || typeSymbol != member.ContainingType) {
-						typeSymbol = member.ContainingType;
-						subMenu = new SymbolMenuItem(this, typeSymbol, null);
-						menuItem.Items.Add(subMenu);
+						typeSymbol = member.ContainingType ?? member as INamedTypeSymbol;
+						if (typeSymbol != null) {
+							subMenu = new SymbolMenuItem(this, typeSymbol, typeSymbol.Locations);
+							menuItem.Items.Add(subMenu);
+							if (typeSymbol == member) {
+								continue;
+							}
+						}
+						else {
+							continue;
+						}
 					}
 					subMenu.Items.Add(new SymbolMenuItem(this, member, member.Locations));
 				}
@@ -679,12 +693,15 @@ namespace Codist.SmartBars
 
 		static int CompareSymbol(ISymbol a, ISymbol b) {
 			var s = b.ContainingAssembly.GetSourceType().CompareTo(a.ContainingAssembly.GetSourceType());
-			INamedTypeSymbol ta, tb;
-			return s != 0 ? s
-				: (s = (tb = b.ContainingType).DeclaredAccessibility.CompareTo((ta = a.ContainingType).DeclaredAccessibility)) != 0 ? s
+			if (s != 0) {
+				return s;
+			}
+			INamedTypeSymbol ta = a.ContainingType, tb = b.ContainingType;
+			var ct = ta != null && tb != null;
+			return ct && (s = tb.DeclaredAccessibility.CompareTo(ta.DeclaredAccessibility)) != 0 ? s
 				: (s = b.DeclaredAccessibility.CompareTo(a.DeclaredAccessibility)) != 0 ? s
-				: (s = ta.Name.CompareTo(tb.Name)) != 0 ? s
-				: (s = ta.GetHashCode().CompareTo(tb.GetHashCode())) != 0 ? s
+				: ct && (s = ta.Name.CompareTo(tb.Name)) != 0 ? s
+				: ct && (s = ta.GetHashCode().CompareTo(tb.GetHashCode())) != 0 ? s
 				: (s = a.Name.CompareTo(b.Name)) != 0 ? s
 				: 0;
 		}
@@ -734,6 +751,7 @@ namespace Codist.SmartBars
 				if (loc != null) {
 					var p = loc.GetLineSpan();
 					CodistPackage.DTE.OpenFile(loc.SourceTree.FilePath, p.StartLinePosition.Line + 1, p.StartLinePosition.Character + 1);
+					args.Handled = true;
 				}
 			}
 

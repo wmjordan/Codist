@@ -144,10 +144,12 @@ namespace Codist
 		/// <summary>
 		/// Finds symbol declarations matching <paramref name="symbolName"/> within given <paramref name="project"/>.
 		/// </summary>
-		public static async Task<IEnumerable<ISymbol>> FindDeclarationsAsync(Project project, string symbolName, int resultLimit, SymbolFilter filter = SymbolFilter.All, CancellationToken token = default) {
-			var symbols = new SortedSet<ISymbol>(Comparer<ISymbol>.Create((x, y) => x.Name.Length - y.Name.Length));
+		public static async Task<IEnumerable<ISymbol>> FindDeclarationsAsync(this Project project, string symbolName, int resultLimit, bool fullMatch, bool matchCase, SymbolFilter filter = SymbolFilter.All, CancellationToken token = default) {
+			var symbols = new SortedSet<ISymbol>(CreateSymbolComparer());
 			int maxNameLength = 0;
-			foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(project, name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1, token)) {
+			var predicate = CreateNameFilter(symbolName, fullMatch, matchCase);
+
+			foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(project, predicate, token)) {
 				if (symbols.Count < resultLimit) {
 					symbols.Add(symbol);
 				}
@@ -160,6 +162,52 @@ namespace Codist
 				}
 			}
 			return symbols;
+		}
+
+		static Comparer<ISymbol> CreateSymbolComparer() {
+			return Comparer<ISymbol>.Create((x, y) => {
+				var l = x.Name.Length - y.Name.Length;
+				return l != 0 ? l : x.GetHashCode() - y.GetHashCode();
+			});
+		}
+
+		public static IEnumerable<ISymbol> FindDeclarationMatchName(this Compilation compilation, string symbolName, bool fullMatch, bool matchCase, CancellationToken cancellationToken = default) {
+			var filter = CreateNameFilter(symbolName, fullMatch, matchCase);
+			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+				if (type.IsAccessible() && filter(type.Name)) {
+					yield return type;
+				}
+				if (cancellationToken.IsCancellationRequested) {
+					break;
+				}
+				foreach (var member in type.GetMembers()) {
+					if (member.Kind != SymbolKind.NamedType
+						&& member.CanBeReferencedByName
+						&& member.IsAccessible()
+						&& filter(member.Name)) {
+						yield return member;
+					}
+				}
+			}
+		}
+
+		static Func<string, bool> CreateNameFilter(string symbolName, bool fullMatch, bool matchCase) {
+			if (fullMatch) {
+				if (matchCase) {
+					return name => name == symbolName;
+				}
+				else {
+					return name => String.Equals(name, symbolName, StringComparison.OrdinalIgnoreCase);
+				}
+			}
+			else {
+				if (matchCase) {
+					return name => name.IndexOf(symbolName, StringComparison.Ordinal) != -1;
+				}
+				else {
+					return name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1;
+				}
+			}
 		}
 		#endregion
 

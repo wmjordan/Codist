@@ -40,7 +40,7 @@ namespace Codist
 				: solution.WithDocumentText(docId, sourceText, PreservationMode.PreserveIdentity).GetDocument(docId);
 		}
 
-		public static IEnumerable<Document> GetRelatedDocuments(this Project project) {
+		public static IEnumerable<Document> GetRelatedProjectDocuments(this Project project) {
 			var projects = GetRelatedProjects(project);
 			foreach (var proj in projects) {
 				foreach (var doc in proj.Documents) {
