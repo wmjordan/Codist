@@ -265,24 +265,11 @@ namespace Codist.NaviBar
 			}
 
 			async Task FindDeclarationsAsync(string symbolName, CancellationToken token) {
-				var result = new SortedSet<ISymbol>(Comparer<ISymbol>.Create((x, y) => {
-					var l = x.Name.Length - y.Name.Length;
-					return l != 0 ? l : x.GetHashCode() - y.GetHashCode();
-				}));
-				int maxNameLength = 0;
-				foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(_Bar._SemanticContext.Document.Project, name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1, token)) {
-					if (result.Count < 50) {
-						result.Add(symbol);
-					}
-					else {
-						maxNameLength = result.Max.Name.Length;
-						if (symbol.Name.Length < maxNameLength) {
-							result.Remove(result.Max);
-							result.Add(symbol);
-						}
-					}
-				}
+				var result = await _Bar._SemanticContext.Document.Project.FindDeclarationsAsync(symbolName, 50, false, false, SymbolFilter.All, token);
 				foreach (var item in result) {
+					if (token.IsCancellationRequested) {
+						break;
+					}
 					Items.Add(new SymbolItem(item, _Bar._SemanticContext));
 				}
 			}
@@ -292,25 +279,13 @@ namespace Codist.NaviBar
 
 				public MemberFinderBox(ItemCollection items) {
 					_Items = items;
-					PreviewKeyUp += ControlMenuSelection;
 					IsVisibleChanged += (s, args) => {
 						var b = s as TextBox;
 						if (b.IsVisible) {
 							b.Focus();
+							b.SelectAll();
 						}
 					};
-				}
-
-				void ControlMenuSelection(object sender, KeyEventArgs e) {
-					if (e.Key == Key.Enter && _Items.Count > 1) {
-						foreach (var item in _Items) {
-							var nav = item as NaviItem;
-							if (nav != null) {
-								nav.RaiseEvent(new RoutedEventArgs(ClickEvent));
-								return;
-							}
-						}
-					}
 				}
 			}
 		}
@@ -549,7 +524,13 @@ namespace Codist.NaviBar
 
 			#region Helper methods
 			public void GoToLocation() {
-				_Bar._SemanticContext.RelocateDeclarationNode(Node)?.GetLocation().GoToSource();
+				var node = _Bar._SemanticContext.RelocateDeclarationNode(Node);
+				if (node != null) {
+					node.GetIdentifierToken().GetLocation().GoToSource();
+				}
+				else {
+					CodistPackage.ShowErrorMessageBox("Syntax node was not found", nameof(Codist), true);
+				}
 			}
 
 			void SelectOrGoToSource() {
@@ -562,7 +543,7 @@ namespace Codist.NaviBar
 					_Bar._View.SelectNode(node, Keyboard.Modifiers != ModifierKeys.Control);
 				}
 				else {
-					node.GetLocation().GoToSource();
+					node.GetIdentifierToken().GetLocation().GoToSource();
 				}
 			}
 			#endregion

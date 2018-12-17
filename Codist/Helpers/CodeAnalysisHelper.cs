@@ -839,6 +839,27 @@ namespace Codist
 		public static IdentifierNameSyntax GetLastIdentifier(this SyntaxNode node) {
 			return node.DescendantNodes().LastOrDefault(i => i.IsKind(SyntaxKind.IdentifierName)) as IdentifierNameSyntax;
 		}
+		public static SyntaxToken GetIdentifierToken(this SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.ClassDeclaration:
+				case SyntaxKind.StructDeclaration:
+				case SyntaxKind.InterfaceDeclaration:
+				case SyntaxKind.EnumDeclaration:
+					return (node as BaseTypeDeclarationSyntax).Identifier;
+				case SyntaxKind.DelegateDeclaration: return (node as DelegateDeclarationSyntax).Identifier;
+				case SyntaxKind.MethodDeclaration: return (node as MethodDeclarationSyntax).Identifier;
+				case SyntaxKind.OperatorDeclaration: return (node as OperatorDeclarationSyntax).OperatorToken;
+				case SyntaxKind.ConversionOperatorDeclaration: return (node as ConversionOperatorDeclarationSyntax).Type.GetFirstToken();
+				case SyntaxKind.ConstructorDeclaration: return (node as ConstructorDeclarationSyntax).Identifier;
+				case SyntaxKind.DestructorDeclaration: return (node as DestructorDeclarationSyntax).Identifier;
+				case SyntaxKind.PropertyDeclaration: return (node as PropertyDeclarationSyntax).Identifier;
+				case SyntaxKind.IndexerDeclaration: return (node as IndexerDeclarationSyntax).ThisKeyword;
+				case SyntaxKind.EventDeclaration: return (node as EventDeclarationSyntax).Identifier;
+				case SyntaxKind.EnumMemberDeclaration: return (node as EnumMemberDeclarationSyntax).Identifier;
+				case SyntaxKind.VariableDeclarator: return (node as VariableDeclaratorSyntax).Identifier;
+			}
+			return node.GetFirstToken();
+		}
 		public static string GetName(this NameSyntax name) {
 			if (name == null) {
 				return null;
