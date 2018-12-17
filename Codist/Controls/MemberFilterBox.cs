@@ -81,8 +81,13 @@ namespace Codist.Controls
 			});
 			Children.Add(_FilterButtons = new MemberFilterButtonGroup());
 			_Items = items;
-			_FilterButtons.FilterChanged += FilterChanged;
-			_FilterBox.TextChanged += FilterChanged;
+			_FilterButtons.FilterChanged += _FilterBox_Changed;
+			_FilterBox.TextChanged += _FilterBox_Changed;
+
+			void _FilterBox_Changed(object sender, EventArgs e) {
+				Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), _FilterButtons.Filters);
+				FocusTextBox();
+			}
 		}
 		public bool FocusTextBox() {
 			if (_FilterBox.IsVisible) {
@@ -96,14 +101,11 @@ namespace Codist.Controls
 		void _FilterBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
 			if (_FilterBox.IsVisible) {
 				_FilterBox.Focus();
+				_FilterBox.SelectAll();
 				_FilterBox.IsVisibleChanged -= _FilterBox_IsVisibleChanged;
 			}
 		}
 
-		void FilterChanged(object sender, EventArgs e) {
-			Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), _FilterButtons.Filters);
-			FocusTextBox();
-		}
 		void Filter(string[] keywords, MemberFilterTypes filters) {
 			bool useModifierFilter = filters != MemberFilterTypes.All;
 			if (keywords.Length == 0) {
@@ -178,7 +180,6 @@ namespace Codist.Controls
 				return words.All(p => text.IndexOf(p, StringComparison.OrdinalIgnoreCase) != -1);
 			}
 		}
-
 		internal static bool FilterByImageId(MemberFilterTypes filterTypes, int imageId) {
 			switch (imageId) {
 				case KnownImageIds.ClassPublic:
@@ -186,29 +187,30 @@ namespace Codist.Controls
 				case KnownImageIds.StructurePublic:
 				case KnownImageIds.EnumerationPublic:
 				case KnownImageIds.DelegatePublic:
-					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.NestedType);
+				case KnownImageIds.Namespace:
+					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.TypeAndNamespace);
 				case KnownImageIds.ClassPrivate:
 				case KnownImageIds.InterfacePrivate:
 				case KnownImageIds.StructurePrivate:
 				case KnownImageIds.EnumerationPrivate:
 				case KnownImageIds.DelegatePrivate:
-					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.NestedType);
+					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.TypeAndNamespace);
 				case KnownImageIds.ClassProtected:
 				case KnownImageIds.InterfaceProtected:
 				case KnownImageIds.StructureProtected:
 				case KnownImageIds.EnumerationProtected:
 				case KnownImageIds.DelegateProtected:
-					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.NestedType);
+					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.TypeAndNamespace);
 				case KnownImageIds.ClassInternal:
 				case KnownImageIds.InterfaceInternal:
 				case KnownImageIds.StructureInternal:
 				case KnownImageIds.EnumerationInternal:
 				case KnownImageIds.DelegateInternal:
-					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.NestedType);
+					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.TypeAndNamespace);
 				case KnownImageIds.ClassShortcut:
 				case KnownImageIds.InterfaceShortcut:
 				case KnownImageIds.StructureShortcut:
-					return filterTypes.MatchFlags(MemberFilterTypes.NestedType);
+					return filterTypes.MatchFlags(MemberFilterTypes.TypeAndNamespace);
 				case KnownImageIds.MethodPublic:
 				case KnownImageIds.TypePublic: // constructor
 				case KnownImageIds.OperatorPublic:
@@ -227,6 +229,7 @@ namespace Codist.Controls
 				case KnownImageIds.OperatorPrivate:
 					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.Method);
 				case KnownImageIds.DeleteListItem: // deconstructor
+				case KnownImageIds.ExtensionMethod:
 					return filterTypes.MatchFlags(MemberFilterTypes.Method);
 				case KnownImageIds.FieldPublic:
 				case KnownImageIds.ConstantPublic:
@@ -264,7 +267,7 @@ namespace Codist.Controls
 			public MemberFilterButtonGroup() {
 				_FieldFilter = CreateButton(KnownImageIds.Field, "Fields and properties");
 				_MethodFilter = CreateButton(KnownImageIds.Method, "Methods, delegates and events");
-				_TypeFilter = CreateButton(KnownImageIds.EntityContainer, "Nested types");
+				_TypeFilter = CreateButton(KnownImageIds.EntityContainer, "Types");
 
 				_PublicFilter = CreateButton(KnownImageIds.ModulePublic, "Public and protected members");
 				_PrivateFilter = CreateButton(KnownImageIds.ModulePrivate, "Internal and private members");
@@ -300,7 +303,7 @@ namespace Codist.Controls
 					f |= MemberFilterTypes.Method;
 				}
 				if (_TypeFilter.IsChecked == true) {
-					f |= MemberFilterTypes.NestedType;
+					f |= MemberFilterTypes.TypeAndNamespace;
 				}
 				if (f.HasAnyFlag(MemberFilterTypes.AllMembers) == false) {
 					f |= MemberFilterTypes.AllMembers;
@@ -346,8 +349,8 @@ namespace Codist.Controls
 		None,
 		FieldAndProperty = 1,
 		Method = 1 << 1,
-		NestedType = 1 << 2,
-		AllMembers = FieldAndProperty | Method | NestedType,
+		TypeAndNamespace = 1 << 2,
+		AllMembers = FieldAndProperty | Method | TypeAndNamespace,
 		Public = 1 << 3,
 		Protected = 1 << 4,
 		Internal = 1 << 5,
