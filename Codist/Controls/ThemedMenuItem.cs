@@ -30,7 +30,7 @@ namespace Codist.Controls
 						switch (args.Key) {
 							case System.Windows.Input.Key.Enter:
 								if (args.OriginalSource is TextBox) {
-									Items.GetFirst<ThemedMenuItem>(i => i.IsEnabled && i.IsVisible).PerformClick();
+									Items.GetFirst<ThemedMenuItem>(i => i.IsEnabled && i.IsVisible)?.PerformClick();
 								}
 								break;
 							case System.Windows.Input.Key.Down: Items.FocusFirst<MenuItem>(); break;
