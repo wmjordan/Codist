@@ -261,17 +261,6 @@ namespace Codist
 			}
 			return null;
 		}
-		public static bool ClickFirstMenuItem<TItem>(this ItemCollection items)
-			where TItem : MenuItem {
-			foreach (var item in items) {
-				var i = item as TItem;
-				if (i != null && i.Visibility == Visibility.Visible && i.IsEnabled) {
-					i.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
-					return true;
-				}
-			}
-			return false;
-		}
 		public static bool FocusFirst<TItem>(this ItemCollection items)
 			where TItem : FrameworkElement {
 			foreach (var item in items) {
