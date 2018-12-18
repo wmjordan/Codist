@@ -174,7 +174,10 @@ namespace Codist
 		public static IEnumerable<ISymbol> FindDeclarationMatchName(this Compilation compilation, string symbolName, bool fullMatch, bool matchCase, CancellationToken cancellationToken = default) {
 			var filter = CreateNameFilter(symbolName, fullMatch, matchCase);
 			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (type.IsAccessible() && filter(type.Name)) {
+				if (type.IsAccessible(true) == false) {
+					continue;
+				}
+				if (filter(type.Name)) {
 					yield return type;
 				}
 				if (cancellationToken.IsCancellationRequested) {
@@ -183,7 +186,7 @@ namespace Codist
 				foreach (var member in type.GetMembers()) {
 					if (member.Kind != SymbolKind.NamedType
 						&& member.CanBeReferencedByName
-						&& member.IsAccessible()
+						&& member.IsAccessible(false)
 						&& filter(member.Name)) {
 						yield return member;
 					}
@@ -653,12 +656,13 @@ namespace Codist
 			CodistPackage.DTE.OpenFile(loc.SyntaxTree.FilePath, pos.Line + 1, pos.Character + 1);
 		}
 
-		public static bool IsAccessible(this ISymbol symbol) {
+		public static bool IsAccessible(this ISymbol symbol, bool checkContainingType) {
 			return symbol != null
 				&& (symbol.DeclaredAccessibility == Accessibility.Public
 					|| symbol.DeclaredAccessibility == Accessibility.Protected
 					|| symbol.DeclaredAccessibility == Accessibility.ProtectedOrInternal
-					|| symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata);
+					|| symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata)
+				&& (checkContainingType == false || symbol.ContainingType == null || symbol.ContainingType.IsAccessible(true));
 		}
 		#endregion
 

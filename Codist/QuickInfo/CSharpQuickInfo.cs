@@ -518,7 +518,7 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NamespaceTypes) == false) {
 				return;
 			}
-			var namespaces = nsSymbol.GetNamespaceMembers().ToImmutableArray().Sort(Comparer<INamespaceSymbol>.Create((x, y) => String.Compare(x.Name, y.Name)));
+			var namespaces = nsSymbol.GetNamespaceMembers().ToImmutableArray().Sort(Comparer<INamespaceSymbol>.Create((x, y) => String.Compare(x.Name, y.Name, StringComparison.Ordinal)));
 			if (namespaces.Length > 0) {
 				var info = new StackPanel();
 				info.Add(new ThemedTipText("Namespace:", true));
@@ -753,7 +753,7 @@ namespace Codist.QuickInfo
 		static void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs, int position) {
 			var info = new StackPanel().Add(new ThemedTipText("Attribute:", true));
 			foreach (var item in attrs) {
-				if (item.AttributeClass.IsAccessible() == false) {
+				if (item.AttributeClass.IsAccessible(true) == false) {
 					continue;
 				}
 				info.Children.Add(_SymbolFormatter.ToUIText(new ThemedTipText(), item));
@@ -771,7 +771,7 @@ namespace Codist.QuickInfo
 			var info = new ThemedTipText("Base type: ", true)
 				.AddSymbol(baseType, null, _SymbolFormatter.Class);
 			while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
-				if (baseType.IsAccessible() && baseType.IsCommonClass() == false) {
+				if (baseType.IsAccessible(false) && baseType.IsCommonClass() == false) {
 					info.Append(" - ").AddSymbol(baseType, null, _SymbolFormatter.Class);
 				}
 			}
