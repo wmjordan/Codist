@@ -92,7 +92,7 @@
 				<ContentPresenter Name="HeaderHost" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="False" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
 				<TextBlock x:Name="InputGestureText" Grid.Column="2" Height="{Binding ElementName=HeaderHost,Path=ActualHeight}" Text="{TemplateBinding InputGestureText}" Margin="5,2,0,2" DockPanel.Dock="Right"/>
 				<Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{DynamicResource VsBrush.CommandBarMenuSubmenuGlyph}"/>
-				<Popup Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
+				<Popup Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}" MaxWidth="500">
 					<Border Name="SubmenuBorder" SnapsToDevicePixels="True" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" BorderThickness="1,1,1,1">
 						<StackPanel Margin="3">
 							<ContentPresenter x:Name="PopupHeader" Content="{TemplateBinding SubMenuHeader}" ContentSource="Tag" Margin="0,0,0,3" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
