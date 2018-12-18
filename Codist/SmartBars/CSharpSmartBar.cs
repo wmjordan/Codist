@@ -665,7 +665,10 @@ namespace Codist.SmartBars
 			if (members.Count < 10) {
 				foreach (var member in members) {
 					menuItem.Items.Add(new SymbolMenuItem(this, member, member.Locations) {
-						Header = new TextBlock().Append(member.ContainingType.Name + ".", WpfBrushes.Gray).Append(member.Name)
+						Header = (member.ContainingType != null
+							? new TextBlock().Append(member.ContainingType.Name + ".", WpfBrushes.Gray)
+							: new TextBlock())
+						.Append(member.Name)
 					});
 				}
 			}
