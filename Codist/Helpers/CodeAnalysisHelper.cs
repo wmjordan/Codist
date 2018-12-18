@@ -624,7 +624,7 @@ namespace Codist
 				case SyntaxKind.ExpressionStatement: return ((ExpressionStatementSyntax)node).Expression.GetExpressionSignature();
 				case SyntaxKind.Attribute: return ((AttributeSyntax)node).Name.ToString();
 				case SyntaxKind.AttributeArgumentList: return GetAttributeArgumentListSignature((AttributeArgumentListSyntax)node);
-				case SyntaxKind.YieldReturnStatement: return ((YieldStatementSyntax)node).Expression.GetExpressionSignature();
+				case SyntaxKind.YieldReturnStatement: return ((YieldStatementSyntax)node).Expression?.GetExpressionSignature();
 				case SyntaxKind.GotoStatement:
 				case SyntaxKind.GotoCaseStatement:
 					return ((GotoStatementSyntax)node).Expression?.GetExpressionSignature();
