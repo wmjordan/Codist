@@ -8,7 +8,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
 	[Name(Constants.CodeControlFlowKeyword)]
 	[UserVisible(false)]
-	[Order(After = Constants.CodeFormalLanguage)]
+	[Order(After = Constants.CodeKeyword)]
 	sealed class ControlFlowKeywordFormat : ClassificationFormatDefinition
 	{
 		public ControlFlowKeywordFormat() {
@@ -21,7 +21,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
 	[Name(Constants.CodeAbstractionKeyword)]
 	[UserVisible(false)]
-	[Order(After = Constants.CodeFormalLanguage)]
+	[Order(After = Constants.CodeKeyword)]
 	sealed class AbstractionKeywordFormat : ClassificationFormatDefinition
 	{
 		public AbstractionKeywordFormat() {
@@ -33,7 +33,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.CodeBranchingKeyword)]
 	[Name(Constants.CodeBranchingKeyword)]
 	[UserVisible(false)]
-	[Order(After = Constants.CodeFormalLanguage)]
+	[Order(After = Constants.CodeKeyword)]
 	sealed class BranchingKeywordFormat : ClassificationFormatDefinition
 	{
 		public BranchingKeywordFormat() {
@@ -45,7 +45,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.CodeLoopKeyword)]
 	[Name(Constants.CodeLoopKeyword)]
 	[UserVisible(false)]
-	[Order(After = Constants.CodeFormalLanguage)]
+	[Order(After = Constants.CodeKeyword)]
 	sealed class LoopKeywordFormat : ClassificationFormatDefinition
 	{
 		public LoopKeywordFormat() {
@@ -57,7 +57,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpResourceKeyword)]
 	[Name(Constants.CSharpResourceKeyword)]
 	[UserVisible(false)]
-	[Order(After = Constants.CodeFormalLanguage)]
+	[Order(After = Constants.CodeKeyword)]
 	sealed class ResourceKeywordFormat : ClassificationFormatDefinition
 	{
 		public ResourceKeywordFormat() {
