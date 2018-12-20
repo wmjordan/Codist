@@ -79,10 +79,49 @@ namespace Codist
 			}
 		}
 
-		public static void ExpandSelectionToLine(this IWpfTextView view) {
+		/// <summary>
+		/// Begins an edit operation to the <paramref name="view"/>.
+		/// </summary>
+		/// <typeparam name="TView">The type of the view.</typeparam>
+		/// <param name="view">The <see cref="ITextView"/> to be edited.</param>
+		/// <param name="action">The edit operation.</param>
+		/// <returns>Returns a new <see cref="ITextSnapshot"/> if <see cref="ITextEdit.HasEffectiveChanges"/>  returns <see langword="true"/>, otherwise, returns <see langword="null"/>.</returns>
+		public static ITextSnapshot Edit<TView>(this TView view, Action<TView, ITextEdit> action)
+			where TView : ITextView {
+			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+				action(view, edit);
+				if (edit.HasEffectiveChanges) {
+					edit.Apply();
+					return edit.Snapshot;
+				}
+				return null;
+			}
+		}
+		/// <summary>
+		/// Performs edit operation to each selected spans in the <paramref name="view"/>.
+		/// </summary>
+		/// <typeparam name="TView">The type of the view.</typeparam>
+		/// <param name="view">The <see cref="ITextView"/> to be edited.</param>
+		/// <param name="action">The edit operation against each selected span.</param>
+		/// <returns>Returns a new <see cref="ITextSnapshot"/> if <see cref="ITextEdit.HasEffectiveChanges"/>  returns <see langword="true"/>, otherwise, returns <see langword="null"/>.</returns>
+		public static ITextSnapshot EditSelection<TView>(this TView view, Action<TView, ITextEdit, SnapshotSpan> action)
+			where TView : ITextView {
+			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+				foreach (var item in view.Selection.SelectedSpans) {
+					action(view, edit, item);
+				}
+				if (edit.HasEffectiveChanges) {
+					edit.Apply();
+					return edit.Snapshot;
+				}
+				return null;
+			}
+		}
+
+		public static void ExpandSelectionToLine(this ITextView view) {
 			view.ExpandSelectionToLine(true);
 		}
-		public static void ExpandSelectionToLine(this IWpfTextView view, bool includeLineBreak) {
+		public static void ExpandSelectionToLine(this ITextView view, bool includeLineBreak) {
 			var start = view.TextSnapshot.GetLineFromPosition(view.Selection.Start.Position).Start;
 			var end = view.Selection.End.Position;
 			var endLine = view.TextSnapshot.GetLineFromPosition(end);
@@ -91,6 +130,12 @@ namespace Codist
 				end = includeLineBreak ? endLine.EndIncludingLineBreak : endLine.End;
 			}
 			view.Selection.Select(new SnapshotSpan(start, end), false);
+		}
+		public static string GetFirstSelectionText(this ITextSelection selection) {
+			return selection.IsEmpty ? String.Empty : selection.SelectedSpans[0].GetText();
+		}
+		public static string GetFirstSelectionText(this ITextView view) {
+			return view.TryGetFirstSelectionSpan(out var span) ? span.GetText() : String.Empty;
 		}
 		public static bool TryGetFirstSelectionSpan(this ITextView view, out SnapshotSpan span) {
 			if (view.Selection.IsEmpty || view.Selection.SelectedSpans.Count < 1) {
@@ -139,15 +184,15 @@ namespace Codist
 			return t;
 		}
 
-		public static SnapshotPoint GetCaretPosition(this IWpfTextView textView) {
+		public static SnapshotPoint GetCaretPosition(this ITextView textView) {
 			return textView.Caret.Position.BufferPosition;
 		}
 
-		public static bool IsCaretInReadOnlyRegion(this IWpfTextView textView) {
+		public static bool IsCaretInReadOnlyRegion(this ITextView textView) {
 			return textView.TextBuffer.IsReadOnly(textView.Caret.Position.BufferPosition);
 		}
 
-		public static bool IsMultilineSelected(this IWpfTextView textView) {
+		public static bool IsMultilineSelected(this ITextView textView) {
 			var s = textView.Selection;
 			if (s.IsEmpty || s.SelectedSpans.Count < 1) {
 				return false;
@@ -155,7 +200,7 @@ namespace Codist
 			return textView.GetTextViewLineContainingBufferPosition(s.Start.Position) != textView.GetTextViewLineContainingBufferPosition(s.End.Position);
 		}
 
-		public static void SelectNode(this IWpfTextView view, Microsoft.CodeAnalysis.SyntaxNode node, bool includeTrivia) {
+		public static void SelectNode(this ITextView view, Microsoft.CodeAnalysis.SyntaxNode node, bool includeTrivia) {
 			var span = includeTrivia ? node.FullSpan : node.Span;
 			if (view.TextSnapshot.Length > span.End) {
 				SnapshotSpan ss;
@@ -178,7 +223,7 @@ namespace Codist
 			}
 		}
 
-		public static void SelectSpan(this IWpfTextView view, SnapshotSpan span) {
+		public static void SelectSpan(this ITextView view, SnapshotSpan span) {
 			view.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.ShowStart);
 			view.Selection.Select(span, false);
 			view.Caret.MoveTo(span.End);

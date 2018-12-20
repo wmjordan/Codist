@@ -285,16 +285,17 @@ namespace Codist.SmartBars
 
 		void SetToolBarPosition() {
 			// keep tool bar position when the selection is restored and the tool bar reappears after executing command
-			if (DateTime.Now > _LastExecute.AddSeconds(1)) {
-				var pos = Mouse.GetPosition(View.VisualElement);
-				var rs = _ToolBarTray.RenderSize;
-				var x = pos.X - 35;
-				var y = pos.Y - rs.Height - 10;
-				Canvas.SetLeft(_ToolBarTray, x < View.ViewportLeft ? View.ViewportLeft
-					: x + rs.Width < View.ViewportRight ? x
-					: View.ViewportRight - rs.Width);
-				Canvas.SetTop(_ToolBarTray, (y < 0 || x < View.ViewportLeft && View.Selection.IsReversed == false ? y + rs.Height + 30 : y) + View.ViewportTop);
+			if (DateTime.Now < _LastExecute.AddSeconds(1)) {
+				return;
 			}
+			var pos = Mouse.GetPosition(View.VisualElement);
+			var rs = _ToolBarTray.RenderSize;
+			var x = pos.X - 35;
+			var y = pos.Y - rs.Height - 10;
+			Canvas.SetLeft(_ToolBarTray, x < View.ViewportLeft ? View.ViewportLeft
+				: x + rs.Width < View.ViewportRight ? x
+				: View.ViewportRight - rs.Width);
+			Canvas.SetTop(_ToolBarTray, (y < 0 || x < View.ViewportLeft && View.Selection.IsReversed == false ? y + rs.Height + 30 : y) + View.ViewportTop);
 		}
 
 		#region Event handlers

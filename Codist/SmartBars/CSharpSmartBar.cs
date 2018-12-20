@@ -166,7 +166,7 @@ namespace Codist.SmartBars
 				}
 			}
 			if (isDesignMode == false) {
-				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger...\nLeft click: Toggle breakpoint\nRight click: Debugger menu...", ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), GetDebugCommands);
+				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger...\nLeft click: Toggle breakpoint\nRight click: Debugger menu...", ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);
 			}
 			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection...\nRight click: Duplicate...\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", null, GetExpandSelectionCommands);
 		}
@@ -178,30 +178,28 @@ namespace Codist.SmartBars
 			AddCommand(MyToolBar, KnownImageIds.GoToNext, "Tag XML Doc with <see> or <paramref>", ctx => {
 				// updates the semantic model before executing the command,
 				// for it could be modified by external editor commands or duplicated document windows
-				if (UpdateSemanticModel()) {
-					using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
-						foreach (var item in View.Selection.SelectedSpans) {
-							var t = item.GetText();
-							var d = _Context.GetNode(item.Start, false, false).GetAncestorOrSelfDeclaration();
-							if (d != null) {
-								var mp = (d as BaseMethodDeclarationSyntax).FindParameter(t);
-								if (mp != null) {
-									edit.Replace(item, "<paramref name=\"" + t + "\"/>");
-									continue;
-								}
-								var tp = d.FindTypeParameter(t);
-								if (tp != null) {
-									edit.Replace(item, "<typeparamref name=\"" + t + "\"/>");
-									continue;
-								}
-							}
-							edit.Replace(item, (SyntaxFacts.GetKeywordKind(t) != SyntaxKind.None ? "<see langword=\"" : "<see cref=\"") + t + "\"/>");
-						}
-						if (edit.HasEffectiveChanges) {
-							edit.Apply();
-						}
-					}
+				if (UpdateSemanticModel() == false) {
+					return;
 				}
+				ctx.View.Edit((view, edit) => {
+					foreach (var item in view.Selection.SelectedSpans) {
+						var t = item.GetText();
+						var d = _Context.GetNode(item.Start, false, false).GetAncestorOrSelfDeclaration();
+						if (d != null) {
+							var mp = (d as BaseMethodDeclarationSyntax).FindParameter(t);
+							if (mp != null) {
+								edit.Replace(item, "<paramref name=\"" + t + "\"/>");
+								continue;
+							}
+							var tp = d.FindTypeParameter(t);
+							if (tp != null) {
+								edit.Replace(item, "<typeparamref name=\"" + t + "\"/>");
+								continue;
+							}
+						}
+						edit.Replace(item, (SyntaxFacts.GetKeywordKind(t) != SyntaxKind.None ? "<see langword=\"" : "<see cref=\"") + t + "\"/>");
+					}
+				});
 			});
 			AddCommand(MyToolBar, KnownImageIds.ParagraphHardReturn, "Tag XML Doc with <para>", ctx => {
 				SurroundWith(ctx, "<para>", "</para>", false);
@@ -459,14 +457,6 @@ namespace Codist.SmartBars
 		void FindSymbolWithName(CommandContext ctx, MenuItem menuItem, ISymbol source) {
 			var result = _Context.SemanticModel.Compilation.FindDeclarationMatchName(source.Name, Keyboard.Modifiers == ModifierKeys.Control, true, ctx.CancellationToken);
 			SortAndGroupSymbolByClass(menuItem, new List<ISymbol>(result));
-		}
-
-		CommandItem[] GetDebugCommands(CommandContext ctx) {
-			return new CommandItem[] {
-				new CommandItem(KnownImageIds.Watch, "Add Watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddWatch")),
-				new CommandItem(KnownImageIds.Watch, "Add Parallel Watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddParallelWatch")),
-				new CommandItem(KnownImageIds.DeleteBreakpoint, "Delete All Breakpoints", c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
-			};
 		}
 
 		List<CommandItem> GetExpandSelectionCommands(CommandContext ctx) {

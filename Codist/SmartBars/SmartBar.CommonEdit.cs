@@ -18,23 +18,22 @@ namespace Codist.SmartBars
 		static readonly CommandItem[] __CaseCommands = GetCaseCommands();
 		static readonly CommandItem[] __SurroundingCommands = GetSurroundingCommands();
 		static readonly CommandItem[] __FormatCommands = GetFormatCommands();
+		static readonly CommandItem[] __DebugCommands = GetDebugCommands();
 
-		static void ExecuteAndFind(CommandContext ctx, string command) {
-			ThreadHelper.ThrowIfNotOnUIThread();
+		protected static IEnumerable<CommandItem> DebugCommands => __DebugCommands;
+
+		static void ExecuteAndFind(CommandContext ctx, string command, string text) {
 			if (ctx.RightClick) {
 				ctx.View.ExpandSelectionToLine(false);
 			}
-			string t = null;
-			if (Keyboard.Modifiers == ModifierKeys.Control && ctx.View.Selection.IsEmpty == false) {
-				t = ctx.View.TextSnapshot.GetText(ctx.View.Selection.SelectedSpans[0]);
-			}
 			ctx.KeepToolBar(false);
 			TextEditorHelper.ExecuteEditorCommand(command);
-			FindNext(ctx, t);
+			if (Keyboard.Modifiers == ModifierKeys.Control) {
+				FindNext(ctx, text);
+			}
 		}
 
 		protected static void FindNext(CommandContext ctx, string t) {
-			ThreadHelper.ThrowIfNotOnUIThread();
 			if (t != null) {
 				var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t, FindOptions.MatchCase);
 				if (r.HasValue) {
@@ -47,31 +46,30 @@ namespace Codist.SmartBars
 		}
 
 		protected SnapshotSpan Replace(CommandContext ctx, Func<string, string> replaceHandler, bool selectModified) {
+			ctx.KeepToolBar(false);
 			var firstModified = new SnapshotSpan();
 			int length = 0;
-			string t = null;
-			ctx.KeepToolBar(false);
-			using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
-				foreach (var item in View.Selection.SelectedSpans) {
-					t = item.GetText();
-					var replacement = replaceHandler(t);
-					if (replacement != null
-						&& edit.Replace(item, replacement)
-						&& firstModified.Snapshot == null) {
-						firstModified = item;
-						length = replacement.Length;
-					}
+			string t = ctx.View.GetFirstSelectionText();
+			if (t.Length == 0) {
+				return firstModified;
+			}
+			var edited = ctx.View.EditSelection((view, edit, item) => {
+				var replacement = replaceHandler(item.GetText());
+				if (replacement != null
+					&& edit.Replace(item, replacement)
+					&& firstModified.Snapshot == null) {
+					firstModified = item;
+					length = replacement.Length;
 				}
-				if (edit.HasEffectiveChanges) {
-					var snapsnot = edit.Apply();
-					firstModified = new SnapshotSpan(snapsnot, firstModified.Start, length);
-					if (t != null
-						&& Keyboard.Modifiers == ModifierKeys.Control) {
-						FindNext(ctx, t);
-					}
-					else if (selectModified) {
-						View.SelectSpan(firstModified);
-					}
+			});
+			if (edited != null) {
+				firstModified = new SnapshotSpan(edited, firstModified.Start, length);
+				if (t != null
+					&& Keyboard.Modifiers == ModifierKeys.Control) {
+					FindNext(ctx, t);
+				}
+				else if (selectModified) {
+					ctx.View.SelectSpan(firstModified);
 				}
 			}
 			return firstModified;
@@ -137,7 +135,10 @@ namespace Codist.SmartBars
 		void AddDeleteCommand() {
 			AddCommand(ToolBar, KnownImageIds.Cancel, "Delete selected text\nRight click: Delete line\nCtrl click: Delete and select next", ctx => {
 				var s = View.Selection;
-				if (s.Mode == TextSelectionMode.Stream && ctx.RightClick == false && Keyboard.Modifiers != ModifierKeys.Control && s.IsEmpty == false) {
+				var t = s.GetFirstSelectionText();
+				if (s.Mode == TextSelectionMode.Stream
+					&& ctx.RightClick == false
+					&& s.IsEmpty == false) {
 					var end = s.End.Position;
 					// remove a trailing space
 					if (end < View.TextSnapshot.Length - 1) {
@@ -147,7 +148,7 @@ namespace Codist.SmartBars
 						}
 					}
 				}
-				ExecuteAndFind(ctx, "Edit.Delete");
+				ExecuteAndFind(ctx, "Edit.Delete", t);
 			});
 		}
 
@@ -164,10 +165,8 @@ namespace Codist.SmartBars
 		void AddFindAndReplaceCommands() {
 			AddCommands(ToolBar, KnownImageIds.FindNext, "Find next selected text\nCtrl click: Find match case\nRight click: Find and replace...", ctx => {
 				ThreadHelper.ThrowIfNotOnUIThread();
-				string t = ctx.View.Selection.IsEmpty == false
-					? ctx.View.TextSnapshot.GetText(ctx.View.Selection.SelectedSpans[0])
-					: null;
-				if (t == null) {
+				string t = ctx.View.GetFirstSelectionText();
+				if (t.Length == 0) {
 					return;
 				}
 				ctx.KeepToolBar(false);
@@ -184,7 +183,7 @@ namespace Codist.SmartBars
 
 		void AddPasteCommand() {
 			if (Clipboard.ContainsText()) {
-				AddCommand(ToolBar, KnownImageIds.Paste, "Paste text from clipboard\nRight click: Paste over line\nCtrl click: Paste and select next", ctx => ExecuteAndFind(ctx, "Edit.Paste"));
+				AddCommand(ToolBar, KnownImageIds.Paste, "Paste text from clipboard\nRight click: Paste over line\nCtrl click: Paste and select next", ctx => ExecuteAndFind(ctx, "Edit.Paste", ctx.View.GetFirstSelectionText()));
 			}
 		}
 
@@ -195,16 +194,17 @@ namespace Codist.SmartBars
 					break;
 				case TokenType.Digit:
 					AddCommand(ToolBar, KnownImageIds.Counter, "Increment number", ctx => {
-						var span = ctx.View.Selection.SelectedSpans[0];
-						var t = span.GetText();
-						long l;
-						if (long.TryParse(t, out l)) {
-							using (var ed = ctx.View.TextBuffer.CreateEdit()) {
-								t = (++l).ToString(System.Globalization.CultureInfo.InvariantCulture);
-								if (ed.Replace(span.Span, t)) {
-									ed.Apply();
-									ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-									ctx.KeepToolBar(false);
+						if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
+							var t = span.GetText();
+							long l;
+							if (long.TryParse(t, out l)) {
+								using (var ed = ctx.View.TextBuffer.CreateEdit()) {
+									t = (++l).ToString(System.Globalization.CultureInfo.InvariantCulture);
+									if (ed.Replace(span.Span, t)) {
+										ed.Apply();
+										ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
+										ctx.KeepToolBar(false);
+									}
 								}
 							}
 						}
@@ -213,13 +213,14 @@ namespace Codist.SmartBars
 				case TokenType.Guid:
 				case TokenType.GuidPlaceHolder:
 					AddCommand(ToolBar, KnownImageIds.NewNamedSet, "New GUID\nHint: To create a new GUID, type 'guid' (without quotes) and select it", ctx => {
-						var span = ctx.View.Selection.SelectedSpans[0];
-						using (var ed = ctx.View.TextBuffer.CreateEdit()) {
-							var t = Guid.NewGuid().ToString(span.Length == 36 || span.Length == 4 ? "D" : span.GetText()[0] == '(' ? "P" : "B").ToUpperInvariant();
-							if (ed.Replace(span, t)) {
-								ed.Apply();
-								ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-								ctx.KeepToolBar(false);
+						if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
+							using (var ed = ctx.View.TextBuffer.CreateEdit()) {
+								var t = Guid.NewGuid().ToString(span.Length == 36 || span.Length == 4 ? "D" : span.GetText()[0] == '(' ? "P" : "B").ToUpperInvariant();
+								if (ed.Replace(span, t)) {
+									ed.Apply();
+									ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
+									ctx.KeepToolBar(false);
+								}
 							}
 						}
 					});
@@ -238,9 +239,10 @@ namespace Codist.SmartBars
 				r.AddRange(__SurroundingCommands);
 				r.AddRange(__FormatCommands);
 				if (View.IsMultilineSelected()) {
-					r.Add(new CommandItem(KnownImageIds.Join, "Join lines", _ => {
-						var span = View.Selection.SelectedSpans[0];
-						View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(span.GetText(), @"[ \t]*\r?\n[ \t]*", " "));
+					r.Add(new CommandItem(KnownImageIds.Join, "Join lines", ctx => {
+						if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
+							ctx.View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(span.GetText(), @"[ \t]*\r?\n[ \t]*", " "));
+						}
 					}));
 				}
 				var t = View.GetTextViewLineContainingBufferPosition(selection.Start.Position).Extent.GetText();
@@ -259,7 +261,6 @@ namespace Codist.SmartBars
 			return r;
 		}
 
-
 		static CommandItem[] GetCaseCommands() {
 			return new CommandItem[] {
 				new CommandItem(KnownImageIds.Font, "Capitalize", ctx => {
@@ -276,6 +277,14 @@ namespace Codist.SmartBars
 				}),
 			};
 		}
+		static CommandItem[] GetDebugCommands() {
+			return new CommandItem[] {
+				new CommandItem(KnownImageIds.Watch, "Add Watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddWatch")),
+				new CommandItem(KnownImageIds.Watch, "Add Parallel Watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddParallelWatch")),
+				new CommandItem(KnownImageIds.DeleteBreakpoint, "Delete All Breakpoints", c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
+			};
+		}
+
 		static CommandItem[] GetFormatCommands() {
 			return new CommandItem[] {
 				new CommandItem(KnownImageIds.FormatSelection, "Format Selection", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")),
@@ -296,7 +305,9 @@ namespace Codist.SmartBars
 					TextEditorHelper.ExecuteEditorCommand("Edit.SurroundWith");
 				}),
 				new CommandItem(KnownImageIds.MaskedTextBox, "Toggle Parentheses", ctx => {
-					var span = ctx.View.Selection.SelectedSpans[0];
+					if (ctx.View.TryGetFirstSelectionSpan(out var span) == false) {
+						return;
+					}
 					using (var ed = ctx.View.TextBuffer.CreateEdit()) {
 						var t = span.GetText();
 						if (t.Length > 1
