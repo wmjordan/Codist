@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Classification;
+using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist
@@ -36,6 +37,9 @@ namespace Codist
 
 		[Import]
 		public IGlyphService Glyph { get; private set; }
+
+		[Import]
+		public ITextStructureNavigatorSelectorService TextStructureNavigator { get; private set; }
 
 		[Import]
 		public IViewTagAggregatorFactoryService ViewTagAggregatorFactory { get; private set; }
