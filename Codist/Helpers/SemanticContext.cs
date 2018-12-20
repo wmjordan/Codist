@@ -13,14 +13,15 @@ namespace Codist
 {
 	sealed class SemanticContext
 	{
-		readonly IWpfTextView _TextView;
 		VersionStamp _Version;
 		SyntaxNode _Node, _NodeIncludeTrivia;
 
 		public SemanticContext(IWpfTextView textView) {
-			_TextView = textView;
+			View = textView;
 		}
 
+		public IWpfTextView View { get; }
+		public Workspace Workspace { get; private set; }
 		public Document Document { get; private set; }
 		public SemanticModel SemanticModel { get; private set; }
 		public CompilationUnitSyntax Compilation { get; private set; }
@@ -224,8 +225,16 @@ namespace Codist
 
 		public async Task<bool> UpdateAsync(CancellationToken cancellationToken) {
 			try {
-				var doc = _TextView.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
+				var text = View.TextSnapshot.AsText();
+				Document doc = null;
+				if (Workspace.TryGetWorkspace(text.Container, out var workspace)) {
+					var id = workspace.GetDocumentIdInCurrentContext(text.Container);
+					if (id != null && workspace.CurrentSolution.ContainsDocument(id)) {
+						doc = workspace.CurrentSolution.WithDocumentText(id, text, PreservationMode.PreserveIdentity).GetDocument(id);
+					}
+				}
 				if (doc != Document) {
+					Workspace = workspace;
 					Document = doc;
 					SemanticModel = await Document.GetSemanticModelAsync(cancellationToken);
 					Compilation = SemanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
@@ -241,7 +250,15 @@ namespace Codist
 		public async Task<bool> UpdateAsync(int position, CancellationToken cancellationToken) {
 			bool versionChanged = false;
 			try {
-				Document = _TextView.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
+				var text = View.TextSnapshot.AsText();
+				Document = null;
+				if (Workspace.TryGetWorkspace(text.Container, out var workspace)) {
+					Workspace = workspace;
+					var id = workspace.GetDocumentIdInCurrentContext(text.Container);
+					if (id != null && workspace.CurrentSolution.ContainsDocument(id)) {
+						Document = workspace.CurrentSolution.WithDocumentText(id, text, PreservationMode.PreserveIdentity).GetDocument(id);
+					}
+				}
 				var ver = await Document.GetTextVersionAsync(cancellationToken);
 				if (versionChanged = ver != _Version) {
 					_Version = ver;

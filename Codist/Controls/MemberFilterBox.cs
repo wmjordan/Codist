@@ -32,7 +32,7 @@ namespace Codist.Controls
 				CornerRadius = new CornerRadius(3),
 				Child = new StackPanel {
 					Children = {
-						_DocumentFilter, _ProjectFilter
+						_DocumentFilter, _ProjectFilter,
 					},
 					Orientation = Orientation.Horizontal
 				}
@@ -41,6 +41,8 @@ namespace Codist.Controls
 		}
 
 		public ScopeType Filter { get; private set; }
+
+		public UIElementCollection Contents => ((StackPanel)((Border)Content).Child).Children;
 
 		ThemedToggleButton CreateButton(int imageId, string toolTip) {
 			var b = new ThemedToggleButton(imageId, toolTip) { BorderThickness = WpfHelper.NoMargin };

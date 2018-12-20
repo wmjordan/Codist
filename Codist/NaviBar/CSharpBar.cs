@@ -25,6 +25,7 @@ namespace Codist.NaviBar
 		readonly IAdornmentLayer _Adornment;
 		readonly SemanticContext _SemanticContext;
 		CancellationTokenSource _cancellationSource = new CancellationTokenSource();
+		RootItem _RootItem;
 		NaviItem _MouseHoverItem;
 
 		public CSharpBar(IWpfTextView textView) {
@@ -37,11 +38,16 @@ namespace Codist.NaviBar
 			Resources = SharedDictionaryManager.Menu;
 			SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
 			SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextInactiveKey);
-			Items.Add(new RootItem(this));
+			Items.Add(_RootItem = new RootItem(this));
 			_View.Selection.SelectionChanged += Update;
 			_View.Closed += ViewClosed;
 			Update(this, EventArgs.Empty);
-			// todo update icons if theme changed
+			foreach(var m in _SemanticContext.Compilation.Members) {
+				if (m.IsKind(SyntaxKind.NamespaceDeclaration)) {
+					_RootItem.SetText(m.GetDeclarationSignature());
+					break;
+				}
+			}
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e) {
@@ -131,13 +137,18 @@ namespace Codist.NaviBar
 				int i;
 				for (i = 0; i < c; i++) {
 					var n = nodes[i];
-					if ((Items[i + 1] as NaviItem).Node != n) {
-						// keep the NaviItem if node is not updated
-						break;
-					}
 					if (token.IsCancellationRequested) {
 						return;
 					}
+					if ((Items[i + 1] as NaviItem).Node == n) {
+						// keep the NaviItem if node is not updated
+						continue;
+					}
+					break;
+				}
+				if ((i == 0 || nodes[i - 1].IsTypeOrNamespaceDeclaration()) && _RootItem.FilterText.Length == 0) {
+					// clear type and namespace menu items if a type is changed
+					_RootItem.ClearItems();
 				}
 				c = Items.Count;
 				while (--c > i) {
@@ -148,8 +159,14 @@ namespace Codist.NaviBar
 					if (token.IsCancellationRequested) {
 						return;
 					}
-					bool highlight = nodes[i].IsMemberDeclaration();
-					var newItem = new NaviItem(this, nodes[i], highlight, false);
+					var node = nodes[i];
+					if (node.IsKind(SyntaxKind.NamespaceDeclaration)) {
+						_RootItem.SetText(node.GetDeclarationSignature());
+						++i;
+						continue;
+					}
+					bool highlight = node.IsMemberDeclaration();
+					var newItem = new NaviItem(this, node, highlight, false);
 					if (highlight) {
 						newItem.IsChecked = true;
 					}
@@ -208,10 +225,10 @@ namespace Codist.NaviBar
 			readonly SearchScopeBox _ScopeBox;
 			public RootItem(CSharpBar bar) {
 				_Bar = bar;
-				Icon = ThemeHelper.GetImage(KnownImageIds.CSProjectNode);
+				Icon = ThemeHelper.GetImage(KnownImageIds.Namespace);
 				this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
-				Header = new ThemedToolBarText("//");
+				Header = new ThemedToolBarText();
 				SubMenuHeader = new StackPanel {
 					Margin = WpfHelper.MenuItemMargin,
 					Children = {
@@ -219,13 +236,18 @@ namespace Codist.NaviBar
 						new StackPanel {
 							Orientation = Orientation.Horizontal,
 							Children = {
-								ThemeHelper.GetImage(KnownImageIds.SearchMember).WrapMargin(WpfHelper.GlyphMargin),
+								ThemeHelper.GetImage(KnownImageIds.SearchContract).WrapMargin(WpfHelper.GlyphMargin),
 								(_FinderBox = new MemberFinderBox(Items) { MinWidth = 150 }),
-								(_ScopeBox = new SearchScopeBox()),
+								(_ScopeBox = new SearchScopeBox {
+									Contents = {
+										new ThemedButton(KnownImageIds.Cancel, "Clear filter", ClearFilter) { Margin = WpfHelper.NoMargin, BorderThickness = WpfHelper.NoMargin }
+									}
+								}),
 							}
 						},
 					}
 				};
+				SubmenuOpened += RootItem_SubmenuOpened;
 				_FinderBox.TextChanged += SearchCriteriaChanged;
 				_ScopeBox.FilterChanged += SearchCriteriaChanged;
 				_ScopeBox.FilterChanged += (s, args) => {
@@ -233,11 +255,76 @@ namespace Codist.NaviBar
 				};
 			}
 
+			public string FilterText => _FinderBox.Text;
+
+			internal void SetText(string text) {
+				((TextBlock)Header).Text = text;
+			}
+
+			void RootItem_SubmenuOpened(object sender, RoutedEventArgs e) {
+				if (_FinderBox.Text.Length == 0) {
+					if (HasExplicitItems == false) {
+						AddNamespaceAndTypes();
+					}
+					else {
+						MarkEnclosingItem();
+					}
+				}
+			}
+
+			void MarkEnclosingItem() {
+				int pos = _Bar._View.GetCaretPosition();
+				bool marked = false;
+				for (int i = Items.Count - 1; i >= 0; i--) {
+					var n = Items[i] as NaviItem;
+					if (n == null) {
+						continue;
+					}
+					if (marked == false) {
+						n.MarkEnclosingItem(pos);
+						if (n.IsChecked) {
+							marked = true;
+						}
+					}
+					else {
+						n.IsChecked = false;
+					}
+				}
+			}
+
+			void AddNamespaceAndTypes() {
+				foreach (var node in _Bar._SemanticContext.Compilation.ChildNodes()) {
+					if (node.IsTypeOrNamespaceDeclaration()) {
+						Items.Add(new NaviItem(_Bar, node) { ClickHandler = i => i.GoToLocation() });
+						AddTypeDeclarations(node);
+					}
+				}
+				MarkEnclosingItem();
+			}
+
+			void AddTypeDeclarations(SyntaxNode node) {
+				int pos = _Bar._View.GetCaretPosition();
+				foreach (var child in node.ChildNodes()) {
+					if (child.IsTypeOrNamespaceDeclaration()) {
+						Items.Add(new NaviItem(_Bar, child) { ClickHandler = i => i.GoToLocation() });
+						AddTypeDeclarations(child);
+					}
+				}
+			}
+
+			void ClearFilter() {
+				if (_FinderBox.Text.Length > 0) {
+					_FinderBox.Text = String.Empty;
+				}
+				_FinderBox.Focus();
+			}
+
 			void SearchCriteriaChanged(object sender, EventArgs e) {
 				CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
 				ClearItems();
 				var s = _FinderBox.Text;
 				if (s.Length == 0) {
+					AddNamespaceAndTypes();
 					return;
 				}
 				try {
@@ -324,7 +411,7 @@ namespace Codist.NaviBar
 			}
 			internal SyntaxNode Node { get; }
 
-			private Action<NaviItem> ClickHandler { get; set; }
+			internal Action<NaviItem> ClickHandler { get; set; }
 
 			async void NaviItem_Click(object sender, RoutedEventArgs e) {
 				CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
@@ -449,7 +536,7 @@ namespace Codist.NaviBar
 				return this;
 			}
 
-			NaviItem MarkEnclosingItem(int position) {
+			internal NaviItem MarkEnclosingItem(int position) {
 				if (NodeIsExternal) {
 					return this;
 				}
@@ -466,16 +553,6 @@ namespace Codist.NaviBar
 
 			async Task AddItemsAsync(ItemCollection items, SyntaxNode node, CancellationToken cancellationToken) {
 				switch (node.Kind()) {
-					case SyntaxKind.NamespaceDeclaration:
-						SubMenuMaxHeight = _Bar._View.ViewportHeight / 2;
-						SubMenuHeader = new StackPanel {
-							Children = {
-								new NaviItem(_Bar, node) { ClickHandler = i => i.GoToLocation() },
-								new Separator()
-							}
-						};
-						await AddTypeDeclarationsAsync(node, cancellationToken);
-						break;
 					case SyntaxKind.ClassDeclaration:
 					case SyntaxKind.StructDeclaration:
 					case SyntaxKind.InterfaceDeclaration:
@@ -567,22 +644,6 @@ namespace Codist.NaviBar
 						}; },
 						i => i.GoToLocation()) { Background = ThemeHelper.TitleBackgroundBrush.Alpha(0.8) });
 					AddMemberDeclarations(partial, true);
-				}
-			}
-			async Task AddTypeDeclarationsAsync(SyntaxNode node, CancellationToken cancellationToken) {
-				int pos = _Bar._View.GetCaretPosition();
-				foreach(var child in node.ChildNodes()) {
-					if (cancellationToken.IsCancellationRequested) {
-						break;
-					}
-					if (child.IsTypeDeclaration() == false) {
-						if (child.IsKind(SyntaxKind.NamespaceDeclaration)) {
-							Items.Add(new NaviItem(_Bar, child) { ClickHandler = i => i.GoToLocation() }.MarkEnclosingItem(pos));
-						}
-						continue;
-					}
-					Items.Add(new NaviItem(_Bar, child) { ClickHandler = i => i.GoToLocation() }.MarkEnclosingItem(pos));
-					await AddTypeDeclarationsAsync(child, cancellationToken);
 				}
 			}
 			void AddMemberDeclarations(SyntaxNode node, bool isExternal) {

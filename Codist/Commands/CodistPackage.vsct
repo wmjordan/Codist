@@ -96,7 +96,7 @@
       </Button>
       <Button guid="guidCodistPackageCmdSet4" id="NaviBarSearchDeclarationId" priority="0x0100" type="Button">
         <Parent guid="guidCodistPackageCmdSet4" id="IDG_VS_EDIT_GOTO" />
-        <Icon guid="ImageCatalogGuid" id="SearchMember" />
+        <Icon guid="ImageCatalogGuid" id="SearchContract" />
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
