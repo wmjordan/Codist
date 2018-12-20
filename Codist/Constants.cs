@@ -14,6 +14,7 @@ namespace Codist
 
 		public static class CodeTypes
 		{
+			public const string CPlusPlus = "C/C++";
 			public const string Code = nameof(Code);
 			public const string CSharp = nameof(CSharp);
 			public const string Text = nameof(Text);
