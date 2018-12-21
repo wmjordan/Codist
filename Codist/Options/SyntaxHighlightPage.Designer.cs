@@ -97,8 +97,9 @@
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(537, 54);
 			this.label1.TabIndex = 3;
-			this.label1.Text = "Tip: you can quickly load or reset syntax theme by pressing the buttons above.\r\nO" +
-    "pen a C# code file to see effects immediately.";
+			this.label1.Text = "Tip: 1) You can quickly load or reset syntax theme by pressing the buttons above." +
+    " 2) Open a C# code file to see effects immediately.\r\nNote: If you changed the VS" +
+    " Theme, you may need to restart VS.";
 			// 
 			// _ResetThemeButton
 			// 
@@ -161,7 +162,7 @@
 			this.customGroupBox1.Size = new System.Drawing.Size(549, 68);
 			this.customGroupBox1.TabIndex = 8;
 			this.customGroupBox1.TabStop = false;
-			this.customGroupBox1.Text = "Advanced Syntax Highlight";
+			this.customGroupBox1.Text = "Extra Syntax Highlight";
 			// 
 			// _HighlightSpecialCommentBox
 			// 
