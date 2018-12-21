@@ -345,6 +345,7 @@
     {
       "Id": 26,
       "StyleID": "ExtensionMethodName",
+      "Italic": true,
       "Underline": true,
       "ForegroundColor": "#FFA4A4"
     },
@@ -352,7 +353,6 @@
       "Id": 27,
       "StyleID": "ExternMethodName",
       "Italic": true,
-      "ForegroundColor": "#800000",
       "BackgroundColor": "#7DFF0000",
       "BackgroundEffect": "ToBottom"
     },
