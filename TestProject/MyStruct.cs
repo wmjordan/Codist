@@ -14,5 +14,7 @@ namespace TestProject
 		private readonly int _readonlyField; // readonly field
 
 		public readonly static DateTime StartDate = DateTime.Now; // public readonly static field
+
+		public int PropReadOnly => Int32.MinValue + 1;
 	}
 }

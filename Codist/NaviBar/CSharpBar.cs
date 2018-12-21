@@ -240,7 +240,7 @@ namespace Codist.NaviBar
 								(_FinderBox = new MemberFinderBox(Items) { MinWidth = 150 }),
 								(_ScopeBox = new SearchScopeBox {
 									Contents = {
-										new ThemedButton(KnownImageIds.Cancel, "Clear filter", ClearFilter) { Margin = WpfHelper.NoMargin, BorderThickness = WpfHelper.NoMargin }
+										new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearBorder().ClearMargin()
 									}
 								}),
 							}

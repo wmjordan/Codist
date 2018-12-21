@@ -159,10 +159,7 @@ namespace Codist.QuickInfo
 					}
 					EXIT:
 					// hides the parent container from taking excessive space in the quick info window
-					var c = this.GetParent<Border>();
-					if (c != null) {
-						c.Visibility = Visibility.Collapsed;
-					}
+					this.GetParent<Border>().Collapse();
 				}
 
 				void OverrideDiagnosticInfo(StackPanel panel) {
@@ -441,10 +438,7 @@ namespace Codist.QuickInfo
 						p.Content = _QuickInfoPanel.Scrollable().LimitSize();
 					}
 					// hides the parent container from taking excessive space in the quick info window
-					var c = this.GetParent<Border>();
-					if (c != null) {
-						c.Visibility = Visibility.Collapsed;
-					}
+					this.GetParent<Border>().Collapse();
 				}
 			}
 

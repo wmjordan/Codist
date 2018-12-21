@@ -166,6 +166,23 @@ namespace Codist
 			}
 			return element;
 		}
+		public static TElement ClearBorder<TElement>(this TElement element)
+			where TElement : Control {
+			element.BorderThickness = NoMargin;
+			return element;
+		}
+		public static TElement ClearMargin<TElement>(this TElement element)
+			where TElement : FrameworkElement {
+			element.Margin = NoMargin;
+			return element;
+		}
+		public static TElement Collapse<TElement>(this TElement element)
+			where TElement : UIElement {
+			if (element != null) {
+				element.Visibility = Visibility.Collapsed;
+			}
+			return element;
+		}
 		public static TElement WrapMargin<TElement>(this TElement element, Thickness thickness)
 			where TElement : FrameworkElement {
 			element.Margin = thickness;
@@ -298,10 +315,7 @@ namespace Codist
 				b.Loaded -= ToolBarLoaded;
 			}
 			void HideOverflowInternal(ToolBar b) {
-				var overflow = b.FindTemplateElement<FrameworkElement>("OverflowGrid");
-				if (overflow != null) {
-					overflow.Visibility = Visibility.Collapsed;
-				}
+				b.FindTemplateElement<FrameworkElement>("OverflowGrid").Collapse();
 				var mainPanelBorder = b.FindTemplateElement<FrameworkElement>("MainPanelBorder");
 				if (mainPanelBorder != null) {
 					mainPanelBorder.Margin = NoMargin;

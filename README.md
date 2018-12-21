@@ -41,6 +41,8 @@
 
   From version 4.0 on, it is possible to Save and Load your own syntax highlight to an individual file and share it with your workmates.
 
+  **Note**: There is a known issue in _Codist_ that if you change the theme of Visual Studio, you may have to restart it for the syntax highlight to work properly.
+
 ### Customization of Syntax Highlight Styles
 
   To customize and tweak the syntax highlight styles, click the *common syntax* tab in the *syntax highlight* section, or click the sub sections inside the *Syntax Highlight* section to change individual styles, accordingly.
@@ -49,7 +51,7 @@
 
   Syntax definitions under the _All languages_ section apply to all languages; those under _Comment_ section apply to comment taggers (see below), others apply to corresponding languages accordingly.
 
-  **TIP**: Open a document window before you change the syntax theme or tweak the syntax highlight settings, while you change theme, you can see how the styles change in the code document window simultaneously.
+  **TIP**: Open a document window before you change the syntax theme or tweak the syntax highlight settings. While you change theme, you can see how the styles change in the code document window simultaneously.
 
 ### My Symbols and External Symbols
 
@@ -97,7 +99,7 @@ The quick info (the tooltip shown when you hover your mouse pointer on your C# s
 
 * **Click and go** to symbols
 
-	If a symbol is defined in your source code, you can click and go to its definition. It also tells you where the symbol is defined.
+	If a symbol is defined in your source code, you can click and go to its definition. _Codist_ also tells you where the symbol is defined if you hover your mouse over it.
 
   ![Super Quick Info 8](doc/super-quick-info-8.png)
 
@@ -184,13 +186,19 @@ Buttons on the *Smart Bar* changes according to your selection.
 
   ![Smart Bar](doc/smart-bar-2.png)
 
-From version 3.7 on, when you select a symbol and click the *Analyze references...* button, a menu will pop up showing possible symbol reference analysis commands.
+From version 3.7 on, when you select a symbol and click the *Analyze symbol...* button, a menu will pop up showing possible symbol analysis commands.
 
   ![Smart Bar Symbol Analysis](doc/smart-bar-symbol-analysis.png)
 
 From version 3.9 on, you can change the behavior of the Smart Bar.
 
   ![Smart Bar Options](doc/smart-bar-options.PNG)
+
+From version 4.4 on, _Smart Bar_ also works on _Output_, _C# Interactive_, _Immediate (Debug)_, _Find Results_ and some other text selectable window panes. If you select a path within those windows, extra command will pop up allowing you to open it directly or locate it in _Windows Explorer_.
+
+  ![Smart Bar File Operations](doc/smart-bar-file-operations.png)
+
+From version 4.4 on, some extra buttons will show up on _Smart Bar_ in C/C++ code windows.
 
 ## Scrollbar Marker
 
@@ -244,13 +252,17 @@ Scollbar Marker draws extra glyphs and shapes on the scrollbar for the following
 
   ![Navigation Bar Menu](doc/navigation-bar-menu.png)
 
-  From version 4.3 on, the drop-down menu shows member initial values for fields.
+  More than showing the name of type and members, the drop-down menu also shows member initial values for fields, and initial values and lambda expressions for properties.
 
   ![Navigation Bar Menu](doc/navigation-bar-fields.png)
 
-  Clicking on the "//" button at the left side of the navigation bar will pop up a text box. You can type some text in it and search for declarations defined in the active document code window.
+  Clicking on the namespace button at the left side of the navigation bar will pop up a text box and list all namespaces and types available in active document.
 
-  From version 4.3 on, it is possible to expand the search scope to project-wide, by clicking the second button nearby the text box.
+  You can type some text in it and search for declarations defined in the active document.
+
+  ![Navigation Bar Namespace Types](doc/navigation-bar-namespace-types.png)
+
+  It is possible to expand the search scope to project-wide, by clicking the second button nearby the text box.
 
   ![Navigation Bar Search Declaration](doc/navigation-bar-search-declaration.png)
 

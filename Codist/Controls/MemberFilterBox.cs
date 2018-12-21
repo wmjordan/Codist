@@ -45,7 +45,7 @@ namespace Codist.Controls
 		public UIElementCollection Contents => ((StackPanel)((Border)Content).Child).Children;
 
 		ThemedToggleButton CreateButton(int imageId, string toolTip) {
-			var b = new ThemedToggleButton(imageId, toolTip) { BorderThickness = WpfHelper.NoMargin };
+			var b = new ThemedToggleButton(imageId, toolTip).ClearMargin().ClearBorder();
 			b.Checked += UpdateFilterValue;
 			return b;
 		}
@@ -284,7 +284,7 @@ namespace Codist.Controls
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
 							_FieldFilter, _MethodFilter, _TypeFilter,
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
-							new ThemedButton(KnownImageIds.StopFilter, "Clear filter switches", ClearFilter) { Margin = WpfHelper.NoMargin, BorderThickness = WpfHelper.NoMargin },
+							new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearMargin().ClearBorder(),
 						},
 						Orientation = Orientation.Horizontal
 					}
@@ -337,7 +337,7 @@ namespace Codist.Controls
 			}
 
 			ThemedToggleButton CreateButton(int imageId, string toolTip) {
-				var b = new ThemedToggleButton(imageId, toolTip) { BorderThickness = WpfHelper.NoMargin };
+				var b = new ThemedToggleButton(imageId, toolTip).ClearMargin().ClearBorder();
 				b.Checked += UpdateFilterValue;
 				b.Unchecked += UpdateFilterValue;
 				return b;
