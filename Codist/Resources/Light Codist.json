@@ -108,7 +108,6 @@
     {
       "Id": 5,
       "StyleID": "ToDo",
-      "Italic": false,
       "FontSize": 3.0,
       "ForegroundColor": "#FFFFFF",
       "BackgroundColor": "#C00000A0"
@@ -123,7 +122,6 @@
     {
       "Id": 7,
       "StyleID": "Hack",
-      "Italic": false,
       "ForegroundColor": "#00F279",
       "BackgroundColor": "#004000"
     },
@@ -137,19 +135,16 @@
     {
       "Id": 9,
       "StyleID": "Heading1",
-      "Italic": false,
       "FontSize": 12.0
     },
     {
       "Id": 10,
       "StyleID": "Heading2",
-      "Italic": false,
       "FontSize": 8.0
     },
     {
       "Id": 11,
       "StyleID": "Heading3",
-      "Italic": false,
       "FontSize": 4.0
     },
     {
@@ -170,7 +165,6 @@
     {
       "Id": 15,
       "StyleID": "Task1",
-      "Italic": false,
       "FontSize": 10.0,
       "ForegroundColor": "#800000",
       "BackgroundColor": "#FF80FF"
@@ -178,7 +172,6 @@
     {
       "Id": 16,
       "StyleID": "Task2",
-      "Italic": false,
       "FontSize": 7.0,
       "ForegroundColor": "#800000",
       "BackgroundColor": "#FF80FF",
@@ -304,8 +297,7 @@
     },
     {
       "Id": 12,
-      "StyleID": "LocalVariableName",
-      "Italic": true
+      "StyleID": "LocalVariableName"
     },
     {
       "Id": 13,
@@ -356,7 +348,6 @@
     {
       "Id": 21,
       "StyleID": "FieldName",
-      "Italic": true,
       "ForegroundColor": "#808000"
     },
     {
@@ -383,14 +374,12 @@
     {
       "Id": 26,
       "StyleID": "ExtensionMethodName",
-      "Italic": true,
       "Underline": true,
       "ForegroundColor": "#800000"
     },
     {
       "Id": 27,
       "StyleID": "ExternMethodName",
-      "Italic": true,
       "ForegroundColor": "#800000",
       "BackgroundColor": "#7DFF0000",
       "BackgroundEffect": "ToBottom"
@@ -398,7 +387,6 @@
     {
       "Id": 28,
       "StyleID": "ParameterName",
-      "Italic": true,
       "ForegroundColor": "#D9006C"
     },
     {
@@ -408,18 +396,15 @@
     {
       "Id": 30,
       "StyleID": "XmlDocComment",
-      "Italic": false,
       "ForegroundColor": "#DC008000"
     },
     {
       "Id": 31,
-      "StyleID": "XmlDocTag",
-      "Italic": true
+      "StyleID": "XmlDocTag"
     },
     {
       "Id": 32,
-      "StyleID": "XmlDocAttributeName",
-      "Italic": true
+      "StyleID": "XmlDocAttributeName"
     },
     {
       "Id": 33,
@@ -615,7 +600,6 @@
     {
       "Id": 17,
       "StyleID": "Comment",
-      "Italic": true,
       "ForegroundColor": "#DF008000"
     },
     {

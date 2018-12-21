@@ -122,7 +122,6 @@
     {
       "Id": 7,
       "StyleID": "Hack",
-      "Italic": false,
       "ForegroundColor": "#00F279",
       "BackgroundColor": "#004000"
     },
@@ -136,19 +135,16 @@
     {
       "Id": 9,
       "StyleID": "Heading1",
-      "Italic": false,
       "FontSize": 12.0
     },
     {
       "Id": 10,
       "StyleID": "Heading2",
-      "Italic": false,
       "FontSize": 8.0
     },
     {
       "Id": 11,
       "StyleID": "Heading3",
-      "Italic": false,
       "FontSize": 4.0
     },
     {
@@ -277,8 +273,7 @@
     },
     {
       "Id": 12,
-      "StyleID": "LocalVariableName",
-      "Italic": true
+      "StyleID": "LocalVariableName"
     },
     {
       "Id": 14,
@@ -345,14 +340,12 @@
     {
       "Id": 26,
       "StyleID": "ExtensionMethodName",
-      "Italic": true,
       "Underline": true,
       "ForegroundColor": "#FFA4A4"
     },
     {
       "Id": 27,
       "StyleID": "ExternMethodName",
-      "Italic": true,
       "BackgroundColor": "#7DFF0000",
       "BackgroundEffect": "ToBottom"
     },
@@ -364,18 +357,15 @@
     {
       "Id": 30,
       "StyleID": "XmlDocComment",
-      "Italic": false,
       "ForegroundColor": "#DC008000"
     },
     {
       "Id": 31,
-      "StyleID": "XmlDocTag",
-      "Italic": true
+      "StyleID": "XmlDocTag"
     },
     {
       "Id": 32,
-      "StyleID": "XmlDocAttributeName",
-      "Italic": true
+      "StyleID": "XmlDocAttributeName"
     },
     {
       "Id": 33,
@@ -597,8 +587,7 @@
     },
     {
       "Id": 17,
-      "StyleID": "Comment",
-      "Italic": true
+      "StyleID": "Comment"
     },
     {
       "Id": 18,
