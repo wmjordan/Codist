@@ -133,36 +133,41 @@ namespace Codist.NaviBar
 			async Task Update(CancellationToken token) {
 				var nodes = await UpdateModelAsync(token);
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(token);
-				var c = Math.Min(Items.Count - 1, nodes.Count);
-				int i;
-				for (i = 0; i < c; i++) {
-					var n = nodes[i];
+				var c = Math.Min(Items.Count, nodes.Count);
+				int i, i2;
+				for (i = 1, i2 = 0; i < c && i2 < c; i2++) {
+					var n = nodes[i2];
 					if (token.IsCancellationRequested) {
 						return;
 					}
-					if ((Items[i + 1] as NaviItem).Node == n) {
+					var n2 = (Items[i] as NaviItem).Node;
+					if (n2 == n) {
 						// keep the NaviItem if node is not updated
+						++i;
+						continue;
+					}
+					if (n.IsKind(SyntaxKind.NamespaceDeclaration)) {
 						continue;
 					}
 					break;
 				}
-				if ((i == 0 || nodes[i - 1].IsTypeOrNamespaceDeclaration()) && _RootItem.FilterText.Length == 0) {
+				if ((i == 1 || i2 < nodes.Count && nodes[i2].IsTypeOrNamespaceDeclaration()) && _RootItem.FilterText.Length == 0) {
 					// clear type and namespace menu items if a type is changed
 					_RootItem.ClearItems();
 				}
 				c = Items.Count;
-				while (--c > i) {
-					Items.RemoveAt(c);
+				while (c > i) {
+					Items.RemoveAt(--c);
 				}
 				c = nodes.Count;
-				while (i < c) {
+				while (i2 < c) {
 					if (token.IsCancellationRequested) {
 						return;
 					}
-					var node = nodes[i];
+					var node = nodes[i2];
 					if (node.IsKind(SyntaxKind.NamespaceDeclaration)) {
 						_RootItem.SetText(node.GetDeclarationSignature());
-						++i;
+						++i2;
 						continue;
 					}
 					bool highlight = node.IsMemberDeclaration();
@@ -171,7 +176,7 @@ namespace Codist.NaviBar
 						newItem.IsChecked = true;
 					}
 					Items.Add(newItem);
-					++i;
+					++i2;
 				}
 			}
 		}
