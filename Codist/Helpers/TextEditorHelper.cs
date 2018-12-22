@@ -91,8 +91,7 @@ namespace Codist
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
 				action(view, edit);
 				if (edit.HasEffectiveChanges) {
-					edit.Apply();
-					return edit.Snapshot;
+					return edit.Apply();
 				}
 				return null;
 			}
@@ -111,8 +110,7 @@ namespace Codist
 					action(view, edit, item);
 				}
 				if (edit.HasEffectiveChanges) {
-					edit.Apply();
-					return edit.Snapshot;
+					return edit.Apply();
 				}
 				return null;
 			}
@@ -224,6 +222,10 @@ namespace Codist
 		}
 
 		public static void SelectSpan(this ITextView view, SnapshotSpan span) {
+			if (view.TextSnapshot != span.Snapshot) {
+				// should not be here
+				span = new SnapshotSpan(view.TextSnapshot, span.Span);
+			}
 			view.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.ShowStart);
 			view.Selection.Select(span, false);
 			view.Caret.MoveTo(span.End);
