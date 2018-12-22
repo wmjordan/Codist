@@ -75,8 +75,9 @@ namespace Codist.SmartBars
 		void AddContextualCommands(CancellationToken cancellationToken) {
 			// anti-pattern for a small margin of performance
 			bool isDesignMode = CodistPackage.DebuggerStatus == DebuggerStatus.Design;
+			var isReadOnly = _Context.View.IsCaretInReadOnlyRegion();
 			var node = _Context.NodeIncludeTrivia;
-			if (isDesignMode && node is XmlTextSyntax) {
+			if (isDesignMode && isReadOnly == false && node is XmlTextSyntax) {
 				AddXmlDocCommands();
 				return;
 			}
@@ -97,31 +98,20 @@ namespace Codist.SmartBars
 							AddCommands(MyToolBar, KnownImageIds.FlagGroup, "Mark symbol...", null, GetMarkerCommands);
 						}
 
-						if (isDesignMode) {
-							if (_Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-								AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
-									ctx.KeepToolBar(false);
-									TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
-								});
-							}
-							if (node is ParameterSyntax && node.Parent is ParameterListSyntax) {
-								AddEditorCommand(MyToolBar, KnownImageIds.ReorderParameters, "Refactor.ReorderParameters", "Reorder parameters");
-							}
-							if (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(SyntaxKind.StructDeclaration)) {
-								AddEditorCommand(MyToolBar, KnownImageIds.ExtractInterface, "Refactor.ExtractInterface", "Extract interface");
-							}
+						if (isDesignMode && isReadOnly == false) {
+							AddRefactorCommands(node);
 						}
 					}
 				}
 				else if (token.RawKind >= (int)SyntaxKind.NumericLiteralToken && token.RawKind <= (int)SyntaxKind.StringLiteralToken) {
 					AddEditorCommand(MyToolBar, KnownImageIds.ReferencedDimension, "Edit.FindAllReferences", "Find all references");
 				}
-				else if (token.IsKind(SyntaxKind.TrueKeyword) || token.IsKind(SyntaxKind.FalseKeyword)) {
+				else if (isReadOnly == false && (token.IsKind(SyntaxKind.TrueKeyword) || token.IsKind(SyntaxKind.FalseKeyword))) {
 					AddCommand(MyToolBar, KnownImageIds.ToggleButton, "Toggle value", ctx => {
 						Replace(ctx, v => v == "true" ? "false" : "true", true);
 					});
 				}
-				if (isDesignMode) {
+				if (isDesignMode && isReadOnly == false) {
 					if (node.IsKind(SyntaxKind.VariableDeclarator)) {
 						if (node?.Parent?.Parent is MemberDeclarationSyntax) {
 							AddCommand(MyToolBar, KnownImageIds.AddComment, "Insert comment", ctx => {
@@ -146,29 +136,48 @@ namespace Codist.SmartBars
 					}
 				}
 			}
-			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running) {
-				var token = _Context.Token;
-				var triviaList = token.HasLeadingTrivia ? token.LeadingTrivia : token.HasTrailingTrivia ? token.TrailingTrivia : default;
-				var lineComment = new SyntaxTrivia();
-				if (triviaList.Equals(SyntaxTriviaList.Empty) == false && triviaList.FullSpan.Contains(View.Selection.Start.Position)) {
-					lineComment = triviaList.FirstOrDefault(i => i.IsLineComment());
-				}
-				if (lineComment.RawKind != 0) {
-					AddEditorCommand(MyToolBar, KnownImageIds.UncommentCode, "Edit.UncommentSelection", "Uncomment selection");
-				}
-				else {
-					AddCommand(MyToolBar, KnownImageIds.CommentCode, "Comment selection\nRight click: Comment line", ctx => {
-						if (ctx.RightClick) {
-							ctx.View.ExpandSelectionToLine();
-						}
-						TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
-					});
-				}
+			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running && isReadOnly == false) {
+				AddCommentCommands();
 			}
 			if (isDesignMode == false) {
 				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger...\nLeft click: Toggle breakpoint\nRight click: Debugger menu...", ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);
 			}
 			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection...\nRight click: Duplicate...\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", null, GetExpandSelectionCommands);
+		}
+
+		void AddCommentCommands() {
+			var token = _Context.Token;
+			var triviaList = token.HasLeadingTrivia ? token.LeadingTrivia : token.HasTrailingTrivia ? token.TrailingTrivia : default;
+			var lineComment = new SyntaxTrivia();
+			if (triviaList.Equals(SyntaxTriviaList.Empty) == false && triviaList.FullSpan.Contains(View.Selection.Start.Position)) {
+				lineComment = triviaList.FirstOrDefault(i => i.IsLineComment());
+			}
+			if (lineComment.RawKind != 0) {
+				AddEditorCommand(MyToolBar, KnownImageIds.UncommentCode, "Edit.UncommentSelection", "Uncomment selection");
+			}
+			else {
+				AddCommand(MyToolBar, KnownImageIds.CommentCode, "Comment selection\nRight click: Comment line", ctx => {
+					if (ctx.RightClick) {
+						ctx.View.ExpandSelectionToLine();
+					}
+					TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
+				});
+			}
+		}
+
+		void AddRefactorCommands(SyntaxNode node) {
+			if (_Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
+				AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
+					ctx.KeepToolBar(false);
+					TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
+				});
+			}
+			if (node is ParameterSyntax && node.Parent is ParameterListSyntax) {
+				AddEditorCommand(MyToolBar, KnownImageIds.ReorderParameters, "Refactor.ReorderParameters", "Reorder parameters");
+			}
+			if (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(SyntaxKind.StructDeclaration)) {
+				AddEditorCommand(MyToolBar, KnownImageIds.ExtractInterface, "Refactor.ExtractInterface", "Extract interface");
+			}
 		}
 
 		void AddXmlDocCommands() {
