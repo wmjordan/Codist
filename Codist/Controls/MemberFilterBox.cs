@@ -83,28 +83,37 @@ namespace Codist.Controls
 			});
 			Children.Add(_FilterButtons = new MemberFilterButtonGroup());
 			_Items = items;
-			_FilterButtons.FilterChanged += _FilterBox_Changed;
-			_FilterBox.TextChanged += _FilterBox_Changed;
-
-			void _FilterBox_Changed(object sender, EventArgs e) {
-				Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), _FilterButtons.Filters);
-				FocusTextBox();
-			}
+			_FilterButtons.FilterChanged += FilterBox_Changed;
+			_FilterButtons.FilterCleared += FilterBox_Clear;
+			_FilterBox.TextChanged += FilterBox_Changed;
 		}
 		public bool FocusTextBox() {
 			if (_FilterBox.IsVisible) {
 				return _FilterBox.Focus();
 			}
-			_FilterBox.IsVisibleChanged -= _FilterBox_IsVisibleChanged;
-			_FilterBox.IsVisibleChanged += _FilterBox_IsVisibleChanged;
+			_FilterBox.IsVisibleChanged -= FilterBox_IsVisibleChanged;
+			_FilterBox.IsVisibleChanged += FilterBox_IsVisibleChanged;
 			return false;
 		}
 
-		void _FilterBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+		void FilterBox_Clear(object sender, EventArgs e) {
+			if (_FilterBox.Text.Length > 0) {
+				_FilterBox.Text = String.Empty;
+			}
+			else {
+				FilterBox_Changed(sender, e);
+			}
+		}
+		void FilterBox_Changed(object sender, EventArgs e) {
+			Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), _FilterButtons.Filters);
+			FocusTextBox();
+		}
+
+		void FilterBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
 			if (_FilterBox.IsVisible) {
 				_FilterBox.Focus();
 				_FilterBox.SelectAll();
-				_FilterBox.IsVisibleChanged -= _FilterBox_IsVisibleChanged;
+				_FilterBox.IsVisibleChanged -= FilterBox_IsVisibleChanged;
 			}
 		}
 
@@ -265,6 +274,7 @@ namespace Codist.Controls
 			bool _uiLock;
 
 			public event EventHandler FilterChanged;
+			public event EventHandler FilterCleared;
 
 			public MemberFilterButtonGroup() {
 				_FieldFilter = CreateButton(KnownImageIds.Field, "Fields and properties");
@@ -332,8 +342,8 @@ namespace Codist.Controls
 				_uiLock = false;
 				if (Filters != MemberFilterTypes.All) {
 					Filters = MemberFilterTypes.All;
-					FilterChanged?.Invoke(this, EventArgs.Empty);
 				}
+				FilterCleared?.Invoke(this, EventArgs.Empty);
 			}
 
 			ThemedToggleButton CreateButton(int imageId, string toolTip) {
