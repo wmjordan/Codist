@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using AppHelpers;
@@ -99,6 +100,18 @@ namespace Codist.Options
 				_TopMarginBox.Value = (decimal)config.TopSpace;
 				_BottomMarginBox.Value = (decimal)config.BottomSpace;
 			});
+		}
+
+		private void _GitHubLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
+			Process.Start("https://github.com/wmjordan/Codist");
+		}
+
+		private void _DonationLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
+			Process.Start("https://www.paypal.me/wmzuo/19.99");
+		}
+
+		private void _ReleaseLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e) {
+			Process.Start("https://github.com/wmjordan/Codist/releases");
 		}
 	}
 }

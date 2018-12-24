@@ -48,6 +48,15 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this._TopMarginBox = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
+			this.tabPage3 = new System.Windows.Forms.TabPage();
+			this.customGroupBox2 = new Codist.Controls.CustomGroupBox();
+			this.label4 = new System.Windows.Forms.Label();
+			this._DonationLinkLabel = new System.Windows.Forms.LinkLabel();
+			this._GitHubLinkLabel = new System.Windows.Forms.LinkLabel();
+			this.label5 = new System.Windows.Forms.Label();
+			this.label6 = new System.Windows.Forms.Label();
+			this.label7 = new System.Windows.Forms.Label();
+			this._ReleaseLinkLabel = new System.Windows.Forms.LinkLabel();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
@@ -57,6 +66,8 @@
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
+			this.tabPage3.SuspendLayout();
+			this.customGroupBox2.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tabControl1
@@ -66,6 +77,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.tabControl1.Controls.Add(this.tabPage1);
 			this.tabControl1.Controls.Add(this.tabPage2);
+			this.tabControl1.Controls.Add(this.tabPage3);
 			this.tabControl1.Location = new System.Drawing.Point(3, 3);
 			this.tabControl1.Name = "tabControl1";
 			this.tabControl1.SelectedIndex = 0;
@@ -309,6 +321,107 @@
 			this.label1.TabIndex = 0;
 			this.label1.Text = "Top margin:";
 			// 
+			// tabPage3
+			// 
+			this.tabPage3.Controls.Add(this.customGroupBox2);
+			this.tabPage3.Location = new System.Drawing.Point(4, 25);
+			this.tabPage3.Name = "tabPage3";
+			this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+			this.tabPage3.Size = new System.Drawing.Size(564, 296);
+			this.tabPage3.TabIndex = 2;
+			this.tabPage3.Text = "About";
+			this.tabPage3.UseVisualStyleBackColor = true;
+			// 
+			// customGroupBox2
+			// 
+			this.customGroupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.customGroupBox2.Controls.Add(this.label7);
+			this.customGroupBox2.Controls.Add(this.label6);
+			this.customGroupBox2.Controls.Add(this.label4);
+			this.customGroupBox2.Controls.Add(this._DonationLinkLabel);
+			this.customGroupBox2.Controls.Add(this._ReleaseLinkLabel);
+			this.customGroupBox2.Controls.Add(this._GitHubLinkLabel);
+			this.customGroupBox2.Controls.Add(this.label5);
+			this.customGroupBox2.Location = new System.Drawing.Point(6, 6);
+			this.customGroupBox2.Name = "customGroupBox2";
+			this.customGroupBox2.Size = new System.Drawing.Size(552, 284);
+			this.customGroupBox2.TabIndex = 0;
+			this.customGroupBox2.TabStop = false;
+			this.customGroupBox2.Text = "Thank you for using Codist";
+			// 
+			// label4
+			// 
+			this.label4.AutoSize = true;
+			this.label4.Location = new System.Drawing.Point(6, 125);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(303, 15);
+			this.label4.TabIndex = 4;
+			this.label4.Text = "Support future development of Codist:";
+			// 
+			// _DonationLinkLabel
+			// 
+			this._DonationLinkLabel.AutoSize = true;
+			this._DonationLinkLabel.Location = new System.Drawing.Point(32, 140);
+			this._DonationLinkLabel.Name = "_DonationLinkLabel";
+			this._DonationLinkLabel.Size = new System.Drawing.Size(143, 15);
+			this._DonationLinkLabel.TabIndex = 5;
+			this._DonationLinkLabel.TabStop = true;
+			this._DonationLinkLabel.Text = "Donate via PayPal";
+			this._DonationLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this._DonationLinkLabel_LinkClicked);
+			// 
+			// _GitHubLinkLabel
+			// 
+			this._GitHubLinkLabel.AutoSize = true;
+			this._GitHubLinkLabel.Location = new System.Drawing.Point(32, 49);
+			this._GitHubLinkLabel.Name = "_GitHubLinkLabel";
+			this._GitHubLinkLabel.Size = new System.Drawing.Size(215, 15);
+			this._GitHubLinkLabel.TabIndex = 1;
+			this._GitHubLinkLabel.TabStop = true;
+			this._GitHubLinkLabel.Text = "github.com/wmjordan/Codist";
+			this._GitHubLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this._GitHubLinkLabel_LinkClicked);
+			// 
+			// label5
+			// 
+			this.label5.AutoSize = true;
+			this.label5.Location = new System.Drawing.Point(6, 34);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(247, 15);
+			this.label5.TabIndex = 0;
+			this.label5.Text = "Report bugs and suggesions to:";
+			// 
+			// label6
+			// 
+			this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.label6.Location = new System.Drawing.Point(32, 165);
+			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(495, 52);
+			this.label6.TabIndex = 6;
+			this.label6.Text = "Recommended donation value is $19.99. But you can modify the amount to any value " +
+    "if you like.";
+			// 
+			// label7
+			// 
+			this.label7.AutoSize = true;
+			this.label7.Location = new System.Drawing.Point(6, 75);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(127, 15);
+			this.label7.TabIndex = 2;
+			this.label7.Text = "Latest release:";
+			// 
+			// _ReleaseLinkLabel
+			// 
+			this._ReleaseLinkLabel.AutoSize = true;
+			this._ReleaseLinkLabel.Location = new System.Drawing.Point(32, 90);
+			this._ReleaseLinkLabel.Name = "_ReleaseLinkLabel";
+			this._ReleaseLinkLabel.Size = new System.Drawing.Size(287, 15);
+			this._ReleaseLinkLabel.TabIndex = 3;
+			this._ReleaseLinkLabel.TabStop = true;
+			this._ReleaseLinkLabel.Text = "github.com/wmjordan/Codist/releases";
+			this._ReleaseLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this._ReleaseLinkLabel_LinkClicked);
+			// 
 			// GeneralPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -329,6 +442,9 @@
 			this.groupBox1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).EndInit();
+			this.tabPage3.ResumeLayout(false);
+			this.customGroupBox2.ResumeLayout(false);
+			this.customGroupBox2.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -358,5 +474,14 @@
 		private System.Windows.Forms.CheckBox _OptimizeCodeWindowBox;
 		private System.Windows.Forms.CheckBox _OptimizeMainWindowBox;
 		private System.Windows.Forms.TextBox textBox1;
+		private System.Windows.Forms.TabPage tabPage3;
+		private Controls.CustomGroupBox customGroupBox2;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.LinkLabel _DonationLinkLabel;
+		private System.Windows.Forms.LinkLabel _GitHubLinkLabel;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.LinkLabel _ReleaseLinkLabel;
 	}
 }

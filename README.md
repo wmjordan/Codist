@@ -322,6 +322,6 @@ Your vote and feedback on the [Visual Studio Extension Marketplace](https://mark
 
 # Support Codist by Donation
 
-If you like _Codist_ and want to support the future development of it, you can [donate to the author](http://paypal.me/wmzuo).
+If you like _Codist_ and want to support the future development of it, you can [donate to the author](https://paypal.me/wmzuo/19.99).
 
 You can donate any amount of money as you like. The recommended amount of donation is `$19.99`.
