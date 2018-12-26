@@ -74,7 +74,7 @@ namespace Codist
 				return config;
 			}
 			try {
-				return InternalLoadConfig(ConfigPath, false);
+				return InternalLoadConfig(ConfigPath, StyleFilters.None);
 			}
 			catch (Exception ex) {
 				Debug.WriteLine(ex.ToString());
@@ -82,16 +82,16 @@ namespace Codist
 			}
 		}
 
-		public static void LoadConfig(string configPath, bool stylesOnly = false) {
+		public static void LoadConfig(string configPath, StyleFilters styleFilter = StyleFilters.None) {
 			if (Interlocked.Exchange(ref _LoadingConfig, 1) != 0) {
 				return;
 			}
 			Debug.WriteLine("Load config: " + configPath);
 			try {
-				Instance = InternalLoadConfig(configPath, stylesOnly);
+				Instance = InternalLoadConfig(configPath, styleFilter);
 				//TextEditorHelper.ResetStyleCache();
 				Loaded?.Invoke(Instance, EventArgs.Empty);
-				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(stylesOnly ? Features.SyntaxHighlight : Features.All));
+				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(styleFilter != StyleFilters.None ? Features.SyntaxHighlight : Features.All));
 			}
 			catch(Exception ex) {
 				Debug.WriteLine(ex.ToString());
@@ -102,7 +102,7 @@ namespace Codist
 			}
 		}
 
-		static Config InternalLoadConfig(string configPath, bool stylesOnly) {
+		static Config InternalLoadConfig(string configPath, StyleFilters styleFilter) {
 			var configContent = configPath == LightTheme ? Properties.Resources.Light
 				: configPath == DarkTheme ? Properties.Resources.Dark
 				: configPath == SimpleTheme ? Properties.Resources.Simple
@@ -114,7 +114,7 @@ namespace Codist
 					args.ErrorContext.Handled = true; // ignore json error
 				}
 			});
-			if (stylesOnly == false) {
+			if (styleFilter == StyleFilters.None) {
 				var l = config.Labels;
 				for (var i = l.Count - 1; i >= 0; i--) {
 					if (String.IsNullOrWhiteSpace(l[i].Label)) {
@@ -132,7 +132,7 @@ namespace Codist
 			LoadStyleEntries<CSharpStyle, CSharpStyleTypes>(config.CodeStyles, removeFontNames);
 			LoadStyleEntries<XmlCodeStyle, XmlStyleTypes>(config.XmlCodeStyles, removeFontNames);
 			LoadStyleEntries<SymbolMarkerStyle, SymbolMarkerStyleTypes>(config.SymbolMarkerStyles, removeFontNames);
-			if (stylesOnly) {
+			if (styleFilter == StyleFilters.All) {
 				// don't override other settings if loaded from predefined themes or syntax config file
 				ResetCodeStyle(Instance.GeneralStyles, config.GeneralStyles);
 				ResetCodeStyle(Instance.CommentStyles, config.CommentStyles);
@@ -140,6 +140,18 @@ namespace Codist
 				ResetCodeStyle(Instance.CppStyles, config.CppStyles);
 				ResetCodeStyle(Instance.XmlCodeStyles, config.XmlCodeStyles);
 				ResetCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles);
+				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
+				_LastLoaded = DateTime.Now;
+				return Instance;
+			}
+			else if (styleFilter != StyleFilters.None) {
+				MergeCodeStyle(Instance.GeneralStyles, config.GeneralStyles, styleFilter);
+				MergeCodeStyle(Instance.CommentStyles, config.CommentStyles, styleFilter);
+				MergeCodeStyle(Instance.CodeStyles, config.CodeStyles, styleFilter);
+				MergeCodeStyle(Instance.CppStyles, config.CppStyles, styleFilter);
+				MergeCodeStyle(Instance.XmlCodeStyles, config.XmlCodeStyles, styleFilter);
+				MergeCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles, styleFilter);
+				//MergeCodeStyle(Instance.MarkerSettings, config.MarkerSettings, styleFilter);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
 				_LastLoaded = DateTime.Now;
 				return Instance;
@@ -306,6 +318,17 @@ namespace Codist
 		static void ResetCodeStyle<TStyle>(List<TStyle> source, IEnumerable<TStyle> target) {
 			source.Clear();
 			source.AddRange(target);
+		}
+		static void MergeCodeStyle<TStyle>(List<TStyle> source, IEnumerable<TStyle> target, StyleFilters styleFilters) where TStyle : StyleBase {
+			foreach (var item in target) {
+				if (item.IsSet == false) {
+					continue;
+				}
+				var s = source.Find(i => i.Id == item.Id);
+				if (s != null) {
+					item.CopyTo(s, styleFilters);
+				}
+			}
 		}
 		internal static CommentStyle[] GetDefaultCommentStyles() {
 			return new CommentStyle[] {
@@ -474,6 +497,17 @@ namespace Codist
 		SpecialPunctuation = 1 << 7,
 		Default = SpecialComment,
 		AllBraces = DeclarationBrace | ParameterBrace | BranchBrace | LoopBrace | ResourceBrace | SpecialPunctuation
+	}
+
+	[Flags]
+	public enum StyleFilters
+	{
+		None,
+		Color = 1,
+		FontFamily = 1 << 1,
+		FontSize = 1 << 2,
+		FontStyle = 1 << 3,
+		All = Color | FontFamily | FontSize | FontStyle
 	}
 
 	[Flags]

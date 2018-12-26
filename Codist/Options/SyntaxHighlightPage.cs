@@ -9,6 +9,7 @@ namespace Codist.Options
 	{
 		readonly UiLock _UI = new UiLock();
 		readonly ConfigPage _servicePage;
+		StyleFilters _StyleFilters = StyleFilters.All;
 		bool _Loaded;
 
 		public SyntaxHighlightPage() {
@@ -16,6 +17,11 @@ namespace Codist.Options
 		}
 		internal SyntaxHighlightPage(ConfigPage page) : this() {
 			_servicePage = page;
+			_ColorBox.Checked = _FontFamilyBox.Checked = _FontSizeBox.Checked = _FontStyleBox.Checked = true;
+			_ColorBox.CheckedChanged += (s, args) => _StyleFilters = _StyleFilters.SetFlags(StyleFilters.Color, _ColorBox.Checked);
+			_FontFamilyBox.CheckedChanged += (s, args) => _StyleFilters = _StyleFilters.SetFlags(StyleFilters.FontFamily, _FontFamilyBox.Checked);
+			_FontSizeBox.CheckedChanged += (s, args) => _StyleFilters = _StyleFilters.SetFlags(StyleFilters.FontSize, _FontSizeBox.Checked);
+			_FontStyleBox.CheckedChanged += (s, args) => _StyleFilters = _StyleFilters.SetFlags(StyleFilters.FontStyle, _FontStyleBox.Checked);
 			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 		private void SyntaxHighlightPage_Load(object sender, EventArgs e) {
@@ -25,13 +31,13 @@ namespace Codist.Options
 			LoadConfig(Config.Instance);
 
 			_DarkThemeButton.Click += (s, args) => {
-				Config.LoadConfig(Config.DarkTheme, true);
+				LoadTheme(Config.DarkTheme);
 			};
 			_LightThemeButton.Click += (s, args) => {
-				Config.LoadConfig(Config.LightTheme, true);
+				LoadTheme(Config.LightTheme);
 			};
 			_SimpleThemeButton.Click += (s, args) => {
-				Config.LoadConfig(Config.SimpleTheme, true);
+				LoadTheme(Config.SimpleTheme);
 			};
 			_ResetThemeButton.Click += (s, args) => {
 				if (MessageBox.Show("Do you want to reset the syntax highlight settings to default?", nameof(Codist), MessageBoxButtons.YesNo) == DialogResult.Yes) {
@@ -47,7 +53,7 @@ namespace Codist.Options
 				}) {
 					if (d.ShowDialog() == DialogResult.OK) {
 						try {
-							Config.LoadConfig(d.FileName, true);
+							LoadTheme(d.FileName);
 						}
 						catch (Exception ex) {
 							MessageBox.Show("Error occured while loading style file: " + ex.Message, nameof(Codist));
@@ -76,6 +82,14 @@ namespace Codist.Options
 			_UI.DoWithLock(() => {
 				_HighlightSpecialCommentBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment);
 			});
+		}
+
+		void LoadTheme(string path) {
+			if (_StyleFilters == StyleFilters.None) {
+				MessageBox.Show("Select at least one style filter to apply the syntax theme.", nameof(Codist));
+				return;
+			}
+			Config.LoadConfig(path, _StyleFilters);
 		}
 	}
 }

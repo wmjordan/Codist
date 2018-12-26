@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Media;
+using AppHelpers;
 using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist.SyntaxHighlight
@@ -65,17 +66,37 @@ namespace Codist.SyntaxHighlight
 		internal StyleBase Clone() {
 			return (StyleBase)MemberwiseClone();
 		}
-		internal void CopyTo(StyleBase style) {
-			style.Bold = Bold;
-			style.Italic = Italic;
-			style.OverLine = OverLine;
-			style.Underline = Underline;
-			style.Strikethrough = Strikethrough;
-			style.FontSize = FontSize;
-			style.BackgroundEffect = BackgroundEffect;
-			style.Font = Font;
-			style.ForeColor = ForeColor;
-			style.BackColor = BackColor;
+		internal void CopyTo(StyleBase target) {
+			target.Bold = Bold;
+			target.Italic = Italic;
+			target.OverLine = OverLine;
+			target.Underline = Underline;
+			target.Strikethrough = Strikethrough;
+			target.FontSize = FontSize;
+			target.BackgroundEffect = BackgroundEffect;
+			target.Font = Font;
+			target.ForeColor = ForeColor;
+			target.BackColor = BackColor;
+		}
+		internal void CopyTo(StyleBase target, StyleFilters filters) {
+			if (filters.MatchFlags(StyleFilters.Color)) {
+				target.ForeColor = ForeColor;
+				target.BackColor = BackColor;
+				target.BackgroundEffect = BackgroundEffect;
+			}
+			if (filters.MatchFlags(StyleFilters.FontFamily)) {
+				target.Font = Font;
+			}
+			if (filters.MatchFlags(StyleFilters.FontSize)) {
+				target.FontSize = FontSize;
+			}
+			if (filters.MatchFlags(StyleFilters.FontStyle)) {
+				target.Bold = Bold;
+				target.Italic = Italic;
+				target.OverLine = OverLine;
+				target.Underline = Underline;
+				target.Strikethrough = Strikethrough;
+			}
 		}
 		internal void Reset() {
 			Bold = Italic = OverLine = Underline = Strikethrough = null;
@@ -85,7 +106,7 @@ namespace Codist.SyntaxHighlight
 			ForeColor = BackColor = default;
 		}
 	}
-	abstract class StyleBase<TStyle> : StyleBase where TStyle : struct
+	abstract class StyleBase<TStyle> : StyleBase where TStyle : Enum
 	{
 		string _ClassficationType, _Description;
 
