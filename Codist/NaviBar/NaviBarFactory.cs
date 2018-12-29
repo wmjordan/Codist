@@ -29,7 +29,8 @@ namespace Codist.NaviBar
 #pragma warning restore 649, 169
 
 		public void TextViewCreated(IWpfTextView textView) {
-			if (Config.Instance.Features.MatchFlags(Features.NaviBar)) {
+			if (Config.Instance.Features.MatchFlags(Features.NaviBar)
+				&& textView.Roles.Contains("DIFF") == false) {
 				if (textView.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp)) {
 					textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
 					new Overrider(textView);
