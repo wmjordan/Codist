@@ -301,7 +301,7 @@ namespace Codist
 				node = node.Parent;
 			}
 			nodes.Reverse();
-			if (includeRegions == false) {
+			if (includeRegions == false || _OutliningManager == null) {
 				return nodes;
 			}
 			foreach (var region in GetRegions(start)) {
