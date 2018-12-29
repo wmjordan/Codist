@@ -177,7 +177,7 @@ namespace Codist.Options
 	[Guid("DA4EC893-7203-489C-9BCA-037D2686F89B")]
 	sealed class SmartBar : ConfigPage
 	{
-		protected override Features Feature => Features.SyntaxHighlight;
+		protected override Features Feature => Features.SmartBar;
 		protected override IWin32Window Window => Control ?? (Control = new SmartBarPage(this));
 	}
 
