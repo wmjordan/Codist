@@ -6,16 +6,16 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Imaging;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using Task = System.Threading.Tasks.Task;
-using AppHelpers;
-using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.NaviBar
 {
@@ -188,22 +188,11 @@ namespace Codist.NaviBar
 		}
 
 		async Task<List<SyntaxNode>> UpdateModelAsync(CancellationToken token) {
-			if (await _SemanticContext.UpdateAsync(_View.Selection.Start.Position, token) == false) {
+			var start = _View.Selection.Start.Position;
+			if (await _SemanticContext.UpdateAsync(start, token) == false) {
 				return new List<SyntaxNode>();
 			}
-			var node = _SemanticContext.Node;
-			var nodes = new List<SyntaxNode>(5);
-			var detail = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail);
-			while (node != null) {
-				if (node.FullSpan.Contains(_View.Selection, true)
-					&& node.IsKind(SyntaxKind.VariableDeclaration) == false
-					&& (detail && node.IsSyntaxBlock() || node.IsDeclaration() || node.IsKind(SyntaxKind.Attribute))) {
-					nodes.Add(node);
-				}
-				node = node.Parent;
-			}
-			nodes.Reverse();
-			return nodes;
+			return _SemanticContext.GetContainingNodes(start, Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail), Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionOnBar));
 		}
 
 		static string GetParameterListSignature(ParameterListSyntax parameters, bool useParamName) {
@@ -468,6 +457,9 @@ namespace Codist.NaviBar
 				if (title == null) {
 					return this;
 				}
+				if (node.IsStructuredTrivia && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.StripRegionNonLetter)) {
+					title = TrimNonLetterOrDigitCharacters(title);
+				}
 				if (includeContainer == false && node.IsTypeDeclaration()) {
 					var p = node.Parent;
 					while (p.IsTypeDeclaration()) {
@@ -503,6 +495,23 @@ namespace Codist.NaviBar
 				}
 				Header = t;
 				return this;
+			}
+
+			static string TrimNonLetterOrDigitCharacters(string title) {
+				int s = 0, e = title.Length;
+				for (int i = 0; i < title.Length; i++) {
+					if (Char.IsLetterOrDigit(title[i])) {
+						s = i;
+						break;
+					}
+				}
+				for (int i = title.Length - 1; i >= s; i--) {
+					if (Char.IsLetterOrDigit(title[i])) {
+						e = i + 1;
+						break;
+					}
+				}
+				return s > 0 || e < title.Length ? title.Substring(s, e - s) : title;
 			}
 
 			NaviItem ShowNodeValue() {

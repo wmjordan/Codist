@@ -30,7 +30,9 @@ namespace Codist.Options
 			_ParameterListParamNameBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.ParameterListShowParamName, _ParameterListParamNameBox.Checked));
 			_PartialClassBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.PartialClassMember, _PartialClassBox.Checked));
 			_RangeHighlightBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.RangeHighlight, _RangeHighlightBox.Checked));
-			_RegionBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.Region, _RegionBox.Checked));
+			_RegionBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.RegionOnBar, _StripNonLetterCharactersBox.Enabled = _RegionBox.Checked));
+			_RegionItemBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.Region, _RegionItemBox.Checked));
+			_StripNonLetterCharactersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.StripRegionNonLetter, _StripNonLetterCharactersBox.Checked));
 			_SyntaxNodesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.SyntaxDetail, _SyntaxNodesBox.Checked));
 			_ToolTipBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.SymbolToolTip, _ToolTipBox.Checked));
 
@@ -47,7 +49,9 @@ namespace Codist.Options
 				_ParameterListParamNameBox.Checked = o.MatchFlags(NaviBarOptions.ParameterListShowParamName);
 				_PartialClassBox.Checked = o.MatchFlags(NaviBarOptions.PartialClassMember);
 				_RangeHighlightBox.Checked = o.MatchFlags(NaviBarOptions.RangeHighlight);
-				_RegionBox.Checked = o.MatchFlags(NaviBarOptions.Region);
+				_StripNonLetterCharactersBox.Enabled = _RegionBox.Checked = o.MatchFlags(NaviBarOptions.RegionOnBar);
+				_StripNonLetterCharactersBox.Checked = o.MatchFlags(NaviBarOptions.StripRegionNonLetter);
+				_RegionItemBox.Checked = o.MatchFlags(NaviBarOptions.Region);
 				_SyntaxNodesBox.Checked = o.MatchFlags(NaviBarOptions.SyntaxDetail);
 				_ToolTipBox.Checked = o.MatchFlags(NaviBarOptions.SymbolToolTip);
 			});

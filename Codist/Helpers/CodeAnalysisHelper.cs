@@ -238,6 +238,20 @@ namespace Codist
 			}
 			return false;
 		}
+
+		public static bool IsRegionalDirective(this SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.IfDirectiveTrivia:
+				case SyntaxKind.ElifDirectiveTrivia:
+				case SyntaxKind.ElseDirectiveTrivia:
+				case SyntaxKind.EndIfDirectiveTrivia:
+				case SyntaxKind.RegionDirectiveTrivia:
+				case SyntaxKind.EndRegionDirectiveTrivia:
+					return true;
+			}
+			return false;
+		}
+
 		#endregion
 
 		#region Node icon

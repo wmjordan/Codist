@@ -7,7 +7,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Outlining;
 
 namespace Codist
 {
@@ -15,9 +17,11 @@ namespace Codist
 	{
 		VersionStamp _Version;
 		SyntaxNode _Node, _NodeIncludeTrivia;
+		readonly IOutliningManager _OutliningManager;
 
 		public SemanticContext(IWpfTextView textView) {
 			View = textView;
+			_OutliningManager = ServicesHelper.Instance.OutliningManager.GetOutliningManager(textView);
 		}
 
 		public IWpfTextView View { get; }
@@ -285,7 +289,42 @@ namespace Codist
 			return true;
 		}
 
-		private void ResetNodeInfo() {
+		public List<SyntaxNode> GetContainingNodes(SnapshotPoint start, bool includeSyntaxDetails, bool includeRegions) {
+			var node = Node;
+			var nodes = new List<SyntaxNode>(5);
+			while (node != null) {
+				if (node.FullSpan.Contains(View.Selection, true)
+					&& node.IsKind(SyntaxKind.VariableDeclaration) == false
+					&& (includeSyntaxDetails && node.IsSyntaxBlock() || node.IsDeclaration() || node.IsKind(SyntaxKind.Attribute))) {
+					nodes.Add(node);
+				}
+				node = node.Parent;
+			}
+			nodes.Reverse();
+			if (includeRegions == false) {
+				return nodes;
+			}
+			foreach (var region in GetRegions(start)) {
+				node = Compilation.FindTrivia(region.Extent.GetStartPoint(View.TextSnapshot)).GetStructure();
+				if (node == null || node is DirectiveTriviaSyntax == false) {
+					continue;
+				}
+				for (int i = 0; i < nodes.Count; i++) {
+					if (node.SpanStart < nodes[i].SpanStart) {
+						nodes.Insert(i, node);
+						break;
+					}
+				}
+			}
+			return nodes;
+		}
+
+		public IEnumerable<ICollapsible> GetRegions(int position) {
+			return _OutliningManager.GetAllRegions(new SnapshotSpan(View.TextSnapshot, position, 0))
+				.Where(c => c.CollapsedForm as string != "...");
+		}
+
+		void ResetNodeInfo() {
 			_Node = _NodeIncludeTrivia = null;
 			Token = default;
 		}

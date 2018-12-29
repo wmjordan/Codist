@@ -534,6 +534,8 @@ namespace Codist
 		SyntaxDetail = 1,
 		SymbolToolTip = 1 << 1,
 		RangeHighlight = 1 << 2,
+		RegionOnBar = 1 << 3,
+		StripRegionNonLetter = 1 << 4,
 		ParameterList = 1 << 10,
 		ParameterListShowParamName = 1 << 11,
 		FieldValue = 1 << 12,

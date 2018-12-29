@@ -304,6 +304,7 @@ I have learned a lot from the following extension projects.
 * UntabifyReplacement: https://github.com/cpmcgrath/UntabifyReplacement
 * Extensiblity Tools: https://github.com/madskristensen/ExtensibilityTools
 * CodeMaid: https://github.com/codecadwallader/codemaid
+* Select Next Occurence: https://github.com/2mas/SelectNextOccurrence
 
 # License
 

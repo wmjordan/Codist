@@ -111,6 +111,9 @@ namespace Codist.SmartBars
 						Replace(ctx, v => v == "true" ? "false" : "true", true);
 					});
 				}
+				else if (node.IsRegionalDirective()) {
+					AddDirectiveCommands();
+				}
 				if (isDesignMode && isReadOnly == false) {
 					if (node.IsKind(SyntaxKind.VariableDeclarator)) {
 						if (node?.Parent?.Parent is MemberDeclarationSyntax) {
@@ -143,6 +146,27 @@ namespace Codist.SmartBars
 				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger...\nLeft click: Toggle breakpoint\nRight click: Debugger menu...", ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);
 			}
 			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection...\nRight click: Duplicate...\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", null, GetExpandSelectionCommands);
+		}
+
+		void AddDirectiveCommands() {
+			AddCommand(MyToolBar, KnownImageIds.BlockSelection, "Select directive region", ctx => {
+				var a = _Context.NodeIncludeTrivia as DirectiveTriviaSyntax;
+				if (a == null) {
+					return;
+				}
+				DirectiveTriviaSyntax b;
+				if (a.IsKind(SyntaxKind.EndRegionDirectiveTrivia) || a.IsKind(SyntaxKind.EndIfDirectiveTrivia)) {
+					b = a;
+					a = b.GetPreviousDirective();
+					if (a == null) {
+						return;
+					}
+				}
+				else {
+					b = a.GetNextDirective();
+				}
+				ctx.View.SelectSpan(new SnapshotSpan(ctx.View.TextSnapshot, Span.FromBounds(a.FullSpan.Start, b.FullSpan.End)));
+			});
 		}
 
 		void AddCommentCommands() {
