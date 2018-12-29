@@ -218,15 +218,31 @@ namespace Codist.QuickInfo
 				}
 				docRenderer.Render(summary, info);
 			}
-			if (symbol.Kind == SymbolKind.Method
-				|| symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Delegate) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.NamedType)) {
+				var typeParams = symbol.GetTypeParameters();
+				if (typeParams.IsDefaultOrEmpty == false) {
+					foreach (var param in typeParams) {
+						var p = doc.GetTypeParameter(param.Name);
+						if (p == null) {
+							continue;
+						}
+						info.AppendLine().Append(param.Name, _SymbolFormatter.TypeParameter).Append(": ");
+						docRenderer.Render(p, info.Inlines);
+					}
+				}
+			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc) &&
+				(symbol.Kind == SymbolKind.Method
+				|| symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Delegate)) {
 				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns;
 				if (returns != null && returns.FirstNode != null) {
-					info.AppendLine().Append("\nReturns", true).Append(": ");
+					info.AppendLine().AppendLine().Append("Returns", true).Append(": ");
 					docRenderer.Render(returns, info.Inlines);
 				}
 			}
-			if (symbol.Kind != SymbolKind.Parameter && symbol.Kind != SymbolKind.TypeParameter) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc)
+				&&symbol.Kind != SymbolKind.Parameter
+				&& symbol.Kind != SymbolKind.TypeParameter) {
 				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks;
 				if (remarks != null && remarks.FirstNode != null) {
 					info.AppendLine().AppendLine().Append("Remarks", true).Append(": ").AppendLine();
@@ -468,7 +484,7 @@ namespace Codist.QuickInfo
 				&& method.ContainingType.TypeKind != TypeKind.Interface) {
 				ShowDeclarationModifier(qiContent, method);
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && method.TypeArguments.Length > 0) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && method.TypeArguments.Length > 0 && method.TypeParameters[0] != method.TypeArguments[0]) {
 				ShowMethodTypeArguments(qiContent, node, method);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
