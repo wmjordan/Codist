@@ -16,20 +16,10 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Classifiers
 {
-	/// <summary>
-	/// Classifier provider. It adds the classifier to the set of classifiers.
-	/// </summary>
 	[Export(typeof(IClassifierProvider))]
 	[ContentType(Constants.CodeTypes.CSharp)]
 	sealed class CSharpClassifierProvider : IClassifierProvider
 	{
-		/// <summary>
-		/// Gets a classifier for the given text buffer.
-		/// </summary>
-		/// <param name="textBuffer">The <see cref="ITextBuffer"/> to classify.</param>
-		/// <returns>
-		/// A classifier for the text buffer, or null if the provider cannot do so in its current state.
-		/// </returns>
 		public IClassifier GetClassifier(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
 				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new CSharpClassifier(ServicesHelper.Instance.ClassificationTypeRegistry, textBuffer))
@@ -45,9 +35,6 @@ namespace Codist.Classifiers
 
 		readonly ITextBuffer _TextBuffer;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CSharpClassifier"/> class.
-		/// </summary>
 		internal CSharpClassifier(
 			IClassificationTypeRegistryService registry,
 			ITextBuffer buffer) {
@@ -60,28 +47,8 @@ namespace Codist.Classifiers
 			_TextBuffer = buffer;
 		}
 
-		/// <summary>
-		/// An event that occurs when the classification of a span of text has changed.
-		/// </summary>
-		/// <remarks>
-		/// This event gets raised if a non-text change would affect the classification in some way,
-		/// for example typing /* would cause the classification to change in C# without directly
-		/// affecting the span.
-		/// </remarks>
 		public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 
-		/// <summary>
-		/// Gets all the <see cref="ClassificationSpan"/> objects that intersect with the given range
-		/// of text.
-		/// </summary>
-		/// <remarks>
-		/// This method scans the given SnapshotSpan for potential matches for this classification.
-		/// In this instance, it classifies everything and returns each span as a new ClassificationSpan.
-		/// </remarks>
-		/// <param name="span">The span currently being classified.</param>
-		/// <returns>
-		/// A list of ClassificationSpans that represent spans identified to be of this classification.
-		/// </returns>
 		public IList<ClassificationSpan> GetClassificationSpans(SnapshotSpan span) {
 			var snapshot = span.Snapshot;
 			var workspace = snapshot.TextBuffer.GetWorkspace();
@@ -200,7 +167,7 @@ namespace Codist.Classifiers
 			return result;
 		}
 
-		private static void GetAttributeNotationSpan(ITextSnapshot snapshot, List<ClassificationSpan> result, TextSpan textSpan, CompilationUnitSyntax unitCompilation) {
+		static void GetAttributeNotationSpan(ITextSnapshot snapshot, List<ClassificationSpan> result, TextSpan textSpan, CompilationUnitSyntax unitCompilation) {
 			var spanNode = unitCompilation.FindNode(textSpan, true, false);
 			if (spanNode.HasLeadingTrivia != false && spanNode.GetLeadingTrivia().FullSpan.Contains(textSpan) != false) {
 				return;
@@ -210,45 +177,6 @@ namespace Codist.Classifiers
 				case SyntaxKind.AttributeArgumentList:
 					result.Add(CreateClassificationSpan(snapshot, textSpan, _Classifications.AttributeNotation));
 					return;
-				//case SyntaxKind.MethodDeclaration:
-				//case SyntaxKind.ConstructorDeclaration:
-				//case SyntaxKind.DestructorDeclaration:
-				//case SyntaxKind.OperatorDeclaration:
-				//case SyntaxKind.ConversionOperatorDeclaration:
-				//	var m = spanNode as BaseMethodDeclarationSyntax;
-				//	AddAttributeSpan(result, snapshot, m.AttributeLists);
-				//	foreach (var item in m.ParameterList.Parameters) {
-				//		AddAttributeSpan(result, snapshot, item.AttributeLists);
-				//	}
-				//	return;
-				//case SyntaxKind.ClassDeclaration:
-				//case SyntaxKind.InterfaceDeclaration:
-				//case SyntaxKind.EnumDeclaration:
-				//case SyntaxKind.StructDeclaration:
-				//	AddAttributeSpan(result, snapshot, (spanNode as BaseTypeDeclarationSyntax).AttributeLists);
-				//	return;
-				//case SyntaxKind.FieldDeclaration:
-				//case SyntaxKind.EventFieldDeclaration:
-				//	AddAttributeSpan(result, snapshot, (spanNode as BaseFieldDeclarationSyntax).AttributeLists);
-				//	return;
-				//case SyntaxKind.EventDeclaration:
-				//case SyntaxKind.PropertyDeclaration:
-				//case SyntaxKind.IndexerDeclaration:
-				//	var p = spanNode as BasePropertyDeclarationSyntax;
-				//	AddAttributeSpan(result, snapshot, p.AttributeLists);
-				//	foreach (var item in p.AccessorList.Accessors) {
-				//		AddAttributeSpan(result, snapshot, item.AttributeLists);
-				//	}
-				//	return;
-				//case SyntaxKind.DelegateDeclaration:
-				//	AddAttributeSpan(result, snapshot, (spanNode as DelegateDeclarationSyntax).AttributeLists);
-				//	return;
-			}
-
-			void AddAttributeSpan(List<ClassificationSpan> spans, ITextSnapshot textSnapshot, SyntaxList<AttributeListSyntax> attributeList) {
-				if (attributeList.Count > 0) {
-					spans.Add(CreateClassificationSpan(textSnapshot, attributeList.Span, _Classifications.AttributeNotation));
-				}
 			}
 		}
 
@@ -375,7 +303,7 @@ namespace Codist.Classifiers
 			}
 		}
 
-		private static void MarkClassificationTypeForBrace(TextSpan itemSpan, ITextSnapshot snapshot, List<ClassificationSpan> result, IClassificationType type, SpecialHighlightOptions options) {
+		static void MarkClassificationTypeForBrace(TextSpan itemSpan, ITextSnapshot snapshot, List<ClassificationSpan> result, IClassificationType type, SpecialHighlightOptions options) {
 			if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
 				result.Add(CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation));
 			}
