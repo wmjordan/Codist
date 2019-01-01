@@ -45,6 +45,7 @@ namespace TestProject
 		/// <param name="date">The date to be formatted to string.</param>
 		/// <param name="format">The format for the date.</param>
 		/// <returns>The formatted <see cref="DateTime"/>.</returns>
+		/// <exception cref="FormatException"><paramref name="format"/> is invalid for <see cref="DateTime.ToString(string)"/>. Validate this in <see cref="Test"/>.</exception>
 		public static string FormatDate(DateTime date, string format) {
 			return date.ToString(format);
 		}

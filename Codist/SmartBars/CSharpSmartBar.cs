@@ -579,7 +579,7 @@ namespace Codist.SmartBars
 					r.Add(CreateCommandMenu("Find Instance as Parameter...", KnownImageIds.Parameter, t, "No instance as parameter was found", FindInstanceAsParameter));
 					if (t.IsSealed == false) {
 						if (t.TypeKind == TypeKind.Class) {
-							r.Add(CreateCommandMenu("Find Derived Classes...", KnownImageIds.NewClass, symbol, "No derived class was found", FindDerivedClasses));
+							r.Add(CreateCommandMenu("Find Derived Classes...", KnownImageIds.NewClass, t, "No derived class was found", FindDerivedClasses));
 						}
 						else if (t.TypeKind == TypeKind.Interface) {
 							r.Add(CreateCommandMenu("Find Implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
@@ -788,8 +788,8 @@ namespace Codist.SmartBars
 					h.Inlines.InsertBefore(
 						h.Inlines.FirstInline,
 						new System.Windows.Documents.InlineUIContainer(new System.Windows.Shapes.Rectangle {
-							Height = 16,
-							Width = 16,
+							Height = ThemeHelper.DefaultIconSize,
+							Width = ThemeHelper.DefaultIconSize,
 							Fill = b,
 							Margin = WpfHelper.GlyphMargin
 						}) {

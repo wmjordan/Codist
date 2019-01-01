@@ -14,15 +14,17 @@ namespace Codist
 {
 	static partial class WpfHelper
 	{
+		internal const int IconRightMargin = 5;
+		internal const int SmallMarginSize = 3;
 		internal static readonly WpfColor EmptyColor = new WpfColor();
 		internal static readonly Thickness NoMargin = new Thickness(0);
 		internal static readonly Thickness TinyMargin = new Thickness(1);
-		internal static readonly Thickness SmallMargin = new Thickness(3);
+		internal static readonly Thickness SmallMargin = new Thickness(SmallMarginSize);
 		internal static readonly Thickness MiddleMargin = new Thickness(6);
-		internal static readonly Thickness GlyphMargin = new Thickness(0, 0, 5, 0);
+		internal static readonly Thickness GlyphMargin = new Thickness(0, 0, IconRightMargin, 0);
 		internal static readonly Thickness ScrollerMargin = new Thickness(0, 0, 3, 0);
 		internal static readonly Thickness TopItemMargin = new Thickness(0, 3, 0, 0);
-		internal static readonly Thickness SmallHorizontalMargin = new Thickness(3, 0, 3, 0);
+		internal static readonly Thickness SmallHorizontalMargin = new Thickness(SmallMarginSize, 0, SmallMarginSize, 0);
 		internal static readonly Thickness MenuItemMargin = new Thickness(6, 0, 6, 0);
 
 		#region TextBlock and Run
@@ -61,6 +63,26 @@ namespace Codist
 		}
 		public static TTextBlock Append<TTextBlock>(this TTextBlock block, UIElement element)
 			where TTextBlock : TextBlock {
+			block.Inlines.Add(new InlineUIContainer(element) { BaselineAlignment = BaselineAlignment.TextTop });
+			return block;
+		}
+		public static Paragraph Append(this Paragraph block, string text) {
+			block.Inlines.Add(text);
+			return block;
+		}
+		public static Paragraph Append(this Paragraph block, string text, bool bold) {
+			block.Inlines.Add(Render(text, bold, false, null));
+			return block;
+		}
+		public static Paragraph Append(this Paragraph block, string text, bool bold, WpfBrush brush) {
+			block.Inlines.Add(Render(text, bold, false, brush));
+			return block;
+		}
+		public static Paragraph Append(this Paragraph block, Inline inline) {
+			block.Inlines.Add(inline);
+			return block;
+		}
+		public static Paragraph Append(this Paragraph block, UIElement element) {
 			block.Inlines.Add(new InlineUIContainer(element) { BaselineAlignment = BaselineAlignment.TextTop });
 			return block;
 		}
@@ -223,11 +245,25 @@ namespace Codist
 				if (r != null && (predicate == null || predicate(r))) {
 					return r;
 				}
-				else {
-					r = GetFirstVisualChild(c, predicate);
-					if (r != null) {
-						return r;
-					}
+				r = GetFirstVisualChild(c, predicate);
+				if (r != null) {
+					return r;
+				}
+			}
+			return null;
+		}
+		public static TChild GetLastVisualChild<TChild>(this DependencyObject obj, Predicate<TChild> predicate = null)
+			where TChild : DependencyObject {
+			var count = VisualTreeHelper.GetChildrenCount(obj);
+			for (int i = count - 1; i >= 0; i--) {
+				var c = VisualTreeHelper.GetChild(obj, i);
+				var r = c as TChild;
+				if (r != null && (predicate == null || predicate(r))) {
+					return r;
+				}
+				r = GetLastVisualChild(c, predicate);
+				if (r != null) {
+					return r;
 				}
 			}
 			return null;

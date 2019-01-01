@@ -39,10 +39,12 @@
 			this._CSharpAttributesQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this._DefaultPage = new System.Windows.Forms.TabPage();
+			this._CSharpExceptionDocBox = new System.Windows.Forms.CheckBox();
 			this._AlternativeStyleBox = new System.Windows.Forms.CheckBox();
 			this._CSharpRemarksDocBox = new System.Windows.Forms.CheckBox();
 			this._CSharpReturnsDocBox = new System.Windows.Forms.CheckBox();
 			this._CSharpTextOnlyDocBox = new System.Windows.Forms.CheckBox();
+			this._CSharpInheritDocCrefBox = new System.Windows.Forms.CheckBox();
 			this._CSharpDocumentationBaseTypeBox = new System.Windows.Forms.CheckBox();
 			this.groupBox4 = new System.Windows.Forms.GroupBox();
 			this._QuickInfoMaxHeightBox = new System.Windows.Forms.NumericUpDown();
@@ -52,7 +54,6 @@
 			this._CSharpOverrideDefaultXmlDocBox = new System.Windows.Forms.CheckBox();
 			this._ClickAndGoBox = new System.Windows.Forms.CheckBox();
 			this._AdditionalItemsPage = new System.Windows.Forms.TabPage();
-			this._CSharpInheritDocCrefBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this._DefaultPage.SuspendLayout();
 			this.groupBox4.SuspendLayout();
@@ -196,6 +197,7 @@
 			// 
 			// _DefaultPage
 			// 
+			this._DefaultPage.Controls.Add(this._CSharpExceptionDocBox);
 			this._DefaultPage.Controls.Add(this._AlternativeStyleBox);
 			this._DefaultPage.Controls.Add(this._CSharpRemarksDocBox);
 			this._DefaultPage.Controls.Add(this._CSharpReturnsDocBox);
@@ -213,20 +215,30 @@
 			this._DefaultPage.Text = "Default";
 			this._DefaultPage.UseVisualStyleBackColor = true;
 			// 
+			// _CSharpExceptionDocBox
+			// 
+			this._CSharpExceptionDocBox.AutoSize = true;
+			this._CSharpExceptionDocBox.Location = new System.Drawing.Point(32, 156);
+			this._CSharpExceptionDocBox.Name = "_CSharpExceptionDocBox";
+			this._CSharpExceptionDocBox.Size = new System.Drawing.Size(253, 19);
+			this._CSharpExceptionDocBox.TabIndex = 7;
+			this._CSharpExceptionDocBox.Text = "Override <exception> XML Doc";
+			this._CSharpExceptionDocBox.UseVisualStyleBackColor = true;
+			// 
 			// _AlternativeStyleBox
 			// 
 			this._AlternativeStyleBox.AutoSize = true;
 			this._AlternativeStyleBox.Location = new System.Drawing.Point(15, 181);
 			this._AlternativeStyleBox.Name = "_AlternativeStyleBox";
 			this._AlternativeStyleBox.Size = new System.Drawing.Size(197, 19);
-			this._AlternativeStyleBox.TabIndex = 7;
+			this._AlternativeStyleBox.TabIndex = 8;
 			this._AlternativeStyleBox.Text = "Use alternative style";
 			this._AlternativeStyleBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpRemarksDocBox
 			// 
 			this._CSharpRemarksDocBox.AutoSize = true;
-			this._CSharpRemarksDocBox.Location = new System.Drawing.Point(32, 156);
+			this._CSharpRemarksDocBox.Location = new System.Drawing.Point(268, 131);
 			this._CSharpRemarksDocBox.Name = "_CSharpRemarksDocBox";
 			this._CSharpRemarksDocBox.Size = new System.Drawing.Size(205, 19);
 			this._CSharpRemarksDocBox.TabIndex = 6;
@@ -253,6 +265,16 @@
 			this._CSharpTextOnlyDocBox.Text = "Allow text only (no <summary>) XML Doc";
 			this._CSharpTextOnlyDocBox.UseVisualStyleBackColor = true;
 			// 
+			// _CSharpInheritDocCrefBox
+			// 
+			this._CSharpInheritDocCrefBox.AutoSize = true;
+			this._CSharpInheritDocCrefBox.Location = new System.Drawing.Point(32, 81);
+			this._CSharpInheritDocCrefBox.Name = "_CSharpInheritDocCrefBox";
+			this._CSharpInheritDocCrefBox.Size = new System.Drawing.Size(357, 19);
+			this._CSharpInheritDocCrefBox.TabIndex = 3;
+			this._CSharpInheritDocCrefBox.Text = "Inherit from <inheritdoc cref=\"\"/> target";
+			this._CSharpInheritDocCrefBox.UseVisualStyleBackColor = true;
+			// 
 			// _CSharpDocumentationBaseTypeBox
 			// 
 			this._CSharpDocumentationBaseTypeBox.AutoSize = true;
@@ -274,7 +296,7 @@
 			this.groupBox4.Location = new System.Drawing.Point(6, 211);
 			this.groupBox4.Name = "groupBox4";
 			this.groupBox4.Size = new System.Drawing.Size(506, 59);
-			this.groupBox4.TabIndex = 8;
+			this.groupBox4.TabIndex = 9;
 			this.groupBox4.TabStop = false;
 			this.groupBox4.Text = "Quick Info Item Size (0: Unlimited)";
 			// 
@@ -316,7 +338,7 @@
 			// _QuickInfoMaxWidthBox
 			// 
 			this._QuickInfoMaxWidthBox.Increment = new decimal(new int[] {
-            200,
+            100,
             0,
             0,
             0});
@@ -372,16 +394,6 @@
 			this._AdditionalItemsPage.Text = "Additional Items";
 			this._AdditionalItemsPage.UseVisualStyleBackColor = true;
 			// 
-			// _CSharpInheritDocCrefBox
-			// 
-			this._CSharpInheritDocCrefBox.AutoSize = true;
-			this._CSharpInheritDocCrefBox.Location = new System.Drawing.Point(32, 81);
-			this._CSharpInheritDocCrefBox.Name = "_CSharpInheritDocCrefBox";
-			this._CSharpInheritDocCrefBox.Size = new System.Drawing.Size(357, 19);
-			this._CSharpInheritDocCrefBox.TabIndex = 3;
-			this._CSharpInheritDocCrefBox.Text = "Inherit from <inheritdoc cref=\"\"/> target";
-			this._CSharpInheritDocCrefBox.UseVisualStyleBackColor = true;
-			// 
 			// CSharpSuperQuickInfoPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -432,5 +444,6 @@
 		private System.Windows.Forms.CheckBox _CSharpRemarksDocBox;
 		private System.Windows.Forms.CheckBox _AlternativeStyleBox;
 		private System.Windows.Forms.CheckBox _CSharpInheritDocCrefBox;
+		private System.Windows.Forms.CheckBox _CSharpExceptionDocBox;
 	}
 }

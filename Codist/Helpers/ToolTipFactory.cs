@@ -40,7 +40,7 @@ namespace Codist
 				content.Append("\nconst: " + f.ConstantValue?.ToString()); // sometimes the const value could be null
 			}
 			foreach (var attr in symbol.GetAttributes()) {
-				SymbolFormatter.Empty.ToUIText(content.AppendLine(), attr);
+				SymbolFormatter.Empty.ToUIText(content.AppendLine().Inlines, attr);
 			}
 			var doc = new XmlDoc(symbol, compilation);
 			var summary = doc.Summary ?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.ExplicitInheritDoc?.Summary : null);

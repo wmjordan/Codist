@@ -29,7 +29,17 @@ namespace Codist
 			}
 			Render(content, text.Inlines);
 		}
-
+		public void Render(XElement content, Controls.ThemedTipDocument doc) {
+			if (content == null || content.HasElements == false && content.IsEmpty) {
+				return;
+			}
+			var paragraph = new Controls.ThemedTipParagraph(Microsoft.VisualStudio.Imaging.KnownImageIds.Comment);
+			doc.Append(paragraph);
+			Render(content, doc, paragraph);
+			if (paragraph.Content.Inlines.FirstInline == null) {
+				doc.Children.Remove(paragraph);
+			}
+		}
 		public void Render(XContainer content, InlineCollection text) {
 			const int LIST_UNDEFINED = -1, LIST_BULLET = -2, LIST_NOT_NUMERIC = -3;
 			var listNum = LIST_UNDEFINED;
@@ -129,6 +139,109 @@ namespace Codist
 					case XmlNodeType.EntityReference:
 					case XmlNodeType.Entity:
 						text.Add(new Run(item.ToString()));
+						break;
+				}
+			}
+		}
+		public void Render(XContainer content, Controls.ThemedTipDocument doc, Controls.ThemedTipParagraph paragraph) {
+			const int LIST_UNDEFINED = -1, LIST_BULLET = -2, LIST_NOT_NUMERIC = -3;
+			var listNum = LIST_UNDEFINED;
+			foreach (var item in content.Nodes()) {
+				switch (item.NodeType) {
+					case XmlNodeType.Element:
+						var e = item as XElement;
+						var name = e.Name.LocalName;
+						switch (name) {
+							case "para":
+							case "listheader":
+							case "item":
+							case "code":
+								if (paragraph.Content.Inlines.FirstInline != null) {
+									doc.Append(paragraph = new Controls.ThemedTipParagraph(new Controls.ThemedTipText()));
+								}
+								if (name == "item") {
+									if (listNum == LIST_UNDEFINED) {
+										switch ((e.Parent as XElement).Attribute("type")?.Value) {
+											case "number": listNum = 0; break;
+											case "bullet": listNum = LIST_BULLET; break;
+											default: listNum = LIST_NOT_NUMERIC; break;
+										}
+									}
+									if (listNum >= 0) {
+										paragraph.Content.Append(new Run((++listNum).ToString() + ". ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
+									}
+									else if (listNum == LIST_BULLET) {
+										paragraph.Content.Append(new Run(" \u00B7 ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
+									}
+								}
+								Render(e, doc, paragraph);
+								if (paragraph.Content.Inlines.FirstInline == null) {
+									paragraph.Content.Inlines.Add(new LineBreak());
+								}
+								break;
+							case "see":
+								var see = e.Attribute("cref");
+								if (see != null) {
+									RenderXmlDocSymbol(see.Value, paragraph.Content.Inlines, SymbolKind.Alias);
+								}
+								else if ((see = e.Attribute("langword")) != null) {
+									RenderXmlDocSymbol(see.Value, paragraph.Content.Inlines, SymbolKind.DynamicType);
+								}
+								break;
+							case "paramref":
+								var paramName = e.Attribute("name");
+								if (paramName != null) {
+									RenderXmlDocSymbol(paramName.Value, paragraph.Content.Inlines, SymbolKind.Parameter);
+								}
+								break;
+							case "typeparamref":
+								var typeParamName = e.Attribute("name");
+								if (typeParamName != null) {
+									RenderXmlDocSymbol(typeParamName.Value, paragraph.Content.Inlines, SymbolKind.TypeParameter);
+								}
+								break;
+							case "c":
+								StyleInner(e, paragraph.Content.Inlines, new Bold() { Background = ThemeHelper.ToolWindowBackgroundBrush, Foreground = ThemeHelper.ToolWindowTextBrush });
+								break;
+							case "b":
+								StyleInner(e, paragraph.Content.Inlines, new Bold());
+								break;
+							case "i":
+								StyleInner(e, paragraph.Content.Inlines, new Italic());
+								break;
+							case "u":
+								StyleInner(e, paragraph.Content.Inlines, new Underline());
+								break;
+							//case "list":
+							//case "description":
+							default:
+								Render(e, doc, paragraph);
+								break;
+						}
+						break;
+					case XmlNodeType.Text:
+						string t = (item as XText).Value;
+						var parentName = item.Parent.Name.LocalName;
+						if (parentName != "code") {
+							var previous = (item.PreviousNode as XElement)?.Name?.LocalName;
+							if (previous == null || IsInlineElementName(previous) == false) {
+								t = item.NextNode == null ? t.Trim() : t.TrimStart();
+							}
+							else if (item.NextNode == null) {
+								t = t.TrimEnd();
+							}
+							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
+						}
+						if (t.Length > 0) {
+							paragraph.Content.Append(new Run(t));
+						}
+						break;
+					case XmlNodeType.CDATA:
+						paragraph.Content.Append(new Run((item as XText).Value));
+						break;
+					case XmlNodeType.EntityReference:
+					case XmlNodeType.Entity:
+						paragraph.Content.Append(new Run(item.ToString()));
 						break;
 				}
 			}

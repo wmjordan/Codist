@@ -16,6 +16,8 @@ namespace Codist
 {
 	static class ThemeHelper
 	{
+		internal const int DefaultIconSize = 16;
+
 		static readonly Microsoft.VisualStudio.Text.Classification.IClassificationFormatMap __ToolTipFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("tooltip");
 		static ThemeHelper() {
 			RefreshThemeCache();
@@ -88,13 +90,12 @@ namespace Codist
 		/// </summary>
 		/// <param name="imageId">The image id.</param>
 		public static CrispImage GetImage(int imageId, int size = 0) {
-			const int DEFAULT_SIZE = 16;
 			var moniker = new ImageMoniker {
 				Guid = KnownImageIds.ImageCatalogGuid,
 				Id = imageId
 			};
 			if (size < 1) {
-				size = DEFAULT_SIZE;
+				size = DefaultIconSize;
 			}
 			var image = new CrispImage {
 				Moniker = moniker,

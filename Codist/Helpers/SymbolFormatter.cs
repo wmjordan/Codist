@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
@@ -257,17 +258,17 @@ namespace Codist
 			return block;
 		}
 
-		internal void ToUIText(TextBlock block, TypedConstant constant) {
+		internal void ToUIText(InlineCollection block, TypedConstant constant) {
 			switch (constant.Kind) {
 				case TypedConstantKind.Primitive:
 					if (constant.Value is bool) {
-						block.Append((bool)constant.Value ? "true" : "false", Keyword);
+						block.Add(WpfHelper.Render((bool)constant.Value ? "true" : "false", Keyword));
 					}
 					else if (constant.Value is string) {
-						block.Append(constant.ToCSharpString(), Text);
+						block.Add(WpfHelper.Render(constant.ToCSharpString(), Text));
 					}
 					else {
-						block.Append(constant.ToCSharpString(), Number);
+						block.Add(WpfHelper.Render(constant.ToCSharpString(), Number));
 					}
 					break;
 				case TypedConstantKind.Enum:
@@ -283,75 +284,76 @@ namespace Codist
 						var flags = items.ToArray();
 						for (int i = 0; i < flags.Length; i++) {
 							if (i > 0) {
-								block.Append(" | ");
+								block.Add(" | ");
 							}
-							block.Append(constant.Type.Name + "." + flags[i].Name, Enum);
+							block.Add(WpfHelper.Render(constant.Type.Name + "." + flags[i].Name, Enum));
 						}
 					}
 					else {
-						block.Append(constant.Type.Name + en.Substring(en.LastIndexOf('.')), Enum);
+						block.Add(WpfHelper.Render(constant.Type.Name + en.Substring(en.LastIndexOf('.')), Enum));
 					}
 					break;
 				case TypedConstantKind.Type:
-					block.Append("typeof", Keyword).Append("(")
-						.AddSymbol(constant.Value as ITypeSymbol, null, this)
-						.Append(")");
+					block.Add(WpfHelper.Render("typeof", Keyword));
+					block.Add("(");
+					ToUIText(block, constant.Value as ITypeSymbol, null);
+					block.Add(")");
 					break;
 				case TypedConstantKind.Array:
-					block.Append("{");
+					block.Add("{");
 					bool c = false;
 					foreach (var item in constant.Values) {
 						if (c == false) {
 							c = true;
 						}
 						else {
-							block.Append(", ");
+							block.Add(", ");
 						}
 						ToUIText(block, item);
 					}
-					block.Append("}");
+					block.Add("}");
 					break;
 				default:
-					block.Append(constant.ToCSharpString());
+					block.Add(constant.ToCSharpString());
 					break;
 			}
 		}
 
-		internal TextBlock ToUIText(TextBlock block, AttributeData item) {
+		internal void ToUIText(InlineCollection block, AttributeData item) {
 			var a = item.AttributeClass.Name;
-			block.Append("[")
-				.AddSymbol(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class);
+			block.Add("[");
+			block.Add(WpfHelper.Render(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class));
 			if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
 				var node = item.ApplicationSyntaxReference?.GetSyntax() as Microsoft.CodeAnalysis.CSharp.Syntax.AttributeSyntax;
 				if (node != null && node.ArgumentList?.Arguments.Count > 0) {
-					block.Append(node.ArgumentList.ToString(), ThemeHelper.SystemGrayTextBrush);
+					block.Add(WpfHelper.Render(node.ArgumentList.ToString(), ThemeHelper.SystemGrayTextBrush));
 				}
-				block.Append("]");
-				return block;
+				block.Add("]");
+				return;
 			}
-			block.Append("(");
+			block.Add("(");
 			int i = 0;
 			foreach (var arg in item.ConstructorArguments) {
 				if (++i > 1) {
-					block.Append(", ");
+					block.Add(", ");
 				}
 				ToUIText(block, arg);
 			}
 			foreach (var arg in item.NamedArguments) {
 				if (++i > 1) {
-					block.Append(", ");
+					block.Add(", ");
 				}
 				var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property);
 				if (attrMember != null) {
-					block.Append(arg.Key, attrMember.Kind == SymbolKind.Property ? Property : Field);
+					block.Add(WpfHelper.Render(arg.Key, attrMember.Kind == SymbolKind.Property ? Property : Field));
 				}
 				else {
-					block.Append(arg.Key, false, true, null);
+					block.Add(WpfHelper.Render(arg.Key, false, true, null));
 				}
-				block.Append("=");
+				block.Add("=");
 				ToUIText(block, arg.Value);
 			}
-			return block.Append(")]");
+			block.Add(")]");
 		}
 
 		internal void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {

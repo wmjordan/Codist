@@ -8,8 +8,8 @@ using System.Windows.Media;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Imaging;
+using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Codist.QuickInfo
 {
@@ -19,6 +19,7 @@ namespace Codist.QuickInfo
 		void ApplyClickAndGo(ISymbol symbol);
 		void LimitQuickInfoItemSize(IList<object> qiContent);
 		void OverrideDocumentation(UIElement docElement);
+		void OverrideException(UIElement exceptionDoc);
 	}
 
 	static class QuickInfoOverrider
@@ -119,6 +120,9 @@ namespace Codist.QuickInfo
 			public void OverrideDocumentation(UIElement docElement) {
 				_Overrider.DocElement = docElement;
 			}
+			public void OverrideException(UIElement exceptionDoc) {
+				_Overrider.ExceptionDoc = exceptionDoc;
+			}
 
 			public void SetDiagnostics(IList<Diagnostic> diagnostics) {
 				_Overrider.Diagnostics = diagnostics;
@@ -135,6 +139,7 @@ namespace Codist.QuickInfo
 				public ISymbol ClickAndGoSymbol;
 				public bool LimitItemSize;
 				public UIElement DocElement;
+				public UIElement ExceptionDoc;
 				public IList<Diagnostic> Diagnostics;
 
 				protected override void OnVisualParentChanged(DependencyObject oldParent) {
@@ -151,7 +156,7 @@ namespace Codist.QuickInfo
 						p.SetValue(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont);
 						p.SetValue(TextBlock.FontSizeProperty, ThemeHelper.ToolTipFontSize);
 					}
-					if (DocElement != null || ClickAndGoSymbol != null || LimitItemSize) {
+					if (DocElement != null || ExceptionDoc != null || ClickAndGoSymbol != null || LimitItemSize) {
 						FixQuickInfo(p);
 					}
 					if (LimitItemSize) {
@@ -252,21 +257,37 @@ namespace Codist.QuickInfo
 					}
 
 					// replace the default XML doc
+					var items = doc.Children;
 					if (DocElement != null) {
 						try {
-							if (doc.Children.Count > 1 && doc.Children[1] is TextBlock) {
-								doc.Children.RemoveAt(1);
-								doc.Children.Insert(1, DocElement);
+							// sequence of items in default XML Doc panel:
+							// 1. summary
+							// 2. type parameter
+							// 3. usage
+							// 4. exception
+							if (items.Count > 1 && items[1] is TextBlock) {
+								items.RemoveAt(1);
+								items.Insert(1, DocElement);
 							}
 							else {
-								doc.Children.Add(DocElement);
+								items.Add(DocElement);
 							}
 						}
 						catch (InvalidOperationException) {
 							// ignore exception: doc.Children was changed by another thread
 						}
 					}
-
+					if (ExceptionDoc != null) {
+						try {
+							if (items.Count > 1 && items[items.Count - 1] is TextBlock) {
+								items.RemoveAt(items.Count - 1);
+							}
+							items.Add(ExceptionDoc);
+						}
+						catch (InvalidOperationException) {
+							// ignore exception: doc.Children was changed by another thread
+						}
+					}
 
 					if (icon != null && signature != null) {
 						// apply click and go feature
@@ -307,7 +328,11 @@ namespace Codist.QuickInfo
 						cp.LimitSize();
 						if (docPanel == c) {
 							cp.MaxWidth += 32;
+							foreach (var r in docPanel.Children) {
+								(r as ThemedTipDocument)?.ApplySizeLimit();
+							}
 						}
+						(c as ThemedTipDocument)?.ApplySizeLimit();
 						if (c is ScrollViewer
 							|| c is Microsoft.VisualStudio.Text.Editor.IWpfTextView // skip snippet tooltip
 							) {
@@ -404,6 +429,7 @@ namespace Codist.QuickInfo
 					Panel.Children.Insert(Panel.Children.IndexOf(doc), newDoc);
 				}
 			}
+			public void OverrideException(UIElement exceptionDoc) { }
 
 			public void SetDiagnostics(IList<Diagnostic> diagnostics) {
 				// not implemented for versions before 15.8

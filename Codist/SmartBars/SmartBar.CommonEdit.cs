@@ -34,14 +34,15 @@ namespace Codist.SmartBars
 		}
 
 		protected static void FindNext(CommandContext ctx, string t) {
-			if (t != null) {
-				var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t, FindOptions.MatchCase);
-				if (r.HasValue) {
-					ctx.View.SelectSpan(r.Value);
-				}
-				else {
-					ctx.HideToolBar();
-				}
+			if (String.IsNullOrEmpty(t)) {
+				return;
+			}
+			var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t, FindOptions.MatchCase);
+			if (r.HasValue) {
+				ctx.View.SelectSpan(r.Value);
+			}
+			else {
+				ctx.HideToolBar();
 			}
 		}
 

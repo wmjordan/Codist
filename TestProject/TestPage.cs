@@ -71,6 +71,7 @@ text".Log(); // multiline string (string verbatim)
 
 		public new void Method() { Property--; }
 
+		/// <typeparam name="TGeneric">Any type</typeparam>
 		public void Method<TGeneric>() { //type parameter
 			// unnecessary code
 			TestProject.ExtensionClass.Log(typeof(TGeneric).Name); // extension method

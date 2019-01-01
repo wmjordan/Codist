@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml.Linq;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
@@ -47,6 +48,12 @@ namespace Codist
 			}
 			return block;
 		}
+		public static Paragraph AddSymbol(this Paragraph paragraph, ISymbol symbol, string alias, SymbolFormatter formatter) {
+			if (symbol != null) {
+				formatter.ToUIText(paragraph.Inlines, symbol, alias);
+			}
+			return paragraph;
+		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, WpfBrush brush) {
 			if (symbol != null) {
 				block.Inlines.Add(symbol.Render(alias, false, brush));
@@ -64,6 +71,10 @@ namespace Codist
 		}
 		public static TextBlock AddSymbolDisplayParts(this TextBlock block, ImmutableArray<SymbolDisplayPart> parts, SymbolFormatter formatter, int argIndex) {
 			return formatter.ToUIText(block, parts, argIndex);
+		}
+		public static TextBlock AddXmlDoc(this TextBlock paragraph, XElement content, XmlDocRenderer docRenderer) {
+			docRenderer.Render(content, paragraph.Inlines);
+			return paragraph;
 		}
 		public static ContextMenu CreateContextMenuForSourceLocations(string symbolName, ImmutableArray<Location> refs) {
 			var menu = new ContextMenu {
@@ -101,10 +112,10 @@ namespace Codist
 				? color
 				: EmptyColor;
 		}
-		public static Run Render(this ISymbol symbol, string alias, WpfBrush brush) {
+		public static Inline Render(this ISymbol symbol, string alias, WpfBrush brush) {
 			return symbol.Render(alias, brush == null, brush);
 		}
-		public static Run Render(this ISymbol symbol, string alias, bool bold, WpfBrush brush) {
+		public static Inline Render(this ISymbol symbol, string alias, bool bold, WpfBrush brush) {
 			var run = new SymbolLink(symbol, alias, Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo));
 			if (bold || brush == null) {
 				run.FontWeight = FontWeights.Bold;
@@ -136,11 +147,13 @@ namespace Codist
 		sealed class SymbolLink : Run
 		{
 			readonly ISymbol _Symbol;
-			ImmutableArray<Location> _References;
+
 			public SymbolLink(ISymbol symbol, string alias, bool clickAndGo) {
 				Text = alias ?? symbol.Name;
 				_Symbol = symbol;
-				if (clickAndGo) {
+				TextDecorations = null;
+				
+				if (clickAndGo && symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 					MouseEnter += InitInteraction;
 				}
 				ToolTipOpening += ShowSymbolToolTip;
@@ -150,30 +163,28 @@ namespace Codist
 			void InitInteraction(object sender, MouseEventArgs e) {
 				MouseEnter -= InitInteraction;
 
-				_References = _Symbol.GetSourceLocations();
-				if (_References.Length > 0) {
-					Cursor = Cursors.Hand;
-					Highlight(sender, e);
-					MouseEnter += Highlight;
-					MouseLeave += Leave;
-					MouseLeftButtonUp += GotoSymbol;
-				}
+				Highlight(sender, e);
+				MouseEnter += Highlight;
+				MouseLeave += Leave;
+				MouseLeftButtonDown += GotoSymbol;
 			}
 
 			void Highlight(object sender, MouseEventArgs e) {
 				Background = SystemColors.HighlightBrush.Alpha(0.3);
+				Cursor = Cursors.Hand;
 			}
 			void Leave(object sender, MouseEventArgs e) {
 				Background = WpfBrushes.Transparent;
 			}
 
-			void GotoSymbol(object sender, MouseButtonEventArgs e) {
-				if (_References.Length == 1) {
-					_References[0].GoToSource();
+			void GotoSymbol(object sender, RoutedEventArgs e) {
+				var r = _Symbol.GetSourceLocations();
+				if (r.Length == 1) {
+					r[0].GoToSource();
 				}
 				else {
 					if (ContextMenu == null) {
-						ContextMenu = CreateContextMenuForSourceLocations(_Symbol.MetadataName, _References);
+						ContextMenu = CreateContextMenuForSourceLocations(_Symbol.MetadataName, r);
 					}
 					ContextMenu.IsOpen = true;
 				}
