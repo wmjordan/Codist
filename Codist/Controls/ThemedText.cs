@@ -49,10 +49,11 @@ namespace Codist.Controls
 			return this;
 		}
 		public void ApplySizeLimit() {
-			var w = Config.Instance.QuickInfoMaxWidth - (WpfHelper.IconRightMargin + ThemeHelper.DefaultIconSize + WpfHelper.SmallMarginSize + WpfHelper.SmallMarginSize + 22/*scrollbar width*/);
-			if (w <= 0) {
-				return;
+			var w = Config.Instance.QuickInfoMaxWidth;
+			if (w == 0) {
+				w = Application.Current.MainWindow.RenderSize.Width;
 			}
+			w = w - (WpfHelper.IconRightMargin + ThemeHelper.DefaultIconSize + WpfHelper.SmallMarginSize + WpfHelper.SmallMarginSize + 22/*scrollbar width*/);
 			foreach (var item in Children) {
 				var r = item as ThemedTipParagraph;
 				if (r != null) {
