@@ -114,14 +114,14 @@ namespace Codist.QuickInfo
 				case SyntaxKind.BaseKeyword:
 					break;
 				default:
-					if (token.Span.Contains(subjectTriggerPoint) == false
+					if (token.Span.Contains(subjectTriggerPoint, true) == false
 						|| token.IsReservedKeyword()) {
 						goto EXIT;
 					}
 					break;
 			}
 			var node = unitCompilation.FindNode(token.Span, true, true);
-			if (node == null || node.Span.Contains(subjectTriggerPoint.Position) == false) {
+			if (node == null || node.Span.Contains(subjectTriggerPoint.Position, true) == false) {
 				goto EXIT;
 			}
 			ISymbol symbol;

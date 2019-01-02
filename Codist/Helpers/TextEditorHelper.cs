@@ -39,11 +39,13 @@ namespace Codist
 			}
 			return false;
 		}
-
-		public static bool Contains(this TextSpan token, ITextSelection selection, bool inclusive) {
+		public static bool Contains(this TextSpan span, int position, bool inclusive) {
+			return span.Contains(position) || (inclusive && span.End == position);
+		}
+		public static bool Contains(this TextSpan span, ITextSelection selection, bool inclusive) {
 			var start = selection.Start.Position.Position;
 			var end = selection.End.Position.Position;
-			return token.Contains(start) && (token.Contains(end) || inclusive && token.End == end);
+			return span.Contains(start) && (span.Contains(end) || inclusive && span.End == end);
 		}
 
 		public static SnapshotSpan CreateSnapshotSpan(this TextSpan span, ITextSnapshot snapshot) {
