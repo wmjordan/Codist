@@ -630,7 +630,7 @@ namespace Codist.NaviBar
 			void SelectOrGoToSource(SyntaxNode node) {
 				node = _Bar._SemanticContext.RelocateDeclarationNode(node) ?? node;
 				var span = node.FullSpan;
-				if (span.Contains(_Bar._SemanticContext.Position)) {
+				if (span.Contains(_Bar._SemanticContext.Position) && node.SyntaxTree.FilePath == _Bar._SemanticContext.Document.FilePath) {
 					_Bar._View.SelectNode(node, Keyboard.Modifiers != ModifierKeys.Control);
 				}
 				else {
