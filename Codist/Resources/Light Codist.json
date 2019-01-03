@@ -1,654 +1,349 @@
 {
-  "Labels": [
-    {
-      "Label": "!",
-      "StyleID": "Emphasis"
-    },
-    {
-      "Label": "#",
-      "StyleID": "Emphasis"
-    },
-    {
-      "Label": "?",
-      "StyleID": "Question"
-    },
-    {
-      "Label": "!?",
-      "StyleID": "Exclaimation"
-    },
-    {
-      "Label": "x",
-      "IgnoreCase": true,
-      "StyleID": "Deletion"
-    },
-    {
-      "Label": "+++",
-      "StyleID": "Heading1"
-    },
-    {
-      "Label": "!!",
-      "StyleID": "Heading1"
-    },
-    {
-      "Label": "++",
-      "StyleID": "Heading2"
-    },
-    {
-      "Label": "+",
-      "StyleID": "Heading3"
-    },
-    {
-      "Label": "-",
-      "StyleID": "Heading4"
-    },
-    {
-      "Label": "--",
-      "StyleID": "Heading5"
-    },
-    {
-      "Label": "---",
-      "StyleID": "Heading6"
-    },
-    {
-      "AllowPunctuationDelimiter": true,
-      "Label": "TODO",
-      "IgnoreCase": true,
-      "StyleID": "ToDo"
-    },
-    {
-      "AllowPunctuationDelimiter": true,
-      "Label": "TO-DO",
-      "IgnoreCase": true,
-      "StyleID": "ToDo"
-    },
-    {
-      "AllowPunctuationDelimiter": true,
-      "Label": "undone",
-      "IgnoreCase": true,
-      "StyleApplication": "Tag",
-      "StyleID": "Undone"
-    },
-    {
-      "AllowPunctuationDelimiter": true,
-      "Label": "NOTE",
-      "IgnoreCase": true,
-      "StyleApplication": "Tag",
-      "StyleID": "Note"
-    },
-    {
-      "AllowPunctuationDelimiter": true,
-      "Label": "HACK",
-      "IgnoreCase": true,
-      "StyleID": "Hack"
-    }
-  ],
   "CommentStyles": [
     {
-      "Id": 1,
       "StyleID": "Emphasis",
       "Bold": true,
-      "FontSize": 7.0
+      "FontSize": 7.0,
+      "ForegroundColor": "#008000",
+      "BackgroundColor": "#00FFFFFF"
     },
     {
-      "Id": 2,
       "StyleID": "Question",
-      "ForegroundColor": "#9370DB"
+      "ForegroundColor": "#9370DB",
+      "BackgroundColor": "#00FFFFFF"
     },
     {
-      "Id": 3,
       "StyleID": "Exclaimation",
-      "ForegroundColor": "#F9FF0080"
+      "ForegroundColor": "#F9FF0080",
+      "BackgroundColor": "#00FFFF80"
     },
     {
-      "Id": 4,
       "StyleID": "Deletion",
       "Strikethrough": true,
-      "ForegroundColor": "#808080"
+      "ForegroundColor": "#808080",
+      "BackgroundColor": "#00FFFFFF"
     },
     {
-      "Id": 5,
       "StyleID": "ToDo",
+      "Italic": false,
       "FontSize": 3.0,
       "ForegroundColor": "#FFFFFF",
       "BackgroundColor": "#C00000A0"
     },
     {
-      "Id": 6,
       "StyleID": "Note",
       "Bold": true,
       "ForegroundColor": "#000000",
       "BackgroundColor": "#FFA500"
     },
     {
-      "Id": 7,
       "StyleID": "Hack",
+      "Italic": false,
       "ForegroundColor": "#00F279",
       "BackgroundColor": "#004000"
     },
     {
-      "Id": 8,
       "StyleID": "Undone",
       "ForegroundColor": "#A4AFD1",
       "BackgroundColor": "#714136",
       "ScrollBarMarkerStyle": "Square"
     },
     {
-      "Id": 9,
       "StyleID": "Heading1",
-      "FontSize": 12.0
+      "FontSize": 12.0,
+      "ForegroundColor": "#008000",
+      "BackgroundColor": "#00FFFFFF"
     },
     {
-      "Id": 10,
       "StyleID": "Heading2",
-      "FontSize": 8.0
+      "FontSize": 8.0,
+      "ForegroundColor": "#008000"
     },
     {
-      "Id": 11,
       "StyleID": "Heading3",
-      "FontSize": 4.0
+      "FontSize": 4.0,
+      "ForegroundColor": "#008000",
+      "BackgroundColor": "#00FFFFFF"
     },
     {
-      "Id": 12,
       "StyleID": "Heading4",
-      "FontSize": -1.0
+      "FontSize": -1.0,
+      "ForegroundColor": "#008000",
+      "BackgroundColor": "#00FFFFFF"
     },
     {
-      "Id": 13,
       "StyleID": "Heading5",
-      "FontSize": -2.0
+      "FontSize": -2.0,
+      "ForegroundColor": "#008000",
+      "BackgroundColor": "#00FFFFFF"
     },
     {
-      "Id": 14,
       "StyleID": "Heading6",
-      "FontSize": -3.0
+      "FontSize": -3.0,
+      "ForegroundColor": "#008000",
+      "BackgroundColor": "#00FFFFFF"
     },
     {
-      "Id": 15,
       "StyleID": "Task1",
+      "Italic": false,
       "FontSize": 10.0,
       "ForegroundColor": "#800000",
       "BackgroundColor": "#FF80FF"
     },
     {
-      "Id": 16,
       "StyleID": "Task2",
+      "Italic": false,
       "FontSize": 7.0,
       "ForegroundColor": "#800000",
       "BackgroundColor": "#FF80FF",
-      "BackgroundEffect": "ToLeft"
+      "BackgroundEffect": "ToBottom"
     },
     {
-      "Id": 17,
-      "StyleID": "Task3"
-    },
-    {
-      "Id": 18,
-      "StyleID": "Task4"
-    },
-    {
-      "Id": 19,
-      "StyleID": "Task5"
-    },
-    {
-      "Id": 20,
-      "StyleID": "Task6"
-    },
-    {
-      "Id": 21,
-      "StyleID": "Task7"
-    },
-    {
-      "Id": 22,
-      "StyleID": "Task8"
-    },
-    {
-      "Id": 23,
-      "StyleID": "Task9"
+      "StyleID": "Task3",
+      "Bold": true,
+      "Italic": false,
+      "FontSize": 2.0,
+      "ForegroundColor": "#FF0000",
+      "BackgroundColor": "#FFFF80"
     }
   ],
-  "XmlCodeStyles": [
-    {
-      "Id": 1,
-      "StyleID": "XmlAttributeName"
-    },
-    {
-      "Id": 2,
-      "StyleID": "XmlAttributeQuotes"
-    },
-    {
-      "Id": 3,
-      "StyleID": "XmlAttributeValue"
-    },
-    {
-      "Id": 4,
-      "StyleID": "XmlCData"
-    },
-    {
-      "Id": 5,
-      "StyleID": "XmlComment"
-    },
-    {
-      "Id": 6,
-      "StyleID": "XmlDelimiter"
-    },
-    {
-      "Id": 7,
-      "StyleID": "XmlName"
-    },
-    {
-      "Id": 8,
-      "StyleID": "XmlProcessingInstruction"
-    },
-    {
-      "Id": 9,
-      "StyleID": "XmlText"
-    }
-  ],
+  "XmlCodeStyles": [],
   "CodeStyles": [
     {
-      "Id": 1,
-      "StyleID": "BreakAndReturnKeyword"
+      "StyleID": "BreakAndReturnKeyword",
+      "Italic": true,
+      "FontSize": 2.0
     },
     {
-      "Id": 2,
-      "StyleID": "AbstractionKeyword"
-    },
-    {
-      "Id": 3,
-      "StyleID": "BranchingKeyword"
-    },
-    {
-      "Id": 4,
-      "StyleID": "LoopKeyword"
-    },
-    {
-      "Id": 5,
-      "StyleID": "ResourceAndExceptionKeyword"
-    },
-    {
-      "Id": 6,
-      "StyleID": "TypeDeclaration",
+      "StyleID": "AbstractionKeyword",
       "Bold": true,
-      "FontSize": 8.0
+      "ForegroundColor": "#004080"
     },
     {
-      "Id": 7,
-      "StyleID": "NestedTypeDeclaration",
+      "StyleID": "BranchingKeyword",
+      "ForegroundColor": "#004080"
+    },
+    {
+      "StyleID": "LoopKeyword",
       "Bold": true,
-      "FontSize": 4.0
+      "ForegroundColor": "#0080FF"
     },
     {
-      "Id": 8,
-      "StyleID": "StaticMemberName"
+      "StyleID": "ResourceAndExceptionKeyword",
+      "Bold": true,
+      "ForegroundColor": "#CE0000"
     },
     {
-      "Id": 9,
-      "StyleID": "OverrideMemberName",
-      "BackgroundColor": "#DFC6FFD5",
-      "BackgroundEffect": "ToBottom"
+      "StyleID": "Declaration",
+      "FontSize": 8.0,
     },
     {
-      "Id": 10,
-      "StyleID": "AbstractMemberName",
+      "StyleID": "MemberDeclaration",
+      "FontSize": 6.0
     },
     {
-      "Id": 11,
-      "StyleID": "VirtualMemberName"
-    },
-    {
-      "Id": 12,
-      "StyleID": "LocalVariableName"
-    },
-    {
-      "Id": 13,
-      "StyleID": "AttributeName",
-      "ForegroundColor": "#EF008080"
-    },
-    {
-      "Id": 14,
-      "StyleID": "AttributeNotation",
-      "FontSize": -1.0
-    },
-    {
-      "Id": 15,
       "StyleID": "DeclarationBrace",
-      "Bold": true,
-      "FontSize": 3.0
+      "FontSize": 2.0
     },
     {
-      "Id": 16,
-      "StyleID": "SealedClassName",
-      "BackgroundColor": "#0000FFFF"
+      "StyleID": "StaticMemberName",
+      "Underline": true
     },
     {
-      "Id": 17,
-      "StyleID": "DelegateName",
-      "ForegroundColor": "#004040",
-      "BackgroundColor": "#8095FFFF",
+      "StyleID": "OverrideMemberName",
+      "BackgroundColor": "#BF80FF80",
       "BackgroundEffect": "ToBottom"
     },
     {
-      "Id": 18,
-      "StyleID": "EventName",
-      "ForegroundColor": "#008040",
-      "BackgroundColor": "#80AAFFAA",
+      "StyleID": "VirtualMemberName",
+      "BackgroundColor": "#A4A4FF",
       "BackgroundEffect": "ToBottom"
     },
     {
-      "Id": 19,
-      "StyleID": "TypeParameterName",
-      "Bold": true,
-      "ForegroundColor": "#8080C0"
+      "StyleID": "LocalVariableName",
+      "Italic": true
     },
     {
-      "Id": 20,
-      "StyleID": "ConstructorMethodName",
-      "ForegroundColor": "#FF8000"
-    },
-    {
-      "Id": 21,
-      "StyleID": "FieldName",
-      "ForegroundColor": "#808000"
-    },
-    {
-      "Id": 22,
-      "StyleID": "ConstFieldName",
-      "Underline": true,
-      "ForegroundColor": "#800080"
-    },
-    {
-      "Id": 23,
-      "StyleID": "ReadOnlyFieldName",
-      "ForegroundColor": "#808000"
-    },
-    {
-      "Id": 24,
-      "StyleID": "PropertyName",
-      "ForegroundColor": "#000080"
-    },
-    {
-      "Id": 25,
-      "StyleID": "MethodName",
-      "ForegroundColor": "#800000"
-    },
-    {
-      "Id": 26,
-      "StyleID": "ExtensionMethodName",
-      "Underline": true,
-      "ForegroundColor": "#800000"
-    },
-    {
-      "Id": 27,
-      "StyleID": "ExternMethodName",
-      "ForegroundColor": "#800000",
-      "BackgroundColor": "#7DFF0000",
-      "BackgroundEffect": "ToBottom"
-    },
-    {
-      "Id": 28,
-      "StyleID": "ParameterName",
-      "ForegroundColor": "#D9006C"
-    },
-    {
-      "Id": 29,
-      "StyleID": "XmlDoc"
-    },
-    {
-      "Id": 30,
-      "StyleID": "XmlDocComment",
-      "ForegroundColor": "#DC008000"
-    },
-    {
-      "Id": 31,
-      "StyleID": "XmlDocTag"
-    },
-    {
-      "Id": 32,
-      "StyleID": "XmlDocAttributeName"
-    },
-    {
-      "Id": 33,
-      "StyleID": "XmlDocAttributeValue"
-    },
-    {
-      "Id": 34,
-      "StyleID": "XmlDocDelimiter"
-    },
-    {
-      "Id": 35,
-      "StyleID": "XmlDocCData",
-      "ForegroundColor": "#008000"
-    }
-  ],
-  "CppStyles": [
-    {
-      "Id": 1,
-      "StyleID": "Function"
-    },
-    {
-      "Id": 2,
-      "StyleID": "ClassTemplate"
-    },
-    {
-      "Id": 3,
-      "StyleID": "FunctionTemplate"
-    },
-    {
-      "Id": 4,
-      "StyleID": "Event"
-    },
-    {
-      "Id": 5,
-      "StyleID": "GenericType"
-    },
-    {
-      "Id": 6,
-      "StyleID": "GlobalVariable"
-    },
-    {
-      "Id": 7,
-      "StyleID": "Label"
-    },
-    {
-      "Id": 8,
-      "StyleID": "LocalVariable"
-    },
-    {
-      "Id": 9,
-      "StyleID": "Macro"
-    },
-    {
-      "Id": 10,
-      "StyleID": "MemberField"
-    },
-    {
-      "Id": 11,
-      "StyleID": "MemberFunction"
-    },
-    {
-      "Id": 12,
-      "StyleID": "MemberOperator"
-    },
-    {
-      "Id": 13,
-      "StyleID": "Namespace"
-    },
-    {
-      "Id": 14,
-      "StyleID": "NewDelete"
-    },
-    {
-      "Id": 15,
-      "StyleID": "Parameter"
-    },
-    {
-      "Id": 16,
-      "StyleID": "Operator"
-    },
-    {
-      "Id": 17,
-      "StyleID": "Property"
-    },
-    {
-      "Id": 18,
-      "StyleID": "RefType"
-    },
-    {
-      "Id": 19,
-      "StyleID": "StaticMemberField"
-    },
-    {
-      "Id": 20,
-      "StyleID": "StaticMemberFunction"
-    },
-    {
-      "Id": 21,
-      "StyleID": "Type"
-    },
-    {
-      "Id": 22,
-      "StyleID": "UserDefinedLiteralNumber"
-    },
-    {
-      "Id": 23,
-      "StyleID": "UserDefinedLiteralRaw"
-    },
-    {
-      "Id": 24,
-      "StyleID": "UserDefinedLiteralString"
-    },
-    {
-      "Id": 25,
-      "StyleID": "ValueType"
-    }
-  ],
-  "GeneralStyles": [
-    {
-      "Id": 1,
-      "StyleID": "Keyword"
-    },
-    {
-      "Id": 2,
-      "StyleID": "NamespaceName",
-      "ForegroundColor": "#808080"
-    },
-    {
-      "Id": 3,
-      "StyleID": "ClassName"
-    },
-    {
-      "Id": 4,
-      "StyleID": "StructName",
-      "ForegroundColor": "#008080"
-    },
-    {
-      "Id": 5,
-      "StyleID": "InterfaceName",
-      "ForegroundColor": "#0080C0"
-    },
-    {
-      "Id": 6,
-      "StyleID": "EnumName",
-      "ForegroundColor": "#800080"
-    },
-    {
-      "Id": 7,
-      "StyleID": "Identifier"
-    },
-    {
-      "Id": 8,
-      "StyleID": "Number",
-      "Bold": true
-    },
-    {
-      "Id": 9,
-      "StyleID": "String",
-      "ForegroundColor": "#000000"
-    },
-    {
-      "Id": 10,
-      "StyleID": "StringVerbatim",
-      "ForegroundColor": "#000000"
-    },
-    {
-      "Id": 11,
-      "StyleID": "Operator"
-    },
-    {
-      "Id": 12,
-      "StyleID": "Punctuation"
-    },
-    {
-      "Id": 13,
-      "StyleID": "Url"
-    },
-    {
-      "Id": 14,
       "StyleID": "Label",
       "Bold": true,
       "ForegroundColor": "#FFFFFF",
       "BackgroundColor": "#0000FF"
     },
     {
-      "Id": 15,
-      "StyleID": "PreprocessorText"
+      "StyleID": "AttributeNotation",
+      "Italic": true,
+      "FontSize": -2.0,
+      "ForegroundColor": "#EF808080"
     },
     {
-      "Id": 16,
-      "StyleID": "PreprocessorKeyword"
+      "StyleID": "NamespaceName",
+      "ForegroundColor": "#808080"
     },
     {
-      "Id": 17,
+      "StyleID": "SealedClassName",
+      "BackgroundColor": "#FFE8E8",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "StyleID": "DelegateName",
+      "ForegroundColor": "#004040",
+      "BackgroundColor": "#8095FFFF",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "StyleID": "EventName",
+      "ForegroundColor": "#008040",
+      "BackgroundColor": "#80CAFFCA",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "StyleID": "TypeParameterName",
+      "Bold": true,
+      "ForegroundColor": "#8080C0"
+    },
+    {
+      "StyleID": "ConstructorMethodName",
+      "ForegroundColor": "#FF8000"
+    },
+    {
+      "StyleID": "FieldName",
+      "Italic": true,
+      "ForegroundColor": "#808000"
+    },
+    {
+      "StyleID": "ConstFieldName",
+      "ForegroundColor": "#800080"
+    },
+    {
+      "StyleID": "ReadOnlyFieldName",
+      "Italic": false,
+      "ForegroundColor": "#808000"
+    },
+    {
+      "StyleID": "PropertyName",
+      "ForegroundColor": "#0000B3"
+    },
+    {
+      "StyleID": "MethodName",
+      "ForegroundColor": "#800000"
+    },
+    {
+      "StyleID": "ExtensionMethodName",
+      "Italic": true,
+      "Underline": true,
+      "ForegroundColor": "#800000"
+    },
+    {
+      "StyleID": "ExternMethodName",
+      "ForegroundColor": "#800000",
+      "BackgroundColor": "#FF0000",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "StyleID": "ParameterName",
+      "Italic": true,
+      "ForegroundColor": "#D9006C"
+    },
+    {
+      "StyleID": "XmlDoc",
+      "FontSize": -1.0,
+      "ForegroundColor": "#E0000000"
+    },
+    {
+      "StyleID": "XmlDocComment",
+    },
+    {
+      "StyleID": "XmlDocTag",
+      "Italic": true
+    },
+    {
+      "StyleID": "XmlDocAttributeName",
+      "Italic": true
+    },
+    {
+      "StyleID": "XmlDocCData",
+      "ForegroundColor": "#008000"
+    }
+  ],
+  "CppStyles": [
+    {
+      "StyleID": "Function",
+      "ForegroundColor": "#800000"
+    },
+    {
+      "StyleID": "Label",
+      "Bold": true,
+      "ForegroundColor": "#FFFFFF",
+      "BackgroundColor": "#0000FF"
+    },
+    {
+      "StyleID": "LocalVariable",
+      "Italic": true
+    },
+    {
+      "StyleID": "MemberField",
+      "ForegroundColor": "#808000"
+    },
+    {
+      "StyleID": "MemberFunction",
+      "ForegroundColor": "#800000"
+    },
+    {
+      "StyleID": "Parameter",
+      "Italic": true,
+      "ForegroundColor": "#FF0080"
+    },
+    {
+      "StyleID": "StaticMemberField",
+      "Underline": true
+    },
+    {
+      "StyleID": "StaticMemberFunction",
+      "Underline": true,
+      "ForegroundColor": "#800000"
+    },
+    {
+      "StyleID": "UserDefinedLiteralNumber",
+      "Bold": true
+    }
+  ],
+  "GeneralStyles": [
+    {
+      "StyleID": "StructName",
+      "ForegroundColor": "#008080"
+    },
+    {
+      "StyleID": "InterfaceName",
+      "ForegroundColor": "#0080C0"
+    },
+    {
+      "StyleID": "EnumName",
+      "ForegroundColor": "#800080"
+    },
+    {
+      "StyleID": "Number",
+      "Bold": true
+    },
+    {
+      "StyleID": "PreprocessorText",
+      "Bold": true,
+      "ForegroundColor": "#FFFFFF",
+      "BackgroundColor": "#0080FF"
+    },
+    {
       "StyleID": "Comment",
+      "Italic": true,
       "ForegroundColor": "#DF008000"
     },
     {
-      "Id": 18,
-      "StyleID": "ExcludedCode"
-    },
-    {
-      "Id": 19,
       "StyleID": "UnnecessaryCode",
       "Strikethrough": true
     }
   ],
   "SymbolMarkerStyles": [
     {
-      "Id": 1,
-      "StyleID": "Highlight1"
-    },
-    {
-      "Id": 2,
-      "StyleID": "Highlight2"
-    },
-    {
-      "Id": 3,
-      "StyleID": "Highlight3"
-    },
-    {
-      "Id": 4,
-      "StyleID": "Highlight4"
-    },
-    {
-      "Id": 5,
-      "StyleID": "Highlight5"
-    },
-    {
-      "Id": 6,
-      "StyleID": "Highlight6"
-    },
-    {
-      "Id": 7,
-      "StyleID": "Highlight7"
-    },
-    {
-      "Id": 8,
-      "StyleID": "Highlight8"
-    },
-    {
-      "Id": 9,
-      "StyleID": "Highlight9"
+      "StyleID": "ReferencedTypeAndMember",
+      "Bold": true
     }
-  ],
-  "MarkerSettings": []
+  ]
 }
