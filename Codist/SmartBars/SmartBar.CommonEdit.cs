@@ -76,26 +76,29 @@ namespace Codist.SmartBars
 			return firstModified;
 		}
 
-		/// <summary>Surround each span of the corrent selection with <paramref name="prefix"/> and <paramref name="suffix"/>, and optionally select the first modified span if <paramref name="selectModified"/> is <see langword="true"/>.</summary>
+		/// <summary>When selection is not surrounded with <paramref name="prefix"/> and <paramref name="suffix"/>, surround each span of the corrent selection with <paramref name="prefix"/> and <paramref name="suffix"/>, and optionally select the first modified span if <paramref name="selectModified"/> is <see langword="true"/>; when surrounded, remove them.</summary>
 		/// <returns>The new span after modification. If modification is unsuccessful, the default of <see cref="SnapshotSpan"/> is returned.</returns>
-		protected SnapshotSpan SurroundWith(CommandContext ctx, string prefix, string suffix, bool selectModified) {
+		protected static SnapshotSpan SurroundWith(CommandContext ctx, string prefix, string suffix, bool selectModified) {
 			var firstModified = new SnapshotSpan();
 			var psLength = prefix.Length + suffix.Length;
 			var removed = false;
 			string t = null;
 			ctx.KeepToolBar(false);
 			using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
-				foreach (var item in View.Selection.SelectedSpans) {
+				foreach (var item in ctx.View.Selection.SelectedSpans) {
 					t = item.GetText();
+					// remove surrounding items
 					if (t.Length > psLength
 						&& t.StartsWith(prefix, StringComparison.Ordinal)
-						&& t.EndsWith(suffix, StringComparison.Ordinal)) {
+						&& t.EndsWith(suffix, StringComparison.Ordinal)
+						&& t.IndexOf(prefix, prefix.Length, t.Length - prefix.Length) <= t.IndexOf(suffix, prefix.Length, t.Length - psLength)) {
 						if (edit.Replace(item, t.Substring(prefix.Length, t.Length - psLength))
 							&& firstModified.Snapshot == null) {
 							firstModified = item;
 							removed = true;
 						}
 					}
+					// surround items
 					else if (edit.Replace(item, prefix + t + suffix) && firstModified.Snapshot == null) {
 						firstModified = item;
 					}
@@ -108,7 +111,7 @@ namespace Codist.SmartBars
 						FindNext(ctx, t);
 					}
 					else if (selectModified) {
-						View.SelectSpan(firstModified);
+						ctx.View.SelectSpan(firstModified);
 					}
 				}
 			}
@@ -306,26 +309,8 @@ namespace Codist.SmartBars
 					TextEditorHelper.ExecuteEditorCommand("Edit.SurroundWith");
 				}),
 				new CommandItem(KnownImageIds.MaskedTextBox, "Toggle Parentheses", ctx => {
-					if (ctx.View.TryGetFirstSelectionSpan(out var span) == false) {
-						return;
-					}
-					using (var ed = ctx.View.TextBuffer.CreateEdit()) {
-						var t = span.GetText();
-						if (t.Length > 1
-							&& t[0] == '(' && t[t.Length - 1] == ')'
-							&& t.IndexOf('(', 1, t.Length - 1) <= t.IndexOf(')', 1, t.Length - 2)
-							 /*avoid toggling "(1 + 1)* (2 + 2)" to "1 + 1) * (2 + 2" */
-							) {
-							t = t.Substring(1, t.Length - 2);
-						}
-						else {
-							t = "(" + t + ")";
-						}
-						if (ed.Replace(span, t)) {
-							ed.Apply();
-							ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-							ctx.KeepToolBar(false);
-						}
+					if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
+						SurroundWith(ctx, "(", ")", true);
 					}
 				}),
 			};
