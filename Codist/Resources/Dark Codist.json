@@ -20,7 +20,6 @@
     },
     {
       "StyleID": "ToDo",
-      "Bold": true,
       "ForegroundColor": "#CCCCCC",
       "BackgroundColor": "#800000A0"
     },
@@ -82,7 +81,7 @@
       "StyleID": "Task2",
       "Italic": false,
       "FontSize": 7.0,
-      "ForegroundColor": "#800000",
+      "ForegroundColor": "#F9C6C6",
       "BackgroundColor": "#FF80FF",
       "BackgroundEffect": "ToBottom"
     },
@@ -104,25 +103,25 @@
     {
       "StyleID": "AbstractionKeyword",
       "Bold": true,
-      "ForegroundColor": "#004080"
+      "ForegroundColor": "#0060BF"
     },
     {
       "StyleID": "BranchingKeyword",
-      "ForegroundColor": "#004080"
+      "ForegroundColor": "#409FFF"
     },
     {
       "StyleID": "LoopKeyword",
       "Bold": true,
-      "ForegroundColor": "#0080FF"
+      "ForegroundColor": "#40CFFF"
     },
     {
       "StyleID": "ResourceAndExceptionKeyword",
       "Bold": true,
-      "ForegroundColor": "#CE0000"
+      "ForegroundColor": "#FF1515"
     },
     {
       "StyleID": "Declaration",
-      "FontSize": 8.0,
+      "FontSize": 8.0
     },
     {
       "StyleID": "MemberDeclaration",
@@ -179,18 +178,17 @@
     },
     {
       "StyleID": "EventName",
-      "ForegroundColor": "#62FFB0",
+      "ForegroundColor": "#22FF91",
       "BackgroundColor": "#80004000",
       "BackgroundEffect": "ToBottom"
     },
     {
       "StyleID": "TypeParameterName",
-      "ForegroundColor": "#FFB693",
-	  "Italic": true
+      "ForegroundColor": "#FFB693"
     },
     {
       "StyleID": "ConstructorMethodName",
-      "ForegroundColor": "#FF8000"
+      "ForegroundColor": "#DB8024"
     },
     {
       "StyleID": "FieldName",
@@ -198,7 +196,7 @@
     },
     {
       "StyleID": "ConstFieldName",
-      "ForegroundColor": "#C400C4"
+      "ForegroundColor": "#C94EC9"
     },
     {
       "StyleID": "ReadOnlyFieldName",
@@ -206,34 +204,31 @@
     },
     {
       "StyleID": "PropertyName",
-      "ForegroundColor": "#FF8040"
+      "ForegroundColor": "#7ABCFE"
     },
     {
       "StyleID": "MethodName",
-      "ForegroundColor": "#FFA4A4"
+      "ForegroundColor": "#CE4D4D"
     },
     {
       "StyleID": "ExtensionMethodName",
-      "Underline": true,
+      "Italic": true,
       "ForegroundColor": "#FFA4A4"
     },
     {
       "StyleID": "ExternMethodName",
-      "BackgroundColor": "#7DFF0000",
+      "BackgroundColor": "#7D800000",
       "BackgroundEffect": "ToBottom"
     },
     {
       "StyleID": "ParameterName",
-      "ForegroundColor": "#D9006C"
+      "Italic": true,
+      "ForegroundColor": "#FF44A2"
     },
     {
       "StyleID": "XmlDoc",
       "FontSize": -1.0,
-      "ForegroundColor": "#E0C0C0C0"
-    },
-    {
-      "StyleID": "XmlDocComment",
-      "ForegroundColor": "#DC008000",
+      "ForegroundColor": "#DFC0C0C0"
     },
     {
       "StyleID": "XmlDocTag",
@@ -245,7 +240,7 @@
     },
     {
       "StyleID": "XmlDocCData",
-      "ForegroundColor": "#008000"
+      "ForegroundColor": "#6AFF6A"
     }
   ],
   "CppStyles": [
@@ -293,7 +288,7 @@
   "GeneralStyles": [
     {
       "StyleID": "StructName",
-      "ForegroundColor": "#00BFBF"
+      "ForegroundColor": "#4EB0C9"
     },
     {
       "StyleID": "InterfaceName",
@@ -301,15 +296,11 @@
     },
     {
       "StyleID": "EnumName",
-      "ForegroundColor": "#C400C4"
+      "ForegroundColor": "#C94EC9"
     },
     {
       "StyleID": "Number",
       "Bold": true
-    },
-    {
-      "StyleID": "String",
-      "ForegroundColor": "#C0C0C0"
     },
     {
       "StyleID": "PreprocessorText",
@@ -320,7 +311,7 @@
     {
       "StyleID": "Comment",
       "Italic": true,
-      "ForegroundColor": "#DF008000"
+      "ForegroundColor": "#00008000"
     },
     {
       "StyleID": "UnnecessaryCode",
