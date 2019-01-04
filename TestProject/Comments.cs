@@ -49,5 +49,14 @@ namespace TestProject
 		public static string FormatDate(DateTime date, string format) {
 			return date.ToString(format);
 		}
+
+		/// <summary>
+		/// Parses text as hexdemical number.
+		/// </summary>
+		/// <param name="text">The text to be parsed as hex.</param>
+		/// <returns>The result number.</returns>
+		public static int ParseAsHexNumber(string text) {
+			return Int32.Parse(text, System.Globalization.NumberStyles.HexNumber);
+		}
 	}
 }

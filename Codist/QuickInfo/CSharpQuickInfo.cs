@@ -121,15 +121,18 @@ namespace Codist.QuickInfo
 					break;
 			}
 			var node = unitCompilation.FindNode(token.Span, true, true);
-			if (node == null || node.Span.Contains(subjectTriggerPoint.Position, true) == false) {
+			if (node == null || node.Span.Contains(subjectTriggerPoint.Position) == false) {
 				goto EXIT;
 			}
 			ISymbol symbol;
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
-				ShowParameterInfo(qiContent, node);
-			}
 			if (node.IsKind(SyntaxKind.Argument)) {
 				node = (node as ArgumentSyntax).Expression;
+			}
+			else if (node.IsKind(SyntaxKind.ArgumentList)) {
+				node = (node as ArgumentListSyntax).Arguments.LastOrDefault()?.Expression ?? node;
+			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
+				ShowParameterInfo(qiContent, node);
 			}
 			if (node.IsKind(SyntaxKind.BaseExpression)) {
 				symbol = semanticModel.GetTypeInfo(node).ConvertedType;

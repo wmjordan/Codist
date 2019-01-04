@@ -49,22 +49,19 @@ namespace Codist.SmartBars
 		protected SnapshotSpan Replace(CommandContext ctx, Func<string, string> replaceHandler, bool selectModified) {
 			ctx.KeepToolBar(false);
 			var firstModified = new SnapshotSpan();
-			int length = 0;
 			string t = ctx.View.GetFirstSelectionText();
 			if (t.Length == 0) {
 				return firstModified;
 			}
 			var edited = ctx.View.EditSelection((view, edit, item) => {
 				var replacement = replaceHandler(item.GetText());
-				if (replacement != null
-					&& edit.Replace(item, replacement)
-					&& firstModified.Snapshot == null) {
-					firstModified = item;
-					length = replacement.Length;
+				if (replacement != null && edit.Replace(item, replacement)) {
+					return new Span(item.Start, replacement.Length);
 				}
+				return null;
 			});
 			if (edited != null) {
-				firstModified = new SnapshotSpan(edited, firstModified.Start, length);
+				firstModified = edited.Value;
 				if (t != null
 					&& Keyboard.Modifiers == ModifierKeys.Control) {
 					FindNext(ctx, t);
@@ -199,17 +196,18 @@ namespace Codist.SmartBars
 				case TokenType.Digit:
 					AddCommand(ToolBar, KnownImageIds.Counter, "Increment number", ctx => {
 						if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
-							var t = span.GetText();
-							long l;
-							if (long.TryParse(t, out l)) {
-								using (var ed = ctx.View.TextBuffer.CreateEdit()) {
-									t = (++l).ToString(System.Globalization.CultureInfo.InvariantCulture);
-									if (ed.Replace(span.Span, t)) {
-										ed.Apply();
-										ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-										ctx.KeepToolBar(false);
+							ctx.KeepToolBar(false);
+							var u = ctx.View.EditSelection((v, edit, s) => {
+								if (long.TryParse(s.GetText(), out var value)) {
+									var t = (++value).ToString(System.Globalization.CultureInfo.InvariantCulture);
+									if (edit.Replace(s.Span, t)) {
+										return new Span(s.Start, t.Length);
 									}
 								}
+								return null;
+							});
+							if (u.HasValue) {
+								ctx.View.SelectSpan(u.Value);
 							}
 						}
 					});

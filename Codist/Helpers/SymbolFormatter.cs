@@ -138,7 +138,7 @@ namespace Codist
 		}
 
 
-		internal void ToUIText(System.Windows.Documents.InlineCollection text, ISymbol symbol, string alias) {
+		internal void ToUIText(InlineCollection text, ISymbol symbol, string alias) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:
 					ToUIText(text, (symbol as IArrayTypeSymbol).ElementType, alias);
@@ -375,7 +375,7 @@ namespace Codist
 			Const = formatMap.GetBrush(Constants.CSharpConstFieldName);
 		}
 
-		void AddTypeArguments(System.Windows.Documents.InlineCollection text, ImmutableArray<ITypeParameterSymbol> arguments) {
+		void AddTypeArguments(InlineCollection text, ImmutableArray<ITypeParameterSymbol> arguments) {
 			text.Add("<");
 			for (int i = 0; i < arguments.Length; i++) {
 				if (i > 0) {

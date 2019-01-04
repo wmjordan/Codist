@@ -104,15 +104,24 @@ namespace Codist
 		/// <typeparam name="TView">The type of the view.</typeparam>
 		/// <param name="view">The <see cref="ITextView"/> to be edited.</param>
 		/// <param name="action">The edit operation against each selected span.</param>
-		/// <returns>Returns a new <see cref="ITextSnapshot"/> if <see cref="ITextEdit.HasEffectiveChanges"/>  returns <see langword="true"/>, otherwise, returns <see langword="null"/>.</returns>
-		public static ITextSnapshot EditSelection<TView>(this TView view, Action<TView, ITextEdit, SnapshotSpan> action)
+		/// <returns>Returns a new <see cref="SnapshotSpan"/> if <see cref="ITextEdit.HasEffectiveChanges"/> returns <see langword="true"/> and <paramref name="action"/> returns a <see cref="Span"/>, otherwise, returns <see langword="null"/>.</returns>
+		public static SnapshotSpan? EditSelection<TView>(this TView view, Func<TView, ITextEdit, SnapshotSpan, Span?> action)
 			where TView : ITextView {
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+				Span? s = null;
 				foreach (var item in view.Selection.SelectedSpans) {
-					action(view, edit, item);
+					if (s == null) {
+						s = action(view, edit, item);
+					}
+					else {
+						action(view, edit, item);
+					}
 				}
 				if (edit.HasEffectiveChanges) {
-					return edit.Apply();
+					var shot = edit.Apply();
+					return s.HasValue ? view.TextSnapshot.CreateTrackingSpan(s.Value, SpanTrackingMode.EdgeInclusive)
+						.GetSpan(shot)
+						: (SnapshotSpan?)null;
 				}
 				return null;
 			}
