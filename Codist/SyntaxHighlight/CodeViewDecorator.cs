@@ -139,7 +139,7 @@ namespace Codist.SyntaxHighlight
 					.SetForeground(settings.ForeColor);
 				}
 			}
-			var bc = settings.BackColor.A > 0 ? settings.BackColor.Alpha(255)
+			var bc = settings.BackColor.A > 0 ? settings.BackColor
 				: properties.BackgroundBrushEmpty == false && properties.BackgroundBrush is SolidColorBrush ? (properties.BackgroundBrush as SolidColorBrush).Color
 				: Colors.Transparent;
 			if (bc.A > 0) {
