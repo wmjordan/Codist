@@ -102,12 +102,13 @@ namespace Codist.Options
 			_loaded = true;
 		}
 
-		static void RenderPreview(Bitmap bmp, string fontName, int fontSize, StyleBase style) {
+		void RenderPreview(Bitmap bmp, string fontName, int fontSize, StyleBase style) {
 			var size = (float)(fontSize + style.FontSize);
 			if (size < 2) {
 				return;
 			}
 			UIHelper.MixStyle(style, out var fs, out var fc, out var bc);
+			_ForeColorButton.DefaultColor = fc;
 			using (var g = Graphics.FromImage(bmp))
 			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontName : style.Font, size, fs))
 			using (var b = new SolidBrush(fc))

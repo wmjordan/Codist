@@ -7,15 +7,16 @@ namespace Codist.Options
 	public partial class PickColorButton : Button
 	{
 		Color _SelectedColor;
-		public Color SelectedColor {
-			get { return _SelectedColor; }
-			set { if (value != SelectedColor) { SetColor(value); } }
-		}
-
 		public PickColorButton() {
 			var x = Height - Padding.Top - Padding.Bottom;
 			Image = new Bitmap(x, x);
 			TextImageRelation = TextImageRelation.ImageBeforeText;
+		}
+
+		public Color DefaultColor { get; set; }
+		public Color SelectedColor {
+			get { return _SelectedColor; }
+			set { if (value != SelectedColor) { SetColor(value); } }
 		}
 
 		void SetColor(Color color) {
@@ -30,7 +31,10 @@ namespace Codist.Options
 		}
 
 		protected override void OnClick(EventArgs e) {
-			using (var c = new ColorDialog() { FullOpen = true, Color = SelectedColor }) {
+			using (var c = new ColorDialog() {
+				FullOpen = true,
+				Color = SelectedColor.A == 0 ? DefaultColor : SelectedColor
+			}) {
 				if (c.ShowDialog() == DialogResult.OK) {
 					SelectedColor = c.Color;
 					base.OnClick(e);
