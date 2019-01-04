@@ -98,7 +98,8 @@
   "CodeStyles": [
     {
       "StyleID": "BreakAndReturnKeyword",
-      "FontSize": 1.0
+      "FontSize": 2.0,
+      "Italic": true
     },
     {
       "StyleID": "AbstractionKeyword",
