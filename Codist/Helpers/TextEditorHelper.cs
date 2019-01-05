@@ -72,7 +72,8 @@ namespace Codist
 		}
 
 		public static TextFormattingRunProperties GetRunProperties(this IClassificationFormatMap formatMap, string classificationType) {
-			return formatMap.GetTextProperties(ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType));
+			var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType);
+			return t == null ? null : formatMap.GetTextProperties(t);
 		}
 
 		public static StyleBase GetStyle(string classificationType) {
