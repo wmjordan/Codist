@@ -140,7 +140,7 @@ namespace Codist.QuickInfo
 			else {
 				var symbolInfo = semanticModel.GetSymbolInfo(node);
 				if (symbolInfo.CandidateReason != CandidateReason.None) {
-					ShowCandidateInfo(qiContent, symbolInfo, node);
+					ShowCandidateInfo(qiContent, symbolInfo);
 					symbol = null;
 					goto RETURN;
 				}
@@ -167,7 +167,7 @@ namespace Codist.QuickInfo
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
-				ShowAttributesInfo(qiContent, node, symbol);
+				ShowAttributesInfo(qiContent, symbol);
 			}
 			ShowSymbolInfo(qiContent, node, symbol);
 			RETURN:
@@ -309,7 +309,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo, SyntaxNode node) {
+		static void ShowCandidateInfo(IList<object> qiContent, SymbolInfo symbolInfo) {
 			var info = new ThemedTipDocument().AppendTitle(KnownImageIds.CodeInformation, "Maybe...");
 			foreach (var item in symbolInfo.CandidateSymbols) {
 				info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
@@ -324,15 +324,15 @@ namespace Codist.QuickInfo
 		void ShowSymbolInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event:
-					ShowEventInfo(qiContent, node, symbol as IEventSymbol);
+					ShowEventInfo(qiContent, symbol as IEventSymbol);
 					break;
 				case SymbolKind.Field:
-					ShowFieldInfo(qiContent, node, symbol as IFieldSymbol);
+					ShowFieldInfo(qiContent, symbol as IFieldSymbol);
 					break;
 				case SymbolKind.Local:
 					var loc = symbol as ILocalSymbol;
 					if (loc.HasConstantValue) {
-						ShowConstInfo(qiContent, node, symbol, loc.ConstantValue);
+						ShowConstInfo(qiContent, symbol, loc.ConstantValue);
 					}
 					break;
 				case SymbolKind.Method:
@@ -345,7 +345,7 @@ namespace Codist.QuickInfo
 						|| node.Parent.Parent.IsKind(SyntaxKind.Attribute) // qualified attribute annotation
 						) {
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
-							ShowAttributesInfo(qiContent, node, symbol.ContainingType);
+							ShowAttributesInfo(qiContent, symbol.ContainingType);
 						}
 						ShowTypeInfo(qiContent, node.Parent, symbol.ContainingType as INamedTypeSymbol);
 					}
@@ -360,7 +360,7 @@ namespace Codist.QuickInfo
 					ShowTypeInfo(qiContent, node, symbol as INamedTypeSymbol);
 					break;
 				case SymbolKind.Property:
-					ShowPropertyInfo(qiContent, node, symbol as IPropertySymbol);
+					ShowPropertyInfo(qiContent, symbol as IPropertySymbol);
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)) {
 						var preview = ColorQuickInfo.PreviewSystemColorProperties(symbol as IPropertySymbol);
 						if (preview != null) {
@@ -369,7 +369,7 @@ namespace Codist.QuickInfo
 					}
 					break;
 				case SymbolKind.Namespace:
-					ShowNamespaceInfo(qiContent, node, symbol as INamespaceSymbol);
+					ShowNamespaceInfo(qiContent, symbol as INamespaceSymbol);
 					break;
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation)) {
@@ -477,25 +477,25 @@ namespace Codist.QuickInfo
 			return null;
 		}
 
-		static void ShowAttributesInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
+		static void ShowAttributesInfo(IList<object> qiContent, ISymbol symbol) {
 			// todo: show inherited attributes
 			var attrs = symbol.GetAttributes();
 			if (attrs.Length > 0) {
-				ShowAttributes(qiContent, attrs, node.SpanStart);
+				ShowAttributes(qiContent, attrs);
 			}
 		}
 
-		static void ShowPropertyInfo(IList<object> qiContent, SyntaxNode node, IPropertySymbol property) {
+		static void ShowPropertyInfo(IList<object> qiContent, IPropertySymbol property) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& (property.DeclaredAccessibility != Accessibility.Public || property.IsAbstract || property.IsStatic || property.IsOverride || property.IsVirtual)) {
 				ShowDeclarationModifier(qiContent, property);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
-				ShowInterfaceImplementation(qiContent, node, property, property.ExplicitInterfaceImplementations);
+				ShowInterfaceImplementation(qiContent, property, property.ExplicitInterfaceImplementations);
 			}
 		}
 
-		static void ShowEventInfo(IList<object> qiContent, SyntaxNode node, IEventSymbol ev) {
+		static void ShowEventInfo(IList<object> qiContent, IEventSymbol ev) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
 				if (ev.DeclaredAccessibility != Accessibility.Public || ev.IsAbstract || ev.IsStatic || ev.IsOverride || ev.IsVirtual) {
 					ShowDeclarationModifier(qiContent, ev);
@@ -509,18 +509,18 @@ namespace Codist.QuickInfo
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
-				ShowInterfaceImplementation(qiContent, node, ev, ev.ExplicitInterfaceImplementations);
+				ShowInterfaceImplementation(qiContent, ev, ev.ExplicitInterfaceImplementations);
 			}
 		}
 
-		static void ShowFieldInfo(IList<object> qiContent, SyntaxNode node, IFieldSymbol field) {
+		static void ShowFieldInfo(IList<object> qiContent, IFieldSymbol field) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& (field.DeclaredAccessibility != Accessibility.Public || field.IsReadOnly || field.IsVolatile || field.IsStatic)
 				&& field.ContainingType.TypeKind != TypeKind.Enum) {
 				ShowDeclarationModifier(qiContent, field);
 			}
 			if (field.HasConstantValue) {
-				ShowConstInfo(qiContent, node, field, field.ConstantValue);
+				ShowConstInfo(qiContent, field, field.ConstantValue);
 			}
 		}
 
@@ -531,10 +531,10 @@ namespace Codist.QuickInfo
 				ShowDeclarationModifier(qiContent, method);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && method.TypeArguments.Length > 0 && method.TypeParameters[0] != method.TypeArguments[0]) {
-				ShowMethodTypeArguments(qiContent, node, method);
+				ShowMethodTypeArguments(qiContent, method);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
-				ShowInterfaceImplementation(qiContent, node, method, method.ExplicitInterfaceImplementations);
+				ShowInterfaceImplementation(qiContent, method, method.ExplicitInterfaceImplementations);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) && method.IsExtensionMethod) {
 				ShowExtensionMethod(qiContent, method);
@@ -563,7 +563,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowMethodTypeArguments(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
+		static void ShowMethodTypeArguments(IList<object> qiContent, IMethodSymbol method) {
 			var info = new ThemedTipDocument();
 			var l = method.TypeArguments.Length;
 			var content = new ThemedTipText("Type argument:", true);
@@ -574,7 +574,7 @@ namespace Codist.QuickInfo
 			qiContent.Add(info);
 		}
 
-		static void ShowNamespaceInfo(IList<object> qiContent, SyntaxNode node, INamespaceSymbol nsSymbol) {
+		static void ShowNamespaceInfo(IList<object> qiContent, INamespaceSymbol nsSymbol) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NamespaceTypes) == false) {
 				return;
 			}
@@ -605,22 +605,20 @@ namespace Codist.QuickInfo
 		void ShowTypeInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol typeSymbol) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
 				if (typeSymbol.TypeKind == TypeKind.Enum) {
-					ShowEnumInfo(qiContent, node, typeSymbol, true);
+					ShowEnumInfo(qiContent, typeSymbol, true);
 				}
 				else {
-					ShowBaseType(qiContent, typeSymbol, node.SpanStart);
+					ShowBaseType(qiContent, typeSymbol);
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces)) {
-				ShowInterfaces(qiContent, typeSymbol, node.SpanStart);
+				ShowInterfaces(qiContent, typeSymbol);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& typeSymbol.TypeKind == TypeKind.Class
 				&& (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
 				ShowDeclarationModifier(qiContent, typeSymbol);
 			}
-			//var pk = (node = node.Parent).Kind();
-			//if (pk == SyntaxKind.ObjectCreationExpression || pk == SyntaxKind.QualifiedName && (node = node.Parent).IsKind(SyntaxKind.ObjectCreationExpression)) {
 			node = node.GetObjectCreationNode();
 			if (node != null) {
 				var method = _SemanticModel.GetSymbolOrFirstCandidate(node) as IMethodSymbol;
@@ -630,7 +628,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowConstInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol, object value) {
+		static void ShowConstInfo(IList<object> qiContent, ISymbol symbol, object value) {
 			var sv = value as string;
 			if (sv != null) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
@@ -640,13 +638,13 @@ namespace Codist.QuickInfo
 			else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
 				var s = ShowNumericForms(value, NumericForm.None);
 				if (s != null) {
-					ShowEnumInfo(qiContent, node, symbol.ContainingType, false);
+					ShowEnumInfo(qiContent, symbol.ContainingType, false);
 					qiContent.Add(s);
 				}
 			}
 		}
 
-		static void ShowInterfaceImplementation<TSymbol>(IList<object> qiContent, SyntaxNode node, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations)
+		static void ShowInterfaceImplementation<TSymbol>(IList<object> qiContent, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations)
 			where TSymbol : class, ISymbol {
 			if (symbol.IsStatic || symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.FirstOrDefault() == null) {
 				return;
@@ -806,7 +804,7 @@ namespace Codist.QuickInfo
 				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).Add(new ThemedTipText("Hash code", true)));
 		}
 
-		static void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs, int position) {
+		static void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs) {
 			var p = new ThemedTipParagraph(KnownImageIds.FormPostBodyParameterNode, new ThemedTipText()
 				.Append("Attribute:", true));
 			foreach (var item in attrs) {
@@ -820,7 +818,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowBaseType(IList<object> qiContent, ITypeSymbol typeSymbol, int position) {
+		static void ShowBaseType(IList<object> qiContent, ITypeSymbol typeSymbol) {
 			var baseType = typeSymbol.BaseType;
 			if (baseType == null || baseType.IsCommonClass() != false) {
 				return;
@@ -836,7 +834,7 @@ namespace Codist.QuickInfo
 			qiContent.Add(info);
 		}
 
-		static void ShowEnumInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol type, bool fromEnum) {
+		static void ShowEnumInfo(IList<object> qiContent, INamedTypeSymbol type, bool fromEnum) {
 			if (!Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
 				return;
 			}
@@ -904,7 +902,7 @@ namespace Codist.QuickInfo
 			qiContent.Add(s);
 		}
 
-		static void ShowInterfaces(IList<object> qiContent, ITypeSymbol type, int position) {
+		static void ShowInterfaces(IList<object> qiContent, ITypeSymbol type) {
 			const string Disposable = "IDisposable";
 			var showAll = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
 			var interfaces = type.Interfaces;
@@ -972,13 +970,13 @@ namespace Codist.QuickInfo
 			do {
 				var n = argument as ArgumentSyntax ?? (SyntaxNode)(argument as AttributeArgumentSyntax);
 				if (n != null) {
-					ShowParameterInfo(qiContent, node, n);
+					ShowArgumentInfo(qiContent, n);
 					return;
 				}
 			} while ((argument = argument.Parent) != null && ++depth < 4);
 		}
 
-		void ShowParameterInfo(IList<object> qiContent, SyntaxNode node, SyntaxNode argument) {
+		void ShowArgumentInfo(IList<object> qiContent, SyntaxNode argument) {
 			var argList = argument.Parent;
 			SeparatedSyntaxList<ArgumentSyntax> arguments;
 			int argIndex, argCount;
