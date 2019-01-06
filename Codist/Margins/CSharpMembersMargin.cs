@@ -324,17 +324,19 @@ namespace Codist.Margins
 			const double MarkerMargin = 1;
 			readonly IWpfTextView _View;
 			readonly IVerticalScrollBar _ScrollBar;
+			readonly SemanticContext _SemanticContext;
 			readonly CSharpMembersMargin _Element;
 			readonly Brush _MarkerBrush = Brushes.Aqua;
 			readonly Pen _DefinitionMarkerPen = new Pen(ThemeHelper.ToolWindowTextBrush, MarkerMargin);
 			IEnumerable<ReferencedSymbol> _ReferencePoints;
 			SyntaxTree _DocSyntax;
-			SyntaxNode _Node;
+			ISymbol _Symbol;
 
 			public SymbolReferenceMarker(IWpfTextView textView, IVerticalScrollBar verticalScrollbar, CSharpMembersMargin element) {
 				_View = textView;
 				_ScrollBar = verticalScrollbar;
 				_Element = element;
+				_SemanticContext = textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
 				HookEvents();
 			}
 
@@ -367,7 +369,7 @@ namespace Codist.Margins
 						var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, start));
 						drawingContext.DrawRectangle(_MarkerBrush, null, new Rect(MarkerMargin, y - (MarkerSize / 2), MarkerSize, MarkerSize));
 					}
-					if (item.Definition.CanBeReferencedByName == false) {
+					if (item.Definition.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
 						continue;
 					}
 					var locs = item.Definition.GetSourceLocations();
@@ -409,24 +411,17 @@ namespace Codist.Margins
 
 			async Task UpdateReferencesAsync() {
 				var cancellation = _Element._Cancellation.GetToken();
-				var doc = _View.TextSnapshot.GetOpenDocumentInCurrentContextWithChanges();
-				var model = await doc.GetSemanticModelAsync(cancellation);
-				_DocSyntax = model.SyntaxTree;
-				var node = (await _DocSyntax.GetRootAsync(cancellation)).FindNode(new TextSpan(_View.Selection.ActivePoint.Position, 0));
-				if (node.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.Argument)) {
-					node = (node as Microsoft.CodeAnalysis.CSharp.Syntax.ArgumentSyntax).Expression;
-				}
-				if (node.HasLeadingTrivia && node.GetLeadingTrivia().FullSpan.Contains(_View.Selection, true)
-					|| node.HasTrailingTrivia && node.GetTrailingTrivia().FullSpan.Contains(_View.Selection, true)) {
-					if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
-						_Node = null;
-						_Element.InvalidateVisual();
-					}
+				if (await _SemanticContext.UpdateAsync(_View.Selection.Start.Position, cancellation) == false) {
+					_Symbol = null;
+					_Element.InvalidateVisual();
 					return;
 				}
-				var symbol = model.GetSymbolOrFirstCandidate(node, cancellation) ?? model.GetSymbolExt(node, cancellation);
+				var node = _SemanticContext.Node;
+				var symbol = await _SemanticContext.GetSymbolAsync(cancellation);
 				if (symbol != null) {
-					if (Interlocked.Exchange(ref _Node, node) != node) {
+					if (Interlocked.Exchange(ref _Symbol, symbol) != symbol) {
+						var doc = _SemanticContext.Document;
+						_DocSyntax = _SemanticContext.Compilation.SyntaxTree;
 						// todo show marked symbols on scrollbar margin
 						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), cancellation);
 						_Element.InvalidateVisual();
@@ -434,7 +429,7 @@ namespace Codist.Margins
 				}
 				else {
 					if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
-						_Node = null;
+						_Symbol = null;
 						_Element.InvalidateVisual();
 					}
 				}
