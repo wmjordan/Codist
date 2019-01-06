@@ -98,8 +98,9 @@
   "CodeStyles": [
     {
       "StyleID": "BreakAndReturnKeyword",
+      "Italic": true,
       "FontSize": 2.0,
-      "Italic": true
+      "ForegroundColor": "#E28E3A"
     },
     {
       "StyleID": "AbstractionKeyword",
@@ -209,12 +210,12 @@
     },
     {
       "StyleID": "MethodName",
-      "ForegroundColor": "#CE4D4D"
+      "ForegroundColor": "#E46B6B"
     },
     {
       "StyleID": "ExtensionMethodName",
       "Italic": true,
-      "ForegroundColor": "#FFA4A4"
+      "ForegroundColor": "#00FFA4A4"
     },
     {
       "StyleID": "ExternMethodName",
@@ -233,7 +234,7 @@
     },
     {
       "StyleID": "XmlDocTag",
-      "Italic": true
+      "ForegroundColor": "#7EAB6D"
     },
     {
       "StyleID": "XmlDocAttributeName",
@@ -247,7 +248,15 @@
   "CppStyles": [
     {
       "StyleID": "Function",
-      "ForegroundColor": "#800000"
+      "ForegroundColor": "#E46B6B"
+    },
+    {
+      "StyleID": "Event",
+      "ForegroundColor": "#22FF91"
+    },
+    {
+      "StyleID": "GlobalVariable",
+      "Underline": true
     },
     {
       "StyleID": "Label",
@@ -261,11 +270,11 @@
     },
     {
       "StyleID": "MemberField",
-      "ForegroundColor": "#808000"
+      "ForegroundColor": "#ACAC00"
     },
     {
       "StyleID": "MemberFunction",
-      "ForegroundColor": "#800000"
+      "ForegroundColor": "#E46B6B"
     },
     {
       "StyleID": "Parameter",
@@ -273,13 +282,18 @@
       "ForegroundColor": "#FF0080"
     },
     {
+      "StyleID": "Property",
+      "ForegroundColor": "#7ABCFE"
+    },
+    {
       "StyleID": "StaticMemberField",
-      "Underline": true
+      "Underline": true,
+      "ForegroundColor": "#ACAC00"
     },
     {
       "StyleID": "StaticMemberFunction",
       "Underline": true,
-      "ForegroundColor": "#800000"
+      "ForegroundColor": "#E46B6B"
     },
     {
       "StyleID": "UserDefinedLiteralNumber",
@@ -293,7 +307,7 @@
     },
     {
       "StyleID": "InterfaceName",
-      "ForegroundColor": "#0080C0"
+      "ForegroundColor": "#00ACFF"
     },
     {
       "StyleID": "EnumName",
