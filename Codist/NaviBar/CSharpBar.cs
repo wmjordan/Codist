@@ -708,7 +708,7 @@ namespace Codist.NaviBar
 						}
 					}
 					if (child.IsKind(SyntaxKind.FieldDeclaration) || child.IsKind(SyntaxKind.EventFieldDeclaration)) {
-						AddVariables((child as BaseFieldDeclarationSyntax).Declaration.Variables, isExternal);
+						AddVariables((child as BaseFieldDeclarationSyntax).Declaration.Variables, isExternal, pos);
 					}
 					else {
 						Items.Add(new NaviItem(_Bar, child, false, true) {
@@ -728,9 +728,9 @@ namespace Codist.NaviBar
 				}
 			}
 
-			void AddVariables(SeparatedSyntaxList<VariableDeclaratorSyntax> fields, bool isExternal) {
+			void AddVariables(SeparatedSyntaxList<VariableDeclaratorSyntax> fields, bool isExternal, int pos) {
 				foreach (var item in fields) {
-					Items.Add(new NaviItem(_Bar, item) { NodeIsExternal = isExternal }.ShowNodeValue());
+					Items.Add(new NaviItem(_Bar, item) { NodeIsExternal = isExternal }.ShowNodeValue().MarkEnclosingItem(pos));
 				}
 			}
 			#endregion
