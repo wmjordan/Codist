@@ -88,7 +88,7 @@ namespace Codist.SmartBars
 					if (t.Length > psLength
 						&& t.StartsWith(prefix, StringComparison.Ordinal)
 						&& t.EndsWith(suffix, StringComparison.Ordinal)
-						&& t.IndexOf(prefix, prefix.Length, t.Length - prefix.Length) <= t.IndexOf(suffix, prefix.Length, t.Length - psLength)) {
+						&& t.IndexOf(prefix, prefix.Length, t.Length - psLength) <= t.IndexOf(suffix, prefix.Length, t.Length - psLength)) {
 						if (edit.Replace(item, t.Substring(prefix.Length, t.Length - psLength))
 							&& firstModified.Snapshot == null) {
 							firstModified = item;
