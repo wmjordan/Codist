@@ -308,9 +308,6 @@ namespace Codist.QuickInfo
 						return;
 					}
 					var docPanel = quickInfoPanel.Children[0].GetFirstVisualChild<StackPanel>();
-					if (docPanel?.Margin != __DocMargin) {
-						docPanel = null;
-					}
 					foreach (var item in quickInfoPanel.Children) {
 						var o = item as DependencyObject;
 						if (o == null) {
@@ -327,7 +324,9 @@ namespace Codist.QuickInfo
 						}
 						cp.LimitSize();
 						if (docPanel == c) {
-							cp.MaxWidth += 32;
+							if (docPanel.Margin == __DocMargin) {
+								cp.MaxWidth += 32;
+							}
 							foreach (var r in docPanel.Children) {
 								(r as ThemedTipDocument)?.ApplySizeLimit();
 							}
