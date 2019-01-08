@@ -544,7 +544,7 @@ namespace Codist
 		AutoPropertyAnnotation = 1 << 13,
 		PartialClassMember = 1 << 14,
 		Region = 1 << 15,
-		Default = SyntaxDetail | RangeHighlight | RegionOnBar | ParameterList | FieldValue | PartialClassMember | Region
+		Default = RangeHighlight | RegionOnBar | ParameterList | FieldValue | AutoPropertyAnnotation | PartialClassMember | Region
 	}
 
 	public enum ScrollbarMarkerStyle
