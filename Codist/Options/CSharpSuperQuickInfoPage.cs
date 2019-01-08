@@ -43,6 +43,7 @@ namespace Codist.Options
 			_CSharpInterfacesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Interfaces, _CSharpInterfaceInheritenceQuickInfoBox.Enabled = _CSharpInterfacesQuickInfoBox.Checked));
 			_CSharpInterfaceImplementationsQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.InterfaceImplementations, _CSharpInterfaceImplementationsQuickInfoBox.Checked));
 			_CSharpInterfaceInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.InterfacesInheritence, _CSharpInterfaceInheritenceQuickInfoBox.Checked));
+			_CSharpMethodOverloadQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.MethodOverload, _CSharpMethodOverloadQuickInfoBox.Checked));
 			_CSharpNumberQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.NumericValues,  _CSharpNumberQuickInfoBox.Checked));
 			_CSharpStringQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.String, _CSharpStringQuickInfoBox.Checked));
 			_CSharpParameterQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Parameter, _CSharpParameterQuickInfoBox.Checked));
@@ -88,6 +89,7 @@ namespace Codist.Options
 					= _CSharpRemarksDocBox.Enabled
 					= _CSharpExceptionDocBox.Enabled
 					= o.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation);
+				_CSharpMethodOverloadQuickInfoBox.Checked = o.MatchFlags(QuickInfoOptions.MethodOverload);
 				_CSharpNumberQuickInfoBox.Checked = o.MatchFlags(QuickInfoOptions.NumericValues);
 				_CSharpStringQuickInfoBox.Checked = o.MatchFlags(QuickInfoOptions.String);
 				_CSharpParameterQuickInfoBox.Checked = o.MatchFlags(QuickInfoOptions.Parameter);

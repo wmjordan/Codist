@@ -301,7 +301,7 @@ namespace Codist
 				new CommentLabel("---", CommentStyleTypes.Heading6),
 				new CommentLabel("TODO", CommentStyleTypes.ToDo, true) { AllowPunctuationDelimiter = true },
 				new CommentLabel("TO-DO", CommentStyleTypes.ToDo, true) { AllowPunctuationDelimiter = true },
-				new CommentLabel("undone", CommentStyleTypes.ToDo, true) { AllowPunctuationDelimiter = true },
+				new CommentLabel("undone", CommentStyleTypes.Undone, true) { AllowPunctuationDelimiter = true },
 				new CommentLabel("NOTE", CommentStyleTypes.Note, true) { AllowPunctuationDelimiter = true },
 				new CommentLabel("HACK", CommentStyleTypes.Hack, true) { AllowPunctuationDelimiter = true },
 			});
@@ -457,6 +457,7 @@ namespace Codist
 		TypeParameters = 1 << 11,
 		NamespaceTypes = 1 << 12,
 		Diagnostics = 1 << 13,
+		MethodOverload = 1 << 14,
 		OverrideDefaultDocumentation = 1 << 17,
 		DocumentationFromBaseType = 1 << 18,
 		DocumentationFromInheritDoc = 1 << 19,
@@ -471,7 +472,7 @@ namespace Codist
 		CtrlQuickInfo = 1 << 29,
 		HideOriginalQuickInfo = 1 << 30,
 		QuickInfoOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | ClickAndGo,
-		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | ClickAndGo | OverrideDefaultDocumentation,
+		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | ClickAndGo | MethodOverload | Parameter | OverrideDefaultDocumentation,
 	}
 
 	[Flags]

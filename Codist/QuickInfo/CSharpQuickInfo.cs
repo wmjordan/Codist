@@ -539,7 +539,9 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) && method.IsExtensionMethod) {
 				ShowExtensionMethod(qiContent, method);
 			}
-			ShowOverloadsInfo(qiContent, node, method);
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.MethodOverload)) {
+				ShowOverloadsInfo(qiContent, node, method);
+			}
 		}
 
 		void ShowOverloadsInfo(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
@@ -619,11 +621,13 @@ namespace Codist.QuickInfo
 				&& (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
 				ShowDeclarationModifier(qiContent, typeSymbol);
 			}
-			node = node.GetObjectCreationNode();
-			if (node != null) {
-				var method = _SemanticModel.GetSymbolOrFirstCandidate(node) as IMethodSymbol;
-				if (method != null) {
-					ShowOverloadsInfo(qiContent, node, method);
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.MethodOverload)) {
+				node = node.GetObjectCreationNode();
+				if (node != null) {
+					var method = _SemanticModel.GetSymbolOrFirstCandidate(node) as IMethodSymbol;
+					if (method != null) {
+						ShowOverloadsInfo(qiContent, node, method);
+					}
 				}
 			}
 		}
@@ -1026,20 +1030,26 @@ namespace Codist.QuickInfo
 						argName = mp[mp.Length - 1].Name;
 					}
 				}
-				var doc = argName != null ? new XmlDoc(m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m, _SemanticModel.Compilation).GetParameter(argName) : null;
+				var doc = argName != null ? new XmlDoc(m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m, _SemanticModel.Compilation) : null;
+				var paramDoc = doc?.GetParameter(argName);
 				var content = new ThemedTipText("Argument", true)
 					.Append(" of ")
 					.AddSymbolDisplayParts(m.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, argIndex);
 				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Parameter, content));
 				m = symbol.Symbol as IMethodSymbol;
-				if (doc != null) {
+				if (paramDoc != null) {
 					content.Append("\n" + argName, true, true, _SymbolFormatter.Parameter).Append(": ");
-					new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, m).Render(doc, content.Inlines);
+					new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, m).Render(paramDoc, content.Inlines);
 				}
 				if (m.IsGenericMethod) {
 					for (int i = 0; i < m.TypeArguments.Length; i++) {
 						content.Append("\n");
 						ShowTypeParameterInfo(m.TypeParameters[i], m.TypeArguments[i], content);
+						var typeParamDoc = doc.GetTypeParameter(m.TypeParameters[i].Name);
+						if (typeParamDoc != null) {
+							content.Append(": ");
+							new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, m).Render(typeParamDoc, content.Inlines);
+						}
 					}
 				}
 				foreach (var item in content.Inlines) {
@@ -1047,7 +1057,6 @@ namespace Codist.QuickInfo
 						item.Foreground = ThemeHelper.ToolTipTextBrush;
 					}
 				}
-
 				qiContent.Add(info);
 			}
 			else if (symbol.CandidateSymbols.Length > 0) {
