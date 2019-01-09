@@ -393,12 +393,12 @@ namespace Codist.Margins
 			async void UpdateReferences(object sender, EventArgs e) {
 				try {
 					CancellationHelper.CancelAndDispose(ref _Element._Cancellation, true);
-					if (_View.Selection.IsEmpty == false) {
-						if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
-							_Element.InvalidateVisual();
-						}
-						return;
-					}
+					//if (_View.Selection.IsEmpty == false) {
+					//	if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
+					//		_Element.InvalidateVisual();
+					//	}
+					//	return;
+					//}
 					await UpdateReferencesAsync();
 				}
 				catch (ObjectDisposedException) {
