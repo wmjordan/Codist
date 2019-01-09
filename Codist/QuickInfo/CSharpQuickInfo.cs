@@ -1061,7 +1061,7 @@ namespace Codist.QuickInfo
 			}
 			else if (symbol.CandidateSymbols.Length > 0) {
 				var info = new ThemedTipDocument();
-				info.Append(new ThemedTipParagraph(KnownImageIds.Parameter, new ThemedTipText("Maybe", true).Append(" argument of")));
+				info.Append(new ThemedTipParagraph(KnownImageIds.ParameterWarning, new ThemedTipText("Maybe", true).Append(" argument of")));
 				foreach (var candidate in symbol.CandidateSymbols) {
 					info.Append(new ThemedTipParagraph(candidate.GetImageId(), new ThemedTipText().AddSymbolDisplayParts(candidate.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, argName == null ? argIndex : Int32.MinValue)));
 				}

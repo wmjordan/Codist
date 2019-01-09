@@ -56,7 +56,15 @@ namespace TestProject
 		/// <param name="text">The text to be parsed as hex.</param>
 		/// <returns>The result number.</returns>
 		public static int ParseAsHexNumber(string text) {
+
+
+
+
 			return Int32.Parse(text, System.Globalization.NumberStyles.HexNumber);
+
+
+
+
 		}
 	}
 }
