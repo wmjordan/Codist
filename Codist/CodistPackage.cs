@@ -18,20 +18,21 @@ namespace Codist
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.General), Constants.NameOfMe, "General", 0, 0, true, Sort = 0)]
 
-	[ProvideOptionPage(typeof(Options.SyntaxHighlight), CategorySyntaxHighlight, "General", 0, 0, true, Sort = 10)]
+	[ProvideOptionPage(typeof(Options.SyntaxHighlight), Constants.NameOfMe, "Syntax Highlight", 0, 0, true, Sort = 10)]
 	[ProvideOptionPage(typeof(Options.CommonStyle), CategorySyntaxHighlight, "All languages", 0, 0, true, Sort = 11)]
 	[ProvideOptionPage(typeof(Options.CSharpStyle), CategorySyntaxHighlight, "C#", 0, 0, true, Sort = 12)]
 	[ProvideOptionPage(typeof(Options.CppStyle), CategorySyntaxHighlight, "C/C++", 0, 0, true, Sort = 13)]
 	[ProvideOptionPage(typeof(Options.XmlStyle), CategorySyntaxHighlight, "XML", 0, 0, true, Sort = 14)]
 	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment", 0, 0, true, Sort = 19)]
 
-	[ProvideOptionPage(typeof(Options.SuperQuickInfo), CategorySuperQuickInfo, "General", 0, 0, true, Sort = 20)]
+	[ProvideOptionPage(typeof(Options.SuperQuickInfo), Constants.NameOfMe, "Super Quick Info", 0, 0, true, Sort = 20)]
 	[ProvideOptionPage(typeof(Options.CSharpSuperQuickInfo), CategorySuperQuickInfo, "C#", 0, 0, true, Sort = 21)]
 
-	[ProvideOptionPage(typeof(Options.SmartBar), CategorySmartBar, "General", 0, 0, true, Sort = 30)]
-	[ProvideOptionPage(typeof(Options.NaviBar), CategoryNaviBar, "General", 0, 0, true, Sort = 40)]
+	[ProvideOptionPage(typeof(Options.SmartBar), Constants.NameOfMe, "Smart Bar", 0, 0, true, Sort = 30)]
 
-	[ProvideOptionPage(typeof(Options.ScrollbarMarker), CategoryScrollbarMarker, "General", 0, 0, true, Sort = 50)]
+	[ProvideOptionPage(typeof(Options.NaviBar), Constants.NameOfMe, "Navigation Bar", 0, 0, true, Sort = 40)]
+
+	[ProvideOptionPage(typeof(Options.ScrollbarMarker), Constants.NameOfMe, "Scrollbar Marker", 0, 0, true, Sort = 50)]
 	[ProvideOptionPage(typeof(Options.CSharpScrollbarMarker), CategoryScrollbarMarker, "C#", 0, 0, true, Sort = 51)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	//[ProvideToolWindow(typeof(Commands.SymbolFinderWindow))]
