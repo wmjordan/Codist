@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
@@ -26,6 +27,13 @@ namespace Codist.Controls
 		}
 		public ThemedTipText(string text, bool bold) : this() {
 			this.Append(text, bold);
+		}
+		protected override void OnPreviewKeyUp(KeyEventArgs e) {
+			base.OnPreviewKeyUp(e);
+			if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control && _editor != null) {
+				_editor.Copy();
+				e.Handled = true;
+			}
 		}
 		public ThemedTipText InvertLastRun() {
 			var last = Inlines.LastInline;
@@ -60,9 +68,6 @@ namespace Codist.Controls
 					r.Content.MaxWidth = w;
 				}
 			}
-		}
-		public UIElement Host() {
-			return this;
 		}
 	}
 	sealed class ThemedTipParagraph : StackPanel
@@ -116,22 +121,32 @@ namespace Codist.Controls
 	// https://stackoverflow.com/questions/136435/any-way-to-make-a-wpf-textblock-selectable
 	sealed class TextEditorWrapper
 	{
-		private static readonly Type TextEditorType = Type.GetType("System.Windows.Documents.TextEditor, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
-		private static readonly PropertyInfo IsReadOnlyProp = TextEditorType.GetProperty("IsReadOnly", BindingFlags.Instance | BindingFlags.NonPublic);
-		private static readonly PropertyInfo TextViewProp = TextEditorType.GetProperty("TextView", BindingFlags.Instance | BindingFlags.NonPublic);
-		private static readonly MethodInfo RegisterMethod = TextEditorType.GetMethod("RegisterCommandHandlers",
+		static readonly Type TextEditorType = Type.GetType("System.Windows.Documents.TextEditor, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
+		static readonly PropertyInfo IsReadOnlyProp = TextEditorType?.GetProperty("IsReadOnly", BindingFlags.Instance | BindingFlags.NonPublic);
+		static readonly PropertyInfo TextViewProp = TextEditorType?.GetProperty("TextView", BindingFlags.Instance | BindingFlags.NonPublic);
+		static readonly MethodInfo RegisterMethod = TextEditorType?.GetMethod("RegisterCommandHandlers",
 			BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(Type), typeof(bool), typeof(bool), typeof(bool) }, null);
 
-		private static readonly Type TextContainerType = Type.GetType("System.Windows.Documents.ITextContainer, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
-		private static readonly PropertyInfo TextContainerTextViewProp = TextContainerType.GetProperty("TextView");
+		static readonly Type TextContainerType = Type.GetType("System.Windows.Documents.ITextContainer, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
+		static readonly PropertyInfo TextContainerTextViewProp = TextContainerType?.GetProperty("TextView");
 
-		private static readonly PropertyInfo TextContainerProp = typeof(TextBlock).GetProperty("TextContainer", BindingFlags.Instance | BindingFlags.NonPublic);
+		static readonly PropertyInfo TextContainerProp = typeof(TextBlock).GetProperty("TextContainer", BindingFlags.Instance | BindingFlags.NonPublic);
+
+		static readonly Type TextEditorCopyPaste = Type.GetType("System.Windows.Documents.TextEditorCopyPaste, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
+		static readonly MethodInfo CopyMethod = TextEditorCopyPaste?.GetMethod("Copy", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { TextEditorType, typeof(bool) }, null);
+
+		static readonly bool __IsInitialized = IsReadOnlyProp != null && TextViewProp != null && RegisterMethod != null
+			&& TextContainerTextViewProp != null && TextContainerProp != null;
+		static readonly bool __CanCopy = CopyMethod != null;
 
 		public static void RegisterCommandHandlers(Type controlType, bool acceptsRichContent, bool readOnly, bool registerEventListeners) {
-			RegisterMethod.Invoke(null, new object[] { controlType, acceptsRichContent, readOnly, registerEventListeners });
+			RegisterMethod?.Invoke(null, new object[] { controlType, acceptsRichContent, readOnly, registerEventListeners });
 		}
 
 		public static TextEditorWrapper CreateFor(TextBlock tb) {
+			if (__IsInitialized == false) {
+				return null;
+			}
 			var textContainer = TextContainerProp.GetValue(tb);
 
 			var editor = new TextEditorWrapper(textContainer, tb, false);
@@ -141,11 +156,19 @@ namespace Codist.Controls
 			return editor;
 		}
 
-		private readonly object _editor;
+		readonly object _editor;
 
 		public TextEditorWrapper(object textContainer, FrameworkElement uiScope, bool isUndoEnabled) {
 			_editor = Activator.CreateInstance(TextEditorType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance,
 				null, new[] { textContainer, uiScope, isUndoEnabled }, null);
+		}
+
+		public bool Copy() {
+			if (__CanCopy) {
+				CopyMethod.Invoke(null, new object[] { _editor, true });
+				return true;
+			}
+			return false;
 		}
 	}
 }
