@@ -43,6 +43,7 @@ namespace Codist.Options
 			_CSharpInterfacesQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Interfaces, _CSharpInterfaceInheritenceQuickInfoBox.Enabled = _CSharpInterfacesQuickInfoBox.Checked));
 			_CSharpInterfaceImplementationsQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.InterfaceImplementations, _CSharpInterfaceImplementationsQuickInfoBox.Checked));
 			_CSharpInterfaceInheritenceQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.InterfacesInheritence, _CSharpInterfaceInheritenceQuickInfoBox.Checked));
+			_CSharpInterfaceMembersQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.InterfaceMembers, _CSharpInterfaceMembersQuickInfoBox.Checked));
 			_CSharpMethodOverloadQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.MethodOverload, _CSharpMethodOverloadQuickInfoBox.Checked));
 			_CSharpNumberQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.NumericValues,  _CSharpNumberQuickInfoBox.Checked));
 			_CSharpStringQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.String, _CSharpStringQuickInfoBox.Checked));
@@ -75,8 +76,9 @@ namespace Codist.Options
 				_CSharpInterfacesQuickInfoBox.Checked
 					= _CSharpInterfaceInheritenceQuickInfoBox.Enabled
 					= o.MatchFlags(QuickInfoOptions.Interfaces);
-				_CSharpInterfaceInheritenceQuickInfoBox.Checked = o.MatchFlags(QuickInfoOptions.InterfacesInheritence);
 				_CSharpInterfaceImplementationsQuickInfoBox.Checked = o.MatchFlags(QuickInfoOptions.InterfaceImplementations);
+				_CSharpInterfaceInheritenceQuickInfoBox.Checked = o.MatchFlags(QuickInfoOptions.InterfacesInheritence);
+				_CSharpInterfaceMembersQuickInfoBox.Checked = o.MatchFlags(QuickInfoOptions.InterfaceMembers);
 				_CSharpSymbolLocationQuickInfoBox.Checked = o.MatchFlags(QuickInfoOptions.SymbolLocation);
 				_CSharpReturnsDocBox.Checked = o.MatchFlags(QuickInfoOptions.ReturnsDoc);
 				_CSharpRemarksDocBox.Checked = o.MatchFlags(QuickInfoOptions.RemarksDoc);

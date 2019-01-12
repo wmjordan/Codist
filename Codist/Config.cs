@@ -458,6 +458,7 @@ namespace Codist
 		NamespaceTypes = 1 << 12,
 		Diagnostics = 1 << 13,
 		MethodOverload = 1 << 14,
+		InterfaceMembers = 1 << 15,
 		OverrideDefaultDocumentation = 1 << 17,
 		DocumentationFromBaseType = 1 << 18,
 		DocumentationFromInheritDoc = 1 << 19,

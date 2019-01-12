@@ -55,6 +55,7 @@
 			this._ClickAndGoBox = new System.Windows.Forms.CheckBox();
 			this._AdditionalItemsPage = new System.Windows.Forms.TabPage();
 			this._CSharpMethodOverloadQuickInfoBox = new System.Windows.Forms.CheckBox();
+			this._CSharpInterfaceMembersQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this._DefaultPage.SuspendLayout();
 			this.groupBox4.SuspendLayout();
@@ -66,20 +67,20 @@
 			// _CSharpTypeParameterQuickInfoBox
 			// 
 			this._CSharpTypeParameterQuickInfoBox.AutoSize = true;
-			this._CSharpTypeParameterQuickInfoBox.Location = new System.Drawing.Point(15, 231);
+			this._CSharpTypeParameterQuickInfoBox.Location = new System.Drawing.Point(15, 257);
 			this._CSharpTypeParameterQuickInfoBox.Name = "_CSharpTypeParameterQuickInfoBox";
 			this._CSharpTypeParameterQuickInfoBox.Size = new System.Drawing.Size(141, 19);
-			this._CSharpTypeParameterQuickInfoBox.TabIndex = 9;
+			this._CSharpTypeParameterQuickInfoBox.TabIndex = 10;
 			this._CSharpTypeParameterQuickInfoBox.Text = "Type parameter";
 			this._CSharpTypeParameterQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpParameterQuickInfoBox
 			// 
 			this._CSharpParameterQuickInfoBox.AutoSize = true;
-			this._CSharpParameterQuickInfoBox.Location = new System.Drawing.Point(15, 206);
+			this._CSharpParameterQuickInfoBox.Location = new System.Drawing.Point(15, 232);
 			this._CSharpParameterQuickInfoBox.Name = "_CSharpParameterQuickInfoBox";
 			this._CSharpParameterQuickInfoBox.Size = new System.Drawing.Size(181, 19);
-			this._CSharpParameterQuickInfoBox.TabIndex = 8;
+			this._CSharpParameterQuickInfoBox.TabIndex = 9;
 			this._CSharpParameterQuickInfoBox.Text = "Parameter of method";
 			this._CSharpParameterQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
@@ -99,7 +100,7 @@
 			this._CSharpStringQuickInfoBox.Location = new System.Drawing.Point(258, 31);
 			this._CSharpStringQuickInfoBox.Name = "_CSharpStringQuickInfoBox";
 			this._CSharpStringQuickInfoBox.Size = new System.Drawing.Size(181, 19);
-			this._CSharpStringQuickInfoBox.TabIndex = 12;
+			this._CSharpStringQuickInfoBox.TabIndex = 13;
 			this._CSharpStringQuickInfoBox.Text = "String length, hash";
 			this._CSharpStringQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
@@ -109,7 +110,7 @@
 			this._CSharpNumberQuickInfoBox.Location = new System.Drawing.Point(258, 6);
 			this._CSharpNumberQuickInfoBox.Name = "_CSharpNumberQuickInfoBox";
 			this._CSharpNumberQuickInfoBox.Size = new System.Drawing.Size(133, 19);
-			this._CSharpNumberQuickInfoBox.TabIndex = 11;
+			this._CSharpNumberQuickInfoBox.TabIndex = 12;
 			this._CSharpNumberQuickInfoBox.Text = "Numeric forms";
 			this._CSharpNumberQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
@@ -136,10 +137,10 @@
 			// _CSharpSymbolLocationQuickInfoBox
 			// 
 			this._CSharpSymbolLocationQuickInfoBox.AutoSize = true;
-			this._CSharpSymbolLocationQuickInfoBox.Location = new System.Drawing.Point(15, 256);
+			this._CSharpSymbolLocationQuickInfoBox.Location = new System.Drawing.Point(15, 282);
 			this._CSharpSymbolLocationQuickInfoBox.Name = "_CSharpSymbolLocationQuickInfoBox";
 			this._CSharpSymbolLocationQuickInfoBox.Size = new System.Drawing.Size(149, 19);
-			this._CSharpSymbolLocationQuickInfoBox.TabIndex = 10;
+			this._CSharpSymbolLocationQuickInfoBox.TabIndex = 11;
 			this._CSharpSymbolLocationQuickInfoBox.Text = "Symbol location";
 			this._CSharpSymbolLocationQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
@@ -375,6 +376,7 @@
 			// 
 			// _AdditionalItemsPage
 			// 
+			this._AdditionalItemsPage.Controls.Add(this._CSharpInterfaceMembersQuickInfoBox);
 			this._AdditionalItemsPage.Controls.Add(this._CSharpMethodOverloadQuickInfoBox);
 			this._AdditionalItemsPage.Controls.Add(this._CSharpTypeParameterQuickInfoBox);
 			this._AdditionalItemsPage.Controls.Add(this._CSharpAttributesQuickInfoBox);
@@ -399,12 +401,22 @@
 			// _CSharpMethodOverloadQuickInfoBox
 			// 
 			this._CSharpMethodOverloadQuickInfoBox.AutoSize = true;
-			this._CSharpMethodOverloadQuickInfoBox.Location = new System.Drawing.Point(15, 181);
+			this._CSharpMethodOverloadQuickInfoBox.Location = new System.Drawing.Point(15, 207);
 			this._CSharpMethodOverloadQuickInfoBox.Name = "_CSharpMethodOverloadQuickInfoBox";
 			this._CSharpMethodOverloadQuickInfoBox.Size = new System.Drawing.Size(149, 19);
-			this._CSharpMethodOverloadQuickInfoBox.TabIndex = 7;
+			this._CSharpMethodOverloadQuickInfoBox.TabIndex = 8;
 			this._CSharpMethodOverloadQuickInfoBox.Text = "Method overload";
 			this._CSharpMethodOverloadQuickInfoBox.UseVisualStyleBackColor = true;
+			// 
+			// _CSharpInterfaceMembersQuickInfoBox
+			// 
+			this._CSharpInterfaceMembersQuickInfoBox.AutoSize = true;
+			this._CSharpInterfaceMembersQuickInfoBox.Location = new System.Drawing.Point(15, 182);
+			this._CSharpInterfaceMembersQuickInfoBox.Name = "_CSharpInterfaceMembersQuickInfoBox";
+			this._CSharpInterfaceMembersQuickInfoBox.Size = new System.Drawing.Size(165, 19);
+			this._CSharpInterfaceMembersQuickInfoBox.TabIndex = 7;
+			this._CSharpInterfaceMembersQuickInfoBox.Text = "Interface members";
+			this._CSharpInterfaceMembersQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpSuperQuickInfoPage
 			// 
@@ -458,5 +470,6 @@
 		private System.Windows.Forms.CheckBox _CSharpInheritDocCrefBox;
 		private System.Windows.Forms.CheckBox _CSharpExceptionDocBox;
 		private System.Windows.Forms.CheckBox _CSharpMethodOverloadQuickInfoBox;
+		private System.Windows.Forms.CheckBox _CSharpInterfaceMembersQuickInfoBox;
 	}
 }

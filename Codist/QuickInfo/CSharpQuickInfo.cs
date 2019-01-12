@@ -636,6 +636,10 @@ namespace Codist.QuickInfo
 					}
 				}
 			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceMembers)
+				&& typeSymbol.TypeKind == TypeKind.Interface) {
+				ShowInterfaceMembers(qiContent, typeSymbol);
+			}
 		}
 
 		static void ShowConstInfo(IList<object> qiContent, ISymbol symbol, object value) {
@@ -700,6 +704,34 @@ namespace Codist.QuickInfo
 				qiContent.Add(info);
 			}
 		}
+		static void ShowInterfaceMembers(IList<object> qiContent, INamedTypeSymbol type) {
+			var doc = new ThemedTipDocument();
+			doc.AppendTitle(KnownImageIds.ListMembers, "Member:");
+			ShowMembers(type, doc, false);
+			foreach (var item in type.AllInterfaces) {
+				ShowMembers(item, doc, true);
+			}
+			if (doc.Children.Count > 1) {
+				qiContent.Add(doc);
+			}
+		}
+
+		static void ShowMembers(INamedTypeSymbol type, ThemedTipDocument doc, bool isInherit) {
+			var members = new List<ISymbol>(type.GetMembers().Where(m => m.CanBeReferencedByName));
+			members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
+			foreach (var member in members) {
+				var t = new ThemedTipText();
+				if (isInherit) {
+					t.AddSymbol(type, _SymbolFormatter).Append(".");
+				}
+				t.AddSymbol(member, _SymbolFormatter);
+				if (member.Kind == SymbolKind.Method) {
+					t.AddParameters((member as IMethodSymbol).Parameters, _SymbolFormatter);
+				}
+				doc.Append(new ThemedTipParagraph(member.GetImageId(), t));
+			}
+		}
+
 		static void ShowExtensionMethod(IList<object> qiContent, IMethodSymbol method) {
 			var info = new StackPanel();
 			var extType = method.ConstructedFrom.ReceiverType;

@@ -751,6 +751,21 @@ namespace Codist
 			return false;
 		}
 
+		public static int CompareSymbol(ISymbol a, ISymbol b) {
+			var s = b.ContainingAssembly.GetSourceType().CompareTo(a.ContainingAssembly.GetSourceType());
+			if (s != 0) {
+				return s;
+			}
+			INamedTypeSymbol ta = a.ContainingType, tb = b.ContainingType;
+			var ct = ta != null && tb != null;
+			return ct && (s = tb.DeclaredAccessibility.CompareTo(ta.DeclaredAccessibility)) != 0 ? s
+				: (s = b.DeclaredAccessibility.CompareTo(a.DeclaredAccessibility)) != 0 ? s
+				: ct && (s = ta.Name.CompareTo(tb.Name)) != 0 ? s
+				: ct && (s = ta.GetHashCode().CompareTo(tb.GetHashCode())) != 0 ? s
+				: (s = a.Name.CompareTo(b.Name)) != 0 ? s
+				: 0;
+		}
+
 		public static int CompareByAccessibilityKindName(ISymbol a, ISymbol b) {
 			int s;
 			if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first

@@ -335,9 +335,7 @@ namespace Codist.SmartBars
 					break;
 				default: return;
 			}
-			Array.Sort(callers, (a, b) => {
-				return CompareSymbol(a.CallingSymbol, b.CallingSymbol);
-			});
+			Array.Sort(callers, (a, b) => CodeAnalysisHelper.CompareSymbol(a.CallingSymbol, b.CallingSymbol));
 			if (callers.Length < 10) {
 				foreach (var caller in callers) {
 					var s = caller.CallingSymbol;
@@ -684,7 +682,7 @@ namespace Codist.SmartBars
 		}
 
 		void SortAndGroupSymbolByClass(MenuItem menuItem, List<ISymbol> members) {
-			members.Sort(CompareSymbol);
+			members.Sort(CodeAnalysisHelper.CompareSymbol);
 			if (members.Count < 10) {
 				foreach (var member in members) {
 					menuItem.Items.Add(new SymbolMenuItem(this, member, member.Locations) {
@@ -715,21 +713,6 @@ namespace Codist.SmartBars
 					subMenu.Items.Add(new SymbolMenuItem(this, member, member.Locations));
 				}
 			}
-		}
-
-		static int CompareSymbol(ISymbol a, ISymbol b) {
-			var s = b.ContainingAssembly.GetSourceType().CompareTo(a.ContainingAssembly.GetSourceType());
-			if (s != 0) {
-				return s;
-			}
-			INamedTypeSymbol ta = a.ContainingType, tb = b.ContainingType;
-			var ct = ta != null && tb != null;
-			return ct && (s = tb.DeclaredAccessibility.CompareTo(ta.DeclaredAccessibility)) != 0 ? s
-				: (s = b.DeclaredAccessibility.CompareTo(a.DeclaredAccessibility)) != 0 ? s
-				: ct && (s = ta.Name.CompareTo(tb.Name)) != 0 ? s
-				: ct && (s = ta.GetHashCode().CompareTo(tb.GetHashCode())) != 0 ? s
-				: (s = a.Name.CompareTo(b.Name)) != 0 ? s
-				: 0;
 		}
 
 		bool UpdateSemanticModel() {
