@@ -42,6 +42,40 @@ namespace Codist
 			}.ReferenceStyle(VsResourceKeys.TextBoxStyleKey));
 			return panel;
 		}
+		public static TextBlock AddParameters(this TextBlock block, ImmutableArray<IParameterSymbol> parameters, SymbolFormatter formatter) {
+			var inlines = block.Inlines;
+			inlines.Add("(");
+			for (var i = 0; i < parameters.Length; i++) {
+				if (i > 0) {
+					inlines.Add(", ");
+				}
+				formatter.ToUIText(inlines, parameters[i].Type, null);
+			}
+			inlines.Add(")");
+			return block;
+		}
+		public static TextBlock AddParameters(this TextBlock block, ImmutableArray<IParameterSymbol> parameters, SymbolFormatter formatter, int argIndex) {
+			var inlines = block.Inlines;
+			inlines.Add("(");
+			for (var i = 0; i < parameters.Length; i++) {
+				if (i > 0) {
+					inlines.Add(", ");
+				}
+				formatter.ToUIText(inlines, parameters[i].Type, null);
+				inlines.Add(new Run(" " + parameters[i].Name) {
+					Foreground = formatter.Parameter,
+					FontWeight = i == argIndex ? FontWeights.Bold : FontWeights.Normal
+				});
+			}
+			inlines.Add(")");
+			return block;
+		}
+		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, SymbolFormatter formatter) {
+			if (symbol != null) {
+				formatter.ToUIText(block.Inlines, symbol, null);
+			}
+			return block;
+		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, SymbolFormatter formatter) {
 			if (symbol != null) {
 				formatter.ToUIText(block.Inlines, symbol, alias);

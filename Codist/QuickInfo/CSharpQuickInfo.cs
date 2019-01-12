@@ -220,9 +220,9 @@ namespace Codist.QuickInfo
 				if (inheritDoc != null && summary != null) {
 					tip.Append(new ThemedTipParagraph(new ThemedTipText()
 							.Append("Documentation from ")
-							.AddSymbol(inheritDoc.Symbol.ContainingType, null, _SymbolFormatter)
+							.AddSymbol(inheritDoc.Symbol.ContainingType, _SymbolFormatter)
 							.Append(".")
-							.AddSymbol(inheritDoc.Symbol, null, _SymbolFormatter)
+							.AddSymbol(inheritDoc.Symbol, _SymbolFormatter)
 							.Append(":"))
 					);
 				}
@@ -280,7 +280,7 @@ namespace Codist.QuickInfo
 				}
 			}
 			if (tip.Children.Count > 0) {
-				qiWrapper.OverrideDocumentation(tip.Host());
+				qiWrapper.OverrideDocumentation(tip);
 			}
 
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExceptionDoc)
@@ -378,11 +378,17 @@ namespace Codist.QuickInfo
 					qiContent.Add(new ThemedTipText("Assembly: ", true).Append(asmName));
 				}
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+				&& (node.Parent.IsKind(SyntaxKind.Argument) == false || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter) == false) /*the signature has already been displayed there*/) {
 				var st = symbol.GetReturnType();
 				if (st != null && st.TypeKind == TypeKind.Delegate) {
-					qiContent.Add(new ThemedTipText("Delegate signature:\n", true)
-						.AddSymbolDisplayParts((st as INamedTypeSymbol).DelegateInvokeMethod.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1));
+					var invoke = (st as INamedTypeSymbol).DelegateInvokeMethod;
+					qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Delegate,
+						new ThemedTipText("Delegate signature", true).Append(":").AppendLine()
+							.AddSymbol(invoke.ReturnType, _SymbolFormatter)
+							.Append(" ").AddSymbol(st, _SymbolFormatter)
+							.AddParameters(invoke.Parameters, _SymbolFormatter)
+						)));
 				}
 			}
 
@@ -453,7 +459,7 @@ namespace Codist.QuickInfo
 					}
 					else {
 						t.Append("Return ")
-							.AddSymbol(retSymbol.GetReturnType(), null, _SymbolFormatter)
+							.AddSymbol(retSymbol.GetReturnType(), _SymbolFormatter)
 							.Append(" for ");
 					}
 				}
@@ -597,7 +603,7 @@ namespace Codist.QuickInfo
 				foreach (var type in members) {
 					var t = new ThemedTipText().SetGlyph(ThemeHelper.GetImage(type.GetImageId()));
 					_SymbolFormatter.ShowSymbolDeclaration(type, t, true, true);
-					t.AddSymbol(type, null, _SymbolFormatter);
+					t.AddSymbol(type, _SymbolFormatter);
 					info.Add(t);
 				}
 				qiContent.Add(info.Scrollable());
@@ -713,7 +719,7 @@ namespace Codist.QuickInfo
 
 		static void ShowTypeParameterInfo(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument, TextBlock text) {
 			text.Append(typeParameter.Name, _SymbolFormatter.TypeParameter).Append(" is ")
-				.AddSymbol(typeArgument, null, _SymbolFormatter);
+				.AddSymbol(typeArgument, _SymbolFormatter);
 			if (typeParameter.HasConstructorConstraint == false && typeParameter.HasReferenceTypeConstraint == false && typeParameter.HasValueTypeConstraint == false && typeParameter.ConstraintTypes.Length == 0) {
 				return;
 			}
@@ -742,7 +748,7 @@ namespace Codist.QuickInfo
 					if (i > 0) {
 						text.Append(", ");
 					}
-					text.AddSymbol(constraint, null, _SymbolFormatter);
+					text.AddSymbol(constraint, _SymbolFormatter);
 					++i;
 				}
 			}
@@ -818,7 +824,7 @@ namespace Codist.QuickInfo
 				_SymbolFormatter.ToUIText(p.Content.AppendLine().Inlines, item);
 			}
 			if (p.Content.Inlines.Count > 1) {
-				qiContent.Add(new ThemedTipDocument().Append(p).Host());
+				qiContent.Add(new ThemedTipDocument().Append(p));
 			}
 		}
 
@@ -1012,11 +1018,13 @@ namespace Codist.QuickInfo
 					return;
 				}
 				m = m.OriginalDefinition;
+				IParameterSymbol p = null;
 				if (argName != null) {
 					var mp = m.Parameters;
 					for (int i = 0; i < mp.Length; i++) {
 						if (mp[i].Name == argName) {
 							argIndex = i;
+							p = mp[i];
 							break;
 						}
 					}
@@ -1024,19 +1032,20 @@ namespace Codist.QuickInfo
 				else if (argIndex != -1) {
 					var mp = m.Parameters;
 					if (argIndex < mp.Length) {
-						argName = mp[argIndex].Name;
+						argName = (p = mp[argIndex]).Name;
 					}
 					else if (mp.Length > 1 && mp[mp.Length - 1].IsParams) {
-						argName = mp[mp.Length - 1].Name;
+						argName = (p = mp[mp.Length - 1]).Name;
 					}
 				}
 				var doc = argName != null ? new XmlDoc(m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m, _SemanticModel.Compilation) : null;
 				var paramDoc = doc?.GetParameter(argName);
 				var content = new ThemedTipText("Argument", true)
 					.Append(" of ")
-					.AddSymbolDisplayParts(m.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, argIndex);
+					.AddSymbol(m.ReturnType, _SymbolFormatter)
+					.Append(" ").AddSymbol(m.MethodKind != MethodKind.DelegateInvoke && m.MethodKind != MethodKind.Constructor ? m : (ISymbol)m.ContainingType, _SymbolFormatter)
+					.AddParameters(m.Parameters, _SymbolFormatter, argIndex);
 				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Parameter, content));
-				m = symbol.Symbol as IMethodSymbol;
 				if (paramDoc != null) {
 					content.Append("\n" + argName, true, true, _SymbolFormatter.Parameter).Append(": ");
 					new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, m).Render(paramDoc, content.Inlines);
@@ -1051,6 +1060,15 @@ namespace Codist.QuickInfo
 							new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, m).Render(typeParamDoc, content.Inlines);
 						}
 					}
+				}
+				if (p != null && p.Type.TypeKind == TypeKind.Delegate) {
+					var invoke = (p.Type as INamedTypeSymbol).DelegateInvokeMethod;
+					info.Append(new ThemedTipParagraph(KnownImageIds.Delegate, 
+						new ThemedTipText("Delegate signature", true).Append(":").AppendLine()
+							.AddSymbol(invoke.ReturnType, _SymbolFormatter)
+							.Append(" ").Append(p.Name, _SymbolFormatter.Parameter)
+							.AddParameters(invoke.Parameters, _SymbolFormatter)
+						));
 				}
 				foreach (var item in content.Inlines) {
 					if (item.Foreground == null) {

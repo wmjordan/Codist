@@ -160,6 +160,10 @@ namespace Codist
 					return;
 				case SymbolKind.NamedType:
 					var type = symbol as INamedTypeSymbol;
+					var specialType = GetSpecialTypeAlias(type);
+					if (specialType != null) {
+						text.Add(new Run(specialType) { Foreground = Keyword }); return;
+					}
 					switch (type.TypeKind) {
 						case TypeKind.Class:
 							text.Add(symbol.Render(alias, Class)); break;
@@ -374,7 +378,28 @@ namespace Codist
 			Field = formatMap.GetBrush(Constants.CSharpFieldName);
 			Const = formatMap.GetBrush(Constants.CSharpConstFieldName);
 		}
-
+		
+		static string GetSpecialTypeAlias(ITypeSymbol type) {
+			switch (type.SpecialType) {
+				case SpecialType.System_Object: return "object";
+				case SpecialType.System_Void: return "void";
+				case SpecialType.System_Boolean: return "bool";
+				case SpecialType.System_Char: return "char";
+				case SpecialType.System_SByte: return "sbyte";
+				case SpecialType.System_Byte: return "byte";
+				case SpecialType.System_Int16: return "short";
+				case SpecialType.System_UInt16: return "ushort";
+				case SpecialType.System_Int32: return "int";
+				case SpecialType.System_UInt32: return "uint";
+				case SpecialType.System_Int64: return "long";
+				case SpecialType.System_UInt64: return "ulong";
+				case SpecialType.System_Decimal: return "decimal";
+				case SpecialType.System_Single: return "float";
+				case SpecialType.System_Double: return "double";
+				case SpecialType.System_String: return "string";
+			}
+			return null;
+		}
 		void AddTypeArguments(InlineCollection text, ImmutableArray<ITypeParameterSymbol> arguments) {
 			text.Add("<");
 			for (int i = 0; i < arguments.Length; i++) {
