@@ -35,6 +35,22 @@ namespace Codist
 	static partial class CodeAnalysisHelper
 	{
 		#region Symbol finder
+		public static ISymbol GetSymbol(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
+			var info = semanticModel.GetSymbolInfo(node, cancellationToken);
+			if (info.Symbol != null) {
+				return info.Symbol;
+			}
+			var symbol = semanticModel.GetDeclaredSymbol(node, cancellationToken);
+			if (symbol != null) {
+				return symbol;
+			}
+			var type = semanticModel.GetTypeInfo(node, cancellationToken);
+			if (type.Type != null) {
+				return type.Type;
+			}
+			return null;
+		}
+
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 		/// </summary>
@@ -535,7 +551,7 @@ namespace Codist
 						output.Append('*');
 						return;
 				}
-				output.Append(type.Name);
+				output.Append(type.GetSpecialTypeAlias() ?? type.Name);
 				var nt = type as INamedTypeSymbol;
 				if (nt == null) {
 					return;
@@ -556,6 +572,28 @@ namespace Codist
 				}
 				output.Append('>');
 			}
+		}
+
+		public static string GetSpecialTypeAlias(this ITypeSymbol type) {
+			switch (type.SpecialType) {
+				case SpecialType.System_Object: return "object";
+				case SpecialType.System_Void: return "void";
+				case SpecialType.System_Boolean: return "bool";
+				case SpecialType.System_Char: return "char";
+				case SpecialType.System_SByte: return "sbyte";
+				case SpecialType.System_Byte: return "byte";
+				case SpecialType.System_Int16: return "short";
+				case SpecialType.System_UInt16: return "ushort";
+				case SpecialType.System_Int32: return "int";
+				case SpecialType.System_UInt32: return "uint";
+				case SpecialType.System_Int64: return "long";
+				case SpecialType.System_UInt64: return "ulong";
+				case SpecialType.System_Decimal: return "decimal";
+				case SpecialType.System_Single: return "float";
+				case SpecialType.System_Double: return "double";
+				case SpecialType.System_String: return "string";
+			}
+			return null;
 		}
 
 		public static string GetSymbolKindName(this ISymbol symbol) {
