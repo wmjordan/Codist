@@ -35,16 +35,6 @@ namespace Codist.Controls
 				e.Handled = true;
 			}
 		}
-		public ThemedTipText InvertLastRun() {
-			var last = Inlines.LastInline;
-			last.Background = ThemeHelper.ToolTipTextBrush;
-			last.Foreground = ThemeHelper.ToolTipBackgroundBrush;
-			return this;
-		}
-		public ThemedTipText UnderlineLastRun() {
-			Inlines.LastInline.TextDecorations = System.Windows.TextDecorations.Underline;
-			return this;
-		}
 	}
 	sealed class ThemedTipDocument : StackPanel
 	{
@@ -124,8 +114,7 @@ namespace Codist.Controls
 		static readonly Type TextEditorType = Type.GetType("System.Windows.Documents.TextEditor, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
 		static readonly PropertyInfo IsReadOnlyProp = TextEditorType?.GetProperty("IsReadOnly", BindingFlags.Instance | BindingFlags.NonPublic);
 		static readonly PropertyInfo TextViewProp = TextEditorType?.GetProperty("TextView", BindingFlags.Instance | BindingFlags.NonPublic);
-		static readonly MethodInfo RegisterMethod = TextEditorType?.GetMethod("RegisterCommandHandlers",
-			BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(Type), typeof(bool), typeof(bool), typeof(bool) }, null);
+		static readonly MethodInfo RegisterMethod = TextEditorType?.GetMethod("RegisterCommandHandlers", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(Type), typeof(bool), typeof(bool), typeof(bool) }, null);
 
 		static readonly Type TextContainerType = Type.GetType("System.Windows.Documents.ITextContainer, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
 		static readonly PropertyInfo TextContainerTextViewProp = TextContainerType?.GetProperty("TextView");
@@ -148,19 +137,16 @@ namespace Codist.Controls
 				return null;
 			}
 			var textContainer = TextContainerProp.GetValue(tb);
-
 			var editor = new TextEditorWrapper(textContainer, tb, false);
 			IsReadOnlyProp.SetValue(editor._editor, true);
 			TextViewProp.SetValue(editor._editor, TextContainerTextViewProp.GetValue(textContainer));
-
 			return editor;
 		}
 
 		readonly object _editor;
 
 		public TextEditorWrapper(object textContainer, FrameworkElement uiScope, bool isUndoEnabled) {
-			_editor = Activator.CreateInstance(TextEditorType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance,
-				null, new[] { textContainer, uiScope, isUndoEnabled }, null);
+			_editor = Activator.CreateInstance(TextEditorType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance, null, new[] { textContainer, uiScope, isUndoEnabled }, null);
 		}
 
 		public bool Copy() {

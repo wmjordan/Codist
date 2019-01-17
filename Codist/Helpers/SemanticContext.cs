@@ -197,34 +197,18 @@ namespace Codist
 					}
 					var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(node.SpanStart, 0));
 					//todo find out the new node
-					if (newNode.IsKind(node.Kind())) {
-						node = newNode;
-					}
-					else {
+					if (newNode.IsKind(node.Kind()) == false) {
 						return null;
 					}
+					node = newNode;
 				}
 				sm = await doc.GetSemanticModelAsync(cancellationToken);
 			}
-			var info = sm.GetSymbolInfo(node, cancellationToken);
-			if (info.Symbol != null) {
-				return info.Symbol;
-			}
-			var symbol = sm.GetDeclaredSymbol(node, cancellationToken);
-			if (symbol != null) {
-				return symbol;
-			}
-			var type = sm.GetTypeInfo(node, cancellationToken);
-			if (type.Type != null) {
-				return type.Type;
-			}
-			return null;
+			return sm.GetSymbol(node, cancellationToken);
 		}
 
 		public async Task<ISymbol> GetSymbolAsync(CancellationToken cancellationToken) {
-			return Node == null
-				? null
-				: await GetSymbolAsync(Position, cancellationToken);
+			return Node == null ? null : await GetSymbolAsync(Position, cancellationToken);
 		}
 
 		public async Task<bool> UpdateAsync(CancellationToken cancellationToken) {
