@@ -49,6 +49,9 @@ namespace Codist.Margins
 
 			Config.Updated += Config_Updated;
 			Config_Updated(null, new ConfigUpdatedEventArgs(Features.ScrollbarMarkers));
+			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SymbolReference)) {
+				_SymbolReferenceMarker.HookEvents();
+			}
 		}
 
 		void TextView_Closed(object sender, EventArgs e) {
@@ -337,10 +340,10 @@ namespace Codist.Margins
 				_ScrollBar = verticalScrollbar;
 				_Element = element;
 				_SemanticContext = textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
-				HookEvents();
 			}
 
 			internal void HookEvents() {
+				_View.Selection.SelectionChanged -= UpdateReferences;
 				_View.Selection.SelectionChanged += UpdateReferences;
 			}
 			internal void UnhookEvents() {
