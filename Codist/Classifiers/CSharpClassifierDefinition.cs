@@ -36,11 +36,14 @@ namespace Codist.Classifiers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
+		[BaseDefinition(Constants.CodeKeywordControl)]
 		[Name(Constants.CodeBranchingKeyword)]
 		static ClassificationTypeDefinition BranchingKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CSharpReadOnlyFieldName)]
+		[BaseDefinition(Constants.CodeStaticSymbol)]
+		[BaseDefinition(Constants.CodeConstantName)]
 		[Name(Constants.CSharpConstFieldName)]
 		static ClassificationTypeDefinition ConstField;
 
@@ -51,6 +54,7 @@ namespace Codist.Classifiers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
+		[BaseDefinition(Constants.CodeKeywordControl)]
 		[Name(Constants.CodeControlFlowKeyword)]
 		static ClassificationTypeDefinition ControlFlowKeyword;
 
@@ -145,6 +149,7 @@ namespace Codist.Classifiers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[BaseDefinition(Constants.CodeStaticSymbol)]
 		[Name(Constants.CSharpStaticMemberName)]
 		static ClassificationTypeDefinition StaticMember;
 

@@ -67,7 +67,8 @@ namespace Codist.Classifiers
 			foreach (var item in classifiedSpans) {
 				var ct = item.ClassificationType;
 				switch (ct) {
-					case "keyword": {
+					case "keyword":
+					case Constants.CodeKeywordControl: {
 							var node = unitCompilation.FindNode(item.TextSpan, true, true);
 							if (node is MemberDeclarationSyntax) {
 								var token = unitCompilation.FindToken(item.TextSpan.Start);
@@ -84,7 +85,6 @@ namespace Codist.Classifiers
 								}
 								continue;
 							}
-							const SyntaxKind ThrowExpression = (SyntaxKind)9052;
 							switch (node.Kind()) {
 								case SyntaxKind.BreakStatement:
 									if (node.Parent is SwitchSectionSyntax == false) {
@@ -101,7 +101,7 @@ namespace Codist.Classifiers
 								case SyntaxKind.YieldReturnStatement:
 								case SyntaxKind.YieldBreakStatement:
 								case SyntaxKind.ThrowStatement:
-								case ThrowExpression:
+								case SyntaxKind.ThrowExpression:
 									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.ControlFlowKeyword));
 									continue;
 								case SyntaxKind.IfStatement:
@@ -154,6 +154,7 @@ namespace Codist.Classifiers
 							}
 						}
 						else if (ct == Constants.CodeIdentifier
+							|| ct == Constants.CodeStaticSymbol
 							|| ct.EndsWith("name", StringComparison.Ordinal)) {
 							var itemSpan = item.TextSpan;
 							var node = unitCompilation.FindNode(itemSpan, true);
@@ -169,7 +170,7 @@ namespace Codist.Classifiers
 
 		static void GetAttributeNotationSpan(ITextSnapshot snapshot, List<ClassificationSpan> result, TextSpan textSpan, CompilationUnitSyntax unitCompilation) {
 			var spanNode = unitCompilation.FindNode(textSpan, true, false);
-			if (spanNode.HasLeadingTrivia != false && spanNode.GetLeadingTrivia().FullSpan.Contains(textSpan) != false) {
+			if (spanNode.HasLeadingTrivia && spanNode.GetLeadingTrivia().FullSpan.Contains(textSpan) != false) {
 				return;
 			}
 			switch (spanNode.Kind()) {

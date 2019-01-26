@@ -79,6 +79,24 @@ namespace Codist
 		public const string CodeSymbolReference = "symbol reference";
 		public const string CodeUrl = "url";
 		public const string CodeFormalLanguage = "formal language";
+		#region Format names introduced in VS 2019
+		public const string CodeOverloadedOperator = "operator - overloaded";
+		public const string CodeStringEscapeCharacter = "string - escape character";
+		public const string CodeKeywordControl = "keyword - control";
+		public const string CodeConstantName = "constant name";
+		public const string CodeEnumMemberName = "enum member name";
+		public const string CodeExtensionMethodName = "extension method name";
+		public const string CodeEventName = "event name";
+		public const string CodeFieldName = "field name";
+		public const string CodePropertyName = "property name";
+		public const string CodeNamespaceName = "namespace name";
+		public const string CodeLocalName = "local name";
+		public const string CodeMethodName = "method name";
+		public const string CodeParameterName = "parameter name";
+		public const string CodeStaticSymbol = "static symbol";
+		public const string CodeLabelName = "label name";
+		public const string CodeNavigableSymbol = "navigableSymbol";
+		#endregion
 
 		public const string XmlDocAttributeName = "xml doc comment - attribute name";
 		public const string XmlDocAttributeQuotes = "xml doc comment - attribute quotes";
@@ -402,6 +420,7 @@ namespace Codist
 		AbstractionKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeBranchingKeyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeKeywordControl)]
 		[Description("Keyword: switch, case, default, if, else, inheriting from Keyword")]
 		BranchingKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
@@ -426,6 +445,7 @@ namespace Codist
 		DeclarationBrace,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpStaticMemberName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeStaticSymbol)]
 		[Description("Name of static member, inheriting from Identifier")]
 		StaticMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
@@ -442,10 +462,12 @@ namespace Codist
 		VirtualMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalVariableName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeLocalName)]
 		[Description("Name of local variable, inheriting from Identifier")]
 		LocalVariableName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLabel)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeLabelName)]
 		[Description("Name of label, inheriting from Identifier")]
 		Label,
 		[Category(Constants.SyntaxCategory.Declaration)]
@@ -459,6 +481,7 @@ namespace Codist
 
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeNamespaceName)]
 		NamespaceName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpSealedClassName)]
@@ -470,10 +493,12 @@ namespace Codist
 		DelegateName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeEventName)]
 		[Description("Name of event, inheriting from Identifier")]
 		EventName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeParameterName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeTypeParameterName)]
 		[Description("Name of type parameter, inheriting from Identifier")]
 		TypeParameterName,
 
@@ -485,10 +510,12 @@ namespace Codist
 		ConstructorMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeFieldName)]
 		[Description("Name of field, inheriting from Identifier")]
 		FieldName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeConstantName)]
 		[Description("Name of constant field, inheriting from Read Only Field Name")]
 		ConstFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
@@ -497,14 +524,17 @@ namespace Codist
 		ReadOnlyFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodePropertyName)]
 		[Description("Name of property, inheriting from Identifier")]
 		PropertyName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpMethodName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeMethodName)]
 		[Description("Name of method, inheriting from Identifier")]
 		MethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpExtensionMethodName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeExtensionMethodName)]
 		[Description("Name of extension method, inheriting from Method Name and Static Member Name")]
 		ExtensionMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
@@ -513,6 +543,7 @@ namespace Codist
 		ExternMethodName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeParameterName)]
 		[Description("Name of parameter, inheriting from Identifier")]
 		ParameterName,
 
