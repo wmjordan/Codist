@@ -42,10 +42,12 @@ namespace Codist.NaviBar
 			_View.Selection.SelectionChanged += Update;
 			_View.Closed += ViewClosed;
 			Update(this, EventArgs.Empty);
-			foreach(var m in _SemanticContext.Compilation.Members) {
-				if (m.IsKind(SyntaxKind.NamespaceDeclaration)) {
-					_RootItem.SetText(m.GetDeclarationSignature());
-					break;
+			if (_SemanticContext.Compilation != null) {
+				foreach(var m in _SemanticContext.Compilation.Members) {
+					if (m.IsKind(SyntaxKind.NamespaceDeclaration)) {
+						_RootItem.SetText(m.GetDeclarationSignature());
+						break;
+					}
 				}
 			}
 		}
