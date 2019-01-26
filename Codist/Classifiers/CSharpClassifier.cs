@@ -131,6 +131,13 @@ namespace Codist.Classifiers
 							}
 						}
 						continue;
+					case "operator":
+					case Constants.CodeOverloadedOperator:
+						var opMethod = semanticModel.GetSymbol(unitCompilation.FindNode(item.TextSpan)) as IMethodSymbol;
+						if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
+							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.OverrideMember));
+						}
+						continue;
 					case Constants.CodePunctuation:
 						if (item.TextSpan.Length == 1) {
 							ClassifyPunctuation(item.TextSpan, snapshot, result, semanticModel, unitCompilation);
