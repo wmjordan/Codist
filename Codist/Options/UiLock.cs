@@ -12,6 +12,7 @@ namespace Codist.Options
 
 		public bool IsLocked => _locked != 0;
 		public Action CommonEventAction { get; set; }
+		public Action PostEventAction { get; set; }
 		public bool Lock() {
 			return Interlocked.CompareExchange(ref _locked, 1, 0) == 0;
 		}
@@ -24,6 +25,7 @@ namespace Codist.Options
 					try {
 						CommonEventAction?.Invoke();
 						action();
+						PostEventAction?.Invoke();
 					}
 					finally {
 						Unlock();

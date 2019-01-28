@@ -14,6 +14,8 @@ namespace Codist.SyntaxHighlight
 	abstract class StyleBase
 	{
 		static protected readonly Regex FriendlyNamePattern = new Regex(@"([a-z])([A-Z0-9])", RegexOptions.Singleline);
+		Color _ForeColor, _BackColor;
+		byte _ForeColorOpacity = Byte.MaxValue, _BackColorOpacity = Byte.MaxValue;
 
 		internal abstract int Id { get; }
 		/// <summary>Gets or sets whether the content rendered in bold.</summary>
@@ -31,14 +33,14 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		[DefaultValue("#00000000")]
 		public string ForegroundColor {
-			get => ForeColor.ToHexString();
-			set => ForeColor = UIHelper.ParseColor(value);
+			get => _ForeColor.A == 0 ? "#" + _ForeColorOpacity.ToString("X2") : _ForeColor.Alpha(_ForeColorOpacity).ToHexString();
+			set => UIHelper.ParseColor(value, out _ForeColor, out _ForeColorOpacity);
 		}
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		[DefaultValue("#00000000")]
 		public string BackgroundColor {
-			get => BackColor.ToHexString();
-			set => BackColor = UIHelper.ParseColor(value);
+			get => _BackColor.A == 0 ? "#" + _BackColorOpacity.ToString("X2") : _BackColor.Alpha(_BackColorOpacity).ToHexString();
+			set => UIHelper.ParseColor(value, out _BackColor, out _BackColorOpacity);
 		}
 		/// <summary>Gets or sets the brush effect to draw the background color.</summary>
 		[DefaultValue(BrushEffect.Solid)]
@@ -49,8 +51,12 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the font.</summary>
 		public string Font { get; set; }
 
-		internal Color ForeColor { get; set; }
-		internal Color BackColor { get; set; }
+		internal Color ForeColor { get => _ForeColor; set => _ForeColor = value; }
+		internal byte ForeColorOpacity { get => _ForeColorOpacity; set => _ForeColorOpacity = value; }
+		internal Color AlphaForeColor => _ForeColor.Alpha(_ForeColorOpacity);
+		internal Color BackColor { get => _BackColor; set => _BackColor = value; }
+		internal byte BackColorOpacity { get => _BackColorOpacity; set => _BackColorOpacity = value; }
+		internal Color AlphaBackColor => _ForeColor.Alpha(_BackColorOpacity);
 
 		/// <summary>The category used in option pages to group style items</summary>
 		[Newtonsoft.Json.JsonIgnore]
@@ -58,7 +64,7 @@ namespace Codist.SyntaxHighlight
 
 		/// <summary>Returns whether any option in this style is set.</summary>
 		[Newtonsoft.Json.JsonIgnore]
-		public bool IsSet => Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false || ForeColor.A > 0 || BackColor.A > 0;
+		public bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForeColorOpacity != Byte.MaxValue || BackColorOpacity != Byte.MaxValue || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false;
 
 		internal abstract string ClassificationType { get; }
 		internal abstract string Description { get; }
@@ -77,11 +83,15 @@ namespace Codist.SyntaxHighlight
 			target.Font = Font;
 			target.ForeColor = ForeColor;
 			target.BackColor = BackColor;
+			target.ForeColorOpacity = ForeColorOpacity;
+			target.BackColorOpacity = BackColorOpacity;
 		}
 		internal void CopyTo(StyleBase target, StyleFilters filters) {
 			if (filters.MatchFlags(StyleFilters.Color)) {
 				target.ForeColor = ForeColor;
 				target.BackColor = BackColor;
+				target.ForeColorOpacity = ForeColorOpacity;
+				target.BackColorOpacity = BackColorOpacity;
 				target.BackgroundEffect = BackgroundEffect;
 			}
 			if (filters.MatchFlags(StyleFilters.FontFamily)) {
@@ -104,6 +114,7 @@ namespace Codist.SyntaxHighlight
 			BackgroundEffect = BrushEffect.Solid;
 			Font = null;
 			ForeColor = BackColor = default;
+			ForeColorOpacity = BackColorOpacity = Byte.MaxValue;
 		}
 	}
 	abstract class StyleBase<TStyle> : StyleBase where TStyle : Enum

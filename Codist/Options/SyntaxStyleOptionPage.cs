@@ -15,13 +15,13 @@ namespace Codist.Options
 	[ToolboxItem(false)]
 	public partial class SyntaxStyleOptionPage : UserControl
 	{
+		readonly UiLock _UI = new UiLock();
 		readonly Func<IEnumerable<StyleBase>> _defaultStyleLoader;
 		readonly ConfigPage _service;
 		readonly Func<IEnumerable<StyleBase>> _styleLoader;
 		readonly IEditorFormatMap _FormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap("text");
 		StyleBase _activeStyle;
 		bool _loaded;
-		bool _uiLock;
 		public SyntaxStyleOptionPage() {
 			InitializeComponent();
 			_BackgroundEffectBox.Items.AddRange(new[] { "Solid", "Bottom gradient", "Top gradient", "Right gradient", "Left gradient" });
@@ -39,66 +39,56 @@ namespace Codist.Options
 				return;
 			}
 			LoadStyleList();
-			_BackColorButton.Click += SetBackColor;
-			_BackColorTransBox.ValueChanged += SetBackColor;
-			_ForeColorButton.Click += SetForeColor;
-			_ForeColorTransBox.ValueChanged += SetForeColor;
+			_BackColorButton.Click += _UI.HandleEvent(SetBackColor);
+			_BackColorTransBox.ValueChanged += _UI.HandleEvent(SetBackColorOpacity);
+			_ForeColorButton.Click += _UI.HandleEvent(SetForeColor);
+			_ForeColorTransBox.ValueChanged += _UI.HandleEvent(SetForeColorOpacity);
 			var ff = new InstalledFontCollection().Families;
 			_FontBox.Items.Add(new FontFamilyItem());
 			_FontBox.SelectedIndex = 0;
 			foreach (var item in ff) {
 				_FontBox.Items.Add(new FontFamilyItem(item));
 			}
-			_FontBox.SelectedIndexChanged += (s, args) => {
-				if (_uiLock == false && _activeStyle != null) {
+			_FontBox.SelectedIndexChanged += _UI.HandleEvent(() => {
+				if (_activeStyle != null) {
 					_activeStyle.Font = _FontBox.Text.Length == 0 ? null : _FontBox.Text;
 				}
-			};
-			_BoldBox.CheckStateChanged += (s, args) => {
-				if (_uiLock == false && _activeStyle != null) {
+			});
+			_BoldBox.CheckStateChanged += _UI.HandleEvent(() => {
+				if (_activeStyle != null) {
 					_activeStyle.Bold = ToBool(_BoldBox.CheckState);
 				}
-			};
-			_ItalicBox.CheckStateChanged += (s, args) => {
-				if (_uiLock == false && _activeStyle != null) {
+			});
+			_ItalicBox.CheckStateChanged += _UI.HandleEvent(() => {
+				if (_activeStyle != null) {
 					_activeStyle.Italic = ToBool(_ItalicBox.CheckState);
 				}
-			};
-			_UnderlineBox.CheckStateChanged += (s, args) => {
-				if (_uiLock == false && _activeStyle != null) {
+			});
+			_UnderlineBox.CheckStateChanged += _UI.HandleEvent(() => {
+				if (_activeStyle != null) {
 					_activeStyle.Underline = ToBool(_UnderlineBox.CheckState);
 				}
-			};
-			_StrikeBox.CheckStateChanged += (s, args) => {
-				if (_uiLock == false && _activeStyle != null) {
+			});
+			_StrikeBox.CheckStateChanged += _UI.HandleEvent(() => {
+				if (_activeStyle != null) {
 					_activeStyle.Strikethrough = ToBool(_StrikeBox.CheckState);
 				}
-			};
-			_BackgroundEffectBox.SelectedIndexChanged += (s, args) => {
-				if (_uiLock == false && _activeStyle != null) {
+			});
+			_BackgroundEffectBox.SelectedIndexChanged += _UI.HandleEvent(() => {
+				if (_activeStyle != null) {
 					_activeStyle.BackgroundEffect = (BrushEffect)_BackgroundEffectBox.SelectedIndex;
 				}
-			};
-			_FontSizeBox.ValueChanged += (s, args) => {
-				if (_uiLock == false && _activeStyle != null) {
+			});
+			_FontSizeBox.ValueChanged += _UI.HandleEvent(() => {
+				if (_activeStyle != null) {
 					_activeStyle.FontSize = (double)_FontSizeBox.Value;
 				}
-			};
-			foreach (var item in new[] { _FontBox, _BackgroundEffectBox }) {
-				item.SelectedIndexChanged += MarkChanged;
-			}
-			foreach (var item in new Control[] { _BackColorButton, _ForeColorButton }) {
-				item.Click += MarkChanged;
-			}
-			foreach (var item in new[] { _BoldBox, _ItalicBox, _UnderlineBox, _StrikeBox }) {
-				item.CheckStateChanged += MarkChanged;
-			}
-			foreach (var item in new[] { _BackColorTransBox, _ForeColorTransBox, _FontSizeBox }) {
-				item.ValueChanged += MarkChanged;
-			}
+			});
+			_ResetButton.Click += _UI.HandleEvent(ResetButton_Click);
+			_UI.PostEventAction += MarkChanged;
 			_PreviewBox.SizeChanged += (s, args) => UpdatePreview();
 			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
-			Config.Loaded += (s, args) => { _activeStyle = null; LoadStyleList(); };
+			Config.Loaded += (s, args) => { _activeStyle = null; _UI.DoWithLock(LoadStyleList); };
 			_loaded = true;
 		}
 
@@ -143,22 +133,22 @@ namespace Codist.Options
 		}
 
 		void _SyntaxListBox_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e) {
-			if (e.ItemIndex == -1) {
-				return;
-			}
-			var i = (e.Item as SyntaxListViewItem)?.Style;
-			if (i == null) {
-				e.Item.Selected = false;
-				_StyleSettingsBox.Enabled = false;
-				return;
-			}
-			_StyleSettingsBox.Enabled = true;
-			_uiLock = true;
-			_activeStyle = i;
-			UpdateUIControls(i);
-
-			UpdatePreview();
-			_uiLock = false;
+			_UI.DoWithLock(() => {
+				if (e.ItemIndex == -1) {
+					return;
+				}
+				var i = (e.Item as SyntaxListViewItem)?.Style;
+				if (i == null) {
+					e.Item.Selected = false;
+					_StyleSettingsBox.Enabled = false;
+					return;
+				}
+				_StyleSettingsBox.Enabled = true;
+				_activeStyle = i;
+				UpdateUIControls(i);
+				UpdatePreview();
+			});
+			_UI.PostEventAction();
 		}
 
 		void UpdateUIControls(StyleBase style) {
@@ -170,8 +160,8 @@ namespace Codist.Options
 
 			_FontBox.Text = style.Font;
 			_FontSizeBox.Value = style.FontSize > 100 ? 100m : style.FontSize < -10 ? -10m : (decimal)style.FontSize;
-			_ForeColorTransBox.Value = style.ForeColor.A;
-			_BackColorTransBox.Value = style.BackColor.A;
+			_ForeColorTransBox.Value = style.ForeColorOpacity;
+			_BackColorTransBox.Value = style.BackColorOpacity;
 			_ForeColorButton.SelectedColor = style.ForeColor.ToGdiColor();
 			_BackColorButton.SelectedColor = style.BackColor.ToGdiColor();
 		}
@@ -192,7 +182,6 @@ namespace Codist.Options
 		}
 
 		void LoadStyleList() {
-			_uiLock = true;
 			_SyntaxListBox.Items.Clear();
 			//_SyntaxListBox.Groups.Clear();
 			//var groups = new List<ListViewGroup>(5);
@@ -221,51 +210,46 @@ namespace Codist.Options
 					Font = new Font(_SyntaxListBox.Font, style.GetFontStyle())
 				});
 			}
-			_uiLock = false;
 		}
 
-		void MarkChanged(object sender, EventArgs args) {
-			if (_uiLock || _activeStyle == null) {
-				return;
-			}
-			_uiLock = true;
-			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
-			UpdatePreview();
-			_uiLock = false;
-		}
-
-		void ResetButton_Click(object sender, EventArgs e) {
+		void MarkChanged() {
 			if (_activeStyle == null) {
 				return;
 			}
-			_uiLock = true;
+			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			UpdatePreview();
+		}
+
+		void ResetButton_Click() {
+			if (_activeStyle == null) {
+				return;
+			}
 			_activeStyle.Reset();
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			UpdateUIControls(_activeStyle);
 			UpdatePreview();
-			_uiLock = false;
 		}
 
-		private void SetBackColor(object sender, EventArgs args) {
-			if (_uiLock || _activeStyle == null) {
-				return;
+		void SetBackColor() {
+			if (_activeStyle != null) {
+				_activeStyle.BackColor = _BackColorButton.SelectedColor.ToWpfColor();
 			}
-			if (sender == _BackColorButton && _BackColorTransBox.Value == 0) {
-				_BackColorTransBox.Value = 255;
+		}
+		void SetBackColorOpacity() {
+			if (_activeStyle != null) {
+				_activeStyle.BackColorOpacity = (byte)_BackColorTransBox.Value;
 			}
-			_BackColorButton.SelectedColor = _BackColorButton.SelectedColor.Alpha((byte)_BackColorTransBox.Value);
-			_activeStyle.BackColor = _BackColorButton.SelectedColor.ToWpfColor();
 		}
 
-		private void SetForeColor(object sender, EventArgs args) {
-			if (_uiLock || _activeStyle == null) {
-				return;
+		void SetForeColor() {
+			if (_activeStyle != null) {
+				_activeStyle.ForeColor = _ForeColorButton.SelectedColor.ToWpfColor();
 			}
-			if (sender == _ForeColorButton && _ForeColorTransBox.Value == 0) {
-				_ForeColorTransBox.Value = 255;
+		}
+		void SetForeColorOpacity() {
+			if (_activeStyle != null) {
+				_activeStyle.ForeColorOpacity = (byte)_ForeColorTransBox.Value;
 			}
-			_ForeColorButton.SelectedColor = _ForeColorButton.SelectedColor.Alpha((byte)_ForeColorTransBox.Value);
-			_activeStyle.ForeColor = _ForeColorButton.SelectedColor.ToWpfColor();
 		}
 		void UpdatePreview() {
 			if (_activeStyle == null) {

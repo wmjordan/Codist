@@ -48,7 +48,6 @@
 			this._BoldBox = new System.Windows.Forms.CheckBox();
 			this._SyntaxListBox = new Codist.Options.SyntaxListView();
 			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this._PicColorBox = new System.Windows.Forms.ColorDialog();
 			this._StyleSettingsBox.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._PreviewBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._BackColorTransBox)).BeginInit();
@@ -104,7 +103,6 @@
 			this._ResetButton.TabIndex = 20;
 			this._ResetButton.Text = "Reset";
 			this._ResetButton.UseVisualStyleBackColor = true;
-			this._ResetButton.Click += new System.EventHandler(this.ResetButton_Click);
 			// 
 			// label2
 			// 
@@ -165,6 +163,7 @@
 			// 
 			// _BackColorButton
 			// 
+			this._BackColorButton.DefaultColor = System.Drawing.Color.Empty;
 			this._BackColorButton.Image = ((System.Drawing.Image)(resources.GetObject("_BackColorButton.Image")));
 			this._BackColorButton.Location = new System.Drawing.Point(6, 163);
 			this._BackColorButton.Name = "_BackColorButton";
@@ -203,6 +202,7 @@
 			// 
 			// _ForeColorButton
 			// 
+			this._ForeColorButton.DefaultColor = System.Drawing.Color.Empty;
 			this._ForeColorButton.Image = ((System.Drawing.Image)(resources.GetObject("_ForeColorButton.Image")));
 			this._ForeColorButton.Location = new System.Drawing.Point(6, 134);
 			this._ForeColorButton.Name = "_ForeColorButton";
@@ -358,7 +358,6 @@
 		private System.Windows.Forms.CheckBox _BoldBox;
 		private SyntaxListView _SyntaxListBox;
 		private System.Windows.Forms.ColumnHeader _NameColumn;
-		private System.Windows.Forms.ColorDialog _PicColorBox;
 		private System.Windows.Forms.PictureBox _PreviewBox;
 		private System.Windows.Forms.ComboBox _FontBox;
 		private System.Windows.Forms.Label label8;

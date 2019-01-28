@@ -20,22 +20,31 @@ namespace Codist
 		public static string ToHexString(this GdiColor color) {
 			return "#" + color.A.ToString("X2") + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
 		}
-		public static WpfColor ParseColor(string colorText) {
+		public static void ParseColor(string colorText, out WpfColor color, out byte opacity) {
 			if (String.IsNullOrEmpty(colorText) || colorText[0] != '#') {
-				return WpfColors.Transparent;
+				goto EXIT;
 			}
 			var l = colorText.Length;
-			if (l != 7 && l != 9) {
-				return WpfColors.Transparent;
+			if (l != 7 && l != 9 && l != 3) {
+				goto EXIT;
 			}
 			try {
-				byte a = 0xFF, r, g, b;
+				byte a, r, g, b;
 				switch (l) {
+					case 3:
+						if (ParseByte(colorText, 1, out a)) {
+							opacity = a == 0 ? Byte.MaxValue : a;
+							color = WpfColors.Transparent;
+							return;
+						}
+						break;
 					case 7:
 						if (ParseByte(colorText, 1, out r)
 							&& ParseByte(colorText, 3, out g)
 							&& ParseByte(colorText, 5, out b)) {
-							return WpfColor.FromArgb(a, r, g, b);
+							color = WpfColor.FromRgb(r, g, b);
+							opacity = Byte.MaxValue;
+							return;
 						}
 						break;
 					case 9:
@@ -43,7 +52,9 @@ namespace Codist
 							&& ParseByte(colorText, 3, out r)
 							&& ParseByte(colorText, 5, out g)
 							&& ParseByte(colorText, 7, out b)) {
-							return WpfColor.FromArgb(a, r, g, b);
+							color = a == 0 ? WpfColors.Transparent : WpfColor.FromRgb(r, g, b);
+							opacity = Byte.MaxValue;
+							return;
 						}
 						break;
 				}
@@ -51,7 +62,9 @@ namespace Codist
 			catch (Exception ex) {
 				System.Diagnostics.Debug.WriteLine(ex);
 			}
-			return WpfColors.Transparent;
+			EXIT:
+			color = WpfColors.Transparent;
+			opacity = 0;
 		}
 
 		static bool ParseByte(string text, int index, out byte value) {
@@ -131,9 +144,9 @@ namespace Codist
 			return d?.ClassificationTypeNames;
 		}
 
-		internal static void MixStyle(SyntaxHighlight.StyleBase style, out FontStyle fontStyle, out GdiColor foreground, out GdiColor background) {
-			foreground = ThemeHelper.DocumentTextColor;
-			background = ThemeHelper.DocumentPageColor;
+		internal static void MixStyle(SyntaxHighlight.StyleBase style, out FontStyle fontStyle, out GdiColor forecolor, out GdiColor backcolor) {
+			forecolor = ThemeHelper.DocumentTextColor.Alpha(style.ForeColorOpacity);
+			backcolor = ThemeHelper.DocumentPageColor.Alpha(style.BackColorOpacity);
 			fontStyle = style.GetFontStyle();
 			if (style.ClassificationType == null) {
 				return;
@@ -144,22 +157,22 @@ namespace Codist
 			}
 			SolidColorBrush colorBrush;
 			if (style.ForeColor.A == 0) {
-				colorBrush = p.ForegroundBrushEmpty == false ? p.ForegroundBrush as SolidColorBrush : null;
+				colorBrush = p.ForegroundBrushEmpty ? null : p.ForegroundBrush as SolidColorBrush;
 				if (colorBrush != null) {
-					foreground = colorBrush.Color.ToGdiColor();
+					forecolor = colorBrush.Color.Alpha(style.ForeColorOpacity).ToGdiColor();
 				}
 			}
 			else {
-				foreground = style.ForeColor.ToGdiColor();
+				forecolor = style.AlphaForeColor.ToGdiColor();
 			}
 			if (style.BackColor.A == 0) {
-				colorBrush = p.BackgroundBrushEmpty == false ? p.BackgroundBrush as SolidColorBrush : null;
+				colorBrush = p.BackgroundBrushEmpty ? null : p.BackgroundBrush as SolidColorBrush;
 				if (colorBrush != null) {
-					background = colorBrush.Color.ToGdiColor();
+					backcolor = colorBrush.Color.Alpha(style.BackColorOpacity).ToGdiColor();
 				}
 			}
 			else {
-				background = style.BackColor.ToGdiColor();
+				backcolor = style.AlphaBackColor.ToGdiColor();
 			}
 			if (p.BoldEmpty == false && p.Bold && style.Bold != false) {
 				fontStyle |= FontStyle.Bold;

@@ -126,6 +126,7 @@ namespace Codist.QuickInfo
 			var c = brush.Color;
 			var v = Microsoft.VisualStudio.Imaging.HslColor.FromColor(c);
 			return new StackPanel {
+				Name = "ColorPreview",
 				Children = {
 					new ThemedTipText().Append(new System.Windows.Shapes.Rectangle { Width = 16, Height = 16, Fill = brush }).Append("Color", true),
 					new StackPanel().AddReadOnlyTextBox($"{c.A}, {c.R}, {c.G}, {c.B}").Add(new ThemedTipText(" ARGB", true)).MakeHorizontal(),
@@ -231,17 +232,12 @@ namespace Codist.QuickInfo
 			static readonly Dictionary<string, SolidColorBrush> __Cache = GetBrushes();
 			static readonly Dictionary<string, Func<SolidColorBrush>> __SystemColors = GetSystemColors();
 			internal static SolidColorBrush GetBrush(string name) {
-				var c = UIHelper.ParseColor(name);
+				UIHelper.ParseColor(name, out var c, out var a);
 				if (c != WpfColors.Transparent) {
-					return new SolidColorBrush(c);
+					return new SolidColorBrush(c.Alpha(a));
 				}
 				var l = name.Length;
-				if (l >= 3 && l <= 20) {
-					if (__Cache.TryGetValue(name, out var brush)) {
-						return brush;
-					}
-				}
-				return null;
+				return l >= 3 && l <= 20 && __Cache.TryGetValue(name, out var brush) ? brush : null;
 			}
 			internal static SolidColorBrush GetSystemBrush(string name) {
 				if (__SystemColors.TryGetValue(name, out var func)) {

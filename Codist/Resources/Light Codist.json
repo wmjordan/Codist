@@ -147,7 +147,8 @@
     },
     {
       "StyleID": "StaticMemberName",
-      "Underline": true
+      "Underline": true,
+	  "Bold": false
     },
     {
       "StyleID": "OverrideMemberName",
@@ -161,7 +162,8 @@
     },
     {
       "StyleID": "LocalVariableName",
-      "Italic": true
+      "Italic": true,
+	  "ForegroundColor": "#010101"
     },
     {
       "StyleID": "Label",
@@ -217,7 +219,6 @@
     {
       "StyleID": "ReadOnlyFieldName",
       "Italic": false,
-      "ForegroundColor": "#808000"
     },
     {
       "StyleID": "PropertyName",

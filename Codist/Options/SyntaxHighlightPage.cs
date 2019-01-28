@@ -30,15 +30,9 @@ namespace Codist.Options
 			}
 			LoadConfig(Config.Instance);
 
-			_DarkThemeButton.Click += (s, args) => {
-				LoadTheme(Config.DarkTheme);
-			};
-			_LightThemeButton.Click += (s, args) => {
-				LoadTheme(Config.LightTheme);
-			};
-			_SimpleThemeButton.Click += (s, args) => {
-				LoadTheme(Config.SimpleTheme);
-			};
+			_DarkThemeButton.Click += (s, args) => LoadTheme(Config.DarkTheme);
+			_LightThemeButton.Click += (s, args) => LoadTheme(Config.LightTheme);
+			_SimpleThemeButton.Click += (s, args) => LoadTheme(Config.SimpleTheme);
 			_ResetThemeButton.Click += (s, args) => {
 				if (MessageBox.Show("Do you want to reset the syntax highlight settings to default?", nameof(Codist), MessageBoxButtons.YesNo) == DialogResult.Yes) {
 					Config.ResetStyles();

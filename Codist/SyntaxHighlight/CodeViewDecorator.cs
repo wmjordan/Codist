@@ -130,40 +130,41 @@ namespace Codist.SyntaxHighlight
 			if (settings.Italic.HasValue) {
 				properties = properties.SetItalic(settings.Italic.Value);
 			}
-			if (settings.ForeColor.A > 0) {
-				if (settings.ForeColor.A == 255 && properties.ForegroundOpacityEmpty) {
-					properties = properties.SetForeground(settings.ForeColor.Alpha(255));
+			if (settings.ForeColorOpacity > 0) {
+				if (settings.ForeColor.A > 0) {
+					properties = properties.SetForeground(settings.ForeColor);
 				}
-				else {
-					properties = properties.SetForegroundOpacity(settings.ForeColor.A / 255.0)
-					.SetForeground(settings.ForeColor);
+				if (settings.ForeColorOpacity != Byte.MaxValue || properties.ForegroundOpacityEmpty == false) {
+					properties = properties.SetForegroundOpacity(settings.ForeColorOpacity / 255.0);
 				}
 			}
-			var bc = settings.BackColor.A > 0 ? settings.BackColor
-				: properties.BackgroundBrushEmpty == false && properties.BackgroundBrush is SolidColorBrush ? (properties.BackgroundBrush as SolidColorBrush).Color
-				: Colors.Transparent;
-			if (bc.A > 0) {
-				if (settings.BackColor.A < 255 || properties.BackgroundOpacityEmpty == false) {
-					properties = properties.SetBackgroundOpacity(bc.A / 255.0);
+			if (settings.BackColorOpacity > 0) {
+				var bc = settings.BackColor.A > 0 ? settings.BackColor
+			   : properties.BackgroundBrushEmpty == false && properties.BackgroundBrush is SolidColorBrush ? (properties.BackgroundBrush as SolidColorBrush).Color
+			   : Colors.Transparent;
+				if (settings.BackColorOpacity != Byte.MaxValue || properties.BackgroundOpacityEmpty == false) {
+					properties = properties.SetBackgroundOpacity(settings.BackColorOpacity / 255.0);
 				}
-				switch (settings.BackgroundEffect) {
-					case BrushEffect.Solid:
-						properties = properties.SetBackground(bc);
-						break;
-					case BrushEffect.ToBottom:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 90));
-						break;
-					case BrushEffect.ToTop:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 90));
-						break;
-					case BrushEffect.ToRight:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 0));
-						break;
-					case BrushEffect.ToLeft:
-						properties = properties.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 0));
-						break;
-					default:
-						break;
+				if (bc.A > 0) {
+					switch (settings.BackgroundEffect) {
+						case BrushEffect.Solid:
+							properties = properties.SetBackground(bc);
+							break;
+						case BrushEffect.ToBottom:
+							properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 90));
+							break;
+						case BrushEffect.ToTop:
+							properties = properties.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 90));
+							break;
+						case BrushEffect.ToRight:
+							properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 0));
+							break;
+						case BrushEffect.ToLeft:
+							properties = properties.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 0));
+							break;
+						default:
+							break;
+					}
 				}
 			}
 			if (settings.Underline.HasValue || settings.Strikethrough.HasValue || settings.OverLine.HasValue) {
