@@ -60,6 +60,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpResourceKeyword)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
+	[Order(After = Constants.CodeBranchingKeyword)]
 	sealed class ResourceKeywordFormat : ClassificationFormatDefinition
 	{
 		public ResourceKeywordFormat() {
