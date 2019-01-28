@@ -96,15 +96,22 @@ namespace Codist.Margins
 
 		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
 			base.OnRenderSizeChanged(sizeInfo);
-			_ScrollbarWidth = (_ScrollBar as FrameworkElement).ActualWidth + LineNumberRenderPadding;
+			var b = _ScrollBar as FrameworkElement;
+			_ScrollbarWidth = b.ActualWidth + LineNumberRenderPadding;
+			InvalidateVisual();
 		}
 
 		void DrawLineNumbers(DrawingContext drawingContext) {
 			var snapshot = _TextView.TextSnapshot;
 			var lc = snapshot.LineCount;
 			var step = lc < 500 ? 50 : lc < 2000 ? 100 : lc < 3000 ? 200 : lc < 5000 ? 500 : lc < 20000 ? 1000 : lc < 100000 ? 5000 : 10000;
+			var dy = 0.0;
 			for (int i = step; i < lc; i += step) {
 				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, snapshot.GetLineFromLineNumber(i - 1).Start));
+				if (y - dy < 50) {
+					continue;
+				}
+				dy = y;
 				drawingContext.DrawLine(LineNumberPen, new Point(-100, y), new Point(100, y));
 				var t = WpfHelper.ToFormattedText(i.ToString(), 9, LineNumberBrush);
 				drawingContext.DrawText(t, new Point(_ScrollbarWidth - t.Width, y));
