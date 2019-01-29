@@ -15,7 +15,7 @@ namespace Codist.SyntaxHighlight
 	{
 		static protected readonly Regex FriendlyNamePattern = new Regex(@"([a-z])([A-Z0-9])", RegexOptions.Singleline);
 		Color _ForeColor, _BackColor;
-		byte _ForeColorOpacity = Byte.MaxValue, _BackColorOpacity = Byte.MaxValue;
+		byte _ForeColorOpacity, _BackColorOpacity;
 
 		internal abstract int Id { get; }
 		/// <summary>Gets or sets whether the content rendered in bold.</summary>
@@ -64,7 +64,7 @@ namespace Codist.SyntaxHighlight
 
 		/// <summary>Returns whether any option in this style is set.</summary>
 		[Newtonsoft.Json.JsonIgnore]
-		public bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForeColorOpacity != Byte.MaxValue || BackColorOpacity != Byte.MaxValue || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false;
+		public bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForeColorOpacity != 0 || BackColorOpacity != 0 || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false;
 
 		internal abstract string ClassificationType { get; }
 		internal abstract string Description { get; }
@@ -114,7 +114,7 @@ namespace Codist.SyntaxHighlight
 			BackgroundEffect = BrushEffect.Solid;
 			Font = null;
 			ForeColor = BackColor = default;
-			ForeColorOpacity = BackColorOpacity = Byte.MaxValue;
+			ForeColorOpacity = BackColorOpacity = 0;
 		}
 	}
 	abstract class StyleBase<TStyle> : StyleBase where TStyle : Enum

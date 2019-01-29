@@ -33,7 +33,7 @@ namespace Codist
 				switch (l) {
 					case 3:
 						if (ParseByte(colorText, 1, out a)) {
-							opacity = a == 0 ? Byte.MaxValue : a;
+							opacity = a;
 							color = WpfColors.Transparent;
 							return;
 						}
@@ -52,8 +52,11 @@ namespace Codist
 							&& ParseByte(colorText, 3, out r)
 							&& ParseByte(colorText, 5, out g)
 							&& ParseByte(colorText, 7, out b)) {
-							color = a == 0 ? WpfColors.Transparent : WpfColor.FromRgb(r, g, b);
-							opacity = Byte.MaxValue;
+							if (a == 0) {
+								goto EXIT;
+							}
+							color = WpfColor.FromRgb(r, g, b);
+							opacity = a;
 							return;
 						}
 						break;
@@ -159,19 +162,19 @@ namespace Codist
 			if (style.ForeColor.A == 0) {
 				colorBrush = p.ForegroundBrushEmpty ? null : p.ForegroundBrush as SolidColorBrush;
 				if (colorBrush != null) {
-					forecolor = colorBrush.Color.Alpha(style.ForeColorOpacity).ToGdiColor();
+					forecolor = (style.ForeColorOpacity > 0 ? colorBrush.Color.Alpha(style.ForeColorOpacity) : colorBrush.Color).ToGdiColor();
 				}
 			}
-			else {
+			else if (style.ForeColorOpacity > 0) {
 				forecolor = style.AlphaForeColor.ToGdiColor();
 			}
 			if (style.BackColor.A == 0) {
 				colorBrush = p.BackgroundBrushEmpty ? null : p.BackgroundBrush as SolidColorBrush;
 				if (colorBrush != null) {
-					backcolor = colorBrush.Color.Alpha(style.BackColorOpacity).ToGdiColor();
+					backcolor = (style.BackColorOpacity > 0 ? colorBrush.Color.Alpha(style.BackColorOpacity) : colorBrush.Color).ToGdiColor();
 				}
 			}
-			else {
+			else if (style.BackColorOpacity > 0) {
 				backcolor = style.AlphaBackColor.ToGdiColor();
 			}
 			if (p.BoldEmpty == false && p.Bold && style.Bold != false) {
