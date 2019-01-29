@@ -43,7 +43,7 @@ namespace Codist.Options
 					Title = "Load Codist syntax highlight setting file...",
 					FileName = "Codist.styles",
 					DefaultExt = "styles",
-					Filter = "Codist syntax highlight setting file|*.styles"
+					Filter = "Codist syntax highlight setting file|*.styles|All files|*.*"
 				}) {
 					if (d.ShowDialog() == DialogResult.OK) {
 						try {
@@ -60,7 +60,7 @@ namespace Codist.Options
 					Title = "Save Codist syntax highlight setting file...",
 					FileName = "Codist.styles",
 					DefaultExt = "styles",
-					Filter = "Codist syntax highlight setting file|*.styles"
+					Filter = "Codist syntax highlight setting file|*.styles|All files|*.*"
 				}) {
 					if (d.ShowDialog() == DialogResult.OK) {
 						Config.Instance.SaveConfig(d.FileName, true);

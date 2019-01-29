@@ -55,7 +55,7 @@ namespace Codist.Options
 					Title = "Save Codist configuration file...",
 					FileName = "Codist.json",
 					DefaultExt = "json",
-					Filter = "Codist configuration file|*.json"
+					Filter = "Codist configuration file|*.json|All files|*.*"
 				}) {
 					if (d.ShowDialog() != DialogResult.OK) {
 						return;
@@ -68,7 +68,7 @@ namespace Codist.Options
 					Title = "Load Codist configuration file...",
 					FileName = "Codist.json",
 					DefaultExt = "json",
-					Filter = "Codist configuration file|*.json"
+					Filter = "Codist configuration file|*.json|All files|*.*"
 				}) {
 					if (d.ShowDialog() != DialogResult.OK) {
 						return;
