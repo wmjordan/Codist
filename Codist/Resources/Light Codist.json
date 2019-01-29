@@ -4,24 +4,20 @@
       "StyleID": "Emphasis",
       "Bold": true,
       "FontSize": 7.0,
-      "ForegroundColor": "#008000",
-      "BackgroundColor": "#00FFFFFF"
+      "ForegroundColor": "#008000"
     },
     {
       "StyleID": "Question",
-      "ForegroundColor": "#9370DB",
-      "BackgroundColor": "#00FFFFFF"
+      "ForegroundColor": "#9370DB"
     },
     {
       "StyleID": "Exclaimation",
-      "ForegroundColor": "#F9FF0080",
-      "BackgroundColor": "#00FFFF80"
+      "ForegroundColor": "#F9FF0080"
     },
     {
       "StyleID": "Deletion",
       "Strikethrough": true,
-      "ForegroundColor": "#808080",
-      "BackgroundColor": "#00FFFFFF"
+      "ForegroundColor": "#808080"
     },
     {
       "StyleID": "ToDo",
@@ -51,8 +47,7 @@
     {
       "StyleID": "Heading1",
       "FontSize": 12.0,
-      "ForegroundColor": "#008000",
-      "BackgroundColor": "#00FFFFFF"
+      "ForegroundColor": "#008000"
     },
     {
       "StyleID": "Heading2",
@@ -62,26 +57,22 @@
     {
       "StyleID": "Heading3",
       "FontSize": 4.0,
-      "ForegroundColor": "#008000",
-      "BackgroundColor": "#00FFFFFF"
+      "ForegroundColor": "#008000"
     },
     {
       "StyleID": "Heading4",
       "FontSize": -1.0,
-      "ForegroundColor": "#008000",
-      "BackgroundColor": "#00FFFFFF"
+      "ForegroundColor": "#008000"
     },
     {
       "StyleID": "Heading5",
       "FontSize": -2.0,
-      "ForegroundColor": "#008000",
-      "BackgroundColor": "#00FFFFFF"
+      "ForegroundColor": "#008000"
     },
     {
       "StyleID": "Heading6",
       "FontSize": -3.0,
-      "ForegroundColor": "#008000",
-      "BackgroundColor": "#00FFFFFF"
+      "ForegroundColor": "#008000"
     },
     {
       "StyleID": "Task1",
@@ -135,7 +126,7 @@
     },
     {
       "StyleID": "Declaration",
-      "FontSize": 8.0,
+      "FontSize": 8.0
     },
     {
       "StyleID": "MemberDeclaration",
@@ -147,8 +138,8 @@
     },
     {
       "StyleID": "StaticMemberName",
-      "Underline": true,
-	  "Bold": false
+      "Bold": false,
+      "Underline": true
     },
     {
       "StyleID": "OverrideMemberName",
@@ -163,7 +154,7 @@
     {
       "StyleID": "LocalVariableName",
       "Italic": true,
-	  "ForegroundColor": "#010101"
+      "ForegroundColor": "#010101"
     },
     {
       "StyleID": "Label",
@@ -175,7 +166,7 @@
       "StyleID": "AttributeNotation",
       "Italic": true,
       "FontSize": -2.0,
-      "ForegroundColor": "#EF808080"
+      "ForegroundColor": "#DF808080"
     },
     {
       "StyleID": "NamespaceName",
@@ -218,7 +209,7 @@
     },
     {
       "StyleID": "ReadOnlyFieldName",
-      "Italic": false,
+      "Italic": false
     },
     {
       "StyleID": "PropertyName",
@@ -249,9 +240,6 @@
       "StyleID": "XmlDoc",
       "FontSize": -1.0,
       "ForegroundColor": "#E0000000"
-    },
-    {
-      "StyleID": "XmlDocComment",
     },
     {
       "StyleID": "XmlDocTag",

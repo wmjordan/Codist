@@ -55,20 +55,17 @@
     {
       "StyleID": "Heading4",
       "FontSize": -1.0,
-      "ForegroundColor": "#008000",
-      "BackgroundColor": "#00FFFFFF"
+      "ForegroundColor": "#008000"
     },
     {
       "StyleID": "Heading5",
       "FontSize": -2.0,
-      "ForegroundColor": "#008000",
-      "BackgroundColor": "#00FFFFFF"
+      "ForegroundColor": "#008000"
     },
     {
       "StyleID": "Heading6",
       "FontSize": -3.0,
-      "ForegroundColor": "#008000",
-      "BackgroundColor": "#00FFFFFF"
+      "ForegroundColor": "#008000"
     },
     {
       "StyleID": "Task1",
@@ -109,7 +106,7 @@
     },
     {
       "StyleID": "BranchingKeyword",
-      "ForegroundColor": "#409FFF"
+      "ForegroundColor": "#8080FF"
     },
     {
       "StyleID": "LoopKeyword",
@@ -119,7 +116,7 @@
     {
       "StyleID": "ResourceAndExceptionKeyword",
       "Bold": true,
-      "ForegroundColor": "#FF1515"
+      "ForegroundColor": "#CF3030"
     },
     {
       "StyleID": "Declaration",
@@ -135,6 +132,7 @@
     },
     {
       "StyleID": "StaticMemberName",
+      "Bold": false,
       "Underline": true
     },
     {
@@ -149,7 +147,8 @@
     },
     {
       "StyleID": "LocalVariableName",
-      "Italic": true
+      "Italic": true,
+      "ForegroundColor": "#D4D4D4"
     },
     {
       "StyleID": "Label",
@@ -161,7 +160,7 @@
       "StyleID": "AttributeNotation",
       "Italic": true,
       "FontSize": -2.0,
-      "ForegroundColor": "#EF808080"
+      "ForegroundColor": "#BF808080"
     },
     {
       "StyleID": "NamespaceName",
@@ -214,8 +213,7 @@
     },
     {
       "StyleID": "ExtensionMethodName",
-      "Italic": true,
-      "ForegroundColor": "#00FFA4A4"
+      "Italic": true
     },
     {
       "StyleID": "ExternMethodName",
@@ -230,7 +228,7 @@
     {
       "StyleID": "XmlDoc",
       "FontSize": -1.0,
-      "ForegroundColor": "#DFC0C0C0"
+      "ForegroundColor": "#DF"
     },
     {
       "StyleID": "XmlDocTag",
@@ -326,7 +324,7 @@
     {
       "StyleID": "Comment",
       "Italic": true,
-      "ForegroundColor": "#00008000"
+      "ForegroundColor": "#DF"
     },
     {
       "StyleID": "UnnecessaryCode",
