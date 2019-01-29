@@ -160,8 +160,8 @@ namespace Codist.Options
 
 			_FontBox.Text = style.Font;
 			_FontSizeBox.Value = style.FontSize > 100 ? 100m : style.FontSize < -10 ? -10m : (decimal)style.FontSize;
-			_ForeColorTransBox.Value = style.ForeColorOpacity;
-			_BackColorTransBox.Value = style.BackColorOpacity;
+			_ForeColorTransBox.Value = style.ForegroundOpacity;
+			_BackColorTransBox.Value = style.BackgroundOpacity;
 			_ForeColorButton.SelectedColor = style.ForeColor.ToGdiColor();
 			_BackColorButton.SelectedColor = style.BackColor.ToGdiColor();
 		}
@@ -237,7 +237,7 @@ namespace Codist.Options
 		}
 		void SetBackColorOpacity() {
 			if (_activeStyle != null) {
-				_activeStyle.BackColorOpacity = (byte)_BackColorTransBox.Value;
+				_activeStyle.BackgroundOpacity = (byte)_BackColorTransBox.Value;
 			}
 		}
 
@@ -248,7 +248,7 @@ namespace Codist.Options
 		}
 		void SetForeColorOpacity() {
 			if (_activeStyle != null) {
-				_activeStyle.ForeColorOpacity = (byte)_ForeColorTransBox.Value;
+				_activeStyle.ForegroundOpacity = (byte)_ForeColorTransBox.Value;
 			}
 		}
 		void UpdatePreview() {

@@ -50,17 +50,13 @@ namespace Codist.SyntaxHighlight
 		}
 
 		void SettingsSaved(object sender, ConfigUpdatedEventArgs eventArgs) {
-			if (eventArgs.UpdatedFeature.MatchFlags(Features.SyntaxHighlight) == false) {
-				return;
+			if (eventArgs.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)) {
+				FormatUpdated(sender, eventArgs);
 			}
-			FormatUpdated(sender, eventArgs);
 		}
 
 		void FormatUpdated(object sender, EventArgs e) {
-			if (_IsDecorating != 0) {
-				return;
-			}
-			if (_TextView.VisualElement.IsVisible) {
+			if (_IsDecorating == 0 && _TextView.VisualElement.IsVisible) {
 				Decorate();
 			}
 		}
@@ -72,7 +68,7 @@ namespace Codist.SyntaxHighlight
 			try {
 				var c = TextEditorHelper.DefaultEditorFormatMap.GetColor(Constants.EditorProperties.Text, EditorFormatDefinition.ForegroundColorId);
 				if (c.A > 0) {
-					if (c.Equals(_ForeColor) == false) {
+					if (c != _ForeColor) {
 						Debug.WriteLine("Fore color changed: " + _ForeColor.ToString() + "->" + c.ToString());
 					}
 					_ForeColor = c;
@@ -130,23 +126,23 @@ namespace Codist.SyntaxHighlight
 			if (settings.Italic.HasValue) {
 				properties = properties.SetItalic(settings.Italic.Value);
 			}
-			if (settings.ForeColorOpacity > 0) {
+			if (settings.ForegroundOpacity > 0) {
 				if (settings.ForeColor.A > 0) {
 					properties = properties.SetForeground(settings.ForeColor);
 				}
-				if (settings.ForeColorOpacity != Byte.MaxValue || properties.ForegroundOpacityEmpty == false) {
-					properties = properties.SetForegroundOpacity(settings.ForeColorOpacity / 255.0);
+				if (settings.ForegroundOpacity != Byte.MaxValue || properties.ForegroundOpacityEmpty == false) {
+					properties = properties.SetForegroundOpacity(settings.ForegroundOpacity / 255.0);
 				}
 			}
 			else if (settings.ForeColor.A > 0) {
 				properties = properties.SetForeground(settings.ForeColor);
 			}
-			if (settings.BackColorOpacity > 0) {
+			if (settings.BackColor.A > 0) {
 				var bc = settings.BackColor.A > 0 ? settings.BackColor
 				   : properties.BackgroundBrushEmpty == false && properties.BackgroundBrush is SolidColorBrush ? (properties.BackgroundBrush as SolidColorBrush).Color
 				   : Colors.Transparent;
-				if (settings.BackColorOpacity != Byte.MaxValue || properties.BackgroundOpacityEmpty == false) {
-					properties = properties.SetBackgroundOpacity(settings.BackColorOpacity / 255.0);
+				if (settings.BackgroundOpacity != Byte.MaxValue && settings.BackgroundOpacity != 0 || properties.BackgroundOpacityEmpty == false) {
+					properties = properties.SetBackgroundOpacity(settings.BackgroundOpacity / 255.0);
 				}
 				if (bc.A > 0) {
 					switch (settings.BackgroundEffect) {

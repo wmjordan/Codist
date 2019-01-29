@@ -33,15 +33,19 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		[DefaultValue("#00000000")]
 		public string ForegroundColor {
-			get => _ForeColor.A == 0 ? "#" + _ForeColorOpacity.ToString("X2") : _ForeColor.Alpha(_ForeColorOpacity).ToHexString();
+			get => _ForeColor.A == 0 ? "#00000000" : _ForeColor.ToHexString();
 			set => UIHelper.ParseColor(value, out _ForeColor, out _ForeColorOpacity);
 		}
+		[DefaultValue((byte)0)]
+		public byte ForegroundOpacity { get => _ForeColorOpacity; set => _ForeColorOpacity = value; }
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		[DefaultValue("#00000000")]
 		public string BackgroundColor {
-			get => _BackColor.A == 0 ? "#" + _BackColorOpacity.ToString("X2") : _BackColor.Alpha(_BackColorOpacity).ToHexString();
+			get => _BackColor.A == 0 ? "#00000000" : _BackColor.ToHexString();
 			set => UIHelper.ParseColor(value, out _BackColor, out _BackColorOpacity);
 		}
+		[DefaultValue((byte)0)]
+		public byte BackgroundOpacity { get => _BackColorOpacity; set => _BackColorOpacity = value; }
 		/// <summary>Gets or sets the brush effect to draw the background color.</summary>
 		[DefaultValue(BrushEffect.Solid)]
 		public BrushEffect BackgroundEffect { get; set; }
@@ -52,11 +56,9 @@ namespace Codist.SyntaxHighlight
 		public string Font { get; set; }
 
 		internal Color ForeColor { get => _ForeColor; set => _ForeColor = value; }
-		internal byte ForeColorOpacity { get => _ForeColorOpacity; set => _ForeColorOpacity = value; }
-		internal Color AlphaForeColor => _ForeColor.Alpha(_ForeColorOpacity);
+		internal Color AlphaForeColor => _ForeColorOpacity > 0 ? _ForeColor.Alpha(_ForeColorOpacity) : _ForeColor;
 		internal Color BackColor { get => _BackColor; set => _BackColor = value; }
-		internal byte BackColorOpacity { get => _BackColorOpacity; set => _BackColorOpacity = value; }
-		internal Color AlphaBackColor => _ForeColor.Alpha(_BackColorOpacity);
+		internal Color AlphaBackColor => _BackColorOpacity > 0 ? _BackColor.Alpha(_BackColorOpacity) : _BackColor;
 
 		/// <summary>The category used in option pages to group style items</summary>
 		[Newtonsoft.Json.JsonIgnore]
@@ -64,7 +66,7 @@ namespace Codist.SyntaxHighlight
 
 		/// <summary>Returns whether any option in this style is set.</summary>
 		[Newtonsoft.Json.JsonIgnore]
-		public bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForeColorOpacity != 0 || BackColorOpacity != 0 || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false;
+		public bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForegroundOpacity != 0 || BackgroundOpacity != 0 || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false;
 
 		internal abstract string ClassificationType { get; }
 		internal abstract string Description { get; }
@@ -83,15 +85,15 @@ namespace Codist.SyntaxHighlight
 			target.Font = Font;
 			target.ForeColor = ForeColor;
 			target.BackColor = BackColor;
-			target.ForeColorOpacity = ForeColorOpacity;
-			target.BackColorOpacity = BackColorOpacity;
+			target.ForegroundOpacity = ForegroundOpacity;
+			target.BackgroundOpacity = BackgroundOpacity;
 		}
 		internal void CopyTo(StyleBase target, StyleFilters filters) {
 			if (filters.MatchFlags(StyleFilters.Color)) {
 				target.ForeColor = ForeColor;
 				target.BackColor = BackColor;
-				target.ForeColorOpacity = ForeColorOpacity;
-				target.BackColorOpacity = BackColorOpacity;
+				target.ForegroundOpacity = ForegroundOpacity;
+				target.BackgroundOpacity = BackgroundOpacity;
 				target.BackgroundEffect = BackgroundEffect;
 			}
 			if (filters.MatchFlags(StyleFilters.FontFamily)) {
@@ -114,7 +116,7 @@ namespace Codist.SyntaxHighlight
 			BackgroundEffect = BrushEffect.Solid;
 			Font = null;
 			ForeColor = BackColor = default;
-			ForeColorOpacity = BackColorOpacity = 0;
+			ForegroundOpacity = BackgroundOpacity = 0;
 		}
 	}
 	abstract class StyleBase<TStyle> : StyleBase where TStyle : Enum

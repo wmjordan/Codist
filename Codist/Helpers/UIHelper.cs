@@ -148,8 +148,8 @@ namespace Codist
 		}
 
 		internal static void MixStyle(SyntaxHighlight.StyleBase style, out FontStyle fontStyle, out GdiColor forecolor, out GdiColor backcolor) {
-			forecolor = style.ForeColorOpacity > 0 ? ThemeHelper.DocumentTextColor.Alpha(style.ForeColorOpacity) : ThemeHelper.DocumentTextColor;
-			backcolor = style.BackColorOpacity > 0 ? ThemeHelper.DocumentPageColor.Alpha(style.BackColorOpacity) : ThemeHelper.DocumentPageColor;
+			forecolor = style.ForegroundOpacity > 0 ? ThemeHelper.DocumentTextColor.Alpha(style.ForegroundOpacity) : ThemeHelper.DocumentTextColor;
+			backcolor = style.BackgroundOpacity > 0 ? ThemeHelper.DocumentPageColor.Alpha(style.BackgroundOpacity) : ThemeHelper.DocumentPageColor;
 			fontStyle = style.GetFontStyle();
 			if (style.ClassificationType == null) {
 				return;
@@ -162,26 +162,20 @@ namespace Codist
 			if (style.ForeColor.A == 0) {
 				colorBrush = p.ForegroundBrushEmpty ? null : p.ForegroundBrush as SolidColorBrush;
 				if (colorBrush != null) {
-					forecolor = (style.ForeColorOpacity > 0 ? colorBrush.Color.Alpha(style.ForeColorOpacity) : colorBrush.Color).ToGdiColor();
+					forecolor = (style.ForegroundOpacity > 0 ? colorBrush.Color.Alpha(style.ForegroundOpacity) : colorBrush.Color).ToGdiColor();
 				}
 			}
-			else if (style.ForeColorOpacity > 0) {
-				forecolor = style.AlphaForeColor.ToGdiColor();
-			}
 			else {
-				forecolor = style.ForeColor.ToGdiColor();
+				forecolor = style.AlphaForeColor.ToGdiColor();
 			}
 			if (style.BackColor.A == 0) {
 				colorBrush = p.BackgroundBrushEmpty ? null : p.BackgroundBrush as SolidColorBrush;
 				if (colorBrush != null) {
-					backcolor = (style.BackColorOpacity > 0 ? colorBrush.Color.Alpha(style.BackColorOpacity) : colorBrush.Color).ToGdiColor();
+					backcolor = (style.BackgroundOpacity > 0 ? colorBrush.Color.Alpha(style.BackgroundOpacity) : colorBrush.Color).ToGdiColor();
 				}
 			}
-			else if (style.BackColorOpacity > 0) {
-				backcolor = style.AlphaBackColor.ToGdiColor();
-			}
 			else {
-				backcolor = style.BackColor.ToGdiColor();
+				backcolor = style.AlphaBackColor.ToGdiColor();
 			}
 			if (p.BoldEmpty == false && p.Bold && style.Bold != false) {
 				fontStyle |= FontStyle.Bold;
