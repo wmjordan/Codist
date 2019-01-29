@@ -72,16 +72,14 @@ namespace Codist.Classifiers
 							var node = unitCompilation.FindNode(item.TextSpan, true, true);
 							if (node is MemberDeclarationSyntax) {
 								var token = unitCompilation.FindToken(item.TextSpan.Start);
-								if (token != null) {
-									switch (token.Kind()) {
-										case SyntaxKind.SealedKeyword:
-										case SyntaxKind.OverrideKeyword:
-										case SyntaxKind.AbstractKeyword:
-										case SyntaxKind.VirtualKeyword:
-										case SyntaxKind.NewKeyword:
-											result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.AbstractionKeyword));
-											continue;
-									}
+								switch (token.Kind()) {
+									case SyntaxKind.SealedKeyword:
+									case SyntaxKind.OverrideKeyword:
+									case SyntaxKind.AbstractKeyword:
+									case SyntaxKind.VirtualKeyword:
+									case SyntaxKind.NewKeyword:
+										result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.AbstractionKeyword));
+										continue;
 								}
 								continue;
 							}
@@ -149,15 +147,13 @@ namespace Codist.Classifiers
 								continue;
 							}
 							var node = unitCompilation.FindTrivia(item.TextSpan.Start);
-							if (node != null) {
-								switch (node.Kind()) {
-									case SyntaxKind.SingleLineDocumentationCommentTrivia:
-									case SyntaxKind.MultiLineDocumentationCommentTrivia:
-									case SyntaxKind.DocumentationCommentExteriorTrivia:
-										lastTriviaSpan = node.FullSpan;
-										result.Add(CreateClassificationSpan(snapshot, lastTriviaSpan, _Classifications.XmlDoc));
-										continue;
-								}
+							switch (node.Kind()) {
+								case SyntaxKind.SingleLineDocumentationCommentTrivia:
+								case SyntaxKind.MultiLineDocumentationCommentTrivia:
+								case SyntaxKind.DocumentationCommentExteriorTrivia:
+									lastTriviaSpan = node.FullSpan;
+									result.Add(CreateClassificationSpan(snapshot, lastTriviaSpan, _Classifications.XmlDoc));
+									continue;
 							}
 						}
 						else if (ct == Constants.CodeIdentifier
