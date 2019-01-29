@@ -40,9 +40,9 @@ namespace Codist.Options
 			}
 			LoadStyleList();
 			_BackColorButton.Click += _UI.HandleEvent(SetBackColor);
-			_BackColorTransBox.ValueChanged += _UI.HandleEvent(SetBackColorOpacity);
+			_BackgroundOpacityButton.Click += _UI.HandleEvent(SetBackColorOpacity);
 			_ForeColorButton.Click += _UI.HandleEvent(SetForeColor);
-			_ForeColorTransBox.ValueChanged += _UI.HandleEvent(SetForeColorOpacity);
+			_ForegroundOpacityButton.Click += _UI.HandleEvent(SetForeColorOpacity);
 			var ff = new InstalledFontCollection().Families;
 			_FontBox.Items.Add(new FontFamilyItem());
 			_FontBox.SelectedIndex = 0;
@@ -160,8 +160,8 @@ namespace Codist.Options
 
 			_FontBox.Text = style.Font;
 			_FontSizeBox.Value = style.FontSize > 100 ? 100m : style.FontSize < -10 ? -10m : (decimal)style.FontSize;
-			_ForeColorTransBox.Value = style.ForegroundOpacity;
-			_BackColorTransBox.Value = style.BackgroundOpacity;
+			_ForegroundOpacityButton.Value = style.ForegroundOpacity;
+			_BackgroundOpacityButton.Value = style.BackgroundOpacity;
 			_ForeColorButton.SelectedColor = style.ForeColor.ToGdiColor();
 			_BackColorButton.SelectedColor = style.BackColor.ToGdiColor();
 		}
@@ -237,7 +237,7 @@ namespace Codist.Options
 		}
 		void SetBackColorOpacity() {
 			if (_activeStyle != null) {
-				_activeStyle.BackgroundOpacity = (byte)_BackColorTransBox.Value;
+				_activeStyle.BackgroundOpacity = _BackgroundOpacityButton.Value;
 			}
 		}
 
@@ -248,7 +248,7 @@ namespace Codist.Options
 		}
 		void SetForeColorOpacity() {
 			if (_activeStyle != null) {
-				_activeStyle.ForegroundOpacity = (byte)_ForeColorTransBox.Value;
+				_activeStyle.ForegroundOpacity = _ForegroundOpacityButton.Value;
 			}
 		}
 		void UpdatePreview() {

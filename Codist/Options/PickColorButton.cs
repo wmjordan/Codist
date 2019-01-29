@@ -10,7 +10,7 @@ namespace Codist.Options
 		ContextMenuStrip _ContextMenu;
 
 		public PickColorButton() {
-			var x = Height - Padding.Top - Padding.Bottom - 1;
+			var x = Height - Padding.Top - Padding.Bottom - 2;
 			Image = new Bitmap(x, x);
 			TextImageRelation = TextImageRelation.ImageBeforeText;
 		}
@@ -61,7 +61,7 @@ namespace Codist.Options
 					}
 				};
 			}
-			_ContextMenu.Show(this, 0, Height - 1);
+			_ContextMenu.Show(this, 1, Height - 1);
 		}
 
 		protected override void Dispose(bool disposing) {

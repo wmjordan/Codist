@@ -162,6 +162,9 @@
     <Compile Include="Options\CSharpSuperQuickInfoPage.Designer.cs">
       <DependentUpon>CSharpSuperQuickInfoPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="Options\PickOpacityButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Options\SmartBarPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
