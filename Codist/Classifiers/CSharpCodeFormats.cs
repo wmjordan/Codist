@@ -379,6 +379,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpAttributeName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
+	[Order(After = Constants.CodeMethodName)]
 	sealed class AttributeNameFormat : ClassificationFormatDefinition
 	{
 		public AttributeNameFormat() {
