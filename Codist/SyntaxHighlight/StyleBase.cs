@@ -30,22 +30,24 @@ namespace Codist.SyntaxHighlight
 		public bool? Underline { get; set; }
 		/// <summary>Gets or sets the font size. Font size number is relative to the editor text size.</summary>
 		public double FontSize { get; set; }
-		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
+		/// <summary>Gets or sets the foreground color to render the text. The color format could be #AARRGGBB or #RRGGBB.</summary>
 		[DefaultValue("#00000000")]
 		public string ForegroundColor {
-			get => _ForeColor.A == 0 ? "#00000000" : _ForeColor.ToHexString();
+			get => _ForeColor.A == 0 && _ForeColorOpacity == 0 ? "#00000000"
+				: _ForeColor.A > 0 && _ForeColorOpacity == 0 ? _ForeColor.ToHexString()
+				: _ForeColor.A == 0 && _ForeColorOpacity > 0 ? "#" + _ForeColorOpacity.ToString("X2")
+				: _ForeColor.Alpha(_ForeColorOpacity).ToHexString();
 			set => UIHelper.ParseColor(value, out _ForeColor, out _ForeColorOpacity);
 		}
-		[DefaultValue((byte)0)]
-		public byte ForegroundOpacity { get => _ForeColorOpacity; set => _ForeColorOpacity = value; }
-		/// <summary>Gets or sets the foreground color to render the text. The color format could be #RRGGBBAA or #RRGGBB.</summary>
+		/// <summary>Gets or sets the foreground color to render the text. The color format could be #AARRGGBB or #RRGGBB.</summary>
 		[DefaultValue("#00000000")]
 		public string BackgroundColor {
-			get => _BackColor.A == 0 ? "#00000000" : _BackColor.ToHexString();
+			get => _BackColor.A == 0 && _BackColorOpacity == 0 ? "#00000000"
+				: _BackColor.A > 0 && _BackColorOpacity == 0 ? _BackColor.ToHexString()
+				: _BackColor.A == 0 && _BackColorOpacity > 0 ? "#" + _BackColorOpacity.ToString("X2")
+				: _BackColor.Alpha(_BackColorOpacity).ToHexString();
 			set => UIHelper.ParseColor(value, out _BackColor, out _BackColorOpacity);
 		}
-		[DefaultValue((byte)0)]
-		public byte BackgroundOpacity { get => _BackColorOpacity; set => _BackColorOpacity = value; }
 		/// <summary>Gets or sets the brush effect to draw the background color.</summary>
 		[DefaultValue(BrushEffect.Solid)]
 		public BrushEffect BackgroundEffect { get; set; }
@@ -56,8 +58,10 @@ namespace Codist.SyntaxHighlight
 		public string Font { get; set; }
 
 		internal Color ForeColor { get => _ForeColor; set => _ForeColor = value; }
+		internal byte ForegroundOpacity { get => _ForeColorOpacity; set => _ForeColorOpacity = value; }
 		internal Color AlphaForeColor => _ForeColorOpacity > 0 ? _ForeColor.Alpha(_ForeColorOpacity) : _ForeColor;
 		internal Color BackColor { get => _BackColor; set => _BackColor = value; }
+		internal byte BackgroundOpacity { get => _BackColorOpacity; set => _BackColorOpacity = value; }
 		internal Color AlphaBackColor => _BackColorOpacity > 0 ? _BackColor.Alpha(_BackColorOpacity) : _BackColor;
 
 		/// <summary>The category used in option pages to group style items</summary>
