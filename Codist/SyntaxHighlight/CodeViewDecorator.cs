@@ -138,10 +138,13 @@ namespace Codist.SyntaxHighlight
 					properties = properties.SetForegroundOpacity(settings.ForeColorOpacity / 255.0);
 				}
 			}
+			else if (settings.ForeColor.A > 0) {
+				properties = properties.SetForeground(settings.ForeColor);
+			}
 			if (settings.BackColorOpacity > 0) {
 				var bc = settings.BackColor.A > 0 ? settings.BackColor
-			   : properties.BackgroundBrushEmpty == false && properties.BackgroundBrush is SolidColorBrush ? (properties.BackgroundBrush as SolidColorBrush).Color
-			   : Colors.Transparent;
+				   : properties.BackgroundBrushEmpty == false && properties.BackgroundBrush is SolidColorBrush ? (properties.BackgroundBrush as SolidColorBrush).Color
+				   : Colors.Transparent;
 				if (settings.BackColorOpacity != Byte.MaxValue || properties.BackgroundOpacityEmpty == false) {
 					properties = properties.SetBackgroundOpacity(settings.BackColorOpacity / 255.0);
 				}
@@ -163,9 +166,12 @@ namespace Codist.SyntaxHighlight
 							properties = properties.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 0));
 							break;
 						default:
-							break;
+							throw new NotImplementedException("Background effect not supported: " + settings.BackgroundEffect.ToString());
 					}
 				}
+			}
+			else if (settings.BackColor.A > 0) {
+				properties = properties.SetBackground(settings.BackColor);
 			}
 			if (settings.Underline.HasValue || settings.Strikethrough.HasValue || settings.OverLine.HasValue) {
 				var tdc = new TextDecorationCollection();

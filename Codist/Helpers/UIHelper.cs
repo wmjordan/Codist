@@ -148,8 +148,8 @@ namespace Codist
 		}
 
 		internal static void MixStyle(SyntaxHighlight.StyleBase style, out FontStyle fontStyle, out GdiColor forecolor, out GdiColor backcolor) {
-			forecolor = ThemeHelper.DocumentTextColor.Alpha(style.ForeColorOpacity);
-			backcolor = ThemeHelper.DocumentPageColor.Alpha(style.BackColorOpacity);
+			forecolor = style.ForeColorOpacity > 0 ? ThemeHelper.DocumentTextColor.Alpha(style.ForeColorOpacity) : ThemeHelper.DocumentTextColor;
+			backcolor = style.BackColorOpacity > 0 ? ThemeHelper.DocumentPageColor.Alpha(style.BackColorOpacity) : ThemeHelper.DocumentPageColor;
 			fontStyle = style.GetFontStyle();
 			if (style.ClassificationType == null) {
 				return;
@@ -168,6 +168,9 @@ namespace Codist
 			else if (style.ForeColorOpacity > 0) {
 				forecolor = style.AlphaForeColor.ToGdiColor();
 			}
+			else {
+				forecolor = style.ForeColor.ToGdiColor();
+			}
 			if (style.BackColor.A == 0) {
 				colorBrush = p.BackgroundBrushEmpty ? null : p.BackgroundBrush as SolidColorBrush;
 				if (colorBrush != null) {
@@ -176,6 +179,9 @@ namespace Codist
 			}
 			else if (style.BackColorOpacity > 0) {
 				backcolor = style.AlphaBackColor.ToGdiColor();
+			}
+			else {
+				backcolor = style.BackColor.ToGdiColor();
 			}
 			if (p.BoldEmpty == false && p.Bold && style.Bold != false) {
 				fontStyle |= FontStyle.Bold;
