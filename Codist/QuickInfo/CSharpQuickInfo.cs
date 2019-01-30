@@ -30,7 +30,9 @@ namespace Codist.QuickInfo
 		static readonly SymbolFormatter _SymbolFormatter = SymbolFormatter.Instance;
 
 		readonly IEditorFormatMapService _FormatMapService;
+		readonly bool _IsVsProject;
 		bool _IsDisposed;
+		Document _Document;
 		SemanticModel _SemanticModel;
 		ITextBuffer _TextBuffer;
 
@@ -38,6 +40,7 @@ namespace Codist.QuickInfo
 			_TextBuffer = subjectBuffer;
 			_FormatMapService = formatMapService;
 			_TextBuffer.Changing += TextBuffer_Changing;
+			_IsVsProject = Array.IndexOf(CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[], "VsixProjectExtender") != -1;
 		}
 
 		public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {
@@ -61,19 +64,16 @@ namespace Codist.QuickInfo
 			var querySpan = new SnapshotSpan(subjectTriggerPoint, 0);
 			var semanticModel = _SemanticModel;
 			if (semanticModel == null) {
-				//var container = currentSnapshot.AsText().Container;
-				//if (Workspace.TryGetWorkspace(container, out var workspace)) {
-				//	var docs = workspace.GetRelatedDocumentIds(container);
-				//	foreach (var item in docs) {
-				//		var d = workspace.CurrentSolution.GetDocument(item);
-				//		var p = workspace.CurrentSolution.GetProject(item.ProjectId);
-				//	}
-				//}
-				var doc = currentSnapshot.GetOpenDocumentInCurrentContextWithChanges();
-				if (doc == null) {
+				var container = currentSnapshot.AsText().Container;
+				DocumentId docId;
+				if (Workspace.TryGetWorkspace(container, out var workspace) == false
+					|| (docId = workspace.GetDocumentIdInCurrentContext(container)) == null
+					|| (_Document = workspace.CurrentSolution.GetDocument(docId)).TryGetSemanticModel(out semanticModel) == false) {
 					goto EXIT;
 				}
-				_SemanticModel = semanticModel = ThreadHelper.JoinableTaskFactory.Run(() => doc.GetSemanticModelAsync());
+
+				_SemanticModel = semanticModel;
+				//_ExtraModels = _Document.GetLinkedDocumentIds();
 			}
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 
@@ -124,7 +124,6 @@ namespace Codist.QuickInfo
 			if (node == null || node.Span.Contains(subjectTriggerPoint.Position) == false) {
 				goto EXIT;
 			}
-			ISymbol symbol;
 			if (node.IsKind(SyntaxKind.Argument)) {
 				node = (node as ArgumentSyntax).Expression;
 			}
@@ -134,6 +133,7 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowParameterInfo(qiContent, node);
 			}
+			ISymbol symbol;
 			if (node.IsKind(SyntaxKind.BaseExpression)) {
 				symbol = semanticModel.GetTypeInfo(node).ConvertedType;
 			}
@@ -268,7 +268,7 @@ namespace Codist.QuickInfo
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc)
-				&&symbol.Kind != SymbolKind.Parameter
+				&& symbol.Kind != SymbolKind.Parameter
 				&& symbol.Kind != SymbolKind.TypeParameter) {
 				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks;
 				if (remarks != null && remarks.FirstNode != null) {
@@ -279,6 +279,14 @@ namespace Codist.QuickInfo
 						);
 				}
 			}
+			//if (_ExtraModels.IsDefaultOrEmpty == false) {
+			//	foreach (var item in _ExtraModels) {
+			//		if (_Document.Project.Solution.GetDocument(item).TryGetSemanticModel(out var model)
+			//			&& Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSymbolAtPosition(model, node.SpanStart, workspace) == null) {
+			//			;
+			//		}
+			//	}
+			//}
 			if (tip.Children.Count > 0) {
 				qiWrapper.OverrideDocumentation(tip);
 			}
@@ -319,6 +327,7 @@ namespace Codist.QuickInfo
 
 		void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {
 			_SemanticModel = null;
+			_Document = null;
 		}
 
 		void ShowSymbolInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {
@@ -362,7 +371,7 @@ namespace Codist.QuickInfo
 				case SymbolKind.Property:
 					ShowPropertyInfo(qiContent, symbol as IPropertySymbol);
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)) {
-						var preview = ColorQuickInfo.PreviewSystemColorProperties(symbol as IPropertySymbol);
+						var preview = ColorQuickInfo.PreviewColorProperty(symbol as IPropertySymbol, _IsVsProject);
 						if (preview != null) {
 							qiContent.Add(preview);
 						}

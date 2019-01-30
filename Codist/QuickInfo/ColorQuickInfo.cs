@@ -3,20 +3,22 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 using AppHelpers;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.CSharp;
+using Codist.Controls;
 using GdiColor = System.Drawing.Color;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
-using Codist.Controls;
 
 namespace Codist.QuickInfo
 {
@@ -32,7 +34,7 @@ namespace Codist.QuickInfo
 		sealed class ColorQuickInfoControllerProvider : IQuickInfoSourceProvider
 		{
 			[Import]
-			internal ITextStructureNavigatorSelectorService _NavigatorService = null;
+			internal ITextStructureNavigatorSelectorService _NavigatorService;
 
 			public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 				return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
@@ -77,18 +79,29 @@ namespace Codist.QuickInfo
 
 	static class ColorQuickInfo
 	{
+		static readonly Type ObjectType = typeof(object);
+		static readonly Type ThemeResourceKeyType = typeof(ThemeResourceKey);
+
 		public static SolidColorBrush GetBrush(string color) {
 			return NamedColorCache.GetBrush(color);
 		}
-		public static StackPanel PreviewSystemColorProperties(IPropertySymbol symbol) {
-			switch (symbol.ContainingType?.Name) {
-				case nameof(System.Windows.SystemColors):
-				case nameof(System.Drawing.SystemBrushes):
-				case nameof(System.Drawing.KnownColor):
-					return PreviewColor(GetBrush(symbol));
-			}
-			return null;
+
+		public static StackPanel PreviewColorProperty(IPropertySymbol symbol, bool includeVsColors) {
+			return PreviewColor(GetBrush(symbol, includeVsColors));
 		}
+
+		private static SolidColorBrush GetVsResourceBrush(Type type, string name) {
+			var p = type.GetProperty(name, ObjectType);
+			return p != null
+				? System.Windows.Application.Current.Resources.Get<SolidColorBrush>(p.GetValue(null))
+				: null;
+		}
+
+		static SolidColorBrush GetVsThemeBrush(Type type, string name) {
+			var p = type.GetProperty(name, ThemeResourceKeyType);
+			return (p?.GetValue(null) as ThemeResourceKey)?.GetWpfBrush();
+		}
+
 		public static StackPanel PreviewColorMethodInvocation(SemanticModel semanticModel, SyntaxNode node, IMethodSymbol methodSymbol) {
 			switch (methodSymbol.Name) {
 				case nameof(WpfColor.FromArgb):
@@ -145,8 +158,9 @@ namespace Codist.QuickInfo
 			};
 		}
 
-		public static SolidColorBrush GetBrush(ISymbol symbol) {
-			switch (symbol.ContainingType?.Name) {
+		public static SolidColorBrush GetBrush(ISymbol symbol, bool includeVsColors) {
+			var n = symbol.ContainingType?.Name;
+			switch (n) {
 				case nameof(System.Windows.SystemColors):
 				case nameof(System.Drawing.SystemBrushes):
 					return NamedColorCache.GetSystemBrush(symbol.Name);
@@ -156,6 +170,20 @@ namespace Codist.QuickInfo
 				case nameof(System.Drawing.Brushes):
 				case nameof(Colors):
 					return NamedColorCache.GetBrush(symbol.Name);
+			}
+			if (includeVsColors) {
+				switch (n) {
+					case nameof(EnvironmentColors):
+						return GetVsThemeBrush(typeof(EnvironmentColors), symbol.Name);
+					case nameof(CommonDocumentColors):
+						return GetVsThemeBrush(typeof(CommonDocumentColors), symbol.Name);
+					case nameof(CommonControlsColors):
+						return GetVsThemeBrush(typeof(CommonControlsColors), symbol.Name);
+					case nameof(InfoBarColors):
+						return GetVsThemeBrush(typeof(InfoBarColors), symbol.Name);
+					case nameof(VsBrushes):
+						return GetVsResourceBrush(typeof(VsBrushes), symbol.Name);
+				}
 			}
 			return null;
 		}

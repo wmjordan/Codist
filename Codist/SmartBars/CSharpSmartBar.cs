@@ -28,10 +28,12 @@ namespace Codist.SmartBars
 	sealed class CSharpSmartBar : SmartBar {
 		static readonly Classifiers.HighlightClassifications __HighlightClassifications = new Classifiers.HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 		readonly SemanticContext _Context;
+		readonly bool _IsVsProject;
 		ISymbol _Symbol;
 
 		public CSharpSmartBar(IWpfTextView view, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(view, textSearchService) {
 			_Context = view.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(view));
+			_IsVsProject = Array.IndexOf(CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[], "VsixProjectExtender") != -1;
 		}
 
 		ToolBar MyToolBar => ToolBar2;
@@ -433,7 +435,7 @@ namespace Codist.SmartBars
 				}
 			}
 			AddSymbolMembers(this, menuItem, symbol, ct);
-			void AddSymbolMembers(SmartBar bar, MenuItem menu, ISymbol source, CancellationToken token) {
+			void AddSymbolMembers(CSharpSmartBar bar, MenuItem menu, ISymbol source, CancellationToken token) {
 				var nsOrType = source as INamespaceOrTypeSymbol;
 				var members = nsOrType.GetMembers().RemoveAll(m => m.CanBeReferencedByName == false);
 				if (source.Kind == SymbolKind.NamedType && (source as INamedTypeSymbol).TypeKind == TypeKind.Enum) {
@@ -720,9 +722,9 @@ namespace Codist.SmartBars
 		}
 		sealed class SymbolMenuItem : CommandMenuItem, IMemberFilterable
 		{
-			public SymbolMenuItem(SmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(WpfHelper.MemberNameFormat), locations) {
+			public SymbolMenuItem(CSharpSmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(WpfHelper.MemberNameFormat), locations) {
 			}
-			public SymbolMenuItem(SmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
+			public SymbolMenuItem(CSharpSmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
 				Locations = locations;
 				Symbol = symbol;
 				if (symbol.Kind == SymbolKind.Field) {
@@ -737,7 +739,7 @@ namespace Codist.SmartBars
 				//else {
 				//	InputGestureText = symbol.GetReturnType()?.Name;
 				//}
-				SetColorPreviewIcon(symbol);
+				SetColorPreviewIcon(symbol, bar);
 				//todo deal with symbols with multiple locations
 				if (locations != null && locations.Any(l => l.SourceTree?.FilePath != null)) {
 					Click += GotoLocation;
@@ -764,18 +766,23 @@ namespace Codist.SmartBars
 				}
 			}
 
-			void SetColorPreviewIcon(ISymbol symbol) {
-				var b = symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Field ? QuickInfo.ColorQuickInfo.GetBrush(symbol) : null;
+			void SetColorPreviewIcon(ISymbol symbol, CSharpSmartBar bar) {
+				var b = symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Field ? QuickInfo.ColorQuickInfo.GetBrush(symbol, bar._IsVsProject) : null;
 				if (b != null) {
 					var h = Header as TextBlock;
 					h.Inlines.InsertBefore(
 						h.Inlines.FirstInline,
-						new System.Windows.Documents.InlineUIContainer(new System.Windows.Shapes.Rectangle {
-							Height = ThemeHelper.DefaultIconSize,
-							Width = ThemeHelper.DefaultIconSize,
-							Fill = b,
-							Margin = WpfHelper.GlyphMargin
-						}) {
+						new System.Windows.Documents.InlineUIContainer(
+							new Border {
+								BorderThickness = WpfHelper.TinyMargin,
+								BorderBrush = ThemeHelper.MenuTextBrush,
+								Margin = WpfHelper.GlyphMargin,
+								SnapsToDevicePixels = true,
+								Background = b,
+								Height = ThemeHelper.DefaultIconSize,
+								Width = ThemeHelper.DefaultIconSize,
+							}
+							) {
 							BaselineAlignment = BaselineAlignment.TextTop
 						});
 				}
