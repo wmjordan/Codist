@@ -37,10 +37,14 @@ namespace Codist.QuickInfo
 		ITextBuffer _TextBuffer;
 
 		public CSharpQuickInfo(ITextBuffer subjectBuffer, IEditorFormatMapService formatMapService) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			_TextBuffer = subjectBuffer;
 			_FormatMapService = formatMapService;
 			_TextBuffer.Changing += TextBuffer_Changing;
-			_IsVsProject = Array.IndexOf(CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[], "VsixProjectExtender") != -1;
+			var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];
+			if (extenders != null) {
+				_IsVsProject = Array.IndexOf(extenders, "VsixProjectExtender") != -1;
+			}
 		}
 
 		public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {

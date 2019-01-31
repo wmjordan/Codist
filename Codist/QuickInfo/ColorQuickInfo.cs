@@ -90,11 +90,17 @@ namespace Codist.QuickInfo
 			return PreviewColor(GetBrush(symbol, includeVsColors));
 		}
 
-		private static SolidColorBrush GetVsResourceBrush(Type type, string name) {
-			var p = type.GetProperty(name, ObjectType);
-			return p != null
-				? System.Windows.Application.Current.Resources.Get<SolidColorBrush>(p.GetValue(null))
-				: null;
+		static SolidColorBrush GetVsResourceBrush(Type type, string name) {
+			var p = type.GetProperty(name, ObjectType)?.GetValue(null);
+			return p == null
+				? null
+				: System.Windows.Application.Current.Resources.Get<SolidColorBrush>(p);
+		}
+		static SolidColorBrush GetVsResourceColor(Type type, string name) {
+			var p = type.GetProperty(name, ObjectType)?.GetValue(null);
+			return p == null
+				? null
+				: new SolidColorBrush(System.Windows.Application.Current.Resources.Get<WpfColor>(p));
 		}
 
 		static SolidColorBrush GetVsThemeBrush(Type type, string name) {
@@ -181,6 +187,20 @@ namespace Codist.QuickInfo
 						return GetVsThemeBrush(typeof(CommonControlsColors), symbol.Name);
 					case nameof(InfoBarColors):
 						return GetVsThemeBrush(typeof(InfoBarColors), symbol.Name);
+					case nameof(StartPageColors):
+						return GetVsThemeBrush(typeof(StartPageColors), symbol.Name);
+					case nameof(HeaderColors):
+						return GetVsThemeBrush(typeof(HeaderColors), symbol.Name);
+					case nameof(ThemedDialogColors):
+						return GetVsThemeBrush(typeof(ThemedDialogColors), symbol.Name);
+					case nameof(ProgressBarColors):
+						return GetVsThemeBrush(typeof(ProgressBarColors), symbol.Name);
+					case nameof(SearchControlColors):
+						return GetVsThemeBrush(typeof(SearchControlColors), symbol.Name);
+					case nameof(TreeViewColors):
+						return GetVsThemeBrush(typeof(TreeViewColors), symbol.Name);
+					case nameof(VsColors):
+						return GetVsResourceColor(typeof(VsColors), symbol.Name);
 					case nameof(VsBrushes):
 						return GetVsResourceBrush(typeof(VsBrushes), symbol.Name);
 				}

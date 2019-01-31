@@ -32,8 +32,12 @@ namespace Codist.SmartBars
 		ISymbol _Symbol;
 
 		public CSharpSmartBar(IWpfTextView view, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(view, textSearchService) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			_Context = view.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(view));
-			_IsVsProject = Array.IndexOf(CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[], "VsixProjectExtender") != -1;
+			var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];
+			if (extenders != null) {
+				_IsVsProject = Array.IndexOf(extenders, "VsixProjectExtender") != -1;
+			}
 		}
 
 		ToolBar MyToolBar => ToolBar2;
