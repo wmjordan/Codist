@@ -5,18 +5,12 @@ using Microsoft.VisualStudio.Shell;
 namespace Codist.Commands
 {
 	/// <summary>
-	/// Command handler
+	/// A command handler which shows the root item menu of Navigation Bar.
 	/// </summary>
 	internal static class NaviBarSearchDeclarationCommand
 	{
-		/// <summary>
-		/// Command ID.
-		/// </summary>
 		public const int CommandId = 4130;
 
-		/// <summary>
-		/// Command menu group (command set GUID).
-		/// </summary>
 		public static readonly Guid CommandSet = new Guid("5EF88028-C0FC-4849-9883-10F4BD2217B3");
 
 		public static void Initialize(AsyncPackage package) {

@@ -46,7 +46,7 @@ namespace Codist.SmartBars
 			}
 		}
 
-		protected SnapshotSpan Replace(CommandContext ctx, Func<string, string> replaceHandler, bool selectModified) {
+		protected static SnapshotSpan Replace(CommandContext ctx, Func<string, string> replaceHandler, bool selectModified) {
 			ctx.KeepToolBar(false);
 			var firstModified = new SnapshotSpan();
 			string t = ctx.View.GetFirstSelectionText();
