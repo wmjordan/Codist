@@ -94,6 +94,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Helpers\CancellationHelper.cs" />
+    <Compile Include="Margins\SelectionMargin.cs" />
     <Compile Include="NaviBar\NaviBarFactory.cs" />
     <Compile Include="NaviBar\CSharpBar.cs" />
     <Compile Include="CodistPackage.cs" />
@@ -125,9 +126,7 @@
     <Compile Include="Margins\CSharpMembersMargin.cs" />
     <Compile Include="Margins\CommentMarginElement.cs" />
     <Compile Include="Margins\LineNumberMargin.cs" />
-    <Compile Include="Margins\LineNumberMarginFactory.cs" />
-    <Compile Include="Margins\CommentMarginFactory.cs" />
-    <Compile Include="Margins\CSharpMembersMarginFactory.cs" />
+    <Compile Include="Margins\MarginFactories.cs" />
     <Compile Include="Margins\MarkerStyle.cs" />
     <Compile Include="Options\CommentTaggerOptionPage.cs">
       <SubType>UserControl</SubType>
