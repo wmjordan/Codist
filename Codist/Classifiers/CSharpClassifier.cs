@@ -377,8 +377,13 @@ namespace Codist.Classifiers
 							yield return symbol.ContainingType != null ? _Classifications.NestedDeclaration : _Classifications.Declaration;
 							break;
 						case SymbolKind.Event:
-						case SymbolKind.Method:
 							yield return _Classifications.NestedDeclaration;
+							break;
+						case SymbolKind.Method:
+							if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.LocalFunctionDeclaration)
+								|| (symbol as IMethodSymbol).MethodKind != MethodKind.LocalFunction) {
+								yield return _Classifications.NestedDeclaration;
+							}
 							break;
 						case SymbolKind.Property:
 							if (symbol.ContainingType.IsAnonymousType == false) {

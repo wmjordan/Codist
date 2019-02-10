@@ -36,6 +36,8 @@ namespace Codist.Options
 			_HighlightLoopBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.LoopBrace, _HighlightLoopBracesBox.Checked));
 			_HighlightResourceBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.ResourceBrace, _HighlightResourceBracesBox.Checked));
 
+			_HighlightLocalFunctionDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.LocalFunctionDeclaration, _HighlightLocalFunctionDeclarationBox.Checked));
+
 			Config.Loaded += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
@@ -49,6 +51,8 @@ namespace Codist.Options
 				_HighlightBranchBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.BranchBrace);
 				_HighlightLoopBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.LoopBrace);
 				_HighlightResourceBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ResourceBrace);
+
+				_HighlightLocalFunctionDeclarationBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.LocalFunctionDeclaration);
 			});
 		}
 	}
