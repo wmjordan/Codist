@@ -28,6 +28,7 @@
 			this._GeneralScrolbarMarkerTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this._LineNumbersBox = new System.Windows.Forms.CheckBox();
+			this._SelectionBox = new System.Windows.Forms.CheckBox();
 			this._GeneralScrolbarMarkerTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
@@ -46,6 +47,7 @@
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this._SelectionBox);
 			this.tabPage2.Controls.Add(this._LineNumbersBox);
 			this.tabPage2.Location = new System.Drawing.Point(4, 25);
 			this.tabPage2.Name = "tabPage2";
@@ -64,6 +66,16 @@
 			this._LineNumbersBox.TabIndex = 1;
 			this._LineNumbersBox.Text = "Draw line numbers on editor scrollbar";
 			this._LineNumbersBox.UseVisualStyleBackColor = true;
+			// 
+			// _SelectionBox
+			// 
+			this._SelectionBox.AutoSize = true;
+			this._SelectionBox.Location = new System.Drawing.Point(15, 31);
+			this._SelectionBox.Name = "_SelectionBox";
+			this._SelectionBox.Size = new System.Drawing.Size(349, 19);
+			this._SelectionBox.TabIndex = 1;
+			this._SelectionBox.Text = "Mark selection range on editor scrollbar";
+			this._SelectionBox.UseVisualStyleBackColor = true;
 			// 
 			// ScrollbarMarkerPage
 			// 
@@ -84,5 +96,6 @@
 		private System.Windows.Forms.TabControl _GeneralScrolbarMarkerTabs;
 		private System.Windows.Forms.TabPage tabPage2;
 		private System.Windows.Forms.CheckBox _LineNumbersBox;
+		private System.Windows.Forms.CheckBox _SelectionBox;
 	}
 }

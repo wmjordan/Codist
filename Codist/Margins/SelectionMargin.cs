@@ -9,20 +9,20 @@ using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.Margins
 {
-	sealed class LineNumberMargin : FrameworkElement, IDisposable, IWpfTextViewMargin
+	sealed class SelectionMargin : FrameworkElement, IDisposable, IWpfTextViewMargin
 	{
-		public const string MarginName = nameof(LineNumberMargin);
-		const double LineNumberRenderPadding = -3;
+		public const string MarginName = nameof(SelectionMargin);
+		const string FormatName = "Selected Text";
+		const double SelectionRenderPadding = -3;
+		const double MarginOpacity = 0.3;
 		readonly IWpfTextView _TextView;
 		readonly IEditorFormatMap _EditorFormatMap;
 		readonly IVerticalScrollBar _ScrollBar;
 
-		static readonly SolidColorBrush LineNumberBrush = Brushes.DarkGray;
-		static readonly Pen LineNumberPen = new Pen(LineNumberBrush, 1) { DashStyle = DashStyles.Dash };
-
+		Brush _SelectionBrush;
 		double _ScrollbarWidth;
 
-		public LineNumberMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) {
+		public SelectionMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) {
 			_TextView = textView;
 
 			IsHitTestVisible = false;
@@ -32,9 +32,12 @@ namespace Codist.Margins
 
 			Width = 0;
 
-			Visibility = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LineNumber) ? Visibility.Visible : Visibility.Collapsed;
+			var showSelection = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Selection);
+			Visibility = showSelection ? Visibility.Visible : Visibility.Collapsed;
 			Config.Updated += Config_Updated;
-			Setup();
+			if (showSelection) {
+				Setup();
+			}
 			_TextView.Closed += (s, args) => Dispose();
 		}
 
@@ -46,15 +49,23 @@ namespace Codist.Margins
 			return string.Equals(marginName, MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
 		}
 
+		void Setup() {
+			_EditorFormatMap.FormatMappingChanged += _EditorFormatMap_FormatMappingChanged;
+			_TextView.Selection.SelectionChanged += TextView_SelectionChanged;
+			_ScrollBar.TrackSpanChanged += OnMappingChanged;
+			_SelectionBrush = GetMarginBrush();
+		}
+
 		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers) == false) {
 				return;
 			}
-			var setVisible = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
+			var setVisible = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Selection);
 			var visible = Visibility == Visibility.Visible;
 			if (setVisible == false && visible) {
 				Visibility = Visibility.Collapsed;
-				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
+				_TextView.Selection.SelectionChanged -= TextView_SelectionChanged;
+				_EditorFormatMap.FormatMappingChanged -= _EditorFormatMap_FormatMappingChanged;
 				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 				InvalidateVisual();
 			}
@@ -65,15 +76,21 @@ namespace Codist.Margins
 			}
 		}
 
-		void Setup() {
-			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
-			_ScrollBar.TrackSpanChanged += OnMappingChanged;
+		void _EditorFormatMap_FormatMappingChanged(object sender, FormatItemsEventArgs e) {
+			foreach (var item in e.ChangedItems) {
+				if (item == FormatName) {
+					_SelectionBrush = GetMarginBrush();
+					InvalidateVisual();
+					return;
+				}
+			}
 		}
 
-		void TextView_TextBufferChanged(object sender, TextContentChangedEventArgs args) {
-			if (args.Changes.Count == 0) {
-				return;
-			}
+		Brush GetMarginBrush() {
+			return (_EditorFormatMap.GetProperties(FormatName).Get<Brush>(EditorFormatDefinition.BackgroundBrushId) ?? ThemeHelper.FileTabProvisionalSelectionBrush).Alpha(MarginOpacity);
+		}
+
+		void TextView_SelectionChanged(object sender, EventArgs args) {
 			InvalidateVisual();
 		}
 
@@ -92,32 +109,25 @@ namespace Codist.Margins
 			if (_TextView.IsClosed) {
 				return;
 			}
-			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LineNumber)) {
-				DrawLineNumbers(drawingContext);
+			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Selection)) {
+				DrawSelections(drawingContext);
 			}
 		}
 
 		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
 			base.OnRenderSizeChanged(sizeInfo);
 			var b = _ScrollBar as FrameworkElement;
-			_ScrollbarWidth = b.ActualWidth + LineNumberRenderPadding;
+			_ScrollbarWidth = b.ActualWidth + SelectionRenderPadding;
 			InvalidateVisual();
 		}
 
-		void DrawLineNumbers(DrawingContext drawingContext) {
-			var snapshot = _TextView.TextSnapshot;
-			var lc = snapshot.LineCount;
-			var step = lc < 500 ? 50 : lc < 2000 ? 100 : lc < 3000 ? 200 : lc < 5000 ? 500 : lc < 20000 ? 1000 : lc < 100000 ? 5000 : 10000;
-			var dy = 0.0;
-			for (int i = step; i < lc; i += step) {
-				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, snapshot.GetLineFromLineNumber(i - 1).Start));
-				if (y - dy < 50) {
-					continue;
+		void DrawSelections(DrawingContext drawingContext) {
+			foreach (var item in _TextView.Selection.SelectedSpans) {
+				var top = _ScrollBar.GetYCoordinateOfBufferPosition(item.Start);
+				var height = _ScrollBar.GetYCoordinateOfBufferPosition(item.End) - top;
+				if (height > 3) {
+					drawingContext.DrawRectangle(_SelectionBrush, null, new Rect(-100, top, 200, height));
 				}
-				dy = y;
-				drawingContext.DrawLine(LineNumberPen, new Point(-100, y), new Point(100, y));
-				var t = WpfHelper.ToFormattedText(i.ToString(), 9, LineNumberBrush);
-				drawingContext.DrawText(t, new Point(_ScrollbarWidth - t.Width, y));
 			}
 		}
 
@@ -129,7 +139,8 @@ namespace Codist.Margins
 				if (disposing) {
 					//_TextView.VisualElement.IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
 					Config.Updated -= Config_Updated;
-					_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
+					_TextView.Selection.SelectionChanged -= TextView_SelectionChanged;
+					_EditorFormatMap.FormatMappingChanged -= _EditorFormatMap_FormatMappingChanged;
 					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 				}
 

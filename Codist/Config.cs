@@ -498,6 +498,7 @@ namespace Codist
 		LoopBrace = 1 << 5,
 		ResourceBrace = 1 << 6,
 		SpecialPunctuation = 1 << 7,
+		LocalFunctionDeclaration = 1 << 10,
 		Default = SpecialComment,
 		AllBraces = DeclarationBrace | ParameterBrace | BranchBrace | LoopBrace | ResourceBrace | SpecialPunctuation
 	}
@@ -525,9 +526,10 @@ namespace Codist
 		TypeDeclaration = 1 << 5,
 		MethodDeclaration = 1 << 6,
 		SymbolReference = 1 << 7,
+		Selection = 1 << 8,
 		CodeMarginMask = SpecialComment | CompilerDirective,
 		MemberMarginMask = MemberDeclaration | SymbolReference,
-		Default = SpecialComment | MemberDeclaration | LineNumber | LongMemberDeclaration | SymbolReference
+		Default = SpecialComment | MemberDeclaration | LineNumber | Selection | LongMemberDeclaration | SymbolReference
 	}
 
 	[Flags]
