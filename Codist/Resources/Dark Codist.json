@@ -193,6 +193,7 @@
     },
     {
       "StyleID": "FieldName",
+      "Italic": true,
       "ForegroundColor": "#ACAC00"
     },
     {
@@ -201,6 +202,7 @@
     },
     {
       "StyleID": "ReadOnlyFieldName",
+      "Italic": false,
       "ForegroundColor": "#808000"
     },
     {
