@@ -374,6 +374,7 @@ namespace Codist.SmartBars
 					(item.Header as TextBlock).Foreground = WpfBrushes.Gray;
 				}
 				menuItem.Items.Add(item);
+				AddSymbolMembers(this, item, derived, default);
 			}
 		}
 
@@ -439,22 +440,23 @@ namespace Codist.SmartBars
 				}
 			}
 			AddSymbolMembers(this, menuItem, symbol, ct);
-			void AddSymbolMembers(CSharpSmartBar bar, MenuItem menu, ISymbol source, CancellationToken token) {
-				var nsOrType = source as INamespaceOrTypeSymbol;
-				var members = nsOrType.GetMembers().RemoveAll(m => m.CanBeReferencedByName == false);
-				if (source.Kind == SymbolKind.NamedType && (source as INamedTypeSymbol).TypeKind == TypeKind.Enum) {
-					// sort enum members by value
-					members = members.Sort(CodeAnalysisHelper.CompareByFieldIntegerConst);
+		}
+
+		static void AddSymbolMembers(CSharpSmartBar bar, MenuItem menu, ISymbol source, CancellationToken token) {
+			var nsOrType = source as INamespaceOrTypeSymbol;
+			var members = nsOrType.GetMembers().RemoveAll(m => m.CanBeReferencedByName == false);
+			if (source.Kind == SymbolKind.NamedType && (source as INamedTypeSymbol).TypeKind == TypeKind.Enum) {
+				// sort enum members by value
+				members = members.Sort(CodeAnalysisHelper.CompareByFieldIntegerConst);
+			}
+			else {
+				members = members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
+			}
+			foreach (var item in members) {
+				if (token.IsCancellationRequested) {
+					break;
 				}
-				else {
-					members = members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
-				}
-				foreach (var item in members) {
-					if (token.IsCancellationRequested) {
-						break;
-					}
-					menu.Items.Add(new SymbolMenuItem(bar, item, item.Locations));
-				}
+				menu.Items.Add(new SymbolMenuItem(bar, item, item.Locations));
 			}
 		}
 
