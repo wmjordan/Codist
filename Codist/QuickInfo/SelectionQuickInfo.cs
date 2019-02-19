@@ -21,7 +21,7 @@ namespace Codist.QuickInfo
 			}
 			var textSnapshot = session.TextView.TextSnapshot;
 			var triggerPoint = session.GetTriggerPoint(textSnapshot).GetValueOrDefault();
-			if (qiContent.FirstOrDefault(i => (i as TextBlock)?.Name == Name) != null) {
+			if (qiContent.Any(i => (i as TextBlock)?.Name == Name)) {
 				applicableToSpan = null;
 				return;
 			}
@@ -43,14 +43,14 @@ namespace Codist.QuickInfo
 				return activeSpan;
 			}
 			var p1 = selection.Start.Position;
-			var p2 = selection.End.Position;
-			if (p1 > point || point > p2) {
+			if (p1 > point || point > selection.End.Position) {
 				var tes = session.TextView.GetTextElementSpan(point);
 				if (tes.Contains(p1) == false) {
 					return activeSpan;
 				}
 			}
 			var c = 0;
+			var lines = selection.SelectedSpans.Count;
 			foreach (var item in selection.SelectedSpans) {
 				c += item.Length;
 				if (item.Contains(point)) {
@@ -66,10 +66,17 @@ namespace Codist.QuickInfo
 				);
 				return activeSpan;
 			}
-			var lines = selection.StreamSelectionSpan.SnapshotSpan.GetLineSpan();
-			var info = new ThemedTipText() { Name = Name }.Append("Selection: ", true).Append(c.ToString()).Append(" characters");
-			if (lines.Length > 0) {
-				info.Append(", " + (lines.Length + 1).ToString() + " lines");
+			var info = new ThemedTipText() { Name = Name }
+				.Append("Selection: ", true)
+				.Append(c.ToString() + " characters");
+			if (lines > 1) {
+				info.Append(", " + lines + " spans");
+			}
+			else {
+				lines = selection.StreamSelectionSpan.SnapshotSpan.GetLineSpan().Length;
+				if (lines > 0) {
+					info.Append(", " + (lines + 1).ToString() + " lines");
+				}
 			}
 			qiContent.Add(info);
 			return activeSpan;
