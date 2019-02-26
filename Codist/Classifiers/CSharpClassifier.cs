@@ -190,7 +190,7 @@ namespace Codist.Classifiers
 			}
 			var s = snapshot.GetText(itemSpan.Start, itemSpan.Length)[0];
 			if (s == '{' || s == '}') {
-				var node = unitCompilation.FindNode(itemSpan, true, false);
+				var node = unitCompilation.FindNode(itemSpan, true, true);
 				if (node is BaseTypeDeclarationSyntax == false
 					&& node is ExpressionSyntax == false
 					&& node is NamespaceDeclarationSyntax == false
