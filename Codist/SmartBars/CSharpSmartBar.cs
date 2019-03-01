@@ -92,7 +92,7 @@ namespace Codist.SmartBars
 				var token = _Context.Token;
 				if (token.Span.Contains(View.Selection, true)
 					&& token.Kind() == SyntaxKind.IdentifierToken
-					&& (node.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || node.IsKind(SyntaxKind.VariableDeclarator))) {
+					&& (node.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || node.IsKind(SyntaxKind.VariableDeclarator) || node.IsKind(SyntaxKind.ForEachStatement))) {
 					// selection is within a symbol
 					_Symbol = ThreadHelper.JoinableTaskFactory.Run(() => _Context.GetSymbolAsync(cancellationToken));
 					if (_Symbol != null) {
