@@ -196,6 +196,8 @@ namespace Codist
 		}
 
 		internal TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, int argIndex) {
+			const SymbolDisplayPartKind ExtensionName = (SymbolDisplayPartKind)29;
+
 			foreach (var part in parts) {
 				switch (part.Kind) {
 					case SymbolDisplayPartKind.AliasName:
@@ -253,6 +255,9 @@ namespace Codist
 						break;
 					case SymbolDisplayPartKind.EventName:
 						block.Append(part.Symbol.Name, Delegate);
+						break;
+					case ExtensionName:
+						block.AddSymbol(part.Symbol, true, Method);
 						break;
 					default:
 						block.Append(part.ToString());
