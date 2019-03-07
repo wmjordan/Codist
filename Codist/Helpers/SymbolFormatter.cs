@@ -204,7 +204,10 @@ namespace Codist
 						//todo resolve alias type
 						goto default;
 					case SymbolDisplayPartKind.ClassName:
-						if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
+						if (part.Symbol.Kind == SymbolKind.Method) {
+							block.AddSymbol(part.Symbol, true, Method);
+						}
+						else if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
 							block.Append("?", Class);
 						}
 						else {
@@ -230,7 +233,12 @@ namespace Codist
 						}
 						break;
 					case SymbolDisplayPartKind.StructName:
-						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, Struct);
+						if (part.Symbol.Kind == SymbolKind.Method) {
+							block.AddSymbol(part.Symbol, true, Method);
+						}
+						else {
+							block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, Struct);
+						}
 						break;
 					case SymbolDisplayPartKind.DelegateName:
 						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, Delegate);
@@ -286,7 +294,7 @@ namespace Codist
 						var items = constant.Type.GetMembers().Where(i => {
 							var field = i as IFieldSymbol;
 							return field != null
-								&& field.HasConstantValue != false
+								&& field.HasConstantValue
 								&& UnsafeArithmeticHelper.Equals(UnsafeArithmeticHelper.And(constant.Value, field.ConstantValue), field.ConstantValue)
 								&& UnsafeArithmeticHelper.IsZero(field.ConstantValue) == false;
 						});
@@ -312,11 +320,11 @@ namespace Codist
 					block.Add("{");
 					bool c = false;
 					foreach (var item in constant.Values) {
-						if (c == false) {
-							c = true;
+						if (c) {
+							block.Add(", ");
 						}
 						else {
-							block.Add(", ");
+							c = true;
 						}
 						ToUIText(block, item);
 					}
@@ -334,7 +342,7 @@ namespace Codist
 			block.Add(WpfHelper.Render(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class));
 			if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
 				var node = item.ApplicationSyntaxReference?.GetSyntax() as Microsoft.CodeAnalysis.CSharp.Syntax.AttributeSyntax;
-				if (node != null && node.ArgumentList?.Arguments.Count > 0) {
+				if (node?.ArgumentList?.Arguments.Count > 0) {
 					block.Add(WpfHelper.Render(node.ArgumentList.ToString(), ThemeHelper.SystemGrayTextBrush));
 				}
 				block.Add("]");
