@@ -122,10 +122,12 @@ namespace Codist.Margins
 		}
 
 		void DrawSelections(DrawingContext drawingContext) {
-			foreach (var item in _TextView.Selection.SelectedSpans) {
+			var ss = _TextView.Selection.SelectedSpans;
+			var threshold = ss.Count < 2 ? 3 : 0.5;
+			foreach (var item in ss) {
 				var top = _ScrollBar.GetYCoordinateOfBufferPosition(item.Start);
 				var height = _ScrollBar.GetYCoordinateOfBufferPosition(item.End) - top;
-				if (height > 3) {
+				if (height > threshold) {
 					drawingContext.DrawRectangle(_SelectionBrush, null, new Rect(-100, top, 200, height));
 				}
 			}
