@@ -5,21 +5,18 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Xml.Linq;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
-using Microsoft.VisualStudio.Shell;
-using System.Windows.Documents;
-using Microsoft.VisualStudio.Imaging;
 
 namespace Codist.QuickInfo
 {
@@ -128,12 +125,7 @@ namespace Codist.QuickInfo
 			if (node == null || node.Span.Contains(subjectTriggerPoint.Position) == false) {
 				goto EXIT;
 			}
-			if (node.IsKind(SyntaxKind.Argument)) {
-				node = (node as ArgumentSyntax).Expression;
-			}
-			else if (node.IsKind(SyntaxKind.ArgumentList)) {
-				node = (node as ArgumentListSyntax).Arguments.LastOrDefault()?.Expression ?? node;
-			}
+			LocateNodeInParameterList(ref node, ref token);
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowParameterInfo(qiContent, node);
 			}
@@ -198,6 +190,29 @@ namespace Codist.QuickInfo
 				qiWrapper.LimitQuickInfoItemSize(qiContent);
 			}
 			applicableToSpan = null;
+		}
+
+		static void LocateNodeInParameterList(ref SyntaxNode node, ref SyntaxToken token) {
+			if (node.IsKind(SyntaxKind.Argument)) {
+				node = (node as ArgumentSyntax).Expression;
+			}
+			else if (node.IsKind(SyntaxKind.ArgumentList)) {
+				var al = node as ArgumentListSyntax;
+				if (al.OpenParenToken == token) {
+					node = al.Arguments.FirstOrDefault() ?? node;
+				}
+				else if (al.CloseParenToken == token) {
+					node = al.Arguments.LastOrDefault() ?? node;
+				}
+				else {
+					foreach (var item in al.Arguments) {
+						if (item.FullSpan.Contains(token.SpanStart, true)) {
+							node = item;
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		void OverrideDocumentation(SyntaxNode node, IQuickInfoOverrider qiWrapper, ISymbol symbol) {
