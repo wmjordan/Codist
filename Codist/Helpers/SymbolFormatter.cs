@@ -154,8 +154,7 @@ namespace Codist
 					text.Add(symbol.Render(alias, Method));
 					var method = symbol as IMethodSymbol;
 					if (method.IsGenericMethod) {
-						var arguments = method.TypeParameters;
-						AddTypeArguments(text, arguments);
+						AddTypeArguments(text, method.TypeArguments);
 					}
 					return;
 				case SymbolKind.NamedType:
@@ -183,8 +182,7 @@ namespace Codist
 							text.Add(symbol.MetadataName.Render(Class)); return;
 					}
 					if (type.IsGenericType) {
-						var arguments = type.TypeParameters;
-						AddTypeArguments(text, arguments);
+						AddTypeArguments(text, type.TypeArguments);
 					}
 					return;
 				case SymbolKind.Namespace: text.Add(symbol.Name.Render(Namespace)); return;
@@ -392,13 +390,13 @@ namespace Codist
 			Const = formatMap.GetBrush(Constants.CSharpConstFieldName);
 		}
 		
-		void AddTypeArguments(InlineCollection text, ImmutableArray<ITypeParameterSymbol> arguments) {
+		void AddTypeArguments(InlineCollection text, ImmutableArray<ITypeSymbol> arguments) {
 			text.Add("<");
 			for (int i = 0; i < arguments.Length; i++) {
 				if (i > 0) {
 					text.Add(", ");
 				}
-				text.Add(arguments[i].Name.Render(TypeParameter));
+				ToUIText(text, arguments[i], null);
 			}
 			text.Add(">");
 		}

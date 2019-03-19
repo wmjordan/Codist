@@ -783,33 +783,18 @@ namespace Codist.QuickInfo
 			if (typeParameter.HasConstructorConstraint == false && typeParameter.HasReferenceTypeConstraint == false && typeParameter.HasValueTypeConstraint == false && typeParameter.ConstraintTypes.Length == 0) {
 				return;
 			}
-			text.Append(" where ", _SymbolFormatter.Keyword).Append(typeParameter.Name, _SymbolFormatter.TypeParameter).Append(" : ");
-			var i = 0;
 			if (typeParameter.HasReferenceTypeConstraint) {
-				text.Append("class", _SymbolFormatter.Keyword);
-				++i;
+				text.Append(", ").Append("class", _SymbolFormatter.Keyword);
 			}
 			if (typeParameter.HasValueTypeConstraint) {
-				if (i > 0) {
-					text.Append(", ");
-				}
-				text.Append("struct", _SymbolFormatter.Keyword);
-				++i;
+				text.Append(", ").Append("struct", _SymbolFormatter.Keyword);
 			}
 			if (typeParameter.HasConstructorConstraint) {
-				if (i > 0) {
-					text.Append(", ");
-				}
-				text.Append("new", _SymbolFormatter.Keyword).Append("()");
-				++i;
+				text.Append(", ").Append("new", _SymbolFormatter.Keyword).Append("()");
 			}
 			if (typeParameter.ConstraintTypes.Length > 0) {
 				foreach (var constraint in typeParameter.ConstraintTypes) {
-					if (i > 0) {
-						text.Append(", ");
-					}
-					text.AddSymbol(constraint, _SymbolFormatter);
-					++i;
+					text.Append(", ").AddSymbol(constraint, _SymbolFormatter);
 				}
 			}
 		}
@@ -1077,10 +1062,10 @@ namespace Codist.QuickInfo
 				if (m == null) { // in a very rare case m can be null
 					return;
 				}
-				m = m.OriginalDefinition;
+				var om = m.OriginalDefinition;
 				IParameterSymbol p = null;
 				if (argName != null) {
-					var mp = m.Parameters;
+					var mp = om.Parameters;
 					for (int i = 0; i < mp.Length; i++) {
 						if (mp[i].Name == argName) {
 							argIndex = i;
@@ -1090,7 +1075,7 @@ namespace Codist.QuickInfo
 					}
 				}
 				else if (argIndex != -1) {
-					var mp = m.Parameters;
+					var mp = om.Parameters;
 					if (argIndex < mp.Length) {
 						argName = (p = mp[argIndex]).Name;
 					}
@@ -1098,17 +1083,17 @@ namespace Codist.QuickInfo
 						argName = (p = mp[mp.Length - 1]).Name;
 					}
 				}
-				var doc = argName != null ? new XmlDoc(m.MethodKind == MethodKind.DelegateInvoke ? m.ContainingSymbol : m, _SemanticModel.Compilation) : null;
+				var doc = argName != null ? new XmlDoc(om.MethodKind == MethodKind.DelegateInvoke ? om.ContainingSymbol : om, _SemanticModel.Compilation) : null;
 				var paramDoc = doc?.GetParameter(argName);
 				var content = new ThemedTipText("Argument", true)
 					.Append(" of ")
 					.AddSymbol(m.ReturnType, _SymbolFormatter)
-					.Append(" ").AddSymbol(m.MethodKind != MethodKind.DelegateInvoke && m.MethodKind != MethodKind.Constructor ? m : (ISymbol)m.ContainingType, _SymbolFormatter)
-					.AddParameters(m.Parameters, _SymbolFormatter, argIndex);
+					.Append(" ").AddSymbol(om.MethodKind != MethodKind.DelegateInvoke && om.MethodKind != MethodKind.Constructor ? om : (ISymbol)om.ContainingType, _SymbolFormatter)
+					.AddParameters(om.Parameters, _SymbolFormatter, argIndex);
 				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Parameter, content));
 				if (paramDoc != null) {
 					content.Append("\n" + argName, true, true, _SymbolFormatter.Parameter).Append(": ");
-					new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, m).Render(paramDoc, content.Inlines);
+					new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, om).Render(paramDoc, content.Inlines);
 				}
 				if (m.IsGenericMethod) {
 					for (int i = 0; i < m.TypeArguments.Length; i++) {
