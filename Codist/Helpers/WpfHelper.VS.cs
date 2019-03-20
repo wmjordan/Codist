@@ -245,7 +245,7 @@ namespace Codist
 						content.AppendLine();
 					}
 					c = true;
-					content.Append("return value: ").Append(t.ToDisplayString(QuickInfoSymbolDisplayFormat), true);
+					content.Append("return type: ").Append(t.ToDisplayString(QuickInfoSymbolDisplayFormat), true);
 				}
 				var f = _Symbol as IFieldSymbol;
 				if (f != null && f.IsConst) {
