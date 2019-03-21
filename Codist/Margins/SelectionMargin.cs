@@ -13,14 +13,12 @@ namespace Codist.Margins
 	{
 		public const string MarginName = nameof(SelectionMargin);
 		const string FormatName = "Selected Text";
-		const double SelectionRenderPadding = -3;
 		const double MarginOpacity = 0.3;
 		readonly IWpfTextView _TextView;
 		readonly IEditorFormatMap _EditorFormatMap;
 		readonly IVerticalScrollBar _ScrollBar;
 
 		Brush _SelectionBrush;
-		double _ScrollbarWidth;
 
 		public SelectionMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) {
 			_TextView = textView;
@@ -112,13 +110,6 @@ namespace Codist.Margins
 			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Selection)) {
 				DrawSelections(drawingContext);
 			}
-		}
-
-		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
-			base.OnRenderSizeChanged(sizeInfo);
-			var b = _ScrollBar as FrameworkElement;
-			_ScrollbarWidth = b.ActualWidth + SelectionRenderPadding;
-			InvalidateVisual();
 		}
 
 		void DrawSelections(DrawingContext drawingContext) {
