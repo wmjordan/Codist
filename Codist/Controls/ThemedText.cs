@@ -84,7 +84,7 @@ namespace Codist.Controls
 		public ThemedTipParagraph(TextBlock content) : this(0, content) {
 		}
 		public Image Icon => Children[0] as Image;
-		public TextBlock Content { get; private set; }
+		public TextBlock Content { get; }
 	}
 	sealed class ThemedToolBarText : TextBlock
 	{

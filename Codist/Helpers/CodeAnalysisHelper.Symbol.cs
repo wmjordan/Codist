@@ -261,7 +261,7 @@ namespace Codist
 
 		#region Symbol information
 		public static string GetAbstractionModifier(this ISymbol symbol) {
-			if (symbol.IsAbstract) {
+			if (symbol.IsAbstract && (symbol.Kind != SymbolKind.NamedType || (symbol as INamedTypeSymbol).TypeKind != TypeKind.Interface)) {
 				return "abstract ";
 			}
 			else if (symbol.IsStatic) {

@@ -313,7 +313,6 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExceptionDoc)
 				&& (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
 				&& doc.Exceptions != null) {
-				var exceptions = doc.Exceptions;
 				var p = new ThemedTipParagraph(KnownImageIds.StatusInvalidOutline, new ThemedTipText("Exception:", true));
 				foreach (var ex in doc.Exceptions) {
 					var et = ex.Attribute("cref");
@@ -375,7 +374,7 @@ namespace Codist.QuickInfo
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
 							ShowAttributesInfo(qiContent, symbol.ContainingType);
 						}
-						ShowTypeInfo(qiContent, node.Parent, symbol.ContainingType as INamedTypeSymbol);
+						ShowTypeInfo(qiContent, node.Parent, symbol.ContainingType);
 					}
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) && m.ContainingType.Name == "Color") {
 						var preview = ColorQuickInfo.PreviewColorMethodInvocation(_SemanticModel, node, symbol as IMethodSymbol);
@@ -688,7 +687,7 @@ namespace Codist.QuickInfo
 
 		static void ShowInterfaceImplementation<TSymbol>(IList<object> qiContent, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations)
 			where TSymbol : class, ISymbol {
-			if (symbol.IsStatic || symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.FirstOrDefault() == null) {
+			if (symbol.IsStatic || symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.Any() == false) {
 				return;
 			}
 			var interfaces = symbol.ContainingType.AllInterfaces;
@@ -946,7 +945,7 @@ namespace Codist.QuickInfo
 					.Append(max.ToString() + "(")
 					.Append(maxName.Name, _SymbolFormatter.Enum)
 					.Append(")");
-			if (type.GetAttributes().FirstOrDefault(a => a.AttributeClass.ToDisplayString() == "System.FlagsAttribute") != null) {
+			if (type.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == "System.FlagsAttribute")) {
 				var d = Convert.ToString(Convert.ToInt64(bits), 2);
 				content.AppendLine().Append("All flags: ", true)
 					.Append(d)
@@ -1173,11 +1172,10 @@ namespace Codist.QuickInfo
 		}
 
 		static StackPanel ShowNumericForms(string dec, byte[] bytes) {
-			var s = new StackPanel()
+			return new StackPanel()
 				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(dec).Add(new ThemedTipText(" DEC", true)))
 				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToHexString(bytes)).Add(new ThemedTipText(" HEX", true)))
 				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToBinString(bytes)).Add(new ThemedTipText(" BIN", true)));
-			return s;
 		}
 
 		static TextBlock ToUIText(ISymbol symbol) {
