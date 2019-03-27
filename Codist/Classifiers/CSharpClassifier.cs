@@ -334,6 +334,7 @@ namespace Codist.Classifiers
 				case SyntaxKind.ArrayInitializerExpression:
 				case SyntaxKind.ThisConstructorInitializer:
 					return _Classifications.ConstructorMethod;
+				case SyntaxKind.IndexerDeclaration:
 				case SyntaxKind.PropertyDeclaration: return _Classifications.Property;
 				case SyntaxKind.ClassDeclaration: return _Classifications.ClassName;
 				case SyntaxKind.InterfaceDeclaration: return _Classifications.InterfaceName;
