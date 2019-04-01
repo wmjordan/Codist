@@ -58,7 +58,7 @@ namespace Codist
 								}
 								if (name == "item") {
 									if (listNum == LIST_UNDEFINED) {
-										switch ((e.Parent as XElement).Attribute("type")?.Value) {
+										switch (e.Parent.Attribute("type")?.Value) {
 											case "number": listNum = 0; break;
 											case "bullet": listNum = LIST_BULLET; break;
 											default: listNum = LIST_NOT_NUMERIC; break;
@@ -157,11 +157,11 @@ namespace Codist
 							case "item":
 							case "code":
 								if (paragraph.Content.Inlines.FirstInline != null) {
-									doc.Append(paragraph = new Controls.ThemedTipParagraph(new Controls.ThemedTipText()));
+									paragraph.Content.AppendLine(true);
 								}
 								if (name == "item") {
 									if (listNum == LIST_UNDEFINED) {
-										switch ((e.Parent as XElement).Attribute("type")?.Value) {
+										switch (e.Parent.Attribute("type")?.Value) {
 											case "number": listNum = 0; break;
 											case "bullet": listNum = LIST_BULLET; break;
 											default: listNum = LIST_NOT_NUMERIC; break;

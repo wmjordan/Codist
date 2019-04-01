@@ -56,6 +56,15 @@ namespace Codist
 			block.Inlines.Add(new LineBreak());
 			return block;
 		}
+		public static TTextBlock AppendLine<TTextBlock>(this TTextBlock block, bool withMargin)
+			where TTextBlock : TextBlock {
+			block.Inlines.Add(new LineBreak());
+			if (withMargin) {
+				block.Inlines.Add(new InlineUIContainer(new Border { Width = 1, Height = 5 }));
+				block.Inlines.Add(new LineBreak());
+			}
+			return block;
+		}
 		public static TTextBlock Append<TTextBlock>(this TTextBlock block, Inline inline)
 			where TTextBlock : TextBlock {
 			block.Inlines.Add(inline);

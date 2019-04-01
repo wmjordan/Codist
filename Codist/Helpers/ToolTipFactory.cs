@@ -45,7 +45,7 @@ namespace Codist
 			var doc = new XmlDoc(symbol, compilation);
 			var summary = doc.Summary ?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.ExplicitInheritDoc?.Summary : null);
 			if (summary != null) {
-				content.AppendLine().AppendLine();
+				content.AppendLine(true);
 				new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(summary, content.Inlines);
 				tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 			}
