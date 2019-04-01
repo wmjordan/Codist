@@ -197,6 +197,7 @@ namespace Codist.QuickInfo
 						else {
 							cp.SetGlyph(ThemeHelper.GetImage(KnownImageIds.StatusInformation));
 						}
+						TextEditorWrapper.CreateFor(cp);
 					}
 
 					int GetGlyphForSeverity(DiagnosticSeverity severity) {

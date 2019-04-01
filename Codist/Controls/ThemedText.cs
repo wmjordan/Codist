@@ -10,30 +10,22 @@ namespace Codist.Controls
 	sealed class ThemedTipText : TextBlock
 	{
 		static ThemedTipText() {
-			FocusableProperty.OverrideMetadata(typeof(ThemedTipText), new FrameworkPropertyMetadata(true));
-			TextEditorWrapper.RegisterCommandHandlers(typeof(ThemedTipText), true, true, true);
+			FocusableProperty.OverrideMetadata(typeof(TextBlock), new FrameworkPropertyMetadata(true));
+			TextEditorWrapper.RegisterCommandHandlers(typeof(TextBlock), true, true, true);
 
 			// remove the focus rectangle around the control
-			FocusVisualStyleProperty.OverrideMetadata(typeof(ThemedTipText), new FrameworkPropertyMetadata((object)null));
+			FocusVisualStyleProperty.OverrideMetadata(typeof(TextBlock), new FrameworkPropertyMetadata((object)null));
 		}
-		readonly TextEditorWrapper _editor;
 		public ThemedTipText() {
 			TextWrapping = TextWrapping.Wrap;
 			Foreground = ThemeHelper.ToolTipTextBrush;
-			_editor = TextEditorWrapper.CreateFor(this);
+			TextEditorWrapper.CreateFor(this);
 		}
 		public ThemedTipText(string text) : this() {
 			Inlines.Add(text);
 		}
 		public ThemedTipText(string text, bool bold) : this() {
 			this.Append(text, bold);
-		}
-		protected override void OnPreviewKeyUp(KeyEventArgs e) {
-			base.OnPreviewKeyUp(e);
-			if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control && _editor != null) {
-				_editor.Copy();
-				e.Handled = true;
-			}
 		}
 	}
 	sealed class ThemedTipDocument : StackPanel
@@ -140,7 +132,15 @@ namespace Codist.Controls
 			var editor = new TextEditorWrapper(textContainer, tb, false);
 			IsReadOnlyProp.SetValue(editor._editor, true);
 			TextViewProp.SetValue(editor._editor, TextContainerTextViewProp.GetValue(textContainer));
+			tb.PreviewKeyUp += editor.HandleCopyShortcut;
 			return editor;
+		}
+
+		void HandleCopyShortcut(object sender, KeyEventArgs e) {
+			if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control && _editor != null) {
+				Copy();
+				e.Handled = true;
+			}
 		}
 
 		readonly object _editor;
