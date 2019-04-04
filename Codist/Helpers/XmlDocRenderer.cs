@@ -11,6 +11,8 @@ namespace Codist
 	sealed class XmlDocRenderer
 	{
 		internal const string XmlDocNodeName = "member";
+		const int LIST_UNDEFINED = -1, LIST_BULLET = -2, LIST_NOT_NUMERIC = -3;
+		const int BLOCK_PARA = 0, BLOCK_ITEM = 1, BLOCK_OTHER = 2;
 
 		static readonly Regex _FixWhitespaces = new Regex(@" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 		readonly Compilation _Compilation;
@@ -40,79 +42,77 @@ namespace Codist
 				doc.Children.Remove(paragraph);
 			}
 		}
-		public void Render(XContainer content, InlineCollection text) {
-			const int LIST_UNDEFINED = -1, LIST_BULLET = -2, LIST_NOT_NUMERIC = -3;
-			var listNum = LIST_UNDEFINED;
+		public void Render(XContainer content, InlineCollection inlines) {
+			InternalRender(content, inlines, null);
+		}
+
+		void InternalRender(XContainer content, InlineCollection inlines, ListContext list) {
 			foreach (var item in content.Nodes()) {
 				switch (item.NodeType) {
 					case XmlNodeType.Element:
 						var e = item as XElement;
-						var name = e.Name.LocalName;
-						switch (name) {
+						switch (e.Name.LocalName) {
+							case "list":
+								list = list == null
+									? new ListContext(e.Attribute("type")?.Value)
+									: new ListContext(e.Attribute("type")?.Value, list);
+								InternalRender(e, inlines, list);
+								list = list.Parent;
+								break;
 							case "para":
+								var isOnlyChildOfItem = list != null && e.Parent.Name == "item" && e.Parent.FirstNode == e.Parent.LastNode && e.Parent.FirstNode == item;
+								if (inlines.FirstInline != null && isOnlyChildOfItem == false) {
+									inlines.AppendLineWithMargin();
+								}
+								InternalRender(e, inlines, list);
+								if (inlines.FirstInline == null && isOnlyChildOfItem == false) {
+									inlines.Add(new LineBreak());
+								}
+								break;
 							case "listheader":
-							case "item":
 							case "code":
-								if (text.FirstInline != null) {
-									text.AppendLineWithMargin();
-								}
-								if (name == "item") {
-									if (listNum == LIST_UNDEFINED) {
-										switch (e.Parent.Attribute("type")?.Value) {
-											case "number": listNum = 0; break;
-											case "bullet": listNum = LIST_BULLET; break;
-											default: listNum = LIST_NOT_NUMERIC; break;
-										}
-									}
-									if (listNum >= 0) {
-										text.Add(new Run((++listNum).ToString() + ". ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
-									}
-									else if (listNum == LIST_BULLET) {
-										text.Add(new Run(" \u00B7 ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
-									}
-								}
-								Render(e, text);
-								if (text.FirstInline == null) {
-									text.Add(new LineBreak());
-								}
+								RenderBlockContent(inlines, list, e, BLOCK_OTHER);
+								break;
+							case "item":
+								RenderBlockContent(inlines, list, e, BLOCK_ITEM);
 								break;
 							case "see":
 								var see = e.Attribute("cref");
 								if (see != null) {
-									RenderXmlDocSymbol(see.Value, text, SymbolKind.Alias);
+									RenderXmlDocSymbol(see.Value, inlines, SymbolKind.Alias);
 								}
 								else if ((see = e.Attribute("langword")) != null) {
-									RenderXmlDocSymbol(see.Value, text, SymbolKind.DynamicType);
+									RenderXmlDocSymbol(see.Value, inlines, SymbolKind.DynamicType);
 								}
 								break;
 							case "paramref":
 								var paramName = e.Attribute("name");
 								if (paramName != null) {
-									RenderXmlDocSymbol(paramName.Value, text, SymbolKind.Parameter);
+									RenderXmlDocSymbol(paramName.Value, inlines, SymbolKind.Parameter);
 								}
 								break;
 							case "typeparamref":
 								var typeParamName = e.Attribute("name");
 								if (typeParamName != null) {
-									RenderXmlDocSymbol(typeParamName.Value, text, SymbolKind.TypeParameter);
+									RenderXmlDocSymbol(typeParamName.Value, inlines, SymbolKind.TypeParameter);
 								}
 								break;
 							case "c":
-								StyleInner(e, text, new Bold() { Background = ThemeHelper.ToolWindowBackgroundBrush, Foreground = ThemeHelper.ToolWindowTextBrush });
+								StyleInner(e, inlines, new Bold() { Background = ThemeHelper.ToolWindowBackgroundBrush, Foreground = ThemeHelper.ToolWindowTextBrush });
 								break;
 							case "b":
-								StyleInner(e, text, new Bold());
+								StyleInner(e, inlines, new Bold());
 								break;
 							case "i":
-								StyleInner(e, text, new Italic());
+								StyleInner(e, inlines, new Italic());
 								break;
 							case "u":
-								StyleInner(e, text, new Underline());
+								StyleInner(e, inlines, new Underline());
 								break;
 							//case "list":
 							//case "description":
 							default:
-								Render(e, text);
+								InternalRender(e, inlines, list);
 								break;
 						}
 						break;
@@ -130,120 +130,40 @@ namespace Codist
 							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
 						}
 						if (t.Length > 0) {
-							text.Add(new Run(t));
+							inlines.Add(new Run(t));
 						}
 						break;
 					case XmlNodeType.CDATA:
-						text.Add(new Run((item as XText).Value));
+						inlines.Add(new Run((item as XText).Value));
 						break;
 					case XmlNodeType.EntityReference:
 					case XmlNodeType.Entity:
-						text.Add(new Run(item.ToString()));
+						inlines.Add(new Run(item.ToString()));
 						break;
 				}
 			}
 		}
-		public void Render(XContainer content, Controls.ThemedTipDocument doc, Controls.ThemedTipParagraph paragraph) {
-			const int LIST_UNDEFINED = -1, LIST_BULLET = -2, LIST_NOT_NUMERIC = -3;
-			var listNum = LIST_UNDEFINED;
-			foreach (var item in content.Nodes()) {
-				switch (item.NodeType) {
-					case XmlNodeType.Element:
-						var e = item as XElement;
-						var name = e.Name.LocalName;
-						switch (name) {
-							case "para":
-							case "listheader":
-							case "item":
-							case "code":
-								if (paragraph.Content.Inlines.FirstInline != null) {
-									paragraph.Content.AppendLine(true);
-								}
-								if (name == "item") {
-									if (listNum == LIST_UNDEFINED) {
-										switch (e.Parent.Attribute("type")?.Value) {
-											case "number": listNum = 0; break;
-											case "bullet": listNum = LIST_BULLET; break;
-											default: listNum = LIST_NOT_NUMERIC; break;
-										}
-									}
-									if (listNum >= 0) {
-										paragraph.Content.Append(new Run((++listNum).ToString() + ". ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
-									}
-									else if (listNum == LIST_BULLET) {
-										paragraph.Content.Append(new Run(" \u00B7 ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
-									}
-								}
-								Render(e, doc, paragraph);
-								if (paragraph.Content.Inlines.FirstInline == null) {
-									paragraph.Content.Inlines.Add(new LineBreak());
-								}
-								break;
-							case "see":
-								var see = e.Attribute("cref");
-								if (see != null) {
-									RenderXmlDocSymbol(see.Value, paragraph.Content.Inlines, SymbolKind.Alias);
-								}
-								else if ((see = e.Attribute("langword")) != null) {
-									RenderXmlDocSymbol(see.Value, paragraph.Content.Inlines, SymbolKind.DynamicType);
-								}
-								break;
-							case "paramref":
-								var paramName = e.Attribute("name");
-								if (paramName != null) {
-									RenderXmlDocSymbol(paramName.Value, paragraph.Content.Inlines, SymbolKind.Parameter);
-								}
-								break;
-							case "typeparamref":
-								var typeParamName = e.Attribute("name");
-								if (typeParamName != null) {
-									RenderXmlDocSymbol(typeParamName.Value, paragraph.Content.Inlines, SymbolKind.TypeParameter);
-								}
-								break;
-							case "c":
-								StyleInner(e, paragraph.Content.Inlines, new Bold() { Background = ThemeHelper.ToolWindowBackgroundBrush, Foreground = ThemeHelper.ToolWindowTextBrush });
-								break;
-							case "b":
-								StyleInner(e, paragraph.Content.Inlines, new Bold());
-								break;
-							case "i":
-								StyleInner(e, paragraph.Content.Inlines, new Italic());
-								break;
-							case "u":
-								StyleInner(e, paragraph.Content.Inlines, new Underline());
-								break;
-							//case "list":
-							//case "description":
-							default:
-								Render(e, doc, paragraph);
-								break;
-						}
-						break;
-					case XmlNodeType.Text:
-						string t = (item as XText).Value;
-						var parentName = item.Parent.Name.LocalName;
-						if (parentName != "code") {
-							var previous = (item.PreviousNode as XElement)?.Name?.LocalName;
-							if (previous == null || IsInlineElementName(previous) == false) {
-								t = item.NextNode == null ? t.Trim() : t.TrimStart();
-							}
-							else if (item.NextNode == null) {
-								t = t.TrimEnd();
-							}
-							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
-						}
-						if (t.Length > 0) {
-							paragraph.Content.Append(new Run(t));
-						}
-						break;
-					case XmlNodeType.CDATA:
-						paragraph.Content.Append(new Run((item as XText).Value));
-						break;
-					case XmlNodeType.EntityReference:
-					case XmlNodeType.Entity:
-						paragraph.Content.Append(new Run(item.ToString()));
-						break;
-				}
+
+		void RenderBlockContent(InlineCollection inlines, ListContext list, XElement e, int blockType) {
+			if (inlines.FirstInline != null) {
+				inlines.AppendLineWithMargin();
+			}
+			if (blockType == BLOCK_ITEM) {
+				PopulateListNumber(inlines, list);
+			}
+			InternalRender(e, inlines, list);
+			if (inlines.FirstInline == null) {
+				inlines.Add(new LineBreak());
+			}
+		}
+
+		static void PopulateListNumber(InlineCollection text, ListContext list) {
+			string indent = list.Indent > 0 ? new string(' ', list.Indent) : String.Empty;
+			if (list.ListType > 0) {
+				text.Add(new Run(indent + ((int)list.ListType++).ToString() + ". ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
+			}
+			else if (list.ListType == ListType.Bullet) {
+				text.Add(new Run(list.Indent > 0 ? indent + " \u00B7 " : " \u00B7 ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
 			}
 		}
 
@@ -295,15 +215,6 @@ namespace Codist
 			Render(element, span.Inlines);
 		}
 
-		static bool IsBlockElementName(string name) {
-			switch (name) {
-				case "para":
-				case "listheader":
-				case "item":
-				case "code": return true;
-			}
-			return false;
-		}
 		static bool IsInlineElementName(string name) {
 			switch (name) {
 				case "see":
@@ -315,6 +226,32 @@ namespace Codist
 				case "c": return true;
 			}
 			return false;
+		}
+
+		sealed class ListContext
+		{
+			public readonly int Indent;
+			public readonly ListContext Parent;
+			public ListType ListType;
+
+			public ListContext(string type) {
+				switch (type) {
+					case "number": ListType = ListType.Number; break;
+					case "bullet": ListType = ListType.Bullet; break;
+					default: ListType = ListType.Table; break;
+				}
+			}
+			public ListContext(string type, ListContext parent) : this(type) {
+				Indent = parent.Indent + 1;
+				Parent = parent;
+			}
+		}
+		enum ListType
+		{
+			Number = 1,
+			Undefined = LIST_UNDEFINED,
+			Bullet = LIST_BULLET,
+			Table = LIST_NOT_NUMERIC
 		}
 	}
 }

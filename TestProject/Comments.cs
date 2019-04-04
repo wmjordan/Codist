@@ -12,9 +12,11 @@ namespace TestProject
 	/// <para>The overriden Quick Info does not show qualified names to
 	/// make the text more concise.
 	/// Nevertheless, you can hover your mouse onto the members to see their full names.</para>
-	/// <para>Generic class: <see cref="Dictionary{TKey, TValue}"/></para>
-	/// <para>Langword: <see langword="true"/>, <see langword="null"/></para>
-	/// <para>Error type: <see cref="NonExistingType"/></para>
+    /// <list type="number">
+    /// <item><para>Generic class: <see cref="Dictionary{TKey, TValue}"/></para></item>
+    /// <item><para>Langword: <see langword="true"/>, <see langword="null"/></para></item>
+    /// <item><para>Error type: <see cref="NonExistingType"/></para></item>
+    /// </list>
 	/// <para>You can click and go to the definition of the type, if source code
 	/// is accessible, like <see cref="MyEnum"/>, <see cref="MyStruct._instanceField"/>,
 	/// <see cref="ConcreteClass.Method"/>, or <see cref="ConcreteClass.Method{TGeneric}"/>.</para>
@@ -23,6 +25,7 @@ namespace TestProject
 	/// </summary>
 	/// <remarks>
 	/// <para>Enable <i>Show <c>&lt;remarks&gt;</c> XML Doc</i> option to read remarks for symbols.</para>
+    /// <para>You may also want to limit the max width and height of a Quick Info item by setting corresponding values in the Quick Info options.</para>
 	/// <code><![CDATA[
 	/// Console.WriteLine("some time &amp; some life");
 	/// Console.ReadKey();
