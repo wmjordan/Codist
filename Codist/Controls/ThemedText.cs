@@ -120,6 +120,20 @@ namespace Codist.Controls
 			&& TextContainerTextViewProp != null && TextContainerProp != null;
 		static readonly bool __CanCopy = CopyMethod != null;
 
+		readonly object _editor;
+
+		public TextEditorWrapper(object textContainer, FrameworkElement uiScope, bool isUndoEnabled) {
+			_editor = Activator.CreateInstance(TextEditorType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance, null, new[] { textContainer, uiScope, isUndoEnabled }, null);
+		}
+
+		public bool Copy() {
+			if (__CanCopy) {
+				CopyMethod.Invoke(null, new object[] { _editor, true });
+				return true;
+			}
+			return false;
+		}
+
 		public static void RegisterCommandHandlers(Type controlType, bool acceptsRichContent, bool readOnly, bool registerEventListeners) {
 			RegisterMethod?.Invoke(null, new object[] { controlType, acceptsRichContent, readOnly, registerEventListeners });
 		}
@@ -133,6 +147,9 @@ namespace Codist.Controls
 			IsReadOnlyProp.SetValue(editor._editor, true);
 			TextViewProp.SetValue(editor._editor, TextContainerTextViewProp.GetValue(textContainer));
 			tb.PreviewKeyUp += editor.HandleCopyShortcut;
+			tb.MouseDown += (s, args) => {
+				Keyboard.Focus(tb);
+			};
 			return editor;
 		}
 
@@ -141,20 +158,6 @@ namespace Codist.Controls
 				Copy();
 				e.Handled = true;
 			}
-		}
-
-		readonly object _editor;
-
-		public TextEditorWrapper(object textContainer, FrameworkElement uiScope, bool isUndoEnabled) {
-			_editor = Activator.CreateInstance(TextEditorType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance, null, new[] { textContainer, uiScope, isUndoEnabled }, null);
-		}
-
-		public bool Copy() {
-			if (__CanCopy) {
-				CopyMethod.Invoke(null, new object[] { _editor, true });
-				return true;
-			}
-			return false;
 		}
 	}
 }
