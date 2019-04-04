@@ -89,10 +89,10 @@ namespace Codist
 			if (symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
 				return symbol;
 			}
-			await UpdateAsync(cancellationToken);
+			await UpdateAsync(cancellationToken).ConfigureAwait(false);
 			var path = symbol.DeclaringSyntaxReferences.FirstOrDefault(r => r.SyntaxTree != null);
 			var doc = Document.Project.GetDocument(path.SyntaxTree.FilePath);
-			return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSimilarSymbols(symbol, (await doc.GetSemanticModelAsync(cancellationToken)).Compilation, cancellationToken)
+			return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSimilarSymbols(symbol, (await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false)).Compilation, cancellationToken)
 				.FirstOrDefault() ?? symbol;
 		}
 
@@ -191,7 +191,7 @@ namespace Codist
 					if (doc == null) {
 						return null;
 					}
-					sm = await doc.GetSemanticModelAsync(cancellationToken);
+					sm = await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 					if (node.SpanStart >= sm.SyntaxTree.Length) {
 						return null;
 					}
@@ -202,13 +202,13 @@ namespace Codist
 					}
 					node = newNode;
 				}
-				sm = await doc.GetSemanticModelAsync(cancellationToken);
+				sm = await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 			}
 			return sm.GetSymbol(node, cancellationToken);
 		}
 
 		public async Task<ISymbol> GetSymbolAsync(CancellationToken cancellationToken) {
-			return Node == null ? null : await GetSymbolAsync(Position, cancellationToken);
+			return Node == null ? null : await GetSymbolAsync(Position, cancellationToken).ConfigureAwait(false);
 		}
 
 		public async Task<bool> UpdateAsync(CancellationToken cancellationToken) {
@@ -224,7 +224,7 @@ namespace Codist
 				if (doc != Document) {
 					Workspace = workspace;
 					Document = doc;
-					SemanticModel = await Document.GetSemanticModelAsync(cancellationToken);
+					SemanticModel = await Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 					Compilation = SemanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 				}
 				return true;
@@ -236,7 +236,7 @@ namespace Codist
 		}
 
 		public async Task<bool> UpdateAsync(int position, CancellationToken cancellationToken) {
-			bool versionChanged = false;
+			bool versionChanged;
 			try {
 				var text = View.TextSnapshot.AsText();
 				Document = null;
@@ -247,10 +247,10 @@ namespace Codist
 						Document = workspace.CurrentSolution.WithDocumentText(id, text, PreservationMode.PreserveIdentity).GetDocument(id);
 					}
 				}
-				var ver = await Document.GetTextVersionAsync(cancellationToken);
+				var ver = await Document.GetTextVersionAsync(cancellationToken).ConfigureAwait(false);
 				if (versionChanged = ver != _Version) {
 					_Version = ver;
-					SemanticModel = await Document.GetSemanticModelAsync(cancellationToken);
+					SemanticModel = await Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 					Compilation = SemanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 					ResetNodeInfo();
 				}

@@ -55,7 +55,7 @@ namespace Codist
 		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 		/// </summary>
 		public static async Task<List<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
-			var compilation = await project.GetCompilationAsync(cancellationToken);
+			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var members = new List<ISymbol>(10);
 			ImmutableArray<IParameterSymbol> parameters;
 			var assembly = compilation.Assembly;
@@ -82,7 +82,7 @@ namespace Codist
 		/// Finds all members defined or referenced in <paramref name="project"/> which may return an instance of <paramref name="type"/>.
 		/// </summary>
 		public static async Task<List<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
-			var compilation = await project.GetCompilationAsync(cancellationToken);
+			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var assembly = compilation.Assembly;
 			//todo cache types
 			var members = new List<ISymbol>(10);
@@ -111,7 +111,7 @@ namespace Codist
 		}
 
 		public static async Task<List<ISymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
-			var compilation = await project.GetCompilationAsync(cancellationToken);
+			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var members = new List<ISymbol>(10);
 			var isValueType = type.IsValueType;
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
@@ -165,7 +165,7 @@ namespace Codist
 			int maxNameLength = 0;
 			var predicate = CreateNameFilter(symbolName, fullMatch, matchCase);
 
-			foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(project, predicate, token)) {
+			foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(project, predicate, token).ConfigureAwait(false)) {
 				if (symbols.Count < resultLimit) {
 					symbols.Add(symbol);
 				}

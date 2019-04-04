@@ -348,7 +348,7 @@ namespace Codist.NaviBar
 			}
 
 			async Task FindDeclarationsAsync(string symbolName, CancellationToken token) {
-				var result = await _Bar._SemanticContext.Document.Project.FindDeclarationsAsync(symbolName, 50, false, false, SymbolFilter.All, token);
+				var result = await _Bar._SemanticContext.Document.Project.FindDeclarationsAsync(symbolName, 50, false, false, SymbolFilter.All, token).ConfigureAwait(false);
 				foreach (var item in result) {
 					if (token.IsCancellationRequested) {
 						break;
@@ -746,7 +746,6 @@ namespace Codist.NaviBar
 				_child = new DrawingVisual();
 				using (var context = _child.RenderOpen()) {
 					context.DrawGeometry(new SolidColorBrush(color.Alpha(25)), thickness < 0.1 ? null : new Pen(ThemeHelper.MenuHoverBorderBrush, thickness), geometry);
-					context.Close();
 				}
 				AddVisualChild(_child);
 			}
