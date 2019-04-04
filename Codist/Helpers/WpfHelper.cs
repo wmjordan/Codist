@@ -58,12 +58,19 @@ namespace Codist
 		}
 		public static TTextBlock AppendLine<TTextBlock>(this TTextBlock block, bool withMargin)
 			where TTextBlock : TextBlock {
-			block.Inlines.Add(new LineBreak());
 			if (withMargin) {
-				block.Inlines.Add(new InlineUIContainer(new Border { Width = 1, Height = 5 }));
+				block.Inlines.AppendLineWithMargin();
+			}
+			else {
 				block.Inlines.Add(new LineBreak());
 			}
 			return block;
+		}
+		public static InlineCollection AppendLineWithMargin(this InlineCollection inlines) {
+			inlines.Add(new LineBreak());
+			inlines.Add(new InlineUIContainer(new Border { Width = 1, Height = 3 }));
+			inlines.Add(new LineBreak());
+			return inlines;
 		}
 		public static TTextBlock Append<TTextBlock>(this TTextBlock block, Inline inline)
 			where TTextBlock : TextBlock {

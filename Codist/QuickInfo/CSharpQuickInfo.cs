@@ -293,9 +293,8 @@ namespace Codist.QuickInfo
 				if (remarks != null && remarks.FirstNode != null) {
 					tip.Append(new ThemedTipParagraph(KnownImageIds.CommentGroup, new ThemedTipText()
 						.Append("Remarks", true)
-						.Append(": ")
-						.AddXmlDoc(remarks, docRenderer))
-						);
+						.Append(": ")));
+					tip.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(remarks, docRenderer)));
 				}
 			}
 			//if (_ExtraModels.IsDefaultOrEmpty == false) {

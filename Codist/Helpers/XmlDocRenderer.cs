@@ -35,7 +35,7 @@ namespace Codist
 			}
 			var paragraph = new Controls.ThemedTipParagraph(Microsoft.VisualStudio.Imaging.KnownImageIds.Comment);
 			doc.Append(paragraph);
-			Render(content, doc, paragraph);
+			Render(content, paragraph.Content.Inlines);
 			if (paragraph.Content.Inlines.FirstInline == null) {
 				doc.Children.Remove(paragraph);
 			}
@@ -53,8 +53,8 @@ namespace Codist
 							case "listheader":
 							case "item":
 							case "code":
-								if (e.PreviousNode != null && IsBlockElementName((e.PreviousNode as XElement)?.Name.ToString()) == false) {
-									text.Add(new LineBreak());
+								if (text.FirstInline != null) {
+									text.AppendLineWithMargin();
 								}
 								if (name == "item") {
 									if (listNum == LIST_UNDEFINED) {
@@ -72,7 +72,7 @@ namespace Codist
 									}
 								}
 								Render(e, text);
-								if (e.NextNode != null) {
+								if (text.FirstInline == null) {
 									text.Add(new LineBreak());
 								}
 								break;
