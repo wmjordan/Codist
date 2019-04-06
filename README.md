@@ -3,15 +3,15 @@
 
 # Features
 
-* [Advanced syntax highlight](#advanced-c-syntax-highlight) with [*comment tagger*](#comment-tagger-and-styles)
+* [Advanced Syntax Highlight](#advanced-c-syntax-highlight) with [*Comment Tagger*](#comment-tagger-and-styles)
 * [Super Quick Info](#super-quick-info) with *Click and Go* to source code
 * [Smart Bar](#smart-bar) with symbol reference analyzers
 * [Scrollbar Marker](#scrollbar-marker)
 * [Symbol Marker](#symbol-marker)
-* [Navigation bar](#navigation-bar) (**new in version 4.0**)
-* [Display enhancements](#display-enhancements)
-* [Comprehensive configurations](#feature-control)
-* [License](#license), [Bugs and sugguestions](#bugs-and-suggestions)
+* [Navigation Bar](#navigation-bar) (**new in version 4.0**)
+* [Display Enhancements](#display-enhancements)
+* [Comprehensive Configurations](#feature-control)
+* [License](#license), [Bugs and Sugguestions](#bugs-and-suggestions)
 
 ![Feature overview](doc/preview.png)
 
@@ -147,6 +147,7 @@ Options in the _General_ page apply to all code editor windows.
   * Concise form of members (without leading namespace or containing type names, hover your mouse over a symbol to view its full definition).
   * Extra tags, such as `<b>` (for bold), `<i>` (for italic) and `<u>` (for underline) are supported.
   * Extra information from documentations (see below).
+  * Copyable quick info content (First select text with your mouse, and press `Ctrl + C` shortcut key).
 
   ![Super Quick Info Override Doc](doc/super-quick-info-override-doc.png)
 
@@ -230,7 +231,7 @@ Buttons on the *Smart Bar* changes according to your selection, typical buttons 
 
   ![Smart Bar](doc/smart-bar.png)
 
-Buttons on _Smart Bar_ usually have multiple functions, that is, left clicking it and right clicking it will trigger trigger different commands. For details, see the tooltip for the buttons. Right clicking a button usually expands the effective range of the command to the whole line, or brings a menu bar for more commands.
+Each button on _Smart Bar_ usually has multiple functions. Left clicking, right clicking, Ctrl+clicking and Shift+clicking trigger different commands. For details, see the tooltip for the buttons. Right clicking a button usually expands the effective range of a command to the whole line, or brings out a pop-up menu for more commands.
 
   ![Smart Bar](doc/smart-bar-2.png)
 
@@ -270,13 +271,13 @@ The second one is the **Analyze symbol...** button, a menu will pop up showing p
 
 ### Behavior of Smart Bar
 
-By default, _Smart Bar_ appears after selection change, you can change the behavior in the options page by unchecking the _Show Smart Bar when selection is changed_ checkbox.
+By default, _Smart Bar_ appears after selection changes, you can alter the behavior in the options page by unchecking the _Show Smart Bar when selection is changed_ checkbox.
 
-  ![Smart Bar Options](doc/smart-bar-options.PNG)
+  ![Smart Bar Options](doc/smart-bar-options.png)
 
 _Smart Bar_ automatically disappears when you move your mouse cursor away from it, or execute a certain commands on the _Smart Bar_, or click somewhere else in the code editor window, emptying the selection.
 
-To make _Smart Bar_ reappear, you can tap the `Shift` key on your keyboard twice within a second. This behavior can also be suppressed by unchecking the **Show/hide Smart Bar with Shift key** checkbox.
+To make the _Smart Bar_ reappear, you can tap the `Shift` key on your keyboard twice within a second. This behavior can also be suppressed by unchecking the **Show/hide Smart Bar with Shift key** checkbox.
 
 ### Smart Bar in Other Windows
 
@@ -306,7 +307,7 @@ _Scollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for th
 
   ![Navigation Bar Overview](doc/navigation-bar-overview.png)
 
-  **Note**: currently Navigation Bar only work with C# code documents.
+  **Note**: currently Navigation Bar only works with C# code documents.
 
   Typically you can see three or four items on the bar.
 
@@ -393,15 +394,15 @@ Programmers who do not like *ClearType* rendering, which made text blurry and co
 2. To share or backup your settings of Codist, you can use the *Save* and *Load* buttons.
 
 # Acknowledgements
-I have learned a lot from the following extension projects.
-* Visual Studio Productivity Power Tools: https://github.com/Microsoft/VS-PPT
-* CoCo: https://github.com/GeorgeAlexandria/CoCo
-* Better comments: https://github.com/omsharp/BetterComments
+I have learned a lot from the following extension projects (sorted by the dates when I learned from them).
 * CommentsPlus: https://github.com/mhoumann/CommentsPlus
-* Inheritance Margin: https://github.com/tunnelvisionlabs/InheritanceMargin
-* Font Sizer: https://github.com/Oceanware/FontSizer
-* CodeBlockEndTag: https://github.com/KhaosCoders/VSCodeBlockEndTag
+* Better comments: https://github.com/omsharp/BetterComments
 * Remarker: https://github.com/jgyo/remarker
+* Font Sizer: https://github.com/Oceanware/FontSizer
+* Visual Studio Productivity Power Tools: https://github.com/Microsoft/VS-PPT
+* Inheritance Margin: https://github.com/tunnelvisionlabs/InheritanceMargin
+* CoCo: https://github.com/GeorgeAlexandria/CoCo
+* CodeBlockEndTag: https://github.com/KhaosCoders/VSCodeBlockEndTag
 * UntabifyReplacement: https://github.com/cpmcgrath/UntabifyReplacement
 * Extensiblity Tools: https://github.com/madskristensen/ExtensibilityTools
 * CodeMaid: https://github.com/codecadwallader/codemaid
