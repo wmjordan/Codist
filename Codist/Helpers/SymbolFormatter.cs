@@ -165,7 +165,7 @@ namespace Codist
 					}
 					switch (type.TypeKind) {
 						case TypeKind.Class:
-							text.Add(symbol.Render(alias, Class)); break;
+							text.Add(symbol.Render(alias ?? (type.IsAnonymousType ? "?" : null), Class)); break;
 						case TypeKind.Delegate:
 							text.Add(symbol.Render(alias, Delegate)); break;
 						case TypeKind.Dynamic:
