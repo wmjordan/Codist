@@ -62,7 +62,6 @@ namespace Codist.QuickInfo
 				goto EXIT;
 			}
 
-			var querySpan = new SnapshotSpan(subjectTriggerPoint, 0);
 			var semanticModel = _SemanticModel;
 			if (semanticModel == null) {
 				var container = currentSnapshot.AsText().Container;
@@ -80,6 +79,7 @@ namespace Codist.QuickInfo
 
 			//look for occurrences of our QuickInfo words in the span
 			var token = unitCompilation.FindToken(subjectTriggerPoint, true);
+			var skipTriggerPointCheck = false;
 			switch (token.Kind()) {
 				case SyntaxKind.WhitespaceTrivia:
 				case SyntaxKind.SingleLineCommentTrivia:
@@ -88,8 +88,9 @@ namespace Codist.QuickInfo
 				case SyntaxKind.OpenBraceToken:
 				case SyntaxKind.CloseBraceToken:
 				case SyntaxKind.SwitchKeyword: // switch info
+				case SyntaxKind.ThisKeyword: // convert to type below
+				case SyntaxKind.BaseKeyword:
 					break;
-				case SyntaxKind.ThisKeyword: // can be argument
 				case SyntaxKind.NullKeyword:
 				case SyntaxKind.TrueKeyword:
 				case SyntaxKind.FalseKeyword:
@@ -100,6 +101,13 @@ namespace Codist.QuickInfo
 					else {
 						goto EXIT;
 					}
+				case SyntaxKind.AsKeyword:
+					var asType = (unitCompilation.FindNode(token.Span) as BinaryExpressionSyntax)?.GetLastIdentifier();
+					if (asType != null) {
+						token = asType.Identifier;
+						skipTriggerPointCheck = true;
+					}
+					break;
 				case SyntaxKind.ReturnKeyword:
 					var statement = unitCompilation.FindNode(token.Span);
 					var retStatement = statement as ReturnStatementSyntax;
@@ -112,7 +120,14 @@ namespace Codist.QuickInfo
 						}
 					}
 					goto EXIT;
-				case SyntaxKind.BaseKeyword:
+				case SyntaxKind.OpenParenToken:
+				case SyntaxKind.CloseParenToken:
+				case SyntaxKind.DotToken:
+				case SyntaxKind.CommaToken:
+				case SyntaxKind.ColonToken:
+				case SyntaxKind.SemicolonToken:
+					token = token.GetPreviousToken();
+					skipTriggerPointCheck = true;
 					break;
 				default:
 					if (token.Span.Contains(subjectTriggerPoint, true) == false
@@ -122,7 +137,8 @@ namespace Codist.QuickInfo
 					break;
 			}
 			var node = unitCompilation.FindNode(token.Span, true, true);
-			if (node == null || node.Span.Contains(subjectTriggerPoint.Position) == false) {
+			if (node == null ||
+				skipTriggerPointCheck == false && node.Span.Contains(subjectTriggerPoint.Position, true) == false) {
 				goto EXIT;
 			}
 			LocateNodeInParameterList(ref node, ref token);
@@ -132,6 +148,9 @@ namespace Codist.QuickInfo
 			ISymbol symbol;
 			if (node.IsKind(SyntaxKind.BaseExpression)) {
 				symbol = semanticModel.GetTypeInfo(node).ConvertedType;
+			}
+			else if (node.IsKind(SyntaxKind.ThisExpression)) {
+				symbol = semanticModel.GetTypeInfo(node).Type;
 			}
 			else {
 				var symbolInfo = semanticModel.GetSymbolInfo(node);
@@ -182,7 +201,7 @@ namespace Codist.QuickInfo
 			}
 			qiWrapper.LimitQuickInfoItemSize(qiContent);
 			applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
-				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeExclusive)
+				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive)
 				: null;
 			return;
 			EXIT:
