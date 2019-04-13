@@ -236,29 +236,27 @@ namespace Codist.Margins
 					var end = new SnapshotPoint(snapshot, span.End);
 					var start = new SnapshotPoint(snapshot, span.Start);
 					var level = tag.Tag.Level;
-					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration) && span.Length > 150) {
-						if (tagType.IsMember()) {
-							var lineCount = snapshot.GetLineNumberFromPosition(end) - snapshot.GetLineNumberFromPosition(start);
-							var y1 = _ScrollBar.GetYCoordinateOfBufferPosition(start);
-							Pen pen = null;
-							var y2 = _ScrollBar.GetYCoordinateOfBufferPosition(end);
-							if (lineCount >= longDeclarationLines) {
+					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration) && span.Length > 150 && tagType.IsMember()) {
+						var lineCount = snapshot.GetLineNumberFromPosition(end) - snapshot.GetLineNumberFromPosition(start);
+						var y1 = _ScrollBar.GetYCoordinateOfBufferPosition(start);
+						Pen pen = null;
+						var y2 = _ScrollBar.GetYCoordinateOfBufferPosition(end);
+						if (lineCount >= longDeclarationLines) {
+							pen = _Element.GetPenForCodeMemberType(tagType);
+							drawingContext.DrawLine(pen, new Point(level, y1), new Point(_Element.ActualWidth, y1));
+							drawingContext.DrawLine(pen, new Point(level, y1), new Point(level, y2));
+							drawingContext.DrawLine(pen, new Point(level, y2), new Point(_Element.ActualWidth, y2));
+						}
+						if (y2 - y1 > showMemberDeclarationThredshold && y1 > lastLabel && tag.Tag.Name != null) {
+							if (pen == null) {
 								pen = _Element.GetPenForCodeMemberType(tagType);
-								drawingContext.DrawLine(pen, new Point(level, y1), new Point(_Element.ActualWidth, y1));
-								drawingContext.DrawLine(pen, new Point(level, y1), new Point(level, y2));
-								drawingContext.DrawLine(pen, new Point(level, y2), new Point(_Element.ActualWidth, y2));
 							}
-							if (y2 - y1 > showMemberDeclarationThredshold && y1 > lastLabel && tag.Tag.Name != null) {
-								if (pen == null) {
-									pen = _Element.GetPenForCodeMemberType(tagType);
-								}
-								if (pen.Brush != null) {
-									var text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Alpha((y2 - y1) * 20 / _Element.ActualHeight));
-									y1 -= text.Height / 2;
-									drawingContext.DrawText(text, new Point(level + 2, y1));
-								}
-								lastLabel = y1 + labelSize;
+							if (pen.Brush != null) {
+								var text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Alpha((y2 - y1) * 20 / _Element.ActualHeight));
+								y1 -= text.Height / 2;
+								drawingContext.DrawText(text, new Point(level + 2, y1));
 							}
+							lastLabel = y1 + labelSize;
 						}
 					}
 

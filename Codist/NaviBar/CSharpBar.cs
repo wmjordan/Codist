@@ -219,6 +219,7 @@ namespace Codist.NaviBar
 			readonly CSharpBar _Bar;
 			readonly MemberFinderBox _FinderBox;
 			readonly SearchScopeBox _ScopeBox;
+
 			public RootItem(CSharpBar bar) {
 				_Bar = bar;
 				Icon = ThemeHelper.GetImage(KnownImageIds.Namespace);
@@ -246,9 +247,7 @@ namespace Codist.NaviBar
 				SubmenuOpened += RootItem_SubmenuOpened;
 				_FinderBox.TextChanged += SearchCriteriaChanged;
 				_ScopeBox.FilterChanged += SearchCriteriaChanged;
-				_ScopeBox.FilterChanged += (s, args) => {
-					_FinderBox.Focus();
-				};
+				_ScopeBox.FilterChanged += (s, args) => _FinderBox.Focus();
 			}
 
 			public string FilterText => _FinderBox.Text;

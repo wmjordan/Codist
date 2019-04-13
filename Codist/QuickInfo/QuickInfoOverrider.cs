@@ -137,9 +137,6 @@ namespace Codist.QuickInfo
 				static readonly Thickness __DocPanelBorderMargin = new Thickness(0, 0, -9, 3);
 				static readonly Thickness __DocPanelBorderPadding = new Thickness(0, 0, 9, 0);
 				static readonly Thickness __TitlePanelMargin = new Thickness(0, 0, 30, 6);
-				static readonly Thickness __DocMargin = new Thickness(14, 0, 14, 0);
-				static readonly Thickness __IconMargin = new Thickness(5, 0, 5, 0);
-				static readonly Thickness __SignatureMargin = new Thickness(0, 0, 30, 6);
 
 				public ISymbol ClickAndGoSymbol;
 				public bool LimitItemSize;
@@ -267,22 +264,6 @@ namespace Codist.QuickInfo
 						c.Padding = __DocPanelBorderPadding;
 						c.MinHeight = 50;
 						titlePanel.Margin = __TitlePanelMargin;
-						//var b = titlePanel.GetParent<Border>();
-						//if (b != null && icon != null && signature != null) {
-						//	b.Margin = __DocPanelBorderMargin;
-						//	titlePanel.Margin = __TitlePanelMargin;
-						//	titlePanel.Background = ThemeHelper.ToolWindowBackgroundBrush.Alpha(0.5);
-						//	var docContainer = infoPanel.GetFirstVisualChild<StackPanel>();
-						//	if (docContainer != null && docContainer != doc) {
-						//		titlePanel.GetParent<StackPanel>().Margin = __DocMargin;
-						//		docContainer.Margin = __DocPanelBorderMargin;
-						//	}
-						//	else {
-						//		doc.Margin = __DocMargin;
-						//	}
-						//	icon.Margin = __IconMargin;
-						//	signature.Margin = __SignatureMargin;
-						//}
 					}
 
 					// replace the default XML doc
@@ -329,8 +310,6 @@ namespace Codist.QuickInfo
 						}
 						// fix the width of the signature part to prevent it from falling down to the next row
 						if (Config.Instance.QuickInfoMaxWidth > 0) {
-							//wrapPanel.MaxWidth = Config.Instance.QuickInfoMaxWidth;
-							//signature.HorizontalAlignment = HorizontalAlignment.Left;
 							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 30;
 						}
 					}
@@ -385,9 +364,6 @@ namespace Codist.QuickInfo
 						cp.Content = o.Scrollable();
 					}
 					if (docPanel != null) {
-						//if (docPanel.Margin == __DocMargin) {
-						//	docPanel.GetParent<ContentPresenter>().MaxWidth += 32;
-						//}
 						foreach (var r in docPanel.Children) {
 							(r as ThemedTipDocument)?.ApplySizeLimit();
 						}

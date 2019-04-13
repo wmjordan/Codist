@@ -14,7 +14,7 @@ namespace Codist.NaviBar
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType(Constants.CodeTypes.Code)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
-	sealed partial class NaviBarFactory : IWpfTextViewCreationListener
+	sealed class NaviBarFactory : IWpfTextViewCreationListener
 	{
 #pragma warning disable 649, 169
 
@@ -49,8 +49,7 @@ namespace Codist.NaviBar
 			if (model == null) {
 				return;
 			}
-			var codeElements = model.CodeElements;
-			foreach (EnvDTE80.CodeElement2 item in codeElements) {
+			foreach (EnvDTE80.CodeElement2 item in model.CodeElements) {
 				System.Diagnostics.Debug.WriteLine(item.Name + "," + item.Kind + "," + item.StartPoint.Line + "," + item.StartPoint.LineCharOffset);
 				if (item.IsCodeType && item.Kind != EnvDTE.vsCMElement.vsCMElementDelegate) {
 					var ct = (item as EnvDTE.CodeType).Members;

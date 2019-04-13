@@ -43,7 +43,7 @@ namespace Codist.Controls
 			if (w == 0) {
 				w = Application.Current.MainWindow.RenderSize.Width;
 			}
-			w = w - (WpfHelper.IconRightMargin + ThemeHelper.DefaultIconSize + WpfHelper.SmallMarginSize + WpfHelper.SmallMarginSize + 22/*scrollbar width*/);
+			w -= WpfHelper.IconRightMargin + ThemeHelper.DefaultIconSize + WpfHelper.SmallMarginSize + WpfHelper.SmallMarginSize + 22/*scrollbar width*/;
 			foreach (var item in Children) {
 				var r = item as ThemedTipParagraph;
 				if (r != null) {

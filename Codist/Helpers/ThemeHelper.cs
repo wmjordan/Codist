@@ -98,12 +98,11 @@ namespace Codist
 			if (size < 1) {
 				size = DefaultIconSize;
 			}
-			var image = new CrispImage {
+			return new CrispImage {
 				Moniker = moniker,
 				Height = size,
 				Width = size,
 			};
-			return image;
 		}
 		public static void SetBackgroundForCrispImage(this System.Windows.DependencyObject target, WpfColor color) {
 			ImageThemingUtilities.SetImageBackgroundColor(target, color);
