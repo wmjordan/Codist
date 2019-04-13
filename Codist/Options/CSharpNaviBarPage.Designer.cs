@@ -27,12 +27,12 @@
 		private void InitializeComponent() {
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this._StripNonLetterCharactersBox = new System.Windows.Forms.CheckBox();
+			this._RegionBox = new System.Windows.Forms.CheckBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this._RangeHighlightBox = new System.Windows.Forms.CheckBox();
 			this._ToolTipBox = new System.Windows.Forms.CheckBox();
 			this._SyntaxNodesBox = new System.Windows.Forms.CheckBox();
-			this._RegionBox = new System.Windows.Forms.CheckBox();
-			this._StripNonLetterCharactersBox = new System.Windows.Forms.CheckBox();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this._AutoPropertyValueBox = new System.Windows.Forms.CheckBox();
 			this._ParameterListParamNameBox = new System.Windows.Forms.CheckBox();
@@ -40,9 +40,12 @@
 			this._RegionItemBox = new System.Windows.Forms.CheckBox();
 			this._PartialClassBox = new System.Windows.Forms.CheckBox();
 			this._FieldValueBox = new System.Windows.Forms.CheckBox();
+			this.customGroupBox1 = new Codist.Controls.CustomGroupBox();
+			this.label2 = new System.Windows.Forms.Label();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.tabPage1.SuspendLayout();
+			this.customGroupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// _OptionTabs
@@ -60,9 +63,9 @@
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this.customGroupBox1);
 			this.tabPage2.Controls.Add(this._StripNonLetterCharactersBox);
 			this.tabPage2.Controls.Add(this._RegionBox);
-			this.tabPage2.Controls.Add(this.label1);
 			this.tabPage2.Controls.Add(this._RangeHighlightBox);
 			this.tabPage2.Controls.Add(this._ToolTipBox);
 			this.tabPage2.Controls.Add(this._SyntaxNodesBox);
@@ -74,14 +77,34 @@
 			this.tabPage2.Text = "Navigation Bar";
 			this.tabPage2.UseVisualStyleBackColor = true;
 			// 
+			// _StripNonLetterCharactersBox
+			// 
+			this._StripNonLetterCharactersBox.AutoSize = true;
+			this._StripNonLetterCharactersBox.Location = new System.Drawing.Point(39, 106);
+			this._StripNonLetterCharactersBox.Name = "_StripNonLetterCharactersBox";
+			this._StripNonLetterCharactersBox.Size = new System.Drawing.Size(237, 19);
+			this._StripNonLetterCharactersBox.TabIndex = 11;
+			this._StripNonLetterCharactersBox.Text = "Trim non-letter characters";
+			this._StripNonLetterCharactersBox.UseVisualStyleBackColor = true;
+			// 
+			// _RegionBox
+			// 
+			this._RegionBox.AutoSize = true;
+			this._RegionBox.Location = new System.Drawing.Point(15, 81);
+			this._RegionBox.Name = "_RegionBox";
+			this._RegionBox.Size = new System.Drawing.Size(165, 19);
+			this._RegionBox.TabIndex = 10;
+			this._RegionBox.Text = "Show #region name";
+			this._RegionBox.UseVisualStyleBackColor = true;
+			// 
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(12, 128);
+			this.label1.Location = new System.Drawing.Point(6, 30);
 			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(391, 15);
+			this.label1.Size = new System.Drawing.Size(343, 15);
 			this.label1.TabIndex = 9;
-			this.label1.Text = "Note: currently Navigation Bar works on C# only.";
+			this.label1.Text = "Currently Navigation Bar works on C# only.";
 			// 
 			// _RangeHighlightBox
 			// 
@@ -112,26 +135,6 @@
 			this._SyntaxNodesBox.TabIndex = 0;
 			this._SyntaxNodesBox.Text = "Show syntax detail";
 			this._SyntaxNodesBox.UseVisualStyleBackColor = true;
-			// 
-			// _RegionBox
-			// 
-			this._RegionBox.AutoSize = true;
-			this._RegionBox.Location = new System.Drawing.Point(15, 81);
-			this._RegionBox.Name = "_RegionBox";
-			this._RegionBox.Size = new System.Drawing.Size(165, 19);
-			this._RegionBox.TabIndex = 10;
-			this._RegionBox.Text = "Show #region name";
-			this._RegionBox.UseVisualStyleBackColor = true;
-			// 
-			// _StripNonLetterCharactersBox
-			// 
-			this._StripNonLetterCharactersBox.AutoSize = true;
-			this._StripNonLetterCharactersBox.Location = new System.Drawing.Point(39, 106);
-			this._StripNonLetterCharactersBox.Name = "_StripNonLetterCharactersBox";
-			this._StripNonLetterCharactersBox.Size = new System.Drawing.Size(237, 19);
-			this._StripNonLetterCharactersBox.TabIndex = 11;
-			this._StripNonLetterCharactersBox.Text = "Trim non-letter characters";
-			this._StripNonLetterCharactersBox.UseVisualStyleBackColor = true;
 			// 
 			// tabPage1
 			// 
@@ -209,6 +212,28 @@
 			this._FieldValueBox.Text = "Show field value";
 			this._FieldValueBox.UseVisualStyleBackColor = true;
 			// 
+			// customGroupBox1
+			// 
+			this.customGroupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.customGroupBox1.Controls.Add(this.label2);
+			this.customGroupBox1.Controls.Add(this.label1);
+			this.customGroupBox1.Location = new System.Drawing.Point(6, 128);
+			this.customGroupBox1.Name = "customGroupBox1";
+			this.customGroupBox1.Size = new System.Drawing.Size(512, 100);
+			this.customGroupBox1.TabIndex = 12;
+			this.customGroupBox1.TabStop = false;
+			this.customGroupBox1.Text = "Note:";
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(6, 59);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(367, 15);
+			this.label2.TabIndex = 9;
+			this.label2.Text = "Press Ctrl+` to open the first dropdown menu.";
+			// 
 			// CSharpNaviBarPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -222,6 +247,8 @@
 			this.tabPage2.PerformLayout();
 			this.tabPage1.ResumeLayout(false);
 			this.tabPage1.PerformLayout();
+			this.customGroupBox1.ResumeLayout(false);
+			this.customGroupBox1.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -242,5 +269,7 @@
 		private System.Windows.Forms.CheckBox _RegionItemBox;
 		private System.Windows.Forms.CheckBox _PartialClassBox;
 		private System.Windows.Forms.CheckBox _FieldValueBox;
+		private Controls.CustomGroupBox customGroupBox1;
+		private System.Windows.Forms.Label label2;
 	}
 }
