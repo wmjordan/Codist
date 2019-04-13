@@ -96,6 +96,10 @@ namespace Codist.QuickInfo
 		/// <summary>
 		/// The overrider for VS 15.8 and above versions.
 		/// </summary>
+		/// <remarks>
+		/// <para>The original implementation of QuickInfo locates at: Common7\IDE\CommonExtensions\Microsoft\Editor\Microsoft.VisualStudio.Platform.VSEditor.dll</para>
+		/// <para>class: Microsoft.VisualStudio.Text.AdornmentLibrary.ToolTip.Implementation.WpfToolTipControl</para>
+		/// </remarks>
 		sealed class Default : IQuickInfoOverrider
 		{
 			readonly Overrider _Overrider;
@@ -130,11 +134,12 @@ namespace Codist.QuickInfo
 
 			sealed class Overrider : UIElement
 			{
-				static readonly Thickness __DocPanelBorderMargin = new Thickness(-15, 0, -17, 0);
-				static readonly Thickness __TitlePanelMargin = new Thickness(-14, 0, -14, 3);
+				static readonly Thickness __DocPanelBorderMargin = new Thickness(0, 0, -9, 3);
+				static readonly Thickness __DocPanelBorderPadding = new Thickness(0, 0, 9, 0);
+				static readonly Thickness __TitlePanelMargin = new Thickness(0, 0, 30, 6);
 				static readonly Thickness __DocMargin = new Thickness(14, 0, 14, 0);
 				static readonly Thickness __IconMargin = new Thickness(5, 0, 5, 0);
-				static readonly Thickness __SignatureMargin = new Thickness(0, 0, 14, 0);
+				static readonly Thickness __SignatureMargin = new Thickness(0, 0, 30, 6);
 
 				public ISymbol ClickAndGoSymbol;
 				public bool LimitItemSize;
@@ -230,14 +235,16 @@ namespace Codist.QuickInfo
 				}
 
 				void FixQuickInfo(StackPanel infoPanel) {
-					var doc = infoPanel.GetFirstVisualChild<StackPanel>();
-					if (doc == null) {
-						return;
-					}
 					var titlePanel = infoPanel.GetFirstVisualChild<WrapPanel>();
 					if (titlePanel == null) {
 						return;
 					}
+					var doc = titlePanel.GetParent<StackPanel>();
+					if (doc == null) {
+						return;
+					}
+					var v16_1orLater = infoPanel.GetFirstVisualChild<StackPanel>() != doc;
+
 					titlePanel.HorizontalAlignment = HorizontalAlignment.Stretch;
 					doc.HorizontalAlignment = HorizontalAlignment.Stretch;
 
@@ -246,19 +253,40 @@ namespace Codist.QuickInfo
 
 					// beautify the title panel
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
-						var b = doc.GetParent<Border>();
-						if (b != null && icon != null && signature != null) {
-							b.Margin = __DocPanelBorderMargin;
-							titlePanel.Margin = __TitlePanelMargin;
-							titlePanel.Background = ThemeHelper.ToolWindowBackgroundBrush.Alpha(0.5);
-							doc.Margin = __DocMargin;
-							icon.Margin = __IconMargin;
-							signature.Margin = __SignatureMargin;
-						}
+						var bgIcon = CreateEnlargedIcon(icon);
+						infoPanel.GetParent<Border>().Background = new VisualBrush(bgIcon) {
+							Opacity = 0.3,
+							AlignmentX = AlignmentX.Right,
+							AlignmentY = AlignmentY.Bottom,
+							TileMode = TileMode.None,
+							Stretch = Stretch.None
+						};
+						icon.Visibility = Visibility.Collapsed;
+						var c = infoPanel.GetParent<Border>();
+						c.Margin = __DocPanelBorderMargin;
+						c.Padding = __DocPanelBorderPadding;
+						c.MinHeight = 50;
+						titlePanel.Margin = __TitlePanelMargin;
+						//var b = titlePanel.GetParent<Border>();
+						//if (b != null && icon != null && signature != null) {
+						//	b.Margin = __DocPanelBorderMargin;
+						//	titlePanel.Margin = __TitlePanelMargin;
+						//	titlePanel.Background = ThemeHelper.ToolWindowBackgroundBrush.Alpha(0.5);
+						//	var docContainer = infoPanel.GetFirstVisualChild<StackPanel>();
+						//	if (docContainer != null && docContainer != doc) {
+						//		titlePanel.GetParent<StackPanel>().Margin = __DocMargin;
+						//		docContainer.Margin = __DocPanelBorderMargin;
+						//	}
+						//	else {
+						//		doc.Margin = __DocMargin;
+						//	}
+						//	icon.Margin = __IconMargin;
+						//	signature.Margin = __SignatureMargin;
+						//}
 					}
 
 					// replace the default XML doc
-					var items = doc.Children;
+					System.Collections.IList items = doc.Children;
 					if (DocElement != null) {
 						try {
 							// sequence of items in default XML Doc panel:
@@ -279,8 +307,12 @@ namespace Codist.QuickInfo
 						}
 					}
 					if (ExceptionDoc != null) {
+						if (v16_1orLater) {
+							items = doc.GetParent<ItemsControl>().Items;
+						}
 						try {
-							if (items.Count > 1 && items[items.Count - 1] is TextBlock) {
+							if (items.Count > 1
+								&& (v16_1orLater && items[items.Count - 1] is StackPanel || items[items.Count - 1] is TextBlock)) {
 								items.RemoveAt(items.Count - 1);
 							}
 							items.Add(ExceptionDoc);
@@ -304,11 +336,17 @@ namespace Codist.QuickInfo
 					}
 				}
 
+				private static CrispImage CreateEnlargedIcon(CrispImage icon) {
+					var bgIcon = new CrispImage { Moniker = icon.Moniker, Width = 48, Height = 48 };
+					bgIcon.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+					return bgIcon;
+				}
+
 				static void ApplySizeLimit(StackPanel quickInfoPanel) {
 					if (quickInfoPanel == null) {
 						return;
 					}
-					var docPanel = quickInfoPanel.Children[0].GetFirstVisualChild<StackPanel>();
+					var docPanel = quickInfoPanel.Children[0].GetFirstVisualChild<WrapPanel>().GetParent<StackPanel>();
 					foreach (var item in quickInfoPanel.Children) {
 						var o = item as DependencyObject;
 						if (o == null) {
@@ -325,12 +363,7 @@ namespace Codist.QuickInfo
 						}
 						cp.LimitSize();
 						if (docPanel == c) {
-							if (docPanel.Margin == __DocMargin) {
-								cp.MaxWidth += 32;
-							}
-							foreach (var r in docPanel.Children) {
-								(r as ThemedTipDocument)?.ApplySizeLimit();
-							}
+							continue;
 						}
 						(c as ThemedTipDocument)?.ApplySizeLimit();
 						if (c is ScrollViewer
@@ -350,6 +383,19 @@ namespace Codist.QuickInfo
 						}
 						cp.Content = null;
 						cp.Content = o.Scrollable();
+					}
+					if (docPanel != null) {
+						//if (docPanel.Margin == __DocMargin) {
+						//	docPanel.GetParent<ContentPresenter>().MaxWidth += 32;
+						//}
+						foreach (var r in docPanel.Children) {
+							(r as ThemedTipDocument)?.ApplySizeLimit();
+						}
+						var cp = docPanel.GetParent<ContentPresenter>();
+						if (cp != null && cp.Content == docPanel) {
+							cp.Content = null;
+							cp.Content = docPanel.Scrollable();
+						}
 					}
 				}
 			}
