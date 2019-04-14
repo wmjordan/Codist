@@ -120,10 +120,14 @@ namespace Codist.Controls
 			&& TextContainerTextViewProp != null && TextContainerProp != null;
 		static readonly bool __CanCopy = CopyMethod != null;
 
+		readonly FrameworkElement _uiScope;
 		readonly object _editor;
 
 		public TextEditorWrapper(object textContainer, FrameworkElement uiScope, bool isUndoEnabled) {
 			_editor = Activator.CreateInstance(TextEditorType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance, null, new[] { textContainer, uiScope, isUndoEnabled }, null);
+			_uiScope = uiScope;
+			uiScope.PreviewKeyUp += HandleCopyShortcut;
+			uiScope.MouseRightButtonUp += (s, args) => args.Handled = Copy();
 		}
 
 		public bool Copy() {
@@ -146,10 +150,6 @@ namespace Codist.Controls
 			var editor = new TextEditorWrapper(textContainer, tb, false);
 			IsReadOnlyProp.SetValue(editor._editor, true);
 			TextViewProp.SetValue(editor._editor, TextContainerTextViewProp.GetValue(textContainer));
-			tb.PreviewKeyUp += editor.HandleCopyShortcut;
-			tb.MouseDown += (s, args) => {
-				Keyboard.Focus(tb);
-			};
 			return editor;
 		}
 
