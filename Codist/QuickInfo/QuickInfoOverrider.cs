@@ -250,15 +250,17 @@ namespace Codist.QuickInfo
 
 					// beautify the title panel
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
-						var bgIcon = CreateEnlargedIcon(icon);
-						infoPanel.GetParent<Border>().Background = new VisualBrush(bgIcon) {
-							Opacity = 0.3,
-							AlignmentX = AlignmentX.Right,
-							AlignmentY = AlignmentY.Bottom,
-							TileMode = TileMode.None,
-							Stretch = Stretch.None
-						};
-						icon.Visibility = Visibility.Collapsed;
+						if (icon != null) {
+							var bgIcon = CreateEnlargedIcon(icon);
+							infoPanel.GetParent<Border>().Background = new VisualBrush(bgIcon) {
+								Opacity = 0.3,
+								AlignmentX = AlignmentX.Right,
+								AlignmentY = AlignmentY.Bottom,
+								TileMode = TileMode.None,
+								Stretch = Stretch.None
+							};
+							icon.Visibility = Visibility.Collapsed;
+						}
 						var c = infoPanel.GetParent<Border>();
 						c.Margin = __DocPanelBorderMargin;
 						c.Padding = __DocPanelBorderPadding;
