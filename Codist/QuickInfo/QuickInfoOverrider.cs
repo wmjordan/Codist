@@ -297,6 +297,8 @@ namespace Codist.QuickInfo
 								items.RemoveAt(items.Count - 1);
 							}
 							items.Add(ExceptionDoc);
+							//todo move this to ApplySizeLimit
+							(ExceptionDoc as ThemedTipDocument)?.ApplySizeLimit();
 						}
 						catch (InvalidOperationException) {
 							// ignore exception: doc.Children was changed by another thread
