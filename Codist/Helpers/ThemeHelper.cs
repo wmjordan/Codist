@@ -45,6 +45,7 @@ namespace Codist
 		public static WpfBrush TextBoxBrush { get; private set; }
 		public static WpfBrush TextBoxBackgroundBrush { get; private set; }
 		public static WpfBrush TextBoxBorderBrush { get; private set; }
+		public static WpfBrush TextSelectionHighlightBrush { get; private set; }
 		public static WpfColor SystemButtonFaceColor { get; private set; }
 		public static WpfColor SystemThreeDFaceColor { get; private set; }
 		public static WpfBrush SystemGrayTextBrush { get; private set; }
@@ -132,6 +133,7 @@ namespace Codist
 			TextBoxBrush = CommonControlsColors.TextBoxTextBrushKey.GetWpfBrush();
 			TextBoxBackgroundBrush = CommonControlsColors.TextBoxBackgroundBrushKey.GetWpfBrush();
 			TextBoxBorderBrush = CommonControlsColors.TextBoxBorderBrushKey.GetWpfBrush();
+			TextSelectionHighlightBrush = CommonControlsColors.ComboBoxTextInputSelectionBrushKey.GetWpfBrush();
 			SystemButtonFaceColor = EnvironmentColors.SystemButtonFaceColorKey.GetWpfColor();
 			SystemThreeDFaceColor = EnvironmentColors.SystemThreeDFaceColorKey.GetWpfColor();
 			SystemGrayTextBrush = EnvironmentColors.SystemGrayTextBrushKey.GetWpfBrush();

@@ -107,6 +107,7 @@ namespace Codist.Controls
 		static readonly PropertyInfo IsReadOnlyProp = TextEditorType?.GetProperty("IsReadOnly", BindingFlags.Instance | BindingFlags.NonPublic);
 		static readonly PropertyInfo TextViewProp = TextEditorType?.GetProperty("TextView", BindingFlags.Instance | BindingFlags.NonPublic);
 		static readonly MethodInfo RegisterMethod = TextEditorType?.GetMethod("RegisterCommandHandlers", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(Type), typeof(bool), typeof(bool), typeof(bool) }, null);
+		static readonly MethodInfo OnDetachMethod = TextEditorType?.GetMethod("OnDetach", BindingFlags.Instance | BindingFlags.NonPublic);
 
 		static readonly Type TextContainerType = Type.GetType("System.Windows.Documents.ITextContainer, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
 		static readonly PropertyInfo TextContainerTextViewProp = TextContainerType?.GetProperty("TextView");
@@ -126,8 +127,8 @@ namespace Codist.Controls
 		public TextEditorWrapper(object textContainer, FrameworkElement uiScope, bool isUndoEnabled) {
 			_editor = Activator.CreateInstance(TextEditorType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance, null, new[] { textContainer, uiScope, isUndoEnabled }, null);
 			_uiScope = uiScope;
-			uiScope.PreviewKeyUp += HandleCopyShortcut;
-			uiScope.MouseRightButtonUp += (s, args) => args.Handled = Copy();
+			uiScope.PreviewMouseLeftButtonDown += HandleSelectStart;
+			uiScope.Unloaded += Detach;
 		}
 
 		public bool Copy() {
@@ -153,11 +154,34 @@ namespace Codist.Controls
 			return editor;
 		}
 
+		void HandleSelectStart(object sender, MouseButtonEventArgs e) {
+			_uiScope.PreviewMouseLeftButtonDown -= HandleSelectStart;
+			// don't mess so much if not selected
+			_uiScope.PreviewKeyUp += HandleCopyShortcut;
+			_uiScope.MouseRightButtonUp += HandleMouseCopy;
+			_uiScope.Style = new Style(_uiScope.GetType()) {
+				Setters = {
+					new Setter(System.Windows.Controls.Primitives.TextBoxBase.SelectionBrushProperty, ThemeHelper.TextSelectionHighlightBrush)
+				}
+			};
+		}
+		void HandleMouseCopy(object sender, MouseButtonEventArgs e) {
+			e.Handled = Copy();
+		}
 		void HandleCopyShortcut(object sender, KeyEventArgs e) {
 			if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control && _editor != null) {
 				Copy();
 				e.Handled = true;
 			}
+		}
+
+		void Detach(object sender, RoutedEventArgs e) {
+			_uiScope.Unloaded -= Detach;
+			_uiScope.PreviewMouseLeftButtonDown -= HandleSelectStart;
+			_uiScope.PreviewKeyUp -= HandleCopyShortcut;
+			_uiScope.MouseRightButtonUp -= HandleMouseCopy;
+			//TextViewProp.SetValue(_editor, null);
+			//OnDetachMethod.Invoke(_editor, null);
 		}
 	}
 }
