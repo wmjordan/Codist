@@ -27,7 +27,6 @@
 		private void InitializeComponent() {
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CSharpScrollbarMarkerPage));
 			this._DirectivesBox = new System.Windows.Forms.CheckBox();
-			this._SpecialCommentsBox = new System.Windows.Forms.CheckBox();
 			this._TypeDeclarationBox = new System.Windows.Forms.CheckBox();
 			this._LongMethodBox = new System.Windows.Forms.CheckBox();
 			this._MemberDeclarationBox = new System.Windows.Forms.CheckBox();
@@ -49,16 +48,6 @@
 			this._DirectivesBox.TabIndex = 4;
 			this._DirectivesBox.Text = "Compiler directive";
 			this._DirectivesBox.UseVisualStyleBackColor = true;
-			// 
-			// _SpecialCommentsBox
-			// 
-			this._SpecialCommentsBox.AutoSize = true;
-			this._SpecialCommentsBox.Location = new System.Drawing.Point(15, 131);
-			this._SpecialCommentsBox.Name = "_SpecialCommentsBox";
-			this._SpecialCommentsBox.Size = new System.Drawing.Size(149, 19);
-			this._SpecialCommentsBox.TabIndex = 5;
-			this._SpecialCommentsBox.Text = "Special comment";
-			this._SpecialCommentsBox.UseVisualStyleBackColor = true;
 			// 
 			// _TypeDeclarationBox
 			// 
@@ -108,7 +97,6 @@
 			this.tabPage2.Controls.Add(this._MethodDeclarationBox);
 			this.tabPage2.Controls.Add(this._DirectivesBox);
 			this.tabPage2.Controls.Add(this._MatchSymbolBox);
-			this.tabPage2.Controls.Add(this._SpecialCommentsBox);
 			this.tabPage2.Controls.Add(this._MemberDeclarationBox);
 			this.tabPage2.Controls.Add(this._TypeDeclarationBox);
 			this.tabPage2.Controls.Add(this._LongMethodBox);
@@ -122,8 +110,9 @@
 			// 
 			// _SymbolReferenceColorButton
 			// 
+			this._SymbolReferenceColorButton.DefaultColor = System.Drawing.Color.Empty;
 			this._SymbolReferenceColorButton.Image = ((System.Drawing.Image)(resources.GetObject("_SymbolReferenceColorButton.Image")));
-			this._SymbolReferenceColorButton.Location = new System.Drawing.Point(178, 153);
+			this._SymbolReferenceColorButton.Location = new System.Drawing.Point(178, 128);
 			this._SymbolReferenceColorButton.Name = "_SymbolReferenceColorButton";
 			this._SymbolReferenceColorButton.SelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
 			this._SymbolReferenceColorButton.Size = new System.Drawing.Size(100, 23);
@@ -145,7 +134,7 @@
 			// _MatchSymbolBox
 			// 
 			this._MatchSymbolBox.AutoSize = true;
-			this._MatchSymbolBox.Location = new System.Drawing.Point(15, 156);
+			this._MatchSymbolBox.Location = new System.Drawing.Point(15, 131);
 			this._MatchSymbolBox.Name = "_MatchSymbolBox";
 			this._MatchSymbolBox.Size = new System.Drawing.Size(125, 19);
 			this._MatchSymbolBox.TabIndex = 6;
@@ -168,7 +157,6 @@
 		}
 
 		#endregion
-		private System.Windows.Forms.CheckBox _SpecialCommentsBox;
 		private System.Windows.Forms.CheckBox _MemberDeclarationBox;
 		private System.Windows.Forms.CheckBox _DirectivesBox;
 		private System.Windows.Forms.CheckBox _LongMethodBox;

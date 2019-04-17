@@ -27,8 +27,9 @@
 		private void InitializeComponent() {
 			this._GeneralScrolbarMarkerTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
-			this._LineNumbersBox = new System.Windows.Forms.CheckBox();
 			this._SelectionBox = new System.Windows.Forms.CheckBox();
+			this._LineNumbersBox = new System.Windows.Forms.CheckBox();
+			this._SpecialCommentsBox = new System.Windows.Forms.CheckBox();
 			this._GeneralScrolbarMarkerTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
@@ -47,6 +48,7 @@
 			// 
 			// tabPage2
 			// 
+			this.tabPage2.Controls.Add(this._SpecialCommentsBox);
 			this.tabPage2.Controls.Add(this._SelectionBox);
 			this.tabPage2.Controls.Add(this._LineNumbersBox);
 			this.tabPage2.Location = new System.Drawing.Point(4, 25);
@@ -57,25 +59,35 @@
 			this.tabPage2.Text = "General";
 			this.tabPage2.UseVisualStyleBackColor = true;
 			// 
-			// _LineNumbersBox
-			// 
-			this._LineNumbersBox.AutoSize = true;
-			this._LineNumbersBox.Location = new System.Drawing.Point(15, 6);
-			this._LineNumbersBox.Name = "_LineNumbersBox";
-			this._LineNumbersBox.Size = new System.Drawing.Size(325, 19);
-			this._LineNumbersBox.TabIndex = 1;
-			this._LineNumbersBox.Text = "Draw line numbers on editor scrollbar";
-			this._LineNumbersBox.UseVisualStyleBackColor = true;
-			// 
 			// _SelectionBox
 			// 
 			this._SelectionBox.AutoSize = true;
 			this._SelectionBox.Location = new System.Drawing.Point(15, 31);
 			this._SelectionBox.Name = "_SelectionBox";
-			this._SelectionBox.Size = new System.Drawing.Size(349, 19);
+			this._SelectionBox.Size = new System.Drawing.Size(149, 19);
 			this._SelectionBox.TabIndex = 1;
-			this._SelectionBox.Text = "Mark selection range on editor scrollbar";
+			this._SelectionBox.Text = "Selection range";
 			this._SelectionBox.UseVisualStyleBackColor = true;
+			// 
+			// _LineNumbersBox
+			// 
+			this._LineNumbersBox.AutoSize = true;
+			this._LineNumbersBox.Location = new System.Drawing.Point(15, 6);
+			this._LineNumbersBox.Name = "_LineNumbersBox";
+			this._LineNumbersBox.Size = new System.Drawing.Size(125, 19);
+			this._LineNumbersBox.TabIndex = 1;
+			this._LineNumbersBox.Text = "Line numbers";
+			this._LineNumbersBox.UseVisualStyleBackColor = true;
+			// 
+			// _SpecialCommentsBox
+			// 
+			this._SpecialCommentsBox.AutoSize = true;
+			this._SpecialCommentsBox.Location = new System.Drawing.Point(15, 56);
+			this._SpecialCommentsBox.Name = "_SpecialCommentsBox";
+			this._SpecialCommentsBox.Size = new System.Drawing.Size(149, 19);
+			this._SpecialCommentsBox.TabIndex = 6;
+			this._SpecialCommentsBox.Text = "Tagged comments";
+			this._SpecialCommentsBox.UseVisualStyleBackColor = true;
 			// 
 			// ScrollbarMarkerPage
 			// 
@@ -97,5 +109,6 @@
 		private System.Windows.Forms.TabPage tabPage2;
 		private System.Windows.Forms.CheckBox _LineNumbersBox;
 		private System.Windows.Forms.CheckBox _SelectionBox;
+		private System.Windows.Forms.CheckBox _SpecialCommentsBox;
 	}
 }

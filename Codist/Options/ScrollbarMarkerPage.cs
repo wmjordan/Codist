@@ -26,6 +26,7 @@ namespace Codist.Options
 
 			_LineNumbersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.LineNumber, _LineNumbersBox.Checked));
 			_SelectionBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.Selection, _SelectionBox.Checked));
+			_SpecialCommentsBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.SpecialComment, _SpecialCommentsBox.Checked));
 			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
@@ -34,6 +35,7 @@ namespace Codist.Options
 			_UI.DoWithLock(() => {
 				_LineNumbersBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LineNumber);
 				_SelectionBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.Selection);
+				_SpecialCommentsBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment);
 			});
 		}
 	}

@@ -41,7 +41,7 @@
 			this._ToggleSmartBarBox.Name = "_ToggleSmartBarBox";
 			this._ToggleSmartBarBox.Size = new System.Drawing.Size(349, 34);
 			this._ToggleSmartBarBox.TabIndex = 1;
-			this._ToggleSmartBarBox.Text = "Show/hide Smart Bar with Shift key\r\n* Double tap to show, single tap to hide";
+			this._ToggleSmartBarBox.Text = "Show/hide with Shift key\r\n* Double tap to show, single tap to hide";
 			this._ToggleSmartBarBox.UseVisualStyleBackColor = true;
 			// 
 			// _SuperQuickInfoTabs
@@ -73,9 +73,9 @@
 			this._AutoShowSmartBarBox.AutoSize = true;
 			this._AutoShowSmartBarBox.Location = new System.Drawing.Point(15, 6);
 			this._AutoShowSmartBarBox.Name = "_AutoShowSmartBarBox";
-			this._AutoShowSmartBarBox.Size = new System.Drawing.Size(349, 19);
+			this._AutoShowSmartBarBox.Size = new System.Drawing.Size(181, 19);
 			this._AutoShowSmartBarBox.TabIndex = 2;
-			this._AutoShowSmartBarBox.Text = "Show Smart Bar when selection is changed";
+			this._AutoShowSmartBarBox.Text = "Show upon selection";
 			this._AutoShowSmartBarBox.UseVisualStyleBackColor = true;
 			// 
 			// SmartBarPage
