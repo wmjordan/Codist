@@ -128,7 +128,8 @@ namespace Codist.Controls
 			_editor = Activator.CreateInstance(TextEditorType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance, null, new[] { textContainer, uiScope, isUndoEnabled }, null);
 			_uiScope = uiScope;
 			uiScope.PreviewMouseLeftButtonDown += HandleSelectStart;
-			uiScope.Unloaded += Detach;
+			// hooking this event could make QuickFix on QuickInfo not working, weird!
+			// uiScope.Unloaded += Detach;
 		}
 
 		public bool Copy() {
@@ -143,12 +144,12 @@ namespace Codist.Controls
 			RegisterMethod?.Invoke(null, new object[] { controlType, acceptsRichContent, readOnly, registerEventListeners });
 		}
 
-		public static TextEditorWrapper CreateFor(TextBlock tb) {
+		public static TextEditorWrapper CreateFor(TextBlock textBlock) {
 			if (__IsInitialized == false) {
 				return null;
 			}
-			var textContainer = TextContainerProp.GetValue(tb);
-			var editor = new TextEditorWrapper(textContainer, tb, false);
+			var textContainer = TextContainerProp.GetValue(textBlock);
+			var editor = new TextEditorWrapper(textContainer, textBlock, false);
 			IsReadOnlyProp.SetValue(editor._editor, true);
 			TextViewProp.SetValue(editor._editor, TextContainerTextViewProp.GetValue(textContainer));
 			return editor;
