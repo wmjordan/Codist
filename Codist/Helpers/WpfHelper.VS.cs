@@ -34,12 +34,11 @@ namespace Codist
 
 		public static TPanel AddReadOnlyTextBox<TPanel>(this TPanel panel, string text)
 		where TPanel : Panel {
-			panel.Children.Add(new TextBox {
+			panel.Children.Add(new QuickInfoTextBox {
 				Text = text,
-				IsReadOnly = true,
 				TextAlignment = TextAlignment.Right,
 				MinWidth = 180
-			}.ReferenceStyle(VsResourceKeys.TextBoxStyleKey));
+			});
 			return panel;
 		}
 		public static TextBlock AddParameters(this TextBlock block, ImmutableArray<IParameterSymbol> parameters, SymbolFormatter formatter) {
