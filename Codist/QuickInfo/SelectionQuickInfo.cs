@@ -81,22 +81,6 @@ namespace Codist.QuickInfo
 			qiContent.Add(info);
 			return activeSpan;
 		}
-		/// <summary>Shows information about selections.</summary>
-		[Export(typeof(IQuickInfoSourceProvider))]
-		[Name(Name)]
-		[Order(After = CSharpQuickInfo.Name)]
-		[ContentType(Constants.CodeTypes.Text)]
-		sealed class SelectionQuickInfoProvider : IQuickInfoSourceProvider
-		{
-			const string Name = nameof(SelectionQuickInfoProvider);
-
-			public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
-				return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-					? new SelectionQuickInfo()
-					: null;
-			}
-
-		}
 	}
 
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Microsoft.CodeAnalysis;
@@ -24,25 +23,6 @@ namespace Codist.QuickInfo
 {
 	sealed class ColorQuickInfoController : IQuickInfoSource
 	{
-		/// <summary>
-		/// Provides quick info for named colors or #hex colors
-		/// </summary>
-		[Export(typeof(IQuickInfoSourceProvider))]
-		[Name("Color Quick Info Controller")]
-		[Order(After = "Default Quick Info Presenter")]
-		[ContentType(Constants.CodeTypes.Text)]
-		sealed class ColorQuickInfoControllerProvider : IQuickInfoSourceProvider
-		{
-			[Import]
-			internal ITextStructureNavigatorSelectorService _NavigatorService;
-
-			public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
-				return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-					? new ColorQuickInfoController(_NavigatorService)
-					: null;
-			}
-		}
-
 		readonly ITextStructureNavigatorSelectorService _NavigatorService;
 
 		public ColorQuickInfoController(ITextStructureNavigatorSelectorService navigatorService) {

@@ -46,21 +46,13 @@
 			this._CSharpTextOnlyDocBox = new System.Windows.Forms.CheckBox();
 			this._CSharpInheritDocCrefBox = new System.Windows.Forms.CheckBox();
 			this._CSharpDocumentationBaseTypeBox = new System.Windows.Forms.CheckBox();
-			this.groupBox4 = new System.Windows.Forms.GroupBox();
-			this._QuickInfoMaxHeightBox = new System.Windows.Forms.NumericUpDown();
-			this.label2 = new System.Windows.Forms.Label();
-			this.label1 = new System.Windows.Forms.Label();
-			this._QuickInfoMaxWidthBox = new System.Windows.Forms.NumericUpDown();
 			this._CSharpOverrideDefaultXmlDocBox = new System.Windows.Forms.CheckBox();
 			this._ClickAndGoBox = new System.Windows.Forms.CheckBox();
 			this._AdditionalItemsPage = new System.Windows.Forms.TabPage();
-			this._CSharpMethodOverloadQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpInterfaceMembersQuickInfoBox = new System.Windows.Forms.CheckBox();
+			this._CSharpMethodOverloadQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this._DefaultPage.SuspendLayout();
-			this.groupBox4.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this._QuickInfoMaxHeightBox)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this._QuickInfoMaxWidthBox)).BeginInit();
 			this._AdditionalItemsPage.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -206,7 +198,6 @@
 			this._DefaultPage.Controls.Add(this._CSharpTextOnlyDocBox);
 			this._DefaultPage.Controls.Add(this._CSharpInheritDocCrefBox);
 			this._DefaultPage.Controls.Add(this._CSharpDocumentationBaseTypeBox);
-			this._DefaultPage.Controls.Add(this.groupBox4);
 			this._DefaultPage.Controls.Add(this._CSharpOverrideDefaultXmlDocBox);
 			this._DefaultPage.Controls.Add(this._ClickAndGoBox);
 			this._DefaultPage.Location = new System.Drawing.Point(4, 25);
@@ -287,73 +278,6 @@
 			this._CSharpDocumentationBaseTypeBox.Text = "Inherit from base type or interfaces";
 			this._CSharpDocumentationBaseTypeBox.UseVisualStyleBackColor = true;
 			// 
-			// groupBox4
-			// 
-			this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.groupBox4.Controls.Add(this._QuickInfoMaxHeightBox);
-			this.groupBox4.Controls.Add(this.label2);
-			this.groupBox4.Controls.Add(this.label1);
-			this.groupBox4.Controls.Add(this._QuickInfoMaxWidthBox);
-			this.groupBox4.Location = new System.Drawing.Point(6, 211);
-			this.groupBox4.Name = "groupBox4";
-			this.groupBox4.Size = new System.Drawing.Size(506, 59);
-			this.groupBox4.TabIndex = 9;
-			this.groupBox4.TabStop = false;
-			this.groupBox4.Text = "Quick Info Item Size (0: Unlimited)";
-			// 
-			// _QuickInfoMaxHeightBox
-			// 
-			this._QuickInfoMaxHeightBox.Increment = new decimal(new int[] {
-            50,
-            0,
-            0,
-            0});
-			this._QuickInfoMaxHeightBox.Location = new System.Drawing.Point(347, 19);
-			this._QuickInfoMaxHeightBox.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-			this._QuickInfoMaxHeightBox.Name = "_QuickInfoMaxHeightBox";
-			this._QuickInfoMaxHeightBox.Size = new System.Drawing.Size(120, 25);
-			this._QuickInfoMaxHeightBox.TabIndex = 3;
-			// 
-			// label2
-			// 
-			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(246, 21);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(95, 15);
-			this.label2.TabIndex = 2;
-			this.label2.Text = "Max height:";
-			// 
-			// label1
-			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(6, 21);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(87, 15);
-			this.label1.TabIndex = 0;
-			this.label1.Text = "Max width:";
-			// 
-			// _QuickInfoMaxWidthBox
-			// 
-			this._QuickInfoMaxWidthBox.Increment = new decimal(new int[] {
-            100,
-            0,
-            0,
-            0});
-			this._QuickInfoMaxWidthBox.Location = new System.Drawing.Point(110, 19);
-			this._QuickInfoMaxWidthBox.Maximum = new decimal(new int[] {
-            4000,
-            0,
-            0,
-            0});
-			this._QuickInfoMaxWidthBox.Name = "_QuickInfoMaxWidthBox";
-			this._QuickInfoMaxWidthBox.Size = new System.Drawing.Size(120, 25);
-			this._QuickInfoMaxWidthBox.TabIndex = 1;
-			// 
 			// _CSharpOverrideDefaultXmlDocBox
 			// 
 			this._CSharpOverrideDefaultXmlDocBox.AutoSize = true;
@@ -398,16 +322,6 @@
 			this._AdditionalItemsPage.Text = "Additional Items";
 			this._AdditionalItemsPage.UseVisualStyleBackColor = true;
 			// 
-			// _CSharpMethodOverloadQuickInfoBox
-			// 
-			this._CSharpMethodOverloadQuickInfoBox.AutoSize = true;
-			this._CSharpMethodOverloadQuickInfoBox.Location = new System.Drawing.Point(15, 207);
-			this._CSharpMethodOverloadQuickInfoBox.Name = "_CSharpMethodOverloadQuickInfoBox";
-			this._CSharpMethodOverloadQuickInfoBox.Size = new System.Drawing.Size(149, 19);
-			this._CSharpMethodOverloadQuickInfoBox.TabIndex = 8;
-			this._CSharpMethodOverloadQuickInfoBox.Text = "Method overload";
-			this._CSharpMethodOverloadQuickInfoBox.UseVisualStyleBackColor = true;
-			// 
 			// _CSharpInterfaceMembersQuickInfoBox
 			// 
 			this._CSharpInterfaceMembersQuickInfoBox.AutoSize = true;
@@ -417,6 +331,16 @@
 			this._CSharpInterfaceMembersQuickInfoBox.TabIndex = 7;
 			this._CSharpInterfaceMembersQuickInfoBox.Text = "Interface members";
 			this._CSharpInterfaceMembersQuickInfoBox.UseVisualStyleBackColor = true;
+			// 
+			// _CSharpMethodOverloadQuickInfoBox
+			// 
+			this._CSharpMethodOverloadQuickInfoBox.AutoSize = true;
+			this._CSharpMethodOverloadQuickInfoBox.Location = new System.Drawing.Point(15, 207);
+			this._CSharpMethodOverloadQuickInfoBox.Name = "_CSharpMethodOverloadQuickInfoBox";
+			this._CSharpMethodOverloadQuickInfoBox.Size = new System.Drawing.Size(149, 19);
+			this._CSharpMethodOverloadQuickInfoBox.TabIndex = 8;
+			this._CSharpMethodOverloadQuickInfoBox.Text = "Method overload";
+			this._CSharpMethodOverloadQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpSuperQuickInfoPage
 			// 
@@ -429,10 +353,6 @@
 			this._OptionTabs.ResumeLayout(false);
 			this._DefaultPage.ResumeLayout(false);
 			this._DefaultPage.PerformLayout();
-			this.groupBox4.ResumeLayout(false);
-			this.groupBox4.PerformLayout();
-			((System.ComponentModel.ISupportInitialize)(this._QuickInfoMaxHeightBox)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this._QuickInfoMaxWidthBox)).EndInit();
 			this._AdditionalItemsPage.ResumeLayout(false);
 			this._AdditionalItemsPage.PerformLayout();
 			this.ResumeLayout(false);
@@ -456,11 +376,6 @@
 		private System.Windows.Forms.TabPage _AdditionalItemsPage;
 		private System.Windows.Forms.TabPage _DefaultPage;
 		private System.Windows.Forms.CheckBox _CSharpDocumentationBaseTypeBox;
-		private System.Windows.Forms.GroupBox groupBox4;
-		private System.Windows.Forms.NumericUpDown _QuickInfoMaxHeightBox;
-		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.NumericUpDown _QuickInfoMaxWidthBox;
 		private System.Windows.Forms.CheckBox _CSharpOverrideDefaultXmlDocBox;
 		private System.Windows.Forms.CheckBox _ClickAndGoBox;
 		private System.Windows.Forms.CheckBox _CSharpTextOnlyDocBox;

@@ -10,6 +10,7 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.QuickInfo
 {
@@ -349,9 +350,17 @@ namespace Codist.QuickInfo
 							continue;
 						}
 						(c as ThemedTipDocument)?.ApplySizeLimit();
-						if (c is ScrollViewer
-							|| c is Microsoft.VisualStudio.Text.Editor.IWpfTextView // skip snippet tooltip
-							) {
+						if (c is ScrollViewer) {
+							continue;
+						}
+						var v = c as IWpfTextView; // snippet tooltip, some other default tooltip
+						if (v != null) {
+							cp.Content = new ThemedTipText {
+								Text = v.TextSnapshot.GetText()
+							}.Scrollable();
+							//v.VisualElement.LimitSize();
+							//v.Options.SetOptionValue("TextView/WordWrapStyle", WordWrapStyles.WordWrap);
+							//v.Options.SetOptionValue("TextView/AutoScroll", true);
 							continue;
 						}
 						o = c as DependencyObject;

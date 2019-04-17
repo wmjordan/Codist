@@ -55,8 +55,6 @@ namespace Codist.Options
 			_CSharpRemarksDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.RemarksDoc, _CSharpRemarksDocBox.Checked));
 			_CSharpExceptionDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.ExceptionDoc, _CSharpExceptionDocBox.Checked));
 			_CSharpTextOnlyDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.TextOnlyDoc, _CSharpTextOnlyDocBox.Checked));
-			_QuickInfoMaxWidthBox.ValueChanged += _UI.HandleEvent(() => Config.Instance.QuickInfoMaxWidth = (double)_QuickInfoMaxWidthBox.Value);
-			_QuickInfoMaxHeightBox.ValueChanged += _UI.HandleEvent(() => Config.Instance.QuickInfoMaxHeight = (double)_QuickInfoMaxHeightBox.Value);
 
 			Config.Loaded += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
@@ -99,8 +97,6 @@ namespace Codist.Options
 				_CSharpDocumentationBaseTypeBox.Checked = o.MatchFlags(QuickInfoOptions.DocumentationFromBaseType);
 				_CSharpInheritDocCrefBox.Checked = o.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc);
 				_CSharpTextOnlyDocBox.Checked = o.MatchFlags(QuickInfoOptions.TextOnlyDoc);
-				_QuickInfoMaxWidthBox.Value = (decimal)(config.QuickInfoMaxWidth >= 0 && config.QuickInfoMaxWidth < (double)_QuickInfoMaxWidthBox.Maximum ? config.QuickInfoMaxWidth : 0);
-				_QuickInfoMaxHeightBox.Value = (decimal)(config.QuickInfoMaxHeight >= 0 && config.QuickInfoMaxHeight < (double)_QuickInfoMaxHeightBox.Maximum ? config.QuickInfoMaxHeight : 0);
 			});
 		}
 	}

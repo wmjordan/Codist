@@ -877,15 +877,22 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs) {
-			var p = new ThemedTipParagraph(KnownImageIds.FormPostBodyParameterNode, new ThemedTipText()
-				.Append("Attribute:", true));
+			ThemedTipParagraph p = null;
+			var c = 0;
 			foreach (var item in attrs) {
 				if (item.AttributeClass.IsAccessible(true) == false) {
 					continue;
 				}
+				if (c == 0) {
+					c = 1;
+					p = new ThemedTipParagraph(
+						KnownImageIds.FormPostBodyParameterNode,
+						new ThemedTipText().Append("Attribute:", true)
+					);
+				}
 				_SymbolFormatter.ToUIText(p.Content.AppendLine().Inlines, item);
 			}
-			if (p.Content.Inlines.Count > 1) {
+			if (c > 0) {
 				qiContent.Add(new ThemedTipDocument().Append(p));
 			}
 		}
@@ -1198,20 +1205,6 @@ namespace Codist.QuickInfo
 
 		static TextBlock ToUIText(ISymbol symbol) {
 			return new ThemedTipText().AddSymbolDisplayParts(symbol.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
-		}
-
-
-		[Export(typeof(IQuickInfoSourceProvider))]
-		[Name(Name)]
-		[Order(After = "Default Quick Info Presenter")]
-		[ContentType(Constants.CodeTypes.CSharp)]
-		sealed class CSharpQuickInfoSourceProvider : IQuickInfoSourceProvider
-		{
-			public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
-				return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-					? new CSharpQuickInfo(textBuffer, ServicesHelper.Instance.EditorFormatMap)
-					: null;
-			}
 		}
 
 		enum NumericForm
