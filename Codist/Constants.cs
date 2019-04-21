@@ -127,6 +127,7 @@ namespace Codist
 		public const string CSharpStaticMemberName = "C#: Static member";
 		public const string CSharpOverrideMemberName = "C#: Override member";
 		public const string CSharpVirtualMemberName = "C#: Virtual member";
+		public const string CSharpVolatileFieldName = "C#: Volatile field";
 		public const string CSharpAbstractMemberName = "C#: Abstract member";
 		public const string CSharpSealedClassName = "C#: Sealed class";
 		public const string CSharpAttributeName = "C#: Attribute name";
@@ -522,6 +523,10 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpReadOnlyFieldName)]
 		[Description("Name of read-only field, inheriting from Field Name")]
 		ReadOnlyFieldName,
+		[Category(Constants.SyntaxCategory.Member)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpVolatileFieldName)]
+		[Description("Name of volatile field, inheriting from Field Name")]
+		VolatileFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodePropertyName)]
