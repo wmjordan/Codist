@@ -226,6 +226,7 @@ namespace Codist
 			void ShowSymbolToolTip(object sender, ToolTipEventArgs e) {
 				var tooltip = new ThemedToolTip();
 				tooltip.Title
+					.Append(ThemeHelper.GetImage(_Symbol.GetImageId()).WrapMargin(GlyphMargin))
 					.Append(_Symbol.GetAccessibility() + _Symbol.GetAbstractionModifier() + _Symbol.GetSymbolKindName() + " ")
 					.Append(_Symbol.Name, true)
 					.Append(_Symbol.GetParameterString());

@@ -310,10 +310,19 @@ namespace Codist.QuickInfo
 				&& symbol.Kind != SymbolKind.TypeParameter) {
 				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks;
 				if (remarks != null && remarks.FirstNode != null) {
-					tip.Append(new ThemedTipParagraph(KnownImageIds.CommentGroup, new ThemedTipText()
-						.Append("Remarks", true)
-						.Append(": ")));
-					tip.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(remarks, docRenderer)));
+					tip.Append(new ThemedTipParagraph(KnownImageIds.CommentGroup, new ThemedTipText().Append("Remarks", true).Append(": ")))
+						.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(remarks, docRenderer)));
+				}
+			}
+			if (node is LambdaExpressionSyntax
+				|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
+				var df = node.IsKind(SyntaxKind.IdentifierName) ? _SemanticModel.AnalyzeDataFlow(node.Parent) : _SemanticModel.AnalyzeDataFlow(node);
+				if (df.Captured.Length > 0) {
+					var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true).Append(":"));
+					foreach (var item in df.CapturedInside) {
+						p.Content.Append(" ").AddSymbol(item, _SymbolFormatter);
+					}
+					tip.Append(p);
 				}
 			}
 			//if (_ExtraModels.IsDefaultOrEmpty == false) {

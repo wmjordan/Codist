@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TestProject
 {
@@ -58,16 +59,32 @@ namespace TestProject
 		/// </summary>
 		/// <param name="text">The text to be parsed as hex.</param>
 		/// <returns>The result number.</returns>
-		public static int ParseAsHexNumber(string text) {
+		public static async Task<int> ParseAsHexNumber(string text) {
+			try {
+				return Int32.Parse(text, System.Globalization.NumberStyles.HexNumber);
+			}
+			catch (Exception ex) {
+				await Log(ex);
+				throw;
+			}
+		}
 
-
-
-
-			return Int32.Parse(text, System.Globalization.NumberStyles.HexNumber);
-
-
-
-
+		/// <summary>
+		/// <para>This method is used to test captured variables on Quick Info.</para>
+		/// <para>More contents.</para>
+		/// <list type="number">
+		/// <item><para>item 1</para></item>
+		/// <item><para>item 2</para></item>
+		/// </list>
+		/// <para>Ending.</para>
+		/// </summary>
+		/// <typeparam name="T">T is exception class.</typeparam>
+		/// <exception cref="System.IO.IOException">Not implemented</exception>
+		public static async Task Log<T>(T exception) where T : Exception {
+			await Task.Run(() => WriteLog());
+			void WriteLog() {
+				System.IO.File.WriteAllText("log.txt", exception.ToString());
+			}
 		}
 	}
 }

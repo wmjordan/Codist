@@ -29,6 +29,7 @@ namespace Codist
 		public Brush Enum { get; private set; }
 		public Brush Field { get; private set; }
 		public Brush Interface { get; private set; }
+		public Brush Local { get; private set; }
 		public Brush Keyword { get; private set; }
 		public Brush Method { get; private set; }
 		public Brush Namespace { get; private set; }
@@ -186,8 +187,9 @@ namespace Codist
 					}
 					return;
 				case SymbolKind.Namespace: text.Add(symbol.Name.Render(Namespace)); return;
-				case SymbolKind.Parameter: text.Add(symbol.Name.Render(Parameter)); return;
+				case SymbolKind.Parameter: text.Add(symbol.Render(null, Parameter)); return;
 				case SymbolKind.Property: text.Add(symbol.Render(alias, Property)); return;
+				case SymbolKind.Local: text.Add(symbol.Render(null, Local)); return;
 				case SymbolKind.TypeParameter: text.Add(symbol.Name.Render(TypeParameter)); return;
 				default: text.Add(symbol.Name); return;
 			}
@@ -388,6 +390,7 @@ namespace Codist
 			Property = formatMap.GetBrush(Constants.CSharpPropertyName);
 			Field = formatMap.GetBrush(Constants.CSharpFieldName);
 			Const = formatMap.GetBrush(Constants.CSharpConstFieldName);
+			Local = formatMap.GetBrush(Constants.CSharpLocalVariableName);
 		}
 		
 		void AddTypeArguments(InlineCollection text, ImmutableArray<ITypeSymbol> arguments) {

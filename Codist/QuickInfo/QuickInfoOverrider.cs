@@ -270,7 +270,7 @@ namespace Codist.QuickInfo
 					}
 
 					// replace the default XML doc
-					System.Collections.IList items = doc.Children;
+					var items = doc.IsItemsHost ? (System.Collections.IList)doc.GetParent<ItemsControl>().Items : doc.Children;
 					if (DocElement != null) {
 						try {
 							// sequence of items in default XML Doc panel:
@@ -320,7 +320,7 @@ namespace Codist.QuickInfo
 					}
 				}
 
-				private static CrispImage CreateEnlargedIcon(CrispImage icon) {
+				static CrispImage CreateEnlargedIcon(CrispImage icon) {
 					var bgIcon = new CrispImage { Moniker = icon.Moniker, Width = 48, Height = 48 };
 					bgIcon.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 					return bgIcon;
