@@ -164,6 +164,11 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition VirtualMember;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeFormalLanguage)]
+		[Name(Constants.CSharpVolatileFieldName)]
+		static ClassificationTypeDefinition VolatileField;
+
+		[Export(typeof(ClassificationTypeDefinition))]
 		[Name(Constants.CSharpXmlDoc)]
 		static ClassificationTypeDefinition XmlDoc;
 

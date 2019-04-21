@@ -122,6 +122,19 @@ namespace Codist.Classifiers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpVolatileFieldName)]
+	[Name(Constants.CSharpVolatileFieldName)]
+	[UserVisible(false)]
+	[Order(After = Constants.CodeIdentifier)]
+	[Order(After = Constants.CodeFieldName)]
+	sealed class VolatileFieldFormat : ClassificationFormatDefinition
+	{
+		public VolatileFieldFormat() {
+			DisplayName = Constants.NameOfMe + ": volatile field";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName)]
 	[Name(Constants.CSharpParameterName)]
 	[UserVisible(false)]

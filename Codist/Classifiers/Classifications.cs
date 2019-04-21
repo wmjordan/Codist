@@ -38,6 +38,7 @@ namespace Codist.Classifiers
 			StructName = registry.GetClassificationType(Constants.CodeStructName);
 			TypeParameter = registry.GetClassificationType(Constants.CSharpTypeParameterName);
 			VirtualMember = registry.GetClassificationType(Constants.CSharpVirtualMemberName);
+			VolatileField = registry.GetClassificationType(Constants.CSharpVolatileFieldName);
 			XmlDoc = registry.GetClassificationType(Constants.CSharpXmlDoc);
 			UserSymbol = registry.GetClassificationType(Constants.CSharpUserSymbol);
 			MetadataSymbol = registry.GetClassificationType(Constants.CSharpMetadataSymbol);
@@ -110,6 +111,8 @@ namespace Codist.Classifiers
 		public IClassificationType UserSymbol { get; }
 
 		public IClassificationType VirtualMember { get; }
+
+		public IClassificationType VolatileField { get; }
 
 		public IClassificationType XmlDoc { get; }
 	}

@@ -442,8 +442,11 @@ namespace Codist.Classifiers
 					yield break;
 
 				case SymbolKind.Field:
-					var fieldSymbol = symbol as IFieldSymbol;
-					yield return fieldSymbol.IsConst ? _Classifications.ConstField : fieldSymbol.IsReadOnly ? _Classifications.ReadonlyField : _Classifications.Field;
+					var f = symbol as IFieldSymbol;
+					yield return f.IsConst ? _Classifications.ConstField
+						: f.IsReadOnly ? _Classifications.ReadonlyField
+						: f.IsVolatile ? _Classifications.VolatileField
+						: _Classifications.Field;
 					break;
 
 				case SymbolKind.Property:
