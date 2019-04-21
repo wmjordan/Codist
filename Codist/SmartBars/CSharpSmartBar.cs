@@ -50,7 +50,7 @@ namespace Codist.SmartBars
 			base.AddCommands(cancellationToken);
 		}
 
-		static CommandItem CreateCommandMenu(string title, int imageId, ISymbol symbol, string emptyMenuTitle, Action<CommandContext, MenuItem, ISymbol> itemPopulator) {
+		static CommandItem CreateCommandMenu(int imageId, string title, ISymbol symbol, string emptyMenuTitle, Action<CommandContext, MenuItem, ISymbol> itemPopulator) {
 			return new CommandItem(imageId, title, ctrl => (ctrl as MenuItem).StaysOpenOnClick = true, ctx => {
 				var menuItem = ctx.Sender as ThemedMenuItem;
 				if (menuItem.Items.Count > 0 || menuItem.SubMenuHeader != null) {
@@ -104,7 +104,7 @@ namespace Codist.SmartBars
 							AddCommands(MyToolBar, KnownImageIds.FlagGroup, "Mark symbol...", null, GetMarkerCommands);
 						}
 
-						if (isDesignMode && isReadOnly == false) {
+						if (/*isDesignMode && */isReadOnly == false) {
 							AddRefactorCommands(node);
 						}
 					}
@@ -120,7 +120,7 @@ namespace Codist.SmartBars
 				else if (node.IsRegionalDirective()) {
 					AddDirectiveCommands();
 				}
-				if (isDesignMode && isReadOnly == false) {
+				if (/*isDesignMode && */isReadOnly == false) {
 					if (node.IsKind(SyntaxKind.VariableDeclarator)) {
 						if (node?.Parent?.Parent is MemberDeclarationSyntax) {
 							AddCommand(MyToolBar, KnownImageIds.AddComment, "Insert comment", ctx => {
@@ -140,7 +140,7 @@ namespace Codist.SmartBars
 					else if (IsInvertableOperation(node.Kind())) {
 						AddCommand(MyToolBar, KnownImageIds.Operator, "Invert operator", InvertOperator);
 					}
-					else {
+					else if (isDesignMode) {
 						AddEditorCommand(MyToolBar, KnownImageIds.ExtractMethod, "Refactor.ExtractMethod", "Extract Method");
 					}
 				}
@@ -280,7 +280,7 @@ namespace Codist.SmartBars
 				}));
 			}
 			else if (Classifiers.SymbolMarkManager.HasBookmark) {
-				r.Add(CreateCommandMenu("Unmark symbol...", KnownImageIds.FlagOutline, symbol, "No symbol marked", (ctx, m, s) => {
+				r.Add(CreateCommandMenu(KnownImageIds.FlagOutline, "Unmark symbol...", symbol, "No symbol marked", (ctx, m, s) => {
 					foreach (var item in Classifiers.SymbolMarkManager.MarkedSymbols) {
 						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.ImageId, item.DisplayString, _ => {
 							Classifiers.SymbolMarkManager.Remove(item);
@@ -534,19 +534,21 @@ namespace Codist.SmartBars
 				case SymbolKind.Method:
 				case SymbolKind.Property:
 				case SymbolKind.Event:
-					r.Add(CreateCommandMenu("Find Callers...", KnownImageIds.ShowCallerGraph, symbol, "No caller was found", FindCallers));
+					r.Add(CreateCommandMenu(KnownImageIds.ShowCallerGraph, "Find Callers...", symbol, "No caller was found", FindCallers));
 					if (symbol.MayHaveOverride()) {
-						r.Add(CreateCommandMenu("Find Overrides...", KnownImageIds.OverloadBehavior, symbol, "No override was found", FindOverrides));
+						r.Add(CreateCommandMenu(KnownImageIds.OverloadBehavior, "Find Overrides...", symbol, "No override was found", FindOverrides));
 					}
-					var st = symbol.ContainingType as INamedTypeSymbol;
+					var st = symbol.ContainingType;
 					if (st != null && st.TypeKind == TypeKind.Interface) {
-						r.Add(CreateCommandMenu("Find Implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
+						r.Add(CreateCommandMenu(KnownImageIds.ImplementInterface, "Find Implementations...", symbol, "No implementation was found", FindImplementations));
 					}
 					if (symbol.Kind != SymbolKind.Event) {
 						CreateCommandsForReturnTypeCommand(symbol, r);
 					}
-					if (symbol.Kind == SymbolKind.Method && (symbol as IMethodSymbol).MethodKind == MethodKind.Constructor) {
-						goto case SymbolKind.NamedType;
+					if (symbol.Kind == SymbolKind.Method
+						&& (symbol as IMethodSymbol).MethodKind == MethodKind.Constructor
+						&& st.SpecialType == SpecialType.None) {
+						CreateInstanceCommandsForType(st, r);
 					}
 					//r.Add(CreateCommandMenu("Find similar...", KnownImageIds.DropShadow, symbol, "No similar symbol was found", FindSimilarSymbols));
 					break;
@@ -556,61 +558,79 @@ namespace Codist.SmartBars
 					CreateCommandsForReturnTypeCommand(symbol, r);
 					break;
 				case SymbolKind.NamedType:
-					var t = symbol as INamedTypeSymbol;
-					if (symbol.Kind == SymbolKind.Method) { // from case SymbolKind.Method
-						t = symbol.ContainingType as INamedTypeSymbol;
-					}
-					else {
-						if (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct) {
-							var ctor = _Context.NodeIncludeTrivia.GetObjectCreationNode();
-							if (ctor != null) {
-								var s = _Context.SemanticModel.GetSymbolOrFirstCandidate(ctor);
-								if (s != null) {
-									r.Add(CreateCommandMenu("Find Callers...", KnownImageIds.ShowCallerGraph, s, "No caller was found", FindCallers));
-								}
-							}
-							else if (t.InstanceConstructors.Length > 0) {
-								r.Add(CreateCommandMenu("Find Constructor Callers...", KnownImageIds.ShowCallerGraph, t, "No caller was found", FindCallers));
-							}
-						}
-						r.Add(CreateCommandMenu("Find Members...", KnownImageIds.ListMembers, t, "No member was found", FindMembers));
-						if (t.IsStatic == false) {
-							r.Add(CreateCommandMenu("Find Extensions...", KnownImageIds.ListMembers, t, "No extension method was found", FindExtensionMethods));
-						}
-					}
-					if (t.IsStatic || t.SpecialType != SpecialType.None) {
-						break;
-					}
-					r.Add(CreateCommandMenu("Find Instance Producer...", KnownImageIds.NewItem, t, "No instance creator was found", FindInstanceProducer));
-					r.Add(CreateCommandMenu("Find Instance as Parameter...", KnownImageIds.Parameter, t, "No instance as parameter was found", FindInstanceAsParameter));
-					if (t.IsSealed == false) {
-						if (t.TypeKind == TypeKind.Class) {
-							r.Add(CreateCommandMenu("Find Derived Classes...", KnownImageIds.NewClass, t, "No derived class was found", FindDerivedClasses));
-						}
-						else if (t.TypeKind == TypeKind.Interface) {
-							r.Add(CreateCommandMenu("Find Implementations...", KnownImageIds.ImplementInterface, symbol, "No implementation was found", FindImplementations));
-						}
-					}
+					CreateCommandForNamedType(symbol as INamedTypeSymbol, r);
 					break;
 				case SymbolKind.Namespace:
-					r.Add(CreateCommandMenu("Find Members...", KnownImageIds.ListMembers, symbol, "No member was found", FindMembers));
+					r.Add(CreateCommandMenu(KnownImageIds.ListMembers, "Find Members...", symbol, "No member was found", FindMembers));
 					break;
 			}
+			if (_Context.Node.IsDeclaration() && symbol.Kind != SymbolKind.Namespace) {
+				r.Add(CreateCommandMenu(KnownImageIds.ShowReferencedElements, "Find Referenced Symbols...", symbol, "No referenced symbol was found", FindReferencedSymbols));
+			}
 			//r.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, symbol, "No reference found", FindReferences));
-			r.Add(CreateCommandMenu("Find Symbol Named " + symbol.Name + "...", KnownImageIds.FindSymbol, symbol, "No symbol was found", FindSymbolWithName));
 			r.Add(new CommandItem(KnownImageIds.ReferencedDimension, "Find All References", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences")));
+			r.Add(CreateCommandMenu(KnownImageIds.FindSymbol, "Find Symbol Named " + symbol.Name + "...", symbol, "No symbol was found", FindSymbolWithName));
 			r.Add(new CommandItem(KnownImageIds.ListMembers, "Go to Member", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToMember")));
 			r.Add(new CommandItem(KnownImageIds.Type, "Go to Type", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToType")));
 			r.Add(new CommandItem(KnownImageIds.FindSymbol, "Go to Symbol", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToSymbol")));
 			return r;
 		}
 
+		void FindReferencedSymbols(CommandContext context, MenuItem menuItem, ISymbol symbol) {
+			foreach (var item in _Context.Node.FindReferencingSymbols(_Context.SemanticModel, true)) {
+				var member = item.Key;
+				menuItem.Items.Add(new SymbolMenuItem(this, member, member.Locations) {
+					Header = (member.ContainingType != null
+						? new TextBlock().Append(member.ContainingType.Name + ".", WpfBrushes.Gray)
+						: new TextBlock())
+					.Append(member.Name),
+					InputGestureText = item.Value > 1 ? "* " + item.Value.ToString() : null
+				});
+			}
+		}
+
+		void CreateCommandForNamedType(INamedTypeSymbol t, List<CommandItem> r) {
+			if (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct) {
+				var ctor = _Context.NodeIncludeTrivia.GetObjectCreationNode();
+				if (ctor != null) {
+					var s = _Context.SemanticModel.GetSymbolOrFirstCandidate(ctor);
+					if (s != null) {
+						r.Add(CreateCommandMenu(KnownImageIds.ShowCallerGraph, "Find Callers...", s, "No caller was found", FindCallers));
+					}
+				}
+				else if (t.InstanceConstructors.Length > 0) {
+					r.Add(CreateCommandMenu(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", t, "No caller was found", FindCallers));
+				}
+			}
+			r.Add(CreateCommandMenu(KnownImageIds.ListMembers, "Find Members...", t, "No member was found", FindMembers));
+			if (t.IsStatic) {
+				return;
+			}
+			if (t.IsSealed == false) {
+				if (t.TypeKind == TypeKind.Class) {
+					r.Add(CreateCommandMenu(KnownImageIds.NewClass, "Find Derived Classes...", t, "No derived class was found", FindDerivedClasses));
+				}
+				else if (t.TypeKind == TypeKind.Interface) {
+					r.Add(CreateCommandMenu(KnownImageIds.ImplementInterface, "Find Implementations...", t, "No implementation was found", FindImplementations));
+				}
+			}
+			r.Add(CreateCommandMenu(KnownImageIds.ListMembers, "Find Extensions...", t, "No extension method was found", FindExtensionMethods));
+			if (t.SpecialType == SpecialType.None) {
+				CreateInstanceCommandsForType(t, r);
+			}
+		}
+
+		void CreateInstanceCommandsForType(INamedTypeSymbol t, List<CommandItem> r) {
+			r.Add(CreateCommandMenu(KnownImageIds.NewItem, "Find Instance Producer...", t, "No instance creator was found", FindInstanceProducer));
+			r.Add(CreateCommandMenu(KnownImageIds.Parameter, "Find Instance as Parameter...", t, "No instance as parameter was found", FindInstanceAsParameter));
+		}
+
 		void CreateCommandsForReturnTypeCommand(ISymbol symbol, List<CommandItem> list) {
 			var type = symbol.GetReturnType();
 			if (type != null && type.SpecialType == SpecialType.None) {
-				list.Add(CreateCommandMenu("Find Members of " + type.Name + type.GetParameterString() + "...", KnownImageIds.ListMembers, type, "No member was found", FindMembers));
+				list.Add(CreateCommandMenu(KnownImageIds.ListMembers, "Find Members of " + type.Name + type.GetParameterString() + "...", type, "No member was found", FindMembers));
 				if (type.IsStatic == false) {
-					list.Add(CreateCommandMenu("Find Extensions for " + type.Name + type.GetParameterString() + "...", KnownImageIds.ExtensionMethod, type, "No extension method was found", FindExtensionMethods));
+					list.Add(CreateCommandMenu(KnownImageIds.ExtensionMethod, "Find Extensions for " + type.Name + type.GetParameterString() + "...", type, "No extension method was found", FindExtensionMethods));
 				}
 				if (type.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 					list.Add(new CommandItem(KnownImageIds.GoToDeclaration, "Go to " + type.Name + type.GetParameterString(), _ => type.GoToSource()));

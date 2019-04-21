@@ -18,7 +18,7 @@ namespace Codist
 	{
 		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
 			if (workspace == null) {
-				throw new ArgumentNullException("workspace");
+				throw new ArgumentNullException(nameof(workspace));
 			}
 			var solution = workspace.CurrentSolution;
 			if (solution == null) {
@@ -40,9 +40,9 @@ namespace Codist
 				: solution.WithDocumentText(docId, sourceText, PreservationMode.PreserveIdentity).GetDocument(docId);
 		}
 
+		/// <summary>Gets all <see cref="Document"/>s from a given <see cref="Project"/> and referencing/referenced projects.</summary>
 		public static IEnumerable<Document> GetRelatedProjectDocuments(this Project project) {
-			var projects = GetRelatedProjects(project);
-			foreach (var proj in projects) {
+			foreach (var proj in GetRelatedProjects(project)) {
 				foreach (var doc in proj.Documents) {
 					yield return doc;
 				}
@@ -107,6 +107,53 @@ namespace Codist
 			var info = semanticModel.GetSymbolInfo(node, cancellationToken);
 			return info.Symbol
 				?? (info.CandidateSymbols.Length > 0 ? info.CandidateSymbols[0] : null);
+		}
+
+		/// <summary>Finds symbols referenced by given context node.</summary>
+		/// <returns>An ordered array of <see cref="KeyValuePair{TKey, TValue}"/> which contains number of occurrences of corresponding symbols.</returns>
+		public static KeyValuePair<ISymbol, int>[] FindReferencingSymbols(this SyntaxNode node, SemanticModel semanticModel, bool sourceCodeOnly) {
+			var result = new Dictionary<ISymbol, int>();
+			foreach (var item in node.DescendantNodes()) {
+				if (item.IsKind(SyntaxKind.IdentifierName) == false
+					|| item.IsDeclaration()) {
+					continue;
+				}
+				var symbolInfo = semanticModel.GetSymbolInfo(item);
+				var s = symbolInfo.Symbol ?? semanticModel.GetSymbolExt(item);
+				if (s == null) {
+					continue;
+				}
+				switch (s.Kind) {
+					case SymbolKind.Parameter:
+					case SymbolKind.ArrayType:
+					case SymbolKind.PointerType:
+					case SymbolKind.TypeParameter:
+					case SymbolKind.Namespace:
+					case SymbolKind.Local:
+					case SymbolKind.Discard:
+					case SymbolKind.ErrorType:
+					case SymbolKind.DynamicType:
+					case SymbolKind.RangeVariable:
+					case SymbolKind.NamedType:
+						continue;
+					case SymbolKind.Method:
+						if ((s as IMethodSymbol)?.MethodKind == MethodKind.AnonymousFunction) {
+							continue;
+						}
+						break;
+				}
+				if (sourceCodeOnly && s.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
+					continue;
+				}
+				var ct = s.ContainingType;
+				if (ct != null && (ct.IsTupleType || ct.IsAnonymousType)) {
+					continue;
+				}
+				result[s] = result.TryGetValue(s, out int i) ? ++i : 1;
+			}
+			var a = result.ToArray();
+			Array.Sort(a, (x, y) => y.Value.CompareTo(x.Value));
+			return a;
 		}
 
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
