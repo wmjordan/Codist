@@ -104,6 +104,16 @@
 					<CanonicalName>CodistNaviBarSearchDeclaration</CanonicalName>
         </Strings>
       </Button>
+      <Button guid="guidCodistPackageCmdSet4" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
+        <Parent guid="guidCodistPackageCmdSet4" id="IDG_VS_EDIT_GOTO" />
+        <Icon guid="ImageCatalogGuid" id="SearchMember" />
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+          <ButtonText>Search Class Member</ButtonText>
+					<CanonicalName>CodistNaviBarSearchActiveClass</CanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
 
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -118,7 +128,8 @@
   </Commands>
 	<KeyBindings>
 		<!--Bind NaviBar.SearchDeclaration to Ctrl + ` -->
-		<KeyBinding guid="guidCodistPackageCmdSet4" id="NaviBarSearchDeclarationId" editor="guidVSStd97" mod1="Control" key1="0xC0" />
+		<KeyBinding guid="guidCodistPackageCmdSet4" id="NaviBarSearchDeclarationId" editor="guidVSStd97" mod1="Control" key1="0xC0" mod2="Control" key2="0xC0" />
+		<KeyBinding guid="guidCodistPackageCmdSet4" id="NaviBarSearchActiveClassId" editor="guidVSStd97" mod1="Control" key1="1" mod2="Control" key2="1" />
 	</KeyBindings>
   <Symbols>
     <!-- This is the package guid. -->
@@ -143,6 +154,7 @@
 
 		<GuidSymbol name="guidCodistPackageCmdSet4" value="{5EF88028-C0FC-4849-9883-10F4BD2217B3}">
       <IDSymbol name="NaviBarSearchDeclarationId" value="4130" />
+      <IDSymbol name="NaviBarSearchActiveClassId" value="4131" />
     </GuidSymbol>
   
   </Symbols>

@@ -9,32 +9,37 @@ namespace Codist.Commands
 	/// </summary>
 	internal static class NaviBarSearchDeclarationCommand
 	{
-		public const int CommandId = 4130;
+		public const int CommandSearchDeclarationId = 4130;
+		public const int CommandSearchActiveClassId = 4131;
 
 		public static readonly Guid CommandSet = new Guid("5EF88028-C0FC-4849-9883-10F4BD2217B3");
 
 		public static void Initialize(AsyncPackage package) {
-			var menuItem = new OleMenuCommand(Execute, new CommandID(CommandSet, CommandId));
-			menuItem.BeforeQueryStatus += (s, args) => {
-				ThreadHelper.ThrowIfNotOnUIThread();
-				var c = s as OleMenuCommand;
-				c.Enabled = CodistPackage.DTE.ActiveDocument != null;
-			};
+			var menuItem = new OleMenuCommand(ExecuteSearchDeclaration, new CommandID(CommandSet, CommandSearchDeclarationId));
+			menuItem.BeforeQueryStatus += HandleMenuState;
+			CodistPackage.MenuService.AddCommand(menuItem);
+			menuItem = new OleMenuCommand(ExecuteSearchActiveClass, new CommandID(CommandSet, CommandSearchActiveClassId));
+			menuItem.BeforeQueryStatus += HandleMenuState;
 			CodistPackage.MenuService.AddCommand(menuItem);
 		}
 
-		static void Execute(object sender, EventArgs e) {
+		static void HandleMenuState(object s, EventArgs args) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			var doc = CodistPackage.DTE.ActiveDocument;
-			if (doc == null) {
-				return;
-			}
-			var docWindow = CodistPackage.Instance.GetActiveWpfDocumentView();
-			if (docWindow == null
-				|| docWindow.Properties.TryGetProperty<NaviBar.CSharpBar>(nameof(NaviBar), out var bar) == false) {
-				return;
-			}
-			bar.ShowRootItemMenu();
+			(s as OleMenuCommand).Enabled = GetCSharpBar() != null;
+		}
+
+		static NaviBar.CSharpBar GetCSharpBar() {
+			NaviBar.CSharpBar bar = null;
+			return CodistPackage.Instance.GetActiveWpfDocumentView()?.Properties.TryGetProperty<NaviBar.CSharpBar>(nameof(NaviBar), out bar) == true ? bar : null;
+		}
+
+		static void ExecuteSearchDeclaration(object sender, EventArgs e) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			GetCSharpBar()?.ShowRootItemMenu();
+		}
+		static void ExecuteSearchActiveClass(object sender, EventArgs e) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			GetCSharpBar()?.ShowActiveClassMenu();
 		}
 	}
 }

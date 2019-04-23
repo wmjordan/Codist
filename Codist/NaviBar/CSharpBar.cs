@@ -94,6 +94,16 @@ namespace Codist.NaviBar
 		internal void ShowRootItemMenu() {
 			(Items[0] as RootItem).IsSubmenuOpen = true;
 		}
+		internal void ShowActiveClassMenu() {
+			for (int i = Items.Count - 1; i >= 0; i--) {
+				var item = Items[i] as NaviItem;
+				if (item.Node.IsTypeDeclaration()) {
+					item.PerformClick();
+					item.IsSubmenuOpen = true;
+					return;
+				}
+			}
+		}
 
 		void HighlightNodeRanges(SyntaxNode node, Microsoft.VisualStudio.Text.SnapshotSpan span) {
 			_Adornment.AddAdornment(span, null, new GeometryAdornment(ThemeHelper.MenuHoverBackgroundColor, _View.TextViewLines.GetMarkerGeometry(span), 3));
