@@ -156,10 +156,11 @@ namespace Codist.QuickInfo
 				var symbolInfo = semanticModel.GetSymbolInfo(node);
 				if (symbolInfo.CandidateReason != CandidateReason.None) {
 					ShowCandidateInfo(qiContent, symbolInfo);
-					symbol = null;
-					goto RETURN;
+					symbol = symbolInfo.CandidateSymbols.FirstOrDefault();
 				}
-				symbol = symbolInfo.Symbol ?? semanticModel.GetSymbolExt(node);
+				else {
+					symbol = symbolInfo.Symbol ?? semanticModel.GetSymbolExt(node);
+				}
 			}
 			if (symbol == null) {
 				ShowMiscInfo(qiContent, currentSnapshot, node);
@@ -316,13 +317,17 @@ namespace Codist.QuickInfo
 			}
 			if (node is LambdaExpressionSyntax
 				|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
-				var df = node.IsKind(SyntaxKind.IdentifierName) ? _SemanticModel.AnalyzeDataFlow(node.Parent) : _SemanticModel.AnalyzeDataFlow(node);
-				if (df.Captured.Length > 0) {
-					var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true).Append(":"));
-					foreach (var item in df.CapturedInside) {
-						p.Content.Append(" ").AddSymbol(item, _SymbolFormatter);
+				var ss = node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax);
+				if (ss != null) {
+					var df = _SemanticModel.AnalyzeDataFlow(ss);
+					if (df.ReadInside.Length > 0) {
+						var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true));
+						int i = 0;
+						foreach (var item in df.ReadInside) {
+							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, _SymbolFormatter);
+						}
+						tip.Append(p);
 					}
-					tip.Append(p);
 				}
 			}
 			//if (_ExtraModels.IsDefaultOrEmpty == false) {
