@@ -177,6 +177,7 @@ namespace Codist.Classifiers
 				return;
 			}
 			switch (spanNode.Kind()) {
+				case SyntaxKind.AttributeArgument:
 				case SyntaxKind.AttributeList:
 				case SyntaxKind.AttributeArgumentList:
 					result.Add(CreateClassificationSpan(snapshot, textSpan, _Classifications.AttributeNotation));
