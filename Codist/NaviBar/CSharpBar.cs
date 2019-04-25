@@ -97,7 +97,7 @@ namespace Codist.NaviBar
 		internal void ShowActiveClassMenu() {
 			for (int i = Items.Count - 1; i >= 0; i--) {
 				var item = Items[i] as NaviItem;
-				if (item.Node.IsTypeDeclaration()) {
+				if (item != null && item.Node.IsTypeDeclaration()) {
 					item.PerformClick();
 					item.IsSubmenuOpen = true;
 					return;
@@ -405,6 +405,7 @@ namespace Codist.NaviBar
 					ToolTipOpening += NaviItem_ToolTipOpening;
 				}
 				Click += NaviItem_Click;
+				KeyUp += NaviItem_KeyUp;
 			}
 
 			public bool NodeIsExternal {
@@ -449,6 +450,16 @@ namespace Codist.NaviBar
 					ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Right);
 				}
 				ToolTipOpening -= NaviItem_ToolTipOpening;
+			}
+
+			void NaviItem_KeyUp(object sender, KeyEventArgs e) {
+				var k = e.Key;
+				switch (k) {
+					case Key.Escape:
+						_Bar._View.VisualElement.Focus();
+						e.Handled = true;
+						return;
+				}
 			}
 
 			bool IMemberFilterable.Filter(MemberFilterTypes filterTypes) {

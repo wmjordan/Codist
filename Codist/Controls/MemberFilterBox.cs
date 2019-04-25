@@ -87,6 +87,8 @@ namespace Codist.Controls
 			_FilterButtons.FilterCleared += FilterBox_Clear;
 			_FilterBox.TextChanged += FilterBox_Changed;
 		}
+		public ThemedTextBox FilterBox => _FilterBox;
+
 		public bool FocusTextBox() {
 			if (_FilterBox.IsVisible) {
 				return _FilterBox.Focus();
