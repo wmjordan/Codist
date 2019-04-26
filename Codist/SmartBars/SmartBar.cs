@@ -290,12 +290,12 @@ namespace Codist.SmartBars
 			}
 			var pos = Mouse.GetPosition(View.VisualElement);
 			var rs = _ToolBarTray.RenderSize;
-			var x = pos.X - 35;
-			var y = pos.Y - rs.Height - 10;
+			var x = pos.X - 35 + View.ViewportLeft;
+			var y = pos.Y - rs.Height - 10 + View.ViewportTop;
 			Canvas.SetLeft(_ToolBarTray, x < View.ViewportLeft ? View.ViewportLeft
 				: x + rs.Width < View.ViewportRight ? x
 				: View.ViewportRight - rs.Width);
-			Canvas.SetTop(_ToolBarTray, (y < 0 || x < View.ViewportLeft && View.Selection.IsReversed == false ? y + rs.Height + 30 : y) + View.ViewportTop);
+			Canvas.SetTop(_ToolBarTray, (y < View.ViewportTop || x < 0 && View.Selection.IsReversed == false ? y + rs.Height + 30 : y));
 		}
 
 		#region Event handlers
