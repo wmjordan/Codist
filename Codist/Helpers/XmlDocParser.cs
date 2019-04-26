@@ -90,6 +90,9 @@ namespace Codist
 			if (symbol == null) {
 				return false;
 			}
+			if ((symbol.ContainingSymbol as ITypeSymbol)?.TypeKind == TypeKind.Delegate) {
+				symbol = symbol.ContainingSymbol;
+			}
 			string c = symbol.GetDocumentationCommentXml(null, true);
 			if (String.IsNullOrEmpty(c)) {
 				return false;
