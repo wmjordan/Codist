@@ -241,7 +241,7 @@ namespace Codist.QuickInfo
 					if (doc == null) {
 						return;
 					}
-					var v16_1orLater = infoPanel.GetFirstVisualChild<StackPanel>() != doc;
+					var v16_1orLater = titlePanel.GetParent<ItemsControl>().GetParent<ItemsControl>() != null;
 
 					titlePanel.HorizontalAlignment = HorizontalAlignment.Stretch;
 					doc.HorizontalAlignment = HorizontalAlignment.Stretch;
