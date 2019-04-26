@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
+using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
@@ -225,13 +226,13 @@ namespace Codist.SmartBars
 						var t = item.GetText();
 						var d = _Context.GetNode(item.Start, false, false).GetAncestorOrSelfDeclaration();
 						if (d != null) {
-							var mp = (d as BaseMethodDeclarationSyntax).FindParameter(t);
-							if (mp != null) {
+							if (((d as BaseMethodDeclarationSyntax)?.ParameterList
+								?? (d as DelegateDeclarationSyntax)?.ParameterList)
+									?.Parameters.Any(p => p.Identifier.Text == t) == true) {
 								edit.Replace(item, "<paramref name=\"" + t + "\"/>");
 								continue;
 							}
-							var tp = d.FindTypeParameter(t);
-							if (tp != null) {
+							if (d.FindTypeParameter(t) != null) {
 								edit.Replace(item, "<typeparamref name=\"" + t + "\"/>");
 								continue;
 							}
@@ -321,12 +322,12 @@ namespace Codist.SmartBars
 		void FindCallers(CommandContext context, MenuItem menuItem, ISymbol source) {
 			var doc = _Context.Document;
 			var docs = System.Collections.Immutable.ImmutableHashSet.CreateRange(doc.Project.GetRelatedProjectDocuments());
-			SymbolCallerInfo[] callers;
+			List<SymbolCallerInfo> callers;
 			switch (source.Kind) {
 				case SymbolKind.Method:
 				case SymbolKind.Property:
 				case SymbolKind.Event:
-					callers = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindCallersAsync(source, doc.Project.Solution, docs, context.CancellationToken)).ToArray();
+					callers = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindCallersAsync(source, doc.Project.Solution, docs, context.CancellationToken)).ToList();
 					break;
 				case SymbolKind.NamedType:
 					var tempResults = new HashSet<SymbolCallerInfo>(SymbolCallerInfoComparer.Instance);
@@ -337,12 +338,12 @@ namespace Codist.SmartBars
 							}
 						}
 					});
-					tempResults.CopyTo(callers = new SymbolCallerInfo[tempResults.Count]);
+					(callers = new List<SymbolCallerInfo>(tempResults.Count)).AddRange(tempResults);
 					break;
 				default: return;
 			}
-			Array.Sort(callers, (a, b) => CodeAnalysisHelper.CompareSymbol(a.CallingSymbol, b.CallingSymbol));
-			if (callers.Length < 10) {
+			callers.Sort((a, b) => CodeAnalysisHelper.CompareSymbol(a.CallingSymbol, b.CallingSymbol));
+			if (callers.Count < 10) {
 				foreach (var caller in callers) {
 					var s = caller.CallingSymbol;
 					menuItem.Items.Add(new SymbolMenuItem(this, s, caller.Locations) {
