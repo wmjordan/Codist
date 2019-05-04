@@ -63,6 +63,7 @@ namespace Codist.SmartBars
 				IsLocked = true,
 				Cursor = Cursors.Arrow,
 				Background = Brushes.Transparent,
+				UseLayoutRounding = true
 			};
 			_ToolBarTray.MouseEnter += ToolBarMouseEnter;
 			_ToolBarTray.MouseLeave += ToolBarMouseLeave;

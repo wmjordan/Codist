@@ -82,7 +82,7 @@
 	</ControlTemplate>
 	<!-- SubmenuHeader -->
 	<ControlTemplate x:Key="{x:Static MenuItem.SubmenuHeaderTemplateKey}" TargetType="{x:Type c:ThemedMenuItem}">
-		<Border Name="Border" BorderThickness="1" Background="{TemplateBinding Panel.Background}">
+		<Border Name="Border" BorderThickness="1" Background="{TemplateBinding Panel.Background}" ClipToBounds="True">
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
