@@ -320,10 +320,10 @@ namespace Codist.QuickInfo
 				var ss = node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax);
 				if (ss != null) {
 					var df = _SemanticModel.AnalyzeDataFlow(ss);
-					if (df.ReadInside.Length > 0) {
+					if (df.CapturedInside.Length > 0) {
 						var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true));
 						int i = 0;
-						foreach (var item in df.ReadInside) {
+						foreach (var item in df.CapturedInside) {
 							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, _SymbolFormatter);
 						}
 						tip.Append(p);
@@ -1156,6 +1156,19 @@ namespace Codist.QuickInfo
 				foreach (var item in content.Inlines) {
 					if (item.Foreground == null) {
 						item.Foreground = ThemeHelper.ToolTipTextBrush;
+					}
+				}
+				if (p != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
+					var attrs = p.GetAttributes();
+					if (attrs.Length > 0) {
+						var para = new ThemedTipParagraph(
+							KnownImageIds.FormPostBodyParameterNode,
+							new ThemedTipText().Append("Attribute of ").Append(p.Name, true, false, _SymbolFormatter.Parameter).Append(":")
+						);
+						foreach (var attr in attrs) {
+							_SymbolFormatter.ToUIText(para.Content.AppendLine().Inlines, attr);
+						}
+						info.Append(para);
 					}
 				}
 				qiContent.Add(info);
