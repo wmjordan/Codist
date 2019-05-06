@@ -27,9 +27,11 @@
 		private void InitializeComponent() {
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this.customGroupBox1 = new Codist.Controls.CustomGroupBox();
+			this.label2 = new System.Windows.Forms.Label();
+			this.label1 = new System.Windows.Forms.Label();
 			this._StripNonLetterCharactersBox = new System.Windows.Forms.CheckBox();
 			this._RegionBox = new System.Windows.Forms.CheckBox();
-			this.label1 = new System.Windows.Forms.Label();
 			this._RangeHighlightBox = new System.Windows.Forms.CheckBox();
 			this._ToolTipBox = new System.Windows.Forms.CheckBox();
 			this._SyntaxNodesBox = new System.Windows.Forms.CheckBox();
@@ -40,12 +42,10 @@
 			this._RegionItemBox = new System.Windows.Forms.CheckBox();
 			this._PartialClassBox = new System.Windows.Forms.CheckBox();
 			this._FieldValueBox = new System.Windows.Forms.CheckBox();
-			this.customGroupBox1 = new Codist.Controls.CustomGroupBox();
-			this.label2 = new System.Windows.Forms.Label();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
-			this.tabPage1.SuspendLayout();
 			this.customGroupBox1.SuspendLayout();
+			this.tabPage1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// _OptionTabs
@@ -77,6 +77,39 @@
 			this.tabPage2.Text = "Navigation Bar";
 			this.tabPage2.UseVisualStyleBackColor = true;
 			// 
+			// customGroupBox1
+			// 
+			this.customGroupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.customGroupBox1.Controls.Add(this.label2);
+			this.customGroupBox1.Controls.Add(this.label1);
+			this.customGroupBox1.Location = new System.Drawing.Point(6, 128);
+			this.customGroupBox1.Name = "customGroupBox1";
+			this.customGroupBox1.Size = new System.Drawing.Size(512, 128);
+			this.customGroupBox1.TabIndex = 12;
+			this.customGroupBox1.TabStop = false;
+			this.customGroupBox1.Text = "Note:";
+			// 
+			// label2
+			// 
+			this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.label2.Location = new System.Drawing.Point(6, 59);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(500, 59);
+			this.label2.TabIndex = 9;
+			this.label2.Text = "Default shortcut keys to trigger menus:\r\nCtrl+`, Ctrl+`: Edit.SearchDeclaration\r\n" +
+    "Ctrl+1, Ctrl+1: Edit.SearchClassMember";
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point(6, 30);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(343, 15);
+			this.label1.TabIndex = 9;
+			this.label1.Text = "Currently Navigation Bar works on C# only.";
+			// 
 			// _StripNonLetterCharactersBox
 			// 
 			this._StripNonLetterCharactersBox.AutoSize = true;
@@ -96,15 +129,6 @@
 			this._RegionBox.TabIndex = 10;
 			this._RegionBox.Text = "Show #region name";
 			this._RegionBox.UseVisualStyleBackColor = true;
-			// 
-			// label1
-			// 
-			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(6, 30);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(343, 15);
-			this.label1.TabIndex = 9;
-			this.label1.Text = "Currently Navigation Bar works on C# only.";
 			// 
 			// _RangeHighlightBox
 			// 
@@ -212,28 +236,6 @@
 			this._FieldValueBox.Text = "Show field value";
 			this._FieldValueBox.UseVisualStyleBackColor = true;
 			// 
-			// customGroupBox1
-			// 
-			this.customGroupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.customGroupBox1.Controls.Add(this.label2);
-			this.customGroupBox1.Controls.Add(this.label1);
-			this.customGroupBox1.Location = new System.Drawing.Point(6, 128);
-			this.customGroupBox1.Name = "customGroupBox1";
-			this.customGroupBox1.Size = new System.Drawing.Size(512, 100);
-			this.customGroupBox1.TabIndex = 12;
-			this.customGroupBox1.TabStop = false;
-			this.customGroupBox1.Text = "Note:";
-			// 
-			// label2
-			// 
-			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(6, 59);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(367, 15);
-			this.label2.TabIndex = 9;
-			this.label2.Text = "Press Ctrl+` to open the first dropdown menu.";
-			// 
 			// CSharpNaviBarPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -245,10 +247,10 @@
 			this._OptionTabs.ResumeLayout(false);
 			this.tabPage2.ResumeLayout(false);
 			this.tabPage2.PerformLayout();
-			this.tabPage1.ResumeLayout(false);
-			this.tabPage1.PerformLayout();
 			this.customGroupBox1.ResumeLayout(false);
 			this.customGroupBox1.PerformLayout();
+			this.tabPage1.ResumeLayout(false);
+			this.tabPage1.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
