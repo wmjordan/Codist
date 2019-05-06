@@ -285,6 +285,7 @@ namespace Codist.QuickInfo
 							else {
 								items.Add(DocElement);
 							}
+							(DocElement as ThemedTipDocument)?.ApplySizeLimit();
 						}
 						catch (InvalidOperationException) {
 							// ignore exception: doc.Children was changed by another thread
