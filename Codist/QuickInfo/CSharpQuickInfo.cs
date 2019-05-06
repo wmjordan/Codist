@@ -622,7 +622,7 @@ namespace Codist.QuickInfo
 					continue;
 				}
 				overloadInfo.Append(new ThemedTipParagraph(item.GetImageId(), new ThemedTipText()
-					.AddSymbolDisplayParts(item.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1))
+					.AddSymbolDisplayParts(item.ToDisplayParts(item.ContainingType == method.ContainingType ? WpfHelper.InTypeOverloadDisplayFormat : WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1))
 				);
 			}
 			if (overloadInfo.Children.Count > 1) {
