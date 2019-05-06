@@ -91,7 +91,7 @@ namespace Codist
 			}
 			await UpdateAsync(cancellationToken).ConfigureAwait(false);
 			var path = symbol.DeclaringSyntaxReferences.FirstOrDefault(r => r.SyntaxTree != null);
-			var doc = Document.Project.GetDocument(path.SyntaxTree.FilePath);
+			var doc = Document.Project.GetDocument(path.SyntaxTree.FilePath) ?? Document.Project.Solution.GetDocument(path.SyntaxTree);
 			return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSimilarSymbols(symbol, (await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false)).Compilation, cancellationToken)
 				.FirstOrDefault() ?? symbol;
 		}
