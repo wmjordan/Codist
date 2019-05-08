@@ -19,12 +19,12 @@ namespace Codist.NaviBar
 #pragma warning disable 649, 169
 
 		/// <summary>
-		/// Defines the adornment layer for the item adornment.
+		/// Defines the adornment layer for syntax node range highlight.
 		/// </summary>
 		[Export(typeof(AdornmentLayerDefinition))]
-		[Name(nameof(CSharpBar))]
+		[Name(nameof(CSharpBar.SyntaxNodeRange))]
 		[Order(After = PredefinedAdornmentLayers.CurrentLineHighlighter)]
-		AdornmentLayerDefinition _EditorAdornmentLayer;
+		AdornmentLayerDefinition _SyntaxNodeRangeAdormentLayer;
 
 #pragma warning restore 649, 169
 

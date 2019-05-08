@@ -262,6 +262,27 @@ namespace Codist
 			CodistPackage.DTE.TryExecuteCommand(command, args);
 		}
 
+		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			if (String.IsNullOrEmpty(file)) {
+				return;
+			}
+			file = System.IO.Path.GetFullPath(file);
+			if (System.IO.File.Exists(file) == false) {
+				return;
+			}
+			using (new NewDocumentStateScope(__VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
+				dte.ItemOperations.OpenFile(file);
+				try {
+					((EnvDTE.TextSelection)dte.ActiveDocument.Selection).MoveToLineAndOffset(line, column);
+				}
+				catch (NullReferenceException) { /* ignore */ }
+				catch (ArgumentException) {
+					// ignore incorrect offset
+				}
+			}
+		}
+
 		public static IWpfTextView GetActiveWpfDocumentView(this IServiceProvider service) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var doc = CodistPackage.DTE.ActiveDocument;

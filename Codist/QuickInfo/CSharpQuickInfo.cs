@@ -317,13 +317,14 @@ namespace Codist.QuickInfo
 			}
 			if (node is LambdaExpressionSyntax
 				|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
-				var ss = node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax);
+				var ss = node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName);
 				if (ss != null) {
 					var df = _SemanticModel.AnalyzeDataFlow(ss);
-					if (df.CapturedInside.Length > 0) {
+					var captured = ss is StatementSyntax ? df.CapturedInside : df.ReadInside;
+					if (captured.Length > 0) {
 						var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true));
 						int i = 0;
-						foreach (var item in df.CapturedInside) {
+						foreach (var item in captured) {
 							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, _SymbolFormatter);
 						}
 						tip.Append(p);

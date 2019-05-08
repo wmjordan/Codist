@@ -4,7 +4,7 @@ using System.Windows.Controls;
 
 namespace Codist.Controls
 {
-	public class ThemedButton : Button
+	public sealed class ThemedButton : Button
 	{
 		readonly Action _clickHanler;
 
@@ -26,7 +26,7 @@ namespace Codist.Controls
 		}
 	}
 
-	public class ThemedToggleButton : System.Windows.Controls.Primitives.ToggleButton
+	public sealed class ThemedToggleButton : System.Windows.Controls.Primitives.ToggleButton
 	{
 		public ThemedToggleButton(int imageId, string toolTip) {
 			Content = ThemeHelper.GetImage(imageId);

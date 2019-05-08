@@ -76,6 +76,7 @@ text".Log(); // multiline string (string verbatim)
 			// unnecessary code
 			TestProject.ExtensionClass.Log(typeof(TGeneric).Name); // extension method
 			NativeMethods.ExternMethod(value: 1, ptr: IntPtr.Zero); // extern method
+			NativeMethods.ExternMethod(IntPtr.Zero, 1); // extern method
 			AbstractMethod(); // overridden abstract method
 			VirtualMethod(); // overridden virtual method
 			base.VirtualMethod(); // base virtual method

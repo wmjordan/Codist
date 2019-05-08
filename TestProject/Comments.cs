@@ -81,10 +81,29 @@ namespace TestProject
 		/// <typeparam name="T">T is exception class.</typeparam>
 		/// <exception cref="System.IO.IOException">Not implemented</exception>
 		public static async Task Log<T>(T exception) where T : Exception {
+			DateTime now = DateTime.Now;
+			string file = "log.txt";
+            // captures exception, now, file
 			await Task.Run(() => WriteLog());
-			void WriteLog() {
-				System.IO.File.WriteAllText("log.txt", exception.ToString());
+            // captures exception, now
+            await Task.Run((Action)WriteConsole);
+            // captures exception
+            await Task.Run(() => System.Diagnostics.Debug.WriteLine(exception));
+            // captures exception, now, file
+            void WriteLog() {
+				var ex = exception.ToString();
+				System.IO.File.AppendAllLines(file, new[] { now + " " + ex });
 			}
+            // captures exception, now
+            void WriteConsole() {
+                Console.Write(now);
+				Console.WriteLine(exception.Message);
+			}
+		}
+
+		/// <exception cref="NotImplementedException">Boo boo.</exception>
+		public static void Throw() {
+			throw new NotImplementedException("boo-boo");
 		}
 	}
 }

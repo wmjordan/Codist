@@ -7,6 +7,9 @@ using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
 {
+	/// <summary>
+	/// Selectable <see cref="TextBlock"/> used in Quick Info.
+	/// </summary>
 	sealed class ThemedTipText : TextBlock
 	{
 		static ThemedTipText() {

@@ -348,6 +348,9 @@ namespace Codist
 			}
 			return false;
 		}
+		public static int ItemCount(this ListBox listBox) {
+			return listBox.ItemContainerGenerator.Items.Count;
+		}
 		public static TItem Get<TItem>(this ResourceDictionary items, object key) {
 			return (items != null && items.Contains(key) && items[key] is TItem item)
 				? item

@@ -10,6 +10,16 @@ using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist.SyntaxHighlight
 {
+	[AttributeUsage(AttributeTargets.Field)]
+	sealed class PreviewAttribute : Attribute
+	{
+		public PreviewAttribute(string previewText) {
+			PreviewText = previewText;
+		}
+
+		public string PreviewText { get; }
+	}
+
 	/// <summary>The base style for syntax highlight elements.</summary>
 	abstract class StyleBase
 	{

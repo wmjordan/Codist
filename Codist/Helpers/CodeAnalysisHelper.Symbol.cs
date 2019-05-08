@@ -10,6 +10,8 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Utilities;
 using System.Reflection.Emit;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Codist
 {
@@ -49,6 +51,34 @@ namespace Codist
 				return type.Type;
 			}
 			return null;
+		}
+		public static ISymbol GetSymbolExt(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
+			return node.IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator ? semanticModel.GetDeclaredSymbol(node, cancellationToken) :
+					(node is AttributeArgumentSyntax
+						? semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression, cancellationToken).Symbol
+						: null)
+					?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax
+						? semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true), cancellationToken).Symbol
+						: null)
+					?? (node is ArgumentListSyntax
+						? semanticModel.GetSymbolInfo(node.Parent, cancellationToken).Symbol
+						: null)
+					?? (node.Parent is MemberAccessExpressionSyntax
+						? semanticModel.GetSymbolInfo(node.Parent, cancellationToken).CandidateSymbols.FirstOrDefault()
+						: null)
+					?? (node.Parent is ArgumentSyntax
+						? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression, cancellationToken).CandidateSymbols.FirstOrDefault()
+						: null)
+					?? (node is AccessorDeclarationSyntax
+						? semanticModel.GetDeclaredSymbol(node.Parent.Parent, cancellationToken)
+						: null)
+					?? (node is TypeParameterSyntax || node is ParameterSyntax ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null);
+		}
+
+		public static ISymbol GetSymbolOrFirstCandidate(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
+			var info = semanticModel.GetSymbolInfo(node, cancellationToken);
+			return info.Symbol
+				?? (info.CandidateSymbols.Length > 0 ? info.CandidateSymbols[0] : null);
 		}
 
 		/// <summary>
@@ -227,6 +257,63 @@ namespace Codist
 					return name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1;
 				}
 			}
+		}
+
+		/// <summary>Finds symbols referenced by given context node.</summary>
+		/// <returns>An ordered array of <see cref="KeyValuePair{TKey, TValue}"/> which contains number of occurrences of corresponding symbols.</returns>
+		public static KeyValuePair<ISymbol, int>[] FindReferencingSymbols(this SyntaxNode node, SemanticModel semanticModel, bool sourceCodeOnly) {
+			var result = new Dictionary<ISymbol, int>();
+			foreach (var item in node.DescendantNodes()) {
+				if (item.IsKind(SyntaxKind.IdentifierName) == false
+					|| item.IsDeclaration()) {
+					continue;
+				}
+				var symbolInfo = semanticModel.GetSymbolInfo(item);
+				var s = symbolInfo.Symbol ?? semanticModel.GetSymbolExt(item);
+				if (s == null) {
+					continue;
+				}
+				switch (s.Kind) {
+					case SymbolKind.Parameter:
+					case SymbolKind.ArrayType:
+					case SymbolKind.PointerType:
+					case SymbolKind.TypeParameter:
+					case SymbolKind.Namespace:
+					case SymbolKind.Local:
+					case SymbolKind.Discard:
+					case SymbolKind.ErrorType:
+					case SymbolKind.DynamicType:
+					case SymbolKind.RangeVariable:
+					case SymbolKind.NamedType:
+						continue;
+					case SymbolKind.Method:
+						if ((s as IMethodSymbol)?.MethodKind == MethodKind.AnonymousFunction) {
+							continue;
+						}
+						break;
+				}
+				if (sourceCodeOnly && s.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
+					continue;
+				}
+				var ct = s.ContainingType;
+				if (ct != null && (ct.IsTupleType || ct.IsAnonymousType)) {
+					continue;
+				}
+				result[s] = result.TryGetValue(s, out int i) ? ++i : 1;
+			}
+			var a = result.ToArray();
+			Array.Sort(a, (x, y) => {
+				var i = y.Value.CompareTo(x.Value);
+				if (i != 0) {
+					return i;
+				}
+				i = String.CompareOrdinal(x.Key.ContainingType?.Name, y.Key.ContainingType?.Name);
+				if (i != 0) {
+					return i;
+				}
+				return String.CompareOrdinal(x.Key.Name, y.Key.Name);
+			});
+			return a;
 		}
 		#endregion
 
@@ -476,20 +563,20 @@ namespace Codist
 			string GetPropertyAccessors(IPropertySymbol p) {
 				using (var sbr = ReusableStringBuilder.AcquireDefault(30)) {
 					var sb = sbr.Resource;
-					sb.Append("{ ");
+					sb.Append("{");
 					var m = p.GetMethod;
 					if (m != null) {
 						if (m.DeclaredAccessibility != Accessibility.Public) {
 							sb.Append(m.GetAccessibility());
 						}
-						sb.Append("get; ");
+						sb.Append("get;");
 					}
 					m = p.SetMethod;
 					if (m != null) {
 						if (m.DeclaredAccessibility != Accessibility.Public) {
 							sb.Append(m.GetAccessibility());
 						}
-						sb.Append("set; ");
+						sb.Append("set;");
 					}
 					return sb.Append('}').ToString();
 				}
@@ -527,10 +614,7 @@ namespace Codist
 				}
 			}
 			string GetTypeParameters(INamedTypeSymbol t) {
-				if (t.Arity == 0) {
-					return String.Empty;
-				}
-				return "<" + new string(',', t.Arity - 1) + ">";
+				return t.Arity == 0 ? String.Empty : "<" + new string(',', t.Arity - 1) + ">";
 			}
 			void GetTypeName(ITypeSymbol type, StringBuilder output) {
 				switch (type.TypeKind) {
@@ -874,13 +958,13 @@ namespace Codist
 
 		static class AssemblySourceReflector
 		{
-			static readonly Func<IAssemblySymbol, byte> __getAssemblyType = CreateAssemblySourceTypeFunc();
+			static readonly Func<IAssemblySymbol, int> __getAssemblyType = CreateAssemblySourceTypeFunc();
 			public static AssemblySource GetSourceType(IAssemblySymbol assembly) {
 				return (AssemblySource)__getAssemblyType(assembly);
 			}
 
-			static Func<IAssemblySymbol, byte> CreateAssemblySourceTypeFunc() {
-				var m = new DynamicMethod("GetAssemblySourceType", typeof(byte), new Type[] { typeof(IAssemblySymbol) }, true);
+			static Func<IAssemblySymbol, int> CreateAssemblySourceTypeFunc() {
+				var m = new DynamicMethod("GetAssemblySourceType", typeof(int), new Type[] { typeof(IAssemblySymbol) }, true);
 				var il = m.GetILGenerator();
 				var isSource = il.DefineLabel();
 				var isRetargetSource = il.DefineLabel();
@@ -909,7 +993,7 @@ namespace Codist
 					il.Emit(OpCodes.Ldc_I4_2);
 					il.Emit(OpCodes.Ret);
 				}
-				return m.CreateDelegate(typeof(Func<IAssemblySymbol, byte>)) as Func<IAssemblySymbol, byte>;
+				return m.CreateDelegate(typeof(Func<IAssemblySymbol, int>)) as Func<IAssemblySymbol, int>;
 			}
 		}
 	}

@@ -16,167 +16,6 @@ namespace Codist
 {
 	static partial class CodeAnalysisHelper
 	{
-		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
-			if (workspace == null) {
-				throw new ArgumentNullException(nameof(workspace));
-			}
-			var solution = workspace.CurrentSolution;
-			if (solution == null) {
-				throw new InvalidOperationException("solution is null");
-			}
-			if (span.Snapshot == null) {
-				throw new InvalidOperationException("snapshot is null");
-			}
-			var sourceText = span.Snapshot.AsText();
-			if (sourceText == null) {
-				throw new InvalidOperationException("sourceText is null");
-			}
-			var docId = workspace.GetDocumentIdInCurrentContext(sourceText.Container);
-			if (docId == null) {
-				throw new InvalidOperationException("docId is null");
-			}
-			return solution.ContainsDocument(docId)
-				? solution.GetDocument(docId)
-				: solution.WithDocumentText(docId, sourceText, PreservationMode.PreserveIdentity).GetDocument(docId);
-		}
-
-		/// <summary>Gets all <see cref="Document"/>s from a given <see cref="Project"/> and referencing/referenced projects.</summary>
-		public static IEnumerable<Document> GetRelatedProjectDocuments(this Project project) {
-			foreach (var proj in GetRelatedProjects(project)) {
-				foreach (var doc in proj.Documents) {
-					yield return doc;
-				}
-			}
-		}
-
-		public static Document GetDocument(this Project project, string filePath) {
-			return project.Documents.FirstOrDefault(d => String.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
-		}
-
-		/// <summary>
-		/// Gets a collection containing <paramref name="project"/> itself, and projects referenced by <paramref name="project"/> or referencing <paramref name="project"/>.
-		/// </summary>
-		/// <param name="project">The project to be examined.</param>
-		static HashSet<Project> GetRelatedProjects(this Project project) {
-			var projects = new HashSet<Project>();
-			GetRelatedProjects(project, projects);
-			var id = project.Id;
-			foreach (var proj in project.Solution.Projects) {
-				if (projects.Contains(proj) == false
-					&& proj.AllProjectReferences.Any(p => p.ProjectId == id)) {
-					projects.Add(proj);
-				}
-			}
-			return projects;
-		}
-
-		static void GetRelatedProjects(Project project, HashSet<Project> projects) {
-			if (project == null) {
-				return;
-			}
-			projects.Add(project);
-			foreach (var pr in project.AllProjectReferences) {
-				GetRelatedProjects(project.Solution.GetProject(pr.ProjectId), projects);
-			}
-		}
-
-		public static ISymbol GetSymbolExt(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
-			return node.IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator ? semanticModel.GetDeclaredSymbol(node, cancellationToken) :
-					(node is AttributeArgumentSyntax
-						? semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression, cancellationToken).Symbol
-						: null)
-					?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax
-						? semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true), cancellationToken).Symbol
-						: null)
-					?? (node is ArgumentListSyntax
-						? semanticModel.GetSymbolInfo(node.Parent, cancellationToken).Symbol
-						: null)
-					?? (node.Parent is MemberAccessExpressionSyntax
-						? semanticModel.GetSymbolInfo(node.Parent, cancellationToken).CandidateSymbols.FirstOrDefault()
-						: null)
-					?? (node.Parent is ArgumentSyntax
-						? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression, cancellationToken).CandidateSymbols.FirstOrDefault()
-						: null)
-					?? (node is AccessorDeclarationSyntax
-						? semanticModel.GetDeclaredSymbol(node.Parent.Parent, cancellationToken)
-						: null)
-					?? (node is TypeParameterSyntax || node is ParameterSyntax ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null);
-		}
-
-		public static ISymbol GetSymbolOrFirstCandidate(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
-			var info = semanticModel.GetSymbolInfo(node, cancellationToken);
-			return info.Symbol
-				?? (info.CandidateSymbols.Length > 0 ? info.CandidateSymbols[0] : null);
-		}
-
-		/// <summary>Finds symbols referenced by given context node.</summary>
-		/// <returns>An ordered array of <see cref="KeyValuePair{TKey, TValue}"/> which contains number of occurrences of corresponding symbols.</returns>
-		public static KeyValuePair<ISymbol, int>[] FindReferencingSymbols(this SyntaxNode node, SemanticModel semanticModel, bool sourceCodeOnly) {
-			var result = new Dictionary<ISymbol, int>();
-			foreach (var item in node.DescendantNodes()) {
-				if (item.IsKind(SyntaxKind.IdentifierName) == false
-					|| item.IsDeclaration()) {
-					continue;
-				}
-				var symbolInfo = semanticModel.GetSymbolInfo(item);
-				var s = symbolInfo.Symbol ?? semanticModel.GetSymbolExt(item);
-				if (s == null) {
-					continue;
-				}
-				switch (s.Kind) {
-					case SymbolKind.Parameter:
-					case SymbolKind.ArrayType:
-					case SymbolKind.PointerType:
-					case SymbolKind.TypeParameter:
-					case SymbolKind.Namespace:
-					case SymbolKind.Local:
-					case SymbolKind.Discard:
-					case SymbolKind.ErrorType:
-					case SymbolKind.DynamicType:
-					case SymbolKind.RangeVariable:
-					case SymbolKind.NamedType:
-						continue;
-					case SymbolKind.Method:
-						if ((s as IMethodSymbol)?.MethodKind == MethodKind.AnonymousFunction) {
-							continue;
-						}
-						break;
-				}
-				if (sourceCodeOnly && s.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
-					continue;
-				}
-				var ct = s.ContainingType;
-				if (ct != null && (ct.IsTupleType || ct.IsAnonymousType)) {
-					continue;
-				}
-				result[s] = result.TryGetValue(s, out int i) ? ++i : 1;
-			}
-			var a = result.ToArray();
-			Array.Sort(a, (x, y) => y.Value.CompareTo(x.Value));
-			return a;
-		}
-
-		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
-			ThreadHelper.ThrowIfNotOnUIThread();
-			if (String.IsNullOrEmpty(file)) {
-				return;
-			}
-			file = System.IO.Path.GetFullPath(file);
-			if (System.IO.File.Exists(file) == false) {
-				return;
-			}
-			using (new NewDocumentStateScope(__VSNEWDOCUMENTSTATE.NDS_Provisional, VSConstants.NewDocumentStateReason.Navigation)) {
-				dte.ItemOperations.OpenFile(file);
-				try {
-					((EnvDTE.TextSelection)dte.ActiveDocument.Selection).MoveToLineAndOffset(line, column);
-				}
-				catch (NullReferenceException) { /* ignore */ }
-				catch (ArgumentException) {
-					// ignore incorrect offset
-				}
-			}
-		}
-
 		#region Node info
 		public static bool IsDeclaration(this SyntaxNode node) {
 			switch (node.Kind()) {
@@ -222,16 +61,15 @@ namespace Codist
 		public static bool IsTypeDeclaration(this SyntaxNode node) {
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration:
-				case SyntaxKind.DelegateDeclaration:
+				//case SyntaxKind.DelegateDeclaration:
 				case SyntaxKind.EnumDeclaration:
-				case SyntaxKind.EventDeclaration:
+				//case SyntaxKind.EventDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
 					return true;
 			}
 			return false;
 		}
-
 		public static bool IsMemberDeclaration(this SyntaxNode node) {
 			switch (node.Kind()) {
 				case SyntaxKind.FieldDeclaration:
@@ -783,6 +621,23 @@ namespace Codist
 			}
 		}
 
+		public static string GetParameterListSignature(this ParameterListSyntax parameters, bool useParamName) {
+			if (parameters.Parameters.Count == 0) {
+				return "()";
+			}
+			using (var r = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(30)) {
+				var sb = r.Resource;
+				sb.Append('(');
+				foreach (var item in parameters.Parameters) {
+					if (sb.Length > 1) {
+						sb.Append(',');
+					}
+					sb.Append(useParamName ? item.Identifier.Text : item.Type.ToString());
+				}
+				sb.Append(')');
+				return sb.ToString();
+			}
+		}
 		public static EndRegionDirectiveTriviaSyntax GetEndRegion(this RegionDirectiveTriviaSyntax syntax) {
 			DirectiveTriviaSyntax region = syntax;
 			int c = 1;

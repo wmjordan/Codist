@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
+using System.Windows.Input;
 
 namespace Codist.Controls
 {
@@ -23,21 +22,17 @@ namespace Codist.Controls
 		public object SubMenuHeader {
 			get => _SubMenuHeader;
 			set {
-				SetValue(SubMenuHeaderProperty, _SubMenuHeader = value);
-				if (_SubMenuHeader != null && HasItems == false) {
-					Items.Add(new MenuItemPlaceHolder());
-					(value as FrameworkElement).KeyUp += (s, args) => {
-						switch (args.Key) {
-							case System.Windows.Input.Key.Enter:
-								if (args.OriginalSource is TextBox) {
-									Items.GetFirst<ThemedMenuItem>(i => i.IsEnabled && i.IsVisible)?.PerformClick();
-								}
-								break;
-							case System.Windows.Input.Key.Down: Items.FocusFirst<MenuItem>(); break;
-							case System.Windows.Input.Key.Up: Items.FocusLast<MenuItem>(); break;
-						}
-					};
+				if (value != null) {
+					if (HasItems == false) {
+						Items.Add(new MenuItemPlaceHolder());
+					}
+					(value as FrameworkElement).KeyUp += HeaderKeyUp;
 				}
+				var h = _SubMenuHeader as FrameworkElement;
+				if (_SubMenuHeader != h && h != null) {
+					h.KeyUp -= HeaderKeyUp;
+				}
+				SetValue(SubMenuHeaderProperty, _SubMenuHeader = value);
 			}
 		}
 
@@ -63,6 +58,18 @@ namespace Codist.Controls
 
 		public void PerformClick() {
 			OnClick();
+		}
+
+		void HeaderKeyUp(object sender, KeyEventArgs args) {
+			switch (args.Key) {
+				case Key.Enter:
+					if (args.OriginalSource is TextBox) {
+						Items.GetFirst<ThemedMenuItem>(i => i.IsEnabled && i.IsVisible)?.PerformClick();
+					}
+					break;
+				case Key.Down: Items.FocusFirst<MenuItem>(); break;
+				case Key.Up: Items.FocusLast<MenuItem>(); break;
+			}
 		}
 
 		internal sealed class MenuItemPlaceHolder : Separator

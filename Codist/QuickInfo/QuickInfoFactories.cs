@@ -45,7 +45,9 @@ namespace Codist.QuickInfo
 	}
 
 	/// <summary>
-	/// Controls whether quick info should be displayed. When activated, quick info will not be displayed unless Shift key is pressed.
+	/// <para>Controls whether quick info should be displayed.</para>
+	/// <para>When activated, quick info will not be displayed unless Shift key is pressed.</para>
+	/// <para>It is also used to surpress Quick Info when mouse is hovered on the SmartBar or NaviBar menu.</para>
 	/// </summary>
 	[Export(typeof(IQuickInfoSourceProvider))]
 	[Name("Quick Info Visibility Controller")]

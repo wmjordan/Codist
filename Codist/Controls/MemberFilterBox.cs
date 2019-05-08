@@ -13,6 +13,10 @@ namespace Codist.Controls
 {
 	interface IMemberFilterable
 	{
+		void Filter(string[] keywords, MemberFilterTypes filterTypes);
+	}
+	interface IMemberTypeFilter
+	{
 		bool Filter(MemberFilterTypes filterTypes);
 	}
 
@@ -71,18 +75,18 @@ namespace Codist.Controls
 	{
 		readonly ThemedTextBox _FilterBox;
 		readonly MemberFilterButtonGroup _FilterButtons;
-		readonly ItemCollection _Items;
+		readonly IMemberFilterable _Filter;
 
-		public MemberFilterBox(ItemCollection items) {
+		public MemberFilterBox(IMemberFilterable filter) {
 			Orientation = Orientation.Horizontal;
 			Margin = WpfHelper.MenuItemMargin;
 			Children.Add(ThemeHelper.GetImage(KnownImageIds.Filter).WrapMargin(WpfHelper.GlyphMargin));
-			Children.Add(_FilterBox = new ThemedTextBox() {
+			Children.Add(_FilterBox = new ThemedTextBox(true) {
 				MinWidth = 150,
 				ToolTip = new ThemedToolTip("Result Filter", "Filter items in this menu.\nUse space to separate keywords.")
 			});
 			Children.Add(_FilterButtons = new MemberFilterButtonGroup());
-			_Items = items;
+			_Filter = filter;
 			_FilterButtons.FilterChanged += FilterBox_Changed;
 			_FilterButtons.FilterCleared += FilterBox_Clear;
 			_FilterBox.TextChanged += FilterBox_Changed;
@@ -107,7 +111,7 @@ namespace Codist.Controls
 			}
 		}
 		void FilterBox_Changed(object sender, EventArgs e) {
-			Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), _FilterButtons.Filters);
+			_Filter.Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), _FilterButtons.Filters);
 			FocusTextBox();
 		}
 
@@ -115,84 +119,9 @@ namespace Codist.Controls
 			if (_FilterBox.IsVisible) {
 				_FilterBox.Focus();
 				_FilterBox.SelectAll();
-				_FilterBox.IsVisibleChanged -= FilterBox_IsVisibleChanged;
 			}
 		}
 
-		void Filter(string[] keywords, MemberFilterTypes filters) {
-			bool useModifierFilter = filters != MemberFilterTypes.All;
-			if (keywords.Length == 0) {
-				foreach (UIElement item in _Items) {
-					item.Visibility = item is ThemedMenuItem.MenuItemPlaceHolder == false
-						&& (useModifierFilter == false || item is IMemberFilterable menuItem && menuItem.Filter(filters))
-						? Visibility.Visible
-						: Visibility.Collapsed;
-				}
-				return;
-			}
-			IMemberFilterable filterable;
-			foreach (UIElement item in _Items) {
-				var menuItem = item as MenuItem;
-				if (useModifierFilter) {
-					filterable = item as IMemberFilterable;
-					if (filterable != null) {
-						if (filterable.Filter(filters) == false && (menuItem == null || menuItem.HasItems == false)) {
-							item.Visibility = Visibility.Collapsed;
-							continue;
-						}
-						item.Visibility = Visibility.Visible;
-					}
-				}
-				if (menuItem == null) {
-					item.Visibility = Visibility.Collapsed;
-					continue;
-				}
-				var b = menuItem.Header as TextBlock;
-				if (b == null) {
-					continue;
-				}
-				if (FilterSignature(b.GetText(), keywords)) {
-					menuItem.Visibility = Visibility.Visible;
-					if (menuItem.HasItems) {
-						foreach (MenuItem sub in menuItem.Items) {
-							sub.Visibility = Visibility.Visible;
-						}
-					}
-					continue;
-				}
-				var matchedSubItem = false;
-				if (menuItem.HasItems) {
-					foreach (MenuItem sub in menuItem.Items) {
-						if (useModifierFilter) {
-							filterable = sub as IMemberFilterable;
-							if (filterable != null) {
-								if (filterable.Filter(filters) == false) {
-									sub.Visibility = Visibility.Collapsed;
-									continue;
-								}
-								sub.Visibility = Visibility.Visible;
-							}
-						}
-						b = sub.Header as TextBlock;
-						if (b == null) {
-							continue;
-						}
-						if (FilterSignature(b.GetText(), keywords)) {
-							matchedSubItem = true;
-							sub.Visibility = Visibility.Visible;
-						}
-						else {
-							sub.Visibility = Visibility.Collapsed;
-						}
-					}
-				}
-				menuItem.Visibility = matchedSubItem ? Visibility.Visible : Visibility.Collapsed;
-			}
-
-			bool FilterSignature(string text, string[] words) {
-				return words.All(p => text.IndexOf(p, StringComparison.OrdinalIgnoreCase) != -1);
-			}
-		}
 		internal static bool FilterByImageId(MemberFilterTypes filterTypes, int imageId) {
 			switch (imageId) {
 				case KnownImageIds.ClassPublic:
@@ -353,6 +282,88 @@ namespace Codist.Controls
 				b.Checked += UpdateFilterValue;
 				b.Unchecked += UpdateFilterValue;
 				return b;
+			}
+		}
+	}
+
+	sealed class MenuItemFilter : IMemberFilterable
+	{
+		readonly ItemCollection _Items;
+		public MenuItemFilter(ItemCollection items) {
+			_Items = items;
+		}
+		public void Filter(string[] keywords, MemberFilterTypes filters) {
+			bool useModifierFilter = filters != MemberFilterTypes.All;
+			if (keywords.Length == 0) {
+				foreach (UIElement item in _Items) {
+					item.Visibility = item is ThemedMenuItem.MenuItemPlaceHolder == false
+						&& (useModifierFilter == false || item is IMemberTypeFilter menuItem && menuItem.Filter(filters))
+						? Visibility.Visible
+						: Visibility.Collapsed;
+				}
+				return;
+			}
+			IMemberTypeFilter filterable;
+			foreach (UIElement item in _Items) {
+				var menuItem = item as MenuItem;
+				if (useModifierFilter) {
+					filterable = item as IMemberTypeFilter;
+					if (filterable != null) {
+						if (filterable.Filter(filters) == false && (menuItem == null || menuItem.HasItems == false)) {
+							item.Visibility = Visibility.Collapsed;
+							continue;
+						}
+						item.Visibility = Visibility.Visible;
+					}
+				}
+				if (menuItem == null) {
+					item.Visibility = Visibility.Collapsed;
+					continue;
+				}
+				var b = menuItem.Header as TextBlock;
+				if (b == null) {
+					continue;
+				}
+				if (FilterSignature(b.GetText(), keywords)) {
+					menuItem.Visibility = Visibility.Visible;
+					if (menuItem.HasItems) {
+						foreach (MenuItem sub in menuItem.Items) {
+							sub.Visibility = Visibility.Visible;
+						}
+					}
+					continue;
+				}
+				var matchedSubItem = false;
+				if (menuItem.HasItems) {
+					foreach (MenuItem sub in menuItem.Items) {
+						if (useModifierFilter) {
+							filterable = sub as IMemberTypeFilter;
+							if (filterable != null) {
+								if (filterable.Filter(filters) == false) {
+									sub.Visibility = Visibility.Collapsed;
+									continue;
+								}
+								sub.Visibility = Visibility.Visible;
+							}
+						}
+						b = sub.Header as TextBlock;
+						if (b == null) {
+							continue;
+						}
+						if (FilterSignature(b.GetText(), keywords)) {
+							matchedSubItem = true;
+							sub.Visibility = Visibility.Visible;
+						}
+						else {
+							sub.Visibility = Visibility.Collapsed;
+						}
+					}
+				}
+				menuItem.Visibility = matchedSubItem ? Visibility.Visible : Visibility.Collapsed;
+			}
+
+			bool FilterSignature(string text, string[] words) {
+				return words.All(p => text.IndexOf(p, StringComparison.OrdinalIgnoreCase) != -1);
 			}
 		}
 	}

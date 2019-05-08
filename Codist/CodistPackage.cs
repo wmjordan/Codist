@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.OLE.Interop;
 
 namespace Codist
 {
@@ -14,7 +15,7 @@ namespace Codist
 	/// <para>The project consists of the following namespace: <see cref="SyntaxHighlight"/> backed by <see cref="Classifiers"/>, <see cref="SmartBars"/>, <see cref="QuickInfo"/>, <see cref="Margins"/>, <see cref="NaviBar"/> etc.</para>
 	/// </summary>
 	[PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-	[InstalledProductRegistration("#110", "#112", "4.6", IconResourceID = 400)] // Information on this package for Help/About
+	[InstalledProductRegistration("#110", "#112", "5.0", IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.General), Constants.NameOfMe, "General", 0, 0, true, Sort = 0)]
 
@@ -51,6 +52,8 @@ namespace Codist
 		static EnvDTE.DTE _dte;
 		static EnvDTE80.DTE2 _dte2;
 		static OleMenuCommandService _menu;
+		static IOleComponentManager _componentManager;
+
 		//static VsDebugger _Debugger;
 
 		/// <summary>
@@ -61,6 +64,7 @@ namespace Codist
 			// any Visual Studio service because at this point the package object is created but
 			// not sited yet inside Visual Studio environment. The place to do all the other
 			// initialization is the Initialize method.
+			Instance = this;
 		}
 
 		public static CodistPackage Instance { get; private set; }
@@ -80,6 +84,12 @@ namespace Codist
 			get {
 				ThreadHelper.ThrowIfNotOnUIThread();
 				return _menu ?? (_menu = Instance.GetService(typeof(System.ComponentModel.Design.IMenuCommandService)) as OleMenuCommandService);
+			}
+		}
+		public static IOleComponentManager OleComponentManager {
+			get {
+				ThreadHelper.ThrowIfNotOnUIThread();
+				return _componentManager ?? (_componentManager = ServiceProvider.GetGlobalServiceAsync<SOleComponentManager, IOleComponentManager>().ConfigureAwait(false).GetAwaiter().GetResult());
 			}
 		}
 
@@ -124,7 +134,6 @@ namespace Codist
 				Classifiers.SymbolMarkManager.Clear();
 			};
 
-			Instance = this;
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -142,7 +151,7 @@ namespace Codist
 
 	internal static class SharedDictionaryManager
 	{
-		static ResourceDictionary _Menu, _ContextMenu;
+		static ResourceDictionary _Menu, _ContextMenu, _SymbolList;
 
 		// to get started with our own context menu styles, see this answer on StackOverflow
 		// https://stackoverflow.com/questions/3391742/wpf-submenu-styling?rq=1
@@ -150,6 +159,8 @@ namespace Codist
 
 		// for menu styles, see https://docs.microsoft.com/en-us/dotnet/framework/wpf/controls/menu-styles-and-templates
 		internal static ResourceDictionary Menu => _Menu ?? (_Menu = WpfHelper.LoadComponent("controls/NavigationBar.xaml"));
+
+		internal static ResourceDictionary SymbolList => _SymbolList ?? (_SymbolList = WpfHelper.LoadComponent("controls/SymbolList.xaml"));
 	}
 
 }
