@@ -140,6 +140,7 @@ namespace Codist
 			};
 			return menu;
 		}
+
 		public static TItem Get<TItem>(this IEditorFormatMap map, string formatName, string resourceId) {
 			return map.GetProperties(formatName).Get<TItem>(resourceId);
 		}
@@ -231,43 +232,7 @@ namespace Codist
 			}
 
 			void ShowSymbolToolTip(object sender, ToolTipEventArgs e) {
-				var tooltip = new ThemedToolTip();
-				tooltip.Title
-					.Append(ThemeHelper.GetImage(_Symbol.GetImageId()).WrapMargin(GlyphMargin))
-					.Append(_Symbol.GetAccessibility() + _Symbol.GetAbstractionModifier() + _Symbol.GetSymbolKindName() + " ")
-					.Append(_Symbol.Name, true)
-					.Append(_Symbol.GetParameterString());
-
-				var content = tooltip.Content;
-				ITypeSymbol t = _Symbol.ContainingType;
-				bool c = false;
-				if (t != null) {
-					content.Append(t.GetSymbolKindName() + ": ")
-						.Append(t.ToDisplayString(QuickInfoSymbolDisplayFormat));
-					c = true;
-				};
-				t = _Symbol.GetReturnType();
-				if (t != null) {
-					if (c) {
-						content.AppendLine();
-					}
-					c = true;
-					content.Append("return type: ").Append(t.ToDisplayString(QuickInfoSymbolDisplayFormat), true);
-				}
-				var f = _Symbol as IFieldSymbol;
-				if (f != null && f.IsConst) {
-					if (c) {
-						content.AppendLine();
-					}
-					c = true;
-					content.Append("const: " + f.ConstantValue.ToString());
-				}
-				if (c) {
-					content.AppendLine();
-				}
-				content.Append("namespace: " + _Symbol.ContainingNamespace?.ToString())
-					.Append("\nassembly: " + _Symbol.GetAssemblyModuleName());
-				ToolTip = tooltip;
+				ToolTip = ToolTipFactory.CreateToolTip(_Symbol);
 				ToolTipOpening -= ShowSymbolToolTip;
 			}
 

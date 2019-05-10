@@ -26,10 +26,7 @@ namespace Codist.Controls
 			if (title != null) {
 				Title.Text = title;
 			}
-			Content = new TextBlock {
-				Padding = _ContentPadding,
-				TextWrapping = TextWrapping.Wrap
-			};
+			Content = CreateContentBlock();
 			if (content != null) {
 				Content.Text = content;
 			}
@@ -38,6 +35,13 @@ namespace Codist.Controls
 			if (Config.Instance.QuickInfoMaxWidth > 0) {
 				MaxWidth = Config.Instance.QuickInfoMaxWidth;
 			}
+		}
+
+		public static TextBlock CreateContentBlock() {
+			return new TextBlock {
+				Padding = _ContentPadding,
+				TextWrapping = TextWrapping.Wrap
+			};
 		}
 
 		protected override void OnVisualParentChanged(DependencyObject oldParent) {
