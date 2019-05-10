@@ -547,6 +547,7 @@ namespace Codist
 		AutoPropertyAnnotation = 1 << 13,
 		PartialClassMember = 1 << 14,
 		Region = 1 << 15,
+		CodeStatistics = 1 << 16,
 		Default = RangeHighlight | RegionOnBar | ParameterList | FieldValue | AutoPropertyAnnotation | PartialClassMember | Region
 	}
 

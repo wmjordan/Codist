@@ -72,6 +72,11 @@ namespace Codist
 			inlines.Add(new LineBreak());
 			return inlines;
 		}
+		public static TTextBlock Clear<TTextBlock>(this TTextBlock block)
+			where TTextBlock : TextBlock {
+			block.Inlines.Clear();
+			return block;
+		}
 		public static TTextBlock Append<TTextBlock>(this TTextBlock block, Inline inline)
 			where TTextBlock : TextBlock {
 			block.Inlines.Add(inline);
@@ -80,6 +85,11 @@ namespace Codist
 		public static TTextBlock Append<TTextBlock>(this TTextBlock block, UIElement element)
 			where TTextBlock : TextBlock {
 			block.Inlines.Add(new InlineUIContainer(element) { BaselineAlignment = BaselineAlignment.TextTop });
+			return block;
+		}
+		public static TTextBlock Append<TTextBlock>(this TTextBlock block, int value)
+			where TTextBlock : TextBlock {
+			block.Inlines.Add(value.ToString(System.Globalization.CultureInfo.InvariantCulture));
 			return block;
 		}
 		public static Paragraph Append(this Paragraph block, string text) {

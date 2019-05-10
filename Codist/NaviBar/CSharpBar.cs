@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -251,10 +251,10 @@ namespace Codist.NaviBar
 		}
 		#endregion
 
-		void SetHeader(ThemedMenuText t, SyntaxNode node, bool includeContainer, bool highlight, bool includeParameterList) {
+		static ThemedMenuText SetHeader(SyntaxNode node, bool includeContainer, bool highlight, bool includeParameterList) {
 			var title = node.GetDeclarationSignature();
 			if (title == null) {
-				return;
+				return null;
 			}
 			if (node.IsStructuredTrivia && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.StripRegionNonLetter)) {
 				title = TrimNonLetterOrDigitCharacters(title);
@@ -266,6 +266,7 @@ namespace Codist.NaviBar
 					p = p.Parent;
 				}
 			}
+			var t = new ThemedMenuText();
 			if (includeContainer) {
 				var p = node.Parent;
 				if (node is VariableDeclaratorSyntax) {
@@ -279,6 +280,7 @@ namespace Codist.NaviBar
 			if (includeParameterList && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterList)) {
 				AddParameterList(t, node);
 			}
+			return t;
 		}
 
 		static void AddParameterList(ThemedMenuText t, SyntaxNode node) {
@@ -326,6 +328,7 @@ namespace Codist.NaviBar
 			readonly SymbolList _Menu;
 			readonly MemberFinderBox _FinderBox;
 			readonly SearchScopeBox _ScopeBox;
+			readonly TextBlock _Note;
 
 			public RootItem(CSharpBar bar) {
 				_Bar = bar;
@@ -353,6 +356,8 @@ namespace Codist.NaviBar
 							},
 						}
 					},
+					Footer = (_Note = new TextBlock { Margin = WpfHelper.MenuItemMargin }
+						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey))
 				};
 				_Bar.SetupSymbolListMenu(_Menu);
 				_FinderBox.TextChanged += SearchCriteriaChanged;
@@ -375,11 +380,17 @@ namespace Codist.NaviBar
 					_Bar.HideMenu();
 					return;
 				}
+				_Menu.Footer.Visibility = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CodeStatistics) ? Visibility.Visible : Visibility.Collapsed;
 				ShowNamespaceAndTypeMenu();
 			}
 
 			internal void ShowNamespaceAndTypeMenu() {
 				PopulateTypes();
+				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CodeStatistics)) {
+					_Note.Clear()
+				   .Append(ThemeHelper.GetImage(KnownImageIds.Code))
+				   .Append(_Bar._View.TextSnapshot.LineCount);
+				}
 				_Bar.ShowMenu(this, _Menu);
 			}
 
@@ -444,14 +455,17 @@ namespace Codist.NaviBar
 				_Menu.Symbols.Clear();
 				var s = _FinderBox.Text;
 				if (s.Length == 0) {
-					AddNamespaceAndTypes();
-					_Menu.RefreshSymbols();
+					ShowNamespaceAndTypeMenu();
 					return;
 				}
 				try {
 					switch (_ScopeBox.Filter) {
-						case ScopeType.ActiveDocument: FindInDocument(s); break;
-						case ScopeType.ActiveProject: FindInProject(s); break;
+						case ScopeType.ActiveDocument:
+							FindInDocument(s);
+							break;
+						case ScopeType.ActiveProject:
+							FindInProject(s);
+							break;
 					}
 					_Menu.RefreshSymbols();
 					_Menu.UpdateLayout();
@@ -467,9 +481,7 @@ namespace Codist.NaviBar
 				foreach (var item in members) {
 					if (item.GetDeclarationSignature().IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1) {
 						var i = _Menu.Add(item, _Bar._SemanticContext);
-						var c = new ThemedMenuText();
-						_Bar.SetHeader(c, item, true, false, true);
-						i.Content = c;
+						i.Content = SetHeader(item, true, false, true);
 					}
 				}
 			}
@@ -483,7 +495,6 @@ namespace Codist.NaviBar
 					if (token.IsCancellationRequested) {
 						break;
 					}
-					//Items.Add(new SymbolItem(item, _Bar._SemanticContext));
 					_Menu.Add(item, _Bar._SemanticContext, true);
 				}
 			}
@@ -506,6 +517,7 @@ namespace Codist.NaviBar
 			readonly CSharpBar _Bar;
 			SymbolList _Menu;
 			MemberFilterBox _FilterBox;
+			int _PartialCount;
 
 			public NodeItem(CSharpBar bar, SyntaxNode node) {
 				_Bar = bar;
@@ -552,6 +564,8 @@ namespace Codist.NaviBar
 							(_FilterBox = new MemberFilterBox(_Menu)),
 						}
 					};
+					_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
+						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
 					_Bar.SetupSymbolListMenu(_Menu);
 					await AddItemsAsync(Node, _Bar._cancellationSource.GetToken());
 					if (_Menu.Symbols.Count > 100) {
@@ -559,7 +573,21 @@ namespace Codist.NaviBar
 					}
 				}
 				else {
+					((TextBlock)_Menu.Footer).Clear();
 					await RefreshItemsAsync(Node, _Bar._cancellationSource.GetToken());
+				}
+				var footer = (TextBlock)_Menu.Footer;
+				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CodeStatistics)) {
+					if (_PartialCount > 1) {
+						footer.Append(ThemeHelper.GetImage(KnownImageIds.OpenDocumentFromCollection))
+							.Append(_PartialCount);
+					}
+					footer.Append(ThemeHelper.GetImage(KnownImageIds.Code))
+						.Append(_Bar._View.TextSnapshot.GetLineSpan(Node.Span).Length);
+					footer.Visibility = Visibility.Visible;
+				}
+				else {
+					footer.Visibility = Visibility.Collapsed;
 				}
 				_Menu.ItemsControlMaxHeight = _Bar._View.ViewportHeight / 2;
 				_Bar.ShowMenu(this, _Menu);
@@ -598,6 +626,7 @@ namespace Codist.NaviBar
 					return;
 				}
 				var current = node.SyntaxTree;
+				int c = 1;
 				foreach (var item in symbol.DeclaringSyntaxReferences) {
 					if (item.SyntaxTree == current || String.Equals(item.SyntaxTree.FilePath, current.FilePath, StringComparison.OrdinalIgnoreCase)) {
 						continue;
@@ -607,7 +636,9 @@ namespace Codist.NaviBar
 					i.Content.Text = System.IO.Path.GetFileName(item.SyntaxTree.FilePath);
 					i.Type = SymbolItemType.Container;
 					AddMemberDeclarations(partial, true);
+					++c;
 				}
+				_PartialCount = c;
 			}
 			void AddMemberDeclarations(SyntaxNode node, bool isExternal) {
 				const byte UNDEFINED = 0xFF, TRUE = 1, FALSE = 0;
@@ -626,6 +657,8 @@ namespace Codist.NaviBar
 							if (d.SpanStart < child.SpanStart) {
 								if (d.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
 									var item = _Menu.Add(d, _Bar._SemanticContext);
+									item.Hint = "#region";
+									item.Content = SetHeader(d, false, false, false);
 									if (isExternal) {
 										item.Type = SymbolItemType.External;
 									}
@@ -669,6 +702,8 @@ namespace Codist.NaviBar
 					foreach (var item in directives) {
 						if (item.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
 							var i = _Menu.Add(item, _Bar._SemanticContext);
+							i.Hint = "#region";
+							i.Content = SetHeader(item, false, false, false);
 							if (isExternal) {
 								i.Type = SymbolItemType.External;
 							}
