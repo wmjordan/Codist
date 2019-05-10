@@ -85,8 +85,15 @@ namespace TestProject
 			string file = "log.txt";
             // captures exception, now, file
 			await Task.Run(() => WriteLog());
+            // captures exception, now, file
+			await Task.Run(WriteLog);
             // captures exception, now
             await Task.Run((Action)WriteConsole);
+            // captures exception
+            await Task.Run(() => {
+				var ex = exception.ToString();
+				System.Diagnostics.Debug.WriteLine(ex);
+			});
             // captures exception
             await Task.Run(() => System.Diagnostics.Debug.WriteLine(exception));
             // captures exception, now, file
