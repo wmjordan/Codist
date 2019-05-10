@@ -62,19 +62,16 @@ namespace Codist.QuickInfo
 				goto EXIT;
 			}
 
-			var semanticModel = _SemanticModel;
-			if (semanticModel == null) {
-				var container = currentSnapshot.AsText().Container;
-				DocumentId docId;
-				if (Workspace.TryGetWorkspace(container, out var workspace) == false
-					|| (docId = workspace.GetDocumentIdInCurrentContext(container)) == null
-					|| (_Document = workspace.CurrentSolution.GetDocument(docId)).TryGetSemanticModel(out semanticModel) == false) {
-					goto EXIT;
-				}
-
-				_SemanticModel = semanticModel;
-				//_ExtraModels = _Document.GetLinkedDocumentIds();
+			SemanticModel semanticModel;
+			var container = currentSnapshot.AsText().Container;
+			DocumentId docId;
+			if (Workspace.TryGetWorkspace(container, out var workspace) == false
+				|| (docId = workspace.GetDocumentIdInCurrentContext(container)) == null
+				|| (_Document = workspace.CurrentSolution.GetDocument(docId)).TryGetSemanticModel(out semanticModel) == false) {
+				goto EXIT;
 			}
+
+			_SemanticModel = semanticModel;
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 
 			//look for occurrences of our QuickInfo words in the span
