@@ -9,9 +9,9 @@ using Microsoft.CodeAnalysis;
 
 namespace Codist.Controls
 {
-	sealed class SymbolList : ListBox, IMemberFilterable
-	{
+	sealed class SymbolList : ListBox, IMemberFilterable {
 		public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(UIElement), typeof(SymbolList));
+		public static readonly DependencyProperty FooterProperty = DependencyProperty.Register("Footer", typeof(UIElement), typeof(SymbolList));
 		public static readonly DependencyProperty ItemsControlMaxHeightProperty = DependencyProperty.Register("ItemsControlMaxHeight", typeof(double), typeof(SymbolList));
 		Predicate<object> _Filter;
 
@@ -25,8 +25,12 @@ namespace Codist.Controls
 			Resources = SharedDictionaryManager.SymbolList;
 		}
 		public UIElement Header {
-			get => (UIElement)GetValue(HeaderProperty);
+			get => GetValue(HeaderProperty) as UIElement;
 			set => SetValue(HeaderProperty, value);
+		}
+		public UIElement Footer {
+			get => GetValue(FooterProperty) as UIElement;
+			set => SetValue(FooterProperty, value);
 		}
 		public double ItemsControlMaxHeight {
 			get => (double)GetValue(ItemsControlMaxHeightProperty);
@@ -37,6 +41,8 @@ namespace Codist.Controls
 		public ListCollectionView FilteredSymbols { get; }
 		public FrameworkElement Container { get; set; }
 		public bool IsVsProject { get; set; }
+		public SymbolItemType ContainerType { get; set; }
+		public Func<SymbolItem, Image> IconProvider { get; set; }
 
 		public SymbolItem Add(SyntaxNode node, SemanticContext context) {
 			var item = new SymbolItem(node, context, this);
@@ -61,6 +67,13 @@ namespace Codist.Controls
 			else {
 				ItemsSource = Symbols;
 			}
+		}
+		public void ScrollToSelectedItem() {
+			if (SelectedIndex == -1) {
+				return;
+			}
+			UpdateLayout();
+			ScrollIntoView(ItemContainerGenerator.Items[SelectedIndex]);
 		}
 
 		protected override void OnPreviewKeyDown(KeyEventArgs e) {
@@ -153,13 +166,6 @@ namespace Codist.Controls
 				}
 			}
 		}
-		public void ScrollToSelectedItem() {
-			if (SelectedIndex == -1) {
-				return;
-			}
-			UpdateLayout();
-			ScrollIntoView(ItemContainerGenerator.Items[SelectedIndex]);
-		}
 		void IMemberFilterable.Filter(string[] keywords, MemberFilterTypes filterTypes) {
 			var noKeyword = keywords.Length == 0;
 			if (noKeyword && filterTypes == MemberFilterTypes.All) {
@@ -246,17 +252,19 @@ namespace Codist.Controls
 
 		//public event PropertyChangedEventHandler PropertyChanged;
 		public int ImageId => _ImageId != 0 ? _ImageId : (_ImageId = Symbol != null ? Symbol.GetImageId() : SyntaxNode != null ? SyntaxNode.GetImageId() : -1);
-		public Image Icon => _Icon ?? (_Icon = ThemeHelper.GetImage(ImageId != -1 ? ImageId : 0));
+		public Image Icon => _Icon ?? (_Icon = Container.IconProvider != null ? Container.IconProvider(this) : ThemeHelper.GetImage(ImageId != -1 ? ImageId : 0));
 		public string Hint {
 			get => _Hint ?? (_Hint = Symbol != null ? GetSymbolConstaintValue(Symbol) : String.Empty);
 			set => _Hint = value;
 		}
 		public SymbolItemType Type { get; set; }
-		public bool IsExternal => Type == SymbolItemType.External || Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
+		public bool IsExternal => Type == SymbolItemType.External
+			|| Container.ContainerType != SymbolItemType.VsKnownImage && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
 		public ThemedMenuText Content {
 			get => _Content ?? (_Content = Symbol != null ? CreateContentForSymbol(Symbol, _IncludeContainerType, true) : SyntaxNode != null ? new ThemedMenuText(SyntaxNode.GetDeclarationSignature()) : new ThemedMenuText());
 			set => _Content = value;
 		}
+		public Location Location { get; set; }
 		public SyntaxNode SyntaxNode { get; private set; }
 		public ISymbol Symbol { get; private set; }
 		public SymbolList Container { get; }
@@ -285,7 +293,10 @@ namespace Codist.Controls
 		}
 
 		public void GoToSource() {
-			if (Symbol != null) {
+			if (Location != null) {
+				Location.GoToSource();
+			}
+			else if (Symbol != null) {
 				RefreshSymbol();
 				Symbol.GoToSource();
 			}
@@ -330,6 +341,35 @@ namespace Codist.Controls
 			return t;
 		}
 
+		internal void Item_ToolTipOpening(object sender, ToolTipEventArgs args) {
+			var e = args.Source as FrameworkElement;
+			if (e.ToolTip == null) {
+				return;
+			}
+			if (e.ToolTip is string) {
+				if (Symbol != null) {
+					RefreshSymbol();
+					e.ToolTip = ToolTipFactory.CreateToolTip(Symbol, false, _SemanticContext.SemanticModel.Compilation);
+					e.SetTipOptions();
+					return;
+				}
+				if (SyntaxNode != null) {
+					if (Symbol != null) {
+						RefreshSymbol();
+					}
+					else {
+						Symbol = _SemanticContext.GetSymbolAsync(SyntaxNode).ConfigureAwait(false).GetAwaiter().GetResult();
+					}
+					if (Symbol != null) {
+						e.ToolTip = ToolTipFactory.CreateToolTip(Symbol, true, _SemanticContext.SemanticModel.Compilation);
+						e.SetTipOptions();
+						return;
+					}
+				}
+				e.ToolTip = null;
+			}
+		}
+
 		static string GetSymbolConstaintValue(ISymbol symbol) {
 			if (symbol.Kind == SymbolKind.Field) {
 				var f = symbol as IFieldSymbol;
@@ -339,7 +379,6 @@ namespace Codist.Controls
 			}
 			return null;
 		}
-
 		void RefreshSyntaxNode() {
 			var node = _SemanticContext.RelocateDeclarationNode(SyntaxNode);
 			if (node != null && node != SyntaxNode) {
@@ -354,21 +393,27 @@ namespace Codist.Controls
 		}
 	}
 
-	enum SymbolItemType
-	{
-		Normal,
-		External,
-		Container
-	}
-
 	public class SymbolItemTemplateSelector : DataTemplateSelector
 	{
 		public override DataTemplate SelectTemplate(object item, DependencyObject container) {
 			var element = container as FrameworkElement;
 			var i = item as SymbolItem;
-			return i != null && (i.Symbol != null || i.SyntaxNode != null)
-				? element.FindResource("SymbolItemTemplate") as DataTemplate
-				: element.FindResource("LabelTemplate") as DataTemplate;
+			if (i != null && (i.Symbol != null || i.SyntaxNode != null)) {
+				element.ToolTip = String.Empty;
+				element.ToolTipOpening += i.Item_ToolTipOpening;
+				return element.FindResource("SymbolItemTemplate") as DataTemplate;
+			}
+			else {
+				return element.FindResource("LabelTemplate") as DataTemplate;
+			}
 		}
+	}
+
+	enum SymbolItemType
+	{
+		Normal,
+		External,
+		Container,
+		VsKnownImage
 	}
 }

@@ -34,12 +34,18 @@
 				<ControlTemplate TargetType="{x:Type c:SymbolList}">
 					<Border BorderThickness="1,1,1,1" CornerRadius="0,0,5,5" x:Name="Border" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" SnapsToDevicePixels="True" UseLayoutRounding="True">
 						<StackPanel>
-							<ContentPresenter x:Name="PopupHeader" Content="{TemplateBinding Header}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
+							<ContentPresenter x:Name="Header" Content="{TemplateBinding Header}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
 							<ScrollViewer Margin="3" Focusable="False" MaxHeight="{TemplateBinding ItemsControlMaxHeight}" VerticalScrollBarVisibility="Auto">
 								<VirtualizingStackPanel IsItemsHost="True" VirtualizingPanel.CacheLength="3" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.VirtualizationMode="Recycling"/>
 							</ScrollViewer>
+							<ContentPresenter x:Name="Footer" Content="{TemplateBinding Footer}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
 						</StackPanel>
 					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="Footer" Value="{x:Null}">
+							<Setter TargetName="Footer" Property="Visibility" Value="Collapsed"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
 				</ControlTemplate>
 			</Setter.Value>
 		</Setter>
