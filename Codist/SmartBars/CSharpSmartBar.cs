@@ -192,6 +192,20 @@ namespace Codist.SmartBars
 		}
 
 		void AddCommentCommands() {
+			AddCommand(MyToolBar, KnownImageIds.CommentCode, "Comment selection\nRight click: Comment line", ctx => {
+				if (ctx.RightClick) {
+					ctx.View.ExpandSelectionToLine();
+				}
+				TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
+			});
+			if (View.TryGetFirstSelectionSpan(out var ss) && ss.Length < 0x2000) {
+				foreach (var t in _Context.Compilation.DescendantTrivia(ss.ToTextSpan())) {
+					if (t.IsKind(SyntaxKind.SingleLineCommentTrivia)) {
+						AddEditorCommand(MyToolBar, KnownImageIds.UncommentCode, "Edit.UncommentSelection", "Uncomment selection");
+						return;
+					}
+				}
+			}
 			var token = _Context.Token;
 			var triviaList = token.HasLeadingTrivia ? token.LeadingTrivia : token.HasTrailingTrivia ? token.TrailingTrivia : default;
 			var lineComment = new SyntaxTrivia();
@@ -200,14 +214,6 @@ namespace Codist.SmartBars
 			}
 			if (lineComment.RawKind != 0) {
 				AddEditorCommand(MyToolBar, KnownImageIds.UncommentCode, "Edit.UncommentSelection", "Uncomment selection");
-			}
-			else {
-				AddCommand(MyToolBar, KnownImageIds.CommentCode, "Comment selection\nRight click: Comment line", ctx => {
-					if (ctx.RightClick) {
-						ctx.View.ExpandSelectionToLine();
-					}
-					TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
-				});
 			}
 		}
 

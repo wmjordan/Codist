@@ -54,6 +54,12 @@ namespace Codist
 			}
 			return default;
 		}
+		public static TextSpan ToTextSpan(this SnapshotSpan span) {
+			return new TextSpan(span.Start, span.Length);
+		}
+		public static Span ToSpan(this SnapshotSpan span) {
+			return new Span(span.Start, span.Length);
+		}
 
 		public static TextFormattingRunProperties GetBackupFormatting(string classificationType) {
 			lock (_syncRoot) {
