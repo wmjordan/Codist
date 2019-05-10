@@ -362,33 +362,15 @@ namespace Codist.SmartBars
 			m.Title.SetGlyph(ThemeHelper.GetImage(source.GetImageId()))
 				.Append(source.ToDisplayString(WpfHelper.MemberNameFormat), true)
 				.Append(" callers");
-			//if (callers.Count < 10) {
-			//	foreach (var caller in callers) {
-			//		var s = caller.CallingSymbol;
-			//		menuItem.Items.Add(new SymbolMenuItem(this, s, caller.Locations) {
-			//			Header = new TextBlock().Append(s.ContainingType.Name + ".", WpfBrushes.Gray).Append(s.Name)
-			//		});
-			//	}
-			//}
-			//else {
-			//SymbolMenuItem subMenu = null;
-			//INamedTypeSymbol typeSymbol = null;
 			var containerType = source.ContainingType;
 			foreach (var caller in callers) {
 				var s = caller.CallingSymbol;
-				//if (typeSymbol == null || typeSymbol != s.ContainingType) {
-				//	typeSymbol = s.ContainingType;
-				//	//subMenu = new SymbolMenuItem(this, typeSymbol, null);
-				//	//menuItem.Items.Add(subMenu);
-				//	m.Menu.Add(typeSymbol, _Context, false).Type = SymbolItemType.Container;
-				//}
-				//subMenu.Items.Add(new SymbolMenuItem(this, s, caller.Locations));
 				var i = m.Menu.Add(s, _Context, false);
+				i.Location = caller.Locations.FirstOrDefault();
 				if (s.ContainingType != containerType) {
 					i.Hint = s.ContainingType.ToDisplayString(WpfHelper.MemberNameFormat);
 				}
 			}
-			//}
 			m.Show();
 		}
 
@@ -465,15 +447,11 @@ namespace Codist.SmartBars
 			if (type != null) {
 				if (type.TypeKind == TypeKind.Class) {
 					while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
-						//var baseTypeItem = new SymbolMenuItem(this, type, type.ToDisplayString(WpfHelper.MemberNameFormat) + " (base class)", null);
-						//menuItem.Items.Add(baseTypeItem);
 						mi += AddSymbolMembers(this, m.Menu, type, type.ToDisplayString(WpfHelper.MemberNameFormat));
 					}
 				}
 				else if (type.TypeKind == TypeKind.Interface) {
 					foreach (var item in type.AllInterfaces) {
-						//var baseInterface = new SymbolMenuItem(this, item, item.ToDisplayString(WpfHelper.MemberNameFormat) + " (base interface)", null);
-						//menuItem.Items.Add(baseInterface);
 						mi += AddSymbolMembers(this, m.Menu, item, item.ToDisplayString(WpfHelper.MemberNameFormat));
 					}
 				}
@@ -488,6 +466,20 @@ namespace Codist.SmartBars
 		static int AddSymbolMembers(CSharpSmartBar bar, SymbolList list, ISymbol source, string typeCategory) {
 			var nsOrType = source as INamespaceOrTypeSymbol;
 			var members = nsOrType.GetMembers().RemoveAll(m => m.CanBeReferencedByName == false);
+			if (bar._IsVsProject) {
+				switch (nsOrType.Name) {
+					case nameof(KnownImageIds):
+						list.ContainerType = SymbolItemType.VsKnownImage;
+						list.IconProvider = s => {
+							var f = s.Symbol as IFieldSymbol;
+							if (f == null || f.HasConstantValue == false || f.Type.SpecialType != SpecialType.System_Int32) {
+								return null;
+							}
+							return ThemeHelper.GetImage((int)f.ConstantValue);
+						};
+						break;
+				}
+			}
 			if (source.Kind == SymbolKind.NamedType && (source as INamedTypeSymbol).TypeKind == TypeKind.Enum) {
 				// sort enum members by value
 				members = members.Sort(CodeAnalysisHelper.CompareByFieldIntegerConst);
@@ -500,7 +492,6 @@ namespace Codist.SmartBars
 				if (typeCategory != null) {
 					i.Hint = typeCategory;
 				}
-				 //menu.Items.Add(new SymbolMenuItem(bar, item, item.Locations));
 			}
 			return members.Length;
 		}
@@ -511,40 +502,12 @@ namespace Codist.SmartBars
 			foreach (var ov in ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindOverridesAsync(symbol, _Context.Document.Project.Solution, null, context.CancellationToken))) {
 				m.Menu.Add(ov, _Context, ov.ContainingType);
 				++c;
-				//menuItem.Items.Add(new SymbolMenuItem(this, ov, ov.ContainingType.Name, ov.Locations));
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
 				.Append(" overrides: ")
 				.Append(c.ToString());
 			m.Show();
-		}
-
-		void FindReferences(CommandContext context, MenuItem menuItem, ISymbol source) {
-			var refs = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindReferencesAsync(source, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.CreateRange(_Context.Document.Project.GetRelatedProjectDocuments()), context.CancellationToken)).ToArray();
-			Array.Sort(refs, (a, b) => {
-				int s;
-				return 0 != (s = a.Definition.ContainingType.Name.CompareTo(b.Definition.ContainingType.Name)) ? s :
-					0 != (s = b.Definition.DeclaredAccessibility - a.Definition.DeclaredAccessibility) ? s
-					: a.Definition.Name.CompareTo(b.Definition.Name);
-			});
-			if (refs.Length < 10) {
-				foreach (var item in refs) {
-					menuItem.Items.Add(new SymbolMenuItem(this, item.Definition, item.Definition.ContainingType?.Name + "." + item.Definition.Name, null));
-				}
-			}
-			else {
-				SymbolMenuItem subMenu = null;
-				INamedTypeSymbol typeSymbol = null;
-				foreach (var item in refs) {
-					if (typeSymbol == null || typeSymbol != item.Definition.ContainingType) {
-						typeSymbol = item.Definition.ContainingType;
-						subMenu = new SymbolMenuItem(this, typeSymbol, null);
-						menuItem.Items.Add(subMenu);
-					}
-					subMenu.Items.Add(new SymbolMenuItem(this, item.Definition, null));
-				}
-			}
 		}
 
 		void FindSymbolWithName(CommandContext ctx, ISymbol source) {
@@ -604,7 +567,6 @@ namespace Codist.SmartBars
 						&& st.SpecialType == SpecialType.None) {
 						CreateInstanceCommandsForType(st, r);
 					}
-					//r.Add(CreateCommandMenu("Find similar...", KnownImageIds.DropShadow, symbol, "No similar symbol was found", FindSimilarSymbols));
 					break;
 				case SymbolKind.Field:
 				case SymbolKind.Local:
@@ -771,83 +733,6 @@ namespace Codist.SmartBars
 		bool UpdateSemanticModel() {
 			return ThreadHelper.JoinableTaskFactory.Run(() => _Context.UpdateAsync(View.Selection.Start.Position, default));
 		}
-		sealed class SymbolMenuItem : CommandMenuItem, IMemberTypeFilter
-		{
-			public SymbolMenuItem(CSharpSmartBar bar, ISymbol symbol, IEnumerable<Location> locations) : this(bar, symbol, symbol.ToDisplayString(WpfHelper.MemberNameFormat), locations) {
-			}
-			public SymbolMenuItem(CSharpSmartBar bar, ISymbol symbol, string alias, IEnumerable<Location> locations) : base(bar, new CommandItem(symbol, alias)) {
-				Locations = locations;
-				Symbol = symbol;
-				if (symbol.Kind == SymbolKind.Field) {
-					var f = symbol as IFieldSymbol;
-					if (f.HasConstantValue) {
-						InputGestureText = f.ConstantValue?.ToString();
-					}
-					//else {
-					//	InputGestureText = f.Type.Name;
-					//}
-				}
-				//else {
-				//	InputGestureText = symbol.GetReturnType()?.Name;
-				//}
-				SetColorPreviewIcon(symbol, bar);
-				//todo deal with symbols with multiple locations
-				if (locations != null && locations.Any(l => l.SourceTree?.FilePath != null)) {
-					Click += GotoLocation;
-				}
-				if (Symbol != null) {
-					ToolTip = String.Empty;
-					ToolTipOpening += ShowToolTip;
-				}
-			}
-
-			public IEnumerable<Location> Locations { get; }
-			public ISymbol Symbol { get; }
-
-			bool IMemberTypeFilter.Filter(MemberFilterTypes filterTypes) {
-				return MemberFilterBox.FilterByImageId(filterTypes, CommandItem.ImageId);
-			}
-
-			void GotoLocation(object sender, RoutedEventArgs args) {
-				var loc = Locations.FirstOrDefault();
-				if (loc != null) {
-					var p = loc.GetLineSpan();
-					CodistPackage.DTE.OpenFile(loc.SourceTree.FilePath, p.StartLinePosition.Line + 1, p.StartLinePosition.Character + 1);
-					args.Handled = true;
-				}
-			}
-
-			void SetColorPreviewIcon(ISymbol symbol, CSharpSmartBar bar) {
-				var b = symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Field ? QuickInfo.ColorQuickInfo.GetBrush(symbol, bar._IsVsProject) : null;
-				if (b != null) {
-					var h = Header as TextBlock;
-					h.Inlines.InsertBefore(
-						h.Inlines.FirstInline,
-						new System.Windows.Documents.InlineUIContainer(
-							new Border {
-								BorderThickness = WpfHelper.TinyMargin,
-								BorderBrush = ThemeHelper.MenuTextBrush,
-								Margin = WpfHelper.GlyphMargin,
-								SnapsToDevicePixels = true,
-								Background = b,
-								Height = ThemeHelper.DefaultIconSize,
-								Width = ThemeHelper.DefaultIconSize,
-							}
-							) {
-							BaselineAlignment = BaselineAlignment.TextTop
-						});
-				}
-			}
-
-			void ShowToolTip(object sender, ToolTipEventArgs args) {
-				ToolTip = ToolTipFactory.CreateToolTip(Symbol, (SmartBar as CSharpSmartBar)._Context.SemanticModel.Compilation);
-				this.SetTipOptions();
-				ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Left);
-				ToolTipOpening -= ShowToolTip;
-			}
-
-		}
-
 		sealed class SymbolCallerInfoComparer : IEqualityComparer<SymbolCallerInfo>
 		{
 			internal static readonly SymbolCallerInfoComparer Instance = new SymbolCallerInfoComparer();
