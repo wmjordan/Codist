@@ -112,7 +112,7 @@ namespace Codist.SmartBars
 					// selection is within a symbol
 					_Symbol = ThreadHelper.JoinableTaskFactory.Run(() => _Context.GetSymbolAsync(cancellationToken));
 					if (_Symbol != null) {
-						if (node is IdentifierNameSyntax) {
+						if (node.IsKind(SyntaxKind.IdentifierName) || node.IsKind(SyntaxKind.GenericName)) {
 							AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition\nRight click: Peek definition", "Edit.PeekDefinition");
 						}
 						AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze symbol...", GetReferenceCommandsAsync);
