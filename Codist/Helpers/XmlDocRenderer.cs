@@ -25,6 +25,11 @@ namespace Codist
 			_Symbol = symbol;
 		}
 
+		/// <summary>
+		/// Use it to remove paragraphs rendered by VS builtin implementation
+		/// </summary>
+		public int ParagraphCount { get; set; }
+
 		public void Render(XElement content, TextBlock text) {
 			if (content == null || content.HasElements == false && content.IsEmpty) {
 				return;
@@ -63,6 +68,10 @@ namespace Codist
 								var isOnlyChildOfItem = list != null && e.Parent.Name == "item" && e.Parent.FirstNode == e.Parent.LastNode && e.Parent.FirstNode == item;
 								if (inlines.FirstInline != null && isOnlyChildOfItem == false) {
 									inlines.AppendLineWithMargin();
+									ParagraphCount++;
+								}
+								if (isOnlyChildOfItem) {
+									ParagraphCount++;
 								}
 								InternalRender(e, inlines, list);
 								if (inlines.FirstInline == null && isOnlyChildOfItem == false) {

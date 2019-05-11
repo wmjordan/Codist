@@ -270,14 +270,14 @@ namespace Codist.QuickInfo
 					}
 
 					// replace the default XML doc
+					// sequence of items in default XML Doc panel:
+					// 1. summary
+					// 2. type parameter
+					// 3. usage
+					// 4. exception
 					var items = doc.IsItemsHost ? (System.Collections.IList)doc.GetParent<ItemsControl>().Items : doc.Children;
 					if (DocElement != null) {
 						try {
-							// sequence of items in default XML Doc panel:
-							// 1. summary
-							// 2. type parameter
-							// 3. usage
-							// 4. exception
 							if (items.Count > 1 && items[1] is TextBlock) {
 								items.RemoveAt(1);
 								items.Insert(1, DocElement);
@@ -285,7 +285,17 @@ namespace Codist.QuickInfo
 							else {
 								items.Add(DocElement);
 							}
-							(DocElement as ThemedTipDocument)?.ApplySizeLimit();
+							var myDoc = DocElement as ThemedTipDocument;
+							if (myDoc != null) {
+								items = doc.GetParent<ItemsControl>()?.Items;
+								if (v16_1orLater && items != null && myDoc.Tag is int) {
+									// used the value from XmlDocRenderer.ParagraphCount to remove builtin paragraphs
+									for (int i = (int)myDoc.Tag - 1; i >= 0; i--) {
+										items.RemoveAt(1);
+									}
+								}
+								myDoc.ApplySizeLimit();
+							}
 						}
 						catch (InvalidOperationException) {
 							// ignore exception: doc.Children was changed by another thread

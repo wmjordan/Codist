@@ -267,7 +267,9 @@ namespace Codist.QuickInfo
 				if (summary.Name.LocalName == XmlDocRenderer.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {
 					return;
 				}
+				docRenderer.ParagraphCount = 0;
 				docRenderer.Render(summary, tip);
+				tip.Tag = docRenderer.ParagraphCount;
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.NamedType)) {
 				var typeParams = symbol.GetTypeParameters();
