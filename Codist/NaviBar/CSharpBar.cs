@@ -243,7 +243,7 @@ namespace Codist.NaviBar
 
 		void MenuItemSelect(object sender, MouseButtonEventArgs e) {
 			var menu = sender as SymbolList;
-			if (menu.SelectedIndex == -1) {
+			if (menu.SelectedIndex == -1 || (e.OriginalSource as DependencyObject)?.GetParent<ListBoxItem>() == null) {
 				return;
 			}
 			_View.VisualElement.Focus();
