@@ -96,6 +96,8 @@ namespace TestProject
 			});
             // captures exception
             await Task.Run(() => System.Diagnostics.Debug.WriteLine(exception));
+            // captures now
+            Array.FindAll(new[] { DateTime.MaxValue, DateTime.Now }, t => t > now);
             // captures exception, now, file
             void WriteLog() {
 				var ex = exception.ToString();
