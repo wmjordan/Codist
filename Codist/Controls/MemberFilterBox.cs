@@ -90,15 +90,17 @@ namespace Codist.Controls
 			_FilterButtons.FilterChanged += FilterBox_Changed;
 			_FilterButtons.FilterCleared += FilterBox_Clear;
 			_FilterBox.TextChanged += FilterBox_Changed;
+			_FilterBox.IsVisibleChanged += FilterBox_IsVisibleChanged;
 		}
 		public ThemedTextBox FilterBox => _FilterBox;
 
 		public bool FocusTextBox() {
+			if (_FilterBox.IsFocused) {
+				return true;
+			}
 			if (_FilterBox.IsVisible) {
 				return _FilterBox.Focus();
 			}
-			_FilterBox.IsVisibleChanged -= FilterBox_IsVisibleChanged;
-			_FilterBox.IsVisibleChanged += FilterBox_IsVisibleChanged;
 			return false;
 		}
 
@@ -196,7 +198,7 @@ namespace Codist.Controls
 				case KnownImageIds.Numeric: // #region
 					return filterTypes == MemberFilterTypes.All;
 			}
-			return true;
+			return false;
 		}
 
 		sealed class MemberFilterButtonGroup : UserControl
@@ -208,9 +210,9 @@ namespace Codist.Controls
 			public event EventHandler FilterCleared;
 
 			public MemberFilterButtonGroup() {
-				_FieldFilter = CreateButton(KnownImageIds.Field, "Fields and properties");
-				_MethodFilter = CreateButton(KnownImageIds.Method, "Methods, delegates and events");
-				_TypeFilter = CreateButton(KnownImageIds.EntityContainer, "Types");
+				_FieldFilter = CreateButton(KnownImageIds.Field, "Fields, properties and events");
+				_MethodFilter = CreateButton(KnownImageIds.Method, "Methods");
+				_TypeFilter = CreateButton(KnownImageIds.EntityContainer, "Types and delegates");
 
 				_PublicFilter = CreateButton(KnownImageIds.ModulePublic, "Public and protected members");
 				_PrivateFilter = CreateButton(KnownImageIds.ModulePrivate, "Internal and private members");
