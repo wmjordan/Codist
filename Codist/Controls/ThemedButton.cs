@@ -28,12 +28,32 @@ namespace Codist.Controls
 
 	public sealed class ThemedToggleButton : System.Windows.Controls.Primitives.ToggleButton
 	{
+		TextBlock _Text;
+
 		public ThemedToggleButton(int imageId, string toolTip) {
-			Content = ThemeHelper.GetImage(imageId);
+			Content = new StackPanel {
+				Children = {
+					ThemeHelper.GetImage(imageId)
+				}
+			};
 			ToolTip = toolTip;
 			Margin = WpfHelper.NoMargin;
 			Background = System.Windows.Media.Brushes.Transparent;
 			this.ReferenceCrispImageBackground(Microsoft.VisualStudio.PlatformUI.EnvironmentColors.MainWindowActiveCaptionColorKey);
+		}
+
+		public TextBlock Text {
+			get => _Text;
+			set {
+				var p = Content as StackPanel;
+				if (_Text == null) {
+					p.Orientation = Orientation.Horizontal;
+					p.Children.Add(_Text = value);
+				}
+				else {
+					p.Children[1] = _Text = value;
+				}
+			}
 		}
 	}
 }

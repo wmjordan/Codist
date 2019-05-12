@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using Microsoft.VisualStudio.Imaging;
 using AppHelpers;
 using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.CodeAnalysis;
 
 namespace Codist.Controls
 {
@@ -102,6 +103,11 @@ namespace Codist.Controls
 				return _FilterBox.Focus();
 			}
 			return false;
+		}
+		public void UpdateNumbers(IEnumerable<ISymbol> symbols) {
+			if (symbols != null) {
+				_FilterButtons.UpdateNumbers(symbols);
+			}
 		}
 
 		void FilterBox_Clear(object sender, EventArgs e) {
@@ -203,7 +209,7 @@ namespace Codist.Controls
 
 		sealed class MemberFilterButtonGroup : UserControl
 		{
-			readonly ThemedToggleButton _FieldFilter, _MethodFilter, _TypeFilter, _PublicFilter, _PrivateFilter;
+			readonly ThemedToggleButton _FieldFilter, _PropertyFilter, _MethodFilter, _TypeFilter, _PublicFilter, _PrivateFilter;
 			bool _uiLock;
 
 			public event EventHandler FilterChanged;
@@ -242,7 +248,10 @@ namespace Codist.Controls
 				}
 				var f = MemberFilterTypes.None;
 				if (_FieldFilter.IsChecked == true) {
-					f |= MemberFilterTypes.FieldAndProperty;
+					f |= _PropertyFilter == null ? MemberFilterTypes.FieldAndProperty : MemberFilterTypes.Field;
+				}
+				if (_PropertyFilter?.IsChecked == true) {
+					f |= MemberFilterTypes.Property;
 				}
 				if (_MethodFilter.IsChecked == true) {
 					f |= MemberFilterTypes.Method;
@@ -268,10 +277,62 @@ namespace Codist.Controls
 				}
 			}
 
+			public void UpdateNumbers(IEnumerable<ISymbol> symbols) {
+				int f = 0, m = 0, t = 0, p = 0, i = 0;
+				foreach (var item in symbols) {
+					if (item == null || item.IsImplicitlyDeclared) {
+						continue;
+					}
+					switch (item.Kind) {
+						case SymbolKind.Event:
+						case SymbolKind.Field:
+						case SymbolKind.Property:
+							++f; break;
+						case SymbolKind.Method:
+							var sm = item as IMethodSymbol;
+							if (sm.MethodKind == MethodKind.PropertyGet
+								|| sm.MethodKind == MethodKind.PropertySet) {
+								continue;
+							}
+							++m; break;
+						case SymbolKind.NamedType:
+							++t; break;
+					}
+					switch (item.DeclaredAccessibility) {
+						case Accessibility.Private:
+						case Accessibility.Internal:
+						case Accessibility.ProtectedAndInternal:
+						case Accessibility.ProtectedOrInternal:
+							++i; break;
+						case Accessibility.Public:
+						case Accessibility.Protected:
+							++p; break;
+					}
+				}
+				ToggleFilterButton(_PublicFilter, p);
+				ToggleFilterButton(_PrivateFilter, i);
+				ToggleFilterButton(_FieldFilter, f);
+				ToggleFilterButton(_MethodFilter, m);
+				ToggleFilterButton(_TypeFilter, t);
+			}
+
+			void ToggleFilterButton(ThemedToggleButton button, int f) {
+				if (f > 0) {
+					button.Visibility = Visibility.Visible;
+					(button.Text == null ? button.Text = new TextBlock() : button.Text).Text = f.ToString();
+				}
+				else {
+					button.Visibility = Visibility.Collapsed;
+				}
+			}
+
 			void ClearFilter() {
 				_uiLock = true;
 				_FieldFilter.IsChecked = _MethodFilter.IsChecked = _TypeFilter.IsChecked
 					= _PublicFilter.IsChecked = _PrivateFilter.IsChecked = false;
+				if (_PropertyFilter != null) {
+					_PropertyFilter.IsChecked = false;
+				}
 				_uiLock = false;
 				if (Filters != MemberFilterTypes.All) {
 					Filters = MemberFilterTypes.All;
@@ -374,14 +435,16 @@ namespace Codist.Controls
 	enum MemberFilterTypes
 	{
 		None,
-		FieldAndProperty = 1,
-		Method = 1 << 1,
-		TypeAndNamespace = 1 << 2,
+		Field = 1,
+		Property = 1 << 1,
+		FieldAndProperty = Field | Property,
+		Method = 1 << 2,
+		TypeAndNamespace = 1 << 3,
 		AllMembers = FieldAndProperty | Method | TypeAndNamespace,
-		Public = 1 << 3,
-		Protected = 1 << 4,
-		Internal = 1 << 5,
-		Private = 1 << 6,
+		Public = 1 << 4,
+		Protected = 1 << 5,
+		Internal = 1 << 6,
+		Private = 1 << 7,
 		AllAccessibility = Public | Protected | Private | Internal,
 		All = AllMembers | AllAccessibility
 	}

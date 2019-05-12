@@ -42,7 +42,7 @@ namespace Codist.Controls
 		public FrameworkElement Container { get; set; }
 		public bool IsVsProject { get; set; }
 		public SymbolItemType ContainerType { get; set; }
-		public Func<SymbolItem, Image> IconProvider { get; set; }
+		public Func<SymbolItem, UIElement> IconProvider { get; set; }
 
 		public SymbolItem Add(SyntaxNode node, SemanticContext context) {
 			var item = new SymbolItem(node, context, this);
@@ -244,7 +244,7 @@ namespace Codist.Controls
 	sealed class SymbolItem /*: INotifyPropertyChanged*/
 	{
 		readonly SemanticContext _SemanticContext;
-		Image _Icon;
+		UIElement _Icon;
 		int _ImageId;
 		ThemedMenuText _Content;
 		string _Hint;
@@ -252,14 +252,14 @@ namespace Codist.Controls
 
 		//public event PropertyChangedEventHandler PropertyChanged;
 		public int ImageId => _ImageId != 0 ? _ImageId : (_ImageId = Symbol != null ? Symbol.GetImageId() : SyntaxNode != null ? SyntaxNode.GetImageId() : -1);
-		public Image Icon => _Icon ?? (_Icon = Container.IconProvider != null ? Container.IconProvider(this) : ThemeHelper.GetImage(ImageId != -1 ? ImageId : 0));
+		public UIElement Icon => _Icon ?? (_Icon = Container.IconProvider?.Invoke(this) ?? ThemeHelper.GetImage(ImageId != -1 ? ImageId : 0));
 		public string Hint {
 			get => _Hint ?? (_Hint = Symbol != null ? GetSymbolConstaintValue(Symbol) : String.Empty);
 			set => _Hint = value;
 		}
 		public SymbolItemType Type { get; set; }
 		public bool IsExternal => Type == SymbolItemType.External
-			|| Container.ContainerType != SymbolItemType.VsKnownImage && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
+			|| Container.ContainerType != SymbolItemType.VsKnownImage && Container.ContainerType != SymbolItemType.PredefinedColors && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
 		public ThemedMenuText Content {
 			get => _Content ?? (_Content = Symbol != null ? CreateContentForSymbol(Symbol, _IncludeContainerType, true) : SyntaxNode != null ? new ThemedMenuText(SyntaxNode.GetDeclarationSignature()) : new ThemedMenuText());
 			set => _Content = value;
@@ -316,23 +316,6 @@ namespace Codist.Controls
 			var t = new ThemedMenuText();
 			if (includeType && symbol.ContainingType != null) {
 				t.Append(symbol.ContainingType.Name + symbol.ContainingType.GetParameterString() + ".", ThemeHelper.SystemGrayTextBrush);
-			}
-			var b = symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Field ? QuickInfo.ColorQuickInfo.GetBrush(symbol, Container.IsVsProject) : null;
-			if (b != null) {
-				t.Append(
-					new System.Windows.Documents.InlineUIContainer(
-						new Border {
-							BorderThickness = WpfHelper.TinyMargin,
-							BorderBrush = ThemeHelper.MenuTextBrush,
-							Margin = WpfHelper.GlyphMargin,
-							SnapsToDevicePixels = true,
-							Background = b,
-							Height = ThemeHelper.DefaultIconSize,
-							Width = ThemeHelper.DefaultIconSize,
-						}
-						) {
-						BaselineAlignment = BaselineAlignment.TextTop
-					});
 			}
 			t.Append(symbol.Name);
 			if (includeParameter) {
@@ -414,6 +397,7 @@ namespace Codist.Controls
 		Normal,
 		External,
 		Container,
-		VsKnownImage
+		VsKnownImage,
+		PredefinedColors
 	}
 }

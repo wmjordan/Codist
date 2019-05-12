@@ -547,34 +547,12 @@ namespace Codist.NaviBar
 					}
 					return;
 				}
-				if (_Menu == null) {
-					_Menu = new SymbolList {
-						Container = _Bar._SymbolListContainer
-					};
-					_Menu.Header = new WrapPanel {
-						Orientation = Orientation.Horizontal,
-						Children = {
-							new ThemedButton(new ThemedMenuText(Node.GetDeclarationSignature(), true)
-									.SetGlyph(ThemeHelper.GetImage(Node.GetImageId())), null,
-									() => _Bar._SemanticContext.RelocateDeclarationNode(Node).GetLocation().GoToSource()) {
-								BorderThickness = WpfHelper.TinyMargin,
-								Margin = WpfHelper.SmallHorizontalMargin,
-								Padding = WpfHelper.SmallHorizontalMargin,
-							},
-							(_FilterBox = new MemberFilterBox(_Menu)),
-						}
-					};
-					_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
-						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
-					_Bar.SetupSymbolListMenu(_Menu);
-					await AddItemsAsync(Node, _Bar._cancellationSource.GetToken());
-					if (_Menu.Symbols.Count > 100) {
-						ScrollViewer.SetCanContentScroll(_Menu, true);
-					}
-				}
-				else {
-					((TextBlock)_Menu.Footer).Clear();
-					await RefreshItemsAsync(Node, _Bar._cancellationSource.GetToken());
+
+				var ct = _Bar._cancellationSource.GetToken();
+				await CreateMenuForTypeSymbolNodeAsync(ct);
+
+				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CodeStatistics)) {
+					_FilterBox.UpdateNumbers((await _Bar._SemanticContext.GetSymbolAsync(Node, ct) as ITypeSymbol)?.GetMembers());
 				}
 				var footer = (TextBlock)_Menu.Footer;
 				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CodeStatistics)) {
@@ -593,6 +571,38 @@ namespace Codist.NaviBar
 				_Bar.ShowMenu(this, _Menu);
 				_FilterBox?.FocusTextBox();
 			}
+
+			async Task CreateMenuForTypeSymbolNodeAsync(CancellationToken cancellationToken) {
+				if (_Menu != null) {
+					((TextBlock)_Menu.Footer).Clear();
+					await RefreshItemsAsync(Node, cancellationToken);
+					return;
+				}
+				_Menu = new SymbolList {
+					Container = _Bar._SymbolListContainer
+				};
+				_Menu.Header = new WrapPanel {
+					Orientation = Orientation.Horizontal,
+					Children = {
+							new ThemedButton(new ThemedMenuText(Node.GetDeclarationSignature(), true)
+									.SetGlyph(ThemeHelper.GetImage(Node.GetImageId())), null,
+									() => _Bar._SemanticContext.RelocateDeclarationNode(Node).GetLocation().GoToSource()) {
+								BorderThickness = WpfHelper.TinyMargin,
+								Margin = WpfHelper.SmallHorizontalMargin,
+								Padding = WpfHelper.SmallHorizontalMargin,
+							},
+							(_FilterBox = new MemberFilterBox(_Menu)),
+						}
+				};
+				_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
+					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
+				_Bar.SetupSymbolListMenu(_Menu);
+				await AddItemsAsync(Node, cancellationToken);
+				if (_Menu.Symbols.Count > 100) {
+					ScrollViewer.SetCanContentScroll(_Menu, true);
+				}
+			}
+
 			async Task AddItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
 				AddMemberDeclarations(node, false);
 				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember)
