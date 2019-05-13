@@ -686,7 +686,16 @@ namespace Codist
 				case SymbolKind.Field: return (symbol as IFieldSymbol).IsConst ? "const" : "field";
 				case SymbolKind.Label: return "label";
 				case SymbolKind.Local: return (symbol as ILocalSymbol).IsConst ? "local const" : "local";
-				case SymbolKind.Method: return (symbol as IMethodSymbol).IsExtensionMethod ? "extension" : "method";
+				case SymbolKind.Method:
+					var m = (IMethodSymbol)symbol;
+					var t = m.IsExtensionMethod ? "extension" : "method";
+					if (m.IsAsync) {
+						t = "async " + t;
+					}
+					else if (m.IsExtern) {
+						t = "extern " + t;
+					}
+					return t;
 				case SymbolKind.NamedType:
 					switch ((symbol as INamedTypeSymbol).TypeKind) {
 						case TypeKind.Array: return "array";
@@ -699,7 +708,6 @@ namespace Codist
 						case TypeKind.TypeParameter: return "type parameter";
 					}
 					return "type";
-
 				case SymbolKind.Namespace: return "namespace";
 				case SymbolKind.Parameter: return "parameter";
 				case SymbolKind.Property: return "property";

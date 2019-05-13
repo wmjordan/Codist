@@ -124,7 +124,7 @@ namespace Codist
 			if (symbol.Kind == SymbolKind.Method) {
 				var method = symbol as IMethodSymbol;
 				if (method.IsAsync) {
-					info.Append("async ");
+					info.Append("async ", Keyword);
 				}
 				if (method.ReturnsByRef) {
 					info.Append("ref ");
