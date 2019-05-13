@@ -36,7 +36,7 @@
 						<StackPanel>
 							<ContentPresenter x:Name="Header" Content="{TemplateBinding Header}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
 							<ScrollViewer Margin="3" Focusable="False" MaxHeight="{TemplateBinding ItemsControlMaxHeight}" VerticalScrollBarVisibility="Auto">
-								<VirtualizingStackPanel IsItemsHost="True" VirtualizingPanel.CacheLength="3" VirtualizingPanel.CacheLengthUnit="Page" VirtualizingPanel.VirtualizationMode="Recycling"/>
+								<VirtualizingStackPanel IsItemsHost="True" CacheLength="3" CacheLengthUnit="Page" VirtualizationMode="Recycling"/>
 							</ScrollViewer>
 							<ContentPresenter x:Name="Footer" Content="{TemplateBinding Footer}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
 						</StackPanel>
@@ -99,7 +99,7 @@
 				<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.PanelTitleBarUnselectedBrushKey}}"/>
 			</DataTrigger>
 			<DataTrigger Binding="{Binding IsExternal}" Value="True">
-				<Setter TargetName="Border" Property="Opacity" Value="0.7"/>
+				<Setter TargetName="Border" Property="Opacity" Value="0.8"/>
 			</DataTrigger>
 			<Trigger Property="UIElement.IsMouseOver" Value="True">
 				<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.CommandBarMenuItemMouseOverBrushKey}}"/>

@@ -326,31 +326,30 @@ namespace Codist.Controls
 
 		internal void Item_ToolTipOpening(object sender, ToolTipEventArgs args) {
 			var e = args.Source as FrameworkElement;
-			if (e.ToolTip == null) {
+			if (Symbol != null) {
+				RefreshSymbol();
+				e.ToolTip = ToolTipFactory.CreateToolTip(Symbol, false, _SemanticContext.SemanticModel.Compilation);
+				e.SetTipOptions();
+				ToolTipService.SetPlacement(e, System.Windows.Controls.Primitives.PlacementMode.Left);
 				return;
 			}
-			if (e.ToolTip is string) {
+			if (SyntaxNode != null) {
 				if (Symbol != null) {
 					RefreshSymbol();
-					e.ToolTip = ToolTipFactory.CreateToolTip(Symbol, false, _SemanticContext.SemanticModel.Compilation);
+				}
+				else {
+					Symbol = _SemanticContext.GetSymbolAsync(SyntaxNode).ConfigureAwait(false).GetAwaiter().GetResult();
+				}
+				if (Symbol != null) {
+					e.ToolTip = ToolTipFactory.CreateToolTip(Symbol, true, _SemanticContext.SemanticModel.Compilation);
 					e.SetTipOptions();
+					ToolTipService.SetPlacement(e, System.Windows.Controls.Primitives.PlacementMode.Left);
 					return;
 				}
-				if (SyntaxNode != null) {
-					if (Symbol != null) {
-						RefreshSymbol();
-					}
-					else {
-						Symbol = _SemanticContext.GetSymbolAsync(SyntaxNode).ConfigureAwait(false).GetAwaiter().GetResult();
-					}
-					if (Symbol != null) {
-						e.ToolTip = ToolTipFactory.CreateToolTip(Symbol, true, _SemanticContext.SemanticModel.Compilation);
-						e.SetTipOptions();
-						return;
-					}
-				}
-				e.ToolTip = null;
+				e.ToolTip = SyntaxNode.GetSyntaxBrief();
+				return;
 			}
+			e.ToolTip = null;
 		}
 
 		static string GetSymbolConstaintValue(ISymbol symbol) {
