@@ -287,11 +287,13 @@ namespace Codist.QuickInfo
 							}
 							var myDoc = DocElement as ThemedTipDocument;
 							if (myDoc != null) {
-								items = doc.GetParent<ItemsControl>()?.Items;
-								if (v16_1orLater && items != null && myDoc.Tag is int) {
-									// used the value from XmlDocRenderer.ParagraphCount to remove builtin paragraphs
-									for (int i = (int)myDoc.Tag - 1; i >= 0; i--) {
-										items.RemoveAt(1);
+								if (v16_1orLater && myDoc.Tag is int) {
+									items = doc.GetParent<ItemsControl>()?.Items;
+									if (items != null) {
+										// used the value from XmlDocRenderer.ParagraphCount to remove builtin paragraphs
+										for (int i = (int)myDoc.Tag - 1; i >= 0; i--) {
+											items.RemoveAt(1);
+										}
 									}
 								}
 								myDoc.ApplySizeLimit();

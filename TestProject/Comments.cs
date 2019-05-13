@@ -79,7 +79,7 @@ namespace TestProject
 		/// <para>Ending.</para>
 		/// </summary>
 		/// <typeparam name="T">T is exception class.</typeparam>
-		/// <exception cref="System.IO.IOException">Not implemented</exception>
+		/// <exception cref="System.IO.IOException"><para>Not implemented</para><para>Period.</para></exception>
 		public static async Task Log<T>(T exception) where T : Exception {
 			DateTime now = DateTime.Now;
 			string file = "log.txt";
