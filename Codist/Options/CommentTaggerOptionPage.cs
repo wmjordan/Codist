@@ -183,7 +183,7 @@ namespace Codist.Options
 			if (size < 2) {
 				return;
 			}
-			UIHelper.MixStyle(style, out var fs, out var fc, out var bc);
+			Codist.SyntaxHighlight.FormatStore.MixStyle(style, out var fs, out var fc, out var bc);
 			using (var g = Graphics.FromImage(bmp))
 			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontName : style.Font, size, fs))
 			using (var b = new SolidBrush(fc))

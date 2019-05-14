@@ -97,7 +97,7 @@ namespace Codist.Options
 			if (size < 2) {
 				return;
 			}
-			UIHelper.MixStyle(style, out var fs, out var fc, out var bc);
+			style.MixStyle(out var fs, out var fc, out var bc);
 			_ForeColorButton.DefaultColor = fc;
 			using (var g = Graphics.FromImage(bmp))
 			using (var f = new Font(String.IsNullOrEmpty(style.Font) ? fontName : style.Font, size, fs))

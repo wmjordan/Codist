@@ -12,7 +12,7 @@ namespace Codist.SyntaxHighlight
 {
 	// see: Microsoft.VisualStudio.Text.Classification.Implementation.ClassificationFormatMap
 	// see: Microsoft.VisualStudio.Text.Classification.Implementation.ViewSpecificFormatMap
-	sealed class CodeViewDecorator
+	sealed partial class CodeViewDecorator
 	{
 		readonly IWpfTextView _TextView;
 		readonly IClassificationFormatMap _ClassificationFormatMap;
@@ -66,14 +66,14 @@ namespace Codist.SyntaxHighlight
 				return;
 			}
 			try {
-				var c = TextEditorHelper.DefaultEditorFormatMap.GetColor(Constants.EditorProperties.Text, EditorFormatDefinition.ForegroundColorId);
+				var c = FormatStore.DefaultEditorFormatMap.GetColor(Constants.EditorProperties.Text, EditorFormatDefinition.ForegroundColorId);
 				if (c.A > 0) {
 					if (c != _ForeColor) {
 						Debug.WriteLine("Fore color changed: " + _ForeColor.ToString() + "->" + c.ToString());
 					}
 					_ForeColor = c;
 				}
-				c = TextEditorHelper.DefaultEditorFormatMap.GetColor(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundColorId);
+				c = FormatStore.DefaultEditorFormatMap.GetColor(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundColorId);
 				if (c.A > 0) {
 					_BackColor = c.Alpha(0);
 				}
@@ -98,8 +98,8 @@ namespace Codist.SyntaxHighlight
 				StyleBase style;
 				TextFormattingRunProperties textFormatting;
 				if (item == null
-					|| (style = TextEditorHelper.GetStyle(item.Classification)) == null
-					|| (textFormatting = TextEditorHelper.GetBackupFormatting(item.Classification)) == null) {
+					|| (style = FormatStore.GetStyle(item.Classification)) == null
+					|| (textFormatting = FormatStore.GetBackupFormatting(item.Classification)) == null) {
 					continue;
 				}
 				_ClassificationFormatMap.SetTextProperties(item, SetProperties(textFormatting, style, defaultSize));
@@ -184,15 +184,5 @@ namespace Codist.SyntaxHighlight
 			}
 			return properties;
 		}
-
-		//void TextView_GotAggregateFocus(object sender, EventArgs e) {
-		//	//ITextView view;
-		//	//if ((view = (sender as ITextView)) != null) {
-		//	//	view.GotAggregateFocus -= TextView_GotAggregateFocus;
-		//	//}
-		//	if (_IsDecorating == 0) {
-		//		Decorate();
-		//	}
-		//}
 	}
 }

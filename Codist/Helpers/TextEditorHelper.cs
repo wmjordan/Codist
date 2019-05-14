@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Codist.SyntaxHighlight;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -20,15 +21,6 @@ namespace Codist
 	static class TextEditorHelper
 	{
 		static /*readonly*/ Guid guidIWpfTextViewHost = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476");
-		static readonly object _syncRoot = new object();
-		internal static readonly IClassificationFormatMap DefaultClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("text");
-		internal static readonly IEditorFormatMap DefaultEditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap("text");
-		static bool _IdentifySymbolSource;
-		static Dictionary<string, StyleBase> _SyntaxStyleCache = InitSyntaxStyleCache();
-		static Dictionary<string, TextFormattingRunProperties> _BackupFormattings = LoadFormattings(new Dictionary<string, TextFormattingRunProperties>(80));
-		static TextFormattingRunProperties _DefaultFormatting;
-
-		internal static bool IdentifySymbolSource => _IdentifySymbolSource;
 
 		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
 			while (oldVersion != currentVersion) {
@@ -54,17 +46,17 @@ namespace Codist
 			}
 			return default;
 		}
+		public static Span ToSpan(this TextSpan span) {
+			return new Span(span.Start, span.Length);
+		}
 		public static TextSpan ToTextSpan(this SnapshotSpan span) {
 			return new TextSpan(span.Start, span.Length);
 		}
 		public static Span ToSpan(this SnapshotSpan span) {
 			return new Span(span.Start, span.Length);
 		}
-
-		public static TextFormattingRunProperties GetBackupFormatting(string classificationType) {
-			lock (_syncRoot) {
-				return _BackupFormattings.TryGetValue(classificationType, out var r) ? r : null;
-			}
+		public static TextSpan ToTextSpan(this Span span) {
+			return new TextSpan(span.Start, span.Length);
 		}
 
 		public static Span GetLineSpan(this SnapshotSpan span) {
@@ -80,12 +72,6 @@ namespace Codist
 		public static TextFormattingRunProperties GetRunProperties(this IClassificationFormatMap formatMap, string classificationType) {
 			var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType);
 			return t == null ? null : formatMap.GetTextProperties(t);
-		}
-
-		public static StyleBase GetStyle(string classificationType) {
-			lock (_syncRoot) {
-				return _SyntaxStyleCache.TryGetValue(classificationType, out var r) ? r : null;
-			}
 		}
 
 		/// <summary>
@@ -126,9 +112,9 @@ namespace Codist
 				}
 				if (edit.HasEffectiveChanges) {
 					var shot = edit.Apply();
-					return s.HasValue ? view.TextSnapshot.CreateTrackingSpan(s.Value, SpanTrackingMode.EdgeInclusive)
-						.GetSpan(shot)
-						: (SnapshotSpan?)null;
+					if (s.HasValue) {
+						return view.TextSnapshot.CreateTrackingSpan(s.Value, SpanTrackingMode.EdgeInclusive).GetSpan(shot);
+					}
 				}
 				return null;
 			}
@@ -216,25 +202,12 @@ namespace Codist
 			return textView.GetTextViewLineContainingBufferPosition(s.Start.Position) != textView.GetTextViewLineContainingBufferPosition(s.End.Position);
 		}
 
-		public static void SelectNode(this ITextView view, Microsoft.CodeAnalysis.SyntaxNode node, bool includeTrivia) {
+		public static void SelectNode(this ITextView view, SyntaxNode node, bool includeTrivia) {
 			var span = includeTrivia ? node.FullSpan : node.Span;
 			if (view.TextSnapshot.Length > span.End) {
-				SnapshotSpan ss;
-				if (includeTrivia && node.ContainsDirectives) {
-					var start = span.Start;
-					var end = span.End;
-					var trivias = node.GetLeadingTrivia();
-					for (int i = trivias.Count - 1; i >= 0; i--) {
-						if (trivias[i].IsDirective) {
-							start = trivias[i].FullSpan.End;
-							break;
-						}
-					}
-					ss = new SnapshotSpan(view.TextSnapshot, start, end - start);
-				}
-				else {
-					ss = new SnapshotSpan(view.TextSnapshot, span.Start, span.Length);
-				}
+				var ss = includeTrivia
+					? new SnapshotSpan(view.TextSnapshot, node.GetSpanWithoutDirective())
+					: new SnapshotSpan(view.TextSnapshot, span.Start, span.Length);
 				view.SelectSpan(ss);
 			}
 		}
@@ -247,6 +220,60 @@ namespace Codist
 			view.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.ShowStart);
 			view.Selection.Select(span, false);
 			view.Caret.MoveTo(span.End);
+		}
+
+		public static void SelectSpan(this ITextView view, int start, int end) {
+			if (end < 0 || start < 0 || start + end > view.TextSnapshot.Length) {
+				return;
+			}
+			var span = new SnapshotSpan(view.TextSnapshot, start, end);
+			view.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.ShowStart);
+			view.Selection.Select(span, false);
+			view.Caret.MoveTo(span.End);
+		}
+
+		public static void CopyOrMoveSyntaxNode(this IWpfTextView view, SyntaxNode sourceNode, SyntaxNode targetNode, bool copy, bool before) {
+			var tSpan = (targetNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? targetNode.Parent.Parent : targetNode).GetSpanWithoutDirective();
+			var sNode = sourceNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? sourceNode.Parent.Parent : sourceNode;
+			var sSpan = sNode.GetSpanWithoutDirective();
+			var target = before ? tSpan.Start : tSpan.End;
+
+			if (targetNode.SyntaxTree.FilePath == sourceNode.SyntaxTree.FilePath) {
+				using (var edit = view.TextBuffer.CreateEdit()) {
+					edit.Insert(target, sNode.GetText().GetSubText(sSpan.ToTextSpan()).ToString());
+					if (copy == false) {
+						edit.Delete(sSpan.Start, sSpan.Length);
+					}
+					if (edit.HasEffectiveChanges) {
+						edit.Apply();
+						view.SelectSpan(sSpan.Start > tSpan.Start ? target : target - sSpan.Length, sSpan.Length);
+					}
+				}
+			}
+			else {
+				using (var edit = view.TextBuffer.CreateEdit()) {
+					if (copy == false) {
+						edit.Delete(sSpan.Start, sSpan.Length);
+					}
+					if (edit.HasEffectiveChanges) {
+						edit.Apply();
+					}
+				}
+				CodistPackage.DTE.OpenFile(targetNode.SyntaxTree.FilePath, d => {
+					//var s = (EnvDTE.TextSelection)d.Selection;
+					//s.MoveToAbsoluteOffset(target);
+					//s.Insert(sNode.ToFullString());
+					//s.TextRanges.
+					view = CodistPackage.Instance.GetActiveWpfDocumentView();
+					using (var edit = view.TextBuffer.CreateEdit()) {
+						edit.Insert(target, sNode.ToFullString());
+						if (edit.HasEffectiveChanges) {
+							edit.Apply();
+							view.SelectSpan(target, sSpan.Length);
+						}
+					}
+				});
+			}
 		}
 
 		public static void TryExecuteCommand(this EnvDTE.DTE dte, string command, string args = "") {
@@ -268,7 +295,7 @@ namespace Codist
 			CodistPackage.DTE.TryExecuteCommand(command, args);
 		}
 
-		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
+		public static void OpenFile(this EnvDTE.DTE dte, string file, Action<EnvDTE.Document> action) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (String.IsNullOrEmpty(file)) {
 				return;
@@ -280,13 +307,13 @@ namespace Codist
 			using (new NewDocumentStateScope(__VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
 				dte.ItemOperations.OpenFile(file);
 				try {
-					((EnvDTE.TextSelection)dte.ActiveDocument.Selection).MoveToLineAndOffset(line, column);
+					action(dte.ActiveDocument);
 				}
 				catch (NullReferenceException) { /* ignore */ }
-				catch (ArgumentException) {
-					// ignore incorrect offset
-				}
 			}
+		}
+		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
+			dte.OpenFile(file, d => ((EnvDTE.TextSelection)d.Selection).MoveToLineAndOffset(line, column));
 		}
 
 		public static IWpfTextView GetActiveWpfDocumentView(this IServiceProvider service) {
@@ -313,92 +340,6 @@ namespace Codist
 			var guidViewHost = guidIWpfTextViewHost;
 			userData.GetData(ref guidViewHost, out object holder);
 			return ((IWpfTextViewHost)holder).TextView;
-		}
-		static Dictionary<string, StyleBase> InitSyntaxStyleCache() {
-			var cache = new Dictionary<string, StyleBase>(100);
-			LoadSyntaxStyleCache(cache);
-			Config.Loaded += (s, args) => ResetStyleCache();
-			DefaultClassificationFormatMap.ClassificationFormatMappingChanged += UpdateFormatCache;
-			return cache;
-		}
-
-		static void ResetStyleCache() {
-			lock (_syncRoot) {
-				var cache = new Dictionary<string, StyleBase>(_SyntaxStyleCache.Count);
-				LoadSyntaxStyleCache(cache);
-				_SyntaxStyleCache = cache;
-			}
-		}
-
-		static void UpdateFormatCache(object sender, EventArgs args) {
-			var defaultFormat = DefaultClassificationFormatMap.DefaultTextProperties;
-			if (_DefaultFormatting == null) {
-				_DefaultFormatting = defaultFormat;
-			}
-			else if (_DefaultFormatting.ForegroundBrushSame(defaultFormat.ForegroundBrush) == false) {
-				System.Diagnostics.Debug.WriteLine("DefaultFormatting Changed");
-				// theme changed
-				lock (_syncRoot) {
-					var formattings = new Dictionary<string, TextFormattingRunProperties>(_BackupFormattings.Count);
-					LoadFormattings(formattings);
-					_BackupFormattings = formattings;
-					_DefaultFormatting = defaultFormat;
-				}
-			}
-			lock (_syncRoot) {
-				UpdateIdentifySymbolSource(_SyntaxStyleCache);
-			}
-		}
-
-		static Dictionary<string, TextFormattingRunProperties> LoadFormattings(Dictionary<string, TextFormattingRunProperties> formattings) {
-			var m = DefaultClassificationFormatMap;
-			foreach (var item in m.CurrentPriorityOrder) {
-				if (item != null && _SyntaxStyleCache.ContainsKey(item.Classification)) {
-					formattings[item.Classification] = m.GetExplicitTextProperties(item);
-				}
-			}
-			return formattings;
-		}
-
-		static void LoadSyntaxStyleCache(Dictionary<string, StyleBase> cache) {
-			var service = ServicesHelper.Instance.ClassificationTypeRegistry;
-			InitStyleClassificationCache<CodeStyleTypes, CodeStyle>(cache, service, Config.Instance.GeneralStyles);
-			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(cache, service, Config.Instance.CommentStyles);
-			InitStyleClassificationCache<CppStyleTypes, CppStyle>(cache, service, Config.Instance.CppStyles);
-			InitStyleClassificationCache<CSharpStyleTypes, CSharpStyle>(cache, service, Config.Instance.CodeStyles);
-			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(cache, service, Config.Instance.XmlCodeStyles);
-			InitStyleClassificationCache<SymbolMarkerStyleTypes, SymbolMarkerStyle>(cache, service, Config.Instance.SymbolMarkerStyles);
-			UpdateIdentifySymbolSource(cache);
-		}
-
-		static void UpdateIdentifySymbolSource(Dictionary<string, StyleBase> cache) {
-			StyleBase style;
-			_IdentifySymbolSource = cache.TryGetValue(Constants.CSharpMetadataSymbol, out style) && style.IsSet
-					|| cache.TryGetValue(Constants.CSharpUserSymbol, out style) && style.IsSet;
-		}
-
-		static void InitStyleClassificationCache<TStyleEnum, TCodeStyle>(Dictionary<string, StyleBase> styleCache, IClassificationTypeRegistryService service, List<TCodeStyle> styles)
-			where TCodeStyle : StyleBase {
-			var cs = typeof(TStyleEnum);
-			var codeStyles = Enum.GetNames(cs);
-			foreach (var styleName in codeStyles) {
-				var f = cs.GetField(styleName);
-				var cso = styles.Find(i => i.Id == (int)f.GetValue(null));
-				if (cso == null) {
-					continue;
-				}
-				var cts = f.GetCustomAttributes<ClassificationTypeAttribute>(false);
-				foreach (var item in cts) {
-					var n = item.ClassificationTypeNames;
-					if (String.IsNullOrWhiteSpace(n)) {
-						continue;
-					}
-					var ct = service.GetClassificationType(n);
-					if (ct != null) {
-						styleCache[ct.Classification] = cso;
-					}
-				}
-			}
 		}
 	}
 

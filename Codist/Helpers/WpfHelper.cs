@@ -231,6 +231,11 @@ namespace Codist
 			}
 			return element;
 		}
+		public static TElement ToggleVisibility<TElement>(this TElement element, bool visible)
+			where TElement : UIElement {
+			element.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+			return element;
+		}
 		public static TElement WrapMargin<TElement>(this TElement element, Thickness thickness)
 			where TElement : FrameworkElement {
 			element.Margin = thickness;
@@ -246,6 +251,14 @@ namespace Codist
 		}
 		public static DependencyObject GetFirstVisualChild(this DependencyObject obj) {
 			return VisualTreeHelper.GetChild(obj, 0);
+		}
+		public static TObject GetParentOrSelf<TObject>(this DependencyObject obj, Predicate<TObject> predicate = null)
+			where TObject : DependencyObject {
+			if (obj == null) {
+				return null;
+			}
+			var o = obj as TObject;
+			return o != null && (predicate == null || predicate(o)) ? o : obj.GetParent<TObject>(predicate);
 		}
 		public static TParent GetParent<TParent>(this DependencyObject obj, Predicate<TParent> predicate = null)
 			where TParent : DependencyObject {

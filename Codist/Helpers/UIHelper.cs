@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Reflection;
 using System.Windows.Forms;
-using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Classification;
 using GdiColor = System.Drawing.Color;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
 using WpfBrush = System.Windows.Media.Brush;
-using FontStyle = System.Drawing.FontStyle;
 
 namespace Codist
 {
@@ -145,71 +143,6 @@ namespace Codist
 			var f = type.GetField(field);
 			var d = f.GetCustomAttribute<ClassificationTypeAttribute>();
 			return d?.ClassificationTypeNames;
-		}
-
-		internal static void MixStyle(SyntaxHighlight.StyleBase style, out FontStyle fontStyle, out GdiColor forecolor, out GdiColor backcolor) {
-			forecolor = style.ForegroundOpacity > 0 ? ThemeHelper.DocumentTextColor.Alpha(style.ForegroundOpacity) : ThemeHelper.DocumentTextColor;
-			backcolor = style.BackgroundOpacity > 0 ? ThemeHelper.DocumentPageColor.Alpha(style.BackgroundOpacity) : ThemeHelper.DocumentPageColor;
-			fontStyle = style.GetFontStyle();
-			if (style.ClassificationType == null) {
-				return;
-			}
-			var p = TextEditorHelper.DefaultClassificationFormatMap.GetRunProperties(style.ClassificationType);
-			if (p == null) {
-				return;
-			}
-			SolidColorBrush colorBrush;
-			if (style.ForeColor.A == 0) {
-				colorBrush = p.ForegroundBrushEmpty ? null : p.ForegroundBrush as SolidColorBrush;
-				if (colorBrush != null) {
-					forecolor = (style.ForegroundOpacity > 0 ? colorBrush.Color.Alpha(style.ForegroundOpacity) : colorBrush.Color).ToGdiColor();
-				}
-			}
-			else {
-				forecolor = style.AlphaForeColor.ToGdiColor();
-			}
-			if (style.BackColor.A == 0) {
-				colorBrush = p.BackgroundBrushEmpty ? null : p.BackgroundBrush as SolidColorBrush;
-				if (colorBrush != null) {
-					backcolor = (style.BackgroundOpacity > 0 ? colorBrush.Color.Alpha(style.BackgroundOpacity) : colorBrush.Color).ToGdiColor();
-				}
-			}
-			else {
-				backcolor = style.AlphaBackColor.ToGdiColor();
-			}
-			if (p.BoldEmpty == false && p.Bold && style.Bold != false) {
-				fontStyle |= FontStyle.Bold;
-			}
-			if (p.ItalicEmpty == false && p.Italic && style.Italic != false) {
-				fontStyle |= FontStyle.Italic;
-			}
-			if (p.TextDecorationsEmpty == false) {
-				foreach (var decoration in p.TextDecorations) {
-					if (decoration.Location == System.Windows.TextDecorationLocation.Underline && style.Underline != false) {
-						fontStyle |= FontStyle.Underline;
-					}
-					else if (decoration.Location == System.Windows.TextDecorationLocation.Strikethrough && style.Strikethrough != false) {
-						fontStyle |= FontStyle.Strikeout;
-					}
-				}
-			}
-		}
-
-		internal static FontStyle GetFontStyle(this SyntaxHighlight.StyleBase activeStyle) {
-			var f = FontStyle.Regular;
-			if (activeStyle.Bold == true) {
-				f |= FontStyle.Bold;
-			}
-			if (activeStyle.Italic == true) {
-				f |= FontStyle.Italic;
-			}
-			if (activeStyle.Underline == true) {
-				f |= FontStyle.Underline;
-			}
-			if (activeStyle.Strikethrough == true) {
-				f |= FontStyle.Strikeout;
-			}
-			return f;
 		}
 	}
 }

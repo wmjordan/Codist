@@ -506,7 +506,7 @@ namespace Codist.Classifiers
 				}
 			}
 
-			if (TextEditorHelper.IdentifySymbolSource && symbol.IsMemberOrType() && symbol.ContainingAssembly != null) {
+			if (SyntaxHighlight.FormatStore.IdentifySymbolSource && symbol.IsMemberOrType() && symbol.ContainingAssembly != null) {
 				yield return symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata
 					? _Classifications.MetadataSymbol
 					: _Classifications.UserSymbol;

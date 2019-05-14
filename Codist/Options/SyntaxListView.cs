@@ -49,7 +49,7 @@ namespace Codist.Options
 			if (Style == null) {
 				return;
 			}
-			UIHelper.MixStyle(Style, out var s, out var fg, out var bg);
+			Style.MixStyle(out var s, out var fg, out var bg);
 			if (Font.Style != s || Style.Font != Font.OriginalFontName) {
 				Font = new Font(Style.Font, Font.Size, s, Font.Unit, Font.GdiCharSet);
 			}
