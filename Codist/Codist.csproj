@@ -100,6 +100,7 @@
     <Compile Include="Helpers\CancellationHelper.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.Document.cs" />
     <Compile Include="Helpers\ColorHelper.cs" />
+    <Compile Include="Helpers\DragDropHelper.cs" />
     <Compile Include="Margins\SelectionMargin.cs" />
     <Compile Include="NaviBar\NaviBarFactory.cs" />
     <Compile Include="NaviBar\CSharpBar.cs" />
@@ -231,6 +232,7 @@
     <Compile Include="SmartBars\SmartBar.CommonEdit.cs" />
     <Compile Include="SmartBars\SmartBar.cs" />
     <Compile Include="SmartBars\SmartBarTextViewCreationListener.cs" />
+    <Compile Include="SyntaxHighlight\FormatStore.cs" />
     <Compile Include="SyntaxHighlight\StyleBase.cs" />
     <Compile Include="SyntaxHighlight\CodeViewCreationListener.cs" />
     <Compile Include="SyntaxHighlight\CodeViewDecorator.cs" />

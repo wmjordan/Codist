@@ -762,6 +762,24 @@ namespace Codist
 			}
 		}
 
+		public static Span GetSpanWithoutDirective(this SyntaxNode node) {
+			var span = node.FullSpan;
+			if (node.ContainsDirectives == false) {
+				return span.ToSpan();
+			}
+
+			var start = span.Start;
+			var end = span.End;
+			var trivias = node.GetLeadingTrivia();
+			for (int i = trivias.Count - 1; i >= 0; i--) {
+				if (trivias[i].IsDirective) {
+					start = trivias[i].FullSpan.End;
+					break;
+				}
+			}
+			return new Span(start, end - start);
+		}
+
 		public static IdentifierNameSyntax GetFirstIdentifier(this SyntaxNode node) {
 			return node.DescendantNodes().FirstOrDefault(i => i.IsKind(SyntaxKind.IdentifierName)) as IdentifierNameSyntax;
 		}

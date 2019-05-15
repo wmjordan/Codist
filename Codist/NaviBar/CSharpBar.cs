@@ -15,6 +15,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Task = System.Threading.Tasks.Task;
 
@@ -45,6 +46,7 @@ namespace Codist.NaviBar
 			SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
 			SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextInactiveKey);
 			Items.Add(_RootItem = new RootItem(this));
+			_View.TextBuffer.Changed += TextBuffer_Changed;
 			_View.Selection.SelectionChanged += Update;
 			_View.Closed += ViewClosed;
 			Update(this, EventArgs.Empty);
@@ -123,6 +125,10 @@ namespace Codist.NaviBar
 			}
 		}
 
+		void TextBuffer_Changed(object sender, TextContentChangedEventArgs e) {
+			HideMenu();
+		}
+
 		async void Update(object sender, EventArgs e) {
 			HideMenu();
 			CancellationHelper.CancelAndDispose(ref _cancellationSource, true);
@@ -189,6 +195,7 @@ namespace Codist.NaviBar
 
 		void ViewClosed(object sender, EventArgs e) {
 			_View.Selection.SelectionChanged -= Update;
+			_View.TextBuffer.Changed -= TextBuffer_Changed;
 			CancellationHelper.CancelAndDispose(ref _cancellationSource, false);
 			_View.Closed -= ViewClosed;
 		}
@@ -218,7 +225,7 @@ namespace Codist.NaviBar
 				_SymbolList = menu;
 			}
 			menu.ItemsControlMaxHeight = _View.ViewportHeight / 2;
-			menu.RefreshSymbols();
+			menu.RefreshItemsSource();
 			menu.ScrollToSelectedItem();
 			menu.PreviewKeyUp -= OnMenuKeyUp;
 			menu.PreviewKeyUp += OnMenuKeyUp;
@@ -283,7 +290,7 @@ namespace Codist.NaviBar
 			return t;
 		}
 
-		static void AddParameterList(ThemedMenuText t, SyntaxNode node) {
+		static void AddParameterList(TextBlock t, SyntaxNode node) {
 			var useParamName = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName);
 			if (node is BaseMethodDeclarationSyntax) {
 				t.Append((node as BaseMethodDeclarationSyntax).ParameterList.GetParameterListSignature(useParamName), ThemeHelper.SystemGrayTextBrush);
@@ -315,7 +322,7 @@ namespace Codist.NaviBar
 
 
 		async Task<List<SyntaxNode>> UpdateModelAsync(CancellationToken token) {
-			var start = _View.Selection.Start.Position;
+			var start = _View.GetCaretPosition();
 			if (await _SemanticContext.UpdateAsync(start, token) == false) {
 				return new List<SyntaxNode>();
 			}
@@ -336,7 +343,7 @@ namespace Codist.NaviBar
 				this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
 				Header = new ThemedToolBarText();
-				_Menu = new SymbolList {
+				_Menu = new SymbolList(bar._SemanticContext) {
 					Container = _Bar._SymbolListContainer,
 					Header = new StackPanel {
 						Margin = WpfHelper.MenuItemMargin,
@@ -417,7 +424,7 @@ namespace Codist.NaviBar
 			void AddNamespaceAndTypes() {
 				foreach (var node in _Bar._SemanticContext.Compilation.ChildNodes()) {
 					if (node.IsTypeOrNamespaceDeclaration()) {
-						_Menu.Add(node, _Bar._SemanticContext);
+						_Menu.Add(node);
 						AddTypeDeclarations(node);
 					}
 				}
@@ -427,7 +434,7 @@ namespace Codist.NaviBar
 			void AddTypeDeclarations(SyntaxNode node) {
 				foreach (var child in node.ChildNodes()) {
 					if (child.IsTypeOrNamespaceDeclaration()) {
-						var i = _Menu.Add(child, _Bar._SemanticContext);
+						var i = _Menu.Add(child);
 						String prefix = null;
 						var p = child.Parent;
 						while (p.IsTypeDeclaration()) {
@@ -467,7 +474,7 @@ namespace Codist.NaviBar
 							FindInProject(s);
 							break;
 					}
-					_Menu.RefreshSymbols();
+					_Menu.RefreshItemsSource();
 					_Menu.UpdateLayout();
 				}
 				catch (OperationCanceledException) {
@@ -480,7 +487,7 @@ namespace Codist.NaviBar
 				var members = _Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken);
 				foreach (var item in members) {
 					if (item.GetDeclarationSignature().IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1) {
-						var i = _Menu.Add(item, _Bar._SemanticContext);
+						var i = _Menu.Add(item);
 						i.Content = SetHeader(item, true, false, true);
 					}
 				}
@@ -495,7 +502,7 @@ namespace Codist.NaviBar
 					if (token.IsCancellationRequested) {
 						break;
 					}
-					_Menu.Add(item, _Bar._SemanticContext, true);
+					_Menu.Add(item, true);
 				}
 			}
 			sealed class MemberFinderBox : ThemedTextBox
@@ -529,7 +536,7 @@ namespace Codist.NaviBar
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
 				Click += HandleClick;
 			}
-			public SyntaxNode Node { get; }
+			public SyntaxNode Node { get; private set; }
 
 			async void HandleClick(object sender, RoutedEventArgs e) {
 				CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
@@ -578,7 +585,7 @@ namespace Codist.NaviBar
 					await RefreshItemsAsync(Node, cancellationToken);
 					return;
 				}
-				_Menu = new SymbolList {
+				_Menu = new SymbolList(_Bar._SemanticContext) {
 					Container = _Bar._SymbolListContainer
 				};
 				_Menu.Header = new WrapPanel {
@@ -616,10 +623,11 @@ namespace Codist.NaviBar
 				await _Bar._SemanticContext.UpdateAsync(cancellationToken);
 				if (sm != _Bar._SemanticContext.SemanticModel) {
 					_Menu.Symbols.Clear();
+					Node = _Bar._SemanticContext.RelocateDeclarationNode(Node);
 					await AddItemsAsync(node, cancellationToken);
 					return;
 				}
-				var pos = _Bar._SemanticContext.Position;
+				var pos = _Bar._View.GetCaretPosition();
 				foreach (var item in _Menu.Symbols) {
 					if (item.Type == SymbolItemType.Container) {
 						continue;
@@ -642,7 +650,8 @@ namespace Codist.NaviBar
 						continue;
 					}
 					var partial = await item.GetSyntaxAsync(cancellationToken);
-					var i = _Menu.Add(partial, _Bar._SemanticContext);
+					var i = _Menu.Add(partial);
+					i.Location = item.SyntaxTree.GetLocation(item.Span);
 					i.Content.Text = System.IO.Path.GetFileName(item.SyntaxTree.FilePath);
 					i.Type = SymbolItemType.Container;
 					AddMemberDeclarations(partial, true);
@@ -656,6 +665,7 @@ namespace Codist.NaviBar
 					? node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia) || d.IsKind(SyntaxKind.EndRegionDirectiveTrivia))
 					: null;
 				byte regionJustStart = UNDEFINED; // undefined, prevent #endregion show up on top of menu items
+				bool selected = false;
 				int pos = _Bar._View.GetCaretPosition();
 				foreach (var child in node.ChildNodes()) {
 					if (child.IsMemberDeclaration() == false && child.IsTypeDeclaration() == false) {
@@ -666,7 +676,7 @@ namespace Codist.NaviBar
 							var d = directives[i];
 							if (d.SpanStart < child.SpanStart) {
 								if (d.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
-									var item = _Menu.Add(d, _Bar._SemanticContext);
+									var item = _Menu.Add(d);
 									item.Hint = "#region";
 									item.Content = SetHeader(d, false, false, false);
 									if (isExternal) {
@@ -695,11 +705,13 @@ namespace Codist.NaviBar
 						AddVariables((child as BaseFieldDeclarationSyntax).Declaration.Variables, isExternal, pos);
 					}
 					else {
-						var i = _Menu.Add(child, _Bar._SemanticContext);
+						var i = _Menu.Add(child);
 						if (isExternal) {
 							i.Type = SymbolItemType.External;
 						}
-						i.SelectIfContainsPosition(pos);
+						if (selected == false && i.SelectIfContainsPosition(pos)) {
+							selected = true;
+						}
 						ShowNodeValue(i);
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterList)) {
 							AddParameterList(i.Content, child);
@@ -711,7 +723,7 @@ namespace Codist.NaviBar
 				if (directives != null) {
 					foreach (var item in directives) {
 						if (item.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
-							var i = _Menu.Add(item, _Bar._SemanticContext);
+							var i = _Menu.Add(item);
 							i.Hint = "#region";
 							i.Content = SetHeader(item, false, false, false);
 							if (isExternal) {
@@ -724,7 +736,7 @@ namespace Codist.NaviBar
 
 			void AddVariables(SeparatedSyntaxList<VariableDeclaratorSyntax> fields, bool isExternal, int pos) {
 				foreach (var item in fields) {
-					var i = _Menu.Add(item, _Bar._SemanticContext);
+					var i = _Menu.Add(item);
 					if (isExternal) {
 						i.Type = SymbolItemType.External;
 					}

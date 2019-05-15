@@ -4,8 +4,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Media;
 using System.Windows.Input;
 using Microsoft.CodeAnalysis;
+using AppHelpers;
 
 namespace Codist.Controls
 {
@@ -15,7 +17,7 @@ namespace Codist.Controls
 		public static readonly DependencyProperty ItemsControlMaxHeightProperty = DependencyProperty.Register("ItemsControlMaxHeight", typeof(double), typeof(SymbolList));
 		Predicate<object> _Filter;
 
-		public SymbolList() {
+		public SymbolList(SemanticContext semanticContext) {
 			SetValue(VirtualizingPanel.IsVirtualizingProperty, true);
 			SetValue(VirtualizingPanel.VirtualizationModeProperty, VirtualizationMode.Recycling);
 			ItemsControlMaxHeight = 500;
@@ -23,6 +25,7 @@ namespace Codist.Controls
 			Symbols = new List<SymbolItem>();
 			FilteredSymbols = new ListCollectionView(Symbols);
 			Resources = SharedDictionaryManager.SymbolList;
+			SemanticContext = semanticContext;
 		}
 		public UIElement Header {
 			get => GetValue(HeaderProperty) as UIElement;
@@ -36,7 +39,7 @@ namespace Codist.Controls
 			get => (double)GetValue(ItemsControlMaxHeightProperty);
 			set => SetValue(ItemsControlMaxHeightProperty, value);
 		}
-		public SymbolItem HighlightedItem { get; internal set; }
+		public SemanticContext SemanticContext { get; }
 		public List<SymbolItem> Symbols { get; }
 		public ListCollectionView FilteredSymbols { get; }
 		public FrameworkElement Container { get; set; }
@@ -44,22 +47,22 @@ namespace Codist.Controls
 		public SymbolItemType ContainerType { get; set; }
 		public Func<SymbolItem, UIElement> IconProvider { get; set; }
 
-		public SymbolItem Add(SyntaxNode node, SemanticContext context) {
-			var item = new SymbolItem(node, context, this);
+		public SymbolItem Add(SyntaxNode node) {
+			var item = new SymbolItem(node, this);
 			Symbols.Add(item);
 			return item;
 		}
-		public SymbolItem Add(ISymbol symbol, SemanticContext context, bool includeContainerType) {
-			var item = new SymbolItem(symbol, context, this, includeContainerType);
+		public SymbolItem Add(ISymbol symbol, bool includeContainerType) {
+			var item = new SymbolItem(symbol, this, includeContainerType);
 			Symbols.Add(item);
 			return item;
 		}
-		public SymbolItem Add(ISymbol symbol, SemanticContext context, ISymbol containerType) {
-			var item = new SymbolItem(symbol, context, this, containerType);
+		public SymbolItem Add(ISymbol symbol, ISymbol containerType) {
+			var item = new SymbolItem(symbol, this, containerType);
 			Symbols.Add(item);
 			return item;
 		}
-		public void RefreshSymbols() {
+		public void RefreshItemsSource() {
 			if (_Filter != null) {
 				FilteredSymbols.Filter = _Filter;
 				ItemsSource = FilteredSymbols;
@@ -166,6 +169,106 @@ namespace Codist.Controls
 				}
 			}
 		}
+		protected override void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e) {
+			base.OnPreviewMouseLeftButtonDown(e);
+			var item = GetMouseEventTarget(e);
+			if (item != null && SemanticContext != null && item.SyntaxNode != null) {
+				MouseMove -= BeginDragHandler;
+				MouseMove += BeginDragHandler;
+			}
+		}
+
+		SymbolItem GetMouseEventTarget(MouseEventArgs e) {
+			return (InputHitTest(e.GetPosition(this)) as DependencyObject).GetParentOrSelf<ListBoxItem>()?.Content as SymbolItem;
+		}
+		ListBoxItem GetDragEventTarget(DragEventArgs e) {
+			return (InputHitTest(e.GetPosition(this)) as DependencyObject).GetParentOrSelf<ListBoxItem>();
+		}
+		static SymbolItem GetDragData(DragEventArgs e) {
+			return e.Data.GetData(typeof(SymbolItem)) as SymbolItem;
+		}
+
+		void BeginDragHandler(object sender, MouseEventArgs e) {
+			SymbolItem item;
+			if (e.LeftButton != MouseButtonState.Pressed || (item = GetMouseEventTarget(e)) == null) {
+				return;
+			}
+			if (item.SyntaxNode != null && SemanticContext.UpdateAsync(default).Result) {
+				item.RefreshSyntaxNode();
+				var s = e.Source as FrameworkElement;
+				MouseMove -= BeginDragHandler;
+				DragOver += DragOverHandler;
+				Drop += DropHandler;
+				DragEnter += DragOverHandler;
+				DragLeave += DragLeaveHandler;
+				QueryContinueDrag += QueryContinueDragHandler;
+				var r = DragDrop.DoDragDrop(s, item, DragDropEffects.Copy | DragDropEffects.Move);
+				var t = Footer as TextBlock;
+				if (t != null) {
+					t.Text = null;
+				}
+				DragOver -= DragOverHandler;
+				Drop -= DropHandler;
+				DragEnter -= DragOverHandler;
+				DragLeave -= DragLeaveHandler;
+				QueryContinueDrag -= QueryContinueDragHandler;
+			}
+		}
+
+		void DragOverHandler(object sender, DragEventArgs e) {
+			var li = GetDragEventTarget(e);
+			SymbolItem item, d;
+			if (li != null && (item = li.Content as SymbolItem)?.SyntaxNode != null
+				&& (d = GetDragData(e)) != null && d != item
+				&& (d.SyntaxNode.SyntaxTree.FilePath != item.SyntaxNode.SyntaxTree.FilePath
+					|| d.SyntaxNode.Span.IntersectsWith(item.SyntaxNode.Span) == false)) {
+				var copy = e.KeyStates.MatchFlags(DragDropKeyStates.ControlKey);
+				e.Effects = copy ? DragDropEffects.Copy : DragDropEffects.Move;
+				var t = Footer as TextBlock;
+				if (t != null) {
+					t.Text = (copy ? "Copy " : "Move ")
+						+ (e.GetPosition(li).Y < li.ActualHeight / 2 ? "before " : "after ")
+						+ item.SyntaxNode.GetDeclarationSignature();
+				}
+			}
+			else {
+				e.Effects = DragDropEffects.None;
+			}
+			e.Handled = true;
+		}
+
+		void DragLeaveHandler(object sender, DragEventArgs e) {
+			var t = Footer as TextBlock;
+			if (t != null) {
+				t.Text = null;
+			}
+			e.Handled = true;
+		}
+
+		void DropHandler(object sender, DragEventArgs e) {
+			var li = GetDragEventTarget(e);
+			SymbolItem source, target;
+			if (li != null && (target = li.Content as SymbolItem)?.SyntaxNode != null
+				&& (source = GetDragData(e)) != null) {
+				target.RefreshSyntaxNode();
+				var copy = e.KeyStates.MatchFlags(DragDropKeyStates.ControlKey);
+				var before = e.GetPosition(li).Y < li.ActualHeight / 2;
+				SemanticContext.View.CopyOrMoveSyntaxNode(source.SyntaxNode, target.SyntaxNode, copy, before);
+				e.Effects = copy ? DragDropEffects.Copy : DragDropEffects.Move;
+			}
+			else {
+				e.Effects = DragDropEffects.None;
+			}
+			e.Handled = true;
+		}
+
+		void QueryContinueDragHandler(object sender, QueryContinueDragEventArgs e) {
+			if (e.EscapePressed) {
+				e.Action = DragAction.Cancel;
+				e.Handled = true;
+			}
+		}
+
 		void IMemberFilterable.Filter(string[] keywords, MemberFilterTypes filterTypes) {
 			var noKeyword = keywords.Length == 0;
 			if (noKeyword && filterTypes == MemberFilterTypes.All) {
@@ -184,7 +287,7 @@ namespace Codist.Controls
 							&& keywords.All(p => i.Content.GetText().IndexOf(p, StringComparison.OrdinalIgnoreCase) != -1);
 				};
 			}
-			RefreshSymbols();
+			RefreshItemsSource();
 		}
 	}
 
@@ -243,10 +346,9 @@ namespace Codist.Controls
 
 	sealed class SymbolItem /*: INotifyPropertyChanged*/
 	{
-		readonly SemanticContext _SemanticContext;
 		UIElement _Icon;
 		int _ImageId;
-		ThemedMenuText _Content;
+		TextBlock _Content;
 		string _Hint;
 		readonly bool _IncludeContainerType;
 
@@ -260,8 +362,8 @@ namespace Codist.Controls
 		public SymbolItemType Type { get; set; }
 		public bool IsExternal => Type == SymbolItemType.External
 			|| Container.ContainerType != SymbolItemType.VsKnownImage && Container.ContainerType != SymbolItemType.PredefinedColors && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
-		public ThemedMenuText Content {
-			get => _Content ?? (_Content = Symbol != null ? CreateContentForSymbol(Symbol, _IncludeContainerType, true) : SyntaxNode != null ? new ThemedMenuText(SyntaxNode.GetDeclarationSignature()) : new ThemedMenuText());
+		public TextBlock Content {
+			get => _Content ?? (_Content = Symbol != null ? CreateContentForSymbol(Symbol, _IncludeContainerType, true) : SyntaxNode != null ? new TextBlock().Append(SyntaxNode.GetDeclarationSignature()) : new TextBlock());
 			set => _Content = value;
 		}
 		public Location Location { get; set; }
@@ -274,21 +376,19 @@ namespace Codist.Controls
 			Content = new ThemedMenuText();
 			_ImageId = -1;
 		}
-		public SymbolItem(ISymbol symbol, SemanticContext semanticContext, SymbolList list, ISymbol containerSymbol)
-			: this (symbol, semanticContext, list, false) {
+		public SymbolItem(ISymbol symbol, SymbolList list, ISymbol containerSymbol)
+			: this (symbol, list, false) {
 			_ImageId = containerSymbol.GetImageId();
 			_Content = CreateContentForSymbol(containerSymbol, false, true);
 		}
-		public SymbolItem(ISymbol symbol, SemanticContext semanticContext, SymbolList list, bool includeContainerType) {
+		public SymbolItem(ISymbol symbol, SymbolList list, bool includeContainerType) {
 			Symbol = symbol;
-			_SemanticContext = semanticContext;
 			Container = list;
 			_IncludeContainerType = includeContainerType;
 		}
 
-		public SymbolItem(SyntaxNode node, SemanticContext semanticContext, SymbolList list) {
+		public SymbolItem(SyntaxNode node, SymbolList list) {
 			SyntaxNode = node;
-			_SemanticContext = semanticContext;
 			Container = list;
 		}
 
@@ -306,7 +406,7 @@ namespace Codist.Controls
 			}
 		}
 		public bool SelectIfContainsPosition(int position) {
-			if (IsExternal == false && SyntaxNode != null && SyntaxNode.FullSpan.Contains(position)) {
+			if (IsExternal == false && SyntaxNode != null && SyntaxNode.FullSpan.Contains(position, true)) {
 				Container.SelectedItem = this;
 				return true;
 			}
@@ -328,7 +428,7 @@ namespace Codist.Controls
 			var e = args.Source as FrameworkElement;
 			if (Symbol != null) {
 				RefreshSymbol();
-				e.ToolTip = ToolTipFactory.CreateToolTip(Symbol, false, _SemanticContext.SemanticModel.Compilation);
+				e.ToolTip = ToolTipFactory.CreateToolTip(Symbol, false, Container.SemanticContext.SemanticModel.Compilation);
 				e.SetTipOptions();
 				ToolTipService.SetPlacement(e, System.Windows.Controls.Primitives.PlacementMode.Left);
 				return;
@@ -338,10 +438,10 @@ namespace Codist.Controls
 					RefreshSymbol();
 				}
 				else {
-					Symbol = _SemanticContext.GetSymbolAsync(SyntaxNode).ConfigureAwait(false).GetAwaiter().GetResult();
+					Symbol = Container.SemanticContext.GetSymbolAsync(SyntaxNode).ConfigureAwait(false).GetAwaiter().GetResult();
 				}
 				if (Symbol != null) {
-					e.ToolTip = ToolTipFactory.CreateToolTip(Symbol, true, _SemanticContext.SemanticModel.Compilation);
+					e.ToolTip = ToolTipFactory.CreateToolTip(Symbol, true, Container.SemanticContext.SemanticModel.Compilation);
 					e.SetTipOptions();
 					ToolTipService.SetPlacement(e, System.Windows.Controls.Primitives.PlacementMode.Left);
 					return;
@@ -361,32 +461,41 @@ namespace Codist.Controls
 			}
 			return null;
 		}
-		void RefreshSyntaxNode() {
-			var node = _SemanticContext.RelocateDeclarationNode(SyntaxNode);
+		internal void RefreshSyntaxNode() {
+			var node = Container.SemanticContext.RelocateDeclarationNode(SyntaxNode);
 			if (node != null && node != SyntaxNode) {
 				SyntaxNode = node;
 			}
 		}
 		void RefreshSymbol() {
-			var symbol = _SemanticContext.RelocateSymbolAsync(Symbol).ConfigureAwait(false).GetAwaiter().GetResult();
+			var symbol = Container.SemanticContext.RelocateSymbolAsync(Symbol).ConfigureAwait(false).GetAwaiter().GetResult();
 			if (symbol != null && symbol != Symbol) {
 				Symbol = symbol;
 			}
 		}
 	}
 
+
 	public class SymbolItemTemplateSelector : DataTemplateSelector
 	{
 		public override DataTemplate SelectTemplate(object item, DependencyObject container) {
-			var element = container as FrameworkElement;
+			var c = container as FrameworkElement;
 			var i = item as SymbolItem;
 			if (i != null && (i.Symbol != null || i.SyntaxNode != null)) {
-				element.ToolTip = String.Empty;
-				element.ToolTipOpening += i.Item_ToolTipOpening;
-				return element.FindResource("SymbolItemTemplate") as DataTemplate;
+				c.ToolTip = String.Empty;
+				c.ToolTipOpening += i.Item_ToolTipOpening;
+				//if (i.SyntaxNode != null) {
+				//	c.MouseDown += i.Item_MouseDownBeginDrag;
+				//	c.DragOver += i.Item_DragOver;
+				//	c.Drop += i.Item_Drop;
+				//	c.DragEnter += i.Item_DragOver;
+				//	c.DragLeave += i.Item_DragLeave;
+				//	c.QueryContinueDrag += i.Item_QueryContinueDrag;
+				//}
+				return c.FindResource("SymbolItemTemplate") as DataTemplate;
 			}
 			else {
-				return element.FindResource("LabelTemplate") as DataTemplate;
+				return c.FindResource("LabelTemplate") as DataTemplate;
 			}
 		}
 	}

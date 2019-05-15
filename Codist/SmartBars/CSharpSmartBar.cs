@@ -371,7 +371,7 @@ namespace Codist.SmartBars
 			var containerType = source.ContainingType;
 			foreach (var caller in callers) {
 				var s = caller.CallingSymbol;
-				var i = m.Menu.Add(s, _Context, false);
+				var i = m.Menu.Add(s, false);
 				i.Location = caller.Locations.FirstOrDefault();
 				if (s.ContainingType != containerType) {
 					i.Hint = s.ContainingType.ToDisplayString(WpfHelper.MemberNameFormat);
@@ -392,12 +392,12 @@ namespace Codist.SmartBars
 			var m = new SymbolMenu(this);
 			if (symbol.Kind == SymbolKind.NamedType) {
 				foreach (var impl in implementations) {
-					m.Menu.Add(impl, _Context, false);
+					m.Menu.Add(impl, false);
 				}
 			}
 			else {
 				foreach (var impl in implementations) {
-					m.Menu.Add(impl, _Context, impl.ContainingSymbol);
+					m.Menu.Add(impl, impl.ContainingSymbol);
 				}
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
@@ -437,10 +437,10 @@ namespace Codist.SmartBars
 			ITypeSymbol containingType = null;
 			foreach (var item in members) {
 				if (groupByType && item.ContainingType != containingType) {
-					m.Menu.Add((containingType = item.ContainingType), _Context, false)
+					m.Menu.Add((containingType = item.ContainingType), false)
 						.Type = SymbolItemType.Container;
 				}
-				m.Menu.Add(item, _Context, false);
+				m.Menu.Add(item, false);
 			}
 			m.Show();
 		}
@@ -515,7 +515,7 @@ namespace Codist.SmartBars
 				members = members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
 			}
 			foreach (var item in members) {
-				var i = list.Add(item, bar._Context, false);
+				var i = list.Add(item, false);
 				if (typeCategory != null) {
 					i.Hint = typeCategory;
 				}
@@ -558,7 +558,7 @@ namespace Codist.SmartBars
 			var m = new SymbolMenu(this);
 			int c = 0;
 			foreach (var ov in ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindOverridesAsync(symbol, _Context.Document.Project.Solution, null, context.CancellationToken))) {
-				m.Menu.Add(ov, _Context, ov.ContainingType);
+				m.Menu.Add(ov, ov.ContainingType);
 				++c;
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
@@ -655,7 +655,7 @@ namespace Codist.SmartBars
 			var c = 0;
 			foreach (var item in _Context.Node.FindReferencingSymbols(_Context.SemanticModel, true)) {
 				var member = item.Key;
-				var i = m.Menu.Add(member, _Context, true);
+				var i = m.Menu.Add(member, true);
 				if (item.Value > 1) {
 					i.Hint = "* " + item.Value.ToString();
 				}
@@ -813,7 +813,7 @@ namespace Codist.SmartBars
 			public MemberFilterBox FilterBox { get; }
 
 			public SymbolMenu(CSharpSmartBar bar) {
-				Menu = new SymbolList {
+				Menu = new SymbolList(bar._Context) {
 					IsVsProject = bar._IsVsProject,
 					Container = bar._SymbolListContainer
 				};
@@ -861,7 +861,7 @@ namespace Codist.SmartBars
 					_Bar._SymbolList = menu;
 				}
 				menu.ItemsControlMaxHeight = _Bar.View.ViewportHeight / 2;
-				menu.RefreshSymbols();
+				menu.RefreshItemsSource();
 				menu.ScrollToSelectedItem();
 				menu.PreviewKeyUp -= OnMenuKeyUp;
 				menu.PreviewKeyUp += OnMenuKeyUp;

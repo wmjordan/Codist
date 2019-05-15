@@ -29,13 +29,14 @@
 		<Setter Property="ItemTemplateSelector" Value="{StaticResource symbolTemplateSelector}"/>
 		<Setter Property="UseLayoutRounding" Value="True" />
 		<Setter Property="Cursor" Value="Arrow"/>
+		<Setter Property="c:DragDropHelper.ScrollOnDragDrop" Value="True"/>
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type c:SymbolList}">
 					<Border BorderThickness="1,1,1,1" CornerRadius="0,0,5,5" x:Name="Border" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" SnapsToDevicePixels="True" UseLayoutRounding="True">
 						<StackPanel>
 							<ContentPresenter x:Name="Header" Content="{TemplateBinding Header}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
-							<ScrollViewer Margin="3" Focusable="False" MaxHeight="{TemplateBinding ItemsControlMaxHeight}" VerticalScrollBarVisibility="Auto">
+							<ScrollViewer x:Name="PART_Scroller" Margin="3" Focusable="False" MaxHeight="{TemplateBinding ItemsControlMaxHeight}" VerticalScrollBarVisibility="Auto">
 								<VirtualizingStackPanel IsItemsHost="True" CacheLength="3" CacheLengthUnit="Page" VirtualizationMode="Recycling"/>
 							</ScrollViewer>
 							<ContentPresenter x:Name="Footer" Content="{TemplateBinding Footer}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>

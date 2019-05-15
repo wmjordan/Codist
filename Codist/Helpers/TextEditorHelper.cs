@@ -240,7 +240,7 @@ namespace Codist
 
 			if (targetNode.SyntaxTree.FilePath == sourceNode.SyntaxTree.FilePath) {
 				using (var edit = view.TextBuffer.CreateEdit()) {
-					edit.Insert(target, sNode.GetText().GetSubText(sSpan.ToTextSpan()).ToString());
+					edit.Insert(target, view.TextSnapshot.GetText(sSpan));
 					if (copy == false) {
 						edit.Delete(sSpan.Start, sSpan.Length);
 					}
