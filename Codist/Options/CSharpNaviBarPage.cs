@@ -32,7 +32,6 @@ namespace Codist.Options
 			_RangeHighlightBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.RangeHighlight, _RangeHighlightBox.Checked));
 			_RegionBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.RegionOnBar, _StripNonLetterCharactersBox.Enabled = _RegionBox.Checked));
 			_RegionItemBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.Region, _RegionItemBox.Checked));
-			_StatisticsBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.CodeStatistics, _StatisticsBox.Checked));
 			_StripNonLetterCharactersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.StripRegionNonLetter, _StripNonLetterCharactersBox.Checked));
 			_SyntaxNodesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.SyntaxDetail, _SyntaxNodesBox.Checked));
 			_ToolTipBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.SymbolToolTip, _ToolTipBox.Checked));
@@ -55,7 +54,6 @@ namespace Codist.Options
 				_RegionItemBox.Checked = o.MatchFlags(NaviBarOptions.Region);
 				_SyntaxNodesBox.Checked = o.MatchFlags(NaviBarOptions.SyntaxDetail);
 				_ToolTipBox.Checked = o.MatchFlags(NaviBarOptions.SymbolToolTip);
-				_StatisticsBox.Checked = o.MatchFlags(NaviBarOptions.CodeStatistics);
 			});
 		}
 	}

@@ -42,7 +42,6 @@
 			this._RegionItemBox = new System.Windows.Forms.CheckBox();
 			this._PartialClassBox = new System.Windows.Forms.CheckBox();
 			this._FieldValueBox = new System.Windows.Forms.CheckBox();
-			this._StatisticsBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.customGroupBox1.SuspendLayout();
@@ -166,7 +165,6 @@
 			this.tabPage1.Controls.Add(this._AutoPropertyValueBox);
 			this.tabPage1.Controls.Add(this._ParameterListParamNameBox);
 			this.tabPage1.Controls.Add(this._ParameterListBox);
-			this.tabPage1.Controls.Add(this._StatisticsBox);
 			this.tabPage1.Controls.Add(this._RegionItemBox);
 			this.tabPage1.Controls.Add(this._PartialClassBox);
 			this.tabPage1.Controls.Add(this._FieldValueBox);
@@ -238,16 +236,6 @@
 			this._FieldValueBox.Text = "Show field value";
 			this._FieldValueBox.UseVisualStyleBackColor = true;
 			// 
-			// _StatisticsBox
-			// 
-			this._StatisticsBox.AutoSize = true;
-			this._StatisticsBox.Location = new System.Drawing.Point(15, 156);
-			this._StatisticsBox.Name = "_StatisticsBox";
-			this._StatisticsBox.Size = new System.Drawing.Size(149, 19);
-			this._StatisticsBox.TabIndex = 14;
-			this._StatisticsBox.Text = "Code statistics";
-			this._StatisticsBox.UseVisualStyleBackColor = true;
-			// 
 			// CSharpNaviBarPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -285,6 +273,5 @@
 		private System.Windows.Forms.CheckBox _FieldValueBox;
 		private Controls.CustomGroupBox customGroupBox1;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.CheckBox _StatisticsBox;
 	}
 }
