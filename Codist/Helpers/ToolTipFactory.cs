@@ -23,7 +23,7 @@ namespace Codist
 				content.Append(t.GetSymbolKindName() + ": ")
 					.Append(t.ToDisplayString(WpfHelper.QuickInfoSymbolDisplayFormat));
 				c = true;
-			};
+			}
 			t = symbol.GetReturnType();
 			if (t != null) {
 				if (c) {
@@ -45,6 +45,15 @@ namespace Codist
 			}
 			content.Append("namespace: " + symbol.ContainingNamespace?.ToString())
 				.Append("\nassembly: " + symbol.GetAssemblyModuleName());
+
+			var d = symbol as INamedTypeSymbol;
+			if (d?.TypeKind == TypeKind.Delegate) {
+				content.Append("\nsignature: ");
+				var invoke = d.OriginalDefinition.DelegateInvokeMethod;
+				content.AddSymbol(invoke.ReturnType, SymbolFormatter.Empty)
+					.Append(" ").AddSymbol(d, SymbolFormatter.Empty)
+					.AddParameters(invoke.Parameters, SymbolFormatter.Empty);
+			}
 			return tooltip;
 		}
 

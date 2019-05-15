@@ -118,7 +118,7 @@ namespace Codist
 					}
 				}
 			}
-			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
+			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
 				info.Append("sealed ", Keyword);
 			}
 			if (symbol.Kind == SymbolKind.Method) {
@@ -142,27 +142,27 @@ namespace Codist
 		internal void ToUIText(InlineCollection text, ISymbol symbol, string alias) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:
-					ToUIText(text, (symbol as IArrayTypeSymbol).ElementType, alias);
+					ToUIText(text, ((IArrayTypeSymbol)symbol).ElementType, alias);
 					if (alias == null) {
 						text.Add("[]");
 					}
 					return;
 				case SymbolKind.Event: text.Add(symbol.Render(alias, Delegate)); return;
 				case SymbolKind.Field:
-					text.Add(symbol.Render(alias, (symbol as IFieldSymbol).IsConst ? Const : Field));
+					text.Add(symbol.Render(alias, ((IFieldSymbol)symbol).IsConst ? Const : Field));
 					return;
 				case SymbolKind.Method:
 					text.Add(symbol.Render(alias, Method));
-					var method = symbol as IMethodSymbol;
+					var method = (IMethodSymbol)symbol;
 					if (method.IsGenericMethod) {
 						AddTypeArguments(text, method.TypeArguments);
 					}
 					return;
 				case SymbolKind.NamedType:
-					var type = symbol as INamedTypeSymbol;
+					var type = (INamedTypeSymbol)symbol;
 					var specialType = type.GetSpecialTypeAlias();
 					if (specialType != null) {
-						text.Add(new Run(specialType) { Foreground = Keyword }); return;
+						text.Add(specialType.Render(Keyword)); return;
 					}
 					switch (type.TypeKind) {
 						case TypeKind.Class:
