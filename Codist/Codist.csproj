@@ -88,6 +88,7 @@
     <Compile Include="Classifiers\XmlFormats.cs" />
     <Compile Include="Commands\IncrementVsixVersionCommand.cs" />
     <Compile Include="Commands\NaviBarSearchDeclarationCommand.cs" />
+    <Compile Include="Controls\ExternalAdornment.cs" />
     <Compile Include="Controls\KeystrokeThief.cs" />
     <Compile Include="Controls\MemberFilterBox.cs" />
     <Compile Include="Controls\QuickInfoTextBox.cs" />
@@ -629,7 +630,7 @@
   <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets')" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.None.Increment" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
+      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.None.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

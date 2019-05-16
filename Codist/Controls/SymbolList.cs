@@ -167,6 +167,7 @@ namespace Codist.Controls
 			}
 		}
 
+		#region Tool Tip
 		protected override void OnMouseEnter(MouseEventArgs e) {
 			base.OnMouseEnter(e);
 			if (_SymbolTip.Tag == null) {
@@ -220,7 +221,8 @@ namespace Codist.Controls
 				return ToolTipFactory.CreateToolTip(item.Symbol, false, SemanticContext.SemanticModel.Compilation);
 			}
 			return null;
-		}
+		} 
+		#endregion
 
 		void IMemberFilterable.Filter(string[] keywords, MemberFilterTypes filterTypes) {
 			var noKeyword = keywords.Length == 0;
@@ -351,59 +353,6 @@ namespace Codist.Controls
 		}
 
 		#endregion
-	}
-
-	// HACK: put the symbol list on top of the WpfTextView
-	// don't use AdornmentLayer to do so, otherwise the menu will go up and down when scrolling code window
-	sealed class ExternalAdornment : Canvas
-	{
-		readonly Microsoft.VisualStudio.Text.Editor.IWpfTextView _View;
-
-		public ExternalAdornment(Microsoft.VisualStudio.Text.Editor.IWpfTextView view) {
-			UseLayoutRounding = true;
-			SnapsToDevicePixels = true;
-			Grid.SetColumn(this, 1);
-			Grid.SetRow(this, 1);
-			Grid.SetIsSharedSizeScope(this, true);
-			var grid = view.VisualElement.GetParent<Grid>();
-			if (grid != null) {
-				grid.Children.Add(this);
-			}
-			else {
-				view.VisualElement.Loaded += VisualElement_Loaded;
-			}
-			_View = view;
-		}
-
-		void VisualElement_Loaded(object sender, RoutedEventArgs e) {
-			_View.VisualElement.Loaded -= VisualElement_Loaded;
-			_View.VisualElement.GetParent<Grid>().Children.Add(this);
-		}
-
-		public void Add(UIElement element) {
-			Children.Add(element);
-			element.MouseLeave -= ReleaseQuickInfo;
-			element.MouseLeave += ReleaseQuickInfo;
-			element.MouseEnter -= SuppressQuickInfo;
-			element.MouseEnter += SuppressQuickInfo;
-		}
-		public void Clear() {
-			foreach (UIElement item in Children) {
-				item.MouseLeave -= ReleaseQuickInfo;
-				item.MouseEnter -= SuppressQuickInfo;
-			}
-			Children.Clear();
-			_View.Properties.RemoveProperty(nameof(ExternalAdornment));
-			_View.VisualElement.Focus();
-		}
-
-		void ReleaseQuickInfo(object sender, MouseEventArgs e) {
-			_View.Properties.RemoveProperty(nameof(ExternalAdornment));
-		}
-
-		void SuppressQuickInfo(object sender, MouseEventArgs e) {
-			_View.Properties[nameof(ExternalAdornment)] = true;
-		}
 	}
 
 	sealed class SymbolItem /*: INotifyPropertyChanged*/
