@@ -112,9 +112,15 @@ namespace TestProject
         }
 
 		/// <exception cref="NotImplementedException">Boo boo.</exception>
-		[return: My(new[] { typeof(int), typeof(string), typeof(DateTime) })]
+		[return: My(new[] { typeof(int), typeof(string), typeof(DateTime), null })]
+		[Name(SharedConstants.A)]
 		public static void Throw() {
 			throw new NotImplementedException("boo-boo");
+		}
+
+		static class SharedConstants
+		{
+			public const string A = "A";
 		}
 	}
 
@@ -129,4 +135,17 @@ namespace TestProject
 		// This is a named argument
 		public int Num { get; set; }
 	}
+
+	[System.AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+	sealed class NameAttribute : Attribute
+	{
+		public NameAttribute(string name, Type type = null) {
+			Name = name;
+			Type = type;
+		}
+
+		public string Name { get; }
+		public Type Type { get; }
+	}
+
 }

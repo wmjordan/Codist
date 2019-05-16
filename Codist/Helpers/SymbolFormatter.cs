@@ -276,6 +276,10 @@ namespace Codist
 		}
 
 		internal void ToUIText(InlineCollection block, TypedConstant constant) {
+			if (constant.IsNull) {
+				block.Add("null".Render(Keyword));
+				return;
+			}
 			switch (constant.Kind) {
 				case TypedConstantKind.Primitive:
 					if (constant.Value is bool) {
