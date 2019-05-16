@@ -814,7 +814,6 @@ namespace Codist.SmartBars
 
 			public SymbolMenu(CSharpSmartBar bar) {
 				Menu = new SymbolList(bar._Context) {
-					IsVsProject = bar._IsVsProject,
 					Container = bar._SymbolListContainer
 				};
 				Menu.Header = new StackPanel {

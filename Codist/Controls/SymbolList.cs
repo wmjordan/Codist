@@ -8,6 +8,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using Microsoft.CodeAnalysis;
 using AppHelpers;
+using Microsoft.VisualStudio.Imaging;
 
 namespace Codist.Controls
 {
@@ -31,6 +32,11 @@ namespace Codist.Controls
 				Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 				PlacementTarget = this
 			};
+			ContextMenu = new ContextMenu {
+				Resources = SharedDictionaryManager.ContextMenu,
+				Foreground = ThemeHelper.ToolWindowTextBrush,
+				IsEnabled = true,
+			};
 		}
 		public UIElement Header {
 			get => GetValue(HeaderProperty) as UIElement;
@@ -48,9 +54,9 @@ namespace Codist.Controls
 		public List<SymbolItem> Symbols { get; }
 		public ListCollectionView FilteredSymbols { get; }
 		public FrameworkElement Container { get; set; }
-		public bool IsVsProject { get; set; }
 		public SymbolItemType ContainerType { get; set; }
 		public Func<SymbolItem, UIElement> IconProvider { get; set; }
+		public SymbolItem SelectedSymbolItem => SelectedItem as SymbolItem;
 
 		public SymbolItem Add(SyntaxNode node) {
 			var item = new SymbolItem(node, this);
@@ -167,6 +173,40 @@ namespace Codist.Controls
 			}
 		}
 
+		protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
+			base.OnContextMenuOpening(e);
+			var item = SelectedSymbolItem;
+			if (item == null || item.Symbol == null && item.SyntaxNode == null) {
+				e.Handled = true;
+				return;
+			}
+			ContextMenu.Items.Clear();
+			SetupContextMenu(item);
+		}
+
+		void SetupContextMenu(SymbolItem item) {
+			if (item.SyntaxNode != null) {
+				SetupMenuCommand(item, KnownImageIds.BlockSelection, "Select Code", s => s.Container.SemanticContext.View.SelectNode(s.SyntaxNode, true));
+				SetupMenuCommand(item, KnownImageIds.BlockSelection, "Copy Code", s => Clipboard.SetText(s.SyntaxNode.ToFullString()));
+				item.SetSymbolToSyntaxNode();
+			}
+			if (item.Symbol != null) {
+				SetupMenuCommand(item, KnownImageIds.DisplayName, "Copy Symbol Name", s => Clipboard.SetText(s.Symbol.Name));
+			}
+		}
+
+		void SetupMenuCommand(SymbolItem item, int imageId, string title, Action<SymbolItem> action) {
+			var mi = new ThemedMenuItem {
+				Icon = ThemeHelper.GetImage(imageId),
+				Header = new ThemedMenuText(title),
+				Tag = (item, action)
+			};
+			mi.Click += (s, args) => {
+				var i = (ValueTuple<SymbolItem, Action<SymbolItem>>)((MenuItem)s).Tag;
+				i.Item2(i.Item1);
+			};
+			ContextMenu.Items.Add(mi);
+		}
 		#region Tool Tip
 		protected override void OnMouseEnter(MouseEventArgs e) {
 			base.OnMouseEnter(e);
