@@ -148,7 +148,11 @@ namespace Codist
 		}
 
 		public static Run Render(this string text, WpfBrush brush) {
-			return text.Render(false, false, brush);
+			var run = new Run(text);
+			if (brush != null) {
+				run.Foreground = brush;
+			}
+			return run;
 		}
 		public static Run Render(this string text, bool bold, bool italic, WpfBrush brush) {
 			var run = new Run(text);
@@ -339,6 +343,10 @@ namespace Codist
 			where TControl : FrameworkElement {
 			control.SetResourceReference(FrameworkElement.StyleProperty, resourceKey);
 			return control;
+		}
+		public static ResourceDictionary MergeWith(this ResourceDictionary dictionary, ResourceDictionary resourceDictionary) {
+			dictionary.MergedDictionaries.Add(resourceDictionary);
+			return dictionary;
 		}
 		#endregion
 
