@@ -545,8 +545,22 @@ namespace Codist.QuickInfo
 		static void ShowAttributesInfo(IList<object> qiContent, ISymbol symbol) {
 			// todo: show inherited attributes
 			var attrs = symbol.GetAttributes();
+			ThemedTipParagraph p = null;
 			if (attrs.Length > 0) {
-				ShowAttributes(qiContent, attrs);
+				p = new ThemedTipParagraph(KnownImageIds.FormPostBodyParameterNode, new ThemedTipText().Append("Attribute:", true));
+				ShowAttributes(p, attrs, false);
+			}
+			if (symbol.Kind == SymbolKind.Method) {
+				attrs = ((IMethodSymbol)symbol).GetReturnTypeAttributes();
+				if (p == null) {
+					p = new ThemedTipParagraph(KnownImageIds.FormPostBodyParameterNode, new ThemedTipText().Append("Attribute:", true));
+				}
+				if (attrs.Length > 0) {
+					ShowAttributes(p, attrs, true);
+				}
+			}
+			if (p != null) {
+				qiContent.Add(new ThemedTipDocument().Append(p));
 			}
 		}
 
@@ -890,24 +904,11 @@ namespace Codist.QuickInfo
 				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).Add(new ThemedTipText("Hash code", true)));
 		}
 
-		static void ShowAttributes(IList<object> qiContent, ImmutableArray<AttributeData> attrs) {
-			ThemedTipParagraph p = null;
-			var c = 0;
+		static void ShowAttributes(ThemedTipParagraph p, ImmutableArray<AttributeData> attrs, bool isReturn) {
 			foreach (var item in attrs) {
-				if (item.AttributeClass.IsAccessible(true) == false) {
-					continue;
+				if (item.AttributeClass.IsAccessible(true)) {
+					_SymbolFormatter.ToUIText(p.Content.AppendLine().Inlines, item, isReturn);
 				}
-				if (c == 0) {
-					c = 1;
-					p = new ThemedTipParagraph(
-						KnownImageIds.FormPostBodyParameterNode,
-						new ThemedTipText().Append("Attribute:", true)
-					);
-				}
-				_SymbolFormatter.ToUIText(p.Content.AppendLine().Inlines, item);
-			}
-			if (c > 0) {
-				qiContent.Add(new ThemedTipDocument().Append(p));
 			}
 		}
 
@@ -1166,7 +1167,7 @@ namespace Codist.QuickInfo
 							new ThemedTipText().Append("Attribute of ").Append(p.Name, true, false, _SymbolFormatter.Parameter).Append(":")
 						);
 						foreach (var attr in attrs) {
-							_SymbolFormatter.ToUIText(para.Content.AppendLine().Inlines, attr);
+							_SymbolFormatter.ToUIText(para.Content.AppendLine().Inlines, attr, false);
 						}
 						info.Append(para);
 					}
@@ -1177,7 +1178,15 @@ namespace Codist.QuickInfo
 				var info = new ThemedTipDocument();
 				info.Append(new ThemedTipParagraph(KnownImageIds.ParameterWarning, new ThemedTipText("Maybe", true).Append(" argument of")));
 				foreach (var candidate in symbol.CandidateSymbols) {
-					info.Append(new ThemedTipParagraph(candidate.GetImageId(), new ThemedTipText().AddSymbolDisplayParts(candidate.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, argName == null ? argIndex : Int32.MinValue)));
+					info.Append(
+						new ThemedTipParagraph(
+							candidate.GetImageId(),
+							new ThemedTipText().AddSymbolDisplayParts(
+								candidate.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat),
+								_SymbolFormatter,
+								argName == null ? argIndex : Int32.MinValue)
+						)
+					);
 				}
 				qiContent.Add(info);
 			}

@@ -282,10 +282,10 @@ namespace Codist
 						block.Add(WpfHelper.Render((bool)constant.Value ? "true" : "false", Keyword));
 					}
 					else if (constant.Value is string) {
-						block.Add(WpfHelper.Render(constant.ToCSharpString(), Text));
+						block.Add(constant.ToCSharpString().Render(Text));
 					}
 					else {
-						block.Add(WpfHelper.Render(constant.ToCSharpString(), Number));
+						block.Add(constant.ToCSharpString().Render(Number));
 					}
 					break;
 				case TypedConstantKind.Enum:
@@ -303,21 +303,22 @@ namespace Codist
 							if (i > 0) {
 								block.Add(" | ");
 							}
-							block.Add(WpfHelper.Render(constant.Type.Name + "." + flags[i].Name, Enum));
+							block.Add((constant.Type.Name + "." + flags[i].Name).Render(Enum));
 						}
 					}
 					else {
-						block.Add(WpfHelper.Render(constant.Type.Name + en.Substring(en.LastIndexOf('.')), Enum));
+						block.Add((constant.Type.Name + en.Substring(en.LastIndexOf('.'))).Render(Enum));
 					}
 					break;
 				case TypedConstantKind.Type:
-					block.Add(WpfHelper.Render("typeof", Keyword));
+					block.Add("typeof".Render(Keyword));
 					block.Add("(");
-					ToUIText(block, constant.Value as ITypeSymbol, null);
+					ToUIText(block, constant.Value as ISymbol, null);
 					block.Add(")");
 					break;
 				case TypedConstantKind.Array:
-					block.Add("{");
+					block.Add("new".Render(Keyword));
+					block.Add("[] { ");
 					bool c = false;
 					foreach (var item in constant.Values) {
 						if (c) {
@@ -328,7 +329,7 @@ namespace Codist
 						}
 						ToUIText(block, item);
 					}
-					block.Add("}");
+					block.Add(" }");
 					break;
 				default:
 					block.Add(constant.ToCSharpString());
@@ -336,14 +337,18 @@ namespace Codist
 			}
 		}
 
-		internal void ToUIText(InlineCollection block, AttributeData item) {
+		internal void ToUIText(InlineCollection block, AttributeData item, bool isReturn) {
 			var a = item.AttributeClass.Name;
 			block.Add("[");
+			if (isReturn) {
+				block.Add("return".Render(Keyword));
+				block.Add(": ");
+			}
 			block.Add(WpfHelper.Render(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class));
 			if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
 				var node = item.ApplicationSyntaxReference?.GetSyntax() as Microsoft.CodeAnalysis.CSharp.Syntax.AttributeSyntax;
 				if (node?.ArgumentList?.Arguments.Count > 0) {
-					block.Add(WpfHelper.Render(node.ArgumentList.ToString(), ThemeHelper.SystemGrayTextBrush));
+					block.Add(node.ArgumentList.ToString().Render(ThemeHelper.SystemGrayTextBrush));
 				}
 				block.Add("]");
 				return;
@@ -362,10 +367,10 @@ namespace Codist
 				}
 				var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property);
 				if (attrMember != null) {
-					block.Add(WpfHelper.Render(arg.Key, attrMember.Kind == SymbolKind.Property ? Property : Field));
+					block.Add(arg.Key.Render(attrMember.Kind == SymbolKind.Property ? Property : Field));
 				}
 				else {
-					block.Add(WpfHelper.Render(arg.Key, false, true, null));
+					block.Add(arg.Key.Render(false, true, null));
 				}
 				block.Add("=");
 				ToUIText(block, arg.Value);

@@ -93,7 +93,12 @@ namespace Codist
 				}
 			}
 			foreach (var attr in symbol.GetAttributes()) {
-				SymbolFormatter.Empty.ToUIText(content.AppendLine().Inlines, attr);
+				SymbolFormatter.Empty.ToUIText(content.AppendLine().Inlines, attr, false);
+			}
+			if (symbol.Kind == SymbolKind.Method) {
+				foreach (var attr in ((IMethodSymbol)symbol).GetReturnTypeAttributes()) {
+					SymbolFormatter.Empty.ToUIText(content.AppendLine().Inlines, attr, true);
+				}
 			}
 			var doc = new XmlDoc(symbol, compilation);
 			var summary = doc.Summary ?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.ExplicitInheritDoc?.Summary : null);
