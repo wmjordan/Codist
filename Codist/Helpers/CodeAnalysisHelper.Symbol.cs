@@ -559,11 +559,11 @@ namespace Codist
 				case SymbolKind.NamedType: return GetTypeParameters(symbol as INamedTypeSymbol);
 				default: return String.Empty;
 			}
-			
+	
 			string GetPropertyAccessors(IPropertySymbol p) {
 				using (var sbr = ReusableStringBuilder.AcquireDefault(30)) {
 					var sb = sbr.Resource;
-					sb.Append("{");
+					sb.Append(" {");
 					var m = p.GetMethod;
 					if (m != null) {
 						if (m.DeclaredAccessibility != Accessibility.Public) {

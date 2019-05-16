@@ -260,10 +260,6 @@ namespace Codist
 					}
 				}
 				CodistPackage.DTE.OpenFile(targetNode.SyntaxTree.FilePath, d => {
-					//var s = (EnvDTE.TextSelection)d.Selection;
-					//s.MoveToAbsoluteOffset(target);
-					//s.Insert(sNode.ToFullString());
-					//s.TextRanges.
 					view = CodistPackage.Instance.GetActiveWpfDocumentView();
 					using (var edit = view.TextBuffer.CreateEdit()) {
 						edit.Insert(target, sNode.ToFullString());
