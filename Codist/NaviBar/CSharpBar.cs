@@ -127,6 +127,7 @@ namespace Codist.NaviBar
 
 		void TextBuffer_Changed(object sender, TextContentChangedEventArgs e) {
 			HideMenu();
+			_RootItem.ClearSymbolList();
 		}
 
 		async void Update(object sender, EventArgs e) {
@@ -387,17 +388,14 @@ namespace Codist.NaviBar
 					_Bar.HideMenu();
 					return;
 				}
-				_Menu.Footer.Visibility = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CodeStatistics) ? Visibility.Visible : Visibility.Collapsed;
 				ShowNamespaceAndTypeMenu();
 			}
 
 			internal void ShowNamespaceAndTypeMenu() {
 				PopulateTypes();
-				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CodeStatistics)) {
-					_Note.Clear()
+				_Note.Clear()
 				   .Append(ThemeHelper.GetImage(KnownImageIds.Code))
 				   .Append(_Bar._View.TextSnapshot.LineCount);
-				}
 				_Bar.ShowMenu(this, _Menu);
 			}
 
@@ -558,22 +556,14 @@ namespace Codist.NaviBar
 				var ct = _Bar._cancellationSource.GetToken();
 				await CreateMenuForTypeSymbolNodeAsync(ct);
 
-				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CodeStatistics)) {
-					_FilterBox.UpdateNumbers((await _Bar._SemanticContext.GetSymbolAsync(Node, ct) as ITypeSymbol)?.GetMembers());
-				}
+				_FilterBox.UpdateNumbers((await _Bar._SemanticContext.GetSymbolAsync(Node, ct) as ITypeSymbol)?.GetMembers());
 				var footer = (TextBlock)_Menu.Footer;
-				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CodeStatistics)) {
-					if (_PartialCount > 1) {
-						footer.Append(ThemeHelper.GetImage(KnownImageIds.OpenDocumentFromCollection))
-							.Append(_PartialCount);
-					}
-					footer.Append(ThemeHelper.GetImage(KnownImageIds.Code))
-						.Append(_Bar._View.TextSnapshot.GetLineSpan(Node.Span).Length);
-					footer.Visibility = Visibility.Visible;
+				if (_PartialCount > 1) {
+					footer.Append(ThemeHelper.GetImage(KnownImageIds.OpenDocumentFromCollection))
+						.Append(_PartialCount);
 				}
-				else {
-					footer.Visibility = Visibility.Collapsed;
-				}
+				footer.Append(ThemeHelper.GetImage(KnownImageIds.Code))
+					.Append(_Bar._View.TextSnapshot.GetLineSpan(Node.Span).Length);
 				_Menu.ItemsControlMaxHeight = _Bar._View.ViewportHeight / 2;
 				_Bar.ShowMenu(this, _Menu);
 				_FilterBox?.FocusTextBox();
