@@ -151,16 +151,18 @@ namespace Codist
 
 	internal static class SharedDictionaryManager
 	{
-		static ResourceDictionary _Menu, _ContextMenu, _SymbolList;
+		static ResourceDictionary _ToolTip, _Menu, _ContextMenu, _SymbolList;
 
 		// to get started with our own context menu styles, see this answer on StackOverflow
 		// https://stackoverflow.com/questions/3391742/wpf-submenu-styling?rq=1
-		internal static ResourceDictionary ContextMenu => _ContextMenu ?? (_ContextMenu = WpfHelper.LoadComponent("controls/ContextMenu.xaml"));
+		internal static ResourceDictionary ToolTip => _ToolTip ?? (_ToolTip = WpfHelper.LoadComponent("controls/ThemedToolTip.xaml"));
+
+		internal static ResourceDictionary ContextMenu => _ContextMenu ?? (_ContextMenu = WpfHelper.LoadComponent("controls/ContextMenu.xaml").MergeWith(ToolTip));
 
 		// for menu styles, see https://docs.microsoft.com/en-us/dotnet/framework/wpf/controls/menu-styles-and-templates
 		internal static ResourceDictionary Menu => _Menu ?? (_Menu = WpfHelper.LoadComponent("controls/NavigationBar.xaml"));
 
-		internal static ResourceDictionary SymbolList => _SymbolList ?? (_SymbolList = WpfHelper.LoadComponent("controls/SymbolList.xaml"));
+		internal static ResourceDictionary SymbolList => _SymbolList ?? (_SymbolList = WpfHelper.LoadComponent("controls/SymbolList.xaml").MergeWith(ToolTip));
 	}
 
 }
