@@ -206,7 +206,7 @@ namespace Codist
 			var span = includeTrivia ? node.FullSpan : node.Span;
 			if (view.TextSnapshot.Length > span.End) {
 				var ss = includeTrivia
-					? new SnapshotSpan(view.TextSnapshot, node.GetSpanWithoutDirective())
+					? new SnapshotSpan(view.TextSnapshot, node.GetSematicSpan())
 					: new SnapshotSpan(view.TextSnapshot, span.Start, span.Length);
 				view.SelectSpan(ss);
 			}
@@ -233,9 +233,9 @@ namespace Codist
 		}
 
 		public static void CopyOrMoveSyntaxNode(this IWpfTextView view, SyntaxNode sourceNode, SyntaxNode targetNode, bool copy, bool before) {
-			var tSpan = (targetNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? targetNode.Parent.Parent : targetNode).GetSpanWithoutDirective();
+			var tSpan = (targetNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? targetNode.Parent.Parent : targetNode).GetSematicSpan();
 			var sNode = sourceNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? sourceNode.Parent.Parent : sourceNode;
-			var sSpan = sNode.GetSpanWithoutDirective();
+			var sSpan = sNode.GetSematicSpan();
 			var target = before ? tSpan.Start : tSpan.End;
 
 			if (targetNode.SyntaxTree.FilePath == sourceNode.SyntaxTree.FilePath) {

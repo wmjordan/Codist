@@ -193,7 +193,7 @@ namespace Codist.Controls
 		void SetupContextMenu(SymbolItem item) {
 			if (item.SyntaxNode != null) {
 				SetupMenuCommand(item, KnownImageIds.BlockSelection, "Select Code", s => s.Container.SemanticContext.View.SelectNode(s.SyntaxNode, true));
-				SetupMenuCommand(item, KnownImageIds.Copy, "Copy Code", s => Clipboard.SetText(s.SyntaxNode.ToFullString()));
+				//SetupMenuCommand(item, KnownImageIds.Copy, "Copy Code", s => Clipboard.SetText(s.SyntaxNode.ToFullString()));
 				item.SetSymbolToSyntaxNode();
 			}
 			if (item.Symbol != null) {
@@ -278,14 +278,15 @@ namespace Codist.Controls
 			else if (noKeyword) {
 				_Filter = o => {
 					var i = (SymbolItem)o;
-					return MemberFilterBox.FilterByImageId(filterTypes, i.ImageId);
+					return i.Symbol != null ? MemberFilterBox.FilterBySymbol(filterTypes, i.Symbol) : MemberFilterBox.FilterByImageId(filterTypes, i.ImageId);
 				};
 			}
 			else {
+				var comparison = Char.IsUpper(keywords[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				_Filter = o => {
 					var i = (SymbolItem)o;
-					return MemberFilterBox.FilterByImageId(filterTypes, i.ImageId)
-							&& keywords.All(p => i.Content.GetText().IndexOf(p, StringComparison.OrdinalIgnoreCase) != -1);
+					return (i.Symbol != null ? MemberFilterBox.FilterBySymbol(filterTypes, i.Symbol) : MemberFilterBox.FilterByImageId(filterTypes, i.ImageId))
+							&& keywords.All(p => i.Content.GetText().IndexOf(p, comparison) != -1);
 				};
 			}
 			RefreshItemsSource();

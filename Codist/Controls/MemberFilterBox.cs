@@ -207,6 +207,31 @@ namespace Codist.Controls
 			return false;
 		}
 
+		internal static bool FilterBySymbol(MemberFilterTypes filterTypes, ISymbol symbol) {
+			MemberFilterTypes symbolFlags;
+			if (symbol.Kind == SymbolKind.Alias) {
+				symbol = ((IAliasSymbol)symbol).Target;
+			}
+			switch (symbol.DeclaredAccessibility) {
+				case Accessibility.Private: symbolFlags = MemberFilterTypes.Private; break;
+				case Accessibility.Protected: symbolFlags = MemberFilterTypes.Protected; break;
+				case Accessibility.Internal: symbolFlags = MemberFilterTypes.Internal; break;
+				case Accessibility.ProtectedAndInternal:
+				case Accessibility.ProtectedOrInternal: symbolFlags = MemberFilterTypes.Internal | MemberFilterTypes.Protected; break;
+				case Accessibility.Public: symbolFlags = MemberFilterTypes.Public; break;
+				default: symbolFlags = MemberFilterTypes.None; break;
+			}
+			switch (symbol.Kind) {
+				case SymbolKind.Event: symbolFlags |= MemberFilterTypes.Event; break;
+				case SymbolKind.Field: symbolFlags |= MemberFilterTypes.Field; break;
+				case SymbolKind.Method: symbolFlags |= MemberFilterTypes.Method; break;
+				case SymbolKind.NamedType:
+				case SymbolKind.Namespace: symbolFlags |= MemberFilterTypes.TypeAndNamespace; break;
+				case SymbolKind.Property: symbolFlags |= MemberFilterTypes.Property; break;
+			}
+			return filterTypes.MatchFlags(symbolFlags);
+		}
+
 		sealed class MemberFilterButtonGroup : UserControl
 		{
 			readonly ThemedToggleButton _FieldFilter, _PropertyFilter, _MethodFilter, _TypeFilter, _PublicFilter, _PrivateFilter;
@@ -437,14 +462,15 @@ namespace Codist.Controls
 		None,
 		Field = 1,
 		Property = 1 << 1,
-		FieldAndProperty = Field | Property,
-		Method = 1 << 2,
-		TypeAndNamespace = 1 << 3,
+		Event = 1 << 2,
+		FieldAndProperty = Field | Property | Event,
+		Method = 1 << 3,
+		TypeAndNamespace = 1 << 4,
 		AllMembers = FieldAndProperty | Method | TypeAndNamespace,
-		Public = 1 << 4,
-		Protected = 1 << 5,
-		Internal = 1 << 6,
-		Private = 1 << 7,
+		Public = 1 << 5,
+		Protected = 1 << 6,
+		Internal = 1 << 7,
+		Private = 1 << 8,
 		AllAccessibility = Public | Protected | Private | Internal,
 		All = AllMembers | AllAccessibility
 	}
