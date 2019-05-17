@@ -31,7 +31,7 @@ namespace Codist.QuickInfo
 		bool _IsDisposed;
 		Document _Document;
 		SemanticModel _SemanticModel;
-		ITextBuffer _TextBuffer;
+		readonly ITextBuffer _TextBuffer;
 
 		public CSharpQuickInfo(ITextBuffer subjectBuffer, IEditorFormatMapService formatMapService) {
 			ThreadHelper.ThrowIfNotOnUIThread();
@@ -544,24 +544,23 @@ namespace Codist.QuickInfo
 
 		static void ShowAttributesInfo(IList<object> qiContent, ISymbol symbol) {
 			// todo: show inherited attributes
-			var attrs = symbol.GetAttributes();
-			ThemedTipParagraph p = null;
-			if (attrs.Length > 0) {
-				p = new ThemedTipParagraph(KnownImageIds.FormPostBodyParameterNode, new ThemedTipText().Append("Attribute:", true));
-				ShowAttributes(p, attrs, false);
-			}
+			var p = ListAttributes(null, symbol.GetAttributes(), false);
 			if (symbol.Kind == SymbolKind.Method) {
-				attrs = ((IMethodSymbol)symbol).GetReturnTypeAttributes();
-				if (p == null) {
-					p = new ThemedTipParagraph(KnownImageIds.FormPostBodyParameterNode, new ThemedTipText().Append("Attribute:", true));
-				}
-				if (attrs.Length > 0) {
-					ShowAttributes(p, attrs, true);
-				}
+				p = ListAttributes(p, ((IMethodSymbol)symbol).GetReturnTypeAttributes(), true);
 			}
 			if (p != null) {
 				qiContent.Add(new ThemedTipDocument().Append(p));
 			}
+		}
+
+		static ThemedTipParagraph ListAttributes(ThemedTipParagraph p, ImmutableArray<AttributeData> attrs, bool isMethodReturnAttrs) {
+			if (attrs.Length > 0) {
+				if (p == null) {
+					p = new ThemedTipParagraph(KnownImageIds.FormPostBodyParameterNode, new ThemedTipText().Append("Attribute:", true));
+				}
+				ShowAttributes(p, attrs, isMethodReturnAttrs);
+			}
+			return p;
 		}
 
 		static void ShowPropertyInfo(IList<object> qiContent, IPropertySymbol property) {
