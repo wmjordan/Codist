@@ -360,6 +360,9 @@ namespace Codist.QuickInfo
 						}
 						cp.LimitSize();
 						if (docPanel == c) {
+							if (Config.Instance.QuickInfoXmlDocExtraHeight > 0 && Config.Instance.QuickInfoMaxHeight > 0) {
+								cp.MaxHeight += Config.Instance.QuickInfoXmlDocExtraHeight;
+							}
 							continue;
 						}
 						(c as ThemedTipDocument)?.ApplySizeLimit();

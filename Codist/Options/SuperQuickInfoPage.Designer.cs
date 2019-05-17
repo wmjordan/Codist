@@ -35,11 +35,14 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this._QuickInfoMaxWidthBox = new System.Windows.Forms.NumericUpDown();
 			this._ColorQuickInfoBox = new System.Windows.Forms.CheckBox();
+			this.label3 = new System.Windows.Forms.Label();
+			this._QuickInfoXmlDocExtraHeightBox = new System.Windows.Forms.NumericUpDown();
 			this._SuperQuickInfoTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.groupBox4.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._QuickInfoMaxHeightBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._QuickInfoMaxWidthBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this._QuickInfoXmlDocExtraHeightBox)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// _SelectionQuickInfoBox
@@ -48,7 +51,7 @@
 			this._SelectionQuickInfoBox.Location = new System.Drawing.Point(15, 31);
 			this._SelectionQuickInfoBox.Name = "_SelectionQuickInfoBox";
 			this._SelectionQuickInfoBox.Size = new System.Drawing.Size(285, 19);
-			this._SelectionQuickInfoBox.TabIndex = 2;
+			this._SelectionQuickInfoBox.TabIndex = 1;
 			this._SelectionQuickInfoBox.Text = "Show info about selection length";
 			this._SelectionQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
@@ -58,7 +61,7 @@
 			this._ControlQuickInfoBox.Location = new System.Drawing.Point(15, 6);
 			this._ControlQuickInfoBox.Name = "_ControlQuickInfoBox";
 			this._ControlQuickInfoBox.Size = new System.Drawing.Size(365, 19);
-			this._ControlQuickInfoBox.TabIndex = 1;
+			this._ControlQuickInfoBox.TabIndex = 0;
 			this._ControlQuickInfoBox.Text = "Hide quick info until Shift key is pressed";
 			this._ControlQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
@@ -72,7 +75,7 @@
 			this._SuperQuickInfoTabs.Name = "_SuperQuickInfoTabs";
 			this._SuperQuickInfoTabs.SelectedIndex = 0;
 			this._SuperQuickInfoTabs.Size = new System.Drawing.Size(569, 322);
-			this._SuperQuickInfoTabs.TabIndex = 3;
+			this._SuperQuickInfoTabs.TabIndex = 0;
 			// 
 			// tabPage2
 			// 
@@ -92,14 +95,16 @@
 			// 
 			this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+			this.groupBox4.Controls.Add(this._QuickInfoXmlDocExtraHeightBox);
 			this.groupBox4.Controls.Add(this._QuickInfoMaxHeightBox);
+			this.groupBox4.Controls.Add(this.label3);
 			this.groupBox4.Controls.Add(this.label2);
 			this.groupBox4.Controls.Add(this.label1);
 			this.groupBox4.Controls.Add(this._QuickInfoMaxWidthBox);
 			this.groupBox4.Location = new System.Drawing.Point(6, 93);
 			this.groupBox4.Name = "groupBox4";
-			this.groupBox4.Size = new System.Drawing.Size(549, 59);
-			this.groupBox4.TabIndex = 10;
+			this.groupBox4.Size = new System.Drawing.Size(549, 83);
+			this.groupBox4.TabIndex = 3;
 			this.groupBox4.TabStop = false;
 			this.groupBox4.Text = "Quick Info Item Size (0: Unlimited)";
 			// 
@@ -161,9 +166,35 @@
 			this._ColorQuickInfoBox.Location = new System.Drawing.Point(15, 56);
 			this._ColorQuickInfoBox.Name = "_ColorQuickInfoBox";
 			this._ColorQuickInfoBox.Size = new System.Drawing.Size(197, 19);
-			this._ColorQuickInfoBox.TabIndex = 3;
+			this._ColorQuickInfoBox.TabIndex = 2;
 			this._ColorQuickInfoBox.Text = "Show info about color";
 			this._ColorQuickInfoBox.UseVisualStyleBackColor = true;
+			// 
+			// label3
+			// 
+			this.label3.Location = new System.Drawing.Point(10, 57);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(332, 15);
+			this.label3.TabIndex = 4;
+			this.label3.Text = "Extra height for XML Documentation:";
+			this.label3.TextAlign = System.Drawing.ContentAlignment.TopRight;
+			// 
+			// _QuickInfoXmlDocExtraHeightBox
+			// 
+			this._QuickInfoXmlDocExtraHeightBox.Increment = new decimal(new int[] {
+            50,
+            0,
+            0,
+            0});
+			this._QuickInfoXmlDocExtraHeightBox.Location = new System.Drawing.Point(348, 55);
+			this._QuickInfoXmlDocExtraHeightBox.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+			this._QuickInfoXmlDocExtraHeightBox.Name = "_QuickInfoXmlDocExtraHeightBox";
+			this._QuickInfoXmlDocExtraHeightBox.Size = new System.Drawing.Size(120, 25);
+			this._QuickInfoXmlDocExtraHeightBox.TabIndex = 5;
 			// 
 			// SuperQuickInfoPage
 			// 
@@ -180,6 +211,7 @@
 			this.groupBox4.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this._QuickInfoMaxHeightBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this._QuickInfoMaxWidthBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this._QuickInfoXmlDocExtraHeightBox)).EndInit();
 			this.ResumeLayout(false);
 
 		}
@@ -195,5 +227,7 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.NumericUpDown _QuickInfoMaxWidthBox;
+		private System.Windows.Forms.NumericUpDown _QuickInfoXmlDocExtraHeightBox;
+		private System.Windows.Forms.Label label3;
 	}
 }
