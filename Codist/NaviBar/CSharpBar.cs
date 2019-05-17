@@ -544,7 +544,7 @@ namespace Codist.NaviBar
 				}
 				if (Node.IsTypeDeclaration() == false) {
 					var span = Node.FullSpan;
-					if (span.Contains(_Bar._SemanticContext.Position) && Node.SyntaxTree.FilePath == _Bar._SemanticContext.Document.FilePath) {
+					if (span.Contains(_Bar._SemanticContext.Position) && Node.SyntaxTree.FilePath == _Bar._SemanticContext.Document.FilePath || Node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
 						_Bar._View.SelectNode(Node, Keyboard.Modifiers != ModifierKeys.Control);
 					}
 					else {

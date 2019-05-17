@@ -762,18 +762,44 @@ namespace Codist
 			}
 		}
 
-		public static Span GetSpanWithoutDirective(this SyntaxNode node) {
+		/// <summary>Gets full span for ordinary nodes, excluding leading directives; gets span for regions.</summary>
+		public static Span GetSematicSpan(this SyntaxNode node) {
+			int start, end;
+			SyntaxTriviaList trivias;
+			SyntaxTrivia t;
+			if (node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+				var region = node as RegionDirectiveTriviaSyntax;
+				start = node.SpanStart;
+				end = node.Span.End;
+				if (start > 0) {
+					t = region.SyntaxTree.GetCompilationUnitRoot().FindTrivia(start - 1, true);
+					if (t.IsKind(SyntaxKind.WhitespaceTrivia)) {
+						start = t.SpanStart;
+					}
+				}
+				trivias = (region.GetEndRegion() ?? (SyntaxNode)region).GetTrailingTrivia();
+				for (int i = trivias.Count - 1; i >= 0; i--) {
+					t = trivias[i];
+					if (t.IsKind(SyntaxKind.EndOfLineTrivia)) {
+						end = t.Span.End;
+						break;
+					}
+				}
+				return new Span(start, end - start);
+			}
+
 			var span = node.FullSpan;
 			if (node.ContainsDirectives == false) {
 				return span.ToSpan();
 			}
 
-			var start = span.Start;
-			var end = span.End;
-			var trivias = node.GetLeadingTrivia();
+			start = span.Start;
+			end = span.End;
+			trivias = node.GetLeadingTrivia();
 			for (int i = trivias.Count - 1; i >= 0; i--) {
-				if (trivias[i].IsDirective) {
-					start = trivias[i].FullSpan.End;
+				t = trivias[i];
+				if (t.IsDirective) {
+					start = t.FullSpan.End;
 					break;
 				}
 			}
