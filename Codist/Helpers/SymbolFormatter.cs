@@ -59,90 +59,11 @@ namespace Codist
 			return info;
 		}
 
-		void ShowFieldDeclaration(IFieldSymbol field, TextBlock info) {
-			if (field.IsConst) {
-				info.Append("const ", Keyword);
-			}
-			else {
-				if (field.IsStatic) {
-					info.Append("static ", Keyword);
-				}
-				if (field.IsReadOnly) {
-					info.Append("readonly ", Keyword);
-				}
-				else if (field.IsVolatile) {
-					info.Append("volatile ", Keyword);
-				}
-			}
-		}
 
-		void ShowLocalDeclaration(ILocalSymbol local, TextBlock info) {
-			if (local.IsConst) {
-				info.Append("const ", Keyword);
-			}
-			else {
-				if (local.IsStatic) {
-					info.Append("static ", Keyword);
-				}
-				if (local.IsRef) {
-					info.Append(local.RefKind == RefKind.RefReadOnly ? "ref readonly " : "ref", Keyword);
-				}
-				if (local.IsFixed) {
-					info.Append("fixed ", Keyword);
-				}
-			}
-		}
-
-		void ShowSymbolDeclaration(ISymbol symbol, TextBlock info) {
-			if (symbol.IsAbstract) {
-				info.Append("abstract ", Keyword);
-			}
-			else if (symbol.IsStatic) {
-				info.Append("static ", Keyword);
-			}
-			else if (symbol.IsVirtual) {
-				info.Append("virtual ", Keyword);
-			}
-			else if (symbol.IsOverride) {
-				info.Append(symbol.IsSealed ? "sealed override " : "override ", Keyword);
-				ISymbol o = null;
-				switch (symbol.Kind) {
-					case SymbolKind.Method: o = ((IMethodSymbol)symbol).OverriddenMethod; break;
-					case SymbolKind.Property: o = ((IPropertySymbol)symbol).OverriddenProperty; break;
-					case SymbolKind.Event: o = ((IEventSymbol)symbol).OverriddenEvent; break;
-				}
-				if (o != null) {
-					var t = o.ContainingType;
-					if (t != null && t.IsCommonClass() == false) {
-						info.AddSymbol(t, null, this).Append(".").AddSymbol(o, null, this).Append(" ");
-					}
-				}
-			}
-			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
-				info.Append("sealed ", Keyword);
-			}
-			if (symbol.Kind == SymbolKind.Method) {
-				var method = symbol as IMethodSymbol;
-				if (method.IsAsync) {
-					info.Append("async ", Keyword);
-				}
-				if (method.ReturnsByRef) {
-					info.Append("ref ");
-				}
-				else if (method.ReturnsByRefReadonly) {
-					info.Append("ref readonly");
-				}
-			}
-			if (symbol.IsExtern) {
-				info.Append("extern ", Keyword);
-			}
-		}
-
-
-		internal void ToUIText(InlineCollection text, ISymbol symbol, string alias) {
+		internal void Format(InlineCollection text, ISymbol symbol, string alias) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:
-					ToUIText(text, ((IArrayTypeSymbol)symbol).ElementType, alias);
+					Format(text, ((IArrayTypeSymbol)symbol).ElementType, alias);
 					if (alias == null) {
 						text.Add("[]");
 					}
@@ -195,7 +116,7 @@ namespace Codist
 			}
 		}
 
-		internal TextBlock ToUIText(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, int argIndex) {
+		internal TextBlock Format(TextBlock block, ImmutableArray<SymbolDisplayPart> parts, int argIndex) {
 			const SymbolDisplayPartKind ExtensionName = (SymbolDisplayPartKind)29;
 
 			foreach (var part in parts) {
@@ -275,7 +196,79 @@ namespace Codist
 			return block;
 		}
 
-		internal void ToUIText(InlineCollection block, TypedConstant constant) {
+		internal void Format(InlineCollection block, AttributeData item, bool isReturn) {
+			var a = item.AttributeClass.Name;
+			block.Add("[");
+			if (isReturn) {
+				block.Add("return".Render(Keyword));
+				block.Add(": ");
+			}
+			block.Add(WpfHelper.Render(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class));
+			if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
+				var node = item.ApplicationSyntaxReference?.GetSyntax() as Microsoft.CodeAnalysis.CSharp.Syntax.AttributeSyntax;
+				if (node?.ArgumentList?.Arguments.Count > 0) {
+					block.Add(node.ArgumentList.ToString().Render(ThemeHelper.SystemGrayTextBrush));
+				}
+				block.Add("]");
+				return;
+			}
+			block.Add("(");
+			int i = 0;
+			foreach (var arg in item.ConstructorArguments) {
+				if (++i > 1) {
+					block.Add(", ");
+				}
+				Format(block, arg);
+			}
+			foreach (var arg in item.NamedArguments) {
+				if (++i > 1) {
+					block.Add(", ");
+				}
+				var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property);
+				if (attrMember != null) {
+					block.Add(arg.Key.Render(attrMember.Kind == SymbolKind.Property ? Property : Field));
+				}
+				else {
+					block.Add(arg.Key.Render(false, true, null));
+				}
+				block.Add("=");
+				Format(block, arg.Value);
+			}
+			block.Add(")]");
+		}
+
+		internal void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {
+			System.Diagnostics.Trace.Assert(formatMap != null, "format map is null");
+			Interface = formatMap.GetBrush(Constants.CodeInterfaceName);
+			Class = formatMap.GetBrush(Constants.CodeClassName);
+			Text = formatMap.GetBrush(Constants.CodeString);
+			Enum = formatMap.GetBrush(Constants.CodeEnumName);
+			Delegate = formatMap.GetBrush(Constants.CodeDelegateName);
+			Number = formatMap.GetBrush(Constants.CodeNumber);
+			Struct = formatMap.GetBrush(Constants.CodeStructName);
+			Keyword = formatMap.GetBrush(Constants.CodeKeyword);
+			Namespace = formatMap.GetBrush(Constants.CSharpNamespaceName);
+			Method = formatMap.GetBrush(Constants.CSharpMethodName);
+			Parameter = formatMap.GetBrush(Constants.CSharpParameterName);
+			TypeParameter = formatMap.GetBrush(Constants.CSharpTypeParameterName);
+			Property = formatMap.GetBrush(Constants.CSharpPropertyName);
+			Field = formatMap.GetBrush(Constants.CSharpFieldName);
+			Const = formatMap.GetBrush(Constants.CSharpConstFieldName);
+			Local = formatMap.GetBrush(Constants.CSharpLocalVariableName);
+		}
+
+		void AddTypeArguments(InlineCollection text, ImmutableArray<ITypeSymbol> arguments) {
+			text.Add("<");
+			for (int i = 0; i < arguments.Length; i++) {
+				if (i > 0) {
+					text.Add(", ");
+				}
+				Format(text, arguments[i], null);
+			}
+			text.Add(">");
+		}
+
+		void Format(InlineCollection block, TypedConstant constant) {
 			if (constant.IsNull) {
 				block.Add("null".Render(Keyword));
 				return;
@@ -317,7 +310,7 @@ namespace Codist
 				case TypedConstantKind.Type:
 					block.Add("typeof".Render(Keyword));
 					block.Add("(");
-					ToUIText(block, constant.Value as ISymbol, null);
+					Format(block, constant.Value as ISymbol, null);
 					block.Add(")");
 					break;
 				case TypedConstantKind.Array:
@@ -331,7 +324,7 @@ namespace Codist
 						else {
 							c = true;
 						}
-						ToUIText(block, item);
+						Format(block, item);
 					}
 					block.Add(" }");
 					break;
@@ -341,76 +334,83 @@ namespace Codist
 			}
 		}
 
-		internal void ToUIText(InlineCollection block, AttributeData item, bool isReturn) {
-			var a = item.AttributeClass.Name;
-			block.Add("[");
-			if (isReturn) {
-				block.Add("return".Render(Keyword));
-				block.Add(": ");
+		void ShowFieldDeclaration(IFieldSymbol field, TextBlock info) {
+			if (field.IsConst) {
+				info.Append("const ", Keyword);
 			}
-			block.Add(WpfHelper.Render(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class));
-			if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
-				var node = item.ApplicationSyntaxReference?.GetSyntax() as Microsoft.CodeAnalysis.CSharp.Syntax.AttributeSyntax;
-				if (node?.ArgumentList?.Arguments.Count > 0) {
-					block.Add(node.ArgumentList.ToString().Render(ThemeHelper.SystemGrayTextBrush));
+			else {
+				if (field.IsStatic) {
+					info.Append("static ", Keyword);
 				}
-				block.Add("]");
-				return;
+				if (field.IsReadOnly) {
+					info.Append("readonly ", Keyword);
+				}
+				else if (field.IsVolatile) {
+					info.Append("volatile ", Keyword);
+				}
 			}
-			block.Add("(");
-			int i = 0;
-			foreach (var arg in item.ConstructorArguments) {
-				if (++i > 1) {
-					block.Add(", ");
-				}
-				ToUIText(block, arg);
-			}
-			foreach (var arg in item.NamedArguments) {
-				if (++i > 1) {
-					block.Add(", ");
-				}
-				var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property);
-				if (attrMember != null) {
-					block.Add(arg.Key.Render(attrMember.Kind == SymbolKind.Property ? Property : Field));
-				}
-				else {
-					block.Add(arg.Key.Render(false, true, null));
-				}
-				block.Add("=");
-				ToUIText(block, arg.Value);
-			}
-			block.Add(")]");
 		}
 
-		internal void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {
-			System.Diagnostics.Trace.Assert(formatMap != null, "format map is null");
-			Interface = formatMap.GetBrush(Constants.CodeInterfaceName);
-			Class = formatMap.GetBrush(Constants.CodeClassName);
-			Text = formatMap.GetBrush(Constants.CodeString);
-			Enum = formatMap.GetBrush(Constants.CodeEnumName);
-			Delegate = formatMap.GetBrush(Constants.CodeDelegateName);
-			Number = formatMap.GetBrush(Constants.CodeNumber);
-			Struct = formatMap.GetBrush(Constants.CodeStructName);
-			Keyword = formatMap.GetBrush(Constants.CodeKeyword);
-			Namespace = formatMap.GetBrush(Constants.CSharpNamespaceName);
-			Method = formatMap.GetBrush(Constants.CSharpMethodName);
-			Parameter = formatMap.GetBrush(Constants.CSharpParameterName);
-			TypeParameter = formatMap.GetBrush(Constants.CSharpTypeParameterName);
-			Property = formatMap.GetBrush(Constants.CSharpPropertyName);
-			Field = formatMap.GetBrush(Constants.CSharpFieldName);
-			Const = formatMap.GetBrush(Constants.CSharpConstFieldName);
-			Local = formatMap.GetBrush(Constants.CSharpLocalVariableName);
-		}
-		
-		void AddTypeArguments(InlineCollection text, ImmutableArray<ITypeSymbol> arguments) {
-			text.Add("<");
-			for (int i = 0; i < arguments.Length; i++) {
-				if (i > 0) {
-					text.Add(", ");
-				}
-				ToUIText(text, arguments[i], null);
+		void ShowLocalDeclaration(ILocalSymbol local, TextBlock info) {
+			if (local.IsConst) {
+				info.Append("const ", Keyword);
 			}
-			text.Add(">");
+			else {
+				if (local.IsStatic) {
+					info.Append("static ", Keyword);
+				}
+				if (local.IsRef) {
+					info.Append(local.RefKind == RefKind.RefReadOnly ? "ref readonly " : "ref", Keyword);
+				}
+				if (local.IsFixed) {
+					info.Append("fixed ", Keyword);
+				}
+			}
+		}
+
+		void ShowSymbolDeclaration(ISymbol symbol, TextBlock info) {
+			if (symbol.IsAbstract) {
+				info.Append("abstract ", Keyword);
+			}
+			else if (symbol.IsStatic) {
+				info.Append("static ", Keyword);
+			}
+			else if (symbol.IsVirtual) {
+				info.Append("virtual ", Keyword);
+			}
+			else if (symbol.IsOverride) {
+				info.Append(symbol.IsSealed ? "sealed override " : "override ", Keyword);
+				ISymbol o = null;
+				switch (symbol.Kind) {
+					case SymbolKind.Method: o = ((IMethodSymbol)symbol).OverriddenMethod; break;
+					case SymbolKind.Property: o = ((IPropertySymbol)symbol).OverriddenProperty; break;
+					case SymbolKind.Event: o = ((IEventSymbol)symbol).OverriddenEvent; break;
+				}
+				if (o != null) {
+					var t = o.ContainingType;
+					if (t != null && t.IsCommonClass() == false) {
+						info.AddSymbol(t, null, this).Append(".").AddSymbol(o, null, this).Append(" ");
+					}
+				}
+			}
+			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
+				info.Append("sealed ", Keyword);
+			}
+			if (symbol.Kind == SymbolKind.Method) {
+				var method = symbol as IMethodSymbol;
+				if (method.IsAsync) {
+					info.Append("async ", Keyword);
+				}
+				if (method.ReturnsByRef) {
+					info.Append("ref ");
+				}
+				else if (method.ReturnsByRefReadonly) {
+					info.Append("ref readonly");
+				}
+			}
+			if (symbol.IsExtern) {
+				info.Append("extern ", Keyword);
+			}
 		}
 	}
 }

@@ -55,7 +55,7 @@ namespace Codist
 				if (i > 0) {
 					inlines.Add(", ");
 				}
-				formatter.ToUIText(inlines, parameters[i].Type, null);
+				formatter.Format(inlines, parameters[i].Type, null);
 			}
 			inlines.Add(")");
 			return block;
@@ -67,7 +67,7 @@ namespace Codist
 				if (i > 0) {
 					inlines.Add(", ");
 				}
-				formatter.ToUIText(inlines, parameters[i].Type, null);
+				formatter.Format(inlines, parameters[i].Type, null);
 				inlines.Add(new Run(" " + parameters[i].Name) {
 					Foreground = formatter.Parameter,
 					FontWeight = i == argIndex ? FontWeights.Bold : FontWeights.Normal
@@ -78,21 +78,15 @@ namespace Codist
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, SymbolFormatter formatter) {
 			if (symbol != null) {
-				formatter.ToUIText(block.Inlines, symbol, null);
+				formatter.Format(block.Inlines, symbol, null);
 			}
 			return block;
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, SymbolFormatter formatter) {
 			if (symbol != null) {
-				formatter.ToUIText(block.Inlines, symbol, alias);
+				formatter.Format(block.Inlines, symbol, alias);
 			}
 			return block;
-		}
-		public static Paragraph AddSymbol(this Paragraph paragraph, ISymbol symbol, string alias, SymbolFormatter formatter) {
-			if (symbol != null) {
-				formatter.ToUIText(paragraph.Inlines, symbol, alias);
-			}
-			return paragraph;
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, WpfBrush brush) {
 			if (symbol != null) {
@@ -107,10 +101,10 @@ namespace Codist
 			return block;
 		}
 		public static TextBlock AddSymbolDisplayParts(this TextBlock block, ImmutableArray<SymbolDisplayPart> parts, SymbolFormatter formatter) {
-			return formatter.ToUIText(block, parts, Int32.MinValue);
+			return formatter.Format(block, parts, Int32.MinValue);
 		}
 		public static TextBlock AddSymbolDisplayParts(this TextBlock block, ImmutableArray<SymbolDisplayPart> parts, SymbolFormatter formatter, int argIndex) {
-			return formatter.ToUIText(block, parts, argIndex);
+			return formatter.Format(block, parts, argIndex);
 		}
 		public static TextBlock AddXmlDoc(this TextBlock paragraph, XElement content, XmlDocRenderer docRenderer) {
 			docRenderer.Render(content, paragraph.Inlines);

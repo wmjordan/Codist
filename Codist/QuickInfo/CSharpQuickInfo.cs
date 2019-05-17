@@ -907,7 +907,7 @@ namespace Codist.QuickInfo
 		static void ShowAttributes(ThemedTipParagraph p, ImmutableArray<AttributeData> attrs, bool isReturn) {
 			foreach (var item in attrs) {
 				if (item.AttributeClass.IsAccessible(true)) {
-					_SymbolFormatter.ToUIText(p.Content.AppendLine().Inlines, item, isReturn);
+					_SymbolFormatter.Format(p.Content.AppendLine().Inlines, item, isReturn);
 				}
 			}
 		}
@@ -1167,7 +1167,7 @@ namespace Codist.QuickInfo
 							new ThemedTipText().Append("Attribute of ").Append(p.Name, true, false, _SymbolFormatter.Parameter).Append(":")
 						);
 						foreach (var attr in attrs) {
-							_SymbolFormatter.ToUIText(para.Content.AppendLine().Inlines, attr, false);
+							_SymbolFormatter.Format(para.Content.AppendLine().Inlines, attr, false);
 						}
 						info.Append(para);
 					}

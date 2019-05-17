@@ -155,7 +155,7 @@ namespace Codist
 					if (member.IsStatic == false || member.Kind != SymbolKind.Method) {
 						continue;
 					}
-					var m = member as IMethodSymbol;
+					var m = (IMethodSymbol)member;
 					if (m.IsExtensionMethod == false || m.CanBeReferencedByName == false) {
 						continue;
 					}
@@ -287,7 +287,7 @@ namespace Codist
 					case SymbolKind.NamedType:
 						continue;
 					case SymbolKind.Method:
-						if ((s as IMethodSymbol)?.MethodKind == MethodKind.AnonymousFunction) {
+						if (((IMethodSymbol)s).MethodKind == MethodKind.AnonymousFunction) {
 							continue;
 						}
 						break;
@@ -360,7 +360,7 @@ namespace Codist
 			else if (symbol.IsOverride) {
 				return symbol.IsSealed ? "sealed override " : "override ";
 			}
-			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
+			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
 				return "sealed ";
 			}
 			return String.Empty;
@@ -531,32 +531,32 @@ namespace Codist
 
 		public static ImmutableArray<IParameterSymbol> GetParameters(this ISymbol symbol) {
 			switch (symbol.Kind) {
-				case SymbolKind.Method: return (symbol as IMethodSymbol).Parameters;
-				case SymbolKind.Event: return (symbol as IEventSymbol).AddMethod.Parameters;
-				case SymbolKind.Property: return (symbol as IPropertySymbol).Parameters;
+				case SymbolKind.Method: return ((IMethodSymbol)symbol).Parameters;
+				case SymbolKind.Event: return ((IEventSymbol)symbol).AddMethod.Parameters;
+				case SymbolKind.Property: return ((IPropertySymbol)symbol).Parameters;
 			}
 			return default;
 		}
 
 		public static ITypeSymbol GetReturnType(this ISymbol symbol) {
 			switch (symbol.Kind) {
-				case SymbolKind.Field: return (symbol as IFieldSymbol).Type;
-				case SymbolKind.Local: return (symbol as ILocalSymbol).Type;
+				case SymbolKind.Field: return ((IFieldSymbol)symbol).Type;
+				case SymbolKind.Local: return ((ILocalSymbol)symbol).Type;
 				case SymbolKind.Method:
-					var m = symbol as IMethodSymbol;
+					var m = (IMethodSymbol)symbol;
 					return m.MethodKind != MethodKind.Constructor ? m.ReturnType : m.ContainingType;
-				case SymbolKind.Parameter: return (symbol as IParameterSymbol).Type;
-				case SymbolKind.Property: return (symbol as IPropertySymbol).Type;
-				case SymbolKind.Alias: return (symbol as IAliasSymbol).Target as ITypeSymbol;
+				case SymbolKind.Parameter: return ((IParameterSymbol)symbol).Type;
+				case SymbolKind.Property: return ((IPropertySymbol)symbol).Type;
+				case SymbolKind.Alias: return ((IAliasSymbol)symbol).Target as ITypeSymbol;
 			}
 			return null;
 		}
 
 		public static string GetParameterString(this ISymbol symbol) {
 			switch (symbol.Kind) {
-				case SymbolKind.Property: return GetPropertyAccessors(symbol as IPropertySymbol);
-				case SymbolKind.Method: return GetMethodParameters(symbol as IMethodSymbol);
-				case SymbolKind.NamedType: return GetTypeParameters(symbol as INamedTypeSymbol);
+				case SymbolKind.Property: return GetPropertyAccessors((IPropertySymbol)symbol);
+				case SymbolKind.Method: return GetMethodParameters((IMethodSymbol)symbol);
+				case SymbolKind.NamedType: return GetTypeParameters((INamedTypeSymbol)symbol);
 				default: return String.Empty;
 			}
 	
@@ -619,7 +619,7 @@ namespace Codist
 			void GetTypeName(ITypeSymbol type, StringBuilder output) {
 				switch (type.TypeKind) {
 					case TypeKind.Array:
-						GetTypeName((type as IArrayTypeSymbol).ElementType, output);
+						GetTypeName(((IArrayTypeSymbol)type).ElementType, output);
 						output.Append("[]");
 						return;
 
@@ -631,7 +631,7 @@ namespace Codist
 					case TypeKind.Error:
 						output.Append(type.Name); return;
 					case TypeKind.Pointer:
-						GetTypeName((type as IPointerTypeSymbol).PointedAtType, output);
+						GetTypeName(((IPointerTypeSymbol)type).PointedAtType, output);
 						output.Append('*');
 						return;
 				}
@@ -683,9 +683,9 @@ namespace Codist
 		public static string GetSymbolKindName(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event: return "event";
-				case SymbolKind.Field: return (symbol as IFieldSymbol).IsConst ? "const" : "field";
+				case SymbolKind.Field: return ((IFieldSymbol)symbol).IsConst ? "const" : "field";
 				case SymbolKind.Label: return "label";
-				case SymbolKind.Local: return (symbol as ILocalSymbol).IsConst ? "local const" : "local";
+				case SymbolKind.Local: return ((ILocalSymbol)symbol).IsConst ? "local const" : "local";
 				case SymbolKind.Method:
 					var m = (IMethodSymbol)symbol;
 					var t = m.IsExtensionMethod ? "extension" : "method";
@@ -697,7 +697,7 @@ namespace Codist
 					}
 					return t;
 				case SymbolKind.NamedType:
-					switch ((symbol as INamedTypeSymbol).TypeKind) {
+					switch (((INamedTypeSymbol)symbol).TypeKind) {
 						case TypeKind.Array: return "array";
 						case TypeKind.Dynamic: return "dynamic";
 						case TypeKind.Class: return "class";
