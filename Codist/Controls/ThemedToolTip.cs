@@ -26,9 +26,7 @@ namespace Codist.Controls
 			if (title != null) {
 				Title.Text = title;
 			}
-			Content = CreateContentBlock()
-				.ReferenceProperty(TextBlock.BackgroundProperty, EnvironmentColors.ToolTipBrushKey)
-				.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.ToolTipTextBrushKey);
+			Content = CreateContentBlock();
 			if (content != null) {
 				Content.Text = content;
 			}
@@ -40,10 +38,9 @@ namespace Codist.Controls
 		}
 
 		public static TextBlock CreateContentBlock() {
-			return new TextBlock {
-				Padding = _ContentPadding,
-				TextWrapping = TextWrapping.Wrap
-			};
+			return new TextBlock { Padding = _ContentPadding, TextWrapping = TextWrapping.Wrap }
+				.ReferenceProperty(TextBlock.BackgroundProperty, EnvironmentColors.ToolTipBrushKey)
+				.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.ToolTipTextBrushKey);
 		}
 
 		protected override void OnVisualParentChanged(DependencyObject oldParent) {
