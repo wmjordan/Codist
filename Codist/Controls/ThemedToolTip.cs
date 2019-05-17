@@ -26,7 +26,9 @@ namespace Codist.Controls
 			if (title != null) {
 				Title.Text = title;
 			}
-			Content = CreateContentBlock().ReferenceProperty(TextBlock.BackgroundProperty, EnvironmentColors.DropDownBackgroundBrushKey);
+			Content = CreateContentBlock()
+				.ReferenceProperty(TextBlock.BackgroundProperty, EnvironmentColors.ToolTipBrushKey)
+				.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.ToolTipTextBrushKey);
 			if (content != null) {
 				Content.Text = content;
 			}

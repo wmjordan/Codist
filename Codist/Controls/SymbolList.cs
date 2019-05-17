@@ -414,7 +414,7 @@ namespace Codist.Controls
 		public bool IsExternal => Type == SymbolItemType.External
 			|| Container.ContainerType != SymbolItemType.VsKnownImage && Container.ContainerType != SymbolItemType.PredefinedColors && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
 		public TextBlock Content {
-			get => _Content ?? (_Content = Symbol != null ? CreateContentForSymbol(Symbol, _IncludeContainerType, true) : SyntaxNode != null ? new TextBlock().Append(SyntaxNode.GetDeclarationSignature()) : new TextBlock());
+			get => _Content ?? (_Content = Symbol != null ? CreateContentForSymbol(Symbol, _IncludeContainerType, true) : SyntaxNode != null ? new ThemedMenuText().Append(SyntaxNode.GetDeclarationSignature()) : new ThemedMenuText());
 			set => _Content = value;
 		}
 		public Location Location { get; set; }

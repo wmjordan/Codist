@@ -319,7 +319,7 @@ namespace Codist.Controls
 			void ToggleFilterButton(ThemedToggleButton button, int f) {
 				if (f > 0) {
 					button.Visibility = Visibility.Visible;
-					(button.Text == null ? button.Text = new TextBlock() : button.Text).Text = f.ToString();
+					(button.Text == null ? button.Text = new ThemedMenuText() : button.Text).Text = f.ToString();
 				}
 				else {
 					button.Visibility = Visibility.Collapsed;
