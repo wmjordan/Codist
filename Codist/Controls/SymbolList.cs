@@ -182,12 +182,18 @@ namespace Codist.Controls
 			}
 			ContextMenu.Items.Clear();
 			SetupContextMenu(item);
+			ContextMenu.Items.Add(new MenuItem {
+				Header = item.SyntaxNode?.GetDeclarationSignature() ?? item.Symbol.Name,
+				IsEnabled = false,
+				Icon = null,
+				HorizontalContentAlignment = HorizontalAlignment.Right
+			});
 		}
 
 		void SetupContextMenu(SymbolItem item) {
 			if (item.SyntaxNode != null) {
 				SetupMenuCommand(item, KnownImageIds.BlockSelection, "Select Code", s => s.Container.SemanticContext.View.SelectNode(s.SyntaxNode, true));
-				SetupMenuCommand(item, KnownImageIds.BlockSelection, "Copy Code", s => Clipboard.SetText(s.SyntaxNode.ToFullString()));
+				SetupMenuCommand(item, KnownImageIds.Copy, "Copy Code", s => Clipboard.SetText(s.SyntaxNode.ToFullString()));
 				item.SetSymbolToSyntaxNode();
 			}
 			if (item.Symbol != null) {

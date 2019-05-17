@@ -23,7 +23,7 @@
 				<Setter Property="Background" Value="{DynamicResource VsBrush.CommandBarMouseOverBackgroundGradient}"></Setter>
 			</Trigger>
 			<Trigger Property="IsEnabled" Value="False">
-				<Setter Property="Foreground" Value="LightGray"></Setter>
+				<Setter Property="Foreground" Value="{DynamicResource VsBrush.GrayText}"></Setter>
 			</Trigger>
 		</Style.Triggers>
 	</Style>
@@ -47,29 +47,32 @@
 		<Border Name="Border" BorderThickness="1" Background="{TemplateBinding Panel.Background}">
 			<Grid>
 				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
+					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="*"/>
-					<ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut"/>
+					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="13"/>
 				</Grid.ColumnDefinitions>
 				<ContentPresenter Name="Icon" Width="16" Height="16" Margin="3,3,8,3" VerticalAlignment="Center" ContentSource="Icon"/>
 				<Border Name="Check" Width="16" Height="16" Visibility="Collapsed" Margin="6,0,6,0" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderThickness="1" BorderBrush="#5082a4">
 					<Path Name="CheckMark" Width="7" Height="7" Visibility="Hidden" SnapsToDevicePixels="False" Stroke="#5082a4" StrokeThickness="2" Data="M 0 0 L 7 7 M 0 7 L 7 0"/>
 				</Border>
-				<ContentPresenter Name="HeaderHost" MaxWidth="500" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="False" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
+				<ContentPresenter Name="HeaderHost" MaxWidth="500" Grid.Column="1" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="False" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
 				<TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,0,2" Height="{Binding ElementName=HeaderHost,Path=ActualHeight}" VerticalAlignment="Center" DockPanel.Dock="Right" Foreground="{DynamicResource VsBrush.GrayText}"/>
 			</Grid>
 		</Border>
 		<ControlTemplate.Triggers>
 			<Trigger Property="Icon" Value="{x:Null}">
-				<Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
+				<Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
 			</Trigger>
 			<Trigger Property="IsChecked" Value="true">
 				<Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
 			</Trigger>
+			<Trigger Property="IsChecked" Value="false">
+				<Setter TargetName="CheckMark" Property="Visibility" Value="Collapsed"/>
+			</Trigger>
 			<Trigger Property="IsCheckable" Value="true">
 				<Setter TargetName="Check" Property="Visibility" Value="Visible"/>
-				<Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
+				<Setter TargetName="Icon" Property="Visibility" Value="Collapsed"/>
 			</Trigger>
 			<Trigger Property="IsHighlighted" Value="true">
 				<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.CommandBarMenuItemMouseOverBrushKey}}" />
@@ -85,13 +88,13 @@
 		<Border Name="Border" BorderThickness="1" Background="{TemplateBinding Panel.Background}" ClipToBounds="True">
 			<Grid>
 				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
+					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="*"/>
-					<ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut"/>
+					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="13"/>
 				</Grid.ColumnDefinitions>
 				<ContentPresenter Name="Icon" Width="16" Height="16" Margin="3,3,8,3" VerticalAlignment="Center" ContentSource="Icon"/>
-				<ContentPresenter Name="HeaderHost" MaxWidth="500" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="False" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
+				<ContentPresenter Name="HeaderHost" MaxWidth="500" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="False" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
 				<TextBlock x:Name="InputGestureText" Grid.Column="2" Height="{Binding ElementName=HeaderHost,Path=ActualHeight}" Text="{TemplateBinding InputGestureText}" TextTrimming="CharacterEllipsis" Margin="5,2,0,2" DockPanel.Dock="Right"/>
 				<Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{DynamicResource VsBrush.CommandBarMenuSubmenuGlyph}"/>
 				<Popup Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
