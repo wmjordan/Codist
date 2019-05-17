@@ -52,6 +52,7 @@ namespace Codist
 		public double BottomSpace { get; set; }
 		public double QuickInfoMaxWidth { get; set; }
 		public double QuickInfoMaxHeight { get; set; }
+		public double QuickInfoXmlDocExtraHeight { get; set; }
 		public bool NoSpaceBetweenWrappedLines { get; set; }
 		[DefaultValue(DefaultIconSize)]
 		public int SmartBarButtonSize { get; set; } = DefaultIconSize;

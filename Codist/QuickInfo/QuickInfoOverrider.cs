@@ -344,6 +344,7 @@ namespace Codist.QuickInfo
 						return;
 					}
 					var docPanel = quickInfoPanel.Children[0].GetFirstVisualChild<WrapPanel>().GetParent<StackPanel>();
+					var docPanelHandled = docPanel == null; // don't process docPanel if it is not found
 					foreach (var item in quickInfoPanel.Children) {
 						var o = item as DependencyObject;
 						if (o == null) {
@@ -359,7 +360,16 @@ namespace Codist.QuickInfo
 							continue;
 						}
 						cp.LimitSize();
-						if (docPanel == c) {
+						if (docPanel == c || docPanelHandled == false && cp.GetFirstVisualChild<StackPanel>(i => i == docPanel) != null) {
+							if (Config.Instance.QuickInfoXmlDocExtraHeight > 0 && Config.Instance.QuickInfoMaxHeight > 0) {
+								cp.MaxHeight += Config.Instance.QuickInfoXmlDocExtraHeight;
+							}
+							foreach (var r in docPanel.Children) {
+								(r as ThemedTipDocument)?.ApplySizeLimit();
+							}
+							cp.Content = null;
+							cp.Content = docPanel.Scrollable();
+							docPanelHandled = true;
 							continue;
 						}
 						(c as ThemedTipDocument)?.ApplySizeLimit();
@@ -388,16 +398,6 @@ namespace Codist.QuickInfo
 						}
 						cp.Content = null;
 						cp.Content = o.Scrollable();
-					}
-					if (docPanel != null) {
-						foreach (var r in docPanel.Children) {
-							(r as ThemedTipDocument)?.ApplySizeLimit();
-						}
-						var cp = docPanel.GetParent<ContentPresenter>();
-						if (cp != null && cp.Content == docPanel) {
-							cp.Content = null;
-							cp.Content = docPanel.Scrollable();
-						}
 					}
 				}
 			}
