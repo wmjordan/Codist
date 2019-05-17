@@ -38,7 +38,7 @@ namespace Codist.NaviBar
 			_View = textView;
 			_SyntaxNodeRangeAdornment = _View.GetAdornmentLayer(SyntaxNodeRange);
 			_SymbolListContainer = new ExternalAdornment(_View);
-			_SemanticContext = textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
+			_SemanticContext = SemanticContext.GetOrCreateSingetonInstance(textView);
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			textView.Properties.AddProperty(nameof(NaviBar), this);
 			Name = nameof(CSharpBar);

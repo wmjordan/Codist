@@ -35,7 +35,7 @@ namespace Codist.SmartBars
 
 		public CSharpSmartBar(IWpfTextView view, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(view, textSearchService) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			_Context = view.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(view));
+			_Context = SemanticContext.GetOrCreateSingetonInstance(view);
 			_SymbolListContainer = new ExternalAdornment(view);
 			View.Selection.SelectionChanged += ViewSeletionChanged;
 			var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];

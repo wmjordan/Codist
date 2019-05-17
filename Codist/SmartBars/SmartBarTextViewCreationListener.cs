@@ -46,7 +46,7 @@ namespace Codist.SmartBars
 			// The toolbar will get wired to the text view events
 			var contentType = textView.TextBuffer.ContentType;
 			if (String.Equals(Constants.CodeTypes.CSharp, contentType.TypeName, StringComparison.OrdinalIgnoreCase)) {
-				textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
+				SemanticContext.GetOrCreateSingetonInstance(textView);
 				new CSharpSmartBar(textView, _TextSearchService);
 			}
 			else if (contentType.IsOfType("code++.Markdown")

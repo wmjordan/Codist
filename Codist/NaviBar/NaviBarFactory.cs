@@ -32,7 +32,7 @@ namespace Codist.NaviBar
 			if (Config.Instance.Features.MatchFlags(Features.NaviBar)
 				&& textView.Roles.Contains("DIFF") == false) {
 				if (textView.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp)) {
-					textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
+					SemanticContext.GetOrCreateSingetonInstance(textView);
 					new Overrider(textView);
 				}
 #if DEBUG

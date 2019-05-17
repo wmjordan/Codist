@@ -19,7 +19,11 @@ namespace Codist
 		SyntaxNode _Node, _NodeIncludeTrivia;
 		readonly IOutliningManager _OutliningManager;
 
-		public SemanticContext(IWpfTextView textView) {
+		public static SemanticContext GetOrCreateSingetonInstance(IWpfTextView view) {
+			return view.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(view));
+		}
+
+		SemanticContext(IWpfTextView textView) {
 			View = textView;
 			_OutliningManager = ServicesHelper.Instance.OutliningManager.GetOutliningManager(textView);
 		}

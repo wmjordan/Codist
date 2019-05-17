@@ -337,7 +337,7 @@ namespace Codist.Margins
 				_View = textView;
 				_ScrollBar = verticalScrollbar;
 				_Element = element;
-				_SemanticContext = textView.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(textView));
+				_SemanticContext = SemanticContext.GetOrCreateSingetonInstance(textView);
 			}
 
 			internal void HookEvents() {
