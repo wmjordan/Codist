@@ -64,7 +64,7 @@ namespace Codist
 		public const string CodeModuleName = "module name";
 		public const string CodeTypeParameterName = "type parameter name";
 		public const string CodePreprocessorText = "preprocessor text";
-		public const string CodePreprocessorKeyword = "Preprocessor Keyword";
+		public const string CodePreprocessorKeyword = "preprocessor keyword";
 		public const string CodeExcluded = "Excluded Code";
 		public const string CodeUnnecessary = "unnecessary code";
 		public const string CodeIdentifier = "identifier";
