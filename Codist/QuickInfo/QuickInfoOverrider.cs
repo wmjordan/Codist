@@ -252,8 +252,7 @@ namespace Codist.QuickInfo
 					// beautify the title panel
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
 						if (icon != null) {
-							var bgIcon = CreateEnlargedIcon(icon);
-							infoPanel.GetParent<Border>().Background = new VisualBrush(bgIcon) {
+							infoPanel.GetParent<Border>().Background = new VisualBrush(CreateEnlargedIcon(icon)) {
 								Opacity = 0.3,
 								AlignmentX = AlignmentX.Right,
 								AlignmentY = AlignmentY.Bottom,
@@ -355,8 +354,7 @@ namespace Codist.QuickInfo
 							continue;
 						}
 						var c = cp.Content;
-						if (c is Overrider
-							|| (c is IInteractiveQuickInfoContent && c.GetType().Name == "LightBulbQuickInfoPlaceHolder")) {
+						if (c is Overrider || c is IInteractiveQuickInfoContent /* don't hack interactive content */) {
 							continue;
 						}
 						cp.LimitSize();
