@@ -365,8 +365,9 @@ namespace Codist.QuickInfo
 							foreach (var r in docPanel.Children) {
 								(r as ThemedTipDocument)?.ApplySizeLimit();
 							}
+							c = cp.Content;
 							cp.Content = null;
-							cp.Content = docPanel.Scrollable();
+							cp.Content = ((DependencyObject)c).Scrollable();
 							docPanelHandled = true;
 							continue;
 						}
