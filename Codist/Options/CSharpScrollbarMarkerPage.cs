@@ -28,10 +28,11 @@ namespace Codist.Options
 			LoadConfig(Config.Instance);
 
 			_DirectivesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.CompilerDirective, _DirectivesBox.Checked));
-			_MemberDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.MemberDeclaration, _LongMethodBox.Enabled = _TypeDeclarationBox.Enabled = _MethodDeclarationBox.Enabled = _MemberDeclarationBox.Checked));
+			_MemberDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.MemberDeclaration, _LongMethodBox.Enabled = _TypeDeclarationBox.Enabled = _MethodDeclarationBox.Enabled = _RegionBox.Enabled = _MemberDeclarationBox.Checked));
 			_LongMethodBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.LongMemberDeclaration, _LongMethodBox.Checked));
 			_TypeDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.TypeDeclaration, _TypeDeclarationBox.Checked));
 			_MethodDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.MethodDeclaration, _MethodDeclarationBox.Checked));
+			_RegionBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.RegionDirective, _RegionBox.Checked));
 			_MatchSymbolBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(MarkerOptions.SymbolReference, _MatchSymbolBox.Checked));
 
 			Config.Loaded += (s, args) => LoadConfig(s as Config);
@@ -42,9 +43,10 @@ namespace Codist.Options
 			_UI.DoWithLock(() => {
 				_DirectivesBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective);
 				_MatchSymbolBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.SymbolReference);
-				_MemberDeclarationBox.Checked = _LongMethodBox.Enabled = _TypeDeclarationBox.Enabled = _MethodDeclarationBox.Enabled = config.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration);
+				_MemberDeclarationBox.Checked = _LongMethodBox.Enabled = _TypeDeclarationBox.Enabled = _MethodDeclarationBox.Enabled = _RegionBox.Enabled = config.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration);
 				_LongMethodBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration);
 				_MethodDeclarationBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.MethodDeclaration);
+				_RegionBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.RegionDirective);
 				_TypeDeclarationBox.Checked = config.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration);
 			});
 		}

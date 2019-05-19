@@ -314,8 +314,13 @@ namespace Codist.Classifiers
 			}
 			protected override TagSpan<ClassificationTag> TagComments(string className, SnapshotSpan snapshotSpan, IMappingTagSpan<IClassificationTag> tagSpan) {
 				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)) {
-					if (Matches(snapshotSpan, "region") || Matches(snapshotSpan, "pragma") || Matches(snapshotSpan, "if") || Matches(snapshotSpan, "else")) {
-						return new TagSpan<ClassificationTag>(snapshotSpan, (ClassificationTag)tagSpan.Tag);
+					if (className == "preprocessor keyword") {
+						if (Matches(snapshotSpan, "region")) {
+							return null;
+						}
+						if (Matches(snapshotSpan, "pragma") || Matches(snapshotSpan, "if") || Matches(snapshotSpan, "else")) {
+							return new TagSpan<ClassificationTag>(snapshotSpan, (ClassificationTag)tagSpan.Tag);
+						}
 					}
 				}
 				return base.TagComments(className, snapshotSpan, tagSpan);

@@ -308,8 +308,12 @@ namespace Codist
 		}
 
 		public IEnumerable<ICollapsible> GetRegions(int position) {
-			return _OutliningManager.GetAllRegions(new SnapshotSpan(View.TextSnapshot, position, 0))
-				.Where(c => c.CollapsedForm as string != "...");
+			return GetRegions(new SnapshotSpan(View.TextSnapshot, position, 0));
+		}
+
+		public IEnumerable<ICollapsible> GetRegions(SnapshotSpan span) {
+			return _OutliningManager?.GetAllRegions(span)
+				.Where(c => c.CollapsedForm as string != "..."); // skip code blocks
 		}
 
 		void ResetNodeInfo() {

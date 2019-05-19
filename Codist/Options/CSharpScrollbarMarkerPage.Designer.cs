@@ -35,6 +35,7 @@
 			this._SymbolReferenceColorButton = new Codist.Options.PickColorButton();
 			this._MethodDeclarationBox = new System.Windows.Forms.CheckBox();
 			this._MatchSymbolBox = new System.Windows.Forms.CheckBox();
+			this._RegionBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.SuspendLayout();
@@ -42,7 +43,7 @@
 			// _DirectivesBox
 			// 
 			this._DirectivesBox.AutoSize = true;
-			this._DirectivesBox.Location = new System.Drawing.Point(15, 106);
+			this._DirectivesBox.Location = new System.Drawing.Point(15, 135);
 			this._DirectivesBox.Name = "_DirectivesBox";
 			this._DirectivesBox.Size = new System.Drawing.Size(173, 19);
 			this._DirectivesBox.TabIndex = 4;
@@ -94,6 +95,7 @@
 			// tabPage2
 			// 
 			this.tabPage2.Controls.Add(this._SymbolReferenceColorButton);
+			this.tabPage2.Controls.Add(this._RegionBox);
 			this.tabPage2.Controls.Add(this._MethodDeclarationBox);
 			this.tabPage2.Controls.Add(this._DirectivesBox);
 			this.tabPage2.Controls.Add(this._MatchSymbolBox);
@@ -112,7 +114,7 @@
 			// 
 			this._SymbolReferenceColorButton.DefaultColor = System.Drawing.Color.Empty;
 			this._SymbolReferenceColorButton.Image = ((System.Drawing.Image)(resources.GetObject("_SymbolReferenceColorButton.Image")));
-			this._SymbolReferenceColorButton.Location = new System.Drawing.Point(178, 128);
+			this._SymbolReferenceColorButton.Location = new System.Drawing.Point(178, 157);
 			this._SymbolReferenceColorButton.Name = "_SymbolReferenceColorButton";
 			this._SymbolReferenceColorButton.SelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
 			this._SymbolReferenceColorButton.Size = new System.Drawing.Size(100, 23);
@@ -134,12 +136,22 @@
 			// _MatchSymbolBox
 			// 
 			this._MatchSymbolBox.AutoSize = true;
-			this._MatchSymbolBox.Location = new System.Drawing.Point(15, 131);
+			this._MatchSymbolBox.Location = new System.Drawing.Point(15, 160);
 			this._MatchSymbolBox.Name = "_MatchSymbolBox";
 			this._MatchSymbolBox.Size = new System.Drawing.Size(125, 19);
 			this._MatchSymbolBox.TabIndex = 6;
 			this._MatchSymbolBox.Text = "Match symbol";
 			this._MatchSymbolBox.UseVisualStyleBackColor = true;
+			// 
+			// _RegionBox
+			// 
+			this._RegionBox.AutoSize = true;
+			this._RegionBox.Location = new System.Drawing.Point(39, 106);
+			this._RegionBox.Name = "_RegionBox";
+			this._RegionBox.Size = new System.Drawing.Size(205, 19);
+			this._RegionBox.TabIndex = 3;
+			this._RegionBox.Text = "#region and #endregion";
+			this._RegionBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpScrollbarMarkerPage
 			// 
@@ -166,5 +178,6 @@
 		private System.Windows.Forms.CheckBox _MethodDeclarationBox;
 		private System.Windows.Forms.CheckBox _MatchSymbolBox;
 		private PickColorButton _SymbolReferenceColorButton;
+		private System.Windows.Forms.CheckBox _RegionBox;
 	}
 }

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.VisualStudio.Text.Outlining;
 
 namespace Codist.Margins
 {
@@ -30,7 +31,9 @@ namespace Codist.Margins
 		readonly MemberMarker _MemberMarker;
 		readonly SymbolReferenceMarker _SymbolReferenceMarker;
 		readonly IEditorFormatMap _FormatMap;
-		Pen _ClassPen, _InterfacePen, _StructPen, _EnumPen, _EventPen, _DelegatePen, _ConstructorPen, _MethodPen, _PropertyPen, _FieldPen;
+		readonly SemanticContext _SemanticContext;
+		Pen _ClassPen, _InterfacePen, _StructPen, _EnumPen, _EventPen, _DelegatePen, _ConstructorPen, _MethodPen, _PropertyPen, _FieldPen, _RegionPen;
+		Brush _RegionForeground, _RegionBackground;
 
 		/// <summary>
 		/// Constructor for the <see cref="CSharpMembersMargin"/>.
@@ -44,6 +47,7 @@ namespace Codist.Margins
 			_MemberMarker = new MemberMarker(textView, verticalScrollbar, this);
 			_SymbolReferenceMarker = new SymbolReferenceMarker(textView, verticalScrollbar, this);
 			_FormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
+			_SemanticContext = SemanticContext.GetOrCreateSingetonInstance(textView);
 			IsVisibleChanged += _MemberMarker.OnIsVisibleChanged;
 			textView.Closed += TextView_Closed;
 
@@ -67,6 +71,7 @@ namespace Codist.Margins
 			Config.Updated -= Config_Updated;
 			_MemberMarker.Dispose();
 			_SymbolReferenceMarker.Dispose();
+			CancellationHelper.CancelAndDispose(ref _Cancellation, false);
 		}
 
 		/// <summary>
@@ -133,6 +138,9 @@ namespace Codist.Margins
 			_MethodPen = new Pen(_FormatMap.GetBrush(Constants.CSharpMethodName).Alpha(MemberAlpha), LineSize);
 			_PropertyPen = new Pen(_FormatMap.GetBrush(Constants.CSharpPropertyName).Alpha(MemberAlpha), LineSize);
 			_StructPen = new Pen(_FormatMap.GetBrush(Constants.CodeStructName).Alpha(TypeAlpha), TypeLineSize);
+			_RegionForeground = _FormatMap.GetBrush(Constants.CodePreprocessorText);
+			_RegionBackground = _FormatMap.GetBrush(Constants.CodePreprocessorText, EditorFormatDefinition.BackgroundBrushId).Alpha(TypeAlpha);
+			_RegionPen = new Pen(_RegionBackground ?? _RegionForeground, TypeLineSize);
 		}
 
 		ITextViewMargin ITextViewMargin.GetTextViewMargin(string marginName) {
@@ -145,9 +153,9 @@ namespace Codist.Margins
 			readonly IVerticalScrollBar _ScrollBar;
 
 			IEnumerable<IMappingTagSpan<ICodeMemberTag>> _Tags;
+			List<ICollapsible> _Regions;
 			ITagAggregator<ICodeMemberTag> _CodeMemberTagger;
 			readonly CSharpMembersMargin _Element;
-			readonly Pen _EmptyPen = new Pen();
 
 			public MemberMarker(IWpfTextView textView, IVerticalScrollBar verticalScrollbar, CSharpMembersMargin element) {
 				_TextView = textView;
@@ -187,7 +195,12 @@ namespace Codist.Margins
 			async void OnTagsChanged(object sender, EventArgs e) {
 				try {
 					CancellationHelper.CancelAndDispose(ref _Element._Cancellation, true);
-					await Task.Run(TagDocument, _Element._Cancellation.GetToken());
+					var ct = _Element._Cancellation.GetToken();
+					await Task.Run(TagDocument, ct);
+					_Regions = TagRegions(ct);
+					if (ct.IsCancellationRequested) {
+						return;
+					}
 				}
 				catch (ObjectDisposedException) {
 					return;
@@ -207,13 +220,51 @@ namespace Codist.Margins
 				_Tags = new List<IMappingTagSpan<ICodeMemberTag>>(tagger.GetTags(new SnapshotSpan(snapshot, 0, snapshot.Length)));
 			}
 
+			List<ICollapsible> TagRegions(CancellationToken cancellationToken) {
+				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.RegionDirective) == false) {
+					return null;
+				}
+				var ts = _TextView.TextSnapshot;
+				List<ICollapsible> regions = null;
+				foreach (var region in _Element._SemanticContext.GetRegions(new SnapshotSpan(ts, 0, ts.Length)) ?? Array.Empty<ICollapsible>()) {
+					if (cancellationToken.IsCancellationRequested) {
+						return null;
+					}
+					if (_Element._SemanticContext.Compilation.FindTrivia(region.Extent.GetStartPoint(ts)).IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.RegionDirectiveTrivia)) {
+						(regions ?? (regions = new List<ICollapsible>())).Add(region);
+					}
+				}
+				return regions;
+			}
+
 			internal void Render(DrawingContext drawingContext) {
 				const int showMemberDeclarationThredshold = 30, longDeclarationLines = 50, labelSize = 8;
-				var tags = _Tags;
-				if (tags == null || _TextView.IsClosed || _CodeMemberTagger == null || Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration) == false) {
+				if (Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.MemberDeclaration | MarkerOptions.RegionDirective) == false
+					|| _TextView.IsClosed) {
 					return;
 				}
 				var snapshot = _TextView.TextSnapshot;
+				var regions = _Regions;
+				FormattedText text;
+				if (regions != null && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.RegionDirective)) {
+					foreach (var region in regions) {
+						var s = region.CollapsedForm as string;
+						if (s != null) {
+							text = WpfHelper.ToFormattedText(s, labelSize, _Element._RegionForeground);
+							var p = new Point(5, _ScrollBar.GetYCoordinateOfBufferPosition(region.Extent.GetStartPoint(snapshot)) - text.Height / 2);
+							if (_Element._RegionBackground != null) {
+								drawingContext.DrawRectangle(_Element._RegionBackground, null, new Rect(p, new Size(text.Width, text.Height)));
+							}
+							drawingContext.DrawText(text, p);
+							p = new Point(0, _ScrollBar.GetYCoordinateOfBufferPosition(region.Extent.GetEndPoint(snapshot)));
+							drawingContext.DrawLine(_Element._RegionPen, p, new Point(_ScrollBar.ThumbHeight, p.Y));
+						}
+					}
+				}
+				var tags = _Tags;
+				if (tags == null || _CodeMemberTagger == null || Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration) == false) {
+					return;
+				}
 				var snapshotLength = snapshot.Length;
 				var memberLevel = 0;
 				var memberType = CodeMemberType.Root;
@@ -252,7 +303,7 @@ namespace Codist.Margins
 								pen = _Element.GetPenForCodeMemberType(tagType);
 							}
 							if (pen.Brush != null) {
-								var text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Alpha((y2 - y1) * 20 / _Element.ActualHeight));
+								text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Alpha((y2 - y1) * 20 / _Element.ActualHeight));
 								y1 -= text.Height / 2;
 								drawingContext.DrawText(text, new Point(level + 2, y1));
 							}
@@ -275,7 +326,7 @@ namespace Codist.Margins
 						drawingContext.DrawLine(pen, new Point(level, yTop), new Point(level, yBottom));
 						if (yTop > lastLabel && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Tag.Name != null) {
 							// draw type name
-							var text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Alpha(1))
+							text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Alpha(1))
 								.SetBold();
 							if (level != 1) {
 								text.SetFontStyle(FontStyles.Italic);
@@ -325,19 +376,17 @@ namespace Codist.Margins
 			const double MarkerMargin = 1;
 			readonly IWpfTextView _View;
 			readonly IVerticalScrollBar _ScrollBar;
-			readonly SemanticContext _SemanticContext;
-			readonly CSharpMembersMargin _Element;
+			readonly CSharpMembersMargin _Margin;
 			readonly Brush _MarkerBrush = Brushes.Aqua;
 			readonly Pen _DefinitionMarkerPen = new Pen(ThemeHelper.ToolWindowTextBrush, MarkerMargin);
 			IEnumerable<ReferencedSymbol> _ReferencePoints;
 			SyntaxTree _DocSyntax;
 			ISymbol _Symbol;
 
-			public SymbolReferenceMarker(IWpfTextView textView, IVerticalScrollBar verticalScrollbar, CSharpMembersMargin element) {
+			public SymbolReferenceMarker(IWpfTextView textView, IVerticalScrollBar verticalScrollbar, CSharpMembersMargin margin) {
 				_View = textView;
 				_ScrollBar = verticalScrollbar;
-				_Element = element;
-				_SemanticContext = SemanticContext.GetOrCreateSingetonInstance(textView);
+				_Margin = margin;
 			}
 
 			internal void HookEvents() {
@@ -359,7 +408,7 @@ namespace Codist.Margins
 				var snapshot = _View.TextSnapshot;
 				var snapshotLength = snapshot.Length;
 				foreach (var item in refs) {
-					if (_Element._Cancellation?.IsCancellationRequested != false) {
+					if (_Margin._Cancellation?.IsCancellationRequested != false) {
 						break;
 					}
 					foreach (var loc in item.Locations) {
@@ -393,7 +442,7 @@ namespace Codist.Margins
 
 			async void UpdateReferences(object sender, EventArgs e) {
 				try {
-					CancellationHelper.CancelAndDispose(ref _Element._Cancellation, true);
+					CancellationHelper.CancelAndDispose(ref _Margin._Cancellation, true);
 					//if (_View.Selection.IsEmpty == false) {
 					//	if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
 					//		_Element.InvalidateVisual();
@@ -411,27 +460,28 @@ namespace Codist.Margins
 			}
 
 			async Task UpdateReferencesAsync() {
-				var cancellation = _Element._Cancellation.GetToken();
-				if (await _SemanticContext.UpdateAsync(_View.Selection.Start.Position, cancellation) == false) {
+				var cancellation = _Margin._Cancellation.GetToken();
+				var ctx = _Margin._SemanticContext;
+				if (await ctx.UpdateAsync(_View.Selection.Start.Position, cancellation) == false) {
 					_Symbol = null;
-					_Element.InvalidateVisual();
+					_Margin.InvalidateVisual();
 					return;
 				}
-				var node = _SemanticContext.Node;
-				var symbol = await _SemanticContext.GetSymbolAsync(cancellation);
+				var node = ctx.Node;
+				var symbol = await ctx.GetSymbolAsync(cancellation);
 				if (symbol != null) {
 					if (Interlocked.Exchange(ref _Symbol, symbol) != symbol) {
-						var doc = _SemanticContext.Document;
-						_DocSyntax = _SemanticContext.Compilation.SyntaxTree;
+						var doc = ctx.Document;
+						_DocSyntax = ctx.Compilation.SyntaxTree;
 						// todo show marked symbols on scrollbar margin
 						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), cancellation);
-						_Element.InvalidateVisual();
+						_Margin.InvalidateVisual();
 					}
 				}
 				else {
 					if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
 						_Symbol = null;
-						_Element.InvalidateVisual();
+						_Margin.InvalidateVisual();
 					}
 				}
 			}

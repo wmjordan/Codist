@@ -523,11 +523,12 @@ namespace Codist
 		MemberDeclaration = 1 << 1,
 		LongMemberDeclaration = 1 << 2,
 		CompilerDirective = 1 << 3,
-		LineNumber = 1 << 4,
+		RegionDirective = 1 << 4,
 		TypeDeclaration = 1 << 5,
 		MethodDeclaration = 1 << 6,
 		SymbolReference = 1 << 7,
 		Selection = 1 << 8,
+		LineNumber = 1 << 9,
 		CodeMarginMask = SpecialComment | CompilerDirective,
 		MemberMarginMask = MemberDeclaration | SymbolReference,
 		Default = SpecialComment | MemberDeclaration | LineNumber | Selection | LongMemberDeclaration | SymbolReference
