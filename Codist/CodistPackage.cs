@@ -7,6 +7,8 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio;
+using AppHelpers;
 
 namespace Codist
 {
@@ -37,7 +39,7 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.CSharpScrollbarMarker), CategoryScrollbarMarker, "C#", 0, 0, true, Sort = 51)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	//[ProvideToolWindow(typeof(Commands.SymbolFinderWindow))]
-	[ProvideAutoLoad(Microsoft.VisualStudio.VSConstants.UICONTEXT.SolutionExists_string, PackageAutoLoadFlags.BackgroundLoad)]
+	[ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string, PackageAutoLoadFlags.BackgroundLoad)]
 	sealed class CodistPackage : AsyncPackage
 	{
 		/// <summary>CodistPackage GUID string.</summary>
@@ -51,6 +53,8 @@ namespace Codist
 
 		static EnvDTE.DTE _dte;
 		static EnvDTE80.DTE2 _dte2;
+		static EnvDTE.Events _dteEvents;
+		static EnvDTE.BuildEvents _buildEvents;
 		static OleMenuCommandService _menu;
 		static IOleComponentManager _componentManager;
 
@@ -133,17 +137,65 @@ namespace Codist
 			SolutionEvents.OnAfterOpenSolution += (s, args) => {
 				Classifiers.SymbolMarkManager.Clear();
 			};
-
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			if ((Config.Instance.DisplayOptimizations & DisplayOptimizations.MainWindow) != 0) {
 				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, true);
 			}
+			_dteEvents = DTE2.Events;
+			_buildEvents = _dteEvents.BuildEvents;
+			_buildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
+			_buildEvents.OnBuildDone += BuildEvents_OnBuildEnd;
+			_buildEvents.OnBuildProjConfigBegin += BuildEvents_OnBuildProjConfigBegin;
 			await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
 			Commands.ScreenshotCommand.Initialize(this);
 			Commands.IncrementVsixVersionCommand.Initialize(this);
 			Commands.NaviBarSearchDeclarationCommand.Initialize(this);
+		}
+
+		void BuildEvents_OnBuildBegin(EnvDTE.vsBuildScope Scope, EnvDTE.vsBuildAction Action) {
+			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
+				var output = GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
+				output?.OutputString(DateTime.Now.ToLongTimeString() + " Build started." + Environment.NewLine);
+			}
+		}
+
+		void BuildEvents_OnBuildEnd(EnvDTE.vsBuildScope Scope, EnvDTE.vsBuildAction Action) {
+			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
+				var output = GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
+				if (output != null) {
+					output.OutputString(DateTime.Now.ToLongTimeString() + " Build finished." + Environment.NewLine);
+				}
+			}
+		}
+
+		void BuildEvents_OnBuildProjConfigBegin (string projectName, string projectConfig, string platform, string solutionConfig) {
+			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) == false) {
+				return;
+			}
+			var project = TextEditorHelper.GetProject(projectName);
+			if (project.IsVsixProject() == false) {
+				return;
+			}
+			var projItems = project.ProjectItems;
+			for (int i = projItems.Count; i > 0; i--) {
+				var item = projItems.Item(i);
+				if (item.Name.EndsWith(".vsixmanifest", StringComparison.OrdinalIgnoreCase)) {
+					if (item.IsOpen && item.IsDirty) {
+						item.Document.NewWindow().Activate();
+						ShowErrorMessageBox(item.Name + " is open and modified. Auto increment VSIX version number failed.", nameof(Codist), true);
+					}
+					else if (Commands.IncrementVsixVersionCommand.IncrementVersion(item, out var message)) {
+						var output = GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
+						output?.OutputString(nameof(Codist) + ": " + message + Environment.NewLine);
+					}
+					else {
+						ShowErrorMessageBox(message, "Auto increment VSIX version number failed.", true);
+					}
+					break;
+				}
+			}
 		}
 
 		#endregion

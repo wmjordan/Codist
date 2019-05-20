@@ -38,7 +38,11 @@ namespace Codist.Commands
 				return;
 			}
 			string message;
-			bool error = false;
+			bool error = IncrementVersion(item, out message) == false;
+			CodistPackage.ShowErrorMessageBox(message, "Increment Version", error);
+		}
+
+		internal static bool IncrementVersion(ProjectItem item, out string message) {
 			const string Namespace = "http://schemas.microsoft.com/developer/vsx-schema/2011";
 			try {
 				var fileName = item.FileNames[0];
@@ -47,19 +51,16 @@ namespace Codist.Commands
 				if (v != null && Version.TryParse(v.Value, out var ver)) {
 					v.Value = new Version(Math.Max(ver.Major, 1), Math.Max(ver.Minor, 0), Math.Max(ver.Build, 0), Math.Max(ver.Revision, 0) + 1).ToString();
 					doc.Save(fileName);
-					message = "Incremented version to " + v.Value;
+					message = "Incremented VSIX manifest version to " + v.Value;
+					return true;
 				}
-				else {
-					message = "Version not found or verion number invalid in file " + fileName;
-					error = true;
-				}
+
+				message = "Version not found or verion number invalid in file " + fileName;
 			}
 			catch (Exception ex) {
 				message = ex.Message;
-				error = true;
 			}
-
-			CodistPackage.ShowErrorMessageBox(message, "Increment Version", error);
+			return false;
 		}
 
 		static ProjectItem GetSelectedProjectItem() {

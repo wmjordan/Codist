@@ -22,15 +22,15 @@ namespace Codist
 	{
 		static /*readonly*/ Guid guidIWpfTextViewHost = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476");
 
-		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
-			while (oldVersion != currentVersion) {
-				if (oldVersion.Changes.Count > 0) {
-					return true;
-				}
-				oldVersion = oldVersion.Next;
-			}
-			return false;
+		#region Position
+		public static SnapshotPoint GetCaretPosition(this ITextView textView) {
+			return textView.Caret.Position.BufferPosition;
 		}
+
+		public static bool IsCaretInReadOnlyRegion(this ITextView textView) {
+			return textView.TextBuffer.IsReadOnly(textView.Caret.Position.BufferPosition);
+		}
+
 		public static bool Contains(this TextSpan span, int position, bool inclusive) {
 			return span.Contains(position) || (inclusive && span.End == position);
 		}
@@ -40,6 +40,9 @@ namespace Codist
 			return span.Contains(start) && (span.Contains(end) || inclusive && span.End == end);
 		}
 
+		#endregion
+
+		#region Spans
 		public static SnapshotSpan CreateSnapshotSpan(this TextSpan span, ITextSnapshot snapshot) {
 			if (span.End < snapshot.Length) {
 				return new SnapshotSpan(snapshot, span.Start, span.Length);
@@ -67,59 +70,15 @@ namespace Codist
 		public static Span GetLineSpan(this ITextSnapshot snapshot, TextSpan span) {
 			return Span.FromBounds(snapshot.GetLineNumberFromPosition(span.Start),
 				snapshot.GetLineNumberFromPosition(span.End));
-		}
+		} 
+		#endregion
 
 		public static TextFormattingRunProperties GetRunProperties(this IClassificationFormatMap formatMap, string classificationType) {
 			var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType);
 			return t == null ? null : formatMap.GetTextProperties(t);
 		}
 
-		/// <summary>
-		/// Begins an edit operation to the <paramref name="view"/>.
-		/// </summary>
-		/// <typeparam name="TView">The type of the view.</typeparam>
-		/// <param name="view">The <see cref="ITextView"/> to be edited.</param>
-		/// <param name="action">The edit operation.</param>
-		/// <returns>Returns a new <see cref="ITextSnapshot"/> if <see cref="ITextEdit.HasEffectiveChanges"/>  returns <see langword="true"/>, otherwise, returns <see langword="null"/>.</returns>
-		public static ITextSnapshot Edit<TView>(this TView view, Action<TView, ITextEdit> action)
-			where TView : ITextView {
-			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
-				action(view, edit);
-				if (edit.HasEffectiveChanges) {
-					return edit.Apply();
-				}
-				return null;
-			}
-		}
-		/// <summary>
-		/// Performs edit operation to each selected spans in the <paramref name="view"/>.
-		/// </summary>
-		/// <typeparam name="TView">The type of the view.</typeparam>
-		/// <param name="view">The <see cref="ITextView"/> to be edited.</param>
-		/// <param name="action">The edit operation against each selected span.</param>
-		/// <returns>Returns a new <see cref="SnapshotSpan"/> if <see cref="ITextEdit.HasEffectiveChanges"/> returns <see langword="true"/> and <paramref name="action"/> returns a <see cref="Span"/>, otherwise, returns <see langword="null"/>.</returns>
-		public static SnapshotSpan? EditSelection<TView>(this TView view, Func<TView, ITextEdit, SnapshotSpan, Span?> action)
-			where TView : ITextView {
-			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
-				Span? s = null;
-				foreach (var item in view.Selection.SelectedSpans) {
-					if (s == null) {
-						s = action(view, edit, item);
-					}
-					else {
-						action(view, edit, item);
-					}
-				}
-				if (edit.HasEffectiveChanges) {
-					var shot = edit.Apply();
-					if (s.HasValue) {
-						return view.TextSnapshot.CreateTrackingSpan(s.Value, SpanTrackingMode.EdgeInclusive).GetSpan(shot);
-					}
-				}
-				return null;
-			}
-		}
-
+		#region Selection
 		public static void ExpandSelectionToLine(this ITextView view) {
 			view.ExpandSelectionToLine(true);
 		}
@@ -186,14 +145,6 @@ namespace Codist
 			return t;
 		}
 
-		public static SnapshotPoint GetCaretPosition(this ITextView textView) {
-			return textView.Caret.Position.BufferPosition;
-		}
-
-		public static bool IsCaretInReadOnlyRegion(this ITextView textView) {
-			return textView.TextBuffer.IsReadOnly(textView.Caret.Position.BufferPosition);
-		}
-
 		public static bool IsMultilineSelected(this ITextView textView) {
 			var s = textView.Selection;
 			if (s.IsEmpty || s.SelectedSpans.Count < 1) {
@@ -231,6 +182,55 @@ namespace Codist
 			view.Selection.Select(span, false);
 			view.Caret.MoveTo(span.End);
 		}
+		#endregion
+
+		#region Edit
+		/// <summary>
+		/// Begins an edit operation to the <paramref name="view"/>.
+		/// </summary>
+		/// <typeparam name="TView">The type of the view.</typeparam>
+		/// <param name="view">The <see cref="ITextView"/> to be edited.</param>
+		/// <param name="action">The edit operation.</param>
+		/// <returns>Returns a new <see cref="ITextSnapshot"/> if <see cref="ITextEdit.HasEffectiveChanges"/>  returns <see langword="true"/>, otherwise, returns <see langword="null"/>.</returns>
+		public static ITextSnapshot Edit<TView>(this TView view, Action<TView, ITextEdit> action)
+			where TView : ITextView {
+			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+				action(view, edit);
+				if (edit.HasEffectiveChanges) {
+					return edit.Apply();
+				}
+				return null;
+			}
+		}
+		/// <summary>
+		/// Performs edit operation to each selected spans in the <paramref name="view"/>.
+		/// </summary>
+		/// <typeparam name="TView">The type of the view.</typeparam>
+		/// <param name="view">The <see cref="ITextView"/> to be edited.</param>
+		/// <param name="action">The edit operation against each selected span.</param>
+		/// <returns>Returns a new <see cref="SnapshotSpan"/> if <see cref="ITextEdit.HasEffectiveChanges"/> returns <see langword="true"/> and <paramref name="action"/> returns a <see cref="Span"/>, otherwise, returns <see langword="null"/>.</returns>
+		public static SnapshotSpan? EditSelection<TView>(this TView view, Func<TView, ITextEdit, SnapshotSpan, Span?> action)
+			where TView : ITextView {
+			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+				Span? s = null;
+				foreach (var item in view.Selection.SelectedSpans) {
+					if (s == null) {
+						s = action(view, edit, item);
+					}
+					else {
+						action(view, edit, item);
+					}
+				}
+				if (edit.HasEffectiveChanges) {
+					var shot = edit.Apply();
+					if (s.HasValue) {
+						return view.TextSnapshot.CreateTrackingSpan(s.Value, SpanTrackingMode.EdgeInclusive).GetSpan(shot);
+					}
+				}
+				return null;
+			}
+		}
+
 
 		public static void CopyOrMoveSyntaxNode(this IWpfTextView view, SyntaxNode sourceNode, SyntaxNode targetNode, bool copy, bool before) {
 			var tSpan = (targetNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? targetNode.Parent.Parent : targetNode).GetSematicSpan();
@@ -312,6 +312,18 @@ namespace Codist
 			dte.OpenFile(file, d => ((EnvDTE.TextSelection)d.Selection).MoveToLineAndOffset(line, column));
 		}
 
+		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
+			while (oldVersion != currentVersion) {
+				if (oldVersion.Changes.Count > 0) {
+					return true;
+				}
+				oldVersion = oldVersion.Next;
+			}
+			return false;
+		}
+		#endregion
+
+		#region TextView and editor
 		public static IWpfTextView GetActiveWpfDocumentView(this IServiceProvider service) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var doc = CodistPackage.DTE.ActiveDocument;
@@ -320,6 +332,22 @@ namespace Codist
 			}
 			var textView = GetIVsTextView(service, doc.FullName);
 			return textView == null ? null : GetWpfTextView(textView);
+		}
+
+		public static EnvDTE.Project GetProject(string projectName) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			return CodistPackage.DTE.Solution.Projects.Item(projectName);
+		}
+
+		public static bool IsVsixProject(this EnvDTE.Project project) {
+			var extenders = project?.ExtenderNames as string[];
+			return extenders != null && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
+		}
+
+		public static bool IsVsixProject() {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];
+			return extenders != null && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
 		}
 
 		static VsTextView GetIVsTextView(IServiceProvider service, string filePath) {
@@ -337,6 +365,7 @@ namespace Codist
 			userData.GetData(ref guidViewHost, out object holder);
 			return ((IWpfTextViewHost)holder).TextView;
 		}
+		#endregion
 	}
 
 	[Flags]

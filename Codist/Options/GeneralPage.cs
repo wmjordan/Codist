@@ -29,6 +29,8 @@ namespace Codist.Options
 			_ScrollbarMarkerBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.ScrollbarMarkers, _ScrollbarMarkerBox.Checked));
 			_SmartBarBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.SmartBar, _SmartBarBox.Checked));
 			_CodeBarBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(Features.NaviBar, _CodeBarBox.Checked));
+			_BuildTimestampBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(BuildOptions.BuildTimestamp, _BuildTimestampBox.Checked));
+			_IncrementVsixRevisionBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(BuildOptions.VsixAutoIncrement, _IncrementVsixRevisionBox.Checked));
 
 			_TopMarginBox.ValueChanged += _UI.HandleEvent(() => {
 				Config.Instance.TopSpace = (double)_TopMarginBox.Value;
@@ -97,6 +99,8 @@ namespace Codist.Options
 				_OptimizeMainWindowBox.Checked = config.DisplayOptimizations.MatchFlags(DisplayOptimizations.MainWindow);
 				_OptimizeCodeWindowBox.Checked = config.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow);
 				_NoSpaceBetweenWrappedLinesBox.Checked = config.NoSpaceBetweenWrappedLines;
+				_BuildTimestampBox.Checked = config.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp);
+				_IncrementVsixRevisionBox.Checked = config.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement);
 				_TopMarginBox.Value = (decimal)config.TopSpace;
 				_BottomMarginBox.Value = (decimal)config.BottomSpace;
 			});

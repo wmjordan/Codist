@@ -48,6 +48,9 @@ namespace Codist
 		[DefaultValue(NaviBarOptions.Default)]
 		public NaviBarOptions NaviBarOptions { get; set; } = NaviBarOptions.Default;
 
+		[DefaultValue(BuildOptions.Default)]
+		public BuildOptions BuildOptions { get; set; } = BuildOptions.Default;
+
 		public double TopSpace { get; set; }
 		public double BottomSpace { get; set; }
 		public double QuickInfoMaxWidth { get; set; }
@@ -254,6 +257,9 @@ namespace Codist
 		internal void Set(SpecialHighlightOptions options, bool set) {
 			SpecialHighlightOptions = EnumHelper.SetFlags(SpecialHighlightOptions, options, set);
 			FireConfigChangedEvent(Features.SyntaxHighlight);
+		}
+		internal void Set(BuildOptions options, bool set) {
+			BuildOptions = EnumHelper.SetFlags(BuildOptions, options, set);
 		}
 
 		static void LoadStyleEntries<TStyle, TStyleType> (List<TStyle> styles, bool removeFontNames)
@@ -550,6 +556,15 @@ namespace Codist
 		PartialClassMember = 1 << 14,
 		Region = 1 << 15,
 		Default = RangeHighlight | RegionOnBar | ParameterList | FieldValue | AutoPropertyAnnotation | PartialClassMember | Region
+	}
+
+	[Flags]
+	public enum BuildOptions
+	{
+		None,
+		BuildTimestamp = 1,
+		VsixAutoIncrement = 1 << 8,
+		Default = None
 	}
 
 	public enum ScrollbarMarkerStyle

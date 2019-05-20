@@ -26,7 +26,7 @@
 		/// </summary>
 		private void InitializeComponent() {
 			this.tabControl1 = new System.Windows.Forms.TabControl();
-			this.tabPage1 = new System.Windows.Forms.TabPage();
+			this._GeneralPage = new System.Windows.Forms.TabPage();
 			this.groupBox2 = new Codist.Controls.CustomGroupBox();
 			this._CodeBarBox = new System.Windows.Forms.CheckBox();
 			this._SmartBarBox = new System.Windows.Forms.CheckBox();
@@ -37,7 +37,7 @@
 			this.groupBox3 = new Codist.Controls.CustomGroupBox();
 			this._SaveConfigButton = new System.Windows.Forms.Button();
 			this._LoadConfigButton = new System.Windows.Forms.Button();
-			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this._DisplayPage = new System.Windows.Forms.TabPage();
 			this.customGroupBox1 = new Codist.Controls.CustomGroupBox();
 			this.textBox1 = new System.Windows.Forms.TextBox();
 			this._OptimizeCodeWindowBox = new System.Windows.Forms.CheckBox();
@@ -48,26 +48,34 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this._TopMarginBox = new System.Windows.Forms.NumericUpDown();
 			this.label1 = new System.Windows.Forms.Label();
-			this.tabPage3 = new System.Windows.Forms.TabPage();
+			this._AboutPage = new System.Windows.Forms.TabPage();
 			this.customGroupBox2 = new Codist.Controls.CustomGroupBox();
+			this.label7 = new System.Windows.Forms.Label();
+			this.label6 = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
 			this._DonationLinkLabel = new System.Windows.Forms.LinkLabel();
+			this._ReleaseLinkLabel = new System.Windows.Forms.LinkLabel();
 			this._GitHubLinkLabel = new System.Windows.Forms.LinkLabel();
 			this.label5 = new System.Windows.Forms.Label();
-			this.label6 = new System.Windows.Forms.Label();
-			this.label7 = new System.Windows.Forms.Label();
-			this._ReleaseLinkLabel = new System.Windows.Forms.LinkLabel();
+			this._BuildPage = new System.Windows.Forms.TabPage();
+			this.customGroupBox3 = new Codist.Controls.CustomGroupBox();
+			this._BuildTimestampBox = new System.Windows.Forms.CheckBox();
+			this.customGroupBox4 = new Codist.Controls.CustomGroupBox();
+			this._IncrementVsixRevisionBox = new System.Windows.Forms.CheckBox();
 			this.tabControl1.SuspendLayout();
-			this.tabPage1.SuspendLayout();
+			this._GeneralPage.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
-			this.tabPage2.SuspendLayout();
+			this._DisplayPage.SuspendLayout();
 			this.customGroupBox1.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
-			this.tabPage3.SuspendLayout();
+			this._AboutPage.SuspendLayout();
 			this.customGroupBox2.SuspendLayout();
+			this._BuildPage.SuspendLayout();
+			this.customGroupBox3.SuspendLayout();
+			this.customGroupBox4.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tabControl1
@@ -75,26 +83,27 @@
 			this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.tabControl1.Controls.Add(this.tabPage1);
-			this.tabControl1.Controls.Add(this.tabPage2);
-			this.tabControl1.Controls.Add(this.tabPage3);
+			this.tabControl1.Controls.Add(this._GeneralPage);
+			this.tabControl1.Controls.Add(this._BuildPage);
+			this.tabControl1.Controls.Add(this._DisplayPage);
+			this.tabControl1.Controls.Add(this._AboutPage);
 			this.tabControl1.Location = new System.Drawing.Point(3, 3);
 			this.tabControl1.Name = "tabControl1";
 			this.tabControl1.SelectedIndex = 0;
 			this.tabControl1.Size = new System.Drawing.Size(572, 325);
 			this.tabControl1.TabIndex = 0;
 			// 
-			// tabPage1
+			// _GeneralPage
 			// 
-			this.tabPage1.Controls.Add(this.groupBox2);
-			this.tabPage1.Controls.Add(this.groupBox3);
-			this.tabPage1.Location = new System.Drawing.Point(4, 25);
-			this.tabPage1.Name = "tabPage1";
-			this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPage1.Size = new System.Drawing.Size(564, 296);
-			this.tabPage1.TabIndex = 0;
-			this.tabPage1.Text = "General";
-			this.tabPage1.UseVisualStyleBackColor = true;
+			this._GeneralPage.Controls.Add(this.groupBox2);
+			this._GeneralPage.Controls.Add(this.groupBox3);
+			this._GeneralPage.Location = new System.Drawing.Point(4, 25);
+			this._GeneralPage.Name = "_GeneralPage";
+			this._GeneralPage.Padding = new System.Windows.Forms.Padding(3);
+			this._GeneralPage.Size = new System.Drawing.Size(564, 296);
+			this._GeneralPage.TabIndex = 0;
+			this._GeneralPage.Text = "General";
+			this._GeneralPage.UseVisualStyleBackColor = true;
 			// 
 			// groupBox2
 			// 
@@ -204,17 +213,17 @@
 			this._LoadConfigButton.Text = "&Load...";
 			this._LoadConfigButton.UseVisualStyleBackColor = true;
 			// 
-			// tabPage2
+			// _DisplayPage
 			// 
-			this.tabPage2.Controls.Add(this.customGroupBox1);
-			this.tabPage2.Controls.Add(this.groupBox1);
-			this.tabPage2.Location = new System.Drawing.Point(4, 25);
-			this.tabPage2.Name = "tabPage2";
-			this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPage2.Size = new System.Drawing.Size(564, 296);
-			this.tabPage2.TabIndex = 1;
-			this.tabPage2.Text = "Display";
-			this.tabPage2.UseVisualStyleBackColor = true;
+			this._DisplayPage.Controls.Add(this.customGroupBox1);
+			this._DisplayPage.Controls.Add(this.groupBox1);
+			this._DisplayPage.Location = new System.Drawing.Point(4, 25);
+			this._DisplayPage.Name = "_DisplayPage";
+			this._DisplayPage.Padding = new System.Windows.Forms.Padding(3);
+			this._DisplayPage.Size = new System.Drawing.Size(564, 296);
+			this._DisplayPage.TabIndex = 1;
+			this._DisplayPage.Text = "Display";
+			this._DisplayPage.UseVisualStyleBackColor = true;
 			// 
 			// customGroupBox1
 			// 
@@ -321,16 +330,16 @@
 			this.label1.TabIndex = 0;
 			this.label1.Text = "Top margin:";
 			// 
-			// tabPage3
+			// _AboutPage
 			// 
-			this.tabPage3.Controls.Add(this.customGroupBox2);
-			this.tabPage3.Location = new System.Drawing.Point(4, 25);
-			this.tabPage3.Name = "tabPage3";
-			this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPage3.Size = new System.Drawing.Size(564, 296);
-			this.tabPage3.TabIndex = 2;
-			this.tabPage3.Text = "About";
-			this.tabPage3.UseVisualStyleBackColor = true;
+			this._AboutPage.Controls.Add(this.customGroupBox2);
+			this._AboutPage.Location = new System.Drawing.Point(4, 25);
+			this._AboutPage.Name = "_AboutPage";
+			this._AboutPage.Padding = new System.Windows.Forms.Padding(3);
+			this._AboutPage.Size = new System.Drawing.Size(564, 296);
+			this._AboutPage.TabIndex = 2;
+			this._AboutPage.Text = "About";
+			this._AboutPage.UseVisualStyleBackColor = true;
 			// 
 			// customGroupBox2
 			// 
@@ -350,6 +359,26 @@
 			this.customGroupBox2.TabIndex = 0;
 			this.customGroupBox2.TabStop = false;
 			this.customGroupBox2.Text = "Thank you for using Codist";
+			// 
+			// label7
+			// 
+			this.label7.AutoSize = true;
+			this.label7.Location = new System.Drawing.Point(6, 75);
+			this.label7.Name = "label7";
+			this.label7.Size = new System.Drawing.Size(127, 15);
+			this.label7.TabIndex = 2;
+			this.label7.Text = "Latest release:";
+			// 
+			// label6
+			// 
+			this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.label6.Location = new System.Drawing.Point(32, 165);
+			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(495, 52);
+			this.label6.TabIndex = 6;
+			this.label6.Text = "Recommended donation value is $19.99. But you can modify the amount to any value " +
+    "if you like.";
 			// 
 			// label4
 			// 
@@ -371,6 +400,17 @@
 			this._DonationLinkLabel.Text = "Donate via PayPal";
 			this._DonationLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this._DonationLinkLabel_LinkClicked);
 			// 
+			// _ReleaseLinkLabel
+			// 
+			this._ReleaseLinkLabel.AutoSize = true;
+			this._ReleaseLinkLabel.Location = new System.Drawing.Point(32, 90);
+			this._ReleaseLinkLabel.Name = "_ReleaseLinkLabel";
+			this._ReleaseLinkLabel.Size = new System.Drawing.Size(287, 15);
+			this._ReleaseLinkLabel.TabIndex = 3;
+			this._ReleaseLinkLabel.TabStop = true;
+			this._ReleaseLinkLabel.Text = "github.com/wmjordan/Codist/releases";
+			this._ReleaseLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this._ReleaseLinkLabel_LinkClicked);
+			// 
 			// _GitHubLinkLabel
 			// 
 			this._GitHubLinkLabel.AutoSize = true;
@@ -391,36 +431,61 @@
 			this.label5.TabIndex = 0;
 			this.label5.Text = "Report bugs and suggesions to:";
 			// 
-			// label6
+			// _BuildPage
 			// 
-			this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+			this._BuildPage.Controls.Add(this.customGroupBox4);
+			this._BuildPage.Controls.Add(this.customGroupBox3);
+			this._BuildPage.Location = new System.Drawing.Point(4, 25);
+			this._BuildPage.Name = "_BuildPage";
+			this._BuildPage.Padding = new System.Windows.Forms.Padding(3);
+			this._BuildPage.Size = new System.Drawing.Size(564, 296);
+			this._BuildPage.TabIndex = 3;
+			this._BuildPage.Text = "Build";
+			this._BuildPage.UseVisualStyleBackColor = true;
+			// 
+			// customGroupBox3
+			// 
+			this.customGroupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.label6.Location = new System.Drawing.Point(32, 165);
-			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(495, 52);
-			this.label6.TabIndex = 6;
-			this.label6.Text = "Recommended donation value is $19.99. But you can modify the amount to any value " +
-    "if you like.";
+			this.customGroupBox3.Controls.Add(this._BuildTimestampBox);
+			this.customGroupBox3.Location = new System.Drawing.Point(6, 6);
+			this.customGroupBox3.Name = "customGroupBox3";
+			this.customGroupBox3.Size = new System.Drawing.Size(552, 84);
+			this.customGroupBox3.TabIndex = 1;
+			this.customGroupBox3.TabStop = false;
+			this.customGroupBox3.Text = "Timestamp";
 			// 
-			// label7
+			// _BuildTimestampBox
 			// 
-			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(6, 75);
-			this.label7.Name = "label7";
-			this.label7.Size = new System.Drawing.Size(127, 15);
-			this.label7.TabIndex = 2;
-			this.label7.Text = "Latest release:";
+			this._BuildTimestampBox.AutoSize = true;
+			this._BuildTimestampBox.Location = new System.Drawing.Point(9, 24);
+			this._BuildTimestampBox.Name = "_BuildTimestampBox";
+			this._BuildTimestampBox.Size = new System.Drawing.Size(405, 19);
+			this._BuildTimestampBox.TabIndex = 4;
+			this._BuildTimestampBox.Text = "Output time stamp before and after build events";
+			this._BuildTimestampBox.UseVisualStyleBackColor = true;
 			// 
-			// _ReleaseLinkLabel
+			// customGroupBox4
 			// 
-			this._ReleaseLinkLabel.AutoSize = true;
-			this._ReleaseLinkLabel.Location = new System.Drawing.Point(32, 90);
-			this._ReleaseLinkLabel.Name = "_ReleaseLinkLabel";
-			this._ReleaseLinkLabel.Size = new System.Drawing.Size(287, 15);
-			this._ReleaseLinkLabel.TabIndex = 3;
-			this._ReleaseLinkLabel.TabStop = true;
-			this._ReleaseLinkLabel.Text = "github.com/wmjordan/Codist/releases";
-			this._ReleaseLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this._ReleaseLinkLabel_LinkClicked);
+			this.customGroupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.customGroupBox4.Controls.Add(this._IncrementVsixRevisionBox);
+			this.customGroupBox4.Location = new System.Drawing.Point(6, 96);
+			this.customGroupBox4.Name = "customGroupBox4";
+			this.customGroupBox4.Size = new System.Drawing.Size(552, 84);
+			this.customGroupBox4.TabIndex = 1;
+			this.customGroupBox4.TabStop = false;
+			this.customGroupBox4.Text = "Visual Studio Extension";
+			// 
+			// _IncrementVsixRevisionBox
+			// 
+			this._IncrementVsixRevisionBox.AutoSize = true;
+			this._IncrementVsixRevisionBox.Location = new System.Drawing.Point(9, 24);
+			this._IncrementVsixRevisionBox.Name = "_IncrementVsixRevisionBox";
+			this._IncrementVsixRevisionBox.Size = new System.Drawing.Size(517, 19);
+			this._IncrementVsixRevisionBox.TabIndex = 4;
+			this._IncrementVsixRevisionBox.Text = "Increment revision number for .vsixmanifest file before build";
+			this._IncrementVsixRevisionBox.UseVisualStyleBackColor = true;
 			// 
 			// GeneralPage
 			// 
@@ -431,20 +496,25 @@
 			this.Size = new System.Drawing.Size(575, 328);
 			this.Load += new System.EventHandler(this.MiscPage_Load);
 			this.tabControl1.ResumeLayout(false);
-			this.tabPage1.ResumeLayout(false);
+			this._GeneralPage.ResumeLayout(false);
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
 			this.groupBox3.ResumeLayout(false);
-			this.tabPage2.ResumeLayout(false);
+			this._DisplayPage.ResumeLayout(false);
 			this.customGroupBox1.ResumeLayout(false);
 			this.customGroupBox1.PerformLayout();
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this._BottomMarginBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).EndInit();
-			this.tabPage3.ResumeLayout(false);
+			this._AboutPage.ResumeLayout(false);
 			this.customGroupBox2.ResumeLayout(false);
 			this.customGroupBox2.PerformLayout();
+			this._BuildPage.ResumeLayout(false);
+			this.customGroupBox3.ResumeLayout(false);
+			this.customGroupBox3.PerformLayout();
+			this.customGroupBox4.ResumeLayout(false);
+			this.customGroupBox4.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -468,13 +538,13 @@
 		private Controls.CustomGroupBox groupBox2;
 		private Controls.CustomGroupBox groupBox3;
 		private System.Windows.Forms.TabControl tabControl1;
-		private System.Windows.Forms.TabPage tabPage1;
-		private System.Windows.Forms.TabPage tabPage2;
+		private System.Windows.Forms.TabPage _GeneralPage;
+		private System.Windows.Forms.TabPage _DisplayPage;
 		private Controls.CustomGroupBox customGroupBox1;
 		private System.Windows.Forms.CheckBox _OptimizeCodeWindowBox;
 		private System.Windows.Forms.CheckBox _OptimizeMainWindowBox;
 		private System.Windows.Forms.TextBox textBox1;
-		private System.Windows.Forms.TabPage tabPage3;
+		private System.Windows.Forms.TabPage _AboutPage;
 		private Controls.CustomGroupBox customGroupBox2;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.LinkLabel _DonationLinkLabel;
@@ -483,5 +553,10 @@
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.Label label7;
 		private System.Windows.Forms.LinkLabel _ReleaseLinkLabel;
+		private System.Windows.Forms.TabPage _BuildPage;
+		private Controls.CustomGroupBox customGroupBox3;
+		private System.Windows.Forms.CheckBox _BuildTimestampBox;
+		private Controls.CustomGroupBox customGroupBox4;
+		private System.Windows.Forms.CheckBox _IncrementVsixRevisionBox;
 	}
 }
