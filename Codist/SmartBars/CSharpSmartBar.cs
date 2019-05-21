@@ -471,7 +471,7 @@ namespace Codist.SmartBars
 
 		static int AddSymbolMembers(CSharpSmartBar bar, SymbolList list, ISymbol source, string typeCategory) {
 			var nsOrType = source as INamespaceOrTypeSymbol;
-			var members = nsOrType.GetMembers().RemoveAll(m => m.CanBeReferencedByName == false);
+			var members = nsOrType.GetMembers().RemoveAll(m => (m as IMethodSymbol)?.AssociatedSymbol != null || m.IsImplicitlyDeclared);
 			if (bar._IsVsProject) {
 				switch (nsOrType.Name) {
 					case nameof(KnownImageIds):
