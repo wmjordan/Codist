@@ -153,6 +153,18 @@ namespace Codist
 			return textView.GetTextViewLineContainingBufferPosition(s.Start.Position) != textView.GetTextViewLineContainingBufferPosition(s.End.Position);
 		}
 
+		public static void SelectNode(this SyntaxNode node, bool includeTrivia) {
+			if (node == null) {
+				return;
+			}
+			CodistPackage.DTE.OpenFile(node.GetLocation().SourceTree.FilePath, doc => {
+				var v = GetIVsTextView(CodistPackage.Instance, doc.FullName);
+				if (v != null) {
+					GetWpfTextView(v)?.SelectSpan(includeTrivia ? node.GetSematicSpan() : node.Span.ToSpan());
+				}
+			});
+		}
+
 		public static void SelectNode(this ITextView view, SyntaxNode node, bool includeTrivia) {
 			var span = includeTrivia ? node.FullSpan : node.Span;
 			if (view.TextSnapshot.Length > span.End) {
@@ -173,11 +185,15 @@ namespace Codist
 			view.Caret.MoveTo(span.End);
 		}
 
-		public static void SelectSpan(this ITextView view, int start, int end) {
-			if (end < 0 || start < 0 || start + end > view.TextSnapshot.Length) {
+		public static void SelectSpan(this ITextView view, Span span) {
+			view.SelectSpan(span.Start, span.Length);
+		}
+
+		public static void SelectSpan(this ITextView view, int start, int length) {
+			if (length < 0 || start < 0 || start + length > view.TextSnapshot.Length) {
 				return;
 			}
-			var span = new SnapshotSpan(view.TextSnapshot, start, end);
+			var span = new SnapshotSpan(view.TextSnapshot, start, length);
 			view.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.ShowStart);
 			view.Selection.Select(span, false);
 			view.Caret.MoveTo(span.End);

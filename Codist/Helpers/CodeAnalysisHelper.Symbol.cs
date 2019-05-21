@@ -759,8 +759,20 @@ namespace Codist
 			return symbol?.Locations.FirstOrDefault(loc => loc.IsInSource);
 		}
 
+		public static bool HasSource(this ISymbol symbol) {
+			return AssemblySourceReflector.GetSourceType(symbol.ContainingAssembly) != AssemblySource.Metadata;
+		}
+
 		public static AssemblySource GetSourceType(this IAssemblySymbol assembly) {
 			return AssemblySourceReflector.GetSourceType(assembly);
+		}
+
+		public static SyntaxNode GetSyntaxNode(this ISymbol symbol) {
+			var syntaxReference = symbol.DeclaringSyntaxReferences.FirstOrDefault()
+				?? (symbol.IsImplicitlyDeclared && symbol.ContainingSymbol != null
+					? symbol.ContainingSymbol?.DeclaringSyntaxReferences.FirstOrDefault()
+					: null);
+			return syntaxReference?.GetSyntax();
 		}
 
 		public static ImmutableArray<Location> GetSourceLocations(this ISymbol symbol) {
