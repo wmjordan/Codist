@@ -147,7 +147,7 @@ namespace Codist
 			_buildEvents = _dteEvents.BuildEvents;
 			_buildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
 			_buildEvents.OnBuildDone += BuildEvents_OnBuildEnd;
-			_buildEvents.OnBuildProjConfigBegin += BuildEvents_OnBuildProjConfigBegin;
+			_buildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
 			await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
 			Commands.ScreenshotCommand.Initialize(this);
 			Commands.IncrementVsixVersionCommand.Initialize(this);
@@ -170,8 +170,9 @@ namespace Codist
 			}
 		}
 
-		void BuildEvents_OnBuildProjConfigBegin (string projectName, string projectConfig, string platform, string solutionConfig) {
-			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) == false) {
+		void BuildEvents_OnBuildProjConfigDone(string projectName, string projectConfig, string platform, string solutionConfig, bool success) {
+			if (success == false
+				|| Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) == false) {
 				return;
 			}
 			var project = TextEditorHelper.GetProject(projectName);
