@@ -149,6 +149,9 @@ namespace Codist.QuickInfo
 			else if (node.IsKind(SyntaxKind.ThisExpression)) {
 				symbol = semanticModel.GetTypeInfo(node).Type;
 			}
+			else if (token.IsKind(SyntaxKind.CloseBraceToken)) {
+				symbol = null;
+			}
 			else {
 				var symbolInfo = semanticModel.GetSymbolInfo(node);
 				if (symbolInfo.CandidateReason != CandidateReason.None) {
@@ -480,7 +483,7 @@ namespace Codist.QuickInfo
 					infoBox = ShowStringInfo(node.GetFirstToken().ValueText);
 				}
 			}
-			else if (nodeKind == SyntaxKind.Block) {
+			else if (nodeKind == SyntaxKind.Block || node.IsDeclaration()) {
 				var lines = currentSnapshot.GetLineSpan(node.Span).Length + 1;
 				if (lines > 100) {
 					qiContent.Add(new ThemedTipText { Text = lines + " lines", FontWeight = FontWeights.Bold });
