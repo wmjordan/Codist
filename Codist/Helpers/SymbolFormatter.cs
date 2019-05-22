@@ -397,19 +397,10 @@ namespace Codist
 				info.Append("sealed ", Keyword);
 			}
 			if (symbol.Kind == SymbolKind.Method) {
-				var method = symbol as IMethodSymbol;
-				if (method.IsAsync) {
-					info.Append("async ", Keyword);
+				var m = (symbol as IMethodSymbol).GetSpecialMethodModifier();
+				if (m != null) {
+					info.Append(m, Keyword);
 				}
-				if (method.ReturnsByRef) {
-					info.Append("ref ");
-				}
-				else if (method.ReturnsByRefReadonly) {
-					info.Append("ref readonly");
-				}
-			}
-			if (symbol.IsExtern) {
-				info.Append("extern ", Keyword);
 			}
 		}
 	}

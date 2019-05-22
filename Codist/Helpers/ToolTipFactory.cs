@@ -12,7 +12,7 @@ namespace Codist
 			var tooltip = new ThemedToolTip();
 			tooltip.Title
 				.Append(ThemeHelper.GetImage(symbol.GetImageId()).WrapMargin(WpfHelper.GlyphMargin))
-				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + symbol.GetSymbolKindName() + " ")
+				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + (symbol as IMethodSymbol).GetSpecialMethodModifier() + symbol.GetSymbolKindName() + " ")
 				.Append(symbol.Name, true)
 				.Append(symbol.GetParameterString());
 
@@ -63,7 +63,7 @@ namespace Codist
 				WpfHelper.SetUITextRenderOptions(tip, true);
 			}
 			tip.Title
-				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + symbol.GetSymbolKindName() + " ")
+				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + (symbol as IMethodSymbol).GetSpecialMethodModifier() + symbol.GetSymbolKindName() + " ")
 				.Append(symbol.Name, true)
 				.Append(symbol.GetParameterString());
 			var content = tip.Content;

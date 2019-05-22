@@ -687,15 +687,7 @@ namespace Codist
 				case SymbolKind.Label: return "label";
 				case SymbolKind.Local: return ((ILocalSymbol)symbol).IsConst ? "local const" : "local";
 				case SymbolKind.Method:
-					var m = (IMethodSymbol)symbol;
-					var t = m.IsExtensionMethod ? "extension" : "method";
-					if (m.IsAsync) {
-						t = "async " + t;
-					}
-					else if (m.IsExtern) {
-						t = "extern " + t;
-					}
-					return t;
+					return ((IMethodSymbol)symbol).IsExtensionMethod ? "extension" : "method";
 				case SymbolKind.NamedType:
 					switch (((INamedTypeSymbol)symbol).TypeKind) {
 						case TypeKind.Array: return "array";
@@ -714,6 +706,26 @@ namespace Codist
 				case SymbolKind.TypeParameter: return "type parameter";
 				default: return symbol.Kind.ToString();
 			}
+		}
+
+		public static string GetSpecialMethodModifier(this IMethodSymbol method) {
+			if (method == null) {
+				return null;
+			}
+			string t = null;
+			if (method.IsAsync) {
+				t = "async ";
+			}
+			else if (method.IsExtern) {
+				t = "extern ";
+			}
+			if (method.ReturnsByRef) {
+				t += "ref ";
+			}
+			else if (method.ReturnsByRefReadonly) {
+				t += "ref readonly ";
+			}
+			return t;
 		}
 
 		public static ImmutableArray<ITypeParameterSymbol> GetTypeParameters(this ISymbol symbol) {
