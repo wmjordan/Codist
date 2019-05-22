@@ -176,7 +176,9 @@ namespace Codist.Controls
 		protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
 			base.OnContextMenuOpening(e);
 			var item = SelectedSymbolItem;
-			if (item == null || item.Symbol == null && item.SyntaxNode == null) {
+			if (item == null
+				|| (item.Symbol == null && item.SyntaxNode == null)
+				|| (e.OriginalSource as DependencyObject).GetParentOrSelf<ListBoxItem>() == null) {
 				e.Handled = true;
 				return;
 			}
@@ -310,12 +312,16 @@ namespace Codist.Controls
 			return GetMouseEventTarget(e)?.Content as SymbolItem;
 		}
 
+		ListBoxItem GetItemFromPoint(Point point) {
+			return (InputHitTest(point) as DependencyObject).GetParentOrSelf<ListBoxItem>();
+		}
+
 		ListBoxItem GetMouseEventTarget(MouseEventArgs e) {
-			return (InputHitTest(e.GetPosition(this)) as DependencyObject).GetParentOrSelf<ListBoxItem>();
+			return GetItemFromPoint(e.GetPosition(this));
 		}
 
 		ListBoxItem GetDragEventTarget(DragEventArgs e) {
-			return (InputHitTest(e.GetPosition(this)) as DependencyObject).GetParentOrSelf<ListBoxItem>();
+			return GetItemFromPoint(e.GetPosition(this));
 		}
 
 		static SymbolItem GetDragData(DragEventArgs e) {
