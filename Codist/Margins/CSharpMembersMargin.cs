@@ -221,7 +221,8 @@ namespace Codist.Margins
 			}
 
 			List<ICollapsible> TagRegions(CancellationToken cancellationToken) {
-				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.RegionDirective) == false) {
+				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.RegionDirective) == false
+					|| _Element._SemanticContext.Compilation == null) {
 					return null;
 				}
 				var ts = _TextView.TextSnapshot;
