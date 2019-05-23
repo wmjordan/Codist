@@ -533,6 +533,10 @@ namespace Codist.NaviBar
 				this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
 				Click += HandleClick;
+				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SymbolToolTip)) {
+					ToolTip = String.Empty;
+					ToolTipOpening += NodeItem_ToolTipOpening;
+				}
 			}
 			public SyntaxNode Node { get; private set; }
 
@@ -769,6 +773,16 @@ namespace Codist.NaviBar
 						}
 						break;
 				}
+			}
+
+			async void NodeItem_ToolTipOpening(object sender, ToolTipEventArgs e) {
+				// todo: handle updated syntax node for RootItem
+				var symbol = await _Bar._SemanticContext.GetSymbolAsync(Node, _Bar._cancellationSource.GetToken());
+				ToolTip = symbol != null
+					? ToolTipFactory.CreateToolTip(symbol, true, _Bar._SemanticContext.SemanticModel.Compilation)
+					: (object)Node.GetSyntaxBrief();
+				this.SetTipOptions();
+				ToolTipOpening -= NodeItem_ToolTipOpening;
 			}
 
 			bool IMemberTypeFilter.Filter(MemberFilterTypes filterTypes) {
