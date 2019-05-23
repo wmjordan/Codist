@@ -206,6 +206,11 @@
       "ForegroundColor": "#808000"
     },
     {
+      "StyleID": "VolatileFieldName",
+      "BackgroundColor": "#FFFF00",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
       "StyleID": "PropertyName",
       "ForegroundColor": "#7ABCFE"
     },
