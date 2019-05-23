@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace TestProject
 {
@@ -18,5 +19,13 @@ namespace TestProject
 		public readonly static DateTime StartDate = DateTime.Now; // public readonly static field
 
 		public int PropReadOnly => Int32.MinValue + 1;
+
+		public static IEnumerable<(string, int)> TupleDeconstruct() {
+			var a = new[] { (1, "one"), (2, "two"), (3, "three") };
+			foreach (var (num, str) in a) {
+				yield return (str, num);
+			}
+		}
+
 	}
 }

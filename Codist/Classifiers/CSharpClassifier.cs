@@ -111,6 +111,7 @@ namespace Codist.Classifiers
 									continue;
 								case SyntaxKind.ForStatement:
 								case SyntaxKind.ForEachStatement:
+								case SyntaxKind.ForEachVariableStatement:
 								case SyntaxKind.WhileStatement:
 								case SyntaxKind.DoStatement:
 								case SyntaxKind.SelectClause:
@@ -267,6 +268,7 @@ namespace Codist.Classifiers
 						return;
 					case SyntaxKind.ForStatement:
 					case SyntaxKind.ForEachStatement:
+					case SyntaxKind.ForEachVariableStatement:
 					case SyntaxKind.WhileStatement:
 					case SyntaxKind.DoStatement:
 						MarkClassificationTypeForBrace(itemSpan, snapshot, result, _GeneralClassifications.LoopKeyword, SpecialHighlightOptions.LoopBrace);
@@ -351,6 +353,7 @@ namespace Codist.Classifiers
 					return _GeneralClassifications.BranchingKeyword;
 				case SyntaxKind.ForStatement:
 				case SyntaxKind.ForEachStatement:
+				case SyntaxKind.ForEachVariableStatement:
 				case SyntaxKind.WhileStatement:
 				case SyntaxKind.DoStatement:
 					return _GeneralClassifications.LoopKeyword;
