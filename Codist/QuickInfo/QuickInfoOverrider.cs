@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text.Editor;
+using System.Collections;
 
 namespace Codist.QuickInfo
 {
@@ -274,50 +275,12 @@ namespace Codist.QuickInfo
 					// 2. type parameter
 					// 3. usage
 					// 4. exception
-					var items = doc.IsItemsHost ? (System.Collections.IList)doc.GetParent<ItemsControl>().Items : doc.Children;
+					var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
 					if (DocElement != null) {
-						try {
-							if (items.Count > 1 && items[1] is TextBlock) {
-								items.RemoveAt(1);
-								items.Insert(1, DocElement);
-							}
-							else {
-								items.Add(DocElement);
-							}
-							var myDoc = DocElement as ThemedTipDocument;
-							if (myDoc != null) {
-								if (v16_1orLater && myDoc.Tag is int) {
-									items = doc.GetParent<ItemsControl>()?.Items;
-									if (items != null) {
-										// used the value from XmlDocRenderer.ParagraphCount to remove builtin paragraphs
-										for (int i = (int)myDoc.Tag - 1; i >= 0; i--) {
-											items.RemoveAt(1);
-										}
-									}
-								}
-								myDoc.ApplySizeLimit();
-							}
-						}
-						catch (InvalidOperationException) {
-							// ignore exception: doc.Children was changed by another thread
-						}
+						OverrideDocElement(doc, v16_1orLater, items);
 					}
 					if (ExceptionDoc != null) {
-						if (v16_1orLater) {
-							items = doc.GetParent<ItemsControl>().Items;
-						}
-						try {
-							if (items.Count > 1
-								&& (v16_1orLater && items[items.Count - 1] is StackPanel || items[items.Count - 1] is TextBlock)) {
-								items.RemoveAt(items.Count - 1);
-							}
-							items.Add(ExceptionDoc);
-							//todo move this to ApplySizeLimit
-							(ExceptionDoc as ThemedTipDocument)?.ApplySizeLimit();
-						}
-						catch (InvalidOperationException) {
-							// ignore exception: doc.Children was changed by another thread
-						}
+						OverrideExceptionDocElement(doc, v16_1orLater, items);
 					}
 
 					if (icon != null && signature != null) {
@@ -329,6 +292,58 @@ namespace Codist.QuickInfo
 						if (Config.Instance.QuickInfoMaxWidth > 0) {
 							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 30;
 						}
+					}
+				}
+
+				void OverrideDocElement(StackPanel doc, bool v16_1orLater, IList items) {
+					try {
+						if (items.Count > 1 && items[1] is TextBlock) {
+							items.RemoveAt(1);
+							items.Insert(1, DocElement);
+						}
+						else {
+							items.Add(DocElement);
+						}
+						var myDoc = DocElement as ThemedTipDocument;
+						if (myDoc == null) {
+							return;
+						}
+						if (v16_1orLater && myDoc.Tag is int) {
+							// in v16.1 or later, 2nd and following paragraphs in XML Doc are in an outer ItemsControl
+							items = doc.GetParent<ItemsControl>()?.Items;
+							if (items != null) {
+								// used the value from XmlDocRenderer.ParagraphCount to remove builtin paragraphs
+								for (int i = Math.Min(items.Count - 1, (int)myDoc.Tag) - 1; i >= 0; i--) {
+									if (items[1] is TextBlock == false) {
+										break;
+									}
+									items.RemoveAt(1);
+								}
+							}
+						}
+						myDoc.ApplySizeLimit();
+					}
+					catch (InvalidOperationException) {
+						// ignore exception: doc.Children was changed by another thread
+					}
+				}
+
+				void OverrideExceptionDocElement(StackPanel doc, bool v16_1orLater, IList items) {
+					if (v16_1orLater) {
+						items = doc.GetParent<ItemsControl>().Items;
+					}
+					try {
+						if (items.Count > 1
+							&& (v16_1orLater && items[items.Count - 1] is StackPanel
+								|| items[items.Count - 1] is TextBlock)) {
+							items.RemoveAt(items.Count - 1);
+						}
+						items.Add(ExceptionDoc);
+						//todo move this to ApplySizeLimit
+						(ExceptionDoc as ThemedTipDocument)?.ApplySizeLimit();
+					}
+					catch (InvalidOperationException) {
+						// ignore exception: doc.Children was changed by another thread
 					}
 				}
 

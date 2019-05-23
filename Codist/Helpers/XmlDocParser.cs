@@ -126,7 +126,11 @@ namespace Codist
 		bool ParseDocSection(XElement item) {
 			switch (item.Name.ToString()) {
 				case "summary":
-					_Summary = item; break;
+					// in case when there is more than one summary, make the behavior the same as VS
+					if (_Summary == null) {
+						_Summary = item;
+					}
+					break;
 				case "remarks":
 					_Remarks = item; break;
 				case "returns":
