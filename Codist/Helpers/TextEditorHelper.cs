@@ -160,7 +160,7 @@ namespace Codist
 			CodistPackage.DTE.OpenFile(node.GetLocation().SourceTree.FilePath, doc => {
 				var v = GetIVsTextView(CodistPackage.Instance, doc.FullName);
 				if (v != null) {
-					GetWpfTextView(v)?.SelectSpan(includeTrivia ? node.GetSematicSpan() : node.Span.ToSpan());
+					GetWpfTextView(v)?.SelectSpan(includeTrivia ? node.GetSematicSpan(true) : node.Span.ToSpan());
 				}
 			});
 		}
@@ -169,7 +169,7 @@ namespace Codist
 			var span = includeTrivia ? node.FullSpan : node.Span;
 			if (view.TextSnapshot.Length > span.End) {
 				var ss = includeTrivia
-					? new SnapshotSpan(view.TextSnapshot, node.GetSematicSpan())
+					? new SnapshotSpan(view.TextSnapshot, node.GetSematicSpan(true))
 					: new SnapshotSpan(view.TextSnapshot, span.Start, span.Length);
 				view.SelectSpan(ss);
 			}
@@ -249,9 +249,9 @@ namespace Codist
 
 
 		public static void CopyOrMoveSyntaxNode(this IWpfTextView view, SyntaxNode sourceNode, SyntaxNode targetNode, bool copy, bool before) {
-			var tSpan = (targetNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? targetNode.Parent.Parent : targetNode).GetSematicSpan();
+			var tSpan = (targetNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? targetNode.Parent.Parent : targetNode).GetSematicSpan(false);
 			var sNode = sourceNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? sourceNode.Parent.Parent : sourceNode;
-			var sSpan = sNode.GetSematicSpan();
+			var sSpan = sNode.GetSematicSpan(true);
 			var target = before ? tSpan.Start : tSpan.End;
 
 			if (targetNode.SyntaxTree.FilePath == sourceNode.SyntaxTree.FilePath) {

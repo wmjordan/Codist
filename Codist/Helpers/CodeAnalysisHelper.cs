@@ -763,7 +763,7 @@ namespace Codist
 		}
 
 		/// <summary>Gets full span for ordinary nodes, excluding leading directives; gets span for regions.</summary>
-		public static Span GetSematicSpan(this SyntaxNode node) {
+		public static Span GetSematicSpan(this SyntaxNode node, bool expandRegion) {
 			int start, end;
 			SyntaxTriviaList trivias;
 			SyntaxTrivia t;
@@ -777,7 +777,7 @@ namespace Codist
 						start = t.SpanStart;
 					}
 				}
-				trivias = (region.GetEndRegion() ?? (SyntaxNode)region).GetTrailingTrivia();
+				trivias = (expandRegion ? (region.GetEndRegion() ?? (SyntaxNode)region) : region).GetTrailingTrivia();
 				for (int i = trivias.Count - 1; i >= 0; i--) {
 					t = trivias[i];
 					if (t.IsKind(SyntaxKind.EndOfLineTrivia)) {
