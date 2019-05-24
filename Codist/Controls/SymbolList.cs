@@ -203,7 +203,14 @@ namespace Codist.Controls
 					SetupMenuCommand(item, KnownImageIds.GoToDefinition, "Go to Code", s => s.Symbol.GoToSource());
 					SetupMenuCommand(item, KnownImageIds.BlockSelection, "Select Code", s => s.Symbol.GetSyntaxNode().SelectNode(true));
 				}
-				SetupMenuCommand(item, KnownImageIds.DisplayName, "Copy Symbol Name", s => Clipboard.SetText(s.Symbol.Name));
+				SetupMenuCommand(item, KnownImageIds.DisplayName, "Copy Symbol Name", s => {
+					try {
+						Clipboard.SetDataObject(s.Symbol.Name);
+					}
+					catch (SystemException) {
+						// ignore failure
+					}
+				});
 			}
 		}
 
