@@ -780,8 +780,10 @@ namespace Codist.NaviBar
 				var symbol = await _Bar._SemanticContext.GetSymbolAsync(Node, _Bar._cancellationSource.GetToken());
 				if (symbol != null) {
 					var tip = ToolTipFactory.CreateToolTip(symbol, true, _Bar._SemanticContext.SemanticModel.Compilation);
-					tip.AddTextBlock()
-						.Append("Line of code: " + (_Bar._View.TextSnapshot.GetLineSpan(Node.Span).Length + 1));
+					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
+						tip.AddTextBlock()
+					   .Append("Line of code: " + (_Bar._View.TextSnapshot.GetLineSpan(Node.Span).Length + 1));
+					}
 					ToolTip = tip;
 				}
 				else {

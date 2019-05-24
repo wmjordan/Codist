@@ -37,6 +37,11 @@
 			this.groupBox3 = new Codist.Controls.CustomGroupBox();
 			this._SaveConfigButton = new System.Windows.Forms.Button();
 			this._LoadConfigButton = new System.Windows.Forms.Button();
+			this._BuildPage = new System.Windows.Forms.TabPage();
+			this.customGroupBox4 = new Codist.Controls.CustomGroupBox();
+			this._IncrementVsixRevisionBox = new System.Windows.Forms.CheckBox();
+			this.customGroupBox3 = new Codist.Controls.CustomGroupBox();
+			this._BuildTimestampBox = new System.Windows.Forms.CheckBox();
 			this._DisplayPage = new System.Windows.Forms.TabPage();
 			this.customGroupBox1 = new Codist.Controls.CustomGroupBox();
 			this.textBox1 = new System.Windows.Forms.TextBox();
@@ -57,15 +62,13 @@
 			this._ReleaseLinkLabel = new System.Windows.Forms.LinkLabel();
 			this._GitHubLinkLabel = new System.Windows.Forms.LinkLabel();
 			this.label5 = new System.Windows.Forms.Label();
-			this._BuildPage = new System.Windows.Forms.TabPage();
-			this.customGroupBox3 = new Codist.Controls.CustomGroupBox();
-			this._BuildTimestampBox = new System.Windows.Forms.CheckBox();
-			this.customGroupBox4 = new Codist.Controls.CustomGroupBox();
-			this._IncrementVsixRevisionBox = new System.Windows.Forms.CheckBox();
 			this.tabControl1.SuspendLayout();
 			this._GeneralPage.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.groupBox3.SuspendLayout();
+			this._BuildPage.SuspendLayout();
+			this.customGroupBox4.SuspendLayout();
+			this.customGroupBox3.SuspendLayout();
 			this._DisplayPage.SuspendLayout();
 			this.customGroupBox1.SuspendLayout();
 			this.groupBox1.SuspendLayout();
@@ -73,9 +76,6 @@
 			((System.ComponentModel.ISupportInitialize)(this._TopMarginBox)).BeginInit();
 			this._AboutPage.SuspendLayout();
 			this.customGroupBox2.SuspendLayout();
-			this._BuildPage.SuspendLayout();
-			this.customGroupBox3.SuspendLayout();
-			this.customGroupBox4.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tabControl1
@@ -212,6 +212,62 @@
 			this._LoadConfigButton.TabIndex = 0;
 			this._LoadConfigButton.Text = "&Load...";
 			this._LoadConfigButton.UseVisualStyleBackColor = true;
+			// 
+			// _BuildPage
+			// 
+			this._BuildPage.Controls.Add(this.customGroupBox4);
+			this._BuildPage.Controls.Add(this.customGroupBox3);
+			this._BuildPage.Location = new System.Drawing.Point(4, 25);
+			this._BuildPage.Name = "_BuildPage";
+			this._BuildPage.Padding = new System.Windows.Forms.Padding(3);
+			this._BuildPage.Size = new System.Drawing.Size(564, 296);
+			this._BuildPage.TabIndex = 3;
+			this._BuildPage.Text = "Build";
+			this._BuildPage.UseVisualStyleBackColor = true;
+			// 
+			// customGroupBox4
+			// 
+			this.customGroupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.customGroupBox4.Controls.Add(this._IncrementVsixRevisionBox);
+			this.customGroupBox4.Location = new System.Drawing.Point(6, 96);
+			this.customGroupBox4.Name = "customGroupBox4";
+			this.customGroupBox4.Size = new System.Drawing.Size(552, 84);
+			this.customGroupBox4.TabIndex = 1;
+			this.customGroupBox4.TabStop = false;
+			this.customGroupBox4.Text = "Visual Studio Extension Project";
+			// 
+			// _IncrementVsixRevisionBox
+			// 
+			this._IncrementVsixRevisionBox.AutoSize = true;
+			this._IncrementVsixRevisionBox.Location = new System.Drawing.Point(9, 24);
+			this._IncrementVsixRevisionBox.Name = "_IncrementVsixRevisionBox";
+			this._IncrementVsixRevisionBox.Size = new System.Drawing.Size(501, 19);
+			this._IncrementVsixRevisionBox.TabIndex = 4;
+			this._IncrementVsixRevisionBox.Text = "Increment revision number in .vsixmanifest file after build";
+			this._IncrementVsixRevisionBox.UseVisualStyleBackColor = true;
+			// 
+			// customGroupBox3
+			// 
+			this.customGroupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.customGroupBox3.Controls.Add(this._BuildTimestampBox);
+			this.customGroupBox3.Location = new System.Drawing.Point(6, 6);
+			this.customGroupBox3.Name = "customGroupBox3";
+			this.customGroupBox3.Size = new System.Drawing.Size(552, 84);
+			this.customGroupBox3.TabIndex = 1;
+			this.customGroupBox3.TabStop = false;
+			this.customGroupBox3.Text = "General Project";
+			// 
+			// _BuildTimestampBox
+			// 
+			this._BuildTimestampBox.AutoSize = true;
+			this._BuildTimestampBox.Location = new System.Drawing.Point(9, 24);
+			this._BuildTimestampBox.Name = "_BuildTimestampBox";
+			this._BuildTimestampBox.Size = new System.Drawing.Size(405, 19);
+			this._BuildTimestampBox.TabIndex = 4;
+			this._BuildTimestampBox.Text = "Output time stamp before and after build events";
+			this._BuildTimestampBox.UseVisualStyleBackColor = true;
 			// 
 			// _DisplayPage
 			// 
@@ -431,62 +487,6 @@
 			this.label5.TabIndex = 0;
 			this.label5.Text = "Report bugs and suggesions to:";
 			// 
-			// _BuildPage
-			// 
-			this._BuildPage.Controls.Add(this.customGroupBox4);
-			this._BuildPage.Controls.Add(this.customGroupBox3);
-			this._BuildPage.Location = new System.Drawing.Point(4, 25);
-			this._BuildPage.Name = "_BuildPage";
-			this._BuildPage.Padding = new System.Windows.Forms.Padding(3);
-			this._BuildPage.Size = new System.Drawing.Size(564, 296);
-			this._BuildPage.TabIndex = 3;
-			this._BuildPage.Text = "Build";
-			this._BuildPage.UseVisualStyleBackColor = true;
-			// 
-			// customGroupBox3
-			// 
-			this.customGroupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.customGroupBox3.Controls.Add(this._BuildTimestampBox);
-			this.customGroupBox3.Location = new System.Drawing.Point(6, 6);
-			this.customGroupBox3.Name = "customGroupBox3";
-			this.customGroupBox3.Size = new System.Drawing.Size(552, 84);
-			this.customGroupBox3.TabIndex = 1;
-			this.customGroupBox3.TabStop = false;
-			this.customGroupBox3.Text = "Timestamp";
-			// 
-			// _BuildTimestampBox
-			// 
-			this._BuildTimestampBox.AutoSize = true;
-			this._BuildTimestampBox.Location = new System.Drawing.Point(9, 24);
-			this._BuildTimestampBox.Name = "_BuildTimestampBox";
-			this._BuildTimestampBox.Size = new System.Drawing.Size(405, 19);
-			this._BuildTimestampBox.TabIndex = 4;
-			this._BuildTimestampBox.Text = "Output time stamp before and after build events";
-			this._BuildTimestampBox.UseVisualStyleBackColor = true;
-			// 
-			// customGroupBox4
-			// 
-			this.customGroupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.customGroupBox4.Controls.Add(this._IncrementVsixRevisionBox);
-			this.customGroupBox4.Location = new System.Drawing.Point(6, 96);
-			this.customGroupBox4.Name = "customGroupBox4";
-			this.customGroupBox4.Size = new System.Drawing.Size(552, 84);
-			this.customGroupBox4.TabIndex = 1;
-			this.customGroupBox4.TabStop = false;
-			this.customGroupBox4.Text = "Visual Studio Extension";
-			// 
-			// _IncrementVsixRevisionBox
-			// 
-			this._IncrementVsixRevisionBox.AutoSize = true;
-			this._IncrementVsixRevisionBox.Location = new System.Drawing.Point(9, 24);
-			this._IncrementVsixRevisionBox.Name = "_IncrementVsixRevisionBox";
-			this._IncrementVsixRevisionBox.Size = new System.Drawing.Size(517, 19);
-			this._IncrementVsixRevisionBox.TabIndex = 4;
-			this._IncrementVsixRevisionBox.Text = "Increment revision number for .vsixmanifest file before build";
-			this._IncrementVsixRevisionBox.UseVisualStyleBackColor = true;
-			// 
 			// GeneralPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -500,6 +500,11 @@
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
 			this.groupBox3.ResumeLayout(false);
+			this._BuildPage.ResumeLayout(false);
+			this.customGroupBox4.ResumeLayout(false);
+			this.customGroupBox4.PerformLayout();
+			this.customGroupBox3.ResumeLayout(false);
+			this.customGroupBox3.PerformLayout();
 			this._DisplayPage.ResumeLayout(false);
 			this.customGroupBox1.ResumeLayout(false);
 			this.customGroupBox1.PerformLayout();
@@ -510,11 +515,6 @@
 			this._AboutPage.ResumeLayout(false);
 			this.customGroupBox2.ResumeLayout(false);
 			this.customGroupBox2.PerformLayout();
-			this._BuildPage.ResumeLayout(false);
-			this.customGroupBox3.ResumeLayout(false);
-			this.customGroupBox3.PerformLayout();
-			this.customGroupBox4.ResumeLayout(false);
-			this.customGroupBox4.PerformLayout();
 			this.ResumeLayout(false);
 
 		}

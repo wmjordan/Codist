@@ -549,6 +549,7 @@ namespace Codist
 		RangeHighlight = 1 << 2,
 		RegionOnBar = 1 << 3,
 		StripRegionNonLetter = 1 << 4,
+		LineOfCode = 1 << 5,
 		ParameterList = 1 << 10,
 		ParameterListShowParamName = 1 << 11,
 		FieldValue = 1 << 12,

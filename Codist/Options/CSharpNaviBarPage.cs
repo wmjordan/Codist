@@ -35,6 +35,7 @@ namespace Codist.Options
 			_StripNonLetterCharactersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.StripRegionNonLetter, _StripNonLetterCharactersBox.Checked));
 			_SyntaxNodesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.SyntaxDetail, _SyntaxNodesBox.Checked));
 			_ToolTipBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.SymbolToolTip, _ToolTipBox.Checked));
+			_LineOfCodeBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.LineOfCode, _LineOfCodeBox.Checked));
 
 			Config.Loaded += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
@@ -54,6 +55,7 @@ namespace Codist.Options
 				_RegionItemBox.Checked = o.MatchFlags(NaviBarOptions.Region);
 				_SyntaxNodesBox.Checked = o.MatchFlags(NaviBarOptions.SyntaxDetail);
 				_ToolTipBox.Checked = o.MatchFlags(NaviBarOptions.SymbolToolTip);
+				_LineOfCodeBox.Checked = o.MatchFlags(NaviBarOptions.LineOfCode);
 			});
 		}
 	}
