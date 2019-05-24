@@ -8,7 +8,7 @@ namespace Codist.Controls
 	sealed class ThemedToolTip : StackPanel
 	{
 		static Thickness _TitlePadding = new Thickness(5);
-		static Thickness _ContentPadding = new Thickness(10, 3, 10, 8);
+		static Thickness _ContentPadding = new Thickness(5, 3, 5, 8);
 
 		public TextBlock Title { get; }
 		public TextBlock Content { get; }
@@ -26,21 +26,22 @@ namespace Codist.Controls
 			if (title != null) {
 				Title.Text = title;
 			}
-			Content = CreateContentBlock();
+			Children.Add(Title);
+			Content = AddTextBlock();
 			if (content != null) {
 				Content.Text = content;
 			}
-			Children.Add(Title);
-			Children.Add(Content);
 			if (Config.Instance.QuickInfoMaxWidth > 0) {
 				MaxWidth = Config.Instance.QuickInfoMaxWidth;
 			}
 		}
 
-		public static TextBlock CreateContentBlock() {
-			return new TextBlock { Padding = _ContentPadding, TextWrapping = TextWrapping.Wrap }
+		public TextBlock AddTextBlock() {
+			var t = new TextBlock { Padding = _ContentPadding, TextWrapping = TextWrapping.Wrap }
 				.ReferenceProperty(TextBlock.BackgroundProperty, EnvironmentColors.ToolTipBrushKey)
 				.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.ToolTipTextBrushKey);
+			Children.Add(t);
+			return t;
 		}
 
 		protected override void OnVisualParentChanged(DependencyObject oldParent) {

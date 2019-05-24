@@ -1,0 +1,50 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:Codist.Controls;assembly=Codist"
+	xmlns:sys="clr-namespace:System;assembly=mscorlib"
+	xmlns:vsp="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0">
+	<c:SymbolItemTemplateSelector x:Key="symbolTemplateSelector"/>
+	<Style x:Key="{x:Type ToolTip}" TargetType="{x:Type ToolTip}">
+		<Setter Property="OverridesDefaultStyle" Value="True"/>
+		<Setter Property="Foreground" Value="{DynamicResource {x:Static vsp:EnvironmentColors.ToolTipTextBrushKey}}"/>
+		<Setter Property="Padding" Value="5"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type ToolTip}">
+					<Border x:Name="Bd" BorderThickness="1" BorderBrush="{DynamicResource VsBrush.DropDownBorder}" Background="{DynamicResource VsBrush.DropDownBackground}" Padding="{TemplateBinding Padding}">
+						<ContentPresenter />
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="Content" Value="{x:Null}">
+							<Setter TargetName="Bd" Property="Visibility" Value="Collapsed"/>
+						</Trigger>
+						<Trigger Property="Content" Value="{x:Static sys:String.Empty}">
+							<Setter TargetName="Bd" Property="Visibility" Value="Collapsed"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style TargetType="{x:Type c:ThemedToggleButton}">
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type c:ThemedToggleButton}">
+					<Border x:Name="Bd" BorderThickness="{TemplateBinding BorderThickness}" Background="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonBrushKey}}" BorderBrush="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonBorderBrushKey}}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+						<ContentPresenter/>
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsChecked" Value="True">
+							<Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonPressedBrushKey}}"/>
+							<Setter Property="Foreground" Value="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonPressedTextBrushKey}}"/>
+						</Trigger>
+						<Trigger Property="IsMouseOver" Value="True">
+							<Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonPressedBrushKey}}"/>
+							<Setter Property="Foreground" Value="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonHoverTextBrushKey}}"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+</ResourceDictionary>

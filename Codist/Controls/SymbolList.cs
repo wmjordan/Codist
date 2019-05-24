@@ -264,9 +264,13 @@ namespace Codist.Controls
 				else {
 					item.SetSymbolToSyntaxNode();
 				}
-				return item.Symbol != null
-					? ToolTipFactory.CreateToolTip(item.Symbol, true, SemanticContext.SemanticModel.Compilation)
-					: (object)item.SyntaxNode.GetSyntaxBrief();
+				if (item.Symbol != null) {
+					var tip = ToolTipFactory.CreateToolTip(item.Symbol, true, SemanticContext.SemanticModel.Compilation);
+					tip.AddTextBlock()
+						.Append("Line of code: " + (SemanticContext.View.TextSnapshot.GetLineSpan(item.SyntaxNode.Span).Length + 1));
+					return tip;
+				}
+				return item.SyntaxNode.GetSyntaxBrief();
 			}
 			if (item.Symbol != null) {
 				item.RefreshSymbol();

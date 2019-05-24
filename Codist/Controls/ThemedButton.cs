@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
 {
@@ -15,7 +17,7 @@ namespace Codist.Controls
 			Content = content;
 			ToolTip = toolTip;
 			Margin = WpfHelper.GlyphMargin;
-			Background = System.Windows.Media.Brushes.Transparent;
+			this.ReferenceProperty(BackgroundProperty, CommonControlsColors.ButtonBrushKey);
 			_clickHanler = onClickHandler;
 			Click += ThemedButton_Click;
 			this.ReferenceCrispImageBackground(Microsoft.VisualStudio.PlatformUI.EnvironmentColors.MainWindowActiveCaptionColorKey);
@@ -37,9 +39,7 @@ namespace Codist.Controls
 				}
 			};
 			ToolTip = toolTip;
-			Margin = WpfHelper.NoMargin;
-			Background = System.Windows.Media.Brushes.Transparent;
-			this.ReferenceCrispImageBackground(Microsoft.VisualStudio.PlatformUI.EnvironmentColors.MainWindowActiveCaptionColorKey);
+			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 
 		public TextBlock Text {

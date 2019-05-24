@@ -103,9 +103,8 @@ namespace Codist
 			var doc = new XmlDoc(symbol, compilation);
 			var summary = doc.Summary ?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.ExplicitInheritDoc?.Summary : null);
 			if (summary != null) {
-				var docContent = ThemedToolTip.CreateContentBlock();
+				var docContent = tip.AddTextBlock();
 				new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(summary, docContent);
-				tip.Children.Add(docContent);
 				tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 			}
 			return tip;

@@ -52,6 +52,7 @@ namespace Codist
 		public static WpfFontFamily ToolTipFont { get; private set; }
 		public static double ToolTipFontSize { get; private set; }
 
+		#region Colors and brushes
 		public static GdiColor GetGdiColor(this ThemeResourceKey resourceKey) {
 			return VSColorTheme.GetThemedColor(resourceKey);
 		}
@@ -60,7 +61,8 @@ namespace Codist
 		}
 		public static WpfBrush GetWpfBrush(this ThemeResourceKey resourceKey) {
 			return new WpfBrush(resourceKey.GetWpfColor());
-		}
+		} 
+		#endregion
 
 		public static void GetFontSettings(string categoryGuid, out string fontName, out int fontSize) {
 			ThreadHelper.ThrowIfNotOnUIThread();
@@ -85,8 +87,9 @@ namespace Codist
 			EXIT:
 			fontName = null;
 			fontSize = 0;
-			return;
 		}
+
+		#region CrispImage
 		/// <summary>
 		/// Gets a themed <see cref="Image"/> from a value defined in <see cref="KnownImageIds"/>
 		/// </summary>
@@ -105,13 +108,17 @@ namespace Codist
 				Width = size,
 			};
 		}
+
 		public static void SetBackgroundForCrispImage(this System.Windows.DependencyObject target, WpfColor color) {
 			ImageThemingUtilities.SetImageBackgroundColor(target, color);
 		}
+
 		public static void ReferenceCrispImageBackground(this System.Windows.FrameworkElement target, object colorKey) {
 			target.SetResourceReference(ImageThemingUtilities.ImageBackgroundColorProperty, colorKey);
 		}
+		#endregion
 
+		#region Cache
 		internal static void RefreshThemeCache() {
 			DocumentPageColor = CommonDocumentColors.PageColorKey.GetGdiColor();
 			DocumentTextColor = CommonDocumentColors.PageTextColorKey.GetGdiColor();
@@ -145,7 +152,8 @@ namespace Codist
 			ToolTipTextBrush = formatMap.ForegroundBrush as WpfBrush;
 			ToolTipFont = formatMap.Typeface.FontFamily;
 			ToolTipFontSize = formatMap.FontRenderingEmSize;
-		}
+		} 
+		#endregion
 
 	}
 }

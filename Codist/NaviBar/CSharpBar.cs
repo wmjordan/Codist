@@ -778,9 +778,15 @@ namespace Codist.NaviBar
 			async void NodeItem_ToolTipOpening(object sender, ToolTipEventArgs e) {
 				// todo: handle updated syntax node for RootItem
 				var symbol = await _Bar._SemanticContext.GetSymbolAsync(Node, _Bar._cancellationSource.GetToken());
-				ToolTip = symbol != null
-					? ToolTipFactory.CreateToolTip(symbol, true, _Bar._SemanticContext.SemanticModel.Compilation)
-					: (object)Node.GetSyntaxBrief();
+				if (symbol != null) {
+					var tip = ToolTipFactory.CreateToolTip(symbol, true, _Bar._SemanticContext.SemanticModel.Compilation);
+					tip.AddTextBlock()
+						.Append("Line of code: " + (_Bar._View.TextSnapshot.GetLineSpan(Node.Span).Length + 1));
+					ToolTip = tip;
+				}
+				else {
+					ToolTip = Node.GetSyntaxBrief();
+				}
 				this.SetTipOptions();
 				ToolTipOpening -= NodeItem_ToolTipOpening;
 			}
