@@ -39,7 +39,7 @@ namespace Codist.QuickInfo
 	{
 		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? new CSharpQuickInfo(textBuffer, ServicesHelper.Instance.EditorFormatMap)
+				? new CSharpQuickInfo(textBuffer)
 				: null;
 		}
 	}

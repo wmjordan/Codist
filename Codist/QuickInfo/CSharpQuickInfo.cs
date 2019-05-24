@@ -26,17 +26,14 @@ namespace Codist.QuickInfo
 
 		static readonly SymbolFormatter _SymbolFormatter = SymbolFormatter.Instance;
 
-		readonly IEditorFormatMapService _FormatMapService;
 		readonly bool _IsVsProject;
 		bool _IsDisposed;
-		Document _Document;
 		SemanticModel _SemanticModel;
 		readonly ITextBuffer _TextBuffer;
 
-		public CSharpQuickInfo(ITextBuffer subjectBuffer, IEditorFormatMapService formatMapService) {
+		public CSharpQuickInfo(ITextBuffer subjectBuffer) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			_TextBuffer = subjectBuffer;
-			_FormatMapService = formatMapService;
 			_TextBuffer.Changing += TextBuffer_Changing;
 			var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];
 			if (extenders != null) {
@@ -67,7 +64,7 @@ namespace Codist.QuickInfo
 			DocumentId docId;
 			if (Workspace.TryGetWorkspace(container, out var workspace) == false
 				|| (docId = workspace.GetDocumentIdInCurrentContext(container)) == null
-				|| (_Document = workspace.CurrentSolution.GetDocument(docId)).TryGetSemanticModel(out semanticModel) == false) {
+				|| workspace.CurrentSolution.GetDocument(docId).TryGetSemanticModel(out semanticModel) == false) {
 				goto EXIT;
 			}
 
@@ -143,6 +140,7 @@ namespace Codist.QuickInfo
 				ShowParameterInfo(qiContent, node);
 			}
 			ISymbol symbol;
+			bool usedCandidate = false;
 			if (node.IsKind(SyntaxKind.BaseExpression)) {
 				symbol = semanticModel.GetTypeInfo(node).ConvertedType;
 			}
@@ -157,6 +155,7 @@ namespace Codist.QuickInfo
 				if (symbolInfo.CandidateReason != CandidateReason.None) {
 					ShowCandidateInfo(qiContent, symbolInfo);
 					symbol = symbolInfo.CandidateSymbols.FirstOrDefault();
+					usedCandidate = true;
 				}
 				else {
 					symbol = symbolInfo.Symbol ?? semanticModel.GetSymbolExt(node);
@@ -170,7 +169,8 @@ namespace Codist.QuickInfo
 			if (node is PredefinedTypeSyntax/* void */) {
 				goto EXIT;
 			}
-			if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)) {
+			if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
+				&& usedCandidate == false) {
 				if (node.Parent.IsKind(SyntaxKind.QualifiedName)) {
 					node = node.Parent;
 				}
@@ -296,14 +296,14 @@ namespace Codist.QuickInfo
 					}
 				}
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc) &&
-				(symbol.Kind == SymbolKind.Method
-				|| symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Delegate)) {
-				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns;
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)
+				&& (symbol.Kind == SymbolKind.Method
+				|| symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Delegate)) {
+				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Returns != null)?.Returns;
 				if (returns != null && returns.FirstNode != null) {
 					tip.Append(new ThemedTipParagraph(KnownImageIds.Return, new ThemedTipText()
 						.Append("Returns", true)
-						.Append(": ")
+						.Append(returns == doc.Returns ? ": " : " (inherited): ")
 						.AddXmlDoc(returns, docRenderer))
 						);
 				}
@@ -311,9 +311,12 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc)
 				&& symbol.Kind != SymbolKind.Parameter
 				&& symbol.Kind != SymbolKind.TypeParameter) {
-				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks;
+				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Remarks != null)?.Remarks;
 				if (remarks != null && remarks.FirstNode != null) {
-					tip.Append(new ThemedTipParagraph(KnownImageIds.CommentGroup, new ThemedTipText().Append("Remarks", true).Append(": ")))
+					tip.Append(new ThemedTipParagraph(KnownImageIds.CommentGroup, new ThemedTipText()
+						.Append("Remarks", true)
+						.Append(remarks == doc.Remarks ? ": " : " (inherited): ")
+						))
 						.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(remarks, docRenderer)));
 				}
 			}
@@ -333,14 +336,6 @@ namespace Codist.QuickInfo
 					}
 				}
 			}
-			//if (_ExtraModels.IsDefaultOrEmpty == false) {
-			//	foreach (var item in _ExtraModels) {
-			//		if (_Document.Project.Solution.GetDocument(item).TryGetSemanticModel(out var model)
-			//			&& Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSymbolAtPosition(model, node.SpanStart, workspace) == null) {
-			//			;
-			//		}
-			//	}
-			//}
 			if (tip.Children.Count > 0) {
 				qiWrapper.OverrideDocumentation(tip);
 			}
@@ -380,7 +375,6 @@ namespace Codist.QuickInfo
 
 		void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {
 			_SemanticModel = null;
-			_Document = null;
 		}
 
 		void ShowSymbolInfo(IList<object> qiContent, SyntaxNode node, ISymbol symbol) {

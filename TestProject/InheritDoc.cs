@@ -19,7 +19,8 @@ namespace TestProject
 		/// <summary>
 		/// Do something.
 		/// </summary>
-		protected abstract void Do();
+        /// <returns>Something.</returns>
+		protected abstract object Do();
 	}
 	interface IRun
 	{
@@ -42,7 +43,9 @@ namespace TestProject
 		/// The description of method.
 		/// </summary>
 		/// <param name="param">The description of parameter.</param>
-		public static void Method(string param) {
+        /// <returns>A value.</returns>
+		public static int Method(string param) {
+            return 1;
 		}
 
 		// turn on <inheritdoc cref=""/> feature in the options page of Super Quick Info,
@@ -54,7 +57,8 @@ namespace TestProject
 		}
 
 		// hover on Do to see its inherited documentation
-		protected override void Do() {
+		protected override object Do() {
+            return null;
 		}
 
 		// hover on Run to see its inherited documentation
