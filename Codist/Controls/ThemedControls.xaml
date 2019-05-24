@@ -7,7 +7,8 @@
 	<Style x:Key="{x:Type ToolTip}" TargetType="{x:Type ToolTip}">
 		<Setter Property="OverridesDefaultStyle" Value="True"/>
 		<Setter Property="Foreground" Value="{DynamicResource {x:Static vsp:EnvironmentColors.ToolTipTextBrushKey}}"/>
-		<Setter Property="Padding" Value="5"/>
+		<Setter Property="Padding" Value="3"/>
+		<Setter Property="FontWeight" Value="Regular"/>
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type ToolTip}">
@@ -30,17 +31,15 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type c:ThemedToggleButton}">
-					<Border x:Name="Bd" BorderThickness="{TemplateBinding BorderThickness}" Background="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonBrushKey}}" BorderBrush="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonBorderBrushKey}}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
-						<ContentPresenter/>
+					<Border x:Name="Bd" BorderThickness="{TemplateBinding BorderThickness}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderBrush="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonBorderBrushKey}}" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+						<ContentPresenter />
 					</Border>
 					<ControlTemplate.Triggers>
-						<Trigger Property="IsChecked" Value="True">
-							<Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonPressedBrushKey}}"/>
-							<Setter Property="Foreground" Value="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonPressedTextBrushKey}}"/>
-						</Trigger>
 						<Trigger Property="IsMouseOver" Value="True">
-							<Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonPressedBrushKey}}"/>
-							<Setter Property="Foreground" Value="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonHoverTextBrushKey}}"/>
+							<Setter TargetName="Bd" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.CommandBarMenuItemMouseOverBrushKey}}"/>
+						</Trigger>
+						<Trigger Property="IsChecked" Value="True">
+							<Setter TargetName="Bd" Property="Background" Value="{DynamicResource VsBrush.FileTabSelectedGradientTop}"/>
 						</Trigger>
 					</ControlTemplate.Triggers>
 				</ControlTemplate>

@@ -8,7 +8,7 @@ namespace Codist.Controls
 	sealed class ThemedToolTip : StackPanel
 	{
 		static Thickness _TitlePadding = new Thickness(5);
-		static Thickness _ContentPadding = new Thickness(5, 3, 5, 8);
+		static Thickness _ContentPadding = new Thickness(8, 3, 8, 8);
 
 		public TextBlock Title { get; }
 		public TextBlock Content { get; }
