@@ -62,6 +62,7 @@ namespace Codist.Classifiers
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 			var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace);
 			var lastTriviaSpan = default(TextSpan);
+			SyntaxNode node;
 			GetAttributeNotationSpan(snapshot, result, textSpan, unitCompilation);
 
 			foreach (var item in classifiedSpans) {
@@ -69,7 +70,7 @@ namespace Codist.Classifiers
 				switch (ct) {
 					case "keyword":
 					case Constants.CodeKeywordControl: {
-							var node = unitCompilation.FindNode(item.TextSpan, true, true);
+							node = unitCompilation.FindNode(item.TextSpan, true, true);
 							if (node is MemberDeclarationSyntax) {
 								var token = unitCompilation.FindToken(item.TextSpan.Start);
 								switch (token.Kind()) {
@@ -131,10 +132,12 @@ namespace Codist.Classifiers
 						}
 						continue;
 					case "operator":
-					case Constants.CodeOverloadedOperator:
-						var opMethod = semanticModel.GetSymbol(unitCompilation.FindNode(item.TextSpan)) as IMethodSymbol;
-						if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
-							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.OverrideMember));
+					case Constants.CodeOverloadedOperator: {
+							node = unitCompilation.FindNode(item.TextSpan);
+							var opMethod = semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node) as IMethodSymbol;
+							if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
+								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.OverrideMember));
+							}
 						}
 						continue;
 					case Constants.CodePunctuation:
@@ -147,12 +150,12 @@ namespace Codist.Classifiers
 							if (lastTriviaSpan.Contains(item.TextSpan)) {
 								continue;
 							}
-							var node = unitCompilation.FindTrivia(item.TextSpan.Start);
-							switch (node.Kind()) {
+							var trivia = unitCompilation.FindTrivia(item.TextSpan.Start);
+							switch (trivia.Kind()) {
 								case SyntaxKind.SingleLineDocumentationCommentTrivia:
 								case SyntaxKind.MultiLineDocumentationCommentTrivia:
 								case SyntaxKind.DocumentationCommentExteriorTrivia:
-									lastTriviaSpan = node.FullSpan;
+									lastTriviaSpan = trivia.FullSpan;
 									result.Add(CreateClassificationSpan(snapshot, lastTriviaSpan, _Classifications.XmlDoc));
 									continue;
 							}
@@ -161,7 +164,7 @@ namespace Codist.Classifiers
 							|| ct == Constants.CodeStaticSymbol
 							|| ct.EndsWith("name", StringComparison.Ordinal)) {
 							var itemSpan = item.TextSpan;
-							var node = unitCompilation.FindNode(itemSpan, true);
+							node = unitCompilation.FindNode(itemSpan, true);
 							foreach (var type in GetClassificationType(node, semanticModel)) {
 								result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 							}
