@@ -135,6 +135,9 @@ namespace Codist.QuickInfo
 				skipTriggerPointCheck == false && node.Span.Contains(subjectTriggerPoint.Position, true) == false) {
 				goto EXIT;
 			}
+			if (node.Parent.IsKind(SyntaxKind.QualifiedName)) {
+				node = node.Parent;
+			}
 			LocateNodeInParameterList(ref node, ref token);
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowParameterInfo(qiContent, node);
@@ -171,16 +174,9 @@ namespace Codist.QuickInfo
 			}
 			if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
 				&& usedCandidate == false) {
-				if (node.Parent.IsKind(SyntaxKind.QualifiedName)) {
-					node = node.Parent;
-				}
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
-				if (ctor != null && ctor.Type == node) {
-					OverrideDocumentation(node, qiWrapper, semanticModel.GetSymbolInfo(ctor).Symbol);
-				}
-				else {
-					OverrideDocumentation(node, qiWrapper, symbol);
-				}
+				OverrideDocumentation(node, qiWrapper,
+					ctor != null && ctor.Type == node ? semanticModel.GetSymbolInfo(ctor).Symbol : symbol);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
 				ShowAttributesInfo(qiContent, symbol);
@@ -188,9 +184,6 @@ namespace Codist.QuickInfo
 			ShowSymbolInfo(qiContent, node, symbol);
 			RETURN:
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)) {
-				if (node.Parent.IsKind(SyntaxKind.QualifiedName)) {
-					node = node.Parent;
-				}
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				if (ctor != null && ctor.Type == node) {
 					symbol = semanticModel.GetSymbolOrFirstCandidate(ctor);
@@ -206,9 +199,7 @@ namespace Codist.QuickInfo
 				: null;
 			return;
 			EXIT:
-			if (qiWrapper != null) {
-				qiWrapper.LimitQuickInfoItemSize(qiContent);
-			}
+			qiWrapper?.LimitQuickInfoItemSize(qiContent);
 			applicableToSpan = null;
 		}
 
