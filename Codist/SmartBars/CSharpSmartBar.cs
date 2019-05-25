@@ -87,7 +87,7 @@ namespace Codist.SmartBars
 			menuItem.SubMenuHeader = new StackPanel {
 				Margin = WpfHelper.TopItemMargin,
 				Children = {
-					new MemberFilterBox(new MenuItemFilter(menuItem.Items)),
+					new SymbolFilterBox(new MenuItemFilter(menuItem.Items)),
 					new Separator()
 				}
 			};
@@ -710,7 +710,7 @@ namespace Codist.SmartBars
 
 			public SymbolList Menu { get; }
 			public ThemedMenuText Title { get; }
-			public MemberFilterBox FilterBox { get; }
+			public SymbolFilterBox FilterBox { get; }
 
 			public SymbolMenu(CSharpSmartBar bar) : this(bar, SymbolListType.None) { }
 			public SymbolMenu(CSharpSmartBar bar, SymbolListType listType) {
@@ -722,7 +722,7 @@ namespace Codist.SmartBars
 					Margin = WpfHelper.MenuItemMargin,
 					Children = {
 						(Title = new ThemedMenuText { TextAlignment = TextAlignment.Center, Padding = WpfHelper.SmallMargin }),
-						(FilterBox = new MemberFilterBox(Menu)),
+						(FilterBox = new SymbolFilterBox(Menu)),
 						new Separator()
 					}
 				};

@@ -15,7 +15,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Codist.Controls
 {
-	sealed class SymbolList : ListBox, IMemberFilterable {
+	sealed class SymbolList : ListBox, ISymbolFilterable {
 		public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(UIElement), typeof(SymbolList));
 		public static readonly DependencyProperty FooterProperty = DependencyProperty.Register("Footer", typeof(UIElement), typeof(SymbolList));
 		public static readonly DependencyProperty ItemsControlMaxHeightProperty = DependencyProperty.Register("ItemsControlMaxHeight", typeof(double), typeof(SymbolList));
@@ -404,15 +404,15 @@ namespace Codist.Controls
 		} 
 		#endregion
 
-		SymbolFilterKind IMemberFilterable.SymbolFilterKind {
+		SymbolFilterKind ISymbolFilterable.SymbolFilterKind {
 			get => ContainerType == SymbolListType.TypeList ? SymbolFilterKind.Type : SymbolFilterKind.Member;
 		}
-		void IMemberFilterable.Filter(string[] keywords, int filterTypes) {
+		void ISymbolFilterable.Filter(string[] keywords, int filterFlags) {
 			if (ContainerType == SymbolListType.TypeList) {
-				_Filter = FilterByTypeKinds(keywords, (TypeFilterTypes)filterTypes);
+				_Filter = FilterByTypeKinds(keywords, (TypeFilterTypes)filterFlags);
 			}
 			else {
-				_Filter = FilterByMemberTypes(keywords, (MemberFilterTypes)filterTypes);
+				_Filter = FilterByMemberTypes(keywords, (MemberFilterTypes)filterFlags);
 			}
 			RefreshItemsSource();
 
@@ -424,13 +424,13 @@ namespace Codist.Controls
 				if (noKeyword) {
 					return o => {
 						var i = (SymbolItem)o;
-						return i.Symbol != null ? MemberFilterBox.FilterBySymbol(memberFilter, i.Symbol) : MemberFilterBox.FilterByImageId(memberFilter, i.ImageId);
+						return i.Symbol != null ? SymbolFilterBox.FilterBySymbol(memberFilter, i.Symbol) : SymbolFilterBox.FilterByImageId(memberFilter, i.ImageId);
 					};
 				}
 				var comparison = Char.IsUpper(keywords[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				return o => {
 					var i = (SymbolItem)o;
-					return (i.Symbol != null ? MemberFilterBox.FilterBySymbol(memberFilter, i.Symbol) : MemberFilterBox.FilterByImageId(memberFilter, i.ImageId))
+					return (i.Symbol != null ? SymbolFilterBox.FilterBySymbol(memberFilter, i.Symbol) : SymbolFilterBox.FilterByImageId(memberFilter, i.ImageId))
 							&& keywords.All(p => i.Content.GetText().IndexOf(p, comparison) != -1);
 				};
 			}
@@ -442,14 +442,14 @@ namespace Codist.Controls
 				if (noKeyword) {
 					return o => {
 						var i = (SymbolItem)o;
-						return i.Symbol != null ? MemberFilterBox.FilterBySymbol(typeFilter, i.Symbol) : false;
+						return i.Symbol != null ? SymbolFilterBox.FilterBySymbol(typeFilter, i.Symbol) : false;
 					};
 				}
 				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				return o => {
 					var i = (SymbolItem)o;
 					return i.Symbol != null
-						&& MemberFilterBox.FilterBySymbol(typeFilter, i.Symbol)
+						&& SymbolFilterBox.FilterBySymbol(typeFilter, i.Symbol)
 						&& keywords.All(p => i.Content.GetText().IndexOf(p, comparison) != -1);
 				};
 			}

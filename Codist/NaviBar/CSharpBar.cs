@@ -519,12 +519,12 @@ namespace Codist.NaviBar
 				}
 			}
 		}
-		sealed class NodeItem : ThemedMenuItem, IMemberTypeFilter
+		sealed class NodeItem : ThemedMenuItem, ISymbolFilter
 		{
 			readonly int _ImageId;
 			readonly CSharpBar _Bar;
 			SymbolList _Menu;
-			MemberFilterBox _FilterBox;
+			SymbolFilterBox _FilterBox;
 			int _PartialCount;
 
 			public NodeItem(CSharpBar bar, SyntaxNode node) {
@@ -596,7 +596,7 @@ namespace Codist.NaviBar
 								Margin = WpfHelper.SmallHorizontalMargin,
 								Padding = WpfHelper.SmallHorizontalMargin,
 							},
-							(_FilterBox = new MemberFilterBox(_Menu)),
+							(_FilterBox = new SymbolFilterBox(_Menu)),
 						}
 				};
 				_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
@@ -797,8 +797,8 @@ namespace Codist.NaviBar
 				ToolTipOpening -= NodeItem_ToolTipOpening;
 			}
 
-			bool IMemberTypeFilter.Filter(int filterTypes) {
-				return MemberFilterBox.FilterByImageId((MemberFilterTypes)filterTypes, _ImageId);
+			bool ISymbolFilter.Filter(int filterTypes) {
+				return SymbolFilterBox.FilterByImageId((MemberFilterTypes)filterTypes, _ImageId);
 			}
 		}
 		sealed class GeometryAdornment : UIElement

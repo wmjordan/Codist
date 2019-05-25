@@ -12,14 +12,14 @@ using Microsoft.CodeAnalysis;
 
 namespace Codist.Controls
 {
-	interface IMemberFilterable
+	interface ISymbolFilterable
 	{
 		SymbolFilterKind SymbolFilterKind { get; }
-		void Filter(string[] keywords, int filterTypes);
+		void Filter(string[] keywords, int filterFlags);
 	}
-	interface IMemberTypeFilter
+	interface ISymbolFilter
 	{
-		bool Filter(int filterTypes);
+		bool Filter(int filterFlags);
 	}
 
 	sealed class SearchScopeBox : UserControl
@@ -73,13 +73,13 @@ namespace Codist.Controls
 			}
 		}
 	}
-	sealed class MemberFilterBox : StackPanel
+	sealed class SymbolFilterBox : StackPanel
 	{
 		readonly ThemedTextBox _FilterBox;
 		readonly FilterButtonGroup _FilterButtons;
-		readonly IMemberFilterable _Filter;
+		readonly ISymbolFilterable _Filter;
 
-		public MemberFilterBox(IMemberFilterable filter) {
+		public SymbolFilterBox(ISymbolFilterable filter) {
 			Orientation = Orientation.Horizontal;
 			Margin = WpfHelper.MenuItemMargin;
 			Children.Add(ThemeHelper.GetImage(KnownImageIds.Filter).WrapMargin(WpfHelper.GlyphMargin));
@@ -563,7 +563,7 @@ namespace Codist.Controls
 		}
 	}
 
-	sealed class MenuItemFilter : IMemberFilterable
+	sealed class MenuItemFilter : ISymbolFilterable
 	{
 		readonly ItemCollection _Items;
 		public MenuItemFilter(ItemCollection items) {
@@ -572,24 +572,24 @@ namespace Codist.Controls
 
 		public SymbolFilterKind SymbolFilterKind => SymbolFilterKind.Member;
 
-		public void Filter(string[] keywords, int filters) {
-			bool useModifierFilter = (MemberFilterTypes)filters != MemberFilterTypes.All;
+		public void Filter(string[] keywords, int filterFlags) {
+			bool useModifierFilter = (MemberFilterTypes)filterFlags != MemberFilterTypes.All;
 			if (keywords.Length == 0) {
 				foreach (UIElement item in _Items) {
 					item.Visibility = item is ThemedMenuItem.MenuItemPlaceHolder == false
-						&& (useModifierFilter == false || item is IMemberTypeFilter menuItem && menuItem.Filter(filters))
+						&& (useModifierFilter == false || item is ISymbolFilter menuItem && menuItem.Filter(filterFlags))
 						? Visibility.Visible
 						: Visibility.Collapsed;
 				}
 				return;
 			}
-			IMemberTypeFilter filterable;
+			ISymbolFilter filterable;
 			foreach (UIElement item in _Items) {
 				var menuItem = item as MenuItem;
 				if (useModifierFilter) {
-					filterable = item as IMemberTypeFilter;
+					filterable = item as ISymbolFilter;
 					if (filterable != null) {
-						if (filterable.Filter(filters) == false && (menuItem == null || menuItem.HasItems == false)) {
+						if (filterable.Filter(filterFlags) == false && (menuItem == null || menuItem.HasItems == false)) {
 							item.Visibility = Visibility.Collapsed;
 							continue;
 						}
@@ -617,9 +617,9 @@ namespace Codist.Controls
 				if (menuItem.HasItems) {
 					foreach (MenuItem sub in menuItem.Items) {
 						if (useModifierFilter) {
-							filterable = sub as IMemberTypeFilter;
+							filterable = sub as ISymbolFilter;
 							if (filterable != null) {
-								if (filterable.Filter(filters) == false) {
+								if (filterable.Filter(filterFlags) == false) {
 									sub.Visibility = Visibility.Collapsed;
 									continue;
 								}
