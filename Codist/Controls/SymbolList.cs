@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using Microsoft.CodeAnalysis;
 using AppHelpers;
+using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using Task = System.Threading.Tasks.Task;
 
 namespace Codist.Controls
 {
@@ -56,7 +57,7 @@ namespace Codist.Controls
 		public List<SymbolItem> Symbols { get; }
 		public ListCollectionView FilteredSymbols { get; }
 		public FrameworkElement Container { get; set; }
-		public SymbolItemType ContainerType { get; set; }
+		public SymbolListType ContainerType { get; set; }
 		public Func<SymbolItem, UIElement> IconProvider { get; set; }
 		public SymbolItem SelectedSymbolItem => SelectedItem as SymbolItem;
 
@@ -204,7 +205,7 @@ namespace Codist.Controls
 			if (isVsProject) {
 				switch (nsOrType.Name) {
 					case nameof(KnownImageIds):
-						ContainerType = SymbolItemType.VsKnownImage;
+						ContainerType = SymbolListType.VsKnownImage;
 						IconProvider = s => {
 							var f = s.Symbol as IFieldSymbol;
 							return f == null || f.HasConstantValue == false || f.Type.SpecialType != SpecialType.System_Int32
@@ -252,23 +253,23 @@ namespace Codist.Controls
 			return members.Length;
 
 			void SetupListForVsUIColors(SymbolList symbolList, Type type) {
-				symbolList.ContainerType = SymbolItemType.PredefinedColors;
+				symbolList.ContainerType = SymbolListType.PredefinedColors;
 				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsThemeBrush(type, s.Symbol.Name)) : null;
 			}
 			void SetupListForVsResourceColors(SymbolList symbolList, Type type) {
-				symbolList.ContainerType = SymbolItemType.PredefinedColors;
+				symbolList.ContainerType = SymbolListType.PredefinedColors;
 				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsResourceColor(type, s.Symbol.Name)) : null;
 			}
 			void SetupListForVsResourceBrushes(SymbolList symbolList, Type type) {
-				symbolList.ContainerType = SymbolItemType.PredefinedColors;
+				symbolList.ContainerType = SymbolListType.PredefinedColors;
 				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsResourceBrush(type, s.Symbol.Name)) : null;
 			}
 			void SetupListForSystemColors(SymbolList symbolList) {
-				symbolList.ContainerType = SymbolItemType.PredefinedColors;
+				symbolList.ContainerType = SymbolListType.PredefinedColors;
 				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
 			}
 			void SetupListForKnownColors(SymbolList symbolList) {
-				symbolList.ContainerType = SymbolItemType.PredefinedColors;
+				symbolList.ContainerType = SymbolListType.PredefinedColors;
 				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name) ?? ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
 			}
 			Border GetColorPreviewIcon(System.Windows.Media.Brush brush) {
@@ -358,23 +359,23 @@ namespace Codist.Controls
 			_SymbolTip.Tag = null;
 		}
 
-		void MouseMove_ChangeToolTip(object sender, MouseEventArgs e) {
+		async void MouseMove_ChangeToolTip(object sender, MouseEventArgs e) {
 			var li = GetMouseEventTarget(e);
 			if (li != null && _SymbolTip.Tag != li) {
-				ShowToolTipForItem(li);
+				await ShowToolTipForItemAsync(li);
 			}
 		}
 
-		void ShowToolTipForItem(ListBoxItem li) {
+		async Task ShowToolTipForItemAsync(ListBoxItem li) {
 			_SymbolTip.Tag = li;
-			_SymbolTip.Content = CreateItemToolTip(li);
+			_SymbolTip.Content = await CreateItemToolTipAsync(li);
 			_SymbolTip.IsOpen = true;
 		}
 
-		object CreateItemToolTip(ListBoxItem li) {
+		async Task<object> CreateItemToolTipAsync(ListBoxItem li) {
 			SymbolItem item;
 			if ((item = li.Content as SymbolItem) == null
-				|| SemanticContext.UpdateAsync(default).Result == false) {
+				|| await SemanticContext.UpdateAsync(default) == false) {
 				return null;
 			}
 
@@ -389,7 +390,7 @@ namespace Codist.Controls
 					var tip = ToolTipFactory.CreateToolTip(item.Symbol, true, SemanticContext.SemanticModel.Compilation);
 					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
 						tip.AddTextBlock()
-					   .Append("Line of code: " + (SemanticContext.View.TextSnapshot.GetLineSpan(item.SyntaxNode.Span).Length + 1));
+							.Append("Line of code: " + (item.SyntaxNode.GetLineSpan().Length + 1).ToString());
 					}
 					return tip;
 				}
@@ -403,31 +404,63 @@ namespace Codist.Controls
 		} 
 		#endregion
 
-		void IMemberFilterable.Filter(string[] keywords, MemberFilterTypes filterTypes) {
-			var noKeyword = keywords.Length == 0;
-			if (noKeyword && filterTypes == MemberFilterTypes.All) {
-				_Filter = null;
-			}
-			else if (noKeyword) {
-				_Filter = o => {
-					var i = (SymbolItem)o;
-					return i.Symbol != null ? MemberFilterBox.FilterBySymbol(filterTypes, i.Symbol) : MemberFilterBox.FilterByImageId(filterTypes, i.ImageId);
-				};
+		SymbolFilterKind IMemberFilterable.SymbolFilterKind {
+			get => ContainerType == SymbolListType.TypeList ? SymbolFilterKind.Type : SymbolFilterKind.Member;
+		}
+		void IMemberFilterable.Filter(string[] keywords, int filterTypes) {
+			if (ContainerType == SymbolListType.TypeList) {
+				_Filter = FilterByTypeKinds(keywords, (TypeFilterTypes)filterTypes);
 			}
 			else {
+				_Filter = FilterByMemberTypes(keywords, (MemberFilterTypes)filterTypes);
+			}
+			RefreshItemsSource();
+
+			Predicate<object> FilterByMemberTypes(string[] k, MemberFilterTypes memberFilter) {
+				var noKeyword = keywords.Length == 0;
+				if (noKeyword && memberFilter == MemberFilterTypes.All) {
+					return null;
+				}
+				if (noKeyword) {
+					return o => {
+						var i = (SymbolItem)o;
+						return i.Symbol != null ? MemberFilterBox.FilterBySymbol(memberFilter, i.Symbol) : MemberFilterBox.FilterByImageId(memberFilter, i.ImageId);
+					};
+				}
 				var comparison = Char.IsUpper(keywords[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-				_Filter = o => {
+				return o => {
 					var i = (SymbolItem)o;
-					return (i.Symbol != null ? MemberFilterBox.FilterBySymbol(filterTypes, i.Symbol) : MemberFilterBox.FilterByImageId(filterTypes, i.ImageId))
+					return (i.Symbol != null ? MemberFilterBox.FilterBySymbol(memberFilter, i.Symbol) : MemberFilterBox.FilterByImageId(memberFilter, i.ImageId))
 							&& keywords.All(p => i.Content.GetText().IndexOf(p, comparison) != -1);
 				};
 			}
-			RefreshItemsSource();
+			Predicate<object> FilterByTypeKinds(string[] k, TypeFilterTypes typeFilter) {
+				var noKeyword = keywords.Length == 0;
+				if (noKeyword && typeFilter == TypeFilterTypes.All) {
+					return null;
+				}
+				if (noKeyword) {
+					return o => {
+						var i = (SymbolItem)o;
+						return i.Symbol != null ? MemberFilterBox.FilterBySymbol(typeFilter, i.Symbol) : false;
+					};
+				}
+				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+				return o => {
+					var i = (SymbolItem)o;
+					return i.Symbol != null
+						&& MemberFilterBox.FilterBySymbol(typeFilter, i.Symbol)
+						&& keywords.All(p => i.Content.GetText().IndexOf(p, comparison) != -1);
+				};
+			}
 		}
 
 		#region Drag and drop
 		protected override void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e) {
 			base.OnPreviewMouseLeftButtonDown(e);
+			if (ContainerType != SymbolListType.NodeList) {
+				return;
+			}
 			var item = GetMouseEventData(e);
 			if (item != null && SemanticContext != null && item.SyntaxNode != null) {
 				MouseMove -= BeginDragHandler;
@@ -455,12 +488,12 @@ namespace Codist.Controls
 			return e.Data.GetData(typeof(SymbolItem)) as SymbolItem;
 		}
 
-		void BeginDragHandler(object sender, MouseEventArgs e) {
+		async void BeginDragHandler(object sender, MouseEventArgs e) {
 			SymbolItem item;
 			if (e.LeftButton != MouseButtonState.Pressed || (item = GetMouseEventData(e)) == null) {
 				return;
 			}
-			if (item.SyntaxNode != null && SemanticContext.UpdateAsync(default).Result) {
+			if (item.SyntaxNode != null && await SemanticContext.UpdateAsync(default)) {
 				item.RefreshSyntaxNode();
 				var s = e.Source as FrameworkElement;
 				MouseMove -= BeginDragHandler;
@@ -556,7 +589,7 @@ namespace Codist.Controls
 		}
 		public SymbolItemType Type { get; set; }
 		public bool IsExternal => Type == SymbolItemType.External
-			|| Container.ContainerType != SymbolItemType.VsKnownImage && Container.ContainerType != SymbolItemType.PredefinedColors && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
+			|| Container.ContainerType == SymbolListType.None && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
 		public TextBlock Content {
 			get => _Content ?? (_Content = Symbol != null ? CreateContentForSymbol(Symbol, _IncludeContainerType, true) : SyntaxNode != null ? new ThemedMenuText().Append(SyntaxNode.GetDeclarationSignature()) : new ThemedMenuText());
 			set => _Content = value;
@@ -660,12 +693,30 @@ namespace Codist.Controls
 		}
 	}
 
+	enum SymbolListType
+	{
+		None,
+		/// <summary>
+		/// Previews KnownImageIds
+		/// </summary>
+		VsKnownImage,
+		/// <summary>
+		/// Previews predefined colors
+		/// </summary>
+		PredefinedColors,
+		/// <summary>
+		/// Enables drag and drop
+		/// </summary>
+		NodeList,
+		/// <summary>
+		/// Filter by type kinds
+		/// </summary>
+		TypeList
+	}
 	enum SymbolItemType
 	{
 		Normal,
 		External,
 		Container,
-		VsKnownImage,
-		PredefinedColors
 	}
 }

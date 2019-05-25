@@ -762,6 +762,11 @@ namespace Codist
 			}
 		}
 
+		public static Span GetLineSpan(this SyntaxNode node) {
+			var s = node.SyntaxTree.GetLineSpan(node.Span);
+			return Span.FromBounds(s.StartLinePosition.Line, s.EndLinePosition.Line);
+		}
+
 		/// <summary>Gets full span for ordinary nodes, excluding leading directives; gets span for regions.</summary>
 		public static Span GetSematicSpan(this SyntaxNode node, bool expandRegion) {
 			int start, end;

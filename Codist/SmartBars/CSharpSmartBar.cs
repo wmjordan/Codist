@@ -17,7 +17,6 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using WpfBrushes = System.Windows.Media.Brushes;
 
 namespace Codist.SmartBars
 {
@@ -446,7 +445,7 @@ namespace Codist.SmartBars
 		}
 
 		void FindMembers(ISymbol symbol) {
-			var m = new SymbolMenu(this);
+			var m = new SymbolMenu(this, symbol.Kind == SymbolKind.Namespace ? SymbolListType.TypeList : SymbolListType.None);
 			var (count, inherited) = m.Menu.AddSymbolMembers(symbol, _IsVsProject);
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
@@ -713,9 +712,11 @@ namespace Codist.SmartBars
 			public ThemedMenuText Title { get; }
 			public MemberFilterBox FilterBox { get; }
 
-			public SymbolMenu(CSharpSmartBar bar) {
+			public SymbolMenu(CSharpSmartBar bar) : this(bar, SymbolListType.None) { }
+			public SymbolMenu(CSharpSmartBar bar, SymbolListType listType) {
 				Menu = new SymbolList(bar._Context) {
-					Container = bar._SymbolListContainer
+					Container = bar._SymbolListContainer,
+					ContainerType = listType
 				};
 				Menu.Header = new StackPanel {
 					Margin = WpfHelper.MenuItemMargin,

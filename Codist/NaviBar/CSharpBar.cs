@@ -346,6 +346,7 @@ namespace Codist.NaviBar
 				Header = new ThemedToolBarText();
 				_Menu = new SymbolList(bar._SemanticContext) {
 					Container = _Bar._SymbolListContainer,
+					ContainerType = SymbolListType.NodeList,
 					Header = new StackPanel {
 						Margin = WpfHelper.MenuItemMargin,
 						Children = {
@@ -460,9 +461,11 @@ namespace Codist.NaviBar
 				_Menu.Symbols.Clear();
 				var s = _FinderBox.Text;
 				if (s.Length == 0) {
+					_Menu.ContainerType = SymbolListType.NodeList;
 					ShowNamespaceAndTypeMenu();
 					return;
 				}
+				_Menu.ContainerType = SymbolListType.None;
 				try {
 					switch (_ScopeBox.Filter) {
 						case ScopeType.ActiveDocument:
@@ -567,7 +570,7 @@ namespace Codist.NaviBar
 						.Append(_PartialCount);
 				}
 				footer.Append(ThemeHelper.GetImage(KnownImageIds.Code))
-					.Append(_Bar._View.TextSnapshot.GetLineSpan(Node.Span).Length);
+					.Append(Node.GetLineSpan().Length + 1);
 				_Menu.ItemsControlMaxHeight = _Bar._View.ViewportHeight / 2;
 				_Bar.ShowMenu(this, _Menu);
 				_FilterBox?.FocusTextBox();
@@ -580,7 +583,8 @@ namespace Codist.NaviBar
 					return;
 				}
 				_Menu = new SymbolList(_Bar._SemanticContext) {
-					Container = _Bar._SymbolListContainer
+					Container = _Bar._SymbolListContainer,
+					ContainerType = SymbolListType.NodeList
 				};
 				_Menu.Header = new WrapPanel {
 					Orientation = Orientation.Horizontal,
@@ -782,7 +786,7 @@ namespace Codist.NaviBar
 					var tip = ToolTipFactory.CreateToolTip(symbol, true, _Bar._SemanticContext.SemanticModel.Compilation);
 					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
 						tip.AddTextBlock()
-					   .Append("Line of code: " + (_Bar._View.TextSnapshot.GetLineSpan(Node.Span).Length + 1));
+					   .Append("Line of code: " + (Node.GetLineSpan().Length + 1));
 					}
 					ToolTip = tip;
 				}
@@ -793,8 +797,8 @@ namespace Codist.NaviBar
 				ToolTipOpening -= NodeItem_ToolTipOpening;
 			}
 
-			bool IMemberTypeFilter.Filter(MemberFilterTypes filterTypes) {
-				return MemberFilterBox.FilterByImageId(filterTypes, _ImageId);
+			bool IMemberTypeFilter.Filter(int filterTypes) {
+				return MemberFilterBox.FilterByImageId((MemberFilterTypes)filterTypes, _ImageId);
 			}
 		}
 		sealed class GeometryAdornment : UIElement

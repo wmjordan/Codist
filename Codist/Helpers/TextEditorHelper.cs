@@ -66,7 +66,10 @@ namespace Codist
 			return Span.FromBounds(span.Snapshot.GetLineNumberFromPosition(span.Start),
 				span.Snapshot.GetLineNumberFromPosition(span.End));
 		}
-
+		/// <summary>
+		/// <para>Gets the start and end line number from a given <see cref="TextSpan"/>.</para>
+		/// <para>Note: Make sure that the <paramref name="span"/> is within the <paramref name="snapshot"/>.</para>
+		/// </summary>
 		public static Span GetLineSpan(this ITextSnapshot snapshot, TextSpan span) {
 			return Span.FromBounds(snapshot.GetLineNumberFromPosition(span.Start),
 				snapshot.GetLineNumberFromPosition(span.End));
