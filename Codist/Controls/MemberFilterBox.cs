@@ -310,7 +310,7 @@ namespace Codist.Controls
 
 		sealed class TypeFilterButtonGroup : FilterButtonGroup
 		{
-			readonly ThemedToggleButton _ClassFilter, _StructFilter, _InterfaceFilter, _DelegateFilter, _NamespaceFilter, _PublicFilter, _PrivateFilter;
+			readonly ThemedToggleButton _ClassFilter, _StructFilter, _EnumFilter, _InterfaceFilter, _DelegateFilter, _NamespaceFilter, _PublicFilter, _PrivateFilter;
 			TypeFilterTypes _Filters;
 			bool _uiLock;
 
@@ -318,9 +318,10 @@ namespace Codist.Controls
 
 			public TypeFilterButtonGroup() {
 				_ClassFilter = CreateButton(KnownImageIds.Class, "Classes");
-				_StructFilter = CreateButton(KnownImageIds.Structure, "Structs and enums");
 				_InterfaceFilter = CreateButton(KnownImageIds.Interface, "Interfaces");
 				_DelegateFilter = CreateButton(KnownImageIds.Delegate, "Delegates");
+				_StructFilter = CreateButton(KnownImageIds.Structure, "Structures");
+				_EnumFilter = CreateButton(KnownImageIds.Enumeration, "Enumerations");
 				_NamespaceFilter = CreateButton(KnownImageIds.Namespace, "Namespaces");
 
 				_PublicFilter = CreateButton(KnownImageIds.ModulePublic, "Public and protected types");
@@ -335,7 +336,7 @@ namespace Codist.Controls
 						Children = {
 							_PublicFilter, _PrivateFilter,
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
-							_ClassFilter, _StructFilter, _InterfaceFilter, _DelegateFilter, _NamespaceFilter,
+							_ClassFilter, _InterfaceFilter, _DelegateFilter, _StructFilter, _EnumFilter, _NamespaceFilter,
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
 							new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearMargin().ClearBorder(),
 						},
@@ -353,7 +354,10 @@ namespace Codist.Controls
 					f |= TypeFilterTypes.Class;
 				}
 				if (_StructFilter.IsChecked == true) {
-					f |= TypeFilterTypes.StructAndEnum;
+					f |= TypeFilterTypes.Struct;
+				}
+				if (_EnumFilter.IsChecked == true) {
+					f |= TypeFilterTypes.Enum;
 				}
 				if (_DelegateFilter.IsChecked == true) {
 					f |= TypeFilterTypes.Delegate;
@@ -415,7 +419,8 @@ namespace Codist.Controls
 				ToggleFilterButton(_PublicFilter, pu);
 				ToggleFilterButton(_PrivateFilter, pi);
 				ToggleFilterButton(_ClassFilter, c);
-				ToggleFilterButton(_StructFilter, s + e);
+				ToggleFilterButton(_StructFilter, s);
+				ToggleFilterButton(_EnumFilter, e);
 				ToggleFilterButton(_InterfaceFilter, i);
 				ToggleFilterButton(_DelegateFilter, d);
 				ToggleFilterButton(_NamespaceFilter, n);
@@ -423,8 +428,8 @@ namespace Codist.Controls
 
 			public override void ClearFilter() {
 				_uiLock = true;
-				_ClassFilter.IsChecked = _StructFilter.IsChecked = _InterfaceFilter.IsChecked
-					= _DelegateFilter.IsChecked = _NamespaceFilter.IsChecked
+				_ClassFilter.IsChecked = _InterfaceFilter.IsChecked = _DelegateFilter.IsChecked
+					= _StructFilter.IsChecked = _EnumFilter.IsChecked = _NamespaceFilter.IsChecked
 					= _PublicFilter.IsChecked = _PrivateFilter.IsChecked = false;
 				_uiLock = false;
 				if (_Filters != TypeFilterTypes.All) {
