@@ -529,6 +529,14 @@ namespace Codist
 			}
 		}
 
+		public static ImmutableArray<ITypeParameterSymbol> GetTypeParameters(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Method: return (symbol as IMethodSymbol).TypeParameters;
+				case SymbolKind.NamedType: return (symbol as INamedTypeSymbol).TypeParameters;
+				default: return ImmutableArray<ITypeParameterSymbol>.Empty;
+			}
+		}
+
 		public static ImmutableArray<IParameterSymbol> GetParameters(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Method: return ((IMethodSymbol)symbol).Parameters;
@@ -559,7 +567,7 @@ namespace Codist
 				case SymbolKind.NamedType: return GetTypeParameters((INamedTypeSymbol)symbol);
 				default: return String.Empty;
 			}
-	
+
 			string GetPropertyAccessors(IPropertySymbol p) {
 				using (var sbr = ReusableStringBuilder.AcquireDefault(30)) {
 					var sb = sbr.Resource;
@@ -585,35 +593,51 @@ namespace Codist
 				using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
 					var sb = sbr.Resource;
 					if (m.IsGenericMethod) {
-						sb.Append('<');
-						var s = false;
-						foreach (var item in m.TypeParameters) {
-							if (s) {
-								sb.Append(", ");
-							}
-							else {
-								s = true;
-							}
-							sb.Append(item.Name);
-						}
-						sb.Append('>');
+						BuildTypeParametersString(sb, m.TypeParameters);
 					}
-					sb.Append('(');
-					var p = false;
-					foreach (var item in m.Parameters) {
-						if (p) {
-							sb.Append(", ");
-						}
-						else {
-							p = true;
-						}
-						GetTypeName(item.Type, sb);
-					}
-					sb.Append(')');
+					BuildParametersString(sb, m.Parameters);
 					return sb.ToString();
 				}
 			}
+			void BuildTypeParametersString(StringBuilder sb, ImmutableArray<ITypeParameterSymbol> paramList) {
+				sb.Append('<');
+				var s = false;
+				foreach (var item in paramList) {
+					if (s) {
+						sb.Append(", ");
+					}
+					else {
+						s = true;
+					}
+					sb.Append(item.Name);
+				}
+				sb.Append('>');
+			}
+			void BuildParametersString(StringBuilder sb, ImmutableArray<IParameterSymbol> paramList) {
+				sb.Append('(');
+				var p = false;
+				foreach (var item in paramList) {
+					if (p) {
+						sb.Append(", ");
+					}
+					else {
+						p = true;
+					}
+					GetTypeName(item.Type, sb);
+				}
+				sb.Append(')');
+			}
 			string GetTypeParameters(INamedTypeSymbol t) {
+				if (t.TypeKind == TypeKind.Delegate) {
+					using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
+						var sb = sbr.Resource;
+						if (t.IsGenericType) {
+							BuildTypeParametersString(sb, t.TypeParameters);
+						}
+						BuildParametersString(sb, t.DelegateInvokeMethod.Parameters);
+						return sb.ToString();
+					}
+				}
 				return t.Arity == 0 ? String.Empty : "<" + new string(',', t.Arity - 1) + ">";
 			}
 			void GetTypeName(ITypeSymbol type, StringBuilder output) {
@@ -637,10 +661,7 @@ namespace Codist
 				}
 				output.Append(type.GetSpecialTypeAlias() ?? type.Name);
 				var nt = type as INamedTypeSymbol;
-				if (nt == null) {
-					return;
-				}
-				if (nt.IsGenericType == false) {
+				if (nt == null || nt.IsGenericType == false) {
 					return;
 				}
 				var s = false;
@@ -726,14 +747,6 @@ namespace Codist
 				t += "ref readonly ";
 			}
 			return t;
-		}
-
-		public static ImmutableArray<ITypeParameterSymbol> GetTypeParameters(this ISymbol symbol) {
-			switch (symbol.Kind) {
-				case SymbolKind.Method: return (symbol as IMethodSymbol).TypeParameters;
-				case SymbolKind.NamedType: return (symbol as INamedTypeSymbol).TypeParameters;
-				default: return ImmutableArray<ITypeParameterSymbol>.Empty;
-			}
 		}
 
 		public static bool IsCommonClass(this ISymbol symbol) {

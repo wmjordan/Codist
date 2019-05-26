@@ -80,13 +80,13 @@ namespace Codist
 				content.Append(t.GetSymbolKindName() + ": ")
 					.Append(t.ToDisplayString(WpfHelper.MemberNameFormat), true);
 			}
-			if (content.Inlines.FirstInline != null) {
-				content.AppendLine();
-			}
-			content.Append("namespace: " + symbol.ContainingNamespace?.ToString())
-				.Append("\nassembly: " + symbol.GetAssemblyModuleName());
-
 			if (forMemberList == false) {
+				if (content.Inlines.FirstInline != null) {
+					content.AppendLine();
+				}
+				content.Append("namespace: " + symbol.ContainingNamespace?.ToString())
+					.Append("\nassembly: " + symbol.GetAssemblyModuleName());
+
 				var f = symbol as IFieldSymbol;
 				if (f != null && f.IsConst) {
 					content.Append("\nconst: " + f.ConstantValue?.ToString()); // sometimes the const value could be null

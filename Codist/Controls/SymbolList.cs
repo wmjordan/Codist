@@ -11,6 +11,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using GDI = System.Drawing;
+using WPF = System.Windows.Media;
 using Task = System.Threading.Tasks.Task;
 
 namespace Codist.Controls
@@ -230,11 +232,11 @@ namespace Codist.Controls
 			else {
 				switch (nsOrType.Name) {
 					case nameof(SystemColors):
-					case nameof(System.Drawing.SystemBrushes): SetupListForSystemColors(this); break;
-					case nameof(System.Drawing.Color):
-					case nameof(System.Drawing.Brushes):
-					case nameof(System.Windows.Media.Colors):
-					case nameof(System.Drawing.KnownColor): SetupListForKnownColors(this); break;
+					case nameof(GDI.SystemBrushes): SetupListForSystemColors(this); break;
+					case nameof(GDI.Color):
+					case nameof(GDI.Brushes):
+					case nameof(WPF.Colors):
+					case nameof(GDI.KnownColor): SetupListForKnownColors(this); break;
 				}
 			}
 			if (source.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
@@ -272,7 +274,7 @@ namespace Codist.Controls
 				symbolList.ContainerType = SymbolListType.PredefinedColors;
 				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name) ?? ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
 			}
-			Border GetColorPreviewIcon(System.Windows.Media.Brush brush) {
+			Border GetColorPreviewIcon(WPF.Brush brush) {
 				return new Border {
 					BorderThickness = WpfHelper.TinyMargin,
 					BorderBrush = ThemeHelper.MenuTextBrush,
@@ -387,7 +389,7 @@ namespace Codist.Controls
 					item.SetSymbolToSyntaxNode();
 				}
 				if (item.Symbol != null) {
-					var tip = ToolTipFactory.CreateToolTip(item.Symbol, true, SemanticContext.SemanticModel.Compilation);
+					var tip = ToolTipFactory.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, SemanticContext.SemanticModel.Compilation);
 					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
 						tip.AddTextBlock()
 							.Append("Line of code: " + (item.SyntaxNode.GetLineSpan().Length + 1).ToString());

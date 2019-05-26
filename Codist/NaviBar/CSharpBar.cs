@@ -293,14 +293,18 @@ namespace Codist.NaviBar
 
 		static void AddParameterList(TextBlock t, SyntaxNode node) {
 			var useParamName = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName);
+			ParameterListSyntax p = null;
 			if (node is BaseMethodDeclarationSyntax) {
-				t.Append((node as BaseMethodDeclarationSyntax).ParameterList.GetParameterListSignature(useParamName), ThemeHelper.SystemGrayTextBrush);
+				p = ((BaseMethodDeclarationSyntax)node).ParameterList;
 			}
 			else if (node.IsKind(SyntaxKind.DelegateDeclaration)) {
-				t.Append((node as DelegateDeclarationSyntax).ParameterList.GetParameterListSignature(useParamName));
+				p = ((DelegateDeclarationSyntax)node).ParameterList;
 			}
 			else if (node is OperatorDeclarationSyntax) {
-				t.Append((node as OperatorDeclarationSyntax).ParameterList.GetParameterListSignature(useParamName));
+				p = ((OperatorDeclarationSyntax)node).ParameterList;
+			}
+			if (p != null) {
+				t.Append(p.GetParameterListSignature(useParamName), ThemeHelper.SystemGrayTextBrush);
 			}
 		}
 
@@ -365,8 +369,8 @@ namespace Codist.NaviBar
 							},
 						}
 					},
-					Footer = (_Note = new TextBlock { Margin = WpfHelper.MenuItemMargin }
-						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey))
+					Footer = _Note = new TextBlock { Margin = WpfHelper.MenuItemMargin }
+						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey)
 				};
 				_Bar.SetupSymbolListMenu(_Menu);
 				_FinderBox.TextChanged += SearchCriteriaChanged;
@@ -434,7 +438,7 @@ namespace Codist.NaviBar
 				foreach (var child in node.ChildNodes()) {
 					if (child.IsTypeOrNamespaceDeclaration()) {
 						var i = _Menu.Add(child);
-						String prefix = null;
+						string prefix = null;
 						var p = child.Parent;
 						while (p.IsTypeDeclaration()) {
 							prefix = "..." + prefix;
@@ -485,8 +489,7 @@ namespace Codist.NaviBar
 			}
 			void FindInDocument(string text) {
 				var cancellationToken = _Bar._cancellationSource.GetToken();
-				var members = _Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken);
-				foreach (var item in members) {
+				foreach (var item in _Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken)) {
 					if (item.GetDeclarationSignature().IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1) {
 						var i = _Menu.Add(item);
 						i.Content = SetHeader(item, true, false, true);
