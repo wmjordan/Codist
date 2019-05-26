@@ -316,7 +316,7 @@ namespace Codist.QuickInfo
 				var ss = node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName);
 				if (ss != null) {
 					var df = _SemanticModel.AnalyzeDataFlow(ss);
-					var captured = ss is StatementSyntax || ss.IsKind(SyntaxKind.ParenthesizedLambdaExpression) || ss.IsKind(SyntaxKind.SimpleLambdaExpression) ? df.CapturedInside : df.ReadInside;
+					var captured = ss is StatementSyntax || ss.IsKind(SyntaxKind.InvocationExpression) || ss.IsKind(SyntaxKind.ParenthesizedLambdaExpression) || ss.IsKind(SyntaxKind.SimpleLambdaExpression) ? df.CapturedInside : df.ReadInside;
 					if (captured.Length > 0) {
 						var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true));
 						int i = 0;
