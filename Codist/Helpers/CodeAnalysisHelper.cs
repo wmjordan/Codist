@@ -5,11 +5,7 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 
 namespace Codist
@@ -61,9 +57,9 @@ namespace Codist
 		public static bool IsTypeDeclaration(this SyntaxNode node) {
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration:
-				//case SyntaxKind.DelegateDeclaration:
+				case SyntaxKind.DelegateDeclaration:
 				case SyntaxKind.EnumDeclaration:
-				//case SyntaxKind.EventDeclaration:
+				case SyntaxKind.EventDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
 					return true;
