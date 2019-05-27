@@ -46,11 +46,14 @@ namespace Codist.Commands
 			const string Namespace = "http://schemas.microsoft.com/developer/vsx-schema/2011";
 			try {
 				var fileName = item.FileNames[0];
+				var file = new System.IO.FileInfo(fileName);
+				var fileTime = file.LastWriteTime;
 				var doc = XDocument.Load(fileName);
 				var v = doc.Root.Element(XName.Get("Metadata", Namespace))?.Element(XName.Get("Identity", Namespace))?.Attribute("Version");
 				if (v != null && Version.TryParse(v.Value, out var ver)) {
 					v.Value = new Version(Math.Max(ver.Major, 1), Math.Max(ver.Minor, 0), Math.Max(ver.Build, 0), Math.Max(ver.Revision, 0) + 1).ToString();
 					doc.Save(fileName);
+					file.LastWriteTime = fileTime;
 					message = "Incremented VSIX manifest version to " + v.Value;
 					return true;
 				}

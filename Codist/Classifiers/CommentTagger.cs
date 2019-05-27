@@ -53,11 +53,6 @@ namespace Codist.Classifiers
 			textView.Closed -= TextViewClosed;
 		}
 
-		enum CodeType
-		{
-			None, CSharp, Markup, C, Css, Js
-		}
-
 		abstract class CommentTagger : ITagger<ClassificationTag>, IDisposable
 		{
 			static ClassificationTag[] __CommentClassifications;
@@ -361,6 +356,11 @@ namespace Codist.Classifiers
 			protected override int GetCommentStartIndex(string comment) {
 				return 0;
 			}
+		}
+
+		enum CodeType
+		{
+			None, CSharp, Markup, C, Css, Js
 		}
 	}
 }

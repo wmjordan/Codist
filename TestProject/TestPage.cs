@@ -115,7 +115,7 @@ text".Log(); // multiline string (string verbatim)
 		/// <remarks>Don't take this too serious.</remarks>
 		/// <returns>Returns an instance of the generic type parameter.</returns>
 		delegate TObject Clone<TObject>(TObject obj);
-		event EventHandler<EventArgs> MyEvent;
+		event EventHandler<EventArgs> MyEvent, MoreEvent;
 
 		/// <summary>
 		/// Nested class

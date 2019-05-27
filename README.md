@@ -5,33 +5,20 @@
 
 * [Advanced Syntax Highlight](#advanced-c-syntax-highlight) with [*Comment Tagger*](#comment-tagger-and-styles)
 * [Super Quick Info](#super-quick-info) with *Click and Go* to source code
-* [Smart Bar](#smart-bar) with symbol reference analyzers
-* [Scrollbar Marker](#scrollbar-marker)
-* [Symbol Marker](#symbol-marker)
-* [Navigation Bar](#navigation-bar) (**new in version 4.0**)
+* [Navigation Bar](#navigation-bar) with member filter and drag-and-drop enabled member list (**new in version 5**)
+* [Smart Bar](#smart-bar) with common edit commands and symbol reference analyzers
+* [Scrollbar Marker](#scrollbar-marker) draws a powerful mini code map
 * [Display Enhancements](#display-enhancements)
+* [Others](#other-features)
 * [Comprehensive Configurations](#feature-control)
-* [License](#license), [Bugs and Sugguestions](#bugs-and-suggestions)
+* [Acknowledgements](#acknowledgements)
+* [License](#license), [Bugs and Sugguestions](#bugs-and-suggestions), [Donate](#support-codist-by-donation)
 
 ![Feature overview](doc/preview.png)
 
 ## Advanced C# Syntax Highlight
 
   The advanced syntax highlight function highlights every aspect of C# language elements with diverse styles, including using various font families and text styles, enlarging or shrinking font sizes, changing foreground or background colors and transparency.
-
-  The following screenshots of the `TestPage.cs` file in the source code project demonstrates possible syntax highlight effects in the Light theme.
- 
-  ![Syntax highlight](doc/highlight1.png) 
-
-  * The font size of type and member declarations can be enlarged, so it is much easier to spot them.
-  * Syntax highlight can be applied to braces and parentheses.
-  * Various syntax identifiers have different styles, temporary elements such as method parameters and local variables are italic, static symbols are underlined.
-  * Comment content can be tagged (e.g. _note_).
-  * Unnecessary code is marked strike-through.
-  * Keywords are categorized and highlighted with various styles (e.g. `abstract` and `sealed`, `return` and `throw`, etc.).
-  * Overriding members (such as `ToString`) can be painted with gradient background color, so at a glance we know that the marked implementations have overrided their base classes.
-  * Imported symbols (from external assemblies, e.g. `NotImplementedException`, `ToString`) can be marked with a different style (bold here) from symbols defined in your code.
-  * All the above styles are customizable.
 
 ### Default Syntax Highlight Themes
 
@@ -47,82 +34,106 @@
 
   From version 4.5 on, it is possible to load only part of the syntax preset or backup theme by unchecking check boxes under _Load following parts when importing themes_.
 
+  The following screenshots of the `TestPage.cs` file in the source code project demonstrates possible syntax highlight effects in the Light theme.
+ 
+  ![Syntax highlight](doc/highlight1.png) 
+
+  * The font size of type and member declarations can be enlarged, font families are also changeable, so it is much easier to spot them.
+  * Syntax highlight can be applied to braces and parentheses.
+  * Various syntax identifiers have different styles, temporary elements such as method parameters and local variables are italic, static symbols are underlined.
+  * Comment content can be tagged (e.g. _note_).
+  * Unnecessary code can be marked strike-through.
+  * Keywords are categorized and highlighted with various styles (e.g. `abstract` and `sealed`, `return` and `throw`, etc.).
+  * Overriding members (such as `ToString`) can be painted with gradient background color, so at a glance we know that the marked implementations have overrided their base classes.
+  * Imported symbols (from external assemblies, e.g. `NotImplementedException`, `ToString`) can be marked with a different style (bold here), distinguishing from symbols defined in your code.
+  * All the above styles are customizable.
+
 ### Customization of Syntax Highlight Styles
 
   To customize and tweak the syntax highlight styles, click the sub sections inside the *Syntax Highlight* section to change individual styles, accordingly.
 
   ![Style customization](doc/syntax-highlight.png)
 
-  From version 4.6 on, it is possible to configure color and opacity individually. If we change the opacity value only, the default syntax color for a syntax definition is used.
-
   Syntax definitions under the _All languages_ section apply to all languages; those under _Comment_ section apply to comment taggers (see below), others apply to corresponding languages accordingly.
+
+  **Note**: From version 4.6 on, it is possible to configure color and opacity individually. If we change the opacity value only, the default syntax color for a syntax definition is used.
 
   **TIP**: Open a document window before you change the syntax theme or tweak the syntax highlight settings. While you change theme, you can see how the styles change in the code document window simultaneously.
 
 ### My Symbols and External Symbols
 
-  _Codist_ can also identify symbols which are defined in your source code and which are imported from external assemblies. This feature is so unique that you may not find it elsewhere.
+  _Codist_ can identify symbols which are defined in your source code and which are imported from external assemblies. This feature is so unique that you may not find it elsewhere.
 
   You can customize it in the *Symbol Marker* tab of in the *C#* section of *Syntax Highlight*. Style _My Type and Member_ is used for symbols from your code, and _Referenced Type and Member_ is used for symbols imported from external assemblies.
 
   ![Symbolmarker Options 2](doc/symbolmarker-options-2.png)
 
-  **Note**: the predefined _Light theme_ and _Dark theme_ have defined external symbols with bold style, as the above screenshot shows.
+  **Note**: the predefined _Light theme_ and _Dark theme_ have defined external symbols with **bold** style, as the above screenshot shows.
 
 ## Comment Tagger and Styles
-* The comment tagger highlights comments to your specific styles, according to the first token inside the comment.
 
-  Here are default effects of the some tagged comments.
+  * The comment tagger highlights comments to your specific styles, according to the first token inside the comment.
 
-  ![Comment syntax highlight](doc/syntax-highlight-comments.png)
+    Here are default effects of the some tagged comments.
 
-  To configure the comment tags, click the *Tags* tab, in the *Comment* sub-section of the *Syntax Highlight* section, where you can add, remove or modify comment tags.
+    ![Comment syntax highlight](doc/syntax-highlight-comments.png)
 
-  ![Comment syntax highlight](doc/comment-tagger-options.png)
+    To configure the comment tags, click the *Tags* tab, in the *Comment* sub-section of the *Syntax Highlight* section, where you can add, remove or modify comment tags.
 
-  To disable comment tagger, uncheck the check box of _Comment Tagger_ on the _Syntax Highlight_ option page.
+    ![Comment syntax highlight](doc/comment-tagger-options.png)
 
-* The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* or the *Font size* value of the corresponding syntax parts.
+    To disable comment tagger, uncheck the check box of _Comment Tagger_ on the _Syntax Highlight_ option page.
 
-  ![Comment syntax XML Doc](doc/csharp-options-xmldoc.png)
+  * The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* or the *Font size* value of the corresponding syntax parts.
 
-  **Note**: the predefined _Light theme_ and _Dark theme_ have defined XML Doc with a smaller font size (-1), as the above screenshot shows.
+    ![Comment syntax XML Doc](doc/csharp-options-xmldoc.png)
+
+    **Note**: the predefined _Light theme_ and _Dark theme_ have defined XML Doc with a smaller font size (-1), as the above screenshot shows.
 
 ## Super Quick Info
 
-The quick info (the tooltip shown when you hover your mouse pointer on your C# source code) can be enhanced by *Codist*.
+  The quick info (the tooltip shown when you hover your mouse pointer on your C# source code) can be enhanced by *Codist*.
 
 ### General Quick Info
 
-To customize the *Super Quick Info*, adjust the settings in the options page.
+  To customize the *Super Quick Info*, adjust the settings in the options page.
 
   ![Super Quick Info Options](doc/super-quick-info-options.png)
 
-Options in the _General_ page apply to all code editor windows.
+  Options in the _General_ page apply to all code editor windows.
 
-* **Hide Quick Info until Shift key is pressed**
+  * **Hide Quick Info until Shift key is pressed**
 
-  By default, _Quick Info_ appears when you hover your mouse over a symbol or syntax token in code editor. Some programmers think this behavior interferes their workflow. Checking this option will suppress the _Quick Info_ until Shift key is pressed.
+    By default, _Quick Info_ appears when you hover your mouse over a symbol or syntax token in code editor. Some programmers think this behavior interferes their workflow. Checking this option will suppress the _Quick Info_ until Shift key is pressed.
 
-* **Show info about selection length**
+  * **Show info about selection length**
 
-  This option will show how many characters and lines in your selection (if your selection spans over multiple lines). So you don't have to count characters one by one.
+    This option will show how many characters and lines in your selection (if your selection spans over multiple lines). So you don't have to count characters one by one.
 
-  ![Super Quick Info Selection Length](doc/super-quick-info-selection-length.png)
+    ![Super Quick Info Selection Length](doc/super-quick-info-selection-length.png)
 
-* **Show info about color**
+  * **Show info about color**
 
-  This option enables you preview color values. It works for hex color values (such as `#00FF00`£¬`#FF993300`), named colors (such as `Black`, `White`, etc.).
+    This option enables you preview color values. It works for hex color values (such as `#00FF00`£¬`#FF993300`), named colors (such as `Black`, `White`, etc.).
 
-  ![Super Quick Info - Color](doc/super-quick-info-color.png)
+    ![Super Quick Info - Color](doc/super-quick-info-color.png)
 
-  In C# code editor, it analysis system colors (such as `SystemColors.WindowColor`, `SystemColors.Control`, etc.), `Color.FromArgb` or `Color.FromRgb` expression with constant values as well.
+    In C# code editor, it analysis system colors (such as `SystemColors.WindowColor`, `SystemColors.Control`, etc.), `Color.FromArgb` or `Color.FromRgb` expression with constant values as well.
 
-  ![Super Quick Info - C# Color](doc/super-quick-info-csharp-color.png)
+    ![Super Quick Info - C# Color](doc/super-quick-info-csharp-color.png)
 
-  The color info not only works in code windows, but also in debugger _Watch_ window.
+    The color info not only works in code windows, but also in debugger _Watch_ window.
 
-  ![Super Quick Info - Color](doc/super-quick-info-debugger-watch.png)
+    ![Super Quick Info - Color](doc/super-quick-info-debugger-watch.png)
+
+  * **Quick Info item size**
+    
+    From version 5 on, it is possible to limit the size of each Quick Info item, so they won't cover your whole screen. Previously, this feature works in C# editor only.
+
+    By default, _Codist_ does not apply size limitations. You must manually set the _Max width_ and _Max height_ here. Extra height can be assigned to C# XML Documentations, so you can read more of them at a glance. If the contents exceed the width, they are wrapped, and scrollbars will appear when necessary, as the screenshot below demonstrates.
+
+    ![Super Quick Info - Size](doc/super-quick-info-size.png)
+
 
 ### C# Quick Info
 
@@ -132,7 +143,7 @@ Options in the _General_ page apply to all code editor windows.
 
 * **Click and go** to source code of symbol definition
 
-  If a symbol is defined in your source code, you can click and go to its definition on the Quick Info window. There's no need to hit `F12` on your keyboard any more. Even more, _Codist_ also tells you where the symbol is defined if you hover your mouse over it.
+  If a symbol is defined in your source code, you can click and go to its definition on the Quick Info window. No need to hit `F12` on your keyboard any more! Even more, _Codist_ also tells you where the symbol is defined if you hover your mouse over it.
 
   ![Super Quick Info - Click and Go](doc/super-quick-info-click-go.png)
 
@@ -143,11 +154,11 @@ Options in the _General_ page apply to all code editor windows.
   * More syntax colors (adopting syntax highlight colors) for symbols.
   * Icons for documetation parts.
   * Selectable content of the documentation.
-  * Symbols inside the documentation work with _Click and Go_ feature too.
+  * Copyable quick info content (First select text with your mouse, then press `Ctrl + C` shortcut key).
+  * Symbols inside the documentation work with _Click and Go_ feature too. i.e. you can click them and go to the source code if available.
   * Concise form of members (without leading namespace or containing type names, hover your mouse over a symbol to view its full definition).
   * Extra tags, such as `<b>` (for bold), `<i>` (for italic) and `<u>` (for underline) are supported.
   * Extra information from documentations (see below).
-  * Copyable quick info content (First select text with your mouse, and press `Ctrl + C` shortcut key).
 
   ![Super Quick Info Override Doc](doc/super-quick-info-override-doc.png)
 
@@ -166,12 +177,6 @@ Options in the _General_ page apply to all code editor windows.
   * **Override `<exception>` XML Doc** option adds back documentations for exceptions to the Quick Info.
 
     ![Super Quick Info - Override Exception](doc/super-quick-info-override-exception.png)
-
-* **Quick Info Item Size** 
-
-    Quite often the Quick Info can take up a lot of space, covering almost half of the screen. It is possible to limit its size with *Super Quick Info* by assigning values to _Max width_ and _Max height_ in the options page.
-
-  ![Super Quick Info - Size](doc/super-quick-info-size.png)
 
 ### Additional Quick Info Items
 
@@ -221,84 +226,6 @@ Options in the _General_ page apply to all code editor windows.
 * **String length and Hash codes** for string constants.
   (Hint: We can use Hash codes to quickly compare whether two strings that look alike are identical)
 
-## Smart Bar
-
-The *Smart Bar* is a context-aware tool bar that appears automatically when you select some text, or double tap the _Shift_ key on your keyboard.
-
-There are two toolbars on _Smart Bar_. The top bar contains general editing commands for all file types. Buttons on the bottom bar changes according to file types.
-
-Buttons on the *Smart Bar* changes according to your selection, typical buttons are editing operations (e.g. _Cut_, _Copy_, _Paste_,  _Delete_, _Duplicate_, _Formatting_, _Find_, etc.), code analysis operations (e.g. _Go to defintion_, _Find references_), refactoring operations (e.g. _Rename_, _Extract method_, etc.)
-
-  ![Smart Bar](doc/smart-bar.png)
-
-Each button on _Smart Bar_ usually has multiple functions. Left clicking, right clicking, Ctrl+clicking and Shift+clicking trigger different commands. For details, see the tooltip for the buttons. Right clicking a button usually expands the effective range of a command to the whole line, or brings out a pop-up menu for more commands.
-
-  ![Smart Bar](doc/smart-bar-2.png)
-
-### C# Specific Commands
-
-When you select a symbol, you may probably see a _Smart Bar_ like below.
-
-  ![Smart Bar](doc/smart-bar.png)
-
-The C# commands are on the second row.
-
-The first one is **Go to Definition**, that behaves the same as the keyboard `F12` command. With this, you no longer need hitting the `F12` key to go to definition.
-
-The second one is the **Analyze symbol...** button, a menu will pop up showing possible symbol analysis commands for the symbol. Since some commands require considerable amount of calculation, items ending with "..." will require a mouse click to expand. For instance, clicking the **Find Callers** command in the following screen shot will search the source code and list at what places are calling the selected method in a sub-menu. After the sub-menu is popped up, you can click items on the sub-menu and jump to the corresponding location.
-
-  ![Smart Bar Symbol Analysis](doc/smart-bar-symbol-analysis.png)
-
-### Symbol Marker
-
-  _Symbol marker_ draws markers for C# symbols.
-
-  Typically, you can double click a symbol in the C# source code, select the *Mark Symbol* command on the *Smart Bar* and choose the desired highlight marker on the drop-down menu.
-
-  ![Symbol Marker](doc/symbolmarker.png)
-
-  After applying the command, all occurrences of the marked symbol will be marked with a different style.
-
-  ![Symbol Marker Effect](doc/symbolmarker-effect.png)
-
-  To remove symbol marker, click the *Remove symbol mark* command in the drop-down menu of the *Mark symbol* command.
-
-  Symbol markers will be cleared when the solution is unloaded.
-
-  **Note**: The style of symbol markers can be customized in options page of the *Syntax highlight* feature. The default colors are listed below. You also need to turn on the _Syntax Highlight_ feature in order to make this feature work.
-
-  ![Symbol marker Options](doc/symbolmarker-options.png)
-
-### Behavior of Smart Bar
-
-By default, _Smart Bar_ appears after selection changes, you can alter the behavior in the options page by unchecking the _Show Smart Bar when selection is changed_ checkbox.
-
-  ![Smart Bar Options](doc/smart-bar-options.png)
-
-_Smart Bar_ automatically disappears when you move your mouse cursor away from it, or execute a certain commands on the _Smart Bar_, or click somewhere else in the code editor window, emptying the selection.
-
-To make the _Smart Bar_ reappear, you can tap the `Shift` key on your keyboard twice within a second. This behavior can also be suppressed by unchecking the **Show/hide Smart Bar with Shift key** checkbox.
-
-### Smart Bar in Other Windows
-
-_Smart Bar_ also works on _Output_, _C# Interactive_, _Immediate (Debug)_, _Find Results_ and some other text selectable window panes. If you select a path within those windows, extra commands will pop up allowing you to open it directly or locate it in _Windows Explorer_.
-
-  ![Smart Bar File Operations](doc/smart-bar-file-operations.png)
-
-From version 4.4 on, some extra buttons will show up on _Smart Bar_ in C/C++ code windows.
-
-## Scrollbar Marker
-
-_Scollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for the following syntax elements:
-
-* C# `class`/`struct`/`interface`/`enum` **declarations** (marked with a square and their names)
-* C# symbol match marker (matches symbol under the caret, marked with an aqua square)
-* C# instructions (`#if`, `#else`, `#region`, `#pragma`) (marked with a gray spot)
-* **Line numbers** (marked with gray dashed lines and numbers)
-* Special comments tagged by comment tagger (marked with small squares)
-
-  Please see the first screenshot of this article.
-
 ## Navigation Bar
 
   _Navigation bar_ locates at the top of the code editor window. It overrides the original navigation bar. When the _Navigation Bar_ is loadeded, it hides two drop-down lists on the original Navigation Bar, but preserves the project drop-down list.
@@ -320,6 +247,10 @@ _Scollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for th
 
   1. Clicking on a **Namespace node** will popup a menu, displaying namespaces and types defined in the active document. You can click on those items and jump to the beginning of corresponding definitions.
 
+     From version 5 on, you can **drag and drop** items in the menu to reorder types within the document.
+
+     The number beneath the items indicates number of lines of the current code file.
+
      ![Navigation Bar Namespace Types](doc/navigation-bar-namespace-types.png)
 
      On top of the menu there is a **Search Declaration** box, within which you can type and search declarations.
@@ -328,17 +259,29 @@ _Scollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for th
 
      ![Navigation Bar Search Declaration](doc/navigation-bar-search-declaration.png)
 
+     **Note**: From version 5 on, if the first character in the search box is an upper case one, the search will be **case-sensitive**, otherwise, it is case-insensitive.
+
   2. Clicking on a **Type node** will popup a menu, displaying members and regions defined within the type. You can click on those items and jump to the definition of the corresponding member.
+
+     From version 5 on, you can **drag and drop** items in the menu to reorder members, nested types and `#region`s within the document. If a `partial` type spans over several code files, it is also possible to rearrange members among them.
+
+     The number beneath the items indicates number of lines of the current type.
 
      ![Navigation Bar Fields](doc/navigation-bar-fields.png)
 
      The current symbol where the caret is on is highlighted.
 
-     Field values and auto-property expressions are also displayed on this menu. So, you can instantly know the initial value of fields.
+     Field values and auto-property expressions are also displayed on this menu. So, you can read the initial value of fields immediately.
 
-     There is also a search box in this menu, which filters content of the menu. There are six buttons beside the search box. The first five of them narrow down the displayed items of the menu and the last one clears the filter.
+     There is also a search box in this menu, which filters content of the menu.
 
-     To navigate to the beginning of the type, click the first item on the menu.
+     **Note**: From version 5 on, if the first character in the search box is an upper case one, the search will be **case-sensitive**, otherwise, it is case-insensitive.
+
+     There are several buttons beside the search box. Numbers on the buttons counts corrsponding items within the type. Hover your mouse cursor over the button, you can read meanings of them. Pressing down those buttons filters members within the menu to corresponding ones.
+
+     From version 5 on, you can right click items on the menu to bring out a context menu for curresponding members.
+
+     ![Navigation Bar Fields](doc/navigation-bar-context-menu.png)
 
    3. Clicking on a **Member node** will select the whole member. If you have the _Smart Bar_ feature on and let it appear when selection is changed, _Smart Bar_ will be displayed and let you perform actions onto the member.
 
@@ -368,63 +311,175 @@ _Scollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for th
 
   ![Navigation Bar Options 2](doc/navigation-bar-options-2.png)
 
+## Smart Bar
+
+  The *Smart Bar* is a context-aware tool bar that appears automatically when you select some text, or double tap the _Shift_ key on your keyboard.
+
+  There are two toolbars on _Smart Bar_. The top bar contains general editing commands for all file types. Buttons on the bottom bar changes according to file types.
+
+  Buttons on the *Smart Bar* changes according to your selection, typical buttons are editing operations (e.g. _Cut_, _Copy_, _Paste_,  _Delete_, _Duplicate_, _Formatting_, _Find_, etc.), code analysis operations (e.g. _Go to defintion_, _Find references_), refactoring operations (e.g. _Rename_, _Extract method_, etc.)
+
+  ![Smart Bar](doc/smart-bar.png)
+
+  Each button on _Smart Bar_ usually has multiple functions. Left clicking, right clicking, Ctrl+clicking and Shift+clicking trigger different commands. For details, see the tooltip for the buttons. Right clicking a button usually expands the effective range of a command to the whole line, or brings out a pop-up menu for more commands.
+
+  ![Smart Bar](doc/smart-bar-2.png)
+
+### C# Specific Commands
+
+  When you select a symbol, you may probably see a _Smart Bar_ like below.
+
+  ![Smart Bar](doc/smart-bar.png)
+
+  The C# commands are on the second row.
+
+  The first one is **Go to Definition**, that behaves the same as the keyboard `F12` command. With this, you no longer need hitting the `F12` key to go to definition.
+
+  The second one is the **Analyze symbol...** button, a menu will pop up showing possible symbol analysis commands for the symbol. Since some commands require considerable amount of calculation, items ending with "..." will require a mouse click to expand. For instance, clicking the **Find Callers** command in the following screen shot will search the source code and list at what places are calling the selected method in a symbol list. In the symbol list, you can filter items like the what you can do in the _Navigation Bar_, click items on the sub-menu and jump to the corresponding location.
+
+  ![Smart Bar Symbol Analysis](doc/smart-bar-symbol-analysis.png)
+
+  Various commands will be conditionally listed under the **Analyze symbol...** menu. Here is a list of commmands for an interface.
+
+  ![Smart Bar Symbol Analysis 2](doc/smart-bar-symbol-analysis-2.png)
+
+  The **Find Members** command under **Analyze symbol...** lists all members defined within a type. For some special types, for instance, `SystemColors`, `Colors`, `Brushes`, etc. The preview is shown on the list.
+
+  ![Smart Bar Member Colors](doc/smart-bar-member-colors.png)
+
+  For Visual Studio extension developers, the preview offers more, for instances, it allows previewing images of `KnownImageIds`, colors in `VsBrush`, etc.
+
+  ![Smart Bar Member KnownImageIds](doc/smart-bar-member-knownimageids.png)
+
+  The **Find Implementations** command for an interface type will display all types that implement that interface. The same command will also appear for interface members, which finds out corresponding members that implement the specific interface member.
+
+  When we begin to work with new libraries, we usually have to learn new types and APIs. Two typical senario are that "_what methods, properties return specific instance of a type?_" and "_what methods can an instance of a given type can be passed into?_". Thus, _Smart Bar_ provides _Find Instance Producer_ and _Find Instance as Parameter_ for type names. The following screen shot demonstrates the reslt of finding instance producers which returns an instance of `IWpfTextView`.
+
+  ![Smart Bar Instance Producer](doc/smart-bar-instance-producer.png)
+
+### Symbol Marker
+
+  _Symbol marker_ draws markers for C# symbols.
+
+  Typically, you can double click a symbol in the C# source code, select the *Mark Symbol* command on the *Smart Bar* and choose the desired highlight marker on the drop-down menu.
+
+  ![Symbol Marker](doc/symbolmarker.png)
+
+  After applying the command, all occurrences of the marked symbol will be marked with a different style.
+
+  ![Symbol Marker Effect](doc/symbolmarker-effect.png)
+
+  To remove symbol marker, click the *Remove symbol mark* command in the drop-down menu of the *Mark symbol* command.
+
+  Symbol markers will be cleared when the solution is unloaded.
+
+  **Note**: The style of symbol markers can be customized in options page of the *Syntax highlight* feature. The default colors are listed below. You also need to turn on the _Syntax Highlight_ feature in order to make this feature work.
+
+  ![Symbol marker Options](doc/symbolmarker-options.png)
+
+### Behavior of Smart Bar
+
+  By default, _Smart Bar_ appears after selection changes, you can alter the behavior in the options page by unchecking the _Show Smart Bar when selection is changed_ checkbox.
+
+  ![Smart Bar Options](doc/smart-bar-options.png)
+
+  _Smart Bar_ automatically disappears when you move your mouse cursor away from it, or execute a certain commands on the _Smart Bar_, or click somewhere else in the code editor window, emptying the selection.
+
+  To make the _Smart Bar_ reappear, you can tap the `Shift` key on your keyboard twice within a second. This behavior can also be suppressed by unchecking the **Show/hide Smart Bar with Shift key** checkbox.
+
+### Smart Bar in Other Windows
+
+  _Smart Bar_ also works on _Output_, _C# Interactive_, _Immediate (Debug)_, _Find Results_ and some other text selectable window panes. If you select a path within those windows, extra commands will pop up allowing you to open it directly or locate it in _Windows Explorer_.
+
+  ![Smart Bar File Operations](doc/smart-bar-file-operations.png)
+
+  From version 4.4 on, some extra buttons will show up on _Smart Bar_ in C/C++ code windows.
+
+## Scrollbar Marker
+
+  _Scollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for the following syntax elements:
+
+  * **Line numbers** (marked with gray dashed lines and numbers)
+  * Selection range (marked with semi-trasparent color blocks over the bar)
+  * Special comments tagged by comment tagger (marked with small squares)
+  * C# `class`/`struct`/`interface`/`enum` **declarations** (marked with lines indicating their ranges and a square, and their names indicating their declaration locations)
+  * C# compiler directives, e.g. `#if`, `#else`, `#region`, `#pragma`, etc. (marked with a gray spot)
+  * C# symbol match marker (matches symbol under the caret, marked with an aqua square)
+
+  Please see the first screenshot of this article. The markers can be toggled via the options page.
+
+  ![Scrollbar Marker Options](doc/scrollbar-marker-options.png)
+
 ## Display Enhancements
 
-In the *Display* tab of the *General* options page, several display enhancement options are offered.
+  In the *Display* tab of the *General* options page, several display enhancement options are offered.
 
   ![General Options Display](doc/general-options-display.png)
 
-Within the *Extra line margins* group box, you can adjust margins between lines to make code lines more readable.
+  Within the *Extra line margins* group box, you can adjust margins between lines to make code lines more readable.
 
-Programmers who do not like *ClearType* rendering, which made text blurry and colorful, may want to try _Force Grayscale Text Rendering_ options.
+  Programmers who do not like *ClearType* rendering, which made text blurry and colorful, may want to try _Force Grayscale Text Rendering_ options.
+
+## Other Features
+
+  From version 5 on, it is possible to output a time stamp after each build.
+
+  For VSIX developers, there is also an option to automatically increment version number for your VSIX manifest file.
 
 # Feature Control
+
   Open the *Codist* section in the *Tools->Options* dialog. In the *General* section you can toggle features of *Codist*.
 
   ![General customization](doc/general-options.png)
 
-1. *Feature controllers* contains check boxes which can be used to enable/disable features of *Codist*.
+  1. *Feature controllers* contains check boxes which can be used to enable/disable features of *Codist*.
 
-   When you are running on a laptop with battery. Disabling *Codist* may help it sustain a little bit longer.
+     When you are running on a laptop with battery. Disabling *Codist* may help it sustain a little bit longer.
 
-   Someone who does not like the syntax highlight or use another syntax highlighter can also turn off the *Syntax Highlight* feature individually here.
+     Someone who does not like the syntax highlight or use another syntax highlighter can also turn off the *Syntax Highlight* feature individually here.
 
-   These **options will take effect on new document windows**. Existing document windows won't be affected.
+     These **options will take effect on new document windows**. Existing document windows won't be affected.
 
-2. To share or backup your settings of Codist, you can use the *Save* and *Load* buttons.
+  2. To share or backup your settings of Codist, you can use the *Save* and *Load* buttons.
 
 # Acknowledgements
-I have learned a lot from the following extension projects (sorted by the dates when I learned from them).
-* CommentsPlus: https://github.com/mhoumann/CommentsPlus
-* Better comments: https://github.com/omsharp/BetterComments
-* Remarker: https://github.com/jgyo/remarker
-* Font Sizer: https://github.com/Oceanware/FontSizer
-* Visual Studio Productivity Power Tools: https://github.com/Microsoft/VS-PPT
-* Inheritance Margin: https://github.com/tunnelvisionlabs/InheritanceMargin
-* CoCo: https://github.com/GeorgeAlexandria/CoCo
-* CodeBlockEndTag: https://github.com/KhaosCoders/VSCodeBlockEndTag
-* UntabifyReplacement: https://github.com/cpmcgrath/UntabifyReplacement
-* Extensiblity Tools: https://github.com/madskristensen/ExtensibilityTools
-* CodeMaid: https://github.com/codecadwallader/codemaid
-* Select Next Occurence: https://github.com/2mas/SelectNextOccurrence
+
+  I have learned a lot from the following extension projects (sorted by the dates when I learned from them).
+
+  * CommentsPlus: https://github.com/mhoumann/CommentsPlus
+  * Better comments: https://github.com/omsharp/BetterComments
+  * Remarker: https://github.com/jgyo/remarker
+  * Font Sizer: https://github.com/Oceanware/FontSizer
+  * Visual Studio Productivity Power Tools: https://github.com/Microsoft/VS-PPT
+  * Inheritance Margin: https://github.com/tunnelvisionlabs/InheritanceMargin
+  * CoCo: https://github.com/GeorgeAlexandria/CoCo
+  * CodeBlockEndTag: https://github.com/KhaosCoders/VSCodeBlockEndTag
+  * UntabifyReplacement: https://github.com/cpmcgrath/UntabifyReplacement
+  * Extensiblity Tools: https://github.com/madskristensen/ExtensibilityTools
+  * CodeMaid: https://github.com/codecadwallader/codemaid
+  * Select Next Occurence: https://github.com/2mas/SelectNextOccurrence
+  * VSColorOutput: https://github.com/mike-ward/VSColorOutput
+
+  And every donaters, beta testers to this project.
 
 # License
 
-_Codist_ comes from the open source community and it goes back to the community.
+  _Codist_ comes from the open source community and it goes back to the community.
 
-_Codist_ is **free** software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+  _Codist_ is **free** software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program. If not, see "https://www.gnu.org/licenses".
+  You should have received a copy of the GNU General Public License along with this program. If not, see "https://www.gnu.org/licenses".
 
 # Bugs and Suggestions
-Please [post New Issue](https://github.com/wmjordan/Codist/issues) in the [GitHub project](https://github.com/wmjordan/Codist) if you find any bug or have any suggestion.
 
-Your vote and feedback on the [Visual Studio Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=wmj.Codist) are also welcomed.
+  Please [post New Issue](https://github.com/wmjordan/Codist/issues) in the [GitHub project](https://github.com/wmjordan/Codist) if you find any bug or have any suggestion.
+
+  Your vote and feedback on the [Visual Studio Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=wmj.Codist) are also welcomed.
 
 # Support Codist by Donation
 
-If you like _Codist_ and want to support the future development of it, you can [donate to the author](https://paypal.me/wmzuo/19.99).
+  If you like _Codist_ and want to support the future development of it, you can [donate to the author](https://paypal.me/wmzuo/19.99).
 
-You can donate any amount of money as you like. The recommended amount of donation is `$19.99`.
+  You can donate any amount of money as you like. The recommended amount of donation is `$19.99`.

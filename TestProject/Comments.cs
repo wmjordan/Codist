@@ -87,10 +87,12 @@ namespace TestProject
 			string file = "log.txt";
 			// captures exception, now, file
 			await Task.Run(() => WriteLog());
+            WriteLog();
 			// captures exception, now, file
 			await Task.Run(WriteLog);
 			// captures exception, now
 			await Task.Run((Action)WriteConsole);
+            WriteConsole();
 			// captures exception
 			await Task.Run(() => {
 				var ex = exception.ToString();
@@ -103,7 +105,8 @@ namespace TestProject
 			// captures exception, now, file
 			void WriteLog() {
 				var ex = exception.ToString();
-				System.IO.File.AppendAllLines(file, new[] { now + " " + ex });
+				System.IO.File.AppendAllLines(file, new[] { ex });
+                WriteConsole();
 			}
 			// captures exception, now
 			void WriteConsole() {
