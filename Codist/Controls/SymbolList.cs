@@ -348,12 +348,14 @@ namespace Codist.Controls
 			base.OnMouseEnter(e);
 			if (_SymbolTip.Tag == null) {
 				_SymbolTip.Tag = DateTime.Now;
+				SizeChanged += SizeChanged_RelocateToolTip;
 				MouseMove += MouseMove_ChangeToolTip;
 				MouseLeave += MouseLeave_HideToolTip;
 			}
 		}
 
 		void MouseLeave_HideToolTip(object sender, MouseEventArgs e) {
+			SizeChanged -= SizeChanged_RelocateToolTip;
 			MouseMove -= MouseMove_ChangeToolTip;
 			MouseLeave -= MouseLeave_HideToolTip;
 			_SymbolTip.IsOpen = false;
@@ -365,6 +367,13 @@ namespace Codist.Controls
 			var li = GetMouseEventTarget(e);
 			if (li != null && _SymbolTip.Tag != li) {
 				await ShowToolTipForItemAsync(li);
+			}
+		}
+
+		void SizeChanged_RelocateToolTip(object sender, SizeChangedEventArgs e) {
+			if (_SymbolTip.IsOpen) {
+				_SymbolTip.IsOpen = false;
+				_SymbolTip.IsOpen = true;
 			}
 		}
 
@@ -403,9 +412,10 @@ namespace Codist.Controls
 				return ToolTipFactory.CreateToolTip(item.Symbol, false, SemanticContext.SemanticModel.Compilation);
 			}
 			return null;
-		} 
+		}
 		#endregion
 
+		#region ISymbolFilterable
 		SymbolFilterKind ISymbolFilterable.SymbolFilterKind {
 			get => ContainerType == SymbolListType.TypeList ? SymbolFilterKind.Type : SymbolFilterKind.Member;
 		}
@@ -456,6 +466,7 @@ namespace Codist.Controls
 				};
 			}
 		}
+		#endregion
 
 		#region Drag and drop
 		protected override void OnPreviewMouseLeftButtonDown(MouseButtonEventArgs e) {
