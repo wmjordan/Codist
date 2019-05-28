@@ -60,6 +60,10 @@ namespace Codist.Controls
 			OnClick();
 		}
 
+		internal void Highlight(bool highlight) {
+			IsHighlighted = highlight;
+		}
+
 		void HeaderKeyUp(object sender, KeyEventArgs args) {
 			switch (args.Key) {
 				case Key.Enter:

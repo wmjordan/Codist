@@ -33,6 +33,7 @@ namespace Codist.NaviBar
 		RootItem _RootItem;
 		NodeItem _MouseHoverItem;
 		SymbolList _SymbolList;
+		ThemedMenuItem _ActiveItem;
 
 		public CSharpBar(IWpfTextView textView) {
 			_View = textView;
@@ -219,24 +220,45 @@ namespace Codist.NaviBar
 			list.MouseLeftButtonUp += MenuItemSelect;
 		}
 
-		void ShowMenu(Visual visual, SymbolList menu) {
+		void ShowMenu(ThemedMenuItem barItem, SymbolList menu) {
 			if (_SymbolList != menu) {
 				_SymbolListContainer.Children.Clear();
 				_SymbolListContainer.Add(menu);
 				_SymbolList = menu;
+				_ActiveItem?.Highlight(false);
 			}
+			_ActiveItem = barItem;
+			_ActiveItem.Highlight(true);
 			menu.ItemsControlMaxHeight = _View.ViewportHeight / 2;
 			menu.RefreshItemsSource();
 			menu.ScrollToSelectedItem();
 			menu.PreviewKeyUp -= OnMenuKeyUp;
 			menu.PreviewKeyUp += OnMenuKeyUp;
-			Canvas.SetLeft(menu, visual.TransformToVisual(_View.VisualElement).Transform(new Point()).X);
-			Canvas.SetTop(menu, 0);
+			PositionMenu();
+		}
+
+		void PositionMenu() {
+			Canvas.SetLeft(_SymbolList, _ActiveItem.TransformToVisual(_View.VisualElement).Transform(new Point()).X);
+			Canvas.SetTop(_SymbolList, -1);
 		}
 
 		void OnMenuKeyUp(object sender, KeyEventArgs e) {
 			if (e.Key == Key.Escape) {
 				HideMenu();
+				e.Handled = true;
+			}
+			else if (e.Key == Key.Tab && _ActiveItem != null) {
+				int i;
+				if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift)) {
+					if ((i = Items.IndexOf(_ActiveItem)) > 0) {
+						((ThemedMenuItem)Items[i - 1]).PerformClick();
+					}
+				}
+				else {
+					if ((i = Items.IndexOf(_ActiveItem)) < Items.Count - 1) {
+						((ThemedMenuItem)Items[i + 1]).PerformClick();
+					}
+				}
 				e.Handled = true;
 			}
 		}
@@ -246,6 +268,8 @@ namespace Codist.NaviBar
 				_SymbolListContainer.Clear();
 				_SymbolList.SelectedItem = null;
 				_SymbolList = null;
+				_ActiveItem?.Highlight(false);
+				_ActiveItem = null;
 			}
 		}
 
