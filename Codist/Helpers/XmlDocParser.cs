@@ -213,7 +213,6 @@ namespace Codist
 					InheritDocumentation(item, querySymbol);
 				}
 			}
-			return;
 		}
 
 		bool AddInheritedDocFromSymbol(ISymbol symbol) {

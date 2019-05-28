@@ -14,7 +14,7 @@ namespace Codist
 		const int LIST_UNDEFINED = -1, LIST_BULLET = -2, LIST_NOT_NUMERIC = -3;
 		const int BLOCK_PARA = 0, BLOCK_ITEM = 1, BLOCK_OTHER = 2;
 
-		static readonly Regex _FixWhitespaces = new Regex(@" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+		static readonly Regex _FixWhitespaces = new Regex(" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 		readonly Compilation _Compilation;
 		readonly SymbolFormatter _SymbolFormatter;
 		readonly ISymbol _Symbol;
@@ -66,11 +66,11 @@ namespace Codist
 								break;
 							case "para":
 								var isOnlyChildOfItem = list != null && e.Parent.Name == "item" && e.Parent.FirstNode == e.Parent.LastNode && e.Parent.FirstNode == item;
-								if (inlines.FirstInline != null && isOnlyChildOfItem == false) {
-									inlines.AppendLineWithMargin();
+								if (isOnlyChildOfItem) {
 									ParagraphCount++;
 								}
-								if (isOnlyChildOfItem) {
+								else if (inlines.FirstInline != null) {
+									inlines.AppendLineWithMargin();
 									ParagraphCount++;
 								}
 								InternalRender(e, inlines, list);
@@ -150,6 +150,12 @@ namespace Codist
 						inlines.Add(new Run(item.ToString()));
 						break;
 				}
+			}
+			var lastNode = content.LastNode;
+			if (lastNode != null
+				&& (lastNode.NodeType != XmlNodeType.Element || ((XElement)lastNode).Name != "para")
+				&& (lastNode.PreviousNode as XElement)?.Name == "para") {
+				ParagraphCount++;
 			}
 		}
 
