@@ -191,7 +191,9 @@ namespace Codist
 				var doc = Document.Project.Solution.GetDocument(node.SyntaxTree);
 				if (doc == null) {
 					var nodeFilePath = node.SyntaxTree.FilePath;
-					doc = Document.FilePath == nodeFilePath ? Document : Document.Project.Documents.FirstOrDefault(d => String.Equals(d.FilePath, nodeFilePath, StringComparison.OrdinalIgnoreCase));
+					doc = Document.FilePath == nodeFilePath
+						? Document
+						: Document.Project.Documents.FirstOrDefault(d => String.Equals(d.FilePath, nodeFilePath, StringComparison.OrdinalIgnoreCase));
 					if (doc == null) {
 						return null;
 					}

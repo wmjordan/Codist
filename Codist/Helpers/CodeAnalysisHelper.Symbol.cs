@@ -38,24 +38,16 @@ namespace Codist
 	{
 		#region Symbol finder
 		public static ISymbol GetSymbol(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
-			var info = semanticModel.GetSymbolInfo(node, cancellationToken);
-			if (info.Symbol != null) {
-				return info.Symbol;
-			}
-			var symbol = semanticModel.GetDeclaredSymbol(node, cancellationToken);
-			if (symbol != null) {
-				return symbol;
-			}
-			var type = semanticModel.GetTypeInfo(node, cancellationToken);
-			if (type.Type != null) {
-				return type.Type;
-			}
-			return null;
+			return semanticModel.GetSymbolInfo(node, cancellationToken).Symbol
+				?? semanticModel.GetDeclaredSymbol(node, cancellationToken)
+				?? semanticModel.GetTypeInfo(node, cancellationToken).Type;
 		}
+
 		public static ISymbol GetSymbolExt(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
-			return node.IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator ? semanticModel.GetDeclaredSymbol(node, cancellationToken) :
-					(node is AttributeArgumentSyntax
-						? semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression, cancellationToken).Symbol
+			return node.IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator
+				? semanticModel.GetDeclaredSymbol(node, cancellationToken)
+				: (node is AttributeArgumentSyntax
+						? semanticModel.GetSymbolInfo(((AttributeArgumentSyntax)node).Expression, cancellationToken).Symbol
 						: null)
 					?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax
 						? semanticModel.GetSymbolInfo(node.FindNode(node.Span, false, true), cancellationToken).Symbol
@@ -67,7 +59,7 @@ namespace Codist
 						? semanticModel.GetSymbolInfo(node.Parent, cancellationToken).CandidateSymbols.FirstOrDefault()
 						: null)
 					?? (node.Parent is ArgumentSyntax
-						? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression, cancellationToken).CandidateSymbols.FirstOrDefault()
+						? semanticModel.GetSymbolInfo(((ArgumentSyntax)node.Parent).Expression, cancellationToken).CandidateSymbols.FirstOrDefault()
 						: null)
 					?? (node is AccessorDeclarationSyntax
 						? semanticModel.GetDeclaredSymbol(node.Parent.Parent, cancellationToken)

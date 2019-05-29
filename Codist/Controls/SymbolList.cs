@@ -530,18 +530,19 @@ namespace Codist.Controls
 
 		void DragOverHandler(object sender, DragEventArgs e) {
 			var li = GetDragEventTarget(e);
-			SymbolItem item, d;
-			if (li != null && (item = li.Content as SymbolItem)?.SyntaxNode != null
-				&& (d = GetDragData(e)) != null && d != item
-				&& (d.SyntaxNode.SyntaxTree.FilePath != item.SyntaxNode.SyntaxTree.FilePath
-					|| d.SyntaxNode.Span.IntersectsWith(item.SyntaxNode.Span) == false)) {
+			SymbolItem target, source;
+			// todo Enable dragging child before parent node
+			if (li != null && (target = li.Content as SymbolItem)?.SyntaxNode != null
+				&& (source = GetDragData(e)) != null && source != target
+				&& (source.SyntaxNode.SyntaxTree.FilePath != target.SyntaxNode.SyntaxTree.FilePath
+					|| source.SyntaxNode.Span.IntersectsWith(target.SyntaxNode.Span) == false)) {
 				var copy = e.KeyStates.MatchFlags(DragDropKeyStates.ControlKey);
 				e.Effects = copy ? DragDropEffects.Copy : DragDropEffects.Move;
 				var t = Footer as TextBlock;
 				if (t != null) {
 					t.Text = (copy ? "Copy " : "Move ")
 						+ (e.GetPosition(li).Y < li.ActualHeight / 2 ? "before " : "after ")
-						+ item.SyntaxNode.GetDeclarationSignature();
+						+ target.SyntaxNode.GetDeclarationSignature();
 				}
 			}
 			else {

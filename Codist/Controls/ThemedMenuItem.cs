@@ -8,10 +8,10 @@ namespace Codist.Controls
 {
 	public class ThemedMenuItem : MenuItem
 	{
-		public static readonly DependencyProperty SubMenuHeaderProperty = DependencyProperty.Register("SubMenuHeader", typeof(object), typeof(ThemedMenuItem));
+		public static readonly DependencyProperty SubMenuHeaderProperty = DependencyProperty.Register("SubMenuHeader", typeof(FrameworkElement), typeof(ThemedMenuItem));
 		public static readonly DependencyProperty SubMenuMaxHeightProperty = DependencyProperty.Register("SubMenuMaxHeight", typeof(double), typeof(ThemedMenuItem));
 
-		object _SubMenuHeader;
+		FrameworkElement _SubMenuHeader;
 
 		public ThemedMenuItem() {
 			SubMenuMaxHeight = 300;
@@ -19,16 +19,16 @@ namespace Codist.Controls
 		}
 
 		/// <summary>Gets or sets the header of the pop up submenu. If the header is set and no sub items are in the menu, an invisible <see cref="Separator"/> will be added to make the menu possible to popup when it is clicked.</summary>
-		public object SubMenuHeader {
+		public FrameworkElement SubMenuHeader {
 			get => _SubMenuHeader;
 			set {
 				if (value != null) {
 					if (HasItems == false) {
 						Items.Add(new MenuItemPlaceHolder());
 					}
-					(value as FrameworkElement).KeyUp += HeaderKeyUp;
+					value.KeyUp += HeaderKeyUp;
 				}
-				var h = _SubMenuHeader as FrameworkElement;
+				var h = _SubMenuHeader;
 				if (_SubMenuHeader != h && h != null) {
 					h.KeyUp -= HeaderKeyUp;
 				}
