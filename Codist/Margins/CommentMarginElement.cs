@@ -122,7 +122,7 @@ namespace Codist.Margins
 					}
 					else if (t.Start > change.OldEnd) {
 						// shift positions of remained items
-						t.Start += change.Delta;
+						t.Shift(change.Delta);
 					}
 				}
 			}
@@ -184,10 +184,7 @@ namespace Codist.Margins
 		/// <param name="drawingContext">The <see cref="DrawingContext"/> used to render the margin.</param>
 		protected override void OnRender(DrawingContext drawingContext) {
 			base.OnRender(drawingContext);
-			if (_TextView.IsClosed) {
-				return;
-			}
-			if (_Tags.Tags.Count > 0) {
+			if (_TextView.IsClosed == false && _Tags.Tags.Count > 0) {
 				DrawMarkers(drawingContext);
 			}
 		}
@@ -195,7 +192,7 @@ namespace Codist.Margins
 		void DrawMarkers(DrawingContext drawingContext) {
 			var lastY = 0.0;
 			Brush lastBrush = null;
-			var tags = new List<SpanTag>(_Tags.Tags);
+			var tags = new List<TaggedContentSpan>(_Tags.Tags);
 			tags.Sort((x, y) => x.Start - y.Start);
 			var snapshot = _TextView.TextSnapshot;
 			var snapshotLength = snapshot.Length;

@@ -33,7 +33,7 @@ namespace Codist.Classifiers
 
 	sealed class CSharpBlockTagger : ITagger<ICodeMemberTag>, IReuseableTagger
 	{
-		ITextBuffer _buffer;
+		readonly ITextBuffer _buffer;
 		int _refCount;
 		CodeBlock _root;
 		CancellationTokenSource _Cancellation;

@@ -86,10 +86,10 @@ namespace Codist.Classifiers
 							}
 							switch (node.Kind()) {
 								case SyntaxKind.BreakStatement:
-									if (node.Parent is SwitchSectionSyntax == false) {
-										goto case SyntaxKind.ReturnStatement;
+									if (node.Parent is SwitchSectionSyntax) {
+										continue;
 									}
-									continue;
+									goto case SyntaxKind.ReturnStatement;
 								// highlights: return, yield return, yield break, throw and continue
 								case SyntaxKind.ReturnKeyword:
 								case SyntaxKind.GotoCaseStatement:

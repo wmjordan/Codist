@@ -307,7 +307,9 @@ namespace Codist
 		}
 
 		public static void ExecuteEditorCommand(string command, string args = "") {
+#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 			CodistPackage.DTE.TryExecuteCommand(command, args);
+#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 		}
 
 		public static void OpenFile(this EnvDTE.DTE dte, string file, Action<EnvDTE.Document> action) {
@@ -328,7 +330,9 @@ namespace Codist
 			}
 		}
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
+#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 			dte.OpenFile(file, d => ((EnvDTE.TextSelection)d.Selection).MoveToLineAndOffset(line, column));
+#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 		}
 
 		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
@@ -351,6 +355,56 @@ namespace Codist
 			}
 			var textView = GetIVsTextView(service, doc.FullName);
 			return textView == null ? null : GetWpfTextView(textView);
+		}
+
+		public static (string platformName, string configName) GetActiveBuildConfiguration() {
+#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
+			return GetActiveBuildConfiguration(CodistPackage.DTE.ActiveDocument);
+#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
+		}
+		public static void SetActiveBuildConfiguration(string configName) {
+#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
+			SetActiveBuildConfiguration(CodistPackage.DTE.ActiveDocument, configName);
+#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
+		}
+
+		public static List<string> GetBuildConfigNames() {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			var configs = new List<string>();
+			foreach (EnvDTE80.SolutionConfiguration2 conf in CodistPackage.DTE.Solution.SolutionBuild.SolutionConfigurations) {
+				foreach (EnvDTE.SolutionContext context in conf.SolutionContexts) {
+					if (configs.Contains(context.ConfigurationName) == false) {
+						configs.Add(context.ConfigurationName);
+					}
+				}
+			}
+			return configs;
+		}
+
+		public static (string platformName, string configName) GetActiveBuildConfiguration(EnvDTE.Document document) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			var pn = document.ProjectItem.ContainingProject.UniqueName;
+			foreach (EnvDTE80.SolutionConfiguration2 conf in CodistPackage.DTE.Solution.SolutionBuild.SolutionConfigurations) {
+				foreach (EnvDTE.SolutionContext context in conf.SolutionContexts) {
+					if (context.ProjectName == pn) {
+						return (conf.PlatformName, context.ConfigurationName);
+					}
+				}
+			}
+			return default;
+		}
+
+		public static void SetActiveBuildConfiguration(EnvDTE.Document document, string configName) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			var pn = document.ProjectItem.ContainingProject.UniqueName;
+			foreach (EnvDTE80.SolutionConfiguration2 conf in CodistPackage.DTE.Solution.SolutionBuild.SolutionConfigurations) {
+				foreach (EnvDTE.SolutionContext context in conf.SolutionContexts) {
+					if (context.ProjectName == pn) {
+						context.ConfigurationName = configName;
+						return;
+					}
+				}
+			}
 		}
 
 		public static EnvDTE.Project GetProject(string projectName) {
