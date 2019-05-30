@@ -91,7 +91,15 @@ namespace Codist.Controls
 			if (SelectedIndex == -1) {
 				return;
 			}
-			UpdateLayout();
+			try {
+				UpdateLayout();
+			}
+			catch (InvalidOperationException) {
+				// ignore
+#if DEBUG
+				throw;
+#endif
+			}
 			ScrollIntoView(ItemContainerGenerator.Items[SelectedIndex]);
 		}
 
