@@ -13,6 +13,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text.Outlining;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Codist.Margins
 {
@@ -153,7 +155,7 @@ namespace Codist.Margins
 			readonly IVerticalScrollBar _ScrollBar;
 
 			IEnumerable<IMappingTagSpan<ICodeMemberTag>> _Tags;
-			List<ICollapsible> _Regions;
+			List<DirectiveTriviaSyntax> _Regions;
 			ITagAggregator<ICodeMemberTag> _CodeMemberTagger;
 			readonly CSharpMembersMargin _Element;
 
@@ -196,8 +198,8 @@ namespace Codist.Margins
 				try {
 					CancellationHelper.CancelAndDispose(ref _Element._Cancellation, true);
 					var ct = _Element._Cancellation.GetToken();
-					await Task.Run(TagDocument, ct);
-					_Regions = TagRegions(ct);
+					await Task.Run(TagDocument, ct).ConfigureAwait(true);
+					_Regions = TagRegions();
 					if (ct.IsCancellationRequested) {
 						return;
 					}
@@ -220,22 +222,10 @@ namespace Codist.Margins
 				_Tags = new List<IMappingTagSpan<ICodeMemberTag>>(tagger.GetTags(new SnapshotSpan(snapshot, 0, snapshot.Length)));
 			}
 
-			List<ICollapsible> TagRegions(CancellationToken cancellationToken) {
-				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.RegionDirective) == false
-					|| _Element._SemanticContext.Compilation == null) {
-					return null;
-				}
-				var ts = _TextView.TextSnapshot;
-				List<ICollapsible> regions = null;
-				foreach (var region in _Element._SemanticContext.GetRegions(new SnapshotSpan(ts, 0, ts.Length)) ?? Array.Empty<ICollapsible>()) {
-					if (cancellationToken.IsCancellationRequested) {
-						return null;
-					}
-					if (_Element._SemanticContext.Compilation.FindTrivia(region.Extent.GetStartPoint(ts)).IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.RegionDirectiveTrivia)) {
-						(regions ?? (regions = new List<ICollapsible>())).Add(region);
-					}
-				}
-				return regions;
+			List<DirectiveTriviaSyntax> TagRegions() {
+				return Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.RegionDirective)
+					? _Element._SemanticContext.Compilation?.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia))
+					: null;
 			}
 
 			internal void Render(DrawingContext drawingContext) {
@@ -248,17 +238,15 @@ namespace Codist.Margins
 				var regions = _Regions;
 				FormattedText text;
 				if (regions != null && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.RegionDirective)) {
-					foreach (var region in regions) {
-						var s = region.CollapsedForm as string;
+					foreach (RegionDirectiveTriviaSyntax region in regions) {
+						var s = region.GetDeclarationSignature();
 						if (s != null) {
 							text = WpfHelper.ToFormattedText(s, labelSize, _Element._RegionForeground);
-							var p = new Point(5, _ScrollBar.GetYCoordinateOfBufferPosition(region.Extent.GetStartPoint(snapshot)) - text.Height / 2);
+							var p = new Point(5, _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, region.SpanStart)) - text.Height / 2);
 							if (_Element._RegionBackground != null) {
 								drawingContext.DrawRectangle(_Element._RegionBackground, null, new Rect(p, new Size(text.Width, text.Height)));
 							}
 							drawingContext.DrawText(text, p);
-							p = new Point(0, _ScrollBar.GetYCoordinateOfBufferPosition(region.Extent.GetEndPoint(snapshot)));
-							drawingContext.DrawLine(_Element._RegionPen, p, new Point(_ScrollBar.ThumbHeight, p.Y));
 						}
 					}
 				}
