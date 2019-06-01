@@ -44,7 +44,7 @@ namespace Codist.Controls
 			//	item.MouseEnter -= SuppressQuickInfo;
 			//}
 			Children.Clear();
-			//_View.Properties.RemoveProperty(nameof(ExternalAdornment));
+			_View.Properties.RemoveProperty(nameof(ExternalAdornment));
 			_View.VisualElement.Focus();
 		}
 
