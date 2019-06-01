@@ -44,11 +44,12 @@ namespace Codist.Classifiers
 		public SnapshotSpan Span => new SnapshotSpan(TextSnapshot, Start, Length);
 		public int Start { get; private set; }
 		public int Length { get; }
-		public int ContentOffset { get; }
-		public int ContentLength { get; }
+		public int ContentOffset { get; private set; }
+		public int ContentLength { get; private set; }
 
 		public int End => Start + Length;
-		public string Text => Span.GetText();
+		public string Text => TextSnapshot.GetText(Start, Length);
+		public string ContentText => TextSnapshot.GetText(Start + ContentOffset, ContentLength);
 
 		public ITextSnapshot TextSnapshot { get; }
 
@@ -66,6 +67,11 @@ namespace Codist.Classifiers
 		}
 		public void Shift(int delta) {
 			Start += delta;
+		}
+
+		public void SetContent(int start, int length) {
+			ContentOffset = start;
+			ContentLength = length;
 		}
 	}
 }

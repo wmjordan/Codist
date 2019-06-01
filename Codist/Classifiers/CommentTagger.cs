@@ -49,9 +49,9 @@ namespace Codist.Classifiers
 
 		void TextViewClosed(object sender, EventArgs args) {
 			var textView = sender as ITextView;
+			textView.Closed -= TextViewClosed;
 			textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>(typeof(ITagAggregator<IClassificationTag>))?.Dispose();
 			textView.Properties.GetProperty<CommentTagger>(typeof(CommentTagger))?.Dispose();
-			textView.Closed -= TextViewClosed;
 		}
 
 		abstract class CommentTagger : ITagger<IClassificationTag>, IDisposable
@@ -171,11 +171,11 @@ namespace Codist.Classifiers
 					}
 				}
 
-				var endOfContent = GetCommentEndIndex(text);
+				var contentEnd = GetCommentEndIndex(text);
 
 				ClassificationTag ctag = null;
 				CommentLabel label = null;
-				var startOfContent = 0;
+				var contentStart = 0;
 				foreach (var item in Config.Instance.Labels) {
 					var c = commentStart + item.LabelLength;
 					if (c >= tl
@@ -194,26 +194,26 @@ namespace Codist.Classifiers
 					if (label == null || label.LabelLength < item.LabelLength) {
 						ctag = __CommentClassifications[(int)item.StyleID];
 						label = item;
-						startOfContent = c;
+						contentStart = c;
 					}
 				}
 
-				if (startOfContent == 0 || ctag == null) {
+				if (contentStart == 0 || ctag == null) {
 					return null;
 				}
 
 				// ignore whitespaces in content
-				while (startOfContent < tl) {
-					if (Char.IsWhiteSpace(text[startOfContent])) {
-						++startOfContent;
+				while (contentStart < tl) {
+					if (Char.IsWhiteSpace(text[contentStart])) {
+						++contentStart;
 					}
 					else {
 						break;
 					}
 				}
-				while (endOfContent > startOfContent) {
-					if (Char.IsWhiteSpace(text[endOfContent - 1])) {
-						--endOfContent;
+				while (contentEnd > contentStart) {
+					if (Char.IsWhiteSpace(text[contentEnd - 1])) {
+						--contentEnd;
 					}
 					else {
 						break;
@@ -221,10 +221,10 @@ namespace Codist.Classifiers
 				}
 
 				return label.StyleApplication == CommentStyleApplication.Tag
-					? new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + commentStart, label.LabelLength, startOfContent, endOfContent - startOfContent)
+					? new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + commentStart, label.LabelLength, contentStart - commentStart, contentEnd - contentStart)
 					: label.StyleApplication == CommentStyleApplication.Content
-					? new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + startOfContent, endOfContent - startOfContent, startOfContent, endOfContent - startOfContent)
-					: new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + commentStart, endOfContent - commentStart, startOfContent, endOfContent - startOfContent);
+					? new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + contentStart, contentEnd - contentStart, contentStart - commentStart, contentEnd - contentStart)
+					: new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + commentStart, contentEnd - commentStart, contentStart - commentStart, contentEnd - contentStart);
 			}
 
 			protected static bool Matches(SnapshotSpan span, string text) {
@@ -258,9 +258,7 @@ namespace Codist.Classifiers
 			}
 
 			void AggregatorBatchedTagsChanged(object sender, EventArgs args) {
-				if (Margin != null) {
-					Margin.InvalidateVisual();
-				}
+				Margin?.InvalidateVisual();
 			}
 
 			#region IDisposable Support
@@ -313,6 +311,7 @@ namespace Codist.Classifiers
 		sealed class CSharpCommentTagger : CommentTagger
 		{
 			readonly IClassificationType _PreprocessorKeyword;
+			TaggedContentSpan _PreviousSpan;
 
 			public CSharpCommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) : base(registry, aggregator, tags) {
 				_PreprocessorKeyword = registry.GetClassificationType("preprocessor keyword");
@@ -320,14 +319,8 @@ namespace Codist.Classifiers
 			protected override TaggedContentSpan TagComments(SnapshotSpan snapshotSpan, IMappingTagSpan<IClassificationTag> tagSpan) {
 				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)
 					&& tagSpan.Tag.ClassificationType == _PreprocessorKeyword) {
-					return Matches(snapshotSpan, "region")
-						? null
-						: Matches(snapshotSpan, "pragma")
-						? new TaggedContentSpan(snapshotSpan.Snapshot, tagSpan.Tag, snapshotSpan.Start, snapshotSpan.Span.Length, 6, snapshotSpan.Span.Length - 6)
-						: Matches(snapshotSpan, "if")
-						? new TaggedContentSpan(snapshotSpan.Snapshot, tagSpan.Tag, snapshotSpan.Start, snapshotSpan.Span.Length, 2, snapshotSpan.Span.Length - 2)
-						: Matches(snapshotSpan, "else")
-						? new TaggedContentSpan(snapshotSpan.Snapshot, tagSpan.Tag, snapshotSpan.Start, snapshotSpan.Span.Length, 4, snapshotSpan.Span.Length - 4)
+					return Matches(snapshotSpan, "pragma") || Matches(snapshotSpan, "if") || Matches(snapshotSpan, "else") /*|| Matches(snapshotSpan, "region")*/
+						? new TaggedContentSpan(snapshotSpan.Snapshot, tagSpan.Tag, snapshotSpan.Start, snapshotSpan.Length, 0, 0)
 						: null;
 				}
 				return base.TagComments(snapshotSpan, tagSpan);
