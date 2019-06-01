@@ -66,7 +66,7 @@
 			this._SyntaxListBox.Name = "_SyntaxListBox";
 			this._SyntaxListBox.ShowGroups = false;
 			this._SyntaxListBox.ShowItemToolTips = true;
-			this._SyntaxListBox.Size = new System.Drawing.Size(239, 263);
+			this._SyntaxListBox.Size = new System.Drawing.Size(239, 257);
 			this._SyntaxListBox.TabIndex = 1;
 			this._SyntaxListBox.UseCompatibleStateImageBehavior = false;
 			this._SyntaxListBox.View = System.Windows.Forms.View.Details;

@@ -28,12 +28,16 @@
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SyntaxStyleOptionPage));
 			this.label1 = new System.Windows.Forms.Label();
 			this._StyleSettingsBox = new System.Windows.Forms.GroupBox();
+			this._BackgroundOpacityButton = new Codist.Options.PickOpacityButton();
+			this._ForegroundOpacityButton = new Codist.Options.PickOpacityButton();
 			this._ResetButton = new System.Windows.Forms.Button();
 			this.label2 = new System.Windows.Forms.Label();
 			this._BackgroundEffectBox = new System.Windows.Forms.ComboBox();
 			this._FontBox = new System.Windows.Forms.ComboBox();
 			this.label8 = new System.Windows.Forms.Label();
 			this._PreviewBox = new System.Windows.Forms.PictureBox();
+			this._BackColorButton = new Codist.Options.PickColorButton();
+			this._ForeColorButton = new Codist.Options.PickColorButton();
 			this._FontSizeBox = new System.Windows.Forms.NumericUpDown();
 			this.label4 = new System.Windows.Forms.Label();
 			this._StrikeBox = new System.Windows.Forms.CheckBox();
@@ -42,10 +46,6 @@
 			this._BoldBox = new System.Windows.Forms.CheckBox();
 			this._SyntaxListBox = new Codist.Options.SyntaxListView();
 			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-			this._BackgroundOpacityButton = new Codist.Options.PickOpacityButton();
-			this._ForegroundOpacityButton = new Codist.Options.PickOpacityButton();
-			this._BackColorButton = new Codist.Options.PickColorButton();
-			this._ForeColorButton = new Codist.Options.PickColorButton();
 			this._StyleSettingsBox.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._PreviewBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this._FontSizeBox)).BeginInit();
@@ -88,6 +88,26 @@
 			this._StyleSettingsBox.TabStop = false;
 			this._StyleSettingsBox.Text = "Syntax Style";
 			// 
+			// _BackgroundOpacityButton
+			// 
+			this._BackgroundOpacityButton.Location = new System.Drawing.Point(132, 163);
+			this._BackgroundOpacityButton.Name = "_BackgroundOpacityButton";
+			this._BackgroundOpacityButton.Size = new System.Drawing.Size(120, 23);
+			this._BackgroundOpacityButton.TabIndex = 21;
+			this._BackgroundOpacityButton.Text = "Opacity not set";
+			this._BackgroundOpacityButton.UseVisualStyleBackColor = true;
+			this._BackgroundOpacityButton.Value = ((byte)(0));
+			// 
+			// _ForegroundOpacityButton
+			// 
+			this._ForegroundOpacityButton.Location = new System.Drawing.Point(132, 134);
+			this._ForegroundOpacityButton.Name = "_ForegroundOpacityButton";
+			this._ForegroundOpacityButton.Size = new System.Drawing.Size(120, 23);
+			this._ForegroundOpacityButton.TabIndex = 21;
+			this._ForegroundOpacityButton.Text = "Opacity not set";
+			this._ForegroundOpacityButton.UseVisualStyleBackColor = true;
+			this._ForegroundOpacityButton.Value = ((byte)(0));
+			// 
 			// _ResetButton
 			// 
 			this._ResetButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -118,6 +138,8 @@
 			// 
 			// _FontBox
 			// 
+			this._FontBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this._FontBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this._FontBox.FormattingEnabled = true;
 			this._FontBox.Location = new System.Drawing.Point(66, 21);
@@ -145,6 +167,32 @@
 			this._PreviewBox.Size = new System.Drawing.Size(249, 186);
 			this._PreviewBox.TabIndex = 15;
 			this._PreviewBox.TabStop = false;
+			// 
+			// _BackColorButton
+			// 
+			this._BackColorButton.DefaultColor = System.Drawing.Color.Empty;
+			this._BackColorButton.Image = ((System.Drawing.Image)(resources.GetObject("_BackColorButton.Image")));
+			this._BackColorButton.Location = new System.Drawing.Point(6, 163);
+			this._BackColorButton.Name = "_BackColorButton";
+			this._BackColorButton.SelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+			this._BackColorButton.Size = new System.Drawing.Size(120, 23);
+			this._BackColorButton.TabIndex = 12;
+			this._BackColorButton.Text = "Background";
+			this._BackColorButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+			this._BackColorButton.UseVisualStyleBackColor = true;
+			// 
+			// _ForeColorButton
+			// 
+			this._ForeColorButton.DefaultColor = System.Drawing.Color.Empty;
+			this._ForeColorButton.Image = ((System.Drawing.Image)(resources.GetObject("_ForeColorButton.Image")));
+			this._ForeColorButton.Location = new System.Drawing.Point(6, 134);
+			this._ForeColorButton.Name = "_ForeColorButton";
+			this._ForeColorButton.SelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+			this._ForeColorButton.Size = new System.Drawing.Size(120, 23);
+			this._ForeColorButton.TabIndex = 8;
+			this._ForeColorButton.Text = "Foreground";
+			this._ForeColorButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+			this._ForeColorButton.UseVisualStyleBackColor = true;
 			// 
 			// _FontSizeBox
 			// 
@@ -226,7 +274,7 @@
 			this._SyntaxListBox.MultiSelect = false;
 			this._SyntaxListBox.Name = "_SyntaxListBox";
 			this._SyntaxListBox.ShowItemToolTips = true;
-			this._SyntaxListBox.Size = new System.Drawing.Size(239, 396);
+			this._SyntaxListBox.Size = new System.Drawing.Size(239, 390);
 			this._SyntaxListBox.TabIndex = 1;
 			this._SyntaxListBox.UseCompatibleStateImageBehavior = false;
 			this._SyntaxListBox.View = System.Windows.Forms.View.Details;
@@ -235,50 +283,6 @@
 			// 
 			this._NameColumn.Text = "Name";
 			this._NameColumn.Width = 200;
-			// 
-			// _BackgroundOpacityButton
-			// 
-			this._BackgroundOpacityButton.Location = new System.Drawing.Point(132, 163);
-			this._BackgroundOpacityButton.Name = "_BackgroundOpacityButton";
-			this._BackgroundOpacityButton.Size = new System.Drawing.Size(120, 23);
-			this._BackgroundOpacityButton.TabIndex = 21;
-			this._BackgroundOpacityButton.UseVisualStyleBackColor = true;
-			this._BackgroundOpacityButton.Value = ((byte)(0));
-			// 
-			// _ForegroundOpacityButton
-			// 
-			this._ForegroundOpacityButton.Location = new System.Drawing.Point(132, 134);
-			this._ForegroundOpacityButton.Name = "_ForegroundOpacityButton";
-			this._ForegroundOpacityButton.Size = new System.Drawing.Size(120, 23);
-			this._ForegroundOpacityButton.TabIndex = 21;
-			this._ForegroundOpacityButton.UseVisualStyleBackColor = true;
-			this._ForegroundOpacityButton.Value = ((byte)(0));
-			// 
-			// _BackColorButton
-			// 
-			this._BackColorButton.DefaultColor = System.Drawing.Color.Empty;
-			this._BackColorButton.Image = ((System.Drawing.Image)(resources.GetObject("_BackColorButton.Image")));
-			this._BackColorButton.Location = new System.Drawing.Point(6, 163);
-			this._BackColorButton.Name = "_BackColorButton";
-			this._BackColorButton.SelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-			this._BackColorButton.Size = new System.Drawing.Size(120, 23);
-			this._BackColorButton.TabIndex = 12;
-			this._BackColorButton.Text = "Background";
-			this._BackColorButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-			this._BackColorButton.UseVisualStyleBackColor = true;
-			// 
-			// _ForeColorButton
-			// 
-			this._ForeColorButton.DefaultColor = System.Drawing.Color.Empty;
-			this._ForeColorButton.Image = ((System.Drawing.Image)(resources.GetObject("_ForeColorButton.Image")));
-			this._ForeColorButton.Location = new System.Drawing.Point(6, 134);
-			this._ForeColorButton.Name = "_ForeColorButton";
-			this._ForeColorButton.SelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-			this._ForeColorButton.Size = new System.Drawing.Size(120, 23);
-			this._ForeColorButton.TabIndex = 8;
-			this._ForeColorButton.Text = "Foreground";
-			this._ForeColorButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-			this._ForeColorButton.UseVisualStyleBackColor = true;
 			// 
 			// SyntaxStyleOptionPage
 			// 
