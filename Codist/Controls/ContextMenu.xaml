@@ -3,7 +3,8 @@
 	xmlns:c="clr-namespace:Codist.Controls;assembly=Codist"
 	xmlns:vsp="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0">
 	<!-- Separator -->
-	<Style x:Key="{x:Type Separator}" TargetType="{x:Type Separator}">
+	<Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="{x:Type Separator}">
+		<Setter Property="OverridesDefaultStyle" Value="True"/>
 		<Setter Property="Height" Value="1"/>
 		<Setter Property="Margin" Value="0,4,0,4"/>
 		<Setter Property="Template">
@@ -34,6 +35,20 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type ContextMenu}">
+					<!--Here is where you change the border thickness to zero on the menu-->
+					<Border BorderThickness="1,1,1,1" x:Name="Border" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}">
+						<StackPanel ClipToBounds="True" Orientation="Vertical" IsItemsHost="True" Margin="3"/>
+					</Border>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+	<Style TargetType="{x:Type c:CSharpSymbolContextMenu}">
+		<Setter Property="OverridesDefaultStyle" Value="True"/>
+		<Setter Property="SnapsToDevicePixels" Value="True"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type c:CSharpSymbolContextMenu}">
 					<!--Here is where you change the border thickness to zero on the menu-->
 					<Border BorderThickness="1,1,1,1" x:Name="Border" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}">
 						<StackPanel ClipToBounds="True" Orientation="Vertical" IsItemsHost="True" Margin="3"/>

@@ -38,7 +38,7 @@ namespace Codist.NaviBar
 		public CSharpBar(IWpfTextView textView) {
 			_View = textView;
 			_SyntaxNodeRangeAdornment = _View.GetAdornmentLayer(SyntaxNodeRange);
-			_SymbolListContainer = new ExternalAdornment(_View);
+			_SymbolListContainer = _View.Properties.GetOrCreateSingletonProperty(() => new ExternalAdornment(textView));
 			_SemanticContext = SemanticContext.GetOrCreateSingetonInstance(textView);
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			textView.Properties.AddProperty(nameof(NaviBar), this);
@@ -100,7 +100,7 @@ namespace Codist.NaviBar
 			}
 		}
 
-		void HighlightNodeRanges(SyntaxNode node, Microsoft.VisualStudio.Text.SnapshotSpan span) {
+		void HighlightNodeRanges(SyntaxNode node, SnapshotSpan span) {
 			_SyntaxNodeRangeAdornment.AddAdornment(span, null, new GeometryAdornment(ThemeHelper.MenuHoverBackgroundColor, _View.TextViewLines.GetMarkerGeometry(span), 3));
 			var p = _View.Caret.Position.BufferPosition;
 			if (span.Contains(p) == false) {
@@ -215,6 +215,11 @@ namespace Codist.NaviBar
 				}
 			}
 		}
+		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
+			base.OnRenderSizeChanged(sizeInfo);
+			PositionMenu();
+		}
+
 		void SetupSymbolListMenu(SymbolList list) {
 			list.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 			list.MouseLeftButtonUp += MenuItemSelect;
@@ -222,8 +227,8 @@ namespace Codist.NaviBar
 
 		void ShowMenu(ThemedMenuItem barItem, SymbolList menu) {
 			if (_SymbolList != menu) {
-				_SymbolListContainer.Children.Clear();
-				_SymbolListContainer.Add(menu);
+				_SymbolListContainer.Children.Remove(_SymbolList);
+				_SymbolListContainer.Children.Add(menu);
 				_SymbolList = menu;
 				_ActiveItem?.Highlight(false);
 			}
@@ -238,8 +243,10 @@ namespace Codist.NaviBar
 		}
 
 		void PositionMenu() {
-			Canvas.SetLeft(_SymbolList, _ActiveItem.TransformToVisual(_View.VisualElement).Transform(new Point()).X);
-			Canvas.SetTop(_SymbolList, -1);
+			if (_SymbolList != null) {
+				Canvas.SetLeft(_SymbolList, _ActiveItem.TransformToVisual(_View.VisualElement).Transform(new Point()).X);
+				Canvas.SetTop(_SymbolList, -1);
+			}
 		}
 
 		void OnMenuKeyUp(object sender, KeyEventArgs e) {
@@ -265,7 +272,7 @@ namespace Codist.NaviBar
 
 		void HideMenu() {
 			if (_SymbolList != null) {
-				_SymbolListContainer.Clear();
+				_SymbolListContainer.Children.Remove(_SymbolList);
 				_SymbolList.SelectedItem = null;
 				_SymbolList = null;
 				_ActiveItem?.Highlight(false);

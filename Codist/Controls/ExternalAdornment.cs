@@ -16,6 +16,7 @@ namespace Codist.Controls
 	sealed class ExternalAdornment : Canvas
 	{
 		readonly Microsoft.VisualStudio.Text.Editor.IWpfTextView _View;
+		int _LayerZIndex;
 
 		public ExternalAdornment(Microsoft.VisualStudio.Text.Editor.IWpfTextView view) {
 			UseLayoutRounding = true;
@@ -33,26 +34,50 @@ namespace Codist.Controls
 			_View = view;
 		}
 
+		public void FocusOnTextView() {
+			_View.VisualElement.Focus();
+		}
+
+		public void Clear() {
+			//foreach (UIElement item in Children) {
+			//	item.MouseLeave -= ReleaseQuickInfo;
+			//	item.MouseEnter -= SuppressQuickInfo;
+			//}
+			Children.Clear();
+			//_View.Properties.RemoveProperty(nameof(ExternalAdornment));
+			_View.VisualElement.Focus();
+		}
+
+		protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved) {
+			base.OnVisualChildrenChanged(visualAdded, visualRemoved);
+			var element = visualAdded as UIElement;
+			if (element != null) {
+				element.MouseLeave -= ReleaseQuickInfo;
+				element.MouseLeave += ReleaseQuickInfo;
+				element.MouseEnter -= SuppressQuickInfo;
+				element.MouseEnter += SuppressQuickInfo;
+				element.MouseLeftButtonDown -= BringToFront;
+				element.MouseLeftButtonDown += BringToFront;
+				SetZIndex(element, ++_LayerZIndex);
+			}
+			element = visualRemoved as UIElement;
+			if (element != null) {
+				element.MouseLeave -= ReleaseQuickInfo;
+				element.MouseEnter -= SuppressQuickInfo;
+				element.MouseLeftButtonDown -= BringToFront;
+			}
+			if (Children.Count == 0) {
+				_View.Properties.RemoveProperty(nameof(ExternalAdornment));
+			}
+		}
+
 		void VisualElement_Loaded(object sender, RoutedEventArgs e) {
 			_View.VisualElement.Loaded -= VisualElement_Loaded;
 			_View.VisualElement.GetParent<Grid>().Children.Add(this);
 		}
 
-		public void Add(UIElement element) {
-			Children.Add(element);
-			element.MouseLeave -= ReleaseQuickInfo;
-			element.MouseLeave += ReleaseQuickInfo;
-			element.MouseEnter -= SuppressQuickInfo;
-			element.MouseEnter += SuppressQuickInfo;
-		}
-		public void Clear() {
-			foreach (UIElement item in Children) {
-				item.MouseLeave -= ReleaseQuickInfo;
-				item.MouseEnter -= SuppressQuickInfo;
-			}
-			Children.Clear();
-			_View.Properties.RemoveProperty(nameof(ExternalAdornment));
-			_View.VisualElement.Focus();
+		void BringToFront(object sender, MouseButtonEventArgs e) {
+			SetZIndex(e.Source as UIElement, ++_LayerZIndex);
 		}
 
 		void ReleaseQuickInfo(object sender, MouseEventArgs e) {

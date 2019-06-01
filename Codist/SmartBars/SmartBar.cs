@@ -270,7 +270,7 @@ namespace Codist.SmartBars
 			View.VisualElement.MouseMove += ViewMouseMove;
 		}
 
-		void HideToolBar() {
+		protected void HideToolBar() {
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			View.VisualElement.MouseMove -= ViewMouseMove;
 			_LastShiftHit = DateTime.MinValue;

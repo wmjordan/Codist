@@ -19,10 +19,12 @@ namespace Codist.Controls
 {
 	sealed class SymbolList : ListBox, ISymbolFilterable {
 		public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(UIElement), typeof(SymbolList));
+		public static readonly DependencyProperty HeaderButtonsProperty = DependencyProperty.Register("HeaderButtons", typeof(UIElement), typeof(SymbolList));
 		public static readonly DependencyProperty FooterProperty = DependencyProperty.Register("Footer", typeof(UIElement), typeof(SymbolList));
 		public static readonly DependencyProperty ItemsControlMaxHeightProperty = DependencyProperty.Register("ItemsControlMaxHeight", typeof(double), typeof(SymbolList));
 		Predicate<object> _Filter;
 		readonly ToolTip _SymbolTip;
+		readonly CSharpSymbolContextMenu _ContextMenu;
 
 		public SymbolList(SemanticContext semanticContext) {
 			SetValue(VirtualizingPanel.IsVirtualizingProperty, true);
@@ -37,15 +39,20 @@ namespace Codist.Controls
 				Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 				PlacementTarget = this
 			};
-			ContextMenu = new ContextMenu {
+			ContextMenu = _ContextMenu = new CSharpSymbolContextMenu(semanticContext, false) {
 				Resources = SharedDictionaryManager.ContextMenu,
 				Foreground = ThemeHelper.ToolWindowTextBrush,
 				IsEnabled = true,
 			};
 		}
+
 		public UIElement Header {
 			get => GetValue(HeaderProperty) as UIElement;
 			set => SetValue(HeaderProperty, value);
+		}
+		public UIElement HeaderButtons {
+			get => GetValue(HeaderButtonsProperty) as UIElement;
+			set => SetValue(HeaderButtonsProperty, value);
 		}
 		public UIElement Footer {
 			get => GetValue(FooterProperty) as UIElement;
@@ -334,6 +341,10 @@ namespace Codist.Controls
 						// ignore failure
 					}
 				});
+				_ContextMenu.Items.Add(new Separator());
+				_ContextMenu.SyntaxNode = item.SyntaxNode;
+				_ContextMenu.Symbol = item.Symbol;
+				_ContextMenu.AddAnalysisCommands();
 			}
 		}
 

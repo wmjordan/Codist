@@ -30,12 +30,11 @@ namespace Codist.SmartBars
 		readonly bool _IsVsProject;
 		readonly ExternalAdornment _SymbolListContainer;
 		ISymbol _Symbol;
-		SymbolList _SymbolList;
 
 		public CSharpSmartBar(IWpfTextView view, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(view, textSearchService) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			_Context = SemanticContext.GetOrCreateSingetonInstance(view);
-			_SymbolListContainer = new ExternalAdornment(view);
+			_SymbolListContainer = view.Properties.GetOrCreateSingletonProperty(() => new ExternalAdornment(view));
 			View.Selection.SelectionChanged += ViewSeletionChanged;
 			var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];
 			if (extenders != null) {
@@ -58,11 +57,11 @@ namespace Codist.SmartBars
 		}
 
 		void HideMenu() {
-			if (_SymbolList != null) {
+			//if (_SymbolList != null) {
 				_SymbolListContainer.Clear();
-				_SymbolList.SelectedItem = null;
-				_SymbolList = null;
-			}
+			//	_SymbolList.SelectedItem = null;
+			//	_SymbolList = null;
+			//}
 		}
 
 		static CommandItem CreateCommandMenu(int imageId, string title, ISymbol symbol, string emptyMenuTitle, Action<CommandContext, MenuItem, ISymbol> itemPopulator) {
@@ -114,7 +113,23 @@ namespace Codist.SmartBars
 						if (node.IsKind(SyntaxKind.IdentifierName) || node.IsKind(SyntaxKind.GenericName)) {
 							AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition\nRight click: Peek definition", "Edit.PeekDefinition");
 						}
-						AddCommands(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze symbol...", GetReferenceCommandsAsync);
+						AddCommand(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze symbol...", ctx => {
+							ctx.KeepToolBar(false);
+							if (UpdateSemanticModel() == false) {
+								return;
+							}
+							var m = new CSharpSymbolContextMenu(_Context, _IsVsProject) {
+								Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
+								PlacementTarget = ctx.Sender,
+								Symbol = _Symbol,
+								SyntaxNode = node
+							};
+							m.ItemClicked += (s, args) => HideToolBar();
+							m.AddAnalysisCommands();
+							m.AddGoToAnyCommands();
+							ctx.Sender.ContextMenu = m;
+							m.IsOpen = true;
+						});
 						if (Classifiers.SymbolMarkManager.CanBookmark(_Symbol)) {
 							AddCommands(MyToolBar, KnownImageIds.FlagGroup, "Mark symbol...", null, GetMarkerCommands);
 						}
@@ -339,140 +354,6 @@ namespace Codist.SmartBars
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 
-		void FindCallers(CommandContext context, ISymbol source) {
-			var doc = _Context.Document;
-			var docs = System.Collections.Immutable.ImmutableHashSet.CreateRange(doc.Project.GetRelatedProjectDocuments());
-			List<SymbolCallerInfo> callers;
-			switch (source.Kind) {
-				case SymbolKind.Method:
-				case SymbolKind.Property:
-				case SymbolKind.Event:
-					callers = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindCallersAsync(source, doc.Project.Solution, docs, context.CancellationToken)).ToList();
-					break;
-				case SymbolKind.NamedType:
-					var tempResults = new HashSet<SymbolCallerInfo>(SymbolCallerInfoComparer.Instance);
-					ThreadHelper.JoinableTaskFactory.Run(async () => {
-						foreach (var item in (source as INamedTypeSymbol).InstanceConstructors) {
-							foreach (var c in await SymbolFinder.FindCallersAsync(item, doc.Project.Solution, docs, context.CancellationToken)) {
-								tempResults.Add(c);
-							}
-						}
-					});
-					(callers = new List<SymbolCallerInfo>(tempResults.Count)).AddRange(tempResults);
-					break;
-				default: return;
-			}
-			callers.Sort((a, b) => CodeAnalysisHelper.CompareSymbol(a.CallingSymbol, b.CallingSymbol));
-			var m = new SymbolMenu(this);
-			m.Title.SetGlyph(ThemeHelper.GetImage(source.GetImageId()))
-				.Append(source.ToDisplayString(WpfHelper.MemberNameFormat), true)
-				.Append(" callers");
-			var containerType = source.ContainingType;
-			foreach (var caller in callers) {
-				var s = caller.CallingSymbol;
-				var i = m.Menu.Add(s, false);
-				i.Location = caller.Locations.FirstOrDefault();
-				if (s.ContainingType != containerType) {
-					i.Hint = s.ContainingType.ToDisplayString(WpfHelper.MemberNameFormat);
-				}
-			}
-			m.Show();
-		}
-
-		void FindDerivedClasses(CommandContext context, ISymbol symbol) {
-			var classes = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, _Context.Document.Project.Solution, null, context.CancellationToken)).Cast<ISymbol>().ToList();
-			classes.Sort((a, b) => a.Name.CompareTo(b.Name));
-			ShowSymbolMenuForResult(symbol, classes, " derived classes", false);
-		}
-
-		void FindImplementations(CommandContext context, ISymbol symbol) {
-			var implementations = new List<ISymbol>(ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindImplementationsAsync(symbol, _Context.Document.Project.Solution, null, context.CancellationToken)));
-			implementations.Sort((a, b) => a.Name.CompareTo(b.Name));
-			var m = new SymbolMenu(this);
-			if (symbol.Kind == SymbolKind.NamedType) {
-				foreach (var impl in implementations) {
-					m.Menu.Add(impl, false);
-				}
-			}
-			else {
-				foreach (var impl in implementations) {
-					m.Menu.Add(impl, impl.ContainingSymbol);
-				}
-			}
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
-				.Append(" implementations: ")
-				.Append(implementations.Count.ToString());
-			m.Show();
-		}
-
-		void FindInstanceAsParameter(CommandContext context, ISymbol source) {
-			ThreadHelper.JoinableTaskFactory.Run(async () => {
-				var members = await (source as ITypeSymbol).FindInstanceAsParameterAsync(_Context.Document.Project, context.CancellationToken);
-				ShowSymbolMenuForResult(source, members, " as parameter", true);
-			});
-		}
-
-		void FindInstanceProducer(CommandContext context, ISymbol source) {
-			ThreadHelper.JoinableTaskFactory.Run(async () => {
-				var members = await (source as ITypeSymbol).FindSymbolInstanceProducerAsync(_Context.Document.Project, context.CancellationToken);
-				ShowSymbolMenuForResult(source, members, " producers", true);
-			});
-		}
-
-		void FindExtensionMethods(CommandContext context, ISymbol source) {
-			ThreadHelper.JoinableTaskFactory.Run(async () => {
-				var members = await (source as ITypeSymbol).FindExtensionMethodsAsync(_Context.Document.Project, context.CancellationToken);
-				ShowSymbolMenuForResult(source, members, " extensions", true);
-			});
-		}
-
-		void ShowSymbolMenuForResult(ISymbol source, List<ISymbol> members, string suffix, bool groupByType) {
-			members.Sort(CodeAnalysisHelper.CompareSymbol);
-			var m = new SymbolMenu(this);
-			m.Title.SetGlyph(ThemeHelper.GetImage(source.GetImageId()))
-				.Append(source.ToDisplayString(WpfHelper.MemberNameFormat), true)
-				.Append(suffix);
-			ITypeSymbol containingType = null;
-			foreach (var item in members) {
-				if (groupByType && item.ContainingType != containingType) {
-					m.Menu.Add((containingType = item.ContainingType), false)
-						.Type = SymbolItemType.Container;
-				}
-				m.Menu.Add(item, false);
-			}
-			m.Show();
-		}
-
-		void FindMembers(ISymbol symbol) {
-			var m = new SymbolMenu(this, symbol.Kind == SymbolKind.Namespace ? SymbolListType.TypeList : SymbolListType.None);
-			var (count, inherited) = m.Menu.AddSymbolMembers(symbol, _IsVsProject);
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
-				.Append(" members: ")
-				.Append(count + " (" + inherited + " inherited)");
-			m.Show();
-		}
-
-		void FindOverrides(CommandContext context, ISymbol symbol) {
-			var m = new SymbolMenu(this);
-			int c = 0;
-			foreach (var ov in ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindOverridesAsync(symbol, _Context.Document.Project.Solution, null, context.CancellationToken))) {
-				m.Menu.Add(ov, ov.ContainingType);
-				++c;
-			}
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
-				.Append(" overrides: ")
-				.Append(c.ToString());
-			m.Show();
-		}
-
-		void FindSymbolWithName(CommandContext ctx, ISymbol source) {
-			var result = _Context.SemanticModel.Compilation.FindDeclarationMatchName(source.Name, Keyboard.Modifiers == ModifierKeys.Control, true, ctx.CancellationToken);
-			ShowSymbolMenuForResult(source, new List<ISymbol>(result), " name alike", true);
-		}
-
 		List<CommandItem> GetExpandSelectionCommands(CommandContext ctx) {
 			var r = new List<CommandItem>();
 			var duplicate = ctx.RightClick;
@@ -496,125 +377,6 @@ namespace Codist.SmartBars
 			}
 			r.Add(new CommandItem(KnownImageIds.SelectAll, "Select All", ctrl => ctrl.ToolTip = "Select all text", ctx2 => TextEditorHelper.ExecuteEditorCommand("Edit.SelectAll")));
 			return r;
-		}
-
-		async Task<IEnumerable<CommandItem>> GetReferenceCommandsAsync(CommandContext ctx) {
-			var r = new List<CommandItem>();
-			var symbol = await SymbolFinder.FindSymbolAtPositionAsync(_Context.Document, View.GetCaretPosition(), ctx.CancellationToken);
-			if (symbol == null) {
-				return r;
-			}
-			symbol = symbol.GetAliasTarget();
-			switch (symbol.Kind) {
-				case SymbolKind.Method:
-				case SymbolKind.Property:
-				case SymbolKind.Event:
-					r.Add(new CommandItem(KnownImageIds.ShowCallerGraph, "Find Callers...", s => FindCallers(s, symbol)));
-					if (symbol.MayHaveOverride()) {
-						r.Add(new CommandItem(KnownImageIds.OverloadBehavior, "Find Overrides...", c => FindOverrides(c, symbol)));
-					}
-					var st = symbol.ContainingType;
-					if (st != null && st.TypeKind == TypeKind.Interface) {
-						r.Add(new CommandItem(KnownImageIds.ImplementInterface, "Find Implementations...", c => FindImplementations(c, symbol)));
-					}
-					if (symbol.Kind != SymbolKind.Event) {
-						CreateCommandsForReturnTypeCommand(symbol, r);
-					}
-					if (symbol.Kind == SymbolKind.Method
-						&& (symbol as IMethodSymbol).MethodKind == MethodKind.Constructor
-						&& st.SpecialType == SpecialType.None) {
-						CreateInstanceCommandsForType(st, r);
-					}
-					break;
-				case SymbolKind.Field:
-				case SymbolKind.Local:
-				case SymbolKind.Parameter:
-					CreateCommandsForReturnTypeCommand(symbol, r);
-					break;
-				case SymbolKind.NamedType:
-					CreateCommandForNamedType(symbol as INamedTypeSymbol, r);
-					break;
-				case SymbolKind.Namespace:
-					r.Add(new CommandItem(KnownImageIds.ListMembers, "Find Members...", s => FindMembers(symbol)));
-					break;
-			}
-			if (_Context.Node.IsDeclaration() && symbol.Kind != SymbolKind.Namespace) {
-				r.Add(new CommandItem(KnownImageIds.ShowReferencedElements, "Find Referenced Symbols...", c => FindReferencedSymbols(c, symbol)));
-			}
-			//r.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, symbol, "No reference found", FindReferences));
-			r.Add(new CommandItem(KnownImageIds.ReferencedDimension, "Find All References", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences")));
-			r.Add(new CommandItem(KnownImageIds.FindSymbol, "Find Symbol with Name " + symbol.Name + "...", c => FindSymbolWithName(c, symbol)));
-			r.Add(new CommandItem(KnownImageIds.ListMembers, "Go to Member", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToMember")));
-			r.Add(new CommandItem(KnownImageIds.Type, "Go to Type", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToType")));
-			r.Add(new CommandItem(KnownImageIds.FindSymbol, "Go to Symbol", _ => TextEditorHelper.ExecuteEditorCommand("Edit.GoToSymbol")));
-			return r;
-		}
-
-		void FindReferencedSymbols(CommandContext context, ISymbol symbol) {
-			var m = new SymbolMenu(this);
-			var c = 0;
-			foreach (var item in _Context.Node.FindReferencingSymbols(_Context.SemanticModel, true)) {
-				var member = item.Key;
-				var i = m.Menu.Add(member, true);
-				if (item.Value > 1) {
-					i.Hint = "* " + item.Value.ToString();
-				}
-				++c;
-			}
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
-				.Append(" referenced members: ")
-				.Append(c.ToString());
-			m.Show();
-		}
-
-		void CreateCommandForNamedType(INamedTypeSymbol t, List<CommandItem> r) {
-			if (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct) {
-				var ctor = _Context.NodeIncludeTrivia.GetObjectCreationNode();
-				if (ctor != null) {
-					var symbol = _Context.SemanticModel.GetSymbolOrFirstCandidate(ctor);
-					if (symbol != null) {
-						r.Add(new CommandItem(KnownImageIds.ShowCallerGraph, "Find Callers...", ctx => FindCallers(ctx, symbol)));
-					}
-				}
-				else if (t.InstanceConstructors.Length > 0) {
-					r.Add(new CommandItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", ctx => FindCallers(ctx, t)));
-				}
-			}
-			r.Add(new CommandItem(KnownImageIds.ListMembers, "Find Members...", ctx => FindMembers(t)));
-			if (t.IsStatic) {
-				return;
-			}
-			if (t.IsSealed == false) {
-				if (t.TypeKind == TypeKind.Class) {
-					r.Add(new CommandItem(KnownImageIds.NewClass, "Find Derived Classes...", c => FindDerivedClasses(c, t)));
-				}
-				else if (t.TypeKind == TypeKind.Interface) {
-					r.Add(new CommandItem(KnownImageIds.ImplementInterface, "Find Implementations...", c => FindImplementations(c, t)));
-				}
-			}
-			r.Add(new CommandItem(KnownImageIds.ExtensionMethod, "Find Extensions...", ctx => FindExtensionMethods(ctx, t)));
-			if (t.SpecialType == SpecialType.None) {
-				CreateInstanceCommandsForType(t, r);
-			}
-		}
-
-		void CreateInstanceCommandsForType(INamedTypeSymbol t, List<CommandItem> r) {
-			r.Add(new CommandItem(KnownImageIds.NewItem, "Find Instance Producer...", ctx => FindInstanceProducer(ctx, t)));
-			r.Add(new CommandItem(KnownImageIds.Parameter, "Find Instance as Parameter...", ctx => FindInstanceAsParameter(ctx, t)));
-		}
-
-		void CreateCommandsForReturnTypeCommand(ISymbol symbol, List<CommandItem> list) {
-			var type = symbol.GetReturnType();
-			if (type != null && type.SpecialType == SpecialType.None) {
-				list.Add(new CommandItem(KnownImageIds.ListMembers, "Find Members of " + type.Name + type.GetParameterString() + "...", s => FindMembers(type)));
-				if (type.IsStatic == false) {
-					list.Add(new CommandItem(KnownImageIds.ExtensionMethod, "Find Extensions for " + type.Name + type.GetParameterString() + "...", ctx => FindExtensionMethods(ctx, type)));
-				}
-				if (type.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-					list.Add(new CommandItem(KnownImageIds.GoToDeclaration, "Go to " + type.Name + type.GetParameterString(), _ => type.GoToSource()));
-				}
-			}
 		}
 
 		static bool IsInvertableOperation(SyntaxKind kind) {
@@ -701,84 +463,6 @@ namespace Codist.SmartBars
 
 			public int GetHashCode(SymbolCallerInfo obj) {
 				return obj.CallingSymbol.GetHashCode();
-			}
-		}
-
-		sealed class SymbolMenu
-		{
-			readonly CSharpSmartBar _Bar;
-
-			public SymbolList Menu { get; }
-			public ThemedMenuText Title { get; }
-			public SymbolFilterBox FilterBox { get; }
-
-			public SymbolMenu(CSharpSmartBar bar) : this(bar, SymbolListType.None) { }
-			public SymbolMenu(CSharpSmartBar bar, SymbolListType listType) {
-				Menu = new SymbolList(bar._Context) {
-					Container = bar._SymbolListContainer,
-					ContainerType = listType
-				};
-				Menu.Header = new StackPanel {
-					Margin = WpfHelper.MenuItemMargin,
-					Children = {
-						(Title = new ThemedMenuText { TextAlignment = TextAlignment.Center, Padding = WpfHelper.SmallMargin }),
-						(FilterBox = new SymbolFilterBox(Menu)),
-						new Separator()
-					}
-				};
-				_Bar = bar;
-			}
-			public void Show() {
-				SetupSymbolListMenu(Menu);
-				ShowMenu(Menu);
-				UpdateNumbers();
-				FilterBox.FocusTextBox();
-			}
-			void UpdateNumbers() {
-				FilterBox.UpdateNumbers(Menu.Symbols.Select(i => i.Symbol));
-			}
-
-			void MenuItemSelect(object sender, MouseButtonEventArgs e) {
-				var menu = sender as SymbolList;
-				if (menu.SelectedIndex == -1 || (e.OriginalSource as DependencyObject)?.GetParent<ListBoxItem>() == null) {
-					return;
-				}
-				_Bar.View.VisualElement.Focus();
-				(menu.SelectedItem as SymbolItem)?.GoToSource();
-			}
-
-			void SetupSymbolListMenu(SymbolList list) {
-				list.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
-				list.MouseLeftButtonUp += MenuItemSelect;
-				if (list.Symbols.Count > 100) {
-					ScrollViewer.SetCanContentScroll(list, true);
-				}
-			}
-
-			void ShowMenu(SymbolList menu) {
-				if (_Bar._SymbolList != menu) {
-					_Bar._SymbolListContainer.Children.Clear();
-					_Bar._SymbolListContainer.Add(menu);
-					_Bar._SymbolList = menu;
-				}
-				menu.ItemsControlMaxHeight = _Bar.View.ViewportHeight / 2;
-				menu.RefreshItemsSource();
-				menu.ScrollToSelectedItem();
-				menu.PreviewKeyUp -= OnMenuKeyUp;
-				menu.PreviewKeyUp += OnMenuKeyUp;
-
-				var p = Mouse.GetPosition(_Bar._SymbolListContainer);
-				Canvas.SetLeft(menu, p.X);
-				Canvas.SetTop(menu, p.Y);
-				//var point = visual.TransformToVisual(View.VisualElement).Transform(new Point());
-				//Canvas.SetLeft(menu, point.X + visual.RenderSize.Width);
-				//Canvas.SetTop(menu, point.Y);
-			}
-			void OnMenuKeyUp(object sender, KeyEventArgs e) {
-				if (e.Key == Key.Escape) {
-					_Bar.HideMenu();
-					e.Handled = true;
-				}
 			}
 		}
 	}

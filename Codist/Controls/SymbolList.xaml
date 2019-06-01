@@ -35,7 +35,14 @@
 				<ControlTemplate TargetType="{x:Type c:SymbolList}">
 					<Border BorderThickness="1,1,1,1" CornerRadius="0,0,5,5" x:Name="Border" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" SnapsToDevicePixels="True" UseLayoutRounding="True">
 						<StackPanel>
-							<ContentPresenter x:Name="Header" Content="{TemplateBinding Header}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="Auto" SharedSizeGroup="HeaderButtons"/>
+								</Grid.ColumnDefinitions>
+								<ContentPresenter x:Name="Header" Content="{TemplateBinding Header}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
+								<ContentPresenter x:Name="HeaderButtons" Content="{TemplateBinding HeaderButtons}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,2,-8,0"/>
+							</Grid>
 							<ScrollViewer x:Name="PART_Scroller" Margin="3" Focusable="False" MaxHeight="{TemplateBinding ItemsControlMaxHeight}" VerticalScrollBarVisibility="Auto">
 								<VirtualizingStackPanel IsItemsHost="True" CacheLength="3" CacheLengthUnit="Page" VirtualizationMode="Recycling"/>
 							</ScrollViewer>

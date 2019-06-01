@@ -3,7 +3,6 @@
 	xmlns:c="clr-namespace:Codist.Controls;assembly=Codist"
 	xmlns:sys="clr-namespace:System;assembly=mscorlib"
 	xmlns:vsp="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0">
-	<c:SymbolItemTemplateSelector x:Key="symbolTemplateSelector"/>
 	<Style x:Key="{x:Type ToolTip}" TargetType="{x:Type ToolTip}">
 		<Setter Property="OverridesDefaultStyle" Value="True"/>
 		<Setter Property="Foreground" Value="{DynamicResource {x:Static vsp:EnvironmentColors.ToolTipTextBrushKey}}"/>
