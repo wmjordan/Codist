@@ -283,6 +283,8 @@
 
      ![Navigation Bar Fields](doc/navigation-bar-context-menu.png)
 
+     From version 5.1 on, the right click menu includes symbol analysis commands.
+
    3. Clicking on a **Member node** will select the whole member. If you have the _Smart Bar_ feature on and let it appear when selection is changed, _Smart Bar_ will be displayed and let you perform actions onto the member.
 
       ![Navigation Bar Select](doc/navigation-bar-select.png)

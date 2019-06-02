@@ -73,6 +73,7 @@ text".Log(); // multiline string (string verbatim)
 
 		/// <typeparam name="TGeneric">Any type</typeparam>
 		public void Method<TGeneric>() { //type parameter
+			#region Test Methods
 			// unnecessary code
 			TestProject.ExtensionClass.Log(typeof(TGeneric).Name); // extension method
 			NativeMethods.ExternMethod(value: 1, ptr: IntPtr.Zero); // extern method
@@ -82,6 +83,7 @@ text".Log(); // multiline string (string verbatim)
 			base.VirtualMethod(); // base virtual method
 			MyEvent(this, EventArgs.Empty); // event
 			this.Method(); // qualified invocation
+			#endregion
 		}
 
 		protected override int AbstractMethod() { // overridden method
