@@ -45,7 +45,7 @@ namespace Codist.Controls
 			//}
 			Children.Clear();
 			_View.Properties.RemoveProperty(nameof(ExternalAdornment));
-			_View.VisualElement.Focus();
+			//_View.VisualElement.Focus();
 		}
 
 		protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved) {
