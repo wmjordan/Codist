@@ -191,7 +191,7 @@ namespace Codist.QuickInfo
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Diagnostics)) {
 					qiWrapper.SetDiagnostics(semanticModel.GetDiagnostics(token.Span));
 				}
-				qiWrapper.ApplyClickAndGo(symbol);
+				qiWrapper.ApplyClickAndGo(symbol, session);
 			}
 			qiWrapper.LimitQuickInfoItemSize(qiContent);
 			applicableToSpan = qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot

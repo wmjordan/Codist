@@ -304,8 +304,12 @@ namespace Codist.Controls
 			var locs = symbol.GetSourceLocations().Sort((x, y) => String.CompareOrdinal(x.SourceTree.FilePath, y.SourceTree.FilePath));
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
-				.Append(" locations: ")
+				.Append(" source locations: ")
 				.Append(locs.Length);
+			foreach (var loc in locs) {
+				m.Menu.Add(loc);
+			}
+			locs = symbol.Locations.RemoveAll(l => l.IsInMetadata == false).Sort((x, y) => String.CompareOrdinal(x.MetadataModule.Name, y.MetadataModule.Name));
 			foreach (var loc in locs) {
 				m.Menu.Add(loc);
 			}

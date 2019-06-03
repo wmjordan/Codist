@@ -437,7 +437,13 @@ namespace Codist.Controls
 				return ToolTipFactory.CreateToolTip(item.Symbol, false, SemanticContext.SemanticModel.Compilation);
 			}
 			if (item.Location != null) {
-				return new ThemedToolTip(Path.GetFileName(item.Location.SourceTree.FilePath), $"Folder: {item.Hint}{Environment.NewLine}Line: {item.Location.GetLineSpan().StartLinePosition.Line + 1}");
+				if (item.Location.IsInSource) {
+					var p = item.Location.SourceTree.FilePath;
+					return new ThemedToolTip(Path.GetFileName(p), $"Folder: {Path.GetDirectoryName(p)}{Environment.NewLine}Line: {item.Location.GetLineSpan().StartLinePosition.Line + 1}");
+				}
+				else {
+					return new ThemedToolTip(item.Location.MetadataModule.Name, $"Containing assembly: {item.Location.MetadataModule.ContainingAssembly}");
+				}
 			}
 			return null;
 		}
@@ -678,10 +684,18 @@ namespace Codist.Controls
 		public SymbolItem(Location location, SymbolList list) {
 			Container = list;
 			Location = location;
-			var filePath = location.SourceTree.FilePath;
-			_Content = new ThemedMenuText(Path.GetFileNameWithoutExtension(filePath)).Append(Path.GetExtension(filePath), ThemeHelper.SystemGrayTextBrush);
-			_Hint = Path.GetFileName(Path.GetDirectoryName(filePath));
-			_ImageId = KnownImageIds.CSFile;
+			if (location.IsInSource) {
+				var filePath = location.SourceTree.FilePath;
+				_Content = new ThemedMenuText(Path.GetFileNameWithoutExtension(filePath)).Append(Path.GetExtension(filePath), ThemeHelper.SystemGrayTextBrush);
+				_Hint = Path.GetFileName(Path.GetDirectoryName(filePath));
+				_ImageId = KnownImageIds.CSFile;
+			}
+			else {
+				var m = location.MetadataModule;
+				_Content = new ThemedMenuText(Path.GetFileNameWithoutExtension(m.Name)).Append(Path.GetExtension(m.Name), ThemeHelper.SystemGrayTextBrush);
+				_Hint = String.Empty;
+				_ImageId = KnownImageIds.Module;
+			}
 		}
 		public SymbolItem(ISymbol symbol, SymbolList list, ISymbol containerSymbol)
 			: this (symbol, list, false) {
@@ -700,7 +714,7 @@ namespace Codist.Controls
 		}
 
 		public void GoToSource() {
-			if (Location != null) {
+			if (Location != null && Location.IsInSource) {
 				Location.GoToSource();
 			}
 			else if (Symbol != null) {

@@ -18,7 +18,7 @@ namespace Codist.QuickInfo
 	interface IQuickInfoOverrider
 	{
 		void SetDiagnostics(IList<Diagnostic> diagnostics);
-		void ApplyClickAndGo(ISymbol symbol);
+		void ApplyClickAndGo(ISymbol symbol, IQuickInfoSession quickInfoSession);
 		void LimitQuickInfoItemSize(IList<object> qiContent);
 		void OverrideDocumentation(UIElement docElement);
 		void OverrideException(UIElement exceptionDoc);
@@ -29,10 +29,10 @@ namespace Codist.QuickInfo
 		static readonly SolidColorBrush __HighlightBrush = SystemColors.HighlightBrush.Alpha(0.3);
 		public static IQuickInfoOverrider CreateOverrider(IList<object> qiContent) {
 			var o = new Legacy(qiContent);
-			return o.Panel != null ? o : (IQuickInfoOverrider)new Default(qiContent);
+			return o.Panel != null ? o : (IQuickInfoOverrider)new Default();
 		}
 
-		static void ApplyClickAndGo(ISymbol symbol, TextBlock description) {
+		static void ApplyClickAndGo(ISymbol symbol, TextBlock description, IQuickInfoSession quickInfoSession) {
 			var locs = symbol.GetSourceLocations();
 			string path;
 			description.ToolTip = String.Empty;
@@ -46,36 +46,47 @@ namespace Codist.QuickInfo
 						goto ClickAndGo;
 					}
 				}
+				if (symbol.Kind == SymbolKind.Namespace) {
+					description.ToolTip = "Locations: " + symbol.Locations.Length;
+					description.Cursor = Cursors.Hand;
+					description.MouseEnter += HighlightSymbol;
+					description.MouseLeave += RemoveSymbolHighlight;
+					description.MouseLeftButtonUp += ListLocations;
+					return;
+				}
 				var asm = symbol.GetAssemblyModuleName();
 				if (asm != null) {
 					path = asm;
-					description.ToolTipOpening += DescriptionShowToolTip;
+					description.ToolTipOpening += ShowToolTip;
 				}
 				return;
 			}
 			ClickAndGo:
 			path = System.IO.Path.GetFileName(locs[0].SourceTree.FilePath);
-			description.ToolTipOpening += DescriptionShowToolTip;
+			description.ToolTipOpening += ShowToolTip;
 			description.Cursor = Cursors.Hand;
-			description.MouseEnter += (s, args) => (s as TextBlock).Background = __HighlightBrush;
-			description.MouseLeave += (s, args) => (s as TextBlock).Background = Brushes.Transparent;
+			description.MouseEnter += HighlightSymbol;
+			description.MouseLeave += RemoveSymbolHighlight;
 			if (locs.Length == 1) {
 				description.MouseLeftButtonUp += (s, args) => symbol.GoToSource();
 				return;
 			}
-			description.MouseLeftButtonUp += ListMultiLocations;
+			description.MouseLeftButtonUp += ListLocations;
 
-			void ListMultiLocations(object sender, MouseButtonEventArgs e) {
-				var view = TextEditorHelper.GetMouseOverDocumentView();
-				if (view == null) {
-					return;
-				}
-				CSharpSymbolContextMenu.ShowLocations(symbol, SemanticContext.GetOrCreateSingetonInstance(view));
+			void ListLocations(object sender, MouseButtonEventArgs e) {
+				quickInfoSession.Dismiss();
+				CSharpSymbolContextMenu.ShowLocations(symbol, SemanticContext.GetOrCreateSingetonInstance(quickInfoSession.TextView as IWpfTextView));
 			}
-			void DescriptionShowToolTip(object sender, ToolTipEventArgs e) {
-				var d = sender as TextBlock;
-				d.ToolTip = ShowSymbolLocation(symbol, path);
-				d.ToolTipOpening -= DescriptionShowToolTip;
+			void ShowToolTip(object sender, ToolTipEventArgs e) {
+				var t = sender as TextBlock;
+				t.ToolTip = ShowSymbolLocation(symbol, path);
+				t.ToolTipOpening -= ShowToolTip;
+			}
+			void HighlightSymbol(object sender, MouseEventArgs e) {
+				((TextBlock)sender).Background = __HighlightBrush;
+			}
+			void RemoveSymbolHighlight(object sender, MouseEventArgs e) {
+				((TextBlock)sender).Background = Brushes.Transparent;
 			}
 		}
 
@@ -108,12 +119,13 @@ namespace Codist.QuickInfo
 		{
 			readonly Overrider _Overrider;
 
-			public Default(IList<object> qiContent) {
+			public Default() {
 				_Overrider = new Overrider();
 			}
 
-			public void ApplyClickAndGo(ISymbol symbol) {
+			public void ApplyClickAndGo(ISymbol symbol, IQuickInfoSession quickInfoSession) {
 				_Overrider.ClickAndGoSymbol = symbol;
+				_Overrider.QuickInfoSession = quickInfoSession;
 			}
 
 			public void LimitQuickInfoItemSize(IList<object> qiContent) {
@@ -147,6 +159,7 @@ namespace Codist.QuickInfo
 				public UIElement DocElement;
 				public UIElement ExceptionDoc;
 				public IList<Diagnostic> Diagnostics;
+				public IQuickInfoSession QuickInfoSession;
 
 				protected override void OnVisualParentChanged(DependencyObject oldParent) {
 					base.OnVisualParentChanged(oldParent);
@@ -288,7 +301,7 @@ namespace Codist.QuickInfo
 					if (icon != null && signature != null) {
 						// apply click and go feature
 						if (ClickAndGoSymbol != null) {
-							QuickInfoOverrider.ApplyClickAndGo(ClickAndGoSymbol, signature);
+							QuickInfoOverrider.ApplyClickAndGo(ClickAndGoSymbol, signature, QuickInfoSession);
 						}
 						// fix the width of the signature part to prevent it from falling down to the next row
 						if (Config.Instance.QuickInfoMaxWidth > 0) {
@@ -442,7 +455,7 @@ namespace Codist.QuickInfo
 			public TextBlock Documentation => Panel != null ? __GetDocumentation(Panel) : null;
 
 			/// <summary>Hack into the default QuickInfo panel and provides click and go feature for symbols.</summary>
-			public void ApplyClickAndGo(ISymbol symbol) {
+			public void ApplyClickAndGo(ISymbol symbol, IQuickInfoSession quickInfoSession) {
 				if (symbol == null) {
 					return;
 				}
@@ -453,7 +466,7 @@ namespace Codist.QuickInfo
 				if (symbol.IsImplicitlyDeclared) {
 					symbol = symbol.ContainingType;
 				}
-				QuickInfoOverrider.ApplyClickAndGo(symbol, description);
+				QuickInfoOverrider.ApplyClickAndGo(symbol, description, quickInfoSession);
 			}
 
 			/// <summary>
@@ -502,7 +515,7 @@ namespace Codist.QuickInfo
 			static StackPanel FindDefaultQuickInfoPanel(IList<object> qiContent) {
 				foreach (var item in qiContent) {
 					var o = item as StackPanel;
-					if (o != null && o.GetType().Name == "QuickInfoDisplayPanel") {
+					if (o?.GetType().Name == "QuickInfoDisplayPanel") {
 						return o;
 					}
 				}
