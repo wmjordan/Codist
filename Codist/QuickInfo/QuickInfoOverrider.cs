@@ -63,13 +63,15 @@ namespace Codist.QuickInfo
 				description.MouseLeftButtonUp += (s, args) => symbol.GoToSource();
 				return;
 			}
-			description.MouseLeftButtonUp += (s, args) => {
-				var tb = s as TextBlock;
-				if (tb.ContextMenu == null) {
-					tb.ContextMenu = WpfHelper.CreateContextMenuForSourceLocations(symbol.MetadataName, locs);
+			description.MouseLeftButtonUp += ListMultiLocations;
+
+			void ListMultiLocations(object sender, MouseButtonEventArgs e) {
+				var view = TextEditorHelper.GetMouseOverDocumentView();
+				if (view == null) {
+					return;
 				}
-				tb.ContextMenu.IsOpen = true;
-			};
+				CSharpSymbolContextMenu.ShowLocations(symbol, SemanticContext.GetOrCreateSingetonInstance(view));
+			}
 			void DescriptionShowToolTip(object sender, ToolTipEventArgs e) {
 				var d = sender as TextBlock;
 				d.ToolTip = ShowSymbolLocation(symbol, path);

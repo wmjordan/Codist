@@ -30,7 +30,7 @@ namespace Codist.Commands
 
 		static NaviBar.CSharpBar GetCSharpBar() {
 			NaviBar.CSharpBar bar = null;
-			return CodistPackage.Instance.GetActiveWpfDocumentView()?.Properties.TryGetProperty<NaviBar.CSharpBar>(nameof(NaviBar), out bar) == true ? bar : null;
+			return TextEditorHelper.GetActiveWpfDocumentView()?.Properties.TryGetProperty<NaviBar.CSharpBar>(nameof(NaviBar), out bar) == true ? bar : null;
 		}
 
 		static void ExecuteSearchDeclaration(object sender, EventArgs e) {

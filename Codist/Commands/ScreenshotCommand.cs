@@ -22,7 +22,7 @@ namespace Codist.Commands
 			menuItem.BeforeQueryStatus += (s, args) => {
 				ThreadHelper.ThrowIfNotOnUIThread();
 				var c = s as OleMenuCommand;
-				c.Enabled = CodistPackage.DTE.ActiveDocument != null;
+				c.Enabled = TextEditorHelper.GetActiveWpfDocumentView() != null;
 			};
 			CodistPackage.MenuService.AddCommand(menuItem);
 		}
@@ -33,7 +33,7 @@ namespace Codist.Commands
 			if (doc == null) {
 				return;
 			}
-			var docWindow = CodistPackage.Instance.GetActiveWpfDocumentView();
+			var docWindow = TextEditorHelper.GetActiveWpfDocumentView();
 			if (docWindow == null) {
 				return;
 			}

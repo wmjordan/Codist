@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Shell;
 using GDI = System.Drawing;
 using WPF = System.Windows.Media;
 using Task = System.Threading.Tasks.Task;
+using System.IO;
 
 namespace Codist.Controls
 {
@@ -82,6 +83,11 @@ namespace Codist.Controls
 		}
 		public SymbolItem Add(ISymbol symbol, ISymbol containerType) {
 			var item = new SymbolItem(symbol, this, containerType);
+			Symbols.Add(item);
+			return item;
+		}
+		public SymbolItem Add(Location location) {
+			var item = new SymbolItem(location, this);
 			Symbols.Add(item);
 			return item;
 		}
@@ -430,6 +436,9 @@ namespace Codist.Controls
 				item.RefreshSymbol();
 				return ToolTipFactory.CreateToolTip(item.Symbol, false, SemanticContext.SemanticModel.Compilation);
 			}
+			if (item.Location != null) {
+				return new ThemedToolTip(Path.GetFileName(item.Location.SourceTree.FilePath), $"Folder: {item.Hint}{Environment.NewLine}Line: {item.Location.GetLineSpan().StartLinePosition.Line + 1}");
+			}
 			return null;
 		}
 		#endregion
@@ -439,16 +448,21 @@ namespace Codist.Controls
 			get => ContainerType == SymbolListType.TypeList ? SymbolFilterKind.Type : SymbolFilterKind.Member;
 		}
 		void ISymbolFilterable.Filter(string[] keywords, int filterFlags) {
-			if (ContainerType == SymbolListType.TypeList) {
-				_Filter = FilterByTypeKinds(keywords, (TypeFilterTypes)filterFlags);
-			}
-			else {
-				_Filter = FilterByMemberTypes(keywords, (MemberFilterTypes)filterFlags);
+			switch (ContainerType) {
+				case SymbolListType.TypeList:
+					_Filter = FilterByTypeKinds(keywords, (TypeFilterTypes)filterFlags);
+					break;
+				case SymbolListType.Locations:
+					_Filter = FilterByLocations(keywords);
+					break;
+				default:
+					_Filter = FilterByMemberTypes(keywords, (MemberFilterTypes)filterFlags);
+					break;
 			}
 			RefreshItemsSource();
 
 			Predicate<object> FilterByMemberTypes(string[] k, MemberFilterTypes memberFilter) {
-				var noKeyword = keywords.Length == 0;
+				var noKeyword = k.Length == 0;
 				if (noKeyword && memberFilter == MemberFilterTypes.All) {
 					return null;
 				}
@@ -458,22 +472,24 @@ namespace Codist.Controls
 						return i.Symbol != null ? SymbolFilterBox.FilterBySymbol(memberFilter, i.Symbol) : SymbolFilterBox.FilterByImageId(memberFilter, i.ImageId);
 					};
 				}
-				var comparison = Char.IsUpper(keywords[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				return o => {
 					var i = (SymbolItem)o;
-					return (i.Symbol != null ? SymbolFilterBox.FilterBySymbol(memberFilter, i.Symbol) : SymbolFilterBox.FilterByImageId(memberFilter, i.ImageId))
-							&& keywords.All(p => i.Content.GetText().IndexOf(p, comparison) != -1);
+					return (i.Symbol != null
+							? SymbolFilterBox.FilterBySymbol(memberFilter, i.Symbol)
+							: SymbolFilterBox.FilterByImageId(memberFilter, i.ImageId))
+						&& MatchKeywords(i.Content.GetText(), k, comparison);
 				};
 			}
 			Predicate<object> FilterByTypeKinds(string[] k, TypeFilterTypes typeFilter) {
-				var noKeyword = keywords.Length == 0;
+				var noKeyword = k.Length == 0;
 				if (noKeyword && typeFilter == TypeFilterTypes.All) {
 					return null;
 				}
 				if (noKeyword) {
 					return o => {
 						var i = (SymbolItem)o;
-						return i.Symbol != null ? SymbolFilterBox.FilterBySymbol(typeFilter, i.Symbol) : false;
+						return i.Symbol != null && SymbolFilterBox.FilterBySymbol(typeFilter, i.Symbol);
 					};
 				}
 				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
@@ -481,8 +497,30 @@ namespace Codist.Controls
 					var i = (SymbolItem)o;
 					return i.Symbol != null
 						&& SymbolFilterBox.FilterBySymbol(typeFilter, i.Symbol)
-						&& keywords.All(p => i.Content.GetText().IndexOf(p, comparison) != -1);
+						&& MatchKeywords(i.Content.GetText(), k, comparison);
 				};
+			}
+			Predicate<object> FilterByLocations(string[] k) {
+				if (k.Length == 0) {
+					return null;
+				}
+				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+				return o => {
+					var i = (SymbolItem)o;
+					return i.Location != null
+						&& (MatchKeywords(((System.Windows.Documents.Run)i.Content.Inlines.FirstInline).Text, k, comparison)
+								|| MatchKeywords(i.Hint, k, comparison));
+				};
+			}
+
+			bool MatchKeywords(string text, string[] k, StringComparison c) {
+				var m = 0;
+				foreach (var item in k) {
+					if ((m = text.IndexOf(item, m, c)) == -1) {
+						return false;
+					}
+				}
+				return true;
 			}
 		}
 		#endregion
@@ -637,6 +675,14 @@ namespace Codist.Controls
 			Content = new ThemedMenuText();
 			_ImageId = -1;
 		}
+		public SymbolItem(Location location, SymbolList list) {
+			Container = list;
+			Location = location;
+			var filePath = location.SourceTree.FilePath;
+			_Content = new ThemedMenuText(Path.GetFileNameWithoutExtension(filePath)).Append(Path.GetExtension(filePath), ThemeHelper.SystemGrayTextBrush);
+			_Hint = Path.GetFileName(Path.GetDirectoryName(filePath));
+			_ImageId = KnownImageIds.CSFile;
+		}
 		public SymbolItem(ISymbol symbol, SymbolList list, ISymbol containerSymbol)
 			: this (symbol, list, false) {
 			_ImageId = containerSymbol.GetImageId();
@@ -717,11 +763,11 @@ namespace Codist.Controls
 		public override DataTemplate SelectTemplate(object item, DependencyObject container) {
 			var c = container as FrameworkElement;
 			var i = item as SymbolItem;
-			if (i != null && (i.Symbol != null || i.SyntaxNode != null)) {
-				return c.FindResource("SymbolItemTemplate") as DataTemplate;
+			if (i is null || i.Symbol is null && i.SyntaxNode is null && i.Location is null) {
+				return c.FindResource("LabelTemplate") as DataTemplate;
 			}
 			else {
-				return c.FindResource("LabelTemplate") as DataTemplate;
+				return c.FindResource("SymbolItemTemplate") as DataTemplate;
 			}
 		}
 	}
@@ -744,7 +790,11 @@ namespace Codist.Controls
 		/// <summary>
 		/// Filter by type kinds
 		/// </summary>
-		TypeList
+		TypeList,
+		/// <summary>
+		/// Lists source code locations
+		/// </summary>
+		Locations
 	}
 	enum SymbolItemType
 	{

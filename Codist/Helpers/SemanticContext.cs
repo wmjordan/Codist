@@ -17,7 +17,7 @@ namespace Codist
 	{
 		VersionStamp _Version;
 		SyntaxNode _Node, _NodeIncludeTrivia;
-		readonly IOutliningManager _OutliningManager;
+		IOutliningManager _OutliningManager;
 
 		public static SemanticContext GetOrCreateSingetonInstance(IWpfTextView view) {
 			return view.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(view));
@@ -25,10 +25,12 @@ namespace Codist
 
 		SemanticContext(IWpfTextView textView) {
 			View = textView;
-			_OutliningManager = ServicesHelper.Instance.OutliningManager.GetOutliningManager(textView);
 		}
 
 		public IWpfTextView View { get; }
+		public IOutliningManager OutliningManager {
+			get => _OutliningManager ?? (_OutliningManager = ServicesHelper.Instance.OutliningManager.GetOutliningManager(View));
+		}
 		public Workspace Workspace { get; private set; }
 		public Document Document { get; private set; }
 		public SemanticModel SemanticModel { get; private set; }
@@ -297,7 +299,7 @@ namespace Codist
 				node = node.Parent;
 			}
 			nodes.Reverse();
-			if (includeRegions == false || _OutliningManager == null) {
+			if (includeRegions == false || OutliningManager == null) {
 				return nodes;
 			}
 			foreach (var region in GetRegions(start)) {
@@ -320,7 +322,7 @@ namespace Codist
 		}
 
 		public IEnumerable<ICollapsible> GetRegions(SnapshotSpan span) {
-			return _OutliningManager?.GetAllRegions(span)
+			return OutliningManager?.GetAllRegions(span)
 				.Where(c => c.CollapsedForm as string != "..."); // skip code blocks
 		}
 

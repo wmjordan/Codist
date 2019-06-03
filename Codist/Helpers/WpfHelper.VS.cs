@@ -218,10 +218,11 @@ namespace Codist
 					r[0].GoToSource();
 				}
 				else {
-					if (ContextMenu == null) {
-						ContextMenu = CreateContextMenuForSourceLocations(_Symbol.MetadataName, r);
+					var view = TextEditorHelper.GetMouseOverDocumentView();
+					if (view == null) {
+						return;
 					}
-					ContextMenu.IsOpen = true;
+					CSharpSymbolContextMenu.ShowLocations(_Symbol, SemanticContext.GetOrCreateSingetonInstance(view));
 				}
 			}
 

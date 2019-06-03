@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Reflection;
+using System.Windows.Input;
 using Codist.SyntaxHighlight;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -10,6 +12,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
+using Microsoft.VisualStudio.Utilities;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
 
@@ -21,6 +24,7 @@ namespace Codist
 	static class TextEditorHelper
 	{
 		static /*readonly*/ Guid guidIWpfTextViewHost = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476");
+		static IWpfTextView _MouseOverTextView;
 
 		#region Position
 		public static SnapshotPoint GetCaretPosition(this ITextView textView) {
@@ -279,7 +283,7 @@ namespace Codist
 					}
 				}
 				CodistPackage.DTE.OpenFile(targetNode.SyntaxTree.FilePath, d => {
-					view = CodistPackage.Instance.GetActiveWpfDocumentView();
+					view = GetActiveWpfDocumentView();
 					using (var edit = view.TextBuffer.CreateEdit()) {
 						edit.Insert(target, sNode.ToFullString());
 						if (edit.HasEffectiveChanges) {
@@ -347,6 +351,13 @@ namespace Codist
 		#endregion
 
 		#region TextView and editor
+		public static IWpfTextView GetMouseOverDocumentView() {
+			return _MouseOverTextView;
+		}
+		public static IWpfTextView GetActiveWpfDocumentView() {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			return ServiceProvider.GlobalProvider.GetActiveWpfDocumentView();
+		}
 		public static IWpfTextView GetActiveWpfDocumentView(this IServiceProvider service) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var doc = CodistPackage.DTE.ActiveDocument;
@@ -439,6 +450,38 @@ namespace Codist
 			return ((IWpfTextViewHost)holder).TextView;
 		}
 		#endregion
+
+		[Export(typeof(IWpfTextViewCreationListener))]
+		[ContentType(Constants.CodeTypes.Code)]
+		[TextViewRole(PredefinedTextViewRoles.Document)]
+		sealed class NaviBarFactory : IWpfTextViewCreationListener
+		{
+			public void TextViewCreated(IWpfTextView textView) {
+				new ActiveViewTracker(textView);
+			}
+
+			sealed class ActiveViewTracker
+			{
+				readonly IWpfTextView _View;
+
+				public ActiveViewTracker(IWpfTextView view) {
+					_View = view;
+					view.Closed += TextViewClosed_UnhookEvent;
+					view.VisualElement.MouseEnter += TextViewMouseEnter_SetActiveView;
+				}
+
+				void TextViewMouseEnter_SetActiveView(object sender, MouseEventArgs e) {
+					_MouseOverTextView = _View;
+				}
+
+				void TextViewClosed_UnhookEvent(object sender, EventArgs e) {
+					var v = sender as IWpfTextView;
+					v.Closed -= TextViewClosed_UnhookEvent;
+					v.VisualElement.MouseEnter -= TextViewMouseEnter_SetActiveView;
+					System.Threading.Interlocked.CompareExchange(ref _MouseOverTextView, null, _View);
+				}
+			}
+		}
 	}
 
 	[Flags]
