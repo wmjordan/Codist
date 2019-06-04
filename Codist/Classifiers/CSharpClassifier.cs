@@ -336,6 +336,7 @@ namespace Codist.Classifiers
 				case SyntaxKind.AnonymousObjectCreationExpression:
 				case SyntaxKind.ObjectInitializerExpression:
 				case SyntaxKind.ObjectCreationExpression:
+				case SyntaxKind.ComplexElementInitializerExpression:
 				case SyntaxKind.CollectionInitializerExpression:
 				case SyntaxKind.ArrayInitializerExpression:
 				case SyntaxKind.ThisConstructorInitializer:
