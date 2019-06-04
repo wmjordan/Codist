@@ -411,14 +411,10 @@ namespace Codist.Margins
 					if (item.Definition.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
 						continue;
 					}
-					var locs = item.Definition.GetSourceLocations();
-					if (locs.IsDefaultOrEmpty) {
-						continue;
-					}
 					// draws the definition marker
-					foreach (var loc in locs) {
-						if (loc.SourceTree == _DocSyntax) {
-							var start = loc.SourceSpan.Start;
+					foreach (var loc in item.Definition.DeclaringSyntaxReferences) {
+						if (loc.SyntaxTree == _DocSyntax) {
+							var start = loc.Span.Start;
 							if (start > snapshotLength) {
 								continue;
 							}

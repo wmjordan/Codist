@@ -33,26 +33,26 @@ namespace Codist.QuickInfo
 		}
 
 		static void ApplyClickAndGo(ISymbol symbol, TextBlock description, IQuickInfoSession quickInfoSession) {
-			var locs = symbol.GetSourceLocations();
+			var locs = symbol.DeclaringSyntaxReferences;
+			if (symbol.Kind == SymbolKind.Namespace) {
+				description.ToolTip = "Locations: " + locs.Length;
+				description.Cursor = Cursors.Hand;
+				description.MouseEnter += HighlightSymbol;
+				description.MouseLeave += RemoveSymbolHighlight;
+				description.MouseLeftButtonUp += ListLocations;
+				return;
+			}
 			string path;
 			description.ToolTip = String.Empty;
-			if (locs.IsDefaultOrEmpty || String.IsNullOrEmpty(locs[0].SourceTree.FilePath)) {
+			if (locs.IsDefaultOrEmpty) {
 				if (symbol.ContainingType != null) {
 					// if the symbol is implicitly declared but its containing type is in source,
 					// navigate to the containing type
-					locs = symbol.ContainingType.GetSourceLocations();
+					locs = symbol.ContainingType.DeclaringSyntaxReferences;
 					if (locs.Length != 0) {
 						symbol = symbol.ContainingType;
 						goto ClickAndGo;
 					}
-				}
-				if (symbol.Kind == SymbolKind.Namespace) {
-					description.ToolTip = "Locations: " + symbol.Locations.Length;
-					description.Cursor = Cursors.Hand;
-					description.MouseEnter += HighlightSymbol;
-					description.MouseLeave += RemoveSymbolHighlight;
-					description.MouseLeftButtonUp += ListLocations;
-					return;
 				}
 				var asm = symbol.GetAssemblyModuleName();
 				if (asm != null) {
@@ -62,7 +62,7 @@ namespace Codist.QuickInfo
 				return;
 			}
 			ClickAndGo:
-			path = System.IO.Path.GetFileName(locs[0].SourceTree.FilePath);
+			path = System.IO.Path.GetFileName(locs[0].SyntaxTree.FilePath);
 			description.ToolTipOpening += ShowToolTip;
 			description.Cursor = Cursors.Hand;
 			description.MouseEnter += HighlightSymbol;

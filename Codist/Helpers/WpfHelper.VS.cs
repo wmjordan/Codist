@@ -187,7 +187,6 @@ namespace Codist
 				Text = alias ?? symbol.Name;
 				_Symbol = symbol;
 				TextDecorations = null;
-				
 				if (clickAndGo && symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 					MouseEnter += InitInteraction;
 				}
@@ -213,7 +212,7 @@ namespace Codist
 			}
 
 			void GotoSymbol(object sender, RoutedEventArgs e) {
-				var r = _Symbol.GetSourceLocations();
+				var r = _Symbol.DeclaringSyntaxReferences;
 				if (r.Length == 1) {
 					r[0].GoToSource();
 				}

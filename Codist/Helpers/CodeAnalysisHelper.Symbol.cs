@@ -772,10 +772,6 @@ namespace Codist
 		#endregion
 
 		#region Source
-		public static Location FirstSourceLocation(this ISymbol symbol) {
-			return symbol?.Locations.FirstOrDefault(loc => loc.IsInSource);
-		}
-
 		public static bool HasSource(this ISymbol symbol) {
 			return AssemblySourceReflector.GetSourceType(symbol.ContainingAssembly) != AssemblySource.Metadata;
 		}
@@ -798,9 +794,12 @@ namespace Codist
 				: symbol.Locations.RemoveAll(i => i.IsInSource == false);
 		}
 
+		public static Location ToLocation(this SyntaxReference syntaxReference) {
+			return Location.Create(syntaxReference.SyntaxTree, syntaxReference.Span);
+		}
 
 		public static void GoToSource(this ISymbol symbol) {
-			symbol.FirstSourceLocation().GoToSource();
+			symbol.DeclaringSyntaxReferences.FirstOrDefault().GoToSource();
 		}
 
 		public static void GoToSource(this Location loc) {
@@ -811,8 +810,10 @@ namespace Codist
 		}
 
 		public static void GoToSource(this SyntaxReference loc) {
-			var pos = loc.SyntaxTree.GetLineSpan(loc.Span).StartLinePosition;
-			CodistPackage.DTE.OpenFile(loc.SyntaxTree.FilePath, pos.Line + 1, pos.Character + 1);
+			if (loc != null) {
+				var pos = loc.SyntaxTree.GetLineSpan(loc.Span).StartLinePosition;
+				CodistPackage.DTE.OpenFile(loc.SyntaxTree.FilePath, pos.Line + 1, pos.Character + 1);
+			}
 		}
 
 		public static bool IsAccessible(this ISymbol symbol, bool checkContainingType) {
@@ -837,7 +838,7 @@ namespace Codist
 				case Accessibility.Public:
 					return true && (target.ContainingType == null || from.CanAccess(target.ContainingType, assembly));
 				case Accessibility.Private:
-					return target.ContainingType.Equals(from) || target.FirstSourceLocation() != null;
+					return target.ContainingType.Equals(from) || target.ContainingAssembly.GetSourceType() != AssemblySource.Metadata;
 				case Accessibility.Internal:
 					return target.ContainingAssembly.GivesAccessTo(assembly) &&
 						(target.ContainingType == null || from.CanAccess(target.ContainingType, assembly));
