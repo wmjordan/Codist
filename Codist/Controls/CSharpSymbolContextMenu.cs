@@ -304,9 +304,9 @@ namespace Codist.Controls
 
 		internal static void ShowLocations(ISymbol symbol, SemanticContext context) {
 			var m = new SymbolMenu(context, SymbolListType.Locations);
-			var locs = new SortedList<(string, string), Location>();
+			var locs = new SortedList<(string, string, int), Location>();
 			foreach (var item in symbol.DeclaringSyntaxReferences) {
-				locs.Add((System.IO.Path.GetDirectoryName(item.SyntaxTree.FilePath), System.IO.Path.GetFileName(item.SyntaxTree.FilePath)), item.ToLocation());
+				locs.Add((System.IO.Path.GetDirectoryName(item.SyntaxTree.FilePath), System.IO.Path.GetFileName(item.SyntaxTree.FilePath), item.Span.Start), item.ToLocation());
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
