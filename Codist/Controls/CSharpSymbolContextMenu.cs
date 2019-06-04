@@ -80,6 +80,9 @@ namespace Codist.Controls
 			}
 			//Items.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, _Symbol, "No reference found", FindReferences));
 			Items.Add(CreateItem(KnownImageIds.FindSymbol, "Find Symbol with Name " + _Symbol.Name + "...", () => FindSymbolWithName(_Symbol, _SemanticContext)));
+		}
+
+		public void AddFindAllReferencesCommand() {
 			Items.Add(CreateItem(KnownImageIds.ReferencedDimension, "Find All References", FindAllReferences));
 		}
 
@@ -301,16 +304,18 @@ namespace Codist.Controls
 
 		internal static void ShowLocations(ISymbol symbol, SemanticContext context) {
 			var m = new SymbolMenu(context, SymbolListType.Locations);
-			var locs = symbol.GetSourceLocations().Sort((x, y) => String.CompareOrdinal(x.SourceTree.FilePath, y.SourceTree.FilePath));
+			var locs = new SortedList<(string, string), Location>();
+			foreach (var item in symbol.GetSourceLocations()) {
+				locs.Add((System.IO.Path.GetDirectoryName(item.SourceTree.FilePath), System.IO.Path.GetFileName(item.SourceTree.FilePath)), item);
+			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
 				.Append(" source locations: ")
-				.Append(locs.Length);
+				.Append(locs.Count);
 			foreach (var loc in locs) {
-				m.Menu.Add(loc);
+				m.Menu.Add(loc.Value);
 			}
-			locs = symbol.Locations.RemoveAll(l => l.IsInMetadata == false).Sort((x, y) => String.CompareOrdinal(x.MetadataModule.Name, y.MetadataModule.Name));
-			foreach (var loc in locs) {
+			foreach (var loc in symbol.Locations.RemoveAll(l => l.IsInMetadata == false).Sort((x, y) => String.CompareOrdinal(x.MetadataModule.Name, y.MetadataModule.Name))) {
 				m.Menu.Add(loc);
 			}
 			m.Show();

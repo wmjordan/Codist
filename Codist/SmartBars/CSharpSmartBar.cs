@@ -126,6 +126,7 @@ namespace Codist.SmartBars
 							};
 							m.ItemClicked += (s, args) => HideToolBar();
 							m.AddAnalysisCommands();
+							m.AddFindAllReferencesCommand();
 							m.AddGoToAnyCommands();
 							ctx.Sender.ContextMenu = m;
 							m.IsOpen = true;
