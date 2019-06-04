@@ -46,7 +46,7 @@ namespace Codist.QuickInfo
 				brush = ColorHelper.GetBrush(word);
 			}
 			if (brush != null) {
-				qiContent.Add(ColorQuickInfo.PreviewColor(brush));
+				ColorQuickInfo.AddToQuickInfoContent(qiContent, ColorQuickInfo.PreviewColor(brush));
 				applicableToSpan = snapshot.CreateTrackingSpan(extent.Span, SpanTrackingMode.EdgeExclusive);
 				return;
 			}
@@ -59,6 +59,19 @@ namespace Codist.QuickInfo
 
 	static class ColorQuickInfo
 	{
+		const string PreviewPanelName = "ColorPreview";
+
+		internal static void AddToQuickInfoContent(IList<object> container, StackPanel previewPanel) {
+			if (previewPanel != null) {
+				foreach (var item in container) {
+					if ((item as StackPanel)?.Name == PreviewPanelName) {
+						return;
+					}
+				}
+				container.Add(previewPanel);
+			}
+		}
+
 		public static StackPanel PreviewColorProperty(IPropertySymbol symbol, bool includeVsColors) {
 			return PreviewColor(ColorHelper.GetBrush(symbol, includeVsColors));
 		}
@@ -100,7 +113,7 @@ namespace Codist.QuickInfo
 			var c = brush.Color;
 			var v = Microsoft.VisualStudio.Imaging.HslColor.FromColor(c);
 			return new StackPanel {
-				Name = "ColorPreview",
+				Name = PreviewPanelName,
 				Children = {
 					new ThemedTipText().Append(new System.Windows.Shapes.Rectangle { Width = 16, Height = 16, Fill = brush }).Append("Color", true),
 					new StackPanel().AddReadOnlyTextBox($"{c.A}, {c.R}, {c.G}, {c.B}").Add(new ThemedTipText(" ARGB", true)).MakeHorizontal(),

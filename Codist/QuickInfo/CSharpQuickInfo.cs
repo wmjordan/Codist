@@ -396,11 +396,9 @@ namespace Codist.QuickInfo
 						}
 						ShowTypeInfo(qiContent, node.Parent, symbol.ContainingType);
 					}
-					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) && m.ContainingType.Name == "Color") {
-						var preview = ColorQuickInfo.PreviewColorMethodInvocation(_SemanticModel, node, symbol as IMethodSymbol);
-						if (preview != null) {
-							qiContent.Add(preview);
-						}
+					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
+						&& m.ContainingType.Name == "Color") {
+						ColorQuickInfo.AddToQuickInfoContent(qiContent, ColorQuickInfo.PreviewColorMethodInvocation(_SemanticModel, node, symbol as IMethodSymbol));
 					}
 					break;
 				case SymbolKind.NamedType:
@@ -409,10 +407,7 @@ namespace Codist.QuickInfo
 				case SymbolKind.Property:
 					ShowPropertyInfo(qiContent, symbol as IPropertySymbol);
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)) {
-						var preview = ColorQuickInfo.PreviewColorProperty(symbol as IPropertySymbol, _IsVsProject);
-						if (preview != null) {
-							qiContent.Add(preview);
-						}
+						ColorQuickInfo.AddToQuickInfoContent(qiContent, ColorQuickInfo.PreviewColorProperty(symbol as IPropertySymbol, _IsVsProject));
 					}
 					break;
 				case SymbolKind.Namespace:

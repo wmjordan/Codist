@@ -33,10 +33,7 @@ namespace Codist
 				return l >= 3 && l <= 20 && __Cache.TryGetValue(name, out var brush) ? brush : null;
 			}
 			internal static SolidColorBrush GetSystemBrush(string name) {
-				if (__SystemColors.TryGetValue(name, out var func)) {
-					return func();
-				}
-				return null;
+				return __SystemColors.TryGetValue(name, out var func) ? func() : null;
 			}
 			static Dictionary<string, SolidColorBrush> GetBrushes() {
 				var c = Array.FindAll(typeof(WpfBrushes).GetProperties(), p => p.PropertyType == typeof(SolidColorBrush));
