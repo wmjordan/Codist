@@ -831,49 +831,51 @@ namespace Codist.QuickInfo
 		}
 
 		static StackPanel ShowNumericForms(object value, NumericForm form) {
-			if (value is int) {
-				var v = (int)value;
-				if (form == NumericForm.Negative) {
-					v = -v;
+			if (value == null) {
+				return null;
+			}
+			switch (Type.GetTypeCode(value.GetType())) {
+				case TypeCode.Int32: {
+					var v = (int)value;
+					if (form == NumericForm.Negative) {
+						v = -v;
+					}
+					return ShowNumericForms(
+						form == NumericForm.Unsigned ? ((uint)v).ToString() : v.ToString(),
+						new byte[] { (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
 				}
-				var bytes = new byte[] { (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v };
-				return ShowNumericForms(form == NumericForm.Unsigned ? ((uint)v).ToString() : v.ToString(), bytes);
-			}
-			else if (value is long) {
-				var v = (long)value;
-				if (form == NumericForm.Negative) {
-					v = -v;
+				case TypeCode.Int64: {
+					var v = (long)value;
+					if (form == NumericForm.Negative) {
+						v = -v;
+					}
+					return ShowNumericForms(
+						form == NumericForm.Unsigned ? ((ulong)v).ToString() : v.ToString(),
+						new byte[] { (byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
 				}
-				var bytes = new byte[] { (byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v };
-				return ShowNumericForms(form == NumericForm.Unsigned ? ((ulong)v).ToString() : v.ToString(), bytes);
-			}
-			else if (value is byte) {
-				return ShowNumericForms(((byte)value).ToString(), new byte[] { (byte)value });
-			}
-			else if (value is short) {
-				var v = (short)value;
-				if (form == NumericForm.Negative) {
-					v = (short)-v;
+				case TypeCode.Byte:
+					return ShowNumericForms(((byte)value).ToString(), new byte[] { (byte)value });
+				case TypeCode.Int16: {
+					var v = (short)value;
+					if (form == NumericForm.Negative) {
+						v = (short)-v;
+					}
+					return ShowNumericForms(
+						form == NumericForm.Unsigned ? ((ushort)v).ToString() : v.ToString(),
+						new byte[] { (byte)(v >> 8), (byte)v });
 				}
-				var bytes = new byte[] { (byte)(v >> 8), (byte)v };
-				return ShowNumericForms(form == NumericForm.Unsigned ? ((ushort)v).ToString() : v.ToString(), bytes);
-			}
-			else if (value is char) {
-				var v = (char)value;
-				var bytes = new byte[] { (byte)(v >> 8), (byte)v };
-				return ShowNumericForms(((ushort)v).ToString(), bytes);
-			}
-			else if (value is uint) {
-				return ShowNumericForms((int)(uint)value, NumericForm.Unsigned);
-			}
-			else if (value is ulong) {
-				return ShowNumericForms((long)(ulong)value, NumericForm.Unsigned);
-			}
-			else if (value is ushort) {
-				return ShowNumericForms((short)(ushort)value, NumericForm.Unsigned);
-			}
-			else if (value is sbyte) {
-				return ShowNumericForms(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
+				case TypeCode.Char: {
+					var v = (char)value;
+					return ShowNumericForms(((ushort)v).ToString(), new byte[] { (byte)(v >> 8), (byte)v });
+				}
+				case TypeCode.UInt32:
+					return ShowNumericForms((int)(uint)value, NumericForm.Unsigned);
+				case TypeCode.UInt16:
+					return ShowNumericForms((short)(ushort)value, NumericForm.Unsigned);
+				case TypeCode.UInt64:
+					return ShowNumericForms((long)(ulong)value, NumericForm.Unsigned);
+				case TypeCode.SByte:
+					return ShowNumericForms(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
 			}
 			return null;
 		}
@@ -937,7 +939,7 @@ namespace Codist.QuickInfo
 				var v = f.ConstantValue;
 				if (v == null) {
 					// hack: the value could somehow be null, if the semantic model is not completely loaded
-					continue;
+					return;
 				}
 				++c;
 				if (min == null) {
