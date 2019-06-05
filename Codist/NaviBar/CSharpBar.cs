@@ -783,33 +783,48 @@ namespace Codist.NaviBar
 				}
 				switch (item.SyntaxNode.Kind()) {
 					case SyntaxKind.VariableDeclarator:
-						item.Hint = (item.SyntaxNode as VariableDeclaratorSyntax).Initializer?.Value?.ToString();
+						item.Hint = ((VariableDeclaratorSyntax)item.SyntaxNode).Initializer?.Value?.ToString();
 						break;
 					case SyntaxKind.EnumMemberDeclaration:
-						item.Hint = (item.SyntaxNode as EnumMemberDeclarationSyntax).EqualsValue?.Value?.ToString();
+						ShowEnumMemberValue(item);
 						break;
 					case SyntaxKind.PropertyDeclaration:
-						var p = item.SyntaxNode as PropertyDeclarationSyntax;
-						if (p.Initializer != null) {
-							item.Hint = p.Initializer.Value.ToString();
-						}
-						else if (p.ExpressionBody != null) {
-							item.Hint = p.ExpressionBody.ToString();
-						}
-						else if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.AutoPropertyAnnotation)) {
-							var a = p.AccessorList.Accessors;
-							if (a.Count == 2) {
-								if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
-									item.Hint = "{;;}";
-								}
-							}
-							else if (a.Count == 1) {
-								if (a[0].Body == null && a[0].ExpressionBody == null) {
-									item.Hint = "{;}";
-								}
-							}
-						}
+						ShowPropertyValue(item);
 						break;
+				}
+
+				void ShowEnumMemberValue(SymbolItem enumItem) {
+					var v = ((EnumMemberDeclarationSyntax)enumItem.SyntaxNode).EqualsValue;
+					if (v != null) {
+						enumItem.Hint = v.Value?.ToString();
+					}
+					else {
+						enumItem.SetSymbolToSyntaxNode();
+						enumItem.Hint = (enumItem.Symbol as IFieldSymbol).ConstantValue?.ToString();
+					}
+				}
+
+				void ShowPropertyValue(SymbolItem propertyItem) {
+					var p = (PropertyDeclarationSyntax)propertyItem.SyntaxNode;
+					if (p.Initializer != null) {
+						propertyItem.Hint = p.Initializer.Value.ToString();
+					}
+					else if (p.ExpressionBody != null) {
+						propertyItem.Hint = p.ExpressionBody.ToString();
+					}
+					else if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.AutoPropertyAnnotation)) {
+						var a = p.AccessorList.Accessors;
+						if (a.Count == 2) {
+							if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
+								propertyItem.Hint = "{;;}";
+							}
+						}
+						else if (a.Count == 1) {
+							if (a[0].Body == null && a[0].ExpressionBody == null) {
+								propertyItem.Hint = "{;}";
+							}
+						}
+					}
 				}
 			}
 
