@@ -440,7 +440,7 @@ namespace Codist.QuickInfo
 			StackPanel infoBox = null;
 			var nodeKind = node.Kind();
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && (nodeKind == SyntaxKind.NumericLiteralExpression || nodeKind == SyntaxKind.CharacterLiteralExpression)) {
-				infoBox = ShowNumericForm(node);
+				infoBox = ToolTipFactory.ShowNumericForms(node);
 			}
 			else if (nodeKind == SyntaxKind.SwitchStatement) {
 				var s = (node as SwitchStatementSyntax).Sections.Count;
@@ -705,7 +705,7 @@ namespace Codist.QuickInfo
 				}
 			}
 			else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
-				var s = ShowNumericForms(value, NumericForm.None);
+				var s = ToolTipFactory.ShowNumericForms(value);
 				if (s != null) {
 					ShowEnumInfo(qiContent, symbol.ContainingType, false);
 					qiContent.Add(s);
@@ -824,60 +824,6 @@ namespace Codist.QuickInfo
 					text.Append(", ").AddSymbol(constraint, _SymbolFormatter);
 				}
 			}
-		}
-
-		static StackPanel ShowNumericForm(SyntaxNode node) {
-			return ShowNumericForms(node.GetFirstToken().Value, node.Parent.Kind() == SyntaxKind.UnaryMinusExpression ? NumericForm.Negative : NumericForm.None);
-		}
-
-		static StackPanel ShowNumericForms(object value, NumericForm form) {
-			if (value == null) {
-				return null;
-			}
-			switch (Type.GetTypeCode(value.GetType())) {
-				case TypeCode.Int32: {
-					var v = (int)value;
-					if (form == NumericForm.Negative) {
-						v = -v;
-					}
-					return ShowNumericForms(
-						form == NumericForm.Unsigned ? ((uint)v).ToString() : v.ToString(),
-						new byte[] { (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
-				}
-				case TypeCode.Int64: {
-					var v = (long)value;
-					if (form == NumericForm.Negative) {
-						v = -v;
-					}
-					return ShowNumericForms(
-						form == NumericForm.Unsigned ? ((ulong)v).ToString() : v.ToString(),
-						new byte[] { (byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
-				}
-				case TypeCode.Byte:
-					return ShowNumericForms(((byte)value).ToString(), new byte[] { (byte)value });
-				case TypeCode.Int16: {
-					var v = (short)value;
-					if (form == NumericForm.Negative) {
-						v = (short)-v;
-					}
-					return ShowNumericForms(
-						form == NumericForm.Unsigned ? ((ushort)v).ToString() : v.ToString(),
-						new byte[] { (byte)(v >> 8), (byte)v });
-				}
-				case TypeCode.Char: {
-					var v = (char)value;
-					return ShowNumericForms(((ushort)v).ToString(), new byte[] { (byte)(v >> 8), (byte)v });
-				}
-				case TypeCode.UInt32:
-					return ShowNumericForms((int)(uint)value, NumericForm.Unsigned);
-				case TypeCode.UInt16:
-					return ShowNumericForms((short)(ushort)value, NumericForm.Unsigned);
-				case TypeCode.UInt64:
-					return ShowNumericForms((long)(ulong)value, NumericForm.Unsigned);
-				case TypeCode.SByte:
-					return ShowNumericForms(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
-			}
-			return null;
 		}
 
 		static StackPanel ShowStringInfo(string sv) {
@@ -1185,53 +1131,9 @@ namespace Codist.QuickInfo
 				qiContent.Add("Argument " + ++argIndex);
 			}
 		}
-		static string ToBinString(byte[] bytes) {
-			using (var sbr = ReusableStringBuilder.AcquireDefault((bytes.Length << 3) + bytes.Length)) {
-				var sb = sbr.Resource;
-				for (int i = 0; i < bytes.Length; i++) {
-					ref var b = ref bytes[i];
-					if (b == 0 && sb.Length == 0) {
-						continue;
-					}
-					if (sb.Length > 0) {
-						sb.Append(' ');
-					}
-					sb.Append(Convert.ToString(b, 2).PadLeft(8, '0'));
-				}
-				return sb.Length == 0 ? "00000000" : sb.ToString();
-			}
-		}
-
-		static string ToHexString(byte[] bytes) {
-			switch (bytes.Length) {
-				case 1: return bytes[0].ToString("X2");
-				case 2: return bytes[0].ToString("X2") + bytes[1].ToString("X2");
-				case 4:
-					return bytes[0].ToString("X2") + bytes[1].ToString("X2") + " " + bytes[2].ToString("X2") + bytes[3].ToString("X2");
-				case 8:
-					return bytes[0].ToString("X2") + bytes[1].ToString("X2") + " " + bytes[2].ToString("X2") + bytes[3].ToString("X2") + " "
-						+ bytes[4].ToString("X2") + bytes[5].ToString("X2") + " " + bytes[6].ToString("X2") + bytes[7].ToString("X2");
-				default:
-					return string.Empty;
-			}
-		}
-
-		static StackPanel ShowNumericForms(string dec, byte[] bytes) {
-			return new StackPanel()
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(dec).Add(new ThemedTipText(" DEC", true)))
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToHexString(bytes)).Add(new ThemedTipText(" HEX", true)))
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToBinString(bytes)).Add(new ThemedTipText(" BIN", true)));
-		}
 
 		static TextBlock ToUIText(ISymbol symbol) {
 			return new ThemedTipText().AddSymbolDisplayParts(symbol.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
-		}
-
-		enum NumericForm
-		{
-			None,
-			Negative,
-			Unsigned
 		}
 	}
 }
