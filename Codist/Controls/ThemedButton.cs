@@ -10,17 +10,26 @@ namespace Codist.Controls
 	{
 		readonly Action _clickHanler;
 
-		public ThemedButton(int imageId, object toolTip, Action onClickHandler)
-			: this(ThemeHelper.GetImage(imageId), toolTip, onClickHandler) { }
-
-		public ThemedButton(object content, object toolTip, Action onClickHandler) {
+		public ThemedButton(object content, object toolTip) {
 			Content = content;
 			ToolTip = toolTip;
 			Margin = WpfHelper.GlyphMargin;
 			this.ReferenceProperty(BackgroundProperty, CommonControlsColors.ButtonBrushKey);
+			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
+		}
+
+		public ThemedButton(int imageId, object toolTip, Action onClickHandler)
+			: this(ThemeHelper.GetImage(imageId), toolTip, onClickHandler) { }
+
+		public ThemedButton(object content, object toolTip, Action onClickHandler)
+			: this(content, toolTip) {
 			_clickHanler = onClickHandler;
 			Click += ThemedButton_Click;
-			this.ReferenceCrispImageBackground(Microsoft.VisualStudio.PlatformUI.EnvironmentColors.MainWindowActiveCaptionColorKey);
+		}
+
+		public ThemedButton(object content, object toolTip, RoutedEventHandler clickHandler)
+			: this(content, toolTip) {
+			Click += clickHandler;
 		}
 
 		void ThemedButton_Click(object sender, RoutedEventArgs e) {

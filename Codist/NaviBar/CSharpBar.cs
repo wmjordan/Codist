@@ -144,7 +144,7 @@ namespace Codist.NaviBar
 				}
 			}
 			async Task Update(CancellationToken token) {
-				var nodes = await UpdateModelAsync(token);
+				var nodes = await UpdateModelAndGetContainingNodesAsync(token);
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(token);
 				var c = Math.Min(Items.Count, nodes.Count);
 				int i, i2;
@@ -153,8 +153,7 @@ namespace Codist.NaviBar
 					if (token.IsCancellationRequested) {
 						return;
 					}
-					var n2 = (Items[i] as NodeItem).Node;
-					if (n2 == n) {
+					if (((NodeItem)Items[i]).Node == n) {
 						// keep the NaviItem if node is not updated
 						++i;
 						continue;
@@ -169,6 +168,7 @@ namespace Codist.NaviBar
 					_RootItem.ClearSymbolList();
 				}
 				c = Items.Count;
+				// remove nodes out of range
 				while (c > i) {
 					Items.RemoveAt(--c);
 				}
@@ -193,6 +193,14 @@ namespace Codist.NaviBar
 					++i2;
 				}
 			}
+		}
+
+		async Task<List<SyntaxNode>> UpdateModelAndGetContainingNodesAsync(CancellationToken token) {
+			var start = _View.GetCaretPosition();
+			if (await _SemanticContext.UpdateAsync(start, token) == false) {
+				return new List<SyntaxNode>();
+			}
+			return _SemanticContext.GetContainingNodes(start, Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail), Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionOnBar));
 		}
 
 		void ViewClosed(object sender, EventArgs e) {
@@ -354,15 +362,6 @@ namespace Codist.NaviBar
 				}
 			}
 			return s > 0 || e < title.Length ? title.Substring(s, e - s) : title;
-		}
-
-
-		async Task<List<SyntaxNode>> UpdateModelAsync(CancellationToken token) {
-			var start = _View.GetCaretPosition();
-			if (await _SemanticContext.UpdateAsync(start, token) == false) {
-				return new List<SyntaxNode>();
-			}
-			return _SemanticContext.GetContainingNodes(start, Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail), Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionOnBar));
 		}
 
 		sealed class RootItem : ThemedMenuItem

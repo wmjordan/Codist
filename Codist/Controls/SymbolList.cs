@@ -71,6 +71,8 @@ namespace Codist.Controls
 		public Func<SymbolItem, UIElement> IconProvider { get; set; }
 		public SymbolItem SelectedSymbolItem => SelectedItem as SymbolItem;
 
+		public bool IsPinned { get; set; }
+
 		public SymbolItem Add(SyntaxNode node) {
 			var item = new SymbolItem(node, this);
 			Symbols.Add(item);
@@ -668,7 +670,11 @@ namespace Codist.Controls
 		public bool IsExternal => Type == SymbolItemType.External
 			|| Container.ContainerType == SymbolListType.None && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
 		public TextBlock Content {
-			get => _Content ?? (_Content = Symbol != null ? CreateContentForSymbol(Symbol, _IncludeContainerType, true) : SyntaxNode != null ? new ThemedMenuText().Append(SyntaxNode.GetDeclarationSignature()) : new ThemedMenuText());
+			get => _Content ?? (_Content = Symbol != null
+				? CreateContentForSymbol(Symbol, _IncludeContainerType, true)
+				: SyntaxNode != null
+					? new ThemedMenuText().Append(SyntaxNode.GetDeclarationSignature())
+					: new ThemedMenuText());
 			set => _Content = value;
 		}
 		public Location Location { get; set; }
@@ -808,7 +814,7 @@ namespace Codist.Controls
 		/// <summary>
 		/// Lists source code locations
 		/// </summary>
-		Locations
+		Locations,
 	}
 	enum SymbolItemType
 	{

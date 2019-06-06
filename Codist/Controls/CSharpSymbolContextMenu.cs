@@ -383,6 +383,7 @@ namespace Codist.Controls
 	sealed class SymbolMenu
 	{
 		readonly ExternalAdornment _Container;
+		readonly StackPanel _HeaderPanel;
 
 		public SymbolList Menu { get; }
 		public ThemedMenuText Title { get; }
@@ -395,7 +396,7 @@ namespace Codist.Controls
 				Container = _Container,
 				ContainerType = listType
 			};
-			Menu.Header = new StackPanel {
+			Menu.Header = _HeaderPanel = new StackPanel {
 				Margin = WpfHelper.MenuItemMargin,
 				Children = {
 						(Title = new ThemedMenuText { TextAlignment = TextAlignment.Center, Padding = WpfHelper.SmallMargin }),
@@ -403,12 +404,22 @@ namespace Codist.Controls
 						new Separator()
 					}
 			};
-			Menu.HeaderButtons = new ThemedButton(KnownImageIds.Close, "Close", () => {
-				_Container.Children.Remove(Menu);
-			});
+			Menu.HeaderButtons = new StackPanel {
+				Orientation = Orientation.Horizontal,
+				Children = {
+					new ThemedButton(ThemeHelper.GetImage(KnownImageIds.Unpin), "Pin", TogglePinButton).ClearMargin(),
+					new ThemedButton(KnownImageIds.Close, "Close", () => _Container.Children.Remove(Menu))
+				}
+			};
 			Menu.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 			Menu.MouseLeftButtonUp += MenuItemSelect;
+			_Container.MakeDraggable(Menu);
 		}
+
+		void TogglePinButton(object sender, RoutedEventArgs e) {
+			((ThemedButton)e.Source).Content = ThemeHelper.GetImage((Menu.IsPinned = !Menu.IsPinned) ? KnownImageIds.Pin : KnownImageIds.Unpin);
+		}
+
 		public void Show() {
 			ShowMenu();
 			UpdateNumbers();

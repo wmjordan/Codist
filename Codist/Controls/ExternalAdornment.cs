@@ -17,6 +17,8 @@ namespace Codist.Controls
 	{
 		readonly Microsoft.VisualStudio.Text.Editor.IWpfTextView _View;
 		int _LayerZIndex;
+		bool _isDragging;
+		Point _beginDragPosition;
 
 		public ExternalAdornment(Microsoft.VisualStudio.Text.Editor.IWpfTextView view) {
 			UseLayoutRounding = true;
@@ -43,9 +45,51 @@ namespace Codist.Controls
 			//	item.MouseLeave -= ReleaseQuickInfo;
 			//	item.MouseEnter -= SuppressQuickInfo;
 			//}
-			Children.Clear();
-			_View.Properties.RemoveProperty(nameof(ExternalAdornment));
+			for (int i = Children.Count - 1; i >= 0; i--) {
+				var c = Children[i] as SymbolList;
+				if (c != null && c.IsPinned) {
+					continue;
+				}
+				Children.RemoveAt(i);
+			}
+			//Children.Clear();
+			//_View.Properties.RemoveProperty(nameof(ExternalAdornment));
 			//_View.VisualElement.Focus();
+		}
+
+		public void MakeDraggable(FrameworkElement draggablePart) {
+			draggablePart.MouseLeftButtonDown += MenuHeader_MouseDown;
+		}
+
+		void MenuHeader_MouseDown(object sender, MouseButtonEventArgs e) {
+			var s = e.Source as UIElement;
+			s.MouseLeftButtonDown -= MenuHeader_MouseDown;
+			s.MouseMove += MenuHeader_DragMove;
+		}
+
+		void MenuHeader_DragMove(object sender, MouseEventArgs e) {
+			var s = e.Source as FrameworkElement;
+			if (e.LeftButton == MouseButtonState.Pressed) {
+				if (_isDragging == false && s.CaptureMouse()) {
+					_isDragging = true;
+					s.Cursor = Cursors.SizeAll;
+					_beginDragPosition = e.GetPosition(s);
+				}
+				else if (_isDragging) {
+					var cp = e.GetPosition(this);
+					SetLeft(s, cp.X - _beginDragPosition.X);
+					SetTop(s, cp.Y - _beginDragPosition.Y);
+				}
+			}
+			else {
+				if (_isDragging) {
+					_isDragging = false;
+					s.Cursor = null;
+					s.MouseMove -= MenuHeader_DragMove;
+					s.ReleaseMouseCapture();
+					s.MouseLeftButtonDown += MenuHeader_MouseDown;
+				}
+			}
 		}
 
 		protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved) {
