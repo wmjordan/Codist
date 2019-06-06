@@ -48,14 +48,21 @@ namespace Codist
 					.Append(" ").AddSymbol(d, SymbolFormatter.Empty)
 					.AddParameters(invoke.Parameters, SymbolFormatter.Empty);
 			}
-			var f = symbol as IFieldSymbol;
-			if (f != null && f.IsConst) {
-				var p = ShowNumericForms(f);
-				if (p != null) {
-					tip.Children.Add(p);
+			ShowAttributes(symbol, content);
+			ShowNumericForms(symbol, tip);
+			return tip;
+		}
+
+		static void ShowNumericForms(ISymbol symbol, ThemedToolTip tip) {
+			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.NumericValues)) {
+				var f = symbol as IFieldSymbol;
+				if (f != null && f.IsConst) {
+					var p = ShowNumericForms(f);
+					if (p != null) {
+						tip.Children.Add(p);
+					}
 				}
 			}
-			return tip;
 		}
 
 		public static ThemedToolTip CreateToolTip(ISymbol symbol, bool forMemberList, Compilation compilation) {
@@ -88,30 +95,35 @@ namespace Codist
 				content.Append("namespace: " + symbol.ContainingNamespace?.ToString())
 					.Append("\nassembly: " + symbol.GetAssemblyModuleName());
 			}
-			foreach (var attr in symbol.GetAttributes()) {
-				SymbolFormatter.Empty.Format(content.AppendLine().Inlines, attr, false);
-			}
-			if (symbol.Kind == SymbolKind.Method) {
-				foreach (var attr in ((IMethodSymbol)symbol).GetReturnTypeAttributes()) {
-					SymbolFormatter.Empty.Format(content.AppendLine().Inlines, attr, true);
-				}
-			}
-			var doc = new XmlDoc(symbol, compilation);
-			var summary = doc.Summary ?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.ExplicitInheritDoc?.Summary : null);
-			if (summary != null) {
-				var docContent = tip.AddTextBlock();
-				new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(summary, docContent);
-				tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
-			}
-
-			var f = symbol as IFieldSymbol;
-			if (f != null && f.IsConst) {
-				var p = ShowNumericForms(f);
-				if (p != null) {
-					tip.Children.Add(p);
-				}
-			}
+			ShowAttributes(symbol, content);
+			ShowXmlDocSummary(symbol, compilation, tip);
+			ShowNumericForms(symbol, tip);
 			return tip;
+		}
+
+		static void ShowXmlDocSummary(ISymbol symbol, Compilation compilation, ThemedToolTip tip) {
+			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.XmlDocSummary)) {
+				var doc = new XmlDoc(symbol, compilation);
+				var summary = doc.Summary ?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.ExplicitInheritDoc?.Summary : null);
+				if (summary != null) {
+					var docContent = tip.AddTextBlock();
+					new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(summary, docContent);
+					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
+				}
+			}
+		}
+
+		static void ShowAttributes(ISymbol symbol, TextBlock content) {
+			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.Attributes)) {
+				foreach (var attr in symbol.GetAttributes()) {
+					SymbolFormatter.Empty.Format(content.AppendLine().Inlines, attr, false);
+				}
+				if (symbol.Kind == SymbolKind.Method) {
+					foreach (var attr in ((IMethodSymbol)symbol).GetReturnTypeAttributes()) {
+						SymbolFormatter.Empty.Format(content.AppendLine().Inlines, attr, true);
+					}
+				}
+			}
 		}
 
 		internal static TTarget SetTipOptions<TTarget>(this TTarget target)

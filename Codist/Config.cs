@@ -51,6 +51,9 @@ namespace Codist
 		[DefaultValue(BuildOptions.Default)]
 		public BuildOptions BuildOptions { get; set; } = BuildOptions.Default;
 
+		[DefaultValue(SymbolToolTipOptions.Default)]
+		public SymbolToolTipOptions SymbolToolTipOptions { get; set; } = SymbolToolTipOptions.Default;
+
 		public double TopSpace { get; set; }
 		public double BottomSpace { get; set; }
 		public double QuickInfoMaxWidth { get; set; }
@@ -260,6 +263,9 @@ namespace Codist
 		}
 		internal void Set(BuildOptions options, bool set) {
 			BuildOptions = EnumHelper.SetFlags(BuildOptions, options, set);
+		}
+		internal void SetSymbolToolTipOptions(SymbolToolTipOptions options, bool set) {
+			SymbolToolTipOptions = EnumHelper.SetFlags(SymbolToolTipOptions, options, set);
 		}
 
 		static void LoadStyleEntries<TStyle, TStyleType> (List<TStyle> styles, bool removeFontNames)
@@ -557,6 +563,16 @@ namespace Codist
 		PartialClassMember = 1 << 14,
 		Region = 1 << 15,
 		Default = RangeHighlight | RegionOnBar | ParameterList | FieldValue | AutoPropertyAnnotation | PartialClassMember | Region
+	}
+
+	[Flags]
+	public enum SymbolToolTipOptions
+	{
+		None,
+		XmlDocSummary = 1,
+		NumericValues = 1 << 1,
+		Attributes = 1 << 2,
+		Default = XmlDocSummary | NumericValues | Attributes
 	}
 
 	[Flags]
