@@ -40,55 +40,13 @@ namespace Codist.Controls
 			_View.VisualElement.Focus();
 		}
 
-		public void Clear() {
-			//foreach (UIElement item in Children) {
-			//	item.MouseLeave -= ReleaseQuickInfo;
-			//	item.MouseEnter -= SuppressQuickInfo;
-			//}
+		public void ClearUnpinnedChildren() {
 			for (int i = Children.Count - 1; i >= 0; i--) {
 				var c = Children[i] as SymbolList;
 				if (c != null && c.IsPinned) {
 					continue;
 				}
 				Children.RemoveAt(i);
-			}
-			//Children.Clear();
-			//_View.Properties.RemoveProperty(nameof(ExternalAdornment));
-			//_View.VisualElement.Focus();
-		}
-
-		public void MakeDraggable(FrameworkElement draggablePart) {
-			draggablePart.MouseLeftButtonDown += MenuHeader_MouseDown;
-		}
-
-		void MenuHeader_MouseDown(object sender, MouseButtonEventArgs e) {
-			var s = e.Source as UIElement;
-			s.MouseLeftButtonDown -= MenuHeader_MouseDown;
-			s.MouseMove += MenuHeader_DragMove;
-		}
-
-		void MenuHeader_DragMove(object sender, MouseEventArgs e) {
-			var s = e.Source as FrameworkElement;
-			if (e.LeftButton == MouseButtonState.Pressed) {
-				if (_isDragging == false && s.CaptureMouse()) {
-					_isDragging = true;
-					s.Cursor = Cursors.SizeAll;
-					_beginDragPosition = e.GetPosition(s);
-				}
-				else if (_isDragging) {
-					var cp = e.GetPosition(this);
-					SetLeft(s, cp.X - _beginDragPosition.X);
-					SetTop(s, cp.Y - _beginDragPosition.Y);
-				}
-			}
-			else {
-				if (_isDragging) {
-					_isDragging = false;
-					s.Cursor = null;
-					s.MouseMove -= MenuHeader_DragMove;
-					s.ReleaseMouseCapture();
-					s.MouseLeftButtonDown += MenuHeader_MouseDown;
-				}
 			}
 		}
 
@@ -115,6 +73,73 @@ namespace Codist.Controls
 				FocusOnTextView();
 			}
 		}
+
+		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
+			base.OnRenderSizeChanged(sizeInfo);
+			foreach (var item in Children) {
+				var child = item as FrameworkElement;
+				if (child != null) {
+					ConstrainChildWindow(child, new Point(GetLeft(child), GetTop(child)));
+				}
+			}
+		}
+
+		void ConstrainChildWindow(FrameworkElement child, Point newPos) {
+			const int ConstraintSize = 30;
+			// constrain window within editor view
+			if (newPos.X + child.ActualWidth < ConstraintSize) {
+				newPos.X = ConstraintSize - child.ActualWidth;
+			}
+			else if (newPos.X > ActualWidth - ConstraintSize) {
+				newPos.X = ActualWidth - ConstraintSize;
+			}
+			if (newPos.Y + child.ActualHeight < ConstraintSize) {
+				newPos.Y = ConstraintSize - child.ActualHeight;
+			}
+			else if (newPos.Y > ActualHeight - ConstraintSize) {
+				newPos.Y = ActualHeight - ConstraintSize;
+			}
+			SetLeft(child, newPos.X);
+			SetTop(child, newPos.Y);
+		}
+
+		#region Draggable
+		public void MakeDraggable(FrameworkElement draggablePart) {
+			draggablePart.MouseLeftButtonDown += MenuHeader_MouseDown;
+		}
+
+		void MenuHeader_MouseDown(object sender, MouseButtonEventArgs e) {
+			var s = e.Source as UIElement;
+			s.MouseLeftButtonDown -= MenuHeader_MouseDown;
+			s.MouseMove += MenuHeader_DragMove;
+		}
+
+		void MenuHeader_DragMove(object sender, MouseEventArgs e) {
+			var s = e.Source as FrameworkElement;
+			if (e.LeftButton == MouseButtonState.Pressed) {
+				if (_isDragging == false && s.CaptureMouse()) {
+					_isDragging = true;
+					s.Cursor = Cursors.SizeAll;
+					_beginDragPosition = e.GetPosition(s);
+				}
+				else if (_isDragging) {
+					var cp = e.GetPosition(this);
+					cp.X -= _beginDragPosition.X;
+					cp.Y -= _beginDragPosition.Y;
+					ConstrainChildWindow(s, cp);
+				}
+			}
+			else {
+				if (_isDragging) {
+					_isDragging = false;
+					s.Cursor = null;
+					s.MouseMove -= MenuHeader_DragMove;
+					s.ReleaseMouseCapture();
+					s.MouseLeftButtonDown += MenuHeader_MouseDown;
+				}
+			}
+		}
+		#endregion
 
 		void VisualElement_Loaded(object sender, RoutedEventArgs e) {
 			_View.VisualElement.Loaded -= VisualElement_Loaded;

@@ -50,7 +50,7 @@ namespace Codist.SmartBars
 
 		void HideMenu() {
 			//if (_SymbolList != null) {
-				_SymbolListContainer.Clear();
+				_SymbolListContainer.ClearUnpinnedChildren();
 			//	_SymbolList.SelectedItem = null;
 			//	_SymbolList = null;
 			//}
