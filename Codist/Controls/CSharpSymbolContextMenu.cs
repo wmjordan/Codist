@@ -19,14 +19,12 @@ namespace Codist.Controls
 		SyntaxNode _Node;
 		ISymbol _Symbol;
 		readonly SemanticContext _SemanticContext;
-		readonly bool _IsVsProject;
 
-		public CSharpSymbolContextMenu(SemanticContext semanticContext, bool isVsProject) {
+		public CSharpSymbolContextMenu(SemanticContext semanticContext) {
 			Resources = SharedDictionaryManager.ContextMenu;
 			Foreground = ThemeHelper.ToolWindowTextBrush;
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			_SemanticContext = semanticContext;
-			_IsVsProject = isVsProject;
 		}
 
 		public SyntaxNode SyntaxNode {
@@ -72,7 +70,7 @@ namespace Codist.Controls
 					CreateCommandForNamedType(_Symbol as INamedTypeSymbol);
 					break;
 				case SymbolKind.Namespace:
-					Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(_Symbol, _SemanticContext, _IsVsProject)));
+					Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(_Symbol, _SemanticContext)));
 					break;
 			}
 			if (_Node != null && _Node.IsDeclaration() && _Symbol.Kind != SymbolKind.Namespace) {
@@ -90,6 +88,15 @@ namespace Codist.Controls
 			Items.Add(CreateItem(KnownImageIds.ListMembers, "Go to Member", GoToMember));
 			Items.Add(CreateItem(KnownImageIds.Type, "Go to Type", GoToType));
 			Items.Add(CreateItem(KnownImageIds.FindSymbol, "Go to Symbol", GoToSymbol));
+		}
+
+		public void AddTitleItem(string name) {
+			Items.Add(new MenuItem {
+				Header = name,
+				IsEnabled = false,
+				Icon = null,
+				HorizontalContentAlignment = HorizontalAlignment.Right
+			});
 		}
 
 		MenuItem CreateItem(int imageId, string title) {
@@ -132,7 +139,7 @@ namespace Codist.Controls
 					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", () => FindCallers(t, _SemanticContext)));
 				}
 			}
-			Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(t, _SemanticContext, _IsVsProject)));
+			Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(t, _SemanticContext)));
 			if (t.IsStatic) {
 				return;
 			}
@@ -158,7 +165,7 @@ namespace Codist.Controls
 		void CreateCommandsForReturnTypeCommand() {
 			var type = _Symbol.GetReturnType();
 			if (type != null && type.SpecialType == SpecialType.None) {
-				Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members of " + type.Name + type.GetParameterString() + "...", () => FindMembers(type, _SemanticContext, _IsVsProject)));
+				Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members of " + type.Name + type.GetParameterString() + "...", () => FindMembers(type, _SemanticContext)));
 				if (type.IsStatic == false) {
 					Items.Add(CreateItem(KnownImageIds.ExtensionMethod, "Find Extensions for " + type.Name + type.GetParameterString() + "...", () => FindExtensionMethods(type, _SemanticContext)));
 				}
@@ -249,9 +256,9 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		static void FindMembers(ISymbol symbol, SemanticContext context, bool isVsProject) {
+		static void FindMembers(ISymbol symbol, SemanticContext context) {
 			var m = new SymbolMenu(context, symbol.Kind == SymbolKind.Namespace ? SymbolListType.TypeList : SymbolListType.None);
-			var (count, inherited) = m.Menu.AddSymbolMembers(symbol, isVsProject);
+			var (count, inherited) = m.Menu.AddSymbolMembers(symbol);
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
 				.Append($" members: {count} ({inherited} inherited)");

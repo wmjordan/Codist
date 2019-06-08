@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AppHelpers;
@@ -13,7 +11,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
@@ -27,7 +24,6 @@ namespace Codist.SmartBars
 	sealed class CSharpSmartBar : SmartBar {
 		static readonly Classifiers.HighlightClassifications __HighlightClassifications = new Classifiers.HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 		readonly SemanticContext _Context;
-		readonly bool _IsVsProject;
 		readonly ExternalAdornment _SymbolListContainer;
 		ISymbol _Symbol;
 
@@ -36,10 +32,6 @@ namespace Codist.SmartBars
 			_Context = SemanticContext.GetOrCreateSingetonInstance(view);
 			_SymbolListContainer = view.Properties.GetOrCreateSingletonProperty(() => new ExternalAdornment(view));
 			View.Selection.SelectionChanged += ViewSeletionChanged;
-			var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];
-			if (extenders != null) {
-				_IsVsProject = Array.IndexOf(extenders, "VsixProjectExtender") != -1;
-			}
 		}
 
 		ToolBar MyToolBar => ToolBar2;
@@ -118,7 +110,7 @@ namespace Codist.SmartBars
 							if (UpdateSemanticModel() == false) {
 								return;
 							}
-							var m = new CSharpSymbolContextMenu(_Context, _IsVsProject) {
+							var m = new CSharpSymbolContextMenu(_Context) {
 								Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 								PlacementTarget = ctx.Sender,
 								Symbol = _Symbol,

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,9 +12,8 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using GDI = System.Drawing;
-using WPF = System.Windows.Media;
 using Task = System.Threading.Tasks.Task;
-using System.IO;
+using WPF = System.Windows.Media;
 
 namespace Codist.Controls
 {
@@ -25,7 +24,6 @@ namespace Codist.Controls
 		public static readonly DependencyProperty ItemsControlMaxHeightProperty = DependencyProperty.Register("ItemsControlMaxHeight", typeof(double), typeof(SymbolList));
 		Predicate<object> _Filter;
 		readonly ToolTip _SymbolTip;
-		readonly CSharpSymbolContextMenu _ContextMenu;
 
 		public SymbolList(SemanticContext semanticContext) {
 			SetValue(VirtualizingPanel.IsVirtualizingProperty, true);
@@ -40,11 +38,7 @@ namespace Codist.Controls
 				Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 				PlacementTarget = this
 			};
-			ContextMenu = _ContextMenu = new CSharpSymbolContextMenu(semanticContext, false) {
-				Resources = SharedDictionaryManager.ContextMenu,
-				Foreground = ThemeHelper.ToolWindowTextBrush,
-				IsEnabled = true,
-			};
+
 		}
 
 		public UIElement Header {
@@ -203,20 +197,20 @@ namespace Codist.Controls
 
 		#region Analysis commands
 
-		public (int count, int inherited) AddSymbolMembers(ISymbol symbol, bool isVsProject) {
-			var count = AddSymbolMembers(symbol, isVsProject, null);
+		public (int count, int inherited) AddSymbolMembers(ISymbol symbol) {
+			var count = AddSymbolMembers(symbol, null);
 			var mi = 0;
 			var type = symbol as INamedTypeSymbol;
 			if (type != null) {
 				switch (type.TypeKind) {
 					case TypeKind.Class:
 						while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
-							mi += AddSymbolMembers(type, isVsProject, type.ToDisplayString(WpfHelper.MemberNameFormat));
+							mi += AddSymbolMembers(type, type.ToDisplayString(WpfHelper.MemberNameFormat));
 						}
 						break;
 					case TypeKind.Interface:
 						foreach (var item in type.AllInterfaces) {
-							mi += AddSymbolMembers(item, isVsProject, item.ToDisplayString(WpfHelper.MemberNameFormat));
+							mi += AddSymbolMembers(item, item.ToDisplayString(WpfHelper.MemberNameFormat));
 						}
 						break;
 				}
@@ -224,44 +218,10 @@ namespace Codist.Controls
 			return (count, mi);
 		}
 
-		public int AddSymbolMembers(ISymbol source, bool isVsProject, string typeCategory) {
+		int AddSymbolMembers(ISymbol source, string typeCategory) {
 			var nsOrType = source as INamespaceOrTypeSymbol;
 			var members = nsOrType.GetMembers().RemoveAll(m => (m as IMethodSymbol)?.AssociatedSymbol != null || m.IsImplicitlyDeclared);
-			if (isVsProject) {
-				switch (nsOrType.Name) {
-					case nameof(KnownImageIds):
-						ContainerType = SymbolListType.VsKnownImage;
-						IconProvider = s => {
-							var f = s.Symbol as IFieldSymbol;
-							return f == null || f.HasConstantValue == false || f.Type.SpecialType != SpecialType.System_Int32
-								? null
-								: ThemeHelper.GetImage((int)f.ConstantValue);
-						};
-						break;
-					case nameof(EnvironmentColors): SetupListForVsUIColors(this, typeof(EnvironmentColors)); break;
-					case nameof(CommonControlsColors): SetupListForVsUIColors(this, typeof(CommonControlsColors)); break;
-					case nameof(CommonDocumentColors): SetupListForVsUIColors(this, typeof(CommonDocumentColors)); break;
-					case nameof(HeaderColors): SetupListForVsUIColors(this, typeof(HeaderColors)); break;
-					case nameof(InfoBarColors): SetupListForVsUIColors(this, typeof(InfoBarColors)); break;
-					case nameof(ProgressBarColors): SetupListForVsUIColors(this, typeof(ProgressBarColors)); break;
-					case nameof(SearchControlColors): SetupListForVsUIColors(this, typeof(SearchControlColors)); break;
-					case nameof(StartPageColors): SetupListForVsUIColors(this, typeof(StartPageColors)); break;
-					case nameof(ThemedDialogColors): SetupListForVsUIColors(this, typeof(ThemedDialogColors)); break;
-					case nameof(TreeViewColors): SetupListForVsUIColors(this, typeof(TreeViewColors)); break;
-					case nameof(VsColors): SetupListForVsResourceColors(this, typeof(VsColors)); break;
-					case nameof(VsBrushes): SetupListForVsResourceBrushes(this, typeof(VsBrushes)); break;
-				}
-			}
-			else {
-				switch (nsOrType.Name) {
-					case nameof(SystemColors):
-					case nameof(GDI.SystemBrushes): SetupListForSystemColors(this); break;
-					case nameof(GDI.Color):
-					case nameof(GDI.Brushes):
-					case nameof(WPF.Colors):
-					case nameof(GDI.KnownColor): SetupListForKnownColors(this); break;
-				}
-			}
+			SetupForSpecialTypes(this, source.ContainingNamespace.ToString(), source.Name);
 			if (source.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
 				// sort enum members by value
 				members = members.Sort(CodeAnalysisHelper.CompareByFieldIntegerConst);
@@ -276,6 +236,49 @@ namespace Codist.Controls
 				}
 			}
 			return members.Length;
+
+			void SetupForSpecialTypes(SymbolList list, string typeNamespace, string typeName) {
+				switch (typeNamespace) {
+					case "System.Drawing":
+						switch (typeName) {
+							case nameof(GDI.SystemBrushes): SetupListForSystemColors(list); return;
+							case nameof(GDI.Color):
+							case nameof(GDI.Brushes):
+							case nameof(GDI.KnownColor): SetupListForKnownColors(list); return;
+						}
+						return;
+					case "System.Windows":
+						if (typeName == nameof(SystemColors)) {
+							SetupListForSystemColors(list);
+						}
+						return;
+					case "Microsoft.VisualStudio.PlatformUI":
+						switch (typeName) {
+							case nameof(EnvironmentColors): SetupListForVsUIColors(list, typeof(EnvironmentColors)); return;
+							case nameof(CommonControlsColors): SetupListForVsUIColors(list, typeof(CommonControlsColors)); return;
+							case nameof(CommonDocumentColors): SetupListForVsUIColors(list, typeof(CommonDocumentColors)); return;
+							case nameof(HeaderColors): SetupListForVsUIColors(list, typeof(HeaderColors)); return;
+							case nameof(InfoBarColors): SetupListForVsUIColors(list, typeof(InfoBarColors)); return;
+							case nameof(ProgressBarColors): SetupListForVsUIColors(list, typeof(ProgressBarColors)); return;
+							case nameof(SearchControlColors): SetupListForVsUIColors(list, typeof(SearchControlColors)); return;
+							case nameof(StartPageColors): SetupListForVsUIColors(list, typeof(StartPageColors)); return;
+							case nameof(ThemedDialogColors): SetupListForVsUIColors(list, typeof(ThemedDialogColors)); return;
+							case nameof(TreeViewColors): SetupListForVsUIColors(list, typeof(TreeViewColors)); return;
+						}
+						return;
+					case "Microsoft.VisualStudio.Shell":
+						switch (typeName) {
+							case nameof(VsColors): SetupListForVsResourceColors(list, typeof(VsColors)); return;
+							case nameof(VsBrushes): SetupListForVsResourceBrushes(list, typeof(VsBrushes)); return;
+						}
+						return;
+					case "Microsoft.VisualStudio.Imaging":
+						if (typeName == nameof(KnownImageIds)) {
+							SetupListForKnownImageIds(list);
+						}
+						return;
+				}
+			}
 
 			void SetupListForVsUIColors(SymbolList symbolList, Type type) {
 				symbolList.ContainerType = SymbolListType.PredefinedColors;
@@ -297,6 +300,15 @@ namespace Codist.Controls
 				symbolList.ContainerType = SymbolListType.PredefinedColors;
 				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name) ?? ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
 			}
+			void SetupListForKnownImageIds(SymbolList symbolList) {
+				symbolList.ContainerType = SymbolListType.VsKnownImage;
+				symbolList.IconProvider = s => {
+					var f = s.Symbol as IFieldSymbol;
+					return f == null || f.HasConstantValue == false || f.Type.SpecialType != SpecialType.System_Int32
+						? null
+						: ThemeHelper.GetImage((int)f.ConstantValue);
+				};
+			}
 			Border GetColorPreviewIcon(WPF.Brush brush) {
 				return new Border {
 					BorderThickness = WpfHelper.TinyMargin,
@@ -313,6 +325,14 @@ namespace Codist.Controls
 		#region Context menu
 		protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
 			base.OnContextMenuOpening(e);
+			var m = ContextMenu as CSharpSymbolContextMenu;
+			if (m == null) {
+				ContextMenu = m = new CSharpSymbolContextMenu(SemanticContext) {
+					Resources = SharedDictionaryManager.ContextMenu,
+					Foreground = ThemeHelper.ToolWindowTextBrush,
+					IsEnabled = true,
+				};
+			}
 			var item = SelectedSymbolItem;
 			if (item == null
 				|| (item.Symbol == null && item.SyntaxNode == null)
@@ -320,17 +340,13 @@ namespace Codist.Controls
 				e.Handled = true;
 				return;
 			}
-			ContextMenu.Items.Clear();
-			SetupContextMenu(item);
-			ContextMenu.Items.Add(new MenuItem {
-				Header = item.SyntaxNode?.GetDeclarationSignature() ?? item.Symbol.Name,
-				IsEnabled = false,
-				Icon = null,
-				HorizontalContentAlignment = HorizontalAlignment.Right
-			});
+			m.Items.Clear();
+			SetupContextMenu(m, item);
+			m.AddTitleItem(item.SyntaxNode?.GetDeclarationSignature() ?? item.Symbol.Name);
+			m.IsOpen = true;
 		}
 
-		void SetupContextMenu(SymbolItem item) {
+		void SetupContextMenu(CSharpSymbolContextMenu menu, SymbolItem item) {
 			if (item.SyntaxNode != null) {
 				SetupMenuCommand(item, KnownImageIds.BlockSelection, "Select Code", s => s.Container.SemanticContext.View.SelectNode(s.SyntaxNode, true));
 				//SetupMenuCommand(item, KnownImageIds.Copy, "Copy Code", s => Clipboard.SetText(s.SyntaxNode.ToFullString()));
@@ -349,10 +365,10 @@ namespace Codist.Controls
 						// ignore failure
 					}
 				});
-				_ContextMenu.Items.Add(new Separator());
-				_ContextMenu.SyntaxNode = item.SyntaxNode;
-				_ContextMenu.Symbol = item.Symbol;
-				_ContextMenu.AddAnalysisCommands();
+				menu.Items.Add(new Separator());
+				menu.SyntaxNode = item.SyntaxNode;
+				menu.Symbol = item.Symbol;
+				menu.AddAnalysisCommands();
 			}
 		}
 

@@ -190,7 +190,6 @@ namespace Codist
 				if (clickAndGo && symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 					MouseEnter += InitInteraction;
 				}
-				ToolTipOpening += ShowSymbolToolTip;
 				ToolTip = String.Empty;
 			}
 
@@ -201,6 +200,35 @@ namespace Codist
 				MouseEnter += Highlight;
 				MouseLeave += Leave;
 				MouseLeftButtonDown += GotoSymbol;
+			}
+
+			protected override void OnToolTipOpening(ToolTipEventArgs e) {
+				base.OnToolTipOpening(e);
+				if (ReferenceEquals(ToolTip, String.Empty)) {
+					ToolTip = ToolTipFactory.CreateToolTip(_Symbol);
+				}
+			}
+			protected override void OnMouseRightButtonDown(MouseButtonEventArgs e) {
+				base.OnMouseRightButtonDown(e);
+				if (ContextMenu != null) {
+					ContextMenu.IsOpen = true;
+					return;
+				}
+				var ctx = GetSemanticContext();
+				if (ctx != null) {
+					var m = new CSharpSymbolContextMenu(ctx) {
+						Symbol = _Symbol
+					};
+					m.AddAnalysisCommands();
+					m.AddTitleItem(_Symbol.Name);
+					ContextMenu = m;
+					m.IsOpen = true;
+				}
+			}
+
+			static SemanticContext GetSemanticContext() {
+				var view = TextEditorHelper.GetMouseOverDocumentView();
+				return view == null ? null : SemanticContext.GetOrCreateSingetonInstance(view);
 			}
 
 			void Highlight(object sender, MouseEventArgs e) {
@@ -217,17 +245,11 @@ namespace Codist
 					r[0].GoToSource();
 				}
 				else {
-					var view = TextEditorHelper.GetMouseOverDocumentView();
-					if (view == null) {
-						return;
+					var ctx = GetSemanticContext();
+					if (ctx != null) {
+						CSharpSymbolContextMenu.ShowLocations(_Symbol, ctx);
 					}
-					CSharpSymbolContextMenu.ShowLocations(_Symbol, SemanticContext.GetOrCreateSingetonInstance(view));
 				}
-			}
-
-			void ShowSymbolToolTip(object sender, ToolTipEventArgs e) {
-				ToolTip = ToolTipFactory.CreateToolTip(_Symbol);
-				ToolTipOpening -= ShowSymbolToolTip;
 			}
 
 		}

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,8 +14,6 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Classification;
-using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.QuickInfo
 {
@@ -35,10 +32,7 @@ namespace Codist.QuickInfo
 			ThreadHelper.ThrowIfNotOnUIThread();
 			_TextBuffer = subjectBuffer;
 			_TextBuffer.Changing += TextBuffer_Changing;
-			var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];
-			if (extenders != null) {
-				_IsVsProject = Array.IndexOf(extenders, "VsixProjectExtender") != -1;
-			}
+			_IsVsProject = TextEditorHelper.IsVsixProject();
 		}
 
 		public void AugmentQuickInfoSession(IQuickInfoSession session, IList<object> qiContent, out ITrackingSpan applicableToSpan) {
