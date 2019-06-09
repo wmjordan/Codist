@@ -307,10 +307,14 @@ namespace Codist.QuickInfo
 			}
 			if (node is LambdaExpressionSyntax
 				|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
-				var ss = node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName);
+				var ss = node is LambdaExpressionSyntax
+					? node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName)
+					: symbol.GetSyntaxNode();
 				if (ss != null) {
 					var df = _SemanticModel.AnalyzeDataFlow(ss);
-					var captured = ss is StatementSyntax || ss.IsKind(SyntaxKind.InvocationExpression) || ss.IsKind(SyntaxKind.ParenthesizedLambdaExpression) || ss.IsKind(SyntaxKind.SimpleLambdaExpression) ? df.DataFlowsIn : df.ReadInside;
+					var captured = ss.IsKind(SyntaxKind.LocalFunctionStatement) ? df.CapturedInside.RemoveAll(i => df.VariablesDeclared.Contains(i))
+						: ss is StatementSyntax || ss.IsKind(SyntaxKind.InvocationExpression) || ss.IsKind(SyntaxKind.ParenthesizedLambdaExpression) || ss.IsKind(SyntaxKind.SimpleLambdaExpression) ? df.DataFlowsIn
+						: df.ReadInside;
 					if (captured.Length > 0) {
 						var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true));
 						int i = 0;
