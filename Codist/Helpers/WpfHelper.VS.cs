@@ -184,7 +184,7 @@ namespace Codist
 			readonly ISymbol _Symbol;
 
 			public SymbolLink(ISymbol symbol, string alias, bool clickAndGo) {
-				Text = alias ?? symbol.Name;
+				Text = alias ?? symbol.GetOriginalName();
 				_Symbol = symbol;
 				TextDecorations = null;
 				if (clickAndGo && symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
@@ -214,21 +214,16 @@ namespace Codist
 					ContextMenu.IsOpen = true;
 					return;
 				}
-				var ctx = GetSemanticContext();
+				var ctx = SemanticContext.GetHovered();
 				if (ctx != null) {
 					var m = new CSharpSymbolContextMenu(ctx) {
 						Symbol = _Symbol
 					};
 					m.AddAnalysisCommands();
-					m.AddTitleItem(_Symbol.Name);
+					m.AddTitleItem(_Symbol.GetOriginalName());
 					ContextMenu = m;
 					m.IsOpen = true;
 				}
-			}
-
-			static SemanticContext GetSemanticContext() {
-				var view = TextEditorHelper.GetMouseOverDocumentView();
-				return view == null ? null : SemanticContext.GetOrCreateSingetonInstance(view);
 			}
 
 			void Highlight(object sender, MouseEventArgs e) {
@@ -245,7 +240,7 @@ namespace Codist
 					r[0].GoToSource();
 				}
 				else {
-					var ctx = GetSemanticContext();
+					var ctx = SemanticContext.GetHovered();
 					if (ctx != null) {
 						CSharpSymbolContextMenu.ShowLocations(_Symbol, ctx);
 					}

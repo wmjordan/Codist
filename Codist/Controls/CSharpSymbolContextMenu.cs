@@ -221,8 +221,7 @@ namespace Codist.Controls
 		}
 
 		static void FindDerivedClasses(ISymbol symbol, SemanticContext context) {
-			var classes = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, context.Document.Project.Solution, null, default)).Cast<ISymbol>().ToList();
-			classes.Sort((a, b) => a.Name.CompareTo(b.Name));
+			var classes = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, context.Document.Project.Solution, null, default)).ToList();
 			ShowSymbolMenuForResult(symbol, context, classes, " derived classes", false);
 		}
 
@@ -332,7 +331,7 @@ namespace Codist.Controls
 			}
 			m.Show();
 		}
-		static void ShowSymbolMenuForResult(ISymbol source, SemanticContext context, List<ISymbol> members, string suffix, bool groupByType) {
+		static void ShowSymbolMenuForResult<TSymbol>(ISymbol source, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType) where TSymbol : ISymbol {
 			members.Sort(CodeAnalysisHelper.CompareSymbol);
 			var m = new SymbolMenu(context);
 			m.Title.SetGlyph(ThemeHelper.GetImage(source.GetImageId()))
@@ -425,7 +424,7 @@ namespace Codist.Controls
 			Menu.HeaderButtons = new StackPanel {
 				Orientation = Orientation.Horizontal,
 				Children = {
-					new ThemedButton(ThemeHelper.GetImage(KnownImageIds.Unpin), "Pin", TogglePinButton).ClearMargin(),
+					new ThemedButton(ThemeHelper.GetImage(KnownImageIds.Unpin), "Pin", TogglePinButton),
 					new ThemedButton(KnownImageIds.Close, "Close", () => _Container.Children.Remove(Menu))
 				}
 			};

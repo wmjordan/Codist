@@ -15,7 +15,7 @@ namespace Codist
 			tip.Title
 				.Append(ThemeHelper.GetImage(symbol.GetImageId()).WrapMargin(WpfHelper.GlyphMargin))
 				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + (symbol as IMethodSymbol).GetSpecialMethodModifier() + symbol.GetSymbolKindName() + " ")
-				.Append(symbol.Name, true)
+				.Append(symbol.GetOriginalName(), true)
 				.Append(symbol.GetParameterString());
 
 			var content = tip.Content;
@@ -72,7 +72,7 @@ namespace Codist
 			}
 			tip.Title
 				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + (symbol as IMethodSymbol).GetSpecialMethodModifier() + symbol.GetSymbolKindName() + " ")
-				.Append(symbol.Name, true)
+				.Append(symbol.GetOriginalName(), true)
 				.Append(symbol.GetParameterString());
 			var content = tip.Content;
 			var t = symbol.GetReturnType();

@@ -342,7 +342,7 @@ namespace Codist.Controls
 			}
 			m.Items.Clear();
 			SetupContextMenu(m, item);
-			m.AddTitleItem(item.SyntaxNode?.GetDeclarationSignature() ?? item.Symbol.Name);
+			m.AddTitleItem(item.SyntaxNode?.GetDeclarationSignature() ?? item.Symbol.GetOriginalName());
 			m.IsOpen = true;
 		}
 
@@ -359,7 +359,7 @@ namespace Codist.Controls
 				}
 				SetupMenuCommand(item, KnownImageIds.DisplayName, "Copy Symbol Name", s => {
 					try {
-						Clipboard.SetDataObject(s.Symbol.Name);
+						Clipboard.SetDataObject(s.Symbol.GetOriginalName());
 					}
 					catch (SystemException) {
 						// ignore failure
@@ -760,7 +760,7 @@ namespace Codist.Controls
 			if (includeType && symbol.ContainingType != null) {
 				t.Append(symbol.ContainingType.Name + symbol.ContainingType.GetParameterString() + ".", ThemeHelper.SystemGrayTextBrush);
 			}
-			t.Append(symbol.Name);
+			t.Append(symbol.GetOriginalName());
 			if (includeParameter) {
 				t.Append(symbol.GetParameterString(), ThemeHelper.SystemGrayTextBrush);
 			}

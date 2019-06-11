@@ -338,7 +338,7 @@ namespace Codist.Controls
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
 							_ClassFilter, _InterfaceFilter, _DelegateFilter, _StructFilter, _EnumFilter, _NamespaceFilter,
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
-							new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearMargin().ClearBorder(),
+							new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearBorder(),
 						},
 						Orientation = Orientation.Horizontal
 					}
@@ -466,7 +466,7 @@ namespace Codist.Controls
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
 							_FieldFilter, _MethodFilter, _TypeFilter,
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
-							new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearMargin().ClearBorder(),
+							new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearBorder(),
 						},
 						Orientation = Orientation.Horizontal
 					}

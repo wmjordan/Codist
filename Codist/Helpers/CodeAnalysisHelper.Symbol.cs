@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Utilities;
-using System.Reflection.Emit;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Codist
 {
@@ -132,9 +132,9 @@ namespace Codist
 			return members;
 		}
 
-		public static async Task<List<ISymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
+		public static async Task<List<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
-			var members = new List<ISymbol>(10);
+			var members = new List<IMethodSymbol>(10);
 			var isValueType = type.IsValueType;
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (typeSymbol.IsStatic == false || typeSymbol.MightContainExtensionMethods == false) {
@@ -225,7 +225,7 @@ namespace Codist
 					if (member.Kind != SymbolKind.NamedType
 						&& member.CanBeReferencedByName
 						&& member.IsAccessible(false)
-						&& filter(member.Name)) {
+						&& filter(member.GetOriginalName())) {
 						yield return member;
 					}
 				}
@@ -335,7 +335,17 @@ namespace Codist
 		public static string GetAssemblyModuleName(this ISymbol symbol) {
 			return symbol.ContainingAssembly?.Modules?.FirstOrDefault()?.Name
 					?? symbol.ContainingAssembly?.Name;
-		} 
+		}
+
+		public static string GetOriginalName(this ISymbol symbol) {
+			if (symbol.Kind == SymbolKind.Method) {
+				var m = (IMethodSymbol)symbol;
+				if (m.MethodKind == MethodKind.ExplicitInterfaceImplementation) {
+					return m.ExplicitInterfaceImplementations[0].Name;
+				}
+			}
+			return symbol.Name;
+		}
 		#endregion
 
 		#region Symbol information
@@ -911,7 +921,7 @@ namespace Codist
 			return false;
 		}
 
-		public static int CompareSymbol(ISymbol a, ISymbol b) {
+		public static int CompareSymbol<TSymbol>(TSymbol a, TSymbol b) where TSymbol : ISymbol {
 			var s = b.ContainingAssembly.GetSourceType().CompareTo(a.ContainingAssembly.GetSourceType());
 			if (s != 0) {
 				return s;

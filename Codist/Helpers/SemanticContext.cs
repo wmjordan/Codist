@@ -19,6 +19,10 @@ namespace Codist
 		SyntaxNode _Node, _NodeIncludeTrivia;
 		IOutliningManager _OutliningManager;
 
+		public static SemanticContext GetHovered() {
+			var view = TextEditorHelper.GetMouseOverDocumentView();
+			return view == null ? null : GetOrCreateSingetonInstance(view);
+		}
 		public static SemanticContext GetOrCreateSingetonInstance(IWpfTextView view) {
 			return view.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(view));
 		}

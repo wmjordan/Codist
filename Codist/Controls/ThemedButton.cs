@@ -13,7 +13,6 @@ namespace Codist.Controls
 		public ThemedButton(object content, object toolTip) {
 			Content = content;
 			ToolTip = toolTip;
-			Margin = WpfHelper.GlyphMargin;
 			this.ReferenceProperty(BackgroundProperty, CommonControlsColors.ButtonBrushKey);
 			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
