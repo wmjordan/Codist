@@ -384,6 +384,24 @@ namespace Codist
 		public static int ItemCount(this ListBox listBox) {
 			return listBox.ItemContainerGenerator.Items.Count;
 		}
+
+		public static void ScrollToSelectedItem(this ListBox listBox) {
+			if (listBox.SelectedIndex == -1) {
+				return;
+			}
+			try {
+				listBox.UpdateLayout();
+			}
+			catch (InvalidOperationException) {
+				// ignore
+#if DEBUG
+				throw;
+#endif
+			}
+			listBox.ScrollIntoView(listBox.ItemContainerGenerator.Items[listBox.SelectedIndex]);
+		}
+
+
 		public static TItem Get<TItem>(this ResourceDictionary items, object key) {
 			return (items != null && items.Contains(key) && items[key] is TItem item)
 				? item

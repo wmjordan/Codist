@@ -96,21 +96,6 @@ namespace Codist.Controls
 				ItemsSource = Symbols;
 			}
 		}
-		public void ScrollToSelectedItem() {
-			if (SelectedIndex == -1) {
-				return;
-			}
-			try {
-				UpdateLayout();
-			}
-			catch (InvalidOperationException) {
-				// ignore
-#if DEBUG
-				throw;
-#endif
-			}
-			ScrollIntoView(ItemContainerGenerator.Items[SelectedIndex]);
-		}
 
 		protected override void OnPreviewKeyDown(KeyEventArgs e) {
 			base.OnPreviewKeyDown(e);
@@ -134,44 +119,44 @@ namespace Codist.Controls
 				case Key.Up:
 					if (SelectedIndex > 0) {
 						SelectedIndex--;
-						ScrollToSelectedItem();
+						this.ScrollToSelectedItem();
 					}
 					else if (HasItems) {
 						SelectedIndex = this.ItemCount() - 1;
-						ScrollToSelectedItem();
+						this.ScrollToSelectedItem();
 					}
 					e.Handled = true;
 					break;
 				case Key.Down:
 					if (SelectedIndex < this.ItemCount() - 1) {
 						SelectedIndex++;
-						ScrollToSelectedItem();
+						this.ScrollToSelectedItem();
 					}
 					else if (HasItems) {
 						SelectedIndex = 0;
-						ScrollToSelectedItem();
+						this.ScrollToSelectedItem();
 					}
 					e.Handled = true;
 					break;
 				case Key.PageUp:
 					if (SelectedIndex >= 10) {
 						SelectedIndex -= 10;
-						ScrollToSelectedItem();
+						this.ScrollToSelectedItem();
 					}
 					else if (HasItems) {
 						SelectedIndex = 0;
-						ScrollToSelectedItem();
+						this.ScrollToSelectedItem();
 					}
 					e.Handled = true;
 					break;
 				case Key.PageDown:
 					if (SelectedIndex >= this.ItemCount() - 10) {
 						SelectedIndex = this.ItemCount() - 1;
-						ScrollToSelectedItem();
+						this.ScrollToSelectedItem();
 					}
 					else if (HasItems) {
 						SelectedIndex += 10;
-						ScrollToSelectedItem();
+						this.ScrollToSelectedItem();
 					}
 					e.Handled = true;
 					break;
@@ -739,13 +724,13 @@ namespace Codist.Controls
 			if (Location != null && Location.IsInSource) {
 				Location.GoToSource();
 			}
-			else if (Symbol != null) {
-				RefreshSymbol();
-				Symbol.GoToSource();
-			}
 			else if (SyntaxNode != null) {
 				RefreshSyntaxNode();
 				SyntaxNode.GetIdentifierToken().GetLocation().GoToSource();
+			}
+			else if (Symbol != null) {
+				RefreshSymbol();
+				Symbol.GoToSource();
 			}
 		}
 		public bool SelectIfContainsPosition(int position) {
