@@ -14,6 +14,7 @@ namespace Codist
 {
 	static partial class WpfHelper
 	{
+		static readonly string DummyToolTip = String.Empty;
 		internal const int IconRightMargin = 5;
 		internal const int SmallMarginSize = 3;
 		internal static readonly WpfColor EmptyColor = new WpfColor();
@@ -249,6 +250,7 @@ namespace Codist
 			return new Border { Margin = thickness, Child = element };
 		}
 		#endregion
+
 		#region WPF tree
 		public static DependencyObject GetParent(this DependencyObject obj) {
 			return obj is System.Windows.Media.Visual ? VisualTreeHelper.GetParent(obj) : LogicalTreeHelper.GetParent(obj);
@@ -426,6 +428,15 @@ namespace Codist
 			}
 		}
 
+		public static TObject UseDummyToolTip<TObject>(this TObject item)
+			where TObject : FrameworkElement {
+			item.ToolTip = DummyToolTip;
+			return item;
+		}
+
+		public static bool HasDummyToolTip(this FrameworkElement item) {
+			return ReferenceEquals(item.ToolTip, DummyToolTip);
+		}
 		#endregion
 	}
 

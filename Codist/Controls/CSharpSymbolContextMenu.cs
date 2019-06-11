@@ -39,6 +39,11 @@ namespace Codist.Controls
 
 		public event RoutedEventHandler ItemClicked;
 
+		public void AddNodeCommands() {
+			Items.Add(CreateItem(KnownImageIds.GoToDefinition, "Go to Code", GoToNode));
+			Items.Add(CreateItem(KnownImageIds.BlockSelection, "Select Code", SelectNode));
+		}
+
 		public void AddAnalysisCommands() {
 			switch (_Symbol.Kind) {
 				case SymbolKind.Method:
@@ -357,6 +362,12 @@ namespace Codist.Controls
 		}
 		static void GoToSymbol(object sender, RoutedEventArgs args) {
 			TextEditorHelper.ExecuteEditorCommand("Edit.GoToSymbol");
+		}
+		void GoToNode(object sender, RoutedEventArgs args) {
+			_Node.GetReference().GoToSource();
+		}
+		void SelectNode(object sender, RoutedEventArgs args) {
+			_SemanticContext.View.SelectNode(_Node, true);
 		}
 		#endregion
 

@@ -392,7 +392,7 @@ namespace Codist.NaviBar
 									(_FinderBox = new MemberFinderBox() { MinWidth = 150 }),
 									(_ScopeBox = new SearchScopeBox {
 										Contents = {
-											new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearBorder().ClearMargin()
+											new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearBorder()
 										}
 									}),
 								}
@@ -569,11 +569,9 @@ namespace Codist.NaviBar
 				this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
 				Click += HandleClick;
-				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SymbolToolTip)) {
-					ToolTip = String.Empty;
-					ToolTipOpening += NodeItem_ToolTipOpening;
-				}
+				this.UseDummyToolTip();
 			}
+
 			public SyntaxNode Node { get; private set; }
 
 			async void HandleClick(object sender, RoutedEventArgs e) {
@@ -827,22 +825,46 @@ namespace Codist.NaviBar
 				}
 			}
 
-			async void NodeItem_ToolTipOpening(object sender, ToolTipEventArgs e) {
-				// todo: handle updated syntax node for RootItem
-				var symbol = await _Bar._SemanticContext.GetSymbolAsync(Node, _Bar._cancellationSource.GetToken());
-				if (symbol != null) {
-					var tip = ToolTipFactory.CreateToolTip(symbol, true, _Bar._SemanticContext.SemanticModel.Compilation);
-					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
-						tip.AddTextBlock()
-					   .Append("Line of code: " + (Node.GetLineSpan().Length + 1));
+			protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
+				base.OnContextMenuOpening(e);
+				if (ContextMenu == null) {
+					var m = new CSharpSymbolContextMenu(_Bar._SemanticContext) {
+						SyntaxNode = Node
+					};
+					m.AddNodeCommands();
+					m.AddTitleItem(Node.GetDeclarationSignature());
+					m.PlacementTarget = this;
+					m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+					ContextMenu = m;
+				}
+				if (ContextMenu != null) {
+					ContextMenu.IsOpen = true;
+				}
+			}
+
+			protected override void OnToolTipOpening(ToolTipEventArgs e) {
+				base.OnToolTipOpening(e);
+				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SymbolToolTip) == false) {
+					ToolTip = null;
+					return;
+				}
+
+				if (this.HasDummyToolTip()) {
+					// todo: handle updated syntax node for RootItem
+					var symbol = ThreadHelper.JoinableTaskFactory.Run(() => _Bar._SemanticContext.GetSymbolAsync(Node, CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true).GetToken()));
+					if (symbol != null) {
+						var tip = ToolTipFactory.CreateToolTip(symbol, true, _Bar._SemanticContext.SemanticModel.Compilation);
+						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
+							tip.AddTextBlock()
+						   .Append("Line of code: " + (Node.GetLineSpan().Length + 1));
+						}
+						ToolTip = tip;
 					}
-					ToolTip = tip;
+					else {
+						ToolTip = Node.GetSyntaxBrief();
+					}
+					this.SetTipOptions();
 				}
-				else {
-					ToolTip = Node.GetSyntaxBrief();
-				}
-				this.SetTipOptions();
-				ToolTipOpening -= NodeItem_ToolTipOpening;
 			}
 
 			bool ISymbolFilter.Filter(int filterTypes) {
