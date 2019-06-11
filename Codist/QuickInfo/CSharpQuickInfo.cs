@@ -536,10 +536,14 @@ namespace Codist.QuickInfo
 
 		static ThemedTipParagraph ListAttributes(ThemedTipParagraph p, ImmutableArray<AttributeData> attrs, bool isMethodReturnAttrs) {
 			if (attrs.Length > 0) {
-				if (p == null) {
-					p = new ThemedTipParagraph(KnownImageIds.FormPostBodyParameterNode, new ThemedTipText().Append("Attribute:", true));
+				foreach (var item in attrs) {
+					if (item.AttributeClass.IsAccessible(true)) {
+						if (p == null) {
+							p = new ThemedTipParagraph(KnownImageIds.FormPostBodyParameterNode, new ThemedTipText().Append("Attribute:", true));
+						}
+						_SymbolFormatter.Format(p.Content.AppendLine().Inlines, item, isMethodReturnAttrs);
+					}
 				}
-				ShowAttributes(p, attrs, isMethodReturnAttrs);
 			}
 			return p;
 		}
@@ -830,14 +834,6 @@ namespace Codist.QuickInfo
 				//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.UTF8.GetByteCount(sv).ToString()).AddText("UTF-8 bytes", true))
 				//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.Default.GetByteCount(sv).ToString()).AddText("System bytes", true))
 				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).Add(new ThemedTipText("Hash code", true)));
-		}
-
-		static void ShowAttributes(ThemedTipParagraph p, ImmutableArray<AttributeData> attrs, bool isReturn) {
-			foreach (var item in attrs) {
-				if (item.AttributeClass.IsAccessible(true)) {
-					_SymbolFormatter.Format(p.Content.AppendLine().Inlines, item, isReturn);
-				}
-			}
 		}
 
 		static void ShowBaseType(IList<object> qiContent, ITypeSymbol typeSymbol) {
