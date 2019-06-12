@@ -28,22 +28,13 @@ namespace Codist.SmartBars
 			}
 			ctx.KeepToolBar(false);
 			TextEditorHelper.ExecuteEditorCommand(command);
-			if (Keyboard.Modifiers == ModifierKeys.Control) {
-				FindNext(ctx, text);
+			if (Keyboard.Modifiers == ModifierKeys.Control && FindNext(ctx, text) == false) {
+				ctx.HideToolBar();
 			}
 		}
 
-		protected static void FindNext(CommandContext ctx, string t) {
-			if (String.IsNullOrEmpty(t)) {
-				return;
-			}
-			var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t, FindOptions.MatchCase);
-			if (r.HasValue) {
-				ctx.View.SelectSpan(r.Value);
-			}
-			else {
-				ctx.HideToolBar();
-			}
+		protected static bool FindNext(CommandContext ctx, string t) {
+			return ctx.View.FindNext(ctx.TextSearchService, t);
 		}
 
 		protected static SnapshotSpan Replace(CommandContext ctx, Func<string, string> replaceHandler, bool selectModified) {
@@ -62,9 +53,8 @@ namespace Codist.SmartBars
 			});
 			if (edited != null) {
 				firstModified = edited.Value;
-				if (t != null
-					&& Keyboard.Modifiers == ModifierKeys.Control) {
-					FindNext(ctx, t);
+				if (t != null && Keyboard.Modifiers == ModifierKeys.Control && FindNext(ctx, t) == false) {
+					ctx.HideToolBar();
 				}
 				else if (selectModified) {
 					ctx.View.SelectSpan(firstModified);
@@ -75,42 +65,15 @@ namespace Codist.SmartBars
 
 		/// <summary>When selection is not surrounded with <paramref name="prefix"/> and <paramref name="suffix"/>, surround each span of the corrent selection with <paramref name="prefix"/> and <paramref name="suffix"/>, and optionally select the first modified span if <paramref name="selectModified"/> is <see langword="true"/>; when surrounded, remove them.</summary>
 		/// <returns>The new span after modification. If modification is unsuccessful, the default of <see cref="SnapshotSpan"/> is returned.</returns>
-		protected static SnapshotSpan SurroundWith(CommandContext ctx, string prefix, string suffix, bool selectModified) {
-			var firstModified = new SnapshotSpan();
-			var psLength = prefix.Length + suffix.Length;
-			var removed = false;
-			string t = null;
+		protected static SnapshotSpan WrapWith(CommandContext ctx, string prefix, string suffix, bool selectModified) {
+			string s = ctx.View.GetFirstSelectionText();
 			ctx.KeepToolBar(false);
-			using (var edit = ctx.View.TextSnapshot.TextBuffer.CreateEdit()) {
-				foreach (var item in ctx.View.Selection.SelectedSpans) {
-					t = item.GetText();
-					// remove surrounding items
-					if (t.Length > psLength
-						&& t.StartsWith(prefix, StringComparison.Ordinal)
-						&& t.EndsWith(suffix, StringComparison.Ordinal)
-						&& t.IndexOf(prefix, prefix.Length, t.Length - psLength) <= t.IndexOf(suffix, prefix.Length, t.Length - psLength)) {
-						if (edit.Replace(item, t.Substring(prefix.Length, t.Length - psLength))
-							&& firstModified.Snapshot == null) {
-							firstModified = item;
-							removed = true;
-						}
-					}
-					// surround items
-					else if (edit.Replace(item, prefix + t + suffix) && firstModified.Snapshot == null) {
-						firstModified = item;
-					}
-				}
-				if (edit.HasEffectiveChanges) {
-					var snapsnot = edit.Apply();
-					firstModified = new SnapshotSpan(snapsnot, firstModified.Start, removed ? firstModified.Length - psLength : firstModified.Length + psLength);
-					if (t != null
-						&& Keyboard.Modifiers == ModifierKeys.Control) {
-						FindNext(ctx, t);
-					}
-					else if (selectModified) {
-						ctx.View.SelectSpan(firstModified);
-					}
-				}
+			var firstModified = ctx.View.WrapWith(prefix, suffix);
+			if (s != null && Keyboard.Modifiers == ModifierKeys.Control && FindNext(ctx, s) == false) {
+				ctx.HideToolBar();
+			}
+			else if (selectModified) {
+				ctx.View.SelectSpan(firstModified);
 			}
 			return firstModified;
 		}
@@ -308,7 +271,7 @@ namespace Codist.SmartBars
 				}),
 				new CommandItem(KnownImageIds.MaskedTextBox, "Toggle Parentheses", ctx => {
 					if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
-						SurroundWith(ctx, "(", ")", true);
+						WrapWith(ctx, "(", ")", true);
 					}
 				}),
 			};

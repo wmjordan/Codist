@@ -241,7 +241,7 @@ namespace Codist.SmartBars
 
 		void AddXmlDocCommands() {
 			AddCommand(MyToolBar, KnownImageIds.MarkupTag, "Tag XML Doc with <c>", ctx => {
-				SurroundWith(ctx, "<c>", "</c>", true);
+				WrapWith(ctx, "<c>", "</c>", true);
 			});
 			AddCommand(MyToolBar, KnownImageIds.GoToNext, "Tag XML Doc with <see> or <paramref>", ctx => {
 				// updates the semantic model before executing the command,
@@ -250,8 +250,10 @@ namespace Codist.SmartBars
 					return;
 				}
 				ctx.View.Edit((view, edit) => {
+					ctx.KeepToolBar(true);
+					string t = null;
 					foreach (var item in view.Selection.SelectedSpans) {
-						var t = item.GetText();
+						t = item.GetText();
 						var d = _Context.GetNode(item.Start, false, false).GetAncestorOrSelfDeclaration();
 						if (d != null) {
 							if (((d as BaseMethodDeclarationSyntax)?.ParameterList
@@ -267,19 +269,22 @@ namespace Codist.SmartBars
 						}
 						edit.Replace(item, (SyntaxFacts.GetKeywordKind(t) != SyntaxKind.None ? "<see langword=\"" : "<see cref=\"") + t + "\"/>");
 					}
+					if (t != null && Keyboard.Modifiers == ModifierKeys.Control && FindNext(ctx, t) == false) {
+						ctx.HideToolBar();
+					}
 				});
 			});
 			AddCommand(MyToolBar, KnownImageIds.ParagraphHardReturn, "Tag XML Doc with <para>", ctx => {
-				SurroundWith(ctx, "<para>", "</para>", false);
+				WrapWith(ctx, "<para>", "</para>", false);
 			});
 			AddCommand(MyToolBar, KnownImageIds.Bold, "Tag XML Doc with HTML <b>", ctx => {
-				SurroundWith(ctx, "<b>", "</b>", true);
+				WrapWith(ctx, "<b>", "</b>", true);
 			});
 			AddCommand(MyToolBar, KnownImageIds.Italic, "Tag XML Doc with HTML <i>", ctx => {
-				SurroundWith(ctx, "<i>", "</i>", true);
+				WrapWith(ctx, "<i>", "</i>", true);
 			});
 			AddCommand(MyToolBar, KnownImageIds.Underline, "Tag XML Doc with HTML <u>", ctx => {
-				SurroundWith(ctx, "<u>", "</u>", true);
+				WrapWith(ctx, "<u>", "</u>", true);
 			});
 			AddCommand(MyToolBar, KnownImageIds.CommentCode, "Comment selection\nRight click: Comment line", ctx => {
 				if (ctx.RightClick) {

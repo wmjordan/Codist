@@ -12,6 +12,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
+using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
@@ -254,6 +255,49 @@ namespace Codist
 			}
 		}
 
+		public static bool FindNext(this ITextView view, ITextSearchService2 searchService, string text) {
+			if (String.IsNullOrEmpty(text)) {
+				return false;
+			}
+			var r = searchService.Find(view.Selection.StreamSelectionSpan.End.Position, text, FindOptions.MatchCase);
+			if (r.HasValue) {
+				view.SelectSpan(r.Value);
+				return true;
+			}
+			return false;
+		}
+
+		public static SnapshotSpan WrapWith(this ITextView view, string prefix, string suffix) {
+			var firstModified = new SnapshotSpan();
+			var psLength = prefix.Length + suffix.Length;
+			var removed = false;
+			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+				foreach (var item in view.Selection.SelectedSpans) {
+					var t = item.GetText();
+					// remove surrounding items
+					if (t.Length > psLength
+						&& t.StartsWith(prefix, StringComparison.Ordinal)
+						&& t.EndsWith(suffix, StringComparison.Ordinal)
+						&& t.IndexOf(prefix, prefix.Length, t.Length - psLength) <= t.IndexOf(suffix, prefix.Length, t.Length - psLength)) {
+						if (edit.Replace(item, t.Substring(prefix.Length, t.Length - psLength))
+							&& firstModified.Snapshot == null) {
+							firstModified = item;
+							removed = true;
+						}
+					}
+					// surround items
+					else if (edit.Replace(item, prefix + t + suffix) && firstModified.Snapshot == null) {
+						firstModified = item;
+					}
+				}
+				if (edit.HasEffectiveChanges) {
+					var snapsnot = edit.Apply();
+					firstModified = new SnapshotSpan(snapsnot, firstModified.Start, removed ? firstModified.Length - psLength : firstModified.Length + psLength);
+				}
+			}
+			return firstModified;
+		}
+
 
 		public static void CopyOrMoveSyntaxNode(this IWpfTextView view, SyntaxNode sourceNode, SyntaxNode targetNode, bool copy, bool before) {
 			var tSpan = (targetNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? targetNode.Parent.Parent : targetNode).GetSematicSpan(false);
@@ -351,6 +395,10 @@ namespace Codist
 		#endregion
 
 		#region TextView and editor
+		public static bool LikeContentType(this ITextBuffer textBuffer, string typeName) {
+			return textBuffer.ContentType.TypeName.IndexOf(typeName) != -1;
+		}
+
 		public static IWpfTextView GetMouseOverDocumentView() {
 			return _MouseOverTextView;
 		}
