@@ -142,6 +142,7 @@ namespace Codist.Controls
 				case KnownImageIds.InterfacePublic:
 				case KnownImageIds.StructurePublic:
 				case KnownImageIds.EnumerationPublic:
+				case KnownImageIds.EnumerationItemPublic:
 				case KnownImageIds.DelegatePublic:
 				case KnownImageIds.Namespace:
 					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.TypeAndNamespace);
