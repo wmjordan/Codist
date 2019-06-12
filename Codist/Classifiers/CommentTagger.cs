@@ -30,7 +30,7 @@ namespace Codist.Classifiers
 			var vp = textView.Properties;
 			var tagger = vp.GetOrCreateSingletonProperty(() => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
 			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
-			var codeTagger = vp.GetOrCreateSingletonProperty(() => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, tagger, tags, codeType));
+			var codeTagger = vp.GetOrCreateSingletonProperty(nameof(CommentTaggerProvider), () => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, tagger, tags, codeType));
 			textView.Closed += TextViewClosed;
 			return codeTagger as ITagger<T>;
 		}
@@ -51,7 +51,7 @@ namespace Codist.Classifiers
 			var textView = sender as ITextView;
 			textView.Closed -= TextViewClosed;
 			textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>(typeof(ITagAggregator<IClassificationTag>))?.Dispose();
-			textView.Properties.GetProperty<CommentTagger>(typeof(CommentTagger))?.Dispose();
+			textView.Properties.GetProperty<CommentTagger>(nameof(CommentTaggerProvider))?.Dispose();
 		}
 
 		abstract class CommentTagger : ITagger<IClassificationTag>, IDisposable
@@ -64,9 +64,7 @@ namespace Codist.Classifiers
 			readonly HashSet<string> _ClassificationTypes = new HashSet<string>();
 #endif
 
-#pragma warning disable 67
 			public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
-#pragma warning restore 67
 
 			protected CommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) {
 				if (__CommentClassifications == null) {
@@ -135,6 +133,7 @@ namespace Codist.Classifiers
 					yield break;
 				}
 
+				TaggedContentSpan ts, s = null;
 				foreach (var tagSpan in tagSpans) {
 #if DEBUG
 					var c = tagSpan.Tag.ClassificationType.Classification;
@@ -142,10 +141,16 @@ namespace Codist.Classifiers
 						Debug.WriteLine("Classification type: " + c);
 					}
 #endif
-					var ts = TagComments(tagSpan.Span.GetSpans(snapshot)[0], tagSpan);
+					ts = TagComments(tagSpan.Span.GetSpans(snapshot)[0], tagSpan);
 					if (ts != null) {
+						if (s == null) {
+							s = ts;
+						}
 						yield return _Tags.Add(ts);
 					}
+				}
+				if (s != null) {
+					TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(s.Span));
 				}
 			}
 
@@ -223,7 +228,7 @@ namespace Codist.Classifiers
 				return label.StyleApplication == CommentStyleApplication.Tag
 					? new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + commentStart, label.LabelLength, contentStart - commentStart, contentEnd - contentStart)
 					: label.StyleApplication == CommentStyleApplication.Content
-					? new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + contentStart, contentEnd - contentStart, contentStart - commentStart, contentEnd - contentStart)
+					? new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + contentStart, contentEnd - contentStart, 0, contentEnd - contentStart)
 					: new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + commentStart, contentEnd - commentStart, contentStart - commentStart, contentEnd - contentStart);
 			}
 

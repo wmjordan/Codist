@@ -8,6 +8,7 @@ using Codist.Classifiers;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Margins
 {
@@ -19,6 +20,7 @@ namespace Codist.Margins
 		readonly IEditorFormatMap _EditorFormatMap;
 		readonly IVerticalScrollBar _ScrollBar;
 		readonly TaggerResult _Tags;
+		readonly ITagger<IClassificationTag> _CommentTagger;
 
 		//ToDo: Configurable marker styles
 		//ToDo: Change brush colors according to user settings
@@ -33,6 +35,7 @@ namespace Codist.Margins
 		static readonly Brush UndoneBrush = new SolidColorBrush(Constants.UndoneColor);
 		static readonly Brush TaskBrush = new SolidColorBrush(Constants.TaskColor);
 		static readonly Brush PreProcessorBrush = Brushes.Gray;
+		static readonly Brush TaskBackgroundBrsh = Brushes.White.Alpha(0.5);
 		//note: this dictionary determines which style has a scrollbar marker
 		static readonly Dictionary<string, Brush> ClassificationBrushMapper = new Dictionary<string, Brush> {
 			{ Constants.EmphasisComment, EmphasisBrush },
@@ -63,13 +66,18 @@ namespace Codist.Margins
 
 			_ScrollBar = verticalScrollbar;
 			_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
+			if (textView.Properties.TryGetProperty(nameof(CommentTaggerProvider), out _CommentTagger)) {
+				_CommentTagger.TagsChanged += (s, args) => {
+					InvalidateVisual();
+				};
+			}
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 
 			Width = MarkSize + MarkPadding + MarkPadding + /*extra padding*/ 2 * MarkPadding;
 
 			Visibility = Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.CodeMarginMask) ? Visibility.Visible : Visibility.Collapsed;
 			Config.Updated += Config_Updated;
-			//subscribe to change events and use them to update the markers
+			//subscribe to change events and use them to clean up and update the markers
 			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
 			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 			//_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
@@ -109,34 +117,7 @@ namespace Codist.Margins
 			if (args.Changes.Count == 0) {
 				return;
 			}
-			Debug.WriteLine($"snapshot version: {args.AfterVersion.VersionNumber}");
-			var tags = _Tags.Tags;
-			foreach (var change in args.Changes) {
-				Debug.WriteLine($"change:{change.OldPosition}->{change.NewPosition}");
-				for (int i = tags.Count - 1; i >= 0; i--) {
-					var t = tags[i];
-					if (!(t.Start > change.OldEnd || t.End < change.OldPosition)) {
-						// remove tags within the updated range
-						Debug.WriteLine($"Removed [{t.Start}..{t.End}) {t.Tag.ClassificationType}");
-						tags.RemoveAt(i);
-					}
-					else if (t.Start > change.OldEnd) {
-						// shift positions of remained items
-						t.Shift(change.Delta);
-					}
-				}
-			}
-			try {
-				_Tags.Version = args.AfterVersion.VersionNumber;
-				_Tags.LastParsed = args.Before.GetLineFromPosition(args.Changes[0].OldPosition).Start.Position;
-			}
-			catch (ArgumentOutOfRangeException) {
-				MessageBox.Show(String.Join("\n",
-					"Code margin exception:", args.Changes[0].OldPosition,
-					"Before length:", args.Before.Length,
-					"After length:", args.After.Length
-				));
-			}
+			_Tags.PurgeOutdatedTags(args);
 			InvalidateVisual();
 		}
 
@@ -164,9 +145,7 @@ namespace Codist.Margins
 					_ScrollBar.TrackSpanChanged += OnMappingChanged;
 					return true;
 				}
-				else {
-					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
-				}
+				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 			}
 
 			return false;
@@ -184,7 +163,7 @@ namespace Codist.Margins
 		/// <param name="drawingContext">The <see cref="DrawingContext"/> used to render the margin.</param>
 		protected override void OnRender(DrawingContext drawingContext) {
 			base.OnRender(drawingContext);
-			if (_TextView.IsClosed == false && _Tags.Tags.Count > 0) {
+			if (_TextView.IsClosed == false && _Tags.HasTag) {
 				DrawMarkers(drawingContext);
 			}
 		}
@@ -192,11 +171,9 @@ namespace Codist.Margins
 		void DrawMarkers(DrawingContext drawingContext) {
 			var lastY = 0.0;
 			Brush lastBrush = null;
-			var tags = new List<TaggedContentSpan>(_Tags.Tags);
-			tags.Sort((x, y) => x.Start - y.Start);
 			var snapshot = _TextView.TextSnapshot;
 			var snapshotLength = snapshot.Length;
-			foreach (var tag in tags) {
+			foreach (var tag in _Tags.GetTags()) {
 				if (tag.End >= snapshotLength) {
 					continue;
 				}
@@ -222,7 +199,7 @@ namespace Codist.Margins
 						continue;
 					}
 					//note the text relies on the last character of Constants.Task1Comment, etc.
-					DrawTaskMark(drawingContext, b, y, c[c.Length - 1].ToString());
+					DrawTaskMark(drawingContext, b, y, c[c.Length - 1].ToString(), tag.ContentText);
 				}
 				else {
 					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
@@ -235,10 +212,13 @@ namespace Codist.Margins
 			}
 		}
 
-		static void DrawTaskMark(DrawingContext dc, Brush brush, double y, string taskName) {
-			var ft = WpfHelper.ToFormattedText(taskName, 9, Brushes.White).SetBold();
+		static void DrawTaskMark(DrawingContext dc, Brush brush, double y, string taskName, string taskContent) {
+			var ft = WpfHelper.ToFormattedText(taskName, 9, TaskBackgroundBrsh).SetBold();
 			dc.DrawRectangle(brush, EmptyPen, new Rect(0, y - ft.Height / 2, ft.Width, ft.Height));
 			dc.DrawText(ft, new Point(0, y - ft.Height / 2));
+			var tt = WpfHelper.ToFormattedText(taskContent, 9, brush);
+			dc.DrawRectangle(TaskBackgroundBrsh, EmptyPen, new Rect(ft.Width, y - ft.Height / 2, tt.Width, ft.Height));
+			dc.DrawText(tt, new Point(ft.Width, y - ft.Height / 2));
 		}
 
 		static void DrawCommentMark(DrawingContext dc, Brush brush, double y) {
