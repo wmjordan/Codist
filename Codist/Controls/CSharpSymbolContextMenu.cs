@@ -428,7 +428,6 @@ namespace Codist.Controls
 					new ThemedButton(KnownImageIds.Close, "Close", () => _Container.Children.Remove(Menu))
 				}
 			};
-			Menu.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 			Menu.MouseLeftButtonUp += MenuItemSelect;
 			_Container.MakeDraggable(Menu);
 		}
@@ -470,12 +469,11 @@ namespace Codist.Controls
 		}
 
 		void MenuItemSelect(object sender, MouseButtonEventArgs e) {
-			var menu = sender as SymbolList;
-			if (menu.SelectedIndex == -1 || (e.OriginalSource as DependencyObject)?.GetParent<ListBoxItem>() == null) {
-				return;
+			var menu = sender as ItemList;
+			if (e.OccursOn<ListBoxItem>()) {
+				_Container.FocusOnTextView();
+				(menu.SelectedItem as SymbolItem)?.GoToSource();
 			}
-			_Container.FocusOnTextView();
-			(menu.SelectedItem as SymbolItem)?.GoToSource();
 		}
 
 		void OnMenuKeyUp(object sender, KeyEventArgs e) {

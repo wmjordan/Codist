@@ -97,18 +97,12 @@ namespace Codist.Controls
 			_FilterButtons.FilterChanged += FilterBox_Changed;
 			_FilterButtons.FilterCleared += FilterBox_Clear;
 			_FilterBox.TextChanged += FilterBox_Changed;
-			_FilterBox.IsVisibleChanged += FilterBox_IsVisibleChanged;
+			_FilterBox.SetOnVisibleSelectAll();
 		}
 		public ThemedTextBox FilterBox => _FilterBox;
 
 		public bool FocusTextBox() {
-			if (_FilterBox.IsFocused) {
-				return true;
-			}
-			if (_FilterBox.IsVisible) {
-				return _FilterBox.Focus();
-			}
-			return false;
+			return _FilterBox.GetFocus();
 		}
 		public void UpdateNumbers(IEnumerable<ISymbol> symbols) {
 			if (symbols != null) {
@@ -127,13 +121,6 @@ namespace Codist.Controls
 		void FilterBox_Changed(object sender, EventArgs e) {
 			_Filter.Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), _FilterButtons.Filters);
 			FocusTextBox();
-		}
-
-		void FilterBox_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-			if (_FilterBox.IsVisible) {
-				_FilterBox.Focus();
-				_FilterBox.SelectAll();
-			}
 		}
 
 		internal static bool FilterByImageId(MemberFilterTypes filterTypes, int imageId) {

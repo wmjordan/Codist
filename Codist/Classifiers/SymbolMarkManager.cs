@@ -63,7 +63,7 @@ namespace Codist.Classifiers
 			public IBookmarkedSymbolType MemberType { get; }
 			public int ImageId { get; }
 			public string DisplayString { get; }
-			public SyntaxReference Reference { get; }
+			//public SyntaxReference Reference { get; }
 
 			public BookmarkedSymbol(ISymbol symbol) {
 				Name = symbol.Name;
@@ -73,7 +73,7 @@ namespace Codist.Classifiers
 				MemberType = rt != null ? new BookmarkedSymbolType(rt) : EmptyBookmarkedSymbolType.Instance;
 				ImageId = symbol.GetImageId();
 				DisplayString = symbol.ToDisplayString();
-				Reference = symbol.DeclaringSyntaxReferences.FirstOrDefault();
+				//Reference = symbol.DeclaringSyntaxReferences.FirstOrDefault();
 			}
 
 			public bool Equals(IBookmarkedSymbol other) {
@@ -150,7 +150,7 @@ namespace Codist.Classifiers
 			}
 			public int ImageId => _Symbol.GetImageId();
 			public string DisplayString => _Symbol.ToDisplayString(WpfHelper.MemberNameFormat);
-			public SyntaxReference Reference => _Symbol.DeclaringSyntaxReferences.FirstOrDefault();
+			//public SyntaxReference Reference => _Symbol.DeclaringSyntaxReferences.FirstOrDefault();
 
 			public bool Equals(IBookmarkedSymbol other) {
 				return other != null && other.Kind == Kind && other.Name == Name

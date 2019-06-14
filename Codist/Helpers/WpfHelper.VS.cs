@@ -110,30 +110,6 @@ namespace Codist
 			docRenderer.Render(content, paragraph.Inlines);
 			return paragraph;
 		}
-		public static ContextMenu CreateContextMenuForSourceLocations(string symbolName, ImmutableArray<Location> refs) {
-			var menu = new ContextMenu {
-				Resources = SharedDictionaryManager.ContextMenu
-			};
-			menu.Opened += (sender, e) => {
-				var m = sender as ContextMenu;
-				m.Items.Add(new MenuItem {
-					Header = new ThemedMenuText().Append(symbolName, true).Append(" is defined in ").Append(refs.Length.ToString(), true).Append(" places"),
-					IsEnabled = false
-				});
-				foreach (var loc in refs.Sort(System.Collections.Generic.Comparer<Location>.Create((a, b) => {
-					return String.Compare(System.IO.Path.GetFileName(a.SourceTree.FilePath), System.IO.Path.GetFileName(b.SourceTree.FilePath), StringComparison.OrdinalIgnoreCase);
-				}))) {
-					//var pos = loc.SourceTree.GetLineSpan(loc.SourceSpan);
-					var item = new MenuItem {
-						Header = new ThemedMenuText(System.IO.Path.GetFileName(loc.SourceTree.FilePath))/*.Append("(line: " + (pos.StartLinePosition.Line + 1).ToString() + ")", WpfBrushes.Gray)*/,
-						Tag = loc
-					};
-					item.Click += (s, args) => ((Location)((MenuItem)s).Tag).GoToSource();
-					m.Items.Add(item);
-				}
-			};
-			return menu;
-		}
 
 		public static TItem Get<TItem>(this IEditorFormatMap map, string formatName, string resourceId) {
 			return map.GetProperties(formatName).Get<TItem>(resourceId);
