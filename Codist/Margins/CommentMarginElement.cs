@@ -20,7 +20,7 @@ namespace Codist.Margins
 		readonly IEditorFormatMap _EditorFormatMap;
 		readonly IVerticalScrollBar _ScrollBar;
 		readonly TaggerResult _Tags;
-		readonly ITagger<IClassificationTag> _CommentTagger;
+		readonly CommentTagger _CommentTagger;
 
 		//ToDo: Configurable marker styles
 		//ToDo: Change brush colors according to user settings
@@ -67,9 +67,7 @@ namespace Codist.Margins
 			_ScrollBar = verticalScrollbar;
 			_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
 			if (textView.Properties.TryGetProperty(nameof(CommentTaggerProvider), out _CommentTagger)) {
-				_CommentTagger.TagsChanged += (s, args) => {
-					InvalidateVisual();
-				};
+				_CommentTagger.TagAdded += CommentTagger_TagAdded;
 			}
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 
@@ -118,6 +116,10 @@ namespace Codist.Margins
 				return;
 			}
 			_Tags.PurgeOutdatedTags(args);
+			InvalidateVisual();
+		}
+
+		void CommentTagger_TagAdded(object sender, EventArgs e) {
 			InvalidateVisual();
 		}
 
@@ -246,6 +248,7 @@ namespace Codist.Margins
 					_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
 					IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
 					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
+					_CommentTagger.TagAdded -= CommentTagger_TagAdded;
 				}
 
 				disposedValue = true;
