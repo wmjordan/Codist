@@ -312,9 +312,7 @@ namespace Codist.QuickInfo
 					: symbol.GetSyntaxNode();
 				if (ss != null) {
 					var df = _SemanticModel.AnalyzeDataFlow(ss);
-					var captured = ss.IsKind(SyntaxKind.LocalFunctionStatement) ? df.CapturedInside.RemoveAll(i => df.VariablesDeclared.Contains(i))
-						: ss is StatementSyntax || ss.IsKind(SyntaxKind.InvocationExpression) || ss.IsKind(SyntaxKind.ParenthesizedLambdaExpression) || ss.IsKind(SyntaxKind.SimpleLambdaExpression) ? df.DataFlowsIn
-						: df.ReadInside;
+					var captured = df.ReadInside.RemoveAll(i => df.VariablesDeclared.Contains(i));
 					if (captured.Length > 0) {
 						var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true));
 						int i = 0;
