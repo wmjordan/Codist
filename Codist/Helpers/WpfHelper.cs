@@ -313,8 +313,13 @@ namespace Codist
 			}
 			return null;
 		}
+
 		public static DependencyObject GetLogicalParent(this DependencyObject obj) {
 			return LogicalTreeHelper.GetParent(obj);
+		}
+
+		public static bool OccursOn<TObject>(this RoutedEventArgs args) where TObject : DependencyObject {
+			return (args.OriginalSource as DependencyObject)?.GetParent<TObject>() != null;
 		}
 		#endregion
 
@@ -401,12 +406,36 @@ namespace Codist
 			listBox.ScrollIntoView(listBox.ItemContainerGenerator.Items[listBox.SelectedIndex]);
 		}
 
+		public static bool GetFocus(this UIElement control) {
+			if (control.IsFocused) {
+				return true;
+			}
+			if (control.IsVisible) {
+				return control.Focus();
+			}
+			return false;
+		}
+
+		public static TextBox SetOnVisibleSelectAll(this TextBox textBox) {
+			textBox.IsVisibleChanged -= TextBox_VisibleSelectAll;
+			textBox.IsVisibleChanged += TextBox_VisibleSelectAll;
+			return textBox;
+		}
+
+		static void TextBox_VisibleSelectAll(object sender, DependencyPropertyChangedEventArgs e) {
+			var b = sender as TextBox;
+			if (b.IsVisible) {
+				b.Focus();
+				b.SelectAll();
+			}
+		}
 
 		public static TItem Get<TItem>(this ResourceDictionary items, object key) {
 			return (items != null && items.Contains(key) && items[key] is TItem item)
 				? item
 				: default;
 		}
+
 		public static ToolBar HideOverflow(this ToolBar toolBar) {
 			if (toolBar.IsLoaded) {
 				HideOverflowInternal(toolBar);

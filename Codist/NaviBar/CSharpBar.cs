@@ -229,7 +229,6 @@ namespace Codist.NaviBar
 		}
 
 		void SetupSymbolListMenu(SymbolList list) {
-			list.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 			list.MouseLeftButtonUp += MenuItemSelect;
 		}
 
@@ -290,7 +289,7 @@ namespace Codist.NaviBar
 
 		void MenuItemSelect(object sender, MouseButtonEventArgs e) {
 			var menu = sender as SymbolList;
-			if (menu.SelectedIndex == -1 || (e.OriginalSource as DependencyObject)?.GetParent<ListBoxItem>() == null) {
+			if (menu.SelectedIndex == -1 || e.OccursOn<ListBoxItem>() == false) {
 				return;
 			}
 			_View.VisualElement.Focus();
@@ -411,7 +410,7 @@ namespace Codist.NaviBar
 			public string FilterText => _FinderBox.Text;
 
 			public void ClearSymbolList() {
-				_Menu.Symbols.Clear();
+				_Menu.NeedsRefresh = true;
 			}
 			internal void SetText(string text) {
 				((TextBlock)Header).Text = text;
@@ -427,6 +426,11 @@ namespace Codist.NaviBar
 			}
 
 			internal void ShowNamespaceAndTypeMenu() {
+				if (_Menu.NeedsRefresh) {
+					_Menu.NeedsRefresh = false;
+					_Menu.Clear();
+					_Menu.ItemsSource = null;
+				}
 				PopulateTypes();
 				_Note.Clear()
 				   .Append(ThemeHelper.GetImage(KnownImageIds.Code))
@@ -492,7 +496,7 @@ namespace Codist.NaviBar
 			void SearchCriteriaChanged(object sender, EventArgs e) {
 				CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
 				_Menu.ItemsSource = null;
-				_Menu.Symbols.Clear();
+				_Menu.Clear();
 				var s = _FinderBox.Text;
 				if (s.Length == 0) {
 					_Menu.ContainerType = SymbolListType.NodeList;
@@ -602,7 +606,6 @@ namespace Codist.NaviBar
 				}
 				footer.Append(ThemeHelper.GetImage(KnownImageIds.Code))
 					.Append(Node.GetLineSpan().Length + 1);
-				_Menu.ItemsControlMaxHeight = _Bar._View.ViewportHeight / 2;
 				_Bar.ShowMenu(this, _Menu);
 				_FilterBox?.FocusTextBox();
 			}
@@ -651,7 +654,7 @@ namespace Codist.NaviBar
 				var sm = _Bar._SemanticContext.SemanticModel;
 				await _Bar._SemanticContext.UpdateAsync(cancellationToken);
 				if (sm != _Bar._SemanticContext.SemanticModel) {
-					_Menu.Symbols.Clear();
+					_Menu.Clear();
 					Node = _Bar._SemanticContext.RelocateDeclarationNode(Node);
 					await AddItemsAsync(node, cancellationToken);
 					return;
@@ -717,9 +720,10 @@ namespace Codist.NaviBar
 									// don't show #endregion if preceeding item is #region
 									if (regionJustStart == FALSE) {
 										var item = new SymbolItem(_Menu);
-										_Menu.Symbols.Add(item);
-										item.Content.Append("#endregion ").Append(d.GetDeclarationSignature());
-										item.Content.Foreground = ThemeHelper.SystemGrayTextBrush;
+										_Menu.Add(item);
+										item.Content
+											.Append("#endregion ").Append(d.GetDeclarationSignature())
+											.Foreground = ThemeHelper.SystemGrayTextBrush;
 									}
 								}
 								directives.RemoveAt(i);
