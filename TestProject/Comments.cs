@@ -6,6 +6,27 @@ using System.Threading.Tasks;
 
 namespace TestProject
 {
+	/// <summary>
+	/// This XML doc will be applied to namespace <see cref="TestProject"/>.
+	/// </summary>
+	/// <remarks>
+	/// <para>To keep the <see cref="NamespaceDoc"/> class from appearing in the help file, leave off the <see langword="public"/> keyword and mark it with a <see cref="System.Runtime.CompilerServices.CompilerGeneratedAttribute"/> attribute. This will cause the class to be automatically ignored when reflection information is generated for the assembly. The following is an example:</para>
+	/// <code><![CDATA[
+	/// /// <summary>
+	/// /// These are the namespace comments.
+	/// /// </summary>
+	/// [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
+	/// class NamespaceDoc
+	/// {
+	/// }
+	/// ]]>
+	/// </code>
+	/// </remarks>
+	[System.Runtime.CompilerServices.CompilerGenerated]
+	struct NamespaceDoc
+	{
+	}
+
 	//note: Turns on "Override default XML Doc" of Super Quick Info, and move your mouse
 	// on to the following code to see the overriden quick info in effect
 	/// <summary>
@@ -83,36 +104,7 @@ namespace TestProject
 		/// <typeparam name="T">T is exception class.</typeparam>
 		/// <exception cref="System.IO.IOException"><para>Not implemented</para><para>Period.</para></exception>
 		public static async Task Log<T>(T exception) where T : Exception {
-			DateTime now = DateTime.Now;
-			string file = "log.txt";
-			// captures exception, now, file
-			await Task.Run(() => WriteLog());
-            WriteLog();
-			// captures exception, now, file
-			await Task.Run(WriteLog);
-			// captures exception, now
-			await Task.Run((Action)WriteConsole);
-            WriteConsole();
-			// captures exception
-			await Task.Run(() => {
-				var ex = exception.ToString();
-				System.Diagnostics.Debug.WriteLine(ex);
-			});
-			// captures exception
-			await Task.Run(() => System.Diagnostics.Debug.WriteLine(exception));
-			// captures now
-			Array.FindAll(new[] { DateTime.MaxValue, DateTime.Now }, t => t > now);
-			// captures exception, now, file
-			void WriteLog() {
-				var ex = exception.ToString();
-				System.IO.File.AppendAllLines(file, new[] { ex });
-                WriteConsole();
-			}
-			// captures exception, now
-			void WriteConsole() {
-				Console.Write(now);
-				Console.WriteLine(exception.Message);
-			}
+			await Task.Run(() => Console.WriteLine(exception.ToString()));
 		}
 
 		/// <exception cref="NotImplementedException">Boo boo.</exception>

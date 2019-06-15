@@ -38,6 +38,9 @@ namespace Codist
 				case SymbolKind.TypeParameter:
 					_HasDoc = Parse(_Symbol.ContainingSymbol);
 					break;
+				case SymbolKind.Namespace:
+					_HasDoc = Parse(((INamespaceSymbol)_Symbol).GetTypeMembers("NamespaceDoc").FirstOrDefault());
+					break;
 			}
 		}
 		public bool HasDoc => _HasDoc;
