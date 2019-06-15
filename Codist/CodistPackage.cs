@@ -58,6 +58,8 @@ namespace Codist
 		static OleMenuCommandService _menu;
 		static IOleComponentManager _componentManager;
 
+		//int _extenderCookie;
+
 		//static VsDebugger _Debugger;
 
 		/// <summary>
@@ -148,10 +150,16 @@ namespace Codist
 			_buildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
 			_buildEvents.OnBuildDone += BuildEvents_OnBuildEnd;
 			_buildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
-			await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
+			//_extenderCookie = DTE.ObjectExtenders.RegisterExtenderProvider(VSConstants.CATID.CSharpFileProperties_string, BuildBots.AutoReplaceExtenderProvider.Name, new BuildBots.AutoReplaceExtenderProvider());
+			//await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
 			Commands.ScreenshotCommand.Initialize(this);
 			Commands.IncrementVsixVersionCommand.Initialize(this);
 			Commands.NaviBarSearchDeclarationCommand.Initialize(this);
+		}
+
+		protected override void Dispose(bool disposing) {
+			base.Dispose(disposing);
+			//DTE.ObjectExtenders.UnregisterExtenderProvider(_extenderCookie);
 		}
 
 		void BuildEvents_OnBuildBegin(EnvDTE.vsBuildScope Scope, EnvDTE.vsBuildAction Action) {
@@ -204,7 +212,7 @@ namespace Codist
 
 	internal static class SharedDictionaryManager
 	{
-		static ResourceDictionary _Controls, _Menu, _ContextMenu, _SymbolList;
+		static ResourceDictionary _Controls, _Menu, _ContextMenu, _ItemList, _SymbolList;
 
 		internal static ResourceDictionary ThemedControls => _Controls ?? (_Controls = WpfHelper.LoadComponent("controls/ThemedControls.xaml"));
 
@@ -215,6 +223,7 @@ namespace Codist
 		// for menu styles, see https://docs.microsoft.com/en-us/dotnet/framework/wpf/controls/menu-styles-and-templates
 		internal static ResourceDictionary Menu => _Menu ?? (_Menu = WpfHelper.LoadComponent("controls/NavigationBar.xaml").MergeWith(ThemedControls));
 
+		internal static ResourceDictionary ItemList => _ItemList ?? (_ItemList = WpfHelper.LoadComponent("controls/ItemList.xaml").MergeWith(ThemedControls));
 		internal static ResourceDictionary SymbolList => _SymbolList ?? (_SymbolList = WpfHelper.LoadComponent("controls/SymbolList.xaml").MergeWith(ThemedControls));
 	}
 

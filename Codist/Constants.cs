@@ -19,6 +19,7 @@ namespace Codist
 			public const string Code = nameof(Code);
 			public const string CSharp = nameof(CSharp);
 			public const string Text = nameof(Text);
+			public const string Markdown = nameof(Markdown);
 		}
 
 		public static class SyntaxCategory

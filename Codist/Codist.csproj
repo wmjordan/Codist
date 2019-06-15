@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="Classifiers\Classifications.cs" />
     <Compile Include="Classifiers\CommentFormats.cs" />
+    <Compile Include="Classifiers\MarkDownTagger.cs" />
     <Compile Include="Classifiers\CommentTagger.cs" />
     <Compile Include="Classifiers\CommentClassificationDefinitions.cs" />
     <Compile Include="Classifiers\CommentLabel.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="Controls\SymbolFilterBox.cs" />
     <Compile Include="Controls\QuickInfoTextBox.cs" />
     <Compile Include="Controls\StateButton.cs" />
+    <Compile Include="Controls\ItemList.cs" />
     <Compile Include="Controls\SymbolList.cs" />
     <Compile Include="Controls\ThemedMenuItem.cs" />
     <Compile Include="Controls\TitleLabel.cs">
@@ -104,6 +106,7 @@
     <Compile Include="Helpers\ColorHelper.cs" />
     <Compile Include="Helpers\DragDropHelper.cs" />
     <Compile Include="Margins\SelectionMargin.cs" />
+    <Compile Include="NaviBar\MarkdownBar.cs" />
     <Compile Include="NaviBar\NaviBarFactory.cs" />
     <Compile Include="NaviBar\CSharpBar.cs" />
     <Compile Include="CodistPackage.cs" />
@@ -588,11 +591,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Resource Include="Controls\SymbolList.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Resource>
     <Resource Include="Controls\ThemedControls.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Resource>
-    <Resource Include="Controls\SymbolList.xaml">
+    <Resource Include="Controls\ItemList.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Resource>

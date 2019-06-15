@@ -45,12 +45,11 @@ namespace Codist.SmartBars
 			textView.VisualElement.Loaded += TextViewLoaded;
 			// The toolbar will get wired to the text view events
 			var contentType = textView.TextBuffer.ContentType;
-			if (String.Equals(Constants.CodeTypes.CSharp, contentType.TypeName, StringComparison.OrdinalIgnoreCase)) {
+			if (Constants.CodeTypes.CSharp.Equals(contentType.TypeName, StringComparison.OrdinalIgnoreCase)) {
 				SemanticContext.GetOrCreateSingetonInstance(textView);
 				new CSharpSmartBar(textView, _TextSearchService);
 			}
-			else if (contentType.IsOfType("code++.Markdown")
-				|| contentType.TypeName.IndexOf("Markdown", StringComparison.OrdinalIgnoreCase) != -1) {
+			else if (textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
 				new MarkdownSmartBar(textView, _TextSearchService);
 			}
 			else if (contentType.IsOfType("output")
@@ -72,10 +71,10 @@ namespace Codist.SmartBars
 
 		static void TextViewLoaded(object sender, EventArgs args) {
 			var e = sender as System.Windows.FrameworkElement;
+			e.Loaded -= TextViewLoaded;
 			if ((Config.Instance.DisplayOptimizations & DisplayOptimizations.CodeWindow) != 0) {
 				WpfHelper.SetUITextRenderOptions(e, true);
 			}
-			e.Loaded -= TextViewLoaded;
 		}
 	}
 }

@@ -17,50 +17,24 @@ using WPF = System.Windows.Media;
 
 namespace Codist.Controls
 {
-	sealed class SymbolList : ListBox, ISymbolFilterable {
-		public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(UIElement), typeof(SymbolList));
-		public static readonly DependencyProperty HeaderButtonsProperty = DependencyProperty.Register("HeaderButtons", typeof(UIElement), typeof(SymbolList));
-		public static readonly DependencyProperty FooterProperty = DependencyProperty.Register("Footer", typeof(UIElement), typeof(SymbolList));
-		public static readonly DependencyProperty ItemsControlMaxHeightProperty = DependencyProperty.Register("ItemsControlMaxHeight", typeof(double), typeof(SymbolList));
+	sealed class SymbolList : ItemList, ISymbolFilterable {
 		Predicate<object> _Filter;
 		readonly ToolTip _SymbolTip;
+		readonly List<SymbolItem> _Symbols;
 
 		public SymbolList(SemanticContext semanticContext) {
-			SetValue(VirtualizingPanel.IsVirtualizingProperty, true);
-			SetValue(VirtualizingPanel.VirtualizationModeProperty, VirtualizationMode.Recycling);
-			ItemsControlMaxHeight = 500;
-			HorizontalContentAlignment = HorizontalAlignment.Stretch;
-			Symbols = new List<SymbolItem>();
-			FilteredSymbols = new ListCollectionView(Symbols);
-			Resources = SharedDictionaryManager.SymbolList;
+			_Symbols = new List<SymbolItem>();
+			FilteredItems = new ListCollectionView(_Symbols);
 			SemanticContext = semanticContext;
 			_SymbolTip = new ToolTip {
 				Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 				PlacementTarget = this
 			};
-
+			Resources = SharedDictionaryManager.SymbolList;
 		}
 
-		public UIElement Header {
-			get => GetValue(HeaderProperty) as UIElement;
-			set => SetValue(HeaderProperty, value);
-		}
-		public UIElement HeaderButtons {
-			get => GetValue(HeaderButtonsProperty) as UIElement;
-			set => SetValue(HeaderButtonsProperty, value);
-		}
-		public UIElement Footer {
-			get => GetValue(FooterProperty) as UIElement;
-			set => SetValue(FooterProperty, value);
-		}
-		public double ItemsControlMaxHeight {
-			get => (double)GetValue(ItemsControlMaxHeightProperty);
-			set => SetValue(ItemsControlMaxHeightProperty, value);
-		}
 		public SemanticContext SemanticContext { get; }
-		public List<SymbolItem> Symbols { get; }
-		public ListCollectionView FilteredSymbols { get; }
-		public FrameworkElement Container { get; set; }
+		public IReadOnlyList<SymbolItem> Symbols => _Symbols;
 		public SymbolListType ContainerType { get; set; }
 		public Func<SymbolItem, UIElement> IconProvider { get; set; }
 		public SymbolItem SelectedSymbolItem => SelectedItem as SymbolItem;
@@ -69,114 +43,55 @@ namespace Codist.Controls
 
 		public SymbolItem Add(SyntaxNode node) {
 			var item = new SymbolItem(node, this);
-			Symbols.Add(item);
+			_Symbols.Add(item);
 			return item;
 		}
 		public SymbolItem Add(ISymbol symbol, bool includeContainerType) {
 			var item = new SymbolItem(symbol, this, includeContainerType);
-			Symbols.Add(item);
+			_Symbols.Add(item);
 			return item;
 		}
 		public SymbolItem Add(ISymbol symbol, ISymbol containerType) {
 			var item = new SymbolItem(symbol, this, containerType);
-			Symbols.Add(item);
+			_Symbols.Add(item);
 			return item;
 		}
 		public SymbolItem Add(Location location) {
 			var item = new SymbolItem(location, this);
-			Symbols.Add(item);
+			_Symbols.Add(item);
 			return item;
+		}
+		public SymbolItem Add(SymbolItem item) {
+			_Symbols.Add(item);
+			return item;
+		}
+
+		public void Clear() {
+			_Symbols.Clear();
 		}
 		public void RefreshItemsSource() {
 			if (_Filter != null) {
-				FilteredSymbols.Filter = _Filter;
-				ItemsSource = FilteredSymbols;
+				FilteredItems.Filter = _Filter;
+				ItemsSource = FilteredItems;
 			}
 			else {
-				ItemsSource = Symbols;
+				ItemsSource = _Symbols;
 			}
 		}
 
 		protected override void OnPreviewKeyDown(KeyEventArgs e) {
 			base.OnPreviewKeyDown(e);
-			if (e.Key == Key.Tab) {
-				e.Handled = true;
+			if (e.OriginalSource is TextBox == false || e.Handled) {
 				return;
 			}
-			if (e.OriginalSource is TextBox == false) {
-				return;
-			}
-			switch (e.Key) {
-				case Key.Enter:
-					if (SelectedIndex == -1 && HasItems) {
-						(ItemContainerGenerator.Items[0] as SymbolItem)?.GoToSource();
-					}
-					else {
-						(SelectedItem as SymbolItem)?.GoToSource();
-					}
-					e.Handled = true;
-					break;
-				case Key.Up:
-					if (SelectedIndex > 0) {
-						SelectedIndex--;
-						this.ScrollToSelectedItem();
-					}
-					else if (HasItems) {
-						SelectedIndex = this.ItemCount() - 1;
-						this.ScrollToSelectedItem();
-					}
-					e.Handled = true;
-					break;
-				case Key.Down:
-					if (SelectedIndex < this.ItemCount() - 1) {
-						SelectedIndex++;
-						this.ScrollToSelectedItem();
-					}
-					else if (HasItems) {
-						SelectedIndex = 0;
-						this.ScrollToSelectedItem();
-					}
-					e.Handled = true;
-					break;
-				case Key.PageUp:
-					if (SelectedIndex >= 10) {
-						SelectedIndex -= 10;
-						this.ScrollToSelectedItem();
-					}
-					else if (HasItems) {
-						SelectedIndex = 0;
-						this.ScrollToSelectedItem();
-					}
-					e.Handled = true;
-					break;
-				case Key.PageDown:
-					if (SelectedIndex >= this.ItemCount() - 10) {
-						SelectedIndex = this.ItemCount() - 1;
-						this.ScrollToSelectedItem();
-					}
-					else if (HasItems) {
-						SelectedIndex += 10;
-						this.ScrollToSelectedItem();
-					}
-					e.Handled = true;
-					break;
-			}
-		}
-
-		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
-			base.OnRenderSizeChanged(sizeInfo);
-			if (sizeInfo.WidthChanged) {
-				var left = Canvas.GetLeft(this);
-				Canvas.SetLeft(this, left < 0 ? 0 : left);
-				if (Container != null) {
-					var top = Canvas.GetTop(this);
-					if (top + sizeInfo.NewSize.Height > Container.RenderSize.Height) {
-						Canvas.SetTop(this, Container.RenderSize.Height - sizeInfo.NewSize.Height);
-					}
-					if (left + sizeInfo.NewSize.Width > Container.RenderSize.Width) {
-						Canvas.SetLeft(this, Container.ActualWidth - sizeInfo.NewSize.Width);
-					}
+			if (e.Key == Key.Enter) {
+				if (SelectedIndex == -1 && HasItems) {
+					(ItemContainerGenerator.Items[0] as SymbolItem)?.GoToSource();
 				}
+				else {
+					(SelectedItem as SymbolItem)?.GoToSource();
+				}
+				e.Handled = true;
 			}
 		}
 
@@ -734,13 +649,13 @@ namespace Codist.Controls
 			}
 		}
 		public bool SelectIfContainsPosition(int position) {
-			if (IsExternal == false && SyntaxNode != null && SyntaxNode.FullSpan.Contains(position, true)) {
-				Container.SelectedItem = this;
-				return true;
+			if (IsExternal || SyntaxNode == null || SyntaxNode.FullSpan.Contains(position, true) == false) {
+				return false;
 			}
-			return false;
+			Container.SelectedItem = this;
+			return true;
 		}
-		public ThemedMenuText CreateContentForSymbol(ISymbol symbol, bool includeType, bool includeParameter) {
+		static ThemedMenuText CreateContentForSymbol(ISymbol symbol, bool includeType, bool includeParameter) {
 			var t = new ThemedMenuText();
 			if (includeType && symbol.ContainingType != null) {
 				t.Append(symbol.ContainingType.Name + symbol.ContainingType.GetParameterString() + ".", ThemeHelper.SystemGrayTextBrush);

@@ -19,27 +19,32 @@ namespace Codist.SmartBars
 		ToolBar MyToolBar => ToolBar2;
 
 		protected override void AddCommands(CancellationToken cancellationToken) {
-			AddCommand(MyToolBar, KnownImageIds.Bold, "Toggle bold\nCtrl click: toggle and select next", ctx => {
-				SurroundWith(ctx, "**", "**", true);
-			});
-			AddCommand(MyToolBar, KnownImageIds.Italic, "Toggle italic\nCtrl click: toggle and select next", ctx => {
-				SurroundWith(ctx, "_", "_", true);
-			});
-			AddCommand(MyToolBar, KnownImageIds.MarkupTag, "Toggle code\nCtrl click: toggle and select next", ctx => {
-				SurroundWith(ctx, "`", "`", true);
-			});
-			AddCommand(MyToolBar, KnownImageIds.HyperLink, "Hyperlink", ctx => {
-				var s = SurroundWith(ctx, "[", "](url)", false);
+			AddCommand(MyToolBar, KnownImageIds.Bold, "Toggle bold\nCtrl click: toggle and select next", ctx => WrapWith(ctx, "**", "**", true));
+			AddCommand(MyToolBar, KnownImageIds.Italic, "Toggle italic\nCtrl click: toggle and select next", ctx => WrapWith(ctx, "_", "_", true));
+			AddCommand(MyToolBar, KnownImageIds.MarkupTag, "Toggle code\nCtrl click: toggle and select next", ctx => WrapWith(ctx, "`", "`", true));
+			AddCommand(MyToolBar, KnownImageIds.HyperLink, "Hyperlink", MakeUrl);
+			AddCommand(MyToolBar, KnownImageIds.StrikeThrough, "Toggle strike through\nCtrl click: toggle and select next", ctx => WrapWith(ctx, "~~", "~~", true));
+			base.AddCommands(cancellationToken);
+		}
+
+		void MakeUrl(CommandContext ctx) {
+			var t = ctx.View.GetFirstSelectionText();
+			if (t.StartsWith("http://", StringComparison.Ordinal) || t.StartsWith("https://", StringComparison.Ordinal)) {
+				var s = WrapWith(ctx, "[title](", ")", false);
+				if (s.Snapshot != null) {
+					// select the "title"
+					View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + 1, 5), false);
+					View.Caret.MoveTo(s.Start + 6);
+				}
+			}
+			else {
+				var s = WrapWith(ctx, "[", "](url)", false);
 				if (s.Snapshot != null) {
 					// select the "url"
 					View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - 4, 3), false);
 					View.Caret.MoveTo(s.End - 1);
 				}
-			});
-			AddCommand(MyToolBar, KnownImageIds.StrikeThrough, "Toggle strike through\nCtrl click: toggle and select next", ctx => {
-				SurroundWith(ctx, "~~", "~~", true);
-			});
-			base.AddCommands(cancellationToken);
+			}
 		}
 	}
 }

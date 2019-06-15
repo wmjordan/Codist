@@ -378,9 +378,10 @@ namespace Codist
 			}
 		}
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
-#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 			dte.OpenFile(file, d => ((EnvDTE.TextSelection)d.Selection).MoveToLineAndOffset(line, column));
-#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
+		}
+		public static void OpenFile(this EnvDTE.DTE dte, string file, int location) {
+			dte.OpenFile(file, d => ((EnvDTE.TextSelection)d.Selection).MoveToAbsoluteOffset(location));
 		}
 
 		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {

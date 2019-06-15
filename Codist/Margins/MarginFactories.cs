@@ -5,9 +5,6 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Margins
 {
-	/// <summary>
-	/// Export a <see cref="IWpfTextViewMarginProvider"/>, which returns an instance of the margin for the editor to use.
-	/// </summary>
 	[Export(typeof(IWpfTextViewMarginProvider))]
 	[Name(CommentMargin.MarginName)]
 	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = PredefinedMarginNames.OverviewMark)]
@@ -18,11 +15,31 @@ namespace Codist.Margins
 	{
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 			var scrollBarContainer = marginContainer as IVerticalScrollBar;
+			var textView = wpfTextViewHost.TextView;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 				&& scrollBarContainer != null
-				&& Classifiers.CommentTaggerProvider.IsCommentTaggable(wpfTextViewHost.TextView)
-				? new CommentMargin(wpfTextViewHost.TextView, scrollBarContainer)
+				&& Classifiers.CommentTagger.IsCommentTaggable(textView)
+				? new CommentMargin(textView, scrollBarContainer)
 				: null;
+		}
+	}
+
+	[Export(typeof(IWpfTextViewMarginProvider))]
+	[Name("MarkdownMargin")]
+	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = CommentMargin.MarginName)]
+	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
+	[ContentType(Constants.CodeTypes.Code)]
+	[TextViewRole(PredefinedTextViewRoles.EmbeddedPeekTextView)]
+	[TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
+	sealed class MarkdownMarginFactory : IWpfTextViewMarginProvider
+	{
+		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
+			var scrollBar = marginContainer as IVerticalScrollBar;
+			var textView = wpfTextViewHost.TextView;
+			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
+				&& scrollBar != null
+				&& textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)
+				? new CommentMargin(wpfTextViewHost.TextView, scrollBar) : null;
 		}
 	}
 

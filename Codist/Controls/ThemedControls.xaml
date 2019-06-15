@@ -45,4 +45,22 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
+	<Style x:Key="{x:Type c:ThemedButton}" TargetType="{x:Type c:ThemedButton}">
+		<Setter Property="OverridesDefaultStyle" Value="True"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type c:ThemedButton}">
+					<Border Name="Border" BorderThickness="{TemplateBinding BorderThickness}" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}">
+						<ContentPresenter />
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="UIElement.IsMouseOver" Value="True">
+							<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.CommandBarMenuItemMouseOverBrushKey}}"/>
+							<Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource VsBrush.CommandBarHoverOverSelectedIconBorder}"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
 </ResourceDictionary>

@@ -2,61 +2,12 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:c="clr-namespace:Codist.Controls;assembly=Codist"
 	xmlns:vsp="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0">
+	<ResourceDictionary.MergedDictionaries>
+		<ResourceDictionary Source="ItemList.xaml"/>
+	</ResourceDictionary.MergedDictionaries>
 	<c:SymbolItemTemplateSelector x:Key="symbolTemplateSelector"/>
-	<Style x:Key="{x:Type Separator}" TargetType="{x:Type Separator}">
-		<Setter Property="OverridesDefaultStyle" Value="True"/>
-		<Setter Property="Height" Value="16"/>
-		<Setter Property="Margin" Value="0,4,0,3"/>
-		<Setter Property="Template">
-			<Setter.Value>
-				<ControlTemplate TargetType="{x:Type Separator}">
-					<Border BorderThickness="0,0,0,1" BorderBrush="{DynamicResource VsBrush.CommandBarMenuSeparator}">
-						<ContentPresenter Name="Header" Content="{TemplateBinding Tag}" />
-					</Border>
-					<ControlTemplate.Triggers>
-						<Trigger Property="Tag" Value="{x:Null}">
-							<Setter TargetName="Header" Property="Visibility" Value="Collapsed"/>
-							<Setter Property="Height" Value="1"/>
-						</Trigger>
-					</ControlTemplate.Triggers>
-				</ControlTemplate>
-			</Setter.Value>
-		</Setter>
-	</Style>
-	<Style TargetType="{x:Type c:SymbolList}">
-		<Setter Property="OverridesDefaultStyle" Value="True"/>
-		<Setter Property="SnapsToDevicePixels" Value="True"/>
+	<Style TargetType="{x:Type c:SymbolList}" BasedOn="{StaticResource {x:Type c:ItemList}}">
 		<Setter Property="ItemTemplateSelector" Value="{StaticResource symbolTemplateSelector}"/>
-		<Setter Property="UseLayoutRounding" Value="True" />
-		<Setter Property="Cursor" Value="Arrow"/>
-		<Setter Property="c:DragDropHelper.ScrollOnDragDrop" Value="True"/>
-		<Setter Property="Template">
-			<Setter.Value>
-				<ControlTemplate TargetType="{x:Type c:SymbolList}">
-					<Border BorderThickness="1,1,1,1" CornerRadius="0,0,5,5" x:Name="Border" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" SnapsToDevicePixels="True" UseLayoutRounding="True">
-						<StackPanel>
-							<Grid>
-								<Grid.ColumnDefinitions>
-									<ColumnDefinition Width="*"/>
-									<ColumnDefinition Width="Auto" SharedSizeGroup="HeaderButtons"/>
-								</Grid.ColumnDefinitions>
-								<ContentPresenter x:Name="Header" Content="{TemplateBinding Header}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
-								<ContentPresenter x:Name="HeaderButtons" Content="{TemplateBinding HeaderButtons}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,2,-8,0"/>
-							</Grid>
-							<ScrollViewer x:Name="PART_Scroller" Margin="3" Focusable="False" MaxHeight="{TemplateBinding ItemsControlMaxHeight}" VerticalScrollBarVisibility="Auto">
-								<VirtualizingStackPanel IsItemsHost="True" CacheLength="3" CacheLengthUnit="Page" VirtualizationMode="Recycling"/>
-							</ScrollViewer>
-							<ContentPresenter x:Name="Footer" Content="{TemplateBinding Footer}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
-						</StackPanel>
-					</Border>
-					<ControlTemplate.Triggers>
-						<Trigger Property="Footer" Value="{x:Null}">
-							<Setter TargetName="Footer" Property="Visibility" Value="Collapsed"/>
-						</Trigger>
-					</ControlTemplate.Triggers>
-				</ControlTemplate>
-			</Setter.Value>
-		</Setter>
 	</Style>
 	<Style TargetType="ListBoxItem">
 		<Setter Property="OverridesDefaultStyle" Value="True"/>
@@ -121,22 +72,4 @@
 			</Trigger>
 		</DataTemplate.Triggers>
 	</DataTemplate>
-	<Style x:Key="{x:Type c:ThemedButton}" TargetType="{x:Type c:ThemedButton}">
-		<Setter Property="OverridesDefaultStyle" Value="True"/>
-		<Setter Property="Template">
-			<Setter.Value>
-				<ControlTemplate TargetType="{x:Type c:ThemedButton}">
-					<Border Name="Border" BorderThickness="{TemplateBinding BorderThickness}" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}">
-						<ContentPresenter />
-					</Border>
-					<ControlTemplate.Triggers>
-						<Trigger Property="UIElement.IsMouseOver" Value="True">
-							<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.CommandBarMenuItemMouseOverBrushKey}}"/>
-							<Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource VsBrush.CommandBarHoverOverSelectedIconBorder}"/>
-						</Trigger>
-					</ControlTemplate.Triggers>
-				</ControlTemplate>
-			</Setter.Value>
-		</Setter>
-	</Style>
 </ResourceDictionary>

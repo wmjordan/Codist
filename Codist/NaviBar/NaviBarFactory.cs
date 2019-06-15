@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 using AppHelpers;
+using Microsoft.VisualStudio.Text.Operations;
 
 namespace Codist.NaviBar
 {
@@ -26,14 +27,17 @@ namespace Codist.NaviBar
 		[Order(After = PredefinedAdornmentLayers.CurrentLineHighlighter)]
 		AdornmentLayerDefinition _SyntaxNodeRangeAdormentLayer;
 
+		[Import(typeof(ITextSearchService2))]
+		ITextSearchService2 _TextSearchService;
+
 #pragma warning restore 649, 169
 
 		public void TextViewCreated(IWpfTextView textView) {
 			if (Config.Instance.Features.MatchFlags(Features.NaviBar)
 				&& textView.Roles.Contains("DIFF") == false) {
-				if (textView.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp)) {
+				if (textView.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp) || textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
 					SemanticContext.GetOrCreateSingetonInstance(textView);
-					new Overrider(textView);
+					new Overrider(textView, _TextSearchService);
 				}
 #if DEBUG
 				else {
@@ -64,29 +68,51 @@ namespace Codist.NaviBar
 		sealed class Overrider
 		{
 			readonly IWpfTextView _View;
+			readonly ITextSearchService2 _TextSearch;
 
-			public Overrider(IWpfTextView view) {
+			public Overrider(IWpfTextView view, ITextSearchService2 textSearch) {
 				_View = view;
+				_TextSearch = textSearch;
 				view.VisualElement.Loaded += FindNaviBar;
-				view.VisualElement.Unloaded += ViewUnloaded;
 			}
 
 			void FindNaviBar(object sender, RoutedEventArgs e) {
+				_View.VisualElement.Loaded -= FindNaviBar;
+
 				var view = sender as FrameworkElement;
 				var naviBar = view
 					?.GetParent<Border>(b => b.Name == "PART_ContentPanel")
 					?.GetFirstVisualChild<Border>(b => b.Name == "DropDownBarMargin");
 				if (naviBar == null) {
-					goto EXIT;
+					var naviBarHolder = view.GetParent<Panel>(b => b.GetType().Name == "WpfMultiViewHost");
+					if (naviBarHolder != null) {
+						var b = new MarkdownBar(_View, _TextSearch);
+						DockPanel.SetDock(b, Dock.Top);
+						if (naviBarHolder.Children.Count == 1) {
+							naviBarHolder.Children.Insert(0, b);
+						}
+						else {
+							var c = naviBarHolder.Children[0] as ContentControl;
+							if (c != null && c.Content == null) {
+								c.Content = b;
+							}
+						}
+					}
+					//else {
+					//	naviBarHolder?.GetFirstVisualChild<ContentControl>();
+					//if (naviBarHolder != null) {
+					//	naviBarHolder.Content = new MarkdownBar(_View, _TextSearch);
+					//}
+					return;
 				}
 				var dropDown1 = naviBar.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown1");
 				var dropDown2 = naviBar.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown2");
 				if (dropDown1 == null || dropDown2 == null) {
-					goto EXIT;
+					return;
 				}
 				var container = dropDown1.GetParent<Grid>();
 				if (container == null) {
-					goto EXIT;
+					return;
 				}
 				var bar = new CSharpBar(_View) {
 					MinWidth = 200
@@ -96,17 +122,6 @@ namespace Codist.NaviBar
 				container.Children.Add(bar);
 				dropDown1.Visibility = Visibility.Hidden;
 				dropDown2.Visibility = Visibility.Hidden;
-				EXIT:
-				UnloadEvents();
-			}
-
-			void ViewUnloaded(object sender, EventArgs e) {
-				UnloadEvents();
-			}
-
-			void UnloadEvents() {
-				_View.VisualElement.Loaded -= FindNaviBar;
-				_View.VisualElement.Unloaded -= ViewUnloaded;
 			}
 		}
 	}
