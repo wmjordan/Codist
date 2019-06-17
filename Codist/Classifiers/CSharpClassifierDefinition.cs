@@ -59,7 +59,7 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition ControlFlowKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeIdentifier)]
+		//[BaseDefinition(Constants.CodeIdentifier)]
 		[Name(Constants.CSharpDeclarationName)]
 		static ClassificationTypeDefinition Declaration;
 
