@@ -239,7 +239,7 @@ namespace Codist.Margins
 		}
 
 		#region IDisposable Support
-		bool disposedValue = false;
+		bool disposedValue;
 
 		void Dispose(bool disposing) {
 			if (!disposedValue) {
@@ -248,7 +248,9 @@ namespace Codist.Margins
 					_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
 					IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
 					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
-					_CommentTagger.TagAdded -= CommentTagger_TagAdded;
+					if (_CommentTagger != null) {
+						_CommentTagger.TagAdded -= CommentTagger_TagAdded;
+					}
 				}
 
 				disposedValue = true;
