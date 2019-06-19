@@ -15,7 +15,7 @@ namespace Codist.Classifiers
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.Code)]
 	[TagType(typeof(IClassificationTag))]
-	sealed class MarkDownTaggerProvider : IViewTaggerProvider
+	sealed class MarkdownTaggerProvider : IViewTaggerProvider
 	{
 		static readonly IClassificationType[] _HeaderClassificationTypes = new IClassificationType[7];
 
@@ -30,17 +30,17 @@ namespace Codist.Classifiers
 				InitHeaderClassificationTypes();
 			}
 			textView.Closed += TextViewClosed;
-			return textView.Properties.GetOrCreateSingletonProperty(() => new MarkDownTagger(textView)) as ITagger<T>;
+			return textView.Properties.GetOrCreateSingletonProperty(() => new MarkdownTagger(textView)) as ITagger<T>;
 		}
 
 		static void InitHeaderClassificationTypes() {
 			var r = ServicesHelper.Instance.ClassificationTypeRegistry;
-			_HeaderClassificationTypes[1] = r.GetClassificationType(Constants.Task1Comment);
-			_HeaderClassificationTypes[2] = r.GetClassificationType(Constants.Task2Comment);
-			_HeaderClassificationTypes[3] = r.GetClassificationType(Constants.Task3Comment);
-			_HeaderClassificationTypes[4] = r.GetClassificationType(Constants.Task4Comment);
-			_HeaderClassificationTypes[5] = r.GetClassificationType(Constants.Task5Comment);
-			_HeaderClassificationTypes[6] = r.GetClassificationType(Constants.Task6Comment);
+			_HeaderClassificationTypes[1] = r.GetClassificationType(Constants.MarkdownHeading1);
+			_HeaderClassificationTypes[2] = r.GetClassificationType(Constants.MarkdownHeading2);
+			_HeaderClassificationTypes[3] = r.GetClassificationType(Constants.MarkdownHeading3);
+			_HeaderClassificationTypes[4] = r.GetClassificationType(Constants.MarkdownHeading4);
+			_HeaderClassificationTypes[5] = r.GetClassificationType(Constants.MarkdownHeading5);
+			_HeaderClassificationTypes[6] = r.GetClassificationType(Constants.MarkdownHeading6);
 		}
 
 		void TextViewClosed(object sender, EventArgs args) {
@@ -48,53 +48,26 @@ namespace Codist.Classifiers
 			textView.Closed -= TextViewClosed;
 		}
 
-		sealed class MarkDownTagger : ITagger<IClassificationTag>
+		sealed class MarkdownTagger : CachedTaggerBase
 		{
-			readonly ITextView _TextView;
-			readonly TaggerResult _Tags;
-
-			public MarkDownTagger(ITextView textView) {
-				_TextView = textView;
-				_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
+			public MarkdownTagger(ITextView textView) : base(textView) {
 			}
 
-#pragma warning disable 67
-			public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
-#pragma warning restore 67
-
-			public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
-				if (spans.Count == 0) {
-					yield break;
-				}
-				IEnumerable<SnapshotSpan> parseSpans = spans;
-				var textSnapshot = _TextView.TextSnapshot;
-
-				if (_Tags.LastParsed == 0) {
-					// perform a full parse for the first time
-					Debug.WriteLine("Full parse");
-					parseSpans = textSnapshot.Lines.Select(l => l.Extent);
-					_Tags.LastParsed = textSnapshot.Length;
-				}
-
-				Parse(textSnapshot, parseSpans);
-			}
-
-			void Parse(ITextSnapshot textSnapshot, IEnumerable<SnapshotSpan> parseSpans) {
-				foreach (var span in parseSpans) {
-					var t = span.GetText();
-					if (t.Length > 0 && t[0] == '#') {
-						int c = 1, w = 0;
-						for (int i = 1; i < t.Length; i++) {
-							switch (t[i]) {
-								case '#': if (w == 0) { ++c; } continue;
-								case ' ': ++w; continue;
-							}
-							break;
+			protected override TaggedContentSpan Parse(ITextSnapshot textSnapshot, SnapshotSpan span) {
+				var t = span.GetText();
+				if (t.Length > 0 && t[0] == '#') {
+					int c = 1, w = 0;
+					for (int i = 1; i < t.Length; i++) {
+						switch (t[i]) {
+							case '#': if (w == 0) { ++c; } continue;
+							case ' ': ++w; continue;
 						}
-						w += c;
-						_Tags.Add(new TaggedContentSpan(textSnapshot, new ClassificationTag(_HeaderClassificationTypes[c]), span.Start, c, w, t.Length - w));
+						break;
 					}
+					w += c;
+					return new TaggedContentSpan(textSnapshot, new ClassificationTag(_HeaderClassificationTypes[c]), span.Start, t.Length, w, t.Length - w);
 				}
+				return null;
 			}
 		}
 	}

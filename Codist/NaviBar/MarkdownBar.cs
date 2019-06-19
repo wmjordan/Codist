@@ -8,6 +8,7 @@ using Codist.Controls;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 
@@ -16,6 +17,13 @@ namespace Codist.NaviBar
 	public sealed class MarkdownBar : ToolBar
 	{
 		const string DefaultActiveTitle = "Headings";
+		static readonly IClassificationType
+			_H1 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading1),
+			_H2 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading2),
+			_H3 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading3),
+			_H4 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading4),
+			_H5 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading5),
+			_H6 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading6);
 		readonly IWpfTextView _View;
 		readonly ITextSearchService2 _TextSearch;
 		readonly ExternalAdornment _ListContainer;
@@ -35,6 +43,7 @@ namespace Codist.NaviBar
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			view.Properties.AddProperty(nameof(NaviBar), this);
 			view.Selection.SelectionChanged += Update;
+			view.TextBuffer.PostChanged += Update;
 			view.Closed += View_Closed;
 			Resources = SharedDictionaryManager.Menu;
 			SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
@@ -58,14 +67,7 @@ namespace Codist.NaviBar
 
 		void Update(object sender, EventArgs e) {
 			HideMenu();
-			if (_Titles != null) {
-				var i = GetSelectedTagIndex(_View.GetCaretPosition().Position);
-				if (i != -1) {
-					_ActiveTitleLabel.Text = _Titles[i].Text;
-					return;
-				}
-			}
-			_ActiveTitleLabel.Text = DefaultActiveTitle;
+			_ActiveTitleLabel.Text = _Tags.GetPreceedingTaggedSpan(_View.GetCaretPosition().Position)?.ContentText ?? DefaultActiveTitle;
 		}
 
 		void HideMenu() {
@@ -126,11 +128,11 @@ namespace Codist.NaviBar
 						.ReferenceProperty(TextBlock.ForegroundProperty, Microsoft.VisualStudio.PlatformUI.EnvironmentColors.SystemGrayTextBrushKey),
 			};
 			menu.ItemsControlMaxHeight = _View.ViewportHeight / 2;
-			_Titles = Array.ConvertAll(_Tags.GetTags(), t => new LocationItem(t));
-			menu.ItemsSource = _Titles;
-			menu.SelectedIndex = GetSelectedTagIndex(_View.GetCaretPosition().Position);
+			var titles = _Titles = Array.ConvertAll(_Tags.GetTags(), t => new LocationItem(t));
+			menu.ItemsSource = titles;
+			menu.SelectedIndex = GetSelectedTagIndex(titles, _View.GetCaretPosition().Position);
 			menu.ScrollToSelectedItem();
-			menu.FilteredItems = new System.Windows.Data.ListCollectionView(_Titles);
+			menu.FilteredItems = new System.Windows.Data.ListCollectionView(titles);
 			menu.MouseLeftButtonUp += MenuItemSelect;
 			_FinderBox.TextChanged += SearchCriteriaChanged;
 			_FinderBox.SetOnVisibleSelectAll();
@@ -148,10 +150,13 @@ namespace Codist.NaviBar
 			}
 		}
 
-		int GetSelectedTagIndex(int p) {
+		static int GetSelectedTagIndex(LocationItem[] titles, int p) {
+			if (titles == null) {
+				return -1;
+			}
 			int selectedIndex = -1;
-			for (int i = 0; i < _Titles.Length; i++) {
-				if (_Titles[i].Span.Start > p) {
+			for (int i = 0; i < titles.Length; i++) {
+				if (titles[i].Span.Start > p) {
 					break;
 				}
 				selectedIndex = i;
@@ -223,31 +228,44 @@ namespace Codist.NaviBar
 
 		sealed class LocationItem : ListItem
 		{
+			static Thickness
+				_H3Padding = new Thickness(10, 0, 0, 0),
+				_H4Padding = new Thickness(20, 0, 0, 0),
+				_H5Padding = new Thickness(30, 0, 0, 0),
+				_H6Padding = new Thickness(40, 0, 0, 0);
 			readonly TaggedContentSpan _Span;
+			readonly int _ImageId;
 
 			public LocationItem(TaggedContentSpan span) {
 				_Span = span;
 				Content = new ThemedMenuText(span.ContentText);
-				if (span.Length == 1) {
+				var t = span.Tag.ClassificationType;
+				if (t == _H1) {
 					Content.FontWeight = FontWeights.Bold;
+					_ImageId = KnownImageIds.FlagDarkRed;
 				}
-				else if (span.Length > 2) {
-					Content.Padding = new Thickness((span.Length - 2) * 10, 0, 0, 0);
+				else if (t == _H2) {
+					_ImageId = KnownImageIds.FlagDarkPurple;
+				}
+				else if (t == _H3) {
+					_ImageId = KnownImageIds.FlagDarkBlue;
+					Content.Padding = _H3Padding;
+				}
+				else if (t == _H4) {
+					_ImageId = KnownImageIds.Flag;
+					Content.Padding = _H4Padding;
+				}
+				else if (t == _H5) {
+					_ImageId = KnownImageIds.FlagOutline;
+					Content.Padding = _H5Padding;
+				}
+				else if (t == _H6) {
+					_ImageId = KnownImageIds.Blank;
+					Content.Padding = _H6Padding;
 				}
 			}
 
-			public override int ImageId {
-				get {
-					switch (_Span.Length) {
-						case 1: return KnownImageIds.LevelOne;
-						case 2: return KnownImageIds.LevelTwo;
-						case 3: return KnownImageIds.LevelThree;
-						case 4: return KnownImageIds.LevelFour;
-						case 5: return KnownImageIds.LevelFive;
-						default: return KnownImageIds.LevelAll;
-					}
-				}
-			}
+			public override int ImageId => _ImageId;
 			public TaggedContentSpan Span => _Span;
 			public string Text => _Span.ContentText;
 			public void GoToSource(ITextView view) {

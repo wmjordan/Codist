@@ -20,10 +20,26 @@ namespace Codist.Classifiers
 		public int LastParsed { get; set; }
 		public bool HasTag => _Tags.Count > 0;
 		public int Count => _Tags.Count;
+
+		public TaggedContentSpan GetPreceedingTaggedSpan(int position) {
+			var tags = _Tags;
+			TaggedContentSpan t = null;
+			for (int i = tags.Count - 1; i >= 0; i--) {
+				var tag = tags[i];
+				if (tag.Contains(position)) {
+					return tag;
+				}
+				if (position > tag.Start && (t == null || tag.Start > t.Start)) {
+					t = tag;
+				}
+			}
+			return t;
+		}
 		/// <summary>Gets a sorted array which contains parsed tags.</summary>
 		public TaggedContentSpan[] GetTags() {
-			var r = new TaggedContentSpan[_Tags.Count];
-			_Tags.CopyTo(r);
+			var tags = _Tags;
+			var r = new TaggedContentSpan[tags.Count];
+			tags.CopyTo(r);
 			Array.Sort(r, (x, y) => x.Start - y.Start);
 			return r;
 		}
@@ -32,12 +48,13 @@ namespace Codist.Classifiers
 			if (s.Start < Start) {
 				Start = s.Start;
 			}
-			for (int i = _Tags.Count - 1; i >= 0; i--) {
-				if (_Tags[i].Contains(s.Start)) {
-					return _Tags[i] = tag;
+			var tags = _Tags;
+			for (int i = tags.Count - 1; i >= 0; i--) {
+				if (tags[i].Contains(s.Start)) {
+					return tags[i] = tag;
 				}
 			}
-			_Tags.Add(tag);
+			tags.Add(tag);
 			return tag;
 		}
 
@@ -45,8 +62,9 @@ namespace Codist.Classifiers
 			Debug.WriteLine($"snapshot version: {args.AfterVersion.VersionNumber}");
 			foreach (var change in args.Changes) {
 				Debug.WriteLine($"change:{change.OldPosition}->{change.NewPosition}");
-				for (int i = _Tags.Count - 1; i >= 0; i--) {
-					var t = _Tags[i];
+				var tags = _Tags;
+				for (int i = tags.Count - 1; i >= 0; i--) {
+					var t = tags[i];
 					if (t.Start > change.OldEnd) {
 						// shift positions of remained items
 						t.Shift(args.After, change.Delta);
@@ -54,7 +72,7 @@ namespace Codist.Classifiers
 					else if (change.OldPosition <= t.End) {
 						// remove tags within the updated range
 						Debug.WriteLine($"Removed [{t.Start}..{t.End}) {t.Tag.ClassificationType}");
-						_Tags.RemoveAt(i);
+						tags.RemoveAt(i);
 					}
 				}
 			}

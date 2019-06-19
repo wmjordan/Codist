@@ -25,7 +25,8 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.CommonStyle), CategorySyntaxHighlight, "All languages", 0, 0, true, Sort = 11)]
 	[ProvideOptionPage(typeof(Options.CSharpStyle), CategorySyntaxHighlight, "C#", 0, 0, true, Sort = 12)]
 	[ProvideOptionPage(typeof(Options.CppStyle), CategorySyntaxHighlight, "C/C++", 0, 0, true, Sort = 13)]
-	[ProvideOptionPage(typeof(Options.XmlStyle), CategorySyntaxHighlight, "XML", 0, 0, true, Sort = 14)]
+	[ProvideOptionPage(typeof(Options.MarkdownStyle), CategorySyntaxHighlight, "Markdown", 0, 0, true, Sort = 14)]
+	[ProvideOptionPage(typeof(Options.XmlStyle), CategorySyntaxHighlight, "XML", 0, 0, true, Sort = 15)]
 	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment", 0, 0, true, Sort = 19)]
 
 	[ProvideOptionPage(typeof(Options.SuperQuickInfo), Constants.NameOfMe, "Super Quick Info", 0, 0, true, Sort = 20)]

@@ -25,8 +25,6 @@
 		/// 使用代码编辑器修改此方法的内容。
 		/// </summary>
 		private void InitializeComponent() {
-			this._SyntaxListBox = new Codist.Options.SyntaxListView();
-			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.label1 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this._ApplyContentTagBox = new System.Windows.Forms.RadioButton();
@@ -43,38 +41,17 @@
 			this._AddTagButton = new System.Windows.Forms.Button();
 			this._RemoveTagButton = new System.Windows.Forms.Button();
 			this._CommentTaggerTabs = new System.Windows.Forms.TabControl();
-			this.tabPage2 = new System.Windows.Forms.TabPage();
+			this._GeneralPage = new System.Windows.Forms.TabPage();
+			this._HighlightSpecialCommentBox = new System.Windows.Forms.CheckBox();
+			this._TagsPage = new System.Windows.Forms.TabPage();
+			this._SyntaxListBox = new Codist.Options.SyntaxListView();
+			this._NameColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.groupBox1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this._PreviewBox)).BeginInit();
 			this._CommentTaggerTabs.SuspendLayout();
-			this.tabPage2.SuspendLayout();
+			this._GeneralPage.SuspendLayout();
+			this._TagsPage.SuspendLayout();
 			this.SuspendLayout();
-			// 
-			// _SyntaxListBox
-			// 
-			this._SyntaxListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-			this._SyntaxListBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-			this._SyntaxListBox.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this._NameColumn});
-			this._SyntaxListBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-			this._SyntaxListBox.FullRowSelect = true;
-			this._SyntaxListBox.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-			this._SyntaxListBox.HideSelection = false;
-			this._SyntaxListBox.Location = new System.Drawing.Point(9, 24);
-			this._SyntaxListBox.MultiSelect = false;
-			this._SyntaxListBox.Name = "_SyntaxListBox";
-			this._SyntaxListBox.ShowGroups = false;
-			this._SyntaxListBox.ShowItemToolTips = true;
-			this._SyntaxListBox.Size = new System.Drawing.Size(239, 257);
-			this._SyntaxListBox.TabIndex = 1;
-			this._SyntaxListBox.UseCompatibleStateImageBehavior = false;
-			this._SyntaxListBox.View = System.Windows.Forms.View.Details;
-			// 
-			// _NameColumn
-			// 
-			this._NameColumn.Text = "Name";
-			this._NameColumn.Width = 200;
 			// 
 			// label1
 			// 
@@ -243,27 +220,75 @@
 			this._CommentTaggerTabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this._CommentTaggerTabs.Controls.Add(this.tabPage2);
+			this._CommentTaggerTabs.Controls.Add(this._GeneralPage);
+			this._CommentTaggerTabs.Controls.Add(this._TagsPage);
 			this._CommentTaggerTabs.Location = new System.Drawing.Point(3, 3);
 			this._CommentTaggerTabs.Name = "_CommentTaggerTabs";
 			this._CommentTaggerTabs.SelectedIndex = 0;
 			this._CommentTaggerTabs.Size = new System.Drawing.Size(569, 322);
 			this._CommentTaggerTabs.TabIndex = 5;
 			// 
-			// tabPage2
+			// _GeneralPage
 			// 
-			this.tabPage2.Controls.Add(this._RemoveTagButton);
-			this.tabPage2.Controls.Add(this.groupBox1);
-			this.tabPage2.Controls.Add(this._AddTagButton);
-			this.tabPage2.Controls.Add(this.label1);
-			this.tabPage2.Controls.Add(this._SyntaxListBox);
-			this.tabPage2.Location = new System.Drawing.Point(4, 25);
-			this.tabPage2.Name = "tabPage2";
-			this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-			this.tabPage2.Size = new System.Drawing.Size(561, 293);
-			this.tabPage2.TabIndex = 1;
-			this.tabPage2.Text = "Tags";
-			this.tabPage2.UseVisualStyleBackColor = true;
+			this._GeneralPage.Controls.Add(this._HighlightSpecialCommentBox);
+			this._GeneralPage.Location = new System.Drawing.Point(4, 25);
+			this._GeneralPage.Name = "_GeneralPage";
+			this._GeneralPage.Padding = new System.Windows.Forms.Padding(3);
+			this._GeneralPage.Size = new System.Drawing.Size(561, 293);
+			this._GeneralPage.TabIndex = 2;
+			this._GeneralPage.Text = "General";
+			this._GeneralPage.UseVisualStyleBackColor = true;
+			// 
+			// _HighlightSpecialCommentBox
+			// 
+			this._HighlightSpecialCommentBox.AutoSize = true;
+			this._HighlightSpecialCommentBox.Location = new System.Drawing.Point(17, 18);
+			this._HighlightSpecialCommentBox.Name = "_HighlightSpecialCommentBox";
+			this._HighlightSpecialCommentBox.Size = new System.Drawing.Size(197, 19);
+			this._HighlightSpecialCommentBox.TabIndex = 8;
+			this._HighlightSpecialCommentBox.Text = "Enable Comment Tagger";
+			this._HighlightSpecialCommentBox.UseVisualStyleBackColor = true;
+			// 
+			// _TagsPage
+			// 
+			this._TagsPage.Controls.Add(this._RemoveTagButton);
+			this._TagsPage.Controls.Add(this.groupBox1);
+			this._TagsPage.Controls.Add(this._AddTagButton);
+			this._TagsPage.Controls.Add(this.label1);
+			this._TagsPage.Controls.Add(this._SyntaxListBox);
+			this._TagsPage.Location = new System.Drawing.Point(4, 25);
+			this._TagsPage.Name = "_TagsPage";
+			this._TagsPage.Padding = new System.Windows.Forms.Padding(3);
+			this._TagsPage.Size = new System.Drawing.Size(561, 293);
+			this._TagsPage.TabIndex = 1;
+			this._TagsPage.Text = "Tags";
+			this._TagsPage.UseVisualStyleBackColor = true;
+			// 
+			// _SyntaxListBox
+			// 
+			this._SyntaxListBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+			this._SyntaxListBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+			this._SyntaxListBox.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this._NameColumn});
+			this._SyntaxListBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+			this._SyntaxListBox.FullRowSelect = true;
+			this._SyntaxListBox.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+			this._SyntaxListBox.HideSelection = false;
+			this._SyntaxListBox.Location = new System.Drawing.Point(9, 24);
+			this._SyntaxListBox.MultiSelect = false;
+			this._SyntaxListBox.Name = "_SyntaxListBox";
+			this._SyntaxListBox.ShowGroups = false;
+			this._SyntaxListBox.ShowItemToolTips = true;
+			this._SyntaxListBox.Size = new System.Drawing.Size(239, 257);
+			this._SyntaxListBox.TabIndex = 1;
+			this._SyntaxListBox.UseCompatibleStateImageBehavior = false;
+			this._SyntaxListBox.View = System.Windows.Forms.View.Details;
+			// 
+			// _NameColumn
+			// 
+			this._NameColumn.Text = "Name";
+			this._NameColumn.Width = 200;
 			// 
 			// CommentTaggerOptionPage
 			// 
@@ -276,8 +301,10 @@
 			this.groupBox1.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this._PreviewBox)).EndInit();
 			this._CommentTaggerTabs.ResumeLayout(false);
-			this.tabPage2.ResumeLayout(false);
-			this.tabPage2.PerformLayout();
+			this._GeneralPage.ResumeLayout(false);
+			this._GeneralPage.PerformLayout();
+			this._TagsPage.ResumeLayout(false);
+			this._TagsPage.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
@@ -302,6 +329,8 @@
 		private System.Windows.Forms.Button _AddTagButton;
 		private System.Windows.Forms.Button _RemoveTagButton;
 		private System.Windows.Forms.TabControl _CommentTaggerTabs;
-		private System.Windows.Forms.TabPage tabPage2;
+		private System.Windows.Forms.TabPage _TagsPage;
+		private System.Windows.Forms.TabPage _GeneralPage;
+		private System.Windows.Forms.CheckBox _HighlightSpecialCommentBox;
 	}
 }

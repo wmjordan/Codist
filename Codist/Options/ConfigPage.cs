@@ -134,6 +134,14 @@ namespace Codist.Options
 	}
 
 	[ToolboxItem(false)]
+	[Guid("A3C980C4-D012-48AD-9506-FED895A2B852")]
+	sealed class MarkdownStyle : ConfigPage
+	{
+		protected override Features Feature => Features.SyntaxHighlight;
+		protected override IWin32Window Window => Control ?? (Control = new MarkdownHighlightPage(this));
+	}
+
+	[ToolboxItem(false)]
 	[Guid("DFC9C0E7-73A1-4DE9-8E94-161111266D38")]
 	sealed class General : ConfigPage
 	{

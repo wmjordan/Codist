@@ -67,14 +67,12 @@ namespace Codist.Options
 					}
 				}
 			};
-			_HighlightSpecialCommentBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.SpecialComment, _HighlightSpecialCommentBox.Checked));
 			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
 
 		void LoadConfig(Config config) {
 			_UI.DoWithLock(() => {
-				_HighlightSpecialCommentBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment);
 			});
 		}
 

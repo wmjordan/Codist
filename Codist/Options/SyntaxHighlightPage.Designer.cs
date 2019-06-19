@@ -27,8 +27,6 @@
 		private void InitializeComponent() {
 			this._SyntaxHighlightTabs = new System.Windows.Forms.TabControl();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
-			this.customGroupBox1 = new Codist.Controls.CustomGroupBox();
-			this._HighlightSpecialCommentBox = new System.Windows.Forms.CheckBox();
 			this.groupBox2 = new Codist.Controls.CustomGroupBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this._FontFamilyBox = new System.Windows.Forms.CheckBox();
@@ -45,7 +43,6 @@
 			this._LightThemeButton = new System.Windows.Forms.Button();
 			this._SyntaxHighlightTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
-			this.customGroupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -63,7 +60,6 @@
 			// 
 			// tabPage2
 			// 
-			this.tabPage2.Controls.Add(this.customGroupBox1);
 			this.tabPage2.Controls.Add(this.groupBox2);
 			this.tabPage2.Location = new System.Drawing.Point(4, 25);
 			this.tabPage2.Name = "tabPage2";
@@ -72,28 +68,6 @@
 			this.tabPage2.TabIndex = 1;
 			this.tabPage2.Text = "General";
 			this.tabPage2.UseVisualStyleBackColor = true;
-			// 
-			// customGroupBox1
-			// 
-			this.customGroupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.customGroupBox1.Controls.Add(this._HighlightSpecialCommentBox);
-			this.customGroupBox1.Location = new System.Drawing.Point(6, 219);
-			this.customGroupBox1.Name = "customGroupBox1";
-			this.customGroupBox1.Size = new System.Drawing.Size(549, 68);
-			this.customGroupBox1.TabIndex = 8;
-			this.customGroupBox1.TabStop = false;
-			this.customGroupBox1.Text = "Extra Syntax Highlight";
-			// 
-			// _HighlightSpecialCommentBox
-			// 
-			this._HighlightSpecialCommentBox.AutoSize = true;
-			this._HighlightSpecialCommentBox.Location = new System.Drawing.Point(6, 24);
-			this._HighlightSpecialCommentBox.Name = "_HighlightSpecialCommentBox";
-			this._HighlightSpecialCommentBox.Size = new System.Drawing.Size(141, 19);
-			this._HighlightSpecialCommentBox.TabIndex = 7;
-			this._HighlightSpecialCommentBox.Text = "Comment tagger";
-			this._HighlightSpecialCommentBox.UseVisualStyleBackColor = true;
 			// 
 			// groupBox2
 			// 
@@ -248,8 +222,6 @@
 			this.Load += new System.EventHandler(this.SyntaxHighlightPage_Load);
 			this._SyntaxHighlightTabs.ResumeLayout(false);
 			this.tabPage2.ResumeLayout(false);
-			this.customGroupBox1.ResumeLayout(false);
-			this.customGroupBox1.PerformLayout();
 			this.groupBox2.ResumeLayout(false);
 			this.groupBox2.PerformLayout();
 			this.ResumeLayout(false);
@@ -264,10 +236,8 @@
 		private System.Windows.Forms.TabControl _SyntaxHighlightTabs;
 		private System.Windows.Forms.TabPage tabPage2;
 		private System.Windows.Forms.Button _SimpleThemeButton;
-		private System.Windows.Forms.CheckBox _HighlightSpecialCommentBox;
 		private System.Windows.Forms.Button _SaveButton;
 		private System.Windows.Forms.Button _LoadButton;
-		private Controls.CustomGroupBox customGroupBox1;
 		private Controls.TitleLabel titleLabel1;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.CheckBox _FontFamilyBox;

@@ -69,7 +69,10 @@
   <ItemGroup>
     <Compile Include="Classifiers\Classifications.cs" />
     <Compile Include="Classifiers\CommentFormats.cs" />
-    <Compile Include="Classifiers\MarkDownTagger.cs" />
+    <Compile Include="Classifiers\CustomTagger.cs" />
+    <Compile Include="Classifiers\MarkdownFormats.cs" />
+    <Compile Include="Classifiers\MarkdownDefinitions.cs" />
+    <Compile Include="Classifiers\MarkdownTagger.cs" />
     <Compile Include="Classifiers\CommentTagger.cs" />
     <Compile Include="Classifiers\CommentClassificationDefinitions.cs" />
     <Compile Include="Classifiers\CommentLabel.cs" />
@@ -84,6 +87,7 @@
     <Compile Include="Classifiers\ICodeMemberTag.cs" />
     <Compile Include="Classifiers\IReuseableTagger.cs" />
     <Compile Include="Classifiers\SymbolMarkManager.cs" />
+    <Compile Include="Classifiers\CachedTaggerBase.cs" />
     <Compile Include="Classifiers\TaggerResult.cs" />
     <Compile Include="Classifiers\XmlClassificationDefinitions.cs" />
     <Compile Include="Classifiers\XmlFormats.cs" />
@@ -154,6 +158,12 @@
     </Compile>
     <Compile Include="Options\CSharpNaviBarPage.Designer.cs">
       <DependentUpon>CSharpNaviBarPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options\MarkdownHighlightPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Options\MarkdownHighlightPage.Designer.cs">
+      <DependentUpon>MarkdownHighlightPage.cs</DependentUpon>
     </Compile>
     <Compile Include="Options\CSharpSyntaxHighlightPage.cs">
       <SubType>UserControl</SubType>
@@ -453,20 +463,17 @@
       <HintPath>..\packages\System.Collections.Immutable.1.5.0\lib\netstandard1.3\System.Collections.Immutable.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Composition.AttributedModel, Version=1.0.33.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Composition.AttributedModel.1.2.0\lib\portable-net45+win8+wp8+wpa81\System.Composition.AttributedModel.dll</HintPath>
+    <Reference Include="System.Composition.Convention, Version=1.0.33.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Composition.Convention.1.2.0\lib\portable-net45+win8+wp8+wpa81\System.Composition.Convention.dll</HintPath>
     </Reference>
-    <Reference Include="System.Composition.Convention, Version=1.0.27.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Composition.1.0.27\lib\portable-net45+win8+wp8+wpa81\System.Composition.Convention.dll</HintPath>
+    <Reference Include="System.Composition.Hosting, Version=1.0.33.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Composition.Hosting.1.2.0\lib\portable-net45+win8+wp8+wpa81\System.Composition.Hosting.dll</HintPath>
     </Reference>
-    <Reference Include="System.Composition.Hosting, Version=1.0.27.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Composition.1.0.27\lib\portable-net45+win8+wp8+wpa81\System.Composition.Hosting.dll</HintPath>
+    <Reference Include="System.Composition.Runtime, Version=1.0.33.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Composition.Runtime.1.2.0\lib\portable-net45+win8+wp8+wpa81\System.Composition.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="System.Composition.Runtime, Version=1.0.27.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Composition.1.0.27\lib\portable-net45+win8+wp8+wpa81\System.Composition.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Composition.TypedParts, Version=1.0.27.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Composition.1.0.27\lib\portable-net45+win8+wp8+wpa81\System.Composition.TypedParts.dll</HintPath>
+    <Reference Include="System.Composition.TypedParts, Version=1.0.33.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Composition.TypedParts.1.2.0\lib\portable-net45+win8+wp8+wpa81\System.Composition.TypedParts.dll</HintPath>
     </Reference>
     <Reference Include="System.Console, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Console.4.3.0\lib\net46\System.Console.dll</HintPath>
@@ -542,6 +549,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Options\CSharpNaviBarPage.resx">
       <DependentUpon>CSharpNaviBarPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\MarkdownHighlightPage.resx">
+      <DependentUpon>MarkdownHighlightPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Options\CSharpSyntaxHighlightPage.resx">
       <DependentUpon>CSharpSyntaxHighlightPage.cs</DependentUpon>

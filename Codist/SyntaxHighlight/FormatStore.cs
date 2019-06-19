@@ -154,6 +154,7 @@ namespace Codist.SyntaxHighlight
 			InitStyleClassificationCache<CommentStyleTypes, CommentStyle>(cache, service, Config.Instance.CommentStyles);
 			InitStyleClassificationCache<CppStyleTypes, CppStyle>(cache, service, Config.Instance.CppStyles);
 			InitStyleClassificationCache<CSharpStyleTypes, CSharpStyle>(cache, service, Config.Instance.CodeStyles);
+			InitStyleClassificationCache<MarkdownStyleTypes, MarkdownStyle>(cache, service, Config.Instance.MarkdownStyles);
 			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(cache, service, Config.Instance.XmlCodeStyles);
 			InitStyleClassificationCache<SymbolMarkerStyleTypes, SymbolMarkerStyle>(cache, service, Config.Instance.SymbolMarkerStyles);
 			UpdateIdentifySymbolSource(cache);

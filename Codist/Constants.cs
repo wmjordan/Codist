@@ -34,6 +34,7 @@ namespace Codist
 			public const string Member = nameof(Member);
 			public const string Xml = "XML";
 			public const string Highlight = nameof(Highlight);
+			public const string Heading = nameof(Heading);
 			public const string Location = nameof(Location);
 		}
 
@@ -176,6 +177,13 @@ namespace Codist
 		public const string XmlName = "XML Name";
 		public const string XmlProcessingInstruction = "XML Processing Instruction";
 		public const string XmlText = "XML Text";
+
+		public const string MarkdownHeading1 = "Markdown: Heading 1";
+		public const string MarkdownHeading2 = "Markdown: Heading 2";
+		public const string MarkdownHeading3 = "Markdown: Heading 3";
+		public const string MarkdownHeading4 = "Markdown: Heading 4";
+		public const string MarkdownHeading5 = "Markdown: Heading 5";
+		public const string MarkdownHeading6 = "Markdown: Heading 6";
 
 		//public const string EditorIntellisense = "intellisense";
 		//public const string EditorSigHelp = "sighelp";
@@ -628,6 +636,7 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.XmlText)]
 		XmlText,
 	}
+
 	enum SymbolMarkerStyleTypes
 	{
 		None,
@@ -669,6 +678,28 @@ namespace Codist
 		ReferencedTypeAndMember,
 	}
 
+	enum MarkdownStyleTypes
+	{
+		None,
+		[Category(Constants.SyntaxCategory.Heading)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading1)]
+		Heading1,
+		[Category(Constants.SyntaxCategory.Heading)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading2)]
+		Heading2,
+		[Category(Constants.SyntaxCategory.Heading)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading3)]
+		Heading3,
+		[Category(Constants.SyntaxCategory.Heading)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading4)]
+		Heading4,
+		[Category(Constants.SyntaxCategory.Heading)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading5)]
+		Heading5,
+		[Category(Constants.SyntaxCategory.Heading)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading6)]
+		Heading6,
+	}
 	enum MarkerStyleTypes
 	{
 		None,

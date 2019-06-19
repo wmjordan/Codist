@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using AppHelpers;
 using Codist.Classifiers;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -14,6 +15,7 @@ namespace Codist.Options
 		readonly CommentStyle _ServicePage;
 		readonly UiLock _UI = new UiLock();
 		CommentLabel _ActiveLabel;
+		TabPage _HighlightPage;
 		bool _Loaded;
 
 		public CommentTaggerOptionPage() {
@@ -29,7 +31,8 @@ namespace Codist.Options
 				return;
 			}
 
-			_CommentTaggerTabs.AddPage("Comment Syntax", new SyntaxStyleOptionPage(_ServicePage, () => Config.Instance.CommentStyles, Config.GetDefaultCommentStyles), true);
+			_CommentTaggerTabs.AddPage("Comment Highlight", new SyntaxStyleOptionPage(_ServicePage, () => Config.Instance.CommentStyles, Config.GetDefaultCommentStyles), false);
+			_HighlightPage = _CommentTaggerTabs.TabPages[2];
 
 			LoadStyleList();
 
@@ -85,18 +88,39 @@ namespace Codist.Options
 				item.CheckedChanged += StyleApplicationChanged;
 				item.CheckedChanged += MarkChanged;
 			}
-			foreach (var item in new[] { _IgnoreCaseBox, _EndWithPunctuationBox }) {
+			foreach (var item in new[] { _IgnoreCaseBox, _EndWithPunctuationBox, _HighlightSpecialCommentBox }) {
 				item.CheckStateChanged += MarkChanged;
 			}
+			_HighlightSpecialCommentBox.CheckedChanged += _UI.HandleEvent(() => {
+				var c = _HighlightSpecialCommentBox.Checked;
+				Config.Instance.Set(SpecialHighlightOptions.SpecialComment, c);
+				if (c) {
+					_CommentTaggerTabs.TabPages.Add(_TagsPage);
+					_CommentTaggerTabs.TabPages.Add(_HighlightPage);
+				}
+				else if (_CommentTaggerTabs.TabCount == 3) {
+					_CommentTaggerTabs.TabPages.RemoveAt(2);
+					_CommentTaggerTabs.TabPages.RemoveAt(1);
+				}
+			});
 
-			_PreviewBox.SizeChanged += (s, args) => { UpdatePreview(); };
+			_PreviewBox.SizeChanged += (s, args) => UpdatePreview();
 			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
-			Config.Loaded += (s, args) => { LoadStyleList(); };
+			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			Config.Loaded += (s, args) => LoadStyleList();
+			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
 
-		private void LoadStyleList() {
+		void LoadConfig(Config config) {
+			_UI.DoWithLock(() => {
+				_HighlightSpecialCommentBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment);
+			});
+		}
+
+		void LoadStyleList() {
 			_UI.Lock();
+			_HighlightSpecialCommentBox.Checked = Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment);
 			_SyntaxListBox.Items.Clear();
 			foreach (var item in Config.Instance.Labels) {
 				_SyntaxListBox.Items.Add(new CommentTaggerListViewItem(item.Label, item));
@@ -110,7 +134,9 @@ namespace Codist.Options
 				}
 				_StyleBox.Items.Add(item);
 			}
-			_StyleBox.SelectedIndex = 0;
+			if (_StyleBox.Visible) {
+				_StyleBox.SelectedIndex = 0;
+			}
 			_UI.Unlock();
 		}
 
