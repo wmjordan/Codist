@@ -11,58 +11,7 @@ namespace Codist
 	static class ToolTipFactory
 	{
 		public static ThemedToolTip CreateToolTip(ISymbol symbol) {
-			var tip = new ThemedToolTip();
-			tip.Title
-				.Append(ThemeHelper.GetImage(symbol.GetImageId()).WrapMargin(WpfHelper.GlyphMargin))
-				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + (symbol as IMethodSymbol).GetSpecialMethodModifier() + symbol.GetSymbolKindName() + " ")
-				.Append(symbol.GetOriginalName(), true)
-				.Append(symbol.GetParameterString());
-
-			var content = tip.Content;
-			ITypeSymbol t = symbol.ContainingType;
-			bool c = false;
-			if (t != null) {
-				content.Append(t.GetSymbolKindName() + ": ")
-					.Append(t.ToDisplayString(WpfHelper.QuickInfoSymbolDisplayFormat));
-				c = true;
-			}
-			t = symbol.GetReturnType();
-			if (t != null) {
-				if (c) {
-					content.AppendLine();
-				}
-				c = true;
-				content.Append("return type: ").Append(t.ToDisplayString(WpfHelper.QuickInfoSymbolDisplayFormat), true);
-			}
-			if (c) {
-				content.AppendLine();
-			}
-			content.Append("namespace: " + symbol.ContainingNamespace?.ToString())
-				.Append("\nassembly: " + symbol.GetAssemblyModuleName());
-
-			var d = symbol as INamedTypeSymbol;
-			if (d?.TypeKind == TypeKind.Delegate) {
-				content.Append("\nsignature: ");
-				var invoke = d.OriginalDefinition.DelegateInvokeMethod;
-				content.AddSymbol(invoke.ReturnType, SymbolFormatter.Empty)
-					.Append(" ").AddSymbol(d, SymbolFormatter.Empty)
-					.AddParameters(invoke.Parameters, SymbolFormatter.Empty);
-			}
-			ShowAttributes(symbol, content);
-			ShowNumericForms(symbol, tip);
-			return tip;
-		}
-
-		static void ShowNumericForms(ISymbol symbol, ThemedToolTip tip) {
-			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.NumericValues)) {
-				var f = symbol as IFieldSymbol;
-				if (f != null && f.IsConst) {
-					var p = ShowNumericForms(f);
-					if (p != null) {
-						tip.Children.Add(p);
-					}
-				}
-			}
+			return CreateToolTip(symbol, false, null);
 		}
 
 		public static ThemedToolTip CreateToolTip(ISymbol symbol, bool forMemberList, Compilation compilation) {
@@ -70,9 +19,12 @@ namespace Codist
 			if ((Config.Instance.DisplayOptimizations & DisplayOptimizations.CodeWindow) != 0) {
 				WpfHelper.SetUITextRenderOptions(tip, true);
 			}
+			if (forMemberList == false) {
+				tip.Title.Append(ThemeHelper.GetImage(symbol.GetImageId()).WrapMargin(WpfHelper.GlyphMargin));
+			}
 			tip.Title
 				.Append(symbol.GetAccessibility() + symbol.GetAbstractionModifier() + (symbol as IMethodSymbol).GetSpecialMethodModifier() + symbol.GetSymbolKindName() + " ")
-				.Append(symbol.GetOriginalName(), true)
+				.Append(symbol.Name, true)
 				.Append(symbol.GetParameterString());
 			var content = tip.Content;
 			var t = symbol.GetReturnType();
@@ -94,23 +46,38 @@ namespace Codist
 				}
 				content.Append("namespace: " + symbol.ContainingNamespace?.ToString())
 					.Append("\nassembly: " + symbol.GetAssemblyModuleName());
+
+				if (symbol.Kind == SymbolKind.NamedType
+					&& ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Delegate) {
+					ShowDelegateSignature(content, (INamedTypeSymbol)symbol);
+				}
 			}
 			ShowAttributes(symbol, content);
-			ShowXmlDocSummary(symbol, compilation, tip);
+			if (compilation != null && Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.XmlDocSummary)) {
+				ShowXmlDocSummary(symbol, compilation, tip);
+			}
 			ShowNumericForms(symbol, tip);
 			return tip;
 		}
 
-		static void ShowXmlDocSummary(ISymbol symbol, Compilation compilation, ThemedToolTip tip) {
-			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.XmlDocSummary)) {
-				var doc = new XmlDoc(symbol, compilation);
-				var summary = doc.Summary ?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.ExplicitInheritDoc?.Summary : null);
-				if (summary != null) {
-					var docContent = tip.AddTextBlock();
-					new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(summary, docContent);
-					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
+		static void ShowNumericForms(ISymbol symbol, ThemedToolTip tip) {
+			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.NumericValues)) {
+				var f = symbol as IFieldSymbol;
+				if (f != null && f.IsConst) {
+					var p = ShowNumericForms(f);
+					if (p != null) {
+						tip.Children.Add(p);
+					}
 				}
 			}
+		}
+
+		static void ShowDelegateSignature(TextBlock content, INamedTypeSymbol d) {
+			content.Append("\nsignature: ");
+			var invoke = d.OriginalDefinition.DelegateInvokeMethod;
+			content.AddSymbol(invoke.ReturnType, SymbolFormatter.Empty)
+				.Append(" ").AddSymbol(d, SymbolFormatter.Empty)
+				.AddParameters(invoke.Parameters, SymbolFormatter.Empty);
 		}
 
 		static void ShowAttributes(ISymbol symbol, TextBlock content) {
@@ -123,6 +90,16 @@ namespace Codist
 						SymbolFormatter.Empty.Format(content.AppendLine().Inlines, attr, true);
 					}
 				}
+			}
+		}
+
+		static void ShowXmlDocSummary(ISymbol symbol, Compilation compilation, ThemedToolTip tip) {
+			var doc = new XmlDoc(symbol, compilation);
+			var summary = doc.Summary ?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.ExplicitInheritDoc?.Summary : null);
+			if (summary != null) {
+				var docContent = tip.AddTextBlock();
+				new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(summary, docContent);
+				tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 			}
 		}
 
