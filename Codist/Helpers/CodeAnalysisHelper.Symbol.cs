@@ -631,7 +631,18 @@ namespace Codist
 					else {
 						p = true;
 					}
+					if (item.IsOptional) {
+						sb.Append('[');
+					}
+					switch (item.RefKind) {
+						case RefKind.Ref: sb.Append("ref "); break;
+						case RefKind.Out: sb.Append("out "); break;
+						case RefKind.In: sb.Append("in "); break;
+					}
 					GetTypeName(item.Type, sb);
+					if (item.IsOptional) {
+						sb.Append(']');
+					}
 				}
 				sb.Append(')');
 			}

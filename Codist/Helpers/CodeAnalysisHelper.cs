@@ -628,7 +628,21 @@ namespace Codist
 					if (sb.Length > 1) {
 						sb.Append(',');
 					}
+					if (item.Default != null) {
+						sb.Append('[');
+					}
+					foreach (var token in item.Modifiers) {
+						switch (token.Kind()) {
+							case SyntaxKind.OutKeyword: sb.Append("out "); break;
+							case SyntaxKind.RefKeyword: sb.Append("ref "); break;
+							case SyntaxKind.InKeyword: sb.Append("in "); break;
+							case SyntaxKind.ParamsKeyword: sb.Append("params "); break;
+						}
+					}
 					sb.Append(useParamName ? item.Identifier.Text : item.Type.ToString());
+					if (item.Default != null) {
+						sb.Append(']');
+					}
 				}
 				sb.Append(')');
 				return sb.ToString();
