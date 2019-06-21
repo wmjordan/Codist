@@ -67,6 +67,7 @@ namespace Codist
 		public List<XmlCodeStyle> XmlCodeStyles { get; } = new List<XmlCodeStyle>();
 		public List<CSharpStyle> CodeStyles { get; } = new List<CSharpStyle>();
 		public List<CppStyle> CppStyles { get; } = new List<CppStyle>();
+		public List<MarkdownStyle> MarkdownStyles { get; } = new List<MarkdownStyle>();
 		public List<CodeStyle> GeneralStyles { get; } = new List<CodeStyle>();
 		public List<SymbolMarkerStyle> SymbolMarkerStyles { get; } = new List<SymbolMarkerStyle>();
 		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
@@ -138,6 +139,7 @@ namespace Codist
 			LoadStyleEntries<CppStyle, CppStyleTypes>(config.CppStyles, removeFontNames);
 			LoadStyleEntries<CSharpStyle, CSharpStyleTypes>(config.CodeStyles, removeFontNames);
 			LoadStyleEntries<XmlCodeStyle, XmlStyleTypes>(config.XmlCodeStyles, removeFontNames);
+			LoadStyleEntries<MarkdownStyle, MarkdownStyleTypes>(config.MarkdownStyles, removeFontNames);
 			LoadStyleEntries<SymbolMarkerStyle, SymbolMarkerStyleTypes>(config.SymbolMarkerStyles, removeFontNames);
 			if (styleFilter == StyleFilters.All) {
 				// don't override other settings if loaded from predefined themes or syntax config file
@@ -146,6 +148,7 @@ namespace Codist
 				ResetCodeStyle(Instance.CodeStyles, config.CodeStyles);
 				ResetCodeStyle(Instance.CppStyles, config.CppStyles);
 				ResetCodeStyle(Instance.XmlCodeStyles, config.XmlCodeStyles);
+				ResetCodeStyle(Instance.MarkdownStyles, config.MarkdownStyles);
 				ResetCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
 				_LastLoaded = DateTime.Now;
@@ -173,6 +176,7 @@ namespace Codist
 			ResetCodeStyle(Instance.CommentStyles, GetDefaultCommentStyles());
 			ResetCodeStyle(Instance.CodeStyles, GetDefaultCodeStyles<CSharpStyle, CSharpStyleTypes>());
 			ResetCodeStyle(Instance.CppStyles, GetDefaultCodeStyles<CppStyle, CppStyleTypes>());
+			ResetCodeStyle(Instance.MarkdownStyles, GetDefaultCodeStyles<MarkdownStyle, MarkdownStyleTypes>());
 			ResetCodeStyle(Instance.XmlCodeStyles, GetDefaultCodeStyles<XmlCodeStyle, XmlStyleTypes>());
 			ResetCodeStyle(Instance.SymbolMarkerStyles, GetDefaultCodeStyles<SymbolMarkerStyle, SymbolMarkerStyleTypes>());
 			ResetCodeStyle(Instance.MarkerSettings, GetDefaultMarkerStyles());
@@ -293,6 +297,7 @@ namespace Codist
 			c.CodeStyles.AddRange(GetDefaultCodeStyles<CSharpStyle, CSharpStyleTypes>());
 			c.CppStyles.AddRange(GetDefaultCodeStyles<CppStyle, CppStyleTypes>());
 			c.XmlCodeStyles.AddRange(GetDefaultCodeStyles<XmlCodeStyle, XmlStyleTypes>());
+			c.MarkdownStyles.AddRange(GetDefaultCodeStyles<MarkdownStyle, MarkdownStyleTypes>());
 			c.SymbolMarkerStyles.AddRange(GetDefaultCodeStyles<SymbolMarkerStyle, SymbolMarkerStyleTypes>());
 			c.MarkerSettings.AddRange(GetDefaultMarkerStyles());
 			return c;
@@ -383,6 +388,7 @@ namespace Codist
 			public List<XmlCodeStyle> XmlCodeStyles => GetDefinedStyles(_Config.XmlCodeStyles);
 			public List<CSharpStyle> CodeStyles => GetDefinedStyles(_Config.CodeStyles);
 			public List<CppStyle> CppStyles => GetDefinedStyles(_Config.CppStyles);
+			public List<MarkdownStyle> MarkdownStyles => GetDefinedStyles(_Config.MarkdownStyles);
 			public List<CodeStyle> GeneralStyles => GetDefinedStyles(_Config.GeneralStyles);
 			public List<SymbolMarkerStyle> SymbolMarkerStyles => GetDefinedStyles(_Config.SymbolMarkerStyles);
 		}
