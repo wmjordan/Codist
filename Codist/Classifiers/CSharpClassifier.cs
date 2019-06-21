@@ -255,6 +255,9 @@ namespace Codist.Classifiers
 									case TypeKind.Enum: type = _Classifications.EnumName; break;
 								}
 								break;
+							case SymbolKind.ArrayType: type = _Classifications.ClassName; break;
+							case SymbolKind.Event: type = _Classifications.Event; break;
+							case SymbolKind.PointerType: type = _Classifications.StructName; break;
 							case SymbolKind.TypeParameter:
 								type = _Classifications.TypeParameter; break;
 						}
