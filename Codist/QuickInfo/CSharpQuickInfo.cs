@@ -230,17 +230,10 @@ namespace Codist.QuickInfo
 			var tip = new ThemedTipDocument();
 			var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
 			var summary = doc.GetDescription(symbol);
-			if (summary == null) {
-				var inheritDoc = doc.ExplicitInheritDoc;
-				if ((inheritDoc == null || (summary = inheritDoc.GetDescription(symbol)) == null)
-					&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
-					foreach (var item in doc.InheritedXmlDocs) {
-						if ((summary = item.GetDescription(symbol)) != null) {
-							inheritDoc = item;
-							break;
-						}
-					}
-				}
+			XmlDoc inheritDoc = null;
+			if (summary == null
+				&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
+				summary = doc.GetInheritedDescription(symbol, out inheritDoc);
 				if (inheritDoc != null && summary != null) {
 					tip.Append(new ThemedTipParagraph(new ThemedTipText()
 							.Append("Documentation from ")
@@ -251,13 +244,13 @@ namespace Codist.QuickInfo
 					);
 				}
 			}
-			if (summary != null) {
-				if (summary.Name.LocalName == XmlDocRenderer.XmlDocNodeName && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc) == false) {
-					return;
-				}
+			if (summary != null
+				&& (summary.Name.LocalName != XmlDocRenderer.XmlDocNodeName || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc))) {
 				docRenderer.ParagraphCount = 0;
 				docRenderer.Render(summary, tip);
-				tip.Tag = docRenderer.ParagraphCount;
+				if (inheritDoc == null) {
+					tip.Tag = docRenderer.ParagraphCount;
+				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.NamedType)) {
 				var typeParams = symbol.GetTypeParameters();
@@ -808,9 +801,6 @@ namespace Codist.QuickInfo
 		static void ShowTypeParameterInfo(ITypeParameterSymbol typeParameter, ITypeSymbol typeArgument, TextBlock text) {
 			text.Append(typeParameter.Name, _SymbolFormatter.TypeParameter).Append(" is ")
 				.AddSymbol(typeArgument, _SymbolFormatter);
-			if (typeParameter.HasConstructorConstraint == false && typeParameter.HasReferenceTypeConstraint == false && typeParameter.HasValueTypeConstraint == false && typeParameter.ConstraintTypes.Length == 0) {
-				return;
-			}
 			if (typeParameter.HasReferenceTypeConstraint) {
 				text.Append(", ").Append("class", _SymbolFormatter.Keyword);
 			}
@@ -820,10 +810,8 @@ namespace Codist.QuickInfo
 			if (typeParameter.HasConstructorConstraint) {
 				text.Append(", ").Append("new", _SymbolFormatter.Keyword).Append("()");
 			}
-			if (typeParameter.ConstraintTypes.Length > 0) {
-				foreach (var constraint in typeParameter.ConstraintTypes) {
-					text.Append(", ").AddSymbol(constraint, _SymbolFormatter);
-				}
+			foreach (var constraint in typeParameter.ConstraintTypes) {
+				text.Append(", ").AddSymbol(constraint, _SymbolFormatter);
 			}
 		}
 
@@ -908,7 +896,7 @@ namespace Codist.QuickInfo
 					.Append(max.ToString() + "(")
 					.Append(maxName.Name, _SymbolFormatter.Enum)
 					.Append(")");
-			if (type.GetAttributes().Any(a => a.AttributeClass.ToDisplayString() == "System.FlagsAttribute")) {
+			if (type.GetAttributes().Any(a => a.AttributeClass.Name == nameof(FlagsAttribute) && a.AttributeClass.ContainingNamespace.ToDisplayString() == "System")) {
 				var d = Convert.ToString(Convert.ToInt64(bits), 2);
 				content.AppendLine().Append("All flags: ", true)
 					.Append(d)

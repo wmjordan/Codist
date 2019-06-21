@@ -14,7 +14,17 @@ namespace TestProject
 		  System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 	}
 
-	abstract class Base : ISing
+	abstract class Walker : IWalk
+	{
+		/// <inheritdoc cref="InternalWalk"/>
+		public abstract void Walk();
+
+		/// <summary>
+		/// Internal walk.
+		/// </summary>
+		void InternalWalk() { }
+	}
+	abstract class Singer : Walker, ISing
 	{
 		public abstract void Sing();
 
@@ -46,7 +56,7 @@ namespace TestProject
 		void Walk();
 	}
 
-	class TestInheritDoc : Base, IRun, IWalk
+	class TestInheritDoc : Singer, IRun, IWalk
 	{
 		/// <summary>
 		/// The description of method.
@@ -89,5 +99,9 @@ namespace TestProject
 
 		// hover on Sing to see its inherited documentation
 		public override void Sing() {}
+
+		// hover on Walk to see its inherited doc from Walker.InternalWalk
+		public override void Walk() {
+		}
 	}
 }

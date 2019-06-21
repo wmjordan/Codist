@@ -43,7 +43,7 @@ namespace Codist.QuickInfo
 				return;
 			}
 			string path;
-			description.ToolTip = String.Empty;
+			description.UseDummyToolTip();
 			if (locs.IsDefaultOrEmpty) {
 				if (symbol.ContainingType != null) {
 					// if the symbol is implicitly declared but its containing type is in source,
@@ -57,22 +57,42 @@ namespace Codist.QuickInfo
 				var asm = symbol.GetAssemblyModuleName();
 				if (asm != null) {
 					path = asm;
-					description.ToolTipOpening += ShowToolTip;
+					description.MouseEnter += HookMetaSymbolEvents;
 				}
 				return;
 			}
-			ClickAndGo:
+		ClickAndGo:
 			path = System.IO.Path.GetFileName(locs[0].SyntaxTree.FilePath);
-			description.ToolTipOpening += ShowToolTip;
-			description.Cursor = Cursors.Hand;
-			description.MouseEnter += HighlightSymbol;
-			description.MouseLeave += RemoveSymbolHighlight;
-			if (locs.Length == 1) {
-				description.MouseLeftButtonUp += (s, args) => symbol.GoToSource();
-				return;
-			}
-			description.MouseLeftButtonUp += ListLocations;
+			description.MouseEnter += HookEvents;
 
+			void HookMetaSymbolEvents(object sender, MouseEventArgs e) {
+				var s = sender as FrameworkElement;
+				s.MouseEnter -= HookMetaSymbolEvents;
+
+				s.ToolTipOpening += ShowToolTip;
+				s.UseDummyToolTip();
+				s.ContextMenuOpening += ShowContextMenu;
+			}
+			void HookEvents(object sender, MouseEventArgs e) {
+				var s = sender as FrameworkElement;
+				s.MouseEnter -= HookEvents;
+				((TextBlock)sender).Background = __HighlightBrush;
+				s.Cursor = Cursors.Hand;
+				s.ToolTipOpening += ShowToolTip;
+				s.MouseEnter += HighlightSymbol;
+				s.MouseLeave += RemoveSymbolHighlight;
+				if (locs.Length == 1) {
+					s.MouseLeftButtonUp += GoToSource;
+				}
+				else {
+					s.MouseLeftButtonUp += ListLocations;
+				}
+				s.UseDummyToolTip();
+				s.ContextMenuOpening += ShowContextMenu;
+			}
+			void GoToSource(object sender, MouseButtonEventArgs e) {
+				symbol.GoToSource();
+			}
 			void ListLocations(object sender, MouseButtonEventArgs e) {
 				quickInfoSession.Dismiss();
 				CSharpSymbolContextMenu.ShowLocations(symbol, SemanticContext.GetOrCreateSingetonInstance(quickInfoSession.TextView as IWpfTextView));
@@ -88,11 +108,21 @@ namespace Codist.QuickInfo
 			void RemoveSymbolHighlight(object sender, MouseEventArgs e) {
 				((TextBlock)sender).Background = Brushes.Transparent;
 			}
+			void ShowContextMenu(object sender, ContextMenuEventArgs e) {
+				var s = sender as FrameworkElement;
+				var m = new CSharpSymbolContextMenu(SemanticContext.GetHovered()) {
+					Symbol = symbol
+				};
+				m.AddAnalysisCommands();
+				m.AddTitleItem(symbol.GetOriginalName());
+				s.ContextMenu = m;
+				m.IsOpen = true;
+			}
 		}
 
 		static StackPanel ShowSymbolLocation(ISymbol symbol, string path) {
 			var tooltip = new ThemedToolTip();
-			tooltip.Title.Append(symbol.Name, true);
+			tooltip.Title.Append(symbol.GetOriginalName(), true);
 			var t = tooltip.Content
 				.Append("defined in ")
 				.Append(String.IsNullOrEmpty(path) ? "?" : path, true);
@@ -148,7 +178,7 @@ namespace Codist.QuickInfo
 				_Overrider.Diagnostics = diagnostics;
 			}
 
-			sealed class Overrider : UIElement
+			sealed class Overrider : StackPanel
 			{
 				static readonly Thickness __DocPanelBorderMargin = new Thickness(0, 0, -9, 3);
 				static readonly Thickness __DocPanelBorderPadding = new Thickness(0, 0, 9, 0);
@@ -207,7 +237,7 @@ namespace Codist.QuickInfo
 							var t = cp.GetText();
 							var d = Diagnostics.FirstOrDefault(i => i.GetMessage() == t);
 							if (d != null) {
-								cp.ToolTip = String.Empty;
+								cp.UseDummyToolTip();
 								cp.Tag = d;
 								cp.SetGlyph(ThemeHelper.GetImage(GetGlyphForSeverity(d.Severity)));
 								cp.ToolTipOpening += ShowToolTipForDiagnostics;
@@ -348,10 +378,14 @@ namespace Codist.QuickInfo
 						items = doc.GetParent<ItemsControl>().Items;
 					}
 					try {
-						if (items.Count > 1
-							&& (v16_1orLater && items[items.Count - 1] is StackPanel
-								|| items[items.Count - 1] is TextBlock)) {
-							items.RemoveAt(items.Count - 1);
+						if (items.Count > 1) {
+							for (int i = items.Count - 1; i > 0; i--) {
+								var item = items[i];
+								if (v16_1orLater && item is StackPanel && item is ThemedTipDocument == false || item is TextBlock) {
+									items.RemoveAt(i);
+									break;
+								}
+							}
 						}
 						items.Add(ExceptionDoc);
 						//todo move this to ApplySizeLimit

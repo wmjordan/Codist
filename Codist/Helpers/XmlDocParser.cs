@@ -70,6 +70,23 @@ namespace Codist
 				default: return Summary;
 			}
 		}
+		public XElement GetInheritedDescription(ISymbol symbol, out XmlDoc inheritDoc) {
+			XElement summary = null;
+			inheritDoc = ExplicitInheritDoc;
+			if (inheritDoc == null || (summary = inheritDoc.GetDescription(symbol)) == null) {
+				foreach (var item in InheritedXmlDocs) {
+					if ((summary = item.GetDescription(symbol)) != null) {
+						inheritDoc = item;
+						break;
+					}
+					if ((summary = item.GetInheritedDescription(symbol, out inheritDoc)) != null) {
+						return summary;
+					}
+				}
+			}
+			return summary;
+		}
+
 		public XElement GetParameter(string name) {
 			return GetNamedItem(_Parameters, name) ?? _ExplicitInheritDoc?.GetParameter(name);
 		}

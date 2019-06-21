@@ -107,10 +107,11 @@ namespace TestProject
 			await Task.Run(() => Console.WriteLine(exception.ToString()));
 		}
 
+		/// <returns>It never returns.</returns>
 		/// <exception cref="NotImplementedException">Boo boo.</exception>
 		[return: My(new[] { typeof(int), typeof(string), typeof(DateTime), null })]
 		[Name(SharedConstants.A)]
-		public static void Throw() {
+		public static string Throw() {
 			throw new NotImplementedException("boo-boo");
 		}
 
