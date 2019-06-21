@@ -726,12 +726,13 @@ namespace Codist.QuickInfo
 			ThemedTipDocument info = null;
 			var returnType = symbol.GetReturnType();
 			var parameters = symbol.GetParameters();
+			var typeParams = symbol.GetTypeParameters();
 			foreach (var intf in interfaces) {
 				foreach (var member in intf.GetMembers()) {
 					if (member.Kind == symbol.Kind
 						&& member.DeclaredAccessibility == Accessibility.Public
 						&& member.Name == symbol.Name
-						&& member.MatchSignature(symbol.Kind, returnType, parameters)) {
+						&& member.MatchSignature(symbol.Kind, returnType, parameters, typeParams)) {
 						explicitIntfs.Add(intf);
 					}
 				}

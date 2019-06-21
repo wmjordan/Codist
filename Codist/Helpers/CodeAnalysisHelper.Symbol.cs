@@ -344,6 +344,12 @@ namespace Codist
 					return m.ExplicitInterfaceImplementations[0].Name;
 				}
 			}
+			else if (symbol.Kind == SymbolKind.Property) {
+				var p = ((IPropertySymbol)symbol).ExplicitInterfaceImplementations;
+				if (p.Length > 0) {
+					return p[0].Name;
+				}
+			}
 			return symbol.Name;
 		}
 		#endregion
@@ -779,6 +785,20 @@ namespace Codist
 			return false;
 		}
 
+		public static IReadOnlyList<ISymbol> GetExplicitInterfaceImplementations(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Method:
+					if (((IMethodSymbol)symbol).MethodKind == MethodKind.ExplicitInterfaceImplementation) {
+						return ((IMethodSymbol)symbol).ExplicitInterfaceImplementations;
+					}
+					break;
+				case SymbolKind.Property:
+					return ((IPropertySymbol)symbol).ExplicitInterfaceImplementations;
+				case SymbolKind.Event:
+					return ((IEventSymbol)symbol).ExplicitInterfaceImplementations;
+			}
+			return null;
+		}
 		#endregion
 
 		#region Source
@@ -846,7 +866,7 @@ namespace Codist
 			}
 			switch (target.DeclaredAccessibility) {
 				case Accessibility.Public:
-					return true && (target.ContainingType == null || from.CanAccess(target.ContainingType, assembly));
+					return target.ContainingType == null || from.CanAccess(target.ContainingType, assembly);
 				case Accessibility.Private:
 					return target.ContainingType.Equals(from) || target.ContainingAssembly.GetSourceType() != AssemblySource.Metadata;
 				case Accessibility.Internal:
@@ -954,8 +974,7 @@ namespace Codist
 			if (generic == null || generic.IsGenericType == false || generic.IsUnboundGenericType) {
 				return false;
 			}
-			var types = generic.TypeArguments;
-			foreach (var item in types) {
+			foreach (var item in generic.TypeArguments) {
 				if (item.CanConvertTo(target)) {
 					return true;
 				}
@@ -963,12 +982,14 @@ namespace Codist
 			return false;
 		}
 
-		/// <summary>Checks whether the given symbol has the given <paramref name="kind"/>, <paramref name="returnType"/> and <paramref name="parameters"/>.</summary>
+		/// <summary>Checks whether the given symbol has the given <paramref name="kind"/>, <paramref name="returnType"/>, <paramref name="parameters"/> and <paramref name="typeParameters"/>.</summary>
 		/// <param name="symbol">The symbol to be checked.</param>
 		/// <param name="kind">The <see cref="SymbolKind"/> the symbol should have.</param>
 		/// <param name="returnType">The type that the symbol should return.</param>
 		/// <param name="parameters">The parameters the symbol should take.</param>
-		public static bool MatchSignature(this ISymbol symbol, SymbolKind kind, ITypeSymbol returnType, ImmutableArray<IParameterSymbol> parameters) {
+		/// <param name="typeParameters">The type parameters the symbol should take.</param>
+		/// <remarks>Details of <paramref name="typeParameters"/> are not yet compared.</remarks>
+		public static bool MatchSignature(this ISymbol symbol, SymbolKind kind, ITypeSymbol returnType, ImmutableArray<IParameterSymbol> parameters, ImmutableArray<ITypeParameterSymbol> typeParameters) {
 			if (symbol.Kind != kind) {
 				return false;
 			}
@@ -979,7 +1000,10 @@ namespace Codist
 			var method = kind == SymbolKind.Method ? symbol as IMethodSymbol
 				: kind == SymbolKind.Event ? (symbol as IEventSymbol).RaiseMethod
 				: null;
-			if (method != null && parameters.IsDefault == false) {
+			if (method == null) {
+				return true;
+			}
+			if (parameters.IsDefault == false) {
 				var memberParameters = method.Parameters;
 				if (memberParameters.Length != parameters.Length) {
 					return false;
@@ -991,6 +1015,12 @@ namespace Codist
 						|| pi.RefKind != mi.RefKind) {
 						return false;
 					}
+				}
+			}
+			if (typeParameters.IsDefault == false) {
+				var typeParams = method.TypeParameters;
+				if (typeParams.Length != typeParameters.Length) {
+					return false;
 				}
 			}
 			return true;

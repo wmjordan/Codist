@@ -14,13 +14,22 @@ namespace TestProject
 		  System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 	}
 
-	abstract class Base
+	abstract class Base : ISing
 	{
+		public abstract void Sing();
+
 		/// <summary>
 		/// Do something.
 		/// </summary>
-        /// <returns>Something.</returns>
+		/// <returns>Something.</returns>
 		protected abstract object Do();
+	}
+	interface ISing
+	{
+		/// <summary>
+		/// Sing a song.
+		/// </summary>
+		void Sing();
 	}
 	interface IRun
 	{
@@ -66,6 +75,8 @@ namespace TestProject
 		}
 		// this does not inherited from documentation of IRun
 		public void Run(int mile) { }
+		// this does not inherited from documentation of IRun
+		public void Run<T>() { }
 
 		// hover on Walk to see its inherited documentation
 		void IWalk.Walk() {
@@ -75,5 +86,8 @@ namespace TestProject
 		public override string ToString() {
 			return "TEST";
 		}
+
+		// hover on Sing to see its inherited documentation
+		public override void Sing() {}
 	}
 }

@@ -180,14 +180,20 @@ namespace Codist
 				var kind = querySymbol.Kind;
 				var returnType = querySymbol.GetReturnType();
 				var parameters = querySymbol.GetParameters();
+				var typeParams = querySymbol.GetTypeParameters();
 				var member = t.GetMembers(querySymbol.Name)
-					.FirstOrDefault(i => i.MatchSignature(kind, returnType, parameters));
+					.FirstOrDefault(i => i.MatchSignature(kind, returnType, parameters, typeParams));
 				if (member != null && AddInheritedDocFromSymbol(member)) {
 					return;
 				}
 			}
 			// inherit from implemented interfaces
-			if (symbol.Kind != SymbolKind.NamedType
+			if (symbol.Kind == SymbolKind.NamedType) {
+				foreach (var item in ((INamedTypeSymbol)symbol).Interfaces) {
+					InheritDocumentation(item, querySymbol);
+				}
+			}
+			else if (symbol.Kind != SymbolKind.NamedType
 				&& (t = symbol.ContainingType) != null) {
 				switch (symbol.Kind) {
 					case SymbolKind.Method:
