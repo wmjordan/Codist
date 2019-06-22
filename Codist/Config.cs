@@ -71,6 +71,8 @@ namespace Codist
 		public List<CodeStyle> GeneralStyles { get; } = new List<CodeStyle>();
 		public List<SymbolMarkerStyle> SymbolMarkerStyles { get; } = new List<SymbolMarkerStyle>();
 		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
+		public string BrowserPath { get; set; }
+		public string BrowserParameter { get; set; }
 
 		public static event EventHandler Loaded;
 		public static event EventHandler<ConfigUpdatedEventArgs> Updated;

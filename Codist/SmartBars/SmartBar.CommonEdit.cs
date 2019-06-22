@@ -262,6 +262,9 @@ namespace Codist.SmartBars
 					new CommandItem(KnownImageIds.QuickReplace, "Replace...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
 					new CommandItem(KnownImageIds.FindInFile, "Find in Files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
 					new CommandItem(KnownImageIds.ReplaceInFolder, "Replace in Files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
+					new CommandItem(KnownImageIds.OpenWebSite, "Web Search with Bing...", ctx => SearchSelection("https://www.bing.com/search?q=", ctx)),
+					new CommandItem(KnownImageIds.OpenWebSite, "Web Search with StackOverflow...", ctx => SearchSelection("https://stackoverflow.com/search?q=", ctx)),
+					new CommandItem(KnownImageIds.OpenWebSite, "Web Search with GitHub...", ctx => SearchSelection("https://github.com/search?q=", ctx)),
 				};
 		}
 		static CommandItem[] GetSurroundingCommands() {
@@ -275,6 +278,24 @@ namespace Codist.SmartBars
 					}
 				}),
 			};
+		}
+		static void SearchSelection(string url, CommandContext ctx) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			try {
+				url += System.Net.WebUtility.UrlEncode(ctx.View.GetFirstSelectionText());
+				if (Keyboard.Modifiers == ModifierKeys.Control) {
+					CodistPackage.DTE.ItemOperations.Navigate(url);
+				}
+				else if (String.IsNullOrEmpty(Config.Instance.BrowserPath) == false) {
+					System.Diagnostics.Process.Start(Config.Instance.BrowserPath, String.IsNullOrEmpty(Config.Instance.BrowserParameter) ? url : Config.Instance.BrowserParameter.Replace("%u", url));
+				}
+				else {
+					System.Diagnostics.Process.Start(url);
+				}
+			}
+			catch (Exception ex) {
+				System.Windows.Forms.MessageBox.Show("Failed to launch web browser to search selected items:\n" + ex.Message, nameof(Codist), System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+			}
 		}
 	}
 }

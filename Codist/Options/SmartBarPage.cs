@@ -25,7 +25,13 @@ namespace Codist.Options
 
 			_AutoShowSmartBarBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SmartBarOptions.ManualDisplaySmartBar, _AutoShowSmartBarBox.Checked == false));
 			_ToggleSmartBarBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SmartBarOptions.ShiftToggleDisplay, _ToggleSmartBarBox.Checked));
-
+			_BrowserPathBox.TextChanged += _UI.HandleEvent(() => Config.Instance.BrowserPath = _BrowserPathBox.Text);
+			_BrowserParameterBox.TextChanged += _UI.HandleEvent(() => Config.Instance.BrowserParameter = _BrowserParameterBox.Text);
+			_BrowseBrowserButton.Click += (s, args) => {
+				if (_BrowseBrowserDialog.ShowDialog() == DialogResult.OK) {
+					_BrowserPathBox.Text = _BrowseBrowserDialog.FileName;
+				}
+			};
 			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
 		}
@@ -34,6 +40,8 @@ namespace Codist.Options
 			_UI.DoWithLock(() => {
 				_AutoShowSmartBarBox.Checked = config.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false;
 				_ToggleSmartBarBox.Checked = config.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay);
+				_BrowserPathBox.Text = config.BrowserPath;
+				_BrowserParameterBox.Text = config.BrowserParameter;
 			});
 		}
 	}
