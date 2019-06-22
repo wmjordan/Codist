@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -187,19 +188,40 @@ namespace Codist
 			protected override void OnMouseRightButtonDown(MouseButtonEventArgs e) {
 				base.OnMouseRightButtonDown(e);
 				if (ContextMenu != null) {
-					ContextMenu.IsOpen = true;
+					//ContextMenu.IsOpen = true;
 					return;
 				}
 				var ctx = SemanticContext.GetHovered();
 				if (ctx != null) {
+					ThreadHelper.JoinableTaskFactory.Run(() => ctx.UpdateAsync(default));
 					var m = new CSharpSymbolContextMenu(ctx) {
-						Symbol = _Symbol
+						Symbol = _Symbol,
+						SyntaxNode = _Symbol.GetSyntaxNode()
 					};
 					m.AddAnalysisCommands();
+					m.Items.Add(new Separator());
+					m.AddNodeCommands();
+					m.AddSymbolCommands();
 					m.AddTitleItem(_Symbol.GetOriginalName());
+					m.ItemClicked += DismissQuickInfo;
 					ContextMenu = m;
-					m.IsOpen = true;
+					e.Handled = true;
+					//m.IsOpen = true;
 				}
+			}
+
+			void DismissQuickInfo(object sender, RoutedEventArgs e) {
+				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
+			}
+
+			protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
+				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, true);
+				base.OnContextMenuOpening(e);
+			}
+
+			protected override void OnContextMenuClosing(ContextMenuEventArgs e) {
+				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, false);
+				base.OnContextMenuClosing(e);
 			}
 
 			void Highlight(object sender, MouseEventArgs e) {

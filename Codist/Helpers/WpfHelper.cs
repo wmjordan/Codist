@@ -283,6 +283,9 @@ namespace Codist
 		}
 		public static TChild GetFirstVisualChild<TChild>(this DependencyObject obj, Predicate<TChild> predicate = null)
 			where TChild : DependencyObject {
+			if (obj == null) {
+				return null;
+			}
 			var count = VisualTreeHelper.GetChildrenCount(obj);
 			for (int i = 0; i < count; i++) {
 				var c = VisualTreeHelper.GetChild(obj, i);
@@ -299,6 +302,9 @@ namespace Codist
 		}
 		public static TChild GetLastVisualChild<TChild>(this DependencyObject obj, Predicate<TChild> predicate = null)
 			where TChild : DependencyObject {
+			if (obj == null) {
+				return null;
+			}
 			var count = VisualTreeHelper.GetChildrenCount(obj);
 			for (int i = count - 1; i >= 0; i--) {
 				var c = VisualTreeHelper.GetChild(obj, i);
@@ -315,11 +321,11 @@ namespace Codist
 		}
 
 		public static DependencyObject GetLogicalParent(this DependencyObject obj) {
-			return LogicalTreeHelper.GetParent(obj);
+			return obj != null ? LogicalTreeHelper.GetParent(obj) : null;
 		}
 
 		public static bool OccursOn<TObject>(this RoutedEventArgs args) where TObject : DependencyObject {
-			return (args.OriginalSource as DependencyObject)?.GetParent<TObject>() != null;
+			return (args.OriginalSource as DependencyObject).GetParent<TObject>() != null;
 		}
 		#endregion
 

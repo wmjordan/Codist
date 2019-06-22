@@ -40,8 +40,14 @@ namespace Codist.Controls
 		public event RoutedEventHandler ItemClicked;
 
 		public void AddNodeCommands() {
-			Items.Add(CreateItem(KnownImageIds.GoToDefinition, "Go to Code", GoToNode));
-			Items.Add(CreateItem(KnownImageIds.BlockSelection, "Select Code", SelectNode));
+			if (_Node != null) {
+				Items.Add(CreateItem(KnownImageIds.GoToDefinition, "Go to Code", GoToNode));
+				Items.Add(CreateItem(KnownImageIds.BlockSelection, "Select Code", SelectNode));
+			}
+		}
+
+		public void AddSymbolCommands() {
+			Items.Add(CreateItem(KnownImageIds.Copy, "Copy Symbol Name", CopySymbolName));
 		}
 
 		public void AddAnalysisCommands() {
@@ -349,7 +355,14 @@ namespace Codist.Controls
 		}
 
 		#region Menu event handlers
-
+		void CopySymbolName(object sender, RoutedEventArgs args) {
+			try {
+				Clipboard.SetDataObject(_Symbol.GetOriginalName());
+			}
+			catch (SystemException) {
+				// ignore failure
+			}
+		}
 		static void FindAllReferences(object sender, RoutedEventArgs args) {
 			TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences");
 		}
@@ -366,7 +379,7 @@ namespace Codist.Controls
 			_Node.GetReference().GoToSource();
 		}
 		void SelectNode(object sender, RoutedEventArgs args) {
-			_SemanticContext.View.SelectNode(_Node, true);
+			_Node.SelectNode(true);
 		}
 		#endregion
 

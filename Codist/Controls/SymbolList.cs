@@ -257,14 +257,7 @@ namespace Codist.Controls
 					SetupMenuCommand(item, KnownImageIds.GoToDefinition, "Go to Code", s => s.Symbol.GoToSource());
 					SetupMenuCommand(item, KnownImageIds.BlockSelection, "Select Code", s => s.Symbol.GetSyntaxNode().SelectNode(true));
 				}
-				SetupMenuCommand(item, KnownImageIds.DisplayName, "Copy Symbol Name", s => {
-					try {
-						Clipboard.SetDataObject(s.Symbol.GetOriginalName());
-					}
-					catch (SystemException) {
-						// ignore failure
-					}
-				});
+				menu.AddSymbolCommands();
 				menu.Items.Add(new Separator());
 				menu.SyntaxNode = item.SyntaxNode;
 				menu.Symbol = item.Symbol;

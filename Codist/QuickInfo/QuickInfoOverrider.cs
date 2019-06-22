@@ -32,6 +32,20 @@ namespace Codist.QuickInfo
 			return o.Panel != null ? o : (IQuickInfoOverrider)new Default();
 		}
 
+		public static void HoldQuickInfo(DependencyObject quickInfoItem, bool hold) {
+			FindHolder(quickInfoItem)?.Hold(hold);
+		}
+
+		public static void DismissQuickInfo(DependencyObject quickInfoItem) {
+			FindHolder(quickInfoItem)?.Dismiss();
+		}
+
+		static IQuickInfoHolder FindHolder(DependencyObject quickInfoItem) {
+			var items = quickInfoItem.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl");
+			// version 16.1 or above
+			items = items.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl") ?? items;
+			return items.GetFirstVisualChild<StackPanel>(o => o is IQuickInfoHolder) as IQuickInfoHolder;
+		}
 		static void ApplyClickAndGo(ISymbol symbol, TextBlock description, IQuickInfoSession quickInfoSession) {
 			var locs = symbol.DeclaringSyntaxReferences;
 			if (symbol.Kind == SymbolKind.Namespace) {
@@ -89,6 +103,7 @@ namespace Codist.QuickInfo
 				}
 				s.UseDummyToolTip();
 				s.ContextMenuOpening += ShowContextMenu;
+				s.ContextMenuClosing += ReleaseQuickInfo;
 			}
 			void GoToSource(object sender, MouseButtonEventArgs e) {
 				symbol.GoToSource();
@@ -110,13 +125,27 @@ namespace Codist.QuickInfo
 			}
 			void ShowContextMenu(object sender, ContextMenuEventArgs e) {
 				var s = sender as FrameworkElement;
-				var m = new CSharpSymbolContextMenu(SemanticContext.GetHovered()) {
-					Symbol = symbol
-				};
-				m.AddAnalysisCommands();
-				m.AddTitleItem(symbol.GetOriginalName());
-				s.ContextMenu = m;
-				m.IsOpen = true;
+				if (s.ContextMenu == null) {
+					var m = new CSharpSymbolContextMenu(SemanticContext.GetHovered()) {
+						Symbol = symbol,
+						SyntaxNode = symbol.GetSyntaxNode()
+					};
+					m.AddAnalysisCommands();
+					m.Items.Add(new Separator());
+					m.AddNodeCommands();
+					m.AddSymbolCommands();
+					m.AddTitleItem(symbol.GetOriginalName());
+					m.ItemClicked += HideQuickInfo;
+					s.ContextMenu = m;
+				}
+				HoldQuickInfo(s, true);
+				s.ContextMenu.IsOpen = true;
+			}
+			void ReleaseQuickInfo(object sender, ContextMenuEventArgs e) {
+				HoldQuickInfo(sender as DependencyObject, false);
+			}
+			void HideQuickInfo(object sender, RoutedEventArgs e) {
+				DismissQuickInfo(description);
 			}
 		}
 
@@ -136,6 +165,12 @@ namespace Codist.QuickInfo
 				}
 			}
 			return tooltip;
+		}
+
+		interface IQuickInfoHolder
+		{
+			void Hold(bool hold);
+			void Dismiss();
 		}
 
 		/// <summary>
@@ -178,7 +213,7 @@ namespace Codist.QuickInfo
 				_Overrider.Diagnostics = diagnostics;
 			}
 
-			sealed class Overrider : StackPanel
+			sealed class Overrider : StackPanel, IInteractiveQuickInfoContent, IQuickInfoHolder
 			{
 				static readonly Thickness __DocPanelBorderMargin = new Thickness(0, 0, -9, 3);
 				static readonly Thickness __DocPanelBorderPadding = new Thickness(0, 0, 9, 0);
@@ -190,6 +225,16 @@ namespace Codist.QuickInfo
 				public UIElement ExceptionDoc;
 				public IList<Diagnostic> Diagnostics;
 				public IQuickInfoSession QuickInfoSession;
+
+				public bool KeepQuickInfoOpen { get; set; }
+				public bool IsMouseOverAggregated { get; set; }
+
+				public void Hold(bool hold) {
+					IsMouseOverAggregated = hold;
+				}
+				public void Dismiss() {
+					QuickInfoSession.Dismiss();
+				}
 
 				protected override void OnVisualParentChanged(DependencyObject oldParent) {
 					base.OnVisualParentChanged(oldParent);

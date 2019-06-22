@@ -161,21 +161,50 @@ namespace Codist.Controls
 		void HandleSelectStart(object sender, MouseButtonEventArgs e) {
 			_uiScope.PreviewMouseLeftButtonDown -= HandleSelectStart;
 			// don't mess so much if not selected
+			_uiScope.Focus();
 			_uiScope.PreviewKeyUp += HandleCopyShortcut;
-			_uiScope.MouseRightButtonUp += HandleMouseCopy;
+			_uiScope.MouseRightButtonUp += ShowContextMenu;
 			_uiScope.Style = new Style(_uiScope.GetType()) {
 				Setters = {
 					new Setter(System.Windows.Controls.Primitives.TextBoxBase.SelectionBrushProperty, ThemeHelper.TextSelectionHighlightBrush)
 				}
 			};
 		}
-		void HandleMouseCopy(object sender, MouseButtonEventArgs e) {
+		void ShowContextMenu(object sender, RoutedEventArgs e) {
+			var s = sender as FrameworkElement;
+			if (e.Source != _uiScope) {
+				QuickInfo.QuickInfoOverrider.HoldQuickInfo(s, true);
+				return;
+			}
+			if (s.ContextMenu == null) {
+				var m = new ContextMenu {
+					Resources = SharedDictionaryManager.ContextMenu,
+					Foreground = ThemeHelper.ToolWindowTextBrush,
+					IsEnabled = true
+				};
+				m.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+				var newItem = new ThemedMenuItem { Icon = null, Header = "Copy selection" };
+				newItem.Click += HandleMouseCopy;
+				m.Items.Add(newItem);
+				m.Closed += ReleaseQuickInfo;
+				s.ContextMenu = m;
+			}
+			QuickInfo.QuickInfoOverrider.HoldQuickInfo(s, true);
+			s.ContextMenu.IsOpen = true;
+		}
+		void ReleaseQuickInfo(object sender, RoutedEventArgs e) {
+			QuickInfo.QuickInfoOverrider.HoldQuickInfo(_uiScope, false);
+			_uiScope.ContextMenu = null;
+		}
+		void HandleMouseCopy(object sender, RoutedEventArgs e) {
 			e.Handled = Copy();
 		}
 		void HandleCopyShortcut(object sender, KeyEventArgs e) {
-			if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control && _editor != null) {
-				Copy();
+			if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control
+				&& _editor != null
+				&& Copy()) {
 				e.Handled = true;
+				System.Diagnostics.Debug.WriteLine("Copied: " + Clipboard.GetText());
 			}
 		}
 
@@ -183,7 +212,7 @@ namespace Codist.Controls
 			_uiScope.Unloaded -= Detach;
 			_uiScope.PreviewMouseLeftButtonDown -= HandleSelectStart;
 			_uiScope.PreviewKeyUp -= HandleCopyShortcut;
-			_uiScope.MouseRightButtonUp -= HandleMouseCopy;
+			//_uiScope.MouseRightButtonUp -= HandleMouseCopy;
 			//TextViewProp.SetValue(_editor, null);
 			//OnDetachMethod.Invoke(_editor, null);
 		}

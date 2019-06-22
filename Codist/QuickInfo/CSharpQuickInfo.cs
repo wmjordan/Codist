@@ -825,7 +825,7 @@ namespace Codist.QuickInfo
 
 		static void ShowBaseType(IList<object> qiContent, ITypeSymbol typeSymbol) {
 			var baseType = typeSymbol.BaseType;
-			if (baseType == null || baseType.IsCommonClass() != false) {
+			if (baseType == null || baseType.IsCommonClass()) {
 				return;
 			}
 			var classList = new ThemedTipText("Base type: ", true)
