@@ -438,7 +438,10 @@ namespace Codist.Controls
 				Orientation = Orientation.Horizontal,
 				Children = {
 					new ThemedButton(ThemeHelper.GetImage(KnownImageIds.Unpin), "Pin", TogglePinButton),
-					new ThemedButton(KnownImageIds.Close, "Close", () => _Container.Children.Remove(Menu))
+					new ThemedButton(KnownImageIds.Close, "Close", () => {
+						_Container.Children.Remove(Menu);
+						_Container.FocusOnTextView();
+					})
 				}
 			};
 			Menu.MouseLeftButtonUp += MenuItemSelect;

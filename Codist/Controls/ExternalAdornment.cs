@@ -67,9 +67,9 @@ namespace Codist.Controls
 				element.MouseLeave -= ReleaseQuickInfo;
 				element.MouseEnter -= SuppressQuickInfo;
 				element.MouseLeftButtonDown -= BringToFront;
+				_View.Properties.RemoveProperty(nameof(ExternalAdornment));
 			}
 			if (Children.Count == 0 || Children.Count == 1 && Children[0] is null) {
-				_View.Properties.RemoveProperty(nameof(ExternalAdornment));
 				FocusOnTextView();
 			}
 		}
