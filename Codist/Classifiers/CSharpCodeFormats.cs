@@ -314,6 +314,18 @@ namespace Codist.Classifiers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalDeclarationName)]
+	[Name(Constants.CSharpLocalDeclarationName)]
+	[UserVisible(false)]
+	[Order(After = Constants.CSharpDeclarationName)]
+	sealed class LocalDeclarationFormat : ClassificationFormatDefinition
+	{
+		public LocalDeclarationFormat() {
+			DisplayName = Constants.NameOfMe + ": local declaration";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpStaticMemberName)]
 	[Name(Constants.CSharpStaticMemberName)]
 	[UserVisible(false)]

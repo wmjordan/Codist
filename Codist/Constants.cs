@@ -126,6 +126,7 @@ namespace Codist
 		public const string CSharpConstructorMethodName = "C#: Constructor method";
 		public const string CSharpDeclarationName = "C#: Type declaration";
 		public const string CSharpNestedDeclarationName = "C#: Nested type declaration";
+		public const string CSharpLocalDeclarationName = "C#: Local declaration";
 		public const string CSharpTypeParameterName = "C#: Type parameter";
 		public const string CSharpStaticMemberName = "C#: Static member";
 		public const string CSharpOverrideMemberName = "C#: Override member";
@@ -460,6 +461,10 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpNestedDeclarationName)]
 		[Description("Declaration of type memeber: property, method, event, delegate, nested type, etc. (excluding fields), inheriting from Declaration")]
 		MemberDeclaration,
+		[Category(Constants.SyntaxCategory.Declaration)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalDeclarationName)]
+		[Description("Declaration of local variable")]
+		LocalDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationBrace)]
 		[Description("Braces {} for declaration, inheriting from Punctuation")]

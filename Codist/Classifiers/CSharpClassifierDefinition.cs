@@ -120,6 +120,10 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition NestedDeclaration;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[Name(Constants.CSharpLocalDeclarationName)]
+		static ClassificationTypeDefinition LocalDeclaration;
+
+		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpOverrideMemberName)]
 		static ClassificationTypeDefinition OverrideMember;

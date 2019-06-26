@@ -407,6 +407,9 @@ namespace Codist.Classifiers
 								symbol = semanticModel.GetTypeInfo((node as TupleElementSyntax).Type).Type;
 							}
 							break;
+						case SymbolKind.Local:
+							yield return _Classifications.LocalDeclaration;
+							break;
 					}
 				}
 				else {

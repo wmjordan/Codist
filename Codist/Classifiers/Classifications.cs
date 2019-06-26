@@ -25,6 +25,7 @@ namespace Codist.Classifiers
 			InterfaceName = registry.GetClassificationType(Constants.CodeInterfaceName);
 			Label = registry.GetClassificationType(Constants.CSharpLabel);
 			LocalVariable = registry.GetClassificationType(Constants.CSharpLocalVariableName);
+			LocalDeclaration = registry.GetClassificationType(Constants.CSharpLocalDeclarationName);
 			Method = registry.GetClassificationType(Constants.CSharpMethodName);
 			Namespace = registry.GetClassificationType(Constants.CSharpNamespaceName);
 			NestedDeclaration = registry.GetClassificationType(Constants.CSharpNestedDeclarationName);
@@ -81,6 +82,8 @@ namespace Codist.Classifiers
 		public IClassificationType Label { get; }
 
 		public IClassificationType LocalVariable { get; }
+
+		public IClassificationType LocalDeclaration { get; }
 
 		public IClassificationType Method { get; }
 
