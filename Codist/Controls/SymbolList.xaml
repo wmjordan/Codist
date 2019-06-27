@@ -36,6 +36,7 @@
 					<ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
 					<ColumnDefinition Width="*"/>
 					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="Auto"/>
 				</Grid.ColumnDefinitions>
 				<ContentPresenter x:Name="Icon" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Content="{Binding Path=Icon}" SnapsToDevicePixels="True"/>
 				<Border x:Name="Check" Width="18" Height="18" Visibility="Collapsed" Margin="6,0,6,0" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderThickness="1" BorderBrush="#5082a4">
@@ -43,11 +44,15 @@
 				</Border>
 				<ContentPresenter x:Name="HeaderHost" MaxWidth="500" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{Binding Path=Content}" RecognizesAccessKey="False" SnapsToDevicePixels="True"/>
 				<TextBlock x:Name="HintText" Grid.Column="2" Text="{Binding Path=Hint}" Margin="5,0,0,0" Height="{Binding ElementName=HeaderHost,Path=ActualHeight}" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource VsBrush.GrayText}" MaxWidth="200" TextTrimming="CharacterEllipsis"/>
+				<ContentPresenter x:Name="ExtIcon" Grid.Column="3" Width="Auto" Height="18" Margin="0,0,0,0" VerticalAlignment="Center" Content="{Binding Path=ExtIcon}" SnapsToDevicePixels="True"/>
 			</Grid>
 		</Border>
 		<DataTemplate.Triggers>
 			<DataTrigger Binding="{Binding Icon}" Value="{x:Null}">
 				<Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
+			</DataTrigger>
+			<DataTrigger Binding="{Binding ExtIcon}" Value="{x:Null}">
+				<Setter TargetName="ExtIcon" Property="Visibility" Value="Collapsed"/>
 			</DataTrigger>
 			<DataTrigger Binding="{Binding ImageId}" Value="2099"><!-- for regions -->
 				<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.PanelTitleBarBrushKey}}"/>

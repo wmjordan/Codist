@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -11,7 +12,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text.Editor;
-using System.Collections;
 
 namespace Codist.QuickInfo
 {
@@ -50,10 +50,7 @@ namespace Codist.QuickInfo
 			var locs = symbol.DeclaringSyntaxReferences;
 			if (symbol.Kind == SymbolKind.Namespace) {
 				description.ToolTip = "Locations: " + locs.Length;
-				description.Cursor = Cursors.Hand;
-				description.MouseEnter += HighlightSymbol;
-				description.MouseLeave += RemoveSymbolHighlight;
-				description.MouseLeftButtonUp += ListLocations;
+				description.MouseEnter += HookNamespaceSymbolEvents;
 				return;
 			}
 			string path;
@@ -86,6 +83,17 @@ namespace Codist.QuickInfo
 				s.ToolTipOpening += ShowToolTip;
 				s.UseDummyToolTip();
 				s.ContextMenuOpening += ShowContextMenu;
+			}
+			void HookNamespaceSymbolEvents(object sender, EventArgs e) {
+				var s = sender as FrameworkElement;
+				s.MouseEnter -= HookNamespaceSymbolEvents;
+				((TextBlock)sender).Background = __HighlightBrush;
+				s.Cursor = Cursors.Hand;
+				s.MouseEnter += HighlightSymbol;
+				s.MouseLeave += RemoveSymbolHighlight;
+				s.MouseLeftButtonUp += ListLocations;
+				s.ContextMenuOpening += ShowContextMenu;
+				s.ContextMenuClosing += ReleaseQuickInfo;
 			}
 			void HookEvents(object sender, MouseEventArgs e) {
 				var s = sender as FrameworkElement;
@@ -126,7 +134,9 @@ namespace Codist.QuickInfo
 			void ShowContextMenu(object sender, ContextMenuEventArgs e) {
 				var s = sender as FrameworkElement;
 				if (s.ContextMenu == null) {
-					var m = new CSharpSymbolContextMenu(SemanticContext.GetHovered()) {
+					var ctx = SemanticContext.GetHovered();
+					Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(() => ctx.UpdateAsync(default));
+					var m = new CSharpSymbolContextMenu(ctx) {
 						Symbol = symbol,
 						SyntaxNode = symbol.GetSyntaxNode()
 					};

@@ -37,6 +37,7 @@ namespace Codist.Controls
 		public IReadOnlyList<SymbolItem> Symbols => _Symbols;
 		public SymbolListType ContainerType { get; set; }
 		public Func<SymbolItem, UIElement> IconProvider { get; set; }
+		public Func<SymbolItem, UIElement> ExtIconProvider { get; set; }
 		public SymbolItem SelectedSymbolItem => SelectedItem as SymbolItem;
 
 		public bool IsPinned { get; set; }
@@ -571,6 +572,7 @@ namespace Codist.Controls
 		//public event PropertyChangedEventHandler PropertyChanged;
 		public int ImageId => _ImageId != 0 ? _ImageId : (_ImageId = Symbol != null ? Symbol.GetImageId() : SyntaxNode != null ? SyntaxNode.GetImageId() : -1);
 		public UIElement Icon => _Icon ?? (_Icon = Container.IconProvider?.Invoke(this) ?? ThemeHelper.GetImage(ImageId != -1 ? ImageId : 0));
+		public UIElement ExtIcon => Container.ExtIconProvider?.Invoke(this);
 		public string Hint {
 			get => _Hint ?? (_Hint = Symbol != null ? GetSymbolConstaintValue(Symbol) : String.Empty);
 			set => _Hint = value;

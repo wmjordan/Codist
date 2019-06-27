@@ -175,7 +175,8 @@ namespace Codist.Controls
 
 		void CreateCommandsForReturnTypeCommand() {
 			var type = _Symbol.GetReturnType();
-			if (type != null && type.SpecialType == SpecialType.None) {
+			if (type != null && type.SpecialType == SpecialType.None && type.IsTupleType == false) {
+				type = type.ResolveElementType();
 				Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members of " + type.Name + type.GetParameterString() + "...", () => FindMembers(type, _SemanticContext)));
 				if (type.IsStatic == false) {
 					Items.Add(CreateItem(KnownImageIds.ExtensionMethod, "Find Extensions for " + type.Name + type.GetParameterString() + "...", () => FindExtensionMethods(type, _SemanticContext)));
@@ -269,6 +270,9 @@ namespace Codist.Controls
 		static void FindMembers(ISymbol symbol, SemanticContext context) {
 			var m = new SymbolMenu(context, symbol.Kind == SymbolKind.Namespace ? SymbolListType.TypeList : SymbolListType.None);
 			var (count, inherited) = m.Menu.AddSymbolMembers(symbol);
+			if (m.Menu.IconProvider == null) {
+				m.Menu.ExtIconProvider = s => GetExtIcons(s.Symbol);
+			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
 				.Append($" members: {count} ({inherited} inherited)");
@@ -337,6 +341,39 @@ namespace Codist.Controls
 			}
 			m.Show();
 		}
+		static StackPanel GetExtIcons(ISymbol symbol) {
+			StackPanel icons = null;
+			if (symbol.Kind == SymbolKind.Method) {
+				var ms = symbol as IMethodSymbol;
+				if (ms.IsAsync) {
+					icons = AddIcon(icons, KnownImageIds.DynamicGroup);
+				}
+				if (ms.IsGenericMethod) {
+					icons = AddIcon(icons, KnownImageIds.MarkupXML);
+				}
+				if (ms.IsExtensionMethod) {
+					return AddIcon(icons, KnownImageIds.ExtensionMethod);
+				}
+			}
+			else if (symbol.Kind == SymbolKind.NamedType) {
+				var mt = symbol as INamedTypeSymbol;
+				if (mt.IsGenericType) {
+					icons = AddIcon(icons, KnownImageIds.MarkupXML);
+				}
+			}
+			if (symbol.IsStatic) {
+				icons = AddIcon(icons, KnownImageIds.Link);
+			}
+			return icons;
+
+			StackPanel AddIcon(StackPanel container, int imageId) {
+				if (container == null) {
+					container = new StackPanel { Orientation = Orientation.Horizontal };
+				}
+				container.Children.Add(ThemeHelper.GetImage(imageId));
+				return container;
+			}
+		}
 		static void ShowSymbolMenuForResult<TSymbol>(ISymbol source, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType) where TSymbol : ISymbol {
 			members.Sort(CodeAnalysisHelper.CompareSymbol);
 			var m = new SymbolMenu(context);
@@ -351,6 +388,7 @@ namespace Codist.Controls
 				}
 				m.Menu.Add(item, false);
 			}
+			m.Menu.ExtIconProvider = s => GetExtIcons(s.Symbol);
 			m.Show();
 		}
 

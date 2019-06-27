@@ -390,6 +390,13 @@ namespace Codist
 			return symbol.Kind == SymbolKind.Alias ? (symbol as IAliasSymbol).Target : symbol;
 		}
 
+		public static ITypeSymbol ResolveElementType(this ITypeSymbol t) {
+			while (t.Kind == SymbolKind.ArrayType) {
+				t = ((IArrayTypeSymbol)t).ElementType;
+			}
+			return t;
+		}
+
 		public static int GetImageId(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Assembly: return KnownImageIds.Assembly;
@@ -434,9 +441,9 @@ namespace Codist
 				case SymbolKind.Local: return KnownImageIds.LocalVariable;
 				case SymbolKind.Method:
 					var m = symbol as IMethodSymbol;
-					if (m.IsExtensionMethod) {
-						return KnownImageIds.ExtensionMethod;
-					}
+					//if (m.IsExtensionMethod) {
+					//	return KnownImageIds.ExtensionMethod;
+					//}
 					if (m.MethodKind == MethodKind.Constructor) {
 						switch (m.DeclaredAccessibility) {
 							case Accessibility.Public: return KnownImageIds.TypePublic;
