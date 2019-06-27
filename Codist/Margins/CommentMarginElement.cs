@@ -8,7 +8,6 @@ using Codist.Classifiers;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Margins
 {
@@ -52,6 +51,7 @@ namespace Codist.Margins
 			{ Constants.Task7Comment, TaskBrush },
 			{ Constants.Task8Comment, TaskBrush },
 			{ Constants.Task9Comment, TaskBrush },
+			{ Constants.MarkdownHeading1, TaskBrush },
 			{ Constants.CodePreprocessorKeyword, PreProcessorBrush },
 		};
 		bool _HasEvents;

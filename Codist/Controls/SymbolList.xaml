@@ -44,7 +44,7 @@
 				</Border>
 				<ContentPresenter x:Name="HeaderHost" MaxWidth="500" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{Binding Path=Content}" RecognizesAccessKey="False" SnapsToDevicePixels="True"/>
 				<TextBlock x:Name="HintText" Grid.Column="2" Text="{Binding Path=Hint}" Margin="5,0,0,0" Height="{Binding ElementName=HeaderHost,Path=ActualHeight}" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource VsBrush.GrayText}" MaxWidth="200" TextTrimming="CharacterEllipsis"/>
-				<ContentPresenter x:Name="ExtIcon" Grid.Column="3" Width="Auto" Height="18" Margin="0,0,0,0" VerticalAlignment="Center" Content="{Binding Path=ExtIcon}" SnapsToDevicePixels="True"/>
+				<ContentPresenter x:Name="ExtIcon" Grid.Column="3" Width="Auto" Height="18" Margin="8,0,0,0" VerticalAlignment="Center" Content="{Binding Path=ExtIcon}" SnapsToDevicePixels="True"/>
 			</Grid>
 		</Border>
 		<DataTemplate.Triggers>
