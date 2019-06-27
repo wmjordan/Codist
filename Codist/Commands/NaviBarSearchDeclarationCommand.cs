@@ -28,9 +28,9 @@ namespace Codist.Commands
 			(s as OleMenuCommand).Enabled = GetCSharpBar() != null;
 		}
 
-		static NaviBar.CSharpBar GetCSharpBar() {
-			NaviBar.CSharpBar bar = null;
-			return TextEditorHelper.GetActiveWpfDocumentView()?.Properties.TryGetProperty<NaviBar.CSharpBar>(nameof(NaviBar), out bar) == true ? bar : null;
+		static NaviBar.INaviBar GetCSharpBar() {
+			NaviBar.INaviBar bar = null;
+			return TextEditorHelper.GetActiveWpfDocumentView()?.Properties.TryGetProperty(nameof(NaviBar), out bar) == true ? bar : null;
 		}
 
 		static void ExecuteSearchDeclaration(object sender, EventArgs e) {
@@ -39,7 +39,7 @@ namespace Codist.Commands
 		}
 		static void ExecuteSearchActiveClass(object sender, EventArgs e) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			GetCSharpBar()?.ShowActiveClassMenu();
+			GetCSharpBar()?.ShowActiveItemMenu();
 		}
 	}
 }

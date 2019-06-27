@@ -114,9 +114,9 @@ namespace Codist.Controls
 		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
 			base.OnRenderSizeChanged(sizeInfo);
 			if (sizeInfo.WidthChanged) {
-				var left = Canvas.GetLeft(this);
 				//Canvas.SetLeft(this, left < 0 ? 0 : left);
 				if (Container != null) {
+					var left = Canvas.GetLeft(this);
 					var top = Canvas.GetTop(this);
 					if (top + sizeInfo.NewSize.Height > Container.RenderSize.Height) {
 						Canvas.SetTop(this, Container.RenderSize.Height - sizeInfo.NewSize.Height);

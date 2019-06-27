@@ -21,7 +21,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace Codist.NaviBar
 {
-	public sealed class CSharpBar : Menu
+	public sealed class CSharpBar : Menu, INaviBar
 	{
 		internal const string SyntaxNodeRange = nameof(SyntaxNodeRange);
 		readonly IWpfTextView _View;
@@ -211,10 +211,10 @@ namespace Codist.NaviBar
 		}
 
 		#region Menu handler
-		internal void ShowRootItemMenu() {
+		public void ShowRootItemMenu() {
 			_RootItem.ShowNamespaceAndTypeMenu();
 		}
-		internal void ShowActiveClassMenu() {
+		public void ShowActiveItemMenu() {
 			for (int i = Items.Count - 1; i >= 0; i--) {
 				var item = Items[i] as NodeItem;
 				if (item != null && item.Node.IsTypeDeclaration()) {

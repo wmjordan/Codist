@@ -9,6 +9,12 @@ using Microsoft.VisualStudio.Text.Operations;
 
 namespace Codist.NaviBar
 {
+	interface INaviBar
+	{
+		void ShowRootItemMenu();
+		void ShowActiveItemMenu();
+	}
+
 	/// <summary>
 	/// Overrides default navigator to editor.
 	/// </summary>
@@ -98,11 +104,6 @@ namespace Codist.NaviBar
 							}
 						}
 					}
-					//else {
-					//	naviBarHolder?.GetFirstVisualChild<ContentControl>();
-					//if (naviBarHolder != null) {
-					//	naviBarHolder.Content = new MarkdownBar(_View, _TextSearch);
-					//}
 					return;
 				}
 				var dropDown1 = naviBar.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown1");

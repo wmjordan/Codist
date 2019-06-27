@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.Text.Operations;
 
 namespace Codist.NaviBar
 {
-	public sealed class MarkdownBar : ToolBar
+	public sealed class MarkdownBar : ToolBar, INaviBar
 	{
 		const string DefaultActiveTitle = "Headings";
 		static readonly IClassificationType
@@ -30,9 +30,8 @@ namespace Codist.NaviBar
 		readonly TaggerResult _Tags;
 		readonly ThemedToolBarText _ActiveTitleLabel;
 		ItemList _TitleList;
-		ThemedTextBox _FinderBox;
-		Predicate<object> _Filter;
 		LocationItem[] _Titles;
+		UIElement _ActiveItem;
 
 		public MarkdownBar(IWpfTextView view, ITextSearchService2 textSearch) {
 			_View = view;
@@ -49,7 +48,7 @@ namespace Codist.NaviBar
 			SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
 			SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextInactiveKey);
 			_ActiveTitleLabel = new ThemedToolBarText(DefaultActiveTitle);
-			Items.Add(new ThemedButton(new StackPanel {
+			Items.Add(_ActiveItem = new ThemedButton(new StackPanel {
 				Orientation = Orientation.Horizontal,
 				Children = { ThemeHelper.GetImage(KnownImageIds.PageHeader), _ActiveTitleLabel }
 			}, null, ShowTitleList) { Padding = WpfHelper.SmallMargin });
@@ -108,25 +107,12 @@ namespace Codist.NaviBar
 				HideMenu();
 				return;
 			}
-			var menu = new ItemList() {
-				Container = _ListContainer,
-				Header = new StackPanel {
-					Margin = WpfHelper.MenuItemMargin,
-					Children = {
-						new Separator { Tag = new ThemedMenuText("Search Titles") },
-						new StackPanel {
-							Orientation = Orientation.Horizontal,
-							Children = {
-								ThemeHelper.GetImage(KnownImageIds.SearchContract).WrapMargin(WpfHelper.GlyphMargin),
-								(_FinderBox = new ThemedTextBox(true) { MinWidth = 150 }),
-								new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter)
-							}
-						},
-					}
-				},
-				Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
-						.ReferenceProperty(TextBlock.ForegroundProperty, Microsoft.VisualStudio.PlatformUI.EnvironmentColors.SystemGrayTextBrushKey),
-			};
+			_ActiveItem = sender as UIElement;
+			ShowRootItemMenu();
+		}
+
+		public void ShowRootItemMenu() {
+			var menu = new MarkdownList(this);
 			menu.ItemsControlMaxHeight = _View.ViewportHeight / 2;
 			var titles = _Titles = Array.ConvertAll(_Tags.GetTags(), t => new LocationItem(t));
 			menu.ItemsSource = titles;
@@ -134,8 +120,6 @@ namespace Codist.NaviBar
 			menu.ScrollToSelectedItem();
 			menu.FilteredItems = new System.Windows.Data.ListCollectionView(titles);
 			menu.MouseLeftButtonUp += MenuItemSelect;
-			_FinderBox.TextChanged += SearchCriteriaChanged;
-			_FinderBox.SetOnVisibleSelectAll();
 			if (_Tags.Count > 100) {
 				ScrollViewer.SetCanContentScroll(menu, true);
 			}
@@ -145,9 +129,12 @@ namespace Codist.NaviBar
 				_TitleList = menu;
 			}
 			if (menu != null) {
-				Canvas.SetLeft(menu, (sender as UIElement).TransformToVisual(_View.VisualElement).Transform(new Point()).X);
+				Canvas.SetLeft(menu, _ActiveItem.TransformToVisual(_View.VisualElement).Transform(new Point()).X);
 				Canvas.SetTop(menu, -1);
 			}
+		}
+		public void ShowActiveItemMenu() {
+			ShowRootItemMenu();
 		}
 
 		static int GetSelectedTagIndex(LocationItem[] titles, int p) {
@@ -162,45 +149,6 @@ namespace Codist.NaviBar
 				selectedIndex = i;
 			}
 			return selectedIndex;
-		}
-
-		void ClearFilter() {
-			if (_FinderBox.Text.Length > 0) {
-				_FinderBox.Text = String.Empty;
-				_FinderBox.Focus();
-			}
-		}
-
-		void SearchCriteriaChanged(object sender, TextChangedEventArgs e) {
-			if (String.IsNullOrWhiteSpace(_FinderBox.Text)) {
-				_Filter = null;
-				RefreshItemsSource();
-				return;
-			}
-			var k = _FinderBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-			var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-			_Filter = o => MatchKeywords((o as LocationItem).Text, k, comparison);
-			RefreshItemsSource();
-
-			bool MatchKeywords(string text, string[] keywords, StringComparison c) {
-				var m = 0;
-				foreach (var item in keywords) {
-					if ((m = text.IndexOf(item, m, c)) == -1) {
-						return false;
-					}
-				}
-				return true;
-			}
-		}
-
-		public void RefreshItemsSource() {
-			if (_Filter != null) {
-				_TitleList.FilteredItems.Filter = _Filter;
-				_TitleList.ItemsSource = _TitleList.FilteredItems;
-			}
-			else {
-				_TitleList.ItemsSource = _Titles;
-			}
 		}
 
 		void MenuItemSelect(object sender, MouseButtonEventArgs e) {
@@ -222,10 +170,97 @@ namespace Codist.NaviBar
 			return firstModified;
 		}
 
-		void AddItem(int imageId, RoutedEventHandler clickHandler) {
-			Items.Add(new ThemedButton(ThemeHelper.GetImage(imageId), null, clickHandler) { Padding = WpfHelper.SmallMargin });
-		}
+		//void AddItem(int imageId, RoutedEventHandler clickHandler) {
+		//	Items.Add(new ThemedButton(ThemeHelper.GetImage(imageId), null, clickHandler) { Padding = WpfHelper.SmallMargin });
+		//}
 
+		sealed class MarkdownList : ItemList
+		{
+			readonly MarkdownBar _Bar;
+			ThemedTextBox _FinderBox;
+			Predicate<object> _Filter;
+
+			public MarkdownList(MarkdownBar bar) {
+				Style = SharedDictionaryManager.ItemList.Get<Style>(typeof(ItemList));
+				Container = bar._ListContainer;
+				Header = new StackPanel {
+					Margin = WpfHelper.MenuItemMargin,
+					Children = {
+						new Separator { Tag = new ThemedMenuText("Search Titles") },
+						new StackPanel {
+							Orientation = Orientation.Horizontal,
+							Children = {
+								ThemeHelper.GetImage(KnownImageIds.SearchContract).WrapMargin(WpfHelper.GlyphMargin),
+								(_FinderBox = new ThemedTextBox(true) { MinWidth = 150 }),
+								new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter)
+							}
+						},
+					}
+				};
+				Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
+						.ReferenceProperty(TextBlock.ForegroundProperty, Microsoft.VisualStudio.PlatformUI.EnvironmentColors.SystemGrayTextBrushKey)     
+						.Append(ThemeHelper.GetImage(KnownImageIds.Code))
+						.Append(bar._View.TextSnapshot.LineCount);
+				_FinderBox.TextChanged += SearchCriteriaChanged;
+				_FinderBox.SetOnVisibleSelectAll();
+				_Bar = bar;
+			}
+
+			protected override void OnPreviewKeyDown(KeyEventArgs e) {
+				base.OnPreviewKeyDown(e);
+				if (e.OriginalSource is TextBox == false || e.Handled) {
+					return;
+				}
+				if (e.Key == Key.Enter) {
+					if (SelectedIndex == -1 && HasItems) {
+						((LocationItem)ItemContainerGenerator.Items[0]).GoToSource(_Bar._View);
+					}
+					else {
+						((LocationItem)SelectedItem).GoToSource(_Bar._View);
+					}
+					e.Handled = true;
+				}
+			}
+
+			void RefreshItemsSource() {
+				if (_Filter != null) {
+					_Bar._TitleList.FilteredItems.Filter = _Filter;
+					_Bar._TitleList.ItemsSource = _Bar._TitleList.FilteredItems;
+				}
+				else {
+					_Bar._TitleList.ItemsSource = _Bar._Titles;
+				}
+			}
+
+			void ClearFilter() {
+				if (_FinderBox.Text.Length > 0) {
+					_FinderBox.Text = String.Empty;
+					_FinderBox.Focus();
+				}
+			}
+
+			void SearchCriteriaChanged(object sender, TextChangedEventArgs e) {
+				if (String.IsNullOrWhiteSpace(_FinderBox.Text)) {
+					_Filter = null;
+					RefreshItemsSource();
+					return;
+				}
+				var k = _FinderBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+				_Filter = o => MatchKeywords(((LocationItem)o).Text, k, comparison);
+				RefreshItemsSource();
+
+				bool MatchKeywords(string text, string[] keywords, StringComparison c) {
+					var m = 0;
+					foreach (var item in keywords) {
+						if ((m = text.IndexOf(item, m, c)) == -1) {
+							return false;
+						}
+					}
+					return true;
+				}
+			}
+		}
 		sealed class LocationItem : ListItem
 		{
 			static Thickness

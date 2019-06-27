@@ -42,7 +42,7 @@
 								<ContentPresenter x:Name="HeaderButtons" Content="{TemplateBinding HeaderButtons}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,2,0,0"/>
 							</Grid>
 							<ScrollViewer x:Name="PART_Scroller" Margin="3" Focusable="False" MaxHeight="{TemplateBinding ItemsControlMaxHeight}" VerticalScrollBarVisibility="Auto">
-								<VirtualizingStackPanel IsItemsHost="True" CacheLength="3" CacheLengthUnit="Page" VirtualizationMode="Recycling"/>
+								<VirtualizingStackPanel IsItemsHost="True" VirtualizingPanel.CacheLength="2,3" VirtualizingPanel.CacheLengthUnit="Page" VirtualizationMode="Recycling"/>
 							</ScrollViewer>
 							<ContentPresenter x:Name="PART_Footer" Content="{TemplateBinding Footer}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
 						</StackPanel>
