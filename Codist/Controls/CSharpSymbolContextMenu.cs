@@ -343,23 +343,47 @@ namespace Codist.Controls
 		}
 		static StackPanel GetExtIcons(ISymbol symbol) {
 			StackPanel icons = null;
-			if (symbol.Kind == SymbolKind.Method) {
-				var ms = symbol as IMethodSymbol;
-				if (ms.IsAsync) {
-					icons = AddIcon(icons, KnownImageIds.DynamicGroup);
-				}
-				if (ms.IsGenericMethod) {
-					icons = AddIcon(icons, KnownImageIds.MarkupXML);
-				}
-				if (ms.IsExtensionMethod) {
-					return AddIcon(icons, KnownImageIds.ExtensionMethod);
-				}
-			}
-			else if (symbol.Kind == SymbolKind.NamedType) {
-				var mt = symbol as INamedTypeSymbol;
-				if (mt.IsGenericType) {
-					icons = AddIcon(icons, KnownImageIds.MarkupXML);
-				}
+			switch (symbol.Kind) {
+				case SymbolKind.Method:
+					var ms = symbol as IMethodSymbol;
+					if (ms.IsAsync) {
+						icons = AddIcon(icons, KnownImageIds.DynamicGroup);
+					}
+					if (ms.IsGenericMethod) {
+						icons = AddIcon(icons, KnownImageIds.MarkupXML);
+					}
+					if (ms.IsExtensionMethod) {
+						return AddIcon(icons, KnownImageIds.ExtensionMethod);
+					}
+					break;
+				case SymbolKind.NamedType:
+					var mt = symbol as INamedTypeSymbol;
+					if (mt.IsGenericType) {
+						icons = AddIcon(icons, KnownImageIds.MarkupXML);
+					}
+					if (mt.TypeKind == TypeKind.Class) {
+						if (mt.IsSealed && mt.IsStatic == false) {
+							icons = AddIcon(icons, KnownImageIds.ClassSealed);
+						}
+						else if (mt.IsAbstract) {
+							icons = AddIcon(icons, KnownImageIds.AbstractClass);
+						}
+					}
+					break;
+				case SymbolKind.Field:
+					var f = symbol as IFieldSymbol;
+					if (f.IsConst) {
+						return null;
+					}
+					if (f.IsReadOnly) {
+						icons = AddIcon(icons, KnownImageIds.EncapsulateField);
+					}
+					else if (f.IsVolatile) {
+						icons = AddIcon(icons, KnownImageIds.ModifyField);
+					}
+					break;
+				case SymbolKind.Namespace:
+					return null;
 			}
 			if (symbol.IsStatic) {
 				icons = AddIcon(icons, KnownImageIds.Link);
