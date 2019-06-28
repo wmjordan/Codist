@@ -241,7 +241,7 @@ namespace Codist.NaviBar
 			}
 			_ActiveItem = barItem;
 			_ActiveItem.Highlight(true);
-			menu.ItemsControlMaxHeight = _View.ViewportHeight / 2;
+			menu.ItemsControlMaxHeight = _SymbolListContainer.ActualHeight / 2;
 			menu.RefreshItemsSource();
 			menu.ScrollToSelectedItem();
 			menu.PreviewKeyUp -= OnMenuKeyUp;
@@ -251,7 +251,7 @@ namespace Codist.NaviBar
 
 		void PositionMenu() {
 			if (_SymbolList != null) {
-				Canvas.SetLeft(_SymbolList, _ActiveItem.TransformToVisual(_View.VisualElement).Transform(new Point()).X);
+				Canvas.SetLeft(_SymbolList, _ActiveItem.TransformToVisual(_SymbolListContainer).Transform(new Point()).X);
 				Canvas.SetTop(_SymbolList, -1);
 			}
 		}
