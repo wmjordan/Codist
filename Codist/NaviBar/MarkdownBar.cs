@@ -29,7 +29,7 @@ namespace Codist.NaviBar
 		readonly ExternalAdornment _ListContainer;
 		readonly TaggerResult _Tags;
 		readonly ThemedToolBarText _ActiveTitleLabel;
-		ItemList _TitleList;
+		MarkdownList _TitleList;
 		LocationItem[] _Titles;
 		UIElement _ActiveItem;
 
@@ -112,13 +112,14 @@ namespace Codist.NaviBar
 		}
 
 		public void ShowRootItemMenu() {
-			var menu = new MarkdownList(this);
-			menu.ItemsControlMaxHeight = _View.ViewportHeight / 2;
 			var titles = _Titles = Array.ConvertAll(_Tags.GetTags(), t => new LocationItem(t));
-			menu.ItemsSource = titles;
-			menu.SelectedIndex = GetSelectedTagIndex(titles, _View.GetCaretPosition().Position);
+			var menu = new MarkdownList(this) {
+				ItemsControlMaxHeight = _View.ViewportHeight / 2,
+				ItemsSource = titles,
+				SelectedIndex = GetSelectedTagIndex(titles, _View.GetCaretPosition().Position),
+				FilteredItems = new System.Windows.Data.ListCollectionView(titles)
+			};
 			menu.ScrollToSelectedItem();
-			menu.FilteredItems = new System.Windows.Data.ListCollectionView(titles);
 			menu.MouseLeftButtonUp += MenuItemSelect;
 			if (_Tags.Count > 100) {
 				ScrollViewer.SetCanContentScroll(menu, true);

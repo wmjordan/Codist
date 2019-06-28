@@ -9,7 +9,7 @@ namespace Codist
 	/// <summary>
 	/// Code style constants
 	/// </summary>
-	static partial class Constants
+	static class Constants
 	{
 		public const string NameOfMe = nameof(Codist);
 

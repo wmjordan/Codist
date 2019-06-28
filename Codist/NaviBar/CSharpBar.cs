@@ -30,7 +30,7 @@ namespace Codist.NaviBar
 		readonly ExternalAdornment _SymbolListContainer;
 
 		CancellationTokenSource _cancellationSource = new CancellationTokenSource();
-		RootItem _RootItem;
+		readonly RootItem _RootItem;
 		NodeItem _MouseHoverItem;
 		SymbolList _SymbolList;
 		ThemedMenuItem _ActiveItem;
@@ -319,7 +319,7 @@ namespace Codist.NaviBar
 					p = p.Parent.Parent;
 				}
 				if (p is BaseTypeDeclarationSyntax) {
-					t.Append((p as BaseTypeDeclarationSyntax).Identifier.ValueText + ".", ThemeHelper.SystemGrayTextBrush);
+					t.Append(((BaseTypeDeclarationSyntax)p).Identifier.ValueText + ".", ThemeHelper.SystemGrayTextBrush);
 				}
 			}
 			t.Append(title, highlight);
@@ -330,7 +330,6 @@ namespace Codist.NaviBar
 		}
 
 		static void AddParameterList(TextBlock t, SyntaxNode node) {
-			var useParamName = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName);
 			ParameterListSyntax p = null;
 			if (node is BaseMethodDeclarationSyntax) {
 				p = ((BaseMethodDeclarationSyntax)node).ParameterList;
@@ -342,6 +341,7 @@ namespace Codist.NaviBar
 				p = ((OperatorDeclarationSyntax)node).ParameterList;
 			}
 			if (p != null) {
+				var useParamName = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName);
 				t.Append(p.GetParameterListSignature(useParamName), ThemeHelper.SystemGrayTextBrush);
 			}
 		}
@@ -735,7 +735,7 @@ namespace Codist.NaviBar
 						}
 					}
 					if (child.IsKind(SyntaxKind.FieldDeclaration) || child.IsKind(SyntaxKind.EventFieldDeclaration)) {
-						AddVariables((child as BaseFieldDeclarationSyntax).Declaration.Variables, isExternal, pos);
+						AddVariables(((BaseFieldDeclarationSyntax)child).Declaration.Variables, isExternal, pos);
 					}
 					else {
 						var i = _Menu.Add(child);
@@ -801,7 +801,7 @@ namespace Codist.NaviBar
 					}
 					else {
 						enumItem.SetSymbolToSyntaxNode();
-						enumItem.Hint = (enumItem.Symbol as IFieldSymbol).ConstantValue?.ToString();
+						enumItem.Hint = ((IFieldSymbol)enumItem.Symbol).ConstantValue?.ToString();
 					}
 				}
 

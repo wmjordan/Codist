@@ -1,19 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using AppHelpers;
-using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
-using Microsoft.VisualStudio.Shell;
-using GDI = System.Drawing;
-using Task = System.Threading.Tasks.Task;
-using WPF = System.Windows.Media;
 
 namespace Codist.Controls
 {
@@ -134,7 +124,6 @@ namespace Codist.Controls
 		UIElement _Icon;
 		TextBlock _Content;
 		string _Hint;
-		readonly bool _IncludeContainerType;
 
 		public abstract int ImageId { get; }
 		public UIElement Icon {
