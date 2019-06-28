@@ -220,6 +220,9 @@ namespace Codist.NaviBar
 					}
 					e.Handled = true;
 				}
+				else if (e.Key == Key.Escape) {
+					_Bar.HideMenu();
+				}
 			}
 
 			void RefreshItemsSource() {
