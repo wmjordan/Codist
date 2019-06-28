@@ -1,4 +1,5 @@
 # Codist
+
 *Codist* is a Visual Studio extension which strives to provide better coding experience and productivity for C# programmers.
 
 # Features
@@ -32,7 +33,7 @@
 
   **Note**: There is a known issue in _Codist_ that if you change the theme of Visual Studio, you may have to restart it to make syntax highlight settings to work properly.
 
-  From version 4.5 on, it is possible to load only part of the syntax preset or backup theme by unchecking check boxes under _Load following parts when importing themes_.
+  It is possible to load only part of the syntax preset or backup theme by unchecking check boxes under _Load following parts when importing themes_.
 
   The following screenshots of the `TestPage.cs` file in the source code project demonstrates possible syntax highlight effects in the Light theme.
  
@@ -56,7 +57,7 @@
 
   Syntax definitions under the _All languages_ section apply to all languages; those under _Comment_ section apply to comment taggers (see below), others apply to corresponding languages accordingly.
 
-  **Note**: From version 4.6 on, it is possible to configure color and opacity individually. If we change the opacity value only, the default syntax color for a syntax definition is used.
+  **Note**: _Font size_ is relative value to editor default font size. Halfly checked checkboxes denote default syntax styles are used.
 
   **TIP**: Open a document window before you change the syntax theme or tweak the syntax highlight settings. While you change theme, you can see how the styles change in the code document window simultaneously.
 
@@ -147,6 +148,10 @@
 
   ![Super Quick Info - Click and Go](doc/super-quick-info-click-go.png)
 
+* From version 5.2 on, a **Context menu** with many symbol analysis commands will show up when you right click the signature of the symbol definition or any symbol that appears in the XML Doc.
+
+  ![Super Quick Info Csharp Menu](doc/super-quick-info-csharp-menu.png)
+
 * **Override XML Documentation**
 
   The overridden XML Documentation makes the following changes to the documentation.
@@ -154,7 +159,7 @@
   * More syntax colors (adopting syntax highlight colors) for symbols.
   * Icons for documetation parts.
   * Selectable content of the documentation.
-  * Copyable quick info content (First select text with your mouse, then press `Ctrl + C` shortcut key).
+  * Copyable quick info content (First select text with your mouse, then press `Ctrl + C` shortcut key, or right click to show up a context menu with Copy command).
   * Symbols inside the documentation work with _Click and Go_ feature too. i.e. you can click them and go to the source code if available.
   * Concise form of members (without leading namespace or containing type names, hover your mouse over a symbol to view its full definition).
   * Extra tags, such as `<b>` (for bold), `<i>` (for italic) and `<u>` (for underline) are supported.
@@ -177,6 +182,10 @@
   * **Override `<exception>` XML Doc** option adds back documentations for exceptions to the Quick Info.
 
     ![Super Quick Info - Override Exception](doc/super-quick-info-override-exception.png)
+
+   From version 5.2 on, _Codist_ shows XML Doc for those `namespace`s with an embedded `NamespaceDoc` class, like what is done in [SandCastle](https://github.com/EWSoftware/SHFB).
+
+   ![Super Quick Info Csharp Namespace](doc/super-quick-info-csharp-namespace.png)
 
 ### Additional Quick Info Items
 
@@ -234,7 +243,7 @@
 
   ![Navigation Bar Overview](doc/navigation-bar-overview.png)
 
-  **Note**: currently Navigation Bar only works with C# code documents.
+  **Note**: From version 5.2 on, Navigation Bar not only works with C# code documents, but also Markdown documents.
 
   Typically you can see three or four items on the bar.
 
@@ -313,6 +322,14 @@
 
   ![Navigation Bar Options 2](doc/navigation-bar-options-2.png)
 
+### Markdown Navigation Bar
+
+  The Markdown navigation bar introduced in version 5.2 lists all titles appear in a Markdown document.
+
+  ![Navigation Bar Markdown](doc/navigation-bar-markdown.png)
+
+  Similarly, you can type in the search box to filter down the titles.
+
 ## Smart Bar
 
   The *Smart Bar* is a context-aware tool bar that appears automatically when you select some text, or double tap the _Shift_ key on your keyboard.
@@ -326,6 +343,14 @@
   Each button on _Smart Bar_ usually has multiple functions. Left clicking, right clicking, Ctrl+clicking and Shift+clicking trigger different commands. For details, see the tooltip for the buttons. Right clicking a button usually expands the effective range of a command to the whole line, or brings out a pop-up menu for more commands.
 
   ![Smart Bar](doc/smart-bar-2.png)
+
+  From version 5.2 on, there are multiple predefined **web search** commands in the menu when you right click the Find button, which will launch your browser to search the text you select in document window. So, it is handier to look for answers from the web or find code examples in _GitHub_.
+
+  ![Smart Bar Search](doc/smart-bar-search.png)
+
+  You can specify what browser you prefer to use in the options page.
+
+  ![Smart Bar Search Options](doc/smart-bar-search-options.png)
 
 ### C# Specific Commands
 
@@ -358,6 +383,8 @@
   When we begin to work with new libraries, we usually have to learn new types and APIs. Two typical senario are that "_what methods, properties return specific instance of a type?_" and "_what methods can an instance of a given type can be passed into?_". Thus, _Smart Bar_ provides _Find Instance Producer_ and _Find Instance as Parameter_ for type names. The following screen shot demonstrates the reslt of finding instance producers which returns an instance of `IWpfTextView`.
 
   ![Smart Bar Instance Producer](doc/smart-bar-instance-producer.png)
+
+  From version 5.2 on, there are two buttons on the top right corner in the result list of symbol analysis commands. The _Pin_ button will keep the list on the screen. And you can use your mouse to drag those lists around.
 
 ### Symbol Marker
 
@@ -461,6 +488,7 @@
   * CodeMaid: https://github.com/codecadwallader/codemaid
   * Select Next Occurence: https://github.com/2mas/SelectNextOccurrence
   * VSColorOutput: https://github.com/mike-ward/VSColorOutput
+  * NuGet: https://github.com/NuGet/NuGet.Build.Packaging
 
   And every donaters, beta testers to this project.
 
@@ -485,3 +513,5 @@
   If you like _Codist_ and want to support the future development of it, you can [donate to the author](https://paypal.me/wmzuo/19.99).
 
   You can donate any amount of money as you like. The recommended amount of donation is `$19.99`.
+
+  4 donations have been received so far :)
