@@ -22,17 +22,17 @@ namespace Codist
 			if (span.Snapshot == null) {
 				throw new InvalidOperationException("snapshot is null");
 			}
-			var sourceText = span.Snapshot.AsText();
-			if (sourceText == null) {
-				throw new InvalidOperationException("sourceText is null");
+			var textContainer = span.Snapshot.TextBuffer.AsTextContainer();
+			if (textContainer == null) {
+				throw new InvalidOperationException("textContainer is null");
 			}
-			var docId = workspace.GetDocumentIdInCurrentContext(sourceText.Container);
+			var docId = workspace.GetDocumentIdInCurrentContext(textContainer);
 			if (docId == null) {
 				throw new InvalidOperationException("docId is null");
 			}
 			return solution.ContainsDocument(docId)
 				? solution.GetDocument(docId)
-				: solution.WithDocumentText(docId, sourceText, PreservationMode.PreserveIdentity).GetDocument(docId);
+				: solution.WithDocumentText(docId, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(docId);
 		}
 
 		/// <summary>Gets all <see cref="Document"/>s from a given <see cref="Project"/> and referencing/referenced projects.</summary>

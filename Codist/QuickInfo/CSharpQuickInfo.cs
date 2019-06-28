@@ -24,9 +24,9 @@ namespace Codist.QuickInfo
 		static readonly SymbolFormatter _SymbolFormatter = SymbolFormatter.Instance;
 
 		readonly bool _IsVsProject;
+		readonly ITextBuffer _TextBuffer;
 		bool _IsDisposed;
 		SemanticModel _SemanticModel;
-		readonly ITextBuffer _TextBuffer;
 
 		public CSharpQuickInfo(ITextBuffer subjectBuffer) {
 			ThreadHelper.ThrowIfNotOnUIThread();
@@ -54,7 +54,7 @@ namespace Codist.QuickInfo
 			}
 
 			SemanticModel semanticModel;
-			var container = currentSnapshot.AsText().Container;
+			var container = _TextBuffer.AsTextContainer();
 			DocumentId docId;
 			if (Workspace.TryGetWorkspace(container, out var workspace) == false
 				|| (docId = workspace.GetDocumentIdInCurrentContext(container)) == null
@@ -86,9 +86,7 @@ namespace Codist.QuickInfo
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 						break;
 					}
-					else {
-						goto EXIT;
-					}
+					goto EXIT;
 				case SyntaxKind.AsKeyword:
 					var asType = (unitCompilation.FindNode(token.Span) as BinaryExpressionSyntax)?.GetLastIdentifier();
 					if (asType != null) {
@@ -659,6 +657,15 @@ namespace Codist.QuickInfo
 		}
 
 		void ShowTypeInfo(IList<object> qiContent, SyntaxNode node, INamedTypeSymbol typeSymbol) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.MethodOverload)) {
+				node = node.GetObjectCreationNode();
+				if (node != null) {
+					var method = _SemanticModel.GetSymbolOrFirstCandidate(node) as IMethodSymbol;
+					if (method != null) {
+						ShowOverloadsInfo(qiContent, node, method);
+					}
+				}
+			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
 				if (typeSymbol.TypeKind == TypeKind.Enum) {
 					ShowEnumInfo(qiContent, typeSymbol, true);
@@ -674,15 +681,6 @@ namespace Codist.QuickInfo
 				&& typeSymbol.TypeKind == TypeKind.Class
 				&& (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
 				ShowDeclarationModifier(qiContent, typeSymbol);
-			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.MethodOverload)) {
-				node = node.GetObjectCreationNode();
-				if (node != null) {
-					var method = _SemanticModel.GetSymbolOrFirstCandidate(node) as IMethodSymbol;
-					if (method != null) {
-						ShowOverloadsInfo(qiContent, node, method);
-					}
-				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceMembers)
 				&& typeSymbol.TypeKind == TypeKind.Interface) {

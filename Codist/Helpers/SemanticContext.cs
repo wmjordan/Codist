@@ -231,12 +231,12 @@ namespace Codist
 
 		public async Task<bool> UpdateAsync(CancellationToken cancellationToken) {
 			try {
-				var text = View.TextSnapshot.AsText();
+				var textContainer = View.TextBuffer.AsTextContainer();
 				Document doc = null;
-				if (Workspace.TryGetWorkspace(text.Container, out var workspace)) {
-					var id = workspace.GetDocumentIdInCurrentContext(text.Container);
+				if (Workspace.TryGetWorkspace(textContainer, out var workspace)) {
+					var id = workspace.GetDocumentIdInCurrentContext(textContainer);
 					if (id != null && workspace.CurrentSolution.ContainsDocument(id)) {
-						doc = workspace.CurrentSolution.WithDocumentText(id, text, PreservationMode.PreserveIdentity).GetDocument(id);
+						doc = workspace.CurrentSolution.WithDocumentText(id, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(id);
 					}
 				}
 				if (doc != Document) {
@@ -256,13 +256,13 @@ namespace Codist
 		public async Task<bool> UpdateAsync(int position, CancellationToken cancellationToken) {
 			bool versionChanged;
 			try {
-				var text = View.TextSnapshot.AsText();
+				var textContainer = View.TextBuffer.AsTextContainer();
 				Document = null;
-				if (Workspace.TryGetWorkspace(text.Container, out var workspace)) {
+				if (Workspace.TryGetWorkspace(textContainer, out var workspace)) {
 					Workspace = workspace;
-					var id = workspace.GetDocumentIdInCurrentContext(text.Container);
+					var id = workspace.GetDocumentIdInCurrentContext(textContainer);
 					if (id != null && workspace.CurrentSolution.ContainsDocument(id)) {
-						Document = workspace.CurrentSolution.WithDocumentText(id, text, PreservationMode.PreserveIdentity).GetDocument(id);
+						Document = workspace.CurrentSolution.WithDocumentText(id, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(id);
 					}
 				}
 				var ver = await Document.GetTextVersionAsync(cancellationToken).ConfigureAwait(false);
