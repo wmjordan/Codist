@@ -85,7 +85,7 @@ namespace Codist.Controls
 					break;
 			}
 			if (_Node != null && _Node.IsDeclaration() && _Symbol.Kind != SymbolKind.Namespace) {
-				Items.Add(CreateItem(KnownImageIds.ShowReferencedElements, "Find Referenced Symbols...", () => FindReferencedSymbols(_Symbol, _SemanticContext)));
+				Items.Add(CreateItem(KnownImageIds.ShowReferencedElements, "Find Referenced Symbols...", FindReferencedSymbols));
 			}
 			//Items.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, _Symbol, "No reference found", FindReferences));
 			Items.Add(CreateItem(KnownImageIds.FindSymbol, "Find Symbol with Name " + _Symbol.Name + "...", () => FindSymbolWithName(_Symbol, _SemanticContext)));
@@ -300,10 +300,10 @@ namespace Codist.Controls
 			});
 		}
 
-		static void FindReferencedSymbols(ISymbol symbol, SemanticContext context) {
-			var m = new SymbolMenu(context);
+		void FindReferencedSymbols() {
+			var m = new SymbolMenu(_SemanticContext);
 			var c = 0;
-			foreach (var item in context.Node.FindReferencingSymbols(context.SemanticModel, true)) {
+			foreach (var item in _Node.FindReferencingSymbols(_SemanticContext.SemanticModel, true)) {
 				var member = item.Key;
 				var i = m.Menu.Add(member, true);
 				if (item.Value > 1) {
@@ -311,8 +311,8 @@ namespace Codist.Controls
 				}
 				++c;
 			}
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
+			m.Title.SetGlyph(ThemeHelper.GetImage(_Symbol.GetImageId()))
+				.Append(_Symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
 				.Append(" referenced members: ")
 				.Append(c.ToString());
 			m.Show();
