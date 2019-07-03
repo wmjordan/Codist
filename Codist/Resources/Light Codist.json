@@ -133,6 +133,11 @@
       "FontSize": 6.0
     },
     {
+      "StyleID": "LocalDeclaration",
+      "Italic": false,
+      "BackgroundColor": "#7FFFFF80"
+    },
+    {
       "StyleID": "DeclarationBrace",
       "FontSize": 2.0
     },
