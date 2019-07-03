@@ -130,9 +130,9 @@
 			this.label2.AutoSize = true;
 			this.label2.Location = new System.Drawing.Point(17, 60);
 			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(399, 15);
+			this.label2.Size = new System.Drawing.Size(463, 15);
 			this.label2.TabIndex = 3;
-			this.label2.Text = "To use default browser, leave the above box alone";
+			this.label2.Text = "To use system default browser, leave the above box empty.";
 			// 
 			// _BrowseBrowserButton
 			// 
