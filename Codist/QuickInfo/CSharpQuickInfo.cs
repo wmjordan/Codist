@@ -127,9 +127,16 @@ namespace Codist.QuickInfo
 				skipTriggerPointCheck == false && node.Span.Contains(subjectTriggerPoint.Position, true) == false) {
 				goto EXIT;
 			}
-			//if (node.Parent.IsKind(SyntaxKind.QualifiedName)) {
-			//	node = node.Parent;
-			//}
+			if (node.Parent.IsKind(SyntaxKind.QualifiedName)) {
+				switch (node.Parent.Parent.Kind()) {
+					case SyntaxKind.UsingDirective:
+					case SyntaxKind.NamespaceDeclaration:
+						break;
+					default:
+						node = node.Parent;
+						break;
+				}
+			}
 			LocateNodeInParameterList(ref node, ref token);
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowParameterInfo(qiContent, node);
