@@ -1,15 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Codist
 {
-	static class CancellationHelper
+	static class SyncHelper
 	{
+		public static void RunSync(Func<Task> func) {
+			Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(func);
+		}
+		public static TResult RunSync<TResult>(Func<Task<TResult>> func) {
+			return Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(func);
+		}
+
+		[DebuggerStepThrough]
+		public static CancellationToken CancelAndRetainToken(ref CancellationTokenSource tokenSource) {
+			return CancelAndDispose(ref tokenSource, true).GetToken();
+		}
+
 		[DebuggerStepThrough]
 		public static CancellationTokenSource CancelAndDispose(ref CancellationTokenSource tokenSource, bool resurrect) {
 			var c = Interlocked.Exchange(ref tokenSource, resurrect ? new CancellationTokenSource() : null);

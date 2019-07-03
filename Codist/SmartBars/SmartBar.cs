@@ -330,7 +330,7 @@ namespace Codist.SmartBars
 		}
 
 		void ViewClosed(object sender, EventArgs e) {
-			CancellationHelper.CancelAndDispose(ref _Cancellation, false);
+			SyncHelper.CancelAndDispose(ref _Cancellation, false);
 			_ToolBarTray.ToolBars.Clear();
 			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
 			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
@@ -410,14 +410,14 @@ namespace Codist.SmartBars
 			if (View.Selection.IsEmpty) {
 				_ToolBarTray.Visibility = Visibility.Hidden;
 				View.VisualElement.MouseMove -= ViewMouseMove;
-				CancellationHelper.CancelAndDispose(ref _Cancellation, true);
+				SyncHelper.CancelAndDispose(ref _Cancellation, true);
 				_SelectionStatus = 0;
 				return;
 			}
 			if (Interlocked.CompareExchange(ref _SelectionStatus, Selecting, 0) != 0) {
 				return;
 			}
-			CancellationHelper.CancelAndDispose(ref _Cancellation, true);
+			SyncHelper.CancelAndDispose(ref _Cancellation, true);
 			CreateToolBar(_Cancellation.Token);
 			async void CreateToolBar(CancellationToken token) {
 				try {

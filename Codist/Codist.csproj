@@ -105,7 +105,7 @@
     <Compile Include="Controls\TitleLabel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Helpers\CancellationHelper.cs" />
+    <Compile Include="Helpers\SyncHelper.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.Document.cs" />
     <Compile Include="Helpers\ColorHelper.cs" />
     <Compile Include="Helpers\DragDropHelper.cs" />

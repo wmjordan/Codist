@@ -78,7 +78,7 @@ namespace Codist.Classifiers
 				_buffer.Changed -= OnChanged;
 
 				//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
-				CancellationHelper.CancelAndDispose(ref _Cancellation, false);
+				SyncHelper.CancelAndDispose(ref _Cancellation, false);
 				_root = null; //Allow the old root to be GC'd
 			}
 		}
@@ -181,7 +181,7 @@ namespace Codist.Classifiers
 
 		async Task ScanBufferAsync(ITextSnapshot snapshot) {
 			//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
-			CancellationHelper.CancelAndDispose(ref _Cancellation, true);
+			SyncHelper.CancelAndDispose(ref _Cancellation, true);
 			var cancellationToken = _Cancellation.GetToken();
 
 			//The underlying buffer could be very large, meaning that doing the scan for all matches on the UI thread

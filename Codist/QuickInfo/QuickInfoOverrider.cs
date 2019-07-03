@@ -135,7 +135,7 @@ namespace Codist.QuickInfo
 				var s = sender as FrameworkElement;
 				if (s.ContextMenu == null) {
 					var ctx = SemanticContext.GetHovered();
-					Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(() => ctx.UpdateAsync(default));
+					SyncHelper.RunSync(() => ctx.UpdateAsync(default));
 					var m = new CSharpSymbolContextMenu(ctx) {
 						Symbol = symbol,
 						SyntaxNode = symbol.GetSyntaxNode()

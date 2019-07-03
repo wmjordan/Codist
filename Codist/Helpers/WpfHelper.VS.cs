@@ -193,7 +193,7 @@ namespace Codist
 				}
 				var ctx = SemanticContext.GetHovered();
 				if (ctx != null) {
-					ThreadHelper.JoinableTaskFactory.Run(() => ctx.UpdateAsync(default));
+					SyncHelper.RunSync(() => ctx.UpdateAsync(default));
 					var m = new CSharpSymbolContextMenu(ctx) {
 						Symbol = _Symbol,
 						SyntaxNode = _Symbol.GetSyntaxNode()

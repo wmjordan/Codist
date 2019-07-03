@@ -100,7 +100,7 @@ namespace Codist.SmartBars
 					&& token.Kind() == SyntaxKind.IdentifierToken
 					&& (node.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || node.IsKind(SyntaxKind.VariableDeclarator) || node.IsKind(SyntaxKind.ForEachStatement))) {
 					// selection is within a symbol
-					_Symbol = ThreadHelper.JoinableTaskFactory.Run(() => _Context.GetSymbolAsync(cancellationToken));
+					_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
 					if (_Symbol != null) {
 						if (node.IsKind(SyntaxKind.IdentifierName) || node.IsKind(SyntaxKind.GenericName)) {
 							AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition\nRight click: Peek definition", "Edit.PeekDefinition");
@@ -449,7 +449,7 @@ namespace Codist.SmartBars
 		}
 
 		bool UpdateSemanticModel() {
-			return ThreadHelper.JoinableTaskFactory.Run(() => _Context.UpdateAsync(View.Selection.Start.Position, default));
+			return SyncHelper.RunSync(() => _Context.UpdateAsync(View.Selection.Start.Position, default));
 		}
 		sealed class SymbolCallerInfoComparer : IEqualityComparer<SymbolCallerInfo>
 		{

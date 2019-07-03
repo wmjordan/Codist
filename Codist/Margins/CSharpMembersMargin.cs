@@ -71,7 +71,7 @@ namespace Codist.Margins
 			Config.Updated -= Config_Updated;
 			_MemberMarker.Dispose();
 			_SymbolReferenceMarker.Dispose();
-			CancellationHelper.CancelAndDispose(ref _Cancellation, false);
+			SyncHelper.CancelAndDispose(ref _Cancellation, false);
 		}
 
 		/// <summary>
@@ -194,8 +194,7 @@ namespace Codist.Margins
 
 			async void OnTagsChanged(object sender, EventArgs e) {
 				try {
-					CancellationHelper.CancelAndDispose(ref _Element._Cancellation, true);
-					var ct = _Element._Cancellation.GetToken();
+					var ct = SyncHelper.CancelAndRetainToken(ref _Element._Cancellation);
 					await Task.Run(TagDocument, ct).ConfigureAwait(true);
 					_Regions = TagRegions();
 					if (ct.IsCancellationRequested) {
@@ -425,7 +424,7 @@ namespace Codist.Margins
 
 			async void UpdateReferences(object sender, EventArgs e) {
 				try {
-					CancellationHelper.CancelAndDispose(ref _Margin._Cancellation, true);
+					SyncHelper.CancelAndDispose(ref _Margin._Cancellation, true);
 					//if (_View.Selection.IsEmpty == false) {
 					//	if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
 					//		_Element.InvalidateVisual();
