@@ -360,6 +360,9 @@ namespace Codist
 #pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 		}
 
+		public static void OpenFile(this EnvDTE.DTE dte, string file) {
+			OpenFile(dte, file, null);
+		}
 		public static void OpenFile(this EnvDTE.DTE dte, string file, Action<EnvDTE.Document> action) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (String.IsNullOrEmpty(file)) {
@@ -369,19 +372,26 @@ namespace Codist
 			if (System.IO.File.Exists(file) == false) {
 				return;
 			}
-			using (new NewDocumentStateScope(__VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
+			using (new NewDocumentStateScope(Keyboard.Modifiers == ModifierKeys.Shift ? __VSNEWDOCUMENTSTATE.NDS_Unspecified : Keyboard.Modifiers == ModifierKeys.Control ? __VSNEWDOCUMENTSTATE.NDS_NoActivate : __VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
 				dte.ItemOperations.OpenFile(file);
-				try {
-					action(dte.ActiveDocument);
+				if (action != null) {
+					try {
+						action.Invoke(dte.ActiveDocument);
+					}
+					catch (NullReferenceException) { /* ignore */ }
 				}
-				catch (NullReferenceException) { /* ignore */ }
 			}
 		}
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
 			dte.OpenFile(file, d => ((EnvDTE.TextSelection)d.Selection).MoveToLineAndOffset(line, column));
 		}
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int location) {
-			dte.OpenFile(file, d => ((EnvDTE.TextSelection)d.Selection).MoveToAbsoluteOffset(location));
+			if (location != 0) {
+				dte.OpenFile(file, d => ((EnvDTE.TextSelection)d.Selection).MoveToAbsoluteOffset(location));
+			}
+			else {
+				dte.OpenFile(file, _ => { });
+			}
 		}
 
 		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
