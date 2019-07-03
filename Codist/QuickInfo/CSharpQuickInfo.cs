@@ -123,8 +123,8 @@ namespace Codist.QuickInfo
 					break;
 			}
 			var node = unitCompilation.FindNode(token.Span, true, true);
-			if (node == null ||
-				skipTriggerPointCheck == false && node.Span.Contains(subjectTriggerPoint.Position, true) == false) {
+			if (node == null
+				|| skipTriggerPointCheck == false && node.Span.Contains(subjectTriggerPoint.Position, true) == false) {
 				goto EXIT;
 			}
 			if (node.Parent.IsKind(SyntaxKind.QualifiedName)) {
@@ -204,7 +204,7 @@ namespace Codist.QuickInfo
 
 		static void LocateNodeInParameterList(ref SyntaxNode node, ref SyntaxToken token) {
 			if (node.IsKind(SyntaxKind.Argument)) {
-				node = (node as ArgumentSyntax).Expression;
+				node = ((ArgumentSyntax)node).Expression;
 			}
 			else if (node.IsKind(SyntaxKind.ArgumentList)) {
 				var al = node as ArgumentListSyntax;
@@ -418,7 +418,7 @@ namespace Codist.QuickInfo
 				&& (node.Parent.IsKind(SyntaxKind.Argument) == false || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter) == false) /*the signature has already been displayed there*/) {
 				var st = symbol.GetReturnType();
 				if (st != null && st.TypeKind == TypeKind.Delegate) {
-					var invoke = (st as INamedTypeSymbol).DelegateInvokeMethod;
+					var invoke = ((INamedTypeSymbol)st).DelegateInvokeMethod;
 					qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Delegate,
 						new ThemedTipText("Delegate signature", true).Append(":").AppendLine()
 							.AddSymbol(invoke.ReturnType, _SymbolFormatter)
@@ -437,16 +437,16 @@ namespace Codist.QuickInfo
 				infoBox = ToolTipFactory.ShowNumericForms(node);
 			}
 			else if (nodeKind == SyntaxKind.SwitchStatement) {
-				var s = (node as SwitchStatementSyntax).Sections.Count;
+				var s = ((SwitchStatementSyntax)node).Sections.Count;
 				if (s > 1) {
 					var cases = 0;
-					foreach (var section in (node as SwitchStatementSyntax).Sections) {
+					foreach (var section in ((SwitchStatementSyntax)node).Sections) {
 						cases += section.Labels.Count;
 					}
 					qiContent.Add(s + " switch sections, " + cases + " cases");
 				}
 				else {
-					var cases = (node as SwitchStatementSyntax).Sections.Count;
+					var cases = ((SwitchStatementSyntax)node).Sections.Count;
 					if (cases > 1) {
 						qiContent.Add("1 switch section, " + cases + " cases");
 					}
@@ -639,7 +639,7 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NamespaceTypes) == false) {
 				return;
 			}
-			var namespaces = nsSymbol.GetNamespaceMembers().ToImmutableArray().Sort(Comparer<INamespaceSymbol>.Create((x, y) => String.Compare(x.Name, y.Name, StringComparison.Ordinal)));
+			var namespaces = nsSymbol.GetNamespaceMembers().ToImmutableArray().Sort(Comparer<INamespaceSymbol>.Create((x, y) => String.CompareOrdinal(x.Name, y.Name)));
 			if (namespaces.Length > 0) {
 				var info = new ThemedTipDocument();
 				info.AppendTitle(KnownImageIds.Namespace, "Namespace:");
@@ -745,10 +745,8 @@ namespace Codist.QuickInfo
 				explicitIntfs.Clear();
 				explicitIntfs.AddRange(explicitImplementations.Select(i => i.ContainingType));
 				if (explicitIntfs.Count > 0) {
-					if (info == null) {
-						info = new ThemedTipDocument();
-					}
-					info.AppendTitle(KnownImageIds.ImplementInterface, "Explicit implements:");
+					(info ?? (info = new ThemedTipDocument()))
+						.AppendTitle(KnownImageIds.ImplementInterface, "Explicit implements:");
 					foreach (var item in explicitIntfs) {
 						info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
 					}
@@ -780,7 +778,7 @@ namespace Codist.QuickInfo
 				}
 				t.AddSymbol(member, _SymbolFormatter);
 				if (member.Kind == SymbolKind.Method) {
-					t.AddParameters((member as IMethodSymbol).Parameters, _SymbolFormatter);
+					t.AddParameters(((IMethodSymbol)member).Parameters, _SymbolFormatter);
 				}
 				doc.Append(new ThemedTipParagraph(member.GetImageId(), t));
 			}
@@ -853,7 +851,7 @@ namespace Codist.QuickInfo
 			if (t == null) {
 				return;
 			}
-			var content = new ThemedTipText("Enum underlying type: ", true).AddSymbolDisplayParts(t.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter);
+			var content = new ThemedTipText("Enum underlying type: ", true).AddSymbol(t, _SymbolFormatter);
 			var s = new ThemedTipDocument()
 				.Append(new ThemedTipParagraph(KnownImageIds.Enumeration, content));
 			if (fromEnum == false) {
@@ -993,17 +991,17 @@ namespace Codist.QuickInfo
 			string argName;
 			switch (argList.Kind()) {
 				case SyntaxKind.ArgumentList:
-					arguments = (argList as ArgumentListSyntax).Arguments;
+					arguments = ((ArgumentListSyntax)argList).Arguments;
 					argIndex = arguments.IndexOf(argument as ArgumentSyntax);
 					argCount = arguments.Count;
-					argName = (argument as ArgumentSyntax).NameColon?.Name.ToString();
+					argName = ((ArgumentSyntax)argument).NameColon?.Name.ToString();
 					break;
 				//case SyntaxKind.BracketedArgumentList: arguments = (argList as BracketedArgumentListSyntax).Arguments; break;
 				case SyntaxKind.AttributeArgumentList:
-					var aa = (argument.Parent as AttributeArgumentListSyntax).Arguments;
-					argIndex = aa.IndexOf(argument as AttributeArgumentSyntax);
+					var aa = ((AttributeArgumentListSyntax)argument.Parent).Arguments;
+					argIndex = aa.IndexOf((AttributeArgumentSyntax)argument);
 					argCount = aa.Count;
-					argName = (argument as AttributeArgumentSyntax).NameColon?.Name.ToString();
+					argName = ((AttributeArgumentSyntax)argument).NameColon?.Name.ToString();
 					break;
 				default:
 					return;
@@ -1062,8 +1060,8 @@ namespace Codist.QuickInfo
 					}
 				}
 				if (p != null && p.Type.TypeKind == TypeKind.Delegate) {
-					var invoke = (p.Type as INamedTypeSymbol).DelegateInvokeMethod;
-					info.Append(new ThemedTipParagraph(KnownImageIds.Delegate, 
+					var invoke = ((INamedTypeSymbol)p.Type).DelegateInvokeMethod;
+					info.Append(new ThemedTipParagraph(KnownImageIds.Delegate,
 						new ThemedTipText("Delegate signature", true).Append(":").AppendLine()
 							.AddSymbol(invoke.ReturnType, _SymbolFormatter)
 							.Append(" ").Append(p.Name, _SymbolFormatter.Parameter)
@@ -1107,7 +1105,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(info);
 			}
 			else if (argList.Parent.IsKind(SyntaxKind.InvocationExpression)) {
-				var methodName = (argList.Parent as InvocationExpressionSyntax).Expression.ToString();
+				var methodName = ((InvocationExpressionSyntax)argList.Parent).Expression.ToString();
 				if (methodName == "nameof" && argCount == 1) {
 					return;
 				}

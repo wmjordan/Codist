@@ -177,7 +177,7 @@ namespace Codist.Classifiers
 
 		static void GetAttributeNotationSpan(ITextSnapshot snapshot, List<ClassificationSpan> result, TextSpan textSpan, CompilationUnitSyntax unitCompilation) {
 			var spanNode = unitCompilation.FindNode(textSpan, true, false);
-			if (spanNode.HasLeadingTrivia && spanNode.GetLeadingTrivia().FullSpan.Contains(textSpan) != false) {
+			if (spanNode.HasLeadingTrivia && spanNode.GetLeadingTrivia().FullSpan.Contains(textSpan)) {
 				return;
 			}
 			switch (spanNode.Kind()) {
@@ -240,14 +240,14 @@ namespace Codist.Classifiers
 						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ParameterBrace) == false) {
 							return;
 						}
-						var symbol = semanticModel.GetSymbolInfo((node as CastExpressionSyntax).Type).Symbol;
+						var symbol = semanticModel.GetSymbolInfo(((CastExpressionSyntax)node).Type).Symbol;
 						if (symbol == null) {
 							return;
 						}
 						IClassificationType type = null;
 						switch (symbol.Kind) {
 							case SymbolKind.NamedType:
-								switch((symbol as INamedTypeSymbol).TypeKind) {
+								switch(((INamedTypeSymbol)symbol).TypeKind) {
 									case TypeKind.Class: type = _Classifications.ClassName; break;
 									case TypeKind.Interface: type = _Classifications.InterfaceName; break;
 									case TypeKind.Struct: type = _Classifications.StructName; break;
@@ -334,7 +334,7 @@ namespace Codist.Classifiers
 				case SyntaxKind.LocalFunctionStatement:
 					return _Classifications.Method;
 				case SyntaxKind.InvocationExpression:
-					return (((node as InvocationExpressionSyntax).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") ? null : _Classifications.Method;
+					return ((((InvocationExpressionSyntax)node).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") ? null : _Classifications.Method;
 				case SyntaxKind.ConstructorDeclaration:
 				case SyntaxKind.AnonymousObjectCreationExpression:
 				case SyntaxKind.ObjectInitializerExpression:
@@ -378,7 +378,7 @@ namespace Codist.Classifiers
 		}
 
 		static IEnumerable<IClassificationType> GetClassificationType(SyntaxNode node, SemanticModel semanticModel) {
-			node = node.Kind() == SyntaxKind.Argument ? (node as ArgumentSyntax).Expression : node;
+			node = node.Kind() == SyntaxKind.Argument ? ((ArgumentSyntax)node).Expression : node;
 			//System.Diagnostics.Debug.WriteLine(node.GetType().Name + node.Span.ToString());
 			var symbol = semanticModel.GetSymbolInfo(node).Symbol;
 			if (symbol == null) {
@@ -393,7 +393,7 @@ namespace Codist.Classifiers
 							break;
 						case SymbolKind.Method:
 							if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.LocalFunctionDeclaration)
-								|| (symbol as IMethodSymbol).MethodKind != MethodKind.LocalFunction) {
+								|| ((IMethodSymbol)symbol).MethodKind != MethodKind.LocalFunction) {
 								yield return _Classifications.NestedDeclaration;
 							}
 							break;
@@ -403,8 +403,8 @@ namespace Codist.Classifiers
 							}
 							break;
 						case SymbolKind.Field:
-							if (node.IsKind(SyntaxKind.TupleElement) && (node as TupleElementSyntax).Identifier.IsKind(SyntaxKind.None)) {
-								symbol = semanticModel.GetTypeInfo((node as TupleElementSyntax).Type).Type;
+							if (node.IsKind(SyntaxKind.TupleElement) && ((TupleElementSyntax)node).Identifier.IsKind(SyntaxKind.None)) {
+								symbol = semanticModel.GetTypeInfo(((TupleElementSyntax)node).Type).Type;
 							}
 							break;
 						case SymbolKind.Local:
@@ -418,16 +418,16 @@ namespace Codist.Classifiers
 						yield return _Classifications.AliasNamespace;
 					}
 					else if (node is AttributeArgumentSyntax) {
-						symbol = semanticModel.GetSymbolInfo((node as AttributeArgumentSyntax).Expression).Symbol;
+						symbol = semanticModel.GetSymbolInfo(((AttributeArgumentSyntax)node).Expression).Symbol;
 						if (symbol != null && symbol.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
 							yield return _Classifications.ConstField;
 							yield return _Classifications.StaticMember;
 						}
 					}
 					symbol = node.Parent is MemberAccessExpressionSyntax ? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
-						: node.Parent.IsKind(SyntaxKind.Argument) ? semanticModel.GetSymbolInfo((node.Parent as ArgumentSyntax).Expression).CandidateSymbols.FirstOrDefault()
-						: node.IsKind(SyntaxKind.SimpleBaseType) ? semanticModel.GetTypeInfo((node as SimpleBaseTypeSyntax).Type).Type
-						: node.IsKind(SyntaxKind.TypeConstraint) ? semanticModel.GetTypeInfo((node as TypeConstraintSyntax).Type).Type
+						: node.Parent.IsKind(SyntaxKind.Argument) ? semanticModel.GetSymbolInfo(((ArgumentSyntax)node.Parent).Expression).CandidateSymbols.FirstOrDefault()
+						: node.IsKind(SyntaxKind.SimpleBaseType) ? semanticModel.GetTypeInfo(((SimpleBaseTypeSyntax)node).Type).Type
+						: node.IsKind(SyntaxKind.TypeConstraint) ? semanticModel.GetTypeInfo(((TypeConstraintSyntax)node).Type).Type
 						: null;
 					if (symbol == null) {
 						yield break;
@@ -531,7 +531,7 @@ namespace Codist.Classifiers
 				}
 			}
 			else if (symbol.IsSealed) {
-				if (symbol.Kind == SymbolKind.NamedType && (symbol as ITypeSymbol).TypeKind != TypeKind.Class) {
+				if (symbol.Kind == SymbolKind.NamedType && ((ITypeSymbol)symbol).TypeKind != TypeKind.Class) {
 					yield break;
 				}
 				yield return _Classifications.SealedMember;
