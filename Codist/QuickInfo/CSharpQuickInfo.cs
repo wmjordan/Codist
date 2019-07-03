@@ -579,7 +579,7 @@ namespace Codist.QuickInfo
 		void ShowMethodInfo(IList<object> qiContent, SyntaxNode node, IMethodSymbol method) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern || method.IsSealed)
-				&& method.ContainingType.TypeKind != TypeKind.Interface) {
+				&& method.ContainingType?.TypeKind != TypeKind.Interface) {
 				ShowDeclarationModifier(qiContent, method);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && method.TypeArguments.Length > 0 && method.TypeParameters[0] != method.TypeArguments[0]) {
