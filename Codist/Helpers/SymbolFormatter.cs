@@ -112,6 +112,12 @@ namespace Codist
 				case SymbolKind.Property: text.Add(symbol.Render(alias, Property)); return;
 				case SymbolKind.Local: text.Add(symbol.Render(null, Local)); return;
 				case SymbolKind.TypeParameter: text.Add(symbol.Name.Render(TypeParameter)); return;
+				case SymbolKind.PointerType:
+					Format(text, ((IPointerTypeSymbol)symbol).PointedAtType, alias);
+					if (alias == null) {
+						text.Add("*");
+					}
+					return;
 				default: text.Add(symbol.Name); return;
 			}
 		}
