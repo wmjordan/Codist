@@ -391,7 +391,7 @@ namespace Codist.QuickInfo
 						ShowTypeInfo(qiContent, node.Parent, symbol.ContainingType);
 					}
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
-						&& m.ContainingType.Name == "Color") {
+						&& m.ContainingType?.Name == "Color") {
 						ColorQuickInfo.AddToQuickInfoContent(qiContent, ColorQuickInfo.PreviewColorMethodInvocation(_SemanticModel, node, symbol as IMethodSymbol));
 					}
 					break;
