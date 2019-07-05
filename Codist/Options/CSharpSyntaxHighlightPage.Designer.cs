@@ -28,12 +28,13 @@
 			this._HighlightDeclarationBracesBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this.tabPage3 = new System.Windows.Forms.TabPage();
+			this._HighlightLocalFunctionDeclarationBox = new System.Windows.Forms.CheckBox();
 			this._HighlightParameterBracesBox = new System.Windows.Forms.CheckBox();
 			this._MarkSpecialPunctuationBox = new System.Windows.Forms.CheckBox();
 			this._HighlightResourceBracesBox = new System.Windows.Forms.CheckBox();
 			this._HighlightLoopBracesBox = new System.Windows.Forms.CheckBox();
 			this._HighlightBranchBracesBox = new System.Windows.Forms.CheckBox();
-			this._HighlightLocalFunctionDeclarationBox = new System.Windows.Forms.CheckBox();
+			this._HighlightCastParenthesesBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage3.SuspendLayout();
 			this.SuspendLayout();
@@ -62,6 +63,7 @@
 			// 
 			// tabPage3
 			// 
+			this.tabPage3.Controls.Add(this._HighlightCastParenthesesBox);
 			this.tabPage3.Controls.Add(this._HighlightLocalFunctionDeclarationBox);
 			this.tabPage3.Controls.Add(this._HighlightParameterBracesBox);
 			this.tabPage3.Controls.Add(this._MarkSpecialPunctuationBox);
@@ -77,14 +79,24 @@
 			this.tabPage3.Text = "Additional Highlight";
 			this.tabPage3.UseVisualStyleBackColor = true;
 			// 
+			// _HighlightLocalFunctionDeclarationBox
+			// 
+			this._HighlightLocalFunctionDeclarationBox.AutoSize = true;
+			this._HighlightLocalFunctionDeclarationBox.Location = new System.Drawing.Point(15, 202);
+			this._HighlightLocalFunctionDeclarationBox.Name = "_HighlightLocalFunctionDeclarationBox";
+			this._HighlightLocalFunctionDeclarationBox.Size = new System.Drawing.Size(421, 19);
+			this._HighlightLocalFunctionDeclarationBox.TabIndex = 6;
+			this._HighlightLocalFunctionDeclarationBox.Text = "Apply member declaration style to local functions";
+			this._HighlightLocalFunctionDeclarationBox.UseVisualStyleBackColor = true;
+			// 
 			// _HighlightParameterBracesBox
 			// 
 			this._HighlightParameterBracesBox.AutoSize = true;
 			this._HighlightParameterBracesBox.Location = new System.Drawing.Point(15, 56);
 			this._HighlightParameterBracesBox.Name = "_HighlightParameterBracesBox";
-			this._HighlightParameterBracesBox.Size = new System.Drawing.Size(221, 19);
+			this._HighlightParameterBracesBox.Size = new System.Drawing.Size(253, 19);
 			this._HighlightParameterBracesBox.TabIndex = 2;
-			this._HighlightParameterBracesBox.Text = "Parameter parentheses ()";
+			this._HighlightParameterBracesBox.Text = "Method parameter parentheses";
 			this._HighlightParameterBracesBox.UseVisualStyleBackColor = true;
 			// 
 			// _MarkSpecialPunctuationBox
@@ -100,7 +112,7 @@
 			// _HighlightResourceBracesBox
 			// 
 			this._HighlightResourceBracesBox.AutoSize = true;
-			this._HighlightResourceBracesBox.Location = new System.Drawing.Point(15, 131);
+			this._HighlightResourceBracesBox.Location = new System.Drawing.Point(15, 156);
 			this._HighlightResourceBracesBox.Name = "_HighlightResourceBracesBox";
 			this._HighlightResourceBracesBox.Size = new System.Drawing.Size(389, 19);
 			this._HighlightResourceBracesBox.TabIndex = 5;
@@ -110,7 +122,7 @@
 			// _HighlightLoopBracesBox
 			// 
 			this._HighlightLoopBracesBox.AutoSize = true;
-			this._HighlightLoopBracesBox.Location = new System.Drawing.Point(15, 106);
+			this._HighlightLoopBracesBox.Location = new System.Drawing.Point(15, 131);
 			this._HighlightLoopBracesBox.Name = "_HighlightLoopBracesBox";
 			this._HighlightLoopBracesBox.Size = new System.Drawing.Size(245, 19);
 			this._HighlightLoopBracesBox.TabIndex = 4;
@@ -120,22 +132,22 @@
 			// _HighlightBranchBracesBox
 			// 
 			this._HighlightBranchBracesBox.AutoSize = true;
-			this._HighlightBranchBracesBox.Location = new System.Drawing.Point(15, 81);
+			this._HighlightBranchBracesBox.Location = new System.Drawing.Point(15, 106);
 			this._HighlightBranchBracesBox.Name = "_HighlightBranchBracesBox";
 			this._HighlightBranchBracesBox.Size = new System.Drawing.Size(261, 19);
 			this._HighlightBranchBracesBox.TabIndex = 3;
 			this._HighlightBranchBracesBox.Text = "Branch braces and parentheses";
 			this._HighlightBranchBracesBox.UseVisualStyleBackColor = true;
 			// 
-			// _HighlightLocalFunctionDeclarationBox
+			// _HighlightCastParenthesesBox
 			// 
-			this._HighlightLocalFunctionDeclarationBox.AutoSize = true;
-			this._HighlightLocalFunctionDeclarationBox.Location = new System.Drawing.Point(15, 177);
-			this._HighlightLocalFunctionDeclarationBox.Name = "_HighlightLocalFunctionDeclarationBox";
-			this._HighlightLocalFunctionDeclarationBox.Size = new System.Drawing.Size(421, 19);
-			this._HighlightLocalFunctionDeclarationBox.TabIndex = 6;
-			this._HighlightLocalFunctionDeclarationBox.Text = "Apply member declaration style to local functions";
-			this._HighlightLocalFunctionDeclarationBox.UseVisualStyleBackColor = true;
+			this._HighlightCastParenthesesBox.AutoSize = true;
+			this._HighlightCastParenthesesBox.Location = new System.Drawing.Point(15, 81);
+			this._HighlightCastParenthesesBox.Name = "_HighlightCastParenthesesBox";
+			this._HighlightCastParenthesesBox.Size = new System.Drawing.Size(197, 19);
+			this._HighlightCastParenthesesBox.TabIndex = 7;
+			this._HighlightCastParenthesesBox.Text = "Type cast parentheses";
+			this._HighlightCastParenthesesBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpSyntaxHighlightPage
 			// 
@@ -162,5 +174,6 @@
 		private System.Windows.Forms.CheckBox _HighlightResourceBracesBox;
 		private System.Windows.Forms.CheckBox _MarkSpecialPunctuationBox;
 		private System.Windows.Forms.CheckBox _HighlightLocalFunctionDeclarationBox;
+		private System.Windows.Forms.CheckBox _HighlightCastParenthesesBox;
 	}
 }

@@ -233,37 +233,37 @@ namespace Codist.Classifiers
 					}
 				}
 			}
-			else if ((s == '(' || s == ')') && Config.Instance.SpecialHighlightOptions.HasAnyFlag(SpecialHighlightOptions.ParameterBrace | SpecialHighlightOptions.BranchBrace | SpecialHighlightOptions.LoopBrace | SpecialHighlightOptions.ResourceBrace)) {
+			else if ((s == '(' || s == ')') && Config.Instance.SpecialHighlightOptions.HasAnyFlag(SpecialHighlightOptions.AllParentheses)) {
 				var node = unitCompilation.FindNode(itemSpan, true, true);
 				switch (node.Kind()) {
 					case SyntaxKind.CastExpression:
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ParameterBrace) == false) {
+						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.CastBrace) == false) {
 							return;
 						}
 						var symbol = semanticModel.GetSymbolInfo(((CastExpressionSyntax)node).Type).Symbol;
 						if (symbol == null) {
 							return;
 						}
-						IClassificationType type = null;
-						switch (symbol.Kind) {
-							case SymbolKind.NamedType:
-								switch(((INamedTypeSymbol)symbol).TypeKind) {
-									case TypeKind.Class: type = _Classifications.ClassName; break;
-									case TypeKind.Interface: type = _Classifications.InterfaceName; break;
-									case TypeKind.Struct: type = _Classifications.StructName; break;
-									case TypeKind.Delegate: type = _Classifications.DelegateName; break;
-									case TypeKind.Enum: type = _Classifications.EnumName; break;
-								}
-								break;
-							case SymbolKind.ArrayType: type = _Classifications.ClassName; break;
-							case SymbolKind.Event: type = _Classifications.Event; break;
-							case SymbolKind.PointerType: type = _Classifications.StructName; break;
-							case SymbolKind.TypeParameter:
-								type = _Classifications.TypeParameter; break;
-						}
+						var type = GetClassificationType(symbol);
 						if (type != null) {
 							result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 							return;
+						}
+						break;
+					case SyntaxKind.ParenthesizedExpression:
+						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.CastBrace) == false) {
+							return;
+						}
+						if (node.ChildNodes().FirstOrDefault().IsKind(SyntaxKind.AsExpression)) {
+							symbol = semanticModel.GetSymbolInfo(((BinaryExpressionSyntax)node.ChildNodes().First()).Right).Symbol;
+							if (symbol == null) {
+								return;
+							}
+							type = GetClassificationType(symbol);
+							if (type != null) {
+								result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
+								return;
+							}
 						}
 						break;
 					case SyntaxKind.SwitchStatement:
@@ -296,9 +296,9 @@ namespace Codist.Classifiers
 				}
 				if (Config.Instance.SpecialHighlightOptions.HasAnyFlag(SpecialHighlightOptions.SpecialPunctuation | SpecialHighlightOptions.ParameterBrace)) {
 					node = (node as BaseArgumentListSyntax
-				   ?? node as BaseParameterListSyntax
-				   ?? (CSharpSyntaxNode)(node as CastExpressionSyntax)
-				   )?.Parent;
+					   ?? node as BaseParameterListSyntax
+					   ?? (CSharpSyntaxNode)(node as CastExpressionSyntax)
+					   )?.Parent;
 					if (node != null) {
 						var type = ClassifySyntaxNode(node);
 						if (type != null) {
@@ -313,6 +313,40 @@ namespace Codist.Classifiers
 				if (node.IsKind(SyntaxKind.AttributeList)) {
 					result.Add(CreateClassificationSpan(snapshot, node.Span, _Classifications.AttributeNotation));
 				}
+			}
+
+			IClassificationType GetClassificationType(ISymbol symbol) {
+				switch (symbol.Kind) {
+					case SymbolKind.NamedType:
+						switch (((INamedTypeSymbol)symbol).TypeKind) {
+							case TypeKind.Class: return _Classifications.ClassName;
+							case TypeKind.Interface: return _Classifications.InterfaceName;
+							case TypeKind.Struct: return _Classifications.StructName;
+							case TypeKind.Delegate: return _Classifications.DelegateName;
+							case TypeKind.Enum: return _Classifications.EnumName;
+						}
+						break;
+					case SymbolKind.ArrayType: return _Classifications.ClassName;
+					case SymbolKind.Event: return _Classifications.Event;
+					case SymbolKind.PointerType: return _Classifications.StructName;
+					case SymbolKind.TypeParameter:
+						var p = (ITypeParameterSymbol)symbol;
+						foreach (var c in p.ConstraintTypes) {
+							switch (c.SpecialType) {
+								case SpecialType.System_Enum: return _Classifications.EnumName;
+								case SpecialType.System_Delegate: return _Classifications.DelegateName;
+							}
+							return _Classifications.ClassName;
+						}
+						if (p.HasReferenceTypeConstraint) {
+							return _Classifications.ClassName;
+						}
+						if (p.HasValueTypeConstraint || p.HasUnmanagedTypeConstraint) {
+							return _Classifications.StructName;
+						}
+						return _Classifications.TypeParameter;
+				}
+				return null;
 			}
 		}
 

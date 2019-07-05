@@ -32,6 +32,7 @@ namespace Codist.Options
 			_MarkSpecialPunctuationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.SpecialPunctuation, _MarkSpecialPunctuationBox.Checked));
 			_HighlightDeclarationBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.DeclarationBrace, _HighlightDeclarationBracesBox.Checked));
 			_HighlightParameterBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.ParameterBrace, _HighlightParameterBracesBox.Checked));
+			_HighlightCastParenthesesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.CastBrace, _HighlightCastParenthesesBox.Checked));
 			_HighlightBranchBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.BranchBrace, _HighlightBranchBracesBox.Checked));
 			_HighlightLoopBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.LoopBrace, _HighlightLoopBracesBox.Checked));
 			_HighlightResourceBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.ResourceBrace, _HighlightResourceBracesBox.Checked));
@@ -48,6 +49,7 @@ namespace Codist.Options
 
 				_HighlightDeclarationBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace);
 				_HighlightParameterBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ParameterBrace);
+				_HighlightCastParenthesesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.CastBrace);
 				_HighlightBranchBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.BranchBrace);
 				_HighlightLoopBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.LoopBrace);
 				_HighlightResourceBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ResourceBrace);
