@@ -255,7 +255,7 @@ namespace Codist.Controls
 			}
 			if (item.Symbol != null) {
 				if (item.SyntaxNode == null && item.Symbol.HasSource()) {
-					SetupMenuCommand(item, KnownImageIds.GoToDefinition, "Go to Code", s => s.Symbol.GoToSource());
+					SetupMenuCommand(item, KnownImageIds.GoToDefinition, "Go to Definition", s => s.Symbol.GoToSource());
 					SetupMenuCommand(item, KnownImageIds.BlockSelection, "Select Code", s => s.Symbol.GetSyntaxNode().SelectNode(true));
 				}
 				menu.AddSymbolCommands();

@@ -133,11 +133,11 @@ namespace Codist.NaviBar
 
 		async void Update(object sender, EventArgs e) {
 			HideMenu();
-			CancellationHelper.CancelAndDispose(ref _cancellationSource, true);
+			SyncHelper.CancelAndDispose(ref _cancellationSource, true);
 			var cs = _cancellationSource;
 			if (cs != null) {
 				try {
-					await Update(cs.Token);
+					await Update(SyncHelper.CancelAndRetainToken(ref _cancellationSource));
 				}
 				catch (OperationCanceledException) {
 					// ignore
@@ -153,7 +153,7 @@ namespace Codist.NaviBar
 					if (token.IsCancellationRequested) {
 						return;
 					}
-					if (((NodeItem)Items[i]).Node == n) {
+					if (Items[i] is NodeItem ni && ni.Node == n) {
 						// keep the NaviItem if node is not updated
 						++i;
 						continue;
@@ -173,6 +173,7 @@ namespace Codist.NaviBar
 					Items.RemoveAt(--c);
 				}
 				c = nodes.Count;
+				NodeItem memberNode = null;
 				while (i2 < c) {
 					if (token.IsCancellationRequested) {
 						return;
@@ -183,14 +184,23 @@ namespace Codist.NaviBar
 						++i2;
 						continue;
 					}
-					bool highlight = node.IsMemberDeclaration();
 					var newItem = new NodeItem(this, node);
-					if (highlight) {
-						newItem.FontWeight = FontWeights.Bold;
+					if (memberNode == null && node.IsMemberDeclaration()) {
+						memberNode = newItem;
+						(newItem.Header as TextBlock).FontWeight = FontWeights.Bold;
 						newItem.IsChecked = true;
+						newItem.ReferencedDocs.AddRange(node.FindRelatedTypes(_SemanticContext.SemanticModel, token).Take(5));
 					}
 					Items.Add(newItem);
 					++i2;
+				}
+				if (memberNode == null) {
+					memberNode = Items.GetFirst<NodeItem>(n => n.HasReferencedDocs);
+				}
+				if (memberNode != null && memberNode.HasReferencedDocs) {
+					foreach (var doc in memberNode.ReferencedDocs) {
+						Items.Add(new DocItem(this, doc));
+					}
 				}
 			}
 		}
@@ -206,7 +216,7 @@ namespace Codist.NaviBar
 		void ViewClosed(object sender, EventArgs e) {
 			_View.Selection.SelectionChanged -= Update;
 			_View.TextBuffer.Changed -= TextBuffer_Changed;
-			CancellationHelper.CancelAndDispose(ref _cancellationSource, false);
+			SyncHelper.CancelAndDispose(ref _cancellationSource, false);
 			_View.Closed -= ViewClosed;
 		}
 
@@ -494,7 +504,7 @@ namespace Codist.NaviBar
 			}
 
 			void SearchCriteriaChanged(object sender, EventArgs e) {
-				CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
+				SyncHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
 				_Menu.ItemsSource = null;
 				_Menu.Clear();
 				var s = _FinderBox.Text;
@@ -531,7 +541,7 @@ namespace Codist.NaviBar
 				}
 			}
 			void FindInProject(string text) {
-				ThreadHelper.JoinableTaskFactory.Run(() => FindDeclarationsAsync(text, _Bar._cancellationSource.GetToken()));
+				SyncHelper.RunSync(() => FindDeclarationsAsync(text, _Bar._cancellationSource.GetToken()));
 			}
 
 			async Task FindDeclarationsAsync(string symbolName, CancellationToken token) {
@@ -563,6 +573,8 @@ namespace Codist.NaviBar
 			SymbolList _Menu;
 			SymbolFilterBox _FilterBox;
 			int _PartialCount;
+			ISymbol _Symbol;
+			List<ISymbol> _ReferencedDocs;
 
 			public NodeItem(CSharpBar bar, SyntaxNode node) {
 				_Bar = bar;
@@ -577,9 +589,12 @@ namespace Codist.NaviBar
 			}
 
 			public SyntaxNode Node { get; private set; }
+			public ISymbol Symbol => _Symbol ?? (_Symbol = SyncHelper.RunSync(() => _Bar._SemanticContext.GetSymbolAsync(Node, _Bar._cancellationSource.GetToken())));
+			public bool HasReferencedDocs => _ReferencedDocs != null && _ReferencedDocs.Count > 0;
+			public List<ISymbol> ReferencedDocs => _ReferencedDocs ?? (_ReferencedDocs = new List<ISymbol>());
 
 			async void HandleClick(object sender, RoutedEventArgs e) {
-				CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
+				SyncHelper.CancelAndDispose(ref _Bar._cancellationSource, true);
 				if (_Menu != null && _Bar._SymbolList == _Menu) {
 					_Bar.HideMenu();
 					return;
@@ -659,13 +674,14 @@ namespace Codist.NaviBar
 					await AddItemsAsync(node, cancellationToken);
 					return;
 				}
+				// select node item which contains caret
 				var pos = _Bar._View.GetCaretPosition();
 				foreach (var item in _Menu.Symbols) {
-					if (item.Type == SymbolItemType.Container) {
-						continue;
-					}
-					if (item.IsExternal || cancellationToken.IsCancellationRequested || item.SelectIfContainsPosition(pos)) {
-						break;
+					if (item.Type != SymbolItemType.Container) {
+						if (item.IsExternal || cancellationToken.IsCancellationRequested
+							|| item.SelectIfContainsPosition(pos)) {
+							break;
+						}
 					}
 				}
 			}
@@ -836,7 +852,14 @@ namespace Codist.NaviBar
 						SyntaxNode = Node
 					};
 					m.AddNodeCommands();
-					m.AddTitleItem(Node.GetDeclarationSignature());
+					var s = Symbol;
+					if (s != null) {
+						m.Symbol = s;
+						m.Items.Add(new Separator());
+						m.AddAnalysisCommands();
+						m.AddSymbolCommands();
+						m.AddTitleItem(Node.GetDeclarationSignature());
+					}
 					m.PlacementTarget = this;
 					m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
 					ContextMenu = m;
@@ -855,9 +878,8 @@ namespace Codist.NaviBar
 
 				if (this.HasDummyToolTip()) {
 					// todo: handle updated syntax node for RootItem
-					var symbol = ThreadHelper.JoinableTaskFactory.Run(() => _Bar._SemanticContext.GetSymbolAsync(Node, CancellationHelper.CancelAndDispose(ref _Bar._cancellationSource, true).GetToken()));
-					if (symbol != null) {
-						var tip = ToolTipFactory.CreateToolTip(symbol, true, _Bar._SemanticContext.SemanticModel.Compilation);
+					if (Symbol != null) {
+						var tip = ToolTipFactory.CreateToolTip(Symbol, true, _Bar._SemanticContext.SemanticModel.Compilation);
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
 							tip.AddTextBlock()
 						   .Append("Line of code: " + (Node.GetLineSpan().Length + 1));
@@ -873,6 +895,25 @@ namespace Codist.NaviBar
 
 			bool ISymbolFilter.Filter(int filterTypes) {
 				return SymbolFilterBox.FilterByImageId((MemberFilterTypes)filterTypes, _ImageId);
+			}
+		}
+
+		sealed class DocItem : ThemedMenuItem
+		{
+			readonly CSharpBar _Bar;
+			readonly ISymbol _SyntaxTree;
+
+			public DocItem(CSharpBar bar, ISymbol syntaxTree) {
+				_Bar = bar;
+				_SyntaxTree = syntaxTree;
+				Header = new ThemedMenuText(syntaxTree.GetOriginalName());
+				Icon = ThemeHelper.GetImage(KnownImageIds.CSFileNode);
+				Opacity = 0.8;
+			}
+
+			protected override void OnClick() {
+				base.OnClick();
+				_SyntaxTree.GoToSource();
 			}
 		}
 		sealed class GeometryAdornment : UIElement

@@ -251,6 +251,43 @@ namespace Codist
 			}
 		}
 
+		public static IQueryable<ISymbol> FindRelatedTypes(this SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken) {
+			var result = new Dictionary<ISymbol, int>();
+			var activeSyntaxTree = semanticModel.SyntaxTree;
+			foreach (var item in node.DescendantNodes()) {
+				if (item.IsKind(SyntaxKind.IdentifierName) == false) {
+					continue;
+				}
+				if (cancellationToken.IsCancellationRequested) {
+					break;
+				}
+				var s = semanticModel.GetSymbol(item, cancellationToken);
+				if (s != null) {
+					if (s.Kind == SymbolKind.NamedType && item.Parent.IsKind(SyntaxKind.SimpleMemberAccessExpression)) {
+						continue;
+					}
+					var t = s.ContainingType ?? (s.Kind == SymbolKind.NamedType ? s : null);
+					if (t != null) {
+						AddResult(result, activeSyntaxTree, t);
+					}
+					s = s.GetReturnType();
+					if (s != null) {
+						AddResult(result, activeSyntaxTree, s);
+					}
+				}
+			}
+			return result.AsQueryable().OrderByDescending(i => i.Value).Select(i => i.Key);
+
+			void AddResult(Dictionary<ISymbol, int> d, SyntaxTree tree, ISymbol s) {
+				foreach (var r in s.DeclaringSyntaxReferences) {
+					var st = r.SyntaxTree;
+					if (st != tree) {
+						d[s] = d.TryGetValue(s, out int i) ? ++i : 1;
+					}
+				}
+			}
+		}
+
 		/// <summary>Finds symbols referenced by given context node.</summary>
 		/// <returns>An ordered array of <see cref="KeyValuePair{TKey, TValue}"/> which contains number of occurrences of corresponding symbols.</returns>
 		public static KeyValuePair<ISymbol, int>[] FindReferencingSymbols(this SyntaxNode node, SemanticModel semanticModel, bool sourceCodeOnly) {
@@ -567,7 +604,7 @@ namespace Codist
 				case SymbolKind.Local: return ((ILocalSymbol)symbol).Type;
 				case SymbolKind.Method:
 					var m = (IMethodSymbol)symbol;
-					return m.MethodKind != MethodKind.Constructor ? m.ReturnType : m.ContainingType;
+					return m.MethodKind == MethodKind.Constructor ? m.ContainingType : m.ReturnType;
 				case SymbolKind.Parameter: return ((IParameterSymbol)symbol).Type;
 				case SymbolKind.Property: return ((IPropertySymbol)symbol).Type;
 				case SymbolKind.Alias: return ((IAliasSymbol)symbol).Target as ITypeSymbol;

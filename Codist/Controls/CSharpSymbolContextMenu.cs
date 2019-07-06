@@ -41,7 +41,7 @@ namespace Codist.Controls
 
 		public void AddNodeCommands() {
 			if (_Node != null) {
-				Items.Add(CreateItem(KnownImageIds.GoToDefinition, "Go to Code", GoToNode));
+				Items.Add(CreateItem(KnownImageIds.GoToDefinition, "Go to Definition", GoToNode));
 				Items.Add(CreateItem(KnownImageIds.BlockSelection, "Select Code", SelectNode));
 			}
 		}
@@ -67,7 +67,7 @@ namespace Codist.Controls
 						CreateCommandsForReturnTypeCommand();
 					}
 					if (_Symbol.Kind == SymbolKind.Method
-						&& (_Symbol as IMethodSymbol).MethodKind == MethodKind.Constructor
+						&& ((IMethodSymbol)_Symbol).MethodKind == MethodKind.Constructor
 						&& st.SpecialType == SpecialType.None) {
 						CreateInstanceCommandsForType(st);
 					}
@@ -84,8 +84,10 @@ namespace Codist.Controls
 					Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(_Symbol, _SemanticContext)));
 					break;
 			}
-			//if (_Node != null && _Node.IsDeclaration() && _Symbol.Kind != SymbolKind.Namespace) {
-			//	Items.Add(CreateItem(KnownImageIds.ShowReferencedElements, "Find Referenced Symbols...", FindReferencedSymbols));
+			//if (_Node != null && _Node.IsDeclaration()
+			//	&& _Node.SyntaxTree == _SemanticContext.SemanticModel.SyntaxTree
+			//	&& _Symbol.Kind != SymbolKind.Namespace) {
+			//	Items.Add(CreateItem(KnownImageIds.OpenDocumentFromCollection, "Find Referenced Documents...", FindReferencedDocuments));
 			//}
 			//Items.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, _Symbol, "No reference found", FindReferences));
 			Items.Add(CreateItem(KnownImageIds.FindSymbol, "Find Symbol with Name " + _Symbol.Name + "...", () => FindSymbolWithName(_Symbol, _SemanticContext)));
@@ -195,13 +197,13 @@ namespace Codist.Controls
 				case SymbolKind.Method:
 				case SymbolKind.Property:
 				case SymbolKind.Event:
-					callers = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindCallersAsync(symbol, doc.Project.Solution, docs, default)).ToList();
+					callers = SyncHelper.RunSync(() => SymbolFinder.FindCallersAsync(symbol, doc.Project.Solution, docs, default)).ToList();
 					break;
 				case SymbolKind.NamedType:
 					var tempResults = new HashSet<SymbolCallerInfo>(SymbolCallerInfoComparer.Instance);
-					ThreadHelper.JoinableTaskFactory.Run(async () => {
+					SyncHelper.RunSync(async () => {
 						foreach (var item in (symbol as INamedTypeSymbol).InstanceConstructors) {
-							foreach (var c in await SymbolFinder.FindCallersAsync(item, doc.Project.Solution, docs, default)) {
+							foreach (var c in await SymbolFinder.FindCallersAsync(item, doc.Project.Solution, docs, default).ConfigureAwait(false)) {
 								tempResults.Add(c);
 							}
 						}
@@ -228,14 +230,14 @@ namespace Codist.Controls
 		}
 
 		static void FindDerivedClasses(ISymbol symbol, SemanticContext context) {
-			var classes = ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, context.Document.Project.Solution, null, default)).ToList();
+			var classes = SyncHelper.RunSync(() => SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, context.Document.Project.Solution, null, default)).ToList();
 			ShowSymbolMenuForResult(symbol, context, classes, " derived classes", false);
 		}
 
 		static void FindOverrides(ISymbol symbol, SemanticContext context) {
 			var m = new SymbolMenu(context);
 			int c = 0;
-			foreach (var ov in ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindOverridesAsync(symbol, context.Document.Project.Solution, null, default))) {
+			foreach (var ov in SyncHelper.RunSync(() => SymbolFinder.FindOverridesAsync(symbol, context.Document.Project.Solution, null, default))) {
 				m.Menu.Add(ov, ov.ContainingType);
 				++c;
 			}
@@ -247,7 +249,7 @@ namespace Codist.Controls
 		}
 
 		static void FindImplementations(ISymbol symbol, SemanticContext context) {
-			var implementations = new List<ISymbol>(ThreadHelper.JoinableTaskFactory.Run(() => SymbolFinder.FindImplementationsAsync(symbol, context.Document.Project.Solution, null, default)));
+			var implementations = new List<ISymbol>(SyncHelper.RunSync(() => SymbolFinder.FindImplementationsAsync(symbol, context.Document.Project.Solution, null, default)));
 			implementations.Sort((a, b) => a.Name.CompareTo(b.Name));
 			var m = new SymbolMenu(context);
 			if (symbol.Kind == SymbolKind.NamedType) {
@@ -280,40 +282,30 @@ namespace Codist.Controls
 		}
 
 		static void FindInstanceAsParameter(ISymbol symbol, SemanticContext context) {
-			ThreadHelper.JoinableTaskFactory.Run(async () => {
-				var members = await (symbol as ITypeSymbol).FindInstanceAsParameterAsync(context.Document.Project, default);
-				ShowSymbolMenuForResult(symbol, context, members, " as parameter", true);
-			});
+			var members = SyncHelper.RunSync(() => (symbol as ITypeSymbol).FindInstanceAsParameterAsync(context.Document.Project, default));
+			ShowSymbolMenuForResult(symbol, context, members, " as parameter", true);
 		}
 
 		static void FindInstanceProducer(ISymbol symbol, SemanticContext context) {
-			ThreadHelper.JoinableTaskFactory.Run(async () => {
-				var members = await (symbol as ITypeSymbol).FindSymbolInstanceProducerAsync(context.Document.Project, default);
-				ShowSymbolMenuForResult(symbol, context, members, " producers", true);
-			});
+			var members = SyncHelper.RunSync(() => (symbol as ITypeSymbol).FindSymbolInstanceProducerAsync(context.Document.Project, default));
+			ShowSymbolMenuForResult(symbol, context, members, " producers", true);
 		}
 
 		static void FindExtensionMethods(ISymbol symbol, SemanticContext context) {
-			ThreadHelper.JoinableTaskFactory.Run(async () => {
-				var members = await (symbol as ITypeSymbol).FindExtensionMethodsAsync(context.Document.Project, default);
-				ShowSymbolMenuForResult(symbol, context, members, " extensions", true);
-			});
+			var members = SyncHelper.RunSync(() => (symbol as ITypeSymbol).FindExtensionMethodsAsync(context.Document.Project, default));
+			ShowSymbolMenuForResult(symbol, context, members, " extensions", true);
 		}
 
-		void FindReferencedSymbols() {
+		void FindReferencedDocuments() {
 			var m = new SymbolMenu(_SemanticContext);
 			var c = 0;
-			foreach (var item in _Node.FindReferencingSymbols(_SemanticContext.SemanticModel, true)) {
-				var member = item.Key;
-				var i = m.Menu.Add(member, true);
-				if (item.Value > 1) {
-					i.Hint = "* " + item.Value.ToString();
-				}
+			foreach (var member in _Node.FindRelatedTypes(_SemanticContext.SemanticModel, default)) {
+				m.Menu.Add(member, false);
 				++c;
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(_Symbol.GetImageId()))
 				.Append(_Symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
-				.Append(" referenced members: ")
+				.Append(" referenced documents: ")
 				.Append(c.ToString());
 			m.Show();
 		}
@@ -404,10 +396,10 @@ namespace Codist.Controls
 			m.Title.SetGlyph(ThemeHelper.GetImage(source.GetImageId()))
 				.Append(source.ToDisplayString(WpfHelper.MemberNameFormat), true)
 				.Append(suffix);
-			ITypeSymbol containingType = null;
+			INamedTypeSymbol containingType = null;
 			foreach (var item in members) {
 				if (groupByType && item.ContainingType != containingType) {
-					m.Menu.Add((containingType = item.ContainingType), false)
+					m.Menu.Add(containingType = item.ContainingType, false)
 						.Type = SymbolItemType.Container;
 				}
 				m.Menu.Add(item, false);
