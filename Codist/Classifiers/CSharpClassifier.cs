@@ -246,6 +246,9 @@ namespace Codist.Classifiers
 						}
 						var type = GetClassificationType(symbol);
 						if (type != null) {
+							if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
+								result.Add(CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation));
+							}
 							result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 							return;
 						}
@@ -261,6 +264,9 @@ namespace Codist.Classifiers
 							}
 							type = GetClassificationType(symbol);
 							if (type != null) {
+								if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
+									result.Add(CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation));
+								}
 								result.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 								return;
 							}
