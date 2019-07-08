@@ -56,6 +56,7 @@ namespace Codist
 		public const string CodeBranchingKeyword = "Keyword: Branching";
 		public const string CodeControlFlowKeyword = "Keyword: Control flow";
 		public const string CodeLoopKeyword = "Keyword: Loop";
+		public const string CodeTypeCastKeyword = "Keyword: Type cast";
 		public const string CodeSpecialPuctuation = "Special Puctuation";
 
 		public const string CodeClassName = "class name";
@@ -449,6 +450,10 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CodeLoopKeyword)]
 		[Description("Keyword: for, foreach in, do, while, inheriting from Keyword")]
 		LoopKeyword,
+		[Category(Constants.SyntaxCategory.Keyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeTypeCastKeyword)]
+		[Description("Keyword: as, is, in, ref, out, inheriting from Keyword")]
+		TypeCastKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpResourceKeyword)]
 		[Description("Keyword: using, lock, try catch finally, fixed, unsafe, inheriting from Keyword")]

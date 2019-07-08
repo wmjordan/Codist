@@ -56,6 +56,18 @@ namespace Codist.Classifiers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CodeTypeCastKeyword)]
+	[Name(Constants.CodeTypeCastKeyword)]
+	[UserVisible(false)]
+	[Order(After = Constants.CodeKeyword)]
+	sealed class TypeCastKeywordFormat : ClassificationFormatDefinition
+	{
+		public TypeCastKeywordFormat() {
+			DisplayName = Constants.CodeTypeCastKeyword;
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpResourceKeyword)]
 	[Name(Constants.CSharpResourceKeyword)]
 	[UserVisible(false)]

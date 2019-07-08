@@ -70,76 +70,95 @@ namespace Codist.Classifiers
 				switch (ct) {
 					case "keyword":
 					case Constants.CodeKeywordControl: {
-							node = unitCompilation.FindNode(item.TextSpan, true, true);
-							if (node is MemberDeclarationSyntax) {
-								var token = unitCompilation.FindToken(item.TextSpan.Start);
+						node = unitCompilation.FindNode(item.TextSpan, true, true);
+						if (node is MemberDeclarationSyntax) {
+							var token = unitCompilation.FindToken(item.TextSpan.Start);
+							switch (token.Kind()) {
+								case SyntaxKind.SealedKeyword:
+								case SyntaxKind.OverrideKeyword:
+								case SyntaxKind.AbstractKeyword:
+								case SyntaxKind.VirtualKeyword:
+								case SyntaxKind.NewKeyword:
+									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.AbstractionKeyword));
+									continue;
+							}
+							continue;
+						}
+						switch (node.Kind()) {
+							case SyntaxKind.BreakStatement:
+								if (node.Parent is SwitchSectionSyntax) {
+									continue;
+								}
+								goto case SyntaxKind.ReturnStatement;
+							// highlights: return, yield return, yield break, throw and continue
+							case SyntaxKind.ReturnKeyword:
+							case SyntaxKind.GotoCaseStatement:
+							case SyntaxKind.GotoDefaultStatement:
+							case SyntaxKind.GotoStatement:
+							case SyntaxKind.ContinueStatement:
+							case SyntaxKind.ReturnStatement:
+							case SyntaxKind.YieldReturnStatement:
+							case SyntaxKind.YieldBreakStatement:
+							case SyntaxKind.ThrowStatement:
+							case SyntaxKind.ThrowExpression:
+								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.ControlFlowKeyword));
+								continue;
+							case SyntaxKind.IfStatement:
+							case SyntaxKind.ElseClause:
+							case SyntaxKind.SwitchStatement:
+							case SyntaxKind.CaseSwitchLabel:
+							case SyntaxKind.DefaultSwitchLabel:
+								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.BranchingKeyword));
+								continue;
+							case SyntaxKind.ForStatement:
+							case SyntaxKind.ForEachStatement:
+							case SyntaxKind.ForEachVariableStatement:
+							case SyntaxKind.WhileStatement:
+							case SyntaxKind.DoStatement:
+							case SyntaxKind.SelectClause:
+								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.LoopKeyword));
+								continue;
+							case SyntaxKind.UsingStatement:
+							case SyntaxKind.FixedStatement:
+							case SyntaxKind.LockStatement:
+							case SyntaxKind.UnsafeStatement:
+							case SyntaxKind.TryStatement:
+							case SyntaxKind.CatchClause:
+							case SyntaxKind.CatchFilterClause:
+							case SyntaxKind.FinallyClause:
+								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword));
+								continue;
+							case SyntaxKind.IsExpression:
+							case SyntaxKind.IsPatternExpression:
+							case SyntaxKind.AsExpression:
+							case SyntaxKind.RefExpression:
+							case SyntaxKind.RefType:
+								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.TypeCastKeyword));
+								break;
+							case SyntaxKind.Argument:
+							case SyntaxKind.Parameter:
+							case SyntaxKind.CrefParameter:
+								var token = unitCompilation.FindToken(item.TextSpan.Start, true);
 								switch (token.Kind()) {
-									case SyntaxKind.SealedKeyword:
-									case SyntaxKind.OverrideKeyword:
-									case SyntaxKind.AbstractKeyword:
-									case SyntaxKind.VirtualKeyword:
-									case SyntaxKind.NewKeyword:
-										result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.AbstractionKeyword));
+									case SyntaxKind.InKeyword:
+									case SyntaxKind.OutKeyword:
+									case SyntaxKind.RefKeyword:
+										result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.TypeCastKeyword));
 										continue;
 								}
-								continue;
-							}
-							switch (node.Kind()) {
-								case SyntaxKind.BreakStatement:
-									if (node.Parent is SwitchSectionSyntax) {
-										continue;
-									}
-									goto case SyntaxKind.ReturnStatement;
-								// highlights: return, yield return, yield break, throw and continue
-								case SyntaxKind.ReturnKeyword:
-								case SyntaxKind.GotoCaseStatement:
-								case SyntaxKind.GotoDefaultStatement:
-								case SyntaxKind.GotoStatement:
-								case SyntaxKind.ContinueStatement:
-								case SyntaxKind.ReturnStatement:
-								case SyntaxKind.YieldReturnStatement:
-								case SyntaxKind.YieldBreakStatement:
-								case SyntaxKind.ThrowStatement:
-								case SyntaxKind.ThrowExpression:
-									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.ControlFlowKeyword));
-									continue;
-								case SyntaxKind.IfStatement:
-								case SyntaxKind.ElseClause:
-								case SyntaxKind.SwitchStatement:
-								case SyntaxKind.CaseSwitchLabel:
-								case SyntaxKind.DefaultSwitchLabel:
-									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.BranchingKeyword));
-									continue;
-								case SyntaxKind.ForStatement:
-								case SyntaxKind.ForEachStatement:
-								case SyntaxKind.ForEachVariableStatement:
-								case SyntaxKind.WhileStatement:
-								case SyntaxKind.DoStatement:
-								case SyntaxKind.SelectClause:
-									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.LoopKeyword));
-									continue;
-								case SyntaxKind.UsingStatement:
-								case SyntaxKind.FixedStatement:
-								case SyntaxKind.LockStatement:
-								case SyntaxKind.UnsafeStatement:
-								case SyntaxKind.TryStatement:
-								case SyntaxKind.CatchClause:
-								case SyntaxKind.CatchFilterClause:
-								case SyntaxKind.FinallyClause:
-									result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword));
-									continue;
-							}
+								break;
 						}
 						continue;
+					}
 					case "operator":
 					case Constants.CodeOverloadedOperator: {
-							node = unitCompilation.FindNode(item.TextSpan);
-							var opMethod = semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node) as IMethodSymbol;
-							if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
-								result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.OverrideMember));
-							}
+						node = unitCompilation.FindNode(item.TextSpan);
+						var opMethod = semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node) as IMethodSymbol;
+						if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
+							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.OverrideMember));
 						}
 						continue;
+					}
 					case Constants.CodePunctuation:
 						if (item.TextSpan.Length == 1) {
 							ClassifyPunctuation(item.TextSpan, snapshot, result, semanticModel, unitCompilation);
@@ -391,6 +410,7 @@ namespace Codist.Classifiers
 				case SyntaxKind.EnumDeclaration: return _Classifications.EnumName;
 				case SyntaxKind.StructDeclaration: return _Classifications.StructName;
 				case SyntaxKind.Attribute: return _Classifications.AttributeName;
+				case SyntaxKind.EventDeclaration: return _Classifications.Event;
 				case SyntaxKind.NamespaceDeclaration:
 					return _Classifications.Namespace;
 				case SyntaxKind.IfStatement:

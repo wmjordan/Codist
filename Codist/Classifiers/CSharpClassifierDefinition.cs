@@ -163,6 +163,11 @@ namespace Codist.Classifiers
 		static ClassificationTypeDefinition TypeParameter;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeKeyword)]
+		[Name(Constants.CodeTypeCastKeyword)]
+		static ClassificationTypeDefinition TypeCastKeyword;
+
+		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpVirtualMemberName)]
 		static ClassificationTypeDefinition VirtualMember;

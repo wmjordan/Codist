@@ -127,6 +127,7 @@ namespace Codist.Classifiers
 			ControlFlowKeyword = registry.GetClassificationType(Constants.CodeControlFlowKeyword);
 			Identifier = registry.GetClassificationType(Constants.CodeIdentifier);
 			LoopKeyword = registry.GetClassificationType(Constants.CodeLoopKeyword);
+			TypeCastKeyword = registry.GetClassificationType(Constants.CodeTypeCastKeyword);
 			Punctuation = registry.GetClassificationType(Constants.CodePunctuation);
 			Keyword = registry.GetClassificationType(Constants.CodeKeyword);
 			SpecialPunctuation = registry.GetClassificationType(Constants.CodeSpecialPuctuation);
@@ -136,6 +137,7 @@ namespace Codist.Classifiers
 		public IClassificationType ControlFlowKeyword { get; }
 		public IClassificationType Identifier { get; }
 		public IClassificationType LoopKeyword { get; }
+		public IClassificationType TypeCastKeyword { get; }
 		public IClassificationType Keyword { get; }
 		public IClassificationType Punctuation { get; }
 		public IClassificationType SpecialPunctuation { get; }
