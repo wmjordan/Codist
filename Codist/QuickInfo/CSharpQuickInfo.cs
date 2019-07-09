@@ -1032,8 +1032,9 @@ namespace Codist.QuickInfo
 					if (argIndex < mp.Length) {
 						argName = (p = mp[argIndex]).Name;
 					}
-					else if (mp.Length > 1 && mp[mp.Length - 1].IsParams) {
-						argName = (p = mp[mp.Length - 1]).Name;
+					else if (mp.Length > 0 && mp[mp.Length - 1].IsParams) {
+						argIndex = mp.Length - 1;
+						argName = (p = mp[argIndex]).Name;
 					}
 				}
 				var doc = argName != null ? new XmlDoc(om.MethodKind == MethodKind.DelegateInvoke ? om.ContainingSymbol : om, _SemanticModel.Compilation) : null;
