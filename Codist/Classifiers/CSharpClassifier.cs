@@ -22,7 +22,7 @@ namespace Codist.Classifiers
 	{
 		public IClassifier GetClassifier(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
-				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new CSharpClassifier(ServicesHelper.Instance.ClassificationTypeRegistry, textBuffer))
+				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new CSharpClassifier())
 				: null;
 		}
 	}
@@ -30,22 +30,8 @@ namespace Codist.Classifiers
 	/// <summary>A classifier for C# code syntax highlight.</summary>
 	sealed class CSharpClassifier : IClassifier
 	{
-		static CSharpClassifications _Classifications;
-		static GeneralClassifications _GeneralClassifications;
-
-		readonly ITextBuffer _TextBuffer;
-
-		internal CSharpClassifier(
-			IClassificationTypeRegistryService registry,
-			ITextBuffer buffer) {
-			if (_Classifications == null) {
-				_Classifications = new CSharpClassifications(registry);
-			}
-			if (_GeneralClassifications == null) {
-				_GeneralClassifications = new GeneralClassifications(registry);
-			}
-			_TextBuffer = buffer;
-		}
+		static readonly CSharpClassifications _Classifications = new CSharpClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
+		static readonly GeneralClassifications _GeneralClassifications = new GeneralClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 
 		public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 
