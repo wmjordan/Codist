@@ -139,6 +139,11 @@ namespace Codist.Classifiers
 					case "operator":
 					case Constants.CodeOverloadedOperator: {
 						node = unitCompilation.FindNode(item.TextSpan);
+						if (node.RawKind == (int)SyntaxKind.DestructorDeclaration) {
+							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.Declaration));
+							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword));
+							continue;
+						}
 						var opMethod = semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node) as IMethodSymbol;
 						if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
 							result.Add(CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.OverrideMember));
@@ -377,6 +382,8 @@ namespace Codist.Classifiers
 				case SyntaxKind.SimpleLambdaExpression:
 				case SyntaxKind.ParenthesizedLambdaExpression:
 				case SyntaxKind.LocalFunctionStatement:
+				case SyntaxKind.ConversionOperatorDeclaration:
+				case SyntaxKind.OperatorDeclaration:
 					return _Classifications.Method;
 				case SyntaxKind.InvocationExpression:
 					return ((((InvocationExpressionSyntax)node).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") ? null : _Classifications.Method;
@@ -388,6 +395,7 @@ namespace Codist.Classifiers
 				case SyntaxKind.CollectionInitializerExpression:
 				case SyntaxKind.ArrayInitializerExpression:
 				case SyntaxKind.ThisConstructorInitializer:
+				case SyntaxKind.DestructorDeclaration:
 					return _Classifications.ConstructorMethod;
 				case SyntaxKind.IndexerDeclaration:
 				case SyntaxKind.PropertyDeclaration: return _Classifications.Property;
