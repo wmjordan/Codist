@@ -94,56 +94,31 @@ namespace Codist.SmartBars
 				return;
 			}
 			var trivia = _Context.GetNodeTrivia();
+			var nodeKind = node.Kind();
 			if (trivia.RawKind == 0) {
 				var token = _Context.Token;
 				if (token.Span.Contains(View.Selection, true)
 					&& token.Kind() == SyntaxKind.IdentifierToken
-					&& (node.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || node.IsKind(SyntaxKind.VariableDeclarator) || node.IsKind(SyntaxKind.ForEachStatement))) {
+					&& (node.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || nodeKind == SyntaxKind.VariableDeclarator || nodeKind == SyntaxKind.ForEachStatement || nodeKind == SyntaxKind.SingleVariableDesignation)) {
 					// selection is within a symbol
 					_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
 					if (_Symbol != null) {
-						if (node.IsKind(SyntaxKind.IdentifierName) || node.IsKind(SyntaxKind.GenericName)) {
-							AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition\nRight click: Peek definition", "Edit.PeekDefinition");
-						}
-						AddCommand(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze symbol...", ctx => {
-							ctx.KeepToolBar(false);
-							if (UpdateSemanticModel() == false) {
-								return;
-							}
-							var m = new CSharpSymbolContextMenu(_Context) {
-								Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
-								PlacementTarget = ctx.Sender,
-								Symbol = _Symbol,
-								SyntaxNode = node
-							};
-							m.ItemClicked += (s, args) => HideToolBar();
-							m.AddAnalysisCommands();
-							m.AddFindAllReferencesCommand();
-							m.AddGoToAnyCommands();
-							ctx.Sender.ContextMenu = m;
-							m.IsOpen = true;
-						});
-						if (Classifiers.SymbolMarkManager.CanBookmark(_Symbol)) {
-							AddCommands(MyToolBar, KnownImageIds.FlagGroup, "Mark symbol...", null, GetMarkerCommands);
-						}
-
-						if (/*isDesignMode && */isReadOnly == false) {
-							AddRefactorCommands(node);
-						}
+						AddSymbolCommands(isReadOnly, node);
 					}
 				}
 				else if (token.RawKind >= (int)SyntaxKind.NumericLiteralToken && token.RawKind <= (int)SyntaxKind.StringLiteralToken) {
 					AddEditorCommand(MyToolBar, KnownImageIds.ReferencedDimension, "Edit.FindAllReferences", "Find all references");
 				}
-				else if (isReadOnly == false && (token.IsKind(SyntaxKind.TrueKeyword) || token.IsKind(SyntaxKind.FalseKeyword))) {
-					AddCommand(MyToolBar, KnownImageIds.ToggleButton, "Toggle value", ctx => {
-						Replace(ctx, v => v == "true" ? "false" : "true", true);
-					});
-				}
-				else if (node.IsRegionalDirective()) {
+				else if (nodeKind.IsRegionalDirective()) {
 					AddDirectiveCommands();
 				}
-				if (/*isDesignMode && */isReadOnly == false) {
+				else if (isReadOnly == false) {
+					if (token.IsKind(SyntaxKind.TrueKeyword) || token.IsKind(SyntaxKind.FalseKeyword)) {
+						AddCommand(MyToolBar, KnownImageIds.ToggleButton, "Toggle value", ctx => Replace(ctx, v => v == "true" ? "false" : "true", true));
+					}
+					else if (token.IsKind(SyntaxKind.ExplicitKeyword) || token.IsKind(SyntaxKind.ImplicitKeyword)) {
+						AddCommand(MyToolBar, KnownImageIds.ToggleButton, "Toggle value", ctx => Replace(ctx, v => v == "implicit" ? "explicit" : "implicit", true));
+					}
 					if (node.IsKind(SyntaxKind.VariableDeclarator)) {
 						if (node?.Parent?.Parent is MemberDeclarationSyntax) {
 							AddCommand(MyToolBar, KnownImageIds.AddComment, "Insert comment", ctx => {
@@ -175,6 +150,37 @@ namespace Codist.SmartBars
 				AddCommands(MyToolBar, KnownImageIds.BreakpointEnabled, "Debugger...\nLeft click: Toggle breakpoint\nRight click: Debugger menu...", ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);
 			}
 			AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection...\nRight click: Duplicate...\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", null, GetExpandSelectionCommands);
+		}
+
+		void AddSymbolCommands(bool isReadOnly, SyntaxNode node) {
+			if (node.IsKind(SyntaxKind.IdentifierName) || node.IsKind(SyntaxKind.GenericName)) {
+				AddEditorCommand(MyToolBar, KnownImageIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition\nRight click: Peek definition", "Edit.PeekDefinition");
+			}
+			AddCommand(MyToolBar, KnownImageIds.ReferencedDimension, "Analyze symbol...", ctx => {
+				ctx.KeepToolBar(false);
+				if (UpdateSemanticModel() == false) {
+					return;
+				}
+				var m = new CSharpSymbolContextMenu(_Context) {
+					Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
+					PlacementTarget = ctx.Sender,
+					Symbol = _Symbol,
+					SyntaxNode = node
+				};
+				m.ItemClicked += (s, args) => HideToolBar();
+				m.AddAnalysisCommands();
+				m.AddFindAllReferencesCommand();
+				m.AddGoToAnyCommands();
+				ctx.Sender.ContextMenu = m;
+				m.IsOpen = true;
+			});
+			if (Classifiers.SymbolMarkManager.CanBookmark(_Symbol)) {
+				AddCommands(MyToolBar, KnownImageIds.FlagGroup, "Mark symbol...", null, GetMarkerCommands);
+			}
+
+			if (/*isDesignMode && */isReadOnly == false) {
+				AddRefactorCommands(node);
+			}
 		}
 
 		void AddDirectiveCommands() {

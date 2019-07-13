@@ -120,8 +120,8 @@ namespace Codist
 			return false;
 		}
 
-		public static bool IsRegionalDirective(this SyntaxNode node) {
-			switch (node.Kind()) {
+		public static bool IsRegionalDirective(this SyntaxKind kind) {
+			switch (kind) {
 				case SyntaxKind.IfDirectiveTrivia:
 				case SyntaxKind.ElifDirectiveTrivia:
 				case SyntaxKind.ElseDirectiveTrivia:
