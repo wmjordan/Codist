@@ -13,8 +13,8 @@ namespace Codist
 	static partial class CodeAnalysisHelper
 	{
 		#region Node info
-		public static bool IsDeclaration(this SyntaxNode node) {
-			switch (node.Kind()) {
+		public static bool IsDeclaration(this SyntaxKind kind) {
+			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.ConstructorDeclaration:
 				case SyntaxKind.ConversionOperatorDeclaration:
@@ -41,8 +41,8 @@ namespace Codist
 			return false;
 		}
 
-		public static bool IsTypeOrNamespaceDeclaration(this SyntaxNode node) {
-			switch (node.Kind()) {
+		public static bool IsTypeOrNamespaceDeclaration(this SyntaxKind kind) {
+			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.DelegateDeclaration:
 				case SyntaxKind.EnumDeclaration:
@@ -54,8 +54,8 @@ namespace Codist
 			}
 			return false;
 		}
-		public static bool IsTypeDeclaration(this SyntaxNode node) {
-			switch (node.Kind()) {
+		public static bool IsTypeDeclaration(this SyntaxKind kind) {
+			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.DelegateDeclaration:
 				case SyntaxKind.EnumDeclaration:
@@ -66,8 +66,8 @@ namespace Codist
 			}
 			return false;
 		}
-		public static bool IsMemberDeclaration(this SyntaxNode node) {
-			switch (node.Kind()) {
+		public static bool IsMemberDeclaration(this SyntaxKind kind) {
+			switch (kind) {
 				case SyntaxKind.FieldDeclaration:
 				case SyntaxKind.MethodDeclaration:
 				case SyntaxKind.ConstructorDeclaration:
@@ -83,8 +83,8 @@ namespace Codist
 			return false;
 		}
 
-		public static bool IsSyntaxBlock(this SyntaxNode node) {
-			switch (node.Kind()) {
+		public static bool IsSyntaxBlock(this SyntaxKind kind) {
+			switch (kind) {
 				case SyntaxKind.ArgumentList:
 				case SyntaxKind.AttributeArgumentList:
 				//case SyntaxKind.Block:

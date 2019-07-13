@@ -96,9 +96,6 @@ namespace Codist
 		/// Locate symbol in case when the semantic model has been changed.
 		/// </summary>
 		public async Task<ISymbol> RelocateSymbolAsync(ISymbol symbol, CancellationToken cancellationToken = default) {
-			if (symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
-				return symbol;
-			}
 			await UpdateAsync(cancellationToken).ConfigureAwait(false);
 			var path = symbol.DeclaringSyntaxReferences.FirstOrDefault(r => r.SyntaxTree != null);
 			var doc = Document.Project.GetDocument(path.SyntaxTree.FilePath) ?? Document.Project.Solution.GetDocument(path.SyntaxTree);
@@ -142,25 +139,18 @@ namespace Codist
 			foreach (var item in root.Members) {
 				MatchDeclarationNode(item, matches, s, node);
 			}
-			if (matches.Count == 1) {
-				return matches[0];
-			}
-			if (matches.Count == 0) {
-				return null;
+			switch (matches.Count) {
+				case 1: return matches[0];
+				case 0: return null;
 			}
 			var match = matches[0];
 			matches = matches.FindAll(i => i.MatchSignature(node));
-			if (matches.Count == 1) {
-				return matches[0];
-			}
-			if (matches.Count == 0) {
-				return match;
+			switch (matches.Count) {
+				case 1: return matches[0];
+				case 0: return match;
 			}
 			matches = matches.FindAll(i => i.MatchAncestorDeclaration(node));
-			if (matches.Count >= 1) {
-				return matches[0];
-			}
-			return match;
+			return matches.Count >= 1 ? matches[0] : match;
 		}
 
 		Document FindDocument(string docPath) {
@@ -173,25 +163,22 @@ namespace Codist
 		}
 
 		static void MatchDeclarationNode(MemberDeclarationSyntax member, List<MemberDeclarationSyntax> matches, string signature, SyntaxNode node) {
-			if (member.Kind() == node.Kind()
+			if (member.RawKind == node.RawKind
 				&& member.GetDeclarationSignature() == signature) {
 				matches.Add(member);
 			}
 			if (member.IsKind(SyntaxKind.NamespaceDeclaration)) {
-				var ns = member as NamespaceDeclarationSyntax;
-				foreach (var item in ns.Members) {
+				foreach (var item in ((NamespaceDeclarationSyntax)member).Members) {
 					MatchDeclarationNode(item, matches, signature, node);
 				}
 			}
 			else if (member is TypeDeclarationSyntax) {
-				var t = member as TypeDeclarationSyntax;
-				foreach (var item in t.Members) {
+				foreach (var item in ((TypeDeclarationSyntax)member).Members) {
 					MatchDeclarationNode(item, matches, signature, node);
 				}
 			}
 			else if (node.IsKind(SyntaxKind.EnumMemberDeclaration) && member.IsKind(SyntaxKind.EnumDeclaration)) {
-				var e = member as EnumDeclarationSyntax;
-				foreach (var item in e.Members) {
+				foreach (var item in ((EnumDeclarationSyntax)member).Members) {
 					MatchDeclarationNode(item, matches, signature, node);
 				}
 			}
@@ -215,7 +202,7 @@ namespace Codist
 					}
 					var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(node.SpanStart, 0));
 					//todo find out the new node
-					if (newNode.IsKind(node.Kind()) == false) {
+					if (newNode.RawKind != node.RawKind) {
 						return null;
 					}
 					node = newNode;
@@ -295,10 +282,12 @@ namespace Codist
 			var node = Node;
 			var nodes = new List<SyntaxNode>(5);
 			while (node != null) {
-				if (node.FullSpan.Contains(View.Selection, true)
-					&& node.IsKind(SyntaxKind.VariableDeclaration) == false
-					&& (includeSyntaxDetails && node.IsSyntaxBlock() || node.IsDeclaration() || node.IsKind(SyntaxKind.Attribute))) {
-					nodes.Add(node);
+				if (node.FullSpan.Contains(View.Selection, true)) {
+					var nodeKind = node.Kind();
+					if (nodeKind != SyntaxKind.VariableDeclaration
+						&& (includeSyntaxDetails && nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() || nodeKind== SyntaxKind.Attribute)) {
+						nodes.Add(node);
+					}
 				}
 				node = node.Parent;
 			}

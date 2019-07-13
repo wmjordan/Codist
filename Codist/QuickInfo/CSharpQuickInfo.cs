@@ -443,12 +443,12 @@ namespace Codist.QuickInfo
 					foreach (var section in ((SwitchStatementSyntax)node).Sections) {
 						cases += section.Labels.Count;
 					}
-					qiContent.Add(s + " switch sections, " + cases + " cases");
+					qiContent.Add($"{s} switch sections, {cases} cases");
 				}
 				else {
-					var cases = ((SwitchStatementSyntax)node).Sections.Count;
-					if (cases > 1) {
-						qiContent.Add("1 switch section, " + cases + " cases");
+					s = ((SwitchStatementSyntax)node).Sections[0].Labels.Count;
+					if (s > 1) {
+						qiContent.Add($"1 switch section, {s} cases");
 					}
 				}
 			}
@@ -457,7 +457,7 @@ namespace Codist.QuickInfo
 					infoBox = ShowStringInfo(node.GetFirstToken().ValueText);
 				}
 			}
-			else if (nodeKind == SyntaxKind.Block || node.IsDeclaration()) {
+			else if (nodeKind == SyntaxKind.Block || nodeKind.IsDeclaration()) {
 				var lines = currentSnapshot.GetLineSpan(node.Span).Length + 1;
 				if (lines > 100) {
 					qiContent.Add(new ThemedTipText { Text = lines + " lines", FontWeight = FontWeights.Bold });
@@ -476,10 +476,11 @@ namespace Codist.QuickInfo
 				? _SemanticModel.GetSymbolInfo(retStatement.Expression).Symbol
 				: null;
 			while ((statement = statement.Parent) != null) {
-				if (statement.IsMemberDeclaration() == false
-					&& statement.IsKind(SyntaxKind.SimpleLambdaExpression) == false
-					&& statement.IsKind(SyntaxKind.ParenthesizedLambdaExpression) == false
-					&& statement.IsKind(SyntaxKind.LocalFunctionStatement) == false) {
+				var nodeKind = statement.Kind();
+				if (nodeKind.IsMemberDeclaration() == false
+					&& nodeKind != SyntaxKind.SimpleLambdaExpression
+					&& nodeKind != SyntaxKind.ParenthesizedLambdaExpression
+					&& nodeKind != SyntaxKind.LocalFunctionStatement) {
 					continue;
 				}
 				var name = statement.GetDeclarationSignature();

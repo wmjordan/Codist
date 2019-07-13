@@ -681,9 +681,11 @@ namespace Codist.Controls
 			}
 		}
 		internal void RefreshSymbol() {
-			var symbol = Container.SemanticContext.RelocateSymbolAsync(Symbol).ConfigureAwait(false).GetAwaiter().GetResult();
-			if (symbol != null && symbol != Symbol) {
-				Symbol = symbol;
+			if (Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
+				var symbol = Container.SemanticContext.RelocateSymbolAsync(Symbol).ConfigureAwait(false).GetAwaiter().GetResult();
+				if (symbol != null && symbol != Symbol) {
+					Symbol = symbol;
+				}
 			}
 		}
 	}

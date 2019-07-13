@@ -109,10 +109,12 @@ namespace Codist.NaviBar
 			var n = _SemanticContext.GetNode(p, false, false);
 			while (n != null && node.Contains(n)) {
 				if (n.Span.Start != span.Start
-					&& n.Span.Length != span.Length
-					&& n.IsKind(SyntaxKind.Block) == false) {
-					span = n.Span.CreateSnapshotSpan(_View.TextSnapshot);
-					_SyntaxNodeRangeAdornment.AddAdornment(span, null, new GeometryAdornment(ThemeHelper.MenuHoverBackgroundColor, _View.TextViewLines.GetMarkerGeometry(span), n.IsSyntaxBlock() || n.IsDeclaration() ? 1 : 0));
+					&& n.Span.Length != span.Length) {
+					var nodeKind = n.Kind();
+					if (nodeKind != SyntaxKind.Block) {
+						span = n.Span.CreateSnapshotSpan(_View.TextSnapshot);
+						_SyntaxNodeRangeAdornment.AddAdornment(span, null, new GeometryAdornment(ThemeHelper.MenuHoverBackgroundColor, _View.TextViewLines.GetMarkerGeometry(span), nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() ? 1 : 0));
+					}
 				}
 				n = n.Parent;
 			}
@@ -163,7 +165,7 @@ namespace Codist.NaviBar
 					}
 					break;
 				}
-				if ((i == 1 || i2 < nodes.Count && nodes[i2].IsTypeOrNamespaceDeclaration()) && _RootItem.FilterText.Length == 0) {
+				if ((i == 1 || i2 < nodes.Count && nodes[i2].Kind().IsTypeOrNamespaceDeclaration()) && _RootItem.FilterText.Length == 0) {
 					// clear type and namespace menu items if a type is changed
 					_RootItem.ClearSymbolList();
 				}
@@ -185,7 +187,7 @@ namespace Codist.NaviBar
 						continue;
 					}
 					var newItem = new NodeItem(this, node);
-					if (memberNode == null && node.IsMemberDeclaration()) {
+					if (memberNode == null && node.Kind().IsMemberDeclaration()) {
 						memberNode = newItem;
 						(newItem.Header as TextBlock).FontWeight = FontWeights.Bold;
 						newItem.IsChecked = true;
@@ -227,7 +229,7 @@ namespace Codist.NaviBar
 		public void ShowActiveItemMenu() {
 			for (int i = Items.Count - 1; i >= 0; i--) {
 				var item = Items[i] as NodeItem;
-				if (item != null && item.Node.IsTypeDeclaration()) {
+				if (item != null && item.Node.Kind().IsTypeDeclaration()) {
 					item.PerformClick();
 					return;
 				}
@@ -315,9 +317,9 @@ namespace Codist.NaviBar
 			if (node.IsStructuredTrivia && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.StripRegionNonLetter)) {
 				title = TrimNonLetterOrDigitCharacters(title);
 			}
-			if (includeContainer == false && node.IsTypeDeclaration()) {
+			if (includeContainer == false && node.Kind().IsTypeDeclaration()) {
 				var p = node.Parent;
-				while (p.IsTypeDeclaration()) {
+				while (p.Kind().IsTypeDeclaration()) {
 					title = "..." + title;
 					p = p.Parent;
 				}
@@ -470,7 +472,7 @@ namespace Codist.NaviBar
 
 			void AddNamespaceAndTypes() {
 				foreach (var node in _Bar._SemanticContext.Compilation.ChildNodes()) {
-					if (node.IsTypeOrNamespaceDeclaration()) {
+					if (node.Kind().IsTypeOrNamespaceDeclaration()) {
 						_Menu.Add(node);
 						AddTypeDeclarations(node);
 					}
@@ -480,11 +482,11 @@ namespace Codist.NaviBar
 
 			void AddTypeDeclarations(SyntaxNode node) {
 				foreach (var child in node.ChildNodes()) {
-					if (child.IsTypeOrNamespaceDeclaration()) {
+					if (child.Kind().IsTypeOrNamespaceDeclaration()) {
 						var i = _Menu.Add(child);
 						string prefix = null;
 						var p = child.Parent;
-						while (p.IsTypeDeclaration()) {
+						while (p.Kind().IsTypeDeclaration()) {
 							prefix = "..." + prefix;
 							p = p.Parent;
 						}
@@ -599,7 +601,7 @@ namespace Codist.NaviBar
 					_Bar.HideMenu();
 					return;
 				}
-				if (Node.IsTypeDeclaration() == false) {
+				if (Node.Kind().IsTypeDeclaration() == false) {
 					var span = Node.FullSpan;
 					if (span.Contains(_Bar._SemanticContext.Position) && Node.SyntaxTree.FilePath == _Bar._SemanticContext.Document.FilePath || Node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
 						_Bar._View.SelectNode(Node, Keyboard.Modifiers != ModifierKeys.Control);
@@ -716,7 +718,8 @@ namespace Codist.NaviBar
 				bool selected = false;
 				int pos = _Bar._View.GetCaretPosition();
 				foreach (var child in node.ChildNodes()) {
-					if (child.IsMemberDeclaration() == false && child.IsTypeDeclaration() == false) {
+					var childKind = child.Kind();
+					if (childKind.IsMemberDeclaration() == false && childKind.IsTypeDeclaration() == false) {
 						continue;
 					}
 					if (directives != null) {
@@ -750,7 +753,7 @@ namespace Codist.NaviBar
 							directives = null;
 						}
 					}
-					if (child.IsKind(SyntaxKind.FieldDeclaration) || child.IsKind(SyntaxKind.EventFieldDeclaration)) {
+					if (childKind == SyntaxKind.FieldDeclaration || childKind == SyntaxKind.EventFieldDeclaration) {
 						AddVariables(((BaseFieldDeclarationSyntax)child).Declaration.Variables, isExternal, pos);
 					}
 					else {
