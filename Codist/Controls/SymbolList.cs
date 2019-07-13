@@ -342,7 +342,7 @@ namespace Codist.Controls
 					}
 					return tip;
 				}
-				return item.SyntaxNode.GetSyntaxBrief();
+				return ((Microsoft.CodeAnalysis.CSharp.SyntaxKind)item.SyntaxNode.RawKind).GetSyntaxBrief();
 			}
 			if (item.Symbol != null) {
 				item.RefreshSymbol();
@@ -681,9 +681,11 @@ namespace Codist.Controls
 			}
 		}
 		internal void RefreshSymbol() {
-			var symbol = Container.SemanticContext.RelocateSymbolAsync(Symbol).ConfigureAwait(false).GetAwaiter().GetResult();
-			if (symbol != null && symbol != Symbol) {
-				Symbol = symbol;
+			if (Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
+				var symbol = Container.SemanticContext.RelocateSymbolAsync(Symbol).ConfigureAwait(false).GetAwaiter().GetResult();
+				if (symbol != null && symbol != Symbol) {
+					Symbol = symbol;
+				}
 			}
 		}
 	}

@@ -13,8 +13,8 @@ namespace Codist
 	static partial class CodeAnalysisHelper
 	{
 		#region Node info
-		public static bool IsDeclaration(this SyntaxNode node) {
-			switch (node.Kind()) {
+		public static bool IsDeclaration(this SyntaxKind kind) {
+			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.ConstructorDeclaration:
 				case SyntaxKind.ConversionOperatorDeclaration:
@@ -41,8 +41,8 @@ namespace Codist
 			return false;
 		}
 
-		public static bool IsTypeOrNamespaceDeclaration(this SyntaxNode node) {
-			switch (node.Kind()) {
+		public static bool IsTypeOrNamespaceDeclaration(this SyntaxKind kind) {
+			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.DelegateDeclaration:
 				case SyntaxKind.EnumDeclaration:
@@ -54,8 +54,8 @@ namespace Codist
 			}
 			return false;
 		}
-		public static bool IsTypeDeclaration(this SyntaxNode node) {
-			switch (node.Kind()) {
+		public static bool IsTypeDeclaration(this SyntaxKind kind) {
+			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.DelegateDeclaration:
 				case SyntaxKind.EnumDeclaration:
@@ -66,8 +66,8 @@ namespace Codist
 			}
 			return false;
 		}
-		public static bool IsMemberDeclaration(this SyntaxNode node) {
-			switch (node.Kind()) {
+		public static bool IsMemberDeclaration(this SyntaxKind kind) {
+			switch (kind) {
 				case SyntaxKind.FieldDeclaration:
 				case SyntaxKind.MethodDeclaration:
 				case SyntaxKind.ConstructorDeclaration:
@@ -83,8 +83,8 @@ namespace Codist
 			return false;
 		}
 
-		public static bool IsSyntaxBlock(this SyntaxNode node) {
-			switch (node.Kind()) {
+		public static bool IsSyntaxBlock(this SyntaxKind kind) {
+			switch (kind) {
 				case SyntaxKind.ArgumentList:
 				case SyntaxKind.AttributeArgumentList:
 				//case SyntaxKind.Block:
@@ -131,6 +131,58 @@ namespace Codist
 					return true;
 			}
 			return false;
+		}
+
+		public static string GetSyntaxBrief(this SyntaxKind kind) {
+			switch (kind) {
+				case SyntaxKind.ClassDeclaration: return "class";
+				case SyntaxKind.EnumDeclaration: return "enum";
+				case SyntaxKind.StructDeclaration: return "struct";
+				case SyntaxKind.InterfaceDeclaration: return "interface";
+				case SyntaxKind.ConstructorDeclaration: return "constructor";
+				case SyntaxKind.ConversionOperatorDeclaration: return "conversion operator";
+				case SyntaxKind.DestructorDeclaration: return "destructor";
+				case SyntaxKind.IndexerDeclaration: return "property";
+				case SyntaxKind.MethodDeclaration: return "method";
+				case SyntaxKind.OperatorDeclaration: return "operator";
+				case SyntaxKind.PropertyDeclaration: return "property";
+				case SyntaxKind.FieldDeclaration: return "field";
+				case SyntaxKind.NamespaceDeclaration: return "namespace";
+				case SyntaxKind.DelegateDeclaration: return "delegate";
+				case SyntaxKind.ArgumentList:
+				case SyntaxKind.AttributeArgumentList: return "argument list";
+				case SyntaxKind.DoStatement: return "do loop";
+				case SyntaxKind.FixedStatement: return "fixed";
+				case SyntaxKind.ForEachStatement: return "foreach";
+				case SyntaxKind.ForStatement: return "for";
+				case SyntaxKind.IfStatement: return "if";
+				case SyntaxKind.LocalDeclarationStatement: return "local";
+				case SyntaxKind.LockStatement: return "lock";
+				case SyntaxKind.SwitchStatement: return "switch";
+				case SyntaxKind.SwitchSection: return "switch section";
+				case SyntaxKind.TryStatement: return "try catch";
+				case SyntaxKind.UsingStatement: return "using";
+				case SyntaxKind.WhileStatement: return "while";
+				case SyntaxKind.ParameterList: return "parameter list";
+				case SyntaxKind.ParenthesizedExpression:
+				case SyntaxKind.ParenthesizedLambdaExpression:
+				case SyntaxKind.SimpleLambdaExpression: return "expression";
+				case SyntaxKind.UnsafeStatement: return "unsafe";
+				case SyntaxKind.VariableDeclarator: return "variable";
+				case SyntaxKind.UncheckedStatement: return "unchecked";
+				case SyntaxKind.CheckedStatement: return "checked";
+				case SyntaxKind.ReturnStatement: return "return";
+				case SyntaxKind.ExpressionStatement: return "expression";
+				case SyntaxKind.GotoStatement:
+				case SyntaxKind.GotoCaseStatement:
+				case SyntaxKind.GotoDefaultStatement: return "goto";
+				case SyntaxKind.XmlElement:
+				case SyntaxKind.XmlEmptyElement: return "xml element";
+				case SyntaxKind.XmlComment: return "xml comment";
+				case SyntaxKind.LocalFunctionStatement: return "local function";
+				case SyntaxKind.RegionDirectiveTrivia: return "region";
+			}
+			return null;
 		}
 
 		#endregion
@@ -414,58 +466,6 @@ namespace Codist
 				}
 			}
 			return true;
-		}
-
-		public static string GetSyntaxBrief(this SyntaxNode node) {
-			switch (node.Kind()) {
-				case SyntaxKind.ClassDeclaration: return "class";
-				case SyntaxKind.EnumDeclaration: return "enum";
-				case SyntaxKind.StructDeclaration: return "struct";
-				case SyntaxKind.InterfaceDeclaration: return "interface";
-				case SyntaxKind.ConstructorDeclaration: return "constructor";
-				case SyntaxKind.ConversionOperatorDeclaration: return "conversion operator";
-				case SyntaxKind.DestructorDeclaration: return "destructor";
-				case SyntaxKind.IndexerDeclaration: return "property";
-				case SyntaxKind.MethodDeclaration: return "method";
-				case SyntaxKind.OperatorDeclaration: return "operator";
-				case SyntaxKind.PropertyDeclaration: return "property";
-				case SyntaxKind.FieldDeclaration: return "field";
-				case SyntaxKind.NamespaceDeclaration: return "namespace";
-				case SyntaxKind.DelegateDeclaration: return "delegate";
-				case SyntaxKind.ArgumentList:
-				case SyntaxKind.AttributeArgumentList: return "argument list";
-				case SyntaxKind.DoStatement: return "do loop";
-				case SyntaxKind.FixedStatement: return "fixed";
-				case SyntaxKind.ForEachStatement: return "foreach";
-				case SyntaxKind.ForStatement: return "for";
-				case SyntaxKind.IfStatement: return "if";
-				case SyntaxKind.LocalDeclarationStatement: return "local";
-				case SyntaxKind.LockStatement: return "lock";
-				case SyntaxKind.SwitchStatement: return "switch";
-				case SyntaxKind.SwitchSection: return "switch section";
-				case SyntaxKind.TryStatement: return "try catch";
-				case SyntaxKind.UsingStatement: return "using";
-				case SyntaxKind.WhileStatement: return "while";
-				case SyntaxKind.ParameterList: return "parameter list";
-				case SyntaxKind.ParenthesizedExpression:
-				case SyntaxKind.ParenthesizedLambdaExpression:
-				case SyntaxKind.SimpleLambdaExpression: return "expression";
-				case SyntaxKind.UnsafeStatement: return "unsafe";
-				case SyntaxKind.VariableDeclarator: return "variable";
-				case SyntaxKind.UncheckedStatement: return "unchecked";
-				case SyntaxKind.CheckedStatement: return "checked";
-				case SyntaxKind.ReturnStatement: return "return";
-				case SyntaxKind.ExpressionStatement: return "expression";
-				case SyntaxKind.GotoStatement:
-				case SyntaxKind.GotoCaseStatement:
-				case SyntaxKind.GotoDefaultStatement: return "goto";
-				case SyntaxKind.XmlElement:
-				case SyntaxKind.XmlEmptyElement: return "xml element";
-				case SyntaxKind.XmlComment: return "xml comment";
-				case SyntaxKind.LocalFunctionStatement: return "local function";
-				case SyntaxKind.RegionDirectiveTrivia: return "region";
-			}
-			return null;
 		}
 
 		/// <summary>Returns the object creation syntax node from an named type identifier node.</summary>
@@ -833,18 +833,18 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.EnumDeclaration:
-					return (node as BaseTypeDeclarationSyntax).Identifier;
-				case SyntaxKind.DelegateDeclaration: return (node as DelegateDeclarationSyntax).Identifier;
-				case SyntaxKind.MethodDeclaration: return (node as MethodDeclarationSyntax).Identifier;
-				case SyntaxKind.OperatorDeclaration: return (node as OperatorDeclarationSyntax).OperatorToken;
-				case SyntaxKind.ConversionOperatorDeclaration: return (node as ConversionOperatorDeclarationSyntax).Type.GetFirstToken();
-				case SyntaxKind.ConstructorDeclaration: return (node as ConstructorDeclarationSyntax).Identifier;
-				case SyntaxKind.DestructorDeclaration: return (node as DestructorDeclarationSyntax).Identifier;
-				case SyntaxKind.PropertyDeclaration: return (node as PropertyDeclarationSyntax).Identifier;
-				case SyntaxKind.IndexerDeclaration: return (node as IndexerDeclarationSyntax).ThisKeyword;
-				case SyntaxKind.EventDeclaration: return (node as EventDeclarationSyntax).Identifier;
-				case SyntaxKind.EnumMemberDeclaration: return (node as EnumMemberDeclarationSyntax).Identifier;
-				case SyntaxKind.VariableDeclarator: return (node as VariableDeclaratorSyntax).Identifier;
+					return ((BaseTypeDeclarationSyntax)node).Identifier;
+				case SyntaxKind.DelegateDeclaration: return ((DelegateDeclarationSyntax)node).Identifier;
+				case SyntaxKind.MethodDeclaration: return ((MethodDeclarationSyntax)node).Identifier;
+				case SyntaxKind.OperatorDeclaration: return ((OperatorDeclarationSyntax)node).OperatorToken;
+				case SyntaxKind.ConversionOperatorDeclaration: return ((ConversionOperatorDeclarationSyntax)node).Type.GetFirstToken();
+				case SyntaxKind.ConstructorDeclaration: return ((ConstructorDeclarationSyntax)node).Identifier;
+				case SyntaxKind.DestructorDeclaration: return ((DestructorDeclarationSyntax)node).Identifier;
+				case SyntaxKind.PropertyDeclaration: return ((PropertyDeclarationSyntax)node).Identifier;
+				case SyntaxKind.IndexerDeclaration: return ((IndexerDeclarationSyntax)node).ThisKeyword;
+				case SyntaxKind.EventDeclaration: return ((EventDeclarationSyntax)node).Identifier;
+				case SyntaxKind.EnumMemberDeclaration: return ((EnumMemberDeclarationSyntax)node).Identifier;
+				case SyntaxKind.VariableDeclarator: return ((VariableDeclaratorSyntax)node).Identifier;
 			}
 			return node.GetFirstToken();
 		}

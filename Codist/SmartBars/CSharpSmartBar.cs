@@ -99,7 +99,7 @@ namespace Codist.SmartBars
 				var token = _Context.Token;
 				if (token.Span.Contains(View.Selection, true)
 					&& token.Kind() == SyntaxKind.IdentifierToken
-					&& (node.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || nodeKind == SyntaxKind.VariableDeclarator || nodeKind == SyntaxKind.ForEachStatement || nodeKind == SyntaxKind.SingleVariableDesignation)) {
+					&& (nodeKind.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || nodeKind == SyntaxKind.VariableDeclarator || nodeKind == SyntaxKind.ForEachStatement || nodeKind == SyntaxKind.SingleVariableDesignation)) {
 					// selection is within a symbol
 					_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
 					if (_Symbol != null) {
@@ -117,9 +117,9 @@ namespace Codist.SmartBars
 						AddCommand(MyToolBar, KnownImageIds.ToggleButton, "Toggle value", ctx => Replace(ctx, v => v == "true" ? "false" : "true", true));
 					}
 					else if (token.IsKind(SyntaxKind.ExplicitKeyword) || token.IsKind(SyntaxKind.ImplicitKeyword)) {
-						AddCommand(MyToolBar, KnownImageIds.ToggleButton, "Toggle value", ctx => Replace(ctx, v => v == "implicit" ? "explicit" : "implicit", true));
+						AddCommand(MyToolBar, KnownImageIds.ToggleButton, "Toggle operator", ctx => Replace(ctx, v => v == "implicit" ? "explicit" : "implicit", true));
 					}
-					if (node.IsKind(SyntaxKind.VariableDeclarator)) {
+					if (nodeKind == SyntaxKind.VariableDeclarator) {
 						if (node?.Parent?.Parent is MemberDeclarationSyntax) {
 							AddCommand(MyToolBar, KnownImageIds.AddComment, "Insert comment", ctx => {
 								TextEditorHelper.ExecuteEditorCommand("Edit.InsertComment");
@@ -127,7 +127,7 @@ namespace Codist.SmartBars
 							});
 						}
 					}
-					else if (node.IsDeclaration()) {
+					else if (nodeKind.IsDeclaration()) {
 						if (node is TypeDeclarationSyntax || node is MemberDeclarationSyntax || node is ParameterListSyntax) {
 							AddCommand(MyToolBar, KnownImageIds.AddComment, "Insert comment", ctx => {
 								TextEditorHelper.ExecuteEditorCommand("Edit.InsertComment");
@@ -363,19 +363,20 @@ namespace Codist.SmartBars
 			var duplicate = ctx.RightClick;
 			var node = _Context.NodeIncludeTrivia;
 			while (node != null) {
-				if (node.FullSpan.Contains(ctx.View.Selection, false)
-					&& (node.IsSyntaxBlock() || node.IsDeclaration() || node.IsKind(SyntaxKind.VariableDeclarator))
-					&& node.IsKind(SyntaxKind.VariableDeclaration) == false) {
-					var n = node;
-					r.Add(new CommandItem(CodeAnalysisHelper.GetImageId(n), (duplicate ? "Duplicate " : "Select ") + n.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), ctx2 => {
-						ctx2.View.SelectNode(n, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ExpansionIncludeTrivia) || n.Span.Contains(ctx2.View.Selection, false) == false);
-						if (Keyboard.Modifiers == ModifierKeys.Control) {
-							TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
-						}
-						if (duplicate) {
-							TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
-						}
-					}));
+				if (node.FullSpan.Contains(ctx.View.Selection, false)) {
+					var nodeKind = node.Kind();
+					if ((nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() || nodeKind ==SyntaxKind.VariableDeclarator)
+					&& nodeKind != SyntaxKind.VariableDeclaration) {
+						r.Add(new CommandItem(CodeAnalysisHelper.GetImageId(node), (duplicate ? "Duplicate " : "Select ") + nodeKind.GetSyntaxBrief() + " " + node.GetDeclarationSignature(), ctx2 => {
+							ctx2.View.SelectNode(node, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ExpansionIncludeTrivia) || node.Span.Contains(ctx2.View.Selection, false) == false);
+							if (Keyboard.Modifiers == ModifierKeys.Control) {
+								TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
+							}
+							if (duplicate) {
+								TextEditorHelper.ExecuteEditorCommand("Edit.Duplicate");
+							}
+						}));
+					}
 				}
 				node = node.Parent;
 			}

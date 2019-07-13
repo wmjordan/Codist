@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Utilities;
@@ -44,7 +45,7 @@ namespace Codist
 		}
 
 		public static ISymbol GetSymbolExt(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
-			return node.IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator
+			return node.Kind().IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator
 				? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 				: (node is AttributeArgumentSyntax
 						? semanticModel.GetSymbolInfo(((AttributeArgumentSyntax)node).Expression, cancellationToken).Symbol
@@ -187,7 +188,7 @@ namespace Codist
 			int maxNameLength = 0;
 			var predicate = CreateNameFilter(symbolName, fullMatch, matchCase);
 
-			foreach (var symbol in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSourceDeclarationsAsync(project, predicate, token).ConfigureAwait(false)) {
+			foreach (var symbol in await SymbolFinder.FindSourceDeclarationsAsync(project, predicate, token).ConfigureAwait(false)) {
 				if (symbols.Count < resultLimit) {
 					symbols.Add(symbol);
 				}
@@ -294,7 +295,7 @@ namespace Codist
 			var result = new Dictionary<ISymbol, int>();
 			foreach (var item in node.DescendantNodes()) {
 				if (item.IsKind(SyntaxKind.IdentifierName) == false
-					|| item.IsDeclaration()) {
+					|| item.Kind().IsDeclaration()) {
 					continue;
 				}
 				var symbolInfo = semanticModel.GetSymbolInfo(item);
@@ -343,6 +344,30 @@ namespace Codist
 				return String.CompareOrdinal(x.Key.Name, y.Key.Name);
 			});
 			return a;
+		}
+
+		static ISymbol GetEnclosingSymbol(SemanticModel semanticModel, ReferenceLocation reference) {
+			for (var current = semanticModel.GetEnclosingSymbol(reference.Location.SourceSpan.Start); current != null; current = current.ContainingSymbol) {
+				switch (current.Kind) {
+					case SymbolKind.Field:
+					case SymbolKind.Property:
+						return current;
+					case SymbolKind.Method:
+						var method = (IMethodSymbol)current;
+						switch (method.MethodKind) {
+							case MethodKind.AnonymousFunction:
+								return null;
+							case MethodKind.PropertyGet:
+							case MethodKind.PropertySet:
+							case MethodKind.EventAdd:
+							case MethodKind.EventRemove:
+								return method.AssociatedSymbol;
+							default:
+								return method;
+						}
+				}
+			}
+			return null;
 		}
 		#endregion
 

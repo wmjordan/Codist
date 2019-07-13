@@ -58,8 +58,7 @@ namespace Codist.Classifiers
 					case Constants.CodeKeywordControl: {
 						node = unitCompilation.FindNode(item.TextSpan, true, true);
 						if (node is MemberDeclarationSyntax) {
-							var token = unitCompilation.FindToken(item.TextSpan.Start);
-							switch (token.Kind()) {
+							switch (unitCompilation.FindToken(item.TextSpan.Start).Kind()) {
 								case SyntaxKind.SealedKeyword:
 								case SyntaxKind.OverrideKeyword:
 								case SyntaxKind.AbstractKeyword:
@@ -124,8 +123,7 @@ namespace Codist.Classifiers
 							case SyntaxKind.Argument:
 							case SyntaxKind.Parameter:
 							case SyntaxKind.CrefParameter:
-								var token = unitCompilation.FindToken(item.TextSpan.Start, true);
-								switch (token.Kind()) {
+								switch (unitCompilation.FindToken(item.TextSpan.Start, true).Kind()) {
 									case SyntaxKind.InKeyword:
 									case SyntaxKind.OutKeyword:
 									case SyntaxKind.RefKeyword:
