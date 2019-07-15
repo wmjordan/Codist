@@ -614,6 +614,14 @@ namespace Codist
 			}
 		}
 
+		public static bool HasConstraint(this ITypeParameterSymbol symbol) {
+			return symbol.HasReferenceTypeConstraint
+				|| symbol.HasValueTypeConstraint
+				|| symbol.HasConstructorConstraint
+				|| symbol.HasUnmanagedTypeConstraint
+				|| symbol.ConstraintTypes.Length > 0;
+		}
+
 		public static ImmutableArray<IParameterSymbol> GetParameters(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Method: return ((IMethodSymbol)symbol).Parameters;
@@ -1034,6 +1042,30 @@ namespace Codist
 				: ct && (s = ta.GetHashCode().CompareTo(tb.GetHashCode())) != 0 ? s
 				: (s = a.Name.CompareTo(b.Name)) != 0 ? s
 				: 0;
+		}
+
+		public static bool AreEqual(ITypeParameterSymbol a, ITypeParameterSymbol b) {
+			if (a == b) {
+				return true;
+			}
+			if (a == null || b == null
+				|| a.HasReferenceTypeConstraint != b.HasReferenceTypeConstraint
+				|| a.HasValueTypeConstraint != b.HasValueTypeConstraint
+				|| a.HasConstructorConstraint != b.HasConstructorConstraint
+				|| a.HasUnmanagedTypeConstraint != b.HasUnmanagedTypeConstraint) {
+				return false;
+			}
+			var ac = a.ConstraintTypes;
+			var bc = b.ConstraintTypes;
+			if (ac.Length != bc.Length) {
+				return false;
+			}
+			for (int i = ac.Length - 1; i >= 0; i--) {
+				if (ac[i].Equals(bc[i]) == false) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 		public static int CompareByAccessibilityKindName(ISymbol a, ISymbol b) {

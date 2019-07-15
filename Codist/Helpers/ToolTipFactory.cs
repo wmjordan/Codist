@@ -32,6 +32,16 @@ namespace Codist
 				content.Append("member type: ")
 					.Append(t.ToDisplayString(WpfHelper.MemberNameFormat), true);
 			}
+			else if (symbol.Kind == SymbolKind.TypeParameter) {
+				content.Append("defined in: ")
+					.Append(symbol.ContainingSymbol.ToDisplayString(WpfHelper.MemberNameFormat), true);
+				var tp = symbol as ITypeParameterSymbol;
+				if (tp.HasConstraint()) {
+					content.Append(" (");
+					SymbolFormatter.Empty.ShowTypeConstaints(tp, content);
+					content.Append(")");
+				}
+			}
 			t = symbol.ContainingType;
 			if (t != null) {
 				if (content.Inlines.FirstInline != null) {
@@ -75,8 +85,8 @@ namespace Codist
 		static void ShowDelegateSignature(TextBlock content, INamedTypeSymbol d) {
 			content.Append("\nsignature: ");
 			var invoke = d.OriginalDefinition.DelegateInvokeMethod;
-			content.AddSymbol(invoke.ReturnType, SymbolFormatter.Empty)
-				.Append(" ").AddSymbol(d, SymbolFormatter.Empty)
+			content.AddSymbol(invoke.ReturnType, false, SymbolFormatter.Empty)
+				.Append(" ").AddSymbol(d, true, SymbolFormatter.Empty)
 				.AddParameters(invoke.Parameters, SymbolFormatter.Empty);
 		}
 

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -13,31 +15,53 @@ namespace Codist
 {
 	sealed class SymbolFormatter
 	{
-		private SymbolFormatter(IEditorFormatMap formatMap) {
+		private SymbolFormatter(IEditorFormatMap formatMap, Func<Brush, Brush> brushConfigurator) {
+			_brushConfigurator = brushConfigurator;
 			if (formatMap != null) {
-				UpdateSyntaxHighlights(formatMap);
-				formatMap.FormatMappingChanged += (s, args) => UpdateSyntaxHighlights(s as IEditorFormatMap);
+				foreach (var setter in _BrushSetter) {
+					setter.Value(this, formatMap);
+				}
+				formatMap.FormatMappingChanged += FormatMap_FormatMappingChanged;
 			}
 		}
 
-		internal static SymbolFormatter Instance = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap("text"));
-		internal static SymbolFormatter Empty = new SymbolFormatter(null);
+		static readonly Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>> _BrushSetter = CreatePropertySetter();
+		internal static readonly SymbolFormatter Instance = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap("text"), b => { b?.Freeze(); return b; });
+		internal static readonly SymbolFormatter SemiTransparent = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap("text"), b => b?.Alpha(0.6));
+		internal static readonly SymbolFormatter Empty = new SymbolFormatter(null, null);
+		readonly Func<Brush, Brush> _brushConfigurator;
 
+		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
 		public Brush Class { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstFieldName)]
 		public Brush Const { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CodeDelegateName)]
 		public Brush Delegate { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumName)]
 		public Brush Enum { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName)]
 		public Brush Field { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CodeInterfaceName)]
 		public Brush Interface { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalVariableName)]
 		public Brush Local { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CodeKeyword)]
 		public Brush Keyword { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpMethodName)]
 		public Brush Method { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName)]
 		public Brush Namespace { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CodeNumber)]
 		public Brush Number { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName)]
 		public Brush Parameter { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName)]
 		public Brush Property { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CodeStructName)]
 		public Brush Struct { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CodeString)]
 		public Brush Text { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeParameterName)]
 		public Brush TypeParameter { get; private set; }
 
 		public TextBlock ShowSymbolDeclaration(ISymbol symbol, TextBlock info, bool defaultPublic, bool hideTypeKind) {
@@ -59,21 +83,44 @@ namespace Codist
 			return info;
 		}
 
+		public void ShowTypeConstaints(ITypeParameterSymbol typeParameter, TextBlock text) {
+			bool hasConstraint = false;
+			if (typeParameter.HasReferenceTypeConstraint) {
+				text.Append(hasConstraint ? ", " : String.Empty).Append("class", Keyword);
+				hasConstraint = true;
+			}
+			if (typeParameter.HasValueTypeConstraint) {
+				text.Append(hasConstraint ? ", " : String.Empty).Append("struct", Keyword);
+				hasConstraint = true;
+			}
+			if (typeParameter.HasUnmanagedTypeConstraint) {
+				text.Append(hasConstraint ? ", " : String.Empty).Append("unmanaged", Keyword);
+				hasConstraint = true;
+			}
+			if (typeParameter.HasConstructorConstraint) {
+				text.Append(hasConstraint ? ", " : String.Empty).Append("new", Keyword).Append("()");
+				hasConstraint = true;
+			}
+			foreach (var constraint in typeParameter.ConstraintTypes) {
+				text.Append(hasConstraint ? ", " : String.Empty).AddSymbol(constraint, false, this);
+				hasConstraint = true;
+			}
+		}
 
-		internal void Format(InlineCollection text, ISymbol symbol, string alias) {
+		internal void Format(InlineCollection text, ISymbol symbol, string alias, bool bold) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:
-					Format(text, ((IArrayTypeSymbol)symbol).ElementType, alias);
+					Format(text, ((IArrayTypeSymbol)symbol).ElementType, alias, bold);
 					if (alias == null) {
 						text.Add("[]");
 					}
 					return;
-				case SymbolKind.Event: text.Add(symbol.Render(alias, Delegate)); return;
+				case SymbolKind.Event: text.Add(symbol.Render(alias, bold, Delegate)); return;
 				case SymbolKind.Field:
-					text.Add(symbol.Render(alias, ((IFieldSymbol)symbol).IsConst ? Const : Field));
+					text.Add(symbol.Render(alias, bold, ((IFieldSymbol)symbol).IsConst ? Const : Field));
 					return;
 				case SymbolKind.Method:
-					text.Add(symbol.Render(alias, Method));
+					text.Add(symbol.Render(alias, bold, Method));
 					var method = (IMethodSymbol)symbol;
 					if (method.IsGenericMethod) {
 						AddTypeArguments(text, method.TypeArguments);
@@ -87,33 +134,48 @@ namespace Codist
 					}
 					switch (type.TypeKind) {
 						case TypeKind.Class:
-							text.Add(symbol.Render(alias ?? (type.IsAnonymousType ? "?" : null), Class)); break;
+							text.Add(symbol.Render(alias ?? (type.IsAnonymousType ? "?" : null), bold, Class)); break;
 						case TypeKind.Delegate:
-							text.Add(symbol.Render(alias, Delegate)); break;
+							text.Add(symbol.Render(alias, bold, Delegate)); break;
 						case TypeKind.Dynamic:
-							text.Add(symbol.Render(alias ?? symbol.Name, Keyword)); return;
+							text.Add(symbol.Render(alias ?? symbol.Name, bold, Keyword)); return;
 						case TypeKind.Enum:
-							text.Add(symbol.Render(alias, Enum)); return;
+							text.Add(symbol.Render(alias, bold, Enum)); return;
 						case TypeKind.Interface:
-							text.Add(symbol.Render(alias, Interface)); break;
+							text.Add(symbol.Render(alias, bold, Interface)); break;
 						case TypeKind.Struct:
-							text.Add(symbol.Render(alias, Struct)); break;
+							if (type.IsTupleType) {
+								text.Add("(");
+								for (int i = 0; i < type.TupleElements.Length; i++) {
+									if (i > 0) {
+										text.Add(", ");
+									}
+									Format(text, type.TupleElements[i].Type, null, false);
+									text.Add(" ");
+									text.Add(type.TupleElements[i].Render(null, Field));
+								}
+								text.Add(")");
+							}
+							else {
+								text.Add(symbol.Render(alias, bold, Struct));
+							}
+							break;
 						case TypeKind.TypeParameter:
-							text.Add(symbol.Render(alias ?? symbol.Name, TypeParameter)); return;
+							text.Add(symbol.Render(alias ?? symbol.Name, bold, TypeParameter)); return;
 						default:
-							text.Add(symbol.MetadataName.Render(Class)); return;
+							text.Add(symbol.MetadataName.Render(bold, false, Class)); return;
 					}
 					if (type.IsGenericType) {
 						AddTypeArguments(text, type.TypeArguments);
 					}
 					return;
 				case SymbolKind.Namespace: text.Add(symbol.Name.Render(Namespace)); return;
-				case SymbolKind.Parameter: text.Add(symbol.Render(null, Parameter)); return;
-				case SymbolKind.Property: text.Add(symbol.Render(alias, Property)); return;
-				case SymbolKind.Local: text.Add(symbol.Render(null, Local)); return;
-				case SymbolKind.TypeParameter: text.Add(symbol.Name.Render(TypeParameter)); return;
+				case SymbolKind.Parameter: text.Add(symbol.Render(null, bold, Parameter)); return;
+				case SymbolKind.Property: text.Add(symbol.Render(alias, bold, Property)); return;
+				case SymbolKind.Local: text.Add(symbol.Render(null, bold, Local)); return;
+				case SymbolKind.TypeParameter: text.Add(symbol.Render(null, bold, TypeParameter)); return;
 				case SymbolKind.PointerType:
-					Format(text, ((IPointerTypeSymbol)symbol).PointedAtType, alias);
+					Format(text, ((IPointerTypeSymbol)symbol).PointedAtType, alias, bold);
 					if (alias == null) {
 						text.Add("*");
 					}
@@ -243,24 +305,23 @@ namespace Codist
 			block.Add(")]");
 		}
 
-		internal void UpdateSyntaxHighlights(IEditorFormatMap formatMap) {
-			System.Diagnostics.Trace.Assert(formatMap != null, "format map is null");
-			Interface = formatMap.GetBrush(Constants.CodeInterfaceName);
-			Class = formatMap.GetBrush(Constants.CodeClassName);
-			Text = formatMap.GetBrush(Constants.CodeString);
-			Enum = formatMap.GetBrush(Constants.CodeEnumName);
-			Delegate = formatMap.GetBrush(Constants.CodeDelegateName);
-			Number = formatMap.GetBrush(Constants.CodeNumber);
-			Struct = formatMap.GetBrush(Constants.CodeStructName);
-			Keyword = formatMap.GetBrush(Constants.CodeKeyword);
-			Namespace = formatMap.GetBrush(Constants.CSharpNamespaceName);
-			Method = formatMap.GetBrush(Constants.CSharpMethodName);
-			Parameter = formatMap.GetBrush(Constants.CSharpParameterName);
-			TypeParameter = formatMap.GetBrush(Constants.CSharpTypeParameterName);
-			Property = formatMap.GetBrush(Constants.CSharpPropertyName);
-			Field = formatMap.GetBrush(Constants.CSharpFieldName);
-			Const = formatMap.GetBrush(Constants.CSharpConstFieldName);
-			Local = formatMap.GetBrush(Constants.CSharpLocalVariableName);
+		static Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>> CreatePropertySetter() {
+			var r = new Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>>(19, StringComparer.OrdinalIgnoreCase);
+			foreach (var item in typeof(SymbolFormatter).GetProperties()) {
+				var ctn = item.GetCustomAttribute<ClassificationTypeAttribute>().ClassificationTypeNames;
+				var a = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(typeof(SymbolFormatter), item.Name);
+				r.Add(item.Name, (f, m) => a(f, f._brushConfigurator != null ? f._brushConfigurator(m.GetBrush(ctn)) : m.GetBrush(ctn)));
+			}
+			return r;
+		}
+
+		void FormatMap_FormatMappingChanged(object sender, FormatItemsEventArgs e) {
+			var m = sender as IEditorFormatMap;
+			foreach (var item in e.ChangedItems) {
+				if (_BrushSetter.TryGetValue(item, out var a)) {
+					a(this, m);
+				}
+			}
 		}
 
 		void AddTypeArguments(InlineCollection text, ImmutableArray<ITypeSymbol> arguments) {
@@ -269,7 +330,7 @@ namespace Codist
 				if (i > 0) {
 					text.Add(", ");
 				}
-				Format(text, arguments[i], null);
+				Format(text, arguments[i], null, false);
 			}
 			text.Add(">");
 		}
@@ -316,7 +377,7 @@ namespace Codist
 				case TypedConstantKind.Type:
 					block.Add("typeof".Render(Keyword));
 					block.Add("(");
-					Format(block, constant.Value as ISymbol, null);
+					Format(block, constant.Value as ISymbol, null, false);
 					block.Add(")");
 					break;
 				case TypedConstantKind.Array:

@@ -55,7 +55,7 @@ namespace Codist
 				if (i > 0) {
 					inlines.Add(", ");
 				}
-				formatter.Format(inlines, parameters[i].Type, null);
+				formatter.Format(inlines, parameters[i].Type, null, false);
 			}
 			inlines.Add(")");
 			return block;
@@ -67,7 +67,7 @@ namespace Codist
 				if (i > 0) {
 					inlines.Add(", ");
 				}
-				formatter.Format(inlines, parameters[i].Type, null);
+				formatter.Format(inlines, parameters[i].Type, null, false);
 				inlines.Add(new Run(" " + parameters[i].Name) {
 					Foreground = formatter.Parameter,
 					FontWeight = i == argIndex ? FontWeights.Bold : FontWeights.Normal
@@ -76,15 +76,15 @@ namespace Codist
 			inlines.Add(")");
 			return block;
 		}
-		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, SymbolFormatter formatter) {
+		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, bool bold, SymbolFormatter formatter) {
 			if (symbol != null) {
-				formatter.Format(block.Inlines, symbol, null);
+				formatter.Format(block.Inlines, symbol, null, bold);
 			}
 			return block;
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, SymbolFormatter formatter) {
 			if (symbol != null) {
-				formatter.Format(block.Inlines, symbol, alias);
+				formatter.Format(block.Inlines, symbol, alias, false);
 			}
 			return block;
 		}

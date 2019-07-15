@@ -197,7 +197,7 @@ namespace Codist
 			}
 			var s = DocumentationCommentId.GetFirstSymbolForDeclarationId(symbol, _Compilation);
 			if (s != null) {
-				_SymbolFormatter.Format(inlines, s, null);
+				_SymbolFormatter.Format(inlines, s, null, false);
 				return;
 			}
 			if (symbol.Length > 2 && symbol[1] == ':') {
