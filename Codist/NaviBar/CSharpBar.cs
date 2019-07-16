@@ -603,7 +603,8 @@ namespace Codist.NaviBar
 				}
 				if (Node.Kind().IsTypeDeclaration() == false) {
 					var span = Node.FullSpan;
-					if (span.Contains(_Bar._SemanticContext.Position) && Node.SyntaxTree.FilePath == _Bar._SemanticContext.Document.FilePath || Node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+					if (span.Contains(_Bar._SemanticContext.Position) && Node.SyntaxTree.FilePath == _Bar._SemanticContext.Document.FilePath
+						|| Node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
 						_Bar._View.SelectNode(Node, Keyboard.Modifiers != ModifierKeys.Control);
 					}
 					else {
@@ -717,6 +718,7 @@ namespace Codist.NaviBar
 				byte regionJustStart = UNDEFINED; // undefined, prevent #endregion show up on top of menu items
 				bool selected = false;
 				int pos = _Bar._View.GetCaretPosition();
+				SyntaxNode lastNode = null;
 				foreach (var child in node.ChildNodes()) {
 					var childKind = child.Kind();
 					if (childKind.IsMemberDeclaration() == false && childKind.IsTypeDeclaration() == false) {
@@ -727,22 +729,21 @@ namespace Codist.NaviBar
 							var d = directives[i];
 							if (d.SpanStart < child.SpanStart) {
 								if (d.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
-									var item = _Menu.Add(d);
-									item.Hint = "#region";
-									item.Content = SetHeader(d, false, false, false);
-									if (isExternal) {
-										item.Type = SymbolItemType.External;
+									if (lastNode == null || lastNode.Span.Contains(d.SpanStart) == false) {
+										ShowStartRegion(d, isExternal);
 									}
 									regionJustStart = TRUE;
 								}
 								else if (d.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
 									// don't show #endregion if preceeding item is #region
 									if (regionJustStart == FALSE) {
-										var item = new SymbolItem(_Menu);
-										_Menu.Add(item);
-										item.Content
-											.Append("#endregion ").Append(d.GetDeclarationSignature())
-											.Foreground = ThemeHelper.SystemGrayTextBrush;
+										if (lastNode == null || lastNode.Span.Contains(d.SpanStart) == false) {
+											var item = new SymbolItem(_Menu);
+											_Menu.Add(item);
+											item.Content
+												.Append("#endregion ").Append(d.GetDeclarationSignature())
+												.Foreground = ThemeHelper.SystemGrayTextBrush;
+										}
 									}
 								}
 								directives.RemoveAt(i);
@@ -768,21 +769,29 @@ namespace Codist.NaviBar
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterList)) {
 							AddParameterList(i.Content, child);
 						}
+						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionInMember) == false) {
+							lastNode = child;
+						}
 					}
 					// a member is added between #region and #endregion
 					regionJustStart = FALSE;
 				}
 				if (directives != null) {
 					foreach (var item in directives) {
-						if (item.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
-							var i = _Menu.Add(item);
-							i.Hint = "#region";
-							i.Content = SetHeader(item, false, false, false);
-							if (isExternal) {
-								i.Type = SymbolItemType.External;
-							}
+						if (item.IsKind(SyntaxKind.RegionDirectiveTrivia)
+							&& (lastNode == null || lastNode.Span.Contains(item.SpanStart) == false)) {
+							ShowStartRegion(item, isExternal);
 						}
 					}
+				}
+			}
+
+			void ShowStartRegion(DirectiveTriviaSyntax d, bool isExternal) {
+				var item = _Menu.Add(d);
+				item.Hint = "#region";
+				item.Content = SetHeader(d, false, false, false);
+				if (isExternal) {
+					item.Type = SymbolItemType.External;
 				}
 			}
 
@@ -849,7 +858,6 @@ namespace Codist.NaviBar
 			}
 
 			protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
-				base.OnContextMenuOpening(e);
 				if (ContextMenu == null) {
 					var m = new CSharpSymbolContextMenu(_Bar._SemanticContext) {
 						SyntaxNode = Node
@@ -867,9 +875,7 @@ namespace Codist.NaviBar
 					m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
 					ContextMenu = m;
 				}
-				if (ContextMenu != null) {
-					ContextMenu.IsOpen = true;
-				}
+				base.OnContextMenuOpening(e);
 			}
 
 			protected override void OnToolTipOpening(ToolTipEventArgs e) {

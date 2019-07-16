@@ -39,10 +39,11 @@
 			this._AutoPropertyValueBox = new System.Windows.Forms.CheckBox();
 			this._ParameterListParamNameBox = new System.Windows.Forms.CheckBox();
 			this._ParameterListBox = new System.Windows.Forms.CheckBox();
+			this._LineOfCodeBox = new System.Windows.Forms.CheckBox();
 			this._RegionItemBox = new System.Windows.Forms.CheckBox();
 			this._PartialClassBox = new System.Windows.Forms.CheckBox();
 			this._FieldValueBox = new System.Windows.Forms.CheckBox();
-			this._LineOfCodeBox = new System.Windows.Forms.CheckBox();
+			this._InMemberRegionItemBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.customGroupBox1.SuspendLayout();
@@ -163,6 +164,7 @@
 			// 
 			// tabPage1
 			// 
+			this.tabPage1.Controls.Add(this._InMemberRegionItemBox);
 			this.tabPage1.Controls.Add(this._AutoPropertyValueBox);
 			this.tabPage1.Controls.Add(this._ParameterListParamNameBox);
 			this.tabPage1.Controls.Add(this._ParameterListBox);
@@ -208,6 +210,16 @@
 			this._ParameterListBox.Text = "Show method parameter";
 			this._ParameterListBox.UseVisualStyleBackColor = true;
 			// 
+			// _LineOfCodeBox
+			// 
+			this._LineOfCodeBox.AutoSize = true;
+			this._LineOfCodeBox.Location = new System.Drawing.Point(15, 181);
+			this._LineOfCodeBox.Name = "_LineOfCodeBox";
+			this._LineOfCodeBox.Size = new System.Drawing.Size(253, 19);
+			this._LineOfCodeBox.TabIndex = 14;
+			this._LineOfCodeBox.Text = "Show line of code statistics";
+			this._LineOfCodeBox.UseVisualStyleBackColor = true;
+			// 
 			// _RegionItemBox
 			// 
 			this._RegionItemBox.AutoSize = true;
@@ -238,15 +250,15 @@
 			this._FieldValueBox.Text = "Show field value";
 			this._FieldValueBox.UseVisualStyleBackColor = true;
 			// 
-			// _LineOfCodeBox
+			// _InMemberRegionItemBox
 			// 
-			this._LineOfCodeBox.AutoSize = true;
-			this._LineOfCodeBox.Location = new System.Drawing.Point(15, 156);
-			this._LineOfCodeBox.Name = "_LineOfCodeBox";
-			this._LineOfCodeBox.Size = new System.Drawing.Size(253, 19);
-			this._LineOfCodeBox.TabIndex = 14;
-			this._LineOfCodeBox.Text = "Show line of code statistics";
-			this._LineOfCodeBox.UseVisualStyleBackColor = true;
+			this._InMemberRegionItemBox.AutoSize = true;
+			this._InMemberRegionItemBox.Location = new System.Drawing.Point(31, 156);
+			this._InMemberRegionItemBox.Name = "_InMemberRegionItemBox";
+			this._InMemberRegionItemBox.Size = new System.Drawing.Size(325, 19);
+			this._InMemberRegionItemBox.TabIndex = 15;
+			this._InMemberRegionItemBox.Text = "Show #region directive in type member";
+			this._InMemberRegionItemBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpNaviBarPage
 			// 
@@ -286,5 +298,6 @@
 		private Controls.CustomGroupBox customGroupBox1;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.CheckBox _LineOfCodeBox;
+		private System.Windows.Forms.CheckBox _InMemberRegionItemBox;
 	}
 }
