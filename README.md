@@ -59,6 +59,8 @@
 
   **Note**: _Font size_ is relative value to editor default font size. Halfly checked checkboxes denote default syntax styles are used.
 
+  **A Side Note for Editor Font**: You may consider subsituting the font used by Visual Studio code editor with professionally designed fonts for programming, for instance, [IBM Plex Mono](https://github.com/IBM/plex), [Fira Code](https://github.com/tonsky/FiraCode), etc. Employing [MacType](https://github.com/snowie2000/mactype) can also enhance systemwide textual display quality, especially for Chinese, Japanese and Korean programmers.
+
   **TIP**: Open a document window before you change the syntax theme or tweak the syntax highlight settings. While you change theme, you can see how the styles change in the code document window simultaneously.
 
 ### My Symbols and External Symbols
