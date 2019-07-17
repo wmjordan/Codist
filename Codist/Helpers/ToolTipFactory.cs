@@ -37,9 +37,8 @@ namespace Codist
 					.Append(symbol.ContainingSymbol.ToDisplayString(WpfHelper.MemberNameFormat), true);
 				var tp = symbol as ITypeParameterSymbol;
 				if (tp.HasConstraint()) {
-					content.Append(" (");
+					content.AppendLine().Append("constraint: ");
 					SymbolFormatter.Empty.ShowTypeConstaints(tp, content);
-					content.Append(")");
 				}
 			}
 			t = symbol.ContainingType;

@@ -242,7 +242,7 @@ namespace Codist
 						block.Append(part.Symbol.Name, Namespace);
 						break;
 					case SymbolDisplayPartKind.TypeParameterName:
-						block.Append(part.Symbol.Name, argIndex == Int32.MinValue, false, TypeParameter);
+						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, TypeParameter);
 						break;
 					case SymbolDisplayPartKind.FieldName:
 						block.AddSymbol(part.Symbol, argIndex == Int32.MinValue, Field);
