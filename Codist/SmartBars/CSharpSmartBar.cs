@@ -112,7 +112,7 @@ namespace Codist.SmartBars
 				else if (nodeKind.IsRegionalDirective()) {
 					AddDirectiveCommands();
 				}
-				else if (isReadOnly == false) {
+				if (isReadOnly == false) {
 					if (token.IsKind(SyntaxKind.TrueKeyword) || token.IsKind(SyntaxKind.FalseKeyword)) {
 						AddCommand(MyToolBar, KnownImageIds.ToggleButton, "Toggle value", ctx => Replace(ctx, v => v == "true" ? "false" : "true", true));
 					}
@@ -135,7 +135,7 @@ namespace Codist.SmartBars
 							});
 						}
 					}
-					else if (IsInvertableOperation(node.Kind())) {
+					else if (IsInvertableOperation(nodeKind)) {
 						AddCommand(MyToolBar, KnownImageIds.Operator, "Invert operator", InvertOperator);
 					}
 					else if (isDesignMode) {
