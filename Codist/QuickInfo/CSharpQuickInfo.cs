@@ -236,8 +236,9 @@ namespace Codist.QuickInfo
 			var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
 			var summary = doc.GetDescription(symbol);
 			XmlDoc inheritDoc = null;
+			#region Summary
 			if (summary == null
-				&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
+					&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
 				summary = doc.GetInheritedDescription(symbol, out inheritDoc);
 				if (inheritDoc != null && summary != null) {
 					tip.Append(new ThemedTipParagraph(new ThemedTipText()
@@ -257,6 +258,8 @@ namespace Codist.QuickInfo
 					tip.Tag = docRenderer.ParagraphCount;
 				}
 			}
+			#endregion
+			#region Type parameter
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.NamedType)) {
 				var typeParams = symbol.GetTypeParameters();
 				if (typeParams.IsDefaultOrEmpty == false) {
@@ -279,9 +282,11 @@ namespace Codist.QuickInfo
 					}
 				}
 			}
+			#endregion
+			#region Returns
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)
-				&& (symbol.Kind == SymbolKind.Method
-				|| symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Delegate)) {
+					&& (symbol.Kind == SymbolKind.Method
+					|| symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Delegate)) {
 				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Returns != null)?.Returns;
 				if (returns != null && returns.FirstNode != null) {
 					tip.Append(new ThemedTipParagraph(KnownImageIds.Return, new ThemedTipText()
@@ -291,9 +296,11 @@ namespace Codist.QuickInfo
 						);
 				}
 			}
+			#endregion
+			#region Remarks
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc)
-				&& symbol.Kind != SymbolKind.Parameter
-				&& symbol.Kind != SymbolKind.TypeParameter) {
+					&& symbol.Kind != SymbolKind.Parameter
+					&& symbol.Kind != SymbolKind.TypeParameter) {
 				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Remarks != null)?.Remarks;
 				if (remarks != null && remarks.FirstNode != null) {
 					tip.Append(new ThemedTipParagraph(KnownImageIds.CommentGroup, new ThemedTipText()
@@ -303,8 +310,10 @@ namespace Codist.QuickInfo
 						.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(remarks, docRenderer)));
 				}
 			}
+			#endregion
+			#region Captured variables
 			if (node is LambdaExpressionSyntax
-				|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
+					|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
 				var ss = node is LambdaExpressionSyntax
 					? node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName)
 					: symbol.GetSyntaxNode();
@@ -321,6 +330,7 @@ namespace Codist.QuickInfo
 					}
 				}
 			}
+			#endregion
 			if (tip.Children.Count > 0) {
 				qiWrapper.OverrideDocumentation(tip);
 			}
@@ -611,6 +621,7 @@ namespace Codist.QuickInfo
 			if (overloads.Length < 2) {
 				return;
 			}
+			var re = method.MethodKind == MethodKind.ReducedExtension;
 			method = method.OriginalDefinition;
 			if (method.ReducedFrom != null) {
 				method = method.ReducedFrom;
@@ -624,15 +635,26 @@ namespace Codist.QuickInfo
 				if (om == null) {
 					continue;
 				}
-				if (om.ReducedFrom != null) {
+				var ore = re && om.MethodKind == MethodKind.ReducedExtension;
+				if (ore) {
+					if (method.Equals(om.ReducedFrom)) {
+						continue;
+					}
+				}
+				else if (om.ReducedFrom != null) {
 					om = om.ReducedFrom;
 				}
 				if (om.Equals(method)) {
 					continue;
 				}
 				var t = new ThemedTipText();
-				t.AddSymbol(om.ReturnType, false, om.ReturnType.Equals(rt) ? SymbolFormatter.SemiTransparent : _SymbolFormatter).Append(" ");
-				if (om.ContainingType != ct) {
+				if (om.MethodKind != MethodKind.Constructor) {
+					t.AddSymbol(om.ReturnType, false, CodeAnalysisHelper.AreEqual(om.ReturnType, rt) ? SymbolFormatter.SemiTransparent : _SymbolFormatter).Append(" ");
+				}
+				if (ore) {
+					t.AddSymbol(om.ContainingType, "this", (om.ContainingType != ct ?  _SymbolFormatter : SymbolFormatter.SemiTransparent).Class).Append(".");
+				}
+				else if (om.ContainingType != ct) {
 					t.AddSymbol(om.ContainingType, false, _SymbolFormatter).Append(".");
 				}
 				t.AddSymbol(om, true, _SymbolFormatter);
@@ -640,7 +662,7 @@ namespace Codist.QuickInfo
 				foreach (var op in om.Parameters) {
 					var mp = mps.FirstOrDefault(p => p.Name == op.Name);
 					if (op.Ordinal == 0) {
-						if (om.IsExtensionMethod) {
+						if (ore == false && om.IsExtensionMethod) {
 							t.Append("this ", _SymbolFormatter.Keyword);
 						}
 					}
@@ -649,7 +671,7 @@ namespace Codist.QuickInfo
 					}
 					if (mp != null) {
 						if (mp.RefKind != op.RefKind
-							|| mp.Type.Equals(op.Type) == false && CodeAnalysisHelper.AreEqual(mp.Type as ITypeParameterSymbol, op.Type as ITypeParameterSymbol) == false
+							|| CodeAnalysisHelper.AreEqual(mp.Type, op.Type) == false
 							|| mp.IsParams != op.IsParams
 							|| mp.IsOptional != op.IsOptional
 							|| mp.HasExplicitDefaultValue != op.HasExplicitDefaultValue) {

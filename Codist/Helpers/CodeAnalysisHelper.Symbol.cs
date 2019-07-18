@@ -1044,7 +1044,11 @@ namespace Codist
 				: 0;
 		}
 
-		public static bool AreEqual(ITypeParameterSymbol a, ITypeParameterSymbol b) {
+		public static bool AreEqual(ITypeSymbol a, ITypeSymbol b) {
+			return a.Equals(b)
+				|| a.TypeKind == TypeKind.TypeParameter && AreEqual(a as ITypeParameterSymbol, b as ITypeParameterSymbol);
+		}
+		static bool AreEqual(ITypeParameterSymbol a, ITypeParameterSymbol b) {
 			if (a == b) {
 				return true;
 			}
