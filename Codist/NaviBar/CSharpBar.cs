@@ -50,6 +50,7 @@ namespace Codist.NaviBar
 			_View.TextBuffer.Changed += TextBuffer_Changed;
 			_View.Selection.SelectionChanged += Update;
 			_View.Closed += ViewClosed;
+			Config.Updated += Config_Updated;
 			Update(this, EventArgs.Empty);
 			if (_SemanticContext.Compilation != null) {
 				foreach(var m in _SemanticContext.Compilation.Members) {
@@ -189,7 +190,7 @@ namespace Codist.NaviBar
 					var newItem = new NodeItem(this, node);
 					if (memberNode == null && node.Kind().IsMemberDeclaration()) {
 						memberNode = newItem;
-						(newItem.Header as TextBlock).FontWeight = FontWeights.Bold;
+						((TextBlock)newItem.Header).FontWeight = FontWeights.Bold;
 						newItem.IsChecked = true;
 						newItem.ReferencedDocs.AddRange(node.FindRelatedTypes(_SemanticContext.SemanticModel, token).Take(5));
 					}
@@ -218,8 +219,21 @@ namespace Codist.NaviBar
 		void ViewClosed(object sender, EventArgs e) {
 			_View.Selection.SelectionChanged -= Update;
 			_View.TextBuffer.Changed -= TextBuffer_Changed;
+			Config.Updated -= Config_Updated;
 			SyncHelper.CancelAndDispose(ref _cancellationSource, false);
 			_View.Closed -= ViewClosed;
+		}
+
+		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
+			if (e.UpdatedFeature == Features.NaviBar) {
+				for (int i = Items.Count - 1; i > 0; i--) {
+					var item = Items[i] as NodeItem;
+					if (item != null) {
+						Items.RemoveAt(i);
+					}
+				}
+				Update(this, EventArgs.Empty);
+			}
 		}
 
 		#region Menu handler
@@ -444,9 +458,11 @@ namespace Codist.NaviBar
 					_Menu.ItemsSource = null;
 				}
 				PopulateTypes();
-				_Note.Clear()
-				   .Append(ThemeHelper.GetImage(KnownImageIds.Code))
-				   .Append(_Bar._View.TextSnapshot.LineCount);
+				_Note.Clear();
+				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
+					  _Note.Append(ThemeHelper.GetImage(KnownImageIds.Code))
+						.Append(_Bar._View.TextSnapshot.LineCount);
+				}
 				_Bar.ShowMenu(this, _Menu);
 			}
 
@@ -622,8 +638,10 @@ namespace Codist.NaviBar
 					footer.Append(ThemeHelper.GetImage(KnownImageIds.OpenDocumentFromCollection))
 						.Append(_PartialCount);
 				}
-				footer.Append(ThemeHelper.GetImage(KnownImageIds.Code))
-					.Append(Node.GetLineSpan().Length + 1);
+				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
+					footer.Append(ThemeHelper.GetImage(KnownImageIds.Code))
+						.Append(Node.GetLineSpan().Length + 1);
+				}
 				_Bar.ShowMenu(this, _Menu);
 				_FilterBox?.FocusTextBox();
 			}
@@ -730,7 +748,7 @@ namespace Codist.NaviBar
 							if (d.SpanStart < child.SpanStart) {
 								if (d.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
 									if (lastNode == null || lastNode.Span.Contains(d.SpanStart) == false) {
-										ShowStartRegion(d, isExternal);
+										AddStartRegion(d, isExternal);
 									}
 									regionJustStart = TRUE;
 								}
@@ -780,13 +798,13 @@ namespace Codist.NaviBar
 					foreach (var item in directives) {
 						if (item.IsKind(SyntaxKind.RegionDirectiveTrivia)
 							&& (lastNode == null || lastNode.Span.Contains(item.SpanStart) == false)) {
-							ShowStartRegion(item, isExternal);
+							AddStartRegion(item, isExternal);
 						}
 					}
 				}
 			}
 
-			void ShowStartRegion(DirectiveTriviaSyntax d, bool isExternal) {
+			void AddStartRegion(DirectiveTriviaSyntax d, bool isExternal) {
 				var item = _Menu.Add(d);
 				item.Hint = "#region";
 				item.Content = SetHeader(d, false, false, false);
