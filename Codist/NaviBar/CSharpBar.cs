@@ -191,6 +191,7 @@ namespace Codist.NaviBar
 					if (memberNode == null && node.Kind().IsMemberDeclaration()) {
 						memberNode = newItem;
 						((TextBlock)newItem.Header).FontWeight = FontWeights.Bold;
+						((TextBlock)newItem.Header).SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.FileTabSelectedTextBrushKey);
 						newItem.IsChecked = true;
 						newItem.ReferencedDocs.AddRange(node.FindRelatedTypes(_SemanticContext.SemanticModel, token).Take(5));
 					}
@@ -934,7 +935,7 @@ namespace Codist.NaviBar
 				_Bar = bar;
 				_SyntaxTree = syntaxTree;
 				Header = new ThemedMenuText(syntaxTree.GetOriginalName());
-				Icon = ThemeHelper.GetImage(KnownImageIds.CSFileNode);
+				Icon = ThemeHelper.GetImage(KnownImageIds.GoToDefinition);
 				Opacity = 0.8;
 			}
 
