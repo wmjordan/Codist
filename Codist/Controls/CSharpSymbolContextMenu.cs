@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 
 namespace Codist.Controls
@@ -112,7 +109,7 @@ namespace Codist.Controls
 			});
 		}
 
-		MenuItem CreateItem(int imageId, string title) {
+		static MenuItem CreateItem(int imageId, string title) {
 			return new MenuItem {
 				Icon = ThemeHelper.GetImage(imageId),
 				Header = new ThemedMenuText { Text = title }
@@ -178,13 +175,13 @@ namespace Codist.Controls
 		void CreateCommandsForReturnTypeCommand() {
 			var type = _Symbol.GetReturnType();
 			if (type != null && type.SpecialType == SpecialType.None && type.IsTupleType == false) {
-				type = type.ResolveElementType();
-				Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members of " + type.Name + type.GetParameterString() + "...", () => FindMembers(type, _SemanticContext)));
+				var et = type.ResolveElementType();
+				Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members of " + et.Name + et.GetParameterString() + "...", () => FindMembers(et, _SemanticContext)));
 				if (type.IsStatic == false) {
 					Items.Add(CreateItem(KnownImageIds.ExtensionMethod, "Find Extensions for " + type.Name + type.GetParameterString() + "...", () => FindExtensionMethods(type, _SemanticContext)));
 				}
-				if (type.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-					Items.Add(CreateItem(KnownImageIds.GoToDeclaration, "Go to " + type.Name + type.GetParameterString(), () => type.GoToSource()));
+				if (et.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
+					Items.Add(CreateItem(KnownImageIds.GoToDeclaration, "Go to " + et.Name + et.GetParameterString(), () => et.GoToSource()));
 				}
 			}
 		}
