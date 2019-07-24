@@ -68,6 +68,7 @@ namespace Codist.QuickInfo
 			//look for occurrences of our QuickInfo words in the span
 			var token = unitCompilation.FindToken(subjectTriggerPoint, true);
 			var skipTriggerPointCheck = false;
+			SyntaxNode node;
 			switch (token.Kind()) {
 				case SyntaxKind.WhitespaceTrivia:
 				case SyntaxKind.SingleLineCommentTrivia:
@@ -118,11 +119,19 @@ namespace Codist.QuickInfo
 				default:
 					if (token.Span.Contains(subjectTriggerPoint, true) == false
 						|| token.IsReservedKeyword()) {
+						node = unitCompilation.FindNode(token.Span, false, false);
+						if (node is StatementSyntax) {
+							ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
+						}
+						if (qiContent.Count > 0) {
+							applicableToSpan = currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive);
+							return;
+						}
 						goto EXIT;
 					}
 					break;
 			}
-			var node = unitCompilation.FindNode(token.Span, true, true);
+			node = unitCompilation.FindNode(token.Span, true, true);
 			if (node == null
 				|| skipTriggerPointCheck == false && node.Span.Contains(subjectTriggerPoint.Position, true) == false) {
 				goto EXIT;
@@ -165,6 +174,9 @@ namespace Codist.QuickInfo
 			}
 			if (symbol == null) {
 				ShowMiscInfo(qiContent, currentSnapshot, node);
+				if (node.IsKind(SyntaxKind.Block) || node.IsKind(SyntaxKind.SwitchStatement)) {
+					ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
+				}
 				goto RETURN;
 			}
 
@@ -198,7 +210,7 @@ namespace Codist.QuickInfo
 				: null;
 			return;
 			EXIT:
-			qiWrapper?.LimitQuickInfoItemSize(qiContent);
+			qiWrapper.LimitQuickInfoItemSize(qiContent);
 			applicableToSpan = null;
 		}
 
@@ -440,6 +452,47 @@ namespace Codist.QuickInfo
 
 		}
 
+		static void ShowBlockInfo(IList<object> qiContent, ITextSnapshot textSnapshot, SyntaxNode node, SemanticModel semanticModel) {
+			var lines = textSnapshot.GetLineSpan(node.Span).Length + 1;
+			if (lines > 100) {
+				qiContent.Add(new ThemedTipText(lines + " lines", true));
+			}
+			else if (lines > 1) {
+				qiContent.Add(lines + " lines");
+			}
+			var df = semanticModel.AnalyzeDataFlow(node);
+			var vd = df.VariablesDeclared;
+			if (vd.IsEmpty == false) {
+				var p = new ThemedTipText("Declared variable:", true).AppendLine();
+				var s = false;
+				foreach (var item in vd) {
+					if (s) {
+						p.Append(", ");
+					}
+					p.AddSymbol(item, false, _SymbolFormatter.Local);
+					s = true;
+				}
+				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.LocalVariable, p)));
+			}
+			vd = df.DataFlowsIn;
+			if (vd.IsEmpty == false) {
+				var p = new ThemedTipText("Read variable:", true).AppendLine();
+				var s = false;
+				foreach (var item in vd) {
+					if (s) {
+						p.Append(", ");
+					}
+					if (item.IsImplicitlyDeclared) {
+						p.Append(item.Name);
+					}
+					else {
+						p.AddSymbol(item, false, _SymbolFormatter);
+					}
+					s = true;
+				}
+				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, p)));
+			}
+		}
 		static void ShowMiscInfo(IList<object> qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
 			StackPanel infoBox = null;
 			var nodeKind = node.Kind();
@@ -465,15 +518,6 @@ namespace Codist.QuickInfo
 			else if (nodeKind == SyntaxKind.StringLiteralExpression) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
 					infoBox = ShowStringInfo(node.GetFirstToken().ValueText);
-				}
-			}
-			else if (nodeKind == SyntaxKind.Block || nodeKind.IsDeclaration()) {
-				var lines = currentSnapshot.GetLineSpan(node.Span).Length + 1;
-				if (lines > 100) {
-					qiContent.Add(new ThemedTipText { Text = lines + " lines", FontWeight = FontWeights.Bold });
-				}
-				else if (lines > 1) {
-					qiContent.Add(lines + " lines");
 				}
 			}
 			if (infoBox != null) {
