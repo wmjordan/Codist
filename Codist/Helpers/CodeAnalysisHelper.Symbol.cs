@@ -264,7 +264,8 @@ namespace Codist
 				}
 				var s = semanticModel.GetSymbol(item, cancellationToken);
 				if (s != null) {
-					if (s.Kind == SymbolKind.NamedType && item.Parent.IsKind(SyntaxKind.SimpleMemberAccessExpression)) {
+					if (s.Kind == SymbolKind.NamedType && item.Parent.IsKind(SyntaxKind.SimpleMemberAccessExpression)
+						|| s.Kind == SymbolKind.Method && ((IMethodSymbol)s).IsExtensionMethod) {
 						continue;
 					}
 					var t = s.ContainingType ?? (s.Kind == SymbolKind.NamedType ? s : null);
