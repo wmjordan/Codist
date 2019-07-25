@@ -693,7 +693,8 @@ namespace Codist.NaviBar
 				if (sm != _Bar._SemanticContext.SemanticModel) {
 					_Menu.Clear();
 					Node = _Bar._SemanticContext.RelocateDeclarationNode(Node);
-					await AddItemsAsync(node, cancellationToken);
+					await AddItemsAsync(Node, cancellationToken);
+					_Menu.RefreshItemsSource(true);
 					return;
 				}
 				// select node item which contains caret

@@ -70,7 +70,10 @@ namespace Codist.Controls
 		public void Clear() {
 			_Symbols.Clear();
 		}
-		public void RefreshItemsSource() {
+		public void RefreshItemsSource(bool force = false) {
+			if (force) {
+				ItemsSource = null;
+			}
 			if (_Filter != null) {
 				FilteredItems.Filter = _Filter;
 				ItemsSource = FilteredItems;
@@ -647,7 +650,7 @@ namespace Codist.Controls
 			if (IsExternal || SyntaxNode == null || SyntaxNode.FullSpan.Contains(position, true) == false) {
 				return false;
 			}
-			Container.SelectedItem = this;
+			Container.SelectedValue = this;
 			return true;
 		}
 		static ThemedMenuText CreateContentForSymbol(ISymbol symbol, bool includeType, bool includeParameter) {
@@ -687,6 +690,10 @@ namespace Codist.Controls
 					Symbol = symbol;
 				}
 			}
+		}
+
+		public override string ToString() {
+			return Content.GetText();
 		}
 	}
 

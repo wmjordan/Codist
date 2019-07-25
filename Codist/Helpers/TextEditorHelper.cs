@@ -304,8 +304,9 @@ namespace Codist
 			var sNode = sourceNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? sourceNode.Parent.Parent : sourceNode;
 			var sSpan = sNode.GetSematicSpan(true);
 			var target = before ? tSpan.Start : tSpan.End;
-
-			if (targetNode.SyntaxTree.FilePath == sourceNode.SyntaxTree.FilePath) {
+			var sPath = sourceNode.SyntaxTree.FilePath;
+			var tPath = targetNode.SyntaxTree.FilePath;
+			if (String.Equals(sPath, tPath, StringComparison.OrdinalIgnoreCase)) {
 				using (var edit = view.TextBuffer.CreateEdit()) {
 					edit.Insert(target, view.TextSnapshot.GetText(sSpan));
 					if (copy == false) {
@@ -317,25 +318,46 @@ namespace Codist
 					}
 				}
 			}
-			else {
-				using (var edit = view.TextBuffer.CreateEdit()) {
-					if (copy == false) {
+			else if (String.Equals(sPath, CodistPackage.DTE.ActiveDocument.FullName, StringComparison.OrdinalIgnoreCase)) {
+				// drag & drop from current file to external file
+				if (copy == false) {
+					using (var edit = view.TextBuffer.CreateEdit()) {
 						edit.Delete(sSpan.Start, sSpan.Length);
-					}
-					if (edit.HasEffectiveChanges) {
-						edit.Apply();
+						if (edit.HasEffectiveChanges) {
+							edit.Apply();
+						}
 					}
 				}
-				CodistPackage.DTE.OpenFile(targetNode.SyntaxTree.FilePath, d => {
-					view = GetActiveWpfDocumentView();
-					using (var edit = view.TextBuffer.CreateEdit()) {
+				CodistPackage.DTE.OpenFile(tPath, d => {
+					var v = GetActiveWpfDocumentView();
+					using (var edit = v.TextBuffer.CreateEdit()) {
 						edit.Insert(target, sNode.ToFullString());
 						if (edit.HasEffectiveChanges) {
 							edit.Apply();
-							view.SelectSpan(target, sSpan.Length);
+							v.SelectSpan(target, sSpan.Length);
 						}
 					}
 				});
+			}
+			else {
+				// drag & drop from external file to current file
+				if (copy == false) {
+					CodistPackage.DTE.OpenFile(sPath, d => {
+						using (var edit = GetActiveWpfDocumentView().TextBuffer.CreateEdit()) {
+							edit.Delete(sSpan.Start, sSpan.Length);
+							if (edit.HasEffectiveChanges) {
+								edit.Apply();
+							}
+						}
+					});
+				}
+				using (var edit = view.TextBuffer.CreateEdit()) {
+					edit.Insert(target, sNode.ToFullString());
+					if (edit.HasEffectiveChanges) {
+						edit.Apply();
+						view.SelectSpan(target, sSpan.Length);
+					}
+				}
 			}
 		}
 
