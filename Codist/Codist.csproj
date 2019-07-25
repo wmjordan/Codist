@@ -105,6 +105,7 @@
     <Compile Include="Controls\TitleLabel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Helpers\CodeAnalysisHelper.SymbolFinder.cs" />
     <Compile Include="Helpers\SyncHelper.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.Document.cs" />
     <Compile Include="Helpers\ColorHelper.cs" />
@@ -648,7 +649,7 @@
   <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets')" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_BuildVersioningStyle="None.None.None.Increment" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
+      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.None.Increment" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

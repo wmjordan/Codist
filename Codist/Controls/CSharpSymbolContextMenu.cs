@@ -187,29 +187,10 @@ namespace Codist.Controls
 		}
 
 		static void FindCallers(ISymbol symbol, SemanticContext context) {
-			var doc = context.Document;
-			var docs = System.Collections.Immutable.ImmutableHashSet.CreateRange(doc.Project.GetRelatedProjectDocuments());
-			List<SymbolCallerInfo> callers;
-			switch (symbol.Kind) {
-				case SymbolKind.Method:
-				case SymbolKind.Property:
-				case SymbolKind.Event:
-					callers = SyncHelper.RunSync(() => SymbolFinder.FindCallersAsync(symbol, doc.Project.Solution, docs, default)).ToList();
-					break;
-				case SymbolKind.NamedType:
-					var tempResults = new HashSet<SymbolCallerInfo>(SymbolCallerInfoComparer.Instance);
-					SyncHelper.RunSync(async () => {
-						foreach (var item in (symbol as INamedTypeSymbol).InstanceConstructors) {
-							foreach (var c in await SymbolFinder.FindCallersAsync(item, doc.Project.Solution, docs, default).ConfigureAwait(false)) {
-								tempResults.Add(c);
-							}
-						}
-					});
-					(callers = new List<SymbolCallerInfo>(tempResults.Count)).AddRange(tempResults);
-					break;
-				default: return;
+			var callers = symbol.FindCallers(context.Document.Project);
+			if (callers == null) {
+				return;
 			}
-			callers.Sort((a, b) => CodeAnalysisHelper.CompareSymbol(a.CallingSymbol, b.CallingSymbol));
 			var m = new SymbolMenu(context);
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
@@ -445,19 +426,6 @@ namespace Codist.Controls
 
 			public abstract bool QueryStatus();
 			public abstract void Execute();
-		}
-
-		sealed class SymbolCallerInfoComparer : IEqualityComparer<SymbolCallerInfo>
-		{
-			internal static readonly SymbolCallerInfoComparer Instance = new SymbolCallerInfoComparer();
-
-			public bool Equals(SymbolCallerInfo x, SymbolCallerInfo y) {
-				return x.CallingSymbol == y.CallingSymbol;
-			}
-
-			public int GetHashCode(SymbolCallerInfo obj) {
-				return obj.CallingSymbol.GetHashCode();
-			}
 		}
 	}
 
