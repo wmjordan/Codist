@@ -875,7 +875,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowMembers(INamedTypeSymbol type, ThemedTipDocument doc, bool isInherit) {
-			var members = new List<ISymbol>(type.GetMembers().Where(m => m.CanBeReferencedByName));
+			var members = new List<ISymbol>(type.GetMembers().RemoveAll(m => (m as IMethodSymbol)?.AssociatedSymbol != null || m.IsImplicitlyDeclared));
 			members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
 			foreach (var member in members) {
 				var t = new ThemedTipText();
@@ -1144,7 +1144,7 @@ namespace Codist.QuickInfo
 					.AddParameters(om.Parameters, _SymbolFormatter, argIndex);
 				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Parameter, content));
 				if (paramDoc != null) {
-					content.Append("\n" + argName, true, true, _SymbolFormatter.Parameter).Append(": ");
+					content.Append("\n" + argName, true, false, _SymbolFormatter.Parameter).Append(": ");
 					new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, om).Render(paramDoc, content.Inlines);
 				}
 				if (m.IsGenericMethod) {
