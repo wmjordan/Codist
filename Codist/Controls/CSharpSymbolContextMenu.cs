@@ -145,11 +145,11 @@ namespace Codist.Controls
 				if (ctor != null) {
 					var symbol = _SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(ctor);
 					if (symbol != null) {
-						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallers(symbol, _SemanticContext)));
+						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallersExt(symbol, _SemanticContext)));
 					}
 				}
 				else if (t.InstanceConstructors.Length > 0) {
-					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", () => FindCallers(t, _SemanticContext)));
+					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", () => FindCallersExt(t, _SemanticContext)));
 				}
 			}
 			Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(t, _SemanticContext)));

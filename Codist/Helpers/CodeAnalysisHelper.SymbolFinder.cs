@@ -306,7 +306,18 @@ namespace Codist
 				foreach (var docRefs in sr.Locations.GroupBy(l => l.Document)) {
 					var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 					foreach (var location in docRefs) {
-						var s = sm.GetEnclosingSymbol(location.Location.SourceSpan.Start, cancellationToken);
+						var n = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(location.Location.SourceSpan);
+						if (n.Span.Contains(location.Location.SourceSpan.Start) == false) {
+							continue;
+						}
+						n = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().IsDeclaration());
+						if (n == null) {
+							continue;
+						}
+						var s = sm.GetSymbol(n, cancellationToken);
+						if (s == null) {
+							continue;
+						}
 						if (s.Kind == SymbolKind.Method) {
 							switch (((IMethodSymbol)s).MethodKind) {
 								case MethodKind.AnonymousFunction:
@@ -329,7 +340,8 @@ namespace Codist
 					}
 				}
 			}
-			var r = d.ToList();
+			var r = new List<KeyValuePair<ISymbol, List<ReferenceLocation>>>(d.Count);
+			r.AddRange(d);
 			r.Sort((x, y) => CompareSymbol(x.Key, y.Key));
 			return r;
 		}
