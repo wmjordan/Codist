@@ -67,17 +67,25 @@ namespace Codist.Controls
 				return;
 			}
 
-			const double tolerance = 60;
-			const double offset = 20;
+			const double tolerance = 30;
 			double verticalPos = e.GetPosition(container).Y;
 
-			if (verticalPos < tolerance) // Top of visible list? 
+			if (verticalPos < tolerance) { // Top of visible list? 
+				scrollViewer.LineUp();
+				scrollViewer.LineUp();
+			}
+			else if (verticalPos < tolerance + tolerance)
 			{
-				scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - offset); //Scroll up. 
+				scrollViewer.LineUp();
 			}
 			else if (verticalPos > container.ActualHeight - tolerance) //Bottom of visible list? 
 			{
-				scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + offset); //Scroll down.     
+				scrollViewer.LineDown();
+				scrollViewer.LineDown();
+			}
+			else if (verticalPos > container.ActualHeight - (tolerance + tolerance))
+			{
+				scrollViewer.LineDown();
 			}
 		}
 
