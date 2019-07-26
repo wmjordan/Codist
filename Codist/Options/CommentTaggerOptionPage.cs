@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Reflection;
 using System.Windows.Forms;
 using AppHelpers;
 using Codist.Classifiers;
@@ -128,7 +129,7 @@ namespace Codist.Options
 			_StyleBox.Items.Clear();
 			var t = typeof(CommentStyleTypes);
 			foreach (var item in Enum.GetNames(t)) {
-				var d = t.GetClassificationType(item);
+				var d = t.GetField(item).GetCustomAttribute<Microsoft.VisualStudio.Text.Classification.ClassificationTypeAttribute>()?.ClassificationTypeNames;
 				if (d == null || d.StartsWith(Constants.CodistPrefix, StringComparison.Ordinal) == false) {
 					continue;
 				}

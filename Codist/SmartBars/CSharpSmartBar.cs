@@ -458,17 +458,5 @@ namespace Codist.SmartBars
 		bool UpdateSemanticModel() {
 			return SyncHelper.RunSync(() => _Context.UpdateAsync(View.Selection.Start.Position, default));
 		}
-		sealed class SymbolCallerInfoComparer : IEqualityComparer<SymbolCallerInfo>
-		{
-			internal static readonly SymbolCallerInfoComparer Instance = new SymbolCallerInfoComparer();
-
-			public bool Equals(SymbolCallerInfo x, SymbolCallerInfo y) {
-				return x.CallingSymbol == y.CallingSymbol;
-			}
-
-			public int GetHashCode(SymbolCallerInfo obj) {
-				return obj.CallingSymbol.GetHashCode();
-			}
-		}
 	}
 }

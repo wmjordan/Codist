@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Reflection;
 using System.Windows.Forms;
-using Microsoft.VisualStudio.Text.Classification;
 using GdiColor = System.Drawing.Color;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
@@ -138,11 +136,6 @@ namespace Codist
 			pageContent.Dock = DockStyle.Fill;
 			page.Controls.Add(pageContent);
 			return tabs;
-		}
-		public static string GetClassificationType(this Type type, string field) {
-			var f = type.GetField(field);
-			var d = f.GetCustomAttribute<ClassificationTypeAttribute>();
-			return d?.ClassificationTypeNames;
 		}
 	}
 }

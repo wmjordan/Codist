@@ -37,7 +37,7 @@ namespace Codist
 
 	static partial class CodeAnalysisHelper
 	{
-		#region Symbol finder
+		#region Symbol getter
 		public static ISymbol GetSymbol(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
 			return semanticModel.GetSymbolInfo(node, cancellationToken).Symbol
 				?? semanticModel.GetDeclaredSymbol(node, cancellationToken)
@@ -72,30 +72,6 @@ namespace Codist
 			var info = semanticModel.GetSymbolInfo(node, cancellationToken);
 			return info.Symbol
 				?? (info.CandidateSymbols.Length > 0 ? info.CandidateSymbols[0] : null);
-		}
-
-		static ISymbol GetEnclosingSymbol(SemanticModel semanticModel, ReferenceLocation reference) {
-			for (var current = semanticModel.GetEnclosingSymbol(reference.Location.SourceSpan.Start); current != null; current = current.ContainingSymbol) {
-				switch (current.Kind) {
-					case SymbolKind.Field:
-					case SymbolKind.Property:
-						return current;
-					case SymbolKind.Method:
-						var method = (IMethodSymbol)current;
-						switch (method.MethodKind) {
-							case MethodKind.AnonymousFunction:
-								return null;
-							case MethodKind.PropertyGet:
-							case MethodKind.PropertySet:
-							case MethodKind.EventAdd:
-							case MethodKind.EventRemove:
-								return method.AssociatedSymbol;
-							default:
-								return method;
-						}
-				}
-			}
-			return null;
 		}
 		#endregion
 
