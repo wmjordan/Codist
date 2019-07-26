@@ -101,6 +101,21 @@ namespace Codist
 			return members;
 		}
 
+		public static async Task<List<INamedTypeSymbol>> FindSubInterfaceAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
+			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
+			var r = new List<INamedTypeSymbol>();
+			foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+				if (item.TypeKind != TypeKind.Interface || item == type) {
+					continue;
+				}
+				var inf = item as INamedTypeSymbol;
+				if (inf.AllInterfaces.Contains(type)) {
+					r.Add(inf);
+				}
+			}
+			return r;
+		}
+
 		public static async Task<List<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var members = new List<IMethodSymbol>(10);
@@ -277,16 +292,46 @@ namespace Codist
 			var a = result.ToArray();
 			Array.Sort(a, (x, y) => {
 				var i = y.Value.CompareTo(x.Value);
-				if (i != 0) {
-					return i;
-				}
-				i = String.CompareOrdinal(x.Key.ContainingType?.Name, y.Key.ContainingType?.Name);
-				if (i != 0) {
-					return i;
-				}
-				return String.CompareOrdinal(x.Key.Name, y.Key.Name);
+				return i != 0 ? i
+					: (i = String.CompareOrdinal(x.Key.ContainingType?.Name, y.Key.ContainingType?.Name)) != 0 ? i
+					: String.CompareOrdinal(x.Key.Name, y.Key.Name);
 			});
 			return a;
+		}
+
+		public static async Task<List<KeyValuePair<ISymbol, List<ReferenceLocation>>>> FindCallersAsync(this ISymbol symbol, Project project, CancellationToken cancellationToken = default) {
+			var docs = ImmutableHashSet.CreateRange(project.GetRelatedProjectDocuments());
+			var d = new Dictionary<ISymbol, List<ReferenceLocation>>(5);
+			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, docs, cancellationToken).ConfigureAwait(false)) {
+				foreach (var docRefs in sr.Locations.GroupBy(l => l.Document)) {
+					var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+					foreach (var location in docRefs) {
+						var s = sm.GetEnclosingSymbol(location.Location.SourceSpan.Start, cancellationToken);
+						if (s.Kind == SymbolKind.Method) {
+							switch (((IMethodSymbol)s).MethodKind) {
+								case MethodKind.AnonymousFunction:
+									s = s.ContainingSymbol;
+									break;
+								case MethodKind.EventAdd:
+								case MethodKind.EventRemove:
+								case MethodKind.PropertyGet:
+								case MethodKind.PropertySet:
+									s = ((IMethodSymbol)s).AssociatedSymbol;
+									break;
+							}
+						}
+						if (d.TryGetValue(s, out var l)) {
+							l.Add(location);
+						}
+						else {
+							d[s] = new List<ReferenceLocation>() { location };
+						}
+					}
+				}
+			}
+			var r = d.ToList();
+			r.Sort((x, y) => CompareSymbol(x.Key, y.Key));
+			return r;
 		}
 
 		static Comparer<ISymbol> CreateSymbolComparer() {

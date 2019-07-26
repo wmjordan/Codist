@@ -52,7 +52,7 @@ namespace Codist.Controls
 				case SymbolKind.Method:
 				case SymbolKind.Property:
 				case SymbolKind.Event:
-					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallers(_Symbol, _SemanticContext)));
+					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallersExt(_Symbol, _SemanticContext)));
 					if (_Symbol.MayHaveOverride()) {
 						Items.Add(CreateItem(KnownImageIds.OverloadBehavior, "Find Overrides...", () => FindOverrides(_Symbol, _SemanticContext)));
 					}
@@ -70,6 +70,9 @@ namespace Codist.Controls
 					}
 					break;
 				case SymbolKind.Field:
+					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallersExt(_Symbol, _SemanticContext)));
+					CreateCommandsForReturnTypeCommand();
+					break;
 				case SymbolKind.Local:
 				case SymbolKind.Parameter:
 					CreateCommandsForReturnTypeCommand();
@@ -202,6 +205,27 @@ namespace Codist.Controls
 				i.Location = caller.Locations.FirstOrDefault();
 				if (s.ContainingType != containerType) {
 					i.Hint = s.ContainingType.ToDisplayString(WpfHelper.MemberNameFormat);
+				}
+			}
+			m.Show();
+		}
+
+		static void FindCallersExt(ISymbol symbol, SemanticContext context) {
+			var callers = SyncHelper.RunSync(()=> symbol.FindCallersAsync(context.Document.Project));
+			if (callers == null) {
+				return;
+			}
+			var m = new SymbolMenu(context);
+			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
+				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
+				.Append(" callers");
+			var containerType = symbol.ContainingType;
+			foreach (var caller in callers) {
+				var s = caller.Key;
+				var i = m.Menu.Add(s, false);
+				i.Location = caller.Value.FirstOrDefault().Location;
+				if (s.ContainingType != containerType) {
+					i.Hint = (s.ContainingType ?? s).ToDisplayString(WpfHelper.MemberNameFormat);
 				}
 			}
 			m.Show();
