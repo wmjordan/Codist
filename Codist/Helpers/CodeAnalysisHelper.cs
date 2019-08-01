@@ -41,6 +41,37 @@ namespace Codist
 			return false;
 		}
 
+		public static DeclarationCategory GetDeclarationCategory(this SyntaxKind kind) {
+			switch (kind) {
+				case SyntaxKind.ClassDeclaration:
+				case SyntaxKind.DelegateDeclaration:
+				case SyntaxKind.EnumDeclaration:
+				case SyntaxKind.EventDeclaration:
+				case SyntaxKind.InterfaceDeclaration:
+				case SyntaxKind.StructDeclaration:
+					return DeclarationCategory.Type;
+				case SyntaxKind.FieldDeclaration:
+				case SyntaxKind.MethodDeclaration:
+				case SyntaxKind.ConstructorDeclaration:
+				case SyntaxKind.DestructorDeclaration:
+				case SyntaxKind.EventFieldDeclaration:
+				case SyntaxKind.PropertyDeclaration:
+				case SyntaxKind.IndexerDeclaration:
+				case SyntaxKind.OperatorDeclaration:
+				case SyntaxKind.ConversionOperatorDeclaration:
+				case SyntaxKind.EnumMemberDeclaration:
+					return DeclarationCategory.Member;
+				case SyntaxKind.NamespaceDeclaration:
+					return DeclarationCategory.Namespace;
+				case SyntaxKind.LocalDeclarationStatement:
+				case SyntaxKind.VariableDeclaration:
+				case SyntaxKind.LocalFunctionStatement:
+				case SyntaxKind.VariableDeclarator:
+					return DeclarationCategory.Local;
+			}
+			return DeclarationCategory.None;
+		}
+
 		public static bool IsTypeOrNamespaceDeclaration(this SyntaxKind kind) {
 			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
@@ -909,13 +940,15 @@ namespace Codist
 			}
 			return false;
 		}
+	}
 
-		public static bool IsType(this CodeMemberType type) {
-			return type > CodeMemberType.Root && type < CodeMemberType.Member;
-		}
-
-		public static bool IsMember(this CodeMemberType type) {
-			return type > CodeMemberType.Member && type < CodeMemberType.Other;
-		}
+	[Flags]
+	enum DeclarationCategory
+	{
+		None,
+		Type = 1,
+		Namespace = 1 << 1,
+		Member = 1 << 2,
+		Local = 1 << 3
 	}
 }

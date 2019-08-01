@@ -40,4 +40,15 @@ namespace Codist
     {
         Root, Class, Interface, Struct, Type = Struct, Enum, Delegate, Member, Constructor, Property, Method, Field, Event, Other, Unknown
     }
+
+	static class CodeMemberTypeExtensions
+	{
+		public static bool IsType(this CodeMemberType type) {
+			return type > CodeMemberType.Root && type < CodeMemberType.Member;
+		}
+
+		public static bool IsMember(this CodeMemberType type) {
+			return type > CodeMemberType.Member && type < CodeMemberType.Other;
+		}
+	}
 }

@@ -52,7 +52,9 @@ namespace Codist.Controls
 				case SymbolKind.Method:
 				case SymbolKind.Property:
 				case SymbolKind.Event:
-					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallersExt(_Symbol, _SemanticContext)));
+					if (_Symbol.Kind != SymbolKind.Method || IsExternallyCallable(((IMethodSymbol)_Symbol).MethodKind)) {
+						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallers(_Symbol, _SemanticContext)));
+					}
 					if (_Symbol.MayHaveOverride()) {
 						Items.Add(CreateItem(KnownImageIds.OverloadBehavior, "Find Overrides...", () => FindOverrides(_Symbol, _SemanticContext)));
 					}
@@ -70,7 +72,7 @@ namespace Codist.Controls
 					}
 					break;
 				case SymbolKind.Field:
-					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallersExt(_Symbol, _SemanticContext)));
+					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallers(_Symbol, _SemanticContext)));
 					CreateCommandsForReturnTypeCommand();
 					break;
 				case SymbolKind.Local:
@@ -91,6 +93,17 @@ namespace Codist.Controls
 			//}
 			//Items.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, _Symbol, "No reference found", FindReferences));
 			Items.Add(CreateItem(KnownImageIds.FindSymbol, "Find Symbol with Name " + _Symbol.Name + "...", () => FindSymbolWithName(_Symbol, _SemanticContext)));
+
+			bool IsExternallyCallable(MethodKind methodKind) {
+				switch (methodKind) {
+					case MethodKind.AnonymousFunction:
+					case MethodKind.LocalFunction:
+					case MethodKind.Destructor:
+					case MethodKind.StaticConstructor:
+						return false;
+				}
+				return true;
+			}
 		}
 
 		public void AddFindAllReferencesCommand() {
@@ -145,11 +158,11 @@ namespace Codist.Controls
 				if (ctor != null) {
 					var symbol = _SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(ctor);
 					if (symbol != null) {
-						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallersExt(symbol, _SemanticContext)));
+						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallers(symbol, _SemanticContext)));
 					}
 				}
 				else if (t.InstanceConstructors.Length > 0) {
-					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", () => FindCallersExt(t, _SemanticContext)));
+					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", () => FindCallers(t, _SemanticContext)));
 				}
 			}
 			Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(t, _SemanticContext)));
@@ -190,27 +203,6 @@ namespace Codist.Controls
 		}
 
 		static void FindCallers(ISymbol symbol, SemanticContext context) {
-			var callers = symbol.FindCallers(context.Document.Project);
-			if (callers == null) {
-				return;
-			}
-			var m = new SymbolMenu(context);
-			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
-				.Append(" callers");
-			var containerType = symbol.ContainingType;
-			foreach (var caller in callers) {
-				var s = caller.CallingSymbol;
-				var i = m.Menu.Add(s, false);
-				i.Location = caller.Locations.FirstOrDefault();
-				if (s.ContainingType != containerType) {
-					i.Hint = s.ContainingType.ToDisplayString(WpfHelper.MemberNameFormat);
-				}
-			}
-			m.Show();
-		}
-
-		static void FindCallersExt(ISymbol symbol, SemanticContext context) {
 			var callers = SyncHelper.RunSync(()=> symbol.FindCallersAsync(context.Document.Project));
 			if (callers == null) {
 				return;

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.FindSymbols;
+using AppHelpers;
 
 namespace Codist
 {
@@ -302,7 +303,19 @@ namespace Codist
 		public static async Task<List<KeyValuePair<ISymbol, List<ReferenceLocation>>>> FindCallersAsync(this ISymbol symbol, Project project, CancellationToken cancellationToken = default) {
 			var docs = ImmutableHashSet.CreateRange(project.GetRelatedProjectDocuments());
 			var d = new Dictionary<ISymbol, List<ReferenceLocation>>(5);
+			var m = symbol.Kind == SymbolKind.NamedType && ((ITypeSymbol)symbol).TypeKind == TypeKind.Class ? MethodKind.Constructor : MethodKind.Ordinary;
+			await FindCallersAsync(symbol, project, docs, m, d, cancellationToken).ConfigureAwait(false);
+			var r = new List<KeyValuePair<ISymbol, List<ReferenceLocation>>>(d.Count);
+			r.AddRange(d);
+			r.Sort((x, y) => CompareSymbol(x.Key, y.Key));
+			return r;
+		}
+
+		static async Task FindCallersAsync(ISymbol symbol, Project project, ImmutableHashSet<Document> docs, MethodKind methodKind, Dictionary<ISymbol, List<ReferenceLocation>> results, CancellationToken cancellationToken) {
 			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, docs, cancellationToken).ConfigureAwait(false)) {
+				if (methodKind == MethodKind.Constructor && (sr.Definition.Kind != SymbolKind.Method || ((IMethodSymbol)sr.Definition).MethodKind != MethodKind.Constructor)) {
+					continue;
+				}
 				foreach (var docRefs in sr.Locations.GroupBy(l => l.Document)) {
 					var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 					foreach (var location in docRefs) {
@@ -310,7 +323,7 @@ namespace Codist
 						if (n.Span.Contains(location.Location.SourceSpan.Start) == false) {
 							continue;
 						}
-						n = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().IsDeclaration());
+						n = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().GetDeclarationCategory().HasAnyFlag(DeclarationCategory.Member | DeclarationCategory.Type));
 						if (n == null) {
 							continue;
 						}
@@ -331,19 +344,15 @@ namespace Codist
 									break;
 							}
 						}
-						if (d.TryGetValue(s, out var l)) {
+						if (results.TryGetValue(s, out var l)) {
 							l.Add(location);
 						}
 						else {
-							d[s] = new List<ReferenceLocation>() { location };
+							results[s] = new List<ReferenceLocation>() { location };
 						}
 					}
 				}
 			}
-			var r = new List<KeyValuePair<ISymbol, List<ReferenceLocation>>>(d.Count);
-			r.AddRange(d);
-			r.Sort((x, y) => CompareSymbol(x.Key, y.Key));
-			return r;
 		}
 
 		static Comparer<ISymbol> CreateSymbolComparer() {
