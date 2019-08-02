@@ -26,6 +26,7 @@ namespace Codist
 		internal static readonly Thickness ScrollerMargin = new Thickness(0, 0, 3, 0);
 		internal static readonly Thickness TopItemMargin = new Thickness(0, 3, 0, 0);
 		internal static readonly Thickness SmallHorizontalMargin = new Thickness(SmallMarginSize, 0, SmallMarginSize, 0);
+		internal static readonly Thickness SmallVerticalMargin = new Thickness(0, SmallMarginSize, 0, SmallMarginSize);
 		internal static readonly Thickness MenuItemMargin = new Thickness(6, 0, 6, 0);
 
 		#region TextBlock and Run

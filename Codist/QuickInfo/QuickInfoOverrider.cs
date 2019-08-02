@@ -17,9 +17,9 @@ namespace Codist.QuickInfo
 {
 	interface IQuickInfoOverrider
 	{
+		UIElement Control { get; }
 		void SetDiagnostics(IList<Diagnostic> diagnostics);
-		void ApplyClickAndGo(ISymbol symbol, IQuickInfoSession quickInfoSession);
-		void LimitQuickInfoItemSize(IList<object> qiContent);
+		void ApplyClickAndGo(ISymbol symbol, IAsyncQuickInfoSession quickInfoSession);
 		void OverrideDocumentation(UIElement docElement);
 		void OverrideException(UIElement exceptionDoc);
 	}
@@ -27,9 +27,9 @@ namespace Codist.QuickInfo
 	static class QuickInfoOverrider
 	{
 		static readonly SolidColorBrush __HighlightBrush = SystemColors.HighlightBrush.Alpha(0.3);
-		public static IQuickInfoOverrider CreateOverrider(IList<object> qiContent) {
-			var o = new Legacy(qiContent);
-			return o.Panel != null ? o : (IQuickInfoOverrider)new Default();
+
+		public static IQuickInfoOverrider CreateOverrider(IAsyncQuickInfoSession session) {
+			return session.Properties.GetOrCreateSingletonProperty<Default>(()=> new Default());
 		}
 
 		public static void HoldQuickInfo(DependencyObject quickInfoItem, bool hold) {
@@ -37,7 +37,7 @@ namespace Codist.QuickInfo
 		}
 
 		public static void DismissQuickInfo(DependencyObject quickInfoItem) {
-			FindHolder(quickInfoItem)?.Dismiss();
+			FindHolder(quickInfoItem)?.DismissAsync();
 		}
 
 		static IQuickInfoHolder FindHolder(DependencyObject quickInfoItem) {
@@ -46,7 +46,7 @@ namespace Codist.QuickInfo
 			items = items.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl") ?? items;
 			return items.GetFirstVisualChild<StackPanel>(o => o is IQuickInfoHolder) as IQuickInfoHolder;
 		}
-		static void ApplyClickAndGo(ISymbol symbol, TextBlock description, IQuickInfoSession quickInfoSession) {
+		static void ApplyClickAndGo(ISymbol symbol, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
 			var locs = symbol.DeclaringSyntaxReferences;
 			if (symbol.Kind == SymbolKind.Namespace) {
 				description.ToolTip = "Locations: " + locs.Length;
@@ -116,8 +116,8 @@ namespace Codist.QuickInfo
 			void GoToSource(object sender, MouseButtonEventArgs e) {
 				symbol.GoToSource();
 			}
-			void ListLocations(object sender, MouseButtonEventArgs e) {
-				quickInfoSession.Dismiss();
+			async void ListLocations(object sender, MouseButtonEventArgs e) {
+				await quickInfoSession.DismissAsync();
 				CSharpSymbolContextMenu.ShowLocations(symbol, SemanticContext.GetOrCreateSingetonInstance(quickInfoSession.TextView as IWpfTextView));
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs e) {
@@ -180,7 +180,7 @@ namespace Codist.QuickInfo
 		interface IQuickInfoHolder
 		{
 			void Hold(bool hold);
-			void Dismiss();
+			System.Threading.Tasks.Task DismissAsync();
 		}
 
 		/// <summary>
@@ -196,20 +196,16 @@ namespace Codist.QuickInfo
 
 			public Default() {
 				_Overrider = new Overrider();
-			}
-
-			public void ApplyClickAndGo(ISymbol symbol, IQuickInfoSession quickInfoSession) {
-				_Overrider.ClickAndGoSymbol = symbol;
-				_Overrider.QuickInfoSession = quickInfoSession;
-			}
-
-			public void LimitQuickInfoItemSize(IList<object> qiContent) {
-				if (Config.Instance.QuickInfoMaxHeight > 0 && Config.Instance.QuickInfoMaxWidth > 0 || qiContent.Count > 0) {
+				if (Config.Instance.QuickInfoMaxHeight > 0 && Config.Instance.QuickInfoMaxWidth > 0) {
 					_Overrider.LimitItemSize = true;
 				}
-				if (qiContent.Count > 0) {
-					qiContent.Add(_Overrider);
-				}
+			}
+
+			public UIElement Control => _Overrider;
+
+			public void ApplyClickAndGo(ISymbol symbol, IAsyncQuickInfoSession quickInfoSession) {
+				_Overrider.ClickAndGoSymbol = symbol;
+				_Overrider.QuickInfoSession = quickInfoSession;
 			}
 
 			public void OverrideDocumentation(UIElement docElement) {
@@ -234,7 +230,7 @@ namespace Codist.QuickInfo
 				public UIElement DocElement;
 				public UIElement ExceptionDoc;
 				public IList<Diagnostic> Diagnostics;
-				public IQuickInfoSession QuickInfoSession;
+				public IAsyncQuickInfoSession QuickInfoSession;
 
 				public bool KeepQuickInfoOpen { get; set; }
 				public bool IsMouseOverAggregated { get; set; }
@@ -242,8 +238,8 @@ namespace Codist.QuickInfo
 				public void Hold(bool hold) {
 					IsMouseOverAggregated = hold;
 				}
-				public void Dismiss() {
-					QuickInfoSession.Dismiss();
+				public async System.Threading.Tasks.Task DismissAsync() {
+					await QuickInfoSession.DismissAsync();
 				}
 
 				protected override void OnVisualParentChanged(DependencyObject oldParent) {
@@ -476,8 +472,8 @@ namespace Codist.QuickInfo
 						if (c is Overrider || c is IInteractiveQuickInfoContent /* don't hack interactive content */) {
 							continue;
 						}
-						cp.LimitSize();
 						if (docPanel == c || docPanelHandled == false && cp.GetFirstVisualChild<StackPanel>(i => i == docPanel) != null) {
+							cp.LimitSize();
 							if (Config.Instance.QuickInfoXmlDocExtraHeight > 0 && Config.Instance.QuickInfoMaxHeight > 0) {
 								cp.MaxHeight += Config.Instance.QuickInfoXmlDocExtraHeight;
 							}
@@ -488,6 +484,10 @@ namespace Codist.QuickInfo
 							cp.Content = null;
 							cp.Content = ((DependencyObject)c).Scrollable();
 							docPanelHandled = true;
+							continue;
+						}
+						else if (c is StackPanel s) {
+							MakeChildrenScrollable(s);
 							continue;
 						}
 						(c as ThemedTipDocument)?.ApplySizeLimit();
@@ -518,123 +518,29 @@ namespace Codist.QuickInfo
 						cp.Content = o.Scrollable();
 					}
 				}
+
+				static void MakeChildrenScrollable(StackPanel s) {
+					var children = new List<DependencyObject>(s.Children.Count);
+					foreach (DependencyObject n in s.Children) {
+						children.Add(n);
+					}
+					s.Children.Clear();
+					foreach (var c in children) {
+						var d = c as ThemedTipDocument;
+						if (d != null) {
+							foreach (var item in d.Children) {
+								(item as FrameworkElement)?.LimitSize();
+								if (item is TextBlock t) {
+									t.TextWrapping = TextWrapping.Wrap;
+								}
+							}
+							d.ApplySizeLimit();
+							d.WrapMargin(WpfHelper.SmallVerticalMargin);
+						}
+						s.Add(c.Scrollable().LimitSize());
+					}
+				}
 			}
 		}
-
-		/// <summary>
-		/// This class works for versions earlier than Visual Studio 15.8 only.
-		/// From version 15.8 on, VS no longer creates WPF elements for the Quick Info immediately,
-		/// thus, we can't hack into the qiContent for the Quick Info panel.
-		/// </summary>
-		sealed class Legacy : IQuickInfoOverrider
-		{
-			static Func<StackPanel, TextBlock> __GetMainDescription;
-			static Func<StackPanel, TextBlock> __GetDocumentation;
-
-			public Legacy(IList<object> qiContent) {
-				Panel = FindDefaultQuickInfoPanel(qiContent);
-				if (__GetMainDescription == null && Panel != null) {
-					var t = Panel.GetType();
-					__GetMainDescription = t.CreateGetPropertyMethod<StackPanel, TextBlock>("MainDescription");
-					__GetDocumentation = t.CreateGetPropertyMethod<StackPanel, TextBlock>("Documentation");
-				}
-			}
-			public StackPanel Panel { get; }
-			public TextBlock MainDesciption => Panel != null ? __GetMainDescription(Panel) : null;
-			public TextBlock Documentation => Panel != null ? __GetDocumentation(Panel) : null;
-
-			/// <summary>Hack into the default QuickInfo panel and provides click and go feature for symbols.</summary>
-			public void ApplyClickAndGo(ISymbol symbol, IQuickInfoSession quickInfoSession) {
-				if (symbol == null) {
-					return;
-				}
-				var description = MainDesciption;
-				if (description == null) {
-					return;
-				}
-				if (symbol.IsImplicitlyDeclared) {
-					symbol = symbol.ContainingType;
-				}
-				QuickInfoOverrider.ApplyClickAndGo(symbol, description, quickInfoSession);
-			}
-
-			/// <summary>
-			/// Limits the displaying size of the quick info items.
-			/// </summary>
-			public void LimitQuickInfoItemSize(IList<object> qiContent) {
-				if (Config.Instance.QuickInfoMaxHeight <= 0 && Config.Instance.QuickInfoMaxWidth <= 0 || qiContent.Count == 0) {
-					return;
-				}
-				for (int i = 0; i < qiContent.Count; i++) {
-					var item = qiContent[i];
-					var p = item as Panel;
-					// finds out the default quick info panel
-					if (p != null && p == Panel || i == 0) {
-						// adds a dummy control to hack into the default quick info panel
-						qiContent.Add(new QuickInfoSizer(p));
-						continue;
-					}
-					var s = item as string;
-					if (s != null) {
-						qiContent[i] = new TextBlock { Text = s, TextWrapping = TextWrapping.Wrap }.Scrollable().LimitSize();
-						continue;
-					}
-					// todo: make other elements scrollable
-					if ((item as FrameworkElement).LimitSize() == null) {
-						continue;
-					}
-				}
-			}
-
-			/// <summary>overrides default doc summary</summary>
-			/// <param name="newDoc">The overriding doc element.</param>
-			public void OverrideDocumentation(UIElement newDoc) {
-				var doc = Documentation;
-				if (doc != null) {
-					doc.Visibility = Visibility.Collapsed;
-					Panel.Children.Insert(Panel.Children.IndexOf(doc), newDoc);
-				}
-			}
-			public void OverrideException(UIElement exceptionDoc) { }
-
-			public void SetDiagnostics(IList<Diagnostic> diagnostics) {
-				// not implemented for versions before 15.8
-			}
-
-			static StackPanel FindDefaultQuickInfoPanel(IList<object> qiContent) {
-				foreach (var item in qiContent) {
-					var o = item as StackPanel;
-					if (o?.GetType().Name == "QuickInfoDisplayPanel") {
-						return o;
-					}
-				}
-				return null;
-			}
-
-			sealed class QuickInfoSizer : UIElement
-			{
-				readonly Panel _QuickInfoPanel;
-
-				public QuickInfoSizer(Panel quickInfoPanel) {
-					_QuickInfoPanel = quickInfoPanel;
-				}
-				protected override void OnVisualParentChanged(DependencyObject oldParent) {
-					base.OnVisualParentChanged(oldParent);
-					if (_QuickInfoPanel == null) {
-						return;
-					}
-					// makes the default quick info panel scrollable and size limited
-					var p = _QuickInfoPanel.GetParent() as ContentPresenter;
-					if (p != null) {
-						p.Content = null;
-						p.Content = _QuickInfoPanel.Scrollable().LimitSize();
-					}
-					// hides the parent container from taking excessive space in the quick info window
-					this.GetParent<Border>().Collapse();
-				}
-			}
-
-		}
-
 	}
 }

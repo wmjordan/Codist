@@ -66,6 +66,9 @@ namespace Codist
 		public static TextSpan ToTextSpan(this Span span) {
 			return new TextSpan(span.Start, span.Length);
 		}
+		public static ITrackingSpan ToTrackingSpan(this SnapshotSpan span) {
+			return span.Snapshot.CreateTrackingSpan(span.ToSpan(), SpanTrackingMode.EdgeInclusive);
+		}
 
 		public static Span GetLineSpan(this SnapshotSpan span) {
 			return Span.FromBounds(span.Snapshot.GetLineNumberFromPosition(span.Start),

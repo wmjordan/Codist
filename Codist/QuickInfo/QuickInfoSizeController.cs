@@ -1,20 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Input;
 using Microsoft.VisualStudio.Language.Intellisense;
-using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Shell;
 
 namespace Codist.QuickInfo
 {
-	sealed class QuickInfoSizeController : IQuickInfoSource
+	sealed class QuickInfoSizeController : IAsyncQuickInfoSource
 	{
-		public void AugmentQuickInfoSession(IQuickInfoSession session, IList<Object> qiContent, out ITrackingSpan applicableToSpan) {
-			if ((Config.Instance.QuickInfoMaxWidth > 0 || Config.Instance.QuickInfoMaxHeight > 0)
-				&& System.Windows.Input.Keyboard.Modifiers != System.Windows.Input.ModifierKeys.Control
-				) {
-				QuickInfoOverrider.CreateOverrider(qiContent)
-					.LimitQuickInfoItemSize(qiContent);
+		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			if (Keyboard.Modifiers != ModifierKeys.Control) {
+				return new QuickInfoItem(null, QuickInfoOverrider.CreateOverrider(session).Control);
 			}
-			applicableToSpan = null;
+			return null;
 		}
 
 		void IDisposable.Dispose() { }

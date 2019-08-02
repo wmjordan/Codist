@@ -1,41 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.VisualStudio.Language.Intellisense;
-using Microsoft.VisualStudio.PlatformUI;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Operations;
-using Microsoft.VisualStudio.Utilities;
 using AppHelpers;
 using Codist.Controls;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Shell;
 using GdiColor = System.Drawing.Color;
-using WpfColor = System.Windows.Media.Color;
-using WpfColors = System.Windows.Media.Colors;
-using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
+using WpfColor = System.Windows.Media.Color;
 
 namespace Codist.QuickInfo
 {
-	sealed class ColorQuickInfoController : IQuickInfoSource
+	sealed class ColorQuickInfoController : IAsyncQuickInfoSource
 	{
-		readonly ITextStructureNavigatorSelectorService _NavigatorService;
-
-		public ColorQuickInfoController(ITextStructureNavigatorSelectorService navigatorService) {
-			_NavigatorService = navigatorService;
-		}
-
-		public void AugmentQuickInfoSession(IQuickInfoSession session, IList<Object> qiContent, out ITrackingSpan applicableToSpan) {
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false) {
+		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false || ColorQuickInfo.IsInQuickInfo(session)) {
 				goto EXIT;
 			}
 			var buffer = session.TextView.TextBuffer;
 			var snapshot = session.TextView.TextSnapshot;
-			var navigator = _NavigatorService.GetTextStructureNavigator(buffer);
+			var navigator = ServicesHelper.Instance.TextStructureNavigator.GetTextStructureNavigator(buffer);
 			var extent = navigator.GetExtentOfWord(session.GetTriggerPoint(snapshot).GetValueOrDefault()).Span;
 			var word = snapshot.GetText(extent);
 			var brush = ColorHelper.GetBrush(word);
@@ -46,12 +35,13 @@ namespace Codist.QuickInfo
 				brush = ColorHelper.GetBrush(word);
 			}
 			if (brush != null) {
-				ColorQuickInfo.AddToQuickInfoContent(qiContent, ColorQuickInfo.PreviewColor(brush));
-				applicableToSpan = snapshot.CreateTrackingSpan(extent.Span, SpanTrackingMode.EdgeExclusive);
-				return;
+				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+				if (ColorQuickInfo.Mark(session)) {
+					return new QuickInfoItem(extent.ToTrackingSpan(), ColorQuickInfo.PreviewColor(brush));
+				}
 			}
 			EXIT:
-			applicableToSpan = null;
+			return null;
 		}
 
 		void IDisposable.Dispose() { }
@@ -61,15 +51,15 @@ namespace Codist.QuickInfo
 	{
 		const string PreviewPanelName = "ColorPreview";
 
-		internal static void AddToQuickInfoContent(IList<object> container, StackPanel previewPanel) {
-			if (previewPanel != null) {
-				foreach (var item in container) {
-					if ((item as StackPanel)?.Name == PreviewPanelName) {
-						return;
-					}
-				}
-				container.Add(previewPanel);
+		internal static bool IsInQuickInfo(IAsyncQuickInfoSession session) {
+			return session.Properties.ContainsProperty(PreviewPanelName);
+		}
+		internal static bool Mark(IAsyncQuickInfoSession session) {
+			if (session.Properties.ContainsProperty(PreviewPanelName) == false) {
+				session.Properties[PreviewPanelName] = PreviewPanelName;
+				return true;
 			}
+			return false;
 		}
 
 		public static StackPanel PreviewColorProperty(IPropertySymbol symbol, bool includeVsColors) {

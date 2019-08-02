@@ -15,29 +15,26 @@ namespace Codist.QuickInfo
 	/// <summary>
 	/// Provides quick info for named colors or #hex colors
 	/// </summary>
-	[Export(typeof(IQuickInfoSourceProvider))]
+	[Export(typeof(IAsyncQuickInfoSourceProvider))]
 	[Name("Color Quick Info Controller")]
 	[Order(After = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.Text)]
-	sealed class ColorQuickInfoControllerProvider : IQuickInfoSourceProvider
+	sealed class ColorQuickInfoControllerProvider : IAsyncQuickInfoSourceProvider
 	{
-		[Import]
-		internal ITextStructureNavigatorSelectorService _NavigatorService;
-
-		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
+		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? new ColorQuickInfoController(_NavigatorService)
+				? new ColorQuickInfoController()
 				: null;
 		}
 	}
 
-	[Export(typeof(IQuickInfoSourceProvider))]
+	[Export(typeof(IAsyncQuickInfoSourceProvider))]
 	[Name(CSharpQuickInfo.Name)]
 	[Order(After = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.CSharp)]
-	sealed class CSharpQuickInfoSourceProvider : IQuickInfoSourceProvider
+	sealed class CSharpQuickInfoSourceProvider : IAsyncQuickInfoSourceProvider
 	{
-		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
+		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
 				? new CSharpQuickInfo(textBuffer)
 				: null;
@@ -49,27 +46,27 @@ namespace Codist.QuickInfo
 	/// <para>When activated, quick info will not be displayed unless Shift key is pressed.</para>
 	/// <para>It is also used to surpress Quick Info when mouse is hovered on the SmartBar or NaviBar menu.</para>
 	/// </summary>
-	[Export(typeof(IQuickInfoSourceProvider))]
+	[Export(typeof(IAsyncQuickInfoSourceProvider))]
 	[Name("Quick Info Visibility Controller")]
 	[Order(Before = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.Code)]
-	sealed class QuickInfoVisibilityControllerProvider : IQuickInfoSourceProvider
+	sealed class QuickInfoVisibilityControllerProvider : IAsyncQuickInfoSourceProvider
 	{
-		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
+		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return new QuickInfoVisibilityController();
 		}
 	}
 
 	/// <summary>Shows information about selections.</summary>
-	[Export(typeof(IQuickInfoSourceProvider))]
+	[Export(typeof(IAsyncQuickInfoSourceProvider))]
 	[Name(Name)]
 	[Order(After = CSharpQuickInfo.Name)]
 	[ContentType(Constants.CodeTypes.Text)]
-	sealed class SelectionQuickInfoProvider : IQuickInfoSourceProvider
+	sealed class SelectionQuickInfoProvider : IAsyncQuickInfoSourceProvider
 	{
 		const string Name = nameof(SelectionQuickInfoProvider);
 
-		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
+		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
 				? new SelectionQuickInfo()
 				: null;
@@ -77,18 +74,16 @@ namespace Codist.QuickInfo
 	}
 
 	/// <summary>Shows information about selections.</summary>
-	[Export(typeof(IQuickInfoSourceProvider))]
+	[Export(typeof(IAsyncQuickInfoSourceProvider))]
 	[Name(Name)]
 	[Order(After = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.Text)]
-	sealed class QuickInfoSizeControllerProvider : IQuickInfoSourceProvider
+	sealed class QuickInfoSizeControllerProvider : IAsyncQuickInfoSourceProvider
 	{
 		const string Name = nameof(QuickInfoSizeController);
 
-		public IQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
+		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-					// do not apply this for C#, since CSharpQuickInfo will deal with this
-					&& textBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp) == false
 				? new QuickInfoSizeController()
 				: null;
 		}
