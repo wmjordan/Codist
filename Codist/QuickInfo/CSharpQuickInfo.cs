@@ -656,7 +656,7 @@ namespace Codist.QuickInfo
 		}
 
 		void ShowOverloadsInfo(QiContainer qiContent, SyntaxNode node, IMethodSymbol method) {
-			var overloads = node.Kind() == SyntaxKind.MethodDeclaration
+			var overloads = node.Kind() == SyntaxKind.MethodDeclaration || node.Kind() == SyntaxKind.ConstructorDeclaration
 				? method.ContainingType.GetMembers(method.Name)
 				: _SemanticModel.GetMemberGroup(node);
 			if (overloads.Length < 2) {
@@ -776,6 +776,11 @@ namespace Codist.QuickInfo
 					}
 				}
 			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+				&& typeSymbol.TypeKind == TypeKind.Class
+				&& (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
+				ShowDeclarationModifier(qiContent, typeSymbol);
+			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
 				if (typeSymbol.TypeKind == TypeKind.Enum) {
 					ShowEnumInfo(qiContent, typeSymbol, true);
@@ -786,11 +791,6 @@ namespace Codist.QuickInfo
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces)) {
 				ShowInterfaces(qiContent, typeSymbol);
-			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-				&& typeSymbol.TypeKind == TypeKind.Class
-				&& (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
-				ShowDeclarationModifier(qiContent, typeSymbol);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceMembers)
 				&& typeSymbol.TypeKind == TypeKind.Interface) {
