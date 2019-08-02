@@ -32,6 +32,7 @@ namespace Codist.Options
 			_RangeHighlightBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.RangeHighlight, _RangeHighlightBox.Checked));
 			_RegionBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.RegionOnBar, _StripNonLetterCharactersBox.Enabled = _RegionBox.Checked));
 			_RegionItemBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.Region, _InMemberRegionItemBox.Enabled = _RegionItemBox.Checked));
+			_ReferenceBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.ReferencingTypes, _ReferenceBox.Checked));
 			_InMemberRegionItemBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.RegionInMember, _InMemberRegionItemBox.Checked));
 			_StripNonLetterCharactersBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.StripRegionNonLetter, _StripNonLetterCharactersBox.Checked));
 			_SyntaxNodesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(NaviBarOptions.SyntaxDetail, _SyntaxNodesBox.Checked));
@@ -51,6 +52,7 @@ namespace Codist.Options
 				_ParameterListParamNameBox.Checked = o.MatchFlags(NaviBarOptions.ParameterListShowParamName);
 				_PartialClassBox.Checked = o.MatchFlags(NaviBarOptions.PartialClassMember);
 				_RangeHighlightBox.Checked = o.MatchFlags(NaviBarOptions.RangeHighlight);
+				_ReferenceBox.Checked = o.MatchFlags(NaviBarOptions.ReferencingTypes);
 				_StripNonLetterCharactersBox.Enabled = _RegionBox.Checked = o.MatchFlags(NaviBarOptions.RegionOnBar);
 				_StripNonLetterCharactersBox.Checked = o.MatchFlags(NaviBarOptions.StripRegionNonLetter);
 				_RegionItemBox.Checked = _InMemberRegionItemBox.Enabled = o.MatchFlags(NaviBarOptions.Region);

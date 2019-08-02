@@ -193,7 +193,9 @@ namespace Codist.NaviBar
 						((TextBlock)newItem.Header).FontWeight = FontWeights.Bold;
 						((TextBlock)newItem.Header).SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.FileTabSelectedTextBrushKey);
 						newItem.IsChecked = true;
-						newItem.ReferencedDocs.AddRange(node.FindRelatedTypes(_SemanticContext.SemanticModel, token).Take(5));
+						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ReferencingTypes)) {
+							newItem.ReferencedDocs.AddRange(node.FindRelatedTypes(_SemanticContext.SemanticModel, token).Take(5));
+						}
 					}
 					Items.Add(newItem);
 					++i2;

@@ -566,6 +566,7 @@ namespace Codist
 		RegionOnBar = 1 << 3,
 		StripRegionNonLetter = 1 << 4,
 		LineOfCode = 1 << 5,
+		ReferencingTypes = 1 << 6,
 		ParameterList = 1 << 10,
 		ParameterListShowParamName = 1 << 11,
 		FieldValue = 1 << 12,

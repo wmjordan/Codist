@@ -36,6 +36,7 @@
 			this._ToolTipBox = new System.Windows.Forms.CheckBox();
 			this._SyntaxNodesBox = new System.Windows.Forms.CheckBox();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
+			this._InMemberRegionItemBox = new System.Windows.Forms.CheckBox();
 			this._AutoPropertyValueBox = new System.Windows.Forms.CheckBox();
 			this._ParameterListParamNameBox = new System.Windows.Forms.CheckBox();
 			this._ParameterListBox = new System.Windows.Forms.CheckBox();
@@ -43,7 +44,7 @@
 			this._RegionItemBox = new System.Windows.Forms.CheckBox();
 			this._PartialClassBox = new System.Windows.Forms.CheckBox();
 			this._FieldValueBox = new System.Windows.Forms.CheckBox();
-			this._InMemberRegionItemBox = new System.Windows.Forms.CheckBox();
+			this._ReferenceBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage2.SuspendLayout();
 			this.customGroupBox1.SuspendLayout();
@@ -67,6 +68,7 @@
 			// 
 			this.tabPage2.Controls.Add(this.customGroupBox1);
 			this.tabPage2.Controls.Add(this._StripNonLetterCharactersBox);
+			this.tabPage2.Controls.Add(this._ReferenceBox);
 			this.tabPage2.Controls.Add(this._RegionBox);
 			this.tabPage2.Controls.Add(this._RangeHighlightBox);
 			this.tabPage2.Controls.Add(this._ToolTipBox);
@@ -85,7 +87,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.customGroupBox1.Controls.Add(this.label2);
 			this.customGroupBox1.Controls.Add(this.label1);
-			this.customGroupBox1.Location = new System.Drawing.Point(6, 128);
+			this.customGroupBox1.Location = new System.Drawing.Point(6, 161);
 			this.customGroupBox1.Name = "customGroupBox1";
 			this.customGroupBox1.Size = new System.Drawing.Size(512, 128);
 			this.customGroupBox1.TabIndex = 12;
@@ -180,6 +182,16 @@
 			this.tabPage1.Text = "Drop-down Menu";
 			this.tabPage1.UseVisualStyleBackColor = true;
 			// 
+			// _InMemberRegionItemBox
+			// 
+			this._InMemberRegionItemBox.AutoSize = true;
+			this._InMemberRegionItemBox.Location = new System.Drawing.Point(31, 156);
+			this._InMemberRegionItemBox.Name = "_InMemberRegionItemBox";
+			this._InMemberRegionItemBox.Size = new System.Drawing.Size(325, 19);
+			this._InMemberRegionItemBox.TabIndex = 15;
+			this._InMemberRegionItemBox.Text = "Show #region directive in type member";
+			this._InMemberRegionItemBox.UseVisualStyleBackColor = true;
+			// 
 			// _AutoPropertyValueBox
 			// 
 			this._AutoPropertyValueBox.AutoSize = true;
@@ -250,15 +262,15 @@
 			this._FieldValueBox.Text = "Show field value";
 			this._FieldValueBox.UseVisualStyleBackColor = true;
 			// 
-			// _InMemberRegionItemBox
+			// _ReferenceBox
 			// 
-			this._InMemberRegionItemBox.AutoSize = true;
-			this._InMemberRegionItemBox.Location = new System.Drawing.Point(31, 156);
-			this._InMemberRegionItemBox.Name = "_InMemberRegionItemBox";
-			this._InMemberRegionItemBox.Size = new System.Drawing.Size(325, 19);
-			this._InMemberRegionItemBox.TabIndex = 15;
-			this._InMemberRegionItemBox.Text = "Show #region directive in type member";
-			this._InMemberRegionItemBox.UseVisualStyleBackColor = true;
+			this._ReferenceBox.AutoSize = true;
+			this._ReferenceBox.Location = new System.Drawing.Point(15, 131);
+			this._ReferenceBox.Name = "_ReferenceBox";
+			this._ReferenceBox.Size = new System.Drawing.Size(381, 19);
+			this._ReferenceBox.TabIndex = 10;
+			this._ReferenceBox.Text = "Show top 5 types referenced by active member";
+			this._ReferenceBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpNaviBarPage
 			// 
@@ -299,5 +311,6 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.CheckBox _LineOfCodeBox;
 		private System.Windows.Forms.CheckBox _InMemberRegionItemBox;
+		private System.Windows.Forms.CheckBox _ReferenceBox;
 	}
 }
