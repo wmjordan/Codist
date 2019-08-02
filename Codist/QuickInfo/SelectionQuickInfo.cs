@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.QuickInfo
 {
@@ -25,7 +20,7 @@ namespace Codist.QuickInfo
 			var textSnapshot = session.TextView.TextSnapshot;
 			var triggerPoint = session.GetTriggerPoint(textSnapshot).GetValueOrDefault();
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			return session.Content.Any(i => (i as TextBlock)?.Name == Name) ? null : ShowSelectionInfo(session, triggerPoint);
+			return ShowSelectionInfo(session, triggerPoint);
 		}
 
 		void IDisposable.Dispose() { }

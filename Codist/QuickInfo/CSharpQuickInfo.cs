@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Input;
 using System.Windows.Controls;
 using AppHelpers;
 using Codist.Controls;
@@ -39,7 +39,7 @@ namespace Codist.QuickInfo
 
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			if (System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Control) {
+			if (Keyboard.Modifiers == ModifierKeys.Control) {
 				return null;
 			}
 			var qiContent = new QiContainer();

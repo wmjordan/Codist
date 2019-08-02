@@ -284,6 +284,7 @@ namespace Codist.QuickInfo
 						if (cp == null) {
 							continue;
 						}
+						cp.LimitSize();
 						if (Diagnostics != null && Diagnostics.Count > 0) {
 							var t = cp.GetText();
 							var d = Diagnostics.FirstOrDefault(i => i.GetMessage() == t);
