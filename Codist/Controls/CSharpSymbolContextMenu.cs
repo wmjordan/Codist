@@ -323,10 +323,10 @@ namespace Codist.Controls
 			ShowSymbolMenuForResult(symbol, context, new List<ISymbol>(result), " name alike", true);
 		}
 
-		internal static void ShowLocations(ISymbol symbol, SemanticContext context) {
+		internal static void ShowLocations(ISymbol symbol, ICollection<SyntaxReference> locations, SemanticContext context) {
 			var m = new SymbolMenu(context, SymbolListType.Locations);
 			var locs = new SortedList<(string, string, int), Location>();
-			foreach (var item in symbol.DeclaringSyntaxReferences) {
+			foreach (var item in locations) {
 				locs.Add((System.IO.Path.GetDirectoryName(item.SyntaxTree.FilePath), System.IO.Path.GetFileName(item.SyntaxTree.FilePath), item.Span.Start), item.ToLocation());
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
@@ -444,12 +444,12 @@ namespace Codist.Controls
 			_Node.SelectNode(true);
 		}
 		void GoToSymbolDefinition(object sender, RoutedEventArgs args) {
-			var locs = _Symbol.GetSourceLocations();
+			var locs = _Symbol.GetSourceReferences();
 			if (locs.Length == 1) {
 				locs[0].GoToSource();
 			}
 			else {
-				ShowLocations(_Symbol, _SemanticContext);
+				ShowLocations(_Symbol, locs, _SemanticContext);
 			}
 		}
 		#endregion

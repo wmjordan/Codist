@@ -231,14 +231,14 @@ namespace Codist
 			}
 
 			void GotoSymbol(object sender, RoutedEventArgs e) {
-				var r = _Symbol.DeclaringSyntaxReferences;
+				var r = _Symbol.GetSourceReferences();
 				if (r.Length == 1) {
 					r[0].GoToSource();
 				}
 				else {
 					var ctx = SemanticContext.GetHovered();
 					if (ctx != null) {
-						CSharpSymbolContextMenu.ShowLocations(_Symbol, ctx);
+						CSharpSymbolContextMenu.ShowLocations(_Symbol, r, ctx);
 					}
 				}
 			}

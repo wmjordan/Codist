@@ -602,18 +602,24 @@ namespace Codist
 			return AssemblySourceReflector.GetSourceType(assembly);
 		}
 
-		public static SyntaxNode GetSyntaxNode(this ISymbol symbol) {
+		public static SyntaxNode GetSyntaxNode(this ISymbol symbol, CancellationToken cancellationToken = default) {
 			var syntaxReference = symbol.DeclaringSyntaxReferences.FirstOrDefault()
 				?? (symbol.IsImplicitlyDeclared && symbol.ContainingSymbol != null
 					? symbol.ContainingSymbol?.DeclaringSyntaxReferences.FirstOrDefault()
 					: null);
-			return syntaxReference?.GetSyntax();
+			return syntaxReference?.GetSyntax(cancellationToken);
 		}
 
-		public static ImmutableArray<Location> GetSourceLocations(this ISymbol symbol) {
-			return symbol == null || symbol.Locations.Length == 0
-				? ImmutableArray<Location>.Empty
-				: symbol.Locations.RemoveAll(i => i.IsInSource == false);
+		public static ImmutableArray<SyntaxReference> GetSourceReferences(this ISymbol symbol) {
+			if (symbol is IMethodSymbol m) {
+				if (m.PartialDefinitionPart != null) {
+					return symbol.DeclaringSyntaxReferences.AddRange(m.PartialDefinitionPart.DeclaringSyntaxReferences);
+				}
+				if (m.PartialImplementationPart != null) {
+					return symbol.DeclaringSyntaxReferences.AddRange(m.PartialImplementationPart.DeclaringSyntaxReferences);
+				}
+			}
+			return symbol.DeclaringSyntaxReferences;
 		}
 
 		public static Location ToLocation(this SyntaxReference syntaxReference) {

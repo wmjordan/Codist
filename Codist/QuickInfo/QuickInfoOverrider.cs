@@ -47,23 +47,19 @@ namespace Codist.QuickInfo
 			return items.GetFirstVisualChild<StackPanel>(o => o is IQuickInfoHolder) as IQuickInfoHolder;
 		}
 		static void ApplyClickAndGo(ISymbol symbol, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
-			var locs = symbol.DeclaringSyntaxReferences;
 			if (symbol.Kind == SymbolKind.Namespace) {
-				description.ToolTip = "Locations: " + locs.Length;
+				description.ToolTip = "Locations: " + symbol.DeclaringSyntaxReferences.Length;
 				description.MouseEnter += HookNamespaceSymbolEvents;
 				return;
 			}
 			string path;
 			description.UseDummyToolTip();
-			if (locs.IsDefaultOrEmpty) {
-				if (symbol.ContainingType != null) {
+			if (symbol.HasSource() == false) {
+				if (symbol.ContainingType != null && symbol.ContainingType.HasSource()) {
 					// if the symbol is implicitly declared but its containing type is in source,
 					// navigate to the containing type
-					locs = symbol.ContainingType.DeclaringSyntaxReferences;
-					if (locs.Length != 0) {
-						symbol = symbol.ContainingType;
-						goto ClickAndGo;
-					}
+					symbol = symbol.ContainingType;
+					goto ClickAndGo;
 				}
 				var asm = symbol.GetAssemblyModuleName();
 				if (asm != null) {
@@ -73,7 +69,6 @@ namespace Codist.QuickInfo
 				return;
 			}
 		ClickAndGo:
-			path = System.IO.Path.GetFileName(locs[0].SyntaxTree.FilePath);
 			description.MouseEnter += HookEvents;
 
 			void HookMetaSymbolEvents(object sender, MouseEventArgs e) {
@@ -91,7 +86,7 @@ namespace Codist.QuickInfo
 				s.Cursor = Cursors.Hand;
 				s.MouseEnter += HighlightSymbol;
 				s.MouseLeave += RemoveSymbolHighlight;
-				s.MouseLeftButtonUp += ListLocations;
+				s.MouseLeftButtonUp += GoToSource;
 				s.ContextMenuOpening += ShowContextMenu;
 				s.ContextMenuClosing += ReleaseQuickInfo;
 			}
@@ -103,27 +98,27 @@ namespace Codist.QuickInfo
 				s.ToolTipOpening += ShowToolTip;
 				s.MouseEnter += HighlightSymbol;
 				s.MouseLeave += RemoveSymbolHighlight;
-				if (locs.Length == 1) {
-					s.MouseLeftButtonUp += GoToSource;
-				}
-				else {
-					s.MouseLeftButtonUp += ListLocations;
-				}
+				s.MouseLeftButtonUp += GoToSource;
 				s.UseDummyToolTip();
 				s.ContextMenuOpening += ShowContextMenu;
 				s.ContextMenuClosing += ReleaseQuickInfo;
 			}
-			void GoToSource(object sender, MouseButtonEventArgs e) {
-				symbol.GoToSource();
-			}
-			async void ListLocations(object sender, MouseButtonEventArgs e) {
+			async void GoToSource(object sender, MouseButtonEventArgs e) {
 				await quickInfoSession.DismissAsync();
-				CSharpSymbolContextMenu.ShowLocations(symbol, SemanticContext.GetOrCreateSingetonInstance(quickInfoSession.TextView as IWpfTextView));
+				var locs = symbol.GetSourceReferences();
+				if (locs.Length == 1) {
+					symbol.GoToSource();
+				}
+				else {
+					CSharpSymbolContextMenu.ShowLocations(symbol, symbol.GetSourceReferences(), SemanticContext.GetOrCreateSingetonInstance(quickInfoSession.TextView as IWpfTextView));
+				}
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs e) {
-				var t = sender as TextBlock;
-				t.ToolTip = ShowSymbolLocation(symbol, path);
-				t.ToolTipOpening -= ShowToolTip;
+				if (symbol.HasSource()) {
+					var t = sender as TextBlock;
+					t.ToolTip = ShowSymbolLocation(symbol, symbol.GetSourceReferences().First().SyntaxTree.FilePath);
+					t.ToolTipOpening -= ShowToolTip;
+				}
 			}
 			void HighlightSymbol(object sender, MouseEventArgs e) {
 				((TextBlock)sender).Background = __HighlightBrush;
