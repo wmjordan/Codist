@@ -142,8 +142,7 @@ namespace Codist.QuickInfo
 					};
 					m.AddAnalysisCommands();
 					m.Items.Add(new Separator());
-					m.AddNodeCommands();
-					m.AddSymbolCommands();
+					m.AddSymbolNodeCommands();
 					m.AddTitleItem(symbol.GetOriginalName());
 					m.ItemClicked += HideQuickInfo;
 					s.ContextMenu = m;

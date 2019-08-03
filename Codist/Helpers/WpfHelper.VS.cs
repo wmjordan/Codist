@@ -199,8 +199,7 @@ namespace Codist
 					};
 					m.AddAnalysisCommands();
 					m.Items.Add(new Separator());
-					m.AddNodeCommands();
-					m.AddSymbolCommands();
+					m.AddSymbolNodeCommands();
 					m.AddTitleItem(_Symbol.GetOriginalName());
 					m.ItemClicked += DismissQuickInfo;
 					ContextMenu = m;

@@ -42,6 +42,20 @@ namespace Codist.Controls
 				Items.Add(CreateItem(KnownImageIds.BlockSelection, "Select Code", SelectNode));
 			}
 		}
+		public void AddSymbolNodeCommands() {
+			if (_Symbol.HasSource()) {
+				Items.Add(CreateItem(KnownImageIds.GoToDefinition, "Go to Definition", GoToSymbolDefinition));
+				if (_Node == null) {
+					Items.Add(CreateItem(KnownImageIds.BlockSelection, "Select Code", () => _Symbol.GetSyntaxNode().SelectNode(true)));
+				}
+			}
+			else if (_Node != null) {
+				Items.Add(CreateItem(KnownImageIds.BlockSelection, "Select Code", SelectNode));
+			}
+			if (_Symbol != null) {
+				Items.Add(CreateItem(KnownImageIds.Copy, "Copy Symbol Name", CopySymbolName));
+			}
+		}
 
 		public void AddSymbolCommands() {
 			Items.Add(CreateItem(KnownImageIds.Copy, "Copy Symbol Name", CopySymbolName));
@@ -428,6 +442,15 @@ namespace Codist.Controls
 		}
 		void SelectNode(object sender, RoutedEventArgs args) {
 			_Node.SelectNode(true);
+		}
+		void GoToSymbolDefinition(object sender, RoutedEventArgs args) {
+			var locs = _Symbol.GetSourceLocations();
+			if (locs.Length == 1) {
+				locs[0].GoToSource();
+			}
+			else {
+				ShowLocations(_Symbol, _SemanticContext);
+			}
 		}
 		#endregion
 
