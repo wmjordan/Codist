@@ -22,6 +22,7 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false || ColorQuickInfo.IsInQuickInfo(session)) {
 				goto EXIT;
 			}
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			var buffer = session.TextView.TextBuffer;
 			var snapshot = session.TextView.TextSnapshot;
 			var navigator = ServicesHelper.Instance.TextStructureNavigator.GetTextStructureNavigator(buffer);
@@ -35,7 +36,6 @@ namespace Codist.QuickInfo
 				brush = ColorHelper.GetBrush(word);
 			}
 			if (brush != null) {
-				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 				if (ColorQuickInfo.Mark(session)) {
 					return new QuickInfoItem(extent.ToTrackingSpan(), ColorQuickInfo.PreviewColor(brush));
 				}
