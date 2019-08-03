@@ -133,16 +133,7 @@ namespace Codist.QuickInfo
 				|| skipTriggerPointCheck == false && node.Span.Contains(subjectTriggerPoint.Position, true) == false) {
 				goto EXIT;
 			}
-			if (node.Parent.IsKind(SyntaxKind.QualifiedName)) {
-				switch (node.Parent.Parent.Kind()) {
-					case SyntaxKind.UsingDirective:
-					case SyntaxKind.NamespaceDeclaration:
-						break;
-					default:
-						node = node.Parent;
-						break;
-				}
-			}
+			node = node.UnqualifyExceptNamespace();
 			LocateNodeInParameterList(ref node, ref token);
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowParameterInfo(qiContent, node);
@@ -190,7 +181,7 @@ namespace Codist.QuickInfo
 				ShowAttributesInfo(qiContent, symbol);
 			}
 			ShowSymbolInfo(session, qiContent, node, symbol);
-			RETURN:
+		RETURN:
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)) {
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				if (ctor != null && ctor.Type == node) {
@@ -204,7 +195,7 @@ namespace Codist.QuickInfo
 			return new QuickInfoItem(qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
 				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive)
 				: null, qiContent.ToUI());
-			EXIT:
+		EXIT:
 			return null;
 		}
 
@@ -598,6 +589,7 @@ namespace Codist.QuickInfo
 
 		static void ShowPropertyInfo(QiContainer qiContent, IPropertySymbol property) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+				&& property.ContainingType?.TypeKind != TypeKind.Interface
 				&& (property.DeclaredAccessibility != Accessibility.Public || property.IsAbstract || property.IsStatic || property.IsOverride || property.IsVirtual)) {
 				ShowDeclarationModifier(qiContent, property);
 			}
@@ -608,7 +600,8 @@ namespace Codist.QuickInfo
 
 		static void ShowEventInfo(QiContainer qiContent, IEventSymbol ev) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
-				if (ev.DeclaredAccessibility != Accessibility.Public || ev.IsAbstract || ev.IsStatic || ev.IsOverride || ev.IsVirtual) {
+				if ((ev.DeclaredAccessibility != Accessibility.Public || ev.IsAbstract || ev.IsStatic || ev.IsOverride || ev.IsVirtual)
+				&& ev.ContainingType?.TypeKind != TypeKind.Interface) {
 					ShowDeclarationModifier(qiContent, ev);
 				}
 				var invoke = ev.Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
@@ -637,8 +630,8 @@ namespace Codist.QuickInfo
 
 		void ShowMethodInfo(QiContainer qiContent, SyntaxNode node, IMethodSymbol method) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-				&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern || method.IsSealed)
-				&& method.ContainingType?.TypeKind != TypeKind.Interface) {
+				&& method.ContainingType?.TypeKind != TypeKind.Interface
+				&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern || method.IsSealed)) {
 				ShowDeclarationModifier(qiContent, method);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && method.TypeArguments.Length > 0 && method.TypeParameters[0] != method.TypeArguments[0]) {
@@ -777,8 +770,10 @@ namespace Codist.QuickInfo
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
-				&& typeSymbol.TypeKind == TypeKind.Class
-				&& (typeSymbol.DeclaredAccessibility != Accessibility.Public || typeSymbol.IsAbstract || typeSymbol.IsStatic || typeSymbol.IsSealed)) {
+				&& (typeSymbol.DeclaredAccessibility != Accessibility.Public
+					|| typeSymbol.IsStatic
+					|| (typeSymbol.IsAbstract || typeSymbol.IsSealed) && typeSymbol.TypeKind == TypeKind.Class)
+				) {
 				ShowDeclarationModifier(qiContent, typeSymbol);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {

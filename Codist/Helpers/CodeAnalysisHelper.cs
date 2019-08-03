@@ -940,6 +940,22 @@ namespace Codist
 			}
 			return false;
 		}
+
+		public static SyntaxNode UnqualifyExceptNamespace(this SyntaxNode node) {
+			if (node.IsKind(SyntaxKind.QualifiedName)) {
+				var n = node;
+				while ((n = n.Parent).IsKind(SyntaxKind.QualifiedName)) {
+				}
+				switch (n.Kind()) {
+					case SyntaxKind.UsingDirective:
+					case SyntaxKind.NamespaceDeclaration:
+						return node;
+					default:
+						return n;
+				}
+			}
+			return node;
+		}
 	}
 
 	[Flags]
