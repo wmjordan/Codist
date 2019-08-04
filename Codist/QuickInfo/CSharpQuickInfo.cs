@@ -16,6 +16,7 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
+using System.Windows;
 
 namespace Codist.QuickInfo
 {
@@ -1220,8 +1221,17 @@ namespace Codist.QuickInfo
 					_List.Add(item);
 				}
 			}
-			public Microsoft.VisualStudio.Text.Adornments.ContainerElement ToUI() {
-				return new Microsoft.VisualStudio.Text.Adornments.ContainerElement(Microsoft.VisualStudio.Text.Adornments.ContainerElementStyle.Stacked, _List);
+			public StackPanel ToUI() {
+				var s = new StackPanel();
+				foreach (var item in _List) {
+					if (item is UIElement u) {
+						s.Children.Add(u);
+					}
+					else if (item is string t) {
+						s.Children.Add(new ThemedTipText(t));
+					}
+				}
+				return s;
 			}
 		}
 	}

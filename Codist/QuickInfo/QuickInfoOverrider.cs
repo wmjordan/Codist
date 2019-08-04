@@ -52,20 +52,15 @@ namespace Codist.QuickInfo
 				description.MouseEnter += HookNamespaceSymbolEvents;
 				return;
 			}
-			string path;
 			description.UseDummyToolTip();
 			if (symbol.HasSource() == false) {
-				if (symbol.ContainingType != null && symbol.ContainingType.HasSource()) {
+				if (symbol.ContainingType?.HasSource() == true) {
 					// if the symbol is implicitly declared but its containing type is in source,
 					// navigate to the containing type
 					symbol = symbol.ContainingType;
 					goto ClickAndGo;
 				}
-				var asm = symbol.GetAssemblyModuleName();
-				if (asm != null) {
-					path = asm;
-					description.MouseEnter += HookMetaSymbolEvents;
-				}
+				description.MouseEnter += HookMetaSymbolEvents;
 				return;
 			}
 		ClickAndGo:
@@ -114,11 +109,9 @@ namespace Codist.QuickInfo
 				}
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs e) {
-				if (symbol.HasSource()) {
-					var t = sender as TextBlock;
-					t.ToolTip = ShowSymbolLocation(symbol, symbol.GetSourceReferences().First().SyntaxTree.FilePath);
-					t.ToolTipOpening -= ShowToolTip;
-				}
+				var t = sender as TextBlock;
+				t.ToolTip = ShowSymbolLocation(symbol, symbol.HasSource() ? System.IO.Path.GetFileName(symbol.Locations[0].SourceTree.FilePath) : symbol.GetAssemblyModuleName());
+				t.ToolTipOpening -= ShowToolTip;
 			}
 			void HighlightSymbol(object sender, MouseEventArgs e) {
 				((TextBlock)sender).Background = __HighlightBrush;
