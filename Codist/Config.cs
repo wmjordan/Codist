@@ -71,6 +71,7 @@ namespace Codist
 		public List<CodeStyle> GeneralStyles { get; } = new List<CodeStyle>();
 		public List<SymbolMarkerStyle> SymbolMarkerStyles { get; } = new List<SymbolMarkerStyle>();
 		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
+		public List<SearchEngine> SearchEngines { get; } = new List<SearchEngine>();
 		public string BrowserPath { get; set; }
 		public string BrowserParameter { get; set; }
 
@@ -126,13 +127,14 @@ namespace Codist
 			});
 			if (styleFilter == StyleFilters.None) {
 				var l = config.Labels;
-				for (var i = l.Count - 1; i >= 0; i--) {
-					if (String.IsNullOrWhiteSpace(l[i].Label)) {
-						l.RemoveAt(i);
-					}
-				}
+				l.RemoveAll(i => String.IsNullOrWhiteSpace(i.Label));
 				if (l.Count == 0) {
 					InitDefaultLabels(l);
+				}
+				var se = config.SearchEngines;
+				se.RemoveAll(i => String.IsNullOrWhiteSpace(i.Name) || String.IsNullOrWhiteSpace(i.Pattern));
+				if (se.Count == 0) {
+					ResetSearchEngines(se);
 				}
 			}
 			var removeFontNames = System.Windows.Forms.Control.ModifierKeys == System.Windows.Forms.Keys.Control;
@@ -184,6 +186,19 @@ namespace Codist
 			ResetCodeStyle(Instance.MarkerSettings, GetDefaultMarkerStyles());
 			Loaded?.Invoke(Instance, EventArgs.Empty);
 			Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.SyntaxHighlight));
+		}
+
+		public void ResetSearchEngines() {
+			ResetSearchEngines(SearchEngines);
+		}
+		public static void ResetSearchEngines(List<SearchEngine> engines) {
+			engines.Clear();
+			engines.AddRange(new[] {
+				new SearchEngine { Name = "Bing", Pattern = "https://www.bing.com/search?q=%s" },
+				new SearchEngine { Name = "StackOverflow", Pattern = "https://stackoverflow.com/search?q=%s" },
+				new SearchEngine { Name = "GitHub", Pattern = "https://github.com/search?q=%s" },
+				new SearchEngine { Name = "CodeProject", Pattern = "https://www.codeproject.com/search.aspx?q=%s&x=0&y=0&sbo=kw" },
+			});
 		}
 
 		public void SaveConfig(string path, bool stylesOnly = false) {
@@ -420,6 +435,16 @@ namespace Codist
 				}
 			}
 		}
+	}
+	sealed class SearchEngine
+	{
+		public SearchEngine() {}
+		public SearchEngine(string name, string pattern) {
+			Name = name;
+			Pattern = pattern;
+		}
+		public string Name { get; set; }
+		public string Pattern { get; set; }
 	}
 
 	sealed class ConfigUpdatedEventArgs : EventArgs

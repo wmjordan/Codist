@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using AppHelpers;
@@ -142,7 +142,7 @@ namespace Codist.SmartBars
 				else {
 					ctx.HideToolBar();
 				}
-			}, ctx => __FindAndReplaceCommands);
+			}, ctx => __FindAndReplaceCommands.Concat(Config.Instance.SearchEngines.ConvertAll(s => new CommandItem(KnownImageIds.OpenWebSite, "Search with " + s.Name, c => SearchSelection(s.Pattern, c)))));
 		}
 
 		void AddPasteCommand() {
@@ -261,10 +261,7 @@ namespace Codist.SmartBars
 					new CommandItem(KnownImageIds.QuickFind, "Find...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
 					new CommandItem(KnownImageIds.QuickReplace, "Replace...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
 					new CommandItem(KnownImageIds.FindInFile, "Find in Files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
-					new CommandItem(KnownImageIds.ReplaceInFolder, "Replace in Files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
-					new CommandItem(KnownImageIds.OpenWebSite, "Web Search with Bing...", ctx => SearchSelection("https://www.bing.com/search?q=", ctx)),
-					new CommandItem(KnownImageIds.OpenWebSite, "Web Search with StackOverflow...", ctx => SearchSelection("https://stackoverflow.com/search?q=", ctx)),
-					new CommandItem(KnownImageIds.OpenWebSite, "Web Search with GitHub...", ctx => SearchSelection("https://github.com/search?q=", ctx)),
+					new CommandItem(KnownImageIds.ReplaceInFolder, "Replace in Files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles"))
 				};
 		}
 		static CommandItem[] GetSurroundingCommands() {
@@ -282,7 +279,7 @@ namespace Codist.SmartBars
 		static void SearchSelection(string url, CommandContext ctx) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			try {
-				url += System.Net.WebUtility.UrlEncode(ctx.View.GetFirstSelectionText());
+				url = url.Replace("%s", System.Net.WebUtility.UrlEncode(ctx.View.GetFirstSelectionText()));
 				if (Keyboard.Modifiers == ModifierKeys.Control) {
 					CodistPackage.DTE.ItemOperations.Navigate(url);
 				}
@@ -294,7 +291,7 @@ namespace Codist.SmartBars
 				}
 			}
 			catch (Exception ex) {
-				System.Windows.Forms.MessageBox.Show("Failed to launch web browser to search selected items:\n" + ex.Message, nameof(Codist), System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+				MessageBox.Show("Failed to launch web browser to search selected items:\n" + ex.Message, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Exclamation);
 			}
 		}
 	}
