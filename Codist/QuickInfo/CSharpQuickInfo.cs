@@ -30,6 +30,7 @@ namespace Codist.QuickInfo
 		readonly ITextBuffer _TextBuffer;
 		bool _IsDisposed;
 		SemanticModel _SemanticModel;
+		bool _isCandidate;
 
 		public CSharpQuickInfo(ITextBuffer subjectBuffer) {
 			ThreadHelper.ThrowIfNotOnUIThread();
@@ -140,7 +141,7 @@ namespace Codist.QuickInfo
 				ShowParameterInfo(qiContent, node);
 			}
 			ISymbol symbol;
-			bool usedCandidate = false;
+			_isCandidate = false;
 			if (node.IsKind(SyntaxKind.BaseExpression)) {
 				symbol = semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
 			}
@@ -155,7 +156,7 @@ namespace Codist.QuickInfo
 				if (symbolInfo.CandidateReason != CandidateReason.None) {
 					ShowCandidateInfo(qiContent, symbolInfo);
 					symbol = symbolInfo.CandidateSymbols.FirstOrDefault();
-					usedCandidate = true;
+					_isCandidate = true;
 				}
 				else {
 					symbol = symbolInfo.Symbol ?? semanticModel.GetSymbolExt(node, cancellationToken);
@@ -173,7 +174,7 @@ namespace Codist.QuickInfo
 				goto EXIT;
 			}
 			if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
-				&& usedCandidate == false) {
+				&& _isCandidate == false) {
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node, qiWrapper,
 					ctor != null && ctor.Type == node ? semanticModel.GetSymbolInfo(ctor).Symbol : symbol);
@@ -650,6 +651,9 @@ namespace Codist.QuickInfo
 		}
 
 		void ShowOverloadsInfo(QiContainer qiContent, SyntaxNode node, IMethodSymbol method) {
+			if (_isCandidate) {
+				return;
+			}
 			var overloads = node.Kind() == SyntaxKind.MethodDeclaration || node.Kind() == SyntaxKind.ConstructorDeclaration
 				? method.ContainingType.GetMembers(method.Name)
 				: _SemanticModel.GetMemberGroup(node);
