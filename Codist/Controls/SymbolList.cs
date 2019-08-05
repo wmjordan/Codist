@@ -244,6 +244,8 @@ namespace Codist.Controls
 				e.Handled = true;
 				return;
 			}
+			m.Symbol = item.Symbol;
+			m.SyntaxNode = item.SyntaxNode;
 			m.Items.Clear();
 			SetupContextMenu(m, item);
 			m.AddTitleItem(item.SyntaxNode?.GetDeclarationSignature() ?? item.Symbol.GetOriginalName());
