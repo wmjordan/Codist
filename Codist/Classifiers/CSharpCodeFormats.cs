@@ -178,7 +178,6 @@ namespace Codist.Classifiers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeNamespaceName)]
-	[Order(After = Constants.CodeSpecialPuctuation)]
 	sealed class NamespaceFormat : ClassificationFormatDefinition
 	{
 		public NamespaceFormat() {
@@ -191,9 +190,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpExtensionMethodName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	[Order(After = Constants.CodeStaticSymbol)]
 	[Order(After = Constants.CodeExtensionMethodName)]
-	[Order(After = Constants.CSharpMethodName)]
 	sealed class ExtensionMethodFormat : ClassificationFormatDefinition
 	{
 		public ExtensionMethodFormat() {
@@ -206,8 +203,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpExternMethodName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	[Order(After = Constants.CodeStaticSymbol)]
-	[Order(After = Constants.CSharpMethodName)]
+	[Order(After = Constants.CodeMethodName)]
 	sealed class ExternMethodFormat : ClassificationFormatDefinition
 	{
 		public ExternMethodFormat() {
@@ -221,7 +217,6 @@ namespace Codist.Classifiers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeMethodName)]
-	[Order(After = Constants.CodeSpecialPuctuation)]
 	sealed class MethodFormat : ClassificationFormatDefinition
 	{
 		public MethodFormat() {
@@ -234,7 +229,6 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpEventName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	[Order(After = Constants.CodeSpecialPuctuation)]
 	sealed class EventFormat : ClassificationFormatDefinition
 	{
 		public EventFormat() {
@@ -248,7 +242,6 @@ namespace Codist.Classifiers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodePropertyName)]
-	[Order(After = Constants.CodeSpecialPuctuation)]
 	sealed class PropertyFormat : ClassificationFormatDefinition
 	{
 		public PropertyFormat() {
@@ -287,7 +280,6 @@ namespace Codist.Classifiers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeMethodName)]
-	[Order(After = Constants.CodeSpecialPuctuation)]
 	sealed class ConstructorMethodFormat : ClassificationFormatDefinition
 	{
 		public ConstructorMethodFormat() {
@@ -351,15 +343,6 @@ namespace Codist.Classifiers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeStaticSymbol)]
-	[Order(After = Constants.CodeClassName)]
-	[Order(After = Constants.CodeStructName)]
-	[Order(After = Constants.CodeInterfaceName)]
-	[Order(After = Constants.CodeEnumName)]
-	[Order(After = Constants.CodeEventName)]
-	[Order(After = Constants.CodeDelegateName)]
-	[Order(After = Constants.CSharpPropertyName)]
-	[Order(After = Constants.CSharpMethodName)]
-	[Order(After = Constants.CSharpFieldName)]
 	sealed class StaticMemberFormat : ClassificationFormatDefinition
 	{
 		public StaticMemberFormat() {
@@ -372,15 +355,6 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpOverrideMemberName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	[Order(After = Constants.CodeClassName)]
-	[Order(After = Constants.CodeStructName)]
-	[Order(After = Constants.CodeInterfaceName)]
-	[Order(After = Constants.CodeEnumName)]
-	[Order(After = Constants.CodeEventName)]
-	[Order(After = Constants.CodeDelegateName)]
-	[Order(After = Constants.CSharpPropertyName)]
-	[Order(After = Constants.CSharpMethodName)]
-	[Order(After = Constants.CSharpFieldName)]
 	sealed class OverrideMemberFormat : ClassificationFormatDefinition
 	{
 		public OverrideMemberFormat() {
@@ -393,15 +367,6 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpAbstractMemberName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	[Order(After = Constants.CodeClassName)]
-	[Order(After = Constants.CodeStructName)]
-	[Order(After = Constants.CodeInterfaceName)]
-	[Order(After = Constants.CodeEnumName)]
-	[Order(After = Constants.CodeEventName)]
-	[Order(After = Constants.CodeDelegateName)]
-	[Order(After = Constants.CSharpPropertyName)]
-	[Order(After = Constants.CSharpMethodName)]
-	[Order(After = Constants.CSharpFieldName)]
 	sealed class AbstractMemberFormat : ClassificationFormatDefinition
 	{
 		public AbstractMemberFormat() {
@@ -414,9 +379,6 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpVirtualMemberName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	[Order(After = Constants.CodeMethodName)]
-	[Order(After = Constants.CSharpPropertyName)]
-	[Order(After = Constants.CSharpEventName)]
 	sealed class VirtualMemberFormat : ClassificationFormatDefinition
 	{
 		public VirtualMemberFormat() {
@@ -429,7 +391,6 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpSealedClassName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	[Order(After = Constants.CodeClassName)]
 	sealed class SealedClassFormat : ClassificationFormatDefinition
 	{
 		public SealedClassFormat() {
@@ -491,17 +452,7 @@ namespace Codist.Classifiers
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpMetadataSymbol)]
 	[Name(Constants.CSharpMetadataSymbol)]
 	[UserVisible(false)]
-	[Order(Before = Constants.CodeIdentifier)]
-	[Order(Before = Constants.CodeStaticSymbol)]
-	[Order(Before = Constants.CodeClassName)]
-	[Order(Before = Constants.CodeStructName)]
-	[Order(Before = Constants.CodeInterfaceName)]
-	[Order(Before = Constants.CodeEnumName)]
-	[Order(Before = Constants.CodeEventName)]
-	[Order(Before = Constants.CodeDelegateName)]
-	[Order(Before = Constants.CSharpPropertyName)]
-	[Order(Before = Constants.CSharpMethodName)]
-	[Order(Before = Constants.CSharpFieldName)]
+	[Order(After = Constants.CodeIdentifier)]
 	sealed class MetadataSymbol : ClassificationFormatDefinition
 	{
 		public MetadataSymbol() {
@@ -514,16 +465,6 @@ namespace Codist.Classifiers
 	[Name(Constants.CSharpUserSymbol)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	[Order(After = Constants.CodeStaticSymbol)]
-	[Order(After = Constants.CodeClassName)]
-	[Order(After = Constants.CodeStructName)]
-	[Order(After = Constants.CodeInterfaceName)]
-	[Order(After = Constants.CodeEnumName)]
-	[Order(After = Constants.CodeEventName)]
-	[Order(After = Constants.CodeDelegateName)]
-	[Order(After = Constants.CSharpPropertyName)]
-	[Order(After = Constants.CSharpMethodName)]
-	[Order(After = Constants.CSharpFieldName)]
 	sealed class UserSymbol : ClassificationFormatDefinition
 	{
 		public UserSymbol() {
