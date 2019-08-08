@@ -41,13 +41,15 @@ namespace Codist
 		public static ISymbol GetSymbol(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
 			return semanticModel.GetSymbolInfo(node, cancellationToken).Symbol
 				?? semanticModel.GetDeclaredSymbol(node, cancellationToken)
-				?? semanticModel.GetTypeInfo(node, cancellationToken).Type;
+				?? semanticModel.GetTypeInfo(node, cancellationToken).Type
+				?? (node.IsKind(SyntaxKind.FieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as FieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
+					: node.IsKind(SyntaxKind.EventFieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as EventFieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
+					: null)
+				;
 		}
 
 		public static ISymbol GetSymbolExt(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
-			return node.Kind().IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator
-				? semanticModel.GetDeclaredSymbol(node, cancellationToken)
-				: (node is AttributeArgumentSyntax
+			return (node is AttributeArgumentSyntax
 						? semanticModel.GetSymbolInfo(((AttributeArgumentSyntax)node).Expression, cancellationToken).Symbol
 						: null)
 					?? (node is SimpleBaseTypeSyntax || node is TypeConstraintSyntax

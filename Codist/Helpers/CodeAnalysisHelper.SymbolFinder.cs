@@ -257,8 +257,7 @@ namespace Codist
 					|| item.Kind().IsDeclaration()) {
 					continue;
 				}
-				var symbolInfo = semanticModel.GetSymbolInfo(item);
-				var s = symbolInfo.Symbol ?? semanticModel.GetSymbolExt(item);
+				var s = semanticModel.GetSymbol(item) ?? semanticModel.GetSymbolExt(item);
 				if (s == null) {
 					continue;
 				}

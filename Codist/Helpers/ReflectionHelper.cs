@@ -7,10 +7,11 @@ namespace Codist
 {
 	static class ReflectionHelper
 	{
-		public static Func<TObject, TField> CreateGetFieldMethod<TObject, TField>(this Type type, string name) where TObject : class where TField : class {
+		public static Func<TObject, TField> CreateGetFieldMethod<TObject, TField>(string name) where TObject : class where TField : class {
+			var type = typeof(TObject);
 			var fieldInfo = type.GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 			if (fieldInfo != null) {
-				var m = new DynamicMethod("Get" + name, typeof(TField), new[] { typeof(TObject) }, true);
+				var m = new DynamicMethod("Get" + name, typeof(TField), new[] { type }, true);
 				var il = m.GetILGenerator();
 				il.Emit(OpCodes.Ldarg_0);
 				il.Emit(OpCodes.Castclass, type);
@@ -20,11 +21,12 @@ namespace Codist
 			}
 			return (s) => null;
 		}
-		public static Func<TObject, TProperty> CreateGetPropertyMethod<TObject, TProperty>(this Type type, string name) where TObject : class
+		public static Func<TObject, TProperty> CreateGetPropertyMethod<TObject, TProperty>(string name) where TObject : class
 			{
+			var type = typeof(TObject);
 			var propInfo = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 			if (propInfo != null) {
-				var m = new DynamicMethod("Get" + name, typeof(TProperty), new[] { typeof(TObject) }, true);
+				var m = new DynamicMethod("Get" + name, typeof(TProperty), new[] { type }, true);
 				var il = m.GetILGenerator();
 				il.Emit(OpCodes.Ldarg_0);
 				il.Emit(OpCodes.Castclass, type);
@@ -34,10 +36,11 @@ namespace Codist
 			}
 			return (s) => default(TProperty);
 		}
-		public static Action<TObject, TProperty> CreateSetPropertyMethod<TObject, TProperty>(this Type type, string name) where TObject : class {
+		public static Action<TObject, TProperty> CreateSetPropertyMethod<TObject, TProperty>(string name) where TObject : class {
+			var type = typeof(TObject);
 			var propInfo = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 			if (propInfo != null) {
-				var m = new DynamicMethod("Set" + name, null, new[] { typeof(TObject), typeof(TProperty) }, true);
+				var m = new DynamicMethod("Set" + name, null, new[] { type, typeof(TProperty) }, true);
 				var il = m.GetILGenerator();
 				il.Emit(OpCodes.Ldarg_0);
 				il.Emit(OpCodes.Castclass, type);

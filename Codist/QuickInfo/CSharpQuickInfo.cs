@@ -159,7 +159,10 @@ namespace Codist.QuickInfo
 					_isCandidate = true;
 				}
 				else {
-					symbol = symbolInfo.Symbol ?? semanticModel.GetSymbolExt(node, cancellationToken);
+					symbol = symbolInfo.Symbol
+						?? (node.Kind().IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator
+							? semanticModel.GetDeclaredSymbol(node, cancellationToken)
+							: semanticModel.GetSymbolExt(node, cancellationToken));
 				}
 			}
 			if (symbol == null) {
