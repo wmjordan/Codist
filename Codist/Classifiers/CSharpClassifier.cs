@@ -386,6 +386,7 @@ namespace Codist.Classifiers
 				case SyntaxKind.InvocationExpression:
 					return ((((InvocationExpressionSyntax)node).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") ? null : _Classifications.Method;
 				case SyntaxKind.ConstructorDeclaration:
+				case SyntaxKind.BaseConstructorInitializer:
 				case SyntaxKind.AnonymousObjectCreationExpression:
 				case SyntaxKind.ObjectInitializerExpression:
 				case SyntaxKind.ObjectCreationExpression:
