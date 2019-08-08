@@ -111,17 +111,52 @@ namespace Codist
 			return paragraph;
 		}
 
-		public static TItem Get<TItem>(this IEditorFormatMap map, string formatName, string resourceId) {
-			return map.GetProperties(formatName).Get<TItem>(resourceId);
+		public static double? GetFontSize(this ResourceDictionary resource) {
+			return resource.GetNullable<double>(Constants.EditorFormatKeys.FontRenderingSize);
 		}
-		public static WpfBrush GetBrush(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundBrushId) {
-			return map.Get<WpfBrush>(formatName, resourceId);
+		public static bool? GetItalicStyle(this ResourceDictionary resource) {
+			return resource.GetNullable<bool>(Constants.EditorFormatKeys.IsItalic);
+		}
+		public static bool? GetBoldStyle(this ResourceDictionary resource) {
+			return resource.GetNullable<bool>(Constants.EditorFormatKeys.IsBold);
+		}
+		public static double? GetOpacity(this ResourceDictionary resource) {
+			return resource.GetNullable<double>(Constants.EditorFormatKeys.ForegroundOpacity);
+		}
+		public static double? GetBackgroundOpacity(this ResourceDictionary resource) {
+			return resource.GetNullable<double>(Constants.EditorFormatKeys.BackgroundOpacity);
+		}
+		public static WpfBrush GetBrush(this ResourceDictionary resource, string resourceId = EditorFormatDefinition.ForegroundBrushId) {
+			return resource.Get<WpfBrush>(resourceId);
+		}
+		public static WpfBrush GetBackgroundBrush(this ResourceDictionary resource) {
+			return resource.Get<WpfBrush>(EditorFormatDefinition.BackgroundBrushId);
+		}
+		public static TextDecorationCollection GetTextDecorations(this ResourceDictionary resource) {
+			return resource.Get<TextDecorationCollection>(Constants.EditorFormatKeys.TextDecorations);
 		}
 		public static WpfColor GetColor(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundColorId) {
 			var p = map.GetProperties(formatName);
 			return p != null && p.Contains(resourceId) && (p[resourceId] is WpfColor color)
 				? color
 				: EmptyColor;
+		}
+		public static WpfColor GetColor(this ResourceDictionary resource, string resourceId = EditorFormatDefinition.ForegroundColorId) {
+			return resource != null && resource.Contains(resourceId) && (resource[resourceId] is WpfColor color)
+				? color
+				: EmptyColor;
+		}
+		public static WpfColor GetBackgroundColor(this ResourceDictionary resource) {
+			return resource.GetColor(EditorFormatDefinition.BackgroundColorId);
+		}
+		public static ResourceDictionary SetBrush(this ResourceDictionary resource, Brush brush) {
+			brush.Freeze();
+			//var p = new ResourceDictionary().MergeWith(resource);
+			resource[EditorFormatDefinition.ForegroundBrushId] = brush;
+			return resource;
+		}
+		public static void Remove(this IEditorFormatMap map, string formatName, string key) {
+			map.GetProperties(formatName).Remove(key);
 		}
 		public static Inline Render(this ISymbol symbol, string alias, WpfBrush brush) {
 			return symbol.Render(alias, brush == null, brush);

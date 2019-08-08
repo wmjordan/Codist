@@ -49,6 +49,16 @@ namespace Codist
 			public const string VisibleWhitespace = "Visible Whitespace";
 		}
 
+		public static class EditorFormatKeys
+		{
+			public const string FontRenderingSize = nameof(FontRenderingSize);
+			public const string IsItalic = nameof(IsItalic);
+			public const string IsBold = nameof(IsBold);
+			public const string ForegroundOpacity = nameof(ForegroundOpacity);
+			public const string BackgroundOpacity = nameof(BackgroundOpacity);
+			public const string TextDecorations = nameof(TextDecorations);
+		}
+
 		public const string CodeKeyword = "Keyword";
 		public const string CodeComment = "Comment";
 

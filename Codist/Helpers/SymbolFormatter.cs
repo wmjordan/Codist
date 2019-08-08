@@ -309,8 +309,8 @@ namespace Codist
 			var r = new Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>>(19, StringComparer.OrdinalIgnoreCase);
 			foreach (var item in typeof(SymbolFormatter).GetProperties()) {
 				var ctn = item.GetCustomAttribute<ClassificationTypeAttribute>().ClassificationTypeNames;
-				var a = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(typeof(SymbolFormatter), item.Name);
-				r.Add(item.Name, (f, m) => a(f, f._brushConfigurator != null ? f._brushConfigurator(m.GetBrush(ctn)) : m.GetBrush(ctn)));
+				var a = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(item.Name);
+				r.Add(item.Name, (f, m) => a(f, f._brushConfigurator != null ? f._brushConfigurator(m.GetProperties(ctn).GetBrush()) : m.GetProperties(ctn).GetBrush()));
 			}
 			return r;
 		}

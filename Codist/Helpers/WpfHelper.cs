@@ -442,6 +442,12 @@ namespace Codist
 				? item
 				: default;
 		}
+		public static TItem? GetNullable<TItem>(this ResourceDictionary items, object key)
+			where TItem : struct {
+			return (items != null && items.Contains(key) && items[key] is TItem item)
+				? (TItem?)item
+				: null;
+		}
 
 		public static ToolBar HideOverflow(this ToolBar toolBar) {
 			if (toolBar.IsLoaded) {

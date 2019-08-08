@@ -112,6 +112,9 @@ namespace Codist
 		public static WpfColor Alpha(this WpfColor color, byte a) {
 			return WpfColor.FromArgb(a, color.R, color.G, color.B);
 		}
+		public static WpfColor MakeOpaque(this WpfColor color) {
+			return WpfColor.FromArgb(Byte.MaxValue, color.R, color.G, color.B);
+		}
 		/// <summary>
 		/// Returns a new clone of <see cref="WpfBrush"/> which has a new <paramref name="opacity"/> as <see cref="WpfBrush.Opacity"/>.
 		/// </summary>

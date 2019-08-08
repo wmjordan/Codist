@@ -128,18 +128,18 @@ namespace Codist.Margins
 
 		void UpdateSyntaxColors() {
 			//todo cache opaque brushes
-			_ClassPen = new Pen(_FormatMap.GetBrush(Constants.CodeClassName).Alpha(TypeAlpha), TypeLineSize);
-			_ConstructorPen = new Pen(_FormatMap.GetBrush(Constants.CSharpConstructorMethodName).Alpha(MemberAlpha), LineSize);
-			_DelegatePen = new Pen(_FormatMap.GetBrush(Constants.CodeDelegateName).Alpha(MemberAlpha), LineSize);
-			_EnumPen = new Pen(_FormatMap.GetBrush(Constants.CodeEnumName).Alpha(TypeAlpha), TypeLineSize);
-			_EventPen = new Pen(_FormatMap.GetBrush(Constants.CSharpEventName).Alpha(MemberAlpha), LineSize);
-			_FieldPen = new Pen(_FormatMap.GetBrush(Constants.CSharpFieldName).Alpha(MemberAlpha), LineSize);
-			_InterfacePen = new Pen(_FormatMap.GetBrush(Constants.CodeInterfaceName).Alpha(TypeAlpha), TypeLineSize);
-			_MethodPen = new Pen(_FormatMap.GetBrush(Constants.CSharpMethodName).Alpha(MemberAlpha), LineSize);
-			_PropertyPen = new Pen(_FormatMap.GetBrush(Constants.CSharpPropertyName).Alpha(MemberAlpha), LineSize);
-			_StructPen = new Pen(_FormatMap.GetBrush(Constants.CodeStructName).Alpha(TypeAlpha), TypeLineSize);
-			_RegionForeground = _FormatMap.GetBrush(Constants.CodePreprocessorText);
-			_RegionBackground = _FormatMap.GetBrush(Constants.CodePreprocessorText, EditorFormatDefinition.BackgroundBrushId).Alpha(TypeAlpha);
+			_ClassPen = new Pen(_FormatMap.GetProperties(Constants.CodeClassName).GetBrush().Alpha(TypeAlpha), TypeLineSize);
+			_ConstructorPen = new Pen(_FormatMap.GetProperties(Constants.CSharpConstructorMethodName).GetBrush().Alpha(MemberAlpha), LineSize);
+			_DelegatePen = new Pen(_FormatMap.GetProperties(Constants.CodeDelegateName).GetBrush().Alpha(MemberAlpha), LineSize);
+			_EnumPen = new Pen(_FormatMap.GetProperties(Constants.CodeEnumName).GetBrush().Alpha(TypeAlpha), TypeLineSize);
+			_EventPen = new Pen(_FormatMap.GetProperties(Constants.CSharpEventName).GetBrush().Alpha(MemberAlpha), LineSize);
+			_FieldPen = new Pen(_FormatMap.GetProperties(Constants.CSharpFieldName).GetBrush().Alpha(MemberAlpha), LineSize);
+			_InterfacePen = new Pen(_FormatMap.GetProperties(Constants.CodeInterfaceName).GetBrush().Alpha(TypeAlpha), TypeLineSize);
+			_MethodPen = new Pen(_FormatMap.GetProperties(Constants.CSharpMethodName).GetBrush().Alpha(MemberAlpha), LineSize);
+			_PropertyPen = new Pen(_FormatMap.GetProperties(Constants.CSharpPropertyName).GetBrush().Alpha(MemberAlpha), LineSize);
+			_StructPen = new Pen(_FormatMap.GetProperties(Constants.CodeStructName).GetBrush().Alpha(TypeAlpha), TypeLineSize);
+			_RegionForeground = _FormatMap.GetProperties(Constants.CodePreprocessorText).GetBrush();
+			_RegionBackground = _FormatMap.GetProperties(Constants.CodePreprocessorText).GetBackgroundBrush().Alpha(TypeAlpha);
 			_RegionPen = new Pen(_RegionBackground ?? _RegionForeground, TypeLineSize);
 		}
 
@@ -444,19 +444,19 @@ namespace Codist.Margins
 			async Task UpdateReferencesAsync() {
 				var cancellation = _Margin._Cancellation.GetToken();
 				var ctx = _Margin._SemanticContext;
-				if (await ctx.UpdateAsync(_View.Selection.Start.Position, cancellation) == false) {
+				if (await ctx.UpdateAsync(_View.Selection.Start.Position, cancellation).ConfigureAwait(true) == false) {
 					_Symbol = null;
 					_Margin.InvalidateVisual();
 					return;
 				}
 				var node = ctx.Node;
-				var symbol = await ctx.GetSymbolAsync(cancellation);
+				var symbol = await ctx.GetSymbolAsync(cancellation).ConfigureAwait(true);
 				if (symbol != null) {
 					if (Interlocked.Exchange(ref _Symbol, symbol) != symbol) {
 						var doc = ctx.Document;
 						_DocSyntax = ctx.Compilation.SyntaxTree;
 						// todo show marked symbols on scrollbar margin
-						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), cancellation);
+						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), cancellation).ConfigureAwait(true);
 						_Margin.InvalidateVisual();
 					}
 				}
