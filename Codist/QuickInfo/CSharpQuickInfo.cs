@@ -180,7 +180,9 @@ namespace Codist.QuickInfo
 				&& _isCandidate == false) {
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node, qiWrapper,
-					ctor != null && ctor.Type == node ? semanticModel.GetSymbolInfo(ctor).Symbol : symbol);
+					ctor?.Type == node ? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol
+						: node.Parent.IsKind(SyntaxKind.Attribute) ? symbol.ContainingType
+						: symbol);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
 				ShowAttributesInfo(qiContent, symbol);
