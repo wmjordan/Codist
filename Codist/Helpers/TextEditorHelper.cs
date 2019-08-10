@@ -49,10 +49,7 @@ namespace Codist
 
 		#region Spans
 		public static SnapshotSpan CreateSnapshotSpan(this TextSpan span, ITextSnapshot snapshot) {
-			if (span.End < snapshot.Length) {
-				return new SnapshotSpan(snapshot, span.Start, span.Length);
-			}
-			return default;
+			return span.End < snapshot.Length ? new SnapshotSpan(snapshot, span.Start, span.Length) : (default);
 		}
 		public static Span ToSpan(this TextSpan span) {
 			return new Span(span.Start, span.Length);
@@ -431,6 +428,9 @@ namespace Codist
 		#endregion
 
 		#region TextView and editor
+		public static ITextDocument GetTextDocument(this ITextBuffer textBuffer) {
+			return textBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out var d) ? d : null;
+		}
 		public static bool LikeContentType(this ITextBuffer textBuffer, string typeName) {
 			return textBuffer.ContentType.TypeName.IndexOf(typeName) != -1;
 		}

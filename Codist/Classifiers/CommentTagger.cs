@@ -54,8 +54,8 @@ namespace Codist.Classifiers
 		protected abstract int GetCommentStartIndex(string comment);
 		protected abstract int GetCommentEndIndex(string comment);
 
-		public static CommentTagger Create(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags, IContentType type) {
-			switch (GetCodeType(type)) {
+		public static CommentTagger Create(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags, ITextBuffer textBuffer) {
+			switch (GetCodeType(textBuffer)) {
 				case CodeType.CSharp: return new CSharpCommentTagger(registry, aggregator, tags);
 				case CodeType.Markup: return new MarkupCommentTagger(registry, aggregator, tags);
 				case CodeType.C: return new CCommentTagger(registry, aggregator, tags);
@@ -230,15 +230,43 @@ namespace Codist.Classifiers
 		}
 
 		internal static bool IsCommentTaggable(ITextView view) {
-			return GetCodeType(view.TextBuffer.ContentType) != CodeType.None;
+			return GetCodeType(view.TextBuffer) != CodeType.None;
 		}
-		static CodeType GetCodeType(IContentType contentType) {
-			return contentType.IsOfType(Constants.CodeTypes.CSharp) ? CodeType.CSharp
-				: contentType.IsOfType("html") || contentType.IsOfType("htmlx") || contentType.IsOfType("XAML") || contentType.IsOfType("XML") ? CodeType.Markup
-				: contentType.IsOfType("code++.css") ? CodeType.Css
-				: contentType.IsOfType("TypeScript") || contentType.IsOfType("JavaScript") ? CodeType.Js
-				: contentType.IsOfType("C/C++") ? CodeType.C
+		static CodeType GetCodeType(ITextBuffer textBuffer) {
+			var t = textBuffer.ContentType;
+			var f = textBuffer.GetTextDocument()?.FilePath;
+			if (f != null) {
+				f = f.Substring(f.LastIndexOf('.') + 1).ToLowerInvariant();
+			}
+			var c = t.IsOfType(Constants.CodeTypes.CSharp) ? CodeType.CSharp
+				: t.IsOfType("html") || t.IsOfType("htmlx") || t.IsOfType("XAML") || t.IsOfType("XML") ? CodeType.Markup
+				: t.IsOfType("code++.css") ? CodeType.Css
+				: t.IsOfType("TypeScript") || t.IsOfType("JavaScript") ? CodeType.Js
+				: t.IsOfType("C/C++") ? CodeType.C
 				: CodeType.None;
+			if (c != CodeType.None) {
+				return c;
+			}
+			switch (f) {
+				case "js": return CodeType.Js;
+				case "c":
+				case "cpp":
+				case "h":
+				case "cxx":
+					return CodeType.C;
+				case "css":
+					return CodeType.Css;
+				case "html":
+				case "htmlx":
+				case "xaml":
+				case "xml":
+				case "xls":
+				case "xlst":
+				case "xsd":
+				case "config":
+					return CodeType.Markup;
+			}
+			return CodeType.None;
 		}
 
 		#region IDisposable Support
@@ -362,7 +390,7 @@ namespace Codist.Classifiers
 			var vp = textView.Properties;
 			var tagger = vp.GetOrCreateSingletonProperty(() => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
 			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
-			var codeTagger = vp.GetOrCreateSingletonProperty(nameof(CommentTaggerProvider), () => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, tagger, tags, textView.TextBuffer.ContentType));
+			var codeTagger = vp.GetOrCreateSingletonProperty(nameof(CommentTaggerProvider), () => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, tagger, tags, textView.TextBuffer));
 			textView.Closed += TextViewClosed;
 			return codeTagger as ITagger<T>;
 		}
