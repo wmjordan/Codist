@@ -329,7 +329,7 @@ namespace Codist.Controls
 		async Task<object> CreateItemToolTipAsync(ListBoxItem li) {
 			SymbolItem item;
 			if ((item = li.Content as SymbolItem) == null
-				|| await SemanticContext.UpdateAsync(default) == false) {
+				|| await SemanticContext.UpdateAsync(default).ConfigureAwait(true) == false) {
 				return null;
 			}
 
@@ -487,7 +487,7 @@ namespace Codist.Controls
 			if (e.LeftButton != MouseButtonState.Pressed || (item = GetMouseEventData(e)) == null) {
 				return;
 			}
-			if (item.SyntaxNode != null && await SemanticContext.UpdateAsync(default)) {
+			if (item.SyntaxNode != null && await SemanticContext.UpdateAsync(default).ConfigureAwait(true)) {
 				item.RefreshSyntaxNode();
 				var s = e.Source as FrameworkElement;
 				MouseMove -= BeginDragHandler;
@@ -678,7 +678,7 @@ namespace Codist.Controls
 			return null;
 		}
 		internal void SetSymbolToSyntaxNode() {
-			Symbol = Container.SemanticContext.GetSymbolAsync(SyntaxNode).ConfigureAwait(false).GetAwaiter().GetResult();
+			Symbol = SyncHelper.RunSync(() => Container.SemanticContext.GetSymbolAsync(SyntaxNode));
 		}
 		internal void RefreshSyntaxNode() {
 			var node = Container.SemanticContext.RelocateDeclarationNode(SyntaxNode);

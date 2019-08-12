@@ -635,7 +635,7 @@ namespace Codist.NaviBar
 				var ct = _Bar._cancellationSource.GetToken();
 				await CreateMenuForTypeSymbolNodeAsync(ct);
 
-				_FilterBox.UpdateNumbers((await _Bar._SemanticContext.GetSymbolAsync(Node, ct) as ITypeSymbol)?.GetMembers());
+				_FilterBox.UpdateNumbers((await _Bar._SemanticContext.GetSymbolAsync(Node, ct).ConfigureAwait(true) as ITypeSymbol)?.GetMembers());
 				var footer = (TextBlock)_Menu.Footer;
 				if (_PartialCount > 1) {
 					footer.Append(ThemeHelper.GetImage(KnownImageIds.OpenDocumentFromCollection))
@@ -691,7 +691,7 @@ namespace Codist.NaviBar
 
 			async Task RefreshItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
 				var sm = _Bar._SemanticContext.SemanticModel;
-				await _Bar._SemanticContext.UpdateAsync(cancellationToken);
+				await _Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
 				if (sm != _Bar._SemanticContext.SemanticModel) {
 					_Menu.Clear();
 					Node = _Bar._SemanticContext.RelocateDeclarationNode(Node);
@@ -711,8 +711,8 @@ namespace Codist.NaviBar
 				}
 			}
 			async Task AddPartialTypeDeclarationsAsync(BaseTypeDeclarationSyntax node, CancellationToken cancellationToken) {
-				await _Bar._SemanticContext.UpdateAsync(cancellationToken);
-				var symbol = await _Bar._SemanticContext.GetSymbolAsync(node, cancellationToken);
+				await _Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
+				var symbol = await _Bar._SemanticContext.GetSymbolAsync(node, cancellationToken).ConfigureAwait(true);
 				if (symbol == null) {
 					return;
 				}
