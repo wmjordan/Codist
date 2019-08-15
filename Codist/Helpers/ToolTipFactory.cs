@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Controls;
 using AppHelpers;
 using Codist.Controls;
@@ -53,8 +54,13 @@ namespace Codist
 				if (content.Inlines.FirstInline != null) {
 					content.AppendLine();
 				}
-				content.Append("namespace: " + symbol.ContainingNamespace?.ToString())
-					.Append("\nassembly: " + symbol.GetAssemblyModuleName());
+				content.Append("namespace: " + symbol.ContainingNamespace?.ToString()).AppendLine();
+				if (symbol.HasSource()) {
+					content.Append("source file: " + String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))));
+				}
+				else {
+					content.Append("assembly: " + symbol.GetAssemblyModuleName());
+				}
 
 				if (symbol.Kind == SymbolKind.NamedType
 					&& ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Delegate) {
