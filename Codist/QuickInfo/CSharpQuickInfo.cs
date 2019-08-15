@@ -193,6 +193,9 @@ namespace Codist.QuickInfo
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				if (ctor != null && ctor.Type == node) {
 					symbol = semanticModel.GetSymbolOrFirstCandidate(ctor, cancellationToken);
+					if (symbol.IsImplicitlyDeclared) {
+						symbol = symbol.ContainingType;
+					}
 				}
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Diagnostics)) {
 					qiWrapper.SetDiagnostics(semanticModel.GetDiagnostics(token.Span, cancellationToken));
