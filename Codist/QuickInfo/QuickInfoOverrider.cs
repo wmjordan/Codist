@@ -12,6 +12,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text.Editor;
+using System.Windows.Documents;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Codist.QuickInfo
 {
@@ -53,31 +55,17 @@ namespace Codist.QuickInfo
 				return;
 			}
 			description.UseDummyToolTip();
-			if (symbol.HasSource() == false) {
-				if (symbol.ContainingType?.HasSource() == true) {
-					// if the symbol is implicitly declared but its containing type is in source,
-					// navigate to the containing type
-					symbol = symbol.ContainingType;
-					goto ClickAndGo;
-				}
-				description.MouseEnter += HookMetaSymbolEvents;
-				return;
+			if (symbol.HasSource() == false && symbol.ContainingType?.HasSource() == true) {
+				// if the symbol is implicitly declared but its containing type is in source,
+				// navigate to the containing type
+				symbol = symbol.ContainingType;
 			}
-		ClickAndGo:
 			description.MouseEnter += HookEvents;
 
-			void HookMetaSymbolEvents(object sender, MouseEventArgs e) {
-				var s = sender as FrameworkElement;
-				s.MouseEnter -= HookMetaSymbolEvents;
-
-				s.ToolTipOpening += ShowToolTip;
-				s.UseDummyToolTip();
-				s.ContextMenuOpening += ShowContextMenu;
-			}
 			void HookNamespaceSymbolEvents(object sender, EventArgs e) {
 				var s = sender as FrameworkElement;
 				s.MouseEnter -= HookNamespaceSymbolEvents;
-				((TextBlock)sender).Background = __HighlightBrush;
+				HighlightSymbol(sender, e);
 				s.Cursor = Cursors.Hand;
 				s.MouseEnter += HighlightSymbol;
 				s.MouseLeave += RemoveSymbolHighlight;
@@ -88,7 +76,7 @@ namespace Codist.QuickInfo
 			void HookEvents(object sender, MouseEventArgs e) {
 				var s = sender as FrameworkElement;
 				s.MouseEnter -= HookEvents;
-				((TextBlock)sender).Background = __HighlightBrush;
+				HighlightSymbol(sender, e);
 				s.Cursor = Cursors.Hand;
 				s.ToolTipOpening += ShowToolTip;
 				s.MouseEnter += HighlightSymbol;
@@ -100,21 +88,15 @@ namespace Codist.QuickInfo
 			}
 			async void GoToSource(object sender, MouseButtonEventArgs e) {
 				await quickInfoSession.DismissAsync();
-				var locs = symbol.GetSourceReferences();
-				if (locs.Length == 1) {
-					symbol.GoToSource();
-				}
-				else {
-					CSharpSymbolContextMenu.ShowLocations(symbol, symbol.GetSourceReferences(), SemanticContext.GetOrCreateSingetonInstance(quickInfoSession.TextView as IWpfTextView));
-				}
+				symbol.GoToDefinition();
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs e) {
 				var t = sender as TextBlock;
 				t.ToolTip = ShowSymbolLocation(symbol, symbol.HasSource() ? System.IO.Path.GetFileName(symbol.Locations[0].SourceTree.FilePath) : symbol.GetAssemblyModuleName());
 				t.ToolTipOpening -= ShowToolTip;
 			}
-			void HighlightSymbol(object sender, MouseEventArgs e) {
-				((TextBlock)sender).Background = __HighlightBrush;
+			void HighlightSymbol(object sender, EventArgs e) {
+				((TextBlock)sender).Background = symbol.HasSource() ? SystemColors.HighlightBrush.Alpha(0.3) : SystemColors.GrayTextBrush.Alpha(0.3);
 			}
 			void RemoveSymbolHighlight(object sender, MouseEventArgs e) {
 				((TextBlock)sender).Background = Brushes.Transparent;
@@ -345,6 +327,17 @@ namespace Codist.QuickInfo
 								Stretch = Stretch.None
 							};
 							icon.Visibility = Visibility.Collapsed;
+						}
+						if (signature != null) {
+							var list = (IList)signature.Inlines;
+							for (var i = 0; i < list.Count; i++) {
+								if (list[i] is Hyperlink link) {
+									var r = link.Inlines.FirstInline as Run;
+									if (r != null) {
+										list[i] = new Run { Text = r.Text, Foreground = r.Foreground, Background = r.Background };
+									}
+								}
+							}
 						}
 						var c = infoPanel.GetParent<Border>();
 						c.Margin = __DocPanelBorderMargin;

@@ -47,5 +47,7 @@ namespace Codist
 		[Import]
 		public IViewTagAggregatorFactoryService ViewTagAggregatorFactory { get; private set; }
 
+		[Import]
+		public Microsoft.VisualStudio.LanguageServices.VisualStudioWorkspace VisualStudioWorkspace { get; private set; }
 	}
 }

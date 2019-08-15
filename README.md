@@ -491,6 +491,7 @@
   * Select Next Occurence: https://github.com/2mas/SelectNextOccurrence
   * VSColorOutput: https://github.com/mike-ward/VSColorOutput
   * NuGet: https://github.com/NuGet/NuGet.Build.Packaging
+  * GoToImplementation: https://github.com/GordianDotNet/GoToImplementation
 
   And every donaters, beta testers to this project.
 

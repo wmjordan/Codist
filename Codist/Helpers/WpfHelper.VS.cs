@@ -190,6 +190,22 @@ namespace Codist
 			TextOptions.SetTextRenderingMode(element, optimize ? TextRenderingMode.Grayscale : TextRenderingMode.Auto);
 		}
 
+		public static void GoToDefinition(this ISymbol symbol) {
+			var r = symbol.GetSourceReferences();
+			if (r.Length == 1) {
+				r[0].GoToSource();
+			}
+			else if (r.Length == 0) {
+				ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, TextEditorHelper.GetMouseOverDocumentView().TextSnapshot.TextBuffer.GetDocument().Project, default);
+			}
+			else {
+				var ctx = SemanticContext.GetHovered();
+				if (ctx != null) {
+					CSharpSymbolContextMenu.ShowLocations(symbol, r, ctx);
+				}
+			}
+		}
+
 		sealed class SymbolLink : Run
 		{
 			readonly ISymbol _Symbol;
@@ -198,7 +214,7 @@ namespace Codist
 				Text = alias ?? symbol.GetOriginalName();
 				_Symbol = symbol;
 				TextDecorations = null;
-				if (clickAndGo && symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
+				if (clickAndGo) {
 					MouseEnter += InitInteraction;
 				}
 				ToolTip = String.Empty;
@@ -258,7 +274,7 @@ namespace Codist
 			}
 
 			void Highlight(object sender, MouseEventArgs e) {
-				Background = SystemColors.HighlightBrush.Alpha(0.3);
+				Background = _Symbol.HasSource() ? SystemColors.HighlightBrush.Alpha(0.3) : SystemColors.GrayTextBrush.Alpha(0.3);
 				Cursor = Cursors.Hand;
 			}
 			void Leave(object sender, MouseEventArgs e) {
@@ -266,18 +282,8 @@ namespace Codist
 			}
 
 			void GotoSymbol(object sender, RoutedEventArgs e) {
-				var r = _Symbol.GetSourceReferences();
-				if (r.Length == 1) {
-					r[0].GoToSource();
-				}
-				else {
-					var ctx = SemanticContext.GetHovered();
-					if (ctx != null) {
-						CSharpSymbolContextMenu.ShowLocations(_Symbol, r, ctx);
-					}
-				}
+				_Symbol.GoToDefinition();
 			}
-
 		}
 	}
 }

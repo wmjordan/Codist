@@ -11,7 +11,7 @@ namespace Codist
 {
 	static partial class CodeAnalysisHelper
 	{
-		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
+		public static Document GetDocument(this Workspace workspace, ITextBuffer textBuffer) {
 			if (workspace == null) {
 				throw new ArgumentNullException(nameof(workspace));
 			}
@@ -19,10 +19,10 @@ namespace Codist
 			if (solution == null) {
 				throw new InvalidOperationException("solution is null");
 			}
-			if (span.Snapshot == null) {
-				throw new InvalidOperationException("snapshot is null");
+			if (textBuffer == null) {
+				throw new InvalidOperationException("textBuffer is null");
 			}
-			var textContainer = span.Snapshot.TextBuffer.AsTextContainer();
+			var textContainer = textBuffer.AsTextContainer();
 			if (textContainer == null) {
 				throw new InvalidOperationException("textContainer is null");
 			}
@@ -33,6 +33,12 @@ namespace Codist
 			return solution.ContainsDocument(docId)
 				? solution.GetDocument(docId)
 				: solution.WithDocumentText(docId, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(docId);
+		}
+		public static Document GetDocument(this ITextBuffer textBuffer) {
+			return textBuffer.GetWorkspace().GetDocument(textBuffer);
+		}
+		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
+			return workspace.GetDocument(span.Snapshot.TextBuffer);
 		}
 
 		/// <summary>Gets all <see cref="Document"/>s from a given <see cref="Project"/> and referencing/referenced projects.</summary>
