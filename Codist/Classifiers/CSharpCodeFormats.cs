@@ -10,6 +10,7 @@ namespace Codist.Classifiers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	[Order(After = Constants.CodeKeywordControl)]
+	[Order(Before = Constants.CodeSpecialPunctuation)]
 	sealed class ControlFlowKeywordFormat : ClassificationFormatDefinition
 	{
 		public ControlFlowKeywordFormat() {
@@ -36,6 +37,7 @@ namespace Codist.Classifiers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	[Order(After = Constants.CodeKeywordControl)]
+	[Order(Before = Constants.CodeSpecialPunctuation)]
 	sealed class BranchingKeywordFormat : ClassificationFormatDefinition
 	{
 		public BranchingKeywordFormat() {
@@ -48,6 +50,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CodeLoopKeyword)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
+	[Order(Before = Constants.CodeSpecialPunctuation)]
 	sealed class LoopKeywordFormat : ClassificationFormatDefinition
 	{
 		public LoopKeywordFormat() {
@@ -60,6 +63,7 @@ namespace Codist.Classifiers
 	[Name(Constants.CodeTypeCastKeyword)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
+	[Order(Before = Constants.CodeSpecialPunctuation)]
 	sealed class TypeCastKeywordFormat : ClassificationFormatDefinition
 	{
 		public TypeCastKeywordFormat() {
@@ -73,6 +77,7 @@ namespace Codist.Classifiers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	[Order(After = Constants.CodeBranchingKeyword)]
+	[Order(Before = Constants.CodeSpecialPunctuation)]
 	sealed class ResourceKeywordFormat : ClassificationFormatDefinition
 	{
 		public ResourceKeywordFormat() {
@@ -81,14 +86,14 @@ namespace Codist.Classifiers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CodeSpecialPuctuation)]
-	[Name(Constants.CodeSpecialPuctuation)]
+	[ClassificationType(ClassificationTypeNames = Constants.CodeSpecialPunctuation)]
+	[Name(Constants.CodeSpecialPunctuation)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	sealed class SpecialPuctuationFormat : ClassificationFormatDefinition
+	sealed class SpecialPunctuationFormat : ClassificationFormatDefinition
 	{
-		public SpecialPuctuationFormat() {
-			DisplayName = Constants.CodeSpecialPuctuation;
+		public SpecialPunctuationFormat() {
+			DisplayName = Constants.CodeSpecialPunctuation;
 			IsBold = true;
 		}
 	}

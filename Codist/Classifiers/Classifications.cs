@@ -130,7 +130,7 @@ namespace Codist.Classifiers
 			TypeCastKeyword = registry.GetClassificationType(Constants.CodeTypeCastKeyword);
 			Punctuation = registry.GetClassificationType(Constants.CodePunctuation);
 			Keyword = registry.GetClassificationType(Constants.CodeKeyword);
-			SpecialPunctuation = registry.GetClassificationType(Constants.CodeSpecialPuctuation);
+			SpecialPunctuation = registry.GetClassificationType(Constants.CodeSpecialPunctuation);
 		}
 
 		public IClassificationType BranchingKeyword { get; }

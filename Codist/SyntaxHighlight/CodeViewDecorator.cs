@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media;
@@ -17,51 +19,52 @@ namespace Codist.SyntaxHighlight
 		readonly IWpfTextView _TextView;
 		readonly IClassificationFormatMap _ClassificationFormatMap;
 		readonly IClassificationTypeRegistryService _RegService;
+		readonly IEditorFormatMap _EditorFormatMap;
 
 		Color _BackColor, _ForeColor;
 		volatile int _IsDecorating;
-		//bool _PendingRefresh;
 
 		public CodeViewDecorator(IWpfTextView view) {
 			view.Closed += View_Closed;
-			//view.VisualElement.IsVisibleChanged += VisualElement_IsVisibleChanged;
-			//view.GotAggregateFocus += TextView_GotAggregateFocus;
 			Config.Updated += SettingsSaved;
 
 			_ClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(view);
-			_ClassificationFormatMap.ClassificationFormatMappingChanged += FormatUpdated;
+			//_ClassificationFormatMap.ClassificationFormatMappingChanged += FormatUpdated;
+			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(view);
+			_EditorFormatMap.FormatMappingChanged += FormatUpdated;
 			_RegService = ServicesHelper.Instance.ClassificationTypeRegistry;
 			_TextView = view;
 
-			Decorate();
+			Decorate(FormatStore.ClassifcationTypeStore.Keys, true);
 		}
-
-		//void VisualElement_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-		//	if (_PendingRefresh && _TextView.VisualElement.IsVisible) {
-		//		SettingsSaved(sender, EventArgs.Empty);
-		//	}
-		//}
 
 		void View_Closed(object sender, EventArgs e) {
 			Config.Updated -= SettingsSaved;
-			_ClassificationFormatMap.ClassificationFormatMappingChanged -= FormatUpdated;
+			//_ClassificationFormatMap.ClassificationFormatMappingChanged -= FormatUpdated;
 			//_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
+			_EditorFormatMap.FormatMappingChanged -= FormatUpdated;
 			_TextView.Closed -= View_Closed;
 		}
 
 		void SettingsSaved(object sender, ConfigUpdatedEventArgs eventArgs) {
 			if (eventArgs.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)) {
-				FormatUpdated(sender, eventArgs);
+				var t = eventArgs.Parameter as string;
+				if (t != null) {
+					Decorate(new[] { ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(t) }, true);
+				}
+				else {
+					Decorate(FormatStore.ClassifcationTypeStore.Keys, false);
+				}
 			}
 		}
 
-		void FormatUpdated(object sender, EventArgs e) {
+		void FormatUpdated(object sender, FormatItemsEventArgs e) {
 			if (_IsDecorating == 0 && _TextView.VisualElement.IsVisible) {
-				Decorate();
+				Decorate(e.ChangedItems.Select(_RegService.GetClassificationType).ToList(), false);
 			}
 		}
 
-		void Decorate() {
+		void Decorate(ICollection<IClassificationType> classifications, bool fullUpdate) {
 			if (Interlocked.CompareExchange(ref _IsDecorating, 1, 0) != 0) {
 				return;
 			}
@@ -77,7 +80,7 @@ namespace Codist.SyntaxHighlight
 				if (c.A > 0) {
 					_BackColor = c.Alpha(0);
 				}
-				DecorateClassificationTypes();
+				DecorateClassificationTypes(classifications, fullUpdate);
 			}
 			catch (Exception ex) {
 				Debug.WriteLine("Decorator exception: ");
@@ -88,78 +91,145 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
-		void DecorateClassificationTypes() {
-			if (_ClassificationFormatMap.IsInBatchUpdate) {
+		void DecorateClassificationTypes(ICollection<IClassificationType> classifications, bool fullUpdate) {
+			if (_ClassificationFormatMap.IsInBatchUpdate || classifications.Count == 0) {
 				return;
 			}
-			_ClassificationFormatMap.BeginBatchUpdate();
 			var defaultSize = _ClassificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
-			foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
-				StyleBase style;
-				TextFormattingRunProperties textFormatting;
+			var updated = new Dictionary<IClassificationType, TextFormattingRunProperties>(classifications.Count);
+			StyleBase style;
+			TextFormattingRunProperties textFormatting;
+			foreach (var item in classifications) {
 				if (item == null
 					|| (style = FormatStore.GetStyle(item.Classification)) == null
 					|| (textFormatting = FormatStore.GetBackupFormatting(item.Classification)) == null) {
 					continue;
 				}
-				_ClassificationFormatMap.SetTextProperties(item, SetProperties(textFormatting, style, defaultSize));
+				var p = SetProperties(textFormatting, style, defaultSize);
+				if (p != textFormatting || fullUpdate) {
+					updated[item] = p;
+				}
 			}
-			_ClassificationFormatMap.EndBatchUpdate();
-			Debug.WriteLine("Decorated");
+			foreach (var item in updated.ToList()) {
+				foreach (var subType in item.Key.GetSubTypes()) {
+					if (updated.ContainsKey(subType) == false) {
+						if ((style = FormatStore.GetStyle(subType.Classification)) == null
+							|| (textFormatting = FormatStore.GetBackupFormatting(subType.Classification)) == null) {
+							continue;
+						}
+						updated[subType] = SetProperties(textFormatting, style, defaultSize);
+					}
+				}
+			}
+			if (updated.Count > 0) {
+				_ClassificationFormatMap.BeginBatchUpdate();
+				foreach (var item in updated) {
+					_ClassificationFormatMap.SetTextProperties(item.Key, item.Value);
+					Debug.WriteLine("Update format: " + item.Key.Classification);
+				}
+				_ClassificationFormatMap.EndBatchUpdate();
+				Debug.WriteLine($"Decorated {updated.Count} formats");
+			}
+
+			bool IsBaseTypeUpdated(IEnumerable<IClassificationType> types, Dictionary<IClassificationType, TextFormattingRunProperties> updateList) {
+				foreach (var item in types) {
+					if (updateList.ContainsKey(item) || IsBaseTypeUpdated(item.BaseTypes, updateList)) {
+						return true;
+					}
+				}
+				return false;
+			}
 		}
 
-		TextFormattingRunProperties SetProperties(TextFormattingRunProperties properties, StyleBase styleOption, double textSize) {
+		TextFormattingRunProperties UpdateFormattingMap(StyleBase style, TextFormattingRunProperties textFormatting, double defaultSize) {
+			var p = SetProperties(textFormatting, style, defaultSize);
+			return textFormatting != p ? p : null;
+		}
+
+		TextFormattingRunProperties SetProperties(TextFormattingRunProperties format, StyleBase styleOption, double textSize) {
 			var settings = styleOption;
 			var fontSize = textSize + settings.FontSize;
 			if (fontSize < 1) {
 				fontSize = 1;
 			}
 			if (string.IsNullOrWhiteSpace(settings.Font) == false) {
-				properties = properties.SetTypeface(new Typeface(settings.Font));
+				format = format.SetTypeface(new Typeface(settings.Font));
 			}
 			if (settings.FontSize != 0) {
-				properties = properties.SetFontRenderingEmSize(fontSize);
+				if (fontSize != format.FontRenderingEmSize) {
+					format = format.SetFontRenderingEmSize(fontSize);
+				}
 			}
 			if (settings.Bold.HasValue) {
-				properties = properties.SetBold(settings.Bold.Value);
+				if (settings.Bold != format.Bold || format.ItalicEmpty) {
+					format = format.SetBold(settings.Bold.Value);
+				}
 			}
 			if (settings.Italic.HasValue) {
-				properties = properties.SetItalic(settings.Italic.Value);
+				if (settings.Italic != format.Italic || format.ItalicEmpty) {
+					format = format.SetItalic(settings.Italic.Value);
+				}
 			}
 			if (settings.ForegroundOpacity > 0) {
 				if (settings.ForeColor.A > 0) {
-					properties = properties.SetForeground(settings.ForeColor);
+					if (format.ForegroundBrushEmpty || (format.ForegroundBrush as SolidColorBrush)?.Color != settings.ForeColor) {
+						format = format.SetForeground(settings.ForeColor);
+					}
 				}
-				if (settings.ForegroundOpacity != Byte.MaxValue || properties.ForegroundOpacityEmpty == false) {
-					properties = properties.SetForegroundOpacity(settings.ForegroundOpacity / 255.0);
+				if (settings.ForegroundOpacity != Byte.MaxValue
+					&& format.ForegroundOpacity != settings.ForegroundOpacity / 255.0
+					&& format.ForegroundBrushEmpty == false
+					&& Math.Abs(format.ForegroundBrush.Opacity - settings.ForegroundOpacity / 255.0) > 0.01) {
+					format = format.SetForegroundOpacity(settings.ForegroundOpacity / 255.0);
 				}
 			}
 			else if (settings.ForeColor.A > 0) {
-				properties = properties.SetForeground(settings.ForeColor);
+				if (format.ForegroundBrushEmpty || (format.ForegroundBrush as SolidColorBrush)?.Color != settings.ForeColor) {
+					format = format.SetForeground(settings.ForeColor);
+				}
 			}
 			if (settings.BackColor.A > 0) {
 				var bc = settings.BackColor.A > 0 ? settings.BackColor
-				   : properties.BackgroundBrushEmpty == false && properties.BackgroundBrush is SolidColorBrush ? (properties.BackgroundBrush as SolidColorBrush).Color
+				   : format.BackgroundBrushEmpty == false && format.BackgroundBrush is SolidColorBrush ? (format.BackgroundBrush as SolidColorBrush).Color
 				   : Colors.Transparent;
-				if (settings.BackgroundOpacity != Byte.MaxValue && settings.BackgroundOpacity != 0 || properties.BackgroundOpacityEmpty == false) {
-					properties = properties.SetBackgroundOpacity(settings.BackgroundOpacity / 255.0);
+				if (settings.BackgroundOpacity != Byte.MaxValue && settings.BackgroundOpacity != 0
+					&& format.BackgroundOpacity != settings.BackgroundOpacity / 255.0
+					&& format.BackgroundBrushEmpty == false
+					&& Math.Abs(format.BackgroundBrush.Opacity - settings.BackgroundOpacity / 255.0) > 0.01) {
+					format = format.SetBackgroundOpacity(settings.BackgroundOpacity / 255.0);
 				}
 				if (bc.A > 0) {
+					var bb = format.BackgroundBrush as LinearGradientBrush;
 					switch (settings.BackgroundEffect) {
 						case BrushEffect.Solid:
-							properties = properties.SetBackground(bc);
+							if (format.BackgroundBrushEmpty || (format.BackgroundBrush as SolidColorBrush)?.Color != bc) {
+								format = format.SetBackground(bc);
+							}
 							break;
 						case BrushEffect.ToBottom:
-							properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 90));
+							if (bb == null || bb.StartPoint.Y > bb.EndPoint.Y || bb.GradientStops.Count != 2
+								|| bb.GradientStops[0].Color != _BackColor || bb.GradientStops[1].Color != bc) {
+								format = format.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 90));
+							}
 							break;
 						case BrushEffect.ToTop:
-							properties = properties.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 90));
+							if (bb == null || bb.StartPoint.Y < bb.EndPoint.Y || bb.GradientStops.Count != 2
+								|| bb.GradientStops[0].Color != bc || bb.GradientStops[1].Color != _BackColor) {
+								format = format.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 90));
+							}
+							bb = new LinearGradientBrush(bc, _BackColor, 90);
 							break;
 						case BrushEffect.ToRight:
-							properties = properties.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 0));
+							if (bb == null || bb.StartPoint.X >= bb.EndPoint.X || bb.GradientStops.Count != 2
+								|| bb.GradientStops[0].Color != _BackColor || bb.GradientStops[1].Color != bc) {
+								format = format.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 0));
+							}
 							break;
 						case BrushEffect.ToLeft:
-							properties = properties.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 0));
+							if (bb == null || bb.StartPoint.X >= bb.EndPoint.X || bb.GradientStops.Count != 2
+								|| bb.GradientStops[0].Color != bc || bb.GradientStops[1].Color != _BackColor) {
+								format = format.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 0));
+							}
 							break;
 						default:
 							throw new NotImplementedException("Background effect not supported: " + settings.BackgroundEffect.ToString());
@@ -167,7 +237,9 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 			else if (settings.BackColor.A > 0) {
-				properties = properties.SetBackground(settings.BackColor);
+				if (format.BackgroundBrushEmpty || (format.BackgroundBrush as SolidColorBrush)?.Color != settings.BackColor) {
+					format = format.SetBackground(settings.BackColor);
+				}
 			}
 			if (settings.Underline.HasValue || settings.Strikethrough.HasValue || settings.OverLine.HasValue) {
 				var tdc = new TextDecorationCollection();
@@ -180,9 +252,9 @@ namespace Codist.SyntaxHighlight
 				if (settings.OverLine.GetValueOrDefault()) {
 					tdc.Add(TextDecorations.OverLine);
 				}
-				properties = properties.SetTextDecorations(tdc);
+				format = format.SetTextDecorations(tdc);
 			}
-			return properties;
+			return format;
 		}
 	}
 }

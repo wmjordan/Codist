@@ -240,6 +240,9 @@ namespace Codist
 		internal void FireConfigChangedEvent(Features updatedFeature) {
 			Updated?.Invoke(this, new ConfigUpdatedEventArgs(updatedFeature));
 		}
+		internal void FireConfigChangedEvent(Features updatedFeature, object parameter) {
+			Updated?.Invoke(this, new ConfigUpdatedEventArgs(updatedFeature) { Parameter = parameter });
+		}
 		internal static TStyle[] GetDefaultCodeStyles<TStyle, TStyleType>()
 			where TStyle : StyleBase<TStyleType>, new()
 			where TStyleType : struct, Enum {
@@ -259,34 +262,33 @@ namespace Codist
 			return styles.FindAll(s => s.IsSet);
 		}
 		internal void Set(Features options, bool set) {
-			Features = EnumHelper.SetFlags(Features, options, set);
+			Features = Features.SetFlags(options, set);
 		}
 		internal void Set(DisplayOptimizations options, bool set) {
-			DisplayOptimizations = EnumHelper.SetFlags(DisplayOptimizations, options, set);
+			DisplayOptimizations = DisplayOptimizations.SetFlags(options, set);
 		}
 		internal void Set(QuickInfoOptions options, bool set) {
-			QuickInfoOptions = EnumHelper.SetFlags(QuickInfoOptions, options, set);
+			QuickInfoOptions = QuickInfoOptions.SetFlags(options, set);
 		}
 		internal void Set(NaviBarOptions options, bool set) {
-			NaviBarOptions = EnumHelper.SetFlags(NaviBarOptions, options, set);
+			NaviBarOptions = NaviBarOptions.SetFlags(options, set);
 		}
 		internal void Set(SmartBarOptions options, bool set) {
-			SmartBarOptions = EnumHelper.SetFlags(SmartBarOptions, options, set);
+			SmartBarOptions = SmartBarOptions.SetFlags(options, set);
 			FireConfigChangedEvent(Features.SmartBar);
 		}
 		internal void Set(MarkerOptions options, bool set) {
-			MarkerOptions = EnumHelper.SetFlags(MarkerOptions, options, set);
+			MarkerOptions = MarkerOptions.SetFlags(options, set);
 			FireConfigChangedEvent(Features.ScrollbarMarkers);
 		}
 		internal void Set(SpecialHighlightOptions options, bool set) {
-			SpecialHighlightOptions = EnumHelper.SetFlags(SpecialHighlightOptions, options, set);
-			FireConfigChangedEvent(Features.SyntaxHighlight);
+			SpecialHighlightOptions = SpecialHighlightOptions.SetFlags(options, set);
 		}
 		internal void Set(BuildOptions options, bool set) {
-			BuildOptions = EnumHelper.SetFlags(BuildOptions, options, set);
+			BuildOptions = BuildOptions.SetFlags(options, set);
 		}
 		internal void SetSymbolToolTipOptions(SymbolToolTipOptions options, bool set) {
-			SymbolToolTipOptions = EnumHelper.SetFlags(SymbolToolTipOptions, options, set);
+			SymbolToolTipOptions = SymbolToolTipOptions.SetFlags(options, set);
 		}
 
 		static void LoadStyleEntries<TStyle, TStyleType> (List<TStyle> styles, bool removeFontNames)
@@ -454,6 +456,7 @@ namespace Codist
 		}
 
 		public Features UpdatedFeature { get; }
+		public object Parameter { get; set; }
 	}
 
 	public enum BrushEffect

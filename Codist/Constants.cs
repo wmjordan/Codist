@@ -67,7 +67,7 @@ namespace Codist
 		public const string CodeControlFlowKeyword = "Keyword: Control flow";
 		public const string CodeLoopKeyword = "Keyword: Loop";
 		public const string CodeTypeCastKeyword = "Keyword: Type cast";
-		public const string CodeSpecialPuctuation = "Special Puctuation";
+		public const string CodeSpecialPunctuation = "Special Punctuation";
 
 		public const string CodeClassName = "class name";
 		public const string CodeStructName = "struct name";

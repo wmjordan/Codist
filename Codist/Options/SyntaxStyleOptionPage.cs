@@ -148,7 +148,7 @@ namespace Codist.Options
 				UpdateUIControls(i);
 				UpdatePreview();
 			});
-			_UI.PostEventAction();
+			//_UI.PostEventAction();
 		}
 
 		void UpdateUIControls(StyleBase style) {
@@ -216,7 +216,7 @@ namespace Codist.Options
 			if (_activeStyle == null) {
 				return;
 			}
-			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight, _activeStyle.ClassificationType);
 			UpdatePreview();
 		}
 

@@ -146,7 +146,7 @@ namespace Codist.Options
 				return;
 			}
 			UpdatePreview();
-			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight, FindStyle(_ActiveLabel).ClassificationType);
 		}
 
 		void StyleApplicationChanged(object sender, EventArgs e) {
@@ -202,7 +202,7 @@ namespace Codist.Options
 		}
 
 		static void RenderPreview(Bitmap bmp, string fontName, int fontSize, CommentLabel label) {
-			var style = Config.Instance.CommentStyles.Find(i => i.StyleID == label.StyleID);
+			var style = FindStyle(label);
 			if (style == null || String.IsNullOrEmpty(label.Label)) {
 				return;
 			}
@@ -228,6 +228,10 @@ namespace Codist.Options
 				}
 				g.DrawString(t, f, b, new RectangleF(PointF.Empty, bmp.PhysicalDimension));
 			}
+		}
+
+		static Codist.SyntaxHighlight.CommentStyle FindStyle(CommentLabel label) {
+			return Config.Instance.CommentStyles.Find(i => i.StyleID == label.StyleID);
 		}
 	}
 }

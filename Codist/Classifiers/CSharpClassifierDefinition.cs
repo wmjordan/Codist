@@ -183,7 +183,7 @@ namespace Codist.Classifiers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodePunctuation)]
-		[Name(Constants.CodeSpecialPuctuation)]
+		[Name(Constants.CodeSpecialPunctuation)]
 		static ClassificationTypeDefinition SpecialPunctuation;
 
 		[Export(typeof(ClassificationTypeDefinition))]
