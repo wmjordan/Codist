@@ -213,7 +213,6 @@ namespace Codist
 			public SymbolLink(ISymbol symbol, string alias, bool clickAndGo) {
 				Text = alias ?? symbol.GetOriginalName();
 				_Symbol = symbol;
-				TextDecorations = null;
 				if (clickAndGo) {
 					MouseEnter += InitInteraction;
 				}
@@ -223,6 +222,7 @@ namespace Codist
 			void InitInteraction(object sender, MouseEventArgs e) {
 				MouseEnter -= InitInteraction;
 
+				Cursor = Cursors.Hand;
 				Highlight(sender, e);
 				MouseEnter += Highlight;
 				MouseLeave += Leave;
@@ -274,8 +274,7 @@ namespace Codist
 			}
 
 			void Highlight(object sender, MouseEventArgs e) {
-				Background = _Symbol.HasSource() ? SystemColors.HighlightBrush.Alpha(0.3) : SystemColors.GrayTextBrush.Alpha(0.3);
-				Cursor = Cursors.Hand;
+				Background = (_Symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(0.3);
 			}
 			void Leave(object sender, MouseEventArgs e) {
 				Background = WpfBrushes.Transparent;
@@ -283,6 +282,7 @@ namespace Codist
 
 			void GotoSymbol(object sender, RoutedEventArgs e) {
 				_Symbol.GoToDefinition();
+				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
 			}
 		}
 	}
