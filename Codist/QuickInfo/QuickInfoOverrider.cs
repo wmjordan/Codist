@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using AppHelpers;
@@ -12,8 +13,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text.Editor;
-using System.Windows.Documents;
-using Microsoft.CodeAnalysis.Text;
 
 namespace Codist.QuickInfo
 {
@@ -28,8 +27,6 @@ namespace Codist.QuickInfo
 
 	static class QuickInfoOverrider
 	{
-		static readonly SolidColorBrush __HighlightBrush = SystemColors.HighlightBrush.Alpha(0.3);
-
 		public static IQuickInfoOverrider CreateOverrider(IAsyncQuickInfoSession session) {
 			return session.Properties.GetOrCreateSingletonProperty<Default>(()=> new Default());
 		}
@@ -51,7 +48,7 @@ namespace Codist.QuickInfo
 		static void ApplyClickAndGo(ISymbol symbol, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
 			if (symbol.Kind == SymbolKind.Namespace) {
 				description.ToolTip = "Locations: " + symbol.DeclaringSyntaxReferences.Length;
-				description.MouseEnter += HookNamespaceSymbolEvents;
+				description.MouseEnter += HookEvents;
 				return;
 			}
 			description.UseDummyToolTip();
@@ -62,27 +59,18 @@ namespace Codist.QuickInfo
 			}
 			description.MouseEnter += HookEvents;
 
-			void HookNamespaceSymbolEvents(object sender, EventArgs e) {
-				var s = sender as FrameworkElement;
-				s.MouseEnter -= HookNamespaceSymbolEvents;
-				HighlightSymbol(sender, e);
-				s.Cursor = Cursors.Hand;
-				s.MouseEnter += HighlightSymbol;
-				s.MouseLeave += RemoveSymbolHighlight;
-				s.MouseLeftButtonUp += GoToSource;
-				s.ContextMenuOpening += ShowContextMenu;
-				s.ContextMenuClosing += ReleaseQuickInfo;
-			}
 			void HookEvents(object sender, MouseEventArgs e) {
 				var s = sender as FrameworkElement;
 				s.MouseEnter -= HookEvents;
 				HighlightSymbol(sender, e);
 				s.Cursor = Cursors.Hand;
-				s.ToolTipOpening += ShowToolTip;
+				if (symbol.Kind != SymbolKind.Namespace) {
+					s.ToolTipOpening += ShowToolTip;
+					s.UseDummyToolTip();
+				}
 				s.MouseEnter += HighlightSymbol;
 				s.MouseLeave += RemoveSymbolHighlight;
 				s.MouseLeftButtonUp += GoToSource;
-				s.UseDummyToolTip();
 				s.ContextMenuOpening += ShowContextMenu;
 				s.ContextMenuClosing += ReleaseQuickInfo;
 			}
@@ -96,7 +84,7 @@ namespace Codist.QuickInfo
 				t.ToolTipOpening -= ShowToolTip;
 			}
 			void HighlightSymbol(object sender, EventArgs e) {
-				((TextBlock)sender).Background = symbol.HasSource() ? SystemColors.HighlightBrush.Alpha(0.3) : SystemColors.GrayTextBrush.Alpha(0.3);
+				((TextBlock)sender).Background = (symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(0.3);
 			}
 			void RemoveSymbolHighlight(object sender, MouseEventArgs e) {
 				((TextBlock)sender).Background = Brushes.Transparent;
@@ -138,7 +126,7 @@ namespace Codist.QuickInfo
 				t.Append("\nnamespace: ").Append(symbol.ContainingNamespace.ToDisplayString());
 			}
 			if (symbol.Kind == SymbolKind.Method) {
-				var m = (symbol as IMethodSymbol).ReducedFrom;
+				var m = ((IMethodSymbol)symbol).ReducedFrom;
 				if (m != null) {
 					t.Append("\nclass: ").Append(m.ContainingType.Name);
 				}
