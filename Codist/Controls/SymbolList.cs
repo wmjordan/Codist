@@ -646,7 +646,7 @@ namespace Codist.Controls
 			}
 			else if (Symbol != null) {
 				RefreshSymbol();
-				Symbol.GoToSource();
+				Symbol.GoToDefinition();
 			}
 		}
 		public bool SelectIfContainsPosition(int position) {
