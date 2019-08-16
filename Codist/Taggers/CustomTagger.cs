@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 	sealed class CustomTagger : CachedTaggerBase
 	{

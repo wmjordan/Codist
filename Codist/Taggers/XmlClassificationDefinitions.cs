@@ -2,7 +2,7 @@
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 	static class XmlClassificationDefinitions
 	{

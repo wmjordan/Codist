@@ -1,4 +1,4 @@
-﻿namespace Codist.Classifiers
+﻿namespace Codist.Taggers
 {
 	interface IReuseableTagger {
 		void AddRef();

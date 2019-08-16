@@ -14,10 +14,10 @@ namespace Codist
 {
 	/// <summary>
 	/// <para>This is the class that implements the package exposed by <see cref="Codist"/>.</para>
-	/// <para>The project consists of the following namespace: <see cref="SyntaxHighlight"/> backed by <see cref="Classifiers"/>, <see cref="SmartBars"/>, <see cref="QuickInfo"/>, <see cref="Margins"/>, <see cref="NaviBar"/> etc.</para>
+	/// <para>The project consists of the following namespace: <see cref="SyntaxHighlight"/> backed by <see cref="Taggers"/>, <see cref="SmartBars"/>, <see cref="QuickInfo"/>, <see cref="Margins"/>, <see cref="NaviBar"/> etc.</para>
 	/// </summary>
 	[PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-	[InstalledProductRegistration("#110", "#112", "5.2", IconResourceID = 400)] // Information on this package for Help/About
+	[InstalledProductRegistration("#110", "#112", "5.3", IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.General), Constants.NameOfMe, "General", 0, 0, true, Sort = 0)]
 
@@ -138,7 +138,7 @@ namespace Codist
 				ThemeHelper.RefreshThemeCache();
 			};
 			SolutionEvents.OnAfterOpenSolution += (s, args) => {
-				Classifiers.SymbolMarkManager.Clear();
+				Taggers.SymbolMarkManager.Clear();
 			};
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.

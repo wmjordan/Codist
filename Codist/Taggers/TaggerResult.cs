@@ -5,7 +5,7 @@ using System.Windows.Forms;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 	sealed class TaggerResult
 	{

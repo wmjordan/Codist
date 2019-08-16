@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.Text.Classification;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 	sealed class CSharpClassifications
 	{

@@ -18,7 +18,7 @@ namespace Codist.Margins
 			var textView = wpfTextViewHost.TextView;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 				&& scrollBarContainer != null
-				&& Classifiers.CommentTagger.IsCommentTaggable(textView)
+				&& Taggers.CommentTagger.IsCommentTaggable(textView)
 				? new CommentMargin(textView, scrollBarContainer)
 				: null;
 		}

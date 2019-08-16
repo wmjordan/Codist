@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.CodeAnalysis;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 	/// <summary>
 	/// A symbol temporarily bookmarked by <see cref="SymbolMarkManager"/> or <see cref="NaviBar.CSharpBar"/>.

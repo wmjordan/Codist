@@ -5,7 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Reflection;
 using System.Windows.Forms;
 using AppHelpers;
-using Codist.Classifiers;
+using Codist.Taggers;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace Codist.Options

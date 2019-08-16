@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Tagging;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 	sealed class DisposableTagger<TTagger, TTag> : ITagger<TTag>, IDisposable
 		where TTag : ITag

@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 	abstract class CachedTaggerBase : ITagger<IClassificationTag>
 	{

@@ -16,27 +16,22 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.CSharp)]
 	[TagType(typeof(IClassificationTag))]
-	sealed class CSharpClassifierProvider : IViewTaggerProvider
+	sealed class CSharpTaggerProvider : IViewTaggerProvider
 	{
-		//public IClassifier GetClassifier(ITextBuffer textBuffer) {
-		//	return Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
-		//		? textBuffer.Properties.GetOrCreateSingletonProperty(() => new CSharpClassifier())
-		//		: null;
-		//}
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			return Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
-				? new CSharpClassifier() as ITagger<T>
+				? new CSharpTagger() as ITagger<T>
 				: null;
 		}
 	}
 
 	/// <summary>A classifier for C# code syntax highlight.</summary>
-	sealed class CSharpClassifier : ITagger<IClassificationTag>
+	sealed class CSharpTagger : ITagger<IClassificationTag>
 	{
 		static readonly CSharpClassifications _Classifications = new CSharpClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 		static readonly GeneralClassifications _GeneralClassifications = new GeneralClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
@@ -46,7 +41,6 @@ namespace Codist.Classifiers
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
 			foreach (var span in spans) {
-				System.Diagnostics.Debug.WriteLine("Tagging " + span.ToString());
 				var snapshot = span.Snapshot;
 				var workspace = snapshot.TextBuffer.GetWorkspace();
 				if (workspace == null) {

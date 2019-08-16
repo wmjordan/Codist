@@ -67,30 +67,30 @@
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Classifiers\Classifications.cs" />
-    <Compile Include="Classifiers\CommentFormats.cs" />
-    <Compile Include="Classifiers\CustomTagger.cs" />
-    <Compile Include="Classifiers\MarkdownFormats.cs" />
-    <Compile Include="Classifiers\MarkdownDefinitions.cs" />
-    <Compile Include="Classifiers\MarkdownTagger.cs" />
-    <Compile Include="Classifiers\CommentTagger.cs" />
-    <Compile Include="Classifiers\CommentClassificationDefinitions.cs" />
-    <Compile Include="Classifiers\CommentLabel.cs" />
-    <Compile Include="Classifiers\CSharpBlockTagger.cs" />
-    <Compile Include="Classifiers\CSharpClassifier.cs" />
-    <Compile Include="Classifiers\CSharpClassifierDefinition.cs" />
-    <Compile Include="Classifiers\CSharpCodeFormats.cs" />
-    <Compile Include="Classifiers\DisposableTagger.cs" />
-    <Compile Include="Classifiers\HighlighterDefinitions.cs" />
-    <Compile Include="Classifiers\HighlighterFormats.cs" />
-    <Compile Include="Classifiers\IBookmarkedSymbol.cs" />
-    <Compile Include="Classifiers\ICodeMemberTag.cs" />
-    <Compile Include="Classifiers\IReuseableTagger.cs" />
-    <Compile Include="Classifiers\SymbolMarkManager.cs" />
-    <Compile Include="Classifiers\CachedTaggerBase.cs" />
-    <Compile Include="Classifiers\TaggerResult.cs" />
-    <Compile Include="Classifiers\XmlClassificationDefinitions.cs" />
-    <Compile Include="Classifiers\XmlFormats.cs" />
+    <Compile Include="Taggers\Classifications.cs" />
+    <Compile Include="Taggers\CommentFormats.cs" />
+    <Compile Include="Taggers\CustomTagger.cs" />
+    <Compile Include="Taggers\MarkdownFormats.cs" />
+    <Compile Include="Taggers\MarkdownDefinitions.cs" />
+    <Compile Include="Taggers\MarkdownTagger.cs" />
+    <Compile Include="Taggers\CommentTagger.cs" />
+    <Compile Include="Taggers\CommentClassificationDefinitions.cs" />
+    <Compile Include="Taggers\CommentLabel.cs" />
+    <Compile Include="Taggers\CSharpBlockTagger.cs" />
+    <Compile Include="Taggers\CSharpClassifier.cs" />
+    <Compile Include="Taggers\CSharpClassifierDefinition.cs" />
+    <Compile Include="Taggers\CSharpCodeFormats.cs" />
+    <Compile Include="Taggers\DisposableTagger.cs" />
+    <Compile Include="Taggers\HighlighterDefinitions.cs" />
+    <Compile Include="Taggers\HighlighterFormats.cs" />
+    <Compile Include="Taggers\IBookmarkedSymbol.cs" />
+    <Compile Include="Taggers\ICodeMemberTag.cs" />
+    <Compile Include="Taggers\IReuseableTagger.cs" />
+    <Compile Include="Taggers\SymbolMarkManager.cs" />
+    <Compile Include="Taggers\CachedTaggerBase.cs" />
+    <Compile Include="Taggers\TaggerResult.cs" />
+    <Compile Include="Taggers\XmlClassificationDefinitions.cs" />
+    <Compile Include="Taggers\XmlFormats.cs" />
     <Compile Include="Commands\IncrementVsixVersionCommand.cs" />
     <Compile Include="Commands\NaviBarSearchDeclarationCommand.cs" />
     <Compile Include="Controls\CSharpSymbolContextMenu.cs" />
@@ -678,7 +678,7 @@
   <Import Project="..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets" Condition="Exists('..\packages\SQLitePCLRaw.lib.e_sqlite3.v110_xp.1.1.2\build\SQLitePCLRaw.lib.e_sqlite3.v110_xp.targets')" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.None.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.None.Increment" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
     </VisualStudio>
   </ProjectExtensions>
   <Import Project="..\packages\Microsoft.VisualStudio.Threading.Analyzers.16.0.102\build\Microsoft.VisualStudio.Threading.Analyzers.targets" Condition="Exists('..\packages\Microsoft.VisualStudio.Threading.Analyzers.16.0.102\build\Microsoft.VisualStudio.Threading.Analyzers.targets')" />

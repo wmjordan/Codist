@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.Code)]

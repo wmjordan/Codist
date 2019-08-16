@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="5.2.0.4511" Language="en-US" Publisher="WMJ" />
+    <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="5.3.0.4816" Language="en-US" Publisher="WMJ" />
     <DisplayName>Codist</DisplayName>
     <Description xml:space="preserve">A productivity enhancer for C# programmers with advanced syntax highlight, Super Quick Info (code tooltip), Smart Bar (contextual toolbar), Navigation Bar, code structure markers on scrollbar, comment tagger, and more.</Description>
     <MoreInfo>https://github.com/wmjordan/Codist</MoreInfo>
@@ -9,7 +9,7 @@
     <ReleaseNotes>https://github.com/wmjordan/Codist/releases</ReleaseNotes>
     <Icon>icon.png</Icon>
     <PreviewImage>preview.png</PreviewImage>
-    <Tags>coding; programming; productivity; syntax highlight; quick info; reference analysis; navigation; comment; tag; line number; scrollbar; C#; C; C++; html; line height</Tags>
+    <Tags>coding; programming; productivity; syntax highlight; quick info; reference analysis; code analysis; navigation; comment; tag; line number; scrollbar; line height; C#; C; C++; html; markdown</Tags>
   </Metadata>
   <Installation>
     <InstallationTarget Version="[15.0,17.0)" Id="Microsoft.VisualStudio.Pro" />

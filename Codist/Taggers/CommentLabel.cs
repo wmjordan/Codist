@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using Microsoft.VisualStudio.Text.Classification;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 
 	[DebuggerDisplay("{Label} IgnoreCase: {IgnoreCase} AllowPunctuationDelimiter: {AllowPunctuationDelimiter}")]

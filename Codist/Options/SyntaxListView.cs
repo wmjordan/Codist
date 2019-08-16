@@ -70,11 +70,11 @@ namespace Codist.Options
 
 	sealed class CommentTaggerListViewItem : SyntaxListViewItem
 	{
-		internal Classifiers.CommentLabel CommentLabel { get; }
+		internal Taggers.CommentLabel CommentLabel { get; }
 
 		public CommentTaggerListViewItem() : base() {
 		}
-		internal CommentTaggerListViewItem(string label, Classifiers.CommentLabel commentLabel) : base(label) {
+		internal CommentTaggerListViewItem(string label, Taggers.CommentLabel commentLabel) : base(label) {
 			CommentLabel = commentLabel ?? throw new ArgumentNullException(nameof(commentLabel));
 		}
 

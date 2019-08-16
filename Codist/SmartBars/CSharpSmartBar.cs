@@ -22,7 +22,7 @@ namespace Codist.SmartBars
 	/// An extended <see cref="SmartBar"/> for C# content type.
 	/// </summary>
 	sealed class CSharpSmartBar : SmartBar {
-		static readonly Classifiers.HighlightClassifications __HighlightClassifications = new Classifiers.HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
+		static readonly Taggers.HighlightClassifications __HighlightClassifications = new Taggers.HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 		readonly SemanticContext _Context;
 		readonly ExternalAdornment _SymbolListContainer;
 		ISymbol _Symbol;
@@ -174,7 +174,7 @@ namespace Codist.SmartBars
 				ctx.Sender.ContextMenu = m;
 				m.IsOpen = true;
 			});
-			if (Classifiers.SymbolMarkManager.CanBookmark(_Symbol)) {
+			if (Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
 				AddCommands(MyToolBar, KnownImageIds.FlagGroup, "Mark symbol...", null, GetMarkerCommands);
 			}
 
@@ -310,20 +310,20 @@ namespace Codist.SmartBars
 				}
 			}
 			r.Add(new CommandItem(KnownImageIds.Flag, "Mark " + symbol.Name, AddHighlightMenuItems, null));
-			if (Classifiers.SymbolMarkManager.Contains(symbol)) {
+			if (Taggers.SymbolMarkManager.Contains(symbol)) {
 				r.Add(new CommandItem(KnownImageIds.FlagOutline, "Unmark " + symbol.Name, ctx => {
 					UpdateSemanticModel();
-					if (_Symbol != null && Classifiers.SymbolMarkManager.Remove(_Symbol)) {
+					if (_Symbol != null && Taggers.SymbolMarkManager.Remove(_Symbol)) {
 						Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 						return;
 					}
 				}));
 			}
-			else if (Classifiers.SymbolMarkManager.HasBookmark) {
+			else if (Taggers.SymbolMarkManager.HasBookmark) {
 				r.Add(CreateCommandMenu(KnownImageIds.FlagOutline, "Unmark symbol...", symbol, "No symbol marked", (ctx, m, s) => {
-					foreach (var item in Classifiers.SymbolMarkManager.MarkedSymbols) {
+					foreach (var item in Taggers.SymbolMarkManager.MarkedSymbols) {
 						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.ImageId, item.DisplayString, _ => {
-							Classifiers.SymbolMarkManager.Remove(item);
+							Taggers.SymbolMarkManager.Remove(item);
 							Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 						})));
 					}
@@ -354,7 +354,7 @@ namespace Codist.SmartBars
 					_Symbol = ctor.ContainingType;
 				}
 			}
-			Classifiers.SymbolMarkManager.Update(_Symbol, context.Sender.Tag as Microsoft.VisualStudio.Text.Classification.IClassificationType);
+			Taggers.SymbolMarkManager.Update(_Symbol, context.Sender.Tag as Microsoft.VisualStudio.Text.Classification.IClassificationType);
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 

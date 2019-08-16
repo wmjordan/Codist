@@ -5,7 +5,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Text.Classification;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 	static class SymbolMarkManager
 	{

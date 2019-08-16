@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
-namespace Codist.Classifiers
+namespace Codist.Taggers
 {
 	abstract class CommentTagger : ITagger<IClassificationTag>, IDisposable
 	{

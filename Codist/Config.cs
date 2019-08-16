@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Windows.Media;
 using AppHelpers;
-using Codist.Classifiers;
+using Codist.Taggers;
 using Codist.Margins;
 using Codist.SyntaxHighlight;
 using Newtonsoft.Json;
