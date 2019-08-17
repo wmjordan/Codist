@@ -51,6 +51,18 @@ namespace Codist.QuickInfo
 				description.MouseEnter += HookEvents;
 				return;
 			}
+			if (symbol.Kind == SymbolKind.Method) {
+				if (((IMethodSymbol)symbol).MethodKind == MethodKind.LambdaMethod) {
+					description.Append("(");
+					foreach (var item in ((IMethodSymbol)symbol).Parameters) {
+						if (item.Ordinal > 0) {
+							description.Append(", ");
+						}
+						description.Append(item.Type.Name + item.Type.GetParameterString() + " " + item.Name);
+					}
+					description.Append(")");
+				}
+			}
 			description.UseDummyToolTip();
 			if (symbol.HasSource() == false && symbol.ContainingType?.HasSource() == true) {
 				// if the symbol is implicitly declared but its containing type is in source,

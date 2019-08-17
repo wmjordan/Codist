@@ -180,6 +180,9 @@ namespace Codist
 						text.Add("*");
 					}
 					return;
+				case SymbolKind.ErrorType:
+					text.Add("?");
+					return;
 				default: text.Add(symbol.Name); return;
 			}
 		}
