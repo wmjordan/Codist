@@ -1,10 +1,17 @@
 ﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Media;
 using System.Xml;
 using System.Xml.Linq;
+using AppHelpers;
+using Codist.Controls;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.VisualStudio.Imaging;
 
 namespace Codist
 {
@@ -19,6 +26,9 @@ namespace Codist
 		readonly SymbolFormatter _SymbolFormatter;
 		readonly ISymbol _Symbol;
 
+		int _isCode;
+		FontFamily _codeFont;
+
 		public XmlDocRenderer(Compilation compilation, SymbolFormatter symbolFormatter, ISymbol symbol) {
 			_Compilation = compilation;
 			_SymbolFormatter = symbolFormatter;
@@ -29,6 +39,125 @@ namespace Codist
 		/// Use it to remove paragraphs rendered by VS builtin implementation
 		/// </summary>
 		public int ParagraphCount { get; set; }
+
+		public ThemedTipDocument RenderXmlDoc(SyntaxNode node, ISymbol symbol, XmlDoc doc, SemanticModel semanticModel) {
+			var tip = new ThemedTipDocument();
+			var summary = doc.GetDescription(symbol);
+			XmlDoc inheritDoc = null;
+			#region Summary
+			if (summary == null
+					&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
+				summary = doc.GetInheritedDescription(symbol, out inheritDoc);
+				if (inheritDoc != null && summary != null) {
+					tip.Append(new ThemedTipParagraph(new ThemedTipText()
+							.Append("Documentation from ")
+							.AddSymbol(inheritDoc.Symbol.ContainingType, false, _SymbolFormatter)
+							.Append(".")
+							.AddSymbol(inheritDoc.Symbol, true, _SymbolFormatter)
+							.Append(":"))
+					);
+				}
+			}
+			if (summary != null
+				&& (summary.Name.LocalName != XmlDocNodeName || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc))) {
+				ParagraphCount = 0;
+				Render(summary, tip);
+				if (inheritDoc == null) {
+					tip.Tag = ParagraphCount;
+				}
+			}
+			#endregion
+			#region Type parameter
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.NamedType)) {
+				var typeParams = symbol.GetTypeParameters();
+				if (typeParams.IsDefaultOrEmpty == false) {
+					var para = new ThemedTipParagraph(KnownImageIds.TypeDefinition);
+					foreach (var param in typeParams) {
+						var p = doc.GetTypeParameter(param.Name);
+						if (p == null) {
+							continue;
+						}
+						if (para.Content.Inlines.FirstInline != null) {
+							para.Content.AppendLine();
+						}
+						para.Content
+							.Append(param.Name, _SymbolFormatter.TypeParameter)
+							.Append(": ")
+							.AddXmlDoc(p, this);
+					}
+					if (para.Content.Inlines.FirstInline != null) {
+						tip.Append(para);
+					}
+				}
+			}
+			#endregion
+			#region Returns
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)
+					&& (symbol.Kind == SymbolKind.Method
+					|| symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Delegate)) {
+				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Returns != null)?.Returns;
+				if (returns != null && returns.FirstNode != null) {
+					tip.Append(new ThemedTipParagraph(KnownImageIds.Return, new ThemedTipText()
+						.Append("Returns", true)
+						.Append(returns == doc.Returns ? ": " : " (inherited): ")
+						.AddXmlDoc(returns, this))
+						);
+				}
+			}
+			#endregion
+			#region Remarks
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc)
+					&& symbol.Kind != SymbolKind.Parameter
+					&& symbol.Kind != SymbolKind.TypeParameter) {
+				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Remarks != null)?.Remarks;
+				if (remarks != null && remarks.FirstNode != null) {
+					tip.Append(new ThemedTipParagraph(KnownImageIds.CommentGroup, new ThemedTipText()
+						.Append("Remarks", true)
+						.Append(remarks == doc.Remarks ? ": " : " (inherited): ")
+						))
+						.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(remarks, this)));
+				}
+			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SeeAlsoDoc)) {
+				var seeAlsos = doc.SeeAlso ?? doc.ExplicitInheritDoc?.SeeAlso;
+				if (seeAlsos != null) {
+					var seeAlso = new ThemedTipText()
+						.Append("See also", true)
+						.Append(seeAlsos == doc.SeeAlso ? ": " : " (inherited): ");
+					bool hasItem = false;
+					foreach (var item in seeAlsos) {
+						if (hasItem) {
+							seeAlso.Append(", ");
+						}
+						RenderXmlDocSymbol(item.Attribute("cref").Value, seeAlso.Inlines, SymbolKind.Alias);
+						hasItem = true;
+					}
+					tip.Append(new ThemedTipParagraph(KnownImageIds.Next, seeAlso));
+				}
+			}
+			#endregion
+			#region Captured variables
+			if (node is LambdaExpressionSyntax
+					|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
+				var ss = node is LambdaExpressionSyntax
+					? node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName)
+					: symbol.GetSyntaxNode();
+				if (ss != null) {
+					var df = semanticModel.AnalyzeDataFlow(ss);
+					var captured = df.ReadInside.RemoveAll(i => df.VariablesDeclared.Contains(i));
+					if (captured.Length > 0) {
+						var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true));
+						int i = 0;
+						foreach (var item in captured) {
+							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, false, _SymbolFormatter);
+						}
+						tip.Append(p);
+					}
+				}
+			}
+			#endregion
+			return tip;
+		}
 
 		public void Render(XElement content, TextBlock text) {
 			if (content == null || content.HasElements == false && content.IsEmpty) {
@@ -79,8 +208,12 @@ namespace Codist
 								}
 								break;
 							case "listheader":
-							case "code":
 								RenderBlockContent(inlines, list, e, BLOCK_OTHER);
+								break;
+							case "code":
+								++_isCode;
+								RenderBlockContent(inlines, list, e, BLOCK_OTHER);
+								--_isCode;
 								break;
 							case "item":
 								RenderBlockContent(inlines, list, e, BLOCK_ITEM);
@@ -107,7 +240,9 @@ namespace Codist
 								}
 								break;
 							case "c":
-								StyleInner(e, inlines, new Bold() { Background = ThemeHelper.ToolWindowBackgroundBrush, Foreground = ThemeHelper.ToolWindowTextBrush });
+								++_isCode;
+								StyleInner(e, inlines, new Span() { FontFamily = GetCodeFont(), Background = ThemeHelper.ToolWindowBackgroundBrush, Foreground = ThemeHelper.ToolWindowTextBrush });
+								--_isCode;
 								break;
 							case "b":
 								StyleInner(e, inlines, new Bold());
@@ -127,8 +262,7 @@ namespace Codist
 						break;
 					case XmlNodeType.Text:
 						string t = (item as XText).Value;
-						var parentName = item.Parent.Name.LocalName;
-						if (parentName != "code") {
+						if (_isCode == 0) {
 							var previous = (item.PreviousNode as XElement)?.Name?.LocalName;
 							if (previous == null || IsInlineElementName(previous) == false) {
 								t = item.NextNode == null ? t.Trim() : t.TrimStart();
@@ -154,7 +288,7 @@ namespace Codist
 			var lastNode = content.LastNode;
 			if (lastNode != null
 				&& (lastNode.NodeType != XmlNodeType.Element || ((XElement)lastNode).Name != "para")
-				&& (lastNode.PreviousNode as XElement)?.Name == "para") {
+				&& IsInlineElementName((lastNode.PreviousNode as XElement)?.Name.LocalName) == false) {
 				ParagraphCount++;
 			}
 		}
@@ -166,8 +300,17 @@ namespace Codist
 			if (blockType == BLOCK_ITEM) {
 				PopulateListNumber(inlines, list);
 			}
-			InternalRender(e, inlines, list);
-			if (inlines.FirstInline == null) {
+			else {
+				ParagraphCount++;
+			}
+			var span = new Span();
+			if (_isCode > 0) {
+				span.FontFamily = GetCodeFont();
+			}
+			inlines.Add(span);
+			InternalRender(e, span.Inlines, list);
+			if (blockType != BLOCK_ITEM && e.NextNode != null
+				&& IsInlineElementName((e.NextNode as XElement)?.Name.LocalName) == false) {
 				inlines.Add(new LineBreak());
 			}
 		}
@@ -228,6 +371,14 @@ namespace Codist
 		void StyleInner(XElement element, InlineCollection text, Span span) {
 			text.Add(span);
 			Render(element, span.Inlines);
+		}
+
+		FontFamily GetCodeFont() {
+			if (_codeFont != null) {
+				return _codeFont;
+			}
+			ThemeHelper.GetFontSettings(Microsoft.VisualStudio.Shell.Interop.FontsAndColorsCategory.TextEditor, out var fontName, out var fontSize);
+			return _codeFont = new FontFamily(fontName);
 		}
 
 		static bool IsInlineElementName(string name) {

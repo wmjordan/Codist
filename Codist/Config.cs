@@ -27,6 +27,8 @@ namespace Codist
 		public static readonly string ConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.NameOfMe + "\\Config.json";
 		public static Config Instance = InitConfig();
 
+		public string Version { get; set; }
+
 		[DefaultValue(Features.All)]
 		public Features Features { get; set; } = Features.All;
 
@@ -511,6 +513,7 @@ namespace Codist
 		OverrideDefaultDocumentation = 1 << 17,
 		DocumentationFromBaseType = 1 << 18,
 		DocumentationFromInheritDoc = 1 << 19,
+		SeeAlsoDoc = 1 << 20,
 		TextOnlyDoc = 1 << 21,
 		ExceptionDoc = 1 << 22,
 		ReturnsDoc = 1 << 23,

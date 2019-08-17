@@ -51,6 +51,7 @@
 			this._AdditionalItemsPage = new System.Windows.Forms.TabPage();
 			this._CSharpInterfaceMembersQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpMethodOverloadQuickInfoBox = new System.Windows.Forms.CheckBox();
+			this._CSharpSeeAlsoDocBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this._DefaultPage.SuspendLayout();
 			this._AdditionalItemsPage.SuspendLayout();
@@ -194,6 +195,7 @@
 			this._DefaultPage.Controls.Add(this._CSharpExceptionDocBox);
 			this._DefaultPage.Controls.Add(this._AlternativeStyleBox);
 			this._DefaultPage.Controls.Add(this._CSharpRemarksDocBox);
+			this._DefaultPage.Controls.Add(this._CSharpSeeAlsoDocBox);
 			this._DefaultPage.Controls.Add(this._CSharpReturnsDocBox);
 			this._DefaultPage.Controls.Add(this._CSharpTextOnlyDocBox);
 			this._DefaultPage.Controls.Add(this._CSharpInheritDocCrefBox);
@@ -211,20 +213,20 @@
 			// _CSharpExceptionDocBox
 			// 
 			this._CSharpExceptionDocBox.AutoSize = true;
-			this._CSharpExceptionDocBox.Location = new System.Drawing.Point(32, 156);
+			this._CSharpExceptionDocBox.Location = new System.Drawing.Point(32, 181);
 			this._CSharpExceptionDocBox.Name = "_CSharpExceptionDocBox";
 			this._CSharpExceptionDocBox.Size = new System.Drawing.Size(253, 19);
-			this._CSharpExceptionDocBox.TabIndex = 7;
+			this._CSharpExceptionDocBox.TabIndex = 8;
 			this._CSharpExceptionDocBox.Text = "Override <exception> XML Doc";
 			this._CSharpExceptionDocBox.UseVisualStyleBackColor = true;
 			// 
 			// _AlternativeStyleBox
 			// 
 			this._AlternativeStyleBox.AutoSize = true;
-			this._AlternativeStyleBox.Location = new System.Drawing.Point(15, 181);
+			this._AlternativeStyleBox.Location = new System.Drawing.Point(15, 206);
 			this._AlternativeStyleBox.Name = "_AlternativeStyleBox";
 			this._AlternativeStyleBox.Size = new System.Drawing.Size(197, 19);
-			this._AlternativeStyleBox.TabIndex = 8;
+			this._AlternativeStyleBox.TabIndex = 9;
 			this._AlternativeStyleBox.Text = "Use alternative style";
 			this._AlternativeStyleBox.UseVisualStyleBackColor = true;
 			// 
@@ -342,6 +344,16 @@
 			this._CSharpMethodOverloadQuickInfoBox.Text = "Method overload";
 			this._CSharpMethodOverloadQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
+			// _CSharpSeeAlsoDocBox
+			// 
+			this._CSharpSeeAlsoDocBox.AutoSize = true;
+			this._CSharpSeeAlsoDocBox.Location = new System.Drawing.Point(32, 156);
+			this._CSharpSeeAlsoDocBox.Name = "_CSharpSeeAlsoDocBox";
+			this._CSharpSeeAlsoDocBox.Size = new System.Drawing.Size(205, 19);
+			this._CSharpSeeAlsoDocBox.TabIndex = 7;
+			this._CSharpSeeAlsoDocBox.Text = "Show <seeAlso> XML Doc";
+			this._CSharpSeeAlsoDocBox.UseVisualStyleBackColor = true;
+			// 
 			// CSharpSuperQuickInfoPage
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -386,5 +398,6 @@
 		private System.Windows.Forms.CheckBox _CSharpExceptionDocBox;
 		private System.Windows.Forms.CheckBox _CSharpMethodOverloadQuickInfoBox;
 		private System.Windows.Forms.CheckBox _CSharpInterfaceMembersQuickInfoBox;
+		private System.Windows.Forms.CheckBox _CSharpSeeAlsoDocBox;
 	}
 }

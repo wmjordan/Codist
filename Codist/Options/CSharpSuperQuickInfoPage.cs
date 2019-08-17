@@ -36,6 +36,7 @@ namespace Codist.Options
 					= _CSharpTextOnlyDocBox.Enabled
 					= _CSharpReturnsDocBox.Enabled
 					= _CSharpRemarksDocBox.Enabled
+					= _CSharpSeeAlsoDocBox.Enabled
 					= _CSharpExceptionDocBox.Enabled
 					= _CSharpOverrideDefaultXmlDocBox.Checked));
 			_CSharpDeclarationQuickInfoBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.Declaration, _CSharpDeclarationQuickInfoBox.Checked));
@@ -53,6 +54,7 @@ namespace Codist.Options
 			_CSharpInheritDocCrefBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.DocumentationFromInheritDoc, _CSharpInheritDocCrefBox.Checked));
 			_CSharpReturnsDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.ReturnsDoc, _CSharpReturnsDocBox.Checked));
 			_CSharpRemarksDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.RemarksDoc, _CSharpRemarksDocBox.Checked));
+			_CSharpSeeAlsoDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.SeeAlsoDoc, _CSharpSeeAlsoDocBox.Checked));
 			_CSharpExceptionDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.ExceptionDoc, _CSharpExceptionDocBox.Checked));
 			_CSharpTextOnlyDocBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(QuickInfoOptions.TextOnlyDoc, _CSharpTextOnlyDocBox.Checked));
 
@@ -80,6 +82,7 @@ namespace Codist.Options
 				_CSharpSymbolLocationQuickInfoBox.Checked = o.MatchFlags(QuickInfoOptions.SymbolLocation);
 				_CSharpReturnsDocBox.Checked = o.MatchFlags(QuickInfoOptions.ReturnsDoc);
 				_CSharpRemarksDocBox.Checked = o.MatchFlags(QuickInfoOptions.RemarksDoc);
+				_CSharpSeeAlsoDocBox.Checked = o.MatchFlags(QuickInfoOptions.SeeAlsoDoc);
 				_CSharpExceptionDocBox.Checked = o.MatchFlags(QuickInfoOptions.ExceptionDoc);
 				_CSharpOverrideDefaultXmlDocBox.Checked
 					= _CSharpDocumentationBaseTypeBox.Enabled
@@ -87,6 +90,7 @@ namespace Codist.Options
 					= _CSharpTextOnlyDocBox.Enabled
 					= _CSharpReturnsDocBox.Enabled
 					= _CSharpRemarksDocBox.Enabled
+					= _CSharpSeeAlsoDocBox.Enabled
 					= _CSharpExceptionDocBox.Enabled
 					= o.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation);
 				_CSharpMethodOverloadQuickInfoBox.Checked = o.MatchFlags(QuickInfoOptions.MethodOverload);

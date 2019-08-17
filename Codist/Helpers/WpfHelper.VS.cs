@@ -67,11 +67,28 @@ namespace Codist
 				if (i > 0) {
 					inlines.Add(", ");
 				}
-				formatter.Format(inlines, parameters[i].Type, null, false);
-				inlines.Add(new Run(" " + parameters[i].Name) {
+				var p = parameters[i];
+				if (p.IsOptional) {
+					inlines.Add("[");
+				}
+				if (p.IsParams) {
+					inlines.Add(new Run("params ") { Foreground = formatter.Keyword });
+				}
+				else {
+					switch (p.RefKind) {
+						case RefKind.Ref: inlines.Add(new Run("ref ") { Foreground = formatter.Keyword }); break;
+						case RefKind.Out: inlines.Add(new Run("out ") { Foreground = formatter.Keyword }); break;
+						case RefKind.In: inlines.Add(new Run("in ") { Foreground = formatter.Keyword }); break;
+					}
+				}
+				formatter.Format(inlines, p.Type, null, false);
+				inlines.Add(new Run(" " + p.Name) {
 					Foreground = formatter.Parameter,
 					FontWeight = i == argIndex ? FontWeights.Bold : FontWeights.Normal
 				});
+				if (p.IsOptional) {
+					inlines.Add("]");
+				}
 			}
 			inlines.Add(")");
 			return block;

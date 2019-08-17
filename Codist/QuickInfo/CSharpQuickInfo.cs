@@ -239,105 +239,8 @@ namespace Codist.QuickInfo
 			}
 			symbol = symbol.GetAliasTarget();
 			var doc = new XmlDoc(symbol, _SemanticModel.Compilation);
-			var tip = new ThemedTipDocument();
 			var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
-			var summary = doc.GetDescription(symbol);
-			XmlDoc inheritDoc = null;
-			#region Summary
-			if (summary == null
-					&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
-				summary = doc.GetInheritedDescription(symbol, out inheritDoc);
-				if (inheritDoc != null && summary != null) {
-					tip.Append(new ThemedTipParagraph(new ThemedTipText()
-							.Append("Documentation from ")
-							.AddSymbol(inheritDoc.Symbol.ContainingType, false, _SymbolFormatter)
-							.Append(".")
-							.AddSymbol(inheritDoc.Symbol, true, _SymbolFormatter)
-							.Append(":"))
-					);
-				}
-			}
-			if (summary != null
-				&& (summary.Name.LocalName != XmlDocRenderer.XmlDocNodeName || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc))) {
-				docRenderer.ParagraphCount = 0;
-				docRenderer.Render(summary, tip);
-				if (inheritDoc == null) {
-					tip.Tag = docRenderer.ParagraphCount;
-				}
-			}
-			#endregion
-			#region Type parameter
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.NamedType)) {
-				var typeParams = symbol.GetTypeParameters();
-				if (typeParams.IsDefaultOrEmpty == false) {
-					var para = new ThemedTipParagraph(KnownImageIds.TypeDefinition);
-					foreach (var param in typeParams) {
-						var p = doc.GetTypeParameter(param.Name);
-						if (p == null) {
-							continue;
-						}
-						if (para.Content.Inlines.FirstInline != null) {
-							para.Content.AppendLine();
-						}
-						para.Content
-							.Append(param.Name, _SymbolFormatter.TypeParameter)
-							.Append(": ")
-							.AddXmlDoc(p, docRenderer);
-					}
-					if (para.Content.Inlines.FirstInline != null) {
-						tip.Append(para);
-					}
-				}
-			}
-			#endregion
-			#region Returns
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ReturnsDoc)
-					&& (symbol.Kind == SymbolKind.Method
-					|| symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Delegate)) {
-				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Returns != null)?.Returns;
-				if (returns != null && returns.FirstNode != null) {
-					tip.Append(new ThemedTipParagraph(KnownImageIds.Return, new ThemedTipText()
-						.Append("Returns", true)
-						.Append(returns == doc.Returns ? ": " : " (inherited): ")
-						.AddXmlDoc(returns, docRenderer))
-						);
-				}
-			}
-			#endregion
-			#region Remarks
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.RemarksDoc)
-					&& symbol.Kind != SymbolKind.Parameter
-					&& symbol.Kind != SymbolKind.TypeParameter) {
-				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Remarks != null)?.Remarks;
-				if (remarks != null && remarks.FirstNode != null) {
-					tip.Append(new ThemedTipParagraph(KnownImageIds.CommentGroup, new ThemedTipText()
-						.Append("Remarks", true)
-						.Append(remarks == doc.Remarks ? ": " : " (inherited): ")
-						))
-						.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(remarks, docRenderer)));
-				}
-			}
-			#endregion
-			#region Captured variables
-			if (node is LambdaExpressionSyntax
-					|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
-				var ss = node is LambdaExpressionSyntax
-					? node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName)
-					: symbol.GetSyntaxNode();
-				if (ss != null) {
-					var df = _SemanticModel.AnalyzeDataFlow(ss);
-					var captured = df.ReadInside.RemoveAll(i => df.VariablesDeclared.Contains(i));
-					if (captured.Length > 0) {
-						var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true));
-						int i = 0;
-						foreach (var item in captured) {
-							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, false, _SymbolFormatter);
-						}
-						tip.Append(p);
-					}
-				}
-			}
-			#endregion
+			var tip = docRenderer.RenderXmlDoc(node, symbol, doc, _SemanticModel);
 			if (tip.Children.Count > 0) {
 				qiWrapper.OverrideDocumentation(tip);
 			}
@@ -936,11 +839,11 @@ namespace Codist.QuickInfo
 				return;
 			}
 			var classList = new ThemedTipText("Base type: ", true)
-				.AddSymbol(baseType, null, _SymbolFormatter.Class);
+				.AddSymbol(baseType, null, _SymbolFormatter);
 			var info = new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.ParentChild, classList));
 			while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
-				if (baseType.IsAccessible(false) && baseType.IsCommonClass() == false) {
-					classList.Append(" - ").AddSymbol(baseType, null, _SymbolFormatter.Class);
+				if (baseType.IsCommonClass() == false) {
+					classList.Append(" - ").AddSymbol(baseType, null, _SymbolFormatter);
 				}
 			}
 			qiContent.Add(info);
