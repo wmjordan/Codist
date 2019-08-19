@@ -52,7 +52,7 @@ namespace Codist.QuickInfo
 			var currentSnapshot = _TextBuffer.CurrentSnapshot;
 			var subjectTriggerPoint = session.GetTriggerPoint(currentSnapshot).GetValueOrDefault();
 			if (subjectTriggerPoint.Snapshot == null) {
-				goto EXIT;
+				return null;
 			}
 
 			SemanticModel semanticModel;
@@ -61,7 +61,7 @@ namespace Codist.QuickInfo
 			if (Workspace.TryGetWorkspace(container, out var workspace) == false
 				|| (docId = workspace.GetDocumentIdInCurrentContext(container)) == null
 				|| workspace.CurrentSolution.GetDocument(docId).TryGetSemanticModel(out semanticModel) == false) {
-				goto EXIT;
+				return null;
 			}
 
 			_SemanticModel = semanticModel;
@@ -75,7 +75,7 @@ namespace Codist.QuickInfo
 				case SyntaxKind.WhitespaceTrivia:
 				case SyntaxKind.SingleLineCommentTrivia:
 				case SyntaxKind.MultiLineCommentTrivia:
-					goto EXIT;
+					return null;
 				case SyntaxKind.OpenBraceToken:
 				case SyntaxKind.CloseBraceToken:
 				case SyntaxKind.SwitchKeyword: // switch info
@@ -89,7 +89,7 @@ namespace Codist.QuickInfo
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 						break;
 					}
-					goto EXIT;
+					return null;
 				case SyntaxKind.AsKeyword:
 					var asType = (unitCompilation.FindNode(token.Span) as BinaryExpressionSyntax)?.GetLastIdentifier();
 					if (asType != null) {
@@ -106,7 +106,7 @@ namespace Codist.QuickInfo
 							return new QuickInfoItem(token.Span.CreateSnapshotSpan(currentSnapshot).ToTrackingSpan(), tb);
 						}
 					}
-					goto EXIT;
+					return null;
 				case SyntaxKind.OpenParenToken:
 				case SyntaxKind.CloseParenToken:
 				case SyntaxKind.DotToken:
@@ -128,14 +128,14 @@ namespace Codist.QuickInfo
 						if (qiContent.Count > 0) {
 							return new QuickInfoItem(currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive), qiContent.ToUI());
 						}
-						goto EXIT;
+						return null;
 					}
 					break;
 			}
 			node = unitCompilation.FindNode(token.Span, true, true);
 			if (node == null
 				|| skipTriggerPointCheck == false && node.Span.Contains(subjectTriggerPoint.Position, true) == false) {
-				goto EXIT;
+				return null;
 			}
 			node = node.UnqualifyExceptNamespace();
 			LocateNodeInParameterList(ref node, ref token);
@@ -176,7 +176,7 @@ namespace Codist.QuickInfo
 			}
 
 			if (node is PredefinedTypeSyntax/* void */) {
-				goto EXIT;
+				return null;
 			}
 			if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
 				&& _isCandidate == false) {
@@ -195,6 +195,9 @@ namespace Codist.QuickInfo
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				if (ctor != null && ctor.Type == node) {
 					symbol = semanticModel.GetSymbolOrFirstCandidate(ctor, cancellationToken);
+					if (symbol == null) {
+						return null;
+					}
 					if (symbol.IsImplicitlyDeclared) {
 						symbol = symbol.ContainingType;
 					}
@@ -207,8 +210,6 @@ namespace Codist.QuickInfo
 			return new QuickInfoItem(qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
 				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeExclusive)
 				: null, qiContent.ToUI());
-		EXIT:
-			return null;
 		}
 
 		static void LocateNodeInParameterList(ref SyntaxNode node, ref SyntaxToken token) {
