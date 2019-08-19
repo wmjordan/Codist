@@ -113,6 +113,8 @@ namespace Codist.QuickInfo
 				case SyntaxKind.CommaToken:
 				case SyntaxKind.ColonToken:
 				case SyntaxKind.SemicolonToken:
+				case SyntaxKind.LessThanToken:
+				case SyntaxKind.GreaterThanToken:
 					token = token.GetPreviousToken();
 					skipTriggerPointCheck = true;
 					break;
@@ -203,7 +205,7 @@ namespace Codist.QuickInfo
 				qiWrapper.ApplyClickAndGo(symbol, session);
 			}
 			return new QuickInfoItem(qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
-				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive)
+				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeExclusive)
 				: null, qiContent.ToUI());
 		EXIT:
 			return null;
