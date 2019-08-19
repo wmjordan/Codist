@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
@@ -36,7 +35,6 @@ namespace Codist.Taggers
 		static readonly CSharpClassifications _Classifications = new CSharpClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 		static readonly GeneralClassifications _GeneralClassifications = new GeneralClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 
-		//public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
