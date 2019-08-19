@@ -17,7 +17,7 @@ namespace Codist
 	/// <para>The project consists of the following namespace: <see cref="SyntaxHighlight"/> backed by <see cref="Taggers"/>, <see cref="SmartBars"/>, <see cref="QuickInfo"/>, <see cref="Margins"/>, <see cref="NaviBar"/> etc.</para>
 	/// </summary>
 	[PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-	[InstalledProductRegistration("#110", "#112", "5.3", IconResourceID = 400)] // Information on this package for Help/About
+	[InstalledProductRegistration("#110", "#112", Config.CurrentVersion, IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.General), Constants.NameOfMe, "General", 0, 0, true, Sort = 0)]
 
@@ -156,6 +156,16 @@ namespace Codist
 			Commands.ScreenshotCommand.Initialize(this);
 			Commands.IncrementVsixVersionCommand.Initialize(this);
 			Commands.NaviBarSearchDeclarationCommand.Initialize(this);
+			switch (Config.Instance.InitStatus) {
+				case InitStatus.FirstLoad:
+					new Commands.VersionInfoBar(this).ShowAfterFirstRun();
+					break;
+				case InitStatus.Upgraded:
+					if (new Commands.VersionInfoBar(this).ShowAfterUpdate()) {
+						
+					}
+					break;
+			}
 		}
 
 		protected override void Dispose(bool disposing) {

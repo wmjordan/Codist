@@ -15,6 +15,7 @@ namespace Codist
 {
 	sealed class Config
 	{
+		internal const string CurrentVersion = "5.3";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
 		internal const string LightTheme = ThemePrefix + "Light", DarkTheme = ThemePrefix + "Dark", SimpleTheme = ThemePrefix + "Simple";
@@ -28,6 +29,7 @@ namespace Codist
 		public static Config Instance = InitConfig();
 
 		public string Version { get; set; }
+		internal InitStatus InitStatus { get; private set; }
 
 		[DefaultValue(Features.All)]
 		public Features Features { get; set; } = Features.All;
@@ -83,11 +85,20 @@ namespace Codist
 		public static Config InitConfig() {
 			if (File.Exists(ConfigPath) == false) {
 				var config = GetDefaultConfig();
+				config.InitStatus = InitStatus.FirstLoad;
+				config.Version = CurrentVersion;
 				config.SaveConfig(ConfigPath);
 				return config;
 			}
 			try {
-				return InternalLoadConfig(ConfigPath, StyleFilters.None);
+				var config = InternalLoadConfig(ConfigPath, StyleFilters.None);
+				if (System.Version.TryParse(config.Version, out var v) == false
+					|| v < System.Version.Parse(CurrentVersion)) {
+					config.InitStatus = InitStatus.Upgraded;
+					config.Version = CurrentVersion;
+					config.SaveConfig(ConfigPath);
+				}
+				return config;
 			}
 			catch (Exception ex) {
 				Debug.WriteLine(ex.ToString());
@@ -102,6 +113,7 @@ namespace Codist
 			Debug.WriteLine("Load config: " + configPath);
 			try {
 				Instance = InternalLoadConfig(configPath, styleFilter);
+				Instance.Version = CurrentVersion;
 				//TextEditorHelper.ResetStyleCache();
 				Loaded?.Invoke(Instance, EventArgs.Empty);
 				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(styleFilter != StyleFilters.None ? Features.SyntaxHighlight : Features.All));
@@ -459,6 +471,13 @@ namespace Codist
 
 		public Features UpdatedFeature { get; }
 		public object Parameter { get; set; }
+	}
+
+	enum InitStatus
+	{
+		Normal,
+		FirstLoad,
+		Upgraded,
 	}
 
 	public enum BrushEffect
