@@ -43,7 +43,7 @@ namespace Codist
 				}
 			}
 			t = symbol.ContainingType;
-			if (t != null) {
+			if (t != null && t.TypeKind != TypeKind.Enum) {
 				if (content.Inlines.FirstInline != null) {
 					content.AppendLine();
 				}
@@ -62,9 +62,17 @@ namespace Codist
 					content.Append("assembly: " + symbol.GetAssemblyModuleName());
 				}
 
-				if (symbol.Kind == SymbolKind.NamedType
-					&& ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Delegate) {
-					ShowDelegateSignature(content, (INamedTypeSymbol)symbol);
+				if (symbol.Kind == SymbolKind.NamedType) {
+					switch (((INamedTypeSymbol)symbol).TypeKind) {
+						case TypeKind.Delegate: {
+							ShowDelegateSignature(content, (INamedTypeSymbol)symbol);
+							break;
+						}
+						case TypeKind.Enum: {
+							ShowEnumType(content, symbol);
+							break;
+						}
+					}
 				}
 			}
 			ShowAttributes(symbol, content);
@@ -75,24 +83,19 @@ namespace Codist
 			return tip;
 		}
 
-		static void ShowNumericForms(ISymbol symbol, ThemedToolTip tip) {
-			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.NumericValues)) {
-				var f = symbol as IFieldSymbol;
-				if (f != null && f.IsConst) {
-					var p = ShowNumericForms(f);
-					if (p != null) {
-						tip.Children.Add(p);
-					}
-				}
-			}
+		static void ShowDelegateSignature(TextBlock content, INamedTypeSymbol type) {
+			content.Append("\nsignature: ");
+			var invoke = type.OriginalDefinition.DelegateInvokeMethod;
+			content.AddSymbol(invoke.ReturnType, false, SymbolFormatter.Empty)
+				.Append(" ").AddSymbol(type, true, SymbolFormatter.Empty)
+				.AddParameters(invoke.Parameters, SymbolFormatter.Empty);
 		}
 
-		static void ShowDelegateSignature(TextBlock content, INamedTypeSymbol d) {
-			content.Append("\nsignature: ");
-			var invoke = d.OriginalDefinition.DelegateInvokeMethod;
-			content.AddSymbol(invoke.ReturnType, false, SymbolFormatter.Empty)
-				.Append(" ").AddSymbol(d, true, SymbolFormatter.Empty)
-				.AddParameters(invoke.Parameters, SymbolFormatter.Empty);
+		static void ShowEnumType(TextBlock content, ISymbol symbol) {
+			var t = ((INamedTypeSymbol)symbol).EnumUnderlyingType.ToDisplayString(WpfHelper.QuickInfoSymbolDisplayFormat);
+			if (t != "int") {
+				content.Append("\ntype: " + t);
+			}
 		}
 
 		static void ShowAttributes(ISymbol symbol, TextBlock content) {
@@ -103,6 +106,18 @@ namespace Codist
 				if (symbol.Kind == SymbolKind.Method) {
 					foreach (var attr in ((IMethodSymbol)symbol).GetReturnTypeAttributes()) {
 						SymbolFormatter.Empty.Format(content.AppendLine().Inlines, attr, true);
+					}
+				}
+			}
+		}
+
+		static void ShowNumericForms(ISymbol symbol, ThemedToolTip tip) {
+			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.NumericValues)) {
+				var f = symbol as IFieldSymbol;
+				if (f != null && f.IsConst) {
+					var p = ShowNumericForms(f);
+					if (p != null) {
+						tip.AddBorder().Child = p;
 					}
 				}
 			}

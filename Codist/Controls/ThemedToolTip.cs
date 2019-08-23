@@ -43,6 +43,12 @@ namespace Codist.Controls
 			Children.Add(t);
 			return t;
 		}
+		public Border AddBorder() {
+			var t = new Border { Padding = _ContentPadding }
+				.ReferenceProperty(Border.BackgroundProperty, EnvironmentColors.ToolTipBrushKey);
+			Children.Add(t);
+			return t;
+		}
 
 		protected override void OnVisualParentChanged(DependencyObject oldParent) {
 			var c = this.GetParent<ContentPresenter>();
