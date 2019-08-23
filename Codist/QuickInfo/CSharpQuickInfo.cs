@@ -1050,7 +1050,7 @@ namespace Codist.QuickInfo
 				var paramDoc = doc?.GetParameter(argName);
 				var content = new ThemedTipText("Argument", true)
 					.Append(" of ")
-					.AddSymbol(m.ReturnType, false, _SymbolFormatter)
+					.AddSymbol(om.ReturnType, false, _SymbolFormatter)
 					.Append(" ").AddSymbol(om.MethodKind != MethodKind.DelegateInvoke && om.MethodKind != MethodKind.Constructor ? om : (ISymbol)om.ContainingType, true, _SymbolFormatter)
 					.AddParameters(om.Parameters, _SymbolFormatter, argIndex);
 				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Parameter, content));
