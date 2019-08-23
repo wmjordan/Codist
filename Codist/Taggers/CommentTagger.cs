@@ -391,6 +391,7 @@ namespace Codist.Taggers
 			var tagger = vp.GetOrCreateSingletonProperty(() => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
 			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
 			var codeTagger = vp.GetOrCreateSingletonProperty(nameof(CommentTaggerProvider), () => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, tagger, tags, textView.TextBuffer));
+			textView.Closed -= TextViewClosed;
 			textView.Closed += TextViewClosed;
 			return codeTagger as ITagger<T>;
 		}

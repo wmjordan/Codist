@@ -24,7 +24,7 @@ namespace Codist.Taggers
 	{
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			return Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
-				? new CSharpTagger() as ITagger<T>
+				? textView.Properties.GetOrCreateSingletonProperty(() => new CSharpTagger() as ITagger<T>)
 				: null;
 		}
 	}

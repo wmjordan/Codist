@@ -29,6 +29,7 @@ namespace Codist.Taggers
 			if (_HeaderClassificationTypes[1] == null) {
 				InitHeaderClassificationTypes();
 			}
+			textView.Closed -= TextViewClosed;
 			textView.Closed += TextViewClosed;
 			return textView.Properties.GetOrCreateSingletonProperty(() => new MarkdownTagger(textView)) as ITagger<T>;
 		}
