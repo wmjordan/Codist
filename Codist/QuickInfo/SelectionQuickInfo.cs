@@ -27,6 +27,9 @@ namespace Codist.QuickInfo
 
 		/// <summary>Displays numbers about selected characters and lines in quick info.</summary>
 		static QuickInfoItem ShowSelectionInfo(IAsyncQuickInfoSession session, SnapshotPoint point) {
+			if (session.Properties.TryGetProperty<Mark>(typeof(Mark), out _)) {
+				return null;
+			}
 			var selection = session.TextView.Selection;
 			if (selection.IsEmpty) {
 				return null;
@@ -50,15 +53,16 @@ namespace Codist.QuickInfo
 			if (activeSpan.IsEmpty) {
 				activeSpan = selection.SelectedSpans[0];
 			}
+			ThemedTipText info;
 			if (c == 1) {
 				var ch = point.Snapshot.GetText(p1, 1);
-				return new QuickInfoItem (activeSpan.ToTrackingSpan(), new ThemedTipText { Name = Name }
+				info = new ThemedTipText { Name = Name }
 					.Append("Selected character: \"", true)
 					.Append(ch)
-					.Append("\" (Unicode: 0x" + ((int)ch[0]).ToString("X2") + ")")
-				);
+					.Append("\" (Unicode: 0x" + ((int)ch[0]).ToString("X2") + ")");
+				goto RETURN;
 			}
-			var info = new ThemedTipText() { Name = Name }
+			info = new ThemedTipText() { Name = Name }
 				.Append("Selection: ", true)
 				.Append(c.ToString() + " characters");
 			if (lines > 1) {
@@ -70,8 +74,12 @@ namespace Codist.QuickInfo
 					info.Append(", " + (lines + 1).ToString() + " lines");
 				}
 			}
+		RETURN:
+			session.Properties.GetOrCreateSingletonProperty(() => new Mark());
 			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info);
 		}
+
+		sealed class Mark { }
 	}
 
 }
