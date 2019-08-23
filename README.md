@@ -4,11 +4,18 @@
 
 # Features
 
+Check out this list to see what _Codist_ can do for you?
+
 * [Advanced Syntax Highlight](#advanced-c-syntax-highlight) with [*Comment Tagger*](#comment-tagger-and-styles)
-* [Super Quick Info](#super-quick-info) with *Click and Go* to source code
-* [Navigation Bar](#navigation-bar) with member filter and drag-and-drop enabled member list (**new in version 5**)
+  ![](doc/feature-brief-syntax-highlight.png)
+* [Super Quick Info](#super-quick-info) with extended XML Doc, *Click and Go* to source code
+  ![Feature Brief Super Quick Info](doc/feature-brief-super-quick-info.png)
+* [Navigation Bar](#navigation-bar) with a drag-and-drop and filter enabled member list (**new in version 5**)
+  ![Feature Brief Navigation Bar](doc/feature-brief-navigation-bar.png)
 * [Smart Bar](#smart-bar) with common edit commands and symbol reference analyzers
+  ![Feature Brief Smart Bar](doc/feature-brief-smart-bar.png)
 * [Scrollbar Marker](#scrollbar-marker) draws a powerful mini code map
+  ![Feature Brief Scrollbar Marker](doc/feature-brief-scrollbar-marker.png)
 * [Display Enhancements](#display-enhancements)
 * [Others](#other-features)
 * [Comprehensive Configurations](#feature-control)
@@ -475,7 +482,7 @@
 
 # Acknowledgements
 
-  I have learned a lot from the following extension projects (sorted by the dates when I learned from them).
+  I have learned a lot from the following extension projects (sorted by the time when I learned from them).
 
   * CommentsPlus: https://github.com/mhoumann/CommentsPlus
   * Better comments: https://github.com/omsharp/BetterComments
@@ -493,7 +500,7 @@
   * NuGet: https://github.com/NuGet/NuGet.Build.Packaging
   * GoToImplementation: https://github.com/GordianDotNet/GoToImplementation
 
-  And every donaters, beta testers to this project.
+  And every donaters, beta testers, feedback providers to this project.
 
 # License
 
