@@ -576,7 +576,7 @@ namespace Codist.NaviBar
 			}
 			sealed class MemberFinderBox : ThemedTextBox
 			{
-				public MemberFinderBox() : base(true) {
+				public MemberFinderBox() : base() {
 					IsVisibleChanged += (s, args) => {
 						var b = s as TextBox;
 						if (b.IsVisible) {

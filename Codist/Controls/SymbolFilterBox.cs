@@ -83,7 +83,7 @@ namespace Codist.Controls
 			Orientation = Orientation.Horizontal;
 			Margin = WpfHelper.MenuItemMargin;
 			Children.Add(ThemeHelper.GetImage(KnownImageIds.Filter).WrapMargin(WpfHelper.GlyphMargin));
-			Children.Add(_FilterBox = new ThemedTextBox(true) {
+			Children.Add(_FilterBox = new ThemedTextBox {
 				MinWidth = 150,
 				ToolTip = new ThemedToolTip("Result Filter", "Filter items in this menu.\nUse space to separate keywords.")
 			});

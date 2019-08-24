@@ -13,15 +13,12 @@ namespace Codist.Controls
 	sealed class ThemedTipText : TextBlock
 	{
 		static ThemedTipText() {
-			FocusableProperty.OverrideMetadata(typeof(TextBlock), new FrameworkPropertyMetadata(true));
 			TextEditorWrapper.RegisterCommandHandlers(typeof(TextBlock), true, true, true);
-
-			// remove the focus rectangle around the control
-			FocusVisualStyleProperty.OverrideMetadata(typeof(TextBlock), new FrameworkPropertyMetadata((object)null));
 		}
 		public ThemedTipText() {
 			TextWrapping = TextWrapping.Wrap;
 			Foreground = ThemeHelper.ToolTipTextBrush;
+			Focusable = true;
 			TextEditorWrapper.CreateFor(this);
 		}
 		public ThemedTipText(string text) : this() {
@@ -183,7 +180,7 @@ namespace Codist.Controls
 					IsEnabled = true
 				};
 				m.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
-				var newItem = new ThemedMenuItem { Icon = null, Header = "Copy selection" };
+				var newItem = new ThemedMenuItem { Icon = ThemeHelper.GetImage(Microsoft.VisualStudio.Imaging.KnownImageIds.Copy), Header = "Copy selection" };
 				newItem.Click += HandleMouseCopy;
 				m.Items.Add(newItem);
 				m.Closed += ReleaseQuickInfo;
@@ -197,7 +194,9 @@ namespace Codist.Controls
 			_uiScope.ContextMenu = null;
 		}
 		void HandleMouseCopy(object sender, RoutedEventArgs e) {
-			e.Handled = Copy();
+			if (e.Handled = Copy()) {
+				QuickInfo.QuickInfoOverrider.DismissQuickInfo(_uiScope);
+			}
 		}
 		void HandleCopyShortcut(object sender, KeyEventArgs e) {
 			if (e.Key == Key.C && Keyboard.Modifiers == ModifierKeys.Control

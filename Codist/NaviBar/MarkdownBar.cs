@@ -192,7 +192,7 @@ namespace Codist.NaviBar
 							Orientation = Orientation.Horizontal,
 							Children = {
 								ThemeHelper.GetImage(KnownImageIds.SearchContract).WrapMargin(WpfHelper.GlyphMargin),
-								(_FinderBox = new ThemedTextBox(true) { MinWidth = 150 }),
+								(_FinderBox = new ThemedTextBox { MinWidth = 150 }),
 								new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter)
 							}
 						},
