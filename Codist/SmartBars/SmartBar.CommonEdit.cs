@@ -98,18 +98,20 @@ namespace Codist.SmartBars
 
 		void AddDeleteCommand() {
 			AddCommand(ToolBar, KnownImageIds.Cancel, "Delete selected text\nRight click: Delete line\nCtrl click: Delete and select next", ctx => {
-				var s = View.Selection;
+				var s = ctx.View.Selection;
 				var t = s.GetFirstSelectionText();
 				if (s.Mode == TextSelectionMode.Stream
 					&& ctx.RightClick == false
 					&& s.IsEmpty == false) {
 					var end = s.End.Position;
 					// remove a trailing space
-					if (end < View.TextSnapshot.Length - 1) {
-						var trailer = View.TextSnapshot.GetText(end - 1, 2);
-						if (Char.IsLetterOrDigit(trailer[0]) && trailer[1] == ' ') {
-							s.Select(new SnapshotSpan(s.Start.Position, s.End.Position + 1), false);
-						}
+					var snapshot = ctx.View.TextSnapshot;
+					if (end < snapshot.Length - 1
+						&& Char.IsLetterOrDigit(snapshot[end - 1])
+						&& snapshot[end] == ' '
+						&& (end == snapshot.Length - 2
+							|| "={<>(-+*/^!|?:~&%".IndexOf(snapshot[end + 1]) == -1)) {
+						s.Select(new SnapshotSpan(s.Start.Position, s.End.Position + 1), false);
 					}
 				}
 				ExecuteAndFind(ctx, "Edit.Delete", t);
