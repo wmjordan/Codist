@@ -34,42 +34,71 @@ namespace Codist.Options
 
 		protected override void OnClick(EventArgs e) {
 			if (_ContextMenu == null) {
-				_ContextMenu = new ContextMenuStrip {
-					RenderMode = ToolStripRenderMode.System,
-					ShowCheckMargin = false,
-					ShowImageMargin = false,
-					Items = {
+				InitContextMenu();
+			}
+			_ContextMenu.Show(this, 1, Height - 1);
+		}
+
+		void InitContextMenu() {
+			_ContextMenu = new ContextMenuStrip {
+				RenderMode = ToolStripRenderMode.Professional,
+				ShowCheckMargin = false,
+				ShowImageMargin = false,
+				Items = {
 						new ToolStripMenuItem("Pick color...") { Name = "PickColor" },
-						new ToolStripMenuItem("Reset to default color") { Name = "Reset" }
+						new ToolStripMenuItem("Reset to default color") { Name = "Reset" },
+						new ToolStripMenuItem("Copy color") { Name = "Copy" },
+						new ToolStripMenuItem("Paste color") { Name = "Paste" },
 					}
-				};
-				_ContextMenu.ItemClicked += (s, args) => {
-					if (args.ClickedItem.Name == "Reset") {
+			};
+			_ContextMenu.Opening += (s, args) => _ContextMenu.Items["Paste"].Enabled = GetClipboardColor().A != 0;
+			_ContextMenu.ItemClicked += (s, args) => {
+				switch (args.ClickedItem.Name) {
+					case "Reset":
 						SelectedColor = Color.Empty;
 						base.OnClick(EventArgs.Empty);
 						return;
-					}
-					args.ClickedItem.GetCurrentParent().Hide();
-					using (var c = new ColorDialog() {
-						FullOpen = true,
-						Color = SelectedColor.A == 0 ? DefaultColor : SelectedColor
-					}) {
-						if (c.ShowDialog() == DialogResult.OK) {
-							SelectedColor = c.Color;
-							base.OnClick(EventArgs.Empty);
+					case "Copy":
+						try {
+							Clipboard.SetDataObject(SelectedColor.ToHexString());
 						}
+						catch (System.Runtime.InteropServices.ExternalException) {
+							// ignore
+						}
+						return;
+					case "Paste":
+						SelectedColor = GetClipboardColor();
+						return;
+				}
+				args.ClickedItem.GetCurrentParent().Hide();
+				using (var c = new ColorDialog() {
+					FullOpen = true,
+					Color = SelectedColor.A == 0 ? DefaultColor : SelectedColor
+				}) {
+					if (c.ShowDialog() == DialogResult.OK) {
+						SelectedColor = c.Color;
+						base.OnClick(EventArgs.Empty);
 					}
-				};
-			}
-			_ContextMenu.Show(this, 1, Height - 1);
+				}
+			};
 		}
 
 		protected override void Dispose(bool disposing) {
 			base.Dispose(disposing);
 			Image.Dispose();
-			if (_ContextMenu != null) {
-				_ContextMenu.Dispose();
+			_ContextMenu?.Dispose();
+		}
+
+		static Color GetClipboardColor() {
+			string c;
+			try {
+				c = Clipboard.GetText();
 			}
+			catch (System.Runtime.InteropServices.ExternalException) {
+				return Color.Empty;
+			}
+			UIHelper.ParseColor(c, out var color, out _);
+			return color.ToGdiColor();
 		}
 	}
 }
