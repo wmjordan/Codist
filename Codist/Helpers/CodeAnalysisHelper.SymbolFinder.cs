@@ -299,56 +299,55 @@ namespace Codist
 			return a;
 		}
 
-		public static async Task<List<KeyValuePair<ISymbol, List<ReferenceLocation>>>> FindCallersAsync(this ISymbol symbol, Project project, CancellationToken cancellationToken = default) {
+		public static async Task<List<KeyValuePair<ISymbol, List<ReferenceLocation>>>> FindCallersAsync(this ISymbol symbol, Project project, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
 			var docs = ImmutableHashSet.CreateRange(project.GetRelatedProjectDocuments());
 			var d = new Dictionary<ISymbol, List<ReferenceLocation>>(5);
-			var m = symbol.Kind == SymbolKind.NamedType && ((ITypeSymbol)symbol).TypeKind == TypeKind.Class ? MethodKind.Constructor : MethodKind.Ordinary;
-			await FindCallersAsync(symbol, project, docs, m, d, cancellationToken).ConfigureAwait(false);
+			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, docs, cancellationToken).ConfigureAwait(false)) {
+				if (definitionFilter?.Invoke(sr.Definition) == false) {
+					continue;
+				}
+				await GroupReferenceAsync(d, sr, nodeFilter, cancellationToken).ConfigureAwait(false);
+			}
 			var r = new List<KeyValuePair<ISymbol, List<ReferenceLocation>>>(d.Count);
 			r.AddRange(d);
 			r.Sort((x, y) => CompareSymbol(x.Key, y.Key));
 			return r;
 		}
 
-		static async Task FindCallersAsync(ISymbol symbol, Project project, ImmutableHashSet<Document> docs, MethodKind methodKind, Dictionary<ISymbol, List<ReferenceLocation>> results, CancellationToken cancellationToken) {
-			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, docs, cancellationToken).ConfigureAwait(false)) {
-				if (methodKind == MethodKind.Constructor && (sr.Definition.Kind != SymbolKind.Method || ((IMethodSymbol)sr.Definition).MethodKind != MethodKind.Constructor)) {
-					continue;
-				}
-				foreach (var docRefs in sr.Locations.GroupBy(l => l.Document)) {
-					var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-					foreach (var location in docRefs) {
-						var n = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(location.Location.SourceSpan);
-						if (n.Span.Contains(location.Location.SourceSpan.Start) == false) {
-							continue;
+		static async Task GroupReferenceAsync(Dictionary<ISymbol, List<ReferenceLocation>> results, ReferencedSymbol reference, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
+			foreach (var docRefs in reference.Locations.GroupBy(l => l.Document)) {
+				var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+				foreach (var location in docRefs) {
+					var n = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(location.Location.SourceSpan);
+					if (n.Span.Contains(location.Location.SourceSpan.Start) == false || nodeFilter?.Invoke(n) == false) {
+						continue;
+					}
+					n = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().GetDeclarationCategory().HasAnyFlag(DeclarationCategory.Member | DeclarationCategory.Type));
+					if (n == null) {
+						continue;
+					}
+					var s = sm.GetSymbol(n, cancellationToken);
+					if (s == null) {
+						continue;
+					}
+					if (s.Kind == SymbolKind.Method) {
+						switch (((IMethodSymbol)s).MethodKind) {
+							case MethodKind.AnonymousFunction:
+								s = s.ContainingSymbol;
+								break;
+							case MethodKind.EventAdd:
+							case MethodKind.EventRemove:
+							case MethodKind.PropertyGet:
+							case MethodKind.PropertySet:
+								s = ((IMethodSymbol)s).AssociatedSymbol;
+								break;
 						}
-						n = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().GetDeclarationCategory().HasAnyFlag(DeclarationCategory.Member | DeclarationCategory.Type));
-						if (n == null) {
-							continue;
-						}
-						var s = sm.GetSymbol(n, cancellationToken);
-						if (s == null) {
-							continue;
-						}
-						if (s.Kind == SymbolKind.Method) {
-							switch (((IMethodSymbol)s).MethodKind) {
-								case MethodKind.AnonymousFunction:
-									s = s.ContainingSymbol;
-									break;
-								case MethodKind.EventAdd:
-								case MethodKind.EventRemove:
-								case MethodKind.PropertyGet:
-								case MethodKind.PropertySet:
-									s = ((IMethodSymbol)s).AssociatedSymbol;
-									break;
-							}
-						}
-						if (results.TryGetValue(s, out var l)) {
-							l.Add(location);
-						}
-						else {
-							results[s] = new List<ReferenceLocation>() { location };
-						}
+					}
+					if (results.TryGetValue(s, out var l)) {
+						l.Add(location);
+					}
+					else {
+						results[s] = new List<ReferenceLocation>() { location };
 					}
 				}
 			}

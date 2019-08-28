@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
@@ -66,28 +67,8 @@ namespace Codist.Controls
 				case SymbolKind.Method:
 				case SymbolKind.Property:
 				case SymbolKind.Event:
-					if (_Symbol.Kind != SymbolKind.Method || IsExternallyCallable(((IMethodSymbol)_Symbol).MethodKind)) {
-						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallers(_Symbol, _SemanticContext)));
-					}
-					if (_Symbol.MayHaveOverride()) {
-						Items.Add(CreateItem(KnownImageIds.OverloadBehavior, "Find Overrides...", () => FindOverrides(_Symbol, _SemanticContext)));
-					}
-					var st = _Symbol.ContainingType;
-					if (st != null && st.TypeKind == TypeKind.Interface) {
-						Items.Add(CreateItem(KnownImageIds.ImplementInterface, "Find Implementations...", () => FindImplementations(_Symbol, _SemanticContext)));
-					}
-					if (_Symbol.Kind != SymbolKind.Event) {
-						CreateCommandsForReturnTypeCommand();
-					}
-					if (_Symbol.Kind == SymbolKind.Method
-						&& ((IMethodSymbol)_Symbol).MethodKind == MethodKind.Constructor
-						&& st.SpecialType == SpecialType.None) {
-						CreateInstanceCommandsForType(st);
-					}
-					break;
 				case SymbolKind.Field:
-					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallers(_Symbol, _SemanticContext)));
-					CreateCommandsForReturnTypeCommand();
+					CreateCommandForMembers();
 					break;
 				case SymbolKind.Local:
 				case SymbolKind.Parameter:
@@ -100,13 +81,34 @@ namespace Codist.Controls
 					Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(_Symbol, _SemanticContext)));
 					break;
 			}
-			//if (_Node != null && _Node.IsDeclaration()
-			//	&& _Node.SyntaxTree == _SemanticContext.SemanticModel.SyntaxTree
-			//	&& _Symbol.Kind != SymbolKind.Namespace) {
-			//	Items.Add(CreateItem(KnownImageIds.OpenDocumentFromCollection, "Find Referenced Documents...", FindReferencedDocuments));
-			//}
+			if (_Node != null && _Node.Kind().IsDeclaration()
+				&& _Node.SyntaxTree == _SemanticContext.SemanticModel.SyntaxTree
+				&& _Symbol.Kind != SymbolKind.Namespace) {
+				Items.Add(CreateItem(KnownImageIds.FindSymbol, "Find Referenced Symbols...", FindReferencedSymbols));
+			}
 			//Items.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, _Symbol, "No reference found", FindReferences));
 			Items.Add(CreateItem(KnownImageIds.FindSymbol, "Find Symbol with Name " + _Symbol.Name + "...", () => FindSymbolWithName(_Symbol, _SemanticContext)));
+		}
+
+		private void CreateCommandForMembers() {
+			if (_Symbol.Kind != SymbolKind.Method || IsExternallyCallable(((IMethodSymbol)_Symbol).MethodKind)) {
+				Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallers(_Symbol, _SemanticContext)));
+			}
+			if (_Symbol.MayHaveOverride()) {
+				Items.Add(CreateItem(KnownImageIds.OverloadBehavior, "Find Overrides...", () => FindOverrides(_Symbol, _SemanticContext)));
+			}
+			var st = _Symbol.ContainingType;
+			if (st != null && st.TypeKind == TypeKind.Interface) {
+				Items.Add(CreateItem(KnownImageIds.ImplementInterface, "Find Implementations...", () => FindImplementations(_Symbol, _SemanticContext)));
+			}
+			if (_Symbol.Kind != SymbolKind.Event) {
+				CreateCommandsForReturnTypeCommand();
+			}
+			if (_Symbol.Kind == SymbolKind.Method
+				&& ((IMethodSymbol)_Symbol).MethodKind == MethodKind.Constructor
+				&& st.SpecialType == SpecialType.None) {
+				CreateInstanceCommandsForType(st);
+			}
 
 			bool IsExternallyCallable(MethodKind methodKind) {
 				switch (methodKind) {
@@ -176,9 +178,10 @@ namespace Codist.Controls
 					}
 				}
 				else if (t.InstanceConstructors.Length > 0) {
-					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", () => FindCallers(t, _SemanticContext)));
+					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", () => FindCallers(t, _SemanticContext, s => s.Kind == SymbolKind.Method)));
 				}
 			}
+			Items.Add(CreateItem(KnownImageIds.MarkupXML, "Find Usages as Method Type Argument...", () => FindCallers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, n => (n = n.Parent).IsKind(SyntaxKind.TypeArgumentList) && (n = n.Parent).IsKind(SyntaxKind.GenericName) && (n = n.Parent).IsKind(SyntaxKind.SimpleMemberAccessExpression))));
 			Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(t, _SemanticContext)));
 			if (t.IsStatic) {
 				return;
@@ -216,8 +219,8 @@ namespace Codist.Controls
 			}
 		}
 
-		static void FindCallers(ISymbol symbol, SemanticContext context) {
-			var callers = SyncHelper.RunSync(()=> symbol.FindCallersAsync(context.Document.Project));
+		static void FindCallers(ISymbol symbol, SemanticContext context, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null) {
+			var callers = SyncHelper.RunSync(() => symbol.FindCallersAsync(context.Document.Project, definitionFilter, nodeFilter));
 			if (callers == null) {
 				return;
 			}
@@ -304,16 +307,32 @@ namespace Codist.Controls
 			ShowSymbolMenuForResult(symbol, context, members, " extensions", true);
 		}
 
-		void FindReferencedDocuments() {
+		void FindReferencedSymbols() {
 			var m = new SymbolMenu(_SemanticContext);
 			var c = 0;
-			foreach (var member in _Node.FindRelatedTypes(_SemanticContext.SemanticModel, default)) {
-				m.Menu.Add(member, false);
+			var containerType = _Symbol.ContainingType ?? _Symbol;
+			var loc = _Node.SyntaxTree.FilePath;
+			foreach (var s in _Node.FindReferencingSymbols(_SemanticContext.SemanticModel, true)
+					.OrderBy(i => i.Key.ContainingType == containerType ? null : (i.Key.ContainingType ?? i.Key).Name)
+					.ThenBy(i => i.Key.Name)
+					.Select(i => i.Key)) {
+				var sl = s.DeclaringSyntaxReferences.First();
+				SymbolItem i;
+				if (sl.SyntaxTree.FilePath != loc) {
+					i = m.Menu.Add(sl.ToLocation());
+					i.Content.FontWeight = FontWeights.Bold;
+					i.Content.HorizontalAlignment = HorizontalAlignment.Center;
+					loc = sl.SyntaxTree.FilePath;
+				}
+				i = m.Menu.Add(s, false);
+				if (s.ContainingType.Equals(containerType) == false) {
+					i.Hint = (s.ContainingType ?? s).ToDisplayString(WpfHelper.MemberNameFormat);
+				}
 				++c;
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(_Symbol.GetImageId()))
 				.Append(_Symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
-				.Append(" referenced documents: ")
+				.Append(" referenced symbols: ")
 				.Append(c.ToString());
 			m.Show();
 		}
