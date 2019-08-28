@@ -8,15 +8,18 @@ using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.Taggers
 {
+	// todo enable users to define their own simple taggers
 	sealed class CustomTagger : CachedTaggerBase
 	{
 		readonly ITextTagger[] _Taggers;
+		readonly bool _FullParse;
 
-		public CustomTagger(ITextView view, ITextTagger[] taggers) : base(view) {
+		public CustomTagger(ITextView view, ITextTagger[] taggers, bool fullParse) : base(view) {
 			_Taggers = taggers;
+			_FullParse = fullParse;
 		}
-
-		protected override TaggedContentSpan Parse(ITextSnapshot textSnapshot, SnapshotSpan span) {
+		protected override bool DoFullParseAtFirstLoad => _FullParse;
+		protected override TaggedContentSpan Parse(SnapshotSpan span) {
 			if (_Taggers.Length == 0) {
 				return null;
 			}

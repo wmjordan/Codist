@@ -6,8 +6,8 @@ using Microsoft.VisualStudio.Text.Tagging;
 namespace Codist.Taggers
 {
 	sealed class DisposableTagger<TTagger, TTag> : ITagger<TTag>, IDisposable
-		where TTag : ITag
 		where TTagger : class, IReuseableTagger, ITagger<TTag>
+		where TTag : ITag
 	{
 		TTagger _tagger;
 		public DisposableTagger(TTagger tagger) {

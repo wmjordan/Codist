@@ -17,7 +17,7 @@ namespace Codist.Taggers
 	[TagType(typeof(IClassificationTag))]
 	sealed class MarkdownTaggerProvider : IViewTaggerProvider
 	{
-		static readonly IClassificationType[] _HeaderClassificationTypes = new IClassificationType[7];
+		static readonly ClassificationTag[] _HeaderClassificationTypes = new ClassificationTag[7];
 
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false) {
@@ -36,12 +36,12 @@ namespace Codist.Taggers
 
 		static void InitHeaderClassificationTypes() {
 			var r = ServicesHelper.Instance.ClassificationTypeRegistry;
-			_HeaderClassificationTypes[1] = r.GetClassificationType(Constants.MarkdownHeading1);
-			_HeaderClassificationTypes[2] = r.GetClassificationType(Constants.MarkdownHeading2);
-			_HeaderClassificationTypes[3] = r.GetClassificationType(Constants.MarkdownHeading3);
-			_HeaderClassificationTypes[4] = r.GetClassificationType(Constants.MarkdownHeading4);
-			_HeaderClassificationTypes[5] = r.GetClassificationType(Constants.MarkdownHeading5);
-			_HeaderClassificationTypes[6] = r.GetClassificationType(Constants.MarkdownHeading6);
+			_HeaderClassificationTypes[1] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading1));
+			_HeaderClassificationTypes[2] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading2));
+			_HeaderClassificationTypes[3] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading3));
+			_HeaderClassificationTypes[4] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading4));
+			_HeaderClassificationTypes[5] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading5));
+			_HeaderClassificationTypes[6] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading6));
 		}
 
 		void TextViewClosed(object sender, EventArgs args) {
@@ -53,8 +53,8 @@ namespace Codist.Taggers
 		{
 			public MarkdownTagger(ITextView textView) : base(textView) {
 			}
-
-			protected override TaggedContentSpan Parse(ITextSnapshot textSnapshot, SnapshotSpan span) {
+			protected override bool DoFullParseAtFirstLoad => true;
+			protected override TaggedContentSpan Parse(SnapshotSpan span) {
 				var t = span.GetText();
 				if (t.Length > 0 && t[0] == '#') {
 					int c = 1, w = 0;
@@ -66,7 +66,7 @@ namespace Codist.Taggers
 						break;
 					}
 					w += c;
-					return new TaggedContentSpan(textSnapshot, new ClassificationTag(_HeaderClassificationTypes[c]), span.Start, t.Length, w, t.Length - w);
+					return new TaggedContentSpan(span.Snapshot, _HeaderClassificationTypes[c], span.Start, t.Length, w, t.Length - w);
 				}
 				return null;
 			}

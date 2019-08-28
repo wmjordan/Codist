@@ -21,6 +21,7 @@ namespace Codist.Taggers
 
 		protected ITextView TextView => _TextView;
 		public TaggerResult Result => _Tags;
+		protected abstract bool DoFullParseAtFirstLoad { get; }
 
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
@@ -29,22 +30,22 @@ namespace Codist.Taggers
 				yield break;
 			}
 			IEnumerable<SnapshotSpan> parseSpans = spans;
-			var textSnapshot = _TextView.TextSnapshot;
 
-			if (_Tags.LastParsed == 0) {
+			if (_Tags.LastParsed == 0 && DoFullParseAtFirstLoad) {
+				var textSnapshot = _TextView.TextSnapshot;
 				// perform a full parse for the first time
 				System.Diagnostics.Debug.WriteLine("Full parse");
 				parseSpans = textSnapshot.Lines.Select(l => l.Extent);
 				_Tags.LastParsed = textSnapshot.Length;
 			}
 			foreach (var span in parseSpans) {
-				var r = Parse(textSnapshot, span);
+				var r = Parse(span);
 				if (r != null) {
 					yield return _Tags.Add(r);
 				}
 			}
 		}
 
-		protected abstract TaggedContentSpan Parse(ITextSnapshot textSnapshot, SnapshotSpan span);
+		protected abstract TaggedContentSpan Parse(SnapshotSpan span);
 	}
 }

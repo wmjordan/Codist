@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 
@@ -16,6 +17,7 @@ namespace Codist.Taggers
 	[Export(typeof(ITaggerProvider))]
 	[ContentType(Constants.CodeTypes.CSharp)]
 	[TagType(typeof(ICodeMemberTag))]
+	[TextViewRole(PredefinedTextViewRoles.Document)]
 	sealed class CSharpBlockTaggerProvider : ITaggerProvider
 	{
 		public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag {
