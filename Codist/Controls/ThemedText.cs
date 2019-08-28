@@ -18,7 +18,6 @@ namespace Codist.Controls
 		public ThemedTipText() {
 			TextWrapping = TextWrapping.Wrap;
 			Foreground = ThemeHelper.ToolTipTextBrush;
-			Focusable = true;
 			TextEditorWrapper.CreateFor(this);
 		}
 		public ThemedTipText(string text) : this() {
@@ -144,12 +143,13 @@ namespace Codist.Controls
 			RegisterMethod?.Invoke(null, new object[] { controlType, acceptsRichContent, readOnly, registerEventListeners });
 		}
 
-		public static TextEditorWrapper CreateFor(TextBlock textBlock) {
+		public static TextEditorWrapper CreateFor(TextBlock text) {
 			if (__IsInitialized == false) {
 				return null;
 			}
-			var textContainer = TextContainerProp.GetValue(textBlock);
-			var editor = new TextEditorWrapper(textContainer, textBlock, false);
+			text.Focusable = true;
+			var textContainer = TextContainerProp.GetValue(text);
+			var editor = new TextEditorWrapper(textContainer, text, false);
 			IsReadOnlyProp.SetValue(editor._editor, true);
 			TextViewProp.SetValue(editor._editor, TextContainerTextViewProp.GetValue(textContainer));
 			return editor;
