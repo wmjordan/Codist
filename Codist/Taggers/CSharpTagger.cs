@@ -153,6 +153,9 @@ namespace Codist.Taggers
 							}
 							var opMethod = semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node) as IMethodSymbol;
 							if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
+								if (node.RawKind == (int)SyntaxKind.OperatorDeclaration) {
+									yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.Declaration);
+								}
 								yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.OverrideMember);
 							}
 							continue;
