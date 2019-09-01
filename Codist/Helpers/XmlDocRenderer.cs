@@ -165,11 +165,11 @@ namespace Codist
 			}
 			Render(content, text.Inlines);
 		}
-		public void Render(XElement content, Controls.ThemedTipDocument doc) {
+		public void Render(XElement content, ThemedTipDocument doc) {
 			if (content == null || content.HasElements == false && content.IsEmpty) {
 				return;
 			}
-			var paragraph = new Controls.ThemedTipParagraph(Microsoft.VisualStudio.Imaging.KnownImageIds.Comment);
+			var paragraph = new ThemedTipParagraph(KnownImageIds.Comment);
 			doc.Append(paragraph);
 			Render(content, paragraph.Content.Inlines);
 			if (paragraph.Content.Inlines.FirstInline == null) {

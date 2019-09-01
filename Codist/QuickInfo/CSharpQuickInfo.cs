@@ -4,8 +4,9 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
@@ -16,7 +17,6 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
-using System.Windows;
 
 namespace Codist.QuickInfo
 {
@@ -235,11 +235,12 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		void OverrideDocumentation(SyntaxNode node, IQuickInfoOverrider qiWrapper, ISymbol symbol) {
+		ThemedTipDocument OverrideDocumentation(SyntaxNode node, IQuickInfoOverrider qiWrapper, ISymbol symbol) {
 			if (symbol == null
 				|| Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) == false) {
-				return;
+				return null;
 			}
+			// todo Also show type XML Doc for constructors
 			symbol = symbol.GetAliasTarget();
 			var doc = new XmlDoc(symbol, _SemanticModel.Compilation);
 			var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
@@ -263,6 +264,18 @@ namespace Codist.QuickInfo
 					qiWrapper.OverrideException(new ThemedTipDocument().Append(p));
 				}
 			}
+
+			if (node.Parent.IsKind(SyntaxKind.ObjectCreationExpression)) {
+				symbol = symbol.ContainingType;
+				doc = new XmlDoc(symbol, _SemanticModel.Compilation);
+				docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
+				var summary = doc.GetDescription(symbol);
+				if (summary != null) {
+					tip.Append(new ThemedTipParagraph(new ThemedTipText("Documentation from ").AddSymbol(symbol, true, SymbolFormatter.Instance).Append(":")));
+					docRenderer.Render(summary, tip);
+				}
+			}
+			return tip;
 		}
 
 		void IDisposable.Dispose() {
@@ -458,9 +471,6 @@ namespace Codist.QuickInfo
 							.Append(" for ");
 					}
 				}
-				//else if (retStatement.Expression.Kind() == SyntaxKind.NullLiteralExpression) {
-				//	tb.AddText("Return ").AddText("null", _SymbolFormatter.Keyword).AddText(" for ");
-				//}
 				else {
 					t.Append("Return for ");
 				}
