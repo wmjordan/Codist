@@ -14,7 +14,8 @@ namespace Codist.QuickInfo
 		const string Name = "SelectionInfo";
 
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Selection) == false) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Selection) == false
+				|| session.Mark(nameof(SelectionQuickInfo)) == false) {
 				return null;
 			}
 			var textSnapshot = session.TextView.TextSnapshot;
@@ -27,9 +28,6 @@ namespace Codist.QuickInfo
 
 		/// <summary>Displays numbers about selected characters and lines in quick info.</summary>
 		static QuickInfoItem ShowSelectionInfo(IAsyncQuickInfoSession session, SnapshotPoint point) {
-			if (session.Properties.TryGetProperty<Mark>(typeof(Mark), out _)) {
-				return null;
-			}
 			var selection = session.TextView.Selection;
 			if (selection.IsEmpty) {
 				return null;
@@ -75,7 +73,6 @@ namespace Codist.QuickInfo
 				}
 			}
 		RETURN:
-			session.Properties.GetOrCreateSingletonProperty(() => new Mark());
 			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info);
 		}
 

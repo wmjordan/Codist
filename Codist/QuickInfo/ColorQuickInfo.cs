@@ -19,8 +19,10 @@ namespace Codist.QuickInfo
 	sealed class ColorQuickInfoController : IAsyncQuickInfoSource
 	{
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false || ColorQuickInfo.IsInQuickInfo(session)) {
-				goto EXIT;
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false
+				|| session.Mark(nameof(ColorQuickInfo)) == false
+				) {
+				return null;
 			}
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			var buffer = session.TextView.TextBuffer;
@@ -35,13 +37,9 @@ namespace Codist.QuickInfo
 				}
 				brush = ColorHelper.GetBrush(word);
 			}
-			if (brush != null) {
-				if (ColorQuickInfo.Mark(session)) {
-					return new QuickInfoItem(extent.ToTrackingSpan(), ColorQuickInfo.PreviewColor(brush));
-				}
-			}
-			EXIT:
-			return null;
+			return brush != null
+				? new QuickInfoItem(extent.ToTrackingSpan(), ColorQuickInfo.PreviewColor(brush))
+				: null;
 		}
 
 		void IDisposable.Dispose() { }
@@ -50,17 +48,6 @@ namespace Codist.QuickInfo
 	static class ColorQuickInfo
 	{
 		const string PreviewPanelName = "ColorPreview";
-
-		internal static bool IsInQuickInfo(IAsyncQuickInfoSession session) {
-			return session.Properties.ContainsProperty(PreviewPanelName);
-		}
-		internal static bool Mark(IAsyncQuickInfoSession session) {
-			if (session.Properties.ContainsProperty(PreviewPanelName) == false) {
-				session.Properties[PreviewPanelName] = PreviewPanelName;
-				return true;
-			}
-			return false;
-		}
 
 		public static StackPanel PreviewColorProperty(IPropertySymbol symbol, bool includeVsColors) {
 			return PreviewColor(ColorHelper.GetBrush(symbol, includeVsColors));

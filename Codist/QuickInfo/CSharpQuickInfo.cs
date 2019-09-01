@@ -245,9 +245,6 @@ namespace Codist.QuickInfo
 			var doc = new XmlDoc(symbol, _SemanticModel.Compilation);
 			var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
 			var tip = docRenderer.RenderXmlDoc(node, symbol, doc, _SemanticModel);
-			if (tip.Children.Count > 0) {
-				qiWrapper.OverrideDocumentation(tip);
-			}
 
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExceptionDoc)
 				&& (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
@@ -265,15 +262,18 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			if (node.Parent.IsKind(SyntaxKind.ObjectCreationExpression)) {
+			if ((symbol as IMethodSymbol)?.MethodKind == MethodKind.Constructor) {
 				symbol = symbol.ContainingType;
-				doc = new XmlDoc(symbol, _SemanticModel.Compilation);
-				docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
-				var summary = doc.GetDescription(symbol);
+				var summary = new XmlDoc(symbol, _SemanticModel.Compilation)
+					.GetDescription(symbol);
 				if (summary != null) {
 					tip.Append(new ThemedTipParagraph(new ThemedTipText("Documentation from ").AddSymbol(symbol, true, SymbolFormatter.Instance).Append(":")));
-					docRenderer.Render(summary, tip);
+					new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol)
+						.Render(summary, tip);
 				}
+			}
+			if (tip.Children.Count > 0) {
+				qiWrapper.OverrideDocumentation(tip);
 			}
 			return tip;
 		}
@@ -328,7 +328,7 @@ namespace Codist.QuickInfo
 					}
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
 						&& m.ContainingType?.Name == "Color"
-						&& ColorQuickInfo.Mark(session)) {
+						&& session.Mark(nameof(ColorQuickInfo))) {
 						qiContent.Add(ColorQuickInfo.PreviewColorMethodInvocation(_SemanticModel, node, symbol as IMethodSymbol));
 					}
 					break;
@@ -338,7 +338,7 @@ namespace Codist.QuickInfo
 				case SymbolKind.Property:
 					ShowPropertyInfo(qiContent, symbol as IPropertySymbol);
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
-						&& ColorQuickInfo.Mark(session)) {
+						&& session.Mark(nameof(ColorQuickInfo))) {
 						qiContent.Add(ColorQuickInfo.PreviewColorProperty(symbol as IPropertySymbol, _IsVsProject));
 					}
 					break;

@@ -86,6 +86,14 @@ namespace Codist
 			return t == null ? null : formatMap.GetTextProperties(t);
 		}
 
+		public static bool Mark<TKey>(this IPropertyOwner owner, TKey mark) {
+			if (owner.Properties.ContainsProperty(mark) == false) {
+				owner.Properties.AddProperty(mark, mark);
+				return true;
+			}
+			return false;
+		}
+
 		#region Selection
 		public static void ExpandSelectionToLine(this ITextView view) {
 			view.ExpandSelectionToLine(true);
