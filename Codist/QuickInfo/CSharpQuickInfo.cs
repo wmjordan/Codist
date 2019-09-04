@@ -331,6 +331,12 @@ namespace Codist.QuickInfo
 						&& session.Mark(nameof(ColorQuickInfo))) {
 						qiContent.Add(ColorQuickInfo.PreviewColorMethodInvocation(_SemanticModel, node, symbol as IMethodSymbol));
 					}
+					if (m.MethodKind == MethodKind.BuiltinOperator && node is ExpressionSyntax) {
+						var value = _SemanticModel.GetConstantValue(node);
+						if (value.HasValue) {
+							ShowConstInfo(qiContent, null, value.Value);
+						}
+					}
 					break;
 				case SymbolKind.NamedType:
 					ShowTypeInfo(qiContent, node, symbol as INamedTypeSymbol);
@@ -409,7 +415,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, p)));
 			}
 		}
-		static void ShowMiscInfo(QiContainer qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
+		void ShowMiscInfo(QiContainer qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
 			StackPanel infoBox = null;
 			var nodeKind = node.Kind();
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && (nodeKind == SyntaxKind.NumericLiteralExpression || nodeKind == SyntaxKind.CharacterLiteralExpression)) {
@@ -433,9 +439,10 @@ namespace Codist.QuickInfo
 			}
 			else if (nodeKind == SyntaxKind.StringLiteralExpression) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
-					infoBox = ShowStringInfo(node.GetFirstToken().ValueText);
+					infoBox = ShowStringInfo(node.GetFirstToken().ValueText, false);
 				}
 			}
+
 			if (infoBox != null) {
 				qiContent.Add(infoBox);
 			}
@@ -726,13 +733,15 @@ namespace Codist.QuickInfo
 			var sv = value as string;
 			if (sv != null) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
-					qiContent.Add(ShowStringInfo(sv));
+					qiContent.Add(ShowStringInfo(sv, true));
 				}
 			}
 			else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
 				var s = ToolTipFactory.ShowNumericForms(value);
 				if (s != null) {
-					ShowEnumInfo(qiContent, symbol.ContainingType, false);
+					if (symbol != null) {
+						ShowEnumInfo(qiContent, symbol.ContainingType, false);
+					}
 					qiContent.Add(s);
 				}
 			}
@@ -838,12 +847,16 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static StackPanel ShowStringInfo(string sv) {
-			return new StackPanel()
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.Length.ToString()).Add(new ThemedTipText("chars", true)))
-				//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.UTF8.GetByteCount(sv).ToString()).AddText("UTF-8 bytes", true))
-				//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.Default.GetByteCount(sv).ToString()).AddText("System bytes", true))
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(sv.GetHashCode().ToString()).Add(new ThemedTipText("Hash code", true)));
+		static StackPanel ShowStringInfo(string sv, bool showText) {
+			var s = new StackPanel();
+			if (showText) {
+				s.Add(new StackPanel { Orientation = Orientation.Horizontal }.AddReadOnlyTextBox(sv, true).Add(new ThemedTipText("text", true)));
+			}
+			s.Add(new StackPanel { Orientation = Orientation.Horizontal }.AddReadOnlyTextBox(sv.Length.ToString()).Add(new ThemedTipText("chars", true)))
+			//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.UTF8.GetByteCount(sv).ToString()).AddText("UTF-8 bytes", true))
+			//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.Default.GetByteCount(sv).ToString()).AddText("System bytes", true))
+				.Add(new StackPanel { Orientation = Orientation.Horizontal }.AddReadOnlyTextBox(sv.GetHashCode().ToString()).Add(new ThemedTipText("Hash code", true)));
+			return s;
 		}
 
 		static void ShowBaseType(QiContainer qiContent, ITypeSymbol typeSymbol) {

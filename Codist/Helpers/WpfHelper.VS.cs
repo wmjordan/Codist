@@ -39,12 +39,15 @@ namespace Codist
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 
-		public static TPanel AddReadOnlyTextBox<TPanel>(this TPanel panel, string text)
+		public static TPanel AddReadOnlyTextBox<TPanel>(this TPanel panel, string text, bool alignLeft = false)
 		where TPanel : Panel {
 			panel.Children.Add(new QuickInfoTextBox {
 				Text = text,
-				TextAlignment = TextAlignment.Right,
-				MinWidth = 180
+				TextAlignment = alignLeft ? TextAlignment.Left : TextAlignment.Right,
+				MinWidth = 180,
+				MaxWidth = Config.Instance.QuickInfoMaxWidth > 180 ? Config.Instance.QuickInfoMaxWidth - 100 : 180,
+				TextWrapping = TextWrapping.Wrap,
+				VerticalScrollBarVisibility = ScrollBarVisibility.Auto
 			});
 			return panel;
 		}
