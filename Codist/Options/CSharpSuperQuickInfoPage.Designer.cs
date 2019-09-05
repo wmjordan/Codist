@@ -42,6 +42,7 @@
 			this._CSharpExceptionDocBox = new System.Windows.Forms.CheckBox();
 			this._AlternativeStyleBox = new System.Windows.Forms.CheckBox();
 			this._CSharpRemarksDocBox = new System.Windows.Forms.CheckBox();
+			this._CSharpSeeAlsoDocBox = new System.Windows.Forms.CheckBox();
 			this._CSharpReturnsDocBox = new System.Windows.Forms.CheckBox();
 			this._CSharpTextOnlyDocBox = new System.Windows.Forms.CheckBox();
 			this._CSharpInheritDocCrefBox = new System.Windows.Forms.CheckBox();
@@ -51,7 +52,6 @@
 			this._AdditionalItemsPage = new System.Windows.Forms.TabPage();
 			this._CSharpInterfaceMembersQuickInfoBox = new System.Windows.Forms.CheckBox();
 			this._CSharpMethodOverloadQuickInfoBox = new System.Windows.Forms.CheckBox();
-			this._CSharpSeeAlsoDocBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this._DefaultPage.SuspendLayout();
 			this._AdditionalItemsPage.SuspendLayout();
@@ -92,9 +92,9 @@
 			this._CSharpStringQuickInfoBox.AutoSize = true;
 			this._CSharpStringQuickInfoBox.Location = new System.Drawing.Point(258, 31);
 			this._CSharpStringQuickInfoBox.Name = "_CSharpStringQuickInfoBox";
-			this._CSharpStringQuickInfoBox.Size = new System.Drawing.Size(181, 19);
+			this._CSharpStringQuickInfoBox.Size = new System.Drawing.Size(253, 19);
 			this._CSharpStringQuickInfoBox.TabIndex = 13;
-			this._CSharpStringQuickInfoBox.Text = "String length, hash";
+			this._CSharpStringQuickInfoBox.Text = "String length, hash, content";
 			this._CSharpStringQuickInfoBox.UseVisualStyleBackColor = true;
 			// 
 			// _CSharpNumberQuickInfoBox
@@ -240,6 +240,16 @@
 			this._CSharpRemarksDocBox.Text = "Show <remarks> XML Doc";
 			this._CSharpRemarksDocBox.UseVisualStyleBackColor = true;
 			// 
+			// _CSharpSeeAlsoDocBox
+			// 
+			this._CSharpSeeAlsoDocBox.AutoSize = true;
+			this._CSharpSeeAlsoDocBox.Location = new System.Drawing.Point(32, 156);
+			this._CSharpSeeAlsoDocBox.Name = "_CSharpSeeAlsoDocBox";
+			this._CSharpSeeAlsoDocBox.Size = new System.Drawing.Size(205, 19);
+			this._CSharpSeeAlsoDocBox.TabIndex = 7;
+			this._CSharpSeeAlsoDocBox.Text = "Show <seeAlso> XML Doc";
+			this._CSharpSeeAlsoDocBox.UseVisualStyleBackColor = true;
+			// 
 			// _CSharpReturnsDocBox
 			// 
 			this._CSharpReturnsDocBox.AutoSize = true;
@@ -343,16 +353,6 @@
 			this._CSharpMethodOverloadQuickInfoBox.TabIndex = 8;
 			this._CSharpMethodOverloadQuickInfoBox.Text = "Method overload";
 			this._CSharpMethodOverloadQuickInfoBox.UseVisualStyleBackColor = true;
-			// 
-			// _CSharpSeeAlsoDocBox
-			// 
-			this._CSharpSeeAlsoDocBox.AutoSize = true;
-			this._CSharpSeeAlsoDocBox.Location = new System.Drawing.Point(32, 156);
-			this._CSharpSeeAlsoDocBox.Name = "_CSharpSeeAlsoDocBox";
-			this._CSharpSeeAlsoDocBox.Size = new System.Drawing.Size(205, 19);
-			this._CSharpSeeAlsoDocBox.TabIndex = 7;
-			this._CSharpSeeAlsoDocBox.Text = "Show <seeAlso> XML Doc";
-			this._CSharpSeeAlsoDocBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpSuperQuickInfoPage
 			// 

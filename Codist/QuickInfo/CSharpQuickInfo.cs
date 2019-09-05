@@ -848,14 +848,14 @@ namespace Codist.QuickInfo
 		}
 
 		static StackPanel ShowStringInfo(string sv, bool showText) {
-			var s = new StackPanel();
-			if (showText) {
-				s.Add(new StackPanel { Orientation = Orientation.Horizontal }.AddReadOnlyTextBox(sv, true).Add(new ThemedTipText("text", true)));
-			}
-			s.Add(new StackPanel { Orientation = Orientation.Horizontal }.AddReadOnlyTextBox(sv.Length.ToString()).Add(new ThemedTipText("chars", true)))
+			var s = new StackPanel()
+				.Add(new StackPanel { Orientation = Orientation.Horizontal }.AddReadOnlyTextBox(sv.Length.ToString()).Add(new ThemedTipText("chars", true)))
 			//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.UTF8.GetByteCount(sv).ToString()).AddText("UTF-8 bytes", true))
 			//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.Default.GetByteCount(sv).ToString()).AddText("System bytes", true))
 				.Add(new StackPanel { Orientation = Orientation.Horizontal }.AddReadOnlyTextBox(sv.GetHashCode().ToString()).Add(new ThemedTipText("Hash code", true)));
+			if (showText) {
+				s.Add(new StackPanel { Orientation = Orientation.Horizontal }.AddReadOnlyTextBox(sv, true).Add(new ThemedTipText("text", true)));
+			}
 			return s;
 		}
 
