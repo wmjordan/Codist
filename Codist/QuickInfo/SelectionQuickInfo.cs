@@ -18,10 +18,15 @@ namespace Codist.QuickInfo
 				|| session.Mark(nameof(SelectionQuickInfo)) == false) {
 				return null;
 			}
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			var textSnapshot = session.TextView.TextSnapshot;
 			var triggerPoint = session.GetTriggerPoint(textSnapshot).GetValueOrDefault();
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			return ShowSelectionInfo(session, triggerPoint);
+			try {
+				return ShowSelectionInfo(session, triggerPoint);
+			}
+			catch (ArgumentException /*triggerPoint has a differ TextBuffer from textSnapshot*/) {
+				return null;
+			}
 		}
 
 		void IDisposable.Dispose() { }
