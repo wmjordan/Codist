@@ -82,7 +82,7 @@ namespace Codist.Controls
 					break;
 			}
 			if (_Node != null && _Node.Kind().IsDeclaration()
-				&& _Node.SyntaxTree == _SemanticContext.SemanticModel.SyntaxTree
+				&& _Node.SyntaxTree == _SemanticContext.SemanticModel?.SyntaxTree
 				&& _Symbol.Kind != SymbolKind.Namespace) {
 				Items.Add(CreateItem(KnownImageIds.FindSymbol, "Find Referenced Symbols...", FindReferencedSymbols));
 			}
