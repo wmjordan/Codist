@@ -12,8 +12,8 @@ namespace Codist.Controls
 		}
 
 		protected override void OnMouseRightButtonUp(MouseButtonEventArgs e) {
-			Copy();
-			e.Handled = true;
+			base.OnMouseRightButtonUp(e);
+			QuickInfo.QuickInfoOverrider.HoldQuickInfo(e.Source as System.Windows.DependencyObject, true);
 		}
 	}
 }
