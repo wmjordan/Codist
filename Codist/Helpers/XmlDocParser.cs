@@ -119,7 +119,7 @@ namespace Codist
 			}
 			XElement d;
 			try {
-				d = XElement.Parse(c, LoadOptions.None);
+				d = XElement.Parse(c, LoadOptions.PreserveWhitespace);
 			}
 			catch (XmlException) {
 				// ignore

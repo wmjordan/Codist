@@ -270,6 +270,9 @@ namespace Codist
 							else if (item.NextNode == null) {
 								t = t.TrimEnd();
 							}
+							if (t.Length == 0) {
+								break;
+							}
 							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
 						}
 						if (t.Length > 0) {
