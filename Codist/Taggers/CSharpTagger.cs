@@ -38,14 +38,22 @@ namespace Codist.Taggers
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
+			ITextSnapshot snapshot = null;
+			Workspace workspace = null;
+			SemanticModel semanticModel = null;
 			foreach (var span in spans) {
-				var snapshot = span.Snapshot;
-				var workspace = snapshot.TextBuffer.GetWorkspace();
-				if (workspace == null) {
-					yield break;
+				if (snapshot != span.Snapshot) {
+					snapshot = span.Snapshot;
+					if (workspace == null) {
+						workspace = snapshot.TextBuffer.GetWorkspace();
+					}
+					if (workspace == null) {
+						yield break;
+					}
+					if (semanticModel == null) {
+						semanticModel = SyncHelper.RunSync(() => workspace.GetDocument(span).GetSemanticModelAsync());
+					}
 				}
-				//var result = new List<ClassificationSpan>(16);
-				var semanticModel = SyncHelper.RunSync(() => workspace.GetDocument(span).GetSemanticModelAsync());
 
 				var textSpan = new TextSpan(span.Start.Position, span.Length);
 				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
