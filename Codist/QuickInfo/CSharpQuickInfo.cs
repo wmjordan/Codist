@@ -143,30 +143,11 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowParameterInfo(qiContent, node);
 			}
-			ISymbol symbol;
-			_isCandidate = false;
-			if (node.IsKind(SyntaxKind.BaseExpression)) {
-				symbol = semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
-			}
-			else if (node.IsKind(SyntaxKind.ThisExpression)) {
-				symbol = semanticModel.GetTypeInfo(node, cancellationToken).Type;
-			}
-			else if (token.IsKind(SyntaxKind.CloseBraceToken)) {
-				symbol = null;
-			}
-			else {
-				var symbolInfo = semanticModel.GetSymbolInfo(node, cancellationToken);
-				if (symbolInfo.CandidateReason != CandidateReason.None) {
-					ShowCandidateInfo(qiContent, symbolInfo);
-					symbol = symbolInfo.CandidateSymbols.FirstOrDefault();
-					_isCandidate = true;
-				}
-				else {
-					symbol = symbolInfo.Symbol
-						?? (node.Kind().IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator
-							? semanticModel.GetDeclaredSymbol(node, cancellationToken)
-							: semanticModel.GetSymbolExt(node, cancellationToken));
-				}
+			ImmutableArray<ISymbol> candidates;
+			var symbol = token.IsKind(SyntaxKind.CloseBraceToken) ? null
+				: GetSymbol(semanticModel, node, ref candidates, cancellationToken);
+			if (_isCandidate = candidates.IsDefaultOrEmpty == false) {
+				ShowCandidateInfo(qiContent, candidates);
 			}
 			if (symbol == null) {
 				ShowMiscInfo(qiContent, currentSnapshot, node);
@@ -175,11 +156,11 @@ namespace Codist.QuickInfo
 				}
 				goto RETURN;
 			}
-
 			if (node is PredefinedTypeSyntax/* void */) {
 				return null;
 			}
 			if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)) {
+				qiContent.Add(await OverrideAvailabilityAsync(docId, workspace, token, cancellationToken));
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node, qiWrapper,
 					ctor?.Type == node ? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol
@@ -210,6 +191,45 @@ namespace Codist.QuickInfo
 			return new QuickInfoItem(qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
 				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeExclusive)
 				: null, qiContent.ToUI());
+		}
+
+		static async Task<ThemedTipDocument> OverrideAvailabilityAsync(DocumentId docId, Workspace workspace, SyntaxToken token, CancellationToken cancellationToken) {
+			ThemedTipDocument r = null;
+			if (workspace.CurrentSolution.ProjectIds.Count > 0) {
+				var linkedDocuments = workspace.CurrentSolution.GetDocument(docId).GetLinkedDocumentIds();
+				if (linkedDocuments.Length > 0) {
+					ImmutableArray<ISymbol> candidates;
+					foreach (var id in linkedDocuments) {
+						var d = workspace.CurrentSolution.GetDocument(id);
+						var sm = await d.GetSemanticModelAsync(cancellationToken);
+						if (GetSymbol(sm, sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(token.Span, true, true), ref candidates, cancellationToken) == null) {
+							if (r == null) {
+								r = new ThemedTipDocument().AppendTitle(KnownImageIds.StatusWarning, "Symbol unavailable in...");
+							}
+							r.Append(new ThemedTipParagraph(KnownImageIds.CSProjectNode, new ThemedTipText(d.Project.Name)));
+						}
+					}
+				}
+			}
+			return r;
+		}
+
+		static ISymbol GetSymbol(SemanticModel semanticModel, SyntaxNode node, ref ImmutableArray<ISymbol> candidates, CancellationToken cancellationToken) {
+			if (node.IsKind(SyntaxKind.BaseExpression)) {
+				return semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
+			}
+			else if (node.IsKind(SyntaxKind.ThisExpression)) {
+				return semanticModel.GetTypeInfo(node, cancellationToken).Type;
+			}
+			var symbolInfo = semanticModel.GetSymbolInfo(node, cancellationToken);
+			if (symbolInfo.CandidateReason != CandidateReason.None) {
+				candidates = symbolInfo.CandidateSymbols;
+				return symbolInfo.CandidateSymbols.FirstOrDefault();
+			}
+			return symbolInfo.Symbol
+				?? (node.Kind().IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator
+					? semanticModel.GetDeclaredSymbol(node, cancellationToken)
+					: semanticModel.GetSymbolExt(node, cancellationToken));
 		}
 
 		static void LocateNodeInParameterList(ref SyntaxNode node, ref SyntaxToken token) {
@@ -286,9 +306,9 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowCandidateInfo(QiContainer qiContent, SymbolInfo symbolInfo) {
+		static void ShowCandidateInfo(QiContainer qiContent, ImmutableArray<ISymbol> candidates) {
 			var info = new ThemedTipDocument().AppendTitle(KnownImageIds.CodeInformation, "Maybe...");
-			foreach (var item in symbolInfo.CandidateSymbols) {
+			foreach (var item in candidates) {
 				info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
 			}
 			qiContent.Add(info);
@@ -385,7 +405,7 @@ namespace Codist.QuickInfo
 			var df = semanticModel.AnalyzeDataFlow(node);
 			var vd = df.VariablesDeclared;
 			if (vd.IsEmpty == false) {
-				var p = new ThemedTipText("Declared variable:", true).AppendLine();
+				var p = new ThemedTipText("Declared variable: ", true).Append(vd.Length).AppendLine();
 				var s = false;
 				foreach (var item in vd) {
 					if (s) {
@@ -398,7 +418,7 @@ namespace Codist.QuickInfo
 			}
 			vd = df.DataFlowsIn;
 			if (vd.IsEmpty == false) {
-				var p = new ThemedTipText("Read variable:", true).AppendLine();
+				var p = new ThemedTipText("Read variable: ", true).Append(vd.Length).AppendLine();
 				var s = false;
 				foreach (var item in vd) {
 					if (s) {
@@ -415,7 +435,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, p)));
 			}
 		}
-		void ShowMiscInfo(QiContainer qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
+		static void ShowMiscInfo(QiContainer qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
 			StackPanel infoBox = null;
 			var nodeKind = node.Kind();
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && (nodeKind == SyntaxKind.NumericLiteralExpression || nodeKind == SyntaxKind.CharacterLiteralExpression)) {
