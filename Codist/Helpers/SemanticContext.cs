@@ -96,10 +96,13 @@ namespace Codist
 		/// Locate symbol in case when the semantic model has been changed.
 		/// </summary>
 		public async Task<ISymbol> RelocateSymbolAsync(ISymbol symbol, CancellationToken cancellationToken = default) {
-			await UpdateAsync(cancellationToken).ConfigureAwait(false);
+			if (await UpdateAsync(cancellationToken) == false || Document == null) {
+				return symbol;
+			}
 			var path = symbol.DeclaringSyntaxReferences.FirstOrDefault(r => r.SyntaxTree != null);
-			var doc = Document.Project.GetDocument(path.SyntaxTree.FilePath) ?? Document.Project.Solution.GetDocument(path.SyntaxTree);
 			try {
+				var doc = Document.Project.GetDocument(path.SyntaxTree.FilePath)
+					?? Document.Project.Solution.GetDocument(path.SyntaxTree);
 				return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSimilarSymbols(symbol, (await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false)).Compilation, cancellationToken)
 				.FirstOrDefault() ?? symbol;
 			}
@@ -216,15 +219,22 @@ namespace Codist
 			return Node == null ? null : await GetSymbolAsync(Position, cancellationToken).ConfigureAwait(false);
 		}
 
-		public async Task<bool> UpdateAsync(CancellationToken cancellationToken) {
+		public Task<bool> UpdateAsync(CancellationToken cancellationToken) {
+			return UpdateAsync(View.TextBuffer, cancellationToken);
+		}
+
+		public async Task<bool> UpdateAsync(ITextBuffer textBuffer, CancellationToken cancellationToken) {
 			try {
-				var textContainer = View.TextBuffer.AsTextContainer();
+				var textContainer = textBuffer.AsTextContainer();
 				Document doc = null;
 				if (Workspace.TryGetWorkspace(textContainer, out var workspace)) {
 					var id = workspace.GetDocumentIdInCurrentContext(textContainer);
 					if (id != null && workspace.CurrentSolution.ContainsDocument(id)) {
 						doc = workspace.CurrentSolution.WithDocumentText(id, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(id);
 					}
+				}
+				else {
+					return false;
 				}
 				if (doc != Document) {
 					Workspace = workspace;
@@ -240,10 +250,15 @@ namespace Codist
 			return false;
 		}
 
-		public async Task<bool> UpdateAsync(int position, CancellationToken cancellationToken) {
+		public Task<bool> UpdateAsync(int position, CancellationToken cancellationToken) {
+			Position = position;
+			return UpdateAsync(position, View.TextBuffer, cancellationToken);
+		}
+
+		public async Task<bool> UpdateAsync(int position, ITextBuffer textBuffer, CancellationToken cancellationToken) {
 			bool versionChanged;
 			try {
-				var textContainer = View.TextBuffer.AsTextContainer();
+				var textContainer = textBuffer.AsTextContainer();
 				Document = null;
 				if (Workspace.TryGetWorkspace(textContainer, out var workspace)) {
 					Workspace = workspace;
@@ -251,6 +266,9 @@ namespace Codist
 					if (id != null && workspace.CurrentSolution.ContainsDocument(id)) {
 						Document = workspace.CurrentSolution.WithDocumentText(id, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(id);
 					}
+				}
+				else {
+					return false;
 				}
 				var ver = await Document.GetTextVersionAsync(cancellationToken).ConfigureAwait(false);
 				if (versionChanged = ver != _Version) {
@@ -264,7 +282,6 @@ namespace Codist
 				ResetNodeInfo();
 				return false;
 			}
-			Position = position;
 			try {
 				if (versionChanged || Token.Span.Contains(position) == false) {
 					Token = Compilation.FindToken(position, true);

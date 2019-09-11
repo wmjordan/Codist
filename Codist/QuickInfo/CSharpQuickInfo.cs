@@ -49,6 +49,7 @@ namespace Codist.QuickInfo
 				? QuickInfoOverrider.CreateOverrider(session)
 				: null;
 			// Map the trigger point down to our buffer.
+			// It is weird that the session.TextView.TextBuffer != _TextBuffer and we can't get a Workspace from the former one
 			var currentSnapshot = _TextBuffer.CurrentSnapshot;
 			var subjectTriggerPoint = session.GetTriggerPoint(currentSnapshot).GetValueOrDefault();
 			if (subjectTriggerPoint.Snapshot == null) {
@@ -178,8 +179,7 @@ namespace Codist.QuickInfo
 			if (node is PredefinedTypeSyntax/* void */) {
 				return null;
 			}
-			if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
-				&& _isCandidate == false) {
+			if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)) {
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node, qiWrapper,
 					ctor?.Type == node ? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol
@@ -205,7 +205,7 @@ namespace Codist.QuickInfo
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Diagnostics)) {
 					qiWrapper.SetDiagnostics(semanticModel.GetDiagnostics(token.Span, cancellationToken));
 				}
-				qiWrapper.ApplyClickAndGo(symbol, session);
+				qiWrapper.ApplyClickAndGo(symbol, _TextBuffer, session);
 			}
 			return new QuickInfoItem(qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
 				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeExclusive)

@@ -12,6 +12,7 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.QuickInfo
@@ -20,7 +21,7 @@ namespace Codist.QuickInfo
 	{
 		UIElement Control { get; }
 		void SetDiagnostics(IList<Diagnostic> diagnostics);
-		void ApplyClickAndGo(ISymbol symbol, IAsyncQuickInfoSession quickInfoSession);
+		void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, IAsyncQuickInfoSession quickInfoSession);
 		void OverrideDocumentation(UIElement docElement);
 		void OverrideException(UIElement exceptionDoc);
 	}
@@ -45,7 +46,7 @@ namespace Codist.QuickInfo
 			items = items.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl") ?? items;
 			return items.GetFirstVisualChild<StackPanel>(o => o is IQuickInfoHolder) as IQuickInfoHolder;
 		}
-		static void ApplyClickAndGo(ISymbol symbol, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
+		static void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
 			if (symbol.Kind == SymbolKind.Namespace) {
 				description.ToolTip = "Locations: " + symbol.DeclaringSyntaxReferences.Length;
 				description.MouseEnter += HookEvents;
@@ -104,8 +105,8 @@ namespace Codist.QuickInfo
 			void ShowContextMenu(object sender, ContextMenuEventArgs e) {
 				var s = sender as FrameworkElement;
 				if (s.ContextMenu == null) {
-					var ctx = SemanticContext.GetHovered();
-					SyncHelper.RunSync(() => ctx.UpdateAsync(default));
+					var ctx = SemanticContext.GetOrCreateSingetonInstance(quickInfoSession.TextView as IWpfTextView);
+					SyncHelper.RunSync(() => ctx.UpdateAsync(textBuffer, default));
 					var m = new CSharpSymbolContextMenu(ctx) {
 						Symbol = symbol,
 						SyntaxNode = symbol.GetSyntaxNode()
@@ -172,9 +173,10 @@ namespace Codist.QuickInfo
 
 			public UIElement Control => _Overrider;
 
-			public void ApplyClickAndGo(ISymbol symbol, IAsyncQuickInfoSession quickInfoSession) {
+			public void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, IAsyncQuickInfoSession quickInfoSession) {
 				_Overrider.ClickAndGoSymbol = symbol;
 				_Overrider.QuickInfoSession = quickInfoSession;
+				_Overrider.TextBuffer = textBuffer;
 			}
 
 			public void OverrideDocumentation(UIElement docElement) {
@@ -200,6 +202,7 @@ namespace Codist.QuickInfo
 				public UIElement ExceptionDoc;
 				public IList<Diagnostic> Diagnostics;
 				public IAsyncQuickInfoSession QuickInfoSession;
+				public ITextBuffer TextBuffer;
 
 				public bool KeepQuickInfoOpen { get; set; }
 				public bool IsMouseOverAggregated { get; set; }
@@ -349,9 +352,11 @@ namespace Codist.QuickInfo
 					// replace the default XML doc
 					// sequence of items in default XML Doc panel:
 					// 1. summary
-					// 2. type parameter
+					// 2. generic type parameter
 					// 3. usage
 					// 4. exception
+					// 5. availability warning
+					// 6. captured variables
 					var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
 					if (DocElement != null) {
 						OverrideDocElement(doc, v16_1orLater, items);
@@ -363,7 +368,7 @@ namespace Codist.QuickInfo
 					if (icon != null && signature != null) {
 						// apply click and go feature
 						if (ClickAndGoSymbol != null) {
-							QuickInfoOverrider.ApplyClickAndGo(ClickAndGoSymbol, signature, QuickInfoSession);
+							QuickInfoOverrider.ApplyClickAndGo(ClickAndGoSymbol, TextBuffer, signature, QuickInfoSession);
 						}
 						// fix the width of the signature part to prevent it from falling down to the next row
 						if (Config.Instance.QuickInfoMaxWidth > 0) {
