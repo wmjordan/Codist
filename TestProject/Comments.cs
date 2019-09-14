@@ -10,7 +10,7 @@ namespace TestProject
 	/// This XML doc will be applied to namespace <see cref="TestProject"/>.
 	/// </summary>
 	/// <remarks>
-	/// <para>To keep the <see cref="NamespaceDoc"/> class from appearing in the help file, leave off the <see langword="public"/> keyword and mark it with a <see cref="System.Runtime.CompilerServices.CompilerGeneratedAttribute"/> attribute. This will cause the class to be automatically ignored when reflection information is generated for the assembly. The following is an example:</para>
+	/// <para>To keep the <see cref="NamespaceDoc"/> class from appearing in the help file, leave off the <see langword="public"/> keyword and mark it with a <see cref="System.Runtime.CompilerServices.CompilerGeneratedAttribute"/> attribute. This will cause the class to be automatically ignored when reflection information is generated for the assembly. The following is an example (select and right click to copy code):</para>
 	/// <code><![CDATA[
 	/// /// <summary>
 	/// /// These are the namespace comments.
@@ -113,6 +113,36 @@ namespace TestProject
 		[Name(SharedConstants.A)]
 		public static string Throw() {
 			throw new NotImplementedException("boo-boo");
+		}
+
+		/// <summary>Converts value.</summary>
+		/// <typeparam name="TSource">Source type.</typeparam>
+		/// <typeparam name="TValue">Target type.</typeparam>
+		/// <param name="source">source value.</param>
+		/// <returns>Returns converted value.</returns>
+		public static TValue Convert<TSource, TValue> (TSource source)
+			where TSource : struct, IConvertible
+			where TValue : struct, IConvertible {
+			return (TValue)System.Convert.ChangeType(source, typeof(TValue));
+		}
+
+		/// <summary>Prints two variables.</summary>
+		/// <typeparam name="TArg1">Type of var1.</typeparam>
+		/// <typeparam name="TArg2">Type of var2.</typeparam>
+		/// <param name="a">Var1.</param>
+		/// <param name="b">Var2.</param>
+		public static void Print<TArg1, TArg2>(TArg1 a, TArg2 b)
+			where TArg1 : class {
+			Console.WriteLine(a);
+			Console.WriteLine(b);
+		}
+
+		static void TestConvert() {
+			// Hover on methods to test the display of type arguments
+			var l = Convert<int, long>(1);
+			var i = Convert<long, int>(l);
+			// Hover to test the display of anonymous type as type arguments
+			Print(new { a = 1, b = 2, c = 3, d = new { x = 1, y = 2 } }, new { X = 1, Y = new Dictionary<int, int>() });
 		}
 
 		static class SharedConstants

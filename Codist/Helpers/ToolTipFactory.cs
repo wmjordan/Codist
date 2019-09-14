@@ -125,11 +125,14 @@ namespace Codist
 
 		static void ShowXmlDocSummary(ISymbol symbol, Compilation compilation, ThemedToolTip tip) {
 			var doc = new XmlDoc(symbol, compilation);
-			var summary = doc.Summary ?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.ExplicitInheritDoc?.Summary : null);
+			var summary = doc.GetDescription(symbol)
+				?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.GetInheritedDescription(symbol, out doc) : null);
 			if (summary != null) {
 				var docContent = tip.AddTextBlock();
 				new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(summary, docContent);
-				tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
+				if (Config.Instance.QuickInfoMaxWidth >= 100) {
+					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
+				}
 			}
 		}
 

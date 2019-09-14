@@ -96,6 +96,12 @@ namespace Codist
 			inlines.Add(")");
 			return block;
 		}
+		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, bool bold, SymbolFormatter formatter) {
+			if (symbol != null) {
+				formatter.Format(block.Inlines, symbol, alias, bold);
+			}
+			return block;
+		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, bool bold, SymbolFormatter formatter) {
 			if (symbol != null) {
 				formatter.Format(block.Inlines, symbol, null, bold);
@@ -252,7 +258,7 @@ namespace Codist
 			protected override void OnToolTipOpening(ToolTipEventArgs e) {
 				base.OnToolTipOpening(e);
 				if (ReferenceEquals(ToolTip, String.Empty)) {
-					ToolTip = ToolTipFactory.CreateToolTip(_Symbol);
+					ToolTip = ToolTipFactory.CreateToolTip(_Symbol, false, SemanticContext.GetHovered().SemanticModel.Compilation);
 				}
 			}
 			protected override void OnMouseRightButtonDown(MouseButtonEventArgs e) {

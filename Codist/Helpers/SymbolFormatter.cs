@@ -120,8 +120,10 @@ namespace Codist
 					text.Add(symbol.Render(alias, bold, ((IFieldSymbol)symbol).IsConst ? Const : Field));
 					return;
 				case SymbolKind.Method:
-					text.Add(symbol.Render(alias, bold, Method));
 					var method = (IMethodSymbol)symbol;
+					text.Add(method.MethodKind != MethodKind.Constructor
+						? symbol.Render(alias, bold, Method)
+						: symbol.Render(alias ?? method.ContainingType.Name, bold, GetBrushForMethod(method)));
 					if (method.IsGenericMethod) {
 						AddTypeArguments(text, method.TypeArguments);
 					}
@@ -130,7 +132,7 @@ namespace Codist
 					var type = (INamedTypeSymbol)symbol;
 					var specialType = type.GetSpecialTypeAlias();
 					if (specialType != null) {
-						text.Add(specialType.Render(Keyword)); return;
+						text.Add((alias ?? specialType).Render(Keyword)); return;
 					}
 					switch (type.TypeKind) {
 						case TypeKind.Class:
@@ -184,6 +186,14 @@ namespace Codist
 					text.Add("?");
 					return;
 				default: text.Add(symbol.Name); return;
+			}
+
+			Brush GetBrushForMethod(IMethodSymbol m) {
+				switch (m.ContainingType.TypeKind) {
+					case TypeKind.Class: return Class;
+					case TypeKind.Struct: return Struct;
+				}
+				return Method;
 			}
 		}
 

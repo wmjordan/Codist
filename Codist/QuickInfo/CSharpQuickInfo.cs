@@ -28,14 +28,12 @@ namespace Codist.QuickInfo
 
 		readonly bool _IsVsProject;
 		readonly ITextBuffer _TextBuffer;
-		bool _IsDisposed;
 		SemanticModel _SemanticModel;
 		bool _isCandidate;
 
 		public CSharpQuickInfo(ITextBuffer subjectBuffer) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			_TextBuffer = subjectBuffer;
-			_TextBuffer.Changing += TextBuffer_Changing;
 			_IsVsProject = TextEditorHelper.IsVsixProject();
 		}
 
@@ -44,10 +42,10 @@ namespace Codist.QuickInfo
 			if (Keyboard.Modifiers == ModifierKeys.Control) {
 				return null;
 			}
-			var qiContent = new QiContainer();
 			var qiWrapper = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
 				? QuickInfoOverrider.CreateOverrider(session)
 				: null;
+			var qiContent = new QiContainer(qiWrapper);
 			// Map the trigger point down to our buffer.
 			// It is weird that the session.TextView.TextBuffer != _TextBuffer and we can't get a Workspace from the former one
 			var currentSnapshot = _TextBuffer.CurrentSnapshot;
@@ -159,8 +157,8 @@ namespace Codist.QuickInfo
 			if (node is PredefinedTypeSyntax/* void */) {
 				return null;
 			}
-			if (Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)) {
-				qiContent.Add(await OverrideAvailabilityAsync(docId, workspace, token, cancellationToken));
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
+				qiContent.Add(await ShowAvailabilityAsync(docId, workspace, token, cancellationToken));
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node, qiWrapper,
 					ctor?.Type == node ? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol
@@ -193,7 +191,7 @@ namespace Codist.QuickInfo
 				: null, qiContent.ToUI());
 		}
 
-		static async Task<ThemedTipDocument> OverrideAvailabilityAsync(DocumentId docId, Workspace workspace, SyntaxToken token, CancellationToken cancellationToken) {
+		static async Task<ThemedTipDocument> ShowAvailabilityAsync(DocumentId docId, Workspace workspace, SyntaxToken token, CancellationToken cancellationToken) {
 			ThemedTipDocument r = null;
 			if (workspace.CurrentSolution.ProjectIds.Count > 0) {
 				var linkedDocuments = workspace.CurrentSolution.GetDocument(docId).GetLinkedDocumentIds();
@@ -256,11 +254,6 @@ namespace Codist.QuickInfo
 		}
 
 		ThemedTipDocument OverrideDocumentation(SyntaxNode node, IQuickInfoOverrider qiWrapper, ISymbol symbol) {
-			if (symbol == null
-				|| Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) == false) {
-				return null;
-			}
-			// todo Also show type XML Doc for constructors
 			symbol = symbol.GetAliasTarget();
 			var doc = new XmlDoc(symbol, _SemanticModel.Compilation);
 			var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
@@ -274,6 +267,7 @@ namespace Codist.QuickInfo
 					var et = ex.Attribute("cref");
 					if (et != null) {
 						docRenderer.RenderXmlDocSymbol(et.Value, p.Content.AppendLine().Inlines, SymbolKind.NamedType);
+						p.Content.Inlines.LastInline.FontWeight = FontWeights.Bold;
 						docRenderer.Render(ex, p.Content.Append(": ").Inlines);
 					}
 				}
@@ -282,6 +276,7 @@ namespace Codist.QuickInfo
 				}
 			}
 
+			// show type XML Doc for constructors
 			if ((symbol as IMethodSymbol)?.MethodKind == MethodKind.Constructor) {
 				symbol = symbol.ContainingType;
 				var summary = new XmlDoc(symbol, _SemanticModel.Compilation)
@@ -292,17 +287,33 @@ namespace Codist.QuickInfo
 						.Render(summary, tip);
 				}
 			}
+
+			ShowCapturedVariables(node, symbol, tip);
+
 			if (tip.Children.Count > 0) {
 				qiWrapper.OverrideDocumentation(tip);
 			}
 			return tip;
 		}
 
-		void IDisposable.Dispose() {
-			if (!_IsDisposed) {
-				_TextBuffer.Changing -= TextBuffer_Changing;
-				GC.SuppressFinalize(this);
-				_IsDisposed = true;
+		void ShowCapturedVariables(SyntaxNode node, ISymbol symbol, ThemedTipDocument tip) {
+			if (node is LambdaExpressionSyntax
+				|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
+				var ss = node is LambdaExpressionSyntax
+					? node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName)
+					: symbol.GetSyntaxNode();
+				if (ss != null) {
+					var df = _SemanticModel.AnalyzeDataFlow(ss);
+					var captured = df.ReadInside.RemoveAll(i => df.VariablesDeclared.Contains(i));
+					if (captured.Length > 0) {
+						var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true));
+						int i = 0;
+						foreach (var item in captured) {
+							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, false, _SymbolFormatter);
+						}
+						tip.Append(p);
+					}
+				}
 			}
 		}
 
@@ -312,10 +323,6 @@ namespace Codist.QuickInfo
 				info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
 			}
 			qiContent.Add(info);
-		}
-
-		void TextBuffer_Changing(object sender, TextContentChangingEventArgs e) {
-			_SemanticModel = null;
 		}
 
 		void ShowSymbolInfo(IAsyncQuickInfoSession session, QiContainer qiContent, SyntaxNode node, ISymbol symbol) {
@@ -541,6 +548,9 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowPropertyInfo(QiContainer qiContent, IPropertySymbol property) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
+				ShowAnonymousTypeInfo(qiContent, property);
+			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& property.ContainingType?.TypeKind != TypeKind.Interface
 				&& (property.DeclaredAccessibility != Accessibility.Public || property.IsAbstract || property.IsStatic || property.IsOverride || property.IsVirtual)) {
@@ -582,21 +592,25 @@ namespace Codist.QuickInfo
 		}
 
 		void ShowMethodInfo(QiContainer qiContent, SyntaxNode node, IMethodSymbol method) {
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+			var options = Config.Instance.QuickInfoOptions;
+			if (options.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
+				ShowAnonymousTypeInfo(qiContent, method);
+			}
+			if (options.MatchFlags(QuickInfoOptions.Declaration)
 				&& method.ContainingType?.TypeKind != TypeKind.Interface
 				&& (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsStatic || method.IsVirtual || method.IsOverride || method.IsExtern || method.IsSealed)) {
 				ShowDeclarationModifier(qiContent, method);
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && method.TypeArguments.Length > 0 && method.TypeParameters[0] != method.TypeArguments[0]) {
+			if (options.MatchFlags(QuickInfoOptions.TypeParameters) && method.TypeArguments.Length > 0 && method.TypeParameters[0] != method.TypeArguments[0]) {
 				ShowMethodTypeArguments(qiContent, method);
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
+			if (options.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
 				ShowInterfaceImplementation(qiContent, method, method.ExplicitInterfaceImplementations);
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) && method.IsExtensionMethod) {
+			if (options.MatchFlags(QuickInfoOptions.SymbolLocation) && method.IsExtensionMethod) {
 				ShowExtensionMethod(qiContent, method);
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.MethodOverload)) {
+			if (options.MatchFlags(QuickInfoOptions.MethodOverload)) {
 				ShowOverloadsInfo(qiContent, node, method);
 			}
 		}
@@ -716,7 +730,11 @@ namespace Codist.QuickInfo
 		}
 
 		void ShowTypeInfo(QiContainer qiContent, SyntaxNode node, INamedTypeSymbol typeSymbol) {
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.MethodOverload)) {
+			var options = Config.Instance.QuickInfoOptions;
+			if (options.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) && typeSymbol.TypeKind == TypeKind.Class) {
+				ShowAnonymousTypeInfo(qiContent, typeSymbol);
+			}
+			if (options.MatchFlags(QuickInfoOptions.MethodOverload)) {
 				node = node.GetObjectCreationNode();
 				if (node != null) {
 					var method = _SemanticModel.GetSymbolOrFirstCandidate(node) as IMethodSymbol;
@@ -725,14 +743,14 @@ namespace Codist.QuickInfo
 					}
 				}
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
+			if (options.MatchFlags(QuickInfoOptions.Declaration)
 				&& (typeSymbol.DeclaredAccessibility != Accessibility.Public
 					|| typeSymbol.IsStatic
 					|| (typeSymbol.IsAbstract || typeSymbol.IsSealed) && typeSymbol.TypeKind == TypeKind.Class)
 				) {
 				ShowDeclarationModifier(qiContent, typeSymbol);
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
+			if (options.MatchFlags(QuickInfoOptions.BaseType)) {
 				if (typeSymbol.TypeKind == TypeKind.Enum) {
 					ShowEnumInfo(qiContent, typeSymbol, true);
 				}
@@ -740,10 +758,10 @@ namespace Codist.QuickInfo
 					ShowBaseType(qiContent, typeSymbol);
 				}
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Interfaces)) {
+			if (options.MatchFlags(QuickInfoOptions.Interfaces)) {
 				ShowInterfaces(qiContent, typeSymbol);
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceMembers)
+			if (options.MatchFlags(QuickInfoOptions.InterfaceMembers)
 				&& typeSymbol.TypeKind == TypeKind.Interface) {
 				ShowInterfaceMembers(qiContent, typeSymbol);
 			}
@@ -955,10 +973,7 @@ namespace Codist.QuickInfo
 			if (type.GetAttributes().Any(a => a.AttributeClass.Name == nameof(FlagsAttribute) && a.AttributeClass.ContainingNamespace.ToDisplayString() == "System")) {
 				var d = Convert.ToString(Convert.ToInt64(bits), 2);
 				content.AppendLine().Append("All flags: ", true)
-					.Append(d)
-					.Append(" (")
-					.Append(d.Length.ToString())
-					.Append(d.Length > 1 ? " bits)" : " bit)");
+					.Append($"{d} ({ d.Length}" + (d.Length > 1 ? " bits)" : " bit)"));
 			}
 			qiContent.Add(s);
 		}
@@ -1018,7 +1033,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowDeclarationModifier(QiContainer qiContent, ISymbol symbol) {
-			qiContent.Add(new ThemedTipParagraph(KnownImageIds.ControlAltDel, _SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedTipText(), true, false)));
+			qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.ControlAltDel, _SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedTipText(), true, false))));
 		}
 
 		void ShowParameterInfo(QiContainer qiContent, SyntaxNode node) {
@@ -1093,8 +1108,9 @@ namespace Codist.QuickInfo
 				var paramDoc = doc?.GetParameter(argName);
 				var content = new ThemedTipText("Argument", true)
 					.Append(" of ")
-					.AddSymbol(om.ReturnType, false, _SymbolFormatter)
-					.Append(" ").AddSymbol(om.MethodKind != MethodKind.DelegateInvoke && om.MethodKind != MethodKind.Constructor ? om : (ISymbol)om.ContainingType, true, _SymbolFormatter)
+					.AddSymbol(om.ReturnType, om.MethodKind == MethodKind.Constructor ? "new" : null, _SymbolFormatter)
+					.Append(" ")
+					.AddSymbol(om.MethodKind != MethodKind.DelegateInvoke ? om : (ISymbol)om.ContainingType, true, _SymbolFormatter)
 					.AddParameters(om.Parameters, _SymbolFormatter, argIndex);
 				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Parameter, content));
 				if (paramDoc != null) {
@@ -1169,19 +1185,114 @@ namespace Codist.QuickInfo
 			}
 		}
 
+		static void ShowAnonymousTypeInfo(QiContainer container, ISymbol symbol) {
+			INamedTypeSymbol t;
+			List<INamedTypeSymbol> types = null;
+			const string AnonymousNumbers = "abcdefghijklmnopqrstuvwxyz";
+			switch (symbol.Kind) {
+				case SymbolKind.NamedType:
+					if ((t = symbol as INamedTypeSymbol).IsAnonymousType) {
+						Add(ref types, t);
+					}
+					break;
+				case SymbolKind.Method:
+					var m = symbol as IMethodSymbol;
+					if (m.IsGenericMethod) {
+						foreach (var item in m.TypeArguments) {
+							if (item.IsAnonymousType) {
+								Add(ref types, item as INamedTypeSymbol);
+							}
+						}
+					}
+					else if (m.MethodKind == MethodKind.Constructor) {
+						symbol = m.ContainingSymbol;
+						goto case SymbolKind.NamedType;
+					}
+					break;
+				case SymbolKind.Property:
+					if ((t = symbol.ContainingType).IsAnonymousType) {
+						Add(ref types, t);
+					}
+					break;
+				default: return;
+			}
+			if (types != null) {
+				ShowAnonymousTypes();
+			}
+
+			void ShowAnonymousTypes() {
+				var d = new ThemedTipDocument().AppendTitle(KnownImageIds.UserDataType, "Anonymous type: ");
+				for (var i = 0; i < types.Count; i++) {
+					t = types[i];
+					var content = new ThemedTipText()
+						.AddSymbol(t, "'" + AnonymousNumbers[i], _SymbolFormatter)
+						.Append(" is { ");
+					foreach (var m in t.GetMembers()) {
+						if (m.Kind != SymbolKind.Property) {
+							continue;
+						}
+						t = m.GetReturnType() as INamedTypeSymbol;
+						string alias = null;
+						if (t != null && t.IsAnonymousType) {
+							Add(ref types, t);
+							alias = "'" + AnonymousNumbers[types.IndexOf(t)];
+						}
+						content.AddSymbol(t, alias, _SymbolFormatter)
+							.Append(" ")
+							.AddSymbol(m, m == symbol, _SymbolFormatter)
+							.Append(", ");
+					}
+					var run = content.Inlines.LastInline as System.Windows.Documents.Run;
+					if (run.Text == ", ") {
+						run.Text = " }";
+					}
+					else {
+						run.Text += "}";
+					}
+					d.Append(new ThemedTipParagraph(content));
+				}
+				container.Overrider?.OverrideAnonymousTypeInfo(d);
+				container.Insert(0, d);
+			}
+			void Add(ref List<INamedTypeSymbol> list, INamedTypeSymbol type) {
+				if ((list ?? (list = new List<INamedTypeSymbol>())).Contains(type) == false) {
+					list.Add(type);
+				}
+				if (type.ContainingType?.IsAnonymousType == true) {
+					Add(ref list, type);
+				}
+			}
+		}
+
 		static TextBlock ToUIText(ISymbol symbol) {
 			return new ThemedTipText().AddSymbolDisplayParts(symbol.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
+		}
+
+		public void Dispose() {
 		}
 
 		sealed class QiContainer
 		{
 			readonly List<object> _List = new List<object>();
+			public readonly IQuickInfoOverrider Overrider;
+
+			public QiContainer(IQuickInfoOverrider overrider) {
+				Overrider = overrider;
+			}
+
 			public int Count => _List.Count;
+
+			public void Insert(int index, object item) {
+				if (item != null) {
+					_List.Insert(index, item);
+				}
+			}
 			public void Add(object item) {
 				if (item != null) {
 					_List.Add(item);
 				}
 			}
+
 			public StackPanel ToUI() {
 				var s = new StackPanel();
 				foreach (var item in _List) {

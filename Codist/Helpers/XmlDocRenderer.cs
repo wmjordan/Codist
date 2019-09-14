@@ -136,26 +136,6 @@ namespace Codist
 				}
 			}
 			#endregion
-			#region Captured variables
-			if (node is LambdaExpressionSyntax
-					|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
-				var ss = node is LambdaExpressionSyntax
-					? node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName)
-					: symbol.GetSyntaxNode();
-				if (ss != null) {
-					var df = semanticModel.AnalyzeDataFlow(ss);
-					var captured = df.ReadInside.RemoveAll(i => df.VariablesDeclared.Contains(i));
-					if (captured.Length > 0) {
-						var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true));
-						int i = 0;
-						foreach (var item in captured) {
-							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, false, _SymbolFormatter);
-						}
-						tip.Append(p);
-					}
-				}
-			}
-			#endregion
 			return tip;
 		}
 

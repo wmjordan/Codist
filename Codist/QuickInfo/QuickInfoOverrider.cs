@@ -24,6 +24,7 @@ namespace Codist.QuickInfo
 		void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, IAsyncQuickInfoSession quickInfoSession);
 		void OverrideDocumentation(UIElement docElement);
 		void OverrideException(UIElement exceptionDoc);
+		void OverrideAnonymousTypeInfo(UIElement anonymousTypeInfo);
 	}
 
 	static class QuickInfoOverrider
@@ -185,7 +186,9 @@ namespace Codist.QuickInfo
 			public void OverrideException(UIElement exceptionDoc) {
 				_Overrider.ExceptionDoc = exceptionDoc;
 			}
-
+			public void OverrideAnonymousTypeInfo(UIElement anonymousTypeInfo) {
+				_Overrider.AnonymousTypeInfo = anonymousTypeInfo;
+			}
 			public void SetDiagnostics(IList<Diagnostic> diagnostics) {
 				_Overrider.Diagnostics = diagnostics;
 			}
@@ -200,6 +203,7 @@ namespace Codist.QuickInfo
 				public bool LimitItemSize;
 				public UIElement DocElement;
 				public UIElement ExceptionDoc;
+				public UIElement AnonymousTypeInfo;
 				public IList<Diagnostic> Diagnostics;
 				public IAsyncQuickInfoSession QuickInfoSession;
 				public ITextBuffer TextBuffer;
@@ -228,7 +232,7 @@ namespace Codist.QuickInfo
 						p.SetValue(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont);
 						p.SetValue(TextBlock.FontSizeProperty, ThemeHelper.ToolTipFontSize);
 					}
-					if (DocElement != null || ExceptionDoc != null || ClickAndGoSymbol != null || LimitItemSize) {
+					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) || ClickAndGoSymbol != null || LimitItemSize) {
 						FixQuickInfo(p);
 					}
 					if (LimitItemSize) {
@@ -349,21 +353,26 @@ namespace Codist.QuickInfo
 						titlePanel.Margin = __TitlePanelMargin;
 					}
 
+					#region Override documentation
+					// https://github.com/dotnet/roslyn/blob/version-3.0.0/src/Features/Core/Portable/QuickInfo/CommonSemanticQuickInfoProvider.cs
 					// replace the default XML doc
 					// sequence of items in default XML Doc panel:
 					// 1. summary
 					// 2. generic type parameter
-					// 3. usage
-					// 4. exception
-					// 5. availability warning
-					// 6. captured variables
+					// 3. anonymous types
+					// 4. availability warning
+					// 5. usage
+					// 6. exception
+					// 7. captured variables
 					var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
+					ClearDefaultDocumentationItems(doc, v16_1orLater, items);
 					if (DocElement != null) {
 						OverrideDocElement(doc, v16_1orLater, items);
 					}
 					if (ExceptionDoc != null) {
 						OverrideExceptionDocElement(doc, v16_1orLater, items);
 					}
+					#endregion
 
 					if (icon != null && signature != null) {
 						// apply click and go feature
@@ -371,8 +380,27 @@ namespace Codist.QuickInfo
 							QuickInfoOverrider.ApplyClickAndGo(ClickAndGoSymbol, TextBuffer, signature, QuickInfoSession);
 						}
 						// fix the width of the signature part to prevent it from falling down to the next row
-						if (Config.Instance.QuickInfoMaxWidth > 0) {
+						if (Config.Instance.QuickInfoMaxWidth >= 100) {
 							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 30;
+						}
+					}
+				}
+
+				static void ClearDefaultDocumentationItems(StackPanel doc, bool v16_1orLater, IList items) {
+					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
+						if (v16_1orLater) {
+							items = doc.GetParent<ItemsControl>().Items;
+						}
+						try {
+							for (int i = items.Count - 1; i > 0; i--) {
+								var item = items[i];
+								if (v16_1orLater && item is Panel && item is ThemedTipDocument == false || item is TextBlock) {
+									items.RemoveAt(i);
+								}
+							}
+						}
+						catch (InvalidOperationException) {
+							// ignore exception: doc.Children was changed by another thread
 						}
 					}
 				}
@@ -390,19 +418,19 @@ namespace Codist.QuickInfo
 						if (myDoc == null) {
 							return;
 						}
-						if (v16_1orLater && myDoc.Tag is int) {
-							// in v16.1 or later, 2nd and following paragraphs in XML Doc are in an outer ItemsControl
-							items = doc.GetParent<ItemsControl>()?.Items;
-							if (items != null) {
-								// used the value from XmlDocRenderer.ParagraphCount to remove builtin paragraphs
-								for (int i = Math.Min(items.Count - 1, (int)myDoc.Tag) - 1; i >= 0; i--) {
-									if (items[1] is TextBlock == false) {
-										break;
-									}
-									items.RemoveAt(1);
-								}
-							}
-						}
+						//if (v16_1orLater && myDoc.Tag is int) {
+						//	// in v16.1 or later, 2nd and following paragraphs in XML Doc are in an outer ItemsControl
+						//	items = doc.GetParent<ItemsControl>()?.Items;
+						//	if (items != null) {
+						//		// used the value from XmlDocRenderer.ParagraphCount to remove builtin paragraphs
+						//		for (int i = Math.Min(items.Count - 1, (int)myDoc.Tag) - 1; i >= 0; i--) {
+						//			if (items[1] is TextBlock == false) {
+						//				break;
+						//			}
+						//			items.RemoveAt(1);
+						//		}
+						//	}
+						//}
 						myDoc.ApplySizeLimit();
 					}
 					catch (InvalidOperationException) {
@@ -415,15 +443,6 @@ namespace Codist.QuickInfo
 						items = doc.GetParent<ItemsControl>().Items;
 					}
 					try {
-						if (items.Count > 1) {
-							for (int i = items.Count - 1; i > 0; i--) {
-								var item = items[i];
-								if (v16_1orLater && item is StackPanel && item is ThemedTipDocument == false || item is TextBlock) {
-									items.RemoveAt(i);
-									break;
-								}
-							}
-						}
 						items.Add(ExceptionDoc);
 						//todo move this to ApplySizeLimit
 						(ExceptionDoc as ThemedTipDocument)?.ApplySizeLimit();
