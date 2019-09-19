@@ -367,6 +367,7 @@ namespace Codist
 					break;
 				case TypedConstantKind.Enum:
 					var en = constant.ToCSharpString();
+					int d;
 					if (en.IndexOf('|') != -1) {
 						var items = constant.Type.GetMembers().Where(i => {
 							var field = i as IFieldSymbol;
@@ -383,8 +384,11 @@ namespace Codist
 							block.Add((constant.Type.Name + "." + flags[i].Name).Render(Enum));
 						}
 					}
+					else if ((d = en.LastIndexOf('.')) != -1)  {
+						block.Add((constant.Type.Name + en.Substring(d)).Render(Enum));
+					}
 					else {
-						block.Add((constant.Type.Name + en.Substring(en.LastIndexOf('.'))).Render(Enum));
+						block.Add(en.Render(Enum));
 					}
 					break;
 				case TypedConstantKind.Type:
