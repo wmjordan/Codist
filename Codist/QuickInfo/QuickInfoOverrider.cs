@@ -418,20 +418,10 @@ namespace Codist.QuickInfo
 						if (myDoc == null) {
 							return;
 						}
-						//if (v16_1orLater && myDoc.Tag is int) {
-						//	// in v16.1 or later, 2nd and following paragraphs in XML Doc are in an outer ItemsControl
-						//	items = doc.GetParent<ItemsControl>()?.Items;
-						//	if (items != null) {
-						//		// used the value from XmlDocRenderer.ParagraphCount to remove builtin paragraphs
-						//		for (int i = Math.Min(items.Count - 1, (int)myDoc.Tag) - 1; i >= 0; i--) {
-						//			if (items[1] is TextBlock == false) {
-						//				break;
-						//			}
-						//			items.RemoveAt(1);
-						//		}
-						//	}
-						//}
 						myDoc.ApplySizeLimit();
+					}
+					catch (ArgumentException) {
+						// ignore exception: Specified Visual is already a child of another Visual or the root of a CompositionTarget
 					}
 					catch (InvalidOperationException) {
 						// ignore exception: doc.Children was changed by another thread
