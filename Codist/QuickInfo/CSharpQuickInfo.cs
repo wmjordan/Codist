@@ -254,6 +254,9 @@ namespace Codist.QuickInfo
 		}
 
 		ThemedTipDocument OverrideDocumentation(SyntaxNode node, IQuickInfoOverrider qiWrapper, ISymbol symbol) {
+			if (symbol == null) {
+				return null;
+			}
 			symbol = symbol.GetAliasTarget();
 			var doc = new XmlDoc(symbol, _SemanticModel.Compilation);
 			var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
