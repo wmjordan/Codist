@@ -94,7 +94,7 @@ namespace Codist.Controls
 
 		private void CreateCommandForMembers() {
 			if (_Symbol.Kind != SymbolKind.Method || IsExternallyCallable(((IMethodSymbol)_Symbol).MethodKind)) {
-				Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallers(_Symbol, _SemanticContext)));
+				Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindReferrers(_Symbol, _SemanticContext)));
 			}
 			if (_Symbol.MayHaveOverride()) {
 				Items.Add(CreateItem(KnownImageIds.OverloadBehavior, "Find Overrides...", () => FindOverrides(_Symbol, _SemanticContext)));
@@ -179,14 +179,14 @@ namespace Codist.Controls
 				if (ctor != null) {
 					var symbol = _SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(ctor);
 					if (symbol != null) {
-						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindCallers(symbol, _SemanticContext)));
+						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindReferrers(symbol, _SemanticContext)));
 					}
 				}
 				else if (t.InstanceConstructors.Length > 0) {
-					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", () => FindCallers(t, _SemanticContext, s => s.Kind == SymbolKind.Method)));
+					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.Method)));
 				}
 			}
-			Items.Add(CreateItem(KnownImageIds.MarkupXML, "Find Usages as Method Type Argument...", () => FindCallers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, n => (n = n.Parent).IsKind(SyntaxKind.TypeArgumentList) && (n = n.Parent).IsKind(SyntaxKind.GenericName) && (n = n.Parent).IsKind(SyntaxKind.SimpleMemberAccessExpression))));
+			Items.Add(CreateItem(KnownImageIds.MarkupXML, "Find Usages as Method Type Argument...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, n => (n = n.Parent).IsKind(SyntaxKind.TypeArgumentList) && (n = n.Parent).IsKind(SyntaxKind.GenericName) && (n = n.Parent).IsKind(SyntaxKind.SimpleMemberAccessExpression))));
 			Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(t, _SemanticContext)));
 			if (t.IsStatic) {
 				return;
@@ -224,8 +224,8 @@ namespace Codist.Controls
 			}
 		}
 
-		static void FindCallers(ISymbol symbol, SemanticContext context, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null) {
-			var callers = SyncHelper.RunSync(() => symbol.FindCallersAsync(context.Document.Project, definitionFilter, nodeFilter));
+		static void FindReferrers(ISymbol symbol, SemanticContext context, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null) {
+			var callers = SyncHelper.RunSync(() => symbol.FindReferrersAsync(context.Document.Project, definitionFilter, nodeFilter));
 			if (callers == null) {
 				return;
 			}

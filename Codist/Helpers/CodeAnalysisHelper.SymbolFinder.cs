@@ -76,7 +76,6 @@ namespace Codist
 		public static async Task<List<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var assembly = compilation.Assembly;
-			//todo cache types
 			var members = new List<ISymbol>(10);
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				foreach (var member in typeSymbol.GetMembers()) {
@@ -299,7 +298,7 @@ namespace Codist
 			return a;
 		}
 
-		public static async Task<List<KeyValuePair<ISymbol, List<ReferenceLocation>>>> FindCallersAsync(this ISymbol symbol, Project project, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
+		public static async Task<List<KeyValuePair<ISymbol, List<ReferenceLocation>>>> FindReferrersAsync(this ISymbol symbol, Project project, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
 			var docs = ImmutableHashSet.CreateRange(project.GetRelatedProjectDocuments());
 			var d = new Dictionary<ISymbol, List<ReferenceLocation>>(5);
 			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, docs, cancellationToken).ConfigureAwait(false)) {
@@ -322,6 +321,7 @@ namespace Codist
 					if (n.Span.Contains(location.Location.SourceSpan.Start) == false || nodeFilter?.Invoke(n) == false) {
 						continue;
 					}
+					// todo Calculate reference kind
 					n = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().GetDeclarationCategory().HasAnyFlag(DeclarationCategory.Member | DeclarationCategory.Type));
 					if (n == null) {
 						continue;
