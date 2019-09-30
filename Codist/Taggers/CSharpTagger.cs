@@ -122,6 +122,11 @@ namespace Codist.Taggers
 								case SyntaxKind.FinallyClause:
 									yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword);
 									continue;
+								case SyntaxKind.LocalDeclarationStatement:
+									if (unitCompilation.FindToken(item.TextSpan.Start, true).Kind() == SyntaxKind.UsingKeyword) {
+										goto case SyntaxKind.UsingStatement;
+									}
+									continue;
 								case SyntaxKind.IsExpression:
 								case SyntaxKind.IsPatternExpression:
 								case SyntaxKind.AsExpression:
