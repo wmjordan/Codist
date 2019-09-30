@@ -1192,12 +1192,11 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowAnonymousTypeInfo(QiContainer container, ISymbol symbol) {
-			INamedTypeSymbol t;
-			List<INamedTypeSymbol> types = null;
-			const string AnonymousNumbers = "abcdefghijklmnopqrstuvwxyz";
+			ITypeSymbol t;
+			List<ITypeSymbol> types = null;
 			switch (symbol.Kind) {
 				case SymbolKind.NamedType:
-					if ((t = symbol as INamedTypeSymbol).IsAnonymousType) {
+					if ((t = symbol as ITypeSymbol).IsAnonymousType) {
 						Add(ref types, t);
 					}
 					break;
@@ -1206,7 +1205,7 @@ namespace Codist.QuickInfo
 					if (m.IsGenericMethod) {
 						foreach (var item in m.TypeArguments) {
 							if (item.IsAnonymousType) {
-								Add(ref types, item as INamedTypeSymbol);
+								Add(ref types, item as ITypeSymbol);
 							}
 						}
 					}
@@ -1223,29 +1222,30 @@ namespace Codist.QuickInfo
 				default: return;
 			}
 			if (types != null) {
-				ShowAnonymousTypes();
+				ShowAnonymousTypes(container, types, symbol);
 			}
 
-			void ShowAnonymousTypes() {
+			void ShowAnonymousTypes(QiContainer c, List<ITypeSymbol> anonymousTypes, ISymbol currentSymbol) {
+				const string AnonymousNumbers = "abcdefghijklmnopqrstuvwxyz";
 				var d = new ThemedTipDocument().AppendTitle(KnownImageIds.UserDataType, "Anonymous type: ");
-				for (var i = 0; i < types.Count; i++) {
-					t = types[i];
+				for (var i = 0; i < anonymousTypes.Count; i++) {
+					var type = anonymousTypes[i];
 					var content = new ThemedTipText()
-						.AddSymbol(t, "'" + AnonymousNumbers[i], _SymbolFormatter)
+						.AddSymbol(type, "'" + AnonymousNumbers[i], _SymbolFormatter)
 						.Append(" is { ");
-					foreach (var m in t.GetMembers()) {
+					foreach (var m in type.GetMembers()) {
 						if (m.Kind != SymbolKind.Property) {
 							continue;
 						}
-						t = m.GetReturnType() as INamedTypeSymbol;
+						var pt = m.GetReturnType() as ITypeSymbol;
 						string alias = null;
-						if (t != null && t.IsAnonymousType) {
-							Add(ref types, t);
-							alias = "'" + AnonymousNumbers[types.IndexOf(t)];
+						if (pt != null && pt.IsAnonymousType) {
+							Add(ref anonymousTypes, pt);
+							alias = "'" + AnonymousNumbers[anonymousTypes.IndexOf(pt)];
 						}
-						content.AddSymbol(t, alias, _SymbolFormatter)
+						content.AddSymbol(pt, alias, _SymbolFormatter)
 							.Append(" ")
-							.AddSymbol(m, m == symbol, _SymbolFormatter)
+							.AddSymbol(m, m == currentSymbol, _SymbolFormatter)
 							.Append(", ");
 					}
 					var run = content.Inlines.LastInline as System.Windows.Documents.Run;
@@ -1257,11 +1257,11 @@ namespace Codist.QuickInfo
 					}
 					d.Append(new ThemedTipParagraph(content));
 				}
-				container.Overrider?.OverrideAnonymousTypeInfo(d);
-				container.Insert(0, d);
+				c.Overrider?.OverrideAnonymousTypeInfo(d);
+				c.Insert(0, d);
 			}
-			void Add(ref List<INamedTypeSymbol> list, INamedTypeSymbol type) {
-				if ((list ?? (list = new List<INamedTypeSymbol>())).Contains(type) == false) {
+			void Add(ref List<ITypeSymbol> list, ITypeSymbol type) {
+				if ((list ?? (list = new List<ITypeSymbol>())).Contains(type) == false) {
 					list.Add(type);
 				}
 				if (type.ContainingType?.IsAnonymousType == true) {
