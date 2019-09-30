@@ -38,7 +38,8 @@ namespace Codist.Options
 			LoadStyleList();
 
 			_AddTagButton.Click += (s, args) => {
-				var label = new CommentLabel(_TagTextBox.Text.Length > 0 ? _TagTextBox.Text : "tag", (CommentStyleTypes)Enum.Parse(typeof(CommentStyleTypes), _StyleBox.Text));
+				Enum.TryParse<CommentStyleTypes>(_StyleBox.Text, out var style);
+				var label = new CommentLabel(_TagTextBox.Text.Length > 0 ? _TagTextBox.Text : "tag", style);
 				Config.Instance.Labels.Add(label);
 				_SyntaxListBox.Items.Add(new CommentTaggerListViewItem(label.Label, label) { Selected = true });
 				_ActiveLabel = label;
@@ -69,7 +70,8 @@ namespace Codist.Options
 				if (_ActiveLabel == null) {
 					return;
 				}
-				_ActiveLabel.StyleID = (CommentStyleTypes)Enum.Parse(typeof(CommentStyleTypes), _StyleBox.Text);
+				Enum.TryParse<CommentStyleTypes>(_StyleBox.Text, out var style);
+				_ActiveLabel.StyleID = style;
 				MarkChanged(_StyleBox, EventArgs.Empty);
 			});
 			_TagTextBox.TextChanged += _UI.HandleEvent(() => {
@@ -146,7 +148,10 @@ namespace Codist.Options
 				return;
 			}
 			UpdatePreview();
-			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight, FindStyle(_ActiveLabel).ClassificationType);
+			var style = FindStyle(_ActiveLabel);
+			if (style != null) {
+				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight, style.ClassificationType);
+			}
 		}
 
 		void StyleApplicationChanged(object sender, EventArgs e) {

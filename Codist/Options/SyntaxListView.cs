@@ -34,7 +34,7 @@ namespace Codist.Options
 			get => _Style;
 			private set {
 				_Style = value;
-				ToolTipText = _Style.Description;
+				ToolTipText = _Style?.Description;
 			}
 		}
 
