@@ -112,11 +112,18 @@ namespace Codist.QuickInfo
 				case SyntaxKind.CommaToken:
 				case SyntaxKind.ColonToken:
 				case SyntaxKind.SemicolonToken:
-				case SyntaxKind.LessThanToken:
-				case SyntaxKind.GreaterThanToken:
 					token = token.GetPreviousToken();
 					skipTriggerPointCheck = true;
 					break;
+				case SyntaxKind.LessThanToken:
+				case SyntaxKind.GreaterThanToken:
+					node = unitCompilation.FindNode(token.Span, false, false);
+					if (node is BinaryExpressionSyntax) {
+						goto PROCESS;
+					}
+					else {
+						goto case SyntaxKind.OpenParenToken;
+					}
 				default:
 					if (token.Span.Contains(subjectTriggerPoint, true) == false
 						|| token.IsReservedKeyword()) {
@@ -138,6 +145,8 @@ namespace Codist.QuickInfo
 			}
 			node = node.UnqualifyExceptNamespace();
 			LocateNodeInParameterList(ref node, ref token);
+
+			PROCESS:
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowParameterInfo(qiContent, node);
 			}
