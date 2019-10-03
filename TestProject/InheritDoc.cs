@@ -26,7 +26,7 @@ namespace TestProject
 	}
 	abstract class Singer : Walker, ISing
 	{
-		public abstract void Sing();
+		public abstract void Sing(string title, params string[] lyrics);
 
 		/// <summary>
 		/// Do something.
@@ -39,7 +39,9 @@ namespace TestProject
 		/// <summary>
 		/// Sing a song.
 		/// </summary>
-		void Sing();
+		/// <param name="title">The title of the song.</param>
+		/// <param name="lyrics">The lyrics.</param>
+		void Sing(string title, params string[] lyrics);
 	}
 	interface IRun
 	{
@@ -97,8 +99,10 @@ namespace TestProject
 			return "TEST";
 		}
 
-		// hover on Sing to see its inherited documentation
-		public override void Sing() {}
+		// hover on Sing, title, lyrics to see their inherited documentations
+		public override void Sing(string title, params string[] lyrics) {
+			base.Sing("untitled", "a", "b");
+		}
 
 		// hover on Walk to see its inherited doc from Walker.InternalWalk
 		public override void Walk() {
