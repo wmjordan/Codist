@@ -20,6 +20,7 @@ namespace Codist.QuickInfo
 	interface IQuickInfoOverrider
 	{
 		UIElement Control { get; }
+		bool KeepBuiltInXmlDoc { get; set; }
 		void SetDiagnostics(IList<Diagnostic> diagnostics);
 		void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, IAsyncQuickInfoSession quickInfoSession);
 		void OverrideDocumentation(UIElement docElement);
@@ -173,6 +174,7 @@ namespace Codist.QuickInfo
 			}
 
 			public UIElement Control => _Overrider;
+			public bool KeepBuiltInXmlDoc { get => _Overrider.KeepBuiltInXmlDoc; set => _Overrider.KeepBuiltInXmlDoc = value; }
 
 			public void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, IAsyncQuickInfoSession quickInfoSession) {
 				_Overrider.ClickAndGoSymbol = symbol;
@@ -200,7 +202,7 @@ namespace Codist.QuickInfo
 				static readonly Thickness __TitlePanelMargin = new Thickness(0, 0, 30, 6);
 
 				public ISymbol ClickAndGoSymbol;
-				public bool LimitItemSize;
+				public bool LimitItemSize, KeepBuiltInXmlDoc;
 				public UIElement DocElement;
 				public UIElement ExceptionDoc;
 				public UIElement AnonymousTypeInfo;
@@ -365,7 +367,9 @@ namespace Codist.QuickInfo
 					// 6. exception
 					// 7. captured variables
 					var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
-					ClearDefaultDocumentationItems(doc, v16_1orLater, items);
+					if (KeepBuiltInXmlDoc == false) {
+						ClearDefaultDocumentationItems(doc, v16_1orLater, items);
+					}
 					if (DocElement != null) {
 						OverrideDocElement(doc, v16_1orLater, items);
 					}

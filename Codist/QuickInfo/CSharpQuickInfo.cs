@@ -77,6 +77,8 @@ namespace Codist.QuickInfo
 					return null;
 				case SyntaxKind.OpenBraceToken:
 				case SyntaxKind.CloseBraceToken:
+					qiWrapper.KeepBuiltInXmlDoc = true;
+					break;
 				case SyntaxKind.SwitchKeyword: // switch info
 				case SyntaxKind.ThisKeyword: // convert to type below
 				case SyntaxKind.BaseKeyword:
