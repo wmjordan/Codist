@@ -679,7 +679,29 @@ namespace Codist
 				return sb.ToString();
 			}
 		}
+		public static RegionDirectiveTriviaSyntax GetRegion(this EndRegionDirectiveTriviaSyntax syntax) {
+			if (syntax == null) {
+				return null;
+			}
+			DirectiveTriviaSyntax region = syntax;
+			int c = -1;
+			while ((region = region.GetPreviousDirective()) != null) {
+				if (region.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
+					--c;
+				}
+				else if (region.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+					++c;
+					if (c == 0) {
+						return region as RegionDirectiveTriviaSyntax;
+					}
+				}
+			}
+			return null;
+		}
 		public static EndRegionDirectiveTriviaSyntax GetEndRegion(this RegionDirectiveTriviaSyntax syntax) {
+			if (syntax == null) {
+				return null;
+			}
 			DirectiveTriviaSyntax region = syntax;
 			int c = 1;
 			while ((region = region.GetNextDirective()) != null) {

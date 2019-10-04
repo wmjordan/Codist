@@ -126,6 +126,9 @@ namespace Codist.QuickInfo
 					else {
 						goto case SyntaxKind.OpenParenToken;
 					}
+				case SyntaxKind.EndRegionKeyword:
+					qiContent.Add(new ThemedTipText("End of region ").Append((unitCompilation.FindNode(token.Span, true, false) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true));
+					return new QuickInfoItem(currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive), qiContent.ToUI());
 				default:
 					if (token.Span.Contains(subjectTriggerPoint, true) == false
 						|| token.IsReservedKeyword()) {
