@@ -99,15 +99,11 @@ namespace Codist.QuickInfo
 					}
 					break;
 				case SyntaxKind.ReturnKeyword:
-					var statement = unitCompilation.FindNode(token.Span);
-					var retStatement = statement as ReturnStatementSyntax;
-					if (statement != null && retStatement != null) {
-						var tb = await ShowReturnInfoAsync(statement, retStatement, token, cancellationToken).ConfigureAwait(false);
-						if (tb != null) {
-							return new QuickInfoItem(token.Span.CreateSnapshotSpan(currentSnapshot).ToTrackingSpan(), tb);
-						}
-					}
-					return null;
+					var tb = await ShowReturnInfoAsync(unitCompilation.FindNode(token.Span) as ReturnStatementSyntax, cancellationToken).ConfigureAwait(false);
+					return tb != null ? new QuickInfoItem(token.Span.CreateSnapshotSpan(currentSnapshot).ToTrackingSpan(), tb) : null;
+				case SyntaxKind.AwaitKeyword:
+					node = (unitCompilation.FindNode(token.Span) as AwaitExpressionSyntax)?.Expression;
+					goto PROCESS;
 				case SyntaxKind.OpenParenToken:
 				case SyntaxKind.CloseParenToken:
 				case SyntaxKind.DotToken:
@@ -127,8 +123,13 @@ namespace Codist.QuickInfo
 						goto case SyntaxKind.OpenParenToken;
 					}
 				case SyntaxKind.EndRegionKeyword:
-					qiContent.Add(new ThemedTipText("End of region ").Append((unitCompilation.FindNode(token.Span, true, false) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true));
+					qiContent.Add(new ThemedTipText("End of region ")
+						.SetGlyph(ThemeHelper.GetImage(KnownImageIds.Numeric))
+						.Append((unitCompilation.FindNode(token.Span, true, false) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
+						);
 					return new QuickInfoItem(currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive), qiContent.ToUI());
+				case SyntaxKind.VoidKeyword:
+					return null;
 				default:
 					if (token.Span.Contains(subjectTriggerPoint, true) == false
 						|| token.IsReservedKeyword()) {
@@ -158,6 +159,10 @@ namespace Codist.QuickInfo
 			ImmutableArray<ISymbol> candidates;
 			var symbol = token.IsKind(SyntaxKind.CloseBraceToken) ? null
 				: GetSymbol(semanticModel, node, ref candidates, cancellationToken);
+			if (token.IsKind(SyntaxKind.AwaitKeyword)
+				&& symbol != null && symbol.Kind == SymbolKind.Method) {
+				symbol = (symbol.GetReturnType() as INamedTypeSymbol).TypeArguments.FirstOrDefault();
+			}
 			if (_isCandidate = candidates.IsDefaultOrEmpty == false) {
 				ShowCandidateInfo(qiContent, candidates);
 			}
@@ -167,9 +172,6 @@ namespace Codist.QuickInfo
 					ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
 				}
 				goto RETURN;
-			}
-			if (node is PredefinedTypeSyntax/* void */) {
-				return null;
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 				qiContent.Add(await ShowAvailabilityAsync(docId, workspace, token, cancellationToken));
@@ -492,44 +494,47 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		async Task<ThemedTipText> ShowReturnInfoAsync(SyntaxNode statement, ReturnStatementSyntax retStatement, SyntaxToken token, CancellationToken cancellationToken) {
-			var retSymbol = retStatement.Expression != null
-				? _SemanticModel.GetSymbolInfo(retStatement.Expression, cancellationToken).Symbol
+		async Task<ThemedTipText> ShowReturnInfoAsync(ReturnStatementSyntax returns, CancellationToken cancellationToken) {
+			if (returns == null) {
+				return null;
+			}
+			SyntaxNode node = returns;
+			var method = returns.Expression != null
+				? _SemanticModel.GetSymbolInfo(returns.Expression, cancellationToken).Symbol as IMethodSymbol
 				: null;
-			while ((statement = statement.Parent) != null) {
-				var nodeKind = statement.Kind();
+			while ((node = node.Parent) != null) {
+				var nodeKind = node.Kind();
 				if (nodeKind.IsMemberDeclaration() == false
 					&& nodeKind != SyntaxKind.SimpleLambdaExpression
 					&& nodeKind != SyntaxKind.ParenthesizedLambdaExpression
 					&& nodeKind != SyntaxKind.LocalFunctionStatement) {
 					continue;
 				}
-				var name = statement.GetDeclarationSignature();
+				var name = node.GetDeclarationSignature();
 				if (name == null) {
 					continue;
 				}
-				var symbol = _SemanticModel.GetSymbolInfo(statement, cancellationToken).Symbol ?? _SemanticModel.GetDeclaredSymbol(statement, cancellationToken);
+				var symbol = _SemanticModel.GetSymbolInfo(node, cancellationToken).Symbol ?? _SemanticModel.GetDeclaredSymbol(node, cancellationToken);
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 				var t = new ThemedTipText();
-				if (retSymbol != null) {
-					var m = retSymbol as IMethodSymbol;
-					if (m != null && m.MethodKind == MethodKind.AnonymousFunction) {
+				t.SetGlyph(ThemeHelper.GetImage(KnownImageIds.ReturnValue));
+				if (method != null) {
+					if (method.MethodKind == MethodKind.AnonymousFunction) {
 						t.Append("Return anonymous function for ");
 					}
 					else {
 						t.Append("Return ")
-							.AddSymbol(retSymbol.GetReturnType(), false, _SymbolFormatter)
+							.AddSymbol(method.GetReturnType(), false, _SymbolFormatter)
 							.Append(" for ");
 					}
 				}
 				else {
-					t.Append("Return for ");
+					t.Append("Return ")
+						.AddSymbol(symbol?.GetReturnType(), false, _SymbolFormatter)
+						.Append(" for ");
 				}
 				if (symbol != null) {
-					if (statement is LambdaExpressionSyntax) {
-						t.Append("lambda expression");
-					}
-					t.AddSymbol(symbol, name, _SymbolFormatter);
+					t.AddSymbol(symbol, node is LambdaExpressionSyntax ? "lambda expression" + name : null, _SymbolFormatter);
 				}
 				else {
 					t.Append(name);
@@ -537,6 +542,10 @@ namespace Codist.QuickInfo
 				return t;
 			}
 			return null;
+		}
+
+		ITypeSymbol GetAwaitReturnType(SemanticModel semanticModel, AwaitExpressionSyntax expression, CancellationToken cancellationToken) {
+			return expression == null ? null : (_SemanticModel.GetSymbolOrFirstCandidate(expression.Expression, cancellationToken) as IMethodSymbol)?.GetReturnType();
 		}
 
 		static void ShowAttributesInfo(QiContainer qiContent, ISymbol symbol) {

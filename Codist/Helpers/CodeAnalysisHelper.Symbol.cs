@@ -450,11 +450,11 @@ namespace Codist
 						return;
 
 					case TypeKind.Dynamic:
+					case TypeKind.Error:
 						output.Append('?'); return;
 					case TypeKind.Module:
 					case TypeKind.TypeParameter:
 					case TypeKind.Enum:
-					case TypeKind.Error:
 						output.Append(type.Name); return;
 					case TypeKind.Pointer:
 						GetTypeName(((IPointerTypeSymbol)type).PointedAtType, output);
