@@ -63,6 +63,9 @@ namespace Codist.Controls
 		}
 
 		public void AddAnalysisCommands() {
+			if (_SemanticContext.Document == null) {
+				return;
+			}
 			switch (_Symbol.Kind) {
 				case SymbolKind.Method:
 				case SymbolKind.Property:
@@ -124,6 +127,62 @@ namespace Codist.Controls
 			}
 		}
 
+		void CreateCommandForNamedType(INamedTypeSymbol t) {
+			if (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct) {
+				var ctor = _SemanticContext.NodeIncludeTrivia.GetObjectCreationNode();
+				if (ctor != null) {
+					var symbol = _SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(ctor);
+					if (symbol != null) {
+						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Referrers...", () => FindReferrers(symbol, _SemanticContext)));
+					}
+				}
+				else if (t.InstanceConstructors.Length > 0) {
+					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Referrers...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.Method)));
+				}
+			}
+			Items.Add(CreateItem(KnownImageIds.MarkupXML, "Find Referrers to Type " + t.GetOriginalName() + "...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, n => {
+				var p = n.Parent;
+				switch (p.Kind()) {
+					case SyntaxKind.TypeOfExpression:
+					case SyntaxKind.SimpleMemberAccessExpression:
+						return true;
+					case SyntaxKind.TypeArgumentList:
+						return (p = p.Parent).IsKind(SyntaxKind.GenericName) && (p = p.Parent).IsKind(SyntaxKind.SimpleMemberAccessExpression);
+				}
+				return false;
+				})));
+			Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(t, _SemanticContext)));
+			if (t.IsStatic) {
+				return;
+			}
+			if (t.IsSealed == false) {
+				if (t.TypeKind == TypeKind.Class) {
+					Items.Add(CreateItem(KnownImageIds.NewClass, "Find Derived Classes...", () => FindDerivedClasses(t, _SemanticContext)));
+				}
+				else if (t.TypeKind == TypeKind.Interface) {
+					Items.Add(CreateItem(KnownImageIds.ImplementInterface, "Find Implementations...", () => FindImplementations(t, _SemanticContext)));
+				}
+			}
+			Items.Add(CreateItem(KnownImageIds.ExtensionMethod, "Find Extensions...", () => FindExtensionMethods(t, _SemanticContext)));
+			if (t.SpecialType == SpecialType.None) {
+				CreateInstanceCommandsForType(t);
+			}
+		}
+
+		void CreateCommandsForReturnTypeCommand() {
+			var type = _Symbol.GetReturnType();
+			if (type != null && type.SpecialType == SpecialType.None && type.IsTupleType == false) {
+				var et = type.ResolveElementType();
+				Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members of " + et.Name + et.GetParameterString() + "...", () => FindMembers(et, _SemanticContext)));
+				if (type.IsStatic == false) {
+					Items.Add(CreateItem(KnownImageIds.ExtensionMethod, "Find Extensions for " + type.Name + type.GetParameterString() + "...", () => FindExtensionMethods(type, _SemanticContext)));
+				}
+				if (et.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
+					Items.Add(CreateItem(KnownImageIds.GoToDeclaration, "Go to " + et.Name + et.GetParameterString(), () => et.GoToSource()));
+				}
+			}
+		}
+
 		public void AddFindAllReferencesCommand() {
 			Items.Add(CreateItem(KnownImageIds.ReferencedDimension, "Find All References", FindAllReferences));
 		}
@@ -170,68 +229,9 @@ namespace Codist.Controls
 			ItemClicked?.Invoke(sender, e);
 		}
 
-		void CreateCommandForNamedType(INamedTypeSymbol t) {
-			if (_SemanticContext.Document == null) {
-				return;
-			}
-			if (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct) {
-				var ctor = _SemanticContext.NodeIncludeTrivia.GetObjectCreationNode();
-				if (ctor != null) {
-					var symbol = _SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(ctor);
-					if (symbol != null) {
-						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Referrers...", () => FindReferrers(symbol, _SemanticContext)));
-					}
-				}
-				else if (t.InstanceConstructors.Length > 0) {
-					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Referrers...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.Method)));
-				}
-			}
-			Items.Add(CreateItem(KnownImageIds.MarkupXML, "Find Referrers to Type " + t.GetOriginalName() + "...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, n => {
-				var p = n.Parent;
-				switch (p.Kind()) {
-					case SyntaxKind.TypeOfExpression:
-					case SyntaxKind.SimpleMemberAccessExpression:
-						return true;
-					case SyntaxKind.TypeArgumentList:
-						return (p = p.Parent).IsKind(SyntaxKind.GenericName) && (p = p.Parent).IsKind(SyntaxKind.SimpleMemberAccessExpression);
-				}
-				return false;
-				})));
-			Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(t, _SemanticContext)));
-			if (t.IsStatic) {
-				return;
-			}
-			if (t.IsSealed == false) {
-				if (t.TypeKind == TypeKind.Class) {
-					Items.Add(CreateItem(KnownImageIds.NewClass, "Find Derived Classes...", () => FindDerivedClasses(t, _SemanticContext)));
-				}
-				else if (t.TypeKind == TypeKind.Interface) {
-					Items.Add(CreateItem(KnownImageIds.ImplementInterface, "Find Implementations...", () => FindImplementations(t, _SemanticContext)));
-				}
-			}
-			Items.Add(CreateItem(KnownImageIds.ExtensionMethod, "Find Extensions...", () => FindExtensionMethods(t, _SemanticContext)));
-			if (t.SpecialType == SpecialType.None) {
-				CreateInstanceCommandsForType(t);
-			}
-		}
-
 		void CreateInstanceCommandsForType(INamedTypeSymbol t) {
 			Items.Add(CreateItem(KnownImageIds.NewItem, "Find Instance Producer...", () => FindInstanceProducer(t, _SemanticContext)));
 			Items.Add(CreateItem(KnownImageIds.Parameter, "Find Instance as Parameter...", () => FindInstanceAsParameter(t, _SemanticContext)));
-		}
-
-		void CreateCommandsForReturnTypeCommand() {
-			var type = _Symbol.GetReturnType();
-			if (type != null && type.SpecialType == SpecialType.None && type.IsTupleType == false) {
-				var et = type.ResolveElementType();
-				Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members of " + et.Name + et.GetParameterString() + "...", () => FindMembers(et, _SemanticContext)));
-				if (type.IsStatic == false) {
-					Items.Add(CreateItem(KnownImageIds.ExtensionMethod, "Find Extensions for " + type.Name + type.GetParameterString() + "...", () => FindExtensionMethods(type, _SemanticContext)));
-				}
-				if (et.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-					Items.Add(CreateItem(KnownImageIds.GoToDeclaration, "Go to " + et.Name + et.GetParameterString(), () => et.GoToSource()));
-				}
-			}
 		}
 
 		static void FindReferrers(ISymbol symbol, SemanticContext context, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null) {

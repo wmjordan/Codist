@@ -221,13 +221,17 @@ namespace Codist
 			if (r.Length == 1) {
 				r[0].GoToSource();
 			}
-			else if (r.Length == 0) {
-				ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, TextEditorHelper.GetMouseOverDocumentView().TextSnapshot.TextBuffer.GetDocument().Project, default);
-			}
 			else {
 				var ctx = SemanticContext.GetHovered();
 				if (ctx != null) {
-					CSharpSymbolContextMenu.ShowLocations(symbol, r, ctx);
+					if (r.Length == 0) {
+						if (ctx.Document != null) {
+							ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, ctx.Document.Project, default);
+						}
+					}
+					else {
+						CSharpSymbolContextMenu.ShowLocations(symbol, r, ctx);
+					}
 				}
 			}
 		}
@@ -258,7 +262,7 @@ namespace Codist
 			protected override void OnToolTipOpening(ToolTipEventArgs e) {
 				base.OnToolTipOpening(e);
 				if (ReferenceEquals(ToolTip, String.Empty)) {
-					ToolTip = ToolTipFactory.CreateToolTip(_Symbol, false, SemanticContext.GetHovered().SemanticModel.Compilation);
+					ToolTip = ToolTipFactory.CreateToolTip(_Symbol, false, SemanticContext.GetHovered().SemanticModel?.Compilation);
 				}
 			}
 			protected override void OnMouseRightButtonDown(MouseButtonEventArgs e) {
@@ -275,7 +279,9 @@ namespace Codist
 						SyntaxNode = _Symbol.GetSyntaxNode()
 					};
 					m.AddAnalysisCommands();
-					m.Items.Add(new Separator());
+					if (m.HasItems) {
+						m.Items.Add(new Separator());
+					}
 					m.AddSymbolNodeCommands();
 					m.AddTitleItem(_Symbol.GetOriginalName());
 					m.ItemClicked += DismissQuickInfo;

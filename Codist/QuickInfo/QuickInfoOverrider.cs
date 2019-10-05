@@ -114,7 +114,9 @@ namespace Codist.QuickInfo
 						SyntaxNode = symbol.GetSyntaxNode()
 					};
 					m.AddAnalysisCommands();
-					m.Items.Add(new Separator());
+					if (m.HasItems) {
+						m.Items.Add(new Separator());
+					}
 					m.AddSymbolNodeCommands();
 					m.AddTitleItem(symbol.GetOriginalName());
 					m.ItemClicked += HideQuickInfo;
