@@ -183,7 +183,7 @@ namespace Codist
 
 		public static void SelectNode(this ITextView view, SyntaxNode node, bool includeTrivia) {
 			var span = includeTrivia ? node.FullSpan : node.Span;
-			if (view.TextSnapshot.Length > span.End) {
+			if (view.TextSnapshot.Length >= span.End) {
 				var ss = includeTrivia
 					? new SnapshotSpan(view.TextSnapshot, node.GetSematicSpan(true))
 					: new SnapshotSpan(view.TextSnapshot, span.Start, span.Length);
