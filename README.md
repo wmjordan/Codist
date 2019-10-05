@@ -28,6 +28,20 @@ Check out this list to see what _Codist_ can do for you?
 
   The advanced syntax highlight function highlights every aspect of C# language elements with diverse styles, including using various font families and text styles, enlarging or shrinking font sizes, changing foreground or background colors and transparency.
 
+  The following screenshots of the `TestPage.cs` file in the source code project demonstrates possible syntax highlight effects in the Light theme.
+ 
+  ![Syntax highlight](doc/highlight1.png) 
+
+  * The font size of type and member declarations can be enlarged, font families are also changeable, so it is much easier to spot them.
+  * Syntax highlight can be applied to braces and parentheses.
+  * Various syntax identifiers have different styles, temporary elements such as method parameters and local variables are italic, `static` symbols are underlined.
+  * Comment content can be tagged (e.g. _note_).
+  * Unnecessary code can be marked strike-through.
+  * Keywords are categorized and highlighted with various styles (e.g. `abstract` and `sealed`, `return` and `throw`, etc.).
+  * Overriding members (such as `ToString`) can be painted with gradient background color, so at a glance we know that the marked implementations have overrided their base classes.
+  * Imported symbols (from external assemblies, e.g. `NotImplementedException`, `ToString`) can be marked with a different style (bold here), distinguishing from symbols defined in your code.
+  * All the above styles are customizable.
+
 ### Default Syntax Highlight Themes
 
   To quickly get started with advanced syntax highlight, open a C# project, then open the _Options_ dialog, navigate to the *Syntax Highlight* section, click the **Light theme** or **Dark theme** button in the dialog and see changes in effect. Don't forget to click the *OK* button to confirm the changes.
@@ -36,25 +50,11 @@ Check out this list to see what _Codist_ can do for you?
 
   With the **Save** and **Load** buttons, you can backup and share your own syntax highlight settings.
 
-  If you mess up your syntax highlight styles, you can press the _Reset_ button to reset all settings to default, or press the _Light theme_ or _Dark theme_ button to reapply predefined themes.
+  If you mess up your syntax highlight styles, you can press the **Reset** button to reset all settings to default, or press the _Light theme_ or _Dark theme_ button to reapply predefined themes.
 
   **Note**: There is a known issue in _Codist_ that if you change the theme of Visual Studio, you may have to restart it to make syntax highlight settings to work properly.
 
   It is possible to load only part of the syntax preset or backup theme by unchecking check boxes under _Load following parts when importing themes_.
-
-  The following screenshots of the `TestPage.cs` file in the source code project demonstrates possible syntax highlight effects in the Light theme.
- 
-  ![Syntax highlight](doc/highlight1.png) 
-
-  * The font size of type and member declarations can be enlarged, font families are also changeable, so it is much easier to spot them.
-  * Syntax highlight can be applied to braces and parentheses.
-  * Various syntax identifiers have different styles, temporary elements such as method parameters and local variables are italic, static symbols are underlined.
-  * Comment content can be tagged (e.g. _note_).
-  * Unnecessary code can be marked strike-through.
-  * Keywords are categorized and highlighted with various styles (e.g. `abstract` and `sealed`, `return` and `throw`, etc.).
-  * Overriding members (such as `ToString`) can be painted with gradient background color, so at a glance we know that the marked implementations have overrided their base classes.
-  * Imported symbols (from external assemblies, e.g. `NotImplementedException`, `ToString`) can be marked with a different style (bold here), distinguishing from symbols defined in your code.
-  * All the above styles are customizable.
 
 ### Customization of Syntax Highlight Styles
 
@@ -195,6 +195,8 @@ Check out this list to see what _Codist_ can do for you?
    From version 5.2 on, _Codist_ shows XML Doc for those `namespace`s with an embedded `NamespaceDoc` class, like what is done in [SandCastle](https://github.com/EWSoftware/SHFB).
 
    ![Super Quick Info Csharp Namespace](doc/super-quick-info-csharp-namespace.png)
+
+  * **Use alternative style** option moves the glyph of the symbol to the bottom-right of the quick info, and [removes individual hyperlinks within the symbol signature parts](https://github.com/wmjordan/Codist/issues/102), which comes with Visual Studio 2019 update 3, in order to make it easier to use the _Click and Go_ feature on the symbol.
 
 ### Additional Quick Info Items
 
