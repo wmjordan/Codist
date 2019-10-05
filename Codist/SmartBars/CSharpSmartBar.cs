@@ -367,8 +367,9 @@ namespace Codist.SmartBars
 					var nodeKind = node.Kind();
 					if ((nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() || nodeKind ==SyntaxKind.VariableDeclarator)
 					&& nodeKind != SyntaxKind.VariableDeclaration) {
-						r.Add(new CommandItem(CodeAnalysisHelper.GetImageId(node), (duplicate ? "Duplicate " : "Select ") + nodeKind.GetSyntaxBrief() + " " + node.GetDeclarationSignature(), ctx2 => {
-							ctx2.View.SelectNode(node, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ExpansionIncludeTrivia) || node.Span.Contains(ctx2.View.Selection, false) == false);
+						var n = node;
+						r.Add(new CommandItem(CodeAnalysisHelper.GetImageId(n), (duplicate ? "Duplicate " : "Select ") + nodeKind.GetSyntaxBrief() + " " + n.GetDeclarationSignature(), ctx2 => {
+							ctx2.View.SelectNode(n, Keyboard.Modifiers == ModifierKeys.Shift ^ Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ExpansionIncludeTrivia) || n.Span.Contains(ctx2.View.Selection, false) == false);
 							if (Keyboard.Modifiers == ModifierKeys.Control) {
 								TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
 							}
