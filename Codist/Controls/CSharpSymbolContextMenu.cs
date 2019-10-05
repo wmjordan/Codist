@@ -140,7 +140,7 @@ namespace Codist.Controls
 					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Referrers...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.Method)));
 				}
 			}
-			Items.Add(CreateItem(KnownImageIds.MarkupXML, "Find Referrers to Type " + t.GetOriginalName() + "...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, n => {
+			Items.Add(CreateItem(KnownImageIds.ShowReferencedElements, "Find Referrers to Type " + t.GetOriginalName() + "...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, n => {
 				var p = n.Parent;
 				switch (p.Kind()) {
 					case SyntaxKind.TypeOfExpression:

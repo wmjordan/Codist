@@ -78,7 +78,7 @@ namespace Codist.QuickInfo
 				}
 			}
 		RETURN:
-			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info);
+			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(ThemeHelper.GetImage(Microsoft.VisualStudio.Imaging.KnownImageIds.BlockSelection)));
 		}
 
 		sealed class Mark { }
