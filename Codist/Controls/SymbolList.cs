@@ -688,7 +688,7 @@ namespace Codist.Controls
 		}
 		internal void RefreshSymbol() {
 			if (Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-				var symbol = Container.SemanticContext.RelocateSymbolAsync(Symbol).ConfigureAwait(false).GetAwaiter().GetResult();
+				var symbol = Container.SemanticContext.RelocateSymbolAsync(Symbol).GetAwaiter().GetResult();
 				if (symbol != null && symbol != Symbol) {
 					Symbol = symbol;
 				}

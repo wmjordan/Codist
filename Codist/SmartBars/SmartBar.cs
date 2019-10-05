@@ -11,8 +11,8 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
-using Task = System.Threading.Tasks.Task;
 using Microsoft.VisualStudio.Text.Operations;
+using Task = System.Threading.Tasks.Task;
 
 namespace Codist.SmartBars
 {
@@ -334,6 +334,7 @@ namespace Codist.SmartBars
 			_ToolBarTray.ToolBars.Clear();
 			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
 			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
+			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
 			View.Selection.SelectionChanged -= ViewSelectionChanged;
 			View.VisualElement.MouseMove -= ViewMouseMove;
 			View.VisualElement.PreviewKeyUp -= ViewKeyUp;
