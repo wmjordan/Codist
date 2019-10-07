@@ -133,14 +133,14 @@ namespace Codist.Controls
 				if (ctor != null) {
 					var symbol = _SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(ctor);
 					if (symbol != null) {
-						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Referrers...", () => FindReferrers(symbol, _SemanticContext)));
+						Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Callers...", () => FindReferrers(symbol, _SemanticContext)));
 					}
 				}
 				else if (t.InstanceConstructors.Length > 0) {
-					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Referrers...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.Method)));
+					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.Method)));
 				}
 			}
-			Items.Add(CreateItem(KnownImageIds.ShowReferencedElements, "Find Referrers to Type " + t.GetOriginalName() + "...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, n => {
+			Items.Add(CreateItem(KnownImageIds.ShowReferencedElements, "Find Type Referrers...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, n => {
 				var p = n.Parent;
 				switch (p.Kind()) {
 					case SyntaxKind.TypeOfExpression:
