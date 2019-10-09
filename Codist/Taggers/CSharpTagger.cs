@@ -83,6 +83,9 @@ namespace Codist.Taggers
 									case SyntaxKind.ThisKeyword:
 										yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.Declaration);
 										continue;
+									case SyntaxKind.UnsafeKeyword:
+										yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword);
+										continue;
 								}
 								continue;
 							}
@@ -128,6 +131,7 @@ namespace Codist.Taggers
 								case SyntaxKind.CatchClause:
 								case SyntaxKind.CatchFilterClause:
 								case SyntaxKind.FinallyClause:
+								case SyntaxKind.StackAllocArrayCreationExpression:
 									yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword);
 									continue;
 								case SyntaxKind.LocalDeclarationStatement:
