@@ -109,10 +109,20 @@ namespace Codist.Controls
 			if (_Symbol.Kind != SymbolKind.Event) {
 				CreateCommandsForReturnTypeCommand();
 			}
-			if (_Symbol.Kind == SymbolKind.Method
-				&& ((IMethodSymbol)_Symbol).MethodKind == MethodKind.Constructor
-				&& st.SpecialType == SpecialType.None) {
-				CreateInstanceCommandsForType(st);
+			if (_Symbol.Kind == SymbolKind.Method) {
+				switch (((IMethodSymbol)_Symbol).MethodKind) {
+					case MethodKind.Constructor:
+						if (st.SpecialType == SpecialType.None) {
+							CreateInstanceCommandsForType(st);
+						}
+						break;
+					case MethodKind.StaticConstructor:
+					case MethodKind.Destructor:
+						break;
+					default:
+						Items.Add(CreateItem(KnownImageIds.ClassMethodReference, "Find Methods with Same Signature...", () => FindMethodsBySignature(_Symbol, _SemanticContext)));
+						break;
+				}
 			}
 
 			bool IsExternallyCallable(MethodKind methodKind) {
@@ -162,6 +172,9 @@ namespace Codist.Controls
 				else if (t.TypeKind == TypeKind.Interface) {
 					Items.Add(CreateItem(KnownImageIds.ImplementInterface, "Find Implementations...", () => FindImplementations(t, _SemanticContext)));
 				}
+			}
+			if (t.TypeKind == TypeKind.Delegate) {
+				Items.Add(CreateItem(KnownImageIds.ClassMethodReference, "Find Methods with Same Signature...", () => FindMethodsBySignature(_Symbol, _SemanticContext)));
 			}
 			Items.Add(CreateItem(KnownImageIds.ExtensionMethod, "Find Extensions...", () => FindExtensionMethods(t, _SemanticContext)));
 			if (t.SpecialType == SpecialType.None) {
@@ -355,6 +368,11 @@ namespace Codist.Controls
 		static void FindSymbolWithName(ISymbol symbol, SemanticContext context) {
 			var result = context.SemanticModel.Compilation.FindDeclarationMatchName(symbol.Name, Keyboard.Modifiers == ModifierKeys.Control, true, default);
 			ShowSymbolMenuForResult(symbol, context, new List<ISymbol>(result), " name alike", true);
+		}
+
+		static void FindMethodsBySignature(ISymbol symbol, SemanticContext context) {
+			var result = context.SemanticModel.Compilation.FindMethodBySignature(symbol, Keyboard.Modifiers == ModifierKeys.Control, default);
+			ShowSymbolMenuForResult(symbol, context, new List<ISymbol>(result), " signature match", true);
 		}
 
 		internal static void ShowLocations(ISymbol symbol, ICollection<SyntaxReference> locations, SemanticContext context) {

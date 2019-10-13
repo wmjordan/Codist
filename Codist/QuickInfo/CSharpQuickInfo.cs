@@ -682,7 +682,7 @@ namespace Codist.QuickInfo
 				}
 				var t = new ThemedTipText();
 				if (om.MethodKind != MethodKind.Constructor) {
-					t.AddSymbol(om.ReturnType, false, CodeAnalysisHelper.AreEqual(om.ReturnType, rt) ? SymbolFormatter.SemiTransparent : _SymbolFormatter).Append(" ");
+					t.AddSymbol(om.ReturnType, false, CodeAnalysisHelper.AreEqual(om.ReturnType, rt, false) ? SymbolFormatter.SemiTransparent : _SymbolFormatter).Append(" ");
 				}
 				if (ore) {
 					t.AddSymbol(om.ContainingType, "this", (om.ContainingType != ct ?  _SymbolFormatter : SymbolFormatter.SemiTransparent).Class).Append(".");
@@ -704,7 +704,7 @@ namespace Codist.QuickInfo
 					}
 					if (mp != null) {
 						if (mp.RefKind != op.RefKind
-							|| CodeAnalysisHelper.AreEqual(mp.Type, op.Type) == false
+							|| CodeAnalysisHelper.AreEqual(mp.Type, op.Type, false) == false
 							|| mp.IsParams != op.IsParams
 							|| mp.IsOptional != op.IsOptional
 							|| mp.HasExplicitDefaultValue != op.HasExplicitDefaultValue) {

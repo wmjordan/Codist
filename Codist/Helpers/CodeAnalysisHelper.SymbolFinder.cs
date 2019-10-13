@@ -247,6 +247,46 @@ namespace Codist
 			}
 		}
 
+		public static IEnumerable<ISymbol> FindMethodBySignature(this Compilation compilation, ISymbol symbol, bool myCodeOnly, CancellationToken cancellationToken = default) {
+			var rt = symbol.GetReturnType();
+			var pn = symbol.GetParameters();
+			var pl = pn.Length;
+			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
+				if (myCodeOnly && type.HasSource() == false || type.IsAccessible(true) == false || ReferenceEquals(type, symbol)) {
+					continue;
+				}
+				if (cancellationToken.IsCancellationRequested) {
+					break;
+				}
+				foreach (var member in type.GetMembers()) {
+					if (member.Kind != SymbolKind.Method
+						|| member.CanBeReferencedByName == false
+						|| member.IsAccessible(false) == false
+						|| ReferenceEquals(member, symbol)) {
+						continue;
+					}
+					var m = (IMethodSymbol)member;
+					if (AreEqual(rt, m.ReturnType, true) == false) {
+						continue;
+					}
+					var mp = m.Parameters;
+					if (mp.Length != pl) {
+						continue;
+					}
+					var pm = true;
+					for (int i = pl - 1; i >= 0; i--) {
+						if (AreEqual(mp[i].Type, pn[i].Type, true) == false) {
+							pm = false;
+							break;
+						}
+					}
+					if (pm) {
+						yield return member;
+					}
+				}
+			}
+		}
+
 		/// <summary>Finds symbols referenced by given context node.</summary>
 		/// <returns>An ordered array of <see cref="KeyValuePair{TKey, TValue}"/> which contains number of occurrences of corresponding symbols.</returns>
 		public static KeyValuePair<ISymbol, int>[] FindReferencingSymbols(this SyntaxNode node, SemanticModel semanticModel, bool sourceCodeOnly) {

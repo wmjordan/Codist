@@ -333,8 +333,11 @@ namespace Codist
 				case SymbolKind.Method: return ((IMethodSymbol)symbol).Parameters;
 				case SymbolKind.Event: return ((IEventSymbol)symbol).AddMethod.Parameters;
 				case SymbolKind.Property: return ((IPropertySymbol)symbol).Parameters;
+				case SymbolKind.NamedType:
+					return (symbol = symbol.AsMethod()) != null ? ((IMethodSymbol)symbol).Parameters
+						: ImmutableArray<IParameterSymbol>.Empty;
 			}
-			return default;
+			return ImmutableArray<IParameterSymbol>.Empty;
 		}
 
 		public static ITypeSymbol GetReturnType(this ISymbol symbol) {
@@ -346,7 +349,11 @@ namespace Codist
 					return m.MethodKind == MethodKind.Constructor ? m.ContainingType : m.ReturnType;
 				case SymbolKind.Parameter: return ((IParameterSymbol)symbol).Type;
 				case SymbolKind.Property: return ((IPropertySymbol)symbol).Type;
-				case SymbolKind.Alias: return ((IAliasSymbol)symbol).Target as ITypeSymbol;
+				case SymbolKind.Alias: return GetReturnType(((IAliasSymbol)symbol).Target);
+				case SymbolKind.NamedType:
+					return (symbol = symbol.AsMethod()) != null
+						? ((IMethodSymbol)symbol).ReturnType
+						: null;
 			}
 			return null;
 		}
@@ -593,6 +600,17 @@ namespace Codist
 			}
 			return null;
 		}
+
+		public static IMethodSymbol AsMethod(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Method: return symbol as IMethodSymbol;
+				case SymbolKind.Event: return (symbol as IEventSymbol).RaiseMethod;
+				case SymbolKind.NamedType:
+					var t = symbol as INamedTypeSymbol;
+					return t.TypeKind == TypeKind.Delegate ? t.GetMembers("Invoke").First() as IMethodSymbol : null;
+				default: return null;
+			}
+		}
 		#endregion
 
 		#region Source
@@ -756,12 +774,43 @@ namespace Codist
 				: 0;
 		}
 
-		public static bool AreEqual(ITypeSymbol a, ITypeSymbol b) {
-			return a.Equals(b)
-				|| a.TypeKind == TypeKind.TypeParameter && AreEqual(a as ITypeParameterSymbol, b as ITypeParameterSymbol);
+		public static bool AreEqual(ITypeSymbol a, ITypeSymbol b, bool ignoreTypeConstraint) {
+			if (ReferenceEquals(a, b) || a.Equals(b)) {
+				return true;
+			}
+			switch (a.TypeKind) {
+				case TypeKind.Class:
+				case TypeKind.Struct:
+				case TypeKind.Interface:
+				case TypeKind.Delegate:
+					return AreEqual(a as INamedTypeSymbol, b as INamedTypeSymbol, ignoreTypeConstraint);
+				case TypeKind.TypeParameter:
+					return ignoreTypeConstraint && b.TypeKind == TypeKind.TypeParameter
+						|| AreEqual(a as ITypeParameterSymbol, b as ITypeParameterSymbol);
+			}
+			return false;
 		}
+
+		static bool AreEqual(INamedTypeSymbol ta, INamedTypeSymbol tb, bool ignoreTypeConstraint) {
+			if (ta != null && tb != null
+				&& ta.IsGenericType == tb.IsGenericType
+				&& ReferenceEquals(ta.OriginalDefinition, tb.OriginalDefinition)) {
+				var pa = ta.TypeArguments;
+				var pb = tb.TypeArguments;
+				if (pa.Length == pb.Length) {
+					for (int i = pa.Length - 1; i >= 0; i--) {
+						if (AreEqual(pa[i], pb[i], ignoreTypeConstraint) == false) {
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+
 		static bool AreEqual(ITypeParameterSymbol a, ITypeParameterSymbol b) {
-			if (a == b) {
+			if (ReferenceEquals(a, b)) {
 				return true;
 			}
 			if (a == null || b == null
@@ -821,13 +870,14 @@ namespace Codist
 			if (symbol.Kind != kind) {
 				return false;
 			}
-			if (returnType == null && symbol.GetReturnType() != null
-				|| returnType != null && returnType.CanConvertTo(symbol.GetReturnType()) == false) {
-				return false;
+			var retType = symbol.GetReturnType();
+			if (returnType == null && retType != null
+				|| returnType != null && returnType.CanConvertTo(retType) == false) {
+				if (AreEqual(returnType, retType, false) == false) {
+					return false;
+				}
 			}
-			var method = kind == SymbolKind.Method ? symbol as IMethodSymbol
-				: kind == SymbolKind.Event ? (symbol as IEventSymbol).RaiseMethod
-				: null;
+			var method = symbol.AsMethod();
 			if (method == null) {
 				return true;
 			}
@@ -839,7 +889,7 @@ namespace Codist
 				for (var i = parameters.Length - 1; i >= 0; i--) {
 					var pi = parameters[i];
 					var mi = memberParameters[i];
-					if (pi.Type.Equals(mi.Type) == false
+					if (AreEqual(pi.Type, mi.Type, false) == false
 						|| pi.RefKind != mi.RefKind) {
 						return false;
 					}
