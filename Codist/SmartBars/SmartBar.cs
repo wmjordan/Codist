@@ -405,7 +405,7 @@ namespace Codist.SmartBars
 
 		void ViewSelectionChanged(object sender, EventArgs e) {
 			// suppress event handler if KeepToolBar
-			if (DateTime.Now < _LastExecute.AddSeconds(1)) {
+			if (DateTime.Now < _LastExecute.AddSeconds(1) && _ToolBarTray.Visibility == Visibility.Visible) {
 				return;
 			}
 			if (View.Selection.IsEmpty) {
@@ -422,7 +422,9 @@ namespace Codist.SmartBars
 			CreateToolBar(_Cancellation.Token);
 			async void CreateToolBar(CancellationToken token) {
 				try {
-					await Task.Delay(400, token);
+					if (_ToolBarTray.Visibility != Visibility.Visible) {
+						await Task.Delay(400, token);
+					}
 					if (token.IsCancellationRequested == false) {
 						await CreateToolBarAsync(token);
 					}
