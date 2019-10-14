@@ -178,7 +178,7 @@ namespace Codist.QuickInfo
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node, qiWrapper,
 					ctor?.Type == node ? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol
-						: node.Parent.IsKind(SyntaxKind.Attribute) ? symbol.ContainingType
+						//: node.Parent.IsKind(SyntaxKind.Attribute) ? symbol.ContainingType
 						: symbol);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
@@ -301,9 +301,9 @@ namespace Codist.QuickInfo
 				var summary = new XmlDoc(symbol, _SemanticModel.Compilation)
 					.GetDescription(symbol);
 				if (summary != null) {
-					tip.Append(new ThemedTipParagraph(new ThemedTipText("Documentation from ").AddSymbol(symbol, true, SymbolFormatter.Instance).Append(":")));
+					tip.Append(new ThemedTipParagraph(KnownImageIds.GoToNextComment, new ThemedTipText("Documentation from ").AddSymbol(symbol, true, SymbolFormatter.Instance).Append(":")));
 					new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol)
-						.Render(summary, tip);
+						.Render(summary, tip, false);
 				}
 			}
 

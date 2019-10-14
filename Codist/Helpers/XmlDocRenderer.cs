@@ -44,24 +44,26 @@ namespace Codist
 			var tip = new ThemedTipDocument();
 			var summary = doc.GetDescription(symbol);
 			XmlDoc inheritDoc = null;
+			bool showSummaryIcon = true;
 			#region Summary
 			if (summary == null
 					&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
 				summary = doc.GetInheritedDescription(symbol, out inheritDoc);
 				if (inheritDoc != null && summary != null) {
-					tip.Append(new ThemedTipParagraph(new ThemedTipText()
+					tip.Append(new ThemedTipParagraph(KnownImageIds.GoToNextComment, new ThemedTipText()
 							.Append("Documentation from ")
 							.AddSymbol(inheritDoc.Symbol.ContainingSymbol, false, _SymbolFormatter)
 							.Append(".")
 							.AddSymbol(inheritDoc.Symbol, true, _SymbolFormatter)
 							.Append(":"))
 					);
+					showSummaryIcon = false;
 				}
 			}
 			if (summary != null
 				&& (summary.Name.LocalName != XmlDocNodeName || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc))) {
 				ParagraphCount = 0;
-				Render(summary, tip);
+				Render(summary, tip, showSummaryIcon);
 				if (inheritDoc == null) {
 					tip.Tag = ParagraphCount;
 				}
@@ -145,11 +147,11 @@ namespace Codist
 			}
 			Render(content, text.Inlines);
 		}
-		public void Render(XElement content, ThemedTipDocument doc) {
+		public void Render(XElement content, ThemedTipDocument doc, bool showSummaryIcon) {
 			if (content == null || content.HasElements == false && content.IsEmpty) {
 				return;
 			}
-			var paragraph = new ThemedTipParagraph(KnownImageIds.Comment);
+			var paragraph = new ThemedTipParagraph(showSummaryIcon ? KnownImageIds.Comment : 0);
 			doc.Append(paragraph);
 			Render(content, paragraph.Content.Inlines);
 			if (paragraph.Content.Inlines.FirstInline == null) {
