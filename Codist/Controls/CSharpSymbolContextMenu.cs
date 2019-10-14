@@ -151,7 +151,7 @@ namespace Codist.Controls
 				}
 			}
 			Items.Add(CreateItem(KnownImageIds.ShowReferencedElements, "Find Type Referrers...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, n => {
-				var p = n.Parent;
+				var p = n.Parent.UnqualifyExceptNamespace();
 				switch (p.Kind()) {
 					case SyntaxKind.TypeOfExpression:
 					case SyntaxKind.SimpleMemberAccessExpression:
