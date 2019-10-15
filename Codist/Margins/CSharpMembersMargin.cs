@@ -9,10 +9,12 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
+using Task = System.Threading.Tasks.Task;
 
 namespace Codist.Margins
 {
@@ -195,11 +197,13 @@ namespace Codist.Margins
 			async void OnTagsChanged(object sender, EventArgs e) {
 				try {
 					var ct = SyncHelper.CancelAndRetainToken(ref _Element._Cancellation);
-					await Task.Run(TagDocument, ct).ConfigureAwait(true);
+					await Task.Run(TagDocument, ct).ConfigureAwait(false);
 					_Regions = TagRegions();
 					if (ct.IsCancellationRequested) {
 						return;
 					}
+					await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
+					_Element.InvalidateVisual();
 				}
 				catch (ObjectDisposedException) {
 					return;
@@ -207,7 +211,6 @@ namespace Codist.Margins
 				catch (OperationCanceledException) {
 					return;
 				}
-				_Element.InvalidateVisual();
 			}
 
 			void TagDocument() {
@@ -444,25 +447,28 @@ namespace Codist.Margins
 			async Task UpdateReferencesAsync() {
 				var cancellation = _Margin._Cancellation.GetToken();
 				var ctx = _Margin._SemanticContext;
-				if (await ctx.UpdateAsync(_View.Selection.Start.Position, cancellation).ConfigureAwait(true) == false) {
+				if (await ctx.UpdateAsync(_View.Selection.Start.Position, cancellation).ConfigureAwait(false) == false) {
 					_Symbol = null;
+					await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellation);
 					_Margin.InvalidateVisual();
 					return;
 				}
 				var node = ctx.Node;
-				var symbol = await ctx.GetSymbolAsync(cancellation).ConfigureAwait(true);
+				var symbol = await ctx.GetSymbolAsync(cancellation).ConfigureAwait(false);
 				if (symbol != null) {
-					if (Interlocked.Exchange(ref _Symbol, symbol) != symbol) {
+					if (ReferenceEquals(Interlocked.Exchange(ref _Symbol, symbol), symbol) == false) {
 						var doc = ctx.Document;
 						_DocSyntax = ctx.Compilation.SyntaxTree;
 						// todo show marked symbols on scrollbar margin
-						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), cancellation).ConfigureAwait(true);
+						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), cancellation).ConfigureAwait(false);
+						await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellation);
 						_Margin.InvalidateVisual();
 					}
 				}
 				else {
 					if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
 						_Symbol = null;
+						await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellation);
 						_Margin.InvalidateVisual();
 					}
 				}
