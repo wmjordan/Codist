@@ -193,7 +193,7 @@ namespace Codist
 				InheritDocumentation(t.BaseType, querySymbol);
 			}
 			// inherit from base type
-			if (symbol != querySymbol) {
+			if (ReferenceEquals(symbol, querySymbol) == false) {
 				var kind = querySymbol.Kind;
 				ISymbol s;
 				if (kind == SymbolKind.Parameter) {
@@ -210,7 +210,7 @@ namespace Codist
 					.FirstOrDefault(i => i.MatchSignature(kind, returnType, parameters, typeParams));
 				if (member != null) {
 					if (querySymbol.Kind == SymbolKind.Parameter) {
-						member = (member as IMethodSymbol).Parameters[(querySymbol as IParameterSymbol).Ordinal];
+						member = member.GetParameters()[((IParameterSymbol)querySymbol).Ordinal];
 					}
 					if (AddInheritedDocFromSymbol(member)) {
 						return;
@@ -225,21 +225,21 @@ namespace Codist
 				&& (t = symbol.ContainingType) != null) {
 				switch (symbol.Kind) {
 					case SymbolKind.Method:
-						foreach (var item in (symbol as IMethodSymbol).ExplicitInterfaceImplementations) {
+						foreach (var item in ((IMethodSymbol)symbol).ExplicitInterfaceImplementations) {
 							if (AddInheritedDocFromSymbol(item)) {
 								return;
 							}
 						}
 						break;
 					case SymbolKind.Property:
-						foreach (var item in (symbol as IPropertySymbol).ExplicitInterfaceImplementations) {
+						foreach (var item in ((IPropertySymbol)symbol).ExplicitInterfaceImplementations) {
 							if (AddInheritedDocFromSymbol(item)) {
 								return;
 							}
 						}
 						break;
 					case SymbolKind.Event:
-						foreach (var item in (symbol as IEventSymbol).ExplicitInterfaceImplementations) {
+						foreach (var item in ((IEventSymbol)symbol).ExplicitInterfaceImplementations) {
 							if (AddInheritedDocFromSymbol(item)) {
 								return;
 							}
