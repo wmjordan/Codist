@@ -444,6 +444,7 @@ namespace Codist.Taggers
 				case SyntaxKind.StructDeclaration: return _Classifications.StructName;
 				case SyntaxKind.Attribute: return _Classifications.AttributeName;
 				case SyntaxKind.EventDeclaration: return _Classifications.Event;
+				case SyntaxKind.DelegateDeclaration: return _Classifications.DelegateName;
 				case SyntaxKind.NamespaceDeclaration:
 					return _Classifications.Namespace;
 				case SyntaxKind.IfStatement:
