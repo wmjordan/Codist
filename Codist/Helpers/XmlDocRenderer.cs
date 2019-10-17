@@ -24,15 +24,13 @@ namespace Codist
 		static readonly Regex _FixWhitespaces = new Regex(" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 		readonly Compilation _Compilation;
 		readonly SymbolFormatter _SymbolFormatter;
-		readonly ISymbol _Symbol;
 
 		int _isCode;
 		FontFamily _codeFont;
 
-		public XmlDocRenderer(Compilation compilation, SymbolFormatter symbolFormatter, ISymbol symbol) {
+		public XmlDocRenderer(Compilation compilation, SymbolFormatter symbolFormatter) {
 			_Compilation = compilation;
 			_SymbolFormatter = symbolFormatter;
-			_Symbol = symbol;
 		}
 
 		/// <summary>
@@ -40,7 +38,7 @@ namespace Codist
 		/// </summary>
 		public int ParagraphCount { get; set; }
 
-		public ThemedTipDocument RenderXmlDoc(SyntaxNode node, ISymbol symbol, XmlDoc doc, SemanticModel semanticModel) {
+		public ThemedTipDocument RenderXmlDoc(ISymbol symbol, XmlDoc doc) {
 			var tip = new ThemedTipDocument();
 			var summary = doc.GetDescription(symbol);
 			XmlDoc inheritDoc = null;
@@ -121,7 +119,7 @@ namespace Codist
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SeeAlsoDoc)) {
-				var seeAlsos = doc.SeeAlso ?? doc.ExplicitInheritDoc?.SeeAlso;
+				var seeAlsos = doc.SeeAlso ?? doc.ExplicitInheritDoc?.SeeAlso ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.SeeAlso != null)?.SeeAlso;
 				if (seeAlsos != null) {
 					var seeAlso = new ThemedTipText()
 						.Append("See also", true)

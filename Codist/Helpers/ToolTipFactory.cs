@@ -64,14 +64,12 @@ namespace Codist
 
 				if (symbol.Kind == SymbolKind.NamedType) {
 					switch (((INamedTypeSymbol)symbol).TypeKind) {
-						case TypeKind.Delegate: {
+						case TypeKind.Delegate:
 							ShowDelegateSignature(content, (INamedTypeSymbol)symbol);
 							break;
-						}
-						case TypeKind.Enum: {
+						case TypeKind.Enum:
 							ShowEnumType(content, symbol);
 							break;
-						}
 					}
 				}
 			}
@@ -129,7 +127,7 @@ namespace Codist
 				?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.GetInheritedDescription(symbol, out doc) : null);
 			if (summary != null) {
 				var docContent = tip.AddTextBlock();
-				new XmlDocRenderer(compilation, SymbolFormatter.Empty, symbol).Render(summary, docContent);
+				new XmlDocRenderer(compilation, SymbolFormatter.Empty).Render(summary, docContent);
 				if (Config.Instance.QuickInfoMaxWidth >= 100) {
 					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 				}

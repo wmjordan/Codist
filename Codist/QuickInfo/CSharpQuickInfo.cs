@@ -275,22 +275,23 @@ namespace Codist.QuickInfo
 			}
 			symbol = symbol.GetAliasTarget();
 			var doc = new XmlDoc(symbol, _SemanticModel.Compilation);
-			var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol);
-			var tip = docRenderer.RenderXmlDoc(node, symbol, doc, _SemanticModel);
+			var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance);
+			var tip = docRenderer.RenderXmlDoc(symbol, doc);
 
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExceptionDoc)
-				&& (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)
-				&& doc.Exceptions != null) {
-				var p = new ThemedTipParagraph(KnownImageIds.StatusInvalidOutline, new ThemedTipText("Exception:", true));
-				foreach (var ex in doc.Exceptions) {
-					var et = ex.Attribute("cref");
-					if (et != null) {
-						docRenderer.RenderXmlDocSymbol(et.Value, p.Content.AppendLine().Inlines, SymbolKind.NamedType);
-						p.Content.Inlines.LastInline.FontWeight = FontWeights.Bold;
-						docRenderer.Render(ex, p.Content.Append(": ").Inlines);
+				&& (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)) {
+				var exceptions = doc.Exceptions ?? doc.ExplicitInheritDoc?.Exceptions ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Exceptions != null)?.Exceptions;
+				if (exceptions != null) {
+					var p = new ThemedTipParagraph(KnownImageIds.StatusInvalidOutline, new ThemedTipText("Exception", true)
+					   .Append(exceptions == doc.Exceptions ? ": " : " (inherited): "));
+					foreach (var ex in exceptions) {
+						var et = ex.Attribute("cref");
+						if (et != null) {
+							docRenderer.RenderXmlDocSymbol(et.Value, p.Content.AppendLine().Inlines, SymbolKind.NamedType);
+							p.Content.Inlines.LastInline.FontWeight = FontWeights.Bold;
+							docRenderer.Render(ex, p.Content.Append(": ").Inlines);
+						}
 					}
-				}
-				if (p.Content.Inlines.Count > 1) {
 					qiWrapper.OverrideException(new ThemedTipDocument().Append(p));
 				}
 			}
@@ -302,7 +303,7 @@ namespace Codist.QuickInfo
 					.GetDescription(symbol);
 				if (summary != null) {
 					tip.Append(new ThemedTipParagraph(KnownImageIds.GoToNextComment, new ThemedTipText("Documentation from ").AddSymbol(symbol, true, SymbolFormatter.Instance).Append(":")));
-					new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance, symbol)
+					new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance)
 						.Render(summary, tip, false);
 				}
 			}
@@ -1144,7 +1145,7 @@ namespace Codist.QuickInfo
 				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Parameter, content));
 				if (paramDoc != null) {
 					content.Append("\n" + argName, true, false, _SymbolFormatter.Parameter).Append(": ");
-					new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, om).Render(paramDoc, content.Inlines);
+					new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter).Render(paramDoc, content.Inlines);
 				}
 				if (m.IsGenericMethod) {
 					for (int i = 0; i < m.TypeArguments.Length; i++) {
@@ -1153,7 +1154,7 @@ namespace Codist.QuickInfo
 						var typeParamDoc = doc.GetTypeParameter(m.TypeParameters[i].Name);
 						if (typeParamDoc != null) {
 							content.Append(": ");
-							new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter, m).Render(typeParamDoc, content.Inlines);
+							new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter).Render(typeParamDoc, content.Inlines);
 						}
 					}
 				}
