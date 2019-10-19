@@ -206,11 +206,7 @@ namespace Codist.SmartBars
 				r.AddRange(__SurroundingCommands);
 				r.AddRange(__FormatCommands);
 				if (View.IsMultilineSelected()) {
-					r.Add(new CommandItem(KnownImageIds.Join, "Join lines", ctx => {
-						if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
-							ctx.View.TextBuffer.Replace(span, System.Text.RegularExpressions.Regex.Replace(span.GetText(), @"[ \t]*\r?\n[ \t]*", " "));
-						}
-					}));
+					r.Add(new CommandItem(KnownImageIds.Join, "Join Lines", ctx => ctx.View.JoinSelectedLines()));
 				}
 				var t = View.GetTextViewLineContainingBufferPosition(selection.Start.Position).Extent.GetText();
 				if (t.Length > 0 && (t[0] == ' ' || t[0] == '\t')) {

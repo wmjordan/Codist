@@ -435,6 +435,72 @@ namespace Codist
 		}
 		#endregion
 
+		#region Edit commands
+		public static void JoinSelectedLines(this ITextView view) {
+			if (view.TryGetFirstSelectionSpan(out var span) == false) {
+				return;
+			}
+			var t = span.GetText();
+			var b = new ReusableResourceHolder<System.Text.StringBuilder>();
+			var sb = b.Resource;
+			var p = 0;
+			bool nl = false;
+			for (int i = 0; i < t.Length; i++) {
+				switch (t[i]) {
+					case '\r':
+					case '\n':
+						nl = true;
+						goto case ' ';
+					case ' ':
+					case '\t':
+						int j;
+						for (j = i + 1; j < t.Length; j++) {
+							switch (t[j]) {
+								case ' ':
+								case '\t':
+									continue;
+								case '\n':
+								case '\r':
+									nl = true;
+									continue;
+								default:
+									goto CHECK_NEW_LINE;
+							}
+						}
+					CHECK_NEW_LINE:
+						if (nl == false || j <= i) {
+							continue;
+						}
+						if (sb == null) {
+							b = ReusableStringBuilder.AcquireDefault(t.Length);
+							sb = b.Resource;
+						}
+						if (p == 0) {
+							span = new SnapshotSpan(span.Snapshot, span.Start + i, span.Length - i);
+						}
+						else {
+							sb.Append(t, p, i - p);
+						}
+						if (i > 0 && "(['\"".IndexOf(t[i - 1]) == -1 && j < t.Length && ")]'\"".IndexOf(t[j]) == -1) {
+							sb.Append(' ');
+						}
+						i = j;
+						p = j;
+						nl = false;
+						break;
+				}
+			}
+
+			if (p > 0) {
+				if (p < t.Length) {
+					span = new SnapshotSpan(span.Snapshot, span.Start, span.Length - (t.Length - p));
+				}
+				view.TextBuffer.Replace(span, sb.ToString());
+				b.Dispose();
+			}
+		}
+		#endregion
+
 		#region TextView and editor
 		public static ITextDocument GetTextDocument(this ITextBuffer textBuffer) {
 			return textBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out var d) ? d : null;
