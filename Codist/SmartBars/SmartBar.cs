@@ -118,7 +118,9 @@ namespace Codist.SmartBars
 			//if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
 			//	AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");
 			//}
-			AddFindAndReplaceCommands();
+			if (View.IsMultilineSelected() == false) {
+				AddFindAndReplaceCommands();
+			}
 			//AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
 		}
