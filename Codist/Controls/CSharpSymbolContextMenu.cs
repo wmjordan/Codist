@@ -157,7 +157,7 @@ namespace Codist.Controls
 					case SyntaxKind.SimpleMemberAccessExpression:
 						return true;
 					case SyntaxKind.TypeArgumentList:
-						return (p = p.Parent).IsKind(SyntaxKind.GenericName) && (p = p.Parent).IsKind(SyntaxKind.SimpleMemberAccessExpression);
+						return (p = p.Parent).IsKind(SyntaxKind.GenericName) && ((p = p.Parent.UnqualifyExceptNamespace()).IsKind(SyntaxKind.SimpleMemberAccessExpression) || p.IsKind(SyntaxKind.ObjectCreationExpression));
 				}
 				return false;
 				})));
@@ -231,6 +231,16 @@ namespace Codist.Controls
 
 		public MenuItem CreateItem(int imageId, string title, Action clickHandler) {
 			var item = CreateItem(imageId, title);
+			item.Click += Item_Click;
+			if (clickHandler != null) {
+				item.Click += (s, args) => clickHandler();
+			}
+			return item;
+		}
+
+		public MenuItem CreateItem(int imageId, Action<MenuItem> itemConfigurator, Action clickHandler) {
+			var item = new MenuItem { Icon = ThemeHelper.GetImage(imageId) };
+			itemConfigurator(item);
 			item.Click += Item_Click;
 			if (clickHandler != null) {
 				item.Click += (s, args) => clickHandler();
