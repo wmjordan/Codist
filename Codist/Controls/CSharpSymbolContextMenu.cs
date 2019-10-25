@@ -252,7 +252,7 @@ namespace Codist.Controls
 			if (referrers == null) {
 				return;
 			}
-			var m = new SymbolMenu(context);
+			var m = new SymbolMenu(context, SymbolListType.SymbolReferrers);
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
 				.Append(" referrers");
