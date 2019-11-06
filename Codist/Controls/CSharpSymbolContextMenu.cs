@@ -88,10 +88,10 @@ namespace Codist.Controls
 				if (_Node != null && _Node.Kind().IsDeclaration()
 					&& _Node.SyntaxTree == _SemanticContext.SemanticModel.SyntaxTree
 					&& _Symbol.Kind != SymbolKind.Namespace) {
-					Items.Add(CreateItem(KnownImageIds.FindSymbol, "Find Referenced Symbols...", FindReferencedSymbols));
+					Items.Add(CreateItem(KnownImageIds.ShowBuiltIns, "Find Referenced Symbols...", FindReferencedSymbols));
 				}
 				//Items.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, _Symbol, "No reference found", FindReferences));
-				Items.Add(CreateItem(KnownImageIds.FindSymbol, "Find Symbol with Name " + _Symbol.Name + "...", () => FindSymbolWithName(_Symbol, _SemanticContext)));
+				Items.Add(CreateItem(KnownImageIds.DisplayName, "Find Symbol with Name " + _Symbol.Name + "...", () => FindSymbolWithName(_Symbol, _SemanticContext)));
 			}
 		}
 
@@ -201,7 +201,7 @@ namespace Codist.Controls
 		}
 
 		public void AddGoToAnyCommands() {
-			Items.Add(CreateItem(KnownImageIds.ListMembers, "Go to Member", GoToMember));
+			Items.Add(CreateItem(KnownImageIds.GoToNext, "Go to Member", GoToMember));
 			Items.Add(CreateItem(KnownImageIds.Type, "Go to Type", GoToType));
 			Items.Add(CreateItem(KnownImageIds.FindSymbol, "Go to Symbol", GoToSymbol));
 		}
