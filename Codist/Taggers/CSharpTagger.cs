@@ -132,6 +132,7 @@ namespace Codist.Taggers
 								case SyntaxKind.CatchFilterClause:
 								case SyntaxKind.FinallyClause:
 								case SyntaxKind.StackAllocArrayCreationExpression:
+								case (SyntaxKind)9053: // implicit stackalloc
 									yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword);
 									continue;
 								case SyntaxKind.LocalDeclarationStatement:
@@ -414,6 +415,8 @@ namespace Codist.Taggers
 		}
 
 		static IClassificationType ClassifySyntaxNode(SyntaxNode node) {
+			const SyntaxKind SwitchExpression = (SyntaxKind)9025;
+
 			switch (node.Kind()) {
 				case SyntaxKind.MethodDeclaration:
 				case SyntaxKind.AnonymousMethodExpression:
@@ -451,6 +454,7 @@ namespace Codist.Taggers
 				case SyntaxKind.ElseClause:
 				case SyntaxKind.SwitchStatement:
 				case SyntaxKind.SwitchSection:
+				case SwitchExpression:
 					return _GeneralClassifications.BranchingKeyword;
 				case SyntaxKind.ForStatement:
 				case SyntaxKind.ForEachStatement:
