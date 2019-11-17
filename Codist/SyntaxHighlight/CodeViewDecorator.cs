@@ -171,19 +171,9 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 			if (settings.ForegroundOpacity > 0) {
-				if (settings.ForeColor.A > 0) {
-					if (format.ForegroundBrushEmpty || (format.ForegroundBrush as SolidColorBrush)?.Color != settings.ForeColor) {
-						format = format.SetForeground(settings.ForeColor);
-					}
-				}
-				if (settings.ForegroundOpacity != Byte.MaxValue
-					&& format.ForegroundOpacity != settings.ForegroundOpacity / 255.0
-					&& format.ForegroundBrushEmpty == false
-					&& Math.Abs(format.ForegroundBrush.Opacity - settings.ForegroundOpacity / 255.0) > 0.01) {
-					format = format.SetForegroundOpacity(settings.ForegroundOpacity / 255.0);
-				}
+				format = format.SetForegroundOpacity(settings.ForegroundOpacity / 255.0);
 			}
-			else if (settings.ForeColor.A > 0) {
+			if (settings.ForeColor.A > 0) {
 				if (format.ForegroundBrushEmpty || (format.ForegroundBrush as SolidColorBrush)?.Color != settings.ForeColor) {
 					format = format.SetForeground(settings.ForeColor);
 				}
@@ -192,10 +182,7 @@ namespace Codist.SyntaxHighlight
 				var bc = settings.BackColor.A > 0 ? settings.BackColor
 				   : format.BackgroundBrushEmpty == false && format.BackgroundBrush is SolidColorBrush ? (format.BackgroundBrush as SolidColorBrush).Color
 				   : Colors.Transparent;
-				if (settings.BackgroundOpacity != Byte.MaxValue && settings.BackgroundOpacity != 0
-					&& format.BackgroundOpacity != settings.BackgroundOpacity / 255.0
-					&& format.BackgroundBrushEmpty == false
-					&& Math.Abs(format.BackgroundBrush.Opacity - settings.BackgroundOpacity / 255.0) > 0.01) {
+				if (settings.BackgroundOpacity != 0) {
 					format = format.SetBackgroundOpacity(settings.BackgroundOpacity / 255.0);
 				}
 				if (bc.A > 0) {
