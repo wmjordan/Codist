@@ -177,8 +177,13 @@ namespace Codist.Controls
 						}
 						return;
 					case "Microsoft.VisualStudio.Imaging":
-						if (typeName == nameof(KnownImageIds)) {
-							SetupListForKnownImageIds(list);
+						switch (typeName) {
+							case nameof(KnownImageIds):
+								SetupListForKnownImageIds(list);
+								break;
+							case nameof(KnownMonikers):
+								SetupListForKnownMonikers(list);
+								break;
 						}
 						return;
 				}
@@ -211,6 +216,15 @@ namespace Codist.Controls
 					return f == null || f.HasConstantValue == false || f.Type.SpecialType != SpecialType.System_Int32
 						? null
 						: ThemeHelper.GetImage((int)f.ConstantValue);
+				};
+			}
+			void SetupListForKnownMonikers(SymbolList symbolList) {
+				symbolList.ContainerType = SymbolListType.VsKnownImage;
+				symbolList.IconProvider = s => {
+					var p = s.Symbol as IPropertySymbol;
+					return p == null || p.IsStatic == false
+						? null
+						: ThemeHelper.GetImage(p.Name);
 				};
 			}
 			Border GetColorPreviewIcon(WPF.Brush brush) {

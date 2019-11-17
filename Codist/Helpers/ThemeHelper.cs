@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Controls;
 using Microsoft.VisualStudio;
@@ -108,7 +109,9 @@ namespace Codist
 				Width = size,
 			};
 		}
-
+		public static CrispImage GetImage(string monikerName, int size = 0) {
+			return GetImage(KnownMonikerNameMap.Map.TryGetValue(monikerName, out int i) ? i : KnownImageIds.Blank, size);
+		}
 		public static void SetBackgroundForCrispImage(this System.Windows.DependencyObject target, WpfColor color) {
 			ImageThemingUtilities.SetImageBackgroundColor(target, color);
 		}
@@ -155,5 +158,20 @@ namespace Codist
 		} 
 		#endregion
 
+		static class KnownMonikerNameMap
+		{
+			internal static readonly Dictionary<string, int> Map = CreateMap();
+
+			static Dictionary<string, int> CreateMap() {
+				var d = new Dictionary<string, int>(3760);
+				var intType = typeof(int);
+				foreach (var item in typeof(KnownImageIds).GetFields()) {
+					if (item.FieldType == intType) {
+						d.Add(item.Name, (int)item.GetValue(null));
+					}
+				}
+				return d;
+			}
+		}
 	}
 }
