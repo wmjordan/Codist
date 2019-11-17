@@ -72,11 +72,13 @@ namespace Codist
 			switch (n) {
 				case nameof(System.Windows.SystemColors):
 				case nameof(System.Drawing.SystemBrushes):
+				case nameof(System.Drawing.SystemPens):
 					return NamedColorCache.GetSystemBrush(symbol.Name);
 				case nameof(System.Drawing.KnownColor):
 					return NamedColorCache.GetBrush(symbol.Name) ?? NamedColorCache.GetSystemBrush(symbol.Name);
 				case nameof(System.Drawing.Color):
 				case nameof(System.Drawing.Brushes):
+				case nameof(System.Drawing.Pens):
 				case nameof(Colors):
 					return NamedColorCache.GetBrush(symbol.Name);
 			}

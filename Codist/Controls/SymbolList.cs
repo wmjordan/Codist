@@ -145,9 +145,14 @@ namespace Codist.Controls
 				switch (typeNamespace) {
 					case "System.Drawing":
 						switch (typeName) {
-							case nameof(GDI.SystemBrushes): SetupListForSystemColors(list); return;
+							case nameof(GDI.SystemBrushes):
+							case nameof(GDI.SystemPens):
+							case nameof(GDI.SystemColors):
+								SetupListForSystemColors(list); return;
 							case nameof(GDI.Color):
 							case nameof(GDI.Brushes):
+							case nameof(GDI.Pens):
+								SetupListForColors(list); return;
 							case nameof(GDI.KnownColor): SetupListForKnownColors(list); return;
 						}
 						return;
@@ -205,9 +210,13 @@ namespace Codist.Controls
 				symbolList.ContainerType = SymbolListType.PredefinedColors;
 				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
 			}
+			void SetupListForColors(SymbolList symbolList) {
+				symbolList.ContainerType = SymbolListType.PredefinedColors;
+				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name)) : null;
+			}
 			void SetupListForKnownColors(SymbolList symbolList) {
 				symbolList.ContainerType = SymbolListType.PredefinedColors;
-				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name) ?? ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
+				symbolList.IconProvider = s => ((s.Symbol as IFieldSymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name) ?? ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
 			}
 			void SetupListForKnownImageIds(SymbolList symbolList) {
 				symbolList.ContainerType = SymbolListType.VsKnownImage;
@@ -228,7 +237,7 @@ namespace Codist.Controls
 				};
 			}
 			Border GetColorPreviewIcon(WPF.Brush brush) {
-				return new Border {
+				return brush == null ? null : new Border {
 					BorderThickness = WpfHelper.TinyMargin,
 					BorderBrush = ThemeHelper.MenuTextBrush,
 					SnapsToDevicePixels = true,
