@@ -152,6 +152,19 @@ namespace Codist.Taggers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpEnumFieldName)]
+	[Name(Constants.CSharpEnumFieldName)]
+	[UserVisible(false)]
+	[Order(After = Constants.CodeIdentifier)]
+	[Order(After = Constants.CodeFieldName)]
+	sealed class EnumFieldFormat : ClassificationFormatDefinition
+	{
+		public EnumFieldFormat() {
+			DisplayName = Constants.NameOfMe + ": enum field";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName)]
 	[Name(Constants.CSharpParameterName)]
 	[UserVisible(false)]

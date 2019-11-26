@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.Imaging.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text.Classification;
 using GdiColor = System.Drawing.Color;
 using WpfBrush = System.Windows.Media.SolidColorBrush;
 using WpfColor = System.Windows.Media.Color;
@@ -30,7 +31,6 @@ namespace Codist
 		public static WpfBrush DocumentTextBrush { get; private set; }
 		public static WpfBrush FileTabProvisionalSelectionBrush { get; private set; }
 		public static GdiColor ToolWindowBackgroundColor { get; private set; }
-		public static WpfBrush TitleBackgroundBrush { get; private set; }
 		public static WpfColor TitleBackgroundColor { get; private set; }
 		public static WpfBrush TitleTextBrush { get; private set; }
 		public static WpfBrush ToolTipTextBrush { get; private set; }
@@ -54,6 +54,16 @@ namespace Codist
 		public static double ToolTipFontSize { get; private set; }
 
 		#region Colors and brushes
+		public static System.Windows.Media.Brush GetBrush(this IEditorFormatMap formatMap, params string[] formatNames) {
+			foreach (var item in formatNames) {
+				var r = formatMap.GetProperties(item);
+				var b = r.GetBrush();
+				if (b != null) {
+					return b;
+				}
+			}
+			return null;
+		}
 		public static GdiColor GetGdiColor(this ThemeResourceKey resourceKey) {
 			return VSColorTheme.GetThemedColor(resourceKey);
 		}
@@ -130,7 +140,6 @@ namespace Codist
 			ToolWindowBackgroundColor = EnvironmentColors.ToolWindowBackgroundColorKey.GetGdiColor();
 			TitleBackgroundColor = EnvironmentColors.MainWindowActiveCaptionColorKey.GetWpfColor();
 			TitleTextBrush = EnvironmentColors.MainWindowActiveCaptionTextBrushKey.GetWpfBrush();
-			TitleBackgroundBrush = new WpfBrush(TitleBackgroundColor);
 			ToolTipBackgroundBrush = EnvironmentColors.ToolTipBrushKey.GetWpfBrush();
 			ToolWindowTextBrush = EnvironmentColors.ToolWindowTextBrushKey.GetWpfBrush();
 			ToolWindowBackgroundBrush = EnvironmentColors.ToolWindowBackgroundBrushKey.GetWpfBrush();
@@ -143,7 +152,7 @@ namespace Codist
 			TextBoxBrush = CommonControlsColors.TextBoxTextBrushKey.GetWpfBrush();
 			TextBoxBackgroundBrush = CommonControlsColors.TextBoxBackgroundBrushKey.GetWpfBrush();
 			TextBoxBorderBrush = CommonControlsColors.TextBoxBorderBrushKey.GetWpfBrush();
-			TextSelectionHighlightBrush = CommonControlsColors.ComboBoxTextInputSelectionBrushKey.GetWpfBrush().Alpha(0.3);
+			TextSelectionHighlightBrush = CommonControlsColors.ComboBoxTextInputSelectionBrushKey.GetWpfBrush().Alpha(0.5);
 			SystemButtonFaceColor = EnvironmentColors.SystemButtonFaceColorKey.GetWpfColor();
 			SystemThreeDFaceColor = EnvironmentColors.SystemThreeDFaceColorKey.GetWpfColor();
 			SystemGrayTextBrush = EnvironmentColors.SystemGrayTextBrushKey.GetWpfBrush();

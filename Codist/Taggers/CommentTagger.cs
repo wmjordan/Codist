@@ -234,10 +234,6 @@ namespace Codist.Taggers
 		}
 		static CodeType GetCodeType(ITextBuffer textBuffer) {
 			var t = textBuffer.ContentType;
-			var f = textBuffer.GetTextDocument()?.FilePath;
-			if (f != null) {
-				f = f.Substring(f.LastIndexOf('.') + 1).ToLowerInvariant();
-			}
 			var c = t.IsOfType(Constants.CodeTypes.CSharp) ? CodeType.CSharp
 				: t.IsOfType("html") || t.IsOfType("htmlx") || t.IsOfType("XAML") || t.IsOfType("XML") ? CodeType.Markup
 				: t.IsOfType("code++.css") ? CodeType.Css
@@ -247,7 +243,11 @@ namespace Codist.Taggers
 			if (c != CodeType.None) {
 				return c;
 			}
-			switch (f) {
+			var f = textBuffer.GetTextDocument()?.FilePath;
+			if (f == null) {
+				return CodeType.None;
+			}
+			switch (f.Substring(f.LastIndexOf('.') + 1).ToLowerInvariant()) {
 				case "js": return CodeType.Js;
 				case "c":
 				case "cpp":

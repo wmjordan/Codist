@@ -132,6 +132,7 @@ namespace Codist
 		public const string CSharpFieldName = "C#: Field";
 		public const string CSharpConstFieldName = "C#: Const field";
 		public const string CSharpReadOnlyFieldName = "C#: Read-only field";
+		public const string CSharpEnumFieldName = "C#: Enum field";
 		public const string CSharpResourceKeyword = "C#: Resource keyword";
 		public const string CSharpAliasNamespaceName = "C#: Alias namespace";
 		public const string CSharpConstructorMethodName = "C#: Constructor method";
@@ -567,6 +568,11 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpVolatileFieldName)]
 		[Description("Name of volatile field, inheriting from Field Name")]
 		VolatileFieldName,
+		[Category(Constants.SyntaxCategory.Member)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpEnumFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumMemberName)]
+		[Description("Name of enum field, inheriting from Const Field Name")]
+		EnumFieldName,
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodePropertyName)]

@@ -555,7 +555,9 @@ namespace Codist.Taggers
 
 				case SymbolKind.Field:
 					var f = symbol as IFieldSymbol;
-					yield return f.IsConst ? _Classifications.ConstField
+					yield return f.IsConst ?
+							f.ContainingType.TypeKind == TypeKind.Enum ? _Classifications.EnumField
+							: _Classifications.ConstField
 						: f.IsReadOnly ? _Classifications.ReadonlyField
 						: f.IsVolatile ? _Classifications.VolatileField
 						: _Classifications.Field;

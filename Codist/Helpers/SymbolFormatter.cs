@@ -33,35 +33,37 @@ namespace Codist
 
 		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
 		public Brush Class { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstFieldName + ";" + Constants.CodeConstantName)]
 		public Brush Const { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeDelegateName)]
 		public Brush Delegate { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumName)]
 		public Brush Enum { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumMemberName)]
+		public Brush EnumField { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName + ";" + Constants.CodeFieldName)]
 		public Brush Field { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeInterfaceName)]
 		public Brush Interface { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalVariableName)]
+		[ClassificationType(ClassificationTypeNames =Constants.CSharpLocalVariableName + ";" +  Constants.CodeLocalName)]
 		public Brush Local { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeKeyword)]
 		public Brush Keyword { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpMethodName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpMethodName + ";" + Constants.CodeMethodName)]
 		public Brush Method { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName + ";" + Constants.CodeNamespaceName)]
 		public Brush Namespace { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeNumber)]
 		public Brush Number { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName + ";" + Constants.CodeParameterName)]
 		public Brush Parameter { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName + ";" + Constants.CodePropertyName)]
 		public Brush Property { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeStructName)]
 		public Brush Struct { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeString)]
 		public Brush Text { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeParameterName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeParameterName + ";" + Constants.CodeTypeParameterName)]
 		public Brush TypeParameter { get; private set; }
 
 		public TextBlock ShowSymbolDeclaration(ISymbol symbol, TextBlock info, bool defaultPublic, bool hideTypeKind) {
@@ -323,7 +325,10 @@ namespace Codist
 			foreach (var item in typeof(SymbolFormatter).GetProperties()) {
 				var ctn = item.GetCustomAttribute<ClassificationTypeAttribute>().ClassificationTypeNames;
 				var a = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(item.Name);
-				r.Add(item.Name, (f, m) => a(f, f._brushConfigurator != null ? f._brushConfigurator(m.GetProperties(ctn).GetBrush()) : m.GetProperties(ctn).GetBrush()));
+				r.Add(item.Name, (f, m) => {
+					var brush = m.GetBrush(ctn.Split(';'));
+					a(f, f._brushConfigurator != null ? f._brushConfigurator(brush) : brush);
+				});
 			}
 			return r;
 		}

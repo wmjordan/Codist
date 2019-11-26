@@ -42,7 +42,7 @@ namespace Codist.Taggers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CSharpReadOnlyFieldName)]
-		[BaseDefinition(Constants.CodeStaticSymbol)]
+		[BaseDefinition(Constants.CSharpStaticMemberName)]
 		[BaseDefinition(Constants.CodeConstantName)]
 		[Name(Constants.CSharpConstFieldName)]
 		static ClassificationTypeDefinition ConstField;
@@ -69,7 +69,14 @@ namespace Codist.Taggers
 		static ClassificationTypeDefinition DeclarationBrace;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeEnumMemberName)]
+		[BaseDefinition(Constants.CSharpConstFieldName)]
+		[Name(Constants.CSharpEnumFieldName)]
+		static ClassificationTypeDefinition EnumField;
+
+		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeEventName)]
 		[Name(Constants.CSharpEventName)]
 		static ClassificationTypeDefinition Event;
 
@@ -81,21 +88,25 @@ namespace Codist.Taggers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CSharpMethodName)]
+		[BaseDefinition(Constants.CodeExtensionMethodName)]
 		[Name(Constants.CSharpExternMethodName)]
 		static ClassificationTypeDefinition ExternMethod;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeFieldName)]
 		[Name(Constants.CSharpFieldName)]
 		static ClassificationTypeDefinition Field;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeLabelName)]
 		[Name(Constants.CSharpLabel)]
 		static ClassificationTypeDefinition Label;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeLocalName)]
 		[Name(Constants.CSharpLocalVariableName)]
 		static ClassificationTypeDefinition LocalVariable;
 
@@ -106,11 +117,13 @@ namespace Codist.Taggers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeMethodName)]
 		[Name(Constants.CSharpMethodName)]
 		static ClassificationTypeDefinition Method;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeNamespaceName)]
 		[Name(Constants.CSharpNamespaceName)]
 		static ClassificationTypeDefinition Namespace;
 
@@ -120,6 +133,7 @@ namespace Codist.Taggers
 		static ClassificationTypeDefinition NestedDeclaration;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CSharpLocalVariableName)]
 		[Name(Constants.CSharpLocalDeclarationName)]
 		static ClassificationTypeDefinition LocalDeclaration;
 
@@ -130,12 +144,16 @@ namespace Codist.Taggers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodeParameterName)]
 		[Name(Constants.CSharpParameterName)]
 		static ClassificationTypeDefinition Parameter;
+
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CodePropertyName)]
 		[Name(Constants.CSharpPropertyName)]
 		static ClassificationTypeDefinition Property;
+
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CSharpFieldName)]
 		[Name(Constants.CSharpReadOnlyFieldName)]

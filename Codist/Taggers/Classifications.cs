@@ -18,6 +18,7 @@ namespace Codist.Taggers
 			DeclarationBrace = registry.GetClassificationType(Constants.CSharpDeclarationBrace);
 			DelegateName = registry.GetClassificationType(Constants.CodeDelegateName);
 			EnumName = registry.GetClassificationType(Constants.CodeEnumName);
+			EnumField = registry.GetClassificationType(Constants.CSharpEnumFieldName);
 			Event = registry.GetClassificationType(Constants.CSharpEventName);
 			ExtensionMethod = registry.GetClassificationType(Constants.CSharpExtensionMethodName);
 			ExternMethod = registry.GetClassificationType(Constants.CSharpExternMethodName);
@@ -68,6 +69,8 @@ namespace Codist.Taggers
 		public IClassificationType DelegateName { get; }
 
 		public IClassificationType EnumName { get; }
+
+		public IClassificationType EnumField { get; }
 
 		public IClassificationType Event { get; }
 
