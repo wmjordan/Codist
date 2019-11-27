@@ -363,6 +363,7 @@ namespace Codist
 				case SymbolKind.Property: return GetPropertyAccessors((IPropertySymbol)symbol);
 				case SymbolKind.Method: return GetMethodParameters((IMethodSymbol)symbol);
 				case SymbolKind.NamedType: return GetTypeParameters((INamedTypeSymbol)symbol);
+				case SymbolKind.Event: return GetMethodParameters(((IEventSymbol)symbol).Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol);
 				default: return String.Empty;
 			}
 
