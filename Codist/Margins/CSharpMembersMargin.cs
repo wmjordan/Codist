@@ -131,14 +131,14 @@ namespace Codist.Margins
 		void UpdateSyntaxColors() {
 			//todo cache opaque brushes
 			_ClassPen = new Pen(_FormatMap.GetProperties(Constants.CodeClassName).GetBrush().Alpha(TypeAlpha), TypeLineSize);
-			_ConstructorPen = new Pen(_FormatMap.GetProperties(Constants.CSharpConstructorMethodName).GetBrush().Alpha(MemberAlpha), LineSize);
+			_ConstructorPen = new Pen(_FormatMap.GetBrush(Constants.CSharpConstructorMethodName, Constants.CSharpMethodName, Constants.CodeMethodName).Alpha(MemberAlpha), LineSize);
 			_DelegatePen = new Pen(_FormatMap.GetProperties(Constants.CodeDelegateName).GetBrush().Alpha(MemberAlpha), LineSize);
 			_EnumPen = new Pen(_FormatMap.GetProperties(Constants.CodeEnumName).GetBrush().Alpha(TypeAlpha), TypeLineSize);
-			_EventPen = new Pen(_FormatMap.GetProperties(Constants.CSharpEventName).GetBrush().Alpha(MemberAlpha), LineSize);
-			_FieldPen = new Pen(_FormatMap.GetProperties(Constants.CSharpFieldName).GetBrush().Alpha(MemberAlpha), LineSize);
+			_EventPen = new Pen(_FormatMap.GetBrush(Constants.CSharpEventName, Constants.CodeEventName).Alpha(MemberAlpha), LineSize);
+			_FieldPen = new Pen(_FormatMap.GetBrush(Constants.CSharpFieldName, Constants.CodeFieldName).Alpha(MemberAlpha), LineSize);
 			_InterfacePen = new Pen(_FormatMap.GetProperties(Constants.CodeInterfaceName).GetBrush().Alpha(TypeAlpha), TypeLineSize);
-			_MethodPen = new Pen(_FormatMap.GetProperties(Constants.CSharpMethodName).GetBrush().Alpha(MemberAlpha), LineSize);
-			_PropertyPen = new Pen(_FormatMap.GetProperties(Constants.CSharpPropertyName).GetBrush().Alpha(MemberAlpha), LineSize);
+			_MethodPen = new Pen(_FormatMap.GetBrush(Constants.CSharpMethodName, Constants.CodeMethodName).Alpha(MemberAlpha), LineSize);
+			_PropertyPen = new Pen(_FormatMap.GetBrush(Constants.CSharpPropertyName, Constants.CodePropertyName).Alpha(MemberAlpha), LineSize);
 			_StructPen = new Pen(_FormatMap.GetProperties(Constants.CodeStructName).GetBrush().Alpha(TypeAlpha), TypeLineSize);
 			_RegionForeground = _FormatMap.GetProperties(Constants.CodePreprocessorText).GetBrush();
 			_RegionBackground = _FormatMap.GetProperties(Constants.CodePreprocessorText).GetBackgroundBrush().Alpha(TypeAlpha);
