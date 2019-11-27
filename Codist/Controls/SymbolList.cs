@@ -161,6 +161,13 @@ namespace Codist.Controls
 							SetupListForSystemColors(list);
 						}
 						return;
+					case "System.Windows.Media":
+						switch (typeName) {
+							case nameof(WPF.Colors):
+							case nameof(WPF.Brushes):
+								SetupListForColors(list); return;
+						}
+						return;
 					case "Microsoft.VisualStudio.PlatformUI":
 						switch (typeName) {
 							case nameof(EnvironmentColors): SetupListForVsUIColors(list, typeof(EnvironmentColors)); return;
