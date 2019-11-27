@@ -20,7 +20,7 @@ namespace Codist
 	{
 		internal const int DefaultIconSize = 16;
 
-		static readonly Microsoft.VisualStudio.Text.Classification.IClassificationFormatMap __ToolTipFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("tooltip");
+		static readonly IClassificationFormatMap __ToolTipFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("tooltip");
 		static ThemeHelper() {
 			RefreshThemeCache();
 			__ToolTipFormatMap.ClassificationFormatMappingChanged += UpdateToolTipFormatMap;

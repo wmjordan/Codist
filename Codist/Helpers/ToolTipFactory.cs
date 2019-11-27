@@ -39,7 +39,7 @@ namespace Codist
 				var tp = symbol as ITypeParameterSymbol;
 				if (tp.HasConstraint()) {
 					content.AppendLine().Append("constraint: ");
-					SymbolFormatter.Empty.ShowTypeConstaints(tp, content);
+					SymbolFormatter.Instance.ShowTypeConstaints(tp, content);
 				}
 			}
 			t = symbol.ContainingType;
@@ -84,9 +84,9 @@ namespace Codist
 		static void ShowDelegateSignature(TextBlock content, INamedTypeSymbol type) {
 			content.Append("\nsignature: ");
 			var invoke = type.OriginalDefinition.DelegateInvokeMethod;
-			content.AddSymbol(invoke.ReturnType, false, SymbolFormatter.Empty)
-				.Append(" ").AddSymbol(type, true, SymbolFormatter.Empty)
-				.AddParameters(invoke.Parameters, SymbolFormatter.Empty);
+			content.AddSymbol(invoke.ReturnType, false, SymbolFormatter.Instance)
+				.Append(" ").AddSymbol(type, true, SymbolFormatter.Instance)
+				.AddParameters(invoke.Parameters, SymbolFormatter.Instance);
 		}
 
 		static void ShowEnumType(TextBlock content, ISymbol symbol) {
@@ -99,11 +99,11 @@ namespace Codist
 		static void ShowAttributes(ISymbol symbol, TextBlock content) {
 			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.Attributes)) {
 				foreach (var attr in symbol.GetAttributes()) {
-					SymbolFormatter.Empty.Format(content.AppendLine().Inlines, attr, false);
+					SymbolFormatter.Instance.Format(content.AppendLine().Inlines, attr, false);
 				}
 				if (symbol.Kind == SymbolKind.Method) {
 					foreach (var attr in ((IMethodSymbol)symbol).GetReturnTypeAttributes()) {
-						SymbolFormatter.Empty.Format(content.AppendLine().Inlines, attr, true);
+						SymbolFormatter.Instance.Format(content.AppendLine().Inlines, attr, true);
 					}
 				}
 			}
@@ -127,7 +127,7 @@ namespace Codist
 				?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.GetInheritedDescription(symbol, out doc) : null);
 			if (summary != null) {
 				var docContent = tip.AddTextBlock();
-				new XmlDocRenderer(compilation, SymbolFormatter.Empty).Render(summary, docContent);
+				new XmlDocRenderer(compilation, SymbolFormatter.Instance).Render(summary, docContent);
 				if (Config.Instance.QuickInfoMaxWidth >= 100) {
 					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 				}

@@ -189,7 +189,7 @@ namespace Codist
 		}
 		public static Inline Render(this ISymbol symbol, string alias, bool bold, WpfBrush brush) {
 			var run = new SymbolLink(symbol, alias, Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo));
-			if (bold || brush == null) {
+			if (bold) {
 				run.FontWeight = FontWeights.Bold;
 			}
 			if (brush != null) {
