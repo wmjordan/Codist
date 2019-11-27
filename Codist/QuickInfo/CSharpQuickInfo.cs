@@ -686,7 +686,7 @@ namespace Codist.QuickInfo
 					t.AddSymbol(om.ReturnType, false, CodeAnalysisHelper.AreEqual(om.ReturnType, rt, false) ? SymbolFormatter.SemiTransparent : _SymbolFormatter).Append(" ");
 				}
 				if (ore) {
-					t.AddSymbol(om.ContainingType, "this", (om.ContainingType != ct ?  _SymbolFormatter : SymbolFormatter.SemiTransparent).Class).Append(".");
+					t.AddSymbol(om.ReceiverType, "this", (om.ContainingType != ct ?  _SymbolFormatter : SymbolFormatter.SemiTransparent).Keyword).Append(".");
 				}
 				else if (om.ContainingType != ct) {
 					t.AddSymbol(om.ContainingType, false, _SymbolFormatter).Append(".");
