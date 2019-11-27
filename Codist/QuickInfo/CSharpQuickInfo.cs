@@ -596,10 +596,9 @@ namespace Codist.QuickInfo
 				}
 				var invoke = ev.Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
 				if (invoke != null && invoke.Parameters.Length == 2) {
-					qiContent.Add(
-						new ThemedTipText("Event argument: ", true)
-						.AddSymbolDisplayParts(invoke.Parameters[1].Type.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1)
-					);
+					qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Event,
+						new ThemedTipText("Event signature ", true).AddParameters(invoke.Parameters, _SymbolFormatter)
+						)));
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfaceImplementations)) {
