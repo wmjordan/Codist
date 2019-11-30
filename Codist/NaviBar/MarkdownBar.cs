@@ -130,7 +130,7 @@ namespace Codist.NaviBar
 				_TitleList = menu;
 			}
 			if (menu != null) {
-				Canvas.SetLeft(menu, _ActiveItem.TransformToVisual(_View.VisualElement).Transform(new Point()).X);
+				Canvas.SetLeft(menu, _ActiveItem.TransformToVisual(_ActiveItem.GetParent<Grid>()).Transform(new Point()).X - _View.VisualElement.TranslatePoint(new Point(), _View.VisualElement.GetParent<Grid>()).X);
 				Canvas.SetTop(menu, -1);
 			}
 		}

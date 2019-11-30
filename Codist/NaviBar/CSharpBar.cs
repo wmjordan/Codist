@@ -280,7 +280,7 @@ namespace Codist.NaviBar
 
 		void PositionMenu() {
 			if (_SymbolList != null) {
-				Canvas.SetLeft(_SymbolList, _ActiveItem.TransformToVisual(_SymbolListContainer).Transform(new Point()).X);
+				Canvas.SetLeft(_SymbolList, _ActiveItem.TransformToVisual(_ActiveItem.GetParent<Grid>()).Transform(new Point()).X - _View.VisualElement.TranslatePoint(new Point(), _View.VisualElement.GetParent<Grid>()).X);
 				Canvas.SetTop(_SymbolList, -1);
 			}
 		}
