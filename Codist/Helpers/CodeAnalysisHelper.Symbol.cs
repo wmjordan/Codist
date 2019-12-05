@@ -939,8 +939,17 @@ namespace Codist
 				var isSource = il.DefineLabel();
 				var isRetargetSource = il.DefineLabel();
 				var a = System.Reflection.Assembly.GetAssembly(typeof(Microsoft.CodeAnalysis.CSharp.CSharpExtensions));
-				var ts = a.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.SourceAssemblySymbol");
-				var tr = a.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.Retargeting.RetargetingAssemblySymbol");
+				const string NS = "Microsoft.CodeAnalysis.CSharp.Symbols.";
+				var s = a.GetType(NS + "PublicModel.AssemblySymbol"); // from VS16.5
+				Type ts = null, tr = a.GetType(NS + "Retargeting.RetargetingAssemblySymbol");
+				System.Reflection.PropertyInfo ua = null;
+				if (s != null) { // from VS16.5
+					ts = a.GetType(NS + "PublicModel.SourceAssemblySymbol");
+					ua = s.GetProperty("UnderlyingAssemblySymbol", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+				}
+				else {
+					ts = a.GetType(NS + "SourceAssemblySymbol");
+				}
 				if (ts != null) {
 					il.Emit(OpCodes.Ldarg_0);
 					il.Emit(OpCodes.Isinst, ts);
@@ -948,6 +957,14 @@ namespace Codist
 				}
 				if (tr != null) {
 					il.Emit(OpCodes.Ldarg_0);
+					il.Emit(OpCodes.Isinst, tr);
+					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
+				}
+				if (ua != null) {
+					// (asm as AssemblySymbol).UnderlyingAssemblySymbol is RetargetingAssemblySymbol
+					il.Emit(OpCodes.Ldarg_0);
+					il.Emit(OpCodes.Isinst, s);
+					il.Emit(OpCodes.Callvirt, ua.GetGetMethod(true));
 					il.Emit(OpCodes.Isinst, tr);
 					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
 				}
