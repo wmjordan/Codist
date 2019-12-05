@@ -497,12 +497,14 @@ namespace Codist.QuickInfo
 						}
 						var v = c as IWpfTextView; // snippet tooltip, some other default tooltip
 						if (v != null) {
+							// use the custom control to enable selection
 							cp.Content = new ThemedTipText {
 								Text = v.TextSnapshot.GetText()
-							}.Scrollable();
+							}.Scrollable().LimitSize();
 							//v.VisualElement.LimitSize();
-							//v.Options.SetOptionValue("TextView/WordWrapStyle", WordWrapStyles.WordWrap);
-							//v.Options.SetOptionValue("TextView/AutoScroll", true);
+							//v.Options.SetOptionValue(DefaultTextViewHostOptions.VerticalScrollBarName, true);
+							//v.Options.SetOptionValue(DefaultTextViewOptions.WordWrapStyleName, WordWrapStyles.WordWrap);
+							//v.Options.SetOptionValue(DefaultTextViewOptions.AutoScrollName, true);
 							continue;
 						}
 						o = c as DependencyObject;
