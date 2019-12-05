@@ -85,10 +85,8 @@ namespace Codist
 					}
 				}
 				formatter.Format(inlines, p.Type, null, false);
-				inlines.Add(new Run(" " + p.Name) {
-					Foreground = formatter.Parameter,
-					FontWeight = i == argIndex ? FontWeights.Bold : FontWeights.Normal
-				});
+				inlines.Add(" ");
+				inlines.Add(p.Render(null, i == argIndex, formatter.Parameter));
 				if (p.IsOptional) {
 					inlines.Add("]");
 				}

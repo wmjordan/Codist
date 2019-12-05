@@ -228,12 +228,7 @@ namespace Codist
 						break;
 					case SymbolDisplayPartKind.ParameterName:
 						var p = part.Symbol as IParameterSymbol;
-						if (p.Ordinal == argIndex || p.IsParams && argIndex > p.Ordinal) {
-							block.Append(p.Name, true, true, Parameter);
-						}
-						else {
-							block.Append(p.Name, false, false, Parameter);
-						}
+						block.AddSymbol(p, p.Ordinal == argIndex || p.IsParams && argIndex > p.Ordinal, Parameter);
 						break;
 					case SymbolDisplayPartKind.StructName:
 						if (part.Symbol.Kind == SymbolKind.Method) {
@@ -387,11 +382,15 @@ namespace Codist
 							if (i > 0) {
 								block.Add(" | ");
 							}
-							block.Add((constant.Type.Name + "." + flags[i].Name).Render(Enum));
+							block.Add(constant.Type.Render(null, Enum));
+							block.Add(".");
+							block.Add(flags[i].Render(null, EnumField));
 						}
 					}
 					else if ((d = en.LastIndexOf('.')) != -1)  {
-						block.Add((constant.Type.Name + en.Substring(d)).Render(Enum));
+						block.Add(constant.Type.Render(null, Enum));
+						block.Add(".");
+						block.Add(en.Substring(d + 1).Render(EnumField));
 					}
 					else {
 						block.Add(en.Render(Enum));
