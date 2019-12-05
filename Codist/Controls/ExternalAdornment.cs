@@ -50,6 +50,15 @@ namespace Codist.Controls
 			}
 		}
 
+		protected override void OnPreviewMouseRightButtonUp(MouseButtonEventArgs args) {
+			base.OnPreviewMouseRightButtonUp(args);
+			// hack: suppress the undesired built-in context menu of tabs in VS 16.5
+			if (args.Source is SymbolList symbolList) {
+				symbolList.ShowContextMenu(args);
+			}
+			args.Handled = true;
+		}
+
 		protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved) {
 			base.OnVisualChildrenChanged(visualAdded, visualRemoved);
 			var element = visualAdded as UIElement;

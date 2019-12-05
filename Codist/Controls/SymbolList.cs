@@ -259,6 +259,10 @@ namespace Codist.Controls
 		#region Context menu
 		protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
 			base.OnContextMenuOpening(e);
+			ShowContextMenu(e);
+		}
+
+		internal void ShowContextMenu(RoutedEventArgs e) {
 			var m = ContextMenu as CSharpSymbolContextMenu;
 			if (m == null) {
 				ContextMenu = m = new CSharpSymbolContextMenu(SemanticContext) {
