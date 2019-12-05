@@ -102,7 +102,7 @@ namespace Codist.QuickInfo
 					var tb = await ShowReturnInfoAsync(unitCompilation.FindNode(token.Span) as ReturnStatementSyntax, cancellationToken).ConfigureAwait(false);
 					return tb != null ? new QuickInfoItem(token.Span.CreateSnapshotSpan(currentSnapshot).ToTrackingSpan(), tb) : null;
 				case SyntaxKind.AwaitKeyword:
-					node = (unitCompilation.FindNode(token.Span) as AwaitExpressionSyntax)?.Expression;
+					node = (unitCompilation.FindNode(token.Span, false, true) as AwaitExpressionSyntax)?.Expression;
 					goto PROCESS;
 				case SyntaxKind.OpenParenToken:
 				case SyntaxKind.CloseParenToken:
@@ -411,9 +411,9 @@ namespace Codist.QuickInfo
 				if (st != null && st.TypeKind == TypeKind.Delegate) {
 					var invoke = ((INamedTypeSymbol)st).DelegateInvokeMethod;
 					qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Delegate,
-						new ThemedTipText("Delegate signature", true).Append(":").AppendLine()
+						new ThemedTipText("Delegate signature", true).Append(": ")
 							.AddSymbol(invoke.ReturnType, false, _SymbolFormatter)
-							.Append(" ").AddSymbol(st, true, _SymbolFormatter)
+							.Append(" ")
 							.AddParameters(invoke.Parameters, _SymbolFormatter)
 						)));
 				}
@@ -1160,7 +1160,7 @@ namespace Codist.QuickInfo
 				if (p != null && p.Type.TypeKind == TypeKind.Delegate) {
 					var invoke = ((INamedTypeSymbol)p.Type).DelegateInvokeMethod;
 					info.Append(new ThemedTipParagraph(KnownImageIds.Delegate,
-						new ThemedTipText("Delegate signature", true).Append(":").AppendLine()
+						new ThemedTipText("Delegate signature", true).Append(": ")
 							.AddSymbol(invoke.ReturnType, false, _SymbolFormatter)
 							.Append(" ").Append(p.Name, true, false, _SymbolFormatter.Parameter)
 							.AddParameters(invoke.Parameters, _SymbolFormatter)
