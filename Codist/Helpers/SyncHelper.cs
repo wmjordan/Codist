@@ -9,10 +9,20 @@ namespace Codist
 	static class SyncHelper
 	{
 		public static void RunSync(Func<Task> func) {
-			Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(func);
+			try {
+				Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(func);
+			}
+			catch (OperationCanceledException) {
+				// ignore
+			}
 		}
 		public static TResult RunSync<TResult>(Func<Task<TResult>> func) {
-			return Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(func);
+			try {
+				return Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(func);
+			}
+			catch (OperationCanceledException) {
+				return default;
+			}
 		}
 
 		[DebuggerStepThrough]
