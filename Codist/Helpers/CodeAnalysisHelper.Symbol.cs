@@ -930,7 +930,7 @@ namespace Codist
 		{
 			static readonly Func<IAssemblySymbol, int> __getAssemblyType = CreateAssemblySourceTypeFunc();
 			public static AssemblySource GetSourceType(IAssemblySymbol assembly) {
-				return (AssemblySource)__getAssemblyType(assembly);
+				return assembly is null ? AssemblySource.Metadata : (AssemblySource)__getAssemblyType(assembly);
 			}
 
 			static Func<IAssemblySymbol, int> CreateAssemblySourceTypeFunc() {
@@ -941,7 +941,7 @@ namespace Codist
 				var a = System.Reflection.Assembly.GetAssembly(typeof(Microsoft.CodeAnalysis.CSharp.CSharpExtensions));
 				const string NS = "Microsoft.CodeAnalysis.CSharp.Symbols.";
 				var s = a.GetType(NS + "PublicModel.AssemblySymbol"); // from VS16.5
-				Type ts = null, tr = a.GetType(NS + "Retargeting.RetargetingAssemblySymbol");
+				Type ts, tr = a.GetType(NS + "Retargeting.RetargetingAssemblySymbol");
 				System.Reflection.PropertyInfo ua = null;
 				if (s != null) { // from VS16.5
 					ts = a.GetType(NS + "PublicModel.SourceAssemblySymbol");
@@ -955,16 +955,16 @@ namespace Codist
 					il.Emit(OpCodes.Isinst, ts);
 					il.Emit(OpCodes.Brtrue_S, isSource);
 				}
-				if (tr != null) {
-					il.Emit(OpCodes.Ldarg_0);
-					il.Emit(OpCodes.Isinst, tr);
-					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
-				}
-				if (ua != null) {
+				if (ua != null) { // VS16.5
 					// (asm as AssemblySymbol).UnderlyingAssemblySymbol is RetargetingAssemblySymbol
 					il.Emit(OpCodes.Ldarg_0);
 					il.Emit(OpCodes.Isinst, s);
 					il.Emit(OpCodes.Callvirt, ua.GetGetMethod(true));
+					il.Emit(OpCodes.Isinst, tr);
+					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
+				}
+				else if (tr != null) { // prior to VS16.5
+					il.Emit(OpCodes.Ldarg_0);
 					il.Emit(OpCodes.Isinst, tr);
 					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
 				}
