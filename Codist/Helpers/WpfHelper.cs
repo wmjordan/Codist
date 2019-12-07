@@ -366,7 +366,7 @@ namespace Codist
 
 		#region Others
 		public static TItem GetFirst<TItem>(this ItemCollection items, Predicate<TItem> predicate)
-			where TItem : FrameworkElement {
+			where TItem : UIElement {
 			foreach (var item in items) {
 				var i = item as TItem;
 				if (i != null && (predicate == null || predicate(i))) {
@@ -376,7 +376,7 @@ namespace Codist
 			return null;
 		}
 		public static bool FocusFirst<TItem>(this ItemCollection items)
-			where TItem : FrameworkElement {
+			where TItem : UIElement {
 			foreach (var item in items) {
 				if ((item as TItem)?.Focus() == true) {
 					return true;
@@ -385,7 +385,7 @@ namespace Codist
 			return false;
 		}
 		public static bool FocusLast<TItem>(this ItemCollection items)
-			where TItem : FrameworkElement {
+			where TItem : UIElement {
 			for (int i = items.Count - 1; i >= 0; i--) {
 				if ((items[i] as TItem)?.Focus() == true) {
 					return true;

@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
 {
-	public sealed class ThemedButton : Button
+	public sealed class ThemedButton : Button, IContextMenuHost
 	{
 		readonly Action _clickHanler;
 
@@ -31,8 +31,47 @@ namespace Codist.Controls
 			Click += clickHandler;
 		}
 
+		public void ShowContextMenu(RoutedEventArgs args) {
+		}
+
 		void ThemedButton_Click(object sender, RoutedEventArgs e) {
 			_clickHanler?.Invoke();
+		}
+
+		internal void PerformClick() {
+			OnClick();
+		}
+	}
+
+	public class ThemedImageButton : Button
+	{
+		public static readonly DependencyProperty IsCheckedProperty = DependencyProperty.Register("IsChecked", typeof(bool), typeof(ThemedImageButton));
+		public static readonly DependencyProperty IsHighlightedProperty = DependencyProperty.Register("IsHighlighted", typeof(bool), typeof(ThemedImageButton));
+		bool _IsChecked, _IsHighlighted;
+
+		public ThemedImageButton(int imageId, TextBlock content) {
+			Content = new StackPanel {
+				Orientation = Orientation.Horizontal,
+				Children = {
+					ThemeHelper.GetImage(imageId).WrapMargin(WpfHelper.SmallHorizontalMargin),
+					content
+				}
+			};
+			Header = content;
+			this.ReferenceStyle(typeof(ThemedImageButton));
+			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
+		}
+		public object Header { get; }
+		public bool IsChecked {
+			get => _IsChecked;
+			set => SetValue(IsCheckedProperty, _IsChecked = value);
+		}
+		public bool IsHighlighted {
+			get => _IsHighlighted;
+			set => SetValue(IsHighlightedProperty, _IsHighlighted = value);
+		}
+		internal void PerformClick() {
+			OnClick();
 		}
 	}
 

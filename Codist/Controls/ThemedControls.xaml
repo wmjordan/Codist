@@ -63,4 +63,32 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
+	<Style TargetType="{x:Type c:ThemedImageButton}">
+		<Setter Property="OverridesDefaultStyle" Value="True"/>
+		<Setter Property="BorderThickness" Value="1"/>
+		<Setter Property="Padding" Value="1,2,3,2"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type c:ThemedImageButton}">
+					<Border Name="Border" BorderThickness="{TemplateBinding BorderThickness}" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}" VerticalAlignment="Center">
+						<ContentPresenter />
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="UIElement.IsMouseOver" Value="True">
+							<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.CommandBarMenuItemMouseOverBrushKey}}"/>
+							<Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource VsBrush.CommandBarHoverOverSelectedIconBorder}"/>
+						</Trigger>
+						<Trigger Property="IsChecked" Value="True">
+							<Setter TargetName="Border" Property="Background" Value="{DynamicResource VsBrush.FileTabSelectedGradientTop}"/>
+							<Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource VsBrush.FileTabSelectedGradientTop}"/>
+						</Trigger>
+						<Trigger Property="IsHighlighted" Value="True">
+							<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.CommandBarSelectedBrushKey}}"/>
+							<Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource {x:Static vsp:EnvironmentColors.CommandBarSelectedBorderBrushKey}}"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
 </ResourceDictionary>
