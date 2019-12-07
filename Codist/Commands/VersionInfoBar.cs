@@ -28,7 +28,7 @@ namespace Codist.Commands
 						new InfoBarTextSpan(nameof(Codist) + " has been updated to " + Config.CurrentVersion + ". "),
 						new InfoBarHyperlink("Click to see what's new", "New"),
 						new InfoBarTextSpan(" or "),
-						new InfoBarHyperlink("dismiss this bar", "Close")
+						new InfoBarHyperlink("dismiss this notification", "Close")
 					},
 					KnownMonikers.StatusInformation));
 			}

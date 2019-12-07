@@ -84,7 +84,7 @@
 			this._StyleSettingsBox.Location = new System.Drawing.Point(248, 3);
 			this._StyleSettingsBox.Name = "_StyleSettingsBox";
 			this._StyleSettingsBox.Size = new System.Drawing.Size(271, 417);
-			this._StyleSettingsBox.TabIndex = 2;
+			this._StyleSettingsBox.TabIndex = 0;
 			this._StyleSettingsBox.TabStop = false;
 			this._StyleSettingsBox.Text = "Syntax Style";
 			// 
@@ -93,7 +93,7 @@
 			this._BackgroundOpacityButton.Location = new System.Drawing.Point(132, 163);
 			this._BackgroundOpacityButton.Name = "_BackgroundOpacityButton";
 			this._BackgroundOpacityButton.Size = new System.Drawing.Size(120, 23);
-			this._BackgroundOpacityButton.TabIndex = 21;
+			this._BackgroundOpacityButton.TabIndex = 11;
 			this._BackgroundOpacityButton.Text = "Opacity not set";
 			this._BackgroundOpacityButton.UseVisualStyleBackColor = true;
 			this._BackgroundOpacityButton.Value = ((byte)(0));
@@ -103,7 +103,7 @@
 			this._ForegroundOpacityButton.Location = new System.Drawing.Point(132, 134);
 			this._ForegroundOpacityButton.Name = "_ForegroundOpacityButton";
 			this._ForegroundOpacityButton.Size = new System.Drawing.Size(120, 23);
-			this._ForegroundOpacityButton.TabIndex = 21;
+			this._ForegroundOpacityButton.TabIndex = 9;
 			this._ForegroundOpacityButton.Text = "Opacity not set";
 			this._ForegroundOpacityButton.UseVisualStyleBackColor = true;
 			this._ForegroundOpacityButton.Value = ((byte)(0));
@@ -114,7 +114,7 @@
 			this._ResetButton.Location = new System.Drawing.Point(190, 0);
 			this._ResetButton.Name = "_ResetButton";
 			this._ResetButton.Size = new System.Drawing.Size(75, 23);
-			this._ResetButton.TabIndex = 20;
+			this._ResetButton.TabIndex = 14;
 			this._ResetButton.Text = "Reset";
 			this._ResetButton.UseVisualStyleBackColor = true;
 			// 
@@ -124,7 +124,7 @@
 			this.label2.Location = new System.Drawing.Point(6, 199);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(95, 15);
-			this.label2.TabIndex = 19;
+			this.label2.TabIndex = 12;
 			this.label2.Text = "Background:";
 			// 
 			// _BackgroundEffectBox
@@ -134,7 +134,7 @@
 			this._BackgroundEffectBox.Location = new System.Drawing.Point(122, 196);
 			this._BackgroundEffectBox.Name = "_BackgroundEffectBox";
 			this._BackgroundEffectBox.Size = new System.Drawing.Size(130, 23);
-			this._BackgroundEffectBox.TabIndex = 18;
+			this._BackgroundEffectBox.TabIndex = 13;
 			// 
 			// _FontBox
 			// 
@@ -145,7 +145,7 @@
 			this._FontBox.Location = new System.Drawing.Point(66, 21);
 			this._FontBox.Name = "_FontBox";
 			this._FontBox.Size = new System.Drawing.Size(186, 23);
-			this._FontBox.TabIndex = 17;
+			this._FontBox.TabIndex = 1;
 			// 
 			// label8
 			// 
@@ -153,7 +153,7 @@
 			this.label8.Location = new System.Drawing.Point(6, 24);
 			this.label8.Name = "label8";
 			this.label8.Size = new System.Drawing.Size(47, 15);
-			this.label8.TabIndex = 16;
+			this.label8.TabIndex = 0;
 			this.label8.Text = "Font:";
 			// 
 			// _PreviewBox
@@ -176,7 +176,7 @@
 			this._BackColorButton.Name = "_BackColorButton";
 			this._BackColorButton.SelectedColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
 			this._BackColorButton.Size = new System.Drawing.Size(120, 23);
-			this._BackColorButton.TabIndex = 12;
+			this._BackColorButton.TabIndex = 10;
 			this._BackColorButton.Text = "Background";
 			this._BackColorButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
 			this._BackColorButton.UseVisualStyleBackColor = true;
@@ -204,7 +204,7 @@
             -2147483648});
 			this._FontSizeBox.Name = "_FontSizeBox";
 			this._FontSizeBox.Size = new System.Drawing.Size(129, 25);
-			this._FontSizeBox.TabIndex = 6;
+			this._FontSizeBox.TabIndex = 3;
 			// 
 			// label4
 			// 
@@ -212,7 +212,7 @@
 			this.label4.Location = new System.Drawing.Point(6, 55);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(87, 15);
-			this.label4.TabIndex = 5;
+			this.label4.TabIndex = 2;
 			this.label4.Text = "Font size:";
 			// 
 			// _StrikeBox
@@ -221,7 +221,7 @@
 			this._StrikeBox.Location = new System.Drawing.Point(123, 109);
 			this._StrikeBox.Name = "_StrikeBox";
 			this._StrikeBox.Size = new System.Drawing.Size(133, 19);
-			this._StrikeBox.TabIndex = 4;
+			this._StrikeBox.TabIndex = 7;
 			this._StrikeBox.Text = "Strikethrough";
 			this._StrikeBox.ThreeState = true;
 			this._StrikeBox.UseVisualStyleBackColor = true;
@@ -232,7 +232,7 @@
 			this._UnderlineBox.Location = new System.Drawing.Point(6, 109);
 			this._UnderlineBox.Name = "_UnderlineBox";
 			this._UnderlineBox.Size = new System.Drawing.Size(101, 19);
-			this._UnderlineBox.TabIndex = 3;
+			this._UnderlineBox.TabIndex = 6;
 			this._UnderlineBox.Text = "Underline";
 			this._UnderlineBox.ThreeState = true;
 			this._UnderlineBox.UseVisualStyleBackColor = true;
@@ -243,7 +243,7 @@
 			this._ItalicBox.Location = new System.Drawing.Point(123, 84);
 			this._ItalicBox.Name = "_ItalicBox";
 			this._ItalicBox.Size = new System.Drawing.Size(77, 19);
-			this._ItalicBox.TabIndex = 2;
+			this._ItalicBox.TabIndex = 5;
 			this._ItalicBox.Text = "Italic";
 			this._ItalicBox.ThreeState = true;
 			this._ItalicBox.UseVisualStyleBackColor = true;
@@ -254,7 +254,7 @@
 			this._BoldBox.Location = new System.Drawing.Point(6, 84);
 			this._BoldBox.Name = "_BoldBox";
 			this._BoldBox.Size = new System.Drawing.Size(61, 19);
-			this._BoldBox.TabIndex = 1;
+			this._BoldBox.TabIndex = 4;
 			this._BoldBox.Text = "Bold";
 			this._BoldBox.ThreeState = true;
 			this._BoldBox.UseVisualStyleBackColor = true;

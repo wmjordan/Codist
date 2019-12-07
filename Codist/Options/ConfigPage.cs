@@ -53,6 +53,7 @@ namespace Codist.Options
 
 		protected override void Dispose(bool disposing) {
 			Control?.Dispose();
+			_DisabledNotice?.Dispose();
 			base.Dispose(disposing);
 		}
 

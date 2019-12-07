@@ -35,7 +35,7 @@ Check out this list to see what _Codist_ can do for you?
   * The font size of type and member declarations can be enlarged, font families are also changeable, so it is much easier to spot them.
   * Syntax highlight can be applied to braces and parentheses.
   * Various syntax identifiers have different styles, temporary elements such as method parameters and local variables are italic, `static` symbols are underlined.
-  * Comment content can be tagged (e.g. _note_).
+  * Comment content can be tagged (e.g. _note_) and highlighted with individual style.
   * Unnecessary code can be marked strike-through.
   * Keywords are categorized and highlighted with various styles (e.g. `abstract` and `sealed`, `return` and `throw`, etc.).
   * Overriding members (such as `ToString`) can be painted with gradient background color, so at a glance we know that the marked implementations have overrided their base classes.
