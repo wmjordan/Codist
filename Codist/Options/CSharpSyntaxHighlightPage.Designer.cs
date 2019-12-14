@@ -28,13 +28,14 @@
 			this._HighlightDeclarationBracesBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs = new System.Windows.Forms.TabControl();
 			this.tabPage3 = new System.Windows.Forms.TabPage();
+			this._HighlightCastParenthesesBox = new System.Windows.Forms.CheckBox();
 			this._HighlightLocalFunctionDeclarationBox = new System.Windows.Forms.CheckBox();
 			this._HighlightParameterBracesBox = new System.Windows.Forms.CheckBox();
 			this._MarkSpecialPunctuationBox = new System.Windows.Forms.CheckBox();
 			this._HighlightResourceBracesBox = new System.Windows.Forms.CheckBox();
 			this._HighlightLoopBracesBox = new System.Windows.Forms.CheckBox();
 			this._HighlightBranchBracesBox = new System.Windows.Forms.CheckBox();
-			this._HighlightCastParenthesesBox = new System.Windows.Forms.CheckBox();
+			this._HighlightNonPrivateFieldDeclarationBox = new System.Windows.Forms.CheckBox();
 			this._OptionTabs.SuspendLayout();
 			this.tabPage3.SuspendLayout();
 			this.SuspendLayout();
@@ -64,6 +65,7 @@
 			// tabPage3
 			// 
 			this.tabPage3.Controls.Add(this._HighlightCastParenthesesBox);
+			this.tabPage3.Controls.Add(this._HighlightNonPrivateFieldDeclarationBox);
 			this.tabPage3.Controls.Add(this._HighlightLocalFunctionDeclarationBox);
 			this.tabPage3.Controls.Add(this._HighlightParameterBracesBox);
 			this.tabPage3.Controls.Add(this._MarkSpecialPunctuationBox);
@@ -78,6 +80,16 @@
 			this.tabPage3.TabIndex = 2;
 			this.tabPage3.Text = "Additional Highlight";
 			this.tabPage3.UseVisualStyleBackColor = true;
+			// 
+			// _HighlightCastParenthesesBox
+			// 
+			this._HighlightCastParenthesesBox.AutoSize = true;
+			this._HighlightCastParenthesesBox.Location = new System.Drawing.Point(15, 81);
+			this._HighlightCastParenthesesBox.Name = "_HighlightCastParenthesesBox";
+			this._HighlightCastParenthesesBox.Size = new System.Drawing.Size(197, 19);
+			this._HighlightCastParenthesesBox.TabIndex = 7;
+			this._HighlightCastParenthesesBox.Text = "Type cast parentheses";
+			this._HighlightCastParenthesesBox.UseVisualStyleBackColor = true;
 			// 
 			// _HighlightLocalFunctionDeclarationBox
 			// 
@@ -139,15 +151,15 @@
 			this._HighlightBranchBracesBox.Text = "Branch braces and parentheses";
 			this._HighlightBranchBracesBox.UseVisualStyleBackColor = true;
 			// 
-			// _HighlightCastParenthesesBox
+			// _HighlightNonPrivateFieldDeclarationBox
 			// 
-			this._HighlightCastParenthesesBox.AutoSize = true;
-			this._HighlightCastParenthesesBox.Location = new System.Drawing.Point(15, 81);
-			this._HighlightCastParenthesesBox.Name = "_HighlightCastParenthesesBox";
-			this._HighlightCastParenthesesBox.Size = new System.Drawing.Size(197, 19);
-			this._HighlightCastParenthesesBox.TabIndex = 7;
-			this._HighlightCastParenthesesBox.Text = "Type cast parentheses";
-			this._HighlightCastParenthesesBox.UseVisualStyleBackColor = true;
+			this._HighlightNonPrivateFieldDeclarationBox.AutoSize = true;
+			this._HighlightNonPrivateFieldDeclarationBox.Location = new System.Drawing.Point(15, 227);
+			this._HighlightNonPrivateFieldDeclarationBox.Name = "_HighlightNonPrivateFieldDeclarationBox";
+			this._HighlightNonPrivateFieldDeclarationBox.Size = new System.Drawing.Size(445, 19);
+			this._HighlightNonPrivateFieldDeclarationBox.TabIndex = 6;
+			this._HighlightNonPrivateFieldDeclarationBox.Text = "Apply member declaration style to non-private fields";
+			this._HighlightNonPrivateFieldDeclarationBox.UseVisualStyleBackColor = true;
 			// 
 			// CSharpSyntaxHighlightPage
 			// 
@@ -175,5 +187,6 @@
 		private System.Windows.Forms.CheckBox _MarkSpecialPunctuationBox;
 		private System.Windows.Forms.CheckBox _HighlightLocalFunctionDeclarationBox;
 		private System.Windows.Forms.CheckBox _HighlightCastParenthesesBox;
+		private System.Windows.Forms.CheckBox _HighlightNonPrivateFieldDeclarationBox;
 	}
 }

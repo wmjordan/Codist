@@ -109,7 +109,7 @@ namespace Codist.Options
 
 			_PreviewBox.SizeChanged += (s, args) => UpdatePreview();
 			_SyntaxListBox.ItemSelectionChanged += _SyntaxListBox_ItemSelectionChanged;
-			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			_UI.PostEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 			Config.Loaded += (s, args) => LoadStyleList();
 			Config.Updated += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;

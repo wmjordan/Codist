@@ -22,7 +22,7 @@ namespace Codist.Options
 			_FontFamilyBox.CheckedChanged += (s, args) => _StyleFilters = _StyleFilters.SetFlags(StyleFilters.FontFamily, _FontFamilyBox.Checked);
 			_FontSizeBox.CheckedChanged += (s, args) => _StyleFilters = _StyleFilters.SetFlags(StyleFilters.FontSize, _FontSizeBox.Checked);
 			_FontStyleBox.CheckedChanged += (s, args) => _StyleFilters = _StyleFilters.SetFlags(StyleFilters.FontStyle, _FontStyleBox.Checked);
-			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			_UI.PostEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 		private void SyntaxHighlightPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {

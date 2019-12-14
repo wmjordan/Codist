@@ -230,7 +230,7 @@ namespace Codist.Taggers
 		}
 
 		static IEnumerable<ITagSpan<IClassificationTag>> ClassifyPunctuation(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
-			if (Config.Instance.SpecialHighlightOptions.HasAnyFlag(SpecialHighlightOptions.AllBraces) == false) {
+			if (HighlightOptions.AllBraces == false) {
 				yield break;
 			}
 			var s = snapshot.GetText(itemSpan.Start, itemSpan.Length)[0];
@@ -244,23 +244,23 @@ namespace Codist.Taggers
 				}
 				var type = ClassifySyntaxNode(node);
 				if (type != null) {
-					if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
+					if (HighlightOptions.SpecialPunctuation) {
 						yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
 					}
 					if (type == _GeneralClassifications.BranchingKeyword) {
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.BranchBrace)) {
+						if (HighlightOptions.BranchBrace) {
 							yield return CreateClassificationSpan(snapshot, itemSpan, type);
 						}
 						yield break;
 					}
 					if (type == _GeneralClassifications.LoopKeyword) {
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.LoopBrace)) {
+						if (HighlightOptions.LoopBrace) {
 							yield return CreateClassificationSpan(snapshot, itemSpan, type);
 						}
 						yield break;
 					}
 					if (type == _Classifications.ResourceKeyword) {
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ResourceBrace)) {
+						if (HighlightOptions.ResourceBrace) {
 							yield return CreateClassificationSpan(snapshot, itemSpan, type);
 						}
 						yield break;
@@ -268,16 +268,16 @@ namespace Codist.Taggers
 					if (node is ExpressionSyntax == false) {
 						yield return CreateClassificationSpan(snapshot, itemSpan, _Classifications.DeclarationBrace);
 					}
-					if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.DeclarationBrace)) {
+					if (HighlightOptions.DeclarationBrace) {
 						yield return CreateClassificationSpan(snapshot, itemSpan, type);
 					}
 				}
 			}
-			else if ((s == '(' || s == ')') && Config.Instance.SpecialHighlightOptions.HasAnyFlag(SpecialHighlightOptions.AllParentheses)) {
+			else if ((s == '(' || s == ')') && HighlightOptions.AllParentheses) {
 				var node = unitCompilation.FindNode(itemSpan, true, true);
 				switch (node.Kind()) {
 					case SyntaxKind.CastExpression:
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.CastBrace) == false) {
+						if (HighlightOptions.CastBrace == false) {
 							yield break;
 						}
 						var symbol = semanticModel.GetSymbolInfo(((CastExpressionSyntax)node).Type).Symbol;
@@ -286,14 +286,14 @@ namespace Codist.Taggers
 						}
 						var type = GetClassificationType(symbol);
 						if (type != null) {
-							if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
+							if (HighlightOptions.SpecialPunctuation) {
 								yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
 							}
 							yield return CreateClassificationSpan(snapshot, itemSpan, type);
 						}
 						break;
 					case SyntaxKind.ParenthesizedExpression:
-						if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.CastBrace) == false) {
+						if (HighlightOptions.CastBrace == false) {
 							yield break;
 						}
 						if (node.ChildNodes().FirstOrDefault().IsKind(SyntaxKind.AsExpression)) {
@@ -303,7 +303,7 @@ namespace Codist.Taggers
 							}
 							type = GetClassificationType(symbol);
 							if (type != null) {
-								if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
+								if (HighlightOptions.SpecialPunctuation) {
 									yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
 								}
 								yield return CreateClassificationSpan(snapshot, itemSpan, type);
@@ -315,7 +315,7 @@ namespace Codist.Taggers
 					case SyntaxKind.SwitchSection:
 					case SyntaxKind.IfStatement:
 					case SyntaxKind.ElseClause:
-						foreach(var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _GeneralClassifications.BranchingKeyword, SpecialHighlightOptions.BranchBrace)) {
+						foreach(var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _GeneralClassifications.BranchingKeyword, HighlightOptions.BranchBrace)) {
 							yield return i;
 						}
 						yield break;
@@ -324,7 +324,7 @@ namespace Codist.Taggers
 					case SyntaxKind.ForEachVariableStatement:
 					case SyntaxKind.WhileStatement:
 					case SyntaxKind.DoStatement:
-						foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _GeneralClassifications.LoopKeyword, SpecialHighlightOptions.LoopBrace)) {
+						foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _GeneralClassifications.LoopKeyword, HighlightOptions.LoopBrace)) {
 							yield return i;
 						}
 						yield break;
@@ -337,17 +337,17 @@ namespace Codist.Taggers
 					case SyntaxKind.CatchClause:
 					case SyntaxKind.CatchFilterClause:
 					case SyntaxKind.FinallyClause:
-						foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _Classifications.ResourceKeyword, SpecialHighlightOptions.ResourceBrace)) {
+						foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _Classifications.ResourceKeyword, HighlightOptions.ResourceBrace)) {
 							yield return i;
 						}
 						yield break;
 					case SyntaxKind.TupleExpression:
-						foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _Classifications.ConstructorMethod, SpecialHighlightOptions.ParameterBrace)) {
+						foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _Classifications.ConstructorMethod, HighlightOptions.ParameterBrace)) {
 							yield return i;
 						}
 						yield break;
 				}
-				if (Config.Instance.SpecialHighlightOptions.HasAnyFlag(SpecialHighlightOptions.SpecialPunctuation | SpecialHighlightOptions.ParameterBrace)) {
+				if (HighlightOptions.SpecialPunctuation | HighlightOptions.ParameterBrace) {
 					node = (node as BaseArgumentListSyntax
 					   ?? node as BaseParameterListSyntax
 					   ?? (CSharpSyntaxNode)(node as CastExpressionSyntax)
@@ -355,7 +355,7 @@ namespace Codist.Taggers
 					if (node != null) {
 						var type = ClassifySyntaxNode(node);
 						if (type != null) {
-							foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, type, SpecialHighlightOptions.ParameterBrace)) {
+							foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, type, HighlightOptions.ParameterBrace)) {
 								yield return i;
 							}
 						}
@@ -405,11 +405,11 @@ namespace Codist.Taggers
 			}
 		}
 
-		static IEnumerable<ITagSpan<IClassificationTag>> MarkClassificationTypeForBrace(TextSpan itemSpan, ITextSnapshot snapshot, IClassificationType type, SpecialHighlightOptions options) {
-			if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialPunctuation)) {
+		static IEnumerable<ITagSpan<IClassificationTag>> MarkClassificationTypeForBrace(TextSpan itemSpan, ITextSnapshot snapshot, IClassificationType type, bool option) {
+			if (HighlightOptions.SpecialPunctuation) {
 				yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
 			}
-			if (Config.Instance.SpecialHighlightOptions.MatchFlags(options)) {
+			if (option) {
 				yield return CreateClassificationSpan(snapshot, itemSpan, type);
 			}
 		}
@@ -490,7 +490,7 @@ namespace Codist.Taggers
 							yield return _Classifications.NestedDeclaration;
 							break;
 						case SymbolKind.Method:
-							if (Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.LocalFunctionDeclaration)
+							if (HighlightOptions.LocalFunctionDeclaration
 								|| ((IMethodSymbol)symbol).MethodKind != MethodKind.LocalFunction) {
 								yield return _Classifications.NestedDeclaration;
 							}
@@ -503,6 +503,9 @@ namespace Codist.Taggers
 						case SymbolKind.Field:
 							if (node.IsKind(SyntaxKind.TupleElement) && ((TupleElementSyntax)node).Identifier.IsKind(SyntaxKind.None)) {
 								symbol = semanticModel.GetTypeInfo(((TupleElementSyntax)node).Type).Type;
+							}
+							else if (symbol.DeclaredAccessibility >= Accessibility.ProtectedAndInternal && HighlightOptions.NonPrivateField) {
+								yield return _Classifications.NestedDeclaration;
 							}
 							break;
 						case SymbolKind.Local:
@@ -649,6 +652,37 @@ namespace Codist.Taggers
 
 		static ITagSpan<IClassificationTag> CreateClassificationSpan(ITextSnapshot snapshotSpan, TextSpan span, IClassificationType type) {
 			return new TagSpan<IClassificationTag>(new SnapshotSpan(snapshotSpan, span.Start, span.Length), new ClassificationTag(type));
+		}
+
+		static class HighlightOptions
+		{
+			static bool _dummy = Init();
+			// use fields to cache option flags
+			public static bool AllBraces, AllParentheses, SpecialPunctuation, BranchBrace, CastBrace, LoopBrace, ParameterBrace, ResourceBrace, DeclarationBrace, LocalFunctionDeclaration, NonPrivateField;
+
+			static bool Init() {
+				Config.Updated += Update;
+				Update(Config.Instance, new ConfigUpdatedEventArgs(Features.SyntaxHighlight));
+				return true;
+			}
+
+			static void Update(object sender, ConfigUpdatedEventArgs e) {
+				if (e.UpdatedFeature.MatchFlags(Features.SyntaxHighlight) == false) {
+					return;
+				}
+				var o = (sender as Config).SpecialHighlightOptions;
+				AllBraces = o.HasAnyFlag(SpecialHighlightOptions.AllBraces);
+				AllParentheses = o.HasAnyFlag(SpecialHighlightOptions.AllParentheses);
+				SpecialPunctuation = o.MatchFlags(SpecialHighlightOptions.SpecialPunctuation);
+				BranchBrace = o.MatchFlags(SpecialHighlightOptions.BranchBrace);
+				CastBrace = o.MatchFlags(SpecialHighlightOptions.CastBrace);
+				LoopBrace = o.MatchFlags(SpecialHighlightOptions.LoopBrace);
+				ResourceBrace = o.MatchFlags(SpecialHighlightOptions.ResourceBrace);
+				ParameterBrace = o.MatchFlags(SpecialHighlightOptions.ParameterBrace);
+				DeclarationBrace = o.MatchFlags(SpecialHighlightOptions.DeclarationBrace);
+				LocalFunctionDeclaration = o.MatchFlags(SpecialHighlightOptions.LocalFunctionDeclaration);
+				NonPrivateField = o.MatchFlags(SpecialHighlightOptions.NonPrivateField);
+			}
 		}
 	}
 }

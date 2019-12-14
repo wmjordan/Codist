@@ -17,7 +17,7 @@ namespace Codist.Options
 		}
 		internal CSharpSyntaxHighlightPage(ConfigPage page) : this() {
 			_ServicePage = page;
-			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			_UI.PostEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 
 		void CSharpSpecialHighlightPage_Load(object sender, EventArgs e) {
@@ -38,6 +38,7 @@ namespace Codist.Options
 			_HighlightResourceBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.ResourceBrace, _HighlightResourceBracesBox.Checked));
 
 			_HighlightLocalFunctionDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.LocalFunctionDeclaration, _HighlightLocalFunctionDeclarationBox.Checked));
+			_HighlightNonPrivateFieldDeclarationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.NonPrivateField, _HighlightNonPrivateFieldDeclarationBox.Checked));
 
 			Config.Loaded += (s, args) => LoadConfig(s as Config);
 			_Loaded = true;
@@ -55,6 +56,7 @@ namespace Codist.Options
 				_HighlightResourceBracesBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.ResourceBrace);
 
 				_HighlightLocalFunctionDeclarationBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.LocalFunctionDeclaration);
+				_HighlightNonPrivateFieldDeclarationBox.Checked = config.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.NonPrivateField);
 			});
 		}
 	}

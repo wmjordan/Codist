@@ -570,6 +570,7 @@ namespace Codist
 		CastBrace = 1 << 7,
 		SpecialPunctuation = 1 << 8,
 		LocalFunctionDeclaration = 1 << 10,
+		NonPrivateField = 1 << 11,
 		Default = SpecialComment,
 		AllParentheses = ParameterBrace | CastBrace | BranchBrace | LoopBrace | ResourceBrace,
 		AllBraces = DeclarationBrace | ParameterBrace | CastBrace | BranchBrace | LoopBrace | ResourceBrace | SpecialPunctuation

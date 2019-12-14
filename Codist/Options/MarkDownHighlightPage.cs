@@ -17,7 +17,7 @@ namespace Codist.Options
 		}
 		internal MarkdownHighlightPage(ConfigPage page) : this() {
 			_ServicePage = page;
-			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			_UI.PostEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 
 		void MarkdownHighlightPage_Load(object sender, EventArgs e) {

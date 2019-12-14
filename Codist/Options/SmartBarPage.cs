@@ -15,7 +15,7 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal SmartBarPage(ConfigPage page) : this() {
-			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SmartBar);
+			_UI.PostEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SmartBar);
 		}
 		private void SmartBarPage_Load(object sender, EventArgs e) {
 			if (_Loaded) {

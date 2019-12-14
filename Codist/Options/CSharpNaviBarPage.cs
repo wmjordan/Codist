@@ -15,7 +15,7 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal CSharpNaviBarPage(ConfigPage page) : this() {
-			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.NaviBar);
+			_UI.PostEventAction += () => Config.Instance.FireConfigChangedEvent(Features.NaviBar);
 		}
 
 		void CSharpNaviBarPage_Load(object sender, EventArgs e) {

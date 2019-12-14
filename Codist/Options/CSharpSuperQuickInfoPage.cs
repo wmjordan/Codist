@@ -15,7 +15,7 @@ namespace Codist.Options
 			InitializeComponent();
 		}
 		internal CSharpSuperQuickInfoPage(ConfigPage page) : this() {
-			_UI.CommonEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
+			_UI.PostEventAction += () => Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
 		}
 
 		void CSharpSuperQuickInfoPage_Load(object sender, EventArgs e) {
