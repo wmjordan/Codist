@@ -329,10 +329,17 @@ namespace Codist.Margins
 						rangeFrom = start;
 						continue;
 					}
-					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MethodDeclaration)
-						&& tagType == CodeMemberType.Method
-						&& _Element._MethodPen.Brush != null) {
-						drawingContext.DrawRectangle(_Element._MethodPen.Brush.Alpha(1), _Element._MethodPen, new Rect(level - (MarkerSize / 2), _ScrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
+					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MethodDeclaration)) {
+						if (tagType == CodeMemberType.Method) {
+							if (_Element._MethodPen.Brush != null) {
+								drawingContext.DrawRectangle(_Element._MethodPen.Brush.Alpha(1), _Element._MethodPen, new Rect(level - (MarkerSize / 2), _ScrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
+							}
+						}
+						else if (tagType == CodeMemberType.Constructor) {
+							if (_Element._ConstructorPen.Brush != null) {
+								drawingContext.DrawRectangle(_Element._ConstructorPen.Brush.Alpha(1), _Element._ConstructorPen, new Rect(level - (MarkerSize / 2), _ScrollBar.GetYCoordinateOfBufferPosition(start) - (MarkerSize / 2), MarkerSize, MarkerSize));
+							}
+						}
 					}
 					if (tagType == memberType) {
 						// expand the range to the end of the tag
