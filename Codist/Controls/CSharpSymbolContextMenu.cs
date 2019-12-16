@@ -549,8 +549,13 @@ namespace Codist.Controls
 			Menu.Header = _HeaderPanel = new StackPanel {
 				Margin = WpfHelper.MenuItemMargin,
 				Children = {
-						(Title = new ThemedMenuText { TextAlignment = TextAlignment.Center, Padding = WpfHelper.SmallMargin }),
-						(FilterBox = new SymbolFilterBox(Menu)),
+						(Title = new ThemedMenuText {
+							TextAlignment = TextAlignment.Left,
+							Padding = WpfHelper.SmallVerticalMargin
+						}),
+						(FilterBox = new SymbolFilterBox(Menu) {
+							Margin = WpfHelper.NoMargin
+						}),
 						new Separator()
 					}
 			};
@@ -590,7 +595,7 @@ namespace Codist.Controls
 			Menu.PreviewKeyUp -= OnMenuKeyUp;
 			Menu.PreviewKeyUp += OnMenuKeyUp;
 			if (Menu.Symbols.Count > 100) {
-				ScrollViewer.SetCanContentScroll(Menu, true);
+				Menu.EnableVirtualMode = true;
 			}
 
 			var p = Mouse.GetPosition(_Container);
@@ -605,7 +610,7 @@ namespace Codist.Controls
 		}
 
 		void MenuItemSelect(object sender, MouseButtonEventArgs e) {
-			var menu = sender as ItemList;
+			var menu = sender as VirtualList;
 			if (e.OccursOn<ListBoxItem>()) {
 				_Container.FocusOnTextView();
 				(menu.SelectedItem as SymbolItem)?.GoToSource();

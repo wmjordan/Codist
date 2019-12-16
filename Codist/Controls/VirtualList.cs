@@ -7,18 +7,18 @@ using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
 {
-	class ItemList : ListBox {
-		public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(UIElement), typeof(ItemList));
-		public static readonly DependencyProperty HeaderButtonsProperty = DependencyProperty.Register("HeaderButtons", typeof(UIElement), typeof(ItemList));
-		public static readonly DependencyProperty FooterProperty = DependencyProperty.Register("Footer", typeof(UIElement), typeof(ItemList));
-		public static readonly DependencyProperty ItemsControlMaxHeightProperty = DependencyProperty.Register("ItemsControlMaxHeight", typeof(double), typeof(ItemList));
+	class VirtualList : ListBox {
+		public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(UIElement), typeof(VirtualList));
+		public static readonly DependencyProperty HeaderButtonsProperty = DependencyProperty.Register("HeaderButtons", typeof(UIElement), typeof(VirtualList));
+		public static readonly DependencyProperty FooterProperty = DependencyProperty.Register("Footer", typeof(UIElement), typeof(VirtualList));
+		public static readonly DependencyProperty ItemsControlMaxHeightProperty = DependencyProperty.Register("ItemsControlMaxHeight", typeof(double), typeof(VirtualList));
 
-		public ItemList() {
+		public VirtualList() {
 			SetValue(VirtualizingPanel.IsVirtualizingProperty, true);
 			SetValue(VirtualizingPanel.VirtualizationModeProperty, VirtualizationMode.Recycling);
 			ItemsControlMaxHeight = 500;
 			HorizontalContentAlignment = HorizontalAlignment.Stretch;
-			Resources = SharedDictionaryManager.ItemList;
+			Resources = SharedDictionaryManager.VirtualList;
 			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 
@@ -41,6 +41,10 @@ namespace Codist.Controls
 		public ListCollectionView FilteredItems { get; set; }
 		public FrameworkElement Container { get; set; }
 		public bool NeedsRefresh { get; set; }
+		public bool EnableVirtualMode {
+			get => ScrollViewer.GetCanContentScroll(this);
+			set => ScrollViewer.SetCanContentScroll(this, value);
+		}
 
 		protected override void OnPreviewKeyDown(KeyEventArgs e) {
 			base.OnPreviewKeyDown(e);
@@ -138,7 +142,7 @@ namespace Codist.Controls
 			get => _Content;
 			set => _Content = value;
 		}
-		public ItemList Container { get; }
+		public VirtualList Container { get; }
 
 	}
 

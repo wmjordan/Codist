@@ -22,7 +22,7 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
-	<Style x:Key="{x:Type c:ItemList}" TargetType="{x:Type c:ItemList}">
+	<Style x:Key="{x:Type c:VirtualList}" TargetType="{x:Type c:VirtualList}">
 		<Setter Property="OverridesDefaultStyle" Value="True"/>
 		<Setter Property="SnapsToDevicePixels" Value="True"/>
 		<Setter Property="UseLayoutRounding" Value="True" />
@@ -30,7 +30,7 @@
 		<Setter Property="c:DragDropHelper.ScrollOnDragDrop" Value="True"/>
 		<Setter Property="Template">
 			<Setter.Value>
-				<ControlTemplate TargetType="{x:Type c:ItemList}">
+				<ControlTemplate TargetType="{x:Type c:VirtualList}">
 					<Border BorderThickness="1,1,1,1" CornerRadius="0,0,5,5" x:Name="Border" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" SnapsToDevicePixels="True" UseLayoutRounding="True">
 						<StackPanel>
 							<Grid>

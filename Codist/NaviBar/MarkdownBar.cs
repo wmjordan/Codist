@@ -113,7 +113,7 @@ namespace Codist.NaviBar
 			menu.ScrollToSelectedItem();
 			menu.MouseLeftButtonUp += MenuItemSelect;
 			if (_Tags.Count > 100) {
-				ScrollViewer.SetCanContentScroll(menu, true);
+				menu.EnableVirtualMode = true;
 			}
 			if (_TitleList != menu) {
 				ListContainer.Children.Remove(_TitleList);
@@ -166,14 +166,14 @@ namespace Codist.NaviBar
 		//	Items.Add(new ThemedButton(ThemeHelper.GetImage(imageId), null, clickHandler) { Padding = WpfHelper.SmallMargin });
 		//}
 
-		sealed class MarkdownList : ItemList
+		sealed class MarkdownList : VirtualList
 		{
 			readonly MarkdownBar _Bar;
 			ThemedTextBox _FinderBox;
 			Predicate<object> _Filter;
 
 			public MarkdownList(MarkdownBar bar) {
-				Style = SharedDictionaryManager.ItemList.Get<Style>(typeof(ItemList));
+				Style = SharedDictionaryManager.VirtualList.Get<Style>(typeof(VirtualList));
 				Container = bar.ListContainer;
 				Header = new StackPanel {
 					Margin = WpfHelper.MenuItemMargin,

@@ -3,10 +3,10 @@
 	xmlns:c="clr-namespace:Codist.Controls;assembly=Codist"
 	xmlns:vsp="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0">
 	<ResourceDictionary.MergedDictionaries>
-		<ResourceDictionary Source="ItemList.xaml"/>
+		<ResourceDictionary Source="VirtualList.xaml"/>
 	</ResourceDictionary.MergedDictionaries>
 	<c:SymbolItemTemplateSelector x:Key="symbolTemplateSelector"/>
-	<Style TargetType="{x:Type c:SymbolList}" BasedOn="{StaticResource {x:Type c:ItemList}}">
+	<Style TargetType="{x:Type c:SymbolList}" BasedOn="{StaticResource {x:Type c:VirtualList}}">
 		<Setter Property="ItemTemplateSelector" Value="{StaticResource symbolTemplateSelector}"/>
 	</Style>
 	<Style TargetType="ListBoxItem">

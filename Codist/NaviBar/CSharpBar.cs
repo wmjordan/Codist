@@ -696,7 +696,7 @@ namespace Codist.NaviBar
 				_Bar.SetupSymbolListMenu(_Menu);
 				await AddItemsAsync(Node, cancellationToken);
 				if (_Menu.Symbols.Count > 100) {
-					ScrollViewer.SetCanContentScroll(_Menu, true);
+					_Menu.EnableVirtualMode = true;
 				}
 			}
 

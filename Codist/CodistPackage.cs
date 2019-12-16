@@ -223,7 +223,7 @@ namespace Codist
 
 	internal static class SharedDictionaryManager
 	{
-		static ResourceDictionary _Controls, _Menu, _ContextMenu, _ItemList, _SymbolList;
+		static ResourceDictionary _Controls, _Menu, _ContextMenu, _VirtualList, _SymbolList;
 
 		internal static ResourceDictionary ThemedControls => _Controls ?? (_Controls = WpfHelper.LoadComponent("controls/ThemedControls.xaml"));
 
@@ -234,7 +234,7 @@ namespace Codist
 		// for menu styles, see https://docs.microsoft.com/en-us/dotnet/framework/wpf/controls/menu-styles-and-templates
 		internal static ResourceDictionary Menu => _Menu ?? (_Menu = WpfHelper.LoadComponent("controls/NavigationBar.xaml").MergeWith(ThemedControls));
 
-		internal static ResourceDictionary ItemList => _ItemList ?? (_ItemList = WpfHelper.LoadComponent("controls/ItemList.xaml").MergeWith(ThemedControls));
+		internal static ResourceDictionary VirtualList => _VirtualList ?? (_VirtualList = WpfHelper.LoadComponent("controls/VirtualList.xaml").MergeWith(ThemedControls));
 		internal static ResourceDictionary SymbolList => _SymbolList ?? (_SymbolList = WpfHelper.LoadComponent("controls/SymbolList.xaml").MergeWith(ThemedControls));
 	}
 

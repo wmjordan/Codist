@@ -17,7 +17,7 @@ using WPF = System.Windows.Media;
 
 namespace Codist.Controls
 {
-	sealed class SymbolList : ItemList, ISymbolFilterable {
+	sealed class SymbolList : VirtualList, ISymbolFilterable {
 		Predicate<object> _Filter;
 		readonly ToolTip _SymbolTip;
 		readonly List<SymbolItem> _Symbols;
@@ -521,30 +521,35 @@ namespace Codist.Controls
 			return e.Data.GetData(typeof(SymbolItem)) as SymbolItem;
 		}
 
-		async void BeginDragHandler(object sender, MouseEventArgs e) {
+		void BeginDragHandler(object sender, MouseEventArgs e) {
 			SymbolItem item;
-			if (e.LeftButton != MouseButtonState.Pressed || (item = GetMouseEventData(e)) == null) {
-				return;
+			if (e.LeftButton == MouseButtonState.Pressed
+				&& (item = GetMouseEventData(e)) != null
+				&& item.SyntaxNode != null) {
+				Handler(item, e);
 			}
-			if (item.SyntaxNode != null && await SemanticContext.UpdateAsync(default).ConfigureAwait(true)) {
-				item.RefreshSyntaxNode();
-				var s = e.Source as FrameworkElement;
-				MouseMove -= BeginDragHandler;
-				DragOver += DragOverHandler;
-				Drop += DropHandler;
-				DragEnter += DragOverHandler;
-				DragLeave += DragLeaveHandler;
-				QueryContinueDrag += QueryContinueDragHandler;
-				var r = DragDrop.DoDragDrop(s, item, DragDropEffects.Copy | DragDropEffects.Move);
-				var t = Footer as TextBlock;
-				if (t != null) {
-					t.Text = null;
+
+			async void Handler(SymbolItem i, MouseEventArgs args) {
+				if (await SemanticContext.UpdateAsync(default).ConfigureAwait(true)) {
+					i.RefreshSyntaxNode();
+					var s = args.Source as FrameworkElement;
+					MouseMove -= BeginDragHandler;
+					DragOver += DragOverHandler;
+					Drop += DropHandler;
+					DragEnter += DragOverHandler;
+					DragLeave += DragLeaveHandler;
+					QueryContinueDrag += QueryContinueDragHandler;
+					var r = DragDrop.DoDragDrop(s, i, DragDropEffects.Copy | DragDropEffects.Move);
+					var t = Footer as TextBlock;
+					if (t != null) {
+						t.Text = null;
+					}
+					DragOver -= DragOverHandler;
+					Drop -= DropHandler;
+					DragEnter -= DragOverHandler;
+					DragLeave -= DragLeaveHandler;
+					QueryContinueDrag -= QueryContinueDragHandler;
 				}
-				DragOver -= DragOverHandler;
-				Drop -= DropHandler;
-				DragEnter -= DragOverHandler;
-				DragLeave -= DragLeaveHandler;
-				QueryContinueDrag -= QueryContinueDragHandler;
 			}
 		}
 
