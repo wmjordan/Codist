@@ -38,7 +38,7 @@ namespace Codist.Options
 			}
 		}
 
-		public SyntaxListViewItem() : base() {
+		public SyntaxListViewItem() {
 		}
 		internal SyntaxListViewItem(string label) : base(label) { }
 		internal SyntaxListViewItem(string label, StyleBase style) : base(label) {
@@ -72,7 +72,7 @@ namespace Codist.Options
 	{
 		internal Taggers.CommentLabel CommentLabel { get; }
 
-		public CommentTaggerListViewItem() : base() {
+		public CommentTaggerListViewItem() {
 		}
 		internal CommentTaggerListViewItem(string label, Taggers.CommentLabel commentLabel) : base(label) {
 			CommentLabel = commentLabel ?? throw new ArgumentNullException(nameof(commentLabel));

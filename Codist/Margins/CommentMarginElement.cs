@@ -214,6 +214,7 @@ namespace Codist.Margins
 			}
 		}
 
+		/// <summary>draws task name (inverted) and the task content</summary>
 		static void DrawTaskMark(DrawingContext dc, Brush brush, double y, string taskName, string taskContent) {
 			var ft = WpfHelper.ToFormattedText(taskName, 9, TaskBackgroundBrsh).SetBold();
 			dc.DrawRectangle(brush, EmptyPen, new Rect(0, y - ft.Height / 2, ft.Width, ft.Height));
@@ -223,10 +224,12 @@ namespace Codist.Margins
 			dc.DrawText(tt, new Point(ft.Width, y - ft.Height / 2));
 		}
 
+		/// <summary>draws a rectangle, with a border</summary>
 		static void DrawCommentMark(DrawingContext dc, Brush brush, double y) {
 			dc.DrawRectangle(brush, CommentPen, new Rect(MarkPadding, y - HalfMarkSize, MarkSize, MarkSize));
 		}
 
+		/// <summary>draws circle or a rectangle</summary>
 		static void DrawMark(DrawingContext dc, Brush brush, double y, int style) {
 			switch (style) {
 				case 0:
