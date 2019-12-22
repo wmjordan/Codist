@@ -73,6 +73,17 @@
 					<ToolTipText>Take a screenshot for the active code window</ToolTipText>
         </Strings>
       </Button>
+      <Button guid="guidCodistPackageCmdSet" id="GetContentTypeCommandId" priority="4133" type="Button">
+        <Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="ContentType" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<Strings>
+          <ButtonText>Show Document Content Type...</ButtonText>
+					<ToolTipText>Display content types of the current document</ToolTipText>
+        </Strings>
+      </Button>
       <!--<Button guid="guidCodistPackageCmdSet2" id="SymbolFinderWindowCommandId" priority="0x0800" type="Button">
 				<Parent guid="guidCodistPackageCmdSet2" id="IDG_VS_VIEW_DEFINEVIEWS" />
 				<Icon guid="ImageCatalogGuid" id="FindSymbol" />
@@ -139,6 +150,7 @@
     <GuidSymbol name="guidCodistPackageCmdSet" value="{d668a130-cb52-4143-b389-55560823f3d6}">
       <IDSymbol name="CodistMenuGroup" value="0x1020" />
       <IDSymbol name="ScreenshotCommandId" value="0x0100" />
+      <IDSymbol name="GetContentTypeCommandId" value="4133" />
     </GuidSymbol>
 
     <!-- This is the guid used to group the menu commands together -->
