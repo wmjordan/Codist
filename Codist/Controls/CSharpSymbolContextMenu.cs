@@ -403,32 +403,34 @@ namespace Codist.Controls
 			}
 			m.Show();
 		}
+
 		static StackPanel GetExtIcons(ISymbol symbol) {
 			StackPanel icons = null;
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
 					var ms = symbol as IMethodSymbol;
 					if (ms.IsAsync) {
-						icons = AddIcon(icons, KnownImageIds.DynamicGroup);
+						AddIcon(ref icons, KnownImageIds.DynamicGroup);
 					}
 					if (ms.IsGenericMethod) {
-						icons = AddIcon(icons, KnownImageIds.MarkupXML);
+						AddIcon(ref icons, KnownImageIds.MarkupXML);
 					}
 					if (ms.IsExtensionMethod) {
-						return AddIcon(icons, KnownImageIds.ExtensionMethod);
+						AddIcon(ref icons, KnownImageIds.ExtensionMethod);
+						return icons;
 					}
 					break;
 				case SymbolKind.NamedType:
 					var mt = symbol as INamedTypeSymbol;
 					if (mt.IsGenericType) {
-						icons = AddIcon(icons, KnownImageIds.MarkupXML);
+						AddIcon(ref icons, KnownImageIds.MarkupXML);
 					}
 					if (mt.TypeKind == TypeKind.Class) {
 						if (mt.IsSealed && mt.IsStatic == false) {
-							icons = AddIcon(icons, KnownImageIds.ClassSealed);
+							AddIcon(ref icons, KnownImageIds.ClassSealed);
 						}
 						else if (mt.IsAbstract) {
-							icons = AddIcon(icons, KnownImageIds.AbstractClass);
+							AddIcon(ref icons, KnownImageIds.AbstractClass);
 						}
 					}
 					break;
@@ -438,26 +440,25 @@ namespace Codist.Controls
 						return null;
 					}
 					if (f.IsReadOnly) {
-						icons = AddIcon(icons, KnownImageIds.EncapsulateField);
+						AddIcon(ref icons, KnownImageIds.EncapsulateField);
 					}
 					else if (f.IsVolatile) {
-						icons = AddIcon(icons, KnownImageIds.ModifyField);
+						AddIcon(ref icons, KnownImageIds.ModifyField);
 					}
 					break;
 				case SymbolKind.Namespace:
 					return null;
 			}
 			if (symbol.IsStatic) {
-				icons = AddIcon(icons, KnownImageIds.Link);
+				AddIcon(ref icons, KnownImageIds.Link);
 			}
 			return icons;
 
-			StackPanel AddIcon(StackPanel container, int imageId) {
+			void AddIcon(ref StackPanel container, int imageId) {
 				if (container == null) {
 					container = new StackPanel { Orientation = Orientation.Horizontal };
 				}
 				container.Children.Add(ThemeHelper.GetImage(imageId));
-				return container;
 			}
 		}
 		static void ShowSymbolMenuForResult<TSymbol>(ISymbol source, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType) where TSymbol : ISymbol {
