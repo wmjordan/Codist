@@ -676,7 +676,8 @@ namespace Codist.NaviBar
 				}
 				_Menu = new SymbolList(_Bar._SemanticContext) {
 					Container = _Bar.ListContainer,
-					ContainerType = SymbolListType.NodeList
+					ContainerType = SymbolListType.NodeList,
+					ExtIconProvider = s => GetExtIcons(s.SyntaxNode)
 				};
 				_Menu.Header = new WrapPanel {
 					Orientation = Orientation.Horizontal,
@@ -844,6 +845,64 @@ namespace Codist.NaviBar
 					}
 					i.SelectIfContainsPosition(pos);
 					ShowNodeValue(i);
+				}
+			}
+
+			static StackPanel GetExtIcons(SyntaxNode node) {
+				StackPanel icons = null;
+				switch (node) {
+					case BaseMethodDeclarationSyntax m:
+						var p1 = m.ParameterList.Parameters.FirstOrDefault();
+						var isExt = false;
+						if (p1 != null && p1.Modifiers.Any(SyntaxKind.ThisKeyword)) {
+							AddIcon(ref icons, KnownImageIds.ExtensionMethod);
+							isExt = true;
+						}
+						foreach (var modifier in m.Modifiers) {
+							switch (modifier.Kind()) {
+								case SyntaxKind.AsyncKeyword: AddIcon(ref icons, KnownImageIds.DynamicGroup); break;
+								case SyntaxKind.StaticKeyword:
+									if (isExt == false)
+										AddIcon(ref icons, KnownImageIds.Link);
+									break;
+							}
+						}
+						break;
+					case BasePropertyDeclarationSyntax p:
+						foreach (var modifier in p.Modifiers) {
+							switch (modifier.Kind()) {
+								case SyntaxKind.StaticKeyword: AddIcon(ref icons, KnownImageIds.Link); break;
+							}
+						}
+						break;
+					case BaseFieldDeclarationSyntax f:
+						foreach (var modifier in f.Modifiers) {
+							switch (modifier.Kind()) {
+								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, KnownImageIds.EncapsulateField); break;
+								case SyntaxKind.VolatileKeyword: AddIcon(ref icons, KnownImageIds.ModifyField); break;
+								case SyntaxKind.StaticKeyword: AddIcon(ref icons, KnownImageIds.Link); break;
+							}
+						}
+						break;
+					case VariableDeclaratorSyntax v:
+						return GetExtIcons(node.Parent.Parent);
+					case BaseTypeDeclarationSyntax c:
+						foreach (var modifier in c.Modifiers) {
+							switch (modifier.Kind()) {
+								case SyntaxKind.SealedKeyword: AddIcon(ref icons, KnownImageIds.ClassSealed); break;
+								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, KnownImageIds.AbstractClass); break;
+								case SyntaxKind.StaticKeyword: AddIcon(ref icons, KnownImageIds.Link); break;
+							}
+						}
+						break;
+				}
+				return icons;
+
+				void AddIcon(ref StackPanel container, int imageId) {
+					if (container == null) {
+						container = new StackPanel { Orientation = Orientation.Horizontal };
+					}
+					container.Children.Add(ThemeHelper.GetImage(imageId));
 				}
 			}
 
