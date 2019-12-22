@@ -409,6 +409,7 @@ namespace Codist
 						action.Invoke(dte.ActiveDocument);
 					}
 					catch (NullReferenceException) { /* ignore */ }
+					catch (ArgumentException) { /* ignore */ }
 				}
 			}
 		}
