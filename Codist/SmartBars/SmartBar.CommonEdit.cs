@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
+using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.SmartBars
 {
@@ -197,6 +198,36 @@ namespace Codist.SmartBars
 					AddCommands(ToolBar, KnownImageIds.FormatSelection, "Formatting...", null, _ => __CaseCommands);
 					break;
 			}
+		}
+
+		void AddClassificationInfoCommand() {
+			AddCommand(ToolBar, KnownImageIds.CodeInformation, "Show syntax classification info", ctx => {
+				if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
+					var cs = ServicesHelper.Instance.ClassifierAggregator.GetClassifier(ctx.View.TextBuffer)
+						.GetClassificationSpans(span);
+					var t = ServicesHelper.Instance.ViewTagAggregatorFactory.CreateTagAggregator<Microsoft.VisualStudio.Text.Tagging.IClassificationTag>(ctx.View).GetTags(span);
+					using (var b = ReusableStringBuilder.AcquireDefault(100)) {
+						var sb = b.Resource;
+						sb.AppendLine($"Classifications for selected {span.Length} characters:");
+						foreach (var s in cs) {
+							sb.Append(s.Span.Span.ToString())
+								.Append(' ')
+								.Append(s.ClassificationType.Classification)
+								.Append(':')
+								.Append(' ')
+								.Append(s.Span.GetText())
+								.AppendLine();
+						}
+						sb.AppendLine().AppendLine("Tags:");
+						foreach (var item in t) {
+							sb.Append(item.Span.GetSpans(ctx.View.TextBuffer).ToString())
+								.Append(' ')
+								.AppendLine(item.Tag.ClassificationType.Classification);
+						}
+						System.Windows.Forms.MessageBox.Show(sb.ToString(), nameof(Codist));
+					}
+				}
+			});
 		}
 
 		List<CommandItem> GetFormatItems(CommandContext arg) {

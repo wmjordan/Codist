@@ -154,6 +154,7 @@ namespace Codist
 			//_extenderCookie = DTE.ObjectExtenders.RegisterExtenderProvider(VSConstants.CATID.CSharpFileProperties_string, BuildBots.AutoReplaceExtenderProvider.Name, new BuildBots.AutoReplaceExtenderProvider());
 			//await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
 			Commands.ScreenshotCommand.Initialize(this);
+			Commands.GetContentTypeCommand.Initialize(this);
 			Commands.IncrementVsixVersionCommand.Initialize(this);
 			Commands.NaviBarSearchDeclarationCommand.Initialize(this);
 			switch (Config.Instance.InitStatus) {
@@ -217,7 +218,6 @@ namespace Codist
 				}
 			}
 		}
-
 		#endregion
 	}
 

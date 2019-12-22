@@ -120,6 +120,7 @@ namespace Codist.SmartBars
 			//}
 			if (View.IsMultilineSelected() == false) {
 				AddFindAndReplaceCommands();
+				AddClassificationInfoCommand();
 			}
 			//AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
