@@ -409,7 +409,7 @@ namespace Codist.Margins
 					}
 					foreach (var loc in item.Locations) {
 						var start = loc.Location.SourceSpan.Start;
-						if (start > snapshotLength) {
+						if (start >= snapshotLength) {
 							continue;
 						}
 						var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, start));
@@ -422,7 +422,7 @@ namespace Codist.Margins
 					foreach (var loc in item.Definition.DeclaringSyntaxReferences) {
 						if (loc.SyntaxTree == _DocSyntax) {
 							var start = loc.Span.Start;
-							if (start > snapshotLength) {
+							if (start >= snapshotLength) {
 								continue;
 							}
 							var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, start));
