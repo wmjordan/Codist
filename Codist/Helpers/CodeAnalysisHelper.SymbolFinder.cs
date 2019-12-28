@@ -13,36 +13,6 @@ namespace Codist
 {
 	partial class CodeAnalysisHelper
 	{
-		/// <summary>Finds caller to method, property, event, or type constructor.</summary>
-		/// <param name="symbol">The callee.</param>
-		/// <param name="project">The contextual project.</param>
-		/// <returns>The list to callers, or <see langword="null"/> when an inapplicable <see cref="ISymbol"/> is provided.</returns>
-		public static List<SymbolCallerInfo> FindCallers(this ISymbol symbol, Project project, CancellationToken cancellationToken = default) {
-			var docs = ImmutableHashSet.CreateRange(project.GetRelatedProjectDocuments());
-			List<SymbolCallerInfo> callers;
-			switch (symbol.Kind) {
-				case SymbolKind.Method:
-				case SymbolKind.Property:
-				case SymbolKind.Event:
-					callers = SyncHelper.RunSync(() => SymbolFinder.FindCallersAsync(symbol, project.Solution, docs, cancellationToken)).ToList();
-					break;
-				case SymbolKind.NamedType:
-					var tempResults = new HashSet<SymbolCallerInfo>(SymbolCallerInfoComparer.Instance);
-					SyncHelper.RunSync(async () => {
-						foreach (var item in (symbol as INamedTypeSymbol).InstanceConstructors) {
-							foreach (var c in await SymbolFinder.FindCallersAsync(item, project.Solution, docs, cancellationToken).ConfigureAwait(false)) {
-								tempResults.Add(c);
-							}
-						}
-					});
-					(callers = new List<SymbolCallerInfo>(tempResults.Count)).AddRange(tempResults);
-					break;
-				default: return null;
-			}
-			callers.Sort((a, b) => CompareSymbol(a.CallingSymbol, b.CallingSymbol));
-			return callers;
-		}
-
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 		/// </summary>
