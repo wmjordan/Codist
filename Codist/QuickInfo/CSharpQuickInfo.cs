@@ -340,7 +340,7 @@ namespace Codist.QuickInfo
 		static void ShowCandidateInfo(QiContainer qiContent, ImmutableArray<ISymbol> candidates) {
 			var info = new ThemedTipDocument().AppendTitle(KnownImageIds.CodeInformation, "Maybe...");
 			foreach (var item in candidates) {
-				info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
+				info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item.OriginalDefinition)));
 			}
 			qiContent.Add(info);
 		}
