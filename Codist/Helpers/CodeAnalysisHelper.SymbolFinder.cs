@@ -229,13 +229,20 @@ namespace Codist
 					break;
 				}
 				foreach (var member in type.GetMembers()) {
+					IMethodSymbol m;
 					if (member.Kind != SymbolKind.Method
 						|| member.CanBeReferencedByName == false
 						|| member.IsAccessible(false) == false
 						|| ReferenceEquals(member, symbol)) {
-						continue;
+						// also find delegates with the same signature
+						if (member.Kind != SymbolKind.NamedType
+							|| (m = (member as INamedTypeSymbol)?.DelegateInvokeMethod) == null) {
+							continue;
+						}
 					}
-					var m = (IMethodSymbol)member;
+					else {
+						m = (IMethodSymbol)member;
+					}
 					if (AreEqual(rt, m.ReturnType, true) == false) {
 						continue;
 					}
@@ -245,7 +252,8 @@ namespace Codist
 					}
 					var pm = true;
 					for (int i = pl - 1; i >= 0; i--) {
-						if (AreEqual(mp[i].Type, pn[i].Type, true) == false) {
+						if (mp[i].RefKind != pn[i].RefKind
+							|| AreEqual(mp[i].Type, pn[i].Type, true) == false) {
 							pm = false;
 							break;
 						}

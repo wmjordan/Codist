@@ -608,7 +608,7 @@ namespace Codist
 				case SymbolKind.Event: return (symbol as IEventSymbol).RaiseMethod;
 				case SymbolKind.NamedType:
 					var t = symbol as INamedTypeSymbol;
-					return t.TypeKind == TypeKind.Delegate ? t.GetMembers("Invoke").First() as IMethodSymbol : null;
+					return t.TypeKind == TypeKind.Delegate ? t.DelegateInvokeMethod as IMethodSymbol : null;
 				default: return null;
 			}
 		}
@@ -786,8 +786,8 @@ namespace Codist
 				case TypeKind.Delegate:
 					return AreEqual(a as INamedTypeSymbol, b as INamedTypeSymbol, ignoreTypeConstraint);
 				case TypeKind.TypeParameter:
-					return ignoreTypeConstraint && b.TypeKind == TypeKind.TypeParameter
-						|| AreEqual(a as ITypeParameterSymbol, b as ITypeParameterSymbol);
+					return ignoreTypeConstraint
+						|| b.TypeKind == TypeKind.TypeParameter && AreEqual(a as ITypeParameterSymbol, b as ITypeParameterSymbol);
 			}
 			return false;
 		}
