@@ -19,9 +19,7 @@ namespace Codist.QuickInfo
 	sealed class ColorQuickInfoController : IAsyncQuickInfoSource
 	{
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false
-				|| session.Mark(nameof(ColorQuickInfo)) == false
-				) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false) {
 				return null;
 			}
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -37,7 +35,7 @@ namespace Codist.QuickInfo
 				}
 				brush = ColorHelper.GetBrush(word);
 			}
-			return brush != null
+			return brush != null && session.Mark(nameof(ColorQuickInfo))
 				? new QuickInfoItem(extent.ToTrackingSpan(), ColorQuickInfo.PreviewColor(brush))
 				: null;
 		}
