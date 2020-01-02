@@ -532,7 +532,7 @@ namespace Codist.QuickInfo
 						var d = c as ThemedTipDocument;
 						if (d != null) {
 							foreach (var item in d.Children) {
-								(item as FrameworkElement)?.LimitSize();
+								//(item as FrameworkElement)?.LimitSize();
 								if (item is TextBlock t) {
 									t.TextWrapping = TextWrapping.Wrap;
 								}
