@@ -201,7 +201,7 @@ namespace Codist.Taggers
 								}
 							}
 							else if (ct == Constants.CodeIdentifier
-								|| ct == Constants.CodeStaticSymbol
+								//|| ct == Constants.CodeStaticSymbol
 								|| ct.EndsWith("name", StringComparison.Ordinal)) {
 								var itemSpan = item.TextSpan;
 								node = unitCompilation.FindNode(itemSpan, true);
@@ -501,10 +501,14 @@ namespace Codist.Taggers
 							}
 							break;
 						case SymbolKind.Field:
-							if (node.IsKind(SyntaxKind.TupleElement) && ((TupleElementSyntax)node).Identifier.IsKind(SyntaxKind.None)) {
-								symbol = semanticModel.GetTypeInfo(((TupleElementSyntax)node).Type).Type;
+							if (node.IsKind(SyntaxKind.TupleElement)) {
+								if (((TupleElementSyntax)node).Identifier.IsKind(SyntaxKind.None)) {
+									symbol = semanticModel.GetTypeInfo(((TupleElementSyntax)node).Type).Type;
+								}
 							}
-							else if (symbol.DeclaredAccessibility >= Accessibility.ProtectedAndInternal && HighlightOptions.NonPrivateField) {
+							else if (HighlightOptions.NonPrivateField
+								&& symbol.DeclaredAccessibility >= Accessibility.ProtectedAndInternal
+								&& symbol.ContainingType.TypeKind != TypeKind.Enum) {
 								yield return _Classifications.NestedDeclaration;
 							}
 							break;
