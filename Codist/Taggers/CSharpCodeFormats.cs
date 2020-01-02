@@ -331,14 +331,14 @@ namespace Codist.Taggers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CSharpNestedDeclarationName)]
-	[Name(Constants.CSharpNestedDeclarationName)]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpMemberDeclarationName)]
+	[Name(Constants.CSharpMemberDeclarationName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CSharpDeclarationName)]
-	sealed class NestedDeclarationFormat : ClassificationFormatDefinition
+	sealed class MemberDeclarationFormat : ClassificationFormatDefinition
 	{
-		public NestedDeclarationFormat() {
-			DisplayName = Constants.NameOfMe + ": nested declaration";
+		public MemberDeclarationFormat() {
+			DisplayName = Constants.NameOfMe + ": member declaration";
 			IsBold = true;
 		}
 	}

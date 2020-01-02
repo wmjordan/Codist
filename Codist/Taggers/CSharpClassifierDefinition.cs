@@ -83,12 +83,12 @@ namespace Codist.Taggers
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CSharpMethodName)]
 		[BaseDefinition(Constants.CSharpStaticMemberName)]
+		[BaseDefinition(Constants.CodeExtensionMethodName)]
 		[Name(Constants.CSharpExtensionMethodName)]
 		static ClassificationTypeDefinition ExtensionMethod;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CSharpMethodName)]
-		[BaseDefinition(Constants.CodeExtensionMethodName)]
 		[Name(Constants.CSharpExternMethodName)]
 		static ClassificationTypeDefinition ExternMethod;
 
@@ -129,8 +129,8 @@ namespace Codist.Taggers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CSharpDeclarationName)]
-		[Name(Constants.CSharpNestedDeclarationName)]
-		static ClassificationTypeDefinition NestedDeclaration;
+		[Name(Constants.CSharpMemberDeclarationName)]
+		static ClassificationTypeDefinition MemberDeclaration;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CSharpLocalVariableName)]

@@ -29,7 +29,7 @@ namespace Codist.Taggers
 			LocalDeclaration = registry.GetClassificationType(Constants.CSharpLocalDeclarationName);
 			Method = registry.GetClassificationType(Constants.CSharpMethodName);
 			Namespace = registry.GetClassificationType(Constants.CSharpNamespaceName);
-			NestedDeclaration = registry.GetClassificationType(Constants.CSharpNestedDeclarationName);
+			NestedDeclaration = registry.GetClassificationType(Constants.CSharpMemberDeclarationName);
 			OverrideMember = registry.GetClassificationType(Constants.CSharpOverrideMemberName);
 			Parameter = registry.GetClassificationType(Constants.CSharpParameterName);
 			Property = registry.GetClassificationType(Constants.CSharpPropertyName);

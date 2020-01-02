@@ -20,6 +20,7 @@ namespace Codist
 			public const string CSharp = nameof(CSharp);
 			public const string Text = nameof(Text);
 			public const string Markdown = nameof(Markdown);
+			public const string Xml = "XML";
 		}
 
 		public static class SyntaxCategory
@@ -137,7 +138,7 @@ namespace Codist
 		public const string CSharpAliasNamespaceName = "C#: Alias namespace";
 		public const string CSharpConstructorMethodName = "C#: Constructor method";
 		public const string CSharpDeclarationName = "C#: Type declaration";
-		public const string CSharpNestedDeclarationName = "C#: Nested type declaration";
+		public const string CSharpMemberDeclarationName = "C#: Member declaration";
 		public const string CSharpLocalDeclarationName = "C#: Local declaration";
 		public const string CSharpTypeParameterName = "C#: Type parameter";
 		public const string CSharpStaticMemberName = "C#: Static member";
@@ -474,7 +475,7 @@ namespace Codist
 		[Description("Declaration of non-nested type: class, struct, interface, enum, delegate and event, inheriting from Identifier")]
 		Declaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpNestedDeclarationName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpMemberDeclarationName)]
 		[Description("Declaration of type memeber: property, method, event, delegate, nested type, etc. (excluding fields), inheriting from Declaration")]
 		MemberDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
