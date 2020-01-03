@@ -98,12 +98,19 @@ namespace Codist.SmartBars
 			if (trivia.RawKind == 0) {
 				var token = _Context.Token;
 				if (token.Span.Contains(View.Selection, true)
-					&& token.Kind() == SyntaxKind.IdentifierToken
-					&& (nodeKind.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || nodeKind == SyntaxKind.VariableDeclarator || nodeKind == SyntaxKind.ForEachStatement || nodeKind == SyntaxKind.SingleVariableDesignation)) {
-					// selection is within a symbol
-					_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
-					if (_Symbol != null) {
-						AddSymbolCommands(isReadOnly, node);
+					&& token.Kind() == SyntaxKind.IdentifierToken) {
+					if (nodeKind.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || nodeKind == SyntaxKind.VariableDeclarator || nodeKind == SyntaxKind.ForEachStatement || nodeKind == SyntaxKind.SingleVariableDesignation) {
+						// selection is within a symbol
+						_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
+						if (_Symbol != null) {
+							AddSymbolCommands(isReadOnly, node);
+						}
+					}
+					else if (nodeKind == SyntaxKind.TypeParameter) {
+						_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
+						if (_Symbol != null && isReadOnly == false) {
+							AddRenameCommand(node);
+						}
 					}
 				}
 				else if (token.RawKind >= (int)SyntaxKind.NumericLiteralToken && token.RawKind <= (int)SyntaxKind.StringLiteralToken) {
@@ -138,7 +145,7 @@ namespace Codist.SmartBars
 					else if (IsInvertableOperation(nodeKind)) {
 						AddCommand(MyToolBar, KnownImageIds.Operator, "Invert operator", InvertOperator);
 					}
-					else if (isDesignMode) {
+					else if (isDesignMode && nodeKind != SyntaxKind.TypeParameter) {
 						AddEditorCommand(MyToolBar, KnownImageIds.ExtractMethod, "Refactor.ExtractMethod", "Extract Method");
 					}
 				}
@@ -230,13 +237,17 @@ namespace Codist.SmartBars
 			}
 		}
 
-		void AddRefactorCommands(SyntaxNode node) {
+		void AddRenameCommand(SyntaxNode node) {
 			if (_Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 				AddCommand(MyToolBar, KnownImageIds.Rename, "Rename symbol", ctx => {
 					ctx.KeepToolBar(false);
 					TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
 				});
 			}
+		}
+
+		void AddRefactorCommands(SyntaxNode node) {
+			AddRenameCommand(node);
 			if (node is ParameterSyntax && node.Parent is ParameterListSyntax) {
 				AddEditorCommand(MyToolBar, KnownImageIds.ReorderParameters, "Refactor.ReorderParameters", "Reorder parameters");
 			}
