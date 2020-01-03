@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Media.Imaging;
 using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
@@ -168,7 +169,12 @@ namespace Codist
 				run.Foreground = brush;
 			}
 			return run;
-		} 
+		}
+
+		public static Hyperlink ClickToNavigate(this Hyperlink hyperlink) {
+			hyperlink.Click += (s, args) => { System.Diagnostics.Process.Start(((Hyperlink)s).NavigateUri.AbsoluteUri); };
+			return hyperlink;
+		}
 		#endregion
 
 		#region FormattedText
@@ -195,7 +201,16 @@ namespace Codist
 		public static StackPanel MakeHorizontal(this StackPanel panel) {
 			panel.Orientation = Orientation.Horizontal;
 			return panel;
-		} 
+		}
+		public static TPanel ForEachChild<TPanel, TChild>(this TPanel panel, Action<TChild> action)
+			where TPanel : Panel {
+			foreach (object item in panel.Children) {
+				if (item is TChild c) {
+					action(c);
+				}
+			}
+			return panel;
+		}
 		#endregion
 
 		#region Margin and size
@@ -247,7 +262,7 @@ namespace Codist
 			element.Margin = thickness;
 			return element;
 		}
-		public static Border WrapMargin(this UIElement element, Thickness thickness) {
+		public static Border WrapBorder(this UIElement element, Thickness thickness) {
 			return new Border { Margin = thickness, Child = element };
 		}
 		#endregion
@@ -328,6 +343,12 @@ namespace Codist
 		public static bool OccursOn<TObject>(this RoutedEventArgs args) where TObject : DependencyObject {
 			return (args.OriginalSource as DependencyObject).GetParent<TObject>() != null;
 		}
+
+		public static TDependencyObject SetDependentValue<TDependencyObject, TValue>(this TDependencyObject obj, Action<TDependencyObject, TValue> setter, TValue value) where TDependencyObject : DependencyObject {
+			setter(obj, value);
+			return obj;
+		}
+
 		#endregion
 
 		#region Template and style
@@ -496,6 +517,25 @@ namespace Codist
 
 		public static bool HasDummyToolTip(this FrameworkElement item) {
 			return ReferenceEquals(item.ToolTip, DummyToolTip);
+		}
+
+		public static TObject SetLazyToolTip<TObject>(this TObject item, Func<object> toolTipProvider)
+			where TObject : FrameworkElement {
+			item.ToolTip = DummyToolTip;
+			item.ToolTipOpening += ShowLazyToolTip;
+			return item;
+
+			void ShowLazyToolTip(object sender, ToolTipEventArgs args) {
+				var s = args.Source as TObject;
+				var v = toolTipProvider();
+				if (v is string t) {
+					v = new TextBlock {
+						Text = t
+					}.LimitSize();
+				}
+				s.ToolTip = v;
+				s.ToolTipOpening -= ShowLazyToolTip;
+			}
 		}
 		#endregion
 	}

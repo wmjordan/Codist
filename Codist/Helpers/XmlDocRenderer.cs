@@ -208,15 +208,15 @@ namespace Codist
 								}
 								break;
 							case "paramref":
-								var paramName = e.Attribute("name");
-								if (paramName != null) {
-									RenderXmlDocSymbol(paramName.Value, inlines, SymbolKind.Parameter);
+								see = e.Attribute("name");
+								if (see != null) {
+									RenderXmlDocSymbol(see.Value, inlines, SymbolKind.Parameter);
 								}
 								break;
 							case "typeparamref":
-								var typeParamName = e.Attribute("name");
-								if (typeParamName != null) {
-									RenderXmlDocSymbol(typeParamName.Value, inlines, SymbolKind.TypeParameter);
+								see = e.Attribute("name");
+								if (see != null) {
+									RenderXmlDocSymbol(see.Value, inlines, SymbolKind.TypeParameter);
 								}
 								break;
 							case "c":
@@ -232,6 +232,15 @@ namespace Codist
 								break;
 							case "u":
 								StyleInner(e, inlines, new Underline());
+								break;
+							case "a":
+								see = e.Attribute("href");
+								if (see != null) {
+									StyleInner(e, inlines, new Hyperlink { NavigateUri = new Uri(see.Value), ToolTip = see.Value }.ClickToNavigate());
+								}
+								else {
+									goto case "u";
+								}
 								break;
 							//case "list":
 							//case "description":
