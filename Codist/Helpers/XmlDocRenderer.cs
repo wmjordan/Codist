@@ -235,7 +235,7 @@ namespace Codist
 								break;
 							case "a":
 								see = e.Attribute("href");
-								if (see != null) {
+								if (see != null && (see.Value.StartsWith("http://", StringComparison.Ordinal) || see.Value.StartsWith("https://", StringComparison.Ordinal))) {
 									StyleInner(e, inlines, new Hyperlink { NavigateUri = new Uri(see.Value), ToolTip = see.Value }.ClickToNavigate());
 								}
 								else {
