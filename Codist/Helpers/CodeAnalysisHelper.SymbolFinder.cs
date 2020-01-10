@@ -228,7 +228,10 @@ namespace Codist
 				if (cancellationToken.IsCancellationRequested) {
 					break;
 				}
-				foreach (var member in type.GetMembers()) {
+				var members = type.TypeKind == TypeKind.Delegate && type.DelegateInvokeMethod != null
+					? ImmutableArray.Create<ISymbol>(type.DelegateInvokeMethod)
+					: type.GetMembers();
+				foreach (var member in members) {
 					IMethodSymbol m;
 					if (member.Kind != SymbolKind.Method
 						|| member.CanBeReferencedByName == false
