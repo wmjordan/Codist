@@ -9,8 +9,6 @@ using System.Xml.Linq;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Imaging;
 
 namespace Codist
@@ -19,7 +17,7 @@ namespace Codist
 	{
 		internal const string XmlDocNodeName = "member";
 		const int LIST_UNDEFINED = -1, LIST_BULLET = -2, LIST_NOT_NUMERIC = -3;
-		const int BLOCK_PARA = 0, BLOCK_ITEM = 1, BLOCK_OTHER = 2;
+		const int BLOCK_PARA = 0, BLOCK_ITEM = 1, BLOCK_OTHER = 2, BLOCK_TITLE = 3;
 
 		static readonly Regex _FixWhitespaces = new Regex(" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 		readonly Compilation _Compilation;
@@ -178,7 +176,7 @@ namespace Codist
 								if (isOnlyChildOfItem) {
 									ParagraphCount++;
 								}
-								else if (inlines.FirstInline != null) {
+								else if (inlines.LastInline != null && inlines.LastInline is LineBreak == false) {
 									inlines.AppendLineWithMargin();
 									ParagraphCount++;
 								}
@@ -190,9 +188,27 @@ namespace Codist
 							case "listheader":
 								RenderBlockContent(inlines, list, e, BLOCK_OTHER);
 								break;
+							case "h1":
+								RenderBlockContent(inlines, list, e, BLOCK_TITLE).FontSize = ThemeHelper.ToolTipFontSize + 5;
+								break;
+							case "h2":
+								RenderBlockContent(inlines, list, e, BLOCK_TITLE).FontSize = ThemeHelper.ToolTipFontSize + 3;
+								break;
+							case "h3":
+								RenderBlockContent(inlines, list, e, BLOCK_TITLE).FontSize = ThemeHelper.ToolTipFontSize + 2;
+								break;
+							case "h4":
+								RenderBlockContent(inlines, list, e, BLOCK_TITLE).FontSize = ThemeHelper.ToolTipFontSize + 1;
+								break;
+							case "h5":
+								RenderBlockContent(inlines, list, e, BLOCK_TITLE).FontSize = ThemeHelper.ToolTipFontSize + 0.5;
+								break;
+							case "h6":
+								RenderBlockContent(inlines, list, e, BLOCK_TITLE);
+								break;
 							case "code":
 								++_isCode;
-								RenderBlockContent(inlines, list, e, BLOCK_OTHER);
+								RenderBlockContent(inlines, list, e, BLOCK_OTHER).FontFamily = GetCodeFont();
 								--_isCode;
 								break;
 							case "item":
@@ -236,7 +252,7 @@ namespace Codist
 							case "a":
 								see = e.Attribute("href");
 								if (see != null && (see.Value.StartsWith("http://", StringComparison.Ordinal) || see.Value.StartsWith("https://", StringComparison.Ordinal))) {
-									StyleInner(e, inlines, new Hyperlink { NavigateUri = new Uri(see.Value), ToolTip = see.Value }.ClickToNavigate());
+									StyleInner(e, inlines, new Hyperlink { NavigateUri = new Uri(see.Value), ToolTip = String.Join(Environment.NewLine, e.Attribute("title"), see.Value) }.ClickToNavigate());
 								}
 								else {
 									goto case "u";
@@ -285,8 +301,8 @@ namespace Codist
 			}
 		}
 
-		void RenderBlockContent(InlineCollection inlines, ListContext list, XElement e, int blockType) {
-			if (inlines.FirstInline != null) {
+		Span RenderBlockContent(InlineCollection inlines, ListContext list, XElement e, int blockType) {
+			if (inlines.LastInline != null && inlines.LastInline is LineBreak == false) {
 				inlines.AppendLineWithMargin();
 			}
 			if (blockType == BLOCK_ITEM) {
@@ -299,12 +315,16 @@ namespace Codist
 			if (_isCode > 0) {
 				span.FontFamily = GetCodeFont();
 			}
+			if (blockType == BLOCK_TITLE) {
+				span.FontWeight = System.Windows.FontWeights.Bold;
+			}
 			inlines.Add(span);
 			InternalRender(e, span.Inlines, list);
 			if (blockType != BLOCK_ITEM && e.NextNode != null
 				&& IsInlineElementName((e.NextNode as XElement)?.Name.LocalName) == false) {
 				inlines.Add(new LineBreak());
 			}
+			return span;
 		}
 
 		static void PopulateListNumber(InlineCollection text, ListContext list) {
