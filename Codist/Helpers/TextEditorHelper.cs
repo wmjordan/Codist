@@ -25,7 +25,7 @@ namespace Codist
 	static class TextEditorHelper
 	{
 		static /*readonly*/ Guid guidIWpfTextViewHost = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476");
-		static IWpfTextView _MouseOverTextView;
+		static IWpfTextView _MouseOverTextView, _ActiveTextView;
 
 		#region Position
 		public static SnapshotPoint GetCaretPosition(this ITextView textView) {
@@ -514,8 +514,9 @@ namespace Codist
 			return _MouseOverTextView;
 		}
 		public static IWpfTextView GetActiveWpfDocumentView() {
-			ThreadHelper.ThrowIfNotOnUIThread();
-			return ServiceProvider.GlobalProvider.GetActiveWpfDocumentView();
+			return _ActiveTextView;
+			//ThreadHelper.ThrowIfNotOnUIThread();
+			//return ServiceProvider.GlobalProvider.GetActiveWpfDocumentView();
 		}
 		public static IWpfTextView GetActiveWpfDocumentView(this IServiceProvider service) {
 			ThreadHelper.ThrowIfNotOnUIThread();
@@ -613,7 +614,8 @@ namespace Codist
 		[Export(typeof(IWpfTextViewCreationListener))]
 		[ContentType(Constants.CodeTypes.Code)]
 		[TextViewRole(PredefinedTextViewRoles.Document)]
-		sealed class NaviBarFactory : IWpfTextViewCreationListener
+		[TextViewRole(PredefinedTextViewRoles.Editable)]
+		sealed class ActiveViewTrackerFactory : IWpfTextViewCreationListener
 		{
 			public void TextViewCreated(IWpfTextView textView) {
 				new ActiveViewTracker(textView);
@@ -627,6 +629,11 @@ namespace Codist
 					_View = view;
 					view.Closed += TextViewClosed_UnhookEvent;
 					view.VisualElement.MouseEnter += TextViewMouseEnter_SetActiveView;
+					view.GotAggregateFocus += TextViewGotFocus_SetActiveView;
+				}
+
+				void TextViewGotFocus_SetActiveView(object sender, EventArgs e) {
+					_ActiveTextView = _View;
 				}
 
 				void TextViewMouseEnter_SetActiveView(object sender, MouseEventArgs e) {
@@ -637,7 +644,9 @@ namespace Codist
 					var v = sender as IWpfTextView;
 					v.Closed -= TextViewClosed_UnhookEvent;
 					v.VisualElement.MouseEnter -= TextViewMouseEnter_SetActiveView;
+					v.GotAggregateFocus -= TextViewGotFocus_SetActiveView;
 					System.Threading.Interlocked.CompareExchange(ref _MouseOverTextView, null, _View);
+					System.Threading.Interlocked.CompareExchange(ref _ActiveTextView, null, _View);
 				}
 			}
 		}
