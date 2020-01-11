@@ -575,6 +575,23 @@ namespace Codist
 			return false;
 		}
 
+		public static bool IsAwaitable(this ITypeSymbol t) {
+			if (t is null || t.ContainingNamespace.MetadataName != "System.Runtime.CompilerServices") {
+				return false;
+			}
+
+			foreach (var item in t.GetMembers(WellKnownMemberNames.GetAwaiter)) {
+				if (item.Kind != SymbolKind.Method) {
+					continue;
+				}
+				var m = (IMethodSymbol)item;
+				if (m.Parameters.Length == 0 && m.ReturnType.Name == "TaskAwaiter") {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public static bool IsMemberOrType(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event:
@@ -784,7 +801,8 @@ namespace Codist
 				case TypeKind.Struct:
 				case TypeKind.Interface:
 				case TypeKind.Delegate:
-					return AreEqual(a as INamedTypeSymbol, b as INamedTypeSymbol, ignoreTypeConstraint);
+					return AreEqual(a as INamedTypeSymbol, b as INamedTypeSymbol, ignoreTypeConstraint)
+						|| ignoreTypeConstraint && b.TypeKind == TypeKind.TypeParameter;
 				case TypeKind.TypeParameter:
 					return ignoreTypeConstraint
 						|| b.TypeKind == TypeKind.TypeParameter && AreEqual(a as ITypeParameterSymbol, b as ITypeParameterSymbol);

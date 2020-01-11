@@ -409,7 +409,7 @@ namespace Codist.Controls
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
 					var ms = symbol as IMethodSymbol;
-					if (ms.IsAsync) {
+					if (ms.IsAsync || ms.ReturnType.IsAwaitable()) {
 						AddIcon(ref icons, KnownImageIds.DynamicGroup);
 					}
 					if (ms.IsGenericMethod) {
