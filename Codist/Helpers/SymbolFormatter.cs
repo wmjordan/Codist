@@ -40,6 +40,8 @@ namespace Codist
 		public Brush Enum { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumMemberName)]
 		public Brush EnumField { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName + ";" + Constants.CodeEventName)]
+		public Brush Event { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName + ";" + Constants.CodeFieldName)]
 		public Brush Field { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeInterfaceName)]
@@ -116,7 +118,7 @@ namespace Codist
 						text.Add("[]");
 					}
 					return;
-				case SymbolKind.Event: text.Add(symbol.Render(alias, bold, Delegate)); return;
+				case SymbolKind.Event: text.Add(symbol.Render(alias, bold, Event)); return;
 				case SymbolKind.Field:
 					text.Add(symbol.Render(alias, bold, ((IFieldSymbol)symbol).IsConst ? Const : Field));
 					return;
@@ -260,7 +262,7 @@ namespace Codist
 						block.Append(part.Symbol.Name, Property);
 						break;
 					case SymbolDisplayPartKind.EventName:
-						block.Append(part.Symbol.Name, Delegate);
+						block.Append(part.Symbol.Name, Event);
 						break;
 					case ExtensionName:
 						block.AddSymbol(part.Symbol, true, Method);

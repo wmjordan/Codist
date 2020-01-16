@@ -116,6 +116,8 @@ namespace Codist
 						.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(remarks, this)));
 				}
 			}
+			#endregion
+			#region SeeAlso
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SeeAlsoDoc)) {
 				var seeAlsos = doc.SeeAlso ?? doc.ExplicitInheritDoc?.SeeAlso ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.SeeAlso != null)?.SeeAlso;
 				if (seeAlsos != null) {
@@ -134,6 +136,14 @@ namespace Codist
 				}
 			}
 			#endregion
+			var example = doc.Example ?? doc.ExplicitInheritDoc?.Example ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Example != null)?.Example;
+			if (example != null) {
+				tip.Append(new ThemedTipParagraph(KnownImageIds.EnableCode, new ThemedTipText()
+					.Append("Example", true)
+					.Append(example == doc.Example ? ": " : " (inherited): ")
+					))
+					.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(example, this)));
+			}
 			return tip;
 		}
 
@@ -208,7 +218,10 @@ namespace Codist
 								break;
 							case "code":
 								++_isCode;
-								RenderBlockContent(inlines, list, e, BLOCK_OTHER).FontFamily = GetCodeFont();
+								var span = RenderBlockContent(inlines, list, e, BLOCK_OTHER);
+								span.FontFamily = GetCodeFont();
+								span.Background = ThemeHelper.ToolWindowBackgroundBrush;
+								span.Foreground = ThemeHelper.ToolWindowTextBrush;
 								--_isCode;
 								break;
 							case "item":
@@ -280,12 +293,15 @@ namespace Codist
 							}
 							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
 						}
+						else {
+							t = t.Replace("\n    ", "\n").TrimEnd();
+						}
 						if (t.Length > 0) {
 							inlines.Add(new Run(t));
 						}
 						break;
 					case XmlNodeType.CDATA:
-						inlines.Add(new Run((item as XText).Value));
+						inlines.Add(_isCode == 0 ? new Run((item as XText).Value) : new Run((item as XText).Value.Replace("\n    ", "\n").TrimEnd()));
 						break;
 					case XmlNodeType.EntityReference:
 					case XmlNodeType.Entity:
@@ -370,7 +386,7 @@ namespace Codist
 						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Field));
 						return;
 					case 'E':
-						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Delegate));
+						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Event));
 						return;
 					case '!':
 						inlines.Add(symbol.Substring(2).Render(true, true, null));
