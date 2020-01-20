@@ -12,6 +12,7 @@ namespace Codist.Controls
 		public ThemedButton(object content, object toolTip) {
 			Content = content;
 			ToolTip = toolTip;
+			this.ReferenceProperty(ForegroundProperty, CommonControlsColors.ButtonTextBrushKey);
 			this.ReferenceProperty(BackgroundProperty, CommonControlsColors.ButtonBrushKey);
 			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
