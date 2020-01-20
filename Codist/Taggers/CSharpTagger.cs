@@ -86,6 +86,11 @@ namespace Codist.Taggers
 									case SyntaxKind.UnsafeKeyword:
 										yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword);
 										continue;
+									case SyntaxKind.ExplicitKeyword:
+									case SyntaxKind.ImplicitKeyword:
+										yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.TypeCastKeyword);
+										yield return CreateClassificationSpan(snapshot, (node as ConversionOperatorDeclarationSyntax).Type.Span, _Classifications.NestedDeclaration);
+										continue;
 								}
 								continue;
 							}
