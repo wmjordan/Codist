@@ -14,7 +14,7 @@ namespace Codist.SyntaxHighlight
 {
 	// see: Microsoft.VisualStudio.Text.Classification.Implementation.ClassificationFormatMap
 	// see: Microsoft.VisualStudio.Text.Classification.Implementation.ViewSpecificFormatMap
-	sealed partial class CodeViewDecorator
+	sealed class CodeViewDecorator
 	{
 		readonly IWpfTextView _TextView;
 		readonly IClassificationFormatMap _ClassificationFormatMap;
@@ -35,7 +35,7 @@ namespace Codist.SyntaxHighlight
 			_RegService = ServicesHelper.Instance.ClassificationTypeRegistry;
 			_TextView = view;
 
-			Decorate(FormatStore.ClassifcationTypeStore.Keys, true);
+			Decorate(FormatStore.ClassificationTypeStore.Keys, true);
 		}
 
 		void View_Closed(object sender, EventArgs e) {
@@ -53,7 +53,7 @@ namespace Codist.SyntaxHighlight
 					Decorate(new[] { ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(t) }, true);
 				}
 				else {
-					Decorate(FormatStore.ClassifcationTypeStore.Keys, false);
+					Decorate(FormatStore.ClassificationTypeStore.Keys, false);
 				}
 			}
 		}
@@ -101,8 +101,8 @@ namespace Codist.SyntaxHighlight
 			TextFormattingRunProperties textFormatting;
 			foreach (var item in classifications) {
 				if (item == null
-					|| (style = FormatStore.GetStyle(item.Classification)) == null
-					|| (textFormatting = FormatStore.GetBackupFormatting(item.Classification)) == null) {
+					|| (style = FormatStore.GetOrCreateStyle(item)) == null
+					|| (textFormatting = FormatStore.GetOrSaveBackupFormatting(item)) == null) {
 					continue;
 				}
 				var p = SetProperties(textFormatting, style, defaultSize);
@@ -156,17 +156,17 @@ namespace Codist.SyntaxHighlight
 				format = format.SetTypeface(new Typeface(settings.Font));
 			}
 			if (settings.FontSize != 0) {
-				if (fontSize != format.FontRenderingEmSize) {
+				if (format.FontRenderingEmSizeEmpty || fontSize != format.FontRenderingEmSize) {
 					format = format.SetFontRenderingEmSize(fontSize);
 				}
 			}
 			if (settings.Bold.HasValue) {
-				if (settings.Bold != format.Bold || format.ItalicEmpty) {
+				if (format.BoldEmpty || settings.Bold != format.Bold) {
 					format = format.SetBold(settings.Bold.Value);
 				}
 			}
 			if (settings.Italic.HasValue) {
-				if (settings.Italic != format.Italic || format.ItalicEmpty) {
+				if (format.ItalicEmpty || settings.Italic != format.Italic) {
 					format = format.SetItalic(settings.Italic.Value);
 				}
 			}

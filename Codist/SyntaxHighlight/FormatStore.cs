@@ -20,7 +20,7 @@ namespace Codist.SyntaxHighlight
 		internal static readonly IEditorFormatMap DefaultEditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap("text");
 		internal static readonly IClassificationFormatMap DefaultClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("text");
 		static Dictionary<string, StyleBase> _SyntaxStyleCache = InitSyntaxStyleCache();
-		internal static readonly Dictionary<IClassificationType, List<IClassificationType>> ClassifcationTypeStore = InitClassificationTypes(_SyntaxStyleCache.Keys);
+		internal static readonly Dictionary<IClassificationType, List<IClassificationType>> ClassificationTypeStore = InitClassificationTypes(_SyntaxStyleCache.Keys);
 
 		static Dictionary<string, TextFormattingRunProperties> _BackupFormattings = LoadFormattings(new Dictionary<string, TextFormattingRunProperties>(80, StringComparer.OrdinalIgnoreCase));
 		static TextFormattingRunProperties _DefaultFormatting;
@@ -32,10 +32,36 @@ namespace Codist.SyntaxHighlight
 				return _BackupFormattings.TryGetValue(classificationType, out var r) ? r : null;
 			}
 		}
+		public static TextFormattingRunProperties GetOrSaveBackupFormatting(IClassificationType classificationType) {
+			var c = classificationType.Classification;
+			lock (_syncRoot) {
+				if (_BackupFormattings.TryGetValue(c, out var r)) {
+					return r;
+				}
+				else {
+					r = DefaultClassificationFormatMap.GetExplicitTextProperties(classificationType);
+					_BackupFormattings.Add(c, r);
+					return r;
+				}
+			}
+		}
 
 		public static StyleBase GetStyle(string classificationType) {
 			lock (_syncRoot) {
 				return _SyntaxStyleCache.TryGetValue(classificationType, out var r) ? r : null;
+			}
+		}
+		public static StyleBase GetOrCreateStyle(IClassificationType classificationType) {
+			var c = classificationType.Classification;
+			lock (_syncRoot) {
+				if (_SyntaxStyleCache.TryGetValue(c, out var r)) {
+					return r;
+				}
+				else {
+					r = new SyntaxStyle(c);
+					_SyntaxStyleCache.Add(c, r);
+					return r;
+				}
 			}
 		}
 		public static IEnumerable<KeyValuePair<string, StyleBase>> GetStyles() {
@@ -49,7 +75,7 @@ namespace Codist.SyntaxHighlight
 			return GetSubTypes(classificationType, new HashSet<IClassificationType>());
 
 			IEnumerable<IClassificationType> GetSubTypes(IClassificationType ct, HashSet<IClassificationType> dedup) {
-				if (ClassifcationTypeStore.TryGetValue(ct, out var subTypes)) {
+				if (ClassificationTypeStore.TryGetValue(ct, out var subTypes)) {
 					foreach (var t in subTypes) {
 						if (dedup.Add(t)) {
 							yield return t;
