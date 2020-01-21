@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Reflection;
 using System.Windows.Input;
-using Codist.SyntaxHighlight;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Shell;
@@ -13,6 +11,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.Text.Operations;
+using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
@@ -78,8 +77,12 @@ namespace Codist
 		public static Span GetLineSpan(this ITextSnapshot snapshot, TextSpan span) {
 			return Span.FromBounds(snapshot.GetLineNumberFromPosition(span.Start),
 				snapshot.GetLineNumberFromPosition(span.End));
-		} 
+		}
 		#endregion
+
+		public static ClassificationTag GetClassificationTag(this IClassificationTypeRegistryService registry, string clasificationType) {
+			return new ClassificationTag(registry.GetClassificationType(clasificationType));
+		}
 
 		public static TextFormattingRunProperties GetRunProperties(this IClassificationFormatMap formatMap, string classificationType) {
 			var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType);

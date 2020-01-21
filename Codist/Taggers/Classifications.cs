@@ -1,172 +1,173 @@
 ﻿using System;
 using Microsoft.VisualStudio.Text.Classification;
+using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Taggers
 {
 	sealed class CSharpClassifications
 	{
 		public CSharpClassifications(IClassificationTypeRegistryService registry) {
-			AbstractMember = registry.GetClassificationType(Constants.CSharpAbstractMemberName);
-			AbstractionKeyword = registry.GetClassificationType(Constants.CodeAbstractionKeyword);
-			AliasNamespace = registry.GetClassificationType(Constants.CSharpAliasNamespaceName);
-			AttributeName = registry.GetClassificationType(Constants.CSharpAttributeName);
-			AttributeNotation = registry.GetClassificationType(Constants.CSharpAttributeNotation);
-			ClassName = registry.GetClassificationType(Constants.CodeClassName);
-			ConstField = registry.GetClassificationType(Constants.CSharpConstFieldName);
-			ConstructorMethod = registry.GetClassificationType(Constants.CSharpConstructorMethodName);
-			Declaration = registry.GetClassificationType(Constants.CSharpDeclarationName);
-			DeclarationBrace = registry.GetClassificationType(Constants.CSharpDeclarationBrace);
-			DelegateName = registry.GetClassificationType(Constants.CodeDelegateName);
-			EnumName = registry.GetClassificationType(Constants.CodeEnumName);
-			EnumField = registry.GetClassificationType(Constants.CSharpEnumFieldName);
-			Event = registry.GetClassificationType(Constants.CSharpEventName);
-			ExtensionMethod = registry.GetClassificationType(Constants.CSharpExtensionMethodName);
-			ExternMethod = registry.GetClassificationType(Constants.CSharpExternMethodName);
-			Field = registry.GetClassificationType(Constants.CSharpFieldName);
-			InterfaceName = registry.GetClassificationType(Constants.CodeInterfaceName);
-			Label = registry.GetClassificationType(Constants.CSharpLabel);
-			LocalVariable = registry.GetClassificationType(Constants.CSharpLocalVariableName);
-			LocalDeclaration = registry.GetClassificationType(Constants.CSharpLocalDeclarationName);
-			Method = registry.GetClassificationType(Constants.CSharpMethodName);
-			Namespace = registry.GetClassificationType(Constants.CSharpNamespaceName);
-			NestedDeclaration = registry.GetClassificationType(Constants.CSharpMemberDeclarationName);
-			OverrideMember = registry.GetClassificationType(Constants.CSharpOverrideMemberName);
-			Parameter = registry.GetClassificationType(Constants.CSharpParameterName);
-			Property = registry.GetClassificationType(Constants.CSharpPropertyName);
-			ReadonlyField = registry.GetClassificationType(Constants.CSharpReadOnlyFieldName);
-			ResourceKeyword = registry.GetClassificationType(Constants.CSharpResourceKeyword);
-			SealedMember = registry.GetClassificationType(Constants.CSharpSealedClassName);
-			StaticMember = registry.GetClassificationType(Constants.CSharpStaticMemberName);
-			StructName = registry.GetClassificationType(Constants.CodeStructName);
-			TypeParameter = registry.GetClassificationType(Constants.CSharpTypeParameterName);
-			VirtualMember = registry.GetClassificationType(Constants.CSharpVirtualMemberName);
-			VolatileField = registry.GetClassificationType(Constants.CSharpVolatileFieldName);
-			XmlDoc = registry.GetClassificationType(Constants.CSharpXmlDoc);
-			UserSymbol = registry.GetClassificationType(Constants.CSharpUserSymbol);
-			MetadataSymbol = registry.GetClassificationType(Constants.CSharpMetadataSymbol);
+			AbstractMember = registry.GetClassificationTag(Constants.CSharpAbstractMemberName);
+			AbstractionKeyword = registry.GetClassificationTag(Constants.CodeAbstractionKeyword);
+			AliasNamespace = registry.GetClassificationTag(Constants.CSharpAliasNamespaceName);
+			AttributeName = registry.GetClassificationTag(Constants.CSharpAttributeName);
+			AttributeNotation = registry.GetClassificationTag(Constants.CSharpAttributeNotation);
+			ClassName = registry.GetClassificationTag(Constants.CodeClassName);
+			ConstField = registry.GetClassificationTag(Constants.CSharpConstFieldName);
+			ConstructorMethod = registry.GetClassificationTag(Constants.CSharpConstructorMethodName);
+			Declaration = registry.GetClassificationTag(Constants.CSharpDeclarationName);
+			DeclarationBrace = registry.GetClassificationTag(Constants.CSharpDeclarationBrace);
+			DelegateName = registry.GetClassificationTag(Constants.CodeDelegateName);
+			EnumName = registry.GetClassificationTag(Constants.CodeEnumName);
+			EnumField = registry.GetClassificationTag(Constants.CSharpEnumFieldName);
+			Event = registry.GetClassificationTag(Constants.CSharpEventName);
+			ExtensionMethod = registry.GetClassificationTag(Constants.CSharpExtensionMethodName);
+			ExternMethod = registry.GetClassificationTag(Constants.CSharpExternMethodName);
+			Field = registry.GetClassificationTag(Constants.CSharpFieldName);
+			InterfaceName = registry.GetClassificationTag(Constants.CodeInterfaceName);
+			Label = registry.GetClassificationTag(Constants.CSharpLabel);
+			LocalVariable = registry.GetClassificationTag(Constants.CSharpLocalVariableName);
+			LocalDeclaration = registry.GetClassificationTag(Constants.CSharpLocalDeclarationName);
+			Method = registry.GetClassificationTag(Constants.CSharpMethodName);
+			Namespace = registry.GetClassificationTag(Constants.CSharpNamespaceName);
+			NestedDeclaration = registry.GetClassificationTag(Constants.CSharpMemberDeclarationName);
+			OverrideMember = registry.GetClassificationTag(Constants.CSharpOverrideMemberName);
+			Parameter = registry.GetClassificationTag(Constants.CSharpParameterName);
+			Property = registry.GetClassificationTag(Constants.CSharpPropertyName);
+			ReadonlyField = registry.GetClassificationTag(Constants.CSharpReadOnlyFieldName);
+			ResourceKeyword = registry.GetClassificationTag(Constants.CSharpResourceKeyword);
+			SealedMember = registry.GetClassificationTag(Constants.CSharpSealedClassName);
+			StaticMember = registry.GetClassificationTag(Constants.CSharpStaticMemberName);
+			StructName = registry.GetClassificationTag(Constants.CodeStructName);
+			TypeParameter = registry.GetClassificationTag(Constants.CSharpTypeParameterName);
+			VirtualMember = registry.GetClassificationTag(Constants.CSharpVirtualMemberName);
+			VolatileField = registry.GetClassificationTag(Constants.CSharpVolatileFieldName);
+			XmlDoc = registry.GetClassificationTag(Constants.CSharpXmlDoc);
+			UserSymbol = registry.GetClassificationTag(Constants.CSharpUserSymbol);
+			MetadataSymbol = registry.GetClassificationTag(Constants.CSharpMetadataSymbol);
 		}
 
-		public IClassificationType AbstractMember { get; }
+		public ClassificationTag AbstractMember { get; }
 
-		public IClassificationType AbstractionKeyword { get; }
+		public ClassificationTag AbstractionKeyword { get; }
 
-		public IClassificationType AliasNamespace { get; }
+		public ClassificationTag AliasNamespace { get; }
 
-		public IClassificationType AttributeName { get; }
+		public ClassificationTag AttributeName { get; }
 
-		public IClassificationType AttributeNotation { get; }
+		public ClassificationTag AttributeNotation { get; }
 
-		public IClassificationType ClassName { get; }
+		public ClassificationTag ClassName { get; }
 
-		public IClassificationType ConstField { get; }
+		public ClassificationTag ConstField { get; }
 
-		public IClassificationType ConstructorMethod { get; }
+		public ClassificationTag ConstructorMethod { get; }
 
-		public IClassificationType Declaration { get; }
+		public ClassificationTag Declaration { get; }
 
-		public IClassificationType DeclarationBrace { get; }
+		public ClassificationTag DeclarationBrace { get; }
 
-		public IClassificationType DelegateName { get; }
+		public ClassificationTag DelegateName { get; }
 
-		public IClassificationType EnumName { get; }
+		public ClassificationTag EnumName { get; }
 
-		public IClassificationType EnumField { get; }
+		public ClassificationTag EnumField { get; }
 
-		public IClassificationType Event { get; }
+		public ClassificationTag Event { get; }
 
-		public IClassificationType ExtensionMethod { get; }
+		public ClassificationTag ExtensionMethod { get; }
 
-		public IClassificationType ExternMethod { get; }
+		public ClassificationTag ExternMethod { get; }
 
-		public IClassificationType Field { get; }
+		public ClassificationTag Field { get; }
 
-		public IClassificationType InterfaceName { get; }
+		public ClassificationTag InterfaceName { get; }
 
-		public IClassificationType Label { get; }
+		public ClassificationTag Label { get; }
 
-		public IClassificationType LocalVariable { get; }
+		public ClassificationTag LocalVariable { get; }
 
-		public IClassificationType LocalDeclaration { get; }
+		public ClassificationTag LocalDeclaration { get; }
 
-		public IClassificationType Method { get; }
+		public ClassificationTag Method { get; }
 
-		public IClassificationType MetadataSymbol { get; }
+		public ClassificationTag MetadataSymbol { get; }
 
-		public IClassificationType Namespace { get; }
+		public ClassificationTag Namespace { get; }
 
-		public IClassificationType NestedDeclaration { get; }
+		public ClassificationTag NestedDeclaration { get; }
 
-		public IClassificationType OverrideMember { get; }
+		public ClassificationTag OverrideMember { get; }
 
-		public IClassificationType Parameter { get; }
+		public ClassificationTag Parameter { get; }
 
-		public IClassificationType Property { get; }
+		public ClassificationTag Property { get; }
 
-		public IClassificationType ReadonlyField { get; }
+		public ClassificationTag ReadonlyField { get; }
 
-		public IClassificationType ResourceKeyword { get; }
+		public ClassificationTag ResourceKeyword { get; }
 
-		public IClassificationType SealedMember { get; }
+		public ClassificationTag SealedMember { get; }
 
-		public IClassificationType StaticMember { get; }
+		public ClassificationTag StaticMember { get; }
 
-		public IClassificationType StructName { get; }
+		public ClassificationTag StructName { get; }
 
-		public IClassificationType TypeParameter { get; }
+		public ClassificationTag TypeParameter { get; }
 
-		public IClassificationType UserSymbol { get; }
+		public ClassificationTag UserSymbol { get; }
 
-		public IClassificationType VirtualMember { get; }
+		public ClassificationTag VirtualMember { get; }
 
-		public IClassificationType VolatileField { get; }
+		public ClassificationTag VolatileField { get; }
 
-		public IClassificationType XmlDoc { get; }
+		public ClassificationTag XmlDoc { get; }
 	}
 
 	sealed class GeneralClassifications
 	{
 		public GeneralClassifications(IClassificationTypeRegistryService registry) {
-			BranchingKeyword = registry.GetClassificationType(Constants.CodeBranchingKeyword);
-			ControlFlowKeyword = registry.GetClassificationType(Constants.CodeControlFlowKeyword);
-			Identifier = registry.GetClassificationType(Constants.CodeIdentifier);
-			LoopKeyword = registry.GetClassificationType(Constants.CodeLoopKeyword);
-			TypeCastKeyword = registry.GetClassificationType(Constants.CodeTypeCastKeyword);
-			Punctuation = registry.GetClassificationType(Constants.CodePunctuation);
-			Keyword = registry.GetClassificationType(Constants.CodeKeyword);
-			SpecialPunctuation = registry.GetClassificationType(Constants.CodeSpecialPunctuation);
+			BranchingKeyword = registry.GetClassificationTag(Constants.CodeBranchingKeyword);
+			ControlFlowKeyword = registry.GetClassificationTag(Constants.CodeControlFlowKeyword);
+			Identifier = registry.GetClassificationTag(Constants.CodeIdentifier);
+			LoopKeyword = registry.GetClassificationTag(Constants.CodeLoopKeyword);
+			TypeCastKeyword = registry.GetClassificationTag(Constants.CodeTypeCastKeyword);
+			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
+			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
+			SpecialPunctuation = registry.GetClassificationTag(Constants.CodeSpecialPunctuation);
 		}
 
-		public IClassificationType BranchingKeyword { get; }
-		public IClassificationType ControlFlowKeyword { get; }
-		public IClassificationType Identifier { get; }
-		public IClassificationType LoopKeyword { get; }
-		public IClassificationType TypeCastKeyword { get; }
-		public IClassificationType Keyword { get; }
-		public IClassificationType Punctuation { get; }
-		public IClassificationType SpecialPunctuation { get; }
+		public ClassificationTag BranchingKeyword { get; }
+		public ClassificationTag ControlFlowKeyword { get; }
+		public ClassificationTag Identifier { get; }
+		public ClassificationTag LoopKeyword { get; }
+		public ClassificationTag TypeCastKeyword { get; }
+		public ClassificationTag Keyword { get; }
+		public ClassificationTag Punctuation { get; }
+		public ClassificationTag SpecialPunctuation { get; }
 	}
 
 	sealed class HighlightClassifications
 	{
 		public HighlightClassifications(IClassificationTypeRegistryService registry) {
-			Highlight1 = registry.GetClassificationType(Constants.Highlight1);
-			Highlight2 = registry.GetClassificationType(Constants.Highlight2);
-			Highlight3 = registry.GetClassificationType(Constants.Highlight3);
-			Highlight4 = registry.GetClassificationType(Constants.Highlight4);
-			Highlight5 = registry.GetClassificationType(Constants.Highlight5);
-			Highlight6 = registry.GetClassificationType(Constants.Highlight6);
-			Highlight7 = registry.GetClassificationType(Constants.Highlight7);
-			Highlight8 = registry.GetClassificationType(Constants.Highlight8);
-			Highlight9 = registry.GetClassificationType(Constants.Highlight9);
+			Highlight1 = registry.GetClassificationTag(Constants.Highlight1);
+			Highlight2 = registry.GetClassificationTag(Constants.Highlight2);
+			Highlight3 = registry.GetClassificationTag(Constants.Highlight3);
+			Highlight4 = registry.GetClassificationTag(Constants.Highlight4);
+			Highlight5 = registry.GetClassificationTag(Constants.Highlight5);
+			Highlight6 = registry.GetClassificationTag(Constants.Highlight6);
+			Highlight7 = registry.GetClassificationTag(Constants.Highlight7);
+			Highlight8 = registry.GetClassificationTag(Constants.Highlight8);
+			Highlight9 = registry.GetClassificationTag(Constants.Highlight9);
 		}
-		public IClassificationType Highlight1 { get; }
-		public IClassificationType Highlight2 { get; }
-		public IClassificationType Highlight3 { get; }
-		public IClassificationType Highlight4 { get; }
-		public IClassificationType Highlight5 { get; }
-		public IClassificationType Highlight6 { get; }
-		public IClassificationType Highlight7 { get; }
-		public IClassificationType Highlight8 { get; }
-		public IClassificationType Highlight9 { get; }
+		public ClassificationTag Highlight1 { get; }
+		public ClassificationTag Highlight2 { get; }
+		public ClassificationTag Highlight3 { get; }
+		public ClassificationTag Highlight4 { get; }
+		public ClassificationTag Highlight5 { get; }
+		public ClassificationTag Highlight6 { get; }
+		public ClassificationTag Highlight7 { get; }
+		public ClassificationTag Highlight8 { get; }
+		public ClassificationTag Highlight9 { get; }
 	}
 }

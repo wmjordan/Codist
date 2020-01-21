@@ -280,21 +280,23 @@ namespace Codist.Taggers
 			}
 			else if ((s == '(' || s == ')') && HighlightOptions.AllParentheses) {
 				var node = unitCompilation.FindNode(itemSpan, true, true);
+				ISymbol symbol;
+				ClassificationTag tag;
 				switch (node.Kind()) {
 					case SyntaxKind.CastExpression:
 						if (HighlightOptions.CastBrace == false) {
 							yield break;
 						}
-						var symbol = semanticModel.GetSymbolInfo(((CastExpressionSyntax)node).Type).Symbol;
+						symbol = semanticModel.GetSymbolInfo(((CastExpressionSyntax)node).Type).Symbol;
 						if (symbol == null) {
 							yield break;
 						}
-						var type = GetClassificationType(symbol);
-						if (type != null) {
+						tag = GetClassificationType(symbol);
+						if (tag != null) {
 							if (HighlightOptions.SpecialPunctuation) {
 								yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
 							}
-							yield return CreateClassificationSpan(snapshot, itemSpan, type);
+							yield return CreateClassificationSpan(snapshot, itemSpan, tag);
 						}
 						break;
 					case SyntaxKind.ParenthesizedExpression:
@@ -306,12 +308,12 @@ namespace Codist.Taggers
 							if (symbol == null) {
 								yield break;
 							}
-							type = GetClassificationType(symbol);
-							if (type != null) {
+							tag = GetClassificationType(symbol);
+							if (tag != null) {
 								if (HighlightOptions.SpecialPunctuation) {
 									yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
 								}
-								yield return CreateClassificationSpan(snapshot, itemSpan, type);
+								yield return CreateClassificationSpan(snapshot, itemSpan, tag);
 								yield break;
 							}
 						}
@@ -375,7 +377,7 @@ namespace Codist.Taggers
 				}
 			}
 
-			IClassificationType GetClassificationType(ISymbol symbol) {
+			ClassificationTag GetClassificationType(ISymbol symbol) {
 				switch (symbol.Kind) {
 					case SymbolKind.NamedType:
 						switch (((INamedTypeSymbol)symbol).TypeKind) {
@@ -410,16 +412,16 @@ namespace Codist.Taggers
 			}
 		}
 
-		static IEnumerable<ITagSpan<IClassificationTag>> MarkClassificationTypeForBrace(TextSpan itemSpan, ITextSnapshot snapshot, IClassificationType type, bool option) {
+		static IEnumerable<ITagSpan<IClassificationTag>> MarkClassificationTypeForBrace(TextSpan itemSpan, ITextSnapshot snapshot, ClassificationTag tag, bool option) {
 			if (HighlightOptions.SpecialPunctuation) {
 				yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
 			}
 			if (option) {
-				yield return CreateClassificationSpan(snapshot, itemSpan, type);
+				yield return CreateClassificationSpan(snapshot, itemSpan, tag);
 			}
 		}
 
-		static IClassificationType ClassifySyntaxNode(SyntaxNode node) {
+		static ClassificationTag ClassifySyntaxNode(SyntaxNode node) {
 			const SyntaxKind SwitchExpression = (SyntaxKind)9025;
 
 			switch (node.Kind()) {
@@ -480,7 +482,7 @@ namespace Codist.Taggers
 			return null;
 		}
 
-		static IEnumerable<IClassificationType> GetClassificationType(SyntaxNode node, SemanticModel semanticModel) {
+		static IEnumerable<ClassificationTag> GetClassificationType(SyntaxNode node, SemanticModel semanticModel) {
 			node = node.Kind() == SyntaxKind.Argument ? ((ArgumentSyntax)node).Expression : node;
 			//System.Diagnostics.Debug.WriteLine(node.GetType().Name + node.Span.ToString());
 			var symbol = semanticModel.GetSymbolInfo(node).Symbol;
@@ -659,8 +661,8 @@ namespace Codist.Taggers
 			}
 		}
 
-		static ITagSpan<IClassificationTag> CreateClassificationSpan(ITextSnapshot snapshotSpan, TextSpan span, IClassificationType type) {
-			return new TagSpan<IClassificationTag>(new SnapshotSpan(snapshotSpan, span.Start, span.Length), new ClassificationTag(type));
+		static ITagSpan<IClassificationTag> CreateClassificationSpan(ITextSnapshot snapshotSpan, TextSpan span, ClassificationTag tag) {
+			return new TagSpan<IClassificationTag>(new SnapshotSpan(snapshotSpan, span.Start, span.Length), tag);
 		}
 
 		static class HighlightOptions
