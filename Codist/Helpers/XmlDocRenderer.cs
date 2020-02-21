@@ -279,7 +279,7 @@ namespace Codist
 						}
 						break;
 					case XmlNodeType.Text:
-						string t = (item as XText).Value;
+						string t = ((XText)item).Value;
 						if (_isCode == 0) {
 							var previous = (item.PreviousNode as XElement)?.Name?.LocalName;
 							if (previous == null || IsInlineElementName(previous) == false) {
@@ -294,14 +294,14 @@ namespace Codist
 							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
 						}
 						else {
-							t = t.Replace("\n    ", "\n").TrimEnd();
+							t = t.Replace("\n    ", "\n");
 						}
 						if (t.Length > 0) {
 							inlines.Add(new Run(t));
 						}
 						break;
 					case XmlNodeType.CDATA:
-						inlines.Add(_isCode == 0 ? new Run((item as XText).Value) : new Run((item as XText).Value.Replace("\n    ", "\n").TrimEnd()));
+						inlines.Add(_isCode == 0 ? new Run(((XText)item).Value) : new Run(((XText)item).Value.Replace("\n    ", "\n").TrimEnd()));
 						break;
 					case XmlNodeType.EntityReference:
 					case XmlNodeType.Entity:
