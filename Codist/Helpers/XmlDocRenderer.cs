@@ -230,7 +230,12 @@ namespace Codist
 							case "see":
 								var see = e.Attribute("cref");
 								if (see != null) {
-									RenderXmlDocSymbol(see.Value, inlines, SymbolKind.Alias);
+									if (IsUrl(see)) {
+										CreateLink(inlines, e, see);
+									}
+									else {
+										RenderXmlDocSymbol(see.Value, inlines, SymbolKind.Alias);
+									}
 								}
 								else if ((see = e.Attribute("langword")) != null) {
 									RenderXmlDocSymbol(see.Value, inlines, SymbolKind.DynamicType);
@@ -264,8 +269,8 @@ namespace Codist
 								break;
 							case "a":
 								see = e.Attribute("href");
-								if (see != null && (see.Value.StartsWith("http://", StringComparison.Ordinal) || see.Value.StartsWith("https://", StringComparison.Ordinal))) {
-									StyleInner(e, inlines, new Hyperlink { NavigateUri = new Uri(see.Value), ToolTip = String.Join(Environment.NewLine, e.Attribute("title"), see.Value) }.ClickToNavigate());
+								if (see != null && IsUrl(see)) {
+									CreateLink(inlines, e, see);
 								}
 								else {
 									goto case "u";
@@ -315,6 +320,21 @@ namespace Codist
 				&& IsInlineElementName((lastNode.PreviousNode as XElement)?.Name.LocalName) == false) {
 				ParagraphCount++;
 			}
+		}
+
+		void CreateLink(InlineCollection inlines, XElement e, XAttribute see) {
+			var link = new Hyperlink { NavigateUri = new Uri(see.Value), ToolTip = String.Join(Environment.NewLine, e.Attribute("title"), see.Value) }.ClickToNavigate();
+			if (e.IsEmpty) {
+				link.Inlines.Add(see.Value);
+				inlines.Add(link);
+			}
+			else {
+				StyleInner(e, inlines, link);
+			}
+		}
+
+		private static bool IsUrl(XAttribute see) {
+			return see.Value.StartsWith("http://", StringComparison.Ordinal) || see.Value.StartsWith("https://", StringComparison.Ordinal);
 		}
 
 		Span RenderBlockContent(InlineCollection inlines, ListContext list, XElement e, int blockType) {
