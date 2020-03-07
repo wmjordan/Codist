@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Text.Classification;
+using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Taggers
 {
 	static class SymbolMarkManager
 	{
-		static readonly ConcurrentDictionary<IBookmarkedSymbol, IClassificationType> _Bookmarks = new ConcurrentDictionary<IBookmarkedSymbol, IClassificationType>(new SymbolComparer());
+		static readonly ConcurrentDictionary<IBookmarkedSymbol, ClassificationTag> _Bookmarks = new ConcurrentDictionary<IBookmarkedSymbol, ClassificationTag>(new SymbolComparer());
 
 		internal static IEnumerable<IBookmarkedSymbol> MarkedSymbols => _Bookmarks.Keys;
 		internal static bool HasBookmark => _Bookmarks.IsEmpty == false;
@@ -28,7 +29,7 @@ namespace Codist.Taggers
 			}
 			return false;
 		}
-		internal static IClassificationType GetSymbolMarkerStyle(ISymbol symbol) {
+		internal static ClassificationTag GetSymbolMarkerStyle(ISymbol symbol) {
 			return _Bookmarks.TryGetValue(new WrappedSymbol(symbol), out var result) ? result : null;
 		}
 		internal static void Clear() {
@@ -37,7 +38,7 @@ namespace Codist.Taggers
 		internal static bool Contains(ISymbol symbol) {
 			return _Bookmarks.ContainsKey(new WrappedSymbol(symbol));
 		}
-		internal static void Update(ISymbol symbol, IClassificationType classificationType) {
+		internal static void Update(ISymbol symbol, ClassificationTag classificationType) {
 			_Bookmarks[new BookmarkedSymbol(symbol)] = classificationType;
 		}
 		internal static bool Remove(IBookmarkedSymbol symbol) {

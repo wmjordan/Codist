@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.SmartBars
 {
@@ -89,7 +90,7 @@ namespace Codist.SmartBars
 			bool isDesignMode = CodistPackage.DebuggerStatus == DebuggerStatus.Design;
 			var isReadOnly = _Context.View.IsCaretInReadOnlyRegion();
 			var node = _Context.NodeIncludeTrivia;
-			if (isDesignMode && isReadOnly == false && node is XmlTextSyntax) {
+			if (isDesignMode && isReadOnly == false && (node is XmlTextSyntax)) {
 				AddXmlDocCommands();
 				return;
 			}
@@ -340,6 +341,8 @@ namespace Codist.SmartBars
 					}
 				}));
 			}
+			r.Add(new CommandItem(KnownImageIds.BreakpointEnabled, "Toggle Breakpoint", _ => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint")));
+			r.Add(new CommandItem(KnownImageIds.Bookmark, "Toggle Bookmark", _ => TextEditorHelper.ExecuteEditorCommand("Edit.ToggleBookmark")));
 			return r;
 		}
 
@@ -365,7 +368,7 @@ namespace Codist.SmartBars
 					_Symbol = ctor.ContainingType;
 				}
 			}
-			Taggers.SymbolMarkManager.Update(_Symbol, context.Sender.Tag as Microsoft.VisualStudio.Text.Classification.IClassificationType);
+			Taggers.SymbolMarkManager.Update(_Symbol, context.Sender.Tag as ClassificationTag);
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
 		}
 
