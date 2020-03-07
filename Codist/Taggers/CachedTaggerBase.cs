@@ -13,6 +13,7 @@ namespace Codist.Taggers
 	{
 		readonly ITextView _TextView;
 		readonly TaggerResult _Tags;
+		readonly List<TaggedContentSpan> _TaggedContents = new List<TaggedContentSpan>(3);
 
 		protected CachedTaggerBase(ITextView textView) {
 			_TextView = textView;
@@ -27,9 +28,9 @@ namespace Codist.Taggers
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
 			if (spans.Count == 0) {
-				yield break;
+				return Array.Empty<ITagSpan<IClassificationTag>>();
 			}
-			IEnumerable<SnapshotSpan> parseSpans = spans;
+			IEnumerable<SnapshotSpan> parseSpans;
 
 			if (_Tags.LastParsed == 0 && DoFullParseAtFirstLoad) {
 				var textSnapshot = _TextView.TextSnapshot;
@@ -38,14 +39,22 @@ namespace Codist.Taggers
 				parseSpans = textSnapshot.Lines.Select(l => l.Extent);
 				_Tags.LastParsed = textSnapshot.Length;
 			}
+			else {
+				parseSpans = spans;
+			}
+			_TaggedContents.Clear();
+			return ParseSpans(parseSpans);
+		}
+
+		IEnumerable<ITagSpan<IClassificationTag>> ParseSpans(IEnumerable<SnapshotSpan> parseSpans) {
 			foreach (var span in parseSpans) {
-				var r = Parse(span);
-				if (r != null) {
-					yield return _Tags.Add(r);
+				Parse(span, _TaggedContents);
+				foreach (var item in _TaggedContents) {
+					yield return _Tags.Add(item);
 				}
 			}
 		}
 
-		protected abstract TaggedContentSpan Parse(SnapshotSpan span);
+		protected abstract void Parse(SnapshotSpan span, ICollection<TaggedContentSpan> results);
 	}
 }

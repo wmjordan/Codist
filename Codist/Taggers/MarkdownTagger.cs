@@ -29,8 +29,6 @@ namespace Codist.Taggers
 			if (_HeaderClassificationTypes[1] == null) {
 				InitHeaderClassificationTypes();
 			}
-			textView.Closed -= TextViewClosed;
-			textView.Closed += TextViewClosed;
 			return textView.Properties.GetOrCreateSingletonProperty(() => new MarkdownTagger(textView)) as ITagger<T>;
 		}
 
@@ -44,31 +42,27 @@ namespace Codist.Taggers
 			_HeaderClassificationTypes[6] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading6));
 		}
 
-		void TextViewClosed(object sender, EventArgs args) {
-			var textView = sender as ITextView;
-			textView.Closed -= TextViewClosed;
-		}
-
 		sealed class MarkdownTagger : CachedTaggerBase
 		{
 			public MarkdownTagger(ITextView textView) : base(textView) {
 			}
 			protected override bool DoFullParseAtFirstLoad => true;
-			protected override TaggedContentSpan Parse(SnapshotSpan span) {
+			protected override void Parse(SnapshotSpan span, ICollection<TaggedContentSpan> results) {
 				var t = span.GetText();
-				if (t.Length > 0 && t[0] == '#') {
-					int c = 1, w = 0;
-					for (int i = 1; i < t.Length; i++) {
-						switch (t[i]) {
-							case '#': if (w == 0) { ++c; } continue;
-							case ' ': ++w; continue;
-						}
-						break;
-					}
-					w += c;
-					return new TaggedContentSpan(span.Snapshot, _HeaderClassificationTypes[c], span.Start, t.Length, w, t.Length - w);
+				if (t.Length < 1 || t[0] != '#') {
+					return;
 				}
-				return null;
+				int c = 1, w = 0;
+				for (int i = 1; i < t.Length; i++) {
+					switch (t[i]) {
+						case '#': if (w == 0) { ++c; } continue;
+						case ' ':
+						case '\t': ++w; continue;
+					}
+					break;
+				}
+				w += c;
+				results.Add(new TaggedContentSpan(_HeaderClassificationTypes[c], span, w, t.Length - w));
 			}
 		}
 	}

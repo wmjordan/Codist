@@ -10,6 +10,7 @@ namespace Codist.Margins
 	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = PredefinedMarginNames.OverviewMark)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType("projection")]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class CommentMarginFactory : IWpfTextViewMarginProvider
 	{
@@ -18,7 +19,7 @@ namespace Codist.Margins
 			var textView = wpfTextViewHost.TextView;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 				&& scrollBarContainer != null
-				&& Taggers.CommentTagger.IsCommentTaggable(textView)
+				&& Taggers.CommentTagger.IsCommentTaggable(textView.TextBuffer)
 				? new CommentMargin(textView, scrollBarContainer)
 				: null;
 		}

@@ -104,6 +104,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeLocalName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class LocalVariableFormat : ClassificationFormatDefinition
 	{
 		public LocalVariableFormat() {
@@ -118,6 +119,7 @@ namespace Codist.Taggers
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeStaticSymbol)]
 	[Order(After = Constants.CodeConstantName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class ConstFieldFormat : ClassificationFormatDefinition
 	{
 		public ConstFieldFormat() {
@@ -131,6 +133,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeFieldName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class ReadOnlyFieldFormat : ClassificationFormatDefinition
 	{
 		public ReadOnlyFieldFormat() {
@@ -144,6 +147,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeFieldName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class VolatileFieldFormat : ClassificationFormatDefinition
 	{
 		public VolatileFieldFormat() {
@@ -157,6 +161,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeFieldName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class EnumFieldFormat : ClassificationFormatDefinition
 	{
 		public EnumFieldFormat() {
@@ -170,6 +175,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeParameterName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class ParameterFormat : ClassificationFormatDefinition
 	{
 		public ParameterFormat() {
@@ -183,6 +189,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeTypeParameterName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class TypeParameterFormat : ClassificationFormatDefinition
 	{
 		public TypeParameterFormat() {
@@ -196,6 +203,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeNamespaceName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class NamespaceFormat : ClassificationFormatDefinition
 	{
 		public NamespaceFormat() {
@@ -209,6 +217,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeExtensionMethodName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class ExtensionMethodFormat : ClassificationFormatDefinition
 	{
 		public ExtensionMethodFormat() {
@@ -222,6 +231,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeMethodName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class ExternMethodFormat : ClassificationFormatDefinition
 	{
 		public ExternMethodFormat() {
@@ -235,6 +245,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeMethodName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class MethodFormat : ClassificationFormatDefinition
 	{
 		public MethodFormat() {
@@ -247,6 +258,7 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpEventName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class EventFormat : ClassificationFormatDefinition
 	{
 		public EventFormat() {
@@ -260,6 +272,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodePropertyName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class PropertyFormat : ClassificationFormatDefinition
 	{
 		public PropertyFormat() {
@@ -273,6 +286,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeFieldName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class FieldFormat : ClassificationFormatDefinition
 	{
 		public FieldFormat() {
@@ -285,6 +299,7 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpAliasNamespaceName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class AliasNamespaceFormat : ClassificationFormatDefinition
 	{
 		public AliasNamespaceFormat() {
@@ -298,6 +313,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeMethodName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class ConstructorMethodFormat : ClassificationFormatDefinition
 	{
 		public ConstructorMethodFormat() {
@@ -361,6 +377,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeStaticSymbol)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class StaticMemberFormat : ClassificationFormatDefinition
 	{
 		public StaticMemberFormat() {
@@ -373,6 +390,7 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpOverrideMemberName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class OverrideMemberFormat : ClassificationFormatDefinition
 	{
 		public OverrideMemberFormat() {
@@ -385,6 +403,7 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpAbstractMemberName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class AbstractMemberFormat : ClassificationFormatDefinition
 	{
 		public AbstractMemberFormat() {
@@ -397,6 +416,7 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpVirtualMemberName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class VirtualMemberFormat : ClassificationFormatDefinition
 	{
 		public VirtualMemberFormat() {
@@ -409,6 +429,7 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpSealedClassName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class SealedClassFormat : ClassificationFormatDefinition
 	{
 		public SealedClassFormat() {
@@ -435,6 +456,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeMethodName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class AttributeNameFormat : ClassificationFormatDefinition
 	{
 		public AttributeNameFormat() {
@@ -470,7 +492,7 @@ namespace Codist.Taggers
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpMetadataSymbol)]
 	[Name(Constants.CSharpMetadataSymbol)]
 	[UserVisible(false)]
-	[Order(After = Constants.CodeIdentifier)]
+	[Order(After = Constants.CSharpUserSymbol)]
 	sealed class MetadataSymbol : ClassificationFormatDefinition
 	{
 		public MetadataSymbol() {

@@ -9,6 +9,9 @@ namespace Codist.Taggers
 {
 	sealed class TaggerResult
 	{
+		// hack This is used to prevent the syntax classification info function from altering this result
+		internal static bool IsLocked;
+
 		// hack We assume that it is threadsafe to organize the tags with this
 		readonly List<TaggedContentSpan> _Tags = new List<TaggedContentSpan>();
 
@@ -44,13 +47,16 @@ namespace Codist.Taggers
 			return r;
 		}
 		public TaggedContentSpan Add(TaggedContentSpan tag) {
-			var s = tag.Span;
-			if (s.Start < Start) {
-				Start = s.Start;
+			if (IsLocked) {
+				return tag;
+			}
+			var s = new SnapshotPoint(tag.TextSnapshot, tag.Start);
+			if (s < Start) {
+				Start = s;
 			}
 			var tags = _Tags;
 			for (int i = tags.Count - 1; i >= 0; i--) {
-				if (tags[i].Contains(s.Start)) {
+				if (tags[i].Contains(s)) {
 					return tags[i] = tag;
 				}
 			}
@@ -111,7 +117,11 @@ namespace Codist.Taggers
 
 		public ITextSnapshot TextSnapshot { get; private set; }
 
-		public TaggedContentSpan(ITextSnapshot textSnapshot, IClassificationTag tag, int tagStart, int tagLength, int contentOffset, int contentLength) {
+		public TaggedContentSpan(IClassificationTag tag, SnapshotSpan span, int contentOffset, int contentLength)
+			: this(tag, span.Snapshot, span.Start, span.Length, contentOffset, contentLength) {
+		}
+
+		public TaggedContentSpan(IClassificationTag tag, ITextSnapshot textSnapshot, int tagStart, int tagLength, int contentOffset, int contentLength) {
 			TextSnapshot = textSnapshot;
 			Tag = tag;
 			Start = tagStart;

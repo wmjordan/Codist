@@ -102,7 +102,11 @@ namespace Codist.Taggers
 					Debug.WriteLine("Classification type: " + c);
 				}
 #endif
-				ts = TagComments(tagSpan.Span.GetSpans(snapshot)[0], tagSpan);
+				var ss = tagSpan.Span.GetSpans(snapshot);
+				if (ss.Count == 0) {
+					continue;
+				}
+				ts = TagComments(ss[0], tagSpan);
 				if (ts != null) {
 					if (s == null) {
 						s = ts;
@@ -189,10 +193,10 @@ namespace Codist.Taggers
 			}
 
 			return label.StyleApplication == CommentStyleApplication.Tag
-				? new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + commentStart, label.LabelLength, contentStart - commentStart, contentEnd - contentStart)
+				? new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, label.LabelLength, contentStart - commentStart, contentEnd - contentStart)
 				: label.StyleApplication == CommentStyleApplication.Content
-				? new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + contentStart, contentEnd - contentStart, 0, contentEnd - contentStart)
-				: new TaggedContentSpan(snapshotSpan.Snapshot, ctag, snapshotSpan.Start + commentStart, contentEnd - commentStart, contentStart - commentStart, contentEnd - contentStart);
+				? new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + contentStart, contentEnd - contentStart, 0, contentEnd - contentStart)
+				: new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, contentEnd - commentStart, contentStart - commentStart, contentEnd - contentStart);
 		}
 
 		protected static bool Matches(SnapshotSpan span, string text) {
@@ -229,12 +233,12 @@ namespace Codist.Taggers
 			Margin?.InvalidateVisual();
 		}
 
-		internal static bool IsCommentTaggable(ITextView view) {
-			return GetCodeType(view.TextBuffer) != CodeType.None;
+		internal static bool IsCommentTaggable(ITextBuffer buffer) {
+			return GetCodeType(buffer) != CodeType.None;
 		}
 		static CodeType GetCodeType(ITextBuffer textBuffer) {
 			var t = textBuffer.ContentType;
-			var c = t.IsOfType(Constants.CodeTypes.CSharp) ? CodeType.CSharp
+			var c = t.IsOfType(Constants.CodeTypes.CSharp) || t.IsOfType("HTMLXProjection") ? CodeType.CSharp
 				: t.IsOfType("html") || t.IsOfType("htmlx") || t.IsOfType("XAML") || t.IsOfType("XML") ? CodeType.Markup
 				: t.IsOfType("code++.css") ? CodeType.Css
 				: t.IsOfType("TypeScript") || t.IsOfType("JavaScript") ? CodeType.Js
@@ -256,6 +260,8 @@ namespace Codist.Taggers
 					return CodeType.C;
 				case "css":
 					return CodeType.Css;
+				case "cshtml":
+					return CodeType.CSharp;
 				case "html":
 				case "htmlx":
 				case "xaml":
@@ -331,7 +337,7 @@ namespace Codist.Taggers
 				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)
 					&& tagSpan.Tag.ClassificationType == _PreprocessorKeyword) {
 					return Matches(snapshotSpan, "pragma") || Matches(snapshotSpan, "if") || Matches(snapshotSpan, "else") /*|| Matches(snapshotSpan, "region")*/
-						? new TaggedContentSpan(snapshotSpan.Snapshot, tagSpan.Tag, snapshotSpan.Start, snapshotSpan.Length, 0, 0)
+						? new TaggedContentSpan(tagSpan.Tag, snapshotSpan, 0, 0)
 						: null;
 				}
 				return base.TagComments(snapshotSpan, tagSpan);
@@ -377,6 +383,7 @@ namespace Codist.Taggers
 
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType("projection")]
 	[TagType(typeof(IClassificationTag))]
 	sealed class CommentTaggerProvider : IViewTaggerProvider
 	{
@@ -384,13 +391,17 @@ namespace Codist.Taggers
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false) {
 				return null;
 			}
-			if (CommentTagger.IsCommentTaggable(textView) == false) {
+			if (CommentTagger.IsCommentTaggable(buffer) == false) {
 				return null;
 			}
 			var vp = textView.Properties;
-			var tagger = vp.GetOrCreateSingletonProperty(() => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
+			CommentTagger codeTagger;
+			//if (vp.TryGetProperty(typeof(CommentTagger), out codeTagger)) {
+			//	return null;
+			//}
 			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
-			var codeTagger = vp.GetOrCreateSingletonProperty(nameof(CommentTaggerProvider), () => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, tagger, tags, textView.TextBuffer));
+			var agg = vp.GetOrCreateSingletonProperty(() => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
+			codeTagger = vp.GetOrCreateSingletonProperty(() => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, agg, tags, buffer));
 			textView.Closed -= TextViewClosed;
 			textView.Closed += TextViewClosed;
 			return codeTagger as ITagger<T>;
@@ -400,7 +411,7 @@ namespace Codist.Taggers
 			var textView = sender as ITextView;
 			textView.Closed -= TextViewClosed;
 			textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>(typeof(ITagAggregator<IClassificationTag>))?.Dispose();
-			textView.Properties.GetProperty<CommentTagger>(nameof(CommentTaggerProvider))?.Dispose();
+			textView.Properties.GetProperty<CommentTagger>(typeof(CommentTagger))?.Dispose();
 		}
 	}
 }
