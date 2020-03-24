@@ -472,7 +472,7 @@ namespace Codist.Controls
 				if (groupByType && item.ContainingType != containingType) {
 					m.Menu.Add(containingType = item.ContainingType, false)
 						.Type = SymbolItemType.Container;
-					if (containingType.TypeKind == TypeKind.Delegate) {
+					if (containingType?.TypeKind == TypeKind.Delegate) {
 						continue; // skip Invoke method in Delegates, for results from FindMethodBySignature
 					}
 				}
