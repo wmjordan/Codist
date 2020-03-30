@@ -120,7 +120,9 @@ namespace Codist.SmartBars
 			//}
 			if (View.IsMultilineSelected() == false) {
 				AddFindAndReplaceCommands();
-				AddClassificationInfoCommand();
+				if (Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowSyntaxClassificationInfo)) {
+					AddClassificationInfoCommand();
+				}
 			}
 			//AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
@@ -299,7 +301,7 @@ namespace Codist.SmartBars
 			Canvas.SetLeft(_ToolBarTray, x < View.ViewportLeft ? View.ViewportLeft
 				: x + rs.Width < View.ViewportRight ? x
 				: View.ViewportRight - rs.Width);
-			Canvas.SetTop(_ToolBarTray, (y < View.ViewportTop || x < 0 && View.Selection.IsReversed == false ? y + rs.Height + 30 : y));
+			Canvas.SetTop(_ToolBarTray, y < View.ViewportTop || x < 0 && View.Selection.IsReversed == false ? y + rs.Height + 30 : y);
 		}
 
 		#region Event handlers
