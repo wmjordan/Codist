@@ -242,7 +242,14 @@ namespace Codist.Margins
 						var s = region.GetDeclarationSignature();
 						if (s != null) {
 							text = WpfHelper.ToFormattedText(s, labelSize, _Element._RegionForeground);
-							var p = new Point(5, _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, region.SpanStart)) - text.Height / 2);
+							SnapshotPoint rp;
+							try {
+								rp = new SnapshotPoint(snapshot, region.SpanStart);
+							}
+							catch (ArgumentOutOfRangeException) {
+								break;
+							}
+							var p = new Point(5, _ScrollBar.GetYCoordinateOfBufferPosition(rp) - text.Height / 2);
 							if (_Element._RegionBackground != null) {
 								drawingContext.DrawRectangle(_Element._RegionBackground, null, new Rect(p, new Size(text.Width, text.Height)));
 							}
