@@ -55,6 +55,9 @@ namespace Codist
 		[DefaultValue(BuildOptions.Default)]
 		public BuildOptions BuildOptions { get; set; } = BuildOptions.Default;
 
+		[DefaultValue(DeveloperOptions.Default)]
+		public DeveloperOptions DeveloperOptions { get; set; } = DeveloperOptions.Default;
+
 		[DefaultValue(SymbolToolTipOptions.Default)]
 		public SymbolToolTipOptions SymbolToolTipOptions { get; set; } = SymbolToolTipOptions.Default;
 
@@ -289,17 +292,18 @@ namespace Codist
 		}
 		internal void Set(SmartBarOptions options, bool set) {
 			SmartBarOptions = SmartBarOptions.SetFlags(options, set);
-			FireConfigChangedEvent(Features.SmartBar);
 		}
 		internal void Set(MarkerOptions options, bool set) {
 			MarkerOptions = MarkerOptions.SetFlags(options, set);
-			FireConfigChangedEvent(Features.ScrollbarMarkers);
 		}
 		internal void Set(SpecialHighlightOptions options, bool set) {
 			SpecialHighlightOptions = SpecialHighlightOptions.SetFlags(options, set);
 		}
 		internal void Set(BuildOptions options, bool set) {
 			BuildOptions = BuildOptions.SetFlags(options, set);
+		}
+		internal void Set(DeveloperOptions options, bool set) {
+			DeveloperOptions = DeveloperOptions.SetFlags(options, set);
 		}
 		internal void SetSymbolToolTipOptions(SymbolToolTipOptions options, bool set) {
 			SymbolToolTipOptions = SymbolToolTipOptions.SetFlags(options, set);
@@ -506,7 +510,7 @@ namespace Codist
 	{
 		None,
 		MainWindow,
-		CodeWindow,
+		CodeWindow = 1 << 1
 	}
 
 	[Flags]
@@ -537,11 +541,12 @@ namespace Codist
 		ExceptionDoc = 1 << 22,
 		ReturnsDoc = 1 << 23,
 		RemarksDoc = 1 << 24,
-		AlternativeStyle = 1 << 25,
+		ExampleDoc = 1 << 25,
 		Color = 1 << 26,
 		Selection = 1 << 27,
 		ClickAndGo = 1 << 28,
 		CtrlQuickInfo = 1 << 29,
+		AlternativeStyle = 1 << 30,
 		QuickInfoOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | ClickAndGo | AlternativeStyle,
 		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | ClickAndGo | MethodOverload | Parameter | OverrideDefaultDocumentation,
 	}
@@ -643,6 +648,15 @@ namespace Codist
 		None,
 		BuildTimestamp = 1,
 		VsixAutoIncrement = 1 << 8,
+		Default = None
+	}
+
+	[Flags]
+	public enum DeveloperOptions
+	{
+		None,
+		ShowDocumentContentType = 1,
+		ShowSyntaxClassificationInfo = 1 << 1,
 		Default = None
 	}
 

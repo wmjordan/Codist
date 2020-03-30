@@ -4,30 +4,20 @@ using System.Text;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Utilities;
 using System.Collections.Generic;
+using AppHelpers;
 
 namespace Codist.Commands
 {
 	/// <summary>A command which displays content types of the document.</summary>
 	internal static class GetContentTypeCommand
 	{
-		/// <summary>
-		/// Command ID.
-		/// </summary>
-		public const int CommandId = 4133;
-
-		/// <summary>
-		/// Command menu group (command set GUID).
-		/// </summary>
-		public static readonly Guid CommandSet = new Guid("d668a130-cb52-4143-b389-55560823f3d6");
-
-		public static void Initialize(AsyncPackage package) {
-			var menuItem = new OleMenuCommand(Execute, new CommandID(CommandSet, CommandId));
-			menuItem.BeforeQueryStatus += (s, args) => {
+		public static void Initialize() {
+			Command.GetContentType.Register(Execute, (s, args) => {
 				ThreadHelper.ThrowIfNotOnUIThread();
 				var c = s as OleMenuCommand;
-				c.Visible = TextEditorHelper.GetActiveWpfDocumentView() != null;
-			};
-			CodistPackage.MenuService.AddCommand(menuItem);
+				c.Visible = Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowDocumentContentType)
+					&& TextEditorHelper.GetActiveWpfDocumentView() != null;
+			});
 		}
 
 		static void Execute(object sender, EventArgs e) {

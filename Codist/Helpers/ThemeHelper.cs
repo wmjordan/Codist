@@ -24,9 +24,14 @@ namespace Codist
 		static ThemeHelper() {
 			RefreshThemeCache();
 			__ToolTipFormatMap.ClassificationFormatMappingChanged += UpdateToolTipFormatMap;
+			VSColorTheme.ThemeChanged += _ => {
+				System.Diagnostics.Debug.WriteLine("Theme changed.");
+				RefreshThemeCache();
+			};
 		}
 
 		public static GdiColor DocumentPageColor { get; private set; }
+		public static WpfBrush DocumentPageBrush { get; private set; }
 		public static GdiColor DocumentTextColor { get; private set; }
 		public static WpfBrush DocumentTextBrush { get; private set; }
 		public static WpfBrush FileTabProvisionalSelectionBrush { get; private set; }
@@ -134,8 +139,9 @@ namespace Codist
 		#region Cache
 		internal static void RefreshThemeCache() {
 			DocumentPageColor = CommonDocumentColors.PageColorKey.GetGdiColor();
+			DocumentPageBrush = new WpfBrush(DocumentPageColor.ToWpfColor());
 			DocumentTextColor = CommonDocumentColors.PageTextColorKey.GetGdiColor();
-			DocumentTextBrush = CommonDocumentColors.PageTextColorKey.GetWpfBrush();
+			DocumentTextBrush = new WpfBrush(DocumentTextColor.ToWpfColor());
 			FileTabProvisionalSelectionBrush = EnvironmentColors.FileTabProvisionalSelectedActiveBrushKey.GetWpfBrush();
 			ToolWindowBackgroundColor = EnvironmentColors.ToolWindowBackgroundColorKey.GetGdiColor();
 			TitleBackgroundColor = EnvironmentColors.MainWindowActiveCaptionColorKey.GetWpfColor();

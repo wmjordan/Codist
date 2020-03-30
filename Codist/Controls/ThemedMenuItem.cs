@@ -17,6 +17,13 @@ namespace Codist.Controls
 			SubMenuMaxHeight = 300;
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 		}
+		public ThemedMenuItem(int imageId, string text, RoutedEventHandler clickHandler) : this() {
+			if (imageId >= 0) {
+				Icon = ThemeHelper.GetImage(imageId);
+			}
+			Header = new ThemedMenuText(text);
+			Click += clickHandler;
+		}
 
 		/// <summary>Gets or sets the header of the pop up submenu. If the header is set and no sub items are in the menu, an invisible <see cref="Separator"/> will be added to make the menu possible to popup when it is clicked.</summary>
 		public FrameworkElement SubMenuHeader {

@@ -13,14 +13,15 @@
     <ShouldCreateLogs>False</ShouldCreateLogs>
     <AdvancedSettingsExpanded>False</AdvancedSettingsExpanded>
     <UpdateAssemblyVersion>False</UpdateAssemblyVersion>
-    <UpdateAssemblyFileVersion>True</UpdateAssemblyFileVersion>
+    <UpdateAssemblyFileVersion>False</UpdateAssemblyFileVersion>
     <UpdateAssemblyInfoVersion>False</UpdateAssemblyInfoVersion>
     <UpdatePackageVersion>False</UpdatePackageVersion>
     <AssemblyInfoVersionType>SettingsVersion</AssemblyInfoVersionType>
     <InheritWinAppVersionFrom>None</InheritWinAppVersionFrom>
     <AssemblyInfoVersionSettings>
     </AssemblyInfoVersionSettings>
-    <AssemblyFileVersionSettings>None.None.None.Increment</AssemblyFileVersionSettings>
+    <AssemblyFileVersionSettings>
+    </AssemblyFileVersionSettings>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -65,11 +66,27 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>7.3</LangVersion>
+    <DeployExtension>False</DeployExtension>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Commands\CommandRegistry.cs" />
+    <Compile Include="Commands\GetContentTypeCommand.cs" />
+    <Compile Include="Commands\SyntaxCustomizerWindow.cs" />
+    <Compile Include="Commands\SyntaxCustomizerWindowCommand.cs" />
+    <Compile Include="Commands\SyntaxCustomizerWindowControl.xaml.cs">
+      <DependentUpon>SyntaxCustomizerWindowControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Commands\VersionInfoBar.cs" />
     <Compile Include="Controls\IContextMenuHost.cs" />
+    <Compile Include="Controls\IntegerBox.xaml.cs">
+      <DependentUpon>IntegerBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\NumericUpDown.cs" />
     <Compile Include="NaviBar\NaviBar.cs" />
+    <Compile Include="Options\OptionsPage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Options\SyntaxHighlightCustomizationWindow.cs" />
     <Compile Include="QuickInfo\CSharpOpCodeQuickInfo.cs" />
     <Compile Include="Taggers\Classifications.cs" />
     <Compile Include="Taggers\CommentFormats.cs" />
@@ -87,9 +104,8 @@
     <Compile Include="Taggers\DisposableTagger.cs" />
     <Compile Include="Taggers\HighlighterDefinitions.cs" />
     <Compile Include="Taggers\HighlighterFormats.cs" />
-    <Compile Include="Taggers\IBookmarkedSymbol.cs" />
     <Compile Include="Taggers\ICodeMemberTag.cs" />
-    <Compile Include="Taggers\IReuseableTagger.cs" />
+    <Compile Include="Taggers\Interfaces.cs" />
     <Compile Include="Taggers\SymbolMarkManager.cs" />
     <Compile Include="Taggers\CachedTaggerBase.cs" />
     <Compile Include="Taggers\TaggerResult.cs" />
@@ -103,7 +119,7 @@
     <Compile Include="Controls\SymbolFilterBox.cs" />
     <Compile Include="Controls\QuickInfoTextBox.cs" />
     <Compile Include="Controls\StateButton.cs" />
-    <Compile Include="Controls\ItemList.cs" />
+    <Compile Include="Controls\VirtualList.cs" />
     <Compile Include="Controls\SymbolList.cs" />
     <Compile Include="Controls\ThemedMenuItem.cs" />
     <Compile Include="Controls\TitleLabel.cs">
@@ -639,6 +655,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Commands\SyntaxCustomizerWindowControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\IntegerBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Resource Include="Controls\SymbolList.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -647,7 +671,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Resource>
-    <Resource Include="Controls\ItemList.xaml">
+    <Resource Include="Controls\VirtualList.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Resource>

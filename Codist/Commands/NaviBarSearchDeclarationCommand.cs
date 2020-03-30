@@ -9,18 +9,9 @@ namespace Codist.Commands
 	/// </summary>
 	internal static class NaviBarSearchDeclarationCommand
 	{
-		public const int CommandSearchDeclarationId = 4130;
-		public const int CommandSearchActiveClassId = 4131;
-
-		public static readonly Guid CommandSet = new Guid("5EF88028-C0FC-4849-9883-10F4BD2217B3");
-
-		public static void Initialize(AsyncPackage package) {
-			var menuItem = new OleMenuCommand(ExecuteSearchDeclaration, new CommandID(CommandSet, CommandSearchDeclarationId));
-			menuItem.BeforeQueryStatus += HandleMenuState;
-			CodistPackage.MenuService.AddCommand(menuItem);
-			menuItem = new OleMenuCommand(ExecuteSearchActiveClass, new CommandID(CommandSet, CommandSearchActiveClassId));
-			menuItem.BeforeQueryStatus += HandleMenuState;
-			CodistPackage.MenuService.AddCommand(menuItem);
+		public static void Initialize() {
+			Command.NaviBarSearchDeclaration.Register(ExecuteSearchDeclaration, HandleMenuState);
+			Command.NaviBarSearchActiveClass.Register(ExecuteSearchActiveClass, HandleMenuState);
 		}
 
 		static void HandleMenuState(object s, EventArgs args) {

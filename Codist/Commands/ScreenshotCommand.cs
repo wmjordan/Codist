@@ -7,24 +7,12 @@ namespace Codist.Commands
 	/// <summary>A command which takes screenshot of the active code document window.</summary>
 	internal static class ScreenshotCommand
 	{
-		/// <summary>
-		/// Command ID.
-		/// </summary>
-		public const int CommandId = 0x0100;
-
-		/// <summary>
-		/// Command menu group (command set GUID).
-		/// </summary>
-		public static readonly Guid CommandSet = new Guid("d668a130-cb52-4143-b389-55560823f3d6");
-
-		public static void Initialize(AsyncPackage package) {
-			var menuItem = new OleMenuCommand(Execute, new CommandID(CommandSet, CommandId));
-			menuItem.BeforeQueryStatus += (s, args) => {
+		public static void Initialize() {
+			Command.CodeWindowScreenshot.Register(Execute, (s, args) => {
 				ThreadHelper.ThrowIfNotOnUIThread();
 				var c = s as OleMenuCommand;
 				c.Enabled = TextEditorHelper.GetActiveWpfDocumentView() != null;
-			};
-			CodistPackage.MenuService.AddCommand(menuItem);
+			});
 		}
 
 		static void Execute(object sender, EventArgs e) {

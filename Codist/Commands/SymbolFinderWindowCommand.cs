@@ -15,16 +15,6 @@ namespace Codist.Commands
 	internal sealed class SymbolFinderWindowCommand
 	{
 		/// <summary>
-		/// Command ID.
-		/// </summary>
-		public const int CommandId = 4129;
-
-		/// <summary>
-		/// Command menu group (command set GUID).
-		/// </summary>
-		public static readonly Guid CommandSet = new Guid("d668a130-cb52-4143-b389-55560823f3d6");
-
-		/// <summary>
 		/// VS Package that provides this command, not null.
 		/// </summary>
 		private readonly AsyncPackage _Package;
@@ -37,11 +27,8 @@ namespace Codist.Commands
 		/// <param name="commandService">Command service to add command to, not null.</param>
 		private SymbolFinderWindowCommand(AsyncPackage package, OleMenuCommandService commandService) {
 			this._Package = package ?? throw new ArgumentNullException(nameof(package));
-			commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
-			var menuCommandID = new CommandID(CommandSet, CommandId);
-			var menuItem = new MenuCommand(this.Execute, menuCommandID);
-			commandService.AddCommand(menuItem);
+			Command.SymbolFinderWindow.Register(Execute);
 		}
 
 		/// <summary>

@@ -4,12 +4,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using WpfText = System.Windows.Media.FormattedText;
+using System.Collections.Generic;
 
 namespace Codist
 {
@@ -198,6 +200,13 @@ namespace Codist
 			panel.Children.Add(control);
 			return panel;
 		}
+		public static TPanel Add<TPanel>(this TPanel panel, Func<UIElement, UIElement> template, params UIElement[] controls)
+			where TPanel : Panel {
+			foreach (var item in controls) {
+				panel.Children.Add(template(item));
+			}
+			return panel;
+		}
 		public static StackPanel MakeHorizontal(this StackPanel panel) {
 			panel.Orientation = Orientation.Horizontal;
 			return panel;
@@ -344,7 +353,13 @@ namespace Codist
 			return (args.OriginalSource as DependencyObject).GetParent<TObject>() != null;
 		}
 
-		public static TDependencyObject SetDependentValue<TDependencyObject, TValue>(this TDependencyObject obj, Action<TDependencyObject, TValue> setter, TValue value) where TDependencyObject : DependencyObject {
+		public static TDependencyObject ClearValues<TDependencyObject>(this TDependencyObject obj, params DependencyProperty[] dependencies) where TDependencyObject : DependencyObject {
+			foreach (var item in dependencies) {
+				obj.ClearValue(item);
+			}
+			return obj;
+		}
+		public static TDependencyObject SetValue<TDependencyObject, TValue>(this TDependencyObject obj, Action<TDependencyObject, TValue> setter, TValue value) where TDependencyObject : DependencyObject {
 			setter(obj, value);
 			return obj;
 		}
@@ -395,6 +410,11 @@ namespace Codist
 				}
 			}
 			return null;
+		}
+		public static void AddRange(this ItemCollection items, IEnumerable<object> objects) {
+			foreach (var item in objects) {
+				items.Add(item);
+			}
 		}
 		public static bool FocusFirst<TItem>(this ItemCollection items)
 			where TItem : UIElement {
@@ -509,6 +529,10 @@ namespace Codist
 			}
 		}
 
+		public static IEnumerable<InstalledFont> GetInstalledFonts() {
+			return InstalledFonts.All;
+		}
+
 		public static TObject UseDummyToolTip<TObject>(this TObject item)
 			where TObject : FrameworkElement {
 			item.ToolTip = DummyToolTip;
@@ -537,7 +561,71 @@ namespace Codist
 				s.ToolTipOpening -= ShowLazyToolTip;
 			}
 		}
+
+		public static string GetTypefaceAdjustedName(this FamilyTypeface typeface) {
+			var names = typeface.AdjustedFaceNames;
+			if (names.Count == 1) {
+				return names.First().Value;
+			}
+			if (names.Count == 0) {
+				return "Regular";
+			}
+			foreach (var item in names) {
+				if (String.Equals(item.Key.IetfLanguageTag, InstalledFont.SystemLang, StringComparison.OrdinalIgnoreCase)) {
+					return item.Value;
+				}
+			}
+			return names.First().Value;
+		}
+
+		public static bool IsStandardStyle(this FamilyTypeface typeface) {
+			return (typeface.Weight == FontWeights.Normal || typeface.Weight == FontWeights.Bold)
+				 && (typeface.Style == FontStyles.Normal || typeface.Style == FontStyles.Italic || typeface.Style == FontStyles.Oblique)
+				 && (typeface.Stretch == FontStretches.Normal);
+		}
 		#endregion
+
+		static class InstalledFonts
+		{
+			static readonly InstalledFont[] _InstalledFonts = Init();
+
+			public static IEnumerable<InstalledFont> All => _InstalledFonts;
+
+			static InstalledFont[] Init() {
+				var l = new List<InstalledFont>(100);
+				foreach (var item in Fonts.SystemFontFamilies) {
+					l.Add(new InstalledFont(item));
+				}
+				l.Sort((x, y) => x.Name.CompareTo(y.Name));
+				return l.ToArray();
+			}
+		}
 	}
 
+	sealed class InstalledFont
+	{
+		internal static readonly string SystemLang = System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag;
+
+		public InstalledFont(FontFamily font) {
+			Font = font;
+			foreach (var item in Font.FamilyNames) {
+				if (String.Equals(item.Key.IetfLanguageTag, SystemLang, StringComparison.OrdinalIgnoreCase)) {
+					Name = item.Value;
+					break;
+				}
+			}
+			if (Name == null) {
+				Name = Font.Source;
+			}
+			ExtraTypefaces = font.FamilyTypefaces
+				.Where(i => i.IsStandardStyle() == false)
+				.ToArray();
+		}
+		public FontFamily Font { get; }
+		public string Name { get; }
+		public FamilyTypeface[] ExtraTypefaces { get; }
+		public override string ToString() {
+			return Name;
+		}
+	}
 }

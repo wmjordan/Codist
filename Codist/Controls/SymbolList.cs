@@ -307,14 +307,11 @@ namespace Codist.Controls
 		}
 
 		void SetupMenuCommand(SymbolItem item, int imageId, string title, Action<SymbolItem> action) {
-			var mi = new ThemedMenuItem {
-				Icon = ThemeHelper.GetImage(imageId),
-				Header = new ThemedMenuText(title),
-				Tag = (item, action)
-			};
-			mi.Click += (s, args) => {
+			var mi = new ThemedMenuItem(imageId, title, (s, args) => {
 				var i = (ValueTuple<SymbolItem, Action<SymbolItem>>)((MenuItem)s).Tag;
 				i.Item2(i.Item1);
+			}) {
+				Tag = (item, action)
 			};
 			ContextMenu.Items.Add(mi);
 		}

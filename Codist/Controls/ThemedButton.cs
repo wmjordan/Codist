@@ -19,6 +19,11 @@ namespace Codist.Controls
 
 		public ThemedButton(int imageId, object toolTip, Action onClickHandler)
 			: this(ThemeHelper.GetImage(imageId), toolTip, onClickHandler) { }
+		public ThemedButton(int imageId, string text, object toolTip, Action onClickHandler)
+			: this(new StackPanel {
+				Orientation = Orientation.Horizontal,
+				Children = { ThemeHelper.GetImage(imageId).WrapMargin(WpfHelper.GlyphMargin), new TextBlock { Text = text } }
+			}, toolTip, onClickHandler) { }
 
 		public ThemedButton(object content, object toolTip, Action onClickHandler)
 			: this(content, toolTip) {
@@ -50,13 +55,14 @@ namespace Codist.Controls
 		bool _IsChecked, _IsHighlighted;
 
 		public ThemedImageButton(int imageId, TextBlock content) {
-			Content = new StackPanel {
-				Orientation = Orientation.Horizontal,
-				Children = {
-					ThemeHelper.GetImage(imageId).WrapMargin(WpfHelper.SmallHorizontalMargin),
-					content
-				}
-			};
+			Content = content != null ?
+				(object)new StackPanel {
+					Orientation = Orientation.Horizontal,
+					Children = {
+						ThemeHelper.GetImage(imageId).WrapMargin(WpfHelper.SmallHorizontalMargin),
+						content
+					}
+				} : ThemeHelper.GetImage(imageId).WrapMargin(WpfHelper.SmallHorizontalMargin);
 			Header = content;
 			this.ReferenceStyle(typeof(ThemedImageButton));
 			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);

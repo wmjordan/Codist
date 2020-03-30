@@ -209,6 +209,9 @@ namespace Codist
 		}
 
 		public static void SetUITextRenderOptions(DependencyObject element, bool optimize) {
+			if (element == null) {
+				return;
+			}
 			//TextOptions.SetTextFormattingMode(element, optimize ? TextFormattingMode.Ideal : TextFormattingMode.Display);
 			TextOptions.SetTextHintingMode(element, optimize ? TextHintingMode.Fixed : TextHintingMode.Auto);
 			TextOptions.SetTextRenderingMode(element, optimize ? TextRenderingMode.Grayscale : TextRenderingMode.Auto);

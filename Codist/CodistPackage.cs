@@ -21,26 +21,22 @@ namespace Codist
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.General), Constants.NameOfMe, "General", 0, 0, true, Sort = 0)]
 
-	[ProvideOptionPage(typeof(Options.SyntaxHighlight), Constants.NameOfMe, "Syntax Highlight", 0, 0, true, Sort = 10)]
-	[ProvideOptionPage(typeof(Options.CommonStyle), CategorySyntaxHighlight, "All languages", 0, 0, true, Sort = 11)]
-	[ProvideOptionPage(typeof(Options.CSharpStyle), CategorySyntaxHighlight, "C#", 0, 0, true, Sort = 12)]
-	[ProvideOptionPage(typeof(Options.CppStyle), CategorySyntaxHighlight, "C/C++", 0, 0, true, Sort = 13)]
-	[ProvideOptionPage(typeof(Options.MarkdownStyle), CategorySyntaxHighlight, "Markdown", 0, 0, true, Sort = 14)]
-	[ProvideOptionPage(typeof(Options.XmlStyle), CategorySyntaxHighlight, "XML", 0, 0, true, Sort = 15)]
-	[ProvideOptionPage(typeof(Options.CommentStyle), CategorySyntaxHighlight, "Comment", 0, 0, true, Sort = 19)]
+	[ProvideOptionPage(typeof(Options.SyntaxHighlightOptionsPage), Constants.NameOfMe, "Syntax Highlight", 0, 0, true, Sort = 10)]
 
-	[ProvideOptionPage(typeof(Options.SuperQuickInfo), Constants.NameOfMe, "Super Quick Info", 0, 0, true, Sort = 20)]
-	[ProvideOptionPage(typeof(Options.CSharpSuperQuickInfo), CategorySuperQuickInfo, "C#", 0, 0, true, Sort = 21)]
+	[ProvideOptionPage(typeof(Options.SuperQuickInfoOptionsPage), Constants.NameOfMe, "Super Quick Info", 0, 0, true, Sort = 20)]
 
-	[ProvideOptionPage(typeof(Options.SmartBar), Constants.NameOfMe, "Smart Bar", 0, 0, true, Sort = 30)]
+	[ProvideOptionPage(typeof(Options.SmartBarOptionsPage), Constants.NameOfMe, "Smart Bar", 0, 0, true, Sort = 30)]
 
-	[ProvideOptionPage(typeof(Options.NaviBar), Constants.NameOfMe, "Navigation Bar", 0, 0, true, Sort = 40)]
+	[ProvideOptionPage(typeof(Options.NavigationBarPage), Constants.NameOfMe, "Navigation Bar", 0, 0, true, Sort = 40)]
 
-	[ProvideOptionPage(typeof(Options.ScrollbarMarker), Constants.NameOfMe, "Scrollbar Marker", 0, 0, true, Sort = 50)]
-	[ProvideOptionPage(typeof(Options.CSharpScrollbarMarker), CategoryScrollbarMarker, "C#", 0, 0, true, Sort = 51)]
+	[ProvideOptionPage(typeof(Options.ScrollBarMarkerPage), Constants.NameOfMe, "Scrollbar Marker", 0, 0, true, Sort = 50)]
+
+	[ProvideOptionPage(typeof(Options.DisplayPage), Constants.NameOfMe, "Display", 0, 0, true, Sort = 61)]
+	[ProvideOptionPage(typeof(Options.ExtensionDeveloperPage), Constants.NameOfMe, "Extension developer", 0, 0, true, Sort = 62)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	//[ProvideToolWindow(typeof(Commands.SymbolFinderWindow))]
 	[ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string, PackageAutoLoadFlags.BackgroundLoad)]
+	[ProvideToolWindow(typeof(Commands.SyntaxCustomizerWindow), Style = VsDockStyle.Tabbed, Window = EnvDTE.Constants.vsWindowKindProperties)]
 	sealed class CodistPackage : AsyncPackage
 	{
 		/// <summary>CodistPackage GUID string.</summary>
@@ -133,17 +129,13 @@ namespace Codist
 		protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress) {
 			await base.InitializeAsync(cancellationToken, progress);
 
-			VSColorTheme.ThemeChanged += _ => {
-				System.Diagnostics.Debug.WriteLine("Theme changed.");
-				ThemeHelper.RefreshThemeCache();
-			};
 			SolutionEvents.OnAfterOpenSolution += (s, args) => {
 				Taggers.SymbolMarkManager.Clear();
 			};
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			if ((Config.Instance.DisplayOptimizations & DisplayOptimizations.MainWindow) != 0) {
+			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.MainWindow)) {
 				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, true);
 			}
 			_dteEvents = DTE2.Events;
@@ -152,21 +144,21 @@ namespace Codist
 			_buildEvents.OnBuildDone += BuildEvents_OnBuildEnd;
 			_buildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
 			//_extenderCookie = DTE.ObjectExtenders.RegisterExtenderProvider(VSConstants.CATID.CSharpFileProperties_string, BuildBots.AutoReplaceExtenderProvider.Name, new BuildBots.AutoReplaceExtenderProvider());
-			//await Commands.SymbolFinderWindowCommand.InitializeAsync(this);
-			Commands.ScreenshotCommand.Initialize(this);
-			Commands.GetContentTypeCommand.Initialize(this);
-			Commands.IncrementVsixVersionCommand.Initialize(this);
-			Commands.NaviBarSearchDeclarationCommand.Initialize(this);
+			//Commands.SymbolFinderWindowCommand.Initialize();
+			Commands.ScreenshotCommand.Initialize();
+			Commands.GetContentTypeCommand.Initialize();
+			Commands.IncrementVsixVersionCommand.Initialize();
+			Commands.NaviBarSearchDeclarationCommand.Initialize();
 			switch (Config.Instance.InitStatus) {
 				case InitStatus.FirstLoad:
 					new Commands.VersionInfoBar(this).ShowAfterFirstRun();
 					break;
 				case InitStatus.Upgraded:
 					if (new Commands.VersionInfoBar(this).ShowAfterUpdate()) {
-						
 					}
 					break;
 			}
+			Commands.SyntaxCustomizerWindowCommand.Initialize();
 		}
 
 		protected override void Dispose(bool disposing) {

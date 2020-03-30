@@ -30,6 +30,9 @@ namespace Codist
 		public IClassificationTypeRegistryService ClassificationTypeRegistry { get; private set; }
 
 		[Import]
+		public IClassifierAggregatorService ClassifierAggregator { get; private set; }
+
+		[Import]
 		public Microsoft.VisualStudio.Utilities.IFileExtensionRegistryService FileExtensionRegistry { get; private set; }
 
 		[Import]

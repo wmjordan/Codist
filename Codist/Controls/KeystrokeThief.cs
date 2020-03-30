@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell;
 
 namespace Codist.Controls
 {
@@ -22,12 +24,12 @@ namespace Codist.Controls
 	/// <para>Adapted from code originally received from Microsoft as an answer to Omer's Connect ticket,</para>
 	/// <para>https://connect.microsoft.com/VisualStudio/feedback/details/549866/msdn-visual-studio-extensibility-forum-backspace-tab-and-enter-key-are-not-captured-in-wpf-window-which-exist-in-a-package</para>
 	/// </summary>
-	public class KeystrokeThief
+	public sealed class KeystrokeThief
 	{
 		readonly IOleComponentManager _manager;
 		uint _componentCookie;
 
-		public KeystrokeThief(IOleComponentManager manager) {
+		KeystrokeThief(IOleComponentManager manager) {
 			if (manager == null) {
 				throw new ArgumentNullException("manager");
 			}
@@ -36,6 +38,15 @@ namespace Codist.Controls
 		}
 
 		public bool IsStealing { get; set; }
+
+		public static void Bind(Window window) {
+			var componentManager = ServiceProvider.GetGlobalServiceAsync<SOleComponentManager, IOleComponentManager>().Result;
+			var thief = new KeystrokeThief(componentManager);
+			new System.Windows.Interop.WindowInteropHelper(window).Owner = new IntPtr(CodistPackage.DTE.MainWindow.HWnd);
+			window.Activated += (s, args) => thief.StartStealing();
+			window.Deactivated += (s, args) => thief.StopStealing();
+			window.Closed += (s, args) => thief.StopStealing();
+		}
 
 		void RegisterDummyComponent() {
 			var component = new EmptyOleComponent();
@@ -56,13 +67,17 @@ namespace Codist.Controls
 
 
 		public void StartStealing() {
-			RegisterDummyComponent();
-			IsStealing = true;
+			if (IsStealing == false) {
+				RegisterDummyComponent();
+				IsStealing = true;
+			}
 		}
 
 		public void StopStealing() {
-			UnregisterDummyComponent();
-			IsStealing = false;
+			if (IsStealing) {
+				UnregisterDummyComponent();
+				IsStealing = false;
+			}
 		}
 
 		/// <summary>
@@ -70,7 +85,7 @@ namespace Codist.Controls
 		/// commands for the active IVsWindowFrame.  By activating this component when this window is active,
 		/// it will allow normal keyboard processing without command keybindings.
 		/// </summary>
-		class EmptyOleComponent : IOleComponent
+		sealed class EmptyOleComponent : IOleComponent
 		{
 			public int FContinueMessageLoop(uint uReason, IntPtr pvLoopData, MSG[] pMsgPeeked) {
 				return VSConstants.S_OK;

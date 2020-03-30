@@ -26,9 +26,6 @@ namespace Codist.Options
 			}
 			LoadConfig(Config.Instance);
 
-			_OptionTabs.AddPage("Symbol marker", new SyntaxStyleOptionPage(_ServicePage, () => Config.Instance.SymbolMarkerStyles, Config.GetDefaultCodeStyles<Codist.SyntaxHighlight.SymbolMarkerStyle, SymbolMarkerStyleTypes>), true);
-			_OptionTabs.AddPage("C# Syntax", new SyntaxStyleOptionPage(_ServicePage, () => Config.Instance.CodeStyles, Config.GetDefaultCodeStyles<Codist.SyntaxHighlight.CSharpStyle, CSharpStyleTypes>), true);
-
 			_MarkSpecialPunctuationBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.SpecialPunctuation, _MarkSpecialPunctuationBox.Checked));
 			_HighlightDeclarationBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.DeclarationBrace, _HighlightDeclarationBracesBox.Checked));
 			_HighlightParameterBracesBox.CheckedChanged += _UI.HandleEvent(() => Config.Instance.Set(SpecialHighlightOptions.ParameterBrace, _HighlightParameterBracesBox.Checked));

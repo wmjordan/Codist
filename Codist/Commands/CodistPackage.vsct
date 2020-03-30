@@ -40,13 +40,13 @@
       <Group guid="guidCodistPackageCmdSet" id="CodistMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_FILE" />
       </Group>
-      <Group guid="guidCodistPackageCmdSet2" id="IDG_VS_VIEW_DEFINEVIEWS" priority="0x0800">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_VIEW" />
+      <Group guid="guidCodistPackageCmdSet" id="IDG_VS_TOOLS_OPTIONS" priority="0x0800">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
       </Group>
-      <Group guid="guidCodistPackageCmdSet3" id="EDIT_PROJECT_GROUP_ID" priority="0x017F">
+      <Group guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" priority="0x017F">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
       </Group>
-      <Group guid="guidCodistPackageCmdSet4" id="IDG_VS_EDIT_GOTO" priority="0x0800">
+      <Group guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" priority="0x0800">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_EDITOR_FIND_MENU" />
       </Group>
     </Groups>
@@ -65,9 +65,8 @@
       <Button guid="guidCodistPackageCmdSet" id="ScreenshotCommandId" priority="0x0100" type="Button">
         <Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="RectangularScreenshot" />
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<CommandFlag>DynamicItemStart</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
           <ButtonText>Save Code &amp;Window Screenshot...</ButtonText>
 					<ToolTipText>Take a screenshot for the active code window</ToolTipText>
@@ -76,37 +75,36 @@
       <Button guid="guidCodistPackageCmdSet" id="GetContentTypeCommandId" priority="4133" type="Button">
         <Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
 				<Icon guid="ImageCatalogGuid" id="ContentType" />
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
           <ButtonText>Show Document Content Type...</ButtonText>
 					<ToolTipText>Display content types of the current document</ToolTipText>
         </Strings>
       </Button>
-      <!--<Button guid="guidCodistPackageCmdSet2" id="SymbolFinderWindowCommandId" priority="0x0800" type="Button">
-				<Parent guid="guidCodistPackageCmdSet2" id="IDG_VS_VIEW_DEFINEVIEWS" />
+      <!--<Button guid="guidCodistPackageCmdSet" id="SymbolFinderWindowCommandId" priority="0x0800" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_TOOLS_OPTIONS" />
 				<Icon guid="ImageCatalogGuid" id="FindSymbol" />
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<CommandFlag>DynamicItemStart</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
           <ButtonText>Symbol finder</ButtonText>
         </Strings>
       </Button>-->
-      <Button guid="guidCodistPackageCmdSet3" id="EDIT_VSIXMANIFEST_ID" priority="0x0100" type="Button">
-        <Parent guid="guidCodistPackageCmdSet3" id="EDIT_PROJECT_GROUP_ID" />
+      <Button guid="guidCodistPackageCmdSet" id="IncrementVsixVersionId" priority="0x0100" type="Button">
+        <Parent guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" />
         <Icon guid="ImageCatalogGuid" id="Counter" />
-				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>TextChanges</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
           <ButtonText>Increment Version</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidCodistPackageCmdSet4" id="NaviBarSearchDeclarationId" priority="0x0100" type="Button">
-        <Parent guid="guidCodistPackageCmdSet4" id="IDG_VS_EDIT_GOTO" />
+      <Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" priority="0x0100" type="Button">
+        <Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
         <Icon guid="ImageCatalogGuid" id="SearchContract" />
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
@@ -115,14 +113,23 @@
 					<CanonicalName>CodistNaviBarSearchDeclaration</CanonicalName>
         </Strings>
       </Button>
-      <Button guid="guidCodistPackageCmdSet4" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
-        <Parent guid="guidCodistPackageCmdSet4" id="IDG_VS_EDIT_GOTO" />
+      <Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
+        <Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
         <Icon guid="ImageCatalogGuid" id="SearchMember" />
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
           <ButtonText>Search Class Member</ButtonText>
 					<CanonicalName>CodistNaviBarSearchActiveClass</CanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="guidCodistPackageCmdSet" id="SyntaxCustomizeHighlightId" priority="0x0100" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OPTIONS" />
+				<Icon guid="ImageCatalogGuid" id="StyleBlock" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+					<ButtonText>Customize Codist Syntax Highlight...</ButtonText>
+					<CanonicalName>CustomizeSyntaxHighlight</CanonicalName>
         </Strings>
       </Button>
     </Buttons>
@@ -139,8 +146,8 @@
   </Commands>
 	<KeyBindings>
 		<!--Bind NaviBar.SearchDeclaration to Ctrl + ` -->
-		<KeyBinding guid="guidCodistPackageCmdSet4" id="NaviBarSearchDeclarationId" editor="guidVSStd97" mod1="Control" key1="0xC0" mod2="Control" key2="0xC0" />
-		<KeyBinding guid="guidCodistPackageCmdSet4" id="NaviBarSearchActiveClassId" editor="guidVSStd97" mod1="Control" key1="1" mod2="Control" key2="1" />
+		<KeyBinding guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" editor="guidVSStd97" mod1="Control" key1="0xC0" mod2="Control" key2="0xC0" />
+		<KeyBinding guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" editor="guidVSStd97" mod1="Control" key1="1" mod2="Control" key2="1" />
 	</KeyBindings>
   <Symbols>
     <!-- This is the package guid. -->
@@ -149,24 +156,15 @@
     <!-- This is the guid used to group the menu commands together -->
     <GuidSymbol name="guidCodistPackageCmdSet" value="{d668a130-cb52-4143-b389-55560823f3d6}">
       <IDSymbol name="CodistMenuGroup" value="0x1020" />
-      <IDSymbol name="ScreenshotCommandId" value="0x0100" />
-      <IDSymbol name="GetContentTypeCommandId" value="4133" />
-    </GuidSymbol>
-
-    <!-- This is the guid used to group the menu commands together -->
-    <GuidSymbol name="guidCodistPackageCmdSet2" value="{0CEFE689-7B5C-450C-921D-BA0C74D65D9C}">
-			<IDSymbol name="IDG_VS_VIEW_DEFINEVIEWS" value="0x1020" />
-			<IDSymbol name="SymbolFinderWindowCommandId" value="4129" />
-    </GuidSymbol>
-
-		<GuidSymbol name="guidCodistPackageCmdSet3" value="{eb9f9d42-d000-4d82-874a-4688ddd26dbe}">
+      <IDSymbol name="ScreenshotCommandId" value="0x4001" />
+      <IDSymbol name="GetContentTypeCommandId" value="0x4002" />
 			<IDSymbol name="EDIT_PROJECT_GROUP_ID" value="0x1000" />
-      <IDSymbol name="EDIT_VSIXMANIFEST_ID" value="4128" />
-		</GuidSymbol>
-
-		<GuidSymbol name="guidCodistPackageCmdSet4" value="{5EF88028-C0FC-4849-9883-10F4BD2217B3}">
-      <IDSymbol name="NaviBarSearchDeclarationId" value="4130" />
-      <IDSymbol name="NaviBarSearchActiveClassId" value="4131" />
+      <IDSymbol name="IncrementVsixVersionId" value="0x4003" />
+			<IDSymbol name="IDG_VS_TOOLS_OPTIONS" value="0x1020" />
+			<IDSymbol name="SymbolFinderWindowCommandId" value="0x4004" />
+      <IDSymbol name="SyntaxCustomizeHighlightId" value="0x4005" />
+      <IDSymbol name="NaviBarSearchDeclarationId" value="0x4006" />
+      <IDSymbol name="NaviBarSearchActiveClassId" value="0x4007" />
     </GuidSymbol>
   
   </Symbols>
