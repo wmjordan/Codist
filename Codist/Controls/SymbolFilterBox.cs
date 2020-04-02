@@ -178,23 +178,27 @@ namespace Codist.Controls
 				case KnownImageIds.FieldPublic:
 				case KnownImageIds.ConstantPublic:
 				case KnownImageIds.PropertyPublic:
-				case KnownImageIds.EventPublic:
 					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.FieldAndProperty);
 				case KnownImageIds.FieldProtected:
 				case KnownImageIds.ConstantProtected:
 				case KnownImageIds.PropertyProtected:
-				case KnownImageIds.EventProtected:
 					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.FieldAndProperty);
 				case KnownImageIds.FieldInternal:
 				case KnownImageIds.ConstantInternal:
 				case KnownImageIds.PropertyInternal:
-				case KnownImageIds.EventInternal:
 					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.FieldAndProperty);
 				case KnownImageIds.FieldPrivate:
 				case KnownImageIds.ConstantPrivate:
 				case KnownImageIds.PropertyPrivate:
-				case KnownImageIds.EventPrivate:
 					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.FieldAndProperty);
+				case KnownImageIds.EventPublic:
+					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.Event);
+				case KnownImageIds.EventProtected:
+					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.Event);
+				case KnownImageIds.EventInternal:
+					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.Event);
+				case KnownImageIds.EventPrivate:
+					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.Event);
 				case KnownImageIds.Numeric: // #region
 					return filterTypes == MemberFilterTypes.All;
 			}
@@ -429,15 +433,16 @@ namespace Codist.Controls
 
 		sealed class MemberFilterButtonGroup : FilterButtonGroup
 		{
-			readonly ThemedToggleButton _FieldFilter, _PropertyFilter, _MethodFilter, _TypeFilter, _PublicFilter, _PrivateFilter;
+			readonly ThemedToggleButton _FieldFilter, _PropertyFilter, _EventFilter, _MethodFilter, _TypeFilter, _PublicFilter, _PrivateFilter;
 			MemberFilterTypes _Filters;
 			bool _uiLock;
 
 			public override int Filters => (int)_Filters;
 
 			public MemberFilterButtonGroup() {
-				_FieldFilter = CreateButton(KnownImageIds.Field, "Fields, properties and events");
+				_FieldFilter = CreateButton(KnownImageIds.Field, "Fields, properties");
 				_MethodFilter = CreateButton(KnownImageIds.Method, "Methods");
+				_EventFilter = CreateButton(KnownImageIds.Event, "Events");
 				_TypeFilter = CreateButton(KnownImageIds.EntityContainer, "Types and delegates");
 
 				_PublicFilter = CreateButton(KnownImageIds.ModulePublic, "Public and protected members");
@@ -452,7 +457,7 @@ namespace Codist.Controls
 						Children = {
 							_PublicFilter, _PrivateFilter,
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
-							_FieldFilter, _MethodFilter, _TypeFilter,
+							_FieldFilter, _MethodFilter, _EventFilter, _TypeFilter,
 							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
 							new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearBorder(),
 						},
@@ -471,6 +476,9 @@ namespace Codist.Controls
 				}
 				if (_PropertyFilter?.IsChecked == true) {
 					f |= MemberFilterTypes.Property;
+				}
+				if (_EventFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Event;
 				}
 				if (_MethodFilter.IsChecked == true) {
 					f |= MemberFilterTypes.Method;
@@ -497,13 +505,14 @@ namespace Codist.Controls
 			}
 
 			public override void UpdateNumbers(IEnumerable<ISymbol> symbols) {
-				int f = 0, m = 0, t = 0, pu = 0, pi = 0;
+				int f = 0, m = 0, e = 0, t = 0, pu = 0, pi = 0;
 				foreach (var item in symbols) {
 					if (item == null || item.IsImplicitlyDeclared) {
 						continue;
 					}
 					switch (item.Kind) {
 						case SymbolKind.Event:
+							++e; break;
 						case SymbolKind.Field:
 						case SymbolKind.Property:
 							++f; break;
@@ -532,12 +541,14 @@ namespace Codist.Controls
 				ToggleFilterButton(_PrivateFilter, pi);
 				ToggleFilterButton(_FieldFilter, f);
 				ToggleFilterButton(_MethodFilter, m);
+				ToggleFilterButton(_EventFilter, e);
 				ToggleFilterButton(_TypeFilter, t);
 			}
 
 			public override void ClearFilter() {
 				_uiLock = true;
-				_FieldFilter.IsChecked = _MethodFilter.IsChecked = _TypeFilter.IsChecked
+				_FieldFilter.IsChecked = _MethodFilter.IsChecked = _EventFilter.IsChecked
+					= _TypeFilter.IsChecked
 					= _PublicFilter.IsChecked = _PrivateFilter.IsChecked = false;
 				if (_PropertyFilter != null) {
 					_PropertyFilter.IsChecked = false;
@@ -649,11 +660,11 @@ namespace Codist.Controls
 		None,
 		Field = 1,
 		Property = 1 << 1,
+		FieldAndProperty = Field | Property,
 		Event = 1 << 2,
-		FieldAndProperty = Field | Property | Event,
 		Method = 1 << 3,
 		TypeAndNamespace = 1 << 4,
-		AllMembers = FieldAndProperty | Method | TypeAndNamespace,
+		AllMembers = FieldAndProperty | Event | Method | TypeAndNamespace,
 		Public = 1 << 5,
 		Protected = 1 << 6,
 		Internal = 1 << 7,
