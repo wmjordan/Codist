@@ -36,7 +36,7 @@ namespace Codist.Options
 
 		protected override void OnActivate(CancelEventArgs e) {
 			base.OnActivate(e);
-			if (Feature != Features.None) {
+			if (Feature != Features.None && Control != null) {
 				Control.IsEnabled = Config.Instance.Features.MatchFlags(Feature);
 			}
 			Config.Instance.BeginUpdate();
@@ -139,6 +139,10 @@ namespace Codist.Options
 				TextWrapping = TextWrapping.Wrap
 			};
 		}
+		public Note(TextBlock text) {
+			Content = text;
+			text.TextWrapping = TextWrapping.Wrap;
+		}
 	}
 
 	sealed class DescriptionBox : TextBlock
@@ -207,12 +211,126 @@ namespace Codist.Options
 		}
 	}
 
+	[Guid("3B2F0A1D-5279-496B-A342-33F083404A80")]
+	sealed class GeneralOptionsPage : OptionsPage
+	{
+		UIElement _Child;
+
+		protected override Features Feature => Features.None;
+		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
+
+		sealed class PageControl : OptionsPageContainer
+		{
+			readonly OptionBox<Features> _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker;
+			readonly OptionBox<Features>[] _Options;
+			readonly Button _LoadButton, _SaveButton;
+
+			public PageControl(OptionsPage page) : base(page) {
+				var o = Config.Instance.Features;
+				AddPage("General",
+					new TitleBox("Feature Controllers"),
+					new DescriptionBox("Use the following checkboxes to control features provided by Codist."),
+					new WrapPanel {
+						Children = {
+							(_SyntaxHighlight = o.CreateOptionBox(Features.SyntaxHighlight, UpdateConfig, "Syntax Highlight")
+								.SetLazyToolTip(() => "Provides advanced syntax highlight and comment taggers")),
+							(_SuperQuickInfo = o.CreateOptionBox(Features.SuperQuickInfo, UpdateConfig, "Super Quick Info")
+								.SetLazyToolTip(() => "Provides enhancements to Quick Info (code tooltips)")),
+							(_SmartBar = o.CreateOptionBox(Features.SmartBar, UpdateConfig, "Smart Bar")
+								.SetLazyToolTip(() => "Provides a dynamic floating toolbar in your code editor")),
+							(_NavigationBar = o.CreateOptionBox(Features.NaviBar, UpdateConfig, "Navigation Bar")
+								.SetLazyToolTip(() => "Provides an enhanced navigation bar for C# and Markdown languages")),
+							(_ScrollbarMarker = o.CreateOptionBox(Features.ScrollbarMarkers, UpdateConfig, "Scrollbar Markers")
+								.SetLazyToolTip(() => "Provides additional markers on the scrollbar"))
+						}
+					},
+					new Note("Changes will take place on new document windows. Currently opened document windows WILL NOT BE AFFECTED."),
+
+					new TitleBox("Configuration File"),
+					new DescriptionBox("You can save configurations to backup your settings and share the file with your teammates."),
+					new WrapPanel {
+						Children = {
+							(_LoadButton = new Button { Name = "_Load", Content = "Load..." }),
+							(_SaveButton = new Button { Name = "_Save", Content = "Save..." })
+						}
+					}
+					);
+				AddPage("About",
+					new TitleBox("Thank You for Using Codist"),
+					new Note("Report bugs and suggesions to:"),
+					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist", "https://github.com/wmjordan/Codist", "Go to project web site"),
+					new Note("Latest release:"),
+					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist/releases", "https://github.com/wmjordan/Codist/releases", "Go to project release page"),
+					new Note("Support future development of Codist:"),
+					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("Donate via PayPal", "https://www.paypal.me/wmzuo/19.99", "Open your browser and donate to project Codist"),
+					new DescriptionBox("Recommended donation value is $19.99. But you can modify the amount to any value if you like.")
+					);
+				_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker };
+				foreach (var item in _Options) {
+					item.MinWidth = 120;
+					item.Margin = WpfHelper.MiddleMargin;
+				}
+				foreach (var item in new[] { _LoadButton, _SaveButton }) {
+					item.MinWidth = 120;
+					item.Margin = WpfHelper.MiddleMargin;
+					item.Click += LoadOrSaveConfig;
+				}
+			}
+
+			protected override void LoadConfig(Config config) {
+				var o = config.Features;
+				Array.ForEach(_Options, i => i.UpdateWithOption(o));
+			}
+
+			void UpdateConfig(Features options, bool set) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.Set(options, set);
+				Config.Instance.FireConfigChangedEvent(options);
+			}
+
+			void LoadOrSaveConfig(object sender, EventArgs args) {
+				if (sender == _LoadButton) {
+					var d = new OpenFileDialog {
+						Title = "Load Codist configuration file...",
+						FileName = "Codist.json",
+						DefaultExt = "json",
+						Filter = "Codist configuration file|*.json|All files|*.*"
+					};
+					if (d.ShowDialog() != true) {
+						return;
+					}
+					try {
+						Config.LoadConfig(d.FileName);
+						System.IO.File.Copy(d.FileName, Config.ConfigPath, true);
+					}
+					catch (Exception ex) {
+						MessageBox.Show("Error occured while loading config file: " + ex.Message, nameof(Codist));
+					}
+				}
+				else {
+					var d = new SaveFileDialog {
+						Title = "Save Codist configuration file...",
+						FileName = "Codist.json",
+						DefaultExt = "json",
+						Filter = "Codist configuration file|*.json|All files|*.*"
+					};
+					if (d.ShowDialog() != true) {
+						return;
+					}
+					Config.Instance.SaveConfig(d.FileName);
+				}
+			}
+		}
+	}
+
 	[Guid("09020157-B191-464F-8F9B-F3100596BDF0")]
 	sealed class SuperQuickInfoOptionsPage : OptionsPage
 	{
 		UIElement _Child;
 
-		protected override Features Feature => Features.None;
+		protected override Features Feature => Features.SuperQuickInfo;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
 
 		sealed class PageControl : OptionsPageContainer
@@ -361,14 +479,17 @@ namespace Codist.Options
 	{
 		UIElement _Child;
 
-		protected override Features Feature => Features.None;
+		protected override Features Feature => Features.SyntaxHighlight;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
 
 		sealed class PageControl : OptionsPageContainer
 		{
 			public PageControl(OptionsPage page) : base(page) {
 				AddPage("General",
-					new Note("To configure and manage syntax highlight and comment taggers, use the Configure Codist Syntax Highlight command under the Tools menu.")
+					new Note(new TextBlock()
+						.Append("To configure syntax highlight and manage comment taggers, use the ")
+						.AppendLink("Configure Codist Syntax Highlight", _ => Commands.SyntaxCustomizerWindowCommand.Execute(null, EventArgs.Empty), "Open the syntax highlight configuration dialog window")
+						.Append(" command under the Tools menu."))
 					);
 			}
 
@@ -382,7 +503,7 @@ namespace Codist.Options
 	{
 		UIElement _Child;
 
-		protected override Features Feature => Features.None;
+		protected override Features Feature => Features.SmartBar;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
 
 		sealed class PageControl : OptionsPageContainer
@@ -477,7 +598,7 @@ namespace Codist.Options
 	{
 		UIElement _Child;
 
-		protected override Features Feature => Features.None;
+		protected override Features Feature => Features.NaviBar;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
 
 		sealed class PageControl : OptionsPageContainer
@@ -558,7 +679,7 @@ namespace Codist.Options
 	{
 		UIElement _Child;
 
-		protected override Features Feature => Features.None;
+		protected override Features Feature => Features.ScrollbarMarkers;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
 
 		sealed class PageControl : OptionsPageContainer
@@ -644,7 +765,7 @@ namespace Codist.Options
 						.SetLazyToolTip(() => "Displays results of classifiers and taggers for selected content"),
 
 					new TitleBox("Build"),
-					_BuildVsixAutoIncrement = Config.Instance.BuildOptions.CreateOptionBox(BuildOptions.VsixAutoIncrement, UpdateConfig, "Automatically increment version revision number")
+					_BuildVsixAutoIncrement = Config.Instance.BuildOptions.CreateOptionBox(BuildOptions.VsixAutoIncrement, UpdateConfig, "Automatically increment version revision number in .vsixmanifest file")
 						.SetLazyToolTip(() => "Add 1 to the last number of your VSIX version, by modifying the .vsixmanifest file in the project, after each successful build")
 					);
 			}
