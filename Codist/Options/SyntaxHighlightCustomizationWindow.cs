@@ -37,12 +37,14 @@ namespace Codist.Options
 		readonly ColorButton _BackgroundButton;
 		readonly OpacityButton _BackgroundOpacityButton;
 		readonly ComboBox _BackgroundEffectBox;
+		readonly WrapPanel _BaseTypesList;
+		readonly Button _AddTagButton, _RemoveTagButton;
 		readonly TextBox _TagBox;
 		readonly ComboBox _TagStyleBox;
 		readonly StyleCheckBox _TagCaseSensitiveBox;
 		readonly StyleCheckBox _TagHasPunctuationBox;
 		readonly RadioBox _TagApplyOnTagBox, _TagApplyOnContentBox, _TagApplyOnWholeBox;
-		readonly Button _LoadThemeButton, _SaveThemeButton, _ResetThemeButton, _LoadLightThemeButton, _LoadDarkThemeButton, _LoadSimpleThemeButton;
+		readonly Button _LoadThemeButton, _SaveThemeButton, _ResetThemeButton;
 		readonly UiLock _Lock = new UiLock();
 		IWpfTextView _WpfTextView;
 		IClassificationFormatMap _FormatMap;
@@ -117,7 +119,15 @@ namespace Codist.Options
 								new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
 							},
 							Children = {
-								new TextBlock { Text = "Syntax styles:", FontWeight = FontWeights.Bold },
+								new DockPanel {
+									Children = {
+										new TextBlock { Text = "Syntax styles:", FontWeight = FontWeights.Bold }.SetValue(DockPanel.SetDock, Dock.Left),
+										new[] {
+											_AddTagButton = new Button { Content = "Add" }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+											_RemoveTagButton = new Button { Content = "Remove" }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
+										}.Stack(true).SetValue(DockPanel.SetDock, Dock.Right)
+									}
+								},
 								(_OptionPageHolder = new Border {
 									BorderThickness = WpfHelper.TinyMargin,
 									Child = _SettingsList = new StackPanel()
@@ -164,7 +174,13 @@ namespace Codist.Options
 													new TextBlock { Text = "Background effect: ", Width = 130 },
 													(_BackgroundEffectBox = new ComboBox { Width = 160 }.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey))
 												}
-											}
+											},
+											(_BaseTypesList = new WrapPanel {
+												Margin = WpfHelper.SmallMargin,
+												Children = {
+													new TextBlock { Text = "Base syntax: " }
+												}
+											})
 										}
 									},
 									Padding = new Thickness(0, 6, 0, 0)
@@ -241,6 +257,8 @@ namespace Codist.Options
 			_BackgroundEffectBox.Items.AddRange(new[] { "Solid", "Bottom gradient", "Top gradient", "Right gradient", "Left gradient" });
 			_BackgroundEffectBox.SelectionChanged += OnBackgroundEffectChanged;
 			_SyntaxSourceBox.SelectionChanged += SyntaxSourceChanged;
+			_AddTagButton.Click += AddTag;
+			_RemoveTagButton.Click += RemoveTag;
 			_TagBox.TextChanged += ApplyTag;
 			Config.Instance.BeginUpdate();
 		}
@@ -304,7 +322,7 @@ namespace Codist.Options
 
 		void SyntaxSourceChanged(object source, RoutedEventArgs args) {
 			if (_SyntaxSourceBox.SelectedValue is IControlProvider c) {
-				_Notice.Visibility = _SettingsGroup.Visibility = Visibility.Collapsed;
+				_Notice.Visibility = _SettingsGroup.Visibility = _AddTagButton.Visibility = _RemoveTagButton.Visibility = Visibility.Collapsed;
 				_OptionPageHolder.Child = c.Control;
 			}
 			else {
@@ -323,6 +341,7 @@ namespace Codist.Options
 		void LoadCommentLabels() {
 			var l = _SettingsList.Children;
 			l.Clear();
+			_AddTagButton.Visibility = Visibility.Visible;
 			_Notice.Visibility = _SettingsGroup.Visibility = Visibility.Collapsed;
 			_SelectedStyleButton = null;
 			var tag = _SelectedCommentTag;
@@ -334,14 +353,14 @@ namespace Codist.Options
 				if (tag != null && label == tag) {
 					button.IsChecked = true;
 					_SelectedStyleButton = button;
-					_TagSettingsGroup.Visibility = Visibility.Visible;
+					_RemoveTagButton.Visibility = _TagSettingsGroup.Visibility = Visibility.Visible;
 					tag = null;
 				}
 				l.Add(button);
 			}
 
 			if (_SelectedStyleButton == null) {
-				_TagSettingsGroup.Visibility = Visibility.Collapsed;
+				_RemoveTagButton.Visibility = _TagSettingsGroup.Visibility = Visibility.Collapsed;
 			}
 
 			if (l.Count == 0) {
@@ -350,7 +369,7 @@ namespace Codist.Options
 					FontSize = 20,
 					TextWrapping = TextWrapping.Wrap
 				});
-				_TagSettingsGroup.Visibility = Visibility.Collapsed;
+				_RemoveTagButton.Visibility = _TagSettingsGroup.Visibility = Visibility.Collapsed;
 			}
 		}
 
@@ -379,7 +398,7 @@ namespace Codist.Options
 			var l = _SettingsList.Children;
 			l.Clear();
 			_Notice.Visibility = _SettingsList.Visibility != Visibility.Visible ? Visibility.Visible : Visibility.Collapsed;
-			_TagSettingsGroup.Visibility = Visibility.Collapsed;
+			_AddTagButton.Visibility = _RemoveTagButton.Visibility = _TagSettingsGroup.Visibility = Visibility.Collapsed;
 			IEnumerable<IClassificationType> classifications;
 			switch (source) {
 				case SyntaxStyleSource.Common: classifications = ToClassificationTypes(Config.Instance.GeneralStyles); break;
@@ -491,7 +510,7 @@ namespace Codist.Options
 				_SelectedStyleButton.IsChecked = false;
 			}
 			else {
-				_TagSettingsGroup.Visibility = Visibility.Visible;
+				_RemoveTagButton.Visibility = _TagSettingsGroup.Visibility = Visibility.Visible;
 				if (_TagStyleBox.Items.Count == 0) {
 					InitTagStyleBox();
 				}
@@ -551,6 +570,22 @@ namespace Codist.Options
 				_ForegroundOpacityButton.Value = s.ForegroundOpacity;
 				_BackgroundOpacityButton.Value = s.BackgroundOpacity;
 				_BackgroundEffectBox.SelectedIndex = (int)s.BackgroundEffect;
+				_BaseTypesList.Children.RemoveRange(1, _BaseTypesList.Children.Count - 1);
+				if (s.ClassificationType != null) {
+					var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(s.ClassificationType);
+					if (t != null) {
+						bool m = false;
+						foreach (var item in t.GetBaseTypes()) {
+							if (m == false) {
+								m = true;
+							}
+							else {
+								_BaseTypesList.Add(new TextBlock { Text = ", " });
+							}
+							_BaseTypesList.Add(new TextBlock { Text = item.Classification }.ReferenceProperty(ForegroundProperty, VsBrushes.ControlLinkTextKey));
+						}
+					}
+				}
 			}
 			finally {
 				_Lock.Unlock();
@@ -655,6 +690,31 @@ namespace Codist.Options
 					return true;
 				}
 				return false;
+			});
+		}
+
+		void AddTag(object sender, EventArgs e) {
+			Update(() => {
+				var label = new CommentLabel("TAG", CommentStyleTypes.ToDo);
+				Config.Instance.Labels.Insert(0, label);
+				var b = CreateButtonForLabel(label);
+				_SettingsList.Children.Insert(0, b);
+				_SettingsList.GetParent<ScrollViewer>().ScrollToVerticalOffset(0);
+				b.PerformClick();
+				return true;
+			});
+		}
+
+		void RemoveTag(object sender, EventArgs e) {
+			Update(() => {
+				if (_SelectedStyleButton != null) {
+					var i = _SettingsList.Children.IndexOf(_SelectedStyleButton);
+					if (i >= 0) {
+						_SettingsList.Children.RemoveAt(i);
+						Config.Instance.Labels.RemoveAt(i);
+					}
+				}
+				return true;
 			});
 		}
 
@@ -767,7 +827,6 @@ namespace Codist.Options
 		protected override void OnClosed(EventArgs e) {
 			Owner.Activate();
 			_FormatMap.ClassificationFormatMappingChanged -= RefreshList;
-			Config.Instance.EndUpdate(false);
 			base.OnClosed(e);
 		}
 		void Ok() {
@@ -776,6 +835,7 @@ namespace Codist.Options
 		}
 		void Cancel() {
 			Close();
+			Config.Instance.EndUpdate(false);
 		}
 
 		sealed class StyleSettingsButton : Button
@@ -822,6 +882,9 @@ namespace Codist.Options
 			public IClassificationType Classification => _Classification;
 			public StyleBase StyleSettings => _Style;
 
+			public void PerformClick() {
+				OnClick();
+			}
 			public void Refresh(IClassificationFormatMap formatMap) {
 				_Preview.ClearValues(TextBlock.ForegroundProperty, TextBlock.BackgroundProperty,
 					TextBlock.FontFamilyProperty, TextBlock.FontSizeProperty,

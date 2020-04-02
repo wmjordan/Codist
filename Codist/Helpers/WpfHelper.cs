@@ -135,6 +135,16 @@ namespace Codist
 			block.Inlines.Add(Render(text, bold, italic, brush));
 			return block;
 		}
+		public static TTextBlock AppendLink<TTextBlock>(this TTextBlock block, string text, string uri, string toolTip)
+			where TTextBlock : TextBlock {
+			block.Inlines.Add(new Hyperlink { Inlines = { text }, NavigateUri = new Uri(uri), ToolTip = toolTip }.ClickToNavigate());
+			return block;
+		}
+		public static TTextBlock AppendLink<TTextBlock>(this TTextBlock block, string text, Action<Hyperlink> clickHandler, string toolTip)
+			where TTextBlock : TextBlock {
+			block.Inlines.Add(new Hyperlink { Inlines = { text }, ToolTip = toolTip }.ClickToNavigate(clickHandler));
+			return block;
+		}
 
 		/// <summary>
 		/// Gets the <see cref="TextBlock.Text"/> of a <see cref="TextBlock"/>, or the concatenated <see cref="Run.Text"/>s of <see cref="Run"/> instances in the <see cref="TextBlock.Inlines"/>.
@@ -177,6 +187,10 @@ namespace Codist
 			hyperlink.Click += (s, args) => { System.Diagnostics.Process.Start(((Hyperlink)s).NavigateUri.AbsoluteUri); };
 			return hyperlink;
 		}
+		public static Hyperlink ClickToNavigate(this Hyperlink hyperlink, Action<Hyperlink> clickHandler) {
+			hyperlink.Click += (s, args) => clickHandler((Hyperlink)s);
+			return hyperlink;
+		}
 		#endregion
 
 		#region FormattedText
@@ -207,6 +221,14 @@ namespace Codist
 			}
 			return panel;
 		}
+		public static TPanel Add<TPanel>(this TPanel panel, params UIElement[] controls)
+			where TPanel : Panel {
+			var c = panel.Children;
+			foreach (var item in controls) {
+				c.Add(item);
+			}
+			return panel;
+		}
 		public static StackPanel MakeHorizontal(this StackPanel panel) {
 			panel.Orientation = Orientation.Horizontal;
 			return panel;
@@ -219,6 +241,13 @@ namespace Codist
 				}
 			}
 			return panel;
+		}
+		public static StackPanel Stack(this UIElement[] elements, bool horizontal) {
+			var p = new StackPanel();
+			if (horizontal) {
+				p.Orientation = Orientation.Horizontal;
+			}
+			return Add(p, elements);
 		}
 		#endregion
 
