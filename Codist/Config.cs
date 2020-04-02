@@ -313,7 +313,6 @@ namespace Codist
 			where TStyle : StyleBase<TStyleType>, new()
 			where TStyleType : struct, Enum {
 			styles.RemoveAll(i => i.Id < 1);
-			styles.Sort((x, y) => x.Id - y.Id);
 			if (removeFontNames) {
 				styles.ForEach(i => i.Font = null);
 			}
@@ -323,6 +322,7 @@ namespace Codist
 				}
 			}
 			MergeDefaultCodeStyles<TStyle, TStyleType>(styles);
+			styles.Sort((x, y) => x.Id - y.Id);
 		}
 
 		static Config GetDefaultConfig() {
