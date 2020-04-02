@@ -22,25 +22,40 @@ namespace Codist.SyntaxHighlight
 		static Dictionary<string, StyleBase> _SyntaxStyleCache = InitSyntaxStyleCache();
 		internal static readonly Dictionary<IClassificationType, List<IClassificationType>> ClassificationTypeStore = InitClassificationTypes(_SyntaxStyleCache.Keys);
 
-		static Dictionary<string, TextFormattingRunProperties> _BackupFormattings = LoadFormattings(new Dictionary<string, TextFormattingRunProperties>(80, StringComparer.OrdinalIgnoreCase));
+		static Dictionary<IClassificationType, TextFormattingRunProperties> _BackupFormattings = LoadFormattings(new Dictionary<IClassificationType, TextFormattingRunProperties>(80));
 		static TextFormattingRunProperties _DefaultFormatting;
 
 		internal static bool IdentifySymbolSource { get; private set; }
 
-		public static TextFormattingRunProperties GetBackupFormatting(string classificationType) {
+		public static TextFormattingRunProperties GetBackupFormatting(IClassificationType classificationType) {
 			lock (_syncRoot) {
 				return _BackupFormattings.TryGetValue(classificationType, out var r) ? r : null;
 			}
 		}
+		public static IEnumerable<IClassificationType> GetBaseTypes(this IClassificationType classificationType) {
+			var h = new HashSet<IClassificationType>();
+
+			return GetBaseTypes(classificationType, h);
+
+			IEnumerable<IClassificationType> GetBaseTypes(IClassificationType type, HashSet<IClassificationType> dedup) {
+				foreach (var item in type.BaseTypes) {
+					if (dedup.Add(item)) {
+						yield return item;
+						foreach (var c in GetBaseTypes(item, dedup)) {
+							yield return c;
+						}
+					}
+				}
+			}
+		}
 		public static TextFormattingRunProperties GetOrSaveBackupFormatting(IClassificationType classificationType) {
-			var c = classificationType.Classification;
 			lock (_syncRoot) {
-				if (_BackupFormattings.TryGetValue(c, out var r)) {
+				if (_BackupFormattings.TryGetValue(classificationType, out var r)) {
 					return r;
 				}
 				else {
 					r = DefaultClassificationFormatMap.GetExplicitTextProperties(classificationType);
-					_BackupFormattings.Add(c, r);
+					_BackupFormattings.Add(classificationType, r);
 					return r;
 				}
 			}
@@ -159,11 +174,7 @@ namespace Codist.SyntaxHighlight
 			lock (_syncRoot) {
 				DefaultClassificationFormatMap.BeginBatchUpdate();
 				foreach (var item in _BackupFormattings) {
-					var cts = ServicesHelper.Instance.ClassificationTypeRegistry;
-					var ct = cts.GetClassificationType(item.Key);
-					if (ct != null) {
-						DefaultClassificationFormatMap.SetTextProperties(ct, item.Value);
-					}
+					DefaultClassificationFormatMap.SetTextProperties(item.Key, item.Value);
 				}
 				DefaultClassificationFormatMap.EndBatchUpdate();
 				var cache = new Dictionary<string, StyleBase>(_SyntaxStyleCache.Count, StringComparer.OrdinalIgnoreCase);
@@ -181,7 +192,7 @@ namespace Codist.SyntaxHighlight
 				Debug.WriteLine("DefaultFormatting Changed");
 				// theme changed
 				lock (_syncRoot) {
-					var formattings = new Dictionary<string, TextFormattingRunProperties>(_BackupFormattings.Count, StringComparer.OrdinalIgnoreCase);
+					var formattings = new Dictionary<IClassificationType, TextFormattingRunProperties>(_BackupFormattings.Count);
 					LoadFormattings(formattings);
 					_BackupFormattings = formattings;
 					_DefaultFormatting = defaultFormat;
@@ -192,12 +203,11 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
-		static Dictionary<string, TextFormattingRunProperties> LoadFormattings(Dictionary<string, TextFormattingRunProperties> formattings) {
+		static Dictionary<IClassificationType, TextFormattingRunProperties> LoadFormattings(Dictionary<IClassificationType, TextFormattingRunProperties> formattings) {
 			var m = DefaultClassificationFormatMap;
-			string key;
 			foreach (var item in m.CurrentPriorityOrder) {
-				if (item != null && _SyntaxStyleCache.ContainsKey(key = m.GetEditorFormatMapKey(item))) {
-					formattings[key] = m.GetExplicitTextProperties(item);
+				if (item != null && _SyntaxStyleCache.ContainsKey(m.GetEditorFormatMapKey(item))) {
+					formattings[item] = m.GetExplicitTextProperties(item);
 				}
 			}
 			return formattings;
