@@ -67,8 +67,15 @@ namespace Codist.Commands
 
 		static void RefreshWindow(object sender, EventArgs e) {
 			if (_Window != null && _Window.IsVisible) {
+				var b = _Window.RestoreBounds;
+				var s = _Window.WindowState;
 				_Window.Close();
 				CreateWindow(TextEditorHelper.GetActiveWpfDocumentView());
+				_Window.Top = b.Top;
+				_Window.Left = b.Left;
+				_Window.Width = b.Width;
+				_Window.Height = b.Height;
+				_Window.WindowState = s;
 				_Window.Show();
 			}
 		}
