@@ -29,8 +29,8 @@ namespace Codist.SyntaxHighlight
 			Config.Updated += SettingsSaved;
 
 			_ClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(view);
-			//_ClassificationFormatMap.ClassificationFormatMappingChanged += FormatUpdated;
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(view);
+			//_ClassificationFormatMap.ClassificationFormatMappingChanged += FormatUpdated;
 			_EditorFormatMap.FormatMappingChanged += FormatUpdated;
 			_RegService = ServicesHelper.Instance.ClassificationTypeRegistry;
 			_TextView = view;
@@ -113,8 +113,8 @@ namespace Codist.SyntaxHighlight
 			foreach (var item in updated.ToList()) {
 				foreach (var subType in item.Key.GetSubTypes()) {
 					if (updated.ContainsKey(subType) == false) {
-						if ((style = FormatStore.GetStyle(subType.Classification)) == null
-							|| (textFormatting = FormatStore.GetBackupFormatting(subType.Classification)) == null) {
+						if ((style = FormatStore.GetOrCreateStyle(subType)) == null
+							|| (textFormatting = FormatStore.GetBackupFormatting(subType)) == null) {
 							continue;
 						}
 						updated[subType] = SetProperties(textFormatting, style, defaultSize);
