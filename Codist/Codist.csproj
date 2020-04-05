@@ -166,90 +166,6 @@
     <Compile Include="Margins\LineNumberMargin.cs" />
     <Compile Include="Margins\MarginFactories.cs" />
     <Compile Include="Margins\MarkerStyle.cs" />
-    <Compile Include="Options\CommentTaggerOptionPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\CommentTaggerOptionPage.Designer.cs">
-      <DependentUpon>CommentTaggerOptionPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\ConfigPage.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Options\CSharpNaviBarPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\CSharpNaviBarPage.Designer.cs">
-      <DependentUpon>CSharpNaviBarPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\MarkdownHighlightPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\MarkdownHighlightPage.Designer.cs">
-      <DependentUpon>MarkdownHighlightPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\CSharpSyntaxHighlightPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\CSharpSyntaxHighlightPage.Designer.cs">
-      <DependentUpon>CSharpSyntaxHighlightPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\CSharpScrollbarMarkerPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\CSharpScrollbarMarkerPage.Designer.cs">
-      <DependentUpon>CSharpScrollbarMarkerPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\CSharpSuperQuickInfoPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\CSharpSuperQuickInfoPage.Designer.cs">
-      <DependentUpon>CSharpSuperQuickInfoPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\PickOpacityButton.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Options\SmartBarPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\SmartBarPage.Designer.cs">
-      <DependentUpon>SmartBarPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\SyntaxHighlightPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\SyntaxHighlightPage.Designer.cs">
-      <DependentUpon>SyntaxHighlightPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\ScrollbarMarkerPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\ScrollbarMarkerPage.Designer.cs">
-      <DependentUpon>ScrollbarMarkerPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\SuperQuickInfoPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\SuperQuickInfoPage.Designer.cs">
-      <DependentUpon>SuperQuickInfoPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\GeneralPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\GeneralPage.Designer.cs">
-      <DependentUpon>GeneralPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options\PickColorButton.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Options\SyntaxListView.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Options\SyntaxStyleOptionPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Options\SyntaxStyleOptionPage.Designer.cs">
-      <DependentUpon>SyntaxStyleOptionPage.cs</DependentUpon>
-    </Compile>
     <Compile Include="Options\UiLock.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -597,42 +513,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Options\CommentTaggerOptionPage.resx">
-      <DependentUpon>CommentTaggerOptionPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\CSharpNaviBarPage.resx">
-      <DependentUpon>CSharpNaviBarPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\MarkdownHighlightPage.resx">
-      <DependentUpon>MarkdownHighlightPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\CSharpSyntaxHighlightPage.resx">
-      <DependentUpon>CSharpSyntaxHighlightPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\CSharpScrollbarMarkerPage.resx">
-      <DependentUpon>CSharpScrollbarMarkerPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\CSharpSuperQuickInfoPage.resx">
-      <DependentUpon>CSharpSuperQuickInfoPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\SmartBarPage.resx">
-      <DependentUpon>SmartBarPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\SyntaxHighlightPage.resx">
-      <DependentUpon>SyntaxHighlightPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\ScrollbarMarkerPage.resx">
-      <DependentUpon>ScrollbarMarkerPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\SuperQuickInfoPage.resx">
-      <DependentUpon>SuperQuickInfoPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\GeneralPage.resx">
-      <DependentUpon>GeneralPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options\SyntaxStyleOptionPage.resx">
-      <DependentUpon>SyntaxStyleOptionPage.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
