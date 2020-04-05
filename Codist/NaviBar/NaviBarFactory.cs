@@ -53,6 +53,7 @@ namespace Codist.NaviBar
 			}
 		}
 
+#if DEBUG
 		static void AssociateFileCodeModelOverrider() {
 			Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 			var model = CodistPackage.DTE2.ActiveDocument?.ProjectItem?.FileCodeModel; // the active document can be null
@@ -70,6 +71,7 @@ namespace Codist.NaviBar
 				}
 			}
 		}
+#endif
 
 		sealed class Overrider
 		{
