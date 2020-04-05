@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using AppHelpers;
 using Microsoft.VisualStudio.Shell;
@@ -112,105 +113,6 @@ namespace Codist.Options
 		}
 	}
 
-	sealed class TitleBox : ContentControl
-	{
-		public TitleBox() {
-			Margin = new Thickness(0, 3, 0, 0);
-			Content = new Border {
-				BorderThickness = new Thickness(0, 0, 0, 1),
-				BorderBrush = SystemColors.ControlDarkDarkBrush,
-				Padding = WpfHelper.SmallHorizontalMargin,
-				Child = Title = new TextBlock() { FontWeight = FontWeights.Bold }
-			};
-		}
-
-		public TitleBox(string text) : this () {
-			Title.Text = text;
-		}
-
-		public TextBlock Title { get; private set; }
-	}
-
-	sealed class Note : Label
-	{
-		public Note(string text) {
-			Content = new TextBlock {
-				Text = text,
-				TextWrapping = TextWrapping.Wrap
-			};
-		}
-		public Note(TextBlock text) {
-			Content = text;
-			text.TextWrapping = TextWrapping.Wrap;
-		}
-	}
-
-	sealed class DescriptionBox : TextBlock
-	{
-		public DescriptionBox(string text) {
-			Margin = new Thickness(23, 0, 3, 0);
-			TextWrapping = TextWrapping.Wrap;
-			Foreground = SystemColors.GrayTextBrush;
-			Text = text;
-		}
-	}
-	sealed class OptionBox<TOption> : CheckBox where TOption : struct, Enum
-	{
-		readonly TOption _Option;
-		readonly Action<TOption, bool> _CheckEventHandler;
-
-		public OptionBox() {
-			Margin = WpfHelper.SmallMargin;
-		}
-		public OptionBox(TOption initialValue, TOption option, Action<TOption, bool> checkEventHandler) : this() {
-			IsChecked = initialValue.MatchFlags(option);
-			_Option = option;
-			_CheckEventHandler = checkEventHandler;
-		}
-		public OptionBox(TOption initialValue, TOption option, Action<TOption, bool> checkEventHandler, Features updateFeature) : this(initialValue, option, checkEventHandler) {
-			_CheckEventHandler += (o, v) => Config.Instance.FireConfigChangedEvent(updateFeature);
-		}
-		public void UpdateWithOption(TOption newValue) {
-			IsChecked = newValue.MatchFlags(_Option);
-		}
-		protected override void OnChecked(RoutedEventArgs e) {
-			base.OnChecked(e);
-			_CheckEventHandler?.Invoke(_Option, true);
-		}
-		protected override void OnUnchecked(RoutedEventArgs e) {
-			base.OnUnchecked(e);
-			_CheckEventHandler?.Invoke(_Option, false);
-		}
-	}
-	sealed class OptionBox : CheckBox
-	{
-		readonly Action<bool?> _CheckEventHandler;
-
-		public OptionBox() {
-			Margin = WpfHelper.SmallMargin;
-		}
-		public OptionBox(bool initialValue, Action<bool?> checkEventHandler) : this() {
-			IsChecked = initialValue;
-			_CheckEventHandler = checkEventHandler;
-		}
-		public OptionBox(bool? initialValue, Action<bool?> checkEventHandler) : this() {
-			IsChecked = initialValue;
-			_CheckEventHandler = checkEventHandler;
-		}
-		protected override void OnIndeterminate(RoutedEventArgs e) {
-			base.OnIndeterminate(e);
-			_CheckEventHandler?.Invoke(null);
-		}
-		protected override void OnChecked(RoutedEventArgs e) {
-			base.OnChecked(e);
-			_CheckEventHandler?.Invoke(true);
-		}
-		protected override void OnUnchecked(RoutedEventArgs e) {
-			base.OnUnchecked(e);
-			_CheckEventHandler?.Invoke(false);
-		}
-	}
-
 	[Guid("3B2F0A1D-5279-496B-A342-33F083404A80")]
 	sealed class GeneralOptionsPage : OptionsPage
 	{
@@ -244,14 +146,14 @@ namespace Codist.Options
 								.SetLazyToolTip(() => "Provides additional markers on the scrollbar"))
 						}
 					},
-					new Note("Changes will take place on new document windows. Currently opened document windows WILL NOT BE AFFECTED."),
+					new Note("Changes will take place on NEWLY OPENED document windows. Currently opened document windows WILL NOT BE AFFECTED"),
 
 					new TitleBox("Configuration File"),
-					new DescriptionBox("You can save configurations to backup your settings and share the file with your teammates."),
+					new DescriptionBox("Use the following buttons to backup your settings or share the file with others"),
 					new WrapPanel {
 						Children = {
-							(_LoadButton = new Button { Name = "_Load", Content = "Load..." }),
-							(_SaveButton = new Button { Name = "_Save", Content = "Save..." })
+							(_LoadButton = new Button { Name = "_Load", Content = "Load...", ToolTip = "Restore configurations from a file..." }),
+							(_SaveButton = new Button { Name = "_Save", Content = "Save...", ToolTip = "Backup configurations to a file..." })
 						}
 					}
 					);
@@ -263,7 +165,7 @@ namespace Codist.Options
 					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist/releases", "https://github.com/wmjordan/Codist/releases", "Go to project release page"),
 					new Note("Support future development of Codist:"),
 					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("Donate via PayPal", "https://www.paypal.me/wmzuo/19.99", "Open your browser and donate to project Codist"),
-					new DescriptionBox("Recommended donation value is $19.99. But you can modify the amount to any value if you like.")
+					new DescriptionBox("Recommended donation value is $19.99. But you can modify the amount to any value if you like")
 					);
 				_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker };
 				foreach (var item in _Options) {
@@ -336,7 +238,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly OptionBox<QuickInfoOptions> _CtrlQuickInfo, _Selection, _Color, _ClickAndGo;
-			readonly OptionBox<QuickInfoOptions> _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _AlternativeStyle;
+			readonly OptionBox<QuickInfoOptions> _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle;
 			readonly OptionBox<QuickInfoOptions> _Attributes, _BaseType, _BaseTypeInheritence, _Declaration, _SymbolLocation, _Interfaces, _InterfacesInheritence, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers;
 			readonly OptionBox<QuickInfoOptions>[] _Options;
 			readonly Controls.IntegerBox _MaxWidth, _MaxHeight, _ExtraHeight;
@@ -395,6 +297,8 @@ namespace Codist.Options
 						.SetLazyToolTip(() => "Displays the content of <exception/>"),
 					_SeeAlsoDoc = o.CreateOptionBox(QuickInfoOptions.SeeAlsoDoc, UpdateConfig, "Show <seealso/> links")
 						.SetLazyToolTip(() => "Displays referenced symbols of <seealso/>"),
+					_ExampleDoc = o.CreateOptionBox(QuickInfoOptions.ExampleDoc, UpdateConfig, "Show <example/> XML Doc")
+						.SetLazyToolTip(() => "Displays the content of <example/>"),
 					_AlternativeStyle = o.CreateOptionBox(QuickInfoOptions.AlternativeStyle, UpdateConfig, "Use alternative style")
 						.SetLazyToolTip(() => "Uses an alternative style to display Quick Info, and unify the topmost link in the symbol definition part of Quick Info"),
 
@@ -434,11 +338,11 @@ namespace Codist.Options
 				_MaxHeight.ValueChanged += UpdateQuickInfoSize;
 				_MaxWidth.ValueChanged += UpdateQuickInfoSize;
 				_ExtraHeight.ValueChanged += UpdateQuickInfoSize;
-				_Options = new[] { _CtrlQuickInfo, _Selection, _Color, _ClickAndGo, _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _AlternativeStyle, _Attributes, _BaseType, _BaseTypeInheritence, _Declaration, _SymbolLocation, _Interfaces, _InterfacesInheritence, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, /*_NamespaceTypes, */_MethodOverload, _InterfaceMembers };
-				foreach (var item in new[] { _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _BaseTypeInheritence, _InterfacesInheritence }) {
+				_Options = new[] { _CtrlQuickInfo, _Selection, _Color, _ClickAndGo, _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _Attributes, _BaseType, _BaseTypeInheritence, _Declaration, _SymbolLocation, _Interfaces, _InterfacesInheritence, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, /*_NamespaceTypes, */_MethodOverload, _InterfaceMembers };
+				foreach (var item in new[] { _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _BaseTypeInheritence, _InterfacesInheritence }) {
 					item.WrapMargin(SubOptionMargin);
 				}
-				_OverrideDefaultDocumentation.BindDependentOptionControls(_DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc);
+				_OverrideDefaultDocumentation.BindDependentOptionControls(_DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc);
 				_BaseType.BindDependentOptionControls(_BaseTypeInheritence);
 				_Interfaces.BindDependentOptionControls(_InterfacesInheritence);
 			}
@@ -510,8 +414,9 @@ namespace Codist.Options
 		{
 			readonly OptionBox<SmartBarOptions> _ShiftToggleDisplay, _ManualDisplaySmartBar;
 			readonly OptionBox<SmartBarOptions>[] _Options;
-			readonly TextBox _BrowserPath, _BrowserParameter;
-			readonly Button _BrowseBrowserPath;
+			readonly TextBox _BrowserPath, _BrowserParameter, _SearchEngineName, _SearchEngineUrl;
+			readonly ListBox _SearchEngineList;
+			readonly Button _BrowseBrowserPath, _AddSearchButton, _RemoveSearchButton, _MoveUpSearchButton, _ResetSearchButton, _SaveSearchButton;
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.SmartBarOptions;
@@ -525,7 +430,63 @@ namespace Codist.Options
 					);
 
 				AddPage("Web Search",
-					new Note("This page defines search engines which can be accessed via Smart Bar"),
+					new Note("This page defines search engines which can be accessed via right clicking the Find button on the Smart Bar"),
+					new TitleBox("Search Engines"),
+					new Grid {
+						ColumnDefinitions = {
+							new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), },
+							new ColumnDefinition { Width = new GridLength(80, GridUnitType.Pixel) }
+						},
+						RowDefinitions = {
+							new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+							new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }
+						},
+						Children = {
+							(_SearchEngineList = new ListView {
+								Margin = WpfHelper.SmallMargin,
+								View = new GridView {
+									Columns = {
+										new GridViewColumn { Header = "Name", Width = 100, DisplayMemberBinding = new Binding("Name") },
+										new GridViewColumn { Header = "URL Pattern", Width = 220, DisplayMemberBinding = new Binding("Pattern") }
+									}
+								}
+							}),
+							new Grid {
+								Margin = WpfHelper.SmallMargin,
+								ColumnDefinitions = {
+									new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+									new ColumnDefinition { Width = new GridLength(5, GridUnitType.Star) },
+								},
+								RowDefinitions = {
+									new RowDefinition { },
+									new RowDefinition { },
+									new RowDefinition { }
+								},
+								Children = {
+									new Label { Content = "Name: ", Width = 60 },
+									(_SearchEngineName = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1),
+									new Label { Content = "URL: ", Width = 60 }.SetValue(Grid.SetRow, 1),
+									(_SearchEngineUrl = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
+									new DescriptionBox("Use %s for search keyword").SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumnSpan, 2)
+								}
+							}.SetValue(Grid.SetRow, 1),
+							new StackPanel {
+								Margin = WpfHelper.SmallMargin,
+								Children = {
+									(_RemoveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = "Remove" }),
+									(_MoveUpSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = "Move up" }),
+									(_ResetSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = "Reset" }),
+								}
+							}.SetValue(Grid.SetColumn, 1),
+							new StackPanel {
+								Margin = WpfHelper.SmallMargin,
+								Children = {
+									(_AddSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = "Add" }),
+									(_SaveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = "Update" })
+								}
+							}.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1)
+						}
+					},
 					new TitleBox("Search Result Browser"),
 					new Note("Browser path (empty to use system default browser):"),
 					new Grid {
@@ -543,7 +504,8 @@ namespace Codist.Options
 					new Note("Browser parameter (optional, empty to use URL as parameter):"),
 					_BrowserParameter = new TextBox { Margin = WpfHelper.SmallHorizontalMargin, Text = Config.Instance.BrowserParameter },
 					new DescriptionBox("Use %u for search engine URL")
-					);
+
+				);
 
 				_Options = new[] { _ShiftToggleDisplay, _ManualDisplaySmartBar };
 				_BrowserPath.TextChanged += _BrowserPath_TextChanged;
@@ -558,6 +520,57 @@ namespace Codist.Options
 						_BrowserPath.Text = d.FileName;
 					}
 				};
+				_SearchEngineList.Items.AddRange(Config.Instance.SearchEngines);
+				_SearchEngineList.SelectionChanged += (s, args)=> RefreshSearchEngineUI();
+				_AddSearchButton.Click += (s, args) => {
+					var item = new SearchEngine("New Item", String.Empty);
+					_SearchEngineList.Items.Add(item);
+					Config.Instance.SearchEngines.Add(item);
+					_SearchEngineList.SelectedIndex = _SearchEngineList.Items.Count - 1;
+					RefreshSearchEngineUI();
+					_SearchEngineName.Focus();
+					Config.Instance.FireConfigChangedEvent(Features.SmartBar);
+				};
+				_RemoveSearchButton.Click += (s, args) => {
+					var i = _SearchEngineList.SelectedItem as SearchEngine;
+					if (MessageBox.Show("Are you sure to remove search engine " + i.Name + "?", nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+						var p = _SearchEngineList.SelectedIndex;
+						_SearchEngineList.Items.RemoveAt(p);
+						Config.Instance.SearchEngines.RemoveAt(p);
+						RefreshSearchEngineUI();
+						Config.Instance.FireConfigChangedEvent(Features.SmartBar);
+					}
+				};
+				_MoveUpSearchButton.Click += (s, args) => {
+					var p = _SearchEngineList.SelectedIndex;
+					if (p > 0) {
+						var se = Config.Instance.SearchEngines[p];
+						_SearchEngineList.Items.RemoveAt(p);
+						Config.Instance.SearchEngines.RemoveAt(p);
+						_SearchEngineList.Items.Insert(--p, se);
+						Config.Instance.SearchEngines.Insert(p, se);
+						_SearchEngineList.SelectedIndex = p;
+						Config.Instance.FireConfigChangedEvent(Features.SmartBar);
+					}
+					_MoveUpSearchButton.IsEnabled = p > 0;
+				};
+				_SaveSearchButton.Click += (s, args) => {
+					var se = _SearchEngineList.SelectedItem as SearchEngine;
+					se.Name = _SearchEngineName.Text;
+					se.Pattern = _SearchEngineUrl.Text;
+					var p = _SearchEngineList.SelectedIndex;
+					_SearchEngineList.Items.RemoveAt(p);
+					_SearchEngineList.Items.Insert(p, se);
+					Config.Instance.FireConfigChangedEvent(Features.SmartBar);
+				};
+				_ResetSearchButton.Click += (s, args) => {
+					if (MessageBox.Show("Do you want to reset search engines to default ones?\nALL existing items will be REMOVED.", nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+						Config.Instance.ResetSearchEngines();
+						ResetSearchEngines(Config.Instance.SearchEngines);
+						Config.Instance.FireConfigChangedEvent(Features.SmartBar);
+					}
+				};
+				RefreshSearchEngineUI();
 			}
 
 			void _BrowserParameter_TextChanged(object sender, TextChangedEventArgs e) {
@@ -581,6 +594,7 @@ namespace Codist.Options
 				Array.ForEach(_Options, i => i.UpdateWithOption(o));
 				_BrowserPath.Text = config.BrowserPath;
 				_BrowserParameter.Text = config.BrowserParameter;
+				ResetSearchEngines(config.SearchEngines);
 			}
 
 			void UpdateConfig(SmartBarOptions options, bool set) {
@@ -589,6 +603,22 @@ namespace Codist.Options
 				}
 				Config.Instance.Set(options, set);
 				Config.Instance.FireConfigChangedEvent(Features.SmartBar);
+			}
+
+			void RefreshSearchEngineUI() {
+				var se = _SearchEngineList.SelectedItem as SearchEngine;
+				if (_RemoveSearchButton.IsEnabled = _ResetSearchButton.IsEnabled = _SaveSearchButton.IsEnabled = _SearchEngineName.IsEnabled = _SearchEngineUrl.IsEnabled = se != null) {
+					_MoveUpSearchButton.IsEnabled = _SearchEngineList.SelectedIndex > 0;
+					_SearchEngineName.Text = se.Name;
+					_SearchEngineUrl.Text = se.Pattern;
+				}
+				else {
+					_MoveUpSearchButton.IsEnabled = false;
+				}
+			}
+			void ResetSearchEngines(System.Collections.Generic.List<SearchEngine> searchEngines) {
+				_SearchEngineList.Items.Clear();
+				_SearchEngineList.Items.AddRange(searchEngines);
 			}
 		}
 	}
@@ -641,7 +671,7 @@ namespace Codist.Options
 						.SetLazyToolTip(() => "Displays #region and #endregion directives defined within members of types in the drop-down menu of navigation bar"),
 					_LineOfCode = o.CreateOptionBox(NaviBarOptions.LineOfCode, UpdateConfig, "Line of code")
 						.SetLazyToolTip(() => "Displays number of lines for current type or members in the drop-down menu of navigation bar and tool tips"),
-					new DescriptionBox("The above options will take effect when the navigation bar is repopulated."),
+					new DescriptionBox("The above options will take effect when the navigation bar is repopulated"),
 
 					new TitleBox("Shortcut Keys"),
 					new DescriptionBox("Shortcut keys to access the menus of the navigation bar:\r\nCtrl+`, Ctrl+`: Edit.SearchDeclaration\r\nCtrl+1, Ctrl+1: Edit.SearchClassMember"),
