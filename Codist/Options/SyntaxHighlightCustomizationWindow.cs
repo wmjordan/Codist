@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -119,13 +120,16 @@ namespace Codist.Options
 								new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
 							},
 							Children = {
-								new DockPanel {
+								new Grid {
+									ColumnDefinitions = {
+										new ColumnDefinition { Width = new GridLength(10, GridUnitType.Star) },
+										new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+										new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+									},
 									Children = {
-										new TextBlock { Text = "Syntax styles:", FontWeight = FontWeights.Bold }.SetValue(DockPanel.SetDock, Dock.Left),
-										new[] {
-											_AddTagButton = new Button { Content = "Add" }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-											_RemoveTagButton = new Button { Content = "Remove" }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
-										}.Stack(true).SetValue(DockPanel.SetDock, Dock.Right)
+										new TextBlock { Text = "Syntax styles:", FontWeight = FontWeights.Bold }.SetValue(Grid.SetColumn, 0),
+										(_AddTagButton = new Button { Content = "Add" }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)).SetValue(Grid.SetColumn, 1),
+										(_RemoveTagButton = new Button { Content = "Remove" }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)).SetValue(Grid.SetColumn, 2)
 									}
 								},
 								(_OptionPageHolder = new Border {
@@ -215,7 +219,7 @@ namespace Codist.Options
 												Margin = WpfHelper.SmallMargin,
 												Children = {
 													(_TagCaseSensitiveBox = new StyleCheckBox("Case sensitive", OnTagCaseSensitiveChanged) { IsThreeState = false }),
-													(_TagHasPunctuationBox = new StyleCheckBox("End with punctuation", OnTagHasPunctuationChanged) { IsThreeState = false }),
+													(_TagHasPunctuationBox = new StyleCheckBox("May end with punctuation", OnTagHasPunctuationChanged) { IsThreeState = false }),
 												}
 											},
 											new WrapPanel {
@@ -263,6 +267,7 @@ namespace Codist.Options
 			Config.Instance.BeginUpdate();
 		}
 
+		public bool IsClosing { get; private set; }
 		internal StyleBase ActiveStyle => _SelectedStyleButton?.StyleSettings;
 
 		#region List initializers
@@ -532,8 +537,8 @@ namespace Codist.Options
 				}
 				switch (t.StyleApplication) {
 					case CommentStyleApplication.Content: _TagApplyOnContentBox.IsChecked = true; break;
-					case CommentStyleApplication.Tag: _TagApplyOnTagBox.IsChecked = true; break;
 					case CommentStyleApplication.TagAndContent: _TagApplyOnWholeBox.IsChecked = true; break;
+					default: _TagApplyOnTagBox.IsChecked = true; break;
 				}
 			}
 			finally {
@@ -695,7 +700,13 @@ namespace Codist.Options
 
 		void AddTag(object sender, EventArgs e) {
 			Update(() => {
-				var label = new CommentLabel("TAG", CommentStyleTypes.ToDo);
+				var label = new CommentLabel(
+					_TagBox.Text.Length > 0 ? _TagBox.Text : "TAG",
+					Enum.TryParse<CommentStyleTypes>((string)_TagStyleBox.SelectedValue, out var style) ? style : CommentStyleTypes.ToDo,
+					_TagCaseSensitiveBox.IsChecked == false) {
+					StyleApplication = _TagApplyOnContentBox.IsChecked == true ? CommentStyleApplication.Content : _TagApplyOnContentBox.IsChecked == true ? CommentStyleApplication.TagAndContent : CommentStyleApplication.Tag,
+					AllowPunctuationDelimiter = _TagHasPunctuationBox.IsChecked == true
+				};
 				Config.Instance.Labels.Insert(0, label);
 				var b = CreateButtonForLabel(label);
 				_SettingsList.Children.Insert(0, b);
@@ -829,11 +840,29 @@ namespace Codist.Options
 			_FormatMap.ClassificationFormatMappingChanged -= RefreshList;
 			base.OnClosed(e);
 		}
+		protected override void OnClosing(CancelEventArgs e) {
+			if (IsClosing == false && Config.Instance.IsChanged) {
+				IsClosing = true;
+				var r = MessageBox.Show("The configuration has been changed, do you want to save it?", nameof(Codist), MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+				switch (r) {
+					case MessageBoxResult.Yes:
+						Config.Instance.EndUpdate(true); break;
+					case MessageBoxResult.No:
+						Config.Instance.EndUpdate(false); break;
+					default:
+						IsClosing = false;
+						e.Cancel = true; break;
+				}
+			}
+			base.OnClosing(e);
+		}
 		void Ok() {
+			IsClosing = true;
 			Config.Instance.EndUpdate(true);
 			Close();
 		}
 		void Cancel() {
+			IsClosing = true;
 			Close();
 			Config.Instance.EndUpdate(false);
 		}

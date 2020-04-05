@@ -66,7 +66,7 @@ namespace Codist.Commands
 		}
 
 		static void RefreshWindow(object sender, EventArgs e) {
-			if (_Window != null && _Window.IsVisible) {
+			if (_Window != null && _Window.IsClosing == false && _Window.IsVisible) {
 				var b = _Window.RestoreBounds;
 				var s = _Window.WindowState;
 				_Window.Close();

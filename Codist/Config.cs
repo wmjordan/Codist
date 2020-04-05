@@ -81,6 +81,7 @@ namespace Codist
 		public List<SearchEngine> SearchEngines { get; } = new List<SearchEngine>();
 		public string BrowserPath { get; set; }
 		public string BrowserParameter { get; set; }
+		internal bool IsChanged => _ConfigManager?.IsChanged ?? false;
 
 		public static event EventHandler Loaded;
 		public static event EventHandler<ConfigUpdatedEventArgs> Updated;
@@ -436,6 +437,7 @@ namespace Codist
 			public ConfigManager() {
 				Updated += MarkUpdated;
 			}
+			public bool IsChanged => _version != _oldVersion;
 			void MarkUpdated(object sender, ConfigUpdatedEventArgs e) {
 				++_version;
 			}
