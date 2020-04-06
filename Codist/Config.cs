@@ -216,6 +216,8 @@ namespace Codist
 				new SearchEngine { Name = "StackOverflow", Pattern = "https://stackoverflow.com/search?q=%s" },
 				new SearchEngine { Name = "GitHub", Pattern = "https://github.com/search?q=%s" },
 				new SearchEngine { Name = "CodeProject", Pattern = "https://www.codeproject.com/search.aspx?q=%s&x=0&y=0&sbo=kw" },
+				new SearchEngine { Name = ".NET Core Source", Pattern = "https://source.dot.net/#q=%s" },
+				new SearchEngine { Name = ".NET Framework Source", Pattern = "https://referencesource.microsoft.com/#q=%s" },
 			});
 		}
 
