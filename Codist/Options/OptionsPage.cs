@@ -835,7 +835,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly Controls.IntegerBox _TopSpace, _BottomSpace;
-			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _UseLayoutRounding;
+			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow/*, _UseLayoutRounding*/;
 
 			public PageControl(OptionsPage page) : base(page) {
 				AddPage("General",
@@ -877,7 +877,7 @@ namespace Codist.Options
 				var o = config.DisplayOptimizations;
 				_MainWindow.UpdateWithOption(o);
 				_CodeWindow.UpdateWithOption(o);
-				_UseLayoutRounding.UpdateWithOption(o);
+				//_UseLayoutRounding.UpdateWithOption(o);
 			}
 
 			void UpdateCodeWindowDisplayOption(DisplayOptimizations options, bool value) {
