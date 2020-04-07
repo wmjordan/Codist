@@ -20,17 +20,11 @@ namespace Codist
 	[InstalledProductRegistration("#110", "#112", Config.CurrentVersion, IconResourceID = 400)] // Information on this package for Help/About
 	[Guid(PackageGuidString)]
 	[ProvideOptionPage(typeof(Options.GeneralOptionsPage), Constants.NameOfMe, "General", 0, 0, true, Sort = 0)]
-
 	[ProvideOptionPage(typeof(Options.SyntaxHighlightOptionsPage), Constants.NameOfMe, "Syntax Highlight", 0, 0, true, Sort = 10)]
-
 	[ProvideOptionPage(typeof(Options.SuperQuickInfoOptionsPage), Constants.NameOfMe, "Super Quick Info", 0, 0, true, Sort = 20)]
-
 	[ProvideOptionPage(typeof(Options.SmartBarOptionsPage), Constants.NameOfMe, "Smart Bar", 0, 0, true, Sort = 30)]
-
 	[ProvideOptionPage(typeof(Options.NavigationBarPage), Constants.NameOfMe, "Navigation Bar", 0, 0, true, Sort = 40)]
-
 	[ProvideOptionPage(typeof(Options.ScrollBarMarkerPage), Constants.NameOfMe, "Scrollbar Marker", 0, 0, true, Sort = 50)]
-
 	[ProvideOptionPage(typeof(Options.DisplayPage), Constants.NameOfMe, "Display", 0, 0, true, Sort = 61)]
 	[ProvideOptionPage(typeof(Options.ExtensionDeveloperPage), Constants.NameOfMe, "Extension developer", 0, 0, true, Sort = 62)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]

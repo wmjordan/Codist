@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Forms;
 using GdiColor = System.Drawing.Color;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
@@ -125,20 +124,6 @@ namespace Codist
 				brush.Opacity = opacity;
 			}
 			return brush;
-		}
-
-		public static TabControl AddPage(this TabControl tabs, string name, Control pageContent, bool prepend) {
-			var page = new TabPage(name) { UseVisualStyleBackColor = true };
-			if (prepend) {
-				tabs.TabPages.Insert(0, page);
-				tabs.SelectedIndex = 0;
-			}
-			else {
-				tabs.TabPages.Add(page);
-			}
-			pageContent.Dock = DockStyle.Fill;
-			page.Controls.Add(pageContent);
-			return tabs;
 		}
 	}
 }
