@@ -607,7 +607,7 @@ namespace Codist.Options
 
 			void RefreshSearchEngineUI() {
 				var se = _SearchEngineList.SelectedItem as SearchEngine;
-				if (_RemoveSearchButton.IsEnabled = _ResetSearchButton.IsEnabled = _SaveSearchButton.IsEnabled = _SearchEngineName.IsEnabled = _SearchEngineUrl.IsEnabled = se != null) {
+				if (_RemoveSearchButton.IsEnabled = _SaveSearchButton.IsEnabled = _SearchEngineName.IsEnabled = _SearchEngineUrl.IsEnabled = se != null) {
 					_MoveUpSearchButton.IsEnabled = _SearchEngineList.SelectedIndex > 0;
 					_SearchEngineName.Text = se.Name;
 					_SearchEngineUrl.Text = se.Pattern;
