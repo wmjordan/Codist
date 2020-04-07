@@ -13,11 +13,14 @@ namespace Codist.QuickInfo
 	{
 		const string Name = "SelectionInfo";
 
-		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Selection) == false
-				|| session.Mark(nameof(SelectionQuickInfo)) == false) {
-				return null;
-			}
+		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Selection) == false
+				|| session.Mark(nameof(SelectionQuickInfo)) == false
+				? System.Threading.Tasks.Task.FromResult<QuickInfoItem>(null)
+				: InternalGetQuickInfoItemAsync(session, cancellationToken);
+		}
+
+		static async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			var textSnapshot = session.TextView.TextSnapshot;
 			var triggerPoint = session.GetTriggerPoint(textSnapshot).GetValueOrDefault();

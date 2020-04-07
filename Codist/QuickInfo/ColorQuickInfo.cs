@@ -18,10 +18,13 @@ namespace Codist.QuickInfo
 {
 	sealed class ColorQuickInfoController : IAsyncQuickInfoSource
 	{
-		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false) {
-				return null;
-			}
+		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
+			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false
+				? System.Threading.Tasks.Task.FromResult<QuickInfoItem>(null)
+				: InternalGetQuickInfoItemAsync(session, cancellationToken);
+		}
+
+		static async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			var buffer = session.TextView.TextBuffer;
 			var snapshot = session.TextView.TextSnapshot;
