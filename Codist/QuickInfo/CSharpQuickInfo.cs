@@ -177,7 +177,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(await ShowAvailabilityAsync(docId, workspace, token, cancellationToken));
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node, qiWrapper,
-					ctor?.Type == node ? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol
+					ctor?.Type == node ? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? symbol
 						//: node.Parent.IsKind(SyntaxKind.Attribute) ? symbol.ContainingType
 						: symbol);
 			}
@@ -189,7 +189,7 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)) {
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				if (ctor != null && ctor.Type == node) {
-					symbol = semanticModel.GetSymbolOrFirstCandidate(ctor, cancellationToken);
+					symbol = semanticModel.GetSymbolOrFirstCandidate(ctor, cancellationToken) ?? symbol;
 					if (symbol == null) {
 						return null;
 					}

@@ -517,15 +517,28 @@ namespace Codist.QuickInfo
 							}
 							continue;
 						}
+						if (cp.Content is ItemsControl items && items.GetType().Name == "WpfToolTipItemsControl") {
+							try {
+								MakeChildrenScrollable(items);
+								continue;
+							}
+							catch (InvalidOperationException) {
+								// ignore
+#if DEBUG
+								throw;
+#endif
+							}
+						}
 						cp.Content = null;
 						cp.Content = o.Scrollable();
 					}
 				}
 
 				static void MakeChildrenScrollable(StackPanel s) {
-					var children = new List<DependencyObject>(s.Children.Count);
+					var children = new DependencyObject[s.Children.Count];
+					var i = -1;
 					foreach (DependencyObject n in s.Children) {
-						children.Add(n);
+						children[++i] = n;
 					}
 					s.Children.Clear();
 					foreach (var c in children) {
@@ -541,6 +554,24 @@ namespace Codist.QuickInfo
 							d.WrapMargin(WpfHelper.SmallVerticalMargin);
 						}
 						s.Add(c.Scrollable().LimitSize());
+					}
+				}
+				static void MakeChildrenScrollable(ItemsControl s) {
+					var children = new object[s.Items.Count];
+					var i = -1;
+					foreach (object n in s.Items) {
+						children[++i] = n;
+					}
+					s.Items.Clear();
+					foreach (var c in children) {
+						var t = c as TextBlock;
+						if (t != null) {
+							t.TextWrapping = TextWrapping.Wrap;
+							s.Items.Add(t.Scrollable().LimitSize());
+						}
+						else {
+							s.Items.Add(c);
+						}
 					}
 				}
 			}
