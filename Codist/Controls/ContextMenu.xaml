@@ -40,7 +40,7 @@
 					<Border BorderThickness="1,1,1,1" x:Name="Border" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}">
 						<StackPanel ClipToBounds="True" Orientation="Vertical">
 							<ScrollViewer Name="MenuScrollViewer" MaxHeight="{TemplateBinding MaxHeight}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Style="{DynamicResource {x:Static vsui:VsResourceKeys.ScrollViewerStyleKey}}">
-								<ItemsPresenter Name="ItemsPresenter" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.DirectionalNavigation="Cycle" Margin="3"/>
+								<ItemsPresenter Name="ItemsPresenter" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.DirectionalNavigation="Cycle" Margin="3"/>
 							</ScrollViewer>
 						</StackPanel>
 					</Border>
@@ -76,7 +76,7 @@
 				<Border Name="Check" Width="16" Height="16" Visibility="Collapsed" Margin="6,0,6,0" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderThickness="1" BorderBrush="#5082a4">
 					<Path Name="CheckMark" Width="7" Height="7" Visibility="Hidden" SnapsToDevicePixels="False" Stroke="#5082a4" StrokeThickness="2" Data="M 0 0 L 7 7 M 0 7 L 7 0"/>
 				</Border>
-				<ContentPresenter Name="HeaderHost" MaxWidth="500" Grid.Column="1" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="False" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
+				<ContentPresenter Name="HeaderHost" MaxWidth="500" Grid.Column="1" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" ContentSource="Header" RecognizesAccessKey="False"/>
 				<TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="5,2,0,2" Height="{Binding ElementName=HeaderHost,Path=ActualHeight}" VerticalAlignment="Center" DockPanel.Dock="Right" Foreground="{DynamicResource VsBrush.GrayText}"/>
 			</Grid>
 		</Border>
@@ -114,15 +114,15 @@
 					<ColumnDefinition Width="13"/>
 				</Grid.ColumnDefinitions>
 				<ContentPresenter Name="Icon" Width="16" Height="16" Margin="3,3,8,3" VerticalAlignment="Center" ContentSource="Icon"/>
-				<ContentPresenter Name="HeaderHost" MaxWidth="500" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="False" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
+				<ContentPresenter Name="HeaderHost" MaxWidth="500" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="False"/>
 				<TextBlock x:Name="InputGestureText" Grid.Column="2" Height="{Binding ElementName=HeaderHost,Path=ActualHeight}" Text="{TemplateBinding InputGestureText}" TextTrimming="CharacterEllipsis" Margin="5,2,0,2" DockPanel.Dock="Right"/>
 				<Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="{DynamicResource VsBrush.CommandBarMenuSubmenuGlyph}"/>
 				<Popup Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
 					<Border Name="SubmenuBorder" SnapsToDevicePixels="True" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" BorderThickness="1,1,1,1">
 						<StackPanel Margin="3">
-							<ContentPresenter x:Name="PopupHeader" Content="{TemplateBinding SubMenuHeader}" ContentSource="Tag" Margin="0,0,0,3" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"/>
+							<ContentPresenter x:Name="PopupHeader" Content="{TemplateBinding SubMenuHeader}" ContentSource="Tag" Margin="0,0,0,3"/>
 							<ScrollViewer Name="SubMenuScrollViewer" MaxHeight="{TemplateBinding SubMenuMaxHeight}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-								<ItemsPresenter Name="ItemsPresenter" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+								<ItemsPresenter Name="ItemsPresenter" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.DirectionalNavigation="Cycle"/>
 							</ScrollViewer>
 						</StackPanel>
 					</Border>

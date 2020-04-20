@@ -31,20 +31,20 @@
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type c:VirtualList}">
-					<Border BorderThickness="1,1,1,1" CornerRadius="0,0,5,5" x:Name="Border" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" SnapsToDevicePixels="True" UseLayoutRounding="True">
+					<Border BorderThickness="1,1,1,1" CornerRadius="0,0,5,5" x:Name="Border" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" UseLayoutRounding="True">
 						<StackPanel>
 							<Grid>
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition Width="*"/>
 									<ColumnDefinition Width="Auto" SharedSizeGroup="HeaderButtons"/>
 								</Grid.ColumnDefinitions>
-								<ContentPresenter x:Name="Header" Content="{TemplateBinding Header}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
+								<ContentPresenter x:Name="Header" Content="{TemplateBinding Header}" Margin="0,3,0,3"/>
 								<ContentPresenter x:Name="HeaderButtons" Content="{TemplateBinding HeaderButtons}" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,2,0,0"/>
 							</Grid>
 							<ScrollViewer x:Name="PART_Scroller" Margin="3" Focusable="False" MaxHeight="{TemplateBinding ItemsControlMaxHeight}" VerticalScrollBarVisibility="Auto">
 								<VirtualizingStackPanel IsItemsHost="True" VirtualizingPanel.CacheLength="2,3" VirtualizingPanel.CacheLengthUnit="Page" VirtualizationMode="Recycling"/>
 							</ScrollViewer>
-							<ContentPresenter x:Name="PART_Footer" Content="{TemplateBinding Footer}" Margin="0,3,0,3" SnapsToDevicePixels="True"/>
+							<ContentPresenter x:Name="PART_Footer" Content="{TemplateBinding Footer}" Margin="0,3,0,3"/>
 						</StackPanel>
 					</Border>
 					<ControlTemplate.Triggers>
@@ -64,11 +64,11 @@
 					<ColumnDefinition Width="*"/>
 					<ColumnDefinition Width="Auto"/>
 				</Grid.ColumnDefinitions>
-				<ContentPresenter x:Name="Icon" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Content="{Binding Path=Icon}" SnapsToDevicePixels="True"/>
+				<ContentPresenter x:Name="Icon" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Content="{Binding Path=Icon}"/>
 				<Border x:Name="Check" Width="18" Height="18" Visibility="Collapsed" Margin="6,0,6,0" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderThickness="1" BorderBrush="#5082a4">
 					<Path x:Name="CheckMark" Width="7" Height="7" Visibility="Hidden" SnapsToDevicePixels="False" Stroke="#5082a4" StrokeThickness="2" Data="M 0 0 L 7 7 M 0 7 L 7 0"/>
 				</Border>
-				<ContentPresenter x:Name="HeaderHost" MaxWidth="500" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{Binding Path=Content}" RecognizesAccessKey="False" SnapsToDevicePixels="True"/>
+				<ContentPresenter x:Name="HeaderHost" MaxWidth="500" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{Binding Path=Content}" RecognizesAccessKey="False"/>
 				<TextBlock x:Name="HintText" Grid.Column="2" Text="{Binding Path=Hint}" Margin="5,0,0,0" Height="{Binding ElementName=HeaderHost,Path=ActualHeight}" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource VsBrush.GrayText}" MaxWidth="200" TextTrimming="CharacterEllipsis"/>
 			</Grid>
 		</Border>

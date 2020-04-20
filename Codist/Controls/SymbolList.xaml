@@ -25,8 +25,8 @@
 		</Setter>
 	</Style>
 	<DataTemplate x:Key="LabelTemplate" DataType="{x:Type c:SymbolItem}">
-		<Border Name="Border" BorderThickness="0,0,0,1" Padding="5,1,1,1" HorizontalAlignment="Stretch" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderBrush="{DynamicResource VsBrush.CommandBarMenuSeparator}" SnapsToDevicePixels="True">
-			<ContentPresenter MaxWidth="500" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Path=Content}" RecognizesAccessKey="False" SnapsToDevicePixels="True" />
+		<Border Name="Border" BorderThickness="0,0,0,1" Padding="5,1,1,1" HorizontalAlignment="Stretch" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderBrush="{DynamicResource VsBrush.CommandBarMenuSeparator}">
+			<ContentPresenter MaxWidth="500" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Path=Content}" RecognizesAccessKey="False" />
 		</Border>
 	</DataTemplate>
 	<DataTemplate x:Key="SymbolItemTemplate" DataType="{x:Type c:SymbolItem}">
@@ -38,13 +38,13 @@
 					<ColumnDefinition Width="Auto"/>
 					<ColumnDefinition Width="Auto"/>
 				</Grid.ColumnDefinitions>
-				<ContentPresenter x:Name="Icon" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Content="{Binding Path=Icon}" SnapsToDevicePixels="True"/>
+				<ContentPresenter x:Name="Icon" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Content="{Binding Path=Icon}"/>
 				<Border x:Name="Check" Width="18" Height="18" Visibility="Collapsed" Margin="6,0,6,0" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderThickness="1" BorderBrush="#5082a4">
 					<Path x:Name="CheckMark" Width="7" Height="7" Visibility="Hidden" SnapsToDevicePixels="False" Stroke="#5082a4" StrokeThickness="2" Data="M 0 0 L 7 7 M 0 7 L 7 0"/>
 				</Border>
-				<ContentPresenter x:Name="HeaderHost" MaxWidth="500" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{Binding Path=Content}" RecognizesAccessKey="False" SnapsToDevicePixels="True"/>
+				<ContentPresenter x:Name="HeaderHost" MaxWidth="500" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{Binding Path=Content}" RecognizesAccessKey="False"/>
 				<TextBlock x:Name="HintText" Grid.Column="2" Text="{Binding Path=Hint}" Margin="5,0,0,0" Height="{Binding ElementName=HeaderHost,Path=ActualHeight}" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="{DynamicResource VsBrush.GrayText}" MaxWidth="200" TextTrimming="CharacterEllipsis"/>
-				<ContentPresenter x:Name="ExtIcon" Grid.Column="3" Width="Auto" Height="18" Margin="8,0,0,0" VerticalAlignment="Center" Content="{Binding Path=ExtIcon}" SnapsToDevicePixels="True"/>
+				<ContentPresenter x:Name="ExtIcon" Grid.Column="3" Width="Auto" Height="18" Margin="8,0,0,0" VerticalAlignment="Center" Content="{Binding Path=ExtIcon}"/>
 			</Grid>
 		</Border>
 		<DataTemplate.Triggers>
