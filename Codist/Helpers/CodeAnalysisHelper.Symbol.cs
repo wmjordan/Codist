@@ -576,7 +576,7 @@ namespace Codist
 		}
 
 		public static bool IsAwaitable(this ITypeSymbol t) {
-			if (t is null || t.ContainingNamespace.MetadataName != "System.Runtime.CompilerServices") {
+			if (t is null || t.ContainingNamespace == null || t.ContainingNamespace.MetadataName != "System.Runtime.CompilerServices") {
 				return false;
 			}
 
