@@ -470,7 +470,7 @@ namespace Codist.Controls
 			INamedTypeSymbol containingType = null;
 			foreach (var item in members) {
 				if (groupByType && item.ContainingType != containingType) {
-					m.Menu.Add(containingType = item.ContainingType, false)
+					m.Menu.Add((ISymbol)(containingType = item.ContainingType) ?? item.ContainingNamespace, false)
 						.Type = SymbolItemType.Container;
 					if (containingType?.TypeKind == TypeKind.Delegate) {
 						continue; // skip Invoke method in Delegates, for results from FindMethodBySignature
