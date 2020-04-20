@@ -10,8 +10,7 @@ namespace Codist.Commands
 		public static void Initialize() {
 			Command.CodeWindowScreenshot.Register(Execute, (s, args) => {
 				ThreadHelper.ThrowIfNotOnUIThread();
-				var c = s as OleMenuCommand;
-				c.Enabled = TextEditorHelper.GetActiveWpfDocumentView() != null;
+				((OleMenuCommand)s).Enabled = TextEditorHelper.GetActiveWpfDocumentView() != null;
 			});
 		}
 

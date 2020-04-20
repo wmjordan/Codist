@@ -11,8 +11,7 @@ namespace Codist.Commands
 	{
 		public static void Initialize() {
 			Command.IncrementVsixVersion.Register(Execute, (s, args) => {
-				var cmd = s as OleMenuCommand;
-				cmd.Visible = GetSelectedProjectItem() != null;
+				((OleMenuCommand)s).Visible = GetSelectedProjectItem() != null;
 			});
 		}
 

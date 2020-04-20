@@ -16,7 +16,7 @@ namespace Codist.Commands
 
 		static void HandleMenuState(object s, EventArgs args) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			(s as OleMenuCommand).Enabled = GetCSharpBar() != null;
+			((OleMenuCommand)s).Enabled = GetCSharpBar() != null;
 		}
 
 		static NaviBar.INaviBar GetCSharpBar() {

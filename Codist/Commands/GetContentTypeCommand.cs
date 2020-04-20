@@ -14,8 +14,7 @@ namespace Codist.Commands
 		public static void Initialize() {
 			Command.GetContentType.Register(Execute, (s, args) => {
 				ThreadHelper.ThrowIfNotOnUIThread();
-				var c = s as OleMenuCommand;
-				c.Visible = Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowDocumentContentType)
+				((OleMenuCommand)s).Visible = Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowDocumentContentType)
 					&& TextEditorHelper.GetActiveWpfDocumentView() != null;
 			});
 		}

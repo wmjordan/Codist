@@ -323,7 +323,10 @@ namespace Codist
 		}
 
 		void CreateLink(InlineCollection inlines, XElement e, XAttribute see) {
-			var link = new Hyperlink { NavigateUri = new Uri(see.Value), ToolTip = String.Join(Environment.NewLine, e.Attribute("title"), see.Value) }.ClickToNavigate();
+			var link = new Hyperlink {
+				NavigateUri = new Uri(see.Value),
+				ToolTip = String.Join(Environment.NewLine, e.Attribute("title"), see.Value)
+			}.ClickToNavigate();
 			if (e.IsEmpty) {
 				link.Inlines.Add(see.Value);
 				inlines.Add(link);

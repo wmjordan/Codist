@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
@@ -89,7 +88,7 @@ namespace Codist.Taggers
 									case SyntaxKind.ExplicitKeyword:
 									case SyntaxKind.ImplicitKeyword:
 										yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.TypeCastKeyword);
-										yield return CreateClassificationSpan(snapshot, (node as ConversionOperatorDeclarationSyntax).Type.Span, _Classifications.NestedDeclaration);
+										yield return CreateClassificationSpan(snapshot, ((ConversionOperatorDeclarationSyntax)node).Type.Span, _Classifications.NestedDeclaration);
 										continue;
 								}
 								continue;
