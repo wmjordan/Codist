@@ -477,7 +477,7 @@ namespace Codist.QuickInfo
 					}
 					qiContent.Add($"{s} switch sections, {cases} cases");
 				}
-				else {
+				else if (s == 1) {
 					s = ((SwitchStatementSyntax)node).Sections[0].Labels.Count;
 					if (s > 1) {
 						qiContent.Add($"1 switch section, {s} cases");
