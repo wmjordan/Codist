@@ -14,6 +14,7 @@ namespace Codist.SyntaxHighlight
 {
 	// see: Microsoft.VisualStudio.Text.Classification.Implementation.ClassificationFormatMap
 	// see: Microsoft.VisualStudio.Text.Classification.Implementation.ViewSpecificFormatMap
+	// see: https://stackoverflow.com/questions/24404473/create-visual-studio-theme-specific-syntax-highlighting
 	sealed class CodeViewDecorator
 	{
 		readonly IWpfTextView _TextView;
@@ -59,12 +60,12 @@ namespace Codist.SyntaxHighlight
 		}
 
 		void FormatUpdated(object sender, FormatItemsEventArgs e) {
-			if (_IsDecorating == 0 && _TextView.VisualElement.IsVisible) {
-				Decorate(e.ChangedItems.Select(_RegService.GetClassificationType).ToList(), false);
+			if (_IsDecorating == 0 && _TextView.VisualElement.IsVisible && e.ChangedItems.Count > 0) {
+				Decorate(e.ChangedItems.Select(_RegService.GetClassificationType), false);
 			}
 		}
 
-		void Decorate(ICollection<IClassificationType> classifications, bool fullUpdate) {
+		void Decorate(IEnumerable<IClassificationType> classifications, bool fullUpdate) {
 			if (Interlocked.CompareExchange(ref _IsDecorating, 1, 0) != 0) {
 				return;
 			}
@@ -91,12 +92,12 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
-		void DecorateClassificationTypes(ICollection<IClassificationType> classifications, bool fullUpdate) {
-			if (_ClassificationFormatMap.IsInBatchUpdate || classifications.Count == 0) {
+		void DecorateClassificationTypes(IEnumerable<IClassificationType> classifications, bool fullUpdate) {
+			if (_ClassificationFormatMap.IsInBatchUpdate) {
 				return;
 			}
 			var defaultSize = _ClassificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
-			var updated = new Dictionary<IClassificationType, TextFormattingRunProperties>(classifications.Count);
+			var updated = new Dictionary<IClassificationType, TextFormattingRunProperties>();
 			StyleBase style;
 			TextFormattingRunProperties textFormatting;
 			foreach (var item in classifications) {
@@ -110,7 +111,7 @@ namespace Codist.SyntaxHighlight
 					updated[item] = p;
 				}
 			}
-			foreach (var item in updated.ToList()) {
+			foreach (var item in updated) {
 				foreach (var subType in item.Key.GetSubTypes()) {
 					if (updated.ContainsKey(subType) == false) {
 						if ((style = FormatStore.GetOrCreateStyle(subType)) == null
