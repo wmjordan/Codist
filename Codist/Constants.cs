@@ -17,11 +17,12 @@ namespace Codist
 		public static class CodeTypes
 		{
 			public const string CPlusPlus = "C/C++";
-			public const string Code = nameof(Code);
-			public const string CSharp = nameof(CSharp);
-			public const string Text = nameof(Text);
-			public const string Markdown = nameof(Markdown);
+			public const string Code = "Code";
+			public const string CSharp = "CSharp";
+			public const string Text = "Text";
+			public const string Markdown = "Markdown";
 			public const string Xml = "XML";
+			public const string FindResults = "FindResults";
 		}
 
 		public static class SyntaxCategory

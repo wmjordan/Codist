@@ -13,7 +13,9 @@ namespace Codist.SyntaxHighlight
 	/// </summary>
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType(Constants.CodeTypes.FindResults)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
+	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class CodeViewCreationListener : IWpfTextViewCreationListener
 	{
 		public void TextViewCreated(IWpfTextView textView) {

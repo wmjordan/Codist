@@ -94,6 +94,7 @@
     <Compile Include="Taggers\CustomTagger.cs" />
     <Compile Include="Taggers\MarkdownFormats.cs" />
     <Compile Include="Taggers\MarkdownDefinitions.cs" />
+    <Compile Include="Taggers\FindResultTagger.cs" />
     <Compile Include="Taggers\MarkdownTagger.cs" />
     <Compile Include="Taggers\CommentTagger.cs" />
     <Compile Include="Taggers\CommentClassificationDefinitions.cs" />

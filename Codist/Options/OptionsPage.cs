@@ -66,7 +66,7 @@ namespace Codist.Options
 	{
 		readonly TabControl _Tabs;
 
-		public OptionsPage Page { get; private set; }
+		public OptionsPage Page { get; }
 
 		protected OptionsPageContainer(OptionsPage page) {
 			Page = page;
@@ -388,16 +388,33 @@ namespace Codist.Options
 
 		sealed class PageControl : OptionsPageContainer
 		{
+			readonly OptionBox<SpecialHighlightOptions> _CommentTaggerBox, _SearchResultBox;
+
 			public PageControl(OptionsPage page) : base(page) {
+				var o = Config.Instance.SpecialHighlightOptions;
 				AddPage("General",
 					new Note(new TextBlock()
 						.Append("To configure syntax highlight and manage comment taggers, use the ")
 						.AppendLink("Configure Codist Syntax Highlight", _ => Commands.SyntaxCustomizerWindowCommand.Execute(null, EventArgs.Empty), "Open the syntax highlight configuration dialog window")
-						.Append(" command under the Tools menu."))
+						.Append(" command under the Tools menu.")),
+					new TitleBox("Extra highlight"),
+					_CommentTaggerBox = o.CreateOptionBox(SpecialHighlightOptions.SpecialComment, UpdateConfig, "Enable comment tagger"),
+					_SearchResultBox = o.CreateOptionBox(SpecialHighlightOptions.SearchResult, UpdateConfig, "Highlight search results (*)"),
+					new DescriptionBox("*: The highlight search results feature is under development and may not work as expected")
 					);
 			}
 
+			void UpdateConfig(SpecialHighlightOptions options, bool set) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.Set(options, set);
+				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			}
+
 			protected override void LoadConfig(Config config) {
+				_CommentTaggerBox.UpdateWithOption(config.SpecialHighlightOptions);
+				_SearchResultBox.UpdateWithOption(config.SpecialHighlightOptions);
 			}
 		}
 	}

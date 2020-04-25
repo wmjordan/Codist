@@ -53,7 +53,7 @@ namespace Codist.SmartBars
 				new MarkdownSmartBar(textView, _TextSearchService);
 			}
 			else if (contentType.IsOfType("output")
-				|| contentType.IsOfType("FindResults")
+				|| contentType.IsOfType(Constants.CodeTypes.FindResults)
 				|| contentType.IsOfType("Interactive Content")
 				|| contentType.IsOfType("DebugOutput")
 				|| contentType.IsOfType("Command")

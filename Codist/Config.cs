@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows.Media;
 using AppHelpers;
@@ -70,6 +71,7 @@ namespace Codist
 		[DefaultValue(DefaultIconSize)]
 		public int SmartBarButtonSize { get; set; } = DefaultIconSize;
 		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
+		#region Deprecated style containers
 		public List<CommentStyle> CommentStyles { get; } = new List<CommentStyle>();
 		public List<XmlCodeStyle> XmlCodeStyles { get; } = new List<XmlCodeStyle>();
 		public List<CSharpStyle> CodeStyles { get; } = new List<CSharpStyle>();
@@ -77,6 +79,17 @@ namespace Codist
 		public List<MarkdownStyle> MarkdownStyles { get; } = new List<MarkdownStyle>();
 		public List<CodeStyle> GeneralStyles { get; } = new List<CodeStyle>();
 		public List<SymbolMarkerStyle> SymbolMarkerStyles { get; } = new List<SymbolMarkerStyle>();
+		//public bool ShouldSerializeCommentStyles() => false;
+		//public bool ShouldSerializeXmlCodeStyles() => false;
+		//public bool ShouldSerializeCodeStyles() => false;
+		//public bool ShouldSerializeCppStyles() => false;
+		//public bool ShouldSerializeMarkdownStyles() => false;
+		//public bool ShouldSerializeGeneralStyles() => false;
+		//public bool ShouldSerializeSymbolMarkerStyles() => false;
+		#endregion
+		public IEnumerable<SyntaxStyle> Styles => FormatStore.GetStyles()
+			.Where(i => i.Value?.IsSet == true)
+			.Select(i => { var s = new SyntaxStyle(i.Key); i.Value.CopyTo(s); return s; });
 		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
 		public List<SearchEngine> SearchEngines { get; } = new List<SearchEngine>();
 		public string BrowserPath { get; set; }
@@ -229,7 +242,7 @@ namespace Codist
 					Directory.CreateDirectory(d);
 				}
 				File.WriteAllText(path, JsonConvert.SerializeObject(
-					stylesOnly ? (object)new StyleConfig(this) : this,
+					stylesOnly ? (object)new StyleConfig(this)/*{ Version, Styles }*/ : this,
 					Formatting.Indented,
 					new JsonSerializerSettings {
 						DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
@@ -580,6 +593,7 @@ namespace Codist
 		SpecialPunctuation = 1 << 8,
 		LocalFunctionDeclaration = 1 << 10,
 		NonPrivateField = 1 << 11,
+		SearchResult = 1 << 20,
 		Default = SpecialComment,
 		AllParentheses = ParameterBrace | CastBrace | BranchBrace | LoopBrace | ResourceBrace,
 		AllBraces = DeclarationBrace | ParameterBrace | CastBrace | BranchBrace | LoopBrace | ResourceBrace | SpecialPunctuation
