@@ -155,7 +155,7 @@ namespace Codist
 				Error = (sender, args) => {
 					args.ErrorContext.Handled = true; // ignore json error
 				}
-			});
+			}) ?? GetDefaultConfig();
 			if (styleFilter == StyleFilters.None) {
 				var l = config.Labels;
 				l.RemoveAll(i => String.IsNullOrWhiteSpace(i.Label));
