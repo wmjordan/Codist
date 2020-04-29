@@ -290,7 +290,7 @@ namespace Codist.Taggers
 						if (symbol == null) {
 							yield break;
 						}
-						tag = GetClassificationType(symbol);
+						tag = _GeneralClassifications.TypeCastKeyword; //x GetClassificationType(symbol);
 						if (tag != null) {
 							if (HighlightOptions.SpecialPunctuation) {
 								yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
@@ -307,7 +307,7 @@ namespace Codist.Taggers
 							if (symbol == null) {
 								yield break;
 							}
-							tag = GetClassificationType(symbol);
+							tag = _GeneralClassifications.TypeCastKeyword; //x GetClassificationType(symbol);
 							if (tag != null) {
 								if (HighlightOptions.SpecialPunctuation) {
 									yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
