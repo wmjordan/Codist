@@ -59,6 +59,7 @@ namespace Codist.Options
 			ShowInTaskbar = false;
 			MinHeight = 300;
 			MinWidth = 480;
+			SnapsToDevicePixels = true;
 			Content = new Border {
 				Padding = WpfHelper.MiddleMargin,
 				Child = new Grid {
@@ -97,7 +98,7 @@ namespace Codist.Options
 									Margin = WpfHelper.TopItemMargin
 								},
 								(_LoadThemeButton = new ThemedButton(KnownImageIds.FolderOpened, "Load...", "Load syntax highlight theme...", LoadTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								(_SaveThemeButton = new ThemedButton(KnownImageIds.SaveFileDialog, "Save...", "Save syntax highlight theme...", SaveTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								(_SaveThemeButton = new ThemedButton(KnownImageIds.SaveAs, "Save...", "Save syntax highlight theme...", SaveTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
 								(_ResetThemeButton = new ThemedButton(KnownImageIds.CleanData, "Reset...", "Reset syntax highlight theme to default...", ResetTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)),
 								new TextBlock {
 									Text = "Predefined themes:",
