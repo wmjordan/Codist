@@ -111,6 +111,7 @@ namespace Codist.SyntaxHighlight
 					updated[item] = p;
 				}
 			}
+			var refreshList = new List<(IClassificationType type, TextFormattingRunProperties property)>();
 			foreach (var item in updated) {
 				foreach (var subType in item.Key.GetSubTypes()) {
 					if (updated.ContainsKey(subType) == false) {
@@ -118,8 +119,13 @@ namespace Codist.SyntaxHighlight
 							|| (textFormatting = FormatStore.GetBackupFormatting(subType)) == null) {
 							continue;
 						}
-						updated[subType] = SetProperties(textFormatting, style, defaultSize);
+						refreshList.Add((subType, SetProperties(textFormatting, style, defaultSize)));
 					}
+				}
+			}
+			if (refreshList.Count > 0) {
+				foreach (var item in refreshList) {
+					updated[item.type] = item.property;
 				}
 			}
 			if (updated.Count > 0) {
