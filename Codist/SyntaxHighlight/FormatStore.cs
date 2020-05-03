@@ -171,9 +171,9 @@ namespace Codist.SyntaxHighlight
 		static void InitStyleClassificationCache<TStyleEnum, TCodeStyle>(Dictionary<string, StyleBase> styleCache, IClassificationTypeRegistryService service, List<TCodeStyle> styles)
 			where TCodeStyle : StyleBase {
 			var cs = typeof(TStyleEnum);
-			foreach (var styleName in Enum.GetNames(cs)) {
-				var f = cs.GetField(styleName);
-				var cso = styles.Find(i => i.Id == (int)f.GetValue(null));
+			foreach (var f in cs.GetFields(BindingFlags.Public | BindingFlags.Static)) {
+				var styleId = (int)f.GetValue(null);
+				var cso = styles.Find(i => i.Id == styleId);
 				if (cso == null) {
 					continue;
 				}

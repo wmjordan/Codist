@@ -23,7 +23,7 @@ namespace Codist.SmartBars
 	/// An extended <see cref="SmartBar"/> for C# content type.
 	/// </summary>
 	sealed class CSharpSmartBar : SmartBar {
-		static readonly Taggers.HighlightClassifications __HighlightClassifications = new Taggers.HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
+		static readonly Taggers.HighlightClassifications __HighlightClassifications = Taggers.HighlightClassifications.Instance;
 		readonly SemanticContext _Context;
 		readonly ExternalAdornment _SymbolListContainer;
 		ISymbol _Symbol;

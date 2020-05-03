@@ -6,7 +6,9 @@ namespace Codist.Taggers
 {
 	sealed class CSharpClassifications
 	{
-		public CSharpClassifications(IClassificationTypeRegistryService registry) {
+		public static readonly CSharpClassifications Instance = new CSharpClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
+
+		CSharpClassifications(IClassificationTypeRegistryService registry) {
 			AbstractMember = registry.GetClassificationTag(Constants.CSharpAbstractMemberName);
 			AbstractionKeyword = registry.GetClassificationTag(Constants.CodeAbstractionKeyword);
 			AliasNamespace = registry.GetClassificationTag(Constants.CSharpAliasNamespaceName);
@@ -45,6 +47,11 @@ namespace Codist.Taggers
 			XmlDoc = registry.GetClassificationTag(Constants.CSharpXmlDoc);
 			UserSymbol = registry.GetClassificationTag(Constants.CSharpUserSymbol);
 			MetadataSymbol = registry.GetClassificationTag(Constants.CSharpMetadataSymbol);
+
+			DeclarationBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(GeneralClassifications.Instance.SpecialPunctuation.ClassificationType, DeclarationBrace.ClassificationType));
+			MethodBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(GeneralClassifications.Instance.SpecialPunctuation.ClassificationType, Method.ClassificationType));
+			ConstructorBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(GeneralClassifications.Instance.SpecialPunctuation.ClassificationType, ConstructorMethod.ClassificationType));
+			ResourceBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(GeneralClassifications.Instance.SpecialPunctuation.ClassificationType, ResourceKeyword.ClassificationType));
 		}
 
 		public ClassificationTag AbstractMember { get; }
@@ -122,11 +129,18 @@ namespace Codist.Taggers
 		public ClassificationTag VolatileField { get; }
 
 		public ClassificationTag XmlDoc { get; }
+
+		public ClassificationTag DeclarationBoldBrace { get; }
+		public ClassificationTag MethodBoldBrace { get; }
+		public ClassificationTag ConstructorBoldBrace { get; }
+		public ClassificationTag ResourceBoldBrace { get; }
 	}
 
 	sealed class GeneralClassifications
 	{
-		public GeneralClassifications(IClassificationTypeRegistryService registry) {
+		public static readonly GeneralClassifications Instance = new GeneralClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
+
+		GeneralClassifications(IClassificationTypeRegistryService registry) {
 			BranchingKeyword = registry.GetClassificationTag(Constants.CodeBranchingKeyword);
 			ControlFlowKeyword = registry.GetClassificationTag(Constants.CodeControlFlowKeyword);
 			Identifier = registry.GetClassificationTag(Constants.CodeIdentifier);
@@ -135,6 +149,10 @@ namespace Codist.Taggers
 			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
 			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
 			SpecialPunctuation = registry.GetClassificationTag(Constants.CodeSpecialPunctuation);
+
+			BranchingBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(SpecialPunctuation.ClassificationType, BranchingKeyword.ClassificationType));
+			LoopBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(SpecialPunctuation.ClassificationType, LoopKeyword.ClassificationType));
+			TypeCastBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(SpecialPunctuation.ClassificationType, TypeCastKeyword.ClassificationType));
 		}
 
 		public ClassificationTag BranchingKeyword { get; }
@@ -145,11 +163,17 @@ namespace Codist.Taggers
 		public ClassificationTag Keyword { get; }
 		public ClassificationTag Punctuation { get; }
 		public ClassificationTag SpecialPunctuation { get; }
+
+		public ClassificationTag BranchingBoldBrace { get; }
+		public ClassificationTag LoopBoldBrace { get; }
+		public ClassificationTag TypeCastBoldBrace { get; }
 	}
 
 	sealed class HighlightClassifications
 	{
-		public HighlightClassifications(IClassificationTypeRegistryService registry) {
+		public static readonly HighlightClassifications Instance = new HighlightClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
+
+		HighlightClassifications(IClassificationTypeRegistryService registry) {
 			Highlight1 = registry.GetClassificationTag(Constants.Highlight1);
 			Highlight2 = registry.GetClassificationTag(Constants.Highlight2);
 			Highlight3 = registry.GetClassificationTag(Constants.Highlight3);

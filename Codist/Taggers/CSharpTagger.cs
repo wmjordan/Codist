@@ -31,8 +31,8 @@ namespace Codist.Taggers
 	/// <summary>A classifier for C# code syntax highlight.</summary>
 	sealed class CSharpTagger : ITagger<IClassificationTag>
 	{
-		static readonly CSharpClassifications _Classifications = new CSharpClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
-		static readonly GeneralClassifications _GeneralClassifications = new GeneralClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
+		static readonly CSharpClassifications _Classifications = CSharpClassifications.Instance;
+		static readonly GeneralClassifications _GeneralClassifications = GeneralClassifications.Instance;
 
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
@@ -117,6 +117,8 @@ namespace Codist.Taggers
 								case SyntaxKind.SwitchStatement:
 								case SyntaxKind.CaseSwitchLabel:
 								case SyntaxKind.DefaultSwitchLabel:
+								case (SyntaxKind)9025: // switch expression
+								case (SyntaxKind)9013: // when clause
 									yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.BranchingKeyword);
 									continue;
 								case SyntaxKind.ForStatement:
@@ -248,18 +250,15 @@ namespace Codist.Taggers
 				}
 				var type = ClassifySyntaxNode(node);
 				if (type != null) {
-					if (HighlightOptions.SpecialPunctuation) {
-						yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
-					}
 					if (type == _GeneralClassifications.BranchingKeyword) {
 						if (HighlightOptions.BranchBrace) {
-							yield return CreateClassificationSpan(snapshot, itemSpan, type);
+							yield return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.BranchingBoldBrace : type);
 						}
 						yield break;
 					}
 					if (type == _GeneralClassifications.LoopKeyword) {
 						if (HighlightOptions.LoopBrace) {
-							yield return CreateClassificationSpan(snapshot, itemSpan, type);
+							yield return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.LoopBoldBrace : type);
 						}
 						yield break;
 					}
@@ -270,10 +269,13 @@ namespace Codist.Taggers
 						yield break;
 					}
 					if (node is ExpressionSyntax == false) {
-						yield return CreateClassificationSpan(snapshot, itemSpan, _Classifications.DeclarationBrace);
+						yield return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _Classifications.DeclarationBoldBrace : _Classifications.DeclarationBrace);
 					}
 					if (HighlightOptions.DeclarationBrace) {
-						yield return CreateClassificationSpan(snapshot, itemSpan, type);
+						yield return CreateClassificationSpan(snapshot, itemSpan,
+							type == _Classifications.ConstructorMethod ? HighlightOptions.SpecialPunctuation ? _Classifications.ConstructorBoldBrace : type
+							: type == _Classifications.Method ? HighlightOptions.SpecialPunctuation ? _Classifications.MethodBoldBrace : type
+							: type);
 					}
 				}
 			}
@@ -292,10 +294,7 @@ namespace Codist.Taggers
 						}
 						tag = _GeneralClassifications.TypeCastKeyword; //x GetClassificationType(symbol);
 						if (tag != null) {
-							if (HighlightOptions.SpecialPunctuation) {
-								yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
-							}
-							yield return CreateClassificationSpan(snapshot, itemSpan, tag);
+							yield return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.TypeCastBoldBrace : tag);
 						}
 						break;
 					case SyntaxKind.ParenthesizedExpression:
@@ -309,10 +308,7 @@ namespace Codist.Taggers
 							}
 							tag = _GeneralClassifications.TypeCastKeyword; //x GetClassificationType(symbol);
 							if (tag != null) {
-								if (HighlightOptions.SpecialPunctuation) {
-									yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
-								}
-								yield return CreateClassificationSpan(snapshot, itemSpan, tag);
+								yield return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.TypeCastBoldBrace : tag);
 								yield break;
 							}
 						}
@@ -321,18 +317,14 @@ namespace Codist.Taggers
 					case SyntaxKind.SwitchSection:
 					case SyntaxKind.IfStatement:
 					case SyntaxKind.ElseClause:
-						foreach(var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _GeneralClassifications.BranchingKeyword, HighlightOptions.BranchBrace)) {
-							yield return i;
-						}
+						yield return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.BranchingBoldBrace : _GeneralClassifications.BranchingKeyword);
 						yield break;
 					case SyntaxKind.ForStatement:
 					case SyntaxKind.ForEachStatement:
 					case SyntaxKind.ForEachVariableStatement:
 					case SyntaxKind.WhileStatement:
 					case SyntaxKind.DoStatement:
-						foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _GeneralClassifications.LoopKeyword, HighlightOptions.LoopBrace)) {
-							yield return i;
-						}
+						yield return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.LoopBoldBrace : _GeneralClassifications.LoopKeyword);
 						yield break;
 					case SyntaxKind.UsingStatement:
 					case SyntaxKind.FixedStatement:
@@ -343,14 +335,10 @@ namespace Codist.Taggers
 					case SyntaxKind.CatchClause:
 					case SyntaxKind.CatchFilterClause:
 					case SyntaxKind.FinallyClause:
-						foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _Classifications.ResourceKeyword, HighlightOptions.ResourceBrace)) {
-							yield return i;
-						}
+						yield return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _Classifications.ResourceBoldBrace : _Classifications.ResourceKeyword);
 						yield break;
 					case SyntaxKind.TupleExpression:
-						foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, _Classifications.ConstructorMethod, HighlightOptions.ParameterBrace)) {
-							yield return i;
-						}
+						yield return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _Classifications.ConstructorBoldBrace : _Classifications.ConstructorMethod);
 						yield break;
 				}
 				if (HighlightOptions.SpecialPunctuation | HighlightOptions.ParameterBrace) {
@@ -360,10 +348,11 @@ namespace Codist.Taggers
 					   )?.Parent;
 					if (node != null) {
 						var type = ClassifySyntaxNode(node);
-						if (type != null) {
-							foreach (var i in MarkClassificationTypeForBrace(itemSpan, snapshot, type, HighlightOptions.ParameterBrace)) {
-								yield return i;
-							}
+						if (type == _Classifications.Method) {
+							yield return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _Classifications.MethodBoldBrace : _Classifications.Method);
+						}
+						else if (type == _Classifications.ConstructorMethod) {
+							yield return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _Classifications.ConstructorBoldBrace : _Classifications.ConstructorMethod);
 						}
 					}
 				}
@@ -374,40 +363,6 @@ namespace Codist.Taggers
 				if (node.IsKind(SyntaxKind.AttributeList)) {
 					yield return CreateClassificationSpan(snapshot, node.Span, _Classifications.AttributeNotation);
 				}
-			}
-
-			ClassificationTag GetClassificationType(ISymbol symbol) {
-				switch (symbol.Kind) {
-					case SymbolKind.NamedType:
-						switch (((INamedTypeSymbol)symbol).TypeKind) {
-							case TypeKind.Class: return _Classifications.ClassName;
-							case TypeKind.Interface: return _Classifications.InterfaceName;
-							case TypeKind.Struct: return _Classifications.StructName;
-							case TypeKind.Delegate: return _Classifications.DelegateName;
-							case TypeKind.Enum: return _Classifications.EnumName;
-						}
-						break;
-					case SymbolKind.ArrayType: return _Classifications.ClassName;
-					case SymbolKind.Event: return _Classifications.Event;
-					case SymbolKind.PointerType: return _Classifications.StructName;
-					case SymbolKind.TypeParameter:
-						var p = (ITypeParameterSymbol)symbol;
-						foreach (var c in p.ConstraintTypes) {
-							switch (c.SpecialType) {
-								case SpecialType.System_Enum: return _Classifications.EnumName;
-								case SpecialType.System_Delegate: return _Classifications.DelegateName;
-							}
-							return _Classifications.ClassName;
-						}
-						if (p.HasReferenceTypeConstraint) {
-							return _Classifications.ClassName;
-						}
-						if (p.HasValueTypeConstraint || p.HasUnmanagedTypeConstraint) {
-							return _Classifications.StructName;
-						}
-						return _Classifications.TypeParameter;
-				}
-				return null;
 			}
 		}
 
@@ -421,8 +376,6 @@ namespace Codist.Taggers
 		}
 
 		static ClassificationTag ClassifySyntaxNode(SyntaxNode node) {
-			const SyntaxKind SwitchExpression = (SyntaxKind)9025;
-
 			switch (node.Kind()) {
 				case SyntaxKind.MethodDeclaration:
 				case SyntaxKind.AnonymousMethodExpression:
@@ -460,7 +413,7 @@ namespace Codist.Taggers
 				case SyntaxKind.ElseClause:
 				case SyntaxKind.SwitchStatement:
 				case SyntaxKind.SwitchSection:
-				case SwitchExpression:
+				case (SyntaxKind)9025: // switch expression
 					return _GeneralClassifications.BranchingKeyword;
 				case SyntaxKind.ForStatement:
 				case SyntaxKind.ForEachStatement:
