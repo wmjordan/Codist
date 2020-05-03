@@ -328,7 +328,7 @@ namespace Codist.Options
 
 		void SyntaxSourceChanged(object source, RoutedEventArgs args) {
 			if (_SyntaxSourceBox.SelectedValue is IControlProvider c) {
-				_Notice.Visibility = _SettingsGroup.Visibility = _AddTagButton.Visibility = _RemoveTagButton.Visibility = Visibility.Collapsed;
+				_Notice.Visibility = _SettingsGroup.Visibility = _TagSettingsGroup.Visibility = _AddTagButton.Visibility = _RemoveTagButton.Visibility = Visibility.Collapsed;
 				_OptionPageHolder.Child = c.Control;
 			}
 			else {
@@ -896,7 +896,7 @@ namespace Codist.Options
 					},
 				};
 				PreviewLabelStyle(_Preview, t);
-				this.ReferenceStyle(VsResourceKeys.ThemedDialogButtonStyleKey)
+				this.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
 					.ReferenceProperty(BackgroundProperty, CommonDocumentColors.PageBrushKey);
 				Click += clickHandler;
 			}
@@ -1298,7 +1298,11 @@ namespace Codist.Options
 					});
 				foreach (var item in new[] { _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox }) {
 					item.WrapMargin(SubOptionMargin);
+					item.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				}
+				_MarkSpecialPunctuationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
+				_HighlightLocalFunctionDeclarationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
+				_HighlightNonPrivateFieldDeclarationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				//_Options = new[] { _MarkSpecialPunctuationBox, _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox, _HighlightLocalFunctionDeclarationBox, _HighlightNonPrivateFieldDeclarationBox };
 			}
 
