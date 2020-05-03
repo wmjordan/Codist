@@ -83,6 +83,7 @@ namespace Codist.Taggers
 										yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.Declaration);
 										continue;
 									case SyntaxKind.UnsafeKeyword:
+									case SyntaxKind.FixedKeyword:
 										yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword);
 										continue;
 									case SyntaxKind.ExplicitKeyword:
@@ -162,6 +163,11 @@ namespace Codist.Taggers
 										case SyntaxKind.RefKeyword:
 											yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.TypeCastKeyword);
 											continue;
+									}
+									break;
+								case SyntaxKind.IdentifierName:
+									if (node.Parent.IsKind(SyntaxKind.TypeConstraint) && item.TextSpan.Length == 9 && node.ToString() == "unmanaged") {
+										goto case SyntaxKind.UnsafeStatement;
 									}
 									break;
 							}
@@ -317,6 +323,8 @@ namespace Codist.Taggers
 					case SyntaxKind.SwitchSection:
 					case SyntaxKind.IfStatement:
 					case SyntaxKind.ElseClause:
+					case (SyntaxKind)9023: // positional pattern clause
+					case (SyntaxKind)8928: // parenthesized variable designation
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.BranchingBoldBrace : _GeneralClassifications.BranchingKeyword);
 					case SyntaxKind.ForStatement:
 					case SyntaxKind.ForEachStatement:
@@ -418,6 +426,7 @@ namespace Codist.Taggers
 				case SyntaxKind.SwitchStatement:
 				case SyntaxKind.SwitchSection:
 				case (SyntaxKind)9025: // switch expression
+				case (SyntaxKind)9020: // recursive pattern
 					return _GeneralClassifications.BranchingKeyword;
 				case SyntaxKind.ForStatement:
 				case SyntaxKind.ForEachStatement:

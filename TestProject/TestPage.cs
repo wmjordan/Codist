@@ -41,21 +41,6 @@ text".Log(); // multiline string (string verbatim)
 					throw new NotImplementedException(fieldId.ToString() + " is not supported"); // control flow keyword
 			}
 
-			var (a, b, option) = (10, 5, "+");
-
-			var example1 = option switch
-			{
-				"+" => a + b,
-				"-" => a - b,
-				_ => a * b
-			};
-			var value = 25;
-			int example3 = value switch
-			{
-				_ when value > 10 => 0,
-				_ when value <= 10 => 1
-			};
-
 			for (int i = 0; i < 0XFF; i++) {
 				if (i == localField) {
 					continue; // control flow keyword
@@ -151,24 +136,5 @@ text".Log(); // multiline string (string verbatim)
 				[In] int value
 			);
 		}
-	}
-	class Bank
-	{
-		public BankBranchStatus Status { get; set; }
-		static bool CheckIfCanWalkIntoBank(Bank bank, bool isVip) {
-			return bank switch
-			{
-				{ Status: BankBranchStatus.Open } => true,
-				{ Status: BankBranchStatus.Closed } => false,
-				{ Status: BankBranchStatus.VIPCustomersOnly } => isVip
-			};
-		}
-	}
-
-	enum BankBranchStatus
-	{
-		Open,
-		Closed,
-		VIPCustomersOnly
 	}
 }
