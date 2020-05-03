@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="Colors.cs" />
     <Compile Include="Comments.cs" />
+    <Compile Include="CS7_2.cs" />
     <Compile Include="CS7_3.cs" />
     <Compile Include="CS8_0.cs" />
     <Compile Include="ExtensionClass.cs" />
