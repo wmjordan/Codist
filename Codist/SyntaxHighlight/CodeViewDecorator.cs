@@ -134,14 +134,11 @@ namespace Codist.SyntaxHighlight
 					_ClassificationFormatMap.SetTextProperties(item.Key, item.Value);
 					Debug.WriteLine("Update format: " + item.Key.Classification);
 				}
-				var g = Taggers.GeneralClassifications.Instance;
-				var c = Taggers.CSharpClassifications.Instance;
-				SetBoldBrace(_ClassificationFormatMap, g.BranchingBoldBrace, g.LoopBoldBrace, g.TypeCastBoldBrace, c.ConstructorBoldBrace, c.DeclarationBoldBrace, c.MethodBoldBrace, c.ResourceBoldBrace);
 				_ClassificationFormatMap.EndBatchUpdate();
 				Debug.WriteLine($"Decorated {updated.Count} formats");
 			}
 
-			void SetBoldBrace(IClassificationFormatMap map, params Microsoft.VisualStudio.Text.Tagging.ClassificationTag[] types) {
+			void EnforceBoldBrace(IClassificationFormatMap map, params Microsoft.VisualStudio.Text.Tagging.ClassificationTag[] types) {
 				foreach (var item in types) {
 					var t = map.GetTextProperties(item.ClassificationType);
 					if (t != null && t.BoldEmpty) {

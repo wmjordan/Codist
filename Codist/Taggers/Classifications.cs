@@ -47,11 +47,6 @@ namespace Codist.Taggers
 			XmlDoc = registry.GetClassificationTag(Constants.CSharpXmlDoc);
 			UserSymbol = registry.GetClassificationTag(Constants.CSharpUserSymbol);
 			MetadataSymbol = registry.GetClassificationTag(Constants.CSharpMetadataSymbol);
-
-			DeclarationBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(GeneralClassifications.Instance.SpecialPunctuation.ClassificationType, DeclarationBrace.ClassificationType));
-			MethodBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(GeneralClassifications.Instance.SpecialPunctuation.ClassificationType, Method.ClassificationType));
-			ConstructorBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(GeneralClassifications.Instance.SpecialPunctuation.ClassificationType, ConstructorMethod.ClassificationType));
-			ResourceBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(GeneralClassifications.Instance.SpecialPunctuation.ClassificationType, ResourceKeyword.ClassificationType));
 		}
 
 		public ClassificationTag AbstractMember { get; }
@@ -129,11 +124,6 @@ namespace Codist.Taggers
 		public ClassificationTag VolatileField { get; }
 
 		public ClassificationTag XmlDoc { get; }
-
-		public ClassificationTag DeclarationBoldBrace { get; }
-		public ClassificationTag MethodBoldBrace { get; }
-		public ClassificationTag ConstructorBoldBrace { get; }
-		public ClassificationTag ResourceBoldBrace { get; }
 	}
 
 	sealed class GeneralClassifications
@@ -148,11 +138,7 @@ namespace Codist.Taggers
 			TypeCastKeyword = registry.GetClassificationTag(Constants.CodeTypeCastKeyword);
 			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
 			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
-			SpecialPunctuation = registry.GetClassificationTag(Constants.CodeSpecialPunctuation);
-
-			BranchingBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(SpecialPunctuation.ClassificationType, BranchingKeyword.ClassificationType));
-			LoopBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(SpecialPunctuation.ClassificationType, LoopKeyword.ClassificationType));
-			TypeCastBoldBrace = new ClassificationTag(registry.CreateTransientClassificationType(SpecialPunctuation.ClassificationType, TypeCastKeyword.ClassificationType));
+			StrongBrace = registry.GetClassificationTag(Constants.CodeSpecialPunctuation);
 		}
 
 		public ClassificationTag BranchingKeyword { get; }
@@ -162,11 +148,7 @@ namespace Codist.Taggers
 		public ClassificationTag TypeCastKeyword { get; }
 		public ClassificationTag Keyword { get; }
 		public ClassificationTag Punctuation { get; }
-		public ClassificationTag SpecialPunctuation { get; }
-
-		public ClassificationTag BranchingBoldBrace { get; }
-		public ClassificationTag LoopBoldBrace { get; }
-		public ClassificationTag TypeCastBoldBrace { get; }
+		public ClassificationTag StrongBrace { get; }
 	}
 
 	sealed class HighlightClassifications

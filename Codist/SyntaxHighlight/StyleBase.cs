@@ -136,13 +136,14 @@ namespace Codist.SyntaxHighlight
 	sealed class SyntaxStyle : StyleBase
 	{
 		public override string Category { get; }
+		public string Key { get; set; }
 		internal override int Id { get; }
-		internal override string ClassificationType { get; }
+		internal override string ClassificationType => Key;
 		internal override string Description { get; }
 
 		public SyntaxStyle(string classificationType) {
-			ClassificationType = classificationType;
-			Category = "Misc.";
+			Key = classificationType;
+			Category = "General";
 		}
 	}
 	abstract class StyleBase<TStyle> : StyleBase where TStyle : Enum

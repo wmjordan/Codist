@@ -501,6 +501,7 @@ namespace Codist.Options
 			var classifications = ServicesHelper.Instance.ViewTagAggregatorFactory
 				.CreateTagAggregator<Microsoft.VisualStudio.Text.Tagging.IClassificationTag>(_WpfTextView)
 				.GetTags(span)
+				.Where(t => t.Tag.ClassificationType.IsOfType("(TRANSIENT)") == false) // remove transient classification types
 				.Select(t => t.Tag.ClassificationType)
 				.ToList();
 			return classifications.Union(classifications.SelectMany(i => i.BaseTypes)).ToList();

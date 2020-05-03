@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Reflection;
 using AppHelpers;
+using Codist.SyntaxHighlight;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.CSharp;
@@ -70,12 +71,13 @@ namespace Codist.Taggers
 						case "keyword":
 						case Constants.CodeKeywordControl: {
 							node = unitCompilation.FindNode(item.TextSpan, true, true);
-							if (node is MemberDeclarationSyntax) {
+							if (node is MemberDeclarationSyntax || node is AccessorDeclarationSyntax) {
 								switch (unitCompilation.FindToken(item.TextSpan.Start).Kind()) {
 									case SyntaxKind.SealedKeyword:
 									case SyntaxKind.OverrideKeyword:
 									case SyntaxKind.AbstractKeyword:
 									case SyntaxKind.VirtualKeyword:
+									case SyntaxKind.ProtectedKeyword:
 									case SyntaxKind.NewKeyword:
 										yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.AbstractionKeyword);
 										continue;
@@ -90,6 +92,9 @@ namespace Codist.Taggers
 									case SyntaxKind.ImplicitKeyword:
 										yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.TypeCastKeyword);
 										yield return CreateClassificationSpan(snapshot, ((ConversionOperatorDeclarationSyntax)node).Type.Span, _Classifications.NestedDeclaration);
+										continue;
+									case SyntaxKind.ReadOnlyKeyword:
+										yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.TypeCastKeyword);
 										continue;
 								}
 								continue;
@@ -255,83 +260,38 @@ namespace Codist.Taggers
 					&& node.Kind() != SyntaxKind.SwitchStatement && (node = node.Parent) == null) {
 					return null;
 				}
-				var type = ClassifySyntaxNode(node);
+				var type = ClassifySyntaxNode(node, node is ExpressionSyntax ? HighlightOptions.MemberBraceTags : HighlightOptions.MemberDeclarationBraceTags, HighlightOptions.KeywordBraceTags);
 				if (type != null) {
-					if (type == _GeneralClassifications.BranchingKeyword) {
-						if (HighlightOptions.BranchBrace) {
-							return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.BranchingBoldBrace : type);
-						}
-						return null;
-					}
-					if (type == _GeneralClassifications.LoopKeyword) {
-						if (HighlightOptions.LoopBrace) {
-							return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.LoopBoldBrace : type);
-						}
-						return null;
-					}
-					if (type == _Classifications.ResourceKeyword) {
-						if (HighlightOptions.ResourceBrace) {
-							return CreateClassificationSpan(snapshot, itemSpan, type);
-						}
-						return null;
-					}
-					if (node is ExpressionSyntax == false) {
-						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _Classifications.DeclarationBoldBrace : _Classifications.DeclarationBrace);
-					}
-					if (HighlightOptions.DeclarationBrace) {
-						return CreateClassificationSpan(snapshot, itemSpan,
-							type == _Classifications.ConstructorMethod ? HighlightOptions.SpecialPunctuation ? _Classifications.ConstructorBoldBrace : type
-							: type == _Classifications.Method ? HighlightOptions.SpecialPunctuation ? _Classifications.MethodBoldBrace : type
-							: type);
-					}
+					return CreateClassificationSpan(snapshot, itemSpan, type);
 				}
 			}
 			else if ((s == '(' || s == ')') && HighlightOptions.AllParentheses) {
 				var node = unitCompilation.FindNode(itemSpan, true, true);
-				ISymbol symbol;
-				ClassificationTag tag;
 				switch (node.Kind()) {
 					case SyntaxKind.CastExpression:
-						if (HighlightOptions.CastBrace == false) {
-							return null;
-						}
-						symbol = semanticModel.GetSymbolInfo(((CastExpressionSyntax)node).Type).Symbol;
-						if (symbol == null) {
-							return null;
-						}
-						tag = _GeneralClassifications.TypeCastKeyword; //x GetClassificationType(symbol);
-						if (tag != null) {
-							return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.TypeCastBoldBrace : tag);
-						}
-						break;
+						return HighlightOptions.KeywordBraceTags.TypeCast != null
+							&& semanticModel.GetSymbolInfo(((CastExpressionSyntax)node).Type).Symbol != null
+							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.TypeCast)
+							: null;
 					case SyntaxKind.ParenthesizedExpression:
-						if (HighlightOptions.CastBrace == false) {
-							return null;
-						}
-						if (node.ChildNodes().FirstOrDefault().IsKind(SyntaxKind.AsExpression)) {
-							symbol = semanticModel.GetSymbolInfo(((BinaryExpressionSyntax)node.ChildNodes().First()).Right).Symbol;
-							if (symbol == null) {
-								return null;
-							}
-							tag = _GeneralClassifications.TypeCastKeyword; //x GetClassificationType(symbol);
-							if (tag != null) {
-								return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.TypeCastBoldBrace : tag);
-							}
-						}
-						break;
+						return (HighlightOptions.KeywordBraceTags.TypeCast != null
+							&& node.ChildNodes().FirstOrDefault().IsKind(SyntaxKind.AsExpression)
+							&& semanticModel.GetSymbolInfo(((BinaryExpressionSyntax)node.ChildNodes().First()).Right).Symbol != null)
+							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.TypeCast)
+							: null;
 					case SyntaxKind.SwitchStatement:
 					case SyntaxKind.SwitchSection:
 					case SyntaxKind.IfStatement:
 					case SyntaxKind.ElseClause:
 					case (SyntaxKind)9023: // positional pattern clause
 					case (SyntaxKind)8928: // parenthesized variable designation
-						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.BranchingBoldBrace : _GeneralClassifications.BranchingKeyword);
+						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.Branching);
 					case SyntaxKind.ForStatement:
 					case SyntaxKind.ForEachStatement:
 					case SyntaxKind.ForEachVariableStatement:
 					case SyntaxKind.WhileStatement:
 					case SyntaxKind.DoStatement:
-						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _GeneralClassifications.LoopBoldBrace : _GeneralClassifications.LoopKeyword);
+						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.Loop);
 					case SyntaxKind.UsingStatement:
 					case SyntaxKind.FixedStatement:
 					case SyntaxKind.LockStatement:
@@ -341,22 +301,20 @@ namespace Codist.Taggers
 					case SyntaxKind.CatchClause:
 					case SyntaxKind.CatchFilterClause:
 					case SyntaxKind.FinallyClause:
-						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _Classifications.ResourceBoldBrace : _Classifications.ResourceKeyword);
+						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.Resource);
 					case SyntaxKind.TupleExpression:
-						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _Classifications.ConstructorBoldBrace : _Classifications.ConstructorMethod);
+						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
 				}
-				if (HighlightOptions.SpecialPunctuation | HighlightOptions.ParameterBrace) {
+				if (HighlightOptions.MemberBraceTags.Constructor != null) {
+					// SpecialHighlightOptions.ParameterBrace or SpecialHighlightOptions.SpecialPunctuation is ON
 					node = (node as BaseArgumentListSyntax
 					   ?? node as BaseParameterListSyntax
 					   ?? (CSharpSyntaxNode)(node as CastExpressionSyntax)
 					   )?.Parent;
 					if (node != null) {
-						var type = ClassifySyntaxNode(node);
-						if (type == _Classifications.Method) {
-							return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _Classifications.MethodBoldBrace : _Classifications.Method);
-						}
-						else if (type == _Classifications.ConstructorMethod) {
-							return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _Classifications.ConstructorBoldBrace : _Classifications.ConstructorMethod);
+						var type = ClassifySyntaxNode(node, HighlightOptions.MemberBraceTags, HighlightOptions.KeywordBraceTags);
+						if (type != null) {
+							return CreateClassificationSpan(snapshot, itemSpan, type);
 						}
 					}
 				}
@@ -367,27 +325,12 @@ namespace Codist.Taggers
 				switch (node.Kind()) {
 					case SyntaxKind.AttributeList:
 						return CreateClassificationSpan(snapshot, node.Span, _Classifications.AttributeNotation);
-					case SyntaxKind.BracketedArgumentList:
-						var bracket = ((BracketedArgumentListSyntax)node).Arguments;
-						if (bracket.Count == 1 && bracket[0].Expression.IsKind((SyntaxKind)8658/*RangeExpression*/)) {
-							return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.SpecialPunctuation ? _Classifications.ConstructorBoldBrace : _Classifications.ConstructorMethod);
-						}
-						break;
 				}
 			}
 			return null;
 		}
 
-		static IEnumerable<ITagSpan<IClassificationTag>> MarkClassificationTypeForBrace(TextSpan itemSpan, ITextSnapshot snapshot, ClassificationTag tag, bool option) {
-			if (HighlightOptions.SpecialPunctuation) {
-				yield return CreateClassificationSpan(snapshot, itemSpan, _GeneralClassifications.SpecialPunctuation);
-			}
-			if (option) {
-				yield return CreateClassificationSpan(snapshot, itemSpan, tag);
-			}
-		}
-
-		static ClassificationTag ClassifySyntaxNode(SyntaxNode node) {
+		static ClassificationTag ClassifySyntaxNode(SyntaxNode node, TransientMemberTagHolder tag, TransientKeywordTagHolder keyword) {
 			switch (node.Kind()) {
 				case SyntaxKind.MethodDeclaration:
 				case SyntaxKind.AnonymousMethodExpression:
@@ -396,9 +339,9 @@ namespace Codist.Taggers
 				case SyntaxKind.LocalFunctionStatement:
 				case SyntaxKind.ConversionOperatorDeclaration:
 				case SyntaxKind.OperatorDeclaration:
-					return _Classifications.Method;
+					return tag.Method;
 				case SyntaxKind.InvocationExpression:
-					return ((((InvocationExpressionSyntax)node).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") ? null : _Classifications.Method;
+					return ((((InvocationExpressionSyntax)node).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") ? null : tag.Method;
 				case SyntaxKind.ConstructorDeclaration:
 				case SyntaxKind.BaseConstructorInitializer:
 				case SyntaxKind.AnonymousObjectCreationExpression:
@@ -409,31 +352,31 @@ namespace Codist.Taggers
 				case SyntaxKind.ArrayInitializerExpression:
 				case SyntaxKind.ThisConstructorInitializer:
 				case SyntaxKind.DestructorDeclaration:
-					return _Classifications.ConstructorMethod;
+					return tag.Constructor;
 				case SyntaxKind.IndexerDeclaration:
-				case SyntaxKind.PropertyDeclaration: return _Classifications.Property;
-				case SyntaxKind.ClassDeclaration: return _Classifications.ClassName;
-				case SyntaxKind.InterfaceDeclaration: return _Classifications.InterfaceName;
-				case SyntaxKind.EnumDeclaration: return _Classifications.EnumName;
-				case SyntaxKind.StructDeclaration: return _Classifications.StructName;
+				case SyntaxKind.PropertyDeclaration: return tag.Property;
+				case SyntaxKind.ClassDeclaration: return tag.Class;
+				case SyntaxKind.InterfaceDeclaration: return tag.Interface;
+				case SyntaxKind.EnumDeclaration: return tag.Enum;
+				case SyntaxKind.StructDeclaration: return tag.Struct;
 				case SyntaxKind.Attribute: return _Classifications.AttributeName;
-				case SyntaxKind.EventDeclaration: return _Classifications.Event;
-				case SyntaxKind.DelegateDeclaration: return _Classifications.DelegateName;
+				case SyntaxKind.EventDeclaration: return tag.Event;
+				case SyntaxKind.DelegateDeclaration: return tag.Delegate;
 				case SyntaxKind.NamespaceDeclaration:
-					return _Classifications.Namespace;
+					return tag.Namespace;
 				case SyntaxKind.IfStatement:
 				case SyntaxKind.ElseClause:
 				case SyntaxKind.SwitchStatement:
 				case SyntaxKind.SwitchSection:
 				case (SyntaxKind)9025: // switch expression
 				case (SyntaxKind)9020: // recursive pattern
-					return _GeneralClassifications.BranchingKeyword;
+					return keyword.Branching;
 				case SyntaxKind.ForStatement:
 				case SyntaxKind.ForEachStatement:
 				case SyntaxKind.ForEachVariableStatement:
 				case SyntaxKind.WhileStatement:
 				case SyntaxKind.DoStatement:
-					return _GeneralClassifications.LoopKeyword;
+					return keyword.Loop;
 				case SyntaxKind.UsingStatement:
 				case SyntaxKind.LockStatement:
 				case SyntaxKind.FixedStatement:
@@ -442,7 +385,7 @@ namespace Codist.Taggers
 				case SyntaxKind.CatchClause:
 				case SyntaxKind.CatchFilterClause:
 				case SyntaxKind.FinallyClause:
-					return _Classifications.ResourceKeyword;
+					return keyword.Resource;
 			}
 			return null;
 		}
@@ -598,7 +541,7 @@ namespace Codist.Taggers
 				}
 			}
 
-			if (SyntaxHighlight.FormatStore.IdentifySymbolSource && symbol.IsMemberOrType() && symbol.ContainingAssembly != null) {
+			if (FormatStore.IdentifySymbolSource && symbol.IsMemberOrType() && symbol.ContainingAssembly != null) {
 				yield return symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata
 					? _Classifications.MetadataSymbol
 					: _Classifications.UserSymbol;
@@ -633,8 +576,12 @@ namespace Codist.Taggers
 		static class HighlightOptions
 		{
 			static bool _dummy = Init();
+			public static TransientKeywordTagHolder KeywordBraceTags { get; private set; }
+			public static TransientMemberTagHolder MemberDeclarationBraceTags { get; private set; }
+			public static TransientMemberTagHolder MemberBraceTags { get; private set; }
+
 			// use fields to cache option flags
-			public static bool AllBraces, AllParentheses, SpecialPunctuation, BranchBrace, CastBrace, LoopBrace, ParameterBrace, ResourceBrace, DeclarationBrace, LocalFunctionDeclaration, NonPrivateField;
+			public static bool AllBraces, AllParentheses, LocalFunctionDeclaration, NonPrivateField;
 
 			static bool Init() {
 				Config.Updated += Update;
@@ -649,13 +596,47 @@ namespace Codist.Taggers
 				var o = (sender as Config).SpecialHighlightOptions;
 				AllBraces = o.HasAnyFlag(SpecialHighlightOptions.AllBraces);
 				AllParentheses = o.HasAnyFlag(SpecialHighlightOptions.AllParentheses);
-				SpecialPunctuation = o.MatchFlags(SpecialHighlightOptions.SpecialPunctuation);
-				BranchBrace = o.MatchFlags(SpecialHighlightOptions.BranchBrace);
-				CastBrace = o.MatchFlags(SpecialHighlightOptions.CastBrace);
-				LoopBrace = o.MatchFlags(SpecialHighlightOptions.LoopBrace);
-				ResourceBrace = o.MatchFlags(SpecialHighlightOptions.ResourceBrace);
-				ParameterBrace = o.MatchFlags(SpecialHighlightOptions.ParameterBrace);
-				DeclarationBrace = o.MatchFlags(SpecialHighlightOptions.DeclarationBrace);
+				var sp = o.MatchFlags(SpecialHighlightOptions.SpecialPunctuation);
+				if (sp) {
+					KeywordBraceTags = TransientKeywordTagHolder.StrongBraces.Clone();
+					MemberBraceTags = TransientMemberTagHolder.StrongBraces.Clone();
+					MemberDeclarationBraceTags = TransientMemberTagHolder.StrongDeclarationBraces.Clone();
+				}
+				else {
+					KeywordBraceTags = TransientKeywordTagHolder.Default.Clone();
+					MemberBraceTags = TransientMemberTagHolder.Default.Clone();
+					MemberDeclarationBraceTags = TransientMemberTagHolder.DeclarationBraces.Clone();
+				}
+				if (o.MatchFlags(SpecialHighlightOptions.BranchBrace) == false) {
+					KeywordBraceTags.Branching = sp ? ClassificationTagHelper.StrongBraceTag : null;
+				}
+				if (o.MatchFlags(SpecialHighlightOptions.CastBrace) == false) {
+					KeywordBraceTags.TypeCast = sp ? ClassificationTagHelper.StrongBraceTag : null;
+				}
+				if (o.MatchFlags(SpecialHighlightOptions.LoopBrace) == false) {
+					KeywordBraceTags.Loop = sp ? ClassificationTagHelper.StrongBraceTag : null;
+				}
+				if (o.MatchFlags(SpecialHighlightOptions.ResourceBrace) == false) {
+					KeywordBraceTags.Resource = sp ? ClassificationTagHelper.StrongBraceTag : null;
+				}
+				if (o.MatchFlags(SpecialHighlightOptions.ParameterBrace) == false) {
+					MemberBraceTags.Constructor = sp ? ClassificationTagHelper.StrongBraceTag : null;
+					MemberBraceTags.Method = sp ? ClassificationTagHelper.StrongBraceTag : null;
+				}
+				if (o.MatchFlags(SpecialHighlightOptions.DeclarationBrace) == false) {
+					MemberDeclarationBraceTags.Class
+						= MemberDeclarationBraceTags.Constructor
+						= MemberDeclarationBraceTags.Delegate
+						= MemberDeclarationBraceTags.Enum
+						= MemberDeclarationBraceTags.Event
+						= MemberDeclarationBraceTags.Field
+						= MemberDeclarationBraceTags.Interface
+						= MemberDeclarationBraceTags.Method
+						= MemberDeclarationBraceTags.Namespace
+						= MemberDeclarationBraceTags.Property
+						= MemberDeclarationBraceTags.Struct
+						= sp ? ClassificationTagHelper.StrongDeclarationBraceTag : ClassificationTagHelper.DeclarationBraceTag;
+				}
 				LocalFunctionDeclaration = o.MatchFlags(SpecialHighlightOptions.LocalFunctionDeclaration);
 				NonPrivateField = o.MatchFlags(SpecialHighlightOptions.NonPrivateField);
 			}
