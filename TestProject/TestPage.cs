@@ -152,4 +152,23 @@ text".Log(); // multiline string (string verbatim)
 			);
 		}
 	}
+	class Bank
+	{
+		public BankBranchStatus Status { get; set; }
+		static bool CheckIfCanWalkIntoBank(Bank bank, bool isVip) {
+			return bank switch
+			{
+				{ Status: BankBranchStatus.Open } => true,
+				{ Status: BankBranchStatus.Closed } => false,
+				{ Status: BankBranchStatus.VIPCustomersOnly } => isVip
+			};
+		}
+	}
+
+	enum BankBranchStatus
+	{
+		Open,
+		Closed,
+		VIPCustomersOnly
+	}
 }
