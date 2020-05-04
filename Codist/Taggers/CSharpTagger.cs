@@ -124,7 +124,8 @@ namespace Codist.Taggers
 								case SyntaxKind.CaseSwitchLabel:
 								case SyntaxKind.DefaultSwitchLabel:
 								case (SyntaxKind)9025: // switch expression
-								case (SyntaxKind)9013: // when clause
+								case SyntaxKind.CasePatternSwitchLabel:
+								case SyntaxKind.WhenClause:
 									yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.BranchingKeyword);
 									continue;
 								case SyntaxKind.ForStatement:
@@ -133,6 +134,7 @@ namespace Codist.Taggers
 								case SyntaxKind.WhileStatement:
 								case SyntaxKind.DoStatement:
 								case SyntaxKind.SelectClause:
+								case SyntaxKind.FromClause:
 									yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.LoopKeyword);
 									continue;
 								case SyntaxKind.UsingStatement:
@@ -284,7 +286,6 @@ namespace Codist.Taggers
 					case SyntaxKind.IfStatement:
 					case SyntaxKind.ElseClause:
 					case (SyntaxKind)9023: // positional pattern clause
-					case (SyntaxKind)8928: // parenthesized variable designation
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.Branching);
 					case SyntaxKind.ForStatement:
 					case SyntaxKind.ForEachStatement:
@@ -302,7 +303,10 @@ namespace Codist.Taggers
 					case SyntaxKind.CatchFilterClause:
 					case SyntaxKind.FinallyClause:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.Resource);
+					case SyntaxKind.ParenthesizedVariableDesignation:
+						return CreateClassificationSpan(snapshot, itemSpan, node.Parent.IsKind((SyntaxKind)9027) ? HighlightOptions.KeywordBraceTags.Branching : HighlightOptions.MemberBraceTags.Constructor);
 					case SyntaxKind.TupleExpression:
+					case SyntaxKind.TupleType:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
 				}
 				if (HighlightOptions.MemberBraceTags.Constructor != null) {
@@ -325,6 +329,14 @@ namespace Codist.Taggers
 				switch (node.Kind()) {
 					case SyntaxKind.AttributeList:
 						return CreateClassificationSpan(snapshot, node.Span, _Classifications.AttributeNotation);
+					case SyntaxKind.ArrayRankSpecifier:
+						return node.Parent.Parent.IsKind(SyntaxKind.ArrayCreationExpression)
+							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor)
+							: null;
+					case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
+						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
+					case SyntaxKind.Argument:
+						return ((ArgumentSyntax)node).Expression.IsKind(SyntaxKind.ImplicitStackAllocArrayCreationExpression) ? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor) : null;
 				}
 			}
 			return null;
