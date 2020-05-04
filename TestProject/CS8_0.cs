@@ -126,10 +126,10 @@ namespace TestProject.CS8_0
         public decimal CalculateToll(object vehicle) =>
             vehicle switch
             {
-                Car c => 2.00m,
-                Taxi t => 3.50m,
-                Bus b => 5.00m,
-                DeliveryTruck t => 10.00m,
+                Car _ => 2.00m,
+                Taxi _ => 3.50m,
+                Bus _ => 5.00m,
+                DeliveryTruck _ => 10.00m,
                 { } => throw new ArgumentException(message: "Not a known vehicle type", paramName: nameof(vehicle)),
                 null => throw new ArgumentNullException(nameof(vehicle))
             };
@@ -158,7 +158,7 @@ namespace TestProject.CS8_0
 
             DeliveryTruck t when (t.GrossWeightClass > 5000) => 10.00m + 5.00m,
             DeliveryTruck t when (t.GrossWeightClass < 3000) => 10.00m - 2.00m,
-            DeliveryTruck t => 10.00m,
+            DeliveryTruck _ => 10.00m,
 
             { } => throw new ArgumentException(message: "Not a known vehicle type", paramName: nameof(vehicle)),
             null => throw new ArgumentNullException(nameof(vehicle))
