@@ -101,11 +101,11 @@ namespace TestProject
 
 		// hover on Sing, title, lyrics to see their inherited documentations
 		public override void Sing(string title, params string[] lyrics) {
-			base.Sing("untitled", "a", "b");
 		}
 
 		// hover on Walk to see its inherited doc from Walker.InternalWalk
 		public override void Walk() {
+			Sing("untitled", "a", "b");
 		}
 	}
 }
