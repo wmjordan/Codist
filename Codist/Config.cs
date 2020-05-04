@@ -87,9 +87,9 @@ namespace Codist
 		//public bool ShouldSerializeGeneralStyles() => false;
 		//public bool ShouldSerializeSymbolMarkerStyles() => false;
 		#endregion
-		public IEnumerable<SyntaxStyle> Styles => FormatStore.GetStyles()
-			.Where(i => i.Value?.IsSet == true)
-			.Select(i => { var s = new SyntaxStyle(i.Key); i.Value.CopyTo(s); return s; });
+		//public IEnumerable<SyntaxStyle> Styles => FormatStore.GetStyles()
+		//	.Where(i => i.Value?.IsSet == true)
+		//	.Select(i => { var s = new SyntaxStyle(i.Key); i.Value.CopyTo(s); return s; });
 		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
 		public List<SearchEngine> SearchEngines { get; } = new List<SearchEngine>();
 		public string BrowserPath { get; set; }
