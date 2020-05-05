@@ -624,8 +624,8 @@ namespace Codist.Controls
 			get => _Hint ?? (_Hint = Symbol != null ? GetSymbolConstaintValue(Symbol) : String.Empty);
 			set => _Hint = value;
 		}
-		public SymbolItemType Type { get; set; }
-		public bool IsExternal => Type == SymbolItemType.External
+		public SymbolUsageKind Type { get; set; }
+		public bool IsExternal => Type == SymbolUsageKind.External
 			|| Container.ContainerType == SymbolListType.None && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
 		public TextBlock Content {
 			get => _Content ?? (_Content = Symbol != null
@@ -796,11 +796,5 @@ namespace Codist.Controls
 		/// List of symbol referrers
 		/// </summary>
 		SymbolReferrers
-	}
-	enum SymbolItemType
-	{
-		Normal,
-		External,
-		Container,
 	}
 }

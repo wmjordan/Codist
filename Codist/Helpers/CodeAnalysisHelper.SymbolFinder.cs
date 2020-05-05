@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.FindSymbols;
 using AppHelpers;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Codist
 {
@@ -319,35 +320,45 @@ namespace Codist
 			return a;
 		}
 
-		public static async Task<List<KeyValuePair<ISymbol, List<ReferenceLocation>>>> FindReferrersAsync(this ISymbol symbol, Project project, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
+		public static async Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> FindReferrersAsync(this ISymbol symbol, Project project, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
 			var docs = ImmutableHashSet.CreateRange(project.GetRelatedProjectDocuments());
-			var d = new Dictionary<ISymbol, List<ReferenceLocation>>(5);
+			var d = new Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>>(5);
+			var t = symbol as INamedTypeSymbol;
+			// fix a problem that FindReferencesAsync returns unbounded references for generic type
+			if (t != null && (t.IsGenericType == false || t.IsUnboundGenericType || t == t.OriginalDefinition)) {
+				t = null;
+			}
 			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, docs, cancellationToken).ConfigureAwait(false)) {
 				if (definitionFilter?.Invoke(sr.Definition) == false) {
 					continue;
 				}
-				await GroupReferenceAsync(d, sr, nodeFilter, cancellationToken).ConfigureAwait(false);
+				await GroupReferenceByContainerAsync(d, sr, t?.ToDisplayString(), nodeFilter, cancellationToken).ConfigureAwait(false);
 			}
-			var r = new List<KeyValuePair<ISymbol, List<ReferenceLocation>>>(d.Count);
-			r.AddRange(d);
-			r.Sort((x, y) => CompareSymbol(x.Key, y.Key));
+			var r = new List<(ISymbol container, List<(SymbolUsageKind, ReferenceLocation)>)>(d.Count);
+			r.AddRange(d.Select(i => (i.Key, i.Value)));
+			r.Sort((x, y) => CompareSymbol(x.container, y.container));
 			return r;
 		}
 
-		static async Task GroupReferenceAsync(Dictionary<ISymbol, List<ReferenceLocation>> results, ReferencedSymbol reference, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
+		static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>> results, ReferencedSymbol reference, string typeSymbol, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
+			var pu = GetPotentialUsageKinds(reference.Definition);
 			foreach (var docRefs in reference.Locations.GroupBy(l => l.Document)) {
 				var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+				var r = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 				foreach (var location in docRefs) {
-					var n = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(location.Location.SourceSpan);
+					var n = r.FindNode(location.Location.SourceSpan);
 					if (n.Span.Contains(location.Location.SourceSpan.Start) == false || nodeFilter?.Invoke(n) == false) {
 						continue;
 					}
-					// todo Calculate reference kind
-					n = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().GetDeclarationCategory().HasAnyFlag(DeclarationCategory.Member | DeclarationCategory.Type));
-					if (n == null) {
+					var c = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().GetDeclarationCategory().HasAnyFlag(DeclarationCategory.Member | DeclarationCategory.Type));
+					ISymbol s;
+					if (c == null
+						// unfortunately we can't compare the symbol s with the original typeSymbol directly,
+						// even though they are actually the same
+						|| typeSymbol != null && ((s = sm.GetSymbol(n, cancellationToken)) == null || (s?.ToDisplayString() != typeSymbol))) {
 						continue;
 					}
-					var s = sm.GetSymbol(n, cancellationToken);
+					s = sm.GetSymbol(c, cancellationToken);
 					if (s == null) {
 						continue;
 					}
@@ -365,12 +376,102 @@ namespace Codist
 						}
 					}
 					if (results.TryGetValue(s, out var l)) {
-						l.Add(location);
+						l.Add((GetUsageKind(pu, n), location));
 					}
 					else {
-						results[s] = new List<ReferenceLocation>() { location };
+						results[s] = new List<(SymbolUsageKind, ReferenceLocation)> { (GetUsageKind(pu, n), location) };
 					}
 				}
+			}
+		}
+
+		static SymbolUsageKind GetUsageKind(SymbolUsageKind possibleUsage, SyntaxNode node) {
+			if (possibleUsage.MatchFlags(SymbolUsageKind.Write)) {
+				var n = node.GetNodePurpose();
+				var a = n as AssignmentExpressionSyntax;
+				if (a != null && (a.Left == node || a.Left.GetLastIdentifier() == node)) {
+					return SymbolUsageKind.Write;
+				}
+				else {
+					if (n.IsKind(SyntaxKind.PostIncrementExpression) || n.IsKind(SyntaxKind.PreIncrementExpression)) {
+						return SymbolUsageKind.Write;
+					}
+					var r = n as ArgumentSyntax;
+					if (r != null && (r.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) || r.RefKindKeyword.IsKind(SyntaxKind.OutKeyword))) {
+						return SymbolUsageKind.Write;
+					}
+				}
+			}
+			else if (possibleUsage.MatchFlags(SymbolUsageKind.TypeCast)) {
+				node = node.GetNodePurpose();
+				if (node.IsKind(SyntaxKind.AsExpression) || node.IsKind(SyntaxKind.IsExpression) || node.IsKind(SyntaxKind.IsPatternExpression) || node.IsKind(SyntaxKind.CastExpression)) {
+					return SymbolUsageKind.TypeCast;
+				}
+				if (possibleUsage.MatchFlags(SymbolUsageKind.Catch)
+					&& node.IsKind(SyntaxKind.CatchDeclaration)) {
+					return SymbolUsageKind.Catch;
+				}
+				if (possibleUsage.MatchFlags(SymbolUsageKind.TypeParameter)
+					&& (node.IsKind(SyntaxKind.TypeArgumentList) || node.IsKind(SyntaxKind.TypeOfExpression))) {
+					return SymbolUsageKind.TypeParameter;
+				}
+			}
+			else if (possibleUsage.HasAnyFlag(SymbolUsageKind.Attach | SymbolUsageKind.Detach)) {
+				node = node.GetNodePurpose();
+				var a = node as AssignmentExpressionSyntax;
+				if (a != null) {
+					if (a.IsKind(SyntaxKind.AddAssignmentExpression)) {
+						return SymbolUsageKind.Attach;
+					}
+					else if (a.IsKind(SyntaxKind.SubtractAssignmentExpression)) {
+						return SymbolUsageKind.Detach;
+					}
+				}
+			}
+			else if (possibleUsage.MatchFlags(SymbolUsageKind.Read)) {
+				var n = node.GetNodePurpose();
+				if (n.IsKind(SyntaxKind.Argument)) {
+					return SymbolUsageKind.Read;
+				}
+				//var last = node.GetLastAncestorExpressionNode();
+				//if (last != null && last.Parent.IsKind(SyntaxKind.Argument) == true && (last == node || last is MemberAccessExpressionSyntax)) {
+				//	return SymbolUsageKind.Read;
+				//}
+				var a = n as AssignmentExpressionSyntax;
+				if (a != null && a.Right == node) {
+					if (a.IsKind(SyntaxKind.AddAssignmentExpression)) {
+						return SymbolUsageKind.Attach;
+					}
+					else if (a.IsKind(SyntaxKind.SubtractAssignmentExpression)) {
+						return SymbolUsageKind.Detach;
+					}
+				}
+			}
+			return SymbolUsageKind.Normal;
+		}
+
+		static SymbolUsageKind GetPotentialUsageKinds(ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Event:
+					return SymbolUsageKind.Attach | SymbolUsageKind.Detach;
+				case SymbolKind.Field:
+					return ((IFieldSymbol)symbol).IsConst ? SymbolUsageKind.Normal : SymbolUsageKind.Write;
+				case SymbolKind.Local:
+				case SymbolKind.Property:
+					return SymbolUsageKind.Write;
+				case SymbolKind.NamedType:
+					var t = (INamedTypeSymbol)symbol;
+					switch (t.TypeKind) {
+						case TypeKind.Class:
+							return t.Name?.EndsWith("Exception", StringComparison.Ordinal) == true
+								? SymbolUsageKind.Catch | SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter
+								: SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter;
+					}
+					return SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter;
+				case SymbolKind.Method:
+					return SymbolUsageKind.Read;
+				default:
+					return SymbolUsageKind.Normal;
 			}
 		}
 
@@ -399,5 +500,20 @@ namespace Codist
 				}
 			}
 		}
+	}
+
+	[Flags]
+	enum SymbolUsageKind
+	{
+		Normal,
+		External = 1,
+		Container = 1 << 1,
+		Read = 1 << 2,
+		Write = 1 << 3,
+		Attach = 1 << 5,
+		Detach = 1 << 6,
+		TypeCast = 1 << 7,
+		TypeParameter = 1 << 8,
+		Catch = 1 << 9,
 	}
 }

@@ -783,6 +783,35 @@ namespace Codist
 		public static SyntaxNode GetAncestorOrSelfDeclaration(this SyntaxNode node) {
 			return node.AncestorsAndSelf().FirstOrDefault(n => n is MemberDeclarationSyntax || n is BaseTypeDeclarationSyntax);
 		}
+		/// <summary>Gets the first expression containing current node which is of type <typeparamref name="TExpression"/>.</summary>
+		public static TExpression GetAncestorOrSelfExpression<TExpression>(this SyntaxNode node)
+			where TExpression : ExpressionSyntax {
+			TExpression r;
+			if ((r = node as TExpression) != null) {
+				return r;
+			}
+			if (node is ExpressionSyntax) {
+				var n = node;
+				while ((n = n.Parent) is ExpressionSyntax) {
+					if ((r = n as TExpression) != null) {
+						return r;
+					}
+				}
+			}
+			return null;
+		}
+		/// <summary>Gets the first node containing current node which is of type <typeparamref name="TSyntaxNode"/> and not <see cref="ExpressionSyntax"/>.</summary>
+		public static ExpressionSyntax GetLastAncestorExpressionNode(this SyntaxNode node) {
+			var r = node as ExpressionSyntax;
+			if (r == null) {
+				return null;
+			}
+			while (node.Parent is ExpressionSyntax n) {
+				node = r = n;
+			}
+			return r;
+		}
+
 		public static IEnumerable<SyntaxNode> GetDecendantDeclarations(this SyntaxNode root, CancellationToken cancellationToken = default) {
 			foreach (var child in root.ChildNodes()) {
 				cancellationToken.ThrowIfCancellationRequested();
@@ -977,6 +1006,29 @@ namespace Codist
 				}
 			}
 			return node;
+		}
+
+		/// <summary>Navigates upward through ancestral axis and find out the first node reflecting the usage.</summary>
+		public static SyntaxNode GetNodePurpose(this SyntaxNode node) {
+			NameSyntax originName;
+			if (node.IsKind(SyntaxKind.IdentifierName) || node.IsKind(SyntaxKind.GenericName)) {
+				originName = node as NameSyntax;
+				node = node.Parent;
+			}
+			else {
+				originName = null;
+			}
+			var n = node;
+			while (n.IsKind(SyntaxKind.QualifiedName)
+				|| n.IsKind(SyntaxKind.SimpleMemberAccessExpression)
+				|| n.IsKind(SyntaxKind.PointerMemberAccessExpression)) {
+				if (n is MemberAccessExpressionSyntax ma && ma.Name != originName) {
+					return node;
+				}
+				node = n;
+				n = n.Parent;
+			}
+			return n;
 		}
 	}
 

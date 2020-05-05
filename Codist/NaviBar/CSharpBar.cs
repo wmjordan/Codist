@@ -722,7 +722,7 @@ namespace Codist.NaviBar
 				// select node item which contains caret
 				var pos = _Bar.View.GetCaretPosition();
 				foreach (var item in _Menu.Symbols) {
-					if (item.Type != SymbolItemType.Container) {
+					if (item.Type != SymbolUsageKind.Container) {
 						if (item.IsExternal || cancellationToken.IsCancellationRequested
 							|| item.SelectIfContainsPosition(pos)) {
 							break;
@@ -746,7 +746,7 @@ namespace Codist.NaviBar
 					var i = _Menu.Add(partial);
 					i.Location = item.SyntaxTree.GetLocation(item.Span);
 					i.Content.Text = System.IO.Path.GetFileName(item.SyntaxTree.FilePath);
-					i.Type = SymbolItemType.Container;
+					i.Type = SymbolUsageKind.Container;
 					AddMemberDeclarations(partial, true);
 					++c;
 				}
@@ -802,7 +802,7 @@ namespace Codist.NaviBar
 					else {
 						var i = _Menu.Add(child);
 						if (isExternal) {
-							i.Type = SymbolItemType.External;
+							i.Type = SymbolUsageKind.External;
 						}
 						if (selected == false && i.SelectIfContainsPosition(pos)) {
 							selected = true;
@@ -833,7 +833,7 @@ namespace Codist.NaviBar
 				item.Hint = "#region";
 				item.Content = SetHeader(d, false, false, false);
 				if (isExternal) {
-					item.Type = SymbolItemType.External;
+					item.Type = SymbolUsageKind.External;
 				}
 			}
 
@@ -841,7 +841,7 @@ namespace Codist.NaviBar
 				foreach (var item in fields) {
 					var i = _Menu.Add(item);
 					if (isExternal) {
-						i.Type = SymbolItemType.External;
+						i.Type = SymbolUsageKind.External;
 					}
 					i.SelectIfContainsPosition(pos);
 					ShowNodeValue(i);

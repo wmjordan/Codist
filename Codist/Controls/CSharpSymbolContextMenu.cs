@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.Shell;
+using AppHelpers;
 
 namespace Codist.Controls
 {
@@ -150,17 +150,7 @@ namespace Codist.Controls
 					Items.Add(CreateItem(KnownImageIds.ShowCallerGraph, "Find Constructor Callers...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.Method)));
 				}
 			}
-			Items.Add(CreateItem(KnownImageIds.ShowReferencedElements, "Find Type Referrers...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, n => {
-				var p = n.Parent.UnqualifyExceptNamespace();
-				switch (p.Kind()) {
-					case SyntaxKind.TypeOfExpression:
-					case SyntaxKind.SimpleMemberAccessExpression:
-						return true;
-					case SyntaxKind.TypeArgumentList:
-						return (p = p.Parent).IsKind(SyntaxKind.GenericName) && ((p = p.Parent.UnqualifyExceptNamespace()).IsKind(SyntaxKind.SimpleMemberAccessExpression) || p.IsKind(SyntaxKind.ObjectCreationExpression));
-				}
-				return false;
-				})));
+			Items.Add(CreateItem(KnownImageIds.ShowReferencedElements, "Find Type Referrers...", () => FindReferrers(t, _SemanticContext, s => s.Kind == SymbolKind.NamedType, IsTypeReference)));
 			Items.Add(CreateItem(KnownImageIds.ListMembers, "Find Members...", () => FindMembers(t, _SemanticContext)));
 			if (t.IsStatic) {
 				return;
@@ -180,6 +170,23 @@ namespace Codist.Controls
 			if (t.SpecialType == SpecialType.None) {
 				CreateInstanceCommandsForType(t);
 			}
+		}
+
+		bool IsTypeReference(SyntaxNode node) {
+			var p = node.Parent.UnqualifyExceptNamespace();
+			switch (p.Kind()) {
+				case SyntaxKind.TypeOfExpression:
+				case SyntaxKind.SimpleMemberAccessExpression:
+				case SyntaxKind.CatchDeclaration:
+				case SyntaxKind.CastExpression:
+				case SyntaxKind.IsExpression:
+				case SyntaxKind.IsPatternExpression:
+				case SyntaxKind.AsExpression:
+					return true;
+				case SyntaxKind.TypeArgumentList:
+					return (p = p.Parent).IsKind(SyntaxKind.GenericName) && ((p = p.Parent.UnqualifyExceptNamespace()).IsKind(SyntaxKind.SimpleMemberAccessExpression) || p.IsKind(SyntaxKind.ObjectCreationExpression));
+			}
+			return false;
 		}
 
 		void CreateCommandsForReturnTypeCommand() {
@@ -267,14 +274,18 @@ namespace Codist.Controls
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
 				.Append(" referrers");
 			var containerType = symbol.ContainingType;
-			foreach (var referrer in referrers) {
-				var s = referrer.Key;
+			foreach (var (referrer, occurance) in referrers) {
+				var s = referrer;
 				var i = m.Menu.Add(s, false);
-				i.Location = referrer.Value.FirstOrDefault().Location;
+				i.Location = occurance.FirstOrDefault().Item2.Location;
+				foreach (var item in occurance) {
+					i.Type |= item.Item1;
+				}
 				if (s.ContainingType != containerType) {
 					i.Hint = (s.ContainingType ?? s).ToDisplayString(WpfHelper.MemberNameFormat);
 				}
 			}
+			m.Menu.ExtIconProvider = GetExtIcons;
 			m.Show();
 		}
 
@@ -322,7 +333,7 @@ namespace Codist.Controls
 			var m = new SymbolMenu(context, symbol.Kind == SymbolKind.Namespace ? SymbolListType.TypeList : SymbolListType.None);
 			var (count, inherited) = m.Menu.AddSymbolMembers(symbol);
 			if (m.Menu.IconProvider == null) {
-				m.Menu.ExtIconProvider = s => GetExtIcons(s.Symbol);
+				m.Menu.ExtIconProvider = GetExtIcons;
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
@@ -404,7 +415,8 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		static StackPanel GetExtIcons(ISymbol symbol) {
+		static StackPanel GetExtIcons(SymbolItem symbolItem) {
+			var symbol = symbolItem.Symbol;
 			StackPanel icons = null;
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
@@ -417,7 +429,6 @@ namespace Codist.Controls
 					}
 					if (ms.IsExtensionMethod) {
 						AddIcon(ref icons, KnownImageIds.ExtensionMethod);
-						return icons;
 					}
 					break;
 				case SymbolKind.NamedType:
@@ -452,6 +463,32 @@ namespace Codist.Controls
 			if (symbol.IsStatic) {
 				AddIcon(ref icons, KnownImageIds.Link);
 			}
+			var t = symbolItem.Type;
+			if (t != SymbolUsageKind.Normal) {
+				if (t.MatchFlags(SymbolUsageKind.Write)) {
+					AddIcon(ref icons, KnownImageIds.Writeable);
+				}
+				else if (t.MatchFlags(SymbolUsageKind.Catch)) {
+					AddIcon(ref icons, KnownImageIds.TryCatch);
+				}
+				else if (t.HasAnyFlag(SymbolUsageKind.Attach | SymbolUsageKind.Detach)) {
+					if (t.MatchFlags(SymbolUsageKind.Attach)) {
+						AddIcon(ref icons, KnownImageIds.AddEvent);
+					}
+					if (t.MatchFlags(SymbolUsageKind.Detach)) {
+						AddIcon(ref icons, KnownImageIds.EventMissing);
+					}
+				}
+				else if (t.MatchFlags(SymbolUsageKind.TypeCast)) {
+					AddIcon(ref icons, KnownImageIds.ReportingAction);
+				}
+				else if (t.MatchFlags(SymbolUsageKind.TypeParameter)) {
+					AddIcon(ref icons, KnownImageIds.CPPMarkupXML);
+				}
+				else if (t.MatchFlags(SymbolUsageKind.Read)) {
+					AddIcon(ref icons, KnownImageIds.InputParameter);
+				}
+			}
 			return icons;
 
 			void AddIcon(ref StackPanel container, int imageId) {
@@ -471,14 +508,14 @@ namespace Codist.Controls
 			foreach (var item in members) {
 				if (groupByType && item.ContainingType != containingType) {
 					m.Menu.Add((ISymbol)(containingType = item.ContainingType) ?? item.ContainingNamespace, false)
-						.Type = SymbolItemType.Container;
+						.Type = SymbolUsageKind.Container;
 					if (containingType?.TypeKind == TypeKind.Delegate) {
 						continue; // skip Invoke method in Delegates, for results from FindMethodBySignature
 					}
 				}
 				m.Menu.Add(item, false);
 			}
-			m.Menu.ExtIconProvider = s => GetExtIcons(s.Symbol);
+			m.Menu.ExtIconProvider = GetExtIcons;
 			m.Show();
 		}
 
