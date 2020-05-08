@@ -10,7 +10,7 @@ namespace Codist.Taggers
 #pragma warning disable 169
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
-		[Name(Constants.CodeAbstractionKeyword)]
+		[Name(Constants.CSharpAbstractionKeyword)]
 		static ClassificationTypeDefinition AbstractionKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
@@ -37,7 +37,7 @@ namespace Codist.Taggers
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
 		[BaseDefinition(Constants.CodeKeywordControl)]
-		[Name(Constants.CodeBranchingKeyword)]
+		[Name(Constants.CSharpBranchingKeyword)]
 		static ClassificationTypeDefinition BranchingKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
@@ -55,7 +55,7 @@ namespace Codist.Taggers
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
 		[BaseDefinition(Constants.CodeKeywordControl)]
-		[Name(Constants.CodeControlFlowKeyword)]
+		[Name(Constants.CSharpControlFlowKeyword)]
 		static ClassificationTypeDefinition ControlFlowKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
@@ -112,7 +112,7 @@ namespace Codist.Taggers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
-		[Name(Constants.CodeLoopKeyword)]
+		[Name(Constants.CSharpLoopKeyword)]
 		static ClassificationTypeDefinition LoopKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
@@ -182,7 +182,7 @@ namespace Codist.Taggers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
-		[Name(Constants.CodeTypeCastKeyword)]
+		[Name(Constants.CSharpTypeCastKeyword)]
 		static ClassificationTypeDefinition TypeCastKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]

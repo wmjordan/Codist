@@ -5,8 +5,8 @@ using Microsoft.VisualStudio.Utilities;
 namespace Codist.Taggers
 {
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CodeControlFlowKeyword)]
-	[Name(Constants.CodeControlFlowKeyword)]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpControlFlowKeyword)]
+	[Name(Constants.CSharpControlFlowKeyword)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	[Order(After = Constants.CodeKeywordControl)]
@@ -14,26 +14,26 @@ namespace Codist.Taggers
 	sealed class ControlFlowKeywordFormat : ClassificationFormatDefinition
 	{
 		public ControlFlowKeywordFormat() {
-			DisplayName = Constants.CodeControlFlowKeyword;
+			DisplayName = Constants.CSharpControlFlowKeyword;
 			IsBold = true;
 		}
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CodeAbstractionKeyword)]
-	[Name(Constants.CodeAbstractionKeyword)]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpAbstractionKeyword)]
+	[Name(Constants.CSharpAbstractionKeyword)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	sealed class AbstractionKeywordFormat : ClassificationFormatDefinition
 	{
 		public AbstractionKeywordFormat() {
-			DisplayName = Constants.CodeAbstractionKeyword;
+			DisplayName = Constants.CSharpAbstractionKeyword;
 		}
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CodeBranchingKeyword)]
-	[Name(Constants.CodeBranchingKeyword)]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpBranchingKeyword)]
+	[Name(Constants.CSharpBranchingKeyword)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	[Order(After = Constants.CodeKeywordControl)]
@@ -41,33 +41,33 @@ namespace Codist.Taggers
 	sealed class BranchingKeywordFormat : ClassificationFormatDefinition
 	{
 		public BranchingKeywordFormat() {
-			DisplayName = Constants.CodeBranchingKeyword;
+			DisplayName = Constants.CSharpBranchingKeyword;
 		}
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CodeLoopKeyword)]
-	[Name(Constants.CodeLoopKeyword)]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpLoopKeyword)]
+	[Name(Constants.CSharpLoopKeyword)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	[Order(Before = Constants.CodeSpecialPunctuation)]
 	sealed class LoopKeywordFormat : ClassificationFormatDefinition
 	{
 		public LoopKeywordFormat() {
-			DisplayName = Constants.CodeLoopKeyword;
+			DisplayName = Constants.CSharpLoopKeyword;
 		}
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CodeTypeCastKeyword)]
-	[Name(Constants.CodeTypeCastKeyword)]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeCastKeyword)]
+	[Name(Constants.CSharpTypeCastKeyword)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	[Order(Before = Constants.CodeSpecialPunctuation)]
 	sealed class TypeCastKeywordFormat : ClassificationFormatDefinition
 	{
 		public TypeCastKeywordFormat() {
-			DisplayName = Constants.CodeTypeCastKeyword;
+			DisplayName = Constants.CSharpTypeCastKeyword;
 		}
 	}
 
@@ -76,7 +76,7 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpResourceKeyword)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
-	[Order(After = Constants.CodeBranchingKeyword)]
+	[Order(After = Constants.CSharpBranchingKeyword)]
 	[Order(Before = Constants.CodeSpecialPunctuation)]
 	sealed class ResourceKeywordFormat : ClassificationFormatDefinition
 	{

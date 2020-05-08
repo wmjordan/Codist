@@ -199,6 +199,7 @@ namespace Codist.SyntaxHighlight
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class CommentStyle : StyleBase<CommentStyleTypes>
 	{
+		string _Category;
 		public CommentStyle() {
 		}
 		public CommentStyle(CommentStyleTypes styleID) {
@@ -214,7 +215,7 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the comment style.</summary>
 		public override CommentStyleTypes StyleID { get; set; }
 
-		public override string Category => Constants.SyntaxCategory.Comment;
+		public override string Category => _Category ?? (_Category = GetCategory());
 
 		internal new CommentStyle Clone() {
 			return (CommentStyle)MemberwiseClone();
@@ -228,6 +229,7 @@ namespace Codist.SyntaxHighlight
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class CppStyle : StyleBase<CppStyleTypes>
 	{
+		string _Category;
 		public CppStyle() {
 		}
 		public CppStyle(CppStyleTypes styleID) {
@@ -243,7 +245,7 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the C++ style.</summary>
 		public override CppStyleTypes StyleID { get; set; }
 
-		public override string Category => StyleID != CppStyleTypes.None ? Constants.SyntaxCategory.General : String.Empty;
+		public override string Category => _Category ?? (_Category = GetCategory());
 
 		internal new CppStyle Clone() {
 			return (CppStyle)MemberwiseClone();

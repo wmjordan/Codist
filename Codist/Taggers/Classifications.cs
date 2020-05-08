@@ -10,7 +10,7 @@ namespace Codist.Taggers
 
 		CSharpClassifications(IClassificationTypeRegistryService registry) {
 			AbstractMember = registry.GetClassificationTag(Constants.CSharpAbstractMemberName);
-			AbstractionKeyword = registry.GetClassificationTag(Constants.CodeAbstractionKeyword);
+			AbstractionKeyword = registry.GetClassificationTag(Constants.CSharpAbstractionKeyword);
 			AliasNamespace = registry.GetClassificationTag(Constants.CSharpAliasNamespaceName);
 			AttributeName = registry.GetClassificationTag(Constants.CSharpAttributeName);
 			AttributeNotation = registry.GetClassificationTag(Constants.CSharpAttributeNotation);
@@ -131,11 +131,11 @@ namespace Codist.Taggers
 		public static readonly GeneralClassifications Instance = new GeneralClassifications(ServicesHelper.Instance.ClassificationTypeRegistry);
 
 		GeneralClassifications(IClassificationTypeRegistryService registry) {
-			BranchingKeyword = registry.GetClassificationTag(Constants.CodeBranchingKeyword);
-			ControlFlowKeyword = registry.GetClassificationTag(Constants.CodeControlFlowKeyword);
+			BranchingKeyword = registry.GetClassificationTag(Constants.CSharpBranchingKeyword);
+			ControlFlowKeyword = registry.GetClassificationTag(Constants.CSharpControlFlowKeyword);
 			Identifier = registry.GetClassificationTag(Constants.CodeIdentifier);
-			LoopKeyword = registry.GetClassificationTag(Constants.CodeLoopKeyword);
-			TypeCastKeyword = registry.GetClassificationTag(Constants.CodeTypeCastKeyword);
+			LoopKeyword = registry.GetClassificationTag(Constants.CSharpLoopKeyword);
+			TypeCastKeyword = registry.GetClassificationTag(Constants.CSharpTypeCastKeyword);
 			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
 			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
 			StrongBrace = registry.GetClassificationTag(Constants.CodeSpecialPunctuation);
