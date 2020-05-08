@@ -428,10 +428,10 @@ namespace Codist
 					}
 				}
 			}
-			else if (possibleUsage.MatchFlags(SymbolUsageKind.Read)) {
+			else if (possibleUsage.MatchFlags(SymbolUsageKind.Delegate)) {
 				var n = node.GetNodePurpose();
 				if (n.IsKind(SyntaxKind.Argument)) {
-					return SymbolUsageKind.Read;
+					return SymbolUsageKind.Delegate;
 				}
 				//var last = node.GetLastAncestorExpressionNode();
 				//if (last != null && last.Parent.IsKind(SyntaxKind.Argument) == true && (last == node || last is MemberAccessExpressionSyntax)) {
@@ -469,7 +469,7 @@ namespace Codist
 					}
 					return SymbolUsageKind.TypeCast | SymbolUsageKind.TypeParameter;
 				case SymbolKind.Method:
-					return SymbolUsageKind.Read;
+					return SymbolUsageKind.Delegate;
 				default:
 					return SymbolUsageKind.Normal;
 			}
@@ -508,12 +508,13 @@ namespace Codist
 		Normal,
 		External = 1,
 		Container = 1 << 1,
-		Read = 1 << 2,
-		Write = 1 << 3,
+		Write = 1 << 2,
+		Delegate = 1 << 3,
 		Attach = 1 << 5,
 		Detach = 1 << 6,
 		TypeCast = 1 << 7,
 		TypeParameter = 1 << 8,
 		Catch = 1 << 9,
+		Usage = Delegate | Write | Attach | Detach | TypeCast | TypeParameter | Catch
 	}
 }

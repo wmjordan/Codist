@@ -405,15 +405,22 @@ namespace Codist.Controls
 
 		#region ISymbolFilterable
 		SymbolFilterKind ISymbolFilterable.SymbolFilterKind {
-			get => ContainerType == SymbolListType.TypeList ? SymbolFilterKind.Type : SymbolFilterKind.Member;
+			get => ContainerType == SymbolListType.TypeList ? SymbolFilterKind.Type
+				: ContainerType == SymbolListType.SymbolReferrers ? SymbolFilterKind.Usage
+				: SymbolFilterKind.Member;
 		}
 		void ISymbolFilterable.Filter(string[] keywords, int filterFlags) {
 			switch (ContainerType) {
 				case SymbolListType.TypeList:
-					_Filter = FilterByTypeKinds(keywords, (TypeFilterTypes)filterFlags);
+					_Filter = FilterByTypeKinds(keywords, (MemberFilterTypes)filterFlags);
 					break;
 				case SymbolListType.Locations:
 					_Filter = FilterByLocations(keywords);
+					break;
+				case SymbolListType.SymbolReferrers:
+					_Filter = ((MemberFilterTypes)filterFlags).MatchFlags(MemberFilterTypes.AllUsages)
+						? FilterByMemberTypes(keywords, (MemberFilterTypes)filterFlags)
+						: FilterByUsages(keywords, (MemberFilterTypes)filterFlags);
 					break;
 				default:
 					_Filter = FilterByMemberTypes(keywords, (MemberFilterTypes)filterFlags);
@@ -441,22 +448,22 @@ namespace Codist.Controls
 						&& MatchKeywords(i.Content.GetText(), k, comparison);
 				};
 			}
-			Predicate<object> FilterByTypeKinds(string[] k, TypeFilterTypes typeFilter) {
+			Predicate<object> FilterByTypeKinds(string[] k, MemberFilterTypes typeFilter) {
 				var noKeyword = k.Length == 0;
-				if (noKeyword && typeFilter == TypeFilterTypes.All) {
+				if (noKeyword && typeFilter == MemberFilterTypes.All) {
 					return null;
 				}
 				if (noKeyword) {
 					return o => {
 						var i = (SymbolItem)o;
-						return i.Symbol != null && SymbolFilterBox.FilterBySymbol(typeFilter, i.Symbol);
+						return i.Symbol != null && SymbolFilterBox.FilterBySymbolType(typeFilter, i.Symbol);
 					};
 				}
 				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				return o => {
 					var i = (SymbolItem)o;
 					return i.Symbol != null
-						&& SymbolFilterBox.FilterBySymbol(typeFilter, i.Symbol)
+						&& SymbolFilterBox.FilterBySymbolType(typeFilter, i.Symbol)
 						&& MatchKeywords(i.Content.GetText(), k, comparison);
 				};
 			}
@@ -472,7 +479,28 @@ namespace Codist.Controls
 								|| MatchKeywords(i.Hint, k, comparison));
 				};
 			}
-
+			Predicate<object> FilterByUsages(string[] k, MemberFilterTypes filter) {
+				var noKeyword = k.Length == 0;
+				if (noKeyword && filter == MemberFilterTypes.All) {
+					return null;
+				}
+				if (noKeyword) {
+					return o => {
+						var i = (SymbolItem)o;
+						return SymbolFilterBox.FilterByUsage(filter, i)
+							&& (i.Symbol != null ? SymbolFilterBox.FilterBySymbol(filter, i.Symbol) : SymbolFilterBox.FilterByImageId(filter, i.ImageId));
+					};
+				}
+				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+				return o => {
+					var i = (SymbolItem)o;
+					return SymbolFilterBox.FilterByUsage(filter, i)
+						&& (i.Symbol != null
+							? SymbolFilterBox.FilterBySymbol(filter, i.Symbol)
+							: SymbolFilterBox.FilterByImageId(filter, i.ImageId))
+						&& MatchKeywords(i.Content.GetText(), k, comparison);
+				};
+			}
 			bool MatchKeywords(string text, string[] k, StringComparison c) {
 				var m = 0;
 				foreach (var item in k) {
@@ -624,8 +652,8 @@ namespace Codist.Controls
 			get => _Hint ?? (_Hint = Symbol != null ? GetSymbolConstaintValue(Symbol) : String.Empty);
 			set => _Hint = value;
 		}
-		public SymbolUsageKind Type { get; set; }
-		public bool IsExternal => Type == SymbolUsageKind.External
+		public SymbolUsageKind Usage { get; set; }
+		public bool IsExternal => Usage == SymbolUsageKind.External
 			|| Container.ContainerType == SymbolListType.None && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
 		public TextBlock Content {
 			get => _Content ?? (_Content = Symbol != null
@@ -795,6 +823,6 @@ namespace Codist.Controls
 		/// <summary>
 		/// List of symbol referrers
 		/// </summary>
-		SymbolReferrers
+		SymbolReferrers,
 	}
 }

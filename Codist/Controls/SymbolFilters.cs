@@ -76,8 +76,9 @@ namespace Codist.Controls
 	sealed class SymbolFilterBox : StackPanel
 	{
 		readonly ThemedTextBox _FilterBox;
-		readonly FilterButtonGroup _FilterButtons;
 		readonly ISymbolFilterable _Filter;
+		readonly FilterButtonGroup[] _FilterGroups;
+		readonly StackPanel _FilterContainer;
 
 		public SymbolFilterBox(ISymbolFilterable filter) {
 			Orientation = Orientation.Horizontal;
@@ -87,40 +88,73 @@ namespace Codist.Controls
 				MinWidth = 150,
 				ToolTip = new ThemedToolTip("Result Filter", "Filter items in this menu.\nUse space to separate keywords.")
 			});
-			if (filter.SymbolFilterKind == SymbolFilterKind.Type) {
-				Children.Add(_FilterButtons = new TypeFilterButtonGroup());
+			Children.Add(new Border {
+				BorderThickness = WpfHelper.TinyMargin,
+				CornerRadius = new CornerRadius(3),
+				Child = _FilterContainer = new StackPanel {Orientation = Orientation.Horizontal }
+			}.ReferenceProperty(Border.BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey));
+			switch (filter.SymbolFilterKind) {
+				case SymbolFilterKind.Type:
+					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new TypeFilterButtonGroup() };
+					break;
+				case SymbolFilterKind.Usage:
+					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new SymbolUsageFilterButtonGroup(), new MemberFilterButtonGroup() };
+					break;
+				default:
+					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new MemberFilterButtonGroup() };
+					break;
 			}
-			else {
-				Children.Add(_FilterButtons = new MemberFilterButtonGroup());
-			}
+			_FilterContainer.Add(_FilterGroups);
+			_FilterContainer.Add(new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilters).ClearBorder());
 			_Filter = filter;
-			_FilterButtons.FilterChanged += FilterBox_Changed;
-			_FilterButtons.FilterCleared += FilterBox_Clear;
+			foreach (var item in _FilterGroups) {
+				item.FilterChanged += FilterBox_Changed;
+			}
 			_FilterBox.TextChanged += FilterBox_Changed;
 			_FilterBox.SetOnVisibleSelectAll();
 		}
-		public ThemedTextBox FilterBox => _FilterBox;
+		//public ThemedTextBox FilterBox => _FilterBox;
 
-		public bool FocusTextBox() {
+		public bool FocusFilterBox() {
 			return _FilterBox.GetFocus();
 		}
-		public void UpdateNumbers(IEnumerable<ISymbol> symbols) {
+		public void UpdateNumbers(IEnumerable<SymbolItem> symbols) {
 			if (symbols != null) {
-				_FilterButtons.UpdateNumbers(symbols);
+				foreach (var item in _FilterGroups) {
+					item.UpdateNumbers(symbols);
+				}
 			}
 		}
-
-		void FilterBox_Clear(object sender, EventArgs e) {
+		void ClearFilters() {
+			bool needUpdate = false;
+			var filters = GetFilterFlags();
+			if (filters != 0) {
+				foreach (var item in _FilterGroups) {
+					item.ClearFilter();
+				}
+				needUpdate = true;
+			}
 			if (_FilterBox.Text.Length > 0) {
 				_FilterBox.Text = String.Empty;
+				needUpdate = true;
 			}
-			else {
-				FilterBox_Changed(sender, e);
+			if (needUpdate) {
+				_Filter.Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), (int)MemberFilterTypes.All);
+				FocusFilterBox();
 			}
 		}
 		void FilterBox_Changed(object sender, EventArgs e) {
-			_Filter.Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), _FilterButtons.Filters);
-			FocusTextBox();
+			var filters = GetFilterFlags();
+			_Filter.Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), filters);
+			FocusFilterBox();
+		}
+
+		int GetFilterFlags() {
+			var filters = 0;
+			foreach (var item in _FilterGroups) {
+				filters |= item.Filters;
+			}
+			return filters;
 		}
 
 		internal static bool FilterByImageId(MemberFilterTypes filterTypes, int imageId) {
@@ -230,34 +264,54 @@ namespace Codist.Controls
 			return filterTypes.MatchFlags(symbolFlags);
 		}
 
-		internal static bool FilterBySymbol(TypeFilterTypes filterTypes, ISymbol symbol) {
-			TypeFilterTypes symbolFlags;
+		internal static bool FilterBySymbolType(MemberFilterTypes filterTypes, ISymbol symbol) {
+			MemberFilterTypes symbolFlags;
 			if (symbol.Kind == SymbolKind.Alias) {
 				symbol = ((IAliasSymbol)symbol).Target;
 			}
 
 			switch (symbol.DeclaredAccessibility) {
-				case Accessibility.Private: symbolFlags = TypeFilterTypes.Private; break;
-				case Accessibility.Protected: symbolFlags = TypeFilterTypes.Protected; break;
-				case Accessibility.Internal: symbolFlags = TypeFilterTypes.Internal; break;
+				case Accessibility.Private: symbolFlags = MemberFilterTypes.Private; break;
+				case Accessibility.Protected: symbolFlags = MemberFilterTypes.Protected; break;
+				case Accessibility.Internal: symbolFlags = MemberFilterTypes.Internal; break;
 				case Accessibility.ProtectedAndInternal:
-				case Accessibility.ProtectedOrInternal: symbolFlags = TypeFilterTypes.Internal | TypeFilterTypes.Protected; break;
-				case Accessibility.Public: symbolFlags = TypeFilterTypes.Public; break;
-				default: symbolFlags = TypeFilterTypes.None; break;
+				case Accessibility.ProtectedOrInternal: symbolFlags = MemberFilterTypes.Internal | MemberFilterTypes.Protected; break;
+				case Accessibility.Public: symbolFlags = MemberFilterTypes.Public; break;
+				default: symbolFlags = MemberFilterTypes.None; break;
 			}
 			if (symbol.Kind == SymbolKind.NamedType) {
 				switch (((INamedTypeSymbol)symbol).TypeKind) {
-					case TypeKind.Class: symbolFlags |= TypeFilterTypes.Class; break;
-					case TypeKind.Struct: symbolFlags |= TypeFilterTypes.Struct; break;
-					case TypeKind.Interface: symbolFlags |= TypeFilterTypes.Interface; break;
-					case TypeKind.Delegate: symbolFlags |= TypeFilterTypes.Delegate; break;
-					case TypeKind.Enum: symbolFlags |= TypeFilterTypes.Enum; break;
+					case TypeKind.Class: symbolFlags |= MemberFilterTypes.Class; break;
+					case TypeKind.Struct: symbolFlags |= MemberFilterTypes.Struct; break;
+					case TypeKind.Interface: symbolFlags |= MemberFilterTypes.Interface; break;
+					case TypeKind.Delegate: symbolFlags |= MemberFilterTypes.Delegate; break;
+					case TypeKind.Enum: symbolFlags |= MemberFilterTypes.Enum; break;
 				}
 			}
 			else if (symbol.Kind == SymbolKind.Namespace) {
-				symbolFlags |= TypeFilterTypes.Namespace;
+				symbolFlags |= MemberFilterTypes.Namespace;
 			}
 			return filterTypes.MatchFlags(symbolFlags);
+		}
+
+		internal static bool FilterByUsage(MemberFilterTypes filterTypes, SymbolItem item) {
+			var m = MemberFilterTypes.None;
+			if (item.Usage.HasAnyFlag(SymbolUsageKind.Usage) == false) {
+				return false;
+			}
+			if (item.Usage.MatchFlags(SymbolUsageKind.Write)) {
+				m |= MemberFilterTypes.Write;
+			}
+			if (item.Usage.MatchFlags(SymbolUsageKind.TypeCast)) {
+				m |= MemberFilterTypes.TypeCast;
+			}
+			if (item.Usage.HasAnyFlag(SymbolUsageKind.TypeParameter | SymbolUsageKind.Catch)) {
+				m |= MemberFilterTypes.TypeReference;
+			}
+			if (item.Usage.HasAnyFlag(SymbolUsageKind.Delegate | SymbolUsageKind.Attach | SymbolUsageKind.Detach)) {
+				m |= MemberFilterTypes.Read;
+			}
+			return filterTypes.HasAnyFlag(m);
 		}
 
 		static void ToggleFilterButton(ThemedToggleButton button, int label) {
@@ -273,67 +327,50 @@ namespace Codist.Controls
 		abstract class FilterButtonGroup : UserControl
 		{
 			public event EventHandler FilterChanged;
-			public event EventHandler FilterCleared;
 
 			public abstract int Filters { get; }
 			protected abstract void UpdateFilterValue();
 			public abstract void ClearFilter();
-			public abstract void UpdateNumbers(IEnumerable<ISymbol> symbols);
+			public abstract void UpdateNumbers(IEnumerable<SymbolItem> symbols);
 
 			protected void OnFilterChanged() {
 				FilterChanged?.Invoke(this, EventArgs.Empty);
 			}
 
-			protected void OnFilterCleared() {
-				FilterCleared?.Invoke(this, EventArgs.Empty);
-			}
-
 			protected ThemedToggleButton CreateButton(int imageId, string toolTip) {
 				var b = new ThemedToggleButton(imageId, toolTip).ClearMargin().ClearBorder();
-				b.Checked += UpdateFilterValue;
-				b.Unchecked += UpdateFilterValue;
+				b.Checked += UpdateFilterValueHandler;
+				b.Unchecked += UpdateFilterValueHandler;
 				return b;
 			}
+			protected static Border CreateSeparator() {
+				return new Border { Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey);
+			}
 
-			void UpdateFilterValue(object sender, RoutedEventArgs eventArgs) {
+			void UpdateFilterValueHandler(object sender, RoutedEventArgs eventArgs) {
 				UpdateFilterValue();
 			}
 		}
 
-		sealed class TypeFilterButtonGroup : FilterButtonGroup
+		sealed class AccessibilityFilterButtonGroup : FilterButtonGroup
 		{
-			readonly ThemedToggleButton _ClassFilter, _StructFilter, _EnumFilter, _InterfaceFilter, _DelegateFilter, _NamespaceFilter, _PublicFilter, _PrivateFilter;
-			TypeFilterTypes _Filters;
+			readonly ThemedToggleButton _PublicFilter, _PrivateFilter;
+			readonly Border _Separator;
+			MemberFilterTypes _Filters;
 			bool _uiLock;
 
 			public override int Filters => (int)_Filters;
 
-			public TypeFilterButtonGroup() {
-				_ClassFilter = CreateButton(KnownImageIds.Class, "Classes");
-				_InterfaceFilter = CreateButton(KnownImageIds.Interface, "Interfaces");
-				_DelegateFilter = CreateButton(KnownImageIds.Delegate, "Delegates");
-				_StructFilter = CreateButton(KnownImageIds.Structure, "Structures");
-				_EnumFilter = CreateButton(KnownImageIds.Enumeration, "Enumerations");
-				_NamespaceFilter = CreateButton(KnownImageIds.Namespace, "Namespaces");
-
+			public AccessibilityFilterButtonGroup() {
 				_PublicFilter = CreateButton(KnownImageIds.ModulePublic, "Public and protected types");
 				_PrivateFilter = CreateButton(KnownImageIds.ModulePrivate, "Internal and private types");
-
-				_Filters = TypeFilterTypes.All;
-				Margin = WpfHelper.SmallHorizontalMargin;
-				Content = new Border {
-					BorderThickness = WpfHelper.TinyMargin,
-					CornerRadius = new CornerRadius(3),
-					Child = new StackPanel {
-						Children = {
-							_PublicFilter, _PrivateFilter,
-							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
-							_ClassFilter, _InterfaceFilter, _DelegateFilter, _StructFilter, _EnumFilter, _NamespaceFilter,
-							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
-							new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearBorder(),
-						},
-						Orientation = Orientation.Horizontal
-					}
+				_Filters = MemberFilterTypes.AllAccessibilities;
+				Content = new StackPanel {
+					Children = {
+						_PublicFilter, _PrivateFilter,
+						(_Separator = CreateSeparator())
+					},
+					Orientation = Orientation.Horizontal
 				}.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey);
 			}
 
@@ -341,36 +378,15 @@ namespace Codist.Controls
 				if (_uiLock) {
 					return;
 				}
-				var f = TypeFilterTypes.None;
-				if (_ClassFilter.IsChecked == true) {
-					f |= TypeFilterTypes.Class;
-				}
-				if (_StructFilter.IsChecked == true) {
-					f |= TypeFilterTypes.Struct;
-				}
-				if (_EnumFilter.IsChecked == true) {
-					f |= TypeFilterTypes.Enum;
-				}
-				if (_DelegateFilter.IsChecked == true) {
-					f |= TypeFilterTypes.Delegate;
-				}
-				if (_InterfaceFilter.IsChecked == true) {
-					f |= TypeFilterTypes.Interface;
-				}
-				if (_NamespaceFilter.IsChecked == true) {
-					f |= TypeFilterTypes.Namespace;
-				}
-				if (f.HasAnyFlag(TypeFilterTypes.AllTypes) == false) {
-					f |= TypeFilterTypes.AllTypes;
-				}
+				var f = MemberFilterTypes.None;
 				if (_PublicFilter.IsChecked == true) {
-					f |= TypeFilterTypes.Public | TypeFilterTypes.Protected;
+					f |= MemberFilterTypes.Public | MemberFilterTypes.Protected;
 				}
 				if (_PrivateFilter.IsChecked == true) {
-					f |= TypeFilterTypes.Internal | TypeFilterTypes.Private;
+					f |= MemberFilterTypes.Internal | MemberFilterTypes.Private;
 				}
-				if (f.HasAnyFlag(TypeFilterTypes.AllAccessibility) == false) {
-					f |= TypeFilterTypes.AllAccessibility;
+				if (f.HasAnyFlag(MemberFilterTypes.AllAccessibilities) == false) {
+					f |= MemberFilterTypes.AllAccessibilities;
 				}
 				if (_Filters != f) {
 					_Filters = f;
@@ -378,26 +394,14 @@ namespace Codist.Controls
 				}
 			}
 
-			public override void UpdateNumbers(IEnumerable<ISymbol> symbols) {
-				int c = 0, s = 0, e = 0, d = 0, i = 0, n = 0, pu = 0, pi = 0;
+			public override void UpdateNumbers(IEnumerable<SymbolItem> symbols) {
+				int pu = 0, pi = 0;
 				foreach (var item in symbols) {
-					if (item == null || item.IsImplicitlyDeclared) {
+					var symbol = item.Symbol;
+					if (symbol == null || symbol.IsImplicitlyDeclared) {
 						continue;
 					}
-					switch (item.Kind) {
-						case SymbolKind.NamedType:
-							switch (((INamedTypeSymbol)item).TypeKind) {
-								case TypeKind.Class: ++c; break;
-								case TypeKind.Struct: ++s; break;
-								case TypeKind.Interface: ++i; break;
-								case TypeKind.Delegate: ++d; break;
-								case TypeKind.Enum: ++e; break;
-							}
-							break;
-						case SymbolKind.Namespace:
-							++n; break;
-					}
-					switch (item.DeclaredAccessibility) {
+					switch (symbol.DeclaredAccessibility) {
 						case Accessibility.Private:
 						case Accessibility.Internal:
 						case Accessibility.ProtectedAndInternal:
@@ -410,30 +414,119 @@ namespace Codist.Controls
 				}
 				ToggleFilterButton(_PublicFilter, pu);
 				ToggleFilterButton(_PrivateFilter, pi);
+				_Separator.Visibility = (pu != 0 || pi != 0) ? Visibility.Visible : Visibility.Collapsed;
+			}
+
+			public override void ClearFilter() {
+				_uiLock = true;
+				_PublicFilter.IsChecked = _PrivateFilter.IsChecked = false;
+				_uiLock = false;
+				_Filters |= MemberFilterTypes.AllAccessibilities;
+			}
+		}
+
+		sealed class TypeFilterButtonGroup : FilterButtonGroup
+		{
+			readonly ThemedToggleButton _ClassFilter, _StructFilter, _EnumFilter, _InterfaceFilter, _DelegateFilter, _NamespaceFilter;
+			readonly Border _Separator;
+			MemberFilterTypes _Filters;
+			bool _uiLock;
+
+			public override int Filters => (int)_Filters;
+
+			public TypeFilterButtonGroup() {
+				_ClassFilter = CreateButton(KnownImageIds.Class, "Classes");
+				_InterfaceFilter = CreateButton(KnownImageIds.Interface, "Interfaces");
+				_DelegateFilter = CreateButton(KnownImageIds.Delegate, "Delegates");
+				_StructFilter = CreateButton(KnownImageIds.Structure, "Structures");
+				_EnumFilter = CreateButton(KnownImageIds.Enumeration, "Enumerations");
+				_NamespaceFilter = CreateButton(KnownImageIds.Namespace, "Namespaces");
+
+				_Filters = MemberFilterTypes.AllTypes;
+				Content = new StackPanel {
+						Children = {
+							_ClassFilter, _InterfaceFilter, _DelegateFilter, _StructFilter, _EnumFilter, _NamespaceFilter,
+							(_Separator = CreateSeparator()),
+						},
+						Orientation = Orientation.Horizontal
+					};
+			}
+
+			protected override void UpdateFilterValue() {
+				if (_uiLock) {
+					return;
+				}
+				var f = MemberFilterTypes.None;
+				if (_ClassFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Class;
+				}
+				if (_StructFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Struct;
+				}
+				if (_EnumFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Enum;
+				}
+				if (_DelegateFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Delegate;
+				}
+				if (_InterfaceFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Interface;
+				}
+				if (_NamespaceFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Namespace;
+				}
+				if (f.HasAnyFlag(MemberFilterTypes.AllTypes) == false) {
+					f |= MemberFilterTypes.AllTypes;
+				}
+				if (_Filters != f) {
+					_Filters = f;
+					OnFilterChanged();
+				}
+			}
+
+			public override void UpdateNumbers(IEnumerable<SymbolItem> symbols) {
+				int c = 0, s = 0, e = 0, d = 0, i = 0, n = 0;
+				foreach (var item in symbols) {
+					var symbol = item.Symbol;
+					if (symbol == null || symbol.IsImplicitlyDeclared) {
+						continue;
+					}
+					switch (symbol.Kind) {
+						case SymbolKind.NamedType:
+							switch (((INamedTypeSymbol)symbol).TypeKind) {
+								case TypeKind.Class: ++c; break;
+								case TypeKind.Struct: ++s; break;
+								case TypeKind.Interface: ++i; break;
+								case TypeKind.Delegate: ++d; break;
+								case TypeKind.Enum: ++e; break;
+							}
+							break;
+						case SymbolKind.Namespace:
+							++n; break;
+					}
+				}
 				ToggleFilterButton(_ClassFilter, c);
 				ToggleFilterButton(_StructFilter, s);
 				ToggleFilterButton(_EnumFilter, e);
 				ToggleFilterButton(_InterfaceFilter, i);
 				ToggleFilterButton(_DelegateFilter, d);
 				ToggleFilterButton(_NamespaceFilter, n);
+				_Separator.Visibility = (c != 0 || s != 0 || e != 0 || i != 0 || d != 0 || n != 0) ? Visibility.Visible : Visibility.Collapsed;
 			}
 
 			public override void ClearFilter() {
 				_uiLock = true;
 				_ClassFilter.IsChecked = _InterfaceFilter.IsChecked = _DelegateFilter.IsChecked
-					= _StructFilter.IsChecked = _EnumFilter.IsChecked = _NamespaceFilter.IsChecked
-					= _PublicFilter.IsChecked = _PrivateFilter.IsChecked = false;
+					= _StructFilter.IsChecked = _EnumFilter.IsChecked = _NamespaceFilter.IsChecked = false;
 				_uiLock = false;
-				if (_Filters != TypeFilterTypes.All) {
-					_Filters = TypeFilterTypes.All;
-				}
-				OnFilterCleared();
+				_Filters |= MemberFilterTypes.AllTypes;
 			}
 		}
 
 		sealed class MemberFilterButtonGroup : FilterButtonGroup
 		{
-			readonly ThemedToggleButton _FieldFilter, _PropertyFilter, _EventFilter, _MethodFilter, _TypeFilter, _PublicFilter, _PrivateFilter;
+			readonly ThemedToggleButton _FieldFilter, _PropertyFilter, _EventFilter, _MethodFilter, _TypeFilter;
+			readonly Border _Separator;
 			MemberFilterTypes _Filters;
 			bool _uiLock;
 
@@ -445,25 +538,14 @@ namespace Codist.Controls
 				_EventFilter = CreateButton(KnownImageIds.Event, "Events");
 				_TypeFilter = CreateButton(KnownImageIds.EntityContainer, "Types and delegates");
 
-				_PublicFilter = CreateButton(KnownImageIds.ModulePublic, "Public and protected members");
-				_PrivateFilter = CreateButton(KnownImageIds.ModulePrivate, "Internal and private members");
-
-				_Filters = MemberFilterTypes.All;
-				Margin = WpfHelper.SmallHorizontalMargin;
-				Content = new Border {
-					BorderThickness = WpfHelper.TinyMargin,
-					CornerRadius = new CornerRadius(3),
-					Child = new StackPanel {
-						Children = {
-							_PublicFilter, _PrivateFilter,
-							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
-							_FieldFilter, _MethodFilter, _EventFilter, _TypeFilter,
-							new Border{ Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey),
-							new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearBorder(),
-						},
-						Orientation = Orientation.Horizontal
-					}
-				}.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey);
+				_Filters = MemberFilterTypes.AllMembers;
+				Content = new StackPanel {
+					Children = {
+						_FieldFilter, _MethodFilter, _EventFilter, _TypeFilter,
+						(_Separator = CreateSeparator())
+					},
+					Orientation = Orientation.Horizontal
+				};
 			}
 
 			protected override void UpdateFilterValue() {
@@ -489,35 +571,27 @@ namespace Codist.Controls
 				if (f.HasAnyFlag(MemberFilterTypes.AllMembers) == false) {
 					f |= MemberFilterTypes.AllMembers;
 				}
-				if (_PublicFilter.IsChecked == true) {
-					f |= MemberFilterTypes.Public | MemberFilterTypes.Protected;
-				}
-				if (_PrivateFilter.IsChecked == true) {
-					f |= MemberFilterTypes.Internal | MemberFilterTypes.Private;
-				}
-				if (f.HasAnyFlag(MemberFilterTypes.AllAccessibility) == false) {
-					f |= MemberFilterTypes.AllAccessibility;
-				}
 				if (_Filters != f) {
 					_Filters = f;
 					OnFilterChanged();
 				}
 			}
 
-			public override void UpdateNumbers(IEnumerable<ISymbol> symbols) {
-				int f = 0, m = 0, e = 0, t = 0, pu = 0, pi = 0;
+			public override void UpdateNumbers(IEnumerable<SymbolItem> symbols) {
+				int f = 0, m = 0, e = 0, t = 0;
 				foreach (var item in symbols) {
-					if (item == null || item.IsImplicitlyDeclared) {
+					var symbol = item.Symbol;
+					if (symbol == null || symbol.IsImplicitlyDeclared) {
 						continue;
 					}
-					switch (item.Kind) {
+					switch (symbol.Kind) {
 						case SymbolKind.Event:
 							++e; break;
 						case SymbolKind.Field:
 						case SymbolKind.Property:
 							++f; break;
 						case SymbolKind.Method:
-							var sm = item as IMethodSymbol;
+							var sm = symbol as IMethodSymbol;
 							if (sm.MethodKind == MethodKind.PropertyGet
 								|| sm.MethodKind == MethodKind.PropertySet) {
 								continue;
@@ -526,38 +600,108 @@ namespace Codist.Controls
 						case SymbolKind.NamedType:
 							++t; break;
 					}
-					switch (item.DeclaredAccessibility) {
-						case Accessibility.Private:
-						case Accessibility.Internal:
-						case Accessibility.ProtectedAndInternal:
-						case Accessibility.ProtectedOrInternal:
-							++pi; break;
-						case Accessibility.Public:
-						case Accessibility.Protected:
-							++pu; break;
-					}
 				}
-				ToggleFilterButton(_PublicFilter, pu);
-				ToggleFilterButton(_PrivateFilter, pi);
 				ToggleFilterButton(_FieldFilter, f);
 				ToggleFilterButton(_MethodFilter, m);
 				ToggleFilterButton(_EventFilter, e);
 				ToggleFilterButton(_TypeFilter, t);
+				_Separator.Visibility = (f != 0 || m != 0 || e != 0 || t != 0) ? Visibility.Visible : Visibility.Collapsed;
 			}
 
 			public override void ClearFilter() {
 				_uiLock = true;
 				_FieldFilter.IsChecked = _MethodFilter.IsChecked = _EventFilter.IsChecked
-					= _TypeFilter.IsChecked
-					= _PublicFilter.IsChecked = _PrivateFilter.IsChecked = false;
+					= _TypeFilter.IsChecked = false;
 				if (_PropertyFilter != null) {
 					_PropertyFilter.IsChecked = false;
 				}
 				_uiLock = false;
-				if (_Filters != MemberFilterTypes.All) {
-					_Filters = MemberFilterTypes.All;
+				_Filters |= MemberFilterTypes.AllMembers;
+			}
+		}
+
+		sealed class SymbolUsageFilterButtonGroup : FilterButtonGroup
+		{
+			readonly ThemedToggleButton _WriteFilter, _ReadFilter, _EventFilter, _TypeCastFilter, _TypeReferenceFilter;
+			readonly Border _Separator;
+			MemberFilterTypes _Filters;
+			bool _uiLock;
+
+			public override int Filters => (int)_Filters;
+
+			public SymbolUsageFilterButtonGroup() {
+				_WriteFilter = CreateButton(KnownImageIds.Writeable, "Write");
+				_ReadFilter = CreateButton(KnownImageIds.Event, "Delegate, attach or detach");
+				_TypeCastFilter = CreateButton(KnownImageIds.ReportingAction, "Type conversion");
+				_TypeReferenceFilter = CreateButton(KnownImageIds.CPPMarkupXML, "Type reference or argument");
+				_Filters = MemberFilterTypes.AllUsages;
+				Content = new StackPanel {
+					Children = {
+						_WriteFilter, _ReadFilter, _TypeCastFilter, _TypeReferenceFilter,
+						(_Separator = CreateSeparator())
+					},
+					Orientation = Orientation.Horizontal
+				};
+			}
+
+			protected override void UpdateFilterValue() {
+				if (_uiLock) {
+					return;
 				}
-				OnFilterCleared();
+				var f = MemberFilterTypes.None;
+				if (_WriteFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Write;
+				}
+				if (_ReadFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Read;
+				}
+				if (_TypeCastFilter.IsChecked == true) {
+					f |= MemberFilterTypes.TypeCast;
+				}
+				if (_TypeReferenceFilter.IsChecked == true) {
+					f |= MemberFilterTypes.TypeReference;
+				}
+				if (f.HasAnyFlag(MemberFilterTypes.AllUsages) == false) {
+					f |= MemberFilterTypes.AllUsages;
+				}
+				if (_Filters != f) {
+					_Filters = f;
+					OnFilterChanged();
+				}
+			}
+
+			public override void UpdateNumbers(IEnumerable<SymbolItem> symbols) {
+				int r = 0, w = 0, tc = 0, tr = 0;
+				foreach (var item in symbols) {
+					var t = item.Usage;
+					if (t == SymbolUsageKind.Normal) {
+						continue;
+					}
+					if (t.MatchFlags(SymbolUsageKind.Write)) {
+						++w;
+					}
+					if (t.HasAnyFlag(SymbolUsageKind.Delegate | SymbolUsageKind.Attach | SymbolUsageKind.Detach)) {
+						++r;
+					}
+					if (t.MatchFlags(SymbolUsageKind.TypeCast)) {
+						++tc;
+					}
+					if (t.HasAnyFlag(SymbolUsageKind.TypeParameter | SymbolUsageKind.Catch)) {
+						++tr;
+					}
+				}
+				ToggleFilterButton(_ReadFilter, r);
+				ToggleFilterButton(_WriteFilter, w);
+				ToggleFilterButton(_TypeCastFilter, tc);
+				ToggleFilterButton(_TypeReferenceFilter, tr);
+				_Separator.Visibility = (w != 0 || r != 0 || tc != 0 || tr != 0) ? Visibility.Visible : Visibility.Collapsed;
+			}
+
+			public override void ClearFilter() {
+				_uiLock = true;
+				_WriteFilter.IsChecked = _ReadFilter.IsChecked = _TypeCastFilter.IsChecked = _TypeReferenceFilter.IsChecked = false;
+				_uiLock = false;
+				_Filters |= MemberFilterTypes.AllUsages;
 			}
 		}
 	}
@@ -651,7 +795,8 @@ namespace Codist.Controls
 	{
 		Undefined,
 		Member,
-		Type
+		Type,
+		Usage
 	}
 
 	[Flags]
@@ -669,28 +814,21 @@ namespace Codist.Controls
 		Protected = 1 << 6,
 		Internal = 1 << 7,
 		Private = 1 << 8,
-		AllAccessibility = Public | Protected | Private | Internal,
-		All = AllMembers | AllAccessibility
-	}
-
-	[Flags]
-	enum TypeFilterTypes
-	{
-		None,
-		Class = 1,
-		Struct = 1 << 1,
-		Enum = 1 << 2,
+		AllAccessibilities = Public | Protected | Private | Internal,
+		Class = 1 << 10,
+		Struct = 1 << 11,
+		Enum = 1 << 12,
 		StructAndEnum = Struct | Enum,
-		Delegate = 1 << 3,
-		Interface = 1 << 5,
-		Namespace = 1 << 6,
+		Delegate = 1 << 13,
+		Interface = 1 << 14,
+		Namespace = 1 << 15,
 		AllTypes = Class | StructAndEnum | Delegate| Interface | Namespace,
-		Public = 1 << 7,
-		Protected = 1 << 8,
-		Internal = 1 << 9,
-		Private = 1 << 10,
-		AllAccessibility = Public | Protected | Private | Internal,
-		All = AllTypes | AllAccessibility
+		Read = 1 << 20,
+		Write = 1 << 21,
+		TypeCast = 1 << 22,
+		TypeReference = 1 << 23,
+		AllUsages = Read | Write | TypeCast | TypeReference,
+		All = AllMembers | AllAccessibilities | AllTypes | AllUsages
 	}
 
 	enum ScopeType

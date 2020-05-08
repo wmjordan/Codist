@@ -48,11 +48,11 @@ namespace Codist.SyntaxHighlight
 	{
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpResourceKeyword)]
 		public ClassificationTag Resource;
-		[ClassificationType(ClassificationTypeNames = Constants.CodeLoopKeyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpLoopKeyword)]
 		public ClassificationTag Loop;
-		[ClassificationType(ClassificationTypeNames = Constants.CodeBranchingKeyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpBranchingKeyword)]
 		public ClassificationTag Branching;
-		[ClassificationType(ClassificationTypeNames = Constants.CodeTypeCastKeyword)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeCastKeyword)]
 		public ClassificationTag TypeCast;
 
 		public static readonly TransientKeywordTagHolder Default = ClassificationTagHelper.InitFields<TransientKeywordTagHolder>((s, t) => new ClassificationTag(t));

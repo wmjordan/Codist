@@ -654,7 +654,7 @@ namespace Codist.NaviBar
 				var ct = _Bar._cancellationSource.GetToken();
 				await CreateMenuForTypeSymbolNodeAsync(ct);
 
-				_FilterBox.UpdateNumbers((await _Bar._SemanticContext.GetSymbolAsync(Node, ct).ConfigureAwait(true) as ITypeSymbol)?.GetMembers());
+				_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.GetMembers().Select(s => new SymbolItem(s, _Menu, false)));
 				var footer = (TextBlock)_Menu.Footer;
 				if (_PartialCount > 1) {
 					footer.Append(ThemeHelper.GetImage(KnownImageIds.OpenDocumentFromCollection))
@@ -665,7 +665,7 @@ namespace Codist.NaviBar
 						.Append(Node.GetLineSpan().Length + 1);
 				}
 				_Bar.ShowMenu(this, _Menu);
-				_FilterBox?.FocusTextBox();
+				_FilterBox?.FocusFilterBox();
 			}
 
 			async Task CreateMenuForTypeSymbolNodeAsync(CancellationToken cancellationToken) {
@@ -714,6 +714,7 @@ namespace Codist.NaviBar
 				await _Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
 				if (sm != _Bar._SemanticContext.SemanticModel) {
 					_Menu.Clear();
+					_Symbol = null;
 					Node = _Bar._SemanticContext.RelocateDeclarationNode(Node);
 					await AddItemsAsync(Node, cancellationToken);
 					_Menu.RefreshItemsSource(true);
@@ -722,7 +723,7 @@ namespace Codist.NaviBar
 				// select node item which contains caret
 				var pos = _Bar.View.GetCaretPosition();
 				foreach (var item in _Menu.Symbols) {
-					if (item.Type != SymbolUsageKind.Container) {
+					if (item.Usage != SymbolUsageKind.Container) {
 						if (item.IsExternal || cancellationToken.IsCancellationRequested
 							|| item.SelectIfContainsPosition(pos)) {
 							break;
@@ -746,7 +747,7 @@ namespace Codist.NaviBar
 					var i = _Menu.Add(partial);
 					i.Location = item.SyntaxTree.GetLocation(item.Span);
 					i.Content.Text = System.IO.Path.GetFileName(item.SyntaxTree.FilePath);
-					i.Type = SymbolUsageKind.Container;
+					i.Usage = SymbolUsageKind.Container;
 					AddMemberDeclarations(partial, true);
 					++c;
 				}
@@ -802,7 +803,7 @@ namespace Codist.NaviBar
 					else {
 						var i = _Menu.Add(child);
 						if (isExternal) {
-							i.Type = SymbolUsageKind.External;
+							i.Usage = SymbolUsageKind.External;
 						}
 						if (selected == false && i.SelectIfContainsPosition(pos)) {
 							selected = true;
@@ -833,7 +834,7 @@ namespace Codist.NaviBar
 				item.Hint = "#region";
 				item.Content = SetHeader(d, false, false, false);
 				if (isExternal) {
-					item.Type = SymbolUsageKind.External;
+					item.Usage = SymbolUsageKind.External;
 				}
 			}
 
@@ -841,7 +842,7 @@ namespace Codist.NaviBar
 				foreach (var item in fields) {
 					var i = _Menu.Add(item);
 					if (isExternal) {
-						i.Type = SymbolUsageKind.External;
+						i.Usage = SymbolUsageKind.External;
 					}
 					i.SelectIfContainsPosition(pos);
 					ShowNodeValue(i);

@@ -279,7 +279,7 @@ namespace Codist.Controls
 				var i = m.Menu.Add(s, false);
 				i.Location = occurance.FirstOrDefault().Item2.Location;
 				foreach (var item in occurance) {
-					i.Type |= item.Item1;
+					i.Usage |= item.Item1;
 				}
 				if (s.ContainingType != containerType) {
 					i.Hint = (s.ContainingType ?? s).ToDisplayString(WpfHelper.MemberNameFormat);
@@ -463,7 +463,7 @@ namespace Codist.Controls
 			if (symbol.IsStatic) {
 				AddIcon(ref icons, KnownImageIds.Link);
 			}
-			var t = symbolItem.Type;
+			var t = symbolItem.Usage;
 			if (t != SymbolUsageKind.Normal) {
 				if (t.MatchFlags(SymbolUsageKind.Write)) {
 					AddIcon(ref icons, KnownImageIds.Writeable);
@@ -485,7 +485,7 @@ namespace Codist.Controls
 				else if (t.MatchFlags(SymbolUsageKind.TypeParameter)) {
 					AddIcon(ref icons, KnownImageIds.CPPMarkupXML);
 				}
-				else if (t.MatchFlags(SymbolUsageKind.Read)) {
+				else if (t.MatchFlags(SymbolUsageKind.Delegate)) {
 					AddIcon(ref icons, KnownImageIds.InputParameter);
 				}
 			}
@@ -508,7 +508,7 @@ namespace Codist.Controls
 			foreach (var item in members) {
 				if (groupByType && item.ContainingType != containingType) {
 					m.Menu.Add((ISymbol)(containingType = item.ContainingType) ?? item.ContainingNamespace, false)
-						.Type = SymbolUsageKind.Container;
+						.Usage = SymbolUsageKind.Container;
 					if (containingType?.TypeKind == TypeKind.Delegate) {
 						continue; // skip Invoke method in Delegates, for results from FindMethodBySignature
 					}
@@ -621,7 +621,7 @@ namespace Codist.Controls
 		public void Show() {
 			ShowMenu();
 			UpdateNumbers();
-			FilterBox.FocusTextBox();
+			FilterBox.FocusFilterBox();
 		}
 
 		void ShowMenu() {
@@ -647,7 +647,7 @@ namespace Codist.Controls
 			//Canvas.SetTop(Menu, point.Y);
 		}
 		void UpdateNumbers() {
-			FilterBox.UpdateNumbers(Menu.Symbols.Select(i => i.Symbol));
+			FilterBox.UpdateNumbers(Menu.Symbols);
 		}
 
 		void MenuItemSelect(object sender, MouseButtonEventArgs e) {
