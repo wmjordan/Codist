@@ -762,6 +762,7 @@ namespace Codist
 				case SyntaxKind.AliasQualifiedName: return (expression as AliasQualifiedNameSyntax).Name.Identifier.Text;
 				case SyntaxKind.SimpleMemberAccessExpression: return (expression as MemberAccessExpressionSyntax).Name.Identifier.Text;
 				case SyntaxKind.PointerMemberAccessExpression:
+					return ((MemberAccessExpressionSyntax)expression).Name.Identifier.Text;
 				case SyntaxKind.MemberBindingExpression: return (expression as MemberBindingExpressionSyntax).Name.Identifier.Text;
 				case SyntaxKind.CastExpression:
 					return (expression as CastExpressionSyntax).Type.GetExpressionSignature();

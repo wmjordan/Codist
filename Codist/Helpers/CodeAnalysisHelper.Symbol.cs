@@ -162,6 +162,9 @@ namespace Codist
 			while (t.Kind == SymbolKind.ArrayType) {
 				t = ((IArrayTypeSymbol)t).ElementType;
 			}
+			if (t.Kind == SymbolKind.PointerType) {
+				t = ((IPointerTypeSymbol)t).PointedAtType;
+			}
 			return t;
 		}
 
