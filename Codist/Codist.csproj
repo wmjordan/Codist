@@ -89,7 +89,7 @@
     </Compile>
     <Compile Include="Options\SyntaxHighlightCustomizationWindow.cs" />
     <Compile Include="QuickInfo\CSharpOpCodeQuickInfo.cs" />
-    <Compile Include="SyntaxHighlight\TransientClassificationTagHolder.cs" />
+    <Compile Include="Taggers\TransientClassificationTagHolder.cs" />
     <Compile Include="Taggers\Classifications.cs" />
     <Compile Include="Taggers\CommentFormats.cs" />
     <Compile Include="Taggers\CustomTagger.cs" />

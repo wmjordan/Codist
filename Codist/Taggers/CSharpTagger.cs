@@ -159,6 +159,10 @@ namespace Codist.Taggers
 								case SyntaxKind.AsExpression:
 								case SyntaxKind.RefExpression:
 								case SyntaxKind.RefType:
+								case SyntaxKind.CheckedExpression:
+								case SyntaxKind.CheckedStatement:
+								case SyntaxKind.UncheckedExpression:
+								case SyntaxKind.UncheckedStatement:
 									yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.TypeCastKeyword);
 									break;
 								case SyntaxKind.Argument:
@@ -308,6 +312,9 @@ namespace Codist.Taggers
 					case SyntaxKind.TupleExpression:
 					case SyntaxKind.TupleType:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
+					case SyntaxKind.CheckedExpression:
+					case SyntaxKind.UncheckedExpression:
+						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.TypeCast);
 				}
 				if (HighlightOptions.MemberBraceTags.Constructor != null) {
 					// SpecialHighlightOptions.ParameterBrace or SpecialHighlightOptions.SpecialPunctuation is ON
@@ -398,6 +405,9 @@ namespace Codist.Taggers
 				case SyntaxKind.CatchFilterClause:
 				case SyntaxKind.FinallyClause:
 					return keyword.Resource;
+				case SyntaxKind.CheckedStatement:
+				case SyntaxKind.UncheckedStatement:
+					return keyword.TypeCast;
 			}
 			return null;
 		}
@@ -610,9 +620,9 @@ namespace Codist.Taggers
 				AllParentheses = o.HasAnyFlag(SpecialHighlightOptions.AllParentheses);
 				var sp = o.MatchFlags(SpecialHighlightOptions.SpecialPunctuation);
 				if (sp) {
-					KeywordBraceTags = TransientKeywordTagHolder.StrongBraces.Clone();
-					MemberBraceTags = TransientMemberTagHolder.StrongBraces.Clone();
-					MemberDeclarationBraceTags = TransientMemberTagHolder.StrongDeclarationBraces.Clone();
+					KeywordBraceTags = TransientKeywordTagHolder.BoldBraces.Clone();
+					MemberBraceTags = TransientMemberTagHolder.BoldBraces.Clone();
+					MemberDeclarationBraceTags = TransientMemberTagHolder.BoldDeclarationBraces.Clone();
 				}
 				else {
 					KeywordBraceTags = TransientKeywordTagHolder.Default.Clone();
@@ -620,20 +630,20 @@ namespace Codist.Taggers
 					MemberDeclarationBraceTags = TransientMemberTagHolder.DeclarationBraces.Clone();
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.BranchBrace) == false) {
-					KeywordBraceTags.Branching = sp ? ClassificationTagHelper.StrongBraceTag : null;
+					KeywordBraceTags.Branching = sp ? ClassificationTagHelper.BoldBraceTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.CastBrace) == false) {
-					KeywordBraceTags.TypeCast = sp ? ClassificationTagHelper.StrongBraceTag : null;
+					KeywordBraceTags.TypeCast = sp ? ClassificationTagHelper.BoldBraceTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.LoopBrace) == false) {
-					KeywordBraceTags.Loop = sp ? ClassificationTagHelper.StrongBraceTag : null;
+					KeywordBraceTags.Loop = sp ? ClassificationTagHelper.BoldBraceTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.ResourceBrace) == false) {
-					KeywordBraceTags.Resource = sp ? ClassificationTagHelper.StrongBraceTag : null;
+					KeywordBraceTags.Resource = sp ? ClassificationTagHelper.BoldBraceTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.ParameterBrace) == false) {
-					MemberBraceTags.Constructor = sp ? ClassificationTagHelper.StrongBraceTag : null;
-					MemberBraceTags.Method = sp ? ClassificationTagHelper.StrongBraceTag : null;
+					MemberBraceTags.Constructor = sp ? ClassificationTagHelper.BoldBraceTag : null;
+					MemberBraceTags.Method = sp ? ClassificationTagHelper.BoldBraceTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.DeclarationBrace) == false) {
 					MemberDeclarationBraceTags.Class
@@ -647,7 +657,7 @@ namespace Codist.Taggers
 						= MemberDeclarationBraceTags.Namespace
 						= MemberDeclarationBraceTags.Property
 						= MemberDeclarationBraceTags.Struct
-						= sp ? ClassificationTagHelper.StrongDeclarationBraceTag : ClassificationTagHelper.DeclarationBraceTag;
+						= sp ? ClassificationTagHelper.BoldDeclarationBraceTag : ClassificationTagHelper.DeclarationBraceTag;
 				}
 				LocalFunctionDeclaration = o.MatchFlags(SpecialHighlightOptions.LocalFunctionDeclaration);
 				NonPrivateField = o.MatchFlags(SpecialHighlightOptions.NonPrivateField);

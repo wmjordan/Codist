@@ -201,7 +201,7 @@ namespace Codist.Taggers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodePunctuation)]
-		[Name(Constants.CodeSpecialPunctuation)]
+		[Name(Constants.CodeBoldBrace)]
 		static ClassificationTypeDefinition SpecialPunctuation;
 
 		[Export(typeof(ClassificationTypeDefinition))]

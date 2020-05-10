@@ -200,7 +200,7 @@ namespace Codist.SyntaxHighlight
 				}
 				AddSelfAndBase(d, i);
 			}
-			AddSelfAndBase(d, cts.GetClassificationType(Constants.CodeSpecialPunctuation));
+			AddSelfAndBase(d, cts.GetClassificationType(Constants.CodeBoldBrace));
 			return d;
 
 			void AddSelfAndBase(Dictionary<IClassificationType, List<IClassificationType>> store, IClassificationType type) {

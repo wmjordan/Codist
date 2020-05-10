@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using Codist.Taggers;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Tagging;
 
-namespace Codist.SyntaxHighlight
+namespace Codist.Taggers
 {
 	sealed class TransientMemberTagHolder
 	{
@@ -35,9 +34,9 @@ namespace Codist.SyntaxHighlight
 
 		public static readonly TransientMemberTagHolder DeclarationBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.DeclarationBrace)));
 
-		public static readonly TransientMemberTagHolder StrongDeclarationBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.StrongBrace, ClassificationTagHelper.DeclarationBrace)));
+		public static readonly TransientMemberTagHolder BoldDeclarationBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.BoldBrace, ClassificationTagHelper.DeclarationBrace)));
 
-		public static readonly TransientMemberTagHolder StrongBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.StrongBrace)));
+		public static readonly TransientMemberTagHolder BoldBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.BoldBrace)));
 
 		public TransientMemberTagHolder Clone() {
 			return (TransientMemberTagHolder)MemberwiseClone();
@@ -57,7 +56,7 @@ namespace Codist.SyntaxHighlight
 
 		public static readonly TransientKeywordTagHolder Default = ClassificationTagHelper.InitFields<TransientKeywordTagHolder>((s, t) => new ClassificationTag(t));
 
-		public static readonly TransientKeywordTagHolder StrongBraces = ClassificationTagHelper.InitFields<TransientKeywordTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.StrongBrace)));
+		public static readonly TransientKeywordTagHolder BoldBraces = ClassificationTagHelper.InitFields<TransientKeywordTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.BoldBrace)));
 
 		public TransientKeywordTagHolder Clone() {
 			return (TransientKeywordTagHolder)MemberwiseClone();
@@ -67,12 +66,12 @@ namespace Codist.SyntaxHighlight
 	static class ClassificationTagHelper
 	{
 		public static readonly IClassificationType DeclarationBrace = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CSharpDeclarationBrace);
-		public static readonly IClassificationType StrongBrace = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeSpecialPunctuation);
-		public static readonly IClassificationType StrongDeclarationBrace = ServicesHelper.Instance.ClassificationTypeRegistry.CreateTransientClassificationType(DeclarationBrace, StrongBrace);
+		public static readonly IClassificationType BoldBrace = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBoldBrace);
+		public static readonly IClassificationType BoldDeclarationBrace = ServicesHelper.Instance.ClassificationTypeRegistry.CreateTransientClassificationType(DeclarationBrace, BoldBrace);
 
 		public static readonly ClassificationTag DeclarationBraceTag = new ClassificationTag(DeclarationBrace);
-		public static readonly ClassificationTag StrongBraceTag = new ClassificationTag(StrongBrace);
-		public static readonly ClassificationTag StrongDeclarationBraceTag = new ClassificationTag(StrongDeclarationBrace);
+		public static readonly ClassificationTag BoldBraceTag = new ClassificationTag(BoldBrace);
+		public static readonly ClassificationTag BoldDeclarationBraceTag = new ClassificationTag(BoldDeclarationBrace);
 
 		public static T InitFields<T>(Func<IClassificationTypeRegistryService, IClassificationType, ClassificationTag> tagBuilder)
 			where T : class, new() {

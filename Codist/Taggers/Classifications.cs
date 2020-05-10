@@ -138,7 +138,7 @@ namespace Codist.Taggers
 			TypeCastKeyword = registry.GetClassificationTag(Constants.CSharpTypeCastKeyword);
 			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
 			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
-			StrongBrace = registry.GetClassificationTag(Constants.CodeSpecialPunctuation);
+			StrongBrace = registry.GetClassificationTag(Constants.CodeBoldBrace);
 		}
 
 		public ClassificationTag BranchingKeyword { get; }

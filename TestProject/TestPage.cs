@@ -68,9 +68,9 @@ text".Log(); // multiline string (string verbatim)
 		}
 
 		protected override int Property { get; set; } = 1;
-		public int PropertyAddOne => Property + 1;
+		public int PropertyAddOne => unchecked(Property + 1);
 
-		public new void Method() { Property--; }
+		public new void Method() { checked { Property--; } }
 
 		/// <typeparam name="TGeneric">Any type</typeparam>
 		public void Method<TGeneric>() { //type parameter
