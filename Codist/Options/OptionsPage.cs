@@ -205,6 +205,10 @@ namespace Codist.Options
 					}
 					try {
 						Config.LoadConfig(d.FileName);
+						if (Version.TryParse(Config.Instance.Version, out var newVersion)
+							&& newVersion > Version.Parse(Config.CurrentVersion)) {
+							MessageBox.Show("The loaded version is created by a newer version of " + nameof(Codist) + ". Some items may not be correctly loaded.", nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Information);
+						}
 						System.IO.File.Copy(d.FileName, Config.ConfigPath, true);
 					}
 					catch (Exception ex) {
