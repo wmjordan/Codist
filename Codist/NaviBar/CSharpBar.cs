@@ -862,6 +862,7 @@ namespace Codist.NaviBar
 						foreach (var modifier in m.Modifiers) {
 							switch (modifier.Kind()) {
 								case SyntaxKind.AsyncKeyword: AddIcon(ref icons, KnownImageIds.DynamicGroup); break;
+								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, KnownImageIds.DialogTemplate); break;
 								case SyntaxKind.StaticKeyword:
 									if (isExt == false)
 										AddIcon(ref icons, KnownImageIds.Link);
@@ -873,6 +874,7 @@ namespace Codist.NaviBar
 						foreach (var modifier in p.Modifiers) {
 							switch (modifier.Kind()) {
 								case SyntaxKind.StaticKeyword: AddIcon(ref icons, KnownImageIds.Link); break;
+								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, KnownImageIds.DialogTemplate); break;
 							}
 						}
 						break;
@@ -880,7 +882,7 @@ namespace Codist.NaviBar
 						foreach (var modifier in f.Modifiers) {
 							switch (modifier.Kind()) {
 								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, KnownImageIds.EncapsulateField); break;
-								case SyntaxKind.VolatileKeyword: AddIcon(ref icons, KnownImageIds.ModifyField); break;
+								case SyntaxKind.VolatileKeyword: AddIcon(ref icons, KnownImageIds.SetField); break;
 								case SyntaxKind.StaticKeyword: AddIcon(ref icons, KnownImageIds.Link); break;
 							}
 						}

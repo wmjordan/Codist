@@ -285,7 +285,7 @@ namespace Codist.Controls
 					i.Hint = (s.ContainingType ?? s).ToDisplayString(WpfHelper.MemberNameFormat);
 				}
 			}
-			m.Menu.ExtIconProvider = GetExtIcons;
+			m.Menu.ExtIconProvider = ExtIconProvider.Default.GetExtIconsWithUsage;
 			m.Show();
 		}
 
@@ -333,7 +333,18 @@ namespace Codist.Controls
 			var m = new SymbolMenu(context, symbol.Kind == SymbolKind.Namespace ? SymbolListType.TypeList : SymbolListType.None);
 			var (count, inherited) = m.Menu.AddSymbolMembers(symbol);
 			if (m.Menu.IconProvider == null) {
-				m.Menu.ExtIconProvider = GetExtIcons;
+				if (symbol.Kind == SymbolKind.NamedType) {
+					switch (((INamedTypeSymbol)symbol).TypeKind) {
+						case TypeKind.Interface:
+							m.Menu.ExtIconProvider = ExtIconProvider.InterfaceMembers.GetExtIcons; break;
+						case TypeKind.Class:
+						case TypeKind.Struct:
+							m.Menu.ExtIconProvider = ExtIconProvider.Default.GetExtIcons; break;
+					}
+				}
+				else {
+					m.Menu.ExtIconProvider = ExtIconProvider.Default.GetExtIcons;
+				}
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(WpfHelper.MemberNameFormat), true)
@@ -415,89 +426,6 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		static StackPanel GetExtIcons(SymbolItem symbolItem) {
-			var symbol = symbolItem.Symbol;
-			StackPanel icons = null;
-			switch (symbol.Kind) {
-				case SymbolKind.Method:
-					var ms = symbol as IMethodSymbol;
-					if (ms.IsAsync || ms.ReturnType.IsAwaitable()) {
-						AddIcon(ref icons, KnownImageIds.DynamicGroup);
-					}
-					if (ms.IsGenericMethod) {
-						AddIcon(ref icons, KnownImageIds.MarkupXML);
-					}
-					if (ms.IsExtensionMethod) {
-						AddIcon(ref icons, KnownImageIds.ExtensionMethod);
-					}
-					break;
-				case SymbolKind.NamedType:
-					var mt = symbol as INamedTypeSymbol;
-					if (mt.IsGenericType) {
-						AddIcon(ref icons, KnownImageIds.MarkupXML);
-					}
-					if (mt.TypeKind == TypeKind.Class) {
-						if (mt.IsSealed && mt.IsStatic == false) {
-							AddIcon(ref icons, KnownImageIds.ClassSealed);
-						}
-						else if (mt.IsAbstract) {
-							AddIcon(ref icons, KnownImageIds.AbstractClass);
-						}
-					}
-					break;
-				case SymbolKind.Field:
-					var f = symbol as IFieldSymbol;
-					if (f.IsConst) {
-						return null;
-					}
-					if (f.IsReadOnly) {
-						AddIcon(ref icons, KnownImageIds.EncapsulateField);
-					}
-					else if (f.IsVolatile) {
-						AddIcon(ref icons, KnownImageIds.ModifyField);
-					}
-					break;
-				case SymbolKind.Namespace:
-					return null;
-			}
-			if (symbol.IsStatic) {
-				AddIcon(ref icons, KnownImageIds.Link);
-			}
-			var t = symbolItem.Usage;
-			if (t != SymbolUsageKind.Normal) {
-				if (t.MatchFlags(SymbolUsageKind.Write)) {
-					AddIcon(ref icons, KnownImageIds.Writeable);
-				}
-				else if (t.MatchFlags(SymbolUsageKind.Catch)) {
-					AddIcon(ref icons, KnownImageIds.TryCatch);
-				}
-				else if (t.HasAnyFlag(SymbolUsageKind.Attach | SymbolUsageKind.Detach)) {
-					if (t.MatchFlags(SymbolUsageKind.Attach)) {
-						AddIcon(ref icons, KnownImageIds.AddEvent);
-					}
-					if (t.MatchFlags(SymbolUsageKind.Detach)) {
-						AddIcon(ref icons, KnownImageIds.EventMissing);
-					}
-				}
-				else if (t.MatchFlags(SymbolUsageKind.TypeCast)) {
-					AddIcon(ref icons, KnownImageIds.ReportingAction);
-				}
-				else if (t.MatchFlags(SymbolUsageKind.TypeParameter)) {
-					AddIcon(ref icons, KnownImageIds.CPPMarkupXML);
-				}
-				else if (t.MatchFlags(SymbolUsageKind.Delegate)) {
-					AddIcon(ref icons, KnownImageIds.InputParameter);
-				}
-			}
-			return icons;
-
-			void AddIcon(ref StackPanel container, int imageId) {
-				if (container == null) {
-					container = new StackPanel { Orientation = Orientation.Horizontal };
-				}
-				container.Children.Add(ThemeHelper.GetImage(imageId));
-			}
-		}
 		static void ShowSymbolMenuForResult<TSymbol>(ISymbol source, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType) where TSymbol : ISymbol {
 			members.Sort(CodeAnalysisHelper.CompareSymbol);
 			var m = new SymbolMenu(context);
@@ -515,7 +443,7 @@ namespace Codist.Controls
 				}
 				m.Menu.Add(item, false);
 			}
-			m.Menu.ExtIconProvider = GetExtIcons;
+			m.Menu.ExtIconProvider = ExtIconProvider.Default.GetExtIcons;
 			m.Show();
 		}
 
@@ -568,6 +496,139 @@ namespace Codist.Controls
 
 			public abstract bool QueryStatus();
 			public abstract void Execute();
+		}
+
+		sealed class ExtIconProvider
+		{
+			public ExtIconProvider(bool containerIsInterface) {
+				_ContainerIsInterface = containerIsInterface;
+			}
+			public static readonly ExtIconProvider Default = new ExtIconProvider(false);
+			public static readonly ExtIconProvider InterfaceMembers = new ExtIconProvider(true);
+			readonly bool _ContainerIsInterface;
+
+			public StackPanel GetExtIcons(SymbolItem symbolItem) {
+				return GetSpecialSymbolIcon(symbolItem.Symbol);
+			}
+
+			public StackPanel GetExtIconsWithUsage(SymbolItem symbolItem) {
+				var icons = GetSpecialSymbolIcon(symbolItem.Symbol);
+				if (icons != null && symbolItem.Usage != SymbolUsageKind.Normal) {
+					AddSymbolUsageIcons(ref icons, symbolItem.Usage);
+				}
+				return icons;
+			}
+
+			StackPanel GetSpecialSymbolIcon(ISymbol symbol) {
+				StackPanel icons = null;
+				switch (symbol.Kind) {
+					case SymbolKind.Method:
+						var ms = symbol as IMethodSymbol;
+						if (ms.IsAsync || ms.ReturnType.IsAwaitable()) {
+							AddIcon(ref icons, KnownImageIds.DynamicGroup);
+						}
+						if (ms.IsGenericMethod) {
+							AddIcon(ref icons, KnownImageIds.MarkupXML);
+						}
+						if (_ContainerIsInterface == false) {
+							if (ms.IsAbstract) {
+								AddIcon(ref icons, KnownImageIds.DialogTemplate);
+							}
+							else if (ms.IsSealed) {
+								AddIcon(ref icons, KnownImageIds.MethodSealed);
+							}
+							else if (ms.IsExtensionMethod) {
+								AddIcon(ref icons, KnownImageIds.ExtensionMethod);
+							}
+						}
+						break;
+					case SymbolKind.NamedType:
+						var type = symbol as INamedTypeSymbol;
+						if (type.IsGenericType) {
+							AddIcon(ref icons, KnownImageIds.MarkupXML);
+						}
+						if (type.TypeKind == TypeKind.Class) {
+							if (type.IsSealed && type.IsStatic == false) {
+								AddIcon(ref icons, KnownImageIds.ClassSealed);
+							}
+							else if (type.IsAbstract) {
+								AddIcon(ref icons, KnownImageIds.AbstractClass);
+							}
+						}
+						break;
+					case SymbolKind.Field:
+						var f = symbol as IFieldSymbol;
+						if (f.IsConst) {
+							return null;
+						}
+						if (f.IsReadOnly) {
+							AddIcon(ref icons, KnownImageIds.DialogTemplate);
+						}
+						else if (f.IsVolatile) {
+							AddIcon(ref icons, KnownImageIds.SetField);
+						}
+						break;
+					case SymbolKind.Event:
+						if (_ContainerIsInterface == false) {
+							if (symbol.IsAbstract) {
+								AddIcon(ref icons, KnownImageIds.DialogTemplate);
+							}
+							else if (symbol.IsSealed) {
+								AddIcon(ref icons, KnownImageIds.EventSealed);
+							}
+						}
+						break;
+					case SymbolKind.Property:
+						if (_ContainerIsInterface == false) {
+							if (symbol.IsAbstract) {
+								AddIcon(ref icons, KnownImageIds.DialogTemplate);
+							}
+							else if (symbol.IsSealed) {
+								AddIcon(ref icons, KnownImageIds.PropertySealed);
+							}
+						}
+						break;
+					case SymbolKind.Namespace:
+						return null;
+				}
+				if (symbol.IsStatic) {
+					AddIcon(ref icons, KnownImageIds.Link);
+				}
+				return icons;
+			}
+
+			static void AddSymbolUsageIcons(ref StackPanel icons, SymbolUsageKind usage) {
+				if (usage.MatchFlags(SymbolUsageKind.Write)) {
+					AddIcon(ref icons, KnownImageIds.Writeable);
+				}
+				else if (usage.MatchFlags(SymbolUsageKind.Catch)) {
+					AddIcon(ref icons, KnownImageIds.TryCatch);
+				}
+				else if (usage.HasAnyFlag(SymbolUsageKind.Attach | SymbolUsageKind.Detach)) {
+					if (usage.MatchFlags(SymbolUsageKind.Attach)) {
+						AddIcon(ref icons, KnownImageIds.AddEvent);
+					}
+					if (usage.MatchFlags(SymbolUsageKind.Detach)) {
+						AddIcon(ref icons, KnownImageIds.EventMissing);
+					}
+				}
+				else if (usage.MatchFlags(SymbolUsageKind.TypeCast)) {
+					AddIcon(ref icons, KnownImageIds.ReportingAction);
+				}
+				else if (usage.MatchFlags(SymbolUsageKind.TypeParameter)) {
+					AddIcon(ref icons, KnownImageIds.CPPMarkupXML);
+				}
+				else if (usage.MatchFlags(SymbolUsageKind.Delegate)) {
+					AddIcon(ref icons, KnownImageIds.InputParameter);
+				}
+			}
+
+			static void AddIcon(ref StackPanel container, int imageId) {
+				if (container == null) {
+					container = new StackPanel { Orientation = Orientation.Horizontal };
+				}
+				container.Children.Add(ThemeHelper.GetImage(imageId));
+			}
 		}
 	}
 
