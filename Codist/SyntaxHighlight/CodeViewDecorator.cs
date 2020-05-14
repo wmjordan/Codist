@@ -54,14 +54,14 @@ namespace Codist.SyntaxHighlight
 					Decorate(new[] { ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(t) }, true);
 				}
 				else {
-					Decorate(FormatStore.ClassificationTypeStore.Keys, false);
+					Decorate(_ClassificationFormatMap.CurrentPriorityOrder, false);
 				}
 			}
 		}
 
 		void FormatUpdated(object sender, FormatItemsEventArgs e) {
 			if (_IsDecorating == 0 && _TextView.VisualElement.IsVisible && e.ChangedItems.Count > 0) {
-				Decorate(e.ChangedItems.Select(_RegService.GetClassificationType), false);
+				Decorate(e.ChangedItems.Select(_RegService.GetClassificationType), true);
 			}
 		}
 

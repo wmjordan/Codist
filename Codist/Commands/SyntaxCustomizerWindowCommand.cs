@@ -70,12 +70,14 @@ namespace Codist.Commands
 				var b = _Window.RestoreBounds;
 				var s = _Window.WindowState;
 				_Window.Close();
-				CreateWindow(TextEditorHelper.GetActiveWpfDocumentView());
-				_Window.Top = b.Top;
-				_Window.Left = b.Left;
-				_Window.Width = b.Width;
-				_Window.Height = b.Height;
-				_Window.WindowState = s;
+				if (_Window.IsClosing == false) {
+					CreateWindow(TextEditorHelper.GetActiveWpfDocumentView());
+					_Window.Top = b.Top;
+					_Window.Left = b.Left;
+					_Window.Width = b.Width;
+					_Window.Height = b.Height;
+					_Window.WindowState = s;
+				}
 				_Window.Show();
 			}
 		}

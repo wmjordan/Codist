@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="5.5.0.5144" Language="en-US" Publisher="WMJ" />
+    <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="5.6.0.5644" Language="en-US" Publisher="WMJ" />
     <DisplayName>Codist</DisplayName>
-    <Description xml:space="preserve">A productivity enhancer for C# programmers with advanced syntax highlight, Super Quick Info (code tooltip), Smart Bar (contextual toolbar), Navigation Bar, code structure markers on scrollbar, comment tagger, and more.</Description>
+    <Description xml:space="preserve">A productivity booster for C# programmers which enhances syntax highlighting, quick info (tooltip), navigation bar, scrollbar, display quality and brings smart tool bar to code editor.</Description>
     <MoreInfo>https://github.com/wmjordan/Codist</MoreInfo>
     <License>license.txt</License>
     <ReleaseNotes>https://github.com/wmjordan/Codist/releases</ReleaseNotes>

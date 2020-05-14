@@ -21,30 +21,28 @@ namespace Codist.Commands
 			_ServiceProvider = serviceProvider;
 		}
 
-		public bool ShowAfterUpdate() {
+		public bool Show(InitStatus status) {
 			if (TryGetInfoBarHost(out var host)) {
-				return ShowInfoBar(host, new InfoBarModel(
-					new[] {
-						new InfoBarTextSpan(nameof(Codist) + " has been updated to " + Config.CurrentVersion + ". "),
-						new InfoBarHyperlink("Click to see what's new", "New"),
-						new InfoBarTextSpan(" or "),
-						new InfoBarHyperlink("dismiss this notification", "Close")
-					},
-					KnownMonikers.StatusInformation));
-			}
-			return false;
-		}
-
-		public bool ShowAfterFirstRun() {
-			if (TryGetInfoBarHost(out var host)) {
-				return ShowInfoBar(host, new InfoBarModel(
-					new[] {
-						new InfoBarTextSpan(nameof(Codist) + " is run on your Visual Studio for the first time. "),
-						new InfoBarHyperlink("Click to learn more", "More"),
-						new InfoBarTextSpan(" or "),
-						new InfoBarHyperlink("dismiss this bar", "Close"),
-					},
-					KnownMonikers.StatusInformation));
+				switch (status) {
+					case InitStatus.Upgraded:
+						return ShowInfoBar(host, new InfoBarModel(
+							new[] {
+								new InfoBarTextSpan(nameof(Codist) + " has been upgraded to " + Config.CurrentVersion + ". Click here to "),
+								new InfoBarHyperlink("see what's new", "New"),
+								new InfoBarTextSpan(" or "),
+								new InfoBarHyperlink("dismiss this notification", "Close")
+							},
+							KnownMonikers.StatusInformation));
+					case InitStatus.FirstLoad:
+						return ShowInfoBar(host, new InfoBarModel(
+							new[] {
+								new InfoBarTextSpan(nameof(Codist) + " is run on your Visual Studio for the first time. Click here to "),
+								new InfoBarHyperlink("learn more", "More"),
+								new InfoBarTextSpan(" or "),
+								new InfoBarHyperlink("dismiss this notification", "Close"),
+							},
+							KnownMonikers.StatusInformation));
+				}
 			}
 			return false;
 		}

@@ -143,14 +143,9 @@ namespace Codist
 			Commands.GetContentTypeCommand.Initialize();
 			Commands.IncrementVsixVersionCommand.Initialize();
 			Commands.NaviBarSearchDeclarationCommand.Initialize();
-			switch (Config.Instance.InitStatus) {
-				case InitStatus.FirstLoad:
-					new Commands.VersionInfoBar(this).ShowAfterFirstRun();
-					break;
-				case InitStatus.Upgraded:
-					if (new Commands.VersionInfoBar(this).ShowAfterUpdate()) {
-					}
-					break;
+			if (Config.Instance.InitStatus != InitStatus.Normal) {
+				Config.Instance.SaveConfig(Config.ConfigPath); // save the file to prevent this notification from reoccurrence
+				new Commands.VersionInfoBar(this).Show(Config.Instance.InitStatus);
 			}
 			Commands.SyntaxCustomizerWindowCommand.Initialize();
 		}

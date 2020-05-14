@@ -159,6 +159,19 @@ namespace Codist.SyntaxHighlight
 			InitStyleClassificationCache<MarkdownStyleTypes, MarkdownStyle>(cache, service, Config.Instance.MarkdownStyles);
 			InitStyleClassificationCache<XmlStyleTypes, XmlCodeStyle>(cache, service, Config.Instance.XmlCodeStyles);
 			InitStyleClassificationCache<SymbolMarkerStyleTypes, SymbolMarkerStyle>(cache, service, Config.Instance.SymbolMarkerStyles);
+			var styles = Config.Instance.Styles;
+			if (styles != null) {
+				foreach (var item in styles) {
+					if (item == null || String.IsNullOrEmpty(item.ClassificationType)) {
+						continue;
+					}
+					var c = service.GetClassificationType(item.ClassificationType);
+					if (c != null) {
+						cache[item.ClassificationType] = item;
+					}
+				}
+				Config.Instance.Styles = null;
+			}
 			UpdateIdentifySymbolSource(cache);
 		}
 

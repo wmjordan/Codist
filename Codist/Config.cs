@@ -16,7 +16,7 @@ namespace Codist
 {
 	sealed class Config
 	{
-		internal const string CurrentVersion = "5.5";
+		internal const string CurrentVersion = "5.6";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
 		internal const string LightTheme = ThemePrefix + "Light", DarkTheme = ThemePrefix + "Dark", SimpleTheme = ThemePrefix + "Simple";
@@ -79,17 +79,15 @@ namespace Codist
 		public List<MarkdownStyle> MarkdownStyles { get; } = new List<MarkdownStyle>();
 		public List<CodeStyle> GeneralStyles { get; } = new List<CodeStyle>();
 		public List<SymbolMarkerStyle> SymbolMarkerStyles { get; } = new List<SymbolMarkerStyle>();
-		//public bool ShouldSerializeCommentStyles() => false;
-		//public bool ShouldSerializeXmlCodeStyles() => false;
-		//public bool ShouldSerializeCodeStyles() => false;
-		//public bool ShouldSerializeCppStyles() => false;
-		//public bool ShouldSerializeMarkdownStyles() => false;
-		//public bool ShouldSerializeGeneralStyles() => false;
-		//public bool ShouldSerializeSymbolMarkerStyles() => false;
+		public bool ShouldSerializeCommentStyles() => false;
+		public bool ShouldSerializeXmlCodeStyles() => false;
+		public bool ShouldSerializeCodeStyles() => false;
+		public bool ShouldSerializeCppStyles() => false;
+		public bool ShouldSerializeMarkdownStyles() => false;
+		public bool ShouldSerializeGeneralStyles() => false;
+		public bool ShouldSerializeSymbolMarkerStyles() => false;
 		#endregion
-		//public IEnumerable<SyntaxStyle> Styles => FormatStore.GetStyles()
-		//	.Where(i => i.Value?.IsSet == true)
-		//	.Select(i => { var s = new SyntaxStyle(i.Key); i.Value.CopyTo(s); return s; });
+		public List<SyntaxStyle> Styles { get; set; } // for serialization only
 		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
 		public List<SearchEngine> SearchEngines { get; } = new List<SearchEngine>();
 		public string BrowserPath { get; set; }
@@ -103,8 +101,6 @@ namespace Codist
 			if (File.Exists(ConfigPath) == false) {
 				var config = GetDefaultConfig();
 				config.InitStatus = InitStatus.FirstLoad;
-				config.Version = CurrentVersion;
-				config.SaveConfig(ConfigPath);
 				return config;
 			}
 			try {
@@ -112,8 +108,6 @@ namespace Codist
 				if (System.Version.TryParse(config.Version, out var v) == false
 					|| v < System.Version.Parse(CurrentVersion)) {
 					config.InitStatus = InitStatus.Upgraded;
-					config.Version = CurrentVersion;
-					config.SaveConfig(ConfigPath);
 				}
 				return config;
 			}
@@ -130,10 +124,10 @@ namespace Codist
 			Debug.WriteLine("Load config: " + configPath);
 			try {
 				Instance = InternalLoadConfig(configPath, styleFilter);
-				Instance.Version = CurrentVersion;
 				//TextEditorHelper.ResetStyleCache();
 				Loaded?.Invoke(Instance, EventArgs.Empty);
 				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(styleFilter != StyleFilters.None ? Features.SyntaxHighlight : Features.All));
+				Instance._ConfigManager?.MarkVersioned();
 			}
 			catch(Exception ex) {
 				Debug.WriteLine(ex.ToString());
@@ -186,6 +180,7 @@ namespace Codist
 				ResetCodeStyle(Instance.MarkdownStyles, config.MarkdownStyles);
 				ResetCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
+				Instance.Styles = config.Styles;
 				_LastLoaded = DateTime.Now;
 				return Instance;
 			}
@@ -198,6 +193,7 @@ namespace Codist
 				MergeCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles, styleFilter);
 				//MergeCodeStyle(Instance.MarkerSettings, config.MarkerSettings, styleFilter);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
+				Instance.Styles = config.Styles;
 				_LastLoaded = DateTime.Now;
 				return Instance;
 			}
@@ -241,8 +237,20 @@ namespace Codist
 				if (Directory.Exists(d) == false) {
 					Directory.CreateDirectory(d);
 				}
+				object o;
+				if (stylesOnly) {
+					o = new {
+						Version = CurrentVersion,
+						Styles = GetCustomizedStyles()
+					};
+				}
+				else {
+					o = this;
+					Version = CurrentVersion;
+					Styles = GetCustomizedStyles().ToList();
+				}
 				File.WriteAllText(path, JsonConvert.SerializeObject(
-					stylesOnly ? (object)new StyleConfig(this)/*{ Version, Styles }*/ : this,
+					o,
 					Formatting.Indented,
 					new JsonSerializerSettings {
 						DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate,
@@ -251,11 +259,21 @@ namespace Codist
 					}));
 				if (path == ConfigPath) {
 					_LastSaved = _LastLoaded = DateTime.Now;
+					//_ConfigManager?.MarkVersioned();
 					Debug.WriteLine("Config saved");
 				}
 			}
 			catch (Exception ex) {
 				Debug.WriteLine(ex.ToString());
+			}
+			finally {
+				Styles = null;
+			}
+
+			IEnumerable<SyntaxStyle> GetCustomizedStyles() {
+				return FormatStore.GetStyles()
+					.Where(i => i.Value?.IsSet == true)
+					.Select(i => { var s = new SyntaxStyle(i.Key); i.Value.CopyTo(s); return s; });
 			}
 		}
 
@@ -270,6 +288,9 @@ namespace Codist
 				m.Quit(apply);
 			}
 		}
+		//internal void ResetUpdate() {
+		//	_ConfigManager?.MarkVersioned();
+		//}
 		internal void FireConfigChangedEvent(Features updatedFeature) {
 			Updated?.Invoke(this, new ConfigUpdatedEventArgs(updatedFeature));
 		}
@@ -456,13 +477,16 @@ namespace Codist
 			void MarkUpdated(object sender, ConfigUpdatedEventArgs e) {
 				++_version;
 			}
+			internal void MarkVersioned() {
+				_oldVersion = _version;
+			}
 			internal void Quit(bool apply) {
 				Updated -= MarkUpdated;
 				if (apply) {
 					if (_version != _oldVersion) {
 						Instance.SaveConfig(null);
+						_oldVersion = _version;
 					}
-					_oldVersion = _version;
 				}
 				else {
 					if (_version != _oldVersion) {

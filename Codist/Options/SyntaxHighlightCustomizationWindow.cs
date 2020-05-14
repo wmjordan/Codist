@@ -269,6 +269,7 @@ namespace Codist.Options
 		}
 
 		public bool IsClosing { get; private set; }
+		public bool IsReloading { get; private set; }
 		internal StyleBase ActiveStyle => _SelectedStyleButton?.StyleSettings;
 
 		#region List initializers
@@ -843,22 +844,6 @@ namespace Codist.Options
 			Owner.Activate();
 			_FormatMap.ClassificationFormatMappingChanged -= RefreshList;
 			base.OnClosed(e);
-		}
-		protected override void OnClosing(CancelEventArgs e) {
-			if (IsClosing == false && Config.Instance.IsChanged) {
-				IsClosing = true;
-				var r = MessageBox.Show("The configuration has been changed, do you want to save it?", nameof(Codist), MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-				switch (r) {
-					case MessageBoxResult.Yes:
-						Config.Instance.EndUpdate(true); break;
-					case MessageBoxResult.No:
-						Config.Instance.EndUpdate(false); break;
-					default:
-						IsClosing = false;
-						e.Cancel = true; break;
-				}
-			}
-			base.OnClosing(e);
 		}
 		void Ok() {
 			IsClosing = true;
