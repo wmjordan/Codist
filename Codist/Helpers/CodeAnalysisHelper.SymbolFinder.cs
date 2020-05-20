@@ -439,11 +439,10 @@ namespace Codist
 				//}
 				var a = n as AssignmentExpressionSyntax;
 				if (a != null && a.Right == node) {
-					if (a.IsKind(SyntaxKind.AddAssignmentExpression)) {
-						return SymbolUsageKind.Attach;
-					}
-					else if (a.IsKind(SyntaxKind.SubtractAssignmentExpression)) {
-						return SymbolUsageKind.Detach;
+					switch (a.Kind()) {
+						case SyntaxKind.AddAssignmentExpression: return SymbolUsageKind.Attach;
+						case SyntaxKind.SubtractAssignmentExpression: return SymbolUsageKind.Detach;
+						case SyntaxKind.SimpleAssignmentExpression: return SymbolUsageKind.Delegate;
 					}
 				}
 			}
