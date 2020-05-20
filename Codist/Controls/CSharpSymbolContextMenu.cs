@@ -513,7 +513,7 @@ namespace Codist.Controls
 
 			public StackPanel GetExtIconsWithUsage(SymbolItem symbolItem) {
 				var icons = GetSpecialSymbolIcon(symbolItem.Symbol);
-				if (icons != null && symbolItem.Usage != SymbolUsageKind.Normal) {
+				if (symbolItem.Usage != SymbolUsageKind.Normal) {
 					AddSymbolUsageIcons(ref icons, symbolItem.Usage);
 				}
 				return icons;
