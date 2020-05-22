@@ -400,10 +400,7 @@ namespace Codist.QuickInfo
 					break;
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation)) {
-				string asmName = symbol.GetAssemblyModuleName();
-				if (asmName != null) {
-					qiContent.Add(new ThemedTipText("Assembly: ", true).Append(asmName));
-				}
+				ShowSymbolLocationInfo(qiContent, symbol);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& (node.Parent.IsKind(SyntaxKind.Argument) == false || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter) == false) /*the signature has already been displayed there*/) {
@@ -419,6 +416,23 @@ namespace Codist.QuickInfo
 				}
 			}
 
+		}
+
+		static void ShowSymbolLocationInfo(QiContainer qiContent, ISymbol symbol) {
+			string asmName = symbol.GetAssemblyModuleName();
+			if (asmName != null) {
+				var item = new ThemedTipText("Assembly: ", true).Append(asmName);
+				switch (symbol.Kind) {
+					case SymbolKind.Field:
+					case SymbolKind.Property:
+					case SymbolKind.Event:
+					case SymbolKind.Method:
+						item.Append(" Namespace: ", true)
+							.Append(symbol.ContainingNamespace?.ToDisplayString());
+						break;
+				}
+				qiContent.Add(item);
+			}
 		}
 
 		static void ShowBlockInfo(QiContainer qiContent, ITextSnapshot textSnapshot, SyntaxNode node, SemanticModel semanticModel) {
