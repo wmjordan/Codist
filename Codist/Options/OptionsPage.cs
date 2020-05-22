@@ -159,8 +159,10 @@ namespace Codist.Options
 					);
 				AddPage("About",
 					new TitleBox("Thank You for Using Codist"),
-					new Note("Report bugs and suggesions to:"),
+					new Note("Project web site:"),
 					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist", "https://github.com/wmjordan/Codist", "Go to project web site"),
+					new Note("Report bugs and suggestions to:"),
+					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist/issues", "https://github.com/wmjordan/Codist/issues", "Post your opinions in the issues page"),
 					new Note("Latest release:"),
 					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist/releases", "https://github.com/wmjordan/Codist/releases", "Go to project release page"),
 					new Note("Support future development of Codist:"),
