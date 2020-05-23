@@ -50,6 +50,7 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpLoopKeyword)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
+	[Order(After = Constants.CodeKeywordControl)]
 	[Order(Before = Constants.CodeBoldBrace)]
 	sealed class LoopKeywordFormat : ClassificationFormatDefinition
 	{
