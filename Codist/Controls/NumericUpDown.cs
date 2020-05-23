@@ -30,9 +30,9 @@ namespace Codist.Controls
 						new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) }
 					},
 					Children = {
-						new ThemedButton(KnownImageIds.RemoveCommand, null, Decrease) { BorderThickness = WpfHelper.TinyMargin }.SetValue(Grid.SetColumn, 0),
+						new ThemedButton(KnownImageIds.GlyphDown, null, Decrease) { BorderThickness = WpfHelper.TinyMargin }.SetValue(Grid.SetColumn, 0),
 						(_ValueBox = new ThemedTextBox { BorderThickness = WpfHelper.NoMargin, TextAlignment = TextAlignment.Center }.SetValue(Grid.SetColumn, 1)),
-						new ThemedButton(KnownImageIds.Add, null, Increase) { BorderThickness = WpfHelper.TinyMargin }.SetValue(Grid.SetColumn, 2),
+						new ThemedButton(KnownImageIds.GlyphUp, null, Increase) { BorderThickness = WpfHelper.TinyMargin }.SetValue(Grid.SetColumn, 2),
 					}
 				}
 			}.ReferenceProperty(BorderBrushProperty, CommonControlsColors.ButtonBorderBrushKey);
