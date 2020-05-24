@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
-using PreviewAttribute = Codist.SyntaxHighlight.PreviewAttribute;
 
 namespace Codist
 {
@@ -491,26 +490,16 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpControlFlowKeyword)]
 		[BaseDefinition(Constants.CodeKeyword)]
 		[Description("Keyword: break, continue, yield, return, throw, inheriting from Keyword")]
-		[Preview(@"public int Method() {
-    `return` 1;
-}")]
 		BreakAndReturnKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpAbstractionKeyword)]
 		[BaseDefinition(Constants.CodeKeyword)]
 		[Description("Keyword: abstract, override, sealed, virtual, inheriting from Keyword")]
-		[Preview(@"public `override` string ToString() {
-    return Text;
-}")]
 		AbstractionKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpBranchingKeyword)]
 		[BaseDefinition(Constants.CodeKeyword)]
 		[Description("Keyword: switch, case, default, if, else, inheriting from Keyword")]
-		[Preview(@"`if` (a == 1)
-    x = a;
-`else`
-	y = a;")]
 		BranchingKeyword,
 		[Category(Constants.SyntaxCategory.Keyword)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLoopKeyword)]
