@@ -562,7 +562,7 @@ namespace Codist.Controls
 							return null;
 						}
 						if (f.IsReadOnly) {
-							AddIcon(ref icons, KnownImageIds.DialogTemplate);
+							AddIcon(ref icons, KnownImageIds.EncapsulateField);
 						}
 						else if (f.IsVolatile) {
 							AddIcon(ref icons, KnownImageIds.SetField);
@@ -585,6 +585,9 @@ namespace Codist.Controls
 							}
 							else if (symbol.IsSealed) {
 								AddIcon(ref icons, KnownImageIds.PropertySealed);
+							}
+							if (((IPropertySymbol)symbol).SetMethod == null) {
+								AddIcon(ref icons, KnownImageIds.MoveProperty);
 							}
 						}
 						break;
