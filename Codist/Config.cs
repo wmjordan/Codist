@@ -127,7 +127,7 @@ namespace Codist
 				//TextEditorHelper.ResetStyleCache();
 				Loaded?.Invoke(Instance, EventArgs.Empty);
 				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(styleFilter != StyleFilters.None ? Features.SyntaxHighlight : Features.All));
-				Instance._ConfigManager?.MarkVersioned();
+				//Instance._ConfigManager?.MarkVersioned();
 			}
 			catch(Exception ex) {
 				Debug.WriteLine(ex.ToString());
@@ -288,9 +288,6 @@ namespace Codist
 				m.Quit(apply);
 			}
 		}
-		//internal void ResetUpdate() {
-		//	_ConfigManager?.MarkVersioned();
-		//}
 		internal void FireConfigChangedEvent(Features updatedFeature) {
 			Updated?.Invoke(this, new ConfigUpdatedEventArgs(updatedFeature));
 		}
