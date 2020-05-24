@@ -6,7 +6,7 @@
 
 Check out this list to see what _Codist_ can do for you?
 
-* [Advanced Syntax Highlight](#advanced-c-syntax-highlight) with [*Comment Tagger*](#comment-tagger-and-styles)
+* [Advanced Syntax Highlight](#advanced-c-syntax-highlight) items in ANY LANGUAGES (**new in version 5.6**), and [*Comment Tagger*](#comment-tagger-and-styles) highlights your `to-do` style comments
   ![](doc/feature-brief-syntax-highlight.png)
 * [Super Quick Info](#super-quick-info) with extended XML Doc, *Click and Go* to source code
   ![Feature Brief Super Quick Info](doc/feature-brief-super-quick-info.png)
@@ -28,6 +28,8 @@ Check out this list to see what _Codist_ can do for you?
 
   The advanced syntax highlight function highlights every aspect of C# language elements with diverse styles, including using various font families and text styles, enlarging or shrinking font sizes, changing foreground or background colors and transparency.
 
+  From version 5.6 on, it is possible to change syntax highlight styles in any languages, such as Visual BASIC, F#, SASS, and so on, even if they are not recognized by Codist.
+
   The following screenshots of the `TestPage.cs` file in the source code project demonstrates possible syntax highlight effects in the Light theme.
  
   ![Syntax highlight](doc/highlight1.png) 
@@ -44,9 +46,11 @@ Check out this list to see what _Codist_ can do for you?
 
 ### Default Syntax Highlight Themes
 
-  To quickly get started with advanced syntax highlight, open a C# project, then open the _Options_ dialog, navigate to the *Syntax Highlight* section, click the **Light theme** or **Dark theme** button in the dialog and see changes in effect. Don't forget to click the *OK* button to confirm the changes.
+  To quickly get started with advanced syntax highlight, open a C# project, then click the _Customize Codist Syntax Highlighting_ command under the _Tools_ menu.
 
-  ![Load Theme](doc/load-theme.png)
+  A window will pop up, click the **Light theme** or **Dark theme** button at the left side of the dialog and see changes in effect. Don't forget to click the *OK* button to confirm the changes.
+
+  ![Load Theme](doc/syntax-highlight-customization-window.png)
 
   With the **Save** and **Load** buttons, you can backup and share your own syntax highlight settings.
 
@@ -54,29 +58,33 @@ Check out this list to see what _Codist_ can do for you?
 
   **Note**: There is a known issue in _Codist_ that if you change the theme of Visual Studio, you may have to restart it to make syntax highlight settings to work properly.
 
-  It is possible to load only part of the syntax preset or backup theme by unchecking check boxes under _Load following parts when importing themes_.
-
 ### Customization of Syntax Highlight Styles
 
-  To customize and tweak the syntax highlight styles, click the sub sections inside the *Syntax Highlight* section to change individual styles, accordingly.
+  To customize and tweak the desired syntax highlight styles, click or select the text in the document window, and click the _Customize Codist Syntax Highlighting_ command under the _Tools_ menu.
 
-  ![Style customization](doc/syntax-highlight.png)
+  The customization window will pop up and listing syntax classifications applied to the active text.
 
-  Syntax definitions under the _All languages_ section apply to all languages; those under _Comment_ section apply to comment taggers (see below), others apply to corresponding languages accordingly.
+  ![Syntax Highlight Customizing Selected](doc/syntax-highlight-customizing-selected.png)
+
+  Click the style in the Syntax Styles list, adjustment controls will be displayed at the bottom of the dialog, where you can change the style. As you change the style, you can immediately see how it appears in the code document window.
+
+  ![Syntax Highlight Customization Preview](doc/syntax-highlight-customization-preview.png)
+
+  If you want to change another syntax element, you can click on the place where it is applied in the code document window. If the customization window is still opened, and the _Selected Code_ section under _Syntax Categories_ is selected, when you focus on that window again, corresponding syntax styles will be listed for the place you clicked.
+
+  You can explore other synta categories by clicking the list on the left of the dialog.
+
+  Syntax definitions in the _All languages_ section will list all syntax styles for any languages installed; those under _Tagged comments_ section apply to comment taggers (see below), others apply to corresponding languages accordingly.
 
   **Note**: _Font size_ is relative value to editor default font size. Halfly checked checkboxes denote default syntax styles are used.
 
   **A Side Note for Editor Font**: You may consider subsituting the font used by Visual Studio code editor with professionally designed fonts for programming, for instance, [IBM Plex Mono](https://github.com/IBM/plex), [Fira Code](https://github.com/tonsky/FiraCode), etc. Employing [MacType](https://github.com/snowie2000/mactype) can also enhance systemwide textual display quality, especially for Chinese, Japanese and Korean programmers.
 
-  **TIP**: Open a document window before you change the syntax theme or tweak the syntax highlight settings. While you change theme, you can see how the styles change in the code document window simultaneously.
-
 ### My Symbols and External Symbols
 
-  _Codist_ can identify symbols which are defined in your source code and which are imported from external assemblies. This feature is so unique that you may not find it elsewhere.
+  _Codist_ can identify symbols which are defined in your source C# code and which are imported from external assemblies. This feature is so unique that you may not find it elsewhere.
 
-  You can customize it in the *Symbol Marker* tab of in the *C#* section of *Syntax Highlight*. Style _My Type and Member_ is used for symbols from your code, and _Referenced Type and Member_ is used for symbols imported from external assemblies.
-
-  ![Symbolmarker Options 2](doc/symbolmarker-options-2.png)
+  You can customize it in the *symbol markers* section under the *C#* section in the *Syntax Highlight Configurations* dialog. Style _C#: User symbol_ is used for symbols from your code, and _C#: Metadata symbol_ is used for symbols imported from external assemblies.
 
   **Note**: the predefined _Light theme_ and _Dark theme_ have defined external symbols with **bold** style, as the above screenshot shows.
 
@@ -88,17 +96,11 @@ Check out this list to see what _Codist_ can do for you?
 
     ![Comment syntax highlight](doc/syntax-highlight-comments.png)
 
-    To configure the comment tags, click the *Tags* tab, in the *Comment* sub-section of the *Syntax Highlight* section, where you can add, remove or modify comment tags.
+    To configure the comment tags, click the *tags* section, under the *Tagged comments* section in the *Syntax Highlight Configurations* dialog, where you can add, remove or modify comment tags.
 
-    ![Comment syntax highlight](doc/comment-tagger-options.png)
+    ![Syntax Highlight Comment Tags](doc/syntax-highlight-comment-tags.png)
 
-    To disable comment tagger, uncheck the check box of _Comment Tagger_ on the _Syntax Highlight_ option page.
-
-  * The syntax style of comments or C# XML Documentations could be changed too. You can make them semitrasparent to stand behind usual code lines by changing the *Opacity* or the *Font size* value of the corresponding syntax parts.
-
-    ![Comment syntax XML Doc](doc/csharp-options-xmldoc.png)
-
-    **Note**: the predefined _Light theme_ and _Dark theme_ have defined XML Doc with a smaller font size (-1), as the above screenshot shows.
+    To disable comment tagger, open the _Options_ dialog, find the _Codist/Syntax Highlight_ section and  uncheck the check box labeled _Enable comment tagger_ in the _Syntax Highlight_ option page.
 
 ## Super Quick Info
 
@@ -315,23 +317,21 @@ Check out this list to see what _Codist_ can do for you?
 
   ![Navigation Bar Options](doc/navigation-bar-options.png)
 
-  * If **Show syntax detail** option is set, the _Navigation Bar_ not only shows available types and declarations in the code window like the original navigation bar, but also syntax nodes such as statements and expressions containing the caret.
+  * If **Syntax detail** option is set, the _Navigation Bar_ not only shows available types and declarations in the code window like the original navigation bar, but also syntax nodes such as statements and expressions containing the caret.
 
     ![Navigation Bar Syntax Details](doc/navigation-bar-syntax-details.png)
 
-  * If **Show symbol info tip** option is set, you can read information about a symbol when you hover your mouse onto a node.
+  * If **Symbol info tip** option is set, you can read information about a symbol when you hover your mouse onto a node.
 
     ![Navigation Bar Symbol Info](doc/navigation-bar-symbol-info.png)
 
-  * If **Highlight node range in editor** option is set, when you hover the mouse over the node on the bar, corresponding span of the node will be highlighted in the editor.
+  * If **Highlight syntax range** option is set, when you hover the mouse over the node on the bar, corresponding span of the node will be highlighted in the editor.
 
     ![Navigation Bar Node Range](doc/navigation-bar-node-range.png)
 
-   * If **Show #region name** option is set, `#region` names will be displayed on the Navigation Bar. If you pad region names with some non-alphabetic characters like "`#region [====== private methods ======]`", you can check the **Trim non-letter characters** checkbox so only alphabetic part like "`private methods`" will be displayed on the _Navigation Bar_.
+   * If **Region** option is set, `#region` names will be displayed on the Navigation Bar. If you pad region names with some non-alphabetic characters like "`#region [====== private methods ======]`", you can check the **Trim non-letter characters in region** checkbox so only alphabetic part like "`private methods`" will be displayed on the _Navigation Bar_.
 
   To customize drop-down menus of the _Navigation Bar,_ change options in the _Drop-down Menu_ tab.
-
-  ![Navigation Bar Options 2](doc/navigation-bar-options-2.png)
 
 ### Markdown Navigation Bar
 
@@ -413,7 +413,7 @@ Check out this list to see what _Codist_ can do for you?
 
   Symbol markers will be cleared when the solution is unloaded.
 
-  **Note**: The style of symbol markers can be customized in options page of the *Syntax highlight* feature. The default colors are listed below. You also need to turn on the _Syntax Highlight_ feature in order to make this feature work.
+  **Note**: The style of symbol markers can be customized in othe *Syntax highlight Configurations* dialog. The default colors are listed below. You also need to turn on the _Syntax Highlight_ feature in order to make this feature work.
 
   ![Symbol marker Options](doc/symbolmarker-options.png)
 
@@ -454,7 +454,7 @@ Check out this list to see what _Codist_ can do for you?
 
   In the *Display* tab of the *General* options page, several display enhancement options are offered.
 
-  ![General Options Display](doc/general-options-display.png)
+  ![General Options Display](doc/display-options.png)
 
   Within the *Extra line margins* group box, you can adjust margins between lines to make code lines more readable.
 
