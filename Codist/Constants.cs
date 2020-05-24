@@ -141,7 +141,7 @@ namespace Codist
 		public const string CSharpResourceKeyword = "C#: Resource keyword";
 		public const string CSharpAliasNamespaceName = "C#: Alias namespace";
 		public const string CSharpConstructorMethodName = "C#: Constructor method";
-		public const string CSharpDeclarationName = "C#: Type declaration";
+		public const string CSharpDeclarationName = "C#: Declaration";
 		public const string CSharpMemberDeclarationName = "C#: Member declaration";
 		public const string CSharpLocalDeclarationName = "C#: Local declaration";
 		public const string CSharpTypeParameterName = "C#: Type parameter";
