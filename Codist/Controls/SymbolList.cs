@@ -109,12 +109,12 @@ namespace Codist.Controls
 				switch (type.TypeKind) {
 					case TypeKind.Class:
 						while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
-							mi += AddSymbolMembers(type, type.ToDisplayString(WpfHelper.MemberNameFormat));
+							mi += AddSymbolMembers(type, type.ToDisplayString(CodeAnalysisHelper.MemberNameFormat));
 						}
 						break;
 					case TypeKind.Interface:
 						foreach (var item in type.AllInterfaces) {
-							mi += AddSymbolMembers(item, item.ToDisplayString(WpfHelper.MemberNameFormat));
+							mi += AddSymbolMembers(item, item.ToDisplayString(CodeAnalysisHelper.MemberNameFormat));
 						}
 						break;
 				}
@@ -288,7 +288,7 @@ namespace Codist.Controls
 
 		void SetupContextMenu(CSharpSymbolContextMenu menu, SymbolItem item) {
 			if (item.SyntaxNode != null) {
-				SetupMenuCommand(item, KnownImageIds.BlockSelection, "Select Code", s => s.Container.SemanticContext.View.SelectNode(s.SyntaxNode, true));
+				SetupMenuCommand(item, IconIds.SelectCode, "Select Code", s => s.Container.SemanticContext.View.SelectNode(s.SyntaxNode, true));
 				//SetupMenuCommand(item, KnownImageIds.Copy, "Copy Code", s => Clipboard.SetText(s.SyntaxNode.ToFullString()));
 				item.SetSymbolToSyntaxNode();
 			}
@@ -680,13 +680,13 @@ namespace Codist.Controls
 				var filePath = location.SourceTree.FilePath;
 				_Content = new ThemedMenuText(Path.GetFileNameWithoutExtension(filePath)).Append(Path.GetExtension(filePath), ThemeHelper.SystemGrayTextBrush);
 				_Hint = Path.GetFileName(Path.GetDirectoryName(filePath));
-				_ImageId = KnownImageIds.CSFile;
+				_ImageId = IconIds.FileEmpty;
 			}
 			else {
 				var m = location.MetadataModule;
 				_Content = new ThemedMenuText(Path.GetFileNameWithoutExtension(m.Name)).Append(Path.GetExtension(m.Name), ThemeHelper.SystemGrayTextBrush);
 				_Hint = String.Empty;
-				_ImageId = KnownImageIds.Module;
+				_ImageId = IconIds.Module;
 			}
 		}
 		public SymbolItem(ISymbol symbol, SymbolList list, ISymbol containerSymbol)

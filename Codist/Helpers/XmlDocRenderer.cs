@@ -46,7 +46,7 @@ namespace Codist
 					&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
 				summary = doc.GetInheritedDescription(symbol, out inheritDoc);
 				if (inheritDoc != null && summary != null) {
-					tip.Append(new ThemedTipParagraph(KnownImageIds.GoToNextComment, new ThemedTipText()
+					tip.Append(new ThemedTipParagraph(IconIds.ReferencedXmlDoc, new ThemedTipText()
 							.Append("Documentation from ")
 							.AddSymbol(inheritDoc.Symbol.ContainingSymbol, false, _SymbolFormatter)
 							.Append(".")
@@ -66,10 +66,11 @@ namespace Codist
 			}
 			#endregion
 			#region Type parameter
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters) && (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.NamedType)) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TypeParameters)
+				&& (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.NamedType)) {
 				var typeParams = symbol.GetTypeParameters();
 				if (typeParams.IsDefaultOrEmpty == false) {
-					var para = new ThemedTipParagraph(KnownImageIds.TypeDefinition);
+					var para = new ThemedTipParagraph(IconIds.TypeParameters);
 					foreach (var param in typeParams) {
 						var p = doc.GetTypeParameter(param.Name);
 						if (p == null) {
@@ -95,7 +96,7 @@ namespace Codist
 					|| symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Delegate)) {
 				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Returns != null)?.Returns;
 				if (returns != null && returns.FirstNode != null) {
-					tip.Append(new ThemedTipParagraph(KnownImageIds.Return, new ThemedTipText()
+					tip.Append(new ThemedTipParagraph(IconIds.Return, new ThemedTipText()
 						.Append("Returns", true)
 						.Append(returns == doc.Returns ? ": " : " (inherited): ")
 						.AddXmlDoc(returns, this))
@@ -109,7 +110,7 @@ namespace Codist
 					&& symbol.Kind != SymbolKind.TypeParameter) {
 				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Remarks != null)?.Remarks;
 				if (remarks != null && remarks.FirstNode != null) {
-					tip.Append(new ThemedTipParagraph(KnownImageIds.CommentGroup, new ThemedTipText()
+					tip.Append(new ThemedTipParagraph(IconIds.RemarksXmlDoc, new ThemedTipText()
 						.Append("Remarks", true)
 						.Append(remarks == doc.Remarks ? ": " : " (inherited): ")
 						))
@@ -132,13 +133,13 @@ namespace Codist
 						RenderXmlDocSymbol(item.Attribute("cref").Value, seeAlso.Inlines, SymbolKind.Alias);
 						hasItem = true;
 					}
-					tip.Append(new ThemedTipParagraph(KnownImageIds.Next, seeAlso));
+					tip.Append(new ThemedTipParagraph(IconIds.SeeAlsoXmlDoc, seeAlso));
 				}
 			}
 			#endregion
 			var example = doc.Example ?? doc.ExplicitInheritDoc?.Example ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Example != null)?.Example;
 			if (example != null) {
-				tip.Append(new ThemedTipParagraph(KnownImageIds.EnableCode, new ThemedTipText()
+				tip.Append(new ThemedTipParagraph(IconIds.ExampleXmlDoc, new ThemedTipText()
 					.Append("Example", true)
 					.Append(example == doc.Example ? ": " : " (inherited): ")
 					))
@@ -157,7 +158,7 @@ namespace Codist
 			if (content == null || content.HasElements == false && content.IsEmpty) {
 				return;
 			}
-			var paragraph = new ThemedTipParagraph(showSummaryIcon ? KnownImageIds.Comment : 0);
+			var paragraph = new ThemedTipParagraph(showSummaryIcon ? IconIds.XmlDocComment : 0);
 			doc.Append(paragraph);
 			Render(content, paragraph.Content.Inlines);
 			if (paragraph.Content.Inlines.FirstInline == null) {

@@ -26,10 +26,9 @@ namespace Codist.QuickInfo
 		}
 
 		public static void ShowOpCodeInfo(this QiContainer container, IFieldSymbol property) {
-			if (property.ContainingType.Name == nameof(OpCodes)
-				&& _OpCodes.TryGetValue(property.Name, out OpCode code)) {
+			if (_OpCodes.TryGetValue(property.Name, out OpCode code)) {
 				container.Add(new ThemedTipDocument()
-					.AppendTitle(KnownImageIds.Binary, code.OpCodeType.ToString() + " " + code.Name)
+					.AppendTitle(IconIds.OpCodes, code.OpCodeType.ToString() + " " + code.Name)
 					.Append(new ThemedTipParagraph(new ThemedTipText("Value: 0x" + code.Value.ToString("X2"))
 						.AppendLine().Append("Operand type: " + code.OperandType.ToString())
 						.AppendLine().Append("Stack: " + code.StackBehaviourPop.ToString() + ", " + code.StackBehaviourPush.ToString())

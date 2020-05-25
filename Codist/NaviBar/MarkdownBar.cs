@@ -39,7 +39,7 @@ namespace Codist.NaviBar
 			view.TextBuffer.PostChanged += Update;
 			view.Closed += View_Closed;
 			_ActiveTitleLabel = new ThemedToolBarText(DefaultActiveTitle);
-			_ActiveItem = new ThemedImageButton(KnownImageIds.PageHeader, _ActiveTitleLabel);
+			_ActiveItem = new ThemedImageButton(IconIds.Headings, _ActiveTitleLabel);
 			_ActiveItem.Click += ShowTitleList;
 			Items.Add(_ActiveItem);
 			//AddItem(KnownImageIds.Bold, ToggleBold);
@@ -182,16 +182,16 @@ namespace Codist.NaviBar
 						new StackPanel {
 							Orientation = Orientation.Horizontal,
 							Children = {
-								ThemeHelper.GetImage(KnownImageIds.SearchContract).WrapMargin(WpfHelper.GlyphMargin),
+								ThemeHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
 								(_FinderBox = new ThemedTextBox { MinWidth = 150 }),
-								new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter)
+								new ThemedButton(IconIds.ClearFilter, "Clear filter", ClearFilter)
 							}
 						},
 					}
 				};
 				Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
 						.ReferenceProperty(TextBlock.ForegroundProperty, Microsoft.VisualStudio.PlatformUI.EnvironmentColors.SystemGrayTextBrushKey)     
-						.Append(ThemeHelper.GetImage(KnownImageIds.Code))
+						.Append(ThemeHelper.GetImage(IconIds.LineOfCode))
 						.Append(bar.View.TextSnapshot.LineCount);
 				_FinderBox.TextChanged += SearchCriteriaChanged;
 				_FinderBox.SetOnVisibleSelectAll();
@@ -272,25 +272,25 @@ namespace Codist.NaviBar
 				var t = span.Tag.ClassificationType;
 				if (t == _H1) {
 					Content.FontWeight = FontWeights.Bold;
-					_ImageId = KnownImageIds.FlagDarkRed;
+					_ImageId = IconIds.Heading1;
 				}
 				else if (t == _H2) {
-					_ImageId = KnownImageIds.FlagDarkPurple;
+					_ImageId = IconIds.Heading2;
 				}
 				else if (t == _H3) {
-					_ImageId = KnownImageIds.FlagDarkBlue;
+					_ImageId = IconIds.Heading3;
 					Content.Padding = _H3Padding;
 				}
 				else if (t == _H4) {
-					_ImageId = KnownImageIds.Flag;
+					_ImageId = IconIds.Heading4;
 					Content.Padding = _H4Padding;
 				}
 				else if (t == _H5) {
-					_ImageId = KnownImageIds.FlagOutline;
+					_ImageId = IconIds.Heading5;
 					Content.Padding = _H5Padding;
 				}
 				else if (t == _H6) {
-					_ImageId = KnownImageIds.Blank;
+					_ImageId = IconIds.None;
 					Content.Padding = _H6Padding;
 				}
 			}

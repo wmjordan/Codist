@@ -13,7 +13,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
@@ -124,7 +123,7 @@ namespace Codist.QuickInfo
 					}
 				case SyntaxKind.EndRegionKeyword:
 					qiContent.Add(new ThemedTipText("End of region ")
-						.SetGlyph(ThemeHelper.GetImage(KnownImageIds.Numeric))
+						.SetGlyph(ThemeHelper.GetImage(IconIds.Region))
 						.Append((unitCompilation.FindNode(token.Span, true, false) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
 						);
 					return new QuickInfoItem(currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive), qiContent.ToUI());
@@ -218,9 +217,9 @@ namespace Codist.QuickInfo
 						var sm = await d.GetSemanticModelAsync(cancellationToken);
 						if (GetSymbol(sm, sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(token.Span, true, true), ref candidates, cancellationToken) == null) {
 							if (r == null) {
-								r = new ThemedTipDocument().AppendTitle(KnownImageIds.StatusWarning, "Symbol unavailable in...");
+								r = new ThemedTipDocument().AppendTitle(IconIds.UnavailableSymbol, "Symbol unavailable in...");
 							}
-							r.Append(new ThemedTipParagraph(KnownImageIds.CSProjectNode, new ThemedTipText(d.Project.Name)));
+							r.Append(new ThemedTipParagraph(IconIds.Project, new ThemedTipText(d.Project.Name)));
 						}
 					}
 				}
@@ -282,7 +281,7 @@ namespace Codist.QuickInfo
 				&& (symbol.Kind == SymbolKind.Method || symbol.Kind == SymbolKind.Property || symbol.Kind == SymbolKind.Event)) {
 				var exceptions = doc.Exceptions ?? doc.ExplicitInheritDoc?.Exceptions ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Exceptions != null)?.Exceptions;
 				if (exceptions != null) {
-					var p = new ThemedTipParagraph(KnownImageIds.StatusInvalidOutline, new ThemedTipText("Exception", true)
+					var p = new ThemedTipParagraph(IconIds.ExceptionXmlDoc, new ThemedTipText("Exception", true)
 					   .Append(exceptions == doc.Exceptions ? ": " : " (inherited): "));
 					foreach (var ex in exceptions) {
 						var et = ex.Attribute("cref");
@@ -302,7 +301,7 @@ namespace Codist.QuickInfo
 				var summary = new XmlDoc(symbol, _SemanticModel.Compilation)
 					.GetDescription(symbol);
 				if (summary != null) {
-					tip.Append(new ThemedTipParagraph(KnownImageIds.GoToNextComment, new ThemedTipText("Documentation from ").AddSymbol(symbol, true, SymbolFormatter.Instance).Append(":")));
+					tip.Append(new ThemedTipParagraph(IconIds.ReferencedXmlDoc, new ThemedTipText("Documentation from ").AddSymbol(symbol, true, SymbolFormatter.Instance).Append(":")));
 					new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance)
 						.Render(summary, tip, false);
 				}
@@ -326,7 +325,7 @@ namespace Codist.QuickInfo
 					var df = _SemanticModel.AnalyzeDataFlow(ss);
 					var captured = df.ReadInside.RemoveAll(i => df.VariablesDeclared.Contains(i));
 					if (captured.Length > 0) {
-						var p = new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, new ThemedTipText().Append("Captured variables", true));
+						var p = new ThemedTipParagraph(IconIds.ReadVariables, new ThemedTipText().Append("Captured variables", true));
 						int i = 0;
 						foreach (var item in captured) {
 							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, false, _SymbolFormatter);
@@ -338,7 +337,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowCandidateInfo(QiContainer qiContent, ImmutableArray<ISymbol> candidates) {
-			var info = new ThemedTipDocument().AppendTitle(KnownImageIds.CodeInformation, "Maybe...");
+			var info = new ThemedTipDocument().AppendTitle(IconIds.SymbolCandidate, "Maybe...");
 			foreach (var item in candidates) {
 				info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item.OriginalDefinition)));
 			}
@@ -407,7 +406,7 @@ namespace Codist.QuickInfo
 				var st = symbol.GetReturnType();
 				if (st != null && st.TypeKind == TypeKind.Delegate) {
 					var invoke = ((INamedTypeSymbol)st).DelegateInvokeMethod;
-					qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Delegate,
+					qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.Delegate,
 						new ThemedTipText("Delegate signature", true).Append(": ")
 							.AddSymbol(invoke.ReturnType, false, _SymbolFormatter)
 							.Append(" ")
@@ -455,7 +454,7 @@ namespace Codist.QuickInfo
 					p.AddSymbol(item, false, _SymbolFormatter.Local);
 					s = true;
 				}
-				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.LocalVariable, p)));
+				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.LocalVariable, p)));
 			}
 			vd = df.DataFlowsIn;
 			if (vd.IsEmpty == false) {
@@ -473,7 +472,7 @@ namespace Codist.QuickInfo
 					}
 					s = true;
 				}
-				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.ExternalVariableValue, p)));
+				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.ReadVariables, p)));
 			}
 		}
 		static void ShowMiscInfo(QiContainer qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
@@ -532,7 +531,7 @@ namespace Codist.QuickInfo
 				var symbol = _SemanticModel.GetSymbolInfo(node, cancellationToken).Symbol ?? _SemanticModel.GetDeclaredSymbol(node, cancellationToken);
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 				var t = new ThemedTipText();
-				t.SetGlyph(ThemeHelper.GetImage(KnownImageIds.ReturnValue));
+				t.SetGlyph(ThemeHelper.GetImage(IconIds.ReturnValue));
 				if (method != null) {
 					if (method.MethodKind == MethodKind.AnonymousFunction) {
 						t.Append("Return anonymous function for ");
@@ -578,7 +577,7 @@ namespace Codist.QuickInfo
 					foreach (var item in attributes) {
 						if (item.AttributeClass.IsAccessible(true)) {
 							if (paragraph == null) {
-								paragraph = new ThemedTipParagraph(KnownImageIds.FormPostBodyParameterNode, new ThemedTipText().Append("Attribute:", true));
+								paragraph = new ThemedTipParagraph(IconIds.Attribute, new ThemedTipText().Append("Attribute:", true));
 							}
 							_SymbolFormatter.Format(paragraph.Content.AppendLine().Inlines, item, isMethodReturnAttrs);
 						}
@@ -610,7 +609,7 @@ namespace Codist.QuickInfo
 				}
 				var invoke = ev.Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol;
 				if (invoke != null && invoke.Parameters.Length == 2) {
-					qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Event,
+					qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.Event,
 						new ThemedTipText("Event signature ", true).AddParameters(invoke.Parameters, _SymbolFormatter)
 						)));
 				}
@@ -620,17 +619,28 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowFieldInfo(QiContainer qiContent, IFieldSymbol field) {
+		void ShowFieldInfo(QiContainer qiContent, IFieldSymbol field) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& (field.DeclaredAccessibility != Accessibility.Public || field.IsReadOnly || field.IsVolatile || field.IsStatic)
 				&& field.ContainingType.TypeKind != TypeKind.Enum) {
 				ShowDeclarationModifier(qiContent, field);
 			}
 			if (field.HasConstantValue) {
+				if (_IsVsProject && field.ConstantValue is int) {
+					ShowKnownImageId(qiContent, field, (int)field.ConstantValue);
+				}
 				ShowConstInfo(qiContent, field, field.ConstantValue);
 			}
-			if (field.IsReadOnly && field.IsStatic) {
+			else if (field.IsReadOnly && field.IsStatic && field.ContainingType.Name == nameof(System.Reflection.Emit.OpCodes)) {
 				qiContent.ShowOpCodeInfo(field);
+			}
+
+			void ShowKnownImageId(QiContainer qc, IFieldSymbol f, int fieldValue) {
+				var t = f.ContainingType.Name;
+				if (t == nameof(Microsoft.VisualStudio.Imaging.KnownImageIds) && f.ContainingNamespace?.ToDisplayString() == "Microsoft.VisualStudio.Imaging"
+					|| t == nameof(IconIds) && f.ContainingNamespace?.Name == nameof(Codist)) {
+					qc.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(fieldValue, new ThemedTipText(field.Name))));
+				}
 			}
 		}
 
@@ -676,7 +686,7 @@ namespace Codist.QuickInfo
 			var rt = method.ReturnType;
 			var mps = method.Parameters;
 			var ct = method.ContainingType;
-			var overloadInfo = new ThemedTipDocument().AppendTitle(KnownImageIds.MethodSet, "Method overload:");
+			var overloadInfo = new ThemedTipDocument().AppendTitle(IconIds.MethodOverloads, "Method overload:");
 			foreach (var overload in overloads) {
 				var om = overload.OriginalDefinition as IMethodSymbol;
 				if (om == null) {
@@ -725,7 +735,7 @@ namespace Codist.QuickInfo
 							mp = null;
 						}
 					}
-					t.AddSymbolDisplayParts(op.ToDisplayParts(WpfHelper.InTypeOverloadDisplayFormat), mp == null ? _SymbolFormatter : SymbolFormatter.SemiTransparent, -1);
+					t.AddSymbolDisplayParts(op.ToDisplayParts(CodeAnalysisHelper.InTypeOverloadDisplayFormat), mp == null ? _SymbolFormatter : SymbolFormatter.SemiTransparent, -1);
 				}
 				t.Append(")");
 				overloadInfo.Append(new ThemedTipParagraph(overload.GetImageId(), t));
@@ -739,7 +749,7 @@ namespace Codist.QuickInfo
 			var info = new ThemedTipDocument();
 			var l = method.TypeArguments.Length;
 			var content = new ThemedTipText("Type argument:", true);
-			info.Append(new ThemedTipParagraph(KnownImageIds.Template, content));
+			info.Append(new ThemedTipParagraph(IconIds.GenericDefinition, content));
 			for (int i = 0; i < l; i++) {
 				ShowTypeParameterInfo(method.TypeParameters[i], method.TypeArguments[i], content.AppendLine());
 			}
@@ -752,9 +762,9 @@ namespace Codist.QuickInfo
 			}
 			var namespaces = nsSymbol.GetNamespaceMembers().ToImmutableArray().Sort(Comparer<INamespaceSymbol>.Create((x, y) => String.CompareOrdinal(x.Name, y.Name)));
 			if (namespaces.Length > 0) {
-				var info = new ThemedTipDocument().AppendTitle(KnownImageIds.Namespace, "Namespace:");
+				var info = new ThemedTipDocument().AppendTitle(IconIds.Namespace, "Namespace:");
 				foreach (var ns in namespaces) {
-					info.Append(new ThemedTipParagraph(KnownImageIds.Namespace, new ThemedTipText().Append(ns.Name, _SymbolFormatter.Namespace)));
+					info.Append(new ThemedTipParagraph(IconIds.Namespace, new ThemedTipText().Append(ns.Name, _SymbolFormatter.Namespace)));
 				}
 				qiContent.Add(info);
 			}
@@ -853,7 +863,7 @@ namespace Codist.QuickInfo
 				}
 			}
 			if (explicitIntfs.Count > 0) {
-				info = new ThemedTipDocument().AppendTitle(KnownImageIds.ImplementInterface, "Implements:");
+				info = new ThemedTipDocument().AppendTitle(IconIds.InterfaceImplementation, "Implements:");
 				foreach (var item in explicitIntfs) {
 					info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
 				}
@@ -863,7 +873,7 @@ namespace Codist.QuickInfo
 				explicitIntfs.AddRange(explicitImplementations.Select(i => i.ContainingType));
 				if (explicitIntfs.Count > 0) {
 					(info ?? (info = new ThemedTipDocument()))
-						.AppendTitle(KnownImageIds.ImplementInterface, "Explicit implements:");
+						.AppendTitle(IconIds.InterfaceImplementation, "Explicit implements:");
 					foreach (var item in explicitIntfs) {
 						info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
 					}
@@ -875,7 +885,7 @@ namespace Codist.QuickInfo
 		}
 		static void ShowInterfaceMembers(QiContainer qiContent, INamedTypeSymbol type) {
 			var doc = new ThemedTipDocument();
-			doc.AppendTitle(KnownImageIds.ListMembers, "Member:");
+			doc.AppendTitle(IconIds.ListMembers, "Member:");
 			ShowMembers(type, doc, false);
 			foreach (var item in type.AllInterfaces) {
 				ShowMembers(item, doc, true);
@@ -909,7 +919,7 @@ namespace Codist.QuickInfo
 				var ext = new ThemedTipText("Extending: ", true)
 					.AddSymbol(extType, true, _SymbolFormatter.Class)
 					.Append(" with ")
-					.AddSymbolDisplayParts(method.ReceiverType.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
+					.AddSymbolDisplayParts(method.ReceiverType.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
 				info.Add(ext);
 			}
 			var def = new ThemedTipText("Extended by: ", true)
@@ -947,7 +957,7 @@ namespace Codist.QuickInfo
 			}
 			var classList = new ThemedTipText("Base type: ", true)
 				.AddSymbol(baseType, null, _SymbolFormatter);
-			var info = new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.ParentChild, classList));
+			var info = new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.BaseTypes, classList));
 			while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
 				if (baseType.IsCommonClass() == false) {
 					classList.Append(" - ").AddSymbol(baseType, null, _SymbolFormatter);
@@ -967,7 +977,7 @@ namespace Codist.QuickInfo
 			}
 			var content = new ThemedTipText("Enum underlying type: ", true).AddSymbol(t, true, _SymbolFormatter);
 			var s = new ThemedTipDocument()
-				.Append(new ThemedTipParagraph(KnownImageIds.Enumeration, content));
+				.Append(new ThemedTipParagraph(IconIds.Enum, content));
 			if (fromEnum == false) {
 				qiContent.Add(s);
 				return;
@@ -1056,13 +1066,13 @@ namespace Codist.QuickInfo
 			if (declaredInterfaces.Count == 0 && inheritedInterfaces.Count == 0 && disposable == null) {
 				return;
 			}
-			var info = new ThemedTipDocument().AppendTitle(KnownImageIds.Interface, "Interface:");
+			var info = new ThemedTipDocument().AppendTitle(IconIds.Interface, "Interface:");
 			if (disposable != null) {
 				var t = ToUIText(disposable);
 				if (interfaces.Contains(disposable) == false) {
 					t.Append(" (inherited)");
 				}
-				info.Append(new ThemedTipParagraph(KnownImageIds.PartWarning, t));
+				info.Append(new ThemedTipParagraph(IconIds.Disposable, t));
 			}
 			foreach (var item in declaredInterfaces) {
 				if (item != disposable) {
@@ -1076,7 +1086,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowDeclarationModifier(QiContainer qiContent, ISymbol symbol) {
-			qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.ControlAltDel, _SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedTipText(), true, false))));
+			qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.DeclarationModifier, _SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedTipText(), true, false))));
 		}
 
 		void ShowParameterInfo(QiContainer qiContent, SyntaxNode node) {
@@ -1155,7 +1165,7 @@ namespace Codist.QuickInfo
 					.Append(" ")
 					.AddSymbol(om.MethodKind != MethodKind.DelegateInvoke ? om : (ISymbol)om.ContainingType, true, _SymbolFormatter)
 					.AddParameters(om.Parameters, _SymbolFormatter, argIndex);
-				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(KnownImageIds.Parameter, content));
+				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.Argument, content));
 				if (paramDoc != null) {
 					content.Append("\n" + argName, true, false, _SymbolFormatter.Parameter).Append(": ");
 					new XmlDocRenderer(_SemanticModel.Compilation, _SymbolFormatter).Render(paramDoc, content.Inlines);
@@ -1173,7 +1183,7 @@ namespace Codist.QuickInfo
 				}
 				if (p != null && p.Type.TypeKind == TypeKind.Delegate) {
 					var invoke = ((INamedTypeSymbol)p.Type).DelegateInvokeMethod;
-					info.Append(new ThemedTipParagraph(KnownImageIds.Delegate,
+					info.Append(new ThemedTipParagraph(IconIds.Delegate,
 						new ThemedTipText("Delegate signature", true).Append(": ")
 							.AddSymbol(invoke.ReturnType, false, _SymbolFormatter)
 							.Append(" ").Append(p.Name, true, false, _SymbolFormatter.Parameter)
@@ -1189,7 +1199,7 @@ namespace Codist.QuickInfo
 					var attrs = p.GetAttributes();
 					if (attrs.Length > 0) {
 						var para = new ThemedTipParagraph(
-							KnownImageIds.FormPostBodyParameterNode,
+							IconIds.Attribute,
 							new ThemedTipText().Append("Attribute of ").Append(p.Name, true, false, _SymbolFormatter.Parameter).Append(":")
 						);
 						foreach (var attr in attrs) {
@@ -1202,13 +1212,13 @@ namespace Codist.QuickInfo
 			}
 			else if (symbol.CandidateSymbols.Length > 0) {
 				var info = new ThemedTipDocument();
-				info.Append(new ThemedTipParagraph(KnownImageIds.ParameterWarning, new ThemedTipText("Maybe", true).Append(" argument of")));
+				info.Append(new ThemedTipParagraph(IconIds.ParameterCandidate, new ThemedTipText("Maybe", true).Append(" argument of")));
 				foreach (var candidate in symbol.CandidateSymbols) {
 					info.Append(
 						new ThemedTipParagraph(
 							candidate.GetImageId(),
 							new ThemedTipText().AddSymbolDisplayParts(
-								candidate.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat),
+								candidate.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat),
 								_SymbolFormatter,
 								argName == null ? argIndex : Int32.MinValue)
 						)
@@ -1264,7 +1274,7 @@ namespace Codist.QuickInfo
 
 			void ShowAnonymousTypes(QiContainer c, List<ITypeSymbol> anonymousTypes, ISymbol currentSymbol) {
 				const string AnonymousNumbers = "abcdefghijklmnopqrstuvwxyz";
-				var d = new ThemedTipDocument().AppendTitle(KnownImageIds.UserDataType, "Anonymous type: ");
+				var d = new ThemedTipDocument().AppendTitle(IconIds.AnonymousType, "Anonymous type: ");
 				for (var i = 0; i < anonymousTypes.Count; i++) {
 					var type = anonymousTypes[i];
 					var content = new ThemedTipText()
@@ -1308,7 +1318,7 @@ namespace Codist.QuickInfo
 		}
 
 		static TextBlock ToUIText(ISymbol symbol) {
-			return new ThemedTipText().AddSymbolDisplayParts(symbol.ToDisplayParts(WpfHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
+			return new ThemedTipText().AddSymbolDisplayParts(symbol.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
 		}
 
 		public void Dispose() {

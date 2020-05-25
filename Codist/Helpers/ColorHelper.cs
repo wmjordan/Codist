@@ -15,6 +15,9 @@ using WpfBrushes = System.Windows.Media.Brushes;
 
 namespace Codist
 {
+	/// <summary>
+	/// Used by symbol analysis tools and super quick info to provide color previews
+	/// </summary>
 	static class ColorHelper
 	{
 		static readonly Type ObjectType = typeof(object);

@@ -19,26 +19,6 @@ namespace Codist
 {
 	partial class WpfHelper
 	{
-		internal static readonly SymbolDisplayFormat QuickInfoSymbolDisplayFormat = new SymbolDisplayFormat(
-			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-			parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
-			memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType | SymbolDisplayMemberOptions.IncludeContainingType,
-			delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
-			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
-		internal static readonly SymbolDisplayFormat InTypeOverloadDisplayFormat = new SymbolDisplayFormat(
-			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameOnly,
-			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-			parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
-			memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType,
-			delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
-			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
-		internal static readonly SymbolDisplayFormat MemberNameFormat = new SymbolDisplayFormat(
-			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-			parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
-			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
-
 		public static TPanel AddReadOnlyTextBox<TPanel>(this TPanel panel, string text, bool alignLeft = false)
 		where TPanel : Panel {
 			panel.Children.Add(new QuickInfoTextBox {

@@ -31,11 +31,11 @@ namespace Codist
 			var t = symbol.GetReturnType();
 			if (t != null) {
 				content.Append("member type: ")
-					.Append(t.ToDisplayString(WpfHelper.MemberNameFormat), true);
+					.Append(t.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
 			}
 			else if (symbol.Kind == SymbolKind.TypeParameter) {
 				content.Append("defined in: ")
-					.Append(symbol.ContainingSymbol.ToDisplayString(WpfHelper.MemberNameFormat), true);
+					.Append(symbol.ContainingSymbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
 				var tp = symbol as ITypeParameterSymbol;
 				if (tp.HasConstraint()) {
 					content.AppendLine().Append("constraint: ");
@@ -48,7 +48,7 @@ namespace Codist
 					content.AppendLine();
 				}
 				content.Append(t.GetSymbolKindName() + ": ")
-					.Append(t.ToDisplayString(WpfHelper.MemberNameFormat), true);
+					.Append(t.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
 			}
 			if (forMemberList == false) {
 				if (content.Inlines.FirstInline != null) {
@@ -90,7 +90,7 @@ namespace Codist
 		}
 
 		static void ShowEnumType(TextBlock content, ISymbol symbol) {
-			var t = ((INamedTypeSymbol)symbol).EnumUnderlyingType.ToDisplayString(WpfHelper.QuickInfoSymbolDisplayFormat);
+			var t = ((INamedTypeSymbol)symbol).EnumUnderlyingType.ToDisplayString(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat);
 			if (t != "int") {
 				content.Append("\ntype: " + t);
 			}

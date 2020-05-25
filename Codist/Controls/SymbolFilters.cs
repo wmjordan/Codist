@@ -30,8 +30,8 @@ namespace Codist.Controls
 		public event EventHandler FilterChanged;
 
 		public SearchScopeBox() {
-			_ProjectFilter = CreateButton(KnownImageIds.CSProjectNode, "Current Project");
-			_DocumentFilter = CreateButton(KnownImageIds.CSSourceFile, "Current Document");
+			_ProjectFilter = CreateButton(IconIds.Project, "Current Project");
+			_DocumentFilter = CreateButton(IconIds.File, "Current Document");
 			Margin = WpfHelper.SmallHorizontalMargin;
 			Content = new Border {
 				BorderThickness = WpfHelper.TinyMargin,
@@ -83,9 +83,10 @@ namespace Codist.Controls
 		public SymbolFilterBox(ISymbolFilterable filter) {
 			Orientation = Orientation.Horizontal;
 			Margin = WpfHelper.MenuItemMargin;
-			Children.Add(ThemeHelper.GetImage(KnownImageIds.Filter).WrapMargin(WpfHelper.GlyphMargin));
+			Children.Add(ThemeHelper.GetImage(IconIds.Filter).WrapMargin(WpfHelper.GlyphMargin));
 			Children.Add(_FilterBox = new ThemedTextBox {
 				MinWidth = 150,
+				Margin = WpfHelper.GlyphMargin,
 				ToolTip = new ThemedToolTip("Result Filter", "Filter items in this menu.\nUse space to separate keywords.")
 			});
 			Children.Add(new Border {
@@ -105,7 +106,7 @@ namespace Codist.Controls
 					break;
 			}
 			_FilterContainer.Add(_FilterGroups);
-			_FilterContainer.Add(new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilters).ClearBorder());
+			_FilterContainer.Add(new ThemedButton(IconIds.ClearFilter, "Clear filter", ClearFilters).ClearBorder());
 			_Filter = filter;
 			foreach (var item in _FilterGroups) {
 				item.FilterChanged += FilterBox_Changed;
@@ -163,9 +164,9 @@ namespace Codist.Controls
 				case KnownImageIds.InterfacePublic:
 				case KnownImageIds.StructurePublic:
 				case KnownImageIds.EnumerationPublic:
-				case KnownImageIds.EnumerationItemPublic:
+				case IconIds.EnumField:
 				case KnownImageIds.DelegatePublic:
-				case KnownImageIds.Namespace:
+				case IconIds.Namespace:
 					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.TypeAndNamespace);
 				case KnownImageIds.ClassPrivate:
 				case KnownImageIds.InterfacePrivate:
@@ -185,29 +186,29 @@ namespace Codist.Controls
 				case KnownImageIds.EnumerationInternal:
 				case KnownImageIds.DelegateInternal:
 					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.TypeAndNamespace);
-				case KnownImageIds.ClassShortcut:
-				case KnownImageIds.InterfaceShortcut:
-				case KnownImageIds.StructureShortcut:
+				case IconIds.PartialClass:
+				case IconIds.PartialInterface:
+				case IconIds.PartialStruct:
 					return filterTypes.MatchFlags(MemberFilterTypes.TypeAndNamespace);
 				case KnownImageIds.MethodPublic:
-				case KnownImageIds.TypePublic: // constructor
+				case IconIds.PublicConstructor:
 				case KnownImageIds.OperatorPublic:
-				case KnownImageIds.ConvertPartition: // conversion
+				case IconIds.ConvertOperator:
 					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.Method);
 				case KnownImageIds.MethodProtected:
-				case KnownImageIds.TypeProtected: // constructor
+				case IconIds.ProtectedConstructor:
 				case KnownImageIds.OperatorProtected:
 					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.Method);
 				case KnownImageIds.MethodInternal:
-				case KnownImageIds.TypeInternal: // constructor
+				case IconIds.InternalConstructor:
 				case KnownImageIds.OperatorInternal:
 					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.Method);
 				case KnownImageIds.MethodPrivate:
-				case KnownImageIds.TypePrivate: // constructor
+				case IconIds.PrivateConstructor:
 				case KnownImageIds.OperatorPrivate:
 					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.Method);
-				case KnownImageIds.DeleteListItem: // deconstructor
-				case KnownImageIds.ExtensionMethod:
+				case IconIds.Deconstructor:
+				case IconIds.ExtensionMethod:
 					return filterTypes.MatchFlags(MemberFilterTypes.Method);
 				case KnownImageIds.FieldPublic:
 				case KnownImageIds.ConstantPublic:
@@ -233,7 +234,7 @@ namespace Codist.Controls
 					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.Event);
 				case KnownImageIds.EventPrivate:
 					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.Event);
-				case KnownImageIds.Numeric: // #region
+				case IconIds.Region: // #region
 					return filterTypes == MemberFilterTypes.All;
 			}
 			return false;
@@ -362,8 +363,8 @@ namespace Codist.Controls
 			public override int Filters => (int)_Filters;
 
 			public AccessibilityFilterButtonGroup() {
-				_PublicFilter = CreateButton(KnownImageIds.ModulePublic, "Public and protected types");
-				_PrivateFilter = CreateButton(KnownImageIds.ModulePrivate, "Internal and private types");
+				_PublicFilter = CreateButton(IconIds.PublicSymbols, "Public and protected types");
+				_PrivateFilter = CreateButton(IconIds.PrivateSymbols, "Internal and private types");
 				_Filters = MemberFilterTypes.AllAccessibilities;
 				Content = new StackPanel {
 					Children = {
@@ -435,12 +436,12 @@ namespace Codist.Controls
 			public override int Filters => (int)_Filters;
 
 			public TypeFilterButtonGroup() {
-				_ClassFilter = CreateButton(KnownImageIds.Class, "Classes");
-				_InterfaceFilter = CreateButton(KnownImageIds.Interface, "Interfaces");
-				_DelegateFilter = CreateButton(KnownImageIds.Delegate, "Delegates");
-				_StructFilter = CreateButton(KnownImageIds.Structure, "Structures");
-				_EnumFilter = CreateButton(KnownImageIds.Enumeration, "Enumerations");
-				_NamespaceFilter = CreateButton(KnownImageIds.Namespace, "Namespaces");
+				_ClassFilter = CreateButton(IconIds.Class, "Classes");
+				_InterfaceFilter = CreateButton(IconIds.Interface, "Interfaces");
+				_DelegateFilter = CreateButton(IconIds.Delegate, "Delegates");
+				_StructFilter = CreateButton(IconIds.Structure, "Structures");
+				_EnumFilter = CreateButton(IconIds.Enum, "Enumerations");
+				_NamespaceFilter = CreateButton(IconIds.Namespace, "Namespaces");
 
 				_Filters = MemberFilterTypes.AllTypes;
 				Content = new StackPanel {
@@ -533,10 +534,10 @@ namespace Codist.Controls
 			public override int Filters => (int)_Filters;
 
 			public MemberFilterButtonGroup() {
-				_FieldFilter = CreateButton(KnownImageIds.Field, "Fields, properties");
-				_MethodFilter = CreateButton(KnownImageIds.Method, "Methods");
-				_EventFilter = CreateButton(KnownImageIds.Event, "Events");
-				_TypeFilter = CreateButton(KnownImageIds.EntityContainer, "Types and delegates");
+				_FieldFilter = CreateButton(IconIds.Field, "Fields, properties");
+				_MethodFilter = CreateButton(IconIds.Method, "Methods");
+				_EventFilter = CreateButton(IconIds.Event, "Events");
+				_TypeFilter = CreateButton(IconIds.TypeAndDelegate, "Types and delegates");
 
 				_Filters = MemberFilterTypes.AllMembers;
 				Content = new StackPanel {
@@ -630,10 +631,10 @@ namespace Codist.Controls
 			public override int Filters => (int)_Filters;
 
 			public SymbolUsageFilterButtonGroup() {
-				_WriteFilter = CreateButton(KnownImageIds.Writeable, "Write");
-				_ReadFilter = CreateButton(KnownImageIds.Event, "Delegate, attach or detach");
-				_TypeCastFilter = CreateButton(KnownImageIds.ReportingAction, "Type conversion");
-				_TypeReferenceFilter = CreateButton(KnownImageIds.CPPMarkupXML, "Type reference or argument");
+				_WriteFilter = CreateButton(IconIds.UseToWrite, "Write");
+				_ReadFilter = CreateButton(IconIds.UseAsDelegate, "Delegate; attach or detach event");
+				_TypeCastFilter = CreateButton(IconIds.UseToCast, "Type conversion");
+				_TypeReferenceFilter = CreateButton(IconIds.UseAsTypeParameter, "Type reference or argument");
 				_Filters = MemberFilterTypes.AllUsages;
 				Content = new StackPanel {
 					Children = {

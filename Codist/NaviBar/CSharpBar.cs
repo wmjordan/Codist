@@ -395,7 +395,7 @@ namespace Codist.NaviBar
 			readonly SearchScopeBox _ScopeBox;
 			readonly TextBlock _Note;
 
-			public RootItem(CSharpBar bar) : base(KnownImageIds.Namespace, new ThemedToolBarText()) {
+			public RootItem(CSharpBar bar) : base(IconIds.Namespace, new ThemedToolBarText()) {
 				_Bar = bar;
 				this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
@@ -409,11 +409,11 @@ namespace Codist.NaviBar
 							new StackPanel {
 								Orientation = Orientation.Horizontal,
 								Children = {
-									ThemeHelper.GetImage(KnownImageIds.SearchContract).WrapMargin(WpfHelper.GlyphMargin),
+									ThemeHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
 									(_FinderBox = new MemberFinderBox() { MinWidth = 150 }),
 									(_ScopeBox = new SearchScopeBox {
 										Contents = {
-											new ThemedButton(KnownImageIds.StopFilter, "Clear filter", ClearFilter).ClearBorder()
+											new ThemedButton(IconIds.ClearFilter, "Clear filter", ClearFilter).ClearBorder()
 										}
 									}),
 								}
@@ -456,7 +456,7 @@ namespace Codist.NaviBar
 				PopulateTypes();
 				_Note.Clear();
 				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
-					  _Note.Append(ThemeHelper.GetImage(KnownImageIds.Code))
+					  _Note.Append(ThemeHelper.GetImage(IconIds.LineOfCode))
 						.Append(_Bar.View.TextSnapshot.LineCount);
 				}
 				_Bar.ShowMenu(this, _Menu);
@@ -657,11 +657,11 @@ namespace Codist.NaviBar
 				_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.GetMembers().Select(s => new SymbolItem(s, _Menu, false)));
 				var footer = (TextBlock)_Menu.Footer;
 				if (_PartialCount > 1) {
-					footer.Append(ThemeHelper.GetImage(KnownImageIds.OpenDocumentFromCollection))
+					footer.Append(ThemeHelper.GetImage(IconIds.PartialDocumentCount))
 						.Append(_PartialCount);
 				}
 				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
-					footer.Append(ThemeHelper.GetImage(KnownImageIds.Code))
+					footer.Append(ThemeHelper.GetImage(IconIds.LineOfCode))
 						.Append(Node.GetLineSpan().Length + 1);
 				}
 				_Bar.ShowMenu(this, _Menu);
@@ -856,16 +856,17 @@ namespace Codist.NaviBar
 						var p1 = m.ParameterList.Parameters.FirstOrDefault();
 						var isExt = false;
 						if (p1 != null && p1.Modifiers.Any(SyntaxKind.ThisKeyword)) {
-							AddIcon(ref icons, KnownImageIds.ExtensionMethod);
+							AddIcon(ref icons, IconIds.ExtensionMethod);
 							isExt = true;
 						}
 						foreach (var modifier in m.Modifiers) {
 							switch (modifier.Kind()) {
-								case SyntaxKind.AsyncKeyword: AddIcon(ref icons, KnownImageIds.DynamicGroup); break;
-								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, KnownImageIds.DialogTemplate); break;
+								case SyntaxKind.AsyncKeyword: AddIcon(ref icons, IconIds.AsyncMember); break;
+								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractMember); break;
 								case SyntaxKind.StaticKeyword:
-									if (isExt == false)
-										AddIcon(ref icons, KnownImageIds.Link);
+									if (isExt == false) {
+										AddIcon(ref icons, IconIds.StaticMember);
+									}
 									break;
 							}
 						}
@@ -873,17 +874,17 @@ namespace Codist.NaviBar
 					case BasePropertyDeclarationSyntax p:
 						foreach (var modifier in p.Modifiers) {
 							switch (modifier.Kind()) {
-								case SyntaxKind.StaticKeyword: AddIcon(ref icons, KnownImageIds.Link); break;
-								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, KnownImageIds.DialogTemplate); break;
+								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
+								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractMember); break;
 							}
 						}
 						break;
 					case BaseFieldDeclarationSyntax f:
 						foreach (var modifier in f.Modifiers) {
 							switch (modifier.Kind()) {
-								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, KnownImageIds.EncapsulateField); break;
-								case SyntaxKind.VolatileKeyword: AddIcon(ref icons, KnownImageIds.SetField); break;
-								case SyntaxKind.StaticKeyword: AddIcon(ref icons, KnownImageIds.Link); break;
+								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyField); break;
+								case SyntaxKind.VolatileKeyword: AddIcon(ref icons, IconIds.VolatileField); break;
+								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
 							}
 						}
 						break;
@@ -892,9 +893,9 @@ namespace Codist.NaviBar
 					case BaseTypeDeclarationSyntax c:
 						foreach (var modifier in c.Modifiers) {
 							switch (modifier.Kind()) {
-								case SyntaxKind.SealedKeyword: AddIcon(ref icons, KnownImageIds.ClassSealed); break;
-								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, KnownImageIds.AbstractClass); break;
-								case SyntaxKind.StaticKeyword: AddIcon(ref icons, KnownImageIds.Link); break;
+								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedClass); break;
+								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractClass); break;
+								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
 							}
 						}
 						break;
@@ -995,7 +996,7 @@ namespace Codist.NaviBar
 			readonly ISymbol _SyntaxTree;
 
 			public DocItem(CSharpBar bar, ISymbol syntaxTree)
-				: base (KnownImageIds.GoToDefinition, new ThemedMenuText(syntaxTree.GetOriginalName())) {
+				: base (IconIds.GoToDefinition, new ThemedMenuText(syntaxTree.GetOriginalName())) {
 				_Bar = bar;
 				_SyntaxTree = syntaxTree;
 				Opacity = 0.8;

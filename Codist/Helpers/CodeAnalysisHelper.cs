@@ -12,6 +12,36 @@ namespace Codist
 {
 	static partial class CodeAnalysisHelper
 	{
+		internal static readonly SymbolDisplayFormat QuickInfoSymbolDisplayFormat = new SymbolDisplayFormat(
+			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+			parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
+			memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType | SymbolDisplayMemberOptions.IncludeContainingType,
+			delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
+			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+		internal static readonly SymbolDisplayFormat InTypeOverloadDisplayFormat = new SymbolDisplayFormat(
+			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameOnly,
+			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+			parameterOptions: SymbolDisplayParameterOptions.IncludeDefaultValue | SymbolDisplayParameterOptions.IncludeName | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeType,
+			memberOptions: SymbolDisplayMemberOptions.IncludeParameters | SymbolDisplayMemberOptions.IncludeType,
+			delegateStyle: SymbolDisplayDelegateStyle.NameAndSignature,
+			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+		internal static readonly SymbolDisplayFormat MemberNameFormat = new SymbolDisplayFormat(
+			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+			parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
+			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+		internal static readonly SymbolDisplayFormat TypeMemberNameFormat = new SymbolDisplayFormat(
+			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
+			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+		internal static readonly SymbolDisplayFormat QualifiedTypeNameFormat = new SymbolDisplayFormat(
+			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
+			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+
 		#region Node info
 		public static bool IsDeclaration(this SyntaxKind kind) {
 			switch (kind) {
@@ -230,15 +260,15 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.IndexerDeclaration: return GetPropertyIcon((BasePropertyDeclarationSyntax)node);
 				case SyntaxKind.OperatorDeclaration: return GetOperatorIcon((OperatorDeclarationSyntax)node);
-				case SyntaxKind.ConversionOperatorDeclaration: return KnownImageIds.ConvertPartition;
+				case SyntaxKind.ConversionOperatorDeclaration: return IconIds.ConvertOperator;
 				case SyntaxKind.FieldDeclaration: return GetFieldIcon((FieldDeclarationSyntax)node);
-				case SyntaxKind.EnumMemberDeclaration: return KnownImageIds.EnumerationItemPublic;
+				case SyntaxKind.EnumMemberDeclaration: return IconIds.EnumField;
 				case SyntaxKind.VariableDeclarator: return node.Parent.Parent.GetImageId();
 				case SyntaxKind.VariableDeclaration:
-				case SyntaxKind.LocalDeclarationStatement: return KnownImageIds.LocalVariable;
-				case SyntaxKind.NamespaceDeclaration: return KnownImageIds.Namespace;
+				case SyntaxKind.LocalDeclarationStatement: return IconIds.LocalVariable;
+				case SyntaxKind.NamespaceDeclaration: return IconIds.Namespace;
 				case SyntaxKind.ArgumentList:
-				case SyntaxKind.AttributeArgumentList: return KnownImageIds.Parameter;
+				case SyntaxKind.AttributeArgumentList: return IconIds.Argument;
 				case SyntaxKind.DoStatement: return KnownImageIds.DoWhile;
 				case SyntaxKind.FixedStatement: return KnownImageIds.Pin;
 				case SyntaxKind.ForEachStatement: return KnownImageIds.ForEach;
@@ -251,28 +281,28 @@ namespace Codist
 				case SyntaxKind.UsingStatement: return KnownImageIds.TransactedReceiveScope;
 				case SyntaxKind.WhileStatement: return KnownImageIds.While;
 				case SyntaxKind.ParameterList: return KnownImageIds.Parameter;
-				case SyntaxKind.ParenthesizedExpression: return KnownImageIds.NamedSet;
+				case SyntaxKind.ParenthesizedExpression: return IconIds.ParenthesizedExpression;
 				case SyntaxKind.ParenthesizedLambdaExpression:
-				case SyntaxKind.SimpleLambdaExpression: return KnownImageIds.PartitionFunction;
+				case SyntaxKind.SimpleLambdaExpression: return IconIds.LambdaExpression;
 				case SyntaxKind.DelegateDeclaration: return GetDelegateIcon((DelegateDeclarationSyntax)node);
 				case SyntaxKind.EventDeclaration: return GetEventIcon((BasePropertyDeclarationSyntax)node);
 				case SyntaxKind.EventFieldDeclaration: return GetEventFieldIcon((EventFieldDeclarationSyntax)node);
-				case SyntaxKind.UnsafeStatement: return KnownImageIds.HotSpot;
+				case SyntaxKind.UnsafeStatement: return IconIds.Unsafe;
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement: return KnownImageIds.XMLElement;
 				case SyntaxKind.XmlComment: return KnownImageIds.XMLCommentTag;
-				case SyntaxKind.DestructorDeclaration: return KnownImageIds.DeleteListItem;
+				case SyntaxKind.DestructorDeclaration: return IconIds.Deconstructor;
 				case SyntaxKind.UncheckedStatement: return KnownImageIds.CheckBoxUnchecked;
 				case SyntaxKind.CheckedStatement: return KnownImageIds.CheckBoxChecked;
-				case SyntaxKind.ReturnStatement: return KnownImageIds.Return;
+				case SyntaxKind.ReturnStatement: return IconIds.Return;
 				case SyntaxKind.ExpressionStatement: return GetImageId(((ExpressionStatementSyntax)node).Expression);
-				case SyntaxKind.Attribute: return KnownImageIds.FormPostBodyParameterNode;
+				case SyntaxKind.Attribute: return IconIds.Attribute;
 				case SyntaxKind.YieldReturnStatement: return KnownImageIds.Yield;
 				case SyntaxKind.GotoStatement:
 				case SyntaxKind.GotoCaseStatement:
 				case SyntaxKind.GotoDefaultStatement: return KnownImageIds.GoToSourceCode;
-				case SyntaxKind.LocalFunctionStatement: return KnownImageIds.MethodSnippet;
-				case SyntaxKind.RegionDirectiveTrivia: return KnownImageIds.Numeric;
+				case SyntaxKind.LocalFunctionStatement: return IconIds.LocalFunction;
+				case SyntaxKind.RegionDirectiveTrivia: return IconIds.Region;
 				case SyntaxKind.EndRegionDirectiveTrivia: return KnownImageIds.ToolstripPanelBottom;
 			}
 			return KnownImageIds.UnknownMember;
@@ -287,7 +317,7 @@ namespace Codist
 						case "partial": isPartial = true; break;
 					}
 				}
-				return isPartial ? KnownImageIds.ClassShortcut : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.ClassInternal : KnownImageIds.ClassPrivate;
+				return isPartial ? IconIds.PartialClass : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.ClassInternal : KnownImageIds.ClassPrivate;
 			}
 			int GetStructIcon(StructDeclarationSyntax syntax) {
 				bool isPartial = false;
@@ -300,7 +330,7 @@ namespace Codist
 						case "partial": isPartial = true; break;
 					}
 				}
-				return isPartial ? KnownImageIds.StructureShortcut : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.StructureInternal : KnownImageIds.StructurePrivate;
+				return isPartial ? IconIds.PartialStruct : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.StructureInternal : KnownImageIds.StructurePrivate;
 			}
 			int GetEnumIcon(EnumDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -322,7 +352,7 @@ namespace Codist
 						case "partial": isPartial = true; break;
 					}
 				}
-				return isPartial ? KnownImageIds.InterfaceSnippet : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.InterfaceInternal : KnownImageIds.InterfacePrivate;
+				return isPartial ? IconIds.PartialInterface : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.InterfaceInternal : KnownImageIds.InterfacePrivate;
 			}
 			int GetEventIcon(BasePropertyDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -391,13 +421,13 @@ namespace Codist
 			int GetConstructorIcon(ConstructorDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
 					switch (modifier.Text) {
-						case "public": return KnownImageIds.TypePublic;
-						case "internal": return KnownImageIds.TypeInternal;
-						case "protected": return KnownImageIds.TypeProtected;
-						case "private": return KnownImageIds.TypePrivate;
+						case "public": return IconIds.PublicConstructor;
+						case "internal": return IconIds.InternalConstructor;
+						case "protected": return IconIds.ProtectedConstructor;
+						case "private": return IconIds.PrivateConstructor;
 					}
 				}
-				return KnownImageIds.TypePrivate;
+				return IconIds.PrivateConstructor;
 			}
 			int GetPropertyIcon(BasePropertyDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {

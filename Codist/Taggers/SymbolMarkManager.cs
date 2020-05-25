@@ -150,7 +150,7 @@ namespace Codist.Taggers
 				}
 			}
 			public int ImageId => _Symbol.GetImageId();
-			public string DisplayString => _Symbol.ToDisplayString(WpfHelper.MemberNameFormat);
+			public string DisplayString => _Symbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat);
 			//public SyntaxReference Reference => _Symbol.DeclaringSyntaxReferences.FirstOrDefault();
 
 			public bool Equals(IBookmarkedSymbol other) {

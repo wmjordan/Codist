@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -9,7 +8,6 @@ using System.Windows.Media;
 using Codist.Controls;
 using Codist.SyntaxHighlight;
 using Codist.Taggers;
-using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Classification;
@@ -97,18 +95,18 @@ namespace Codist.Options
 									FontWeight = FontWeights.Bold,
 									Margin = WpfHelper.TopItemMargin
 								},
-								(_LoadThemeButton = new ThemedButton(KnownImageIds.FolderOpened, "Load...", "Load syntax highlight theme...", LoadTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								(_SaveThemeButton = new ThemedButton(KnownImageIds.SaveAs, "Save...", "Save syntax highlight theme...", SaveTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								(_ResetThemeButton = new ThemedButton(KnownImageIds.CleanData, "Reset...", "Reset syntax highlight theme to default...", ResetTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)),
+								(_LoadThemeButton = new ThemedButton(IconIds.Load, "Load...", "Load syntax highlight theme...", LoadTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								(_SaveThemeButton = new ThemedButton(IconIds.SaveAs, "Save...", "Save syntax highlight theme...", SaveTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								(_ResetThemeButton = new ThemedButton(IconIds.ResetTheme, "Reset...", "Reset syntax highlight theme to default...", ResetTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)),
 								new TextBlock {
 									Text = "Predefined themes:",
 									Height = 20,
 									FontWeight = FontWeights.Bold,
 									Margin = WpfHelper.TopItemMargin
 								},
-								new ThemedButton(KnownImageIds.ColorPalette, "Light theme", "Load predefined theme for light editing environment", () => LoadTheme(Config.LightTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								new ThemedButton(KnownImageIds.ColorPalette, "Dark theme", "Load predefined theme for dark editing environment", () => LoadTheme(Config.DarkTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								new ThemedButton(KnownImageIds.ColorPalette, "Simple theme", "Load a predefined simple theme", () => LoadTheme(Config.SimpleTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, "Light theme", "Load predefined theme for light editing environment", () => LoadTheme(Config.LightTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, "Dark theme", "Load predefined theme for dark editing environment", () => LoadTheme(Config.DarkTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, "Simple theme", "Load a predefined simple theme", () => LoadTheme(Config.SimpleTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
 							}
 						},
 
@@ -1070,10 +1068,10 @@ namespace Codist.Options
 					ContextMenu = new ContextMenu {
 						Resources = SharedDictionaryManager.ContextMenu,
 						Items = {
-							new ThemedMenuItem(KnownImageIds.ColorDialog, "Pick color...", PickColor),
-							new ThemedMenuItem(KnownImageIds.EmptyBucket, "Reset color", ResetColor),
-							new ThemedMenuItem(KnownImageIds.Copy, "Copy color", CopyColor),
-							new ThemedMenuItem(KnownImageIds.Paste, "Paste color", PasteColor),
+							new ThemedMenuItem(IconIds.PickColor, "Pick color...", PickColor),
+							new ThemedMenuItem(IconIds.Reset, "Reset color", ResetColor),
+							new ThemedMenuItem(IconIds.Copy, "Copy color", CopyColor),
+							new ThemedMenuItem(IconIds.Paste, "Paste color", PasteColor),
 						},
 						Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 						PlacementTarget = this
@@ -1149,7 +1147,7 @@ namespace Codist.Options
 					ContextMenu = new ContextMenu {
 						Resources = SharedDictionaryManager.ContextMenu,
 						Items = {
-							new ThemedMenuItem(KnownImageIds.FillOpacity, "Default", SelectOpacity) { Tag = 0 },
+							new ThemedMenuItem(IconIds.Opacity, "Default", SelectOpacity) { Tag = 0 },
 						},
 						MaxHeight = 300,
 						Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
@@ -1158,7 +1156,7 @@ namespace Codist.Options
 					ContextMenu.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 					var items = new ThemedMenuItem[16];
 					for (int i = 16; i > 0; i--) {
-						items[16 - i] = new ThemedMenuItem(KnownImageIds.Blank, i.ToString(), SelectOpacity) { Tag = i * 16 - 1 };
+						items[16 - i] = new ThemedMenuItem(IconIds.None, i.ToString(), SelectOpacity) { Tag = i * 16 - 1 };
 					}
 					ContextMenu.Items.AddRange(items);
 				}

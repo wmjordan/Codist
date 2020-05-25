@@ -430,6 +430,7 @@ namespace Codist
 			}
 			else if (possibleUsage.MatchFlags(SymbolUsageKind.Delegate)) {
 				var n = node.GetNodePurpose();
+				// todo detect delegate usage burried under calculation expressions
 				if (n.IsKind(SyntaxKind.Argument)) {
 					return SymbolUsageKind.Delegate;
 				}

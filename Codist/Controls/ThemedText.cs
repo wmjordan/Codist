@@ -180,7 +180,7 @@ namespace Codist.Controls
 					IsEnabled = true
 				};
 				m.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
-				var newItem = new ThemedMenuItem { Icon = ThemeHelper.GetImage(Microsoft.VisualStudio.Imaging.KnownImageIds.Copy), Header = "Copy selection" };
+				var newItem = new ThemedMenuItem { Icon = ThemeHelper.GetImage(IconIds.Copy), Header = "Copy selection" };
 				newItem.Click += HandleMouseCopy;
 				m.Items.Add(newItem);
 				m.Closed += ReleaseQuickInfo;
