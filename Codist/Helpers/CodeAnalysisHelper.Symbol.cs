@@ -595,6 +595,21 @@ namespace Codist
 			return false;
 		}
 
+		public static bool IsQualifiable(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.ArrayType:
+				case SymbolKind.Event:
+				case SymbolKind.Field:
+				case SymbolKind.Method:
+				case SymbolKind.Property:
+				case SymbolKind.NamedType:
+				case SymbolKind.Namespace:
+				case SymbolKind.PointerType:
+					return true;
+			}
+			return false;
+		}
+
 		public static bool IsMemberOrType(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event:

@@ -54,7 +54,7 @@ namespace Codist.Controls
 			}
 			if (_Symbol != null) {
 				Items.Add(CreateItem(IconIds.Copy, "Copy Symbol Name", CopySymbolName));
-				if (_Symbol.Kind == SymbolKind.NamedType || _Symbol.IsStatic && _Symbol.ContainingType?.IsGenericType == false) {
+				if (_Symbol != null && _Symbol.IsQualifiable()) {
 					Items.Add(CreateItem(IconIds.Copy, "Copy Qualified Symbol Name", CopyQualifiedSymbolName));
 				}
 			}
@@ -62,8 +62,7 @@ namespace Codist.Controls
 
 		public void AddSymbolCommands() {
 			Items.Add(CreateItem(IconIds.Copy, "Copy Symbol Name", CopySymbolName));
-			if (_Symbol != null
-				&& (_Symbol.Kind == SymbolKind.NamedType ||  _Symbol.IsStatic && _Symbol.ContainingType?.IsGenericType == false)) {
+			if (_Symbol != null && _Symbol.IsQualifiable()) {
 				Items.Add(CreateItem(IconIds.Copy, "Copy Qualified Symbol Name", CopyQualifiedSymbolName));
 			}
 		}
@@ -464,7 +463,21 @@ namespace Codist.Controls
 		}
 		void CopyQualifiedSymbolName(object sender, RoutedEventArgs args) {
 			try {
-				Clipboard.SetDataObject(_Symbol.ToDisplayString(_Symbol.Kind == SymbolKind.NamedType ? CodeAnalysisHelper.QualifiedTypeNameFormat : CodeAnalysisHelper.TypeMemberNameFormat));
+				var s = _Symbol.OriginalDefinition;
+				string t;
+				switch (s.Kind) {
+					case SymbolKind.NamedType: t = s.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat); break;
+					case SymbolKind.Method:
+						var m = s as IMethodSymbol;
+						if (m.ReducedFrom != null) {
+							s = m.ReducedFrom;
+						}
+						goto default;
+					default:
+						t = s.ToDisplayString(CodeAnalysisHelper.TypeMemberNameFormat);
+						break;
+				}
+				Clipboard.SetDataObject(t);
 			}
 			catch (SystemException) {
 				// ignore failure
