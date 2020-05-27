@@ -259,6 +259,7 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpEventName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
+	[Order(After = Constants.CodeEventName)]
 	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class EventFormat : ClassificationFormatDefinition
 	{
