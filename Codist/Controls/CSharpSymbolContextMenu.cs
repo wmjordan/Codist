@@ -54,7 +54,7 @@ namespace Codist.Controls
 			}
 			if (_Symbol != null) {
 				Items.Add(CreateItem(IconIds.Copy, "Copy Symbol Name", CopySymbolName));
-				if (_Symbol != null && _Symbol.IsQualifiable()) {
+				if (_Symbol.IsQualifiable()) {
 					Items.Add(CreateItem(IconIds.Copy, "Copy Qualified Symbol Name", CopyQualifiedSymbolName));
 				}
 			}

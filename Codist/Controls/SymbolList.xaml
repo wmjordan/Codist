@@ -58,7 +58,7 @@
 				<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.PanelTitleBarBrushKey}}"/>
 				<Setter TargetName="HeaderHost" Property="TextBlock.FontWeight" Value="Bold"/>
 			</DataTrigger>
-			<DataTrigger Binding="{Binding Type}" Value="Container">
+			<DataTrigger Binding="{Binding Usage}" Value="Container">
 				<Setter TargetName="HeaderHost" Property="HorizontalAlignment" Value="Center"/>
 				<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:EnvironmentColors.PanelTitleBarUnselectedBrushKey}}"/>
 			</DataTrigger>
