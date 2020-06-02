@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using R = Codist.Properties.Resources;
 
 namespace Codist.QuickInfo
 {
@@ -50,7 +51,7 @@ namespace Codist.QuickInfo
 		}
 		static void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
 			if (symbol.Kind == SymbolKind.Namespace) {
-				description.ToolTip = "Locations: " + symbol.DeclaringSyntaxReferences.Length;
+				description.ToolTip = R.T_Locations + symbol.DeclaringSyntaxReferences.Length;
 				description.MouseEnter += HookEvents;
 				return;
 			}
@@ -137,15 +138,15 @@ namespace Codist.QuickInfo
 			var tooltip = new ThemedToolTip();
 			tooltip.Title.Append(symbol.GetOriginalName(), true);
 			var t = tooltip.Content
-				.Append("defined in ")
+				.Append(R.T_DefinedIn)
 				.Append(String.IsNullOrEmpty(path) ? "?" : path, true);
 			if (symbol.IsMemberOrType() && symbol.ContainingNamespace != null) {
-				t.Append("\nnamespace: ").Append(symbol.ContainingNamespace.ToDisplayString());
+				t.Append("\n" + R.T_Namespace).Append(symbol.ContainingNamespace.ToDisplayString());
 			}
 			if (symbol.Kind == SymbolKind.Method) {
 				var m = ((IMethodSymbol)symbol).ReducedFrom;
 				if (m != null) {
-					t.Append("\nclass: ").Append(m.ContainingType.Name);
+					t.Append("\n" + R.T_Class).Append(m.ContainingType.Name);
 				}
 			}
 			return tooltip;

@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Utilities;
+using R = Codist.Properties.Resources;
 
 namespace Codist.SmartBars
 {
@@ -80,7 +81,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddCopyCommand() {
-			AddCommand(ToolBar, IconIds.Copy, "Copy selected text\nRight click: Copy line", ctx => {
+			AddCommand(ToolBar, IconIds.Copy, R.CMD_CopySelectedText, ctx => {
 				if (ctx.RightClick) {
 					ctx.View.ExpandSelectionToLine();
 				}
@@ -89,7 +90,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddCutCommand() {
-			AddCommand(ToolBar, IconIds.Cut, "Cut selected text\nRight click: Cut line", ctx => {
+			AddCommand(ToolBar, IconIds.Cut, R.CMD_CutSelectedText, ctx => {
 				if (ctx.RightClick) {
 					ctx.View.ExpandSelectionToLine();
 				}
@@ -98,7 +99,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddDeleteCommand() {
-			AddCommand(ToolBar, IconIds.Delete, "Delete selected text\nRight click: Delete line\nCtrl click: Delete and select next", ctx => {
+			AddCommand(ToolBar, IconIds.Delete, R.CMD_DeleteSelectedText, ctx => {
 				var s = ctx.View.Selection;
 				var t = s.GetFirstSelectionText();
 				if (s.Mode == TextSelectionMode.Stream
@@ -120,7 +121,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddDuplicateCommand() {
-			AddCommand(ToolBar, IconIds.Duplicate, "Duplicate selection\nRight click: Duplicate line", ctx => {
+			AddCommand(ToolBar, IconIds.Duplicate, R.CMD_DuplicateSelection, ctx => {
 				if (ctx.RightClick) {
 					ctx.View.ExpandSelectionToLine();
 				}
@@ -130,7 +131,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddFindAndReplaceCommands() {
-			AddCommands(ToolBar, IconIds.FindNext, "Find next selected text\nCtrl click: Find match case\nRight click: Find and replace...", ctx => {
+			AddCommands(ToolBar, IconIds.FindNext, R.CMD_FindReplace, ctx => {
 				ThreadHelper.ThrowIfNotOnUIThread();
 				string t = ctx.View.GetFirstSelectionText();
 				if (t.Length == 0) {
@@ -145,22 +146,22 @@ namespace Codist.SmartBars
 				else {
 					ctx.HideToolBar();
 				}
-			}, ctx => __FindAndReplaceCommands.Concat(Config.Instance.SearchEngines.ConvertAll(s => new CommandItem(IconIds.SearchWebSite, "Search with " + s.Name, c => SearchSelection(s.Pattern, c)))));
+			}, ctx => __FindAndReplaceCommands.Concat(Config.Instance.SearchEngines.ConvertAll(s => new CommandItem(IconIds.SearchWebSite, R.CMD_SearchWith.Replace("<NAME>", s.Name), c => SearchSelection(s.Pattern, c)))));
 		}
 
 		void AddPasteCommand() {
 			if (Clipboard.ContainsText()) {
-				AddCommand(ToolBar, IconIds.Paste, "Paste text from clipboard\nRight click: Paste over line\nCtrl click: Paste and select next", ctx => ExecuteAndFind(ctx, "Edit.Paste", ctx.View.GetFirstSelectionText()));
+				AddCommand(ToolBar, IconIds.Paste, R.CMD_Paste, ctx => ExecuteAndFind(ctx, "Edit.Paste", ctx.View.GetFirstSelectionText()));
 			}
 		}
 
 		void AddSpecialFormatCommand() {
 			switch (View.GetSelectedTokenType()) {
 				case TokenType.None:
-					AddCommands(ToolBar, IconIds.FormatSelection, "Format selection...", null, GetFormatItems);
+					AddCommands(ToolBar, IconIds.FormatSelection, R.CMD_Formatting, null, GetFormatItems);
 					break;
 				case TokenType.Digit:
-					AddCommand(ToolBar, IconIds.IncrementNumber, "Increment number", ctx => {
+					AddCommand(ToolBar, IconIds.IncrementNumber, R.CMD_IncrementNumber, ctx => {
 						if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
 							ctx.KeepToolBar(false);
 							var u = ctx.View.EditSelection((v, edit, s) => {
@@ -180,7 +181,7 @@ namespace Codist.SmartBars
 					break;
 				case TokenType.Guid:
 				case TokenType.GuidPlaceHolder:
-					AddCommand(ToolBar, IconIds.NewGuid, "New GUID\nHint: To create a new GUID, type 'guid' (without quotes) and select it", ctx => {
+					AddCommand(ToolBar, IconIds.NewGuid, R.CMD_GUID, ctx => {
 						if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
 							using (var ed = ctx.View.TextBuffer.CreateEdit()) {
 								var t = Guid.NewGuid().ToString(span.Length == 36 || span.Length == 4 ? "D" : span.GetText()[0] == '(' ? "P" : "B").ToUpperInvariant();
@@ -192,16 +193,16 @@ namespace Codist.SmartBars
 							}
 						}
 					});
-					AddCommands(ToolBar, IconIds.FormatSelection, "Formatting...", null, _ => __CaseCommands);
+					AddCommands(ToolBar, IconIds.FormatSelection, R.CMD_Formatting, null, _ => __CaseCommands);
 					break;
 				default:
-					AddCommands(ToolBar, IconIds.FormatSelection, "Formatting...", null, _ => __CaseCommands);
+					AddCommands(ToolBar, IconIds.FormatSelection, R.CMD_Formatting, null, _ => __CaseCommands);
 					break;
 			}
 		}
 
 		void AddClassificationInfoCommand() {
-			AddCommand(ToolBar, IconIds.ShowClassificationInfo, "Show syntax classification info", ctx => {
+			AddCommand(ToolBar, IconIds.ShowClassificationInfo, R.CMD_ShowSyntaxClassificationInfo, ctx => {
 				if (ctx.View.TryGetFirstSelectionSpan(out var span) == false) {
 					return;
 				}
@@ -240,16 +241,16 @@ namespace Codist.SmartBars
 				r.AddRange(__SurroundingCommands);
 				r.AddRange(__FormatCommands);
 				if (View.IsMultilineSelected()) {
-					r.Add(new CommandItem(IconIds.JoinLines, "Join Lines", ctx => ctx.View.JoinSelectedLines()));
+					r.Add(new CommandItem(IconIds.JoinLines, R.CMD_JoinLines, ctx => ctx.View.JoinSelectedLines()));
 				}
 				var t = View.GetTextViewLineContainingBufferPosition(selection.Start.Position).Extent.GetText();
 				if (t.Length > 0 && (t[0] == ' ' || t[0] == '\t')) {
-					r.Add(new CommandItem(IconIds.Unindent, "Unindent", ctx => {
+					r.Add(new CommandItem(IconIds.Unindent, R.CMD_Unindent, ctx => {
 						ctx.KeepToolBarOnClick = true;
 						TextEditorHelper.ExecuteEditorCommand("Edit.DecreaseLineIndent");
 					}));
 				}
-				r.Add(new CommandItem(IconIds.Indent, "Indent", ctx => {
+				r.Add(new CommandItem(IconIds.Indent, R.CMD_Indent, ctx => {
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.IncreaseLineIndent");
 				}));
@@ -260,15 +261,15 @@ namespace Codist.SmartBars
 
 		static CommandItem[] GetCaseCommands() {
 			return new CommandItem[] {
-				new CommandItem(IconIds.Capitalize, "Capitalize", ctx => {
+				new CommandItem(IconIds.Capitalize, R.CMD_Capitalize, ctx => {
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.Capitalize");
 				}),
-				new CommandItem(IconIds.Uppercase, "Uppercase", ctx => {
+				new CommandItem(IconIds.Uppercase, R.CMD_Uppercase, ctx => {
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.MakeUppercase");
 				}),
-				new CommandItem(IconIds.None, "Lowercase", ctx => {
+				new CommandItem(IconIds.None, R.CMD_Lowercase, ctx => {
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.MakeLowercase");
 				}),
@@ -276,32 +277,32 @@ namespace Codist.SmartBars
 		}
 		static CommandItem[] GetDebugCommands() {
 			return new CommandItem[] {
-				new CommandItem(IconIds.Watch, "Add Watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddWatch")),
-				new CommandItem(IconIds.Watch, "Add Parallel Watch", c => TextEditorHelper.ExecuteEditorCommand("Debug.AddParallelWatch")),
-				new CommandItem(IconIds.DeleteBreakpoint, "Delete All Breakpoints", c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
+				new CommandItem(IconIds.Watch, R.CMD_AddWatch, c => TextEditorHelper.ExecuteEditorCommand("Debug.AddWatch")),
+				new CommandItem(IconIds.Watch, R.CMD_AddParallelWatch, c => TextEditorHelper.ExecuteEditorCommand("Debug.AddParallelWatch")),
+				new CommandItem(IconIds.DeleteBreakpoint, R.CMD_DeleteAllBreakpoints, c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
 			};
 		}
 
 		static CommandItem[] GetFormatCommands() {
 			return new CommandItem[] {
-				new CommandItem(IconIds.FormatSelection, "Format Selection", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")),
-				new CommandItem(IconIds.FormatDocument, "Format Document", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatDocument")),
+				new CommandItem(IconIds.FormatSelection, R.CMD_FormatSelection, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")),
+				new CommandItem(IconIds.FormatDocument, R.CMD_FormatDocument, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatDocument")),
 			};
 		}
 		static CommandItem[] GetFindAndReplaceCommands() {
 			return new CommandItem[] {
-					new CommandItem(IconIds.Find, "Find...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
-					new CommandItem(IconIds.Replace, "Replace...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
-					new CommandItem(IconIds.FindInFile, "Find in Files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
-					new CommandItem(IconIds.ReplaceInFolder, "Replace in Files...", _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles"))
+					new CommandItem(IconIds.Find, R.CMD_Find, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
+					new CommandItem(IconIds.Replace, R.CMD_Replace, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
+					new CommandItem(IconIds.FindInFile, R.CMD_FindInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
+					new CommandItem(IconIds.ReplaceInFolder, R.CMD_ReplaceInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles"))
 				};
 		}
 		static CommandItem[] GetSurroundingCommands() {
 			return new CommandItem[] {
-				new CommandItem(IconIds.SurroundWith, "Surround with...", ctx => {
+				new CommandItem(IconIds.SurroundWith, R.CMD_SurroundWith, ctx => {
 					TextEditorHelper.ExecuteEditorCommand("Edit.SurroundWith");
 				}),
-				new CommandItem(IconIds.ToggleParentheses, "Toggle Parentheses", ctx => {
+				new CommandItem(IconIds.ToggleParentheses, R.CMD_ToggleParentheses, ctx => {
 					if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
 						WrapWith(ctx, "(", ")", true);
 					}

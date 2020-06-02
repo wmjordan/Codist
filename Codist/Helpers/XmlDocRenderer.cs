@@ -10,6 +10,7 @@ using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
+using R = Codist.Properties.Resources;
 
 namespace Codist
 {
@@ -47,7 +48,7 @@ namespace Codist
 				summary = doc.GetInheritedDescription(symbol, out inheritDoc);
 				if (inheritDoc != null && summary != null) {
 					tip.Append(new ThemedTipParagraph(IconIds.ReferencedXmlDoc, new ThemedTipText()
-							.Append("Documentation from ")
+							.Append(R.T_DocumentationFrom)
 							.AddSymbol(inheritDoc.Symbol.ContainingSymbol, false, _SymbolFormatter)
 							.Append(".")
 							.AddSymbol(inheritDoc.Symbol, true, _SymbolFormatter)
@@ -97,8 +98,8 @@ namespace Codist
 				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Returns != null)?.Returns;
 				if (returns != null && returns.FirstNode != null) {
 					tip.Append(new ThemedTipParagraph(IconIds.Return, new ThemedTipText()
-						.Append("Returns", true)
-						.Append(returns == doc.Returns ? ": " : " (inherited): ")
+						.Append(R.T_Returns, true)
+						.Append(returns == doc.Returns ? ": " : (R.T_Inherited + ": "))
 						.AddXmlDoc(returns, this))
 						);
 				}
@@ -111,8 +112,8 @@ namespace Codist
 				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Remarks != null)?.Remarks;
 				if (remarks != null && remarks.FirstNode != null) {
 					tip.Append(new ThemedTipParagraph(IconIds.RemarksXmlDoc, new ThemedTipText()
-						.Append("Remarks", true)
-						.Append(remarks == doc.Remarks ? ": " : " (inherited): ")
+						.Append(R.T_Remarks, true)
+						.Append(remarks == doc.Remarks ? ": " : (R.T_Inherited + ": "))
 						))
 						.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(remarks, this)));
 				}
@@ -123,8 +124,8 @@ namespace Codist
 				var seeAlsos = doc.SeeAlso ?? doc.ExplicitInheritDoc?.SeeAlso ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.SeeAlso != null)?.SeeAlso;
 				if (seeAlsos != null) {
 					var seeAlso = new ThemedTipText()
-						.Append("See also", true)
-						.Append(seeAlsos == doc.SeeAlso ? ": " : " (inherited): ");
+						.Append(R.T_SeeAlso, true)
+						.Append(seeAlsos == doc.SeeAlso ? ": " : (R.T_Inherited + ": "));
 					bool hasItem = false;
 					foreach (var item in seeAlsos) {
 						if (hasItem) {
@@ -140,8 +141,8 @@ namespace Codist
 			var example = doc.Example ?? doc.ExplicitInheritDoc?.Example ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Example != null)?.Example;
 			if (example != null) {
 				tip.Append(new ThemedTipParagraph(IconIds.ExampleXmlDoc, new ThemedTipText()
-					.Append("Example", true)
-					.Append(example == doc.Example ? ": " : " (inherited): ")
+					.Append(R.T_Example, true)
+					.Append(example == doc.Example ? ": " : (R.T_Inherited + ": "))
 					))
 					.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(example, this)));
 			}

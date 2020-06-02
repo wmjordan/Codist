@@ -18,6 +18,7 @@ namespace Codist
 		VersionStamp _Version;
 		SyntaxNode _Node, _NodeIncludeTrivia;
 		IOutliningManager _OutliningManager;
+		int _Position;
 
 		public static SemanticContext GetHovered() {
 			var view = TextEditorHelper.GetMouseOverDocumentView();
@@ -39,22 +40,25 @@ namespace Codist
 		public Document Document { get; private set; }
 		public SemanticModel SemanticModel { get; private set; }
 		public CompilationUnitSyntax Compilation { get; private set; }
-		public SyntaxNode Node => _Node != null && _Node.Span.Contains(Position)
+		public SyntaxNode Node => _Node != null && _Node.Span.Contains(_Position)
 			? _Node
-			: (_Node = GetNode(Position, false, false));
+			: (_Node = GetNode(_Position, false, false));
 		public SyntaxNode NodeIncludeTrivia {
 			get {
-				return _NodeIncludeTrivia != null && _NodeIncludeTrivia.Span.Contains(Position)
+				return _NodeIncludeTrivia != null && _NodeIncludeTrivia.Span.Contains(_Position)
 					? _NodeIncludeTrivia
-					: (_NodeIncludeTrivia = GetNode(Position, true, true));
+					: (_NodeIncludeTrivia = GetNode(_Position, true, true));
 			}
 		}
 		public SyntaxToken Token { get; private set; }
 		public ISymbol Symbol { get; private set; }
-		public int Position { get; set; }
+		public int Position {
+			get => _Position;
+			set { _Position = value; ResetNodeInfo(); }
+		}
 
 		public SyntaxNode GetNode(int position, bool includeTrivia, bool deep) {
-			SyntaxNode node = Compilation.FindNode(Token.Span, includeTrivia, deep);
+			SyntaxNode node = Compilation.FindNode(new TextSpan(position, 0), includeTrivia, deep);
 			SeparatedSyntaxList<VariableDeclaratorSyntax> variables;
 			if (node.IsKind(SyntaxKind.FieldDeclaration) || node.IsKind(SyntaxKind.EventFieldDeclaration)) {
 				variables = (node as BaseFieldDeclarationSyntax).Declaration.Variables;
@@ -81,8 +85,8 @@ namespace Codist
 								: Token.HasTrailingTrivia ? Token.TrailingTrivia
 								: default;
 				if (triviaList.Equals(SyntaxTriviaList.Empty) == false
-					&& triviaList.FullSpan.Contains(Position)) {
-					return triviaList.FirstOrDefault(i => i.Span.Contains(Position));
+					&& triviaList.FullSpan.Contains(_Position)) {
+					return triviaList.FirstOrDefault(i => i.Span.Contains(_Position));
 				}
 			}
 			return default;
@@ -216,7 +220,7 @@ namespace Codist
 		}
 
 		public async Task<ISymbol> GetSymbolAsync(CancellationToken cancellationToken) {
-			return Node == null ? null : await GetSymbolAsync(Position, cancellationToken).ConfigureAwait(false);
+			return Node == null ? null : await GetSymbolAsync(_Position, cancellationToken).ConfigureAwait(false);
 		}
 
 		public Task<bool> UpdateAsync(CancellationToken cancellationToken) {
@@ -251,7 +255,7 @@ namespace Codist
 		}
 
 		public Task<bool> UpdateAsync(int position, CancellationToken cancellationToken) {
-			Position = position;
+			_Position = position;
 			return UpdateAsync(position, View.TextBuffer, cancellationToken);
 		}
 
@@ -295,14 +299,14 @@ namespace Codist
 			return true;
 		}
 
-		public List<SyntaxNode> GetContainingNodes(SnapshotPoint start, bool includeSyntaxDetails, bool includeRegions) {
+		public List<SyntaxNode> GetContainingNodes(bool includeSyntaxDetails, bool includeRegions) {
 			var node = Node;
 			var nodes = new List<SyntaxNode>(5);
 			while (node != null) {
-				if (node.FullSpan.Contains(View.Selection, true)) {
+				if (node.FullSpan.Contains(_Position)) {
 					var nodeKind = node.Kind();
 					if (nodeKind != SyntaxKind.VariableDeclaration
-						&& (includeSyntaxDetails && nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() || nodeKind== SyntaxKind.Attribute)) {
+						&& (includeSyntaxDetails && nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() || nodeKind == SyntaxKind.Attribute)) {
 						nodes.Add(node);
 					}
 				}
@@ -312,7 +316,7 @@ namespace Codist
 			if (includeRegions == false || OutliningManager == null) {
 				return nodes;
 			}
-			foreach (var region in GetRegions(start)) {
+			foreach (var region in GetRegions(_Position)) {
 				node = Compilation.FindTrivia(region.Extent.GetStartPoint(View.TextSnapshot)).GetStructure();
 				if (node == null || node is DirectiveTriviaSyntax == false) {
 					continue;

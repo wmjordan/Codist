@@ -6,6 +6,7 @@ using Codist.Controls;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
+using R = Codist.Properties.Resources;
 
 namespace Codist.QuickInfo
 {
@@ -63,21 +64,21 @@ namespace Codist.QuickInfo
 			if (c == 1) {
 				var ch = point.Snapshot.GetText(p1, 1);
 				info = new ThemedTipText { Name = Name }
-					.Append("Selected character: \"", true)
+					.Append(R.T_SelectedCharacter + "\"", true)
 					.Append(ch)
 					.Append("\" (Unicode: 0x" + ((int)ch[0]).ToString("X2") + ")");
 				goto RETURN;
 			}
 			info = new ThemedTipText() { Name = Name }
-				.Append("Selection: ", true)
-				.Append(c.ToString() + " characters");
+				.Append(R.T_Selection, true)
+				.Append(c.ToString() + R.T_Characters);
 			if (lines > 1) {
-				info.Append(", " + lines + " spans");
+				info.Append(", " + lines + R.T_Spans);
 			}
 			else {
 				lines = selection.StreamSelectionSpan.SnapshotSpan.GetLineSpan().Length;
 				if (lines > 0) {
-					info.Append(", " + (lines + 1).ToString() + " lines");
+					info.Append(", " + (lines + 1).ToString() + R.T_Lines);
 				}
 			}
 		RETURN:

@@ -117,668 +117,624 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CMDT_SelectAll" xml:space="preserve">
-    <value>Select all text</value>
-  </data>
-  <data name="CMD_AddParallelWatch" xml:space="preserve">
-    <value>Add Parallel Watch</value>
-  </data>
-  <data name="CMD_AddWatch" xml:space="preserve">
-    <value>Add Watch</value>
-  </data>
-  <data name="CMD_AnalyzeSymbol" xml:space="preserve">
-    <value>Analyze symbol...</value>
-  </data>
-  <data name="CMD_Capitalize" xml:space="preserve">
-    <value>Capitalize</value>
-  </data>
-  <data name="CMD_ClearFilter" xml:space="preserve">
-    <value>Clear filter</value>
+  <data name="CMD_FindMembers" xml:space="preserve">
+    <value>查找成员...</value>
   </data>
   <data name="CMD_Close" xml:space="preserve">
-    <value>Close</value>
-  </data>
-  <data name="CMD_CommentSelection" xml:space="preserve">
-    <value>Comment selection
-Right click: Comment line</value>
+    <value>关闭</value>
   </data>
   <data name="CMD_CopyQualifiedSymbolName" xml:space="preserve">
-    <value>Copy Qualified Symbol Name</value>
-  </data>
-  <data name="CMD_CopySelectedText" xml:space="preserve">
-    <value>Copy selected text
-Right click: Copy line</value>
+    <value>复制类和符号名称</value>
   </data>
   <data name="CMD_CopySymbolName" xml:space="preserve">
-    <value>Copy Symbol Name</value>
-  </data>
-  <data name="CMD_CutSelectedText" xml:space="preserve">
-    <value>Cut selected text
-Right click: Cut line</value>
-  </data>
-  <data name="CMD_Debugger" xml:space="preserve">
-    <value>Debugger...
-Left click: Toggle breakpoint
-Right click: Debugger menu...</value>
-  </data>
-  <data name="CMD_DeleteAllBreakpoints" xml:space="preserve">
-    <value>Delete All Breakpoints</value>
-  </data>
-  <data name="CMD_DeleteSelectedText" xml:space="preserve">
-    <value>Delete selected text
-Right click: Delete line
-Ctrl click: Delete and select next</value>
-  </data>
-  <data name="CMD_DuplicateSelection" xml:space="preserve">
-    <value>Duplicate selection
-Right click: Duplicate line</value>
-  </data>
-  <data name="CMD_ExtractInterface" xml:space="preserve">
-    <value>Extract interface</value>
-  </data>
-  <data name="CMD_ExtractMethod" xml:space="preserve">
-    <value>Extract Method</value>
-  </data>
-  <data name="CMD_Find" xml:space="preserve">
-    <value>Find...</value>
+    <value>复制符号名称</value>
   </data>
   <data name="CMD_FindAllReferences" xml:space="preserve">
-    <value>Find All References</value>
+    <value>查找所有引用</value>
   </data>
   <data name="CMD_FindCallers" xml:space="preserve">
-    <value>Find Callers...</value>
+    <value>查找调用方...</value>
   </data>
   <data name="CMD_FindConstructorCallers" xml:space="preserve">
-    <value>Find Constructor Callers...</value>
+    <value>查找构造函数调用方...</value>
   </data>
   <data name="CMD_FindDerivedClasses" xml:space="preserve">
-    <value>Find Derived Classes...</value>
+    <value>查找继承的类...</value>
   </data>
   <data name="CMD_FindExtensions" xml:space="preserve">
-    <value>Find Extensions...</value>
+    <value>查找扩展方法...</value>
   </data>
   <data name="CMD_FindExtensionsFor" xml:space="preserve">
-    <value>Find Extensions for &lt;TYPE&gt;...</value>
+    <value>查找 &lt;TYPE&gt; 的扩展方法...</value>
   </data>
   <data name="CMD_FindImplementations" xml:space="preserve">
-    <value>Find Implementations...</value>
-  </data>
-  <data name="CMD_FindInFiles" xml:space="preserve">
-    <value>Find in Files...</value>
+    <value>查找接口实现...</value>
   </data>
   <data name="CMD_FindInstanceAsParameter" xml:space="preserve">
-    <value>Find Instance as Parameter...</value>
+    <value>查找以实例为参数的方法...</value>
   </data>
   <data name="CMD_FindInstanceProducer" xml:space="preserve">
-    <value>Find Instance Producer...</value>
-  </data>
-  <data name="CMD_FindMembers" xml:space="preserve">
-    <value>Find Members...</value>
+    <value>查找生成实例的成员...</value>
   </data>
   <data name="CMD_FindMembersOf" xml:space="preserve">
-    <value>Find Members of &lt;TYPE&gt;...</value>
+    <value>查找 &lt;TYPE&gt; 的成员...</value>
   </data>
   <data name="CMD_FindMethodsSameSignature" xml:space="preserve">
-    <value>Find Methods with Same Signature...</value>
+    <value>查找具有相同签名的方法...</value>
   </data>
   <data name="CMD_FindOverrides" xml:space="preserve">
-    <value>Find Overrides...</value>
+    <value>查找重载方法...</value>
   </data>
   <data name="CMD_FindReferencedSymbols" xml:space="preserve">
-    <value>Find Referenced Symbols...</value>
+    <value>查找引用的符号...</value>
   </data>
   <data name="CMD_FindReferrers" xml:space="preserve">
-    <value>Find Referrers...</value>
-  </data>
-  <data name="CMD_FindReplace" xml:space="preserve">
-    <value>Find next selected text
-Ctrl click: Find match case
-Right click: Find and replace...</value>
+    <value>查找引用...</value>
   </data>
   <data name="CMD_FindSymbolwithName" xml:space="preserve">
-    <value>Find Symbol with Name "&lt;NAME&gt;"...</value>
+    <value>查找名称带有 &lt;NAME&gt; 的符号...</value>
   </data>
   <data name="CMD_FindTypeReferrers" xml:space="preserve">
-    <value>Find Type Referrers...</value>
-  </data>
-  <data name="CMD_FormatDocument" xml:space="preserve">
-    <value>Format Document</value>
-  </data>
-  <data name="CMD_FormatSelection" xml:space="preserve">
-    <value>Format selection</value>
-  </data>
-  <data name="CMD_Formatting" xml:space="preserve">
-    <value>Formatting...</value>
+    <value>查找类型引用...</value>
   </data>
   <data name="CMD_GoTo" xml:space="preserve">
-    <value>Go to &lt;TYPE&gt;</value>
-  </data>
-  <data name="CMD_GoToDeclaration" xml:space="preserve">
-    <value>Go to declaration</value>
+    <value>转到 &lt;TYPE&gt;</value>
   </data>
   <data name="CMD_GoToDefinition" xml:space="preserve">
-    <value>Go to Definition</value>
-  </data>
-  <data name="CMD_GoToDefinitionPeek" xml:space="preserve">
-    <value>Go to definition
-Right click: Peek definition</value>
+    <value>转到定义</value>
   </data>
   <data name="CMD_GotoMember" xml:space="preserve">
-    <value>Go to Member</value>
+    <value>转到成员</value>
   </data>
   <data name="CMD_GotoSymbol" xml:space="preserve">
-    <value>Go to Symbol</value>
+    <value>转到符号</value>
   </data>
   <data name="CMD_GotoType" xml:space="preserve">
-    <value>Go to Type</value>
-  </data>
-  <data name="CMD_GUID" xml:space="preserve">
-    <value>New GUID
-Hint: To create a new GUID, type 'guid' (without quotes) and select it</value>
-  </data>
-  <data name="CMD_Highlight" xml:space="preserve">
-    <value>Highlight</value>
-  </data>
-  <data name="CMD_IncrementNumber" xml:space="preserve">
-    <value>Increment number</value>
-  </data>
-  <data name="CMD_Indent" xml:space="preserve">
-    <value>Indent</value>
-  </data>
-  <data name="CMD_InsertComment" xml:space="preserve">
-    <value>Insert comment</value>
-  </data>
-  <data name="CMD_InvertOperator" xml:space="preserve">
-    <value>Invert operator</value>
-  </data>
-  <data name="CMD_JoinLines" xml:space="preserve">
-    <value>Join Lines</value>
-  </data>
-  <data name="CMD_Lowercase" xml:space="preserve">
-    <value>Lowercase</value>
-  </data>
-  <data name="CMD_Mark" xml:space="preserve">
-    <value>Mark &lt;NAME&gt;</value>
-  </data>
-  <data name="CMD_MarkSymbol" xml:space="preserve">
-    <value>Mark symbol...</value>
-  </data>
-  <data name="CMD_Paste" xml:space="preserve">
-    <value>Paste text from clipboard
-Right click: Paste over line
-Ctrl click: Paste and select next</value>
+    <value>转到类型</value>
   </data>
   <data name="CMD_Pin" xml:space="preserve">
-    <value>Pin</value>
-  </data>
-  <data name="CMD_RenameSymbol" xml:space="preserve">
-    <value>Rename symbol</value>
-  </data>
-  <data name="CMD_ReorderParameters" xml:space="preserve">
-    <value>Reorder parameters</value>
-  </data>
-  <data name="CMD_Replace" xml:space="preserve">
-    <value>Replace...</value>
-  </data>
-  <data name="CMD_ReplaceInFiles" xml:space="preserve">
-    <value>Replace in Files...</value>
-  </data>
-  <data name="CMD_SearchDeclaration" xml:space="preserve">
-    <value>Search Declaration</value>
-  </data>
-  <data name="CMD_SearchWith" xml:space="preserve">
-    <value>Search with &lt;NAME&gt;...</value>
-  </data>
-  <data name="CMD_SelectAll" xml:space="preserve">
-    <value>Select All</value>
+    <value>固定</value>
   </data>
   <data name="CMD_SelectCode" xml:space="preserve">
-    <value>Select Code</value>
+    <value>选择代码</value>
+  </data>
+  <data name="CMD_AddParallelWatch" xml:space="preserve">
+    <value>添加并行监视</value>
+  </data>
+  <data name="CMD_AddWatch" xml:space="preserve">
+    <value>添加监视</value>
+  </data>
+  <data name="CMD_AnalyzeSymbol" xml:space="preserve">
+    <value>分析...</value>
+  </data>
+  <data name="CMD_Capitalize" xml:space="preserve">
+    <value>首字母大写</value>
+  </data>
+  <data name="CMD_ClearFilter" xml:space="preserve">
+    <value>清除筛选条件</value>
+  </data>
+  <data name="CMD_CommentSelection" xml:space="preserve">
+    <value>注释选中内容
+右键：注释整行</value>
+  </data>
+  <data name="CMD_CopySelectedText" xml:space="preserve">
+    <value>复制选中文本
+右键：复制整行</value>
+  </data>
+  <data name="CMD_CutSelectedText" xml:space="preserve">
+    <value>剪切选中文本
+右键：剪切整行</value>
+  </data>
+  <data name="CMD_Debugger" xml:space="preserve">
+    <value>调试器...
+左键：切换断点
+右键：调试器菜单...</value>
+  </data>
+  <data name="CMD_DeleteAllBreakpoints" xml:space="preserve">
+    <value>删除所有断点</value>
+  </data>
+  <data name="CMD_DeleteSelectedText" xml:space="preserve">
+    <value>删除选中文本
+右键：删除整行
+Ctrl单击：删除并选中下一项</value>
+  </data>
+  <data name="CMD_DuplicateSelection" xml:space="preserve">
+    <value>重复选中内容
+右键：重复整行</value>
+  </data>
+  <data name="CMD_ExtractInterface" xml:space="preserve">
+    <value>提取接口</value>
+  </data>
+  <data name="CMD_ExtractMethod" xml:space="preserve">
+    <value>提取方法</value>
+  </data>
+  <data name="CMD_Find" xml:space="preserve">
+    <value>查找...</value>
+  </data>
+  <data name="CMD_FindInFiles" xml:space="preserve">
+    <value>在文件中查找...</value>
+  </data>
+  <data name="CMD_FindReplace" xml:space="preserve">
+    <value>查找下一个选中文本
+Ctrl 单击：匹配大小写查找
+右键：查找及替换...</value>
+  </data>
+  <data name="CMD_FormatDocument" xml:space="preserve">
+    <value>格式化文档</value>
+  </data>
+  <data name="CMD_FormatSelection" xml:space="preserve">
+    <value>格式化选中内容</value>
+  </data>
+  <data name="CMD_Formatting" xml:space="preserve">
+    <value>文本格式...</value>
+  </data>
+  <data name="CMD_GoToDeclaration" xml:space="preserve">
+    <value>转到声明</value>
+  </data>
+  <data name="CMD_GoToDefinitionPeek" xml:space="preserve">
+    <value>转到定义
+右键：查看定义</value>
+  </data>
+  <data name="CMD_GUID" xml:space="preserve">
+    <value>生成新的 GUID
+提示：要创建一个新的 GUID，输入并选中“guid”（不带引号），然后执行本命令</value>
+  </data>
+  <data name="CMD_Highlight" xml:space="preserve">
+    <value>突出标记</value>
+  </data>
+  <data name="CMD_IncrementNumber" xml:space="preserve">
+    <value>数值加一</value>
+  </data>
+  <data name="CMD_Indent" xml:space="preserve">
+    <value>缩进</value>
+  </data>
+  <data name="CMD_InsertComment" xml:space="preserve">
+    <value>插入注释</value>
+  </data>
+  <data name="CMD_InvertOperator" xml:space="preserve">
+    <value>反转操作符</value>
+  </data>
+  <data name="CMD_JoinLines" xml:space="preserve">
+    <value>连接选中的行</value>
+  </data>
+  <data name="CMD_Lowercase" xml:space="preserve">
+    <value>转为小写</value>
+  </data>
+  <data name="CMD_Mark" xml:space="preserve">
+    <value>标记 &lt;NAME&gt;</value>
+  </data>
+  <data name="CMD_MarkSymbol" xml:space="preserve">
+    <value>标记符号...</value>
+  </data>
+  <data name="CMD_Paste" xml:space="preserve">
+    <value>粘贴文本
+右键：覆盖整行粘贴
+Ctrl 单击：粘贴并选中下一项</value>
+  </data>
+  <data name="CMD_RenameSymbol" xml:space="preserve">
+    <value>重命名符号</value>
+  </data>
+  <data name="CMD_ReorderParameters" xml:space="preserve">
+    <value>重新排列参数</value>
+  </data>
+  <data name="CMD_Replace" xml:space="preserve">
+    <value>替换...</value>
+  </data>
+  <data name="CMD_ReplaceInFiles" xml:space="preserve">
+    <value>在文件中替换...</value>
+  </data>
+  <data name="CMD_SearchDeclaration" xml:space="preserve">
+    <value>搜索成员声明</value>
+  </data>
+  <data name="CMD_SearchWith" xml:space="preserve">
+    <value>联网搜索 &lt;NAME&gt;...</value>
+  </data>
+  <data name="CMD_SelectAll" xml:space="preserve">
+    <value>选择所有</value>
   </data>
   <data name="CMD_SelectDirectiveRegion" xml:space="preserve">
-    <value>Select directive region</value>
+    <value>选择指令区域</value>
   </data>
   <data name="CMD_ShowSyntaxClassificationInfo" xml:space="preserve">
-    <value>Show syntax classification info</value>
+    <value>显示语法归类信息</value>
   </data>
   <data name="CMD_SurroundWith" xml:space="preserve">
-    <value>Surround with...</value>
+    <value>外侧代码...</value>
   </data>
   <data name="CMD_TagXmlDocB" xml:space="preserve">
-    <value>Tag XML Doc with HTML &lt;b&gt;</value>
+    <value>以 &lt;b&gt; 包围</value>
   </data>
   <data name="CMD_TagXmlDocC" xml:space="preserve">
-    <value>Tag XML Doc with &lt;c&gt;</value>
+    <value>以 &lt;c&gt; 包围</value>
   </data>
   <data name="CMD_TagXmlDocI" xml:space="preserve">
-    <value>Tag XML Doc with HTML &lt;i&gt;</value>
+    <value>以 &lt;i&gt; 包围</value>
   </data>
   <data name="CMD_TagXmlDocPara" xml:space="preserve">
-    <value>Tag XML Doc with &lt;para&gt;</value>
+    <value>以 &lt;para&gt; 包围</value>
   </data>
   <data name="CMD_TagXmlDocSee" xml:space="preserve">
-    <value>Tag XML Doc with &lt;see&gt; or &lt;paramref&gt;</value>
+    <value>以 &lt;see&gt; 或 &lt;paramref&gt; 包围</value>
   </data>
   <data name="CMD_TagXmlDocU" xml:space="preserve">
-    <value>Tag XML Doc with HTML &lt;u&gt;</value>
+    <value>以 &lt;u&gt; 包围</value>
   </data>
   <data name="CMD_ToggleBookmark" xml:space="preserve">
-    <value>Toggle Bookmark</value>
+    <value>切换书签标记</value>
   </data>
   <data name="CMD_ToggleBreakpoint" xml:space="preserve">
-    <value>Toggle Breakpoint</value>
+    <value>切换断点</value>
   </data>
   <data name="CMD_ToggleOperator" xml:space="preserve">
-    <value>Toggle operator</value>
+    <value>切换操作符</value>
   </data>
   <data name="CMD_ToggleParentheses" xml:space="preserve">
-    <value>Toggle Parentheses</value>
+    <value>切换括号</value>
   </data>
   <data name="CMD_ToggleValue" xml:space="preserve">
-    <value>Toggle value</value>
+    <value>切换值</value>
   </data>
   <data name="CMD_UncommentSelection" xml:space="preserve">
-    <value>Uncomment selection</value>
+    <value>取消注释选定内容</value>
   </data>
   <data name="CMD_Unindent" xml:space="preserve">
-    <value>Unindent</value>
+    <value>减少行缩进</value>
   </data>
   <data name="CMD_Unmark" xml:space="preserve">
-    <value>Unmark &lt;NAME&gt;</value>
+    <value>取消标记 &lt;NAME&gt;</value>
   </data>
   <data name="CMD_UnmarkSymbol" xml:space="preserve">
-    <value>Unmark symbol...</value>
+    <value>取消标记...</value>
   </data>
   <data name="CMD_Uppercase" xml:space="preserve">
-    <value>Uppercase</value>
+    <value>转为大写</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Dark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Dark Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="Light" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Light Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="Simple" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Simple Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;gb2312</value>
+  <data name="CMDT_SelectAll" xml:space="preserve">
+    <value>选中所有文本</value>
   </data>
   <data name="T_AsParameter" xml:space="preserve">
-    <value> as parameter</value>
+    <value> 作为参数</value>
   </data>
   <data name="T_Classes" xml:space="preserve">
-    <value>Classes</value>
+    <value>类</value>
   </data>
   <data name="T_CurrentDocument" xml:space="preserve">
-    <value>Current Document</value>
+    <value>当前文档</value>
   </data>
   <data name="T_CurrentProject" xml:space="preserve">
-    <value>Current Project</value>
+    <value>当前项目</value>
   </data>
   <data name="T_DelegateEvent" xml:space="preserve">
-    <value>Delegate; attach or detach event</value>
+    <value>委托、附加或移除事件</value>
   </data>
   <data name="T_Delegates" xml:space="preserve">
-    <value>Delegates</value>
+    <value>委托</value>
   </data>
   <data name="T_DerivedClasses" xml:space="preserve">
-    <value> derived classes</value>
+    <value> 派生类</value>
   </data>
   <data name="T_Enumerations" xml:space="preserve">
-    <value>Enumerations</value>
+    <value>枚举类型</value>
   </data>
   <data name="T_Events" xml:space="preserve">
-    <value>Events</value>
+    <value>事件</value>
   </data>
   <data name="T_Extensions" xml:space="preserve">
-    <value> extensions</value>
+    <value> 扩展方法</value>
   </data>
   <data name="T_FieldsProperties" xml:space="preserve">
-    <value>Fields and properties</value>
+    <value>字段和属性</value>
   </data>
   <data name="T_Implementations" xml:space="preserve">
-    <value> implementations: </value>
+    <value> 接口实现: </value>
   </data>
   <data name="T_Interfaces" xml:space="preserve">
-    <value>Interfaces</value>
+    <value>接口</value>
   </data>
   <data name="T_InternalPrivateTypes" xml:space="preserve">
-    <value>Internal and private types</value>
+    <value>内部或私有类型</value>
   </data>
   <data name="T_LineOfCode" xml:space="preserve">
-    <value>Line of code: </value>
-  </data>
-  <data name="T_Members" xml:space="preserve">
-    <value> members: {count} ({inherited} inherited)</value>
+    <value>代码行数: </value>
   </data>
   <data name="T_Methods" xml:space="preserve">
-    <value>Methods</value>
+    <value>方法</value>
   </data>
   <data name="T_NameAlike" xml:space="preserve">
-    <value> name alike</value>
+    <value> 类似名称</value>
   </data>
   <data name="T_Namespaces" xml:space="preserve">
-    <value>Namespaces</value>
+    <value>名称空间</value>
   </data>
   <data name="T_Overrides" xml:space="preserve">
-    <value> overrides: </value>
+    <value> 重载: </value>
+  </data>
+  <data name="T_Members" xml:space="preserve">
+    <value> 成员数 {count} (继承 {inherited})</value>
   </data>
   <data name="T_Producers" xml:space="preserve">
-    <value> producers</value>
+    <value> 生成位置</value>
   </data>
   <data name="T_PublicProtectedTypes" xml:space="preserve">
-    <value>Public and protected types</value>
+    <value>公共或保护类型</value>
   </data>
   <data name="T_ReferencedSymbols" xml:space="preserve">
-    <value> referenced symbols: </value>
+    <value> 引用的符号: </value>
   </data>
   <data name="T_Referrers" xml:space="preserve">
-    <value> referrers</value>
+    <value> 引用方</value>
   </data>
   <data name="T_ResultFilter" xml:space="preserve">
-    <value>Result Filter</value>
+    <value>筛选结果</value>
   </data>
   <data name="T_ResultFilterTip" xml:space="preserve">
-    <value>Filter items in this menu.
-Use space to separate keywords.</value>
+    <value>筛选本菜单中的项，用空格隔开关键词。</value>
   </data>
   <data name="T_SignatureMatch" xml:space="preserve">
-    <value> signature match</value>
+    <value> 签名匹配</value>
   </data>
   <data name="T_SourceLocations" xml:space="preserve">
-    <value> source locations: </value>
+    <value> 源代码位置: </value>
   </data>
   <data name="T_Structures" xml:space="preserve">
-    <value>Structures</value>
+    <value>结构</value>
   </data>
   <data name="T_TypeConversion" xml:space="preserve">
-    <value>Type conversion</value>
+    <value>类型转换</value>
   </data>
   <data name="T_TypeReferenceOrArgument" xml:space="preserve">
-    <value>Type reference or argument</value>
+    <value>引用或参数类型</value>
   </data>
   <data name="T_TypesDelegates" xml:space="preserve">
-    <value>Types and delegates</value>
+    <value>类型和委托</value>
   </data>
   <data name="T_Write" xml:space="preserve">
-    <value>Write</value>
+    <value>写入</value>
   </data>
   <data name="CMD_GotoProjectReleasePage" xml:space="preserve">
-    <value>Go to project release page</value>
+    <value>转到发布 Codist 项目的网页</value>
   </data>
   <data name="CMD_GotoProjectWebSite" xml:space="preserve">
-    <value>Go to project web site</value>
+    <value>转到 Codist 项目的网站</value>
   </data>
   <data name="CMD_Load" xml:space="preserve">
-    <value>Load...</value>
+    <value>加载...</value>
   </data>
   <data name="CMD_OpenDonatePage" xml:space="preserve">
-    <value>Open your browser and donate to project Codist</value>
+    <value>打开浏览器并捐赠 Codist 项目</value>
   </data>
   <data name="CMD_PostIssue" xml:space="preserve">
-    <value>Post your opinions in the issues page</value>
+    <value>发表建议或提交问题报告</value>
   </data>
   <data name="CMD_Save" xml:space="preserve">
-    <value>Save...</value>
+    <value>保存...</value>
   </data>
   <data name="OT_About" xml:space="preserve">
-    <value>About</value>
+    <value>关于 Codist</value>
   </data>
   <data name="OT_ConfigurationFile" xml:space="preserve">
-    <value>Configuration File</value>
+    <value>配置文件</value>
   </data>
   <data name="OT_ConfigurationFileTip" xml:space="preserve">
-    <value>Use the following buttons to backup your settings or share the file with others</value>
+    <value>使用以下按钮备份你的配置，配置文件可共享给其他伙伴</value>
   </data>
   <data name="OT_DonateLink" xml:space="preserve">
-    <value>Donate via PayPal</value>
-  </data>
-  <data name="OT_DonateLinkTip" xml:space="preserve">
-    <value>Recommended donation value is $19.99. But you can modify the amount to any value if you like</value>
-  </data>
-  <data name="OT_FeatureChangesTip" xml:space="preserve">
-    <value>Changes will take place on NEWLY OPENED document windows. Currently opened document windows WILL NOT BE AFFECTED</value>
+    <value>通过 PayPal 捐赠</value>
   </data>
   <data name="OT_FeatureControllers" xml:space="preserve">
-    <value>Feature Controllers</value>
-  </data>
-  <data name="OT_FeatureControllersTip" xml:space="preserve">
-    <value>Use the following checkboxes to control features provided by Codist.</value>
+    <value>特性控制</value>
   </data>
   <data name="OT_General" xml:space="preserve">
-    <value>General</value>
+    <value>常规</value>
   </data>
   <data name="OT_LatestRelease" xml:space="preserve">
-    <value>Latest release:</value>
-  </data>
-  <data name="OT_LoadConfigFileTip" xml:space="preserve">
-    <value>Restore configurations from a file...</value>
-  </data>
-  <data name="OT_NavigationBarTip" xml:space="preserve">
-    <value>Provides an enhanced navigation bar for C# and Markdown languages</value>
+    <value>最近发布版本:</value>
   </data>
   <data name="OT_ProjectWebSite" xml:space="preserve">
-    <value>Project web site:</value>
-  </data>
-  <data name="OT_QuickInfoTip" xml:space="preserve">
-    <value>Provides enhancements to Quick Info (code tooltips)</value>
-  </data>
-  <data name="OT_ReportBugsAndSuggestions" xml:space="preserve">
-    <value>Report bugs and suggestions to:</value>
-  </data>
-  <data name="OT_SaveConfigFileTip" xml:space="preserve">
-    <value>Backup configurations to a file...</value>
-  </data>
-  <data name="OT_ScrollbarMarkerTip" xml:space="preserve">
-    <value>Provides additional markers on the scrollbar</value>
-  </data>
-  <data name="OT_SmartBarTip" xml:space="preserve">
-    <value>Provides a dynamic floating toolbar in your code editor</value>
-  </data>
-  <data name="OT_SupportCodst" xml:space="preserve">
-    <value>Support future development of Codist:</value>
-  </data>
-  <data name="OT_SyntaxHighlightTip" xml:space="preserve">
-    <value>Provides advanced syntax highlight and comment taggers</value>
-  </data>
-  <data name="OT_ThankYou" xml:space="preserve">
-    <value>Thank You for Using Codist</value>
+    <value>项目网站:</value>
   </data>
   <data name="T_AnonymousType" xml:space="preserve">
-    <value>Anonymous type: </value>
+    <value>匿名类型: </value>
   </data>
   <data name="T_Argument" xml:space="preserve">
-    <value>Argument</value>
-  </data>
-  <data name="T_ArgumentN" xml:space="preserve">
-    <value>Argument &lt;N&gt;</value>
-  </data>
-  <data name="T_ArgumentNOf" xml:space="preserve">
-    <value>Argument &lt;N&gt; of </value>
+    <value>方法参数</value>
   </data>
   <data name="T_ArgumentOf" xml:space="preserve">
-    <value> of </value>
+    <value> </value>
+  </data>
+  <data name="T_ArgumentN" xml:space="preserve">
+    <value>参数 &lt;N&gt;</value>
+  </data>
+  <data name="T_ArgumentNOf" xml:space="preserve">
+    <value>参数 &lt;N&gt; </value>
   </data>
   <data name="T_Assembly" xml:space="preserve">
-    <value>Assembly: </value>
+    <value>程序集: </value>
   </data>
   <data name="T_Attribute" xml:space="preserve">
-    <value>Attribute:</value>
-  </data>
-  <data name="T_AttributeOf" xml:space="preserve">
-    <value>Attribute of</value>
-  </data>
-  <data name="T_CapturedVariables" xml:space="preserve">
-    <value>Captured variables</value>
+    <value>特性:</value>
   </data>
   <data name="T_Chars" xml:space="preserve">
-    <value>chars</value>
+    <value>字符</value>
   </data>
   <data name="T_Color" xml:space="preserve">
-    <value>Color</value>
+    <value>颜色</value>
   </data>
-  <data name="T_DeclaredVariable" xml:space="preserve">
-    <value>Declared variable: </value>
-  </data>
-  <data name="T_DelegateSignature" xml:space="preserve">
-    <value>Delegate signature</value>
-  </data>
-  <data name="T_DocumentationFrom" xml:space="preserve">
-    <value>Documentation from </value>
-  </data>
-  <data name="T_EndOfRegion" xml:space="preserve">
-    <value>End of region </value>
-  </data>
-  <data name="T_EnumAllFlags" xml:space="preserve">
-    <value>All flags: </value>
-  </data>
-  <data name="T_EnumFieldCount" xml:space="preserve">
-    <value>Field count:</value>
-  </data>
-  <data name="T_EnumMax" xml:space="preserve">
-    <value>Max: </value>
-  </data>
-  <data name="T_EnumMin" xml:space="preserve">
-    <value>Min: </value>
-  </data>
-  <data name="T_EnumUnderlyingType" xml:space="preserve">
-    <value>Enum underlying type: </value>
-  </data>
-  <data name="T_ExplicitImplements" xml:space="preserve">
-    <value>Explicit implements:</value>
-  </data>
-  <data name="T_HashCode" xml:space="preserve">
-    <value>Hash code</value>
-  </data>
-  <data name="T_Implements" xml:space="preserve">
-    <value>Implements:</value>
-  </data>
-  <data name="T_Interface" xml:space="preserve">
-    <value>Interface:</value>
-  </data>
-  <data name="T_Inherited" xml:space="preserve">
-    <value> (inherited)</value>
-  </data>
-  <data name="T_LambdaExpression" xml:space="preserve">
-    <value>lambda expression</value>
-  </data>
-  <data name="T_Lines" xml:space="preserve">
-    <value> lines</value>
-  </data>
-  <data name="T_Maybe" xml:space="preserve">
-    <value>Maybe...</value>
-  </data>
-  <data name="T_MaybeArgument" xml:space="preserve">
-    <value>Maybe</value>
-  </data>
-  <data name="T_MaybeArgumentOf" xml:space="preserve">
-    <value> argument of</value>
-  </data>
-  <data name="T_Member" xml:space="preserve">
-    <value>Member:</value>
-  </data>
-  <data name="T_MethodOverload" xml:space="preserve">
-    <value>Method overload:</value>
-  </data>
-  <data name="T_Namespace" xml:space="preserve">
-    <value>Namespace: </value>
-  </data>
-  <data name="T_NavigationBar" xml:space="preserve">
-    <value>Navigation Bar</value>
-  </data>
-  <data name="T_ReadVariable" xml:space="preserve">
-    <value>Read variable: </value>
-  </data>
-  <data name="T_Return" xml:space="preserve">
-    <value>Return </value>
-  </data>
-  <data name="T_ReturnAnonymousFunction" xml:space="preserve">
-    <value>Return anonymous function for </value>
-  </data>
-  <data name="T_ReturnFor" xml:space="preserve">
-    <value> for </value>
-  </data>
-  <data name="T_ScrollbarMarkers" xml:space="preserve">
-    <value>Scrollbar Markers</value>
-  </data>
-  <data name="T_SmartBar" xml:space="preserve">
-    <value>Smart Bar</value>
+  <data name="T_CapturedVariables" xml:space="preserve">
+    <value>捕获的变量</value>
   </data>
   <data name="T_SuperQuickInfo" xml:space="preserve">
-    <value>Super Quick Info</value>
+    <value>超级代码提示</value>
   </data>
-  <data name="T_SymbolUnavailableIn" xml:space="preserve">
-    <value>Symbol unavailable in:</value>
+  <data name="T_SmartBar" xml:space="preserve">
+    <value>智能工具条</value>
+  </data>
+  <data name="T_ScrollbarMarkers" xml:space="preserve">
+    <value>滚动条标记</value>
+  </data>
+  <data name="T_ReturnAnonymousFunction" xml:space="preserve">
+    <value>返回匿名方法 </value>
+  </data>
+  <data name="T_ReturnFor" xml:space="preserve">
+    <value> </value>
+  </data>
+  <data name="T_Return" xml:space="preserve">
+    <value>返回 </value>
+  </data>
+  <data name="T_ReadVariable" xml:space="preserve">
+    <value>读取变量: </value>
+  </data>
+  <data name="T_NavigationBar" xml:space="preserve">
+    <value>导航栏</value>
   </data>
   <data name="T_SyntaxHighlight" xml:space="preserve">
-    <value>Syntax Highlight</value>
+    <value>高级语法样式</value>
+  </data>
+  <data name="T_EndOfRegion" xml:space="preserve">
+    <value>#region 结束 </value>
+  </data>
+  <data name="T_EnumAllFlags" xml:space="preserve">
+    <value>所有标识位: </value>
+  </data>
+  <data name="T_EnumFieldCount" xml:space="preserve">
+    <value>字段数:</value>
+  </data>
+  <data name="T_EnumMax" xml:space="preserve">
+    <value>最大值: </value>
+  </data>
+  <data name="T_EnumMin" xml:space="preserve">
+    <value>最小值: </value>
+  </data>
+  <data name="T_EnumUnderlyingType" xml:space="preserve">
+    <value>Enum 基础类型: </value>
+  </data>
+  <data name="T_HashCode" xml:space="preserve">
+    <value>散列值</value>
+  </data>
+  <data name="T_Implements" xml:space="preserve">
+    <value>实现接口:</value>
+  </data>
+  <data name="T_Interface" xml:space="preserve">
+    <value>接口:</value>
+  </data>
+  <data name="T_LambdaExpression" xml:space="preserve">
+    <value>lambda 表达式</value>
+  </data>
+  <data name="T_Lines" xml:space="preserve">
+    <value> 行</value>
+  </data>
+  <data name="T_DocumentationFrom" xml:space="preserve">
+    <value>借用文档: </value>
+  </data>
+  <data name="T_DelegateSignature" xml:space="preserve">
+    <value>委托签名</value>
+  </data>
+  <data name="T_DeclaredVariable" xml:space="preserve">
+    <value>声明的变量: </value>
+  </data>
+  <data name="T_ExplicitImplements" xml:space="preserve">
+    <value>显式实现接口:</value>
+  </data>
+  <data name="T_Member" xml:space="preserve">
+    <value>成员:</value>
+  </data>
+  <data name="T_MethodOverload" xml:space="preserve">
+    <value>方法重载:</value>
+  </data>
+  <data name="T_Namespace" xml:space="preserve">
+    <value>名称空间: </value>
+  </data>
+  <data name="T_SymbolUnavailableIn" xml:space="preserve">
+    <value>符号在以下项目中不可用:</value>
   </data>
   <data name="T_Text" xml:space="preserve">
-    <value>text</value>
+    <value>文本</value>
   </data>
   <data name="T_Type" xml:space="preserve">
-    <value>Type:</value>
+    <value>类型:</value>
   </data>
   <data name="T_TypeArgument" xml:space="preserve">
-    <value>Type argument:</value>
+    <value>类型参数:</value>
+  </data>
+  <data name="T_MaybeArgument" xml:space="preserve">
+    <value>可能是</value>
+  </data>
+  <data name="T_MaybeArgumentOf" xml:space="preserve">
+    <value> 参数</value>
+  </data>
+  <data name="T_Maybe" xml:space="preserve">
+    <value>可能是...</value>
+  </data>
+  <data name="T_AttributeOf" xml:space="preserve">
+    <value>特性</value>
+  </data>
+  <data name="T_Inherited" xml:space="preserve">
+    <value> (继承)</value>
   </data>
   <data name="T_BaseType" xml:space="preserve">
-    <value>Base type: </value>
+    <value>基类: </value>
   </data>
   <data name="T_Characters" xml:space="preserve">
-    <value> characters</value>
+    <value> 字符</value>
   </data>
   <data name="T_Class" xml:space="preserve">
-    <value>Class: </value>
+    <value>类: </value>
   </data>
   <data name="T_Constraint" xml:space="preserve">
-    <value>Constraint: </value>
+    <value>约束: </value>
   </data>
   <data name="T_DefinedIn" xml:space="preserve">
-    <value>defined in </value>
+    <value>定义于 </value>
   </data>
   <data name="T_DefinedInType" xml:space="preserve">
-    <value>Defined in: </value>
+    <value>定义于: </value>
   </data>
   <data name="T_EventSignature" xml:space="preserve">
-    <value>Event signature </value>
+    <value>事件签名 </value>
   </data>
   <data name="T_Exception" xml:space="preserve">
-    <value>Exception</value>
+    <value>异常</value>
   </data>
   <data name="T_Locations" xml:space="preserve">
-    <value>Locations: </value>
+    <value>位置: </value>
   </data>
   <data name="T_MemberType" xml:space="preserve">
-    <value>Member type: </value>
+    <value>成员类型: </value>
   </data>
   <data name="T_SelectedCharacter" xml:space="preserve">
-    <value>Selected character:</value>
+    <value>选中的字符:</value>
   </data>
   <data name="T_Selection" xml:space="preserve">
-    <value>Selection: </value>
+    <value>选中内容: </value>
   </data>
   <data name="T_Signature" xml:space="preserve">
-    <value>Signature: </value>
+    <value>签名: </value>
   </data>
   <data name="T_SourceFile" xml:space="preserve">
-    <value>Source file: </value>
+    <value>源文件: </value>
   </data>
   <data name="T_Spans" xml:space="preserve">
-    <value> spans</value>
+    <value> 段</value>
+  </data>
+  <data name="OT_ThankYou" xml:space="preserve">
+    <value>感谢您使用 Codist</value>
+  </data>
+  <data name="OT_SupportCodst" xml:space="preserve">
+    <value>支持 Codist 未来的开发:</value>
   </data>
   <data name="T_Example" xml:space="preserve">
-    <value>Example</value>
-  </data>
-  <data name="T_Remarks" xml:space="preserve">
-    <value>Remarks</value>
-  </data>
-  <data name="T_Returns" xml:space="preserve">
-    <value>Returns</value>
+    <value>示例</value>
   </data>
   <data name="T_SeeAlso" xml:space="preserve">
-    <value>See also</value>
+    <value>参见</value>
+  </data>
+  <data name="T_Returns" xml:space="preserve">
+    <value>返回值</value>
+  </data>
+  <data name="T_Remarks" xml:space="preserve">
+    <value>备注</value>
   </data>
   <data name="CMD_SearchTitles" xml:space="preserve">
-    <value>Search Titles</value>
+    <value>搜索标题</value>
   </data>
 </root>

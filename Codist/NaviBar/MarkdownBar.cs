@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
+using R = Codist.Properties.Resources;
 
 namespace Codist.NaviBar
 {
@@ -178,13 +179,13 @@ namespace Codist.NaviBar
 				Header = new StackPanel {
 					Margin = WpfHelper.MenuItemMargin,
 					Children = {
-						new Separator { Tag = new ThemedMenuText("Search Titles") },
+						new Separator { Tag = new ThemedMenuText(R.CMD_SearchTitles) },
 						new StackPanel {
 							Orientation = Orientation.Horizontal,
 							Children = {
 								ThemeHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
 								(_FinderBox = new ThemedTextBox { MinWidth = 150 }),
-								new ThemedButton(IconIds.ClearFilter, "Clear filter", ClearFilter)
+								new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter)
 							}
 						},
 					}

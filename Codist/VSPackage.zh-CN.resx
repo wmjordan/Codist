@@ -121,19 +121,15 @@
     <value>Codist</value>
   </data>
   <data name="112" xml:space="preserve">
-    <value>This extension provides enhanced syntax highlighting, contextual toolbar and navigation bar for code editor, shows more details on quick info and marks interesting items on scrollbar margin.</value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="400" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\CodistPackage.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>此扩展提供了增强的语法突出显示、代码提示、智能工具栏和导航栏，并能在滚动条上标记关键的代码和注释项。</value>
   </data>
   <data name="10" xml:space="preserve">
-    <value>General</value>
+    <value>常规</value>
   </data>
   <data name="11" xml:space="preserve">
-    <value>Syntax Highlight</value>
+    <value>高级语法样式</value>
   </data>
   <data name="12" xml:space="preserve">
-    <value>Super Quick Info</value>
+    <value>超级代码提示</value>
   </data>
 </root>

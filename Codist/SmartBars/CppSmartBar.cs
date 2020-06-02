@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
+using R = Codist.Properties.Resources;
 
 namespace Codist.SmartBars
 {
@@ -20,25 +21,25 @@ namespace Codist.SmartBars
 
 		protected override void AddCommands(CancellationToken cancellationToken) {
 			base.AddCommands(cancellationToken);
-			AddCommand(MyToolBar, IconIds.GoToDefinition, "Go to definition", ctx => {
+			AddCommand(MyToolBar, IconIds.GoToDefinition, R.CMD_GoToDefinition, ctx => {
 				TextEditorHelper.ExecuteEditorCommand("Edit.GoToDefinition", GetCurrentWord(ctx.View));
 			});
-			AddCommand(MyToolBar, IconIds.GoToDeclaration, "Go to declaration", ctx => {
+			AddCommand(MyToolBar, IconIds.GoToDeclaration, R.CMD_GoToDeclaration, ctx => {
 				TextEditorHelper.ExecuteEditorCommand("Edit.GoToDeclaration", GetCurrentWord(ctx.View));
 			});
 			var mode = CodistPackage.DebuggerStatus;
 			if (mode != DebuggerStatus.Running) {
 				//AddEditorCommand(MyToolBar, KnownImageIds.IntellisenseLightBulb, "EditorContextMenus.CodeWindow.QuickActionsForPosition", "Quick actions for position");
-				AddCommand(MyToolBar, IconIds.Comment, "Comment selection\nRight click: Comment line", ctx => {
+				AddCommand(MyToolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
 					if (ctx.RightClick) {
 						ctx.View.ExpandSelectionToLine();
 					}
 					TextEditorHelper.ExecuteEditorCommand("Edit.CommentSelection");
 				});
-				AddEditorCommand(MyToolBar, IconIds.Uncomment, "Edit.UncommentSelection", "Uncomment selection");
+				AddEditorCommand(MyToolBar, IconIds.Uncomment, "Edit.UncommentSelection", R.CMD_UncommentSelection);
 			}
 			else if (mode != DebuggerStatus.Design) {
-				AddCommands(MyToolBar, IconIds.ToggleBreakpoint, "Debugger...\nLeft click: Toggle breakpoint\nRight click: Debugger menu...", ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);
+				AddCommands(MyToolBar, IconIds.ToggleBreakpoint, R.CMD_Debugger, ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);
 			}
 		}
 

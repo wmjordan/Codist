@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.Imaging;
 using AppHelpers;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.CodeAnalysis;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
 {
@@ -30,8 +31,8 @@ namespace Codist.Controls
 		public event EventHandler FilterChanged;
 
 		public SearchScopeBox() {
-			_ProjectFilter = CreateButton(IconIds.Project, "Current Project");
-			_DocumentFilter = CreateButton(IconIds.File, "Current Document");
+			_DocumentFilter = CreateButton(IconIds.File, R.T_CurrentDocument);
+			_ProjectFilter = CreateButton(IconIds.Project, R.T_CurrentProject);
 			Margin = WpfHelper.SmallHorizontalMargin;
 			Content = new Border {
 				BorderThickness = WpfHelper.TinyMargin,
@@ -87,7 +88,7 @@ namespace Codist.Controls
 			Children.Add(_FilterBox = new ThemedTextBox {
 				MinWidth = 150,
 				Margin = WpfHelper.GlyphMargin,
-				ToolTip = new ThemedToolTip("Result Filter", "Filter items in this menu.\nUse space to separate keywords.")
+				ToolTip = new ThemedToolTip(R.T_ResultFilter, R.T_ResultFilterTip)
 			});
 			Children.Add(new Border {
 				BorderThickness = WpfHelper.TinyMargin,
@@ -106,7 +107,7 @@ namespace Codist.Controls
 					break;
 			}
 			_FilterContainer.Add(_FilterGroups);
-			_FilterContainer.Add(new ThemedButton(IconIds.ClearFilter, "Clear filter", ClearFilters).ClearBorder());
+			_FilterContainer.Add(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilters).ClearBorder());
 			_Filter = filter;
 			foreach (var item in _FilterGroups) {
 				item.FilterChanged += FilterBox_Changed;
@@ -363,8 +364,8 @@ namespace Codist.Controls
 			public override int Filters => (int)_Filters;
 
 			public AccessibilityFilterButtonGroup() {
-				_PublicFilter = CreateButton(IconIds.PublicSymbols, "Public and protected types");
-				_PrivateFilter = CreateButton(IconIds.PrivateSymbols, "Internal and private types");
+				_PublicFilter = CreateButton(IconIds.PublicSymbols, R.T_PublicProtectedTypes);
+				_PrivateFilter = CreateButton(IconIds.PrivateSymbols, R.T_InternalPrivateTypes);
 				_Filters = MemberFilterTypes.AllAccessibilities;
 				Content = new StackPanel {
 					Children = {
@@ -436,12 +437,12 @@ namespace Codist.Controls
 			public override int Filters => (int)_Filters;
 
 			public TypeFilterButtonGroup() {
-				_ClassFilter = CreateButton(IconIds.Class, "Classes");
-				_InterfaceFilter = CreateButton(IconIds.Interface, "Interfaces");
-				_DelegateFilter = CreateButton(IconIds.Delegate, "Delegates");
-				_StructFilter = CreateButton(IconIds.Structure, "Structures");
-				_EnumFilter = CreateButton(IconIds.Enum, "Enumerations");
-				_NamespaceFilter = CreateButton(IconIds.Namespace, "Namespaces");
+				_ClassFilter = CreateButton(IconIds.Class, R.T_Classes);
+				_InterfaceFilter = CreateButton(IconIds.Interface, R.T_Interfaces);
+				_DelegateFilter = CreateButton(IconIds.Delegate, R.T_Delegates);
+				_StructFilter = CreateButton(IconIds.Structure, R.T_Structures);
+				_EnumFilter = CreateButton(IconIds.Enum, R.T_Enumerations);
+				_NamespaceFilter = CreateButton(IconIds.Namespace, R.T_Namespaces);
 
 				_Filters = MemberFilterTypes.AllTypes;
 				Content = new StackPanel {
@@ -534,10 +535,10 @@ namespace Codist.Controls
 			public override int Filters => (int)_Filters;
 
 			public MemberFilterButtonGroup() {
-				_FieldFilter = CreateButton(IconIds.Field, "Fields, properties");
-				_MethodFilter = CreateButton(IconIds.Method, "Methods");
-				_EventFilter = CreateButton(IconIds.Event, "Events");
-				_TypeFilter = CreateButton(IconIds.TypeAndDelegate, "Types and delegates");
+				_FieldFilter = CreateButton(IconIds.Field, R.T_FieldsProperties);
+				_MethodFilter = CreateButton(IconIds.Method, R.T_Methods);
+				_EventFilter = CreateButton(IconIds.Event, R.T_Events);
+				_TypeFilter = CreateButton(IconIds.TypeAndDelegate, R.T_TypesDelegates);
 
 				_Filters = MemberFilterTypes.AllMembers;
 				Content = new StackPanel {
@@ -631,10 +632,10 @@ namespace Codist.Controls
 			public override int Filters => (int)_Filters;
 
 			public SymbolUsageFilterButtonGroup() {
-				_WriteFilter = CreateButton(IconIds.UseToWrite, "Write");
-				_ReadFilter = CreateButton(IconIds.UseAsDelegate, "Delegate; attach or detach event");
-				_TypeCastFilter = CreateButton(IconIds.UseToCast, "Type conversion");
-				_TypeReferenceFilter = CreateButton(IconIds.UseAsTypeParameter, "Type reference or argument");
+				_WriteFilter = CreateButton(IconIds.UseToWrite, R.T_Write);
+				_ReadFilter = CreateButton(IconIds.UseAsDelegate, R.T_DelegateEvent);
+				_TypeCastFilter = CreateButton(IconIds.UseToCast, R.T_TypeConversion);
+				_TypeReferenceFilter = CreateButton(IconIds.UseAsTypeParameter, R.T_TypeReferenceOrArgument);
 				_Filters = MemberFilterTypes.AllUsages;
 				Content = new StackPanel {
 					Children = {

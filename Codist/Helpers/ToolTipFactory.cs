@@ -6,6 +6,7 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Utilities;
+using R = Codist.Properties.Resources;
 
 namespace Codist
 {
@@ -30,15 +31,15 @@ namespace Codist
 			var content = tip.Content;
 			var t = symbol.GetReturnType();
 			if (t != null) {
-				content.Append("member type: ")
+				content.Append(R.T_MemberType)
 					.Append(t.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
 			}
 			else if (symbol.Kind == SymbolKind.TypeParameter) {
-				content.Append("defined in: ")
+				content.Append(R.T_DefinedInType)
 					.Append(symbol.ContainingSymbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
 				var tp = symbol as ITypeParameterSymbol;
 				if (tp.HasConstraint()) {
-					content.AppendLine().Append("constraint: ");
+					content.AppendLine().Append(R.T_Constraint);
 					SymbolFormatter.Instance.ShowTypeConstaints(tp, content);
 				}
 			}
@@ -47,19 +48,19 @@ namespace Codist
 				if (content.Inlines.FirstInline != null) {
 					content.AppendLine();
 				}
-				content.Append(t.GetSymbolKindName() + ": ")
+				content.Append(t.GetSymbolKindName(), SymbolFormatter.Instance.Keyword).Append(": ")
 					.Append(t.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
 			}
 			if (forMemberList == false) {
 				if (content.Inlines.FirstInline != null) {
 					content.AppendLine();
 				}
-				content.Append("namespace: " + symbol.ContainingNamespace?.ToString()).AppendLine();
+				content.Append(R.T_Namespace + symbol.ContainingNamespace?.ToString()).AppendLine();
 				if (symbol.HasSource()) {
-					content.Append("source file: " + String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))));
+					content.Append(R.T_SourceFile + String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))));
 				}
 				else {
-					content.Append("assembly: " + symbol.GetAssemblyModuleName());
+					content.Append(R.T_Assembly + symbol.GetAssemblyModuleName());
 				}
 
 				if (symbol.Kind == SymbolKind.NamedType) {
@@ -82,7 +83,7 @@ namespace Codist
 		}
 
 		static void ShowDelegateSignature(TextBlock content, INamedTypeSymbol type) {
-			content.Append("\nsignature: ");
+			content.Append("\n" + R.T_Signature);
 			var invoke = type.OriginalDefinition.DelegateInvokeMethod;
 			content.AddSymbol(invoke.ReturnType, false, SymbolFormatter.Instance)
 				.Append(" ").AddSymbol(type, true, SymbolFormatter.Instance)
@@ -92,7 +93,7 @@ namespace Codist
 		static void ShowEnumType(TextBlock content, ISymbol symbol) {
 			var t = ((INamedTypeSymbol)symbol).EnumUnderlyingType.ToDisplayString(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat);
 			if (t != "int") {
-				content.Append("\ntype: " + t);
+				content.Append("\n" + R.T_Type + t);
 			}
 		}
 

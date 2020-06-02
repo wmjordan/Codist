@@ -18,6 +18,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Task = System.Threading.Tasks.Task;
+using R = Codist.Properties.Resources;
 
 namespace Codist.NaviBar
 {
@@ -27,8 +28,8 @@ namespace Codist.NaviBar
 		readonly IAdornmentLayer _SyntaxNodeRangeAdornment;
 		readonly SemanticContext _SemanticContext;
 
-		CancellationTokenSource _cancellationSource = new CancellationTokenSource();
 		readonly RootItem _RootItem;
+		CancellationTokenSource _cancellationSource = new CancellationTokenSource();
 		NodeItem _MouseHoverItem;
 		SymbolList _SymbolList;
 		ThemedImageButton _ActiveItem;
@@ -44,7 +45,7 @@ namespace Codist.NaviBar
 			Config.Updated += Config_Updated;
 			Update(this, EventArgs.Empty);
 			if (_SemanticContext.Compilation != null) {
-				foreach(var m in _SemanticContext.Compilation.Members) {
+				foreach (var m in _SemanticContext.Compilation.Members) {
 					if (m.IsKind(SyntaxKind.NamespaceDeclaration)) {
 						_RootItem.SetText(m.GetDeclarationSignature());
 						break;
@@ -142,6 +143,7 @@ namespace Codist.NaviBar
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(token);
 				var c = Math.Min(Items.Count, nodes.Count);
 				int i, i2;
+				#region Remove outdated nodes on NaviBar
 				for (i = 1, i2 = 0; i < c && i2 < c; i2++) {
 					var n = nodes[i2];
 					if (token.IsCancellationRequested) {
@@ -166,6 +168,8 @@ namespace Codist.NaviBar
 				while (c > i) {
 					Items.RemoveAt(--c);
 				}
+				#endregion
+				#region Add updated nodes
 				c = nodes.Count;
 				NodeItem memberNode = null;
 				while (i2 < c) {
@@ -174,7 +178,7 @@ namespace Codist.NaviBar
 					}
 					var node = nodes[i2];
 					if (node.IsKind(SyntaxKind.NamespaceDeclaration)) {
-						_RootItem.SetText(node.GetDeclarationSignature());
+						_RootItem.SetText(((NamespaceDeclarationSyntax)node).Name.GetName());
 						++i2;
 						continue;
 					}
@@ -191,6 +195,8 @@ namespace Codist.NaviBar
 					Items.Add(newItem);
 					++i2;
 				}
+				#endregion
+				#region Add external referenced nodes in node range
 				if (memberNode == null) {
 					memberNode = Items.GetFirst<NodeItem>(n => n.HasReferencedDocs);
 				}
@@ -198,16 +204,25 @@ namespace Codist.NaviBar
 					foreach (var doc in memberNode.ReferencedDocs) {
 						Items.Add(new DocItem(this, doc));
 					}
-				}
+				} 
+				#endregion
 			}
 		}
 
 		async Task<List<SyntaxNode>> UpdateModelAndGetContainingNodesAsync(CancellationToken token) {
-			var start = View.GetCaretPosition();
-			if (await _SemanticContext.UpdateAsync(start, token) == false) {
+			int position = View.GetCaretPosition();
+			if (await _SemanticContext.UpdateAsync(position, token) == false) {
 				return new List<SyntaxNode>();
 			}
-			return _SemanticContext.GetContainingNodes(start, Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail), Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionOnBar));
+			// if the caret is at the beginning of the document, move to the first type declaration
+			if (position == 0 && _SemanticContext.Compilation != null) {
+				var n = _SemanticContext.Compilation.GetDecendantDeclarations(token).FirstOrDefault();
+				if (n != null) {
+					position = n.SpanStart;
+				}
+				_SemanticContext.Position = position;
+			}
+			return _SemanticContext.GetContainingNodes(Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail), Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionOnBar));
 		}
 
 		void ViewClosed(object sender, EventArgs e) {
@@ -405,7 +420,7 @@ namespace Codist.NaviBar
 					Header = new StackPanel {
 						Margin = WpfHelper.MenuItemMargin,
 						Children = {
-							new Separator { Tag = new ThemedMenuText("Search Declaration") },
+							new Separator { Tag = new ThemedMenuText(R.CMD_SearchDeclaration) },
 							new StackPanel {
 								Orientation = Orientation.Horizontal,
 								Children = {
@@ -413,7 +428,7 @@ namespace Codist.NaviBar
 									(_FinderBox = new MemberFinderBox() { MinWidth = 150 }),
 									(_ScopeBox = new SearchScopeBox {
 										Contents = {
-											new ThemedButton(IconIds.ClearFilter, "Clear filter", ClearFilter).ClearBorder()
+											new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter).ClearBorder()
 										}
 									}),
 								}
@@ -974,7 +989,7 @@ namespace Codist.NaviBar
 						var tip = ToolTipFactory.CreateToolTip(Symbol, true, _Bar._SemanticContext.SemanticModel.Compilation);
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
 							tip.AddTextBlock()
-						   .Append("Line of code: " + (Node.GetLineSpan().Length + 1));
+						   .Append(R.T_LineOfCode + (Node.GetLineSpan().Length + 1));
 						}
 						ToolTip = tip;
 					}

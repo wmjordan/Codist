@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
+using R = Codist.Properties.Resources;
 
 namespace Codist.SmartBars
 {
@@ -121,14 +122,14 @@ namespace Codist.SmartBars
 				}
 				if (isReadOnly == false) {
 					if (token.IsKind(SyntaxKind.TrueKeyword) || token.IsKind(SyntaxKind.FalseKeyword)) {
-						AddCommand(MyToolBar, IconIds.ToggleValue, "Toggle value", ctx => Replace(ctx, v => v == "true" ? "false" : "true", true));
+						AddCommand(MyToolBar, IconIds.ToggleValue, R.CMD_ToggleValue, ctx => Replace(ctx, v => v == "true" ? "false" : "true", true));
 					}
 					else if (token.IsKind(SyntaxKind.ExplicitKeyword) || token.IsKind(SyntaxKind.ImplicitKeyword)) {
-						AddCommand(MyToolBar, IconIds.ToggleValue, "Toggle operator", ctx => Replace(ctx, v => v == "implicit" ? "explicit" : "implicit", true));
+						AddCommand(MyToolBar, IconIds.ToggleValue, R.CMD_ToggleOperator, ctx => Replace(ctx, v => v == "implicit" ? "explicit" : "implicit", true));
 					}
 					if (nodeKind == SyntaxKind.VariableDeclarator) {
 						if (node?.Parent?.Parent is MemberDeclarationSyntax) {
-							AddCommand(MyToolBar, IconIds.AddXmlDoc, "Insert comment", ctx => {
+							AddCommand(MyToolBar, IconIds.AddXmlDoc, R.CMD_InsertComment, ctx => {
 								TextEditorHelper.ExecuteEditorCommand("Edit.InsertComment");
 								ctx.View.Selection.Clear();
 							});
@@ -136,17 +137,17 @@ namespace Codist.SmartBars
 					}
 					else if (nodeKind.IsDeclaration()) {
 						if (node is TypeDeclarationSyntax || node is MemberDeclarationSyntax || node is ParameterListSyntax) {
-							AddCommand(MyToolBar, IconIds.AddXmlDoc, "Insert comment", ctx => {
+							AddCommand(MyToolBar, IconIds.AddXmlDoc, R.CMD_InsertComment, ctx => {
 								TextEditorHelper.ExecuteEditorCommand("Edit.InsertComment");
 								ctx.View.Selection.Clear();
 							});
 						}
 					}
 					else if (IsInvertableOperation(nodeKind)) {
-						AddCommand(MyToolBar, IconIds.InvertOperator, "Invert operator", InvertOperator);
+						AddCommand(MyToolBar, IconIds.InvertOperator, R.CMD_InvertOperator, InvertOperator);
 					}
 					else if (isDesignMode && nodeKind != SyntaxKind.TypeParameter) {
-						AddEditorCommand(MyToolBar, IconIds.ExtractMethod, "Refactor.ExtractMethod", "Extract Method");
+						AddEditorCommand(MyToolBar, IconIds.ExtractMethod, "Refactor.ExtractMethod", R.CMD_ExtractMethod);
 					}
 				}
 			}
@@ -154,16 +155,16 @@ namespace Codist.SmartBars
 				AddCommentCommands();
 			}
 			if (isDesignMode == false) {
-				AddCommands(MyToolBar, IconIds.ToggleBreakpoint, "Debugger...\nLeft click: Toggle breakpoint\nRight click: Debugger menu...", ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);
+				AddCommands(MyToolBar, IconIds.ToggleBreakpoint, R.CMD_Debugger, ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);
 			}
 			//AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection...\nRight click: Duplicate...\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", null, GetExpandSelectionCommands);
 		}
 
 		void AddSymbolCommands(bool isReadOnly, SyntaxNode node) {
 			if (node.IsKind(SyntaxKind.IdentifierName) || node.IsKind(SyntaxKind.GenericName)) {
-				AddEditorCommand(MyToolBar, IconIds.GoToDefinition, "Edit.GoToDefinition", "Go to definition\nRight click: Peek definition", "Edit.PeekDefinition");
+				AddEditorCommand(MyToolBar, IconIds.GoToDefinition, "Edit.GoToDefinition", R.CMD_GoToDefinitionPeek, "Edit.PeekDefinition");
 			}
-			AddCommand(MyToolBar, IconIds.FindReference, "Analyze symbol...", ctx => {
+			AddCommand(MyToolBar, IconIds.FindReference, R.CMD_AnalyzeSymbol, ctx => {
 				ctx.KeepToolBar(false);
 				if (UpdateSemanticModel() == false) {
 					return;
@@ -182,7 +183,7 @@ namespace Codist.SmartBars
 				m.IsOpen = true;
 			});
 			if (Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
-				AddCommands(MyToolBar, IconIds.Marks, "Mark symbol...", null, GetMarkerCommands);
+				AddCommands(MyToolBar, IconIds.Marks, R.CMD_MarkSymbol, null, GetMarkerCommands);
 			}
 
 			if (/*isDesignMode && */isReadOnly == false) {
@@ -191,7 +192,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddDirectiveCommands() {
-			AddCommand(MyToolBar, IconIds.SelectCode, "Select directive region", ctx => {
+			AddCommand(MyToolBar, IconIds.SelectCode, R.CMD_SelectDirectiveRegion, ctx => {
 				var a = _Context.NodeIncludeTrivia as DirectiveTriviaSyntax;
 				if (a == null) {
 					return;
@@ -212,7 +213,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddCommentCommands() {
-			AddCommand(MyToolBar, IconIds.Comment, "Comment selection\nRight click: Comment line", ctx => {
+			AddCommand(MyToolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
 				if (ctx.RightClick) {
 					ctx.View.ExpandSelectionToLine();
 				}
@@ -239,7 +240,7 @@ namespace Codist.SmartBars
 
 		void AddRenameCommand(SyntaxNode node) {
 			if (_Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-				AddCommand(MyToolBar, IconIds.Rename, "Rename symbol", ctx => {
+				AddCommand(MyToolBar, IconIds.Rename, R.CMD_RenameSymbol, ctx => {
 					ctx.KeepToolBar(false);
 					TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
 				});
@@ -249,18 +250,18 @@ namespace Codist.SmartBars
 		void AddRefactorCommands(SyntaxNode node) {
 			AddRenameCommand(node);
 			if (node is ParameterSyntax && node.Parent is ParameterListSyntax) {
-				AddEditorCommand(MyToolBar, IconIds.ReorderParameters, "Refactor.ReorderParameters", "Reorder parameters");
+				AddEditorCommand(MyToolBar, IconIds.ReorderParameters, "Refactor.ReorderParameters", R.CMD_ReorderParameters);
 			}
 			if (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(SyntaxKind.StructDeclaration)) {
-				AddEditorCommand(MyToolBar, IconIds.ExtractInterface, "Refactor.ExtractInterface", "Extract interface");
+				AddEditorCommand(MyToolBar, IconIds.ExtractInterface, "Refactor.ExtractInterface", R.CMD_ExtractInterface);
 			}
 		}
 
 		void AddXmlDocCommands() {
-			AddCommand(MyToolBar, IconIds.TagCode, "Tag XML Doc with <c>", ctx => {
+			AddCommand(MyToolBar, IconIds.TagCode, R.CMD_TagXmlDocC, ctx => {
 				WrapWith(ctx, "<c>", "</c>", true);
 			});
-			AddCommand(MyToolBar, IconIds.TagXmlDocSee, "Tag XML Doc with <see> or <paramref>", ctx => {
+			AddCommand(MyToolBar, IconIds.TagXmlDocSee, R.CMD_TagXmlDocSee, ctx => {
 				// updates the semantic model before executing the command,
 				// for it could be modified by external editor commands or duplicated document windows
 				if (UpdateSemanticModel() == false) {
@@ -291,19 +292,19 @@ namespace Codist.SmartBars
 					}
 				});
 			});
-			AddCommand(MyToolBar, IconIds.TagXmlDocPara, "Tag XML Doc with <para>", ctx => {
+			AddCommand(MyToolBar, IconIds.TagXmlDocPara, R.CMD_TagXmlDocPara, ctx => {
 				WrapWith(ctx, "<para>", "</para>", false);
 			});
-			AddCommand(MyToolBar, IconIds.TagBold, "Tag XML Doc with HTML <b>", ctx => {
+			AddCommand(MyToolBar, IconIds.TagBold, R.CMD_TagXmlDocB, ctx => {
 				WrapWith(ctx, "<b>", "</b>", true);
 			});
-			AddCommand(MyToolBar, IconIds.TagItalic, "Tag XML Doc with HTML <i>", ctx => {
+			AddCommand(MyToolBar, IconIds.TagItalic, R.CMD_TagXmlDocI, ctx => {
 				WrapWith(ctx, "<i>", "</i>", true);
 			});
-			AddCommand(MyToolBar, IconIds.TagUnderline, "Tag XML Doc with HTML <u>", ctx => {
+			AddCommand(MyToolBar, IconIds.TagUnderline, R.CMD_TagXmlDocU, ctx => {
 				WrapWith(ctx, "<u>", "</u>", true);
 			});
-			AddCommand(MyToolBar, IconIds.Comment, "Comment selection\nRight click: Comment line", ctx => {
+			AddCommand(MyToolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
 				if (ctx.RightClick) {
 					ctx.View.ExpandSelectionToLine();
 				}
@@ -320,9 +321,9 @@ namespace Codist.SmartBars
 					symbol = ctor.ContainingType;
 				}
 			}
-			r.Add(new CommandItem(IconIds.MarkSymbol, "Mark " + symbol.Name, AddHighlightMenuItems, null));
+			r.Add(new CommandItem(IconIds.MarkSymbol, R.CMD_Mark.Replace("<NAME>", symbol.Name), AddHighlightMenuItems, null));
 			if (Taggers.SymbolMarkManager.Contains(symbol)) {
-				r.Add(new CommandItem(IconIds.UnmarkSymbol, "Unmark " + symbol.Name, ctx => {
+				r.Add(new CommandItem(IconIds.UnmarkSymbol, R.CMD_Unmark.Replace("<NAME>", symbol.Name), ctx => {
 					UpdateSemanticModel();
 					if (_Symbol != null && Taggers.SymbolMarkManager.Remove(_Symbol)) {
 						Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
@@ -331,7 +332,7 @@ namespace Codist.SmartBars
 				}));
 			}
 			else if (Taggers.SymbolMarkManager.HasBookmark) {
-				r.Add(CreateCommandMenu(IconIds.UnmarkSymbol, "Unmark symbol...", symbol, "No symbol marked", (ctx, m, s) => {
+				r.Add(CreateCommandMenu(IconIds.UnmarkSymbol, R.CMD_UnmarkSymbol, symbol, "No symbol marked", (ctx, m, s) => {
 					foreach (var item in Taggers.SymbolMarkManager.MarkedSymbols) {
 						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.ImageId, item.DisplayString, _ => {
 							Taggers.SymbolMarkManager.Remove(item);
@@ -340,21 +341,21 @@ namespace Codist.SmartBars
 					}
 				}));
 			}
-			r.Add(new CommandItem(IconIds.ToggleBreakpoint, "Toggle Breakpoint", _ => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint")));
-			r.Add(new CommandItem(IconIds.ToggleBookmark, "Toggle Bookmark", _ => TextEditorHelper.ExecuteEditorCommand("Edit.ToggleBookmark")));
+			r.Add(new CommandItem(IconIds.ToggleBreakpoint, R.CMD_ToggleBreakpoint, _ => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint")));
+			r.Add(new CommandItem(IconIds.ToggleBookmark, R.CMD_ToggleBookmark, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ToggleBookmark")));
 			return r;
 		}
 
 		void AddHighlightMenuItems(MenuItem menuItem) {
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, "Highlight 1", item => item.Tag = __HighlightClassifications.Highlight1, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, "Highlight 2", item => item.Tag = __HighlightClassifications.Highlight2, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, "Highlight 3", item => item.Tag = __HighlightClassifications.Highlight3, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, "Highlight 4", item => item.Tag = __HighlightClassifications.Highlight4, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, "Highlight 5", item => item.Tag = __HighlightClassifications.Highlight5, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, "Highlight 6", item => item.Tag = __HighlightClassifications.Highlight6, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, "Highlight 7", item => item.Tag = __HighlightClassifications.Highlight7, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, "Highlight 8", item => item.Tag = __HighlightClassifications.Highlight8, SetSymbolMark)));
-			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, "Highlight 9", item => item.Tag = __HighlightClassifications.Highlight9, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 1", item => item.Tag = __HighlightClassifications.Highlight1, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 2", item => item.Tag = __HighlightClassifications.Highlight2, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 3", item => item.Tag = __HighlightClassifications.Highlight3, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 4", item => item.Tag = __HighlightClassifications.Highlight4, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 5", item => item.Tag = __HighlightClassifications.Highlight5, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 6", item => item.Tag = __HighlightClassifications.Highlight6, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 7", item => item.Tag = __HighlightClassifications.Highlight7, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 8", item => item.Tag = __HighlightClassifications.Highlight8, SetSymbolMark)));
+			menuItem.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.MarkSymbol, R.CMD_Highlight + " 9", item => item.Tag = __HighlightClassifications.Highlight9, SetSymbolMark)));
 		}
 
 		void SetSymbolMark(CommandContext context) {
@@ -394,7 +395,7 @@ namespace Codist.SmartBars
 				}
 				node = node.Parent;
 			}
-			r.Add(new CommandItem(IconIds.SelectAll, "Select All", ctrl => ctrl.ToolTip = "Select all text", ctx2 => TextEditorHelper.ExecuteEditorCommand("Edit.SelectAll")));
+			r.Add(new CommandItem(IconIds.SelectAll, R.CMD_SelectAll, ctrl => ctrl.ToolTip = R.CMDT_SelectAll, ctx2 => TextEditorHelper.ExecuteEditorCommand("Edit.SelectAll")));
 			return r;
 		}
 
