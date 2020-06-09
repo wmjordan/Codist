@@ -8,6 +8,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Commands
 {
@@ -27,19 +28,19 @@ namespace Codist.Commands
 					case InitStatus.Upgraded:
 						return ShowInfoBar(host, new InfoBarModel(
 							new[] {
-								new InfoBarTextSpan(nameof(Codist) + " has been upgraded to " + Config.CurrentVersion + ". Click here to "),
-								new InfoBarHyperlink("see what's new", "New"),
-								new InfoBarTextSpan(" or "),
-								new InfoBarHyperlink("dismiss this notification", "Close")
+								new InfoBarTextSpan(R.T_CodistUpdated.Replace("<VERSION>", Config.CurrentVersion)),
+								new InfoBarHyperlink(R.CMD_SeeWhatsNew, "New"),
+								new InfoBarTextSpan(R.T_Or),
+								new InfoBarHyperlink(R.CMD_DismissNotification, "Close")
 							},
 							KnownMonikers.StatusInformation));
 					case InitStatus.FirstLoad:
 						return ShowInfoBar(host, new InfoBarModel(
 							new[] {
-								new InfoBarTextSpan(nameof(Codist) + " is run on your Visual Studio for the first time. Click here to "),
-								new InfoBarHyperlink("learn more", "More"),
-								new InfoBarTextSpan(" or "),
-								new InfoBarHyperlink("dismiss this notification", "Close"),
+								new InfoBarTextSpan(R.T_CodistFirstRun),
+								new InfoBarHyperlink(R.CMD_LearnMore, "More"),
+								new InfoBarTextSpan(R.T_Or),
+								new InfoBarHyperlink(R.CMD_DismissNotification, "Close")
 							},
 							KnownMonikers.StatusInformation));
 				}

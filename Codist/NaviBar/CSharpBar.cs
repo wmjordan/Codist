@@ -12,13 +12,12 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
-using Task = System.Threading.Tasks.Task;
 using R = Codist.Properties.Resources;
+using Task = System.Threading.Tasks.Task;
 
 namespace Codist.NaviBar
 {
@@ -883,6 +882,8 @@ namespace Codist.NaviBar
 										AddIcon(ref icons, IconIds.StaticMember);
 									}
 									break;
+								case SyntaxKind.UnsafeKeyword: AddIcon(ref icons, IconIds.Unsafe); break;
+								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedMethod); break;
 							}
 						}
 						break;
@@ -891,6 +892,7 @@ namespace Codist.NaviBar
 							switch (modifier.Kind()) {
 								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
 								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractMember); break;
+								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedProperty); break;
 							}
 						}
 						break;
@@ -900,6 +902,11 @@ namespace Codist.NaviBar
 								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyField); break;
 								case SyntaxKind.VolatileKeyword: AddIcon(ref icons, IconIds.VolatileField); break;
 								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
+								case SyntaxKind.SealedKeyword:
+									if (f.IsKind(SyntaxKind.EventFieldDeclaration)) {
+										AddIcon(ref icons, IconIds.SealedEvent);
+									}
+									break;
 							}
 						}
 						break;
@@ -908,9 +915,9 @@ namespace Codist.NaviBar
 					case BaseTypeDeclarationSyntax c:
 						foreach (var modifier in c.Modifiers) {
 							switch (modifier.Kind()) {
-								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedClass); break;
-								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractClass); break;
 								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
+								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractClass); break;
+								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedClass); break;
 							}
 						}
 						break;

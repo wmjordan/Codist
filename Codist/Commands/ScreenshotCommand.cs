@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Design;
 using Microsoft.VisualStudio.Shell;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Commands
 {
@@ -10,7 +11,7 @@ namespace Codist.Commands
 		public static void Initialize() {
 			Command.CodeWindowScreenshot.Register(Execute, (s, args) => {
 				ThreadHelper.ThrowIfNotOnUIThread();
-				((OleMenuCommand)s).Enabled = TextEditorHelper.GetActiveWpfDocumentView() != null;
+				((OleMenuCommand)s).Visible = TextEditorHelper.GetActiveWpfDocumentView() != null;
 			});
 		}
 
@@ -25,9 +26,9 @@ namespace Codist.Commands
 				return;
 			}
 			using (var f = new System.Windows.Forms.SaveFileDialog {
-				Filter = "PNG images (*.png)|*.png",
+				Filter = R.T_PngFileFilter,
 				AddExtension = true,
-				Title = "Please specify the location of the screenshot file",
+				Title = R.T_SpecifyScreenshotLocation,
 				FileName = System.IO.Path.GetFileNameWithoutExtension(doc.Name) + ".png"
 			}) {
 				if (f.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
@@ -36,7 +37,7 @@ namespace Codist.Commands
 						WpfHelper.ScreenShot(g, f.FileName, (int)g.ActualWidth, (int)g.ActualHeight);
 					}
 					catch (Exception ex) {
-						CodistPackage.ShowErrorMessageBox("Failed to save screenshot for " + doc.Name + "\n" + ex.Message, null, true);
+						CodistPackage.ShowErrorMessageBox(R.T_FailedToSaveScreenshot.Replace("<NAME>", doc.Name) + Environment.NewLine + ex.Message, null, true);
 					}
 				}
 			}

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Commands
 {
@@ -30,7 +31,7 @@ namespace Codist.Commands
 			if (_Window == null || _Window.IsVisible == false) {
 				var v = TextEditorHelper.GetActiveWpfDocumentView();
 				if (v == null) {
-					CodistPackage.ShowErrorMessageBox("To configure syntax highlight, open a code file first and execute this command.", "Syntax Customization", true);
+					CodistPackage.ShowErrorMessageBox(R.T_CustomizeSyntaxHighlightNote, R.CMD_ConfigureSyntaxHighlight, true);
 					return;
 				}
 				CreateWindow(v);

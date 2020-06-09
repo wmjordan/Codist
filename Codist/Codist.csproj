@@ -22,6 +22,7 @@
     </AssemblyInfoVersionSettings>
     <AssemblyFileVersionSettings>
     </AssemblyFileVersionSettings>
+    <UICulture>en-US</UICulture>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -211,8 +212,20 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppHelpers.Ext.dll" />
+    <Content Include="zh-Hans\Extension.vsixlangpack">
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <SubType>Designer</SubType>
+    </Content>
     <None Include="Resources\Simple Codist.json" />
-    <VSCTCompile Include="Commands\CodistPackage.vsct">
+    <VSCTCompile Include="Commands\CodistPackage.en-US.vsct">
+      <ResourceName>Menus.ctmenu</ResourceName>
+      <SubType>Designer</SubType>
+    </VSCTCompile>
+    <None Include="Commands\CodistPackage.vsct">
+      <ResourceName>Menus.ctmenu</ResourceName>
+      <SubType>Designer</SubType>
+    </None>
+    <VSCTCompile Include="Commands\CodistPackage.zh-Hans.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
     </VSCTCompile>
@@ -516,17 +529,33 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
+    <EmbeddedResource Include="Properties\Resources.en-US.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </None>
+    <EmbeddedResource Include="Properties\Resources.zh-Hans.resx">
+      <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.zh-CN.resx" />
-    <EmbeddedResource Include="VSPackage.resx">
-      <MergeWithCTO>true</MergeWithCTO>
+    <None Include="VSPackage.resx">
+      <SubType>Designer</SubType>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
       <ManifestResourceName>VSPackage</ManifestResourceName>
+    </None>
+    <EmbeddedResource Include="VSPackage.en-US.resx">
+      <MergeWithCTO>true</MergeWithCTO>
+      <SubType>Designer</SubType>
+      <LogicalName>VSPackage.en-US.resources</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="VSPackage.zh-CN.resx" />
+    <EmbeddedResource Include="VSPackage.zh-Hans.resx">
+      <MergeWithCTO>true</MergeWithCTO>
+      <SubType>Designer</SubType>
+      <LogicalName>VSPackage.zh-Hans.resources</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />

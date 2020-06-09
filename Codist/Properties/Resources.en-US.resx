@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
+	<!-- 
     Microsoft ResX Schema 
     
     Version 2.0
@@ -59,1619 +59,1619 @@
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="CMDT_SelectAll" xml:space="preserve">
+	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+		<xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+		<xsd:element name="root" msdata:IsDataSet="true">
+			<xsd:complexType>
+				<xsd:choice maxOccurs="unbounded">
+					<xsd:element name="metadata">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" />
+							</xsd:sequence>
+							<xsd:attribute name="name" use="required" type="xsd:string" />
+							<xsd:attribute name="type" type="xsd:string" />
+							<xsd:attribute name="mimetype" type="xsd:string" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="assembly">
+						<xsd:complexType>
+							<xsd:attribute name="alias" type="xsd:string" />
+							<xsd:attribute name="name" type="xsd:string" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="data">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+							<xsd:attribute ref="xml:space" />
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="resheader">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+							</xsd:sequence>
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:element>
+	</xsd:schema>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+	</resheader>
+	<data name="CMDT_SelectAll" xml:space="preserve">
     <value>Select all text</value>
   </data>
-  <data name="CMD_AddParallelWatch" xml:space="preserve">
+	<data name="CMD_AddParallelWatch" xml:space="preserve">
     <value>Add Parallel Watch</value>
   </data>
-  <data name="CMD_AddWatch" xml:space="preserve">
+	<data name="CMD_AddWatch" xml:space="preserve">
     <value>Add Watch</value>
   </data>
-  <data name="CMD_AnalyzeSymbol" xml:space="preserve">
+	<data name="CMD_AnalyzeSymbol" xml:space="preserve">
     <value>Analyze symbol...</value>
   </data>
-  <data name="CMD_Capitalize" xml:space="preserve">
+	<data name="CMD_Capitalize" xml:space="preserve">
     <value>Capitalize</value>
   </data>
-  <data name="CMD_ClearFilter" xml:space="preserve">
+	<data name="CMD_ClearFilter" xml:space="preserve">
     <value>Clear filter</value>
   </data>
-  <data name="CMD_Close" xml:space="preserve">
+	<data name="CMD_Close" xml:space="preserve">
     <value>Close</value>
   </data>
-  <data name="CMD_CommentSelection" xml:space="preserve">
+	<data name="CMD_CommentSelection" xml:space="preserve">
     <value>Comment selection
 Right click: Comment line</value>
   </data>
-  <data name="CMD_CopyQualifiedSymbolName" xml:space="preserve">
+	<data name="CMD_CopyQualifiedSymbolName" xml:space="preserve">
     <value>Copy Qualified Symbol Name</value>
   </data>
-  <data name="CMD_CopySelectedText" xml:space="preserve">
+	<data name="CMD_CopySelectedText" xml:space="preserve">
     <value>Copy selected text
 Right click: Copy line</value>
   </data>
-  <data name="CMD_CopySymbolName" xml:space="preserve">
+	<data name="CMD_CopySymbolName" xml:space="preserve">
     <value>Copy Symbol Name</value>
   </data>
-  <data name="CMD_CutSelectedText" xml:space="preserve">
+	<data name="CMD_CutSelectedText" xml:space="preserve">
     <value>Cut selected text
 Right click: Cut line</value>
   </data>
-  <data name="CMD_Debugger" xml:space="preserve">
+	<data name="CMD_Debugger" xml:space="preserve">
     <value>Debugger...
 Left click: Toggle breakpoint
 Right click: Debugger menu...</value>
   </data>
-  <data name="CMD_DeleteAllBreakpoints" xml:space="preserve">
+	<data name="CMD_DeleteAllBreakpoints" xml:space="preserve">
     <value>Delete All Breakpoints</value>
   </data>
-  <data name="CMD_DeleteSelectedText" xml:space="preserve">
+	<data name="CMD_DeleteSelectedText" xml:space="preserve">
     <value>Delete selected text
 Right click: Delete line
 Ctrl click: Delete and select next</value>
   </data>
-  <data name="CMD_DuplicateSelection" xml:space="preserve">
+	<data name="CMD_DuplicateSelection" xml:space="preserve">
     <value>Duplicate selection
 Right click: Duplicate line</value>
   </data>
-  <data name="CMD_ExtractInterface" xml:space="preserve">
+	<data name="CMD_ExtractInterface" xml:space="preserve">
     <value>Extract interface</value>
   </data>
-  <data name="CMD_ExtractMethod" xml:space="preserve">
+	<data name="CMD_ExtractMethod" xml:space="preserve">
     <value>Extract Method</value>
   </data>
-  <data name="CMD_Find" xml:space="preserve">
+	<data name="CMD_Find" xml:space="preserve">
     <value>Find...</value>
   </data>
-  <data name="CMD_FindAllReferences" xml:space="preserve">
+	<data name="CMD_FindAllReferences" xml:space="preserve">
     <value>Find All References</value>
   </data>
-  <data name="CMD_FindCallers" xml:space="preserve">
+	<data name="CMD_FindCallers" xml:space="preserve">
     <value>Find Callers...</value>
   </data>
-  <data name="CMD_FindConstructorCallers" xml:space="preserve">
+	<data name="CMD_FindConstructorCallers" xml:space="preserve">
     <value>Find Constructor Callers...</value>
   </data>
-  <data name="CMD_FindDerivedClasses" xml:space="preserve">
+	<data name="CMD_FindDerivedClasses" xml:space="preserve">
     <value>Find Derived Classes...</value>
   </data>
-  <data name="CMD_FindExtensions" xml:space="preserve">
+	<data name="CMD_FindExtensions" xml:space="preserve">
     <value>Find Extensions...</value>
   </data>
-  <data name="CMD_FindExtensionsFor" xml:space="preserve">
+	<data name="CMD_FindExtensionsFor" xml:space="preserve">
     <value>Find Extensions for &lt;TYPE&gt;...</value>
   </data>
-  <data name="CMD_FindImplementations" xml:space="preserve">
+	<data name="CMD_FindImplementations" xml:space="preserve">
     <value>Find Implementations...</value>
   </data>
-  <data name="CMD_FindInFiles" xml:space="preserve">
+	<data name="CMD_FindInFiles" xml:space="preserve">
     <value>Find in Files...</value>
   </data>
-  <data name="CMD_FindInstanceAsParameter" xml:space="preserve">
+	<data name="CMD_FindInstanceAsParameter" xml:space="preserve">
     <value>Find Instance as Parameter...</value>
   </data>
-  <data name="CMD_FindInstanceProducer" xml:space="preserve">
+	<data name="CMD_FindInstanceProducer" xml:space="preserve">
     <value>Find Instance Producer...</value>
   </data>
-  <data name="CMD_FindMembers" xml:space="preserve">
+	<data name="CMD_FindMembers" xml:space="preserve">
     <value>Find Members...</value>
   </data>
-  <data name="CMD_FindMembersOf" xml:space="preserve">
+	<data name="CMD_FindMembersOf" xml:space="preserve">
     <value>Find Members of &lt;TYPE&gt;...</value>
   </data>
-  <data name="CMD_FindMethodsSameSignature" xml:space="preserve">
+	<data name="CMD_FindMethodsSameSignature" xml:space="preserve">
     <value>Find Methods with Same Signature...</value>
   </data>
-  <data name="CMD_FindOverrides" xml:space="preserve">
+	<data name="CMD_FindOverrides" xml:space="preserve">
     <value>Find Overrides...</value>
   </data>
-  <data name="CMD_FindReferencedSymbols" xml:space="preserve">
+	<data name="CMD_FindReferencedSymbols" xml:space="preserve">
     <value>Find Referenced Symbols...</value>
   </data>
-  <data name="CMD_FindReferrers" xml:space="preserve">
+	<data name="CMD_FindReferrers" xml:space="preserve">
     <value>Find Referrers...</value>
   </data>
-  <data name="CMD_FindReplace" xml:space="preserve">
+	<data name="CMD_FindReplace" xml:space="preserve">
     <value>Find next selected text
 Ctrl click: Find match case
 Right click: Find and replace...</value>
   </data>
-  <data name="CMD_FindSymbolwithName" xml:space="preserve">
+	<data name="CMD_FindSymbolwithName" xml:space="preserve">
     <value>Find Symbol with Name "&lt;NAME&gt;"...</value>
   </data>
-  <data name="CMD_FindTypeReferrers" xml:space="preserve">
+	<data name="CMD_FindTypeReferrers" xml:space="preserve">
     <value>Find Type Referrers...</value>
   </data>
-  <data name="CMD_FormatDocument" xml:space="preserve">
+	<data name="CMD_FormatDocument" xml:space="preserve">
     <value>Format Document</value>
   </data>
-  <data name="CMD_FormatSelection" xml:space="preserve">
+	<data name="CMD_FormatSelection" xml:space="preserve">
     <value>Format selection</value>
   </data>
-  <data name="CMD_Formatting" xml:space="preserve">
+	<data name="CMD_Formatting" xml:space="preserve">
     <value>Formatting...</value>
   </data>
-  <data name="CMD_GoTo" xml:space="preserve">
+	<data name="CMD_GoTo" xml:space="preserve">
     <value>Go to &lt;TYPE&gt;</value>
   </data>
-  <data name="CMD_GoToDeclaration" xml:space="preserve">
+	<data name="CMD_GoToDeclaration" xml:space="preserve">
     <value>Go to declaration</value>
   </data>
-  <data name="CMD_GoToDefinition" xml:space="preserve">
+	<data name="CMD_GoToDefinition" xml:space="preserve">
     <value>Go to Definition</value>
   </data>
-  <data name="CMD_GoToDefinitionPeek" xml:space="preserve">
+	<data name="CMD_GoToDefinitionPeek" xml:space="preserve">
     <value>Go to definition
 Right click: Peek definition</value>
   </data>
-  <data name="CMD_GotoMember" xml:space="preserve">
+	<data name="CMD_GotoMember" xml:space="preserve">
     <value>Go to Member</value>
   </data>
-  <data name="CMD_GotoSymbol" xml:space="preserve">
+	<data name="CMD_GotoSymbol" xml:space="preserve">
     <value>Go to Symbol</value>
   </data>
-  <data name="CMD_GotoType" xml:space="preserve">
+	<data name="CMD_GotoType" xml:space="preserve">
     <value>Go to Type</value>
   </data>
-  <data name="CMD_GUID" xml:space="preserve">
+	<data name="CMD_GUID" xml:space="preserve">
     <value>New GUID
 Hint: To create a new GUID, type 'guid' (without quotes) and select it</value>
   </data>
-  <data name="CMD_Highlight" xml:space="preserve">
+	<data name="CMD_Highlight" xml:space="preserve">
     <value>Highlight</value>
   </data>
-  <data name="CMD_IncrementNumber" xml:space="preserve">
+	<data name="CMD_IncrementNumber" xml:space="preserve">
     <value>Increment number</value>
   </data>
-  <data name="CMD_Indent" xml:space="preserve">
+	<data name="CMD_Indent" xml:space="preserve">
     <value>Indent</value>
   </data>
-  <data name="CMD_InsertComment" xml:space="preserve">
+	<data name="CMD_InsertComment" xml:space="preserve">
     <value>Insert comment</value>
   </data>
-  <data name="CMD_InvertOperator" xml:space="preserve">
+	<data name="CMD_InvertOperator" xml:space="preserve">
     <value>Invert operator</value>
   </data>
-  <data name="CMD_JoinLines" xml:space="preserve">
+	<data name="CMD_JoinLines" xml:space="preserve">
     <value>Join Lines</value>
   </data>
-  <data name="CMD_Lowercase" xml:space="preserve">
+	<data name="CMD_Lowercase" xml:space="preserve">
     <value>Lowercase</value>
   </data>
-  <data name="CMD_Mark" xml:space="preserve">
+	<data name="CMD_Mark" xml:space="preserve">
     <value>Mark &lt;NAME&gt;</value>
   </data>
-  <data name="CMD_MarkSymbol" xml:space="preserve">
+	<data name="CMD_MarkSymbol" xml:space="preserve">
     <value>Mark symbol...</value>
   </data>
-  <data name="CMD_Paste" xml:space="preserve">
+	<data name="CMD_Paste" xml:space="preserve">
     <value>Paste text from clipboard
 Right click: Paste over line
 Ctrl click: Paste and select next</value>
   </data>
-  <data name="CMD_Pin" xml:space="preserve">
+	<data name="CMD_Pin" xml:space="preserve">
     <value>Pin</value>
   </data>
-  <data name="CMD_RenameSymbol" xml:space="preserve">
+	<data name="CMD_RenameSymbol" xml:space="preserve">
     <value>Rename symbol</value>
   </data>
-  <data name="CMD_ReorderParameters" xml:space="preserve">
+	<data name="CMD_ReorderParameters" xml:space="preserve">
     <value>Reorder parameters</value>
   </data>
-  <data name="CMD_Replace" xml:space="preserve">
+	<data name="CMD_Replace" xml:space="preserve">
     <value>Replace...</value>
   </data>
-  <data name="CMD_ReplaceInFiles" xml:space="preserve">
+	<data name="CMD_ReplaceInFiles" xml:space="preserve">
     <value>Replace in Files...</value>
   </data>
-  <data name="CMD_SearchDeclaration" xml:space="preserve">
+	<data name="CMD_SearchDeclaration" xml:space="preserve">
     <value>Search Declaration</value>
   </data>
-  <data name="CMD_SearchWith" xml:space="preserve">
+	<data name="CMD_SearchWith" xml:space="preserve">
     <value>Search with &lt;NAME&gt;...</value>
   </data>
-  <data name="CMD_SelectAll" xml:space="preserve">
+	<data name="CMD_SelectAll" xml:space="preserve">
     <value>Select All</value>
   </data>
-  <data name="CMD_SelectCode" xml:space="preserve">
+	<data name="CMD_SelectCode" xml:space="preserve">
     <value>Select Code</value>
   </data>
-  <data name="CMD_SelectDirectiveRegion" xml:space="preserve">
+	<data name="CMD_SelectDirectiveRegion" xml:space="preserve">
     <value>Select directive region</value>
   </data>
-  <data name="CMD_ShowSyntaxClassificationInfo" xml:space="preserve">
+	<data name="CMD_ShowSyntaxClassificationInfo" xml:space="preserve">
     <value>Show syntax classification info</value>
   </data>
-  <data name="CMD_SurroundWith" xml:space="preserve">
+	<data name="CMD_SurroundWith" xml:space="preserve">
     <value>Surround with...</value>
   </data>
-  <data name="CMD_TagXmlDocB" xml:space="preserve">
+	<data name="CMD_TagXmlDocB" xml:space="preserve">
     <value>Tag XML Doc with HTML &lt;b&gt;</value>
   </data>
-  <data name="CMD_TagXmlDocC" xml:space="preserve">
+	<data name="CMD_TagXmlDocC" xml:space="preserve">
     <value>Tag XML Doc with &lt;c&gt;</value>
   </data>
-  <data name="CMD_TagXmlDocI" xml:space="preserve">
+	<data name="CMD_TagXmlDocI" xml:space="preserve">
     <value>Tag XML Doc with HTML &lt;i&gt;</value>
   </data>
-  <data name="CMD_TagXmlDocPara" xml:space="preserve">
+	<data name="CMD_TagXmlDocPara" xml:space="preserve">
     <value>Tag XML Doc with &lt;para&gt;</value>
   </data>
-  <data name="CMD_TagXmlDocSee" xml:space="preserve">
+	<data name="CMD_TagXmlDocSee" xml:space="preserve">
     <value>Tag XML Doc with &lt;see&gt; or &lt;paramref&gt;</value>
   </data>
-  <data name="CMD_TagXmlDocU" xml:space="preserve">
+	<data name="CMD_TagXmlDocU" xml:space="preserve">
     <value>Tag XML Doc with HTML &lt;u&gt;</value>
   </data>
-  <data name="CMD_ToggleBookmark" xml:space="preserve">
+	<data name="CMD_ToggleBookmark" xml:space="preserve">
     <value>Toggle Bookmark</value>
   </data>
-  <data name="CMD_ToggleBreakpoint" xml:space="preserve">
+	<data name="CMD_ToggleBreakpoint" xml:space="preserve">
     <value>Toggle Breakpoint</value>
   </data>
-  <data name="CMD_ToggleOperator" xml:space="preserve">
+	<data name="CMD_ToggleOperator" xml:space="preserve">
     <value>Toggle operator</value>
   </data>
-  <data name="CMD_ToggleParentheses" xml:space="preserve">
+	<data name="CMD_ToggleParentheses" xml:space="preserve">
     <value>Toggle Parentheses</value>
   </data>
-  <data name="CMD_ToggleValue" xml:space="preserve">
+	<data name="CMD_ToggleValue" xml:space="preserve">
     <value>Toggle value</value>
   </data>
-  <data name="CMD_UncommentSelection" xml:space="preserve">
+	<data name="CMD_UncommentSelection" xml:space="preserve">
     <value>Uncomment selection</value>
   </data>
-  <data name="CMD_Unindent" xml:space="preserve">
+	<data name="CMD_Unindent" xml:space="preserve">
     <value>Unindent</value>
   </data>
-  <data name="CMD_Unmark" xml:space="preserve">
+	<data name="CMD_Unmark" xml:space="preserve">
     <value>Unmark &lt;NAME&gt;</value>
   </data>
-  <data name="CMD_UnmarkSymbol" xml:space="preserve">
+	<data name="CMD_UnmarkSymbol" xml:space="preserve">
     <value>Unmark symbol...</value>
   </data>
-  <data name="CMD_Uppercase" xml:space="preserve">
+	<data name="CMD_Uppercase" xml:space="preserve">
     <value>Uppercase</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Dark" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Dark Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="Light" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Light Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
-  <data name="Simple" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Simple Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;gb2312</value>
-  </data>
-  <data name="T_AsParameter" xml:space="preserve">
+	<assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+	<data name="Dark" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>..\Resources\Dark Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+	</data>
+	<data name="Light" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>..\Resources\Light Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+	</data>
+	<data name="Simple" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>..\Resources\Simple Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;gb2312</value>
+	</data>
+	<data name="T_AsParameter" xml:space="preserve">
     <value> as parameter</value>
   </data>
-  <data name="T_Classes" xml:space="preserve">
+	<data name="T_Classes" xml:space="preserve">
     <value>Classes</value>
   </data>
-  <data name="T_SearchCurrentDocument" xml:space="preserve">
+	<data name="T_SearchCurrentDocument" xml:space="preserve">
     <value>Search current document</value>
   </data>
-  <data name="T_SearchCurrentProject" xml:space="preserve">
+	<data name="T_SearchCurrentProject" xml:space="preserve">
     <value>Search current project</value>
   </data>
-  <data name="T_DelegateEvent" xml:space="preserve">
+	<data name="T_DelegateEvent" xml:space="preserve">
     <value>Delegate; attach or detach event</value>
   </data>
-  <data name="T_Delegates" xml:space="preserve">
+	<data name="T_Delegates" xml:space="preserve">
     <value>Delegates</value>
   </data>
-  <data name="T_DerivedClasses" xml:space="preserve">
+	<data name="T_DerivedClasses" xml:space="preserve">
     <value> derived classes</value>
   </data>
-  <data name="T_Enumerations" xml:space="preserve">
+	<data name="T_Enumerations" xml:space="preserve">
     <value>Enumerations</value>
   </data>
-  <data name="T_Events" xml:space="preserve">
+	<data name="T_Events" xml:space="preserve">
     <value>Events</value>
   </data>
-  <data name="T_Extensions" xml:space="preserve">
+	<data name="T_Extensions" xml:space="preserve">
     <value> extensions</value>
   </data>
-  <data name="T_FieldsProperties" xml:space="preserve">
+	<data name="T_FieldsProperties" xml:space="preserve">
     <value>Fields and properties</value>
   </data>
-  <data name="T_Implementations" xml:space="preserve">
+	<data name="T_Implementations" xml:space="preserve">
     <value> implementations: </value>
   </data>
-  <data name="T_Interfaces" xml:space="preserve">
+	<data name="T_Interfaces" xml:space="preserve">
     <value>Interfaces</value>
   </data>
-  <data name="T_InternalPrivateTypes" xml:space="preserve">
+	<data name="T_InternalPrivateTypes" xml:space="preserve">
     <value>Internal and private types</value>
   </data>
-  <data name="T_LineOfCode" xml:space="preserve">
+	<data name="T_LineOfCode" xml:space="preserve">
     <value>Line of code: </value>
   </data>
-  <data name="T_Members" xml:space="preserve">
+	<data name="T_Members" xml:space="preserve">
     <value> members: {count} ({inherited} inherited)</value>
   </data>
-  <data name="T_Methods" xml:space="preserve">
+	<data name="T_Methods" xml:space="preserve">
     <value>Methods</value>
   </data>
-  <data name="T_NameAlike" xml:space="preserve">
+	<data name="T_NameAlike" xml:space="preserve">
     <value> name alike</value>
   </data>
-  <data name="T_Namespaces" xml:space="preserve">
+	<data name="T_Namespaces" xml:space="preserve">
     <value>Namespaces</value>
   </data>
-  <data name="T_Overrides" xml:space="preserve">
+	<data name="T_Overrides" xml:space="preserve">
     <value> overrides: </value>
   </data>
-  <data name="T_Producers" xml:space="preserve">
+	<data name="T_Producers" xml:space="preserve">
     <value> producers</value>
   </data>
-  <data name="T_PublicProtectedTypes" xml:space="preserve">
+	<data name="T_PublicProtectedTypes" xml:space="preserve">
     <value>Public and protected types</value>
   </data>
-  <data name="T_ReferencedSymbols" xml:space="preserve">
+	<data name="T_ReferencedSymbols" xml:space="preserve">
     <value> referenced symbols: </value>
   </data>
-  <data name="T_Referrers" xml:space="preserve">
+	<data name="T_Referrers" xml:space="preserve">
     <value> referrers</value>
   </data>
-  <data name="T_ResultFilter" xml:space="preserve">
+	<data name="T_ResultFilter" xml:space="preserve">
     <value>Result Filter</value>
   </data>
-  <data name="T_ResultFilterTip" xml:space="preserve">
+	<data name="T_ResultFilterTip" xml:space="preserve">
     <value>Filter items in this menu.
 Use space to separate keywords.</value>
   </data>
-  <data name="T_SignatureMatch" xml:space="preserve">
+	<data name="T_SignatureMatch" xml:space="preserve">
     <value> signature match</value>
   </data>
-  <data name="T_SourceLocations" xml:space="preserve">
+	<data name="T_SourceLocations" xml:space="preserve">
     <value> source locations: </value>
   </data>
-  <data name="T_Structures" xml:space="preserve">
+	<data name="T_Structures" xml:space="preserve">
     <value>Structures</value>
   </data>
-  <data name="T_TypeConversion" xml:space="preserve">
+	<data name="T_TypeConversion" xml:space="preserve">
     <value>Type conversion</value>
   </data>
-  <data name="T_TypeReferenceOrArgument" xml:space="preserve">
+	<data name="T_TypeReferenceOrArgument" xml:space="preserve">
     <value>Type reference or argument</value>
   </data>
-  <data name="T_TypesDelegates" xml:space="preserve">
+	<data name="T_TypesDelegates" xml:space="preserve">
     <value>Types and delegates</value>
   </data>
-  <data name="T_Write" xml:space="preserve">
+	<data name="T_Write" xml:space="preserve">
     <value>Write</value>
   </data>
-  <data name="CMD_GotoProjectReleasePage" xml:space="preserve">
+	<data name="CMD_GotoProjectReleasePage" xml:space="preserve">
     <value>Go to project release page</value>
   </data>
-  <data name="CMD_GotoProjectWebSite" xml:space="preserve">
+	<data name="CMD_GotoProjectWebSite" xml:space="preserve">
     <value>Go to project web site</value>
   </data>
-  <data name="CMD_Load" xml:space="preserve">
+	<data name="CMD_Load" xml:space="preserve">
     <value>Load...</value>
   </data>
-  <data name="CMD_OpenDonatePage" xml:space="preserve">
+	<data name="CMD_OpenDonatePage" xml:space="preserve">
     <value>Open your browser and donate to project Codist</value>
   </data>
-  <data name="CMD_PostIssue" xml:space="preserve">
+	<data name="CMD_PostIssue" xml:space="preserve">
     <value>Post your opinions in the issues page</value>
   </data>
-  <data name="CMD_Save" xml:space="preserve">
+	<data name="CMD_Save" xml:space="preserve">
     <value>Save...</value>
   </data>
-  <data name="OT_About" xml:space="preserve">
+	<data name="OT_About" xml:space="preserve">
     <value>About</value>
   </data>
-  <data name="OT_ConfigurationFile" xml:space="preserve">
+	<data name="OT_ConfigurationFile" xml:space="preserve">
     <value>Configuration File</value>
   </data>
-  <data name="OT_ConfigurationFileTip" xml:space="preserve">
+	<data name="OT_ConfigurationFileTip" xml:space="preserve">
     <value>Use the following buttons to backup your settings or share the file with others</value>
   </data>
-  <data name="OT_DonateLink" xml:space="preserve">
+	<data name="OT_DonateLink" xml:space="preserve">
     <value>Donate via PayPal</value>
   </data>
-  <data name="OT_DonateLinkTip" xml:space="preserve">
+	<data name="OT_DonateLinkTip" xml:space="preserve">
     <value>Recommended donation value is $19.99. But you can modify the amount to any value if you like</value>
   </data>
-  <data name="OT_FeatureChangesTip" xml:space="preserve">
+	<data name="OT_FeatureChangesTip" xml:space="preserve">
     <value>Changes will take place on NEWLY OPENED document windows. Currently opened document windows WILL NOT BE AFFECTED</value>
   </data>
-  <data name="OT_FeatureControllers" xml:space="preserve">
+	<data name="OT_FeatureControllers" xml:space="preserve">
     <value>Feature Controllers</value>
   </data>
-  <data name="OT_FeatureControllersTip" xml:space="preserve">
+	<data name="OT_FeatureControllersTip" xml:space="preserve">
     <value>Use the following checkboxes to control features provided by Codist.</value>
   </data>
-  <data name="OT_General" xml:space="preserve">
+	<data name="OT_General" xml:space="preserve">
     <value>General</value>
   </data>
-  <data name="OT_LatestRelease" xml:space="preserve">
+	<data name="OT_LatestRelease" xml:space="preserve">
     <value>Latest release:</value>
   </data>
-  <data name="OT_LoadConfigFileTip" xml:space="preserve">
+	<data name="OT_LoadConfigFileTip" xml:space="preserve">
     <value>Restore configurations from a file...</value>
   </data>
-  <data name="OT_NavigationBarTip" xml:space="preserve">
+	<data name="OT_NavigationBarTip" xml:space="preserve">
     <value>Provides an enhanced navigation bar for C# and Markdown languages</value>
   </data>
-  <data name="OT_ProjectWebSite" xml:space="preserve">
+	<data name="OT_ProjectWebSite" xml:space="preserve">
     <value>Project web site:</value>
   </data>
-  <data name="OT_QuickInfoTip" xml:space="preserve">
+	<data name="OT_QuickInfoTip" xml:space="preserve">
     <value>Provides enhancements to Quick Info (code tooltips)</value>
   </data>
-  <data name="OT_ReportBugsAndSuggestions" xml:space="preserve">
+	<data name="OT_ReportBugsAndSuggestions" xml:space="preserve">
     <value>Report bugs and suggestions to:</value>
   </data>
-  <data name="OT_SaveConfigFileTip" xml:space="preserve">
+	<data name="OT_SaveConfigFileTip" xml:space="preserve">
     <value>Backup configurations to a file...</value>
   </data>
-  <data name="OT_ScrollbarMarkerTip" xml:space="preserve">
+	<data name="OT_ScrollbarMarkerTip" xml:space="preserve">
     <value>Provides additional markers on the scrollbar</value>
   </data>
-  <data name="OT_SmartBarTip" xml:space="preserve">
+	<data name="OT_SmartBarTip" xml:space="preserve">
     <value>Provides a dynamic floating toolbar in your code editor</value>
   </data>
-  <data name="OT_SupportCodst" xml:space="preserve">
+	<data name="OT_SupportCodst" xml:space="preserve">
     <value>Support future development of Codist:</value>
   </data>
-  <data name="OT_SyntaxHighlightTip" xml:space="preserve">
+	<data name="OT_SyntaxHighlightTip" xml:space="preserve">
     <value>Provides advanced syntax highlight and comment taggers</value>
   </data>
-  <data name="OT_ThankYou" xml:space="preserve">
+	<data name="OT_ThankYou" xml:space="preserve">
     <value>Thank You for Using Codist</value>
   </data>
-  <data name="T_AnonymousType" xml:space="preserve">
+	<data name="T_AnonymousType" xml:space="preserve">
     <value>Anonymous type: </value>
   </data>
-  <data name="T_Argument" xml:space="preserve">
+	<data name="T_Argument" xml:space="preserve">
     <value>Argument</value>
   </data>
-  <data name="T_ArgumentN" xml:space="preserve">
+	<data name="T_ArgumentN" xml:space="preserve">
     <value>Argument &lt;N&gt;</value>
   </data>
-  <data name="T_ArgumentNOf" xml:space="preserve">
+	<data name="T_ArgumentNOf" xml:space="preserve">
     <value>Argument &lt;N&gt; of </value>
   </data>
-  <data name="T_ArgumentOf" xml:space="preserve">
+	<data name="T_ArgumentOf" xml:space="preserve">
     <value> of </value>
   </data>
-  <data name="T_Assembly" xml:space="preserve">
+	<data name="T_Assembly" xml:space="preserve">
     <value>Assembly: </value>
   </data>
-  <data name="T_Attribute" xml:space="preserve">
+	<data name="T_Attribute" xml:space="preserve">
     <value>Attribute:</value>
   </data>
-  <data name="T_AttributeOf" xml:space="preserve">
+	<data name="T_AttributeOf" xml:space="preserve">
     <value>Attribute of</value>
   </data>
-  <data name="T_CapturedVariables" xml:space="preserve">
+	<data name="T_CapturedVariables" xml:space="preserve">
     <value>Captured variables</value>
   </data>
-  <data name="T_Chars" xml:space="preserve">
+	<data name="T_Chars" xml:space="preserve">
     <value>chars</value>
   </data>
-  <data name="T_Color" xml:space="preserve">
+	<data name="T_Color" xml:space="preserve">
     <value>Color</value>
   </data>
-  <data name="T_DeclaredVariable" xml:space="preserve">
+	<data name="T_DeclaredVariable" xml:space="preserve">
     <value>Declared variable: </value>
   </data>
-  <data name="T_DelegateSignature" xml:space="preserve">
+	<data name="T_DelegateSignature" xml:space="preserve">
     <value>Delegate signature</value>
   </data>
-  <data name="T_DocumentationFrom" xml:space="preserve">
+	<data name="T_DocumentationFrom" xml:space="preserve">
     <value>Documentation from </value>
   </data>
-  <data name="T_EndOfRegion" xml:space="preserve">
+	<data name="T_EndOfRegion" xml:space="preserve">
     <value>End of region </value>
   </data>
-  <data name="T_EnumAllFlags" xml:space="preserve">
+	<data name="T_EnumAllFlags" xml:space="preserve">
     <value>All flags: </value>
   </data>
-  <data name="T_EnumFieldCount" xml:space="preserve">
+	<data name="T_EnumFieldCount" xml:space="preserve">
     <value>Field count: </value>
   </data>
-  <data name="T_EnumMax" xml:space="preserve">
+	<data name="T_EnumMax" xml:space="preserve">
     <value>Max: </value>
   </data>
-  <data name="T_EnumMin" xml:space="preserve">
+	<data name="T_EnumMin" xml:space="preserve">
     <value>Min: </value>
   </data>
-  <data name="T_EnumUnderlyingType" xml:space="preserve">
+	<data name="T_EnumUnderlyingType" xml:space="preserve">
     <value>Enum underlying type: </value>
   </data>
-  <data name="T_ExplicitImplements" xml:space="preserve">
+	<data name="T_ExplicitImplements" xml:space="preserve">
     <value>Explicit implements:</value>
   </data>
-  <data name="T_HashCode" xml:space="preserve">
+	<data name="T_HashCode" xml:space="preserve">
     <value>Hash code</value>
   </data>
-  <data name="T_Implements" xml:space="preserve">
+	<data name="T_Implements" xml:space="preserve">
     <value>Implements:</value>
   </data>
-  <data name="T_Interface" xml:space="preserve">
+	<data name="T_Interface" xml:space="preserve">
     <value>Interface:</value>
   </data>
-  <data name="T_Inherited" xml:space="preserve">
+	<data name="T_Inherited" xml:space="preserve">
     <value> (inherited)</value>
   </data>
-  <data name="T_LambdaExpression" xml:space="preserve">
+	<data name="T_LambdaExpression" xml:space="preserve">
     <value>lambda expression</value>
   </data>
-  <data name="T_Lines" xml:space="preserve">
+	<data name="T_Lines" xml:space="preserve">
     <value> lines</value>
   </data>
-  <data name="T_Maybe" xml:space="preserve">
+	<data name="T_Maybe" xml:space="preserve">
     <value>Maybe...</value>
   </data>
-  <data name="T_MaybeArgument" xml:space="preserve">
+	<data name="T_MaybeArgument" xml:space="preserve">
     <value>Maybe</value>
   </data>
-  <data name="T_MaybeArgumentOf" xml:space="preserve">
+	<data name="T_MaybeArgumentOf" xml:space="preserve">
     <value> argument of</value>
   </data>
-  <data name="T_Member" xml:space="preserve">
+	<data name="T_Member" xml:space="preserve">
     <value>Member:</value>
   </data>
-  <data name="T_MethodOverload" xml:space="preserve">
+	<data name="T_MethodOverload" xml:space="preserve">
     <value>Method overload:</value>
   </data>
-  <data name="T_Namespace" xml:space="preserve">
+	<data name="T_Namespace" xml:space="preserve">
     <value>Namespace: </value>
   </data>
-  <data name="T_NavigationBar" xml:space="preserve">
+	<data name="T_NavigationBar" xml:space="preserve">
     <value>Navigation Bar</value>
   </data>
-  <data name="T_ReadVariable" xml:space="preserve">
+	<data name="T_ReadVariable" xml:space="preserve">
     <value>Read variable: </value>
   </data>
-  <data name="T_Return" xml:space="preserve">
+	<data name="T_Return" xml:space="preserve">
     <value>Return </value>
   </data>
-  <data name="T_ReturnAnonymousFunction" xml:space="preserve">
+	<data name="T_ReturnAnonymousFunction" xml:space="preserve">
     <value>Return anonymous function for </value>
   </data>
-  <data name="T_ReturnFor" xml:space="preserve">
+	<data name="T_ReturnFor" xml:space="preserve">
     <value> for </value>
   </data>
-  <data name="T_ScrollbarMarkers" xml:space="preserve">
+	<data name="T_ScrollbarMarkers" xml:space="preserve">
     <value>Scrollbar Markers</value>
   </data>
-  <data name="T_SmartBar" xml:space="preserve">
+	<data name="T_SmartBar" xml:space="preserve">
     <value>Smart Bar</value>
   </data>
-  <data name="T_SuperQuickInfo" xml:space="preserve">
+	<data name="T_SuperQuickInfo" xml:space="preserve">
     <value>Super Quick Info</value>
   </data>
-  <data name="T_SymbolUnavailableIn" xml:space="preserve">
+	<data name="T_SymbolUnavailableIn" xml:space="preserve">
     <value>Symbol unavailable in:</value>
   </data>
-  <data name="T_SyntaxHighlight" xml:space="preserve">
+	<data name="T_SyntaxHighlight" xml:space="preserve">
     <value>Syntax Highlight</value>
   </data>
-  <data name="T_Text" xml:space="preserve">
+	<data name="T_Text" xml:space="preserve">
     <value>text</value>
   </data>
-  <data name="T_Type" xml:space="preserve">
+	<data name="T_Type" xml:space="preserve">
     <value>Type:</value>
   </data>
-  <data name="T_TypeArgument" xml:space="preserve">
+	<data name="T_TypeArgument" xml:space="preserve">
     <value>Type argument:</value>
   </data>
-  <data name="T_BaseType" xml:space="preserve">
+	<data name="T_BaseType" xml:space="preserve">
     <value>Base type: </value>
   </data>
-  <data name="T_Characters" xml:space="preserve">
+	<data name="T_Characters" xml:space="preserve">
     <value> characters</value>
   </data>
-  <data name="T_Class" xml:space="preserve">
+	<data name="T_Class" xml:space="preserve">
     <value>Class: </value>
   </data>
-  <data name="T_Constraint" xml:space="preserve">
+	<data name="T_Constraint" xml:space="preserve">
     <value>Constraint: </value>
   </data>
-  <data name="T_DefinedIn" xml:space="preserve">
+	<data name="T_DefinedIn" xml:space="preserve">
     <value>defined in </value>
   </data>
-  <data name="T_DefinedInType" xml:space="preserve">
+	<data name="T_DefinedInType" xml:space="preserve">
     <value>Defined in: </value>
   </data>
-  <data name="T_EventSignature" xml:space="preserve">
+	<data name="T_EventSignature" xml:space="preserve">
     <value>Event signature </value>
   </data>
-  <data name="T_Exception" xml:space="preserve">
+	<data name="T_Exception" xml:space="preserve">
     <value>Exception</value>
   </data>
-  <data name="T_Locations" xml:space="preserve">
+	<data name="T_Locations" xml:space="preserve">
     <value>Locations: </value>
   </data>
-  <data name="T_MemberType" xml:space="preserve">
+	<data name="T_MemberType" xml:space="preserve">
     <value>Member type: </value>
   </data>
-  <data name="T_SelectedCharacter" xml:space="preserve">
+	<data name="T_SelectedCharacter" xml:space="preserve">
     <value>Selected character:</value>
   </data>
-  <data name="T_Selection" xml:space="preserve">
+	<data name="T_Selection" xml:space="preserve">
     <value>Selection: </value>
   </data>
-  <data name="T_Signature" xml:space="preserve">
+	<data name="T_Signature" xml:space="preserve">
     <value>Signature: </value>
   </data>
-  <data name="T_SourceFile" xml:space="preserve">
+	<data name="T_SourceFile" xml:space="preserve">
     <value>Source file: </value>
   </data>
-  <data name="T_Spans" xml:space="preserve">
+	<data name="T_Spans" xml:space="preserve">
     <value> spans</value>
   </data>
-  <data name="T_Example" xml:space="preserve">
+	<data name="T_Example" xml:space="preserve">
     <value>Example</value>
   </data>
-  <data name="T_Remarks" xml:space="preserve">
+	<data name="T_Remarks" xml:space="preserve">
     <value>Remarks</value>
   </data>
-  <data name="T_Returns" xml:space="preserve">
+	<data name="T_Returns" xml:space="preserve">
     <value>Returns</value>
   </data>
-  <data name="T_SeeAlso" xml:space="preserve">
+	<data name="T_SeeAlso" xml:space="preserve">
     <value>See also</value>
   </data>
-  <data name="CMD_SearchTitles" xml:space="preserve">
+	<data name="CMD_SearchTitles" xml:space="preserve">
     <value>Search Titles</value>
   </data>
-  <data name="CMDT_ConfigureSyntaxHighlight" xml:space="preserve">
+	<data name="CMDT_ConfigureSyntaxHighlight" xml:space="preserve">
     <value>Open the syntax highlight configuration dialog window</value>
   </data>
-  <data name="CMD_Add" xml:space="preserve">
+	<data name="CMD_Add" xml:space="preserve">
     <value>Add</value>
   </data>
-  <data name="CMD_Browse" xml:space="preserve">
+	<data name="CMD_Browse" xml:space="preserve">
     <value>Browse...</value>
   </data>
-  <data name="CMD_ConfigureSyntaxHighlight" xml:space="preserve">
+	<data name="CMD_ConfigureSyntaxHighlight" xml:space="preserve">
     <value>Configure Codist Syntax Highlight</value>
   </data>
-  <data name="CMD_MoveUp" xml:space="preserve">
+	<data name="CMD_MoveUp" xml:space="preserve">
     <value>Move up</value>
   </data>
-  <data name="CMD_NewItem" xml:space="preserve">
+	<data name="CMD_NewItem" xml:space="preserve">
     <value>New Item</value>
   </data>
-  <data name="CMD_Remove" xml:space="preserve">
+	<data name="CMD_Remove" xml:space="preserve">
     <value>Remove</value>
   </data>
-  <data name="CMD_Reset" xml:space="preserve">
+	<data name="CMD_Reset" xml:space="preserve">
     <value>Reset</value>
   </data>
-  <data name="CMD_Update" xml:space="preserve">
+	<data name="CMD_Update" xml:space="preserve">
     <value>Update</value>
   </data>
-  <data name="OT_AdditionalQuickInfo" xml:space="preserve">
+	<data name="OT_AdditionalQuickInfo" xml:space="preserve">
     <value>Additional Quick Info</value>
   </data>
-  <data name="OT_AdditionalQuickInfoNote" xml:space="preserve">
+	<data name="OT_AdditionalQuickInfoNote" xml:space="preserve">
     <value>The following options allow adding more items to the Quick Info</value>
   </data>
-  <data name="OT_AddShowDocumentContentType" xml:space="preserve">
+	<data name="OT_AddShowDocumentContentType" xml:space="preserve">
     <value>Add "Show Document Content Type" command to File menu</value>
   </data>
-  <data name="OT_AddShowDocumentContentTypeTip" xml:space="preserve">
+	<data name="OT_AddShowDocumentContentTypeTip" xml:space="preserve">
     <value>Displays ContentType and base types of the active document</value>
   </data>
-  <data name="OT_AddShowSyntaxClassifcationInfo" xml:space="preserve">
+	<data name="OT_AddShowSyntaxClassifcationInfo" xml:space="preserve">
     <value>Add "Show Syntax Classification Info" command to Smart Bar</value>
   </data>
-  <data name="OT_AddShowSyntaxClassifcationInfoTip" xml:space="preserve">
+	<data name="OT_AddShowSyntaxClassifcationInfoTip" xml:space="preserve">
     <value>Displays results of classifiers and taggers for selected content</value>
   </data>
-  <data name="OT_AllAncestorTypes" xml:space="preserve">
+	<data name="OT_AllAncestorTypes" xml:space="preserve">
     <value>All ancestor types</value>
   </data>
-  <data name="OT_AllAncestorTypesTip" xml:space="preserve">
+	<data name="OT_AllAncestorTypesTip" xml:space="preserve">
     <value>Displays base type of a symbol along inheritance relations</value>
   </data>
-  <data name="OT_AllLanguages" xml:space="preserve">
+	<data name="OT_AllLanguages" xml:space="preserve">
     <value>All languages</value>
   </data>
-  <data name="OT_AllLanguagesNote" xml:space="preserve">
+	<data name="OT_AllLanguagesNote" xml:space="preserve">
     <value>Markers for all code types</value>
   </data>
-  <data name="OT_AlternativeStyle" xml:space="preserve">
+	<data name="OT_AlternativeStyle" xml:space="preserve">
     <value>Use alternative style</value>
   </data>
-  <data name="OT_AlternativeStyleTip" xml:space="preserve">
+	<data name="OT_AlternativeStyleTip" xml:space="preserve">
     <value>Uses an alternative style to display Quick Info, and unify the topmost link in the symbol definition part of Quick Info</value>
   </data>
-  <data name="OT_ApplyToCodeWindow" xml:space="preserve">
+	<data name="OT_ApplyToCodeWindow" xml:space="preserve">
     <value>Apply to code window</value>
   </data>
-  <data name="OT_ApplyToMainWindow" xml:space="preserve">
+	<data name="OT_ApplyToMainWindow" xml:space="preserve">
     <value>Apply to main window</value>
   </data>
-  <data name="OT_Attributes" xml:space="preserve">
+	<data name="OT_Attributes" xml:space="preserve">
     <value>Attributes</value>
   </data>
-  <data name="OT_AttributesTip" xml:space="preserve">
+	<data name="OT_AttributesTip" xml:space="preserve">
     <value>Displays attributes of a symbol</value>
   </data>
-  <data name="OT_AutoIncrementVsixVersion" xml:space="preserve">
+	<data name="OT_AutoIncrementVsixVersion" xml:space="preserve">
     <value>Automatically increment version revision number in .vsixmanifest file</value>
   </data>
-  <data name="OT_AutoIncrementVsixVersionTip" xml:space="preserve">
+	<data name="OT_AutoIncrementVsixVersionTip" xml:space="preserve">
     <value>Add 1 to the last number of your VSIX version, by modifying the .vsixmanifest file in the project, after each successful build</value>
   </data>
-  <data name="OT_BaseType" xml:space="preserve">
+	<data name="OT_BaseType" xml:space="preserve">
     <value>Base type</value>
   </data>
-  <data name="OT_BaseTypeTip" xml:space="preserve">
+	<data name="OT_BaseTypeTip" xml:space="preserve">
     <value>Displays base type of a symbol</value>
   </data>
-  <data name="OT_Behavior" xml:space="preserve">
+	<data name="OT_Behavior" xml:space="preserve">
     <value>Behavior</value>
   </data>
-  <data name="OT_BehaviorTip" xml:space="preserve">
+	<data name="OT_BehaviorTip" xml:space="preserve">
     <value>This page changes the behavior of Smart Bar, which by default appears when you select something in a text editor window</value>
   </data>
-  <data name="OTC_BottomMargin" xml:space="preserve">
+	<data name="OTC_BottomMargin" xml:space="preserve">
     <value>Bottom margin:</value>
   </data>
-  <data name="OT_BottomMarginTip" xml:space="preserve">
+	<data name="OT_BottomMarginTip" xml:space="preserve">
     <value>This option adds extra margin below each line in code editor</value>
   </data>
-  <data name="OT_BrowserParameter" xml:space="preserve">
+	<data name="OT_BrowserParameter" xml:space="preserve">
     <value>Browser parameter (optional, empty to use URL as parameter):</value>
   </data>
-  <data name="OT_Build" xml:space="preserve">
+	<data name="OT_Build" xml:space="preserve">
     <value>Build</value>
   </data>
-  <data name="OT_ClickAndGo" xml:space="preserve">
+	<data name="OT_ClickAndGo" xml:space="preserve">
     <value>Click and go to source code of symbol definition</value>
   </data>
-  <data name="OT_ClickAndGoTip" xml:space="preserve">
+	<data name="OT_ClickAndGoTip" xml:space="preserve">
     <value>Makes symbols in Quick Info clickable to the source code</value>
   </data>
-  <data name="OT_ColorInfo" xml:space="preserve">
+	<data name="OT_ColorInfo" xml:space="preserve">
     <value>Color info</value>
   </data>
-  <data name="OT_ColorInfoTip" xml:space="preserve">
+	<data name="OT_ColorInfoTip" xml:space="preserve">
     <value>Shows color information for predefined color names and hexidemical values</value>
   </data>
-  <data name="OT_CompilerDirective" xml:space="preserve">
+	<data name="OT_CompilerDirective" xml:space="preserve">
     <value>Compiler directive</value>
   </data>
-  <data name="OT_CompilerDirectiveTip" xml:space="preserve">
+	<data name="OT_CompilerDirectiveTip" xml:space="preserve">
     <value>Draws circles for compiler directives on the scroll bar</value>
   </data>
-  <data name="OT_ConfigSyntaxNote" xml:space="preserve">
+	<data name="OT_ConfigSyntaxNote" xml:space="preserve">
     <value>To configure syntax highlight and manage comment taggers, click this command under the Tools menu: </value>
   </data>
-  <data name="OT_ConfirmRemoveSearchEngine" xml:space="preserve">
+	<data name="OT_ConfirmRemoveSearchEngine" xml:space="preserve">
     <value>Are you sure to remove search engine &lt;NAME&gt;?</value>
   </data>
-  <data name="OT_ConfirmResetSearchEngine" xml:space="preserve">
+	<data name="OT_ConfirmResetSearchEngine" xml:space="preserve">
     <value>Do you want to reset search engines to default ones?
 ALL existing items will be REMOVED.</value>
   </data>
-  <data name="OT_CSharp" xml:space="preserve">
+	<data name="OT_CSharp" xml:space="preserve">
     <value>C#</value>
   </data>
-  <data name="OT_CSharpMarkerNote" xml:space="preserve">
+	<data name="OT_CSharpMarkerNote" xml:space="preserve">
     <value>Markers for C# type and member declarations and special directives</value>
   </data>
-  <data name="OT_CSharpNaviBar" xml:space="preserve">
+	<data name="OT_CSharpNaviBar" xml:space="preserve">
     <value>C# Navigation Bar</value>
   </data>
-  <data name="OT_CSharpNaviBarMenu" xml:space="preserve">
+	<data name="OT_CSharpNaviBarMenu" xml:space="preserve">
     <value>C# Navigation Bar Drop-down Menu</value>
   </data>
-  <data name="OT_CSharpNote" xml:space="preserve">
+	<data name="OT_CSharpNote" xml:space="preserve">
     <value>This page changes the behavior of C# Quick Infos (code tool tips)</value>
   </data>
-  <data name="OT_Declaration" xml:space="preserve">
+	<data name="OT_Declaration" xml:space="preserve">
     <value>Declaration</value>
   </data>
-  <data name="OT_DesclarationTip" xml:space="preserve">
+	<data name="OT_DesclarationTip" xml:space="preserve">
     <value>Displays declaration information of a symbol if it is not a public instance one, as well as event or delegate signatures</value>
   </data>
-  <data name="OT_EnableCommentTagger" xml:space="preserve">
+	<data name="OT_EnableCommentTagger" xml:space="preserve">
     <value>Enable comment tagger</value>
   </data>
-  <data name="OT_ExecutableFileFilter" xml:space="preserve">
+	<data name="OT_ExecutableFileFilter" xml:space="preserve">
     <value>Executable files (*.exe)|*.exe</value>
   </data>
-  <data name="OT_ExtensionNote" xml:space="preserve">
+	<data name="OT_ExtensionNote" xml:space="preserve">
     <value>This page contains functions for Visual Studio extension developers</value>
   </data>
-  <data name="OT_ExtraHighlight" xml:space="preserve">
+	<data name="OT_ExtraHighlight" xml:space="preserve">
     <value>Extra highlight</value>
   </data>
-  <data name="OT_ExtraLineMargin" xml:space="preserve">
+	<data name="OT_ExtraLineMargin" xml:space="preserve">
     <value>Extra Line Margin</value>
   </data>
-  <data name="OT_ExtraLineMarginNote" xml:space="preserve">
+	<data name="OT_ExtraLineMarginNote" xml:space="preserve">
     <value>Add extra space between lines in code document window</value>
   </data>
-  <data name="OT_ExtraXmlDocSize" xml:space="preserve">
+	<data name="OT_ExtraXmlDocSize" xml:space="preserve">
     <value>More max-height for C# XML Documentation:</value>
   </data>
-  <data name="OT_ExtraXmlDocSizeTip" xml:space="preserve">
+	<data name="OT_ExtraXmlDocSizeTip" xml:space="preserve">
     <value>This option plus max-height is the max height for the C# XML Documentation</value>
   </data>
-  <data name="OT_ForceGrayscaleTextRendering" xml:space="preserve">
+	<data name="OT_ForceGrayscaleTextRendering" xml:space="preserve">
     <value>Force Grayscale Text Rendering</value>
   </data>
-  <data name="OT_ForceGrayscaleTextRenderingNote" xml:space="preserve">
+	<data name="OT_ForceGrayscaleTextRenderingNote" xml:space="preserve">
     <value>Disable ClearType</value>
   </data>
-  <data name="OT_ForceGrayscaleTextRenderingTip" xml:space="preserve">
+	<data name="OT_ForceGrayscaleTextRenderingTip" xml:space="preserve">
     <value>If you feel text in the code window or the main window blurry and spotted with colors. Check these options to make text rendered in grayscale and see whether it helps.</value>
   </data>
-  <data name="OT_HideQuickInfoUntilShift" xml:space="preserve">
+	<data name="OT_HideQuickInfoUntilShift" xml:space="preserve">
     <value>Hide Quick Info until Shift key is pressed</value>
   </data>
-  <data name="OT_HideQuickInfoUntilShiftTip" xml:space="preserve">
+	<data name="OT_HideQuickInfoUntilShiftTip" xml:space="preserve">
     <value>Suppresses tool tip until pressing Shift key</value>
   </data>
-  <data name="OT_HighlightSearchResults" xml:space="preserve">
+	<data name="OT_HighlightSearchResults" xml:space="preserve">
     <value>Highlight search results (*)</value>
   </data>
-  <data name="OT_HighlightSyntaxRange" xml:space="preserve">
+	<data name="OT_HighlightSyntaxRange" xml:space="preserve">
     <value>Highlight syntax range</value>
   </data>
-  <data name="OT_HighlightSyntaxRangeTip" xml:space="preserve">
+	<data name="OT_HighlightSyntaxRangeTip" xml:space="preserve">
     <value>Highlights the range of an item, on which the mouse is hovering, in the code editor</value>
   </data>
-  <data name="OT_IncludeMemberRegions" xml:space="preserve">
+	<data name="OT_IncludeMemberRegions" xml:space="preserve">
     <value>Include #region within member</value>
   </data>
-  <data name="OT_IncludeMemberRegionsTip" xml:space="preserve">
+	<data name="OT_IncludeMemberRegionsTip" xml:space="preserve">
     <value>Displays #region and #endregion directives defined within members of types in the drop-down menu of navigation bar</value>
   </data>
-  <data name="OT_IncludePartialTypeMembers" xml:space="preserve">
+	<data name="OT_IncludePartialTypeMembers" xml:space="preserve">
     <value>Include partial type and members</value>
   </data>
-  <data name="OT_IncludePartialTypeMembersTip" xml:space="preserve">
+	<data name="OT_IncludePartialTypeMembersTip" xml:space="preserve">
     <value>Displays members defined in other code files for partial types in the drop-down menu of navigation bar</value>
   </data>
-  <data name="OT_IncludeRegions" xml:space="preserve">
+	<data name="OT_IncludeRegions" xml:space="preserve">
     <value>#region and #endregion</value>
   </data>
-  <data name="OT_IncludeRegionsTip" xml:space="preserve">
+	<data name="OT_IncludeRegionsTip" xml:space="preserve">
     <value>Displays #region and #endregion directives in the drop-down menu of navigation bar</value>
   </data>
-  <data name="OT_InheritDoc" xml:space="preserve">
+	<data name="OT_InheritDoc" xml:space="preserve">
     <value>Inherits from &lt;inheritdoc cref=\"\"/&gt; target</value>
   </data>
-  <data name="OT_InheritDocTip" xml:space="preserve">
+	<data name="OT_InheritDocTip" xml:space="preserve">
     <value>Supports inheritdoc which uses XML Doc in referenced symbol</value>
   </data>
-  <data name="OT_InheritedInterfaces" xml:space="preserve">
+	<data name="OT_InheritedInterfaces" xml:space="preserve">
     <value>Inherited interfaces</value>
   </data>
-  <data name="OT_InheritedInterfacesTip" xml:space="preserve">
+	<data name="OT_InheritedInterfacesTip" xml:space="preserve">
     <value>Displays inherited interfaces implemented by the symbol</value>
   </data>
-  <data name="OT_InheritXmlDoc" xml:space="preserve">
+	<data name="OT_InheritXmlDoc" xml:space="preserve">
     <value>Inherits from base type or interfaces</value>
   </data>
-  <data name="OT_InheritXmlDocTip" xml:space="preserve">
+	<data name="OT_InheritXmlDocTip" xml:space="preserve">
     <value>Displays XML Doc from base types or interfaces if it is absent in active symbol</value>
   </data>
-  <data name="OT_InterfaceImplementation" xml:space="preserve">
+	<data name="OT_InterfaceImplementation" xml:space="preserve">
     <value>Interface implementation</value>
   </data>
-  <data name="OT_InterfaceImplementationTip" xml:space="preserve">
+	<data name="OT_InterfaceImplementationTip" xml:space="preserve">
     <value>Displays the interface member if it is implemented by the symbol</value>
   </data>
-  <data name="OT_InterfaceMembers" xml:space="preserve">
+	<data name="OT_InterfaceMembers" xml:space="preserve">
     <value>Interface members</value>
   </data>
-  <data name="OT_InterfaceMembersTip" xml:space="preserve">
+	<data name="OT_InterfaceMembersTip" xml:space="preserve">
     <value>Displays members of an interface</value>
   </data>
-  <data name="OT_Interfaces" xml:space="preserve">
+	<data name="OT_Interfaces" xml:space="preserve">
     <value>Interfaces</value>
   </data>
-  <data name="OT_InterfacesTip" xml:space="preserve">
+	<data name="OT_InterfacesTip" xml:space="preserve">
     <value>Displays interfaces implemented by the symbol</value>
   </data>
-  <data name="OT_ItemSize" xml:space="preserve">
+	<data name="OT_ItemSize" xml:space="preserve">
     <value>Item Size</value>
   </data>
-  <data name="OT_ItemSizeNote" xml:space="preserve">
+	<data name="OT_ItemSizeNote" xml:space="preserve">
     <value>Limit the maximum size of each items in Quick Info, preventing any item from taking up the whole screen</value>
   </data>
-  <data name="OT_LineNumber" xml:space="preserve">
+	<data name="OT_LineNumber" xml:space="preserve">
     <value>Line number</value>
   </data>
-  <data name="OT_LineNumberTip" xml:space="preserve">
+	<data name="OT_LineNumberTip" xml:space="preserve">
     <value>Draws line number values on the scroll bar</value>
   </data>
-  <data name="OT_LineOfCode" xml:space="preserve">
+	<data name="OT_LineOfCode" xml:space="preserve">
     <value>Line of code</value>
   </data>
-  <data name="OT_LineOfCodeTip" xml:space="preserve">
+	<data name="OT_LineOfCodeTip" xml:space="preserve">
     <value>Displays number of lines for current type or members in the drop-down menu of navigation bar and tool tips</value>
   </data>
-  <data name="OT_LocateBrowser" xml:space="preserve">
+	<data name="OT_LocateBrowser" xml:space="preserve">
     <value>Locate your web browser to view search results</value>
   </data>
-  <data name="OT_LongMethodName" xml:space="preserve">
+	<data name="OT_LongMethodName" xml:space="preserve">
     <value>Long method name</value>
   </data>
-  <data name="OT_LongMethodNameTip" xml:space="preserve">
+	<data name="OT_LongMethodNameTip" xml:space="preserve">
     <value>Draws names of long methods on the scroll bar</value>
   </data>
-  <data name="OT_MacTypeLink" xml:space="preserve">
+	<data name="OT_MacTypeLink" xml:space="preserve">
     <value>Note: For best text rendering effects, it is recommended to use MacType, which can be downloaded from: 
 https://github.com/snowie2000/mactype/releases</value>
   </data>
-  <data name="OT_ManualSmartBar" xml:space="preserve">
+	<data name="OT_ManualSmartBar" xml:space="preserve">
     <value>Manually display Smart Bar</value>
   </data>
-  <data name="OT_ManualSmartBarTip" xml:space="preserve">
+	<data name="OT_ManualSmartBarTip" xml:space="preserve">
     <value>Don't automatically display Smart Bar when the selection is changed, combine with the following option</value>
   </data>
-  <data name="OT_MatchSymbol" xml:space="preserve">
+	<data name="OT_MatchSymbol" xml:space="preserve">
     <value>Match symbol</value>
   </data>
-  <data name="OT_MatchSymbolTip" xml:space="preserve">
+	<data name="OT_MatchSymbolTip" xml:space="preserve">
     <value>Draws squares for other locations the same as current symbol under caret on the scroll bar</value>
   </data>
-  <data name="OT_MaxHeight" xml:space="preserve">
+	<data name="OT_MaxHeight" xml:space="preserve">
     <value>Max height:</value>
   </data>
-  <data name="OT_MaxHeightTip" xml:space="preserve">
+	<data name="OT_MaxHeightTip" xml:space="preserve">
     <value>This option limits the max height of a Quick Info item</value>
   </data>
-  <data name="OT_MaxWidth" xml:space="preserve">
+	<data name="OT_MaxWidth" xml:space="preserve">
     <value>Max width:</value>
   </data>
-  <data name="OT_MaxWidthTip" xml:space="preserve">
+	<data name="OT_MaxWidthTip" xml:space="preserve">
     <value>This option limits the max width of a Quick Info item</value>
   </data>
-  <data name="OT_MemberDeclarationLine" xml:space="preserve">
+	<data name="OT_MemberDeclarationLine" xml:space="preserve">
     <value>Member declaration line</value>
   </data>
-  <data name="OT_MemberDeclarationLineTip" xml:space="preserve">
+	<data name="OT_MemberDeclarationLineTip" xml:space="preserve">
     <value>Draws lines indicating spans of type and member declarations on the scroll bar, with corresponding syntax highlight colors</value>
   </data>
-  <data name="OT_MethodDeclarationSpot" xml:space="preserve">
+	<data name="OT_MethodDeclarationSpot" xml:space="preserve">
     <value>Method declaration spot</value>
   </data>
-  <data name="OT_MethodDeclarationSpotTip" xml:space="preserve">
+	<data name="OT_MethodDeclarationSpotTip" xml:space="preserve">
     <value>Draws squares for each methods on the scroll bar</value>
   </data>
-  <data name="OT_MethodOverloads" xml:space="preserve">
+	<data name="OT_MethodOverloads" xml:space="preserve">
     <value>Method overloads</value>
   </data>
-  <data name="OT_MethodOverloadsTip" xml:space="preserve">
+	<data name="OT_MethodOverloadsTip" xml:space="preserve">
     <value>Displays method overloads and applicable extension methods</value>
   </data>
-  <data name="OT_MethodParameterList" xml:space="preserve">
+	<data name="OT_MethodParameterList" xml:space="preserve">
     <value>Method parameter list</value>
   </data>
-  <data name="OT_MethodParameterListTip" xml:space="preserve">
+	<data name="OT_MethodParameterListTip" xml:space="preserve">
     <value>Displays parameters of methods in the drop-down menu of navigation bar</value>
   </data>
-  <data name="OT_Name" xml:space="preserve">
+	<data name="OT_Name" xml:space="preserve">
     <value>Name</value>
   </data>
-  <data name="OT_NaviBarNote" xml:space="preserve">
+	<data name="OT_NaviBarNote" xml:space="preserve">
     <value>Currently navigation bar works for C# and markdown documents only</value>
   </data>
-  <data name="OT_NaviBarShortcutKeys" xml:space="preserve">
+	<data name="OT_NaviBarShortcutKeys" xml:space="preserve">
     <value>Shortcut keys to access the menus of the navigation bar:
 Ctrl+`, Ctrl+`: Edit.SearchDeclaration
 Ctrl+1, Ctrl+1: Edit.SearchClassMember</value>
   </data>
-  <data name="OT_NaviBarUpdateNote" xml:space="preserve">
+	<data name="OT_NaviBarUpdateNote" xml:space="preserve">
     <value>The above options will take effect when the navigation bar is repopulated</value>
   </data>
-  <data name="OT_NoMarginBetweenWrappedLines" xml:space="preserve">
+	<data name="OT_NoMarginBetweenWrappedLines" xml:space="preserve">
     <value>Don't add margin between wrapped lines</value>
   </data>
-  <data name="OT_NumericForms" xml:space="preserve">
+	<data name="OT_NumericForms" xml:space="preserve">
     <value>Numeric forms</value>
   </data>
-  <data name="OT_NumericFormsTip" xml:space="preserve">
+	<data name="OT_NumericFormsTip" xml:space="preserve">
     <value>Displays decimal, hexidecimal, binary forms of a number</value>
   </data>
-  <data name="OT_OverrideXmlDoc" xml:space="preserve">
+	<data name="OT_OverrideXmlDoc" xml:space="preserve">
     <value>Override default XML Documentation</value>
   </data>
-  <data name="OT_OverrideXmlDocTip" xml:space="preserve">
+	<data name="OT_OverrideXmlDocTip" xml:space="preserve">
     <value>Reformats the XML Documentation, making them selectable, copiable and clickable</value>
   </data>
-  <data name="OT_ParameterOfMethod" xml:space="preserve">
+	<data name="OT_ParameterOfMethod" xml:space="preserve">
     <value>Parameter of method</value>
   </data>
-  <data name="OT_ParameterOfMethodTip" xml:space="preserve">
+	<data name="OT_ParameterOfMethodTip" xml:space="preserve">
     <value>Displays information of parameter if active symbol is a parameter of a method</value>
   </data>
-  <data name="OT_PropertyAccessors" xml:space="preserve">
+	<data name="OT_PropertyAccessors" xml:space="preserve">
     <value>Property accessors</value>
   </data>
-  <data name="OT_PropertyAccessorsTip" xml:space="preserve">
+	<data name="OT_PropertyAccessorsTip" xml:space="preserve">
     <value>Displays accessor types of properties ("{;;}" for getter and setter, "{;}" for getter only) in the drop-down menu of navigation bar</value>
   </data>
-  <data name="OT_QuickInfoNote" xml:space="preserve">
+	<data name="OT_QuickInfoNote" xml:space="preserve">
     <value>This page changes the behavior of all types of Quick Infos (code tool tips)</value>
   </data>
-  <data name="OT_QuickInfoOverride" xml:space="preserve">
+	<data name="OT_QuickInfoOverride" xml:space="preserve">
     <value>Quick Info Override</value>
   </data>
-  <data name="OT_QuickInfoOverrideNote" xml:space="preserve">
+	<data name="OT_QuickInfoOverrideNote" xml:space="preserve">
     <value>The following options allow overriding C# Quick Info with more features</value>
   </data>
-  <data name="OT_Region" xml:space="preserve">
+	<data name="OT_Region" xml:space="preserve">
     <value>Region</value>
   </data>
-  <data name="OT_RegionName" xml:space="preserve">
+	<data name="OT_RegionName" xml:space="preserve">
     <value>#region name</value>
   </data>
-  <data name="OT_RegionNameTip" xml:space="preserve">
+	<data name="OT_RegionNameTip" xml:space="preserve">
     <value>Draws #region names on the scroll bar</value>
   </data>
-  <data name="OT_RegionTip" xml:space="preserve">
+	<data name="OT_RegionTip" xml:space="preserve">
     <value>Displays #region names enclosing caret on navigation bar</value>
   </data>
-  <data name="OT_SearchEngines" xml:space="preserve">
+	<data name="OT_SearchEngines" xml:space="preserve">
     <value>Search Engines</value>
   </data>
-  <data name="OT_SearchResultBrowser" xml:space="preserve">
+	<data name="OT_SearchResultBrowser" xml:space="preserve">
     <value>Search Result Browser</value>
   </data>
-  <data name="OT_SearchResultBrowserNote" xml:space="preserve">
+	<data name="OT_SearchResultBrowserNote" xml:space="preserve">
     <value>Browser path (empty to use system default browser):</value>
   </data>
-  <data name="OT_Selection" xml:space="preserve">
+	<data name="OT_Selection" xml:space="preserve">
     <value>Selection</value>
   </data>
-  <data name="OT_SelectionInfo" xml:space="preserve">
+	<data name="OT_SelectionInfo" xml:space="preserve">
     <value>Selection info</value>
   </data>
-  <data name="OT_SelectionInfoTip" xml:space="preserve">
+	<data name="OT_SelectionInfoTip" xml:space="preserve">
     <value>Shows selection information, such as character count, line count, Unicode of character, etc.</value>
   </data>
-  <data name="OT_SelectionTip" xml:space="preserve">
+	<data name="OT_SelectionTip" xml:space="preserve">
     <value>Draws selection ranges on the scroll bar</value>
   </data>
-  <data name="OT_ShortcutKeys" xml:space="preserve">
+	<data name="OT_ShortcutKeys" xml:space="preserve">
     <value>Shortcut Keys</value>
   </data>
-  <data name="OT_ShortcutKeysNote" xml:space="preserve">
+	<data name="OT_ShortcutKeysNote" xml:space="preserve">
     <value>Use the Keyboard mapper options page in Options dialog to reconfigure them</value>
   </data>
-  <data name="OT_ShowExampleXmlDoc" xml:space="preserve">
+	<data name="OT_ShowExampleXmlDoc" xml:space="preserve">
     <value>Show &lt;example/&gt; XML Doc</value>
   </data>
-  <data name="OT_ShowExampleXmlDocTip" xml:space="preserve">
+	<data name="OT_ShowExampleXmlDocTip" xml:space="preserve">
     <value>Displays the content of &lt;example/&gt;</value>
   </data>
-  <data name="OT_ShowExceptionXmlDoc" xml:space="preserve">
+	<data name="OT_ShowExceptionXmlDoc" xml:space="preserve">
     <value>Show &lt;exception/&gt; XML Doc</value>
   </data>
-  <data name="OT_ShowExceptionXmlDocTip" xml:space="preserve">
+	<data name="OT_ShowExceptionXmlDocTip" xml:space="preserve">
     <value>Displays the content of &lt;exception/&gt;</value>
   </data>
-  <data name="OT_ShowMethodParameterName" xml:space="preserve">
+	<data name="OT_ShowMethodParameterName" xml:space="preserve">
     <value>Show parameter name instead of parameter type</value>
   </data>
-  <data name="OT_ShowMethodParameterNameTip" xml:space="preserve">
+	<data name="OT_ShowMethodParameterNameTip" xml:space="preserve">
     <value>Displays parameter names in method parameter list</value>
   </data>
-  <data name="OT_ShowRemarksXmlDoc" xml:space="preserve">
+	<data name="OT_ShowRemarksXmlDoc" xml:space="preserve">
     <value>Show &lt;remarks/&gt; XML Doc</value>
   </data>
-  <data name="OT_ShowRemarksXmlDocTip" xml:space="preserve">
+	<data name="OT_ShowRemarksXmlDocTip" xml:space="preserve">
     <value>Displays the content of &lt;remarks/&gt;</value>
   </data>
-  <data name="OT_ShowReturnsXmlDoc" xml:space="preserve">
+	<data name="OT_ShowReturnsXmlDoc" xml:space="preserve">
     <value>Show &lt;returns/&gt; XML Doc</value>
   </data>
-  <data name="OT_ShowReturnsXmlDocTip" xml:space="preserve">
+	<data name="OT_ShowReturnsXmlDocTip" xml:space="preserve">
     <value>Displays the content of &lt;returns/&gt;</value>
   </data>
-  <data name="OT_ShowSeeAlsoXmlDoc" xml:space="preserve">
+	<data name="OT_ShowSeeAlsoXmlDoc" xml:space="preserve">
     <value>Show &lt;seealso/&gt; links</value>
   </data>
-  <data name="OT_ShowSeeAlsoXmlDocTip" xml:space="preserve">
+	<data name="OT_ShowSeeAlsoXmlDocTip" xml:space="preserve">
     <value>Displays referenced symbols of &lt;seealso/&gt;</value>
   </data>
-  <data name="OT_StringInfo" xml:space="preserve">
+	<data name="OT_StringInfo" xml:space="preserve">
     <value>String length, hash and content</value>
   </data>
-  <data name="OT_StringInfoTip" xml:space="preserve">
+	<data name="OT_StringInfoTip" xml:space="preserve">
     <value>Displays length, hash code and content of strings</value>
   </data>
-  <data name="OT_SymbolLocation" xml:space="preserve">
+	<data name="OT_SymbolLocation" xml:space="preserve">
     <value>Symbol location</value>
   </data>
-  <data name="OT_SymbolLocationTip" xml:space="preserve">
+	<data name="OT_SymbolLocationTip" xml:space="preserve">
     <value>Displays the location where a symbol is defined</value>
   </data>
-  <data name="OT_SymbolToolTip" xml:space="preserve">
+	<data name="OT_SymbolToolTip" xml:space="preserve">
     <value>Symbol tool tip</value>
   </data>
-  <data name="OT_SymbolToolTipTip" xml:space="preserve">
+	<data name="OT_SymbolToolTipTip" xml:space="preserve">
     <value>Displays tool tip for items enclosing caret on navigation bar</value>
   </data>
-  <data name="OT_SyntaxDetail" xml:space="preserve">
+	<data name="OT_SyntaxDetail" xml:space="preserve">
     <value>Syntax detail</value>
   </data>
-  <data name="OT_SyntaxDetailTip" xml:space="preserve">
+	<data name="OT_SyntaxDetailTip" xml:space="preserve">
     <value>Displays syntax nodes (for instance, foreach, while, assignment and other statements) inside a member on navigation bar</value>
   </data>
-  <data name="OT_SyntaxDiagnostics" xml:space="preserve">
+	<data name="OT_SyntaxDiagnostics" xml:space="preserve">
     <value>Syntax Diagnostics</value>
   </data>
-  <data name="OT_SyntaxDiagnosticsNote" xml:space="preserve">
+	<data name="OT_SyntaxDiagnosticsNote" xml:space="preserve">
     <value>Peek the results of syntax classifiers and taggers</value>
   </data>
-  <data name="OT_TaggedComments" xml:space="preserve">
+	<data name="OT_TaggedComments" xml:space="preserve">
     <value>Tagged comments</value>
   </data>
-  <data name="OT_TaggedCommentsTip" xml:space="preserve">
+	<data name="OT_TaggedCommentsTip" xml:space="preserve">
     <value>Draws markers for tagged comments like To-Do, Hack, Note, etc. on the scroll bar</value>
   </data>
-  <data name="OT_TextOnlyXmlDoc" xml:space="preserve">
+	<data name="OT_TextOnlyXmlDoc" xml:space="preserve">
     <value>Allow text only (no &lt;summary/&gt;) XML Doc</value>
   </data>
-  <data name="OT_TextOnlyXmlDocTip" xml:space="preserve">
+	<data name="OT_TextOnlyXmlDocTip" xml:space="preserve">
     <value>Displays the text content of XML Doc if &lt;summary/&gt; is absent</value>
   </data>
-  <data name="OT_ToggleSmartBar" xml:space="preserve">
+	<data name="OT_ToggleSmartBar" xml:space="preserve">
     <value>Show/hide with Shift key</value>
   </data>
-  <data name="OT_ToggleSmartBarNote" xml:space="preserve">
+	<data name="OT_ToggleSmartBarNote" xml:space="preserve">
     <value>Double tap Shift-key to show, single tap Shift-key to hide</value>
   </data>
-  <data name="OT_ToggleSmartBarTip" xml:space="preserve">
+	<data name="OT_ToggleSmartBarTip" xml:space="preserve">
     <value>Toggle the display of Smart Bar with Shift-key</value>
   </data>
-  <data name="OTC_TopMargin" xml:space="preserve">
+	<data name="OTC_TopMargin" xml:space="preserve">
     <value>Top margin:</value>
   </data>
-  <data name="OT_TopMarginTip" xml:space="preserve">
+	<data name="OT_TopMarginTip" xml:space="preserve">
     <value>This option adds extra margin above each line in code editor</value>
   </data>
-  <data name="OT_TrimNonLetterRegion" xml:space="preserve">
+	<data name="OT_TrimNonLetterRegion" xml:space="preserve">
     <value>Trim non-letter characters in region</value>
   </data>
-  <data name="OT_TrimNonLetterRegionTip" xml:space="preserve">
+	<data name="OT_TrimNonLetterRegionTip" xml:space="preserve">
     <value>Trims non-letter characters in region names, for instance, remove "===========" alike notations</value>
   </data>
-  <data name="OT_TypeName" xml:space="preserve">
+	<data name="OT_TypeName" xml:space="preserve">
     <value>Type name</value>
   </data>
-  <data name="OT_TypeNameTip" xml:space="preserve">
+	<data name="OT_TypeNameTip" xml:space="preserve">
     <value>Draws names of declared types on the scroll bar</value>
   </data>
-  <data name="OT_TypeParameter" xml:space="preserve">
+	<data name="OT_TypeParameter" xml:space="preserve">
     <value>Type parameter</value>
   </data>
-  <data name="OT_TypeParameterTip" xml:space="preserve">
+	<data name="OT_TypeParameterTip" xml:space="preserve">
     <value>Displays information of type parameters</value>
   </data>
-  <data name="OT_UnlimitedSize" xml:space="preserve">
+	<data name="OT_UnlimitedSize" xml:space="preserve">
     <value>Set the above value to 0 to for unlimited size</value>
   </data>
-  <data name="OT_URLPattern" xml:space="preserve">
+	<data name="OT_URLPattern" xml:space="preserve">
     <value>URL Pattern</value>
   </data>
-  <data name="OT_URLSubstitution" xml:space="preserve">
+	<data name="OT_URLSubstitution" xml:space="preserve">
     <value>Use %u for search engine URL</value>
   </data>
-  <data name="OT_ValueOfFields" xml:space="preserve">
+	<data name="OT_ValueOfFields" xml:space="preserve">
     <value>Initial value of fields and properties</value>
   </data>
-  <data name="OT_ValueOfFieldsTip" xml:space="preserve">
+	<data name="OT_ValueOfFieldsTip" xml:space="preserve">
     <value>Displays the initial values of fields and properties in the drop-down menu of navigation bar</value>
   </data>
-  <data name="OT_WebSearch" xml:space="preserve">
+	<data name="OT_WebSearch" xml:space="preserve">
     <value>Web Search</value>
   </data>
-  <data name="OT_WebSearchNote" xml:space="preserve">
+	<data name="OT_WebSearchNote" xml:space="preserve">
     <value>This page defines search engines which can be accessed via right clicking the Find button on the Smart Bar</value>
   </data>
-  <data name="T_ConfigFileFilter" xml:space="preserve">
+	<data name="T_ConfigFileFilter" xml:space="preserve">
     <value>Codist configuration file|*.json|All files|*.*</value>
   </data>
-  <data name="T_ErrorLoadingConfig" xml:space="preserve">
+	<data name="T_ErrorLoadingConfig" xml:space="preserve">
     <value>Error occured while loading config file: </value>
   </data>
-  <data name="T_LoadConfig" xml:space="preserve">
+	<data name="T_LoadConfig" xml:space="preserve">
     <value>Load Codist configuration file...</value>
   </data>
-  <data name="T_NewVersionConfig" xml:space="preserve">
+	<data name="T_NewVersionConfig" xml:space="preserve">
     <value>The loaded configuration file is created by a newer version of Codist. Some items may not be correctly loaded.</value>
   </data>
-  <data name="T_SaveConfig" xml:space="preserve">
+	<data name="T_SaveConfig" xml:space="preserve">
     <value>Save Codist configuration file...</value>
   </data>
-  <data name="CMD_OpenFolder" xml:space="preserve">
+	<data name="CMD_OpenFolder" xml:space="preserve">
     <value>Open folder</value>
   </data>
-  <data name="CMD_OpenOrExecuteFile" xml:space="preserve">
+	<data name="CMD_OpenOrExecuteFile" xml:space="preserve">
     <value>Open or execute file</value>
   </data>
-  <data name="CMD_OpenWithVS" xml:space="preserve">
+	<data name="CMD_OpenWithVS" xml:space="preserve">
     <value>Open file with Visual Studio</value>
   </data>
-  <data name="T_ContainingAssembly" xml:space="preserve">
+	<data name="T_ContainingAssembly" xml:space="preserve">
     <value>Containing assembly: </value>
   </data>
-  <data name="T_CopyAfter" xml:space="preserve">
+	<data name="T_CopyAfter" xml:space="preserve">
     <value>Copy after &lt;NAME&gt;</value>
   </data>
-  <data name="T_CopyBefore" xml:space="preserve">
+	<data name="T_CopyBefore" xml:space="preserve">
     <value>Copy before &lt;NAME&gt;</value>
   </data>
-  <data name="T_MoveAfter" xml:space="preserve">
+	<data name="T_MoveAfter" xml:space="preserve">
     <value>Move after &lt;NAME&gt;</value>
   </data>
-  <data name="T_MoveBefore" xml:space="preserve">
+	<data name="T_MoveBefore" xml:space="preserve">
     <value>Move before &lt;NAME&gt;</value>
   </data>
-  <data name="T_SourceLineInfo" xml:space="preserve">
+	<data name="T_SourceLineInfo" xml:space="preserve">
     <value>Folder: {Folder}
 Line: {Line}</value>
   </data>
-  <data name="T_SourceReference" xml:space="preserve">
+	<data name="T_SourceReference" xml:space="preserve">
     <value>source reference:</value>
   </data>
-  <data name="T_FailedToLaunchBrowser" xml:space="preserve">
+	<data name="T_FailedToLaunchBrowser" xml:space="preserve">
     <value>Failed to launch web browser to search with selected text:</value>
   </data>
-  <data name="CMD_DismissNotification" xml:space="preserve">
+	<data name="CMD_DismissNotification" xml:space="preserve">
     <value>dismiss this notification</value>
   </data>
-  <data name="CMD_LearnMore" xml:space="preserve">
+	<data name="CMD_LearnMore" xml:space="preserve">
     <value>learn more</value>
   </data>
-  <data name="CMD_SaveScreenshot" xml:space="preserve">
+	<data name="CMD_SaveScreenshot" xml:space="preserve">
     <value>Save Code &amp;Window Screenshot...</value>
   </data>
-  <data name="CMD_SearchClassMember" xml:space="preserve">
+	<data name="CMD_SearchClassMember" xml:space="preserve">
     <value>Search Type Member</value>
   </data>
-  <data name="CMD_SeeWhatsNew" xml:space="preserve">
+	<data name="CMD_SeeWhatsNew" xml:space="preserve">
     <value>see what's new</value>
   </data>
-  <data name="CMD_ShowDocumentContentType" xml:space="preserve">
+	<data name="CMD_ShowDocumentContentType" xml:space="preserve">
     <value>Show Document Content Type...</value>
   </data>
-  <data name="T_AllLanguages" xml:space="preserve">
+	<data name="T_AllLanguages" xml:space="preserve">
     <value>All languages</value>
   </data>
-  <data name="T_CodistFirstRun" xml:space="preserve">
+	<data name="T_CodistFirstRun" xml:space="preserve">
     <value>It is the first time for Codist running on your Visual Studio. Click here to</value>
   </data>
-  <data name="T_CodistUpdated" xml:space="preserve">
+	<data name="T_CodistUpdated" xml:space="preserve">
     <value>Codist has been upgraded to &lt;VERSION&gt;. Click here to </value>
   </data>
-  <data name="T_Common" xml:space="preserve">
+	<data name="T_Common" xml:space="preserve">
     <value>Common</value>
   </data>
-  <data name="T_ContentTypeOfDocument" xml:space="preserve">
+	<data name="T_ContentTypeOfDocument" xml:space="preserve">
     <value>Content type of document </value>
   </data>
-  <data name="T_CustomizeSyntaxHighlightNote" xml:space="preserve">
+	<data name="T_CustomizeSyntaxHighlightNote" xml:space="preserve">
     <value>To configure syntax highlight, open a code file first and execute this command.</value>
   </data>
-  <data name="T_FailedToSaveScreenshot" xml:space="preserve">
+	<data name="T_FailedToSaveScreenshot" xml:space="preserve">
     <value>Failed to save screenshot for &lt;NAME&gt;.</value>
   </data>
-  <data name="T_Options" xml:space="preserve">
+	<data name="T_Options" xml:space="preserve">
     <value>options</value>
   </data>
-  <data name="T_Or" xml:space="preserve">
+	<data name="T_Or" xml:space="preserve">
     <value> or </value>
   </data>
-  <data name="T_PngFileFilter" xml:space="preserve">
+	<data name="T_PngFileFilter" xml:space="preserve">
     <value>PNG images (*.png)|*.png</value>
   </data>
-  <data name="T_SelectedCode" xml:space="preserve">
+	<data name="T_SelectedCode" xml:space="preserve">
     <value>Selected code</value>
   </data>
-  <data name="T_SpecifyScreenshotLocation" xml:space="preserve">
+	<data name="T_SpecifyScreenshotLocation" xml:space="preserve">
     <value>Save screenshot file</value>
   </data>
-  <data name="T_SymbolMarkers" xml:space="preserve">
+	<data name="T_SymbolMarkers" xml:space="preserve">
     <value>symbol markers</value>
   </data>
-  <data name="T_SyntaxCategories" xml:space="preserve">
+	<data name="T_SyntaxCategories" xml:space="preserve">
     <value>Syntax categories:</value>
   </data>
-  <data name="T_SyntaxHighlightConfigurations" xml:space="preserve">
+	<data name="T_SyntaxHighlightConfigurations" xml:space="preserve">
     <value>Syntax Highlight Configurations</value>
   </data>
-  <data name="T_TaggedComments" xml:space="preserve">
+	<data name="T_TaggedComments" xml:space="preserve">
     <value>Tagged comments</value>
   </data>
-  <data name="T_Tags" xml:space="preserve">
+	<data name="T_Tags" xml:space="preserve">
     <value>tags</value>
   </data>
-  <data name="CMDT_DarkTheme" xml:space="preserve">
+	<data name="CMDT_DarkTheme" xml:space="preserve">
     <value>Load predefined theme for dark editing environment</value>
   </data>
-  <data name="CMDT_LightTheme" xml:space="preserve">
+	<data name="CMDT_LightTheme" xml:space="preserve">
     <value>Load predefined theme for light editing environment</value>
   </data>
-  <data name="CMDT_LoadTheme" xml:space="preserve">
+	<data name="CMDT_LoadTheme" xml:space="preserve">
     <value>Load syntax highlight theme...</value>
   </data>
-  <data name="CMDT_ResetTheme" xml:space="preserve">
+	<data name="CMDT_ResetTheme" xml:space="preserve">
     <value>Reset syntax highlight theme to default...</value>
   </data>
-  <data name="CMDT_SaveHighlightChanges" xml:space="preserve">
+	<data name="CMDT_SaveHighlightChanges" xml:space="preserve">
     <value>Confirm changes</value>
   </data>
-  <data name="CMDT_SaveTheme" xml:space="preserve">
+	<data name="CMDT_SaveTheme" xml:space="preserve">
     <value>Save syntax highlight theme...</value>
   </data>
-  <data name="CMDT_SimpleTheme" xml:space="preserve">
+	<data name="CMDT_SimpleTheme" xml:space="preserve">
     <value>Load a predefined simple theme</value>
   </data>
-  <data name="CMDT_UndoHighlightChanges" xml:space="preserve">
+	<data name="CMDT_UndoHighlightChanges" xml:space="preserve">
     <value>Undo changes</value>
   </data>
-  <data name="CMD_Bold" xml:space="preserve">
+	<data name="CMD_Bold" xml:space="preserve">
     <value>Bold</value>
   </data>
-  <data name="CMD_Cancel" xml:space="preserve">
+	<data name="CMD_Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="CMD_CopyColor" xml:space="preserve">
+	<data name="CMD_CopyColor" xml:space="preserve">
     <value>Copy color</value>
   </data>
-  <data name="CMD_DarkTheme" xml:space="preserve">
+	<data name="CMD_DarkTheme" xml:space="preserve">
     <value>Dark theme</value>
   </data>
-  <data name="CMD_Italic" xml:space="preserve">
+	<data name="CMD_Italic" xml:space="preserve">
     <value>Italic</value>
   </data>
-  <data name="CMD_LightTheme" xml:space="preserve">
+	<data name="CMD_LightTheme" xml:space="preserve">
     <value>Light theme</value>
   </data>
-  <data name="CMD_PasteColor" xml:space="preserve">
+	<data name="CMD_PasteColor" xml:space="preserve">
     <value>Paste color</value>
   </data>
-  <data name="CMD_PickColor" xml:space="preserve">
+	<data name="CMD_PickColor" xml:space="preserve">
     <value>Pick color...</value>
   </data>
-  <data name="CMD_ResetColor" xml:space="preserve">
+	<data name="CMD_ResetColor" xml:space="preserve">
     <value>Reset color</value>
   </data>
-  <data name="CMD_SaveHighlightChanges" xml:space="preserve">
+	<data name="CMD_SaveHighlightChanges" xml:space="preserve">
     <value>Save</value>
   </data>
-  <data name="CMD_SimpleTheme" xml:space="preserve">
+	<data name="CMD_SimpleTheme" xml:space="preserve">
     <value>Simple theme</value>
   </data>
-  <data name="CMD_Strikethrough" xml:space="preserve">
+	<data name="CMD_Strikethrough" xml:space="preserve">
     <value>Strikethrough</value>
   </data>
-  <data name="CMD_Underline" xml:space="preserve">
+	<data name="CMD_Underline" xml:space="preserve">
     <value>Underline</value>
   </data>
-  <data name="OT_ApplyToLocalFunction" xml:space="preserve">
+	<data name="OT_ApplyToLocalFunction" xml:space="preserve">
     <value>Apply to local functions</value>
   </data>
-  <data name="OT_ApplyToNonPrivateField" xml:space="preserve">
+	<data name="OT_ApplyToNonPrivateField" xml:space="preserve">
     <value>Apply to non-private fields</value>
   </data>
-  <data name="OT_BoldBraces" xml:space="preserve">
+	<data name="OT_BoldBraces" xml:space="preserve">
     <value>Apply bold style to following braces</value>
   </data>
-  <data name="OT_BoldBracesNote" xml:space="preserve">
+	<data name="OT_BoldBracesNote" xml:space="preserve">
     <value>When the following checkboxes are checked, braces and parentheses will be highlighted by their semantic syntax styles</value>
   </data>
-  <data name="OT_BracesAndParentheses" xml:space="preserve">
+	<data name="OT_BracesAndParentheses" xml:space="preserve">
     <value>Braces and Parentheses</value>
   </data>
-  <data name="OT_BranceBraces" xml:space="preserve">
+	<data name="OT_BranceBraces" xml:space="preserve">
     <value>Branch braces and parentheses</value>
   </data>
-  <data name="OT_Content" xml:space="preserve">
+	<data name="OT_Content" xml:space="preserve">
     <value>Content</value>
   </data>
-  <data name="OT_DeclarationBraces" xml:space="preserve">
+	<data name="OT_DeclarationBraces" xml:space="preserve">
     <value>Type and member declaration braces</value>
   </data>
-  <data name="OT_LoopBraces" xml:space="preserve">
+	<data name="OT_LoopBraces" xml:space="preserve">
     <value>Loop braces and parentheses</value>
   </data>
-  <data name="OT_MemberStyles" xml:space="preserve">
+	<data name="OT_MemberStyles" xml:space="preserve">
     <value>Member Declaration Styles</value>
   </data>
-  <data name="OT_MethodParameterBraces" xml:space="preserve">
+	<data name="OT_MethodParameterBraces" xml:space="preserve">
     <value>Method parameter parentheses</value>
   </data>
-  <data name="OT_ResourceBraces" xml:space="preserve">
+	<data name="OT_ResourceBraces" xml:space="preserve">
     <value>Resource and exception braces and parentheses</value>
   </data>
-  <data name="OT_Tag" xml:space="preserve">
+	<data name="OT_Tag" xml:space="preserve">
     <value>Tag</value>
   </data>
-  <data name="OT_TagContent" xml:space="preserve">
+	<data name="OT_TagContent" xml:space="preserve">
     <value>Tag and content</value>
   </data>
-  <data name="OT_TypeCastBraces" xml:space="preserve">
+	<data name="OT_TypeCastBraces" xml:space="preserve">
     <value>Type cast parentheses</value>
   </data>
-  <data name="T_ApplyOn" xml:space="preserve">
+	<data name="T_ApplyOn" xml:space="preserve">
     <value>Apply on:</value>
   </data>
-  <data name="T_Background" xml:space="preserve">
+	<data name="T_Background" xml:space="preserve">
     <value>Background</value>
   </data>
-  <data name="T_BackgroundEffect" xml:space="preserve">
+	<data name="T_BackgroundEffect" xml:space="preserve">
     <value>Background effect:</value>
   </data>
-  <data name="T_BaseSyntax" xml:space="preserve">
+	<data name="T_BaseSyntax" xml:space="preserve">
     <value>Base syntax: </value>
   </data>
-  <data name="T_BottomGradient" xml:space="preserve">
+	<data name="T_BottomGradient" xml:space="preserve">
     <value>Bottom gradient</value>
   </data>
-  <data name="T_CaseSensitive" xml:space="preserve">
+	<data name="T_CaseSensitive" xml:space="preserve">
     <value>Case sensitive</value>
   </data>
-  <data name="T_CommentTagSettings" xml:space="preserve">
+	<data name="T_CommentTagSettings" xml:space="preserve">
     <value>Comment tag settings:</value>
   </data>
-  <data name="T_ConfirmResetSyntaxHighlight" xml:space="preserve">
+	<data name="T_ConfirmResetSyntaxHighlight" xml:space="preserve">
     <value>Do you want to reset the syntax highlight settings to default?</value>
   </data>
-  <data name="T_Default" xml:space="preserve">
+	<data name="T_Default" xml:space="preserve">
     <value>Default</value>
   </data>
-  <data name="T_EndWithPunctuation" xml:space="preserve">
+	<data name="T_EndWithPunctuation" xml:space="preserve">
     <value>May end with punctuation</value>
   </data>
-  <data name="T_FailedToLoadStyleFile" xml:space="preserve">
+	<data name="T_FailedToLoadStyleFile" xml:space="preserve">
     <value>Error occured while loading style file:</value>
   </data>
-  <data name="T_Font" xml:space="preserve">
+	<data name="T_Font" xml:space="preserve">
     <value>Font:</value>
   </data>
-  <data name="T_Foreground" xml:space="preserve">
+	<data name="T_Foreground" xml:space="preserve">
     <value>Foreground</value>
   </data>
-  <data name="T_HighlightSettingFileFilter" xml:space="preserve">
+	<data name="T_HighlightSettingFileFilter" xml:space="preserve">
     <value>Codist syntax highlight setting file|*.styles|All files|*.*</value>
   </data>
-  <data name="T_LeftGradient" xml:space="preserve">
+	<data name="T_LeftGradient" xml:space="preserve">
     <value>Left gradient</value>
   </data>
-  <data name="T_LoadSyntaxHighlightFile" xml:space="preserve">
+	<data name="T_LoadSyntaxHighlightFile" xml:space="preserve">
     <value>Load Codist syntax highlight setting file...</value>
   </data>
-  <data name="T_NoCommentTagDefined" xml:space="preserve">
+	<data name="T_NoCommentTagDefined" xml:space="preserve">
     <value>No comment tag is defined. Use the Add button to add new comment tag definitions.</value>
   </data>
-  <data name="T_NoSyntaxHighlightDefined" xml:space="preserve">
+	<data name="T_NoSyntaxHighlightDefined" xml:space="preserve">
     <value>No syntax highlight is defined for selected syntax type. You need to install corresponding feature with the Visual Studio installer.</value>
   </data>
-  <data name="T_NoSyntaxHighlightSelected" xml:space="preserve">
+	<data name="T_NoSyntaxHighlightSelected" xml:space="preserve">
     <value>No syntax highlight is applied to active position in code window.</value>
   </data>
-  <data name="T_NotSet" xml:space="preserve">
+	<data name="T_NotSet" xml:space="preserve">
     <value>Not set</value>
   </data>
-  <data name="T_Opacity" xml:space="preserve">
+	<data name="T_Opacity" xml:space="preserve">
     <value>Opacity: </value>
   </data>
-  <data name="T_OpacityNotSet" xml:space="preserve">
+	<data name="T_OpacityNotSet" xml:space="preserve">
     <value>Opacity not set</value>
   </data>
-  <data name="T_PredefinedThemes" xml:space="preserve">
+	<data name="T_PredefinedThemes" xml:space="preserve">
     <value>Predefined themes:</value>
   </data>
-  <data name="T_RightGradient" xml:space="preserve">
+	<data name="T_RightGradient" xml:space="preserve">
     <value>Right gradient</value>
   </data>
-  <data name="T_SaveSyntaxHighlightFile" xml:space="preserve">
+	<data name="T_SaveSyntaxHighlightFile" xml:space="preserve">
     <value>Save Codist syntax highlight setting file...</value>
   </data>
-  <data name="T_Size" xml:space="preserve">
+	<data name="T_Size" xml:space="preserve">
     <value>Size:</value>
   </data>
-  <data name="T_Solid" xml:space="preserve">
+	<data name="T_Solid" xml:space="preserve">
     <value>Solid</value>
   </data>
-  <data name="T_Style" xml:space="preserve">
+	<data name="T_Style" xml:space="preserve">
     <value>Style:</value>
   </data>
-  <data name="T_StyleSettings" xml:space="preserve">
+	<data name="T_StyleSettings" xml:space="preserve">
     <value>Style settings:</value>
   </data>
-  <data name="T_SyntaxHighlightConfigNotice" xml:space="preserve">
+	<data name="T_SyntaxHighlightConfigNotice" xml:space="preserve">
     <value>To configure other syntax styles, click on the corresponding place in the code document window, then switch to this window.</value>
   </data>
-  <data name="T_SyntaxStyles" xml:space="preserve">
+	<data name="T_SyntaxStyles" xml:space="preserve">
     <value>Syntax styles:</value>
   </data>
-  <data name="T_Tag" xml:space="preserve">
+	<data name="T_Tag" xml:space="preserve">
     <value>Tag:</value>
   </data>
-  <data name="T_TopGradient" xml:space="preserve">
+	<data name="T_TopGradient" xml:space="preserve">
     <value>Top gradient</value>
   </data>
-  <data name="OTC_Name" xml:space="preserve">
+	<data name="OTC_Name" xml:space="preserve">
     <value>Name:</value>
   </data>
-  <data name="OTC_URL" xml:space="preserve">
+	<data name="OTC_URL" xml:space="preserve">
     <value>URL:</value>
   </data>
-  <data name="OT_SearchParamSubsitution" xml:space="preserve">
+	<data name="OT_SearchParamSubsitution" xml:space="preserve">
     <value>Use %s for search keyword</value>
   </data>
-  <data name="T_Themes" xml:space="preserve">
+	<data name="T_Themes" xml:space="preserve">
     <value>Themes:</value>
   </data>
 </root>

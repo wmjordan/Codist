@@ -115,7 +115,7 @@ namespace Codist.SmartBars
 					}
 				}
 				else if (token.RawKind >= (int)SyntaxKind.NumericLiteralToken && token.RawKind <= (int)SyntaxKind.StringLiteralToken) {
-					AddEditorCommand(MyToolBar, IconIds.FindReference, "Edit.FindAllReferences", "Find all references");
+					AddEditorCommand(MyToolBar, IconIds.FindReference, "Edit.FindAllReferences", R.CMD_FindAllReferences);
 				}
 				else if (nodeKind.IsRegionalDirective()) {
 					AddDirectiveCommands();
@@ -222,7 +222,7 @@ namespace Codist.SmartBars
 			if (View.TryGetFirstSelectionSpan(out var ss) && ss.Length < 0x2000) {
 				foreach (var t in _Context.Compilation.DescendantTrivia(ss.ToTextSpan())) {
 					if (t.IsKind(SyntaxKind.SingleLineCommentTrivia)) {
-						AddEditorCommand(MyToolBar, IconIds.Uncomment, "Edit.UncommentSelection", "Uncomment selection");
+						AddEditorCommand(MyToolBar, IconIds.Uncomment, "Edit.UncommentSelection", R.CMD_UncommentSelection);
 						return;
 					}
 				}
@@ -234,7 +234,7 @@ namespace Codist.SmartBars
 				lineComment = triviaList.FirstOrDefault(i => i.IsLineComment());
 			}
 			if (lineComment.RawKind != 0) {
-				AddEditorCommand(MyToolBar, IconIds.Uncomment, "Edit.UncommentSelection", "Uncomment selection");
+				AddEditorCommand(MyToolBar, IconIds.Uncomment, "Edit.UncommentSelection", R.CMD_UncommentSelection);
 			}
 		}
 

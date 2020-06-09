@@ -5,10 +5,10 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Media;
 using AppHelpers;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.Win32;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Options
 {
@@ -129,45 +129,45 @@ namespace Codist.Options
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.Features;
-				AddPage("General",
-					new TitleBox("Feature Controllers"),
-					new DescriptionBox("Use the following checkboxes to control features provided by Codist."),
+				AddPage(R.OT_General,
+					new TitleBox(R.OT_FeatureControllers),
+					new DescriptionBox(R.OT_FeatureControllersTip),
 					new WrapPanel {
 						Children = {
-							(_SyntaxHighlight = o.CreateOptionBox(Features.SyntaxHighlight, UpdateConfig, "Syntax Highlight")
-								.SetLazyToolTip(() => "Provides advanced syntax highlight and comment taggers")),
-							(_SuperQuickInfo = o.CreateOptionBox(Features.SuperQuickInfo, UpdateConfig, "Super Quick Info")
-								.SetLazyToolTip(() => "Provides enhancements to Quick Info (code tooltips)")),
-							(_SmartBar = o.CreateOptionBox(Features.SmartBar, UpdateConfig, "Smart Bar")
-								.SetLazyToolTip(() => "Provides a dynamic floating toolbar in your code editor")),
-							(_NavigationBar = o.CreateOptionBox(Features.NaviBar, UpdateConfig, "Navigation Bar")
-								.SetLazyToolTip(() => "Provides an enhanced navigation bar for C# and Markdown languages")),
-							(_ScrollbarMarker = o.CreateOptionBox(Features.ScrollbarMarkers, UpdateConfig, "Scrollbar Markers")
-								.SetLazyToolTip(() => "Provides additional markers on the scrollbar"))
+							(_SyntaxHighlight = o.CreateOptionBox(Features.SyntaxHighlight, UpdateConfig, R.T_SyntaxHighlight)
+								.SetLazyToolTip(() => R.OT_SyntaxHighlightTip)),
+							(_SuperQuickInfo = o.CreateOptionBox(Features.SuperQuickInfo, UpdateConfig, R.T_SuperQuickInfo)
+								.SetLazyToolTip(() => R.OT_QuickInfoTip)),
+							(_SmartBar = o.CreateOptionBox(Features.SmartBar, UpdateConfig, R.T_SmartBar)
+								.SetLazyToolTip(() => R.OT_SmartBarTip)),
+							(_NavigationBar = o.CreateOptionBox(Features.NaviBar, UpdateConfig, R.T_NavigationBar)
+								.SetLazyToolTip(() => R.OT_NavigationBarTip)),
+							(_ScrollbarMarker = o.CreateOptionBox(Features.ScrollbarMarkers, UpdateConfig, R.T_ScrollbarMarkers)
+								.SetLazyToolTip(() => R.OT_ScrollbarMarkerTip))
 						}
 					},
-					new Note("Changes will take place on NEWLY OPENED document windows. Currently opened document windows WILL NOT BE AFFECTED"),
+					new Note(R.OT_FeatureChangesTip),
 
-					new TitleBox("Configuration File"),
-					new DescriptionBox("Use the following buttons to backup your settings or share the file with others"),
+					new TitleBox(R.OT_ConfigurationFile),
+					new DescriptionBox(R.OT_ConfigurationFileTip),
 					new WrapPanel {
 						Children = {
-							(_LoadButton = new Button { Name = "_Load", Content = "Load...", ToolTip = "Restore configurations from a file..." }),
-							(_SaveButton = new Button { Name = "_Save", Content = "Save...", ToolTip = "Backup configurations to a file..." })
+							(_LoadButton = new Button { Name = "_Load", Content = R.CMD_Load, ToolTip = R.OT_LoadConfigFileTip }),
+							(_SaveButton = new Button { Name = "_Save", Content = R.CMD_Save, ToolTip = R.OT_SaveConfigFileTip })
 						}
 					}
 					);
-				AddPage("About",
-					new TitleBox("Thank You for Using Codist"),
-					new Note("Project web site:"),
-					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist", "https://github.com/wmjordan/Codist", "Go to project web site"),
-					new Note("Report bugs and suggestions to:"),
-					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist/issues", "https://github.com/wmjordan/Codist/issues", "Post your opinions in the issues page"),
-					new Note("Latest release:"),
-					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist/releases", "https://github.com/wmjordan/Codist/releases", "Go to project release page"),
-					new Note("Support future development of Codist:"),
-					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("Donate via PayPal", "https://www.paypal.me/wmzuo/19.99", "Open your browser and donate to project Codist"),
-					new DescriptionBox("Recommended donation value is $19.99. But you can modify the amount to any value if you like")
+				AddPage(R.OT_About,
+					new TitleBox(R.OT_ThankYou),
+					new Note(R.OT_ProjectWebSite),
+					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist", "https://github.com/wmjordan/Codist", R.CMD_GotoProjectWebSite),
+					new Note(R.OT_ReportBugsAndSuggestions),
+					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist/issues", "https://github.com/wmjordan/Codist/issues", R.CMD_PostIssue),
+					new Note(R.OT_LatestRelease),
+					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist/releases", "https://github.com/wmjordan/Codist/releases", R.CMD_GotoProjectReleasePage),
+					new Note(R.OT_SupportCodst),
+					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink(R.OT_DonateLink, "https://www.paypal.me/wmzuo/19.99", R.CMD_OpenDonatePage),
+					new DescriptionBox(R.OT_DonateLinkTip)
 					);
 				_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker };
 				foreach (var item in _Options) {
@@ -197,10 +197,10 @@ namespace Codist.Options
 			void LoadOrSaveConfig(object sender, EventArgs args) {
 				if (sender == _LoadButton) {
 					var d = new OpenFileDialog {
-						Title = "Load Codist configuration file...",
+						Title = R.T_LoadConfig,
 						FileName = "Codist.json",
 						DefaultExt = "json",
-						Filter = "Codist configuration file|*.json|All files|*.*"
+						Filter = R.T_ConfigFileFilter
 					};
 					if (d.ShowDialog() != true) {
 						return;
@@ -209,20 +209,20 @@ namespace Codist.Options
 						Config.LoadConfig(d.FileName);
 						if (Version.TryParse(Config.Instance.Version, out var newVersion)
 							&& newVersion > Version.Parse(Config.CurrentVersion)) {
-							MessageBox.Show("The loaded version is created by a newer version of " + nameof(Codist) + ". Some items may not be correctly loaded.", nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Information);
+							MessageBox.Show(R.T_NewVersionConfig, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Information);
 						}
 						System.IO.File.Copy(d.FileName, Config.ConfigPath, true);
 					}
 					catch (Exception ex) {
-						MessageBox.Show("Error occured while loading config file: " + ex.Message, nameof(Codist));
+						MessageBox.Show(R.T_ErrorLoadingConfig + ex.Message, nameof(Codist));
 					}
 				}
 				else {
 					var d = new SaveFileDialog {
-						Title = "Save Codist configuration file...",
+						Title = R.T_SaveConfig,
 						FileName = "Codist.json",
 						DefaultExt = "json",
-						Filter = "Codist configuration file|*.json|All files|*.*"
+						Filter = R.T_ConfigFileFilter
 					};
 					if (d.ShowDialog() != true) {
 						return;
@@ -251,94 +251,93 @@ namespace Codist.Options
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.QuickInfoOptions;
-				AddPage("General",
-					new Note("This page changes the behavior of all types of Quick Infos (code tool tips)"),
-					_CtrlQuickInfo = o.CreateOptionBox(QuickInfoOptions.CtrlQuickInfo, UpdateConfig, "Hide Quick Info until Shift key is pressed")
-						.SetLazyToolTip(() => "Suppresses tool tip until pressing Shift key"),
-					_Selection = o.CreateOptionBox(QuickInfoOptions.Selection, UpdateConfig, "Selection info")
-						.SetLazyToolTip(() => "Shows selection information, such as character count, line count, Unicode of character, etc."),
-					_Color = o.CreateOptionBox(QuickInfoOptions.Color, UpdateConfig, "Color info")
-						.SetLazyToolTip(() => "Shows color information for predefined color names and hexidemical values"),
+				AddPage(R.OT_General,
+					new Note(R.OT_QuickInfoNote),
+					_CtrlQuickInfo = o.CreateOptionBox(QuickInfoOptions.CtrlQuickInfo, UpdateConfig, R.OT_HideQuickInfoUntilShift)
+						.SetLazyToolTip(() => R.OT_HideQuickInfoUntilShiftTip),
+					_Selection = o.CreateOptionBox(QuickInfoOptions.Selection, UpdateConfig, R.OT_SelectionInfo)
+						.SetLazyToolTip(() => R.OT_SelectionInfoTip),
+					_Color = o.CreateOptionBox(QuickInfoOptions.Color, UpdateConfig, R.OT_ColorInfo)
+						.SetLazyToolTip(() => R.OT_ColorInfoTip),
 
-					new TitleBox("Item Size"),
-					new DescriptionBox("Limit the maximum size of each items in Quick Info, preventing any item from taking up the whole screen"),
+					new TitleBox(R.OT_ItemSize),
+					new DescriptionBox(R.OT_ItemSizeNote),
 					new WrapPanel {
 						Children = {
 							new StackPanel().MakeHorizontal()
-								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append("Max width:"))
+								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_MaxWidth))
 								.Add(_MaxWidth = new Controls.IntegerBox((int)Config.Instance.QuickInfoMaxWidth) { Minimum = 0, Maximum = 5000, Step = 100 })
-								.SetLazyToolTip(() => "This option limits the max width of a Quick Info item"),
+								.SetLazyToolTip(() => R.OT_MaxWidthTip),
 							new StackPanel().MakeHorizontal()
-								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append("Max height:"))
+								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_MaxHeight))
 								.Add(_MaxHeight = new Controls.IntegerBox((int)Config.Instance.QuickInfoMaxHeight) { Minimum = 0, Maximum = 5000, Step = 50 })
-								.SetLazyToolTip(() => "This option limits the max height of a Quick Info item"),
+								.SetLazyToolTip(() => R.OT_MaxHeightTip),
 						}
 					}.ForEachChild((FrameworkElement b) => b.MinWidth = MinColumnWidth),
-					new DescriptionBox("Set the above value to 0 to for unlimited size"),
+					new DescriptionBox(R.OT_UnlimitedSize),
 					new StackPanel().MakeHorizontal()
-						.Add(new TextBlock { MinWidth = 240, Margin = WpfHelper.SmallHorizontalMargin, Text = "More max-height for C# XML Documentation:" })
+						.Add(new TextBlock { MinWidth = 240, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_ExtraXmlDocSize })
 						.Add(_ExtraHeight = new Controls.IntegerBox((int)Config.Instance.QuickInfoXmlDocExtraHeight) { Minimum = 0, Maximum = 1000, Step = 50 })
-						.SetLazyToolTip(() => "This option plus max-height is the max height for the C# XML Documentation")
+						.SetLazyToolTip(() => R.OT_ExtraXmlDocSizeTip)
 				);
 
-				AddPage("C#",
-					new Note("This page changes the behavior of C# Quick Infos (code tool tips)"),
-					new TitleBox("Quick Info Override"),
-					new DescriptionBox("The following options allow overriding C# Quick Info with more features"),
-					_ClickAndGo = o.CreateOptionBox(QuickInfoOptions.ClickAndGo, UpdateConfig, "Click and go to source code of symbol definition")
-						.SetLazyToolTip(() => "Makes symbols in Quick Info clickable to the source code"),
-					_OverrideDefaultDocumentation = o.CreateOptionBox(QuickInfoOptions.OverrideDefaultDocumentation, UpdateConfig, "Override default XML Documentation")
-						.SetLazyToolTip(() => "Reformats the XML Documentation, making them selectable, copiable and clickable"),
-					_DocumentationFromBaseType = o.CreateOptionBox(QuickInfoOptions.DocumentationFromBaseType, UpdateConfig, "Inherits from base type or interfaces")
-						.SetLazyToolTip(() => "Displays XML Doc from base types or interfaces if it is absent in active symbol"),
-					_DocumentationFromInheritDoc = o.CreateOptionBox(QuickInfoOptions.DocumentationFromInheritDoc, UpdateConfig, "Inherits from <inheritdoc cref=\"\"/> target")
-						.SetLazyToolTip(() => "Supports inheritdoc which uses XML Doc in referenced symbol"),
-					_TextOnlyDoc = o.CreateOptionBox(QuickInfoOptions.TextOnlyDoc, UpdateConfig, "Allow text only (no <summary/>) XML Doc")
-						.SetLazyToolTip(() => "Displays the text content of XML Doc if <summary/> is absent"),
-					_ReturnsDoc = o.CreateOptionBox(QuickInfoOptions.ReturnsDoc, UpdateConfig, "Show <returns/> XML Doc")
-						.SetLazyToolTip(() => "Displays the content of <returns/>"),
-					_RemarksDoc = o.CreateOptionBox(QuickInfoOptions.RemarksDoc, UpdateConfig, "Show <remarks/> XML Doc")
-						.SetLazyToolTip(() => "Displays the content of <remarks/>"),
-					_ExceptionDoc = o.CreateOptionBox(QuickInfoOptions.ExceptionDoc, UpdateConfig, "Show <exception/> XML Doc")
-						.SetLazyToolTip(() => "Displays the content of <exception/>"),
-					_SeeAlsoDoc = o.CreateOptionBox(QuickInfoOptions.SeeAlsoDoc, UpdateConfig, "Show <seealso/> links")
-						.SetLazyToolTip(() => "Displays referenced symbols of <seealso/>"),
-					_ExampleDoc = o.CreateOptionBox(QuickInfoOptions.ExampleDoc, UpdateConfig, "Show <example/> XML Doc")
-						.SetLazyToolTip(() => "Displays the content of <example/>"),
-					_AlternativeStyle = o.CreateOptionBox(QuickInfoOptions.AlternativeStyle, UpdateConfig, "Use alternative style")
-						.SetLazyToolTip(() => "Uses an alternative style to display Quick Info, and unify the topmost link in the symbol definition part of Quick Info"),
+				AddPage(R.OT_CSharp,
+					new Note(R.OT_CSharpNote),
+					new TitleBox(R.OT_QuickInfoOverride),
+					new DescriptionBox(R.OT_QuickInfoOverrideNote),
+					_ClickAndGo = o.CreateOptionBox(QuickInfoOptions.ClickAndGo, UpdateConfig, R.OT_ClickAndGo)
+						.SetLazyToolTip(() => R.OT_ClickAndGoTip),
+					_OverrideDefaultDocumentation = o.CreateOptionBox(QuickInfoOptions.OverrideDefaultDocumentation, UpdateConfig, R.OT_OverrideXmlDoc)
+						.SetLazyToolTip(() => R.OT_OverrideXmlDocTip),
+					_DocumentationFromBaseType = o.CreateOptionBox(QuickInfoOptions.DocumentationFromBaseType, UpdateConfig, R.OT_InheritXmlDoc)
+						.SetLazyToolTip(() => R.OT_InheritXmlDocTip),
+					_DocumentationFromInheritDoc = o.CreateOptionBox(QuickInfoOptions.DocumentationFromInheritDoc, UpdateConfig, R.OT_InheritDoc)
+						.SetLazyToolTip(() => R.OT_InheritDocTip),
+					_TextOnlyDoc = o.CreateOptionBox(QuickInfoOptions.TextOnlyDoc, UpdateConfig, R.OT_TextOnlyXmlDoc)
+						.SetLazyToolTip(() => R.OT_TextOnlyXmlDocTip),
+					_ReturnsDoc = o.CreateOptionBox(QuickInfoOptions.ReturnsDoc, UpdateConfig, R.OT_ShowReturnsXmlDoc)
+						.SetLazyToolTip(() => R.OT_ShowReturnsXmlDocTip),
+					_RemarksDoc = o.CreateOptionBox(QuickInfoOptions.RemarksDoc, UpdateConfig, R.OT_ShowRemarksXmlDoc)
+						.SetLazyToolTip(() => R.OT_ShowRemarksXmlDocTip),
+					_ExceptionDoc = o.CreateOptionBox(QuickInfoOptions.ExceptionDoc, UpdateConfig, R.OT_ShowExceptionXmlDoc)
+						.SetLazyToolTip(() => R.OT_ShowExceptionXmlDocTip),
+					_SeeAlsoDoc = o.CreateOptionBox(QuickInfoOptions.SeeAlsoDoc, UpdateConfig, R.OT_ShowSeeAlsoXmlDoc)
+						.SetLazyToolTip(() => R.OT_ShowSeeAlsoXmlDocTip),
+					_ExampleDoc = o.CreateOptionBox(QuickInfoOptions.ExampleDoc, UpdateConfig, R.OT_ShowExampleXmlDoc)
+						.SetLazyToolTip(() => R.OT_ShowExampleXmlDocTip),
+					_AlternativeStyle = o.CreateOptionBox(QuickInfoOptions.AlternativeStyle, UpdateConfig, R.OT_AlternativeStyle)
+						.SetLazyToolTip(() => R.OT_AlternativeStyleTip),
 
-					new TitleBox("Additional Quick Info"),
-					new DescriptionBox("The following options allow adding more items to the Quick Info"),
-					_Attributes = o.CreateOptionBox(QuickInfoOptions.Attributes, UpdateConfig, "Attributes")
-						.SetLazyToolTip(() => "Displays attributes of a symbol"),
-					_BaseType = o.CreateOptionBox(QuickInfoOptions.BaseType, UpdateConfig, "Base type")
-						.SetLazyToolTip(() => "Displays base type of a symbol"),
-					_BaseTypeInheritence = o.CreateOptionBox(QuickInfoOptions.BaseTypeInheritence, UpdateConfig, "All ancestor types")
-						.SetLazyToolTip(() => "Displays base type of a symbol along inheritance relations"),
-					_Declaration = o.CreateOptionBox(QuickInfoOptions.Declaration, UpdateConfig, "Declaration")
-						.SetLazyToolTip(() => "Displays declaration information of a symbol if it is not a public instance one, as well as event or delegate signatures"),
-					_Interfaces = o.CreateOptionBox(QuickInfoOptions.Interfaces, UpdateConfig, "Interfaces")
-						.SetLazyToolTip(() => "Displays interfaces implemented by the symbol"),
-					_InterfacesInheritence = o.CreateOptionBox(QuickInfoOptions.InterfacesInheritence, UpdateConfig, "Inherited interfaces")
-						.SetLazyToolTip(() => "Displays inherited interfaces implemented by the symbol"),
-					_InterfaceImplementations = o.CreateOptionBox(QuickInfoOptions.InterfaceImplementations, UpdateConfig, "Interface implementation")
-						.SetLazyToolTip(() => "Displays the interface member if it is implemented by the symbol"),
-					_InterfaceMembers = o.CreateOptionBox(QuickInfoOptions.InterfaceMembers, UpdateConfig, "Interface members")
-						.SetLazyToolTip(() => "Displays members of an interface"),
-					_MethodOverload = o.CreateOptionBox(QuickInfoOptions.MethodOverload, UpdateConfig, "Method overloads")
-						.SetLazyToolTip(() => "Displays method overloads and applicable extension methods"),
-					_Parameter = o.CreateOptionBox(QuickInfoOptions.Parameter, UpdateConfig, "Parameter of method")
-						.SetLazyToolTip(() => "Displays information of parameter if active symbol is a parameter of a method"),
-					_TypeParameters = o.CreateOptionBox(QuickInfoOptions.TypeParameters, UpdateConfig, "Type parameter")
-						.SetLazyToolTip(() => "Displays information of type parameters"),
-					_SymbolLocation = o.CreateOptionBox(QuickInfoOptions.SymbolLocation, UpdateConfig, "Symbol location")
-						.SetLazyToolTip(() => "Displays the location where a symbol is defined"),
-					_NumericValues = o.CreateOptionBox(QuickInfoOptions.NumericValues, UpdateConfig, "Numeric forms")
-						.SetLazyToolTip(() => "Displays decimal, hexidecimal, binary forms of a number"),
-					_String = o.CreateOptionBox(QuickInfoOptions.String, UpdateConfig, "String length, hash and content")
-						.SetLazyToolTip(() => "Displays length, hash code and content of strings")
-
+					new TitleBox(R.OT_AdditionalQuickInfo),
+					new DescriptionBox(R.OT_AdditionalQuickInfoNote),
+					_Attributes = o.CreateOptionBox(QuickInfoOptions.Attributes, UpdateConfig, R.OT_Attributes)
+						.SetLazyToolTip(() => R.OT_AttributesTip),
+					_BaseType = o.CreateOptionBox(QuickInfoOptions.BaseType, UpdateConfig, R.OT_BaseType)
+						.SetLazyToolTip(() => R.OT_BaseTypeTip),
+					_BaseTypeInheritence = o.CreateOptionBox(QuickInfoOptions.BaseTypeInheritence, UpdateConfig, R.OT_AllAncestorTypes)
+						.SetLazyToolTip(() => R.OT_AllAncestorTypesTip),
+					_Declaration = o.CreateOptionBox(QuickInfoOptions.Declaration, UpdateConfig, R.OT_Declaration)
+						.SetLazyToolTip(() => R.OT_DesclarationTip),
+					_Interfaces = o.CreateOptionBox(QuickInfoOptions.Interfaces, UpdateConfig, R.OT_Interfaces)
+						.SetLazyToolTip(() => R.OT_InterfacesTip),
+					_InterfacesInheritence = o.CreateOptionBox(QuickInfoOptions.InterfacesInheritence, UpdateConfig, R.OT_InheritedInterfaces)
+						.SetLazyToolTip(() => R.OT_InheritedInterfacesTip),
+					_InterfaceImplementations = o.CreateOptionBox(QuickInfoOptions.InterfaceImplementations, UpdateConfig, R.OT_InterfaceImplementation)
+						.SetLazyToolTip(() => R.OT_InterfaceImplementationTip),
+					_InterfaceMembers = o.CreateOptionBox(QuickInfoOptions.InterfaceMembers, UpdateConfig, R.OT_InterfaceMembers)
+						.SetLazyToolTip(() => R.OT_InterfaceMembersTip),
+					_MethodOverload = o.CreateOptionBox(QuickInfoOptions.MethodOverload, UpdateConfig, R.OT_MethodOverloads)
+						.SetLazyToolTip(() => R.OT_MethodOverloadsTip),
+					_Parameter = o.CreateOptionBox(QuickInfoOptions.Parameter, UpdateConfig, R.OT_ParameterOfMethod)
+						.SetLazyToolTip(() => R.OT_ParameterOfMethodTip),
+					_TypeParameters = o.CreateOptionBox(QuickInfoOptions.TypeParameters, UpdateConfig, R.OT_TypeParameter)
+						.SetLazyToolTip(() => R.OT_TypeParameterTip),
+					_SymbolLocation = o.CreateOptionBox(QuickInfoOptions.SymbolLocation, UpdateConfig, R.OT_SymbolLocation)
+						.SetLazyToolTip(() => R.OT_SymbolLocationTip),
+					_NumericValues = o.CreateOptionBox(QuickInfoOptions.NumericValues, UpdateConfig, R.OT_NumericForms)
+						.SetLazyToolTip(() => R.OT_NumericFormsTip),
+					_String = o.CreateOptionBox(QuickInfoOptions.String, UpdateConfig, R.OT_StringInfo)
+						.SetLazyToolTip(() => R.OT_StringInfoTip)
 					);
 
 				_MaxHeight.ValueChanged += UpdateQuickInfoSize;
@@ -398,14 +397,13 @@ namespace Codist.Options
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.SpecialHighlightOptions;
-				AddPage("General",
+				AddPage(R.OT_General,
 					new Note(new TextBlock()
-						.Append("To configure syntax highlight and manage comment taggers, use the ")
-						.AppendLink("Configure Codist Syntax Highlight", _ => Commands.SyntaxCustomizerWindowCommand.Execute(null, EventArgs.Empty), "Open the syntax highlight configuration dialog window")
-						.Append(" command under the Tools menu.")),
-					new TitleBox("Extra highlight"),
-					_CommentTaggerBox = o.CreateOptionBox(SpecialHighlightOptions.SpecialComment, UpdateConfig, "Enable comment tagger"),
-					_SearchResultBox = o.CreateOptionBox(SpecialHighlightOptions.SearchResult, UpdateConfig, "Highlight search results (*)"),
+						.Append(R.OT_ConfigSyntaxNote)
+						.AppendLink(R.CMD_ConfigureSyntaxHighlight, _ => Commands.SyntaxCustomizerWindowCommand.Execute(null, EventArgs.Empty), R.CMDT_ConfigureSyntaxHighlight)),
+					new TitleBox(R.OT_ExtraHighlight),
+					_CommentTaggerBox = o.CreateOptionBox(SpecialHighlightOptions.SpecialComment, UpdateConfig, R.OT_EnableCommentTagger),
+					_SearchResultBox = o.CreateOptionBox(SpecialHighlightOptions.SearchResult, UpdateConfig, R.OT_HighlightSearchResults),
 					new DescriptionBox("*: The highlight search results feature is under development and may not work as expected")
 					);
 			}
@@ -443,18 +441,18 @@ namespace Codist.Options
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.SmartBarOptions;
-				AddPage("Behavior",
-					new Note("This page changes the behavior of Smart Bar, which by default appears when you select something in a text editor window"),
-					_ManualDisplaySmartBar = o.CreateOptionBox(SmartBarOptions.ManualDisplaySmartBar, UpdateConfig, "Manually display Smart Bar")
-						.SetLazyToolTip(() => "Don't automatically display Smart Bar when the selection is changed, combine with the following option"),
-					_ShiftToggleDisplay = o.CreateOptionBox(SmartBarOptions.ShiftToggleDisplay, UpdateConfig, "Show/hide with Shift key")
-						.SetLazyToolTip(() => "Toggle the display of Smart Bar with Shift-key"),
-					new DescriptionBox("Double tap Shift-key to show, single tap Shift-key to hide")
+				AddPage(R.OT_Behavior,
+					new Note(R.OT_BehaviorTip),
+					_ManualDisplaySmartBar = o.CreateOptionBox(SmartBarOptions.ManualDisplaySmartBar, UpdateConfig, R.OT_ManualSmartBar)
+						.SetLazyToolTip(() => R.OT_ManualSmartBarTip),
+					_ShiftToggleDisplay = o.CreateOptionBox(SmartBarOptions.ShiftToggleDisplay, UpdateConfig, R.OT_ToggleSmartBar)
+						.SetLazyToolTip(() => R.OT_ToggleSmartBarTip),
+					new DescriptionBox(R.OT_ToggleSmartBarNote)
 					);
 
-				AddPage("Web Search",
-					new Note("This page defines search engines which can be accessed via right clicking the Find button on the Smart Bar"),
-					new TitleBox("Search Engines"),
+				AddPage(R.OT_WebSearch,
+					new Note(R.OT_WebSearchNote),
+					new TitleBox(R.OT_SearchEngines),
 					new Grid {
 						ColumnDefinitions = {
 							new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), },
@@ -469,8 +467,8 @@ namespace Codist.Options
 								Margin = WpfHelper.SmallMargin,
 								View = new GridView {
 									Columns = {
-										new GridViewColumn { Header = "Name", Width = 100, DisplayMemberBinding = new Binding("Name") },
-										new GridViewColumn { Header = "URL Pattern", Width = 220, DisplayMemberBinding = new Binding("Pattern") }
+										new GridViewColumn { Header = R.OT_Name, Width = 100, DisplayMemberBinding = new Binding("Name") },
+										new GridViewColumn { Header = R.OT_URLPattern, Width = 220, DisplayMemberBinding = new Binding("Pattern") }
 									}
 								}
 							}),
@@ -486,32 +484,32 @@ namespace Codist.Options
 									new RowDefinition { }
 								},
 								Children = {
-									new Label { Content = "Name: ", Width = 60 },
+									new Label { Content = R.OTC_Name, Width = 60 },
 									(_SearchEngineName = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1),
-									new Label { Content = "URL: ", Width = 60 }.SetValue(Grid.SetRow, 1),
+									new Label { Content = R.OTC_URL, Width = 60 }.SetValue(Grid.SetRow, 1),
 									(_SearchEngineUrl = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
-									new DescriptionBox("Use %s for search keyword").SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumnSpan, 2)
+									new DescriptionBox(R.OT_SearchParamSubsitution).SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumnSpan, 2)
 								}
 							}.SetValue(Grid.SetRow, 1),
 							new StackPanel {
 								Margin = WpfHelper.SmallMargin,
 								Children = {
-									(_RemoveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = "Remove" }),
-									(_MoveUpSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = "Move up" }),
-									(_ResetSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = "Reset" }),
+									(_RemoveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Remove }),
+									(_MoveUpSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_MoveUp }),
+									(_ResetSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Reset }),
 								}
 							}.SetValue(Grid.SetColumn, 1),
 							new StackPanel {
 								Margin = WpfHelper.SmallMargin,
 								Children = {
-									(_AddSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = "Add" }),
-									(_SaveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = "Update" })
+									(_AddSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Add }),
+									(_SaveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Update })
 								}
 							}.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1)
 						}
 					},
-					new TitleBox("Search Result Browser"),
-					new Note("Browser path (empty to use system default browser):"),
+					new TitleBox(R.OT_SearchResultBrowser),
+					new Note(R.OT_SearchResultBrowserNote),
 					new Grid {
 						ColumnDefinitions = {
 							new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), },
@@ -520,13 +518,13 @@ namespace Codist.Options
 						Children = {
 							(_BrowserPath = new TextBox { Margin = WpfHelper.SmallHorizontalMargin, Text = Config.Instance.BrowserPath })
 								.SetValue(Grid.SetColumn, 0),
-							(_BrowseBrowserPath = new Button { Content = "Browse...", Margin = WpfHelper.SmallHorizontalMargin })
+							(_BrowseBrowserPath = new Button { Content = R.CMD_Browse, Margin = WpfHelper.SmallHorizontalMargin })
 								.SetValue(Grid.SetColumn, 1)
 						}
 					},
-					new Note("Browser parameter (optional, empty to use URL as parameter):"),
+					new Note(R.OT_BrowserParameter),
 					_BrowserParameter = new TextBox { Margin = WpfHelper.SmallHorizontalMargin, Text = Config.Instance.BrowserParameter },
-					new DescriptionBox("Use %u for search engine URL")
+					new DescriptionBox(R.OT_URLSubstitution)
 
 				);
 
@@ -535,10 +533,11 @@ namespace Codist.Options
 				_BrowserParameter.TextChanged += _BrowserParameter_TextChanged;
 				_BrowseBrowserPath.Click += (s, args) => {
 					var d = new OpenFileDialog {
-						Title = "Locate your web browser to view search results",
+						Title = R.OT_LocateBrowser,
 						CheckFileExists = true,
 						AddExtension = true,
-						Filter = "Executable files (*.exe)|*.exe" };
+						Filter = R.OT_ExecutableFileFilter
+					};
 					if (d.ShowDialog() == true) {
 						_BrowserPath.Text = d.FileName;
 					}
@@ -546,7 +545,7 @@ namespace Codist.Options
 				_SearchEngineList.Items.AddRange(Config.Instance.SearchEngines);
 				_SearchEngineList.SelectionChanged += (s, args)=> RefreshSearchEngineUI();
 				_AddSearchButton.Click += (s, args) => {
-					var item = new SearchEngine("New Item", String.Empty);
+					var item = new SearchEngine(R.CMD_NewItem, String.Empty);
 					_SearchEngineList.Items.Add(item);
 					Config.Instance.SearchEngines.Add(item);
 					_SearchEngineList.SelectedIndex = _SearchEngineList.Items.Count - 1;
@@ -556,7 +555,7 @@ namespace Codist.Options
 				};
 				_RemoveSearchButton.Click += (s, args) => {
 					var i = _SearchEngineList.SelectedItem as SearchEngine;
-					if (MessageBox.Show("Are you sure to remove search engine " + i.Name + "?", nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+					if (MessageBox.Show(R.OT_ConfirmRemoveSearchEngine.Replace("<NAME>", i.Name), nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
 						var p = _SearchEngineList.SelectedIndex;
 						_SearchEngineList.Items.RemoveAt(p);
 						Config.Instance.SearchEngines.RemoveAt(p);
@@ -587,7 +586,7 @@ namespace Codist.Options
 					Config.Instance.FireConfigChangedEvent(Features.SmartBar);
 				};
 				_ResetSearchButton.Click += (s, args) => {
-					if (MessageBox.Show("Do you want to reset search engines to default ones?\nALL existing items will be REMOVED.", nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+					if (MessageBox.Show(R.OT_ConfirmResetSearchEngine, nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
 						Config.Instance.ResetSearchEngines();
 						ResetSearchEngines(Config.Instance.SearchEngines);
 						Config.Instance.FireConfigChangedEvent(Features.SmartBar);
@@ -662,43 +661,43 @@ namespace Codist.Options
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.NaviBarOptions;
-				AddPage("General",
-					new Note("Currently navigation bar works for C# and markdown documents only"),
+				AddPage(R.OT_General,
+					new Note(R.OT_NaviBarNote),
 
-					new TitleBox("C# Navigation Bar"),
-					_SyntaxDetail = o.CreateOptionBox(NaviBarOptions.SyntaxDetail, UpdateConfig, "Syntax detail")
-						.SetLazyToolTip(() => "Displays syntax nodes (for instance, foreach, while, assignment and other statements) inside a member on navigation bar"),
-					_SymbolToolTip = o.CreateOptionBox(NaviBarOptions.SymbolToolTip, UpdateConfig, "Symbol tool tip")
-						.SetLazyToolTip(() => "Displays tool tip for items enclosing caret on navigation bar"),
-					_RegionOnBar = o.CreateOptionBox(NaviBarOptions.RegionOnBar, UpdateConfig, "Region")
-						.SetLazyToolTip(() => "Displays #region names enclosing caret on navigation bar"),
-					_StripRegionNonLetter = o.CreateOptionBox(NaviBarOptions.StripRegionNonLetter, UpdateConfig, "Trim non-letter characters in region")
-						.SetLazyToolTip(() => "Trims non-letter characters in region names, for instance, remove \"===========\" alike notations"),
-					_RangeHighlight = o.CreateOptionBox(NaviBarOptions.RangeHighlight, UpdateConfig, "Highlight syntax range")
-						.SetLazyToolTip(() => "Highlights the range of an item, on which the mouse is hovering, in the code editor"),
+					new TitleBox(R.OT_CSharpNaviBar),
+					_SyntaxDetail = o.CreateOptionBox(NaviBarOptions.SyntaxDetail, UpdateConfig, R.OT_SyntaxDetail)
+						.SetLazyToolTip(() => R.OT_SyntaxDetailTip),
+					_SymbolToolTip = o.CreateOptionBox(NaviBarOptions.SymbolToolTip, UpdateConfig, R.OT_SymbolToolTip)
+						.SetLazyToolTip(() => R.OT_SymbolToolTipTip),
+					_RegionOnBar = o.CreateOptionBox(NaviBarOptions.RegionOnBar, UpdateConfig, R.OT_Region)
+						.SetLazyToolTip(() => R.OT_RegionTip),
+					_StripRegionNonLetter = o.CreateOptionBox(NaviBarOptions.StripRegionNonLetter, UpdateConfig, R.OT_TrimNonLetterRegion)
+						.SetLazyToolTip(() => R.OT_TrimNonLetterRegionTip),
+					_RangeHighlight = o.CreateOptionBox(NaviBarOptions.RangeHighlight, UpdateConfig, R.OT_HighlightSyntaxRange)
+						.SetLazyToolTip(() => R.OT_HighlightSyntaxRangeTip),
 
-					new TitleBox("C# Navigation Bar Drop-down Menu"),
-					_ParameterList = o.CreateOptionBox(NaviBarOptions.ParameterList, UpdateConfig, "Method parameter list")
-						.SetLazyToolTip(() => "Displays parameters of methods in the drop-down menu of navigation bar"),
-					_ParameterListShowParamName = o.CreateOptionBox(NaviBarOptions.ParameterListShowParamName, UpdateConfig, "Show parameter name instead of parameter type")
-						.SetLazyToolTip(() => "Displays parameter names in method parameter list"),
-					_FieldValue = o.CreateOptionBox(NaviBarOptions.FieldValue, UpdateConfig, "Initial value of fields and properties")
-						.SetLazyToolTip(() => "Displays the initial values of fields and properties in the drop-down menu of navigation bar"),
-					_AutoPropertyAnnotation = o.CreateOptionBox(NaviBarOptions.AutoPropertyAnnotation, UpdateConfig, "Property accessors")
-						.SetLazyToolTip(() => "Displays accessor types of properties (\"{;;}\" for getter and setter, \"{;}\" for getter only) in the drop-down menu of navigation bar"),
-					_PartialClassMember = o.CreateOptionBox(NaviBarOptions.PartialClassMember, UpdateConfig, "Include partial type and members")
-						.SetLazyToolTip(() => "Displays members defined in other code files for partial types in the drop-down menu of navigation bar"),
-					_Region = o.CreateOptionBox(NaviBarOptions.Region, UpdateConfig, "#region and #endregion")
-						.SetLazyToolTip(() => "Displays #region and #endregion directives in the drop-down menu of navigation bar"),
-					_RegionInMember = o.CreateOptionBox(NaviBarOptions.RegionInMember, UpdateConfig, "Include #region within member")
-						.SetLazyToolTip(() => "Displays #region and #endregion directives defined within members of types in the drop-down menu of navigation bar"),
-					_LineOfCode = o.CreateOptionBox(NaviBarOptions.LineOfCode, UpdateConfig, "Line of code")
-						.SetLazyToolTip(() => "Displays number of lines for current type or members in the drop-down menu of navigation bar and tool tips"),
-					new DescriptionBox("The above options will take effect when the navigation bar is repopulated"),
+					new TitleBox(R.OT_CSharpNaviBarMenu),
+					_ParameterList = o.CreateOptionBox(NaviBarOptions.ParameterList, UpdateConfig, R.OT_MethodParameterList)
+						.SetLazyToolTip(() => R.OT_MethodParameterListTip),
+					_ParameterListShowParamName = o.CreateOptionBox(NaviBarOptions.ParameterListShowParamName, UpdateConfig, R.OT_ShowMethodParameterName)
+						.SetLazyToolTip(() => R.OT_ShowMethodParameterNameTip),
+					_FieldValue = o.CreateOptionBox(NaviBarOptions.FieldValue, UpdateConfig, R.OT_ValueOfFields)
+						.SetLazyToolTip(() => R.OT_ValueOfFieldsTip),
+					_AutoPropertyAnnotation = o.CreateOptionBox(NaviBarOptions.AutoPropertyAnnotation, UpdateConfig, R.OT_PropertyAccessors)
+						.SetLazyToolTip(() => R.OT_PropertyAccessorsTip),
+					_PartialClassMember = o.CreateOptionBox(NaviBarOptions.PartialClassMember, UpdateConfig, R.OT_IncludePartialTypeMembers)
+						.SetLazyToolTip(() => R.OT_IncludePartialTypeMembersTip),
+					_Region = o.CreateOptionBox(NaviBarOptions.Region, UpdateConfig, R.OT_IncludeRegions)
+						.SetLazyToolTip(() => R.OT_IncludeRegionsTip),
+					_RegionInMember = o.CreateOptionBox(NaviBarOptions.RegionInMember, UpdateConfig, R.OT_IncludeMemberRegions)
+						.SetLazyToolTip(() => R.OT_IncludeMemberRegionsTip),
+					_LineOfCode = o.CreateOptionBox(NaviBarOptions.LineOfCode, UpdateConfig, R.OT_LineOfCode)
+						.SetLazyToolTip(() => R.OT_LineOfCodeTip),
+					new DescriptionBox(R.OT_NaviBarUpdateNote),
 
-					new TitleBox("Shortcut Keys"),
-					new DescriptionBox("Shortcut keys to access the menus of the navigation bar:\r\nCtrl+`, Ctrl+`: Edit.SearchDeclaration\r\nCtrl+1, Ctrl+1: Edit.SearchClassMember"),
-					new DescriptionBox("Use the Keyboard mapper options page in Options dialog to reconfigure them")
+					new TitleBox(R.OT_ShortcutKeys),
+					new DescriptionBox(R.OT_NaviBarShortcutKeys),
+					new DescriptionBox(R.OT_ShortcutKeysNote)
 					);
 
 				_Options = new[] { _SyntaxDetail, _SymbolToolTip, _RegionOnBar, _StripRegionNonLetter, _RangeHighlight,
@@ -742,32 +741,32 @@ namespace Codist.Options
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.MarkerOptions;
-				AddPage("General",
-					new TitleBox("All languages"),
-					new DescriptionBox("Markers for all code types"),
-					_LineNumber = o.CreateOptionBox(MarkerOptions.LineNumber, UpdateConfig, "Line number")
-						.SetLazyToolTip(() => "Draws line number values on the scroll bar"),
-					_Selection = o.CreateOptionBox(MarkerOptions.Selection, UpdateConfig, "Selection")
-						.SetLazyToolTip(() => "Draws selection ranges on the scroll bar"),
-					_SpecialComment = o.CreateOptionBox(MarkerOptions.SpecialComment, UpdateConfig, "Tagged comments")
-						.SetLazyToolTip(() => "Draws markers for tagged comments like To-Do, Hack, Note, etc. on the scroll bar"),
+				AddPage(R.OT_General,
+					new TitleBox(R.OT_AllLanguages),
+					new DescriptionBox(R.OT_AllLanguagesNote),
+					_LineNumber = o.CreateOptionBox(MarkerOptions.LineNumber, UpdateConfig, R.OT_LineNumber)
+						.SetLazyToolTip(() => R.OT_LineNumberTip),
+					_Selection = o.CreateOptionBox(MarkerOptions.Selection, UpdateConfig, R.OT_Selection)
+						.SetLazyToolTip(() => R.OT_SelectionTip),
+					_SpecialComment = o.CreateOptionBox(MarkerOptions.SpecialComment, UpdateConfig, R.OT_TaggedComments)
+						.SetLazyToolTip(() => R.OT_TaggedCommentsTip),
 
-					new TitleBox("C#"),
-					new DescriptionBox("Markers for C# type and member declarations and special directives"),
-					_MarkerDeclarationLine = o.CreateOptionBox(MarkerOptions.MemberDeclaration, UpdateConfig, "Member declaration line")
-						.SetLazyToolTip(() => "Draws lines indicating spans of type and member declarations on the scroll bar, with corresponding syntax highlight colors"),
-					_LongMemberDeclaration = o.CreateOptionBox(MarkerOptions.LongMemberDeclaration, UpdateConfig, "Long method name")
-						.SetLazyToolTip(() => "Draws names of long methods on the scroll bar"),
-					_TypeDeclaration = o.CreateOptionBox(MarkerOptions.TypeDeclaration, UpdateConfig, "Type name")
-						.SetLazyToolTip(() => "Draws names of declared types on the scroll bar"),
-					_MethodDeclaration = o.CreateOptionBox(MarkerOptions.MethodDeclaration, UpdateConfig, "Method declaration spot")
-						.SetLazyToolTip(() => "Draws squares for each methods on the scroll bar"),
-					_RegionDirective = o.CreateOptionBox(MarkerOptions.RegionDirective, UpdateConfig, "#region name")
-						.SetLazyToolTip(() => "Draws #region names on the scroll bar"),
-					_CompilerDirective = o.CreateOptionBox(MarkerOptions.CompilerDirective, UpdateConfig, "Compiler directive")
-						.SetLazyToolTip(() => "Draws circles for compiler directives on the scroll bar"),
-					_SymbolReference = o.CreateOptionBox(MarkerOptions.SymbolReference, UpdateConfig, "Match symbol")
-						.SetLazyToolTip(() => "Draws squares for other locations the same as current symbol under caret on the scroll bar")
+					new TitleBox(R.OT_CSharp),
+					new DescriptionBox(R.OT_CSharpMarkerNote),
+					_MarkerDeclarationLine = o.CreateOptionBox(MarkerOptions.MemberDeclaration, UpdateConfig, R.OT_MemberDeclarationLine)
+						.SetLazyToolTip(() => R.OT_MemberDeclarationLineTip),
+					_LongMemberDeclaration = o.CreateOptionBox(MarkerOptions.LongMemberDeclaration, UpdateConfig, R.OT_LongMethodName)
+						.SetLazyToolTip(() => R.OT_LongMethodNameTip),
+					_TypeDeclaration = o.CreateOptionBox(MarkerOptions.TypeDeclaration, UpdateConfig, R.OT_TypeName)
+						.SetLazyToolTip(() => R.OT_TypeNameTip),
+					_MethodDeclaration = o.CreateOptionBox(MarkerOptions.MethodDeclaration, UpdateConfig, R.OT_MethodDeclarationSpot)
+						.SetLazyToolTip(() => R.OT_MethodDeclarationSpotTip),
+					_RegionDirective = o.CreateOptionBox(MarkerOptions.RegionDirective, UpdateConfig, R.OT_RegionName)
+						.SetLazyToolTip(() => R.OT_RegionNameTip),
+					_CompilerDirective = o.CreateOptionBox(MarkerOptions.CompilerDirective, UpdateConfig, R.OT_CompilerDirective)
+						.SetLazyToolTip(() => R.OT_CompilerDirectiveTip),
+					_SymbolReference = o.CreateOptionBox(MarkerOptions.SymbolReference, UpdateConfig, R.OT_MatchSymbol)
+						.SetLazyToolTip(() => R.OT_MatchSymbolTip)
 					);
 				_Options = new[] { _LineNumber, _Selection, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference };
 				var declarationSubOptions = new[] { _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective };
@@ -807,19 +806,19 @@ namespace Codist.Options
 			readonly OptionBox<DeveloperOptions> _ShowDocumentContentType, _ShowSyntaxClassificationInfo;
 
 			public PageControl(OptionsPage page) : base(page) {
-				AddPage("General",
-					new Note("This page contains functions for Visual Studio extension developers"),
+				AddPage(R.OT_General,
+					new Note(R.OT_ExtensionNote),
 
-					new TitleBox("Syntax Diagnostics"),
-					new DescriptionBox("Peek the results of syntax classifiers and taggers"),
-					_ShowDocumentContentType = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowDocumentContentType, UpdateConfig, "Add \"Show Document Content Type\" command to File menu")
-						.SetLazyToolTip(() => "Displays ContentType and base types of the active document"),
-					_ShowSyntaxClassificationInfo = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowSyntaxClassificationInfo, UpdateConfig, "Add \"Show Syntax Classification Info\" command to Smart Bar")
-						.SetLazyToolTip(() => "Displays results of classifiers and taggers for selected content"),
+					new TitleBox(R.OT_SyntaxDiagnostics),
+					new DescriptionBox(R.OT_SyntaxDiagnosticsNote),
+					_ShowDocumentContentType = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowDocumentContentType, UpdateConfig, R.OT_AddShowDocumentContentType)
+						.SetLazyToolTip(() => R.OT_AddShowDocumentContentTypeTip),
+					_ShowSyntaxClassificationInfo = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowSyntaxClassificationInfo, UpdateConfig, R.OT_AddShowSyntaxClassifcationInfo)
+						.SetLazyToolTip(() => R.OT_AddShowSyntaxClassifcationInfoTip),
 
-					new TitleBox("Build"),
-					_BuildVsixAutoIncrement = Config.Instance.BuildOptions.CreateOptionBox(BuildOptions.VsixAutoIncrement, UpdateConfig, "Automatically increment version revision number in .vsixmanifest file")
-						.SetLazyToolTip(() => "Add 1 to the last number of your VSIX version, by modifying the .vsixmanifest file in the project, after each successful build")
+					new TitleBox(R.OT_Build),
+					_BuildVsixAutoIncrement = Config.Instance.BuildOptions.CreateOptionBox(BuildOptions.VsixAutoIncrement, UpdateConfig, R.OT_AutoIncrementVsixVersion)
+						.SetLazyToolTip(() => R.OT_AutoIncrementVsixVersionTip)
 					);
 			}
 
@@ -861,34 +860,34 @@ namespace Codist.Options
 			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow/*, _UseLayoutRounding*/;
 
 			public PageControl(OptionsPage page) : base(page) {
-				AddPage("General",
-					new TitleBox("Extra Line Margin"),
-					new DescriptionBox("Add extra space between lines in code document window"),
+				AddPage(R.OT_General,
+					new TitleBox(R.OT_ExtraLineMargin),
+					new DescriptionBox(R.OT_ExtraLineMarginNote),
 					new WrapPanel {
 						Children = {
 							new StackPanel().MakeHorizontal()
-								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append("Top margin:"))
+								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OTC_TopMargin))
 								.Add(_TopSpace = new Controls.IntegerBox((int)Config.Instance.TopSpace) { Minimum = 0, Maximum = 255 })
-								.SetLazyToolTip(() => "This option adds extra margin above each line in code editor"),
+								.SetLazyToolTip(() => R.OT_TopMarginTip),
 							new StackPanel().MakeHorizontal()
-								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append("Bottom margin:"))
+								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OTC_BottomMargin))
 								.Add(_BottomSpace = new Controls.IntegerBox((int)Config.Instance.BottomSpace) { Minimum = 0, Maximum = 255 })
-								.SetLazyToolTip(() => "This option adds extra margin below each line in code editor"),
+								.SetLazyToolTip(() => R.OT_BottomMarginTip),
 						}
 					}.ForEachChild((FrameworkElement b) => b.MinWidth = MinColumnWidth),
-					OptionPageControlHelper.CreateOptionBox(Config.Instance.NoSpaceBetweenWrappedLines, v => { Config.Instance.NoSpaceBetweenWrappedLines = v == true; Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight); }, "Don't add margin between wrapped lines"),
+					OptionPageControlHelper.CreateOptionBox(Config.Instance.NoSpaceBetweenWrappedLines, v => { Config.Instance.NoSpaceBetweenWrappedLines = v == true; Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight); }, R.OT_NoMarginBetweenWrappedLines),
 
-					new TitleBox("Force Grayscale Text Rendering"),
-					new DescriptionBox("Disable ClearType"),
+					new TitleBox(R.OT_ForceGrayscaleTextRendering),
+					new DescriptionBox(R.OT_ForceGrayscaleTextRenderingNote),
 					new WrapPanel {
 						Children = {
-							(_MainWindow = Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.MainWindow, UpdateMainWindowDisplayOption, "Apply to main window")),
-							(_CodeWindow = Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.CodeWindow, UpdateCodeWindowDisplayOption, "Apply to code window"))
+							(_MainWindow = Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.MainWindow, UpdateMainWindowDisplayOption, R.OT_ApplyToMainWindow)),
+							(_CodeWindow = Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.CodeWindow, UpdateCodeWindowDisplayOption, R.OT_ApplyToCodeWindow))
 						}
 					}
 					.ForEachChild((CheckBox b) => b.MinWidth = MinColumnWidth)
-					.SetLazyToolTip(() => "If you feel text in the code window or the main window blurry and spotted with colors. Check these options to make text rendered in grayscale and see whether it helps."),
-					new TextBox { TextWrapping = TextWrapping.Wrap, Text = "Note: For best text rendering effects, it is recommended to use MacType, which can be downloaded from: \nhttps://github.com/snowie2000/mactype/releases", Padding = WpfHelper.SmallMargin, IsReadOnly = true }
+					.SetLazyToolTip(() => R.OT_ForceGrayscaleTextRenderingTip),
+					new TextBox { TextWrapping = TextWrapping.Wrap, Text = R.OT_MacTypeLink, Padding = WpfHelper.SmallMargin, IsReadOnly = true }
 					);
 				_TopSpace.ValueChanged += _TopSpace_ValueChanged;
 				_BottomSpace.ValueChanged += _BottomSpace_ValueChanged;

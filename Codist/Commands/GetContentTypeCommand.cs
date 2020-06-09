@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Utilities;
 using System.Collections.Generic;
 using AppHelpers;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Commands
 {
@@ -33,7 +34,7 @@ namespace Codist.Commands
 			using (var b = ReusableStringBuilder.AcquireDefault(100)) {
 				var sb = b.Resource;
 				var d = docWindow.TextBuffer.GetTextDocument();
-				sb.Append("Content type of document ");
+				sb.Append(R.T_ContentTypeOfDocument);
 				if (d != null) {
 					sb.Append(System.IO.Path.GetFileName(d.FilePath));
 				}

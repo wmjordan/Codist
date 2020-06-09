@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.Win32;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Options
 {
@@ -53,7 +54,7 @@ namespace Codist.Options
 
 		public SyntaxHighlightCustomizationWindow(IWpfTextView wpfTextView) {
 			_WpfTextView = wpfTextView;
-			Title = "Syntax Highlight Configurations";
+			Title = R.T_SyntaxHighlightConfigurations;
 			ShowInTaskbar = false;
 			MinHeight = 300;
 			MinWidth = 480;
@@ -70,43 +71,43 @@ namespace Codist.Options
 							Margin = WpfHelper.MiddleMargin,
 							Children = {
 								new TextBlock {
-									Text = "Syntax categories:",
+									Text = R.T_SyntaxCategories,
 									Height = 20,
 									FontWeight = FontWeights.Bold
 								},
 								(_SyntaxSourceBox = new ListBox {
 									Items = {
-										new ClassificationCategoryItem(SyntaxStyleSource.Selection, "Selected code"),
-										new ClassificationCategoryItem(SyntaxStyleSource.Common, "Common"),
+										new ClassificationCategoryItem(SyntaxStyleSource.Selection, R.T_SelectedCode),
+										new ClassificationCategoryItem(SyntaxStyleSource.Common, R.T_Common),
 										new ClassificationCategoryItem(SyntaxStyleSource.CSharp, "C#"),
-										new ClassificationCategoryItem(SyntaxStyleSource.CSharpSymbolMarker, "   symbol markers"),
-										new ConfigPageItem<CSharpAdditionalHighlightConfigPage>("   options"),
+										new ClassificationCategoryItem(SyntaxStyleSource.CSharpSymbolMarker, "   "+R.T_SymbolMarkers),
+										new ConfigPageItem<CSharpAdditionalHighlightConfigPage>("   "+R.T_Options),
 										new ClassificationCategoryItem(SyntaxStyleSource.CPlusPlus, "C++"),
 										new ClassificationCategoryItem(SyntaxStyleSource.Markdown, "Markdown"),
 										new ClassificationCategoryItem(SyntaxStyleSource.Xml, "XML"),
-										new ClassificationCategoryItem(SyntaxStyleSource.CommentTagger, "Tagged comments"),
-										new ClassificationCategoryItem(SyntaxStyleSource.CommentLabels, "   tags"),
-										new ClassificationCategoryItem(SyntaxStyleSource.PriorityOrder, "All languages")
+										new ClassificationCategoryItem(SyntaxStyleSource.CommentTagger, R.T_TaggedComments),
+										new ClassificationCategoryItem(SyntaxStyleSource.CommentLabels, "   "+R.T_Tags),
+										new ClassificationCategoryItem(SyntaxStyleSource.PriorityOrder, R.T_AllLanguages)
 									}
 								}.ReferenceStyle(VsResourceKeys.ThemedDialogListBoxStyleKey)),
 								new TextBlock {
-									Text = "Themes:",
+									Text = R.T_Themes,
 									Height = 20,
 									FontWeight = FontWeights.Bold,
 									Margin = WpfHelper.TopItemMargin
 								},
-								(_LoadThemeButton = new ThemedButton(IconIds.Load, "Load...", "Load syntax highlight theme...", LoadTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								(_SaveThemeButton = new ThemedButton(IconIds.SaveAs, "Save...", "Save syntax highlight theme...", SaveTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								(_ResetThemeButton = new ThemedButton(IconIds.ResetTheme, "Reset...", "Reset syntax highlight theme to default...", ResetTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)),
+								(_LoadThemeButton = new ThemedButton(IconIds.Load, R.CMD_Load, R.CMDT_LoadTheme, LoadTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								(_SaveThemeButton = new ThemedButton(IconIds.SaveAs, R.CMD_Save, R.CMDT_SaveTheme, SaveTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								(_ResetThemeButton = new ThemedButton(IconIds.ResetTheme, R.CMD_Reset, R.CMDT_ResetTheme, ResetTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)),
 								new TextBlock {
-									Text = "Predefined themes:",
+									Text = R.T_PredefinedThemes,
 									Height = 20,
 									FontWeight = FontWeights.Bold,
 									Margin = WpfHelper.TopItemMargin
 								},
-								new ThemedButton(IconIds.SyntaxTheme, "Light theme", "Load predefined theme for light editing environment", () => LoadTheme(Config.LightTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								new ThemedButton(IconIds.SyntaxTheme, "Dark theme", "Load predefined theme for dark editing environment", () => LoadTheme(Config.DarkTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								new ThemedButton(IconIds.SyntaxTheme, "Simple theme", "Load a predefined simple theme", () => LoadTheme(Config.SimpleTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, R.CMD_LightTheme, R.CMDT_LightTheme, () => LoadTheme(Config.LightTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, R.CMD_DarkTheme, R.CMDT_DarkTheme, () => LoadTheme(Config.DarkTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, R.CMD_SimpleTheme, R.CMDT_SimpleTheme, () => LoadTheme(Config.SimpleTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
 							}
 						},
 
@@ -126,9 +127,9 @@ namespace Codist.Options
 										new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
 									},
 									Children = {
-										new TextBlock { Text = "Syntax styles:", FontWeight = FontWeights.Bold }.SetValue(Grid.SetColumn, 0),
-										(_AddTagButton = new Button { Content = "Add" }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)).SetValue(Grid.SetColumn, 1),
-										(_RemoveTagButton = new Button { Content = "Remove" }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)).SetValue(Grid.SetColumn, 2)
+										new TextBlock { Text = R.T_SyntaxStyles, FontWeight = FontWeights.Bold }.SetValue(Grid.SetColumn, 0),
+										(_AddTagButton = new Button { Content = R.CMD_Add }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)).SetValue(Grid.SetColumn, 1),
+										(_RemoveTagButton = new Button { Content = R.CMD_Remove }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)).SetValue(Grid.SetColumn, 2)
 									}
 								},
 								(_OptionPageHolder = new Border {
@@ -143,45 +144,45 @@ namespace Codist.Options
 									Visibility = Visibility.Collapsed,
 									Child = new StackPanel {
 										Children = {
-											new TextBlock { Text = "Style settings:", FontWeight = FontWeights.Bold },
+											new TextBlock { Text = R.T_StyleSettings, FontWeight = FontWeights.Bold },
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													new TextBlock { Text = "Font: ", Width = 60, Margin = WpfHelper.SmallMargin },
+													new TextBlock { Text = R.T_Font, Width = 60, Margin = WpfHelper.SmallMargin },
 													(_FontButton = new FontButton(ApplyFont) { Width = 230, Margin = WpfHelper.SmallMargin }.ReferenceStyle(VsResourceKeys.ThemedDialogButtonStyleKey)),
-													new TextBlock { Text = "Size: ", Width = 60, Margin = WpfHelper.SmallMargin },
+													new TextBlock { Text = R.T_Size, Width = 60, Margin = WpfHelper.SmallMargin },
 													(_FontSizeBox = new NumericUpDown { Width = 80, Margin = WpfHelper.SmallMargin }),
 												}
 											},
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													(_BoldBox = new StyleCheckBox("Bold", OnBoldChanged)),
-													(_ItalicBox = new StyleCheckBox("Italic", OnItalicChanged)),
-													(_UnderlineBox = new StyleCheckBox("Underline", OnUnderlineChanged)),
-													(_StrikethroughBox = new StyleCheckBox("Strikethrough", OnStrikeThroughChanged)),
+													(_BoldBox = new StyleCheckBox(R.CMD_Bold, OnBoldChanged)),
+													(_ItalicBox = new StyleCheckBox(R.CMD_Italic, OnItalicChanged)),
+													(_UnderlineBox = new StyleCheckBox(R.CMD_Underline, OnUnderlineChanged)),
+													(_StrikethroughBox = new StyleCheckBox(R.CMD_Strikethrough, OnStrikeThroughChanged)),
 												}
 											},
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													(_ForegroundButton = new ColorButton(Colors.Transparent, "Foreground", OnForeColorChanged)),
+													(_ForegroundButton = new ColorButton(Colors.Transparent, R.T_Foreground, OnForeColorChanged)),
 													(_ForegroundOpacityButton = new OpacityButton(OnForeOpacityChanged)),
-													(_BackgroundButton = new ColorButton(Colors.Transparent, "Background", OnBackColorChanged)),
+													(_BackgroundButton = new ColorButton(Colors.Transparent, R.T_Background, OnBackColorChanged)),
 													(_BackgroundOpacityButton = new OpacityButton(OnBackOpacityChanged))
 												}
 											},
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													new TextBlock { Text = "Background effect: ", Width = 130 },
+													new TextBlock { Text = R.T_BackgroundEffect, Width = 130 },
 													(_BackgroundEffectBox = new ComboBox { Width = 160 }.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey))
 												}
 											},
 											(_BaseTypesList = new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													new TextBlock { Text = "Base syntax: " }
+													new TextBlock { Text = R.T_BaseSyntax }
 												}
 											})
 										}
@@ -194,21 +195,21 @@ namespace Codist.Options
 									Visibility = Visibility.Collapsed,
 									Child = new StackPanel {
 										Children = {
-											new TextBlock { Text = "Comment tag settings:", FontWeight = FontWeights.Bold },
+											new TextBlock { Text = R.T_CommentTagSettings, FontWeight = FontWeights.Bold },
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
 													new StackPanel {
 														Orientation = Orientation.Horizontal,
 														Children = {
-															new TextBlock { Text = "Tag: ", Width = 60, Margin = WpfHelper.SmallMargin },
+															new TextBlock { Text = R.T_Tag, Width = 60, Margin = WpfHelper.SmallMargin },
 															(_TagBox = new TextBox() { Width = 230, Margin = WpfHelper.SmallMargin }.ReferenceStyle(VsResourceKeys.TextBoxStyleKey))
 														}
 													},
 													new StackPanel {
 														Orientation = Orientation.Horizontal,
 														Children = {
-															new TextBlock { Text = "Style: ", Width = 60, Margin = WpfHelper.SmallMargin },
+															new TextBlock { Text = R.T_Style, Width = 60, Margin = WpfHelper.SmallMargin },
 															(_TagStyleBox = new ComboBox { Width = 230, Margin = WpfHelper.SmallMargin, IsEditable = false }.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey))
 														}
 													}
@@ -217,17 +218,17 @@ namespace Codist.Options
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													(_TagCaseSensitiveBox = new StyleCheckBox("Case sensitive", OnTagCaseSensitiveChanged) { IsThreeState = false }),
-													(_TagHasPunctuationBox = new StyleCheckBox("May end with punctuation", OnTagHasPunctuationChanged) { IsThreeState = false }),
+													(_TagCaseSensitiveBox = new StyleCheckBox(R.T_CaseSensitive, OnTagCaseSensitiveChanged) { IsThreeState = false }),
+													(_TagHasPunctuationBox = new StyleCheckBox(R.T_EndWithPunctuation, OnTagHasPunctuationChanged) { IsThreeState = false }),
 												}
 											},
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													new TextBlock { Text = "Apply on:", Width = 60, Margin = WpfHelper.SmallMargin },
-													(_TagApplyOnTagBox = new RadioBox("Tag", "TagApplication", OnTagApplicationChanged)),
-													(_TagApplyOnContentBox = new RadioBox("Content", "TagApplication", OnTagApplicationChanged)),
-													(_TagApplyOnWholeBox = new RadioBox("Tag and content", "TagApplication", OnTagApplicationChanged)),
+													new TextBlock { Text = R.T_ApplyOn, Width = 60, Margin = WpfHelper.SmallMargin },
+													(_TagApplyOnTagBox = new RadioBox(R.OT_Tag, "TagApplication", OnTagApplicationChanged)),
+													(_TagApplyOnContentBox = new RadioBox(R.OT_Content, "TagApplication", OnTagApplicationChanged)),
+													(_TagApplyOnWholeBox = new RadioBox(R.OT_TagContent, "TagApplication", OnTagApplicationChanged)),
 												}
 											},
 										}
@@ -236,15 +237,15 @@ namespace Codist.Options
 								}).SetValue(Grid.SetRow, 2),
 
 								(_Notice = new TextBlock {
-									Text = "To configure other syntax styles, click on the corresponding place in the code document window.",
+									Text = R.T_SyntaxHighlightConfigNotice,
 									TextWrapping = TextWrapping.Wrap
 								}).SetValue(Grid.SetRow, 2),
 
 								new WrapPanel {
 									HorizontalAlignment = HorizontalAlignment.Right,
 									Children = {
-										new ThemedButton("Save", "Confirm changes", Ok) { IsDefault = true, Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-										new ThemedButton("Cancel", "Undo changes", Cancel) { Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
+										new ThemedButton(R.CMD_SaveHighlightChanges, R.CMDT_SaveHighlightChanges, Ok) { IsDefault = true, Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+										new ThemedButton(R.CMD_Cancel, R.CMDT_UndoHighlightChanges, Cancel) { Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
 									}
 								}.SetValue(Grid.SetRow, 3)
 							}
@@ -257,7 +258,7 @@ namespace Codist.Options
 			_SyntaxSourceBox.SelectedIndex = 0;
 			_FontSizeBox.ValueChanged += ApplyFontSize;
 			LoadSyntaxStyles(SyntaxStyleSource.Selection);
-			_BackgroundEffectBox.Items.AddRange(new[] { "Solid", "Bottom gradient", "Top gradient", "Right gradient", "Left gradient" });
+			_BackgroundEffectBox.Items.AddRange(new[] { R.T_Solid, R.T_BottomGradient, R.T_TopGradient, R.T_RightGradient, R.T_LeftGradient });
 			_BackgroundEffectBox.SelectionChanged += OnBackgroundEffectChanged;
 			_SyntaxSourceBox.SelectionChanged += SyntaxSourceChanged;
 			_AddTagButton.Click += AddTag;
@@ -459,10 +460,10 @@ namespace Codist.Options
 			if (l.Count == 0) {
 				l.Add(new TextBlock {
 					Text = source == SyntaxStyleSource.Selection
-						? "No syntax highlight is applied to active position in code window."
+						? R.T_NoSyntaxHighlightSelected
 						: source == SyntaxStyleSource.CommentLabels
-						? "No comment tag is defined. Use the Add button to add new comment tag definitions."
-						: "No syntax highlight is defined for selected syntax type. You need to install corresponding feature with the Visual Studio installer.",
+						? R.T_NoCommentTagDefined
+						: R.T_NoSyntaxHighlightDefined,
 					FontSize = 20,
 					TextWrapping = TextWrapping.Wrap
 				});
@@ -803,33 +804,33 @@ namespace Codist.Options
 		#region Theme management
 		void LoadTheme() {
 			var d = new OpenFileDialog {
-				Title = "Load Codist syntax highlight setting file...",
+				Title = R.T_LoadSyntaxHighlightFile,
 				FileName = "Codist.styles",
 				DefaultExt = "styles",
-				Filter = "Codist syntax highlight setting file|*.styles|All files|*.*"
+				Filter = R.T_HighlightSettingFileFilter
 			};
 			if (d.ShowDialog() == true) {
 				try {
 					LoadTheme(d.FileName);
 				}
 				catch (Exception ex) {
-					MessageBox.Show("Error occured while loading style file: " + ex.Message, nameof(Codist));
+					MessageBox.Show(R.T_FailedToLoadStyleFile + Environment.NewLine + ex.Message, nameof(Codist));
 				}
 			}
 		}
 		void SaveTheme() {
 			var d = new SaveFileDialog {
-				Title = "Save Codist syntax highlight setting file...",
+				Title = R.T_SaveSyntaxHighlightFile,
 				FileName = "Codist.styles",
 				DefaultExt = "styles",
-				Filter = "Codist syntax highlight setting file|*.styles|All files|*.*"
+				Filter = R.T_HighlightSettingFileFilter
 			};
 			if (d.ShowDialog() == true) {
 				Config.Instance.SaveConfig(d.FileName, true);
 			}
 		}
 		void ResetTheme() {
-			if (MessageBox.Show("Do you want to reset the syntax highlight settings to default?", nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+			if (MessageBox.Show(R.T_ConfirmResetSyntaxHighlight, nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
 				Config.ResetStyles();
 			}
 		}
@@ -982,14 +983,14 @@ namespace Codist.Options
 
 			public FontButton(Action<string> fontChanged) {
 				_FontChangedHandler = fontChanged;
-				Content = "Not set";
+				Content = R.T_NotSet;
 			}
 			public string Value {
 				get => _Font as string;
 				set {
 					if (_Font != value) {
 						_Font = value;
-						Content = String.IsNullOrWhiteSpace(value) ? "Not set" : value;
+						Content = String.IsNullOrWhiteSpace(value) ? R.T_NotSet : value;
 						_FontChangedHandler(value);
 					}
 				}
@@ -1002,7 +1003,7 @@ namespace Codist.Options
 						MaxHeight = 300,
 						Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 						PlacementTarget = this,
-						ItemsSource = new[] { new ThemedMenuItem(-1, "Not set", SetFont) { Tag = null } }
+						ItemsSource = new[] { new ThemedMenuItem(-1, R.T_NotSet, SetFont) { Tag = null } }
 							.Concat(WpfHelper.GetInstalledFonts().Select(f => new ThemedMenuItem(-1, f.Name, SetFont) { Tag = f.Name }))
 							//.Concat(WpfHelper.GetInstalledFonts()
 							//	.SelectMany(f => new[] { new ThemedMenuItem(-1, f.Name, SetFont) { Tag = f.Name } }
@@ -1068,10 +1069,10 @@ namespace Codist.Options
 					ContextMenu = new ContextMenu {
 						Resources = SharedDictionaryManager.ContextMenu,
 						Items = {
-							new ThemedMenuItem(IconIds.PickColor, "Pick color...", PickColor),
-							new ThemedMenuItem(IconIds.Reset, "Reset color", ResetColor),
-							new ThemedMenuItem(IconIds.Copy, "Copy color", CopyColor),
-							new ThemedMenuItem(IconIds.Paste, "Paste color", PasteColor),
+							new ThemedMenuItem(IconIds.PickColor, R.CMD_PickColor, PickColor),
+							new ThemedMenuItem(IconIds.Reset, R.CMD_ResetColor, ResetColor),
+							new ThemedMenuItem(IconIds.Copy, R.CMD_CopyColor, CopyColor),
+							new ThemedMenuItem(IconIds.Paste, R.CMD_PasteColor, PasteColor),
 						},
 						Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 						PlacementTarget = this
@@ -1138,7 +1139,7 @@ namespace Codist.Options
 				get => _Opacity;
 				set {
 					_Opacity = value;
-					Content = value == 0 ? "Opacity not set" : "Opacity: " + ((value + 1) / 16).ToString();
+					Content = value == 0 ? R.T_OpacityNotSet : R.T_Opacity + ((value + 1) / 16).ToString();
 				}
 			}
 			protected override void OnClick() {
@@ -1147,7 +1148,7 @@ namespace Codist.Options
 					ContextMenu = new ContextMenu {
 						Resources = SharedDictionaryManager.ContextMenu,
 						Items = {
-							new ThemedMenuItem(IconIds.Opacity, "Default", SelectOpacity) { Tag = 0 },
+							new ThemedMenuItem(IconIds.Opacity, R.T_Default, SelectOpacity) { Tag = 0 },
 						},
 						MaxHeight = 300,
 						Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
@@ -1267,19 +1268,19 @@ namespace Codist.Options
 			public CSharpAdditionalHighlightConfigPage() {
 				var o = Config.Instance.SpecialHighlightOptions;
 				Content = new StackPanel { Margin = WpfHelper.SmallMargin }.Add(i => new Border { Padding = WpfHelper.SmallMargin, Child = i }, new UIElement[] {
-						new TitleBox("Braces and Parentheses"),
-						(_MarkSpecialPunctuationBox = o.CreateOptionBox(SpecialHighlightOptions.SpecialPunctuation, UpdateConfig, "Apply bold style to following braces")),
-						new DescriptionBox("When the following checkboxes are checked, braces and parentheses will be highlighted by their semantic syntax styles"),
-						(_HighlightDeclarationBracesBox = o.CreateOptionBox(SpecialHighlightOptions.DeclarationBrace, UpdateConfig, "Type and member declaration braces")),
-						(_HighlightParameterBracesBox = o.CreateOptionBox(SpecialHighlightOptions.ParameterBrace, UpdateConfig, "Method parameter parentheses")),
-						(_HighlightCastParenthesesBox = o.CreateOptionBox(SpecialHighlightOptions.CastBrace, UpdateConfig, "Type cast parentheses")),
-						(_HighlightBranchBracesBox = o.CreateOptionBox(SpecialHighlightOptions.BranchBrace, UpdateConfig, "Branch braces and parentheses")),
-						(_HighlightLoopBracesBox = o.CreateOptionBox(SpecialHighlightOptions.LoopBrace, UpdateConfig, "Loop braces and parentheses")),
-						(_HighlightResourceBracesBox = o.CreateOptionBox(SpecialHighlightOptions.ResourceBrace, UpdateConfig, "Resource and exception braces and parentheses")),
+						new TitleBox(R.OT_BracesAndParentheses),
+						(_MarkSpecialPunctuationBox = o.CreateOptionBox(SpecialHighlightOptions.SpecialPunctuation, UpdateConfig, R.OT_BoldBraces)),
+						new DescriptionBox(R.OT_BoldBracesNote),
+						(_HighlightDeclarationBracesBox = o.CreateOptionBox(SpecialHighlightOptions.DeclarationBrace, UpdateConfig, R.OT_DeclarationBraces)),
+						(_HighlightParameterBracesBox = o.CreateOptionBox(SpecialHighlightOptions.ParameterBrace, UpdateConfig, R.OT_MethodParameterBraces)),
+						(_HighlightCastParenthesesBox = o.CreateOptionBox(SpecialHighlightOptions.CastBrace, UpdateConfig, R.OT_TypeCastBraces)),
+						(_HighlightBranchBracesBox = o.CreateOptionBox(SpecialHighlightOptions.BranchBrace, UpdateConfig, R.OT_BranceBraces)),
+						(_HighlightLoopBracesBox = o.CreateOptionBox(SpecialHighlightOptions.LoopBrace, UpdateConfig, R.OT_LoopBraces)),
+						(_HighlightResourceBracesBox = o.CreateOptionBox(SpecialHighlightOptions.ResourceBrace, UpdateConfig, R.OT_ResourceBraces)),
 
-						new TitleBox("Member Declaration Styles"),
-						(_HighlightLocalFunctionDeclarationBox = o.CreateOptionBox(SpecialHighlightOptions.LocalFunctionDeclaration, UpdateConfig, "Apply to local functions")),
-						(_HighlightNonPrivateFieldDeclarationBox = o.CreateOptionBox(SpecialHighlightOptions.NonPrivateField, UpdateConfig, "Apply to non-private fields")),
+						new TitleBox(R.OT_MemberStyles),
+						(_HighlightLocalFunctionDeclarationBox = o.CreateOptionBox(SpecialHighlightOptions.LocalFunctionDeclaration, UpdateConfig, R.OT_ApplyToLocalFunction)),
+						(_HighlightNonPrivateFieldDeclarationBox = o.CreateOptionBox(SpecialHighlightOptions.NonPrivateField, UpdateConfig, R.OT_ApplyToNonPrivateField)),
 
 					});
 				foreach (var item in new[] { _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox }) {

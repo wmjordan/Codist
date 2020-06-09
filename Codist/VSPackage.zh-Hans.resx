@@ -123,13 +123,31 @@
   <data name="112" xml:space="preserve">
     <value>此扩展提供了增强的语法突出显示、代码提示、智能工具栏和导航栏，并能在滚动条上标记关键的代码和注释项。</value>
   </data>
-  <data name="10" xml:space="preserve">
+  <data name="301" xml:space="preserve">
     <value>常规</value>
   </data>
-  <data name="11" xml:space="preserve">
+  <data name="302" xml:space="preserve">
     <value>高级语法样式</value>
   </data>
-  <data name="12" xml:space="preserve">
+  <data name="303" xml:space="preserve">
     <value>超级代码提示</value>
+  </data>
+  <data name="200" xml:space="preserve">
+    <value>Codist</value>
+  </data>
+  <data name="304" xml:space="preserve">
+    <value>智能工具条</value>
+  </data>
+  <data name="305" xml:space="preserve">
+    <value>导航栏</value>
+  </data>
+  <data name="306" xml:space="preserve">
+    <value>滚动条标记</value>
+  </data>
+  <data name="307" xml:space="preserve">
+    <value>显示</value>
+  </data>
+  <data name="308" xml:space="preserve">
+    <value>扩展开发辅助</value>
   </data>
 </root>

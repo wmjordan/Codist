@@ -31,8 +31,8 @@ namespace Codist.Controls
 		public event EventHandler FilterChanged;
 
 		public SearchScopeBox() {
-			_DocumentFilter = CreateButton(IconIds.File, R.T_CurrentDocument);
-			_ProjectFilter = CreateButton(IconIds.Project, R.T_CurrentProject);
+			_DocumentFilter = CreateButton(IconIds.File, R.T_SearchCurrentDocument);
+			_ProjectFilter = CreateButton(IconIds.Project, R.T_SearchCurrentProject);
 			Margin = WpfHelper.SmallHorizontalMargin;
 			Content = new Border {
 				BorderThickness = WpfHelper.TinyMargin,

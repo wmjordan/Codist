@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Design;
 using Microsoft.VisualStudio.Shell;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Commands
 {

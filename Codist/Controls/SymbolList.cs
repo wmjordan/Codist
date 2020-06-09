@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Shell;
 using GDI = System.Drawing;
 using Task = System.Threading.Tasks.Task;
 using WPF = System.Windows.Media;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
 {
@@ -288,7 +289,7 @@ namespace Codist.Controls
 
 		void SetupContextMenu(CSharpSymbolContextMenu menu, SymbolItem item) {
 			if (item.SyntaxNode != null) {
-				SetupMenuCommand(item, IconIds.SelectCode, "Select Code", s => s.Container.SemanticContext.View.SelectNode(s.SyntaxNode, true));
+				SetupMenuCommand(item, IconIds.SelectCode, R.CMD_SelectCode, s => s.Container.SemanticContext.View.SelectNode(s.SyntaxNode, true));
 				//SetupMenuCommand(item, KnownImageIds.Copy, "Copy Code", s => Clipboard.SetText(s.SyntaxNode.ToFullString()));
 				item.SetSymbolToSyntaxNode();
 			}
@@ -375,7 +376,7 @@ namespace Codist.Controls
 					var tip = ToolTipFactory.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, SemanticContext.SemanticModel.Compilation);
 					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
 						tip.AddTextBlock()
-							.Append("Line of code: " + (item.SyntaxNode.GetLineSpan().Length + 1).ToString());
+							.Append(R.T_LineOfCode + (item.SyntaxNode.GetLineSpan().Length + 1).ToString());
 					}
 					return tip;
 				}
@@ -386,17 +387,17 @@ namespace Codist.Controls
 				var tip = ToolTipFactory.CreateToolTip(item.Symbol, false, SemanticContext.SemanticModel.Compilation);
 				if (ContainerType == SymbolListType.SymbolReferrers && item.Location.IsInSource) {
 					// append location info to tip
-					item.ShowSourceReference(tip.AddTextBlock().Append("source reference:").AppendLine());
+					item.ShowSourceReference(tip.AddTextBlock().Append(R.T_SourceReference).AppendLine());
 				}
 				return tip;
 			}
 			if (item.Location != null) {
 				if (item.Location.IsInSource) {
 					var p = item.Location.SourceTree.FilePath;
-					return new ThemedToolTip(Path.GetFileName(p), $"Folder: {Path.GetDirectoryName(p)}{Environment.NewLine}Line: {item.Location.GetLineSpan().StartLinePosition.Line + 1}");
+					return new ThemedToolTip(Path.GetFileName(p), R.T_SourceLineInfo.Replace("{Folder}", Path.GetDirectoryName(p)).Replace("{Line}", (item.Location.GetLineSpan().StartLinePosition.Line + 1).ToString()));
 				}
 				else {
-					return new ThemedToolTip(item.Location.MetadataModule.Name, $"Containing assembly: {item.Location.MetadataModule.ContainingAssembly}");
+					return new ThemedToolTip(item.Location.MetadataModule.Name, R.T_ContainingAssembly + item.Location.MetadataModule.ContainingAssembly);
 				}
 			}
 			return null;
@@ -590,9 +591,10 @@ namespace Codist.Controls
 				e.Effects = copy ? DragDropEffects.Copy : DragDropEffects.Move;
 				var t = Footer as TextBlock;
 				if (t != null) {
-					t.Text = (copy ? "Copy " : "Move ")
-						+ (e.GetPosition(li).Y < li.ActualHeight / 2 ? "before " : "after ")
-						+ target.SyntaxNode.GetDeclarationSignature();
+					t.Text = (e.GetPosition(li).Y < li.ActualHeight / 2
+							? (copy ? R.T_CopyBefore : R.T_MoveBefore)
+							: (copy ? R.T_CopyAfter : R.T_MoveAfter)
+							).Replace("<NAME>", target.SyntaxNode.GetDeclarationSignature());
 				}
 			}
 			else {

@@ -32,7 +32,7 @@ namespace Codist.Controls
 
 		public ISymbol Symbol {
 			get => _Symbol;
-			set => _Symbol = value.Kind == SymbolKind.Alias ? ((IAliasSymbol)value).Target : value;
+			set => _Symbol = value?.Kind == SymbolKind.Alias ? ((IAliasSymbol)value).Target : value;
 		}
 
 		public event RoutedEventHandler ItemClicked;
@@ -197,7 +197,7 @@ namespace Codist.Controls
 
 		void CreateCommandsForReturnTypeCommand() {
 			var type = _Symbol.GetReturnType();
-			if (type != null && type.SpecialType == SpecialType.None && type.IsTupleType == false) {
+			if (type != null && type.SpecialType == SpecialType.None && type.TypeKind != TypeKind.TypeParameter && type.IsTupleType == false) {
 				var et = type.ResolveElementType();
 				Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf.Replace("<TYPE>", et.Name + et.GetParameterString()), () => FindMembers(et, _SemanticContext)));
 				if (type.IsStatic == false) {

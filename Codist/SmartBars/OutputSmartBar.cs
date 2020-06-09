@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows.Controls;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Text.Editor;
+using R = Codist.Properties.Resources;
 
 namespace Codist.SmartBars
 {
@@ -22,17 +23,17 @@ namespace Codist.SmartBars
 				return;
 			}
 			if (File.Exists(t)) {
-				AddCommand(MyToolBar, IconIds.Open, "Open or execute file", ctx => {
+				AddCommand(MyToolBar, IconIds.Open, R.CMD_OpenOrExecuteFile, ctx => {
 					TryRun(TryGetPath(View));
 				});
-				AddCommand(MyToolBar, IconIds.OpenFolder, "Open folder", ctx => {
+				AddCommand(MyToolBar, IconIds.OpenFolder, R.CMD_OpenFolder, ctx => {
 					var s = TryGetPath(View);
 					if (s != null) {
 						Process.Start("Explorer.exe", "/select,\"" + s + "\"");
 					}
 				});
 				if (IsFileTypeRegisteredInVS(t)) {
-					AddCommand(MyToolBar, IconIds.OpenWithVisualStudio, "Open file with Visual Studio", ctx => {
+					AddCommand(MyToolBar, IconIds.OpenWithVisualStudio, R.CMD_OpenWithVS, ctx => {
 						var s = TryGetPath(View);
 						if (s != null && IsFileTypeRegisteredInVS(s)) {
 							CodistPackage.DTE.OpenFile(s, 1, 1);
@@ -41,7 +42,7 @@ namespace Codist.SmartBars
 				}
 			}
 			else if (Directory.Exists(t)) {
-				AddCommand(MyToolBar, IconIds.OpenFolder, "Open folder", ctx => {
+				AddCommand(MyToolBar, IconIds.OpenFolder, R.CMD_OpenFolder, ctx => {
 					TryRun(TryGetPath(View));
 				});
 			}

@@ -324,7 +324,7 @@ namespace Codist.SmartBars
 				}
 			}
 			catch (Exception ex) {
-				MessageBox.Show("Failed to launch web browser to search selected items:\n" + ex.Message, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Exclamation);
+				MessageBox.Show(R.T_FailedToLaunchBrowser + Environment.NewLine + ex.Message, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Exclamation);
 			}
 		}
 	}

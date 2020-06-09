@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<Include href="CodistPackage.vsct"/>
+	<Commands package="guidCodistPackage">
+		<Buttons>
+			<!--To define a menu group you have to specify its ID, the parent menu and its display priority.
+          The command is visible and enabled by default. If you need to change the visibility, status, etc, you can use
+          the CommandFlag node.
+          You can add more than one CommandFlag node e.g.:
+              <CommandFlag>DefaultInvisible</CommandFlag>
+              <CommandFlag>DynamicVisibility</CommandFlag>
+          If you do not want an image next to your command, remove the Icon node /> -->
+			<Button guid="guidCodistPackageCmdSet" id="ScreenshotCommandId" priority="0x0100" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="RectangularScreenshot" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Save Code &amp;Window Screenshot...</ButtonText>
+					<ToolTipText>Take a screenshot for the active code window</ToolTipText>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="GetContentTypeCommandId" priority="4133" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
+				<Icon guid="ImageCatalogGuid" id="ContentType" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Show Document Content Type...</ButtonText>
+					<ToolTipText>Display content types of the current document</ToolTipText>
+				</Strings>
+			</Button>
+			<!--<Button guid="guidCodistPackageCmdSet" id="SymbolFinderWindowCommandId" priority="0x0800" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_TOOLS_OPTIONS" />
+				<Icon guid="ImageCatalogGuid" id="FindSymbol" />
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+          <ButtonText>Symbol finder</ButtonText>
+        </Strings>
+      </Button>-->
+			<Button guid="guidCodistPackageCmdSet" id="IncrementVsixVersionId" priority="0x0100" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" />
+				<Icon guid="ImageCatalogGuid" id="Counter" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Increment Version</ButtonText>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" priority="0x0100" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
+				<Icon guid="ImageCatalogGuid" id="SearchContract" />
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Search Declaration</ButtonText>
+					<CanonicalName>CodistNaviBarSearchDeclaration</CanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
+				<Icon guid="ImageCatalogGuid" id="SearchMember" />
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Search Class Member</ButtonText>
+					<CanonicalName>CodistNaviBarSearchActiveClass</CanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="SyntaxCustomizeHighlightId" priority="0x0100" type="Button">
+				<Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OPTIONS" />
+				<Icon guid="ImageCatalogGuid" id="StyleBlock" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Customize Codist Syntax Highlight...</ButtonText>
+					<CanonicalName>CustomizeSyntaxHighlight</CanonicalName>
+				</Strings>
+			</Button>
+		</Buttons>
+	</Commands>
+</CommandTable>

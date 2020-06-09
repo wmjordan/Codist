@@ -1,30 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-
-  <!--  This is the file that defines the actual layout and type of the commands.
+	<!--  This is the file that defines the actual layout and type of the commands.
         It is divided in different sections (e.g. command definition, command
         placement, ...), with each defining a specific set of properties.
         See the comment before each section for more details about how to
         use it. -->
 
-  <!--  The VSCT compiler (the tool that translates this file into the binary
+	<!--  The VSCT compiler (the tool that translates this file into the binary
         format that VisualStudio will consume) has the ability to run a preprocessor
         on the vsct file; this preprocessor is (usually) the C++ preprocessor, so
         it is possible to define includes and macros with the same syntax used
         in C++ files. Using this ability of the compiler here, we include some files
         defining some of the constants that we will use inside the file. -->
 	<Include href="KnownImageIds.vsct" />
-	
-  <!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
-  <Extern href="stdidcmd.h" />
 
-  <!--This header contains the command ids for the menus provided by the shell. -->
-  <Extern href="vsshlids.h" />
+	<!--This is the file that defines the IDs for all the commands exposed by VisualStudio. -->
+	<Extern href="stdidcmd.h" />
 
-  <!--The Commands section is where commands, menus, and menu groups are defined.
+	<!--This header contains the command ids for the menus provided by the shell. -->
+	<Extern href="vsshlids.h" />
+
+	<!--The Commands section is where commands, menus, and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
-  <Commands package="guidCodistPackage">
-    <!-- Inside this section we have different sub-sections: one for the menus, another
+	<Commands package="guidCodistPackage">
+		<!-- Inside this section we have different sub-sections: one for the menus, another
     for the menu groups, one for the buttons (the actual commands), one for the combos
     and the last one for the bitmaps used. Each element is identified by a command id that
     is a unique pair of guid and numeric identifier; the guid part of the identifier is usually
@@ -32,140 +31,59 @@
     group; your package should define its own command set in order to avoid collisions
     with command ids defined by other packages. -->
 
-    <!-- In this section you can define new menu groups. A menu group is a container for
+		<!-- In this section you can define new menu groups. A menu group is a container for
          other menus or buttons (commands); from a visual point of view you can see the
          group as the part of a menu contained between two lines. The parent of a group
          must be a menu. -->
-    <Groups>
-      <Group guid="guidCodistPackageCmdSet" id="CodistMenuGroup" priority="0x0600">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_FILE" />
-      </Group>
-      <Group guid="guidCodistPackageCmdSet" id="IDG_VS_TOOLS_OPTIONS" priority="0x0800">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
-      </Group>
-      <Group guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" priority="0x017F">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
-      </Group>
-      <Group guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" priority="0x0800">
-        <Parent guid="guidSHLMainMenu" id="IDM_VS_EDITOR_FIND_MENU" />
-      </Group>
-    </Groups>
-
-    <!--Buttons section. -->
-    <!--This section defines the elements the user can interact with, like a menu command or a button
-        or combo box in a toolbar. -->
-    <Buttons>
-      <!--To define a menu group you have to specify its ID, the parent menu and its display priority.
-          The command is visible and enabled by default. If you need to change the visibility, status, etc, you can use
-          the CommandFlag node.
-          You can add more than one CommandFlag node e.g.:
-              <CommandFlag>DefaultInvisible</CommandFlag>
-              <CommandFlag>DynamicVisibility</CommandFlag>
-          If you do not want an image next to your command, remove the Icon node /> -->
-      <Button guid="guidCodistPackageCmdSet" id="ScreenshotCommandId" priority="0x0100" type="Button">
-        <Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
-				<Icon guid="ImageCatalogGuid" id="RectangularScreenshot" />
-				<CommandFlag>DefaultDisabled</CommandFlag>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-          <ButtonText>Save Code &amp;Window Screenshot...</ButtonText>
-					<ToolTipText>Take a screenshot for the active code window</ToolTipText>
-        </Strings>
-      </Button>
-      <Button guid="guidCodistPackageCmdSet" id="GetContentTypeCommandId" priority="4133" type="Button">
-        <Parent guid="guidCodistPackageCmdSet" id="CodistMenuGroup" />
-				<Icon guid="ImageCatalogGuid" id="ContentType" />
-				<CommandFlag>DefaultInvisible</CommandFlag>
-				<CommandFlag>DynamicVisibility</CommandFlag>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-          <ButtonText>Show Document Content Type...</ButtonText>
-					<ToolTipText>Display content types of the current document</ToolTipText>
-        </Strings>
-      </Button>
-      <!--<Button guid="guidCodistPackageCmdSet" id="SymbolFinderWindowCommandId" priority="0x0800" type="Button">
-				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_TOOLS_OPTIONS" />
-				<Icon guid="ImageCatalogGuid" id="FindSymbol" />
-				<CommandFlag>DefaultDisabled</CommandFlag>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-          <ButtonText>Symbol finder</ButtonText>
-        </Strings>
-      </Button>-->
-      <Button guid="guidCodistPackageCmdSet" id="IncrementVsixVersionId" priority="0x0100" type="Button">
-        <Parent guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" />
-        <Icon guid="ImageCatalogGuid" id="Counter" />
-				<CommandFlag>DefaultInvisible</CommandFlag>
-				<CommandFlag>DynamicVisibility</CommandFlag>
-				<CommandFlag>TextChanges</CommandFlag>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-          <ButtonText>Increment Version</ButtonText>
-        </Strings>
-      </Button>
-      <Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" priority="0x0100" type="Button">
-        <Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
-        <Icon guid="ImageCatalogGuid" id="SearchContract" />
-				<CommandFlag>DefaultDisabled</CommandFlag>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-          <ButtonText>Search Declaration</ButtonText>
-					<CanonicalName>CodistNaviBarSearchDeclaration</CanonicalName>
-        </Strings>
-      </Button>
-      <Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
-        <Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
-        <Icon guid="ImageCatalogGuid" id="SearchMember" />
-				<CommandFlag>DefaultDisabled</CommandFlag>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-          <ButtonText>Search Class Member</ButtonText>
-					<CanonicalName>CodistNaviBarSearchActiveClass</CanonicalName>
-        </Strings>
-      </Button>
-      <Button guid="guidCodistPackageCmdSet" id="SyntaxCustomizeHighlightId" priority="0x0100" type="Button">
-        <Parent guid="guidSHLMainMenu" id="IDG_VS_TOOLS_OPTIONS" />
-				<Icon guid="ImageCatalogGuid" id="StyleBlock" />
-				<CommandFlag>IconIsMoniker</CommandFlag>
-        <Strings>
-					<ButtonText>Customize Codist Syntax Highlight...</ButtonText>
-					<CanonicalName>CustomizeSyntaxHighlight</CanonicalName>
-        </Strings>
-      </Button>
-    </Buttons>
-
-    <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
-    <!--<Bitmaps>
-      --><!--  The bitmap id is defined in a way that is a little bit different from the others:
+		<Groups>
+			<Group guid="guidCodistPackageCmdSet" id="CodistMenuGroup" priority="0x0600">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_FILE" />
+			</Group>
+			<Group guid="guidCodistPackageCmdSet" id="IDG_VS_TOOLS_OPTIONS" priority="0x0800">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+			</Group>
+			<Group guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" priority="0x017F">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
+			</Group>
+			<Group guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" priority="0x0800">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_EDITOR_FIND_MENU" />
+			</Group>
+		</Groups>
+		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
+		<!--<Bitmaps>
+      -->
+		<!--  The bitmap id is defined in a way that is a little bit different from the others:
             the declaration starts with a guid for the bitmap strip, then there is the resource id of the
             bitmap strip containing the bitmaps and then there are the numeric ids of the elements used
             inside a button definition. An important aspect of this declaration is that the element id
-            must be the actual index (1-based) of the bitmap inside the bitmap strip. --><!--
+            must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
+		<!--
       <Bitmap guid="guidImages" href="Resources\ScreenshotCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
     </Bitmaps>-->
-  </Commands>
+	</Commands>
 	<KeyBindings>
 		<!--Bind NaviBar.SearchDeclaration to Ctrl + ` -->
 		<KeyBinding guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" editor="guidVSStd97" mod1="Control" key1="0xC0" mod2="Control" key2="0xC0" />
 		<KeyBinding guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" editor="guidVSStd97" mod1="Control" key1="1" mod2="Control" key2="1" />
 	</KeyBindings>
-  <Symbols>
-    <!-- This is the package guid. -->
-    <GuidSymbol name="guidCodistPackage" value="{c7b93d20-621f-4b21-9d28-d51157ef0b94}" />
+	<Symbols>
+		<!-- This is the package guid. -->
+		<GuidSymbol name="guidCodistPackage" value="{c7b93d20-621f-4b21-9d28-d51157ef0b94}" />
 
-    <!-- This is the guid used to group the menu commands together -->
-    <GuidSymbol name="guidCodistPackageCmdSet" value="{d668a130-cb52-4143-b389-55560823f3d6}">
-      <IDSymbol name="CodistMenuGroup" value="0x1020" />
-      <IDSymbol name="ScreenshotCommandId" value="0x4001" />
-      <IDSymbol name="GetContentTypeCommandId" value="0x4002" />
+		<!-- This is the guid used to group the menu commands together -->
+		<GuidSymbol name="guidCodistPackageCmdSet" value="{d668a130-cb52-4143-b389-55560823f3d6}">
+			<IDSymbol name="CodistMenuGroup" value="0x1020" />
+			<IDSymbol name="ScreenshotCommandId" value="0x4001" />
+			<IDSymbol name="GetContentTypeCommandId" value="0x4002" />
 			<IDSymbol name="EDIT_PROJECT_GROUP_ID" value="0x1000" />
-      <IDSymbol name="IncrementVsixVersionId" value="0x4003" />
+			<IDSymbol name="IncrementVsixVersionId" value="0x4003" />
 			<IDSymbol name="IDG_VS_TOOLS_OPTIONS" value="0x1020" />
 			<IDSymbol name="SymbolFinderWindowCommandId" value="0x4004" />
-      <IDSymbol name="SyntaxCustomizeHighlightId" value="0x4005" />
-      <IDSymbol name="NaviBarSearchDeclarationId" value="0x4006" />
-      <IDSymbol name="NaviBarSearchActiveClassId" value="0x4007" />
-    </GuidSymbol>
-  
-  </Symbols>
+			<IDSymbol name="SyntaxCustomizeHighlightId" value="0x4005" />
+			<IDSymbol name="NaviBarSearchDeclarationId" value="0x4006" />
+			<IDSymbol name="NaviBarSearchActiveClassId" value="0x4007" />
+		</GuidSymbol>
+
+	</Symbols>
+
 </CommandTable>

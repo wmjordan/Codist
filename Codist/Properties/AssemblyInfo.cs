@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Resources;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle(nameof(Codist))]
@@ -8,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct(nameof(Codist))]
 [assembly: AssemblyCopyright("Copyright WMJ, 2020")]
 [assembly: AssemblyTrademark(nameof(Codist))]
-[assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: AssemblyVersion("5.0.0.0")]
-[assembly: AssemblyFileVersion("5.6.1.5667")]
+[assembly: AssemblyFileVersion("5.7.0.5719")]
+[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
