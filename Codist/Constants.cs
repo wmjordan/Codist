@@ -125,7 +125,7 @@ namespace Codist
 		public const string XmlDocEntity = "xml doc comment - entity reference";
 		public const string XmlDocTag = "xml doc comment - name";
 
-		public const string CSharpLocalVariableName = "C#: Local field";
+		public const string CSharpLocalVariableName = "C#: Local variable";
 		public const string CSharpParameterName = "C#: Parameter";
 		public const string CSharpNamespaceName = "C#: Namespace";
 		public const string CSharpExtensionMethodName = "C#: Extension method";
