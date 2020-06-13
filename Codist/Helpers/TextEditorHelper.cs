@@ -506,6 +506,8 @@ namespace Codist
 		#endregion
 
 		#region TextView and editor
+		public static event EventHandler<TextViewCreatedEventArgs> ActiveTextViewChanged;
+
 		public static ITextDocument GetTextDocument(this ITextBuffer textBuffer) {
 			return textBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out var d) ? d : null;
 		}
@@ -593,8 +595,14 @@ namespace Codist
 
 		public static bool IsVsixProject() {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];
-			return extenders != null && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
+			try {
+				var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];
+				return extenders != null && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
+			}
+			catch (ArgumentException ex) {
+				// hack: for https://github.com/wmjordan/Codist/issues/124
+				return false;
+			}
 		}
 
 		static VsTextView GetIVsTextView(IServiceProvider service, string filePath) {
@@ -629,7 +637,8 @@ namespace Codist
 				readonly IWpfTextView _View;
 
 				public ActiveViewTracker(IWpfTextView view) {
-					_View = view;
+					_ActiveTextView = _View = view;
+					ActiveTextViewChanged?.Invoke(view, new TextViewCreatedEventArgs(view));
 					view.Closed += TextViewClosed_UnhookEvent;
 					view.VisualElement.MouseEnter += TextViewMouseEnter_SetActiveView;
 					view.GotAggregateFocus += TextViewGotFocus_SetActiveView;
@@ -637,6 +646,7 @@ namespace Codist
 
 				void TextViewGotFocus_SetActiveView(object sender, EventArgs e) {
 					_ActiveTextView = _View;
+					ActiveTextViewChanged?.Invoke(_View, new TextViewCreatedEventArgs(_View));
 				}
 
 				void TextViewMouseEnter_SetActiveView(object sender, MouseEventArgs e) {

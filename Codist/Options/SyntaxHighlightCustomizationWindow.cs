@@ -287,23 +287,33 @@ namespace Codist.Options
 		#endregion
 
 		#region Syntax settings loader
-		// todo suppress unnecessary refresh when menus for style setting buttons are closed
-		protected override void OnActivated(EventArgs e) {
-			base.OnActivated(e);
-			var view = TextEditorHelper.GetActiveWpfDocumentView();
-			if (_WpfTextView != view) {
-				_WpfTextView = view;
-				SetFormatMap(view);
+
+		void HandleViewChangedEvent(object sender, TextViewCreatedEventArgs args) {
+			if (args.TextView == _WpfTextView) {
+				return;
 			}
-			_SettingsList.IsEnabled = _SettingsGroup.IsEnabled = true;
-			System.Diagnostics.Debug.WriteLine("Refresh style config box");
+			if (_WpfTextView != null) {
+				UnhookSelectionChangedEvent(_WpfTextView, EventArgs.Empty);
+			}
+			_WpfTextView = args.TextView as IWpfTextView;
+			if (_WpfTextView != null) {
+				_WpfTextView.Selection.SelectionChanged += HandleViewSelectionChangedEvent;
+				_WpfTextView.Closed += UnhookSelectionChangedEvent;
+			}
+		}
+
+		void HandleViewSelectionChangedEvent(object sender, EventArgs args) {
 			if (_SyntaxSourceBox.SelectedIndex == 0) {
 				LoadSyntaxStyles(SyntaxStyleSource.Selection);
 			}
 		}
-		protected override void OnDeactivated(EventArgs e) {
-			base.OnDeactivated(e);
-			_SettingsList.IsEnabled = _SettingsGroup.IsEnabled = false;
+
+		void UnhookSelectionChangedEvent(object sender, EventArgs args) {
+			var view = sender as ITextView;
+			if (view != null) {
+				view.Closed -= UnhookSelectionChangedEvent;
+				view.Selection.SelectionChanged -= HandleViewSelectionChangedEvent;
+			}
 		}
 
 		void SetFormatMap(ITextView view) {
@@ -423,6 +433,14 @@ namespace Codist.Options
 					}
 					classifications = GetClassificationsForSelection();
 					break;
+			}
+			if (source == SyntaxStyleSource.Selection) {
+				TextEditorHelper.ActiveTextViewChanged += HandleViewChangedEvent;
+				_WpfTextView.Selection.SelectionChanged -= HandleViewSelectionChangedEvent;
+				_WpfTextView.Selection.SelectionChanged += HandleViewSelectionChangedEvent;
+			}
+			else {
+				TextEditorHelper.ActiveTextViewChanged -= HandleViewChangedEvent;
 			}
 			var cts = new HashSet<IClassificationType>();
 			var style = ActiveStyle;
@@ -841,6 +859,8 @@ namespace Codist.Options
 
 		protected override void OnClosed(EventArgs e) {
 			Owner.Activate();
+			UnhookSelectionChangedEvent(_WpfTextView, EventArgs.Empty);
+			TextEditorHelper.ActiveTextViewChanged -= HandleViewChangedEvent;
 			_FormatMap.ClassificationFormatMappingChanged -= RefreshList;
 			base.OnClosed(e);
 		}
