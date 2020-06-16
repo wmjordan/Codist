@@ -1345,16 +1345,16 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
     <value>引用符号的代码:</value>
   </data>
   <data name="T_CopyAfter" xml:space="preserve">
-    <value>复制到 &lt;NAME&gt; 前面</value>
-  </data>
-  <data name="T_CopyBefore" xml:space="preserve">
     <value>复制到 &lt;NAME&gt; 后面</value>
   </data>
+  <data name="T_CopyBefore" xml:space="preserve">
+    <value>复制到 &lt;NAME&gt; 前面</value>
+  </data>
   <data name="T_MoveAfter" xml:space="preserve">
-    <value>移动到 &lt;NAME&gt; 前面</value>
+    <value>移动到 &lt;NAME&gt; 后面</value>
   </data>
   <data name="T_MoveBefore" xml:space="preserve">
-    <value>移动到 &lt;NAME&gt; 后面</value>
+    <value>移动到 &lt;NAME&gt; 前面</value>
   </data>
   <data name="T_SourceLineInfo" xml:space="preserve">
     <value>目录：{Folder}
