@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Formatting;
 
@@ -16,10 +17,11 @@ namespace Codist.SyntaxHighlight
 		static Dictionary<string, StyleBase> _SyntaxStyleCache = InitSyntaxStyleCache();
 		internal static readonly Dictionary<IClassificationType, List<IClassificationType>> ClassificationTypeStore = InitClassificationTypes(_SyntaxStyleCache.Keys);
 
-		static Dictionary<IClassificationType, TextFormattingRunProperties> _BackupFormattings = LoadFormattings(new Dictionary<IClassificationType, TextFormattingRunProperties>(80));
+		static Dictionary<IClassificationType, TextFormattingRunProperties> _BackupFormattings = new Dictionary<IClassificationType, TextFormattingRunProperties>(80);
 		static TextFormattingRunProperties _DefaultFormatting;
 
 		internal static bool IdentifySymbolSource { get; private set; }
+		internal static int BackupFormatCount => _BackupFormattings.Count;
 
 		public static TextFormattingRunProperties GetBackupFormatting(IClassificationType classificationType) {
 			lock (_syncRoot) {
@@ -42,14 +44,15 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 		}
-		public static TextFormattingRunProperties GetOrSaveBackupFormatting(IClassificationType classificationType) {
+		public static TextFormattingRunProperties GetOrSaveBackupFormatting(IClassificationType classificationType, bool update) {
 			lock (_syncRoot) {
-				if (_BackupFormattings.TryGetValue(classificationType, out var r)) {
+				if (update == false && _BackupFormattings.TryGetValue(classificationType, out var r)) {
 					return r;
 				}
 				else {
 					r = DefaultClassificationFormatMap.GetExplicitTextProperties(classificationType);
-					_BackupFormattings.Add(classificationType, r);
+					System.Diagnostics.Debug.WriteLine("Backup format: " + classificationType.Classification + " " + (r.ForegroundBrushEmpty ? "<empty>" : r.ForegroundBrush.ToString()));
+					_BackupFormattings[classificationType] = r;
 					return r;
 				}
 			}
@@ -132,6 +135,10 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
+		internal static void LoadBackupFormattings() {
+			LoadFormattings(_BackupFormattings);
+		}
+
 		static Dictionary<IClassificationType, TextFormattingRunProperties> LoadFormattings(Dictionary<IClassificationType, TextFormattingRunProperties> formattings) {
 			var m = DefaultClassificationFormatMap;
 			foreach (var item in m.CurrentPriorityOrder) {
@@ -147,6 +154,12 @@ namespace Codist.SyntaxHighlight
 			LoadSyntaxStyleCache(cache);
 			Config.Loaded += (s, args) => ResetStyleCache();
 			DefaultClassificationFormatMap.ClassificationFormatMappingChanged += UpdateFormatCache;
+			VSColorTheme.ThemeChanged += _ => {
+				if (_BackupFormattings != null) {
+					_BackupFormattings?.Clear();
+					LoadFormattings(_BackupFormattings);
+				}
+			};
 			return cache;
 		}
 

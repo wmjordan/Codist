@@ -24,30 +24,66 @@ namespace Codist.SyntaxHighlight
 
 		Color _BackColor, _ForeColor;
 		volatile int _IsDecorating;
+		bool _IsViewActive;
+		static bool _Initialized;
 
 		public CodeViewDecorator(IWpfTextView view) {
 			view.Closed += View_Closed;
-			Config.Updated += SettingsSaved;
+			view.VisualElement.IsVisibleChanged += VisualElement_IsVisibleChanged;
+			if (_Initialized == false) {
+				view.VisualElement.IsVisibleChanged += MarkInitialized;
+			}
+			Config.Updated += SettingsUpdated;
 
 			_ClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(view);
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(view);
 			//_ClassificationFormatMap.ClassificationFormatMappingChanged += FormatUpdated;
-			_EditorFormatMap.FormatMappingChanged += FormatUpdated;
 			_RegService = ServicesHelper.Instance.ClassificationTypeRegistry;
 			_TextView = view;
 
-			Decorate(FormatStore.ClassificationTypeStore.Keys, true);
+			_IsViewActive = true;
+			if (_Initialized) {
+				Debug.WriteLine("Decorate known types");
+				Decorate(FormatStore.ClassificationTypeStore.Keys, true);
+				_EditorFormatMap.FormatMappingChanged += FormatUpdated;
+			}
+			else {
+				_EditorFormatMap.FormatMappingChanged += BackupFormat;
+				_ClassificationFormatMap.BeginBatchUpdate();
+				foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
+					if (item != null) {
+						_ClassificationFormatMap.SetTextProperties(item, _ClassificationFormatMap.GetExplicitTextProperties(item));
+					}
+				}
+				_ClassificationFormatMap.EndBatchUpdate();
+			}
+		}
+
+		void VisualElement_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
+			_IsViewActive = (bool)e.NewValue;
+		}
+
+		void MarkInitialized(object sender, DependencyPropertyChangedEventArgs e) {
+			if ((bool)e.NewValue) {
+				_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
+				_EditorFormatMap.FormatMappingChanged -= BackupFormat;
+				Debug.WriteLine("Decorator initialized");
+				Decorate(FormatStore.ClassificationTypeStore.Keys, true);
+				_Initialized = true;
+				_EditorFormatMap.FormatMappingChanged += FormatUpdated;
+			}
 		}
 
 		void View_Closed(object sender, EventArgs e) {
-			Config.Updated -= SettingsSaved;
+			_IsViewActive = false;
+			Config.Updated -= SettingsUpdated;
 			//_ClassificationFormatMap.ClassificationFormatMappingChanged -= FormatUpdated;
-			//_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
+			_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
 			_EditorFormatMap.FormatMappingChanged -= FormatUpdated;
 			_TextView.Closed -= View_Closed;
 		}
 
-		void SettingsSaved(object sender, ConfigUpdatedEventArgs eventArgs) {
+		void SettingsUpdated(object sender, ConfigUpdatedEventArgs eventArgs) {
 			if (eventArgs.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)) {
 				var t = eventArgs.Parameter as string;
 				if (t != null) {
@@ -59,8 +95,19 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
+		void BackupFormat(object sender, FormatItemsEventArgs e) {
+			if (e.ChangedItems.Count > 0) {
+				foreach (var item in e.ChangedItems) {
+					var t = _RegService.GetClassificationType(item);
+					if (t != null) {
+						FormatStore.GetOrSaveBackupFormatting(t, true);
+					}
+				}
+			}
+		}
+
 		void FormatUpdated(object sender, FormatItemsEventArgs e) {
-			if (_IsDecorating == 0 && _TextView.VisualElement.IsVisible && e.ChangedItems.Count > 0) {
+			if (_IsDecorating == 0 && _IsViewActive && e.ChangedItems.Count > 0) {
 				Decorate(e.ChangedItems.Select(_RegService.GetClassificationType), true);
 			}
 		}
@@ -103,7 +150,7 @@ namespace Codist.SyntaxHighlight
 			foreach (var item in classifications) {
 				if (item == null
 					|| (style = FormatStore.GetOrCreateStyle(item)) == null
-					|| (textFormatting = FormatStore.GetOrSaveBackupFormatting(item)) == null) {
+					|| (textFormatting = FormatStore.GetOrSaveBackupFormatting(item, _Initialized == false)) == null) {
 					continue;
 				}
 				var p = SetProperties(textFormatting, style, defaultSize);
