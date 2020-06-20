@@ -500,9 +500,6 @@ Ctrl 单击：粘贴并选中下一项</value>
   <data name="CMD_Load" xml:space="preserve">
     <value>加载...</value>
   </data>
-  <data name="CMD_OpenDonatePage" xml:space="preserve">
-    <value>打开浏览器并捐赠 Codist 项目</value>
-  </data>
   <data name="CMD_PostIssue" xml:space="preserve">
     <value>发表建议或提交问题报告</value>
   </data>
@@ -517,9 +514,6 @@ Ctrl 单击：粘贴并选中下一项</value>
   </data>
   <data name="OT_ConfigurationFileTip" xml:space="preserve">
     <value>使用以下按钮备份你的配置，配置文件可共享给其他伙伴</value>
-  </data>
-  <data name="OT_DonateLink" xml:space="preserve">
-    <value>通过 PayPal 捐赠</value>
   </data>
   <data name="OT_FeatureControllers" xml:space="preserve">
     <value>特性控制</value>
@@ -1291,9 +1285,6 @@ https://github.com/snowie2000/mactype/releases</value>
   <data name="OT_ToggleSmartBarTip" xml:space="preserve">
     <value>使用 Shift 键切换智能工具栏的显示</value>
   </data>
-  <data name="OT_TopMargin" xml:space="preserve">
-    <value>上边距:</value>
-  </data>
   <data name="OT_URLPattern" xml:space="preserve">
     <value>URL 模式</value>
   </data>
@@ -1662,5 +1653,20 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   </data>
   <data name="T_Themes" xml:space="preserve">
     <value>样式主题:</value>
+  </data>
+  <data name="CMDT_OpenDonatePage" xml:space="preserve">
+    <value>用浏览器打开捐赠 Codist 项目的网页</value>
+  </data>
+  <data name="CMD_DonateLink" xml:space="preserve">
+    <value>通过 PayPal 捐赠</value>
+  </data>
+  <data name="OTC_TopMargin" xml:space="preserve">
+    <value>上边距:</value>
+  </data>
+  <data name="CMD_WechatDonateLink" xml:space="preserve">
+    <value>微信扫码捐赠</value>
+  </data>
+  <data name="CMDT_OpenWechatQrCode" xml:space="preserve">
+    <value>打开作者的微信收款码</value>
   </data>
 </root>

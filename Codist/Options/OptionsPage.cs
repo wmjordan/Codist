@@ -166,7 +166,8 @@ namespace Codist.Options
 					new Note(R.OT_LatestRelease),
 					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist/releases", "https://github.com/wmjordan/Codist/releases", R.CMD_GotoProjectReleasePage),
 					new Note(R.OT_SupportCodst),
-					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink(R.OT_DonateLink, "https://www.paypal.me/wmzuo/19.99", R.CMD_OpenDonatePage),
+					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink(R.CMD_DonateLink, "https://www.paypal.me/wmzuo/19.99", R.CMDT_OpenDonatePage),
+					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink(R.CMD_WechatDonateLink, ShowWechatQrCode, R.CMDT_OpenWechatQrCode),
 					new DescriptionBox(R.OT_DonateLinkTip)
 					);
 				_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker };
@@ -178,6 +179,16 @@ namespace Codist.Options
 					item.MinWidth = 120;
 					item.Margin = WpfHelper.MiddleMargin;
 					item.Click += LoadOrSaveConfig;
+				}
+				void ShowWechatQrCode(object link) {
+					new Window {
+						Width = 401,
+						Height = 401,
+						Title = R.CMD_WechatDonateLink,
+						Content = new Image {
+							Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/Codist;component/Resources/wechatQrcode.png"))
+						}
+					}.ShowDialog();
 				}
 			}
 

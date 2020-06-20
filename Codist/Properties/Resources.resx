@@ -511,7 +511,7 @@ Use space to separate keywords.</value>
   <data name="CMD_Load" xml:space="preserve">
     <value>Load...</value>
   </data>
-  <data name="CMD_OpenDonatePage" xml:space="preserve">
+  <data name="CMDT_OpenDonatePage" xml:space="preserve">
     <value>Open your browser and donate to project Codist</value>
   </data>
   <data name="CMD_PostIssue" xml:space="preserve">
@@ -529,7 +529,7 @@ Use space to separate keywords.</value>
   <data name="OT_ConfigurationFileTip" xml:space="preserve">
     <value>Use the following buttons to backup your settings or share the file with others</value>
   </data>
-  <data name="OT_DonateLink" xml:space="preserve">
+  <data name="CMD_DonateLink" xml:space="preserve">
     <value>Donate via PayPal</value>
   </data>
   <data name="OT_DonateLinkTip" xml:space="preserve">
@@ -1673,5 +1673,14 @@ Line: {Line}</value>
   </data>
   <data name="T_Themes" xml:space="preserve">
     <value>Themes:</value>
+  </data>
+  <data name="CMDT_OpenWechatQrCode" xml:space="preserve">
+    <value>Donate to the author via scanning his Wechat QR Code</value>
+  </data>
+  <data name="CMD_WechatDonateLink" xml:space="preserve">
+    <value>Donate via Wechat</value>
+  </data>
+  <data name="CMD_OpenDonatePage" xml:space="preserve">
+    <value></value>
   </data>
 </root>
