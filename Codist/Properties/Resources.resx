@@ -1680,7 +1680,4 @@ Line: {Line}</value>
   <data name="CMD_WechatDonateLink" xml:space="preserve">
     <value>Donate via Wechat</value>
   </data>
-  <data name="CMD_OpenDonatePage" xml:space="preserve">
-    <value></value>
-  </data>
 </root>

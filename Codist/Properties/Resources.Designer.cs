@@ -739,15 +739,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
-        /// </summary>
-        internal static string CMD_OpenDonatePage {
-            get {
-                return ResourceManager.GetString("CMD_OpenDonatePage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Open folder.
         /// </summary>
         internal static string CMD_OpenFolder {
