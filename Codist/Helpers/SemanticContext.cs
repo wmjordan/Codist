@@ -274,17 +274,22 @@ namespace Codist
 				else {
 					return false;
 				}
+				if (Document == null) {
+					return Reset();
+				}
 				var ver = await Document.GetTextVersionAsync(cancellationToken).ConfigureAwait(false);
 				if (versionChanged = ver != _Version) {
 					_Version = ver;
 					SemanticModel = await Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+					if (SemanticModel == null) {
+						return Reset();
+					}
 					Compilation = SemanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 					ResetNodeInfo();
 				}
 			}
 			catch (NullReferenceException) {
-				ResetNodeInfo();
-				return false;
+				return Reset();
 			}
 			try {
 				if (versionChanged || Token.Span.Contains(position) == false) {
@@ -293,8 +298,7 @@ namespace Codist
 				}
 			}
 			catch (ArgumentOutOfRangeException) {
-				ResetNodeInfo();
-				return false;
+				return Reset();
 			}
 			return true;
 		}
@@ -343,6 +347,10 @@ namespace Codist
 		void ResetNodeInfo() {
 			_Node = _NodeIncludeTrivia = null;
 			Token = default;
+		}
+		bool Reset() {
+			ResetNodeInfo();
+			return false;
 		}
 	}
 }
