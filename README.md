@@ -4,7 +4,7 @@
 
 # Features
 
-Check out this list to see what _Codist_ can do for you?
+Check out this list to see what _Codist_ can do for you.
 
 * [Advanced Syntax Highlight](#advanced-c-syntax-highlight) items in ANY LANGUAGES (**new in version 5.6**), and [*Comment Tagger*](#comment-tagger-and-styles) highlights your `to-do` style comments
   ![](doc/feature-brief-syntax-highlight.png)
@@ -21,6 +21,8 @@ Check out this list to see what _Codist_ can do for you?
 * [Comprehensive Configurations](#feature-control)
 * [Acknowledgements](#acknowledgements)
 * [License](#license), [Bugs and Sugguestions](#bugs-and-suggestions), [Donate](#support-codist-by-donation)
+
+From version 5.7 on, _Codist_ supports localization into other languages and it has both English and Chinese now.
 
 ![Feature overview](doc/preview.png)
 
