@@ -119,12 +119,17 @@
       "ForegroundColor": "#CF3030"
     },
     {
+      "StyleID": "TypeCastKeyword",
+      "Bold": true,
+      "ForegroundColor": "#00B900"
+    },
+    {
       "StyleID": "Declaration",
       "FontSize": 8.0
     },
     {
       "StyleID": "MemberDeclaration",
-      "FontSize": 6.0
+      "FontSize": 5.0
     },
     {
       "StyleID": "LocalDeclaration",
@@ -174,12 +179,6 @@
     {
       "StyleID": "SealedClassName",
       "BackgroundColor": "#4F0000",
-      "BackgroundEffect": "ToBottom"
-    },
-    {
-      "StyleID": "DelegateName",
-      "ForegroundColor": "#B5FFFF",
-      "BackgroundColor": "#80004040",
       "BackgroundEffect": "ToBottom"
     },
     {
@@ -322,6 +321,12 @@
     {
       "StyleID": "EnumName",
       "ForegroundColor": "#C94EC9"
+    },
+    {
+      "StyleID": "DelegateName",
+      "ForegroundColor": "#B5FFFF",
+      "BackgroundColor": "#80004040",
+      "BackgroundEffect": "ToBottom"
     },
     {
       "StyleID": "Number",

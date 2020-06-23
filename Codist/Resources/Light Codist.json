@@ -125,17 +125,17 @@
       "ForegroundColor": "#CE0000"
     },
     {
+      "StyleID": "TypeCastKeyword",
+      "Bold": true,
+      "ForegroundColor": "#00B900"
+    },
+    {
       "StyleID": "Declaration",
       "FontSize": 8.0
     },
     {
       "StyleID": "MemberDeclaration",
-      "FontSize": 6.0
-    },
-    {
-      "StyleID": "LocalDeclaration",
-      "Italic": false,
-      "BackgroundColor": "#7FFFFF80"
+      "FontSize": 5.0
     },
     {
       "StyleID": "DeclarationBrace",
@@ -155,6 +155,11 @@
       "StyleID": "VirtualMemberName",
       "BackgroundColor": "#A4A4FF",
       "BackgroundEffect": "ToBottom"
+    },
+    {
+      "StyleID": "LocalDeclaration",
+      "Italic": false,
+      "BackgroundColor": "#7FFFFF80"
     },
     {
       "StyleID": "LocalVariableName",

@@ -353,6 +353,9 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CodeKeyword)]
 		Keyword,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeNamespaceName)]
+		NamespaceName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
 		ClassName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
@@ -364,6 +367,21 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumName)]
 		EnumName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumMemberName)]
+		EnumMemberName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeDelegateName)]
+		DelegateName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeEventName)]
+		EventName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodePropertyName)]
+		PropertyName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeFieldName)]
+		FieldName,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeIdentifier)]
 		[Description("A base style shared by type, type member, local, parameter, etc.")]
@@ -525,10 +543,6 @@ namespace Codist
 		[Description("Declaration of type memeber: property, method, event, delegate, nested type, etc. (excluding fields), inheriting from Declaration")]
 		MemberDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalDeclarationName)]
-		[Description("Declaration of local variable")]
-		LocalDeclaration,
-		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationBrace)]
 		[BaseDefinition(Constants.CodePunctuation)]
 		[Description("Braces {} for declaration, inheriting from Punctuation")]
@@ -550,6 +564,10 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpVirtualMemberName)]
 		[Description("Name of virtual member, inheriting from Identifier")]
 		VirtualMemberName,
+		[Category(Constants.SyntaxCategory.Declaration)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalDeclarationName)]
+		[Description("Declaration of local variable")]
+		LocalDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalVariableName)]
 		[Description("Name of local variable, inheriting from Identifier")]
@@ -579,11 +597,6 @@ namespace Codist
 		[BaseDefinition(Constants.CodeClassName)]
 		[Description("Name of sealed class, inheriting from Class Name")]
 		SealedClassName,
-		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[ClassificationType(ClassificationTypeNames = Constants.CodeDelegateName)]
-		[BaseDefinition(Constants.CodeDelegateName)]
-		[Description("Name of delegate, inheriting from Identifier")]
-		DelegateName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName)]
 		[BaseDefinition(Constants.CodeEventName)]
