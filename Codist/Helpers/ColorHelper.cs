@@ -30,7 +30,7 @@ namespace Codist
 			internal static SolidColorBrush GetBrush(string name) {
 				UIHelper.ParseColor(name, out var c, out var a);
 				if (c != WpfColors.Transparent) {
-					return new SolidColorBrush(c.Alpha(a));
+					return new SolidColorBrush(a == 0 ? c : c.Alpha(a));
 				}
 				var l = name.Length;
 				return l >= 3 && l <= 20 && __Cache.TryGetValue(name, out var brush) ? brush : null;
