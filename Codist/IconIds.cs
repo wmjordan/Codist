@@ -57,6 +57,9 @@ namespace Codist
 		public const int Return = KnownImageIds.Return;
 		public const int PublicSymbols = KnownImageIds.ModulePublic;
 		public const int PrivateSymbols = KnownImageIds.ModulePrivate;
+		public const int OverrideEvent = KnownImageIds.ModifyEvent;
+		public const int OverrideProperty = KnownImageIds.ModifyProperty;
+		public const int OverrideMethod = KnownImageIds.ModifyMethod;
 
 		// interface icons
 		public const int Filter = KnownImageIds.Filter;

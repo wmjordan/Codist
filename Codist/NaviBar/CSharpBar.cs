@@ -884,15 +884,22 @@ namespace Codist.NaviBar
 									break;
 								case SyntaxKind.UnsafeKeyword: AddIcon(ref icons, IconIds.Unsafe); break;
 								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedMethod); break;
+								case SyntaxKind.OverrideKeyword: AddIcon(ref icons, IconIds.OverrideMethod); break;
 							}
 						}
 						break;
 					case BasePropertyDeclarationSyntax p:
+						var isEvent = p.IsKind(SyntaxKind.EventDeclaration);
 						foreach (var modifier in p.Modifiers) {
 							switch (modifier.Kind()) {
 								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
 								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractMember); break;
-								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedProperty); break;
+								case SyntaxKind.SealedKeyword:
+									AddIcon(ref icons, isEvent ? IconIds.SealedEvent : IconIds.SealedProperty);
+									break;
+								case SyntaxKind.OverrideKeyword:
+									AddIcon(ref icons, isEvent ? IconIds.OverrideEvent : IconIds.OverrideProperty);
+									break;
 							}
 						}
 						break;
@@ -902,11 +909,6 @@ namespace Codist.NaviBar
 								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyField); break;
 								case SyntaxKind.VolatileKeyword: AddIcon(ref icons, IconIds.VolatileField); break;
 								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
-								case SyntaxKind.SealedKeyword:
-									if (f.IsKind(SyntaxKind.EventFieldDeclaration)) {
-										AddIcon(ref icons, IconIds.SealedEvent);
-									}
-									break;
 							}
 						}
 						break;

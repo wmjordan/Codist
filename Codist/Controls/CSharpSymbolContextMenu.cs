@@ -562,11 +562,16 @@ namespace Codist.Controls
 							if (ms.IsAbstract) {
 								AddIcon(ref icons, IconIds.AbstractMember);
 							}
-							else if (ms.IsSealed) {
-								AddIcon(ref icons, IconIds.SealedMethod);
-							}
 							else if (ms.IsExtensionMethod) {
 								AddIcon(ref icons, IconIds.ExtensionMethod);
+							}
+							else {
+								if (ms.IsSealed) {
+									AddIcon(ref icons, IconIds.SealedMethod);
+								}
+								if (ms.IsOverride) {
+									AddIcon(ref icons, IconIds.OverrideMethod);
+								}
 							}
 						}
 						break;
@@ -601,21 +606,31 @@ namespace Codist.Controls
 							if (symbol.IsAbstract) {
 								AddIcon(ref icons, IconIds.AbstractMember);
 							}
-							else if (symbol.IsSealed) {
-								AddIcon(ref icons, IconIds.SealedEvent);
+							else {
+								if (symbol.IsSealed) {
+									AddIcon(ref icons, IconIds.SealedEvent);
+								}
+								if (symbol.IsOverride) {
+									AddIcon(ref icons, IconIds.OverrideEvent);
+								}
 							}
 						}
 						break;
 					case SymbolKind.Property:
 						if (_ContainerIsInterface == false) {
+							if (((IPropertySymbol)symbol).SetMethod == null) {
+								AddIcon(ref icons, IconIds.ReadonlyProperty);
+							}
 							if (symbol.IsAbstract) {
 								AddIcon(ref icons, IconIds.AbstractMember);
 							}
-							else if (symbol.IsSealed) {
-								AddIcon(ref icons, IconIds.SealedProperty);
-							}
-							if (((IPropertySymbol)symbol).SetMethod == null) {
-								AddIcon(ref icons, IconIds.ReadonlyProperty);
+							else {
+								if (symbol.IsSealed) {
+									AddIcon(ref icons, IconIds.SealedProperty);
+								}
+								if (symbol.IsOverride) {
+									AddIcon(ref icons, IconIds.OverrideProperty);
+								}
 							}
 						}
 						break;
