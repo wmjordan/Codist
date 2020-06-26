@@ -18,7 +18,7 @@ namespace Codist
 
 		public static ThemedToolTip CreateToolTip(ISymbol symbol, bool forMemberList, Compilation compilation) {
 			var tip = new ThemedToolTip();
-			if ((Config.Instance.DisplayOptimizations & DisplayOptimizations.CodeWindow) != 0) {
+			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 				WpfHelper.SetUITextRenderOptions(tip, true);
 			}
 			if (forMemberList == false) {

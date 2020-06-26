@@ -72,7 +72,7 @@ namespace Codist.SmartBars
 		void TextViewLoaded(object sender, EventArgs args) {
 			var e = sender as System.Windows.FrameworkElement;
 			e.Loaded -= TextViewLoaded;
-			if ((Config.Instance.DisplayOptimizations & DisplayOptimizations.CodeWindow) != 0) {
+			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 				WpfHelper.SetUITextRenderOptions(e, true);
 			}
 		}

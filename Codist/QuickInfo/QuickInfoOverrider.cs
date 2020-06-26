@@ -229,7 +229,7 @@ namespace Codist.QuickInfo
 					if (p == null) {
 						goto EXIT;
 					}
-					if ((Config.Instance.DisplayOptimizations & DisplayOptimizations.CodeWindow) != 0) {
+					if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 						WpfHelper.SetUITextRenderOptions(p, true);
 					}
 					if (p.Children.Count > 1) {
