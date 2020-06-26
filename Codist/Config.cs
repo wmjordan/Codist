@@ -548,7 +548,8 @@ namespace Codist
 	{
 		None,
 		MainWindow,
-		CodeWindow = 1 << 1
+		CodeWindow = 1 << 1,
+		CompactMenu = 1 << 2
 	}
 
 	[Flags]

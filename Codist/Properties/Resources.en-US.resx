@@ -1680,4 +1680,13 @@ Line: {Line}</value>
   <data name="CMDT_OpenWechatQrCode" xml:space="preserve">
     <value>Donate to the author via scanning his Wechat QR Code</value>
   </data>
+  <data name="OT_LayoutOverride" xml:space="preserve">
+    <value>Layout Override</value>
+  </data>
+  <data name="OT_LayoutOverrideNote" xml:space="preserve">
+    <value>Override layout of Visual Studio</value>
+  </data>
+  <data name="OT_OverrideMainMenu" xml:space="preserve">
+    <value>Move main menu to title bar (VS 2017 only)</value>
+  </data>
 </root>

@@ -1669,4 +1669,13 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   <data name="CMDT_OpenWechatQrCode" xml:space="preserve">
     <value>打开作者的微信收款码</value>
   </data>
+  <data name="OT_LayoutOverride" xml:space="preserve">
+    <value>更改开发环境布局</value>
+  </data>
+  <data name="OT_LayoutOverrideNote" xml:space="preserve">
+    <value>更改 Visual Studio 窗口的布局</value>
+  </data>
+  <data name="OT_OverrideMainMenu" xml:space="preserve">
+    <value>将主菜单移到标题栏 (仅 VS 2017)</value>
+  </data>
 </root>

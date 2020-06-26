@@ -868,7 +868,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly Controls.IntegerBox _TopSpace, _BottomSpace;
-			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow/*, _UseLayoutRounding*/;
+			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride;
 
 			public PageControl(OptionsPage page) : base(page) {
 				AddPage(R.OT_General,
@@ -898,10 +898,24 @@ namespace Codist.Options
 					}
 					.ForEachChild((CheckBox b) => b.MinWidth = MinColumnWidth)
 					.SetLazyToolTip(() => R.OT_ForceGrayscaleTextRenderingTip),
-					new TextBox { TextWrapping = TextWrapping.Wrap, Text = R.OT_MacTypeLink, Padding = WpfHelper.SmallMargin, IsReadOnly = true }
+					new TextBox { TextWrapping = TextWrapping.Wrap, Text = R.OT_MacTypeLink, Padding = WpfHelper.SmallMargin, IsReadOnly = true },
+
+					new TitleBox(R.OT_LayoutOverride),
+					new DescriptionBox(R.OT_LayoutOverrideNote),
+					new WrapPanel {
+						Children = {
+							(_MenuLayoutOverride = Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.CompactMenu, UpdateMenuLayoutOption, R.OT_OverrideMainMenu))
+						}
+					}
+					.ForEachChild((CheckBox b) => b.MinWidth = MinColumnWidth)
 					);
 				_TopSpace.ValueChanged += _TopSpace_ValueChanged;
 				_BottomSpace.ValueChanged += _BottomSpace_ValueChanged;
+
+				_MenuLayoutOverride.IsEnabled = Application.Current.MainWindow
+					.GetFirstVisualChild<Grid>(i => i.Name == "RootGrid")
+					?.GetFirstVisualChild<Border>(i => i.Name == "MainWindowTitleBar")
+					?.Child is DockPanel;
 			}
 
 			protected override void LoadConfig(Config config) {
@@ -931,16 +945,17 @@ namespace Codist.Options
 				Config.Instance.FireConfigChangedEvent(Features.None);
 			}
 
-			void UpdateUseLayoutRoundingOption(DisplayOptimizations options, bool value) {
+			void UpdateMenuLayoutOption(DisplayOptimizations options, bool value) {
 				if (Page.IsConfigUpdating) {
 					return;
 				}
 				Config.Instance.Set(options, value);
 				if (value) {
-					Application.Current.MainWindow.UseLayoutRounding = value;
+					Controls.LayoutOverrider.CompactMenu();
 				}
 				else {
-					Application.Current.MainWindow.ClearValue(UseLayoutRoundingProperty);
+					Controls.LayoutOverrider.UndoCompactMenu();
+					//MessageBox.Show(R.T_LayoutOverrideRestore, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Information);
 				}
 				Config.Instance.FireConfigChangedEvent(Features.None);
 			}
