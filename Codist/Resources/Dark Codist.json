@@ -209,11 +209,11 @@
       "Italic": false,
       "ForegroundColor": "#808000"
     },
-    {
-      "StyleID": "VolatileFieldName",
-      "BackgroundColor": "#FFFF00",
-      "BackgroundEffect": "ToBottom"
-    },
+		{
+			"StyleID": "VolatileFieldName",
+			"BackgroundColor": "#808000",
+			"BackgroundEffect": "ToBottom"
+		},
     {
       "StyleID": "PropertyName",
       "ForegroundColor": "#7ABCFE"
