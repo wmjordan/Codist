@@ -68,10 +68,10 @@ namespace Codist.Controls
 			t.Children.Insert(2, _Menu = new InteractiveControlContainer(menu) { Margin = new Thickness(0, 7, 5, 4) });
 
 			var title = new TextBlock { FontWeight = FontWeights.Bold };
-			title.SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.MainWindowActiveCaptionTextBrushKey);
+			title.SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.SystemCaptionTextBrushKey);
 			var sn = System.IO.Path.GetFileNameWithoutExtension(CodistPackage.DTE.Solution.FileName);
 			title.Text = sn.Length > 0 ? sn + _RootSuffix : DefaultTitle;
-			t.Children.Insert(3, _TitleBlock = new Border { Child = title, Padding = new Thickness(7, 7, 7, 4) });
+			t.Children.Insert(3, _TitleBlock = new Border { Child = title, Padding = new Thickness(7, 9, 7, 4) });
 			_TitleBlock.SetResourceReference(Border.BackgroundProperty, EnvironmentColors.SystemActiveCaptionBrushKey);
 
 			(_TitleBarButtons = t.GetFirstVisualChild<StackPanel>(i => i.Name == "WindowTitleBarButtons"))
@@ -132,10 +132,10 @@ namespace Codist.Controls
 			}
 		}
 		static void MainWindowActivated(object sender, EventArgs args) {
-			(_TitleBlock?.Child as TextBlock).SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.MainWindowActiveCaptionTextBrushKey);
+			(_TitleBlock?.Child as TextBlock).SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.SystemCaptionTextBrushKey);
 		}
 		static void MainWindowDeactivated(object sender, EventArgs args) {
-			(_TitleBlock?.Child as TextBlock).SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.MainWindowInactiveCaptionTextBrushKey);
+			(_TitleBlock?.Child as TextBlock).SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.SystemInactiveCaptionTextBrushKey);
 		}
 		sealed class InteractiveControlContainer : ContentControl, INonClientArea
 		{
