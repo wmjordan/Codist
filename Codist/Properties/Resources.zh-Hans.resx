@@ -825,7 +825,7 @@ Ctrl 单击：粘贴并选中下一项</value>
     <value>本页面的选项更改智能工具条的行为，该工具条默认在选中代码文本后自动出现</value>
   </data>
   <data name="OTC_BottomMargin" xml:space="preserve">
-    <value>底部留空:</value>
+    <value>下边距:</value>
   </data>
   <data name="OT_BottomMarginTip" xml:space="preserve">
     <value>本选项在代码编辑器每一行代码下增加额外的空白</value>
@@ -907,7 +907,7 @@ Ctrl 单击：粘贴并选中下一项</value>
     <value>提供高级语法突出显示和注释标记器</value>
   </data>
   <data name="OT_DonateLinkTip" xml:space="preserve">
-    <value>建议的捐赠值为$19.99。但是，您可以根据需要将金额修改为任何值</value>
+    <value>建议的捐赠金额为 49 人民币，但是，您可以根据您的经济状况，爱捐多少就捐多少</value>
   </data>
   <data name="OT_FeatureChangesTip" xml:space="preserve">
     <value>更改将应用到新打开的文档窗口上，当前打开的文档窗口将不受影响</value>
@@ -973,7 +973,7 @@ Ctrl 单击：粘贴并选中下一项</value>
     <value>可执行文件(*.exe)|*.exe</value>
   </data>
   <data name="OT_ExtensionNote" xml:space="preserve">
-    <value>此页面包含适用于Visual Studio扩展开发人员的功能</value>
+    <value>此页面包含适用于 Visual Studio 扩展开发人员的功能</value>
   </data>
   <data name="OT_ExtraHighlight" xml:space="preserve">
     <value>特殊语法功能</value>
@@ -1018,7 +1018,7 @@ Ctrl 单击：粘贴并选中下一项</value>
     <value>显示成员中包含的 #region</value>
   </data>
   <data name="OT_IncludeMemberRegionsTip" xml:space="preserve">
-    <value>在导航栏的菜单中显示成员内定义的# region 和 #endregion 指令</value>
+    <value>在导航栏的菜单中显示成员内定义的 #region 和 #endregion 指令</value>
   </data>
   <data name="OT_IncludePartialTypeMembers" xml:space="preserve">
     <value>显示 partial 类型外部文件中定义的成员</value>
@@ -1289,7 +1289,7 @@ https://github.com/snowie2000/mactype/releases</value>
     <value>URL 模式</value>
   </data>
   <data name="OT_URLSubstitution" xml:space="preserve">
-    <value>使用 ％u 表示搜索引擎URL</value>
+    <value>使用 ％u 表示搜索引擎 URL</value>
   </data>
   <data name="OT_UnlimitedSize" xml:space="preserve">
     <value>如上面的值为 0，表示不限大小</value>
@@ -1328,7 +1328,7 @@ https://github.com/snowie2000/mactype/releases</value>
     <value>该页面定义搜索引擎，右键单击智能工具栏上的“查找”按钮，可使用它们搜索选中内容</value>
   </data>
   <data name="OT_NaviBarShortcutKeys" xml:space="preserve">
-    <value>用于访问导航栏菜单的快捷键：
+    <value>用于访问导航栏菜单的默认快捷键：
 Ctrl +`，Ctrl +`：Edit.SearchDeclaration
 Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   </data>
@@ -1649,7 +1649,7 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
     <value>网址:</value>
   </data>
   <data name="OT_SearchParamSubsitution" xml:space="preserve">
-    <value>使用 %s 替代搜索关键字</value>
+    <value>使用 %s 表示搜索关键字</value>
   </data>
   <data name="T_Themes" xml:space="preserve">
     <value>样式主题:</value>
