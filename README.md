@@ -1,6 +1,7 @@
 # Codist
 
 *Codist* is a Visual Studio extension which strives to provide better coding experience and productivity for C# programmers.
+Codist 是一个致力于为 C# 程序员提供更佳的编码体验和效率的 Visual Studio 扩展。
 
 # Features
 
@@ -17,6 +18,7 @@ Check out this list to see what _Codist_ can do for you.
 * [Scrollbar Marker](#scrollbar-marker) draws a powerful mini code map
   ![Feature Brief Scrollbar Marker](doc/feature-brief-scrollbar-marker.png)
 * [Display Enhancements](#display-enhancements)
+* [Codist in Your Language](#codist-in-your-language)
 * [Others](#other-features)
 * [Comprehensive Configurations](#feature-control)
 * [Acknowledgements](#acknowledgements)
@@ -72,7 +74,7 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
   ![Syntax Highlight Customization Preview](doc/syntax-highlight-customization-preview.png)
 
-  If you want to change another syntax element, you can click on the place where it is applied in the code document window. If the customization window is still opened, and the _Selected Code_ section under _Syntax Categories_ is selected, when you focus on that window again, corresponding syntax styles will be listed for the place you clicked.
+  If you want to change another syntax element, you can click on the place where it is applied in the code document window. If the customization window is still opened, and the _Selected Code_ section under _Syntax Categories_ is selected, the list will display the corresponding syntax styles for the place you clicked immediately.
 
   You can explore other synta categories by clicking the list on the left of the dialog.
 
@@ -461,6 +463,16 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
   Within the *Extra line margins* group box, you can adjust margins between lines to make code lines more readable.
 
   Programmers who do not like *ClearType* rendering, which made text blurry and colorful, may want to try _Force Grayscale Text Rendering_ options.
+
+  From version 5.7 on, it is possible to use Compact menu like _Visual Studio 2019_ in _Visual Studio 2017_. Simply checking the _Move main menu to title bar_ option will do.
+
+  ![Compact Menu](doc/compact-menu.png)
+
+## Codist in Your Language
+
+  From version 5.7 on, it is possible to localize _Codist_ to other language. Simplified Chinese (简体中文) and English are provided by default.
+
+  The interface of _Codist_ will change according to the _International_ settings of _Visual Studio_.
 
 ## Other Features
 
