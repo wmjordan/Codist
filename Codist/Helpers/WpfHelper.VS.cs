@@ -38,7 +38,15 @@ namespace Codist
 				if (i > 0) {
 					inlines.Add(", ");
 				}
-				formatter.Format(inlines, parameters[i].Type, null, false);
+				var p = parameters[i];
+				if (p.IsOptional) {
+					inlines.Add("[");
+				}
+				AddParameterModifier(formatter, inlines, p);
+				formatter.Format(inlines, p.Type, null, false);
+				if (p.IsOptional) {
+					inlines.Add("]");
+				}
 			}
 			inlines.Add(")");
 			return block;
@@ -54,16 +62,7 @@ namespace Codist
 				if (p.IsOptional) {
 					inlines.Add("[");
 				}
-				if (p.IsParams) {
-					inlines.Add(new Run("params ") { Foreground = formatter.Keyword });
-				}
-				else {
-					switch (p.RefKind) {
-						case RefKind.Ref: inlines.Add(new Run("ref ") { Foreground = formatter.Keyword }); break;
-						case RefKind.Out: inlines.Add(new Run("out ") { Foreground = formatter.Keyword }); break;
-						case RefKind.In: inlines.Add(new Run("in ") { Foreground = formatter.Keyword }); break;
-					}
-				}
+				AddParameterModifier(formatter, inlines, p);
 				formatter.Format(inlines, p.Type, null, false);
 				inlines.Add(" ");
 				inlines.Add(p.Render(null, i == argIndex, formatter.Parameter));
@@ -74,6 +73,32 @@ namespace Codist
 			inlines.Add(")");
 			return block;
 		}
+
+		static void AddParameterModifier(SymbolFormatter formatter, InlineCollection inlines, IParameterSymbol p) {
+			switch (p.RefKind) {
+				case RefKind.Ref:
+					inlines.Add(new Run("ref ") {
+						Foreground = formatter.Keyword
+					});
+					return;
+				case RefKind.Out:
+					inlines.Add(new Run("out ") {
+						Foreground = formatter.Keyword
+					});
+					return;
+				case RefKind.In:
+					inlines.Add(new Run("in ") {
+						Foreground = formatter.Keyword
+					});
+					return;
+			}
+			if (p.IsParams) {
+				inlines.Add(new Run("params ") {
+					Foreground = formatter.Keyword
+				});
+			}
+		}
+
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, bool bold, SymbolFormatter formatter) {
 			if (symbol != null) {
 				formatter.Format(block.Inlines, symbol, alias, bold);
