@@ -57,14 +57,21 @@ namespace Codist.QuickInfo
 			}
 			if (symbol.Kind == SymbolKind.Method) {
 				if (((IMethodSymbol)symbol).MethodKind == MethodKind.LambdaMethod) {
-					description.Append("(");
-					foreach (var item in ((IMethodSymbol)symbol).Parameters) {
-						if (item.Ordinal > 0) {
-							description.Append(", ");
+					using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(30)) {
+						var sb = sbr.Resource;
+						sb.Append('(');
+						foreach (var item in ((IMethodSymbol)symbol).Parameters) {
+							if (item.Ordinal > 0) {
+								sb.Append(", ");
+							}
+							sb.Append(item.Type.ToDisplayString(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat))
+								.Append(item.Type.GetParameterString())
+								.Append(' ')
+								.Append(item.Name);
 						}
-						description.Append(item.Type.Name + item.Type.GetParameterString() + " " + item.Name);
+						sb.Append(')');
+						description.Append(sb.ToString(), ThemeHelper.DocumentTextBrush);
 					}
-					description.Append(")");
 				}
 			}
 			description.UseDummyToolTip();
