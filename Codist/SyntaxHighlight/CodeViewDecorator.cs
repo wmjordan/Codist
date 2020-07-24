@@ -66,10 +66,12 @@ namespace Codist.SyntaxHighlight
 		void MarkInitialized(object sender, DependencyPropertyChangedEventArgs e) {
 			if ((bool)e.NewValue) {
 				_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
+				_TextView.VisualElement.IsVisibleChanged -= MarkInitialized;
 				_EditorFormatMap.FormatMappingChanged -= BackupFormat;
 				Debug.WriteLine("Decorator initialized");
 				Decorate(FormatStore.ClassificationTypeStore.Keys, true);
 				_Initialized = true;
+				_EditorFormatMap.FormatMappingChanged -= FormatUpdated;
 				_EditorFormatMap.FormatMappingChanged += FormatUpdated;
 			}
 		}
@@ -79,7 +81,9 @@ namespace Codist.SyntaxHighlight
 			Config.Updated -= SettingsUpdated;
 			//_ClassificationFormatMap.ClassificationFormatMappingChanged -= FormatUpdated;
 			_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
+			_TextView.VisualElement.IsVisibleChanged -= MarkInitialized;
 			_EditorFormatMap.FormatMappingChanged -= FormatUpdated;
+			_EditorFormatMap.FormatMappingChanged -= BackupFormat;
 			_TextView.Closed -= View_Closed;
 		}
 

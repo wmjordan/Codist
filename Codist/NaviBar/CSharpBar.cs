@@ -38,9 +38,9 @@ namespace Codist.NaviBar
 			_SemanticContext = SemanticContext.GetOrCreateSingetonInstance(textView);
 			Name = nameof(CSharpBar);
 			Items.Add(_RootItem = new RootItem(this));
+			View.Closed += ViewClosed;
 			View.TextBuffer.Changed += TextBuffer_Changed;
 			View.Selection.SelectionChanged += Update;
-			View.Closed += ViewClosed;
 			Config.Updated += Config_Updated;
 			Update(this, EventArgs.Empty);
 			if (_SemanticContext.Compilation != null) {

@@ -53,6 +53,7 @@ namespace Codist.NaviBar
 		void View_Closed(object sender, EventArgs e) {
 			View.Closed -= View_Closed;
 			View.Selection.SelectionChanged -= Update;
+			View.TextBuffer.PostChanged -= Update;
 		}
 
 		void Update(object sender, EventArgs e) {
