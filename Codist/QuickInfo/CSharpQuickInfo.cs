@@ -167,7 +167,7 @@ namespace Codist.QuickInfo
 				ShowCandidateInfo(qiContent, candidates);
 			}
 			if (symbol == null) {
-				ShowMiscInfo(qiContent, currentSnapshot, node);
+				ShowMiscInfo(qiContent, node);
 				if (node.IsKind(SyntaxKind.Block) || node.IsKind(SyntaxKind.SwitchStatement)) {
 					ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
 				}
@@ -476,7 +476,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.ReadVariables, p)));
 			}
 		}
-		static void ShowMiscInfo(QiContainer qiContent, ITextSnapshot currentSnapshot, SyntaxNode node) {
+		static void ShowMiscInfo(QiContainer qiContent, SyntaxNode node) {
 			StackPanel infoBox = null;
 			var nodeKind = node.Kind();
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && (nodeKind == SyntaxKind.NumericLiteralExpression || nodeKind == SyntaxKind.CharacterLiteralExpression)) {
@@ -1253,7 +1253,7 @@ namespace Codist.QuickInfo
 					if (m.IsGenericMethod) {
 						foreach (var item in m.TypeArguments) {
 							if (item.IsAnonymousType) {
-								Add(ref types, item as ITypeSymbol);
+								Add(ref types, item);
 							}
 						}
 					}
@@ -1285,7 +1285,7 @@ namespace Codist.QuickInfo
 						if (m.Kind != SymbolKind.Property) {
 							continue;
 						}
-						var pt = m.GetReturnType() as ITypeSymbol;
+						var pt = m.GetReturnType();
 						string alias = null;
 						if (pt != null && pt.IsAnonymousType) {
 							Add(ref anonymousTypes, pt);
