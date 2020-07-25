@@ -165,9 +165,8 @@ namespace Codist.Taggers
 		static ClassificationTypeDefinition ResourceKeyword;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeClassName)]
-		[Name(Constants.CSharpSealedClassName)]
-		static ClassificationTypeDefinition SealedClass;
+		[Name(Constants.CSharpSealedMemberName)]
+		static ClassificationTypeDefinition SealedClassOrMember;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]

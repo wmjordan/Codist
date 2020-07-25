@@ -427,15 +427,19 @@ namespace Codist.Taggers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CSharpSealedClassName)]
-	[Name(Constants.CSharpSealedClassName)]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpSealedMemberName)]
+	[Name(Constants.CSharpSealedMemberName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
+	[Order(After = Constants.CodeClassName)]
+	[Order(After = Constants.CodeMethodName)]
+	[Order(After = Constants.CodePropertyName)]
+	[Order(After = Constants.CodeEventName)]
 	[Order(Before = Constants.CSharpUserSymbol)]
-	sealed class SealedClassFormat : ClassificationFormatDefinition
+	sealed class SealedMemberFormat : ClassificationFormatDefinition
 	{
-		public SealedClassFormat() {
-			DisplayName = Constants.NameOfMe + ": sealed class";
+		public SealedMemberFormat() {
+			DisplayName = Constants.NameOfMe + ": sealed class or member";
 		}
 	}
 

@@ -149,7 +149,7 @@ namespace Codist
 		public const string CSharpVirtualMemberName = "C#: Virtual member";
 		public const string CSharpVolatileFieldName = "C#: Volatile field";
 		public const string CSharpAbstractMemberName = "C#: Abstract member";
-		public const string CSharpSealedClassName = "C#: Sealed class";
+		public const string CSharpSealedMemberName = "C#: Sealed class or member";
 		public const string CSharpAttributeName = "C#: Attribute name";
 		public const string CSharpAttributeNotation = "C#: Attribute notation";
 		public const string CSharpLabel = "C#: Label";
@@ -593,9 +593,8 @@ namespace Codist
 		[BaseDefinition(Constants.CodeNamespaceName)]
 		NamespaceName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpSealedClassName)]
-		[BaseDefinition(Constants.CodeClassName)]
-		[Description("Name of sealed class, inheriting from Class Name")]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpSealedMemberName)]
+		[Description("Name of sealed class or sealed member")]
 		SealedClassName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName)]

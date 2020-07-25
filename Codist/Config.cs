@@ -170,6 +170,7 @@ namespace Codist
 			LoadStyleEntries<XmlCodeStyle, XmlStyleTypes>(config.XmlCodeStyles, removeFontNames);
 			LoadStyleEntries<MarkdownStyle, MarkdownStyleTypes>(config.MarkdownStyles, removeFontNames);
 			LoadStyleEntries<SymbolMarkerStyle, SymbolMarkerStyleTypes>(config.SymbolMarkerStyles, removeFontNames);
+			MigrateSyntaxStyleNames(config);
 			if (styleFilter == StyleFilters.All) {
 				// don't override other settings if loaded from predefined themes or syntax config file
 				ResetCodeStyle(Instance.GeneralStyles, config.GeneralStyles);
@@ -200,6 +201,17 @@ namespace Codist
 			_LastLoaded = DateTime.Now;
 			Debug.WriteLine("Config loaded");
 			return config;
+		}
+
+		static void MigrateSyntaxStyleNames(Config config) {
+			if (config.Styles == null) {
+				return;
+			}
+			foreach (var item in config.Styles) {
+				if (item.Key == "C#: Sealed class") {
+					item.Key = Constants.CSharpSealedMemberName;
+				}
+			}
 		}
 
 		public static void ResetStyles() {
