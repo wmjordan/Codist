@@ -873,10 +873,15 @@ namespace Codist
 		public static int CompareByAccessibilityKindName(ISymbol a, ISymbol b) {
 			int s;
 			if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first
-				|| (s = a.Kind - b.Kind) != 0) { // then by member kind
+				|| (s = a.Kind - b.Kind) != 0 // then by member kind
+				|| (s = a.Name.CompareTo(b.Name)) != 0) { // then by name
 				return s;
 			}
-			return a.Name.CompareTo(b.Name);
+			switch (a.Kind) {
+				case SymbolKind.NamedType: return ((INamedTypeSymbol)a).Arity.CompareTo(((INamedTypeSymbol)b).Arity);
+				case SymbolKind.Method: return ((IMethodSymbol)a).Arity.CompareTo(((IMethodSymbol)b).Arity);
+				default: return 0;
+			}
 		}
 
 		public static int CompareByFieldIntegerConst(ISymbol a, ISymbol b) {
