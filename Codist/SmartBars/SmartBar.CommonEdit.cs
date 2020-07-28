@@ -30,13 +30,14 @@ namespace Codist.SmartBars
 			}
 			ctx.KeepToolBar(false);
 			TextEditorHelper.ExecuteEditorCommand(command);
-			if (Keyboard.Modifiers == ModifierKeys.Control && FindNext(ctx, text) == false) {
+			if (Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
+				&& FindNext(ctx, text) == false) {
 				ctx.HideToolBar();
 			}
 		}
 
 		protected static bool FindNext(CommandContext ctx, string t) {
-			return ctx.View.FindNext(ctx.TextSearchService, t);
+			return ctx.View.FindNext(ctx.TextSearchService, t, TextEditorHelper.GetFindOptionsFromKeyboardModifiers());
 		}
 
 		protected static SnapshotSpan Replace(CommandContext ctx, Func<string, string> replaceHandler, bool selectModified) {
@@ -55,7 +56,7 @@ namespace Codist.SmartBars
 			});
 			if (edited != null) {
 				firstModified = edited.Value;
-				if (t != null && Keyboard.Modifiers == ModifierKeys.Control && FindNext(ctx, t) == false) {
+				if (t != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift) && FindNext(ctx, t) == false) {
 					ctx.HideToolBar();
 				}
 				else if (selectModified) {
@@ -71,7 +72,8 @@ namespace Codist.SmartBars
 			string s = ctx.View.GetFirstSelectionText();
 			ctx.KeepToolBar(false);
 			var firstModified = ctx.View.WrapWith(prefix, suffix);
-			if (s != null && Keyboard.Modifiers == ModifierKeys.Control && FindNext(ctx, s) == false) {
+			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
+				&& FindNext(ctx, s) == false) {
 				ctx.HideToolBar();
 			}
 			else if (selectModified) {
@@ -138,7 +140,7 @@ namespace Codist.SmartBars
 					return;
 				}
 				ctx.KeepToolBar(false);
-				var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t, Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) ? FindOptions.MatchCase : FindOptions.None);
+				var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t, Keyboard.Modifiers == ModifierKeys.Control ? FindOptions.MatchCase | FindOptions.Wrap : Keyboard.Modifiers == ModifierKeys.Shift ? FindOptions.Wrap | FindOptions.WholeWord : FindOptions.None);
 				if (r.HasValue) {
 					ctx.View.SelectSpan(r.Value);
 					ctx.KeepToolBar(true);
@@ -146,7 +148,9 @@ namespace Codist.SmartBars
 				else {
 					ctx.HideToolBar();
 				}
-			}, ctx => __FindAndReplaceCommands.Concat(Config.Instance.SearchEngines.ConvertAll(s => new CommandItem(IconIds.SearchWebSite, R.CMD_SearchWith.Replace("<NAME>", s.Name), c => SearchSelection(s.Pattern, c)))));
+			}, ctx => __FindAndReplaceCommands.Concat(
+				Config.Instance.SearchEngines.ConvertAll(s => new CommandItem(IconIds.SearchWebSite, R.CMD_SearchWith.Replace("<NAME>", s.Name), c => SearchSelection(s.Pattern, c))))
+			);
 		}
 
 		void AddPasteCommand() {

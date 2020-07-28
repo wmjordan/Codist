@@ -248,7 +248,8 @@ namespace Codist.Properties {
         /// <summary>
         ///   查找类似 Delete selected text
         ///Right click: Delete line
-        ///Ctrl click: Delete and select next 的本地化字符串。
+        ///Ctrl click: Delete and select next
+        ///Shift click: Delete and select next (whole word) 的本地化字符串。
         /// </summary>
         internal static string CMD_DeleteSelectedText {
             get {
@@ -768,7 +769,8 @@ namespace Codist.Properties {
         /// <summary>
         ///   查找类似 Paste text from clipboard
         ///Right click: Paste over line
-        ///Ctrl click: Paste and select next 的本地化字符串。
+        ///Ctrl click: Paste and select next
+        ///Shift click: Paste and select next (whole word) 的本地化字符串。
         /// </summary>
         internal static string CMD_Paste {
             get {

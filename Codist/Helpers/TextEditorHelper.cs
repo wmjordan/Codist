@@ -266,11 +266,20 @@ namespace Codist
 			}
 		}
 
-		public static bool FindNext(this ITextView view, ITextSearchService2 searchService, string text) {
+		public static FindOptions GetFindOptionsFromKeyboardModifiers() {
+			switch (Keyboard.Modifiers) {
+				case ModifierKeys.Control: return FindOptions.MatchCase | FindOptions.Wrap;
+				case ModifierKeys.Shift: return FindOptions.WholeWord | FindOptions.Wrap;
+				case ModifierKeys.Control | ModifierKeys.Shift: return FindOptions.MatchCase | FindOptions.WholeWord | FindOptions.Wrap;
+				default: return FindOptions.Wrap;
+			}
+		}
+
+		public static bool FindNext(this ITextView view, ITextSearchService2 searchService, string text, FindOptions options) {
 			if (String.IsNullOrEmpty(text)) {
 				return false;
 			}
-			var r = searchService.Find(view.Selection.StreamSelectionSpan.End.Position, text, FindOptions.MatchCase);
+			var r = searchService.Find(view.Selection.StreamSelectionSpan.End.Position, text, options);
 			if (r.HasValue) {
 				view.SelectSpan(r.Value);
 				return true;

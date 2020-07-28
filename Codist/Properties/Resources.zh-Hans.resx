@@ -236,7 +236,8 @@
   <data name="CMD_DeleteSelectedText" xml:space="preserve">
     <value>删除选中文本
 右键：删除整行
-Ctrl单击：删除并选中下一项</value>
+Ctrl单击：删除并选中下一项
+Shift单击：删除并选中下一项（整个单词）</value>
   </data>
   <data name="CMD_DuplicateSelection" xml:space="preserve">
     <value>重复选中内容
@@ -309,7 +310,8 @@ Ctrl 单击：匹配大小写查找
   <data name="CMD_Paste" xml:space="preserve">
     <value>粘贴文本
 右键：覆盖整行粘贴
-Ctrl 单击：粘贴并选中下一项</value>
+Ctrl 单击：粘贴并选中下一项
+Shift单击：删除并选中下一项（整个单词）</value>
   </data>
   <data name="CMD_RenameSymbol" xml:space="preserve">
     <value>重命名符号</value>

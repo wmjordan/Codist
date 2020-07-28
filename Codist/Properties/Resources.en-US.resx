@@ -167,7 +167,8 @@ Right click: Debugger menu...</value>
   <data name="CMD_DeleteSelectedText" xml:space="preserve">
     <value>Delete selected text
 Right click: Delete line
-Ctrl click: Delete and select next</value>
+Ctrl click: Delete and select next
+Shift click: Delete and select next (whole word)</value>
   </data>
   <data name="CMD_DuplicateSelection" xml:space="preserve">
     <value>Duplicate selection
@@ -306,7 +307,8 @@ Hint: To create a new GUID, type 'guid' (without quotes) and select it</value>
   <data name="CMD_Paste" xml:space="preserve">
     <value>Paste text from clipboard
 Right click: Paste over line
-Ctrl click: Paste and select next</value>
+Ctrl click: Paste and select next
+Shift click: Paste and select next (whole word)</value>
   </data>
   <data name="CMD_Pin" xml:space="preserve">
     <value>Pin</value>

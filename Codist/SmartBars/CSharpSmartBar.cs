@@ -287,7 +287,8 @@ namespace Codist.SmartBars
 						}
 						edit.Replace(item, (SyntaxFacts.GetKeywordKind(t) != SyntaxKind.None ? "<see langword=\"" : "<see cref=\"") + t + "\"/>");
 					}
-					if (t != null && Keyboard.Modifiers == ModifierKeys.Control && FindNext(ctx, t) == false) {
+					if (t != null && Keyboard.Modifiers.MatchFlags(ModifierKeys.Control | ModifierKeys.Shift)
+						&& FindNext(ctx, t) == false) {
 						ctx.HideToolBar();
 					}
 				});

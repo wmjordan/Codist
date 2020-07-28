@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
+using AppHelpers;
 using R = Codist.Properties.Resources;
 
 namespace Codist.NaviBar
@@ -155,7 +156,8 @@ namespace Codist.NaviBar
 		SnapshotSpan WrapWith(string prefix, string suffix, bool selectModified) {
 			string s = View.GetFirstSelectionText();
 			var firstModified = View.WrapWith(prefix, suffix);
-			if (s != null && Keyboard.Modifiers == ModifierKeys.Control && View.FindNext(_TextSearch, s) == false) {
+			if (s != null && Keyboard.Modifiers.MatchFlags(ModifierKeys.Control | ModifierKeys.Shift)
+				&& View.FindNext(_TextSearch, s, TextEditorHelper.GetFindOptionsFromKeyboardModifiers()) == false) {
 				//
 			}
 			else if (selectModified) {
