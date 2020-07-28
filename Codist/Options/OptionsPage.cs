@@ -107,7 +107,7 @@ namespace Codist.Options
 			};
 		}
 
-		public static void BindDependentOptionControls(this CheckBox checkBox, params UIElement[] dependentControls) {
+		public static void BindDependentOptionControls(this System.Windows.Controls.Primitives.ToggleButton checkBox, params UIElement[] dependentControls) {
 			checkBox.Checked += (s, args) => Array.ForEach(dependentControls, c => c.IsEnabled = true);
 			checkBox.Unchecked += (s, args) => Array.ForEach(dependentControls, c => c.IsEnabled = false);
 		}
