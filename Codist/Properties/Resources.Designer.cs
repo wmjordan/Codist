@@ -2027,6 +2027,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Include members in base classes 的本地化字符串。
+        /// </summary>
+        internal static string OT_IncludeBaseTypeMembers {
+            get {
+                return ResourceManager.GetString("OT_IncludeBaseTypeMembers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Displays members defined in code files for base types in the drop-down menu of navigation bar 的本地化字符串。
+        /// </summary>
+        internal static string OT_IncludeBaseTypeMembersTip {
+            get {
+                return ResourceManager.GetString("OT_IncludeBaseTypeMembersTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Include #region within member 的本地化字符串。
         /// </summary>
         internal static string OT_IncludeMemberRegions {

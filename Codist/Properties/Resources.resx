@@ -1691,4 +1691,10 @@ Line: {Line}</value>
   <data name="OT_OverrideMainMenu" xml:space="preserve">
     <value>Move main menu to title bar (VS 2017 only)</value>
   </data>
+  <data name="OT_IncludeBaseTypeMembers" xml:space="preserve">
+    <value>Include members in base classes</value>
+  </data>
+  <data name="OT_IncludeBaseTypeMembersTip" xml:space="preserve">
+    <value>Displays members defined in code files for base types in the drop-down menu of navigation bar</value>
+  </data>
 </root>

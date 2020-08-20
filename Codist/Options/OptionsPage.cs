@@ -667,7 +667,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly OptionBox<NaviBarOptions> _SyntaxDetail, _SymbolToolTip, _RegionOnBar, _StripRegionNonLetter, _RangeHighlight,
-				_ParameterList, _ParameterListShowParamName, _FieldValue, _AutoPropertyAnnotation, _PartialClassMember, _Region, _RegionInMember, _LineOfCode;
+				_ParameterList, _ParameterListShowParamName, _FieldValue, _AutoPropertyAnnotation, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode;
 			readonly OptionBox<NaviBarOptions>[] _Options;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -698,6 +698,8 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_PropertyAccessorsTip),
 					_PartialClassMember = o.CreateOptionBox(NaviBarOptions.PartialClassMember, UpdateConfig, R.OT_IncludePartialTypeMembers)
 						.SetLazyToolTip(() => R.OT_IncludePartialTypeMembersTip),
+					_BaseClassMember = o.CreateOptionBox(NaviBarOptions.BaseClassMember, UpdateConfig, R.OT_IncludeBaseTypeMembers)
+						.SetLazyToolTip(() => R.OT_IncludeBaseTypeMembersTip),
 					_Region = o.CreateOptionBox(NaviBarOptions.Region, UpdateConfig, R.OT_IncludeRegions)
 						.SetLazyToolTip(() => R.OT_IncludeRegionsTip),
 					_RegionInMember = o.CreateOptionBox(NaviBarOptions.RegionInMember, UpdateConfig, R.OT_IncludeMemberRegions)
@@ -712,7 +714,7 @@ namespace Codist.Options
 					);
 
 				_Options = new[] { _SyntaxDetail, _SymbolToolTip, _RegionOnBar, _StripRegionNonLetter, _RangeHighlight,
-				_ParameterList, _ParameterListShowParamName, _FieldValue, _AutoPropertyAnnotation, _PartialClassMember, _Region, _RegionInMember, _LineOfCode };
+				_ParameterList, _ParameterListShowParamName, _FieldValue, _AutoPropertyAnnotation, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode };
 				foreach (var item in new[] { _StripRegionNonLetter, _ParameterListShowParamName, _AutoPropertyAnnotation, _RegionInMember }) {
 					item.WrapMargin(SubOptionMargin);
 				}

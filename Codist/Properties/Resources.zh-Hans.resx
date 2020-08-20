@@ -1680,4 +1680,10 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   <data name="OT_OverrideMainMenu" xml:space="preserve">
     <value>将主菜单移到标题栏 (仅 VS 2017)</value>
   </data>
+  <data name="OT_IncludeBaseTypeMembers" xml:space="preserve">
+    <value>显示基类代码文件中定义的成员</value>
+  </data>
+  <data name="OT_IncludeBaseTypeMembersTip" xml:space="preserve">
+    <value>在导航栏的下拉菜单中显示基类定义的成员</value>
+  </data>
 </root>
