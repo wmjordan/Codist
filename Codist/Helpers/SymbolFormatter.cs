@@ -190,13 +190,71 @@ namespace Codist
 					return;
 				default: text.Add(symbol.Name); return;
 			}
+		}
 
-			Brush GetBrushForMethod(IMethodSymbol m) {
-				switch (m.ContainingType.TypeKind) {
-					case TypeKind.Class: return Class;
-					case TypeKind.Struct: return Struct;
-				}
-				return Method;
+		Brush GetBrushForMethod(IMethodSymbol m) {
+			switch (m.ContainingType.TypeKind) {
+				case TypeKind.Class: return Class;
+				case TypeKind.Struct: return Struct;
+			}
+			return Method;
+		}
+
+		internal Brush GetBrush(ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.ArrayType:
+					return GetBrush((IArrayTypeSymbol)symbol);
+				case SymbolKind.Event: return Event;
+				case SymbolKind.Field: return ((IFieldSymbol)symbol).IsConst ? Const : Field;
+				case SymbolKind.Method:
+					var method = (IMethodSymbol)symbol;
+					return method.MethodKind != MethodKind.Constructor
+						? Method
+						: GetBrushForMethod(method);
+				case SymbolKind.NamedType:
+					var type = (INamedTypeSymbol)symbol;
+					var specialType = type.GetSpecialTypeAlias();
+					if (specialType != null) {
+						return Keyword;
+					}
+					switch (type.TypeKind) {
+						case TypeKind.Class: return Class;
+						case TypeKind.Delegate: return Delegate;
+						case TypeKind.Dynamic: return Keyword;
+						case TypeKind.Enum: return Enum;
+						case TypeKind.Interface: return Interface;
+						case TypeKind.Struct: return Struct;
+						case TypeKind.TypeParameter: return TypeParameter;
+						default: return Class;
+					}
+				case SymbolKind.Namespace: return Namespace;
+				case SymbolKind.Parameter: return Parameter;
+				case SymbolKind.Property: return Property;
+				case SymbolKind.Local: return Local;
+				case SymbolKind.TypeParameter: return TypeParameter;
+				case SymbolKind.PointerType: return GetBrush(((IPointerTypeSymbol)symbol).PointedAtType);
+				default: return null;
+			}
+		}
+
+		internal Brush GetBrush(SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.PropertyDeclaration:
+				case SyntaxKind.IndexerDeclaration: return Property;
+				case SyntaxKind.FieldDeclaration: return Field;
+				case SyntaxKind.ConstructorDeclaration: return GetBrush(node.Parent);
+				case SyntaxKind.MethodDeclaration: return Method;
+				case SyntaxKind.ClassDeclaration: return Class;
+				case SyntaxKind.StructDeclaration: return Struct;
+				case SyntaxKind.InterfaceDeclaration: return Interface;
+				case SyntaxKind.EventDeclaration:
+				case SyntaxKind.EventFieldDeclaration: return Event;
+				case SyntaxKind.DelegateDeclaration: return Delegate;
+				case SyntaxKind.EnumDeclaration: return Enum;
+				case SyntaxKind.EnumMemberDeclaration: return EnumField;
+				case SyntaxKind.NamespaceDeclaration: return Namespace;
+				case SyntaxKind.VariableDeclarator: return GetBrush(node.Parent.Parent);
+				default: return null;
 			}
 		}
 
