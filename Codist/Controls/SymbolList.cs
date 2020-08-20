@@ -661,7 +661,7 @@ namespace Codist.Controls
 			get => _Content ?? (_Content = Symbol != null
 				? CreateContentForSymbol(Symbol, _IncludeContainerType, true)
 				: SyntaxNode != null
-					? new ThemedMenuText().Append(SyntaxNode.GetDeclarationSignature())
+					? new ThemedMenuText().Append(SyntaxNode.GetDeclarationSignature(), SymbolFormatter.Instance.GetBrush(SyntaxNode))
 					: new ThemedMenuText());
 			set => _Content = value;
 		}
@@ -732,7 +732,7 @@ namespace Codist.Controls
 			if (includeType && symbol.ContainingType != null) {
 				t.Append(symbol.ContainingType.Name + symbol.ContainingType.GetParameterString() + ".", ThemeHelper.SystemGrayTextBrush);
 			}
-			t.Append(symbol.GetOriginalName());
+			t.Append(symbol.GetOriginalName(), SymbolFormatter.Instance.GetBrush(symbol));
 			if (includeParameter) {
 				t.Append(symbol.GetParameterString(), ThemeHelper.SystemGrayTextBrush);
 			}
