@@ -9,6 +9,7 @@ using System.Windows.Media;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist
@@ -241,7 +242,7 @@ namespace Codist
 			switch (node.Kind()) {
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.IndexerDeclaration: return Property;
-				case SyntaxKind.FieldDeclaration: return Field;
+				case SyntaxKind.FieldDeclaration: return ((BaseFieldDeclarationSyntax)node).Modifiers.Any(SyntaxKind.ConstKeyword) ? Const : Field;
 				case SyntaxKind.ConstructorDeclaration: return GetBrush(node.Parent);
 				case SyntaxKind.MethodDeclaration: return Method;
 				case SyntaxKind.ClassDeclaration: return Class;
