@@ -27,6 +27,9 @@ namespace Codist.SmartBars
 			AddCommand(MyToolBar, IconIds.GoToDeclaration, R.CMD_GoToDeclaration, ctx => {
 				TextEditorHelper.ExecuteEditorCommand("Edit.GoToDeclaration", GetCurrentWord(ctx.View));
 			});
+			AddCommand(MyToolBar, IconIds.FindReference, R.CMD_FindAllReferences, ctx => {
+				TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences");
+			});
 			var mode = CodistPackage.DebuggerStatus;
 			if (mode != DebuggerStatus.Running) {
 				//AddEditorCommand(MyToolBar, KnownImageIds.IntellisenseLightBulb, "EditorContextMenus.CodeWindow.QuickActionsForPosition", "Quick actions for position");
