@@ -60,6 +60,7 @@ namespace Codist
 		public const int OverrideEvent = KnownImageIds.ModifyEvent;
 		public const int OverrideProperty = KnownImageIds.ModifyProperty;
 		public const int OverrideMethod = KnownImageIds.ModifyMethod;
+		public const int Constant = KnownImageIds.Constant;
 
 		// interface icons
 		public const int Filter = KnownImageIds.Filter;

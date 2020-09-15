@@ -58,6 +58,9 @@ namespace Codist.Controls
 				if (_Symbol.IsQualifiable()) {
 					Items.Add(CreateItem(IconIds.Copy, R.CMD_CopyQualifiedSymbolName, CopyQualifiedSymbolName));
 				}
+				if (_Symbol.Kind == SymbolKind.Field && ((IFieldSymbol)_Symbol).HasConstantValue) {
+					Items.Add(CreateItem(IconIds.Constant, R.CMD_CopyConstantValue, CopyConstantValue));
+				}
 			}
 		}
 
@@ -167,6 +170,7 @@ namespace Codist.Controls
 				}
 				else if (t.TypeKind == TypeKind.Interface) {
 					Items.Add(CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, () => FindImplementations(t, _SemanticContext)));
+					Items.Add(CreateItem(IconIds.FindDerivedClasses, R.CMD_FindInheritedInterfaces, () => FindSubInterfaces(t, _SemanticContext)));
 				}
 			}
 			if (t.TypeKind == TypeKind.Delegate) {
@@ -298,6 +302,11 @@ namespace Codist.Controls
 		static void FindDerivedClasses(ISymbol symbol, SemanticContext context) {
 			var classes = SyncHelper.RunSync(() => SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, context.Document.Project.Solution, null, default)).ToList();
 			ShowSymbolMenuForResult(symbol, context, classes, R.T_DerivedClasses, false);
+		}
+
+		static void FindSubInterfaces(ISymbol symbol, SemanticContext context) {
+			var interfaces = SyncHelper.RunSync(() => (symbol as INamedTypeSymbol).FindSubInterfaceAsync(context.Document.Project, default)).ToList();
+			ShowSymbolMenuForResult(symbol, context, interfaces, R.T_DerivedInterfaces, false);
 		}
 
 		static void FindOverrides(ISymbol symbol, SemanticContext context) {
@@ -479,6 +488,18 @@ namespace Codist.Controls
 						break;
 				}
 				Clipboard.SetDataObject(t);
+			}
+			catch (SystemException) {
+				// ignore failure
+			}
+		}
+		void CopyConstantValue(object sender, RoutedEventArgs args) {
+			var f = _Symbol as IFieldSymbol;
+			if (f.HasConstantValue == false) {
+				return;
+			}
+			try {
+				Clipboard.SetDataObject(f.ConstantValue?.ToString() ?? "null");
 			}
 			catch (SystemException) {
 				// ignore failure

@@ -1686,4 +1686,10 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   <data name="OT_IncludeBaseTypeMembersTip" xml:space="preserve">
     <value>在导航栏的下拉菜单中显示基类定义的成员</value>
   </data>
+  <data name="CMD_CopyConstantValue" xml:space="preserve">
+    <value>复制常量值</value>
+  </data>
+  <data name="CMD_FindInheritedInterfaces" xml:space="preserve">
+    <value>查找继承的接口...</value>
+  </data>
 </root>

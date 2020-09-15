@@ -1697,4 +1697,13 @@ Line: {Line}</value>
   <data name="OT_IncludeBaseTypeMembersTip" xml:space="preserve">
     <value>Displays members defined in code files for base types in the drop-down menu of navigation bar</value>
   </data>
+  <data name="CMD_CopyConstantValue" xml:space="preserve">
+    <value>Copy Constant Value</value>
+  </data>
+  <data name="CMD_FindInheritedInterfaces" xml:space="preserve">
+    <value>Find Inherited Interfaces...</value>
+  </data>
+  <data name="T_DerivedInterfaces" xml:space="preserve">
+    <value>derived interfaces</value>
+  </data>
 </root>
