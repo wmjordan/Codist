@@ -1692,4 +1692,7 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   <data name="CMD_FindInheritedInterfaces" xml:space="preserve">
     <value>查找继承的接口...</value>
   </data>
+  <data name="T_DerivedInterfaces" xml:space="preserve">
+    <value>派生接口</value>
+  </data>
 </root>
