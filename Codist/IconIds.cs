@@ -155,7 +155,7 @@ namespace Codist
 		public const int FindReferencingSymbols = KnownImageIds.ShowBuiltIns;
 		public const int FindReferrers = KnownImageIds.ShowCallerGraph;
 		public const int FindTypeReferrers = KnownImageIds.ShowReferencedElements;
-		public const int FindDerivedClasses = KnownImageIds.NewClass;
+		public const int FindDerivedTypes = KnownImageIds.ParentChildAttribute;
 		public const int FindImplementations = KnownImageIds.ImplementInterface;
 		public const int FindSymbolsWithName = KnownImageIds.DisplayName;
 		public const int FindOverloads = KnownImageIds.OverloadBehavior;

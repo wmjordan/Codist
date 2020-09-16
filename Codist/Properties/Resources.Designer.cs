@@ -3777,7 +3777,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to derived interfaces.
+        ///   Looks up a localized string similar to  derived interfaces.
         /// </summary>
         internal static string T_DerivedInterfaces {
             get {

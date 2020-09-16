@@ -166,11 +166,11 @@ namespace Codist.Controls
 			}
 			if (t.IsSealed == false) {
 				if (t.TypeKind == TypeKind.Class) {
-					Items.Add(CreateItem(IconIds.FindDerivedClasses, R.CMD_FindDerivedClasses, () => FindDerivedClasses(t, _SemanticContext)));
+					Items.Add(CreateItem(IconIds.FindDerivedTypes, R.CMD_FindDerivedClasses, () => FindDerivedClasses(t, _SemanticContext)));
 				}
 				else if (t.TypeKind == TypeKind.Interface) {
 					Items.Add(CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, () => FindImplementations(t, _SemanticContext)));
-					Items.Add(CreateItem(IconIds.FindDerivedClasses, R.CMD_FindInheritedInterfaces, () => FindSubInterfaces(t, _SemanticContext)));
+					Items.Add(CreateItem(IconIds.FindDerivedTypes, R.CMD_FindInheritedInterfaces, () => FindSubInterfaces(t, _SemanticContext)));
 				}
 			}
 			if (t.TypeKind == TypeKind.Delegate) {
@@ -305,7 +305,7 @@ namespace Codist.Controls
 		}
 
 		static void FindSubInterfaces(ISymbol symbol, SemanticContext context) {
-			var interfaces = SyncHelper.RunSync(() => (symbol as INamedTypeSymbol).FindSubInterfaceAsync(context.Document.Project, default)).ToList();
+			var interfaces = SyncHelper.RunSync(() => (symbol as INamedTypeSymbol).FindDerivedInterfacesAsync(context.Document.Project, default)).ToList();
 			ShowSymbolMenuForResult(symbol, context, interfaces, R.T_DerivedInterfaces, false);
 		}
 

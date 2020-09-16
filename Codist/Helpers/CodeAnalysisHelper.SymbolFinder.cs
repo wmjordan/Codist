@@ -72,7 +72,7 @@ namespace Codist
 			return members;
 		}
 
-		public static async Task<List<INamedTypeSymbol>> FindSubInterfaceAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
+		public static async Task<List<INamedTypeSymbol>> FindDerivedInterfacesAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var r = new List<INamedTypeSymbol>();
 			foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {

@@ -1704,6 +1704,6 @@ Line: {Line}</value>
     <value>Find Inherited Interfaces...</value>
   </data>
   <data name="T_DerivedInterfaces" xml:space="preserve">
-    <value>derived interfaces</value>
+    <value> derived interfaces</value>
   </data>
 </root>
