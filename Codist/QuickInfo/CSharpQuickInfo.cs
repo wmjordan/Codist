@@ -324,7 +324,7 @@ namespace Codist.QuickInfo
 					: symbol.GetSyntaxNode();
 				if (ss != null) {
 					var df = _SemanticModel.AnalyzeDataFlow(ss);
-					var captured = df.ReadInside.RemoveAll(i => df.VariablesDeclared.Contains(i));
+					var captured = df.ReadInside.RemoveAll(i => df.VariablesDeclared.Contains(i) || (i as ILocalSymbol)?.IsConst == true);
 					if (captured.Length > 0) {
 						var p = new ThemedTipParagraph(IconIds.ReadVariables, new ThemedTipText().Append(R.T_CapturedVariables, true));
 						int i = 0;
