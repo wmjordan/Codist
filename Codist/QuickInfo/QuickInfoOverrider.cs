@@ -260,7 +260,7 @@ namespace Codist.QuickInfo
 					if (infoPanel == null) {
 						// try the first item (symbol title may be absent)
 						infoPanel = panel.Children[0].GetFirstVisualChild<ItemsControl>()?.GetFirstVisualChild<StackPanel>();
-						if (infoPanel?.GetFirstVisualChild<WrapPanel>() != null) {
+						if (infoPanel?.GetFirstVisualChild<WrapPanel>()?.GetFirstVisualChild<Image>() != null) {
 							return;
 						}
 					}
@@ -428,11 +428,9 @@ namespace Codist.QuickInfo
 						else {
 							items.Add(DocElement);
 						}
-						var myDoc = DocElement as ThemedTipDocument;
-						if (myDoc == null) {
-							return;
+						if (DocElement is ThemedTipDocument myDoc) {
+							myDoc.ApplySizeLimit();
 						}
-						myDoc.ApplySizeLimit();
 					}
 					catch (ArgumentException) {
 						// ignore exception: Specified Visual is already a child of another Visual or the root of a CompositionTarget
