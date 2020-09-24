@@ -234,6 +234,7 @@ Right click: Duplicate line</value>
   <data name="CMD_FindReplace" xml:space="preserve">
     <value>Find next selected text
 Ctrl click: Find match case
+Alt click: Insert caret at next match
 Right click: Find and replace...</value>
   </data>
   <data name="CMD_FindSymbolwithName" xml:space="preserve">
@@ -1705,5 +1706,8 @@ Line: {Line}</value>
   </data>
   <data name="T_DerivedInterfaces" xml:space="preserve">
     <value> derived interfaces</value>
+  </data>
+  <data name="CMD_EditMatches" xml:space="preserve">
+    <value>Edit All Matching</value>
   </data>
 </root>

@@ -140,7 +140,14 @@ namespace Codist.SmartBars
 					return;
 				}
 				ctx.KeepToolBar(false);
-				var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t, Keyboard.Modifiers == ModifierKeys.Control ? FindOptions.MatchCase | FindOptions.Wrap : Keyboard.Modifiers == ModifierKeys.Shift ? FindOptions.Wrap | FindOptions.WholeWord : FindOptions.None);
+				if (Keyboard.Modifiers == ModifierKeys.Alt) {
+					TextEditorHelper.ExecuteEditorCommand("Edit.InsertNextMatchingCaret");
+					return;
+				}
+				var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t, 
+					Keyboard.Modifiers == ModifierKeys.Control ? FindOptions.MatchCase | FindOptions.Wrap
+					: Keyboard.Modifiers == ModifierKeys.Shift ? FindOptions.Wrap | FindOptions.WholeWord
+					: FindOptions.None);
 				if (r.HasValue) {
 					ctx.View.SelectSpan(r.Value);
 					ctx.KeepToolBar(true);
@@ -277,6 +284,7 @@ namespace Codist.SmartBars
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.MakeLowercase");
 				}),
+				new CommandItem(IconIds.EditMatches, R.CMD_EditMatches, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.InsertCaretsatAllMatching")),
 			};
 		}
 		static CommandItem[] GetDebugCommands() {

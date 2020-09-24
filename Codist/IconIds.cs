@@ -167,6 +167,7 @@ namespace Codist
 		public const int GoToDeclaration = KnownImageIds.GoToDeclaration;
 		public const int Capitalize = KnownImageIds.Font;
 		public const int Uppercase = KnownImageIds.ASerif;
+		public const int EditMatches = KnownImageIds.EditAssociation;
 		public const int ShowClassificationInfo = KnownImageIds.HighlightText;
 		public const int TogglePinning = KnownImageIds.Unpin;
 		public const int Pin = KnownImageIds.Pin;

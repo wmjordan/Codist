@@ -258,6 +258,7 @@ Shift单击：删除并选中下一项（整个单词）</value>
   <data name="CMD_FindReplace" xml:space="preserve">
     <value>查找下一个选中文本
 Ctrl 单击：匹配大小写查找
+Alt 单击：在下一个匹配位置插入光标
 右键：查找及替换...</value>
   </data>
   <data name="CMD_FormatDocument" xml:space="preserve">
@@ -1694,5 +1695,8 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   </data>
   <data name="T_DerivedInterfaces" xml:space="preserve">
     <value> 派生接口</value>
+  </data>
+  <data name="CMD_EditMatches" xml:space="preserve">
+    <value>编辑所有匹配的文本</value>
   </data>
 </root>
