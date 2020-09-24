@@ -153,6 +153,7 @@ namespace Codist
 				new Commands.VersionInfoBar(this).Show(Config.Instance.InitStatus);
 			}
 			Commands.SyntaxCustomizerWindowCommand.Initialize();
+			ListEditorCommands();
 		}
 
 		protected override void Dispose(bool disposing) {
@@ -203,6 +204,39 @@ namespace Codist
 					break;
 				}
 			}
+		}
+
+		/// <summary>A helper method to discover registered editor commands.</summary>
+		static void ListEditorCommands() {
+			var commands = _dte.Commands;
+			var c = commands.Count;
+			var s = new string[c];
+			var s2 = new string[c];
+			for (int i = 0; i < s.Length; i++) {
+				var name = commands.Item(i+1).Name;
+				if (name.IndexOf('.') == -1) {
+					s[i] = name;
+				}
+				else {
+					s2[i] = name;
+				}
+			}
+			Array.Sort(s);
+			Array.Sort(s2);
+			var sb = new System.Text.StringBuilder(16000)
+				.AppendLine("// Call CodistPackage.ListEditorCommands to generate this file")
+				.AppendLine();
+			foreach (var item in s) {
+				if (String.IsNullOrEmpty(item) == false) {
+					sb.AppendLine(item);
+				}
+			}
+			foreach (var item in s2) {
+				if (String.IsNullOrEmpty(item) == false) {
+					sb.AppendLine(item);
+				}
+			}
+			System.Diagnostics.Debug.WriteLine(sb);
 		}
 		#endregion
 	}
