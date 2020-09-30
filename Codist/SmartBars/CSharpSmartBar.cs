@@ -252,8 +252,11 @@ namespace Codist.SmartBars
 			if (node is ParameterSyntax && node.Parent is ParameterListSyntax) {
 				AddEditorCommand(MyToolBar, IconIds.ReorderParameters, "Refactor.ReorderParameters", R.CMD_ReorderParameters);
 			}
-			if (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(SyntaxKind.StructDeclaration)) {
+			else if ((node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(SyntaxKind.StructDeclaration)) && (node as TypeDeclarationSyntax).Modifiers.Any(SyntaxKind.StaticKeyword) == false) {
 				AddEditorCommand(MyToolBar, IconIds.ExtractInterface, "Refactor.ExtractInterface", R.CMD_ExtractInterface);
+			}
+			else if (node.IsKind(SyntaxKind.VariableDeclarator) && node.Parent?.Parent.IsKind(SyntaxKind.FieldDeclaration) == true) {
+				AddEditorCommand(MyToolBar, IconIds.EncapsulateField, "Refactor.EncapsulateField", R.CMD_EncapsulateField);
 			}
 		}
 
