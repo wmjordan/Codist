@@ -153,7 +153,7 @@ namespace Codist
 				new Commands.VersionInfoBar(this).Show(Config.Instance.InitStatus);
 			}
 			Commands.SyntaxCustomizerWindowCommand.Initialize();
-			ListEditorCommands();
+			//ListEditorCommands();
 		}
 
 		protected override void Dispose(bool disposing) {
