@@ -15,7 +15,7 @@ namespace Codist.NaviBar
 			ListContainer = View.Properties.GetOrCreateSingletonProperty(() => new ExternalAdornment(textView));
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			textView.Properties.AddProperty(nameof(NaviBar), this);
-			Resources = SharedDictionaryManager.Menu;
+			Resources = SharedDictionaryManager.NavigationBar;
 			SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
 			SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextInactiveKey);
 		}
