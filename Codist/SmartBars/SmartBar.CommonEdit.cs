@@ -19,7 +19,6 @@ namespace Codist.SmartBars
 		static readonly CommandItem[] __FindAndReplaceCommands = GetFindAndReplaceCommands();
 		static readonly CommandItem[] __CaseCommands = GetCaseCommands();
 		static readonly CommandItem[] __SurroundingCommands = GetSurroundingCommands();
-		static readonly CommandItem[] __FormatCommands = GetFormatCommands();
 		static readonly CommandItem[] __DebugCommands = GetDebugCommands();
 
 		protected static IEnumerable<CommandItem> DebugCommands => __DebugCommands;
@@ -250,7 +249,7 @@ namespace Codist.SmartBars
 			var selection = View.Selection;
 			if (selection.Mode == TextSelectionMode.Stream) {
 				r.AddRange(__SurroundingCommands);
-				r.AddRange(__FormatCommands);
+				r.Add(new CommandItem(IconIds.FormatSelection, R.CMD_FormatSelection, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")));
 				if (View.IsMultilineSelected()) {
 					r.Add(new CommandItem(IconIds.JoinLines, R.CMD_JoinLines, ctx => ctx.View.JoinSelectedLines()));
 				}
@@ -284,7 +283,6 @@ namespace Codist.SmartBars
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.MakeLowercase");
 				}),
-				new CommandItem(IconIds.EditMatches, R.CMD_EditMatches, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.InsertCaretsatAllMatching")),
 			};
 		}
 		static CommandItem[] GetDebugCommands() {
@@ -294,19 +292,13 @@ namespace Codist.SmartBars
 				new CommandItem(IconIds.DeleteBreakpoint, R.CMD_DeleteAllBreakpoints, c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
 			};
 		}
-
-		static CommandItem[] GetFormatCommands() {
-			return new CommandItem[] {
-				new CommandItem(IconIds.FormatSelection, R.CMD_FormatSelection, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatSelection")),
-				new CommandItem(IconIds.FormatDocument, R.CMD_FormatDocument, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FormatDocument")),
-			};
-		}
 		static CommandItem[] GetFindAndReplaceCommands() {
 			return new CommandItem[] {
 					new CommandItem(IconIds.Find, R.CMD_Find, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
 					new CommandItem(IconIds.Replace, R.CMD_Replace, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
 					new CommandItem(IconIds.FindInFile, R.CMD_FindInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
-					new CommandItem(IconIds.ReplaceInFolder, R.CMD_ReplaceInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles"))
+					new CommandItem(IconIds.ReplaceInFolder, R.CMD_ReplaceInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
+					new CommandItem(IconIds.EditMatches, R.CMD_EditMatches, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.InsertCaretsatAllMatching")),
 				};
 		}
 		static CommandItem[] GetSurroundingCommands() {
