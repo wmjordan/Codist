@@ -244,10 +244,10 @@ Shift单击：删除并选中下一项（整个单词）</value>
 右键：重复整行</value>
   </data>
   <data name="CMD_ExtractInterface" xml:space="preserve">
-    <value>提取接口</value>
+    <value>提取接口...</value>
   </data>
   <data name="CMD_ExtractMethod" xml:space="preserve">
-    <value>提取方法</value>
+    <value>提取方法...</value>
   </data>
   <data name="CMD_Find" xml:space="preserve">
     <value>查找...</value>
@@ -315,10 +315,10 @@ Ctrl 单击：粘贴并选中下一项
 Shift单击：删除并选中下一项（整个单词）</value>
   </data>
   <data name="CMD_RenameSymbol" xml:space="preserve">
-    <value>重命名符号</value>
+    <value>重命名符号...</value>
   </data>
   <data name="CMD_ReorderParameters" xml:space="preserve">
-    <value>重新排列参数</value>
+    <value>重新排列参数...</value>
   </data>
   <data name="CMD_Replace" xml:space="preserve">
     <value>替换...</value>
@@ -1698,5 +1698,8 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   </data>
   <data name="CMD_EditMatches" xml:space="preserve">
     <value>编辑所有匹配的文本</value>
+  </data>
+  <data name="CMD_EncapsulateField" xml:space="preserve">
+    <value>封装字段...</value>
   </data>
 </root>

@@ -159,11 +159,9 @@ namespace Codist
 		}
 
 		public static ITypeSymbol ResolveElementType(this ITypeSymbol t) {
-			while (t.Kind == SymbolKind.ArrayType) {
-				t = ((IArrayTypeSymbol)t).ElementType;
-			}
-			if (t.Kind == SymbolKind.PointerType) {
-				t = ((IPointerTypeSymbol)t).PointedAtType;
+			switch (t.Kind) {
+				case SymbolKind.ArrayType: return ResolveElementType(((IArrayTypeSymbol)t).ElementType);
+				case SymbolKind.PointerType: return ResolveElementType(((IPointerTypeSymbol)t).PointedAtType);
 			}
 			return t;
 		}
@@ -453,43 +451,64 @@ namespace Codist
 				}
 				return t.Arity == 0 ? String.Empty : "<" + new string(',', t.Arity - 1) + ">";
 			}
-			void GetTypeName(ITypeSymbol type, StringBuilder output) {
-				switch (type.TypeKind) {
-					case TypeKind.Array:
-						GetTypeName(((IArrayTypeSymbol)type).ElementType, output);
-						output.Append("[]");
-						return;
+		}
 
-					case TypeKind.Dynamic:
-					case TypeKind.Error:
-						output.Append('?'); return;
-					case TypeKind.Module:
-					case TypeKind.TypeParameter:
-					case TypeKind.Enum:
-						output.Append(type.Name); return;
-					case TypeKind.Pointer:
-						GetTypeName(((IPointerTypeSymbol)type).PointedAtType, output);
-						output.Append('*');
-						return;
-				}
-				output.Append(type.GetSpecialTypeAlias() ?? type.Name);
-				var nt = type as INamedTypeSymbol;
-				if (nt == null || nt.IsGenericType == false) {
-					return;
-				}
-				var s = false;
-				output.Append('<');
-				foreach (var item in nt.TypeArguments) {
-					if (s) {
-						output.Append(", ");
+		public static string GetTypeName(this ITypeSymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.ArrayType:
+				case SymbolKind.ErrorType:
+				case SymbolKind.PointerType:
+				case SymbolKind.DynamicType:
+					using (var sb = ReusableStringBuilder.AcquireDefault(30)) {
+						var b = sb.Resource;
+						GetTypeName(symbol, b);
+						return b.ToString();
 					}
-					else {
-						s = true;
+				case SymbolKind.NamedType:
+					if ((symbol as INamedTypeSymbol).IsGenericType) {
+						return symbol.Name + "<" + new string(',', (symbol as INamedTypeSymbol).Arity - 1) + ">";
 					}
-					GetTypeName(item, output);
-				}
-				output.Append('>');
+					goto default;
+				default:
+					return symbol.Name;
 			}
+		}
+		static void GetTypeName(ITypeSymbol type, StringBuilder output) {
+			switch (type.TypeKind) {
+				case TypeKind.Array:
+					GetTypeName(((IArrayTypeSymbol)type).ElementType, output);
+					output.Append("[]");
+					return;
+
+				case TypeKind.Dynamic:
+				case TypeKind.Error:
+					output.Append('?'); return;
+				case TypeKind.Module:
+				case TypeKind.TypeParameter:
+				case TypeKind.Enum:
+					output.Append(type.Name); return;
+				case TypeKind.Pointer:
+					GetTypeName(((IPointerTypeSymbol)type).PointedAtType, output);
+					output.Append('*');
+					return;
+			}
+			output.Append(type.GetSpecialTypeAlias() ?? type.Name);
+			var nt = type as INamedTypeSymbol;
+			if (nt == null || nt.IsGenericType == false) {
+				return;
+			}
+			var s = false;
+			output.Append('<');
+			foreach (var item in nt.TypeArguments) {
+				if (s) {
+					output.Append(", ");
+				}
+				else {
+					s = true;
+				}
+				GetTypeName(item, output);
+			}
+			output.Append('>');
 		}
 
 		public static string GetSpecialTypeAlias(this ITypeSymbol type) {

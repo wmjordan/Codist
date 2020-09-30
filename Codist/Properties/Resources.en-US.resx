@@ -175,10 +175,10 @@ Shift click: Delete and select next (whole word)</value>
 Right click: Duplicate line</value>
   </data>
   <data name="CMD_ExtractInterface" xml:space="preserve">
-    <value>Extract interface</value>
+    <value>Extract interface...</value>
   </data>
   <data name="CMD_ExtractMethod" xml:space="preserve">
-    <value>Extract Method</value>
+    <value>Extract method...</value>
   </data>
   <data name="CMD_Find" xml:space="preserve">
     <value>Find...</value>
@@ -315,10 +315,10 @@ Shift click: Paste and select next (whole word)</value>
     <value>Pin</value>
   </data>
   <data name="CMD_RenameSymbol" xml:space="preserve">
-    <value>Rename symbol</value>
+    <value>Rename symbol...</value>
   </data>
   <data name="CMD_ReorderParameters" xml:space="preserve">
-    <value>Reorder parameters</value>
+    <value>Reorder parameters...</value>
   </data>
   <data name="CMD_Replace" xml:space="preserve">
     <value>Replace...</value>
@@ -1709,5 +1709,8 @@ Line: {Line}</value>
   </data>
   <data name="CMD_EditMatches" xml:space="preserve">
     <value>Edit All Matching</value>
+  </data>
+  <data name="CMD_EncapsulateField" xml:space="preserve">
+    <value>Encapsulate field...</value>
   </data>
 </root>

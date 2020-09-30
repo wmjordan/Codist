@@ -205,10 +205,10 @@ namespace Codist.Controls
 				var et = type.ResolveElementType();
 				Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf.Replace("<TYPE>", et.Name + et.GetParameterString()), () => FindMembers(et, _SemanticContext)));
 				if (type.IsStatic == false) {
-					Items.Add(CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor.Replace("<TYPE>", type.Name + type.GetParameterString()), () => FindExtensionMethods(type, _SemanticContext)));
+					Items.Add(CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor.Replace("<TYPE>", type.GetTypeName()), () => FindExtensionMethods(type, _SemanticContext)));
 				}
 				if (et.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-					Items.Add(CreateItem(IconIds.GoToReturnType, R.CMD_GoTo.Replace("<TYPE>", et.Name + et.GetParameterString()), () => et.GoToSource()));
+					Items.Add(CreateItem(IconIds.GoToReturnType, R.CMD_GoTo.Replace("<TYPE>", et.GetTypeName()), () => et.GoToSource()));
 				}
 			}
 		}
@@ -378,7 +378,7 @@ namespace Codist.Controls
 		}
 
 		static void FindExtensionMethods(ISymbol symbol, SemanticContext context) {
-			var members = SyncHelper.RunSync(() => (symbol as ITypeSymbol).FindExtensionMethodsAsync(context.Document.Project, default));
+			var members = SyncHelper.RunSync(() => (symbol as ITypeSymbol).FindExtensionMethodsAsync(context.Document.Project, Keyboard.Modifiers == ModifierKeys.Control, default));
 			ShowSymbolMenuForResult(symbol, context, members, R.T_Extensions, true);
 		}
 

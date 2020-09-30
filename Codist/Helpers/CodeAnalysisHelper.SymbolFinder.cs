@@ -87,7 +87,7 @@ namespace Codist
 			return r;
 		}
 
-		public static async Task<List<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
+		public static async Task<List<IMethodSymbol>> FindExtensionMethodsAsync(this ITypeSymbol type, Project project, bool strict, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var members = new List<IMethodSymbol>(10);
 			var isValueType = type.IsValueType;
@@ -120,11 +120,13 @@ namespace Codist
 							|| item.HasReferenceTypeConstraint && isValueType) {
 							continue;
 						}
-						if (item.HasConstructorConstraint) {
-
+						var constraintTypes = item.ConstraintTypes;
+						if (constraintTypes.Length == 0) {
+							if (strict) {
+								continue;
+							}
 						}
-						if (item.ConstraintTypes.Length > 0
-							&& item.ConstraintTypes.Any(i => i == type || type.CanConvertTo(i)) == false) {
+						else if (constraintTypes.Any(i => i == type || type.CanConvertTo(i)) == false) {
 							continue;
 						}
 						members.Add(m);

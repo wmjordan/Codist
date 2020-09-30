@@ -304,7 +304,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Extract interface 的本地化字符串。
+        ///   查找类似 Encapsulate field... 的本地化字符串。
+        /// </summary>
+        internal static string CMD_EncapsulateField {
+            get {
+                return ResourceManager.GetString("CMD_EncapsulateField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Extract interface... 的本地化字符串。
         /// </summary>
         internal static string CMD_ExtractInterface {
             get {
@@ -313,7 +322,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Extract Method 的本地化字符串。
+        ///   查找类似 Extract method... 的本地化字符串。
         /// </summary>
         internal static string CMD_ExtractMethod {
             get {
@@ -852,7 +861,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Rename symbol 的本地化字符串。
+        ///   查找类似 Rename symbol... 的本地化字符串。
         /// </summary>
         internal static string CMD_RenameSymbol {
             get {
@@ -861,7 +870,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Reorder parameters 的本地化字符串。
+        ///   查找类似 Reorder parameters... 的本地化字符串。
         /// </summary>
         internal static string CMD_ReorderParameters {
             get {
