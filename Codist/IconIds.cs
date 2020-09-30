@@ -100,6 +100,7 @@ namespace Codist
 		public const int ReorderParameters = KnownImageIds.ReorderParameters;
 		public const int ExtractInterface = KnownImageIds.ExtractInterface;
 		public const int ExtractMethod = KnownImageIds.ExtractMethod;
+		public const int EncapsulateField = KnownImageIds.EncapsulateField;
 		public const int ToggleValue = KnownImageIds.ToggleButton;
 		public const int InvertOperator = KnownImageIds.Operator;
 		public const int AddXmlDoc = KnownImageIds.AddComment;
