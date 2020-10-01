@@ -75,7 +75,7 @@ namespace Codist.Options
 									Height = 20,
 									FontWeight = FontWeights.Bold
 								},
-								(_SyntaxSourceBox = new ListBox {
+								new ListBox {
 									Items = {
 										new ClassificationCategoryItem(SyntaxStyleSource.Selection, R.T_SelectedCode),
 										new ClassificationCategoryItem(SyntaxStyleSource.Common, R.T_Common),
@@ -89,16 +89,16 @@ namespace Codist.Options
 										new ClassificationCategoryItem(SyntaxStyleSource.CommentLabels, "   "+R.T_Tags),
 										new ClassificationCategoryItem(SyntaxStyleSource.PriorityOrder, R.T_AllLanguages)
 									}
-								}.ReferenceStyle(VsResourceKeys.ThemedDialogListBoxStyleKey)),
+								}.Set(ref _SyntaxSourceBox).ReferenceStyle(VsResourceKeys.ThemedDialogListBoxStyleKey),
 								new TextBlock {
 									Text = R.T_Themes,
 									Height = 20,
 									FontWeight = FontWeights.Bold,
 									Margin = WpfHelper.TopItemMargin
 								},
-								(_LoadThemeButton = new ThemedButton(IconIds.Load, R.CMD_Load, R.CMDT_LoadTheme, LoadTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								(_SaveThemeButton = new ThemedButton(IconIds.SaveAs, R.CMD_Save, R.CMDT_SaveTheme, SaveTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								(_ResetThemeButton = new ThemedButton(IconIds.ResetTheme, R.CMD_Reset, R.CMDT_ResetTheme, ResetTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)),
+								new ThemedButton(IconIds.Load, R.CMD_Load, R.CMDT_LoadTheme, LoadTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.Set(ref _LoadThemeButton).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SaveAs, R.CMD_Save, R.CMDT_SaveTheme, SaveTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.Set(ref _SaveThemeButton).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.ResetTheme, R.CMD_Reset, R.CMDT_ResetTheme, ResetTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.Set(ref _ResetThemeButton).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
 								new TextBlock {
 									Text = R.T_PredefinedThemes,
 									Height = 20,
@@ -128,19 +128,21 @@ namespace Codist.Options
 									},
 									Children = {
 										new TextBlock { Text = R.T_SyntaxStyles, FontWeight = FontWeights.Bold }.SetValue(Grid.SetColumn, 0),
-										(_AddTagButton = new Button { Content = R.CMD_Add }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)).SetValue(Grid.SetColumn, 1),
-										(_RemoveTagButton = new Button { Content = R.CMD_Remove }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)).SetValue(Grid.SetColumn, 2)
+										new Button { Content = R.CMD_Add }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
+											.Set(ref _AddTagButton).SetValue(Grid.SetColumn, 1),
+										new Button { Content = R.CMD_Remove }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
+											.Set(ref _RemoveTagButton).SetValue(Grid.SetColumn, 2)
 									}
 								},
-								(_OptionPageHolder = new Border {
+								new Border {
 									BorderThickness = WpfHelper.TinyMargin,
-									Child = _SettingsList = new StackPanel()
-								})
+									Child = new StackPanel().Set(ref _SettingsList)
+								}.Set(ref _OptionPageHolder)
 								.Scrollable()
 								.SetValue(Grid.SetRow, 1)
 								.ReferenceProperty(Border.BorderBrushProperty, VsBrushes.ActiveBorderKey),
 
-								(_SettingsGroup = new Border {
+								new Border {
 									Visibility = Visibility.Collapsed,
 									Child = new StackPanel {
 										Children = {
@@ -149,49 +151,53 @@ namespace Codist.Options
 												Margin = WpfHelper.SmallMargin,
 												Children = {
 													new TextBlock { Text = R.T_Font, Width = 60, Margin = WpfHelper.SmallMargin },
-													(_FontButton = new FontButton(ApplyFont) { Width = 230, Margin = WpfHelper.SmallMargin }.ReferenceStyle(VsResourceKeys.ThemedDialogButtonStyleKey)),
+													new FontButton(ApplyFont) { Width = 230, Margin = WpfHelper.SmallMargin }
+														.Set(ref _FontButton)
+														.ReferenceStyle(VsResourceKeys.ThemedDialogButtonStyleKey),
 													new TextBlock { Text = R.T_Size, Width = 60, Margin = WpfHelper.SmallMargin },
-													(_FontSizeBox = new NumericUpDown { Width = 80, Margin = WpfHelper.SmallMargin }),
+													new NumericUpDown { Width = 80, Margin = WpfHelper.SmallMargin }
+														.Set(ref _FontSizeBox),
 												}
 											},
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													(_BoldBox = new StyleCheckBox(R.CMD_Bold, OnBoldChanged)),
-													(_ItalicBox = new StyleCheckBox(R.CMD_Italic, OnItalicChanged)),
-													(_UnderlineBox = new StyleCheckBox(R.CMD_Underline, OnUnderlineChanged)),
-													(_StrikethroughBox = new StyleCheckBox(R.CMD_Strikethrough, OnStrikeThroughChanged)),
+													new StyleCheckBox(R.CMD_Bold, OnBoldChanged).Set(ref _BoldBox),
+													new StyleCheckBox(R.CMD_Italic, OnItalicChanged).Set(ref _ItalicBox),
+													new StyleCheckBox(R.CMD_Underline, OnUnderlineChanged).Set(ref _UnderlineBox),
+													new StyleCheckBox(R.CMD_Strikethrough, OnStrikeThroughChanged).Set(ref _StrikethroughBox),
 												}
 											},
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													(_ForegroundButton = new ColorButton(Colors.Transparent, R.T_Foreground, OnForeColorChanged)),
-													(_ForegroundOpacityButton = new OpacityButton(OnForeOpacityChanged)),
-													(_BackgroundButton = new ColorButton(Colors.Transparent, R.T_Background, OnBackColorChanged)),
-													(_BackgroundOpacityButton = new OpacityButton(OnBackOpacityChanged))
+													new ColorButton(Colors.Transparent, R.T_Foreground, OnForeColorChanged).Set(ref _ForegroundButton),
+													new OpacityButton(OnForeOpacityChanged).Set(ref _ForegroundOpacityButton),
+													new ColorButton(Colors.Transparent, R.T_Background, OnBackColorChanged).Set(ref _BackgroundButton),
+													new OpacityButton(OnBackOpacityChanged).Set(ref _BackgroundOpacityButton)
 												}
 											},
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
 													new TextBlock { Text = R.T_BackgroundEffect, Width = 130 },
-													(_BackgroundEffectBox = new ComboBox { Width = 160 }.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey))
+													new ComboBox { Width = 160 }.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey).Set(ref _BackgroundEffectBox)
 												}
 											},
-											(_BaseTypesList = new WrapPanel {
+											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
 													new TextBlock { Text = R.T_BaseSyntax }
 												}
-											})
+											}.Set(ref _BaseTypesList)
 										}
 									},
 									Padding = new Thickness(0, 6, 0, 0)
-								}).ReferenceProperty(Border.BorderBrushProperty, VsBrushes.PanelBorderKey)
-								.SetValue(Grid.SetRow, 2),
+								}.Set(ref _SettingsGroup)
+									.ReferenceProperty(Border.BorderBrushProperty, VsBrushes.PanelBorderKey)
+									.SetValue(Grid.SetRow, 2),
 
-								(_TagSettingsGroup = new Border {
+								new Border {
 									Visibility = Visibility.Collapsed,
 									Child = new StackPanel {
 										Children = {
@@ -203,14 +209,15 @@ namespace Codist.Options
 														Orientation = Orientation.Horizontal,
 														Children = {
 															new TextBlock { Text = R.T_Tag, Width = 60, Margin = WpfHelper.SmallMargin },
-															(_TagBox = new TextBox() { Width = 230, Margin = WpfHelper.SmallMargin }.ReferenceStyle(VsResourceKeys.TextBoxStyleKey))
+															new TextBox() { Width = 230, Margin = WpfHelper.SmallMargin }.ReferenceStyle(VsResourceKeys.TextBoxStyleKey).Set(ref _TagBox)
 														}
 													},
 													new StackPanel {
 														Orientation = Orientation.Horizontal,
 														Children = {
 															new TextBlock { Text = R.T_Style, Width = 60, Margin = WpfHelper.SmallMargin },
-															(_TagStyleBox = new ComboBox { Width = 230, Margin = WpfHelper.SmallMargin, IsEditable = false }.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey))
+															new ComboBox { Width = 230, Margin = WpfHelper.SmallMargin, IsEditable = false }
+																.Set(ref _TagStyleBox).ReferenceStyle(VsResourceKeys.ComboBoxStyleKey)
 														}
 													}
 												}
@@ -218,28 +225,28 @@ namespace Codist.Options
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													(_TagCaseSensitiveBox = new StyleCheckBox(R.T_CaseSensitive, OnTagCaseSensitiveChanged) { IsThreeState = false }),
-													(_TagHasPunctuationBox = new StyleCheckBox(R.T_EndWithPunctuation, OnTagHasPunctuationChanged) { IsThreeState = false }),
+													new StyleCheckBox(R.T_CaseSensitive, OnTagCaseSensitiveChanged) { IsThreeState = false }.Set(ref _TagCaseSensitiveBox),
+													new StyleCheckBox(R.T_EndWithPunctuation, OnTagHasPunctuationChanged) { IsThreeState = false }.Set(ref _TagHasPunctuationBox),
 												}
 											},
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
 													new TextBlock { Text = R.T_ApplyOn, Width = 60, Margin = WpfHelper.SmallMargin },
-													(_TagApplyOnTagBox = new RadioBox(R.OT_Tag, "TagApplication", OnTagApplicationChanged)),
-													(_TagApplyOnContentBox = new RadioBox(R.OT_Content, "TagApplication", OnTagApplicationChanged)),
-													(_TagApplyOnWholeBox = new RadioBox(R.OT_TagContent, "TagApplication", OnTagApplicationChanged)),
+													new RadioBox(R.OT_Tag, "TagApplication", OnTagApplicationChanged).Set(ref _TagApplyOnTagBox),
+													new RadioBox(R.OT_Content, "TagApplication", OnTagApplicationChanged).Set(ref _TagApplyOnContentBox),
+													new RadioBox(R.OT_TagContent, "TagApplication", OnTagApplicationChanged).Set(ref _TagApplyOnWholeBox),
 												}
 											},
 										}
 									},
 									Padding = new Thickness(0, 6, 0, 0)
-								}).SetValue(Grid.SetRow, 2),
+								}.Set(ref _TagSettingsGroup).SetValue(Grid.SetRow, 2),
 
-								(_Notice = new TextBlock {
+								new TextBlock {
 									Text = R.T_SyntaxHighlightConfigNotice,
 									TextWrapping = TextWrapping.Wrap
-								}).SetValue(Grid.SetRow, 2),
+								}.Set(ref _Notice).SetValue(Grid.SetRow, 2),
 
 								new WrapPanel {
 									HorizontalAlignment = HorizontalAlignment.Right,

@@ -430,6 +430,9 @@ namespace Codist
 		#endregion
 
 		#region Others
+		public static TObj Set<TObj>(this TObj obj, ref TObj field) where TObj : System.Windows.Threading.DispatcherObject {
+			return field = obj;
+		}
 		public static TItem GetFirst<TItem>(this ItemCollection items, Predicate<TItem> predicate)
 			where TItem : UIElement {
 			foreach (var item in items) {
@@ -621,12 +624,14 @@ namespace Codist
 			public static IEnumerable<InstalledFont> All => _InstalledFonts;
 
 			static InstalledFont[] Init() {
-				var l = new List<InstalledFont>(100);
-				foreach (var item in Fonts.SystemFontFamilies) {
-					l.Add(new InstalledFont(item));
+				var systemFonts = Fonts.SystemFontFamilies;
+				var l = new InstalledFont[systemFonts.Count];
+				var i = 0;
+				foreach (var item in systemFonts) {
+					l[i++] = new InstalledFont(item);
 				}
-				l.Sort((x, y) => x.Name.CompareTo(y.Name));
-				return l.ToArray();
+				Array.Sort(l, (x, y) => x.Name.CompareTo(y.Name));
+				return l;
 			}
 		}
 	}
@@ -646,13 +651,13 @@ namespace Codist
 			if (Name == null) {
 				Name = Font.Source;
 			}
-			ExtraTypefaces = font.FamilyTypefaces
-				.Where(i => i.IsStandardStyle() == false)
-				.ToArray();
+			//ExtraTypefaces = font.FamilyTypefaces
+			//	.Where(i => i.IsStandardStyle() == false)
+			//	.ToArray();
 		}
 		public FontFamily Font { get; }
 		public string Name { get; }
-		public FamilyTypeface[] ExtraTypefaces { get; }
+		//public FamilyTypeface[] ExtraTypefaces { get; }
 		public override string ToString() {
 			return Name;
 		}
