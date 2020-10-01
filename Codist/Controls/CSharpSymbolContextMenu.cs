@@ -106,7 +106,7 @@ namespace Codist.Controls
 
 		private void CreateCommandForMembers() {
 			if (_Symbol.Kind != SymbolKind.Method || IsExternallyCallable(((IMethodSymbol)_Symbol).MethodKind)) {
-				Items.Add(CreateItem(IconIds.FindReferrers, R.CMD_FindReferrers, () => FindReferrers(_Symbol, _SemanticContext)));
+				Items.Add(CreateItem(IconIds.FindReferrers, R.CMD_FindReferrers, () => FindReferrers(_Symbol, _SemanticContext, Keyboard.Modifiers == ModifierKeys.Control ? (Predicate<ISymbol>)(s => s == _Symbol) : null)));
 			}
 			if (_Symbol.MayHaveOverride()) {
 				Items.Add(CreateItem(IconIds.FindOverloads, R.CMD_FindOverrides, () => FindOverrides(_Symbol, _SemanticContext)));
