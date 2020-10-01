@@ -176,12 +176,14 @@ namespace Codist
 			if (node == null) {
 				return;
 			}
+#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 			CodistPackage.DTE.OpenFile(node.GetLocation().SourceTree.FilePath, doc => {
 				var v = GetIVsTextView(CodistPackage.Instance, doc.FullName);
 				if (v != null) {
 					GetWpfTextView(v)?.SelectSpan(includeTrivia ? node.GetSematicSpan(true) : node.Span.ToSpan());
 				}
 			});
+#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 		}
 
 		public static void SelectNode(this ITextView view, SyntaxNode node, bool includeTrivia) {
@@ -320,6 +322,7 @@ namespace Codist
 
 
 		public static void CopyOrMoveSyntaxNode(this IWpfTextView view, SyntaxNode sourceNode, SyntaxNode targetNode, bool copy, bool before) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			var tSpan = (targetNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? targetNode.Parent.Parent : targetNode).GetSematicSpan(false);
 			var sNode = sourceNode.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.VariableDeclarator) ? sourceNode.Parent.Parent : sourceNode;
 			var sSpan = sNode.GetSematicSpan(true);
@@ -425,6 +428,7 @@ namespace Codist
 				}
 			}
 		}
+#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
 			dte.OpenFile(file, d => ((EnvDTE.TextSelection)d.Selection).MoveToLineAndOffset(line, column));
 		}
@@ -436,6 +440,7 @@ namespace Codist
 				dte.OpenFile(file, _ => { });
 			}
 		}
+#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 
 		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
 			while (oldVersion != currentVersion) {
@@ -608,7 +613,7 @@ namespace Codist
 				var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];
 				return extenders != null && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
 			}
-			catch (ArgumentException ex) {
+			catch (ArgumentException) {
 				// hack: for https://github.com/wmjordan/Codist/issues/124
 				return false;
 			}

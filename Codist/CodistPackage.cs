@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio;
 using AppHelpers;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Codist
 {
@@ -161,6 +162,7 @@ namespace Codist
 			//DTE.ObjectExtenders.UnregisterExtenderProvider(_extenderCookie);
 		}
 
+#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 		void BuildEvents_OnBuildBegin(EnvDTE.vsBuildScope Scope, EnvDTE.vsBuildAction Action) {
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
 				var output = GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
@@ -240,6 +242,7 @@ namespace Codist
 		}
 		#endregion
 	}
+#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 
 	internal static class SharedDictionaryManager
 	{

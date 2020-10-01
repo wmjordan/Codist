@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
@@ -30,16 +26,13 @@ namespace Codist.Controls
 		uint _componentCookie;
 
 		KeystrokeThief(IOleComponentManager manager) {
-			if (manager == null) {
-				throw new ArgumentNullException("manager");
-			}
-
-			_manager = manager;
+			_manager = manager ?? throw new ArgumentNullException("manager");
 		}
 
 		public bool IsStealing { get; set; }
 
 		public static void Bind(Window window) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			var componentManager = ServiceProvider.GetGlobalServiceAsync<SOleComponentManager, IOleComponentManager>().Result;
 			var thief = new KeystrokeThief(componentManager);
 			new System.Windows.Interop.WindowInteropHelper(window).Owner = new IntPtr(CodistPackage.DTE.MainWindow.HWnd);
@@ -49,6 +42,7 @@ namespace Codist.Controls
 		}
 
 		void RegisterDummyComponent() {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			var component = new EmptyOleComponent();
 			var regInfo = new OLECRINFO { grfcrf = 0U, grfcadvf = 0U, uIdleTimeInterval = 0U };
 			regInfo.cbSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf(regInfo);
@@ -61,6 +55,7 @@ namespace Codist.Controls
 		}
 
 		void UnregisterDummyComponent() {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			_manager.FRevokeComponent(_componentCookie);
 			_componentCookie = 0;
 		}

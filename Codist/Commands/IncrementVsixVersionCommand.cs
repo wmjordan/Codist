@@ -15,6 +15,7 @@ namespace Codist.Commands
 			});
 		}
 
+#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 		static void Execute(object sender, EventArgs e) {
 			var item = GetSelectedProjectItem();
 			if (item == null) {
@@ -28,8 +29,10 @@ namespace Codist.Commands
 			bool error = IncrementVersion(item, out message) == false;
 			CodistPackage.ShowErrorMessageBox(message, "Increment Version", error);
 		}
+#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 
 		internal static bool IncrementVersion(ProjectItem item, out string message) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			const string Namespace = "http://schemas.microsoft.com/developer/vsx-schema/2011";
 			try {
 				var fileName = item.FileNames[0];
