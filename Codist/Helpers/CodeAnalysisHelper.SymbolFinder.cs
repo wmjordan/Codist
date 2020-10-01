@@ -327,14 +327,12 @@ namespace Codist
 			var d = new Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>>(5);
 			var t = symbol as INamedTypeSymbol;
 			// fix a problem that FindReferencesAsync returns unbounded references for generic type
-			if (t != null && (t.IsGenericType == false || t.IsUnboundGenericType || t == t.OriginalDefinition)) {
-				t = null;
-			}
+			var ts = t == null || t.IsGenericType == false || t.IsUnboundGenericType || t == t.OriginalDefinition ? null : t.ToDisplayString();
 			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, docs, cancellationToken).ConfigureAwait(false)) {
 				if (definitionFilter?.Invoke(sr.Definition) == false) {
 					continue;
 				}
-				await GroupReferenceByContainerAsync(d, sr, t?.ToDisplayString(), nodeFilter, cancellationToken).ConfigureAwait(false);
+				await GroupReferenceByContainerAsync(d, sr, ts, nodeFilter, cancellationToken).ConfigureAwait(false);
 			}
 			var r = new List<(ISymbol container, List<(SymbolUsageKind, ReferenceLocation)>)>(d.Count);
 			r.AddRange(d.Select(i => (i.Key, i.Value)));
