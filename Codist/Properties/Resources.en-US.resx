@@ -1716,4 +1716,7 @@ Line: {Line}</value>
   <data name="CMD_OpenFolderWithCmd" xml:space="preserve">
     <value>Open folder with command prompt</value>
   </data>
+  <data name="CMD_OpenFileInCmd" xml:space="preserve">
+    <value>Execute file in command prompt</value>
+  </data>
 </root>

@@ -1705,4 +1705,7 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   <data name="CMD_OpenFolderWithCmd" xml:space="preserve">
     <value>在命令提示符定位文件夹</value>
   </data>
+  <data name="CMD_OpenFileInCmd" xml:space="preserve">
+    <value>在命令行执行文件</value>
+  </data>
 </root>

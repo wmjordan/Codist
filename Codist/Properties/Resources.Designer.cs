@@ -777,6 +777,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Execute file in command prompt 的本地化字符串。
+        /// </summary>
+        internal static string CMD_OpenFileInCmd {
+            get {
+                return ResourceManager.GetString("CMD_OpenFileInCmd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Open folder 的本地化字符串。
         /// </summary>
         internal static string CMD_OpenFolder {
