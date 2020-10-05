@@ -29,7 +29,7 @@ namespace Codist.SmartBars
 				AddCommand(MyToolBar, IconIds.OpenFolder, R.CMD_OpenFolder, ctx => {
 					var s = TryGetPath(View);
 					if (s != null) {
-						Process.Start("Explorer.exe", "/select,\"" + s + "\"");
+						Process.Start(new ProcessStartInfo("Explorer.exe", "/select,\"" + s + "\"") { WorkingDirectory = Environment.SystemDirectory });
 					}
 				});
 				if (IsFileTypeRegisteredInVS(t)) {
@@ -44,6 +44,12 @@ namespace Codist.SmartBars
 			else if (Directory.Exists(t)) {
 				AddCommand(MyToolBar, IconIds.OpenFolder, R.CMD_OpenFolder, ctx => {
 					TryRun(TryGetPath(View));
+				});
+				AddCommand(MyToolBar, IconIds.OpenWithCmd, R.CMD_OpenFolderWithCmd, ctx => {
+					var s = TryGetPath(View);
+					if (s != null) {
+						Process.Start(new ProcessStartInfo(Environment.SystemDirectory + "\\cmd.exe") { WorkingDirectory = s });
+					}
 				});
 			}
 

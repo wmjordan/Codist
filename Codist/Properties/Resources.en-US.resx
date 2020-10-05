@@ -1713,4 +1713,7 @@ Line: {Line}</value>
   <data name="CMD_EncapsulateField" xml:space="preserve">
     <value>Encapsulate field...</value>
   </data>
+  <data name="CMD_OpenFolderWithCmd" xml:space="preserve">
+    <value>Open folder with command prompt</value>
+  </data>
 </root>

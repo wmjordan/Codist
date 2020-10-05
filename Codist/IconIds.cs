@@ -131,6 +131,7 @@ namespace Codist
 		public const int Open = KnownImageIds.Open;
 		public const int OpenFolder = KnownImageIds.OpenFolder;
 		public const int OpenWithVisualStudio = KnownImageIds.VisualStudio;
+		public const int OpenWithCmd = KnownImageIds.Console;
 		public const int Load = KnownImageIds.FolderOpened;
 		public const int SaveAs = KnownImageIds.SaveAs;
 		public const int Copy = KnownImageIds.Copy;
