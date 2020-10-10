@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio;
 using AppHelpers;
-using System.Diagnostics.CodeAnalysis;
+using R = Codist.Properties.Resources;
 
 namespace Codist
 {
@@ -166,7 +166,7 @@ namespace Codist
 		void BuildEvents_OnBuildBegin(EnvDTE.vsBuildScope Scope, EnvDTE.vsBuildAction Action) {
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
 				var output = GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
-				output?.OutputString(DateTime.Now.ToLongTimeString() + " Build started." + Environment.NewLine);
+				output?.OutputString(DateTime.Now.ToLongTimeString() + " " + R.T_BuildStarted + Environment.NewLine);
 			}
 		}
 
@@ -174,7 +174,7 @@ namespace Codist
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
 				var output = GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
 				if (output != null) {
-					output.OutputString(DateTime.Now.ToLongTimeString() + " Build finished." + Environment.NewLine);
+					output.OutputString(DateTime.Now.ToLongTimeString() + " " + R.T_BuildFinished + Environment.NewLine);
 				}
 			}
 		}

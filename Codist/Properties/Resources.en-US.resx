@@ -1719,4 +1719,22 @@ Line: {Line}</value>
   <data name="CMD_OpenFileInCmd" xml:space="preserve">
     <value>Execute file in command prompt</value>
   </data>
+  <data name="OT_BuildTimestamp" xml:space="preserve">
+    <value>Timestamps of build</value>
+  </data>
+  <data name="OT_BuildTimestampTip" xml:space="preserve">
+    <value>Displays timestamp before and after each build</value>
+  </data>
+  <data name="OT_Output" xml:space="preserve">
+    <value>Output Window</value>
+  </data>
+  <data name="OT_OutputNote" xml:space="preserve">
+    <value>Print extra info into output windows</value>
+  </data>
+  <data name="T_BuildFinished" xml:space="preserve">
+    <value>Build finished.</value>
+  </data>
+  <data name="T_BuildStarted" xml:space="preserve">
+    <value>Build started.</value>
+  </data>
 </root>

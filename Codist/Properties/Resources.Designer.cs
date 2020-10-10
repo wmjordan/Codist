@@ -1712,6 +1712,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Timestamps of build 的本地化字符串。
+        /// </summary>
+        internal static string OT_BuildTimestamp {
+            get {
+                return ResourceManager.GetString("OT_BuildTimestamp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Displays timestamp before and after each build 的本地化字符串。
+        /// </summary>
+        internal static string OT_BuildTimestampTip {
+            get {
+                return ResourceManager.GetString("OT_BuildTimestampTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Click and go to source code of symbol definition 的本地化字符串。
         /// </summary>
         internal static string OT_ClickAndGo {
@@ -2630,6 +2648,24 @@ namespace Codist.Properties {
         internal static string OT_NumericFormsTip {
             get {
                 return ResourceManager.GetString("OT_NumericFormsTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Output Window 的本地化字符串。
+        /// </summary>
+        internal static string OT_Output {
+            get {
+                return ResourceManager.GetString("OT_Output", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Print extra info into output windows 的本地化字符串。
+        /// </summary>
+        internal static string OT_OutputNote {
+            get {
+                return ResourceManager.GetString("OT_OutputNote", resourceCulture);
             }
         }
         
@@ -3567,6 +3603,24 @@ namespace Codist.Properties {
         internal static string T_BottomGradient {
             get {
                 return ResourceManager.GetString("T_BottomGradient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Build finished. 的本地化字符串。
+        /// </summary>
+        internal static string T_BuildFinished {
+            get {
+                return ResourceManager.GetString("T_BuildFinished", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Build started. 的本地化字符串。
+        /// </summary>
+        internal static string T_BuildStarted {
+            get {
+                return ResourceManager.GetString("T_BuildStarted", resourceCulture);
             }
         }
         

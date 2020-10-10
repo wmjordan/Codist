@@ -1708,4 +1708,22 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   <data name="CMD_OpenFileInCmd" xml:space="preserve">
     <value>在命令行执行文件</value>
   </data>
+  <data name="OT_BuildTimestamp" xml:space="preserve">
+    <value>显示生成时间</value>
+  </data>
+  <data name="OT_BuildTimestampTip" xml:space="preserve">
+    <value>在开始和结束生成操作时显示时间</value>
+  </data>
+  <data name="OT_Output" xml:space="preserve">
+    <value>输出窗口</value>
+  </data>
+  <data name="OT_OutputNote" xml:space="preserve">
+    <value>在输出窗口显示额外的信息</value>
+  </data>
+  <data name="T_BuildFinished" xml:space="preserve">
+    <value>结束生成。</value>
+  </data>
+  <data name="T_BuildStarted" xml:space="preserve">
+    <value>开始生成。</value>
+  </data>
 </root>

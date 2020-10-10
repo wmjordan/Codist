@@ -871,6 +871,7 @@ namespace Codist.Options
 		{
 			readonly Controls.IntegerBox _TopSpace, _BottomSpace;
 			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride;
+			readonly OptionBox<BuildOptions> _BuildTimestamp;
 
 			public PageControl(OptionsPage page) : base(page) {
 				AddPage(R.OT_General,
@@ -880,11 +881,11 @@ namespace Codist.Options
 						Children = {
 							new StackPanel().MakeHorizontal()
 								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OTC_TopMargin))
-								.Add(_TopSpace = new Controls.IntegerBox((int)Config.Instance.TopSpace) { Minimum = 0, Maximum = 255 })
+								.Add(new Controls.IntegerBox((int)Config.Instance.TopSpace) { Minimum = 0, Maximum = 255 }.Set(ref _TopSpace))
 								.SetLazyToolTip(() => R.OT_TopMarginTip),
 							new StackPanel().MakeHorizontal()
 								.Add(new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OTC_BottomMargin))
-								.Add(_BottomSpace = new Controls.IntegerBox((int)Config.Instance.BottomSpace) { Minimum = 0, Maximum = 255 })
+								.Add(new Controls.IntegerBox((int)Config.Instance.BottomSpace) { Minimum = 0, Maximum = 255 }.Set(ref _BottomSpace))
 								.SetLazyToolTip(() => R.OT_BottomMarginTip),
 						}
 					}.ForEachChild((FrameworkElement b) => b.MinWidth = MinColumnWidth),
@@ -894,19 +895,28 @@ namespace Codist.Options
 					new DescriptionBox(R.OT_ForceGrayscaleTextRenderingNote),
 					new WrapPanel {
 						Children = {
-							(_MainWindow = Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.MainWindow, UpdateMainWindowDisplayOption, R.OT_ApplyToMainWindow)),
-							(_CodeWindow = Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.CodeWindow, UpdateCodeWindowDisplayOption, R.OT_ApplyToCodeWindow))
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.MainWindow, UpdateMainWindowDisplayOption, R.OT_ApplyToMainWindow).Set(ref _MainWindow),
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.CodeWindow, UpdateCodeWindowDisplayOption, R.OT_ApplyToCodeWindow).Set(ref _CodeWindow)
 						}
 					}
 					.ForEachChild((CheckBox b) => b.MinWidth = MinColumnWidth)
 					.SetLazyToolTip(() => R.OT_ForceGrayscaleTextRenderingTip),
 					new TextBox { TextWrapping = TextWrapping.Wrap, Text = R.OT_MacTypeLink, Padding = WpfHelper.SmallMargin, IsReadOnly = true },
 
+					new TitleBox(R.OT_Output),
+					new DescriptionBox(R.OT_OutputNote),
+					new WrapPanel {
+						Children = {
+							Config.Instance.BuildOptions.CreateOptionBox(BuildOptions.BuildTimestamp, UpdateConfig, R.OT_BuildTimestamp).Set(ref _BuildTimestamp).SetLazyToolTip(() => R.OT_BuildTimestampTip)
+						}
+					}
+					.ForEachChild((CheckBox b) => b.MinWidth = MinColumnWidth),
+
 					new TitleBox(R.OT_LayoutOverride),
 					new DescriptionBox(R.OT_LayoutOverrideNote),
 					new WrapPanel {
 						Children = {
-							(_MenuLayoutOverride = Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.CompactMenu, UpdateMenuLayoutOption, R.OT_OverrideMainMenu))
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.CompactMenu, UpdateMenuLayoutOption, R.OT_OverrideMainMenu).Set(ref _MenuLayoutOverride)
 						}
 					}
 					.ForEachChild((CheckBox b) => b.MinWidth = MinColumnWidth)
@@ -926,6 +936,7 @@ namespace Codist.Options
 				var o = config.DisplayOptimizations;
 				_MainWindow.UpdateWithOption(o);
 				_CodeWindow.UpdateWithOption(o);
+				_BuildTimestamp.UpdateWithOption(config.BuildOptions);
 				//_UseLayoutRounding.UpdateWithOption(o);
 			}
 
@@ -945,6 +956,13 @@ namespace Codist.Options
 				Config.Instance.Set(options, value);
 				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, value);
 				Config.Instance.FireConfigChangedEvent(Features.None);
+			}
+
+			void UpdateConfig(BuildOptions options, bool set) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.Set(options, set);
 			}
 
 			void UpdateMenuLayoutOption(DisplayOptimizations options, bool value) {
