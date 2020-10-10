@@ -106,8 +106,8 @@ namespace Codist.Controls
 					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new MemberFilterButtonGroup() };
 					break;
 			}
-			_FilterContainer.Add(_FilterGroups);
-			_FilterContainer.Add(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilters).ClearBorder());
+			_FilterContainer.Add(_FilterGroups)
+				.Add(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilters).ClearBorder());
 			_Filter = filter;
 			foreach (var item in _FilterGroups) {
 				item.FilterChanged += FilterBox_Changed;
@@ -115,7 +115,7 @@ namespace Codist.Controls
 			_FilterBox.TextChanged += FilterBox_Changed;
 			_FilterBox.SetOnVisibleSelectAll();
 		}
-		//public ThemedTextBox FilterBox => _FilterBox;
+		public string FilterText => _FilterBox.Text;
 
 		public bool FocusFilterBox() {
 			return _FilterBox.GetFocus();
@@ -127,7 +127,7 @@ namespace Codist.Controls
 				}
 			}
 		}
-		void ClearFilters() {
+		public void ClearFilters() {
 			bool needUpdate = false;
 			var filters = GetFilterFlags();
 			if (filters != 0) {
@@ -151,7 +151,7 @@ namespace Codist.Controls
 			FocusFilterBox();
 		}
 
-		int GetFilterFlags() {
+		public int GetFilterFlags() {
 			var filters = 0;
 			foreach (var item in _FilterGroups) {
 				filters |= item.Filters;
@@ -330,9 +330,20 @@ namespace Codist.Controls
 		{
 			public event EventHandler FilterChanged;
 
+			/// <summary>
+			/// Returns a number which indicates the combination of filters.
+			/// </summary>
 			public abstract int Filters { get; }
+
+			/// <summary>
+			/// Updates the value of <see cref="Filters"/> according to button states.
+			/// </summary>
 			protected abstract void UpdateFilterValue();
 			public abstract void ClearFilter();
+			/// <summary>
+			/// Updates counters on buttons after symbol list <paramref name="symbols"/> is populated.
+			/// </summary>
+			/// <param name="symbols">The list of symbols.</param>
 			public abstract void UpdateNumbers(IEnumerable<SymbolItem> symbols);
 
 			protected void OnFilterChanged() {
@@ -346,7 +357,8 @@ namespace Codist.Controls
 				return b;
 			}
 			protected static Border CreateSeparator() {
-				return new Border { Width = 1, BorderThickness = WpfHelper.TinyMargin }.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey);
+				return new Border { Width = 1, BorderThickness = WpfHelper.TinyMargin }
+					.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey);
 			}
 
 			void UpdateFilterValueHandler(object sender, RoutedEventArgs eventArgs) {

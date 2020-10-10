@@ -125,7 +125,25 @@ namespace Codist.Controls
 
 		int AddSymbolMembers(ISymbol source, string typeCategory) {
 			var nsOrType = source as INamespaceOrTypeSymbol;
-			var members = nsOrType.GetMembers().RemoveAll(m => (m as IMethodSymbol)?.AssociatedSymbol != null || m.IsImplicitlyDeclared);
+			var members = nsOrType.GetMembers().RemoveAll(m => {
+				if (m.IsImplicitlyDeclared) {
+					return true;
+				}
+				if (m.Kind == SymbolKind.Method) {
+					var ms = (IMethodSymbol)m;
+					if (ms.AssociatedSymbol != null) {
+						return true;
+					}
+					switch (ms.MethodKind) {
+						case MethodKind.PropertyGet:
+						case MethodKind.PropertySet:
+						case MethodKind.EventAdd:
+						case MethodKind.EventRemove:
+							return true;
+					}
+				}
+				return false;
+			});
 			SetupForSpecialTypes(this, source.ContainingNamespace.ToString(), source.Name);
 			if (source.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
 				// sort enum members by value

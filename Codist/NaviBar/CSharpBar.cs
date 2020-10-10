@@ -401,6 +401,7 @@ namespace Codist.NaviBar
 			return s > 0 || e < title.Length ? title.Substring(s, e - s) : title;
 		}
 
+		// todo use this to replace the root menu in NamespaceItem and have it display members in NS
 		sealed class RootItem : BarItem, IContextMenuHost
 		{
 			readonly SymbolList _Menu;
@@ -418,6 +419,8 @@ namespace Codist.NaviBar
 			readonly MemberFinderBox _FinderBox;
 			readonly SearchScopeBox _ScopeBox;
 			readonly TextBlock _Note;
+			IReadOnlyCollection<ISymbol> _IncrementalSearchContainer;
+			string _PreviousSearchKeywords;
 
 			public NamespaceItem(CSharpBar bar) : base(bar, IconIds.Namespace, new ThemedToolBarText()) {
 				_Menu = new SymbolList(bar._SemanticContext) {
@@ -446,6 +449,12 @@ namespace Codist.NaviBar
 				};
 				Bar.SetupSymbolListMenu(_Menu);
 				_FinderBox.TextChanged += SearchCriteriaChanged;
+				_FinderBox.IsVisibleChanged += (s, args) => {
+					if ((bool)args.NewValue == false) {
+						_IncrementalSearchContainer = null;
+						_PreviousSearchKeywords = null;
+					}
+				};
 				_ScopeBox.FilterChanged += SearchCriteriaChanged;
 				_ScopeBox.FilterChanged += (s, args) => _FinderBox.Focus();
 			}
@@ -546,6 +555,8 @@ namespace Codist.NaviBar
 				if (s.Length == 0) {
 					_Menu.ContainerType = SymbolListType.NodeList;
 					ShowNamespaceAndTypeMenu();
+					_IncrementalSearchContainer = null;
+					_PreviousSearchKeywords = null;
 					return;
 				}
 				_Menu.ContainerType = SymbolListType.None;
@@ -568,8 +579,9 @@ namespace Codist.NaviBar
 			}
 			void FindInDocument(string text) {
 				var cancellationToken = Bar._cancellationSource.GetToken();
+				var filter = CodeAnalysisHelper.CreateNameFilter(text, false, Char.IsUpper(text[0]));
 				foreach (var item in Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken)) {
-					if (item.GetDeclarationSignature().IndexOf(text, StringComparison.OrdinalIgnoreCase) != -1) {
+					if (filter(item.GetDeclarationSignature())) {
 						var i = _Menu.Add(item);
 						i.Content = SetHeader(item, true, false, true);
 					}
@@ -580,9 +592,23 @@ namespace Codist.NaviBar
 			}
 
 			async Task FindDeclarationsAsync(string symbolName, CancellationToken token) {
-				var result = await Bar._SemanticContext.Document.Project.FindDeclarationsAsync(symbolName, 50, false, false, SymbolFilter.All, token).ConfigureAwait(false);
+				const int MaxResultLimit = 500;
+				IReadOnlyCollection<ISymbol> result;
+				if (_PreviousSearchKeywords != null
+					&& symbolName.StartsWith(_PreviousSearchKeywords)
+					&& _IncrementalSearchContainer != null
+					&& _IncrementalSearchContainer.Count < MaxResultLimit) {
+					var filter = CodeAnalysisHelper.CreateNameFilter(symbolName, false, Char.IsUpper(symbolName[0]));
+					result = _IncrementalSearchContainer.Where(i => filter(i.Name)).ToList();
+				}
+				else {
+					// todo find async, sort later, incrementally
+					_IncrementalSearchContainer = result = await Bar._SemanticContext.Document.Project.FindDeclarationsAsync(symbolName, MaxResultLimit, false, Char.IsUpper(symbolName[0]), SymbolFilter.All, token).ConfigureAwait(false);
+					_PreviousSearchKeywords = symbolName;
+				}
+				int c = 0;
 				foreach (var item in result) {
-					if (token.IsCancellationRequested) {
+					if (token.IsCancellationRequested || ++c > 50) {
 						break;
 					}
 					_Menu.Add(item, true);

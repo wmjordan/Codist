@@ -137,12 +137,12 @@ namespace Codist
 		}
 
 		/// <summary>
-		/// Finds symbol declarations matching <paramref name="symbolName"/> within given <paramref name="project"/>.
+		/// Finds symbol declarations matching <paramref name="keywords"/> within given <paramref name="project"/>.
 		/// </summary>
-		public static async Task<IEnumerable<ISymbol>> FindDeclarationsAsync(this Project project, string symbolName, int resultLimit, bool fullMatch, bool matchCase, SymbolFilter filter = SymbolFilter.All, CancellationToken token = default) {
+		public static async Task<IReadOnlyCollection<ISymbol>> FindDeclarationsAsync(this Project project, string keywords, int resultLimit, bool fullMatch, bool matchCase, SymbolFilter filter = SymbolFilter.All, CancellationToken token = default) {
 			var symbols = new SortedSet<ISymbol>(CreateSymbolComparer());
 			int maxNameLength = 0;
-			var predicate = CreateNameFilter(symbolName, fullMatch, matchCase);
+			var predicate = CreateNameFilter(keywords, fullMatch, matchCase);
 
 			foreach (var symbol in await SymbolFinder.FindSourceDeclarationsAsync(project, predicate, token).ConfigureAwait(false)) {
 				if (symbols.Count < resultLimit) {
@@ -197,8 +197,8 @@ namespace Codist
 			}
 		}
 
-		public static IEnumerable<ISymbol> FindDeclarationMatchName(this Compilation compilation, string symbolName, bool fullMatch, bool matchCase, CancellationToken cancellationToken = default) {
-			var filter = CreateNameFilter(symbolName, fullMatch, matchCase);
+		public static IEnumerable<ISymbol> FindDeclarationMatchName(this Compilation compilation, string keywords, bool fullMatch, bool matchCase, CancellationToken cancellationToken = default) {
+			var filter = CreateNameFilter(keywords, fullMatch, matchCase);
 			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (type.IsAccessible(true) == false) {
 					continue;
@@ -482,23 +482,42 @@ namespace Codist
 			});
 		}
 
-		static Func<string, bool> CreateNameFilter(string symbolName, bool fullMatch, bool matchCase) {
-			if (fullMatch) {
-				if (matchCase) {
-					return name => name == symbolName;
+		static readonly char[] __SplitArray = new char[] { ' ' };
+		static string[] SplitKeywords(string text) {
+			return text.Split(__SplitArray, StringSplitOptions.RemoveEmptyEntries);
+		}
+		public static Func<string, bool> CreateNameFilter(string keywords, bool fullMatch, bool matchCase) {
+			var k = SplitKeywords(keywords);
+			if (k.Length == 1 || fullMatch) {
+				keywords = k[0];
+				if (fullMatch) {
+					if (matchCase) {
+						return name => name == keywords;
+					}
+					else {
+						return name => String.Equals(name, keywords, StringComparison.OrdinalIgnoreCase);
+					}
 				}
 				else {
-					return name => String.Equals(name, symbolName, StringComparison.OrdinalIgnoreCase);
+					if (matchCase) {
+						return name => name.IndexOf(keywords, StringComparison.Ordinal) != -1;
+					}
+					else {
+						return name => name.IndexOf(keywords, StringComparison.OrdinalIgnoreCase) != -1;
+					}
 				}
 			}
-			else {
-				if (matchCase) {
-					return name => name.IndexOf(symbolName, StringComparison.Ordinal) != -1;
+			return name => {
+				int i = 0;
+				var c = matchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+				foreach (var item in k) {
+					if ((i = name.IndexOf(item, i, c)) == -1) {
+						return false;
+					}
+					i += item.Length;
 				}
-				else {
-					return name => name.IndexOf(symbolName, StringComparison.OrdinalIgnoreCase) != -1;
-				}
-			}
+				return true;
+			};
 		}
 	}
 
