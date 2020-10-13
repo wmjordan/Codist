@@ -41,6 +41,7 @@ namespace Codist.SmartBars
 						case ".exe":
 						case ".bat":
 						case ".cmd":
+						case ".py":
 						case ".js":
 						case ".vbs":
 						case ".com":
@@ -76,12 +77,13 @@ namespace Codist.SmartBars
 					// assume the selection is the file name, try get its full path
 					var ts = view.TextSnapshot;
 					var line = ts.GetLineFromPosition(span.Start);
-					var le = line.End.Position;
-					var e = span.End < le ? span.End : le;
+					var eol = line.End.Position;
+					var e = span.End < eol ? span.End : eol;
 					// find start of path
 					int ss = span.Start - line.Start > 255 ? span.Start - 255 : line.Start;
-					var text = ts.GetText(ss, le - ss);
-					var s = text.LastIndexOf(Path.VolumeSeparatorChar);
+					var text = ts.GetText(ss, eol - ss);
+					int s = span.Start - ss;
+					s = text.LastIndexOf(Path.VolumeSeparatorChar, s, s);
 					if (s < 1
 						|| Char.IsLetterOrDigit(text[--s]) == false
 						|| s > 1 && Char.IsLetterOrDigit(text[s - 1])) {
@@ -89,12 +91,12 @@ namespace Codist.SmartBars
 					}
 					s += ss;
 					if (s > e) {
-						e = le;
+						e = eol;
 					}
 					// detect end of path
 					char c;
 					int i;
-					for (i = e; i < le; i++) {
+					for (i = e; i < eol; i++) {
 						switch (c = ts[i]) {
 							case '.':
 							case '_':
