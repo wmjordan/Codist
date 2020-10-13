@@ -121,31 +121,54 @@ namespace Codist
 			#endregion
 			#region SeeAlso
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SeeAlsoDoc)) {
-				var seeAlsos = doc.SeeAlso ?? doc.ExplicitInheritDoc?.SeeAlso ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.SeeAlso != null)?.SeeAlso;
+				var seeAlsos = doc.SeeAlsos ?? doc.ExplicitInheritDoc?.SeeAlsos ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.SeeAlsos != null)?.SeeAlsos;
+				ThemedTipText seeAlso = null;
+				bool hasItem = false;
 				if (seeAlsos != null) {
-					var seeAlso = new ThemedTipText()
+					seeAlso = new ThemedTipText()
 						.Append(R.T_SeeAlso, true)
-						.Append(seeAlsos == doc.SeeAlso ? ": " : (R.T_Inherited + ": "));
-					bool hasItem = false;
+						.Append(seeAlsos == doc.SeeAlsos ? ": " : (R.T_Inherited + ": "));
 					foreach (var item in seeAlsos) {
 						if (hasItem) {
 							seeAlso.Append(", ");
 						}
-						RenderXmlDocSymbol(item.Attribute("cref").Value, seeAlso.Inlines, SymbolKind.Alias);
+						RenderSee(seeAlso.Inlines, item);
 						hasItem = true;
 					}
+				}
+				var sees = doc.Sees ?? doc.ExplicitInheritDoc?.Sees ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Sees != null)?.Sees;
+				if (sees != null) {
+					if (seeAlso == null) {
+						seeAlso = new ThemedTipText()
+						   .Append(R.T_SeeAlso, true)
+						   .Append(sees == doc.Sees ? ": " : (R.T_Inherited + ": "));
+					}
+					foreach (var item in sees) {
+						if (hasItem) {
+							seeAlso.Append(", ");
+						}
+						RenderSee(seeAlso.Inlines, item);
+						hasItem = true;
+					}
+				}
+				if (seeAlso != null) {
 					tip.Append(new ThemedTipParagraph(IconIds.SeeAlsoXmlDoc, seeAlso));
 				}
 			}
 			#endregion
-			var example = doc.Example ?? doc.ExplicitInheritDoc?.Example ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Example != null)?.Example;
-			if (example != null) {
-				tip.Append(new ThemedTipParagraph(IconIds.ExampleXmlDoc, new ThemedTipText()
-					.Append(R.T_Example, true)
-					.Append(example == doc.Example ? ": " : (R.T_Inherited + ": "))
-					))
-					.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(example, this)));
+			#region Example
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ExampleDoc)) {
+				var examples = doc.Examples ?? doc.ExplicitInheritDoc?.Examples ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Examples != null)?.Examples;
+				if (examples != null) {
+					tip.Append(new ThemedTipParagraph(IconIds.ExampleXmlDoc, new ThemedTipText()
+						.Append(R.T_Example, true)
+						.Append(examples == doc.Examples ? ": " : (R.T_Inherited + ": "))));
+					foreach (var item in examples) {
+						tip.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(item, this)));
+					}
+				}
 			}
+			#endregion
 			return tip;
 		}
 
@@ -230,30 +253,14 @@ namespace Codist
 								RenderBlockContent(inlines, list, e, BLOCK_ITEM);
 								break;
 							case "see":
-								var see = e.Attribute("cref");
-								if (see != null) {
-									if (IsUrl(see)) {
-										CreateLink(inlines, e, see);
-									}
-									else {
-										RenderXmlDocSymbol(see.Value, inlines, SymbolKind.Alias);
-									}
-								}
-								else if ((see = e.Attribute("langword")) != null) {
-									RenderXmlDocSymbol(see.Value, inlines, SymbolKind.DynamicType);
-								}
+							case "seealso":
+								RenderSee(inlines, e);
 								break;
 							case "paramref":
-								see = e.Attribute("name");
-								if (see != null) {
-									RenderXmlDocSymbol(see.Value, inlines, SymbolKind.Parameter);
-								}
+								RenderParamRef(inlines, e);
 								break;
 							case "typeparamref":
-								see = e.Attribute("name");
-								if (see != null) {
-									RenderXmlDocSymbol(see.Value, inlines, SymbolKind.TypeParameter);
-								}
+								RenderTypeParamRef(inlines, e);
 								break;
 							case "c":
 								++_isCode;
@@ -270,9 +277,9 @@ namespace Codist
 								StyleInner(e, inlines, new Underline());
 								break;
 							case "a":
-								see = e.Attribute("href");
-								if (see != null && IsUrl(see)) {
-									CreateLink(inlines, e, see);
+								var a = e.Attribute("href");
+								if (a != null && IsUrl(a)) {
+									CreateLink(inlines, e, a);
 								}
 								else {
 									goto case "u";
@@ -324,13 +331,17 @@ namespace Codist
 			}
 		}
 
-		void CreateLink(InlineCollection inlines, XElement e, XAttribute see) {
+		static bool IsUrl(XAttribute a) {
+			return a.Value.StartsWith("http://", StringComparison.Ordinal) || a.Value.StartsWith("https://", StringComparison.Ordinal);
+		}
+
+		void CreateLink(InlineCollection inlines, XElement e, XAttribute a) {
 			var link = new Hyperlink {
-				NavigateUri = new Uri(see.Value),
-				ToolTip = String.Join(Environment.NewLine, e.Attribute("title"), see.Value)
+				NavigateUri = new Uri(a.Value),
+				ToolTip = String.Join(Environment.NewLine, e.Attribute("title"), a.Value)
 			}.ClickToNavigate();
 			if (e.IsEmpty) {
-				link.Inlines.Add(see.Value);
+				link.Inlines.Add(a.Value);
 				inlines.Add(link);
 			}
 			else {
@@ -338,8 +349,39 @@ namespace Codist
 			}
 		}
 
-		private static bool IsUrl(XAttribute see) {
-			return see.Value.StartsWith("http://", StringComparison.Ordinal) || see.Value.StartsWith("https://", StringComparison.Ordinal);
+		XAttribute RenderSee(InlineCollection inlines, XElement e) {
+			var see = e.Attribute("cref");
+			if (see != null) {
+				if (IsUrl(see)) {
+					CreateLink(inlines, e, see);
+				}
+				else {
+					RenderXmlDocSymbol(see.Value, inlines, SymbolKind.Alias);
+				}
+			}
+			else if ((see = e.Attribute("langword")) != null) {
+				RenderXmlDocSymbol(see.Value, inlines, SymbolKind.DynamicType);
+			}
+
+			return see;
+		}
+
+		XAttribute RenderParamRef(InlineCollection inlines, XElement e) {
+			var r = e.Attribute("name");
+			if (r != null) {
+				RenderXmlDocSymbol(r.Value, inlines, SymbolKind.Parameter);
+			}
+
+			return r;
+		}
+
+		XAttribute RenderTypeParamRef(InlineCollection inlines, XElement e) {
+			var r = e.Attribute("name");
+			if (r != null) {
+				RenderXmlDocSymbol(r.Value, inlines, SymbolKind.TypeParameter);
+			}
+
+			return r;
 		}
 
 		Span RenderBlockContent(InlineCollection inlines, ListContext list, XElement e, int blockType) {
@@ -445,6 +487,63 @@ namespace Codist
 				case "c": return true;
 			}
 			return false;
+		}
+
+		static XNode GetFirstContent(XElement element) {
+			var node = element.FirstNode;
+			if (node == null) {
+				return null;
+			}
+			do {
+				switch (node.NodeType) {
+					case XmlNodeType.Element: return (XElement)node;
+					case XmlNodeType.Whitespace: continue;
+					case XmlNodeType.SignificantWhitespace: continue;
+					case XmlNodeType.Text:
+						if (((XText)node).Value.Trim().Length == 0) {
+							continue;
+						}
+						return node;
+				}
+				return node;
+			} while ((node = node.NextNode) != null);
+			return null;
+		}
+
+		static XElement GetPrevElement(XElement element) {
+			XNode node = element;
+			while ((node = node.PreviousNode) != null) {
+				switch (node.NodeType) {
+					case XmlNodeType.Element: return (XElement)node;
+					case XmlNodeType.Whitespace: continue;
+					case XmlNodeType.SignificantWhitespace: continue;
+					case XmlNodeType.Text:
+						if (((XText)node).Value.Trim().Length == 0) {
+							continue;
+						}
+						return null;
+				}
+				return null;
+			}
+			return null;
+		}
+
+		static XElement GetNextElement(XElement element) {
+			XNode node = element;
+			while ((node = node.NextNode) != null) {
+				switch (node.NodeType) {
+					case XmlNodeType.Element: return (XElement)node;
+					case XmlNodeType.Whitespace: continue;
+					case XmlNodeType.SignificantWhitespace: continue;
+					case XmlNodeType.Text:
+						if (((XText)node).Value.Trim().Length == 0) {
+							continue;
+						}
+						return null;
+				}
+				return null;
+			}
+			return null;
 		}
 
 		sealed class ListContext

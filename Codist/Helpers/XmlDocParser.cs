@@ -14,9 +14,9 @@ namespace Codist
 		readonly ISymbol _Symbol;
 		readonly Compilation _Compilation;
 		readonly bool _HasDoc;
-		XElement _Summary, _Remarks, _Returns, _Example;
+		XElement _Summary, _Remarks, _Returns;
 		bool _Preliminary;
-		List<XElement> _Parameters, _Exceptions, _TypeParameters, _SeeAlso;
+		List<XElement> _Parameters, _Exceptions, _TypeParameters, _SeeAlsos, _Sees, _Examples;
 		List<XmlDoc> _InheritedXmlDocs;
 		XmlDoc _ExplicitInheritDoc;
 
@@ -48,9 +48,10 @@ namespace Codist
 		public XElement Summary => _Summary;
 		public XElement Remarks => _Remarks;
 		public XElement Returns => _Returns;
-		public XElement Example => _Example;
+		public IEnumerable<XElement> Examples => _Examples;
 		public IEnumerable<XElement> Exceptions => _Exceptions;
-		public IEnumerable<XElement> SeeAlso => _SeeAlso;
+		public IEnumerable<XElement> Sees => _Sees;
+		public IEnumerable<XElement> SeeAlsos => _SeeAlsos;
 		public XmlDoc ExplicitInheritDoc => _ExplicitInheritDoc;
 		public IEnumerable<XmlDoc> InheritedXmlDocs {
 			get {
@@ -162,9 +163,11 @@ namespace Codist
 				case "exception":
 					(_Exceptions ?? (_Exceptions = new List<XElement>())).Add(item); break;
 				case "example":
-					_Example = item; break;
+					(_Examples ?? (_Examples = new List<XElement>())).Add(item); break;
 				case "seealso":
-					(_SeeAlso ?? (_SeeAlso = new List<XElement>())).Add(item); break;
+					(_SeeAlsos ?? (_SeeAlsos = new List<XElement>())).Add(item); break;
+				case "see":
+					(_Sees ?? (_Sees = new List<XElement>())).Add(item); break;
 				case "preliminary":
 					_Preliminary = true; break;
 				case "inheritdoc":

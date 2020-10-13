@@ -44,6 +44,7 @@ namespace TestProject
 	/// <see cref="ConcreteClass.Method"/>, or <see cref="ConcreteClass.Method{TGeneric}"/>.</para>
 	/// <para>The "<c>para</c>" elements no longer generate empty lines.</para>
 	/// <para>You can style your comment with <b>bold</b>, <i>italic</i> and <u>underline</u>, or <b><i><u>combinations of them</u></i></b>.</para>
+	/// <para>See also: <seealso cref="NamespaceDoc"/>, <seealso cref="Test"/></para>
 	/// </summary>
 	/// <remarks>
 	/// <para>Enable <i>Show <c>&lt;remarks&gt;</c> XML Doc</i> option to read remarks for symbols.</para>
@@ -103,6 +104,7 @@ namespace TestProject
 		/// <summary>A redundant summary.</summary>
 		/// <typeparam name="T">T is exception class.</typeparam>
 		/// <exception cref="System.IO.IOException"><para>Not implemented</para><para>Period.</para></exception>
+		/// <seealso cref="Print{TArg1, TArg2}(TArg1, TArg2)"/>
 		public static async Task Log<T>(T exception) where T : Exception {
 			await Task.Run(() => Console.WriteLine(exception.ToString()));
 		}
