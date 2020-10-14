@@ -32,7 +32,7 @@ namespace TestProject
 	/// <summary>
 	/// <para>Codist can override the existing Quick Info.</para>
 	/// <para>The overriden Quick Info does not show qualified names to
-	/// make the text more concise.
+	/// make the text more concise.<br/>
 	/// Nevertheless, you can hover your mouse onto the members to see their full names.</para>
 	/// <list type="number">
 	/// <item><para>Generic class: <see cref="Dictionary{TKey, TValue}"/></para></item>

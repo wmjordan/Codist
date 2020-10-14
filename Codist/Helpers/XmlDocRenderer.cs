@@ -263,14 +263,18 @@ namespace Codist
 								RenderTypeParamRef(inlines, e);
 								break;
 							case "c":
+							case "tt":
 								++_isCode;
 								StyleInner(e, inlines, new Span() { FontFamily = GetCodeFont(), Background = ThemeHelper.ToolWindowBackgroundBrush, Foreground = ThemeHelper.ToolWindowTextBrush });
 								--_isCode;
 								break;
 							case "b":
+							case "strong":
+							case "term":
 								StyleInner(e, inlines, new Bold());
 								break;
 							case "i":
+							case "em":
 								StyleInner(e, inlines, new Italic());
 								break;
 							case "u":
@@ -284,6 +288,9 @@ namespace Codist
 								else {
 									goto case "u";
 								}
+								break;
+							case "br":
+								inlines.Add(new LineBreak());
 								break;
 							//case "list":
 							//case "description":
