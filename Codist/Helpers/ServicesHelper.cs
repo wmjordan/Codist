@@ -52,5 +52,10 @@ namespace Codist
 
 		[Import]
 		public Microsoft.VisualStudio.LanguageServices.VisualStudioWorkspace VisualStudioWorkspace { get; private set; }
+
+		public static TInterface Get<TInterface, VSInterface>() where TInterface : class {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			return ServiceProvider.GlobalProvider.GetService(typeof(VSInterface)) as TInterface;
+		}
 	}
 }

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.VisualStudio.PlatformUI;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
 {
@@ -107,9 +108,17 @@ namespace Codist.Controls
 		static readonly PropertyInfo TextViewProp = TextEditorType?.GetProperty("TextView", BindingFlags.Instance | BindingFlags.NonPublic);
 		static readonly MethodInfo RegisterMethod = TextEditorType?.GetMethod("RegisterCommandHandlers", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(Type), typeof(bool), typeof(bool), typeof(bool) }, null);
 		static readonly MethodInfo OnDetachMethod = TextEditorType?.GetMethod("OnDetach", BindingFlags.Instance | BindingFlags.NonPublic);
+		static readonly PropertyInfo TextSelectionProp = TextEditorType?.GetProperty("Selection", BindingFlags.Instance | BindingFlags.NonPublic);
 
 		static readonly Type TextContainerType = Type.GetType("System.Windows.Documents.ITextContainer, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
 		static readonly PropertyInfo TextContainerTextViewProp = TextContainerType?.GetProperty("TextView");
+		static readonly Type TextSelectionType = Type.GetType("System.Windows.Documents.ITextSelection, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
+		static readonly MethodInfo TextSelectionContains = TextSelectionType?.GetMethod("Contains", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(Point) }, null);
+		static readonly PropertyInfo TextSelectionAnchorPositionProp = TextSelectionType?.GetProperty("AnchorPosition");
+		static readonly Type TextRangeType = Type.GetType("System.Windows.Documents.ITextRange, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
+		static readonly PropertyInfo TextRangeIsEmptyProp = TextRangeType?.GetProperty("IsEmpty");
+		static readonly PropertyInfo TextRangeTextProp = TextRangeType?.GetProperty("Text");
+		static readonly MethodInfo TextRangeSelect = TextRangeType?.GetMethod("Select", BindingFlags.Public | BindingFlags.Instance, null, new[] { TextSelectionAnchorPositionProp?.PropertyType ?? typeof(int), TextSelectionAnchorPositionProp?.PropertyType ?? typeof(int) }, null);
 
 		static readonly PropertyInfo TextContainerProp = typeof(TextBlock).GetProperty("TextContainer", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -117,11 +126,23 @@ namespace Codist.Controls
 		static readonly MethodInfo CopyMethod = TextEditorCopyPaste?.GetMethod("Copy", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { TextEditorType, typeof(bool) }, null);
 
 		static readonly bool __IsInitialized = IsReadOnlyProp != null && TextViewProp != null && RegisterMethod != null
-			&& TextContainerTextViewProp != null && TextContainerProp != null;
+			&& TextContainerTextViewProp != null && TextSelectionProp != null && TextSelectionContains != null && TextRangeIsEmptyProp != null && TextContainerProp != null;
 		static readonly bool __CanCopy = CopyMethod != null;
 
 		readonly FrameworkElement _uiScope;
 		readonly object _editor;
+
+		public static TextEditorWrapper CreateFor(TextBlock text) {
+			if (__IsInitialized == false) {
+				return null;
+			}
+			text.Focusable = true;
+			var textContainer = TextContainerProp.GetValue(text);
+			var editor = new TextEditorWrapper(textContainer, text, false);
+			IsReadOnlyProp.SetValue(editor._editor, true);
+			TextViewProp.SetValue(editor._editor, TextContainerTextViewProp.GetValue(textContainer));
+			return editor;
+		}
 
 		public TextEditorWrapper(object textContainer, FrameworkElement uiScope, bool isUndoEnabled) {
 			_editor = Activator.CreateInstance(TextEditorType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance, null, new[] { textContainer, uiScope, isUndoEnabled }, null);
@@ -143,51 +164,55 @@ namespace Codist.Controls
 			RegisterMethod?.Invoke(null, new object[] { controlType, acceptsRichContent, readOnly, registerEventListeners });
 		}
 
-		public static TextEditorWrapper CreateFor(TextBlock text) {
-			if (__IsInitialized == false) {
-				return null;
-			}
-			text.Focusable = true;
-			var textContainer = TextContainerProp.GetValue(text);
-			var editor = new TextEditorWrapper(textContainer, text, false);
-			IsReadOnlyProp.SetValue(editor._editor, true);
-			TextViewProp.SetValue(editor._editor, TextContainerTextViewProp.GetValue(textContainer));
-			return editor;
-		}
-
 		void HandleSelectStart(object sender, MouseButtonEventArgs e) {
 			_uiScope.PreviewMouseLeftButtonDown -= HandleSelectStart;
-			// don't mess so much if not selected
 			_uiScope.Focus();
-			_uiScope.PreviewKeyUp += HandleCopyShortcut;
-			_uiScope.MouseRightButtonUp += ShowContextMenu;
-			_uiScope.Style = new Style(_uiScope.GetType()) {
-				Setters = {
-					new Setter(System.Windows.Controls.Primitives.TextBoxBase.SelectionBrushProperty, ThemeHelper.TextSelectionHighlightBrush)
-				}
-			};
-		}
-		void ShowContextMenu(object sender, RoutedEventArgs e) {
-			var s = sender as FrameworkElement;
-			if (e.Source != _uiScope) {
-				QuickInfo.QuickInfoOverrider.HoldQuickInfo(s, true);
-				return;
-			}
-			if (s.ContextMenu == null) {
+			// don't mess so much if not selected
+			// lazy initialization (only when selection is started)
+			if (_uiScope.ContextMenu == null) {
+				_uiScope.PreviewKeyUp += HandleCopyShortcut;
+				//_uiScope.ContextMenuOpening += ShowContextMenu;
+				_uiScope.Style = new Style(_uiScope.GetType()) {
+					Setters = {
+						new Setter(System.Windows.Controls.Primitives.TextBoxBase.SelectionBrushProperty, ThemeHelper.TextSelectionHighlightBrush)
+					}
+				};
 				var m = new ContextMenu {
 					Resources = SharedDictionaryManager.ContextMenu,
 					Foreground = ThemeHelper.ToolWindowTextBrush,
 					IsEnabled = true
 				};
 				m.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
-				var newItem = new ThemedMenuItem { Icon = ThemeHelper.GetImage(IconIds.Copy), Header = "Copy selection" };
+				var newItem = new ThemedMenuItem { Icon = ThemeHelper.GetImage(IconIds.Copy), Header = R.CMD_CopySelection };
 				newItem.Click += HandleMouseCopy;
 				m.Items.Add(newItem);
-				m.Closed += ReleaseQuickInfo;
-				s.ContextMenu = m;
+				m.Items.AddRange(Config.Instance.SearchEngines.ConvertAll(s => new ThemedMenuItem(IconIds.SearchWebSite, R.CMD_SearchWith.Replace("<NAME>", s.Name), (_, args) => ExternalCommand.OpenWithWebBrowser(s.Pattern, TextRangeTextProp.GetValue(TextSelectionProp.GetValue(_editor)) as string))));
+				_uiScope.ContextMenu = m;
+				_uiScope.ContextMenuOpening += HandleContextMenuOpening;
+				_uiScope.ContextMenuClosing += HandleContextMenuClosing;
+			}
+		}
+		void HandleContextMenuOpening(object sender, ContextMenuEventArgs e) {
+			var s = sender as FrameworkElement;
+			//if (e.Source != _uiScope) {
+			//	QuickInfo.QuickInfoOverrider.HoldQuickInfo(s, true);
+			//	return;
+			//}
+			var selection = TextSelectionProp.GetValue(_editor);
+			var selectionEmpty = (bool)TextRangeIsEmptyProp.GetValue(selection);
+			if (selectionEmpty || (bool)TextSelectionContains.Invoke(selection, new object[] { new Point(e.CursorLeft, e.CursorTop) }) == false) {
+				_uiScope.ContextMenu.IsOpen = false;
+				e.Handled = true;
+				return;
 			}
 			QuickInfo.QuickInfoOverrider.HoldQuickInfo(s, true);
-			s.ContextMenu.IsOpen = true;
+			//s.ContextMenu.IsOpen = true;
+		}
+		void HandleContextMenuClosing(object sender, ContextMenuEventArgs e) {
+			// clears selection
+			var selection = TextSelectionProp.GetValue(_editor);
+			var anchor = TextSelectionAnchorPositionProp.GetValue(selection);
+			TextRangeSelect.Invoke(selection, new object[] { anchor, anchor });
 		}
 		void ReleaseQuickInfo(object sender, RoutedEventArgs e) {
 			QuickInfo.QuickInfoOverrider.HoldQuickInfo(_uiScope, false);

@@ -207,6 +207,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Copy Selection 的本地化字符串。
+        /// </summary>
+        internal static string CMD_CopySelection {
+            get {
+                return ResourceManager.GetString("CMD_CopySelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Copy Symbol Name 的本地化字符串。
         /// </summary>
         internal static string CMD_CopySymbolName {

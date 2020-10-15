@@ -1737,4 +1737,7 @@ Line: {Line}</value>
   <data name="T_BuildStarted" xml:space="preserve">
     <value>Build started.</value>
   </data>
+  <data name="CMD_CopySelection" xml:space="preserve">
+    <value>Copy Selection</value>
+  </data>
 </root>

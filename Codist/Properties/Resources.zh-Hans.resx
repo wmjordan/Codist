@@ -1726,4 +1726,7 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   <data name="T_BuildStarted" xml:space="preserve">
     <value>开始生成。</value>
   </data>
+  <data name="CMD_CopySelection" xml:space="preserve">
+    <value>复制选中内容</value>
+  </data>
 </root>

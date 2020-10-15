@@ -303,6 +303,10 @@ namespace Codist
 
 			protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
 				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, true);
+				if (ContextMenu != null) {
+					ContextMenu.IsOpen = true;
+					e.Handled = true;
+				}
 				base.OnContextMenuOpening(e);
 			}
 
