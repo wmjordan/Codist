@@ -36,7 +36,7 @@ namespace Codist
 			}
 			else if (symbol.Kind == SymbolKind.TypeParameter) {
 				content.Append(R.T_DefinedInType)
-					.Append(symbol.ContainingSymbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
+					.Append(symbol.ContainingSymbol?.ToDisplayString(CodeAnalysisHelper.MemberNameFormat) ?? String.Empty, true);
 				var tp = symbol as ITypeParameterSymbol;
 				if (tp.HasConstraint()) {
 					content.AppendLine().Append(R.T_Constraint);
