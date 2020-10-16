@@ -72,7 +72,15 @@ namespace Codist.Controls
 
 		public IntegerBox() {
 			InitializeComponent();
+			tbmain.TextChanged += Tbmain_TextChanged;
 		}
+
+		void Tbmain_TextChanged(object sender, RoutedEventArgs e) {
+			if (Int32.TryParse(tbmain.Text, out int v)) {
+				Value = v;
+			}
+		}
+
 		public IntegerBox(int initialValue) : this() {
 			Value = initialValue;
 		}
