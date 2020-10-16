@@ -550,11 +550,9 @@ namespace Codist.QuickInfo
 					foreach (var c in children) {
 						var d = c as ThemedTipDocument;
 						if (d != null) {
-							foreach (var item in d.Children) {
+							foreach (var item in d.Paragraphs) {
 								//(item as FrameworkElement)?.LimitSize();
-								if (item is TextBlock t) {
-									t.TextWrapping = TextWrapping.Wrap;
-								}
+								item.TextWrapping = TextWrapping.Wrap;
 							}
 							d.ApplySizeLimit();
 							d.WrapMargin(WpfHelper.SmallVerticalMargin);

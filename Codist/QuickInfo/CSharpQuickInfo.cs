@@ -310,7 +310,7 @@ namespace Codist.QuickInfo
 
 			ShowCapturedVariables(node, symbol, tip);
 
-			if (tip.Children.Count > 0) {
+			if (tip.ParagraphCount > 0) {
 				qiWrapper.OverrideDocumentation(tip);
 			}
 			return tip;
@@ -741,7 +741,7 @@ namespace Codist.QuickInfo
 				t.Append(")");
 				overloadInfo.Append(new ThemedTipParagraph(overload.GetImageId(), t));
 			}
-			if (overloadInfo.Children.Count > 1) {
+			if (overloadInfo.ParagraphCount > 1) {
 				qiContent.Add(overloadInfo);
 			}
 		}
@@ -891,7 +891,7 @@ namespace Codist.QuickInfo
 			foreach (var item in type.AllInterfaces) {
 				ShowMembers(item, doc, true);
 			}
-			if (doc.Children.Count > 1) {
+			if (doc.ParagraphCount > 1) {
 				qiContent.Add(doc);
 			}
 		}

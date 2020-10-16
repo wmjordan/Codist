@@ -183,10 +183,9 @@ namespace Codist
 				return;
 			}
 			var paragraph = new ThemedTipParagraph(showSummaryIcon ? IconIds.XmlDocComment : 0);
-			doc.Append(paragraph);
 			Render(content, paragraph.Content.Inlines);
-			if (paragraph.Content.Inlines.FirstInline == null) {
-				doc.Children.Remove(paragraph);
+			if (paragraph.Content.Inlines.FirstInline != null) {
+				doc.Append(paragraph);
 			}
 		}
 		public void Render(XContainer content, InlineCollection inlines) {

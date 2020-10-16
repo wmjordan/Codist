@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,14 +30,46 @@ namespace Codist.Controls
 			this.Append(text, bold);
 		}
 	}
-	sealed class ThemedTipDocument : StackPanel
+	sealed class ThemedTipDocument : Border
 	{
+		const int PlaceHolderSize = WpfHelper.IconRightMargin + ThemeHelper.DefaultIconSize;
+		readonly Grid _Container;
+		int _RowCount;
+		public ThemedTipDocument() {
+			_Container = new Grid {
+				ColumnDefinitions = {
+					new ColumnDefinition { Width = new GridLength(PlaceHolderSize) },
+					new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
+				}
+			};
+			Child = _Container;
+		}
+		public IEnumerable<TextBlock> Paragraphs => _Container.Children.OfType<TextBlock>();
+		public int ParagraphCount => _RowCount;
+
 		public ThemedTipDocument Append(ThemedTipParagraph block) {
-			Children.Add(block);
-			return this;
+			return AppendParagraph(block.Icon, block.Content);
 		}
 		public ThemedTipDocument AppendTitle(int imageId, string text) {
-			Children.Add(new ThemedTipParagraph(imageId, new ThemedTipText(text, true)));
+			return AppendParagraph(imageId, new ThemedTipText(text, true));
+		}
+		public ThemedTipDocument AppendParagraph(int iconId, TextBlock content) {
+			_Container.RowDefinitions.Add(new RowDefinition());
+			UIElement icon;
+			if (iconId == 0) {
+				icon = new Border { Height = WpfHelper.IconRightMargin, Width = PlaceHolderSize };
+			}
+			else {
+				icon = ThemeHelper.GetImage(iconId).WrapMargin(WpfHelper.GlyphMargin);
+				icon.SetValue(VerticalAlignmentProperty, VerticalAlignment.Top);
+			}
+			icon.SetValue(Grid.RowProperty, _RowCount);
+			_Container.Children.Add(icon);
+			content.SetValue(Grid.RowProperty, _RowCount);
+			content.SetValue(Grid.ColumnProperty, 1);
+			content.Margin = WpfHelper.TinyMargin;
+			_Container.Children.Add(content);
+			_RowCount++;
 			return this;
 		}
 		public void ApplySizeLimit() {
@@ -44,38 +78,27 @@ namespace Codist.Controls
 				w = Application.Current.MainWindow.RenderSize.Width;
 			}
 			w -= WpfHelper.IconRightMargin + ThemeHelper.DefaultIconSize + WpfHelper.SmallMarginSize + WpfHelper.SmallMarginSize + 22/*scrollbar width*/;
-			foreach (var item in Children) {
-				var r = item as ThemedTipParagraph;
+			foreach (var item in _Container.Children) {
+				var r = item as TextBlock;
 				if (r != null) {
-					r.Content.MaxWidth = w;
+					r.MaxWidth = w;
 				}
 			}
 		}
 	}
-	sealed class ThemedTipParagraph : StackPanel
+	sealed class ThemedTipParagraph
 	{
 		const int PlaceHolderSize = WpfHelper.IconRightMargin + ThemeHelper.DefaultIconSize;
 
-		ThemedTipParagraph() {
-			Margin = WpfHelper.TinyMargin;
-			Orientation = Orientation.Horizontal;
-		}
-		public ThemedTipParagraph(int iconId, TextBlock content) : this() {
-			if (iconId == 0) {
-				Children.Add(new Border { Height = WpfHelper.IconRightMargin, Width = PlaceHolderSize });
-			}
-			else {
-				var icon = ThemeHelper.GetImage(iconId).WrapMargin(WpfHelper.GlyphMargin);
-				icon.VerticalAlignment = VerticalAlignment.Top;
-				Children.Add(icon);
-			}
-			Children.Add(Content = content ?? new ThemedTipText());
+		public ThemedTipParagraph(int iconId, TextBlock content) {
+			Icon = iconId;
+			Content = content ?? new ThemedTipText();
 		}
 		public ThemedTipParagraph(int iconId) : this(iconId, null) {
 		}
 		public ThemedTipParagraph(TextBlock content) : this(0, content) {
 		}
-		public Image Icon => Children[0] as Image;
+		public int Icon { get; }
 		public TextBlock Content { get; }
 	}
 	sealed class ThemedToolBarText : TextBlock
