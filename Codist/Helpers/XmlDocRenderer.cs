@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Xml;
@@ -9,7 +11,6 @@ using System.Xml.Linq;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Imaging;
 using R = Codist.Properties.Resources;
 
 namespace Codist
@@ -290,6 +291,20 @@ namespace Codist
 								break;
 							case "br":
 								inlines.Add(new LineBreak());
+								break;
+							case "hr":
+								inlines.AddRange(new Inline[] {
+									new LineBreak(),
+									new InlineUIContainer(new Border {
+											Height = 1,
+											Background = ThemeHelper.DocumentTextBrush,
+											Margin = WpfHelper.MiddleVerticalMargin,
+											Opacity = 0.5
+										}.Bind(FrameworkElement.WidthProperty, new Binding {
+											RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(ThemedTipText), 1),
+											Path = new PropertyPath("ActualWidth")
+										})),
+									new LineBreak() });
 								break;
 							//case "list":
 							//case "description":

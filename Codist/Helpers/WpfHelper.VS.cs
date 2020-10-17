@@ -178,7 +178,7 @@ namespace Codist
 		public static WpfColor GetBackgroundColor(this ResourceDictionary resource) {
 			return resource.GetColor(EditorFormatDefinition.BackgroundColorId);
 		}
-		public static ResourceDictionary SetBrush(this ResourceDictionary resource, Brush brush) {
+		public static ResourceDictionary SetBrush(this ResourceDictionary resource, WpfBrush brush) {
 			brush.Freeze();
 			//var p = new ResourceDictionary().MergeWith(resource);
 			resource[EditorFormatDefinition.ForegroundBrushId] = brush;

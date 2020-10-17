@@ -30,6 +30,7 @@ namespace Codist
 		internal static readonly Thickness TopItemMargin = new Thickness(0, 3, 0, 0);
 		internal static readonly Thickness SmallHorizontalMargin = new Thickness(SmallMarginSize, 0, SmallMarginSize, 0);
 		internal static readonly Thickness SmallVerticalMargin = new Thickness(0, SmallMarginSize, 0, SmallMarginSize);
+		internal static readonly Thickness MiddleVerticalMargin = new Thickness(0, 6, 0, 6);
 		internal static readonly Thickness MenuItemMargin = new Thickness(6, 0, 6, 0);
 
 		#region TextBlock and Run
@@ -388,11 +389,20 @@ namespace Codist
 			}
 			return obj;
 		}
+
 		public static TDependencyObject SetValue<TDependencyObject, TValue>(this TDependencyObject obj, Action<TDependencyObject, TValue> setter, TValue value) where TDependencyObject : DependencyObject {
 			setter(obj, value);
 			return obj;
 		}
 
+		public static TElement Bind<TElement>(this TElement control, DependencyProperty dependency, string binding) where TElement : FrameworkElement {
+			control.SetBinding(dependency, binding);
+			return control;
+		}
+		public static TElement Bind<TElement>(this TElement control, DependencyProperty dependency, System.Windows.Data.BindingBase binding) where TElement : FrameworkElement {
+			control.SetBinding(dependency, binding);
+			return control;
+		}
 		#endregion
 
 		#region Template and style
@@ -500,13 +510,13 @@ namespace Codist
 			textBox.IsVisibleChanged -= TextBox_VisibleSelectAll;
 			textBox.IsVisibleChanged += TextBox_VisibleSelectAll;
 			return textBox;
-		}
 
-		static void TextBox_VisibleSelectAll(object sender, DependencyPropertyChangedEventArgs e) {
-			var b = sender as TextBox;
-			if (b.IsVisible) {
-				b.Focus();
-				b.SelectAll();
+			void TextBox_VisibleSelectAll(object sender, DependencyPropertyChangedEventArgs e) {
+				var b = sender as TextBox;
+				if (b.IsVisible) {
+					b.Focus();
+					b.SelectAll();
+				}
 			}
 		}
 
