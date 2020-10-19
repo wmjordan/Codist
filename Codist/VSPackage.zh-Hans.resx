@@ -147,7 +147,10 @@
   <data name="307" xml:space="preserve">
     <value>显示</value>
   </data>
-  <data name="308" xml:space="preserve">
+  <data name="309" xml:space="preserve">
     <value>扩展开发辅助</value>
+  </data>
+  <data name="308" xml:space="preserve">
+    <value>联网搜索</value>
   </data>
 </root>

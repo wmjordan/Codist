@@ -446,9 +446,6 @@ namespace Codist.Options
 		{
 			readonly OptionBox<SmartBarOptions> _ShiftToggleDisplay, _ManualDisplaySmartBar;
 			readonly OptionBox<SmartBarOptions>[] _Options;
-			readonly TextBox _BrowserPath, _BrowserParameter, _SearchEngineName, _SearchEngineUrl;
-			readonly ListBox _SearchEngineList;
-			readonly Button _BrowseBrowserPath, _AddSearchButton, _RemoveSearchButton, _MoveUpSearchButton, _ResetSearchButton, _SaveSearchButton;
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.SmartBarOptions;
@@ -461,173 +458,12 @@ namespace Codist.Options
 					new DescriptionBox(R.OT_ToggleSmartBarNote)
 					);
 
-				AddPage(R.OT_WebSearch,
-					new Note(R.OT_WebSearchNote),
-					new TitleBox(R.OT_SearchEngines),
-					new Grid {
-						ColumnDefinitions = {
-							new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), },
-							new ColumnDefinition { Width = new GridLength(80, GridUnitType.Pixel) }
-						},
-						RowDefinitions = {
-							new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-							new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }
-						},
-						Children = {
-							(_SearchEngineList = new ListView {
-								Margin = WpfHelper.SmallMargin,
-								View = new GridView {
-									Columns = {
-										new GridViewColumn { Header = R.OT_Name, Width = 100, DisplayMemberBinding = new Binding("Name") },
-										new GridViewColumn { Header = R.OT_URLPattern, Width = 220, DisplayMemberBinding = new Binding("Pattern") }
-									}
-								}
-							}),
-							new Grid {
-								Margin = WpfHelper.SmallMargin,
-								ColumnDefinitions = {
-									new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
-									new ColumnDefinition { Width = new GridLength(5, GridUnitType.Star) },
-								},
-								RowDefinitions = {
-									new RowDefinition { },
-									new RowDefinition { },
-									new RowDefinition { }
-								},
-								Children = {
-									new Label { Content = R.OTC_Name, Width = 60 },
-									(_SearchEngineName = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1),
-									new Label { Content = R.OTC_URL, Width = 60 }.SetValue(Grid.SetRow, 1),
-									(_SearchEngineUrl = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
-									new DescriptionBox(R.OT_SearchParamSubsitution).SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumnSpan, 2)
-								}
-							}.SetValue(Grid.SetRow, 1),
-							new StackPanel {
-								Margin = WpfHelper.SmallMargin,
-								Children = {
-									(_RemoveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Remove }),
-									(_MoveUpSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_MoveUp }),
-									(_ResetSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Reset }),
-								}
-							}.SetValue(Grid.SetColumn, 1),
-							new StackPanel {
-								Margin = WpfHelper.SmallMargin,
-								Children = {
-									(_AddSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Add }),
-									(_SaveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Update })
-								}
-							}.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1)
-						}
-					},
-					new TitleBox(R.OT_SearchResultBrowser),
-					new Note(R.OT_SearchResultBrowserNote),
-					new Grid {
-						ColumnDefinitions = {
-							new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), },
-							new ColumnDefinition { Width = new GridLength(100, GridUnitType.Pixel) }
-						},
-						Children = {
-							(_BrowserPath = new TextBox { Margin = WpfHelper.SmallHorizontalMargin, Text = Config.Instance.BrowserPath })
-								.SetValue(Grid.SetColumn, 0),
-							(_BrowseBrowserPath = new Button { Content = R.CMD_Browse, Margin = WpfHelper.SmallHorizontalMargin })
-								.SetValue(Grid.SetColumn, 1)
-						}
-					},
-					new Note(R.OT_BrowserParameter),
-					_BrowserParameter = new TextBox { Margin = WpfHelper.SmallHorizontalMargin, Text = Config.Instance.BrowserParameter },
-					new DescriptionBox(R.OT_URLSubstitution)
-
-				);
-
 				_Options = new[] { _ShiftToggleDisplay, _ManualDisplaySmartBar };
-				_BrowserPath.TextChanged += _BrowserPath_TextChanged;
-				_BrowserParameter.TextChanged += _BrowserParameter_TextChanged;
-				_BrowseBrowserPath.Click += (s, args) => {
-					var d = new OpenFileDialog {
-						Title = R.OT_LocateBrowser,
-						CheckFileExists = true,
-						AddExtension = true,
-						Filter = R.OT_ExecutableFileFilter
-					};
-					if (d.ShowDialog() == true) {
-						_BrowserPath.Text = d.FileName;
-					}
-				};
-				_SearchEngineList.Items.AddRange(Config.Instance.SearchEngines);
-				_SearchEngineList.SelectionChanged += (s, args)=> RefreshSearchEngineUI();
-				_AddSearchButton.Click += (s, args) => {
-					var item = new SearchEngine(R.CMD_NewItem, String.Empty);
-					_SearchEngineList.Items.Add(item);
-					Config.Instance.SearchEngines.Add(item);
-					_SearchEngineList.SelectedIndex = _SearchEngineList.Items.Count - 1;
-					RefreshSearchEngineUI();
-					_SearchEngineName.Focus();
-					Config.Instance.FireConfigChangedEvent(Features.SmartBar);
-				};
-				_RemoveSearchButton.Click += (s, args) => {
-					var i = _SearchEngineList.SelectedItem as SearchEngine;
-					if (MessageBox.Show(R.OT_ConfirmRemoveSearchEngine.Replace("<NAME>", i.Name), nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
-						var p = _SearchEngineList.SelectedIndex;
-						_SearchEngineList.Items.RemoveAt(p);
-						Config.Instance.SearchEngines.RemoveAt(p);
-						RefreshSearchEngineUI();
-						Config.Instance.FireConfigChangedEvent(Features.SmartBar);
-					}
-				};
-				_MoveUpSearchButton.Click += (s, args) => {
-					var p = _SearchEngineList.SelectedIndex;
-					if (p > 0) {
-						var se = Config.Instance.SearchEngines[p];
-						_SearchEngineList.Items.RemoveAt(p);
-						Config.Instance.SearchEngines.RemoveAt(p);
-						_SearchEngineList.Items.Insert(--p, se);
-						Config.Instance.SearchEngines.Insert(p, se);
-						_SearchEngineList.SelectedIndex = p;
-						Config.Instance.FireConfigChangedEvent(Features.SmartBar);
-					}
-					_MoveUpSearchButton.IsEnabled = p > 0;
-				};
-				_SaveSearchButton.Click += (s, args) => {
-					var se = _SearchEngineList.SelectedItem as SearchEngine;
-					se.Name = _SearchEngineName.Text;
-					se.Pattern = _SearchEngineUrl.Text;
-					var p = _SearchEngineList.SelectedIndex;
-					_SearchEngineList.Items.RemoveAt(p);
-					_SearchEngineList.Items.Insert(p, se);
-					Config.Instance.FireConfigChangedEvent(Features.SmartBar);
-				};
-				_ResetSearchButton.Click += (s, args) => {
-					if (MessageBox.Show(R.OT_ConfirmResetSearchEngine, nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
-						Config.Instance.ResetSearchEngines();
-						ResetSearchEngines(Config.Instance.SearchEngines);
-						Config.Instance.FireConfigChangedEvent(Features.SmartBar);
-					}
-				};
-				RefreshSearchEngineUI();
-			}
-
-			void _BrowserParameter_TextChanged(object sender, TextChangedEventArgs e) {
-				if (Page.IsConfigUpdating) {
-					return;
-				}
-				Config.Instance.BrowserParameter = _BrowserParameter.Text;
-				Config.Instance.FireConfigChangedEvent(Features.SmartBar);
-			}
-
-			void _BrowserPath_TextChanged(object sender, TextChangedEventArgs e) {
-				if (Page.IsConfigUpdating) {
-					return;
-				}
-				Config.Instance.BrowserPath = _BrowserPath.Text;
-				Config.Instance.FireConfigChangedEvent(Features.SmartBar);
 			}
 
 			protected override void LoadConfig(Config config) {
 				var o = config.SmartBarOptions;
 				Array.ForEach(_Options, i => i.UpdateWithOption(o));
-				_BrowserPath.Text = config.BrowserPath;
-				_BrowserParameter.Text = config.BrowserParameter;
-				ResetSearchEngines(config.SearchEngines);
 			}
 
 			void UpdateConfig(SmartBarOptions options, bool set) {
@@ -636,22 +472,6 @@ namespace Codist.Options
 				}
 				Config.Instance.Set(options, set);
 				Config.Instance.FireConfigChangedEvent(Features.SmartBar);
-			}
-
-			void RefreshSearchEngineUI() {
-				var se = _SearchEngineList.SelectedItem as SearchEngine;
-				if (_RemoveSearchButton.IsEnabled = _SaveSearchButton.IsEnabled = _SearchEngineName.IsEnabled = _SearchEngineUrl.IsEnabled = se != null) {
-					_MoveUpSearchButton.IsEnabled = _SearchEngineList.SelectedIndex > 0;
-					_SearchEngineName.Text = se.Name;
-					_SearchEngineUrl.Text = se.Pattern;
-				}
-				else {
-					_MoveUpSearchButton.IsEnabled = false;
-				}
-			}
-			void ResetSearchEngines(System.Collections.Generic.List<SearchEngine> searchEngines) {
-				_SearchEngineList.Items.Clear();
-				_SearchEngineList.Items.AddRange(searchEngines);
 			}
 		}
 	}
@@ -994,6 +814,205 @@ namespace Codist.Options
 				}
 				Config.Instance.TopSpace = (int)e.NewValue;
 				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			}
+		}
+	}
+
+	[Guid("4BD9DEDE-B83D-4552-8197-45BF050E20CA")]
+	sealed class WebSearchPage : OptionsPage
+	{
+		UIElement _Child;
+
+		protected override Features Feature => Features.SmartBar;
+		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
+
+		sealed class PageControl : OptionsPageContainer
+		{
+			readonly TextBox _BrowserPath, _BrowserParameter, _SearchEngineName, _SearchEngineUrl;
+			readonly ListBox _SearchEngineList;
+			readonly Button _BrowseBrowserPath, _AddSearchButton, _RemoveSearchButton, _MoveUpSearchButton, _ResetSearchButton, _SaveSearchButton;
+
+			public PageControl(OptionsPage page) : base(page) {
+				AddPage(R.OT_WebSearch,
+					new Note(R.OT_WebSearchNote),
+					new TitleBox(R.OT_SearchEngines),
+					new Grid {
+						ColumnDefinitions = {
+							new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), },
+							new ColumnDefinition { Width = new GridLength(80, GridUnitType.Pixel) }
+						},
+						RowDefinitions = {
+							new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+							new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }
+						},
+						Children = {
+							(_SearchEngineList = new ListView {
+								Margin = WpfHelper.SmallMargin,
+								View = new GridView {
+									Columns = {
+										new GridViewColumn { Header = R.OT_Name, Width = 100, DisplayMemberBinding = new Binding("Name") },
+										new GridViewColumn { Header = R.OT_URLPattern, Width = 220, DisplayMemberBinding = new Binding("Pattern") }
+									}
+								}
+							}),
+							new Grid {
+								Margin = WpfHelper.SmallMargin,
+								ColumnDefinitions = {
+									new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+									new ColumnDefinition { Width = new GridLength(5, GridUnitType.Star) },
+								},
+								RowDefinitions = {
+									new RowDefinition { },
+									new RowDefinition { },
+									new RowDefinition { }
+								},
+								Children = {
+									new Label { Content = R.OTC_Name, Width = 60 },
+									(_SearchEngineName = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1),
+									new Label { Content = R.OTC_URL, Width = 60 }.SetValue(Grid.SetRow, 1),
+									(_SearchEngineUrl = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
+									new DescriptionBox(R.OT_SearchParamSubsitution).SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumnSpan, 2)
+								}
+							}.SetValue(Grid.SetRow, 1),
+							new StackPanel {
+								Margin = WpfHelper.SmallMargin,
+								Children = {
+									(_RemoveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Remove }),
+									(_MoveUpSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_MoveUp }),
+									(_ResetSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Reset }),
+								}
+							}.SetValue(Grid.SetColumn, 1),
+							new StackPanel {
+								Margin = WpfHelper.SmallMargin,
+								Children = {
+									(_AddSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Add }),
+									(_SaveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Update })
+								}
+							}.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1)
+						}
+					},
+					new TitleBox(R.OT_SearchResultBrowser),
+					new Note(R.OT_SearchResultBrowserNote),
+					new Grid {
+						ColumnDefinitions = {
+							new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), },
+							new ColumnDefinition { Width = new GridLength(100, GridUnitType.Pixel) }
+						},
+						Children = {
+							(_BrowserPath = new TextBox { Margin = WpfHelper.SmallHorizontalMargin, Text = Config.Instance.BrowserPath })
+								.SetValue(Grid.SetColumn, 0),
+							(_BrowseBrowserPath = new Button { Content = R.CMD_Browse, Margin = WpfHelper.SmallHorizontalMargin })
+								.SetValue(Grid.SetColumn, 1)
+						}
+					},
+					new Note(R.OT_BrowserParameter),
+					_BrowserParameter = new TextBox { Margin = WpfHelper.SmallHorizontalMargin, Text = Config.Instance.BrowserParameter },
+					new DescriptionBox(R.OT_URLSubstitution)
+
+				);
+
+				_BrowserPath.TextChanged += _BrowserPath_TextChanged;
+				_BrowserParameter.TextChanged += _BrowserParameter_TextChanged;
+				_BrowseBrowserPath.Click += (s, args) => {
+					var d = new OpenFileDialog {
+						Title = R.OT_LocateBrowser,
+						CheckFileExists = true,
+						AddExtension = true,
+						Filter = R.OT_ExecutableFileFilter
+					};
+					if (d.ShowDialog() == true) {
+						_BrowserPath.Text = d.FileName;
+					}
+				};
+				_SearchEngineList.Items.AddRange(Config.Instance.SearchEngines);
+				_SearchEngineList.SelectionChanged += (s, args) => RefreshSearchEngineUI();
+				_AddSearchButton.Click += (s, args) => {
+					var item = new SearchEngine(R.CMD_NewItem, String.Empty);
+					_SearchEngineList.Items.Add(item);
+					Config.Instance.SearchEngines.Add(item);
+					_SearchEngineList.SelectedIndex = _SearchEngineList.Items.Count - 1;
+					RefreshSearchEngineUI();
+					_SearchEngineName.Focus();
+					Config.Instance.FireConfigChangedEvent(Features.SmartBar);
+				};
+				_RemoveSearchButton.Click += (s, args) => {
+					var i = _SearchEngineList.SelectedItem as SearchEngine;
+					if (MessageBox.Show(R.OT_ConfirmRemoveSearchEngine.Replace("<NAME>", i.Name), nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+						var p = _SearchEngineList.SelectedIndex;
+						_SearchEngineList.Items.RemoveAt(p);
+						Config.Instance.SearchEngines.RemoveAt(p);
+						RefreshSearchEngineUI();
+						Config.Instance.FireConfigChangedEvent(Features.WebSearch);
+					}
+				};
+				_MoveUpSearchButton.Click += (s, args) => {
+					var p = _SearchEngineList.SelectedIndex;
+					if (p > 0) {
+						var se = Config.Instance.SearchEngines[p];
+						_SearchEngineList.Items.RemoveAt(p);
+						Config.Instance.SearchEngines.RemoveAt(p);
+						_SearchEngineList.Items.Insert(--p, se);
+						Config.Instance.SearchEngines.Insert(p, se);
+						_SearchEngineList.SelectedIndex = p;
+						Config.Instance.FireConfigChangedEvent(Features.WebSearch);
+					}
+					_MoveUpSearchButton.IsEnabled = p > 0;
+				};
+				_SaveSearchButton.Click += (s, args) => {
+					var se = _SearchEngineList.SelectedItem as SearchEngine;
+					se.Name = _SearchEngineName.Text;
+					se.Pattern = _SearchEngineUrl.Text;
+					var p = _SearchEngineList.SelectedIndex;
+					_SearchEngineList.Items.RemoveAt(p);
+					_SearchEngineList.Items.Insert(p, se);
+					Config.Instance.FireConfigChangedEvent(Features.WebSearch);
+				};
+				_ResetSearchButton.Click += (s, args) => {
+					if (MessageBox.Show(R.OT_ConfirmResetSearchEngine, nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+						Config.Instance.ResetSearchEngines();
+						ResetSearchEngines(Config.Instance.SearchEngines);
+						Config.Instance.FireConfigChangedEvent(Features.WebSearch);
+					}
+				};
+				RefreshSearchEngineUI();
+			}
+
+			void _BrowserParameter_TextChanged(object sender, TextChangedEventArgs e) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.BrowserParameter = _BrowserParameter.Text;
+				Config.Instance.FireConfigChangedEvent(Features.WebSearch);
+			}
+
+			void _BrowserPath_TextChanged(object sender, TextChangedEventArgs e) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.BrowserPath = _BrowserPath.Text;
+				Config.Instance.FireConfigChangedEvent(Features.WebSearch);
+			}
+
+			protected override void LoadConfig(Config config) {
+				_BrowserPath.Text = config.BrowserPath;
+				_BrowserParameter.Text = config.BrowserParameter;
+				ResetSearchEngines(config.SearchEngines);
+			}
+
+			void RefreshSearchEngineUI() {
+				var se = _SearchEngineList.SelectedItem as SearchEngine;
+				if (_RemoveSearchButton.IsEnabled = _SaveSearchButton.IsEnabled = _SearchEngineName.IsEnabled = _SearchEngineUrl.IsEnabled = se != null) {
+					_MoveUpSearchButton.IsEnabled = _SearchEngineList.SelectedIndex > 0;
+					_SearchEngineName.Text = se.Name;
+					_SearchEngineUrl.Text = se.Pattern;
+				}
+				else {
+					_MoveUpSearchButton.IsEnabled = false;
+				}
+			}
+			void ResetSearchEngines(System.Collections.Generic.List<SearchEngine> searchEngines) {
+				_SearchEngineList.Items.Clear();
+				_SearchEngineList.Items.AddRange(searchEngines);
 			}
 		}
 	}

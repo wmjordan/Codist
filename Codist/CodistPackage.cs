@@ -25,8 +25,9 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.SmartBarOptionsPage), Constants.NameOfMe, "Smart Bar", 200, 304, true, Sort = 30)]
 	[ProvideOptionPage(typeof(Options.NavigationBarPage), Constants.NameOfMe, "Navigation Bar", 200, 305, true, Sort = 40)]
 	[ProvideOptionPage(typeof(Options.ScrollBarMarkerPage), Constants.NameOfMe, "Scrollbar Marker", 200, 306, true, Sort = 50)]
-	[ProvideOptionPage(typeof(Options.DisplayPage), Constants.NameOfMe, "Display", 200, 307, true, Sort = 61)]
-	[ProvideOptionPage(typeof(Options.ExtensionDeveloperPage), Constants.NameOfMe, "Extension developer", 200, 308, true, Sort = 62)]
+	[ProvideOptionPage(typeof(Options.DisplayPage), Constants.NameOfMe, "Display", 200, 307, true, Sort = 60)]
+	[ProvideOptionPage(typeof(Options.WebSearchPage), Constants.NameOfMe, "Web Search", 200, 308, true, Sort = 70)]
+	[ProvideOptionPage(typeof(Options.ExtensionDeveloperPage), Constants.NameOfMe, "Extension development", 200, 309, true, Sort = 80)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	//[ProvideToolWindow(typeof(Commands.SymbolFinderWindow))]
 	[ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string, PackageAutoLoadFlags.BackgroundLoad)]
@@ -35,12 +36,6 @@ namespace Codist
 	{
 		/// <summary>CodistPackage GUID string.</summary>
 		const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
-
-		const string CategorySuperQuickInfo = Constants.NameOfMe + "\\Super Quick Info";
-		const string CategoryScrollbarMarker = Constants.NameOfMe + "\\Scrollbar Marker";
-		const string CategorySyntaxHighlight = Constants.NameOfMe + "\\Syntax Highlight";
-		const string CategoryNaviBar = Constants.NameOfMe + "\\Navigation Bar";
-		const string CategorySmartBar = Constants.NameOfMe + "\\Smart Bar";
 
 		static EnvDTE.DTE _dte;
 		static EnvDTE80.DTE2 _dte2;

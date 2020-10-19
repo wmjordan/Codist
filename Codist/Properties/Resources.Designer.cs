@@ -3390,7 +3390,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 This page defines search engines which can be accessed via right clicking the Find button on the Smart Bar 的本地化字符串。
+        ///   查找类似 This page defines search engines which can be accessed via right clicking the Find button on the Smart Bar or the selected content in Super Quick Info 的本地化字符串。
         /// </summary>
         internal static string OT_WebSearchNote {
             get {

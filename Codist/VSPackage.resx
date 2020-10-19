@@ -151,7 +151,10 @@
   <data name="307" xml:space="preserve">
     <value>Display</value>
   </data>
+  <data name="309" xml:space="preserve">
+    <value>Extension Development</value>
+  </data>
   <data name="308" xml:space="preserve">
-    <value>Extension developer</value>
+    <value>Web Search</value>
   </data>
 </root>

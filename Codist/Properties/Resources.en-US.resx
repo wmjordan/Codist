@@ -1332,7 +1332,7 @@ Ctrl+1, Ctrl+1: Edit.SearchClassMember</value>
     <value>Web Search</value>
   </data>
   <data name="OT_WebSearchNote" xml:space="preserve">
-    <value>This page defines search engines which can be accessed via right clicking the Find button on the Smart Bar</value>
+    <value>This page defines search engines which can be accessed via right clicking the Find button on the Smart Bar or the selected content in Super Quick Info</value>
   </data>
   <data name="T_ConfigFileFilter" xml:space="preserve">
     <value>Codist configuration file|*.json|All files|*.*</value>

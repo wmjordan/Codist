@@ -552,7 +552,8 @@ namespace Codist
 		SuperQuickInfo = 1 << 2,
 		SmartBar = 1 << 3,
 		NaviBar = 1 << 4,
-		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar
+		WebSearch = 1 << 5,
+		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar | WebSearch
 	}
 
 	[Flags]

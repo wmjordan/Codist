@@ -1325,10 +1325,12 @@ https://github.com/snowie2000/mactype/releases</value>
     <value>字段和属性的初始值</value>
   </data>
   <data name="OT_WebSearch" xml:space="preserve">
-    <value>搜索引擎</value>
+    <value>联网搜索</value>
   </data>
   <data name="OT_WebSearchNote" xml:space="preserve">
-    <value>该页面定义搜索引擎，右键单击智能工具栏上的“查找”按钮，可使用它们搜索选中内容</value>
+    <value>该页面定义搜索引擎，搜索菜单在如下场景出现：
+1. 右键单击智能工具栏上的“查找”按钮；
+2. 超级代码提示选中内容的右键菜单</value>
   </data>
   <data name="OT_NaviBarShortcutKeys" xml:space="preserve">
     <value>用于访问导航栏菜单的默认快捷键：
