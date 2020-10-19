@@ -108,6 +108,11 @@ namespace Codist
 				if (System.Version.TryParse(config.Version, out var v) == false
 					|| v < System.Version.Parse(CurrentVersion)) {
 					config.InitStatus = InitStatus.Upgraded;
+					if (v < new Version(5, 4)) {
+						if (config.SearchEngines.Count == 0) {
+							ResetSearchEngines(config.SearchEngines);
+						}
+					}
 				}
 				return config;
 			}
@@ -124,10 +129,8 @@ namespace Codist
 			Debug.WriteLine("Load config: " + configPath);
 			try {
 				Instance = InternalLoadConfig(configPath, styleFilter);
-				//TextEditorHelper.ResetStyleCache();
 				Loaded?.Invoke(Instance, EventArgs.Empty);
 				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(styleFilter != StyleFilters.None ? Features.SyntaxHighlight : Features.All));
-				//Instance._ConfigManager?.MarkVersioned();
 			}
 			catch(Exception ex) {
 				Debug.WriteLine(ex.ToString());
@@ -153,14 +156,8 @@ namespace Codist
 			if (styleFilter == StyleFilters.None) {
 				var l = config.Labels;
 				l.RemoveAll(i => String.IsNullOrWhiteSpace(i.Label));
-				if (l.Count == 0) {
-					InitDefaultLabels(l);
-				}
 				var se = config.SearchEngines;
 				se.RemoveAll(i => String.IsNullOrWhiteSpace(i.Name) || String.IsNullOrWhiteSpace(i.Pattern));
-				if (se.Count == 0) {
-					ResetSearchEngines(se);
-				}
 			}
 			var removeFontNames = System.Windows.Forms.Control.ModifierKeys == System.Windows.Forms.Keys.Control;
 			LoadStyleEntries<CodeStyle, CodeStyleTypes>(config.GeneralStyles, removeFontNames);
@@ -233,12 +230,12 @@ namespace Codist
 		public static void ResetSearchEngines(List<SearchEngine> engines) {
 			engines.Clear();
 			engines.AddRange(new[] {
-				new SearchEngine { Name = "Bing", Pattern = "https://www.bing.com/search?q=%s" },
-				new SearchEngine { Name = "StackOverflow", Pattern = "https://stackoverflow.com/search?q=%s" },
-				new SearchEngine { Name = "GitHub", Pattern = "https://github.com/search?q=%s" },
-				new SearchEngine { Name = "CodeProject", Pattern = "https://www.codeproject.com/search.aspx?q=%s&x=0&y=0&sbo=kw" },
-				new SearchEngine { Name = ".NET Core Source", Pattern = "https://source.dot.net/#q=%s" },
-				new SearchEngine { Name = ".NET Framework Source", Pattern = "https://referencesource.microsoft.com/#q=%s" },
+				new SearchEngine("Bing", "https://www.bing.com/search?q=%s"),
+				new SearchEngine("StackOverflow", "https://stackoverflow.com/search?q=%s"),
+				new SearchEngine("GitHub", "https://github.com/search?q=%s"),
+				new SearchEngine("CodeProject", "https://www.codeproject.com/search.aspx?q=%s&x=0&y=0&sbo=kw"),
+				new SearchEngine(".NET Core Source", "https://source.dot.net/#q=%s"),
+				new SearchEngine(".NET Framework Source", "https://referencesource.microsoft.com/#q=%s"),
 			});
 		}
 
@@ -375,6 +372,7 @@ namespace Codist
 			_LastLoaded = DateTime.Now;
 			var c = new Config();
 			InitDefaultLabels(c.Labels);
+			ResetSearchEngines(c.SearchEngines);
 			c.GeneralStyles.AddRange(GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>());
 			c.CommentStyles.AddRange(GetDefaultCodeStyles<CommentStyle, CommentStyleTypes>());
 			c.CodeStyles.AddRange(GetDefaultCodeStyles<CSharpStyle, CSharpStyleTypes>());
