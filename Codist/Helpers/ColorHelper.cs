@@ -136,5 +136,9 @@ namespace Codist
 			var p = type.GetProperty(name, ThemeResourceKeyType);
 			return (p?.GetValue(null) as ThemeResourceKey)?.GetWpfBrush();
 		}
+
+		public static bool IsDark(this WpfColor color) {
+			return (299 * color.R + 587 * color.G + 114 * color.B) / 1000 < 128;
+		}
 	}
 }

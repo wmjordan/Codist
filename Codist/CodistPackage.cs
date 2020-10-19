@@ -147,6 +147,15 @@ namespace Codist
 			if (Config.Instance.InitStatus != InitStatus.Normal) {
 				Config.Instance.SaveConfig(Config.ConfigPath); // save the file to prevent this notification from reoccurrence
 				new Commands.VersionInfoBar(this).Show(Config.Instance.InitStatus);
+				if (Config.Instance.InitStatus == InitStatus.FirstLoad) {
+					// automatically load theme when first load
+					if (ThemeHelper.DocumentPageColor.ToWpfColor().IsDark()) {
+						Config.LoadConfig(Config.DarkTheme, StyleFilters.All);
+					}
+					else {
+						Config.LoadConfig(Config.LightTheme, StyleFilters.All);
+					}
+				}
 			}
 			Commands.SyntaxCustomizerWindowCommand.Initialize();
 			//ListEditorCommands();
