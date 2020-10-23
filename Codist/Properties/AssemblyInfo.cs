@@ -11,5 +11,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTrademark(nameof(Codist))]
 [assembly: ComVisible(false)]
 [assembly: AssemblyVersion("5.0.0.0")]
-[assembly: AssemblyFileVersion("5.7.0.5719")]
+[assembly: AssemblyFileVersion("5.8.0.6026")]
 [assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
