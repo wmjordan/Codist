@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 using AppHelpers;
 using Microsoft.VisualStudio.Text.Operations;
+using System.Threading.Tasks;
 
 namespace Codist.NaviBar
 {
@@ -125,6 +126,23 @@ namespace Codist.NaviBar
 				container.Children.Add(bar);
 				dropDown1.Visibility = Visibility.Hidden;
 				dropDown2.Visibility = Visibility.Hidden;
+				naviBar.Unloaded += ResurrectNaviBar_OnUnloaded;
+			}
+
+			// Fixes https://github.com/wmjordan/Codist/issues/131
+			async void ResurrectNaviBar_OnUnloaded(object sender, RoutedEventArgs e) {
+				var naviBar = sender as Border;
+				if (naviBar != null) {
+					naviBar.Unloaded -= ResurrectNaviBar_OnUnloaded;
+				}
+				if (_View.IsClosed) {
+					return;
+				}
+				await Task.Delay(1000).ConfigureAwait(false);
+				await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+				if (_View.VisualElement.IsVisible) {
+					FindNaviBar(_View.VisualElement, e);
+				}
 			}
 		}
 	}
