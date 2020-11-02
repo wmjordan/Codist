@@ -998,6 +998,8 @@ namespace Codist
 				var il = m.GetILGenerator();
 				var isSource = il.DefineLabel();
 				var isRetargetSource = il.DefineLabel();
+				var notAssemblySymbol = il.DefineLabel();
+				var getUnderlyingAssemblySymbol = il.DefineLabel();
 				var a = System.Reflection.Assembly.GetAssembly(typeof(Microsoft.CodeAnalysis.CSharp.CSharpExtensions));
 				const string NS = "Microsoft.CodeAnalysis.CSharp.Symbols.";
 				var s = a.GetType(NS + "PublicModel.AssemblySymbol"); // from VS16.5
@@ -1016,12 +1018,20 @@ namespace Codist
 					il.Emit(OpCodes.Brtrue_S, isSource);
 				}
 				if (ua != null) { // VS16.5
-					// (asm as AssemblySymbol).UnderlyingAssemblySymbol is RetargetingAssemblySymbol
+					// (asm as AssemblySymbol)?.UnderlyingAssemblySymbol is RetargetingAssemblySymbol
 					il.Emit(OpCodes.Ldarg_0);
 					il.Emit(OpCodes.Isinst, s);
+					#region Workaround for https://github.com/wmjordan/Codist/issues/138
+					il.Emit(OpCodes.Dup /* AssemblySymbol */);
+					il.Emit(OpCodes.Brtrue_S, getUnderlyingAssemblySymbol);
+					il.Emit(OpCodes.Pop /* AssemblySymbol */);
+					il.Emit(OpCodes.Br_S, notAssemblySymbol);
+					il.MarkLabel(getUnderlyingAssemblySymbol); 
+					#endregion
 					il.Emit(OpCodes.Callvirt, ua.GetGetMethod(true));
 					il.Emit(OpCodes.Isinst, tr);
 					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
+					il.MarkLabel(notAssemblySymbol);
 				}
 				else if (tr != null) { // prior to VS16.5
 					il.Emit(OpCodes.Ldarg_0);
