@@ -352,7 +352,7 @@ namespace Codist
 					}
 				}
 				CodistPackage.DTE.OpenFile(tPath, d => {
-					var v = GetActiveWpfDocumentView();
+					var v = d.GetActiveWpfDocumentView();
 					using (var edit = v.TextBuffer.CreateEdit()) {
 						edit.Insert(target, sNode.ToFullString());
 						if (edit.HasEffectiveChanges) {
@@ -366,7 +366,7 @@ namespace Codist
 				// drag & drop from external file to current file
 				if (copy == false) {
 					CodistPackage.DTE.OpenFile(sPath, d => {
-						using (var edit = GetActiveWpfDocumentView().TextBuffer.CreateEdit()) {
+						using (var edit = d.GetActiveWpfDocumentView().TextBuffer.CreateEdit()) {
 							edit.Delete(sSpan.Start, sSpan.Length);
 							if (edit.HasEffectiveChanges) {
 								edit.Apply();
@@ -544,6 +544,11 @@ namespace Codist
 				return null;
 			}
 			var textView = GetIVsTextView(service, doc.FullName);
+			return textView == null ? null : GetWpfTextView(textView);
+		}
+		public static IWpfTextView GetActiveWpfDocumentView(this EnvDTE.Document doc) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			var textView = GetIVsTextView(ServiceProvider.GlobalProvider, doc.FullName);
 			return textView == null ? null : GetWpfTextView(textView);
 		}
 
