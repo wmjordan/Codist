@@ -597,12 +597,12 @@ namespace Codist
 			return false;
 		}
 
-		public static bool IsAwaitable(this ITypeSymbol t) {
-			if (t is null || t.ContainingNamespace == null || t.ContainingNamespace.MetadataName != "System.Runtime.CompilerServices") {
+		public static bool IsAwaitable(this ITypeSymbol type) {
+			if (type is null || type.ContainingNamespace == null || type.ContainingNamespace.MetadataName != "System.Runtime.CompilerServices") {
 				return false;
 			}
 
-			foreach (var item in t.GetMembers(WellKnownMemberNames.GetAwaiter)) {
+			foreach (var item in type.GetMembers(WellKnownMemberNames.GetAwaiter)) {
 				if (item.Kind != SymbolKind.Method) {
 					continue;
 				}
@@ -614,6 +614,31 @@ namespace Codist
 			return false;
 		}
 
+		static readonly Func<ITypeSymbol, bool> __TypeIsReadOnlyAccessor = GetTypeIsReadOnlyMethod();
+		static Func<ITypeSymbol, bool> GetTypeIsReadOnlyMethod() {
+			var t = typeof(CSharpSyntaxTree).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.TypeSymbol");
+			var p = t?.GetProperty("IsReadOnly", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			if (p == null) {
+				return _ => false;
+			}
+			var m = new DynamicMethod("Type_IsReadOnly", typeof(bool), new[] { typeof(ITypeSymbol) }, true);
+			var il = m.GetILGenerator();
+			var isTypeSymbol = il.DefineLabel();
+			il.Emit(OpCodes.Ldarg_0);
+			il.Emit(OpCodes.Isinst, t);
+			il.Emit(OpCodes.Dup /*TypeSymbol*/);
+			il.Emit(OpCodes.Brtrue_S, isTypeSymbol);
+			il.Emit(OpCodes.Pop);
+			il.Emit(OpCodes.Ldc_I4_0);
+			il.Emit(OpCodes.Ret);
+			il.MarkLabel(isTypeSymbol);
+			il.Emit(OpCodes.Callvirt, p.GetGetMethod(true));
+			il.Emit(OpCodes.Ret);
+			return (Func<ITypeSymbol, bool>)m.CreateDelegate(typeof(Func<ITypeSymbol, bool>));
+		}
+		public static bool IsReadOnly(this ITypeSymbol type) {
+			return __TypeIsReadOnlyAccessor(type);
+		}
 		public static bool IsQualifiable(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:

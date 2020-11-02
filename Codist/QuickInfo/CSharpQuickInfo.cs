@@ -800,6 +800,7 @@ namespace Codist.QuickInfo
 			if (options.MatchFlags(QuickInfoOptions.Declaration)
 				&& (typeSymbol.DeclaredAccessibility != Accessibility.Public
 					|| typeSymbol.IsStatic
+					|| typeSymbol.IsReadOnly()
 					|| (typeSymbol.IsAbstract || typeSymbol.IsSealed) && typeSymbol.TypeKind == TypeKind.Class)
 				) {
 				ShowDeclarationModifier(qiContent, typeSymbol);

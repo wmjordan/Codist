@@ -543,8 +543,22 @@ namespace Codist
 					}
 				}
 			}
-			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
-				info.Append("sealed ", Keyword);
+			else if (symbol.IsSealed) {
+				switch (symbol.Kind) {
+					case SymbolKind.NamedType:
+						switch (((INamedTypeSymbol)symbol).TypeKind) {
+							case TypeKind.Class:
+								info.Append("sealed ", Keyword); break;
+							case TypeKind.Struct:
+								if (((INamedTypeSymbol)symbol).IsReadOnly()) {
+									info.Append("readonly ", Keyword);
+								}
+								break;
+						}
+						break;
+					case SymbolKind.Method:
+						info.Append("sealed ", Keyword); break;
+				}
 			}
 			if (symbol.Kind == SymbolKind.Method) {
 				var m = (symbol as IMethodSymbol).GetSpecialMethodModifier();
