@@ -555,14 +555,18 @@ namespace Codist
 		}
 
 		public static void ScreenShot(FrameworkElement control, string path, int width, int height) {
-			var bmp = new RenderTargetBitmap(width, height, 96, 96, System.Windows.Media.PixelFormats.Default);
-			//var sourceBrush = new System.Windows.Media.VisualBrush(control) { Stretch = System.Windows.Media.Stretch.None };
-			//var drawingVisual = new System.Windows.Media.DrawingVisual();
-			//using (var dc = drawingVisual.RenderOpen()) {
-			//	dc.DrawRectangle(sourceBrush, null, new Rect(0, 0, width, height));
-			//	dc.Close();
-			//}
-			//bmp.Render(drawingVisual);
+			// see: https://stackoverflow.com/questions/1918877/how-can-i-get-the-dpi-in-wpf
+			var source = PresentationSource.FromVisual(control);
+
+			RenderTargetBitmap bmp;
+			if (source != null) {
+				var s1 = source.CompositionTarget.TransformToDevice.M11;
+				var s2 = source.CompositionTarget.TransformToDevice.M22;
+				bmp = new RenderTargetBitmap((int)(width * s1), (int)(height * s2), 96 * s1, 96 * s2, PixelFormats.Default);
+			}
+			else {
+				bmp = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Default);
+			}
 			bmp.Render(control);
 			var enc = new PngBitmapEncoder();
 			enc.Frames.Add(BitmapFrame.Create(bmp));
