@@ -201,6 +201,12 @@ namespace Codist
 				// should not be here
 				span = new SnapshotSpan(view.TextSnapshot, span.Span);
 			}
+			var m = ServicesHelper.Instance.OutliningManager.GetOutliningManager(view);
+			if (m != null) {
+				foreach (var c in m.GetCollapsedRegions(span)) {
+					m.Expand(c);
+				}
+			}
 			view.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.ShowStart);
 			view.Selection.Select(span, false);
 			view.Caret.MoveTo(span.End);
