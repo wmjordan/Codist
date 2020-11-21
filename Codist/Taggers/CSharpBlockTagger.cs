@@ -120,6 +120,7 @@ namespace Codist.Taggers
 		static CodeMemberType MatchDeclaration(SyntaxNode node) {
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration:
+				case CodeAnalysisHelper.RecordDeclaration:
 					return CodeMemberType.Class;
 				case SyntaxKind.InterfaceDeclaration:
 					return CodeMemberType.Interface;

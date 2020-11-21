@@ -44,6 +44,7 @@ namespace Codist
 				?? semanticModel.GetTypeInfo(node, cancellationToken).Type
 				?? (node.IsKind(SyntaxKind.FieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as FieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
 					: node.IsKind(SyntaxKind.EventFieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as EventFieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
+					: node.IsKind((SyntaxKind)9063) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 					: null)
 				;
 		}
@@ -67,7 +68,7 @@ namespace Codist
 					?? (node is AccessorDeclarationSyntax
 						? semanticModel.GetDeclaredSymbol(node.Parent.Parent, cancellationToken)
 						: null)
-					?? (node is TypeParameterSyntax || node is ParameterSyntax ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null);
+					?? (node is TypeParameterSyntax || node is ParameterSyntax || node.RawKind == (int)RecordDeclaration ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null);
 		}
 
 		public static ISymbol GetSymbolOrFirstCandidate(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
@@ -384,7 +385,7 @@ namespace Codist
 						if (m.DeclaredAccessibility != Accessibility.Public) {
 							sb.Append(m.GetAccessibility());
 						}
-						sb.Append("set;");
+						sb.Append(m.IsInitOnly() ? "init;" : "set;");
 					}
 					return sb.Append('}').ToString();
 				}
@@ -616,8 +617,7 @@ namespace Codist
 
 		static readonly Func<ITypeSymbol, bool> __TypeIsReadOnlyAccessor = GetTypeIsReadOnlyMethod();
 		static Func<ITypeSymbol, bool> GetTypeIsReadOnlyMethod() {
-			var t = typeof(CSharpSyntaxTree).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.TypeSymbol");
-			var p = t?.GetProperty("IsReadOnly", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			var p = typeof(ITypeSymbol).GetProperty("IsReadOnly");
 			if (p == null) {
 				return _ => false;
 			}
@@ -625,19 +625,28 @@ namespace Codist
 			var il = m.GetILGenerator();
 			var isTypeSymbol = il.DefineLabel();
 			il.Emit(OpCodes.Ldarg_0);
-			il.Emit(OpCodes.Isinst, t);
-			il.Emit(OpCodes.Dup /*TypeSymbol*/);
-			il.Emit(OpCodes.Brtrue_S, isTypeSymbol);
-			il.Emit(OpCodes.Pop);
-			il.Emit(OpCodes.Ldc_I4_0);
-			il.Emit(OpCodes.Ret);
-			il.MarkLabel(isTypeSymbol);
 			il.Emit(OpCodes.Callvirt, p.GetGetMethod(true));
 			il.Emit(OpCodes.Ret);
 			return (Func<ITypeSymbol, bool>)m.CreateDelegate(typeof(Func<ITypeSymbol, bool>));
 		}
+		static readonly Func<IMethodSymbol, bool> __MethodIsInitOnlyAccessor = GetMethodIsInitOnlyMethod();
+		static Func<IMethodSymbol, bool> GetMethodIsInitOnlyMethod() {
+			var p = typeof(IMethodSymbol).GetProperty("IsInitOnly");
+			if (p == null) {
+				return _ => false;
+			}
+			var m = new DynamicMethod("Method_IsInitOnly", typeof(bool), new[] { typeof(IMethodSymbol) }, true);
+			var il = m.GetILGenerator();
+			il.Emit(OpCodes.Ldarg_0);
+			il.Emit(OpCodes.Callvirt, p.GetGetMethod(true));
+			il.Emit(OpCodes.Ret);
+			return (Func<IMethodSymbol, bool>)m.CreateDelegate(typeof(Func<IMethodSymbol, bool>));
+		}
 		public static bool IsReadOnly(this ITypeSymbol type) {
-			return __TypeIsReadOnlyAccessor(type);
+			return type != null && __TypeIsReadOnlyAccessor(type);
+		}
+		public static bool IsInitOnly(this IMethodSymbol method) {
+			return method != null && __MethodIsInitOnlyAccessor(method);
 		}
 		public static bool IsQualifiable(this ISymbol symbol) {
 			switch (symbol.Kind) {

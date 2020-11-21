@@ -143,7 +143,8 @@ namespace Codist.NaviBar
 				var c = Math.Min(Items.Count, nodes.Count);
 				int i, i2;
 				#region Remove outdated nodes on NaviBar
-				for (i = 1, i2 = 0; i < c && i2 < c; i2++) {
+				const int FirstNodeIndex = 1;
+				for (i = FirstNodeIndex, i2 = 0; i < c && i2 < c; i2++) {
 					var n = nodes[i2];
 					if (token.IsCancellationRequested) {
 						return;
@@ -158,7 +159,7 @@ namespace Codist.NaviBar
 					}
 					break;
 				}
-				if ((i == 1 || i2 < nodes.Count && nodes[i2].Kind().IsTypeOrNamespaceDeclaration()) && _RootItem.FilterText.Length == 0) {
+				if ((i == FirstNodeIndex || i2 < nodes.Count && nodes[i2].Kind().IsTypeOrNamespaceDeclaration()) && _RootItem.FilterText.Length == 0) {
 					// clear type and namespace menu items if a type is changed
 					_RootItem.ClearSymbolList();
 				}
@@ -745,10 +746,10 @@ namespace Codist.NaviBar
 			}
 
 			async Task AddItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
-				AddMemberDeclarations(node, false);
+				AddMemberDeclarations(node, false, true);
 				var externals = (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember)
 					&& (node as BaseTypeDeclarationSyntax).Modifiers.Any(SyntaxKind.PartialKeyword) ? MemberListOptions.ShowPartial : 0)
-					| (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.BaseClassMember) && node.IsKind(SyntaxKind.ClassDeclaration) ? MemberListOptions.ShowBase : 0);
+					| (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.BaseClassMember) && (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(CodeAnalysisHelper.RecordDeclaration)) ? MemberListOptions.ShowBase : 0);
 				ISymbol symbol;
 				if (externals != 0) {
 					await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
@@ -794,7 +795,7 @@ namespace Codist.NaviBar
 					if (item.SyntaxTree == current || String.Equals(item.SyntaxTree.FilePath, current.FilePath, StringComparison.OrdinalIgnoreCase)) {
 						continue;
 					}
-					await AddExternalNodesAsync(item, cancellationToken);
+					await AddExternalNodesAsync(item, null, true, cancellationToken);
 					++c;
 				}
 				_PartialCount = c;
@@ -803,23 +804,23 @@ namespace Codist.NaviBar
 				var current = node.SyntaxTree;
 				while ((symbol = symbol.BaseType) != null && symbol.HasSource()) {
 					foreach (var item in symbol.DeclaringSyntaxReferences) {
-						await AddExternalNodesAsync(item, cancellationToken);
+						await AddExternalNodesAsync(item, symbol.GetTypeName(), false, cancellationToken);
 					}
 				}
 			}
 
-			async Task AddExternalNodesAsync(SyntaxReference item, CancellationToken cancellationToken) {
+			async Task AddExternalNodesAsync(SyntaxReference item, string textOverride, bool includeDirectives, CancellationToken cancellationToken) {
 				var externalNode = await item.GetSyntaxAsync(cancellationToken);
 				var i = _Menu.Add(externalNode);
 				i.Location = item.SyntaxTree.GetLocation(item.Span);
-				i.Content.Text = System.IO.Path.GetFileName(item.SyntaxTree.FilePath);
+				i.Content.Text = textOverride ?? System.IO.Path.GetFileName(item.SyntaxTree.FilePath);
 				i.Usage = SymbolUsageKind.Container;
-				AddMemberDeclarations(externalNode, true);
+				AddMemberDeclarations(externalNode, true, includeDirectives);
 			}
 
-			void AddMemberDeclarations(SyntaxNode node, bool isExternal) {
+			void AddMemberDeclarations(SyntaxNode node, bool isExternal, bool includeDirectives) {
 				const byte UNDEFINED = 0xFF, TRUE = 1, FALSE = 0;
-				var directives = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.Region)
+				var directives = includeDirectives && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.Region)
 					? node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia) || d.IsKind(SyntaxKind.EndRegionDirectiveTrivia))
 					: null;
 				byte regionJustStart = UNDEFINED; // undefined, prevent #endregion show up on top of menu items
@@ -1022,7 +1023,10 @@ namespace Codist.NaviBar
 					else if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.AutoPropertyAnnotation)) {
 						var a = p.AccessorList.Accessors;
 						if (a.Count == 2) {
-							if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
+							if (a.Any(i => i.RawKind == (int)CodeAnalysisHelper.InitKeyword)) {
+								propertyItem.Hint = "{init}";
+							}
+							else if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
 								propertyItem.Hint = "{;;}";
 							}
 						}

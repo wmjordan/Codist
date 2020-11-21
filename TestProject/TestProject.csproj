@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A271AA17-5C0A-44DF-BBC7-BC54CDB5FCC3}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TestProject</RootNamespace>
     <AssemblyName>TestProject</AssemblyName>
@@ -37,6 +37,9 @@
     <Prefer32Bit>false</Prefer32Bit>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -67,6 +70,7 @@
     <Compile Include="CS7_2.cs" />
     <Compile Include="CS7_3.cs" />
     <Compile Include="CS8_0.cs" />
+    <Compile Include="CS9_0.cs" />
     <Compile Include="ExtensionClass.cs" />
     <Compile Include="IInterface.cs" />
     <Compile Include="InheritDoc.cs" />

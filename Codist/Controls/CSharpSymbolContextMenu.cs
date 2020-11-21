@@ -639,8 +639,11 @@ namespace Codist.Controls
 						break;
 					case SymbolKind.Property:
 						if (_ContainerIsInterface == false) {
-							if (((IPropertySymbol)symbol).SetMethod == null) {
+							if ((ms = ((IPropertySymbol)symbol).SetMethod) == null) {
 								AddIcon(ref icons, IconIds.ReadonlyProperty);
+							}
+							else if (ms.IsInitOnly()) {
+								AddIcon(ref icons, IconIds.InitonlyProperty);
 							}
 							if (symbol.IsAbstract) {
 								AddIcon(ref icons, IconIds.AbstractMember);

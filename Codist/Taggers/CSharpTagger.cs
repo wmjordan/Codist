@@ -96,6 +96,10 @@ namespace Codist.Taggers
 									case SyntaxKind.ReadOnlyKeyword:
 										yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.TypeCastKeyword);
 										continue;
+									case (SyntaxKind)8444: // workaround for missing classification type for record identifier
+										yield return CreateClassificationSpan(snapshot, (node as TypeDeclarationSyntax).Identifier.Span, _Classifications.ClassName);
+										yield return CreateClassificationSpan(snapshot, (node as TypeDeclarationSyntax).Identifier.Span, _Classifications.Declaration);
+										continue;
 								}
 								continue;
 							}
@@ -374,6 +378,7 @@ namespace Codist.Taggers
 					return tag.Constructor;
 				case SyntaxKind.IndexerDeclaration:
 				case SyntaxKind.PropertyDeclaration: return tag.Property;
+				case CodeAnalysisHelper.RecordDeclaration:
 				case SyntaxKind.ClassDeclaration: return tag.Class;
 				case SyntaxKind.InterfaceDeclaration: return tag.Interface;
 				case SyntaxKind.EnumDeclaration: return tag.Enum;

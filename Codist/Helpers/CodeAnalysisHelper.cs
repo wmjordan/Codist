@@ -41,11 +41,14 @@ namespace Codist
 			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+		internal const SyntaxKind RecordDeclaration = (SyntaxKind)9063;
+		internal const SyntaxKind InitKeyword = (SyntaxKind)9060;
 
 		#region Node info
 		public static bool IsDeclaration(this SyntaxKind kind) {
 			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
+				case RecordDeclaration:
 				case SyntaxKind.ConstructorDeclaration:
 				case SyntaxKind.ConversionOperatorDeclaration:
 				case SyntaxKind.DelegateDeclaration:
@@ -74,6 +77,7 @@ namespace Codist
 		public static DeclarationCategory GetDeclarationCategory(this SyntaxKind kind) {
 			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
+				case RecordDeclaration:
 				case SyntaxKind.DelegateDeclaration:
 				case SyntaxKind.EnumDeclaration:
 				case SyntaxKind.EventDeclaration:
@@ -111,6 +115,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.NamespaceDeclaration:
+				case RecordDeclaration:
 					return true;
 			}
 			return false;
@@ -123,6 +128,7 @@ namespace Codist
 				case SyntaxKind.EventDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
+				case RecordDeclaration:
 					return true;
 			}
 			return false;
@@ -196,7 +202,8 @@ namespace Codist
 
 		public static string GetSyntaxBrief(this SyntaxKind kind) {
 			switch (kind) {
-				case SyntaxKind.ClassDeclaration: return "class";
+				case SyntaxKind.ClassDeclaration:
+				case RecordDeclaration: return "class";
 				case SyntaxKind.EnumDeclaration: return "enum";
 				case SyntaxKind.StructDeclaration: return "struct";
 				case SyntaxKind.InterfaceDeclaration: return "interface";
@@ -251,7 +258,9 @@ namespace Codist
 		#region Node icon
 		public static int GetImageId(this SyntaxNode node) {
 			switch (node.Kind()) {
-				case SyntaxKind.ClassDeclaration: return GetClassIcon((ClassDeclarationSyntax)node);
+				case SyntaxKind.ClassDeclaration:
+				case RecordDeclaration:
+					return GetClassIcon((TypeDeclarationSyntax)node);
 				case SyntaxKind.EnumDeclaration: return GetEnumIcon((EnumDeclarationSyntax)node);
 				case SyntaxKind.StructDeclaration: return GetStructIcon((StructDeclarationSyntax)node);
 				case SyntaxKind.InterfaceDeclaration: return GetInterfaceIcon((InterfaceDeclarationSyntax)node);
@@ -306,7 +315,7 @@ namespace Codist
 				case SyntaxKind.EndRegionDirectiveTrivia: return KnownImageIds.ToolstripPanelBottom;
 			}
 			return KnownImageIds.UnknownMember;
-			int GetClassIcon(ClassDeclarationSyntax syntax) {
+			int GetClassIcon(TypeDeclarationSyntax syntax) {
 				bool isPartial = false;
 				foreach (var modifier in syntax.Modifiers) {
 					switch (modifier.Text) {
@@ -472,6 +481,7 @@ namespace Codist
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
+				case RecordDeclaration:
 					var t1 = (TypeDeclarationSyntax)node;
 					var t2 = (TypeDeclarationSyntax)other;
 					return t1.Arity == t2.Arity && t1.Identifier.Text == t2.Identifier.Text;
@@ -552,9 +562,11 @@ namespace Codist
 
 		public static string GetDeclarationSignature(this SyntaxNode node, int position = 0) {
 			switch (node.Kind()) {
-				case SyntaxKind.ClassDeclaration: return GetClassSignature((ClassDeclarationSyntax)node);
-				case SyntaxKind.StructDeclaration: return GetStructSignature((StructDeclarationSyntax)node);
-				case SyntaxKind.InterfaceDeclaration: return GetInterfaceSignature((InterfaceDeclarationSyntax)node);
+				case SyntaxKind.ClassDeclaration:
+				case SyntaxKind.StructDeclaration:
+				case SyntaxKind.InterfaceDeclaration:
+				case RecordDeclaration:
+					return GetTypeSignature((TypeDeclarationSyntax)node);
 				case SyntaxKind.EnumDeclaration: return ((EnumDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.MethodDeclaration: return GetMethodSignature((MethodDeclarationSyntax)node);
 				case SyntaxKind.ArgumentList: return GetArgumentListSignature((ArgumentListSyntax)node);
@@ -605,9 +617,7 @@ namespace Codist
 					return GetEndRegionSignature((EndRegionDirectiveTriviaSyntax)node);
 			}
 			return null;
-			string GetClassSignature(ClassDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
-			string GetStructSignature(StructDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
-			string GetInterfaceSignature(InterfaceDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
+			string GetTypeSignature(TypeDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
 			string GetMethodSignature(MethodDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
 			string GetDelegateSignature(DelegateDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
 			string GetArgumentListSignature(ArgumentListSyntax syntax) {
@@ -859,6 +869,7 @@ namespace Codist
 					case SyntaxKind.EventDeclaration:
 					case SyntaxKind.InterfaceDeclaration:
 					case SyntaxKind.StructDeclaration:
+					case RecordDeclaration:
 						yield return child;
 						goto case SyntaxKind.CompilationUnit;
 					case SyntaxKind.MethodDeclaration:
@@ -946,6 +957,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.EnumDeclaration:
+				case RecordDeclaration:
 					return ((BaseTypeDeclarationSyntax)node).Identifier;
 				case SyntaxKind.DelegateDeclaration: return ((DelegateDeclarationSyntax)node).Identifier;
 				case SyntaxKind.MethodDeclaration: return ((MethodDeclarationSyntax)node).Identifier;
@@ -982,10 +994,13 @@ namespace Codist
 				return null;
 			}
 			var directives = new List<DirectiveTriviaSyntax>(4);
+			var endOfNode = node.Span.End;
 			do {
-				directives.Add(directive);
+				if (directive.SpanStart > node.SpanStart) {
+					directives.Add(directive);
+				}
 				directive = directive.GetNextDirective(predicate);
-			} while (directive != null);
+			} while (directive != null && directive.SpanStart < endOfNode);
 			return directives;
 		}
 		public static ParameterSyntax FindParameter(this BaseMethodDeclarationSyntax node, string name) {

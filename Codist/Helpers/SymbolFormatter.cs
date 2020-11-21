@@ -245,7 +245,9 @@ namespace Codist
 				case SyntaxKind.FieldDeclaration: return ((BaseFieldDeclarationSyntax)node).Modifiers.Any(SyntaxKind.ConstKeyword) ? Const : Field;
 				case SyntaxKind.ConstructorDeclaration: return GetBrush(node.Parent);
 				case SyntaxKind.MethodDeclaration: return Method;
-				case SyntaxKind.ClassDeclaration: return Class;
+				case SyntaxKind.ClassDeclaration:
+				case CodeAnalysisHelper.RecordDeclaration:
+					return Class;
 				case SyntaxKind.StructDeclaration: return Struct;
 				case SyntaxKind.InterfaceDeclaration: return Interface;
 				case SyntaxKind.EventDeclaration:
