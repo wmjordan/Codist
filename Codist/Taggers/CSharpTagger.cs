@@ -96,7 +96,7 @@ namespace Codist.Taggers
 									case SyntaxKind.ReadOnlyKeyword:
 										yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.TypeCastKeyword);
 										continue;
-									case (SyntaxKind)8444: // workaround for missing classification type for record identifier
+									case CodeAnalysisHelper.RecordKeyword: // workaround for missing classification type for record identifier
 										yield return CreateClassificationSpan(snapshot, (node as TypeDeclarationSyntax).Identifier.Span, _Classifications.ClassName);
 										yield return CreateClassificationSpan(snapshot, (node as TypeDeclarationSyntax).Identifier.Span, _Classifications.Declaration);
 										continue;
@@ -127,7 +127,7 @@ namespace Codist.Taggers
 								case SyntaxKind.SwitchStatement:
 								case SyntaxKind.CaseSwitchLabel:
 								case SyntaxKind.DefaultSwitchLabel:
-								case (SyntaxKind)9025: // switch expression
+								case CodeAnalysisHelper.SwitchExpression:
 								case SyntaxKind.CasePatternSwitchLabel:
 								case SyntaxKind.WhenClause:
 									yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.BranchingKeyword);
@@ -150,7 +150,8 @@ namespace Codist.Taggers
 								case SyntaxKind.CatchFilterClause:
 								case SyntaxKind.FinallyClause:
 								case SyntaxKind.StackAllocArrayCreationExpression:
-								case (SyntaxKind)9053: // implicit stackalloc
+								case CodeAnalysisHelper.ImplicitStackAllocArrayCreationExpression:
+								case CodeAnalysisHelper.FunctionPointerCallingConvention:
 									yield return CreateClassificationSpan(snapshot, item.TextSpan, _Classifications.ResourceKeyword);
 									continue;
 								case SyntaxKind.LocalDeclarationStatement:
@@ -293,7 +294,7 @@ namespace Codist.Taggers
 					case SyntaxKind.SwitchSection:
 					case SyntaxKind.IfStatement:
 					case SyntaxKind.ElseClause:
-					case (SyntaxKind)9023: // positional pattern clause
+					case CodeAnalysisHelper.PositionalPatternClause:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.Branching);
 					case SyntaxKind.ForStatement:
 					case SyntaxKind.ForEachStatement:
@@ -312,7 +313,7 @@ namespace Codist.Taggers
 					case SyntaxKind.FinallyClause:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.Resource);
 					case SyntaxKind.ParenthesizedVariableDesignation:
-						return CreateClassificationSpan(snapshot, itemSpan, node.Parent.IsKind((SyntaxKind)9027) ? HighlightOptions.KeywordBraceTags.Branching : HighlightOptions.MemberBraceTags.Constructor);
+						return CreateClassificationSpan(snapshot, itemSpan, node.Parent.IsKind(CodeAnalysisHelper.VarPattern) ? HighlightOptions.KeywordBraceTags.Branching : HighlightOptions.MemberBraceTags.Constructor);
 					case SyntaxKind.TupleExpression:
 					case SyntaxKind.TupleType:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
@@ -375,6 +376,7 @@ namespace Codist.Taggers
 				case SyntaxKind.ArrayInitializerExpression:
 				case SyntaxKind.ThisConstructorInitializer:
 				case SyntaxKind.DestructorDeclaration:
+				case CodeAnalysisHelper.ImplicitObjectCreationExpression:
 					return tag.Constructor;
 				case SyntaxKind.IndexerDeclaration:
 				case SyntaxKind.PropertyDeclaration: return tag.Property;
@@ -392,8 +394,8 @@ namespace Codist.Taggers
 				case SyntaxKind.ElseClause:
 				case SyntaxKind.SwitchStatement:
 				case SyntaxKind.SwitchSection:
-				case (SyntaxKind)9025: // switch expression
-				case (SyntaxKind)9020: // recursive pattern
+				case CodeAnalysisHelper.SwitchExpression:
+				case CodeAnalysisHelper.RecursivePattern:
 					return keyword.Branching;
 				case SyntaxKind.ForStatement:
 				case SyntaxKind.ForEachStatement:

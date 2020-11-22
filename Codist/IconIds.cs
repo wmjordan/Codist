@@ -62,6 +62,7 @@ namespace Codist
 		public const int OverrideProperty = KnownImageIds.ModifyProperty;
 		public const int OverrideMethod = KnownImageIds.ModifyMethod;
 		public const int Constant = KnownImageIds.Constant;
+		public const int FunctionPointer = KnownImageIds.CallReturnInstructionPointer;
 
 		// interface icons
 		public const int Filter = KnownImageIds.Filter;

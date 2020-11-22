@@ -65,7 +65,12 @@ namespace Codist
 				AddParameterModifier(formatter, inlines, p);
 				formatter.Format(inlines, p.Type, null, false);
 				inlines.Add(" ");
-				inlines.Add(p.Render(null, i == argIndex, formatter.Parameter));
+				if (String.IsNullOrEmpty(p.Name)) {
+					inlines.Add(("@" + i.ToString()).Render(i == argIndex, false, formatter.Parameter));
+				}
+				else {
+					inlines.Add(p.Render(null, i == argIndex, formatter.Parameter));
+				}
 				if (p.IsOptional) {
 					inlines.Add("]");
 				}

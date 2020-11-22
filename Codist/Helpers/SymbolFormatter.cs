@@ -125,9 +125,11 @@ namespace Codist
 					return;
 				case SymbolKind.Method:
 					var method = (IMethodSymbol)symbol;
-					text.Add(method.MethodKind != MethodKind.Constructor
-						? symbol.Render(alias, bold, Method)
-						: symbol.Render(alias ?? method.ContainingType.Name, bold, GetBrushForMethod(method)));
+					text.Add(method.MethodKind == MethodKind.Constructor
+						? symbol.Render(alias ?? method.ContainingType.Name, bold, GetBrushForMethod(method))
+						: method.MethodKind == CodeAnalysisHelper.FunctionPointerMethod
+						? symbol.Render("delegate*", true, GetBrushForMethod(method))
+						: symbol.Render(alias, bold, Method));
 					if (method.IsGenericMethod) {
 						AddTypeArguments(text, method.TypeArguments);
 					}
@@ -194,7 +196,7 @@ namespace Codist
 		}
 
 		Brush GetBrushForMethod(IMethodSymbol m) {
-			switch (m.ContainingType.TypeKind) {
+			switch (m.ContainingType?.TypeKind) {
 				case TypeKind.Class: return Class;
 				case TypeKind.Struct: return Struct;
 			}

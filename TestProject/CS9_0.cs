@@ -171,6 +171,41 @@ namespace TestProject.CS9_0
 		public bool ReturnValue { get; }
 	}
 	#endregion
+
+	#region Function pointers
+	unsafe class FunctionPointers
+	{
+		static readonly delegate*<int, int, int> p1 = null;
+		delegate* managed<int, int, int> p2 = null;
+		//delegate* unmanaged<int, int, int> p3 = null; // this is supported only after .NET 5
+
+		void Conversions() {
+			var c = p1(Int32.MaxValue, 0);
+			delegate*<int, int, int> p3 = p1;
+			Console.WriteLine(p2 == p1); // True
+		}
+		void F(Action<int> a, delegate*<int, void> f) {
+			a(42);
+			f(42);
+		}
+
+		class Util
+		{
+			public static void Log() { }
+
+			void Use() {
+				delegate*<void> ptr1 = &Util.Log;
+			}
+		}
+		unsafe struct Action
+		{
+			readonly delegate*<void> _ptr;
+
+			Action(delegate*<void> ptr) => _ptr = ptr;
+			public void Invoke() => _ptr();
+		}
+	}
+	#endregion
 }
 
 namespace System.Runtime.CompilerServices

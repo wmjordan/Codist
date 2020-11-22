@@ -1133,7 +1133,12 @@ namespace Codist.QuickInfo
 			}
 			var symbol = _SemanticModel.GetSymbolInfo(argList.Parent);
 			if (symbol.Symbol != null) {
-				var m = symbol.Symbol as IMethodSymbol;
+				IMethodSymbol m;
+				switch (symbol.Symbol.Kind) {
+					case SymbolKind.Method: m = symbol.Symbol as IMethodSymbol; break;
+					case CodeAnalysisHelper.FunctionPointerType: m = (symbol.Symbol as ITypeSymbol).Signature(); break;
+					default: m = null; break;
+				}
 				if (m == null) { // in a very rare case m can be null
 					return;
 				}

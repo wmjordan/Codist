@@ -44,7 +44,7 @@ namespace Codist
 				?? semanticModel.GetTypeInfo(node, cancellationToken).Type
 				?? (node.IsKind(SyntaxKind.FieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as FieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
 					: node.IsKind(SyntaxKind.EventFieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as EventFieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
-					: node.IsKind((SyntaxKind)9063) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
+					: node.IsKind(RecordDeclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 					: null)
 				;
 		}
@@ -310,6 +310,7 @@ namespace Codist
 						case Accessibility.Internal: return KnownImageIds.PropertyInternal;
 						default: return KnownImageIds.Property;
 					}
+				case FunctionPointerType: return IconIds.FunctionPointer;
 				default: return KnownImageIds.Item;
 			}
 		}
@@ -460,6 +461,7 @@ namespace Codist
 				case SymbolKind.ErrorType:
 				case SymbolKind.PointerType:
 				case SymbolKind.DynamicType:
+				case FunctionPointerType:
 					using (var sb = ReusableStringBuilder.AcquireDefault(30)) {
 						var b = sb.Resource;
 						GetTypeName(symbol, b);
@@ -491,6 +493,30 @@ namespace Codist
 				case TypeKind.Pointer:
 					GetTypeName(((IPointerTypeSymbol)type).PointedAtType, output);
 					output.Append('*');
+					return;
+				case FunctionPointer:
+					var sig = type.Signature();
+					if (sig != null) {
+						output.Append("delegate*");
+						var cc = sig.CallingConvention();
+						switch (cc) {
+							case 0: break;
+							case 1: output.Append(" unmanaged[Cdecl]"); break;
+							case 2: output.Append(" unmanaged[Stdcall]"); break;
+							case 3: output.Append(" unmanaged[Thiscall]"); break;
+							case 4: output.Append(" unmanaged[Fastcall]"); break;
+							case 5: output.Append(" unmanaged[Varargs]"); break;
+							case 9: output.Append(" unmanaged"); break;
+							default: break; // not supported
+						}
+						output.Append('<');
+						foreach (var item in sig.Parameters) {
+							GetTypeName(item.Type, output);
+							output.Append(',');
+						}
+						GetTypeName(sig.ReturnType, output);
+						output.Append('>');
+					}
 					return;
 			}
 			output.Append(type.GetSpecialTypeAlias() ?? type.Name);
@@ -558,6 +584,7 @@ namespace Codist
 				case SymbolKind.Parameter: return "parameter";
 				case SymbolKind.Property: return "property";
 				case SymbolKind.TypeParameter: return "type parameter";
+				case FunctionPointerType: return "function pointer";
 				default: return symbol.Kind.ToString();
 			}
 		}
@@ -615,13 +642,14 @@ namespace Codist
 			return false;
 		}
 
+		#region Compatible property accessors
 		static readonly Func<ITypeSymbol, bool> __TypeIsReadOnlyAccessor = GetTypeIsReadOnlyMethod();
 		static Func<ITypeSymbol, bool> GetTypeIsReadOnlyMethod() {
 			var p = typeof(ITypeSymbol).GetProperty("IsReadOnly");
 			if (p == null) {
 				return _ => false;
 			}
-			var m = new DynamicMethod("Type_IsReadOnly", typeof(bool), new[] { typeof(ITypeSymbol) }, true);
+			var m = new DynamicMethod("ITypeSymbol.IsReadOnly", typeof(bool), new[] { typeof(ITypeSymbol) }, true);
 			var il = m.GetILGenerator();
 			var isTypeSymbol = il.DefineLabel();
 			il.Emit(OpCodes.Ldarg_0);
@@ -629,25 +657,61 @@ namespace Codist
 			il.Emit(OpCodes.Ret);
 			return (Func<ITypeSymbol, bool>)m.CreateDelegate(typeof(Func<ITypeSymbol, bool>));
 		}
+		public static bool IsReadOnly(this ITypeSymbol type) {
+			return type != null && __TypeIsReadOnlyAccessor(type);
+		}
 		static readonly Func<IMethodSymbol, bool> __MethodIsInitOnlyAccessor = GetMethodIsInitOnlyMethod();
 		static Func<IMethodSymbol, bool> GetMethodIsInitOnlyMethod() {
 			var p = typeof(IMethodSymbol).GetProperty("IsInitOnly");
 			if (p == null) {
 				return _ => false;
 			}
-			var m = new DynamicMethod("Method_IsInitOnly", typeof(bool), new[] { typeof(IMethodSymbol) }, true);
+			var m = new DynamicMethod("IMethodSymbol.IsInitOnly", typeof(bool), new[] { typeof(IMethodSymbol) }, true);
 			var il = m.GetILGenerator();
 			il.Emit(OpCodes.Ldarg_0);
 			il.Emit(OpCodes.Callvirt, p.GetGetMethod(true));
 			il.Emit(OpCodes.Ret);
 			return (Func<IMethodSymbol, bool>)m.CreateDelegate(typeof(Func<IMethodSymbol, bool>));
 		}
-		public static bool IsReadOnly(this ITypeSymbol type) {
-			return type != null && __TypeIsReadOnlyAccessor(type);
-		}
 		public static bool IsInitOnly(this IMethodSymbol method) {
 			return method != null && __MethodIsInitOnlyAccessor(method);
 		}
+		static readonly Func<IMethodSymbol, byte> __MethodCallingConventionAccessor = GetMethodCallingConventionMethod();
+		static Func<IMethodSymbol, byte> GetMethodCallingConventionMethod() {
+			var p = typeof(IMethodSymbol).GetProperty("CallingConvention");
+			if (p == null) {
+				return _ => 0;
+			}
+			var m = new DynamicMethod("IMethodSymbol.CallingConvention", typeof(byte), new[] { typeof(IMethodSymbol) }, true);
+			var il = m.GetILGenerator();
+			il.Emit(OpCodes.Ldarg_0);
+			il.Emit(OpCodes.Callvirt, p.GetGetMethod(true));
+			il.Emit(OpCodes.Ret);
+			return (Func<IMethodSymbol, byte>)m.CreateDelegate(typeof(Func<IMethodSymbol, byte>));
+		}
+		public static byte CallingConvention(this IMethodSymbol method) {
+			return method != null ? __MethodCallingConventionAccessor(method) : (byte)0;
+		}
+		static readonly Func<ITypeSymbol, IMethodSymbol> __FunctionPointerTypeSignatureAccessor = GetFunctionPointerSignatureMethod();
+		static Func<ITypeSymbol, IMethodSymbol> GetFunctionPointerSignatureMethod() {
+			var fpt = typeof(ITypeSymbol).Assembly.GetType("Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol");
+			if (fpt == null) {
+				return _ => null;
+			}
+			var p = fpt.GetProperty("Signature");
+			var m = new DynamicMethod("IFunctionPointerTypeSymbol.Signature", typeof(IMethodSymbol), new[] { typeof(ITypeSymbol) }, true);
+			var il = m.GetILGenerator();
+			il.Emit(OpCodes.Ldarg_0);
+			il.Emit(OpCodes.Isinst, fpt);
+			il.Emit(OpCodes.Callvirt, p.GetGetMethod(true));
+			il.Emit(OpCodes.Ret);
+			return (Func<ITypeSymbol, IMethodSymbol>)m.CreateDelegate(typeof(Func<ITypeSymbol, IMethodSymbol>));
+		}
+		public static IMethodSymbol Signature(this ITypeSymbol symbol) {
+			return symbol?.TypeKind == FunctionPointer ? __FunctionPointerTypeSignatureAccessor(symbol) : null;
+		}
+		#endregion
+
 		public static bool IsQualifiable(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:
@@ -658,6 +722,7 @@ namespace Codist
 				case SymbolKind.NamedType:
 				case SymbolKind.Namespace:
 				case SymbolKind.PointerType:
+				case FunctionPointerType:
 					return true;
 			}
 			return false;

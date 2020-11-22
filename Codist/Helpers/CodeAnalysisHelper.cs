@@ -28,7 +28,7 @@ namespace Codist
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
 		internal static readonly SymbolDisplayFormat MemberNameFormat = new SymbolDisplayFormat(
 			typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-			parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets,
+			parameterOptions: SymbolDisplayParameterOptions.IncludeParamsRefOut | SymbolDisplayParameterOptions.IncludeOptionalBrackets | SymbolDisplayParameterOptions.IncludeType,
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 		internal static readonly SymbolDisplayFormat TypeMemberNameFormat = new SymbolDisplayFormat(
@@ -41,8 +41,19 @@ namespace Codist
 			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
-		internal const SyntaxKind RecordDeclaration = (SyntaxKind)9063;
+		internal const SyntaxKind RecordKeyword = (SyntaxKind)8444;
+		internal const SyntaxKind ImplicitObjectCreationExpression = (SyntaxKind)8659;
+		internal const SyntaxKind RecursivePattern = (SyntaxKind)9020;
+		internal const SyntaxKind PositionalPatternClause = (SyntaxKind)9023;
+		internal const SyntaxKind SwitchExpression = (SyntaxKind)9025;
+		internal const SyntaxKind VarPattern = (SyntaxKind)9027;
+		internal const SyntaxKind ImplicitStackAllocArrayCreationExpression = (SyntaxKind)9053;
+		internal const SyntaxKind FunctionPointerCallingConvention = (SyntaxKind)9059;
 		internal const SyntaxKind InitKeyword = (SyntaxKind)9060;
+		internal const SyntaxKind RecordDeclaration = (SyntaxKind)9063;
+		internal const SymbolKind FunctionPointerType = (SymbolKind)20;
+		internal const TypeKind FunctionPointer = (TypeKind)13;
+		internal const MethodKind FunctionPointerMethod = (MethodKind)18;
 
 		#region Node info
 		public static bool IsDeclaration(this SyntaxKind kind) {
