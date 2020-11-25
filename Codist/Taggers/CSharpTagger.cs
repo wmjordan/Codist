@@ -377,6 +377,7 @@ namespace Codist.Taggers
 				case SyntaxKind.ThisConstructorInitializer:
 				case SyntaxKind.DestructorDeclaration:
 				case CodeAnalysisHelper.ImplicitObjectCreationExpression:
+				case CodeAnalysisHelper.WithInitializerExpression:
 					return tag.Constructor;
 				case SyntaxKind.IndexerDeclaration:
 				case SyntaxKind.PropertyDeclaration: return tag.Property;

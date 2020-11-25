@@ -50,6 +50,7 @@ namespace Codist
 		internal const SyntaxKind ImplicitStackAllocArrayCreationExpression = (SyntaxKind)9053;
 		internal const SyntaxKind FunctionPointerCallingConvention = (SyntaxKind)9059;
 		internal const SyntaxKind InitKeyword = (SyntaxKind)9060;
+		internal const SyntaxKind WithInitializerExpression = (SyntaxKind)9062;
 		internal const SyntaxKind RecordDeclaration = (SyntaxKind)9063;
 		internal const SymbolKind FunctionPointerType = (SymbolKind)20;
 		internal const TypeKind FunctionPointer = (TypeKind)13;
