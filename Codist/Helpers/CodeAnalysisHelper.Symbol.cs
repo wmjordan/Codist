@@ -451,7 +451,7 @@ namespace Codist
 						return sb.ToString();
 					}
 				}
-				return t.Arity == 0 ? String.Empty : "<" + new string(',', t.Arity - 1) + ">";
+				return t.Arity > 0 ? "<" + new string(',', t.Arity - 1) + ">" : String.Empty;
 			}
 		}
 
@@ -468,8 +468,8 @@ namespace Codist
 						return b.ToString();
 					}
 				case SymbolKind.NamedType:
-					if ((symbol as INamedTypeSymbol).IsGenericType) {
-						return symbol.Name + "<" + new string(',', (symbol as INamedTypeSymbol).Arity - 1) + ">";
+					if (symbol is INamedTypeSymbol type && type.IsGenericType && type.Arity > 0) {
+						return symbol.Name + "<" + new string(',', type.Arity - 1) + ">";
 					}
 					goto default;
 				default:
@@ -521,7 +521,7 @@ namespace Codist
 			}
 			output.Append(type.GetSpecialTypeAlias() ?? type.Name);
 			var nt = type as INamedTypeSymbol;
-			if (nt == null || nt.IsGenericType == false) {
+			if (nt == null || nt.IsGenericType == false || nt.Arity == 0) {
 				return;
 			}
 			var s = false;
