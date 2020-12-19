@@ -424,9 +424,30 @@ namespace Codist.Taggers
 			node = node.Kind() == SyntaxKind.Argument ? ((ArgumentSyntax)node).Expression : node;
 			//System.Diagnostics.Debug.WriteLine(node.GetType().Name + node.Span.ToString());
 			var symbol = semanticModel.GetSymbolInfo(node).Symbol;
-			if (symbol == null) {
+			if (symbol is null) {
 				symbol = semanticModel.GetDeclaredSymbol(node);
-				if (symbol != null) {
+				if (symbol is null) {
+					// NOTE: handle alias in using directive
+					if ((node.Parent as NameEqualsSyntax)?.Parent is UsingDirectiveSyntax) {
+						yield return _Classifications.AliasNamespace;
+					}
+					else if (node is AttributeArgumentSyntax) {
+						symbol = semanticModel.GetSymbolInfo(((AttributeArgumentSyntax)node).Expression).Symbol;
+						if (symbol != null && symbol.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
+							yield return _Classifications.ConstField;
+							yield return _Classifications.StaticMember;
+						}
+					}
+					symbol = node.Parent is MemberAccessExpressionSyntax ? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
+						: node.Parent.IsKind(SyntaxKind.Argument) ? semanticModel.GetSymbolInfo(((ArgumentSyntax)node.Parent).Expression).CandidateSymbols.FirstOrDefault()
+						: node.IsKind(SyntaxKind.SimpleBaseType) ? semanticModel.GetTypeInfo(((SimpleBaseTypeSyntax)node).Type).Type
+						: node.IsKind(SyntaxKind.TypeConstraint) ? semanticModel.GetTypeInfo(((TypeConstraintSyntax)node).Type).Type
+						: null;
+					if (symbol is null) {
+						yield break;
+					}
+				}
+				else {
 					switch (symbol.Kind) {
 						case SymbolKind.NamedType:
 							yield return symbol.ContainingType != null ? _Classifications.NestedDeclaration : _Classifications.Declaration;
@@ -449,6 +470,9 @@ namespace Codist.Taggers
 							if (node.IsKind(SyntaxKind.TupleElement)) {
 								if (((TupleElementSyntax)node).Identifier.IsKind(SyntaxKind.None)) {
 									symbol = semanticModel.GetTypeInfo(((TupleElementSyntax)node).Type).Type;
+									if (symbol is null) {
+										yield break;
+									}
 								}
 							}
 							else if (HighlightOptions.NonPrivateField
@@ -460,27 +484,6 @@ namespace Codist.Taggers
 						case SymbolKind.Local:
 							yield return _Classifications.LocalDeclaration;
 							break;
-					}
-				}
-				else {
-					// NOTE: handle alias in using directive
-					if ((node.Parent as NameEqualsSyntax)?.Parent is UsingDirectiveSyntax) {
-						yield return _Classifications.AliasNamespace;
-					}
-					else if (node is AttributeArgumentSyntax) {
-						symbol = semanticModel.GetSymbolInfo(((AttributeArgumentSyntax)node).Expression).Symbol;
-						if (symbol != null && symbol.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
-							yield return _Classifications.ConstField;
-							yield return _Classifications.StaticMember;
-						}
-					}
-					symbol = node.Parent is MemberAccessExpressionSyntax ? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
-						: node.Parent.IsKind(SyntaxKind.Argument) ? semanticModel.GetSymbolInfo(((ArgumentSyntax)node.Parent).Expression).CandidateSymbols.FirstOrDefault()
-						: node.IsKind(SyntaxKind.SimpleBaseType) ? semanticModel.GetTypeInfo(((SimpleBaseTypeSyntax)node).Type).Type
-						: node.IsKind(SyntaxKind.TypeConstraint) ? semanticModel.GetTypeInfo(((TypeConstraintSyntax)node).Type).Type
-						: null;
-					if (symbol == null) {
-						yield break;
 					}
 				}
 			}
