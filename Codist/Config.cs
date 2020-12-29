@@ -626,6 +626,7 @@ namespace Codist
 		SpecialPunctuation = 1 << 8,
 		LocalFunctionDeclaration = 1 << 10,
 		NonPrivateField = 1 << 11,
+		UseTypeStyleOnConstructor = 1 << 12,
 		SearchResult = 1 << 20,
 		Default = SpecialComment,
 		AllParentheses = ParameterBrace | CastBrace | BranchBrace | LoopBrace | ResourceBrace,

@@ -546,11 +546,15 @@ namespace Codist.Taggers
 							yield return
 								node is AttributeSyntax || node.Parent is AttributeSyntax || node.Parent?.Parent is AttributeSyntax
 									? _Classifications.AttributeName
+									: HighlightOptions.StyleConstructorAsType
+									? (methodSymbol.ContainingType.TypeKind == TypeKind.Struct ? _Classifications.StructName : _Classifications.ClassName)
 									: _Classifications.ConstructorMethod;
 							break;
 						case MethodKind.Destructor:
 						case MethodKind.StaticConstructor:
-							yield return _Classifications.ConstructorMethod;
+							yield return HighlightOptions.StyleConstructorAsType
+									? (methodSymbol.ContainingType.TypeKind == TypeKind.Struct ? _Classifications.StructName : _Classifications.ClassName)
+									: _Classifications.ConstructorMethod;
 							break;
 						default:
 							yield return methodSymbol.IsExtensionMethod ? _Classifications.ExtensionMethod
@@ -614,7 +618,7 @@ namespace Codist.Taggers
 			public static TransientMemberTagHolder MemberBraceTags { get; private set; }
 
 			// use fields to cache option flags
-			public static bool AllBraces, AllParentheses, LocalFunctionDeclaration, NonPrivateField;
+			public static bool AllBraces, AllParentheses, LocalFunctionDeclaration, NonPrivateField, StyleConstructorAsType;
 
 			static bool Init() {
 				Config.Updated += Update;
@@ -672,6 +676,7 @@ namespace Codist.Taggers
 				}
 				LocalFunctionDeclaration = o.MatchFlags(SpecialHighlightOptions.LocalFunctionDeclaration);
 				NonPrivateField = o.MatchFlags(SpecialHighlightOptions.NonPrivateField);
+				StyleConstructorAsType = o.MatchFlags(SpecialHighlightOptions.UseTypeStyleOnConstructor);
 			}
 		}
 	}

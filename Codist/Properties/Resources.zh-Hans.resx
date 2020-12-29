@@ -1731,4 +1731,7 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   <data name="CMD_CopySelection" xml:space="preserve">
     <value>复制选中内容</value>
   </data>
+  <data name="OT_StyleConstructorAsType" xml:space="preserve">
+    <value>构造函数使用类型的语法样式</value>
+  </data>
 </root>

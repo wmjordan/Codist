@@ -1740,4 +1740,7 @@ Line: {Line}</value>
   <data name="CMD_CopySelection" xml:space="preserve">
     <value>Copy Selection</value>
   </data>
+  <data name="OT_StyleConstructorAsType" xml:space="preserve">
+    <value>Highlight constructor with container type style</value>
+  </data>
 </root>

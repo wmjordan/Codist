@@ -1289,7 +1289,8 @@ namespace Codist.Options
 
 		sealed class CSharpAdditionalHighlightConfigPage : ContentControl
 		{
-			readonly OptionBox<SpecialHighlightOptions> _MarkSpecialPunctuationBox, _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox, _HighlightLocalFunctionDeclarationBox, _HighlightNonPrivateFieldDeclarationBox;
+			readonly OptionBox<SpecialHighlightOptions> _MarkSpecialPunctuationBox, _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox,
+				_HighlightLocalFunctionDeclarationBox, _HighlightNonPrivateFieldDeclarationBox, _HighlightConstructorAsTypeBox;
 			//readonly OptionBox<SpecialHighlightOptions>[] _Options;
 
 			public CSharpAdditionalHighlightConfigPage() {
@@ -1308,6 +1309,7 @@ namespace Codist.Options
 						new TitleBox(R.OT_MemberStyles),
 						(_HighlightLocalFunctionDeclarationBox = o.CreateOptionBox(SpecialHighlightOptions.LocalFunctionDeclaration, UpdateConfig, R.OT_ApplyToLocalFunction)),
 						(_HighlightNonPrivateFieldDeclarationBox = o.CreateOptionBox(SpecialHighlightOptions.NonPrivateField, UpdateConfig, R.OT_ApplyToNonPrivateField)),
+						(_HighlightConstructorAsTypeBox = o.CreateOptionBox(SpecialHighlightOptions.UseTypeStyleOnConstructor, UpdateConfig, R.OT_StyleConstructorAsType)),
 
 					});
 				foreach (var item in new[] { _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox }) {
@@ -1317,6 +1319,7 @@ namespace Codist.Options
 				_MarkSpecialPunctuationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				_HighlightLocalFunctionDeclarationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				_HighlightNonPrivateFieldDeclarationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
+				_HighlightConstructorAsTypeBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				//_Options = new[] { _MarkSpecialPunctuationBox, _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox, _HighlightLocalFunctionDeclarationBox, _HighlightNonPrivateFieldDeclarationBox };
 			}
 

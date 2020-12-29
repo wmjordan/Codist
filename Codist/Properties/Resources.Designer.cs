@@ -3084,6 +3084,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Highlight constructor with container type style 的本地化字符串。
+        /// </summary>
+        internal static string OT_StyleConstructorAsType {
+            get {
+                return ResourceManager.GetString("OT_StyleConstructorAsType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Support future development of Codist: 的本地化字符串。
         /// </summary>
         internal static string OT_SupportCodst {
