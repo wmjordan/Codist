@@ -100,11 +100,11 @@ namespace Codist.QuickInfo
 					new StackPanel().AddReadOnlyTextBox($"{v.Hue.ToString("0.###")}, {v.Saturation.ToString("0.###")}, {v.Luminosity.ToString("0.###")}").Add(new ThemedTipText(" HSL", true)).MakeHorizontal(),
 					new StackPanel {
 						Children = {
-							new TextBox { Text = SAMPLE, BorderBrush = WpfBrushes.Black, Foreground = brush, Background = WpfBrushes.Black },
-							new TextBox { Text = SAMPLE, BorderBrush = WpfBrushes.Black, Background = brush, Foreground = WpfBrushes.Black },
-							new TextBox { Text = SAMPLE, BorderBrush = WpfBrushes.Black, Foreground = brush, Background = WpfBrushes.Gray },
-							new TextBox { Text = SAMPLE, BorderBrush = WpfBrushes.Black, Background = brush, Foreground = WpfBrushes.White },
-							new TextBox { Text = SAMPLE, BorderBrush = WpfBrushes.Black, Foreground = brush, Background = WpfBrushes.White },
+							new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Foreground = brush, Background = WpfBrushes.Black },
+							new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Background = brush, Foreground = WpfBrushes.Black },
+							new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Foreground = brush, Background = WpfBrushes.Gray },
+							new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Background = brush, Foreground = WpfBrushes.White },
+							new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Foreground = brush, Background = WpfBrushes.White },
 						}
 					}.MakeHorizontal(),
 				}
