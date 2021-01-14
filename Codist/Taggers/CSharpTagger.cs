@@ -251,7 +251,7 @@ namespace Codist.Taggers
 			}
 			switch (spanNode.Kind()) {
 				case SyntaxKind.AttributeArgument:
-				case SyntaxKind.AttributeList:
+				//case SyntaxKind.AttributeList:
 				case SyntaxKind.AttributeArgumentList:
 					return CreateClassificationSpan(snapshot, textSpan, _Classifications.AttributeNotation);
 			}
