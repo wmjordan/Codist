@@ -121,7 +121,12 @@ namespace Codist
 			where TBrush : WpfBrush {
 			if (brush != null) {
 				brush = brush.Clone() as TBrush;
-				brush.Opacity = opacity;
+				if (brush is System.Windows.Media.SolidColorBrush cb) {
+					cb.Color = cb.Color.Alpha((byte)(opacity * 255));
+				}
+				else {
+					brush.Opacity = opacity;
+				}
 			}
 			return brush;
 		}
