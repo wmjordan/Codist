@@ -83,6 +83,9 @@ namespace Codist.SmartBars
 					int ss = span.Start - line.Start > 255 ? span.Start - 255 : line.Start;
 					var text = ts.GetText(ss, eol - ss);
 					int s = span.Start - ss;
+					if (s >= text.Length) {
+						return null;
+					}
 					s = text.LastIndexOf(Path.VolumeSeparatorChar, s, s);
 					if (s < 1
 						|| Char.IsLetterOrDigit(text[--s]) == false
