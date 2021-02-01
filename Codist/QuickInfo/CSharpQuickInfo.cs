@@ -862,7 +862,7 @@ namespace Codist.QuickInfo
 			if (interfaces.Length == 0) {
 				return;
 			}
-			var explicitIntfs = new List<ITypeSymbol>(3);
+			var explicitIntfs = ImmutableArray.CreateBuilder<ITypeSymbol>(3);
 			ThemedTipDocument info = null;
 			var returnType = symbol.GetReturnType();
 			var parameters = symbol.GetParameters();
@@ -911,7 +911,8 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowMembers(INamedTypeSymbol type, ThemedTipDocument doc, bool isInherit) {
-			var members = new List<ISymbol>(type.GetMembers().RemoveAll(m => (m as IMethodSymbol)?.AssociatedSymbol != null || m.IsImplicitlyDeclared));
+			var members = ImmutableArray.CreateBuilder<ISymbol>();
+			members.AddRange(type.GetMembers().RemoveAll(m => (m as IMethodSymbol)?.AssociatedSymbol != null || m.IsImplicitlyDeclared));
 			members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
 			foreach (var member in members) {
 				var t = new ThemedTipText();
@@ -1046,8 +1047,8 @@ namespace Codist.QuickInfo
 			if (interfaces.Length == 0 && showAll == false) {
 				return;
 			}
-			var declaredInterfaces = new List<INamedTypeSymbol>(interfaces.Length);
-			var inheritedInterfaces = new List<INamedTypeSymbol>(5);
+			var declaredInterfaces = ImmutableArray.CreateBuilder<INamedTypeSymbol>(interfaces.Length);
+			var inheritedInterfaces = ImmutableArray.CreateBuilder<INamedTypeSymbol>(5);
 			INamedTypeSymbol disposable = null;
 			foreach (var item in interfaces) {
 				if (item.Name == Disposable) {
@@ -1253,7 +1254,7 @@ namespace Codist.QuickInfo
 
 		static void ShowAnonymousTypeInfo(QiContainer container, ISymbol symbol) {
 			ITypeSymbol t;
-			List<ITypeSymbol> types = null;
+			ImmutableArray<ITypeSymbol>.Builder types = null;
 			switch (symbol.Kind) {
 				case SymbolKind.NamedType:
 					if ((t = symbol as ITypeSymbol).IsAnonymousType) {
@@ -1285,7 +1286,7 @@ namespace Codist.QuickInfo
 				ShowAnonymousTypes(container, types, symbol);
 			}
 
-			void ShowAnonymousTypes(QiContainer c, List<ITypeSymbol> anonymousTypes, ISymbol currentSymbol) {
+			void ShowAnonymousTypes(QiContainer c, ImmutableArray<ITypeSymbol>.Builder anonymousTypes, ISymbol currentSymbol) {
 				const string AnonymousNumbers = "abcdefghijklmnopqrstuvwxyz";
 				var d = new ThemedTipDocument().AppendTitle(IconIds.AnonymousType, R.T_AnonymousType);
 				for (var i = 0; i < anonymousTypes.Count; i++) {
@@ -1320,8 +1321,8 @@ namespace Codist.QuickInfo
 				c.Overrider?.OverrideAnonymousTypeInfo(d);
 				c.Insert(0, d);
 			}
-			void Add(ref List<ITypeSymbol> list, ITypeSymbol type) {
-				if ((list ?? (list = new List<ITypeSymbol>())).Contains(type) == false) {
+			void Add(ref ImmutableArray<ITypeSymbol>.Builder list, ITypeSymbol type) {
+				if ((list ?? (list = ImmutableArray.CreateBuilder<ITypeSymbol>())).Contains(type) == false) {
 					list.Add(type);
 				}
 				if (type.ContainingType?.IsAnonymousType == true) {
@@ -1340,7 +1341,7 @@ namespace Codist.QuickInfo
 
 	sealed class QiContainer
 	{
-		readonly List<object> _List = new List<object>();
+		ImmutableArray<object>.Builder _List = ImmutableArray.CreateBuilder<object>();
 		public readonly IQuickInfoOverrider Overrider;
 
 		public QiContainer(IQuickInfoOverrider overrider) {
