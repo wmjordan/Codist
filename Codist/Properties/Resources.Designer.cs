@@ -4030,6 +4030,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Extended by:  的本地化字符串。
+        /// </summary>
+        internal static string T_ExtendedBy {
+            get {
+                return ResourceManager.GetString("T_ExtendedBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Extending:  的本地化字符串。
+        /// </summary>
+        internal static string T_Extending {
+            get {
+                return ResourceManager.GetString("T_Extending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似  extensions 的本地化字符串。
         /// </summary>
         internal static string T_Extensions {

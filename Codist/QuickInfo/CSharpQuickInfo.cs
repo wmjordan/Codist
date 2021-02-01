@@ -421,14 +421,27 @@ namespace Codist.QuickInfo
 		static void ShowSymbolLocationInfo(QiContainer qiContent, ISymbol symbol) {
 			string asmName = symbol.GetAssemblyModuleName();
 			if (asmName != null) {
-				var item = new ThemedTipText(R.T_Assembly, true).Append(asmName);
+				var item = new ThemedTipDocument()
+					.AppendParagraph(IconIds.Module, new ThemedTipText(R.T_Assembly, true).Append(asmName));
 				switch (symbol.Kind) {
 					case SymbolKind.Field:
 					case SymbolKind.Property:
 					case SymbolKind.Event:
 					case SymbolKind.Method:
-						item.Append(" ").Append(R.T_Namespace, true)
-							.Append(symbol.ContainingNamespace?.ToDisplayString());
+					case SymbolKind.NamedType:
+						var ns = symbol.ContainingNamespace;
+						if (ns != null) {
+							var t = new ThemedTipText(R.T_Namespace, true);
+							var n = ImmutableArray.CreateBuilder<ISymbol>();
+							do {
+								n.Add(ns);
+							} while ((ns = ns.ContainingNamespace) != null && ns.IsGlobalNamespace == false);
+							for (int i = n.Count - 1; i > 0; i--) {
+								t.AddSymbol(n[i], false, _SymbolFormatter).Append(".");
+							}
+							t.AddSymbol(n[0], false, _SymbolFormatter);
+							item.AppendParagraph(IconIds.Namespace, t);
+						}
 						break;
 				}
 				qiContent.Add(item);
@@ -914,19 +927,12 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowExtensionMethod(QiContainer qiContent, IMethodSymbol method) {
-			var info = new StackPanel();
+			var info = new ThemedTipDocument();
 			var extType = method.ConstructedFrom.ReceiverType;
-			var extTypeParameter = extType as ITypeParameterSymbol;
-			if (extTypeParameter != null && (extTypeParameter.HasConstructorConstraint || extTypeParameter.HasReferenceTypeConstraint || extTypeParameter.HasValueTypeConstraint || extTypeParameter.ConstraintTypes.Length > 0)) {
-				var ext = new ThemedTipText("Extending: ", true)
-					.AddSymbol(extType, true, _SymbolFormatter.Class)
-					.Append(" with ")
-					.AddSymbolDisplayParts(method.ReceiverType.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
-				info.Add(ext);
+			if (extType != null) {
+				info.AppendParagraph(extType.GetImageId(), new ThemedTipText(R.T_Extending, true).AddSymbol(extType, true, _SymbolFormatter));
 			}
-			var def = new ThemedTipText("Extended by: ", true)
-				.AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), _SymbolFormatter, -1);
-			info.Add(def);
+			info.AppendParagraph(IconIds.ExtensionMethod, new ThemedTipText(R.T_ExtendedBy, true).AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), _SymbolFormatter, -1));
 			qiContent.Add(info);
 		}
 

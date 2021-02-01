@@ -1743,4 +1743,10 @@ Line: {Line}</value>
   <data name="OT_StyleConstructorAsType" xml:space="preserve">
     <value>Highlight constructor with container type style</value>
   </data>
+  <data name="T_ExtendedBy" xml:space="preserve">
+    <value>Extended by: </value>
+  </data>
+  <data name="T_Extending" xml:space="preserve">
+    <value>Extending: </value>
+  </data>
 </root>

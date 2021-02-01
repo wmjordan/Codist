@@ -1734,4 +1734,10 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   <data name="OT_StyleConstructorAsType" xml:space="preserve">
     <value>构造函数使用类型的语法样式</value>
   </data>
+  <data name="T_ExtendedBy" xml:space="preserve">
+    <value>扩展方法类: </value>
+  </data>
+  <data name="T_Extending" xml:space="preserve">
+    <value>扩展对象: </value>
+  </data>
 </root>
