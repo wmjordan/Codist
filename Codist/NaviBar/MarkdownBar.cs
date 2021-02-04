@@ -19,13 +19,19 @@ namespace Codist.NaviBar
 	public sealed class MarkdownBar : NaviBar
 	{
 		const string DefaultActiveTitle = "Headings";
-		static readonly IClassificationType
-			_H1 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading1),
-			_H2 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading2),
-			_H3 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading3),
-			_H4 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading4),
-			_H5 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading5),
-			_H6 = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.MarkdownHeading6);
+		static readonly Microsoft.VisualStudio.Text.Tagging.ClassificationTag
+			_H1 = MarkdownTaggerProvider.HeaderClassificationTypes[1],
+			_H2 = MarkdownTaggerProvider.HeaderClassificationTypes[2],
+			_H3 = MarkdownTaggerProvider.HeaderClassificationTypes[3],
+			_H4 = MarkdownTaggerProvider.HeaderClassificationTypes[4],
+			_H5 = MarkdownTaggerProvider.HeaderClassificationTypes[5],
+			_H6 = MarkdownTaggerProvider.HeaderClassificationTypes[6],
+			_DummyTag1 = MarkdownTaggerProvider.DummyHeaderTags[1],
+			_DummyTag2 = MarkdownTaggerProvider.DummyHeaderTags[2],
+			_DummyTag3 = MarkdownTaggerProvider.DummyHeaderTags[3],
+			_DummyTag4 = MarkdownTaggerProvider.DummyHeaderTags[4],
+			_DummyTag5 = MarkdownTaggerProvider.DummyHeaderTags[5],
+			_DummyTag6 = MarkdownTaggerProvider.DummyHeaderTags[6];
 		readonly ITextSearchService2 _TextSearch;
 		readonly TaggerResult _Tags;
 		readonly ThemedToolBarText _ActiveTitleLabel;
@@ -273,27 +279,27 @@ namespace Codist.NaviBar
 			public LocationItem(TaggedContentSpan span) {
 				_Span = span;
 				Content = new ThemedMenuText(span.ContentText);
-				var t = span.Tag.ClassificationType;
-				if (t == _H1) {
+				var t = span.Tag;
+				if (t == _H1 || t == _DummyTag1) {
 					Content.FontWeight = FontWeights.Bold;
 					_ImageId = IconIds.Heading1;
 				}
-				else if (t == _H2) {
+				else if (t == _H2 || t == _DummyTag2) {
 					_ImageId = IconIds.Heading2;
 				}
-				else if (t == _H3) {
+				else if (t == _H3 || t == _DummyTag3) {
 					_ImageId = IconIds.Heading3;
 					Content.Padding = _H3Padding;
 				}
-				else if (t == _H4) {
+				else if (t == _H4 || t == _DummyTag4) {
 					_ImageId = IconIds.Heading4;
 					Content.Padding = _H4Padding;
 				}
-				else if (t == _H5) {
+				else if (t == _H5 || t == _DummyTag5) {
 					_ImageId = IconIds.Heading5;
 					Content.Padding = _H5Padding;
 				}
-				else if (t == _H6) {
+				else if (t == _H6 || t == _DummyTag6) {
 					_ImageId = IconIds.None;
 					Content.Padding = _H6Padding;
 				}

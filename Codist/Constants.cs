@@ -65,6 +65,7 @@ namespace Codist
 
 		public const string CodeKeyword = "Keyword";
 		public const string CodeComment = "Comment";
+		public const string CodeText = "text";
 
 		public const string CSharpAbstractionKeyword = "C#: Abstraction keyword";
 		public const string CSharpBranchingKeyword = "C#: Branching keyword";
