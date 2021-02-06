@@ -329,7 +329,7 @@ namespace Codist.Options
 			}
 			_FormatMap = view != null
 				? ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(view)
-				: ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("text");
+				: ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(Constants.CodeText);
 			_FormatMap.ClassificationFormatMappingChanged += RefreshList;
 			UpdateDefaultFormat();
 		}
