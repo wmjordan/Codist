@@ -82,11 +82,11 @@ namespace Codist.NaviBar
 			public Overrider(IWpfTextView view, ITextSearchService2 textSearch) {
 				_View = view;
 				_TextSearch = textSearch;
-				view.VisualElement.Loaded += FindNaviBar;
+				view.VisualElement.Loaded += AddNaviBar;
 			}
 
-			void FindNaviBar(object sender, RoutedEventArgs e) {
-				_View.VisualElement.Loaded -= FindNaviBar;
+			void AddNaviBar(object sender, RoutedEventArgs e) {
+				_View.VisualElement.Loaded -= AddNaviBar;
 
 				var view = sender as FrameworkElement;
 				var naviBar = view
@@ -140,8 +140,8 @@ namespace Codist.NaviBar
 				}
 				await Task.Delay(1000).ConfigureAwait(false);
 				await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-				if (_View.VisualElement.IsVisible) {
-					FindNaviBar(_View.VisualElement, e);
+				if (_View.VisualElement.IsVisible && _View.Properties.ContainsProperty(nameof(NaviBar)) == false) {
+					AddNaviBar(_View.VisualElement, e);
 				}
 			}
 		}

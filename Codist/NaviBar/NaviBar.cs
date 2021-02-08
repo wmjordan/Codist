@@ -37,6 +37,15 @@ namespace Codist.NaviBar
 		void NaviBar_Unloaded(object sender, RoutedEventArgs e) {
 			Unloaded -= NaviBar_Unloaded;
 			View.Properties.RemoveProperty(nameof(NaviBar));
+
+			if (View.IsClosed == false) {
+				Loaded += NaviBar_Loaded;
+			}
+		}
+
+		void NaviBar_Loaded(object sender, RoutedEventArgs e) {
+			Loaded -= NaviBar_Loaded;
+			View.Properties.AddProperty(nameof(NaviBar), this);
 		}
 	}
 }
