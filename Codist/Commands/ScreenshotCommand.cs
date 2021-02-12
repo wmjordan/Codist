@@ -37,7 +37,7 @@ namespace Codist.Commands
 						WpfHelper.ScreenShot(g, f.FileName, (int)g.ActualWidth, (int)g.ActualHeight);
 					}
 					catch (Exception ex) {
-						CodistPackage.ShowErrorMessageBox(R.T_FailedToSaveScreenshot.Replace("<NAME>", doc.Name) + Environment.NewLine + ex.Message, null, true);
+						CodistPackage.ShowMessageBox(R.T_FailedToSaveScreenshot.Replace("<NAME>", doc.Name) + Environment.NewLine + ex.Message, null, true);
 					}
 				}
 			}

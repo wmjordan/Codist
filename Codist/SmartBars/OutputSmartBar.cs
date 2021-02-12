@@ -26,7 +26,7 @@ namespace Codist.SmartBars
 				t = TryGetPathFromView(View, out p);
 			}
 			catch (Exception ex) {
-				CodistPackage.ShowErrorMessageBox(ex.Message, null, true);
+				CodistPackage.ShowMessageBox(ex.Message, null, true);
 				return;
 			}
 			switch (p) {
@@ -151,7 +151,7 @@ namespace Codist.SmartBars
 					Process.Start(path);
 				}
 				catch (System.ComponentModel.Win32Exception ex) {
-					CodistPackage.ShowErrorMessageBox(ex.Message, null, true);
+					CodistPackage.ShowMessageBox(ex.Message, null, true);
 				}
 				catch (FileNotFoundException) {
 					// ignore

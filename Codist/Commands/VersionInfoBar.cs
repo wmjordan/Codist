@@ -52,10 +52,9 @@ namespace Codist.Commands
 			ThreadHelper.ThrowIfNotOnUIThread();
 			string context = actionItem.ActionContext as string;
 			switch (context) {
-				case "New": {
+				case "New":
 					Process.Start("https://github.com/wmjordan/Codist/releases");
 					break;
-				}
 				case "More":
 					Process.Start("https://github.com/wmjordan/Codist");
 					break;
@@ -74,17 +73,17 @@ namespace Codist.Commands
 #pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 		bool ShowInfoBar(IVsInfoBarHost host, InfoBarModel infoBar) {
 			var factory = _ServiceProvider.GetService(typeof(SVsInfoBarUIFactory)) as IVsInfoBarUIFactory;
-			if (factory != null) {
-				_InfoBarUI = factory.CreateInfoBar(infoBar);
-				_InfoBarUI.Advise(this, out _Cookie);
-				host.AddInfoBar(_InfoBarUI);
-				return true;
+			if (factory is null) {
+				return false;
 			}
-			return false;
+			_InfoBarUI = factory.CreateInfoBar(infoBar);
+			_InfoBarUI.Advise(this, out _Cookie);
+			host.AddInfoBar(_InfoBarUI);
+			return true;
 		}
 		bool TryCreateInfoBarUI(IVsInfoBar infoBar, out IVsInfoBarUIElement uiElement) {
 			var infoBarUIFactory = _ServiceProvider.GetService(typeof(SVsInfoBarUIFactory)) as IVsInfoBarUIFactory;
-			if (infoBarUIFactory == null) {
+			if (infoBarUIFactory is null) {
 				uiElement = null;
 				return false;
 			}
@@ -93,7 +92,7 @@ namespace Codist.Commands
 
 		bool TryGetInfoBarHost(out IVsInfoBarHost infoBarHost) {
 			var shell = _ServiceProvider.GetService(typeof(SVsShell)) as IVsShell;
-			if (shell == null) {
+			if (shell is null) {
 				goto Exit;
 			}
 			object infoBarHostObj;

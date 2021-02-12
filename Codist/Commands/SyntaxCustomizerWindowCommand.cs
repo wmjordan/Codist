@@ -31,7 +31,7 @@ namespace Codist.Commands
 			if (_Window == null || _Window.IsVisible == false) {
 				var v = TextEditorHelper.GetActiveWpfDocumentView();
 				if (v == null) {
-					CodistPackage.ShowErrorMessageBox(R.T_CustomizeSyntaxHighlightNote, R.CMD_ConfigureSyntaxHighlight, true);
+					CodistPackage.ShowMessageBox(R.T_CustomizeSyntaxHighlightNote, R.CMD_ConfigureSyntaxHighlight, true);
 					return;
 				}
 				CreateWindow(v);

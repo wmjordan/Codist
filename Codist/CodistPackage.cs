@@ -97,7 +97,7 @@ namespace Codist
 			}
 		}
 
-		public static void ShowErrorMessageBox(string message, string title, bool error) {
+		public static void ShowMessageBox(string message, string title, bool error) {
 			VsShellUtilities.ShowMessageBox(
 				Instance,
 				message,
@@ -198,14 +198,14 @@ namespace Codist
 				if (item.Name.EndsWith(".vsixmanifest", StringComparison.OrdinalIgnoreCase)) {
 					if (item.IsOpen && item.IsDirty) {
 						item.Document.NewWindow().Activate();
-						ShowErrorMessageBox(item.Name + " is open and modified. Auto increment VSIX version number failed.", nameof(Codist), true);
+						ShowMessageBox(item.Name + " is open and modified. Auto increment VSIX version number failed.", nameof(Codist), true);
 					}
 					else if (Commands.IncrementVsixVersionCommand.IncrementVersion(item, out var message)) {
 						var output = GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
 						output?.OutputString(nameof(Codist) + ": " + message + Environment.NewLine);
 					}
 					else {
-						ShowErrorMessageBox(message, "Auto increment VSIX version number failed.", true);
+						ShowMessageBox(message, "Auto increment VSIX version number failed.", true);
 					}
 					break;
 				}

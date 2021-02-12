@@ -27,7 +27,7 @@ namespace Codist.Commands
 			}
 			string message;
 			bool error = IncrementVersion(item, out message) == false;
-			CodistPackage.ShowErrorMessageBox(message, "Increment Version", error);
+			CodistPackage.ShowMessageBox(message, "Increment Version", error);
 		}
 #pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 
