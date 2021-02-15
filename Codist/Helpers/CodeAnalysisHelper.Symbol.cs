@@ -1010,8 +1010,8 @@ namespace Codist
 
 		public static int CompareByAccessibilityKindName(ISymbol a, ISymbol b) {
 			int s;
-			if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility first
-				|| (s = a.Kind - b.Kind) != 0 // then by member kind
+			if ((s = b.DeclaredAccessibility - a.DeclaredAccessibility) != 0 // sort by visibility
+				|| (s = GetSymbolKindSortOrder(a.Kind) - GetSymbolKindSortOrder(b.Kind)) != 0 // then by symbol kind
 				|| (s = a.Name.CompareTo(b.Name)) != 0) { // then by name
 				return s;
 			}
@@ -1019,6 +1019,34 @@ namespace Codist
 				case SymbolKind.NamedType: return ((INamedTypeSymbol)a).Arity.CompareTo(((INamedTypeSymbol)b).Arity);
 				case SymbolKind.Method: return ((IMethodSymbol)a).Arity.CompareTo(((IMethodSymbol)b).Arity);
 				default: return 0;
+			}
+
+			int GetSymbolKindSortOrder(SymbolKind x) {
+				switch (x) {
+					case SymbolKind.Assembly: return -1;
+					case SymbolKind.NetModule: return 0;
+					case SymbolKind.Namespace: return 1;
+					case SymbolKind.NamedType: return 2;
+					case SymbolKind.ArrayType: return 3;
+					case SymbolKind.PointerType:
+					case FunctionPointerType:
+						return 4;
+					case SymbolKind.DynamicType: return 5;
+					case SymbolKind.Field: return 6;
+					case SymbolKind.Property: return 7;
+					case SymbolKind.Event: return 8;
+					case SymbolKind.Method: return 9;
+					case SymbolKind.TypeParameter: return 10;
+					case SymbolKind.Parameter: return 11;
+					case SymbolKind.Discard: return 12;
+					case SymbolKind.Local: return 13;
+					case SymbolKind.RangeVariable: return 14;
+					case SymbolKind.Label: return 15;
+					case SymbolKind.Preprocessing: return 16;
+					case SymbolKind.Alias: return 17;
+					case SymbolKind.ErrorType: return 18;
+					default: return 19;
+				}
 			}
 		}
 
