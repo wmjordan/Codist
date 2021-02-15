@@ -1380,10 +1380,6 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_MoveBefore" xml:space="preserve">
     <value>Move before &lt;NAME&gt;</value>
   </data>
-  <data name="T_SourceLineInfo" xml:space="preserve">
-    <value>Folder: {Folder}
-Line: {Line}</value>
-  </data>
   <data name="T_SourceReference" xml:space="preserve">
     <value>source reference:</value>
   </data>
@@ -1757,5 +1753,11 @@ Line: {Line}</value>
     <value>Search member name with this input box.
 - key: search current document
 = key: search current project</value>
+  </data>
+  <data name="T_Folder" xml:space="preserve">
+    <value>Folder: </value>
+  </data>
+  <data name="T_Line" xml:space="preserve">
+    <value>Line: </value>
   </data>
 </root>

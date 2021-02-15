@@ -1353,10 +1353,6 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_MoveBefore" xml:space="preserve">
     <value>移动到 &lt;NAME&gt; 前面</value>
   </data>
-  <data name="T_SourceLineInfo" xml:space="preserve">
-    <value>目录：{Folder}
-行号：{Line}</value>
-  </data>
   <data name="CMD_OpenFolder" xml:space="preserve">
     <value>打开文件夹</value>
   </data>
@@ -1748,5 +1744,11 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>在此键入搜索成员的条件。
 - 键: 搜索当前文档
 = 键: 搜索当前项目</value>
+  </data>
+  <data name="T_Folder" xml:space="preserve">
+    <value>目录: </value>
+  </data>
+  <data name="T_Line" xml:space="preserve">
+    <value>行号: </value>
   </data>
 </root>

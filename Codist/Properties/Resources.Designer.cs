@@ -4094,6 +4094,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Folder:  的本地化字符串。
+        /// </summary>
+        internal static string T_Folder {
+            get {
+                return ResourceManager.GetString("T_Folder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Font: 的本地化字符串。
         /// </summary>
         internal static string T_Font {
@@ -4198,6 +4207,15 @@ namespace Codist.Properties {
         internal static string T_LeftGradient {
             get {
                 return ResourceManager.GetString("T_LeftGradient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Line:  的本地化字符串。
+        /// </summary>
+        internal static string T_Line {
+            get {
+                return ResourceManager.GetString("T_Line", resourceCulture);
             }
         }
         
@@ -4750,16 +4768,6 @@ namespace Codist.Properties {
         internal static string T_SourceFile {
             get {
                 return ResourceManager.GetString("T_SourceFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Folder: {Folder}
-        ///Line: {Line} 的本地化字符串。
-        /// </summary>
-        internal static string T_SourceLineInfo {
-            get {
-                return ResourceManager.GetString("T_SourceLineInfo", resourceCulture);
             }
         }
         

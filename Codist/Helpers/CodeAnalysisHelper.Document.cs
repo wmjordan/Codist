@@ -40,6 +40,9 @@ namespace Codist
 		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
 			return workspace.GetDocument(span.Snapshot.TextBuffer);
 		}
+		public static Document GetDocument(this Project project, string filePath) {
+			return project.Documents.FirstOrDefault(d => String.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+		}
 
 		/// <summary>Gets all <see cref="Document"/>s from a given <see cref="Project"/> and referencing/referenced projects.</summary>
 		public static IEnumerable<Document> GetRelatedProjectDocuments(this Project project) {
@@ -48,10 +51,6 @@ namespace Codist
 					yield return doc;
 				}
 			}
-		}
-
-		public static Document GetDocument(this Project project, string filePath) {
-			return project.Documents.FirstOrDefault(d => String.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
 		}
 
 		/// <summary>
@@ -75,9 +74,10 @@ namespace Codist
 			if (project == null) {
 				return;
 			}
-			projects.Add(project);
-			foreach (var pr in project.AllProjectReferences) {
-				GetRelatedProjects(project.Solution.GetProject(pr.ProjectId), projects);
+			if (projects.Add(project)) {
+				foreach (var pr in project.AllProjectReferences) {
+					GetRelatedProjects(project.Solution.GetProject(pr.ProjectId), projects);
+				}
 			}
 		}
 
