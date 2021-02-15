@@ -608,7 +608,7 @@ Use space to separate keywords.</value>
     <value>Attribute:</value>
   </data>
   <data name="T_AttributeOf" xml:space="preserve">
-    <value>Attribute of</value>
+    <value>Attribute of </value>
   </data>
   <data name="T_CapturedVariables" xml:space="preserve">
     <value>Captured variables</value>
@@ -748,8 +748,8 @@ Use space to separate keywords.</value>
   <data name="T_Exception" xml:space="preserve">
     <value>Exception</value>
   </data>
-  <data name="T_Locations" xml:space="preserve">
-    <value>Locations: </value>
+  <data name="T_Location" xml:space="preserve">
+    <value>Location: </value>
   </data>
   <data name="T_MemberType" xml:space="preserve">
     <value>Member type: </value>
@@ -1748,5 +1748,8 @@ Line: {Line}</value>
   </data>
   <data name="T_Extending" xml:space="preserve">
     <value>Extending: </value>
+  </data>
+  <data name="T_Project" xml:space="preserve">
+    <value>Project: </value>
   </data>
 </root>

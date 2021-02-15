@@ -422,11 +422,11 @@ namespace Codist.Controls
 			ShowSymbolMenuForResult(symbol, context, new List<ISymbol>(result), R.T_SignatureMatch, true);
 		}
 
-		internal static void ShowLocations(ISymbol symbol, ICollection<SyntaxReference> locations, SemanticContext context) {
+		internal static void ShowLocations(ISymbol symbol, ICollection<SyntaxReference> locations, SemanticContext context, UIElement positionElement = null) {
 			var m = new SymbolMenu(context, SymbolListType.Locations);
 			var locs = new SortedList<(string, string, int), Location>();
 			foreach (var item in locations) {
-				locs.Add((System.IO.Path.GetDirectoryName(item.SyntaxTree.FilePath), System.IO.Path.GetFileName(item.SyntaxTree.FilePath), item.Span.Start), item.ToLocation());
+				locs[(System.IO.Path.GetDirectoryName(item.SyntaxTree.FilePath), System.IO.Path.GetFileName(item.SyntaxTree.FilePath), item.Span.Start)] = item.ToLocation();
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true)
@@ -438,7 +438,7 @@ namespace Codist.Controls
 			foreach (var loc in symbol.Locations.RemoveAll(l => l.IsInMetadata == false).Sort((x, y) => String.CompareOrdinal(x.MetadataModule.Name, y.MetadataModule.Name))) {
 				m.Menu.Add(loc);
 			}
-			m.Show();
+			m.Show(positionElement);
 		}
 
 		static void ShowSymbolMenuForResult<TSymbol>(ISymbol source, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType) where TSymbol : ISymbol {
@@ -749,18 +749,14 @@ namespace Codist.Controls
 			((ThemedButton)e.Source).Content = ThemeHelper.GetImage((Menu.IsPinned = !Menu.IsPinned) ? IconIds.Pin : IconIds.Unpin);
 		}
 
-		public void Show() {
-			ShowMenu();
+		public void Show(UIElement relativeElement = null) {
+			ShowMenu(relativeElement);
 			UpdateNumbers();
 			FilterBox.FocusFilterBox();
 		}
 
-		void ShowMenu() {
-			//if (_Bar._SymbolList != menu) {
-			//	_Bar._SymbolListContainer.Children.Clear();
+		void ShowMenu(UIElement positionElement) {
 			_Container.Children.Add(Menu);
-			//	_Bar._SymbolList = menu;
-			//}
 			Menu.ItemsControlMaxHeight = _Container.ActualHeight / 2;
 			Menu.RefreshItemsSource();
 			Menu.ScrollToSelectedItem();
@@ -769,13 +765,10 @@ namespace Codist.Controls
 			if (Menu.Symbols.Count > 100) {
 				Menu.EnableVirtualMode = true;
 			}
-
-			var p = Mouse.GetPosition(_Container);
+			
+			var p = positionElement != null ? positionElement.TranslatePoint(new Point(positionElement.RenderSize.Width, 0), _Container) : Mouse.GetPosition(_Container);
 			Canvas.SetLeft(Menu, p.X);
 			Canvas.SetTop(Menu, p.Y);
-			//var point = visual.TransformToVisual(View.VisualElement).Transform(new Point());
-			//Canvas.SetLeft(Menu, point.X + visual.RenderSize.Width);
-			//Canvas.SetTop(Menu, point.Y);
 		}
 		void UpdateNumbers() {
 			FilterBox.UpdateNumbers(Menu.Symbols);
@@ -786,12 +779,18 @@ namespace Codist.Controls
 			if (e.OccursOn<ListBoxItem>()) {
 				_Container.FocusOnTextView();
 				(menu.SelectedItem as SymbolItem)?.GoToSource();
+				if (Menu.IsPinned == false) {
+					_Container.Children.Remove(Menu);
+				}
 			}
 		}
 
 		void OnMenuKeyUp(object sender, KeyEventArgs e) {
 			if (e.Key == Key.Escape) {
 				_Container.Children.Remove(Menu);
+				if (_Container.Children.Count > 0) {
+					_Container.Children[_Container.Children.Count - 1].GetFirstVisualChild<TextBox>()?.Focus();
+				}
 				e.Handled = true;
 			}
 		}

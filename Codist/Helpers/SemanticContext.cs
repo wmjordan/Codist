@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -100,13 +101,14 @@ namespace Codist
 		/// Locate symbol in case when the semantic model has been changed.
 		/// </summary>
 		public async Task<ISymbol> RelocateSymbolAsync(ISymbol symbol, CancellationToken cancellationToken = default) {
-			if (await UpdateAsync(cancellationToken) == false || Document == null) {
+			Document doc;
+			if (await UpdateAsync(cancellationToken) == false || (doc = Document) == null) {
 				return symbol;
 			}
 			var path = symbol.DeclaringSyntaxReferences.FirstOrDefault(r => r.SyntaxTree != null);
 			try {
-				var doc = Document.Project.GetDocument(path.SyntaxTree.FilePath)
-					?? Document.Project.Solution.GetDocument(path.SyntaxTree);
+				doc = doc.Project.GetDocument(path.SyntaxTree.FilePath)
+					?? doc.Project.Solution.GetDocument(path.SyntaxTree);
 				return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSimilarSymbols(symbol, (await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false)).Compilation, cancellationToken)
 				.FirstOrDefault() ?? symbol;
 			}
@@ -249,6 +251,7 @@ namespace Codist
 				return true;
 			}
 			catch (NullReferenceException) {
+				System.Diagnostics.Debug.WriteLine("Update sematic context failed.");
 				ResetNodeInfo();
 			}
 			return false;
@@ -303,9 +306,9 @@ namespace Codist
 			return true;
 		}
 
-		public List<SyntaxNode> GetContainingNodes(bool includeSyntaxDetails, bool includeRegions) {
+		public ImmutableArray<SyntaxNode> GetContainingNodes(bool includeSyntaxDetails, bool includeRegions) {
 			var node = Node;
-			var nodes = new List<SyntaxNode>(5);
+			var nodes = ImmutableArray.CreateBuilder<SyntaxNode>(5);
 			while (node != null) {
 				if (node.FullSpan.Contains(_Position)) {
 					var nodeKind = node.Kind();
@@ -318,7 +321,7 @@ namespace Codist
 			}
 			nodes.Reverse();
 			if (includeRegions == false || OutliningManager == null) {
-				return nodes;
+				return nodes.ToImmutable();
 			}
 			foreach (var region in GetRegions(_Position)) {
 				node = Compilation.FindTrivia(region.Extent.GetStartPoint(View.TextSnapshot)).GetStructure();
@@ -332,7 +335,7 @@ namespace Codist
 					}
 				}
 			}
-			return nodes;
+			return nodes.ToImmutable();
 		}
 
 		public IEnumerable<ICollapsible> GetRegions(int position) {

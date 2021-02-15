@@ -391,7 +391,7 @@ namespace Codist.Controls
 					item.SetSymbolToSyntaxNode();
 				}
 				if (item.Symbol != null) {
-					var tip = ToolTipFactory.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, SemanticContext.SemanticModel.Compilation);
+					var tip = ToolTipFactory.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, SemanticContext);
 					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
 						tip.AddTextBlock()
 							.Append(R.T_LineOfCode + (item.SyntaxNode.GetLineSpan().Length + 1).ToString());
@@ -402,7 +402,7 @@ namespace Codist.Controls
 			}
 			if (item.Symbol != null) {
 				item.RefreshSymbol();
-				var tip = ToolTipFactory.CreateToolTip(item.Symbol, false, SemanticContext.SemanticModel.Compilation);
+				var tip = ToolTipFactory.CreateToolTip(item.Symbol, false, SemanticContext);
 				if (ContainerType == SymbolListType.SymbolReferrers && item.Location.IsInSource) {
 					// append location info to tip
 					item.ShowSourceReference(tip.AddTextBlock().Append(R.T_SourceReference).AppendLine());
@@ -735,7 +735,14 @@ namespace Codist.Controls
 			}
 			else if (Symbol != null) {
 				RefreshSymbol();
-				Symbol.GoToDefinition();
+				var s = Symbol.GetSourceReferences();
+				if (s.Length == 1) {
+					s[0].GoToSource();
+				}
+				else if (s.Length > 1) {
+					var p = _Content.GetParent<ListBoxItem>();
+					CSharpSymbolContextMenu.ShowLocations(Symbol, s, Container.SemanticContext, p?.IsMouseOver == true ? null : p);
+				}
 			}
 		}
 		public bool SelectIfContainsPosition(int position) {

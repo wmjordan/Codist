@@ -818,6 +818,26 @@ namespace Codist
 			}
 		}
 
+		public static void GoToDefinition(this ISymbol symbol) {
+			var r = symbol.GetSourceReferences();
+			if (r.Length == 1) {
+				r[0].GoToSource();
+			}
+			else {
+				var ctx = SemanticContext.GetHovered();
+				if (ctx != null) {
+					if (r.Length == 0) {
+						if (ctx.Document != null) {
+							ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, ctx.Document.Project, default);
+						}
+					}
+					else {
+						Controls.CSharpSymbolContextMenu.ShowLocations(symbol, r, ctx);
+					}
+				}
+			}
+		}
+
 		public static bool IsAccessible(this ISymbol symbol, bool checkContainingType) {
 			return symbol != null
 				&& (symbol.DeclaredAccessibility == Accessibility.Public

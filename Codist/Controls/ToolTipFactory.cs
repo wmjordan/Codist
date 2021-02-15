@@ -12,11 +12,7 @@ namespace Codist
 {
 	static class ToolTipFactory
 	{
-		public static ThemedToolTip CreateToolTip(ISymbol symbol) {
-			return CreateToolTip(symbol, false, null);
-		}
-
-		public static ThemedToolTip CreateToolTip(ISymbol symbol, bool forMemberList, Compilation compilation) {
+		public static ThemedToolTip CreateToolTip(ISymbol symbol, bool forMemberList, SemanticContext context) {
 			var tip = new ThemedToolTip();
 			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 				WpfHelper.SetUITextRenderOptions(tip, true);
@@ -45,45 +41,49 @@ namespace Codist
 			}
 			t = symbol.ContainingType;
 			if (t != null && t.TypeKind != TypeKind.Enum) {
-				if (content.Inlines.FirstInline != null) {
-					content.AppendLine();
-				}
-				content.Append(t.GetSymbolKindName(), SymbolFormatter.Instance.Keyword).Append(": ")
+				content.AppendLineBreak()
+					.Append(t.GetSymbolKindName(), SymbolFormatter.Instance.Keyword).Append(": ")
 					.Append(t.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
 			}
 			if (forMemberList == false) {
-				if (content.Inlines.FirstInline != null) {
-					content.AppendLine();
-				}
-				content.Append(R.T_Namespace + symbol.ContainingNamespace?.ToString()).AppendLine();
-				if (symbol.HasSource()) {
-					content.Append(R.T_SourceFile + String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))));
+				content.AppendLineBreak()
+					.Append(R.T_Namespace + symbol.ContainingNamespace?.ToString()).AppendLine();
+				if (symbol.Kind == SymbolKind.Namespace) {
+					content.Append(R.T_Assembly + String.Join(", ", ((INamespaceSymbol)symbol).ConstituentNamespaces.Select(n => n.GetAssemblyModuleName()).Distinct()))
+						.AppendLine().Append(R.T_Project + String.Join(", ", symbol.GetSourceReferences().SelectMany(r => context.Workspace.CurrentSolution.Projects.Where(p => p.GetDocument(r.SyntaxTree) != null)).Distinct().Select(p => p.Name)))
+						.AppendLine().Append(R.T_Location + symbol.Locations.Length);
 				}
 				else {
-					content.Append(R.T_Assembly + symbol.GetAssemblyModuleName());
-				}
+					if (symbol.HasSource()) {
+						content.Append(R.T_SourceFile + String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))));
+						content.AppendLine().Append(R.T_Project + String.Join(", ", symbol.GetSourceReferences().SelectMany(r => context.Workspace.CurrentSolution.Projects.Where(p => p.GetDocument(r.SyntaxTree) != null)).Distinct().Select(p => p.Name)));
+					}
+					else {
+						content.Append(R.T_Assembly + symbol.GetAssemblyModuleName());
+					}
 
-				if (symbol.Kind == SymbolKind.NamedType) {
-					switch (((INamedTypeSymbol)symbol).TypeKind) {
-						case TypeKind.Delegate:
-							ShowDelegateSignature(content, (INamedTypeSymbol)symbol);
-							break;
-						case TypeKind.Enum:
-							ShowEnumType(content, symbol);
-							break;
+					if (symbol.Kind == SymbolKind.NamedType) {
+						switch (((INamedTypeSymbol)symbol).TypeKind) {
+							case TypeKind.Delegate:
+								ShowDelegateSignature(content, (INamedTypeSymbol)symbol);
+								break;
+							case TypeKind.Enum:
+								ShowEnumType(content, symbol);
+								break;
+						}
 					}
 				}
 			}
 			ShowAttributes(symbol, content);
-			if (compilation != null && Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.XmlDocSummary)) {
-				ShowXmlDocSummary(symbol, compilation, tip);
+			if (context.SemanticModel?.Compilation != null && Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.XmlDocSummary)) {
+				ShowXmlDocSummary(symbol, context.SemanticModel.Compilation, tip);
 			}
 			ShowNumericForms(symbol, tip);
 			return tip;
 		}
 
 		static void ShowDelegateSignature(TextBlock content, INamedTypeSymbol type) {
-			content.Append("\n" + R.T_Signature);
+			content.AppendLineBreak().Append(R.T_Signature);
 			var invoke = type.OriginalDefinition.DelegateInvokeMethod;
 			content.AddSymbol(invoke.ReturnType, false, SymbolFormatter.Instance)
 				.Append(" ").AddSymbol(type, true, SymbolFormatter.Instance)
@@ -93,7 +93,7 @@ namespace Codist
 		static void ShowEnumType(TextBlock content, ISymbol symbol) {
 			var t = ((INamedTypeSymbol)symbol).EnumUnderlyingType.ToDisplayString(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat);
 			if (t != "int") {
-				content.Append("\n" + R.T_Type + t);
+				content.AppendLineBreak().Append(R.T_Type + t);
 			}
 		}
 

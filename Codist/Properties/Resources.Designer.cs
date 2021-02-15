@@ -3571,7 +3571,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Attribute of 的本地化字符串。
+        ///   查找类似 Attribute of  的本地化字符串。
         /// </summary>
         internal static string T_AttributeOf {
             get {
@@ -4237,11 +4237,11 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Locations:  的本地化字符串。
+        ///   查找类似 Location:  的本地化字符串。
         /// </summary>
-        internal static string T_Locations {
+        internal static string T_Location {
             get {
-                return ResourceManager.GetString("T_Locations", resourceCulture);
+                return ResourceManager.GetString("T_Location", resourceCulture);
             }
         }
         
@@ -4485,6 +4485,15 @@ namespace Codist.Properties {
         internal static string T_Producers {
             get {
                 return ResourceManager.GetString("T_Producers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Project:  的本地化字符串。
+        /// </summary>
+        internal static string T_Project {
+            get {
+                return ResourceManager.GetString("T_Project", resourceCulture);
             }
         }
         

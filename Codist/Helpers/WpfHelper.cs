@@ -62,6 +62,13 @@ namespace Codist
 			block.Inlines.Add(new LineBreak());
 			return block;
 		}
+		public static TTextBlock AppendLineBreak<TTextBlock>(this TTextBlock block)
+			where TTextBlock : TextBlock {
+			if (block.Inlines.FirstInline != null) {
+				block.Inlines.Add(new LineBreak());
+			}
+			return block;
+		}
 		public static TTextBlock AppendLine<TTextBlock>(this TTextBlock block, bool withMargin)
 			where TTextBlock : TextBlock {
 			if (withMargin) {

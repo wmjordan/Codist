@@ -51,7 +51,7 @@ namespace Codist.QuickInfo
 		}
 		static void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
 			if (symbol.Kind == SymbolKind.Namespace) {
-				description.ToolTip = R.T_Locations + symbol.DeclaringSyntaxReferences.Length;
+				description.ToolTip = R.T_Location + symbol.DeclaringSyntaxReferences.Length;
 				description.MouseEnter += HookEvents;
 				return;
 			}

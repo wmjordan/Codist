@@ -663,7 +663,7 @@ Shift单击：删除并选中下一项（整个单词）</value>
     <value>可能是...</value>
   </data>
   <data name="T_AttributeOf" xml:space="preserve">
-    <value>特性</value>
+    <value>特性 </value>
   </data>
   <data name="T_Inherited" xml:space="preserve">
     <value> (继承)</value>
@@ -692,7 +692,7 @@ Shift单击：删除并选中下一项（整个单词）</value>
   <data name="T_Exception" xml:space="preserve">
     <value>异常</value>
   </data>
-  <data name="T_Locations" xml:space="preserve">
+  <data name="T_Location" xml:space="preserve">
     <value>位置: </value>
   </data>
   <data name="T_MemberType" xml:space="preserve">
@@ -1739,5 +1739,8 @@ Ctrl + 1，Ctrl + 1：Edit.SearchClassMember</value>
   </data>
   <data name="T_Extending" xml:space="preserve">
     <value>扩展对象: </value>
+  </data>
+  <data name="T_Project" xml:space="preserve">
+    <value>项目: </value>
   </data>
 </root>

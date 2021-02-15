@@ -227,26 +227,6 @@ namespace Codist
 			TextOptions.SetTextRenderingMode(element, optimize ? TextRenderingMode.Grayscale : TextRenderingMode.Auto);
 		}
 
-		public static void GoToDefinition(this ISymbol symbol) {
-			var r = symbol.GetSourceReferences();
-			if (r.Length == 1) {
-				r[0].GoToSource();
-			}
-			else {
-				var ctx = SemanticContext.GetHovered();
-				if (ctx != null) {
-					if (r.Length == 0) {
-						if (ctx.Document != null) {
-							ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, ctx.Document.Project, default);
-						}
-					}
-					else {
-						CSharpSymbolContextMenu.ShowLocations(symbol, r, ctx);
-					}
-				}
-			}
-		}
-
 		sealed class SymbolLink : Run
 		{
 			readonly ISymbol _Symbol;
@@ -273,7 +253,7 @@ namespace Codist
 			protected override void OnToolTipOpening(ToolTipEventArgs e) {
 				base.OnToolTipOpening(e);
 				if (ReferenceEquals(ToolTip, String.Empty)) {
-					ToolTip = ToolTipFactory.CreateToolTip(_Symbol, false, SemanticContext.GetHovered().SemanticModel?.Compilation);
+					ToolTip = ToolTipFactory.CreateToolTip(_Symbol, false, SemanticContext.GetHovered());
 				}
 			}
 			protected override void OnMouseRightButtonDown(MouseButtonEventArgs e) {
