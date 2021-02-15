@@ -476,6 +476,7 @@ namespace Codist.Controls
 				var s = _Symbol.OriginalDefinition;
 				string t;
 				switch (s.Kind) {
+					case SymbolKind.Namespace:
 					case SymbolKind.NamedType: t = s.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat); break;
 					case SymbolKind.Method:
 						var m = s as IMethodSymbol;
