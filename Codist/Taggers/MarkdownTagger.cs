@@ -17,8 +17,16 @@ namespace Codist.Taggers
 	[TagType(typeof(IClassificationTag))]
 	sealed class MarkdownTaggerProvider : IViewTaggerProvider
 	{
-		internal static readonly ClassificationTag[] HeaderClassificationTypes = new ClassificationTag[7];
-		internal static readonly ClassificationTag[] DummyHeaderTags = new ClassificationTag[7]; // used when syntax highlight is disabled
+		internal static readonly ClassificationTag[] HeaderClassificationTypes = InitHeaderClassificationTypes();
+		internal static readonly ClassificationTag[] DummyHeaderTags = new ClassificationTag[7] {
+			null,
+			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText)),
+			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText)),
+			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText)),
+			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText)),
+			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText)),
+			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText))
+		}; // used when syntax highlight is disabled
 
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			// the results produced by the tagger are also reused by the NaviBar and ScrollbarMarker
@@ -28,26 +36,20 @@ namespace Codist.Taggers
 			if (textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown) == false) {
 				return null;
 			}
-			if (HeaderClassificationTypes[1] == null) {
-				InitHeaderClassificationTypes();
-			}
 			return textView.Properties.GetOrCreateSingletonProperty(() => new MarkdownTagger(textView, Config.Instance.Features.MatchFlags(Features.SyntaxHighlight))) as ITagger<T>;
 		}
 
-		static void InitHeaderClassificationTypes() {
+		static ClassificationTag[] InitHeaderClassificationTypes() {
 			var r = ServicesHelper.Instance.ClassificationTypeRegistry;
-			HeaderClassificationTypes[1] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading1));
-			HeaderClassificationTypes[2] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading2));
-			HeaderClassificationTypes[3] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading3));
-			HeaderClassificationTypes[4] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading4));
-			HeaderClassificationTypes[5] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading5));
-			HeaderClassificationTypes[6] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading6));
-			DummyHeaderTags[1] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
-			DummyHeaderTags[2] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
-			DummyHeaderTags[3] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
-			DummyHeaderTags[4] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
-			DummyHeaderTags[5] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
-			DummyHeaderTags[6] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
+			return new ClassificationTag[7] {
+				null,
+				new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading1)),
+				new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading2)),
+				new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading3)),
+				new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading4)),
+				new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading5)),
+				new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading6))
+			};
 		}
 
 		sealed class MarkdownTagger : CachedTaggerBase
