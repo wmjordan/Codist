@@ -1126,9 +1126,10 @@ https://github.com/snowie2000/mactype/releases</value>
     <value>Currently navigation bar works for C# and markdown documents only</value>
   </data>
   <data name="OT_NaviBarShortcutKeys" xml:space="preserve">
-    <value>Shortcut keys to access the menus of the navigation bar:
-Ctrl+`, Ctrl+`: Edit.SearchDeclaration
-Ctrl+1, Ctrl+1: Edit.SearchClassMember</value>
+    <value>Default shortcut keys to access the menus of the navigation bar:
+Ctrl+1, Ctrl+1: Edit.SearchClassMember
+Ctrl+1, Ctrl+2: Edit.SearchDeclaration
+Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="OT_NaviBarUpdateNote" xml:space="preserve">
     <value>The above options will take effect when the navigation bar is repopulated</value>
@@ -1751,5 +1752,10 @@ Line: {Line}</value>
   </data>
   <data name="T_Project" xml:space="preserve">
     <value>Project: </value>
+  </data>
+  <data name="T_SearchMemberTip" xml:space="preserve">
+    <value>Search member name with this input box.
+- key: search current document
+= key: search current project</value>
   </data>
 </root>

@@ -24,6 +24,7 @@ namespace Codist
 	static class TextEditorHelper
 	{
 		static /*readonly*/ Guid guidIWpfTextViewHost = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476");
+		static readonly HashSet<IWpfTextView> _WpfTextViews = new HashSet<IWpfTextView>();
 		static IWpfTextView _MouseOverTextView, _ActiveTextView;
 
 		#region Position
@@ -82,6 +83,9 @@ namespace Codist
 
 		public static ClassificationTag GetClassificationTag(this IClassificationTypeRegistryService registry, string clasificationType) {
 			return new ClassificationTag(registry.GetClassificationType(clasificationType));
+		}
+		public static IClassificationType CreateClassificationType(string classificationType) {
+			return new ClassificationCategory(classificationType);
 		}
 
 		public static TextFormattingRunProperties GetRunProperties(this IClassificationFormatMap formatMap, string classificationType) {
@@ -558,6 +562,18 @@ namespace Codist
 			return textView == null ? null : GetWpfTextView(textView);
 		}
 
+		public static IWpfTextView GetWpfTextView(this System.Windows.UIElement element) {
+			foreach (var item in _WpfTextViews) {
+				if (item.VisualElement.IsVisible == false) {
+					continue;
+				}
+				if (item.VisualElement.Contains(element.TranslatePoint(new System.Windows.Point(0,0), item.VisualElement))) {
+					return item;
+				}
+			}
+			return null;
+		}
+
 		public static (string platformName, string configName) GetActiveBuildConfiguration() {
 #pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 			return GetActiveBuildConfiguration(CodistPackage.DTE.ActiveDocument);
@@ -645,6 +661,7 @@ namespace Codist
 			userData.GetData(ref guidViewHost, out object holder);
 			return ((IWpfTextViewHost)holder).TextView;
 		}
+
 		#endregion
 
 		[Export(typeof(IWpfTextViewCreationListener))]
@@ -664,9 +681,10 @@ namespace Codist
 				public ActiveViewTracker(IWpfTextView view) {
 					_ActiveTextView = _View = view;
 					ActiveTextViewChanged?.Invoke(view, new TextViewCreatedEventArgs(view));
-					view.Closed += TextViewClosed_UnhookEvent;
+					view.Closed += TextViewClosed_UnloadView;
 					view.VisualElement.MouseEnter += TextViewMouseEnter_SetActiveView;
 					view.GotAggregateFocus += TextViewGotFocus_SetActiveView;
+					_WpfTextViews.Add(view);
 				}
 
 				void TextViewGotFocus_SetActiveView(object sender, EventArgs e) {
@@ -678,15 +696,31 @@ namespace Codist
 					_MouseOverTextView = _View;
 				}
 
-				void TextViewClosed_UnhookEvent(object sender, EventArgs e) {
+				void TextViewClosed_UnloadView(object sender, EventArgs e) {
 					var v = sender as IWpfTextView;
-					v.Closed -= TextViewClosed_UnhookEvent;
+					v.Closed -= TextViewClosed_UnloadView;
 					v.VisualElement.MouseEnter -= TextViewMouseEnter_SetActiveView;
 					v.GotAggregateFocus -= TextViewGotFocus_SetActiveView;
+					_WpfTextViews.Remove(v);
 					System.Threading.Interlocked.CompareExchange(ref _MouseOverTextView, null, _View);
 					System.Threading.Interlocked.CompareExchange(ref _ActiveTextView, null, _View);
 				}
 			}
+		}
+
+		/// <summary>
+		/// A dummy classification type simply to serve the purpose of grouping classification types in the configuration list
+		/// </summary>
+		internal sealed class ClassificationCategory : IClassificationType
+		{
+			public ClassificationCategory(string classification) {
+				Classification = classification;
+			}
+
+			public string Classification { get; }
+			public IEnumerable<IClassificationType> BaseTypes => Array.Empty<IClassificationType>();
+
+			public bool IsOfType(string type) { return false; }
 		}
 	}
 

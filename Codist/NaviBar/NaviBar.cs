@@ -22,7 +22,7 @@ namespace Codist.NaviBar
 		}
 
 		public abstract void ShowActiveItemMenu();
-		public abstract void ShowRootItemMenu();
+		public abstract void ShowRootItemMenu(int parameter);
 		protected IWpfTextView View { get; }
 		internal ExternalAdornment ListContainer { get; }
 

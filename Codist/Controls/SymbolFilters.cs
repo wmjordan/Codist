@@ -27,6 +27,7 @@ namespace Codist.Controls
 	{
 		readonly ThemedToggleButton _ProjectFilter, _DocumentFilter;
 		bool _uiLock;
+		private ScopeType _Filter;
 
 		public event EventHandler FilterChanged;
 
@@ -47,14 +48,37 @@ namespace Codist.Controls
 			_DocumentFilter.IsChecked = true;
 		}
 
-		public ScopeType Filter { get; private set; }
+		public ScopeType Filter {
+			get => _Filter;
+			set {
+				if (_Filter != value) {
+					switch (value) {
+						case ScopeType.ActiveDocument: _DocumentFilter.IsChecked = true;
+							break;
+						case ScopeType.ActiveProject: _ProjectFilter.IsChecked = true;
+							break;
+					}
+				}
+			}
+		}
 
 		public UIElementCollection Contents => ((StackPanel)((Border)Content).Child).Children;
 
 		ThemedToggleButton CreateButton(int imageId, string toolTip) {
 			var b = new ThemedToggleButton(imageId, toolTip).ClearMargin().ClearBorder();
 			b.Checked += UpdateFilterValue;
+			b.Unchecked += KeepChecked;
 			return b;
+		}
+
+		void KeepChecked(object sender, RoutedEventArgs e) {
+			if (_uiLock) {
+				return;
+			}
+			_uiLock = true;
+			(sender as ThemedToggleButton).IsChecked = true;
+			e.Handled = true;
+			_uiLock = false;
 		}
 
 		void UpdateFilterValue(object sender, RoutedEventArgs eventArgs) {
@@ -68,8 +92,8 @@ namespace Codist.Controls
 			var f = sender == _DocumentFilter ? ScopeType.ActiveDocument
 				: sender == _ProjectFilter ? ScopeType.ActiveProject
 				: ScopeType.Undefined;
-			if (Filter != f) {
-				Filter = f;
+			if (_Filter != f) {
+				_Filter = f;
 				FilterChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}

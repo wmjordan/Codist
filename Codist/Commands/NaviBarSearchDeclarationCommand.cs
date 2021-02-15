@@ -12,26 +12,31 @@ namespace Codist.Commands
 	{
 		public static void Initialize() {
 			Command.NaviBarSearchDeclaration.Register(ExecuteSearchDeclaration, HandleMenuState);
+			Command.NaviBarSearchDeclarationInProject.Register(ExecuteSearchDeclarationInProject, HandleMenuState);
 			Command.NaviBarSearchActiveClass.Register(ExecuteSearchActiveClass, HandleMenuState);
 		}
 
 		static void HandleMenuState(object s, EventArgs args) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			((OleMenuCommand)s).Enabled = GetCSharpBar() != null;
+			((OleMenuCommand)s).Enabled = GetNaviBar() != null;
 		}
 
-		static NaviBar.INaviBar GetCSharpBar() {
+		static NaviBar.INaviBar GetNaviBar() {
 			NaviBar.INaviBar bar = null;
 			return TextEditorHelper.GetActiveWpfDocumentView()?.Properties.TryGetProperty(nameof(NaviBar), out bar) == true ? bar : null;
 		}
 
 		static void ExecuteSearchDeclaration(object sender, EventArgs e) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			GetCSharpBar()?.ShowRootItemMenu();
+			GetNaviBar()?.ShowRootItemMenu((int)Controls.ScopeType.ActiveDocument);
+		}
+		static void ExecuteSearchDeclarationInProject(object sender, EventArgs e) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			GetNaviBar()?.ShowRootItemMenu((int)Controls.ScopeType.ActiveProject);
 		}
 		static void ExecuteSearchActiveClass(object sender, EventArgs e) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			GetCSharpBar()?.ShowActiveItemMenu();
+			GetNaviBar()?.ShowActiveItemMenu();
 		}
 	}
 }

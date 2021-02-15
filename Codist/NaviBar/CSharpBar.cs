@@ -254,8 +254,8 @@ namespace Codist.NaviBar
 		}
 
 		#region Menu handler
-		public override void ShowRootItemMenu() {
-			_RootItem.ShowNamespaceAndTypeMenu();
+		public override void ShowRootItemMenu(int parameter) {
+			_RootItem.ShowNamespaceAndTypeMenu(parameter);
 		}
 		public override void ShowActiveItemMenu() {
 			for (int i = Items.Count - 1; i >= 0; i--) {
@@ -369,7 +369,7 @@ namespace Codist.NaviBar
 					t.Append(((BaseTypeDeclarationSyntax)p).Identifier.ValueText + ".", ThemeHelper.SystemGrayTextBrush);
 				}
 			}
-			t.Append(title, highlight);
+			t.Append(title, highlight, false, SymbolFormatter.Instance.GetBrush(node));
 			if (includeParameterList && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterList)) {
 				AddParameterList(t, node);
 			}
@@ -431,7 +431,7 @@ namespace Codist.NaviBar
 								Orientation = Orientation.Horizontal,
 								Children = {
 									ThemeHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
-									(_FinderBox = new MemberFinderBox() { MinWidth = 150 }),
+									(_FinderBox = new MemberFinderBox() { MinWidth = 150, ToolTip = R.T_SearchMemberTip }),
 									(_ScopeBox = new SearchScopeBox {
 										Contents = {
 											new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter).ClearBorder()
@@ -445,6 +445,7 @@ namespace Codist.NaviBar
 						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey)
 				};
 				Bar.SetupSymbolListMenu(_Menu);
+				_FinderBox.PreviewKeyDown += ChangeSearchScope;
 				_FinderBox.TextChanged += SearchCriteriaChanged;
 				_FinderBox.IsVisibleChanged += (s, args) => {
 					if ((bool)args.NewValue == false) {
@@ -471,10 +472,10 @@ namespace Codist.NaviBar
 					Bar.HideMenu();
 					return;
 				}
-				ShowNamespaceAndTypeMenu();
+				ShowNamespaceAndTypeMenu((int)ScopeType.Undefined);
 			}
 
-			internal void ShowNamespaceAndTypeMenu() {
+			internal void ShowNamespaceAndTypeMenu(int parameter) {
 				if (_Menu.NeedsRefresh) {
 					_Menu.NeedsRefresh = false;
 					_Menu.Clear();
@@ -487,6 +488,10 @@ namespace Codist.NaviBar
 						.Append(Bar.View.TextSnapshot.LineCount);
 				}
 				Bar.ShowMenu(this, _Menu);
+				switch ((ScopeType)parameter) {
+					case ScopeType.ActiveDocument: _ScopeBox.Filter = ScopeType.ActiveDocument; break;
+					case ScopeType.ActiveProject: _ScopeBox.Filter = ScopeType.ActiveProject; break;
+				}
 			}
 
 			void PopulateTypes() {
@@ -551,7 +556,7 @@ namespace Codist.NaviBar
 				var s = _FinderBox.Text;
 				if (s.Length == 0) {
 					_Menu.ContainerType = SymbolListType.NodeList;
-					ShowNamespaceAndTypeMenu();
+					ShowNamespaceAndTypeMenu((int)ScopeType.Undefined);
 					_IncrementalSearchContainer = null;
 					_PreviousSearchKeywords = null;
 					return;
@@ -573,6 +578,18 @@ namespace Codist.NaviBar
 					// ignores cancellation
 				}
 				catch (ObjectDisposedException) { }
+			}
+			void ChangeSearchScope(object sender, KeyEventArgs e) {
+				if (Keyboard.Modifiers == ModifierKeys.None) {
+					if (e.Key == Key.OemPlus || e.Key == Key.Add) {
+						_ScopeBox.Filter = ScopeType.ActiveProject;
+						e.Handled = true;
+					}
+					else if (e.Key == Key.OemMinus || e.Key == Key.Subtract) {
+						_ScopeBox.Filter = ScopeType.ActiveDocument;
+						e.Handled = true;
+					}
+				}
 			}
 			void FindInDocument(string text) {
 				var cancellationToken = Bar._cancellationSource.GetToken();
@@ -613,7 +630,7 @@ namespace Codist.NaviBar
 			}
 
 			void IContextMenuHost.ShowContextMenu(RoutedEventArgs args) {
-				ShowNamespaceAndTypeMenu();
+				ShowNamespaceAndTypeMenu((int)ScopeType.Undefined);
 			}
 
 			sealed class MemberFinderBox : ThemedTextBox

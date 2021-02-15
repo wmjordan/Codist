@@ -21,8 +21,8 @@ namespace Codist.Taggers
 		internal static readonly ClassificationTag[] DummyHeaderTags = new ClassificationTag[7]; // used when syntax highlight is disabled
 
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
-			// the results produced by the tagger are also reused by the NaviBar
-			if (Config.Instance.Features.HasAnyFlag(Features.SyntaxHighlight | Features.NaviBar) == false) {
+			// the results produced by the tagger are also reused by the NaviBar and ScrollbarMarker
+			if (Config.Instance.Features.HasAnyFlag(Features.SyntaxHighlight | Features.NaviBar | Features.ScrollbarMarkers) == false) {
 				return null;
 			}
 			if (textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown) == false) {
@@ -42,13 +42,12 @@ namespace Codist.Taggers
 			HeaderClassificationTypes[4] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading4));
 			HeaderClassificationTypes[5] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading5));
 			HeaderClassificationTypes[6] = new ClassificationTag(r.GetClassificationType(Constants.MarkdownHeading6));
-			var dummyTag = r.GetClassificationType(Constants.CodeText);
-			DummyHeaderTags[1] = new ClassificationTag(dummyTag);
-			DummyHeaderTags[2] = new ClassificationTag(dummyTag);
-			DummyHeaderTags[3] = new ClassificationTag(dummyTag);
-			DummyHeaderTags[4] = new ClassificationTag(dummyTag);
-			DummyHeaderTags[5] = new ClassificationTag(dummyTag);
-			DummyHeaderTags[6] = new ClassificationTag(dummyTag);
+			DummyHeaderTags[1] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
+			DummyHeaderTags[2] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
+			DummyHeaderTags[3] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
+			DummyHeaderTags[4] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
+			DummyHeaderTags[5] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
+			DummyHeaderTags[6] = new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText));
 		}
 
 		sealed class MarkdownTagger : CachedTaggerBase

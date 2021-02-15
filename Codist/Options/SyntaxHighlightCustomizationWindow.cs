@@ -453,7 +453,7 @@ namespace Codist.Options
 			var style = ActiveStyle;
 			_SelectedStyleButton = null;
 			foreach (var c in classifications) {
-				if (c is ClassificationCategory) {
+				if (c is TextEditorHelper.ClassificationCategory) {
 					l.Add(new Label {
 						Content = c.Classification,
 						Padding = WpfHelper.SmallMargin,
@@ -507,7 +507,7 @@ namespace Codist.Options
 				}
 				var style = styles.FirstOrDefault(i => i.Id == item.Id) ?? item;
 				if (item.Category != category) {
-					r.Add(new ClassificationCategory(category = item.Category));
+					r.Add(TextEditorHelper.CreateClassificationType(category = item.Category));
 				}
 				r.Add(ctr.GetClassificationType(item.ClassificationType));
 			}
@@ -1224,21 +1224,6 @@ namespace Codist.Options
 			CommentTagger,
 			CommentLabels,
 			PriorityOrder
-		}
-
-		/// <summary>
-		/// A dummy classification type simply to serve the purpose of grouping classification types in the configuration list
-		/// </summary>
-		sealed class ClassificationCategory : IClassificationType
-		{
-			public ClassificationCategory(string classification) {
-				Classification = classification;
-			}
-
-			public string Classification { get; }
-			public IEnumerable<IClassificationType> BaseTypes => null;
-
-			public bool IsOfType(string type) { throw new NotImplementedException(); }
 		}
 
 		sealed class TagStyle

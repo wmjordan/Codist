@@ -2605,9 +2605,10 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Shortcut keys to access the menus of the navigation bar:
-        ///Ctrl+`, Ctrl+`: Edit.SearchDeclaration
-        ///Ctrl+1, Ctrl+1: Edit.SearchClassMember 的本地化字符串。
+        ///   查找类似 Default shortcut keys to access the menus of the navigation bar:
+        ///Ctrl+1, Ctrl+1: Edit.SearchClassMember
+        ///Ctrl+1, Ctrl+2: Edit.SearchDeclaration
+        ///Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject 的本地化字符串。
         /// </summary>
         internal static string OT_NaviBarShortcutKeys {
             get {
@@ -4648,6 +4649,17 @@ namespace Codist.Properties {
         internal static string T_SearchCurrentProject {
             get {
                 return ResourceManager.GetString("T_SearchCurrentProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Search member name with this input box.
+        ///- key: search current document
+        ///= key: search current project 的本地化字符串。
+        /// </summary>
+        internal static string T_SearchMemberTip {
+            get {
+                return ResourceManager.GetString("T_SearchMemberTip", resourceCulture);
             }
         }
         

@@ -36,24 +36,7 @@ namespace Codist.Margins
 		static readonly Brush PreProcessorBrush = Brushes.Gray;
 		static readonly Brush TaskBackgroundBrsh = Brushes.White.Alpha(0.5);
 		//note: this dictionary determines which style has a scrollbar marker
-		static readonly Dictionary<string, Brush> ClassificationBrushMapper = new Dictionary<string, Brush> {
-			{ Constants.EmphasisComment, EmphasisBrush },
-			{ Constants.TodoComment, ToDoBrush },
-			{ Constants.NoteComment, NoteBrush },
-			{ Constants.HackComment, HackBrush },
-			{ Constants.UndoneComment, UndoneBrush },
-			{ Constants.Task1Comment, TaskBrush },
-			{ Constants.Task2Comment, TaskBrush },
-			{ Constants.Task3Comment, TaskBrush },
-			{ Constants.Task4Comment, TaskBrush },
-			{ Constants.Task5Comment, TaskBrush },
-			{ Constants.Task6Comment, TaskBrush },
-			{ Constants.Task7Comment, TaskBrush },
-			{ Constants.Task8Comment, TaskBrush },
-			{ Constants.Task9Comment, TaskBrush },
-			{ Constants.MarkdownHeading1, TaskBrush },
-			{ Constants.CodePreprocessorKeyword, PreProcessorBrush },
-		};
+		static readonly Dictionary<IClassificationType, Brush> ClassificationBrushMapper = InitClassificationBrushMapper();
 		bool _HasEvents;
 		const double MarkPadding = 1.0;
 		const double MarkSize = 4.0;
@@ -85,6 +68,29 @@ namespace Codist.Margins
 		FrameworkElement IWpfTextViewMargin.VisualElement => this;
 		double ITextViewMargin.MarginSize => ActualWidth;
 		bool ITextViewMargin.Enabled => true;
+
+		static Dictionary<IClassificationType, Brush> InitClassificationBrushMapper() {
+			var r = ServicesHelper.Instance.ClassificationTypeRegistry;
+			return new Dictionary<IClassificationType, Brush> {
+				{ r.GetClassificationType(Constants.EmphasisComment), EmphasisBrush },
+				{ r.GetClassificationType(Constants.TodoComment), ToDoBrush },
+				{ r.GetClassificationType(Constants.NoteComment), NoteBrush },
+				{ r.GetClassificationType(Constants.HackComment), HackBrush },
+				{ r.GetClassificationType(Constants.UndoneComment), UndoneBrush },
+				{ r.GetClassificationType(Constants.Task1Comment), TaskBrush },
+				{ r.GetClassificationType(Constants.Task2Comment), TaskBrush },
+				{ r.GetClassificationType(Constants.Task3Comment), TaskBrush },
+				{ r.GetClassificationType(Constants.Task4Comment), TaskBrush },
+				{ r.GetClassificationType(Constants.Task5Comment), TaskBrush },
+				{ r.GetClassificationType(Constants.Task6Comment), TaskBrush },
+				{ r.GetClassificationType(Constants.Task7Comment), TaskBrush },
+				{ r.GetClassificationType(Constants.Task8Comment), TaskBrush },
+				{ r.GetClassificationType(Constants.Task9Comment), TaskBrush },
+				{ r.GetClassificationType(Constants.CodePreprocessorKeyword), PreProcessorBrush },
+				{ MarkdownTaggerProvider.HeaderClassificationTypes[1].ClassificationType, TaskBrush },
+				{ MarkdownTaggerProvider.DummyHeaderTags[1].ClassificationType, TaskBrush },
+			};
+		}
 
 		ITextViewMargin ITextViewMargin.GetTextViewMargin(string marginName) {
 			return string.Equals(marginName, MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
@@ -180,7 +186,7 @@ namespace Codist.Margins
 					continue;
 				}
 				//todo: customizable marker style
-				var c = tag.Tag.ClassificationType.Classification;
+				var c = tag.Tag.ClassificationType;
 				Brush b;
 				if (ClassificationBrushMapper.TryGetValue(c, out b) == false) {
 					continue;
@@ -200,8 +206,7 @@ namespace Codist.Margins
 					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
 						continue;
 					}
-					//note the text relies on the last character of Constants.Task1Comment, etc.
-					DrawTaskMark(drawingContext, b, y, c[c.Length - 1].ToString(), tag.ContentText);
+					DrawTaskMark(drawingContext, b, y, String.Empty, tag.ContentText);
 				}
 				else {
 					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
@@ -216,12 +221,12 @@ namespace Codist.Margins
 
 		/// <summary>draws task name (inverted) and the task content</summary>
 		static void DrawTaskMark(DrawingContext dc, Brush brush, double y, string taskName, string taskContent) {
-			var ft = WpfHelper.ToFormattedText(taskName, 9, TaskBackgroundBrsh).SetBold();
-			dc.DrawRectangle(brush, EmptyPen, new Rect(0, y - ft.Height / 2, ft.Width, ft.Height));
-			dc.DrawText(ft, new Point(0, y - ft.Height / 2));
+			//var ft = WpfHelper.ToFormattedText(taskName, 9, TaskBackgroundBrsh).SetBold();
+			//dc.DrawRectangle(brush, EmptyPen, new Rect(0, y - ft.Height / 2, ft.Width, ft.Height));
+			//dc.DrawText(ft, new Point(0, y - ft.Height / 2));
 			var tt = WpfHelper.ToFormattedText(taskContent, 9, brush);
-			dc.DrawRectangle(TaskBackgroundBrsh, EmptyPen, new Rect(ft.Width, y - ft.Height / 2, tt.Width, ft.Height));
-			dc.DrawText(tt, new Point(ft.Width, y - ft.Height / 2));
+			dc.DrawRectangle(TaskBackgroundBrsh, EmptyPen, new Rect(0, y - tt.Height / 2, tt.Width, tt.Height));
+			dc.DrawText(tt, new Point(0, y - tt.Height / 2));
 		}
 
 		/// <summary>draws a rectangle, with a border</summary>

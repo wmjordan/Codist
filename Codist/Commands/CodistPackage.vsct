@@ -62,9 +62,9 @@
     </Bitmaps>-->
 	</Commands>
 	<KeyBindings>
-		<!--Bind NaviBar.SearchDeclaration to Ctrl + ` -->
-		<KeyBinding guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" editor="guidVSStd97" mod1="Control" key1="0xC0" mod2="Control" key2="0xC0" />
 		<KeyBinding guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" editor="guidVSStd97" mod1="Control" key1="1" mod2="Control" key2="1" />
+		<KeyBinding guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" editor="guidVSStd97" mod1="Control" key1="1" mod2="Control" key2="2" />
+		<KeyBinding guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationInProjectId" editor="guidVSStd97" mod1="Control" key1="1" mod2="Control" key2="3" />
 	</KeyBindings>
 	<Symbols>
 		<!-- This is the package guid. -->
@@ -82,6 +82,7 @@
 			<IDSymbol name="SyntaxCustomizeHighlightId" value="0x4005" />
 			<IDSymbol name="NaviBarSearchDeclarationId" value="0x4006" />
 			<IDSymbol name="NaviBarSearchActiveClassId" value="0x4007" />
+			<IDSymbol name="NaviBarSearchDeclarationInProjectId" value="0x4008" />
 		</GuidSymbol>
 
 	</Symbols>

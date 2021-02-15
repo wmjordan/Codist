@@ -35,16 +35,6 @@
 					<ButtonText>递增版本修订号</ButtonText>
 				</Strings>
 			</Button>
-			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" priority="0x0100" type="Button">
-				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
-				<Icon guid="ImageCatalogGuid" id="SearchContract" />
-				<CommandFlag>DefaultDisabled</CommandFlag>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>查找定义</ButtonText>
-					<CanonicalName>CodistNaviBarSearchDeclaration</CanonicalName>
-				</Strings>
-			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="SearchMember" />
@@ -53,6 +43,26 @@
 				<Strings>
 					<ButtonText>查找类成员</ButtonText>
 					<CanonicalName>CodistNaviBarSearchActiveClass</CanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" priority="0x0101" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
+				<Icon guid="ImageCatalogGuid" id="SearchContract" />
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>在当前文档查找定义</ButtonText>
+					<CanonicalName>CodistNaviBarSearchDeclaration</CanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationInProjectId" priority="0x0102" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
+				<Icon guid="ImageCatalogGuid" id="SearchContract" />
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>在当前项目查找定义</ButtonText>
+					<CanonicalName>CodistNaviBarSearchDeclarationInProject</CanonicalName>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="SyntaxCustomizeHighlightId" priority="0x0100" type="Button">

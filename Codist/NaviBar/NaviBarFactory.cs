@@ -12,7 +12,7 @@ namespace Codist.NaviBar
 {
 	interface INaviBar
 	{
-		void ShowRootItemMenu();
+		void ShowRootItemMenu(int parameter);
 		void ShowActiveItemMenu();
 	}
 
@@ -42,7 +42,8 @@ namespace Codist.NaviBar
 		public void TextViewCreated(IWpfTextView textView) {
 			if (Config.Instance.Features.MatchFlags(Features.NaviBar)
 				&& textView.Roles.Contains("DIFF") == false) {
-				if (textView.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp) || textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
+				if (textView.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp)
+					|| textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
 					SemanticContext.GetOrCreateSingetonInstance(textView);
 					new Overrider(textView, _TextSearchService);
 				}

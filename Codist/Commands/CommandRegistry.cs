@@ -29,6 +29,7 @@ namespace Codist.Commands
 		SymbolFinderWindow,
 		SyntaxCustomizerWindow,
 		NaviBarSearchDeclaration,
-		NaviBarSearchActiveClass
+		NaviBarSearchActiveClass,
+		NaviBarSearchDeclarationInProject,
 	}
 }
