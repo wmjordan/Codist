@@ -686,7 +686,7 @@ namespace Codist.NaviBar
 				_Menu = new SymbolList(Bar._SemanticContext) {
 					Container = Bar.ListContainer,
 					ContainerType = SymbolListType.TypeList,
-					ExtIconProvider = s => GetExtIcons(s.SyntaxNode)
+					ExtIconProvider = ExtIconProvider.Default.GetExtIcons
 				};
 				_Menu.Header = new WrapPanel {
 					Orientation = Orientation.Horizontal,
@@ -723,37 +723,6 @@ namespace Codist.NaviBar
 				}
 			}
 
-			static StackPanel GetExtIcons(SyntaxNode node) {
-				StackPanel icons = null;
-				switch (node) {
-					case NamespaceDeclarationSyntax ns: AddIcon(ref icons, IconIds.Namespace); break;
-					case BaseTypeDeclarationSyntax t:
-						foreach (var modifier in t.Modifiers) {
-							switch (modifier.Kind()) {
-								case SyntaxKind.PartialKeyword:
-									switch (t.Kind()) {
-										case SyntaxKind.ClassDeclaration: AddIcon(ref icons, IconIds.PartialClass); break;
-										case SyntaxKind.StructDeclaration: AddIcon(ref icons, IconIds.PartialStruct); break;
-										case SyntaxKind.InterfaceDeclaration: AddIcon(ref icons, IconIds.PartialInterface);break;
-									}
-									break;
-								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
-								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractClass); break;
-								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedClass); break;
-							}
-						}
-						break;
-				}
-				return icons;
-
-				void AddIcon(ref StackPanel container, int imageId) {
-					if (container == null) {
-						container = new StackPanel { Orientation = Orientation.Horizontal };
-					}
-					container.Children.Add(ThemeHelper.GetImage(imageId));
-				}
-			}
-
 			void AddNamespacesAndTypes() {
 				var s = Symbol as INamespaceSymbol;
 				if (s == null) {
@@ -766,6 +735,7 @@ namespace Codist.NaviBar
 					_Menu.Add(item, false);
 				}
 			}
+
 			void IContextMenuHost.ShowContextMenu(RoutedEventArgs args) {
 				if (ContextMenu == null) {
 					var m = new CSharpSymbolContextMenu(Bar._SemanticContext) {
@@ -778,12 +748,9 @@ namespace Codist.NaviBar
 						m.AddSymbolCommands();
 						m.AddTitleItem(s.Name);
 					}
-					//m.PlacementTarget = this;
-					//m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
 					ContextMenu = m;
 				}
 				ContextMenu.IsOpen = true;
-
 			}
 		}
 
@@ -824,8 +791,6 @@ namespace Codist.NaviBar
 						m.AddSymbolCommands();
 						m.AddTitleItem(Node.GetDeclarationSignature());
 					}
-					//m.PlacementTarget = this;
-					//m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
 					ContextMenu = m;
 				}
 				ContextMenu.IsOpen = true;

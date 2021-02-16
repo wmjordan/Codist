@@ -19,7 +19,8 @@ using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
 {
-	sealed class SymbolList : VirtualList, ISymbolFilterable {
+	sealed class SymbolList : VirtualList, ISymbolFilterable
+	{
 		Predicate<object> _Filter;
 		readonly ToolTip _SymbolTip;
 		readonly List<SymbolItem> _Symbols;
@@ -659,6 +660,162 @@ namespace Codist.Controls
 		}
 
 		#endregion
+
+	}
+
+
+	sealed class ExtIconProvider
+	{
+		ExtIconProvider(bool containerIsInterface) {
+			_ContainerIsInterface = containerIsInterface;
+		}
+		public static readonly ExtIconProvider Default = new ExtIconProvider(false);
+		public static readonly ExtIconProvider InterfaceMembers = new ExtIconProvider(true);
+		readonly bool _ContainerIsInterface;
+
+		public StackPanel GetExtIcons(SymbolItem symbolItem) {
+			return GetSpecialSymbolIcon(symbolItem.Symbol);
+		}
+
+		public StackPanel GetExtIconsWithUsage(SymbolItem symbolItem) {
+			var icons = GetSpecialSymbolIcon(symbolItem.Symbol);
+			if (symbolItem.Usage != SymbolUsageKind.Normal) {
+				AddSymbolUsageIcons(ref icons, symbolItem.Usage);
+			}
+			return icons;
+		}
+
+		StackPanel GetSpecialSymbolIcon(ISymbol symbol) {
+			StackPanel icons = null;
+			switch (symbol.Kind) {
+				case SymbolKind.Method:
+					var ms = symbol as IMethodSymbol;
+					if (ms.IsAsync || ms.ReturnType.IsAwaitable()) {
+						AddIcon(ref icons, IconIds.AsyncMember);
+					}
+					if (ms.IsGenericMethod) {
+						AddIcon(ref icons, IconIds.Generic);
+					}
+					if (_ContainerIsInterface == false) {
+						if (ms.IsAbstract) {
+							AddIcon(ref icons, IconIds.AbstractMember);
+						}
+						else if (ms.IsExtensionMethod) {
+							AddIcon(ref icons, IconIds.ExtensionMethod);
+						}
+						else {
+							if (ms.IsSealed) {
+								AddIcon(ref icons, IconIds.SealedMethod);
+							}
+							if (ms.IsOverride) {
+								AddIcon(ref icons, IconIds.OverrideMethod);
+							}
+						}
+					}
+					break;
+				case SymbolKind.NamedType:
+					var type = symbol as INamedTypeSymbol;
+					if (type.IsGenericType) {
+						AddIcon(ref icons, IconIds.Generic);
+					}
+					if (type.TypeKind == TypeKind.Class) {
+						if (type.IsSealed && type.IsStatic == false) {
+							AddIcon(ref icons, IconIds.SealedClass);
+						}
+						else if (type.IsAbstract) {
+							AddIcon(ref icons, IconIds.AbstractClass);
+						}
+					}
+					break;
+				case SymbolKind.Field:
+					var f = symbol as IFieldSymbol;
+					if (f.IsConst) {
+						return null;
+					}
+					if (f.IsReadOnly) {
+						AddIcon(ref icons, IconIds.ReadonlyField);
+					}
+					else if (f.IsVolatile) {
+						AddIcon(ref icons, IconIds.VolatileField);
+					}
+					break;
+				case SymbolKind.Event:
+					if (_ContainerIsInterface == false) {
+						if (symbol.IsAbstract) {
+							AddIcon(ref icons, IconIds.AbstractMember);
+						}
+						else {
+							if (symbol.IsSealed) {
+								AddIcon(ref icons, IconIds.SealedEvent);
+							}
+							if (symbol.IsOverride) {
+								AddIcon(ref icons, IconIds.OverrideEvent);
+							}
+						}
+					}
+					break;
+				case SymbolKind.Property:
+					if (_ContainerIsInterface == false) {
+						if ((ms = ((IPropertySymbol)symbol).SetMethod) == null) {
+							AddIcon(ref icons, IconIds.ReadonlyProperty);
+						}
+						else if (ms.IsInitOnly()) {
+							AddIcon(ref icons, IconIds.InitonlyProperty);
+						}
+						if (symbol.IsAbstract) {
+							AddIcon(ref icons, IconIds.AbstractMember);
+						}
+						else {
+							if (symbol.IsSealed) {
+								AddIcon(ref icons, IconIds.SealedProperty);
+							}
+							if (symbol.IsOverride) {
+								AddIcon(ref icons, IconIds.OverrideProperty);
+							}
+						}
+					}
+					break;
+				case SymbolKind.Namespace:
+					return null;
+			}
+			if (symbol.IsStatic) {
+				AddIcon(ref icons, IconIds.StaticMember);
+			}
+			return icons;
+		}
+
+		static void AddSymbolUsageIcons(ref StackPanel icons, SymbolUsageKind usage) {
+			if (usage.MatchFlags(SymbolUsageKind.Write)) {
+				AddIcon(ref icons, IconIds.UseToWrite);
+			}
+			else if (usage.MatchFlags(SymbolUsageKind.Catch)) {
+				AddIcon(ref icons, IconIds.UseToCatch);
+			}
+			else if (usage.HasAnyFlag(SymbolUsageKind.Attach | SymbolUsageKind.Detach)) {
+				if (usage.MatchFlags(SymbolUsageKind.Attach)) {
+					AddIcon(ref icons, IconIds.AttachEvent);
+				}
+				if (usage.MatchFlags(SymbolUsageKind.Detach)) {
+					AddIcon(ref icons, IconIds.DetachEvent);
+				}
+			}
+			else if (usage.MatchFlags(SymbolUsageKind.TypeCast)) {
+				AddIcon(ref icons, IconIds.UseToCast);
+			}
+			else if (usage.MatchFlags(SymbolUsageKind.TypeParameter)) {
+				AddIcon(ref icons, IconIds.UseAsTypeParameter);
+			}
+			else if (usage.MatchFlags(SymbolUsageKind.Delegate)) {
+				AddIcon(ref icons, IconIds.UseAsDelegate);
+			}
+		}
+
+		static void AddIcon(ref StackPanel container, int imageId) {
+			if (container == null) {
+				container = new StackPanel { Orientation = Orientation.Horizontal };
+			}
+			container.Children.Add(ThemeHelper.GetImage(imageId));
+		}
 	}
 
 
