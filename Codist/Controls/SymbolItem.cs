@@ -91,7 +91,7 @@ namespace Codist.Controls
 				}
 				else if (s.Length > 1) {
 					var p = _Content.GetParent<ListBoxItem>();
-					CSharpSymbolContextMenu.ShowLocations(Symbol, s, Container.SemanticContext, p?.IsMouseOver == true ? null : p);
+					Container.SemanticContext.ShowLocations(Symbol, s, p?.IsMouseOver == true ? null : p);
 				}
 			}
 		}

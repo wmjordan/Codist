@@ -832,7 +832,7 @@ namespace Codist
 						}
 					}
 					else {
-						Controls.CSharpSymbolContextMenu.ShowLocations(symbol, r, ctx);
+						Controls.SymbolCommands.ShowLocations(ctx, symbol, r);
 					}
 				}
 			}
