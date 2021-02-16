@@ -783,6 +783,7 @@ namespace Codist.Options
 					return;
 				}
 				Config.Instance.Set(options, set);
+				Config.Instance.FireConfigChangedEvent(Features.None);
 			}
 
 			void UpdateMenuLayoutOption(DisplayOptimizations options, bool value) {
