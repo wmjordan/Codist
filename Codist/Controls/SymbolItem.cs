@@ -85,13 +85,16 @@ namespace Codist.Controls
 			}
 			else if (Symbol != null) {
 				RefreshSymbol();
+				if (Symbol.Kind == SymbolKind.Namespace) {
+					Container.SemanticContext.FindMembers(Symbol, _Content.GetParent<ListBoxItem>().NullIfMouseOver());
+					return;
+				}
 				var s = Symbol.GetSourceReferences();
 				if (s.Length == 1) {
 					s[0].GoToSource();
 				}
 				else if (s.Length > 1) {
-					var p = _Content.GetParent<ListBoxItem>();
-					Container.SemanticContext.ShowLocations(Symbol, s, p?.IsMouseOver == true ? null : p);
+					Container.SemanticContext.ShowLocations(Symbol, s, _Content.GetParent<ListBoxItem>().NullIfMouseOver());
 				}
 			}
 		}

@@ -83,7 +83,7 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		internal static void FindMembers(this SemanticContext context, ISymbol symbol) {
+		internal static void FindMembers(this SemanticContext context, ISymbol symbol, UIElement positionElement = null) {
 			var m = new SymbolMenu(context, symbol.Kind == SymbolKind.Namespace ? SymbolListType.TypeList : SymbolListType.None);
 			var (count, inherited) = m.Menu.AddSymbolMembers(symbol);
 			if (m.Menu.IconProvider == null) {
@@ -103,7 +103,7 @@ namespace Codist.Controls
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true)
 				.Append(R.T_Members.Replace("{count}", count.ToString()).Replace("{inherited}", inherited.ToString()));
-			m.Show();
+			m.Show(positionElement);
 		}
 
 		internal static void FindInstanceAsParameter(this SemanticContext context, ISymbol symbol) {

@@ -539,6 +539,11 @@ namespace Codist
 				: null;
 		}
 
+		public static TElement NullIfMouseOver<TElement>(this TElement uiElement)
+			where TElement : UIElement {
+			return uiElement?.IsMouseOver == true ? null : uiElement;
+		}
+
 		public static ToolBar HideOverflow(this ToolBar toolBar) {
 			if (toolBar.IsLoaded) {
 				HideOverflowInternal(toolBar);
