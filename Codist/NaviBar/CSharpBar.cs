@@ -839,6 +839,7 @@ namespace Codist.NaviBar
 				}
 				_Menu = new SymbolList(Bar._SemanticContext) {
 					Container = Bar.ListContainer,
+					ContainerType = SymbolListType.NodeList,
 					ExtIconProvider = s => GetExtIcons(s.SyntaxNode)
 				};
 				_Menu.Header = new WrapPanel {
