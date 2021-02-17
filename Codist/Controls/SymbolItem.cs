@@ -90,11 +90,18 @@ namespace Codist.Controls
 					return;
 				}
 				var s = Symbol.GetSourceReferences();
-				if (s.Length == 1) {
-					s[0].GoToSource();
-				}
-				else if (s.Length > 1) {
-					Container.SemanticContext.ShowLocations(Symbol, s, _Content.GetParent<ListBoxItem>().NullIfMouseOver());
+				switch (s.Length) {
+					case 0:
+						if (Container.SemanticContext.Document != null) {
+							ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(Symbol, Container.SemanticContext.Document.Project, default);
+						}
+						return;
+					case 1:
+						s[0].GoToSource();
+						return;
+					default:
+						Container.SemanticContext.ShowLocations(Symbol, s, _Content.GetParent<ListBoxItem>().NullIfMouseOver());
+						break;
 				}
 			}
 		}
