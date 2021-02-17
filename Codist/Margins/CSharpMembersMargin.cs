@@ -467,31 +467,30 @@ namespace Codist.Margins
 					_Margin.InvalidateVisual();
 					return;
 				}
-				var node = ctx.Node;
-				var symbol = await ctx.GetSymbolAsync(cancellation).ConfigureAwait(false);
-				if (symbol != null) {
-					if (ReferenceEquals(Interlocked.Exchange(ref _Symbol, symbol), symbol) == false) {
-						var doc = ctx.Document;
-						_DocSyntax = ctx.Compilation.SyntaxTree;
-						// todo show marked symbols on scrollbar margin
-						try {
-							_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), cancellation).ConfigureAwait(false);
-						}
-						catch (ArgumentException) {
-							// hack: multiple async updates could occur and invalidated ctx.Document, which might cause ArgumentException
-							// ignore this at this moment
-							return;
-						}
-						await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellation);
-						_Margin.InvalidateVisual();
-					}
-				}
-				else {
+				var symbol = await ctx.GetSymbolAsync(_View.Selection.Start.Position, cancellation).ConfigureAwait(false);
+				if (symbol == null) {
 					if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
 						_Symbol = null;
 						await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellation);
 						_Margin.InvalidateVisual();
 					}
+					return;
+				}
+
+				if (ReferenceEquals(Interlocked.Exchange(ref _Symbol, symbol), symbol) == false) {
+					var doc = ctx.Document;
+					_DocSyntax = ctx.Compilation.SyntaxTree;
+					// todo show marked symbols on scrollbar margin
+					try {
+						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), cancellation).ConfigureAwait(false);
+					}
+					catch (ArgumentException) {
+						// hack: multiple async updates could occur and invalidated ctx.Document, which might cause ArgumentException
+						// ignore this at this moment
+						return;
+					}
+					await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellation);
+					_Margin.InvalidateVisual();
 				}
 			}
 		}
