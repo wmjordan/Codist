@@ -4672,6 +4672,7 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   查找类似 Search member name with this input box.
+        ///Use space to separate multiple search terms.
         ///- key: search current document
         ///= key: search current project 的本地化字符串。
         /// </summary>
