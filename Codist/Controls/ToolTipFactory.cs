@@ -49,17 +49,19 @@ namespace Codist
 				content.AppendLineBreak()
 					.Append(R.T_Namespace + symbol.ContainingNamespace?.ToString()).AppendLine();
 				if (symbol.Kind == SymbolKind.Namespace) {
-					content.Append(R.T_Assembly + String.Join(", ", ((INamespaceSymbol)symbol).ConstituentNamespaces.Select(n => n.GetAssemblyModuleName()).Distinct()))
-						.AppendLine().Append(R.T_Project + String.Join(", ", symbol.GetSourceReferences().SelectMany(r => context.Workspace.CurrentSolution.Projects.Where(p => p.GetDocument(r.SyntaxTree) != null)).Distinct().Select(p => p.Name)))
-						.AppendLine().Append(R.T_Location + symbol.Locations.Length);
+					var sol = context.Workspace.CurrentSolution;
+					content.Append(R.T_Assembly).Append(String.Join(", ", ((INamespaceSymbol)symbol).ConstituentNamespaces.Select(n => n.GetAssemblyModuleName()).Distinct()))
+						.AppendLine().Append(R.T_Project).Append(String.Join(", ", symbol.GetSourceReferences().Select(r => sol.GetDocument(r.SyntaxTree).Project).Distinct().Select(p => p.Name)))
+						.AppendLine().Append(R.T_Location).Append(symbol.Locations.Length);
 				}
 				else {
 					if (symbol.HasSource()) {
-						content.Append(R.T_SourceFile + String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))));
-						content.AppendLine().Append(R.T_Project + String.Join(", ", symbol.GetSourceReferences().SelectMany(r => context.Workspace.CurrentSolution.Projects.Where(p => p.GetDocument(r.SyntaxTree) != null)).Distinct().Select(p => p.Name)));
+						content.Append(R.T_SourceFile).Append(String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))));
+						var sol = context.Workspace.CurrentSolution;
+						content.AppendLine().Append(R.T_Project).Append(String.Join(", ", symbol.GetSourceReferences().Select(r => sol.GetDocument(r.SyntaxTree).Project).Distinct().Select(p => p.Name)));
 					}
 					else {
-						content.Append(R.T_Assembly + symbol.GetAssemblyModuleName());
+						content.Append(R.T_Assembly).Append(symbol.GetAssemblyModuleName());
 					}
 
 					if (symbol.Kind == SymbolKind.NamedType) {
