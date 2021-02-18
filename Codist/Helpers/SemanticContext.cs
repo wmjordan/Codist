@@ -210,6 +210,9 @@ namespace Codist
 					}
 					var p = node.SpanStart;
 					foreach (var item in sm.SyntaxTree.GetChanges(node.SyntaxTree)) {
+						if (item.Span.Start > p) {
+							break;
+						}
 						p += item.NewText.Length - item.Span.Length;
 					}
 					var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(p, 0));

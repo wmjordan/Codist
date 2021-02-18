@@ -142,22 +142,26 @@ namespace Codist.NaviBar
 						return;
 					}
 					CHECK_NODE:
-					if (Items[i] is INodeItem ni) {
-						if (ni.IsSymbolNode) {
-							if (++i < c) {
-								goto CHECK_NODE;
-							}
-						}
-						else if (ni.Node == nodes[i2]) {
-							// keep the item if corresponding node is not updated
-							++i;
-							continue;
+					if (Items[i] is BarItem ni) {
+						switch (ni.ItemType) {
+							case BarItemType.Namespace:
+								if (++i < c) {
+									goto CHECK_NODE;
+								}
+								break;
+							case BarItemType.Node:
+								if (((NodeItem)ni).Node == nodes[i2]) {
+									// keep the item if corresponding node is not updated
+									++i;
+									continue;
+								}
+								break;
 						}
 					}
 					break;
 				}
 				c = Items.Count;
-				if (i < c && (Items[i] as INodeItem).IsSymbolNode == true) {
+				if (i < c && (Items[i] as BarItem).ItemType == BarItemType.Namespace) {
 					i = FirstNodeIndex;
 				}
 				if (i == FirstNodeIndex && _RootItem.FilterText.Length == 0) {
@@ -247,8 +251,7 @@ namespace Codist.NaviBar
 		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature == Features.NaviBar) {
 				for (int i = Items.Count - 1; i > 0; i--) {
-					var item = Items[i] as NodeItem;
-					if (item != null) {
+					if (Items[i] is RootItem == false) {
 						Items.RemoveAt(i);
 					}
 				}
@@ -460,6 +463,7 @@ namespace Codist.NaviBar
 				_ScopeBox.FilterChanged += (s, args) => _FinderBox.Focus();
 			}
 
+			public override BarItemType ItemType => BarItemType.Root;
 			public string FilterText => _FinderBox.Text;
 
 			public void ClearSymbolList() {
@@ -650,23 +654,22 @@ namespace Codist.NaviBar
 			}
 		}
 
-		sealed class NamespaceItem : BarItem, INodeItem, IContextMenuHost
+		sealed class NamespaceItem : BarItem, IContextMenuHost
 		{
 			SymbolList _Menu;
 			SymbolFilterBox _FilterBox;
-			SyntaxNode _Node;
 			ISymbol _Symbol;
 
 			public NamespaceItem(CSharpBar bar, SyntaxNode node) : base(bar, IconIds.Namespace, new ThemedToolBarText()) {
-				_Node = node;
+				_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(node, Bar._cancellationSource.GetToken()));
 				((TextBlock)Header).Text = node.GetLastToken().Text;
 				Click += HandleClick;
 				this.UseDummyToolTip();
 			}
-
-			public SyntaxNode Node => _Node;
+			
+			public override BarItemType ItemType => BarItemType.Namespace;
 			public bool IsSymbolNode { get; }
-			public ISymbol Symbol => _Symbol ?? (_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(_Node, Bar._cancellationSource.GetToken())));
+			public ISymbol Symbol => _Symbol/* ?? (_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(_Node, Bar._cancellationSource.GetToken())))*/;
 
 			async void HandleClick(object sender, RoutedEventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
@@ -699,9 +702,8 @@ namespace Codist.NaviBar
 				_Menu.Header = new WrapPanel {
 					Orientation = Orientation.Horizontal,
 					Children = {
-							new ThemedButton(new ThemedMenuText(((NameSyntax)Node).GetName(), true)
-									.SetGlyph(ThemeHelper.GetImage(IconIds.Namespace)), null,
-									() => Bar._SemanticContext.RelocateDeclarationNode(Node).GetLocation().GoToSource()) {
+							new Border {
+								Child = new ThemedMenuText(_Symbol.Name, true).SetGlyph(ThemeHelper.GetImage(IconIds.Namespace)),
 								BorderThickness = WpfHelper.TinyMargin,
 								Margin = WpfHelper.SmallHorizontalMargin,
 								Padding = WpfHelper.SmallHorizontalMargin,
@@ -768,9 +770,7 @@ namespace Codist.NaviBar
 
 			void IContextMenuHost.ShowContextMenu(RoutedEventArgs args) {
 				if (ContextMenu == null) {
-					var m = new CSharpSymbolContextMenu(Bar._SemanticContext) {
-						SyntaxNode = Node
-					};
+					var m = new CSharpSymbolContextMenu(Bar._SemanticContext);
 					var s = Symbol;
 					if (s != null) {
 						m.Symbol = s;
@@ -784,7 +784,7 @@ namespace Codist.NaviBar
 			}
 		}
 
-		sealed class NodeItem : BarItem, INodeItem, ISymbolFilter, IContextMenuHost
+		sealed class NodeItem : BarItem, ISymbolFilter, IContextMenuHost
 		{
 			readonly int _ImageId;
 			SymbolList _Menu;
@@ -800,7 +800,7 @@ namespace Codist.NaviBar
 				Click += HandleClick;
 				this.UseDummyToolTip();
 			}
-
+			public override BarItemType ItemType => BarItemType.Node;
 			public SyntaxNode Node { get; private set; }
 			public bool IsSymbolNode => false;
 			public ISymbol Symbol => _Symbol ?? (_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(Node, Bar._cancellationSource.GetToken())));
@@ -1217,8 +1217,7 @@ namespace Codist.NaviBar
 			}
 		}
 
-		class BarItem : ThemedImageButton
-		{
+		abstract class BarItem : ThemedImageButton {
 			public BarItem(CSharpBar bar, int imageId, TextBlock content) : base(imageId, content) {
 				Bar = bar;
 				this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
@@ -1226,6 +1225,7 @@ namespace Codist.NaviBar
 			}
 
 			protected CSharpBar Bar { get; }
+			public abstract BarItemType ItemType { get; }
 		}
 
 		sealed class SymbolNodeItem : ThemedImageButton
@@ -1264,10 +1264,9 @@ namespace Codist.NaviBar
 			}
 		}
 
-		interface INodeItem
+		enum BarItemType
 		{
-			SyntaxNode Node { get; }
-			bool IsSymbolNode { get; }
+			Root, Namespace, Node
 		}
 		enum MemberListOptions
 		{
