@@ -52,7 +52,6 @@ namespace Codist
 			}
 		}
 		public SyntaxToken Token { get; private set; }
-		public ISymbol Symbol { get; private set; }
 		public int Position {
 			get => _Position;
 			set { _Position = value; ResetNodeInfo(); }
@@ -209,7 +208,11 @@ namespace Codist
 					if (node.SpanStart >= sm.SyntaxTree.Length) {
 						return null;
 					}
-					var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(node.SpanStart, 0));
+					var p = node.SpanStart;
+					foreach (var item in sm.SyntaxTree.GetChanges(node.SyntaxTree)) {
+						p += item.NewText.Length - item.Span.Length;
+					}
+					var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(p, 0));
 					//todo find out the new node
 					if (newNode.RawKind != node.RawKind) {
 						return null;
