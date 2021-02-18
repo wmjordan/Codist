@@ -156,11 +156,14 @@ namespace Codist.NaviBar
 					}
 					break;
 				}
-				if ((i == FirstNodeIndex /*|| i2 < nodes.Length && nodes[i2].Kind().IsTypeOrNamespaceDeclaration()*/) && _RootItem.FilterText.Length == 0) {
+				c = Items.Count;
+				if (i < c && (Items[i] as INodeItem).IsSymbolNode == true) {
+					i = FirstNodeIndex;
+				}
+				if (i == FirstNodeIndex && _RootItem.FilterText.Length == 0) {
 					// clear type and namespace menu items if a type is changed
 					_RootItem.ClearSymbolList();
 				}
-				c = Items.Count;
 				// remove outdated nodes
 				while (c > i) {
 					Items.RemoveAt(--c);
@@ -672,9 +675,14 @@ namespace Codist.NaviBar
 					return;
 				}
 				var ct = Bar._cancellationSource.GetToken();
-				await CreateMenuForNamespaceNodeAsync(ct);
-				_FilterBox.UpdateNumbers(_Menu.Symbols);
-				Bar.ShowMenu(this, _Menu);
+				try {
+					await CreateMenuForNamespaceNodeAsync(ct);
+					_FilterBox.UpdateNumbers(_Menu.Symbols);
+					Bar.ShowMenu(this, _Menu);
+				}
+				catch (TaskCanceledException) {
+					// ignore
+				}
 			}
 
 			async Task CreateMenuForNamespaceNodeAsync(CancellationToken cancellationToken) {
@@ -705,33 +713,55 @@ namespace Codist.NaviBar
 					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
 				Bar.SetupSymbolListMenu(_Menu);
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
-				AddNamespacesAndTypes();
+				await AddNamespacesAndTypesAsync(Bar._SemanticContext, cancellationToken);
 				if (_Menu.Symbols.Count > 100) {
 					_Menu.EnableVirtualMode = true;
 				}
 			}
 
 			async Task RefreshItemsAsync(CancellationToken cancellationToken) {
-				var sm = Bar._SemanticContext.SemanticModel;
-				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
-				if (sm != Bar._SemanticContext.SemanticModel) {
+				var ctx = Bar._SemanticContext;
+				var sm = ctx.SemanticModel;
+				await ctx.UpdateAsync(cancellationToken).ConfigureAwait(true);
+				if (sm != ctx.SemanticModel) {
 					_Menu.Clear();
-					_Symbol = await Bar._SemanticContext.RelocateSymbolAsync(_Symbol, cancellationToken);
+					_Symbol = await ctx.RelocateSymbolAsync(_Symbol, cancellationToken);
 					//_Node = Bar._SemanticContext.RelocateDeclarationNode(_Node);
-					AddNamespacesAndTypes();
+					await AddNamespacesAndTypesAsync(ctx, cancellationToken);
 					_Menu.RefreshItemsSource(true);
 				}
 			}
 
-			void AddNamespacesAndTypes() {
+			async Task AddNamespacesAndTypesAsync(SemanticContext context, CancellationToken cancellationToken) {
 				var s = Symbol as INamespaceSymbol;
 				if (s == null) {
 					return;
 				}
-				foreach (var item in s.GetNamespaceMembers().OrderBy(n => n.Name)) {
+				var ss = new HashSet<(string, Microsoft.CodeAnalysis.Text.TextSpan)>();
+				var nb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
+				var tb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
+				foreach (var ns in await s.FindSimilarNamespacesAsync(context.Document.Project, cancellationToken)) {
+					foreach (var m in ns.GetMembers()) {
+						var sr = m.GetSourceReferences();
+						if (sr.Length == 0) {
+							continue;
+						}
+						bool hasAdded = false;
+						foreach (var r in sr) {
+							if (ss.Add((r.SyntaxTree.FilePath, r.Span)) == false) {
+								hasAdded = true;
+								break;
+							}
+						}
+						if (hasAdded == false) {
+							(m.IsNamespace ? nb : tb).Add(m);
+						}
+					}
+				}
+				foreach (var item in nb.OrderBy(n => n.Name)) {
 					_Menu.Add(item, false);
 				}
-				foreach (var item in s.GetTypeMembers().OrderBy(m => m.Name)) {
+				foreach (var item in tb.OrderBy(n => n.Name)) {
 					_Menu.Add(item, false);
 				}
 			}

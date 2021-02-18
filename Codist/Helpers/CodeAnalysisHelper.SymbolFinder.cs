@@ -271,6 +271,32 @@ namespace Codist
 			}
 		}
 
+		/// <summary>Finds namespaces in related projects having the same fully qualified name.</summary>
+		/// <returns>Namespaces having the same name in current solution</returns>
+		public static async Task<ImmutableArray<INamespaceSymbol>> FindSimilarNamespacesAsync(this INamespaceSymbol symbol, Project project, CancellationToken cancellationToken = default) {
+			var ns = ImmutableArray.CreateBuilder<string>();
+			do {
+				ns.Add(symbol.Name);
+			} while ((symbol = symbol.ContainingNamespace) != null && symbol.IsGlobalNamespace == false);
+			ns.Reverse();
+			var r = ImmutableArray.CreateBuilder<INamespaceSymbol>();
+			foreach (var p in GetRelatedProjects(project)) {
+				if (p.SupportsCompilation == false) {
+					continue;
+				}
+				var n = (await p.GetCompilationAsync(cancellationToken)).GlobalNamespace;
+				foreach (var item in ns) {
+					if ((n = n.GetNamespaceMembers().FirstOrDefault(m => m.Name == item)) == null) {
+						break;
+					}
+				}
+				if (n != null) {
+					r.Add(n);
+				}
+			}
+			return r.ToImmutable();
+		}
+
 		/// <summary>Finds symbols referenced by given context node.</summary>
 		/// <returns>An ordered array of <see cref="KeyValuePair{TKey, TValue}"/> which contains number of occurrences of corresponding symbols.</returns>
 		public static KeyValuePair<ISymbol, int>[] FindReferencingSymbols(this SyntaxNode node, SemanticModel semanticModel, bool sourceCodeOnly) {

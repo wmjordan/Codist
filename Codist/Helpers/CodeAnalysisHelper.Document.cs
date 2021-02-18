@@ -57,7 +57,7 @@ namespace Codist
 		/// Gets a collection containing <paramref name="project"/> itself, and projects referenced by <paramref name="project"/> or referencing <paramref name="project"/>.
 		/// </summary>
 		/// <param name="project">The project to be examined.</param>
-		static HashSet<Project> GetRelatedProjects(this Project project) {
+		static HashSet<Project> GetRelatedProjects(Project project) {
 			var projects = new HashSet<Project>();
 			GetRelatedProjects(project, projects);
 			var id = project.Id;

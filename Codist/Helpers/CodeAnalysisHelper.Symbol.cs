@@ -765,6 +765,18 @@ namespace Codist
 				default: return null;
 			}
 		}
+
+		public static async Task<Project> GetProjectAsync(this ISymbol symbol, Solution solution, CancellationToken cancellationToken = default) {
+			var asm = symbol.ContainingAssembly;
+			if (asm != null) {
+				foreach (var item in solution.Projects) {
+					if (item.SupportsCompilation && (await item.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).Assembly == asm) {
+						return item;
+					}
+				}
+			}
+			return null;
+		}
 		#endregion
 
 		#region Source
