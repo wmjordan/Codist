@@ -838,14 +838,12 @@ namespace Codist
 			else {
 				var ctx = SemanticContext.GetHovered();
 				if (ctx != null) {
-					if (r.Length == 0) {
-						if (ctx.Document != null) {
-							ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, ctx.Document.Project, default);
-						}
+					if (r.Length == 0
+						&& ctx.Document != null
+						&& ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, ctx.Document.Project, default)) {
+						return;
 					}
-					else {
-						Controls.SymbolCommands.ShowLocations(ctx, symbol, r);
-					}
+					Controls.SymbolCommands.ShowLocations(ctx, symbol, r);
 				}
 			}
 		}
