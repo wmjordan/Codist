@@ -133,7 +133,7 @@ namespace Codist.NaviBar
 			async Task Update(CancellationToken token) {
 				var nodes = await UpdateModelAndGetContainingNodesAsync(token);
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(token);
-				var c = Math.Min(Items.Count, nodes.Length);
+				int ic = Items.Count, c = Math.Min(ic, nodes.Length);
 				int i, i2;
 				#region Remove outdated nodes on NaviBar
 				const int FirstNodeIndex = 1;
@@ -143,27 +143,24 @@ namespace Codist.NaviBar
 					}
 					CHECK_NODE:
 					if (Items[i] is BarItem ni) {
-						switch (ni.ItemType) {
-							case BarItemType.Namespace:
-								if (++i < c) {
-									goto CHECK_NODE;
-								}
-								break;
-							case BarItemType.Node:
-								if (((NodeItem)ni).Node == nodes[i2]) {
-									// keep the item if corresponding node is not updated
-									++i;
-									continue;
-								}
-								break;
+						if (ni.Node == nodes[i2]) {
+							// keep the item if corresponding node is not updated
+							++i;
+							continue;
+						}
+						else if (ni.ItemType == BarItemType.Namespace
+							&& ni.Node.IsKind(SyntaxKind.NamespaceDeclaration) == false) {
+							if (++i < ic) {
+								goto CHECK_NODE;
+							}
+						}
+						if (ni.ItemType == BarItemType.Namespace) {
+							i = FirstNodeIndex;
 						}
 					}
 					break;
 				}
 				c = Items.Count;
-				if (i < c && (Items[i] as BarItem).ItemType == BarItemType.Namespace) {
-					i = FirstNodeIndex;
-				}
 				if (i == FirstNodeIndex && _RootItem.FilterText.Length == 0) {
 					// clear type and namespace menu items if a type is changed
 					_RootItem.ClearSymbolList();
@@ -193,7 +190,7 @@ namespace Codist.NaviBar
 								Items.Add(new NamespaceItem(this, nb[i]));
 							}
 						}
-						Items.Add(new NamespaceItem(this, ((NamespaceDeclarationSyntax)node).Name));
+						Items.Add(new NamespaceItem(this, node));
 					}
 					else {
 						var newItem = new NodeItem(this, node);
@@ -661,8 +658,9 @@ namespace Codist.NaviBar
 			ISymbol _Symbol;
 
 			public NamespaceItem(CSharpBar bar, SyntaxNode node) : base(bar, IconIds.Namespace, new ThemedToolBarText()) {
+				Node = node;
 				_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(node, Bar._cancellationSource.GetToken()));
-				((TextBlock)Header).Text = node.GetLastToken().Text;
+				((TextBlock)Header).Text = _Symbol.Name;
 				Click += HandleClick;
 				this.UseDummyToolTip();
 			}
@@ -801,7 +799,6 @@ namespace Codist.NaviBar
 				this.UseDummyToolTip();
 			}
 			public override BarItemType ItemType => BarItemType.Node;
-			public SyntaxNode Node { get; private set; }
 			public bool IsSymbolNode => false;
 			public ISymbol Symbol => _Symbol ?? (_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(Node, Bar._cancellationSource.GetToken())));
 			public bool HasReferencedSymbols => _ReferencedSymbols != null && _ReferencedSymbols.Count > 0;
@@ -1225,6 +1222,7 @@ namespace Codist.NaviBar
 			}
 
 			protected CSharpBar Bar { get; }
+			public SyntaxNode Node { get; protected set; }
 			public abstract BarItemType ItemType { get; }
 		}
 
