@@ -928,12 +928,12 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowExtensionMethod(QiContainer qiContent, IMethodSymbol method) {
-			var info = new ThemedTipDocument();
-			var extType = method.ConstructedFrom.ReceiverType;
+			var info = new ThemedTipDocument()
+				.AppendParagraph(IconIds.ExtensionMethod, new ThemedTipText(R.T_ExtendedBy, true).AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), _SymbolFormatter, -1));
+			var extType = method.MethodKind == MethodKind.ReducedExtension ? method.ReceiverType : method.GetParameters()[0].Type;
 			if (extType != null) {
 				info.AppendParagraph(extType.GetImageId(), new ThemedTipText(R.T_Extending, true).AddSymbol(extType, true, _SymbolFormatter));
 			}
-			info.AppendParagraph(IconIds.ExtensionMethod, new ThemedTipText(R.T_ExtendedBy, true).AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), _SymbolFormatter, -1));
 			qiContent.Add(info);
 		}
 
