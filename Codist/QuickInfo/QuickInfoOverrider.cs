@@ -51,7 +51,6 @@ namespace Codist.QuickInfo
 		}
 		static void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
 			if (symbol.Kind == SymbolKind.Namespace) {
-				description.ToolTip = R.T_Location + symbol.DeclaringSyntaxReferences.Length;
 				description.MouseEnter += HookEvents;
 				return;
 			}
@@ -87,10 +86,8 @@ namespace Codist.QuickInfo
 				s.MouseEnter -= HookEvents;
 				HighlightSymbol(sender, e);
 				s.Cursor = Cursors.Hand;
-				if (symbol.Kind != SymbolKind.Namespace) {
-					s.ToolTipOpening += ShowToolTip;
-					s.UseDummyToolTip();
-				}
+				s.ToolTipOpening += ShowToolTip;
+				s.UseDummyToolTip();
 				s.MouseEnter += HighlightSymbol;
 				s.MouseLeave += RemoveSymbolHighlight;
 				s.MouseLeftButtonUp += GoToSource;
@@ -144,19 +141,49 @@ namespace Codist.QuickInfo
 		static StackPanel ShowSymbolLocation(ISymbol symbol, string path) {
 			var tooltip = new ThemedToolTip();
 			tooltip.Title.Append(symbol.GetOriginalName(), true);
-			var t = tooltip.Content
-				.Append(R.T_DefinedIn)
-				.Append(String.IsNullOrEmpty(path) ? "?" : path, true);
+			var t = tooltip.Content;
+			if (symbol.Kind != SymbolKind.Namespace) {
+				var sr = symbol.GetSourceReferences();
+				if (sr.Length > 0) {
+					t.Append(R.T_DefinedIn);
+					foreach (var (name, ext) in sr.Select(r => DeconstructFileName(System.IO.Path.GetFileName(r.SyntaxTree.FilePath))).Distinct().OrderBy(i => i.name)) {
+						t.AppendLine().Append(name, true);
+						if (ext.Length > 0) {
+							t.Append(ext);
+						}
+					}
+				}
+			}
+			t.AppendLineBreak().Append(R.T_Assembly);
+			if (symbol.Kind == SymbolKind.Namespace) {
+				foreach (var (name, ext) in ((INamespaceSymbol)symbol).ConstituentNamespaces.Select(n => n.ContainingModule?.Name).Where(m => m != null).Select(DeconstructFileName).Distinct().OrderBy(i => i.name)) {
+					t.AppendLine().Append(name, true);
+					if (ext.Length > 0) {
+						t.Append(ext);
+					}
+				}
+			}
+			else {
+				t.Append(symbol.ContainingModule?.Name);
+			}
 			if (symbol.IsMemberOrType() && symbol.ContainingNamespace != null) {
-				t.Append("\n" + R.T_Namespace).Append(symbol.ContainingNamespace.ToDisplayString());
+				t.AppendLineBreak().Append(R.T_Namespace).Append(symbol.ContainingNamespace.ToDisplayString());
 			}
 			if (symbol.Kind == SymbolKind.Method) {
 				var m = ((IMethodSymbol)symbol).ReducedFrom;
 				if (m != null) {
-					t.Append("\n" + R.T_Class).Append(m.ContainingType.Name);
+					t.AppendLineBreak().Append(R.T_Class).Append(m.ContainingType.Name);
 				}
 			}
 			return tooltip;
+
+			(string name, string ext) DeconstructFileName(string fileName) {
+				int i = fileName.LastIndexOf('.');
+				if (i >= 0) {
+					return (fileName.Substring(0, i), fileName.Substring(i));
+				}
+				return (fileName, String.Empty);
+			}
 		}
 
 		interface IQuickInfoHolder
