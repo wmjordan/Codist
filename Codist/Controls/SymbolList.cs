@@ -103,7 +103,7 @@ namespace Codist.Controls
 
 		#region Analysis commands
 
-		public (int count, int inherited) AddSymbolMembers(ISymbol symbol) {
+		internal (int count, int inherited) AddSymbolMembers(ISymbol symbol) {
 			var count = AddSymbolMembers(symbol, null);
 			var mi = 0;
 			var type = symbol as INamedTypeSymbol;

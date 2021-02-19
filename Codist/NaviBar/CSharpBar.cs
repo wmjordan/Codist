@@ -511,8 +511,9 @@ namespace Codist.NaviBar
 
 			void MarkEnclosingType() {
 				int pos = Bar.View.GetCaretPosition();
-				for (int i = _Menu.Symbols.Count - 1; i >= 0; i--) {
-					if (_Menu.Symbols[i].SelectIfContainsPosition(pos)) {
+				var symbols = _Menu.Symbols;
+				for (int i = symbols.Count - 1; i >= 0; i--) {
+					if (symbols[i].SelectIfContainsPosition(pos)) {
 						return;
 					}
 				}
