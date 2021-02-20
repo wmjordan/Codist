@@ -781,7 +781,9 @@ namespace Codist
 
 		#region Source
 		public static bool HasSource(this ISymbol symbol) {
-			return AssemblySourceReflector.GetSourceType(symbol.ContainingAssembly) != AssemblySource.Metadata;
+			return symbol.Kind == SymbolKind.Namespace
+				? ((INamespaceSymbol)symbol).ConstituentNamespaces.Any(n => n.ContainingAssembly.GetSourceType() != AssemblySource.Metadata)
+				: AssemblySourceReflector.GetSourceType(symbol.ContainingAssembly) != AssemblySource.Metadata;
 		}
 
 		public static AssemblySource GetSourceType(this IAssemblySymbol assembly) {
