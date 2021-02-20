@@ -12,7 +12,7 @@ namespace Codist
 		public const int None = KnownImageIds.Blank;
 		// sematic icons
 		public const int AbstractMember = KnownImageIds.DialogTemplate;
-		public const int AsyncMember = KnownImageIds.DynamicGroup;
+		public const int AsyncMember = KnownImageIds.Thread;
 		public const int Generic = KnownImageIds.MarkupXML;
 		public const int ExtensionMethod = KnownImageIds.ExtensionMethod;
 		public const int StaticMember = KnownImageIds.Link;
