@@ -443,19 +443,20 @@ namespace Codist.Controls
 		}
 
 		void ShowMenu(UIElement positionElement) {
-			_Container.Children.Add(Menu);
-			Menu.ItemsControlMaxHeight = _Container.ActualHeight / 2;
-			Menu.RefreshItemsSource();
-			Menu.ScrollToSelectedItem();
-			Menu.PreviewKeyUp -= OnMenuKeyUp;
-			Menu.PreviewKeyUp += OnMenuKeyUp;
-			if (Menu.Symbols.Count > 100) {
-				Menu.EnableVirtualMode = true;
+			var m = Menu;
+			_Container.Children.Add(m);
+			m.ItemsControlMaxHeight = _Container.ActualHeight / 2;
+			m.RefreshItemsSource();
+			m.ScrollToSelectedItem();
+			m.PreviewKeyUp -= OnMenuKeyUp;
+			m.PreviewKeyUp += OnMenuKeyUp;
+			if (m.Symbols.Count > 100) {
+				m.EnableVirtualMode = true;
 			}
 			
 			var p = positionElement != null ? positionElement.TranslatePoint(new Point(positionElement.RenderSize.Width, 0), _Container) : Mouse.GetPosition(_Container);
-			Canvas.SetLeft(Menu, p.X);
-			Canvas.SetTop(Menu, p.Y);
+			Canvas.SetLeft(m, p.X);
+			Canvas.SetTop(m, p.Y);
 		}
 		void UpdateNumbers() {
 			FilterBox.UpdateNumbers(Menu.Symbols);
@@ -474,9 +475,10 @@ namespace Codist.Controls
 
 		void OnMenuKeyUp(object sender, KeyEventArgs e) {
 			if (e.Key == Key.Escape) {
-				_Container.Children.Remove(Menu);
-				if (_Container.Children.Count > 0) {
-					_Container.Children[_Container.Children.Count - 1].GetFirstVisualChild<TextBox>()?.Focus();
+				var c = _Container.Children;
+				c.Remove(Menu);
+				if (c.Count > 0) {
+					c[c.Count - 1].GetFirstVisualChild<TextBox>()?.Focus();
 				}
 				e.Handled = true;
 			}

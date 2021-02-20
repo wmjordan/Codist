@@ -694,7 +694,7 @@ namespace Codist.QuickInfo
 			}
 			var re = method.MethodKind == MethodKind.ReducedExtension;
 			method = method.OriginalDefinition;
-			if (method.ReducedFrom != null) {
+			if (re) {
 				method = method.ReducedFrom;
 			}
 			var rt = method.ReturnType;
