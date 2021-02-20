@@ -101,14 +101,14 @@ namespace Codist
 		/// </summary>
 		public async Task<ISymbol> RelocateSymbolAsync(ISymbol symbol, CancellationToken cancellationToken = default) {
 			Document doc;
-			if (await UpdateAsync(cancellationToken) == false || (doc = Document) == null) {
+			if (await UpdateAsync(cancellationToken) == false || Workspace == null) {
 				return symbol;
 			}
-			var path = symbol.DeclaringSyntaxReferences.FirstOrDefault(r => r.SyntaxTree != null);
+			var s = Workspace.CurrentSolution;
+			var sr = symbol.DeclaringSyntaxReferences.FirstOrDefault(r => r.SyntaxTree != null);
 			try {
-				doc = doc.Project.GetDocument(path.SyntaxTree.FilePath)
-					?? doc.Project.Solution.GetDocument(path.SyntaxTree);
-				return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSimilarSymbols(symbol, (await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false)).Compilation, cancellationToken)
+				doc = GetDocument(sr?.SyntaxTree);
+				return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSimilarSymbols(symbol, (await doc.GetSemanticModelAsync(cancellationToken)).Compilation, cancellationToken)
 				.FirstOrDefault() ?? symbol;
 			}
 			catch (NullReferenceException) {
@@ -133,11 +133,10 @@ namespace Codist
 			if (node is MemberDeclarationSyntax == false) {
 				return null;
 			}
-			var nodeFilePath = node.SyntaxTree.FilePath;
 			var root = Compilation;
-			if (String.Equals(nodeFilePath, SemanticModel.SyntaxTree.FilePath, StringComparison.OrdinalIgnoreCase) == false) {
+			if (String.Equals(node.SyntaxTree.FilePath, SemanticModel.SyntaxTree.FilePath, StringComparison.OrdinalIgnoreCase) == false) {
 				// not the same document
-				if ((root = FindDocument(nodeFilePath)?.GetSemanticModelAsync().Result.SyntaxTree.GetCompilationUnitRoot()) == null) {
+				if ((root = GetDocument(node.SyntaxTree)?.GetSemanticModelAsync().Result.SyntaxTree.GetCompilationUnitRoot()) == null) {
 					// document no longer exists
 					return null;
 				}
@@ -161,13 +160,14 @@ namespace Codist
 			return matches.Count >= 1 ? matches[0] : match;
 		}
 
-		Document FindDocument(string docPath) {
-			foreach (var item in Document.Project.Documents) {
-				if (String.Equals(item.FilePath, docPath, StringComparison.OrdinalIgnoreCase)) {
-					return item;
-				}
+		/// <summary>Locates document despite of version changes.</summary>
+		public Document GetDocument(SyntaxTree syntaxTree) {
+			if (Workspace == null || syntaxTree == null) {
+				return null;
 			}
-			return null;
+			var s = Workspace.CurrentSolution;
+			var d = s.GetDocumentId(syntaxTree);
+			return d != null ? s.GetDocument(d) : null;
 		}
 
 		static void MatchDeclarationNode(MemberDeclarationSyntax member, List<MemberDeclarationSyntax> matches, string signature, SyntaxNode node) {
