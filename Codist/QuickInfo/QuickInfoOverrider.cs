@@ -146,21 +146,31 @@ namespace Codist.QuickInfo
 				var sr = symbol.GetSourceReferences();
 				if (sr.Length > 0) {
 					t.Append(R.T_DefinedIn);
+					var s = false;
 					foreach (var (name, ext) in sr.Select(r => DeconstructFileName(System.IO.Path.GetFileName(r.SyntaxTree.FilePath))).Distinct().OrderBy(i => i.name)) {
-						t.AppendLine().Append(name, true);
+						if (s) {
+							t.AppendLine();
+						}
+						t.Append(name, true);
 						if (ext.Length > 0) {
 							t.Append(ext);
 						}
+						s = true;
 					}
 				}
 			}
 			t.AppendLineBreak().Append(R.T_Assembly);
 			if (symbol.Kind == SymbolKind.Namespace) {
+				var s = false;
 				foreach (var (name, ext) in ((INamespaceSymbol)symbol).ConstituentNamespaces.Select(n => n.ContainingModule?.Name).Where(m => m != null).Select(DeconstructFileName).Distinct().OrderBy(i => i.name)) {
-					t.AppendLine().Append(name, true);
+					if (s) {
+						t.AppendLine();
+					}
+					t.Append(name, true);
 					if (ext.Length > 0) {
 						t.Append(ext);
 					}
+					s = true;
 				}
 			}
 			else {
