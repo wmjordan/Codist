@@ -343,7 +343,9 @@ namespace Codist.NaviBar
 				return;
 			}
 			View.VisualElement.Focus();
-			(menu.SelectedItem as SymbolItem)?.GoToSource();
+			if ((menu.SelectedItem as SymbolItem)?.GoToSource() == true) {
+				HideMenu();
+			}
 		}
 		#endregion
 

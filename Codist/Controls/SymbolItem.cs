@@ -75,35 +75,38 @@ namespace Codist.Controls
 			Container = list;
 		}
 
-		public void GoToSource() {
+		public bool GoToSource() {
 			if (Location != null && Location.IsInSource) {
 				Location.GoToSource();
+				return true;
 			}
-			else if (SyntaxNode != null) {
+			if (SyntaxNode != null) {
 				RefreshSyntaxNode();
 				SyntaxNode.GetIdentifierToken().GetLocation().GoToSource();
+				return true;
 			}
-			else if (Symbol != null) {
+			if (Symbol != null) {
 				RefreshSymbol();
 				if (Symbol.Kind == SymbolKind.Namespace) {
 					Container.SemanticContext.FindMembers(Symbol, _Content.GetParent<ListBoxItem>().NullIfMouseOver());
-					return;
+					return false;
 				}
 				var s = Symbol.GetSourceReferences();
 				switch (s.Length) {
 					case 0:
 						if (Container.SemanticContext.Document != null) {
-							ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(Symbol, Container.SemanticContext.Document.Project, default);
+							return ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(Symbol, Container.SemanticContext.Document.Project, default);
 						}
-						return;
+						return false;
 					case 1:
 						s[0].GoToSource();
-						return;
+						return true ;
 					default:
 						Container.SemanticContext.ShowLocations(Symbol, s, _Content.GetParent<ListBoxItem>().NullIfMouseOver());
-						break;
+						return false;
 				}
 			}
+			return false;
 		}
 		public bool SelectIfContainsPosition(int position) {
 			if (IsExternal || SyntaxNode == null || SyntaxNode.FullSpan.Contains(position, true) == false) {
