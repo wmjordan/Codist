@@ -25,6 +25,8 @@ namespace Codist.NaviBar
 	public sealed class CSharpBar : NaviBar
 	{
 		internal const string SyntaxNodeRange = nameof(SyntaxNodeRange);
+		static string __ProjectWideSearchExpression;
+
 		readonly IAdornmentLayer _SyntaxNodeRangeAdornment;
 		readonly SemanticContext _SemanticContext;
 
@@ -42,6 +44,7 @@ namespace Codist.NaviBar
 			View.Closed += ViewClosed;
 			View.TextBuffer.Changed += TextBuffer_Changed;
 			View.Selection.SelectionChanged += Update;
+			ListContainer.ChildRemoved += ListContainer_MenuRemoved;
 			Config.Updated += Config_Updated;
 			Update(this, EventArgs.Empty);
 		}
@@ -328,6 +331,11 @@ namespace Codist.NaviBar
 		void HideMenu() {
 			if (_SymbolList != null) {
 				ListContainer.Children.Remove(_SymbolList);
+			}
+		}
+
+		void ListContainer_MenuRemoved(object sender, AdornmentChildRemovedEventArgs e) {
+			if (_SymbolList == e.RemovedElement) {
 				_SymbolList.HideToolTip();
 				_SymbolList.SelectedItem = null;
 				_SymbolList = null;
@@ -344,10 +352,13 @@ namespace Codist.NaviBar
 				return;
 			}
 			View.VisualElement.Focus();
-			(menu.SelectedItem as SymbolItem)?.GoToSource();
-			if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) == false) {
+			if ((menu.SelectedItem as SymbolItem)?.GoToSource() == true) {
 				HideMenu();
 			}
+		}
+
+		void OnKeyboardSelectedItem(object sender, EventArgs args) {
+			HideMenu();
 		}
 		#endregion
 
@@ -459,6 +470,10 @@ namespace Codist.NaviBar
 						_IncrementalSearchContainer = null;
 						_PreviousSearchKeywords = null;
 					}
+					else if (_ScopeBox.Filter != ScopeType.ActiveDocument
+						&& _FinderBox.Text != __ProjectWideSearchExpression) {
+						_FinderBox.Text = __ProjectWideSearchExpression;
+					}
 				};
 				_ScopeBox.FilterChanged += SearchCriteriaChanged;
 				_ScopeBox.FilterChanged += (s, args) => _FinderBox.Focus();
@@ -498,7 +513,13 @@ namespace Codist.NaviBar
 				Bar.ShowMenu(this, _Menu);
 				switch ((ScopeType)parameter) {
 					case ScopeType.ActiveDocument: _ScopeBox.Filter = ScopeType.ActiveDocument; break;
-					case ScopeType.ActiveProject: _ScopeBox.Filter = ScopeType.ActiveProject; break;
+					case ScopeType.ActiveProject:
+						_ScopeBox.Filter = ScopeType.ActiveProject;
+						if (String.IsNullOrWhiteSpace(__ProjectWideSearchExpression) == false
+							&& _FinderBox.Text != __ProjectWideSearchExpression) {
+							_FinderBox.Text = __ProjectWideSearchExpression;
+						}
+						break;
 				}
 			}
 
@@ -562,12 +583,18 @@ namespace Codist.NaviBar
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
 				_Menu.ItemsSource = null;
 				_Menu.Clear();
-				var s = _FinderBox.Text;
+				var s = _FinderBox.Text.Trim();
 				if (s.Length == 0) {
 					_Menu.ContainerType = SymbolListType.NodeList;
 					ShowNamespaceAndTypeMenu((int)ScopeType.Undefined);
 					_IncrementalSearchContainer = null;
 					_PreviousSearchKeywords = null;
+					if (String.IsNullOrWhiteSpace(__ProjectWideSearchExpression) == false && sender == _ScopeBox) {
+						_FinderBox.Text = __ProjectWideSearchExpression;
+					}
+					else if (_ScopeBox.Filter != ScopeType.ActiveDocument) {
+						__ProjectWideSearchExpression = String.Empty;
+					}
 					return;
 				}
 				_Menu.ContainerType = SymbolListType.None;
@@ -577,6 +604,7 @@ namespace Codist.NaviBar
 							FindInDocument(s);
 							break;
 						case ScopeType.ActiveProject:
+							__ProjectWideSearchExpression = s;
 							FindInProject(s);
 							break;
 					}

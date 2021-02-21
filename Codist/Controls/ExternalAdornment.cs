@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
-using Microsoft.CodeAnalysis;
-using AppHelpers;
+using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.Controls
 {
@@ -15,12 +10,14 @@ namespace Codist.Controls
 	// don't use AdornmentLayer to do so, otherwise contained objects will go up and down when scrolling code window
 	sealed class ExternalAdornment : Canvas
 	{
+		internal const string QuickInfoSuppressionId = nameof(ExternalAdornment);
+
 		readonly Microsoft.VisualStudio.Text.Editor.IWpfTextView _View;
 		int _LayerZIndex;
 		bool _isDragging;
 		Point _beginDragPosition;
 
-		public ExternalAdornment(Microsoft.VisualStudio.Text.Editor.IWpfTextView view) {
+		public ExternalAdornment(IWpfTextView view) {
 			UseLayoutRounding = true;
 			SnapsToDevicePixels = true;
 			Grid.SetColumn(this, 1);
@@ -35,6 +32,15 @@ namespace Codist.Controls
 			}
 			_View = view;
 		}
+
+		public static ExternalAdornment GetOrCreate(IWpfTextView view) {
+			return view.Properties.GetOrCreateSingletonProperty(() => new ExternalAdornment(view));
+		}
+		public static ExternalAdornment Get(IWpfTextView view) {
+			return view.Properties.TryGetProperty(typeof(ExternalAdornment), out ExternalAdornment a) ? a : null;
+		}
+
+		public event EventHandler<AdornmentChildRemovedEventArgs> ChildRemoved;
 
 		public void FocusOnTextView() {
 			_View.VisualElement.Focus();
@@ -76,7 +82,8 @@ namespace Codist.Controls
 				element.MouseLeave -= ReleaseQuickInfo;
 				element.MouseEnter -= SuppressQuickInfo;
 				element.MouseLeftButtonDown -= BringToFront;
-				_View.Properties.RemoveProperty(nameof(ExternalAdornment));
+				ChildRemoved?.Invoke(this, new AdornmentChildRemovedEventArgs(element));
+				_View.Properties.RemoveProperty(QuickInfoSuppressionId);
 			}
 			if (Children.Count == 0 || Children.Count == 1 && Children[0] is null) {
 				FocusOnTextView();
@@ -160,11 +167,20 @@ namespace Codist.Controls
 		}
 
 		void ReleaseQuickInfo(object sender, MouseEventArgs e) {
-			_View.Properties.RemoveProperty(nameof(ExternalAdornment));
+			_View.Properties.RemoveProperty(QuickInfoSuppressionId);
 		}
 
 		void SuppressQuickInfo(object sender, MouseEventArgs e) {
-			_View.Properties[nameof(ExternalAdornment)] = true;
+			_View.Properties[QuickInfoSuppressionId] = true;
+		}
+	}
+
+	public class AdornmentChildRemovedEventArgs
+	{
+		public readonly UIElement RemovedElement;
+
+		public AdornmentChildRemovedEventArgs(UIElement removed) {
+			RemovedElement = removed;
 		}
 	}
 }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.CodeAnalysis;
+using AppHelpers;
 
 namespace Codist.Controls
 {
@@ -77,11 +78,13 @@ namespace Codist.Controls
 
 		public bool GoToSource() {
 			if (Location != null && Location.IsInSource) {
+				CloseUnpinnedMenus();
 				Location.GoToSource();
 				return true;
 			}
 			if (SyntaxNode != null) {
 				RefreshSyntaxNode();
+				CloseUnpinnedMenus();
 				SyntaxNode.GetIdentifierToken().GetLocation().GoToSource();
 				return true;
 			}
@@ -95,12 +98,14 @@ namespace Codist.Controls
 				switch (s.Length) {
 					case 0:
 						if (Container.SemanticContext.Document != null) {
+							CloseUnpinnedMenus();
 							return ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(Symbol, Container.SemanticContext.Document.Project, default);
 						}
 						return false;
 					case 1:
+						CloseUnpinnedMenus();
 						s[0].GoToSource();
-						return true ;
+						return true;
 					default:
 						Container.SemanticContext.ShowLocations(Symbol, s, _Content.GetParent<ListBoxItem>().NullIfMouseOver());
 						return false;
@@ -108,6 +113,14 @@ namespace Codist.Controls
 			}
 			return false;
 		}
+
+		void CloseUnpinnedMenus() {
+			if (_Content.GetParent<ListBoxItem>()?.IsMouseOver == false
+				&& System.Windows.Input.Keyboard.Modifiers.MatchFlags(System.Windows.Input.ModifierKeys.Control) == false) {
+				ExternalAdornment.Get(Container.SemanticContext.View)?.ClearUnpinnedChildren();
+			}
+		}
+
 		public bool SelectIfContainsPosition(int position) {
 			if (IsExternal || SyntaxNode == null || SyntaxNode.FullSpan.Contains(position, true) == false) {
 				return false;
