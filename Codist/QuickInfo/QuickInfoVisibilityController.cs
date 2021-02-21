@@ -16,8 +16,8 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlQuickInfo)
 				&& Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift) == false
 				// do not show Quick Info when user is hovering on the SmartBar or the SymbolList
-				|| session.TextView.Properties.ContainsProperty(nameof(SmartBars.SmartBar))
-				|| session.TextView.Properties.ContainsProperty(nameof(Controls.ExternalAdornment))
+				|| session.TextView.Properties.ContainsProperty(SmartBars.SmartBar.QuickInfoSuppressionId)
+				|| session.TextView.Properties.ContainsProperty(Controls.ExternalAdornment.QuickInfoSuppressionId)
 				) {
 				await session.DismissAsync();
 			}

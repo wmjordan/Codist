@@ -22,7 +22,8 @@ namespace Codist.SmartBars
 	/// <summary>
 	/// An extended <see cref="SmartBar"/> for C# content type.
 	/// </summary>
-	sealed class CSharpSmartBar : SmartBar {
+	sealed class CSharpSmartBar : SmartBar
+	{
 		static readonly Taggers.HighlightClassifications __HighlightClassifications = Taggers.HighlightClassifications.Instance;
 		readonly SemanticContext _Context;
 		readonly ExternalAdornment _SymbolListContainer;
@@ -31,7 +32,7 @@ namespace Codist.SmartBars
 		public CSharpSmartBar(IWpfTextView view, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(view, textSearchService) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			_Context = SemanticContext.GetOrCreateSingetonInstance(view);
-			_SymbolListContainer = view.Properties.GetOrCreateSingletonProperty(() => new ExternalAdornment(view));
+			_SymbolListContainer = ExternalAdornment.GetOrCreate(view);
 			View.Selection.SelectionChanged += ViewSeletionChanged;
 		}
 
@@ -46,15 +47,7 @@ namespace Codist.SmartBars
 		}
 
 		void ViewSeletionChanged(object sender, EventArgs e) {
-			HideMenu();
-		}
-
-		void HideMenu() {
-			//if (_SymbolList != null) {
-				_SymbolListContainer.ClearUnpinnedChildren();
-			//	_SymbolList.SelectedItem = null;
-			//	_SymbolList = null;
-			//}
+			_SymbolListContainer.ClearUnpinnedChildren();
 		}
 
 		static CommandItem CreateCommandMenu(int imageId, string title, ISymbol symbol, string emptyMenuTitle, Action<CommandContext, MenuItem, ISymbol> itemPopulator) {

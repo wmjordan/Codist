@@ -18,8 +18,11 @@ namespace Codist.SmartBars
 {
 	//todo Make this class async
 	/// <summary>The contextual toolbar.</summary>
-	internal partial class SmartBar {
+	internal partial class SmartBar
+	{
 		const int Selecting = 1, Working = 2;
+		internal const string QuickInfoSuppressionId = nameof(SmartBar);
+
 		/// <summary>The layer for the smart bar adornment.</summary>
 		readonly IAdornmentLayer _ToolBarLayer;
 		readonly ToolBarTray _ToolBarTray;
@@ -321,12 +324,12 @@ namespace Codist.SmartBars
 		void ToolBarMouseEnter(object sender, EventArgs e) {
 			View.VisualElement.MouseMove -= ViewMouseMove;
 			((ToolBarTray)sender).Opacity = 1;
-			View.Properties[nameof(SmartBar)] = true;
+			View.Properties[QuickInfoSuppressionId] = true;
 		}
 
 		void ToolBarMouseLeave(object sender, EventArgs e) {
 			View.VisualElement.MouseMove += ViewMouseMove;
-			View.Properties.RemoveProperty(nameof(SmartBar));
+			View.Properties.RemoveProperty(QuickInfoSuppressionId);
 		}
 
 		void ToolBarSizeChanged(object sender, SizeChangedEventArgs e) {

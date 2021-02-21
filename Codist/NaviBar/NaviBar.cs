@@ -12,7 +12,7 @@ namespace Codist.NaviBar
 	{
 		protected NaviBar(IWpfTextView textView) {
 			View = textView;
-			ListContainer = View.Properties.GetOrCreateSingletonProperty(() => new ExternalAdornment(textView));
+			ListContainer = ExternalAdornment.GetOrCreate(textView);
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			textView.Properties.AddProperty(nameof(NaviBar), this);
 			Resources = SharedDictionaryManager.NavigationBar;

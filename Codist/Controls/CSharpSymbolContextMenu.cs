@@ -400,7 +400,7 @@ namespace Codist.Controls
 
 		public SymbolMenu(SemanticContext semanticContext) : this(semanticContext, SymbolListType.None) { }
 		public SymbolMenu(SemanticContext semanticContext, SymbolListType listType) {
-			_Container = semanticContext.View.Properties.GetOrCreateSingletonProperty(() => new ExternalAdornment(semanticContext.View));
+			_Container = ExternalAdornment.GetOrCreate(semanticContext.View);
 			Menu = new SymbolList(semanticContext) {
 				Container = _Container,
 				ContainerType = listType
