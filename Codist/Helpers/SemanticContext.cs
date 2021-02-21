@@ -195,7 +195,7 @@ namespace Codist
 		public async Task<ISymbol> GetSymbolAsync(SyntaxNode node, CancellationToken cancellationToken = default) {
 			var sm = SemanticModel;
 			if (node.SyntaxTree != sm.SyntaxTree) {
-				var doc = Document.Project.Solution.GetDocument(node.SyntaxTree);
+				var doc = GetDocument(node.SyntaxTree);
 				if (doc == null) {
 					var nodeFilePath = node.SyntaxTree.FilePath;
 					doc = Document.FilePath == nodeFilePath

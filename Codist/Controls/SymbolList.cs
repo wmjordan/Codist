@@ -91,11 +91,11 @@ namespace Codist.Controls
 				return;
 			}
 			if (e.Key == Key.Enter) {
-				if (SelectedIndex == -1 && HasItems) {
-					(ItemContainerGenerator.Items[0] as SymbolItem)?.GoToSource();
-				}
-				else {
-					(SelectedItem as SymbolItem)?.GoToSource();
+				var item = SelectedIndex == -1 && HasItems
+					? ItemContainerGenerator.Items[0] as SymbolItem
+					: SelectedItem as SymbolItem;
+				if (item != null) {
+					item.GoToSource();
 				}
 				e.Handled = true;
 			}
@@ -423,7 +423,7 @@ namespace Codist.Controls
 					return new ThemedToolTip(Path.GetFileName(f), String.Join(Environment.NewLine,
 						R.T_Folder + Path.GetDirectoryName(f),
 						R.T_Line + (item.Location.GetLineSpan().StartLinePosition.Line + 1).ToString(),
-						R.T_Project + SemanticContext.Workspace?.CurrentSolution.GetDocument(item.Location.SourceTree)?.Project.Name
+						R.T_Project + SemanticContext.GetDocument(item.Location.SourceTree)?.Project.Name
 					));
 				}
 				else {
@@ -440,6 +440,7 @@ namespace Codist.Controls
 				: ContainerType == SymbolListType.SymbolReferrers ? SymbolFilterKind.Usage
 				: SymbolFilterKind.Member;
 		}
+
 		void ISymbolFilterable.Filter(string[] keywords, int filterFlags) {
 			switch (ContainerType) {
 				case SymbolListType.TypeList:
