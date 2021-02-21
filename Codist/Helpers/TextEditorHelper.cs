@@ -427,7 +427,7 @@ namespace Codist
 			if (System.IO.File.Exists(file) == false) {
 				return;
 			}
-			using (new NewDocumentStateScope(Keyboard.Modifiers == ModifierKeys.Shift ? __VSNEWDOCUMENTSTATE.NDS_Unspecified : Keyboard.Modifiers == ModifierKeys.Control ? __VSNEWDOCUMENTSTATE.NDS_NoActivate : __VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
+			using (new NewDocumentStateScope(Keyboard.Modifiers == ModifierKeys.Shift ? __VSNEWDOCUMENTSTATE.NDS_Unspecified : __VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
 				dte.ItemOperations.OpenFile(file);
 				if (action != null) {
 					try {

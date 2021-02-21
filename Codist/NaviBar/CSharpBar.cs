@@ -328,6 +328,7 @@ namespace Codist.NaviBar
 		void HideMenu() {
 			if (_SymbolList != null) {
 				ListContainer.Children.Remove(_SymbolList);
+				_SymbolList.HideToolTip();
 				_SymbolList.SelectedItem = null;
 				_SymbolList = null;
 				if (_ActiveItem != null) {
@@ -343,7 +344,8 @@ namespace Codist.NaviBar
 				return;
 			}
 			View.VisualElement.Focus();
-			if ((menu.SelectedItem as SymbolItem)?.GoToSource() == true) {
+			(menu.SelectedItem as SymbolItem)?.GoToSource();
+			if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) == false) {
 				HideMenu();
 			}
 		}
@@ -716,7 +718,7 @@ namespace Codist.NaviBar
 					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
 				Bar.SetupSymbolListMenu(_Menu);
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
-				await AddNamespacesAndTypesAsync(Bar._SemanticContext, cancellationToken);
+				await SymbolCommands.AddNamespacesAndTypesAsync(Bar._SemanticContext, _Symbol as INamespaceSymbol, _Menu, cancellationToken);
 				if (_Menu.Symbols.Count > 100) {
 					_Menu.EnableVirtualMode = true;
 				}
@@ -730,42 +732,8 @@ namespace Codist.NaviBar
 					_Menu.Clear();
 					_Symbol = await ctx.RelocateSymbolAsync(_Symbol, cancellationToken);
 					//_Node = Bar._SemanticContext.RelocateDeclarationNode(_Node);
-					await AddNamespacesAndTypesAsync(ctx, cancellationToken);
+					await SymbolCommands.AddNamespacesAndTypesAsync(ctx, _Symbol as INamespaceSymbol, _Menu, cancellationToken);
 					_Menu.RefreshItemsSource(true);
-				}
-			}
-
-			async Task AddNamespacesAndTypesAsync(SemanticContext context, CancellationToken cancellationToken) {
-				var s = Symbol as INamespaceSymbol;
-				if (s == null) {
-					return;
-				}
-				var ss = new HashSet<(string, Microsoft.CodeAnalysis.Text.TextSpan)>();
-				var nb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
-				var tb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
-				foreach (var ns in await s.FindSimilarNamespacesAsync(context.Document.Project, cancellationToken)) {
-					foreach (var m in ns.GetMembers()) {
-						var sr = m.GetSourceReferences();
-						if (sr.Length == 0) {
-							continue;
-						}
-						bool hasAdded = false;
-						foreach (var r in sr) {
-							if (ss.Add((r.SyntaxTree.FilePath, r.Span)) == false) {
-								hasAdded = true;
-								break;
-							}
-						}
-						if (hasAdded == false) {
-							(m.IsNamespace ? nb : tb).Add(m);
-						}
-					}
-				}
-				foreach (var item in nb.OrderBy(n => n.Name)) {
-					_Menu.Add(item, false);
-				}
-				foreach (var item in tb.OrderBy(n => n.Name)) {
-					_Menu.Add(item, false);
 				}
 			}
 

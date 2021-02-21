@@ -103,7 +103,10 @@ namespace Codist.Controls
 
 		#region Analysis commands
 
-		internal (int count, int inherited) AddSymbolMembers(ISymbol symbol) {
+		internal (int count, int external) AddSymbolMembers(ISymbol symbol) {
+			if (symbol.Kind == SymbolKind.Namespace) {
+				return SyncHelper.RunSync(() => SymbolCommands.AddNamespacesAndTypesAsync(SemanticContext, symbol as INamespaceSymbol, this, default));
+			}
 			var count = AddSymbolMembers(symbol, null);
 			var mi = 0;
 			var type = symbol as INamedTypeSymbol;
@@ -349,6 +352,10 @@ namespace Codist.Controls
 		}
 
 		void MouseLeave_HideToolTip(object sender, MouseEventArgs e) {
+			HideToolTip();
+		}
+
+		public void HideToolTip() {
 			SizeChanged -= SizeChanged_RelocateToolTip;
 			MouseMove -= MouseMove_ChangeToolTip;
 			MouseLeave -= MouseLeave_HideToolTip;

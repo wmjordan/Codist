@@ -4373,6 +4373,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似  members: {count} ({external} unreferenced) 的本地化字符串。
+        /// </summary>
+        internal static string T_NamespaceMembers {
+            get {
+                return ResourceManager.GetString("T_NamespaceMembers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Namespaces 的本地化字符串。
         /// </summary>
         internal static string T_Namespaces {
