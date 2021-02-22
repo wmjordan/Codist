@@ -44,7 +44,7 @@ namespace Codist.Controls
 		public void AddSymbolNodeCommands() {
 			if (_Symbol.HasSource()) {
 				Items.Add(CreateItem(IconIds.GoToDefinition, R.CMD_GoToDefinition, GoToSymbolDefinition));
-				if (_Node == null) {
+				if (_Symbol.Kind != SymbolKind.Namespace && _Node == null) {
 					Items.Add(CreateItem(IconIds.SelectCode, R.CMD_SelectCode, () => _Symbol.GetSyntaxNode().SelectNode(true)));
 				}
 			}
