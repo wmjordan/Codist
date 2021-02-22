@@ -475,11 +475,7 @@ namespace Codist.Controls
 
 		void OnMenuKeyUp(object sender, KeyEventArgs e) {
 			if (e.Key == Key.Escape) {
-				var c = _Container.Children;
-				c.Remove(Menu);
-				if (c.Count > 0) {
-					c[c.Count - 1].GetFirstVisualChild<TextBox>()?.Focus();
-				}
+				_Container.Children.Remove(Menu);
 				e.Handled = true;
 			}
 		}

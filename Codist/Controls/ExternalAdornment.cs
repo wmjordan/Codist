@@ -12,7 +12,7 @@ namespace Codist.Controls
 	{
 		internal const string QuickInfoSuppressionId = nameof(ExternalAdornment);
 
-		readonly Microsoft.VisualStudio.Text.Editor.IWpfTextView _View;
+		readonly IWpfTextView _View;
 		int _LayerZIndex;
 		bool _isDragging;
 		Point _beginDragPosition;
@@ -84,9 +84,18 @@ namespace Codist.Controls
 				element.MouseLeftButtonDown -= BringToFront;
 				ChildRemoved?.Invoke(this, new AdornmentChildRemovedEventArgs(element));
 				_View.Properties.RemoveProperty(QuickInfoSuppressionId);
-			}
-			if (Children.Count == 0 || Children.Count == 1 && Children[0] is null) {
-				FocusOnTextView();
+				if (Children.Count == 0 || Children.Count == 1 && Children[0] is null) {
+					FocusOnTextView();
+				}
+				else {
+					for (int i = Children.Count - 1; i >= 0; i--) {
+						var f = Children[i].GetFirstVisualChild<TextBox>();
+						if (f != null && f.Focus()) {
+							return;
+						}
+					}
+					FocusOnTextView();
+				}
 			}
 		}
 
