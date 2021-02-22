@@ -472,7 +472,7 @@ namespace Codist.NaviBar
 					}
 					else if (_ScopeBox.Filter != ScopeType.ActiveDocument
 						&& _FinderBox.Text != __ProjectWideSearchExpression) {
-						_FinderBox.Text = __ProjectWideSearchExpression;
+						SetAndSelectFinderText();
 					}
 				};
 				_ScopeBox.FilterChanged += SearchCriteriaChanged;
@@ -517,7 +517,7 @@ namespace Codist.NaviBar
 						_ScopeBox.Filter = ScopeType.ActiveProject;
 						if (String.IsNullOrWhiteSpace(__ProjectWideSearchExpression) == false
 							&& _FinderBox.Text != __ProjectWideSearchExpression) {
-							_FinderBox.Text = __ProjectWideSearchExpression;
+							SetAndSelectFinderText();
 						}
 						break;
 				}
@@ -590,7 +590,7 @@ namespace Codist.NaviBar
 					_IncrementalSearchContainer = null;
 					_PreviousSearchKeywords = null;
 					if (String.IsNullOrWhiteSpace(__ProjectWideSearchExpression) == false && sender == _ScopeBox) {
-						_FinderBox.Text = __ProjectWideSearchExpression;
+						SetAndSelectFinderText();
 					}
 					else if (_ScopeBox.Filter != ScopeType.ActiveDocument) {
 						__ProjectWideSearchExpression = String.Empty;
@@ -615,6 +615,11 @@ namespace Codist.NaviBar
 					// ignores cancellation
 				}
 				catch (ObjectDisposedException) { }
+			}
+			void SetAndSelectFinderText() {
+				_FinderBox.Text = __ProjectWideSearchExpression;
+				_FinderBox.CaretIndex = _FinderBox.Text.Length;
+				_FinderBox.SelectAll();
 			}
 			void ChangeSearchScope(object sender, KeyEventArgs e) {
 				if (Keyboard.Modifiers == ModifierKeys.None) {
