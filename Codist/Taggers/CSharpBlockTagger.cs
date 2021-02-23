@@ -89,7 +89,7 @@ namespace Codist.Taggers
 			try {
 				return await GetAndParseSyntaxNodeAsync(snapshot, token);
 			}
-			catch (TaskCanceledException) {
+			catch (OperationCanceledException) {
 				//ignore the exception.
 				return null;
 			}

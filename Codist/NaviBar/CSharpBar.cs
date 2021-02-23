@@ -719,7 +719,7 @@ namespace Codist.NaviBar
 					_FilterBox.UpdateNumbers(_Menu.Symbols);
 					Bar.ShowMenu(this, _Menu);
 				}
-				catch (TaskCanceledException) {
+				catch (OperationCanceledException) {
 					// ignore
 				}
 			}
@@ -733,7 +733,8 @@ namespace Codist.NaviBar
 				_Menu = new SymbolList(Bar._SemanticContext) {
 					Container = Bar.ListContainer,
 					ContainerType = SymbolListType.TypeList,
-					ExtIconProvider = ExtIconProvider.Default.GetExtIcons
+					ExtIconProvider = ExtIconProvider.Default.GetExtIcons,
+					EnableVirtualMode = true
 				};
 				_Menu.Header = new WrapPanel {
 					Orientation = Orientation.Horizontal,
@@ -752,9 +753,6 @@ namespace Codist.NaviBar
 				Bar.SetupSymbolListMenu(_Menu);
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
 				await SymbolCommands.AddNamespacesAndTypesAsync(Bar._SemanticContext, _Symbol as INamespaceSymbol, _Menu, cancellationToken);
-				if (_Menu.Symbols.Count > 100) {
-					_Menu.EnableVirtualMode = true;
-				}
 			}
 
 			async Task RefreshItemsAsync(CancellationToken cancellationToken) {
@@ -846,20 +844,25 @@ namespace Codist.NaviBar
 				}
 
 				var ct = Bar._cancellationSource.GetToken();
-				await CreateMenuForTypeSymbolNodeAsync(ct);
+				try {
+					await CreateMenuForTypeSymbolNodeAsync(ct);
 
-				_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.GetMembers().Select(s => new SymbolItem(s, _Menu, false)));
-				var footer = (TextBlock)_Menu.Footer;
-				if (_PartialCount > 1) {
-					footer.Append(ThemeHelper.GetImage(IconIds.PartialDocumentCount))
-						.Append(_PartialCount);
+					_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.GetMembers().Select(s => new SymbolItem(s, _Menu, false)));
+					var footer = (TextBlock)_Menu.Footer;
+					if (_PartialCount > 1) {
+						footer.Append(ThemeHelper.GetImage(IconIds.PartialDocumentCount))
+							.Append(_PartialCount);
+					}
+					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
+						footer.Append(ThemeHelper.GetImage(IconIds.LineOfCode))
+							.Append(Node.GetLineSpan().Length + 1);
+					}
+					Bar.ShowMenu(this, _Menu);
+					_FilterBox?.FocusFilterBox();
 				}
-				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
-					footer.Append(ThemeHelper.GetImage(IconIds.LineOfCode))
-						.Append(Node.GetLineSpan().Length + 1);
+				catch (OperationCanceledException) {
+					// ignore
 				}
-				Bar.ShowMenu(this, _Menu);
-				_FilterBox?.FocusFilterBox();
 			}
 
 			async Task CreateMenuForTypeSymbolNodeAsync(CancellationToken cancellationToken) {
