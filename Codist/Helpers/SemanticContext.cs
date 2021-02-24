@@ -196,33 +196,27 @@ namespace Codist
 			var sm = SemanticModel;
 			if (node.SyntaxTree != sm.SyntaxTree) {
 				var doc = GetDocument(node.SyntaxTree);
+				// doc no longer exists
 				if (doc == null) {
-					var nodeFilePath = node.SyntaxTree.FilePath;
-					doc = Document.FilePath == nodeFilePath
-						? Document
-						: Document.Project.Documents.FirstOrDefault(d => String.Equals(d.FilePath, nodeFilePath, StringComparison.OrdinalIgnoreCase));
-					if (doc == null) {
-						return null;
-					}
-					sm = await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-					if (node.SpanStart >= sm.SyntaxTree.Length) {
-						return null;
-					}
-					var p = node.SpanStart;
-					foreach (var item in sm.SyntaxTree.GetChanges(node.SyntaxTree)) {
-						if (item.Span.Start > p) {
-							break;
-						}
-						p += item.NewText.Length - item.Span.Length;
-					}
-					var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(p, 0));
-					//todo find out the new node
-					if (newNode.RawKind != node.RawKind) {
-						return null;
-					}
-					node = newNode;
+					return null;
 				}
 				sm = await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+				if (node.SpanStart >= sm.SyntaxTree.Length) {
+					return null;
+				}
+				// find the new node in the new model
+				var p = node.SpanStart;
+				foreach (var item in sm.SyntaxTree.GetChanges(node.SyntaxTree)) {
+					if (item.Span.Start > p) {
+						break;
+					}
+					p += item.NewText.Length - item.Span.Length;
+				}
+				var newNode = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(new TextSpan(p, 0));
+				if (newNode.RawKind != node.RawKind) {
+					return null;
+				}
+				node = newNode;
 			}
 			return sm.GetSymbol(node, cancellationToken);
 		}
