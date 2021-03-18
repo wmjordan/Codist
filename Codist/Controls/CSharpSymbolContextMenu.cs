@@ -467,9 +467,6 @@ namespace Codist.Controls
 			if (e.OccursOn<ListBoxItem>()) {
 				_Container.FocusOnTextView();
 				(menu.SelectedItem as SymbolItem)?.GoToSource();
-				if (Menu.IsPinned == false) {
-					_Container.Children.Remove(Menu);
-				}
 			}
 		}
 
