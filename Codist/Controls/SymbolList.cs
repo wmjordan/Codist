@@ -105,7 +105,7 @@ namespace Codist.Controls
 
 		internal (int count, int external) AddSymbolMembers(ISymbol symbol) {
 			if (symbol.Kind == SymbolKind.Namespace) {
-				return SyncHelper.RunSync(() => SymbolCommands.AddNamespacesAndTypesAsync(SemanticContext, symbol as INamespaceSymbol, this, default));
+				return (SyncHelper.RunSync(() => SymbolCommands.AddNamespacesAndTypesAsync(SemanticContext, symbol as INamespaceSymbol, this, default)), 0);
 			}
 			var count = AddSymbolMembers(symbol, null);
 			var mi = 0;

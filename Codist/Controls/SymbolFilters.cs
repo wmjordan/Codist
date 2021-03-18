@@ -400,8 +400,8 @@ namespace Codist.Controls
 			public override int Filters => (int)_Filters;
 
 			public AccessibilityFilterButtonGroup() {
-				_PublicFilter = CreateButton(IconIds.PublicSymbols, R.T_PublicProtectedTypes);
-				_PrivateFilter = CreateButton(IconIds.PrivateSymbols, R.T_InternalPrivateTypes);
+				_PublicFilter = CreateButton(IconIds.PublicSymbols, R.T_PublicProtected);
+				_PrivateFilter = CreateButton(IconIds.PrivateSymbols, R.T_InternalPrivate);
 				_Filters = MemberFilterTypes.AllAccessibilities;
 				Content = new StackPanel {
 					Children = {

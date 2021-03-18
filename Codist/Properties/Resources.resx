@@ -444,8 +444,8 @@ Shift click: Paste and select next (whole word)</value>
   <data name="T_Interfaces" xml:space="preserve">
     <value>Interfaces</value>
   </data>
-  <data name="T_InternalPrivateTypes" xml:space="preserve">
-    <value>Internal and private types</value>
+  <data name="T_InternalPrivate" xml:space="preserve">
+    <value>Internal and private</value>
   </data>
   <data name="T_LineOfCode" xml:space="preserve">
     <value>Line of code: </value>
@@ -468,8 +468,8 @@ Shift click: Paste and select next (whole word)</value>
   <data name="T_Producers" xml:space="preserve">
     <value> producers</value>
   </data>
-  <data name="T_PublicProtectedTypes" xml:space="preserve">
-    <value>Public and protected types</value>
+  <data name="T_PublicProtected" xml:space="preserve">
+    <value>Public and protected</value>
   </data>
   <data name="T_ReferencedSymbols" xml:space="preserve">
     <value> referenced symbols: </value>
@@ -1762,6 +1762,6 @@ Use space to separate multiple search terms.
     <value>Line: </value>
   </data>
   <data name="T_NamespaceMembers" xml:space="preserve">
-    <value> members: {count} ({external} unreferenced)</value>
+    <value> members: {count}</value>
   </data>
 </root>

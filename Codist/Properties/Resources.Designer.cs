@@ -4184,11 +4184,11 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Internal and private types 的本地化字符串。
+        ///   查找类似 Internal and private 的本地化字符串。
         /// </summary>
-        internal static string T_InternalPrivateTypes {
+        internal static string T_InternalPrivate {
             get {
-                return ResourceManager.GetString("T_InternalPrivateTypes", resourceCulture);
+                return ResourceManager.GetString("T_InternalPrivate", resourceCulture);
             }
         }
         
@@ -4373,7 +4373,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似  members: {count} ({external} unreferenced) 的本地化字符串。
+        ///   查找类似  members: {count} 的本地化字符串。
         /// </summary>
         internal static string T_NamespaceMembers {
             get {
@@ -4526,11 +4526,11 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Public and protected types 的本地化字符串。
+        ///   查找类似 Public and protected 的本地化字符串。
         /// </summary>
-        internal static string T_PublicProtectedTypes {
+        internal static string T_PublicProtected {
             get {
-                return ResourceManager.GetString("T_PublicProtectedTypes", resourceCulture);
+                return ResourceManager.GetString("T_PublicProtected", resourceCulture);
             }
         }
         

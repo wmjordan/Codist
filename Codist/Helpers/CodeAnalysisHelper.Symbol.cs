@@ -960,6 +960,17 @@ namespace Codist
 				: 0;
 		}
 
+		public static bool HasSameName(ISymbol a, ISymbol b) {
+			var x = a;
+			var y = b;
+			var r = ReferenceEquals(a, b)
+				|| a.Name == b.Name && (a = a.ContainingSymbol) != null && (b = b.ContainingSymbol) != null && a.Kind == b.Kind && (a.Kind == SymbolKind.NetModule || a.Kind == SymbolKind.Namespace && ((INamespaceSymbol)a).IsGlobalNamespace && ((INamespaceSymbol)b).IsGlobalNamespace || HasSameName(a, b));
+			if (r != true && x.Name == y.Name) {
+
+			}
+			return r;
+		}
+
 		public static bool AreEqual(ITypeSymbol a, ITypeSymbol b, bool ignoreTypeConstraint) {
 			if (ReferenceEquals(a, b) || a.Equals(b)) {
 				return true;
@@ -1130,7 +1141,24 @@ namespace Codist
 				   (symbol.IsVirtual || symbol.IsAbstract || symbol.IsOverride) &&
 				   symbol.IsSealed == false;
 		}
+
+		public static IEqualityComparer<ISymbol> GetSymbolNameComparer() {
+			return SymbolNameComparer.Instance;
+		}
 		#endregion
+
+		sealed class SymbolNameComparer : IEqualityComparer<ISymbol>
+		{
+			internal static readonly SymbolNameComparer Instance = new SymbolNameComparer();
+
+			public bool Equals(ISymbol x, ISymbol y) {
+				return HasSameName(x,y);
+			}
+
+			public int GetHashCode(ISymbol obj) {
+				return obj.Name.GetHashCode();
+			}
+		}
 
 		sealed class SymbolCallerInfoComparer : IEqualityComparer<SymbolCallerInfo>
 		{

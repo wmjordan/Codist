@@ -107,7 +107,7 @@ namespace Codist.Controls
 				m.Title.Append(R.T_Members.Replace("{count}", count.ToString()).Replace("{inherited}", external.ToString()));
 			}
 			else {
-				m.Title.Append(R.T_NamespaceMembers.Replace("{count}", count.ToString()).Replace("{external}", external.ToString()));
+				m.Title.Append(R.T_NamespaceMembers.Replace("{count}", count.ToString()));
 			}
 			m.Show(positionElement);
 		}
@@ -179,43 +179,30 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		internal static async Task<(int defOrRef, int external)> AddNamespacesAndTypesAsync(SemanticContext context, INamespaceSymbol s, SymbolList symbolList, CancellationToken cancellationToken) {
+		internal static async Task<int> AddNamespacesAndTypesAsync(SemanticContext context, INamespaceSymbol s, SymbolList symbolList, CancellationToken cancellationToken) {
 			if (s == null) {
-				return (0, 0);
+				return 0;
 			}
 			var ss = new HashSet<(Microsoft.CodeAnalysis.Text.TextSpan, string)>();
+			var a = new HashSet<ISymbol>(CodeAnalysisHelper.GetSymbolNameComparer());
 			var defOrRefMembers = new HashSet<INamespaceOrTypeSymbol>(s.GetMembers());
 			var nb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
 			var tb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
-			int defOrRef = 0, external = 0;
+			int defOrRef = 0;
 			foreach (var ns in await s.FindSimilarNamespacesAsync(context.Document.Project, cancellationToken)) {
 				foreach (var m in ns.GetMembers()) {
-					var sr = m.GetSourceReferences();
-					if (sr.Length == 0) {
-						continue;
-					}
-					bool hasAdded = false;
-					foreach (var r in sr) {
-						if (ss.Add((r.Span, r.SyntaxTree.FilePath)) == false) {
-							hasAdded = true;
-							break;
-						}
-					}
-					if (hasAdded == false) {
+					if (a.Add(m)) {
 						(m.IsNamespace ? nb : tb).Add(m);
 					}
+					continue;
 				}
 			}
 			foreach (var item in nb.OrderBy(n => n.Name)
 									.Concat(tb.OrderBy(n => n.Name))) {
-				var i = symbolList.Add(item, false);
-				if (defOrRefMembers.Contains(item) == false) {
-					i.Usage = SymbolUsageKind.External;
-					external++;
-				}
+				symbolList.Add(item, false);
 				defOrRef++;
 			}
-			return (defOrRef, external);
+			return defOrRef;
 		}
 	}
 }
