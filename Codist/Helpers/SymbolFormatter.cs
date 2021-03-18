@@ -28,7 +28,11 @@ namespace Codist
 
 		static readonly Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>> _BrushSetter = CreatePropertySetter();
 		internal static readonly SymbolFormatter Instance = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText), b => { b?.Freeze(); return b; });
-		internal static readonly SymbolFormatter SemiTransparent = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText), b => b?.Alpha(0.6));
+		internal static readonly SymbolFormatter SemiTransparent = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText), b => {
+			if (b != null) {
+				b = b.Alpha(0.6); b.Freeze();
+			}
+			return b; });
 		readonly Func<Brush, Brush> _brushConfigurator;
 
 		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
