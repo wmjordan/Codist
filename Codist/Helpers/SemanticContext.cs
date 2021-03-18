@@ -169,6 +169,9 @@ namespace Codist
 			var d = s.GetDocumentId(syntaxTree);
 			return d != null ? s.GetDocument(d) : null;
 		}
+		public Project GetProject(SyntaxTree syntaxTree) {
+			return GetDocument(syntaxTree)?.Project;
+		}
 
 		static void MatchDeclarationNode(MemberDeclarationSyntax member, List<MemberDeclarationSyntax> matches, string signature, SyntaxNode node) {
 			if (member.RawKind == node.RawKind

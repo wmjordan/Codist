@@ -49,14 +49,15 @@ namespace Codist
 				content.AppendLineBreak()
 					.Append(R.T_Namespace + symbol.ContainingNamespace?.ToString()).AppendLine();
 				if (symbol.Kind == SymbolKind.Namespace) {
+					// hack: workaround to exclude references that returns null from GetDocument
 					content.Append(R.T_Assembly).Append(String.Join(", ", ((INamespaceSymbol)symbol).ConstituentNamespaces.Select(n => n.GetAssemblyModuleName()).Distinct()))
-						.AppendLine().Append(R.T_Project).Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetDocument(r.SyntaxTree).Project).Distinct().Select(p => p.Name)))
+						.AppendLine().Append(R.T_Project).Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)))
 						.AppendLine().Append(R.T_Location).Append(symbol.Locations.Length);
 				}
 				else {
 					if (symbol.HasSource()) {
 						content.Append(R.T_SourceFile).Append(String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))))
-							.AppendLine().Append(R.T_Project).Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetDocument(r.SyntaxTree).Project).Distinct().Select(p => p.Name)));
+							.AppendLine().Append(R.T_Project).Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)));
 					}
 					else {
 						content.Append(R.T_Assembly).Append(symbol.GetAssemblyModuleName());
