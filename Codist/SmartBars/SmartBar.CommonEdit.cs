@@ -114,6 +114,7 @@ namespace Codist.SmartBars
 						&& snapshot[end] == ' '
 						&& (end == snapshot.Length - 2
 							|| "={<>(-+*/^!|?:~&%".IndexOf(snapshot[end + 1]) == -1)) {
+						ctx.KeepToolBar(false);
 						s.Select(new SnapshotSpan(s.Start.Position, s.End.Position + 1), false);
 					}
 				}
