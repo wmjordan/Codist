@@ -533,7 +533,7 @@ namespace Codist
 						else {
 							sb.Append(t, p, i - p);
 						}
-						if (i > 0 && "(['\"".IndexOf(t[i - 1]) == -1 && j < t.Length && ")]'\"".IndexOf(t[j]) == -1) {
+						if (i > 0 && NeedSpace("(['\"", t[i - 1]) && j < t.Length && NeedSpace(")]'\"", t[j])) {
 							sb.Append(' ');
 						}
 						i = j;
@@ -549,6 +549,10 @@ namespace Codist
 				}
 				view.TextBuffer.Replace(span, sb.ToString());
 				b.Dispose();
+			}
+
+			bool NeedSpace(string tokens, char c) {
+				return tokens.IndexOf(c) == -1 && c < 0x2E80;
 			}
 		}
 		#endregion
