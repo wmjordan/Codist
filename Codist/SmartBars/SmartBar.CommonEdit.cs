@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using AppHelpers;
-using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
@@ -166,17 +166,39 @@ namespace Codist.SmartBars
 		}
 
 		void AddSpecialFormatCommand() {
-			switch (View.GetSelectedTokenType()) {
+			var tokenType = View.GetSelectedTokenType();
+			switch (tokenType) {
 				case TokenType.None:
 					AddCommands(ToolBar, IconIds.FormatSelection, R.CMD_Formatting, null, GetFormatItems);
 					break;
 				case TokenType.Digit:
+				case TokenType.Digit | TokenType.Hex:
+				case TokenType.Digit | TokenType.Hex | TokenType.ZeroXHex:
+				case TokenType.Digit | TokenType.Hex | TokenType.Letter:
+				case TokenType.Digit | TokenType.Hex | TokenType.ZeroXHex | TokenType.Letter:
 					AddCommand(ToolBar, IconIds.IncrementNumber, R.CMD_IncrementNumber, ctx => {
 						if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
 							ctx.KeepToolBar(false);
 							var u = ctx.View.EditSelection((v, edit, s) => {
-								if (long.TryParse(s.GetText(), out var value)) {
-									var t = (++value).ToString(System.Globalization.CultureInfo.InvariantCulture);
+								var t = s.GetText();
+								var hex = tokenType.MatchFlags(TokenType.Hex);
+								if (long.TryParse(
+									hex ? t.Substring(2) : t,
+									hex ? NumberStyles.HexNumber : NumberStyles.Integer,
+									CultureInfo.InvariantCulture,
+									out var value)
+									) {
+									if (hex) {
+										if (tokenType.MatchFlags(TokenType.ZeroXHex)) {
+											t = t.Substring(0, 2) + (++value).ToString("X" + (t.Length - 2).ToString(CultureInfo.InvariantCulture));
+										}
+										else {
+											t = (++value).ToString("X" + t.Length.ToString(CultureInfo.InvariantCulture));
+										}
+									}
+									else {
+										t = (++value).ToString("D" + t.Length.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
+									}
 									if (edit.Replace(s.Span, t)) {
 										return new Span(s.Start, t.Length);
 									}

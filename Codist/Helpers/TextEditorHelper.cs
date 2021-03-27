@@ -15,6 +15,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
+using AppHelpers;
 
 namespace Codist
 {
@@ -148,12 +149,31 @@ namespace Codist
 				return TokenType.GuidPlaceHolder;
 			}
 			var t = TokenType.None;
-			foreach (var c in s ?? (s = selection.GetText())) {
+			if (s == null) {
+				s = selection.GetText();
+			}
+			if (s.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) {
+				if (s.Length > 2) {
+					s = s.Substring(2);
+					t = TokenType.Hex | TokenType.ZeroXHex;
+				}
+				else {
+					return TokenType.None;
+				}
+			}
+			foreach (var c in s) {
 				if (c >= '0' && c <= '9') {
 					t |= TokenType.Digit;
 				}
-				else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-					t |= TokenType.Letter;
+				else if (c >= 'a' && c <= 'z') {
+					if (t.MatchFlags(TokenType.Letter) == false) {
+						t = t.SetFlags(TokenType.Hex, c <= 'f') | TokenType.Letter;
+					}
+				}
+				else if (c >= 'A' && c <= 'Z') {
+					if (t.MatchFlags(TokenType.Letter) == false) {
+						t = t.SetFlags(TokenType.Hex, c <= 'F') | TokenType.Letter;
+					}
 				}
 				else if (c == '_') {
 					t |= TokenType.Underscore;
@@ -164,6 +184,10 @@ namespace Codist
 				else {
 					return TokenType.None;
 				}
+			}
+			if (t.MatchFlags(TokenType.Hex) && t.HasAnyFlag(TokenType.Dot | TokenType.Underscore)
+				|| t.MatchFlags(TokenType.ZeroXHex) && t.HasAnyFlag(TokenType.Hex | TokenType.Digit) == false) {
+				return TokenType.None;
 			}
 			return t;
 		}
@@ -733,6 +757,8 @@ namespace Codist
 		Dot = 4,
 		Underscore = 8,
 		Guid = 16,
-		GuidPlaceHolder = 32
+		GuidPlaceHolder = 32,
+		Hex = 64,
+		ZeroXHex = 128
 	}
 }
