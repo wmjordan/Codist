@@ -25,7 +25,7 @@ namespace Codist.SmartBars
 
 		static void ExecuteAndFind(CommandContext ctx, string command, string text) {
 			if (ctx.RightClick) {
-				ctx.View.ExpandSelectionToLine(false);
+				ctx.View.ExpandSelectionToLine(true);
 			}
 			ctx.KeepToolBar(false);
 			TextEditorHelper.ExecuteEditorCommand(command);

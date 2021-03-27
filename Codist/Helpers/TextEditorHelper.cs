@@ -104,15 +104,15 @@ namespace Codist
 
 		#region Selection
 		public static void ExpandSelectionToLine(this ITextView view) {
-			view.ExpandSelectionToLine(true);
+			view.ExpandSelectionToLine(false);
 		}
-		public static void ExpandSelectionToLine(this ITextView view, bool includeLineBreak) {
+		public static void ExpandSelectionToLine(this ITextView view, bool excludeLineBreak) {
 			var start = view.TextSnapshot.GetLineFromPosition(view.Selection.Start.Position).Start;
 			var end = view.Selection.End.Position;
 			var endLine = view.TextSnapshot.GetLineFromPosition(end);
 			if (endLine.Start != end) {
 				// if selection not ended in line break, expand to line break
-				end = includeLineBreak ? endLine.EndIncludingLineBreak : endLine.End;
+				end = excludeLineBreak ? endLine.End : endLine.EndIncludingLineBreak;
 			}
 			view.Selection.Select(new SnapshotSpan(start, end), false);
 		}
