@@ -496,7 +496,7 @@ namespace Codist
 			var b = new ReusableResourceHolder<System.Text.StringBuilder>();
 			var sb = b.Resource;
 			var p = 0;
-			bool nl = false;
+			bool nl = false, noSlash = NoSlash(view);
 			for (int i = 0; i < t.Length; i++) {
 				switch (t[i]) {
 					case '\r':
@@ -511,6 +511,11 @@ namespace Codist
 								case ' ':
 								case '\t':
 									continue;
+								case '/':
+									if (nl && noSlash && (t[j-1] == '/' || j+1 < t.Length && t[j+1] == '/')) {
+										continue;
+									}
+									goto default;
 								case '\n':
 								case '\r':
 									nl = true;
@@ -554,6 +559,10 @@ namespace Codist
 			bool NeedSpace(string tokens, char c) {
 				return tokens.IndexOf(c) == -1 && c < 0x2E80;
 			}
+			bool NoSlash(ITextView v) {
+				var ct = v.TextBuffer.ContentType;
+				return ct.IsOfType(Constants.CodeTypes.CSharp) || ct.IsOfType(Constants.CodeTypes.CPlusPlus) || ct.LikeContentType("TypeScript") || ct.LikeContentType("Java");
+			}
 		}
 		#endregion
 
@@ -565,6 +574,9 @@ namespace Codist
 		}
 		public static bool LikeContentType(this ITextBuffer textBuffer, string typeName) {
 			return textBuffer.ContentType.TypeName.IndexOf(typeName) != -1;
+		}
+		public static bool LikeContentType(this IContentType contentType, string typeName) {
+			return contentType.TypeName.IndexOf(typeName) != -1;
 		}
 
 		public static IWpfTextView GetMouseOverDocumentView() {
