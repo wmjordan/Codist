@@ -90,6 +90,10 @@ namespace Codist.NaviBar
 				_View.VisualElement.Loaded -= AddNaviBar;
 
 				var view = sender as FrameworkElement;
+				if (_View.Properties.ContainsProperty(nameof(NaviBar)))
+				{
+					return;
+				}
 				var naviBar = view
 					?.GetParent<Border>(b => b.Name == "PART_ContentPanel")
 					?.GetFirstVisualChild<Border>(b => b.Name == "DropDownBarMargin");
