@@ -23,7 +23,10 @@ namespace Codist.NaviBar
 
 		public abstract void ShowActiveItemMenu();
 		public abstract void ShowRootItemMenu(int parameter);
-		protected IWpfTextView View { get; }
+		internal protected abstract void BindView(IWpfTextView view);
+		protected abstract void UnbindViewEvents();
+
+		protected IWpfTextView View { get; set; }
 		internal ExternalAdornment ListContainer { get; }
 
 		protected override void OnPreviewMouseRightButtonUp(MouseButtonEventArgs e) {

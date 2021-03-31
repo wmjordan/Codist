@@ -249,7 +249,7 @@ namespace Codist.SmartBars
 			while ((Mouse.LeftButton == MouseButtonState.Pressed || Keyboard.Modifiers == ModifierKeys.Shift)
 				&& cancellationToken.IsCancellationRequested == false) {
 				// postpone the even handler until the mouse button is released
-				await Task.Delay(100);
+				await Task.Delay(100, cancellationToken);
 			}
 			if (View.Selection.IsEmpty || Interlocked.Exchange(ref _SelectionStatus, Working) != Selecting) {
 				goto EXIT;

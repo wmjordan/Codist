@@ -43,9 +43,7 @@ namespace Codist.NaviBar
 			_TextSearch = textSearch;
 			_Tags = view.Properties.GetProperty<TaggerResult>(typeof(TaggerResult));
 			Name = nameof(MarkdownBar);
-			view.Selection.SelectionChanged += Update;
-			view.TextBuffer.PostChanged += Update;
-			view.Closed += View_Closed;
+			BindView(view);
 			_ActiveTitleLabel = new ThemedToolBarText(DefaultActiveTitle);
 			_ActiveItem = new ThemedImageButton(IconIds.Headings, _ActiveTitleLabel);
 			_ActiveItem.Click += ShowTitleList;
@@ -57,10 +55,22 @@ namespace Codist.NaviBar
 			//AddItem(KnownImageIds.StrikeThrough, ToggleStrikeThrough);
 		}
 
-		void View_Closed(object sender, EventArgs e) {
+		protected internal override void BindView(IWpfTextView view) {
+			UnbindViewEvents();
+			View = view;
+			View.Selection.SelectionChanged += Update;
+			View.TextBuffer.PostChanged += Update;
+			View.Closed += View_Closed;
+		}
+
+		protected override void UnbindViewEvents() {
 			View.Closed -= View_Closed;
 			View.Selection.SelectionChanged -= Update;
 			View.TextBuffer.PostChanged -= Update;
+		}
+
+		void View_Closed(object sender, EventArgs e) {
+			UnbindViewEvents();
 		}
 
 		void Update(object sender, EventArgs e) {

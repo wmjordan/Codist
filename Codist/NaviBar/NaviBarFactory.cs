@@ -89,20 +89,25 @@ namespace Codist.NaviBar
 			void AddNaviBar(object sender, RoutedEventArgs e) {
 				_View.VisualElement.Loaded -= AddNaviBar;
 
-				var view = sender as FrameworkElement;
-				var naviBar = view
+				var view = sender as IWpfTextView ?? _View;
+				NaviBar naviBar;
+				if ((naviBar = view.VisualElement?.GetParent<Grid>().GetFirstVisualChild<NaviBar>()) != null) {
+					naviBar.BindView(view);
+					return;
+				}
+				var naviBarHolder = view.VisualElement
 					?.GetParent<Border>(b => b.Name == "PART_ContentPanel")
 					?.GetFirstVisualChild<Border>(b => b.Name == "DropDownBarMargin");
-				if (naviBar == null) {
-					var naviBarHolder = view.GetParent<Panel>(b => b.GetType().Name == "WpfMultiViewHost");
-					if (naviBarHolder != null) {
+				if (naviBarHolder == null) {
+					var viewHost = view.VisualElement.GetParent<Panel>(b => b.GetType().Name == "WpfMultiViewHost");
+					if (viewHost != null) {
 						var b = new MarkdownBar(_View, _TextSearch);
 						DockPanel.SetDock(b, Dock.Top);
-						if (naviBarHolder.Children.Count == 1) {
-							naviBarHolder.Children.Insert(0, b);
+						if (viewHost.Children.Count == 1) {
+							viewHost.Children.Insert(0, b);
 						}
 						else {
-							var c = naviBarHolder.Children[0] as ContentControl;
+							var c = viewHost.Children[0] as ContentControl;
 							if (c != null && c.Content == null) {
 								c.Content = b;
 							}
@@ -110,8 +115,8 @@ namespace Codist.NaviBar
 					}
 					return;
 				}
-				var dropDown1 = naviBar.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown1");
-				var dropDown2 = naviBar.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown2");
+				var dropDown1 = naviBarHolder.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown1");
+				var dropDown2 = naviBarHolder.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown2");
 				if (dropDown1 == null || dropDown2 == null) {
 					return;
 				}
@@ -127,7 +132,7 @@ namespace Codist.NaviBar
 				container.Children.Add(bar);
 				dropDown1.Visibility = Visibility.Hidden;
 				dropDown2.Visibility = Visibility.Hidden;
-				naviBar.Unloaded += ResurrectNaviBar_OnUnloaded;
+				naviBarHolder.Unloaded += ResurrectNaviBar_OnUnloaded;
 			}
 
 			// Fixes https://github.com/wmjordan/Codist/issues/131
@@ -142,7 +147,7 @@ namespace Codist.NaviBar
 				await Task.Delay(1000).ConfigureAwait(false);
 				await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				if (_View.VisualElement.IsVisible && _View.Properties.ContainsProperty(nameof(NaviBar)) == false) {
-					AddNaviBar(_View.VisualElement, e);
+					AddNaviBar(_View, e);
 				}
 			}
 		}

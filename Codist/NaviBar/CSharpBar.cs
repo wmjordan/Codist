@@ -28,7 +28,7 @@ namespace Codist.NaviBar
 		static string __ProjectWideSearchExpression;
 
 		readonly IAdornmentLayer _SyntaxNodeRangeAdornment;
-		readonly SemanticContext _SemanticContext;
+		SemanticContext _SemanticContext;
 
 		readonly RootItem _RootItem;
 		CancellationTokenSource _cancellationSource = new CancellationTokenSource();
@@ -36,16 +36,12 @@ namespace Codist.NaviBar
 		SymbolList _SymbolList;
 		ThemedImageButton _ActiveItem;
 
-		public CSharpBar(IWpfTextView textView) : base(textView) {
+		public CSharpBar(IWpfTextView view) : base(view) {
 			_SyntaxNodeRangeAdornment = View.GetAdornmentLayer(SyntaxNodeRange);
-			_SemanticContext = SemanticContext.GetOrCreateSingetonInstance(textView);
 			Name = nameof(CSharpBar);
+			BindView(view);
 			Items.Add(_RootItem = new RootItem(this));
-			View.Closed += ViewClosed;
-			View.TextBuffer.Changed += TextBuffer_Changed;
-			View.Selection.SelectionChanged += Update;
 			ListContainer.ChildRemoved += ListContainer_MenuRemoved;
-			Config.Updated += Config_Updated;
 			Update(this, EventArgs.Empty);
 		}
 
@@ -86,6 +82,24 @@ namespace Codist.NaviBar
 				_SyntaxNodeRangeAdornment.RemoveAllAdornments();
 				_MouseHoverItem = null;
 			}
+		}
+
+		internal protected override void BindView(IWpfTextView view) {
+			UnbindViewEvents();
+			View = view;
+			View.Closed += ViewClosed;
+			View.TextBuffer.Changed += TextBuffer_Changed;
+			View.Selection.SelectionChanged += Update;
+			Config.Updated += Config_Updated;
+			SyncHelper.CancelAndDispose(ref _cancellationSource, true);
+			_SemanticContext = SemanticContext.GetOrCreateSingetonInstance(view);
+		}
+
+		protected override void UnbindViewEvents() {
+			View.Selection.SelectionChanged -= Update;
+			View.TextBuffer.Changed -= TextBuffer_Changed;
+			Config.Updated -= Config_Updated;
+			View.Closed -= ViewClosed;
 		}
 
 		void HighlightNodeRanges(SyntaxNode node, SnapshotSpan span) {
@@ -241,11 +255,8 @@ namespace Codist.NaviBar
 		}
 
 		void ViewClosed(object sender, EventArgs e) {
-			View.Selection.SelectionChanged -= Update;
-			View.TextBuffer.Changed -= TextBuffer_Changed;
-			Config.Updated -= Config_Updated;
+			UnbindViewEvents();
 			SyncHelper.CancelAndDispose(ref _cancellationSource, false);
-			View.Closed -= ViewClosed;
 		}
 
 		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
