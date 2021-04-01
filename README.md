@@ -7,11 +7,11 @@ Codist 是一个致力于为 C# 程序员提供更佳的编码体验和效率的 Visual Studio 扩展。
 
 Check out this list to see what _Codist_ can do for you.
 
-* [Advanced Syntax Highlight](#advanced-c-syntax-highlight) items in ANY LANGUAGES (**new in version 5.6**), and [*Comment Tagger*](#comment-tagger-and-styles) highlights your `to-do` style comments
+* [Advanced Syntax Highlight](#advanced-c-syntax-highlight) items in ANY LANGUAGES, and [*Comment Tagger*](#comment-tagger-and-styles) highlights your `to-do` style comments
   ![](doc/feature-brief-syntax-highlight.png)
 * [Super Quick Info](#super-quick-info) with extended XML Doc, *Click and Go* to source code
   ![Feature Brief Super Quick Info](doc/feature-brief-super-quick-info.png)
-* [Navigation Bar](#navigation-bar) with a drag-and-drop and filter enabled member list (**new in version 5**)
+* [Navigation Bar](#navigation-bar) with a drag-and-drop and filter enabled member list
   ![Feature Brief Navigation Bar](doc/feature-brief-navigation-bar.png)
 * [Smart Bar](#smart-bar) with common edit commands and symbol reference analyzers
   ![Feature Brief Smart Bar](doc/feature-brief-smart-bar.png)
@@ -24,7 +24,7 @@ Check out this list to see what _Codist_ can do for you.
 * [Acknowledgements](#acknowledgements)
 * [License](#license), [Bugs and Sugguestions](#bugs-and-suggestions), [Donate](#support-codist-by-donation)
 
-From version 5.7 on, _Codist_ supports localization into other languages and it has both English and Chinese now.
+_Codist_ supports localization into other languages and it has both English and Chinese now.
 
 ![Feature overview](doc/preview.png)
 
@@ -32,7 +32,7 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
   The advanced syntax highlight function highlights every aspect of C# language elements with diverse styles, including using various font families and text styles, enlarging or shrinking font sizes, changing foreground or background colors and transparency.
 
-  From version 5.6 on, it is possible to change syntax highlight styles in any languages, such as Visual BASIC, F#, SASS, and so on, even if they are not recognized by Codist.
+  You can change syntax highlight styles in any languages, such as Visual BASIC, F#, SASS, and so on, even if they are not recognized by Codist.
 
   The following screenshots of the `TestPage.cs` file in the source code project demonstrates possible syntax highlight effects in the Light theme.
  
@@ -144,7 +144,7 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
   * **Quick Info item size**
     
-    From version 5 on, it is possible to limit the size of each Quick Info item, so they won't cover your whole screen. Previously, this feature works in C# editor only.
+    It is possible to limit the size of each Quick Info item, so they won't cover your whole screen. Previously, this feature works in C# editor only.
 
     By default, _Codist_ does not apply size limitations. You must manually set the _Max width_ and _Max height_ here. Extra height can be assigned to C# XML Documentations, so you can read more of them at a glance. If the contents exceed the width, they are wrapped, and scrollbars will appear when necessary, as the screenshot below demonstrates.
 
@@ -163,7 +163,7 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
   ![Super Quick Info - Click and Go](doc/super-quick-info-click-go.png)
 
-* From version 5.2 on, a **Context menu** with many symbol analysis commands will show up when you right click the signature of the symbol definition or any symbol that appears in the XML Doc.
+* A **Context menu** with many symbol analysis commands will show up when you right click the signature of the symbol definition or any symbol that appears in the XML Doc.
 
   ![Super Quick Info Csharp Menu](doc/super-quick-info-csharp-menu.png)
 
@@ -198,7 +198,7 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
     ![Super Quick Info - Override Exception](doc/super-quick-info-override-exception.png)
 
-   From version 5.2 on, _Codist_ shows XML Doc for those `namespace`s with an embedded `NamespaceDoc` class, like what is done in [SandCastle](https://github.com/EWSoftware/SHFB).
+   _Codist_ shows XML Doc for those `namespace`s with an embedded `NamespaceDoc` class, like what is done in [SandCastle](https://github.com/EWSoftware/SHFB).
 
    ![Super Quick Info Csharp Namespace](doc/super-quick-info-csharp-namespace.png)
 
@@ -260,36 +260,37 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
   ![Navigation Bar Overview](doc/navigation-bar-overview.png)
 
-  **Note**: From version 5.2 on, Navigation Bar not only works with C# code documents, but also Markdown documents.
-
-  Typically you can see three or four items on the bar.
-
-  1. **Namespace node**: the innermost namespace which contains the caret. On the above screen shot, it is the "`TestProject`" node.
-  2. **Type node**: the type which contains the caret. On the above screen shot, it is the "`MyStruct`" node.
-  3. **Region node**: when the caret is between `#region` and `#endregion`, this node appears. On the above screen shot, it is the "`Private fields`" node.
-  4. **Member node**: the member where the caret is in. This node is drawn highlighted. On the above screen shot, it is the "`Constant`" node.
+  **Note**: Navigation Bar works with both C# code documents and Markdown documents.
 
   Nodes on the _Navigation Bar_ are clickable.
 
-  1. Clicking on a **Namespace node** will popup a menu, displaying namespaces and types defined in the active document. You can click on those items and jump to the beginning of corresponding definitions.
-
-     From version 5 on, you can **drag and drop** items in the menu to reorder types within the document.
-
-     The number beneath the items indicates number of lines of the current code file.
-
-     ![Navigation Bar Namespace Types](doc/navigation-bar-namespace-types.png)
+  1. Clicking on the left-most **Document node** will popup a menu, displaying namespaces and types defined in the active document.
 
      On top of the menu there is a **Search Declaration** box, within which you can type and search declarations.
 
+     ![Navigation Bar Namespace Types](doc/navigation-bar-namespace-types.png)
+
      Besides the _Search Declaration_ box, there are three buttons. The first one is pressed by default, which restricts the search scope to active document. If the second one is pressed, it pops up the first button and expands the search scope to current project (see screen shot below). The third button clears the search box and reverts the items back to unfiltered namespaces and types.
+
+	 From version 5.10 on, you can press `-` or `=` key on your keyboard to switch search scope between current document and current project.
 
      ![Navigation Bar Search Declaration](doc/navigation-bar-search-declaration.png)
 
-     **Note**: From version 5 on, if the first character in the search box is an upper case one, the search will be **case-sensitive**, otherwise, it is case-insensitive.
+     **Note**: If the first character in the search box is an upper case one, the search will be **case-sensitive**, otherwise, it is case-insensitive.
 
-  2. Clicking on a **Type node** will popup a menu, displaying members and regions defined within the type. You can click on those items and jump to the definition of the corresponding member.
+     You can **drag and drop** items in the menu to reorder types within the document.
 
-     From version 5 on, you can **drag and drop** items in the menu to reorder members, nested types and `#region`s within the document. If a `partial` type spans over several code files, it is also possible to rearrange members among them.
+  2. Clicking on a **Namespace node** which follows the Document node will popup a menu, displaying namespaces and types defined in the corresponding namespace. You can click on those items and jump to the beginning of corresponding definitions.
+
+     There is also a search box in this menu, which filters content of the menu.
+
+     There are several buttons beside the search box. Numbers on the buttons counts corrsponding items within the type. Hover your mouse cursor over the button, you can read meanings of them. Pressing down those buttons filters members within the menu to corresponding ones.
+
+     You can right click items on the menu to bring out a context menu for curresponding members.
+
+  3. Clicking on a **Type node** will popup a menu, displaying members and regions defined within the type. You can click on those items and jump to the definition of the corresponding member.
+
+     You can **drag and drop** items in the menu to reorder members, nested types and `#region`s within the document. If a `partial` type spans over several code files, it is also possible to rearrange members among them.
 
      The number beneath the items indicates number of lines of the current type.
 
@@ -299,19 +300,9 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
      Field values and auto-property expressions are also displayed on this menu. So, you can read the initial value of fields immediately.
 
-     There is also a search box in this menu, which filters content of the menu.
-
-     **Note**: From version 5 on, if the first character in the search box is an upper case one, the search will be **case-sensitive**, otherwise, it is case-insensitive.
-
-     There are several buttons beside the search box. Numbers on the buttons counts corrsponding items within the type. Hover your mouse cursor over the button, you can read meanings of them. Pressing down those buttons filters members within the menu to corresponding ones.
-
-     From version 5 on, you can right click items on the menu to bring out a context menu for curresponding members.
-
      ![Navigation Bar Fields](doc/navigation-bar-context-menu.png)
 
-     From version 5.1 on, the right click menu includes symbol analysis commands.
-
-   3. Clicking on a **Member node** will select the whole member. If you have the _Smart Bar_ feature on and let it appear when selection is changed, _Smart Bar_ will be displayed and let you perform actions onto the member.
+   4. Clicking on a **Member node** will select the whole member. If you have the _Smart Bar_ feature on and let it appear when selection is changed, _Smart Bar_ will be displayed and let you perform actions onto the member.
 
       ![Navigation Bar Select](doc/navigation-bar-select.png)
 
@@ -339,7 +330,7 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
 ### Markdown Navigation Bar
 
-  The Markdown navigation bar introduced in version 5.2 lists all titles appear in a Markdown document.
+  The Markdown navigation bar lists all titles appear in a Markdown document.
 
   ![Navigation Bar Markdown](doc/navigation-bar-markdown.png)
 
@@ -359,7 +350,7 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
   ![Smart Bar](doc/smart-bar-2.png)
 
-  From version 5.2 on, there are multiple predefined **web search** commands in the menu when you right click the Find button, which will launch your browser to search the text you select in document window. So, it is handier to look for answers from the web or find code examples in _GitHub_.
+  There are multiple predefined **web search** commands in the menu when you right click the Find button, which will launch your browser to search the text you select in document window. So, it is handier to look for answers from the web or find code examples in _GitHub_.
 
   ![Smart Bar Search](doc/smart-bar-search.png)
 
@@ -399,7 +390,7 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
   ![Smart Bar Instance Producer](doc/smart-bar-instance-producer.png)
 
-  From version 5.2 on, there are two buttons on the top right corner in the result list of symbol analysis commands. The _Pin_ button will keep the list on the screen. And you can use your mouse to drag those lists around.
+  There are two buttons on the top right corner in the result list of symbol analysis commands. The _Pin_ button will keep the list on the screen. And you can use your mouse to drag those lists around.
 
 ### Symbol Marker
 
@@ -437,8 +428,6 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
   ![Smart Bar File Operations](doc/smart-bar-file-operations.png)
 
-  From version 4.4 on, some extra buttons will show up on _Smart Bar_ in C/C++ code windows.
-
 ## Scrollbar Marker
 
   _Scollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for the following syntax elements:
@@ -464,19 +453,19 @@ From version 5.7 on, _Codist_ supports localization into other languages and it 
 
   Programmers who do not like *ClearType* rendering, which made text blurry and colorful, may want to try _Force Grayscale Text Rendering_ options.
 
-  From version 5.7 on, it is possible to use Compact menu like _Visual Studio 2019_ in _Visual Studio 2017_. Simply checking the _Move main menu to title bar_ option will do.
+  It is possible to use Compact menu like _Visual Studio 2019_ in _Visual Studio 2017_. Simply checking the _Move main menu to title bar_ option will do.
 
   ![Compact Menu](doc/compact-menu.png)
 
 ## Codist in Your Language
 
-  From version 5.7 on, it is possible to localize _Codist_ to other language. Simplified Chinese (简体中文) and English are provided by default.
+  It is possible to localize _Codist_ to other language. Simplified Chinese (简体中文) and English are provided by default.
 
   The interface of _Codist_ will change according to the _International_ settings of _Visual Studio_.
 
 ## Other Features
 
-  From version 5 on, it is possible to output a time stamp after each build.
+  It is possible to output a time stamp after each build.
 
   For VSIX developers, there is also an option to automatically increment version number for your VSIX manifest file.
 
