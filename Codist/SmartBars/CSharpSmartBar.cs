@@ -175,7 +175,7 @@ namespace Codist.SmartBars
 				ctx.Sender.ContextMenu = m;
 				m.IsOpen = true;
 			});
-			if (Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) && Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
 				AddCommands(MyToolBar, IconIds.Marks, R.CMD_MarkSymbol, null, GetMarkerCommands);
 			}
 

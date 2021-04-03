@@ -1755,4 +1755,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_NamespaceMembers" xml:space="preserve">
     <value> 成员 {count}</value>
   </data>
+  <data name="T_SyntaxHighlightDisabled" xml:space="preserve">
+    <value>高级语法样式功能已被禁用。请先在 Codist 的选项中启用该功能，再配置语法样式。</value>
+  </data>
 </root>

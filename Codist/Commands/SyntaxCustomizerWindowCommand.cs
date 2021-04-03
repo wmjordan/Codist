@@ -3,6 +3,7 @@ using System.ComponentModel.Design;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
+using AppHelpers;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
@@ -28,6 +29,10 @@ namespace Codist.Commands
 		/// <param name="e">The event args.</param>
 		internal static void Execute(object sender, EventArgs e) {
 			ThreadHelper.ThrowIfNotOnUIThread();
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false) {
+				CodistPackage.ShowMessageBox(R.T_SyntaxHighlightDisabled, R.CMD_ConfigureSyntaxHighlight, true);
+				return;
+			}
 			if (_Window == null || _Window.IsVisible == false) {
 				var v = TextEditorHelper.GetActiveWpfDocumentView();
 				if (v == null) {

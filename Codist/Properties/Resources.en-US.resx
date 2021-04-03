@@ -1764,4 +1764,7 @@ Use space to separate multiple search terms.
   <data name="T_NamespaceMembers" xml:space="preserve">
     <value> members: {count}</value>
   </data>
+  <data name="T_SyntaxHighlightDisabled" xml:space="preserve">
+    <value>Codist Syntax Highlight feature is disabled. Turn it on before configuring syntax highlight styles.</value>
+  </data>
 </root>

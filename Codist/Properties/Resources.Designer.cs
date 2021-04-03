@@ -4908,6 +4908,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Codist Syntax Highlight feature is disabled. Turn it on before configuring syntax highlight styles. 的本地化字符串。
+        /// </summary>
+        internal static string T_SyntaxHighlightDisabled {
+            get {
+                return ResourceManager.GetString("T_SyntaxHighlightDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Syntax styles: 的本地化字符串。
         /// </summary>
         internal static string T_SyntaxStyles {
