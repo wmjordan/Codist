@@ -274,12 +274,24 @@ namespace Codist
 		/// <summary>Finds namespaces in related projects having the same fully qualified name.</summary>
 		/// <returns>Namespaces having the same name in current solution</returns>
 		public static async Task<ImmutableArray<INamespaceSymbol>> FindSimilarNamespacesAsync(this INamespaceSymbol symbol, Project project, CancellationToken cancellationToken = default) {
+			var r = ImmutableArray.CreateBuilder<INamespaceSymbol>();
+			if (symbol.IsGlobalNamespace) {
+				foreach (var p in GetRelatedProjects(project)) {
+					if (p.SupportsCompilation == false) {
+						continue;
+					}
+					var n = (await p.GetCompilationAsync(cancellationToken)).GlobalNamespace;
+					if (n != null) {
+						r.Add(n);
+					}
+				}
+				return r.ToImmutable();
+			}
 			var ns = ImmutableArray.CreateBuilder<string>();
 			do {
 				ns.Add(symbol.Name);
 			} while ((symbol = symbol.ContainingNamespace) != null && symbol.IsGlobalNamespace == false);
 			ns.Reverse();
-			var r = ImmutableArray.CreateBuilder<INamespaceSymbol>();
 			foreach (var p in GetRelatedProjects(project)) {
 				if (p.SupportsCompilation == false) {
 					continue;

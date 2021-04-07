@@ -191,7 +191,7 @@ namespace Codist.Controls
 			int defOrRef = 0;
 			foreach (var ns in await s.FindSimilarNamespacesAsync(context.Document.Project, cancellationToken)) {
 				foreach (var m in ns.GetMembers()) {
-					if (a.Add(m)) {
+					if (m.CanBeReferencedByName && m.IsImplicitlyDeclared == false && a.Add(m)) {
 						(m.IsNamespace ? nb : tb).Add(m);
 					}
 					continue;

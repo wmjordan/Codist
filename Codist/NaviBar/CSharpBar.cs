@@ -31,6 +31,7 @@ namespace Codist.NaviBar
 		SemanticContext _SemanticContext;
 
 		readonly RootItem _RootItem;
+		readonly GlobalNamespaceItem _GlobalNamespaceItem;
 		CancellationTokenSource _cancellationSource = new CancellationTokenSource();
 		NodeItem _MouseHoverItem;
 		SymbolList _SymbolList;
@@ -41,6 +42,7 @@ namespace Codist.NaviBar
 			Name = nameof(CSharpBar);
 			BindView(view);
 			Items.Add(_RootItem = new RootItem(this));
+			Items.Add(_GlobalNamespaceItem = new GlobalNamespaceItem(this));
 			ListContainer.ChildRemoved += ListContainer_MenuRemoved;
 			Update(this, EventArgs.Empty);
 		}
@@ -153,7 +155,7 @@ namespace Codist.NaviBar
 				int ic = Items.Count, c = Math.Min(ic, nodes.Length);
 				int i, i2;
 				#region Remove outdated nodes on NaviBar
-				const int FirstNodeIndex = 1;
+				const int FirstNodeIndex = 2; // exclude root and globalNs node
 				for (i = FirstNodeIndex, i2 = 0; i < c && i2 < c; i2++) {
 					if (token.IsCancellationRequested) {
 						return;
@@ -262,9 +264,10 @@ namespace Codist.NaviBar
 		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature == Features.NaviBar) {
 				for (int i = Items.Count - 1; i > 0; i--) {
-					if (Items[i] is RootItem == false) {
-						Items.RemoveAt(i);
+					if (Items[i] is GlobalNamespaceItem) {
+						break;
 					}
+					Items.RemoveAt(i);
 				}
 				Update(this, EventArgs.Empty);
 			}
@@ -448,7 +451,7 @@ namespace Codist.NaviBar
 			IReadOnlyCollection<ISymbol> _IncrementalSearchContainer;
 			string _PreviousSearchKeywords;
 
-			public RootItem(CSharpBar bar) : base(bar, IconIds.File, new ThemedToolBarText()) {
+			public RootItem(CSharpBar bar) : base(bar, IconIds.Search, new ThemedToolBarText()) {
 				_Menu = new SymbolList(bar._SemanticContext) {
 					Container = Bar.ListContainer,
 					ContainerType = SymbolListType.NodeList,
@@ -698,6 +701,75 @@ namespace Codist.NaviBar
 					};
 				}
 			}
+		}
+
+		sealed class GlobalNamespaceItem : BarItem
+		{
+			SymbolList _Menu;
+			SymbolFilterBox _FilterBox;
+
+			public GlobalNamespaceItem(CSharpBar bar) : base(bar, IconIds.GlobalNamespace, new ThemedToolBarText()) {
+				Click += HandleClick;
+				this.UseDummyToolTip();
+			}
+
+			public override BarItemType ItemType => BarItemType.GlobalNamespace;
+
+			async void HandleClick(object sender, RoutedEventArgs e) {
+				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
+				if (_Menu != null && Bar._SymbolList == _Menu) {
+					Bar.HideMenu();
+					return;
+				}
+				var ct = Bar._cancellationSource.GetToken();
+				try {
+					await CreateMenuForGlobalNamespaceNodeAsync(ct);
+					_FilterBox.UpdateNumbers(_Menu.Symbols);
+					Bar.ShowMenu(this, _Menu);
+				}
+				catch (OperationCanceledException) {
+					// ignore
+				}
+			}
+
+			async Task CreateMenuForGlobalNamespaceNodeAsync(CancellationToken cancellationToken) {
+				if (_Menu != null) {
+					((TextBlock)_Menu.Footer).Clear();
+					await RefreshItemsAsync(cancellationToken);
+					return;
+				}
+				_Menu = new SymbolList(Bar._SemanticContext) {
+					Container = Bar.ListContainer,
+					ContainerType = SymbolListType.TypeList,
+					ExtIconProvider = ExtIconProvider.Default.GetExtIcons,
+					EnableVirtualMode = true
+				};
+				_Menu.Header = _FilterBox = new SymbolFilterBox(_Menu);
+				_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
+					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
+				Bar.SetupSymbolListMenu(_Menu);
+				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
+				var d = Bar._SemanticContext.Document;
+				if (d != null) {
+					await SymbolCommands.AddNamespacesAndTypesAsync(Bar._SemanticContext, (await d.Project.GetCompilationAsync(cancellationToken)).GlobalNamespace, _Menu, cancellationToken);
+				}
+			}
+
+			async Task RefreshItemsAsync(CancellationToken cancellationToken) {
+				var ctx = Bar._SemanticContext;
+				var sm = ctx.SemanticModel;
+				await ctx.UpdateAsync(cancellationToken).ConfigureAwait(true);
+				if (sm != ctx.SemanticModel) {
+					_Menu.Clear();
+					var d = ctx.Document;
+					if (d != null) {
+						await SymbolCommands.AddNamespacesAndTypesAsync(ctx, (await d.Project.GetCompilationAsync(cancellationToken)).GlobalNamespace, _Menu, cancellationToken);
+					}
+
+					_Menu.RefreshItemsSource(true);
+				}
+			}
+
 		}
 
 		sealed class NamespaceItem : BarItem, IContextMenuHost
@@ -1282,7 +1354,7 @@ namespace Codist.NaviBar
 
 		enum BarItemType
 		{
-			Root, Namespace, Node
+			Root, GlobalNamespace, Namespace, Node
 		}
 		enum MemberListOptions
 		{
