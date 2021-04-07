@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -264,8 +265,9 @@ namespace Codist.Margins
 				var snapshotLength = snapshot.Length;
 				var memberLevel = 0;
 				var memberType = CodeMemberType.Root;
-				var lastLabel = Double.MinValue;
 				SnapshotPoint rangeFrom = default, rangeTo = default;
+				var dt = ImmutableArray.CreateBuilder<DrawText>();
+				double y1, y2;
 
 				foreach (var tag in tags) {
 					if (_Element._Cancellation?.IsCancellationRequested != false) {
@@ -283,53 +285,52 @@ namespace Codist.Margins
 					var end = new SnapshotPoint(snapshot, span.End);
 					var start = new SnapshotPoint(snapshot, span.Start);
 					var level = tag.Tag.Level;
+					Pen pen;
 					if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LongMemberDeclaration) && span.Length > 150 && tagType.IsMember()) {
 						var lineCount = snapshot.GetLineNumberFromPosition(end) - snapshot.GetLineNumberFromPosition(start);
-						var y1 = _ScrollBar.GetYCoordinateOfBufferPosition(start);
-						Pen pen = null;
-						var y2 = _ScrollBar.GetYCoordinateOfBufferPosition(end);
+						y1 = _ScrollBar.GetYCoordinateOfBufferPosition(start);
+						y2 = _ScrollBar.GetYCoordinateOfBufferPosition(end);
+						pen = null;
 						if (lineCount >= longDeclarationLines) {
 							pen = _Element.GetPenForCodeMemberType(tagType);
 							drawingContext.DrawLine(pen, new Point(level, y1), new Point(_Element.ActualWidth, y1));
 							drawingContext.DrawLine(pen, new Point(level, y1), new Point(level, y2));
 							drawingContext.DrawLine(pen, new Point(level, y2), new Point(_Element.ActualWidth, y2));
 						}
-						if (y2 - y1 > showMemberDeclarationThredshold && y1 > lastLabel && tag.Tag.Name != null) {
+						y2 -= y1;
+						if (y2 > showMemberDeclarationThredshold && tag.Tag.Name != null) {
 							if (pen == null) {
 								pen = _Element.GetPenForCodeMemberType(tagType);
 							}
 							if (pen.Brush != null) {
-								text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Alpha((y2 - y1) * 20 / _Element.ActualHeight));
-								y1 -= text.Height / 2;
-								drawingContext.DrawText(text, new Point(level + 2, y1));
+								text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Alpha(y2 / _Element.ActualHeight * 0.5 + 0.5));
+								dt.Add(new DrawText(text, y2, new Point(level + 2, y1 -= text.Height / 2)));
 							}
-							lastLabel = y1 + labelSize;
 						}
 					}
 
 					if (tagType.IsType()) {
 						if (memberType.IsMember()) {
 							// draw range for previous grouped members
-							var y1 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
-							var y2 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeTo);
+							y1 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
+							y2 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeTo);
 							drawingContext.DrawLine(_Element.GetPenForCodeMemberType(memberType), new Point(memberLevel, y1), new Point(memberLevel, y2));
 						}
 						// draw type declaration line
-						var pen = _Element.GetPenForCodeMemberType(tagType);
-						var yTop = _ScrollBar.GetYCoordinateOfBufferPosition(start);
-						var yBottom = _ScrollBar.GetYCoordinateOfBufferPosition(end);
-						drawingContext.DrawRectangle(pen.Brush.Alpha(1), pen, new Rect(level - (MarkerSize / 2), yTop - (MarkerSize / 2), MarkerSize, MarkerSize));
-						drawingContext.DrawLine(pen, new Point(level, yTop), new Point(level, yBottom));
-						if (yTop > lastLabel && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Tag.Name != null) {
+						pen = _Element.GetPenForCodeMemberType(tagType);
+						y1 = _ScrollBar.GetYCoordinateOfBufferPosition(start);
+						y2 = _ScrollBar.GetYCoordinateOfBufferPosition(end);
+						drawingContext.DrawRectangle(pen.Brush.Alpha(1), pen, new Rect(level - (MarkerSize / 2), y1 - (MarkerSize / 2), MarkerSize, MarkerSize));
+						drawingContext.DrawLine(pen, new Point(level, y1), new Point(level, y2));
+						if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.TypeDeclaration) && tag.Tag.Name != null) {
 							// draw type name
 							text = WpfHelper.ToFormattedText(tag.Tag.Name, labelSize, pen.Brush.Alpha(1))
 								.SetBold();
 							if (level != 1) {
 								text.SetFontStyle(FontStyles.Italic);
 							}
-							yTop -= text.Height / 2;
-							drawingContext.DrawText(text, new Point(level + 1, yTop));
-							lastLabel = yTop + text.Height;
+							y2 -= y1;
+							dt.Add(new DrawText(text, y2, new Point(level + 1, y1 -= text.Height / 2)));
 						}
 						// mark the beginning of the range
 						memberType = tagType;
@@ -355,8 +356,8 @@ namespace Codist.Margins
 					else {
 						if (memberType.IsMember()) {
 							// draw range for previous grouped members
-							var y1 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
-							var y2 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeTo);
+							y1 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
+							y2 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeTo);
 							drawingContext.DrawLine(_Element.GetPenForCodeMemberType(memberType), new Point(level, y1), new Point(level, y2));
 						}
 						memberType = tagType;
@@ -367,9 +368,52 @@ namespace Codist.Margins
 				}
 				if (memberType.IsMember()) {
 					// draw range for previous grouped members
-					var y1 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
-					var y2 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeTo);
+					y1 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeFrom);
+					y2 = _ScrollBar.GetYCoordinateOfBufferPosition(rangeTo);
 					drawingContext.DrawLine(_Element.GetPenForCodeMemberType(memberType), new Point(memberLevel, y1), new Point(memberLevel, y2));
+				}
+				// adjust and write text on scrollbar margins
+				var tc = dt.Count;
+				switch (tc) {
+					case 0: break;
+					case 1:
+						drawingContext.DrawText(dt[0].Text, dt[0].Point);
+						break;
+					default:
+						DrawText t, tPrev = dt[0];
+						for (int i = 0; ++i < tc;) {
+							t = dt[i];
+							// no overlapped
+							if (t.Point.Y >= tPrev.Point.Y + tPrev.Text.Height * 0.7) {
+								drawingContext.DrawText(tPrev.Text, tPrev.Point);
+								tPrev = t;
+								continue;
+							}
+							if (tPrev.YSpan >= t.YSpan) {
+								drawingContext.DrawText(tPrev.Text, tPrev.Point);
+								tPrev = t;
+							}
+						}
+						t = dt[tc - 1];
+						drawingContext.DrawText(tPrev.Text, tPrev.Point);
+						if (t != tPrev) {
+							drawingContext.DrawText(t.Text, t.Point.Y >= tPrev.Point.Y + tPrev.Text.Height * 0.7 ? t.Point : new Point(t.Point.X, t.Point.Y + t.Text.Height / 2));
+						}
+						break;
+				}
+			}
+
+			[System.Diagnostics.DebuggerDisplay("{Text.Text} {YSpan} {Point}")]
+			sealed class DrawText
+			{
+				public readonly FormattedText Text;
+				public readonly Point Point;
+				public readonly double YSpan;
+
+				public DrawText(FormattedText text, double ySpan, Point point) {
+					Text = text;
+					Point = point;
+					YSpan = ySpan;
 				}
 			}
 		}
