@@ -39,7 +39,7 @@ namespace Codist.Controls
 			_Container = new Grid {
 				ColumnDefinitions = {
 					new ColumnDefinition { Width = new GridLength(PlaceHolderSize) },
-					new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
+					new ColumnDefinition { }
 				}
 			};
 			Child = _Container;
