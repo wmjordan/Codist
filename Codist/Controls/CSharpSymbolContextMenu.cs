@@ -190,9 +190,17 @@ namespace Codist.Controls
 				case SyntaxKind.IsExpression:
 				case SyntaxKind.IsPatternExpression:
 				case SyntaxKind.AsExpression:
+				case SyntaxKind.InvocationExpression:
 					return true;
+				case SyntaxKind.GenericName:
+					return p.Parent.IsKind(SyntaxKind.ObjectCreationExpression) || IsTypeReference(p);
 				case SyntaxKind.TypeArgumentList:
-					return (p = p.Parent).IsKind(SyntaxKind.GenericName) && ((p = p.Parent.UnqualifyExceptNamespace()).IsKind(SyntaxKind.SimpleMemberAccessExpression) || p.IsKind(SyntaxKind.ObjectCreationExpression));
+					p = p.Parent;
+					goto case SyntaxKind.GenericName;
+				case SyntaxKind.QualifiedName:
+					return IsTypeReference(p);
+				case SyntaxKind.DeclarationPattern:
+					return p.Parent.IsKind(SyntaxKind.IsPatternExpression) || p.Parent.IsKind(SyntaxKind.CasePatternSwitchLabel);
 			}
 			return false;
 		}
