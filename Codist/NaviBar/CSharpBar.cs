@@ -19,6 +19,7 @@ using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
+using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist.NaviBar
 {
@@ -593,35 +594,38 @@ namespace Codist.NaviBar
 				_FinderBox.Focus();
 			}
 
-			void SearchCriteriaChanged(object sender, EventArgs e) {
+			async void SearchCriteriaChanged(object sender, EventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
-				_Menu.ItemsSource = null;
-				_Menu.Clear();
-				var s = _FinderBox.Text.Trim();
-				if (s.Length == 0) {
-					_Menu.ContainerType = SymbolListType.NodeList;
-					ShowNamespaceAndTypeMenu((int)ScopeType.Undefined);
-					_IncrementalSearchContainer = null;
-					_PreviousSearchKeywords = null;
-					if (String.IsNullOrWhiteSpace(__ProjectWideSearchExpression) == false && sender == _ScopeBox) {
-						SetAndSelectFinderText();
-					}
-					else if (_ScopeBox.Filter != ScopeType.ActiveDocument) {
-						__ProjectWideSearchExpression = String.Empty;
-					}
-					return;
-				}
-				_Menu.ContainerType = SymbolListType.None;
+				var ct = Bar._cancellationSource.GetToken();
 				try {
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
+					_Menu.ItemsSource = null;
+					_Menu.Clear();
+					var s = _FinderBox.Text.Trim();
+					if (s.Length == 0) {
+						_Menu.ContainerType = SymbolListType.NodeList;
+						ShowNamespaceAndTypeMenu((int)ScopeType.Undefined);
+						_IncrementalSearchContainer = null;
+						_PreviousSearchKeywords = null;
+						if (String.IsNullOrWhiteSpace(__ProjectWideSearchExpression) == false && sender == _ScopeBox) {
+							SetAndSelectFinderText();
+						}
+						else if (_ScopeBox.Filter != ScopeType.ActiveDocument) {
+							__ProjectWideSearchExpression = String.Empty;
+						}
+						return;
+					}
+					_Menu.ContainerType = SymbolListType.None;
 					switch (_ScopeBox.Filter) {
 						case ScopeType.ActiveDocument:
-							FindInDocument(s);
+							FindInDocument(s, ct);
 							break;
 						case ScopeType.ActiveProject:
 							__ProjectWideSearchExpression = s;
-							FindInProject(s);
+							await FindInProjectAsync(s, ct);
 							break;
 					}
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
 					_Menu.RefreshItemsSource();
 					_Menu.UpdateLayout();
 				}
@@ -647,18 +651,17 @@ namespace Codist.NaviBar
 					}
 				}
 			}
-			void FindInDocument(string text) {
-				var cancellationToken = Bar._cancellationSource.GetToken();
+			void FindInDocument(string text, CancellationToken token) {
 				var filter = CodeAnalysisHelper.CreateNameFilter(text, false, Char.IsUpper(text[0]));
-				foreach (var item in Bar._SemanticContext.Compilation.GetDecendantDeclarations(cancellationToken)) {
+				foreach (var item in Bar._SemanticContext.Compilation.GetDecendantDeclarations(token)) {
 					if (filter(item.GetDeclarationSignature())) {
 						var i = _Menu.Add(item);
 						i.Content = SetHeader(item, true, false, true);
 					}
 				}
 			}
-			void FindInProject(string text) {
-				SyncHelper.RunSync(() => FindDeclarationsAsync(text, Bar._cancellationSource.GetToken()));
+			async Task FindInProjectAsync(string text, CancellationToken token) {
+				await FindDeclarationsAsync(text, token);
 			}
 
 			async Task FindDeclarationsAsync(string symbolName, CancellationToken token) {
@@ -751,7 +754,9 @@ namespace Codist.NaviBar
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
 				var d = Bar._SemanticContext.Document;
 				if (d != null) {
-					await SymbolCommands.AddNamespacesAndTypesAsync(Bar._SemanticContext, (await d.Project.GetCompilationAsync(cancellationToken)).GlobalNamespace, _Menu, cancellationToken);
+					var items = await SymbolCommands.AddNamespacesAndTypesAsync(Bar._SemanticContext, (await d.Project.GetCompilationAsync(cancellationToken)).GlobalNamespace, cancellationToken);
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
+					_Menu.AddNamespaceItems(items);
 				}
 			}
 
@@ -763,7 +768,9 @@ namespace Codist.NaviBar
 					_Menu.Clear();
 					var d = ctx.Document;
 					if (d != null) {
-						await SymbolCommands.AddNamespacesAndTypesAsync(ctx, (await d.Project.GetCompilationAsync(cancellationToken)).GlobalNamespace, _Menu, cancellationToken);
+						var items = await SymbolCommands.AddNamespacesAndTypesAsync(ctx, (await d.Project.GetCompilationAsync(cancellationToken)).GlobalNamespace,cancellationToken);
+						await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
+						_Menu.AddNamespaceItems(items);
 					}
 
 					_Menu.RefreshItemsSource(true);
@@ -834,19 +841,23 @@ namespace Codist.NaviBar
 				_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
 					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
 				Bar.SetupSymbolListMenu(_Menu);
-				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
-				await SymbolCommands.AddNamespacesAndTypesAsync(Bar._SemanticContext, _Symbol as INamespaceSymbol, _Menu, cancellationToken);
+				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(false);
+				var items = await SymbolCommands.AddNamespacesAndTypesAsync(Bar._SemanticContext, _Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
+				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
+				_Menu.AddNamespaceItems(items);
 			}
 
 			async Task RefreshItemsAsync(CancellationToken cancellationToken) {
 				var ctx = Bar._SemanticContext;
 				var sm = ctx.SemanticModel;
-				await ctx.UpdateAsync(cancellationToken).ConfigureAwait(true);
+				await ctx.UpdateAsync(cancellationToken).ConfigureAwait(false);
 				if (sm != ctx.SemanticModel) {
 					_Menu.Clear();
-					_Symbol = await ctx.RelocateSymbolAsync(_Symbol, cancellationToken);
+					_Symbol = await ctx.RelocateSymbolAsync(_Symbol, cancellationToken).ConfigureAwait(false);
 					//_Node = Bar._SemanticContext.RelocateDeclarationNode(_Node);
-					await SymbolCommands.AddNamespacesAndTypesAsync(ctx, _Symbol as INamespaceSymbol, _Menu, cancellationToken);
+					var items = await SymbolCommands.AddNamespacesAndTypesAsync(ctx, _Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
+					_Menu.AddNamespaceItems(items);
 					_Menu.RefreshItemsSource(true);
 				}
 			}

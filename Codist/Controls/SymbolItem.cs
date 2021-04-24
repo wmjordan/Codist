@@ -91,7 +91,7 @@ namespace Codist.Controls
 			if (Symbol != null) {
 				RefreshSymbol();
 				if (Symbol.Kind == SymbolKind.Namespace) {
-					Container.SemanticContext.FindMembers(Symbol, _Content.GetParent<ListBoxItem>().NullIfMouseOver());
+					SyncHelper.RunSync(() => Container.SemanticContext.FindMembersAsync(Symbol, _Content.GetParent<ListBoxItem>().NullIfMouseOver()));
 					return false;
 				}
 				var s = Symbol.GetSourceReferences();

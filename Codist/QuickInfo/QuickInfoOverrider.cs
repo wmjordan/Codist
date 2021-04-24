@@ -15,6 +15,7 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using R = Codist.Properties.Resources;
+using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist.QuickInfo
 {
@@ -109,11 +110,13 @@ namespace Codist.QuickInfo
 			void RemoveSymbolHighlight(object sender, MouseEventArgs e) {
 				((TextBlock)sender).Background = Brushes.Transparent;
 			}
-			void ShowContextMenu(object sender, ContextMenuEventArgs e) {
+			async void ShowContextMenu(object sender, ContextMenuEventArgs e) {
+				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				var s = sender as FrameworkElement;
 				if (s.ContextMenu == null) {
 					var ctx = SemanticContext.GetOrCreateSingetonInstance(quickInfoSession.TextView as IWpfTextView);
-					SyncHelper.RunSync(() => ctx.UpdateAsync(textBuffer, default));
+					await ctx.UpdateAsync(textBuffer, default);
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 					var m = new CSharpSymbolContextMenu(ctx) {
 						Symbol = symbol,
 						SyntaxNode = symbol.GetSyntaxNode()
@@ -127,6 +130,7 @@ namespace Codist.QuickInfo
 					m.ItemClicked += HideQuickInfo;
 					s.ContextMenu = m;
 				}
+				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				HoldQuickInfo(s, true);
 				s.ContextMenu.IsOpen = true;
 			}

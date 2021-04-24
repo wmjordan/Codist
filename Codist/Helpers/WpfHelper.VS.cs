@@ -14,6 +14,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
+using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist
 {
@@ -238,6 +239,7 @@ namespace Codist
 					MouseEnter += InitInteraction;
 				}
 				ToolTip = String.Empty;
+				MouseRightButtonDown += LinkContextMenu;
 			}
 
 			void InitInteraction(object sender, MouseEventArgs e) {
@@ -256,15 +258,16 @@ namespace Codist
 					ToolTip = ToolTipFactory.CreateToolTip(_Symbol, false, SemanticContext.GetHovered());
 				}
 			}
-			protected override void OnMouseRightButtonDown(MouseButtonEventArgs e) {
-				base.OnMouseRightButtonDown(e);
+			async void LinkContextMenu(object sender, MouseButtonEventArgs e) {
+				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {
 					//ContextMenu.IsOpen = true;
 					return;
 				}
 				var ctx = SemanticContext.GetHovered();
 				if (ctx != null) {
-					SyncHelper.RunSync(() => ctx.UpdateAsync(default));
+					await ctx.UpdateAsync(default);
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 					var m = new CSharpSymbolContextMenu(ctx) {
 						Symbol = _Symbol,
 						SyntaxNode = _Symbol.GetSyntaxNode()

@@ -102,11 +102,12 @@ namespace Codist.Controls
 		}
 
 		#region Analysis commands
-
-		internal (int count, int external) AddSymbolMembers(ISymbol symbol) {
-			if (symbol.Kind == SymbolKind.Namespace) {
-				return (SyncHelper.RunSync(() => SymbolCommands.AddNamespacesAndTypesAsync(SemanticContext, symbol as INamespaceSymbol, this, default)), 0);
+		internal void AddNamespaceItems(ISymbol[] symbols) {
+			foreach (var item in symbols) {
+				Add(item, false);
 			}
+		}
+		internal (int count, int external) AddSymbolMembers(ISymbol symbol) {
 			var count = AddSymbolMembers(symbol, null);
 			var mi = 0;
 			var type = symbol as INamedTypeSymbol;

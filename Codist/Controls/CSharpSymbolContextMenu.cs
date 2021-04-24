@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Task = System.Threading.Tasks.Task;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
@@ -88,7 +89,7 @@ namespace Codist.Controls
 					CreateCommandForNamedType(_Symbol as INamedTypeSymbol);
 					break;
 				case SymbolKind.Namespace:
-					Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembers, () => _SemanticContext.FindMembers(_Symbol)));
+					Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembers, () => _SemanticContext.FindMembersAsync(_Symbol)));
 					break;
 			}
 			if (_SemanticContext.SemanticModel != null) {
@@ -104,14 +105,15 @@ namespace Codist.Controls
 
 		private void CreateCommandForMembers() {
 			if (_Symbol.Kind != SymbolKind.Method || IsExternallyCallable(((IMethodSymbol)_Symbol).MethodKind)) {
-				Items.Add(CreateItem(IconIds.FindReferrers, R.CMD_FindReferrers, () => _SemanticContext.FindReferrers(_Symbol, Keyboard.Modifiers == ModifierKeys.Control ? (Predicate<ISymbol>)(s => s == _Symbol) : null)));
+				var filter = Keyboard.Modifiers == ModifierKeys.Control ? (Predicate<ISymbol>)(s => s == _Symbol) : null;
+				Items.Add(CreateItem(IconIds.FindReferrers, R.CMD_FindReferrers, () => _SemanticContext.FindReferrersAsync(_Symbol, filter)));
 			}
 			if (_Symbol.MayHaveOverride()) {
-				Items.Add(CreateItem(IconIds.FindOverloads, R.CMD_FindOverrides, () => _SemanticContext.FindOverrides(_Symbol)));
+				Items.Add(CreateItem(IconIds.FindOverloads, R.CMD_FindOverrides, () => _SemanticContext.FindOverridesAsync(_Symbol)));
 			}
 			var st = _Symbol.ContainingType;
 			if (st != null && st.TypeKind == TypeKind.Interface) {
-				Items.Add(CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, () => _SemanticContext.FindImplementations(_Symbol)));
+				Items.Add(CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, () => _SemanticContext.FindImplementationsAsync(_Symbol)));
 			}
 			if (_Symbol.Kind != SymbolKind.Event) {
 				CreateCommandsForReturnTypeCommand();
@@ -150,31 +152,31 @@ namespace Codist.Controls
 				if (ctor != null) {
 					var symbol = _SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(ctor);
 					if (symbol != null) {
-						Items.Add(CreateItem(IconIds.FindReferrers, R.CMD_FindCallers, () => _SemanticContext.FindReferrers(symbol)));
+						Items.Add(CreateItem(IconIds.FindReferrers, R.CMD_FindCallers, () => _SemanticContext.FindReferrersAsync(symbol)));
 					}
 				}
 				else if (t.InstanceConstructors.Length > 0) {
-					Items.Add(CreateItem(IconIds.FindReferrers, R.CMD_FindConstructorCallers, () => _SemanticContext.FindReferrers(t, s => s.Kind == SymbolKind.Method)));
+					Items.Add(CreateItem(IconIds.FindReferrers, R.CMD_FindConstructorCallers, () => _SemanticContext.FindReferrersAsync(t, s => s.Kind == SymbolKind.Method)));
 				}
 			}
-			Items.Add(CreateItem(IconIds.FindTypeReferrers, R.CMD_FindTypeReferrers, () => _SemanticContext.FindReferrers(t, s => s.Kind == SymbolKind.NamedType, IsTypeReference)));
-			Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembers, () => _SemanticContext.FindMembers(t)));
+			Items.Add(CreateItem(IconIds.FindTypeReferrers, R.CMD_FindTypeReferrers, () => _SemanticContext.FindReferrersAsync(t, s => s.Kind == SymbolKind.NamedType, IsTypeReference)));
+			Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembers, () => _SemanticContext.FindMembersAsync(t)));
 			if (t.IsStatic) {
 				return;
 			}
 			if (t.IsSealed == false) {
 				if (t.TypeKind == TypeKind.Class) {
-					Items.Add(CreateItem(IconIds.FindDerivedTypes, R.CMD_FindDerivedClasses, () => _SemanticContext.FindDerivedClasses(t)));
+					Items.Add(CreateItem(IconIds.FindDerivedTypes, R.CMD_FindDerivedClasses, () => _SemanticContext.FindDerivedClassesAsync(t)));
 				}
 				else if (t.TypeKind == TypeKind.Interface) {
-					Items.Add(CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, () => _SemanticContext.FindImplementations(t)));
-					Items.Add(CreateItem(IconIds.FindDerivedTypes, R.CMD_FindInheritedInterfaces, () => _SemanticContext.FindSubInterfaces(t)));
+					Items.Add(CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, () => _SemanticContext.FindImplementationsAsync(t)));
+					Items.Add(CreateItem(IconIds.FindDerivedTypes, R.CMD_FindInheritedInterfaces, () => _SemanticContext.FindSubInterfacesAsync(t)));
 				}
 			}
 			if (t.TypeKind == TypeKind.Delegate) {
 				Items.Add(CreateItem(IconIds.FindMethodsMatchingSignature, R.CMD_FindMethodsSameSignature, () => _SemanticContext.FindMethodsBySignature(_Symbol)));
 			}
-			Items.Add(CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensions, () => _SemanticContext.FindExtensionMethods(t)));
+			Items.Add(CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensions, () => _SemanticContext.FindExtensionMethodsAsync(t)));
 			if (t.SpecialType == SpecialType.None) {
 				CreateInstanceCommandsForType(t);
 			}
@@ -209,9 +211,9 @@ namespace Codist.Controls
 			var type = _Symbol.GetReturnType();
 			if (type != null && type.SpecialType == SpecialType.None && type.TypeKind != TypeKind.TypeParameter && type.IsTupleType == false) {
 				var et = type.ResolveElementType();
-				Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf.Replace("<TYPE>", et.Name + et.GetParameterString()), () => _SemanticContext.FindMembers(et)));
+				Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf.Replace("<TYPE>", et.Name + et.GetParameterString()), () => _SemanticContext.FindMembersAsync(et)));
 				if (type.IsStatic == false) {
-					Items.Add(CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor.Replace("<TYPE>", type.GetTypeName()), () => _SemanticContext.FindExtensionMethods(type)));
+					Items.Add(CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor.Replace("<TYPE>", type.GetTypeName()), () => _SemanticContext.FindExtensionMethodsAsync(type)));
 				}
 				if (et.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 					Items.Add(CreateItem(IconIds.GoToReturnType, R.CMD_GoTo.Replace("<TYPE>", et.GetTypeName()), () => et.GoToSource()));
@@ -261,6 +263,15 @@ namespace Codist.Controls
 			return item;
 		}
 
+		public MenuItem CreateItem(int imageId, string title, Func<Task> asyncAction) {
+			var item = CreateItem(imageId, title);
+			item.Click += Item_Click;
+			if (asyncAction != null) {
+				item.Click += new AsyncCommand(asyncAction).AsyncEventHandler;
+			}
+			return item;
+		}
+
 		public MenuItem CreateItem(int imageId, Action<MenuItem> itemConfigurator, Action clickHandler) {
 			var item = new MenuItem { Icon = ThemeHelper.GetImage(imageId) };
 			itemConfigurator(item);
@@ -276,8 +287,8 @@ namespace Codist.Controls
 		}
 
 		void CreateInstanceCommandsForType(INamedTypeSymbol t) {
-			Items.Add(CreateItem(IconIds.InstanceProducer, R.CMD_FindInstanceProducer, () => _SemanticContext.FindInstanceProducer(t)));
-			Items.Add(CreateItem(IconIds.Argument, R.CMD_FindInstanceAsParameter, () => _SemanticContext.FindInstanceAsParameter(t)));
+			Items.Add(CreateItem(IconIds.InstanceProducer, R.CMD_FindInstanceProducer, () => _SemanticContext.FindInstanceProducerAsync(t)));
+			Items.Add(CreateItem(IconIds.Argument, R.CMD_FindInstanceAsParameter, () => _SemanticContext.FindInstanceAsParameterAsync(t)));
 		}
 
 		void FindReferencedSymbols() {
@@ -394,6 +405,18 @@ namespace Codist.Controls
 
 			public abstract bool QueryStatus();
 			public abstract void Execute();
+		}
+
+		sealed class AsyncCommand
+		{
+			readonly Func<Task> _Task;
+
+			public AsyncCommand(Func<Task> action) {
+				_Task = action;
+			}
+			public async void AsyncEventHandler(object sender, RoutedEventArgs args) {
+				await Task.Run(_Task);
+			}
 		}
 	}
 
