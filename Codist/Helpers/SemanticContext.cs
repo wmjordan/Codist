@@ -136,7 +136,7 @@ namespace Codist
 			var root = Compilation;
 			if (String.Equals(node.SyntaxTree.FilePath, SemanticModel.SyntaxTree.FilePath, StringComparison.OrdinalIgnoreCase) == false) {
 				// not the same document
-				if ((root = GetDocument(node.SyntaxTree)?.GetSemanticModelAsync().Result.SyntaxTree.GetCompilationUnitRoot()) == null) {
+				if ((root = SyncHelper.RunSync(() => GetDocument(node.SyntaxTree)?.GetSemanticModelAsync())?.SyntaxTree.GetCompilationUnitRoot()) == null) {
 					// document no longer exists
 					return null;
 				}
@@ -157,7 +157,13 @@ namespace Codist
 				case 0: return match;
 			}
 			matches = matches.FindAll(i => i.MatchAncestorDeclaration(node));
-			return matches.Count >= 1 ? matches[0] : match;
+			switch (matches.Count) {
+				case 1: return matches[0];
+				case 0: return match;
+				default:
+					var p = node.SpanStart;
+					return matches.OrderBy(i => Math.Abs(i.SpanStart - p)).First();
+			}
 		}
 
 		/// <summary>Locates document despite of version changes.</summary>
