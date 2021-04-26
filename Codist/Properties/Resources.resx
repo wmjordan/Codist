@@ -1767,4 +1767,16 @@ Use space to separate multiple search terms.
   <data name="T_SyntaxHighlightDisabled" xml:space="preserve">
     <value>Codist Syntax Highlight feature is disabled. Turn it on before configuring syntax highlight styles.</value>
   </data>
+  <data name="T_Condensed" xml:space="preserve">
+    <value>Condensed</value>
+  </data>
+  <data name="T_Expanded" xml:space="preserve">
+    <value>Expanded</value>
+  </data>
+  <data name="T_Normal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="T_Stretch" xml:space="preserve">
+    <value>Stretch:</value>
+  </data>
 </root>

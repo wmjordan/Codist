@@ -3743,6 +3743,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Condensed 的本地化字符串。
+        /// </summary>
+        internal static string T_Condensed {
+            get {
+                return ResourceManager.GetString("T_Condensed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Codist configuration file|*.json|All files|*.* 的本地化字符串。
         /// </summary>
         internal static string T_ConfigFileFilter {
@@ -4018,6 +4027,15 @@ namespace Codist.Properties {
         internal static string T_Exception {
             get {
                 return ResourceManager.GetString("T_Exception", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Expanded 的本地化字符串。
+        /// </summary>
+        internal static string T_Expanded {
+            get {
+                return ResourceManager.GetString("T_Expanded", resourceCulture);
             }
         }
         
@@ -4418,6 +4436,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Normal 的本地化字符串。
+        /// </summary>
+        internal static string T_Normal {
+            get {
+                return ResourceManager.GetString("T_Normal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 No syntax highlight is defined for selected syntax type. You need to install corresponding feature with the Visual Studio installer. 的本地化字符串。
         /// </summary>
         internal static string T_NoSyntaxHighlightDefined {
@@ -4814,6 +4841,15 @@ namespace Codist.Properties {
         internal static string T_SpecifyScreenshotLocation {
             get {
                 return ResourceManager.GetString("T_SpecifyScreenshotLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Stretch: 的本地化字符串。
+        /// </summary>
+        internal static string T_Stretch {
+            get {
+                return ResourceManager.GetString("T_Stretch", resourceCulture);
             }
         }
         

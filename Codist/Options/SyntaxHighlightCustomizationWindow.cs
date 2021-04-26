@@ -32,6 +32,7 @@ namespace Codist.Options
 		readonly StyleCheckBox _ItalicBox;
 		readonly StyleCheckBox _UnderlineBox;
 		readonly StyleCheckBox _StrikethroughBox;
+		readonly ComboBox _StretchBox;
 		readonly ColorButton _ForegroundButton;
 		readonly OpacityButton _ForegroundOpacityButton;
 		readonly ColorButton _BackgroundButton;
@@ -157,6 +158,8 @@ namespace Codist.Options
 													new TextBlock { Text = R.T_Size, Width = 60, Margin = WpfHelper.SmallMargin },
 													new NumericUpDown { Width = 80, Margin = WpfHelper.SmallMargin }
 														.Set(ref _FontSizeBox),
+													new TextBlock { Text = R.T_Stretch, Width = 40, Margin = WpfHelper.SmallMargin },
+													new ComboBox { Width = 80, Margin = WpfHelper.SmallMargin }.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey).Set(ref _StretchBox)
 												}
 											},
 											new WrapPanel {
@@ -264,6 +267,8 @@ namespace Codist.Options
 			SetFormatMap(wpfTextView);
 			_SyntaxSourceBox.SelectedIndex = 0;
 			_FontSizeBox.ValueChanged += ApplyFontSize;
+			_StretchBox.Items.AddRange(new[] { R.T_NotSet, R.T_Expanded, R.T_Normal, R.T_Condensed });
+			_StretchBox.SelectionChanged += OnStretchChanged;
 			LoadSyntaxStyles(SyntaxStyleSource.Selection);
 			_BackgroundEffectBox.Items.AddRange(new[] { R.T_Solid, R.T_BottomGradient, R.T_TopGradient, R.T_RightGradient, R.T_LeftGradient });
 			_BackgroundEffectBox.SelectionChanged += OnBackgroundEffectChanged;
@@ -604,6 +609,7 @@ namespace Codist.Options
 				_ForegroundOpacityButton.Value = s.ForegroundOpacity;
 				_BackgroundOpacityButton.Value = s.BackgroundOpacity;
 				_BackgroundEffectBox.SelectedIndex = (int)s.BackgroundEffect;
+				_StretchBox.SelectedIndex = GetStretchIndex(s.Stretch);
 				_BaseTypesList.Children.RemoveRange(1, _BaseTypesList.Children.Count - 1);
 				if (s.ClassificationType != null) {
 					var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(s.ClassificationType);
@@ -623,6 +629,23 @@ namespace Codist.Options
 			}
 			finally {
 				_Lock.Unlock();
+			}
+
+			int GetStretchIndex(int? stretch) {
+				if (stretch.HasValue == false) {
+					return 0;
+				}
+				var v = stretch.Value;
+				if (v == FontStretches.Expanded.ToOpenTypeStretch()) {
+					return 1;
+				}
+				if (v == FontStretches.Normal.ToOpenTypeStretch()) {
+					return 2;
+				}
+				if (v == FontStretches.Condensed.ToOpenTypeStretch()) {
+					return 3;
+				}
+				return 0;
 			}
 		}
 
@@ -721,6 +744,23 @@ namespace Codist.Options
 				var s = (BrushEffect)_BackgroundEffectBox.SelectedIndex;
 				if (ActiveStyle.BackgroundEffect != s) {
 					ActiveStyle.BackgroundEffect = s;
+					return true;
+				}
+				return false;
+			});
+		}
+
+		void OnStretchChanged(object sender, EventArgs e) {
+			Update(() => {
+				int? s;
+				switch (_StretchBox.SelectedIndex) {
+					case 1: s = FontStretches.Expanded.ToOpenTypeStretch(); break;
+					case 2: s = FontStretches.Normal.ToOpenTypeStretch(); break;
+					case 3: s = FontStretches.Condensed.ToOpenTypeStretch(); break;
+					default: s = null; break;
+				}
+				if (ActiveStyle.Stretch != s) {
+					ActiveStyle.Stretch = s;
 					return true;
 				}
 				return false;

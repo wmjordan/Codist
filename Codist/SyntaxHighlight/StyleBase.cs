@@ -28,6 +28,8 @@ namespace Codist.SyntaxHighlight
 		public bool? Strikethrough { get; set; }
 		/// <summary>Gets or sets whether the content rendered with underline.</summary>
 		public bool? Underline { get; set; }
+		/// <summary>Gets or sets whether the text is stretched.</summary>
+		public int? Stretch { get; set; }
 		/// <summary>Gets or sets the font size. Font size number is relative to the editor text size.</summary>
 		public double FontSize { get; set; }
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #AARRGGBB or #RRGGBB.</summary>
@@ -70,7 +72,7 @@ namespace Codist.SyntaxHighlight
 
 		/// <summary>Returns whether any option in this style is set.</summary>
 		[Newtonsoft.Json.JsonIgnore]
-		public bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForegroundOpacity != 0 || BackgroundOpacity != 0 || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false;
+		public bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForegroundOpacity != 0 || BackgroundOpacity != 0 || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || Stretch.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false;
 
 		internal abstract string ClassificationType { get; }
 		internal abstract string Description { get; }
@@ -85,6 +87,7 @@ namespace Codist.SyntaxHighlight
 			target.Underline = Underline;
 			target.Strikethrough = Strikethrough;
 			target.FontSize = FontSize;
+			target.Stretch = Stretch;
 			target.BackgroundEffect = BackgroundEffect;
 			target.Font = Font;
 			target.ForeColor = ForeColor;
@@ -102,6 +105,7 @@ namespace Codist.SyntaxHighlight
 			}
 			if (filters.MatchFlags(StyleFilters.FontFamily)) {
 				target.Font = Font;
+				target.Stretch = Stretch;
 			}
 			if (filters.MatchFlags(StyleFilters.FontSize)) {
 				target.FontSize = FontSize;
@@ -117,6 +121,7 @@ namespace Codist.SyntaxHighlight
 		internal void Reset() {
 			Bold = Italic = OverLine = Underline = Strikethrough = null;
 			FontSize = 0;
+			Stretch = null;
 			BackgroundEffect = BrushEffect.Solid;
 			Font = null;
 			ForeColor = BackColor = default;

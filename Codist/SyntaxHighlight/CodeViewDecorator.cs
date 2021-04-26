@@ -26,6 +26,8 @@ namespace Codist.SyntaxHighlight
 		volatile int _IsDecorating;
 		bool _IsViewActive;
 		static bool _Initialized;
+		static FontFamily _DefaultFontFamily;
+		static double _DefaultFontSize;
 
 		public CodeViewDecorator(IWpfTextView view) {
 			view.Closed += View_Closed;
@@ -37,7 +39,7 @@ namespace Codist.SyntaxHighlight
 
 			_ClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(view);
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(view);
-			//_ClassificationFormatMap.ClassificationFormatMappingChanged += FormatUpdated;
+			_ClassificationFormatMap.ClassificationFormatMappingChanged += FormatUpdated;
 			_RegService = ServicesHelper.Instance.ClassificationTypeRegistry;
 			_TextView = view;
 
@@ -79,7 +81,7 @@ namespace Codist.SyntaxHighlight
 		void View_Closed(object sender, EventArgs e) {
 			_IsViewActive = false;
 			Config.Updated -= SettingsUpdated;
-			//_ClassificationFormatMap.ClassificationFormatMappingChanged -= FormatUpdated;
+			_ClassificationFormatMap.ClassificationFormatMappingChanged -= FormatUpdated;
 			_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
 			_TextView.VisualElement.IsVisibleChanged -= MarkInitialized;
 			_EditorFormatMap.FormatMappingChanged -= FormatUpdated;
@@ -107,6 +109,30 @@ namespace Codist.SyntaxHighlight
 						FormatStore.GetOrSaveBackupFormatting(t, true);
 					}
 				}
+			}
+		}
+
+		void FormatUpdated(object sender, EventArgs e) {
+			var defaultProperties = _ClassificationFormatMap.DefaultTextProperties;
+			if (_IsDecorating != 0
+				|| _DefaultFontFamily == defaultProperties.Typeface.FontFamily && _DefaultFontSize == defaultProperties.FontRenderingEmSize) {
+				return;
+			}
+			_DefaultFontFamily = defaultProperties.Typeface.FontFamily;
+			_DefaultFontSize = defaultProperties.FontRenderingEmSize;
+			var updated = new Dictionary<IClassificationType, TextFormattingRunProperties>();
+			foreach (var item in FormatStore.GetStyles()) {
+				if (item.Value.Stretch.HasValue && String.IsNullOrWhiteSpace(item.Value.Font)
+					|| item.Value.FontSize != 0) {
+					var key = _RegService.GetClassificationType(item.Key);
+					if (key == null) {
+						continue;
+					}
+					updated[key] = SetProperties(_ClassificationFormatMap.GetTextProperties(key), item.Value, _DefaultFontSize);
+				}
+			}
+			if (updated.Count > 0) {
+				Decorate(updated.Keys, true);
 			}
 		}
 
@@ -190,19 +216,14 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
-		TextFormattingRunProperties UpdateFormattingMap(StyleBase style, TextFormattingRunProperties textFormatting, double defaultSize) {
-			var p = SetProperties(textFormatting, style, defaultSize);
-			return textFormatting != p ? p : null;
-		}
-
 		TextFormattingRunProperties SetProperties(TextFormattingRunProperties format, StyleBase styleOption, double textSize) {
 			var settings = styleOption;
 			var fontSize = textSize + settings.FontSize;
 			if (fontSize < 1) {
 				fontSize = 1;
 			}
-			if (string.IsNullOrWhiteSpace(settings.Font) == false) {
-				format = format.SetTypeface(new Typeface(settings.Font));
+			if (string.IsNullOrWhiteSpace(settings.Font) == false || settings.Stretch.HasValue) {
+				format = format.SetTypeface(new Typeface(string.IsNullOrWhiteSpace(settings.Font) == false ? new FontFamily(settings.Font) : _DefaultFontFamily, FontStyles.Normal, FontWeights.Normal, settings.Stretch.HasValue ? FontStretch.FromOpenTypeStretch(settings.Stretch.Value) : FontStretches.Normal));
 			}
 			if (settings.FontSize != 0) {
 				if (format.FontRenderingEmSizeEmpty || fontSize != format.FontRenderingEmSize) {
@@ -229,7 +250,7 @@ namespace Codist.SyntaxHighlight
 			}
 			if (settings.BackColor.A > 0) {
 				var bc = settings.BackColor.A > 0 ? settings.BackColor
-				   : format.BackgroundBrushEmpty == false && format.BackgroundBrush is SolidColorBrush ? (format.BackgroundBrush as SolidColorBrush).Color
+				   : format.BackgroundBrushEmpty == false && format.BackgroundBrush is SolidColorBrush b ? b.Color
 				   : Colors.Transparent;
 				if (settings.BackgroundOpacity != 0) {
 					format = format.SetBackgroundOpacity(settings.BackgroundOpacity / 255.0);

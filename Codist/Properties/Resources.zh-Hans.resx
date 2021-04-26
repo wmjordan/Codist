@@ -1758,4 +1758,16 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_SyntaxHighlightDisabled" xml:space="preserve">
     <value>高级语法样式功能已被禁用。请先在 Codist 的选项中启用该功能，再配置语法样式。</value>
   </data>
+  <data name="T_Condensed" xml:space="preserve">
+    <value>收窄</value>
+  </data>
+  <data name="T_Expanded" xml:space="preserve">
+    <value>加宽</value>
+  </data>
+  <data name="T_Normal" xml:space="preserve">
+    <value>普通</value>
+  </data>
+  <data name="T_Stretch" xml:space="preserve">
+    <value>拉伸:</value>
+  </data>
 </root>
