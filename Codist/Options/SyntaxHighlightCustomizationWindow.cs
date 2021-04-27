@@ -986,6 +986,7 @@ namespace Codist.Options
 				}
 				if (format.TypefaceEmpty == false) {
 					label.FontFamily = format.Typeface.FontFamily;
+					label.FontStretch = format.Typeface.Stretch;
 				}
 				if (format.FontRenderingEmSizeEmpty == false) {
 					label.FontSize = format.FontRenderingEmSize;

@@ -170,6 +170,9 @@ namespace Codist
 		public static TextDecorationCollection GetTextDecorations(this ResourceDictionary resource) {
 			return resource.Get<TextDecorationCollection>(Constants.EditorFormatKeys.TextDecorations);
 		}
+		public static Typeface GetTypeface(this ResourceDictionary resource) {
+			return resource.Get<Typeface>(Constants.EditorFormatKeys.Typeface);
+		}
 		public static WpfColor GetColor(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundColorId) {
 			var p = map.GetProperties(formatName);
 			return p != null && p.Contains(resourceId) && (p[resourceId] is WpfColor color)
@@ -188,6 +191,12 @@ namespace Codist
 			brush.Freeze();
 			//var p = new ResourceDictionary().MergeWith(resource);
 			resource[EditorFormatDefinition.ForegroundBrushId] = brush;
+			return resource;
+		}
+		public static ResourceDictionary SetTypeface(this ResourceDictionary resource, Typeface typeface) {
+			if (resource != null) {
+				resource[Constants.EditorFormatKeys.Typeface] = typeface;
+			}
 			return resource;
 		}
 		public static void Remove(this IEditorFormatMap map, string formatName, string key) {

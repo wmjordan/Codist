@@ -46,6 +46,7 @@ namespace Codist
 		{
 			public const string TextViewBackground = "TextView Background";
 			public const string Text = "Text";
+			public const string PlainText = "Plain Text";
 			public const string Caret = "Caret";
 			public const string OverwriteCaret = "Overwrite Caret";
 			public const string SelectedText = "Selected Text";
@@ -61,6 +62,7 @@ namespace Codist
 			public const string ForegroundOpacity = nameof(ForegroundOpacity);
 			public const string BackgroundOpacity = nameof(BackgroundOpacity);
 			public const string TextDecorations = nameof(TextDecorations);
+			public const string Typeface = nameof(Typeface);
 		}
 
 		public const string CodeKeyword = "Keyword";
@@ -383,6 +385,9 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeFieldName)]
 		FieldName,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeFormalLanguage)]
+		FormalLanguage,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeIdentifier)]
 		[Description("A base style shared by type, type member, local, parameter, etc.")]

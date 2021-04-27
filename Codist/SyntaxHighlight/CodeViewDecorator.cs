@@ -113,15 +113,24 @@ namespace Codist.SyntaxHighlight
 		}
 
 		void FormatUpdated(object sender, EventArgs e) {
+			Debug.WriteLine("ClassificationFormatMapping changed.");
 			var defaultProperties = _ClassificationFormatMap.DefaultTextProperties;
-			if (_IsDecorating != 0
-				|| _DefaultFontFamily == defaultProperties.Typeface.FontFamily && _DefaultFontSize == defaultProperties.FontRenderingEmSize) {
+			if (_DefaultFontFamily == defaultProperties.Typeface.FontFamily && _DefaultFontSize == defaultProperties.FontRenderingEmSize) {
 				return;
 			}
+			Debug.WriteLine("Default text properties changed.");
 			_DefaultFontFamily = defaultProperties.Typeface.FontFamily;
 			_DefaultFontSize = defaultProperties.FontRenderingEmSize;
+			// hack: it is weird that this property is not in sync with the Text editor format, we have to force that
+			_EditorFormatMap.GetProperties(Constants.EditorProperties.PlainText)
+				.SetTypeface(defaultProperties.Typeface);
+			if (_IsDecorating != 0) {
+				Debug.WriteLine("Cancelled formatMap update.");
+				return;
+			}
 			var updated = new Dictionary<IClassificationType, TextFormattingRunProperties>();
 			foreach (var item in FormatStore.GetStyles()) {
+				// explicitly update formats when font name or font size is changed in font options
 				if (item.Value.Stretch.HasValue && String.IsNullOrWhiteSpace(item.Value.Font)
 					|| item.Value.FontSize != 0) {
 					var key = _RegService.GetClassificationType(item.Key);
@@ -132,12 +141,14 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 			if (updated.Count > 0) {
+				Debug.WriteLine("Decorate updated format: " + updated.Count);
 				Decorate(updated.Keys, true);
 			}
 		}
 
 		void FormatUpdated(object sender, FormatItemsEventArgs e) {
 			if (_IsDecorating == 0 && _IsViewActive && e.ChangedItems.Count > 0) {
+				Debug.WriteLine("Format updated: " + e.ChangedItems.Count);
 				Decorate(e.ChangedItems.Select(_RegService.GetClassificationType), true);
 			}
 		}
