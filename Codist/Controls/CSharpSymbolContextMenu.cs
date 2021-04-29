@@ -103,10 +103,9 @@ namespace Codist.Controls
 			}
 		}
 
-		private void CreateCommandForMembers() {
+		void CreateCommandForMembers() {
 			if (_Symbol.Kind != SymbolKind.Method || IsExternallyCallable(((IMethodSymbol)_Symbol).MethodKind)) {
-				var filter = Keyboard.Modifiers == ModifierKeys.Control ? (Predicate<ISymbol>)(s => s == _Symbol) : null;
-				Items.Add(CreateItem(IconIds.FindReferrers, R.CMD_FindReferrers, () => _SemanticContext.FindReferrersAsync(_Symbol, filter)));
+				Items.Add(CreateItem(IconIds.FindReferrers, R.CMD_FindReferrers, () => _SemanticContext.FindReferrersAsync(_Symbol)));
 			}
 			if (_Symbol.MayHaveOverride()) {
 				Items.Add(CreateItem(IconIds.FindOverloads, R.CMD_FindOverrides, () => _SemanticContext.FindOverridesAsync(_Symbol)));

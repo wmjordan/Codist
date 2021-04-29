@@ -17,7 +17,7 @@ namespace Codist
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 		/// </summary>
-		public static async Task<List<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
+		public static async Task<List<ISymbol>> FindInstanceAsParameterAsync(this ITypeSymbol type, Project project, bool strictMatch, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var members = new List<ISymbol>(10);
 			ImmutableArray<IParameterSymbol> parameters;
@@ -30,7 +30,9 @@ namespace Codist
 					if (member.Kind != SymbolKind.Field
 						&& member.CanBeReferencedByName
 						&& (parameters = member.GetParameters()).IsDefaultOrEmpty == false) {
-						if (parameters.Any(p => type.CanConvertTo(p.Type) && p.Type.IsCommonClass() == false)
+						if (parameters.Any(strictMatch
+								? (Func<IParameterSymbol, bool>)(p => p.Type == type)
+								: (p => type.CanConvertTo(p.Type) && p.Type.IsCommonClass() == false))
 							&& type.CanAccess(member, assembly)) {
 
 							members.Add(member);
@@ -44,10 +46,13 @@ namespace Codist
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may return an instance of <paramref name="type"/>.
 		/// </summary>
-		public static async Task<List<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
+		public static async Task<List<ISymbol>> FindSymbolInstanceProducerAsync(this ITypeSymbol type, Project project, bool strict, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var assembly = compilation.Assembly;
 			var members = new List<ISymbol>(10);
+			var paramComparer = strict
+				? (Func<IParameterSymbol, bool>)(p => p.Type == type && p.RefKind != RefKind.None)
+				: (p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None);
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				foreach (var member in typeSymbol.GetMembers()) {
 					if (cancellationToken.IsCancellationRequested) {
@@ -56,14 +61,14 @@ namespace Codist
 					ITypeSymbol mt;
 					if (member.Kind == SymbolKind.Field) {
 						if (member.CanBeReferencedByName
-							&& (mt = member.GetReturnType()) != null && (mt.CanConvertTo(type) || (mt as INamedTypeSymbol).ContainsTypeArgument(type))
+							&& (mt = member.GetReturnType()) != null && (mt == type || strict == false && mt.CanConvertTo(type) || (mt as INamedTypeSymbol).ContainsTypeArgument(type))
 							&& type.CanAccess(member, assembly)) {
 							members.Add(member);
 						}
 					}
 					else if (member.CanBeReferencedByName
-						&& ((mt = member.GetReturnType()) != null && (mt.CanConvertTo(type) || (mt as INamedTypeSymbol).ContainsTypeArgument(type))
-							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(p => p.Type.CanConvertTo(type) && p.RefKind != RefKind.None))
+						&& ((mt = member.GetReturnType()) != null && (mt == type || strict == false && mt.CanConvertTo(type) || (mt as INamedTypeSymbol).ContainsTypeArgument(type))
+							|| member.Kind == SymbolKind.Method && member.GetParameters().Any(paramComparer))
 						&& type.CanAccess(member, assembly)) {
 						members.Add(member);
 					}

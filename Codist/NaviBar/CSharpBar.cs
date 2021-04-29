@@ -754,7 +754,7 @@ namespace Codist.NaviBar
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
 				var d = Bar._SemanticContext.Document;
 				if (d != null) {
-					var items = await SymbolCommands.AddNamespacesAndTypesAsync(Bar._SemanticContext, (await d.Project.GetCompilationAsync(cancellationToken)).GlobalNamespace, cancellationToken);
+					var items = await SymbolCommands.AddNamespacesAndTypesAsync(Bar._SemanticContext, (await d.Project.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace, cancellationToken).ConfigureAwait(false);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
 					_Menu.AddNamespaceItems(items);
 				}
@@ -768,7 +768,7 @@ namespace Codist.NaviBar
 					_Menu.Clear();
 					var d = ctx.Document;
 					if (d != null) {
-						var items = await SymbolCommands.AddNamespacesAndTypesAsync(ctx, (await d.Project.GetCompilationAsync(cancellationToken)).GlobalNamespace,cancellationToken);
+						var items = await SymbolCommands.AddNamespacesAndTypesAsync(ctx, (await d.Project.GetCompilationAsync(cancellationToken)).GlobalNamespace,cancellationToken).ConfigureAwait(false);
 						await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
 						_Menu.AddNamespaceItems(items);
 					}
@@ -806,6 +806,7 @@ namespace Codist.NaviBar
 				var ct = Bar._cancellationSource.GetToken();
 				try {
 					await CreateMenuForNamespaceNodeAsync(ct);
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
 					_FilterBox.UpdateNumbers(_Menu.Symbols);
 					Bar.ShowMenu(this, _Menu);
 				}
@@ -940,6 +941,7 @@ namespace Codist.NaviBar
 				var ct = Bar._cancellationSource.GetToken();
 				try {
 					await CreateMenuForTypeSymbolNodeAsync(ct);
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
 
 					_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.GetMembers().Select(s => new SymbolItem(s, _Menu, false)));
 					var footer = (TextBlock)_Menu.Footer;
