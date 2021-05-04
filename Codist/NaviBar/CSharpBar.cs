@@ -352,7 +352,7 @@ namespace Codist.NaviBar
 		void ListContainer_MenuRemoved(object sender, AdornmentChildRemovedEventArgs e) {
 			if (_SymbolList == e.RemovedElement) {
 				_SymbolList.HideToolTip();
-				_SymbolList.SelectedItem = null;
+				//_SymbolList.SelectedItem = null;
 				_SymbolList = null;
 				if (_ActiveItem != null) {
 					_ActiveItem.IsHighlighted = false;
@@ -407,6 +407,13 @@ namespace Codist.NaviBar
 				AddParameterList(t, node);
 			}
 			return t;
+		}
+
+		async Task<ISymbol> GetChildSymbolOnNaviBarAsync(BarItem item, bool update, CancellationToken cancellationToken) {
+			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			var p = Items.IndexOf(item);
+			var s = p != -1 && p < Items.Count - 1 ? (Items[p + 1] as ISymbolContainer)?.Symbol : null;
+			return s == null ? null : update ? await _SemanticContext.RelocateSymbolAsync(s, cancellationToken) : s;
 		}
 
 		static void AddParameterList(TextBlock t, SyntaxNode node) {
@@ -747,7 +754,11 @@ namespace Codist.NaviBar
 					ExtIconProvider = ExtIconProvider.Default.GetExtIcons,
 					EnableVirtualMode = true
 				};
+				if (_FilterBox != null) {
+					_FilterBox.FilterChanged -= FilterChanged;
+				}
 				_Menu.Header = _FilterBox = new SymbolFilterBox(_Menu);
+				_FilterBox.FilterChanged += FilterChanged;
 				_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
 					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
 				Bar.SetupSymbolListMenu(_Menu);
@@ -755,8 +766,14 @@ namespace Codist.NaviBar
 				var d = Bar._SemanticContext.Document;
 				if (d != null) {
 					var items = await SymbolCommands.AddNamespacesAndTypesAsync(Bar._SemanticContext, (await d.Project.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace, cancellationToken).ConfigureAwait(false);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
-					_Menu.AddNamespaceItems(items);
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+					_Menu.AddNamespaceItems(items, await Bar.GetChildSymbolOnNaviBarAsync(this, true, cancellationToken));
+				}
+			}
+
+			async void FilterChanged(object sender, SymbolFilterBox.FilterEventArgs e) {
+				if (e.FilterText.Length == 0) {
+					await SelectChildAsync(default);
 				}
 			}
 
@@ -769,17 +786,27 @@ namespace Codist.NaviBar
 					var d = ctx.Document;
 					if (d != null) {
 						var items = await SymbolCommands.AddNamespacesAndTypesAsync(ctx, (await d.Project.GetCompilationAsync(cancellationToken)).GlobalNamespace,cancellationToken).ConfigureAwait(false);
-						await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
-						_Menu.AddNamespaceItems(items);
+						await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+						_Menu.AddNamespaceItems(items, await Bar.GetChildSymbolOnNaviBarAsync(this, true, cancellationToken));
 					}
 
 					_Menu.RefreshItemsSource(true);
 				}
+				else {
+					await SelectChildAsync(cancellationToken);
+				}
 			}
 
+			async Task SelectChildAsync(CancellationToken cancellationToken) {
+				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+				var child = await Bar.GetChildSymbolOnNaviBarAsync(this, false, cancellationToken);
+				if (child != null && _Menu.HasItems) {
+					_Menu.SelectedItem = _Menu.Symbols.FirstOrDefault(s => s.Symbol == child);
+				}
+			}
 		}
 
-		sealed class NamespaceItem : BarItem, IContextMenuHost
+		sealed class NamespaceItem : BarItem, IContextMenuHost, ISymbolContainer
 		{
 			SymbolList _Menu;
 			SymbolFilterBox _FilterBox;
@@ -795,7 +822,7 @@ namespace Codist.NaviBar
 			
 			public override BarItemType ItemType => BarItemType.Namespace;
 			public bool IsSymbolNode { get; }
-			public ISymbol Symbol => _Symbol/* ?? (_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(_Node, Bar._cancellationSource.GetToken())))*/;
+			public ISymbol Symbol => _Symbol;
 
 			async void HandleClick(object sender, RoutedEventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
@@ -827,6 +854,9 @@ namespace Codist.NaviBar
 					ExtIconProvider = ExtIconProvider.Default.GetExtIcons,
 					EnableVirtualMode = true
 				};
+				if (_FilterBox != null) {
+					_FilterBox.FilterChanged -= FilterChanged;
+				}
 				_Menu.Header = new WrapPanel {
 					Orientation = Orientation.Horizontal,
 					Children = {
@@ -839,13 +869,20 @@ namespace Codist.NaviBar
 							(_FilterBox = new SymbolFilterBox(_Menu)),
 						}
 				};
+				_FilterBox.FilterChanged += FilterChanged;
 				_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
 					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
 				Bar.SetupSymbolListMenu(_Menu);
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(false);
 				var items = await SymbolCommands.AddNamespacesAndTypesAsync(Bar._SemanticContext, _Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
-				_Menu.AddNamespaceItems(items);
+				_Menu.AddNamespaceItems(items, await Bar.GetChildSymbolOnNaviBarAsync(this, true, cancellationToken));
+			}
+
+			async void FilterChanged(object sender, SymbolFilterBox.FilterEventArgs e) {
+				if (e.FilterText.Length == 0) {
+					await SelectChildAsync(default);
+				}
 			}
 
 			async Task RefreshItemsAsync(CancellationToken cancellationToken) {
@@ -858,8 +895,19 @@ namespace Codist.NaviBar
 					//_Node = Bar._SemanticContext.RelocateDeclarationNode(_Node);
 					var items = await SymbolCommands.AddNamespacesAndTypesAsync(ctx, _Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
-					_Menu.AddNamespaceItems(items);
+					_Menu.AddNamespaceItems(items, await Bar.GetChildSymbolOnNaviBarAsync(this, true, cancellationToken));
 					_Menu.RefreshItemsSource(true);
+				}
+				else {
+					await SelectChildAsync(cancellationToken);
+				}
+			}
+
+			async Task SelectChildAsync(CancellationToken cancellationToken) {
+				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
+				var child = await Bar.GetChildSymbolOnNaviBarAsync(this, false, cancellationToken);
+				if (child != null && _Menu.HasItems) {
+					_Menu.SelectedItem = _Menu.Symbols.FirstOrDefault(s => s.Symbol == child);
 				}
 			}
 
@@ -879,7 +927,7 @@ namespace Codist.NaviBar
 			}
 		}
 
-		sealed class NodeItem : BarItem, ISymbolFilter, IContextMenuHost
+		sealed class NodeItem : BarItem, ISymbolFilter, IContextMenuHost, ISymbolContainer
 		{
 			readonly int _ImageId;
 			SymbolList _Menu;
@@ -1365,6 +1413,10 @@ namespace Codist.NaviBar
 			}
 		}
 
+		interface ISymbolContainer
+		{
+			ISymbol Symbol { get; }
+		}
 		enum BarItemType
 		{
 			Root, GlobalNamespace, Namespace, Node

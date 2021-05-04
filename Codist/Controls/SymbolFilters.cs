@@ -139,7 +139,10 @@ namespace Codist.Controls
 			_FilterBox.TextChanged += FilterBox_Changed;
 			_FilterBox.SetOnVisibleSelectAll();
 		}
+
 		public string FilterText => _FilterBox.Text;
+
+		public event EventHandler<FilterEventArgs> FilterChanged;
 
 		public bool FocusFilterBox() {
 			return _FilterBox.GetFocus();
@@ -167,12 +170,14 @@ namespace Codist.Controls
 			if (needUpdate) {
 				_Filter.Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), (int)MemberFilterTypes.All);
 				FocusFilterBox();
+				FilterChanged?.Invoke(this, new FilterEventArgs(filters, _FilterBox.Text));
 			}
 		}
 		void FilterBox_Changed(object sender, EventArgs e) {
 			var filters = GetFilterFlags();
 			_Filter.Filter(_FilterBox.Text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), filters);
 			FocusFilterBox();
+			FilterChanged?.Invoke(this, new FilterEventArgs(filters, _FilterBox.Text));
 		}
 
 		public int GetFilterFlags() {
@@ -347,6 +352,17 @@ namespace Codist.Controls
 			}
 			else {
 				button.Visibility = Visibility.Collapsed;
+			}
+		}
+
+		internal sealed class FilterEventArgs : EventArgs
+		{
+			public readonly int FilterFlags;
+			public readonly string FilterText;
+
+			public FilterEventArgs(int filterFlags, string filter) {
+				FilterFlags = filterFlags;
+				FilterText = filter;
 			}
 		}
 

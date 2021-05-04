@@ -83,6 +83,9 @@ namespace Codist.Controls
 			else {
 				ItemsSource = _Symbols;
 			}
+			if (SelectedIndex == -1 && HasItems) {
+				SelectedIndex = 0;
+			}
 		}
 
 		protected override void OnPreviewKeyDown(KeyEventArgs e) {
@@ -102,9 +105,12 @@ namespace Codist.Controls
 		}
 
 		#region Analysis commands
-		internal void AddNamespaceItems(ISymbol[] symbols) {
+		internal void AddNamespaceItems(ISymbol[] symbols, ISymbol highlight) {
 			foreach (var item in symbols) {
-				Add(item, false);
+				var i = Add(item, false);
+				if (item == highlight) {
+					SelectedItem = i;
+				}
 			}
 		}
 		internal (int count, int external) AddSymbolMembers(ISymbol symbol) {

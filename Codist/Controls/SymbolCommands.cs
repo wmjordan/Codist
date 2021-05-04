@@ -100,7 +100,7 @@ namespace Codist.Controls
 				var items = await AddNamespacesAndTypesAsync(context, symbol as INamespaceSymbol, default).ConfigureAwait(false);
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
 				m = new SymbolMenu(context, SymbolListType.TypeList);
-				m.Menu.AddNamespaceItems(items);
+				m.Menu.AddNamespaceItems(items, null);
 				countLabel = R.T_NamespaceMembers.Replace("{count}", items.Length.ToString());
 			}
 			else {
