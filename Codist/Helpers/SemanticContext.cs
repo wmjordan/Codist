@@ -172,8 +172,8 @@ namespace Codist
 				return null;
 			}
 			var s = Workspace.CurrentSolution;
-			var d = s.GetDocumentId(syntaxTree);
-			return d != null ? s.GetDocument(d) : null;
+			var d = s.GetDocumentId(syntaxTree) ?? s.GetDocumentIdsWithFilePath(syntaxTree.FilePath).FirstOrDefault();
+			return d is null ? null : s.GetDocument(d);
 		}
 		public Project GetProject(SyntaxTree syntaxTree) {
 			return GetDocument(syntaxTree)?.Project;

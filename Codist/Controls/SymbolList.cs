@@ -110,11 +110,11 @@ namespace Codist.Controls
 
 		#region Analysis commands
 		internal void AddNamespaceItems(ISymbol[] symbols, ISymbol highlight) {
-			foreach (var item in symbols) {
-				var i = Add(item, false);
-				if (item == highlight) {
-					SelectedItem = i;
-				}
+			var items = Array.ConvertAll(symbols, s => new SymbolItem(s, this, false));
+			AddRange(items);
+			if (highlight != null) {
+				var c = CodeAnalysisHelper.GetSpecificSymbolComparer(highlight);
+				SelectedItem = items.FirstOrDefault(s => c(s.Symbol));
 			}
 		}
 

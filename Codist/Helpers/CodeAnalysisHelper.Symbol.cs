@@ -961,14 +961,32 @@ namespace Codist
 		}
 
 		public static bool HasSameName(ISymbol a, ISymbol b) {
-			var x = a;
-			var y = b;
-			var r = ReferenceEquals(a, b)
-				|| a.Name == b.Name && (a = a.ContainingSymbol) != null && (b = b.ContainingSymbol) != null && a.Kind == b.Kind && (a.Kind == SymbolKind.NetModule || a.Kind == SymbolKind.Namespace && ((INamespaceSymbol)a).IsGlobalNamespace && ((INamespaceSymbol)b).IsGlobalNamespace || HasSameName(a, b));
-			if (r != true && x.Name == y.Name) {
-
+			if (ReferenceEquals(a, b)) {
+				return true;
 			}
-			return r;
+			if (a.Kind != b.Kind || a.Name != b.Name) {
+				return false;
+			}
+			switch (a.Kind) {
+				case SymbolKind.NamedType:
+					if (((INamedTypeSymbol)a).Arity != ((INamedTypeSymbol)b).Arity) {
+						return false;
+					}
+					break;
+				case SymbolKind.Namespace:
+					if (((INamespaceSymbol)a).IsGlobalNamespace && ((INamespaceSymbol)b).IsGlobalNamespace) {
+						return true;
+					}
+					break;
+				case SymbolKind.Method:
+					if (((IMethodSymbol)a).Arity != ((IMethodSymbol)b).Arity) {
+						return false;
+					}
+					break;
+			}
+			return ((a = a.ContainingSymbol) != null ^ (b = b.ContainingSymbol) != null)
+				? a == null || HasSameName(a, b)
+				: true;
 		}
 
 		public static bool AreEqual(ITypeSymbol a, ITypeSymbol b, bool ignoreTypeConstraint) {
@@ -1145,8 +1163,22 @@ namespace Codist
 		public static IEqualityComparer<ISymbol> GetSymbolNameComparer() {
 			return SymbolNameComparer.Instance;
 		}
+		public static Func<ISymbol, bool> GetSpecificSymbolComparer(ISymbol symbol) {
+			return new SpecificSymbolEqualityComparer(symbol).Equals;
+		}
 		#endregion
+		sealed class SpecificSymbolEqualityComparer : IEquatable<ISymbol>
+		{
+			readonly ISymbol _Specified;
 
+			public SpecificSymbolEqualityComparer(ISymbol specified) {
+				_Specified = specified;
+			}
+
+			public bool Equals(ISymbol other) {
+				return HasSameName(_Specified, other);
+			}
+		}
 		sealed class SymbolNameComparer : IEqualityComparer<ISymbol>
 		{
 			internal static readonly SymbolNameComparer Instance = new SymbolNameComparer();
