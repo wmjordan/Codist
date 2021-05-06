@@ -474,6 +474,8 @@ namespace Codist.Controls
 
 		void ShowMenu(UIElement positionElement) {
 			var m = Menu;
+			m.Visibility = Visibility.Hidden; // avoid flicking
+
 			_Container.Children.Add(m);
 			m.ItemsControlMaxHeight = _Container.ActualHeight / 2;
 			m.RefreshItemsSource();
@@ -483,10 +485,11 @@ namespace Codist.Controls
 			if (m.Symbols.Count > 100) {
 				m.EnableVirtualMode = true;
 			}
-			
+
 			var p = positionElement != null ? positionElement.TranslatePoint(new Point(positionElement.RenderSize.Width, 0), _Container) : Mouse.GetPosition(_Container);
 			Canvas.SetLeft(m, p.X);
 			Canvas.SetTop(m, p.Y);
+			m.Visibility = Visibility.Visible;
 		}
 		void UpdateNumbers() {
 			FilterBox.UpdateNumbers(Menu.Symbols);
