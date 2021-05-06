@@ -95,32 +95,45 @@ namespace Codist.Controls
 
 		internal static async Task FindMembersAsync(this SemanticContext context, ISymbol symbol, UIElement positionElement = null) {
 			SymbolMenu m;
+			SymbolList l;
 			string countLabel;
 			if (symbol.Kind == SymbolKind.Namespace) {
-				var items = await AddNamespacesAndTypesAsync(context, symbol as INamespaceSymbol, default).ConfigureAwait(false);
+				var items = await context.GetNamespacesAndTypesAsync(symbol as INamespaceSymbol, default).ConfigureAwait(false);
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
 				m = new SymbolMenu(context, SymbolListType.TypeList);
-				m.Menu.AddNamespaceItems(items, null);
+				l = m.Menu;
+				l.EnableVirtualMode = true;
+				l.AddRange(items.Select(s => new SymbolItem(s, l, false)));
 				countLabel = R.T_NamespaceMembers.Replace("{count}", items.Length.ToString());
 			}
 			else {
+				var members = symbol.FindMembers();
+				int count = members[0].members.Count;
+				var items = ImmutableArray.CreateBuilder<SymbolItem>(members.Sum(i => i.members.Count));
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
 				m = new SymbolMenu(context, symbol.Kind == SymbolKind.Namespace ? SymbolListType.TypeList : SymbolListType.None);
-				var (count, external) = m.Menu.AddSymbolMembers(symbol);
-				countLabel = R.T_Members.Replace("{count}", count.ToString()).Replace("{inherited}", external.ToString());
+				l = m.Menu;
+				foreach (var item in members) {
+					var t = item.type;
+					items.AddRange(item.members.Select(s => new SymbolItem(s, l, false) { Hint = t }));
+				}
+				l.SetupForSpecialTypes(symbol as ITypeSymbol);
+				l.EnableVirtualMode = true;
+				l.AddRange(items);
+				countLabel = R.T_Members.Replace("{count}", count.ToString()).Replace("{inherited}", (items.Count - count).ToString());
 			}
-			if (m.Menu.IconProvider == null) {
+			if (l.IconProvider == null) {
 				if (symbol.Kind == SymbolKind.NamedType) {
 					switch (((INamedTypeSymbol)symbol).TypeKind) {
 						case TypeKind.Interface:
-							m.Menu.ExtIconProvider = ExtIconProvider.InterfaceMembers.GetExtIcons; break;
+							l.ExtIconProvider = ExtIconProvider.InterfaceMembers.GetExtIcons; break;
 						case TypeKind.Class:
 						case TypeKind.Struct:
-							m.Menu.ExtIconProvider = ExtIconProvider.Default.GetExtIcons; break;
+							l.ExtIconProvider = ExtIconProvider.Default.GetExtIcons; break;
 					}
 				}
 				else {
-					m.Menu.ExtIconProvider = ExtIconProvider.Default.GetExtIcons;
+					l.ExtIconProvider = ExtIconProvider.Default.GetExtIcons;
 				}
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
@@ -207,7 +220,7 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		internal static async Task<ISymbol[]> AddNamespacesAndTypesAsync(SemanticContext context, INamespaceSymbol s, CancellationToken cancellationToken) {
+		internal static async Task<ISymbol[]> GetNamespacesAndTypesAsync(this SemanticContext context, INamespaceSymbol s, CancellationToken cancellationToken) {
 			if (s == null) {
 				return Array.Empty<ISymbol>();
 			}

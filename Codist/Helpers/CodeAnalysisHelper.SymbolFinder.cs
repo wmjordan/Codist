@@ -14,6 +14,58 @@ namespace Codist
 {
 	partial class CodeAnalysisHelper
 	{
+		public static IImmutableList<(string type, IImmutableList<ISymbol> members)> FindMembers(this ISymbol symbol) {
+			var r = ImmutableArray.CreateBuilder<(string type, IImmutableList<ISymbol> members)>();
+			r.Add(FindMembers(symbol, null));
+			var type = symbol as INamedTypeSymbol;
+			if (type != null) {
+				switch (type.TypeKind) {
+					case TypeKind.Class:
+						while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
+							r.Add(FindMembers(type, type.ToDisplayString(MemberNameFormat)));
+						}
+						break;
+					case TypeKind.Interface:
+						foreach (var item in type.AllInterfaces) {
+							r.Add(FindMembers(item, item.ToDisplayString(MemberNameFormat)));
+						}
+						break;
+				}
+			}
+			return r.ToImmutable();
+
+			(string, IImmutableList<ISymbol>) FindMembers(ISymbol source, string category) {
+				var nsOrType = source as INamespaceOrTypeSymbol;
+				var members = nsOrType.GetMembers().RemoveAll(m => {
+					if (m.IsImplicitlyDeclared) {
+						return true;
+					}
+					if (m.Kind == SymbolKind.Method) {
+						var ms = (IMethodSymbol)m;
+						if (ms.AssociatedSymbol != null) {
+							return true;
+						}
+						switch (ms.MethodKind) {
+							case MethodKind.PropertyGet:
+							case MethodKind.PropertySet:
+							case MethodKind.EventAdd:
+							case MethodKind.EventRemove:
+								return true;
+						}
+					}
+					return false;
+				});
+				if (source.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
+					// sort enum members by value
+					members = members.Sort(CompareByFieldIntegerConst);
+				}
+				else {
+					members = members.Sort(CompareByAccessibilityKindName);
+				}
+				return (category, members);
+			}
+		}
+
 		/// <summary>
 		/// Finds all members defined or referenced in <paramref name="project"/> which may have a parameter that is of or derived from <paramref name="type"/>.
 		/// </summary>

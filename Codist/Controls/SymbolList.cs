@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -68,6 +69,9 @@ namespace Codist.Controls
 			_Symbols.Add(item);
 			return item;
 		}
+		public void AddRange(IEnumerable<SymbolItem> items) {
+			_Symbols.AddRange(items);
+		}
 
 		public void Clear() {
 			_Symbols.Clear();
@@ -113,176 +117,127 @@ namespace Codist.Controls
 				}
 			}
 		}
-		internal (int count, int external) AddSymbolMembers(ISymbol symbol) {
-			var count = AddSymbolMembers(symbol, null);
-			var mi = 0;
-			var type = symbol as INamedTypeSymbol;
-			if (type != null) {
-				switch (type.TypeKind) {
-					case TypeKind.Class:
-						while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
-							mi += AddSymbolMembers(type, type.ToDisplayString(CodeAnalysisHelper.MemberNameFormat));
-						}
-						break;
-					case TypeKind.Interface:
-						foreach (var item in type.AllInterfaces) {
-							mi += AddSymbolMembers(item, item.ToDisplayString(CodeAnalysisHelper.MemberNameFormat));
-						}
-						break;
-				}
+
+		internal void SetupForSpecialTypes(ITypeSymbol type) {
+			if (type == null) {
+				return;
 			}
-			return (count, mi);
+			if (type.TypeKind == TypeKind.Enum
+				&& type.GetAttributes().Any(a => a.AttributeClass.Name == nameof(FlagsAttribute) && a.AttributeClass.ContainingNamespace.Name == "System")) {
+				ContainerType = SymbolListType.EnumFlags;
+				return;
+			}
+			string typeNamespace = type.ContainingNamespace.ToString(), typeName = type.Name;
+			switch (typeNamespace) {
+				case "System.Drawing":
+					switch (typeName) {
+						case nameof(GDI.SystemBrushes):
+						case nameof(GDI.SystemPens):
+						case nameof(GDI.SystemColors):
+							SetupListForSystemColors(); return;
+						case nameof(GDI.Color):
+						case nameof(GDI.Brushes):
+						case nameof(GDI.Pens):
+							SetupListForColors(); return;
+						case nameof(GDI.KnownColor): SetupListForKnownColors(); return;
+					}
+					return;
+				case "System.Windows":
+					if (typeName == nameof(SystemColors)) {
+						SetupListForSystemColors();
+					}
+					return;
+				case "System.Windows.Media":
+					switch (typeName) {
+						case nameof(WPF.Colors):
+						case nameof(WPF.Brushes):
+							SetupListForColors(); return;
+					}
+					return;
+				case "Microsoft.VisualStudio.PlatformUI":
+					switch (typeName) {
+						case nameof(EnvironmentColors): SetupListForVsUIColors(typeof(EnvironmentColors)); return;
+						case nameof(CommonControlsColors): SetupListForVsUIColors(typeof(CommonControlsColors)); return;
+						case nameof(CommonDocumentColors): SetupListForVsUIColors(typeof(CommonDocumentColors)); return;
+						case nameof(HeaderColors): SetupListForVsUIColors(typeof(HeaderColors)); return;
+						case nameof(InfoBarColors): SetupListForVsUIColors(typeof(InfoBarColors)); return;
+						case nameof(ProgressBarColors): SetupListForVsUIColors(typeof(ProgressBarColors)); return;
+						case nameof(SearchControlColors): SetupListForVsUIColors(typeof(SearchControlColors)); return;
+						case nameof(StartPageColors): SetupListForVsUIColors(typeof(StartPageColors)); return;
+						case nameof(ThemedDialogColors): SetupListForVsUIColors(typeof(ThemedDialogColors)); return;
+						case nameof(TreeViewColors): SetupListForVsUIColors(typeof(TreeViewColors)); return;
+					}
+					return;
+				case "Microsoft.VisualStudio.Shell":
+					switch (typeName) {
+						case nameof(VsColors): SetupListForVsResourceColors(typeof(VsColors)); return;
+						case nameof(VsBrushes): SetupListForVsResourceBrushes(typeof(VsBrushes)); return;
+					}
+					return;
+				case "Microsoft.VisualStudio.Imaging":
+					switch (typeName) {
+						case nameof(KnownImageIds):
+							SetupListForKnownImageIds();
+							break;
+						case nameof(KnownMonikers):
+							SetupListForKnownMonikers();
+							break;
+					}
+					return;
+			}
 		}
 
-		int AddSymbolMembers(ISymbol source, string typeCategory) {
-			var nsOrType = source as INamespaceOrTypeSymbol;
-			var members = nsOrType.GetMembers().RemoveAll(m => {
-				if (m.IsImplicitlyDeclared) {
-					return true;
-				}
-				if (m.Kind == SymbolKind.Method) {
-					var ms = (IMethodSymbol)m;
-					if (ms.AssociatedSymbol != null) {
-						return true;
-					}
-					switch (ms.MethodKind) {
-						case MethodKind.PropertyGet:
-						case MethodKind.PropertySet:
-						case MethodKind.EventAdd:
-						case MethodKind.EventRemove:
-							return true;
-					}
-				}
-				return false;
-			});
-			SetupForSpecialTypes(this, source.ContainingNamespace.ToString(), source.Name);
-			if (source.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
-				// sort enum members by value
-				members = members.Sort(CodeAnalysisHelper.CompareByFieldIntegerConst);
-			}
-			else {
-				members = members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
-			}
-			foreach (var item in members) {
-				var i = Add(item, false);
-				if (typeCategory != null) {
-					i.Hint = typeCategory;
-				}
-			}
-			return members.Length;
-
-			void SetupForSpecialTypes(SymbolList list, string typeNamespace, string typeName) {
-				switch (typeNamespace) {
-					case "System.Drawing":
-						switch (typeName) {
-							case nameof(GDI.SystemBrushes):
-							case nameof(GDI.SystemPens):
-							case nameof(GDI.SystemColors):
-								SetupListForSystemColors(list); return;
-							case nameof(GDI.Color):
-							case nameof(GDI.Brushes):
-							case nameof(GDI.Pens):
-								SetupListForColors(list); return;
-							case nameof(GDI.KnownColor): SetupListForKnownColors(list); return;
-						}
-						return;
-					case "System.Windows":
-						if (typeName == nameof(SystemColors)) {
-							SetupListForSystemColors(list);
-						}
-						return;
-					case "System.Windows.Media":
-						switch (typeName) {
-							case nameof(WPF.Colors):
-							case nameof(WPF.Brushes):
-								SetupListForColors(list); return;
-						}
-						return;
-					case "Microsoft.VisualStudio.PlatformUI":
-						switch (typeName) {
-							case nameof(EnvironmentColors): SetupListForVsUIColors(list, typeof(EnvironmentColors)); return;
-							case nameof(CommonControlsColors): SetupListForVsUIColors(list, typeof(CommonControlsColors)); return;
-							case nameof(CommonDocumentColors): SetupListForVsUIColors(list, typeof(CommonDocumentColors)); return;
-							case nameof(HeaderColors): SetupListForVsUIColors(list, typeof(HeaderColors)); return;
-							case nameof(InfoBarColors): SetupListForVsUIColors(list, typeof(InfoBarColors)); return;
-							case nameof(ProgressBarColors): SetupListForVsUIColors(list, typeof(ProgressBarColors)); return;
-							case nameof(SearchControlColors): SetupListForVsUIColors(list, typeof(SearchControlColors)); return;
-							case nameof(StartPageColors): SetupListForVsUIColors(list, typeof(StartPageColors)); return;
-							case nameof(ThemedDialogColors): SetupListForVsUIColors(list, typeof(ThemedDialogColors)); return;
-							case nameof(TreeViewColors): SetupListForVsUIColors(list, typeof(TreeViewColors)); return;
-						}
-						return;
-					case "Microsoft.VisualStudio.Shell":
-						switch (typeName) {
-							case nameof(VsColors): SetupListForVsResourceColors(list, typeof(VsColors)); return;
-							case nameof(VsBrushes): SetupListForVsResourceBrushes(list, typeof(VsBrushes)); return;
-						}
-						return;
-					case "Microsoft.VisualStudio.Imaging":
-						switch (typeName) {
-							case nameof(KnownImageIds):
-								SetupListForKnownImageIds(list);
-								break;
-							case nameof(KnownMonikers):
-								SetupListForKnownMonikers(list);
-								break;
-						}
-						return;
-				}
-			}
-
-			void SetupListForVsUIColors(SymbolList symbolList, Type type) {
-				symbolList.ContainerType = SymbolListType.PredefinedColors;
-				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsThemeBrush(type, s.Symbol.Name)) : null;
-			}
-			void SetupListForVsResourceColors(SymbolList symbolList, Type type) {
-				symbolList.ContainerType = SymbolListType.PredefinedColors;
-				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsResourceColor(type, s.Symbol.Name)) : null;
-			}
-			void SetupListForVsResourceBrushes(SymbolList symbolList, Type type) {
-				symbolList.ContainerType = SymbolListType.PredefinedColors;
-				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsResourceBrush(type, s.Symbol.Name)) : null;
-			}
-			void SetupListForSystemColors(SymbolList symbolList) {
-				symbolList.ContainerType = SymbolListType.PredefinedColors;
-				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
-			}
-			void SetupListForColors(SymbolList symbolList) {
-				symbolList.ContainerType = SymbolListType.PredefinedColors;
-				symbolList.IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name)) : null;
-			}
-			void SetupListForKnownColors(SymbolList symbolList) {
-				symbolList.ContainerType = SymbolListType.PredefinedColors;
-				symbolList.IconProvider = s => ((s.Symbol as IFieldSymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name) ?? ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
-			}
-			void SetupListForKnownImageIds(SymbolList symbolList) {
-				symbolList.ContainerType = SymbolListType.VsKnownImage;
-				symbolList.IconProvider = s => {
-					var f = s.Symbol as IFieldSymbol;
-					return f == null || f.HasConstantValue == false || f.Type.SpecialType != SpecialType.System_Int32
-						? null
-						: ThemeHelper.GetImage((int)f.ConstantValue);
-				};
-			}
-			void SetupListForKnownMonikers(SymbolList symbolList) {
-				symbolList.ContainerType = SymbolListType.VsKnownImage;
-				symbolList.IconProvider = s => {
-					var p = s.Symbol as IPropertySymbol;
-					return p == null || p.IsStatic == false
-						? null
-						: ThemeHelper.GetImage(p.Name);
-				};
-			}
-			Border GetColorPreviewIcon(WPF.Brush brush) {
-				return brush == null ? null : new Border {
-					BorderThickness = WpfHelper.TinyMargin,
-					BorderBrush = ThemeHelper.MenuTextBrush,
-					SnapsToDevicePixels = true,
-					Background = brush,
-					Height = ThemeHelper.DefaultIconSize,
-					Width = ThemeHelper.DefaultIconSize,
-				};
-			}
+		void SetupListForVsUIColors(Type type) {
+			ContainerType = SymbolListType.PredefinedColors;
+			IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsThemeBrush(type, s.Symbol.Name)) : null;
+		}
+		void SetupListForVsResourceColors(Type type) {
+			ContainerType = SymbolListType.PredefinedColors;
+			IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsResourceColor(type, s.Symbol.Name)) : null;
+		}
+		void SetupListForVsResourceBrushes(Type type) {
+			ContainerType = SymbolListType.PredefinedColors;
+			IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsResourceBrush(type, s.Symbol.Name)) : null;
+		}
+		void SetupListForSystemColors() {
+			ContainerType = SymbolListType.PredefinedColors;
+			IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
+		}
+		void SetupListForColors() {
+			ContainerType = SymbolListType.PredefinedColors;
+			IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name)) : null;
+		}
+		void SetupListForKnownColors() {
+			ContainerType = SymbolListType.PredefinedColors;
+			IconProvider = s => ((s.Symbol as IFieldSymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name) ?? ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
+		}
+		void SetupListForKnownImageIds() {
+			ContainerType = SymbolListType.VsKnownImage;
+			IconProvider = s => {
+				var f = s.Symbol as IFieldSymbol;
+				return f == null || f.HasConstantValue == false || f.Type.SpecialType != SpecialType.System_Int32
+					? null
+					: ThemeHelper.GetImage((int)f.ConstantValue);
+			};
+		}
+		void SetupListForKnownMonikers() {
+			ContainerType = SymbolListType.VsKnownImage;
+			IconProvider = s => {
+				var p = s.Symbol as IPropertySymbol;
+				return p == null || p.IsStatic == false
+					? null
+					: ThemeHelper.GetImage(p.Name);
+			};
+		}
+		static Border GetColorPreviewIcon(WPF.Brush brush) {
+			return brush == null ? null : new Border {
+				BorderThickness = WpfHelper.TinyMargin,
+				BorderBrush = ThemeHelper.MenuTextBrush,
+				SnapsToDevicePixels = true,
+				Background = brush,
+				Height = ThemeHelper.DefaultIconSize,
+				Width = ThemeHelper.DefaultIconSize,
+			};
 		}
 		#endregion
 
