@@ -695,6 +695,11 @@ namespace Codist.Controls
 							AddIcon(ref icons, IconIds.AbstractClass);
 						}
 					}
+					else if (type.TypeKind == TypeKind.Enum) {
+						if (type.GetAttributes().Any(a => a.AttributeClass.Name == "FlagsAttribute" && a.AttributeClass.ContainingNamespace.Name == "System")) {
+							AddIcon(ref icons, IconIds.EnumFlags);
+						}
+					}
 					break;
 				case SymbolKind.Field:
 					var f = symbol as IFieldSymbol;
@@ -829,5 +834,9 @@ namespace Codist.Controls
 		/// List of symbol referrers
 		/// </summary>
 		SymbolReferrers,
+		/// <summary>
+		/// List of enum flags
+		/// </summary>
+		EnumFlags,
 	}
 }
