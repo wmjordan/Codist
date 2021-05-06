@@ -102,7 +102,6 @@ namespace Codist.Controls
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
 				m = new SymbolMenu(context, SymbolListType.TypeList);
 				l = m.Menu;
-				l.EnableVirtualMode = true;
 				l.AddRange(items.Select(s => new SymbolItem(s, l, false)));
 				countLabel = R.T_NamespaceMembers.Replace("{count}", items.Length.ToString());
 			}
@@ -118,7 +117,6 @@ namespace Codist.Controls
 					items.AddRange(item.members.Select(s => new SymbolItem(s, l, false) { Hint = t }));
 				}
 				l.SetupForSpecialTypes(symbol as ITypeSymbol);
-				l.EnableVirtualMode = true;
 				l.AddRange(items);
 				countLabel = R.T_Members.Replace("{count}", count.ToString()).Replace("{inherited}", (items.Count - count).ToString());
 			}
@@ -240,7 +238,8 @@ namespace Codist.Controls
 			var r = new ISymbol[nb.Count + tb.Count];
 			var i = -1;
 			foreach (var item in nb.OrderBy(n => n.Name)
-									.Concat(tb.OrderBy(n => n.Name))) {
+				.Concat(tb.OrderBy(n => n.Name).ThenBy(t => (t as INamedTypeSymbol)?.Arity ?? 0))
+				) {
 				r[++i] = item;
 			}
 			return r;
