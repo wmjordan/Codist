@@ -1447,13 +1447,13 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>复制颜色</value>
   </data>
   <data name="CMD_DarkTheme" xml:space="preserve">
-    <value>暗黑主题</value>
+    <value>暗黑</value>
   </data>
   <data name="CMD_Italic" xml:space="preserve">
     <value>斜体</value>
   </data>
   <data name="CMD_LightTheme" xml:space="preserve">
-    <value>亮色主题</value>
+    <value>明亮</value>
   </data>
   <data name="CMD_PasteColor" xml:space="preserve">
     <value>粘贴颜色</value>
@@ -1769,5 +1769,11 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="T_Stretch" xml:space="preserve">
     <value>拉伸:</value>
+  </data>
+  <data name="CMDT_PaleLightTheme" xml:space="preserve">
+    <value>加载为光亮编辑环境设计的淡色预定义主题</value>
+  </data>
+  <data name="CMD_PaleLightTheme" xml:space="preserve">
+    <value>淡雅</value>
   </data>
 </root>

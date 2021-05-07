@@ -1450,10 +1450,10 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>tags</value>
   </data>
   <data name="CMDT_DarkTheme" xml:space="preserve">
-    <value>Load predefined theme for dark editing environment</value>
+    <value>Load a predefined theme for dark editing environment</value>
   </data>
   <data name="CMDT_LightTheme" xml:space="preserve">
-    <value>Load predefined theme for light editing environment</value>
+    <value>Load a predefined theme for light editing environment</value>
   </data>
   <data name="CMDT_LoadTheme" xml:space="preserve">
     <value>Load syntax highlight theme...</value>
@@ -1483,13 +1483,13 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>Copy color</value>
   </data>
   <data name="CMD_DarkTheme" xml:space="preserve">
-    <value>Dark theme</value>
+    <value>Dark</value>
   </data>
   <data name="CMD_Italic" xml:space="preserve">
     <value>Italic</value>
   </data>
   <data name="CMD_LightTheme" xml:space="preserve">
-    <value>Light theme</value>
+    <value>Light</value>
   </data>
   <data name="CMD_PasteColor" xml:space="preserve">
     <value>Paste color</value>
@@ -1779,4 +1779,13 @@ Use space to separate multiple search terms.
   <data name="T_Stretch" xml:space="preserve">
     <value>Stretch:</value>
   </data>
+  <data name="CMDT_PaleLightTheme" xml:space="preserve">
+    <value>Load a predefined theme in pale style for light editing environment</value>
+  </data>
+  <data name="CMD_PaleLightTheme" xml:space="preserve">
+    <value>Pale Light</value>
+  </data>
+	<data name="PaleLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+		<value>..\resources\light pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+	</data>
 </root>

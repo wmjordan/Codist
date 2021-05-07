@@ -210,6 +210,7 @@
     </None>
     <None Include="Resources\Dark Codist.json" />
     <None Include="Resources\Light Codist.json" />
+    <None Include="Resources\Light Pale Codist.json" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>

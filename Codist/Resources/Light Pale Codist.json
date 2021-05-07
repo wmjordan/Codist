@@ -1,0 +1,406 @@
+{
+  "Styles": [
+    {
+      "Key": "Keyword",
+      "ForegroundColor": "#5555AA"
+    },
+    {
+      "Key": "class name",
+      "ForegroundColor": "#498292"
+    },
+    {
+      "Key": "struct name",
+      "ForegroundColor": "#2B5555"
+    },
+    {
+      "Key": "interface name",
+      "ForegroundColor": "#406B80"
+    },
+    {
+      "Key": "enum name",
+      "ForegroundColor": "#552B55"
+    },
+    {
+      "Key": "delegate name",
+      "ForegroundColor": "#497092"
+    },
+    {
+      "Key": "Number",
+      "Bold": true
+    },
+    {
+      "Key": "String",
+      "ForegroundColor": "#7B3E3E"
+    },
+    {
+      "Key": "string - verbatim",
+      "ForegroundColor": "#552B2B"
+    },
+    {
+      "Key": "preprocessor text",
+      "Bold": true,
+      "ForegroundColor": "#FFFFFF",
+      "BackgroundColor": "#5480AB"
+    },
+    {
+      "Key": "Comment",
+      "Italic": true,
+      "ForegroundColor": "#DF2B552B"
+    },
+    {
+      "Key": "unnecessary code",
+      "Strikethrough": true
+    },
+    {
+      "Key": "Codist: Emphasis",
+      "Bold": true,
+      "FontSize": 7.0,
+      "ForegroundColor": "#2B552B"
+    },
+    {
+      "Key": "Codist: Question",
+      "ForegroundColor": "#9B88C4"
+    },
+    {
+      "Key": "Codist: Exclaimation",
+      "ForegroundColor": "#F9AA5580"
+    },
+    {
+      "Key": "Codist: Deletion",
+      "Strikethrough": true,
+      "ForegroundColor": "#808080"
+    },
+    {
+      "Key": "Codist: Task - ToDo",
+      "Italic": false,
+      "FontSize": 3.0,
+      "ForegroundColor": "#FFFFFF",
+      "BackgroundColor": "#C035356A"
+    },
+    {
+      "Key": "Codist: Task - Note",
+      "Bold": true,
+      "ForegroundColor": "#000000",
+      "BackgroundColor": "#C7B38D"
+    },
+    {
+      "Key": "Codist: Task - Hack",
+      "Italic": false,
+      "ForegroundColor": "#AFD8C4",
+      "BackgroundColor": "#152B15"
+    },
+    {
+      "Key": "Codist: Task - Undone",
+      "ForegroundColor": "#A5B0D1",
+      "BackgroundColor": "#704238"
+    },
+    {
+      "Key": "Codist: Heading 1",
+      "FontSize": 12.0,
+      "ForegroundColor": "#2B552B"
+    },
+    {
+      "Key": "Codist: Heading 2",
+      "FontSize": 8.0,
+      "ForegroundColor": "#2B552B"
+    },
+    {
+      "Key": "Codist: Heading 3",
+      "FontSize": 4.0,
+      "ForegroundColor": "#2B552B"
+    },
+    {
+      "Key": "Codist: Heading 4",
+      "FontSize": -1.0,
+      "ForegroundColor": "#2B552B"
+    },
+    {
+      "Key": "Codist: Heading 5",
+      "FontSize": -2.0,
+      "ForegroundColor": "#2B552B"
+    },
+    {
+      "Key": "Codist: Heading 6",
+      "FontSize": -3.0,
+      "ForegroundColor": "#2B552B"
+    },
+    {
+      "Key": "Codist: Task 1",
+      "Italic": false,
+      "FontSize": 10.0,
+      "ForegroundColor": "#552B2B",
+      "BackgroundColor": "#D5AAD5"
+    },
+    {
+      "Key": "Codist: Task 2",
+      "Italic": false,
+      "FontSize": 7.0,
+      "ForegroundColor": "#552B2B",
+      "BackgroundColor": "#D5AAD5",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "Key": "Codist: Task 3",
+      "Bold": true,
+      "Italic": false,
+      "FontSize": 2.0,
+      "ForegroundColor": "#AA5555",
+      "BackgroundColor": "#D5D5AA"
+    },
+    {
+      "Key": "C#: Control flow keyword",
+      "Italic": true,
+      "FontSize": 2.0
+    },
+    {
+      "Key": "C#: Abstraction keyword",
+      "Bold": true,
+      "ForegroundColor": "#2B4055"
+    },
+    {
+      "Key": "C#: Branching keyword",
+      "ForegroundColor": "#004080"
+    },
+    {
+      "Key": "C#: Loop keyword",
+      "Bold": true,
+      "ForegroundColor": "#5580AA"
+    },
+    {
+      "Key": "C#: Type cast keyword",
+      "Bold": true,
+      "ForegroundColor": "#3E7B3E"
+    },
+    {
+      "Key": "C#: Resource keyword",
+      "Bold": true,
+      "ForegroundColor": "#894545"
+    },
+    {
+      "Key": "C#: Declaration",
+      "FontSize": 8.0
+    },
+    {
+      "Key": "C#: Member declaration",
+      "FontSize": 5.0
+    },
+    {
+      "Key": "C#: Declaration brace",
+      "FontSize": 2.0
+    },
+    {
+      "Key": "C#: Static member",
+      "Bold": false,
+      "Underline": true
+    },
+    {
+      "Key": "C#: Override member",
+      "BackgroundColor": "#BFAAD5AA",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "Key": "C#: Virtual member",
+      "BackgroundColor": "#C2C2E0",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "Key": "C#: Local declaration",
+      "Italic": false,
+      "BackgroundColor": "#7FD5D5AA"
+    },
+    {
+      "Key": "C#: Local variable",
+      "Italic": true,
+      "ForegroundColor": "#010101"
+    },
+    {
+      "Key": "C#: Label",
+      "Bold": true,
+      "ForegroundColor": "#FFFFFF",
+      "BackgroundColor": "#5555AA"
+    },
+    {
+      "Key": "C#: Attribute notation",
+      "Italic": true,
+      "FontSize": -2.0,
+      "ForegroundColor": "#DF808080"
+    },
+    {
+      "Key": "C#: Namespace",
+      "ForegroundColor": "#808080"
+    },
+    {
+      "Key": "C#: Sealed class or member",
+      "BackgroundColor": "#FFE8E8",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "Key": "C#: Event",
+      "ForegroundColor": "#2B5540",
+      "BackgroundColor": "#80DCEDDC",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "Key": "C#: Type parameter",
+      "Bold": true,
+      "ForegroundColor": "#8080C0"
+    },
+    {
+      "Key": "C#: Constructor method",
+      "ForegroundColor": "#AA8055"
+    },
+    {
+      "Key": "C#: Field",
+      "Italic": true,
+      "ForegroundColor": "#55552B"
+    },
+    {
+      "Key": "C#: Const field",
+      "ForegroundColor": "#552B55"
+    },
+    {
+      "Key": "C#: Read-only field",
+      "Italic": false
+    },
+    {
+      "Key": "C#: Volatile field",
+      "BackgroundColor": "#AAAA55",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "Key": "C#: Property",
+      "ForegroundColor": "#3C3C77"
+    },
+    {
+      "Key": "C#: Method",
+      "ForegroundColor": "#5A2525"
+    },
+    {
+      "Key": "C#: Extension method",
+      "Italic": true,
+      "Underline": true,
+      "ForegroundColor": "#5A2525"
+    },
+    {
+      "Key": "C#: Extern method",
+      "ForegroundColor": "#800000",
+      "BackgroundColor": "#AA5555",
+      "BackgroundEffect": "ToBottom"
+    },
+    {
+      "Key": "C#: Parameter",
+      "Italic": true,
+      "ForegroundColor": "#91486C"
+    },
+    {
+      "Key": "C#: XML Doc",
+      "FontSize": -1.0,
+      "ForegroundColor": "#E0000000"
+    },
+    {
+      "Key": "xml doc comment - text",
+      "ForegroundColor": "#2B552B"
+    },
+    {
+      "Key": "xml doc comment - name",
+      "Italic": true
+    },
+    {
+      "Key": "xml doc comment - attribute name",
+      "Italic": true
+    },
+    {
+      "Key": "xml doc comment - cdata section",
+      "ForegroundColor": "#2B552B"
+    },
+    {
+      "Key": "XML Attribute",
+      "ForegroundColor": "#AA5555"
+    },
+    {
+      "Key": "XML Attribute Value",
+      "ForegroundColor": "#5555AA"
+    },
+    {
+      "Key": "XML Comment",
+      "ForegroundColor": "#2B552B"
+    },
+    {
+      "Key": "XML Delimiter",
+      "ForegroundColor": "#5555AA"
+    },
+    {
+      "Key": "XML Name",
+      "ForegroundColor": "#7B3E3E"
+    },
+    {
+      "Key": "C#: Metadata symbol",
+      "Bold": true
+    },
+    {
+      "Key": "keyword - control",
+      "ForegroundColor": "#754488"
+    },
+    {
+      "Key": "type parameter name",
+      "ForegroundColor": "#498292"
+    },
+    {
+      "Key": "url",
+      "ForegroundColor": "#556AAA"
+    },
+    {
+      "Key": "type",
+      "ForegroundColor": "#498292"
+    },
+    {
+      "Key": "XAML Attribute",
+      "ForegroundColor": "#AA5555"
+    },
+    {
+      "Key": "XAML Delimiter",
+      "ForegroundColor": "#5555AA"
+    },
+    {
+      "Key": "XAML Name",
+      "ForegroundColor": "#7B3E3E"
+    },
+    {
+      "Key": "XAML Attribute Value",
+      "ForegroundColor": "#404080"
+    },
+    {
+      "Key": "XAML Markup Extension Parameter Name",
+      "Bold": true,
+      "ForegroundColor": "#AA5555"
+    },
+    {
+      "Key": "XAML Markup Extension Parameter Value",
+      "ForegroundColor": "#5555AA"
+    },
+    {
+      "Key": "XAML Markup Extension Class",
+      "ForegroundColor": "#7B3E3E"
+    },
+    {
+      "Key": "XAML Comment",
+      "ForegroundColor": "#2B552B"
+    },
+    {
+      "Key": "module name",
+      "ForegroundColor": "#498292"
+    },
+    {
+      "Key": "markup attribute",
+      "ForegroundColor": "#AA5555"
+    },
+    {
+      "Key": "markup attribute value",
+      "ForegroundColor": "#5555AA"
+    },
+    {
+      "Key": "markup node",
+      "ForegroundColor": "#552B2B"
+    }
+  ]
+}

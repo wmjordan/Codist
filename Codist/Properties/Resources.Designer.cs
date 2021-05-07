@@ -235,7 +235,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Dark theme 的本地化字符串。
+        ///   查找类似 Dark 的本地化字符串。
         /// </summary>
         internal static string CMD_DarkTheme {
             get {
@@ -723,7 +723,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Light theme 的本地化字符串。
+        ///   查找类似 Light 的本地化字符串。
         /// </summary>
         internal static string CMD_LightTheme {
             get {
@@ -827,6 +827,15 @@ namespace Codist.Properties {
         internal static string CMD_OpenWithVS {
             get {
                 return ResourceManager.GetString("CMD_OpenWithVS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Pale Light 的本地化字符串。
+        /// </summary>
+        internal static string CMD_PaleLightTheme {
+            get {
+                return ResourceManager.GetString("CMD_PaleLightTheme", resourceCulture);
             }
         }
         
@@ -1266,7 +1275,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Load predefined theme for dark editing environment 的本地化字符串。
+        ///   查找类似 Load a predefined theme for dark editing environment 的本地化字符串。
         /// </summary>
         internal static string CMDT_DarkTheme {
             get {
@@ -1275,7 +1284,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Load predefined theme for light editing environment 的本地化字符串。
+        ///   查找类似 Load a predefined theme for light editing environment 的本地化字符串。
         /// </summary>
         internal static string CMDT_LightTheme {
             get {
@@ -1307,6 +1316,15 @@ namespace Codist.Properties {
         internal static string CMDT_OpenWechatQrCode {
             get {
                 return ResourceManager.GetString("CMDT_OpenWechatQrCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Load a predefined theme in pale style for light editing environment 的本地化字符串。
+        /// </summary>
+        internal static string CMDT_PaleLightTheme {
+            get {
+                return ResourceManager.GetString("CMDT_PaleLightTheme", resourceCulture);
             }
         }
         
@@ -3441,6 +3459,42 @@ namespace Codist.Properties {
         internal static string OTC_URL {
             get {
                 return ResourceManager.GetString("OTC_URL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {
+        ///  &quot;Styles&quot;: [
+        ///    {
+        ///      &quot;Key&quot;: &quot;Keyword&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#5555AA&quot;
+        ///    },
+        ///    {
+        ///      &quot;Key&quot;: &quot;class name&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#498292&quot;
+        ///    },
+        ///    {
+        ///      &quot;Key&quot;: &quot;struct name&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#2B5555&quot;
+        ///    },
+        ///    {
+        ///      &quot;Key&quot;: &quot;interface name&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#406B80&quot;
+        ///    },
+        ///    {
+        ///      &quot;Key&quot;: &quot;enum name&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#552B55&quot;
+        ///    },
+        ///    {
+        ///      &quot;Key&quot;: &quot;delegate name&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#497092&quot;
+        ///    },
+        ///    {
+        ///      &quot;Ke [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string PaleLight {
+            get {
+                return ResourceManager.GetString("PaleLight", resourceCulture);
             }
         }
         

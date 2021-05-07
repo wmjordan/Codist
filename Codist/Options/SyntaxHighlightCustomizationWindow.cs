@@ -107,6 +107,7 @@ namespace Codist.Options
 									Margin = WpfHelper.TopItemMargin
 								},
 								new ThemedButton(IconIds.SyntaxTheme, R.CMD_LightTheme, R.CMDT_LightTheme, () => LoadTheme(Config.LightTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, R.CMD_PaleLightTheme, R.CMDT_PaleLightTheme, () => LoadTheme(Config.PaleLightTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
 								new ThemedButton(IconIds.SyntaxTheme, R.CMD_DarkTheme, R.CMDT_DarkTheme, () => LoadTheme(Config.DarkTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
 								new ThemedButton(IconIds.SyntaxTheme, R.CMD_SimpleTheme, R.CMDT_SimpleTheme, () => LoadTheme(Config.SimpleTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
 							}

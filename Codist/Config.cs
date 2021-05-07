@@ -19,7 +19,7 @@ namespace Codist
 		internal const string CurrentVersion = "5.10.0";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
-		internal const string LightTheme = ThemePrefix + "Light", DarkTheme = ThemePrefix + "Dark", SimpleTheme = ThemePrefix + "Simple";
+		internal const string LightTheme = ThemePrefix + "Light", PaleLightTheme = ThemePrefix + "PaleLight", DarkTheme = ThemePrefix + "Dark", SimpleTheme = ThemePrefix + "Simple";
 
 		static DateTime _LastSaved, _LastLoaded;
 		static int _LoadingConfig;
@@ -144,6 +144,7 @@ namespace Codist
 		static Config InternalLoadConfig(string configPath, StyleFilters styleFilter) {
 			var configContent = configPath == LightTheme ? Properties.Resources.Light
 				: configPath == DarkTheme ? Properties.Resources.Dark
+				: configPath == PaleLightTheme ? Properties.Resources.PaleLight
 				: configPath == SimpleTheme ? Properties.Resources.Simple
 				: File.ReadAllText(configPath);
 			var config = JsonConvert.DeserializeObject<Config>(configContent, new JsonSerializerSettings {
