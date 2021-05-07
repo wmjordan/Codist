@@ -476,7 +476,7 @@ namespace Codist.Controls
 			var m = Menu;
 			m.Visibility = Visibility.Hidden; // avoid flickering
 
-			if (m.Symbols.Count > 100) {
+			if (m.Symbols.Count > 50) {
 				m.EnableVirtualMode = true;
 			}
 			_Container.Children.Add(m);
@@ -487,8 +487,7 @@ namespace Codist.Controls
 			m.PreviewKeyUp += OnMenuKeyUp;
 
 			var p = positionElement != null ? positionElement.TranslatePoint(new Point(positionElement.RenderSize.Width, 0), _Container) : Mouse.GetPosition(_Container);
-			Canvas.SetLeft(m, p.X);
-			Canvas.SetTop(m, p.Y);
+			_Container.Position(m, p, 100);
 			m.Visibility = Visibility.Visible;
 		}
 		void UpdateNumbers() {

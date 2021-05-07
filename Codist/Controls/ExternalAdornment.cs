@@ -56,6 +56,10 @@ namespace Codist.Controls
 			}
 		}
 
+		public void Position(FrameworkElement child, Point point, int minVisibleSize) {
+			ConstrainChildWindow(child, point, minVisibleSize);
+		}
+
 		protected override void OnPreviewMouseRightButtonUp(MouseButtonEventArgs args) {
 			base.OnPreviewMouseRightButtonUp(args);
 			// hack: suppress the undesired built-in context menu of tabs in VS 16.5
@@ -109,20 +113,19 @@ namespace Codist.Controls
 			}
 		}
 
-		void ConstrainChildWindow(FrameworkElement child, Point newPos) {
-			const int ConstraintSize = 30;
+		void ConstrainChildWindow(FrameworkElement child, Point newPos, int minVisibleSize = 30) {
 			// constrain window within editor view
-			if (newPos.X + child.ActualWidth < ConstraintSize) {
-				newPos.X = ConstraintSize - child.ActualWidth;
+			if (newPos.X + child.ActualWidth < minVisibleSize) {
+				newPos.X = minVisibleSize - child.ActualWidth;
 			}
-			else if (newPos.X > ActualWidth - ConstraintSize) {
-				newPos.X = ActualWidth - ConstraintSize;
+			else if (newPos.X > ActualWidth - minVisibleSize) {
+				newPos.X = ActualWidth - minVisibleSize;
 			}
-			if (newPos.Y + child.ActualHeight < ConstraintSize) {
-				newPos.Y = ConstraintSize - child.ActualHeight;
+			if (newPos.Y + child.ActualHeight < minVisibleSize) {
+				newPos.Y = minVisibleSize - child.ActualHeight;
 			}
-			else if (newPos.Y > ActualHeight - ConstraintSize) {
-				newPos.Y = ActualHeight - ConstraintSize;
+			else if (newPos.Y > ActualHeight - minVisibleSize) {
+				newPos.Y = ActualHeight - minVisibleSize;
 			}
 			SetLeft(child, newPos.X);
 			SetTop(child, newPos.Y);
