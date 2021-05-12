@@ -72,13 +72,22 @@ namespace Codist.Controls
 		}
 
 		internal static async Task FindImplementationsAsync(this SemanticContext context, ISymbol symbol) {
-			var implementations = new List<ISymbol>(await SymbolFinder.FindImplementationsAsync(symbol, context.Document.Project.Solution, null, default).ConfigureAwait(false));
-			implementations.Sort((a, b) => a.Name.CompareTo(b.Name));
+			var s = symbol;
+			INamedTypeSymbol st;
+			// workaround for a bug in Roslyn which keeps generic types from returning any result
+			if (symbol.Kind == SymbolKind.NamedType && (st = (INamedTypeSymbol)symbol).IsGenericType) {
+				s = st.OriginalDefinition;
+			}
+			var implementations = new List<ISymbol>(await SymbolFinder.FindImplementationsAsync(s, context.Document.Project.Solution, null, default).ConfigureAwait(false));
+			implementations.Sort(CodeAnalysisHelper.CompareSymbol);
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context);
 			if (symbol.Kind == SymbolKind.NamedType) {
-				foreach (var impl in implementations) {
-					m.Menu.Add(impl, false);
+				st = (INamedTypeSymbol)symbol;
+				foreach (INamedTypeSymbol impl in implementations) {
+					if (impl.IsGenericType || impl.CanConvertTo(st)) {
+						m.Menu.Add(impl, false);
+					}
 				}
 			}
 			else {
