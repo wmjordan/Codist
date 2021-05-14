@@ -29,9 +29,8 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.WebSearchPage), Constants.NameOfMe, "Web Search", 200, 308, true, Sort = 70)]
 	[ProvideOptionPage(typeof(Options.ExtensionDeveloperPage), Constants.NameOfMe, "Extension development", 200, 309, true, Sort = 80)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
-	//[ProvideToolWindow(typeof(Commands.SymbolFinderWindow))]
+	//[ProvideToolWindow(typeof(Commands.SymbolFinderWindow), Style = VsDockStyle.Tabbed, Window = EnvDTE.Constants.vsWindowKindProperties))]
 	[ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string, PackageAutoLoadFlags.BackgroundLoad)]
-	[ProvideToolWindow(typeof(Commands.SyntaxCustomizerWindow), Style = VsDockStyle.Tabbed, Window = EnvDTE.Constants.vsWindowKindProperties)]
 	sealed class CodistPackage : AsyncPackage
 	{
 		/// <summary>CodistPackage GUID string.</summary>
