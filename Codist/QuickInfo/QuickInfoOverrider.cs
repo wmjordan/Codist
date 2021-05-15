@@ -119,7 +119,7 @@ namespace Codist.QuickInfo
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 					var m = new CSharpSymbolContextMenu(ctx) {
 						Symbol = symbol,
-						SyntaxNode = symbol.GetSyntaxNode()
+						SyntaxNode = ctx.GetNode(quickInfoSession.ApplicableToSpan.GetStartPoint(quickInfoSession.TextView.TextSnapshot).Position, true, true)
 					};
 					m.AddAnalysisCommands();
 					if (m.HasItems) {

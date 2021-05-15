@@ -147,7 +147,7 @@ namespace Codist.Controls
 
 		void CreateCommandForNamedType(INamedTypeSymbol t) {
 			if (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct) {
-				var ctor = _SemanticContext.NodeIncludeTrivia.GetObjectCreationNode();
+				var ctor = _Node?.GetObjectCreationNode();
 				if (ctor != null) {
 					var symbol = _SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(ctor);
 					if (symbol != null) {
