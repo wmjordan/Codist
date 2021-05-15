@@ -53,7 +53,7 @@ namespace Codist.SyntaxHighlight
 				_EditorFormatMap.FormatMappingChanged += BackupFormat;
 				_ClassificationFormatMap.BeginBatchUpdate();
 				foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
-					if (item != null) {
+					if (item != null && item.Classification != Constants.CodeBraceMatching) {
 						_ClassificationFormatMap.SetTextProperties(item, _ClassificationFormatMap.GetExplicitTextProperties(item));
 					}
 				}
@@ -219,6 +219,9 @@ namespace Codist.SyntaxHighlight
 			if (updated.Count > 0) {
 				_ClassificationFormatMap.BeginBatchUpdate();
 				foreach (var item in updated) {
+					if (item.Key.Classification == Constants.CodeBraceMatching) {
+						continue;
+					}
 					_ClassificationFormatMap.SetTextProperties(item.Key, item.Value);
 					Debug.WriteLine("Update format: " + item.Key.Classification);
 				}
