@@ -8,7 +8,7 @@ namespace Codist.Taggers
 	/// <summary>Classification type definition export for symbol highlighter.</summary>
 	static class HighlighterDefinitions
 	{
-#pragma warning disable 169
+#pragma warning disable 169, IDE0044
 		[Export(typeof(ClassificationTypeDefinition))]
 		[Name(Constants.Highlight1)]
 		static ClassificationTypeDefinition Highlight1;

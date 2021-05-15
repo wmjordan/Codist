@@ -8,7 +8,7 @@ namespace Codist.Taggers
 	/// <summary>Classification type definition export for code tagger.</summary>
 	static class CommentClassificationDefinitions
 	{
-#pragma warning disable 169
+#pragma warning disable 169, IDE0044
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeComment)]
 		[Name(Constants.EmphasisComment)]

@@ -7,7 +7,7 @@ namespace Codist.Taggers
 	/// <summary>Classification type definition export for <see cref="CSharpTagger"/>.</summary>
 	static class CSharpClassificationDefinition
 	{
-#pragma warning disable 169
+#pragma warning disable 169, IDE0044
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
 		[Name(Constants.CSharpAbstractionKeyword)]

@@ -6,7 +6,7 @@ namespace Codist.Taggers
 {
 	static class XmlClassificationDefinitions
 	{
-#pragma warning disable 169
+#pragma warning disable 169, IDE0044
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.XmlName)]

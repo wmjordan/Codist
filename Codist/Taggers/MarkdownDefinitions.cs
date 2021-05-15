@@ -8,7 +8,7 @@ namespace Codist.Taggers
 	/// <summary>Classification type definition export for markdown highlighter.</summary>
 	static class MarkdownDefinitions
 	{
-#pragma warning disable 169
+#pragma warning disable 169, IDE0044
 		[Export(typeof(ClassificationTypeDefinition))]
 		[Name(Constants.MarkdownHeading1)]
 		static ClassificationTypeDefinition MarkdownHeading1;
