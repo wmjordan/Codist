@@ -423,11 +423,20 @@ namespace Codist
 			var t = symbol as INamedTypeSymbol;
 			// fix a problem that FindReferencesAsync returns unbounded references for generic type
 			var ts = t == null || t.IsGenericType == false || t.IsUnboundGenericType || t == t.OriginalDefinition ? null : t.ToDisplayString();
+			Predicate<SymbolUsageKind> usageFilter = null;
+			if (symbol is IMethodSymbol m) {
+				if (m.MethodKind == MethodKind.PropertyGet) {
+					usageFilter = u => u != SymbolUsageKind.Write;
+				}
+				else if (m.MethodKind == MethodKind.PropertySet || m.IsInitOnly()) {
+					usageFilter = u => u == SymbolUsageKind.Write;
+				}
+			}
 			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, docs, cancellationToken).ConfigureAwait(false)) {
 				if (definitionFilter?.Invoke(sr.Definition) == false) {
 					continue;
 				}
-				await GroupReferenceByContainerAsync(d, sr, ts, nodeFilter, cancellationToken).ConfigureAwait(false);
+				await GroupReferenceByContainerAsync(d, sr, ts, nodeFilter, usageFilter, cancellationToken).ConfigureAwait(false);
 			}
 			var r = new List<(ISymbol container, List<(SymbolUsageKind, ReferenceLocation)>)>(d.Count);
 			r.AddRange(d.Select(i => (i.Key, i.Value)));
@@ -435,7 +444,7 @@ namespace Codist
 			return r;
 		}
 
-		static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>> results, ReferencedSymbol reference, string typeSymbol, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
+		static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>> results, ReferencedSymbol reference, string typeSymbol, Predicate<SyntaxNode> nodeFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
 			var pu = GetPotentialUsageKinds(reference.Definition);
 			foreach (var docRefs in reference.Locations.GroupBy(l => l.Document)) {
 				var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
@@ -470,11 +479,15 @@ namespace Codist
 								break;
 						}
 					}
+					var u = GetUsageKind(pu, n);
+					if (usageFilter != null && usageFilter(u) == false) {
+						continue;
+					}
 					if (results.TryGetValue(s, out var l)) {
-						l.Add((GetUsageKind(pu, n), location));
+						l.Add((u, location));
 					}
 					else {
-						results[s] = new List<(SymbolUsageKind, ReferenceLocation)> { (GetUsageKind(pu, n), location) };
+						results[s] = new List<(SymbolUsageKind, ReferenceLocation)> { (u, location) };
 					}
 				}
 			}
@@ -487,14 +500,12 @@ namespace Codist
 				if (a != null && (a.Left == node || a.Left.GetLastIdentifier() == node)) {
 					return SymbolUsageKind.Write;
 				}
-				else {
-					if (n.IsKind(SyntaxKind.PostIncrementExpression) || n.IsKind(SyntaxKind.PreIncrementExpression)) {
-						return SymbolUsageKind.Write;
-					}
-					var r = n as ArgumentSyntax;
-					if (r != null && (r.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) || r.RefKindKeyword.IsKind(SyntaxKind.OutKeyword))) {
-						return SymbolUsageKind.Write;
-					}
+				if (n.IsKind(SyntaxKind.PostIncrementExpression) || n.IsKind(SyntaxKind.PreIncrementExpression)) {
+					return SymbolUsageKind.Write;
+				}
+				var r = n as ArgumentSyntax;
+				if (r != null && (r.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) || r.RefKindKeyword.IsKind(SyntaxKind.OutKeyword))) {
+					return SymbolUsageKind.Write;
 				}
 			}
 			else if (possibleUsage.MatchFlags(SymbolUsageKind.TypeCast)) {
@@ -518,7 +529,7 @@ namespace Codist
 					if (a.IsKind(SyntaxKind.AddAssignmentExpression)) {
 						return SymbolUsageKind.Attach;
 					}
-					else if (a.IsKind(SyntaxKind.SubtractAssignmentExpression)) {
+					if (a.IsKind(SyntaxKind.SubtractAssignmentExpression)) {
 						return SymbolUsageKind.Detach;
 					}
 				}

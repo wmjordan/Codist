@@ -41,6 +41,7 @@ namespace Codist
 			memberOptions: SymbolDisplayMemberOptions.IncludeContainingType,
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+		internal const SyntaxKind InitKeyword = (SyntaxKind)8443;
 		internal const SyntaxKind RecordKeyword = (SyntaxKind)8444;
 		internal const SyntaxKind ImplicitObjectCreationExpression = (SyntaxKind)8659;
 		internal const SyntaxKind RecursivePattern = (SyntaxKind)9020;
@@ -49,7 +50,7 @@ namespace Codist
 		internal const SyntaxKind VarPattern = (SyntaxKind)9027;
 		internal const SyntaxKind ImplicitStackAllocArrayCreationExpression = (SyntaxKind)9053;
 		internal const SyntaxKind FunctionPointerCallingConvention = (SyntaxKind)9059;
-		internal const SyntaxKind InitKeyword = (SyntaxKind)9060;
+		internal const SyntaxKind InitAccessorDeclaration = (SyntaxKind)9060;
 		internal const SyntaxKind WithInitializerExpression = (SyntaxKind)9062;
 		internal const SyntaxKind RecordDeclaration = (SyntaxKind)9063;
 		internal const SymbolKind FunctionPointerType = (SymbolKind)20;

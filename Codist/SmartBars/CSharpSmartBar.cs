@@ -92,8 +92,8 @@ namespace Codist.SmartBars
 			if (trivia.RawKind == 0) {
 				var token = _Context.Token;
 				if (token.Span.Contains(View.Selection, true)
-					&& token.Kind() == SyntaxKind.IdentifierToken) {
-					if (nodeKind.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || nodeKind == SyntaxKind.VariableDeclarator || nodeKind == SyntaxKind.ForEachStatement || nodeKind == SyntaxKind.SingleVariableDesignation) {
+					&& (token.Kind() == SyntaxKind.IdentifierToken || token.RawKind == (int)SyntaxKind.SetKeyword || token.RawKind == (int)SyntaxKind.GetKeyword || token.RawKind == (int)CodeAnalysisHelper.InitKeyword)) {
+					if (nodeKind.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || nodeKind == SyntaxKind.VariableDeclarator || nodeKind == SyntaxKind.ForEachStatement || nodeKind == SyntaxKind.SingleVariableDesignation || node is AccessorDeclarationSyntax) {
 						// selection is within a symbol
 						_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
 						if (_Symbol != null) {

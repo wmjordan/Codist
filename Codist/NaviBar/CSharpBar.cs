@@ -1318,7 +1318,7 @@ namespace Codist.NaviBar
 					else if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.AutoPropertyAnnotation)) {
 						var a = p.AccessorList.Accessors;
 						if (a.Count == 2) {
-							if (a.Any(i => i.RawKind == (int)CodeAnalysisHelper.InitKeyword)) {
+							if (a.Any(i => i.RawKind == (int)CodeAnalysisHelper.InitAccessorDeclaration)) {
 								propertyItem.Hint = "{init}";
 							}
 							else if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
