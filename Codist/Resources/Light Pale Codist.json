@@ -14,7 +14,7 @@
     },
     {
       "Key": "interface name",
-      "ForegroundColor": "#406B80"
+      "ForegroundColor": "#5584AA"
     },
     {
       "Key": "enum name",
@@ -354,39 +354,6 @@
       "ForegroundColor": "#498292"
     },
     {
-      "Key": "XAML Attribute",
-      "ForegroundColor": "#AA5555"
-    },
-    {
-      "Key": "XAML Delimiter",
-      "ForegroundColor": "#5555AA"
-    },
-    {
-      "Key": "XAML Name",
-      "ForegroundColor": "#7B3E3E"
-    },
-    {
-      "Key": "XAML Attribute Value",
-      "ForegroundColor": "#404080"
-    },
-    {
-      "Key": "XAML Markup Extension Parameter Name",
-      "Bold": true,
-      "ForegroundColor": "#AA5555"
-    },
-    {
-      "Key": "XAML Markup Extension Parameter Value",
-      "ForegroundColor": "#5555AA"
-    },
-    {
-      "Key": "XAML Markup Extension Class",
-      "ForegroundColor": "#7B3E3E"
-    },
-    {
-      "Key": "XAML Comment",
-      "ForegroundColor": "#2B552B"
-    },
-    {
       "Key": "module name",
       "ForegroundColor": "#498292"
     },
@@ -400,7 +367,94 @@
     },
     {
       "Key": "markup node",
+      "ForegroundColor": "#2B3555"
+    },
+    {
+      "Key": "cppType",
+      "ForegroundColor": "#498292"
+    },
+    {
+      "Key": "cppMemberOperator",
+      "ForegroundColor": "#2B5555"
+    },
+    {
+      "Key": "cppMemberFunction",
       "ForegroundColor": "#552B2B"
+    },
+    {
+      "Key": "cppStringDelimiterCharacter",
+      "ForegroundColor": "#AB5656"
+    },
+    {
+      "Key": "cppMacro",
+      "Underline": true,
+      "ForegroundColor": "#8B67B4"
+    },
+    {
+      "Key": "cppControlKeyword",
+      "Bold": true,
+      "ForegroundColor": "#754488"
+    },
+    {
+      "Key": "cppMemberField",
+      "ForegroundColor": "#55552B"
+    },
+    {
+      "Key": "cppParameter",
+      "Italic": true
+    },
+    {
+      "Key": "cppLocalVariable",
+      "Italic": true,
+      "ForegroundColor": "#344269"
+    },
+    {
+      "Key": "cppFunction",
+      "Underline": true,
+      "ForegroundColor": "#552B2B"
+    },
+    {
+      "Key": "cppGlobalVariable",
+      "Underline": true
+    },
+    {
+      "Key": "cppNamespace",
+      "ForegroundColor": "#808080"
+    },
+    {
+      "Key": "cppEnumerator",
+      "Underline": true,
+      "ForegroundColor": "#402B55"
+    },
+    {
+      "Key": "cppClassTemplate",
+      "ForegroundColor": "#496D92"
+    },
+    {
+      "Key": "cppNewDelete",
+      "ForegroundColor": "#5555AA"
+    },
+    {
+      "Key": "cppOperator",
+      "ForegroundColor": "#2B5555"
+    },
+    {
+      "Key": "cppGenericType",
+      "ForegroundColor": "#498292"
+    },
+    {
+      "Key": "cppLabel",
+      "Bold": true,
+      "ForegroundColor": "#FFFFFF",
+      "BackgroundColor": "#5580AA"
+    },
+    {
+      "Key": "cppValueType",
+      "ForegroundColor": "#498292"
+    },
+    {
+      "Key": "cppRefType",
+      "ForegroundColor": "#498292"
     }
   ]
 }
