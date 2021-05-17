@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Media;
+using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 
@@ -65,8 +66,8 @@ namespace Codist
 			public const string Typeface = nameof(Typeface);
 		}
 
-		public const string CodeKeyword = "Keyword";
-		public const string CodeComment = "Comment";
+		public const string CodeKeyword = PredefinedClassificationTypeNames.Keyword;
+		public const string CodeComment = PredefinedClassificationTypeNames.Comment;
 		public const string CodeText = "text";
 
 		public const string CSharpAbstractionKeyword = "C#: Abstraction keyword";
@@ -84,22 +85,22 @@ namespace Codist
 		public const string CodeModuleName = "module name";
 		public const string CodeTypeParameterName = "type parameter name";
 		public const string CodePreprocessorText = "preprocessor text";
-		public const string CodePreprocessorKeyword = "preprocessor keyword";
-		public const string CodeExcluded = "Excluded Code";
+		public const string CodePreprocessorKeyword = PredefinedClassificationTypeNames.PreprocessorKeyword;
+		public const string CodeExcluded = PredefinedClassificationTypeNames.ExcludedCode;
 		public const string CodeUnnecessary = "unnecessary code";
-		public const string CodeIdentifier = "identifier";
-		public const string CodeLiteral = "Literal";
-		public const string CodeNumber = "Number";
-		public const string CodeOperator = "Operator";
+		public const string CodeIdentifier = PredefinedClassificationTypeNames.Identifier;
+		public const string CodeLiteral = PredefinedClassificationTypeNames.Literal;
+		public const string CodeNumber = PredefinedClassificationTypeNames.Number;
+		public const string CodeOperator = PredefinedClassificationTypeNames.Operator;
 		public const string CodePunctuation = "punctuation";
 		public const string CodeBraceMatching = "brace matching";
 		public const string CodeInlineRenameField = "inline rename field";
-		public const string CodeString = "String";
+		public const string CodeString = PredefinedClassificationTypeNames.String;
 		public const string CodeStringVerbatim = "string - verbatim";
-		public const string CodeSymbolDefinition = "symbol definition";
-		public const string CodeSymbolReference = "symbol reference";
+		public const string CodeSymbolDefinition = PredefinedClassificationTypeNames.SymbolDefinition;
+		public const string CodeSymbolReference = PredefinedClassificationTypeNames.SymbolReference;
 		public const string CodeUrl = "url";
-		public const string CodeFormalLanguage = "formal language";
+		public const string CodeFormalLanguage = PredefinedClassificationTypeNames.FormalLanguage;
 		#region Format names introduced in VS 2019
 		public const string CodeOverloadedOperator = "operator - overloaded";
 		public const string CodeStringEscapeCharacter = "string - escape character";
