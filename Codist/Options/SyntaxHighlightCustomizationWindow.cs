@@ -21,6 +21,7 @@ namespace Codist.Options
 	sealed class SyntaxHighlightCustomizationWindow : Window
 	{
 		static readonly Thickness SubOptionMargin = new Thickness(24, 0, 0, 0);
+		static readonly IClassificationType __BraceMatchingClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBraceMatching);
 		readonly StackPanel _SettingsList;
 		readonly Border _OptionPageHolder;
 		readonly TextBlock _Notice;
@@ -437,7 +438,7 @@ namespace Codist.Options
 				case SyntaxStyleSource.Markdown: classifications = ToClassificationTypes(Config.Instance.MarkdownStyles); break;
 				case SyntaxStyleSource.Xml: classifications = ToClassificationTypes(Config.Instance.XmlCodeStyles); break;
 				case SyntaxStyleSource.CommentTagger: classifications = ToClassificationTypes(Config.Instance.CommentStyles); break;
-				case SyntaxStyleSource.PriorityOrder: classifications = _FormatMap.CurrentPriorityOrder; break;
+				case SyntaxStyleSource.PriorityOrder: classifications = _FormatMap.CurrentPriorityOrder.Where(i => i != __BraceMatchingClassificationType); break;
 				case SyntaxStyleSource.Selection:
 				default:
 					if (_WpfTextView == null) {

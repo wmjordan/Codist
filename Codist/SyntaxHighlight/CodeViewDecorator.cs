@@ -17,6 +17,7 @@ namespace Codist.SyntaxHighlight
 	// see: https://stackoverflow.com/questions/24404473/create-visual-studio-theme-specific-syntax-highlighting
 	sealed class CodeViewDecorator
 	{
+		static readonly IClassificationType __BraceMatchingClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBraceMatching);
 		readonly IWpfTextView _TextView;
 		readonly IClassificationFormatMap _ClassificationFormatMap;
 		readonly IClassificationTypeRegistryService _RegService;
@@ -53,7 +54,7 @@ namespace Codist.SyntaxHighlight
 				_EditorFormatMap.FormatMappingChanged += BackupFormat;
 				_ClassificationFormatMap.BeginBatchUpdate();
 				foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
-					if (item != null && item.Classification != Constants.CodeBraceMatching) {
+					if (item != null && item != __BraceMatchingClassificationType) {
 						_ClassificationFormatMap.SetTextProperties(item, _ClassificationFormatMap.GetExplicitTextProperties(item));
 					}
 				}
@@ -219,7 +220,7 @@ namespace Codist.SyntaxHighlight
 			if (updated.Count > 0) {
 				_ClassificationFormatMap.BeginBatchUpdate();
 				foreach (var item in updated) {
-					if (item.Key.Classification == Constants.CodeBraceMatching) {
+					if (item.Key == __BraceMatchingClassificationType) {
 						continue;
 					}
 					_ClassificationFormatMap.SetTextProperties(item.Key, item.Value);
