@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using AppHelpers;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.Win32;
@@ -126,6 +127,7 @@ namespace Codist.Options
 			readonly OptionBox<Features> _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker;
 			readonly OptionBox<Features>[] _Options;
 			readonly Button _LoadButton, _SaveButton;
+			readonly Note _NoticeBox;
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.Features;
@@ -146,7 +148,7 @@ namespace Codist.Options
 								.SetLazyToolTip(() => R.OT_ScrollbarMarkerTip))
 						}
 					},
-					new Note(R.OT_FeatureChangesTip),
+					_NoticeBox = new Note(R.OT_FeatureChangesTip) { BorderThickness = WpfHelper.TinyMargin, Visibility = Visibility.Collapsed },
 
 					new TitleBox(R.OT_ConfigurationFile),
 					new DescriptionBox(R.OT_ConfigurationFileTip),
@@ -174,6 +176,7 @@ namespace Codist.Options
 				foreach (var item in _Options) {
 					item.MinWidth = 120;
 					item.Margin = WpfHelper.MiddleMargin;
+					item.PreviewMouseDown += HighlightNoticeBox;
 				}
 				foreach (var item in new[] { _LoadButton, _SaveButton }) {
 					item.MinWidth = 120;
@@ -189,6 +192,15 @@ namespace Codist.Options
 							Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("pack://application:,,,/Codist;component/Resources/wechatQrcode.png"))
 						}
 					}.ShowDialog();
+				}
+			}
+
+			void HighlightNoticeBox(object sender, MouseButtonEventArgs e) {
+				_NoticeBox.BorderBrush = SystemColors.HighlightBrush;
+				_NoticeBox.Background = SystemColors.HighlightBrush.Alpha(0.3);
+				_NoticeBox.Visibility = Visibility.Visible;
+				foreach (var item in _Options) {
+					item.PreviewMouseDown -= HighlightNoticeBox;
 				}
 			}
 
