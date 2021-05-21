@@ -341,6 +341,10 @@ namespace Codist.Controls
 						if (m.ReducedFrom != null) {
 							s = m.ReducedFrom;
 						}
+						if (m.MethodKind == MethodKind.Constructor) {
+							s = m.ContainingType;
+							goto case SymbolKind.NamedType;
+						}
 						goto default;
 					default:
 						t = s.ToDisplayString(CodeAnalysisHelper.TypeMemberNameFormat);

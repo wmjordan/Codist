@@ -112,6 +112,9 @@ namespace Codist
 				if (m.MethodKind == MethodKind.ExplicitInterfaceImplementation) {
 					return m.ExplicitInterfaceImplementations[0].Name;
 				}
+				if (m.MethodKind == MethodKind.Constructor) {
+					return m.ContainingType.Name;
+				}
 			}
 			else if (symbol.Kind == SymbolKind.Property) {
 				var p = ((IPropertySymbol)symbol).ExplicitInterfaceImplementations;
