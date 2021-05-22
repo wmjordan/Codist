@@ -114,12 +114,13 @@ namespace Codist.QuickInfo
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				var s = sender as FrameworkElement;
 				if (s.ContextMenu == null) {
-					var ctx = SemanticContext.GetOrCreateSingetonInstance(quickInfoSession.TextView as IWpfTextView);
+					var v = quickInfoSession.TextView;
+					var ctx = SemanticContext.GetOrCreateSingetonInstance(v as IWpfTextView);
 					await ctx.UpdateAsync(textBuffer, default);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 					var m = new CSharpSymbolContextMenu(ctx) {
 						Symbol = symbol,
-						SyntaxNode = quickInfoSession.TextView.TextBuffer.ContentType.DisplayName == "Interactive Content" ? null : ctx.GetNode(quickInfoSession.ApplicableToSpan.GetStartPoint(quickInfoSession.TextView.TextSnapshot).Position, true, true)
+						SyntaxNode = v.TextBuffer.ContentType.TypeName == Constants.CodeTypes.InteractiveContent ? null : ctx.GetNode(quickInfoSession.ApplicableToSpan.GetStartPoint(v.TextSnapshot).Position, true, true)
 					};
 					m.AddAnalysisCommands();
 					if (m.HasItems) {

@@ -706,6 +706,7 @@ namespace Codist
 
 		[Export(typeof(IWpfTextViewCreationListener))]
 		[ContentType(Constants.CodeTypes.Code)]
+		[ContentType(Constants.CodeTypes.InteractiveContent)]
 		[TextViewRole(PredefinedTextViewRoles.Document)]
 		[TextViewRole(PredefinedTextViewRoles.Editable)]
 		sealed class ActiveViewTrackerFactory : IWpfTextViewCreationListener

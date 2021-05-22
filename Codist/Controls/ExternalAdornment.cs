@@ -88,18 +88,13 @@ namespace Codist.Controls
 				element.MouseLeftButtonDown -= BringToFront;
 				ChildRemoved?.Invoke(this, new AdornmentChildRemovedEventArgs(element));
 				_View.Properties.RemoveProperty(QuickInfoSuppressionId);
-				if (Children.Count == 0 || Children.Count == 1 && Children[0] is null) {
-					FocusOnTextView();
-				}
-				else {
-					for (int i = Children.Count - 1; i >= 0; i--) {
-						var f = Children[i].GetFirstVisualChild<TextBox>();
-						if (f != null && f.Focus()) {
-							return;
-						}
+				for (int i = Children.Count - 1; i >= 0; i--) {
+					var f = Children[i].GetFirstVisualChild<TextBox>();
+					if (f != null && f.Focus()) {
+						return;
 					}
-					FocusOnTextView();
 				}
+				FocusOnTextView();
 			}
 		}
 
@@ -171,7 +166,18 @@ namespace Codist.Controls
 
 		void VisualElement_Loaded(object sender, RoutedEventArgs e) {
 			_View.VisualElement.Loaded -= VisualElement_Loaded;
+			_View.Selection.SelectionChanged += ViewSeletionChanged;
+			_View.VisualElement.Unloaded += VisualElement_Unloaded;
 			_View.VisualElement.GetParent<Grid>().Children.Add(this);
+		}
+
+		void VisualElement_Unloaded(object sender, RoutedEventArgs e) {
+			_View.Selection.SelectionChanged -= ViewSeletionChanged;
+			_View.VisualElement.Unloaded += VisualElement_Unloaded;
+		}
+
+		void ViewSeletionChanged(object sender, EventArgs e) {
+			ClearUnpinnedChildren();
 		}
 
 		void BringToFront(object sender, MouseButtonEventArgs e) {

@@ -54,7 +54,7 @@ namespace Codist.SmartBars
 			}
 			else if (contentType.IsOfType("output")
 				|| contentType.IsOfType(Constants.CodeTypes.FindResults)
-				|| contentType.IsOfType("Interactive Content")
+				|| contentType.IsOfType(Constants.CodeTypes.InteractiveContent)
 				|| contentType.IsOfType("DebugOutput")
 				|| contentType.IsOfType("Command")
 				|| contentType.IsOfType("PackageConsole")

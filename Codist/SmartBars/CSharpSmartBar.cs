@@ -33,7 +33,6 @@ namespace Codist.SmartBars
 			ThreadHelper.ThrowIfNotOnUIThread();
 			_Context = SemanticContext.GetOrCreateSingetonInstance(view);
 			_SymbolListContainer = ExternalAdornment.GetOrCreate(view);
-			View.Selection.SelectionChanged += ViewSeletionChanged;
 		}
 
 		ToolBar MyToolBar => ToolBar2;
@@ -44,10 +43,6 @@ namespace Codist.SmartBars
 			}
 			//MyToolBar.Items.Add(new Separator());
 			base.AddCommands(cancellationToken);
-		}
-
-		void ViewSeletionChanged(object sender, EventArgs e) {
-			_SymbolListContainer.ClearUnpinnedChildren();
 		}
 
 		static CommandItem CreateCommandMenu(int imageId, string title, ISymbol symbol, string emptyMenuTitle, Action<CommandContext, MenuItem, ISymbol> itemPopulator) {
