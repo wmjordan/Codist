@@ -51,7 +51,7 @@ namespace Codist.SyntaxHighlight
 				}
 				else {
 					r = DefaultClassificationFormatMap.GetExplicitTextProperties(classificationType);
-					System.Diagnostics.Debug.WriteLine("Backup format: " + classificationType.Classification + " " + (r.ForegroundBrushEmpty ? "<empty>" : r.ForegroundBrush.ToString()));
+					Debug.WriteLine("Backup format: " + classificationType.Classification + " " + (r.ForegroundBrushEmpty ? "<empty>" : r.ForegroundBrush.ToString()));
 					_BackupFormattings[classificationType] = r;
 					return r;
 				}

@@ -388,17 +388,12 @@ namespace Codist.Taggers
 	sealed class CommentTaggerProvider : IViewTaggerProvider
 	{
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
-			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false) {
-				return null;
-			}
-			if (CommentTagger.IsCommentTaggable(buffer) == false) {
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
+				|| CommentTagger.IsCommentTaggable(buffer) == false) {
 				return null;
 			}
 			var vp = textView.Properties;
 			CommentTagger codeTagger;
-			//if (vp.TryGetProperty(typeof(CommentTagger), out codeTagger)) {
-			//	return null;
-			//}
 			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
 			var agg = vp.GetOrCreateSingletonProperty(() => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
 			codeTagger = vp.GetOrCreateSingletonProperty(() => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, agg, tags, buffer));
