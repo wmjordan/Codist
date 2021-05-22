@@ -172,8 +172,10 @@ namespace Codist.Controls
 		}
 
 		void VisualElement_Unloaded(object sender, RoutedEventArgs e) {
-			_View.Selection.SelectionChanged -= ViewSeletionChanged;
-			_View.VisualElement.Unloaded += VisualElement_Unloaded;
+			if (_View.IsClosed) {
+				_View.Selection.SelectionChanged -= ViewSeletionChanged;
+				_View.VisualElement.Unloaded -= VisualElement_Unloaded;
+			}
 		}
 
 		void ViewSeletionChanged(object sender, EventArgs e) {
