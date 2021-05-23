@@ -1,7 +1,7 @@
 # Codist
 
 *Codist* is a Visual Studio extension which strives to provide better coding experience and productivity for C# programmers.
-Codist  «“ª∏ˆ÷¬¡¶”⁄Œ™ C# ≥Ã–Ú‘±Ã·π©∏¸º—µƒ±‡¬ÎÃÂ—È∫Õ–ß¬ µƒ Visual Studio ¿©’π°£
+Codist ÊòØ‰∏Ä‰∏™Ëá¥Âäõ‰∫é‰∏∫ C# Á®ãÂ∫èÂëòÊèê‰æõÊõ¥‰Ω≥ÁöÑÁºñÁ†Å‰ΩìÈ™åÂíåÊïàÁéáÁöÑ Visual Studio Êâ©Â±ï„ÄÇ
 
 # Features
 
@@ -35,7 +35,7 @@ _Codist_ supports localization into other languages and it has both English and 
   You can change syntax highlight styles in any languages, such as Visual BASIC, F#, SASS, and so on, even if they are not recognized by Codist.
 
   The following screenshots of the `TestPage.cs` file in the source code project demonstrates possible syntax highlight effects in the Light theme.
- 
+
   ![Syntax highlight](doc/highlight1.png) 
 
   * The font size of type and member declarations can be enlarged, font families are also changeable, so it is much easier to spot them.
@@ -52,7 +52,7 @@ _Codist_ supports localization into other languages and it has both English and 
 
   To quickly get started with advanced syntax highlight, open a C# project, then click the _Customize Codist Syntax Highlighting_ command under the _Tools_ menu.
 
-  A window will pop up, click the **Light theme** or **Dark theme** button at the left side of the dialog and see changes in effect. Don't forget to click the *OK* button to confirm the changes.
+  A window will pop up, click buttons at the left side of the dialog under the **Predefined themes** and see changes in effect. From version 5.11 on, there is a new theme named **Pale** for your choice. The styles on the right of the dialog immediately lists effects of corresponding syntax elements. Don't forget to click the *OK* button to confirm the changes.
 
   ![Load Theme](doc/syntax-highlight-customization-window.png)
 
@@ -130,7 +130,7 @@ _Codist_ supports localization into other languages and it has both English and 
 
   * **Show info about color**
 
-    This option enables you preview color values. It works for hex color values (such as `#00FF00`£¨`#FF993300`), named colors (such as `Black`, `White`, etc.).
+    This option enables you preview color values. It works for hex color values (such as `#00FF00`Ôºå`#FF993300`), named colors (such as `Black`, `White`, etc.).
 
     ![Super Quick Info - Color](doc/super-quick-info-color.png)
 
@@ -264,15 +264,15 @@ _Codist_ supports localization into other languages and it has both English and 
 
   Nodes on the _Navigation Bar_ are clickable.
 
-  1. Clicking on the left-most **Document node** will popup a menu, displaying namespaces and types defined in the active document.
+  1. Clicking on the left-most **Search Document node** will popup a menu, displaying namespaces and types defined in the active document.
 
      On top of the menu there is a **Search Declaration** box, within which you can type and search declarations.
 
-     ![Navigation Bar Namespace Types](doc/navigation-bar-namespace-types.png)
+     ![Navigation Bar Namespace Types](doc/navigation-bar-search.png)
 
      Besides the _Search Declaration_ box, there are three buttons. The first one is pressed by default, which restricts the search scope to active document. If the second one is pressed, it pops up the first button and expands the search scope to current project (see screen shot below). The third button clears the search box and reverts the items back to unfiltered namespaces and types.
 
-	 From version 5.10 on, you can press `-` or `=` key on your keyboard to switch search scope between current document and current project.
+      From version 5.10 on, you can press `-` or `=` key on your keyboard to switch search scope between current document and current project.
 
      ![Navigation Bar Search Declaration](doc/navigation-bar-search-declaration.png)
 
@@ -280,7 +280,9 @@ _Codist_ supports localization into other languages and it has both English and 
 
      You can **drag and drop** items in the menu to reorder types within the document.
 
-  2. Clicking on a **Namespace node** which follows the Document node will popup a menu, displaying namespaces and types defined in the corresponding namespace. You can click on those items and jump to the beginning of corresponding definitions.
+  2. Clicking on the **global namespace node** which has a house as the icon will popup a menu, displaying all root namespaces defined in the project and referenced assemblies, as well as types without any namespace. You can click namespaces to check out its sub-namespaces and types.
+
+     ![Global namespaces](doc/navigation-bar-global-namespaces.png)
 
      There is also a search box in this menu, which filters content of the menu.
 
@@ -288,11 +290,11 @@ _Codist_ supports localization into other languages and it has both English and 
 
      You can right click items on the menu to bring out a context menu for curresponding members.
 
-  3. Clicking on a **Type node** will popup a menu, displaying members and regions defined within the type. You can click on those items and jump to the definition of the corresponding member.
+  3. Clicking a **Namespace node** which follows the Document node will popup a menu, displaying namespaces and types defined in the corresponding namespace. You can click on those items and jump to the beginning of corresponding definitions.
+
+  4. Clicking on a **Type node** will popup a menu, displaying members and regions defined within the type. You can click on those items and jump to the definition of the corresponding member.
 
      You can **drag and drop** items in the menu to reorder members, nested types and `#region`s within the document. If a `partial` type spans over several code files, it is also possible to rearrange members among them.
-
-     The number beneath the items indicates number of lines of the current type.
 
      ![Navigation Bar Fields](doc/navigation-bar-fields.png)
 
@@ -300,9 +302,11 @@ _Codist_ supports localization into other languages and it has both English and 
 
      Field values and auto-property expressions are also displayed on this menu. So, you can read the initial value of fields immediately.
 
+     You can right click items to bring out a context menu for the symbol.
+
      ![Navigation Bar Fields](doc/navigation-bar-context-menu.png)
 
-   4. Clicking on a **Member node** will select the whole member. If you have the _Smart Bar_ feature on and let it appear when selection is changed, _Smart Bar_ will be displayed and let you perform actions onto the member.
+   5. Clicking on a **Member node** will select the whole member. If you have the _Smart Bar_ feature on and let it appear when selection is changed, _Smart Bar_ will be displayed and let you perform actions onto the member.
 
       ![Navigation Bar Select](doc/navigation-bar-select.png)
 
@@ -459,7 +463,7 @@ _Codist_ supports localization into other languages and it has both English and 
 
 ## Codist in Your Language
 
-  It is possible to localize _Codist_ to other language. Simplified Chinese (ºÚÃÂ÷–Œƒ) and English are provided by default.
+  It is possible to localize _Codist_ to other language. Simplified Chinese (ÁÆÄ‰Ωì‰∏≠Êñá) and English are provided by default.
 
   The interface of _Codist_ will change according to the _International_ settings of _Visual Studio_.
 
@@ -525,7 +529,7 @@ _Codist_ supports localization into other languages and it has both English and 
 
 # Support Codist by Donation
 
-  If you like _Codist_ and want to support the future development of it, you can [donate to the author](https://paypal.me/wmzuo/19.99).
+  If you like _Codist_, consider [buying me a cup of Chinese tea](https://paypal.me/wmzuo/19.99).
 
   You can donate any amount of money as you like. The recommended amount of donation is `$19.99`.
 
