@@ -1609,7 +1609,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>将以下括号变成粗体</value>
   </data>
   <data name="OT_BoldBracesNote" xml:space="preserve">
-    <value>当下列复选框被选中时，相关的括号将以其相关的关键字语法颜色着色</value>
+    <value>当下列复选框被选中时，相关的括号将以其对应的关键字语法颜色着色</value>
   </data>
   <data name="OT_ApplyToNonPrivateField" xml:space="preserve">
     <value>应用到非私有的字段</value>
