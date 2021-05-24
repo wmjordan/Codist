@@ -67,7 +67,7 @@ namespace Codist
 			public const string Typeface = nameof(Typeface);
 		}
 
-		public const string CodeKeyword = PredefinedClassificationTypeNames.Keyword;
+		public const string CodeKeyword = "Keyword";// it is weird that there are two keyword with different cases in the resource dictionary: a Keyword and a PredefinedClassificationTypeNames.Keyword;
 		public const string CodeComment = PredefinedClassificationTypeNames.Comment;
 		public const string CodeText = "text";
 
