@@ -66,7 +66,7 @@ namespace Codist
 						? semanticModel.GetSymbolInfo(((ArgumentSyntax)node.Parent).Expression, cancellationToken).CandidateSymbols.FirstOrDefault()
 						: null)
 					?? (node is AccessorDeclarationSyntax
-						? semanticModel.GetDeclaredSymbol(node.Parent.Parent, cancellationToken)
+						? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 						: null)
 					?? (node is TypeParameterSyntax || node is ParameterSyntax || node.RawKind == (int)RecordDeclaration ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null);
 		}
@@ -610,6 +610,17 @@ namespace Codist
 				t += "ref readonly ";
 			}
 			return t;
+		}
+
+		public static bool IsAccessor(this IMethodSymbol method) {
+			switch (method.MethodKind) {
+				case MethodKind.EventAdd:
+				case MethodKind.EventRemove:
+				case MethodKind.PropertyGet:
+				case MethodKind.PropertySet:
+					return true;
+			}
+			return false;
 		}
 
 		public static bool IsCommonClass(this ISymbol symbol) {

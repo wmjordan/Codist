@@ -273,6 +273,9 @@ namespace Codist.QuickInfo
 			if (symbol == null) {
 				return null;
 			}
+			if (symbol.Kind == SymbolKind.Method && ((IMethodSymbol)symbol).IsAccessor()) {
+				symbol = symbol.ContainingSymbol;
+			}
 			symbol = symbol.GetAliasTarget();
 			var doc = new XmlDoc(symbol, _SemanticModel.Compilation);
 			var docRenderer = new XmlDocRenderer(_SemanticModel.Compilation, SymbolFormatter.Instance);
