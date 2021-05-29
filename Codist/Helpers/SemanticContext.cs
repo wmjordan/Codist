@@ -136,7 +136,8 @@ namespace Codist
 			var root = Compilation;
 			if (String.Equals(node.SyntaxTree.FilePath, SemanticModel.SyntaxTree.FilePath, StringComparison.OrdinalIgnoreCase) == false) {
 				// not the same document
-				if ((root = SyncHelper.RunSync(() => GetDocument(node.SyntaxTree)?.GetSemanticModelAsync())?.SyntaxTree.GetCompilationUnitRoot()) == null) {
+				var d = GetDocument(node.SyntaxTree);
+				if (d == null || (root = SyncHelper.RunSync(() => d.GetSemanticModelAsync())?.SyntaxTree.GetCompilationUnitRoot()) == null) {
 					// document no longer exists
 					return null;
 				}
