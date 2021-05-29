@@ -1165,7 +1165,7 @@ namespace Codist.NaviBar
 						if (isExternal) {
 							i.Usage = SymbolUsageKind.External;
 						}
-						if (selected == false && i.SelectIfContainsPosition(pos)) {
+						else if (selected == false && i.SelectIfContainsPosition(pos)) {
 							selected = true;
 						}
 						ShowNodeValue(i);
