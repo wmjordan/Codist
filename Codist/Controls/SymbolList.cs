@@ -273,7 +273,14 @@ namespace Codist.Controls
 
 		void SetupContextMenu(CSharpSymbolContextMenu menu, SymbolItem item) {
 			if (item.SyntaxNode != null) {
-				SetupMenuCommand(item, IconIds.SelectCode, R.CMD_SelectCode, s => s.Container.SemanticContext.View.SelectNode(s.SyntaxNode, true));
+				SetupMenuCommand(item, IconIds.SelectCode, R.CMD_SelectCode, s => {
+					if (s.IsExternal) {
+						s.SyntaxNode.SelectNode(true);
+					}
+					else {
+						s.Container.SemanticContext.View.SelectNode(s.SyntaxNode, true);
+					}
+				});
 				//SetupMenuCommand(item, KnownImageIds.Copy, "Copy Code", s => Clipboard.SetText(s.SyntaxNode.ToFullString()));
 				item.SetSymbolToSyntaxNode();
 			}
