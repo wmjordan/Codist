@@ -17,6 +17,9 @@ namespace Codist.Controls
 	{
 		internal static async Task FindReferrersAsync(this SemanticContext context, ISymbol symbol, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null) {
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			if (symbol.Kind == SymbolKind.Method && ((IMethodSymbol)symbol).IsExtensionMethod) {
+				symbol = ((IMethodSymbol)symbol).ReducedFrom ?? symbol;
+			}
 			var filter = Keyboard.Modifiers == ModifierKeys.Control ? (s => s == symbol) : definitionFilter;
 			var referrers = await symbol.FindReferrersAsync(context.Document.Project, filter, nodeFilter).ConfigureAwait(false);
 			if (referrers == null) {
