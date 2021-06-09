@@ -30,15 +30,10 @@ namespace Codist
 			if (docId == null) {
 				throw new InvalidOperationException("docId is null");
 			}
-			return solution.ContainsDocument(docId)
-				? solution.GetDocument(docId)
-				: solution.WithDocumentText(docId, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(docId);
+			return solution.WithDocumentText(docId, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(docId);
 		}
 		public static Document GetDocument(this ITextBuffer textBuffer) {
 			return textBuffer.GetWorkspace().GetDocument(textBuffer);
-		}
-		public static Document GetDocument(this Workspace workspace, SnapshotSpan span) {
-			return workspace.GetDocument(span.Snapshot.TextBuffer);
 		}
 		public static Document GetDocument(this Project project, string filePath) {
 			return project.Documents.FirstOrDefault(d => String.Equals(d.FilePath, filePath, StringComparison.OrdinalIgnoreCase));

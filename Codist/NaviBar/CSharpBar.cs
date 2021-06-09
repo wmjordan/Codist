@@ -140,8 +140,6 @@ namespace Codist.NaviBar
 
 		async void Update(object sender, EventArgs e) {
 			HideMenu();
-			//SyncHelper.CancelAndDispose(ref _cancellationSource, true);
-			//var cs = _cancellationSource;
 			if (_cancellationSource != null) {
 				try {
 					await Update(SyncHelper.CancelAndRetainToken(ref _cancellationSource));
@@ -152,7 +150,7 @@ namespace Codist.NaviBar
 			}
 			async Task Update(CancellationToken token) {
 				var nodes = await UpdateModelAndGetContainingNodesAsync(token);
-				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(token);
+				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(token);
 				int ic = Items.Count, c = Math.Min(ic, nodes.Length);
 				int i, i2;
 				#region Remove outdated nodes on NaviBar
@@ -246,15 +244,18 @@ namespace Codist.NaviBar
 			if (await _SemanticContext.UpdateAsync(position, token) == false) {
 				return ImmutableArray<SyntaxNode>.Empty;
 			}
+			var model = _SemanticContext.Model;
+			if (model.Compilation == null) {
+				return ImmutableArray<SyntaxNode>.Empty;
+			}
 			// if the caret is at the beginning of the document, move to the first type declaration
-			if (position == 0 && _SemanticContext.Compilation != null) {
-				var n = _SemanticContext.Compilation.GetDecendantDeclarations(token).FirstOrDefault();
+			if (position == 0) {
+				var n = model.Compilation.GetDecendantDeclarations(token).FirstOrDefault();
 				if (n != null) {
 					position = n.SpanStart;
 				}
-				_SemanticContext.Position = position;
 			}
-			return _SemanticContext.GetContainingNodes(Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail), Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionOnBar));
+			return _SemanticContext.GetContainingNodes(position, Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail), Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionOnBar));
 		}
 
 		void ViewClosed(object sender, EventArgs e) {

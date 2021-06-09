@@ -486,12 +486,6 @@ namespace Codist.Margins
 			async void UpdateReferences(object sender, EventArgs e) {
 				try {
 					SyncHelper.CancelAndDispose(ref _Margin._Cancellation, true);
-					//if (_View.Selection.IsEmpty == false) {
-					//	if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
-					//		_Element.InvalidateVisual();
-					//	}
-					//	return;
-					//}
 					await UpdateReferencesAsync();
 				}
 				catch (ObjectDisposedException) {
@@ -507,35 +501,34 @@ namespace Codist.Margins
 				var ctx = _Margin._SemanticContext;
 				if (await ctx.UpdateAsync(_View.Selection.Start.Position, cancellation).ConfigureAwait(false) == false) {
 					_Symbol = null;
-					await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellation);
-					_Margin.InvalidateVisual();
-					return;
+					goto REFRESH;
 				}
 				var symbol = await ctx.GetSymbolAsync(_View.Selection.Start.Position, cancellation).ConfigureAwait(false);
 				if (symbol == null) {
 					if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
 						_Symbol = null;
-						await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellation);
-						_Margin.InvalidateVisual();
+						goto REFRESH;
 					}
 					return;
 				}
 
-				if (ReferenceEquals(Interlocked.Exchange(ref _Symbol, symbol), symbol) == false) {
-					var doc = ctx.Document;
-					_DocSyntax = ctx.Compilation.SyntaxTree;
-					// todo show marked symbols on scrollbar margin
-					try {
-						_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, System.Collections.Immutable.ImmutableSortedSet.Create(doc), cancellation).ConfigureAwait(false);
-					}
-					catch (ArgumentException) {
-						// hack: multiple async updates could occur and invalidated ctx.Document, which might cause ArgumentException
-						// ignore this at this moment
-						return;
-					}
-					await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellation);
-					_Margin.InvalidateVisual();
+				if (ReferenceEquals(Interlocked.Exchange(ref _Symbol, symbol), symbol)) {
+					return;
 				}
+				var doc = ctx.Document;
+				_DocSyntax = ctx.Compilation.SyntaxTree;
+				// todo show marked symbols on scrollbar margin
+				try {
+					_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, ImmutableSortedSet.Create(doc), cancellation).ConfigureAwait(false);
+				}
+				catch (ArgumentException) {
+					// hack: multiple async updates could occur and invalidated ctx.Document, which might cause ArgumentException
+					// ignore this at this moment
+					return;
+				}
+				REFRESH:
+				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellation);
+				_Margin.InvalidateVisual();
 			}
 		}
 	}

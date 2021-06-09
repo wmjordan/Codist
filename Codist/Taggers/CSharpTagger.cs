@@ -23,38 +23,74 @@ namespace Codist.Taggers
 	sealed class CSharpTaggerProvider : IViewTaggerProvider
 	{
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
-			return Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
-				? textView.Properties.GetOrCreateSingletonProperty(() => new CSharpTagger() as ITagger<T>)
-				: null;
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)) {
+				var tagger = textView.Properties.GetOrCreateSingletonProperty(nameof(CSharpTagger), () => new CSharpTagger() as ITagger<T>);
+				textView.Closed += TextView_Closed;
+				return tagger;
+			}
+			return null;
+		}
+
+		void TextView_Closed(object sender, EventArgs e) {
+			var view = (ITextView)sender;
+			view.Closed -= TextView_Closed;
+			if (view.Properties.TryGetProperty(nameof(CSharpTagger), out CSharpTagger tagger)) {
+				tagger.Dispose();
+			}
 		}
 	}
 
 	/// <summary>A classifier for C# code syntax highlight.</summary>
-	sealed class CSharpTagger : ITagger<IClassificationTag>
+	sealed class CSharpTagger : ITagger<IClassificationTag>, IDisposable
 	{
 		static readonly CSharpClassifications _Classifications = CSharpClassifications.Instance;
 		static readonly GeneralClassifications _GeneralClassifications = GeneralClassifications.Instance;
+		VersionStamp _SyntaxVersion;
+		Workspace _Workspace;
+		SemanticModel _SemanticModel;
+		ITextBuffer _TextBuffer;
 
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
-			ITextSnapshot snapshot = null;
-			Workspace workspace = null;
-			SemanticModel semanticModel = null;
-			foreach (var span in spans) {
-				if (snapshot != span.Snapshot) {
-					snapshot = span.Snapshot;
-					if (workspace == null) {
-						workspace = snapshot.TextBuffer.GetWorkspace();
-					}
-					if (workspace == null) {
-						yield break;
-					}
-					if (semanticModel == null) {
-						semanticModel = SyncHelper.RunSync(() => workspace.GetDocument(span).GetSemanticModelAsync());
-					}
+			if (spans.Count == 0) {
+				return Array.Empty<ITagSpan<IClassificationTag>>();
+			}
+			var snapshot = spans[0].Snapshot;
+			var textBuffer = snapshot.TextBuffer;
+			if (_TextBuffer != textBuffer) {
+				_TextBuffer = textBuffer;
+				_SemanticModel = null;
+			}
+			var workspace = _Workspace = textBuffer.GetWorkspace();
+			if (workspace == null) {
+				return Array.Empty<ITagSpan<IClassificationTag>>();
+			}
+			var doc = workspace.GetDocument(textBuffer);
+			if (doc.TryGetSyntaxVersion(out var version)) {
+				if (_SemanticModel != null && version == _SyntaxVersion) {
+					goto GETTAGS;
 				}
+				_SyntaxVersion = version;
+			}
+			if (doc.TryGetSemanticModel(out var semanticModel) == false) {
+				semanticModel = SyncHelper.RunSync(async () => {
+					using (var cts = new System.Threading.CancellationTokenSource(50)) {
+						return await doc.GetSemanticModelAsync(cts.Token);
+					}
+				});
+				if (semanticModel == null) {
+					_SyntaxVersion = VersionStamp.Default;
+					return Array.Empty<ITagSpan<IClassificationTag>>();
+				}
+			}
+			_SemanticModel = semanticModel;
+			GETTAGS:
+			return GetTags(spans, _Workspace, _SemanticModel, snapshot);
+		}
 
+		IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans, Workspace workspace, SemanticModel semanticModel, ITextSnapshot snapshot) {
+			foreach (var span in spans) {
 				var textSpan = new TextSpan(span.Start.Position, span.Length);
 				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 				var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace);
@@ -608,6 +644,10 @@ namespace Codist.Taggers
 
 		static ITagSpan<IClassificationTag> CreateClassificationSpan(ITextSnapshot snapshotSpan, TextSpan span, ClassificationTag tag) {
 			return tag != null ? new TagSpan<IClassificationTag>(new SnapshotSpan(snapshotSpan, span.Start, span.Length), tag) : null;
+		}
+
+		public void Dispose() {
+			;
 		}
 
 		static class HighlightOptions

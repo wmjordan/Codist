@@ -16,9 +16,9 @@ namespace Codist
 {
 	sealed class SemanticContext
 	{
-		VersionStamp _Version;
 		SyntaxNode _Node, _NodeIncludeTrivia;
 		IOutliningManager _OutliningManager;
+		SyntaxModel _Model = SyntaxModel.Empty;
 		int _Position;
 
 		public static SemanticContext GetHovered() {
@@ -37,10 +37,11 @@ namespace Codist
 		public IOutliningManager OutliningManager {
 			get => _OutliningManager ?? (_OutliningManager = ServicesHelper.Instance.OutliningManager.GetOutliningManager(View));
 		}
-		public Workspace Workspace { get; private set; }
-		public Document Document { get; private set; }
-		public SemanticModel SemanticModel { get; private set; }
-		public CompilationUnitSyntax Compilation { get; private set; }
+		public SyntaxModel Model => _Model;
+		public Workspace Workspace => _Model.Workspace;
+		public Document Document => _Model.Document;
+		public SemanticModel SemanticModel => _Model.SemanticModel;
+		public CompilationUnitSyntax Compilation => _Model.Compilation;
 		public SyntaxNode Node => _Node != null && _Node.Span.Contains(_Position)
 			? _Node
 			: (_Node = GetNode(_Position, false, false));
@@ -57,29 +58,39 @@ namespace Codist
 			set { _Position = value; ResetNodeInfo(); }
 		}
 
-		public SyntaxNode GetNode(int position, bool includeTrivia, bool deep) {
-			SyntaxNode node = Compilation.FindNode(new TextSpan(position, 0), includeTrivia, deep);
-			SeparatedSyntaxList<VariableDeclaratorSyntax> variables;
-			if (node.IsKind(SyntaxKind.FieldDeclaration) || node.IsKind(SyntaxKind.EventFieldDeclaration)) {
-				variables = (node as BaseFieldDeclarationSyntax).Declaration.Variables;
-			}
-			else if (node.IsKind(SyntaxKind.VariableDeclaration)) {
-				variables = (node as VariableDeclarationSyntax).Variables;
-			}
-			else if (node.IsKind(SyntaxKind.LocalDeclarationStatement)) {
-				variables = (node as LocalDeclarationStatementSyntax).Declaration.Variables;
-			}
-			else {
-				return node;
-			}
-			foreach (var variable in variables) {
-				if (variable.Span.Contains(position)) {
-					return node;
+		public Task<SyntaxModel> GetSyntaxModelAsync(CancellationToken cancellationToken = default) {
+			return GetSyntaxModelAsync(View.TextBuffer, cancellationToken);
+		}
+		public async Task<SyntaxModel> GetSyntaxModelAsync(ITextBuffer textBuffer, CancellationToken cancellationToken = default) {
+			var textContainer = textBuffer.AsTextContainer();
+			Document doc = null;
+			if (Workspace.TryGetWorkspace(textContainer, out var workspace)) {
+				var id = workspace.GetDocumentIdInCurrentContext(textContainer);
+				if (id is null == false && workspace.CurrentSolution.ContainsDocument(id)) {
+					doc = workspace.CurrentSolution.WithDocumentText(id, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(id);
 				}
 			}
-			return node.FullSpan.Contains(position) ? node : null;
+			else {
+				return null;
+			}
+			if (doc == Document) {
+				return _Model;
+			}
+			SemanticModel model;
+			return _Model = new SyntaxModel(
+				workspace,
+				doc,
+				model = await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false),
+				model.SyntaxTree.GetCompilationUnitRoot(cancellationToken),
+				await doc.GetSyntaxVersionAsync(cancellationToken)
+				);
+		}
+		public SyntaxNode GetNode(int position, bool includeTrivia, bool deep) {
+			return _Model.GetNode(position, includeTrivia, deep);
 		}
 		public SyntaxTrivia GetNodeTrivia() {
+			var c = Compilation;
+
 			if (Node != null) {
 				var triviaList = Token.HasLeadingTrivia ? Token.LeadingTrivia
 								: Token.HasTrailingTrivia ? Token.TrailingTrivia
@@ -253,10 +264,14 @@ namespace Codist
 					return false;
 				}
 				if (doc != Document) {
-					Workspace = workspace;
-					Document = doc;
-					SemanticModel = await Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-					Compilation = SemanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
+					SemanticModel model;
+					_Model = new SyntaxModel(
+						workspace,
+						doc,
+						model = await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false),
+						model.SyntaxTree.GetCompilationUnitRoot(cancellationToken),
+						await doc.GetSyntaxVersionAsync(cancellationToken)
+						);
 				}
 				return true;
 			}
@@ -276,28 +291,32 @@ namespace Codist
 			bool versionChanged;
 			try {
 				var textContainer = textBuffer.AsTextContainer();
-				Document = null;
+				Document document = null;
 				if (Workspace.TryGetWorkspace(textContainer, out var workspace)) {
-					Workspace = workspace;
 					var id = workspace.GetDocumentIdInCurrentContext(textContainer);
-					if (id != null && workspace.CurrentSolution.ContainsDocument(id)) {
-						Document = workspace.CurrentSolution.WithDocumentText(id, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(id);
+					if ((id is null) == false && workspace.CurrentSolution.ContainsDocument(id)) {
+						document = workspace.CurrentSolution.WithDocumentText(id, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(id);
 					}
 				}
 				else {
 					return false;
 				}
-				if (Document == null) {
+				if (document == null) {
 					return Reset();
 				}
-				var ver = await Document.GetTextVersionAsync(cancellationToken).ConfigureAwait(false);
-				if (versionChanged = ver != _Version) {
-					_Version = ver;
-					SemanticModel = await Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-					if (SemanticModel == null) {
+				var ver = await document.GetSyntaxVersionAsync(cancellationToken).ConfigureAwait(false);
+				if (versionChanged = ver != _Model.Version) {
+					var model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+					if (model == null) {
 						return Reset();
 					}
-					Compilation = SemanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
+					_Model = new SyntaxModel(
+						workspace,
+						document,
+						model,
+						model.SyntaxTree.GetCompilationUnitRoot(cancellationToken),
+						ver
+					);
 					ResetNodeInfo();
 				}
 			}
@@ -306,7 +325,7 @@ namespace Codist
 			}
 			try {
 				if (versionChanged || Token.Span.Contains(position) == false) {
-					Token = Compilation.FindToken(position, true);
+					Token = Compilation?.FindToken(position, true) ?? default;
 					_Node = _NodeIncludeTrivia = null;
 				}
 			}
@@ -316,11 +335,15 @@ namespace Codist
 			return true;
 		}
 
-		public ImmutableArray<SyntaxNode> GetContainingNodes(bool includeSyntaxDetails, bool includeRegions) {
-			var node = Node;
+		public ImmutableArray<SyntaxNode> GetContainingNodes(int position, bool includeSyntaxDetails, bool includeRegions) {
+			var model = _Model;
+			var node = model.GetNode(position, false, false);
+			if (node == null) {
+				return ImmutableArray<SyntaxNode>.Empty;
+			}
 			var nodes = ImmutableArray.CreateBuilder<SyntaxNode>(5);
 			while (node != null) {
-				if (node.FullSpan.Contains(_Position)) {
+				if (node.FullSpan.Contains(position)) {
 					var nodeKind = node.Kind();
 					if (nodeKind != SyntaxKind.VariableDeclaration
 						&& (includeSyntaxDetails && nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() || nodeKind == SyntaxKind.Attribute)) {
@@ -333,8 +356,8 @@ namespace Codist
 			if (includeRegions == false || OutliningManager == null) {
 				return nodes.ToImmutable();
 			}
-			foreach (var region in GetRegions(_Position)) {
-				node = Compilation.FindTrivia(region.Extent.GetStartPoint(View.TextSnapshot)).GetStructure();
+			foreach (var region in GetRegions(position)) {
+				node = model.Compilation.FindTrivia(region.Extent.GetStartPoint(View.TextSnapshot)).GetStructure();
 				if (node == null || node is DirectiveTriviaSyntax == false) {
 					continue;
 				}
@@ -365,5 +388,71 @@ namespace Codist
 			ResetNodeInfo();
 			return false;
 		}
+	}
+
+	sealed class SyntaxModel
+	{
+		internal static readonly SyntaxModel Empty = new SyntaxModel(null, null, null, null, VersionStamp.Default);
+
+		public readonly Workspace Workspace;
+		public readonly Document Document;
+		public readonly SemanticModel SemanticModel;
+		public readonly CompilationUnitSyntax Compilation;
+		public readonly VersionStamp Version;
+
+		public SyntaxModel(Workspace workspace, Document document, SemanticModel semanticModel, CompilationUnitSyntax compilation, VersionStamp version) {
+			Workspace = workspace;
+			Document = document;
+			SemanticModel = semanticModel;
+			Compilation = compilation;
+			Version = version;
+		}
+
+		public SyntaxNodeInfo GetNodeInfo(int position) {
+			return new SyntaxNodeInfo(this, position);
+		}
+		public SyntaxNode GetNode(int position, bool includeTrivia, bool deep) {
+			if (Compilation == null) {
+				return null;
+			}
+			var node = Compilation.FindNode(new TextSpan(position, 0), includeTrivia, deep);
+			SeparatedSyntaxList<VariableDeclaratorSyntax> variables;
+			if (node.IsKind(SyntaxKind.FieldDeclaration) || node.IsKind(SyntaxKind.EventFieldDeclaration)) {
+				variables = (node as BaseFieldDeclarationSyntax).Declaration.Variables;
+			}
+			else if (node.IsKind(SyntaxKind.VariableDeclaration)) {
+				variables = (node as VariableDeclarationSyntax).Variables;
+			}
+			else if (node.IsKind(SyntaxKind.LocalDeclarationStatement)) {
+				variables = (node as LocalDeclarationStatementSyntax).Declaration.Variables;
+			}
+			else {
+				return node;
+			}
+			foreach (var variable in variables) {
+				if (variable.Span.Contains(position)) {
+					return node;
+				}
+			}
+			return node.FullSpan.Contains(position) ? node : null;
+		}
+	}
+
+	sealed class SyntaxNodeInfo
+	{
+		readonly SyntaxModel _Model;
+		readonly int _Position;
+		SyntaxNode _Node;
+		SyntaxNode _NodeIncludingTrivia;
+		SyntaxToken _Token;
+
+		public SyntaxNodeInfo(SyntaxModel model, int position) {
+			_Model = model;
+			_Position = position;
+		}
+
+		public SyntaxNode Node => _Node ?? (_Node = _Model.GetNode(_Position, false, false));
+		public SyntaxNode NodeIncludingTrivia => _NodeIncludingTrivia ?? (_NodeIncludingTrivia = _Model.GetNode(_Position, true, true));
+		public SyntaxToken Token => _Token.SyntaxTree != null || _Model.Compilation == null ? _Token : (_Token = _Model.Compilation.FindToken(_Position, true));
 	}
 }
