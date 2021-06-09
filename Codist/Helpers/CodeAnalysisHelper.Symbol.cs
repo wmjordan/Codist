@@ -623,6 +623,10 @@ namespace Codist
 			return false;
 		}
 
+		public static bool IsBoundedGenericMethod(this IMethodSymbol method) {
+			return method != null && method.IsGenericMethod && method != method.OriginalDefinition;
+		}
+
 		public static bool IsCommonClass(this ISymbol symbol) {
 			var type = symbol as ITypeSymbol;
 			if (type == null) {
@@ -1108,6 +1112,10 @@ namespace Codist
 		public static int CompareByFieldIntegerConst(ISymbol a, ISymbol b) {
 			IFieldSymbol fa = a as IFieldSymbol, fb = b as IFieldSymbol;
 			return fa == null ? -1 : fb == null ? 1 : Convert.ToInt64(fa.ConstantValue).CompareTo(Convert.ToInt64(fb.ConstantValue));
+		}
+
+		public static bool IsBoundedGenericType(this INamedTypeSymbol type) {
+			return type != null && type.IsGenericType && type.IsUnboundGenericType == false && type != type.OriginalDefinition;
 		}
 
 		public static bool ContainsTypeArgument(this INamedTypeSymbol generic, ITypeSymbol target) {

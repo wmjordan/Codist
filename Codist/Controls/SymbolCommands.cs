@@ -17,9 +17,6 @@ namespace Codist.Controls
 	{
 		internal static async Task FindReferrersAsync(this SemanticContext context, ISymbol symbol, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null) {
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-			if (symbol.Kind == SymbolKind.Method && ((IMethodSymbol)symbol).IsExtensionMethod) {
-				symbol = ((IMethodSymbol)symbol).ReducedFrom ?? symbol;
-			}
 			var filter = Keyboard.Modifiers == ModifierKeys.Control ? (s => s == symbol) : definitionFilter;
 			var referrers = await symbol.FindReferrersAsync(context.Document.Project, filter, nodeFilter).ConfigureAwait(false);
 			if (referrers == null) {
@@ -32,14 +29,13 @@ namespace Codist.Controls
 				.Append(R.T_Referrers);
 			var containerType = symbol.ContainingType;
 			foreach (var (referrer, occurance) in referrers) {
-				var s = referrer;
-				var i = m.Menu.Add(s, false);
+				var i = m.Menu.Add(referrer, false);
 				i.Location = occurance.FirstOrDefault().Item2.Location;
 				foreach (var item in occurance) {
 					i.Usage |= item.Item1;
 				}
-				if (s.ContainingType != containerType) {
-					i.Hint = (s.ContainingType ?? s).ToDisplayString(CodeAnalysisHelper.MemberNameFormat);
+				if (referrer.ContainingType != containerType) {
+					i.Hint = (referrer.ContainingType ?? referrer).ToDisplayString(CodeAnalysisHelper.MemberNameFormat);
 				}
 			}
 			m.Menu.ExtIconProvider = ExtIconProvider.Default.GetExtIconsWithUsage;
@@ -87,9 +83,16 @@ namespace Codist.Controls
 			var m = new SymbolMenu(context);
 			if (symbol.Kind == SymbolKind.NamedType) {
 				st = (INamedTypeSymbol)symbol;
-				foreach (INamedTypeSymbol impl in implementations) {
-					if (impl.IsGenericType || impl.CanConvertTo(st)) {
+				if (st.ConstructedFrom == st) {
+					foreach (var impl in implementations) {
 						m.Menu.Add(impl, false);
+					}
+				}
+				else {
+					foreach (INamedTypeSymbol impl in implementations) {
+						if (impl.IsGenericType || impl.CanConvertTo(st)) {
+							m.Menu.Add(impl, false);
+						}
 					}
 				}
 			}

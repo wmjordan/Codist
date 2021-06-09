@@ -420,23 +420,42 @@ namespace Codist
 		public static async Task<List<(ISymbol, List<(SymbolUsageKind, ReferenceLocation)>)>> FindReferrersAsync(this ISymbol symbol, Project project, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null, CancellationToken cancellationToken = default) {
 			var docs = ImmutableHashSet.CreateRange(project.GetRelatedProjectDocuments());
 			var d = new Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>>(5);
-			var t = symbol as INamedTypeSymbol;
-			// fix a problem that FindReferencesAsync returns unbounded references for generic type
-			var ts = t == null || t.IsGenericType == false || t.IsUnboundGenericType || t == t.OriginalDefinition ? null : t.ToDisplayString();
+			// hack: fix FindReferencesAsync returning unbounded references for generic type or method
+			string sign = null;
 			Predicate<SymbolUsageKind> usageFilter = null;
-			if (symbol is IMethodSymbol m) {
-				if (m.MethodKind == MethodKind.PropertyGet) {
-					usageFilter = u => u != SymbolUsageKind.Write;
-				}
-				else if (m.MethodKind == MethodKind.PropertySet || m.IsInitOnly()) {
-					usageFilter = u => u == SymbolUsageKind.Write;
-				}
+			switch (symbol.Kind) {
+				case SymbolKind.NamedType:
+					if ((symbol as INamedTypeSymbol).IsBoundedGenericType()) {
+						sign = symbol.ToDisplayString();
+					}
+					break;
+				case SymbolKind.Method:
+					var m = symbol as IMethodSymbol;
+					if (m.IsBoundedGenericMethod()) {
+						sign = symbol.ToDisplayString();
+						// hack: in VS 2017 with Rosyln 2.10, we don't need this,
+						//       but in VS 2019, we have to do that, otherwise we will get nothing
+						symbol = symbol.OriginalDefinition;
+					}
+					else if (m.IsExtensionMethod) {
+						symbol = m.ReducedFrom;
+					}
+					else if (m.MethodKind == MethodKind.PropertyGet) {
+						usageFilter = u => u != SymbolUsageKind.Write;
+					}
+					else if (m.MethodKind == MethodKind.PropertySet || m.IsInitOnly()) {
+						usageFilter = u => u == SymbolUsageKind.Write;
+					}
+					break;
 			}
 			foreach (var sr in await SymbolFinder.FindReferencesAsync(symbol, project.Solution, docs, cancellationToken).ConfigureAwait(false)) {
 				if (definitionFilter?.Invoke(sr.Definition) == false) {
 					continue;
 				}
-				await GroupReferenceByContainerAsync(d, sr, ts, nodeFilter, usageFilter, cancellationToken).ConfigureAwait(false);
+				await GroupReferenceByContainerAsync(d, sr, sign, nodeFilter, usageFilter, cancellationToken).ConfigureAwait(false);
+			}
+			if (d.Count == 0) {
+				return null;
 			}
 			var r = new List<(ISymbol container, List<(SymbolUsageKind, ReferenceLocation)>)>(d.Count);
 			r.AddRange(d.Select(i => (i.Key, i.Value)));
@@ -444,7 +463,7 @@ namespace Codist
 			return r;
 		}
 
-		static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>> results, ReferencedSymbol reference, string typeSymbol, Predicate<SyntaxNode> nodeFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
+		static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>> results, ReferencedSymbol reference, string symbolSignature, Predicate<SyntaxNode> nodeFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
 			var pu = GetPotentialUsageKinds(reference.Definition);
 			foreach (var docRefs in reference.Locations.GroupBy(l => l.Document)) {
 				var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
@@ -459,7 +478,7 @@ namespace Codist
 					if (c == null
 						// unfortunately we can't compare the symbol s with the original typeSymbol directly,
 						// even though they are actually the same
-						|| typeSymbol != null && ((s = sm.GetSymbol(n, cancellationToken)) == null || (s?.ToDisplayString() != typeSymbol))) {
+						|| symbolSignature != null && ((s = sm.GetSymbol(n, cancellationToken)) == null || (s?.ToDisplayString() != symbolSignature))) {
 						continue;
 					}
 					s = sm.GetSymbol(c, cancellationToken);
