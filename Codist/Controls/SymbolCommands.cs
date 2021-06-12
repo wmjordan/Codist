@@ -19,23 +19,22 @@ namespace Codist.Controls
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 			var filter = Keyboard.Modifiers == ModifierKeys.Control ? (s => s == symbol) : definitionFilter;
 			var referrers = await symbol.FindReferrersAsync(context.Document.Project, filter, nodeFilter).ConfigureAwait(false);
-			if (referrers == null) {
-				return;
-			}
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context, SymbolListType.SymbolReferrers);
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true)
 				.Append(R.T_Referrers);
-			var containerType = symbol.ContainingType;
-			foreach (var (referrer, occurance) in referrers) {
-				var i = m.Menu.Add(referrer, false);
-				i.Location = occurance.FirstOrDefault().Item2.Location;
-				foreach (var item in occurance) {
-					i.Usage |= item.Item1;
-				}
-				if (referrer.ContainingType != containerType) {
-					i.Hint = (referrer.ContainingType ?? referrer).ToDisplayString(CodeAnalysisHelper.MemberNameFormat);
+			if (referrers != null) {
+				var containerType = symbol.ContainingType;
+				foreach (var (referrer, occurance) in referrers) {
+					var i = m.Menu.Add(referrer, false);
+					i.Location = occurance.FirstOrDefault().Item2.Location;
+					foreach (var item in occurance) {
+						i.Usage |= item.Item1;
+					}
+					if (referrer.ContainingType != containerType) {
+						i.Hint = (referrer.ContainingType ?? referrer).ToDisplayString(CodeAnalysisHelper.MemberNameFormat);
+					}
 				}
 			}
 			m.Menu.ExtIconProvider = ExtIconProvider.Default.GetExtIconsWithUsage;
