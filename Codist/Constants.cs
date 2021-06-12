@@ -96,7 +96,7 @@ namespace Codist
 		public const string CodePunctuation = "punctuation";
 		public const string CodeBraceMatching = "brace matching";
 		public const string CodeInlineRenameField = "inline rename field";
-		public const string CodeString = PredefinedClassificationTypeNames.String;
+		public const string CodeString = "String";// it is weird that there are two keyword with different cases in the resource dictionary: a String and a PredefinedClassificationTypeNames.String;
 		public const string CodeStringVerbatim = "string - verbatim";
 		public const string CodeSymbolDefinition = PredefinedClassificationTypeNames.SymbolDefinition;
 		public const string CodeSymbolReference = PredefinedClassificationTypeNames.SymbolReference;
