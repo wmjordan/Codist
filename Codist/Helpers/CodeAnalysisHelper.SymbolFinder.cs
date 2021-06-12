@@ -438,7 +438,7 @@ namespace Codist
 						symbol = symbol.OriginalDefinition;
 					}
 					else if (m.IsExtensionMethod) {
-						symbol = m.ReducedFrom;
+						symbol = m.ReducedFrom ?? m;
 					}
 					else if (m.MethodKind == MethodKind.PropertyGet) {
 						usageFilter = u => u != SymbolUsageKind.Write;
