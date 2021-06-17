@@ -273,7 +273,8 @@ namespace Codist.QuickInfo
 			if (symbol == null) {
 				return null;
 			}
-			if (symbol.Kind == SymbolKind.Method && ((IMethodSymbol)symbol).IsAccessor()) {
+			if (symbol.Kind == SymbolKind.Method && (symbol as IMethodSymbol)?.IsAccessor() == true) {
+				// hack: symbol could be Microsoft.CodeAnalysis.CSharp.Symbols.SourceMemberFieldSymbolFromDeclarator which is not IMethodSymbol
 				symbol = symbol.ContainingSymbol;
 			}
 			symbol = symbol.GetAliasTarget();
