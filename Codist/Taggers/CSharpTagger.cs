@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using AppHelpers;
 using Codist.SyntaxHighlight;
 using Microsoft.CodeAnalysis;
@@ -45,10 +49,10 @@ namespace Codist.Taggers
 	{
 		static readonly CSharpClassifications _Classifications = CSharpClassifications.Instance;
 		static readonly GeneralClassifications _GeneralClassifications = GeneralClassifications.Instance;
-		VersionStamp _SyntaxVersion;
-		Workspace _Workspace;
-		SemanticModel _SemanticModel;
-		ITextBuffer _TextBuffer;
+		readonly ConditionalWeakTable<ITextSnapshot, ParserTask> _ParserTasks = new ConditionalWeakTable<ITextSnapshot, ParserTask>();
+		readonly object _SyncRoot = new object();
+		CancellationTokenSource _TaskBreaker;
+		ParserTask _LastFinishedTask;
 
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
@@ -58,38 +62,37 @@ namespace Codist.Taggers
 			}
 			var snapshot = spans[0].Snapshot;
 			var textBuffer = snapshot.TextBuffer;
-			if (_TextBuffer != textBuffer) {
-				_TextBuffer = textBuffer;
-				_SemanticModel = null;
+			if (_ParserTasks.TryGetValue(snapshot, out var task)) {
+				return task.Model != null
+					? GetTags(spans, task.Workspace, task.Model, snapshot)
+					: Array.Empty<ITagSpan<IClassificationTag>>();
 			}
-			var workspace = _Workspace = textBuffer.GetWorkspace();
-			if (workspace == null) {
-				return Array.Empty<ITagSpan<IClassificationTag>>();
+			task = new ParserTask(snapshot, this);
+			foreach (var item in spans) {
+				task.Spans.Enqueue(item);
 			}
-			var doc = workspace.GetDocument(textBuffer);
-			if (doc.TryGetSyntaxVersion(out var version)) {
-				if (_SemanticModel != null && version == _SyntaxVersion) {
-					goto GETTAGS;
-				}
-				_SyntaxVersion = version;
-			}
-			if (doc.TryGetSemanticModel(out var semanticModel) == false) {
-				semanticModel = SyncHelper.RunSync(async () => {
-					using (var cts = new System.Threading.CancellationTokenSource(50)) {
-						return await doc.GetSemanticModelAsync(cts.Token);
-					}
-				});
-				if (semanticModel == null) {
-					_SyntaxVersion = VersionStamp.Default;
-					return Array.Empty<ITagSpan<IClassificationTag>>();
-				}
-			}
-			_SemanticModel = semanticModel;
-			GETTAGS:
-			return GetTags(spans, _Workspace, _SemanticModel, snapshot);
+			task.StartParse(snapshot.Version.VersionNumber > 0 ? SyncHelper.CancelAndRetainToken(ref _TaskBreaker) : default);
+			_ParserTasks.Add(snapshot, task);
+			var last = _LastFinishedTask;
+			return last != null && last.Snapshot.TextBuffer == snapshot.TextBuffer
+				? UseOldResult(spans, snapshot, last)
+				: Array.Empty<ITagSpan<IClassificationTag>>();
 		}
 
-		IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans, Workspace workspace, SemanticModel semanticModel, ITextSnapshot snapshot) {
+		static IEnumerable<ITagSpan<IClassificationTag>> UseOldResult(NormalizedSnapshotSpanCollection spans, ITextSnapshot snapshot, ParserTask last) {
+			var old = last.Snapshot;
+			foreach (var tagSpan in GetTags(MapToOldSpans(snapshot, spans, old), last.Workspace, last.Model, old)) {
+				yield return new TagSpan<IClassificationTag>(old.CreateTrackingSpan(tagSpan.Span, SpanTrackingMode.EdgeExclusive).GetSpan(snapshot), tagSpan.Tag);
+			}
+		}
+
+		static IEnumerable<SnapshotSpan> MapToOldSpans(ITextSnapshot current, NormalizedSnapshotSpanCollection spans, ITextSnapshot last) {
+			foreach (var item in spans) {
+				yield return current.CreateTrackingSpan(item.Span, SpanTrackingMode.EdgeExclusive).GetSpan(last);
+			}
+		}
+
+		static IEnumerable<ITagSpan<IClassificationTag>> GetTags(IEnumerable<SnapshotSpan> spans, Workspace workspace, SemanticModel semanticModel, ITextSnapshot snapshot) {
 			foreach (var span in spans) {
 				var textSpan = new TextSpan(span.Start.Position, span.Length);
 				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
@@ -647,7 +650,46 @@ namespace Codist.Taggers
 		}
 
 		public void Dispose() {
-			;
+			_TaskBreaker?.Dispose();
+		}
+
+		sealed class ParserTask
+		{
+			public readonly Workspace Workspace;
+			public readonly Document Document;
+			public readonly CSharpTagger Tagger;
+			public readonly ConcurrentQueue<SnapshotSpan> Spans = new ConcurrentQueue<SnapshotSpan>();
+			public readonly ITextSnapshot Snapshot;
+
+			public SemanticModel Model;
+			int _ParsingVersion;
+
+			public ParserTask(ITextSnapshot snapshot, CSharpTagger tagger) {
+				var buffer = snapshot.TextBuffer;
+				Workspace = buffer.GetWorkspace();
+				Document = Workspace.GetDocument(buffer);
+				Snapshot = snapshot;
+				Tagger = tagger;
+			}
+
+			public void StartParse(CancellationToken cancellationToken) {
+				if (Interlocked.CompareExchange(ref _ParsingVersion, 1, 0) == 0) {
+					Task.Run(() => Document.GetSemanticModelAsync(cancellationToken).ContinueWith(t => {
+						var tagger = Tagger;
+						while (Spans.TryDequeue(out var span)) {
+							tagger.TagsChanged?.Invoke(tagger, new SnapshotSpanEventArgs(span));
+						}
+						Model = t.Result;
+						lock (tagger._SyncRoot) {
+							ref var last = ref tagger._LastFinishedTask;
+							if (last == null || last.Snapshot.Version.VersionNumber < Snapshot.Version.VersionNumber) {
+								last = this;
+							}
+						}
+						_ParsingVersion = 0;
+					}, TaskScheduler.Default), cancellationToken);
+				}
+			}
 		}
 
 		static class HighlightOptions
