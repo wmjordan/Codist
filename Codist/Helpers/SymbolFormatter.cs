@@ -43,7 +43,7 @@ namespace Codist
 		public Brush Delegate { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumName)]
 		public Brush Enum { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumMemberName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpEnumFieldName + ";" + Constants.CodeEnumMemberName)]
 		public Brush EnumField { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName + ";" + Constants.CodeEventName)]
 		public Brush Event { get; private set; }
@@ -387,11 +387,11 @@ namespace Codist
 			var r = new Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>>(19, StringComparer.OrdinalIgnoreCase);
 			foreach (var item in typeof(SymbolFormatter).GetProperties()) {
 				var ctn = item.GetCustomAttribute<ClassificationTypeAttribute>().ClassificationTypeNames.Split(';');
-				var a = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(item.Name);
+				var setFormatBrush = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(item.Name);
 				foreach (var ct in ctn) {
 					r.Add(ct, (f, m) => {
 						var brush = m.GetBrush(ctn);
-						a(f, f._brushConfigurator != null ? f._brushConfigurator(brush) : brush);
+						setFormatBrush(f, f._brushConfigurator != null ? f._brushConfigurator(brush) : brush);
 					});
 				}
 			}
