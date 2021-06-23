@@ -82,13 +82,13 @@ namespace Codist.Taggers
 		static IEnumerable<ITagSpan<IClassificationTag>> UseOldResult(NormalizedSnapshotSpanCollection spans, ITextSnapshot snapshot, ParserTask last) {
 			var old = last.Snapshot;
 			foreach (var tagSpan in GetTags(MapToOldSpans(snapshot, spans, old), last.Workspace, last.Model, old)) {
-				yield return new TagSpan<IClassificationTag>(old.CreateTrackingSpan(tagSpan.Span, SpanTrackingMode.EdgeExclusive).GetSpan(snapshot), tagSpan.Tag);
+				yield return new TagSpan<IClassificationTag>(old.CreateTrackingSpan(tagSpan.Span, SpanTrackingMode.EdgeInclusive).GetSpan(snapshot), tagSpan.Tag);
 			}
 		}
 
 		static IEnumerable<SnapshotSpan> MapToOldSpans(ITextSnapshot current, NormalizedSnapshotSpanCollection spans, ITextSnapshot last) {
 			foreach (var item in spans) {
-				yield return current.CreateTrackingSpan(item.Span, SpanTrackingMode.EdgeExclusive).GetSpan(last);
+				yield return current.CreateTrackingSpan(item.Span, SpanTrackingMode.EdgeInclusive).GetSpan(last);
 			}
 		}
 
@@ -655,6 +655,7 @@ namespace Codist.Taggers
 
 		sealed class ParserTask
 		{
+			// todo: hook WorkspaceRegistration.WorkspaceChanged, Workspace.WorkspaceChanged, Workspace.DocumentActiveContextChanged to refresh highlight
 			public readonly Workspace Workspace;
 			public readonly Document Document;
 			public readonly CSharpTagger Tagger;
@@ -667,13 +668,15 @@ namespace Codist.Taggers
 			public ParserTask(ITextSnapshot snapshot, CSharpTagger tagger) {
 				var buffer = snapshot.TextBuffer;
 				Workspace = buffer.GetWorkspace();
-				Document = Workspace.GetDocument(buffer);
+				if (Workspace != null) {
+					Document = Workspace.GetDocument(buffer);
+				}
 				Snapshot = snapshot;
 				Tagger = tagger;
 			}
 
 			public void StartParse(CancellationToken cancellationToken) {
-				if (Interlocked.CompareExchange(ref _ParsingVersion, 1, 0) == 0) {
+				if (Document != null && Interlocked.CompareExchange(ref _ParsingVersion, 1, 0) == 0) {
 					Task.Run(() => Document.GetSemanticModelAsync(cancellationToken).ContinueWith(t => {
 						var tagger = Tagger;
 						while (Spans.TryDequeue(out var span)) {
