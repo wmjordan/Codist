@@ -412,7 +412,7 @@ namespace Codist
 			return new SyntaxNodeInfo(this, position);
 		}
 		public SyntaxNode GetNode(int position, bool includeTrivia, bool deep) {
-			if (Compilation == null) {
+			if (Compilation == null || Compilation.FullSpan.Contains(position) == false) {
 				return null;
 			}
 			var node = Compilation.FindNode(new TextSpan(position, 0), includeTrivia, deep);
