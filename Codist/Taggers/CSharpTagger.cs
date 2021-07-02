@@ -584,6 +584,7 @@ namespace Codist.Taggers
 								? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor)
 								: null;
 						case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
+						case CodeAnalysisHelper.ImplicitArrayCreationExpression:
 							return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
 						case SyntaxKind.Argument:
 							return ((ArgumentSyntax)node).Expression.IsKind(SyntaxKind.ImplicitStackAllocArrayCreationExpression) ? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor) : null;

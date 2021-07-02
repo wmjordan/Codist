@@ -43,6 +43,7 @@ namespace Codist
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 		internal const SyntaxKind InitKeyword = (SyntaxKind)8443;
 		internal const SyntaxKind RecordKeyword = (SyntaxKind)8444;
+		internal const SyntaxKind ImplicitArrayCreationExpression = (SyntaxKind)8652;
 		internal const SyntaxKind ImplicitObjectCreationExpression = (SyntaxKind)8659;
 		internal const SyntaxKind RecursivePattern = (SyntaxKind)9020;
 		internal const SyntaxKind PositionalPatternClause = (SyntaxKind)9023;
