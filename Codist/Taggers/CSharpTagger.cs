@@ -27,11 +27,21 @@ namespace Codist.Taggers
 	[TagType(typeof(IClassificationTag))]
 	sealed class CSharpTaggerProvider : IViewTaggerProvider
 	{
+		readonly ConditionalWeakTable<ITextBuffer, CSharpTagger> _Taggers = new ConditionalWeakTable<ITextBuffer, CSharpTagger>();
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			if (typeof(T) == typeof(IClassificationTag) && Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)) {
-				return textView.Properties.GetOrCreateSingletonProperty(typeof(CSharpTagger), () => new CSharpTagger(buffer) as ITagger<T>);
+				if (_Taggers.TryGetValue(buffer, out var tagger) == false) {
+					tagger = new CSharpTagger(this, buffer);
+					_Taggers.Add(buffer, tagger);
+				}
+				tagger.IncrementReference();
+				return tagger as ITagger<T>;
 			}
 			return null;
+		}
+
+		public void DetachTagger(ITextBuffer buffer) {
+			_Taggers.Remove(buffer);
 		}
 	}
 
@@ -42,11 +52,14 @@ namespace Codist.Taggers
 		static readonly GeneralClassifications _GeneralClassifications = GeneralClassifications.Instance;
 		readonly ConditionalWeakTable<ITextSnapshot, ParserTask> _ParserTasks = new ConditionalWeakTable<ITextSnapshot, ParserTask>();
 		readonly object _SyncRoot = new object();
-		readonly ITextBuffer _Buffer;
+		CSharpTaggerProvider _TaggerProvider;
+		ITextBuffer _Buffer;
 		CancellationTokenSource _TaskBreaker;
 		ParserTask _LastFinishedTask;
+		int _Reference;
 
-		public CSharpTagger(ITextBuffer buffer) {
+		public CSharpTagger(CSharpTaggerProvider taggerProvider, ITextBuffer buffer) {
+			_TaggerProvider = taggerProvider;
 			_Buffer = buffer;
 			if (buffer is ITextBuffer2 b) {
 				b.ChangedOnBackground += TextBuffer_ChangedOnBackground;
@@ -76,7 +89,7 @@ namespace Codist.Taggers
 				_ParserTasks.Add(snapshot, task);
 			}
 			if (last != null && last.Snapshot.TextBuffer == snapshot.TextBuffer) {
-				return UseOldResult(spans, snapshot, last);
+				return UseOldResult(last, spans, snapshot);
 			}
 
 			return Array.Empty<ITagSpan<IClassificationTag>>();
@@ -87,17 +100,20 @@ namespace Codist.Taggers
 		}
 
 		void TextBuffer_ChangedOnBackground(object sender, TextContentChangedEventArgs e) {
-			if (e.Changes.Count == 0) {
-				// todo Update by calculating node changes from various snapshot
+			var changes = e.Changes;
+			if (changes.Count == 0) {
 				return;
 			}
-			var changedSpan = new SnapshotSpan(e.After, e.Changes[0].NewPosition, new SnapshotPoint(e.After, e.Changes[e.Changes.Count - 1].NewSpan.End));
+			var start = changes[0].NewPosition;
+			var changedSpan = new SnapshotSpan(e.After, start, changes[changes.Count - 1].NewEnd - start);
 			Debug.WriteLine("Buffer changed: " + changedSpan);
 			TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(changedSpan));
-			//Reclassify(args.After);
 		}
 
-		static IEnumerable<ITagSpan<IClassificationTag>> UseOldResult(NormalizedSnapshotSpanCollection spans, ITextSnapshot snapshot, ParserTask last) {
+		static IEnumerable<ITagSpan<IClassificationTag>> UseOldResult(ParserTask last, NormalizedSnapshotSpanCollection spans, ITextSnapshot snapshot) {
+			if (last.Workspace == null) {
+				yield break;
+			}
 			var old = last.Snapshot;
 			foreach (var tagSpan in Parser.GetTags(MapToOldSpans(snapshot, spans, old), last.Workspace, last.Model, old)) {
 				yield return new TagSpan<IClassificationTag>(old.CreateTrackingSpan(tagSpan.Span, SpanTrackingMode.EdgeInclusive).GetSpan(snapshot), tagSpan.Tag);
@@ -110,10 +126,34 @@ namespace Codist.Taggers
 			}
 		}
 
+		public void IncrementReference() {
+			_Reference++;
+		}
+
+		public void DecrementReference() {
+			if (--_Reference == 0) {
+				ReleaseResources();
+			}
+		}
+
 		public void Dispose() {
-			_TaskBreaker?.Dispose();
-			if (_Buffer is ITextBuffer2 b) {
-				b.ChangedOnBackground -= TextBuffer_ChangedOnBackground;
+			DecrementReference();
+		}
+
+		void ReleaseResources() {
+			if (_Buffer != null) {
+				_TaskBreaker?.Dispose();
+				if (_LastFinishedTask != null) {
+					_LastFinishedTask.DisconnectEvents();
+					_ParserTasks.Remove(_LastFinishedTask.Snapshot);
+					_LastFinishedTask = null;
+				}
+				if (_Buffer is ITextBuffer2 b) {
+					b.ChangedOnBackground -= TextBuffer_ChangedOnBackground;
+				}
+				_TaggerProvider.DetachTagger(_Buffer);
+				_Buffer = null;
+				_TaggerProvider = null;
 			}
 		}
 
@@ -157,12 +197,13 @@ namespace Codist.Taggers
 				if (Document != null && Interlocked.CompareExchange(ref _ParsingVersion, 1, 0) == 0) {
 					Task.Run(() => {
 						Debug.WriteLine("Start parsing " + Snapshot.Version);
-						if (cancellationToken.CanBeCanceled) {
+						if (cancellationToken.CanBeCanceled && Snapshot.Length > 1000) {
 							CancellableWait(Snapshot.Length > 60000 ? 30 : 10, cancellationToken);
 							if (cancellationToken.IsCancellationRequested) {
 								Debug.WriteLine("Cancel parsing " + Snapshot.Version);
 								_ParsingVersion = 0;
 								_Tagger.RemoveParser(this);
+								DisconnectEvents();
 								return Task.CompletedTask;
 							}
 						}
@@ -237,6 +278,14 @@ namespace Codist.Taggers
 
 			void Reclassify(ITextSnapshot snapshot) {
 				_Tagger.TagsChanged?.Invoke(_Tagger, new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, 0, snapshot.Length)));
+			}
+
+			public void DisconnectEvents() {
+				_WorkspaceRegistration.WorkspaceChanged -= WorkspaceRegistration_WorkspaceChanged;
+				if (Workspace != null) {
+					Workspace.WorkspaceChanged -= Workspace_WorkspaceChanged;
+					Workspace.DocumentActiveContextChanged -= Workspace_DocumentActiveContextChanged;
+				}
 			}
 		}
 
