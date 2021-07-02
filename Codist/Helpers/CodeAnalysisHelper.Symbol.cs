@@ -395,6 +395,9 @@ namespace Codist
 				}
 			}
 			string GetMethodParameters(IMethodSymbol m) {
+				if (m == null) {
+					return "(?)";
+				}
 				using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
 					var sb = sbr.Resource;
 					if (m.IsGenericMethod) {
