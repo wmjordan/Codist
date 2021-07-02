@@ -87,6 +87,10 @@ namespace Codist.Taggers
 		}
 
 		void TextBuffer_ChangedOnBackground(object sender, TextContentChangedEventArgs e) {
+			if (e.Changes.Count == 0) {
+				// todo Update by calculating node changes from various snapshot
+				return;
+			}
 			var changedSpan = new SnapshotSpan(e.After, e.Changes[0].NewPosition, new SnapshotPoint(e.After, e.Changes[e.Changes.Count - 1].NewSpan.End));
 			Debug.WriteLine("Buffer changed: " + changedSpan);
 			TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(changedSpan));
@@ -95,7 +99,9 @@ namespace Codist.Taggers
 
 		static IEnumerable<ITagSpan<IClassificationTag>> UseOldResult(NormalizedSnapshotSpanCollection spans, ITextSnapshot snapshot, ParserTask last) {
 			var old = last.Snapshot;
-			return Parser.GetTags(MapToOldSpans(snapshot, spans, old), last.Workspace, last.Model, old);
+			foreach (var tagSpan in Parser.GetTags(MapToOldSpans(snapshot, spans, old), last.Workspace, last.Model, old)) {
+				yield return new TagSpan<IClassificationTag>(old.CreateTrackingSpan(tagSpan.Span, SpanTrackingMode.EdgeInclusive).GetSpan(snapshot), tagSpan.Tag);
+			}
 		}
 
 		static IEnumerable<SnapshotSpan> MapToOldSpans(ITextSnapshot current, NormalizedSnapshotSpanCollection spans, ITextSnapshot last) {
@@ -152,12 +158,7 @@ namespace Codist.Taggers
 					Task.Run(() => {
 						Debug.WriteLine("Start parsing " + Snapshot.Version);
 						if (cancellationToken.CanBeCanceled) {
-							var p = 0;
-							do {
-								Thread.Sleep(10);
-								++p;
-							}
-							while (p < 30 && cancellationToken.IsCancellationRequested == false);
+							CancellableWait(Snapshot.Length > 60000 ? 30 : 10, cancellationToken);
 							if (cancellationToken.IsCancellationRequested) {
 								Debug.WriteLine("Cancel parsing " + Snapshot.Version);
 								_ParsingVersion = 0;
@@ -185,6 +186,15 @@ namespace Codist.Taggers
 						}, TaskScheduler.Default);
 					}, cancellationToken);
 				}
+			}
+
+			static void CancellableWait(int times, CancellationToken cancellationToken) {
+				var p = 0;
+				do {
+					Thread.Sleep(10);
+					++p;
+				}
+				while (p < times && cancellationToken.IsCancellationRequested == false);
 			}
 
 			void WorkspaceRegistration_WorkspaceChanged(object sender, EventArgs e) {
