@@ -142,7 +142,7 @@ namespace Codist.NaviBar
 			HideMenu();
 			if (_cancellationSource != null) {
 				try {
-					await Update(SyncHelper.CancelAndRetainToken(ref _cancellationSource));
+					await Update(SyncHelper.CancelAndRetainToken(ref _cancellationSource)).ConfigureAwait(false);
 				}
 				catch (OperationCanceledException) {
 					// ignore
@@ -241,7 +241,7 @@ namespace Codist.NaviBar
 
 		async Task<ImmutableArray<SyntaxNode>> UpdateModelAndGetContainingNodesAsync(CancellationToken token) {
 			int position = View.GetCaretPosition();
-			if (await _SemanticContext.UpdateAsync(position, token) == false) {
+			if (await _SemanticContext.UpdateAsync(position, token).ConfigureAwait(false) == false) {
 				return ImmutableArray<SyntaxNode>.Empty;
 			}
 			var model = _SemanticContext.Model;

@@ -486,7 +486,7 @@ namespace Codist.Margins
 			async void UpdateReferences(object sender, EventArgs e) {
 				try {
 					SyncHelper.CancelAndDispose(ref _Margin._Cancellation, true);
-					await UpdateReferencesAsync();
+					await UpdateReferencesAsync().ConfigureAwait(false);
 				}
 				catch (ObjectDisposedException) {
 					// ignore exception
