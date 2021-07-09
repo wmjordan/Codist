@@ -452,7 +452,7 @@ namespace Codist
 				return;
 			}
 			using (new NewDocumentStateScope(Keyboard.Modifiers == ModifierKeys.Shift ? __VSNEWDOCUMENTSTATE.NDS_Unspecified : __VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
-				dte.ItemOperations.OpenFile(file);
+				dte.ItemOperations.OpenFile(file, EnvDTE.Constants.vsViewKindCode);
 				if (action != null) {
 					try {
 						action.Invoke(dte.ActiveDocument);
@@ -666,7 +666,30 @@ namespace Codist
 
 		public static EnvDTE.Project GetProject(string projectName) {
 			ThreadHelper.ThrowIfNotOnUIThread();
+			var projects = CodistPackage.DTE.Solution.Projects;
+			var projectPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(CodistPackage.DTE.Solution.FullName), projectName));
+			for (int i = 1; i <= projects.Count; i++) {
+				var project = projects.Item(i);
+				if (project.FullName.Length == 0 && project.Kind == "{66A26720-8FB5-11D2-AA7E-00C04F688DDE}") {
+					if ((project = FindProject(project.ProjectItems, projectPath)) != null) {
+						return project;
+					}
+				}
+				else if (String.Equals(project.FullName, projectPath, StringComparison.OrdinalIgnoreCase)) {
+					return project;
+				}
+			}
 			return CodistPackage.DTE.Solution.Projects.Item(projectName);
+
+			EnvDTE.Project FindProject(EnvDTE.ProjectItems items, string pp) {
+				for (int i = 1; i < items.Count; i++) {
+					var p = items.Item(i);
+					if (p.Object is EnvDTE.Project proj && String.Equals(proj.FullName, pp, StringComparison.OrdinalIgnoreCase)) {
+						return proj;
+					}
+				}
+				return null;
+			}
 		}
 
 		public static bool IsVsixProject(this EnvDTE.Project project) {
