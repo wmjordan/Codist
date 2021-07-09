@@ -85,13 +85,13 @@ namespace Codist.Taggers
 			var last = _LastFinishedTask;
 			if (task == null && (last == null || snapshot != last.Snapshot)) {
 				task = new ParserTask(snapshot, this, spans);
-				task.StartParse(snapshot.Version.VersionNumber > 0 ? SyncHelper.CancelAndRetainToken(ref _TaskBreaker) : default);
-				_ParserTasks.Add(snapshot, task);
+				if (task.StartParse(snapshot.Version.VersionNumber > 0 ? SyncHelper.CancelAndRetainToken(ref _TaskBreaker) : default)) {
+					_ParserTasks.Add(snapshot, task);
+				}
 			}
 			if (last != null && last.Snapshot.TextBuffer == snapshot.TextBuffer) {
 				return UseOldResult(last, spans, snapshot);
 			}
-
 			return Array.Empty<ITagSpan<IClassificationTag>>();
 		}
 
@@ -193,40 +193,42 @@ namespace Codist.Taggers
 				}
 			}
 
-			public void StartParse(CancellationToken cancellationToken) {
-				if (Document != null && Interlocked.CompareExchange(ref _ParsingVersion, 1, 0) == 0) {
-					Task.Run(() => {
-						Debug.WriteLine("Start parsing " + Snapshot.Version);
-						if (cancellationToken.CanBeCanceled && Snapshot.Length > 1000) {
-							CancellableWait(Snapshot.Length > 60000 ? 30 : 10, cancellationToken);
-							if (cancellationToken.IsCancellationRequested) {
-								Debug.WriteLine("Cancel parsing " + Snapshot.Version);
-								_ParsingVersion = 0;
-								_Tagger.RemoveParser(this);
-								DisconnectEvents();
-								return Task.CompletedTask;
+			public bool StartParse(CancellationToken cancellationToken) {
+				if (Document == null || Interlocked.CompareExchange(ref _ParsingVersion, 1, 0) != 0) {
+					return false;
+				}
+				Task.Run(() => {
+					Debug.WriteLine("Start parsing " + Snapshot.Version);
+					if (cancellationToken.CanBeCanceled && Snapshot.Length > 1000) {
+						CancellableWait(Snapshot.Length > 60000 ? 30 : 10, cancellationToken);
+						if (cancellationToken.IsCancellationRequested) {
+							Debug.WriteLine("Cancel parsing " + Snapshot.Version);
+							_ParsingVersion = 0;
+							_Tagger.RemoveParser(this);
+							DisconnectEvents();
+							return Task.CompletedTask;
+						}
+					}
+					return Document.GetSemanticModelAsync(cancellationToken).ContinueWith(t => {
+						if (t.IsCompleted && t.IsCanceled == false) {
+							Debug.WriteLine("End parsing " + Snapshot.Version);
+							Model = t.Result;
+							var tagger = _Tagger;
+							lock (tagger._SyncRoot) {
+								ref var last = ref tagger._LastFinishedTask;
+								if (last == null || last.Snapshot.Version.VersionNumber < Snapshot.Version.VersionNumber) {
+									last = this;
+								}
+							}
+							while (_PendingSpans.TryDequeue(out var span)) {
+								tagger.TagsChanged?.Invoke(tagger, new SnapshotSpanEventArgs(span));
 							}
 						}
-						return Document.GetSemanticModelAsync(cancellationToken).ContinueWith(t => {
-							if (t.IsCompleted) {
-								Debug.WriteLine("End parsing " + Snapshot.Version);
-								Model = t.Result;
-								var tagger = _Tagger;
-								lock (tagger._SyncRoot) {
-									ref var last = ref tagger._LastFinishedTask;
-									if (last == null || last.Snapshot.Version.VersionNumber < Snapshot.Version.VersionNumber) {
-										last = this;
-									}
-								}
-								while (_PendingSpans.TryDequeue(out var span)) {
-									tagger.TagsChanged?.Invoke(tagger, new SnapshotSpanEventArgs(span));
-								}
-							}
-							_Tagger.RemoveParser(this);
-							_ParsingVersion = 0;
-						}, TaskScheduler.Default);
-					}, cancellationToken);
-				}
+						_Tagger.RemoveParser(this);
+						_ParsingVersion = 0;
+					}, TaskScheduler.Default);
+				}, cancellationToken);
+				return true;
 			}
 
 			static void CancellableWait(int times, CancellationToken cancellationToken) {
