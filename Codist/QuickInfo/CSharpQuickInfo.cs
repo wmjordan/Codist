@@ -494,7 +494,7 @@ namespace Codist.QuickInfo
 			}
 		}
 		static void ShowMiscInfo(QiContainer qiContent, SyntaxNode node) {
-			StackPanel infoBox = null;
+			Grid infoBox = null;
 			var nodeKind = node.Kind();
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && (nodeKind == SyntaxKind.NumericLiteralExpression || nodeKind == SyntaxKind.CharacterLiteralExpression)) {
 				infoBox = ToolTipFactory.ShowNumericForms(node);
@@ -951,16 +951,28 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static StackPanel ShowStringInfo(string sv, bool showText) {
-			var s = new StackPanel()
-				.Add(new StackPanel { Orientation = Orientation.Horizontal }.AddReadOnlyTextBox(sv.Length.ToString()).Add(new ThemedTipText(R.T_Chars, true)))
-			//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.UTF8.GetByteCount(sv).ToString()).AddText("UTF-8 bytes", true))
-			//.Add(new StackPanel().MakeHorizontal().AddReadOnlyNumericTextBox(System.Text.Encoding.Default.GetByteCount(sv).ToString()).AddText("System bytes", true))
-				.Add(new StackPanel { Orientation = Orientation.Horizontal }.AddReadOnlyTextBox(sv.GetHashCode().ToString()).Add(new ThemedTipText(R.T_HashCode, true)));
+		static Grid ShowStringInfo(string sv, bool showText) {
+			var g = new Grid {
+				HorizontalAlignment = HorizontalAlignment.Left,
+				RowDefinitions = {
+					new RowDefinition(), new RowDefinition()
+				},
+				ColumnDefinitions = {
+					new ColumnDefinition(), new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) }
+				},
+				Children = {
+					new ThemedTipText(R.T_Chars, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right },
+					new ThemedTipText(R.T_HashCode, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 1),
+					new ThemedTipText(sv.Length.ToString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
+					new ThemedTipText(sv.GetHashCode().ToString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 1).SetValue(Grid.SetColumn, 1),
+				}
+			};
 			if (showText) {
-				s.Add(new StackPanel { Orientation = Orientation.Horizontal }.AddReadOnlyTextBox(sv, true).Add(new ThemedTipText(R.T_Text, true)));
+				g.RowDefinitions.Add(new RowDefinition());
+				g.Children.Add(new ThemedTipText(R.T_Text, true) { Margin = WpfHelper.GlyphMargin }.SetValue(Grid.SetRow, 2));
+				g.Children.Add(new ThemedTipText(sv) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumn, 1));
 			}
-			return s;
+			return g;
 		}
 
 		static void ShowBaseType(QiContainer qiContent, ITypeSymbol typeSymbol) {

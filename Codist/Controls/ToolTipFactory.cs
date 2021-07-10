@@ -7,6 +7,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Utilities;
 using R = Codist.Properties.Resources;
+using System.Windows.Documents;
+using System.Windows;
 
 namespace Codist
 {
@@ -144,19 +146,19 @@ namespace Codist
 			return target;
 		}
 
-		internal static StackPanel ShowNumericForms(SyntaxNode node) {
+		internal static Grid ShowNumericForms(SyntaxNode node) {
 			return ShowNumericForms(node.GetFirstToken().Value, node.Parent.Kind() == SyntaxKind.UnaryMinusExpression ? NumericForm.Negative : NumericForm.None);
 		}
 
-		internal static StackPanel ShowNumericForms(object value) {
+		internal static Grid ShowNumericForms(object value) {
 			return ShowNumericForms(value, NumericForm.None);
 		}
 
-		internal static StackPanel ShowNumericForms(IFieldSymbol symbol) {
+		internal static Grid ShowNumericForms(IFieldSymbol symbol) {
 			return ShowNumericForms(symbol.ConstantValue, NumericForm.None);
 		}
 
-		static StackPanel ShowNumericForms(object value, NumericForm form) {
+		static Grid ShowNumericForms(object value, NumericForm form) {
 			if (value == null) {
 				return null;
 			}
@@ -166,7 +168,7 @@ namespace Codist
 					if (form == NumericForm.Negative) {
 						v = -v;
 					}
-					return ShowNumericForms(
+					return ShowNumberAndBytes(
 						form == NumericForm.Unsigned ? ((uint)v).ToString() : v.ToString(),
 						new byte[] { (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
 				}
@@ -175,24 +177,24 @@ namespace Codist
 					if (form == NumericForm.Negative) {
 						v = -v;
 					}
-					return ShowNumericForms(
+					return ShowNumberAndBytes(
 						form == NumericForm.Unsigned ? ((ulong)v).ToString() : v.ToString(),
 						new byte[] { (byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
 				}
 				case TypeCode.Byte:
-					return ShowNumericForms(((byte)value).ToString(), new byte[] { (byte)value });
+					return ShowNumberAndBytes(((byte)value).ToString(), new byte[] { (byte)value });
 				case TypeCode.Int16: {
 					var v = (short)value;
 					if (form == NumericForm.Negative) {
 						v = (short)-v;
 					}
-					return ShowNumericForms(
+					return ShowNumberAndBytes(
 						form == NumericForm.Unsigned ? ((ushort)v).ToString() : v.ToString(),
 						new byte[] { (byte)(v >> 8), (byte)v });
 				}
 				case TypeCode.Char: {
 					var v = (char)value;
-					return ShowNumericForms(((ushort)v).ToString(), new byte[] { (byte)(v >> 8), (byte)v });
+					return ShowNumberAndBytes(((ushort)v).ToString(), new byte[] { (byte)(v >> 8), (byte)v });
 				}
 				case TypeCode.UInt32:
 					return ShowNumericForms((int)(uint)value, NumericForm.Unsigned);
@@ -201,46 +203,70 @@ namespace Codist
 				case TypeCode.UInt64:
 					return ShowNumericForms((long)(ulong)value, NumericForm.Unsigned);
 				case TypeCode.SByte:
-					return ShowNumericForms(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
+					return ShowNumberAndBytes(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
 			}
 			return null;
-		}
 
-		static StackPanel ShowNumericForms(string dec, byte[] bytes) {
-			return new StackPanel()
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(dec).Add(new ThemedTipText(" DEC", true)))
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToHexString(bytes)).Add(new ThemedTipText(" HEX", true)))
-				.Add(new StackPanel().MakeHorizontal().AddReadOnlyTextBox(ToBinString(bytes)).Add(new ThemedTipText(" BIN", true)));
-		}
+			Grid ShowNumberAndBytes(string number, byte[] bytes) {
+				return new Grid {
+					HorizontalAlignment = HorizontalAlignment.Left,
+					RowDefinitions = {
+						new RowDefinition(), new RowDefinition(), new RowDefinition()
+					},
+					ColumnDefinitions = {
+						new ColumnDefinition(), new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) }
+					},
+					Children = {
+						new ThemedTipText("DEC", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right},
+						new ThemedTipText("HEX", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right}.SetValue(Grid.SetRow, 1),
+						new ThemedTipText("BIN", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right}.SetValue(Grid.SetRow, 2),
+						new ThemedTipText(number) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
+						ToHexString(new ThemedTipText() { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }, bytes).WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
+						ToBinString(new ThemedTipText() { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }, bytes).WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
+					}
+				};
+			}
 
-		static string ToBinString(byte[] bytes) {
-			using (var sbr = ReusableStringBuilder.AcquireDefault((bytes.Length << 3) + bytes.Length)) {
-				var sb = sbr.Resource;
+			ThemedTipText ToBinString(ThemedTipText text, byte[] bytes) {
+				var inlines = text.Inlines;
 				for (int i = 0; i < bytes.Length; i++) {
 					ref var b = ref bytes[i];
-					if (b == 0 && sb.Length == 0) {
-						continue;
+					if (b != 0 || inlines.LastInline != null) {
+						inlines.Add(Convert.ToString(b, 2).PadLeft(8, '0'));
+						if ((i & 1) == 1) {
+							AddBackground(inlines);
+						}
 					}
-					if (sb.Length > 0) {
-						sb.Append(' ');
-					}
-					sb.Append(Convert.ToString(b, 2).PadLeft(8, '0'));
 				}
-				return sb.Length == 0 ? "00000000" : sb.ToString();
+				return inlines.Count == 0 ? text.Append("00000000") : text;
 			}
-		}
 
-		static string ToHexString(byte[] bytes) {
-			switch (bytes.Length) {
-				case 1: return bytes[0].ToString("X2");
-				case 2: return bytes[0].ToString("X2") + bytes[1].ToString("X2");
-				case 4:
-					return bytes[0].ToString("X2") + bytes[1].ToString("X2") + " " + bytes[2].ToString("X2") + bytes[3].ToString("X2");
-				case 8:
-					return bytes[0].ToString("X2") + bytes[1].ToString("X2") + " " + bytes[2].ToString("X2") + bytes[3].ToString("X2") + " "
-						+ bytes[4].ToString("X2") + bytes[5].ToString("X2") + " " + bytes[6].ToString("X2") + bytes[7].ToString("X2");
-				default:
-					return string.Empty;
+			ThemedTipText ToHexString(ThemedTipText text, byte[] bytes) {
+				var inlines = text.Inlines;
+				switch (bytes.Length) {
+					case 1: inlines.Add(bytes[0].ToString("X2")); break;
+					case 2:
+						inlines.Add(bytes[0].ToString("X2"));
+						inlines.Add(bytes[1].ToString("X2"));
+						AddBackground(inlines);
+						break;
+					case 4:
+					case 8:
+						for (int i = 0; i < bytes.Length; i++) {
+							inlines.Add(bytes[i].ToString("X2"));
+							if ((i & 1) == 1) {
+								AddBackground(inlines);
+							}
+						}
+						break;
+					default:
+						return text.Append("00");
+				}
+				return text;
+			}
+
+			void AddBackground(InlineCollection inlines) {
+				inlines.LastInline.Background = ThemeHelper.TextSelectionHighlightBrush.Alpha(0.2);
 			}
 		}
 

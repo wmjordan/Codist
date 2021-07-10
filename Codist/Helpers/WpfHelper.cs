@@ -308,8 +308,8 @@ namespace Codist
 			element.Margin = thickness;
 			return element;
 		}
-		public static Border WrapBorder(this UIElement element, Thickness thickness) {
-			return new Border { Margin = thickness, Child = element };
+		public static Border WrapBorder(this UIElement element, WpfBrush borderBrush, Thickness borderThickness) {
+			return new Border { BorderBrush = borderBrush, BorderThickness = borderThickness, Child = element };
 		}
 		#endregion
 
