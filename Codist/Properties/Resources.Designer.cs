@@ -3479,7 +3479,7 @@ namespace Codist.Properties {
         ///    },
         ///    {
         ///      &quot;Key&quot;: &quot;interface name&quot;,
-        ///      &quot;ForegroundColor&quot;: &quot;#406B80&quot;
+        ///      &quot;ForegroundColor&quot;: &quot;#5584AA&quot;
         ///    },
         ///    {
         ///      &quot;Key&quot;: &quot;enum name&quot;,
@@ -3671,6 +3671,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 BIN 的本地化字符串。
+        /// </summary>
+        internal static string T_Binary {
+            get {
+                return ResourceManager.GetString("T_Binary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Bottom gradient 的本地化字符串。
         /// </summary>
         internal static string T_BottomGradient {
@@ -3725,7 +3734,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 chars 的本地化字符串。
+        ///   查找类似 Chars 的本地化字符串。
         /// </summary>
         internal static string T_Chars {
             get {
@@ -3874,6 +3883,15 @@ namespace Codist.Properties {
         internal static string T_CustomizeSyntaxHighlightNote {
             get {
                 return ResourceManager.GetString("T_CustomizeSyntaxHighlightNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 DEC 的本地化字符串。
+        /// </summary>
+        internal static string T_Decimal {
+            get {
+                return ResourceManager.GetString("T_Decimal", resourceCulture);
             }
         }
         
@@ -4198,6 +4216,15 @@ namespace Codist.Properties {
         internal static string T_HashCode {
             get {
                 return ResourceManager.GetString("T_HashCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 HEX 的本地化字符串。
+        /// </summary>
+        internal static string T_Hexadecimal {
+            get {
+                return ResourceManager.GetString("T_Hexadecimal", resourceCulture);
             }
         }
         
@@ -5043,7 +5070,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 text 的本地化字符串。
+        ///   查找类似 Text 的本地化字符串。
         /// </summary>
         internal static string T_Text {
             get {
@@ -5070,7 +5097,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Type: 的本地化字符串。
+        ///   查找类似 Type:  的本地化字符串。
         /// </summary>
         internal static string T_Type {
             get {

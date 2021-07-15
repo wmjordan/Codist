@@ -139,7 +139,7 @@ namespace Codist
 		}
 
 		internal static TTarget SetTipOptions<TTarget>(this TTarget target)
-			where TTarget : System.Windows.DependencyObject {
+			where TTarget : DependencyObject {
 			ToolTipService.SetBetweenShowDelay(target, 0);
 			ToolTipService.SetInitialShowDelay(target, 1000);
 			ToolTipService.SetShowDuration(target, 15000);
@@ -217,9 +217,9 @@ namespace Codist
 						new ColumnDefinition(), new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) }
 					},
 					Children = {
-						new ThemedTipText("DEC", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right},
-						new ThemedTipText("HEX", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right}.SetValue(Grid.SetRow, 1),
-						new ThemedTipText("BIN", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right}.SetValue(Grid.SetRow, 2),
+						new ThemedTipText(R.T_Decimal, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right },
+						new ThemedTipText(R.T_Hexadecimal, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 1),
+						new ThemedTipText(R.T_Binary, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 2),
 						new ThemedTipText(number) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
 						ToHexString(new ThemedTipText() { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }, bytes).WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
 						ToBinString(new ThemedTipText() { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }, bytes).WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
@@ -229,40 +229,40 @@ namespace Codist
 
 			ThemedTipText ToBinString(ThemedTipText text, byte[] bytes) {
 				var inlines = text.Inlines;
+				inlines.Add(new Run("0b") { FontWeight = FontWeights.Bold });
+				var hasValue = false;
 				for (int i = 0; i < bytes.Length; i++) {
 					ref var b = ref bytes[i];
-					if (b != 0 || inlines.LastInline != null) {
+					if (hasValue || b != 0) {
+						hasValue = true;
 						inlines.Add(Convert.ToString(b, 2).PadLeft(8, '0'));
 						if ((i & 1) == 1) {
 							AddBackground(inlines);
 						}
 					}
 				}
-				return inlines.Count == 0 ? text.Append("00000000") : text;
+				return hasValue ? text : text.Append("00000000");
 			}
 
 			ThemedTipText ToHexString(ThemedTipText text, byte[] bytes) {
 				var inlines = text.Inlines;
-				switch (bytes.Length) {
-					case 1: inlines.Add(bytes[0].ToString("X2")); break;
-					case 2:
-						inlines.Add(bytes[0].ToString("X2"));
-						inlines.Add(bytes[1].ToString("X2"));
-						AddBackground(inlines);
-						break;
-					case 4:
-					case 8:
-						for (int i = 0; i < bytes.Length; i++) {
-							inlines.Add(bytes[i].ToString("X2"));
-							if ((i & 1) == 1) {
-								AddBackground(inlines);
-							}
-						}
-						break;
-					default:
-						return text.Append("00");
+				inlines.Add(new Run("0x") { FontWeight = FontWeights.Bold });
+				if (bytes.Length == 1) {
+					inlines.Add(bytes[0].ToString("X2"));
+					return text;
 				}
-				return text;
+				var hasValue = false;
+				for (int i = 0; i < bytes.Length; i++) {
+					ref var b = ref bytes[i];
+					if (hasValue || b != 0) {
+						hasValue = true;
+						inlines.Add(bytes[i].ToString("X2"));
+						if ((i & 1) == 1) {
+							AddBackground(inlines);
+						}
+					}
+				}
+				return hasValue ? text : text.Append("00");
 			}
 
 			void AddBackground(InlineCollection inlines) {

@@ -608,7 +608,7 @@ Use space to separate keywords.</value>
     <value>Captured variables</value>
   </data>
   <data name="T_Chars" xml:space="preserve">
-    <value>chars</value>
+    <value>Chars</value>
   </data>
   <data name="T_Color" xml:space="preserve">
     <value>Color</value>
@@ -710,10 +710,10 @@ Use space to separate keywords.</value>
     <value>Syntax Highlight</value>
   </data>
   <data name="T_Text" xml:space="preserve">
-    <value>text</value>
+    <value>Text</value>
   </data>
   <data name="T_Type" xml:space="preserve">
-    <value>Type:</value>
+    <value>Type: </value>
   </data>
   <data name="T_TypeArgument" xml:space="preserve">
     <value>Type argument:</value>
@@ -1785,7 +1785,16 @@ Use space to separate multiple search terms.
   <data name="CMD_PaleLightTheme" xml:space="preserve">
     <value>Pale Light</value>
   </data>
-	<data name="PaleLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
-		<value>..\resources\light pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-	</data>
+  <data name="PaleLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\light pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="T_Binary" xml:space="preserve">
+    <value>BIN</value>
+  </data>
+  <data name="T_Decimal" xml:space="preserve">
+    <value>DEC</value>
+  </data>
+  <data name="T_Hexadecimal" xml:space="preserve">
+    <value>HEX</value>
+  </data>
 </root>
