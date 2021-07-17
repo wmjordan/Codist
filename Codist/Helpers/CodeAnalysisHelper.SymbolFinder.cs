@@ -337,7 +337,7 @@ namespace Codist
 					if (p.SupportsCompilation == false) {
 						continue;
 					}
-					var n = (await p.GetCompilationAsync(cancellationToken)).GlobalNamespace;
+					var n = (await p.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace;
 					if (n != null) {
 						r.Add(n);
 					}
