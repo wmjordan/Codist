@@ -189,6 +189,9 @@ namespace Codist
 				case SymbolKind.Field:
 					var f = symbol as IFieldSymbol;
 					if (f.IsConst) {
+						if (f.ContainingType.TypeKind == TypeKind.Enum) {
+							return IconIds.EnumField;
+						}
 						switch (f.DeclaredAccessibility) {
 							case Accessibility.Public: return KnownImageIds.ConstantPublic;
 							case Accessibility.Protected:
