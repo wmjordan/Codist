@@ -255,6 +255,7 @@ namespace Codist.NaviBar
 					position = n.SpanStart;
 				}
 			}
+			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(token);
 			return _SemanticContext.GetContainingNodes(position, Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail), Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionOnBar));
 		}
 
