@@ -127,7 +127,7 @@ text".Log(); // multiline string (string verbatim)
 		{
 			[Obsolete]
 			[System.ComponentModel.Description("An extern method")]
-			[DllImport("dummy.dll",
+			[DllImport("dummy.dll", // multiline attribute annotations
 				EntryPoint = "DummyFunction",
 				CallingConvention = CallingConvention.Cdecl,
 				SetLastError = false)]

@@ -25,25 +25,6 @@ namespace TestProject.CS7_3
 		}
 	}
 
-	// unmanaged types
-	public struct Coords<T> where T : unmanaged
-	{
-		public T X;
-		public T Y;
-	}
-
-	public class UnmanagedTypes
-	{
-		public static void Main() {
-			DisplaySize<Coords<int>>();
-			DisplaySize<Coords<double>>();
-		}
-
-		private unsafe static void DisplaySize<T>() where T : unmanaged {
-			Console.WriteLine($"{typeof(T)} is unmanaged and its size is {sizeof(T)} bytes");
-		}
-	}
-
 	public class FieldAttributeInProperty
 	{
 		// Attach attributes to the backing fields for auto-implemented properties
