@@ -24,7 +24,8 @@ namespace Codist
 	/// </summary>
 	static class TextEditorHelper
 	{
-		static /*readonly*/ Guid guidIWpfTextViewHost = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476");
+		static /*readonly*/ Guid __IWpfTextViewHostGuid = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476"),
+			__ViewKindCodeGuid = new Guid(EnvDTE.Constants.vsViewKindCode);
 		static readonly HashSet<IWpfTextView> _WpfTextViews = new HashSet<IWpfTextView>();
 		static IWpfTextView _MouseOverTextView, _ActiveTextView;
 
@@ -205,11 +206,8 @@ namespace Codist
 				return;
 			}
 #pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
-			CodistPackage.DTE.OpenFile(node.GetLocation().SourceTree.FilePath, doc => {
-				var v = GetIVsTextView(CodistPackage.Instance, doc.FullName);
-				if (v != null) {
-					GetWpfTextView(v)?.SelectSpan(includeTrivia ? node.GetSematicSpan(true) : node.Span.ToSpan());
-				}
+			OpenFile(node.GetLocation().SourceTree.FilePath, view => {
+				view.SelectSpan(includeTrivia ? node.GetSematicSpan(true) : node.Span.ToSpan());
 			});
 #pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 		}
@@ -385,8 +383,7 @@ namespace Codist
 						}
 					}
 				}
-				CodistPackage.DTE.OpenFile(tPath, d => {
-					var v = d.GetActiveWpfDocumentView();
+				OpenFile(tPath, v => {
 					using (var edit = v.TextBuffer.CreateEdit()) {
 						edit.Insert(target, sNode.ToFullString());
 						if (edit.HasEffectiveChanges) {
@@ -399,8 +396,8 @@ namespace Codist
 			else {
 				// drag & drop from external file to current file
 				if (copy == false) {
-					CodistPackage.DTE.OpenFile(sPath, d => {
-						using (var edit = d.GetActiveWpfDocumentView().TextBuffer.CreateEdit()) {
+					OpenFile(sPath, v => {
+						using (var edit = v.TextBuffer.CreateEdit()) {
 							edit.Delete(sSpan.Start, sSpan.Length);
 							if (edit.HasEffectiveChanges) {
 								edit.Apply();
@@ -439,10 +436,10 @@ namespace Codist
 #pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 		}
 
-		public static void OpenFile(this EnvDTE.DTE dte, string file) {
-			OpenFile(dte, file, null);
+		public static void OpenFile(string file) {
+			OpenFile(file, (VsTextView v)=> { });
 		}
-		public static void OpenFile(this EnvDTE.DTE dte, string file, Action<EnvDTE.Document> action) {
+		public static void OpenFile(string file, Action<VsTextView> action) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (String.IsNullOrEmpty(file)) {
 				return;
@@ -451,28 +448,27 @@ namespace Codist
 			if (System.IO.File.Exists(file) == false) {
 				return;
 			}
-			using (new NewDocumentStateScope(Keyboard.Modifiers == ModifierKeys.Shift ? __VSNEWDOCUMENTSTATE.NDS_Unspecified : __VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
-				dte.ItemOperations.OpenFile(file, EnvDTE.Constants.vsViewKindCode);
-				if (action != null) {
-					try {
-						action.Invoke(dte.ActiveDocument);
+			try {
+				using (new NewDocumentStateScope(Keyboard.Modifiers == ModifierKeys.Shift ? __VSNEWDOCUMENTSTATE.NDS_Unspecified : __VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
+					VsShellUtilities.OpenDocument(ServiceProvider.GlobalProvider, file, __ViewKindCodeGuid, out var hierarchy, out var itemId, out var windowFrame, out var view);
+					if (action != null) {
+						action.Invoke(view);
 					}
-					catch (NullReferenceException) { /* ignore */ }
-					catch (ArgumentException) { /* ignore */ }
 				}
 			}
+			catch (Exception) {
+				/* ignore */
+			}
+		}
+		public static void OpenFile(string file, Action<IWpfTextView> action) {
+			OpenFile(file, (VsTextView view) => action(GetWpfTextView(view)));
 		}
 #pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
-		public static void OpenFile(this EnvDTE.DTE dte, string file, int line, int column) {
-			dte.OpenFile(file, d => ((EnvDTE.TextSelection)d.Selection).MoveToLineAndOffset(line, column));
-		}
-		public static void OpenFile(this EnvDTE.DTE dte, string file, int location) {
-			if (location != 0) {
-				dte.OpenFile(file, d => ((EnvDTE.TextSelection)d.Selection).MoveToAbsoluteOffset(location));
-			}
-			else {
-				dte.OpenFile(file, _ => { });
-			}
+		public static void OpenFile(string file, int line, int column) {
+			OpenFile(file, d => {
+				d.SetTopLine(Math.Max(0, line - 5));
+				d.SetCaretPos(line, column);
+			});
 		}
 #pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 
@@ -720,7 +716,7 @@ namespace Codist
 			if (userData == null) {
 				return null;
 			}
-			var guidViewHost = guidIWpfTextViewHost;
+			var guidViewHost = __IWpfTextViewHostGuid;
 			userData.GetData(ref guidViewHost, out object holder);
 			return ((IWpfTextViewHost)holder).TextView;
 		}

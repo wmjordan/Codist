@@ -53,7 +53,7 @@ namespace Codist.SmartBars
 					}
 					if (IsFileTypeRegisteredInVS(t)) {
 						AddCommand(MyToolBar, IconIds.OpenWithVisualStudio, R.CMD_OpenWithVS, ctx => {
-							CodistPackage.DTE.OpenFile(t, 1, 1);
+							TextEditorHelper.OpenFile(t);
 						});
 					}
 					return;

@@ -845,14 +845,14 @@ namespace Codist
 		public static void GoToSource(this Location loc) {
 			if (loc != null) {
 				var pos = loc.GetLineSpan().StartLinePosition;
-				CodistPackage.DTE.OpenFile(loc.SourceTree.FilePath, pos.Line + 1, pos.Character + 1);
+				TextEditorHelper.OpenFile(loc.SourceTree.FilePath, pos.Line, pos.Character);
 			}
 		}
 
 		public static void GoToSource(this SyntaxReference loc) {
 			if (loc != null) {
 				var pos = loc.SyntaxTree.GetLineSpan(loc.Span).StartLinePosition;
-				CodistPackage.DTE.OpenFile(loc.SyntaxTree.FilePath, pos.Line + 1, pos.Character + 1);
+				TextEditorHelper.OpenFile(loc.SyntaxTree.FilePath, pos.Line, pos.Character);
 			}
 		}
 
