@@ -7,7 +7,7 @@ Codist 是一个致力于为 C# 程序员提供更佳的编码体验和效率的
 
 Check out this list to see what _Codist_ can do for you.
 
-* [Advanced Syntax Highlight](#advanced-c-syntax-highlight) items in ANY LANGUAGES, and [*Comment Tagger*](#comment-tagger-and-styles) highlights your `to-do` style comments
+* [Advanced Syntax Highlight](#advanced-c-syntax-highlight) ANY LANGUAGES, and [*Comment Tagger*](#comment-tagger-and-styles) highlights `to-do` style comments
   ![](doc/feature-brief-syntax-highlight.png)
 * [Super Quick Info](#super-quick-info) with extended XML Doc, *Click and Go* to source code
   ![Feature Brief Super Quick Info](doc/feature-brief-super-quick-info.png)
@@ -508,6 +508,8 @@ _Codist_ supports localization into other languages and it has both English and 
   * VSColorOutput: https://github.com/mike-ward/VSColorOutput
   * NuGet: https://github.com/NuGet/NuGet.Build.Packaging
   * GoToImplementation: https://github.com/GordianDotNet/GoToImplementation
+  * Roslyn: https://github.com/dotnet/roslyn
+  * Community.VisualStudio.Toolkit: https://github.com/VsixCommunity/Community.VisualStudio.Toolkit
 
   And every donaters, beta testers, feedback providers to this project.
 
