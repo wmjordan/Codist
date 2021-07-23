@@ -42,6 +42,10 @@ namespace Codist.QuickInfo
 			if (Keyboard.Modifiers == ModifierKeys.Control) {
 				return null;
 			}
+			return await InternalGetQuickInfoItemAsync(session, cancellationToken).ConfigureAwait(false);
+		}
+
+		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			var qiWrapper = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
 				? QuickInfoOverrider.CreateOverrider(session)
 				: null;
@@ -174,7 +178,7 @@ namespace Codist.QuickInfo
 				goto RETURN;
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
-				qiContent.Add(await ShowAvailabilityAsync(docId, workspace, token, cancellationToken));
+				qiContent.Add(await ShowAvailabilityAsync(docId, workspace, token, cancellationToken).ConfigureAwait(false));
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node, qiWrapper,
 					ctor?.Type == node ? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? symbol
@@ -215,7 +219,7 @@ namespace Codist.QuickInfo
 					ImmutableArray<ISymbol> candidates;
 					foreach (var id in linkedDocuments) {
 						var d = workspace.CurrentSolution.GetDocument(id);
-						var sm = await d.GetSemanticModelAsync(cancellationToken);
+						var sm = await d.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 						if (GetSymbol(sm, sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(token.Span, true, true), ref candidates, cancellationToken) == null) {
 							if (r == null) {
 								r = new ThemedTipDocument().AppendTitle(IconIds.UnavailableSymbol, R.T_SymbolUnavailableIn);
