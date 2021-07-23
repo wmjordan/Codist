@@ -464,6 +464,20 @@ namespace Codist
 			}
 		}
 
+		public static bool MatchTypeName(this INamedTypeSymbol typeSymbol, string className, params string[] namespaces) {
+			if (typeSymbol.Name != className) {
+				return false;
+			}
+			var ns = typeSymbol.ContainingNamespace;
+			foreach (var item in namespaces) {
+				if (ns == null || ns.IsGlobalNamespace || ns.Name != item) {
+					return false;
+				}
+				ns = ns.ContainingNamespace;
+			}
+			return ns == null || ns.IsGlobalNamespace;
+		}
+
 		public static string GetTypeName(this ITypeSymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:

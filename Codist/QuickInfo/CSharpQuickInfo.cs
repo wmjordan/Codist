@@ -658,9 +658,9 @@ namespace Codist.QuickInfo
 			}
 
 			void ShowKnownImageId(QiContainer qc, IFieldSymbol f, int fieldValue) {
-				var t = f.ContainingType.Name;
-				if (t == nameof(Microsoft.VisualStudio.Imaging.KnownImageIds) && f.ContainingNamespace?.ToDisplayString() == "Microsoft.VisualStudio.Imaging"
-					|| t == nameof(IconIds) && f.ContainingNamespace?.Name == nameof(Codist)) {
+				var t = f.ContainingType;
+				if (t.MatchTypeName(nameof(Microsoft.VisualStudio.Imaging.KnownImageIds), "Imaging", "VisualStudio", "Microsoft")
+					|| t.MatchTypeName(nameof(IconIds), nameof(Codist))) {
 					qc.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(fieldValue, new ThemedTipText(field.Name))));
 				}
 			}
@@ -1052,7 +1052,7 @@ namespace Codist.QuickInfo
 					.Append(max.ToString() + "(")
 					.Append(maxName.Name, _SymbolFormatter.Enum)
 					.Append(")");
-			if (type.GetAttributes().Any(a => a.AttributeClass.Name == nameof(FlagsAttribute) && a.AttributeClass.ContainingNamespace.ToDisplayString() == "System")) {
+			if (type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"))) {
 				var d = Convert.ToString(Convert.ToInt64(bits), 2);
 				content.AppendLine().Append(R.T_EnumAllFlags, true)
 					.Append($"{d} ({ d.Length}" + (d.Length > 1 ? " bits)" : " bit)"));

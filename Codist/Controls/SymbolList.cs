@@ -123,7 +123,7 @@ namespace Codist.Controls
 				return;
 			}
 			if (type.TypeKind == TypeKind.Enum
-				&& type.GetAttributes().Any(a => a.AttributeClass.Name == nameof(FlagsAttribute) && a.AttributeClass.ContainingNamespace.Name == "System")) {
+				&& type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"))) {
 				ContainerType = SymbolListType.EnumFlags;
 				return;
 			}
@@ -703,7 +703,7 @@ namespace Codist.Controls
 						}
 					}
 					else if (type.TypeKind == TypeKind.Enum) {
-						if (type.GetAttributes().Any(a => a.AttributeClass.Name == "FlagsAttribute" && a.AttributeClass.ContainingNamespace.Name == "System")) {
+						if (type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"))) {
 							AddIcon(ref icons, IconIds.EnumFlags);
 						}
 					}
