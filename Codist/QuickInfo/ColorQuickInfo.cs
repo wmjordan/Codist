@@ -14,6 +14,7 @@ using GdiColor = System.Drawing.Color;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using R = Codist.Properties.Resources;
+using System.Windows;
 
 namespace Codist.QuickInfo
 {
@@ -95,20 +96,54 @@ namespace Codist.QuickInfo
 				Name = PreviewPanelName,
 				Children = {
 					new ThemedTipText().Append(new System.Windows.Shapes.Rectangle { Width = 16, Height = 16, Fill = brush }).Append(R.T_Color, true),
-					new StackPanel().AddReadOnlyTextBox($"{c.A}, {c.R}, {c.G}, {c.B}").Add(new ThemedTipText(" ARGB", true)).MakeHorizontal(),
-					new StackPanel().AddReadOnlyTextBox(c.ToHexString()).Add(new ThemedTipText(" HEX", true)).MakeHorizontal(),
-					new StackPanel().AddReadOnlyTextBox($"{v.Hue.ToString("0.###")}, {v.Saturation.ToString("0.###")}, {v.Luminosity.ToString("0.###")}").Add(new ThemedTipText(" HSL", true)).MakeHorizontal(),
+					new Grid {
+						HorizontalAlignment = HorizontalAlignment.Left,
+						RowDefinitions = {
+							new RowDefinition(), new RowDefinition(), new RowDefinition()
+						},
+						ColumnDefinitions = {
+							new ColumnDefinition(), new ColumnDefinition { Width = new GridLength(3, GridUnitType.Star) }
+						},
+						Children = {
+							new ThemedTipText("ARGB", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right },
+							new ThemedTipText("HEX", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 1),
+							new ThemedTipText("HSL", true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 2),
+							new ThemedTipText($"{c.A}, {c.R}, {c.G}, {c.B}") { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
+								.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin)
+								.SetValue(Grid.SetColumn, 1),
+							new ThemedTipText(c.ToHexString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
+								.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin)
+								.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
+							new ThemedTipText($"{v.Hue.ToString("0.###")}, {v.Saturation.ToString("0.###")}, {v.Luminosity.ToString("0.###")}") { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
+								.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin)
+								.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
+						}
+					},
 					new StackPanel {
 						Children = {
-							new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Foreground = brush, Background = WpfBrushes.Black },
-							new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Background = brush, Foreground = WpfBrushes.Black },
-							new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Foreground = brush, Background = WpfBrushes.Gray },
-							new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Background = brush, Foreground = WpfBrushes.White },
-							new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Foreground = brush, Background = WpfBrushes.White },
+							CreateSampleBlock(brush, WpfBrushes.White),
+							CreateSampleBlock(brush, WpfBrushes.LightGray),
+							CreateSampleBlock(brush, WpfBrushes.DarkGray),
+							CreateSampleBlock(brush, WpfBrushes.Gray),
+							CreateSampleBlock(brush, WpfBrushes.DimGray),
+							CreateSampleBlock(brush, WpfBrushes.Black),
 						}
 					}.MakeHorizontal(),
+					new StackPanel {
+						Children = {
+							CreateSampleBlock(WpfBrushes.White, brush),
+							CreateSampleBlock(WpfBrushes.LightGray, brush),
+							CreateSampleBlock(WpfBrushes.DarkGray, brush),
+							CreateSampleBlock(WpfBrushes.Gray, brush),
+							CreateSampleBlock(WpfBrushes.DimGray, brush),
+							CreateSampleBlock(WpfBrushes.Black, brush),
+						}
+					}.MakeHorizontal()
 				}
 			};
+			TextBlock CreateSampleBlock(Brush foreground, Brush background) {
+				return new TextBlock { Text = SAMPLE, Margin = WpfHelper.TinyMargin, Padding = WpfHelper.TinyMargin, Background = background, Foreground = foreground };
+			}
 		}
 
 		static int? GetColorMethodArgument(SemanticModel semanticModel, SyntaxNode node) {
