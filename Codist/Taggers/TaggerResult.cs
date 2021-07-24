@@ -67,7 +67,7 @@ namespace Codist.Taggers
 		public void PurgeOutdatedTags(TextContentChangedEventArgs args) {
 			Debug.WriteLine($"snapshot version: {args.AfterVersion.VersionNumber}");
 			foreach (var change in args.Changes) {
-				Debug.WriteLine($"change:{change.OldPosition}->{change.NewPosition}");
+				Debug.WriteLine($"change: {change.OldPosition}->{change.NewPosition}");
 				var tags = _Tags;
 				for (int i = tags.Count - 1; i >= 0; i--) {
 					var t = tags[i];

@@ -16,7 +16,7 @@ namespace Codist
 {
 	sealed class Config
 	{
-		internal const string CurrentVersion = "5.11.0";
+		internal const string CurrentVersion = "5.12.0";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
 		internal const string LightTheme = ThemePrefix + "Light", PaleLightTheme = ThemePrefix + "PaleLight", DarkTheme = ThemePrefix + "Dark", SimpleTheme = ThemePrefix + "Simple";
@@ -693,7 +693,8 @@ namespace Codist
 		XmlDocSummary = 1,
 		NumericValues = 1 << 1,
 		Attributes = 1 << 2,
-		Default = XmlDocSummary | NumericValues | Attributes
+		Colors = 1 << 3,
+		Default = XmlDocSummary | NumericValues | Attributes | Colors
 	}
 
 	[Flags]
