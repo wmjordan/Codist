@@ -122,19 +122,19 @@ _Codist_ supports localization into other languages and it has both English and 
 
     By default, _Quick Info_ appears when you hover your mouse over a symbol or syntax token in code editor. Some programmers think this behavior interferes their workflow. Checking this option will suppress the _Quick Info_ until Shift key is pressed.
 
-  * **Show info about selection length**
+  * **Selection info**
 
     This option will show how many characters and lines in your selection (if your selection spans over multiple lines). So you don't have to count characters one by one.
 
     ![Super Quick Info Selection Length](doc/super-quick-info-selection-length.png)
 
-  * **Show info about color**
+  * **Color info**
 
-    This option enables you preview color values. It works for hex color values (such as `#00FF00`，`#FF993300`), named colors (such as `Black`, `White`, etc.).
+    This option enables you preview color values. It works for hex color values (such as `#00FF00`，`#33993300`), named colors (such as `Black`, `White`, etc.). The 12 sample blocks under color values list the color as the foreground or background against various gray scale colors to help designers to determine the best readability.
 
     ![Super Quick Info - Color](doc/super-quick-info-color.png)
 
-    In C# code editor, it analysis system colors (such as `SystemColors.WindowColor`, `SystemColors.Control`, etc.), `Color.FromArgb` or `Color.FromRgb` expression with constant values as well.
+    In C# code editor, it analyzes system colors (such as `SystemColors.WindowColor`, `SystemColors.Control`, etc.), `Color.FromArgb` or `Color.FromRgb` expression with constant values as well.
 
     ![Super Quick Info - C# Color](doc/super-quick-info-csharp-color.png)
 
