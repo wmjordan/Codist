@@ -82,6 +82,12 @@ namespace Codist
 				ShowXmlDocSummary(symbol, context.SemanticModel.Compilation, tip);
 			}
 			ShowNumericForms(symbol, tip);
+			if (symbol.Kind == SymbolKind.Property && Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.Colors)) {
+				var preview = QuickInfo.ColorQuickInfo.PreviewColorProperty(symbol as IPropertySymbol, false);
+				if (preview != null) {
+					tip.Add(preview);
+				}
+			}
 			return tip;
 		}
 
