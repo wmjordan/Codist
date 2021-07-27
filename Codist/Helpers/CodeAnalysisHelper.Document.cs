@@ -76,5 +76,8 @@ namespace Codist
 			}
 		}
 
+		public static bool IsCSharp(this SemanticModel model) {
+			return model.Language == "C#";
+		}
 	}
 }

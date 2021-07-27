@@ -467,6 +467,9 @@ namespace Codist
 			var pu = GetPotentialUsageKinds(reference.Definition);
 			foreach (var docRefs in reference.Locations.GroupBy(l => l.Document)) {
 				var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+				if (sm.IsCSharp() == false) {
+					continue;
+				}
 				var r = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 				foreach (var location in docRefs) {
 					var n = r.FindNode(location.Location.SourceSpan);

@@ -220,6 +220,9 @@ namespace Codist.QuickInfo
 					foreach (var id in linkedDocuments) {
 						var d = workspace.CurrentSolution.GetDocument(id);
 						var sm = await d.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+						if (sm.IsCSharp() == false) {
+							continue;
+						}
 						if (GetSymbol(sm, sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(token.Span, true, true), ref candidates, cancellationToken) == null) {
 							if (r == null) {
 								r = new ThemedTipDocument().AppendTitle(IconIds.UnavailableSymbol, R.T_SymbolUnavailableIn);
