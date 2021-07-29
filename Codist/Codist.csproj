@@ -195,9 +195,13 @@
     <Compile Include="QuickInfo\QuickInfoOverrider.cs" />
     <Compile Include="QuickInfo\SelectionQuickInfo.cs" />
     <Compile Include="QuickInfo\QuickInfoVisibilityController.cs" />
+    <Compile Include="VSVersions\BuildEvents.cs" />
+    <Compile Include="VSVersions\NewDocumentStateScope.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Key.snk" />
     <None Include="Resources\Dark Codist.json" />
     <None Include="Resources\Light Codist.json" />
@@ -207,7 +211,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AppHelpers.Ext.dll" />
     <Resource Include="Resources\wechatQrcode.png" />
     <Content Include="zh-Hans\Extension.vsixlangpack">
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -240,20 +243,14 @@
     <Content Include="Resources\CodistPackage.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="AppHelpers.Ext, Version=2018.1.27.1120, Culture=neutral, PublicKeyToken=964c79fab758d6ea, processorArchitecture=MSIL">
+    <Reference Include="AppHelpers.Ext, Version=2018.9.15.804, Culture=neutral, PublicKeyToken=964c79fab758d6ea, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\AppHelpers.Ext.dll</HintPath>
+      <HintPath>AppHelpers.Ext.dll</HintPath>
     </Reference>
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
-    <Reference Include="EnvDTE100, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
     <Reference Include="EnvDTE80, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
-    <Reference Include="EnvDTE90, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
@@ -268,10 +265,8 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
@@ -347,12 +342,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.EditorFeatures.Text">
       <Version>2.10.0</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.Elfie">
-      <Version>0.10.6</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Composition">
-      <Version>1.0.31</Version>
-    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.ComponentModelHost">
       <Version>15.8.525</Version>
     </PackageReference>
@@ -369,10 +358,10 @@
       <Version>16.5.5</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes">
-      <Version>15.0.21</Version>
+      <Version>15.0.36</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Shell.15.0">
-      <Version>15.8.28010</Version>
+      <Version>15.9.28307</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Text.UI.Wpf">
       <Version>15.8.525</Version>
@@ -387,42 +376,18 @@
       <Version>15.3.32</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools">
-      <Version>15.8.3252</Version>
+      <Version>17.0.2155-preview2</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="NETStandard.Library">
       <Version>2.0.0</Version>
     </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.bundle_green">
-      <Version>1.1.2</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.linux">
-      <Version>1.1.2</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.osx">
-      <Version>1.1.2</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.v110_xp">
-      <Version>1.1.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.Composition">
-      <Version>1.2.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Diagnostics.DiagnosticSource">
-      <Version>4.3.0</Version>
-    </PackageReference>
-    <PackageReference Include="System.Diagnostics.Tracing">
-      <Version>4.3.0</Version>
-    </PackageReference>
     <PackageReference Include="System.IO">
       <Version>4.3.0</Version>
     </PackageReference>
-    <PackageReference Include="System.Net.Http">
-      <Version>4.3.4</Version>
-    </PackageReference>
     <PackageReference Include="System.Net.Primitives">
-      <Version>4.3.0</Version>
+      <Version>4.3.1</Version>
     </PackageReference>
     <PackageReference Include="System.ObjectModel">
       <Version>4.3.0</Version>
@@ -436,23 +401,14 @@
     <PackageReference Include="System.Runtime.Handles">
       <Version>4.3.0</Version>
     </PackageReference>
-    <PackageReference Include="System.Security.Cryptography.Algorithms">
-      <Version>4.3.1</Version>
-    </PackageReference>
-    <PackageReference Include="System.Security.Cryptography.X509Certificates">
-      <Version>4.3.2</Version>
-    </PackageReference>
-    <PackageReference Include="System.Text.Encoding.CodePages">
-      <Version>4.4.0</Version>
-    </PackageReference>
     <PackageReference Include="System.Text.RegularExpressions">
-      <Version>4.3.0</Version>
+      <Version>4.3.1</Version>
     </PackageReference>
     <PackageReference Include="System.Threading.Timer">
       <Version>4.3.0</Version>
     </PackageReference>
     <PackageReference Include="System.ValueTuple">
-      <Version>4.4.0</Version>
+      <Version>4.5.0</Version>
     </PackageReference>
     <PackageReference Include="System.Xml.ReaderWriter">
       <Version>4.3.1</Version>
@@ -462,7 +418,7 @@
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.None.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.None.Increment" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

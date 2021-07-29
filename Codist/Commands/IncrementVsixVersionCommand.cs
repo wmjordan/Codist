@@ -58,7 +58,7 @@ namespace Codist.Commands
 
 		static ProjectItem GetSelectedProjectItem() {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			var items = (object[])CodistPackage.DTE2.ToolWindows.SolutionExplorer.SelectedItems;
+			var items = (object[])CodistPackage.DTE.ToolWindows.SolutionExplorer.SelectedItems;
 			foreach (UIHierarchyItem hi in items) {
 				var item = hi.Object as ProjectItem;
 				if (item != null

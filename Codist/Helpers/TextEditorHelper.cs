@@ -415,7 +415,7 @@ namespace Codist
 			}
 		}
 
-		public static void TryExecuteCommand(this EnvDTE.DTE dte, string command, string args = "") {
+		public static void TryExecuteCommand(this EnvDTE80.DTE2 dte, string command, string args = "") {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			try {
 				if (dte.Commands.Item(command).IsAvailable) {

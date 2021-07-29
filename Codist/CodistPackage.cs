@@ -8,7 +8,6 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio;
 using AppHelpers;
-using R = Codist.Properties.Resources;
 
 namespace Codist
 {
@@ -36,12 +35,10 @@ namespace Codist
 		/// <summary>CodistPackage GUID string.</summary>
 		const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
 
-		static EnvDTE.DTE _dte;
-		static EnvDTE80.DTE2 _dte2;
-		static EnvDTE.Events _dteEvents;
-		static EnvDTE.BuildEvents _buildEvents;
-		static OleMenuCommandService _menu;
-		static IOleComponentManager _componentManager;
+		static EnvDTE80.DTE2 __DTE;
+		static OleMenuCommandService __Menu;
+		static IOleComponentManager __ComponentManager;
+		static BuildEvents __BuildEvents;
 
 		//int _extenderCookie;
 
@@ -59,28 +56,22 @@ namespace Codist
 		}
 
 		public static CodistPackage Instance { get; private set; }
-		public static EnvDTE.DTE DTE {
+		public static EnvDTE80.DTE2 DTE {
 			get {
 				ThreadHelper.ThrowIfNotOnUIThread();
-				return _dte ?? (_dte = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE.DTE);
-			}
-		}
-		public static EnvDTE80.DTE2 DTE2 {
-			get {
-				ThreadHelper.ThrowIfNotOnUIThread();
-				return _dte2 ?? (_dte2 = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE80.DTE2);
+				return __DTE ?? (__DTE = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE80.DTE2);
 			}
 		}
 		public static OleMenuCommandService MenuService {
 			get {
 				ThreadHelper.ThrowIfNotOnUIThread();
-				return _menu ?? (_menu = Instance.GetService(typeof(System.ComponentModel.Design.IMenuCommandService)) as OleMenuCommandService);
+				return __Menu ?? (__Menu = Instance.GetService(typeof(System.ComponentModel.Design.IMenuCommandService)) as OleMenuCommandService);
 			}
 		}
 		public static IOleComponentManager OleComponentManager {
 			get {
 				ThreadHelper.ThrowIfNotOnUIThread();
-				return _componentManager ?? (_componentManager = ServiceProvider.GetGlobalServiceAsync<SOleComponentManager, IOleComponentManager>().ConfigureAwait(false).GetAwaiter().GetResult());
+				return __ComponentManager ?? (__ComponentManager = ServiceProvider.GetGlobalServiceAsync<SOleComponentManager, IOleComponentManager>().ConfigureAwait(false).GetAwaiter().GetResult());
 			}
 		}
 
@@ -131,12 +122,7 @@ namespace Codist
 			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.MainWindow)) {
 				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, true);
 			}
-			
-			_dteEvents = DTE2.Events;
-			_buildEvents = _dteEvents.BuildEvents;
-			_buildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
-			_buildEvents.OnBuildDone += BuildEvents_OnBuildEnd;
-			_buildEvents.OnBuildProjConfigDone += BuildEvents_OnBuildProjConfigDone;
+			__BuildEvents = new BuildEvents(this);
 			//_extenderCookie = DTE.ObjectExtenders.RegisterExtenderProvider(VSConstants.CATID.CSharpFileProperties_string, BuildBots.AutoReplaceExtenderProvider.Name, new BuildBots.AutoReplaceExtenderProvider());
 			//Commands.SymbolFinderWindowCommand.Initialize();
 			Commands.ScreenshotCommand.Initialize();
@@ -166,54 +152,9 @@ namespace Codist
 		}
 
 #pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
-		void BuildEvents_OnBuildBegin(EnvDTE.vsBuildScope Scope, EnvDTE.vsBuildAction Action) {
-			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
-				var output = GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
-				output?.OutputString(DateTime.Now.ToLongTimeString() + " " + R.T_BuildStarted + Environment.NewLine);
-			}
-		}
-
-		void BuildEvents_OnBuildEnd(EnvDTE.vsBuildScope Scope, EnvDTE.vsBuildAction Action) {
-			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
-				var output = GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
-				if (output != null) {
-					output.OutputString(DateTime.Now.ToLongTimeString() + " " + R.T_BuildFinished + Environment.NewLine);
-				}
-			}
-		}
-
-		void BuildEvents_OnBuildProjConfigDone(string projectName, string projectConfig, string platform, string solutionConfig, bool success) {
-			if (success == false
-				|| Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) == false) {
-				return;
-			}
-			var project = TextEditorHelper.GetProject(projectName);
-			if (project.IsVsixProject() == false) {
-				return;
-			}
-			var projItems = project.ProjectItems;
-			for (int i = projItems.Count; i > 0; i--) {
-				var item = projItems.Item(i);
-				if (item.Name.EndsWith(".vsixmanifest", StringComparison.OrdinalIgnoreCase)) {
-					if (item.IsOpen && item.IsDirty) {
-						item.Document.NewWindow().Activate();
-						ShowMessageBox(item.Name + " is open and modified. Auto increment VSIX version number failed.", nameof(Codist), true);
-					}
-					else if (Commands.IncrementVsixVersionCommand.IncrementVersion(item, out var message)) {
-						var output = GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
-						output?.OutputString(nameof(Codist) + ": " + message + Environment.NewLine);
-					}
-					else {
-						ShowMessageBox(message, "Auto increment VSIX version number failed.", true);
-					}
-					break;
-				}
-			}
-		}
-
 		/// <summary>A helper method to discover registered editor commands.</summary>
 		static void ListEditorCommands() {
-			var commands = _dte.Commands;
+			var commands = __DTE.Commands;
 			var c = commands.Count;
 			var s = new string[c];
 			var s2 = new string[c];
