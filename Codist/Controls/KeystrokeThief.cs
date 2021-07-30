@@ -35,7 +35,7 @@ namespace Codist.Controls
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var componentManager = ServiceProvider.GetGlobalServiceAsync<SOleComponentManager, IOleComponentManager>().Result;
 			var thief = new KeystrokeThief(componentManager);
-			new System.Windows.Interop.WindowInteropHelper(window).Owner = new IntPtr(CodistPackage.DTE.MainWindow.HWnd);
+			// window.Owner = Application.Current.MainWindow;
 			window.Activated += (s, args) => thief.StartStealing();
 			window.Deactivated += (s, args) => thief.StopStealing();
 			window.Closed += (s, args) => thief.StopStealing();
