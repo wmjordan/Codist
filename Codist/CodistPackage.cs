@@ -59,7 +59,7 @@ namespace Codist
 		public static EnvDTE80.DTE2 DTE {
 			get {
 				ThreadHelper.ThrowIfNotOnUIThread();
-				return __DTE ?? (__DTE = ServiceProvider.GlobalProvider.GetService(typeof(EnvDTE.DTE)) as EnvDTE80.DTE2);
+				return __DTE ?? (__DTE = ServicesHelper.Get<EnvDTE80.DTE2, EnvDTE.DTE>());
 			}
 		}
 		public static OleMenuCommandService MenuService {
