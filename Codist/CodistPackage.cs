@@ -131,7 +131,12 @@ namespace Codist
 			Commands.NaviBarSearchDeclarationCommand.Initialize();
 			if (Config.Instance.InitStatus != InitStatus.Normal) {
 				Config.Instance.SaveConfig(Config.ConfigPath); // save the file to prevent this notification from reoccurrence
-				new Commands.VersionInfoBar(this).Show(Config.Instance.InitStatus);
+				try {
+					new Commands.VersionInfoBar(this).Show(Config.Instance.InitStatus);
+				}
+				catch (MissingMemberException) {
+					// HACK: ignore this for VS 2022 temporarily
+				}
 				if (Config.Instance.InitStatus == InitStatus.FirstLoad) {
 					// automatically load theme when first load
 					if (ThemeHelper.DocumentPageColor.ToWpfColor().IsDark()) {

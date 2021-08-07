@@ -373,7 +373,7 @@ namespace Codist
 					}
 				}
 			}
-			else if (String.Equals(sPath, CodistPackage.DTE.ActiveDocument.FullName, StringComparison.OrdinalIgnoreCase)) {
+			else if (String.Equals(sPath, view.TextBuffer.GetTextDocument()?.FilePath, StringComparison.OrdinalIgnoreCase)) {
 				// drag & drop from current file to external file
 				if (copy == false) {
 					using (var edit = view.TextBuffer.CreateEdit()) {
