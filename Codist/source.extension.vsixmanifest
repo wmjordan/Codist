@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="5.12.0.6664" Language="en-US" Publisher="WMJ" />
+    <Identity Id="Codist.WMJ.c7b93d20-621f-4b21-9d28-d51157ef0b94" Version="5.12.0.6716" Language="en-US" Publisher="WMJ" />
     <DisplayName>Codist</DisplayName>
     <Description xml:space="preserve">A productivity booster for C# programmers which enhances syntax highlighting, quick info (tooltip), navigation bar, scrollbar, display quality and brings smart tool bar to code editor.</Description>
     <MoreInfo>https://github.com/wmjordan/Codist</MoreInfo>
@@ -21,7 +21,7 @@
     <InstallationTarget Version="[15.0,17.0)" Id="Microsoft.VisualStudio.Enterprise">
       <ProductArchitecture>x86</ProductArchitecture>
     </InstallationTarget>
-    <InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Pro">
+    <!--<InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Pro">
       <ProductArchitecture>amd64</ProductArchitecture>
     </InstallationTarget>
     <InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Community">
@@ -29,7 +29,7 @@
     </InstallationTarget>
     <InstallationTarget Version="[17.0,18.0)" Id="Microsoft.VisualStudio.Enterprise">
       <ProductArchitecture>amd64</ProductArchitecture>
-    </InstallationTarget>
+    </InstallationTarget>-->
   </Installation>
   <Prerequisites>
     <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,18.0)" DisplayName="Visual Studio core editor" />
