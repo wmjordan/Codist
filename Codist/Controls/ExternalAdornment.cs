@@ -26,6 +26,8 @@ namespace Codist.Controls
 			var grid = view.VisualElement.GetParent<Grid>();
 			if (grid != null) {
 				grid.Children.Add(this);
+				view.Selection.SelectionChanged += ViewSeletionChanged;
+				view.VisualElement.Unloaded += VisualElement_Unloaded;
 			}
 			else {
 				view.VisualElement.Loaded += VisualElement_Loaded;
@@ -48,11 +50,9 @@ namespace Codist.Controls
 
 		public void ClearUnpinnedChildren() {
 			for (int i = Children.Count - 1; i >= 0; i--) {
-				var c = Children[i] as SymbolList;
-				if (c != null && c.IsPinned) {
-					continue;
+				if (Children[i] is SymbolList l && l.IsPinned == false) {
+					Children.RemoveAt(i);
 				}
-				Children.RemoveAt(i);
 			}
 		}
 
