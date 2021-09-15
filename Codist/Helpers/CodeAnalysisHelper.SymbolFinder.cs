@@ -427,6 +427,9 @@ namespace Codist
 				case SymbolKind.NamedType:
 					if ((symbol as INamedTypeSymbol).IsBoundedGenericType()) {
 						sign = symbol.ToDisplayString();
+						// hack: in VS 2017 with Rosyln 2.10, we don't need this,
+						//       but in VS 2019, we have to do that, otherwise we will get nothing
+						symbol = symbol.OriginalDefinition;
 					}
 					break;
 				case SymbolKind.Method:
@@ -472,8 +475,9 @@ namespace Codist
 				}
 				var r = sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 				foreach (var location in docRefs) {
-					var n = r.FindNode(location.Location.SourceSpan);
-					if (n.Span.Contains(location.Location.SourceSpan.Start) == false || nodeFilter?.Invoke(n) == false) {
+					var ss = location.Location.SourceSpan;
+					var n = r.FindNode(ss);
+					if (n.Span.Contains(ss.Start) == false || nodeFilter?.Invoke(n) == false) {
 						continue;
 					}
 					var c = n.FirstAncestorOrSelf<SyntaxNode>(i => i.Kind().GetDeclarationCategory().HasAnyFlag(DeclarationCategory.Member | DeclarationCategory.Type));
