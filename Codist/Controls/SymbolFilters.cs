@@ -124,10 +124,10 @@ namespace Codist.Controls
 					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new TypeFilterButtonGroup() };
 					break;
 				case SymbolFilterKind.Usage:
-					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new SymbolUsageFilterButtonGroup(), new MemberFilterButtonGroup() };
+					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new InstanceFilterButtonGroup(), new SymbolUsageFilterButtonGroup(), new MemberFilterButtonGroup() };
 					break;
 				default:
-					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new MemberFilterButtonGroup() };
+					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new InstanceFilterButtonGroup(), new MemberFilterButtonGroup() };
 					break;
 			}
 			_FilterContainer.Add(_FilterGroups)
@@ -292,6 +292,7 @@ namespace Codist.Controls
 				case SymbolKind.Namespace: symbolFlags |= MemberFilterTypes.TypeAndNamespace; break;
 				case SymbolKind.Property: symbolFlags |= MemberFilterTypes.Property; break;
 			}
+			symbolFlags |= symbol.IsStatic ? MemberFilterTypes.Static : MemberFilterTypes.Instance;
 			return filterTypes.MatchFlags(symbolFlags);
 		}
 
@@ -674,6 +675,76 @@ namespace Codist.Controls
 			}
 		}
 
+		sealed class InstanceFilterButtonGroup : FilterButtonGroup
+		{
+			readonly ThemedToggleButton _StaticMemberFilter, _InstanceMemberFilter;
+			readonly Border _Separator;
+			MemberFilterTypes _Filters;
+			bool _uiLock;
+
+			public override int Filters => (int)_Filters;
+
+			public InstanceFilterButtonGroup() {
+				_StaticMemberFilter = CreateButton(IconIds.StaticMember, R.T_Static);
+				_InstanceMemberFilter = CreateButton(IconIds.InstanceMember, R.T_Instance);
+
+				_Filters = MemberFilterTypes.AllInstance;
+				Content = new StackPanel {
+					Children = {
+						_StaticMemberFilter, _InstanceMemberFilter,
+						(_Separator = CreateSeparator())
+					},
+					Orientation = Orientation.Horizontal
+				};
+			}
+
+			protected override void UpdateFilterValue() {
+				if (_uiLock) {
+					return;
+				}
+				var f = MemberFilterTypes.None;
+				if (_InstanceMemberFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Instance;
+				}
+				if (_StaticMemberFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Static;
+				}
+				if (f.HasAnyFlag(MemberFilterTypes.AllInstance) == false) {
+					f |= MemberFilterTypes.AllInstance;
+				}
+				if (_Filters != f) {
+					_Filters = f;
+					OnFilterChanged();
+				}
+			}
+
+			public override void UpdateNumbers(IEnumerable<SymbolItem> symbols) {
+				int i = 0, s = 0;
+				foreach (var item in symbols) {
+					var symbol = item.Symbol;
+					if (symbol == null || symbol.IsImplicitlyDeclared) {
+						continue;
+					}
+					if (symbol.IsStatic) {
+						s++;
+					}
+					else {
+						i++;
+					}
+				}
+				ToggleFilterButton(_StaticMemberFilter, s);
+				ToggleFilterButton(_InstanceMemberFilter, i);
+				_Separator.Visibility = (i != 0 || s != 0) ? Visibility.Visible : Visibility.Collapsed;
+			}
+
+			public override void ClearFilter() {
+				_uiLock = true;
+				_InstanceMemberFilter.IsChecked = _StaticMemberFilter.IsChecked = false;
+				_uiLock = false;
+				_Filters |= MemberFilterTypes.AllMembers;
+			}
+		}
+
 		sealed class SymbolUsageFilterButtonGroup : FilterButtonGroup
 		{
 			readonly ThemedToggleButton _WriteFilter, _ReadFilter, _EventFilter, _TypeCastFilter, _TypeReferenceFilter;
@@ -877,12 +948,15 @@ namespace Codist.Controls
 		Interface = 1 << 14,
 		Namespace = 1 << 15,
 		AllTypes = Class | StructAndEnum | Delegate| Interface | Namespace,
+		Static = 1 << 17,
+		Instance = 1 << 18,
+		AllInstance = Static | Instance,
 		Read = 1 << 20,
 		Write = 1 << 21,
 		TypeCast = 1 << 22,
 		TypeReference = 1 << 23,
 		AllUsages = Read | Write | TypeCast | TypeReference,
-		All = AllMembers | AllAccessibilities | AllTypes | AllUsages
+		All = AllMembers | AllAccessibilities | AllTypes | AllInstance | AllUsages
 	}
 
 	enum ScopeType

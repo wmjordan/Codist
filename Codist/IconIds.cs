@@ -16,6 +16,7 @@ namespace Codist
 		public const int Generic = KnownImageIds.MarkupXML;
 		public const int ExtensionMethod = KnownImageIds.ExtensionMethod;
 		public const int StaticMember = KnownImageIds.Link;
+		public const int InstanceMember = KnownImageIds.BuildQueue;
 		public const int ReadonlyField = KnownImageIds.EncapsulateField;
 		public const int ReadonlyProperty = KnownImageIds.MoveProperty;
 		public const int InitonlyProperty = KnownImageIds.NewProperty;

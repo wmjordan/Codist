@@ -1797,4 +1797,10 @@ Use space to separate multiple search terms.
   <data name="T_Hexadecimal" xml:space="preserve">
     <value>HEX</value>
   </data>
+  <data name="T_Instance" xml:space="preserve">
+    <value>Instance</value>
+  </data>
+  <data name="T_Static" xml:space="preserve">
+    <value>Static</value>
+  </data>
 </root>

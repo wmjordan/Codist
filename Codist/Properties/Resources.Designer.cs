@@ -4265,6 +4265,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Instance 的本地化字符串。
+        /// </summary>
+        internal static string T_Instance {
+            get {
+                return ResourceManager.GetString("T_Instance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Interface: 的本地化字符串。
         /// </summary>
         internal static string T_Interface {
@@ -4922,6 +4931,15 @@ namespace Codist.Properties {
         internal static string T_SpecifyScreenshotLocation {
             get {
                 return ResourceManager.GetString("T_SpecifyScreenshotLocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Static 的本地化字符串。
+        /// </summary>
+        internal static string T_Static {
+            get {
+                return ResourceManager.GetString("T_Static", resourceCulture);
             }
         }
         

@@ -1785,4 +1785,10 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_Hexadecimal" xml:space="preserve">
     <value>16进制</value>
   </data>
+  <data name="T_Instance" xml:space="preserve">
+    <value>实例成员</value>
+  </data>
+  <data name="T_Static" xml:space="preserve">
+    <value>静态成员</value>
+  </data>
 </root>
