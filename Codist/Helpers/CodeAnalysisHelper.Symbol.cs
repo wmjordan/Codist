@@ -162,6 +162,14 @@ namespace Codist
 			return symbol.Kind == SymbolKind.Alias ? (symbol as IAliasSymbol).Target : symbol;
 		}
 
+		public static IEnumerable<INamedTypeSymbol> GetContainingTypes(this ISymbol symbol) {
+			var t = symbol.ContainingType;
+			while (t != null) {
+				yield return t;
+				t = t.ContainingType;
+			}
+		}
+
 		public static ITypeSymbol ResolveElementType(this ITypeSymbol t) {
 			switch (t.Kind) {
 				case SymbolKind.ArrayType: return ResolveElementType(((IArrayTypeSymbol)t).ElementType);

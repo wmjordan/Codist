@@ -425,19 +425,19 @@ namespace Codist
 			Predicate<SymbolUsageKind> usageFilter = null;
 			switch (symbol.Kind) {
 				case SymbolKind.NamedType:
-					if ((symbol as INamedTypeSymbol).IsBoundedGenericType()) {
+					// hack: In VS 2017 with Rosyln 2.10, we don't need this,
+					//       but in VS 2019, we have to do that, otherwise we will get nothing.
+					//       The same to SymbolKind.Method.
+					if ((symbol as INamedTypeSymbol).IsBoundedGenericType()
+						|| symbol.GetContainingTypes().Any(t => t.IsBoundedGenericType())) {
 						sign = symbol.ToDisplayString();
-						// hack: in VS 2017 with Rosyln 2.10, we don't need this,
-						//       but in VS 2019, we have to do that, otherwise we will get nothing
 						symbol = symbol.OriginalDefinition;
 					}
 					break;
 				case SymbolKind.Method:
 					var m = symbol as IMethodSymbol;
-					if (m.IsBoundedGenericMethod()) {
+					if (m.IsBoundedGenericMethod() || m.GetContainingTypes().Any(t => t.IsBoundedGenericType())) {
 						sign = symbol.ToDisplayString();
-						// hack: in VS 2017 with Rosyln 2.10, we don't need this,
-						//       but in VS 2019, we have to do that, otherwise we will get nothing
 						symbol = symbol.OriginalDefinition;
 					}
 					else if (m.IsExtensionMethod) {
