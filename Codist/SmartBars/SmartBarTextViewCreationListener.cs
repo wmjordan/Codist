@@ -39,7 +39,6 @@ namespace Codist.SmartBars
 		/// </summary>
 		/// <param name="textView">The <see cref="IWpfTextView"/> upon which the adornment should be placed</param>
 		public void TextViewCreated(IWpfTextView textView) {
-			textView.VisualElement.Loaded += TextViewLoaded;
 			if (Config.Instance.Features.MatchFlags(Features.SmartBar) == false) {
 				return;
 			}
@@ -66,14 +65,6 @@ namespace Codist.SmartBars
 			}
 			else {
 				new SmartBar(textView, _TextSearchService);
-			}
-		}
-
-		void TextViewLoaded(object sender, EventArgs args) {
-			var e = sender as System.Windows.FrameworkElement;
-			e.Loaded -= TextViewLoaded;
-			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
-				WpfHelper.SetUITextRenderOptions(e, true);
 			}
 		}
 	}

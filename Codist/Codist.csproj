@@ -81,6 +81,7 @@
     <Compile Include="Controls\NumericUpDown.cs" />
     <Compile Include="Controls\SymbolCommands.cs" />
     <Compile Include="Controls\SymbolItem.cs" />
+    <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
     <Compile Include="IconIds.cs" />
     <Compile Include="NaviBar\NaviBar.cs" />
     <Compile Include="Options\CommonControls.cs" />
@@ -418,7 +419,7 @@
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties BuildVersion_StartDate="2000/1/1" BuildVersion_UpdateFileVersion="True" BuildVersion_BuildVersioningStyle="None.None.None.Increment" />
+      <UserProperties BuildVersion_BuildVersioningStyle="None.None.None.Increment" BuildVersion_UpdateFileVersion="True" BuildVersion_StartDate="2000/1/1" />
     </VisualStudio>
   </ProjectExtensions>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
