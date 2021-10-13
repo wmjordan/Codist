@@ -27,7 +27,7 @@ namespace Codist.QuickInfo
 		static readonly SymbolFormatter _SymbolFormatter = SymbolFormatter.Instance;
 
 		readonly bool _IsVsProject;
-		readonly ITextBuffer _TextBuffer;
+		ITextBuffer _TextBuffer;
 		SemanticModel _SemanticModel;
 		bool _isCandidate;
 
@@ -386,8 +386,8 @@ namespace Codist.QuickInfo
 					}
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
 						&& m.ContainingType?.Name == "Color"
-						&& session.Mark(nameof(ColorQuickInfo))) {
-						qiContent.Add(ColorQuickInfo.PreviewColorMethodInvocation(_SemanticModel, node, symbol as IMethodSymbol));
+						&& session.Mark(nameof(ColorQuickInfoUI))) {
+						qiContent.Add(ColorQuickInfoUI.PreviewColorMethodInvocation(_SemanticModel, node, symbol as IMethodSymbol));
 					}
 					if (m.MethodKind == MethodKind.BuiltinOperator && node is ExpressionSyntax) {
 						var value = _SemanticModel.GetConstantValue(node);
@@ -402,8 +402,8 @@ namespace Codist.QuickInfo
 				case SymbolKind.Property:
 					ShowPropertyInfo(qiContent, symbol as IPropertySymbol);
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
-						&& session.Mark(nameof(ColorQuickInfo))) {
-						qiContent.Add(ColorQuickInfo.PreviewColorProperty(symbol as IPropertySymbol, _IsVsProject));
+						&& session.Mark(nameof(ColorQuickInfoUI))) {
+						qiContent.Add(ColorQuickInfoUI.PreviewColorProperty(symbol as IPropertySymbol, _IsVsProject));
 					}
 					break;
 				case SymbolKind.Namespace:
@@ -1359,6 +1359,11 @@ namespace Codist.QuickInfo
 		}
 
 		public void Dispose() {
+			if (_TextBuffer != null) {
+				_TextBuffer.Properties.RemoveProperty(typeof(CSharpQuickInfo));
+				_TextBuffer = null;
+				_SemanticModel = null;
+			}
 		}
 	}
 

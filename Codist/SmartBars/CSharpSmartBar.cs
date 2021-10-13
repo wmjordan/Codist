@@ -25,14 +25,15 @@ namespace Codist.SmartBars
 	sealed class CSharpSmartBar : SmartBar
 	{
 		static readonly Taggers.HighlightClassifications __HighlightClassifications = Taggers.HighlightClassifications.Instance;
-		readonly SemanticContext _Context;
-		readonly ExternalAdornment _SymbolListContainer;
+		SemanticContext _Context;
+		ExternalAdornment _SymbolListContainer;
 		ISymbol _Symbol;
 
 		public CSharpSmartBar(IWpfTextView view, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(view, textSearchService) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			_Context = SemanticContext.GetOrCreateSingetonInstance(view);
 			_SymbolListContainer = ExternalAdornment.GetOrCreate(view);
+			view.Closed += View_Closed;
 		}
 
 		ToolBar MyToolBar => ToolBar2;
@@ -157,17 +158,15 @@ namespace Codist.SmartBars
 				if (UpdateSemanticModel() == false) {
 					return;
 				}
-				var m = new CSharpSymbolContextMenu(_Context) {
+				var m = new CSharpSymbolContextMenu(_Symbol, node, _Context) {
 					Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
-					PlacementTarget = ctx.Sender,
-					Symbol = _Symbol,
-					SyntaxNode = node
+					PlacementTarget = ctx.Sender
 				};
-				m.ItemClicked += (s, args) => HideToolBar();
 				m.AddAnalysisCommands();
 				m.AddFindAllReferencesCommand();
 				m.AddGoToAnyCommands();
 				ctx.Sender.ContextMenu = m;
+				m.Closed += Menu_Closed;
 				m.IsOpen = true;
 			});
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) && Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
@@ -464,6 +463,20 @@ namespace Codist.SmartBars
 
 		bool UpdateSemanticModel() {
 			return SyncHelper.RunSync(() => _Context.UpdateAsync(View.Selection.Start.Position, default));
+		}
+
+		void Menu_Closed(object sender, EventArgs args) {
+			var m = sender as CSharpSymbolContextMenu;
+			m.Closed -= Menu_Closed;
+			m.Dispose();
+			HideToolBar();
+		}
+
+		void View_Closed(object sender, EventArgs e) {
+			(sender as IWpfTextView).Closed -= View_Closed;
+			_Context = null;
+			_SymbolListContainer = null;
+			_Symbol = null;
 		}
 	}
 }

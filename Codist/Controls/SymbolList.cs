@@ -19,7 +19,7 @@ using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
 {
-	sealed class SymbolList : VirtualList, ISymbolFilterable
+	class SymbolList : VirtualList, ISymbolFilterable, IDisposable
 	{
 		Predicate<object> _Filter;
 		readonly ToolTip _SymbolTip;
@@ -36,7 +36,7 @@ namespace Codist.Controls
 			Resources = SharedDictionaryManager.SymbolList;
 		}
 
-		public SemanticContext SemanticContext { get; }
+		public SemanticContext SemanticContext { get; private set; }
 		public IReadOnlyList<SymbolItem> Symbols => _Symbols;
 		public SymbolListType ContainerType { get; set; }
 		public Func<SymbolItem, UIElement> IconProvider { get; set; }
@@ -73,7 +73,10 @@ namespace Codist.Controls
 			_Symbols.AddRange(items);
 		}
 
-		public void Clear() {
+		public void ClearSymbols() {
+			foreach (var item in _Symbols) {
+				item.Release();
+			}
 			_Symbols.Clear();
 		}
 		public void RefreshItemsSource(bool force = false) {
@@ -110,11 +113,13 @@ namespace Codist.Controls
 
 		#region Analysis commands
 		internal void AddNamespaceItems(ISymbol[] symbols, ISymbol highlight) {
-			var items = Array.ConvertAll(symbols, s => new SymbolItem(s, this, false));
-			AddRange(items);
-			if (highlight != null) {
-				var c = CodeAnalysisHelper.GetSpecificSymbolComparer(highlight);
-				SelectedItem = items.FirstOrDefault(s => c(s.Symbol));
+			var c = highlight != null ? CodeAnalysisHelper.GetSpecificSymbolComparer(highlight) : null;
+			foreach (var item in symbols) {
+				var s = Add(new SymbolItem(item, this, false));
+				if (c != null && c(item)) {
+					SelectedItem = s;
+					c = null;
+				}
 			}
 		}
 
@@ -248,14 +253,6 @@ namespace Codist.Controls
 		}
 
 		internal void ShowContextMenu(RoutedEventArgs e) {
-			var m = ContextMenu as CSharpSymbolContextMenu;
-			if (m == null) {
-				ContextMenu = m = new CSharpSymbolContextMenu(SemanticContext) {
-					Resources = SharedDictionaryManager.ContextMenu,
-					Foreground = ThemeHelper.ToolWindowTextBrush,
-					IsEnabled = true,
-				};
-			}
 			var item = SelectedSymbolItem;
 			if (item == null
 				|| (item.Symbol == null && item.SyntaxNode == null)
@@ -263,9 +260,14 @@ namespace Codist.Controls
 				e.Handled = true;
 				return;
 			}
-			m.Symbol = item.Symbol;
-			m.SyntaxNode = item.SyntaxNode;
-			m.Items.Clear();
+			if (ContextMenu is CSharpSymbolContextMenu m) {
+				m.Dispose();
+			}
+			ContextMenu = m = new CSharpSymbolContextMenu(item.Symbol, item.SyntaxNode, SemanticContext) {
+				Resources = SharedDictionaryManager.ContextMenu,
+				Foreground = ThemeHelper.ToolWindowTextBrush,
+				IsEnabled = true,
+			};
 			SetupContextMenu(m, item);
 			m.AddTitleItem(item.SyntaxNode?.GetDeclarationSignature() ?? item.Symbol.GetOriginalName());
 			m.IsOpen = true;
@@ -292,8 +294,6 @@ namespace Codist.Controls
 					menu.AddSymbolCommands();
 				}
 				menu.Items.Add(new Separator());
-				menu.SyntaxNode = item.SyntaxNode;
-				menu.Symbol = item.Symbol;
 				menu.AddAnalysisCommands();
 			}
 		}
@@ -314,6 +314,9 @@ namespace Codist.Controls
 			base.OnMouseEnter(e);
 			if (_SymbolTip.Tag == null) {
 				_SymbolTip.Tag = DateTime.Now;
+				SizeChanged -= SizeChanged_RelocateToolTip;
+				MouseMove -= MouseMove_ChangeToolTip;
+				MouseLeave -= MouseLeave_HideToolTip;
 				SizeChanged += SizeChanged_RelocateToolTip;
 				MouseMove += MouseMove_ChangeToolTip;
 				MouseLeave += MouseLeave_HideToolTip;
@@ -355,8 +358,10 @@ namespace Codist.Controls
 
 		async Task<object> CreateItemToolTipAsync(ListBoxItem li) {
 			SymbolItem item;
+			var sc = SemanticContext;
 			if ((item = li.Content as SymbolItem) == null
-				|| await SemanticContext.UpdateAsync(default).ConfigureAwait(true) == false) {
+				|| sc == null
+				|| await sc.UpdateAsync(default).ConfigureAwait(true) == false) {
 				return null;
 			}
 
@@ -368,7 +373,7 @@ namespace Codist.Controls
 					item.SetSymbolToSyntaxNode();
 				}
 				if (item.Symbol != null) {
-					var tip = ToolTipFactory.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, SemanticContext);
+					var tip = ToolTipFactory.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, sc);
 					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
 						tip.AddTextBlock()
 							.Append(R.T_LineOfCode + (item.SyntaxNode.GetLineSpan().Length + 1).ToString());
@@ -379,7 +384,7 @@ namespace Codist.Controls
 			}
 			if (item.Symbol != null) {
 				item.RefreshSymbol();
-				var tip = ToolTipFactory.CreateToolTip(item.Symbol, false, SemanticContext);
+				var tip = ToolTipFactory.CreateToolTip(item.Symbol, false, sc);
 				if (ContainerType == SymbolListType.SymbolReferrers && item.Location.IsInSource) {
 					// append location info to tip
 					item.ShowSourceReference(tip.AddTextBlock().Append(R.T_SourceReference).AppendLine());
@@ -392,7 +397,7 @@ namespace Codist.Controls
 					return new ThemedToolTip(Path.GetFileName(f), String.Join(Environment.NewLine,
 						R.T_Folder + Path.GetDirectoryName(f),
 						R.T_Line + (item.Location.GetLineSpan().StartLinePosition.Line + 1).ToString(),
-						R.T_Project + SemanticContext.GetDocument(item.Location.SourceTree)?.Project.Name
+						R.T_Project + sc.GetDocument(item.Location.SourceTree)?.Project.Name
 					));
 				}
 				else {
@@ -637,8 +642,22 @@ namespace Codist.Controls
 
 		#endregion
 
-	}
+		public override void Dispose() {
+			base.Dispose();
+			if (SemanticContext != null) {
+				HideToolTip();
+				ClearSymbols();
+				if (ContextMenu is IDisposable d) {
+					d.Dispose();
+				}
+				SelectedItem = null;
+				SemanticContext = null;
+				IconProvider = null;
+				ExtIconProvider = null;
+			}
+		}
 
+	}
 
 	sealed class ExtIconProvider
 	{

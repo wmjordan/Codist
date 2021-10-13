@@ -27,26 +27,28 @@ namespace Codist.SmartBars
 		readonly IAdornmentLayer _ToolBarLayer;
 		readonly ToolBarTray _ToolBarTray;
 		CancellationTokenSource _Cancellation = new CancellationTokenSource();
+		IWpfTextView _View;
+		ITextSearchService2 _TextSearchService;
 		DateTime _LastExecute;
 		DateTime _LastShiftHit;
-		private int _SelectionStatus;
+		int _SelectionStatus;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SmartBar"/> class.
 		/// </summary>
 		/// <param name="view">The <see cref="IWpfTextView"/> upon which the adornment will be drawn</param>
 		public SmartBar(IWpfTextView view, ITextSearchService2 textSearchService) {
-			View = view ?? throw new ArgumentNullException(nameof(view));
-			TextSearchService = textSearchService;
+			_View = view ?? throw new ArgumentNullException(nameof(view));
+			_TextSearchService = textSearchService;
 			_ToolBarLayer = view.GetAdornmentLayer(nameof(SmartBar));
-			Config.Updated += ConfigUpdated;
+			Config.RegisterUpdateHandler(UpdateSmartBarConfig);
 			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
-				View.VisualElement.PreviewKeyUp += ViewKeyUp;
+				_View.VisualElement.PreviewKeyUp += ViewKeyUp;
 			}
 			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false) {
-				View.Selection.SelectionChanged += ViewSelectionChanged;
+				_View.Selection.SelectionChanged += ViewSelectionChanged;
 			}
-			View.Closed += ViewClosed;
+			_View.Closed += ViewClosed;
 			ToolBar = new ToolBar {
 				BorderThickness = new Thickness(1),
 				BorderBrush = Brushes.Gray,
@@ -77,8 +79,8 @@ namespace Codist.SmartBars
 
 		protected ToolBar ToolBar { get; }
 		protected ToolBar ToolBar2 { get; }
-		protected IWpfTextView View { get; }
-		protected ITextSearchService2 TextSearchService { get; }
+		protected IWpfTextView View => _View;
+		protected ITextSearchService2 TextSearchService => _TextSearchService;
 		protected CancellationToken CancellationToken {
 			get {
 				var c = _Cancellation;
@@ -308,7 +310,7 @@ namespace Codist.SmartBars
 		}
 
 		#region Event handlers
-		void ConfigUpdated(object sender, ConfigUpdatedEventArgs e) {
+		void UpdateSmartBarConfig(ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.MatchFlags(Features.SmartBar)) {
 				View.VisualElement.PreviewKeyUp -= ViewKeyUp;
 				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
@@ -335,20 +337,6 @@ namespace Codist.SmartBars
 		void ToolBarSizeChanged(object sender, SizeChangedEventArgs e) {
 			SetToolBarPosition();
 			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
-		}
-
-		void ViewClosed(object sender, EventArgs e) {
-			SyncHelper.CancelAndDispose(ref _Cancellation, false);
-			_ToolBarTray.ToolBars.Clear();
-			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
-			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
-			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
-			View.Selection.SelectionChanged -= ViewSelectionChanged;
-			View.VisualElement.MouseMove -= ViewMouseMove;
-			View.VisualElement.PreviewKeyUp -= ViewKeyUp;
-			//View.LayoutChanged -= ViewLayoutChanged;
-			View.Closed -= ViewClosed;
-			Config.Updated -= ConfigUpdated;
 		}
 
 		void ViewKeyUp(object sender, KeyEventArgs e) {
@@ -428,6 +416,7 @@ namespace Codist.SmartBars
 			}
 			SyncHelper.CancelAndDispose(ref _Cancellation, true);
 			CreateToolBar(_Cancellation.Token);
+
 			async void CreateToolBar(CancellationToken token) {
 				try {
 					if (_ToolBarTray.Visibility != Visibility.Visible) {
@@ -441,6 +430,24 @@ namespace Codist.SmartBars
 					// ignore
 				}
 			}
+		}
+
+		void ViewClosed(object sender, EventArgs e) {
+			SyncHelper.CancelAndDispose(ref _Cancellation, false);
+			_ToolBarTray.ToolBars.Clear();
+			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
+			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
+			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
+			_ToolBarTray.DragEnter -= HideToolBar;
+			_ToolBarLayer.RemoveAdornment(_ToolBarTray);
+			_View.Selection.SelectionChanged -= ViewSelectionChanged;
+			_View.VisualElement.MouseMove -= ViewMouseMove;
+			_View.VisualElement.PreviewKeyUp -= ViewKeyUp;
+			//_View.LayoutChanged -= ViewLayoutChanged;
+			_View.Closed -= ViewClosed;
+			Config.UnregisterUpdateHandler(UpdateSmartBarConfig);
+			_View = null;
+			_TextSearchService = null;
 		}
 		#endregion
 

@@ -158,8 +158,8 @@ namespace Codist.Controls
 			&& TextContainerTextViewProp != null && TextSelectionProp != null && TextSelectionContains != null && TextRangeIsEmptyProp != null && TextContainerProp != null;
 		static readonly bool __CanCopy = CopyMethod != null;
 
-		readonly FrameworkElement _uiScope;
-		readonly object _editor;
+		FrameworkElement _uiScope;
+		object _editor;
 
 		public static TextEditorWrapper CreateFor(TextBlock text) {
 			if (__IsInitialized == false) {
@@ -178,7 +178,7 @@ namespace Codist.Controls
 			_uiScope = uiScope;
 			uiScope.PreviewMouseLeftButtonDown += HandleSelectStart;
 			// hooking this event could make QuickFix on QuickInfo not working, weird!
-			// uiScope.Unloaded += Detach;
+			uiScope.Unloaded += Detach;
 		}
 
 		public bool Copy() {
@@ -212,21 +212,37 @@ namespace Codist.Controls
 					IsEnabled = true
 				};
 				m.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
-				var newItem = new ThemedMenuItem { Icon = ThemeHelper.GetImage(IconIds.Copy), Header = R.CMD_CopySelection };
+				var newItem = new ThemedMenuItem {
+					Icon = ThemeHelper.GetImage(IconIds.Copy),
+					Header = R.CMD_CopySelection,
+					Tag = "Copy"
+				};
 				newItem.Click += HandleMouseCopy;
 				m.Items.Add(newItem);
-				m.Items.AddRange(Config.Instance.SearchEngines.ConvertAll(s => new ThemedMenuItem(IconIds.SearchWebSite, R.CMD_SearchWith.Replace("<NAME>", s.Name), (_, args) => ExternalCommand.OpenWithWebBrowser(s.Pattern, TextRangeTextProp.GetValue(TextSelectionProp.GetValue(_editor)) as string))));
+				m.Items.AddRange(Config.Instance.SearchEngines.ConvertAll(CreateMenuItemForWebSearch));
 				_uiScope.ContextMenu = m;
 				_uiScope.ContextMenuOpening += HandleContextMenuOpening;
 				_uiScope.ContextMenuClosing += HandleContextMenuClosing;
 			}
 		}
+
+		ThemedMenuItem CreateMenuItemForWebSearch(SearchEngine s) {
+			var m = new ThemedMenuItem {
+				Icon = ThemeHelper.GetImage(IconIds.SearchWebSite),
+				Header = R.CMD_SearchWith.Replace("<NAME>", s.Name),
+				Tag = s.Pattern
+			};
+			m.Click += HandleWebSearch;
+			return m;
+		}
+
+		void HandleWebSearch(object sender, RoutedEventArgs e) {
+			var s = sender as MenuItem;
+			ExternalCommand.OpenWithWebBrowser(s.Tag as string, TextRangeTextProp.GetValue(TextSelectionProp.GetValue(_editor)) as string);
+		}
+
 		void HandleContextMenuOpening(object sender, ContextMenuEventArgs e) {
 			var s = sender as FrameworkElement;
-			//if (e.Source != _uiScope) {
-			//	QuickInfo.QuickInfoOverrider.HoldQuickInfo(s, true);
-			//	return;
-			//}
 			var selection = TextSelectionProp.GetValue(_editor);
 			var selectionEmpty = (bool)TextRangeIsEmptyProp.GetValue(selection);
 			if (selectionEmpty || (bool)TextSelectionContains.Invoke(selection, new object[] { new Point(e.CursorLeft, e.CursorTop) }) == false) {
@@ -235,7 +251,6 @@ namespace Codist.Controls
 				return;
 			}
 			QuickInfo.QuickInfoOverrider.HoldQuickInfo(s, true);
-			//s.ContextMenu.IsOpen = true;
 		}
 		void HandleContextMenuClosing(object sender, ContextMenuEventArgs e) {
 			// clears selection
@@ -262,12 +277,23 @@ namespace Codist.Controls
 		}
 
 		void Detach(object sender, RoutedEventArgs e) {
-			_uiScope.Unloaded -= Detach;
-			_uiScope.PreviewMouseLeftButtonDown -= HandleSelectStart;
-			_uiScope.PreviewKeyUp -= HandleCopyShortcut;
-			//_uiScope.MouseRightButtonUp -= HandleMouseCopy;
-			//TextViewProp.SetValue(_editor, null);
-			//OnDetachMethod.Invoke(_editor, null);
+			if (_uiScope != null) {
+				_uiScope.Unloaded -= Detach;
+				_uiScope.PreviewMouseLeftButtonDown -= HandleSelectStart;
+				_uiScope.PreviewKeyUp -= HandleCopyShortcut;
+				_uiScope.MouseRightButtonUp -= HandleMouseCopy;
+				_uiScope.ContextMenuOpening -= HandleContextMenuOpening;
+				_uiScope.ContextMenuClosing -= HandleContextMenuClosing;
+				if (_uiScope.ContextMenu != null) {
+					foreach (MenuItem item in _uiScope.ContextMenu.Items) {
+						item.Click -= HandleMouseCopy;
+						item.Click -= HandleWebSearch;
+					}
+				}
+				TextViewProp.SetValue(_editor, null);
+				_uiScope = null;
+				_editor = null;
+			}
 		}
 	}
 }

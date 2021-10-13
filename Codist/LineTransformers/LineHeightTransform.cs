@@ -59,12 +59,12 @@ namespace Codist.LineTransformers
 				TopSpace = Config.Instance.TopSpace;
 				BottomSpace = Config.Instance.BottomSpace;
 
-				Config.Updated += (s, args) => {
+				Config.RegisterUpdateHandler((args) => {
 					if (args.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)) {
 						TopSpace = Config.Instance.TopSpace;
 						BottomSpace = Config.Instance.BottomSpace;
 					}
-				};
+				});
 			}
 
 			// todo: refresh after settings are changed

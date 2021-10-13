@@ -16,13 +16,15 @@ namespace Codist
 {
 	sealed class Config
 	{
-		internal const string CurrentVersion = "5.12.0";
+		internal const string CurrentVersion = "5.12.1";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
 		internal const string LightTheme = ThemePrefix + "Light", PaleLightTheme = ThemePrefix + "PaleLight", DarkTheme = ThemePrefix + "Dark", SimpleTheme = ThemePrefix + "Simple";
 
 		static DateTime _LastSaved, _LastLoaded;
 		static int _LoadingConfig;
+		static Action<Config> __Loaded;
+		static Action<ConfigUpdatedEventArgs> __Updated;
 
 		ConfigManager _ConfigManager;
 
@@ -94,8 +96,50 @@ namespace Codist
 		public string BrowserParameter { get; set; }
 		internal bool IsChanged => _ConfigManager?.IsChanged ?? false;
 
-		public static event EventHandler Loaded;
-		public static event EventHandler<ConfigUpdatedEventArgs> Updated;
+		public static void RegisterLoadHandler(Action<Config> handler) {
+			if (__Loaded != null) {
+				foreach (var h in __Loaded.GetInvocationList()) {
+					if (h.Equals(handler)) {
+						Debug.WriteLine("Error: " + handler + " has already been registered as load hander");
+						return;
+					}
+				}
+			}
+			__Loaded += handler;
+		}
+		public static void UnregisterLoadHandler(Action<Config> handler) {
+			if (__Loaded != null) {
+				foreach (var h in __Loaded.GetInvocationList()) {
+					if (h.Equals(handler)) {
+						__Loaded -= handler;
+						return;
+					}
+				}
+			}
+			Debug.WriteLine("Error: " + handler + " has not been registered as load hander");
+		}
+		public static void RegisterUpdateHandler(Action<ConfigUpdatedEventArgs> handler) {
+			if (__Updated != null) {
+				foreach (var h in __Updated.GetInvocationList()) {
+					if (h.Equals(handler)) {
+						Debug.WriteLine("Error: " + handler + " has already been registered as update hander");
+						return;
+					}
+				}
+			}
+			__Updated += handler;
+		}
+		public static void UnregisterUpdateHandler(Action<ConfigUpdatedEventArgs> handler) {
+			if (__Updated != null) {
+				foreach (var h in __Updated.GetInvocationList()) {
+					if (h.Equals(handler)) {
+						__Updated -= handler;
+						return;
+					}
+				}
+			}
+			Debug.WriteLine("Error: " + handler + " has not been registered as update hander");
+		}
 
 		public static Config InitConfig() {
 			if (File.Exists(ConfigPath) == false) {
@@ -129,8 +173,8 @@ namespace Codist
 			Debug.WriteLine("Load config: " + configPath);
 			try {
 				Instance = InternalLoadConfig(configPath, styleFilter);
-				Loaded?.Invoke(Instance, EventArgs.Empty);
-				Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(styleFilter != StyleFilters.None ? Features.SyntaxHighlight : Features.All));
+				__Loaded?.Invoke(Instance);
+				__Updated?.Invoke(new ConfigUpdatedEventArgs(Instance, styleFilter != StyleFilters.None ? Features.SyntaxHighlight : Features.All));
 			}
 			catch(Exception ex) {
 				Debug.WriteLine(ex.ToString());
@@ -221,8 +265,8 @@ namespace Codist
 			ResetCodeStyle(Instance.XmlCodeStyles, GetDefaultCodeStyles<XmlCodeStyle, XmlStyleTypes>());
 			ResetCodeStyle(Instance.SymbolMarkerStyles, GetDefaultCodeStyles<SymbolMarkerStyle, SymbolMarkerStyleTypes>());
 			ResetCodeStyle(Instance.MarkerSettings, GetDefaultMarkerStyles());
-			Loaded?.Invoke(Instance, EventArgs.Empty);
-			Updated?.Invoke(Instance, new ConfigUpdatedEventArgs(Features.SyntaxHighlight));
+			__Loaded?.Invoke(Instance);
+			__Updated?.Invoke(new ConfigUpdatedEventArgs(Instance, Features.SyntaxHighlight));
 		}
 
 		public void ResetSearchEngines() {
@@ -299,10 +343,10 @@ namespace Codist
 			}
 		}
 		internal void FireConfigChangedEvent(Features updatedFeature) {
-			Updated?.Invoke(this, new ConfigUpdatedEventArgs(updatedFeature));
+			__Updated?.Invoke(new ConfigUpdatedEventArgs(this, updatedFeature));
 		}
 		internal void FireConfigChangedEvent(Features updatedFeature, object parameter) {
-			Updated?.Invoke(this, new ConfigUpdatedEventArgs(updatedFeature) { Parameter = parameter });
+			__Updated?.Invoke(new ConfigUpdatedEventArgs(this, updatedFeature) { Parameter = parameter });
 		}
 		internal static TStyle[] GetDefaultCodeStyles<TStyle, TStyleType>()
 			where TStyle : StyleBase<TStyleType>, new()
@@ -479,17 +523,17 @@ namespace Codist
 		{
 			int _version, _oldVersion;
 			public ConfigManager() {
-				Updated += MarkUpdated;
+				__Updated += MarkUpdated;
 			}
 			public bool IsChanged => _version != _oldVersion;
-			void MarkUpdated(object sender, ConfigUpdatedEventArgs e) {
+			void MarkUpdated(ConfigUpdatedEventArgs e) {
 				++_version;
 			}
 			internal void MarkVersioned() {
 				_oldVersion = _version;
 			}
 			internal void Quit(bool apply) {
-				Updated -= MarkUpdated;
+				__Updated -= MarkUpdated;
 				if (apply) {
 					if (_version != _oldVersion) {
 						Instance.SaveConfig(null);
@@ -518,10 +562,11 @@ namespace Codist
 
 	sealed class ConfigUpdatedEventArgs : EventArgs
 	{
-		public ConfigUpdatedEventArgs(Features updatedFeature) {
+		public ConfigUpdatedEventArgs(Config config, Features updatedFeature) {
+			Config = config;
 			UpdatedFeature = updatedFeature;
 		}
-
+		public Config Config { get; }
 		public Features UpdatedFeature { get; }
 		public object Parameter { get; set; }
 	}

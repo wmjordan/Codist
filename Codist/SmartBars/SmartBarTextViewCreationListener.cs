@@ -39,7 +39,7 @@ namespace Codist.SmartBars
 		/// </summary>
 		/// <param name="textView">The <see cref="IWpfTextView"/> upon which the adornment should be placed</param>
 		public void TextViewCreated(IWpfTextView textView) {
-			if (Config.Instance.Features.MatchFlags(Features.SmartBar) == false) {
+			if (Config.Instance.Features.MatchFlags(Features.SmartBar) == false || textView.TextBuffer.GetTextDocument() == null) {
 				return;
 			}
 			// The toolbar will get wired to the text view events

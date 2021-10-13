@@ -10,7 +10,7 @@ namespace Codist.Controls
 	{
 		public static readonly DependencyProperty SubMenuHeaderProperty = DependencyProperty.Register("SubMenuHeader", typeof(FrameworkElement), typeof(ThemedMenuItem));
 		public static readonly DependencyProperty SubMenuMaxHeightProperty = DependencyProperty.Register("SubMenuMaxHeight", typeof(double), typeof(ThemedMenuItem));
-
+		RoutedEventHandler _ClickHandler;
 		FrameworkElement _SubMenuHeader;
 
 		public ThemedMenuItem() {
@@ -22,7 +22,9 @@ namespace Codist.Controls
 				Icon = ThemeHelper.GetImage(imageId);
 			}
 			Header = new ThemedMenuText(text);
-			Click += clickHandler;
+			_ClickHandler = clickHandler;
+			Click += _ClickHandler;
+			Unloaded += ThemedMenuItem_Unloaded;
 		}
 
 		/// <summary>Gets or sets the header of the pop up submenu. If the header is set and no sub items are in the menu, an invisible <see cref="Separator"/> will be added to make the menu possible to popup when it is clicked.</summary>
@@ -51,15 +53,11 @@ namespace Codist.Controls
 		protected bool HasExplicitItems => HasItems && Items.Count > 1;
 
 		public void ClearItems() {
-			if (_SubMenuHeader == null) {
-				Items.Clear();
-				return;
-			}
 			for (int i = Items.Count - 1; i >= 0; i--) {
 				if (Items[i] is MenuItemPlaceHolder) {
 					continue;
 				}
-				Items.RemoveAt(i);
+				Items.RemoveAndDisposeAt(i);
 			}
 		}
 
@@ -80,6 +78,16 @@ namespace Codist.Controls
 					break;
 				case Key.Down: Items.FocusFirst<MenuItem>(); break;
 				case Key.Up: Items.FocusLast<MenuItem>(); break;
+			}
+		}
+
+		void ThemedMenuItem_Unloaded(object sender, RoutedEventArgs e) {
+			if (_ClickHandler != null) {
+				Unloaded -= ThemedMenuItem_Unloaded;
+				ClearItems();
+				SubMenuHeader = null;
+				Click -= _ClickHandler;
+				_ClickHandler = null;
 			}
 		}
 

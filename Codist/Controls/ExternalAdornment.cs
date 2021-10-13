@@ -12,7 +12,7 @@ namespace Codist.Controls
 	{
 		internal const string QuickInfoSuppressionId = nameof(ExternalAdornment);
 
-		readonly IWpfTextView _View;
+		IWpfTextView _View;
 		int _LayerZIndex;
 		bool _isDragging;
 		Point _beginDragPosition;
@@ -27,13 +27,16 @@ namespace Codist.Controls
 			if (grid != null) {
 				grid.Children.Add(this);
 				view.Selection.SelectionChanged += ViewSeletionChanged;
-				view.VisualElement.Unloaded += VisualElement_Unloaded;
 			}
 			else {
 				view.VisualElement.Loaded += VisualElement_Loaded;
 			}
+			view.Closed += View_Closed;
 			_View = view;
 		}
+
+		// if nothing in the adornment, it is sized (0,0)
+		public double DisplayHeight => ActualHeight > 0 ? ActualHeight : this.GetParent<FrameworkElement>().ActualHeight;
 
 		public static ExternalAdornment GetOrCreate(IWpfTextView view) {
 			return view.Properties.GetOrCreateSingletonProperty(() => new ExternalAdornment(view));
@@ -51,7 +54,7 @@ namespace Codist.Controls
 		public void ClearUnpinnedChildren() {
 			for (int i = Children.Count - 1; i >= 0; i--) {
 				if (Children[i] is SymbolList l && l.IsPinned == false) {
-					Children.RemoveAt(i);
+					Children.RemoveAndDisposeAt(i);
 				}
 			}
 		}
@@ -86,15 +89,17 @@ namespace Codist.Controls
 				element.MouseLeave -= ReleaseQuickInfo;
 				element.MouseEnter -= SuppressQuickInfo;
 				element.MouseLeftButtonDown -= BringToFront;
-				ChildRemoved?.Invoke(this, new AdornmentChildRemovedEventArgs(element));
 				_View.Properties.RemoveProperty(QuickInfoSuppressionId);
-				for (int i = Children.Count - 1; i >= 0; i--) {
-					var f = Children[i].GetFirstVisualChild<TextBox>();
-					if (f != null && f.Focus()) {
-						return;
+				if (_View.IsClosed == false) {
+					ChildRemoved?.Invoke(this, new AdornmentChildRemovedEventArgs(element));
+					for (int i = Children.Count - 1; i >= 0; i--) {
+						var f = Children[i].GetFirstVisualChild<TextBox>();
+						if (f != null && f.Focus()) {
+							return;
+						}
 					}
+					FocusOnTextView();
 				}
-				FocusOnTextView();
 			}
 		}
 
@@ -129,6 +134,9 @@ namespace Codist.Controls
 		#region Draggable
 		public void MakeDraggable(FrameworkElement draggablePart) {
 			draggablePart.MouseLeftButtonDown += MenuHeader_MouseDown;
+		}
+		public void DisableDraggable(FrameworkElement element) {
+			element.MouseLeftButtonDown -= MenuHeader_MouseDown;
 		}
 
 		void MenuHeader_MouseDown(object sender, MouseButtonEventArgs e) {
@@ -167,14 +175,22 @@ namespace Codist.Controls
 		void VisualElement_Loaded(object sender, RoutedEventArgs e) {
 			_View.VisualElement.Loaded -= VisualElement_Loaded;
 			_View.Selection.SelectionChanged += ViewSeletionChanged;
-			_View.VisualElement.Unloaded += VisualElement_Unloaded;
 			_View.VisualElement.GetParent<Grid>().Children.Add(this);
 		}
 
-		void VisualElement_Unloaded(object sender, RoutedEventArgs e) {
-			if (_View.IsClosed) {
+		void View_Closed(object sender, EventArgs e) {
+			if (_View != null) {
+				_View.Closed -= View_Closed;
 				_View.Selection.SelectionChanged -= ViewSeletionChanged;
-				_View.VisualElement.Unloaded -= VisualElement_Unloaded;
+				_View.Properties.RemoveProperty(typeof(ExternalAdornment));
+				_View.VisualElement.GetParent<Grid>().Children.Remove(this);
+				foreach (var item in Children) {
+					if (item is IDisposable d) {
+						d.Dispose();
+					}
+				}
+				Children.Clear();
+				_View = null;
 			}
 		}
 
@@ -187,7 +203,7 @@ namespace Codist.Controls
 		}
 
 		void ReleaseQuickInfo(object sender, MouseEventArgs e) {
-			_View.Properties.RemoveProperty(QuickInfoSuppressionId);
+			_View?.Properties.RemoveProperty(QuickInfoSuppressionId);
 		}
 
 		void SuppressQuickInfo(object sender, MouseEventArgs e) {

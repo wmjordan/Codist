@@ -17,8 +17,8 @@ namespace Codist.Taggers
 	{
 		static ClassificationTag[] __CommentClassifications;
 		static readonly Dictionary<IClassificationType, bool> __CommentClasses = new Dictionary<IClassificationType, bool>();
-		readonly ITagAggregator<IClassificationTag> _Aggregator;
-		readonly TaggerResult _Tags;
+		ITagAggregator<IClassificationTag> _Aggregator;
+		TaggerResult _Tags;
 #if DEBUG
 		readonly HashSet<string> _ClassificationTypes = new HashSet<string>();
 #endif
@@ -44,8 +44,8 @@ namespace Codist.Taggers
 				}
 			}
 
-			_Aggregator = aggregator;
 			_Tags = tags;
+			_Aggregator = aggregator;
 			_Aggregator.TagsChanged += AggregatorBatchedTagsChanged;
 		}
 
@@ -276,19 +276,15 @@ namespace Codist.Taggers
 		}
 
 		#region IDisposable Support
-		private bool disposedValue = false;
-
-		void Dispose(bool disposing) {
-			if (!disposedValue) {
-				if (disposing) {
-					_Aggregator.BatchedTagsChanged -= AggregatorBatchedTagsChanged;
-				}
-				disposedValue = true;
-			}
-		}
-
 		public void Dispose() {
-			Dispose(true);
+			if (_Tags != null) {
+				_Aggregator.BatchedTagsChanged -= AggregatorBatchedTagsChanged;
+				_Aggregator.Dispose();
+				_Aggregator = null;
+				_Tags.Reset();
+				_Tags = null;
+				Margin = null;
+			}
 		}
 		#endregion
 
@@ -395,8 +391,8 @@ namespace Codist.Taggers
 			var vp = textView.Properties;
 			CommentTagger codeTagger;
 			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
-			var agg = vp.GetOrCreateSingletonProperty(() => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
-			codeTagger = vp.GetOrCreateSingletonProperty(() => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, agg, tags, buffer));
+			var agg = vp.GetOrCreateSingletonProperty("TagAggregator", () => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
+			codeTagger = vp.GetOrCreateSingletonProperty("CommentTagger", () => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, agg, tags, buffer));
 			textView.Closed -= TextViewClosed;
 			textView.Closed += TextViewClosed;
 			return codeTagger as ITagger<T>;
@@ -405,8 +401,11 @@ namespace Codist.Taggers
 		void TextViewClosed(object sender, EventArgs args) {
 			var textView = sender as ITextView;
 			textView.Closed -= TextViewClosed;
-			textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>(typeof(ITagAggregator<IClassificationTag>))?.Dispose();
-			textView.Properties.GetProperty<CommentTagger>(typeof(CommentTagger))?.Dispose();
+			textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>("TagAggregator")?.Dispose();
+			textView.Properties.GetProperty<CommentTagger>("CommentTagger")?.Dispose();
+			textView.Properties.RemoveProperty("TagAggregator");
+			textView.Properties.RemoveProperty("CommentTagger");
+			textView.Properties.RemoveProperty(typeof(TaggerResult));
 		}
 	}
 }

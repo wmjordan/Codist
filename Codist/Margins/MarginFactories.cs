@@ -20,6 +20,7 @@ namespace Codist.Margins
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 				&& scrollBarContainer != null
 				&& Taggers.CommentTagger.IsCommentTaggable(textView.TextBuffer)
+				&& textView.TextBuffer.GetTextDocument() != null
 				? new CommentMargin(textView, scrollBarContainer)
 				: null;
 		}
@@ -40,7 +41,9 @@ namespace Codist.Margins
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 				&& scrollBar != null
 				&& textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)
-				? new CommentMargin(wpfTextViewHost.TextView, scrollBar) : null;
+				&& textView.TextBuffer.GetTextDocument() != null
+				? new CommentMargin(textView, scrollBar)
+				: null;
 		}
 	}
 
@@ -55,7 +58,11 @@ namespace Codist.Margins
 	{
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 			var scrollBar = marginContainer as IVerticalScrollBar;
-			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers) && scrollBar != null ? new CSharpMembersMargin(wpfTextViewHost.TextView, scrollBar) : null;
+			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
+				&& scrollBar != null
+				&& wpfTextViewHost.TextView.TextBuffer.GetTextDocument() != null
+				? new CSharpMembersMargin(wpfTextViewHost.TextView, scrollBar)
+				: null;
 		}
 	}
 
@@ -69,7 +76,9 @@ namespace Codist.Margins
 	{
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 			var scrollBarContainer = marginContainer as IVerticalScrollBar;
-			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers) && scrollBarContainer != null
+			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
+				&& scrollBarContainer != null
+				&& wpfTextViewHost.TextView.TextBuffer.GetTextDocument() != null
 				? new LineNumberMargin(wpfTextViewHost.TextView, scrollBarContainer)
 				: null;
 		}
@@ -85,7 +94,9 @@ namespace Codist.Margins
 	{
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
 			var scrollBarContainer = marginContainer as IVerticalScrollBar;
-			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers) && scrollBarContainer != null
+			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
+				&& scrollBarContainer != null
+				&& wpfTextViewHost.TextView.TextBuffer.GetTextDocument() != null
 				? new SelectionMargin(wpfTextViewHost.TextView, scrollBarContainer)
 				: null;
 		}

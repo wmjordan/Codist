@@ -239,7 +239,7 @@ namespace Codist
 
 		sealed class SymbolLink : Run
 		{
-			readonly ISymbol _Symbol;
+			ISymbol _Symbol;
 
 			public SymbolLink(ISymbol symbol, string alias, bool clickAndGo) {
 				Text = alias ?? symbol.GetOriginalName();
@@ -249,6 +249,7 @@ namespace Codist
 				}
 				ToolTip = String.Empty;
 				MouseRightButtonDown += LinkContextMenu;
+				Unloaded += SymbolLink_Unloaded;
 			}
 
 			void InitInteraction(object sender, MouseEventArgs e) {
@@ -277,17 +278,13 @@ namespace Codist
 				if (ctx != null) {
 					await ctx.UpdateAsync(default);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-					var m = new CSharpSymbolContextMenu(ctx) {
-						Symbol = _Symbol,
-						SyntaxNode = _Symbol.GetSyntaxNode()
-					};
+					var m = new CSharpSymbolContextMenu(_Symbol, _Symbol.GetSyntaxNode(), ctx);
 					m.AddAnalysisCommands();
 					if (m.HasItems) {
 						m.Items.Add(new Separator());
 					}
 					m.AddSymbolNodeCommands();
 					m.AddTitleItem(_Symbol.GetOriginalName());
-					m.ItemClicked += DismissQuickInfo;
 					ContextMenu = m;
 					e.Handled = true;
 					//m.IsOpen = true;
@@ -301,6 +298,7 @@ namespace Codist
 			protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
 				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, true);
 				if (ContextMenu != null) {
+					(this.ContextMenu as CSharpSymbolContextMenu).Closed += DismissQuickInfo;
 					ContextMenu.IsOpen = true;
 					e.Handled = true;
 				}
@@ -309,6 +307,7 @@ namespace Codist
 
 			protected override void OnContextMenuClosing(ContextMenuEventArgs e) {
 				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, false);
+				(this.ContextMenu as CSharpSymbolContextMenu).Closed -= DismissQuickInfo;
 				base.OnContextMenuClosing(e);
 			}
 
@@ -322,6 +321,21 @@ namespace Codist
 			void GotoSymbol(object sender, RoutedEventArgs e) {
 				_Symbol.GoToDefinition();
 				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
+			}
+
+			void SymbolLink_Unloaded(object sender, RoutedEventArgs e) {
+				MouseEnter -= InitInteraction;
+				MouseLeftButtonDown -= GotoSymbol;
+				MouseRightButtonDown -= LinkContextMenu;
+				MouseEnter -= Highlight;
+				MouseLeave -= Leave;
+				Unloaded -= SymbolLink_Unloaded;
+				if (ContextMenu is CSharpSymbolContextMenu m) {
+					m.Closed -= DismissQuickInfo;
+					m.Dispose();
+					ContextMenu = null;
+				}
+				_Symbol = null;
 			}
 		}
 	}

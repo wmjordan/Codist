@@ -57,7 +57,9 @@ namespace Codist.Taggers
 			readonly ClassificationTag[] _Tags;
 			public MarkdownTagger(ITextView textView, bool syntaxHighlightEnabled) : base(textView) {
 				_Tags = syntaxHighlightEnabled ? HeaderClassificationTypes : DummyHeaderTags;
+				textView.Closed += TextView_Closed;
 			}
+
 			protected override bool DoFullParseAtFirstLoad => true;
 			protected override void Parse(SnapshotSpan span, ICollection<TaggedContentSpan> results) {
 				var t = span.GetText();
@@ -75,6 +77,12 @@ namespace Codist.Taggers
 				}
 				w += c;
 				results.Add(new TaggedContentSpan(_Tags[c], span, w, t.Length - w));
+			}
+
+			void TextView_Closed(object sender, EventArgs e) {
+				var view = sender as ITextView;
+				view.Closed -= TextView_Closed;
+				view.Properties.RemoveProperty(typeof(MarkdownTagger));
 			}
 		}
 	}

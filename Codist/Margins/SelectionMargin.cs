@@ -14,29 +14,30 @@ namespace Codist.Margins
 		public const string MarginName = nameof(SelectionMargin);
 		const string FormatName = "Selected Text";
 		const double MarginOpacity = 0.3;
-		readonly IWpfTextView _TextView;
-		readonly IEditorFormatMap _EditorFormatMap;
-		readonly IVerticalScrollBar _ScrollBar;
+
+		IWpfTextView _TextView;
+		IEditorFormatMap _EditorFormatMap;
+		IVerticalScrollBar _ScrollBar;
 
 		Brush _SelectionBrush;
 
 		public SelectionMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) {
 			_TextView = textView;
-
-			IsHitTestVisible = false;
-
 			_ScrollBar = scrollBar;
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 
+			IsHitTestVisible = false;
 			Width = 0;
 
-			var showSelection = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Selection);
-			Visibility = showSelection ? Visibility.Visible : Visibility.Collapsed;
-			Config.Updated += Config_Updated;
-			if (showSelection) {
+			Config.RegisterUpdateHandler(UpdateSelectionMarginConfig);
+			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Selection)) {
+				Visibility = Visibility.Visible;
 				Setup();
 			}
-			_TextView.Closed += (s, args) => Dispose();
+			else {
+				Visibility = Visibility.Collapsed;
+			}
+			_TextView.Closed += _TextView_Closed;
 		}
 
 		public FrameworkElement VisualElement => this;
@@ -54,24 +55,23 @@ namespace Codist.Margins
 			_SelectionBrush = GetMarginBrush();
 		}
 
-		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
+		void UpdateSelectionMarginConfig(ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers) == false) {
 				return;
 			}
 			var setVisible = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Selection);
 			var visible = Visibility == Visibility.Visible;
+			_TextView.Selection.SelectionChanged -= TextView_SelectionChanged;
+			_EditorFormatMap.FormatMappingChanged -= _EditorFormatMap_FormatMappingChanged;
+			_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 			if (setVisible == false && visible) {
 				Visibility = Visibility.Collapsed;
-				_TextView.Selection.SelectionChanged -= TextView_SelectionChanged;
-				_EditorFormatMap.FormatMappingChanged -= _EditorFormatMap_FormatMappingChanged;
-				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
-				InvalidateVisual();
 			}
 			else if (setVisible && visible == false) {
 				Visibility = Visibility.Visible;
 				Setup();
-				InvalidateVisual();
 			}
+			InvalidateVisual();
 		}
 
 		void _EditorFormatMap_FormatMappingChanged(object sender, FormatItemsEventArgs e) {
@@ -124,21 +124,33 @@ namespace Codist.Margins
 			}
 		}
 
+		void _TextView_Closed(object sender, EventArgs e) {
+			Dispose();
+		}
+
 		#region IDisposable Support
 		bool disposedValue = false;
 
 		void Dispose(bool disposing) {
 			if (!disposedValue) {
 				if (disposing) {
-					//_TextView.VisualElement.IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
-					Config.Updated -= Config_Updated;
-					_TextView.Selection.SelectionChanged -= TextView_SelectionChanged;
-					_EditorFormatMap.FormatMappingChanged -= _EditorFormatMap_FormatMappingChanged;
-					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
+					UnbindEvents();
+					_TextView = null;
+					_EditorFormatMap = null;
+					_ScrollBar = null;
+					_SelectionBrush = null;
 				}
 
 				disposedValue = true;
 			}
+		}
+
+		void UnbindEvents() {
+			_TextView.Closed -= _TextView_Closed;
+			Config.UnregisterUpdateHandler(UpdateSelectionMarginConfig);
+			_TextView.Selection.SelectionChanged -= TextView_SelectionChanged;
+			_EditorFormatMap.FormatMappingChanged -= _EditorFormatMap_FormatMappingChanged;
+			_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 		}
 
 		public void Dispose() {

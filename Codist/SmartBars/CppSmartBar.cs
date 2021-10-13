@@ -12,9 +12,10 @@ namespace Codist.SmartBars
 {
 	sealed class CppSmartBar : SmartBar
 	{
-		readonly ITextStructureNavigator _TextStructureNavigator;
+		ITextStructureNavigator _TextStructureNavigator;
 		public CppSmartBar(IWpfTextView textView, ITextSearchService2 textSearchService) : base(textView, textSearchService) {
 			_TextStructureNavigator = ServicesHelper.Instance.TextStructureNavigator.GetTextStructureNavigator(textView.TextBuffer);
+			textView.Closed += TextView_Closed;
 		}
 
 		ToolBar MyToolBar => ToolBar2;
@@ -48,6 +49,11 @@ namespace Codist.SmartBars
 
 		string GetCurrentWord(ITextView view) {
 			return _TextStructureNavigator.GetExtentOfWord(view.Selection.Start.Position).Span.GetText();
+		}
+
+		void TextView_Closed(object sender, EventArgs e) {
+			(sender as ITextView).Closed -= TextView_Closed;
+			_TextStructureNavigator = null;
 		}
 	}
 }

@@ -11,13 +11,14 @@ namespace Codist.Taggers
 {
 	abstract class CachedTaggerBase : ITagger<IClassificationTag>
 	{
-		readonly ITextView _TextView;
-		readonly TaggerResult _Tags;
+		ITextView _TextView;
+		TaggerResult _Tags;
 		readonly List<TaggedContentSpan> _TaggedContents = new List<TaggedContentSpan>(3);
 
 		protected CachedTaggerBase(ITextView textView) {
 			_TextView = textView;
 			_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
+			textView.Closed += TextView_Closed;
 		}
 
 		protected ITextView TextView => _TextView;
@@ -56,5 +57,15 @@ namespace Codist.Taggers
 		}
 
 		protected abstract void Parse(SnapshotSpan span, ICollection<TaggedContentSpan> results);
+
+		void TextView_Closed(object sender, EventArgs e) {
+			if (_TextView != null) {
+				_TaggedContents.Clear();
+				_TextView.Properties.RemoveProperty(typeof(TaggerResult));
+				_TextView.Closed -= TextView_Closed;
+				_TextView = null;
+				_Tags = null;
+			}
+		}
 	}
 }

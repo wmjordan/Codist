@@ -12,30 +12,27 @@ namespace Codist.Margins
 	sealed class LineNumberMargin : FrameworkElement, IDisposable, IWpfTextViewMargin
 	{
 		public const string MarginName = nameof(LineNumberMargin);
-		const double LineNumberRenderPadding = -3;
-		readonly IWpfTextView _TextView;
-		readonly IEditorFormatMap _EditorFormatMap;
-		readonly IVerticalScrollBar _ScrollBar;
-
 		static readonly SolidColorBrush LineNumberBrush = Brushes.DarkGray;
 		static readonly Pen LineNumberPen = new Pen(LineNumberBrush, 1) { DashStyle = DashStyles.Dash };
+		const double LineNumberRenderPadding = -3;
 
+		IWpfTextView _TextView;
+		IEditorFormatMap _EditorFormatMap;
+		IVerticalScrollBar _ScrollBar;
 		double _ScrollbarWidth;
 
 		public LineNumberMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) {
 			_TextView = textView;
-
-			IsHitTestVisible = false;
-
 			_ScrollBar = scrollBar;
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 
+			IsHitTestVisible = false;
 			Width = 0;
-
 			Visibility = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.LineNumber) ? Visibility.Visible : Visibility.Collapsed;
-			Config.Updated += Config_Updated;
+
+			Config.RegisterUpdateHandler(UpdateLineNumberMarginConfig);
 			Setup();
-			_TextView.Closed += (s, args) => Dispose();
+			_TextView.Closed += TextView_Closed;
 		}
 
 		public FrameworkElement VisualElement => this;
@@ -46,7 +43,7 @@ namespace Codist.Margins
 			return string.Equals(marginName, MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
 		}
 
-		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
+		void UpdateLineNumberMarginConfig(ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.MatchFlags(Features.ScrollbarMarkers) == false) {
 				return;
 			}
@@ -121,6 +118,11 @@ namespace Codist.Margins
 			}
 		}
 
+
+		void TextView_Closed(object sender, EventArgs e) {
+			Dispose();
+		}
+
 		#region IDisposable Support
 		bool disposedValue = false;
 
@@ -128,9 +130,13 @@ namespace Codist.Margins
 			if (!disposedValue) {
 				if (disposing) {
 					//_TextView.VisualElement.IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
-					Config.Updated -= Config_Updated;
+					Config.UnregisterUpdateHandler(UpdateLineNumberMarginConfig);
 					_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
+					_TextView.Closed -= TextView_Closed;
 					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
+					_TextView = null;
+					_ScrollBar = null;
+					_EditorFormatMap = null;
 				}
 
 				disposedValue = true;

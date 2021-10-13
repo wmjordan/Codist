@@ -15,11 +15,18 @@ using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using R = Codist.Properties.Resources;
 using System.Windows;
+using Microsoft.VisualStudio.Text;
 
 namespace Codist.QuickInfo
 {
-	sealed class ColorQuickInfoController : IAsyncQuickInfoSource
+	sealed class ColorQuickInfo : IAsyncQuickInfoSource
 	{
+		ITextBuffer _TextBuffer;
+
+		public ColorQuickInfo(ITextBuffer textBuffer) {
+			_TextBuffer = textBuffer;
+		}
+
 		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false
 				? System.Threading.Tasks.Task.FromResult<QuickInfoItem>(null)
@@ -40,15 +47,20 @@ namespace Codist.QuickInfo
 				}
 				brush = ColorHelper.GetBrush(word);
 			}
-			return brush != null && session.Mark(nameof(ColorQuickInfo))
-				? new QuickInfoItem(extent.ToTrackingSpan(), ColorQuickInfo.PreviewColor(brush))
+			return brush != null && session.Mark(nameof(ColorQuickInfoUI))
+				? new QuickInfoItem(extent.ToTrackingSpan(), ColorQuickInfoUI.PreviewColor(brush))
 				: null;
 		}
 
-		void IDisposable.Dispose() { }
+		void IDisposable.Dispose() {
+			if (_TextBuffer != null) {
+				_TextBuffer.Properties.RemoveProperty(typeof(ColorQuickInfo));
+				_TextBuffer = null;
+			}
+		}
 	}
 
-	static class ColorQuickInfo
+	static class ColorQuickInfoUI
 	{
 		const string PreviewPanelName = "ColorPreview";
 

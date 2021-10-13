@@ -22,7 +22,7 @@ namespace Codist.Options
 		int _UILock;
 
 		protected OptionsPage() {
-			Config.Loaded += (s, args) => LoadConfig(s as Config);
+			Config.RegisterLoadHandler (config => LoadConfig(config));
 		}
 
 		void LoadConfig(Config config) {
@@ -952,7 +952,7 @@ namespace Codist.Options
 					var i = _SearchEngineList.SelectedItem as SearchEngine;
 					if (MessageBox.Show(R.OT_ConfirmRemoveSearchEngine.Replace("<NAME>", i.Name), nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
 						var p = _SearchEngineList.SelectedIndex;
-						_SearchEngineList.Items.RemoveAt(p);
+						_SearchEngineList.Items.RemoveAndDisposeAt(p);
 						Config.Instance.SearchEngines.RemoveAt(p);
 						RefreshSearchEngineUI();
 						Config.Instance.FireConfigChangedEvent(Features.WebSearch);

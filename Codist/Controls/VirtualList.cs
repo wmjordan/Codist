@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
 {
-	class VirtualList : ListBox {
+	class VirtualList : ListBox, IDisposable {
 		public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(UIElement), typeof(VirtualList));
 		public static readonly DependencyProperty HeaderButtonsProperty = DependencyProperty.Register("HeaderButtons", typeof(UIElement), typeof(VirtualList));
 		public static readonly DependencyProperty FooterProperty = DependencyProperty.Register("Footer", typeof(UIElement), typeof(VirtualList));
@@ -120,6 +120,11 @@ namespace Codist.Controls
 					}
 				}
 			}
+		}
+
+		public virtual void Dispose() {
+			Container = null;
+			FilteredItems = null;
 		}
 	}
 

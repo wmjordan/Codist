@@ -736,7 +736,7 @@ namespace Codist
 
 			sealed class ActiveViewTracker
 			{
-				readonly IWpfTextView _View;
+				IWpfTextView _View;
 
 				public ActiveViewTracker(IWpfTextView view) {
 					_ActiveTextView = _View = view;
@@ -764,6 +764,7 @@ namespace Codist
 					_WpfTextViews.Remove(v);
 					System.Threading.Interlocked.CompareExchange(ref _MouseOverTextView, null, _View);
 					System.Threading.Interlocked.CompareExchange(ref _ActiveTextView, null, _View);
+					_View = null;
 				}
 			}
 		}

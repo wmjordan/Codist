@@ -9,6 +9,7 @@
 	<Style TargetType="{x:Type c:SymbolList}" BasedOn="{StaticResource {x:Type c:VirtualList}}">
 		<Setter Property="ItemTemplateSelector" Value="{StaticResource symbolTemplateSelector}"/>
 	</Style>
+	<Style TargetType="{x:Type c:SymbolMenu}" BasedOn="{StaticResource {x:Type c:SymbolList}}"/>
 	<Style TargetType="ListBoxItem">
 		<Setter Property="OverridesDefaultStyle" Value="True"/>
 		<Setter Property="SnapsToDevicePixels" Value="True"/>

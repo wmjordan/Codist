@@ -32,18 +32,18 @@ namespace Codist.NaviBar
 			_DummyTag4 = MarkdownTaggerProvider.DummyHeaderTags[4].ClassificationType,
 			_DummyTag5 = MarkdownTaggerProvider.DummyHeaderTags[5].ClassificationType,
 			_DummyTag6 = MarkdownTaggerProvider.DummyHeaderTags[6].ClassificationType;
-		readonly ITextSearchService2 _TextSearch;
 		readonly TaggerResult _Tags;
 		readonly ThemedToolBarText _ActiveTitleLabel;
 		MarkdownList _TitleList;
 		LocationItem[] _Titles;
 		ThemedImageButton _ActiveItem;
+		ITextSearchService2 _TextSearch;
 
 		public MarkdownBar(IWpfTextView view, ITextSearchService2 textSearch) : base(view) {
 			_TextSearch = textSearch;
 			_Tags = view.Properties.GetProperty<TaggerResult>(typeof(TaggerResult));
 			Name = nameof(MarkdownBar);
-			BindView(view);
+			BindView();
 			_ActiveTitleLabel = new ThemedToolBarText(DefaultActiveTitle);
 			_ActiveItem = new ThemedImageButton(IconIds.Headings, _ActiveTitleLabel);
 			_ActiveItem.Click += ShowTitleList;
@@ -53,24 +53,20 @@ namespace Codist.NaviBar
 			//AddItem(KnownImageIds.MarkupTag, ToggleCode);
 			//AddItem(KnownImageIds.HyperLink, ToggleHyperLink);
 			//AddItem(KnownImageIds.StrikeThrough, ToggleStrikeThrough);
+			view.Closed += View_Closed;
 		}
 
-		protected internal override void BindView(IWpfTextView view) {
+		protected internal override void BindView() {
 			UnbindViewEvents();
-			View = view;
 			View.Selection.SelectionChanged += Update;
 			View.TextBuffer.PostChanged += Update;
-			View.Closed += View_Closed;
 		}
 
 		protected override void UnbindViewEvents() {
-			View.Closed -= View_Closed;
-			View.Selection.SelectionChanged -= Update;
-			View.TextBuffer.PostChanged -= Update;
-		}
-
-		void View_Closed(object sender, EventArgs e) {
-			UnbindViewEvents();
+			if (_TextSearch != null) {
+				View.Selection.SelectionChanged -= Update;
+				View.TextBuffer.PostChanged -= Update;
+			}
 		}
 
 		void Update(object sender, EventArgs e) {
@@ -180,6 +176,15 @@ namespace Codist.NaviBar
 				View.SelectSpan(firstModified);
 			}
 			return firstModified;
+		}
+
+		void View_Closed(object sender, EventArgs e) {
+			var view = sender as ITextView;
+			view.Closed -= View_Closed;
+			view.Properties.RemoveProperty(typeof(TaggerResult));
+			_TextSearch = null;
+			_TitleList.Dispose();
+			_TitleList = null;
 		}
 
 		//void AddItem(int imageId, RoutedEventHandler clickHandler) {

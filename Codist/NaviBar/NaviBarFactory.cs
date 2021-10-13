@@ -41,7 +41,8 @@ namespace Codist.NaviBar
 
 		public void TextViewCreated(IWpfTextView textView) {
 			if (Config.Instance.Features.MatchFlags(Features.NaviBar)
-				&& textView.Roles.Contains("DIFF") == false) {
+				&& textView.Roles.Contains("DIFF") == false
+				&& textView.TextBuffer.GetTextDocument() != null) {
 				if (textView.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp)
 					|| textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
 					SemanticContext.GetOrCreateSingetonInstance(textView);
@@ -77,13 +78,14 @@ namespace Codist.NaviBar
 
 		sealed class Overrider
 		{
-			readonly IWpfTextView _View;
-			readonly ITextSearchService2 _TextSearch;
+			IWpfTextView _View;
+			ITextSearchService2 _TextSearch;
 
 			public Overrider(IWpfTextView view, ITextSearchService2 textSearch) {
 				_View = view;
 				_TextSearch = textSearch;
 				view.VisualElement.Loaded += AddNaviBar;
+				view.Closed += View_Closed;
 			}
 
 			void AddNaviBar(object sender, RoutedEventArgs e) {
@@ -92,7 +94,7 @@ namespace Codist.NaviBar
 				var view = sender as IWpfTextView ?? _View;
 				NaviBar naviBar;
 				if ((naviBar = view.VisualElement?.GetParent<Grid>().GetFirstVisualChild<NaviBar>()) != null) {
-					naviBar.BindView(view);
+					naviBar.BindView();
 					return;
 				}
 				var naviBarHolder = view.VisualElement
@@ -124,30 +126,42 @@ namespace Codist.NaviBar
 				if (container == null) {
 					return;
 				}
-				var bar = new CSharpBar(_View) {
-					MinWidth = 200
-				};
-				bar.SetCurrentValue(Grid.ColumnProperty, 2);
-				bar.SetCurrentValue(Grid.ColumnSpanProperty, 3);
-				container.Children.Add(bar);
-				dropDown1.Visibility = Visibility.Hidden;
-				dropDown2.Visibility = Visibility.Hidden;
-				naviBarHolder.Unloaded += ResurrectNaviBar_OnUnloaded;
+				if (_View != null && _View.IsClosed == false) {
+					var bar = new CSharpBar(_View) {
+						MinWidth = 200
+					};
+					bar.SetCurrentValue(Grid.ColumnProperty, 2);
+					bar.SetCurrentValue(Grid.ColumnSpanProperty, 3);
+					container.Children.Add(bar);
+					dropDown1.Visibility = Visibility.Hidden;
+					dropDown2.Visibility = Visibility.Hidden;
+					naviBarHolder.Unloaded += ResurrectNaviBar_OnUnloaded;
+				}
 			}
 
 			// Fixes https://github.com/wmjordan/Codist/issues/131
 			async void ResurrectNaviBar_OnUnloaded(object sender, RoutedEventArgs e) {
-				var naviBar = sender as Border;
+				var naviBar = sender as FrameworkElement;
 				if (naviBar != null) {
 					naviBar.Unloaded -= ResurrectNaviBar_OnUnloaded;
 				}
-				if (_View.IsClosed) {
-					return;
-				}
-				await Task.Delay(1000).ConfigureAwait(false);
-				await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-				if (_View.VisualElement.IsVisible && _View.Properties.ContainsProperty(nameof(NaviBar)) == false) {
-					AddNaviBar(_View, e);
+                var view = _View;
+                if (view != null && view.IsClosed == false) {
+				    await Task.Delay(1000).ConfigureAwait(false);
+				    await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+				    if (view.VisualElement.IsVisible && view.Properties.ContainsProperty(nameof(NaviBar)) == false) {
+                        AddNaviBar(view, e);
+				    }
+                }
+			}
+
+			void View_Closed(object sender, EventArgs e) {
+				if (_View != null) {
+					_View.VisualElement.Loaded -= AddNaviBar;
+					_View.Closed -= View_Closed;
+                    _View.Properties.RemoveProperty(nameof(NaviBar));
+					_TextSearch = null;
+					_View = null;
 				}
 			}
 		}

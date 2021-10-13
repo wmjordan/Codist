@@ -31,10 +31,10 @@ namespace Codist.Margins
 		const double MarkerSize = 3, Padding = 3, LineSize = 2, TypeLineSize = 1, TypeAlpha = 0.5, MemberAlpha = 0.5;
 
 		CancellationTokenSource _Cancellation = new CancellationTokenSource();
-		readonly MemberMarker _MemberMarker;
-		readonly SymbolReferenceMarker _SymbolReferenceMarker;
-		readonly IEditorFormatMap _FormatMap;
-		readonly SemanticContext _SemanticContext;
+		MemberMarker _MemberMarker;
+		SymbolReferenceMarker _SymbolReferenceMarker;
+		IEditorFormatMap _FormatMap;
+		SemanticContext _SemanticContext;
 		Pen _ClassPen, _InterfacePen, _StructPen, _EnumPen, _EventPen, _DelegatePen, _ConstructorPen, _MethodPen, _PropertyPen, _FieldPen, _RegionPen;
 		Brush _RegionForeground, _RegionBackground;
 
@@ -54,28 +54,16 @@ namespace Codist.Margins
 			IsVisibleChanged += _MemberMarker.OnIsVisibleChanged;
 			textView.Closed += TextView_Closed;
 
-			Config.Updated += Config_Updated;
-			Config_Updated(null, new ConfigUpdatedEventArgs(Features.ScrollbarMarkers));
+			Config.RegisterUpdateHandler(UpdateCSharpMembersMarginConfig);
+			UpdateCSharpMembersMarginConfig(new ConfigUpdatedEventArgs(null, Features.ScrollbarMarkers));
 			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SymbolReference)) {
 				_SymbolReferenceMarker.HookEvents();
 			}
 		}
 
-		void TextView_Closed(object sender, EventArgs e) {
-			Dispose();
-		}
-
 		bool ITextViewMargin.Enabled => IsVisible;
 		FrameworkElement IWpfTextViewMargin.VisualElement => this;
 		double ITextViewMargin.MarginSize => Width;
-
-		public void Dispose() {
-			IsVisibleChanged -= _MemberMarker.OnIsVisibleChanged;
-			Config.Updated -= Config_Updated;
-			_MemberMarker.Dispose();
-			_SymbolReferenceMarker.Dispose();
-			SyncHelper.CancelAndDispose(ref _Cancellation, false);
-		}
 
 		/// <summary>
 		/// Override for the FrameworkElement's OnRender. When called, redraw all markers 
@@ -88,7 +76,7 @@ namespace Codist.Margins
 			}
 		}
 
-		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
+		void UpdateCSharpMembersMarginConfig(ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.HasAnyFlag(Features.SyntaxHighlight | Features.ScrollbarMarkers) == false) {
 				return;
 			}
@@ -150,15 +138,34 @@ namespace Codist.Margins
 			return string.Equals(marginName, MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
 		}
 
+		void TextView_Closed(object sender, EventArgs e) {
+			(sender as IWpfTextView).Closed -= TextView_Closed;
+			Dispose();
+		}
+
+		public void Dispose() {
+			if (_SemanticContext != null) {
+				IsVisibleChanged -= _MemberMarker.OnIsVisibleChanged;
+				Config.UnregisterUpdateHandler(UpdateCSharpMembersMarginConfig);
+				_MemberMarker.Dispose();
+				_SymbolReferenceMarker.Dispose();
+				SyncHelper.CancelAndDispose(ref _Cancellation, false);
+				_MemberMarker = null;
+				_SymbolReferenceMarker = null;
+				_FormatMap = null;
+				_SemanticContext = null;
+			}
+		}
+
 		sealed class MemberMarker
 		{
-			readonly IWpfTextView _TextView;
-			readonly IVerticalScrollBar _ScrollBar;
+			IWpfTextView _TextView;
+			IVerticalScrollBar _ScrollBar;
+			CSharpMembersMargin _Element;
 
 			IEnumerable<IMappingTagSpan<ICodeMemberTag>> _Tags;
 			List<DirectiveTriviaSyntax> _Regions;
 			ITagAggregator<ICodeMemberTag> _CodeMemberTagger;
-			readonly CSharpMembersMargin _Element;
 
 			public MemberMarker(IWpfTextView textView, IVerticalScrollBar verticalScrollbar, CSharpMembersMargin element) {
 				_TextView = textView;
@@ -167,9 +174,15 @@ namespace Codist.Margins
 			}
 
 			internal void Dispose() {
-				_ScrollBar.TrackSpanChanged -= OnTagsChanged;
-				if (_CodeMemberTagger != null) {
-					_CodeMemberTagger.BatchedTagsChanged -= OnTagsChanged;
+				if (_TextView != null) {
+					if (_CodeMemberTagger != null) {
+						_CodeMemberTagger.BatchedTagsChanged -= OnTagsChanged;
+						_CodeMemberTagger = null;
+					}
+					_TextView = null;
+					_ScrollBar.TrackSpanChanged -= OnTagsChanged;
+					_ScrollBar = null;
+					_Element = null;
 				}
 			}
 
@@ -421,11 +434,11 @@ namespace Codist.Margins
 		sealed class SymbolReferenceMarker
 		{
 			const double MarkerMargin = 1;
-			readonly IWpfTextView _View;
-			readonly IVerticalScrollBar _ScrollBar;
-			readonly CSharpMembersMargin _Margin;
 			readonly Brush _MarkerBrush = Brushes.Aqua;
 			readonly Pen _DefinitionMarkerPen = new Pen(ThemeHelper.ToolWindowTextBrush, MarkerMargin);
+			IWpfTextView _View;
+			IVerticalScrollBar _ScrollBar;
+			CSharpMembersMargin _Margin;
 			IEnumerable<ReferencedSymbol> _ReferencePoints;
 			SyntaxTree _DocSyntax;
 			ISymbol _Symbol;
@@ -444,7 +457,15 @@ namespace Codist.Margins
 				_View.Selection.SelectionChanged -= UpdateReferences;
 			}
 			internal void Dispose() {
-				UnhookEvents();
+				if (_View != null) {
+					UnhookEvents();
+					_ScrollBar = null;
+					_Margin = null;
+					_View = null;
+					_ReferencePoints = null;
+					_DocSyntax = null;
+					_Symbol = null;
+				}
 			}
 
 			internal void Render(DrawingContext drawingContext) {

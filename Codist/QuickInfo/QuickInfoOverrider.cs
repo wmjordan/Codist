@@ -33,7 +33,7 @@ namespace Codist.QuickInfo
 	static class QuickInfoOverrider
 	{
 		public static IQuickInfoOverrider CreateOverrider(IAsyncQuickInfoSession session) {
-			return session.Properties.GetOrCreateSingletonProperty<Default>(()=> new Default());
+			return session.Properties.GetOrCreateSingletonProperty<Default>(() => new Default());
 		}
 
 		public static void HoldQuickInfo(DependencyObject quickInfoItem, bool hold) {
@@ -49,98 +49,6 @@ namespace Codist.QuickInfo
 			// version 16.1 or above
 			items = items.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl") ?? items;
 			return items.GetFirstVisualChild<StackPanel>(o => o is IQuickInfoHolder) as IQuickInfoHolder;
-		}
-		static void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
-			if (symbol.Kind == SymbolKind.Namespace) {
-				description.MouseEnter += HookEvents;
-				return;
-			}
-			if (symbol.Kind == SymbolKind.Method) {
-				if (((IMethodSymbol)symbol).MethodKind == MethodKind.LambdaMethod) {
-					using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(30)) {
-						var sb = sbr.Resource;
-						sb.Append('(');
-						foreach (var item in ((IMethodSymbol)symbol).Parameters) {
-							if (item.Ordinal > 0) {
-								sb.Append(", ");
-							}
-							sb.Append(item.Type.ToDisplayString(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat))
-								.Append(item.Type.GetParameterString())
-								.Append(' ')
-								.Append(item.Name);
-						}
-						sb.Append(')');
-						description.Append(sb.ToString(), ThemeHelper.DocumentTextBrush);
-					}
-				}
-			}
-			description.UseDummyToolTip();
-			if (symbol.HasSource() == false && symbol.ContainingType?.HasSource() == true) {
-				// if the symbol is implicitly declared but its containing type is in source,
-				// navigate to the containing type
-				symbol = symbol.ContainingType;
-			}
-			description.MouseEnter += HookEvents;
-
-			void HookEvents(object sender, MouseEventArgs e) {
-				var s = sender as FrameworkElement;
-				s.MouseEnter -= HookEvents;
-				HighlightSymbol(sender, e);
-				s.Cursor = Cursors.Hand;
-				s.ToolTipOpening += ShowToolTip;
-				s.UseDummyToolTip();
-				s.MouseEnter += HighlightSymbol;
-				s.MouseLeave += RemoveSymbolHighlight;
-				s.MouseLeftButtonUp += GoToSource;
-				s.ContextMenuOpening += ShowContextMenu;
-				s.ContextMenuClosing += ReleaseQuickInfo;
-			}
-			async void GoToSource(object sender, MouseButtonEventArgs e) {
-				await quickInfoSession.DismissAsync();
-				symbol.GoToDefinition();
-			}
-			void ShowToolTip(object sender, ToolTipEventArgs e) {
-				var t = sender as TextBlock;
-				t.ToolTip = ShowSymbolLocation(symbol, symbol.HasSource() ? System.IO.Path.GetFileName(symbol.Locations[0].SourceTree.FilePath) : symbol.GetAssemblyModuleName());
-				t.ToolTipOpening -= ShowToolTip;
-			}
-			void HighlightSymbol(object sender, EventArgs e) {
-				((TextBlock)sender).Background = (symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(0.3);
-			}
-			void RemoveSymbolHighlight(object sender, MouseEventArgs e) {
-				((TextBlock)sender).Background = Brushes.Transparent;
-			}
-			async void ShowContextMenu(object sender, ContextMenuEventArgs e) {
-				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-				var s = sender as FrameworkElement;
-				if (s.ContextMenu == null) {
-					var v = quickInfoSession.TextView;
-					var ctx = SemanticContext.GetOrCreateSingetonInstance(v as IWpfTextView);
-					await ctx.UpdateAsync(textBuffer, default);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-					var m = new CSharpSymbolContextMenu(ctx) {
-						Symbol = symbol,
-						SyntaxNode = v.TextBuffer.ContentType.TypeName == Constants.CodeTypes.InteractiveContent ? null : ctx.GetNode(quickInfoSession.ApplicableToSpan.GetStartPoint(v.TextSnapshot).Position, true, true)
-					};
-					m.AddAnalysisCommands();
-					if (m.HasItems) {
-						m.Items.Add(new Separator());
-					}
-					m.AddSymbolNodeCommands();
-					m.AddTitleItem(symbol.GetOriginalName());
-					m.ItemClicked += HideQuickInfo;
-					s.ContextMenu = m;
-				}
-				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-				HoldQuickInfo(s, true);
-				s.ContextMenu.IsOpen = true;
-			}
-			void ReleaseQuickInfo(object sender, ContextMenuEventArgs e) {
-				HoldQuickInfo(sender as DependencyObject, false);
-			}
-			void HideQuickInfo(object sender, RoutedEventArgs e) {
-				DismissQuickInfo(description);
-			}
 		}
 
 		static StackPanel ShowSymbolLocation(ISymbol symbol, string path) {
@@ -201,6 +109,141 @@ namespace Codist.QuickInfo
 			}
 		}
 
+		sealed class ClickAndGo
+		{
+			ISymbol _symbol;
+			ITextBuffer _textBuffer;
+			TextBlock _description;
+			IAsyncQuickInfoSession _quickInfoSession;
+
+			ClickAndGo(ISymbol symbol, ITextBuffer textBuffer, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
+				_symbol = symbol;
+				_textBuffer = textBuffer;
+				_description = description;
+				_quickInfoSession = quickInfoSession;
+
+				if (symbol.Kind == SymbolKind.Namespace) {
+					description.MouseEnter += HookEvents;
+					return;
+				}
+				if (symbol.Kind == SymbolKind.Method) {
+					if (((IMethodSymbol)symbol).MethodKind == MethodKind.LambdaMethod) {
+						using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(30)) {
+							var sb = sbr.Resource;
+							sb.Append('(');
+							foreach (var item in ((IMethodSymbol)symbol).Parameters) {
+								if (item.Ordinal > 0) {
+									sb.Append(", ");
+								}
+								sb.Append(item.Type.ToDisplayString(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat))
+									.Append(item.Type.GetParameterString())
+									.Append(' ')
+									.Append(item.Name);
+							}
+							sb.Append(')');
+							description.Append(sb.ToString(), ThemeHelper.DocumentTextBrush);
+						}
+					}
+				}
+				description.UseDummyToolTip();
+				if (symbol.HasSource() == false && symbol.ContainingType?.HasSource() == true) {
+					// if the symbol is implicitly declared but its containing type is in source,
+					// navigate to the containing type
+					symbol = symbol.ContainingType;
+				}
+				description.MouseEnter += HookEvents;
+			}
+
+			public static void Apply(ISymbol symbol, ITextBuffer textBuffer, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
+				quickInfoSession.StateChanged += new ClickAndGo(symbol, textBuffer, description, quickInfoSession).QuickInfoSession_StateChanged;
+			}
+
+			void HookEvents(object sender, MouseEventArgs e) {
+				var s = sender as FrameworkElement;
+				s.MouseEnter -= HookEvents;
+				HighlightSymbol(sender, e);
+				s.Cursor = Cursors.Hand;
+				s.ToolTipOpening += ShowToolTip;
+				s.UseDummyToolTip();
+				s.MouseEnter += HighlightSymbol;
+				s.MouseLeave += RemoveSymbolHighlight;
+				s.MouseLeftButtonUp += GoToSource;
+				s.ContextMenuOpening += ShowContextMenu;
+				s.ContextMenuClosing += ReleaseQuickInfo;
+			}
+
+			void HighlightSymbol(object sender, EventArgs e) {
+				((TextBlock)sender).Background = (_symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(0.3);
+			}
+			void RemoveSymbolHighlight(object sender, MouseEventArgs e) {
+				((TextBlock)sender).Background = Brushes.Transparent;
+			}
+
+			async void GoToSource(object sender, MouseButtonEventArgs e) {
+				var s = _symbol;
+				await _quickInfoSession.DismissAsync();
+				s.GoToDefinition();
+			}
+			void ShowToolTip(object sender, ToolTipEventArgs e) {
+				var t = sender as TextBlock;
+				t.ToolTip = ShowSymbolLocation(_symbol, _symbol.HasSource() ? System.IO.Path.GetFileName(_symbol.Locations[0].SourceTree.FilePath) : _symbol.GetAssemblyModuleName());
+				t.ToolTipOpening -= ShowToolTip;
+			}
+			async void ShowContextMenu(object sender, ContextMenuEventArgs e) {
+				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+				var s = sender as FrameworkElement;
+				if (s.ContextMenu == null) {
+					var v = _quickInfoSession.TextView;
+					var ctx = SemanticContext.GetOrCreateSingetonInstance(v as IWpfTextView);
+					await ctx.UpdateAsync(_textBuffer, default);
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+					var m = new CSharpSymbolContextMenu(_symbol, v.TextBuffer.ContentType.TypeName == Constants.CodeTypes.InteractiveContent ? null : ctx.GetNode(_quickInfoSession.ApplicableToSpan.GetStartPoint(v.TextSnapshot).Position, true, true), ctx);
+					m.AddAnalysisCommands();
+					if (m.HasItems) {
+						m.Items.Add(new Separator());
+					}
+					m.AddSymbolNodeCommands();
+					m.AddTitleItem(_symbol.GetOriginalName());
+					m.Closed += HideQuickInfo;
+					m.DisposeOnClose();
+					s.ContextMenu = m;
+				}
+				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+				HoldQuickInfo(s, true);
+				s.ContextMenu.IsOpen = true;
+			}
+
+			void ReleaseQuickInfo(object sender, RoutedEventArgs e) {
+				HoldQuickInfo(sender as DependencyObject, false);
+			}
+			void HideQuickInfo(object sender, RoutedEventArgs e) {
+				_quickInfoSession?.DismissAsync();
+			}
+
+			void QuickInfoSession_StateChanged(object sender, QuickInfoSessionStateChangedEventArgs e) {
+				if (e.NewState != QuickInfoSessionState.Dismissed) {
+					return;
+				}
+				_quickInfoSession.StateChanged -= QuickInfoSession_StateChanged;
+				var s = _description;
+				s.MouseEnter -= HookEvents;
+				s.ToolTipOpening -= ShowToolTip;
+				s.MouseEnter -= HighlightSymbol;
+				s.MouseLeave -= RemoveSymbolHighlight;
+				s.MouseLeftButtonUp -= GoToSource;
+				s.ContextMenuOpening -= ShowContextMenu;
+				s.ContextMenuClosing -= ReleaseQuickInfo;
+				if (s.ContextMenu is CSharpSymbolContextMenu m) {
+					m.Closed -= HideQuickInfo;
+				}
+				s.ContextMenu = null;
+				_symbol = null;
+				_textBuffer = null;
+				_description = null;
+				_quickInfoSession = null;
+			}
+		}
+
 		interface IQuickInfoHolder
 		{
 			void Hold(bool hold);
@@ -232,6 +275,8 @@ namespace Codist.QuickInfo
 				_Overrider.ClickAndGoSymbol = symbol;
 				_Overrider.QuickInfoSession = quickInfoSession;
 				_Overrider.TextBuffer = textBuffer;
+				quickInfoSession.StateChanged -= _Overrider.ReleaseSession;
+				quickInfoSession.StateChanged += _Overrider.ReleaseSession;
 			}
 
 			public void OverrideDocumentation(UIElement docElement) {
@@ -268,8 +313,8 @@ namespace Codist.QuickInfo
 				public void Hold(bool hold) {
 					IsMouseOverAggregated = hold;
 				}
-				public async System.Threading.Tasks.Task DismissAsync() {
-					await QuickInfoSession.DismissAsync();
+				public System.Threading.Tasks.Task DismissAsync() {
+					return QuickInfoSession?.DismissAsync();
 				}
 
 				protected override void OnVisualParentChanged(DependencyObject oldParent) {
@@ -295,6 +340,21 @@ namespace Codist.QuickInfo
 					EXIT:
 					// hides the parent container from taking excessive space in the quick info window
 					this.GetParent<Border>().Collapse();
+					ClickAndGoSymbol = null;
+					Diagnostics = null;
+					TextBuffer = null;
+				}
+
+				public void ReleaseSession(object sender, QuickInfoSessionStateChangedEventArgs args) {
+					if (args.NewState != QuickInfoSessionState.Dismissed) {
+						return;
+					}
+					var s = sender as IAsyncQuickInfoSession;
+					s.StateChanged -= ReleaseSession;
+					ClickAndGoSymbol = null;
+					Diagnostics = null;
+					TextBuffer = null;
+					QuickInfoSession = null;
 				}
 
 				void OverrideDiagnosticInfo(StackPanel panel) {
@@ -433,7 +493,7 @@ namespace Codist.QuickInfo
 					if (icon != null && signature != null) {
 						// apply click and go feature
 						if (ClickAndGoSymbol != null) {
-							QuickInfoOverrider.ApplyClickAndGo(ClickAndGoSymbol, TextBuffer, signature, QuickInfoSession);
+							ClickAndGo.Apply(ClickAndGoSymbol, TextBuffer, signature, QuickInfoSession);
 						}
 						// fix the width of the signature part to prevent it from falling down to the next row
 						if (Config.Instance.QuickInfoMaxWidth >= 100) {

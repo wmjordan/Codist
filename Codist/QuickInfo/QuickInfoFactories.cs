@@ -16,14 +16,14 @@ namespace Codist.QuickInfo
 	/// Provides quick info for named colors or #hex colors
 	/// </summary>
 	[Export(typeof(IAsyncQuickInfoSourceProvider))]
-	[Name("Color Quick Info Controller")]
+	[Name("Color Quick Info")]
 	[Order(After = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.Text)]
 	sealed class ColorQuickInfoControllerProvider : IAsyncQuickInfoSourceProvider
 	{
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new ColorQuickInfoController())
+				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new ColorQuickInfo(textBuffer))
 				: null;
 		}
 	}
@@ -53,7 +53,7 @@ namespace Codist.QuickInfo
 	sealed class QuickInfoVisibilityControllerProvider : IAsyncQuickInfoSourceProvider
 	{
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
-			return textBuffer.Properties.GetOrCreateSingletonProperty(() => new QuickInfoVisibilityController());
+			return textBuffer.Properties.GetOrCreateSingletonProperty(() => new QuickInfoVisibilityController(textBuffer));
 		}
 	}
 
@@ -68,7 +68,7 @@ namespace Codist.QuickInfo
 
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new SelectionQuickInfo())
+				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new SelectionQuickInfo(textBuffer))
 				: null;
 		}
 	}
@@ -84,7 +84,7 @@ namespace Codist.QuickInfo
 
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? textBuffer.Properties.GetOrCreateSingletonProperty(()=> new QuickInfoSizeController())
+				? textBuffer.Properties.GetOrCreateSingletonProperty(()=> new QuickInfoSizeController(textBuffer))
 				: null;
 		}
 	}

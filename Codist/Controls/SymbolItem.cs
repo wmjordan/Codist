@@ -7,7 +7,7 @@ using AppHelpers;
 
 namespace Codist.Controls
 {
-	sealed class SymbolItem /*: INotifyPropertyChanged*/
+	sealed class SymbolItem
 	{
 		UIElement _Icon;
 		int _ImageId;
@@ -15,17 +15,16 @@ namespace Codist.Controls
 		string _Hint;
 		readonly bool _IncludeContainerType;
 
-		//public event PropertyChangedEventHandler PropertyChanged;
 		public int ImageId => _ImageId != 0 ? _ImageId : (_ImageId = Symbol != null ? Symbol.GetImageId() : SyntaxNode != null ? SyntaxNode.GetImageId() : -1);
-		public UIElement Icon => _Icon ?? (_Icon = Container.IconProvider?.Invoke(this) ?? ThemeHelper.GetImage(ImageId != -1 ? ImageId : 0));
-		public UIElement ExtIcon => Container.ExtIconProvider?.Invoke(this);
+		public UIElement Icon => _Icon ?? (_Icon = Container?.IconProvider?.Invoke(this) ?? ThemeHelper.GetImage(ImageId != -1 ? ImageId : 0));
+		public UIElement ExtIcon => Container?.ExtIconProvider?.Invoke(this);
 		public string Hint {
-			get => _Hint ?? (_Hint = Symbol != null ? GetSymbolConstaintValue(Symbol, Container.ContainerType == SymbolListType.EnumFlags) : String.Empty);
+			get => _Hint ?? (_Hint = Symbol != null && Container != null ? GetSymbolConstaintValue(Symbol, Container.ContainerType == SymbolListType.EnumFlags) : String.Empty);
 			set => _Hint = value;
 		}
 		public SymbolUsageKind Usage { get; set; }
 		public bool IsExternal => Usage == SymbolUsageKind.External
-			|| Container.ContainerType == SymbolListType.None && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
+			|| Container != null && Container.ContainerType == SymbolListType.None && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
 		public TextBlock Content {
 			get => _Content ?? (_Content = Symbol != null
 				? CreateContentForSymbol(Symbol, _IncludeContainerType, true)
@@ -34,10 +33,10 @@ namespace Codist.Controls
 					: new ThemedMenuText());
 			set => _Content = value;
 		}
-		public Location Location { get; set; }
-		public SyntaxNode SyntaxNode { get; private set; }
-		public ISymbol Symbol { get; private set; }
-		public SymbolList Container { get; }
+		internal Location Location { get; set; }
+		internal SyntaxNode SyntaxNode { get; private set; }
+		internal ISymbol Symbol { get; private set; }
+		internal SymbolList Container { get; private set; }
 
 		public SymbolItem(SymbolList list) {
 			Container = list;
@@ -78,40 +77,56 @@ namespace Codist.Controls
 
 		public bool GoToSource() {
 			if (Location != null && Location.IsInSource) {
-				CloseUnpinnedMenus();
-				Location.GoToSource();
+				GoToLocation();
 				return true;
 			}
 			if (SyntaxNode != null) {
-				RefreshSyntaxNode();
-				CloseUnpinnedMenus();
-				SyntaxNode.GetIdentifierToken().GetLocation().GoToSource();
+				GoToNode();
 				return true;
 			}
 			if (Symbol != null) {
-				RefreshSymbol();
-				if (Symbol.Kind == SymbolKind.Namespace) {
-					SyncHelper.RunSync(() => Container.SemanticContext.FindMembersAsync(Symbol, _Content.GetParent<ListBoxItem>().NullIfMouseOver()));
-					return false;
-				}
-				var s = Symbol.GetSourceReferences();
-				switch (s.Length) {
-					case 0:
-						if (Container.SemanticContext.Document != null) {
-							CloseUnpinnedMenus();
-							return ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(Symbol, Container.SemanticContext.Document.Project, default);
-						}
-						return false;
-					case 1:
-						CloseUnpinnedMenus();
-						s[0].GoToSource();
-						return true;
-					default:
-						Container.SemanticContext.ShowLocations(Symbol, s, _Content.GetParent<ListBoxItem>().NullIfMouseOver());
-						return false;
-				}
+				return GoToSymbol();
 			}
 			return false;
+		}
+
+		void GoToLocation() {
+			var loc = Location;
+			CloseUnpinnedMenus();
+			loc.GoToSource();
+		}
+
+		void GoToNode() {
+			RefreshSyntaxNode();
+			var node = SyntaxNode;
+			CloseUnpinnedMenus();
+			node.GetIdentifierToken().GetLocation().GoToSource();
+		}
+
+		bool GoToSymbol() {
+			RefreshSymbol();
+			if (Symbol.Kind == SymbolKind.Namespace) {
+				SyncHelper.RunSync(() => Container.SemanticContext.FindMembersAsync(Symbol, _Content.GetParent<ListBoxItem>().NullIfMouseOver()));
+				return false;
+			}
+			var s = Symbol.GetSourceReferences();
+			switch (s.Length) {
+				case 0:
+					if (Container.SemanticContext.Document != null) {
+						var symbol = Symbol;
+						var proj = Container.SemanticContext.Document.Project;
+						CloseUnpinnedMenus();
+						return ServicesHelper.Instance.VisualStudioWorkspace.TryGoToDefinition(symbol, proj, default);
+					}
+					return false;
+				case 1:
+					CloseUnpinnedMenus();
+					s[0].GoToSource();
+					return true;
+				default:
+					Container.SemanticContext.ShowLocations(Symbol, s, _Content.GetParent<ListBoxItem>().NullIfMouseOver());
+					return false;
+			}
 		}
 
 		void CloseUnpinnedMenus() {
@@ -182,6 +197,13 @@ namespace Codist.Controls
 
 		public override string ToString() {
 			return Content.GetText();
+		}
+
+		internal void Release() {
+			Symbol = null;
+			Location = null;
+			SyntaxNode = null;
+			Container = null;
 		}
 	}
 }

@@ -483,6 +483,27 @@ namespace Codist
 			}
 			return false;
 		}
+		/// <summary>
+		/// Calls <see cref="IDisposable.Dispose"/> on the item and then removes it from the collection at <paramref name="index"/>.
+		/// </summary>
+		public static void RemoveAndDisposeAt(this System.Collections.IList items, int index) {
+			if (items[index] is IDisposable d) {
+				d.Dispose();
+			}
+			items.RemoveAt(index);
+		}
+		/// <summary>
+		/// Calls <see cref="IDisposable.Dispose"/> on <paramref name="item"/> and then removes it from the collection.
+		/// </summary>
+		public static void RemoveAndDispose(this System.Collections.IList items, object item) {
+			int index;
+			if ((index = items.IndexOf(item)) >= 0) {
+				if (items[index] is IDisposable d) {
+					d.Dispose();
+				}
+				items.RemoveAt(index);
+			}
+		}
 		public static int ItemCount(this ListBox listBox) {
 			return listBox.ItemContainerGenerator.Items.Count;
 		}

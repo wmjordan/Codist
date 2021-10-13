@@ -18,17 +18,17 @@ namespace Codist.SyntaxHighlight
 	sealed class CodeViewDecorator
 	{
 		static readonly IClassificationType __BraceMatchingClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBraceMatching);
-		readonly IWpfTextView _TextView;
-		readonly IClassificationFormatMap _ClassificationFormatMap;
-		readonly IClassificationTypeRegistryService _RegService;
-		readonly IEditorFormatMap _EditorFormatMap;
+		static bool _Initialized;
+		static FontFamily _DefaultFontFamily;
+		static double _DefaultFontSize;
+		IWpfTextView _TextView;
+		IClassificationFormatMap _ClassificationFormatMap;
+		IClassificationTypeRegistryService _RegService;
+		IEditorFormatMap _EditorFormatMap;
 
 		Color _BackColor, _ForeColor;
 		volatile int _IsDecorating;
 		bool _IsViewActive;
-		static bool _Initialized;
-		static FontFamily _DefaultFontFamily;
-		static double _DefaultFontSize;
 
 		public CodeViewDecorator(IWpfTextView view) {
 			view.Closed += View_Closed;
@@ -36,7 +36,7 @@ namespace Codist.SyntaxHighlight
 			if (_Initialized == false) {
 				view.VisualElement.IsVisibleChanged += MarkInitialized;
 			}
-			Config.Updated += SettingsUpdated;
+			Config.RegisterUpdateHandler(UpdateSyntaxHighlightConfig);
 
 			_ClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(view);
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(view);
@@ -81,16 +81,21 @@ namespace Codist.SyntaxHighlight
 
 		void View_Closed(object sender, EventArgs e) {
 			_IsViewActive = false;
-			Config.Updated -= SettingsUpdated;
+			Config.UnregisterUpdateHandler(UpdateSyntaxHighlightConfig);
 			_ClassificationFormatMap.ClassificationFormatMappingChanged -= FormatUpdated;
 			_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
 			_TextView.VisualElement.IsVisibleChanged -= MarkInitialized;
+			_TextView.Properties.RemoveProperty(typeof(CodeViewDecorator));
 			_EditorFormatMap.FormatMappingChanged -= FormatUpdated;
 			_EditorFormatMap.FormatMappingChanged -= BackupFormat;
 			_TextView.Closed -= View_Closed;
+			_ClassificationFormatMap = null;
+			_EditorFormatMap = null;
+			_RegService = null;
+			_TextView = null;
 		}
 
-		void SettingsUpdated(object sender, ConfigUpdatedEventArgs eventArgs) {
+		void UpdateSyntaxHighlightConfig(ConfigUpdatedEventArgs eventArgs) {
 			if (eventArgs.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)) {
 				var t = eventArgs.Parameter as string;
 				if (t != null) {

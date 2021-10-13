@@ -14,13 +14,6 @@ namespace Codist.Margins
 	sealed class CommentMargin : FrameworkElement, IWpfTextViewMargin
 	{
 		public const string MarginName = nameof(CommentMargin);
-
-		readonly IWpfTextView _TextView;
-		readonly IEditorFormatMap _EditorFormatMap;
-		readonly IVerticalScrollBar _ScrollBar;
-		readonly TaggerResult _Tags;
-		readonly CommentTagger _CommentTagger;
-
 		//ToDo: Configurable marker styles
 		//ToDo: Change brush colors according to user settings
 		static readonly Pen CommentPen = new Pen(Brushes.LightGreen, 1);
@@ -37,16 +30,19 @@ namespace Codist.Margins
 		static readonly Brush TaskBackgroundBrsh = Brushes.White.Alpha(0.5);
 		//note: this dictionary determines which style has a scrollbar marker
 		static readonly Dictionary<IClassificationType, Brush> ClassificationBrushMapper = InitClassificationBrushMapper();
-		bool _HasEvents;
 		const double MarkPadding = 1.0;
 		const double MarkSize = 4.0;
 		const double HalfMarkSize = MarkSize / 2 + MarkPadding;
 
+		IWpfTextView _TextView;
+		IEditorFormatMap _EditorFormatMap;
+		IVerticalScrollBar _ScrollBar;
+		TaggerResult _Tags;
+		CommentTagger _CommentTagger;
+		bool _HasEvents;
+
 		public CommentMargin(IWpfTextView textView, IVerticalScrollBar verticalScrollbar) {
 			_TextView = textView;
-
-			IsHitTestVisible = false;
-
 			_ScrollBar = verticalScrollbar;
 			_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
 			if (textView.Properties.TryGetProperty(nameof(CommentTaggerProvider), out _CommentTagger)) {
@@ -54,15 +50,16 @@ namespace Codist.Margins
 			}
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 
+			IsHitTestVisible = false;
 			Width = MarkSize + MarkPadding + MarkPadding + /*extra padding*/ 2 * MarkPadding;
-
 			Visibility = Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.CodeMarginMask) ? Visibility.Visible : Visibility.Collapsed;
-			Config.Updated += Config_Updated;
-			//subscribe to change events and use them to clean up and update the markers
+
+			Config.RegisterUpdateHandler(UpdateCommentMarginConfig);
 			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
 			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 			//_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 			_ScrollBar.TrackSpanChanged += OnMappingChanged;
+			_TextView.Closed += _TextView_Closed;
 		}
 
 		FrameworkElement IWpfTextViewMargin.VisualElement => this;
@@ -96,7 +93,7 @@ namespace Codist.Margins
 			return string.Equals(marginName, MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
 		}
 
-		void Config_Updated(object sender, ConfigUpdatedEventArgs e) {
+		void UpdateCommentMarginConfig(ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.HasAnyFlag(Features.SyntaxHighlight | Features.ScrollbarMarkers) == false) {
 				return;
 			}
@@ -246,27 +243,29 @@ namespace Codist.Margins
 			}
 		}
 
-		#region IDisposable Support
-		bool disposedValue;
-
-		void Dispose(bool disposing) {
-			if (!disposedValue) {
-				if (disposing) {
-					Config.Updated -= Config_Updated;
-					_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
-					IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
-					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
-					if (_CommentTagger != null) {
-						_CommentTagger.TagAdded -= CommentTagger_TagAdded;
-					}
-				}
-
-				disposedValue = true;
-			}
+		void _TextView_Closed(object sender, EventArgs e) {
+			Dispose();
 		}
 
+		#region IDisposable Support
 		public void Dispose() {
-			Dispose(true);
+			if (_TextView != null) {
+				_TextView.Closed -= _TextView_Closed;
+				Config.UnregisterUpdateHandler(UpdateCommentMarginConfig);
+				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
+				_TextView.Properties.RemoveProperty(nameof(CommentTaggerProvider));
+				_TextView.Properties.RemoveProperty(typeof(TaggerResult));
+				_TextView = null;
+				IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
+				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
+				if (_CommentTagger != null) {
+					_CommentTagger.TagAdded -= CommentTagger_TagAdded;
+					_CommentTagger = null;
+				}
+				_EditorFormatMap = null;
+				_ScrollBar = null;
+				_Tags = null;
+			}
 		}
 		#endregion
 	}

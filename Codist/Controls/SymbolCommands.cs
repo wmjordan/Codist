@@ -27,7 +27,7 @@ namespace Codist.Controls
 			if (referrers != null) {
 				var containerType = symbol.ContainingType;
 				foreach (var (referrer, occurance) in referrers) {
-					var i = m.Menu.Add(referrer, false);
+					var i = m.Add(referrer, false);
 					i.Location = occurance.FirstOrDefault().Item2.Location;
 					foreach (var item in occurance) {
 						i.Usage |= item.Item1;
@@ -37,7 +37,7 @@ namespace Codist.Controls
 					}
 				}
 			}
-			m.Menu.ExtIconProvider = ExtIconProvider.Default.GetExtIconsWithUsage;
+			m.ExtIconProvider = ExtIconProvider.Default.GetExtIconsWithUsage;
 			m.Show();
 		}
 
@@ -60,7 +60,7 @@ namespace Codist.Controls
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context);
 			foreach (var item in ovs) {
-				m.Menu.Add(item, item.ContainingType);
+				m.Add(item, item.ContainingType);
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.Append(symbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true)
@@ -84,20 +84,20 @@ namespace Codist.Controls
 				st = (INamedTypeSymbol)symbol;
 				if (st.ConstructedFrom == st) {
 					foreach (var impl in implementations) {
-						m.Menu.Add(impl, false);
+						m.Add(impl, false);
 					}
 				}
 				else {
 					foreach (INamedTypeSymbol impl in implementations) {
 						if (impl.IsGenericType || impl.CanConvertTo(st)) {
-							m.Menu.Add(impl, false);
+							m.Add(impl, false);
 						}
 					}
 				}
 			}
 			else {
 				foreach (var impl in implementations) {
-					m.Menu.Add(impl, impl.ContainingSymbol);
+					m.Add(impl, impl.ContainingSymbol);
 				}
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
@@ -109,14 +109,12 @@ namespace Codist.Controls
 
 		internal static async Task FindMembersAsync(this SemanticContext context, ISymbol symbol, UIElement positionElement = null) {
 			SymbolMenu m;
-			SymbolList l;
 			string countLabel;
 			if (symbol.Kind == SymbolKind.Namespace) {
 				var items = await context.GetNamespacesAndTypesAsync(symbol as INamespaceSymbol, default).ConfigureAwait(false);
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
 				m = new SymbolMenu(context, SymbolListType.TypeList);
-				l = m.Menu;
-				l.AddRange(items.Select(s => new SymbolItem(s, l, false)));
+				m.AddRange(items.Select(s => new SymbolItem(s, m, false)));
 				countLabel = R.T_NamespaceMembers.Replace("{count}", items.Length.ToString());
 			}
 			else {
@@ -125,27 +123,26 @@ namespace Codist.Controls
 				var items = ImmutableArray.CreateBuilder<SymbolItem>(members.Sum(i => i.members.Count));
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
 				m = new SymbolMenu(context, symbol.Kind == SymbolKind.Namespace ? SymbolListType.TypeList : SymbolListType.None);
-				l = m.Menu;
 				foreach (var item in members) {
 					var t = item.type;
-					items.AddRange(item.members.Select(s => new SymbolItem(s, l, false) { Hint = t }));
+					items.AddRange(item.members.Select(s => new SymbolItem(s, m, false) { Hint = t }));
 				}
-				l.SetupForSpecialTypes(symbol as ITypeSymbol);
-				l.AddRange(items);
+				m.SetupForSpecialTypes(symbol as ITypeSymbol);
+				m.AddRange(items);
 				countLabel = R.T_Members.Replace("{count}", count.ToString()).Replace("{inherited}", (items.Count - count).ToString());
 			}
-			if (l.IconProvider == null) {
+			if (m.IconProvider == null) {
 				if (symbol.Kind == SymbolKind.NamedType) {
 					switch (((INamedTypeSymbol)symbol).TypeKind) {
 						case TypeKind.Interface:
-							l.ExtIconProvider = ExtIconProvider.InterfaceMembers.GetExtIcons; break;
+							m.ExtIconProvider = ExtIconProvider.InterfaceMembers.GetExtIcons; break;
 						case TypeKind.Class:
 						case TypeKind.Struct:
-							l.ExtIconProvider = ExtIconProvider.Default.GetExtIcons; break;
+							m.ExtIconProvider = ExtIconProvider.Default.GetExtIcons; break;
 					}
 				}
 				else {
-					l.ExtIconProvider = ExtIconProvider.Default.GetExtIcons;
+					m.ExtIconProvider = ExtIconProvider.Default.GetExtIcons;
 				}
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
@@ -202,11 +199,11 @@ namespace Codist.Controls
 				.Append(locs.Count);
 			// add locations in source code
 			foreach (var loc in locs) {
-				m.Menu.Add(loc.Value);
+				m.Add(loc.Value);
 			}
 			// add locations in meta data
 			foreach (var loc in symbol.Locations.Where(l => l.IsInMetadata).OrderBy(x => x.MetadataModule.Name)) {
-				m.Menu.Add(loc);
+				m.Add(loc);
 			}
 			m.Show(positionElement);
 		}
@@ -220,15 +217,15 @@ namespace Codist.Controls
 			INamedTypeSymbol containingType = null;
 			foreach (var item in members) {
 				if (groupByType && item.ContainingType != containingType) {
-					m.Menu.Add((ISymbol)(containingType = item.ContainingType) ?? item.ContainingNamespace, false)
+					m.Add((ISymbol)(containingType = item.ContainingType) ?? item.ContainingNamespace, false)
 						.Usage = SymbolUsageKind.Container;
 					if (containingType?.TypeKind == TypeKind.Delegate) {
 						continue; // skip Invoke method in Delegates, for results from FindMethodBySignature
 					}
 				}
-				m.Menu.Add(item, false);
+				m.Add(item, false);
 			}
-			m.Menu.ExtIconProvider = ExtIconProvider.Default.GetExtIcons;
+			m.ExtIconProvider = ExtIconProvider.Default.GetExtIcons;
 			m.Show();
 		}
 

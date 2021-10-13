@@ -19,6 +19,7 @@ namespace Codist
 		SyntaxNode _Node, _NodeIncludeTrivia;
 		IOutliningManager _OutliningManager;
 		SyntaxModel _Model = SyntaxModel.Empty;
+		IWpfTextView _View;
 		int _Position;
 
 		public static SemanticContext GetHovered() {
@@ -30,10 +31,11 @@ namespace Codist
 		}
 
 		SemanticContext(IWpfTextView textView) {
-			View = textView;
+			_View = textView;
+			textView.Closed += View_Closed;
 		}
 
-		public IWpfTextView View { get; }
+		public IWpfTextView View => _View;
 		public IOutliningManager OutliningManager {
 			get => _OutliningManager ?? (_OutliningManager = ServicesHelper.Instance.OutliningManager.GetOutliningManager(View));
 		}
@@ -388,16 +390,32 @@ namespace Codist
 			ResetNodeInfo();
 			return false;
 		}
+
+		void View_Closed(object sender, EventArgs e) {
+			if (_View != null) {
+				_View.Closed -= View_Closed;
+				_View.Properties.RemoveProperty(typeof(SemanticContext));
+				ResetNodeInfo();
+				_OutliningManager = null;
+				if (_Model != null) {
+					_Model.Release();
+				}
+				_Model = null;
+				_View = null;
+				_Node = _NodeIncludeTrivia = null;
+				Token = default;
+			}
+		}
 	}
 
 	sealed class SyntaxModel
 	{
 		internal static readonly SyntaxModel Empty = new SyntaxModel(null, null, null, null, VersionStamp.Default);
 
-		public readonly Workspace Workspace;
-		public readonly Document Document;
-		public readonly SemanticModel SemanticModel;
-		public readonly CompilationUnitSyntax Compilation;
+		public Workspace Workspace;
+		public Document Document;
+		public SemanticModel SemanticModel;
+		public CompilationUnitSyntax Compilation;
 		public readonly VersionStamp Version;
 
 		public SyntaxModel(Workspace workspace, Document document, SemanticModel semanticModel, CompilationUnitSyntax compilation, VersionStamp version) {
@@ -408,9 +426,6 @@ namespace Codist
 			Version = version;
 		}
 
-		public SyntaxNodeInfo GetNodeInfo(int position) {
-			return new SyntaxNodeInfo(this, position);
-		}
 		public SyntaxNode GetNode(int position, bool includeTrivia, bool deep) {
 			if (Compilation == null || Compilation.FullSpan.Contains(position) == false) {
 				return null;
@@ -436,23 +451,12 @@ namespace Codist
 			}
 			return node.FullSpan.Contains(position) ? node : null;
 		}
-	}
 
-	sealed class SyntaxNodeInfo
-	{
-		readonly SyntaxModel _Model;
-		readonly int _Position;
-		SyntaxNode _Node;
-		SyntaxNode _NodeIncludingTrivia;
-		SyntaxToken _Token;
-
-		public SyntaxNodeInfo(SyntaxModel model, int position) {
-			_Model = model;
-			_Position = position;
+		public void Release() {
+			Workspace = null;
+			Document = null;
+			SemanticModel = null;
+			Compilation = null;
 		}
-
-		public SyntaxNode Node => _Node ?? (_Node = _Model.GetNode(_Position, false, false));
-		public SyntaxNode NodeIncludingTrivia => _NodeIncludingTrivia ?? (_NodeIncludingTrivia = _Model.GetNode(_Position, true, true));
-		public SyntaxToken Token => _Token.SyntaxTree != null || _Model.Compilation == null ? _Token : (_Token = _Model.Compilation.FindToken(_Position, true));
 	}
 }

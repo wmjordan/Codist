@@ -33,7 +33,7 @@ namespace Codist.Taggers
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			if (typeof(T) == typeof(IClassificationTag) && Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)) {
 				if (_Taggers.TryGetValue(buffer, out var tagger) == false) {
-					tagger = new CSharpTagger(this, buffer);
+					tagger = new CSharpTagger(this, textView, buffer);
 					_Taggers.Add(buffer, tagger);
 					++_taggerCount;
 				}
@@ -44,9 +44,10 @@ namespace Codist.Taggers
 		}
 
 		public void DetachTagger(ITextBuffer buffer) {
-			_Taggers.Remove(buffer);
-			--_taggerCount;
-			Debug.WriteLine(buffer?.GetTextDocument()?.FilePath + " detached tagger");
+			if (_Taggers.Remove(buffer)) {
+				--_taggerCount;
+				Debug.WriteLine(buffer?.GetTextDocument()?.FilePath + " detached tagger");
+			}
 		}
 	}
 
@@ -57,6 +58,7 @@ namespace Codist.Taggers
 		static readonly GeneralClassifications _GeneralClassifications = GeneralClassifications.Instance;
 		ConcurrentQueue<SnapshotSpan> _PendingSpans = new ConcurrentQueue<SnapshotSpan>();
 		CSharpTaggerProvider _TaggerProvider;
+		ITextView _View;
 		ITextBuffer _Buffer;
 		CancellationTokenSource _TaskBreaker;
 		ConditionalWeakTable<ITextSnapshot, ParserTask> _ParserTasks = new ConditionalWeakTable<ITextSnapshot, ParserTask>();
@@ -65,27 +67,30 @@ namespace Codist.Taggers
 		// debug info
 		readonly string _name;
 
-		public CSharpTagger(CSharpTaggerProvider taggerProvider, ITextBuffer buffer) {
+		public CSharpTagger(CSharpTaggerProvider taggerProvider, ITextView view, ITextBuffer buffer) {
 			_TaggerProvider = taggerProvider;
-			_name = buffer.GetTextDocument()?.FilePath;
+			_name = buffer.GetTextDocument()?.FilePath ?? buffer.CurrentSnapshot?.GetText(0, Math.Min(buffer.CurrentSnapshot.Length, 500));
+			_View = view;
 			_Buffer = buffer;
 			if (buffer is ITextBuffer2 b) {
 				b.ChangedOnBackground += TextBuffer_ChangedOnBackground;
 			}
+			view.Closed += View_Closed;
 		}
 
 		/// <summary>This event is to notify the IDE that some tags are classified (from the parser thread).</summary>
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		IEnumerable<ITagSpan<IClassificationTag>> ITagger<IClassificationTag>.GetTags(NormalizedSnapshotSpanCollection spans) {
-			if (spans.Count == 0) {
+			var parserTasks = _ParserTasks;
+			if (parserTasks == null || spans.Count == 0) {
 				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
 			}
 			var snapshot = spans[0].Snapshot;
 			var textBuffer = snapshot.TextBuffer;
 			SemanticModel model;
 			Workspace workspace;
-			if (_ParserTasks.TryGetValue(snapshot, out var task)) {
+			if (parserTasks.TryGetValue(snapshot, out var task)) {
 				if ((model = task.Model) != null && (workspace = task.Workspace) != null) {
 					return Parser.GetTags(spans, workspace, model, snapshot);
 				}
@@ -96,7 +101,7 @@ namespace Codist.Taggers
 			if (task == null && (finishedTask == null || snapshot != finishedTask.Snapshot)) {
 				task = new ParserTask(snapshot, this);
 				if (task.StartParse(snapshot.Version.VersionNumber > 0 ? SyncHelper.CancelAndRetainToken(ref _TaskBreaker) : default)) {
-					_ParserTasks.Add(snapshot, task);
+					parserTasks.Add(snapshot, task);
 					EnqueueSpans(spans);
 				}
 				else {
@@ -150,6 +155,17 @@ namespace Codist.Taggers
 			}
 		}
 
+		void TextBuffer_ChangedOnBackground(object sender, TextContentChangedEventArgs e) {
+			var changes = e.Changes;
+			if (changes.Count == 0) {
+				return;
+			}
+			var start = changes[0].NewPosition;
+			var changedSpan = new SnapshotSpan(e.After, start, changes[changes.Count - 1].NewEnd - start);
+			Debug.WriteLine("Buffer changed: " + changedSpan);
+			TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(changedSpan));
+		}
+
 		public void IncrementReference() {
 			_Reference++;
 		}
@@ -160,9 +176,12 @@ namespace Codist.Taggers
 			}
 		}
 
+		void View_Closed(object sender, EventArgs e) {
+			ReleaseResources();
+		}
+
 		public void Dispose() {
 			DecrementReference();
-			_TaskBreaker?.Dispose();
 			Debug.WriteLine(_Buffer?.GetTextDocument()?.FilePath + " ref: " + _Reference);
 		}
 
@@ -182,18 +201,9 @@ namespace Codist.Taggers
 				_Buffer = null;
 				_TaggerProvider = null;
 				_PendingSpans = null;
+				_View.Closed -= View_Closed;
+				_View = null;
 			}
-		}
-
-		void TextBuffer_ChangedOnBackground(object sender, TextContentChangedEventArgs e) {
-			var changes = e.Changes;
-			if (changes.Count == 0) {
-				return;
-			}
-			var start = changes[0].NewPosition;
-			var changedSpan = new SnapshotSpan(e.After, start, changes[changes.Count - 1].NewEnd - start);
-			Debug.WriteLine("Buffer changed: " + changedSpan);
-			TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(changedSpan));
 		}
 
 		sealed class ParserTask
@@ -802,8 +812,7 @@ namespace Codist.Taggers
 						break;
 
 					case SymbolKind.Local:
-						var localSymbol = symbol as ILocalSymbol;
-						yield return localSymbol.IsConst ? _Classifications.ConstField : _Classifications.LocalVariable;
+						yield return ((ILocalSymbol)symbol).IsConst ? _Classifications.ConstField : _Classifications.LocalVariable;
 						break;
 
 					case SymbolKind.Namespace:
@@ -897,16 +906,16 @@ namespace Codist.Taggers
 			public static bool AllBraces, AllParentheses, LocalFunctionDeclaration, NonPrivateField, StyleConstructorAsType;
 
 			static bool Init() {
-				Config.Updated += Update;
-				Update(Config.Instance, new ConfigUpdatedEventArgs(Features.SyntaxHighlight));
+				Config.RegisterUpdateHandler(UpdateCSharpHighlighterConfig);
+				UpdateCSharpHighlighterConfig(new ConfigUpdatedEventArgs(Config.Instance, Features.SyntaxHighlight));
 				return true;
 			}
 
-			static void Update(object sender, ConfigUpdatedEventArgs e) {
+			static void UpdateCSharpHighlighterConfig(ConfigUpdatedEventArgs e) {
 				if (e.UpdatedFeature.MatchFlags(Features.SyntaxHighlight) == false) {
 					return;
 				}
-				var o = (sender as Config).SpecialHighlightOptions;
+				var o = e.Config.SpecialHighlightOptions;
 				AllBraces = o.HasAnyFlag(SpecialHighlightOptions.AllBraces);
 				AllParentheses = o.HasAnyFlag(SpecialHighlightOptions.AllParentheses);
 				var sp = o.MatchFlags(SpecialHighlightOptions.SpecialPunctuation);

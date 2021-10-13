@@ -152,7 +152,7 @@ namespace Codist.SyntaxHighlight
 		static Dictionary<string, StyleBase> InitSyntaxStyleCache() {
 			var cache = new Dictionary<string, StyleBase>(100, StringComparer.OrdinalIgnoreCase);
 			LoadSyntaxStyleCache(cache);
-			Config.Loaded += (s, args) => ResetStyleCache();
+			Config.RegisterLoadHandler((config) => ResetStyleCache());
 			DefaultClassificationFormatMap.ClassificationFormatMappingChanged += UpdateFormatCache;
 			VSColorTheme.ThemeChanged += _ => {
 				if (_BackupFormattings != null) {

@@ -21,7 +21,7 @@ namespace Codist.Taggers
 	sealed class CSharpBlockTaggerProvider : ITaggerProvider
 	{
 		public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag {
-			if (typeof(T) != typeof(ICodeMemberTag)) {
+			if (typeof(T) != typeof(ICodeMemberTag) || buffer.GetTextDocument() == null) {
 				return null;
 			}
 
@@ -35,7 +35,7 @@ namespace Codist.Taggers
 
 	sealed class CSharpBlockTagger : ITagger<ICodeMemberTag>, IReuseableTagger
 	{
-		readonly ITextBuffer _buffer;
+		ITextBuffer _buffer;
 		int _refCount;
 		CodeBlock _root;
 		CancellationTokenSource _Cancellation;
@@ -48,7 +48,7 @@ namespace Codist.Taggers
 
 		public void AddRef() {
 			if (++_refCount == 1) {
-				_buffer.Changed += OnChanged;
+				_buffer.Changed += OnBufferChanged;
 				ScanBufferAsync(_buffer.CurrentSnapshot);
 			}
 		}
@@ -77,12 +77,18 @@ namespace Codist.Taggers
 
 		public void Release() {
 			if (--_refCount == 0) {
-				_buffer.Changed -= OnChanged;
-
-				//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
-				SyncHelper.CancelAndDispose(ref _Cancellation, false);
-				_root = null; //Allow the old root to be GC'd
+				ReleaseResources();
 			}
+		}
+
+		void ReleaseResources() {
+			_buffer.Changed -= OnBufferChanged;
+			_buffer.Properties.RemoveProperty(typeof(CSharpBlockTaggerProvider));
+			_buffer = null;
+
+			//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
+			SyncHelper.CancelAndDispose(ref _Cancellation, false);
+			_root = null; //Allow the old root to be GC'd
 		}
 
 		static async Task<CodeBlock> ParseAsync(ITextSnapshot snapshot, CancellationToken token) {
@@ -171,7 +177,7 @@ namespace Codist.Taggers
 			}
 		}
 
-		async void OnChanged(object sender, TextContentChangedEventArgs e) {
+		async void OnBufferChanged(object sender, TextContentChangedEventArgs e) {
 			try {
 				if (TextEditorHelper.AnyTextChanges(e.Before.Version, e.After.Version)) {
 					await ScanBufferAsync(e.After);
