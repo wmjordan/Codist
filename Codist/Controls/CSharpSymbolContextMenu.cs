@@ -515,11 +515,11 @@ namespace Codist.Controls
 		}
 
 		public override void Dispose() {
-			base.Dispose();
-			FilteredItems = null;
-			ItemsSource = null;
-			PreviewKeyUp -= OnMenuKeyUp;
 			if (_ExternalAdornment != null) {
+				base.Dispose();
+				FilteredItems = null;
+				ItemsSource = null;
+				PreviewKeyUp -= OnMenuKeyUp;
 				MouseLeftButtonUp -= MenuItemSelect;
 				_ExternalAdornment.DisableDraggable(this);
 				_ExternalAdornment = null;

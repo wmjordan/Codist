@@ -27,7 +27,7 @@ namespace Codist.NaviBar
 		public abstract void ShowActiveItemMenu();
 		public abstract void ShowRootItemMenu(int parameter);
 		internal protected abstract void BindView();
-		protected abstract void UnbindViewEvents();
+		protected abstract void UnbindView();
 
 		protected IWpfTextView View => _View;
 		internal ExternalAdornment ListContainer { get; private set; }
@@ -56,11 +56,18 @@ namespace Codist.NaviBar
 
 		void View_Closed(object sender, EventArgs e) {
 			if (_View != null) {
-				UnbindViewEvents();
-				ListContainer = null;
-				Unloaded -= NaviBar_Unloaded;
-				Loaded -= NaviBar_Loaded;
 				_View.Closed -= View_Closed;
+				Loaded -= NaviBar_Loaded;
+				Unloaded -= NaviBar_Unloaded;
+				UnbindView();
+				var visualParent = this.GetParent<FrameworkElement>();
+				if (visualParent is Panel p) {
+					p.Children.Remove(this);
+				}
+				else if (visualParent is ContentControl c) {
+					c.Content = null;
+				}
+				ListContainer = null;
 				_View.Properties.RemoveProperty(nameof(NaviBar));
 				_View.Properties.RemoveProperty(typeof(ExternalAdornment));
 				_View = null;

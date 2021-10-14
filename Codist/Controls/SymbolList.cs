@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,7 +20,7 @@ using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
 {
-	class SymbolList : VirtualList, ISymbolFilterable, IDisposable
+	class SymbolList : VirtualList, ISymbolFilterable, INotifyCollectionChanged, IDisposable
 	{
 		Predicate<object> _Filter;
 		readonly ToolTip _SymbolTip;
@@ -42,6 +43,7 @@ namespace Codist.Controls
 		public Func<SymbolItem, UIElement> IconProvider { get; set; }
 		public Func<SymbolItem, UIElement> ExtIconProvider { get; set; }
 		public SymbolItem SelectedSymbolItem => SelectedItem as SymbolItem;
+		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
 		public bool IsPinned { get; set; }
 
@@ -78,6 +80,7 @@ namespace Codist.Controls
 				item.Release();
 			}
 			_Symbols.Clear();
+			CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 		}
 		public void RefreshItemsSource(bool force = false) {
 			if (force) {
@@ -412,6 +415,7 @@ namespace Codist.Controls
 		SymbolFilterKind ISymbolFilterable.SymbolFilterKind {
 			get => ContainerType == SymbolListType.TypeList ? SymbolFilterKind.Type
 				: ContainerType == SymbolListType.SymbolReferrers ? SymbolFilterKind.Usage
+				: ContainerType == SymbolListType.NodeList ? SymbolFilterKind.Node
 				: SymbolFilterKind.Member;
 		}
 
@@ -646,11 +650,13 @@ namespace Codist.Controls
 			base.Dispose();
 			if (SemanticContext != null) {
 				HideToolTip();
+				_SymbolTip.PlacementTarget = null;
 				ClearSymbols();
 				if (ContextMenu is IDisposable d) {
 					d.Dispose();
 				}
 				SelectedItem = null;
+				ItemsSource = null;
 				SemanticContext = null;
 				IconProvider = null;
 				ExtIconProvider = null;

@@ -126,6 +126,9 @@ namespace Codist.Controls
 				case SymbolFilterKind.Usage:
 					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new InstanceFilterButtonGroup(), new SymbolUsageFilterButtonGroup(), new MemberFilterButtonGroup() };
 					break;
+				case SymbolFilterKind.Node:
+					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new MemberFilterButtonGroup() };
+					break;
 				default:
 					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new InstanceFilterButtonGroup(), new MemberFilterButtonGroup() };
 					break;
@@ -741,7 +744,7 @@ namespace Codist.Controls
 				_uiLock = true;
 				_InstanceMemberFilter.IsChecked = _StaticMemberFilter.IsChecked = false;
 				_uiLock = false;
-				_Filters |= MemberFilterTypes.AllMembers;
+				_Filters |= MemberFilterTypes.AllInstance;
 			}
 		}
 
@@ -920,6 +923,7 @@ namespace Codist.Controls
 	{
 		Undefined,
 		Member,
+		Node,
 		Type,
 		Usage
 	}

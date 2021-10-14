@@ -33,7 +33,7 @@ namespace Codist.QuickInfo
 	static class QuickInfoOverrider
 	{
 		public static IQuickInfoOverrider CreateOverrider(IAsyncQuickInfoSession session) {
-			return session.Properties.GetOrCreateSingletonProperty<Default>(() => new Default());
+			return session.Properties.GetOrCreateSingletonProperty<DefaultOverrider>(() => new DefaultOverrider());
 		}
 
 		public static void HoldQuickInfo(DependencyObject quickInfoItem, bool hold) {
@@ -257,12 +257,12 @@ namespace Codist.QuickInfo
 		/// <para>The original implementation of QuickInfo locates at: Common7\IDE\CommonExtensions\Microsoft\Editor\Microsoft.VisualStudio.Platform.VSEditor.dll</para>
 		/// <para>class: Microsoft.VisualStudio.Text.AdornmentLibrary.ToolTip.Implementation.WpfToolTipControl</para>
 		/// </remarks>
-		sealed class Default : IQuickInfoOverrider
+		sealed class DefaultOverrider : IQuickInfoOverrider
 		{
-			readonly Overrider _Overrider;
+			readonly OverriderControl _Overrider;
 
-			public Default() {
-				_Overrider = new Overrider();
+			public DefaultOverrider() {
+				_Overrider = new OverriderControl();
 				if (Config.Instance.QuickInfoMaxHeight > 0 && Config.Instance.QuickInfoMaxWidth > 0) {
 					_Overrider.LimitItemSize = true;
 				}
@@ -292,7 +292,7 @@ namespace Codist.QuickInfo
 				_Overrider.Diagnostics = diagnostics;
 			}
 
-			sealed class Overrider : StackPanel, IInteractiveQuickInfoContent, IQuickInfoHolder
+			sealed class OverriderControl : StackPanel, IInteractiveQuickInfoContent, IQuickInfoHolder
 			{
 				static readonly Thickness __DocPanelBorderMargin = new Thickness(0, 0, -9, 3);
 				static readonly Thickness __DocPanelBorderPadding = new Thickness(0, 0, 9, 0);
@@ -578,7 +578,7 @@ namespace Codist.QuickInfo
 							continue;
 						}
 						var c = cp.Content;
-						if (c is Overrider || c is IInteractiveQuickInfoContent /* don't hack interactive content */) {
+						if (c is OverriderControl || c is IInteractiveQuickInfoContent /* don't hack interactive content */) {
 							continue;
 						}
 						if (docPanel == c || docPanelHandled == false && cp.GetFirstVisualChild<StackPanel>(i => i == docPanel) != null) {

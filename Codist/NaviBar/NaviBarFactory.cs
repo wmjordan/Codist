@@ -80,6 +80,7 @@ namespace Codist.NaviBar
 		{
 			IWpfTextView _View;
 			ITextSearchService2 _TextSearch;
+			FrameworkElement _NaviBarHolder;
 
 			public Overrider(IWpfTextView view, ITextSearchService2 textSearch) {
 				_View = view;
@@ -97,7 +98,7 @@ namespace Codist.NaviBar
 					naviBar.BindView();
 					return;
 				}
-				var naviBarHolder = view.VisualElement
+				var naviBarHolder = _NaviBarHolder = view.VisualElement
 					?.GetParent<Border>(b => b.Name == "PART_ContentPanel")
 					?.GetFirstVisualChild<Border>(b => b.Name == "DropDownBarMargin");
 				if (naviBarHolder == null) {
@@ -160,6 +161,10 @@ namespace Codist.NaviBar
 					_View.VisualElement.Loaded -= AddNaviBar;
 					_View.Closed -= View_Closed;
                     _View.Properties.RemoveProperty(nameof(NaviBar));
+					if (_NaviBarHolder != null) {
+						_NaviBarHolder.Unloaded -= ResurrectNaviBar_OnUnloaded;
+						_NaviBarHolder = null;
+					}
 					_TextSearch = null;
 					_View = null;
 				}

@@ -57,12 +57,12 @@ namespace Codist.NaviBar
 		}
 
 		protected internal override void BindView() {
-			UnbindViewEvents();
+			UnbindView();
 			View.Selection.SelectionChanged += Update;
 			View.TextBuffer.PostChanged += Update;
 		}
 
-		protected override void UnbindViewEvents() {
+		protected override void UnbindView() {
 			if (_TextSearch != null) {
 				View.Selection.SelectionChanged -= Update;
 				View.TextBuffer.PostChanged -= Update;

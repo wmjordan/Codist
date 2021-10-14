@@ -137,6 +137,7 @@ namespace Codist.Controls
 		}
 		public void DisableDraggable(FrameworkElement element) {
 			element.MouseLeftButtonDown -= MenuHeader_MouseDown;
+			element.MouseMove -= MenuHeader_DragMove;
 		}
 
 		void MenuHeader_MouseDown(object sender, MouseButtonEventArgs e) {
@@ -185,6 +186,11 @@ namespace Codist.Controls
 				_View.Properties.RemoveProperty(typeof(ExternalAdornment));
 				_View.VisualElement.GetParent<Grid>().Children.Remove(this);
 				foreach (var item in Children) {
+					if (item is FrameworkElement fe) {
+						fe.MouseLeave -= ReleaseQuickInfo;
+						fe.MouseEnter -= SuppressQuickInfo;
+						fe.MouseLeftButtonDown -= BringToFront;
+					}
 					if (item is IDisposable d) {
 						d.Dispose();
 					}

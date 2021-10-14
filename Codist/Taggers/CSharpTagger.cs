@@ -31,7 +31,10 @@ namespace Codist.Taggers
 		// for debug info
 		int _taggerCount;
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
-			if (typeof(T) == typeof(IClassificationTag) && Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)) {
+			if (typeof(T) == typeof(IClassificationTag)
+				&& Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
+				&& buffer.GetTextDocument() != null // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
+				) {
 				if (_Taggers.TryGetValue(buffer, out var tagger) == false) {
 					tagger = new CSharpTagger(this, textView, buffer);
 					_Taggers.Add(buffer, tagger);

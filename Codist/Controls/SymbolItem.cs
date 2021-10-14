@@ -1,13 +1,14 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.CodeAnalysis;
 using AppHelpers;
+using Microsoft.CodeAnalysis;
 
 namespace Codist.Controls
 {
-	sealed class SymbolItem
+	sealed class SymbolItem : INotifyPropertyChanged
 	{
 		UIElement _Icon;
 		int _ImageId;
@@ -74,6 +75,8 @@ namespace Codist.Controls
 			SyntaxNode = node;
 			Container = list;
 		}
+
+		public event PropertyChangedEventHandler PropertyChanged;
 
 		public bool GoToSource() {
 			if (Location != null && Location.IsInSource) {

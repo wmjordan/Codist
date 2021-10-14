@@ -13,6 +13,39 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Taggers
 {
+	[Export(typeof(IViewTaggerProvider))]
+	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType("projection")]
+	[TagType(typeof(IClassificationTag))]
+	sealed class CommentTaggerProvider : IViewTaggerProvider
+	{
+		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
+				|| CommentTagger.IsCommentTaggable(buffer) == false
+				|| buffer.GetTextDocument() == null) {
+				return null;
+			}
+			var vp = textView.Properties;
+			CommentTagger codeTagger;
+			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
+			var agg = vp.GetOrCreateSingletonProperty("TagAggregator", () => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
+			codeTagger = vp.GetOrCreateSingletonProperty("CommentTagger", () => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, agg, tags, buffer));
+			textView.Closed -= TextViewClosed;
+			textView.Closed += TextViewClosed;
+			return codeTagger as ITagger<T>;
+		}
+
+		void TextViewClosed(object sender, EventArgs args) {
+			var textView = sender as ITextView;
+			textView.Closed -= TextViewClosed;
+			textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>("TagAggregator")?.Dispose();
+			textView.Properties.GetProperty<CommentTagger>("CommentTagger")?.Dispose();
+			textView.Properties.RemoveProperty("TagAggregator");
+			textView.Properties.RemoveProperty("CommentTagger");
+			textView.Properties.RemoveProperty(typeof(TaggerResult));
+		}
+	}
+
 	abstract class CommentTagger : ITagger<IClassificationTag>, IDisposable
 	{
 		static ClassificationTag[] __CommentClassifications;
@@ -373,39 +406,6 @@ namespace Codist.Taggers
 			protected override int GetCommentEndIndex(string comment) {
 				return comment.EndsWith("-->", StringComparison.Ordinal) ? comment.Length - 3 : comment.Length;
 			}
-		}
-	}
-
-
-	[Export(typeof(IViewTaggerProvider))]
-	[ContentType(Constants.CodeTypes.Code)]
-	[ContentType("projection")]
-	[TagType(typeof(IClassificationTag))]
-	sealed class CommentTaggerProvider : IViewTaggerProvider
-	{
-		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
-			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
-				|| CommentTagger.IsCommentTaggable(buffer) == false) {
-				return null;
-			}
-			var vp = textView.Properties;
-			CommentTagger codeTagger;
-			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
-			var agg = vp.GetOrCreateSingletonProperty("TagAggregator", () => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
-			codeTagger = vp.GetOrCreateSingletonProperty("CommentTagger", () => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, agg, tags, buffer));
-			textView.Closed -= TextViewClosed;
-			textView.Closed += TextViewClosed;
-			return codeTagger as ITagger<T>;
-		}
-
-		void TextViewClosed(object sender, EventArgs args) {
-			var textView = sender as ITextView;
-			textView.Closed -= TextViewClosed;
-			textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>("TagAggregator")?.Dispose();
-			textView.Properties.GetProperty<CommentTagger>("CommentTagger")?.Dispose();
-			textView.Properties.RemoveProperty("TagAggregator");
-			textView.Properties.RemoveProperty("CommentTagger");
-			textView.Properties.RemoveProperty(typeof(TaggerResult));
 		}
 	}
 }

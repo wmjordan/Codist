@@ -97,7 +97,7 @@ namespace Codist.NaviBar
 
 		internal protected override void BindView() {
 			if (_SemanticContext != null) {
-				UnbindViewEvents();
+				UnbindView();
 			}
 			_Buffer = View.TextBuffer;
 			View.TextBuffer.Changed += TextBuffer_Changed;
@@ -108,7 +108,7 @@ namespace Codist.NaviBar
 			_SemanticContext = SemanticContext.GetOrCreateSingetonInstance(View);
 		}
 
-		protected override void UnbindViewEvents() {
+		protected override void UnbindView() {
 			View.Selection.SelectionChanged -= Update;
 			View.TextBuffer.Changed -= TextBuffer_Changed;
 			ListContainer.ChildRemoved -= ListContainer_MenuRemoved;
@@ -152,101 +152,102 @@ namespace Codist.NaviBar
 			HideMenu();
 			if (_cancellationSource != null) {
 				try {
-					await Update(SyncHelper.CancelAndRetainToken(ref _cancellationSource)).ConfigureAwait(false);
+					await UpdateAsync(SyncHelper.CancelAndRetainToken(ref _cancellationSource)).ConfigureAwait(false);
 				}
 				catch (OperationCanceledException) {
 					// ignore
 				}
 			}
-			async Task Update(CancellationToken token) {
-				var nodes = await UpdateModelAndGetContainingNodesAsync(token);
-				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(token);
-				int ic = Items.Count, c = Math.Min(ic, nodes.Length);
-				int i, i2;
-				#region Remove outdated nodes on NaviBar
-				const int FirstNodeIndex = 2; // exclude root and globalNs node
-				for (i = FirstNodeIndex, i2 = 0; i < c && i2 < c; i2++) {
-					if (token.IsCancellationRequested) {
-						return;
+		}
+
+		async Task UpdateAsync(CancellationToken token) {
+			var nodes = await UpdateModelAndGetContainingNodesAsync(token);
+			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(token);
+			int ic = Items.Count, c = Math.Min(ic, nodes.Length);
+			int i, i2;
+			#region Remove outdated nodes on NaviBar
+			const int FirstNodeIndex = 2; // exclude root and globalNs node
+			for (i = FirstNodeIndex, i2 = 0; i < c && i2 < c; i2++) {
+				if (token.IsCancellationRequested) {
+					return;
+				}
+				CHECK_NODE:
+				if (Items[i] is BarItem ni) {
+					if (ni.Node == nodes[i2]) {
+						// keep the item if corresponding node is not updated
+						++i;
+						continue;
 					}
-					CHECK_NODE:
-					if (Items[i] is BarItem ni) {
-						if (ni.Node == nodes[i2]) {
-							// keep the item if corresponding node is not updated
-							++i;
-							continue;
-						}
-						else if (ni.ItemType == BarItemType.Namespace
-							&& ni.Node.IsKind(SyntaxKind.NamespaceDeclaration) == false) {
-							if (++i < ic) {
-								goto CHECK_NODE;
-							}
-						}
-						if (ni.ItemType == BarItemType.Namespace) {
-							i = FirstNodeIndex;
+					else if (ni.ItemType == BarItemType.Namespace
+						&& ni.Node.IsKind(SyntaxKind.NamespaceDeclaration) == false) {
+						if (++i < ic) {
+							goto CHECK_NODE;
 						}
 					}
-					break;
-				}
-				c = Items.Count;
-				if (i == FirstNodeIndex && _RootItem.FilterText.Length == 0) {
-					// clear type and namespace menu items if a type is changed
-					_RootItem.ClearSymbolList();
-				}
-				// remove outdated nodes
-				while (c > i) {
-					Items.RemoveAndDisposeAt(--c);
-				}
-				#endregion
-				#region Add updated nodes
-				c = nodes.Length;
-				NodeItem memberNode = null;
-				while (i2 < c) {
-					if (token.IsCancellationRequested) {
-						return;
+					if (ni.ItemType == BarItemType.Namespace) {
+						i = FirstNodeIndex;
 					}
-					var node = nodes[i2];
-					if (node.IsKind(SyntaxKind.NamespaceDeclaration)) {
-						var ns = ((NamespaceDeclarationSyntax)node).Name;
-						if (node.Parent.IsKind(SyntaxKind.NamespaceDeclaration) == false) {
-							var nb = ImmutableArray.CreateBuilder<NameSyntax>();
-							while (ns is QualifiedNameSyntax q) {
-								ns = q.Left;
-								nb.Add(ns);
-							}
-							for (i = nb.Count - 1; i >= 0; i--) {
-								Items.Add(new NamespaceItem(this, nb[i]));
-							}
-						}
-						Items.Add(new NamespaceItem(this, node));
-					}
-					else {
-						var newItem = new NodeItem(this, node);
-						if (memberNode == null && node.Kind().IsMemberDeclaration()) {
-							memberNode = newItem;
-							((TextBlock)newItem.Header).FontWeight = FontWeights.Bold;
-							((TextBlock)newItem.Header).SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.FileTabSelectedTextBrushKey);
-							newItem.IsChecked = true;
-							if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ReferencingTypes)) {
-								newItem.ReferencedSymbols.AddRange(node.FindRelatedTypes(_SemanticContext.SemanticModel, token).Take(5));
-							}
-						}
-						Items.Add(newItem);
-					}
-					++i2;
 				}
-				#endregion
-				#region Add external referenced nodes in node range
-				if (memberNode == null) {
-					memberNode = Items.GetFirst<NodeItem>(n => n.HasReferencedSymbols);
-				}
-				if (memberNode != null && memberNode.HasReferencedSymbols) {
-					foreach (var doc in memberNode.ReferencedSymbols) {
-						Items.Add(new SymbolNodeItem(this, doc));
-					}
-				} 
-				#endregion
+				break;
 			}
+			c = Items.Count;
+			if (i == FirstNodeIndex && _RootItem.FilterText.Length == 0) {
+				// clear type and namespace menu items if a type is changed
+				_RootItem.ClearSymbolList();
+			}
+			// remove outdated nodes
+			while (c > i) {
+				Items.RemoveAndDisposeAt(--c);
+			}
+			#endregion
+			#region Add updated nodes
+			c = nodes.Length;
+			NodeItem memberNode = null;
+			while (i2 < c) {
+				if (token.IsCancellationRequested) {
+					return;
+				}
+				var node = nodes[i2];
+				if (node.IsKind(SyntaxKind.NamespaceDeclaration)) {
+					var ns = ((NamespaceDeclarationSyntax)node).Name;
+					if (node.Parent.IsKind(SyntaxKind.NamespaceDeclaration) == false) {
+						var nb = ImmutableArray.CreateBuilder<NameSyntax>();
+						while (ns is QualifiedNameSyntax q) {
+							ns = q.Left;
+							nb.Add(ns);
+						}
+						for (i = nb.Count - 1; i >= 0; i--) {
+							Items.Add(new NamespaceItem(this, nb[i]));
+						}
+					}
+					Items.Add(new NamespaceItem(this, node));
+				}
+				else {
+					var newItem = new NodeItem(this, node);
+					if (memberNode == null && node.Kind().IsMemberDeclaration()) {
+						memberNode = newItem;
+						((TextBlock)newItem.Header).FontWeight = FontWeights.Bold;
+						((TextBlock)newItem.Header).SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.FileTabSelectedTextBrushKey);
+						newItem.IsChecked = true;
+						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ReferencingTypes)) {
+							newItem.ReferencedSymbols.AddRange(node.FindRelatedTypes(_SemanticContext.SemanticModel, token).Take(5));
+						}
+					}
+					Items.Add(newItem);
+				}
+				++i2;
+			}
+			#endregion
+			#region Add external referenced nodes in node range
+			if (memberNode == null) {
+				memberNode = Items.GetFirst<NodeItem>(n => n.HasReferencedSymbols);
+			}
+			if (memberNode != null && memberNode.HasReferencedSymbols) {
+				foreach (var doc in memberNode.ReferencedSymbols) {
+					Items.Add(new SymbolNodeItem(this, doc));
+				}
+			} 
+			#endregion
 		}
 
 		async Task<ImmutableArray<SyntaxNode>> UpdateModelAndGetContainingNodesAsync(CancellationToken token) {
@@ -306,7 +307,7 @@ namespace Codist.NaviBar
 		void ShowMenu(ThemedImageButton barItem, SymbolList menu) {
 			ref var l = ref _SymbolList;
 			if (l != menu) {
-				ListContainer.Children.RemoveAndDispose(l);
+				DisposeSymbolList(l);
 				ListContainer.Children.Add(menu);
 				l = menu;
 				if (_ActiveItem != null) {
@@ -354,14 +355,14 @@ namespace Codist.NaviBar
 		void HideMenu() {
 			var l = _SymbolList;
 			if (l != null) {
-				ListContainer.Children.RemoveAndDispose(l);
+				ListContainer.Children.Remove(l);
 			}
 		}
 
 		void ListContainer_MenuRemoved(object sender, AdornmentChildRemovedEventArgs e) {
 			if (_SymbolList == e.RemovedElement) {
-				_SymbolList.HideToolTip();
-				//_SymbolList.SelectedItem = null;
+				_SymbolList.PreviewKeyUp -= OnMenuKeyUp;
+				_SymbolList.Dispose();
 				_SymbolList = null;
 				if (_ActiveItem != null) {
 					_ActiveItem.IsHighlighted = false;
@@ -464,7 +465,10 @@ namespace Codist.NaviBar
 			SyncHelper.CancelAndDispose(ref _cancellationSource, false);
 			_SyntaxNodeRangeAdornment.RemoveAllAdornments();
 			_SyntaxNodeRangeAdornment = null;
-			_SymbolList = null;
+			if (_SymbolList != null) {
+				DisposeSymbolList(_SymbolList);
+				_SymbolList = null;
+			}
 			_ActiveItem = null;
 			_GlobalNamespaceItem = null;
 			_RootItem = null;
@@ -474,6 +478,16 @@ namespace Codist.NaviBar
 				}
 			}
 			Items.Clear();
+		}
+
+		void DisposeSymbolList(SymbolList l) {
+			if (l != null) {
+				l.PreviewKeyUp -= OnMenuKeyUp;
+				l.MouseLeftButtonUp -= MenuItemSelect;
+				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(l, false);
+				ListContainer?.Children.Remove(l);
+				l.Dispose();
+			}
 		}
 
 		sealed class RootItem : BarItem, IContextMenuHost
@@ -733,14 +747,13 @@ namespace Codist.NaviBar
 			}
 
 			public override void Dispose() {
-				if (Node != null) {
-					base.Dispose();
-					_IncrementalSearchContainer = null;
+				if (_FinderBox != null) {
 					if (_Menu != null) {
-						Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
-						_Menu.Dispose();
+						Bar.DisposeSymbolList(_Menu);
 						_Menu = null;
 					}
+					base.Dispose();
+					_IncrementalSearchContainer = null;
 					_FinderBox.PreviewKeyDown -= ChangeSearchScope;
 					_FinderBox.TextChanged -= SearchCriteriaChanged;
 					_FinderBox.IsVisibleChanged -= FinderBox_IsVisibleChanged;
@@ -860,13 +873,12 @@ namespace Codist.NaviBar
 			}
 
 			public override void Dispose() {
-				base.Dispose();
-				Click -= HandleClick;
 				if (_Menu != null) {
-					Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
-					_Menu.Dispose();
+					Bar.DisposeSymbolList(_Menu);
 					_Menu = null;
 				}
+				base.Dispose();
+				Click -= HandleClick;
 				if (_FilterBox != null) {
 					_FilterBox.FilterChanged -= FilterChanged;
 					_FilterBox = null;
@@ -997,14 +1009,13 @@ namespace Codist.NaviBar
 
 			public override void Dispose() {
 				if (Node != null) {
+					if (_Menu != null) {
+						Bar.DisposeSymbolList(_Menu);
+						_Menu = null;
+					}
 					base.Dispose();
 					Click -= HandleClick;
 					_Symbol = null;
-					if (_Menu != null) {
-						Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
-						_Menu.Dispose();
-						_Menu = null;
-					}
 					if (_FilterBox != null) {
 						_FilterBox.FilterChanged -= FilterChanged;
 						_FilterBox = null;
@@ -1107,7 +1118,7 @@ namespace Codist.NaviBar
 				_Menu = new SymbolList(Bar._SemanticContext) {
 					Container = Bar.ListContainer,
 					ContainerType = SymbolListType.NodeList,
-					ExtIconProvider = s => GetExtIcons(s.SyntaxNode)
+					ExtIconProvider = s => GetExtIcons(s.SyntaxNode),
 				};
 				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
 				_Menu.Header = new WrapPanel {
@@ -1456,15 +1467,14 @@ namespace Codist.NaviBar
 
 			public override void Dispose() {
 				if (Node != null) {
+					if (_Menu != null) {
+						Bar.DisposeSymbolList(_Menu);
+						_Menu = null;
+					}
 					base.Dispose();
 					Click -= HandleClick;
 					_Symbol = null;
 					_ReferencedSymbols = null;
-					if (_Menu != null) {
-						Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
-						_Menu.Dispose();
-						_Menu = null;
-					}
 					_FilterBox = null;
 					if (ContextMenu is IDisposable d) {
 						d.Dispose();
