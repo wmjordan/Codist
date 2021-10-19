@@ -467,6 +467,7 @@ namespace Codist.SmartBars
 
 		void Menu_Closed(object sender, EventArgs args) {
 			var m = sender as CSharpSymbolContextMenu;
+			m.PlacementTarget = null;
 			m.Closed -= Menu_Closed;
 			m.Dispose();
 			HideToolBar();

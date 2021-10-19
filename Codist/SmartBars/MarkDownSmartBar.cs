@@ -22,22 +22,22 @@ namespace Codist.SmartBars
 			base.AddCommands(cancellationToken);
 		}
 
-		void MakeUrl(CommandContext ctx) {
+		static void MakeUrl(CommandContext ctx) {
 			var t = ctx.View.GetFirstSelectionText();
 			if (t.StartsWith("http://", StringComparison.Ordinal) || t.StartsWith("https://", StringComparison.Ordinal)) {
 				var s = WrapWith(ctx, "[title](", ")", false);
 				if (s.Snapshot != null) {
 					// select the "title"
-					View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + 1, 5), false);
-					View.Caret.MoveTo(s.Start + 6);
+					ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + 1, 5), false);
+					ctx.View.Caret.MoveTo(s.Start + 6);
 				}
 			}
 			else {
 				var s = WrapWith(ctx, "[", "](url)", false);
 				if (s.Snapshot != null) {
 					// select the "url"
-					View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - 4, 3), false);
-					View.Caret.MoveTo(s.End - 1);
+					ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - 4, 3), false);
+					ctx.View.Caret.MoveTo(s.End - 1);
 				}
 			}
 		}

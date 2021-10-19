@@ -26,6 +26,24 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
+	<Style x:Key="{x:Type Button}" TargetType="{x:Type Button}">
+		<Setter Property="OverridesDefaultStyle" Value="True"/>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Button}">
+					<Border Name="Border" BorderThickness="{TemplateBinding BorderThickness}" Margin="{TemplateBinding Margin}" Padding="{TemplateBinding Padding}">
+						<ContentPresenter />
+					</Border>
+					<ControlTemplate.Triggers>
+						<Trigger Property="UIElement.IsMouseOver" Value="True">
+							<Setter TargetName="Border" Property="Background" Value="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonHoverBrushKey}}"/>
+							<Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource {x:Static vsp:CommonControlsColors.ButtonBorderHoverBrushKey}}"/>
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
 	<Style TargetType="{x:Type c:ThemedToggleButton}">
 		<Setter Property="Template">
 			<Setter.Value>

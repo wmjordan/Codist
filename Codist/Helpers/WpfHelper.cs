@@ -440,6 +440,10 @@ namespace Codist
 			control.SetResourceReference(FrameworkElement.StyleProperty, resourceKey);
 			return control;
 		}
+		public static void InheritStyle<TBaseControl>(this FrameworkElement control, ResourceDictionary resourceDictionary)
+			where TBaseControl : FrameworkElement {
+			control.Style = new Style(control.GetType(), resourceDictionary.Get<Style>(typeof(TBaseControl)));
+		}
 		public static ResourceDictionary MergeWith(this ResourceDictionary dictionary, ResourceDictionary resourceDictionary) {
 			dictionary.MergedDictionaries.Add(resourceDictionary);
 			return dictionary;
@@ -482,6 +486,17 @@ namespace Codist
 				}
 			}
 			return false;
+		}
+		/// <summary>
+		/// Calls <see cref="IDisposable.Dispose"/> on each item in <paramref name="control"/> and empties the collection.
+		/// </summary>
+		public static void DisposeCollection(this ItemsControl control) {
+			foreach (var item in control.Items) {
+				if (item is IDisposable d) {
+					d.Dispose();
+				}
+			}
+			control.Items.Clear();
 		}
 		/// <summary>
 		/// Calls <see cref="IDisposable.Dispose"/> on the item and then removes it from the collection at <paramref name="index"/>.

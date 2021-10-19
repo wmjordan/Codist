@@ -18,7 +18,6 @@ namespace Codist.Margins
 		IWpfTextView _TextView;
 		IEditorFormatMap _EditorFormatMap;
 		IVerticalScrollBar _ScrollBar;
-
 		Brush _SelectionBrush;
 
 		public SelectionMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) {
@@ -129,22 +128,6 @@ namespace Codist.Margins
 		}
 
 		#region IDisposable Support
-		bool disposedValue = false;
-
-		void Dispose(bool disposing) {
-			if (!disposedValue) {
-				if (disposing) {
-					UnbindEvents();
-					_TextView = null;
-					_EditorFormatMap = null;
-					_ScrollBar = null;
-					_SelectionBrush = null;
-				}
-
-				disposedValue = true;
-			}
-		}
-
 		void UnbindEvents() {
 			_TextView.Closed -= _TextView_Closed;
 			Config.UnregisterUpdateHandler(UpdateSelectionMarginConfig);
@@ -154,7 +137,13 @@ namespace Codist.Margins
 		}
 
 		public void Dispose() {
-			Dispose(true);
+			if (_TextView != null) {
+				UnbindEvents();
+				_TextView = null;
+				_EditorFormatMap = null;
+				_ScrollBar = null;
+				_SelectionBrush = null;
+			}
 		}
 		#endregion
 	}

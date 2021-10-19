@@ -24,7 +24,7 @@ namespace Codist.SmartBars
 		internal const string QuickInfoSuppressionId = nameof(SmartBar);
 
 		/// <summary>The layer for the smart bar adornment.</summary>
-		readonly IAdornmentLayer _ToolBarLayer;
+		IAdornmentLayer _ToolBarLayer;
 		readonly ToolBarTray _ToolBarTray;
 		CancellationTokenSource _Cancellation = new CancellationTokenSource();
 		IWpfTextView _View;
@@ -89,23 +89,7 @@ namespace Codist.SmartBars
 		}
 
 		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
-			var b = CreateButton(imageId, tooltip);
-			b.Click += (s, args) => {
-				var ctx = new CommandContext(this, s as Control, args);
-				handler(ctx);
-				if (ctx.KeepToolBarOnClick == false) {
-					HideToolBar(s, args);
-				}
-			};
-			b.MouseRightButtonUp += (s, args) => {
-				var ctx = new CommandContext(this, s as Control, args, true);
-				handler(ctx);
-				if (ctx.KeepToolBarOnClick == false) {
-					HideToolBar(s, args);
-				}
-				args.Handled = true;
-			};
-			toolBar.Items.Add(b);
+			toolBar.Items.Add(new CommandButton(this, imageId, tooltip, handler));
 		}
 
 		protected virtual void AddCommands(CancellationToken cancellationToken) {
@@ -133,74 +117,8 @@ namespace Codist.SmartBars
 			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
 		}
 
-		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Func<CommandContext, Task<IEnumerable<CommandItem>>> getItemsHandler) {
-			AddCommands(toolBar, imageId, tooltip, null, getItemsHandler);
-		}
-
-		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> leftClickHandler, Func<CommandContext, Task<IEnumerable<CommandItem>>> getItemsHandler) {
-			var b = CreateButton(imageId, tooltip);
-			if (leftClickHandler != null) {
-				b.Click += (s, args) => {
-					leftClickHandler(new CommandContext(this, s as Control, args));
-				};
-			}
-			else {
-				b.Click += (s, args) => {
-					ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args));
-				};
-			}
-			b.MouseRightButtonUp += (s, args) => {
-				ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args, true));
-				args.Handled = true;
-			};
-			toolBar.Items.Add(b);
-
-			async void ButtonEventHandler(Button btn, CommandContext ctx) {
-				var m = SetupContextMenu(btn);
-				if (m.Tag == null || (bool)m.Tag != ctx.RightClick) {
-					m.Items.Clear();
-					foreach (var item in await getItemsHandler(ctx)) {
-						if (ctx.CancellationToken.IsCancellationRequested) {
-							return;
-						}
-						m.Items.Add(new CommandMenuItem(this, item));
-					}
-					m.Tag = ctx.RightClick;
-				}
-			}
-
-		}
-
 		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> leftClickHandler, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {
-			var b = CreateButton(imageId, tooltip);
-			void ButtonEventHandler(Button btn, CommandContext ctx) {
-				var m = SetupContextMenu(btn);
-				if (m.Tag == null || (bool)m.Tag != ctx.RightClick) {
-					m.Items.Clear();
-					foreach (var item in getItemsHandler(ctx)) {
-						if (ctx.CancellationToken.IsCancellationRequested) {
-							return;
-						}
-						m.Items.Add(new CommandMenuItem(this, item));
-					}
-					m.Tag = ctx.RightClick;
-				}
-			}
-			if (leftClickHandler != null) {
-				b.Click += (s, args) => {
-					leftClickHandler(new CommandContext(this, s as Control, args));
-				};
-			}
-			else {
-				b.Click += (s, args) => {
-					ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args));
-				};
-			}
-			b.MouseRightButtonUp += (s, args) => {
-				ButtonEventHandler(s as Button, new CommandContext(this, s as Control, args, true));
-				args.Handled = true;
-			};
-			toolBar.Items.Add(b);
+			toolBar.Items.Add(new CommandButton(this, imageId, tooltip, leftClickHandler, getItemsHandler));
 		}
 
 		static ContextMenu SetupContextMenu(Button btn) {
@@ -221,7 +139,6 @@ namespace Codist.SmartBars
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
 				AddCommand(toolBar, imageId, tooltip, (ctx) => {
 					TextEditorHelper.ExecuteEditorCommand(command);
-					//View.Selection.Clear();
 				});
 			}
 		}
@@ -231,19 +148,8 @@ namespace Codist.SmartBars
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
 				AddCommand(toolBar, imageId, tooltip, (ctx) => {
 					TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? command2 : command);
-					//View.Selection.Clear();
 				});
 			}
-		}
-
-		static Button CreateButton(int imageId, string tooltip) {
-			var b = new Button {
-				Content = ThemeHelper.GetImage(imageId, Config.Instance.SmartBarButtonSize),
-				ToolTip = tooltip,
-				Cursor = Cursors.Hand
-			};
-			b.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
-			return b;
 		}
 
 		async Task CreateToolBarAsync(CancellationToken cancellationToken) {
@@ -263,8 +169,8 @@ namespace Codist.SmartBars
 
 		void InternalCreateToolBar(CancellationToken cancellationToken = default) {
 			_ToolBarTray.Visibility = Visibility.Hidden;
-			ToolBar.Items.Clear();
-			ToolBar2.Items.Clear();
+			ToolBar.DisposeCollection();
+			ToolBar2.DisposeCollection();
 			AddCommands(cancellationToken);
 			SetToolBarPosition();
 			if (ToolBar2.Items.Count == 0) {
@@ -299,26 +205,28 @@ namespace Codist.SmartBars
 			if (DateTime.Now < _LastExecute.AddSeconds(1)) {
 				return;
 			}
-			var pos = Mouse.GetPosition(View.VisualElement);
+			var v = View;
+			var pos = Mouse.GetPosition(v.VisualElement);
 			var rs = _ToolBarTray.RenderSize;
-			var x = pos.X - 35 + View.ViewportLeft;
-			var y = pos.Y - rs.Height - 10 + View.ViewportTop;
-			Canvas.SetLeft(_ToolBarTray, x < View.ViewportLeft ? View.ViewportLeft
-				: x + rs.Width < View.ViewportRight ? x
-				: View.ViewportRight - rs.Width);
-			Canvas.SetTop(_ToolBarTray, y < View.ViewportTop || x < 0 && View.Selection.IsReversed == false ? y + rs.Height + 30 : y);
+			var x = pos.X - 35 + v.ViewportLeft;
+			var y = pos.Y - rs.Height - 10 + v.ViewportTop;
+			Canvas.SetLeft(_ToolBarTray, x < v.ViewportLeft ? v.ViewportLeft
+				: x + rs.Width < v.ViewportRight ? x
+				: v.ViewportRight - rs.Width);
+			Canvas.SetTop(_ToolBarTray, y < v.ViewportTop || x < 0 && v.Selection.IsReversed == false ? y + rs.Height + 30 : y);
 		}
 
 		#region Event handlers
 		void UpdateSmartBarConfig(ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.MatchFlags(Features.SmartBar)) {
-				View.VisualElement.PreviewKeyUp -= ViewKeyUp;
+				var v = View;
+				v.VisualElement.PreviewKeyUp -= ViewKeyUp;
 				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
-					View.VisualElement.PreviewKeyUp += ViewKeyUp;
+					v.VisualElement.PreviewKeyUp += ViewKeyUp;
 				}
-				View.Selection.SelectionChanged -= ViewSelectionChanged;
+				v.Selection.SelectionChanged -= ViewSelectionChanged;
 				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ManualDisplaySmartBar) == false) {
-					View.Selection.SelectionChanged += ViewSelectionChanged;
+					v.Selection.SelectionChanged += ViewSelectionChanged;
 				}
 			}
 		}
@@ -434,19 +342,26 @@ namespace Codist.SmartBars
 
 		void ViewClosed(object sender, EventArgs e) {
 			SyncHelper.CancelAndDispose(ref _Cancellation, false);
+			ToolBar.DisposeCollection();
+			ToolBar2.DisposeCollection();
 			_ToolBarTray.ToolBars.Clear();
 			_ToolBarTray.MouseEnter -= ToolBarMouseEnter;
 			_ToolBarTray.MouseLeave -= ToolBarMouseLeave;
 			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
 			_ToolBarTray.DragEnter -= HideToolBar;
-			_ToolBarLayer.RemoveAdornment(_ToolBarTray);
-			_View.Selection.SelectionChanged -= ViewSelectionChanged;
-			_View.VisualElement.MouseMove -= ViewMouseMove;
-			_View.VisualElement.PreviewKeyUp -= ViewKeyUp;
-			//_View.LayoutChanged -= ViewLayoutChanged;
-			_View.Closed -= ViewClosed;
+			if (_ToolBarTray != null) {
+				_ToolBarLayer.RemoveAdornment(_ToolBarTray);
+				_ToolBarLayer = null;
+			}
+			if (_View != null) {
+				_View.Selection.SelectionChanged -= ViewSelectionChanged;
+				_View.VisualElement.MouseMove -= ViewMouseMove;
+				_View.VisualElement.PreviewKeyUp -= ViewKeyUp;
+				//_View.LayoutChanged -= ViewLayoutChanged;
+				_View.Closed -= ViewClosed;
+				_View = null;
+			}
 			Config.UnregisterUpdateHandler(UpdateSmartBarConfig);
-			_View = null;
 			_TextSearchService = null;
 		}
 		#endregion
@@ -455,15 +370,13 @@ namespace Codist.SmartBars
 		{
 			readonly SmartBar _Bar;
 
-			public CommandContext(SmartBar bar, Control control, RoutedEventArgs eventArgs) {
+			public CommandContext(SmartBar bar, Control control) {
 				_Bar = bar;
 				Sender = control;
-				EventArgs = eventArgs;
 			}
-			public CommandContext(SmartBar bar, Control control, RoutedEventArgs eventArgs, bool rightClick) : this(bar, control, eventArgs) {
+			public CommandContext(SmartBar bar, Control control, bool rightClick) : this(bar, control) {
 				RightClick = rightClick;
 			}
-			public RoutedEventArgs EventArgs { get; }
 			public bool KeepToolBarOnClick { get; set; }
 			public bool RightClick { get; }
 			public Control Sender { get; }
@@ -478,6 +391,102 @@ namespace Codist.SmartBars
 				KeepToolBarOnClick = true;
 				if (refresh) {
 					_Bar.InternalCreateToolBar(CancellationToken);
+				}
+			}
+		}
+
+		sealed class CommandButton : Button, IDisposable
+		{
+			const string RightClickTag = "RightClick", LeftClickTag = "LeftClick";
+			SmartBar _Bar;
+			Action<CommandContext> _ClickHandler;
+			Func<CommandContext, IEnumerable<CommandItem>> _MenuFactory;
+
+			public CommandButton(SmartBar bar, int imageId, string tooltip, Action<CommandContext> clickHandler)
+				: this(bar, imageId, tooltip, clickHandler, null) { }
+			public CommandButton(SmartBar bar, int imageId, string tooltip, Action<CommandContext> clickHandler, Func<CommandContext, IEnumerable<CommandItem>> menuFactory) {
+				_Bar = bar;
+				_ClickHandler = clickHandler;
+				_MenuFactory = menuFactory;
+				ToolTip = tooltip;
+				Cursor = Cursors.Hand;
+				BorderThickness = WpfHelper.TinyMargin;
+				Content = ThemeHelper.GetImage(imageId).WrapMargin(WpfHelper.SmallMargin);
+				this.InheritStyle<Button>(SharedDictionaryManager.ThemedControls);
+				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			}
+
+			protected override void OnClick() {
+				base.OnClick();
+				var ctx = new CommandContext(_Bar, this);
+				if (_ClickHandler != null) {
+					_ClickHandler(ctx);
+				}
+				else {
+					if (ContextMenu != null && ContextMenu.Tag as string == LeftClickTag) {
+						ContextMenu.IsOpen = true;
+						return;
+					}
+					ClearContextMenu();
+					var m = CreateContextMenuFromMenuFactory(ctx);
+					m.Tag = LeftClickTag;
+				}
+				if (_Bar != null && ctx.KeepToolBarOnClick == false && ContextMenu?.IsOpen != true) {
+					_Bar.HideToolBar();
+				}
+			}
+
+			protected override void OnMouseRightButtonUp(MouseButtonEventArgs e) {
+				base.OnMouseRightButtonUp(e);
+				if (ContextMenu != null && ContextMenu.Tag as string == RightClickTag) {
+					ContextMenu.IsOpen = true;
+					e.Handled = true;
+					return;
+				}
+				var ctx = new CommandContext(_Bar, this, true);
+				if (_MenuFactory != null) {
+					ClearContextMenu();
+					var m = CreateContextMenuFromMenuFactory(ctx);
+					m.Tag = RightClickTag;
+				}
+				else {
+					_ClickHandler(ctx);
+				}
+				if (_Bar != null && ctx.KeepToolBarOnClick == false && ContextMenu?.IsOpen != true) {
+					_Bar.HideToolBar();
+				}
+				e.Handled = true;
+			}
+
+			ContextMenu CreateContextMenuFromMenuFactory(CommandContext ctx) {
+				var m = SetupContextMenu(this);
+				foreach (var item in _MenuFactory(ctx)) {
+					m.Items.Add(new CommandMenuItem(_Bar, item));
+				}
+				ContextMenu = m;
+				m.IsOpen = true;
+				return m;
+			}
+
+			void ClearContextMenu() {
+				if (ContextMenu is IDisposable d) {
+					d.Dispose();
+				}
+				else if (ContextMenu != null) {
+					ContextMenu.DisposeCollection();
+				}
+			}
+
+			public void Dispose() {
+				if (_Bar != null) {
+					_ClickHandler = null;
+					_MenuFactory = null;
+					if (ContextMenu != null) {
+						ClearContextMenu();
+						ContextMenu.PlacementTarget = null;
+						ContextMenu = null;
+					}
+					_Bar = null;
 				}
 			}
 		}
@@ -505,8 +514,10 @@ namespace Codist.SmartBars
 
 		protected class CommandMenuItem : ThemedMenuItem
 		{
+			SmartBar _SmartBar;
+
 			public CommandMenuItem(SmartBar bar, CommandItem item) {
-				SmartBar = bar;
+				_SmartBar = bar;
 				CommandItem = item;
 				Icon = ThemeHelper.GetImage(item.ImageId);
 				Header = new TextBlock { Text = item.Name };
@@ -515,17 +526,16 @@ namespace Codist.SmartBars
 				if (item.Action != null) {
 					Click += ClickHandler;
 				}
-				MaxHeight = SmartBar.View.ViewportHeight / 2;
+				MaxHeight = _SmartBar.View.ViewportHeight / 2;
 			}
 
 			public CommandItem CommandItem { get; }
-			protected SmartBar SmartBar { get; }
 
 			void ClickHandler(object s, RoutedEventArgs e) {
-				var ctx2 = new CommandContext(SmartBar, s as Control, e);
+				var ctx2 = new CommandContext(_SmartBar, s as Control);
 				CommandItem.Action(ctx2);
 				if (ctx2.KeepToolBarOnClick == false) {
-					SmartBar.HideToolBar();
+					_SmartBar.HideToolBar();
 				}
 			}
 		}
