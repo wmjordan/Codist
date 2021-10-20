@@ -20,6 +20,7 @@ namespace Codist
 		public const int ReadonlyField = KnownImageIds.EncapsulateField;
 		public const int ReadonlyProperty = KnownImageIds.MoveProperty;
 		public const int InitonlyProperty = KnownImageIds.NewProperty;
+		public const int AutoProperty = KnownImageIds.PropertyShortcut;
 		public const int VolatileField = KnownImageIds.SetProactiveCaching;
 		public const int AbstractClass = KnownImageIds.AbstractClass;
 		public const int SealedClass = KnownImageIds.ClassSealed;

@@ -121,6 +121,9 @@ namespace Codist.Controls
 			else if (newPos.X > ActualWidth - minVisibleSize) {
 				newPos.X = ActualWidth - minVisibleSize;
 			}
+			if (newPos.X + child.ActualWidth > ActualWidth) {
+				newPos.X = ActualWidth - child.ActualWidth;
+			}
 			if (newPos.Y + child.ActualHeight < minVisibleSize) {
 				newPos.Y = minVisibleSize - child.ActualHeight;
 			}

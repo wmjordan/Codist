@@ -728,6 +728,7 @@ namespace Codist
 		Region = 1 << 15,
 		RegionInMember = 1 << 16,
 		BaseClassMember = 1 << 17,
+		MemberType = 1 << 18,
 		Default = RangeHighlight | RegionOnBar | ParameterList | FieldValue | AutoPropertyAnnotation | PartialClassMember | Region
 	}
 

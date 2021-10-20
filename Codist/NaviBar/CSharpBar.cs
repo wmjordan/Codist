@@ -307,9 +307,9 @@ namespace Codist.NaviBar
 		void ShowMenu(ThemedImageButton barItem, SymbolList menu) {
 			ref var l = ref _SymbolList;
 			if (l != menu) {
-				DisposeSymbolList(l);
-				ListContainer.Children.Add(menu);
+				ListContainer.Children.Remove(l);
 				l = menu;
+				ListContainer.Children.Add(menu);
 				if (_ActiveItem != null) {
 					_ActiveItem.IsHighlighted = false;
 				}
@@ -322,12 +322,15 @@ namespace Codist.NaviBar
 			menu.PreviewKeyUp -= OnMenuKeyUp;
 			menu.PreviewKeyUp += OnMenuKeyUp;
 			PositionMenu();
+			if (ListContainer.Children.Contains(menu) == false) {
+				ListContainer.Children.Add(menu);
+			}
 		}
 
 		void PositionMenu() {
-			if (_SymbolList != null) {
-				Canvas.SetLeft(_SymbolList, _ActiveItem.TransformToVisual(_ActiveItem.GetParent<Grid>()).Transform(new Point()).X - View.VisualElement.TranslatePoint(new Point(), View.VisualElement.GetParent<Grid>()).X);
-				Canvas.SetTop(_SymbolList, -1);
+			if (_SymbolList != null && _ActiveItem != null) {
+				var x = _ActiveItem.TransformToVisual(_ActiveItem.GetParent<Grid>()).Transform(new Point()).X - View.VisualElement.TranslatePoint(new Point(), View.VisualElement.GetParent<Grid>()).X;
+				ListContainer.Position(_SymbolList, new Point(x, -1), 30);
 			}
 		}
 
@@ -361,9 +364,6 @@ namespace Codist.NaviBar
 
 		void ListContainer_MenuRemoved(object sender, AdornmentChildRemovedEventArgs e) {
 			if (_SymbolList == e.RemovedElement) {
-				_SymbolList.PreviewKeyUp -= OnMenuKeyUp;
-				_SymbolList.Dispose();
-				_SymbolList = null;
 				if (_ActiveItem != null) {
 					_ActiveItem.IsHighlighted = false;
 				}
@@ -438,6 +438,15 @@ namespace Codist.NaviBar
 			if (p != null) {
 				var useParamName = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName);
 				t.Append(p.GetParameterListSignature(useParamName), ThemeHelper.SystemGrayTextBrush);
+			}
+		}
+
+		static void AddReturnType(SymbolItem i, SyntaxNode node) {
+			if (String.IsNullOrEmpty(i.Hint)) {
+				var t = node.GetMemberDeclarationType();
+				if (t != null) {
+					i.Hint = t.ToString();
+				}
 			}
 		}
 
@@ -545,7 +554,7 @@ namespace Codist.NaviBar
 
 			protected override void OnClick() {
 				base.OnClick();
-				if (Bar._SymbolList == _Menu) {
+				if (Bar._SymbolList == _Menu && _Menu.IsVisible) {
 					Bar.HideMenu();
 					return;
 				}
@@ -793,7 +802,7 @@ namespace Codist.NaviBar
 
 			async void HandleClick(object sender, RoutedEventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
-				if (_Menu != null && Bar._SymbolList == _Menu) {
+				if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {
 					Bar.HideMenu();
 					return;
 				}
@@ -906,7 +915,7 @@ namespace Codist.NaviBar
 
 			async void HandleClick(object sender, RoutedEventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
-				if (_Menu != null && Bar._SymbolList == _Menu) {
+				if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {
 					Bar.HideMenu();
 					return;
 				}
@@ -1069,7 +1078,7 @@ namespace Codist.NaviBar
 
 			async void HandleClick(object sender, RoutedEventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
-				if (_Menu != null && Bar._SymbolList == _Menu) {
+				if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {
 					Bar.HideMenu();
 					return;
 				}
@@ -1090,7 +1099,7 @@ namespace Codist.NaviBar
 					await CreateMenuForTypeSymbolNodeAsync(ct);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-					_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.GetMembers().Select(s => new SymbolItem(s, _Menu, false)));
+					_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.FindMembers().Select(s => new SymbolItem(s, null, false)));
 					var footer = (TextBlock)_Menu.Footer;
 					if (_PartialCount > 1) {
 						footer.Append(ThemeHelper.GetImage(IconIds.PartialDocumentCount))
@@ -1275,6 +1284,9 @@ namespace Codist.NaviBar
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterList)) {
 							AddParameterList(i.Content, child);
 						}
+						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.MemberType)) {
+							AddReturnType(i, child);
+						}
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionInMember) == false) {
 							lastNode = child;
 						}
@@ -1309,6 +1321,9 @@ namespace Codist.NaviBar
 					}
 					i.SelectIfContainsPosition(pos);
 					ShowNodeValue(i);
+					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.MemberType)) {
+						AddReturnType(i, item);
+					}
 				}
 			}
 
@@ -1351,6 +1366,22 @@ namespace Codist.NaviBar
 									break;
 							}
 						}
+						if (p.AccessorList != null) {
+							var a = p.AccessorList.Accessors;
+							if (a.Count == 2) {
+								if (a.Any(i => i.RawKind == (int)CodeAnalysisHelper.InitAccessorDeclaration)) {
+									AddIcon(ref icons, IconIds.InitonlyProperty);
+								}
+								else if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
+									AddIcon(ref icons, IconIds.AutoProperty);
+								}
+							}
+							else if (a.Count == 1) {
+								if (a[0].Body == null && a[0].ExpressionBody == null) {
+									AddIcon(ref icons, IconIds.ReadonlyProperty);
+								}
+							}
+						}
 						break;
 					case BaseFieldDeclarationSyntax f:
 						foreach (var modifier in f.Modifiers) {
@@ -1389,7 +1420,10 @@ namespace Codist.NaviBar
 				}
 				switch (item.SyntaxNode.Kind()) {
 					case SyntaxKind.VariableDeclarator:
-						item.Hint = ((VariableDeclaratorSyntax)item.SyntaxNode).Initializer?.Value?.ToString();
+						var v = ((VariableDeclaratorSyntax)item.SyntaxNode).Initializer?.Value?.ToString();
+						if (v != null) {
+							item.Hint = ShowInitializerIndicator() + v;
+						}
 						break;
 					case SyntaxKind.EnumMemberDeclaration:
 						ShowEnumMemberValue(item);
@@ -1413,27 +1447,34 @@ namespace Codist.NaviBar
 				void ShowPropertyValue(SymbolItem propertyItem) {
 					var p = (PropertyDeclarationSyntax)propertyItem.SyntaxNode;
 					if (p.Initializer != null) {
-						propertyItem.Hint = p.Initializer.Value.ToString();
+						propertyItem.Hint = ShowInitializerIndicator() + p.Initializer.Value.ToString();
 					}
 					else if (p.ExpressionBody != null) {
 						propertyItem.Hint = p.ExpressionBody.ToString();
 					}
-					else if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.AutoPropertyAnnotation)) {
-						var a = p.AccessorList.Accessors;
-						if (a.Count == 2) {
-							if (a.Any(i => i.RawKind == (int)CodeAnalysisHelper.InitAccessorDeclaration)) {
-								propertyItem.Hint = "{init}";
-							}
-							else if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
-								propertyItem.Hint = "{;;}";
-							}
+					else //if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.AutoPropertyAnnotation)) {
+					//	var a = p.AccessorList.Accessors;
+					//	if (a.Count == 2) {
+					//		if (a.Any(i => i.RawKind == (int)CodeAnalysisHelper.InitAccessorDeclaration)) {
+					//			propertyItem.Hint = "{init}";
+					//		}
+					//		else if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
+					//			propertyItem.Hint = "{;;}";
+					//		}
+					//	}
+					//	else if (a.Count == 1) {
+					//		if (a[0].Body == null && a[0].ExpressionBody == null) {
+					//			propertyItem.Hint = "{;}";
+					//		}
+					//	}
+						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.MemberType)) {
+							propertyItem.Hint += p.Type.ToString();
 						}
-						else if (a.Count == 1) {
-							if (a[0].Body == null && a[0].ExpressionBody == null) {
-								propertyItem.Hint = "{;}";
-							}
-						}
-					}
+					// }
+				}
+
+				string ShowInitializerIndicator() {
+					return Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.MemberType) ? "= " : null;
 				}
 			}
 
@@ -1449,8 +1490,7 @@ namespace Codist.NaviBar
 					if (Symbol != null) {
 						var tip = ToolTipFactory.CreateToolTip(Symbol, true, Bar._SemanticContext);
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
-							tip.AddTextBlock()
-						   .Append(R.T_LineOfCode + (Node.GetLineSpan().Length + 1));
+							tip.AddTextBlock().Append(R.T_LineOfCode + (Node.GetLineSpan().Length + 1));
 						}
 						ToolTip = tip;
 					}

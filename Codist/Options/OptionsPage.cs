@@ -499,7 +499,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly OptionBox<NaviBarOptions> _SyntaxDetail, _SymbolToolTip, _RegionOnBar, _StripRegionNonLetter, _RangeHighlight,
-				_ParameterList, _ParameterListShowParamName, _FieldValue, _AutoPropertyAnnotation, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode;
+				_ParameterList, _ParameterListShowParamName, _FieldValue, /*_AutoPropertyAnnotation, */_MemberType, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode;
 			readonly OptionBox<NaviBarOptions>[] _Options;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -526,8 +526,9 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_ShowMethodParameterNameTip),
 					_FieldValue = o.CreateOptionBox(NaviBarOptions.FieldValue, UpdateConfig, R.OT_ValueOfFields)
 						.SetLazyToolTip(() => R.OT_ValueOfFieldsTip),
-					_AutoPropertyAnnotation = o.CreateOptionBox(NaviBarOptions.AutoPropertyAnnotation, UpdateConfig, R.OT_PropertyAccessors)
-						.SetLazyToolTip(() => R.OT_PropertyAccessorsTip),
+					//_AutoPropertyAnnotation = o.CreateOptionBox(NaviBarOptions.AutoPropertyAnnotation, UpdateConfig, R.OT_PropertyAccessors)
+					//	.SetLazyToolTip(() => R.OT_PropertyAccessorsTip),
+					_MemberType = o.CreateOptionBox(NaviBarOptions.MemberType, UpdateConfig, R.OT_MemberTypes).SetLazyToolTip(() => R.OT_MemberTypesTip),
 					_PartialClassMember = o.CreateOptionBox(NaviBarOptions.PartialClassMember, UpdateConfig, R.OT_IncludePartialTypeMembers)
 						.SetLazyToolTip(() => R.OT_IncludePartialTypeMembersTip),
 					_BaseClassMember = o.CreateOptionBox(NaviBarOptions.BaseClassMember, UpdateConfig, R.OT_IncludeBaseTypeMembers)
@@ -546,13 +547,13 @@ namespace Codist.Options
 					);
 
 				_Options = new[] { _SyntaxDetail, _SymbolToolTip, _RegionOnBar, _StripRegionNonLetter, _RangeHighlight,
-				_ParameterList, _ParameterListShowParamName, _FieldValue, _AutoPropertyAnnotation, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode };
-				foreach (var item in new[] { _StripRegionNonLetter, _ParameterListShowParamName, _AutoPropertyAnnotation, _RegionInMember }) {
+				_ParameterList, _ParameterListShowParamName, _FieldValue, /*_AutoPropertyAnnotation, */_MemberType, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode };
+				foreach (var item in new[] { _StripRegionNonLetter, _ParameterListShowParamName, /*_AutoPropertyAnnotation, */_RegionInMember }) {
 					item.WrapMargin(SubOptionMargin);
 				}
 				_RegionOnBar.BindDependentOptionControls(_StripRegionNonLetter);
 				_ParameterList.BindDependentOptionControls(_ParameterListShowParamName);
-				_FieldValue.BindDependentOptionControls(_AutoPropertyAnnotation);
+				//_FieldValue.BindDependentOptionControls(_AutoPropertyAnnotation);
 				_Region.BindDependentOptionControls(_RegionInMember);
 			}
 

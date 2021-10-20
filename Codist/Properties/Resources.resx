@@ -1803,4 +1803,10 @@ Use space to separate multiple search terms.
   <data name="T_Static" xml:space="preserve">
     <value>Static</value>
   </data>
+  <data name="OT_MemberTypes" xml:space="preserve">
+    <value>Member types</value>
+  </data>
+  <data name="OT_MemberTypesTip" xml:space="preserve">
+    <value>Displays member declaration types in the drop-down menu of navigation bar</value>
+  </data>
 </root>

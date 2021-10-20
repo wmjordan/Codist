@@ -432,29 +432,39 @@ namespace Codist.Controls
 						? FilterByMemberTypes(keywords, (MemberFilterTypes)filterFlags)
 						: FilterByUsages(keywords, (MemberFilterTypes)filterFlags);
 					break;
+				case SymbolListType.NodeList:
+					_Filter = FilterByNodeTypes(keywords, (MemberFilterTypes)filterFlags);
+					break;
 				default:
 					_Filter = FilterByMemberTypes(keywords, (MemberFilterTypes)filterFlags);
 					break;
 			}
 			RefreshItemsSource();
 
+			Predicate<object> FilterByNodeTypes(string[] k, MemberFilterTypes memberFilter) {
+				var noKeyword = k.Length == 0;
+				if (noKeyword && memberFilter == MemberFilterTypes.All) {
+					return null;
+				}
+				if (noKeyword) {
+					return o => SymbolFilterBox.FilterByImageId(memberFilter, ((SymbolItem)o).ImageId);
+				}
+				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+				return o => SymbolFilterBox.FilterByImageId(memberFilter, ((SymbolItem)o).ImageId)
+						&& MatchKeywords(((SymbolItem)o).Content.GetText(), k, comparison);
+			}
 			Predicate<object> FilterByMemberTypes(string[] k, MemberFilterTypes memberFilter) {
 				var noKeyword = k.Length == 0;
 				if (noKeyword && memberFilter == MemberFilterTypes.All) {
 					return null;
 				}
 				if (noKeyword) {
-					return o => {
-						var i = (SymbolItem)o;
-						return i.Symbol != null ? SymbolFilterBox.FilterBySymbol(memberFilter, i.Symbol) : SymbolFilterBox.FilterByImageId(memberFilter, i.ImageId);
-					};
+					return o => SymbolFilterBox.FilterBySymbol(memberFilter, ((SymbolItem)o).Symbol);
 				}
 				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				return o => {
 					var i = (SymbolItem)o;
-					return (i.Symbol != null
-							? SymbolFilterBox.FilterBySymbol(memberFilter, i.Symbol)
-							: SymbolFilterBox.FilterByImageId(memberFilter, i.ImageId))
+					return SymbolFilterBox.FilterBySymbol(memberFilter, i.Symbol)
 						&& MatchKeywords(i.Content.GetText(), k, comparison);
 				};
 			}

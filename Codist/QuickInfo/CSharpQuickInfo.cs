@@ -927,7 +927,7 @@ namespace Codist.QuickInfo
 
 		static void ShowMembers(INamedTypeSymbol type, ThemedTipDocument doc, bool isInherit) {
 			var members = ImmutableArray.CreateBuilder<ISymbol>();
-			members.AddRange(type.GetMembers().RemoveAll(m => (m as IMethodSymbol)?.AssociatedSymbol != null || m.IsImplicitlyDeclared));
+			members.AddRange(type.FindMembers());
 			members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
 			foreach (var member in members) {
 				var t = new ThemedTipText();

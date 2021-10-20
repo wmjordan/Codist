@@ -16,25 +16,25 @@ namespace Codist
 	{
 		public static IImmutableList<(string type, IImmutableList<ISymbol> members)> FindMembers(this ISymbol symbol) {
 			var r = ImmutableArray.CreateBuilder<(string type, IImmutableList<ISymbol> members)>();
-			r.Add(FindMembers(symbol, null));
+			r.Add((null, FindMembers(symbol)));
 			var type = symbol as INamedTypeSymbol;
 			if (type != null) {
 				switch (type.TypeKind) {
 					case TypeKind.Class:
 						while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
-							r.Add(FindMembers(type, type.ToDisplayString(MemberNameFormat)));
+							r.Add((type.ToDisplayString(MemberNameFormat), FindMembers(type)));
 						}
 						break;
 					case TypeKind.Interface:
 						foreach (var item in type.AllInterfaces) {
-							r.Add(FindMembers(item, item.ToDisplayString(MemberNameFormat)));
+							r.Add((item.ToDisplayString(MemberNameFormat), FindMembers(item)));
 						}
 						break;
 				}
 			}
 			return r.ToImmutable();
 
-			(string, IImmutableList<ISymbol>) FindMembers(ISymbol source, string category) {
+			IImmutableList<ISymbol> FindMembers(ISymbol source) {
 				var nsOrType = source as INamespaceOrTypeSymbol;
 				var members = nsOrType.GetMembers().RemoveAll(m => {
 					if (m.IsImplicitlyDeclared) {
@@ -57,13 +57,34 @@ namespace Codist
 				});
 				if (source.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
 					// sort enum members by value
-					members = members.Sort(CompareByFieldIntegerConst);
+					return members.Sort(CompareByFieldIntegerConst);
 				}
 				else {
-					members = members.Sort(CompareByAccessibilityKindName);
+					return members.Sort(CompareByAccessibilityKindName);
 				}
-				return (category, members);
 			}
+		}
+
+		public static IEnumerable<ISymbol> FindMembers(this INamespaceOrTypeSymbol type) {
+			return type.GetMembers().Where(m => {
+				if (m.IsImplicitlyDeclared) {
+					return false;
+				}
+				if (m.Kind == SymbolKind.Method) {
+					var ms = (IMethodSymbol)m;
+					if (ms.AssociatedSymbol != null) {
+						return false;
+					}
+					switch (ms.MethodKind) {
+						case MethodKind.PropertyGet:
+						case MethodKind.PropertySet:
+						case MethodKind.EventAdd:
+						case MethodKind.EventRemove:
+							return false;
+					}
+				}
+				return true;
+			});
 		}
 
 		/// <summary>

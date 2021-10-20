@@ -267,6 +267,23 @@ namespace Codist
 			return null;
 		}
 
+		public static TypeSyntax GetMemberDeclarationType(this SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.MethodDeclaration: return ((MethodDeclarationSyntax)node).ReturnType;
+				case SyntaxKind.DelegateDeclaration: return ((DelegateDeclarationSyntax)node).ReturnType;
+				case SyntaxKind.OperatorDeclaration:
+				case SyntaxKind.ConversionOperatorDeclaration:
+					return ((OperatorDeclarationSyntax)node).ReturnType;
+				case SyntaxKind.PropertyDeclaration:
+				case SyntaxKind.IndexerDeclaration:
+					return ((BasePropertyDeclarationSyntax)node).Type;
+				case SyntaxKind.FieldDeclaration: return ((FieldDeclarationSyntax)node).Declaration.Type;
+				case SyntaxKind.VariableDeclaration: return ((VariableDeclarationSyntax)node).Type;
+				case SyntaxKind.VariableDeclarator: return ((VariableDeclarationSyntax)node.Parent).Type;
+			}
+			return null;
+		}
+
 		#endregion
 
 		#region Node icon

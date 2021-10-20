@@ -877,7 +877,7 @@ Shift单击：删除并选中下一项（整个单词）</value>
     <value>C# 导航栏</value>
   </data>
   <data name="OT_CSharpNaviBarMenu" xml:space="preserve">
-    <value>C# 导航栏的菜单内容</value>
+    <value>C# 导航栏的成员列表（下拉菜单）</value>
   </data>
   <data name="OT_EnableCommentTagger" xml:space="preserve">
     <value>启用注释标记器</value>
@@ -1027,13 +1027,13 @@ Shift单击：删除并选中下一项（整个单词）</value>
     <value>显示 partial 类型外部文件中定义的成员</value>
   </data>
   <data name="OT_IncludePartialTypeMembersTip" xml:space="preserve">
-    <value>在导航栏的下拉菜单中显示定义在其他代码文件中的 partial 类型成员</value>
+    <value>在导航栏的成员列表中显示定义在其他代码文件中的 partial 类型成员</value>
   </data>
   <data name="OT_IncludeRegions" xml:space="preserve">
     <value>显示 #region 和 #endregion</value>
   </data>
   <data name="OT_IncludeRegionsTip" xml:space="preserve">
-    <value>在导航栏的下拉菜单中显示 #region 和 #endregion 指令</value>
+    <value>在导航栏的成员列表中显示 #region 和 #endregion 指令</value>
   </data>
   <data name="OT_InheritDoc" xml:space="preserve">
     <value>继承&lt;inheritdoc cref=""/&gt; 指向的文档注释</value>
@@ -1070,7 +1070,7 @@ https://github.com/snowie2000/mactype/releases</value>
     <value>定位用于打开搜索结果的 Web 浏览器</value>
   </data>
   <data name="OT_LineOfCodeTip" xml:space="preserve">
-    <value>在导航栏和工具提示的下拉菜单中显示当前类型或成员的行数</value>
+    <value>在导航栏的成员列表下方和工具提示中显示当前类型或成员的行数</value>
   </data>
   <data name="OT_ManualSmartBarTip" xml:space="preserve">
     <value>更改选择后，不要自动显示Smart Bar，请结合以下选项！</value>
@@ -1151,7 +1151,7 @@ https://github.com/snowie2000/mactype/releases</value>
     <value>属性访问器</value>
   </data>
   <data name="OT_PropertyAccessorsTip" xml:space="preserve">
-    <value>在导航栏的下拉菜单中显示属性的访问器类型（“ {;;}”代表 get 和 set 访问器，“ {;}”代表 get 访问器）</value>
+    <value>在导航栏的成员列表中显示属性的访问器类型（“ {;;}”代表 get 和 set 访问器，“ {;}”代表 get 访问器）</value>
   </data>
   <data name="OT_QuickInfoNote" xml:space="preserve">
     <value>此页面更改所有类型的代码提示行为</value>
@@ -1250,7 +1250,7 @@ https://github.com/snowie2000/mactype/releases</value>
     <value>在导航栏上显示项的代码提示</value>
   </data>
   <data name="OT_SyntaxDetailTip" xml:space="preserve">
-    <value>在导航栏上的成员内显示语法节点（例如，foreach、while、赋值和其他语句）</value>
+    <value>在导航栏上的成员列表中显示语法节点（例如，foreach、while、赋值和其他语句）</value>
   </data>
   <data name="OT_SyntaxDetail" xml:space="preserve">
     <value>语法细节</value>
@@ -1319,7 +1319,7 @@ https://github.com/snowie2000/mactype/releases</value>
     <value>此选项每行代码上方添加边距</value>
   </data>
   <data name="OT_ValueOfFieldsTip" xml:space="preserve">
-    <value>在导航栏的菜单中显示字段和属性的初始值</value>
+    <value>在导航栏的成员列表中显示字段和属性的初始值</value>
   </data>
   <data name="OT_ValueOfFields" xml:space="preserve">
     <value>字段和属性的初始值</value>
@@ -1333,7 +1333,7 @@ https://github.com/snowie2000/mactype/releases</value>
 2. 超级代码提示选中内容的右键菜单</value>
   </data>
   <data name="OT_NaviBarShortcutKeys" xml:space="preserve">
-    <value>用于访问导航栏菜单的默认快捷键：
+    <value>用于访问导航栏成员列表的默认快捷键：
 Ctrl+1, Ctrl+1: Edit.SearchClassMember
 Ctrl+1, Ctrl+2: Edit.SearchDeclaration
 Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
@@ -1684,7 +1684,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>显示基类代码文件中定义的成员</value>
   </data>
   <data name="OT_IncludeBaseTypeMembersTip" xml:space="preserve">
-    <value>在导航栏的下拉菜单中显示基类定义的成员</value>
+    <value>在导航栏的成员列表中显示基类定义的成员</value>
   </data>
   <data name="CMD_CopyConstantValue" xml:space="preserve">
     <value>复制常量值</value>
@@ -1790,5 +1790,11 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="T_Static" xml:space="preserve">
     <value>静态成员</value>
+  </data>
+  <data name="OT_MemberTypes" xml:space="preserve">
+    <value>成员类型</value>
+  </data>
+  <data name="OT_MemberTypesTip" xml:space="preserve">
+    <value>在导航栏的成员列表中显示字段、属性和方法等成员的类型</value>
   </data>
 </root>

@@ -2542,6 +2542,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Member types 的本地化字符串。
+        /// </summary>
+        internal static string OT_MemberTypes {
+            get {
+                return ResourceManager.GetString("OT_MemberTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Displays member declaration types in the drop-down menu of navigation bar 的本地化字符串。
+        /// </summary>
+        internal static string OT_MemberTypesTip {
+            get {
+                return ResourceManager.GetString("OT_MemberTypesTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Method declaration spot 的本地化字符串。
         /// </summary>
         internal static string OT_MethodDeclarationSpot {
