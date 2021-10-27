@@ -125,6 +125,7 @@ namespace Codist.Controls
 		public virtual void Dispose() {
 			Container = null;
 			FilteredItems = null;
+			DataContext = null;
 		}
 	}
 
