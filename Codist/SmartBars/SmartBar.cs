@@ -486,6 +486,7 @@ namespace Codist.SmartBars
 						ContextMenu.PlacementTarget = null;
 						ContextMenu = null;
 					}
+					DataContext = null;
 					_Bar = null;
 				}
 			}

@@ -78,6 +78,7 @@ namespace Codist.NaviBar
 			if (_TitleList != null) {
 				ListContainer.Children.Remove(_TitleList);
 				_TitleList.SelectedItem = null;
+				_TitleList.Dispose();
 				_TitleList = null;
 				_ActiveItem.IsHighlighted = false;
 			}
@@ -133,6 +134,7 @@ namespace Codist.NaviBar
 			if (_TitleList != menu) {
 				ListContainer.Children.Remove(_TitleList);
 				ListContainer.Children.Add(menu);
+				_TitleList.Dispose();
 				_TitleList = menu;
 			}
 			if (menu != null) {
@@ -183,8 +185,10 @@ namespace Codist.NaviBar
 			view.Closed -= View_Closed;
 			view.Properties.RemoveProperty(typeof(TaggerResult));
 			_TextSearch = null;
-			_TitleList.Dispose();
-			_TitleList = null;
+			if (_TitleList != null) {
+				_TitleList.Dispose();
+				_TitleList = null;
+			}
 		}
 
 		//void AddItem(int imageId, RoutedEventHandler clickHandler) {

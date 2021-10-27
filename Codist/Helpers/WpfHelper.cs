@@ -488,7 +488,7 @@ namespace Codist
 			return false;
 		}
 		/// <summary>
-		/// Calls <see cref="IDisposable.Dispose"/> on each item in <paramref name="control"/> and empties the collection.
+		/// Calls <see cref="IDisposable.Dispose"/> on each item in <paramref name="control"/> and empties the <see cref="ItemsControl"/>.
 		/// </summary>
 		public static void DisposeCollection(this ItemsControl control) {
 			foreach (var item in control.Items) {

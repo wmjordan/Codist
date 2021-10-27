@@ -481,12 +481,6 @@ namespace Codist.NaviBar
 			_ActiveItem = null;
 			_GlobalNamespaceItem = null;
 			_RootItem = null;
-			foreach (var item in Items) {
-				if (item is IDisposable d) {
-					d.Dispose();
-				}
-			}
-			Items.Clear();
 		}
 
 		void DisposeSymbolList(SymbolList l) {
@@ -531,7 +525,8 @@ namespace Codist.NaviBar
 						}
 					},
 					Footer = _Note = new TextBlock { Margin = WpfHelper.MenuItemMargin }
-						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey)
+						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey),
+					Owner = this
 				};
 				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
 				Bar.SetupSymbolListMenu(_Menu);
@@ -942,7 +937,8 @@ namespace Codist.NaviBar
 					Container = Bar.ListContainer,
 					ContainerType = SymbolListType.TypeList,
 					ExtIconProvider = ExtIconProvider.Default.GetExtIcons,
-					EnableVirtualMode = true
+					EnableVirtualMode = true,
+					Owner = this
 				};
 				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
 				if (_FilterBox != null) {
@@ -1128,6 +1124,7 @@ namespace Codist.NaviBar
 					Container = Bar.ListContainer,
 					ContainerType = SymbolListType.NodeList,
 					ExtIconProvider = s => GetExtIcons(s.SyntaxNode),
+					Owner = this
 				};
 				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
 				_Menu.Header = new WrapPanel {

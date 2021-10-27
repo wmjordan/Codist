@@ -68,6 +68,8 @@ namespace Codist.NaviBar
 					c.Content = null;
 				}
 				ListContainer = null;
+				DataContext = null;
+				this.DisposeCollection();
 				_View.Properties.RemoveProperty(nameof(NaviBar));
 				_View.Properties.RemoveProperty(typeof(ExternalAdornment));
 				_View = null;

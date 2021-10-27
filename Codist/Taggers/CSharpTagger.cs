@@ -190,7 +190,10 @@ namespace Codist.Taggers
 
 		void ReleaseResources() {
 			if (_Buffer != null) {
-				_TaskBreaker?.Dispose();
+				if (_TaskBreaker != null) {
+					_TaskBreaker.Dispose();
+					_TaskBreaker = null;
+				}
 				var last = _LastFinishedTask;
 				if (last != null) {
 					_LastFinishedTask = null;

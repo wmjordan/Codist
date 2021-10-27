@@ -54,7 +54,12 @@ namespace Codist.Controls
 		public void ClearUnpinnedChildren() {
 			for (int i = Children.Count - 1; i >= 0; i--) {
 				if (Children[i] is SymbolList l && l.IsPinned == false) {
-					Children.RemoveAndDisposeAt(i);
+					if (l.Owner == null) {
+						Children.RemoveAndDisposeAt(i);
+					}
+					else {
+						Children.RemoveAt(i);
+					}
 				}
 			}
 		}

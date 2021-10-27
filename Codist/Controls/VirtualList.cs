@@ -40,6 +40,7 @@ namespace Codist.Controls
 		}
 		public ListCollectionView FilteredItems { get; set; }
 		public FrameworkElement Container { get; set; }
+		public FrameworkElement Owner { get; set; }
 		public bool NeedsRefresh { get; set; }
 		public bool EnableVirtualMode {
 			get => ScrollViewer.GetCanContentScroll(this);
@@ -125,6 +126,7 @@ namespace Codist.Controls
 		public virtual void Dispose() {
 			Container = null;
 			FilteredItems = null;
+			Owner = null;
 			DataContext = null;
 		}
 	}
