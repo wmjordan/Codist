@@ -16,7 +16,7 @@ namespace Codist
 {
 	sealed class Config
 	{
-		internal const string CurrentVersion = "5.12.1";
+		internal const string CurrentVersion = "5.12.2";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
 		internal const string LightTheme = ThemePrefix + "Light", PaleLightTheme = ThemePrefix + "PaleLight", DarkTheme = ThemePrefix + "Dark", SimpleTheme = ThemePrefix + "Simple";
@@ -644,7 +644,7 @@ namespace Codist
 		CtrlQuickInfo = 1 << 29,
 		AlternativeStyle = 1 << 30,
 		QuickInfoOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | ClickAndGo | AlternativeStyle,
-		Default = Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | ClickAndGo | MethodOverload | Parameter | OverrideDefaultDocumentation,
+		Default = Attributes | BaseType | BaseTypeInheritence | Interfaces | InterfacesInheritence | NumericValues | InterfaceImplementations | ClickAndGo | MethodOverload | Parameter | OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc | ExceptionDoc | RemarksDoc,
 	}
 
 	[Flags]
