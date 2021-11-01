@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Codist.Taggers;
+using AppHelpers;
 using Codist.Controls;
-using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.Shell;
+using Codist.Taggers;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
-using AppHelpers;
 using R = Codist.Properties.Resources;
 
 namespace Codist.NaviBar
@@ -58,13 +56,13 @@ namespace Codist.NaviBar
 
 		protected internal override void BindView() {
 			UnbindView();
-			View.Selection.SelectionChanged += Update;
+			View.Caret.PositionChanged += Update;
 			View.TextBuffer.PostChanged += Update;
 		}
 
 		protected override void UnbindView() {
 			if (_TextSearch != null) {
-				View.Selection.SelectionChanged -= Update;
+				View.Caret.PositionChanged -= Update;
 				View.TextBuffer.PostChanged -= Update;
 			}
 		}
@@ -132,9 +130,11 @@ namespace Codist.NaviBar
 				menu.EnableVirtualMode = true;
 			}
 			if (_TitleList != menu) {
-				ListContainer.Children.Remove(_TitleList);
+				if (_TitleList != null) {
+					ListContainer.Children.Remove(_TitleList);
+					_TitleList.Dispose();
+				}
 				ListContainer.Children.Add(menu);
-				_TitleList.Dispose();
 				_TitleList = menu;
 			}
 			if (menu != null) {
@@ -213,13 +213,23 @@ namespace Codist.NaviBar
 							Children = {
 								ThemeHelper.GetImage(IconIds.Search).WrapMargin(WpfHelper.GlyphMargin),
 								(_FinderBox = new ThemedTextBox { MinWidth = 150 }),
-								new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter)
+								new Border {
+									BorderThickness = WpfHelper.TinyMargin,
+									CornerRadius = new CornerRadius(3),
+									Margin = WpfHelper.SmallHorizontalMargin,
+									Child = new StackPanel {
+										Children = {
+											new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter)
+										},
+										Orientation = Orientation.Horizontal
+									}
+								}.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey)
 							}
 						},
 					}
 				};
 				Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
-						.ReferenceProperty(TextBlock.ForegroundProperty, Microsoft.VisualStudio.PlatformUI.EnvironmentColors.SystemGrayTextBrushKey)     
+						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey)     
 						.Append(ThemeHelper.GetImage(IconIds.LineOfCode))
 						.Append(bar.View.TextSnapshot.LineCount);
 				_FinderBox.TextChanged += SearchCriteriaChanged;
@@ -328,7 +338,7 @@ namespace Codist.NaviBar
 			public TaggedContentSpan Span => _Span;
 			public string Text => _Span.ContentText;
 			public void GoToSource(ITextView view) {
-				view.SelectSpan(_Span.Start + _Span.ContentOffset, 0);
+				view.SelectSpan(_Span.Start + _Span.ContentOffset, _Span.ContentLength, 1);
 			}
 		}
 	}
