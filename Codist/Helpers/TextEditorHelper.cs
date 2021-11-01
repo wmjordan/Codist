@@ -239,17 +239,19 @@ namespace Codist
 		}
 
 		public static void SelectSpan(this ITextView view, Span span) {
-			view.SelectSpan(span.Start, span.Length);
+			view.SelectSpan(span.Start, span.Length, -1);
 		}
 
-		public static void SelectSpan(this ITextView view, int start, int length) {
+		public static void SelectSpan(this ITextView view, int start, int length, int moveCaret) {
 			if (length < 0 || start < 0 || start + length > view.TextSnapshot.Length) {
 				return;
 			}
 			var span = new SnapshotSpan(view.TextSnapshot, start, length);
 			view.ViewScroller.EnsureSpanVisible(span, EnsureSpanVisibleOptions.ShowStart);
 			view.Selection.Select(span, false);
-			view.Caret.MoveTo(span.End);
+			if (moveCaret != 0) {
+				view.Caret.MoveTo(moveCaret > 0 ? span.End : span.Start);
+			}
 		}
 		#endregion
 
@@ -369,7 +371,7 @@ namespace Codist
 					}
 					if (edit.HasEffectiveChanges) {
 						edit.Apply();
-						view.SelectSpan(sSpan.Start > tSpan.Start ? target : target - sSpan.Length, sSpan.Length);
+						view.SelectSpan(sSpan.Start > tSpan.Start ? target : target - sSpan.Length, sSpan.Length, -1);
 					}
 				}
 			}
@@ -388,7 +390,7 @@ namespace Codist
 						edit.Insert(target, sNode.ToFullString());
 						if (edit.HasEffectiveChanges) {
 							edit.Apply();
-							v.SelectSpan(target, sSpan.Length);
+							v.SelectSpan(target, sSpan.Length, -1);
 						}
 					}
 				});
@@ -409,7 +411,7 @@ namespace Codist
 					edit.Insert(target, sNode.ToFullString());
 					if (edit.HasEffectiveChanges) {
 						edit.Apply();
-						view.SelectSpan(target, sSpan.Length);
+						view.SelectSpan(target, sSpan.Length, -1);
 					}
 				}
 			}
