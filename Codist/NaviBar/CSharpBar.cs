@@ -1085,7 +1085,11 @@ namespace Codist.NaviBar
 					var span = Node.FullSpan;
 					if (span.Contains(Bar._SemanticContext.Position) && Node.SyntaxTree.FilePath == Bar._SemanticContext.Document.FilePath
 						|| Node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+						// Hack: since SelectNode will move the cursor to the end of the span--the beginning of next node,
+						//    it will make next node selected, which is undesired in most cases
+						Bar.View.Selection.SelectionChanged -= Bar.Update;
 						Bar.View.SelectNode(Node, Keyboard.Modifiers != ModifierKeys.Control);
+						Bar.View.Selection.SelectionChanged += Bar.Update;
 					}
 					else {
 						Node.GetIdentifierToken().GetLocation().GoToSource();
