@@ -513,7 +513,7 @@ namespace Codist.SmartBars
 			public string Name { get; }
 		}
 
-		protected class CommandMenuItem : ThemedMenuItem
+		protected class CommandMenuItem : ThemedMenuItem, IDisposable
 		{
 			SmartBar _SmartBar;
 
@@ -531,6 +531,14 @@ namespace Codist.SmartBars
 			}
 
 			public CommandItem CommandItem { get; }
+
+			public override void Dispose() {
+				if (_SmartBar != null) {
+					_SmartBar = null;
+					Click -= ClickHandler;
+					base.Dispose();
+				}
+			}
 
 			void ClickHandler(object s, RoutedEventArgs e) {
 				var ctx2 = new CommandContext(_SmartBar, s as Control);

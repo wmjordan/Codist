@@ -766,6 +766,7 @@ namespace Codist.NaviBar
 					_ScopeBox.FilterChanged -= ScopeBox_FilterChanged;
 					_ScopeBox = null;
 					_Note = null;
+					DataContext = null;
 				}
 			}
 
@@ -887,6 +888,7 @@ namespace Codist.NaviBar
 					_FilterBox.FilterChanged -= FilterChanged;
 					_FilterBox = null;
 				}
+				DataContext = null;
 			}
 		}
 
@@ -1029,6 +1031,7 @@ namespace Codist.NaviBar
 						d.Dispose();
 						ContextMenu = null;
 					}
+					DataContext = null;
 				}
 			}
 		}
@@ -1517,6 +1520,7 @@ namespace Codist.NaviBar
 						d.Dispose();
 						ContextMenu = null;
 					}
+					DataContext = null;
 				}
 			}
 		}

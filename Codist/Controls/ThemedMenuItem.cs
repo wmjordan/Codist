@@ -6,7 +6,7 @@ using System.Windows.Input;
 
 namespace Codist.Controls
 {
-	public class ThemedMenuItem : MenuItem
+	public class ThemedMenuItem : MenuItem, IDisposable
 	{
 		public static readonly DependencyProperty SubMenuHeaderProperty = DependencyProperty.Register("SubMenuHeader", typeof(FrameworkElement), typeof(ThemedMenuItem));
 		public static readonly DependencyProperty SubMenuMaxHeightProperty = DependencyProperty.Register("SubMenuMaxHeight", typeof(double), typeof(ThemedMenuItem));
@@ -24,7 +24,6 @@ namespace Codist.Controls
 			Header = new ThemedMenuText(text);
 			_ClickHandler = clickHandler;
 			Click += _ClickHandler;
-			Unloaded += ThemedMenuItem_Unloaded;
 		}
 
 		/// <summary>Gets or sets the header of the pop up submenu. If the header is set and no sub items are in the menu, an invisible <see cref="Separator"/> will be added to make the menu possible to popup when it is clicked.</summary>
@@ -81,14 +80,14 @@ namespace Codist.Controls
 			}
 		}
 
-		void ThemedMenuItem_Unloaded(object sender, RoutedEventArgs e) {
+		public virtual void Dispose() {
 			if (_ClickHandler != null) {
-				Unloaded -= ThemedMenuItem_Unloaded;
-				ClearItems();
-				SubMenuHeader = null;
 				Click -= _ClickHandler;
 				_ClickHandler = null;
 			}
+			this.DisposeCollection();
+			SubMenuHeader = null;
+			DataContext = null;
 		}
 
 		internal sealed class MenuItemPlaceHolder : Separator
