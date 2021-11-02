@@ -271,9 +271,8 @@ namespace Codist
 			switch (node.Kind()) {
 				case SyntaxKind.MethodDeclaration: return ((MethodDeclarationSyntax)node).ReturnType;
 				case SyntaxKind.DelegateDeclaration: return ((DelegateDeclarationSyntax)node).ReturnType;
-				case SyntaxKind.OperatorDeclaration:
-				case SyntaxKind.ConversionOperatorDeclaration:
-					return ((OperatorDeclarationSyntax)node).ReturnType;
+				case SyntaxKind.OperatorDeclaration: return ((OperatorDeclarationSyntax)node).ReturnType;
+				case SyntaxKind.ConversionOperatorDeclaration: return ((ConversionOperatorDeclarationSyntax)node).Type;
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.IndexerDeclaration:
 					return ((BasePropertyDeclarationSyntax)node).Type;
