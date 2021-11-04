@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using ThreadHelper = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist
 {
@@ -10,7 +11,7 @@ namespace Codist
 	{
 		public static void RunSync(Func<Task> func) {
 			try {
-				Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(func);
+				ThreadHelper.JoinableTaskFactory.Run(func);
 			}
 			catch (OperationCanceledException) {
 				// ignore
@@ -18,11 +19,26 @@ namespace Codist
 		}
 		public static TResult RunSync<TResult>(Func<Task<TResult>> func) {
 			try {
-				return Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(func);
+				return ThreadHelper.JoinableTaskFactory.Run(func);
 			}
 			catch (OperationCanceledException) {
 				return default;
 			}
+		}
+
+		/// <summary>Starts a task and forget it.</summary>
+		public static void FireAndForget(this Task task) {
+			ThreadHelper.JoinableTaskFactory.RunAsync(async () => {
+				try {
+#pragma warning disable VSTHRD003 // As a fire-and-forget continuation, deadlocks can't happen.
+					await task.ConfigureAwait(false);
+#pragma warning restore VSTHRD003
+				}
+				catch (Exception ex) {
+					// ignore error
+					Debug.WriteLine(ex.Message);
+				}
+			});
 		}
 
 		[DebuggerStepThrough]

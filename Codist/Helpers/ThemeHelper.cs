@@ -82,7 +82,7 @@ namespace Codist
 
 		public static void GetFontSettings(string categoryGuid, out string fontName, out int fontSize) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			var storage = (IVsFontAndColorStorage)ServiceProvider.GlobalProvider.GetService(typeof(SVsFontAndColorStorage));
+			var storage = ServicesHelper.Get<IVsFontAndColorStorage, SVsFontAndColorStorage>();
 			if (storage == null) {
 				goto EXIT;
 			}
