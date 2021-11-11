@@ -126,7 +126,7 @@ namespace Codist.Options
 		{
 			readonly OptionBox<Features> _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker;
 			readonly OptionBox<Features>[] _Options;
-			readonly Button _LoadButton, _SaveButton;
+			readonly Button _LoadButton, _SaveButton, _OpenConfigFolderButton;
 			readonly Note _NoticeBox;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -155,7 +155,8 @@ namespace Codist.Options
 					new WrapPanel {
 						Children = {
 							(_LoadButton = new Button { Name = "_Load", Content = R.CMD_Load, ToolTip = R.OT_LoadConfigFileTip }),
-							(_SaveButton = new Button { Name = "_Save", Content = R.CMD_Save, ToolTip = R.OT_SaveConfigFileTip })
+							(_SaveButton = new Button { Name = "_Save", Content = R.CMD_Save, ToolTip = R.OT_SaveConfigFileTip }),
+							(_OpenConfigFolderButton = new Button { Content = R.CMD_OpenConfigFolder, ToolTip = R.OT_OpenConfigFolderTip})
 						}
 					}
 					);
@@ -178,7 +179,7 @@ namespace Codist.Options
 					item.Margin = WpfHelper.MiddleMargin;
 					item.PreviewMouseDown += HighlightNoticeBox;
 				}
-				foreach (var item in new[] { _LoadButton, _SaveButton }) {
+				foreach (var item in new[] { _LoadButton, _SaveButton, _OpenConfigFolderButton }) {
 					item.MinWidth = 120;
 					item.Margin = WpfHelper.MiddleMargin;
 					item.Click += LoadOrSaveConfig;
@@ -240,7 +241,7 @@ namespace Codist.Options
 						MessageBox.Show(R.T_ErrorLoadingConfig + ex.Message, nameof(Codist));
 					}
 				}
-				else {
+				else if (sender == _SaveButton) {
 					var d = new SaveFileDialog {
 						Title = R.T_SaveConfig,
 						FileName = "Codist.json",
@@ -251,6 +252,16 @@ namespace Codist.Options
 						return;
 					}
 					Config.Instance.SaveConfig(d.FileName);
+				}
+				else {
+					try {
+						if (System.IO.File.Exists(Config.ConfigPath)) {
+							System.Diagnostics.Process.Start(System.IO.Path.GetDirectoryName(Config.ConfigPath));
+						}
+					}
+					catch (Exception ex) {
+						System.Diagnostics.Debug.WriteLine(ex);
+					}
 				}
 			}
 		}
@@ -844,7 +855,7 @@ namespace Codist.Options
 		{
 			readonly TextBox _BrowserPath, _BrowserParameter, _SearchEngineName, _SearchEngineUrl;
 			readonly ListBox _SearchEngineList;
-			readonly Button _BrowseBrowserPath, _AddSearchButton, _RemoveSearchButton, _MoveUpSearchButton, _ResetSearchButton, _SaveSearchButton;
+			readonly Button _BrowseBrowserPath, _AddButton, _RemoveButton, _MoveUpButton, _ResetButton, _SaveButton;
 
 			public PageControl(OptionsPage page) : base(page) {
 				AddPage(R.OT_WebSearch,
@@ -891,16 +902,16 @@ namespace Codist.Options
 							new StackPanel {
 								Margin = WpfHelper.SmallMargin,
 								Children = {
-									(_RemoveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Remove }),
-									(_MoveUpSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_MoveUp }),
-									(_ResetSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Reset }),
+									(_RemoveButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Remove }),
+									(_MoveUpButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_MoveUp }),
+									(_ResetButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Reset }),
 								}
 							}.SetValue(Grid.SetColumn, 1),
 							new StackPanel {
 								Margin = WpfHelper.SmallMargin,
 								Children = {
-									(_AddSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Add }),
-									(_SaveSearchButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Update })
+									(_AddButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Add }),
+									(_SaveButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Update })
 								}
 							}.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1)
 						}
@@ -940,7 +951,7 @@ namespace Codist.Options
 				};
 				_SearchEngineList.Items.AddRange(Config.Instance.SearchEngines);
 				_SearchEngineList.SelectionChanged += (s, args) => RefreshSearchEngineUI();
-				_AddSearchButton.Click += (s, args) => {
+				_AddButton.Click += (s, args) => {
 					var item = new SearchEngine(R.CMD_NewItem, String.Empty);
 					_SearchEngineList.Items.Add(item);
 					Config.Instance.SearchEngines.Add(item);
@@ -949,7 +960,7 @@ namespace Codist.Options
 					_SearchEngineName.Focus();
 					Config.Instance.FireConfigChangedEvent(Features.SmartBar);
 				};
-				_RemoveSearchButton.Click += (s, args) => {
+				_RemoveButton.Click += (s, args) => {
 					var i = _SearchEngineList.SelectedItem as SearchEngine;
 					if (MessageBox.Show(R.OT_ConfirmRemoveSearchEngine.Replace("<NAME>", i.Name), nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
 						var p = _SearchEngineList.SelectedIndex;
@@ -959,7 +970,7 @@ namespace Codist.Options
 						Config.Instance.FireConfigChangedEvent(Features.WebSearch);
 					}
 				};
-				_MoveUpSearchButton.Click += (s, args) => {
+				_MoveUpButton.Click += (s, args) => {
 					var p = _SearchEngineList.SelectedIndex;
 					if (p > 0) {
 						var se = Config.Instance.SearchEngines[p];
@@ -970,9 +981,9 @@ namespace Codist.Options
 						_SearchEngineList.SelectedIndex = p;
 						Config.Instance.FireConfigChangedEvent(Features.WebSearch);
 					}
-					_MoveUpSearchButton.IsEnabled = p > 0;
+					_MoveUpButton.IsEnabled = p > 0;
 				};
-				_SaveSearchButton.Click += (s, args) => {
+				_SaveButton.Click += (s, args) => {
 					var se = _SearchEngineList.SelectedItem as SearchEngine;
 					se.Name = _SearchEngineName.Text;
 					se.Pattern = _SearchEngineUrl.Text;
@@ -981,7 +992,7 @@ namespace Codist.Options
 					_SearchEngineList.Items.Insert(p, se);
 					Config.Instance.FireConfigChangedEvent(Features.WebSearch);
 				};
-				_ResetSearchButton.Click += (s, args) => {
+				_ResetButton.Click += (s, args) => {
 					if (MessageBox.Show(R.OT_ConfirmResetSearchEngine, nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
 						Config.Instance.ResetSearchEngines();
 						ResetSearchEngines(Config.Instance.SearchEngines);
@@ -1015,13 +1026,13 @@ namespace Codist.Options
 
 			void RefreshSearchEngineUI() {
 				var se = _SearchEngineList.SelectedItem as SearchEngine;
-				if (_RemoveSearchButton.IsEnabled = _SaveSearchButton.IsEnabled = _SearchEngineName.IsEnabled = _SearchEngineUrl.IsEnabled = se != null) {
-					_MoveUpSearchButton.IsEnabled = _SearchEngineList.SelectedIndex > 0;
+				if (_RemoveButton.IsEnabled = _SaveButton.IsEnabled = _SearchEngineName.IsEnabled = _SearchEngineUrl.IsEnabled = se != null) {
+					_MoveUpButton.IsEnabled = _SearchEngineList.SelectedIndex > 0;
 					_SearchEngineName.Text = se.Name;
 					_SearchEngineUrl.Text = se.Pattern;
 				}
 				else {
-					_MoveUpSearchButton.IsEnabled = false;
+					_MoveUpButton.IsEnabled = false;
 				}
 			}
 			void ResetSearchEngines(System.Collections.Generic.List<SearchEngine> searchEngines) {

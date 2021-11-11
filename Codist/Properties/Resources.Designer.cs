@@ -786,6 +786,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Open Config Folder 的本地化字符串。
+        /// </summary>
+        internal static string CMD_OpenConfigFolder {
+            get {
+                return ResourceManager.GetString("CMD_OpenConfigFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Execute file in command prompt 的本地化字符串。
         /// </summary>
         internal static string CMD_OpenFileInCmd {
@@ -2694,6 +2703,15 @@ namespace Codist.Properties {
         internal static string OT_NumericFormsTip {
             get {
                 return ResourceManager.GetString("OT_NumericFormsTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Open the folder where configurations of Codist are saved. 的本地化字符串。
+        /// </summary>
+        internal static string OT_OpenConfigFolderTip {
+            get {
+                return ResourceManager.GetString("OT_OpenConfigFolderTip", resourceCulture);
             }
         }
         

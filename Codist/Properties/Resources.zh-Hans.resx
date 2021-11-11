@@ -1797,4 +1797,10 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="OT_MemberTypesTip" xml:space="preserve">
     <value>在导航栏的成员列表中显示字段、属性和方法等成员的类型</value>
   </data>
+  <data name="CMD_OpenConfigFolder" xml:space="preserve">
+    <value>打开配置文件夹</value>
+  </data>
+  <data name="OT_OpenConfigFolderTip" xml:space="preserve">
+    <value>打开保存 Codist 配置文件的文件夹</value>
+  </data>
 </root>

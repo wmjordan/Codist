@@ -1809,4 +1809,10 @@ Use space to separate multiple search terms.
   <data name="OT_MemberTypesTip" xml:space="preserve">
     <value>Displays member declaration types in the drop-down menu of navigation bar</value>
   </data>
+  <data name="CMD_OpenConfigFolder" xml:space="preserve">
+    <value>Open Config Folder</value>
+  </data>
+  <data name="OT_OpenConfigFolderTip" xml:space="preserve">
+    <value>Open the folder where configurations of Codist are saved.</value>
+  </data>
 </root>
