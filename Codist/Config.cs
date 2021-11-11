@@ -16,7 +16,7 @@ namespace Codist
 {
 	sealed class Config
 	{
-		internal const string CurrentVersion = "5.13.0";
+		internal const string CurrentVersion = "5.14.0";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
 		internal const string LightTheme = ThemePrefix + "Light", PaleLightTheme = ThemePrefix + "PaleLight", DarkTheme = ThemePrefix + "Dark", SimpleTheme = ThemePrefix + "Simple";
@@ -92,6 +92,7 @@ namespace Codist
 		public List<SyntaxStyle> Styles { get; set; } // for serialization only
 		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
 		public List<SearchEngine> SearchEngines { get; } = new List<SearchEngine>();
+		public List<WrapText> WrapTexts { get; } = new List<WrapText>();
 		public string BrowserPath { get; set; }
 		public string BrowserParameter { get; set; }
 		internal bool IsChanged => _ConfigManager?.IsChanged ?? false;
@@ -157,6 +158,11 @@ namespace Codist
 							ResetSearchEngines(config.SearchEngines);
 						}
 					}
+					if (v < new Version(5, 14)) {
+						if (config.WrapTexts.Count == 0) {
+							ResetWrapTexts(config.WrapTexts);
+						}
+					}
 				}
 				return config;
 			}
@@ -203,6 +209,8 @@ namespace Codist
 				l.RemoveAll(i => String.IsNullOrWhiteSpace(i.Label));
 				var se = config.SearchEngines;
 				se.RemoveAll(i => String.IsNullOrWhiteSpace(i.Name) || String.IsNullOrWhiteSpace(i.Pattern));
+				var wt = config.WrapTexts;
+				wt.RemoveAll(i => String.IsNullOrWhiteSpace(i.Pattern));
 			}
 			var removeFontNames = System.Windows.Forms.Control.ModifierKeys == System.Windows.Forms.Keys.Control;
 			LoadStyleEntries<CodeStyle, CodeStyleTypes>(config.GeneralStyles, removeFontNames);
@@ -281,6 +289,22 @@ namespace Codist
 				new SearchEngine("CodeProject", "https://www.codeproject.com/search.aspx?q=%s&x=0&y=0&sbo=kw"),
 				new SearchEngine(".NET Core Source", "https://source.dot.net/#q=%s"),
 				new SearchEngine(".NET Framework Source", "https://referencesource.microsoft.com/#q=%s"),
+			});
+		}
+
+		public void ResetWrapTexts() {
+			ResetWrapTexts(WrapTexts);
+		}
+		public static void ResetWrapTexts(List<WrapText> wrapTexts) {
+			wrapTexts.Clear();
+			wrapTexts.AddRange(new[] {
+				new WrapText("\"$\"", "\"\""),
+				new WrapText("($)", "()"),
+				new WrapText("'$'", "''"),
+				new WrapText("[$]", "[]"),
+				new WrapText("{$}", "{}"),
+				new WrapText("<$>", "<>"),
+				new WrapText("%$%", "%%"),
 			});
 		}
 
@@ -418,6 +442,7 @@ namespace Codist
 			var c = new Config();
 			InitDefaultLabels(c.Labels);
 			ResetSearchEngines(c.SearchEngines);
+			ResetWrapTexts(c.WrapTexts);
 			c.GeneralStyles.AddRange(GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>());
 			c.CommentStyles.AddRange(GetDefaultCodeStyles<CommentStyle, CommentStyleTypes>());
 			c.CodeStyles.AddRange(GetDefaultCodeStyles<CSharpStyle, CSharpStyleTypes>());
@@ -558,6 +583,48 @@ namespace Codist
 		}
 		public string Name { get; set; }
 		public string Pattern { get; set; }
+	}
+	sealed class WrapText
+	{
+		string _Prefix, _Suffix, _Subsitution;
+		bool _PrefixSubstitution, _SuffixSubstitution;
+
+		public const char DefaultIndicator = '$';
+		public WrapText(string pattern, string name = null, char indicator = DefaultIndicator) {
+			Pattern = pattern;
+			Name = name;
+			Indicator = indicator;
+			int p;
+			if ((p = pattern.IndexOf(indicator)) >= 0) {
+				_Prefix = pattern.Substring(0, p);
+				_Suffix = pattern.Substring(p + 1);
+				var s = new string(indicator, 2);
+				if (_PrefixSubstitution = _Prefix.Contains(s)) {
+					_Subsitution = s;
+				}
+				if (_SuffixSubstitution = _Suffix.Contains(s)) {
+					_Subsitution = s;
+				}
+			}
+			else {
+				_Prefix = pattern;
+				_Suffix = String.Empty;
+			}
+		}
+
+		public string Name { get; set; }
+		public string Pattern { get; set; }
+		public char Indicator { get; set; }
+
+		internal string Prefix => _Prefix;
+		internal string Suffix => _Suffix;
+		internal string Substitution => _Subsitution;
+
+		public string Wrap(string text) {
+			return (_PrefixSubstitution ? _Prefix.Replace(_Subsitution, text) : _Prefix)
+				+ text
+				+ (_SuffixSubstitution ? _Suffix.Replace(_Subsitution, text) : _Suffix);
+		}
 	}
 
 	sealed class ConfigUpdatedEventArgs : EventArgs

@@ -135,10 +135,11 @@ namespace Codist
 		}
 
 		public static TokenType GetSelectedTokenType(this ITextView view) {
-			if (view.Selection.IsEmpty || view.Selection.SelectedSpans.Count > 1) {
+			NormalizedSnapshotSpanCollection spans;
+			if (view.Selection.IsEmpty || (spans = view.Selection.SelectedSpans).Count > 1) {
 				return TokenType.None;
 			}
-			var selection = view.Selection.SelectedSpans[0];
+			var selection = spans[0];
 			if (selection.Length >= 128) {
 				return TokenType.None;
 			}
@@ -354,6 +355,42 @@ namespace Codist
 			return firstModified;
 		}
 
+		public static SnapshotSpan WrapWith(this ITextView view, WrapText wrapText) {
+			var firstModified = new SnapshotSpan();
+			var prefix = wrapText.Prefix;
+			var suffix = wrapText.Suffix;
+			var substitution = wrapText.Substitution;
+			var psLength = prefix.Length + suffix.Length;
+			string firstText = null;
+			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+				foreach (var item in view.Selection.SelectedSpans) {
+					var t = item.GetText();
+					// remove surrounding items
+					if (substitution == null
+						&& t.Length > psLength
+						&& t.StartsWith(prefix, StringComparison.Ordinal)
+						&& t.EndsWith(suffix, StringComparison.Ordinal)
+						&& t.IndexOf(prefix, prefix.Length, t.Length - psLength) <= t.IndexOf(suffix, prefix.Length, t.Length - psLength)) {
+						if (edit.Replace(item, t = t.Substring(prefix.Length, t.Length - psLength))
+							&& firstModified.Snapshot == null) {
+							firstModified = item;
+							firstText = t;
+						}
+					}
+					// surround items
+					else if (edit.Replace(item, t = wrapText.Wrap(t)) && firstModified.Snapshot == null) {
+						firstModified = item;
+						firstText = t;
+					}
+				}
+				if (edit.HasEffectiveChanges) {
+					var snapsnot = edit.Apply();
+					firstModified = new SnapshotSpan(snapsnot, firstModified.Start, firstText.Length);
+				}
+			}
+			return firstModified;
+		}
+
 
 		public static void CopyOrMoveSyntaxNode(this IWpfTextView view, SyntaxNode sourceNode, SyntaxNode targetNode, bool copy, bool before) {
 			ThreadHelper.ThrowIfNotOnUIThread();
@@ -487,6 +524,7 @@ namespace Codist
 
 		#region Edit commands
 		public static void JoinSelectedLines(this ITextView view) {
+			const char FullWidthSpace = (char)0x3000;
 			if (view.TryGetFirstSelectionSpan(out var span) == false) {
 				return;
 			}
@@ -502,11 +540,13 @@ namespace Codist
 						nl = true;
 						goto case ' ';
 					case ' ':
+					case FullWidthSpace:
 					case '\t':
 						int j;
 						for (j = i + 1; j < t.Length; j++) {
 							switch (t[j]) {
 								case ' ':
+								case FullWidthSpace:
 								case '\t':
 									continue;
 								case '/':

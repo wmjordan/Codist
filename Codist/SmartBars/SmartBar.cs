@@ -103,6 +103,7 @@ namespace Codist.SmartBars
 				AddDuplicateCommand();
 				AddDeleteCommand();
 				AddSpecialFormatCommand();
+				AddWrapTextCommand();
 			}
 			//if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
 			//	AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");

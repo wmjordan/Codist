@@ -23,6 +23,8 @@ namespace Codist.SmartBars
 
 		protected static IEnumerable<CommandItem> DebugCommands => __DebugCommands;
 
+		WrapText _RecentWrapText;
+
 		static void ExecuteAndFind(CommandContext ctx, string command, string text) {
 			if (ctx.RightClick) {
 				ctx.View.ExpandSelectionToLine(true);
@@ -71,6 +73,19 @@ namespace Codist.SmartBars
 			string s = ctx.View.GetFirstSelectionText();
 			ctx.KeepToolBar(false);
 			var firstModified = ctx.View.WrapWith(prefix, suffix);
+			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
+				&& FindNext(ctx, s) == false) {
+				ctx.HideToolBar();
+			}
+			else if (selectModified) {
+				ctx.View.SelectSpan(firstModified);
+			}
+			return firstModified;
+		}
+		protected static SnapshotSpan WrapWith(CommandContext ctx, WrapText wrapText, bool selectModified) {
+			string s = ctx.View.GetFirstSelectionText();
+			ctx.KeepToolBar(false);
+			var firstModified = ctx.View.WrapWith(wrapText);
 			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
 				&& FindNext(ctx, s) == false) {
 				ctx.HideToolBar();
@@ -167,6 +182,9 @@ namespace Codist.SmartBars
 		}
 
 		void AddSpecialFormatCommand() {
+			if (View.Selection.IsEmpty) {
+				return;
+			}
 			var tokenType = View.GetSelectedTokenType();
 			switch (tokenType) {
 				case TokenType.None:
@@ -231,6 +249,27 @@ namespace Codist.SmartBars
 				default:
 					AddCommands(ToolBar, IconIds.FormatSelection, R.CMD_Formatting, null, _ => __CaseCommands);
 					break;
+			}
+		}
+
+		void AddWrapTextCommand() {
+			AddCommands(ToolBar, IconIds.WrapText, "Wrap text", WrapRecent, CreateWrapTextMenu);
+		}
+
+		void WrapRecent(CommandContext ctx) {
+			if (_RecentWrapText == null) {
+				WrapWith(ctx, "(", ")", true);
+				return;
+			}
+			WrapWith(ctx, _RecentWrapText, true);
+		}
+		IEnumerable<CommandItem> CreateWrapTextMenu(CommandContext context) {
+			foreach (var item in Config.Instance.WrapTexts) {
+				yield return new CommandItem(IconIds.WrapText, String.IsNullOrEmpty(item.Name) ? item.Pattern : item.Name, null, ctx => {
+					if (WrapWith(ctx, item, true).IsEmpty == false) {
+						_RecentWrapText = item;
+					}
+				});
 			}
 		}
 

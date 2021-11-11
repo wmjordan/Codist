@@ -152,6 +152,7 @@ namespace Codist
 		public const int ReplaceInFolder = KnownImageIds.ReplaceInFolder;
 		public const int SearchWebSite = KnownImageIds.OpenWebSite;
 		public const int SurroundWith = KnownImageIds.AddSnippet;
+		public const int WrapText = KnownImageIds.CorrelationScope;
 		public const int ToggleParentheses = KnownImageIds.MaskedTextBox;
 		public const int NewGuid = KnownImageIds.NewNamedSet;
 		public const int IncrementNumber = KnownImageIds.Counter;
