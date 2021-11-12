@@ -535,17 +535,21 @@ namespace Codist.SmartBars
 
 			public override void Dispose() {
 				if (_SmartBar != null) {
-					_SmartBar = null;
 					Click -= ClickHandler;
+					_SmartBar = null;
 					base.Dispose();
 				}
 			}
 
 			void ClickHandler(object s, RoutedEventArgs e) {
-				var ctx2 = new CommandContext(_SmartBar, s as Control);
+				var bar = _SmartBar;
+				if (bar == null) {
+					return;
+				}
+				var ctx2 = new CommandContext(bar, s as Control);
 				CommandItem.Action(ctx2);
 				if (ctx2.KeepToolBarOnClick == false) {
-					_SmartBar.HideToolBar();
+					bar.HideToolBar();
 				}
 			}
 		}
