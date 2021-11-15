@@ -586,44 +586,54 @@ namespace Codist
 	}
 	sealed class WrapText
 	{
-		string _Prefix, _Suffix, _Subsitution;
-		bool _PrefixSubstitution, _SuffixSubstitution;
-
+		string _Prefix, _Suffix, _Pattern, _Subsitution;
+		char _Indicator;
 		public const char DefaultIndicator = '$';
 		public WrapText(string pattern, string name = null, char indicator = DefaultIndicator) {
+			Indicator = indicator;
 			Pattern = pattern;
 			Name = name;
-			Indicator = indicator;
-			int p;
-			if ((p = pattern.IndexOf(indicator)) >= 0) {
-				_Prefix = pattern.Substring(0, p);
-				_Suffix = pattern.Substring(p + 1);
-				var s = new string(indicator, 2);
-				if (_PrefixSubstitution = _Prefix.Contains(s)) {
-					_Subsitution = s;
-				}
-				if (_SuffixSubstitution = _Suffix.Contains(s)) {
-					_Subsitution = s;
-				}
-			}
-			else {
-				_Prefix = pattern;
-				_Suffix = String.Empty;
-			}
 		}
 
 		public string Name { get; set; }
-		public string Pattern { get; set; }
-		public char Indicator { get; set; }
+		public string Pattern {
+			get => _Pattern;
+			set {
+				_Pattern = value;
+				InternalUpdate();
+			}
+		}
+
+		public char Indicator {
+			get => _Indicator;
+			set {
+				_Indicator = value;
+				InternalUpdate();
+			}
+		}
 
 		internal string Prefix => _Prefix;
 		internal string Suffix => _Suffix;
 		internal string Substitution => _Subsitution;
 
 		public string Wrap(string text) {
-			return (_PrefixSubstitution ? _Prefix.Replace(_Subsitution, text) : _Prefix)
+			return _Prefix
 				+ text
-				+ (_SuffixSubstitution ? _Suffix.Replace(_Subsitution, text) : _Suffix);
+				+ (_Subsitution != null ? _Suffix.Replace(_Subsitution, text) : _Suffix);
+		}
+
+		void InternalUpdate() {
+			int p;
+			if (_Pattern != null && (p = _Pattern.IndexOf(Indicator)) >= 0) {
+				_Prefix = _Pattern.Substring(0, p);
+				_Suffix = _Pattern.Substring(p + 1);
+				_Subsitution = _Suffix.Contains(Indicator) ? Indicator.ToString() : null;
+			}
+			else {
+				_Prefix = _Pattern;
+				_Suffix = String.Empty;
+				_Subsitution = null;
+			}
 		}
 	}
 
@@ -664,7 +674,8 @@ namespace Codist
 		SmartBar = 1 << 3,
 		NaviBar = 1 << 4,
 		WebSearch = 1 << 5,
-		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar | WebSearch
+		WrapText = 1 << 6,
+		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar | WebSearch | WrapText
 	}
 
 	[Flags]

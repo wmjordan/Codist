@@ -909,7 +909,7 @@ Use space to separate keywords.</value>
   </data>
   <data name="OT_ConfirmResetSearchEngine" xml:space="preserve">
     <value>Do you want to reset search engines to default ones?
-ALL existing items will be REMOVED.</value>
+ALL existing items will be REPLACE by default items.</value>
   </data>
   <data name="OT_CSharp" xml:space="preserve">
     <value>C#</value>
@@ -1814,5 +1814,33 @@ Use space to separate multiple search terms.
   </data>
   <data name="OT_OpenConfigFolderTip" xml:space="preserve">
     <value>Open the folder where configurations of Codist are saved.</value>
+  </data>
+  <data name="CMD_WrapText" xml:space="preserve">
+    <value>Wrap selection with text
+Right click: Wrap text menu...</value>
+  </data>
+  <data name="OTC_Indicator" xml:space="preserve">
+    <value>Indicator:</value>
+  </data>
+  <data name="OTC_Pattern" xml:space="preserve">
+    <value>Pattern:</value>
+  </data>
+  <data name="OT_Indicator" xml:space="preserve">
+    <value>Indicator</value>
+  </data>
+  <data name="OT_WrapText" xml:space="preserve">
+    <value>Wrap Text</value>
+  </data>
+  <data name="OT_WrapTextNote" xml:space="preserve">
+    <value>This page defines text items wrapping selection which can be accessed by right clicking the "Wrap select with text" button on Smart Bar</value>
+  </data>
+  <data name="OT_WrapTextPattern" xml:space="preserve">
+    <value>Wrap text pattern</value>
+  </data>
+  <data name="OT_WrapTexts" xml:space="preserve">
+    <value>Wrap Texts</value>
+  </data>
+  <data name="OT_WrapTextSelectionIndicator" xml:space="preserve">
+    <value>The Indicator within the Pattern will be replaced by the selection when Wrap Selection With Text command is executed</value>
   </data>
 </root>

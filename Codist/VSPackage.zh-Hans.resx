@@ -153,4 +153,7 @@
   <data name="308" xml:space="preserve">
     <value>联网搜索</value>
   </data>
+  <data name="310" xml:space="preserve">
+    <value>环绕文本</value>
+  </data>
 </root>

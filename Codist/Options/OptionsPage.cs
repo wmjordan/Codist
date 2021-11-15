@@ -848,13 +848,13 @@ namespace Codist.Options
 	{
 		UIElement _Child;
 
-		protected override Features Feature => Features.SmartBar;
+		protected override Features Feature => Features.WebSearch;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
 
 		sealed class PageControl : OptionsPageContainer
 		{
-			readonly TextBox _BrowserPath, _BrowserParameter, _SearchEngineName, _SearchEngineUrl;
-			readonly ListBox _SearchEngineList;
+			readonly TextBox _BrowserPath, _BrowserParameter, _Name, _Url;
+			readonly ListBox _List;
 			readonly Button _BrowseBrowserPath, _AddButton, _RemoveButton, _MoveUpButton, _ResetButton, _SaveButton;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -871,7 +871,7 @@ namespace Codist.Options
 							new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }
 						},
 						Children = {
-							(_SearchEngineList = new ListView {
+							(_List = new ListView {
 								Margin = WpfHelper.SmallMargin,
 								View = new GridView {
 									Columns = {
@@ -893,9 +893,9 @@ namespace Codist.Options
 								},
 								Children = {
 									new Label { Content = R.OTC_Name, Width = 60 },
-									(_SearchEngineName = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1),
+									(_Name = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1),
 									new Label { Content = R.OTC_URL, Width = 60 }.SetValue(Grid.SetRow, 1),
-									(_SearchEngineUrl = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
+									(_Url = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
 									new DescriptionBox(R.OT_SearchParamSubsitution).SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumnSpan, 2)
 								}
 							}.SetValue(Grid.SetRow, 1),
@@ -949,47 +949,47 @@ namespace Codist.Options
 						_BrowserPath.Text = d.FileName;
 					}
 				};
-				_SearchEngineList.Items.AddRange(Config.Instance.SearchEngines);
-				_SearchEngineList.SelectionChanged += (s, args) => RefreshSearchEngineUI();
+				_List.Items.AddRange(Config.Instance.SearchEngines);
+				_List.SelectionChanged += (s, args) => RefreshSearchEngineUI();
 				_AddButton.Click += (s, args) => {
 					var item = new SearchEngine(R.CMD_NewItem, String.Empty);
-					_SearchEngineList.Items.Add(item);
+					_List.Items.Add(item);
 					Config.Instance.SearchEngines.Add(item);
-					_SearchEngineList.SelectedIndex = _SearchEngineList.Items.Count - 1;
+					_List.SelectedIndex = _List.Items.Count - 1;
 					RefreshSearchEngineUI();
-					_SearchEngineName.Focus();
+					_Name.Focus();
 					Config.Instance.FireConfigChangedEvent(Features.SmartBar);
 				};
 				_RemoveButton.Click += (s, args) => {
-					var i = _SearchEngineList.SelectedItem as SearchEngine;
+					var i = _List.SelectedItem as SearchEngine;
 					if (MessageBox.Show(R.OT_ConfirmRemoveSearchEngine.Replace("<NAME>", i.Name), nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
-						var p = _SearchEngineList.SelectedIndex;
-						_SearchEngineList.Items.RemoveAndDisposeAt(p);
+						var p = _List.SelectedIndex;
+						_List.Items.RemoveAndDisposeAt(p);
 						Config.Instance.SearchEngines.RemoveAt(p);
 						RefreshSearchEngineUI();
 						Config.Instance.FireConfigChangedEvent(Features.WebSearch);
 					}
 				};
 				_MoveUpButton.Click += (s, args) => {
-					var p = _SearchEngineList.SelectedIndex;
+					var p = _List.SelectedIndex;
 					if (p > 0) {
 						var se = Config.Instance.SearchEngines[p];
-						_SearchEngineList.Items.RemoveAt(p);
+						_List.Items.RemoveAt(p);
 						Config.Instance.SearchEngines.RemoveAt(p);
-						_SearchEngineList.Items.Insert(--p, se);
+						_List.Items.Insert(--p, se);
 						Config.Instance.SearchEngines.Insert(p, se);
-						_SearchEngineList.SelectedIndex = p;
+						_List.SelectedIndex = p;
 						Config.Instance.FireConfigChangedEvent(Features.WebSearch);
 					}
 					_MoveUpButton.IsEnabled = p > 0;
 				};
 				_SaveButton.Click += (s, args) => {
-					var se = _SearchEngineList.SelectedItem as SearchEngine;
-					se.Name = _SearchEngineName.Text;
-					se.Pattern = _SearchEngineUrl.Text;
-					var p = _SearchEngineList.SelectedIndex;
-					_SearchEngineList.Items.RemoveAt(p);
-					_SearchEngineList.Items.Insert(p, se);
+					var se = _List.SelectedItem as SearchEngine;
+					se.Name = _Name.Text;
+					se.Pattern = _Url.Text;
+					var p = _List.SelectedIndex;
+					_List.Items.RemoveAt(p);
+					_List.Items.Insert(p, se);
 					Config.Instance.FireConfigChangedEvent(Features.WebSearch);
 				};
 				_ResetButton.Click += (s, args) => {
@@ -1025,19 +1025,172 @@ namespace Codist.Options
 			}
 
 			void RefreshSearchEngineUI() {
-				var se = _SearchEngineList.SelectedItem as SearchEngine;
-				if (_RemoveButton.IsEnabled = _SaveButton.IsEnabled = _SearchEngineName.IsEnabled = _SearchEngineUrl.IsEnabled = se != null) {
-					_MoveUpButton.IsEnabled = _SearchEngineList.SelectedIndex > 0;
-					_SearchEngineName.Text = se.Name;
-					_SearchEngineUrl.Text = se.Pattern;
+				var se = _List.SelectedItem as SearchEngine;
+				if (_RemoveButton.IsEnabled = _SaveButton.IsEnabled = _Name.IsEnabled = _Url.IsEnabled = se != null) {
+					_MoveUpButton.IsEnabled = _List.SelectedIndex > 0;
+					_Name.Text = se.Name;
+					_Url.Text = se.Pattern;
 				}
 				else {
 					_MoveUpButton.IsEnabled = false;
 				}
 			}
 			void ResetSearchEngines(System.Collections.Generic.List<SearchEngine> searchEngines) {
-				_SearchEngineList.Items.Clear();
-				_SearchEngineList.Items.AddRange(searchEngines);
+				_List.Items.Clear();
+				_List.Items.AddRange(searchEngines);
+			}
+		}
+	}
+
+	[Guid("6A7DC1C9-2C62-43ED-9A72-B51B23CB9579")]
+	sealed class WrapTextPage : OptionsPage
+	{
+		UIElement _Child;
+
+		protected override Features Feature => Features.WrapText;
+		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
+
+		sealed class PageControl : OptionsPageContainer
+		{
+			readonly TextBox _Name, _Pattern, _Indicator;
+			readonly ListBox _List;
+			readonly Button _AddButton, _RemoveButton, _MoveUpButton, _ResetButton, _SaveButton;
+
+			public PageControl(OptionsPage page) : base(page) {
+				AddPage(R.OT_WrapText,
+					new Note(R.OT_WrapTextNote),
+					new TitleBox(R.OT_WrapTexts),
+					new Grid {
+						ColumnDefinitions = {
+							new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), },
+							new ColumnDefinition { Width = new GridLength(80, GridUnitType.Pixel) },
+						},
+						RowDefinitions = {
+							new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+							new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }
+						},
+						Children = {
+							(_List = new ListView {
+								Margin = WpfHelper.SmallMargin,
+								View = new GridView {
+									Columns = {
+										new GridViewColumn { Header = R.OT_Name, Width = 80, DisplayMemberBinding = new Binding(nameof(WrapText.Name)) },
+										new GridViewColumn { Header = R.OT_WrapTextPattern, Width = 180, DisplayMemberBinding = new Binding(nameof(WrapText.Pattern)) },
+										new GridViewColumn { Header = R.OT_Indicator, Width = 60, DisplayMemberBinding = new Binding(nameof(WrapText.Indicator)) }
+									}
+								}
+							}),
+							new Grid {
+								Margin = WpfHelper.SmallMargin,
+								ColumnDefinitions = {
+									new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
+									new ColumnDefinition { Width = new GridLength(5, GridUnitType.Star) },
+								},
+								RowDefinitions = {
+									new RowDefinition { },
+									new RowDefinition { },
+									new RowDefinition { },
+									new RowDefinition { }
+								},
+								Children = {
+									new Label { Content = R.OTC_Name, Width = 60 },
+									(_Name = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1),
+									new Label { Content = R.OTC_Pattern, Width = 60 }.SetValue(Grid.SetRow, 1),
+									(_Pattern = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
+									new Label { Content = R.OTC_Indicator, Width = 60 }.SetValue(Grid.SetRow, 2),
+									(_Indicator = new TextBox { IsEnabled = false, Margin = WpfHelper.SmallVerticalMargin, Width = 40, MaxLength = 1 }).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
+									new DescriptionBox(R.OT_WrapTextSelectionIndicator).SetValue(Grid.SetRow, 3).SetValue(Grid.SetColumnSpan, 2)
+								}
+							}.SetValue(Grid.SetRow, 1),
+							new StackPanel {
+								Margin = WpfHelper.SmallMargin,
+								Children = {
+									(_RemoveButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Remove }),
+									(_MoveUpButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_MoveUp }),
+									(_ResetButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Reset }),
+								}
+							}.SetValue(Grid.SetColumn, 1),
+							new StackPanel {
+								Margin = WpfHelper.SmallMargin,
+								Children = {
+									(_AddButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Add }),
+									(_SaveButton = new Button { Margin = WpfHelper.SmallVerticalMargin, Content = R.CMD_Update })
+								}
+							}.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1)
+						}
+					}
+				);
+
+				_List.Items.AddRange(Config.Instance.WrapTexts);
+				_List.SelectionChanged += (s, args) => RefreshWrapTextUI();
+				_AddButton.Click += (s, args) => {
+					var item = new WrapText("<c>" + WrapText.DefaultIndicator + "</c>", R.CMD_NewItem);
+					_List.Items.Add(item);
+					Config.Instance.WrapTexts.Add(item);
+					_List.SelectedIndex = _List.Items.Count - 1;
+					RefreshWrapTextUI();
+					_Name.Focus();
+					Config.Instance.FireConfigChangedEvent(Features.SmartBar);
+				};
+				_RemoveButton.Click += (s, args) => {
+					var p = _List.SelectedIndex;
+					_List.Items.RemoveAndDisposeAt(p);
+					Config.Instance.WrapTexts.RemoveAt(p);
+					RefreshWrapTextUI();
+					Config.Instance.FireConfigChangedEvent(Features.WrapText);
+				};
+				_MoveUpButton.Click += (s, args) => {
+					var p = _List.SelectedIndex;
+					if (p > 0) {
+						var se = Config.Instance.WrapTexts[p];
+						_List.Items.RemoveAt(p);
+						Config.Instance.WrapTexts.RemoveAt(p);
+						_List.Items.Insert(--p, se);
+						Config.Instance.WrapTexts.Insert(p, se);
+						_List.SelectedIndex = p;
+						Config.Instance.FireConfigChangedEvent(Features.WrapText);
+					}
+					_MoveUpButton.IsEnabled = p > 0;
+				};
+				_SaveButton.Click += (s, args) => {
+					var se = _List.SelectedItem as WrapText;
+					se.Name = _Name.Text;
+					se.Pattern = _Pattern.Text;
+					se.Indicator = _Indicator.Text.Length > 0 ? _Indicator.Text[0] : WrapText.DefaultIndicator;
+					var p = _List.SelectedIndex;
+					_List.Items.RemoveAt(p);
+					_List.Items.Insert(p, se);
+					Config.Instance.FireConfigChangedEvent(Features.WrapText);
+				};
+				_ResetButton.Click += (s, args) => {
+					if (MessageBox.Show(R.OT_ConfirmResetWrapText, nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+						Config.Instance.ResetWrapTexts();
+						ResetWrapTexts(Config.Instance.WrapTexts);
+						Config.Instance.FireConfigChangedEvent(Features.WrapText);
+					}
+				};
+				RefreshWrapTextUI();
+			}
+
+			protected override void LoadConfig(Config config) {
+				ResetWrapTexts(config.WrapTexts);
+			}
+
+			void RefreshWrapTextUI() {
+				var se = _List.SelectedItem as WrapText;
+				if (_RemoveButton.IsEnabled = _SaveButton.IsEnabled = _Name.IsEnabled = _Pattern.IsEnabled = _Indicator.IsEnabled = se != null) {
+					_MoveUpButton.IsEnabled = _List.SelectedIndex > 0;
+					_Name.Text = se.Name;
+					_Pattern.Text = se.Pattern;
+					_Indicator.Text = se.Indicator.ToString();
+				}
+				else {
+					_MoveUpButton.IsEnabled = false;
+				}
+			}
+			void ResetWrapTexts(System.Collections.Generic.List<WrapText> wrapTexts) {
+				_List.Items.Clear();
+				_List.Items.AddRange(wrapTexts);
 			}
 		}
 	}

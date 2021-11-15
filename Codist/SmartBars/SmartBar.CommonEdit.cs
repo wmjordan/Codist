@@ -253,13 +253,15 @@ namespace Codist.SmartBars
 		}
 
 		void AddWrapTextCommand() {
-			AddCommands(ToolBar, IconIds.WrapText, "Wrap text", WrapRecent, CreateWrapTextMenu);
+			AddCommands(ToolBar, IconIds.WrapText, R.CMD_WrapText, WrapRecent, CreateWrapTextMenu);
 		}
 
 		void WrapRecent(CommandContext ctx) {
 			if (_RecentWrapText == null) {
-				WrapWith(ctx, "(", ")", true);
-				return;
+				if (Config.Instance.WrapTexts.Count == 0) {
+					WrapWith(ctx, "(", ")", true);
+				}
+				_RecentWrapText = Config.Instance.WrapTexts[0];
 			}
 			WrapWith(ctx, _RecentWrapText, true);
 		}

@@ -153,4 +153,7 @@
   <data name="309" xml:space="preserve">
     <value>Extension Development</value>
   </data>
+  <data name="310" xml:space="preserve">
+    <value>Wrap Text</value>
+  </data>
 </root>

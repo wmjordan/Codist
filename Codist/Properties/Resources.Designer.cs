@@ -1275,6 +1275,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Wrap selection with text
+        ///Right click: Wrap text menu... 的本地化字符串。
+        /// </summary>
+        internal static string CMD_WrapText {
+            get {
+                return ResourceManager.GetString("CMD_WrapText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Open the syntax highlight configuration dialog window 的本地化字符串。
         /// </summary>
         internal static string CMDT_ConfigureSyntaxHighlight {
@@ -1857,11 +1867,21 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   查找类似 Do you want to reset search engines to default ones?
-        ///ALL existing items will be REMOVED. 的本地化字符串。
+        ///ALL existing items will be REPLACE by default items. 的本地化字符串。
         /// </summary>
         internal static string OT_ConfirmResetSearchEngine {
             get {
                 return ResourceManager.GetString("OT_ConfirmResetSearchEngine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Do you want to reset wrap texts to default ones?
+        ///ALL existing items will be REPLACE by default items. 的本地化字符串。
+        /// </summary>
+        internal static string OT_ConfirmResetWrapText {
+            get {
+                return ResourceManager.GetString("OT_ConfirmResetWrapText", resourceCulture);
             }
         }
         
@@ -2204,6 +2224,15 @@ namespace Codist.Properties {
         internal static string OT_IncludeRegionsTip {
             get {
                 return ResourceManager.GetString("OT_IncludeRegionsTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Indicator 的本地化字符串。
+        /// </summary>
+        internal static string OT_Indicator {
+            get {
+                return ResourceManager.GetString("OT_Indicator", resourceCulture);
             }
         }
         
@@ -3463,6 +3492,51 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Wrap Text 的本地化字符串。
+        /// </summary>
+        internal static string OT_WrapText {
+            get {
+                return ResourceManager.GetString("OT_WrapText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 This page defines text items wrapping selection which can be accessed by right clicking the &quot;Wrap select with text&quot; button on Smart Bar 的本地化字符串。
+        /// </summary>
+        internal static string OT_WrapTextNote {
+            get {
+                return ResourceManager.GetString("OT_WrapTextNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Wrap text pattern 的本地化字符串。
+        /// </summary>
+        internal static string OT_WrapTextPattern {
+            get {
+                return ResourceManager.GetString("OT_WrapTextPattern", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Wrap Texts 的本地化字符串。
+        /// </summary>
+        internal static string OT_WrapTexts {
+            get {
+                return ResourceManager.GetString("OT_WrapTexts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 The Indicator within the Pattern will be replaced by the selection when Wrap Selection With Text command is executed 的本地化字符串。
+        /// </summary>
+        internal static string OT_WrapTextSelectionIndicator {
+            get {
+                return ResourceManager.GetString("OT_WrapTextSelectionIndicator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Bottom margin: 的本地化字符串。
         /// </summary>
         internal static string OTC_BottomMargin {
@@ -3472,11 +3546,29 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Indicator: 的本地化字符串。
+        /// </summary>
+        internal static string OTC_Indicator {
+            get {
+                return ResourceManager.GetString("OTC_Indicator", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Name: 的本地化字符串。
         /// </summary>
         internal static string OTC_Name {
             get {
                 return ResourceManager.GetString("OTC_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Pattern: 的本地化字符串。
+        /// </summary>
+        internal static string OTC_Pattern {
+            get {
+                return ResourceManager.GetString("OTC_Pattern", resourceCulture);
             }
         }
         

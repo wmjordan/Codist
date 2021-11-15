@@ -157,4 +157,7 @@
   <data name="308" xml:space="preserve">
     <value>Web Search</value>
   </data>
+  <data name="310" xml:space="preserve">
+    <value>Wrap Text</value>
+  </data>
 </root>
