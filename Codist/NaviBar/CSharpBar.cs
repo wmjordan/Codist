@@ -137,7 +137,7 @@ namespace Codist.NaviBar
 
 		protected override void OnMouseLeave(MouseEventArgs e) {
 			base.OnMouseLeave(e);
-			if (_SyntaxNodeRangeAdornment.IsEmpty == false) {
+			if (_SyntaxNodeRangeAdornment?.IsEmpty == false) {
 				_SyntaxNodeRangeAdornment.RemoveAllAdornments();
 				_MouseHoverItem = null;
 			}
@@ -209,18 +209,10 @@ namespace Codist.NaviBar
 				}
 				var node = nodes[i2];
 				if (node.IsKind(SyntaxKind.NamespaceDeclaration)) {
-					var ns = ((NamespaceDeclarationSyntax)node).Name;
-					if (node.Parent.IsKind(SyntaxKind.NamespaceDeclaration) == false) {
-						var nb = ImmutableArray.CreateBuilder<NameSyntax>();
-						while (ns is QualifiedNameSyntax q) {
-							ns = q.Left;
-							nb.Add(ns);
-						}
-						for (i = nb.Count - 1; i >= 0; i--) {
-							Items.Add(new NamespaceItem(this, nb[i]));
-						}
-					}
-					Items.Add(new NamespaceItem(this, node));
+					AddNamespaceNodes(node, ((NamespaceDeclarationSyntax)node).Name);
+				}
+				else if (node.IsKind(CodeAnalysisHelper.FileScopedNamespaceDeclaration)) {
+					AddNamespaceNodes(node, node.GetFileScopedNamespaceDeclarationName());
 				}
 				else {
 					var newItem = new NodeItem(this, node);
@@ -248,6 +240,20 @@ namespace Codist.NaviBar
 				}
 			} 
 			#endregion
+		}
+
+		void AddNamespaceNodes(SyntaxNode node, NameSyntax ns) {
+			if (node.Parent.IsKind(SyntaxKind.NamespaceDeclaration) == false) {
+				var nb = ImmutableArray.CreateBuilder<NameSyntax>();
+				while (ns is QualifiedNameSyntax q) {
+					ns = q.Left;
+					nb.Add(ns);
+				}
+				for (var i = nb.Count - 1; i >= 0; i--) {
+					Items.Add(new NamespaceItem(this, nb[i]));
+				}
+			}
+			Items.Add(new NamespaceItem(this, node));
 		}
 
 		async Task<ImmutableArray<SyntaxNode>> UpdateModelAndGetContainingNodesAsync(CancellationToken token) {
@@ -825,7 +831,8 @@ namespace Codist.NaviBar
 					Container = Bar.ListContainer,
 					ContainerType = SymbolListType.TypeList,
 					ExtIconProvider = ExtIconProvider.Default.GetExtIcons,
-					EnableVirtualMode = true
+					EnableVirtualMode = true,
+					Owner = this
 				};
 				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
 				if (_FilterBox != null) {

@@ -44,7 +44,7 @@ namespace Codist
 				?? semanticModel.GetTypeInfo(node, cancellationToken).Type
 				?? (node.IsKind(SyntaxKind.FieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as FieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
 					: node.IsKind(SyntaxKind.EventFieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as EventFieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
-					: node.IsKind(RecordDeclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
+					: node.IsKind(RecordDeclaration) || node.IsKind(StructRecordDesclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 					: null)
 				;
 		}
@@ -68,7 +68,7 @@ namespace Codist
 					?? (node is AccessorDeclarationSyntax
 						? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 						: null)
-					?? (node is TypeParameterSyntax || node is ParameterSyntax || node.RawKind == (int)RecordDeclaration ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null);
+					?? (node is TypeParameterSyntax || node is ParameterSyntax || node.RawKind == (int)RecordDeclaration || node.RawKind == (int)StructRecordDesclaration ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null);
 		}
 
 		public static ISymbol GetSymbolOrFirstCandidate(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {

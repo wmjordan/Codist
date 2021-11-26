@@ -355,6 +355,12 @@ namespace Codist
 				node = node.Parent;
 			}
 			nodes.Reverse();
+			if (nodes.Count > 0) {
+				var members = model.Compilation.Members;
+				if (members.Count > 1 && members[0].IsKind(CodeAnalysisHelper.FileScopedNamespaceDeclaration)) {
+					nodes.Insert(0, members[0]);
+				}
+			}
 			if (includeRegions == false || OutliningManager == null) {
 				return nodes.ToImmutable();
 			}

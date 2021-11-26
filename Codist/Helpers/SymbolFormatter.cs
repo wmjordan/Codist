@@ -254,7 +254,9 @@ namespace Codist
 				case SyntaxKind.ClassDeclaration:
 				case CodeAnalysisHelper.RecordDeclaration:
 					return Class;
-				case SyntaxKind.StructDeclaration: return Struct;
+				case SyntaxKind.StructDeclaration:
+				case CodeAnalysisHelper.StructRecordDesclaration:
+					return Struct;
 				case SyntaxKind.InterfaceDeclaration: return Interface;
 				case SyntaxKind.EventDeclaration:
 				case SyntaxKind.EventFieldDeclaration: return Event;

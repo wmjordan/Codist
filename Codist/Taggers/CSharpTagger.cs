@@ -676,6 +676,7 @@ namespace Codist.Taggers
 					case SyntaxKind.ClassDeclaration: return tag.Class;
 					case SyntaxKind.InterfaceDeclaration: return tag.Interface;
 					case SyntaxKind.EnumDeclaration: return tag.Enum;
+					case CodeAnalysisHelper.StructRecordDesclaration:
 					case SyntaxKind.StructDeclaration: return tag.Struct;
 					case SyntaxKind.Attribute: return _Classifications.AttributeName;
 					case SyntaxKind.EventDeclaration: return tag.Event;

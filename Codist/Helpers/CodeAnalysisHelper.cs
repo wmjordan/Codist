@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -45,6 +46,7 @@ namespace Codist
 		internal const SyntaxKind RecordKeyword = (SyntaxKind)8444;
 		internal const SyntaxKind ImplicitArrayCreationExpression = (SyntaxKind)8652;
 		internal const SyntaxKind ImplicitObjectCreationExpression = (SyntaxKind)8659;
+		internal const SyntaxKind FileScopedNamespaceDeclaration = (SyntaxKind)8845;
 		internal const SyntaxKind RecursivePattern = (SyntaxKind)9020;
 		internal const SyntaxKind PositionalPatternClause = (SyntaxKind)9023;
 		internal const SyntaxKind SwitchExpression = (SyntaxKind)9025;
@@ -54,6 +56,7 @@ namespace Codist
 		internal const SyntaxKind InitAccessorDeclaration = (SyntaxKind)9060;
 		internal const SyntaxKind WithInitializerExpression = (SyntaxKind)9062;
 		internal const SyntaxKind RecordDeclaration = (SyntaxKind)9063;
+		internal const SyntaxKind StructRecordDesclaration = (SyntaxKind)9068;
 		internal const SymbolKind FunctionPointerType = (SymbolKind)20;
 		internal const TypeKind FunctionPointer = (TypeKind)13;
 		internal const MethodKind FunctionPointerMethod = (MethodKind)18;
@@ -77,9 +80,11 @@ namespace Codist
 				case SyntaxKind.LocalDeclarationStatement:
 				case SyntaxKind.MethodDeclaration:
 				case SyntaxKind.NamespaceDeclaration:
+				case FileScopedNamespaceDeclaration:
 				case SyntaxKind.OperatorDeclaration:
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.StructDeclaration:
+				case StructRecordDesclaration:
 				case SyntaxKind.VariableDeclaration:
 				case SyntaxKind.LocalFunctionStatement:
 					//case SyntaxKind.VariableDeclarator:
@@ -97,6 +102,7 @@ namespace Codist
 				case SyntaxKind.EventDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
+				case StructRecordDesclaration:
 					return DeclarationCategory.Type;
 				case SyntaxKind.FieldDeclaration:
 				case SyntaxKind.MethodDeclaration:
@@ -110,6 +116,7 @@ namespace Codist
 				case SyntaxKind.EnumMemberDeclaration:
 					return DeclarationCategory.Member;
 				case SyntaxKind.NamespaceDeclaration:
+				case FileScopedNamespaceDeclaration:
 					return DeclarationCategory.Namespace;
 				case SyntaxKind.LocalDeclarationStatement:
 				case SyntaxKind.VariableDeclaration:
@@ -130,6 +137,8 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.NamespaceDeclaration:
 				case RecordDeclaration:
+				case StructRecordDesclaration:
+				case FileScopedNamespaceDeclaration:
 					return true;
 			}
 			return false;
@@ -143,6 +152,15 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case RecordDeclaration:
+				case StructRecordDesclaration:
+					return true;
+			}
+			return false;
+		}
+		public static bool IsNamespaceDeclaration(this SyntaxKind kind) {
+			switch (kind ) {
+				case SyntaxKind.NamespaceDeclaration:
+				case FileScopedNamespaceDeclaration:
 					return true;
 			}
 			return false;
@@ -216,10 +234,11 @@ namespace Codist
 
 		public static string GetSyntaxBrief(this SyntaxKind kind) {
 			switch (kind) {
-				case SyntaxKind.ClassDeclaration:
-				case RecordDeclaration: return "class";
+				case SyntaxKind.ClassDeclaration: return "class";
+				case RecordDeclaration: return "record";
 				case SyntaxKind.EnumDeclaration: return "enum";
 				case SyntaxKind.StructDeclaration: return "struct";
+				case StructRecordDesclaration: return "record struct";
 				case SyntaxKind.InterfaceDeclaration: return "interface";
 				case SyntaxKind.ConstructorDeclaration: return "constructor";
 				case SyntaxKind.ConversionOperatorDeclaration: return "conversion operator";
@@ -229,7 +248,8 @@ namespace Codist
 				case SyntaxKind.OperatorDeclaration: return "operator";
 				case SyntaxKind.PropertyDeclaration: return "property";
 				case SyntaxKind.FieldDeclaration: return "field";
-				case SyntaxKind.NamespaceDeclaration: return "namespace";
+				case SyntaxKind.NamespaceDeclaration:
+				case FileScopedNamespaceDeclaration: return "namespace";
 				case SyntaxKind.DelegateDeclaration: return "delegate";
 				case SyntaxKind.ArgumentList:
 				case SyntaxKind.AttributeArgumentList: return "argument list";
@@ -283,6 +303,9 @@ namespace Codist
 			return null;
 		}
 
+		public static NameSyntax GetFileScopedNamespaceDeclarationName(this SyntaxNode node) {
+			return node.IsKind(FileScopedNamespaceDeclaration) ? FileScopedNamespaceNameReflector.GetName(node) : null;
+		}
 		#endregion
 
 		#region Node icon
@@ -290,9 +313,11 @@ namespace Codist
 			switch (node.Kind()) {
 				case SyntaxKind.ClassDeclaration:
 				case RecordDeclaration:
-					return GetClassIcon((TypeDeclarationSyntax)node);
+					return GetClassIcon((BaseTypeDeclarationSyntax)node);
 				case SyntaxKind.EnumDeclaration: return GetEnumIcon((EnumDeclarationSyntax)node);
-				case SyntaxKind.StructDeclaration: return GetStructIcon((StructDeclarationSyntax)node);
+				case SyntaxKind.StructDeclaration:
+				case StructRecordDesclaration:
+					return GetStructIcon((BaseTypeDeclarationSyntax)node);
 				case SyntaxKind.InterfaceDeclaration: return GetInterfaceIcon((InterfaceDeclarationSyntax)node);
 				case SyntaxKind.MethodDeclaration: return GetMethodIcon((MethodDeclarationSyntax)node);
 				case SyntaxKind.ConstructorDeclaration: return GetConstructorIcon((ConstructorDeclarationSyntax)node);
@@ -305,7 +330,8 @@ namespace Codist
 				case SyntaxKind.VariableDeclarator: return node.Parent.Parent.GetImageId();
 				case SyntaxKind.VariableDeclaration:
 				case SyntaxKind.LocalDeclarationStatement: return IconIds.LocalVariable;
-				case SyntaxKind.NamespaceDeclaration: return IconIds.Namespace;
+				case SyntaxKind.NamespaceDeclaration:
+				case FileScopedNamespaceDeclaration: return IconIds.Namespace;
 				case SyntaxKind.ArgumentList:
 				case SyntaxKind.AttributeArgumentList: return IconIds.Argument;
 				case SyntaxKind.DoStatement: return KnownImageIds.DoWhile;
@@ -345,7 +371,7 @@ namespace Codist
 				case SyntaxKind.EndRegionDirectiveTrivia: return KnownImageIds.ToolstripPanelBottom;
 			}
 			return KnownImageIds.UnknownMember;
-			int GetClassIcon(TypeDeclarationSyntax syntax) {
+			int GetClassIcon(BaseTypeDeclarationSyntax syntax) {
 				bool isPartial = false;
 				foreach (var modifier in syntax.Modifiers) {
 					switch (modifier.Text) {
@@ -358,7 +384,7 @@ namespace Codist
 				}
 				return isPartial ? IconIds.PartialClass : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.ClassInternal : KnownImageIds.ClassPrivate;
 			}
-			int GetStructIcon(StructDeclarationSyntax syntax) {
+			int GetStructIcon(BaseTypeDeclarationSyntax syntax) {
 				bool isPartial = false;
 				foreach (var modifier in syntax.Modifiers) {
 					switch (modifier.Text) {
@@ -508,10 +534,12 @@ namespace Codist
 			}
 			switch (k1) {
 				case SyntaxKind.NamespaceDeclaration: return ((NamespaceDeclarationSyntax)node).Name.ToString() == ((NamespaceDeclarationSyntax)other).Name.ToString();
+				case FileScopedNamespaceDeclaration: return FileScopedNamespaceNameReflector.GetName(node).ToString() == FileScopedNamespaceNameReflector.GetName(other).ToString();
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case RecordDeclaration:
+				case StructRecordDesclaration:
 					var t1 = (TypeDeclarationSyntax)node;
 					var t2 = (TypeDeclarationSyntax)other;
 					return t1.Arity == t2.Arity && t1.Identifier.Text == t2.Identifier.Text;
@@ -596,6 +624,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case RecordDeclaration:
+				case StructRecordDesclaration:
 					return GetTypeSignature((TypeDeclarationSyntax)node);
 				case SyntaxKind.EnumDeclaration: return ((EnumDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.MethodDeclaration: return GetMethodSignature((MethodDeclarationSyntax)node);
@@ -615,6 +644,7 @@ namespace Codist
 				case SyntaxKind.ParenthesizedLambdaExpression: return ((ParenthesizedLambdaExpressionSyntax)node).ParameterList.ToString();
 				case SyntaxKind.LocalFunctionStatement: return ((LocalFunctionStatementSyntax)node).Identifier.Text;
 				case SyntaxKind.NamespaceDeclaration: return (node as NamespaceDeclarationSyntax).Name.GetName();
+				case FileScopedNamespaceDeclaration: return FileScopedNamespaceNameReflector.GetName(node).GetName();
 				case SyntaxKind.VariableDeclarator: return ((VariableDeclaratorSyntax)node).Identifier.Text;
 				case SyntaxKind.LocalDeclarationStatement: return GetVariableSignature(((LocalDeclarationStatementSyntax)node).Declaration, position);
 				case SyntaxKind.VariableDeclaration: return GetVariableSignature((VariableDeclarationSyntax)node, position);
@@ -900,6 +930,7 @@ namespace Codist
 					case SyntaxKind.InterfaceDeclaration:
 					case SyntaxKind.StructDeclaration:
 					case RecordDeclaration:
+					case StructRecordDesclaration:
 						yield return child;
 						goto case SyntaxKind.CompilationUnit;
 					case SyntaxKind.MethodDeclaration:
@@ -988,6 +1019,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.EnumDeclaration:
 				case RecordDeclaration:
+				case StructRecordDesclaration:
 					return ((BaseTypeDeclarationSyntax)node).Identifier;
 				case SyntaxKind.DelegateDeclaration: return ((DelegateDeclarationSyntax)node).Identifier;
 				case SyntaxKind.MethodDeclaration: return ((MethodDeclarationSyntax)node).Identifier;
@@ -1105,6 +1137,22 @@ namespace Codist
 				n = n.Parent;
 			}
 			return n;
+		}
+
+		static class FileScopedNamespaceNameReflector
+		{
+			public static readonly Func<SyntaxNode, NameSyntax> GetName = GenerateGetNamePropertyMethod();
+
+			static Func<SyntaxNode, NameSyntax> GenerateGetNamePropertyMethod() {
+				var m = new DynamicMethod("GetName", typeof(NameSyntax), new[] { typeof(SyntaxNode) }, true);
+				var il = m.GetILGenerator();
+				var t = typeof(NamespaceDeclarationSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax");
+				il.Emit(OpCodes.Ldarg_0);
+				il.Emit(OpCodes.Castclass, t);
+				il.Emit(OpCodes.Callvirt, t.GetProperty("Name").GetGetMethod());
+				il.Emit(OpCodes.Ret);
+				return (Func<SyntaxNode, NameSyntax>)m.CreateDelegate(typeof(Func<SyntaxNode, NameSyntax>));
+			}
 		}
 	}
 
