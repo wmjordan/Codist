@@ -294,8 +294,6 @@ namespace Codist.QuickInfo
 
 			sealed class OverriderControl : StackPanel, IInteractiveQuickInfoContent, IQuickInfoHolder
 			{
-				static readonly Thickness __DocPanelBorderMargin = new Thickness(0, 0, -9, 3);
-				static readonly Thickness __DocPanelBorderPadding = new Thickness(0, 0, 9, 0);
 				static readonly Thickness __TitlePanelMargin = new Thickness(0, 0, 30, 6);
 
 				public ISymbol ClickAndGoSymbol;
@@ -440,13 +438,16 @@ namespace Codist.QuickInfo
 					// beautify the title panel
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
 						if (icon != null) {
-							infoPanel.GetParent<Border>().Background = new VisualBrush(CreateEnlargedIcon(icon)) {
+							var b = infoPanel.GetParent<Border>();
+							b.Background = new VisualBrush(CreateEnlargedIcon(icon)) {
 								Opacity = 0.3,
 								AlignmentX = AlignmentX.Right,
 								AlignmentY = AlignmentY.Bottom,
 								TileMode = TileMode.None,
-								Stretch = Stretch.None
+								Stretch = Stretch.None,
+								Transform = new TranslateTransform(0, -6)
 							};
+							b.MinHeight = 60;
 							icon.Visibility = Visibility.Collapsed;
 						}
 						if (signature != null) {
@@ -460,10 +461,6 @@ namespace Codist.QuickInfo
 								}
 							}
 						}
-						var c = infoPanel.GetParent<Border>();
-						c.Margin = __DocPanelBorderMargin;
-						c.Padding = __DocPanelBorderPadding;
-						c.MinHeight = 50;
 						titlePanel.Margin = __TitlePanelMargin;
 					}
 
