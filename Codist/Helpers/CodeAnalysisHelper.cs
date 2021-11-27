@@ -56,7 +56,7 @@ namespace Codist
 		internal const SyntaxKind InitAccessorDeclaration = (SyntaxKind)9060;
 		internal const SyntaxKind WithInitializerExpression = (SyntaxKind)9062;
 		internal const SyntaxKind RecordDeclaration = (SyntaxKind)9063;
-		internal const SyntaxKind StructRecordDesclaration = (SyntaxKind)9068;
+		internal const SyntaxKind RecordStructDesclaration = (SyntaxKind)9068;
 		internal const SymbolKind FunctionPointerType = (SymbolKind)20;
 		internal const TypeKind FunctionPointer = (TypeKind)13;
 		internal const MethodKind FunctionPointerMethod = (MethodKind)18;
@@ -84,7 +84,7 @@ namespace Codist
 				case SyntaxKind.OperatorDeclaration:
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.StructDeclaration:
-				case StructRecordDesclaration:
+				case RecordStructDesclaration:
 				case SyntaxKind.VariableDeclaration:
 				case SyntaxKind.LocalFunctionStatement:
 					//case SyntaxKind.VariableDeclarator:
@@ -102,7 +102,7 @@ namespace Codist
 				case SyntaxKind.EventDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
-				case StructRecordDesclaration:
+				case RecordStructDesclaration:
 					return DeclarationCategory.Type;
 				case SyntaxKind.FieldDeclaration:
 				case SyntaxKind.MethodDeclaration:
@@ -137,7 +137,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.NamespaceDeclaration:
 				case RecordDeclaration:
-				case StructRecordDesclaration:
+				case RecordStructDesclaration:
 				case FileScopedNamespaceDeclaration:
 					return true;
 			}
@@ -152,7 +152,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case RecordDeclaration:
-				case StructRecordDesclaration:
+				case RecordStructDesclaration:
 					return true;
 			}
 			return false;
@@ -238,7 +238,7 @@ namespace Codist
 				case RecordDeclaration: return "record";
 				case SyntaxKind.EnumDeclaration: return "enum";
 				case SyntaxKind.StructDeclaration: return "struct";
-				case StructRecordDesclaration: return "record struct";
+				case RecordStructDesclaration: return "record struct";
 				case SyntaxKind.InterfaceDeclaration: return "interface";
 				case SyntaxKind.ConstructorDeclaration: return "constructor";
 				case SyntaxKind.ConversionOperatorDeclaration: return "conversion operator";
@@ -316,7 +316,7 @@ namespace Codist
 					return GetClassIcon((BaseTypeDeclarationSyntax)node);
 				case SyntaxKind.EnumDeclaration: return GetEnumIcon((EnumDeclarationSyntax)node);
 				case SyntaxKind.StructDeclaration:
-				case StructRecordDesclaration:
+				case RecordStructDesclaration:
 					return GetStructIcon((BaseTypeDeclarationSyntax)node);
 				case SyntaxKind.InterfaceDeclaration: return GetInterfaceIcon((InterfaceDeclarationSyntax)node);
 				case SyntaxKind.MethodDeclaration: return GetMethodIcon((MethodDeclarationSyntax)node);
@@ -539,7 +539,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case RecordDeclaration:
-				case StructRecordDesclaration:
+				case RecordStructDesclaration:
 					var t1 = (TypeDeclarationSyntax)node;
 					var t2 = (TypeDeclarationSyntax)other;
 					return t1.Arity == t2.Arity && t1.Identifier.Text == t2.Identifier.Text;
@@ -624,7 +624,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case RecordDeclaration:
-				case StructRecordDesclaration:
+				case RecordStructDesclaration:
 					return GetTypeSignature((TypeDeclarationSyntax)node);
 				case SyntaxKind.EnumDeclaration: return ((EnumDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.MethodDeclaration: return GetMethodSignature((MethodDeclarationSyntax)node);
@@ -930,7 +930,7 @@ namespace Codist
 					case SyntaxKind.InterfaceDeclaration:
 					case SyntaxKind.StructDeclaration:
 					case RecordDeclaration:
-					case StructRecordDesclaration:
+					case RecordStructDesclaration:
 						yield return child;
 						goto case SyntaxKind.CompilationUnit;
 					case SyntaxKind.MethodDeclaration:
@@ -1019,7 +1019,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.EnumDeclaration:
 				case RecordDeclaration:
-				case StructRecordDesclaration:
+				case RecordStructDesclaration:
 					return ((BaseTypeDeclarationSyntax)node).Identifier;
 				case SyntaxKind.DelegateDeclaration: return ((DelegateDeclarationSyntax)node).Identifier;
 				case SyntaxKind.MethodDeclaration: return ((MethodDeclarationSyntax)node).Identifier;
