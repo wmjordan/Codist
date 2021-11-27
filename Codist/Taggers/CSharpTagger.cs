@@ -78,7 +78,7 @@ namespace Codist.Taggers
 			if (buffer is ITextBuffer2 b) {
 				b.ChangedOnBackground += TextBuffer_ChangedOnBackground;
 			}
-			view.Closed += View_Closed;
+			//view.Closed += View_Closed;
 		}
 
 		/// <summary>This event is to notify the IDE that some tags are classified (from the parser thread).</summary>
@@ -179,9 +179,9 @@ namespace Codist.Taggers
 			}
 		}
 
-		void View_Closed(object sender, EventArgs e) {
-			ReleaseResources();
-		}
+		//void View_Closed(object sender, EventArgs e) {
+		//	ReleaseResources();
+		//}
 
 		public void Dispose() {
 			DecrementReference();
@@ -207,7 +207,7 @@ namespace Codist.Taggers
 				_Buffer = null;
 				_TaggerProvider = null;
 				_PendingSpans = null;
-				_View.Closed -= View_Closed;
+				//_View.Closed -= View_Closed;
 				_View = null;
 			}
 		}
