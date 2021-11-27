@@ -388,35 +388,22 @@ namespace Codist.Margins
 				// adjust and write text on scrollbar margins
 				var tc = dt.Count;
 				switch (tc) {
-					case 0: break;
+					case 0: return;
 					case 1:
 						drawingContext.DrawText(dt[0].Text, dt[0].Point);
-						break;
-					default:
-						DrawText t, tPrev = dt[0];
-						for (int i = 0; ++i < tc;) {
-							t = dt[i];
-							// no overlapped
-							if (t.Point.Y >= tPrev.Point.Y + tPrev.Text.Height * 0.7) {
-								drawingContext.DrawText(tPrev.Text, tPrev.Point);
-								tPrev = t;
-								continue;
-							}
-							if (tPrev.YSpan >= t.YSpan) {
-								drawingContext.DrawText(tPrev.Text, tPrev.Point);
-								tPrev = t;
-							}
-						}
-						t = dt[tc - 1];
-						drawingContext.DrawText(tPrev.Text, tPrev.Point);
-						if (t != tPrev) {
-							drawingContext.DrawText(t.Text, t.Point.Y >= tPrev.Point.Y + tPrev.Text.Height * 0.7 ? t.Point : new Point(t.Point.X, t.Point.Y + t.Text.Height / 2));
-						}
-						break;
+						return;
+				}
+				DrawText t, tPrev = dt[tc - 1];
+				for (int i = tc - 1; i >= 0; i--) {
+					t = dt[i];
+					// not overlapped, otherwise use the larger one
+					if (t.Point.Y + t.Text.Height * 0.7 < tPrev.Point.Y || tPrev.YSpan < t.YSpan) {
+						drawingContext.DrawText(t.Text, t.Point);
+						tPrev = t;
+					}
 				}
 			}
 
-			[System.Diagnostics.DebuggerDisplay("{Text.Text} {YSpan} {Point}")]
 			sealed class DrawText
 			{
 				public readonly FormattedText Text;
@@ -427,6 +414,10 @@ namespace Codist.Margins
 					Text = text;
 					Point = point;
 					YSpan = ySpan;
+				}
+
+				public override string ToString() {
+					return $"{Text.Text}@{Point.X},{Point.Y:0.00} H:{YSpan:0.00}";
 				}
 			}
 		}
