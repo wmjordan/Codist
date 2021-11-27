@@ -387,8 +387,9 @@ namespace Codist.Taggers
 											yield return CreateClassificationSpan(snapshot, item.TextSpan, _GeneralClassifications.TypeCastKeyword);
 											continue;
 										case CodeAnalysisHelper.RecordKeyword: // workaround for missing classification type for record identifier
-											yield return CreateClassificationSpan(snapshot, (node as TypeDeclarationSyntax).Identifier.Span, _Classifications.ClassName);
-											yield return CreateClassificationSpan(snapshot, (node as TypeDeclarationSyntax).Identifier.Span, _Classifications.Declaration);
+											textSpan = ((TypeDeclarationSyntax)node).Identifier.Span;
+											yield return CreateClassificationSpan(snapshot, textSpan, node.Kind() == CodeAnalysisHelper.RecordDeclaration ? _Classifications.ClassName : _Classifications.StructName);
+											yield return CreateClassificationSpan(snapshot, textSpan, _Classifications.Declaration);
 											continue;
 									}
 									continue;
@@ -672,12 +673,14 @@ namespace Codist.Taggers
 						return tag.Constructor;
 					case SyntaxKind.IndexerDeclaration:
 					case SyntaxKind.PropertyDeclaration: return tag.Property;
+					case SyntaxKind.ClassDeclaration:
 					case CodeAnalysisHelper.RecordDeclaration:
-					case SyntaxKind.ClassDeclaration: return tag.Class;
+						return tag.Class;
 					case SyntaxKind.InterfaceDeclaration: return tag.Interface;
 					case SyntaxKind.EnumDeclaration: return tag.Enum;
 					case CodeAnalysisHelper.StructRecordDesclaration:
-					case SyntaxKind.StructDeclaration: return tag.Struct;
+					case SyntaxKind.StructDeclaration:
+						return tag.Struct;
 					case SyntaxKind.Attribute: return _Classifications.AttributeName;
 					case SyntaxKind.EventDeclaration: return tag.Event;
 					case SyntaxKind.DelegateDeclaration: return tag.Delegate;
