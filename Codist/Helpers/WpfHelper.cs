@@ -524,7 +524,7 @@ namespace Codist
 		}
 
 		public static void ScrollToSelectedItem(this ListBox listBox) {
-			if (listBox.SelectedIndex == -1) {
+			if (listBox.SelectedItem == null) {
 				return;
 			}
 			try {
@@ -536,7 +536,7 @@ namespace Codist
 				throw;
 #endif
 			}
-			listBox.ScrollIntoView(listBox.ItemContainerGenerator.Items[listBox.SelectedIndex]);
+			listBox.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Input, new Action<ListBox>(lb => lb.ScrollIntoView(lb.SelectedItem)), listBox);
 		}
 
 		public static bool GetFocus(this UIElement control) {
