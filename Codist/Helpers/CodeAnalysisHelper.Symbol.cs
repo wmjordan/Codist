@@ -526,10 +526,10 @@ namespace Codist
 					output.Append('*');
 					return;
 				case FunctionPointer:
-					var sig = type.Signature();
+					var sig = type.GetFunctionPointerTypeSignature();
 					if (sig != null) {
 						output.Append("delegate*");
-						var cc = sig.CallingConvention();
+						var cc = sig.GetCallingConvention();
 						switch (cc) {
 							case 0: break;
 							case 1: output.Append(" unmanaged[Cdecl]"); break;
@@ -688,73 +688,21 @@ namespace Codist
 			return false;
 		}
 
-		#region Compatible property accessors
-		static readonly Func<ITypeSymbol, bool> __TypeIsReadOnlyAccessor = GetTypeIsReadOnlyMethod();
-		static Func<ITypeSymbol, bool> GetTypeIsReadOnlyMethod() {
-			var p = typeof(ITypeSymbol).GetProperty("IsReadOnly");
-			if (p == null) {
-				return _ => false;
-			}
-			var m = new DynamicMethod("ITypeSymbol.IsReadOnly", typeof(bool), new[] { typeof(ITypeSymbol) }, true);
-			var il = m.GetILGenerator();
-			var isTypeSymbol = il.DefineLabel();
-			il.Emit(OpCodes.Ldarg_0);
-			il.Emit(OpCodes.Callvirt, p.GetGetMethod(true));
-			il.Emit(OpCodes.Ret);
-			return (Func<ITypeSymbol, bool>)m.CreateDelegate(typeof(Func<ITypeSymbol, bool>));
-		}
+		#region Protected/Future property accessors
 		public static bool IsReadOnly(this ITypeSymbol type) {
-			return type != null && __TypeIsReadOnlyAccessor(type);
-		}
-		static readonly Func<IMethodSymbol, bool> __MethodIsInitOnlyAccessor = GetMethodIsInitOnlyMethod();
-		static Func<IMethodSymbol, bool> GetMethodIsInitOnlyMethod() {
-			var p = typeof(IMethodSymbol).GetProperty("IsInitOnly");
-			if (p == null) {
-				return _ => false;
-			}
-			var m = new DynamicMethod("IMethodSymbol.IsInitOnly", typeof(bool), new[] { typeof(IMethodSymbol) }, true);
-			var il = m.GetILGenerator();
-			il.Emit(OpCodes.Ldarg_0);
-			il.Emit(OpCodes.Callvirt, p.GetGetMethod(true));
-			il.Emit(OpCodes.Ret);
-			return (Func<IMethodSymbol, bool>)m.CreateDelegate(typeof(Func<IMethodSymbol, bool>));
+			return type != null && NonPublicOrFutureAccessors.GetNamedTypeIsReadOnly(type);
 		}
 		public static bool IsInitOnly(this IMethodSymbol method) {
-			return method != null && __MethodIsInitOnlyAccessor(method);
+			return method != null && NonPublicOrFutureAccessors.GetMethodIsInitOnly(method);
 		}
-		static readonly Func<IMethodSymbol, byte> __MethodCallingConventionAccessor = GetMethodCallingConventionMethod();
-		static Func<IMethodSymbol, byte> GetMethodCallingConventionMethod() {
-			var p = typeof(IMethodSymbol).GetProperty("CallingConvention");
-			if (p == null) {
-				return _ => 0;
-			}
-			var m = new DynamicMethod("IMethodSymbol.CallingConvention", typeof(byte), new[] { typeof(IMethodSymbol) }, true);
-			var il = m.GetILGenerator();
-			il.Emit(OpCodes.Ldarg_0);
-			il.Emit(OpCodes.Callvirt, p.GetGetMethod(true));
-			il.Emit(OpCodes.Ret);
-			return (Func<IMethodSymbol, byte>)m.CreateDelegate(typeof(Func<IMethodSymbol, byte>));
+		public static byte GetCallingConvention(this IMethodSymbol method) {
+			return method != null ? NonPublicOrFutureAccessors.GetMethodCallingConvention(method) : (byte)0;
 		}
-		public static byte CallingConvention(this IMethodSymbol method) {
-			return method != null ? __MethodCallingConventionAccessor(method) : (byte)0;
+		public static IMethodSymbol GetFunctionPointerTypeSignature(this ITypeSymbol symbol) {
+			return symbol?.TypeKind == FunctionPointer ? NonPublicOrFutureAccessors.GetFunctionPointerTypeSignature(symbol) : null;
 		}
-		static readonly Func<ITypeSymbol, IMethodSymbol> __FunctionPointerTypeSignatureAccessor = GetFunctionPointerSignatureMethod();
-		static Func<ITypeSymbol, IMethodSymbol> GetFunctionPointerSignatureMethod() {
-			var fpt = typeof(ITypeSymbol).Assembly.GetType("Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol");
-			if (fpt == null) {
-				return _ => null;
-			}
-			var p = fpt.GetProperty("Signature");
-			var m = new DynamicMethod("IFunctionPointerTypeSymbol.Signature", typeof(IMethodSymbol), new[] { typeof(ITypeSymbol) }, true);
-			var il = m.GetILGenerator();
-			il.Emit(OpCodes.Ldarg_0);
-			il.Emit(OpCodes.Isinst, fpt);
-			il.Emit(OpCodes.Callvirt, p.GetGetMethod(true));
-			il.Emit(OpCodes.Ret);
-			return (Func<ITypeSymbol, IMethodSymbol>)m.CreateDelegate(typeof(Func<ITypeSymbol, IMethodSymbol>));
-		}
-		public static IMethodSymbol Signature(this ITypeSymbol symbol) {
-			return symbol?.TypeKind == FunctionPointer ? __FunctionPointerTypeSignatureAccessor(symbol) : null;
+		public static AssemblySource GetSourceType(this IAssemblySymbol assembly) {
+			return assembly is null ? AssemblySource.Metadata : (AssemblySource)NonPublicOrFutureAccessors.GetAssemblySourceType(assembly);
 		}
 		#endregion
 
@@ -829,11 +777,7 @@ namespace Codist
 		public static bool HasSource(this ISymbol symbol) {
 			return symbol.Kind == SymbolKind.Namespace
 				? ((INamespaceSymbol)symbol).ConstituentNamespaces.Any(n => n.ContainingAssembly.GetSourceType() != AssemblySource.Metadata)
-				: AssemblySourceReflector.GetSourceType(symbol.ContainingAssembly) != AssemblySource.Metadata;
-		}
-
-		public static AssemblySource GetSourceType(this IAssemblySymbol assembly) {
-			return AssemblySourceReflector.GetSourceType(assembly);
+				: symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata;
 		}
 
 		public static SyntaxNode GetSyntaxNode(this ISymbol symbol, CancellationToken cancellationToken = default) {
@@ -1217,6 +1161,82 @@ namespace Codist
 			return new SpecificSymbolEqualityComparer(symbol).Equals;
 		}
 		#endregion
+
+		/// <summary>
+		/// This type contains dynamic methods to access properties that are non-public or in later Roslyn versions (after VS 2017)
+		/// </summary>
+		static partial class NonPublicOrFutureAccessors
+		{
+			public static readonly Func<ITypeSymbol, bool> GetNamedTypeIsReadOnly = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsReadOnly", typeof(CSharpCompilation).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.NamedTypeSymbol", false));
+
+			public static readonly Func<IMethodSymbol, bool> GetMethodIsInitOnly = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, bool>("IsInitOnly");
+
+			public static readonly Func<IMethodSymbol, byte> GetMethodCallingConvention = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, byte>("CallingConvention");
+
+			public static readonly Func<ITypeSymbol, IMethodSymbol> GetFunctionPointerTypeSignature = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, IMethodSymbol>("Signature", typeof(ITypeSymbol).Assembly.GetType("Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol"));
+
+			public static readonly Func<IAssemblySymbol, int> GetAssemblySourceType = CreateAssemblySourceTypeFunc();
+			static Func<IAssemblySymbol, int> CreateAssemblySourceTypeFunc() {
+				var m = new DynamicMethod("GetAssemblySourceType", typeof(int), new Type[] { typeof(IAssemblySymbol) }, true);
+				var il = m.GetILGenerator();
+				var isSource = il.DefineLabel();
+				var isRetargetSource = il.DefineLabel();
+				var notAssemblySymbol = il.DefineLabel();
+				var getUnderlyingAssemblySymbol = il.DefineLabel();
+				var a = typeof(CSharpCompilation).Assembly;
+				const string NS = "Microsoft.CodeAnalysis.CSharp.Symbols.";
+				var s = a.GetType(NS + "PublicModel.AssemblySymbol"); // from VS16.5
+				Type ts, tr = a.GetType(NS + "Retargeting.RetargetingAssemblySymbol");
+				System.Reflection.PropertyInfo ua = null;
+				if (s != null) { // from VS16.5
+					ts = a.GetType(NS + "PublicModel.SourceAssemblySymbol");
+					ua = s.GetProperty("UnderlyingAssemblySymbol", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+				}
+				else {
+					ts = a.GetType(NS + "SourceAssemblySymbol");
+				}
+				if (ts != null) {
+					il.Emit(OpCodes.Ldarg_0);
+					il.Emit(OpCodes.Isinst, ts);
+					il.Emit(OpCodes.Brtrue_S, isSource);
+				}
+				if (ua != null) { // VS16.5
+					// (asm as AssemblySymbol)?.UnderlyingAssemblySymbol is RetargetingAssemblySymbol
+					il.Emit(OpCodes.Ldarg_0);
+					il.Emit(OpCodes.Isinst, s);
+					#region Workaround for https://github.com/wmjordan/Codist/issues/138
+					il.Emit(OpCodes.Dup /* AssemblySymbol */);
+					il.Emit(OpCodes.Brtrue_S, getUnderlyingAssemblySymbol);
+					il.Emit(OpCodes.Pop /* AssemblySymbol */);
+					il.Emit(OpCodes.Br_S, notAssemblySymbol);
+					il.MarkLabel(getUnderlyingAssemblySymbol);
+					#endregion
+					il.Emit(OpCodes.Callvirt, ua.GetGetMethod(true));
+					il.Emit(OpCodes.Isinst, tr);
+					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
+					il.MarkLabel(notAssemblySymbol);
+				}
+				else if (tr != null) { // prior to VS16.5
+					il.Emit(OpCodes.Ldarg_0);
+					il.Emit(OpCodes.Isinst, tr);
+					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
+				}
+				il.Emit(OpCodes.Ldc_I4_0);
+				il.Emit(OpCodes.Ret);
+				if (ts != null) {
+					il.MarkLabel(isSource);
+					il.Emit(OpCodes.Ldc_I4_1);
+					il.Emit(OpCodes.Ret);
+				}
+				if (tr != null) {
+					il.MarkLabel(isRetargetSource);
+					il.Emit(OpCodes.Ldc_I4_2);
+					il.Emit(OpCodes.Ret);
+				}
+				return m.CreateDelegate(typeof(Func<IAssemblySymbol, int>)) as Func<IAssemblySymbol, int>;
+			}
+		}
+
 		sealed class SpecificSymbolEqualityComparer : IEquatable<ISymbol>
 		{
 			readonly ISymbol _Specified;
@@ -1252,74 +1272,6 @@ namespace Codist
 
 			public int GetHashCode(SymbolCallerInfo obj) {
 				return obj.CallingSymbol.GetHashCode();
-			}
-		}
-
-		static class AssemblySourceReflector
-		{
-			static readonly Func<IAssemblySymbol, int> __getAssemblyType = CreateAssemblySourceTypeFunc();
-			public static AssemblySource GetSourceType(IAssemblySymbol assembly) {
-				return assembly is null ? AssemblySource.Metadata : (AssemblySource)__getAssemblyType(assembly);
-			}
-
-			static Func<IAssemblySymbol, int> CreateAssemblySourceTypeFunc() {
-				var m = new DynamicMethod("GetAssemblySourceType", typeof(int), new Type[] { typeof(IAssemblySymbol) }, true);
-				var il = m.GetILGenerator();
-				var isSource = il.DefineLabel();
-				var isRetargetSource = il.DefineLabel();
-				var notAssemblySymbol = il.DefineLabel();
-				var getUnderlyingAssemblySymbol = il.DefineLabel();
-				var a = System.Reflection.Assembly.GetAssembly(typeof(Microsoft.CodeAnalysis.CSharp.CSharpExtensions));
-				const string NS = "Microsoft.CodeAnalysis.CSharp.Symbols.";
-				var s = a.GetType(NS + "PublicModel.AssemblySymbol"); // from VS16.5
-				Type ts, tr = a.GetType(NS + "Retargeting.RetargetingAssemblySymbol");
-				System.Reflection.PropertyInfo ua = null;
-				if (s != null) { // from VS16.5
-					ts = a.GetType(NS + "PublicModel.SourceAssemblySymbol");
-					ua = s.GetProperty("UnderlyingAssemblySymbol", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-				}
-				else {
-					ts = a.GetType(NS + "SourceAssemblySymbol");
-				}
-				if (ts != null) {
-					il.Emit(OpCodes.Ldarg_0);
-					il.Emit(OpCodes.Isinst, ts);
-					il.Emit(OpCodes.Brtrue_S, isSource);
-				}
-				if (ua != null) { // VS16.5
-					// (asm as AssemblySymbol)?.UnderlyingAssemblySymbol is RetargetingAssemblySymbol
-					il.Emit(OpCodes.Ldarg_0);
-					il.Emit(OpCodes.Isinst, s);
-					#region Workaround for https://github.com/wmjordan/Codist/issues/138
-					il.Emit(OpCodes.Dup /* AssemblySymbol */);
-					il.Emit(OpCodes.Brtrue_S, getUnderlyingAssemblySymbol);
-					il.Emit(OpCodes.Pop /* AssemblySymbol */);
-					il.Emit(OpCodes.Br_S, notAssemblySymbol);
-					il.MarkLabel(getUnderlyingAssemblySymbol); 
-					#endregion
-					il.Emit(OpCodes.Callvirt, ua.GetGetMethod(true));
-					il.Emit(OpCodes.Isinst, tr);
-					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
-					il.MarkLabel(notAssemblySymbol);
-				}
-				else if (tr != null) { // prior to VS16.5
-					il.Emit(OpCodes.Ldarg_0);
-					il.Emit(OpCodes.Isinst, tr);
-					il.Emit(OpCodes.Brtrue_S, isRetargetSource);
-				}
-				il.Emit(OpCodes.Ldc_I4_0);
-				il.Emit(OpCodes.Ret);
-				if (ts != null) {
-					il.MarkLabel(isSource);
-					il.Emit(OpCodes.Ldc_I4_1);
-					il.Emit(OpCodes.Ret);
-				}
-				if (tr != null) {
-					il.MarkLabel(isRetargetSource);
-					il.Emit(OpCodes.Ldc_I4_2);
-					il.Emit(OpCodes.Ret);
-				}
-				return m.CreateDelegate(typeof(Func<IAssemblySymbol, int>)) as Func<IAssemblySymbol, int>;
 			}
 		}
 	}

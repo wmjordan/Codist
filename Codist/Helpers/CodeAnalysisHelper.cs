@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -304,7 +303,7 @@ namespace Codist
 		}
 
 		public static NameSyntax GetFileScopedNamespaceDeclarationName(this SyntaxNode node) {
-			return node.IsKind(FileScopedNamespaceDeclaration) ? FileScopedNamespaceNameReflector.GetName(node) : null;
+			return node.IsKind(FileScopedNamespaceDeclaration) ? NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node) : null;
 		}
 		#endregion
 
@@ -534,7 +533,7 @@ namespace Codist
 			}
 			switch (k1) {
 				case SyntaxKind.NamespaceDeclaration: return ((NamespaceDeclarationSyntax)node).Name.ToString() == ((NamespaceDeclarationSyntax)other).Name.ToString();
-				case FileScopedNamespaceDeclaration: return FileScopedNamespaceNameReflector.GetName(node).ToString() == FileScopedNamespaceNameReflector.GetName(other).ToString();
+				case FileScopedNamespaceDeclaration: return NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node).ToString() == NonPublicOrFutureAccessors.GetFileScopedNamespaceName(other).ToString();
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
@@ -644,7 +643,7 @@ namespace Codist
 				case SyntaxKind.ParenthesizedLambdaExpression: return ((ParenthesizedLambdaExpressionSyntax)node).ParameterList.ToString();
 				case SyntaxKind.LocalFunctionStatement: return ((LocalFunctionStatementSyntax)node).Identifier.Text;
 				case SyntaxKind.NamespaceDeclaration: return (node as NamespaceDeclarationSyntax).Name.GetName();
-				case FileScopedNamespaceDeclaration: return FileScopedNamespaceNameReflector.GetName(node).GetName();
+				case FileScopedNamespaceDeclaration: return NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node).GetName();
 				case SyntaxKind.VariableDeclarator: return ((VariableDeclaratorSyntax)node).Identifier.Text;
 				case SyntaxKind.LocalDeclarationStatement: return GetVariableSignature(((LocalDeclarationStatementSyntax)node).Declaration, position);
 				case SyntaxKind.VariableDeclaration: return GetVariableSignature((VariableDeclarationSyntax)node, position);
@@ -1139,20 +1138,9 @@ namespace Codist
 			return n;
 		}
 
-		static class FileScopedNamespaceNameReflector
+		static partial class NonPublicOrFutureAccessors
 		{
-			public static readonly Func<SyntaxNode, NameSyntax> GetName = GenerateGetNamePropertyMethod();
-
-			static Func<SyntaxNode, NameSyntax> GenerateGetNamePropertyMethod() {
-				var m = new DynamicMethod("GetName", typeof(NameSyntax), new[] { typeof(SyntaxNode) }, true);
-				var il = m.GetILGenerator();
-				var t = typeof(NamespaceDeclarationSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax");
-				il.Emit(OpCodes.Ldarg_0);
-				il.Emit(OpCodes.Castclass, t);
-				il.Emit(OpCodes.Callvirt, t.GetProperty("Name").GetGetMethod());
-				il.Emit(OpCodes.Ret);
-				return (Func<SyntaxNode, NameSyntax>)m.CreateDelegate(typeof(Func<SyntaxNode, NameSyntax>));
-			}
+			public static readonly Func<SyntaxNode, NameSyntax> GetFileScopedNamespaceName = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, NameSyntax>("Name", typeof(NamespaceDeclarationSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax"));
 		}
 	}
 

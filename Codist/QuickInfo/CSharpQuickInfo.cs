@@ -44,10 +44,7 @@ namespace Codist.QuickInfo
 			// Map the trigger point down to our buffer.
 			// It is weird that the session.TextView.TextBuffer != _TextBuffer and we can't get a Workspace from the former one
 			var buffer = _TextBuffer;
-			if (buffer == null) {
-				return null;
-			}
-			return await InternalGetQuickInfoItemAsync(session, buffer, cancellationToken).ConfigureAwait(false);
+			return buffer == null ? null : await InternalGetQuickInfoItemAsync(session, buffer, cancellationToken).ConfigureAwait(false);
 		}
 
 		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, ITextBuffer buffer, CancellationToken cancellationToken) {
@@ -1170,7 +1167,7 @@ namespace Codist.QuickInfo
 				IMethodSymbol m;
 				switch (symbol.Symbol.Kind) {
 					case SymbolKind.Method: m = symbol.Symbol as IMethodSymbol; break;
-					case CodeAnalysisHelper.FunctionPointerType: m = (symbol.Symbol as ITypeSymbol).Signature(); break;
+					case CodeAnalysisHelper.FunctionPointerType: m = (symbol.Symbol as ITypeSymbol).GetFunctionPointerTypeSignature(); break;
 					default: m = null; break;
 				}
 				if (m == null) { // in a very rare case m can be null
