@@ -540,13 +540,7 @@ namespace Codist
 		}
 
 		public static bool GetFocus(this UIElement control) {
-			if (control.IsFocused) {
-				return true;
-			}
-			if (control.IsVisible) {
-				return control.Focus();
-			}
-			return false;
+			return control.IsFocused || control.IsVisible && control.Focus();
 		}
 
 		public static TextBox SetOnVisibleSelectAll(this TextBox textBox) {
