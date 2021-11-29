@@ -393,13 +393,23 @@ namespace Codist.Margins
 						drawingContext.DrawText(dt[0].Text, dt[0].Point);
 						return;
 				}
-				DrawText t, tPrev = dt[tc - 1];
+				DrawText t, tPrev = null;
 				for (int i = tc - 1; i >= 0; i--) {
 					t = dt[i];
 					// not overlapped, otherwise use the larger one
-					if (t.Point.Y + t.Text.Height * 0.7 < tPrev.Point.Y || tPrev.YSpan < t.YSpan) {
+					if (tPrev == null) {
+						tPrev = t;
+						t = dt[i - 1];
+						if (t.Point.Y + t.Text.Height * 0.7 < tPrev.Point.Y || tPrev.YSpan < t.YSpan) {
+							drawingContext.DrawText(tPrev.Text, tPrev.Point);
+						}
+					}
+					else if (t.Point.Y + t.Text.Height * 0.7 < tPrev.Point.Y || tPrev.YSpan < t.YSpan) {
 						drawingContext.DrawText(t.Text, t.Point);
 						tPrev = t;
+					}
+					else if (i == 0) {
+						drawingContext.DrawText(t.Text, new Point(t.Point.X, t.Point.Y - t.Text.Height * 0.3));
 					}
 				}
 			}
