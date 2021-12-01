@@ -179,7 +179,7 @@ namespace Codist.NaviBar
 						continue;
 					}
 					else if (ni.ItemType == BarItemType.Namespace
-						&& ni.Node.IsKind(SyntaxKind.NamespaceDeclaration) == false) {
+						&& ni.Node.Kind().IsNamespaceDeclaration() == false) {
 						if (++i < ic) {
 							goto CHECK_NODE;
 						}
