@@ -250,26 +250,8 @@ namespace Codist.Margins
 				}
 				var snapshot = _TextView.TextSnapshot;
 				var regions = _Regions;
-				FormattedText text;
 				if (regions != null && Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.RegionDirective)) {
-					foreach (RegionDirectiveTriviaSyntax region in regions) {
-						var s = region.GetDeclarationSignature();
-						if (s != null) {
-							text = WpfHelper.ToFormattedText(s, labelSize, _Element._RegionForeground);
-							SnapshotPoint rp;
-							try {
-								rp = new SnapshotPoint(snapshot, region.SpanStart);
-							}
-							catch (ArgumentOutOfRangeException) {
-								break;
-							}
-							var p = new Point(5, _ScrollBar.GetYCoordinateOfBufferPosition(rp) - text.Height / 2);
-							if (_Element._RegionBackground != null) {
-								drawingContext.DrawRectangle(_Element._RegionBackground, null, new Rect(p, new Size(text.Width, text.Height)));
-							}
-							drawingContext.DrawText(text, p);
-						}
-					}
+					DrawRegions(drawingContext, labelSize, snapshot, regions);
 				}
 				var tags = _Tags;
 				if (tags == null || _CodeMemberTagger == null || Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.MemberDeclaration) == false) {
@@ -281,6 +263,7 @@ namespace Codist.Margins
 				SnapshotPoint rangeFrom = default, rangeTo = default;
 				var dt = ImmutableArray.CreateBuilder<DrawText>();
 				double y1, y2;
+				FormattedText text;
 
 				foreach (var tag in tags) {
 					if (_Element._Cancellation?.IsCancellationRequested != false) {
@@ -410,6 +393,27 @@ namespace Codist.Margins
 					}
 					else if (i == 0) {
 						drawingContext.DrawText(t.Text, new Point(t.Point.X, t.Point.Y - t.Text.Height * 0.3));
+					}
+				}
+			}
+
+			void DrawRegions(DrawingContext drawingContext, int labelSize, ITextSnapshot snapshot, List<DirectiveTriviaSyntax> regions) {
+				foreach (RegionDirectiveTriviaSyntax region in regions) {
+					var s = region.GetDeclarationSignature();
+					if (s != null) {
+						var text = WpfHelper.ToFormattedText(s, labelSize, _Element._RegionForeground);
+						SnapshotPoint rp;
+						try {
+							rp = new SnapshotPoint(snapshot, region.SpanStart);
+						}
+						catch (ArgumentOutOfRangeException) {
+							break;
+						}
+						var p = new Point(5, _ScrollBar.GetYCoordinateOfBufferPosition(rp) - text.Height / 2);
+						if (_Element._RegionBackground != null) {
+							drawingContext.DrawRectangle(_Element._RegionBackground, null, new Rect(p, new Size(text.Width, text.Height)));
+						}
+						drawingContext.DrawText(text, p);
 					}
 				}
 			}
