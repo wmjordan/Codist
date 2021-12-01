@@ -361,7 +361,9 @@ namespace Codist
 					nodes.Insert(0, members[0]);
 				}
 			}
-			if (includeRegions == false || OutliningManager == null) {
+			if (includeRegions == false
+				|| OutliningManager == null
+				|| position >= View.TextSnapshot.Length) {
 				return nodes.ToImmutable();
 			}
 			foreach (var region in GetRegions(position)) {
