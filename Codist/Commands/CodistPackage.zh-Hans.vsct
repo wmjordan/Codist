@@ -35,6 +35,16 @@
 					<ButtonText>递增版本修订号</ButtonText>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="AutoBuildVersionWindowId" priority="0x0101" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" />
+				<Icon guid="ImageCatalogGuid" id="Counter" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>自动生成版本号设置...</ButtonText>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="SearchMember" />

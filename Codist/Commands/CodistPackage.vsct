@@ -45,6 +45,9 @@
 			<Group guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" priority="0x017F">
 				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
 			</Group>
+			<Group guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" priority="0x017F">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE" />
+			</Group>
 			<Group guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" priority="0x0800">
 				<Parent guid="guidSHLMainMenu" id="IDM_VS_EDITOR_FIND_MENU" />
 			</Group>
@@ -77,6 +80,7 @@
 			<IDSymbol name="GetContentTypeCommandId" value="0x4002" />
 			<IDSymbol name="EDIT_PROJECT_GROUP_ID" value="0x1000" />
 			<IDSymbol name="IncrementVsixVersionId" value="0x4003" />
+			<IDSymbol name="AutoBuildVersionWindowId" value="0x4009" />
 			<IDSymbol name="IDG_VS_TOOLS_OPTIONS" value="0x1020" />
 			<IDSymbol name="SymbolFinderWindowCommandId" value="0x4004" />
 			<IDSymbol name="SyntaxCustomizeHighlightId" value="0x4005" />

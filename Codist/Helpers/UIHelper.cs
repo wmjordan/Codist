@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using GdiColor = System.Drawing.Color;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
@@ -11,7 +12,9 @@ namespace Codist
 		public static GdiColor Alpha(this GdiColor color, byte alpha) {
 			return GdiColor.FromArgb(alpha, color.R, color.G, color.B);
 		}
-
+		public static string ToText(this int value) {
+			return value.ToString(CultureInfo.InvariantCulture);
+		}
 		public static string ToHexString(this GdiColor color) {
 			return "#" + color.A.ToString("X2") + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
 		}

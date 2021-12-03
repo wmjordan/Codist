@@ -51,6 +51,16 @@
 					<ButtonText>Increment Version</ButtonText>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="AutoBuildVersionWindowId" priority="0x0101" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" />
+				<Icon guid="ImageCatalogGuid" id="Counter" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Auto Build Version Settings...</ButtonText>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="SearchMember" />

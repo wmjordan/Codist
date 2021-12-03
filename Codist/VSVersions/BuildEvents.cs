@@ -1,16 +1,18 @@
 ﻿using System;
 using AppHelpers;
+using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using R = Codist.Properties.Resources;
 
-namespace Codist {
+namespace Codist
+{
 	/// <summary>
 	/// Events related to building projects and solutions.
 	/// </summary>
 	/// <remarks>
-	/// We could have used <see cref="EnvDTE.BuildEvents"/>. However, VS 2022 won't work without importing Microsoft.VisualStudio.Shell.Interop v17, which breaks Codist on VS 2017 and VS 2019.
+	/// We could have used <see cref="EnvDTE.BuildEvents"/>. However, VS 2022 won't work without importing Microsoft.VisualStudio.Shell.Interop v17, which breaks Codist on VS 2017 and VS 2019. Thus we rewrite one which implements the interfaces that  <see cref="EnvDTE.BuildEvents"/> does.
 	/// </remarks>
 	public class BuildEvents : IVsUpdateSolutionEvents2, IVsUpdateSolutionEvents
 	{
@@ -33,10 +35,7 @@ namespace Codist {
 		int IVsUpdateSolutionEvents.UpdateSolution_Done(int succeeded, int modified, int cancelCommand) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
-				var output = _Package.GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
-				if (output != null) {
-					output.OutputString(DateTime.Now.ToLongTimeString() + " " + R.T_BuildFinished + Environment.NewLine);
-				}
+				WriteBuildText(DateTime.Now.ToLongTimeString() + " " + R.T_BuildFinished + Environment.NewLine);
 			}
 			return VSConstants.S_OK;
 		}
@@ -48,8 +47,7 @@ namespace Codist {
 		int IVsUpdateSolutionEvents.UpdateSolution_StartUpdate(ref int cancelUpdate) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
-				var output = _Package.GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
-				output?.OutputString(DateTime.Now.ToLongTimeString() + " " + R.T_BuildStarted + Environment.NewLine);
+				WriteBuildText(DateTime.Now.ToLongTimeString() + " " + R.T_BuildStarted + Environment.NewLine);
 			}
 
 			return VSConstants.S_OK;
@@ -77,28 +75,55 @@ namespace Codist {
 
 		int IVsUpdateSolutionEvents2.UpdateProjectCfg_Begin(IVsHierarchy proj, IVsCfg cfgProj, IVsCfg cfgSln, uint action, ref int cancel) {
 			// This method is called when a specific project begins building.
-
-			// if clean project or solution,   dwAction == 0x100000
-			// if build project or solution,   dwAction == 0x010000
-			// if rebuild project or solution, dwAction == 0x410000
 			return VSConstants.S_OK;
 		}
 
 		int IVsUpdateSolutionEvents2.UpdateProjectCfg_Done(IVsHierarchy proj, IVsCfg cfgProj, IVsCfg cfgSln, uint action, int success, int cancel) {
-			ThreadHelper.ThrowIfNotOnUIThread();
-			if (success == 0
-				|| Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) == false
-				|| proj.GetProperty(VSConstants.VSITEMID_ROOT, (int)VsHierarchyPropID.ExtObject, out var name) != 0) {
+			if (success == 0) {
 				return VSConstants.S_OK;
 			}
-			var project = name as EnvDTE.Project;
-			if (project.IsVsixProject()) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+
+			// if clean project or solution,   dwAction == 0x100000
+			// if build project or solution,   dwAction == 0x010000
+			// if rebuild project or solution, dwAction == 0x410000
+			Project project;
+			if (((VSSOLNBUILDUPDATEFLAGS)action).HasAnyFlag(VSSOLNBUILDUPDATEFLAGS.SBF_OPERATION_BUILD | VSSOLNBUILDUPDATEFLAGS.SBF_OPERATION_FORCE_UPDATE) == false
+				|| proj.GetProperty(VSConstants.VSITEMID_ROOT, (int)VsHierarchyPropID.ExtObject, out var name) != 0
+				|| (project = name as Project) is null) {
+				return VSConstants.S_OK;
+			}
+			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) && project.IsVsixProject()) {
 				AutoIncrementVsixVersion(project);
 			}
+			AutoChangeBuildVersion(cfgProj, project);
 			return VSConstants.S_OK;
 		}
 
-		void AutoIncrementVsixVersion(EnvDTE.Project project) {
+		static void AutoChangeBuildVersion(IVsCfg cfgProj, Project project) {
+			if (cfgProj.get_DisplayName(out var s) != VSConstants.S_OK || !project.IsCSharpProject()) {
+				return;
+			}
+
+			try {
+				var buildConfig = AutoBuildVersion.BuildSetting.Load(project);
+				if (buildConfig != null) {
+					var i = s.IndexOf('|');
+					if (i != -1) {
+						s = s.Substring(0, i);
+					}
+					if (buildConfig.TryGetValue(s, out var setting) && setting.ShouldRewrite
+						|| buildConfig.TryGetValue("<Any>", out setting) && setting.ShouldRewrite) {
+						setting.RewriteVersion(project);
+					}
+				}
+			}
+			catch (Exception ex) {
+				CodistPackage.ShowMessageBox(ex.Message, "Changing version number failed.", true);
+			}
+		}
+
+		void AutoIncrementVsixVersion(Project project) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var projItems = project.ProjectItems;
 			for (int i = projItems.Count; i > 0; i--) {
@@ -109,8 +134,7 @@ namespace Codist {
 						CodistPackage.ShowMessageBox(item.Name + " is open and modified. Auto increment VSIX version number failed.", nameof(Codist), true);
 					}
 					else if (Commands.IncrementVsixVersionCommand.IncrementVersion(item, out var message)) {
-						var output = _Package.GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build");
-						output?.OutputString(nameof(Codist) + ": " + message + Environment.NewLine);
+						WriteBuildText(nameof(Codist) + ": " + message + Environment.NewLine);
 					}
 					else {
 						CodistPackage.ShowMessageBox(message, "Auto increment VSIX version number failed.", true);
@@ -118,6 +142,10 @@ namespace Codist {
 					break;
 				}
 			}
+		}
+
+		void WriteBuildText(string text) {
+			_Package.GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build")?.OutputString(text);
 		}
 	}
 }

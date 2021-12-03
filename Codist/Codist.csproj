@@ -68,8 +68,14 @@
     <DeployExtension>False</DeployExtension>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AutoBuildVersion\BuildConfigSetting.cs" />
+    <Compile Include="AutoBuildVersion\BuildSetting.cs" />
+    <Compile Include="AutoBuildVersion\VersionRewriteMode.cs" />
+    <Compile Include="AutoBuildVersion\VersionSetting.cs" />
+    <Compile Include="Commands\AutoBuildVersionWindow.cs" />
     <Compile Include="Commands\CommandRegistry.cs" />
     <Compile Include="Commands\GetContentTypeCommand.cs" />
+    <Compile Include="Commands\AutoBuildVersionWindowCommand.cs" />
     <Compile Include="Commands\SyntaxCustomizerWindowCommand.cs" />
     <Compile Include="Commands\VersionInfoBar.cs" />
     <Compile Include="Controls\ExternalCommand.cs" />

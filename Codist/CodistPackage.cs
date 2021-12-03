@@ -129,6 +129,7 @@ namespace Codist
 			Commands.ScreenshotCommand.Initialize();
 			Commands.GetContentTypeCommand.Initialize();
 			Commands.IncrementVsixVersionCommand.Initialize();
+			Commands.AutoBuildVersionWindowCommand.Initialize();
 			Commands.NaviBarSearchDeclarationCommand.Initialize();
 			if (Config.Instance.InitStatus != InitStatus.Normal) {
 				Config.Instance.SaveConfig(Config.ConfigPath); // save the file to prevent this notification from reoccurrence

@@ -971,6 +971,15 @@ namespace Codist.Properties {
         /// <summary>
         ///   查找类似 Save 的本地化字符串。
         /// </summary>
+        internal static string CMD_SaveBuildSetting {
+            get {
+                return ResourceManager.GetString("CMD_SaveBuildSetting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Save 的本地化字符串。
+        /// </summary>
         internal static string CMD_SaveHighlightChanges {
             get {
                 return ResourceManager.GetString("CMD_SaveHighlightChanges", resourceCulture);
@@ -1359,9 +1368,9 @@ namespace Codist.Properties {
         /// <summary>
         ///   查找类似 Confirm changes 的本地化字符串。
         /// </summary>
-        internal static string CMDT_SaveHighlightChanges {
+        internal static string CMDT_SaveChanges {
             get {
-                return ResourceManager.GetString("CMDT_SaveHighlightChanges", resourceCulture);
+                return ResourceManager.GetString("CMDT_SaveChanges", resourceCulture);
             }
         }
         
@@ -1395,9 +1404,9 @@ namespace Codist.Properties {
         /// <summary>
         ///   查找类似 Undo changes 的本地化字符串。
         /// </summary>
-        internal static string CMDT_UndoHighlightChanges {
+        internal static string CMDT_UndoChanges {
             get {
-                return ResourceManager.GetString("CMDT_UndoHighlightChanges", resourceCulture);
+                return ResourceManager.GetString("CMDT_UndoChanges", resourceCulture);
             }
         }
         
@@ -3835,6 +3844,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Auto Build Version Settings 的本地化字符串。
+        /// </summary>
+        internal static string T_BuildVersion {
+            get {
+                return ResourceManager.GetString("T_BuildVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Captured variables 的本地化字符串。
         /// </summary>
         internal static string T_CapturedVariables {
@@ -3948,6 +3966,15 @@ namespace Codist.Properties {
         internal static string T_ConfigFileFilter {
             get {
                 return ResourceManager.GetString("T_ConfigFileFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Configuration: 的本地化字符串。
+        /// </summary>
+        internal static string T_Configuration {
+            get {
+                return ResourceManager.GetString("T_Configuration", resourceCulture);
             }
         }
         
@@ -5284,6 +5311,24 @@ namespace Codist.Properties {
         internal static string T_TypesDelegates {
             get {
                 return ResourceManager.GetString("T_TypesDelegates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Version number not found 的本地化字符串。
+        /// </summary>
+        internal static string T_VersionNumberNotFound {
+            get {
+                return ResourceManager.GetString("T_VersionNumberNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Unchanged/Increment/Zero/Year/Month/Date/ShortYear/YearMonth/MonthDate/DayOfYear/Hour/HourMinute/DaySinceY2K 的本地化字符串。
+        /// </summary>
+        internal static string T_VersionRewriteMode {
+            get {
+                return ResourceManager.GetString("T_VersionRewriteMode", resourceCulture);
             }
         }
         

@@ -1467,7 +1467,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="CMDT_ResetTheme" xml:space="preserve">
     <value>Reset syntax highlight theme to default...</value>
   </data>
-  <data name="CMDT_SaveHighlightChanges" xml:space="preserve">
+  <data name="CMDT_SaveChanges" xml:space="preserve">
     <value>Confirm changes</value>
   </data>
   <data name="CMDT_SaveTheme" xml:space="preserve">
@@ -1476,7 +1476,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="CMDT_SimpleTheme" xml:space="preserve">
     <value>Load a predefined simple theme</value>
   </data>
-  <data name="CMDT_UndoHighlightChanges" xml:space="preserve">
+  <data name="CMDT_UndoChanges" xml:space="preserve">
     <value>Undo changes</value>
   </data>
   <data name="CMD_Bold" xml:space="preserve">
@@ -1846,5 +1846,20 @@ ALL existing items will be REPLACE by default items.</value>
   </data>
   <data name="OT_WrapTextSelectionIndicator" xml:space="preserve">
     <value>The Indicator within the Pattern will be replaced by the selection when Wrap Selection With Text command is executed</value>
+  </data>
+  <data name="T_Configuration" xml:space="preserve">
+    <value>Configuration:</value>
+  </data>
+  <data name="T_VersionRewriteMode" xml:space="preserve">
+    <value>Unchanged/Increment/Zero/Year/Month/Date/ShortYear/YearMonth/MonthDate/DayOfYear/Hour/HourMinute/DaySinceY2K</value>
+  </data>
+  <data name="CMD_SaveBuildSetting" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="T_BuildVersion" xml:space="preserve">
+    <value>Auto Build Version Settings</value>
+  </data>
+  <data name="T_VersionNumberNotFound" xml:space="preserve">
+    <value>Version number not found</value>
   </data>
 </root>

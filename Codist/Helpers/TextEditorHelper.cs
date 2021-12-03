@@ -24,6 +24,9 @@ namespace Codist
 	/// </summary>
 	static class TextEditorHelper
 	{
+		public const string CSharpProjectKind = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}",
+			ProjectFolderKind = "{66A26720-8FB5-11D2-AA7E-00C04F688DDE}";
+
 		static /*readonly*/ Guid __IWpfTextViewHostGuid = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476"),
 			__ViewKindCodeGuid = new Guid(EnvDTE.Constants.vsViewKindCode);
 		static readonly HashSet<IWpfTextView> _WpfTextViews = new HashSet<IWpfTextView>();
@@ -708,7 +711,7 @@ namespace Codist
 			var projectPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(CodistPackage.DTE.Solution.FullName), projectName));
 			for (int i = 1; i <= projects.Count; i++) {
 				var project = projects.Item(i);
-				if (project.FullName.Length == 0 && project.Kind == "{66A26720-8FB5-11D2-AA7E-00C04F688DDE}") {
+				if (project.FullName.Length == 0 && project.Kind == ProjectFolderKind) {
 					if ((project = FindProject(project.ProjectItems, projectPath)) != null) {
 						return project;
 					}
@@ -720,7 +723,7 @@ namespace Codist
 			return CodistPackage.DTE.Solution.Projects.Item(projectName);
 
 			EnvDTE.Project FindProject(EnvDTE.ProjectItems items, string pp) {
-				for (int i = 1; i < items.Count; i++) {
+				for (int i = 1; i <= items.Count; i++) {
 					var p = items.Item(i);
 					if (p.Object is EnvDTE.Project proj && String.Equals(proj.FullName, pp, StringComparison.OrdinalIgnoreCase)) {
 						return proj;
@@ -733,6 +736,32 @@ namespace Codist
 		public static bool IsVsixProject(this EnvDTE.Project project) {
 			var extenders = project?.ExtenderNames as string[];
 			return extenders != null && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
+		}
+
+		public static bool IsCSharpProject(this EnvDTE.Project project) {
+			return project?.Kind == CSharpProjectKind;
+		}
+
+		public static EnvDTE.ProjectItem FindItem(this EnvDTE.Project project, params string[] itemNames) {
+			var items = project.ProjectItems;
+			var count = items.Count;
+			EnvDTE.ProjectItem p = null;
+			foreach (var name in itemNames) {
+				bool match = false;
+				for (int i = 1; i <= count; i++) {
+					p = items.Item(i);
+					if (String.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase)) {
+						items = p.ProjectItems;
+						count = items.Count;
+						match = true;
+						break;
+					}
+				}
+				if (match == false) {
+					return null;
+				}
+			}
+			return p;
 		}
 
 		public static bool IsVsixProject() {

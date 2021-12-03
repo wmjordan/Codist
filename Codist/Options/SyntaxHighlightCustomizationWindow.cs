@@ -256,8 +256,8 @@ namespace Codist.Options
 								new WrapPanel {
 									HorizontalAlignment = HorizontalAlignment.Right,
 									Children = {
-										new ThemedButton(R.CMD_SaveHighlightChanges, R.CMDT_SaveHighlightChanges, Ok) { IsDefault = true, Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-										new ThemedButton(R.CMD_Cancel, R.CMDT_UndoHighlightChanges, Cancel) { Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
+										new ThemedButton(R.CMD_SaveHighlightChanges, R.CMDT_SaveChanges, Ok) { IsDefault = true, Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+										new ThemedButton(R.CMD_Cancel, R.CMDT_UndoChanges, Cancel) { Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
 									}
 								}.SetValue(Grid.SetRow, 3)
 							}

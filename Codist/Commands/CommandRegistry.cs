@@ -31,5 +31,6 @@ namespace Codist.Commands
 		NaviBarSearchDeclaration,
 		NaviBarSearchActiveClass,
 		NaviBarSearchDeclarationInProject,
+		AutoBuildVersionWindow
 	}
 }

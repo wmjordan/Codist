@@ -1835,4 +1835,19 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="OT_WrapTextSelectionIndicator" xml:space="preserve">
     <value>在执行“文本环绕选中内容”命令时，文本内容中的替代符将会以选中项替换</value>
   </data>
+  <data name="T_Configuration" xml:space="preserve">
+    <value>生成项目的配置:</value>
+  </data>
+  <data name="T_VersionRewriteMode" xml:space="preserve">
+    <value>不变/加1/置0/年yyyy/月m/日d/年yy/年月yymm/月日mdd/年日ddd/时h/时分hmm/2000年起日</value>
+  </data>
+  <data name="CMD_SaveBuildSetting" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="T_BuildVersion" xml:space="preserve">
+    <value>自动生成版本号设置</value>
+  </data>
+  <data name="T_VersionNumberNotFound" xml:space="preserve">
+    <value>未找到版本号</value>
+  </data>
 </root>

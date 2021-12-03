@@ -1843,4 +1843,19 @@ Right click: Wrap text menu...</value>
   <data name="OT_WrapTextSelectionIndicator" xml:space="preserve">
     <value>The Indicator within the Pattern will be replaced by the selection when Wrap Selection With Text command is executed</value>
   </data>
+  <data name="T_Configuration" xml:space="preserve">
+    <value>Configuration:</value>
+  </data>
+  <data name="T_VersionRewriteMode" xml:space="preserve">
+    <value>Unchanged/Increment/Zero/Year/Month/Date/ShortYear/YearMonth/MonthDate/DayOfYear/Hour/HourMinute/DaySinceY2K</value>
+  </data>
+  <data name="CMD_SaveBuildSetting" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="T_BuildVersion" xml:space="preserve">
+    <value>Auto Build Version Settings</value>
+  </data>
+  <data name="T_VersionNumberNotFound" xml:space="preserve">
+    <value>Version number not found</value>
+  </data>
 </root>
