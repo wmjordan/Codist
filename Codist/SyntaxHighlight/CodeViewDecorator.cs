@@ -250,6 +250,12 @@ namespace Codist.SyntaxHighlight
 					format = format.SetFontRenderingEmSize(fontSize);
 				}
 			}
+			else if (format.FontRenderingEmSizeEmpty == false) {
+				format = format.ClearFontRenderingEmSize();
+				if (format.FontRenderingEmSize != fontSize) {
+					format = format.SetFontRenderingEmSize(fontSize);
+				}
+			}
 			if (settings.Bold.HasValue) {
 				if (format.BoldEmpty || settings.Bold != format.Bold) {
 					format = format.SetBold(settings.Bold.Value);
