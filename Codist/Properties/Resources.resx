@@ -1788,6 +1788,9 @@ Use space to separate multiple search terms.
   <data name="PaleLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\light pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="PaleDark" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\dark pale codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="T_Binary" xml:space="preserve">
     <value>BIN</value>
   </data>
@@ -1861,5 +1864,11 @@ ALL existing items will be REPLACE by default items.</value>
   </data>
   <data name="T_VersionNumberNotFound" xml:space="preserve">
     <value>Version number not found</value>
+  </data>
+  <data name="CMDT_PaleDarkTheme" xml:space="preserve">
+    <value>Load a predefined theme in pale style for dark editing environment</value>
+  </data>
+  <data name="CMD_PaleDarkTheme" xml:space="preserve">
+    <value>Pale Dark</value>
   </data>
 </root>

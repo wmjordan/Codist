@@ -848,7 +848,7 @@ namespace Codist.Options
 	{
 		UIElement _Child;
 
-		protected override Features Feature => Features.WebSearch;
+		protected override Features Feature => Features.None;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
 
 		sealed class PageControl : OptionsPageContainer
@@ -1047,7 +1047,7 @@ namespace Codist.Options
 	{
 		UIElement _Child;
 
-		protected override Features Feature => Features.WrapText;
+		protected override Features Feature => Features.None;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
 
 		sealed class PageControl : OptionsPageContainer

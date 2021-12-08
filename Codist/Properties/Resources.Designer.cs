@@ -840,6 +840,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Pale Dark 的本地化字符串。
+        /// </summary>
+        internal static string CMD_PaleDarkTheme {
+            get {
+                return ResourceManager.GetString("CMD_PaleDarkTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Pale Light 的本地化字符串。
         /// </summary>
         internal static string CMD_PaleLightTheme {
@@ -1344,6 +1353,15 @@ namespace Codist.Properties {
         internal static string CMDT_OpenWechatQrCode {
             get {
                 return ResourceManager.GetString("CMDT_OpenWechatQrCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Load a predefined theme in pale style for dark editing environment 的本地化字符串。
+        /// </summary>
+        internal static string CMDT_PaleDarkTheme {
+            get {
+                return ResourceManager.GetString("CMDT_PaleDarkTheme", resourceCulture);
             }
         }
         
@@ -3596,6 +3614,41 @@ namespace Codist.Properties {
         internal static string OTC_URL {
             get {
                 return ResourceManager.GetString("OTC_URL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 {
+        ///  &quot;Version&quot;: &quot;5.14.0&quot;,
+        ///  &quot;Styles&quot;: [
+        ///    {
+        ///      &quot;Key&quot;: &quot;Keyword&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#4066BF&quot;
+        ///    },
+        ///    {
+        ///      &quot;Key&quot;: &quot;class name&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#60929F&quot;
+        ///    },
+        ///    {
+        ///      &quot;Key&quot;: &quot;struct name&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#508578&quot;
+        ///    },
+        ///    {
+        ///      &quot;Key&quot;: &quot;interface name&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#60839F&quot;
+        ///    },
+        ///    {
+        ///      &quot;Key&quot;: &quot;enum name&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#9F609F&quot;
+        ///    },
+        ///    {
+        ///      &quot;Key&quot;: &quot;delegate name&quot;,
+        ///      &quot;ForegroundColor&quot;: &quot;#506B85&quot;
+        /// [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        /// </summary>
+        internal static string PaleDark {
+            get {
+                return ResourceManager.GetString("PaleDark", resourceCulture);
             }
         }
         
