@@ -733,6 +733,12 @@ namespace Codist
 			}
 		}
 
+		public static T GetExtObjectAs<T>(this IVsHierarchy proj) where T : class {
+			return proj.GetProperty(Microsoft.VisualStudio.VSConstants.VSITEMID_ROOT, (int)VsHierarchyPropID.ExtObject, out var name) != 0
+				? name as T
+				: null;
+		}
+
 		public static bool IsVsixProject(this EnvDTE.Project project) {
 			var extenders = project?.ExtenderNames as string[];
 			return extenders != null && Array.IndexOf(extenders, "VsixProjectExtender") != -1;

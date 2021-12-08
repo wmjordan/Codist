@@ -49,7 +49,9 @@ namespace Codist
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
 				WriteBuildText(DateTime.Now.ToLongTimeString() + " " + R.T_BuildStarted + Environment.NewLine);
 			}
-
+			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.PrintSolutionProjectProperties)) {
+				PrintProperties(CodistPackage.DTE.Solution.Properties, "Solution " + CodistPackage.DTE.Solution.FileName);
+			}
 			return VSConstants.S_OK;
 		}
 
@@ -75,6 +77,12 @@ namespace Codist
 
 		int IVsUpdateSolutionEvents2.UpdateProjectCfg_Begin(IVsHierarchy proj, IVsCfg cfgProj, IVsCfg cfgSln, uint action, ref int cancel) {
 			// This method is called when a specific project begins building.
+			Project project;
+			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.PrintSolutionProjectProperties)
+				&& (project = proj.GetExtObjectAs<Project>()) != null) {
+				PrintProperties(project.Properties, "project " + project.Name);
+				PrintProperties(project.ConfigurationManager.ActiveConfiguration.Properties, $"project {project.Name} active config");
+			}
 			return VSConstants.S_OK;
 		}
 
@@ -89,8 +97,7 @@ namespace Codist
 			// if rebuild project or solution, dwAction == 0x410000
 			Project project;
 			if (((VSSOLNBUILDUPDATEFLAGS)action).HasAnyFlag(VSSOLNBUILDUPDATEFLAGS.SBF_OPERATION_BUILD | VSSOLNBUILDUPDATEFLAGS.SBF_OPERATION_FORCE_UPDATE) == false
-				|| proj.GetProperty(VSConstants.VSITEMID_ROOT, (int)VsHierarchyPropID.ExtObject, out var name) != 0
-				|| (project = name as Project) is null) {
+				|| (project = proj.GetExtObjectAs<Project>()) is null) {
 				return VSConstants.S_OK;
 			}
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) && project.IsVsixProject()) {
@@ -98,6 +105,20 @@ namespace Codist
 			}
 			AutoChangeBuildVersion(cfgProj, project);
 			return VSConstants.S_OK;
+		}
+
+		void PrintProperties(EnvDTE.Properties properties, string title) {
+			var c = properties.Count;
+			WriteBuildText(title + Environment.NewLine);
+			for (int i = 1; i <= c; i++) {
+				var p = properties.Item(i);
+				try {
+					WriteBuildText($"  {p.Name} = {p.Value}{Environment.NewLine}");
+				}
+				catch (System.Runtime.InteropServices.COMException) {
+					WriteBuildText($"  {p.Name} = ?{Environment.NewLine}");
+				}
+			}
 		}
 
 		static void AutoChangeBuildVersion(IVsCfg cfgProj, Project project) {
