@@ -1,4 +1,5 @@
 {
+  "Version": "5.14.0",
   "Styles": [
     {
       "Key": "Keyword",
@@ -56,7 +57,7 @@
       "Key": "Codist: Emphasis",
       "Bold": true,
       "FontSize": 7.0,
-      "ForegroundColor": "#2B552B"
+      "ForegroundColor": "#397139"
     },
     {
       "Key": "Codist: Question",
@@ -97,27 +98,27 @@
     },
     {
       "Key": "Codist: Heading 1",
-      "ForegroundColor": "#2B552B"
+      "ForegroundColor": "#397139"
     },
     {
       "Key": "Codist: Heading 2",
-      "ForegroundColor": "#2B552B"
+      "ForegroundColor": "#397139"
     },
     {
       "Key": "Codist: Heading 3",
-      "ForegroundColor": "#2B552B"
+      "ForegroundColor": "#397139"
     },
     {
       "Key": "Codist: Heading 4",
-      "ForegroundColor": "#2B552B"
+      "ForegroundColor": "#397139"
     },
     {
       "Key": "Codist: Heading 5",
-      "ForegroundColor": "#2B552B"
+      "ForegroundColor": "#397139"
     },
     {
       "Key": "Codist: Heading 6",
-      "ForegroundColor": "#2B552B"
+      "ForegroundColor": "#397139"
     },
     {
       "Key": "Codist: Task 1",
@@ -130,7 +131,6 @@
       "Key": "Codist: Task 2",
       "Italic": false,
       "FontSize": 7.0,
-      "ForegroundColor": "#552B2B",
       "BackgroundColor": "#D5AAD5",
       "BackgroundEffect": "ToBottom"
     },
@@ -219,7 +219,7 @@
     {
       "Key": "C#: Label",
       "Bold": true,
-      "ForegroundColor": "#FFFFFF",
+      "ForegroundColor": "#D4D4D4",
       "BackgroundColor": "#383872"
     },
     {
@@ -300,7 +300,7 @@
     },
     {
       "Key": "xml doc comment - text",
-      "ForegroundColor": "#2B552B"
+      "ForegroundColor": "#587C58"
     },
     {
       "Key": "xml doc comment - name",
@@ -340,7 +340,7 @@
     },
     {
       "Key": "keyword - control",
-      "ForegroundColor": "#623872"
+      "ForegroundColor": "#7A468E"
     },
     {
       "Key": "type parameter name",
@@ -368,11 +368,7 @@
     },
     {
       "Key": "markup node",
-      "ForegroundColor": "#2B3555"
-    },
-    {
-      "Key": "operator - overloaded",
-      "ForegroundColor": "#B5B54A"
+      "ForegroundColor": "#47598D"
     }
   ]
 }
