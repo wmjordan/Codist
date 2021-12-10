@@ -807,12 +807,15 @@ namespace Codist.Controls
 			else if (usage.MatchFlags(SymbolUsageKind.Catch)) {
 				AddIcon(ref icons, IconIds.UseToCatch);
 			}
-			else if (usage.HasAnyFlag(SymbolUsageKind.Attach | SymbolUsageKind.Detach)) {
+			else if (usage.HasAnyFlag(SymbolUsageKind.Attach | SymbolUsageKind.Detach | SymbolUsageKind.Trigger)) {
 				if (usage.MatchFlags(SymbolUsageKind.Attach)) {
 					AddIcon(ref icons, IconIds.AttachEvent);
 				}
 				if (usage.MatchFlags(SymbolUsageKind.Detach)) {
 					AddIcon(ref icons, IconIds.DetachEvent);
+				}
+				if (usage.MatchFlags(SymbolUsageKind.Trigger)) {
+					AddIcon(ref icons, IconIds.TriggerEvent);
 				}
 			}
 			else if (usage.MatchFlags(SymbolUsageKind.TypeCast)) {

@@ -1856,4 +1856,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="CMD_PaleDarkTheme" xml:space="preserve">
     <value>玄雅</value>
   </data>
+  <data name="T_TriggerEvent" xml:space="preserve">
+    <value>触发事件</value>
+  </data>
 </root>

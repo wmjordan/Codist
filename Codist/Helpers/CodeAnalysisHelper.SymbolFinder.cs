@@ -569,16 +569,18 @@ namespace Codist
 					return SymbolUsageKind.TypeParameter;
 				}
 			}
-			else if (possibleUsage.HasAnyFlag(SymbolUsageKind.Attach | SymbolUsageKind.Detach)) {
+			else if (possibleUsage.HasAnyFlag(SymbolUsageKind.Attach | SymbolUsageKind.Detach | SymbolUsageKind.Trigger)) {
 				node = node.GetNodePurpose();
-				var a = node as AssignmentExpressionSyntax;
-				if (a != null) {
+				if (node is AssignmentExpressionSyntax a) {
 					if (a.IsKind(SyntaxKind.AddAssignmentExpression)) {
 						return SymbolUsageKind.Attach;
 					}
 					if (a.IsKind(SyntaxKind.SubtractAssignmentExpression)) {
 						return SymbolUsageKind.Detach;
 					}
+				}
+				else if (node.IsKind(SyntaxKind.ConditionalAccessExpression) || node.IsKind(SyntaxKind.SimpleMemberAccessExpression)) {
+					return SymbolUsageKind.Trigger;
 				}
 			}
 			else if (possibleUsage.MatchFlags(SymbolUsageKind.Delegate)) {
@@ -606,7 +608,7 @@ namespace Codist
 		static SymbolUsageKind GetPotentialUsageKinds(ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event:
-					return SymbolUsageKind.Attach | SymbolUsageKind.Detach;
+					return SymbolUsageKind.Attach | SymbolUsageKind.Detach | SymbolUsageKind.Trigger;
 				case SymbolKind.Field:
 					return ((IFieldSymbol)symbol).IsConst ? SymbolUsageKind.Normal : SymbolUsageKind.Write;
 				case SymbolKind.Local:
@@ -687,6 +689,7 @@ namespace Codist
 		TypeCast = 1 << 7,
 		TypeParameter = 1 << 8,
 		Catch = 1 << 9,
-		Usage = Delegate | Write | Attach | Detach | TypeCast | TypeParameter | Catch
+		Trigger = 1 << 10,
+		Usage = Delegate | Write | Attach | Detach | TypeCast | TypeParameter | Catch | Trigger
 	}
 }

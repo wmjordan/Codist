@@ -196,5 +196,6 @@ namespace Codist
 		public const int UseAsDelegate = KnownImageIds.DelegateShortcut;
 		public const int AttachEvent = KnownImageIds.AddEvent;
 		public const int DetachEvent = KnownImageIds.EventMissing;
+		public const int TriggerEvent = KnownImageIds.Event;
 	}
 }

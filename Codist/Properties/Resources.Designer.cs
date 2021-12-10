@@ -5323,6 +5323,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Trigger event 的本地化字符串。
+        /// </summary>
+        internal static string T_TriggerEvent {
+            get {
+                return ResourceManager.GetString("T_TriggerEvent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Type:  的本地化字符串。
         /// </summary>
         internal static string T_Type {

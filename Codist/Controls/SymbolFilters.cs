@@ -346,6 +346,9 @@ namespace Codist.Controls
 			if (item.Usage.HasAnyFlag(SymbolUsageKind.Delegate | SymbolUsageKind.Attach | SymbolUsageKind.Detach)) {
 				m |= MemberFilterTypes.Read;
 			}
+			if (item.Usage.HasAnyFlag(SymbolUsageKind.Trigger)) {
+				m |= MemberFilterTypes.Trigger;
+			}
 			return filterTypes.HasAnyFlag(m);
 		}
 
@@ -760,12 +763,13 @@ namespace Codist.Controls
 			public SymbolUsageFilterButtonGroup() {
 				_WriteFilter = CreateButton(IconIds.UseToWrite, R.T_Write);
 				_ReadFilter = CreateButton(IconIds.UseAsDelegate, R.T_DelegateEvent);
+				_EventFilter = CreateButton(IconIds.TriggerEvent, R.T_TriggerEvent);
 				_TypeCastFilter = CreateButton(IconIds.UseToCast, R.T_TypeConversion);
 				_TypeReferenceFilter = CreateButton(IconIds.UseAsTypeParameter, R.T_TypeReferenceOrArgument);
 				_Filters = MemberFilterTypes.AllUsages;
 				Content = new StackPanel {
 					Children = {
-						_WriteFilter, _ReadFilter, _TypeCastFilter, _TypeReferenceFilter,
+						_WriteFilter, _ReadFilter, _EventFilter, _TypeCastFilter, _TypeReferenceFilter,
 						(_Separator = CreateSeparator())
 					},
 					Orientation = Orientation.Horizontal
@@ -783,6 +787,9 @@ namespace Codist.Controls
 				if (_ReadFilter.IsChecked == true) {
 					f |= MemberFilterTypes.Read;
 				}
+				if (_EventFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Trigger;
+				}
 				if (_TypeCastFilter.IsChecked == true) {
 					f |= MemberFilterTypes.TypeCast;
 				}
@@ -799,7 +806,7 @@ namespace Codist.Controls
 			}
 
 			public override void UpdateNumbers(IEnumerable<SymbolItem> symbols) {
-				int r = 0, w = 0, tc = 0, tr = 0;
+				int r = 0, w = 0, tc = 0, iv = 0, tr = 0;
 				foreach (var item in symbols) {
 					var t = item.Usage;
 					if (t == SymbolUsageKind.Normal) {
@@ -811,6 +818,9 @@ namespace Codist.Controls
 					if (t.HasAnyFlag(SymbolUsageKind.Delegate | SymbolUsageKind.Attach | SymbolUsageKind.Detach)) {
 						++r;
 					}
+					if (t.MatchFlags(SymbolUsageKind.Trigger)) {
+						++iv;
+					}
 					if (t.MatchFlags(SymbolUsageKind.TypeCast)) {
 						++tc;
 					}
@@ -820,6 +830,7 @@ namespace Codist.Controls
 				}
 				ToggleFilterButton(_ReadFilter, r);
 				ToggleFilterButton(_WriteFilter, w);
+				ToggleFilterButton(_EventFilter, iv);
 				ToggleFilterButton(_TypeCastFilter, tc);
 				ToggleFilterButton(_TypeReferenceFilter, tr);
 				_Separator.Visibility = (w != 0 || r != 0 || tc != 0 || tr != 0) ? Visibility.Visible : Visibility.Collapsed;
@@ -827,7 +838,7 @@ namespace Codist.Controls
 
 			public override void ClearFilter() {
 				_uiLock = true;
-				_WriteFilter.IsChecked = _ReadFilter.IsChecked = _TypeCastFilter.IsChecked = _TypeReferenceFilter.IsChecked = false;
+				_WriteFilter.IsChecked = _ReadFilter.IsChecked = _EventFilter.IsChecked =  _TypeCastFilter.IsChecked = _TypeReferenceFilter.IsChecked = false;
 				_uiLock = false;
 				_Filters |= MemberFilterTypes.AllUsages;
 			}
@@ -959,7 +970,8 @@ namespace Codist.Controls
 		Write = 1 << 21,
 		TypeCast = 1 << 22,
 		TypeReference = 1 << 23,
-		AllUsages = Read | Write | TypeCast | TypeReference,
+		Trigger = 1 << 24,
+		AllUsages = Read | Write | TypeCast | TypeReference | Trigger,
 		All = AllMembers | AllAccessibilities | AllTypes | AllInstance | AllUsages
 	}
 
