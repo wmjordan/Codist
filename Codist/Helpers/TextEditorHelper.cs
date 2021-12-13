@@ -735,8 +735,8 @@ namespace Codist
 
 		public static T GetExtObjectAs<T>(this IVsHierarchy proj) where T : class {
 			return proj.GetProperty(Microsoft.VisualStudio.VSConstants.VSITEMID_ROOT, (int)VsHierarchyPropID.ExtObject, out var name) != 0
-				? name as T
-				: null;
+				? null
+				: name as T;
 		}
 
 		public static bool IsVsixProject(this EnvDTE.Project project) {
