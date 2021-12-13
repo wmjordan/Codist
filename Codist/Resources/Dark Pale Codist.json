@@ -1,5 +1,4 @@
 {
-  "Version": "5.14.0",
   "Styles": [
     {
       "Key": "Keyword",
@@ -315,6 +314,30 @@
       "ForegroundColor": "#55AA55"
     },
     {
+      "Key": "Markdown: Heading 1",
+      "FontSize": 11.0
+    },
+    {
+      "Key": "Markdown: Heading 2",
+      "FontSize": 8.0
+    },
+    {
+      "Key": "Markdown: Heading 3",
+      "FontSize": 6.0
+    },
+    {
+      "Key": "Markdown: Heading 4",
+      "FontSize": 4.0
+    },
+    {
+      "Key": "Markdown: Heading 5",
+      "FontSize": 3.0
+    },
+    {
+      "Key": "Markdown: Heading 6",
+      "FontSize": 2.0
+    },
+    {
       "Key": "XML Attribute",
       "ForegroundColor": "#AA5555"
     },
@@ -369,6 +392,50 @@
     {
       "Key": "markup node",
       "ForegroundColor": "#47598D"
+    },
+    {
+      "Key": "cppMacro",
+      "ForegroundColor": "#9F96F5"
+    },
+    {
+      "Key": "cppClassTemplate",
+      "ForegroundColor": "#32A38C"
+    },
+    {
+      "Key": "cppFunctionTemplate",
+      "ForegroundColor": "#97973E"
+    },
+    {
+      "Key": "cppGenericType",
+      "ForegroundColor": "#32A38C"
+    },
+    {
+      "Key": "cppLocalVariable",
+      "ForegroundColor": "#0289D2"
+    },
+    {
+      "Key": "cppType",
+      "ForegroundColor": "#32A38C"
+    },
+    {
+      "Key": "cppValueType",
+      "ForegroundColor": "#32A38C"
+    },
+    {
+      "Key": "cppRefType",
+      "ForegroundColor": "#32A38C"
+    },
+    {
+      "Key": "cppFunction",
+      "ForegroundColor": "#97973E"
+    },
+    {
+      "Key": "cppMemberFunction",
+      "ForegroundColor": "#97973E"
+    },
+    {
+      "Key": "cppStaticMemberFunction",
+      "ForegroundColor": "#97973E"
     }
   ]
 }
