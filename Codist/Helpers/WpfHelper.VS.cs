@@ -271,7 +271,7 @@ namespace Codist
 			async void LinkContextMenu(object sender, MouseButtonEventArgs e) {
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {
-					//ContextMenu.IsOpen = true;
+					ContextMenu.IsOpen = true;
 					return;
 				}
 				var ctx = SemanticContext.GetHovered();
@@ -321,6 +321,7 @@ namespace Codist
 			void GotoSymbol(object sender, RoutedEventArgs e) {
 				_Symbol.GoToDefinition();
 				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
+				e.Handled = true;
 			}
 
 			void SymbolLink_Unloaded(object sender, RoutedEventArgs e) {

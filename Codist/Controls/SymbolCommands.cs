@@ -22,7 +22,7 @@ namespace Codist.Controls
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context, SymbolListType.SymbolReferrers);
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.Append(symbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true)
+				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(R.T_Referrers);
 			if (referrers != null) {
 				var containerType = symbol.ContainingType;
@@ -63,7 +63,7 @@ namespace Codist.Controls
 				m.Add(item, item.ContainingType);
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.Append(symbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true)
+				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(R.T_Overrides)
 				.Append(c.ToString());
 			m.Show();
@@ -101,7 +101,7 @@ namespace Codist.Controls
 				}
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.Append(symbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true)
+				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(R.T_Implementations)
 				.Append(implementations.Count.ToString());
 			m.Show();
@@ -146,7 +146,7 @@ namespace Codist.Controls
 				}
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.Append(symbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true)
+				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(countLabel);
 			m.Show(positionElement);
 		}
@@ -194,7 +194,7 @@ namespace Codist.Controls
 				locs[(System.IO.Path.GetDirectoryName(item.SyntaxTree.FilePath), System.IO.Path.GetFileName(item.SyntaxTree.FilePath), item.Span.Start)] = item.ToLocation();
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
-				.Append(symbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true)
+				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(R.T_SourceLocations)
 				.Append(locs.Count);
 			// add locations in source code
@@ -208,11 +208,11 @@ namespace Codist.Controls
 			m.Show(positionElement);
 		}
 
-		static void ShowSymbolMenuForResult<TSymbol>(ISymbol source, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType) where TSymbol : ISymbol {
+		static void ShowSymbolMenuForResult<TSymbol>(ISymbol symbol, SemanticContext context, List<TSymbol> members, string suffix, bool groupByType) where TSymbol : ISymbol {
 			members.Sort(CodeAnalysisHelper.CompareSymbol);
 			var m = new SymbolMenu(context);
-			m.Title.SetGlyph(ThemeHelper.GetImage(source.GetImageId()))
-				.Append(source.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true)
+			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
+				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 				.Append(suffix);
 			INamedTypeSymbol containingType = null;
 			foreach (var item in members) {
