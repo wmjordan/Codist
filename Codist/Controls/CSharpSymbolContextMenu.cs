@@ -10,7 +10,7 @@ namespace Codist.Controls
 {
 	sealed class CSharpSymbolContextMenu : ContextMenu, IDisposable
 	{
-		readonly UIHost _Host;
+		UIHost _Host;
 
 		public CSharpSymbolContextMenu(ISymbol symbol, SyntaxNode node, SemanticContext semanticContext) {
 			Resources = SharedDictionaryManager.ContextMenu;
@@ -230,7 +230,7 @@ namespace Codist.Controls
 		}
 
 		public void Dispose() {
-			_Host.Release();
+			_Host = null;
 			DataContext = null;
 			Items.Clear();
 		}
@@ -252,9 +252,9 @@ namespace Codist.Controls
 
 		sealed class UIHost
 		{
-			ISymbol _Symbol;
-			SyntaxNode _Node;
-			SemanticContext _SemanticContext;
+			readonly ISymbol _Symbol;
+			readonly SyntaxNode _Node;
+			readonly SemanticContext _SemanticContext;
 
 			public UIHost(ISymbol symbol, SyntaxNode node, SemanticContext semanticContext) {
 				_Symbol = symbol?.Kind == SymbolKind.Alias ? ((IAliasSymbol)symbol).Target : symbol;
@@ -367,8 +367,9 @@ namespace Codist.Controls
 					}
 					++c;
 				}
-				m.Title.SetGlyph(ThemeHelper.GetImage(_Symbol.GetImageId()))
-					.Append(_Symbol.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true)
+				var symbol = _Symbol;
+				m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
+					.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
 					.Append(R.T_ReferencedSymbols)
 					.Append(c.ToString());
 				m.Show();
@@ -462,12 +463,6 @@ namespace Codist.Controls
 						return p.Parent.IsKind(SyntaxKind.IsPatternExpression) || p.Parent.IsKind(SyntaxKind.CasePatternSwitchLabel);
 				}
 				return false;
-			}
-
-			public void Release() {
-				_Symbol = null;
-				_Node = null;
-				_SemanticContext = null;
 			}
 		}
 	}
