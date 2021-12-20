@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 namespace TestProject.CS10_0;
 record struct RecordStruct
 {
+	public Address Address { get; init; } = new();
 	public string Name { get; init; }
-	public string Value { get; init; }
-	public Address Address { get; init; }
+	public System.Collections.Generic.Dictionary<string, object> Values { get; init; } = new();
 
 	public RecordStruct NewName(string name)
 	{
@@ -18,7 +18,7 @@ record struct RecordStruct
 		object obj = new RecordStruct
 		{
 			Name = "Kathleen",
-			Value = "Dollard",
+			Values = { { "Dollard", 1 } },
 			Address = new Address { City = "Seattle" }
 		};
 
@@ -34,7 +34,11 @@ record class Address
 	public string City { get; set; }
 }
 public readonly record struct Person(string FirstName, string LastName);
-
+class Fields
+{
+	public string S = new('*', 3);
+	public readonly System.Collections.Generic.Dictionary<string, object> Values = new();
+}
 class Lambdas
 {
 	[Obsolete($"Call {nameof(NaturalTypesOfMethodGroups)} instead")]

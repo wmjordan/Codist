@@ -1431,10 +1431,7 @@ namespace Codist.NaviBar
 				}
 				switch (item.SyntaxNode.Kind()) {
 					case SyntaxKind.VariableDeclarator:
-						var v = ((VariableDeclaratorSyntax)item.SyntaxNode).Initializer?.Value?.ToString();
-						if (v != null) {
-							item.Hint = ShowInitializerIndicator() + v;
-						}
+						ShowVariableValue(item);
 						break;
 					case SyntaxKind.EnumMemberDeclaration:
 						ShowEnumMemberValue(item);
@@ -1442,6 +1439,19 @@ namespace Codist.NaviBar
 					case SyntaxKind.PropertyDeclaration:
 						ShowPropertyValue(item);
 						break;
+				}
+
+				void ShowVariableValue(SymbolItem fieldItem) {
+					var vi = ((VariableDeclaratorSyntax)fieldItem.SyntaxNode).Initializer;
+					if (vi != null) {
+						var v = vi.Value?.ToString();
+						if (v != null) {
+							if (vi.Value.IsKind(CodeAnalysisHelper.ImplicitObjectCreationExpression)) {
+								v = "new " + (fieldItem.SyntaxNode.Parent as VariableDeclarationSyntax).Type.ToString() + vi.Value.GetImplicitObjectCreationArgumentList().ToString();
+							}
+							fieldItem.Hint = ShowInitializerIndicator() + v;
+						}
+					}
 				}
 
 				void ShowEnumMemberValue(SymbolItem enumItem) {
@@ -1458,7 +1468,7 @@ namespace Codist.NaviBar
 				void ShowPropertyValue(SymbolItem propertyItem) {
 					var p = (PropertyDeclarationSyntax)propertyItem.SyntaxNode;
 					if (p.Initializer != null) {
-						propertyItem.Hint = ShowInitializerIndicator() + p.Initializer.Value.ToString();
+						propertyItem.Hint = ShowInitializerIndicator() + (p.Initializer.Value.IsKind(CodeAnalysisHelper.ImplicitObjectCreationExpression) ? "new " + p.Type.ToString() + p.Initializer.Value.GetImplicitObjectCreationArgumentList().ToString() : p.Initializer.Value.ToString());
 					}
 					else if (p.ExpressionBody != null) {
 						propertyItem.Hint = p.ExpressionBody.ToString();

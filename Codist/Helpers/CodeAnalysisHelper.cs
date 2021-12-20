@@ -1138,9 +1138,14 @@ namespace Codist
 			return n;
 		}
 
+		public static ArgumentListSyntax GetImplicitObjectCreationArgumentList(this ExpressionSyntax syntax) {
+			return NonPublicOrFutureAccessors.GetImplicitObjectCreationArgumentList(syntax);
+		}
+
 		static partial class NonPublicOrFutureAccessors
 		{
 			public static readonly Func<SyntaxNode, NameSyntax> GetFileScopedNamespaceName = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, NameSyntax>("Name", typeof(NamespaceDeclarationSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax"));
+			public static readonly Func<ExpressionSyntax, ArgumentListSyntax> GetImplicitObjectCreationArgumentList = ReflectionHelper.CreateGetPropertyMethod<ExpressionSyntax, ArgumentListSyntax>("ArgumentList", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.BaseObjectCreationExpressionSyntax"));
 		}
 	}
 
