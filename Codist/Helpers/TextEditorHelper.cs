@@ -16,6 +16,7 @@ using Microsoft.VisualStudio.Utilities;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
 using AppHelpers;
+using System.IO;
 
 namespace Codist
 {
@@ -486,8 +487,8 @@ namespace Codist
 			if (String.IsNullOrEmpty(file)) {
 				return;
 			}
-			file = System.IO.Path.GetFullPath(file);
-			if (System.IO.File.Exists(file) == false) {
+			file = Path.GetFullPath(file);
+			if (File.Exists(file) == false) {
 				return;
 			}
 			try {
@@ -708,7 +709,7 @@ namespace Codist
 		public static EnvDTE.Project GetProject(string projectName) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var projects = CodistPackage.DTE.Solution.Projects;
-			var projectPath = System.IO.Path.GetFullPath(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(CodistPackage.DTE.Solution.FullName), projectName));
+			var projectPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(CodistPackage.DTE.Solution.FullName), projectName));
 			for (int i = 1; i <= projects.Count; i++) {
 				var project = projects.Item(i);
 				if (project.FullName.Length == 0 && project.Kind == ProjectFolderKind) {

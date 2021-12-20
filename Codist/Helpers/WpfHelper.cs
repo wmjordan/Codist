@@ -1,17 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
 using WpfBrush = System.Windows.Media.Brush;
-using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using WpfText = System.Windows.Media.FormattedText;
-using System.Collections.Generic;
 
 namespace Codist
 {
@@ -210,7 +208,7 @@ namespace Codist
 			text.SetFontWeight(FontWeights.Bold);
 			return text;
 		}
-		static readonly System.Windows.Media.Typeface StatusText = SystemFonts.StatusFontFamily.GetTypefaces().First();
+		static readonly Typeface StatusText = SystemFonts.StatusFontFamily.GetTypefaces().First();
 		public static WpfText ToFormattedText(string text, double size, WpfBrush brush) {
 			return new WpfText(text, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, StatusText, size, brush);
 		}
