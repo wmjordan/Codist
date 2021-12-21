@@ -954,7 +954,7 @@ namespace Codist.Options
 				};
 				PreviewLabelStyle(_Preview, t);
 				this.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
-					.ReferenceProperty(BackgroundProperty, CommonDocumentColors.PageBrushKey);
+					.ReferenceProperty(BackgroundProperty, EnvironmentColors.EnvironmentBackgroundBrushKey);
 				Click += clickHandler;
 			}
 
