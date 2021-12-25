@@ -339,23 +339,31 @@
     },
     {
       "Key": "XML Attribute",
-      "ForegroundColor": "#AA5555"
+      "ForegroundColor": "#8D7D47"
     },
     {
       "Key": "XML Attribute Value",
       "ForegroundColor": "#5555AA"
     },
     {
+      "Key": "XML CData Section",
+      "ForegroundColor": "#C2B16B"
+    },
+    {
       "Key": "XML Comment",
-      "ForegroundColor": "#2B552B"
+      "ForegroundColor": "#397139"
     },
     {
       "Key": "XML Delimiter",
-      "ForegroundColor": "#5555AA"
+      "ForegroundColor": "#7373B7"
     },
     {
       "Key": "XML Name",
-      "ForegroundColor": "#7B3E3E"
+      "ForegroundColor": "#8D4747"
+    },
+    {
+      "Key": "XML Text",
+      "ForegroundColor": "#949494"
     },
     {
       "Key": "C#: Metadata symbol",
@@ -394,48 +402,99 @@
       "ForegroundColor": "#47598D"
     },
     {
+      "Key": "cppFunction",
+      "Underline": true,
+      "ForegroundColor": "#9F6060"
+    },
+    {
       "Key": "cppMacro",
-      "ForegroundColor": "#9F96F5"
+      "ForegroundColor": "#7972B8"
+    },
+    {
+      "Key": "cppNewDelete",
+      "ForegroundColor": "#3287CD"
     },
     {
       "Key": "cppClassTemplate",
-      "ForegroundColor": "#32A38C"
+      "ForegroundColor": "#60929F"
     },
     {
       "Key": "cppFunctionTemplate",
-      "ForegroundColor": "#97973E"
+      "ForegroundColor": "#9F6060"
     },
     {
       "Key": "cppGenericType",
-      "ForegroundColor": "#32A38C"
+      "ForegroundColor": "#60929F"
     },
     {
       "Key": "cppLocalVariable",
-      "ForegroundColor": "#0289D2"
+      "Italic": true,
+      "ForegroundColor": "#808080"
+    },
+    {
+      "Key": "cppLabel",
+      "ForegroundColor": "#D4D4D4",
+      "BackgroundColor": "#383872"
     },
     {
       "Key": "cppType",
-      "ForegroundColor": "#32A38C"
+      "ForegroundColor": "#60929F"
     },
     {
       "Key": "cppValueType",
-      "ForegroundColor": "#32A38C"
+      "ForegroundColor": "#508578"
     },
     {
       "Key": "cppRefType",
-      "ForegroundColor": "#32A38C"
+      "ForegroundColor": "#60929F"
     },
     {
-      "Key": "cppFunction",
-      "ForegroundColor": "#97973E"
+      "Key": "cppEvent",
+      "ForegroundColor": "#478D6A"
+    },
+    {
+      "Key": "cppParameter",
+      "Italic": true,
+      "ForegroundColor": "#8E466A"
+    },
+    {
+      "Key": "cppProperty",
+      "ForegroundColor": "#6D6DA7"
+    },
+    {
+      "Key": "cppGlobalVariable",
+      "Bold": true,
+      "Underline": true
+    },
+    {
+      "Key": "cppMemberField",
+      "ForegroundColor": "#858550"
     },
     {
       "Key": "cppMemberFunction",
-      "ForegroundColor": "#97973E"
+      "ForegroundColor": "#9F6060"
+    },
+    {
+      "Key": "cppStaticMemberField",
+      "Underline": true
     },
     {
       "Key": "cppStaticMemberFunction",
-      "ForegroundColor": "#97973E"
+      "Underline": true,
+      "ForegroundColor": "#9F6060"
+    },
+    {
+      "Key": "cppEnumerator",
+      "Underline": true,
+      "ForegroundColor": "#9F609F"
+    },
+    {
+      "Key": "cppControlKeyword",
+      "ForegroundColor": "#5580AA"
+    },
+    {
+      "Key": "cppStringDelimiterCharacter",
+      "ForegroundColor": "#BF6640"
     }
   ]
 }
