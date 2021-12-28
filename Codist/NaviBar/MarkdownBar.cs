@@ -74,7 +74,7 @@ namespace Codist.NaviBar
 
 		void HideMenu() {
 			if (_TitleList != null) {
-				ListContainer.Children.Remove(_TitleList);
+				ListContainer.Remove(_TitleList);
 				_TitleList.SelectedItem = null;
 				_TitleList.Dispose();
 				_TitleList = null;
@@ -131,10 +131,10 @@ namespace Codist.NaviBar
 			}
 			if (_TitleList != menu) {
 				if (_TitleList != null) {
-					ListContainer.Children.Remove(_TitleList);
+					ListContainer.Remove(_TitleList);
 					_TitleList.Dispose();
 				}
-				ListContainer.Children.Add(menu);
+				ListContainer.Add(menu);
 				_TitleList = menu;
 			}
 			if (menu != null) {

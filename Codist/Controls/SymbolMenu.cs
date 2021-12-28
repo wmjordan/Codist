@@ -38,7 +38,7 @@ namespace Codist.Controls
 					new ThemedButton(ThemeHelper.GetImage(IconIds.TogglePinning), R.CMD_Pin, TogglePinButton),
 					new ThemedButton(IconIds.Close, R.CMD_Close, () => {
 						var a = _ExternalAdornment;
-						a.Children.RemoveAndDispose(this);
+						a.RemoveAndDispose(this);
 						a.FocusOnTextView();
 					})
 				}
@@ -75,7 +75,7 @@ namespace Codist.Controls
 			if (Symbols.Count > 50) {
 				EnableVirtualMode = true;
 			}
-			_ExternalAdornment.Children.Add(this);
+			_ExternalAdornment.Add(this);
 			ItemsControlMaxHeight = _ExternalAdornment.DisplayHeight / 2;
 			RefreshItemsSource();
 			this.ScrollToSelectedItem();
@@ -100,7 +100,7 @@ namespace Codist.Controls
 
 		void OnMenuKeyUp(object sender, KeyEventArgs e) {
 			if (e.Key == Key.Escape) {
-				_ExternalAdornment.Children.RemoveAndDispose(this);
+				_ExternalAdornment.RemoveAndDispose(this);
 				e.Handled = true;
 			}
 		}

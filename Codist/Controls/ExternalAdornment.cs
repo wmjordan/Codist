@@ -8,11 +8,12 @@ namespace Codist.Controls
 {
 	// HACK: put the symbol list, smart bar, etc. on top of the WpfTextView
 	// don't use AdornmentLayer to do so, otherwise contained objects will go up and down when scrolling code window
-	sealed class ExternalAdornment : Canvas
+	sealed class ExternalAdornment : ContentPresenter
 	{
 		internal const string QuickInfoSuppressionId = nameof(ExternalAdornment);
 
 		IWpfTextView _View;
+		readonly Canvas _Canvas;
 		int _LayerZIndex;
 		bool _isDragging;
 		Point _beginDragPosition;
@@ -20,6 +21,7 @@ namespace Codist.Controls
 		public ExternalAdornment(IWpfTextView view) {
 			UseLayoutRounding = true;
 			SnapsToDevicePixels = true;
+			// put the control on top of the editor window and share the same size
 			Grid.SetColumn(this, 1);
 			Grid.SetRow(this, 1);
 			Grid.SetIsSharedSizeScope(this, true);
@@ -32,6 +34,8 @@ namespace Codist.Controls
 				view.VisualElement.Loaded += VisualElement_Loaded;
 			}
 			view.Closed += View_Closed;
+			Content = _Canvas = new Canvas();
+			_Canvas.PreviewMouseRightButtonUp += Canvas_PreviewMouseRightButtonUp;
 			_View = view;
 		}
 
@@ -51,15 +55,69 @@ namespace Codist.Controls
 			_View.VisualElement.Focus();
 		}
 
+		public bool Contains(UIElement element) {
+			return _Canvas.Children.Contains(element);
+		}
+		public void Add(UIElement element) {
+			_Canvas.Children.Add(element);
+			element.MouseLeave -= ReleaseQuickInfo;
+			element.MouseLeave += ReleaseQuickInfo;
+			element.MouseEnter -= SuppressQuickInfo;
+			element.MouseEnter += SuppressQuickInfo;
+			element.MouseLeftButtonDown -= BringToFront;
+			element.MouseLeftButtonDown += BringToFront;
+			Panel.SetZIndex(element, ++_LayerZIndex);
+		}
+		public void Remove(UIElement element) {
+			if (element is null) {
+				return;
+			}
+			_Canvas.Children.Remove(element);
+			UnhookChild(element);
+			AfterChildRemoved();
+		}
+
+		void UnhookChild(UIElement element) {
+			element.MouseLeave -= ReleaseQuickInfo;
+			element.MouseEnter -= SuppressQuickInfo;
+			element.MouseLeftButtonDown -= BringToFront;
+			if (_View.IsClosed == false) {
+				ChildRemoved?.Invoke(this, new AdornmentChildRemovedEventArgs(element));
+			}
+		}
+
+		void AfterChildRemoved() {
+			_View.Properties.RemoveProperty(QuickInfoSuppressionId);
+			if (_View.IsClosed == false) {
+				var children = _Canvas.Children;
+				for (int i = children.Count - 1; i >= 0; i--) {
+					var f = children[i].GetFirstVisualChild<TextBox>();
+					if (f != null && f.Focus()) {
+						return;
+					}
+				}
+				FocusOnTextView();
+			}
+		}
+
+		public void RemoveAndDispose(UIElement element) {
+			_Canvas.Children.RemoveAndDispose(element);
+			UnhookChild(element);
+		}
+
 		public void ClearUnpinnedChildren() {
-			for (int i = Children.Count - 1; i >= 0; i--) {
-				if (Children[i] is SymbolList l && l.IsPinned == false) {
+			var children = _Canvas.Children;
+			for (int i = children.Count - 1; i >= 0; i--) {
+				var child = children[i];
+				if (child is SymbolList l && l.IsPinned == false) {
 					if (l.Owner == null) {
-						Children.RemoveAndDisposeAt(i);
+						children.RemoveAndDisposeAt(i);
 					}
 					else {
-						Children.RemoveAt(i);
+						children.RemoveAt(i);
 					}
+					UnhookChild(child);
+					AfterChildRemoved();
 				}
 			}
 		}
@@ -68,8 +126,7 @@ namespace Codist.Controls
 			ConstrainChildWindow(child, point, minVisibleSize);
 		}
 
-		protected override void OnPreviewMouseRightButtonUp(MouseButtonEventArgs args) {
-			base.OnPreviewMouseRightButtonUp(args);
+		void Canvas_PreviewMouseRightButtonUp(object sender, MouseButtonEventArgs args) {
 			// hack: suppress the undesired built-in context menu of tabs in VS 16.5
 			if (args.Source is SymbolList symbolList) {
 				symbolList.ShowContextMenu(args);
@@ -77,43 +134,12 @@ namespace Codist.Controls
 			args.Handled = true;
 		}
 
-		protected override void OnVisualChildrenChanged(DependencyObject visualAdded, DependencyObject visualRemoved) {
-			base.OnVisualChildrenChanged(visualAdded, visualRemoved);
-			var element = visualAdded as UIElement;
-			if (element != null) {
-				element.MouseLeave -= ReleaseQuickInfo;
-				element.MouseLeave += ReleaseQuickInfo;
-				element.MouseEnter -= SuppressQuickInfo;
-				element.MouseEnter += SuppressQuickInfo;
-				element.MouseLeftButtonDown -= BringToFront;
-				element.MouseLeftButtonDown += BringToFront;
-				SetZIndex(element, ++_LayerZIndex);
-			}
-			element = visualRemoved as UIElement;
-			if (element != null) {
-				element.MouseLeave -= ReleaseQuickInfo;
-				element.MouseEnter -= SuppressQuickInfo;
-				element.MouseLeftButtonDown -= BringToFront;
-				_View.Properties.RemoveProperty(QuickInfoSuppressionId);
-				if (_View.IsClosed == false) {
-					ChildRemoved?.Invoke(this, new AdornmentChildRemovedEventArgs(element));
-					for (int i = Children.Count - 1; i >= 0; i--) {
-						var f = Children[i].GetFirstVisualChild<TextBox>();
-						if (f != null && f.Focus()) {
-							return;
-						}
-					}
-					FocusOnTextView();
-				}
-			}
-		}
-
 		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
 			base.OnRenderSizeChanged(sizeInfo);
-			foreach (var item in Children) {
+			foreach (var item in _Canvas.Children) {
 				var child = item as FrameworkElement;
 				if (child != null) {
-					ConstrainChildWindow(child, new Point(GetLeft(child), GetTop(child)));
+					ConstrainChildWindow(child, new Point(Canvas.GetLeft(child), Canvas.GetTop(child)));
 				}
 			}
 		}
@@ -135,8 +161,8 @@ namespace Codist.Controls
 			else if (newPos.Y > ActualHeight - minVisibleSize) {
 				newPos.Y = ActualHeight - minVisibleSize;
 			}
-			SetLeft(child, newPos.X);
-			SetTop(child, newPos.Y);
+			Canvas.SetLeft(child, newPos.X);
+			Canvas.SetTop(child, newPos.Y);
 		}
 
 		#region Draggable
@@ -193,7 +219,7 @@ namespace Codist.Controls
 				_View.Selection.SelectionChanged -= ViewSeletionChanged;
 				_View.Properties.RemoveProperty(typeof(ExternalAdornment));
 				_View.VisualElement.GetParent<Grid>().Children.Remove(this);
-				foreach (var item in Children) {
+				foreach (var item in _Canvas.Children) {
 					if (item is FrameworkElement fe) {
 						fe.MouseLeave -= ReleaseQuickInfo;
 						fe.MouseEnter -= SuppressQuickInfo;
@@ -203,7 +229,8 @@ namespace Codist.Controls
 						d.Dispose();
 					}
 				}
-				Children.Clear();
+				_Canvas.PreviewMouseRightButtonUp += Canvas_PreviewMouseRightButtonUp;
+				_Canvas.Children.Clear();
 				_View = null;
 			}
 		}
@@ -213,7 +240,7 @@ namespace Codist.Controls
 		}
 
 		void BringToFront(object sender, MouseButtonEventArgs e) {
-			SetZIndex(e.Source as UIElement, ++_LayerZIndex);
+			Canvas.SetZIndex(e.Source as UIElement, ++_LayerZIndex);
 		}
 
 		void ReleaseQuickInfo(object sender, MouseEventArgs e) {

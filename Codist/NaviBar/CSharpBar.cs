@@ -313,9 +313,9 @@ namespace Codist.NaviBar
 		void ShowMenu(ThemedImageButton barItem, SymbolList menu) {
 			ref var l = ref _SymbolList;
 			if (l != menu) {
-				ListContainer.Children.Remove(l);
+				ListContainer.Remove(l);
 				l = menu;
-				ListContainer.Children.Add(menu);
+				ListContainer.Add(menu);
 				if (_ActiveItem != null) {
 					_ActiveItem.IsHighlighted = false;
 				}
@@ -328,8 +328,8 @@ namespace Codist.NaviBar
 			menu.PreviewKeyUp -= OnMenuKeyUp;
 			menu.PreviewKeyUp += OnMenuKeyUp;
 			PositionMenu();
-			if (ListContainer.Children.Contains(menu) == false) {
-				ListContainer.Children.Add(menu);
+			if (ListContainer.Contains(menu) == false) {
+				ListContainer.Add(menu);
 			}
 		}
 
@@ -364,7 +364,7 @@ namespace Codist.NaviBar
 		void HideMenu() {
 			var l = _SymbolList;
 			if (l != null) {
-				ListContainer.Children.Remove(l);
+				ListContainer.Remove(l);
 			}
 		}
 
@@ -494,7 +494,7 @@ namespace Codist.NaviBar
 				l.PreviewKeyUp -= OnMenuKeyUp;
 				l.MouseLeftButtonUp -= MenuItemSelect;
 				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(l, false);
-				ListContainer?.Children.Remove(l);
+				ListContainer?.Remove(l);
 				l.Dispose();
 			}
 		}
