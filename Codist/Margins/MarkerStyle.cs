@@ -12,13 +12,13 @@ namespace Codist.Margins
 		public int Id { get => (int)StyleID; set => StyleID = (MarkerStyleTypes)value; }
 		internal MarkerStyleTypes StyleID { get; set; }
 		/// <summary>Gets or sets the foreground color to render the marker. The color format could be #RRGGBBAA or #RRGGBB.</summary>
-		[DefaultValue("#00000000")]
+		[DefaultValue(Constants.EmptyColor)]
 		public string ForegroundColor {
 			get => ForeColor.ToHexString();
 			set => UIHelper.ParseColor(value, out _ForeColor, out var dummy);
 		}
 		/// <summary>Gets or sets the foreground color to render the marker. The color format could be #RRGGBBAA or #RRGGBB.</summary>
-		[DefaultValue("#00000000")]
+		[DefaultValue(Constants.EmptyColor)]
 		public string BackgroundColor {
 			get => BackColor.ToHexString();
 			set => UIHelper.ParseColor(value, out _BackColor, out var dummy);

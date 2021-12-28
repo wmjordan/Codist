@@ -73,6 +73,8 @@ namespace Codist
 		[DefaultValue(DefaultIconSize)]
 		public int SmartBarButtonSize { get; set; } = DefaultIconSize;
 		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
+		public QuickInfoConfig QuickInfo { get; } = new QuickInfoConfig();
+
 		#region Deprecated style containers
 		public List<CommentStyle> CommentStyles { get; } = new List<CommentStyle>();
 		public List<XmlCodeStyle> XmlCodeStyles { get; } = new List<XmlCodeStyle>();
@@ -574,6 +576,12 @@ namespace Codist
 				}
 			}
 		}
+	}
+
+	public sealed class QuickInfoConfig
+	{
+		[DefaultValue(Constants.EmptyColor)]
+		public string BackgroundColor { get; set; }
 	}
 	sealed class SearchEngine
 	{

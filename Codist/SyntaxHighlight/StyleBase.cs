@@ -33,18 +33,18 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the font size. Font size number is relative to the editor text size.</summary>
 		public double FontSize { get; set; }
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #AARRGGBB or #RRGGBB.</summary>
-		[DefaultValue("#00000000")]
+		[DefaultValue(Constants.EmptyColor)]
 		public string ForegroundColor {
-			get => _ForeColor.A == 0 && _ForeColorOpacity == 0 ? "#00000000"
+			get => _ForeColor.A == 0 && _ForeColorOpacity == 0 ? Constants.EmptyColor
 				: _ForeColor.A > 0 && _ForeColorOpacity == 0 ? _ForeColor.ToHexString()
 				: _ForeColor.A == 0 && _ForeColorOpacity > 0 ? "#" + _ForeColorOpacity.ToString("X2")
 				: _ForeColor.Alpha(_ForeColorOpacity).ToHexString();
 			set => UIHelper.ParseColor(value, out _ForeColor, out _ForeColorOpacity);
 		}
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #AARRGGBB or #RRGGBB.</summary>
-		[DefaultValue("#00000000")]
+		[DefaultValue(Constants.EmptyColor)]
 		public string BackgroundColor {
-			get => _BackColor.A == 0 && _BackColorOpacity == 0 ? "#00000000"
+			get => _BackColor.A == 0 && _BackColorOpacity == 0 ? Constants.EmptyColor
 				: _BackColor.A > 0 && _BackColorOpacity == 0 ? _BackColor.ToHexString()
 				: _BackColor.A == 0 && _BackColorOpacity > 0 ? "#" + _BackColorOpacity.ToString("X2")
 				: _BackColor.Alpha(_BackColorOpacity).ToHexString();

@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using System.Windows.Media;
 using AppHelpers;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.Win32;
@@ -282,6 +283,7 @@ namespace Codist.Options
 			readonly OptionBox<QuickInfoOptions> _Attributes, _BaseType, _BaseTypeInheritence, _Declaration, _SymbolLocation, _Interfaces, _InterfacesInheritence, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers;
 			readonly OptionBox<QuickInfoOptions>[] _Options;
 			readonly Controls.IntegerBox _MaxWidth, _MaxHeight, _ExtraHeight;
+			readonly ColorButton _BackgroundButton;
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.QuickInfoOptions;
@@ -312,7 +314,15 @@ namespace Codist.Options
 					new StackPanel().MakeHorizontal()
 						.Add(new TextBlock { MinWidth = 240, Margin = WpfHelper.SmallHorizontalMargin, Text = R.OT_ExtraXmlDocSize })
 						.Add(_ExtraHeight = new Controls.IntegerBox((int)Config.Instance.QuickInfoXmlDocExtraHeight) { Minimum = 0, Maximum = 1000, Step = 50 })
-						.SetLazyToolTip(() => R.OT_ExtraXmlDocSizeTip)
+						.SetLazyToolTip(() => R.OT_ExtraXmlDocSizeTip),
+
+					new TitleBox(R.T_Background),
+					new WrapPanel {
+						Children = {
+							new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_Color),
+							new ColorButton(Colors.Transparent, R.T_Background, UpdateQuickInfoBackgroundColor).Set(ref _BackgroundButton)
+						}
+					}
 				);
 
 				AddPage(R.OT_CSharp,
@@ -384,6 +394,7 @@ namespace Codist.Options
 				_OverrideDefaultDocumentation.BindDependentOptionControls(_DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc);
 				_BaseType.BindDependentOptionControls(_BaseTypeInheritence);
 				_Interfaces.BindDependentOptionControls(_InterfacesInheritence);
+				_BackgroundButton.DefaultColor = () => ThemeHelper.ToolTipBackgroundBrush.Color;
 			}
 
 			protected override void LoadConfig(Config config) {
@@ -392,6 +403,8 @@ namespace Codist.Options
 				_MaxHeight.Value = (int)config.QuickInfoMaxHeight;
 				_MaxWidth.Value = (int)config.QuickInfoMaxWidth;
 				_ExtraHeight.Value = (int)config.QuickInfoXmlDocExtraHeight;
+				UIHelper.ParseColor(config.QuickInfo.BackgroundColor, out var c, out var op);
+				_BackgroundButton.Color = c;
 			}
 
 			void UpdateConfig(QuickInfoOptions options, bool set) {
@@ -412,6 +425,11 @@ namespace Codist.Options
 				else if (sender == _ExtraHeight) {
 					Config.Instance.QuickInfoXmlDocExtraHeight = _ExtraHeight.Value;
 				}
+				Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
+			}
+
+			void UpdateQuickInfoBackgroundColor(Color color) {
+				Config.Instance.QuickInfo.BackgroundColor = color.ToHexString();
 				Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
 			}
 		}

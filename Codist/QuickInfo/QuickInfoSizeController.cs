@@ -18,10 +18,9 @@ namespace Codist.QuickInfo
 
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			if (Keyboard.Modifiers != ModifierKeys.Control) {
-				return new QuickInfoItem(null, QuickInfoOverrider.CreateOverrider(session).Control);
-			}
-			return null;
+			return Keyboard.Modifiers != ModifierKeys.Control
+				? new QuickInfoItem(null, QuickInfoOverrider.CreateOverrider(session).Control)
+				: null;
 		}
 
 		void IDisposable.Dispose() {

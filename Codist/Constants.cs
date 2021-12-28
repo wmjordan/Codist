@@ -274,6 +274,8 @@ namespace Codist
 		public static readonly Color UndoneColor = Color.FromRgb(113, 65, 54);
 		public static readonly Color TaskColor = Colors.Red;
 		public static readonly Color ControlFlowColor = Colors.MediumBlue;
+
+		public const string EmptyColor = "#00000000";
 	}
 
 	enum CommentStyleTypes

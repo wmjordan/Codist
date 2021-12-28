@@ -1874,4 +1874,7 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="T_TriggerEvent" xml:space="preserve">
     <value>Trigger event</value>
   </data>
+  <data name="OT_Color" xml:space="preserve">
+    <value>Color:</value>
+  </data>
 </root>

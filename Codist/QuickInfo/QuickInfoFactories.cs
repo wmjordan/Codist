@@ -73,7 +73,7 @@ namespace Codist.QuickInfo
 		}
 	}
 
-	/// <summary>Shows information about selections.</summary>
+	/// <summary>Controls size of quick info.</summary>
 	[Export(typeof(IAsyncQuickInfoSourceProvider))]
 	[Name(Name)]
 	[Order(After = "Default Quick Info Presenter")]
@@ -85,6 +85,22 @@ namespace Codist.QuickInfo
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
 				? textBuffer.Properties.GetOrCreateSingletonProperty(()=> new QuickInfoSizeController(textBuffer))
+				: null;
+		}
+	}
+
+	/// <summary>Controls background of quick info.</summary>
+	[Export(typeof(IAsyncQuickInfoSourceProvider))]
+	[Name(Name)]
+	[Order(After = "Default Quick Info Presenter")]
+	[ContentType(Constants.CodeTypes.Text)]
+	sealed class QuickInfoBackgroundControllerProvider : IAsyncQuickInfoSourceProvider
+	{
+		const string Name = nameof(QuickInfoBackgroundController);
+
+		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
+			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
+				? textBuffer.Properties.GetOrCreateSingletonProperty(()=> new QuickInfoBackgroundController(textBuffer))
 				: null;
 		}
 	}

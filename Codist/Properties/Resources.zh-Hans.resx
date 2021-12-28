@@ -1859,4 +1859,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_TriggerEvent" xml:space="preserve">
     <value>触发事件</value>
   </data>
+  <data name="OT_Color" xml:space="preserve">
+    <value>颜色:</value>
+  </data>
 </root>

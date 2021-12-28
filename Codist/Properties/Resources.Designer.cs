@@ -1821,6 +1821,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Color: 的本地化字符串。
+        /// </summary>
+        internal static string OT_Color {
+            get {
+                return ResourceManager.GetString("OT_Color", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Color info 的本地化字符串。
         /// </summary>
         internal static string OT_ColorInfo {
@@ -3619,7 +3628,6 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   查找类似 {
-        ///  &quot;Version&quot;: &quot;5.14.0&quot;,
         ///  &quot;Styles&quot;: [
         ///    {
         ///      &quot;Key&quot;: &quot;Keyword&quot;,
@@ -3644,7 +3652,9 @@ namespace Codist.Properties {
         ///    {
         ///      &quot;Key&quot;: &quot;delegate name&quot;,
         ///      &quot;ForegroundColor&quot;: &quot;#506B85&quot;
-        /// [字符串的其余部分被截断]&quot;; 的本地化字符串。
+        ///    },
+        ///    {
+        ///      &quot;Ke [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string PaleDark {
             get {
