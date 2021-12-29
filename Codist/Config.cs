@@ -64,11 +64,17 @@ namespace Codist
 		[DefaultValue(SymbolToolTipOptions.Default)]
 		public SymbolToolTipOptions SymbolToolTipOptions { get; set; } = SymbolToolTipOptions.Default;
 
+		[DefaultValue(0d)]
 		public double TopSpace { get; set; }
+		[DefaultValue(0d)]
 		public double BottomSpace { get; set; }
+		[DefaultValue(0d)]
 		public double QuickInfoMaxWidth { get; set; }
+		[DefaultValue(0d)]
 		public double QuickInfoMaxHeight { get; set; }
+		[DefaultValue(0d)]
 		public double QuickInfoXmlDocExtraHeight { get; set; }
+		[DefaultValue(false)]
 		public bool NoSpaceBetweenWrappedLines { get; set; }
 		[DefaultValue(DefaultIconSize)]
 		public int SmartBarButtonSize { get; set; } = DefaultIconSize;
@@ -580,8 +586,15 @@ namespace Codist
 
 	public sealed class QuickInfoConfig
 	{
+		Color _BackColor;
+
 		[DefaultValue(Constants.EmptyColor)]
-		public string BackgroundColor { get; set; }
+		public string BackgroundColor {
+			get => _BackColor.A == 0 ? Constants.EmptyColor : _BackColor.ToHexString();
+			set => UIHelper.ParseColor(value, out _BackColor, out _);
+		}
+
+		internal Color BackColor { get => _BackColor; set => _BackColor = value; }
 	}
 	sealed class SearchEngine
 	{

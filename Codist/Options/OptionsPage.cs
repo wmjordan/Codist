@@ -395,6 +395,7 @@ namespace Codist.Options
 				_BaseType.BindDependentOptionControls(_BaseTypeInheritence);
 				_Interfaces.BindDependentOptionControls(_InterfacesInheritence);
 				_BackgroundButton.DefaultColor = () => ThemeHelper.ToolTipBackgroundBrush.Color;
+				_BackgroundButton.Color = Config.Instance.QuickInfo.BackColor;
 			}
 
 			protected override void LoadConfig(Config config) {
@@ -403,8 +404,7 @@ namespace Codist.Options
 				_MaxHeight.Value = (int)config.QuickInfoMaxHeight;
 				_MaxWidth.Value = (int)config.QuickInfoMaxWidth;
 				_ExtraHeight.Value = (int)config.QuickInfoXmlDocExtraHeight;
-				UIHelper.ParseColor(config.QuickInfo.BackgroundColor, out var c, out var op);
-				_BackgroundButton.Color = c;
+				_BackgroundButton.Color = config.QuickInfo.BackColor;
 			}
 
 			void UpdateConfig(QuickInfoOptions options, bool set) {
@@ -429,7 +429,7 @@ namespace Codist.Options
 			}
 
 			void UpdateQuickInfoBackgroundColor(Color color) {
-				Config.Instance.QuickInfo.BackgroundColor = color.ToHexString();
+				Config.Instance.QuickInfo.BackColor = color;
 				Config.Instance.FireConfigChangedEvent(Features.SuperQuickInfo);
 			}
 		}
