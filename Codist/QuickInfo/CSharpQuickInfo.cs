@@ -58,12 +58,12 @@ namespace Codist.QuickInfo
 				return null;
 			}
 
-			SemanticModel semanticModel;
-			var container = buffer.AsTextContainer();
-			DocumentId docId;
-			if (Workspace.TryGetWorkspace(container, out var workspace) == false
-				|| (docId = workspace.GetDocumentIdInCurrentContext(container)) == null
-				|| workspace.CurrentSolution.GetDocument(docId).TryGetSemanticModel(out semanticModel) == false) {
+			var doc = currentSnapshot.GetOpenDocumentInCurrentContextWithChanges();
+			if (doc == null) {
+				return null;
+			}
+			var semanticModel = await doc.GetSemanticModelAsync(cancellationToken);
+			if (semanticModel == null) {
 				return null;
 			}
 
@@ -178,7 +178,7 @@ namespace Codist.QuickInfo
 				goto RETURN;
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
-				qiContent.Add(await ShowAvailabilityAsync(docId, workspace, token, cancellationToken).ConfigureAwait(false));
+				qiContent.Add(await ShowAvailabilityAsync(doc, token, cancellationToken).ConfigureAwait(false));
 				var ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node, qiWrapper,
 					ctor?.Type == node ? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? symbol
@@ -212,14 +212,15 @@ namespace Codist.QuickInfo
 				: null, qiContent.ToUI());
 		}
 
-		static async Task<ThemedTipDocument> ShowAvailabilityAsync(DocumentId docId, Workspace workspace, SyntaxToken token, CancellationToken cancellationToken) {
+		static async Task<ThemedTipDocument> ShowAvailabilityAsync(Document doc, SyntaxToken token, CancellationToken cancellationToken) {
 			ThemedTipDocument r = null;
-			if (workspace.CurrentSolution.ProjectIds.Count > 0) {
-				var linkedDocuments = workspace.CurrentSolution.GetDocument(docId).GetLinkedDocumentIds();
+			var solution = doc.Project.Solution;
+			if (solution.ProjectIds.Count > 0) {
+				var linkedDocuments = doc.GetLinkedDocumentIds();
 				if (linkedDocuments.Length > 0) {
 					ImmutableArray<ISymbol> candidates;
 					foreach (var id in linkedDocuments) {
-						var d = workspace.CurrentSolution.GetDocument(id);
+						var d = solution.GetDocument(id);
 						var sm = await d.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 						if (sm.IsCSharp() == false) {
 							continue;
