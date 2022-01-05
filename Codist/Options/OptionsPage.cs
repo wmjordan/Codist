@@ -337,8 +337,6 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_InheritXmlDocTip),
 					_DocumentationFromInheritDoc = o.CreateOptionBox(QuickInfoOptions.DocumentationFromInheritDoc, UpdateConfig, R.OT_InheritDoc)
 						.SetLazyToolTip(() => R.OT_InheritDocTip),
-					_TextOnlyDoc = o.CreateOptionBox(QuickInfoOptions.TextOnlyDoc, UpdateConfig, R.OT_TextOnlyXmlDoc)
-						.SetLazyToolTip(() => R.OT_TextOnlyXmlDocTip),
 					_ReturnsDoc = o.CreateOptionBox(QuickInfoOptions.ReturnsDoc, UpdateConfig, R.OT_ShowReturnsXmlDoc)
 						.SetLazyToolTip(() => R.OT_ShowReturnsXmlDocTip),
 					_RemarksDoc = o.CreateOptionBox(QuickInfoOptions.RemarksDoc, UpdateConfig, R.OT_ShowRemarksXmlDoc)
@@ -349,6 +347,8 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_ShowSeeAlsoXmlDocTip),
 					_ExampleDoc = o.CreateOptionBox(QuickInfoOptions.ExampleDoc, UpdateConfig, R.OT_ShowExampleXmlDoc)
 						.SetLazyToolTip(() => R.OT_ShowExampleXmlDocTip),
+					_TextOnlyDoc = o.CreateOptionBox(QuickInfoOptions.TextOnlyDoc, UpdateConfig, R.OT_TextOnlyXmlDoc)
+						.SetLazyToolTip(() => R.OT_TextOnlyXmlDocTip),
 					_AlternativeStyle = o.CreateOptionBox(QuickInfoOptions.AlternativeStyle, UpdateConfig, R.OT_AlternativeStyle)
 						.SetLazyToolTip(() => R.OT_AlternativeStyleTip),
 
