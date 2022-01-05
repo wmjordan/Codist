@@ -21,7 +21,6 @@ namespace Codist.NaviBar
 			Resources = SharedDictionaryManager.NavigationBar;
 			SetResourceReference(BackgroundProperty, VsBrushes.CommandBarMenuBackgroundGradientKey);
 			SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextInactiveKey);
-			Unloaded += NaviBar_Unloaded;
 		}
 
 		public abstract void ShowActiveItemMenu();
@@ -52,6 +51,7 @@ namespace Codist.NaviBar
 		void NaviBar_Loaded(object sender, RoutedEventArgs e) {
 			Loaded -= NaviBar_Loaded;
 			_View.Properties.AddProperty(nameof(NaviBar), this);
+			Unloaded += NaviBar_Unloaded;
 		}
 
 		void View_Closed(object sender, EventArgs e) {
