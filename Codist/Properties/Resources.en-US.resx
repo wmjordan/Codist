@@ -1873,4 +1873,7 @@ Right click: Wrap text menu...</value>
   <data name="OT_Color" xml:space="preserve">
     <value>Color:</value>
   </data>
+  <data name="T_NewVersionPrompt" xml:space="preserve">
+    <value>A new version of Codist is just installed. Do you want to learn more about it?</value>
+  </data>
 </root>

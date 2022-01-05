@@ -1862,4 +1862,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="OT_Color" xml:space="preserve">
     <value>颜色:</value>
   </data>
+  <data name="T_NewVersionPrompt" xml:space="preserve">
+    <value>新版本的 Codist 已经安装好了。是否要了解一下该版本的信息呢？</value>
+  </data>
 </root>

@@ -4735,6 +4735,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 A new version of Codist is just installed. Do you want to learn more about it? 的本地化字符串。
+        /// </summary>
+        internal static string T_NewVersionPrompt {
+            get {
+                return ResourceManager.GetString("T_NewVersionPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 No comment tag is defined. Use the Add button to add new comment tag definitions. 的本地化字符串。
         /// </summary>
         internal static string T_NoCommentTagDefined {
