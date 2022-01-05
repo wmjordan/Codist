@@ -273,6 +273,8 @@ namespace Codist.Options
 			_StretchBox.Items.AddRange(new[] { R.T_NotSet, R.T_Expanded, R.T_Normal, R.T_Condensed });
 			_StretchBox.SelectionChanged += OnStretchChanged;
 			LoadSyntaxStyles(SyntaxStyleSource.Selection);
+			_ForegroundButton.UseVsTheme();
+			_BackgroundButton.UseVsTheme();
 			_BackgroundEffectBox.Items.AddRange(new[] { R.T_Solid, R.T_BottomGradient, R.T_TopGradient, R.T_RightGradient, R.T_LeftGradient });
 			_BackgroundEffectBox.SelectionChanged += OnBackgroundEffectChanged;
 			_SyntaxSourceBox.SelectionChanged += SyntaxSourceChanged;
