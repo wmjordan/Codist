@@ -19,6 +19,7 @@ namespace Codist
 			public const string CPlusPlus = "C/C++";
 			public const string Code = "Code";
 			public const string CSharp = "CSharp";
+			public const string HtmlxProjection = "HTMLXProjection";
 			public const string Text = "Text";
 			public const string Markdown = "Markdown";
 			public const string Xml = "XML";

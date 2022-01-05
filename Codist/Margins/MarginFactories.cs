@@ -20,7 +20,7 @@ namespace Codist.Margins
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 				&& scrollBarContainer != null
 				&& Taggers.CommentTagger.IsCommentTaggable(textView.TextBuffer)
-				&& textView.TextBuffer.GetTextDocument() != null
+				&& textView.TextBuffer.MayBeEditor()
 				? new CommentMargin(textView, scrollBarContainer)
 				: null;
 		}
@@ -41,7 +41,7 @@ namespace Codist.Margins
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 				&& scrollBar != null
 				&& textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)
-				&& textView.TextBuffer.GetTextDocument() != null
+				&& textView.TextBuffer.MayBeEditor()
 				? new CommentMargin(textView, scrollBar)
 				: null;
 		}
@@ -60,7 +60,7 @@ namespace Codist.Margins
 			var scrollBar = marginContainer as IVerticalScrollBar;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 				&& scrollBar != null
-				&& wpfTextViewHost.TextView.TextBuffer.GetTextDocument() != null
+				&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
 				? new CSharpMembersMargin(wpfTextViewHost.TextView, scrollBar)
 				: null;
 		}
@@ -78,7 +78,7 @@ namespace Codist.Margins
 			var scrollBarContainer = marginContainer as IVerticalScrollBar;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 				&& scrollBarContainer != null
-				&& wpfTextViewHost.TextView.TextBuffer.GetTextDocument() != null
+				&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
 				? new LineNumberMargin(wpfTextViewHost.TextView, scrollBarContainer)
 				: null;
 		}
@@ -96,7 +96,7 @@ namespace Codist.Margins
 			var scrollBarContainer = marginContainer as IVerticalScrollBar;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 				&& scrollBarContainer != null
-				&& wpfTextViewHost.TextView.TextBuffer.GetTextDocument() != null
+				&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
 				? new SelectionMargin(wpfTextViewHost.TextView, scrollBarContainer)
 				: null;
 		}

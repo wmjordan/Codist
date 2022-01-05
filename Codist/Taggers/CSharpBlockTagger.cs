@@ -21,7 +21,7 @@ namespace Codist.Taggers
 	sealed class CSharpBlockTaggerProvider : ITaggerProvider
 	{
 		public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag {
-			if (typeof(T) != typeof(ICodeMemberTag) || buffer.GetTextDocument() == null) {
+			if (typeof(T) != typeof(ICodeMemberTag) || buffer.MayBeEditor() == false) {
 				return null;
 			}
 

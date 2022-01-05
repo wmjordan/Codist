@@ -42,7 +42,7 @@ namespace Codist.NaviBar
 		public void TextViewCreated(IWpfTextView textView) {
 			if (Config.Instance.Features.MatchFlags(Features.NaviBar)
 				&& textView.Roles.Contains("DIFF") == false
-				&& textView.TextBuffer.GetTextDocument() != null) {
+				&& textView.TextBuffer.MayBeEditor()) {
 				if (textView.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp)
 					|| textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
 					SemanticContext.GetOrCreateSingetonInstance(textView);
@@ -64,7 +64,7 @@ namespace Codist.NaviBar
 				return;
 			}
 			foreach (EnvDTE80.CodeElement2 item in model.CodeElements) {
-				System.Diagnostics.Debug.WriteLine(item.Name + "," + item.Kind + "," + item.StartPoint.Line + "," + item.StartPoint.LineCharOffset);
+				//System.Diagnostics.Debug.WriteLine(item.Name + "," + item.Kind + "," + item.StartPoint.Line + "," + item.StartPoint.LineCharOffset);
 				if (item.IsCodeType && item.Kind != EnvDTE.vsCMElement.vsCMElementDelegate) {
 					var ct = (item as EnvDTE.CodeType).Members;
 					for (int i = 1; i <= ct.Count; i++) {

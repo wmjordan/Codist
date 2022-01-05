@@ -33,7 +33,7 @@ namespace Codist.Taggers
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			if (typeof(T) == typeof(IClassificationTag)
 				&& Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
-				&& buffer.GetTextDocument() != null // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
+				&& buffer.MayBeEditor() // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
 				) {
 				if (_Taggers.TryGetValue(buffer, out var tagger) == false) {
 					tagger = new CSharpTagger(this, textView, buffer);

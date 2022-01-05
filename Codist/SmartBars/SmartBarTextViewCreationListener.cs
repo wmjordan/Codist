@@ -13,6 +13,7 @@ namespace Codist.SmartBars
 	/// </summary>
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType(Constants.CodeTypes.Text)]
+	[ContentType(Constants.CodeTypes.HtmlxProjection)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	internal sealed class SmartBarTextViewCreationListener : IWpfTextViewCreationListener
@@ -39,7 +40,7 @@ namespace Codist.SmartBars
 		/// </summary>
 		/// <param name="textView">The <see cref="IWpfTextView"/> upon which the adornment should be placed</param>
 		public void TextViewCreated(IWpfTextView textView) {
-			if (Config.Instance.Features.MatchFlags(Features.SmartBar) == false || textView.TextBuffer.GetTextDocument() == null) {
+			if (Config.Instance.Features.MatchFlags(Features.SmartBar) == false || textView.TextBuffer.MayBeEditor() == false) {
 				return;
 			}
 			// The toolbar will get wired to the text view events

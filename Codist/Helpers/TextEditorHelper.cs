@@ -611,6 +611,10 @@ namespace Codist
 		#region TextView and editor
 		public static event EventHandler<TextViewCreatedEventArgs> ActiveTextViewChanged;
 
+		/// <summary>A rough method to detect whether a document can be edited.</summary>
+		public static bool MayBeEditor(this ITextBuffer textBuffer) {
+			return textBuffer.IsReadOnly(0) == false || textBuffer.Properties.ContainsProperty(typeof(ITextDocument));
+		}
 		public static ITextDocument GetTextDocument(this ITextBuffer textBuffer) {
 			return textBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out var d) ? d : null;
 		}

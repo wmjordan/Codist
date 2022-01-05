@@ -15,21 +15,21 @@ namespace Codist.Taggers
 {
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.Code)]
-	[ContentType("projection")]
+	[ContentType(Constants.CodeTypes.HtmlxProjection)]
 	[TagType(typeof(IClassificationTag))]
 	sealed class CommentTaggerProvider : IViewTaggerProvider
 	{
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
 				|| CommentTagger.IsCommentTaggable(buffer) == false
-				|| buffer.GetTextDocument() == null) {
+				|| buffer.MayBeEditor() == false) {
 				return null;
 			}
 			var vp = textView.Properties;
 			CommentTagger codeTagger;
 			var tags = vp.GetOrCreateSingletonProperty(() => new TaggerResult());
 			var agg = vp.GetOrCreateSingletonProperty("TagAggregator", () => ServicesHelper.Instance.BufferTagAggregatorFactory.CreateTagAggregator<IClassificationTag>(buffer));
-			codeTagger = vp.GetOrCreateSingletonProperty("CommentTagger", () => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, agg, tags, buffer));
+			codeTagger = vp.GetOrCreateSingletonProperty(nameof(CommentTagger), () => CommentTagger.Create(ServicesHelper.Instance.ClassificationTypeRegistry, textView, buffer));
 			textView.Closed -= TextViewClosed;
 			textView.Closed += TextViewClosed;
 			return codeTagger as ITagger<T>;
@@ -39,9 +39,12 @@ namespace Codist.Taggers
 			var textView = sender as ITextView;
 			textView.Closed -= TextViewClosed;
 			textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>("TagAggregator")?.Dispose();
-			textView.Properties.GetProperty<CommentTagger>("CommentTagger")?.Dispose();
+			if (textView.Properties.TryGetProperty<CommentTagger>(nameof(CommentTagger), out var ct)) {
+				ct.Dispose();
+				textView.Properties.RemoveProperty(nameof(CommentTagger));
+			}
 			textView.Properties.RemoveProperty("TagAggregator");
-			textView.Properties.RemoveProperty("CommentTagger");
+			textView.Properties.RemoveProperty(nameof(CommentTagger));
 			textView.Properties.RemoveProperty(typeof(TaggerResult));
 		}
 	}
@@ -52,6 +55,7 @@ namespace Codist.Taggers
 		static readonly Dictionary<IClassificationType, bool> __CommentClasses = new Dictionary<IClassificationType, bool>();
 		ITagAggregator<IClassificationTag> _Aggregator;
 		TaggerResult _Tags;
+		ITextView _TextView;
 #if DEBUG
 		readonly HashSet<string> _ClassificationTypes = new HashSet<string>();
 #endif
@@ -60,7 +64,7 @@ namespace Codist.Taggers
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 #pragma warning restore 67
 
-		protected CommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) {
+		protected CommentTagger(IClassificationTypeRegistryService registry, ITextView textView) {
 			if (__CommentClassifications == null) {
 				var t = typeof(CommentStyleTypes);
 				var styleNames = Enum.GetNames(t);
@@ -77,8 +81,9 @@ namespace Codist.Taggers
 				}
 			}
 
-			_Tags = tags;
-			_Aggregator = aggregator;
+			_TextView = textView;
+			_Tags = textView.Properties.GetProperty<TaggerResult>(typeof(TaggerResult));
+			_Aggregator = textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>("TagAggregator");
 			_Aggregator.TagsChanged += AggregatorBatchedTagsChanged;
 		}
 
@@ -87,20 +92,21 @@ namespace Codist.Taggers
 		protected abstract int GetCommentStartIndex(string comment);
 		protected abstract int GetCommentEndIndex(string comment);
 
-		public static CommentTagger Create(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags, ITextBuffer textBuffer) {
+		public static CommentTagger Create(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer textBuffer) {
 			switch (GetCodeType(textBuffer)) {
-				case CodeType.CSharp: return new CSharpCommentTagger(registry, aggregator, tags);
-				case CodeType.Markup: return new MarkupCommentTagger(registry, aggregator, tags);
-				case CodeType.C: return new CCommentTagger(registry, aggregator, tags);
-				case CodeType.Css: return new CssCommentTagger(registry, aggregator, tags);
-				case CodeType.Js: return new JsCommentTagger(registry, aggregator, tags);
+				case CodeType.CSharp: return new CSharpCommentTagger(registry, textView);
+				case CodeType.Markup: return new MarkupCommentTagger(registry, textView);
+				case CodeType.C: return new CCommentTagger(registry, textView);
+				case CodeType.Css: return new CssCommentTagger(registry, textView);
+				case CodeType.Js: return new JsCommentTagger(registry, textView);
 			}
 			return null;
 		}
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
 			if (spans.Count == 0
-			|| Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment) == false) {
+			|| Config.Instance.SpecialHighlightOptions.MatchFlags(SpecialHighlightOptions.SpecialComment) == false
+			|| _Tags is null) {
 				yield break;
 			}
 
@@ -129,12 +135,6 @@ namespace Codist.Taggers
 
 			TaggedContentSpan ts, s = null;
 			foreach (var tagSpan in tagSpans) {
-#if DEBUG
-				var c = tagSpan.Tag.ClassificationType.Classification;
-				if (_ClassificationTypes.Add(c)) {
-					Debug.WriteLine("Classification type: " + c);
-				}
-#endif
 				var ss = tagSpan.Span.GetSpans(snapshot);
 				if (ss.Count == 0) {
 					continue;
@@ -272,7 +272,7 @@ namespace Codist.Taggers
 		static CodeType GetCodeType(ITextBuffer textBuffer) {
 			var t = textBuffer.ContentType;
 			var c = t.IsOfType(Constants.CodeTypes.CSharp) || t.IsOfType("HTMLXProjection") ? CodeType.CSharp
-				: t.IsOfType("html") || t.IsOfType("htmlx") || t.IsOfType("XAML") || t.IsOfType("XML") ? CodeType.Markup
+				: t.IsOfType("html") || t.IsOfType("htmlx") || t.IsOfType("XAML") || t.IsOfType("XML") || t.IsOfType(Constants.CodeTypes.HtmlxProjection) ? CodeType.Markup
 				: t.IsOfType("code++.css") ? CodeType.Css
 				: t.IsOfType("TypeScript") || t.IsOfType("JavaScript") ? CodeType.Js
 				: t.IsOfType("C/C++") ? CodeType.C
@@ -316,6 +316,7 @@ namespace Codist.Taggers
 				_Aggregator = null;
 				_Tags.Reset();
 				_Tags = null;
+				_TextView.Properties.RemoveProperty(nameof(CommentTagger));
 				Margin = null;
 			}
 		}
@@ -328,7 +329,7 @@ namespace Codist.Taggers
 
 		sealed class CCommentTagger : CommentTagger
 		{
-			public CCommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) : base(registry, aggregator, tags) {
+			public CCommentTagger(IClassificationTypeRegistryService registry, ITextView textView) : base(registry, textView) {
 			}
 
 			protected override int GetCommentStartIndex(string comment) {
@@ -344,7 +345,7 @@ namespace Codist.Taggers
 
 		sealed class CssCommentTagger : CommentTagger
 		{
-			public CssCommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) : base(registry, aggregator, tags) {
+			public CssCommentTagger(IClassificationTypeRegistryService registry, ITextView textView) : base(registry, textView) {
 			}
 
 			protected override int GetCommentStartIndex(string comment) {
@@ -359,7 +360,7 @@ namespace Codist.Taggers
 		{
 			readonly IClassificationType _PreprocessorKeyword;
 
-			public CSharpCommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) : base(registry, aggregator, tags) {
+			public CSharpCommentTagger(IClassificationTypeRegistryService registry, ITextView textView) : base(registry, textView) {
 				_PreprocessorKeyword = registry.GetClassificationType("preprocessor keyword");
 			}
 			protected override TaggedContentSpan TagComments(SnapshotSpan snapshotSpan, IMappingTagSpan<IClassificationTag> tagSpan) {
@@ -383,7 +384,7 @@ namespace Codist.Taggers
 
 		sealed class JsCommentTagger : CommentTagger
 		{
-			public JsCommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) : base(registry, aggregator, tags) {
+			public JsCommentTagger(IClassificationTypeRegistryService registry, ITextView textView) : base(registry, textView) {
 			}
 
 			protected override int GetCommentStartIndex(string comment) {
@@ -396,7 +397,7 @@ namespace Codist.Taggers
 
 		sealed class MarkupCommentTagger : CommentTagger
 		{
-			public MarkupCommentTagger(IClassificationTypeRegistryService registry, ITagAggregator<IClassificationTag> aggregator, TaggerResult tags) : base(registry, aggregator, tags) {
+			public MarkupCommentTagger(IClassificationTypeRegistryService registry, ITextView textView) : base(registry, textView) {
 			}
 
 			protected override int GetCommentStartIndex(string comment) {
