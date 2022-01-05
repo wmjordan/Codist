@@ -10,7 +10,7 @@ namespace Codist
 	static class IconIds
 	{
 		public const int None = KnownImageIds.Blank;
-		// sematic icons
+		#region sematic icons
 		public const int AbstractMember = KnownImageIds.DialogTemplate;
 		public const int AsyncMember = KnownImageIds.Thread;
 		public const int Generic = KnownImageIds.MarkupXML;
@@ -66,8 +66,8 @@ namespace Codist
 		public const int OverrideMethod = KnownImageIds.ModifyMethod;
 		public const int Constant = KnownImageIds.Constant;
 		public const int FunctionPointer = KnownImageIds.CallReturnInstructionPointer;
-
-		// interface icons
+		#endregion
+		#region user interface icons
 		public const int Filter = KnownImageIds.Filter;
 		public const int ClearFilter = KnownImageIds.StopFilter;
 		public const int Search = KnownImageIds.SearchContract;
@@ -187,8 +187,8 @@ namespace Codist
 		public const int PickColor = KnownImageIds.ColorDialog;
 		public const int Reset = KnownImageIds.EmptyBucket;
 		public const int ResetTheme = KnownImageIds.CleanData;
-
-		// usage
+		#endregion
+		#region symbol usage icons
 		public const int UseToWrite = KnownImageIds.Writeable;
 		public const int UseAsTypeParameter = KnownImageIds.CPPMarkupXML;
 		public const int UseToCast = KnownImageIds.ReportingAction;
@@ -197,5 +197,6 @@ namespace Codist
 		public const int AttachEvent = KnownImageIds.AddEvent;
 		public const int DetachEvent = KnownImageIds.EventMissing;
 		public const int TriggerEvent = KnownImageIds.Event;
+		#endregion
 	}
 }
