@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Imaging;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using R = Codist.Properties.Resources;
+using ThreadHelper = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist.Commands
 {
@@ -52,12 +49,8 @@ namespace Codist.Commands
 			ThreadHelper.ThrowIfNotOnUIThread();
 			string context = actionItem.ActionContext as string;
 			switch (context) {
-				case "New":
-					Process.Start("https://github.com/wmjordan/Codist/releases");
-					break;
-				case "More":
-					Process.Start("https://github.com/wmjordan/Codist");
-					break;
+				case "New": CodistPackage.OpenWebPage(InitStatus.FirstLoad); break;
+				case "More": CodistPackage.OpenWebPage(InitStatus.Upgraded); break;
 				case "Close": break;
 			}
 			_InfoBarUI.Close();
@@ -71,7 +64,7 @@ namespace Codist.Commands
 		}
 
 #pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
-		bool ShowInfoBar(IVsInfoBarHost host, InfoBarModel infoBar) {
+		bool ShowInfoBar(InfoBarHostControl host, InfoBarModel infoBar) {
 			var factory = _ServiceProvider.GetService(typeof(SVsInfoBarUIFactory)) as IVsInfoBarUIFactory;
 			if (factory is null) {
 				return false;
@@ -90,7 +83,7 @@ namespace Codist.Commands
 			return (uiElement = infoBarUIFactory.CreateInfoBar(infoBar)) != null;
 		}
 
-		bool TryGetInfoBarHost(out IVsInfoBarHost infoBarHost) {
+		bool TryGetInfoBarHost(out InfoBarHostControl infoBarHost) {
 			var shell = _ServiceProvider.GetService(typeof(SVsShell)) as IVsShell;
 			if (shell is null) {
 				goto Exit;
@@ -99,7 +92,7 @@ namespace Codist.Commands
 			if (ErrorHandler.Failed(shell.GetProperty((int)__VSSPROPID7.VSSPROPID_MainWindowInfoBarHost, out infoBarHostObj))) {
 				goto Exit;
 			}
-			return (infoBarHost = infoBarHostObj as IVsInfoBarHost) != null;
+			return (infoBarHost = infoBarHostObj as InfoBarHostControl) != null;
 			Exit:
 			infoBarHost = null;
 			return false;

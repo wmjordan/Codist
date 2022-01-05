@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
+using AppHelpers;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio;
-using AppHelpers;
 
 namespace Codist
 {
@@ -88,14 +89,35 @@ namespace Codist
 			}
 		}
 
-		public static void ShowMessageBox(string message, string title, bool error) {
-			VsShellUtilities.ShowMessageBox(
+		public static void OpenWebPage(InitStatus status) {
+			switch (status) {
+				case InitStatus.FirstLoad:
+					Process.Start("https://github.com/wmjordan/Codist");
+					break;
+				case InitStatus.Upgraded:
+					Process.Start("https://github.com/wmjordan/Codist/releases");
+					break;
+				default:
+					break;
+			}
+		}
+
+		public static int ShowMessageBox(string message, string title, bool error) {
+			return VsShellUtilities.ShowMessageBox(
 				Instance,
 				message,
 				title ?? nameof(Codist),
 				error ? OLEMSGICON.OLEMSGICON_WARNING : OLEMSGICON.OLEMSGICON_INFO,
 				OLEMSGBUTTON.OLEMSGBUTTON_OK,
 				OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+		}
+
+		public static bool ShowYesNoBox(string message, string title) {
+			return VsShellUtilities.PromptYesNo(
+				message,
+				title ?? nameof(Codist),
+				OLEMSGICON.OLEMSGICON_QUERY,
+				Instance.GetService(typeof(SVsUIShell)) as IVsUIShell);
 		}
 
 		#region Package Members
@@ -137,7 +159,10 @@ namespace Codist
 					new Commands.VersionInfoBar(this).Show(Config.Instance.InitStatus);
 				}
 				catch (MissingMemberException) {
-					// HACK: ignore this for VS 2022 temporarily
+					// HACK: For VS 2022, InfoBar is broken. Prompt to open page at this moment.
+					if (ShowYesNoBox(Properties.Resources.T_NewVersionPrompt, nameof(Codist))) {
+						OpenWebPage(Config.Instance.InitStatus);
+					}
 				}
 				if (Config.Instance.InitStatus == InitStatus.FirstLoad) {
 					// automatically load theme when first load
