@@ -90,17 +90,20 @@ namespace Codist.NaviBar
 			}
 
 			void AddNaviBar(object sender, RoutedEventArgs e) {
-				_View.VisualElement.Loaded -= AddNaviBar;
-
 				var view = sender as IWpfTextView ?? _View;
-				NaviBar naviBar;
-				if ((naviBar = view.VisualElement?.GetParent<Grid>().GetFirstVisualChild<NaviBar>()) != null) {
-					naviBar.BindView();
+				// don't add duplicated NaviBar
+				var cp = view.VisualElement?.GetParent<Border>(b => b.Name == "PART_ContentPanel");
+				if (cp == null) {
 					return;
 				}
-				var naviBarHolder = _NaviBarHolder = view.VisualElement
-					?.GetParent<Border>(b => b.Name == "PART_ContentPanel")
-					?.GetFirstVisualChild<Border>(b => b.Name == "DropDownBarMargin");
+				var naviBar = cp.GetFirstVisualChild<NaviBar>();
+				if (naviBar != null) {
+					naviBar.BindView();
+					view.Properties.AddProperty(nameof(NaviBar), naviBar);
+					return;
+				}
+
+				var naviBarHolder = _NaviBarHolder = cp.GetFirstVisualChild<Border>(b => b.Name == "DropDownBarMargin");
 				if (naviBarHolder == null) {
 					var viewHost = view.VisualElement.GetParent<Panel>(b => b.GetType().Name == "WpfMultiViewHost");
 					if (viewHost != null) {
@@ -115,6 +118,7 @@ namespace Codist.NaviBar
 								c.Content = b;
 							}
 						}
+						RegisterResurrectionHandler(b);
 					}
 					return;
 				}
@@ -136,24 +140,25 @@ namespace Codist.NaviBar
 					container.Children.Add(bar);
 					dropDown1.Visibility = Visibility.Hidden;
 					dropDown2.Visibility = Visibility.Hidden;
-					naviBarHolder.Unloaded += ResurrectNaviBar_OnUnloaded;
+					RegisterResurrectionHandler(bar);
 				}
+			}
+
+			void RegisterResurrectionHandler(NaviBar bar) {
+				bar.Unloaded += ResurrectNaviBar_OnUnloaded;
 			}
 
 			// Fixes https://github.com/wmjordan/Codist/issues/131
 			async void ResurrectNaviBar_OnUnloaded(object sender, RoutedEventArgs e) {
-				var naviBar = sender as FrameworkElement;
-				if (naviBar != null) {
-					naviBar.Unloaded -= ResurrectNaviBar_OnUnloaded;
-				}
                 var view = _View;
-                if (view != null && view.IsClosed == false) {
-				    await Task.Delay(1000).ConfigureAwait(false);
-				    await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-				    if (view.VisualElement.IsVisible && view.Properties.ContainsProperty(nameof(NaviBar)) == false) {
-                        AddNaviBar(view, e);
-				    }
-                }
+				if (view != null && view.IsClosed == false) {
+					await Task.Delay(1000).ConfigureAwait(false);
+					await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+					view.Properties.RemoveProperty(nameof(NaviBar));
+					if (view.VisualElement.IsVisible) {
+						AddNaviBar(view, e);
+					}
+				}
 			}
 
 			void View_Closed(object sender, EventArgs e) {

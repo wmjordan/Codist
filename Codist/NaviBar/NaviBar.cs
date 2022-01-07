@@ -39,26 +39,9 @@ namespace Codist.NaviBar
 			}
 		}
 
-		void NaviBar_Unloaded(object sender, RoutedEventArgs e) {
-			Unloaded -= NaviBar_Unloaded;
-			_View.Properties.RemoveProperty(nameof(NaviBar));
-
-			if (_View.IsClosed == false) {
-				Loaded += NaviBar_Loaded;
-			}
-		}
-
-		void NaviBar_Loaded(object sender, RoutedEventArgs e) {
-			Loaded -= NaviBar_Loaded;
-			_View.Properties.AddProperty(nameof(NaviBar), this);
-			Unloaded += NaviBar_Unloaded;
-		}
-
 		void View_Closed(object sender, EventArgs e) {
 			if (_View != null) {
 				_View.Closed -= View_Closed;
-				Loaded -= NaviBar_Loaded;
-				Unloaded -= NaviBar_Unloaded;
 				UnbindView();
 				var visualParent = this.GetParent<FrameworkElement>();
 				if (visualParent is Panel p) {
