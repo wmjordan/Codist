@@ -98,8 +98,8 @@ namespace Codist.NaviBar
 				}
 				var naviBar = cp.GetFirstVisualChild<NaviBar>();
 				if (naviBar != null) {
-					naviBar.BindView();
-					view.Properties.AddProperty(nameof(NaviBar), naviBar);
+					//naviBar.BindView();
+					//view.Properties.AddProperty(nameof(NaviBar), naviBar);
 					return;
 				}
 
@@ -152,9 +152,9 @@ namespace Codist.NaviBar
 			async void ResurrectNaviBar_OnUnloaded(object sender, RoutedEventArgs e) {
                 var view = _View;
 				if (view != null && view.IsClosed == false) {
+					view.Properties.RemoveProperty(nameof(NaviBar));
 					await Task.Delay(1000).ConfigureAwait(false);
 					await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-					view.Properties.RemoveProperty(nameof(NaviBar));
 					if (view.VisualElement.IsVisible) {
 						AddNaviBar(view, e);
 					}
