@@ -30,7 +30,6 @@ namespace Codist.Taggers
 		static ClassificationTypeDefinition AttributeName;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodeFormalLanguage)]
 		[Name(Constants.CSharpAttributeNotation)]
 		static ClassificationTypeDefinition AttributeNotation;
 
