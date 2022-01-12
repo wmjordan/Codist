@@ -454,7 +454,7 @@ Please see the first screenshot of this article. The markers can be toggled via 
 
 ## Auto Changing Version Numbers
 
-From version 6.0 on, it is possible to automatically change version numbers for output assemblies after successful builds.
+From version 6.0 on, it is possible to automatically change version numbers for output assemblies before build.
 
 To activate the behavior, right click the project in the Solution Explorer and select the _Auto Build Version Numbers..._ command.
 
@@ -464,9 +464,9 @@ On the left side of the dialog, build configurations are listed. "\<Any>" config
 
 On the right side of the dialog, current version numbers are listed. And four drop-down list controls specify the behavior how version number parts are changed.
 
-Once you change the drop-down list control to a value rather than "Unchanged", the new version number will be displayed next to the current version number as a preview how it will be changed after next build.
+Once you change the drop-down list control to a value rather than "Unchanged", the new version number will be displayed next to the current version number as a preview how it will be changed before next build.
 
-Press the "Save" button to save the settings and Codist will change build numbers for you after future successful builds.
+Press the "Save" button to save the settings and Codist will change build numbers for you before future builds.
 
 **Note**: The build settings are saved in the _obj_ folder where the project file locates.
 

@@ -77,11 +77,13 @@ namespace Codist
 
 		int IVsUpdateSolutionEvents2.UpdateProjectCfg_Begin(IVsHierarchy proj, IVsCfg cfgProj, IVsCfg cfgSln, uint action, ref int cancel) {
 			// This method is called when a specific project begins building.
-			Project project;
-			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.PrintSolutionProjectProperties)
-				&& (project = proj.GetExtObjectAs<Project>()) != null) {
-				PrintProperties(project.Properties, "project " + project.Name);
-				PrintProperties(project.ConfigurationManager.ActiveConfiguration.Properties, $"project {project.Name} active config");
+			var project = proj.GetExtObjectAs<Project>();
+			if (project != null) {
+				if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.PrintSolutionProjectProperties)) {
+					PrintProperties(project.Properties, "project " + project.Name);
+					PrintProperties(project.ConfigurationManager.ActiveConfiguration.Properties, $"project {project.Name} active config");
+				}
+				AutoChangeBuildVersion(cfgProj, project);
 			}
 			return VSConstants.S_OK;
 		}
@@ -103,7 +105,6 @@ namespace Codist
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.VsixAutoIncrement) && project.IsVsixProject()) {
 				AutoIncrementVsixVersion(project);
 			}
-			AutoChangeBuildVersion(cfgProj, project);
 			return VSConstants.S_OK;
 		}
 
