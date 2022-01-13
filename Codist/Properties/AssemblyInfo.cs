@@ -10,6 +10,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright WMJ, 2021")]
 [assembly: AssemblyTrademark(nameof(Codist))]
 [assembly: ComVisible(false)]
-[assembly: AssemblyVersion("5.0.0.0")]
-[assembly: AssemblyFileVersion("5.13.0.6900")]
+[assembly: AssemblyVersion("6.0.0.0")]
+[assembly: AssemblyFileVersion("6.0.0.7000")]
 [assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
