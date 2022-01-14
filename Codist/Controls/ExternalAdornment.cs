@@ -103,6 +103,7 @@ namespace Codist.Controls
 		public void RemoveAndDispose(UIElement element) {
 			_Canvas.Children.RemoveAndDispose(element);
 			UnhookChild(element);
+			AfterChildRemoved();
 		}
 
 		public void ClearUnpinnedChildren() {
