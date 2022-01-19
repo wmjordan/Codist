@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Media;
 using AppHelpers;
 using Microsoft.VisualStudio.Text.Classification;
+using Newtonsoft.Json;
 
 namespace Codist.SyntaxHighlight
 {
@@ -14,8 +15,8 @@ namespace Codist.SyntaxHighlight
 	abstract class StyleBase
 	{
 		static protected readonly Regex FriendlyNamePattern = new Regex(@"([a-z])([A-Z0-9])", RegexOptions.Singleline);
-		Color _ForeColor, _BackColor;
-		byte _ForeColorOpacity, _BackColorOpacity;
+		Color _ForeColor, _BackColor, _LineColor;
+		byte _ForeColorOpacity, _BackColorOpacity, _LineOpacity, _LineThickness, _LineOffset;
 
 		internal abstract int Id { get; }
 		/// <summary>Gets or sets whether the content rendered in bold.</summary>
@@ -34,16 +35,18 @@ namespace Codist.SyntaxHighlight
 		public double FontSize { get; set; }
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #AARRGGBB or #RRGGBB.</summary>
 		[DefaultValue(Constants.EmptyColor)]
-		public string ForegroundColor {
+		[JsonProperty("ForegroundColor")]
+		public string ForeColorText {
 			get => _ForeColor.A == 0 && _ForeColorOpacity == 0 ? Constants.EmptyColor
 				: _ForeColor.A > 0 && _ForeColorOpacity == 0 ? _ForeColor.ToHexString()
 				: _ForeColor.A == 0 && _ForeColorOpacity > 0 ? "#" + _ForeColorOpacity.ToString("X2")
 				: _ForeColor.Alpha(_ForeColorOpacity).ToHexString();
 			set => UIHelper.ParseColor(value, out _ForeColor, out _ForeColorOpacity);
 		}
-		/// <summary>Gets or sets the foreground color to render the text. The color format could be #AARRGGBB or #RRGGBB.</summary>
+		/// <summary>Gets or sets the background color to render the text. The color format could be #AARRGGBB or #RRGGBB.</summary>
 		[DefaultValue(Constants.EmptyColor)]
-		public string BackgroundColor {
+		[JsonProperty("BackgroundColor")]
+		public string BackColorText {
 			get => _BackColor.A == 0 && _BackColorOpacity == 0 ? Constants.EmptyColor
 				: _BackColor.A > 0 && _BackColorOpacity == 0 ? _BackColor.ToHexString()
 				: _BackColor.A == 0 && _BackColorOpacity > 0 ? "#" + _BackColorOpacity.ToString("X2")
@@ -53,6 +56,22 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the brush effect to draw the background color.</summary>
 		[DefaultValue(BrushEffect.Solid)]
 		public BrushEffect BackgroundEffect { get; set; }
+		/// <summary>Gets or sets the underline color to render the text. The color format could be #AARRGGBB or #RRGGBB.</summary>
+		[DefaultValue(Constants.EmptyColor)]
+		[JsonProperty("LineColor")]
+		public string LineColorText {
+			get => _LineColor.A == 0 && _LineOpacity == 0 ? Constants.EmptyColor
+				: _LineColor.A > 0 && _LineOpacity == 0 ? _LineColor.ToHexString()
+				: _LineColor.A == 0 && _LineOpacity > 0 ? "#" + _LineOpacity.ToString("X2")
+				: _LineColor.Alpha(_LineOpacity).ToHexString();
+			set => UIHelper.ParseColor(value, out _LineColor, out _LineOpacity);
+		}
+		[DefaultValue(LineStyle.Solid)]
+		public LineStyle LineStyle { get; set; }
+		[DefaultValue((byte)0)]
+		public byte LineThickness { get => _LineThickness; set => _LineThickness = value; }
+		[DefaultValue((byte)0)]
+		public byte LineOffset { get => _LineOffset; set => _LineOffset = value; }
 		/// <summary>Gets or sets the style of marker on the scrollbar.</summary>
 		[DefaultValue(ScrollbarMarkerStyle.None)]
 		public ScrollbarMarkerStyle ScrollBarMarkerStyle { get; set; }
@@ -61,18 +80,16 @@ namespace Codist.SyntaxHighlight
 
 		internal Color ForeColor { get => _ForeColor; set => _ForeColor = value; }
 		internal byte ForegroundOpacity { get => _ForeColorOpacity; set => _ForeColorOpacity = value; }
-		internal Color AlphaForeColor => _ForeColorOpacity > 0 ? _ForeColor.Alpha(_ForeColorOpacity) : _ForeColor;
 		internal Color BackColor { get => _BackColor; set => _BackColor = value; }
 		internal byte BackgroundOpacity { get => _BackColorOpacity; set => _BackColorOpacity = value; }
-		internal Color AlphaBackColor => _BackColorOpacity > 0 ? _BackColor.Alpha(_BackColorOpacity) : _BackColor;
+		internal Color LineColor { get => _LineColor; set => _LineColor = value; }
+		internal byte LineOpacity { get => _LineOpacity; set => _LineOpacity = value; }
 
 		/// <summary>The category used in option pages to group style items</summary>
-		[Newtonsoft.Json.JsonIgnore]
-		public abstract string Category { get; }
+		internal abstract string Category { get; }
 
 		/// <summary>Returns whether any option in this style is set.</summary>
-		[Newtonsoft.Json.JsonIgnore]
-		public bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForegroundOpacity != 0 || BackgroundOpacity != 0 || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || Stretch.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false;
+		internal bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForegroundOpacity != 0 || BackgroundOpacity != 0 || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || Stretch.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false || LineColor.A > 0 || LineOpacity != 0 || LineThickness != 0 || LineStyle != LineStyle.Solid;
 
 		internal abstract string ClassificationType { get; }
 		internal abstract string Description { get; }
@@ -94,6 +111,11 @@ namespace Codist.SyntaxHighlight
 			target.BackColor = BackColor;
 			target.ForegroundOpacity = ForegroundOpacity;
 			target.BackgroundOpacity = BackgroundOpacity;
+			target.LineColor = LineColor;
+			target.LineOpacity = LineOpacity;
+			target.LineThickness = LineThickness;
+			target.LineOffset = LineOffset;
+			target.LineStyle = LineStyle;
 		}
 		internal void CopyTo(StyleBase target, StyleFilters filters) {
 			if (filters.MatchFlags(StyleFilters.Color)) {
@@ -101,6 +123,8 @@ namespace Codist.SyntaxHighlight
 				target.BackColor = BackColor;
 				target.ForegroundOpacity = ForegroundOpacity;
 				target.BackgroundOpacity = BackgroundOpacity;
+				target.LineColor = LineColor;
+				target.LineOpacity = LineOpacity;
 				target.BackgroundEffect = BackgroundEffect;
 			}
 			if (filters.MatchFlags(StyleFilters.FontFamily)) {
@@ -117,6 +141,11 @@ namespace Codist.SyntaxHighlight
 				target.Underline = Underline;
 				target.Strikethrough = Strikethrough;
 			}
+			if (filters.MatchFlags(StyleFilters.LineStyle)) {
+				target.LineStyle = LineStyle;
+				target.LineOffset = LineOffset;
+				target.LineThickness = LineThickness;
+			}
 		}
 		internal void Reset() {
 			Bold = Italic = OverLine = Underline = Strikethrough = null;
@@ -124,13 +153,14 @@ namespace Codist.SyntaxHighlight
 			Stretch = null;
 			BackgroundEffect = BrushEffect.Solid;
 			Font = null;
-			ForeColor = BackColor = default;
-			ForegroundOpacity = BackgroundOpacity = 0;
+			ForeColor = BackColor = LineColor = default;
+			ForegroundOpacity = BackgroundOpacity = LineOpacity = LineThickness = LineOffset = 0;
+			LineStyle = LineStyle.Solid;
 		}
 	}
 	sealed class SyntaxStyle : StyleBase
 	{
-		public override string Category { get; }
+		internal override string Category { get; }
 		public string Key { get; set; }
 		internal override int Id { get; }
 		internal override string ClassificationType => Key;
@@ -180,7 +210,7 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the code style.</summary>
 		public override CodeStyleTypes StyleID { get; set; }
 
-		public override string Category => _Category ?? (_Category = GetCategory());
+		internal override string Category => _Category ?? (_Category = GetCategory());
 
 		internal new CodeStyle Clone() {
 			return (CodeStyle)MemberwiseClone();
@@ -202,7 +232,7 @@ namespace Codist.SyntaxHighlight
 		}
 		public CommentStyle(CommentStyleTypes styleID, Color foregroundColor) {
 			StyleID = styleID;
-			ForegroundColor = foregroundColor.ToHexString();
+			ForeColor = foregroundColor;
 		}
 
 		internal override int Id => (int)StyleID;
@@ -210,7 +240,7 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the comment style.</summary>
 		public override CommentStyleTypes StyleID { get; set; }
 
-		public override string Category => _Category ?? (_Category = GetCategory());
+		internal override string Category => _Category ?? (_Category = GetCategory());
 
 		internal new CommentStyle Clone() {
 			return (CommentStyle)MemberwiseClone();
@@ -232,7 +262,7 @@ namespace Codist.SyntaxHighlight
 		}
 		public CppStyle(CppStyleTypes styleID, Color foregroundColor) {
 			StyleID = styleID;
-			ForegroundColor = foregroundColor.ToHexString();
+			ForeColor = foregroundColor;
 		}
 
 		internal override int Id => (int)StyleID;
@@ -240,7 +270,7 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the C++ style.</summary>
 		public override CppStyleTypes StyleID { get; set; }
 
-		public override string Category => _Category ?? (_Category = GetCategory());
+		internal override string Category => _Category ?? (_Category = GetCategory());
 
 		internal new CppStyle Clone() {
 			return (CppStyle)MemberwiseClone();
@@ -261,7 +291,7 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the code style.</summary>
 		public override CSharpStyleTypes StyleID { get; set; }
 
-		public override string Category => _Category ?? (_Category = GetCategory());
+		internal override string Category => _Category ?? (_Category = GetCategory());
 
 		internal new CSharpStyle Clone() {
 			return (CSharpStyle)MemberwiseClone();
@@ -282,7 +312,7 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the code style.</summary>
 		public override MarkdownStyleTypes StyleID { get; set; }
 
-		public override string Category => _Category ?? (_Category = GetCategory());
+		internal override string Category => _Category ?? (_Category = GetCategory());
 
 		internal new MarkdownStyle Clone() {
 			return (MarkdownStyle)MemberwiseClone();
@@ -300,7 +330,7 @@ namespace Codist.SyntaxHighlight
 		}
 		public XmlCodeStyle(XmlStyleTypes styleID, Color foregroundColor) {
 			StyleID = styleID;
-			ForegroundColor = foregroundColor.ToHexString();
+			ForeColor = foregroundColor;
 		}
 
 		internal override int Id => (int)StyleID;
@@ -308,7 +338,7 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the comment style.</summary>
 		public override XmlStyleTypes StyleID { get; set; }
 
-		public override string Category => StyleID != XmlStyleTypes.None ? Constants.SyntaxCategory.Xml : String.Empty;
+		internal override string Category => StyleID != XmlStyleTypes.None ? Constants.SyntaxCategory.Xml : String.Empty;
 
 		internal new CommentStyle Clone() {
 			return (CommentStyle)MemberwiseClone();
@@ -327,7 +357,7 @@ namespace Codist.SyntaxHighlight
 		}
 		public SymbolMarkerStyle(SymbolMarkerStyleTypes styleID, Color foregroundColor) {
 			StyleID = styleID;
-			ForegroundColor = foregroundColor.ToHexString();
+			ForeColor = foregroundColor;
 		}
 
 		internal override int Id => (int)StyleID;
@@ -335,7 +365,7 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the comment style.</summary>
 		public override SymbolMarkerStyleTypes StyleID { get; set; }
 
-		public override string Category => _Category ?? (_Category = GetCategory());
+		internal override string Category => _Category ?? (_Category = GetCategory());
 
 		internal new CommentStyle Clone() {
 			return (CommentStyle)MemberwiseClone();

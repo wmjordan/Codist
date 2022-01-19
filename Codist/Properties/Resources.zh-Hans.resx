@@ -1865,4 +1865,28 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_NewVersionPrompt" xml:space="preserve">
     <value>新版本的 Codist 已经安装好了。是否要了解一下该版本的信息呢？</value>
   </data>
+  <data name="T_LineColor" xml:space="preserve">
+    <value>划线颜色</value>
+  </data>
+  <data name="T_LineOffset" xml:space="preserve">
+    <value>划线位置:</value>
+  </data>
+  <data name="T_LineThickness" xml:space="preserve">
+    <value>划线粗细:</value>
+  </data>
+  <data name="T_Dash" xml:space="preserve">
+    <value>虚划线</value>
+  </data>
+  <data name="T_DashDot" xml:space="preserve">
+    <value>虚划加点线</value>
+  </data>
+  <data name="T_Dot" xml:space="preserve">
+    <value>点线</value>
+  </data>
+  <data name="T_LineStyle" xml:space="preserve">
+    <value>划线样式:</value>
+  </data>
+  <data name="T_SolidLine" xml:space="preserve">
+    <value>直线</value>
+  </data>
 </root>

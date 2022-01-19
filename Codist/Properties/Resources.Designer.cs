@@ -4105,6 +4105,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Dash 的本地化字符串。
+        /// </summary>
+        internal static string T_Dash {
+            get {
+                return ResourceManager.GetString("T_Dash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Dash - dot 的本地化字符串。
+        /// </summary>
+        internal static string T_DashDot {
+            get {
+                return ResourceManager.GetString("T_DashDot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 DEC 的本地化字符串。
         /// </summary>
         internal static string T_Decimal {
@@ -4200,6 +4218,15 @@ namespace Codist.Properties {
         internal static string T_DocumentationFrom {
             get {
                 return ResourceManager.GetString("T_DocumentationFrom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Dot 的本地化字符串。
+        /// </summary>
+        internal static string T_Dot {
+            get {
+                return ResourceManager.GetString("T_Dot", resourceCulture);
             }
         }
         
@@ -4546,6 +4573,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Line 的本地化字符串。
+        /// </summary>
+        internal static string T_LineColor {
+            get {
+                return ResourceManager.GetString("T_LineColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Line of code:  的本地化字符串。
         /// </summary>
         internal static string T_LineOfCode {
@@ -4555,11 +4591,38 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Line offset: 的本地化字符串。
+        /// </summary>
+        internal static string T_LineOffset {
+            get {
+                return ResourceManager.GetString("T_LineOffset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似  lines 的本地化字符串。
         /// </summary>
         internal static string T_Lines {
             get {
                 return ResourceManager.GetString("T_Lines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Line style: 的本地化字符串。
+        /// </summary>
+        internal static string T_LineStyle {
+            get {
+                return ResourceManager.GetString("T_LineStyle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Line thickness: 的本地化字符串。
+        /// </summary>
+        internal static string T_LineThickness {
+            get {
+                return ResourceManager.GetString("T_LineThickness", resourceCulture);
             }
         }
         
@@ -5113,6 +5176,15 @@ namespace Codist.Properties {
         internal static string T_Solid {
             get {
                 return ResourceManager.GetString("T_Solid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Solid 的本地化字符串。
+        /// </summary>
+        internal static string T_SolidLine {
+            get {
+                return ResourceManager.GetString("T_SolidLine", resourceCulture);
             }
         }
         

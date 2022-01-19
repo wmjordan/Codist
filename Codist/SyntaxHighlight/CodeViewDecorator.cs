@@ -218,8 +218,8 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 			if (refreshList.Count > 0) {
-				foreach (var item in refreshList) {
-					updated[item.type] = item.property;
+				foreach (var (type, property) in refreshList) {
+					updated[type] = property;
 				}
 			}
 			if (updated.Count > 0) {
@@ -324,10 +324,15 @@ namespace Codist.SyntaxHighlight
 					format = format.SetBackground(settings.BackColor);
 				}
 			}
-			if (settings.Underline.HasValue || settings.Strikethrough.HasValue || settings.OverLine.HasValue) {
+			if (settings.Underline.HasValue || settings.Strikethrough.HasValue || settings.OverLine.HasValue || settings.LineColor.A > 0) {
 				var tdc = new TextDecorationCollection();
-				if (settings.Underline.GetValueOrDefault()) {
-					tdc.Add(TextDecorations.Underline);
+				if (settings.Underline.GetValueOrDefault() || settings.LineColor.A > 0) {
+					if (settings.LineColor.A > 0) {
+						tdc.Add(GetLineDecoration(settings, TextDecorationLocation.Underline));
+					}
+					else {
+						tdc.Add(TextDecorations.Underline);
+					}
 				}
 				if (settings.Strikethrough.GetValueOrDefault()) {
 					tdc.Add(TextDecorations.Strikethrough);
@@ -338,6 +343,37 @@ namespace Codist.SyntaxHighlight
 				format = format.SetTextDecorations(tdc);
 			}
 			return format;
+		}
+
+		static TextDecoration GetLineDecoration(StyleBase settings, TextDecorationLocation location) {
+			var d = new TextDecoration {
+				Location = location,
+				Pen = new Pen {
+					Brush = new SolidColorBrush(settings.LineColor.Alpha(settings.LineOpacity > 0 ? settings.LineOpacity : (byte)255))
+				}
+			};
+			if (settings.LineOffset > 0) {
+				d.PenOffset = settings.LineOffset;
+				d.PenOffsetUnit = TextDecorationUnit.Pixel;
+			}
+			if (settings.LineThickness > 0) {
+				d.Pen.Thickness = settings.LineThickness + 1;
+				d.PenThicknessUnit = TextDecorationUnit.Pixel;
+			}
+			if (settings.LineStyle != LineStyle.Solid) {
+				switch (settings.LineStyle) {
+					case LineStyle.Dot: d.Pen.DashStyle = new DashStyle(new double[] { 2, 2 }, 0);
+						break;
+					case LineStyle.Dash: d.Pen.DashStyle = new DashStyle(new double[] { 4, 4 }, 0);
+						break;
+					case LineStyle.DashDot: d.Pen.DashStyle = new DashStyle(new double[] { 4, 4, 2, 4 }, 0);
+						break;
+					default:
+						break;
+				}
+			}
+			d.Freeze();
+			return d;
 		}
 	}
 }

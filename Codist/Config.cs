@@ -251,7 +251,6 @@ namespace Codist
 				MergeCodeStyle(Instance.CppStyles, config.CppStyles, styleFilter);
 				MergeCodeStyle(Instance.XmlCodeStyles, config.XmlCodeStyles, styleFilter);
 				MergeCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles, styleFilter);
-				//MergeCodeStyle(Instance.MarkerSettings, config.MarkerSettings, styleFilter);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
 				Instance.Styles = config.Styles;
 				_LastLoaded = DateTime.Now;
@@ -346,7 +345,6 @@ namespace Codist
 					}));
 				if (path == ConfigPath) {
 					_LastSaved = _LastLoaded = DateTime.Now;
-					//_ConfigManager?.MarkVersioned();
 					Debug.WriteLine("Config saved");
 				}
 			}
@@ -514,10 +512,10 @@ namespace Codist
 				new CommentStyle(CommentStyleTypes.Exclaimation, Constants.ExclaimationColor),
 				new CommentStyle(CommentStyleTypes.Question, Constants.QuestionColor),
 				new CommentStyle(CommentStyleTypes.Deletion, Constants.DeletionColor) { Strikethrough = true },
-				new CommentStyle(CommentStyleTypes.ToDo, Colors.White) { BackgroundColor = Constants.ToDoColor.ToHexString(), ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
-				new CommentStyle(CommentStyleTypes.Note, Colors.White) { BackgroundColor = Constants.NoteColor.ToHexString(), ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
-				new CommentStyle(CommentStyleTypes.Hack, Colors.White) { BackgroundColor = Constants.HackColor.ToHexString(), ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
-				new CommentStyle(CommentStyleTypes.Undone, Color.FromRgb(164, 175, 209)) { BackgroundColor = Constants.UndoneColor.ToHexString(), ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new CommentStyle(CommentStyleTypes.ToDo, Colors.White) { BackColor = Constants.ToDoColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new CommentStyle(CommentStyleTypes.Note, Colors.White) { BackColor = Constants.NoteColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new CommentStyle(CommentStyleTypes.Hack, Colors.LightGreen) { BackColor = Constants.HackColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
+				new CommentStyle(CommentStyleTypes.Undone, Color.FromRgb(164, 175, 209)) { BackColor = Constants.UndoneColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
 				new CommentStyle(CommentStyleTypes.Heading1) { FontSize = 12 },
 				new CommentStyle(CommentStyleTypes.Heading2) { FontSize = 8 },
 				new CommentStyle(CommentStyleTypes.Heading3) { FontSize = 4 },
@@ -686,6 +684,14 @@ namespace Codist
 		ToLeft
 	}
 
+	public enum LineStyle
+	{
+		Solid,
+		Dot,
+		Dash,
+		DashDot,
+	}
+
 	[Flags]
 	public enum Features
 	{
@@ -787,7 +793,8 @@ namespace Codist
 		FontFamily = 1 << 1,
 		FontSize = 1 << 2,
 		FontStyle = 1 << 3,
-		All = Color | FontFamily | FontSize | FontStyle
+		LineStyle = 1 << 4,
+		All = Color | FontFamily | FontSize | FontStyle | LineStyle
 	}
 
 	[Flags]

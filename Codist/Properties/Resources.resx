@@ -1880,4 +1880,28 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="T_NewVersionPrompt" xml:space="preserve">
     <value>A new version of Codist is just installed. Do you want to learn more about it?</value>
   </data>
+  <data name="T_LineColor" xml:space="preserve">
+    <value>Line</value>
+  </data>
+  <data name="T_LineOffset" xml:space="preserve">
+    <value>Line offset:</value>
+  </data>
+  <data name="T_LineThickness" xml:space="preserve">
+    <value>Line thickness:</value>
+  </data>
+  <data name="T_Dash" xml:space="preserve">
+    <value>Dash</value>
+  </data>
+  <data name="T_DashDot" xml:space="preserve">
+    <value>Dash - dot</value>
+  </data>
+  <data name="T_Dot" xml:space="preserve">
+    <value>Dot</value>
+  </data>
+  <data name="T_LineStyle" xml:space="preserve">
+    <value>Line style:</value>
+  </data>
+  <data name="T_SolidLine" xml:space="preserve">
+    <value>Solid</value>
+  </data>
 </root>

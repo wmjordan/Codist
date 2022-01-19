@@ -22,6 +22,8 @@ namespace Codist.Options
 	{
 		static readonly Thickness SubOptionMargin = new Thickness(24, 0, 0, 0);
 		static readonly IClassificationType __BraceMatchingClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBraceMatching);
+		const int SMALL_LABEL_WIDTH = 60, MIDDLE_LABEL_WIDTH = 120;
+
 		readonly StackPanel _SettingsList;
 		readonly Border _OptionPageHolder;
 		readonly TextBlock _Notice;
@@ -39,6 +41,12 @@ namespace Codist.Options
 		readonly ColorButton _BackgroundButton;
 		readonly OpacityButton _BackgroundOpacityButton;
 		readonly ComboBox _BackgroundEffectBox;
+		readonly ColorButton _LineColorButton;
+		readonly OpacityButton _LineOpacityButton;
+		readonly NumericUpDown _LineThicknessBox;
+		readonly NumericUpDown _LineOffsetBox;
+		readonly WrapPanel _LineStyleGroup;
+		readonly ComboBox _LineStyleBox;
 		readonly WrapPanel _BaseTypesList;
 		readonly Button _AddTagButton, _RemoveTagButton;
 		readonly TextBox _TagBox;
@@ -154,15 +162,17 @@ namespace Codist.Options
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													new TextBlock { Text = R.T_Font, Width = 60, Margin = WpfHelper.SmallMargin },
-													new FontButton(ApplyFont) { Width = 230, Margin = WpfHelper.SmallMargin }
-														.Set(ref _FontButton)
-														.ReferenceStyle(VsResourceKeys.ThemedDialogButtonStyleKey),
-													new TextBlock { Text = R.T_Size, Width = 60, Margin = WpfHelper.SmallMargin },
-													new NumericUpDown { Width = 80, Margin = WpfHelper.SmallMargin }
-														.Set(ref _FontSizeBox),
-													new TextBlock { Text = R.T_Stretch, Width = 40, Margin = WpfHelper.SmallMargin },
-													new ComboBox { Width = 80, Margin = WpfHelper.SmallMargin }.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey).Set(ref _StretchBox)
+													new LabeledControl(R.T_Font, SMALL_LABEL_WIDTH,
+														new FontButton(ApplyFont) { Width = 230 }
+															.Set(ref _FontButton)
+															.ReferenceStyle(VsResourceKeys.ThemedDialogButtonStyleKey)),
+													new LabeledControl(R.T_Size, SMALL_LABEL_WIDTH,
+														new NumericUpDown { Width = 80 }
+															.Set(ref _FontSizeBox)),
+													new LabeledControl(R.T_Stretch, SMALL_LABEL_WIDTH,
+														new ComboBox { Width = 80 }
+															.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey)
+															.Set(ref _StretchBox))
 												}
 											},
 											new WrapPanel {
@@ -180,16 +190,37 @@ namespace Codist.Options
 													new ColorButton(Colors.Transparent, R.T_Foreground, OnForeColorChanged).Set(ref _ForegroundButton),
 													new OpacityButton(OnForeOpacityChanged).Set(ref _ForegroundOpacityButton),
 													new ColorButton(Colors.Transparent, R.T_Background, OnBackColorChanged).Set(ref _BackgroundButton),
-													new OpacityButton(OnBackOpacityChanged).Set(ref _BackgroundOpacityButton)
+													new OpacityButton(OnBackOpacityChanged).Set(ref _BackgroundOpacityButton),
+												}
+											},
+											new LabeledControl(R.T_BackgroundEffect, MIDDLE_LABEL_WIDTH,
+													new ComboBox { Width = 160 }
+														.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey)
+														.Set(ref _BackgroundEffectBox)) {
+												Margin = WpfHelper.SmallMargin
+											},
+											new WrapPanel {
+												Margin = WpfHelper.SmallMargin,
+												Children = {
+													new ColorButton(Colors.Transparent, R.T_LineColor, OnLineColorChanged).Set(ref _LineColorButton),
+													new OpacityButton(OnLineOpacityChanged).Set(ref _LineOpacityButton)
 												}
 											},
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													new TextBlock { Text = R.T_BackgroundEffect, Width = 130 },
-													new ComboBox { Width = 160 }.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey).Set(ref _BackgroundEffectBox)
+													new LabeledControl(R.T_LineThickness, MIDDLE_LABEL_WIDTH,
+														new NumericUpDown { Width = 80, Minimum = 0, Maximum = 255 }
+															.Set(ref _LineThicknessBox)),
+													new LabeledControl(R.T_LineOffset, MIDDLE_LABEL_WIDTH,
+														new NumericUpDown { Width = 80, Minimum = 0, Maximum = 255 }
+															.Set(ref _LineOffsetBox)),
+													new LabeledControl(R.T_LineStyle, MIDDLE_LABEL_WIDTH,
+														new ComboBox { Width = 160 }
+															.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey)
+															.Set(ref _LineStyleBox))
 												}
-											},
+											}.Set(ref _LineStyleGroup),
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
@@ -211,21 +242,14 @@ namespace Codist.Options
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													new StackPanel {
-														Orientation = Orientation.Horizontal,
-														Children = {
-															new TextBlock { Text = R.T_Tag, Width = 60, Margin = WpfHelper.SmallMargin },
-															new TextBox() { Width = 230, Margin = WpfHelper.SmallMargin }.ReferenceStyle(VsResourceKeys.TextBoxStyleKey).Set(ref _TagBox)
-														}
-													},
-													new StackPanel {
-														Orientation = Orientation.Horizontal,
-														Children = {
-															new TextBlock { Text = R.T_Style, Width = 60, Margin = WpfHelper.SmallMargin },
-															new ComboBox { Width = 230, Margin = WpfHelper.SmallMargin, IsEditable = false }
-																.Set(ref _TagStyleBox).ReferenceStyle(VsResourceKeys.ComboBoxStyleKey)
-														}
-													}
+													new LabeledControl(R.T_Tag, SMALL_LABEL_WIDTH,
+														new TextBox() { Width = 230 }
+															.ReferenceStyle(VsResourceKeys.TextBoxStyleKey)
+															.Set(ref _TagBox)),
+													new LabeledControl(R.T_Style, SMALL_LABEL_WIDTH,
+														new ComboBox { Width = 230, IsEditable = false }
+															.Set(ref _TagStyleBox)
+															.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey))
 												}
 											},
 											new WrapPanel {
@@ -238,7 +262,7 @@ namespace Codist.Options
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													new TextBlock { Text = R.T_ApplyOn, Width = 60, Margin = WpfHelper.SmallMargin },
+													new TextBlock { Text = R.T_ApplyOn, Width = SMALL_LABEL_WIDTH, Margin = WpfHelper.SmallMargin },
 													new RadioBox(R.OT_Tag, "TagApplication", OnTagApplicationChanged).Set(ref _TagApplyOnTagBox),
 													new RadioBox(R.OT_Content, "TagApplication", OnTagApplicationChanged).Set(ref _TagApplyOnContentBox),
 													new RadioBox(R.OT_TagContent, "TagApplication", OnTagApplicationChanged).Set(ref _TagApplyOnWholeBox),
@@ -275,8 +299,13 @@ namespace Codist.Options
 			LoadSyntaxStyles(SyntaxStyleSource.Selection);
 			_ForegroundButton.UseVsTheme();
 			_BackgroundButton.UseVsTheme();
+			_LineColorButton.UseVsTheme();
+			_LineThicknessBox.ValueChanged += ApplyLineThickness;
+			_LineOffsetBox.ValueChanged += ApplyLineOffset;
 			_BackgroundEffectBox.Items.AddRange(new[] { R.T_Solid, R.T_BottomGradient, R.T_TopGradient, R.T_RightGradient, R.T_LeftGradient });
 			_BackgroundEffectBox.SelectionChanged += OnBackgroundEffectChanged;
+			_LineStyleBox.Items.AddRange(new[] { R.T_SolidLine, R.T_Dot, R.T_Dash, R.T_DashDot });
+			_LineStyleBox.SelectionChanged += OnLineStyleChanged;
 			_SyntaxSourceBox.SelectionChanged += SyntaxSourceChanged;
 			_AddTagButton.Click += AddTag;
 			_RemoveTagButton.Click += RemoveTag;
@@ -421,7 +450,7 @@ namespace Codist.Options
 			}
 			return new StyleSettingsButton(c, t, OnSelectTag) { Text = label.Label, Tag = label };
 
-			Codist.SyntaxHighlight.CommentStyle FindCommentStyle(CommentLabel cl) {
+			CommentStyle FindCommentStyle(CommentLabel cl) {
 				var styleId = cl.StyleID;
 				return Config.Instance.CommentStyles.Find(i => i.StyleID == styleId);
 			}
@@ -609,11 +638,23 @@ namespace Codist.Options
 				_StrikethroughBox.IsChecked = s.Strikethrough;
 				_ForegroundButton.Color = s.ForeColor;
 				_BackgroundButton.Color = s.BackColor;
+				_LineColorButton.Color = s.LineColor;
 				_ForegroundButton.DefaultColor = () => ((_FormatMap.GetTextProperties(b.Classification)?.ForegroundBrush as SolidColorBrush)?.Color).GetValueOrDefault();
 				_BackgroundButton.DefaultColor = () => ((_FormatMap.GetTextProperties(b.Classification)?.BackgroundBrush as SolidColorBrush)?.Color).GetValueOrDefault();
+				_LineColorButton.DefaultColor = () => {
+					var c = _FormatMap.GetTextProperties(b.Classification);
+					return c != null
+						? ((c.TextDecorations.FirstOrDefault(i => i.Location == TextDecorationLocation.Underline)?.Pen?.Brush as SolidColorBrush ?? (c.ForegroundBrush as SolidColorBrush))?.Color).GetValueOrDefault()
+						: default;
+				};
 				_ForegroundOpacityButton.Value = s.ForegroundOpacity;
 				_BackgroundOpacityButton.Value = s.BackgroundOpacity;
 				_BackgroundEffectBox.SelectedIndex = (int)s.BackgroundEffect;
+				_LineOpacityButton.Value = s.LineOpacity;
+				_LineThicknessBox.Value = s.LineThickness;
+				_LineOffsetBox.Value = s.LineOffset;
+				_LineStyleBox.SelectedIndex = (int)s.LineStyle;
+				_LineOpacityButton.Visibility = _LineStyleGroup.Visibility = s.LineColor.A > 0 ? Visibility.Visible : Visibility.Collapsed;
 				_StretchBox.SelectedIndex = GetStretchIndex(s.Stretch);
 				_BaseTypesList.Children.RemoveRange(1, _BaseTypesList.Children.Count - 1);
 				if (s.ClassificationType != null) {
@@ -691,6 +732,28 @@ namespace Codist.Options
 			});
 		}
 
+		void ApplyLineThickness(object sender, DependencyPropertyChangedEventArgs e) {
+			Update(() => {
+				byte s = (byte)_LineThicknessBox.Value;
+				if (ActiveStyle.LineThickness != s) {
+					ActiveStyle.LineThickness = s;
+					return true;
+				}
+				return false;
+			});
+		}
+
+		void ApplyLineOffset(object sender, DependencyPropertyChangedEventArgs e) {
+			Update(() => {
+				byte s = (byte)_LineOffsetBox.Value;
+				if (ActiveStyle.LineOffset != s) {
+					ActiveStyle.LineOffset = s;
+					return true;
+				}
+				return false;
+			});
+		}
+
 		void OnBoldChanged(bool? state) {
 			Update(() => {
 				ActiveStyle.Bold = state;
@@ -730,6 +793,14 @@ namespace Codist.Options
 			});
 		}
 
+		void OnLineColorChanged(Color color) {
+			Update(() => {
+				ActiveStyle.LineColor = color;
+				_LineOpacityButton.Visibility = _LineStyleGroup.Visibility = color.A > 0 ? Visibility.Visible : Visibility.Collapsed;
+				return true;
+			});
+		}
+
 		void OnForeOpacityChanged(byte value) {
 			Update(() => {
 				ActiveStyle.ForegroundOpacity = value;
@@ -744,11 +815,29 @@ namespace Codist.Options
 			});
 		}
 
+		void OnLineOpacityChanged(byte value) {
+			Update(() => {
+				ActiveStyle.LineOpacity = value;
+				return true;
+			});
+		}
+
 		void OnBackgroundEffectChanged(object sender, EventArgs e) {
 			Update(() => {
 				var s = (BrushEffect)_BackgroundEffectBox.SelectedIndex;
 				if (ActiveStyle.BackgroundEffect != s) {
 					ActiveStyle.BackgroundEffect = s;
+					return true;
+				}
+				return false;
+			});
+		}
+
+		void OnLineStyleChanged(object sender, EventArgs e) {
+			Update(() => {
+				var s = (LineStyle)_LineStyleBox.SelectedIndex;
+				if (ActiveStyle.LineStyle != s) {
+					ActiveStyle.LineStyle = s;
 					return true;
 				}
 				return false;
@@ -1009,6 +1098,14 @@ namespace Codist.Options
 			}
 		}
 
+		sealed class LabeledControl : StackPanel
+		{
+			public LabeledControl(string text, double labelWidth, FrameworkElement control) {
+				Orientation = Orientation.Horizontal;
+				this.Add(new TextBlock { Text = text, Width = labelWidth, VerticalAlignment = VerticalAlignment.Center, Margin = WpfHelper.SmallMargin }, control.WrapMargin(WpfHelper.SmallMargin));
+			}
+		}
+
 		sealed class StyleCheckBox : CheckBox
 		{
 			readonly Action<bool?> _CheckHandler;
@@ -1017,7 +1114,7 @@ namespace Codist.Options
 				Content = text;
 				IsThreeState = true;
 				Margin = WpfHelper.SmallMargin;
-				MinWidth = 120;
+				MinWidth = MIDDLE_LABEL_WIDTH;
 				this.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				Checked += CheckHandler;
 				Unchecked += CheckHandler;
@@ -1110,7 +1207,7 @@ namespace Codist.Options
 
 			public OpacityButton(Action<byte> opacityChangedHandler) {
 				Content = "Opacity";
-				Width = 120;
+				Width = MIDDLE_LABEL_WIDTH;
 				Margin = WpfHelper.SmallMargin;
 				this.ReferenceStyle(VsResourceKeys.ButtonStyleKey);
 				_OpacityChangedHandler = opacityChangedHandler;
