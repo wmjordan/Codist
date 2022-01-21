@@ -805,12 +805,16 @@ namespace Codist.Taggers
 
 					case SymbolKind.Field:
 						var f = symbol as IFieldSymbol;
-						yield return f.IsConst ?
-								f.ContainingType.TypeKind == TypeKind.Enum ? _Classifications.EnumField
-								: _Classifications.ConstField
-							: f.IsReadOnly ? _Classifications.ReadonlyField
-							: f.IsVolatile ? _Classifications.VolatileField
-							: _Classifications.Field;
+						if (f.IsConst) {
+							yield return f.ContainingType.TypeKind == TypeKind.Enum ? _Classifications.EnumField
+					  : _Classifications.ConstField;
+							yield break;
+						}
+						else {
+							yield return f.IsReadOnly ? _Classifications.ReadonlyField
+								: f.IsVolatile ? _Classifications.VolatileField
+								: _Classifications.Field;
+						}
 						break;
 
 					case SymbolKind.Property:
