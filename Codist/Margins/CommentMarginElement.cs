@@ -168,7 +168,7 @@ namespace Codist.Margins
 		/// <param name="drawingContext">The <see cref="DrawingContext"/> used to render the margin.</param>
 		protected override void OnRender(DrawingContext drawingContext) {
 			base.OnRender(drawingContext);
-			if (_TextView.IsClosed == false && _Tags.HasTag) {
+			if (_TextView?.IsClosed != false && _Tags.HasTag) {
 				DrawMarkers(drawingContext);
 			}
 		}
