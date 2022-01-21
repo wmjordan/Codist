@@ -5477,7 +5477,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   查找类似 Unchanged/Increment/Zero/Year/Month/Date/ShortYear/YearMonth/MonthDate/DayOfYear/Hour/HourMinute/DaySinceY2K 的本地化字符串。
+        ///   查找类似 Unchanged/Increment/Zero/Year/Month/Date/ShortYear/YearMonth/MonthDate/DayOfYear/Hour/HourMinute/DaySinceY2K/MidNightSecond 的本地化字符串。
         /// </summary>
         internal static string T_VersionRewriteMode {
             get {

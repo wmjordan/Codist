@@ -14,6 +14,7 @@
 		DayOfYear,
 		Hour,
 		HourMinute,
-		DaySinceY2K
+		DaySinceY2K,
+		MidNightSecond
 	}
 }

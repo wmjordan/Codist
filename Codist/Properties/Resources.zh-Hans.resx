@@ -1839,7 +1839,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>生成项目的配置:</value>
   </data>
   <data name="T_VersionRewriteMode" xml:space="preserve">
-    <value>不变/加1/置0/年yyyy/月m/日d/年yy/年月yymm/月日mdd/年日ddd/时h/时分hmm/2000年起日</value>
+    <value>不变/加1/置0/年yyyy/月m/日d/年yy/年月yymm/月日mdd/年日ddd/时h/时分hmm/2000年起日/午夜起双秒</value>
   </data>
   <data name="CMD_SaveBuildSetting" xml:space="preserve">
     <value>保存</value>

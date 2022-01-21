@@ -5,6 +5,8 @@ namespace Codist.AutoBuildVersion
 {
 	public sealed class VersionSetting
 	{
+		const int MaxVersionNumber = 65535;
+
 		static readonly IFormatProvider __Format = System.Globalization.CultureInfo.InvariantCulture;
 		public VersionRewriteMode Major { get; set; }
 		public VersionRewriteMode Minor { get; set; }
@@ -27,7 +29,7 @@ namespace Codist.AutoBuildVersion
 
 		string WritePart(string part, VersionRewriteMode mode) {
 			switch (mode) {
-				case VersionRewriteMode.Increment: return Int32.TryParse(part, System.Globalization.NumberStyles.Integer, __Format, out var n) ? (++n).ToText() : part;
+				case VersionRewriteMode.Increment: return Int32.TryParse(part, System.Globalization.NumberStyles.Integer, __Format, out var n) ? NormalizeNumber(++n) : part;
 				case VersionRewriteMode.Zero: return "0";
 				case VersionRewriteMode.Year: return DateTime.Now.Year.ToText();
 				case VersionRewriteMode.Month: return DateTime.Now.Month.ToText();
@@ -38,13 +40,18 @@ namespace Codist.AutoBuildVersion
 				case VersionRewriteMode.DayOfYear: return DateTime.Now.DayOfYear.ToText();
 				case VersionRewriteMode.Hour: return DateTime.Now.Hour.ToText();
 				case VersionRewriteMode.HourMinute: return DateTime.Now.Hour.ToText() + DateTime.Now.Minute.ToString("00", __Format);
-				case VersionRewriteMode.DaySinceY2K: return ((int)(DateTime.Now.Date - new DateTime(2000, 1, 1)).TotalDays).ToText();
+				case VersionRewriteMode.DaySinceY2K: return NormalizeNumber((int)(DateTime.Now.Date - new DateTime(2000, 1, 1)).TotalDays);
+				case VersionRewriteMode.MidNightSecond: return ((int)((DateTime.Now - DateTime.Today).TotalSeconds / 2)).ToText();
 				default: return part;
 			}
 		}
 
 		public override string ToString() {
 			return $"{Major}.{Minor}.{Build}.{Revision}";
+		}
+
+		static string NormalizeNumber(int n) {
+			return (n > MaxVersionNumber ? MaxVersionNumber : n < 0 ? 0 : n).ToText();
 		}
 	}
 }

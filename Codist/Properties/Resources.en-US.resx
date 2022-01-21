@@ -1850,7 +1850,7 @@ Right click: Wrap text menu...</value>
     <value>Configuration:</value>
   </data>
   <data name="T_VersionRewriteMode" xml:space="preserve">
-    <value>Unchanged/Increment/Zero/Year/Month/Date/ShortYear/YearMonth/MonthDate/DayOfYear/Hour/HourMinute/DaySinceY2K</value>
+    <value>Unchanged/Increment/Zero/Year/Month/Date/ShortYear/YearMonth/MonthDate/DayOfYear/Hour/HourMinute/DaySinceY2K/MidNightSecond</value>
   </data>
   <data name="CMD_SaveBuildSetting" xml:space="preserve">
     <value>Save</value>
