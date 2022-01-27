@@ -33,7 +33,7 @@ _Codist_ supports localization into other languages and it has both English and 
 
 ## Advanced C# Syntax Highlight
 
-The advanced syntax highlight function highlights every aspect of C# language elements with diverse styles, including using various font families and text styles, enlarging or shrinking font sizes, changing foreground or background colors and transparency.
+The advanced syntax highlight function highlights every aspect of C# language elements with diverse styles, including using various font families and text styles, underline styles, enlarging or shrinking font sizes, changing foreground or background colors and transparency.
 
 You can change syntax highlight styles in any languages, such as Visual BASIC, F#, SASS, and so on, even if they are not recognized by Codist.
 
@@ -63,7 +63,7 @@ With the **Save** and **Load** buttons, you can backup and share your own syntax
 
 If you mess up your syntax highlight styles, you can press the **Reset** button to reset all settings to default, or reapply predefined themes by clicking buttons at the left bottom.
 
-**Note**: There is a known issue in _Codist_ that **if you change the theme of Visual Studio, you may have to restart it to make syntax highlight settings to work properly**.
+**Note**: There is a known issue in _Codist_ that **if you change the theme of Visual Studio, you may have to restart it to make syntax highlight settings to work properly**. If the **Reset** button does not work, please try restarting Visual Studio.
 
 ### Customization of Syntax Highlight Styles
 
@@ -77,9 +77,11 @@ The customization window will pop up and listing syntax classifications applied 
 
   ![Syntax Highlight Customization Preview](doc/syntax-highlight-customization-preview.png)
 
+  From version 6.1 on, it is possible to define and change underline styles. Firstly assign a color for the **Line**, afterwards, more configuration elements will appear.
+
 If you want to change another syntax element, click on the place where it is applied in the code document window. If the customization window is still opened, and the _Selected Code_ section under _Syntax Categories_ is selected, the list will display the corresponding syntax styles for the place you clicked immediately.
 
-You can explore other synta categories by clicking the list on the left of the dialog.
+You can explore other syntax categories by clicking the list on the left of the dialog.
 
 Syntax definitions in the _All languages_ section will list all syntax styles for any languages installed; those under _Tagged comments_ section apply to [comment taggers](#comment-tagger-and-styles), others apply to corresponding languages accordingly.
 
