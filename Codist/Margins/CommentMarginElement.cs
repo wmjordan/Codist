@@ -84,8 +84,8 @@ namespace Codist.Margins
 				{ r.GetClassificationType(Constants.Task8Comment), TaskBrush },
 				{ r.GetClassificationType(Constants.Task9Comment), TaskBrush },
 				{ r.GetClassificationType(Constants.CodePreprocessorKeyword), PreProcessorBrush },
-				{ MarkdownTaggerProvider.HeaderClassificationTypes[1].ClassificationType, TaskBrush },
-				{ MarkdownTaggerProvider.DummyHeaderTags[1].ClassificationType, TaskBrush },
+				{ MarkdownTagger.HeaderClassificationTypes[1].ClassificationType, TaskBrush },
+				{ MarkdownTagger.DummyHeaderTags[1].ClassificationType, TaskBrush },
 			};
 		}
 

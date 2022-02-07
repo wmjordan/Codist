@@ -103,6 +103,7 @@
     </Compile>
     <Compile Include="QuickInfo\CSharpOpCodeQuickInfo.cs" />
     <Compile Include="QuickInfo\QuickInfoBackgroundController.cs" />
+    <Compile Include="Taggers\TaggerProviders.cs" />
     <Compile Include="Taggers\TransientClassificationTagHolder.cs" />
     <Compile Include="Taggers\Classifications.cs" />
     <Compile Include="Taggers\CommentFormats.cs" />

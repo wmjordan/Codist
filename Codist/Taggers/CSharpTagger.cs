@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -18,42 +17,9 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
-using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Taggers
 {
-	[Export(typeof(IViewTaggerProvider))]
-	[ContentType(Constants.CodeTypes.CSharp)]
-	[TagType(typeof(IClassificationTag))]
-	sealed class CSharpTaggerProvider : IViewTaggerProvider
-	{
-		readonly ConditionalWeakTable<ITextBuffer, CSharpTagger> _Taggers = new ConditionalWeakTable<ITextBuffer, CSharpTagger>();
-		// for debug info
-		int _taggerCount;
-		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
-			if (typeof(T) == typeof(IClassificationTag)
-				&& Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
-				&& buffer.MayBeEditor() // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
-				) {
-				if (_Taggers.TryGetValue(buffer, out var tagger) == false) {
-					tagger = new CSharpTagger(this, textView, buffer);
-					_Taggers.Add(buffer, tagger);
-					++_taggerCount;
-				}
-				tagger.IncrementReference();
-				return tagger as ITagger<T>;
-			}
-			return null;
-		}
-
-		public void DetachTagger(ITextBuffer buffer) {
-			if (_Taggers.Remove(buffer)) {
-				--_taggerCount;
-				Debug.WriteLine(buffer?.GetTextDocument()?.FilePath + " detached tagger");
-			}
-		}
-	}
-
 	/// <summary>A classifier for C# code syntax highlight.</summary>
 	sealed class CSharpTagger : ITagger<IClassificationTag>, IDisposable
 	{

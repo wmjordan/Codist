@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -8,31 +7,10 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
-using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Taggers
 {
-	[Export(typeof(ITaggerProvider))]
-	[ContentType(Constants.CodeTypes.CSharp)]
-	[TagType(typeof(ICodeMemberTag))]
-	[TextViewRole(PredefinedTextViewRoles.Document)]
-	sealed class CSharpBlockTaggerProvider : ITaggerProvider
-	{
-		public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag {
-			if (typeof(T) != typeof(ICodeMemberTag) || buffer.MayBeEditor() == false) {
-				return null;
-			}
-
-			var tagger = buffer.Properties.GetOrCreateSingletonProperty(
-				typeof(CSharpBlockTaggerProvider),
-				() => new CSharpBlockTagger(buffer)
-			);
-			return new DisposableTagger<CSharpBlockTagger, ICodeMemberTag>(tagger) as ITagger<T>;
-		}
-	}
-
 	sealed class CSharpBlockTagger : ITagger<ICodeMemberTag>, IReuseableTagger
 	{
 		ITextBuffer _buffer;

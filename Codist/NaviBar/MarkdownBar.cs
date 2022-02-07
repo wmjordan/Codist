@@ -18,18 +18,18 @@ namespace Codist.NaviBar
 	{
 		const string DefaultActiveTitle = "Headings";
 		static readonly IClassificationType
-			_H1 = MarkdownTaggerProvider.HeaderClassificationTypes[1].ClassificationType,
-			_H2 = MarkdownTaggerProvider.HeaderClassificationTypes[2].ClassificationType,
-			_H3 = MarkdownTaggerProvider.HeaderClassificationTypes[3].ClassificationType,
-			_H4 = MarkdownTaggerProvider.HeaderClassificationTypes[4].ClassificationType,
-			_H5 = MarkdownTaggerProvider.HeaderClassificationTypes[5].ClassificationType,
-			_H6 = MarkdownTaggerProvider.HeaderClassificationTypes[6].ClassificationType,
-			_DummyTag1 = MarkdownTaggerProvider.DummyHeaderTags[1].ClassificationType,
-			_DummyTag2 = MarkdownTaggerProvider.DummyHeaderTags[2].ClassificationType,
-			_DummyTag3 = MarkdownTaggerProvider.DummyHeaderTags[3].ClassificationType,
-			_DummyTag4 = MarkdownTaggerProvider.DummyHeaderTags[4].ClassificationType,
-			_DummyTag5 = MarkdownTaggerProvider.DummyHeaderTags[5].ClassificationType,
-			_DummyTag6 = MarkdownTaggerProvider.DummyHeaderTags[6].ClassificationType;
+			_H1 = MarkdownTagger.HeaderClassificationTypes[1].ClassificationType,
+			_H2 = MarkdownTagger.HeaderClassificationTypes[2].ClassificationType,
+			_H3 = MarkdownTagger.HeaderClassificationTypes[3].ClassificationType,
+			_H4 = MarkdownTagger.HeaderClassificationTypes[4].ClassificationType,
+			_H5 = MarkdownTagger.HeaderClassificationTypes[5].ClassificationType,
+			_H6 = MarkdownTagger.HeaderClassificationTypes[6].ClassificationType,
+			_DummyTag1 = MarkdownTagger.DummyHeaderTags[1].ClassificationType,
+			_DummyTag2 = MarkdownTagger.DummyHeaderTags[2].ClassificationType,
+			_DummyTag3 = MarkdownTagger.DummyHeaderTags[3].ClassificationType,
+			_DummyTag4 = MarkdownTagger.DummyHeaderTags[4].ClassificationType,
+			_DummyTag5 = MarkdownTagger.DummyHeaderTags[5].ClassificationType,
+			_DummyTag6 = MarkdownTagger.DummyHeaderTags[6].ClassificationType;
 		readonly TaggerResult _Tags;
 		readonly ThemedToolBarText _ActiveTitleLabel;
 		MarkdownList _TitleList;
