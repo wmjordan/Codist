@@ -121,7 +121,7 @@
     <value>Codist</value>
   </data>
   <data name="112" xml:space="preserve">
-    <value>此扩展提供了增强的语法突出显示、代码提示、智能工具栏和导航栏、自动更改程序集版本号，并能在滚动条上标记关键的代码和注释项。</value>
+    <value>此扩展提供了增强的语法突出显示、代码提示、智能工具条、导航栏、自动更改版本号，滚动条上标记行号、代码声明和注释项等诸多功能。</value>
   </data>
   <data name="301" xml:space="preserve">
     <value>常规</value>
