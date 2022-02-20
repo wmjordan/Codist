@@ -1360,6 +1360,7 @@ namespace Codist.NaviBar
 								case SyntaxKind.UnsafeKeyword: AddIcon(ref icons, IconIds.Unsafe); break;
 								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedMethod); break;
 								case SyntaxKind.OverrideKeyword: AddIcon(ref icons, IconIds.OverrideMethod); break;
+								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
 							}
 						}
 						break;
@@ -1375,6 +1376,7 @@ namespace Codist.NaviBar
 								case SyntaxKind.OverrideKeyword:
 									AddIcon(ref icons, isEvent ? IconIds.OverrideEvent : IconIds.OverrideProperty);
 									break;
+								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
 							}
 						}
 						if (p.AccessorList != null) {
@@ -1385,12 +1387,17 @@ namespace Codist.NaviBar
 								}
 								else if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
 									AddIcon(ref icons, IconIds.AutoProperty);
+									break;
 								}
 							}
 							else if (a.Count == 1) {
 								if (a[0].Body == null && a[0].ExpressionBody == null) {
 									AddIcon(ref icons, IconIds.ReadonlyProperty);
+									break;
 								}
+							}
+							if (a.Any(i => i.Keyword.IsKind(SyntaxKind.GetKeyword) && i.Modifiers.Any(SyntaxKind.ReadOnlyKeyword))) {
+								AddIcon(ref icons, IconIds.ReadonlyMethod);
 							}
 						}
 						break;
@@ -1411,6 +1418,7 @@ namespace Codist.NaviBar
 								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
 								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractClass); break;
 								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedClass); break;
+								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyType); break;
 							}
 						}
 						break;

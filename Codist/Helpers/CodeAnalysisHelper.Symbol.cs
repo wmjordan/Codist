@@ -393,6 +393,9 @@ namespace Codist
 						if (m.DeclaredAccessibility != Accessibility.Public) {
 							sb.Append(m.GetAccessibility());
 						}
+						if (m.IsReadOnly()) {
+							sb.Append("readonly ");
+						}
 						sb.Append("get;");
 					}
 					m = p.SetMethod;
@@ -637,6 +640,9 @@ namespace Codist
 			else if (method.ReturnsByRefReadonly) {
 				t += "ref readonly ";
 			}
+			else if (method.IsReadOnly()) {
+				t += "readonly ";
+			}
 			return t;
 		}
 
@@ -694,6 +700,9 @@ namespace Codist
 		}
 		public static bool IsInitOnly(this IMethodSymbol method) {
 			return method != null && NonPublicOrFutureAccessors.GetMethodIsInitOnly(method);
+		}
+		public static bool IsReadOnly(this IMethodSymbol method) {
+			return method != null && NonPublicOrFutureAccessors.GetMethodIsReadOnly(method);
 		}
 		public static byte GetCallingConvention(this IMethodSymbol method) {
 			return method != null ? NonPublicOrFutureAccessors.GetMethodCallingConvention(method) : (byte)0;
@@ -1167,9 +1176,14 @@ namespace Codist
 		/// </summary>
 		static partial class NonPublicOrFutureAccessors
 		{
-			public static readonly Func<ITypeSymbol, bool> GetNamedTypeIsReadOnly = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsReadOnly", typeof(CSharpCompilation).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.NamedTypeSymbol", false));
+			public static readonly Func<ITypeSymbol, bool> GetNamedTypeIsReadOnly = 
+				typeof(ITypeSymbol).GetProperty("IsReadOnly") != null
+				? ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsReadOnly")
+				: ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsReadOnly", typeof(CSharpCompilation).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.NamedTypeSymbol", false));
 
 			public static readonly Func<IMethodSymbol, bool> GetMethodIsInitOnly = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, bool>("IsInitOnly");
+
+			public static readonly Func<IMethodSymbol, bool> GetMethodIsReadOnly = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, bool>("IsReadOnly");
 
 			public static readonly Func<IMethodSymbol, byte> GetMethodCallingConvention = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, byte>("CallingConvention");
 

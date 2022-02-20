@@ -721,6 +721,9 @@ namespace Codist.Controls
 							if (ms.IsOverride) {
 								AddIcon(ref icons, IconIds.OverrideMethod);
 							}
+							if (ms.IsReadOnly()) {
+								AddIcon(ref icons, IconIds.ReadonlyMethod);
+							}
 						}
 					}
 					break;
@@ -745,7 +748,7 @@ namespace Codist.Controls
 							break;
 						case TypeKind.Struct:
 							if (type.IsReadOnly()) {
-								AddIcon(ref icons, IconIds.ReadonlyField);
+								AddIcon(ref icons, IconIds.ReadonlyType);
 							}
 							break;
 					}
@@ -784,6 +787,9 @@ namespace Codist.Controls
 						}
 						else if (ms.IsInitOnly()) {
 							AddIcon(ref icons, IconIds.InitonlyProperty);
+						}
+						if ((ms = ((IPropertySymbol)symbol).GetMethod) != null && ms.IsReadOnly()) {
+							AddIcon(ref icons, IconIds.ReadonlyMethod);
 						}
 						if (symbol.IsAbstract) {
 							AddIcon(ref icons, IconIds.AbstractMember);
