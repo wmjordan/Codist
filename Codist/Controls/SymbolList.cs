@@ -729,18 +729,25 @@ namespace Codist.Controls
 					if (type.IsGenericType) {
 						AddIcon(ref icons, IconIds.Generic);
 					}
-					if (type.TypeKind == TypeKind.Class) {
-						if (type.IsSealed && type.IsStatic == false) {
-							AddIcon(ref icons, IconIds.SealedClass);
-						}
-						else if (type.IsAbstract) {
-							AddIcon(ref icons, IconIds.AbstractClass);
-						}
-					}
-					else if (type.TypeKind == TypeKind.Enum) {
-						if (type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"))) {
-							AddIcon(ref icons, IconIds.EnumFlags);
-						}
+					switch (type.TypeKind) {
+						case TypeKind.Class:
+							if (type.IsSealed && type.IsStatic == false) {
+								AddIcon(ref icons, IconIds.SealedClass);
+							}
+							else if (type.IsAbstract) {
+								AddIcon(ref icons, IconIds.AbstractClass);
+							}
+							break;
+						case TypeKind.Enum:
+							if (type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"))) {
+								AddIcon(ref icons, IconIds.EnumFlags);
+							}
+							break;
+						case TypeKind.Struct:
+							if (type.IsReadOnly()) {
+								AddIcon(ref icons, IconIds.ReadonlyField);
+							}
+							break;
 					}
 					break;
 				case SymbolKind.Field:
