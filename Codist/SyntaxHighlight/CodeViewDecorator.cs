@@ -349,7 +349,7 @@ namespace Codist.SyntaxHighlight
 			var d = new TextDecoration {
 				Location = location,
 				Pen = new Pen {
-					Brush = new SolidColorBrush(settings.LineColor.Alpha(settings.LineOpacity > 0 ? settings.LineOpacity : (byte)255))
+					Brush = new SolidColorBrush(settings.LineOpacity == 0 ? settings.LineColor : settings.LineColor.Alpha(settings.LineOpacity))
 				}
 			};
 			if (settings.LineOffset > 0) {

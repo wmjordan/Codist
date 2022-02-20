@@ -1,12 +1,12 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Utilities;
 using AppHelpers;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
-using System.Threading.Tasks;
+using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.NaviBar
 {

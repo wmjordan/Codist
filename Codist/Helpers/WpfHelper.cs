@@ -313,7 +313,7 @@ namespace Codist
 
 		#region WPF tree
 		public static DependencyObject GetParent(this DependencyObject obj) {
-			return obj is System.Windows.Media.Visual ? VisualTreeHelper.GetParent(obj) : LogicalTreeHelper.GetParent(obj);
+			return obj is Visual ? VisualTreeHelper.GetParent(obj) : LogicalTreeHelper.GetParent(obj);
 		}
 		public static DependencyObject GetFirstVisualChild(this DependencyObject obj) {
 			return VisualTreeHelper.GetChild(obj, 0);
@@ -349,8 +349,7 @@ namespace Codist
 			var count = VisualTreeHelper.GetChildrenCount(obj);
 			for (int i = 0; i < count; i++) {
 				var c = VisualTreeHelper.GetChild(obj, i);
-				var r = c as TChild;
-				if (r != null && (predicate == null || predicate(r))) {
+				if (c is TChild r && (predicate == null || predicate(r))) {
 					return r;
 				}
 				r = GetFirstVisualChild(c, predicate);
@@ -368,8 +367,7 @@ namespace Codist
 			var count = VisualTreeHelper.GetChildrenCount(obj);
 			for (int i = count - 1; i >= 0; i--) {
 				var c = VisualTreeHelper.GetChild(obj, i);
-				var r = c as TChild;
-				if (r != null && (predicate == null || predicate(r))) {
+				if (c is TChild r && (predicate == null || predicate(r))) {
 					return r;
 				}
 				r = GetLastVisualChild(c, predicate);
