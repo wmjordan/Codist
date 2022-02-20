@@ -58,6 +58,7 @@ namespace Codist
 		}
 
 		public static CodistPackage Instance { get; private set; }
+		public static Version VsVersion => Vs.Version;
 		public static EnvDTE80.DTE2 DTE {
 			get {
 				ThreadHelper.ThrowIfNotOnUIThread();
@@ -237,4 +238,8 @@ namespace Codist
 		internal static ResourceDictionary SymbolList => _SymbolList ?? (_SymbolList = WpfHelper.LoadComponent("controls/SymbolList.xaml").MergeWith(ThemedControls));
 	}
 
+	static class Vs
+	{
+		public static readonly Version Version = Application.Current.MainWindow.GetType().Assembly.GetName().Version;
+	}
 }

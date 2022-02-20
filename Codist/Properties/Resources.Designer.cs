@@ -2003,6 +2003,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   查找类似 Disable change tracker interaction (VS 2022 only) 的本地化字符串。
+        /// </summary>
+        internal static string OT_DisableChangeTracker {
+            get {
+                return ResourceManager.GetString("OT_DisableChangeTracker", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 When clicking the change indicators, suppress the preview window 的本地化字符串。
+        /// </summary>
+        internal static string OT_DisableChangeTrackerTip {
+            get {
+                return ResourceManager.GetString("OT_DisableChangeTrackerTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Recommended donation value is $19.99. But you can modify the amount to any value if you like 的本地化字符串。
         /// </summary>
         internal static string OT_DonateLinkTip {

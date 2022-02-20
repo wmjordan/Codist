@@ -1904,4 +1904,10 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="T_SolidLine" xml:space="preserve">
     <value>Solid</value>
   </data>
+  <data name="OT_DisableChangeTracker" xml:space="preserve">
+    <value>Disable change tracker interaction (VS 2022 only)</value>
+  </data>
+  <data name="OT_DisableChangeTrackerTip" xml:space="preserve">
+    <value>When clicking the change indicators, suppress the preview window</value>
+  </data>
 </root>

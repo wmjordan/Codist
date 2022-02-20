@@ -811,6 +811,7 @@ namespace Codist
 		SymbolReference = 1 << 7,
 		Selection = 1 << 8,
 		LineNumber = 1 << 9,
+		DisableChangeTracker = 1 << 10,
 		CodeMarginMask = SpecialComment | CompilerDirective,
 		MemberMarginMask = MemberDeclaration | SymbolReference,
 		Default = SpecialComment | MemberDeclaration | LineNumber | Selection | LongMemberDeclaration | SymbolReference

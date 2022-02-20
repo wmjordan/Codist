@@ -90,6 +90,7 @@
     <Compile Include="Controls\SymbolMenu.cs" />
     <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
     <Compile Include="IconIds.cs" />
+    <Compile Include="Margins\DisableChangeTrackerMargin.cs" />
     <Compile Include="NaviBar\NaviBar.cs" />
     <Compile Include="Options\CommonControls.cs" />
     <Compile Include="Options\OptionsPage.cs">

@@ -55,10 +55,6 @@ namespace Codist.Options
 			Config.Instance.EndUpdate(e.ApplyBehavior == ApplyKind.Apply);
 		}
 
-		//protected override void OnDeactivate(CancelEventArgs e) {
-		//	base.OnDeactivate(e);
-		//}
-
 		internal void AddConfigChangeHandler(Action<Config> action) {
 			_ConfigChangeHandler += action;
 		}
@@ -611,7 +607,7 @@ namespace Codist.Options
 
 		sealed class PageControl : OptionsPageContainer
 		{
-			readonly OptionBox<MarkerOptions> _LineNumber, _Selection, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference;
+			readonly OptionBox<MarkerOptions> _LineNumber, _Selection, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference, _DisableChangeTracker;
 			readonly OptionBox<MarkerOptions>[] _Options;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -625,6 +621,8 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_SelectionTip),
 					_SpecialComment = o.CreateOptionBox(MarkerOptions.SpecialComment, UpdateConfig, R.OT_TaggedComments)
 						.SetLazyToolTip(() => R.OT_TaggedCommentsTip),
+					_DisableChangeTracker = o.CreateOptionBox(MarkerOptions.DisableChangeTracker, UpdateConfig, R.OT_DisableChangeTracker)
+						.SetLazyToolTip(() => R.OT_DisableChangeTrackerTip),
 
 					new TitleBox(R.OT_CSharp),
 					new DescriptionBox(R.OT_CSharpMarkerNote),
@@ -643,12 +641,16 @@ namespace Codist.Options
 					_SymbolReference = o.CreateOptionBox(MarkerOptions.SymbolReference, UpdateConfig, R.OT_MatchSymbol)
 						.SetLazyToolTip(() => R.OT_MatchSymbolTip)
 					);
-				_Options = new[] { _LineNumber, _Selection, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference };
+				_Options = new[] {
+					_LineNumber, _Selection, _SpecialComment, _DisableChangeTracker,
+					_MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference
+				};
 				var declarationSubOptions = new[] { _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective };
 				foreach (var item in declarationSubOptions) {
 					item.WrapMargin(SubOptionMargin);
 				}
 				_MarkerDeclarationLine.BindDependentOptionControls(declarationSubOptions);
+				_DisableChangeTracker.IsEnabled = CodistPackage.VsVersion.Major >= 17;
 			}
 
 			protected override void LoadConfig(Config config) {
@@ -786,10 +788,11 @@ namespace Codist.Options
 				_TopSpace.ValueChanged += _TopSpace_ValueChanged;
 				_BottomSpace.ValueChanged += _BottomSpace_ValueChanged;
 
-				_MenuLayoutOverride.IsEnabled = Application.Current.MainWindow
-					.GetFirstVisualChild<Grid>(i => i.Name == "RootGrid")
-					?.GetFirstVisualChild<Border>(i => i.Name == "MainWindowTitleBar")
-					?.Child is DockPanel;
+				//_MenuLayoutOverride.IsEnabled = Application.Current.MainWindow
+				//	.GetFirstVisualChild<Grid>(i => i.Name == "RootGrid")
+				//	?.GetFirstVisualChild<Border>(i => i.Name == "MainWindowTitleBar")
+				//	?.Child is DockPanel;
+				_MenuLayoutOverride.IsEnabled = CodistPackage.VsVersion.Major == 15;
 			}
 
 			protected override void LoadConfig(Config config) {

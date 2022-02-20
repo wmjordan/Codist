@@ -67,6 +67,18 @@ namespace Codist.Margins
 	}
 
 	[Export(typeof(IWpfTextViewMarginProvider))]
+	[Name(DisableChangeTrackerMargin.MarginName)]
+	[MarginContainer(PredefinedMarginNames.LeftSelection)]
+	[ContentType(Constants.CodeTypes.Code)]
+	[TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
+	sealed class DisableChangeTrackerMarginFactory : IWpfTextViewMarginProvider
+	{
+		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
+			return CodistPackage.VsVersion.Major >= 17 ? new DisableChangeTrackerMargin(marginContainer) : null;
+		}
+	}
+
+	[Export(typeof(IWpfTextViewMarginProvider))]
 	[Name(LineNumberMargin.MarginName)]
 	[Order(Before = PredefinedMarginNames.OverviewChangeTracking)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]

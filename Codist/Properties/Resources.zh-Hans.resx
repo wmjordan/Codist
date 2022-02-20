@@ -1889,4 +1889,10 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_SolidLine" xml:space="preserve">
     <value>直线</value>
   </data>
+  <data name="OT_DisableChangeTracker" xml:space="preserve">
+    <value>禁止变更标记弹出预览窗口 (仅 VS 2022)</value>
+  </data>
+  <data name="OT_DisableChangeTrackerTip" xml:space="preserve">
+    <value>在点击代码窗口左侧的变更标记时，禁止弹出变更情况预览窗口</value>
+  </data>
 </root>
