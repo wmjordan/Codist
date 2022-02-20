@@ -310,6 +310,19 @@ namespace Codist.Taggers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpReadOnlyStructName)]
+	[Name(Constants.CSharpReadOnlyStructName)]
+	[UserVisible(false)]
+	[Order(After = Constants.CodeStructName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
+	sealed class ReadOnlyStructFormat : ClassificationFormatDefinition
+	{
+		public ReadOnlyStructFormat() {
+			DisplayName = Constants.NameOfMe + ": read-only struct";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpConstructorMethodName)]
 	[Name(Constants.CSharpConstructorMethodName)]
 	[UserVisible(false)]

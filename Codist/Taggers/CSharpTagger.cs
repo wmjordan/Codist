@@ -777,7 +777,7 @@ namespace Codist.Taggers
 							yield break;
 						}
 						else {
-							yield return f.IsReadOnly ? _Classifications.ReadonlyField
+							yield return f.IsReadOnly ? _Classifications.ReadOnlyField
 								: f.IsVolatile ? _Classifications.VolatileField
 								: _Classifications.Field;
 						}
@@ -854,7 +854,12 @@ namespace Codist.Taggers
 					}
 				}
 				else if (symbol.IsSealed) {
-					if (symbol.Kind == SymbolKind.NamedType && ((ITypeSymbol)symbol).TypeKind != TypeKind.Class) {
+					ITypeSymbol type;
+					if (symbol.Kind == SymbolKind.NamedType
+						&& (type = (ITypeSymbol)symbol).TypeKind == TypeKind.Struct) {
+						if (type.IsReadOnly()) {
+							yield return _Classifications.ReadOnlyStruct;
+						}
 						yield break;
 					}
 					yield return _Classifications.SealedMember;

@@ -159,6 +159,11 @@ namespace Codist.Taggers
 		static ClassificationTypeDefinition ReadOnlyField;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeStructName)]
+		[Name(Constants.CSharpReadOnlyStructName)]
+		static ClassificationTypeDefinition ReadOnlyStruct;
+
+		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
 		[Name(Constants.CSharpResourceKeyword)]
 		static ClassificationTypeDefinition ResourceKeyword;

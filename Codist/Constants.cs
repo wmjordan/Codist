@@ -142,6 +142,7 @@ namespace Codist
 		public const string CSharpFieldName = "C#: Field";
 		public const string CSharpConstFieldName = "C#: Const field";
 		public const string CSharpReadOnlyFieldName = "C#: Read-only field";
+		public const string CSharpReadOnlyStructName = "C#: Read-only struct";
 		public const string CSharpEnumFieldName = "C#: Enum field";
 		public const string CSharpResourceKeyword = "C#: Resource keyword";
 		public const string CSharpAliasNamespaceName = "C#: Alias namespace";
@@ -610,6 +611,11 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpSealedMemberName)]
 		[Description("Name of sealed class or sealed member")]
 		SealedClassName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpReadOnlyStructName)]
+		[BaseDefinition(Constants.CodeStructName)]
+		[Description("Name of readonly struct")]
+		ReadOnlyStructName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName)]
 		[BaseDefinition(Constants.CodeEventName)]
