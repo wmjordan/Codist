@@ -34,26 +34,26 @@ namespace TestProject.CS7_2
 
         private double _x;
         public double X {
-            readonly get => _x;
+            get => _x;
             set => _x = value;
         }
 
         private double _y;
         public double Y {
-            readonly get => _y;
+            get => _y;
             set => _y = value;
         }
 
         private double _z;
         public double Z {
-            readonly get => _z;
+            get => _z;
             set => _z = value;
         }
 
-        public readonly double Distance => Math.Sqrt(X * X + Y * Y + Z * Z);
+        public double Distance => Math.Sqrt(X * X + Y * Y + Z * Z);
         public static ref readonly Point3D Origin => ref origin;
 
-        public readonly override string ToString() => $"{X}, {Y}, {Z}";
+        public override string ToString() => $"{X}, {Y}, {Z}";
     }
 
     class CallingSite

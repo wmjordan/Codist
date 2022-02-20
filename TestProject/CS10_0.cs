@@ -2,13 +2,18 @@
 using System.Linq.Expressions;
 
 namespace TestProject.CS10_0;
+
 record struct RecordStruct
 {
 	public string Name { get; init; }
 	public Address Address { get; init; } = new();
-	public System.Collections.Generic.Dictionary<string, object> Values { get; init; } = new();
+	public System.Collections.Generic.Dictionary<string, object> Values { get; init; } = new(StringComparer.Ordinal);
 
-	public RecordStruct NewName(string name)
+	public RecordStruct() {
+		Name = nameof(RecordStruct);
+	}
+
+	public readonly RecordStruct NewName(string name)
 	{
 		return this with { Name = name };
 	}
@@ -64,6 +69,7 @@ class Lambdas
 	void ReturnTypesForLambdas()
 	{
 		var choose = object (bool b) => b ? 1 : "two";
+		var parse = (string t, out int v) => Int32.TryParse(t, out v);
 	}
 
 	void AttributesOnLambdas()
