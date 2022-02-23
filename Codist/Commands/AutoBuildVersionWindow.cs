@@ -19,11 +19,13 @@ namespace Codist.Commands
 		readonly BuildSetting _Settings;
 		readonly ListBox _Configuration;
 		readonly AutoVersionSettingsControl _AssemblyVersion, _AssemblyFileVersion;
+		readonly CheckBox _RewriteCopyrightYear;
+		readonly string _Copyright;
 		readonly string[] _CurrentAssemblyVersion, _CurrentAssemblyFileVersion;
 
 		public AutoBuildVersionWindow(EnvDTE.Project project) {
 			_Project = project;
-			BuildConfigSetting.TryGetVersions(project, out _CurrentAssemblyVersion, out _CurrentAssemblyFileVersion);
+			BuildConfigSetting.TryGetVersions(project, out _CurrentAssemblyVersion, out _CurrentAssemblyFileVersion, out _Copyright);
 			Title = "Auto Build Version";
 			ShowInTaskbar = false;
 			Height = 250;
@@ -66,6 +68,7 @@ namespace Codist.Commands
 						Children = {
 							(_AssemblyVersion = new AutoVersionSettingsControl("AssemblyVersion:", _CurrentAssemblyVersion)),
 							(_AssemblyFileVersion = new AutoVersionSettingsControl("AssemblyFileVersion:", _CurrentAssemblyFileVersion)),
+							(_RewriteCopyrightYear = new CheckBox { Content = "Rewrite copyright year" }.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey)),
 							new WrapPanel {
 								Children = {
 									new ThemedButton(R.CMD_SaveBuildSetting, R.CMDT_SaveChanges, Ok) { IsDefault = true, Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
@@ -104,6 +107,7 @@ namespace Codist.Commands
 			}
 			s.AssemblyVersion = _AssemblyVersion.Setting;
 			s.AssemblyFileVersion = _AssemblyFileVersion.Setting;
+			s.UpdateLastYearNumberInCopyright = _RewriteCopyrightYear.IsChecked == true;
 			if (o == false && s.ShouldRewrite) {
 				_Settings.Add(r, s);
 			}
@@ -113,10 +117,12 @@ namespace Codist.Commands
 			if (_Settings.TryGetValue(config, out var s)) {
 				_AssemblyVersion.Set(s.AssemblyVersion);
 				_AssemblyFileVersion.Set(s.AssemblyFileVersion);
+				_RewriteCopyrightYear.IsChecked = s.UpdateLastYearNumberInCopyright;
 			}
 			else {
 				_AssemblyVersion.Reset();
 				_AssemblyFileVersion.Reset();
+				_RewriteCopyrightYear.IsChecked = false;
 			}
 		}
 
