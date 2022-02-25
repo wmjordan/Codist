@@ -134,8 +134,8 @@ namespace Codist
 					if (i != -1) {
 						s = s.Substring(0, i);
 					}
-					if (buildConfig.TryGetValue(s, out var setting) && setting.ShouldRewrite
-						|| buildConfig.TryGetValue("<Any>", out setting) && setting.ShouldRewrite) {
+					var setting = buildConfig.Merge("<Any>", s);
+					if (setting != null && setting.ShouldRewrite) {
 						setting.RewriteVersion(project);
 					}
 				}

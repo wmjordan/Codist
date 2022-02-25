@@ -39,5 +39,23 @@ namespace Codist.AutoBuildVersion
 				return null;
 			}
 		}
+
+		/// <summary>Merge two <see cref="BuildConfigSetting"/>s named <paramref name="baseConfig"/> and <paramref name="specificConfig"/>. The latter one has higher precedence.</summary>
+		/// <param name="baseConfig">The base configuration name.</param>
+		/// <param name="specificConfig">The specifig configuration name.</param>
+		/// <returns>The merged configuration. If neither <paramref name="baseConfig"/> or <paramref name="specificConfig"/> exists, returns <see langword="null"/>.</returns>
+		public BuildConfigSetting Merge(string baseConfig, string specificConfig) {
+			TryGetValue(specificConfig, out var s);
+			if (TryGetValue(baseConfig, out var b)) {
+				return s != null
+					? new BuildConfigSetting {
+						AssemblyVersion = s.AssemblyVersion?.ShouldRewrite == true ? s.AssemblyVersion : b.AssemblyVersion,
+						AssemblyFileVersion = s.AssemblyFileVersion?.ShouldRewrite == true ? s.AssemblyFileVersion : b.AssemblyFileVersion,
+						UpdateLastYearNumberInCopyright = s.UpdateLastYearNumberInCopyright || b.UpdateLastYearNumberInCopyright
+					}
+					: b;
+			}
+			return s;
+		}
 	}
 }
