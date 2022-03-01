@@ -183,8 +183,9 @@ namespace Codist.Controls
 
 		void MenuHeader_DragMove(object sender, MouseEventArgs e) {
 			var s = e.Source as FrameworkElement;
+			var p = (e.OriginalSource as DependencyObject).GetParentOrSelf<FrameworkElement>();
 			if (e.LeftButton == MouseButtonState.Pressed) {
-				if (_isDragging == false && s.CaptureMouse()) {
+				if (_isDragging == false && p.CaptureMouse()) {
 					_isDragging = true;
 					s.Cursor = Cursors.SizeAll;
 					_beginDragPosition = e.GetPosition(s);
@@ -201,7 +202,7 @@ namespace Codist.Controls
 					_isDragging = false;
 					s.Cursor = null;
 					s.MouseMove -= MenuHeader_DragMove;
-					s.ReleaseMouseCapture();
+					p.ReleaseMouseCapture();
 					s.MouseLeftButtonDown += MenuHeader_MouseDown;
 				}
 			}
