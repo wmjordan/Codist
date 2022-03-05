@@ -227,9 +227,9 @@ namespace Codist.AutoBuildVersion
 		enum RewriteFlags
 		{
 			None,
-			AssemblyVersion,
-			AssemblyFileVersion,
-			CopyrightYear
+			AssemblyVersion = 1,
+			AssemblyFileVersion = 1 << 1,
+			CopyrightYear = 1 << 2
 		}
 
 		static class AttributePattern
