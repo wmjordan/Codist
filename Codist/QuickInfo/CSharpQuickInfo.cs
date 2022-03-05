@@ -66,7 +66,7 @@ namespace Codist.QuickInfo
 			if (semanticModel == null) {
 				return null;
 			}
-
+			qiWrapper.OverrideBuiltInXmlDoc = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationOverride);
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 
 			//look for occurrences of our QuickInfo words in the span
@@ -80,7 +80,7 @@ namespace Codist.QuickInfo
 					return null;
 				case SyntaxKind.OpenBraceToken:
 				case SyntaxKind.CloseBraceToken:
-					qiWrapper.KeepBuiltInXmlDoc = true;
+					qiWrapper.OverrideBuiltInXmlDoc = false;
 					break;
 				case SyntaxKind.SwitchKeyword: // switch info
 				case SyntaxKind.ThisKeyword: // convert to type below

@@ -749,7 +749,8 @@ namespace Codist
 		ClickAndGo = 1 << 28,
 		CtrlQuickInfo = 1 << 29,
 		AlternativeStyle = 1 << 30,
-		QuickInfoOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | ClickAndGo | AlternativeStyle,
+		DocumentationOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc,
+		QuickInfoOverride = DocumentationOverride | ClickAndGo | AlternativeStyle,
 		Default = Attributes | BaseType | BaseTypeInheritence | Interfaces | InterfacesInheritence | NumericValues | InterfaceImplementations | ClickAndGo | MethodOverload | Parameter | OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc | SeeAlsoDoc | ExceptionDoc | ReturnsDoc | RemarksDoc,
 	}
 

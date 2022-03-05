@@ -22,7 +22,7 @@ namespace Codist.QuickInfo
 	interface IQuickInfoOverrider
 	{
 		UIElement Control { get; }
-		bool KeepBuiltInXmlDoc { get; set; }
+		bool OverrideBuiltInXmlDoc { get; set; }
 		void SetDiagnostics(IList<Diagnostic> diagnostics);
 		void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, IAsyncQuickInfoSession quickInfoSession);
 		void OverrideDocumentation(UIElement docElement);
@@ -269,7 +269,10 @@ namespace Codist.QuickInfo
 			}
 
 			public UIElement Control => _Overrider;
-			public bool KeepBuiltInXmlDoc { get => _Overrider.KeepBuiltInXmlDoc; set => _Overrider.KeepBuiltInXmlDoc = value; }
+			public bool OverrideBuiltInXmlDoc {
+				get => _Overrider.OverrideBuiltInXmlDoc;
+				set => _Overrider.OverrideBuiltInXmlDoc = value;
+			}
 
 			public void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, IAsyncQuickInfoSession quickInfoSession) {
 				_Overrider.ClickAndGoSymbol = symbol;
@@ -297,7 +300,7 @@ namespace Codist.QuickInfo
 				static readonly Thickness __TitlePanelMargin = new Thickness(0, 0, 30, 6);
 
 				public ISymbol ClickAndGoSymbol;
-				public bool LimitItemSize, KeepBuiltInXmlDoc;
+				public bool LimitItemSize, OverrideBuiltInXmlDoc;
 				public UIElement DocElement;
 				public UIElement ExceptionDoc;
 				public UIElement AnonymousTypeInfo;
@@ -427,7 +430,6 @@ namespace Codist.QuickInfo
 					if (doc == null) {
 						return;
 					}
-					var v16_1orLater = titlePanel.GetParent<ItemsControl>().GetParent<ItemsControl>() != null;
 
 					titlePanel.HorizontalAlignment = HorizontalAlignment.Stretch;
 					doc.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -435,57 +437,11 @@ namespace Codist.QuickInfo
 					var icon = infoPanel.GetFirstVisualChild<CrispImage>();
 					var signature = infoPanel.GetFirstVisualChild<TextBlock>();
 
-					// beautify the title panel
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
-						if (icon != null) {
-							var b = infoPanel.GetParent<Border>();
-							b.Background = new VisualBrush(CreateEnlargedIcon(icon)) {
-								Opacity = 0.3,
-								AlignmentX = AlignmentX.Right,
-								AlignmentY = AlignmentY.Bottom,
-								TileMode = TileMode.None,
-								Stretch = Stretch.None,
-								Transform = new TranslateTransform(0, -6)
-							};
-							b.MinHeight = 60;
-							icon.Visibility = Visibility.Collapsed;
-						}
-						if (signature != null) {
-							var list = (IList)signature.Inlines;
-							for (var i = 0; i < list.Count; i++) {
-								if (list[i] is Hyperlink link) {
-									var r = link.Inlines.FirstInline as Run;
-									if (r != null) {
-										list[i] = new Run { Text = r.Text, Foreground = r.Foreground, Background = r.Background };
-									}
-								}
-							}
-						}
-						titlePanel.Margin = __TitlePanelMargin;
+						UseAlternativeStyle(infoPanel, titlePanel, icon, signature);
 					}
 
-					#region Override documentation
-					// https://github.com/dotnet/roslyn/blob/version-3.0.0/src/Features/Core/Portable/QuickInfo/CommonSemanticQuickInfoProvider.cs
-					// replace the default XML doc
-					// sequence of items in default XML Doc panel:
-					// 1. summary
-					// 2. generic type parameter
-					// 3. anonymous types
-					// 4. availability warning
-					// 5. usage
-					// 6. exception
-					// 7. captured variables
-					var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
-					if (KeepBuiltInXmlDoc == false) {
-						ClearDefaultDocumentationItems(doc, v16_1orLater, items);
-					}
-					if (DocElement != null) {
-						OverrideDocElement(doc, v16_1orLater, items);
-					}
-					if (ExceptionDoc != null) {
-						OverrideExceptionDocElement(doc, v16_1orLater, items);
-					}
-					#endregion
+					OverrideDocumentation(doc);
 
 					if (icon != null && signature != null) {
 						// apply click and go feature
@@ -499,15 +455,67 @@ namespace Codist.QuickInfo
 					}
 				}
 
-				static void ClearDefaultDocumentationItems(StackPanel doc, bool v16_1orLater, IList items) {
+				static void UseAlternativeStyle(StackPanel infoPanel, WrapPanel titlePanel, CrispImage icon, TextBlock signature) {
+					if (icon != null) {
+						var b = infoPanel.GetParent<Border>();
+						b.Background = new VisualBrush(CreateEnlargedIcon(icon)) {
+							Opacity = 0.3,
+							AlignmentX = AlignmentX.Right,
+							AlignmentY = AlignmentY.Bottom,
+							TileMode = TileMode.None,
+							Stretch = Stretch.None,
+							Transform = new TranslateTransform(0, -6)
+						};
+						b.MinHeight = 60;
+						icon.Visibility = Visibility.Collapsed;
+					}
+					if (signature != null) {
+						var list = (IList)signature.Inlines;
+						for (var i = 0; i < list.Count; i++) {
+							if (list[i] is Hyperlink link) {
+								var r = link.Inlines.FirstInline as Run;
+								if (r != null) {
+									list[i] = new Run { Text = r.Text, Foreground = r.Foreground, Background = r.Background };
+								}
+							}
+						}
+					}
+					titlePanel.Margin = __TitlePanelMargin;
+				}
+
+				void OverrideDocumentation(StackPanel doc) {
+					// https://github.com/dotnet/roslyn/blob/version-3.0.0/src/Features/Core/Portable/QuickInfo/CommonSemanticQuickInfoProvider.cs
+					// replace the default XML doc
+					// sequence of items in default XML Doc panel:
+					// 1. summary
+					// 2. generic type parameter
+					// 3. anonymous types
+					// 4. availability warning
+					// 5. usage
+					// 6. exception
+					// 7. captured variables
+					if (OverrideBuiltInXmlDoc && (DocElement != null || ExceptionDoc != null)) {
+						var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
+						var v16orLater = CodistPackage.VsVersion.Major >= 16;
+						ClearDefaultDocumentationItems(doc, v16orLater, items);
+						if (DocElement != null) {
+							OverrideDocElement(doc, v16orLater, items);
+						}
+						if (ExceptionDoc != null) {
+							OverrideExceptionDocElement(doc, v16orLater, items);
+						}
+					}
+				}
+
+				static void ClearDefaultDocumentationItems(StackPanel doc, bool v16orLater, IList items) {
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
-						if (v16_1orLater) {
+						if (v16orLater) {
 							items = doc.GetParent<ItemsControl>().Items;
 						}
 						try {
 							for (int i = items.Count - 1; i > 0; i--) {
 								var item = items[i];
-								if (v16_1orLater && item is Panel && item is ThemedTipDocument == false || item is TextBlock) {
+								if (v16orLater && item is Panel && item is ThemedTipDocument == false || item is TextBlock) {
 									items.RemoveAt(i);
 								}
 							}
@@ -518,7 +526,7 @@ namespace Codist.QuickInfo
 					}
 				}
 
-				void OverrideDocElement(StackPanel doc, bool v16_1orLater, IList items) {
+				void OverrideDocElement(StackPanel doc, bool v16orLater, IList items) {
 					try {
 						if (items.Count > 1 && items[1] is TextBlock) {
 							items.RemoveAt(1);
@@ -539,8 +547,8 @@ namespace Codist.QuickInfo
 					}
 				}
 
-				void OverrideExceptionDocElement(StackPanel doc, bool v16_1orLater, IList items) {
-					if (v16_1orLater) {
+				void OverrideExceptionDocElement(StackPanel doc, bool v16orLater, IList items) {
+					if (v16orLater) {
 						items = doc.GetParent<ItemsControl>().Items;
 					}
 					try {
