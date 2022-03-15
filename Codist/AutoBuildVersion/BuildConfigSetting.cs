@@ -38,107 +38,12 @@ namespace Codist.AutoBuildVersion
 			//	|| RewriteAssemblyInfoFile(project, project.FindItem("Properties", "AssemblyInfo.cs"), ref f);
 		}
 
-		public static bool TryGetVersions(Project project, out string[] version, out string[] fileVersion, out string copyright) {
+		public static bool TryGetAssemblyAttributeValues(Project project, out string[] version, out string[] fileVersion, out string copyright) {
 			version = AttributePattern.GetMatchedVersion(project, ProjectAssemblyVersionName);
 			fileVersion = AttributePattern.GetMatchedVersion(project, ProjectFileVersionName)
 				?? AttributePattern.GetMatchedVersion(project, SdkProjectFileVersionName);
 			copyright = AttributePattern.GetProperty(project, SdkCopyrightName);
-			if (version != null && fileVersion != null) {
-				return true;
-			}
-			var assemblyInfo = project.FindItem("Properties", "AssemblyInfo.cs");
-			if (assemblyInfo != null) {
-				bool isOpen = assemblyInfo.IsOpen;
-				if (isOpen == false) {
-					assemblyInfo.Open();
-				}
-				var doc = assemblyInfo.Document;
-				if (doc.Selection is TextSelection s) {
-					s.SelectAll();
-					var t = s.Text;
-					if (version is null) {
-						version = AttributePattern.GetMatchedVersion(AttributePattern.AssemblyVersion.Match(t));
-					}
-					if (fileVersion is null) {
-						fileVersion = AttributePattern.GetMatchedVersion(AttributePattern.AssemblyFileVersion.Match(t));
-					}
-				}
-				if (isOpen == false) {
-					doc.Close(vsSaveChanges.vsSaveChangesNo);
-				}
-			}
-			return version != null || fileVersion != null;
-		}
-
-		bool RewriteAssemblyInfoFile(Project project, ProjectItem assemblyInfo, ref RewriteFlags f) {
-			if (assemblyInfo is null || f == RewriteFlags.None) {
-				return false;
-			}
-			bool isOpen = assemblyInfo.IsOpen;
-			if (isOpen == false) {
-				assemblyInfo.Open();
-			}
-			var doc = assemblyInfo.Document;
-			var rf = RewriteFlags.None;
-			if (f.MatchFlags(RewriteFlags.AssemblyVersion) && RewriteVersion(AssemblyVersion, AttributePattern.AssemblyVersion, project, doc)) {
-				rf = rf.SetFlags(RewriteFlags.AssemblyVersion, true);
-			}
-			if (f.MatchFlags(RewriteFlags.AssemblyFileVersion) && RewriteVersion(AssemblyFileVersion, AttributePattern.AssemblyFileVersion, project, doc)) {
-				rf = rf.SetFlags(RewriteFlags.AssemblyFileVersion, true);
-			}
-			if (f.MatchFlags(RewriteFlags.CopyrightYear) && RewriteCopyrightYear(AttributePattern.AssemblyCopyrightYear, project, doc)) {
-				rf = rf.SetFlags(RewriteFlags.CopyrightYear, true);
-			}
-			f = f.SetFlags(rf, false);
-			var r = rf != RewriteFlags.None;
-			if (r && doc.Saved == false) {
-				doc.Save();
-			}
-			if (isOpen == false) {
-				doc.Close(vsSaveChanges.vsSaveChangesNo);
-			}
-			return r;
-		}
-
-		bool RewriteVersion(VersionSetting setting, Regex regex, Project project, Document docAssemblyInfo) {
-			if (setting == null || !(docAssemblyInfo.Selection is TextSelection s)) {
-				return false;
-			}
-			s.SelectAll();
-			var m = regex.Match(s.Text.Replace("\r\n", "\n"));
-			if (m.Success) {
-				var g = m.Groups;
-				var n = $"{g[1].Value}{setting.Rewrite(g[2].Value, g[3].Value, g[4].Value, g[5].Value)}{g[6].Value}";
-				if (g[0].Value != null) {
-					WriteBuildOutput(project.Name + " => " + n);
-					s.MoveToAbsoluteOffset(m.Index + 1);
-					docAssemblyInfo.ReplaceText(g[0].Value, n);
-				}
-				return true;
-			}
-			return false;
-		}
-
-		bool RewriteCopyrightYear(Regex regex, Project project, Document docAssemblyInfo) {
-			if (!(docAssemblyInfo.Selection is TextSelection s)) {
-				return false;
-			}
-			s.SelectAll();
-			var m = regex.Match(s.Text.Replace("\r\n", "\n"));
-			if (m.Success) {
-				var g = m.Groups;
-				var y = Int32.Parse(g[2].Value);
-				if (y != DateTime.Now.Year) {
-					var n = $"{g[1].Value}{DateTime.Now.Year.ToText()}{g[3].Value}";
-					if (g[0].Value != null) {
-						WriteBuildOutput(project.Name + " => " + n);
-						s.MoveToAbsoluteOffset(m.Index + 1);
-						docAssemblyInfo.ReplaceText(g[0].Value, n);
-					}
-					return true;
-				}
-			}
-			return false;
+			return version != null || fileVersion != null || copyright != null;
 		}
 
 		bool RewriteSdkProjectFile(Project project, ref RewriteFlags f) {
@@ -262,13 +167,6 @@ namespace Codist.AutoBuildVersion
 				catch (ArgumentException) {
 					return null;
 				}
-			}
-			public static string[] GetMatchedVersion(Match match) {
-				if (match.Success == false) {
-					return null;
-				}
-				var g = match.Groups;
-				return new[] { g[2].Value, g[3].Value, g[4].Value, g[5].Value };
 			}
 		}
 	}

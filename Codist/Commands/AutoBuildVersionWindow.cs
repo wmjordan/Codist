@@ -25,7 +25,7 @@ namespace Codist.Commands
 
 		public AutoBuildVersionWindow(EnvDTE.Project project) {
 			_Project = project;
-			BuildConfigSetting.TryGetVersions(project, out _CurrentAssemblyVersion, out _CurrentAssemblyFileVersion, out _Copyright);
+			BuildConfigSetting.TryGetAssemblyAttributeValues(project, out _CurrentAssemblyVersion, out _CurrentAssemblyFileVersion, out _Copyright);
 			Title = "Auto Build Version";
 			ShowInTaskbar = false;
 			Height = 250;
