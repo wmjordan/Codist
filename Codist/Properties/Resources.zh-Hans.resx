@@ -257,7 +257,8 @@ Shift单击：删除并选中下一项（整个单词）</value>
   </data>
   <data name="CMD_FindReplace" xml:space="preserve">
     <value>查找下一个选中文本
-Ctrl 单击：匹配大小写查找
+Ctrl 单击：匹配大小写
+Shift 单击：匹配整个单词
 Alt 单击：在下一个匹配位置插入光标
 右键：查找及替换...</value>
   </data>

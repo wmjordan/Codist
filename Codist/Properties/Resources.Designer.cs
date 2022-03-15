@@ -504,6 +504,7 @@ namespace Codist.Properties {
         /// <summary>
         ///   查找类似 Find next selected text
         ///Ctrl click: Find match case
+        ///Shift click: Match whole word
         ///Alt click: Insert caret at next match
         ///Right click: Find and replace... 的本地化字符串。
         /// </summary>
