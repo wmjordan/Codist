@@ -1365,16 +1365,15 @@ namespace Codist.NaviBar
 						}
 						break;
 					case BasePropertyDeclarationSyntax p:
-						var isEvent = p.IsKind(SyntaxKind.EventDeclaration);
 						foreach (var modifier in p.Modifiers) {
 							switch (modifier.Kind()) {
 								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
 								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractMember); break;
 								case SyntaxKind.SealedKeyword:
-									AddIcon(ref icons, isEvent ? IconIds.SealedEvent : IconIds.SealedProperty);
+									AddIcon(ref icons, p.IsKind(SyntaxKind.EventDeclaration) ? IconIds.SealedEvent : IconIds.SealedProperty);
 									break;
 								case SyntaxKind.OverrideKeyword:
-									AddIcon(ref icons, isEvent ? IconIds.OverrideEvent : IconIds.OverrideProperty);
+									AddIcon(ref icons, p.IsKind(SyntaxKind.EventDeclaration) ? IconIds.OverrideEvent : IconIds.OverrideProperty);
 									break;
 								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
 							}
