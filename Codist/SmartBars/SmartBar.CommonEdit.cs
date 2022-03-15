@@ -159,10 +159,12 @@ namespace Codist.SmartBars
 					TextEditorHelper.ExecuteEditorCommand("Edit.InsertNextMatchingCaret");
 					return;
 				}
-				var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t, 
-					Keyboard.Modifiers == ModifierKeys.Control ? FindOptions.MatchCase | FindOptions.Wrap
-					: Keyboard.Modifiers == ModifierKeys.Shift ? FindOptions.Wrap | FindOptions.WholeWord
-					: FindOptions.None);
+				var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t,
+					FindOptions.Wrap
+						.SetFlags(FindOptions.MatchCase, Keyboard.Modifiers.MatchFlags(ModifierKeys.Control))
+						.SetFlags(FindOptions.WholeWord, Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift))
+						.SetFlags(FindOptions.Multiline, t.Contains("\n"))
+					);
 				if (r.HasValue) {
 					ctx.View.SelectSpan(r.Value);
 					ctx.KeepToolBar(true);
