@@ -264,8 +264,9 @@ namespace Codist
 
 			protected override void OnToolTipOpening(ToolTipEventArgs e) {
 				base.OnToolTipOpening(e);
-				if (ReferenceEquals(ToolTip, String.Empty)) {
-					ToolTip = ToolTipFactory.CreateToolTip(_Symbol, false, SemanticContext.GetHovered());
+				var s = _Symbol;
+				if (s != null && ReferenceEquals(ToolTip, String.Empty)) {
+					ToolTip = ToolTipFactory.CreateToolTip(s, false, SemanticContext.GetHovered());
 				}
 			}
 			async void LinkContextMenu(object sender, MouseButtonEventArgs e) {
@@ -278,14 +279,17 @@ namespace Codist
 				if (ctx != null) {
 					await ctx.UpdateAsync(default);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-					var m = new CSharpSymbolContextMenu(_Symbol, _Symbol.GetSyntaxNode(), ctx);
-					m.AddAnalysisCommands();
-					if (m.HasItems) {
-						m.Items.Add(new Separator());
+					var s = _Symbol;
+					if (s != null) {
+						var m = new CSharpSymbolContextMenu(s, s.GetSyntaxNode(), ctx);
+						m.AddAnalysisCommands();
+						if (m.HasItems) {
+							m.Items.Add(new Separator());
+						}
+						m.AddSymbolNodeCommands();
+						m.AddTitleItem(s.GetOriginalName());
+						ContextMenu = m;
 					}
-					m.AddSymbolNodeCommands();
-					m.AddTitleItem(_Symbol.GetOriginalName());
-					ContextMenu = m;
 					e.Handled = true;
 					//m.IsOpen = true;
 				}
@@ -298,7 +302,7 @@ namespace Codist
 			protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
 				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, true);
 				if (ContextMenu != null) {
-					(this.ContextMenu as CSharpSymbolContextMenu).Closed += DismissQuickInfo;
+					(ContextMenu as CSharpSymbolContextMenu).Closed += DismissQuickInfo;
 					ContextMenu.IsOpen = true;
 					e.Handled = true;
 				}
@@ -307,7 +311,7 @@ namespace Codist
 
 			protected override void OnContextMenuClosing(ContextMenuEventArgs e) {
 				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, false);
-				(this.ContextMenu as CSharpSymbolContextMenu).Closed -= DismissQuickInfo;
+				(ContextMenu as CSharpSymbolContextMenu).Closed -= DismissQuickInfo;
 				base.OnContextMenuClosing(e);
 			}
 
