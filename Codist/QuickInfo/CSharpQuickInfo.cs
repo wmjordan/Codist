@@ -29,11 +29,17 @@ namespace Codist.QuickInfo
 		readonly bool _IsVsProject;
 		ITextBuffer _TextBuffer;
 		bool _isCandidate;
+		int _Ref;
 
 		public CSharpQuickInfo(ITextBuffer subjectBuffer) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			_TextBuffer = subjectBuffer;
 			_IsVsProject = TextEditorHelper.IsVsixProject();
+		}
+
+		public CSharpQuickInfo Reference() {
+			++_Ref;
+			return this;
 		}
 
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
@@ -738,13 +744,13 @@ namespace Codist.QuickInfo
 					t.AddSymbol(om.ReturnType, false, CodeAnalysisHelper.AreEqual(om.ReturnType, rt, false) ? SymbolFormatter.SemiTransparent : _SymbolFormatter).Append(" ");
 				}
 				if (ore) {
-					t.AddSymbol(om.ReceiverType, "this", (om.ContainingType != ct ?  _SymbolFormatter : SymbolFormatter.SemiTransparent).Keyword).Append(".");
+					t.AddSymbol(om.ReceiverType, "this", (om.ContainingType != ct ? _SymbolFormatter : SymbolFormatter.SemiTransparent).Keyword).Append(".", SymbolFormatter.SemiTransparent.PlainText);
 				}
 				else if (om.ContainingType != ct) {
-					t.AddSymbol(om.ContainingType, false, _SymbolFormatter).Append(".");
+					t.AddSymbol(om.ContainingType, false, _SymbolFormatter).Append(".", SymbolFormatter.SemiTransparent.PlainText);
 				}
-				t.AddSymbol(om, true, _SymbolFormatter);
-				t.Append("(");
+				t.AddSymbol(om, true, SymbolFormatter.SemiTransparent);
+				t.Append("(", SymbolFormatter.SemiTransparent.PlainText);
 				foreach (var op in om.Parameters) {
 					var mp = mps.FirstOrDefault(p => p.Name == op.Name);
 					if (op.Ordinal == 0) {
@@ -753,7 +759,7 @@ namespace Codist.QuickInfo
 						}
 					}
 					else {
-						t.Append(", ");
+						t.Append(", ", SymbolFormatter.SemiTransparent.PlainText);
 					}
 					if (mp != null) {
 						if (mp.RefKind != op.RefKind
@@ -766,7 +772,7 @@ namespace Codist.QuickInfo
 					}
 					t.AddSymbolDisplayParts(op.ToDisplayParts(CodeAnalysisHelper.InTypeOverloadDisplayFormat), mp == null ? _SymbolFormatter : SymbolFormatter.SemiTransparent, -1);
 				}
-				t.Append(")");
+				t.Append(")", SymbolFormatter.SemiTransparent.PlainText);
 				overloadInfo.Append(new ThemedTipParagraph(overload.GetImageId(), t));
 			}
 			if (overloadInfo.ParagraphCount > 1) {
@@ -1363,7 +1369,7 @@ namespace Codist.QuickInfo
 		}
 
 		public void Dispose() {
-			if (_TextBuffer != null) {
+			if (--_Ref == 0 && _TextBuffer != null) {
 				_TextBuffer.Properties.RemoveProperty(typeof(CSharpQuickInfo));
 				_TextBuffer = null;
 			}

@@ -94,6 +94,7 @@ namespace Codist
 		public const string CodeLiteral = PredefinedClassificationTypeNames.Literal;
 		public const string CodeNumber = "Number"; // it is weird that there are two keyword with different cases in the resource dictionary: a Number and PredefinedClassificationTypeNames.Number;
 		public const string CodeOperator = PredefinedClassificationTypeNames.Operator;
+		public const string CodePlainText = "Plain Text";
 		public const string CodePunctuation = "punctuation";
 		public const string CodeBraceMatching = "brace matching";
 		public const string CodeInlineRenameField = "inline rename field";

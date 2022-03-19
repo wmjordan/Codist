@@ -36,7 +36,7 @@ namespace Codist.QuickInfo
 	{
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new CSharpQuickInfo(textBuffer))
+				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new CSharpQuickInfo(textBuffer)).Reference()
 				: null;
 		}
 	}

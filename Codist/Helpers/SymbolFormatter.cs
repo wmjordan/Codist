@@ -65,6 +65,8 @@ namespace Codist
 		public Brush Parameter { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName + ";" + Constants.CodePropertyName)]
 		public Brush Property { get; private set; }
+		[ClassificationType(ClassificationTypeNames = Constants.CodePlainText)]
+		public Brush PlainText { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeStructName)]
 		public Brush Struct { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeString)]
@@ -94,25 +96,29 @@ namespace Codist
 		public void ShowTypeConstaints(ITypeParameterSymbol typeParameter, TextBlock text) {
 			bool hasConstraint = false;
 			if (typeParameter.HasReferenceTypeConstraint) {
-				text.Append(hasConstraint ? ", " : String.Empty).Append("class", Keyword);
+				text.Append("class", Keyword);
 				hasConstraint = true;
 			}
 			if (typeParameter.HasValueTypeConstraint) {
-				text.Append(hasConstraint ? ", " : String.Empty).Append("struct", Keyword);
+				AppendSeparatorIfHasContraint(text, hasConstraint).Append("struct", Keyword);
 				hasConstraint = true;
 			}
 			if (typeParameter.HasUnmanagedTypeConstraint) {
-				text.Append(hasConstraint ? ", " : String.Empty).Append("unmanaged", Keyword);
+				AppendSeparatorIfHasContraint(text, hasConstraint).Append("unmanaged", Keyword);
 				hasConstraint = true;
 			}
 			if (typeParameter.HasConstructorConstraint) {
-				text.Append(hasConstraint ? ", " : String.Empty).Append("new", Keyword).Append("()");
+				AppendSeparatorIfHasContraint(text, hasConstraint).Append("new", Keyword).Append("()", PlainText);
 				hasConstraint = true;
 			}
 			foreach (var constraint in typeParameter.ConstraintTypes) {
-				text.Append(hasConstraint ? ", " : String.Empty).AddSymbol(constraint, false, this);
+				AppendSeparatorIfHasContraint(text, hasConstraint).AddSymbol(constraint, false, this);
 				hasConstraint = true;
 			}
+		}
+
+		TextBlock AppendSeparatorIfHasContraint(TextBlock text, bool c) {
+			return c ? text.Append(", ".Render(PlainText)) : text;
 		}
 
 		internal void Format(InlineCollection text, ISymbol symbol, string alias, bool bold) {
@@ -120,7 +126,7 @@ namespace Codist
 				case SymbolKind.ArrayType:
 					Format(text, ((IArrayTypeSymbol)symbol).ElementType, alias, bold);
 					if (alias == null) {
-						text.Add("[]");
+						text.Add("[]".Render(PlainText));
 					}
 					return;
 				case SymbolKind.Event: text.Add(symbol.Render(alias, bold, Event)); return;
@@ -157,16 +163,16 @@ namespace Codist
 							text.Add(symbol.Render(alias, bold, Interface)); break;
 						case TypeKind.Struct:
 							if (type.IsTupleType) {
-								text.Add("(");
+								text.Add("(".Render(PlainText));
 								for (int i = 0; i < type.TupleElements.Length; i++) {
 									if (i > 0) {
-										text.Add(", ");
+										text.Add(", ".Render(PlainText));
 									}
 									Format(text, type.TupleElements[i].Type, null, false);
 									text.Add(" ");
 									text.Add(type.TupleElements[i].Render(null, Field));
 								}
-								text.Add(")");
+								text.Add(")".Render(PlainText));
 							}
 							else {
 								text.Add(symbol.Render(alias, bold, Struct));
@@ -189,11 +195,11 @@ namespace Codist
 				case SymbolKind.PointerType:
 					Format(text, ((IPointerTypeSymbol)symbol).PointedAtType, alias, bold);
 					if (alias == null) {
-						text.Add("*");
+						text.Add("*".Render(PlainText));
 					}
 					return;
 				case SymbolKind.ErrorType:
-					text.Add("?");
+					text.Add("?".Render(PlainText));
 					return;
 				default: text.Add(symbol.Name); return;
 			}
@@ -337,7 +343,7 @@ namespace Codist
 						block.AddSymbol(part.Symbol, true, Method);
 						break;
 					default:
-						block.Append(part.ToString());
+						block.Append(part.ToString(), PlainText);
 						break;
 				}
 			}
@@ -346,10 +352,10 @@ namespace Codist
 
 		internal void Format(InlineCollection block, AttributeData item, bool isReturn) {
 			var a = item.AttributeClass.Name;
-			block.Add("[");
+			block.Add("[".Render(PlainText));
 			if (isReturn) {
 				block.Add("return".Render(Keyword));
-				block.Add(": ");
+				block.Add(": ".Render(PlainText));
 			}
 			block.Add(WpfHelper.Render(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class));
 			if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
@@ -357,20 +363,20 @@ namespace Codist
 				if (node?.ArgumentList?.Arguments.Count > 0) {
 					block.Add(node.ArgumentList.ToString().Render(ThemeHelper.SystemGrayTextBrush));
 				}
-				block.Add("]");
+				block.Add("]".Render(PlainText));
 				return;
 			}
-			block.Add("(");
+			block.Add("(".Render(PlainText));
 			int i = 0;
 			foreach (var arg in item.ConstructorArguments) {
 				if (++i > 1) {
-					block.Add(", ");
+					block.Add(", ".Render(PlainText));
 				}
 				Format(block, arg);
 			}
 			foreach (var arg in item.NamedArguments) {
 				if (++i > 1) {
-					block.Add(", ");
+					block.Add(", ".Render(PlainText));
 				}
 				var attrMember = item.AttributeClass.GetMembers(arg.Key).FirstOrDefault(m => m.Kind == SymbolKind.Field || m.Kind == SymbolKind.Property);
 				if (attrMember != null) {
@@ -379,10 +385,10 @@ namespace Codist
 				else {
 					block.Add(arg.Key.Render(false, true, null));
 				}
-				block.Add("=");
+				block.Add("=".Render(PlainText));
 				Format(block, arg.Value);
 			}
-			block.Add(")]");
+			block.Add(")]".Render(PlainText));
 		}
 
 		static Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>> CreatePropertySetter() {
@@ -410,14 +416,14 @@ namespace Codist
 		}
 
 		void AddTypeArguments(InlineCollection text, ImmutableArray<ITypeSymbol> arguments) {
-			text.Add("<");
+			text.Add("<".Render(PlainText));
 			for (int i = 0; i < arguments.Length; i++) {
 				if (i > 0) {
-					text.Add(", ");
+					text.Add(", ".Render(PlainText));
 				}
 				Format(text, arguments[i], null, false);
 			}
-			text.Add(">");
+			text.Add(">".Render(PlainText));
 		}
 
 		void Format(InlineCollection block, TypedConstant constant) {
@@ -451,16 +457,16 @@ namespace Codist
 						var flags = items.ToArray();
 						for (int i = 0; i < flags.Length; i++) {
 							if (i > 0) {
-								block.Add(" | ");
+								block.Add(" | ".Render(PlainText));
 							}
 							block.Add(constant.Type.Render(null, Enum));
-							block.Add(".");
+							block.Add(".".Render(PlainText));
 							block.Add(flags[i].Render(null, EnumField));
 						}
 					}
 					else if ((d = en.LastIndexOf('.')) != -1)  {
 						block.Add(constant.Type.Render(null, Enum));
-						block.Add(".");
+						block.Add(".".Render(PlainText));
 						block.Add(en.Substring(d + 1).Render(EnumField));
 					}
 					else {
@@ -469,24 +475,24 @@ namespace Codist
 					break;
 				case TypedConstantKind.Type:
 					block.Add("typeof".Render(Keyword));
-					block.Add("(");
+					block.Add("(".Render(PlainText));
 					Format(block, constant.Value as ISymbol, null, false);
-					block.Add(")");
+					block.Add(")".Render(PlainText));
 					break;
 				case TypedConstantKind.Array:
 					block.Add("new".Render(Keyword));
-					block.Add("[] { ");
+					block.Add("[] { ".Render(PlainText));
 					bool c = false;
 					foreach (var item in constant.Values) {
 						if (c) {
-							block.Add(", ");
+							block.Add(", ".Render(PlainText));
 						}
 						else {
 							c = true;
 						}
 						Format(block, item);
 					}
-					block.Add(" }");
+					block.Add(" }".Render(PlainText));
 					break;
 				default:
 					block.Add(constant.ToCSharpString());
