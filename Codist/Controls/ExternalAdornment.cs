@@ -69,12 +69,15 @@ namespace Codist.Controls
 			Panel.SetZIndex(element, ++_LayerZIndex);
 		}
 		public void Remove(UIElement element) {
-			if (element is null) {
+			int c;
+			if (element is null || (c = _Canvas.Children.Count) == 0) {
 				return;
 			}
 			_Canvas.Children.Remove(element);
-			UnhookChild(element);
-			AfterChildRemoved();
+			if (_Canvas.Children.Count != c) {
+				UnhookChild(element);
+				AfterChildRemoved();
+			}
 		}
 
 		void UnhookChild(UIElement element) {
