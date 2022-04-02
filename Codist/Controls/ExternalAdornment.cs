@@ -182,6 +182,9 @@ namespace Codist.Controls
 			var s = e.Source as UIElement;
 			s.MouseLeftButtonDown -= MenuHeader_MouseDown;
 			s.MouseMove += MenuHeader_DragMove;
+			if (s is SymbolList l) {
+				l.HideToolTip();
+			}
 		}
 
 		void MenuHeader_DragMove(object sender, MouseEventArgs e) {

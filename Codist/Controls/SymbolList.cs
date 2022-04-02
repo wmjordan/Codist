@@ -327,13 +327,17 @@ namespace Codist.Controls
 		}
 
 		void MouseLeave_HideToolTip(object sender, MouseEventArgs e) {
-			HideToolTip();
+			UnhookMouseEventAndHideToolTip();
 		}
 
-		public void HideToolTip() {
+		void UnhookMouseEventAndHideToolTip() {
 			SizeChanged -= SizeChanged_RelocateToolTip;
 			MouseMove -= MouseMove_ChangeToolTip;
 			MouseLeave -= MouseLeave_HideToolTip;
+			HideToolTip();
+		}
+
+		internal void HideToolTip() {
 			_SymbolTip.IsOpen = false;
 			_SymbolTip.Content = null;
 			_SymbolTip.Tag = null;
@@ -659,7 +663,7 @@ namespace Codist.Controls
 		public override void Dispose() {
 			base.Dispose();
 			if (SemanticContext != null) {
-				HideToolTip();
+				UnhookMouseEventAndHideToolTip();
 				_SymbolTip.PlacementTarget = null;
 				ClearSymbols();
 				if (ContextMenu is IDisposable d) {
