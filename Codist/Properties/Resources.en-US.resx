@@ -1907,4 +1907,13 @@ Right click: Wrap text menu...</value>
   <data name="OT_DisableChangeTrackerTip" xml:space="preserve">
     <value>When clicking the change indicators, suppress the preview window</value>
   </data>
+  <data name="OT_MatchSymbolColor" xml:space="preserve">
+    <value>Match symbol:</value>
+  </data>
+  <data name="OT_QuickInfoBackground" xml:space="preserve">
+    <value>Quick info background:</value>
+  </data>
+  <data name="OT_WriteSymbolColor" xml:space="preserve">
+    <value>Write match symbol:</value>
+  </data>
 </root>

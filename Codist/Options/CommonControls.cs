@@ -112,6 +112,7 @@ namespace Codist.Options
 	{
 		readonly Border _Border;
 		readonly Action<Color> _ColorChangedHandler;
+		bool _IsColorChanging;
 
 		public ColorButton(Color color, string text, Action<Color> colorChangedHandler) {
 			Content = new StackPanel {
@@ -136,7 +137,15 @@ namespace Codist.Options
 			set {
 				if (Color != value) {
 					_Border.Background = new SolidColorBrush(value);
-					_ColorChangedHandler(value);
+					if (_IsColorChanging == false) {
+						_IsColorChanging = true;
+						try {
+							_ColorChangedHandler?.Invoke(value);
+						}
+						finally {
+							_IsColorChanging = false;
+						}
+					}
 				}
 			}
 		}

@@ -540,18 +540,17 @@ namespace Codist
 			}
 		}
 
-		static SymbolUsageKind GetUsageKind(SymbolUsageKind possibleUsage, SyntaxNode node) {
+		public static SymbolUsageKind GetUsageKind(SymbolUsageKind possibleUsage, SyntaxNode node) {
 			if (possibleUsage.MatchFlags(SymbolUsageKind.Write)) {
 				var n = node.GetNodePurpose();
-				var a = n as AssignmentExpressionSyntax;
-				if (a != null && (a.Left == node || a.Left.GetLastIdentifier() == node)) {
-					return SymbolUsageKind.Write;
+				if (n is AssignmentExpressionSyntax a && (a.Left == node || a.Left.GetLastIdentifier() == node)) {
+					return a.Right.IsKind(SyntaxKind.NullLiteralExpression)
+						? SymbolUsageKind.Write | SymbolUsageKind.SetNull
+						: SymbolUsageKind.Write;
 				}
-				if (n.IsKind(SyntaxKind.PostIncrementExpression) || n.IsKind(SyntaxKind.PreIncrementExpression)) {
-					return SymbolUsageKind.Write;
-				}
-				var r = n as ArgumentSyntax;
-				if (r != null && (r.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) || r.RefKindKeyword.IsKind(SyntaxKind.OutKeyword))) {
+				else if (n.IsKind(SyntaxKind.PostIncrementExpression)
+					|| n.IsKind(SyntaxKind.PreIncrementExpression)
+					|| n is ArgumentSyntax r && (r.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) || r.RefKindKeyword.IsKind(SyntaxKind.OutKeyword))) {
 					return SymbolUsageKind.Write;
 				}
 			}
@@ -593,8 +592,7 @@ namespace Codist
 				//if (last != null && last.Parent.IsKind(SyntaxKind.Argument) == true && (last == node || last is MemberAccessExpressionSyntax)) {
 				//	return SymbolUsageKind.Read;
 				//}
-				var a = n as AssignmentExpressionSyntax;
-				if (a != null && a.Right == node) {
+				if (n is AssignmentExpressionSyntax a && a.Right == node) {
 					switch (a.Kind()) {
 						case SyntaxKind.AddAssignmentExpression: return SymbolUsageKind.Attach;
 						case SyntaxKind.SubtractAssignmentExpression: return SymbolUsageKind.Detach;
@@ -605,7 +603,7 @@ namespace Codist
 			return SymbolUsageKind.Normal;
 		}
 
-		static SymbolUsageKind GetPotentialUsageKinds(ISymbol symbol) {
+		public static SymbolUsageKind GetPotentialUsageKinds(ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event:
 					return SymbolUsageKind.Attach | SymbolUsageKind.Detach | SymbolUsageKind.Trigger;
@@ -690,6 +688,7 @@ namespace Codist
 		TypeParameter = 1 << 8,
 		Catch = 1 << 9,
 		Trigger = 1 << 10,
+		SetNull = 1 << 17,
 		Usage = Delegate | Write | Attach | Detach | TypeCast | TypeParameter | Catch | Trigger
 	}
 }

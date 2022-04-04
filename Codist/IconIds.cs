@@ -192,6 +192,7 @@ namespace Codist
 		#endregion
 		#region symbol usage icons
 		public const int UseToWrite = KnownImageIds.Writeable;
+		public const int UseToWriteNull = KnownImageIds.EmptyContainer;
 		public const int UseAsTypeParameter = KnownImageIds.CPPMarkupXML;
 		public const int UseToCast = KnownImageIds.ReportingAction;
 		public const int UseToCatch = KnownImageIds.TryCatch;

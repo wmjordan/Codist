@@ -1896,4 +1896,13 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="OT_DisableChangeTrackerTip" xml:space="preserve">
     <value>在点击代码窗口左侧的变更标记时，禁止弹出变更情况预览窗口</value>
   </data>
+  <data name="OT_MatchSymbolColor" xml:space="preserve">
+    <value>匹配符号标记:</value>
+  </data>
+  <data name="OT_QuickInfoBackground" xml:space="preserve">
+    <value>代码提示背景:</value>
+  </data>
+  <data name="OT_WriteSymbolColor" xml:space="preserve">
+    <value>写入匹配符号标记:</value>
+  </data>
 </root>

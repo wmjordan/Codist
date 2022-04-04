@@ -439,13 +439,11 @@ namespace Codist.Margins
 		sealed class SymbolReferenceMarker
 		{
 			const double MarkerMargin = 1;
-			readonly Brush _MarkerBrush = Brushes.Aqua;
 			readonly Pen _DefinitionMarkerPen = new Pen(ThemeHelper.ToolWindowTextBrush, MarkerMargin);
 			IWpfTextView _View;
 			IVerticalScrollBar _ScrollBar;
 			CSharpMembersMargin _Margin;
-			IEnumerable<ReferencedSymbol> _ReferencePoints;
-			SyntaxTree _DocSyntax;
+			ReferenceContext _Context;
 			ISymbol _Symbol;
 
 			public SymbolReferenceMarker(IWpfTextView textView, IVerticalScrollBar verticalScrollbar, CSharpMembersMargin margin) {
@@ -467,43 +465,60 @@ namespace Codist.Margins
 					_ScrollBar = null;
 					_Margin = null;
 					_View = null;
-					_ReferencePoints = null;
-					_DocSyntax = null;
+					_Context = null;
 					_Symbol = null;
 				}
 			}
 
 			internal void Render(DrawingContext drawingContext) {
-				var refs = _ReferencePoints;
-				if (refs == null) {
+				var ctx = _Context;
+				if (ctx == null) {
 					return;
 				}
 				var snapshot = _View.TextSnapshot;
 				var snapshotLength = snapshot.Length;
-				foreach (var item in refs) {
+				var cur = ctx.SyntaxTree.GetCompilationUnitRoot(_Margin._Cancellation.GetToken());
+				var config = Config.Instance.SymbolReferenceMarkerSettings;
+				foreach (var item in ctx.ReferencePoints) {
 					if (_Margin._Cancellation?.IsCancellationRequested != false) {
 						break;
 					}
+					var pu = CodeAnalysisHelper.GetPotentialUsageKinds(item.Definition);
 					foreach (var loc in item.Locations) {
 						var start = loc.Location.SourceSpan.Start;
 						if (start >= snapshotLength) {
 							continue;
 						}
+						var n = cur.FindNode(loc.Location.SourceSpan);
+						SolidColorBrush b;
+						Pen p = null;
+						switch (CodeAnalysisHelper.GetUsageKind(pu, n)) {
+							case SymbolUsageKind.Write:
+								b = config.WriteMarkerBrush;
+								break;
+							case SymbolUsageKind.Write | SymbolUsageKind.SetNull:
+								b = null;
+								p = config.SetNullPen;
+								break;
+							default:
+								b = config.ReferenceMarkerBrush;
+								break;
+						}
 						var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, start));
-						drawingContext.DrawRectangle(_MarkerBrush, null, new Rect(MarkerMargin, y - (MarkerSize / 2), MarkerSize, MarkerSize));
+						drawingContext.DrawRectangle(b, p, new Rect(MarkerMargin, y - (MarkerSize / 2), MarkerSize, MarkerSize));
 					}
 					if (item.Definition.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
 						continue;
 					}
 					// draws the definition marker
 					foreach (var loc in item.Definition.DeclaringSyntaxReferences) {
-						if (loc.SyntaxTree == _DocSyntax) {
+						if (loc.SyntaxTree == ctx.SyntaxTree) {
 							var start = loc.Span.Start;
 							if (start >= snapshotLength) {
 								continue;
 							}
 							var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, start));
-							drawingContext.DrawRectangle(_MarkerBrush, _DefinitionMarkerPen, new Rect(0, y - (MarkerSize / 2), MarkerSize + MarkerMargin, MarkerSize + MarkerMargin));
+							drawingContext.DrawRectangle(config.ReferenceMarkerBrush, _DefinitionMarkerPen, new Rect(0, y - (MarkerSize / 2), MarkerSize + MarkerMargin, MarkerSize + MarkerMargin));
 						}
 					}
 				}
@@ -531,7 +546,7 @@ namespace Codist.Margins
 				}
 				var symbol = await ctx.GetSymbolAsync(_View.Selection.Start.Position, cancellation).ConfigureAwait(false);
 				if (symbol == null) {
-					if (Interlocked.Exchange(ref _ReferencePoints, null) != null) {
+					if (Interlocked.Exchange(ref _Context, null) != null) {
 						_Symbol = null;
 						goto REFRESH;
 					}
@@ -542,10 +557,12 @@ namespace Codist.Margins
 					return;
 				}
 				var doc = ctx.Document;
-				_DocSyntax = ctx.Compilation.SyntaxTree;
 				// todo show marked symbols on scrollbar margin
 				try {
-					_ReferencePoints = await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, ImmutableSortedSet.Create(doc), cancellation).ConfigureAwait(false);
+					_Context = new ReferenceContext(
+						await SymbolFinder.FindReferencesAsync(symbol.GetAliasTarget(), doc.Project.Solution, ImmutableSortedSet.Create(doc), cancellation).ConfigureAwait(false),
+						ctx.Compilation.SyntaxTree
+						);
 				}
 				catch (ArgumentException) {
 					// hack: multiple async updates could occur and invalidated ctx.Document, which might cause ArgumentException
@@ -555,6 +572,17 @@ namespace Codist.Margins
 				REFRESH:
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellation);
 				_Margin.InvalidateVisual();
+			}
+
+			sealed class ReferenceContext
+			{
+				public readonly IEnumerable<ReferencedSymbol> ReferencePoints;
+				public readonly SyntaxTree SyntaxTree;
+
+				public ReferenceContext(IEnumerable<ReferencedSymbol> referencePoints, SyntaxTree syntaxTree) {
+					ReferencePoints = referencePoints;
+					SyntaxTree = syntaxTree;
+				}
 			}
 		}
 	}

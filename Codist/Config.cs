@@ -101,6 +101,7 @@ namespace Codist
 		public List<MarkerStyle> MarkerSettings { get; } = new List<MarkerStyle>();
 		public List<SearchEngine> SearchEngines { get; } = new List<SearchEngine>();
 		public List<WrapText> WrapTexts { get; } = new List<WrapText>();
+		public SymbolReferenceMarkerStyle SymbolReferenceMarkerSettings { get; } = new SymbolReferenceMarkerStyle();
 		public string BrowserPath { get; set; }
 		public string BrowserParameter { get; set; }
 		internal bool IsChanged => _ConfigManager?.IsChanged ?? false;
@@ -214,12 +215,9 @@ namespace Codist
 				}
 			});
 			if (styleFilter == StyleFilters.None) {
-				var l = config.Labels;
-				l.RemoveAll(i => String.IsNullOrWhiteSpace(i.Label));
-				var se = config.SearchEngines;
-				se.RemoveAll(i => String.IsNullOrWhiteSpace(i.Name) || String.IsNullOrWhiteSpace(i.Pattern));
-				var wt = config.WrapTexts;
-				wt.RemoveAll(i => String.IsNullOrWhiteSpace(i.Pattern));
+				config.Labels.RemoveAll(i => String.IsNullOrWhiteSpace(i.Label));
+				config.SearchEngines.RemoveAll(i => String.IsNullOrWhiteSpace(i.Name) || String.IsNullOrWhiteSpace(i.Pattern));
+				config.WrapTexts.RemoveAll(i => String.IsNullOrWhiteSpace(i.Pattern));
 			}
 			var removeFontNames = System.Windows.Forms.Control.ModifierKeys == System.Windows.Forms.Keys.Control;
 			LoadStyleEntries<CodeStyle, CodeStyleTypes>(config.GeneralStyles, removeFontNames);
@@ -458,6 +456,7 @@ namespace Codist
 			c.MarkdownStyles.AddRange(GetDefaultCodeStyles<MarkdownStyle, MarkdownStyleTypes>());
 			c.SymbolMarkerStyles.AddRange(GetDefaultCodeStyles<SymbolMarkerStyle, SymbolMarkerStyleTypes>());
 			c.MarkerSettings.AddRange(GetDefaultMarkerStyles());
+			c.SymbolReferenceMarkerSettings.Reset();
 			return c;
 		}
 

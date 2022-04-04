@@ -820,6 +820,9 @@ namespace Codist.Controls
 		static void AddSymbolUsageIcons(ref StackPanel icons, SymbolUsageKind usage) {
 			if (usage.MatchFlags(SymbolUsageKind.Write)) {
 				AddIcon(ref icons, IconIds.UseToWrite);
+				if (usage.MatchFlags(SymbolUsageKind.SetNull)) {
+					AddIcon(ref icons, IconIds.UseToWriteNull);
+				}
 			}
 			else if (usage.MatchFlags(SymbolUsageKind.Catch)) {
 				AddIcon(ref icons, IconIds.UseToCatch);

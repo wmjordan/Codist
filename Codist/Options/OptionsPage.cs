@@ -312,11 +312,11 @@ namespace Codist.Options
 						.Add(_ExtraHeight = new Controls.IntegerBox((int)Config.Instance.QuickInfoXmlDocExtraHeight) { Minimum = 0, Maximum = 1000, Step = 50 })
 						.SetLazyToolTip(() => R.OT_ExtraXmlDocSizeTip),
 
-					new TitleBox(R.T_Background),
+					new TitleBox(R.T_Color),
 					new WrapPanel {
 						Children = {
-							new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_Color),
-							new ColorButton(Colors.Transparent, R.T_Background, UpdateQuickInfoBackgroundColor).Set(ref _BackgroundButton)
+							new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_QuickInfoBackground),
+							new ColorButton(Colors.Transparent, R.T_Color, UpdateQuickInfoBackgroundColor).Set(ref _BackgroundButton)
 						}
 					}
 				);
@@ -609,6 +609,7 @@ namespace Codist.Options
 		{
 			readonly OptionBox<MarkerOptions> _LineNumber, _Selection, _SpecialComment, _MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference, _DisableChangeTracker;
 			readonly OptionBox<MarkerOptions>[] _Options;
+			readonly ColorButton _SymbolReferenceButton, _SymbolWriteButton;
 
 			public PageControl(OptionsPage page) : base(page) {
 				var o = Config.Instance.MarkerOptions;
@@ -639,18 +640,35 @@ namespace Codist.Options
 					_CompilerDirective = o.CreateOptionBox(MarkerOptions.CompilerDirective, UpdateConfig, R.OT_CompilerDirective)
 						.SetLazyToolTip(() => R.OT_CompilerDirectiveTip),
 					_SymbolReference = o.CreateOptionBox(MarkerOptions.SymbolReference, UpdateConfig, R.OT_MatchSymbol)
-						.SetLazyToolTip(() => R.OT_MatchSymbolTip)
+						.SetLazyToolTip(() => R.OT_MatchSymbolTip),
+					new WrapPanel {
+						Children = {
+							new StackPanel().MakeHorizontal().Add(
+								new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_MatchSymbolColor),
+								new ColorButton(Margins.SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor, R.T_Color, UpdateSymbolReferenceColor).Set(ref _SymbolReferenceButton)
+							),
+							new StackPanel().MakeHorizontal().Add(
+								new TextBlock { MinWidth = 120, Margin = WpfHelper.SmallHorizontalMargin }.Append(R.OT_WriteSymbolColor),
+								new ColorButton(Margins.SymbolReferenceMarkerStyle.DefaultWriteMarkerColor, R.T_Color, UpdateSymbolWriteColor).Set(ref _SymbolWriteButton)
+								)
+						}
+					}.WrapMargin(SubOptionMargin)
 					);
 				_Options = new[] {
 					_LineNumber, _Selection, _SpecialComment, _DisableChangeTracker,
 					_MarkerDeclarationLine, _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective, _CompilerDirective, _SymbolReference
 				};
-				var declarationSubOptions = new[] { _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective };
-				foreach (var item in declarationSubOptions) {
+				var dubOptions = new[] { _LongMemberDeclaration, _TypeDeclaration, _MethodDeclaration, _RegionDirective };
+				foreach (var item in dubOptions) {
 					item.WrapMargin(SubOptionMargin);
 				}
-				_MarkerDeclarationLine.BindDependentOptionControls(declarationSubOptions);
+				_MarkerDeclarationLine.BindDependentOptionControls(dubOptions);
+				_SymbolReference.BindDependentOptionControls(_SymbolReferenceButton, _SymbolWriteButton);
 				_DisableChangeTracker.IsEnabled = CodistPackage.VsVersion.Major >= 17;
+				_SymbolReferenceButton.DefaultColor = () => Margins.SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
+				_SymbolReferenceButton.Color = Config.Instance.SymbolReferenceMarkerSettings.ReferenceMarkerBrush.Color;
+				_SymbolWriteButton.DefaultColor = () => Margins.SymbolReferenceMarkerStyle.DefaultWriteMarkerColor;
+				_SymbolWriteButton.Color = Config.Instance.SymbolReferenceMarkerSettings.WriteMarkerBrush.Color;
 			}
 
 			protected override void LoadConfig(Config config) {
@@ -663,6 +681,28 @@ namespace Codist.Options
 					return;
 				}
 				Config.Instance.Set(options, set);
+				Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
+			}
+
+			void UpdateSymbolReferenceColor(Color color) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.SymbolReferenceMarkerSettings.ReferenceMarkerColor = color.ToHexString();
+				if (color.A == 0) {
+					_SymbolReferenceButton.Color = Margins.SymbolReferenceMarkerStyle.DefaultReferenceMarkerColor;
+				}
+				Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
+			}
+
+			void UpdateSymbolWriteColor(Color color) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.SymbolReferenceMarkerSettings.WriteMarkerColor = color.ToHexString();
+				if (color.A == 0) {
+					_SymbolWriteButton.Color = Margins.SymbolReferenceMarkerStyle.DefaultWriteMarkerColor;
+				}
 				Config.Instance.FireConfigChangedEvent(Features.ScrollbarMarkers);
 			}
 		}
