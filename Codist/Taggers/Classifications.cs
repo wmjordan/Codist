@@ -38,6 +38,7 @@ namespace Codist.Taggers
 			Property = registry.GetClassificationTag(Constants.CSharpPropertyName);
 			ReadOnlyField = registry.GetClassificationTag(Constants.CSharpReadOnlyFieldName);
 			ReadOnlyStruct = registry.GetClassificationTag(Constants.CSharpReadOnlyStructName);
+			RefStruct = registry.GetClassificationTag(Constants.CSharpRefStructName);
 			ResourceKeyword = registry.GetClassificationTag(Constants.CSharpResourceKeyword);
 			SealedMember = registry.GetClassificationTag(Constants.CSharpSealedMemberName);
 			StaticMember = registry.GetClassificationTag(Constants.CSharpStaticMemberName);
@@ -109,6 +110,8 @@ namespace Codist.Taggers
 		public ClassificationTag ReadOnlyField { get; }
 
 		public ClassificationTag ReadOnlyStruct { get; }
+
+		public ClassificationTag RefStruct { get; }
 
 		public ClassificationTag ResourceKeyword { get; }
 

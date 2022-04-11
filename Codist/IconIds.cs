@@ -10,7 +10,7 @@ namespace Codist
 	static class IconIds
 	{
 		public const int None = KnownImageIds.Blank;
-		#region sematic icons
+		#region semantic icons
 		public const int AbstractMember = KnownImageIds.DialogTemplate;
 		public const int AsyncMember = KnownImageIds.Thread;
 		public const int Generic = KnownImageIds.MarkupXML;
@@ -21,6 +21,7 @@ namespace Codist
 		public const int ReadonlyProperty = KnownImageIds.MoveProperty;
 		public const int ReadonlyMethod = KnownImageIds.MoveMethod;
 		public const int ReadonlyType = KnownImageIds.TextBlock;
+		public const int RefMember = KnownImageIds.DraggedCurrentInstructionPointer;
 		public const int InitonlyProperty = KnownImageIds.NewProperty;
 		public const int AutoProperty = KnownImageIds.PropertyShortcut;
 		public const int VolatileField = KnownImageIds.SetProactiveCaching;

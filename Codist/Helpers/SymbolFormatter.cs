@@ -569,6 +569,9 @@ namespace Codist
 								if (((INamedTypeSymbol)symbol).IsReadOnly()) {
 									info.Append("readonly ", Keyword);
 								}
+								if (((INamedTypeSymbol)symbol).IsRefLike()) {
+									info.Append("ref ", Keyword);
+								}
 								break;
 						}
 						break;
@@ -580,6 +583,14 @@ namespace Codist
 				var m = (symbol as IMethodSymbol).GetSpecialMethodModifier();
 				if (m != null) {
 					info.Append(m, Keyword);
+				}
+			}
+			else if (symbol.Kind == SymbolKind.Property && symbol is IPropertySymbol p) {
+				if (p.ReturnsByRefReadonly) {
+					info.Append("ref readonly ", Keyword);
+				}
+				else if (p.ReturnsByRef) {
+					info.Append("ref", Keyword);
 				}
 			}
 		}

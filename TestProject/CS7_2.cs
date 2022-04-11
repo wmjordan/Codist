@@ -8,7 +8,7 @@ namespace TestProject.CS7_2
 {
     #region Safe efficient code
     // see: https://docs.microsoft.com/en-us/dotnet/csharp/write-safe-efficient-code
-    readonly public struct ReadonlyPoint3D
+    readonly ref struct ReadonlyPoint3D
     {
         public ReadonlyPoint3D(double x, double y, double z) {
             this.X = x;
@@ -19,9 +19,13 @@ namespace TestProject.CS7_2
         public double X { get; }
         public double Y { get; }
         public double Z { get; }
+
+        public ReadonlyPoint3D Cube(double n) {
+            return new ReadonlyPoint3D(n, n, n);
+		}
     }
 
-    public struct Point3D
+    struct Point3D
     {
         static readonly Point3D Empty = new Point3D();
         private static Point3D origin = new Point3D(0, 0, 0);

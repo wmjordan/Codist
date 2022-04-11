@@ -1376,6 +1376,15 @@ namespace Codist.NaviBar
 									AddIcon(ref icons, p.IsKind(SyntaxKind.EventDeclaration) ? IconIds.OverrideEvent : IconIds.OverrideProperty);
 									break;
 								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
+								case SyntaxKind.RefKeyword: AddIcon(ref icons, IconIds.RefMember); break;
+							}
+						}
+						if (p.Type is RefTypeSyntax r) {
+							if (r.RefKeyword != null) {
+								AddIcon(ref icons, IconIds.RefMember);
+							}
+							if (r.ReadOnlyKeyword != null) {
+								AddIcon(ref icons, IconIds.ReadonlyProperty);
 							}
 						}
 						if (p.AccessorList != null) {

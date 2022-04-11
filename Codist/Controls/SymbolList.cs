@@ -754,6 +754,9 @@ namespace Codist.Controls
 							if (type.IsReadOnly()) {
 								AddIcon(ref icons, IconIds.ReadonlyType);
 							}
+							if (type.IsRefLike()) {
+								AddIcon(ref icons, IconIds.RefMember);
+							}
 							break;
 					}
 					break;
@@ -785,28 +788,34 @@ namespace Codist.Controls
 					}
 					break;
 				case SymbolKind.Property:
-					if (_ContainerIsInterface == false) {
-						if ((ms = ((IPropertySymbol)symbol).SetMethod) == null) {
-							AddIcon(ref icons, IconIds.ReadonlyProperty);
-						}
-						else if (ms.IsInitOnly()) {
-							AddIcon(ref icons, IconIds.InitonlyProperty);
-						}
-						if ((ms = ((IPropertySymbol)symbol).GetMethod) != null && ms.IsReadOnly()) {
-							AddIcon(ref icons, IconIds.ReadonlyMethod);
-						}
-						if (symbol.IsAbstract) {
-							AddIcon(ref icons, IconIds.AbstractMember);
-						}
-						else {
-							if (symbol.IsSealed) {
-								AddIcon(ref icons, IconIds.SealedProperty);
+					if (symbol is IPropertySymbol p) {
+						if (_ContainerIsInterface == false) {
+							if ((ms = p.SetMethod) == null) {
+								AddIcon(ref icons, IconIds.ReadonlyProperty);
 							}
-							if (symbol.IsOverride) {
-								AddIcon(ref icons, IconIds.OverrideProperty);
+							else if (ms.IsInitOnly()) {
+								AddIcon(ref icons, IconIds.InitonlyProperty);
 							}
+							if ((ms = p.GetMethod) != null && ms.IsReadOnly()) {
+								AddIcon(ref icons, IconIds.ReadonlyMethod);
+							}
+							if (symbol.IsAbstract) {
+								AddIcon(ref icons, IconIds.AbstractMember);
+							}
+							else {
+								if (symbol.IsSealed) {
+									AddIcon(ref icons, IconIds.SealedProperty);
+								}
+								if (symbol.IsOverride) {
+									AddIcon(ref icons, IconIds.OverrideProperty);
+								}
+							}
+						}
+						if (p.ReturnsByRef || p.ReturnsByRefReadonly) {
+							AddIcon(ref icons, IconIds.RefMember);
 						}
 					}
+
 					break;
 				case SymbolKind.Namespace:
 					return null;

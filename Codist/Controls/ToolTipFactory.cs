@@ -23,7 +23,7 @@ namespace Codist
 				tip.Title.Append(ThemeHelper.GetImage(symbol.GetImageId()).WrapMargin(WpfHelper.GlyphMargin));
 			}
 			tip.Title
-				.Append(symbol.GetAccessibility() + ((symbol as INamedTypeSymbol).IsReadOnly() ? "readonly " : String.Empty) + symbol.GetAbstractionModifier() + (symbol as IMethodSymbol).GetSpecialMethodModifier() + symbol.GetSymbolKindName() + " ")
+				.Append($"{symbol.GetAccessibility()}{symbol.GetAbstractionModifier()}{(symbol is INamedTypeSymbol nt ? nt.IsReadOnly() ? (nt.IsRefLike() ? "ref readonly " : "readonly ") : nt.IsRefLike() ? "ref " : String.Empty : String.Empty)}{(symbol is IPropertySymbol ps ? ps.ReturnsByRefReadonly ? "ref readonly " : ps.ReturnsByRef ? "ref " : String.Empty : String.Empty)}{(symbol as IMethodSymbol).GetSpecialMethodModifier()}{symbol.GetSymbolKindName()} ")
 				.Append(symbol.Name, true)
 				.Append(symbol.GetParameterString());
 			var content = tip.Content;

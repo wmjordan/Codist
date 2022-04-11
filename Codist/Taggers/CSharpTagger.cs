@@ -860,6 +860,9 @@ namespace Codist.Taggers
 						if (type.IsReadOnly()) {
 							yield return _Classifications.ReadOnlyStruct;
 						}
+						if (type.IsRefLike()) {
+							yield return _Classifications.RefStruct;
+						}
 						yield break;
 					}
 					yield return _Classifications.SealedMember;

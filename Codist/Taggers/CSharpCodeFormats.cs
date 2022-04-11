@@ -323,6 +323,19 @@ namespace Codist.Taggers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpRefStructName)]
+	[Name(Constants.CSharpRefStructName)]
+	[UserVisible(false)]
+	[Order(After = Constants.CodeStructName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
+	sealed class RefStructFormat : ClassificationFormatDefinition
+	{
+		public RefStructFormat() {
+			DisplayName = Constants.NameOfMe + ": ref struct";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpConstructorMethodName)]
 	[Name(Constants.CSharpConstructorMethodName)]
 	[UserVisible(false)]

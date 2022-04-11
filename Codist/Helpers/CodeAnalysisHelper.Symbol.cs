@@ -698,6 +698,9 @@ namespace Codist
 		public static bool IsReadOnly(this ITypeSymbol type) {
 			return type != null && NonPublicOrFutureAccessors.GetNamedTypeIsReadOnly(type);
 		}
+		public static bool IsRefLike(this ITypeSymbol type) {
+			return type != null && NonPublicOrFutureAccessors.GetNamedTypeIsRefLikeType(type);
+		}
 		public static bool IsInitOnly(this IMethodSymbol method) {
 			return method != null && NonPublicOrFutureAccessors.GetMethodIsInitOnly(method);
 		}
@@ -1180,6 +1183,11 @@ namespace Codist
 				typeof(ITypeSymbol).GetProperty("IsReadOnly") != null
 				? ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsReadOnly")
 				: ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsReadOnly", typeof(CSharpCompilation).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.NamedTypeSymbol", false));
+
+			public static readonly Func<ITypeSymbol, bool> GetNamedTypeIsRefLikeType =
+				typeof(ITypeSymbol).GetProperty("IsRefLikeType") != null
+				? ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsRefLikeType")
+				: ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsRefLikeType", typeof(CSharpCompilation).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.NamedTypeSymbol", false));
 
 			public static readonly Func<IMethodSymbol, bool> GetMethodIsInitOnly = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, bool>("IsInitOnly");
 

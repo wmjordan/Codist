@@ -144,6 +144,7 @@ namespace Codist
 		public const string CSharpConstFieldName = "C#: Const field";
 		public const string CSharpReadOnlyFieldName = "C#: Read-only field";
 		public const string CSharpReadOnlyStructName = "C#: Read-only struct";
+		public const string CSharpRefStructName = "C#: Ref struct";
 		public const string CSharpEnumFieldName = "C#: Enum field";
 		public const string CSharpResourceKeyword = "C#: Resource keyword";
 		public const string CSharpAliasNamespaceName = "C#: Alias namespace";

@@ -164,6 +164,11 @@ namespace Codist.Taggers
 		static ClassificationTypeDefinition ReadOnlyStruct;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeStructName)]
+		[Name(Constants.CSharpRefStructName)]
+		static ClassificationTypeDefinition RefStruct;
+
+		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeKeyword)]
 		[Name(Constants.CSharpResourceKeyword)]
 		static ClassificationTypeDefinition ResourceKeyword;
