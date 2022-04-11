@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
-using AppHelpers;
 
 namespace Codist
 {
 	static class ReflectionHelper
 	{
+		public static TDelegate CreateDelegate<TDelegate>(this DynamicMethod method) where TDelegate : class, Delegate {
+			return method.CreateDelegate(typeof(TDelegate)) as TDelegate;
+		}
+
 		public static Func<TInstance, TField> CreateGetFieldMethod<TInstance, TField>(string name) where TInstance : class where TField : class {
 			var type = typeof(TInstance);
 			var fieldInfo = type.GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);

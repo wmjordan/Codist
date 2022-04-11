@@ -16,7 +16,7 @@ namespace Codist
 {
 	sealed class Config
 	{
-		internal const string CurrentVersion = "6.1.0";
+		internal const string CurrentVersion = "6.2.0";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
 		internal const string LightTheme = ThemePrefix + "Light", PaleLightTheme = ThemePrefix + "PaleLight", DarkTheme = ThemePrefix + "Dark", PaleDarkTheme = ThemePrefix + "PaleDark", SimpleTheme = ThemePrefix + "Simple";
@@ -162,22 +162,23 @@ namespace Codist
 				if (System.Version.TryParse(config.Version, out var v) == false
 					|| v < System.Version.Parse(CurrentVersion)) {
 					config.InitStatus = InitStatus.Upgraded;
-					if (v < new Version(5, 4)) {
-						if (config.SearchEngines.Count == 0) {
-							ResetSearchEngines(config.SearchEngines);
-						}
-					}
-					if (v < new Version(5, 14)) {
-						if (config.WrapTexts.Count == 0) {
-							ResetWrapTexts(config.WrapTexts);
-						}
-					}
+					UpgradeConfig(config, v);
 				}
 				return config;
 			}
 			catch (Exception ex) {
 				Debug.WriteLine(ex.ToString());
 				return GetDefaultConfig();
+			}
+		}
+
+		static void UpgradeConfig(Config config, Version v) {
+			if (v < new Version(6, 2)) {
+				if (v < new Version(5, 14) && config.WrapTexts.Count == 0) {
+					ResetWrapTexts(config.WrapTexts);
+				}
+				config.MarkerOptions |= MarkerOptions.SymbolReference;
+				__Updated?.Invoke(new ConfigUpdatedEventArgs(config, Features.ScrollbarMarkers));
 			}
 		}
 

@@ -98,8 +98,6 @@ namespace Codist
 				case InitStatus.Upgraded:
 					Process.Start("https://github.com/wmjordan/Codist/releases");
 					break;
-				default:
-					break;
 			}
 		}
 
@@ -215,7 +213,7 @@ namespace Codist
 					sb.AppendLine(item);
 				}
 			}
-			System.Diagnostics.Debug.WriteLine(sb);
+			Debug.WriteLine(sb);
 		}
 		#endregion
 	}
