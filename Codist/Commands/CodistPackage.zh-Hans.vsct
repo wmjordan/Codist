@@ -45,6 +45,14 @@
 					<ButtonText>自动生成版本号设置...</ButtonText>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="ToggleAutoBuildVersionId" priority="0x0101" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_BUILD_MISC" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<Strings>
+					<ButtonText>自动更改版本号</ButtonText>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="SearchMember" />

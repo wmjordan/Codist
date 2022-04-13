@@ -76,6 +76,8 @@ namespace Codist
 		public double QuickInfoXmlDocExtraHeight { get; set; }
 		[DefaultValue(false)]
 		public bool NoSpaceBetweenWrappedLines { get; set; }
+		[DefaultValue(false)]
+		public bool SupressAutoBuildVersion { get; set; }
 		[DefaultValue(DefaultIconSize)]
 		public int SmartBarButtonSize { get; set; } = DefaultIconSize;
 		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();

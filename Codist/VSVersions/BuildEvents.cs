@@ -5,6 +5,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using R = Codist.Properties.Resources;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Codist
 {
@@ -14,7 +15,7 @@ namespace Codist
 	/// <remarks>
 	/// We could have used <see cref="EnvDTE.BuildEvents"/>. However, VS 2022 won't work without importing Microsoft.VisualStudio.Shell.Interop v17, which breaks Codist on VS 2017 and VS 2019. Thus we rewrite one which implements the interfaces that  <see cref="EnvDTE.BuildEvents"/> does.
 	/// </remarks>
-	public class BuildEvents : IVsUpdateSolutionEvents2, IVsUpdateSolutionEvents
+	public sealed class BuildEvents : IVsUpdateSolutionEvents2, IVsUpdateSolutionEvents
 	{
 		readonly CodistPackage _Package;
 
@@ -76,6 +77,7 @@ namespace Codist
 		}
 
 		int IVsUpdateSolutionEvents2.UpdateProjectCfg_Begin(IVsHierarchy proj, IVsCfg cfgProj, IVsCfg cfgSln, uint action, ref int cancel) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			// This method is called when a specific project begins building.
 			var project = proj.GetExtObjectAs<Project>();
 			if (project != null) {
@@ -83,7 +85,9 @@ namespace Codist
 					PrintProperties(project.Properties, "project " + project.Name);
 					PrintProperties(project.ConfigurationManager.ActiveConfiguration.Properties, $"project {project.Name} active config");
 				}
-				AutoChangeBuildVersion(cfgProj, project);
+				if (Config.Instance.SupressAutoBuildVersion == false) {
+					AutoChangeBuildVersion(cfgProj, project);
+				}
 			}
 			return VSConstants.S_OK;
 		}
@@ -108,6 +112,7 @@ namespace Codist
 			return VSConstants.S_OK;
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "checked in caller")]
 		void PrintProperties(EnvDTE.Properties properties, string title) {
 			var c = properties.Count;
 			WriteBuildText(title + Environment.NewLine);
@@ -122,6 +127,7 @@ namespace Codist
 			}
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "checked in caller")]
 		static void AutoChangeBuildVersion(IVsCfg cfgProj, Project project) {
 			if (cfgProj.get_DisplayName(out var s) != VSConstants.S_OK || !project.IsCSharpProject()) {
 				return;

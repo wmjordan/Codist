@@ -1916,4 +1916,10 @@ Right click: Wrap text menu...</value>
   <data name="OT_WriteSymbolColor" xml:space="preserve">
     <value>Write match symbol:</value>
   </data>
+  <data name="T_AutoBuildVersionNote" xml:space="preserve">
+    <value>The above assembly attributes will be rewritten before build.</value>
+  </data>
+  <data name="T_RewriteCopyrightYear" xml:space="preserve">
+    <value>Rewrite year in AssemblyCopyright</value>
+  </data>
 </root>

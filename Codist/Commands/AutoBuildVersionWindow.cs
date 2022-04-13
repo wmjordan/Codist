@@ -23,6 +23,7 @@ namespace Codist.Commands
 		readonly string _Copyright;
 		readonly string[] _CurrentAssemblyVersion, _CurrentAssemblyFileVersion;
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Called from UI")]
 		public AutoBuildVersionWindow(EnvDTE.Project project) {
 			_Project = project;
 			BuildConfigSetting.TryGetAssemblyAttributeValues(project, out _CurrentAssemblyVersion, out _CurrentAssemblyFileVersion, out _Copyright);
@@ -68,7 +69,7 @@ namespace Codist.Commands
 						Children = {
 							(_AssemblyVersion = new AutoVersionSettingsControl("AssemblyVersion:", _CurrentAssemblyVersion)),
 							(_AssemblyFileVersion = new AutoVersionSettingsControl("AssemblyFileVersion:", _CurrentAssemblyFileVersion)),
-							(_RewriteCopyrightYear = new CheckBox { Content = "Rewrite copyright year" }.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey)),
+							(_RewriteCopyrightYear = new CheckBox { Content = R.T_RewriteCopyrightYear }.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey)),
 							new WrapPanel {
 								Children = {
 									new ThemedButton(R.CMD_SaveBuildSetting, R.CMDT_SaveChanges, Ok) { IsDefault = true, Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
@@ -89,7 +90,6 @@ namespace Codist.Commands
 			_Configuration.Items.AddRange(project.ConfigurationManager.ConfigurationRowNames as object[]);
 			_Configuration.SelectionChanged += Configuration_SelectionChanged;
 			_Configuration.SelectedIndex = 0;
-
 		}
 
 		void Configuration_SelectionChanged(object sender, SelectionChangedEventArgs e) {

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using AppHelpers;
 using EnvDTE;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
 using Newtonsoft.Json;
 
 namespace Codist.AutoBuildVersion
@@ -39,6 +41,7 @@ namespace Codist.AutoBuildVersion
 		}
 
 		public static bool TryGetAssemblyAttributeValues(Project project, out string[] version, out string[] fileVersion, out string copyright) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			version = AttributePattern.GetMatchedVersion(project, ProjectAssemblyVersionName);
 			fileVersion = AttributePattern.GetMatchedVersion(project, ProjectFileVersionName)
 				?? AttributePattern.GetMatchedVersion(project, SdkProjectFileVersionName);
@@ -47,6 +50,7 @@ namespace Codist.AutoBuildVersion
 		}
 
 		bool RewriteSdkProjectFile(Project project, ref RewriteFlags f) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			var rf = RewriteFlags.None;
 			if (f.MatchFlags(RewriteFlags.AssemblyVersion) && RewriteVersion(project, AssemblyVersion, ProjectAssemblyVersionName)) {
 				rf = rf.SetFlags(RewriteFlags.AssemblyVersion, true);
@@ -65,6 +69,7 @@ namespace Codist.AutoBuildVersion
 			return r;
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		bool RewriteVersion(Project project, VersionSetting setting, string versionName) {
 			Property ver;
 			if (setting is null) {
@@ -90,6 +95,7 @@ namespace Codist.AutoBuildVersion
 			return false;
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		bool RewriteCopyrightYear(Project project, string propertyName) {
 			Property property;
 			try {
@@ -107,7 +113,7 @@ namespace Codist.AutoBuildVersion
 					&& (i == 0 || IsDigit(t[i - 1]) == false)
 					&& (i + 5 > t.Length || IsDigit(t[i + 4]) == false)) {
 					var n = DateTime.Now.Year.ToText();
-					if (t.Substring(i, 4) != n) {
+					if (String.CompareOrdinal(t, i, n, 0, 4) != 0) {
 						property.Value = t = t.Substring(0, i) + n + t.Substring(i + 4);
 						WriteBuildOutput($"{project.Name} {propertyName} => {t}");
 						return true;
@@ -124,6 +130,7 @@ namespace Codist.AutoBuildVersion
 			return c >= '0' && c <= '9';
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		void WriteBuildOutput(string text) {
 			CodistPackage.Instance?.GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build")?.OutputString(nameof(Codist) + ": " + text + Environment.NewLine);
 		}
@@ -148,6 +155,7 @@ namespace Codist.AutoBuildVersion
 			public static string[] GetMatchedVersion(Version v) {
 				return new[] { v.Major.ToText(), v.Minor.ToText(), v.Build.ToText(), v.Revision.ToText() };
 			}
+			[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 			public static string[] GetMatchedVersion(Project project, string propertyName) {
 				try {
 					var ver = project.Properties.Item(propertyName);
@@ -159,6 +167,7 @@ namespace Codist.AutoBuildVersion
 					return null;
 				}
 			}
+			[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 			public static string GetProperty(Project project, string propertyName) {
 				try {
 					var p = project.Properties.Item(propertyName);

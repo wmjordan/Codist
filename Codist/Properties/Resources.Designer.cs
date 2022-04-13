@@ -3881,6 +3881,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The above assembly attributes will be rewritten before build..
+        /// </summary>
+        internal static string T_AutoBuildVersionNote {
+            get {
+                return ResourceManager.GetString("T_AutoBuildVersionNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Background.
         /// </summary>
         internal static string T_Background {
@@ -5075,6 +5084,15 @@ namespace Codist.Properties {
         internal static string T_Returns {
             get {
                 return ResourceManager.GetString("T_Returns", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rewrite year in AssemblyCopyright.
+        /// </summary>
+        internal static string T_RewriteCopyrightYear {
+            get {
+                return ResourceManager.GetString("T_RewriteCopyrightYear", resourceCulture);
             }
         }
         

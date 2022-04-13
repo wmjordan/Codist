@@ -10,6 +10,7 @@ namespace Microsoft.VisualStudio.Shell
 		readonly IVsNewDocumentStateContext _context;
 
 		private NewDocumentStateScope(uint state, Guid reason) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			var doc = Package.GetGlobalService(typeof(IVsUIShellOpenDocument)) as IVsUIShellOpenDocument3;
 			if (doc != null) {
 				_context = doc.SetNewDocumentState(state, ref reason);
@@ -25,9 +26,8 @@ namespace Microsoft.VisualStudio.Shell
 		}
 
 		protected override void DisposeNativeResources() {
-			if (_context != null) {
-				_context.Restore();
-			}
+			ThreadHelper.ThrowIfNotOnUIThread();
+			_context?.Restore();
 			base.DisposeNativeResources();
 		}
 	}

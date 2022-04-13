@@ -32,15 +32,6 @@
 					<ToolTipText>Display content types of the current document</ToolTipText>
 				</Strings>
 			</Button>
-			<!--<Button guid="guidCodistPackageCmdSet" id="SymbolFinderWindowCommandId" priority="0x0800" type="Button">
-				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_TOOLS_OPTIONS" />
-				<Icon guid="ImageCatalogGuid" id="FindSymbol" />
-				<CommandFlag>DefaultDisabled</CommandFlag>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-          <ButtonText>Symbol finder</ButtonText>
-        </Strings>
-      </Button>-->
 			<Button guid="guidCodistPackageCmdSet" id="IncrementVsixVersionId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="EDIT_PROJECT_GROUP_ID" />
 				<Icon guid="ImageCatalogGuid" id="Counter" />
@@ -59,6 +50,14 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>Auto Build Version Settings...</ButtonText>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="ToggleAutoBuildVersionId" priority="0x0101" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_BUILD_MISC" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<Strings>
+					<ButtonText>Auto Build Version</ButtonText>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">

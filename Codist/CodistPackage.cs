@@ -27,7 +27,7 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.ScrollBarMarkerPage), Constants.NameOfMe, "Scrollbar Marker", 200, 306, true, Sort = 50)]
 	[ProvideOptionPage(typeof(Options.DisplayPage), Constants.NameOfMe, "Display", 200, 307, true, Sort = 60)]
 	[ProvideOptionPage(typeof(Options.WebSearchPage), Constants.NameOfMe, "Web Search", 200, 308, true, Sort = 70)]
-	[ProvideOptionPage(typeof(Options.WrapTextPage), Constants.NameOfMe, "Wrap Text", 200, 310, true, Sort = 80)]
+	[ProvideOptionPage(typeof(Options.WrapTextPage), Constants.NameOfMe, "Smart Bar\\Wrap Text", 200, 310, true, Sort = 80)]
 	[ProvideOptionPage(typeof(Options.ExtensionDeveloperPage), Constants.NameOfMe, "Extension development", 200, 309, true, Sort = 90)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	//[ProvideToolWindow(typeof(Commands.SymbolFinderWindow), Style = VsDockStyle.Tabbed, Window = EnvDTE.Constants.vsWindowKindProperties))]
@@ -146,12 +146,13 @@ namespace Codist
 			}
 			__BuildEvents = new BuildEvents(this);
 			//_extenderCookie = DTE.ObjectExtenders.RegisterExtenderProvider(VSConstants.CATID.CSharpFileProperties_string, BuildBots.AutoReplaceExtenderProvider.Name, new BuildBots.AutoReplaceExtenderProvider());
-			//Commands.SymbolFinderWindowCommand.Initialize();
 			Commands.ScreenshotCommand.Initialize();
 			Commands.GetContentTypeCommand.Initialize();
 			Commands.IncrementVsixVersionCommand.Initialize();
 			Commands.AutoBuildVersionWindowCommand.Initialize();
 			Commands.NaviBarSearchDeclarationCommand.Initialize();
+			Commands.ToggleAutoBuildVersionCommand.Initialize();
+
 			if (Config.Instance.InitStatus != InitStatus.Normal) {
 				Config.Instance.SaveConfig(Config.ConfigPath); // save the file to prevent this notification from reoccurrence
 				try {

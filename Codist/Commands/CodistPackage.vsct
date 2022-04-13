@@ -51,6 +51,9 @@
 			<Group guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" priority="0x0800">
 				<Parent guid="guidSHLMainMenu" id="IDM_VS_EDITOR_FIND_MENU" />
 			</Group>
+			<Group guid="guidCodistPackageCmdSet" id="IDG_VS_BUILD_MISC" priority="0x0400">
+				<Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_BUILD" />
+			</Group>
 		</Groups>
 		<!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
 		<!--<Bitmaps>
@@ -81,6 +84,8 @@
 			<IDSymbol name="EDIT_PROJECT_GROUP_ID" value="0x1000" />
 			<IDSymbol name="IncrementVsixVersionId" value="0x4003" />
 			<IDSymbol name="AutoBuildVersionWindowId" value="0x4009" />
+			<IDSymbol name="IDG_VS_BUILD_SELECTION" value="0x1000" />
+			<IDSymbol name="ToggleAutoBuildVersionId" value="0x400A" />
 			<IDSymbol name="IDG_VS_TOOLS_OPTIONS" value="0x1020" />
 			<IDSymbol name="SymbolFinderWindowCommandId" value="0x4004" />
 			<IDSymbol name="SyntaxCustomizeHighlightId" value="0x4005" />
