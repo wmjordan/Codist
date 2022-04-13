@@ -14,7 +14,7 @@ namespace Codist.Display
 	[ContentType(Constants.CodeTypes.Text)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
-	class EditorWindowDisplayOptimizer : IWpfTextViewCreationListener
+	sealed class EditorWindowDisplayOptimizer : IWpfTextViewCreationListener
 	{
 		public void TextViewCreated(IWpfTextView textView) {
 			textView.VisualElement.Loaded += TextViewLoaded;

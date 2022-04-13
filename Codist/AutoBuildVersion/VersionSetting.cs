@@ -27,7 +27,7 @@ namespace Codist.AutoBuildVersion
 			return $"{WritePart(major, Major)}.{WritePart(minor, Minor)}.{WritePart(build, Build)}.{WritePart(revision, Revision)}";
 		}
 
-		string WritePart(string part, VersionRewriteMode mode) {
+		static string WritePart(string part, VersionRewriteMode mode) {
 			switch (mode) {
 				case VersionRewriteMode.Increment: return Int32.TryParse(part, System.Globalization.NumberStyles.Integer, __Format, out var n) ? NormalizeNumber(++n) : part;
 				case VersionRewriteMode.Zero: return "0";

@@ -514,7 +514,7 @@ namespace Codist.SmartBars
 			public string Name { get; }
 		}
 
-		protected class CommandMenuItem : ThemedMenuItem, IDisposable
+		protected sealed class CommandMenuItem : ThemedMenuItem, IDisposable
 		{
 			SmartBar _SmartBar;
 
