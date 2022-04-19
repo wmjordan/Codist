@@ -414,8 +414,8 @@ namespace Codist.NaviBar
 				if (node is VariableDeclaratorSyntax) {
 					p = p.Parent.Parent;
 				}
-				if (p is BaseTypeDeclarationSyntax) {
-					t.Append(((BaseTypeDeclarationSyntax)p).Identifier.ValueText + ".", ThemeHelper.SystemGrayTextBrush);
+				if (p is BaseTypeDeclarationSyntax bt) {
+					t.Append(bt.Identifier.ValueText + ".", ThemeHelper.SystemGrayTextBrush);
 				}
 			}
 			t.Append(title, highlight, false, SymbolFormatter.Instance.GetBrush(node));
@@ -432,18 +432,17 @@ namespace Codist.NaviBar
 
 		static void AddParameterList(TextBlock t, SyntaxNode node) {
 			ParameterListSyntax p = null;
-			if (node is BaseMethodDeclarationSyntax) {
-				p = ((BaseMethodDeclarationSyntax)node).ParameterList;
+			if (node is BaseMethodDeclarationSyntax bm) {
+				p = bm.ParameterList;
 			}
 			else if (node.IsKind(SyntaxKind.DelegateDeclaration)) {
 				p = ((DelegateDeclarationSyntax)node).ParameterList;
 			}
-			else if (node is OperatorDeclarationSyntax) {
-				p = ((OperatorDeclarationSyntax)node).ParameterList;
+			else if (node is OperatorDeclarationSyntax o) {
+				p = o.ParameterList;
 			}
 			if (p != null) {
-				var useParamName = Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName);
-				t.Append(p.GetParameterListSignature(useParamName), ThemeHelper.SystemGrayTextBrush);
+				t.Append(p.GetParameterListSignature(Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName)), ThemeHelper.SystemGrayTextBrush);
 			}
 		}
 
@@ -493,7 +492,7 @@ namespace Codist.NaviBar
 			if (l != null) {
 				l.PreviewKeyUp -= OnMenuKeyUp;
 				l.MouseLeftButtonUp -= MenuItemSelect;
-				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(l, false);
+				Controls.DragDropHelper.SetScrollOnDragDrop(l, false);
 				ListContainer?.Remove(l);
 				l.Dispose();
 			}
@@ -534,7 +533,7 @@ namespace Codist.NaviBar
 						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey),
 					Owner = this
 				};
-				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
+				Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
 				Bar.SetupSymbolListMenu(_Menu);
 				_FinderBox.PreviewKeyDown += ChangeSearchScope;
 				_FinderBox.TextChanged += SearchCriteriaChanged;
@@ -718,8 +717,7 @@ namespace Codist.NaviBar
 				IReadOnlyCollection<ISymbol> result;
 				if (_PreviousSearchKeywords != null
 					&& symbolName.StartsWith(_PreviousSearchKeywords)
-					&& _IncrementalSearchContainer != null
-					&& _IncrementalSearchContainer.Count < MaxResultLimit) {
+					&& _IncrementalSearchContainer?.Count < MaxResultLimit) {
 					var filter = CodeAnalysisHelper.CreateNameFilter(symbolName, false, Char.IsUpper(symbolName[0]));
 					result = _IncrementalSearchContainer.Where(i => filter(i.Name)).ToList();
 				}
@@ -778,7 +776,7 @@ namespace Codist.NaviBar
 
 			sealed class MemberFinderBox : ThemedTextBox
 			{
-				public MemberFinderBox() : base() {
+				public MemberFinderBox() {
 					IsVisibleChanged += (s, args) => {
 						var b = s as TextBox;
 						if (b.IsVisible) {
@@ -822,7 +820,7 @@ namespace Codist.NaviBar
 			async Task CreateMenuForGlobalNamespaceNodeAsync(CancellationToken cancellationToken) {
 				if (_Menu != null) {
 					((TextBlock)_Menu.Footer).Clear();
-					Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
+					Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
 					await RefreshItemsAsync(cancellationToken);
 					return;
 				}
@@ -834,7 +832,7 @@ namespace Codist.NaviBar
 					EnableVirtualMode = true,
 					Owner = this
 				};
-				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
+				Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
 				if (_FilterBox != null) {
 					_FilterBox.FilterChanged -= FilterChanged;
 				}
@@ -926,7 +924,7 @@ namespace Codist.NaviBar
 				var ct = Bar._cancellationSource.GetToken();
 				try {
 					await CreateMenuForNamespaceNodeAsync(ct);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
 					_FilterBox.UpdateNumbers(_Menu.Symbols);
 					Bar.ShowMenu(this, _Menu);
 				}
@@ -938,7 +936,7 @@ namespace Codist.NaviBar
 			async Task CreateMenuForNamespaceNodeAsync(CancellationToken cancellationToken) {
 				if (_Menu != null) {
 					((TextBlock)_Menu.Footer).Clear();
-					Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
+					Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
 					await RefreshItemsAsync(cancellationToken);
 					return;
 				}
@@ -949,7 +947,7 @@ namespace Codist.NaviBar
 					EnableVirtualMode = true,
 					Owner = this
 				};
-				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
+				Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
 				if (_FilterBox != null) {
 					_FilterBox.FilterChanged -= FilterChanged;
 				}
@@ -971,7 +969,7 @@ namespace Codist.NaviBar
 				Bar.SetupSymbolListMenu(_Menu);
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(false);
 				var items = await Bar._SemanticContext.GetNamespacesAndTypesAsync(_Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
-				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
+				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 				_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this, cancellationToken));
 			}
 
@@ -990,7 +988,7 @@ namespace Codist.NaviBar
 					_Symbol = await ctx.RelocateSymbolAsync(_Symbol, cancellationToken).ConfigureAwait(false);
 					//_Node = Bar._SemanticContext.RelocateDeclarationNode(_Node);
 					var items = await ctx.GetNamespacesAndTypesAsync(_Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this, cancellationToken));
 					_Menu.RefreshItemsSource(true);
 				}
@@ -1107,7 +1105,7 @@ namespace Codist.NaviBar
 				var ct = Bar._cancellationSource.GetToken();
 				try {
 					await CreateMenuForTypeSymbolNodeAsync(ct);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
 
 					_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.FindMembers().Select(s => new SymbolItem(s, null, false)));
 					var footer = (TextBlock)_Menu.Footer;
@@ -1130,7 +1128,7 @@ namespace Codist.NaviBar
 			async Task CreateMenuForTypeSymbolNodeAsync(CancellationToken cancellationToken) {
 				if (_Menu != null) {
 					((TextBlock)_Menu.Footer).Clear();
-					Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
+					Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
 					await RefreshItemsAsync(Node, cancellationToken);
 					return;
 				}
@@ -1140,7 +1138,7 @@ namespace Codist.NaviBar
 					ExtIconProvider = s => GetExtIcons(s.SyntaxNode),
 					Owner = this
 				};
-				Codist.Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
+				Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
 				_Menu.Header = new WrapPanel {
 					Orientation = Orientation.Horizontal,
 					Children = {
@@ -1179,7 +1177,7 @@ namespace Codist.NaviBar
 						await AddPartialTypeDeclarationsAsync(node as BaseTypeDeclarationSyntax, symbol, cancellationToken);
 					}
 					if (externals.MatchFlags(MemberListOptions.ShowBase) && symbol.Kind == SymbolKind.NamedType) {
-						await AddBaseTypeDeclarationsAsync(node as BaseTypeDeclarationSyntax, symbol as INamedTypeSymbol, cancellationToken);
+						await AddBaseTypeDeclarationsAsync(symbol as INamedTypeSymbol, cancellationToken);
 					}
 				}
 			}
@@ -1218,8 +1216,7 @@ namespace Codist.NaviBar
 				}
 				_PartialCount = c;
 			}
-			async Task AddBaseTypeDeclarationsAsync(BaseTypeDeclarationSyntax node, INamedTypeSymbol symbol, CancellationToken cancellationToken) {
-				var current = node.SyntaxTree;
+			async Task AddBaseTypeDeclarationsAsync(INamedTypeSymbol symbol, CancellationToken cancellationToken) {
 				while ((symbol = symbol.BaseType) != null && symbol.HasSource()) {
 					foreach (var item in symbol.DeclaringSyntaxReferences) {
 						await AddExternalNodesAsync(item, symbol.GetTypeName(), false, cancellationToken);
@@ -1339,99 +1336,115 @@ namespace Codist.NaviBar
 			}
 
 			static StackPanel GetExtIcons(SyntaxNode node) {
-				StackPanel icons = null;
 				switch (node) {
 					case BaseMethodDeclarationSyntax m:
-						var p1 = m.ParameterList.Parameters.FirstOrDefault();
-						var isExt = false;
-						if (p1 != null && p1.Modifiers.Any(SyntaxKind.ThisKeyword)) {
-							AddIcon(ref icons, IconIds.ExtensionMethod);
-							isExt = true;
-						}
-						foreach (var modifier in m.Modifiers) {
-							switch (modifier.Kind()) {
-								case SyntaxKind.AsyncKeyword: AddIcon(ref icons, IconIds.AsyncMember); break;
-								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractMember); break;
-								case SyntaxKind.StaticKeyword:
-									if (isExt == false) {
-										AddIcon(ref icons, IconIds.StaticMember);
-									}
-									break;
-								case SyntaxKind.UnsafeKeyword: AddIcon(ref icons, IconIds.Unsafe); break;
-								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedMethod); break;
-								case SyntaxKind.OverrideKeyword: AddIcon(ref icons, IconIds.OverrideMethod); break;
-								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
-							}
-						}
-						break;
+						return GetMethodExtIcons(m);
 					case BasePropertyDeclarationSyntax p:
-						foreach (var modifier in p.Modifiers) {
-							switch (modifier.Kind()) {
-								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
-								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractMember); break;
-								case SyntaxKind.SealedKeyword:
-									AddIcon(ref icons, p.IsKind(SyntaxKind.EventDeclaration) ? IconIds.SealedEvent : IconIds.SealedProperty);
-									break;
-								case SyntaxKind.OverrideKeyword:
-									AddIcon(ref icons, p.IsKind(SyntaxKind.EventDeclaration) ? IconIds.OverrideEvent : IconIds.OverrideProperty);
-									break;
-								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
-								case SyntaxKind.RefKeyword: AddIcon(ref icons, IconIds.RefMember); break;
-							}
-						}
-						if (p.Type is RefTypeSyntax r) {
-							if (r.RefKeyword != null) {
-								AddIcon(ref icons, IconIds.RefMember);
-							}
-							if (r.ReadOnlyKeyword != null) {
-								AddIcon(ref icons, IconIds.ReadonlyProperty);
-							}
-						}
-						if (p.AccessorList != null) {
-							var a = p.AccessorList.Accessors;
-							if (a.Count == 2) {
-								if (a.Any(i => i.RawKind == (int)CodeAnalysisHelper.InitAccessorDeclaration)) {
-									AddIcon(ref icons, IconIds.InitonlyProperty);
-								}
-								else if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
-									AddIcon(ref icons, IconIds.AutoProperty);
-									break;
-								}
-							}
-							else if (a.Count == 1) {
-								if (a[0].Body == null && a[0].ExpressionBody == null) {
-									AddIcon(ref icons, IconIds.ReadonlyProperty);
-									break;
-								}
-							}
-							if (a.Any(i => i.Keyword.IsKind(SyntaxKind.GetKeyword) && i.Modifiers.Any(SyntaxKind.ReadOnlyKeyword))) {
-								AddIcon(ref icons, IconIds.ReadonlyMethod);
-							}
-						}
-						break;
+						return GetPropertyExtIcons(p);
 					case BaseFieldDeclarationSyntax f:
-						foreach (var modifier in f.Modifiers) {
-							switch (modifier.Kind()) {
-								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyField); break;
-								case SyntaxKind.VolatileKeyword: AddIcon(ref icons, IconIds.VolatileField); break;
-								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
-							}
-						}
-						break;
+						return GetFieldExtIcons(f);
 					case VariableDeclaratorSyntax v:
 						return GetExtIcons(node.Parent.Parent);
 					case BaseTypeDeclarationSyntax c:
-						foreach (var modifier in c.Modifiers) {
-							switch (modifier.Kind()) {
-								case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
-								case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractClass); break;
-								case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedClass); break;
-								case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyType); break;
+						return GetTypeExtIcons(c);
+				}
+				return null;
+
+				StackPanel GetMethodExtIcons(BaseMethodDeclarationSyntax m) {
+					StackPanel icons = null;
+					var isExt = false;
+					if (m.ParameterList.Parameters.FirstOrDefault()?.Modifiers.Any(SyntaxKind.ThisKeyword) == true) {
+						AddIcon(ref icons, IconIds.ExtensionMethod);
+						isExt = true;
+					}
+					foreach (var modifier in m.Modifiers) {
+						switch (modifier.Kind()) {
+							case SyntaxKind.AsyncKeyword: AddIcon(ref icons, IconIds.AsyncMember); break;
+							case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractMember); break;
+							case SyntaxKind.StaticKeyword:
+								if (isExt == false) {
+									AddIcon(ref icons, IconIds.StaticMember);
+								}
+								break;
+							case SyntaxKind.UnsafeKeyword: AddIcon(ref icons, IconIds.Unsafe); break;
+							case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedMethod); break;
+							case SyntaxKind.OverrideKeyword: AddIcon(ref icons, IconIds.OverrideMethod); break;
+							case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
+						}
+					}
+					return icons;
+				}
+
+				StackPanel GetPropertyExtIcons(BasePropertyDeclarationSyntax p) {
+					StackPanel icons = null;
+					foreach (var modifier in p.Modifiers) {
+						switch (modifier.Kind()) {
+							case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
+							case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractMember); break;
+							case SyntaxKind.SealedKeyword:
+								AddIcon(ref icons, p.IsKind(SyntaxKind.EventDeclaration) ? IconIds.SealedEvent : IconIds.SealedProperty);
+								break;
+							case SyntaxKind.OverrideKeyword:
+								AddIcon(ref icons, p.IsKind(SyntaxKind.EventDeclaration) ? IconIds.OverrideEvent : IconIds.OverrideProperty);
+								break;
+							case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
+							case SyntaxKind.RefKeyword: AddIcon(ref icons, IconIds.RefMember); break;
+						}
+					}
+					if (p.Type is RefTypeSyntax r) {
+						AddIcon(ref icons, IconIds.RefMember);
+						if (r.ReadOnlyKeyword.Parent != null) {
+							AddIcon(ref icons, IconIds.ReadonlyProperty);
+						}
+					}
+					if (p.AccessorList != null) {
+						var a = p.AccessorList.Accessors;
+						if (a.Count == 2) {
+							if (a.Any(i => i.RawKind == (int)CodeAnalysisHelper.InitAccessorDeclaration)) {
+								AddIcon(ref icons, IconIds.InitonlyProperty);
+							}
+							else if (a[0].Body == null && a[0].ExpressionBody == null && a[1].Body == null && a[1].ExpressionBody == null) {
+								AddIcon(ref icons, IconIds.AutoProperty);
+								return icons;
 							}
 						}
-						break;
+						else if (a.Count == 1) {
+							if (a[0].Body == null && a[0].ExpressionBody == null) {
+								AddIcon(ref icons, IconIds.ReadonlyProperty);
+								return icons;
+							}
+						}
+						if (a.Any(i => i.Keyword.IsKind(SyntaxKind.GetKeyword) && i.Modifiers.Any(SyntaxKind.ReadOnlyKeyword))) {
+							AddIcon(ref icons, IconIds.ReadonlyMethod);
+						}
+					}
+					return icons;
 				}
-				return icons;
+
+				StackPanel GetFieldExtIcons(BaseFieldDeclarationSyntax f) {
+					StackPanel icons = null;
+					foreach (var modifier in f.Modifiers) {
+						switch (modifier.Kind()) {
+							case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyField); break;
+							case SyntaxKind.VolatileKeyword: AddIcon(ref icons, IconIds.VolatileField); break;
+							case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
+						}
+					}
+					return icons;
+				}
+
+				StackPanel GetTypeExtIcons(BaseTypeDeclarationSyntax c) {
+					StackPanel icons = null;
+					foreach (var modifier in c.Modifiers) {
+						switch (modifier.Kind()) {
+							case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
+							case SyntaxKind.AbstractKeyword: AddIcon(ref icons, IconIds.AbstractClass); break;
+							case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedClass); break;
+							case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyType); break;
+						}
+					}
+					return icons;
+				}
 
 				void AddIcon(ref StackPanel container, int imageId) {
 					if (container == null) {
