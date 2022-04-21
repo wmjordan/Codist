@@ -1086,7 +1086,7 @@ namespace Codist.NaviBar
 					Bar.HideMenu();
 					return;
 				}
-				if (Node.Kind().IsTypeDeclaration() == false) {
+				if (Node.Kind().IsTypeDeclaration() == false || Node.IsKind(SyntaxKind.DelegateDeclaration)) {
 					var span = Node.FullSpan;
 					if (span.Contains(Bar._SemanticContext.Position) && Node.SyntaxTree.FilePath == Bar._SemanticContext.Document.FilePath
 						|| Node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
