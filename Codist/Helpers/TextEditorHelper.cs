@@ -200,21 +200,17 @@ namespace Codist
 
 		public static bool IsMultilineSelected(this ITextView textView) {
 			var s = textView.Selection;
-			if (s.IsEmpty || s.SelectedSpans.Count < 1) {
-				return false;
-			}
-			return textView.GetTextViewLineContainingBufferPosition(s.Start.Position) != textView.GetTextViewLineContainingBufferPosition(s.End.Position);
+			return s.IsEmpty == false && s.SelectedSpans.Count > 0
+				&& textView.GetTextViewLineContainingBufferPosition(s.Start.Position) != textView.GetTextViewLineContainingBufferPosition(s.End.Position);
 		}
 
 		public static void SelectNode(this SyntaxNode node, bool includeTrivia) {
 			if (node == null) {
 				return;
 			}
-#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 			OpenFile(node.GetLocation().SourceTree.FilePath, view => {
 				view.SelectSpan(includeTrivia ? node.GetSematicSpan(true) : node.Span.ToSpan());
 			});
-#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 		}
 
 		public static void SelectNode(this ITextView view, SyntaxNode node, bool includeTrivia) {

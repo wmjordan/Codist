@@ -17,6 +17,7 @@ namespace Codist.SmartBars
 	partial class SmartBar
 	{
 		static readonly CommandItem[] __FindAndReplaceCommands = GetFindAndReplaceCommands();
+		static readonly CommandItem[] __MultilineFindAndReplaceCommands = GetMultilineFindAndReplaceCommands();
 		static readonly CommandItem[] __CaseCommands = GetCaseCommands();
 		static readonly CommandItem[] __SurroundingCommands = GetSurroundingCommands();
 		static readonly CommandItem[] __DebugCommands = GetDebugCommands();
@@ -148,33 +149,39 @@ namespace Codist.SmartBars
 		}
 
 		void AddFindAndReplaceCommands() {
-			AddCommands(ToolBar, IconIds.FindNext, R.CMD_FindReplace, ctx => {
-				ThreadHelper.ThrowIfNotOnUIThread();
-				string t = ctx.View.GetFirstSelectionText();
-				if (t.Length == 0) {
-					return;
-				}
-				ctx.KeepToolBar(false);
-				if (Keyboard.Modifiers == ModifierKeys.Alt) {
-					TextEditorHelper.ExecuteEditorCommand("Edit.InsertNextMatchingCaret");
-					return;
-				}
-				var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t,
-					FindOptions.Wrap
-						.SetFlags(FindOptions.MatchCase, Keyboard.Modifiers.MatchFlags(ModifierKeys.Control))
-						.SetFlags(FindOptions.WholeWord, Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift))
-						.SetFlags(FindOptions.Multiline, t.Contains("\n"))
-					);
-				if (r.HasValue) {
-					ctx.View.SelectSpan(r.Value);
-					ctx.KeepToolBar(true);
-				}
-				else {
-					ctx.HideToolBar();
-				}
-			}, ctx => __FindAndReplaceCommands.Concat(
+			AddCommands(ToolBar, IconIds.FindNext, R.CMD_FindReplace, QuickFind, ctx => __FindAndReplaceCommands.Concat(
 				Config.Instance.SearchEngines.ConvertAll(s => new CommandItem(IconIds.SearchWebSite, R.CMD_SearchWith.Replace("<NAME>", s.Name), c => SearchSelection(s.Pattern, c))))
 			);
+		}
+
+		void AddMultilineFindAndReplaceCommands() {
+			AddCommands(ToolBar, IconIds.FindNext, R.CMD_Find, QuickFind, ctx => __MultilineFindAndReplaceCommands);
+		}
+
+		void QuickFind(CommandContext ctx) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			string t = ctx.View.GetFirstSelectionText();
+			if (t.Length == 0) {
+				return;
+			}
+			ctx.KeepToolBar(false);
+			if (Keyboard.Modifiers == ModifierKeys.Alt) {
+				TextEditorHelper.ExecuteEditorCommand("Edit.InsertNextMatchingCaret");
+				return;
+			}
+			var r = ctx.TextSearchService.Find(ctx.View.Selection.StreamSelectionSpan.End.Position, t,
+				FindOptions.Wrap
+					.SetFlags(FindOptions.MatchCase, Keyboard.Modifiers.MatchFlags(ModifierKeys.Control))
+					.SetFlags(FindOptions.WholeWord, Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift))
+					.SetFlags(FindOptions.Multiline, t.IndexOf('\n') >= 0)
+				);
+			if (r.HasValue) {
+				ctx.View.SelectSpan(r.Value);
+				ctx.KeepToolBar(true);
+			}
+			else {
+				ctx.HideToolBar();
+			}
 		}
 
 		void AddPasteCommand() {
@@ -360,12 +367,17 @@ namespace Codist.SmartBars
 		}
 		static CommandItem[] GetFindAndReplaceCommands() {
 			return new CommandItem[] {
-					new CommandItem(IconIds.Find, R.CMD_Find, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
-					new CommandItem(IconIds.Replace, R.CMD_Replace, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
-					new CommandItem(IconIds.FindInFile, R.CMD_FindInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
-					new CommandItem(IconIds.ReplaceInFolder, R.CMD_ReplaceInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
-					new CommandItem(IconIds.EditMatches, R.CMD_EditMatches, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.InsertCaretsatAllMatching")),
-				};
+				new CommandItem(IconIds.Find, R.CMD_Find, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Find")),
+				new CommandItem(IconIds.Replace, R.CMD_Replace, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
+				new CommandItem(IconIds.FindInFile, R.CMD_FindInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
+				new CommandItem(IconIds.ReplaceInFolder, R.CMD_ReplaceInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
+				new CommandItem(IconIds.EditMatches, R.CMD_EditMatches, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.InsertCaretsatAllMatching")),
+			};
+		}
+		static CommandItem[] GetMultilineFindAndReplaceCommands() {
+			return new CommandItem[] {
+				new CommandItem(IconIds.EditMatches, R.CMD_EditMatches, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.InsertCaretsatAllMatching")),
+			};
 		}
 		static CommandItem[] GetSurroundingCommands() {
 			return new CommandItem[] {

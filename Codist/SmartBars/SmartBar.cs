@@ -108,7 +108,12 @@ namespace Codist.SmartBars
 			//if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
 			//	AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");
 			//}
-			if (View.IsMultilineSelected() == false) {
+			if (View.IsMultilineSelected()) {
+				if (View.Selection.Mode == TextSelectionMode.Stream) {
+					AddMultilineFindAndReplaceCommands();
+				}
+			}
+			else {
 				AddFindAndReplaceCommands();
 				if (Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowSyntaxClassificationInfo)) {
 					AddClassificationInfoCommand();
