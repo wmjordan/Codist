@@ -320,16 +320,16 @@ namespace Codist.Taggers
 
 		sealed class CSharpCommentTagger : CommentTagger
 		{
-			readonly IClassificationType _PreprocessorKeyword;
+			readonly ClassificationTag _PreprocessorKeywordTag;
 
 			public CSharpCommentTagger(IClassificationTypeRegistryService registry, ITextView textView) : base(registry, textView) {
-				_PreprocessorKeyword = registry.GetClassificationType("preprocessor keyword");
+				_PreprocessorKeywordTag = new ClassificationTag(registry.GetClassificationType(Constants.CodePreprocessorKeyword));
 			}
 			protected override TaggedContentSpan TagComments(SnapshotSpan snapshotSpan, IMappingTagSpan<IClassificationTag> tagSpan) {
 				if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)
-					&& tagSpan.Tag.ClassificationType == _PreprocessorKeyword) {
-					return Matches(snapshotSpan, "pragma") || Matches(snapshotSpan, "if") || Matches(snapshotSpan, "else") /*|| Matches(snapshotSpan, "region")*/
-						? new TaggedContentSpan(tagSpan.Tag, snapshotSpan, 0, 0)
+					&& tagSpan.Tag.ClassificationType.Classification == Constants.CodePreprocessorKeyword) {
+					return Matches(snapshotSpan, "pragma") || Matches(snapshotSpan, "if") || Matches(snapshotSpan, "else")
+						? new TaggedContentSpan(_PreprocessorKeywordTag, snapshotSpan, 0, 0)
 						: null;
 				}
 				return base.TagComments(snapshotSpan, tagSpan);
