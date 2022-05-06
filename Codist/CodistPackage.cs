@@ -31,20 +31,17 @@ namespace Codist
 	[ProvideOptionPage(typeof(Options.ExtensionDeveloperPage), Constants.NameOfMe, "Extension development", 200, 309, true, Sort = 90)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	//[ProvideToolWindow(typeof(Commands.SymbolFinderWindow), Style = VsDockStyle.Tabbed, Window = EnvDTE.Constants.vsWindowKindProperties))]
-	[ProvideAutoLoad(VSConstants.UICONTEXT.ShellInitialized_string, PackageAutoLoadFlags.BackgroundLoad)]
+	[ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
 	sealed class CodistPackage : AsyncPackage
 	{
 		/// <summary>CodistPackage GUID string.</summary>
 		const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
 
-		static EnvDTE80.DTE2 __DTE;
 		static OleMenuCommandService __Menu;
 		static IOleComponentManager __ComponentManager;
 		static BuildEvents __BuildEvents;
 
 		//int _extenderCookie;
-
-		//static VsDebugger _Debugger;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CodistPackage"/> class.
@@ -59,12 +56,8 @@ namespace Codist
 
 		public static CodistPackage Instance { get; private set; }
 		public static Version VsVersion => Vs.Version;
-		public static EnvDTE80.DTE2 DTE {
-			get {
-				ThreadHelper.ThrowIfNotOnUIThread();
-				return __DTE ?? (__DTE = ServicesHelper.Get<EnvDTE80.DTE2, EnvDTE.DTE>());
-			}
-		}
+		public static EnvDTE80.DTE2 DTE { get; } = GetGlobalService(typeof(SDTE)) as EnvDTE80.DTE2;
+
 		public static OleMenuCommandService MenuService {
 			get {
 				ThreadHelper.ThrowIfNotOnUIThread();
@@ -130,12 +123,14 @@ namespace Codist
 		protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress) {
 			await base.InitializeAsync(cancellationToken, progress);
 
-			SolutionEvents.OnAfterOpenSolution += (s, args) => {
+			SolutionEvents.OnAfterCloseSolution += (s, args) => {
 				Taggers.SymbolMarkManager.Clear();
 			};
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+			__BuildEvents = new BuildEvents(this);
 
 			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CompactMenu)) {
 				Controls.LayoutOverrider.CompactMenu();
@@ -144,7 +139,6 @@ namespace Codist
 			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.MainWindow)) {
 				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, true);
 			}
-			__BuildEvents = new BuildEvents(this);
 			//_extenderCookie = DTE.ObjectExtenders.RegisterExtenderProvider(VSConstants.CATID.CSharpFileProperties_string, BuildBots.AutoReplaceExtenderProvider.Name, new BuildBots.AutoReplaceExtenderProvider());
 			Commands.ScreenshotCommand.Initialize();
 			Commands.GetContentTypeCommand.Initialize();
@@ -186,7 +180,7 @@ namespace Codist
 #pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 		/// <summary>A helper method to discover registered editor commands.</summary>
 		static void ListEditorCommands() {
-			var commands = __DTE.Commands;
+			var commands = DTE.Commands;
 			var c = commands.Count;
 			var s = new string[c];
 			var s2 = new string[c];
