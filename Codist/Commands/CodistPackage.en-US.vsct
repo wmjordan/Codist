@@ -55,6 +55,7 @@
 			<Button guid="guidCodistPackageCmdSet" id="ToggleAutoBuildVersionId" priority="0x0101" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_BUILD_MISC" />
 				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DontCache</CommandFlag>
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<Strings>
 					<ButtonText>Auto Build Version</ButtonText>
