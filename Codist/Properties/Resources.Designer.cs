@@ -2418,6 +2418,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Provides additional shortcuts, such as safe mode, no DPI scaling, etc. to jump list of Visual Studio.
+        /// </summary>
+        internal static string OT_JumpListTip {
+            get {
+                return ResourceManager.GetString("OT_JumpListTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Latest release:.
         /// </summary>
         internal static string OT_LatestRelease {
@@ -4601,6 +4610,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Jump List Shortcuts.
+        /// </summary>
+        internal static string T_JumpList {
+            get {
+                return ResourceManager.GetString("T_JumpList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to lambda expression.
         /// </summary>
         internal static string T_LambdaExpression {
@@ -4880,6 +4898,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No Scaling Mode.
+        /// </summary>
+        internal static string T_NoScaleMode {
+            get {
+                return ResourceManager.GetString("T_NoScaleMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Starts Visual Studio without DPI scaling to work with WinForms designers..
+        /// </summary>
+        internal static string T_NoScaleModeTip {
+            get {
+                return ResourceManager.GetString("T_NoScaleModeTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No syntax highlight is defined for selected syntax type. You need to install corresponding feature with the Visual Studio installer..
         /// </summary>
         internal static string T_NoSyntaxHighlightDefined {
@@ -4966,6 +5002,24 @@ namespace Codist.Properties {
         internal static string T_PredefinedThemes {
             get {
                 return ResourceManager.GetString("T_PredefinedThemes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Presentation Mode.
+        /// </summary>
+        internal static string T_PresentationMode {
+            get {
+                return ResourceManager.GetString("T_PresentationMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Starts a separate Visual Studio instance with its own settings, layout, extensions, and more....
+        /// </summary>
+        internal static string T_PresentationModeTip {
+            get {
+                return ResourceManager.GetString("T_PresentationModeTip", resourceCulture);
             }
         }
         
@@ -5102,6 +5156,24 @@ namespace Codist.Properties {
         internal static string T_RightGradient {
             get {
                 return ResourceManager.GetString("T_RightGradient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Safe Mode.
+        /// </summary>
+        internal static string T_SafeMode {
+            get {
+                return ResourceManager.GetString("T_SafeMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Starts Visual Studio in limited functionality mode where all extensions are disabled..
+        /// </summary>
+        internal static string T_SafeModeTip {
+            get {
+                return ResourceManager.GetString("T_SafeModeTip", resourceCulture);
             }
         }
         

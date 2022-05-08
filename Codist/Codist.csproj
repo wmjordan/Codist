@@ -90,6 +90,7 @@
     <Compile Include="Controls\SymbolItem.cs" />
     <Compile Include="Controls\SymbolMenu.cs" />
     <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
+    <Compile Include="Display\JumpListEnhancer.cs" />
     <Compile Include="IconIds.cs" />
     <Compile Include="Margins\DisableChangeTrackerMargin.cs" />
     <Compile Include="Margins\SymbolReferenceMarkerStyle.cs" />

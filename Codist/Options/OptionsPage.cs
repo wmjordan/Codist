@@ -121,7 +121,7 @@ namespace Codist.Options
 
 		sealed class PageControl : OptionsPageContainer
 		{
-			readonly OptionBox<Features> _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker;
+			readonly OptionBox<Features> _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer;
 			readonly OptionBox<Features>[] _Options;
 			readonly Button _LoadButton, _SaveButton, _OpenConfigFolderButton;
 			readonly Note _NoticeBox;
@@ -142,7 +142,9 @@ namespace Codist.Options
 							(_NavigationBar = o.CreateOptionBox(Features.NaviBar, UpdateConfig, R.T_NavigationBar)
 								.SetLazyToolTip(() => R.OT_NavigationBarTip)),
 							(_ScrollbarMarker = o.CreateOptionBox(Features.ScrollbarMarkers, UpdateConfig, R.T_ScrollbarMarkers)
-								.SetLazyToolTip(() => R.OT_ScrollbarMarkerTip))
+								.SetLazyToolTip(() => R.OT_ScrollbarMarkerTip)),
+							(_JumpListEnhancer = o.CreateOptionBox(Features.JumpList, UpdateConfig, R.T_JumpList)
+								.SetLazyToolTip(() => R.OT_JumpListTip))
 						}
 					},
 					_NoticeBox = new Note(R.OT_FeatureChangesTip) { BorderThickness = WpfHelper.TinyMargin, Visibility = Visibility.Collapsed },
@@ -170,11 +172,13 @@ namespace Codist.Options
 					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink(R.CMD_WechatDonateLink, ShowWechatQrCode, R.CMDT_OpenWechatQrCode),
 					new DescriptionBox(R.OT_DonateLinkTip)
 					);
-				_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker };
+				_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer };
 				foreach (var item in _Options) {
 					item.MinWidth = 120;
 					item.Margin = WpfHelper.MiddleMargin;
-					item.PreviewMouseDown += HighlightNoticeBox;
+					if (item != _JumpListEnhancer) {
+						item.PreviewMouseDown += HighlightNoticeBox;
+					}
 				}
 				foreach (var item in new[] { _LoadButton, _SaveButton, _OpenConfigFolderButton }) {
 					item.MinWidth = 120;

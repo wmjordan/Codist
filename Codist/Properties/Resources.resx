@@ -1926,4 +1926,28 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="T_RewriteCopyrightYear" xml:space="preserve">
     <value>Rewrite year in AssemblyCopyright</value>
   </data>
+  <data name="T_NoScaleMode" xml:space="preserve">
+    <value>No Scaling Mode</value>
+  </data>
+  <data name="T_NoScaleModeTip" xml:space="preserve">
+    <value>Starts Visual Studio without DPI scaling to work with WinForms designers.</value>
+  </data>
+  <data name="T_PresentationMode" xml:space="preserve">
+    <value>Presentation Mode</value>
+  </data>
+  <data name="T_PresentationModeTip" xml:space="preserve">
+    <value>Starts a separate Visual Studio instance with its own settings, layout, extensions, and more...</value>
+  </data>
+  <data name="T_SafeMode" xml:space="preserve">
+    <value>Safe Mode</value>
+  </data>
+  <data name="T_SafeModeTip" xml:space="preserve">
+    <value>Starts Visual Studio in limited functionality mode where all extensions are disabled.</value>
+  </data>
+  <data name="OT_JumpListTip" xml:space="preserve">
+    <value>Provides additional shortcuts, such as safe mode, no DPI scaling, etc. to jump list of Visual Studio</value>
+  </data>
+  <data name="T_JumpList" xml:space="preserve">
+    <value>Jump List Shortcuts</value>
+  </data>
 </root>

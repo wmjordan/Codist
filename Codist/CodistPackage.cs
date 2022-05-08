@@ -146,6 +146,7 @@ namespace Codist
 			Commands.AutoBuildVersionWindowCommand.Initialize();
 			Commands.NaviBarSearchDeclarationCommand.Initialize();
 			Commands.ToggleAutoBuildVersionCommand.Initialize();
+			Display.JumpListEnhancer.Initialize();
 
 			if (Config.Instance.InitStatus != InitStatus.Normal) {
 				Config.Instance.SaveConfig(Config.ConfigPath); // save the file to prevent this notification from reoccurrence

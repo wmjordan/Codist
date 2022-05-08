@@ -64,6 +64,9 @@ namespace Codist
 		[DefaultValue(SymbolToolTipOptions.Default)]
 		public SymbolToolTipOptions SymbolToolTipOptions { get; set; } = SymbolToolTipOptions.Default;
 
+		[DefaultValue(JumpListOptions.Default)]
+		public JumpListOptions JumpListOptions { get; set; } = JumpListOptions.Default;
+
 		[DefaultValue(0d)]
 		public double TopSpace { get; set; }
 		[DefaultValue(0d)]
@@ -369,10 +372,7 @@ namespace Codist
 			}
 		}
 		internal void EndUpdate(bool apply) {
-			var m = Interlocked.Exchange(ref _ConfigManager, null);
-			if (m != null) {
-				m.Quit(apply);
-			}
+			Interlocked.Exchange(ref _ConfigManager, null)?.Quit(apply);
 		}
 		internal void FireConfigChangedEvent(Features updatedFeature) {
 			__Updated?.Invoke(new ConfigUpdatedEventArgs(this, updatedFeature));
@@ -425,8 +425,11 @@ namespace Codist
 		internal void Set(DeveloperOptions options, bool set) {
 			DeveloperOptions = DeveloperOptions.SetFlags(options, set);
 		}
-		internal void SetSymbolToolTipOptions(SymbolToolTipOptions options, bool set) {
+		internal void Set(SymbolToolTipOptions options, bool set) {
 			SymbolToolTipOptions = SymbolToolTipOptions.SetFlags(options, set);
+		}
+		internal void Set(JumpListOptions options, bool set) {
+			JumpListOptions = JumpListOptions.SetFlags(options, set);
 		}
 
 		static void LoadStyleEntries<TStyle, TStyleType> (List<TStyle> styles, bool removeFontNames)
@@ -705,7 +708,8 @@ namespace Codist
 		NaviBar = 1 << 4,
 		WebSearch = 1 << 5,
 		WrapText = 1 << 6,
-		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar | WebSearch | WrapText
+		JumpList = 1 << 7,
+		All = SyntaxHighlight | ScrollbarMarkers | SuperQuickInfo | SmartBar | NaviBar | WebSearch | WrapText | JumpList
 	}
 
 	[Flags]
@@ -871,6 +875,16 @@ namespace Codist
 		ShowDocumentContentType = 1,
 		ShowSyntaxClassificationInfo = 1 << 1,
 		Default = None
+	}
+
+	[Flags]
+	public enum JumpListOptions
+	{
+		None,
+		SafeMode = 1,
+		DemostrationMode = 1 << 1,
+		NoScaling = 1 << 2,
+		Default = SafeMode | DemostrationMode | NoScaling
 	}
 
 	public enum ScrollbarMarkerStyle

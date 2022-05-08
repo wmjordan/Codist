@@ -1911,4 +1911,28 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_RewriteCopyrightYear" xml:space="preserve">
     <value>重写 AssemblyCopyright 中的年份</value>
   </data>
+  <data name="T_NoScaleMode" xml:space="preserve">
+    <value>禁用 DPI 感知模式</value>
+  </data>
+  <data name="T_NoScaleModeTip" xml:space="preserve">
+    <value>启动禁用 DPI 感知功能以设置 WinForms 界面布局的 Visual Studio 实例...</value>
+  </data>
+  <data name="T_PresentationMode" xml:space="preserve">
+    <value>演示模式</value>
+  </data>
+  <data name="T_PresentationModeTip" xml:space="preserve">
+    <value>启动一个带有独立设置、布局、扩展等配置的 Visual Studio 实例...</value>
+  </data>
+  <data name="T_SafeMode" xml:space="preserve">
+    <value>安全模式</value>
+  </data>
+  <data name="T_SafeModeTip" xml:space="preserve">
+    <value>启动禁用大部分扩展的 Visual Studio 实例...</value>
+  </data>
+  <data name="OT_JumpListTip" xml:space="preserve">
+    <value>为 Visual Studio 在开始菜单的跳转列表增加“安全模式”、“禁用 DPI 感知”等特殊启动方式</value>
+  </data>
+  <data name="T_JumpList" xml:space="preserve">
+    <value>跳转列表任务</value>
+  </data>
 </root>
