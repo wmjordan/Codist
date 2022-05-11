@@ -1,22 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using AppHelpers;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using R = Codist.Properties.Resources;
-using System.Diagnostics.CodeAnalysis;
-using System.Collections.Generic;
-using System.Diagnostics;
 
-namespace Codist
+namespace Codist.AutoBuildVersion
 {
 	/// <summary>
 	/// Events related to building projects and solutions.
 	/// </summary>
 	/// <remarks>
 	/// <para>We could have used <see cref="EnvDTE.BuildEvents"/>. However, VS 2022 won't work without importing Microsoft.VisualStudio.Shell.Interop v17, which breaks Codist on VS 2017 and VS 2019. Thus we rewrite one which implements the interfaces that <see cref="EnvDTE.BuildEvents"/> does.</para>
-	/// <para>Further more, auto-build-version feature is also implemented with the <see cref="IVsUpdateSolutionEvents3"/> event.</para>
+	/// <para>Further more, auto-build-version feature is also implemented with the <see cref="IVsSolutionEvents"/> and <see cref="IVsRunningDocTableEvents3"/> events.</para>
 	/// </remarks>
 	public sealed class BuildEvents : IVsUpdateSolutionEvents2, IVsSolutionEvents, IVsRunningDocTableEvents3
 	{

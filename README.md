@@ -533,6 +533,7 @@ I have learned a lot from the following extension projects (sorted by the time w
   * GoToImplementation: https://github.com/GordianDotNet/GoToImplementation
   * Roslyn: https://github.com/dotnet/roslyn
   * Community.VisualStudio.Toolkit: https://github.com/VsixCommunity/Community.VisualStudio.Toolkit
+  * ReviewBoard: code.google.com/p/reviewboardvsx
   * Tweaks: https://github.com/madskristensen/Tweakster
 
 And every donaters, beta testers, feedback providers to this project.
