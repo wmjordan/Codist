@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using AppHelpers;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
@@ -39,7 +38,7 @@ namespace Codist
 
 		static OleMenuCommandService __Menu;
 		static IOleComponentManager __ComponentManager;
-		static BuildEvents __BuildEvents;
+		static AutoBuildVersion.BuildEvents __BuildEvents;
 
 		//int _extenderCookie;
 
@@ -130,7 +129,7 @@ namespace Codist
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-			__BuildEvents = new BuildEvents(this);
+			__BuildEvents = new AutoBuildVersion.BuildEvents(this);
 
 			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CompactMenu)) {
 				Controls.LayoutOverrider.CompactMenu();

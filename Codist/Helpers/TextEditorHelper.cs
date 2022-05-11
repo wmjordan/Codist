@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 using System.Windows.Input;
+using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
@@ -15,8 +18,6 @@ using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
-using AppHelpers;
-using System.IO;
 
 namespace Codist
 {
@@ -470,9 +471,7 @@ namespace Codist
 		}
 
 		public static void ExecuteEditorCommand(string command, string args = "") {
-#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 			CodistPackage.DTE.TryExecuteCommand(command, args);
-#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 		}
 
 		public static void OpenFile(string file) {
@@ -490,9 +489,7 @@ namespace Codist
 			try {
 				using (new NewDocumentStateScope(Keyboard.Modifiers == ModifierKeys.Shift ? __VSNEWDOCUMENTSTATE.NDS_Unspecified : __VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
 					VsShellUtilities.OpenDocument(ServiceProvider.GlobalProvider, file, __ViewKindCodeGuid, out var hierarchy, out var itemId, out var windowFrame, out var view);
-					if (action != null) {
-						action.Invoke(view);
-					}
+					action?.Invoke(view);
 				}
 			}
 			catch (Exception) {
@@ -502,14 +499,12 @@ namespace Codist
 		public static void OpenFile(string file, Action<IWpfTextView> action) {
 			OpenFile(file, (VsTextView view) => action(GetWpfTextView(view)));
 		}
-#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 		public static void OpenFile(string file, int line, int column) {
 			OpenFile(file, d => {
 				d.SetTopLine(Math.Max(0, line - 5));
 				d.SetCaretPos(line, column);
 			});
 		}
-#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 
 		public static bool AnyTextChanges(ITextVersion oldVersion, ITextVersion currentVersion) {
 			while (oldVersion != currentVersion) {
@@ -657,14 +652,10 @@ namespace Codist
 		}
 
 		public static (string platformName, string configName) GetActiveBuildConfiguration() {
-#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 			return GetActiveBuildConfiguration(CodistPackage.DTE.ActiveDocument);
-#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 		}
 		public static void SetActiveBuildConfiguration(string configName) {
-#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 			SetActiveBuildConfiguration(CodistPackage.DTE.ActiveDocument, configName);
-#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 		}
 
 		public static List<string> GetBuildConfigNames() {
@@ -790,13 +781,12 @@ namespace Codist
 				: null;
 		}
 		static IWpfTextView GetWpfTextView(VsTextView vTextView) {
-			var userData = vTextView as VsUserData;
-			if (userData == null) {
-				return null;
+			if (vTextView is VsUserData userData) {
+				var guidViewHost = __IWpfTextViewHostGuid;
+				userData.GetData(ref guidViewHost, out object holder);
+				return ((IWpfTextViewHost)holder).TextView;
 			}
-			var guidViewHost = __IWpfTextViewHostGuid;
-			userData.GetData(ref guidViewHost, out object holder);
-			return ((IWpfTextViewHost)holder).TextView;
+			return null;
 		}
 
 		#endregion
@@ -861,6 +851,35 @@ namespace Codist
 
 			public bool IsOfType(string type) { return false; }
 		}
+
+		// hack: workaround for compatibility with VS 2017, 2019 and VS 2022
+		// taken from Microsoft.VisualStudio.Shell.NewDocumentStateScope
+		sealed class NewDocumentStateScope : DisposableObject
+		{
+			readonly IVsNewDocumentStateContext _context;
+
+			private NewDocumentStateScope(uint state, Guid reason) {
+				ThreadHelper.ThrowIfNotOnUIThread();
+				if (Package.GetGlobalService(typeof(IVsUIShellOpenDocument)) is IVsUIShellOpenDocument3 doc) {
+					_context = doc.SetNewDocumentState(state, ref reason);
+				}
+			}
+
+			public NewDocumentStateScope(__VSNEWDOCUMENTSTATE state, Guid reason)
+				: this((uint)state, reason) {
+			}
+
+			public NewDocumentStateScope(__VSNEWDOCUMENTSTATE2 state, Guid reason)
+				: this((uint)state, reason) {
+			}
+
+			protected override void DisposeNativeResources() {
+				ThreadHelper.ThrowIfNotOnUIThread();
+				_context?.Restore();
+				base.DisposeNativeResources();
+			}
+		}
+
 	}
 
 	[Flags]

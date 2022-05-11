@@ -209,8 +209,7 @@
     <Compile Include="QuickInfo\QuickInfoOverrider.cs" />
     <Compile Include="QuickInfo\SelectionQuickInfo.cs" />
     <Compile Include="QuickInfo\QuickInfoVisibilityController.cs" />
-    <Compile Include="VSVersions\BuildEvents.cs" />
-    <Compile Include="VSVersions\NewDocumentStateScope.cs" />
+    <Compile Include="AutoBuildVersion\BuildEvents.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">
