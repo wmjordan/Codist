@@ -46,6 +46,9 @@ namespace Codist.Taggers
 
 		protected override bool DoFullParseAtFirstLoad => true;
 		protected override void Parse(SnapshotSpan span, ICollection<TaggedContentSpan> results) {
+			// hack: Workaround for fixing markdown title list not being refreshed after altering title identifiers
+			Result.ClearRange(span.Start, span.Length);
+
 			var t = span.GetText();
 			if (t.Length < 1 || t[0] != '#') {
 				return;

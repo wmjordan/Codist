@@ -13,12 +13,16 @@ namespace Codist.Taggers
 		internal static bool IsLocked;
 
 		// hack We assume that it is threadsafe to organize the tags with this
-		readonly List<TaggedContentSpan> _Tags = new List<TaggedContentSpan>();
+		readonly SortedSet<TaggedContentSpan> _Tags = new SortedSet<TaggedContentSpan>(Comparer<TaggedContentSpan>.Create((x, y) => {
+			var s1 = x.Start;
+			var s2 = y.Start;
+			return s1 < s2 ?
+				x.End < s2 ? -1 : 0
+				: s1 > y.End ? 1 : 0;
+		}));
 
 		/// <summary>The snapshot version.</summary>
 		public int Version { get; set; }
-		/// <summary>The first parsed position.</summary>
-		public int Start { get; set; }
 		/// <summary>The last parsed position.</summary>
 		public int LastParsed { get; set; }
 		public bool HasTag => _Tags.Count > 0;
@@ -27,8 +31,7 @@ namespace Codist.Taggers
 		public TaggedContentSpan GetPreceedingTaggedSpan(int position) {
 			var tags = _Tags;
 			TaggedContentSpan t = null;
-			for (int i = tags.Count - 1; i >= 0; i--) {
-				var tag = tags[i];
+			foreach (var tag in tags.Reverse()) {
 				if (tag.Contains(position)) {
 					return tag;
 				}
@@ -50,38 +53,30 @@ namespace Codist.Taggers
 			if (IsLocked) {
 				return tag;
 			}
-			var s = new SnapshotPoint(tag.TextSnapshot, tag.Start);
-			if (s < Start) {
-				Start = s;
-			}
 			var tags = _Tags;
-			for (int i = tags.Count - 1; i >= 0; i--) {
-				if (tags[i].Contains(s)) {
-					return tags[i] = tag;
-				}
-			}
+			tags.Remove(tag);
 			tags.Add(tag);
 			return tag;
 		}
 
-		public void PurgeOutdatedTags(TextContentChangedEventArgs args) {
-			Debug.WriteLine($"snapshot version: {args.AfterVersion.VersionNumber}");
-			foreach (var change in args.Changes) {
-				Debug.WriteLine($"change: {change.OldPosition}->{change.NewPosition}");
-				var tags = _Tags;
-				for (int i = tags.Count - 1; i >= 0; i--) {
-					var t = tags[i];
-					if (t.Start > change.OldEnd) {
-						// shift positions of remained items
-						t.Shift(args.After, change.Delta);
-					}
-					else if (change.OldPosition <= t.End) {
-						// remove tags within the updated range
-						Debug.WriteLine($"Removed [{t.Start}..{t.End}) {t.Tag.ClassificationType}");
-						tags.RemoveAt(i);
-					}
-				}
+		public void ClearRange(int start, int length) {
+			var span = new TaggedContentSpan(start, length);
+			var tags = _Tags;
+			while (tags.Remove(span)) {
 			}
+		}
+
+		public void PurgeOutdatedTags(TextContentChangedEventArgs args) {
+			if (Version == args.AfterVersion.VersionNumber) {
+				return;
+			}
+			Debug.WriteLine($"snapshot version: {args.AfterVersion.VersionNumber}");
+			var tags = _Tags;
+			var after = args.After;
+			tags.RemoveWhere(t => t.Update(after) == false);
+			// todo remove the item if the following events happen as well:
+			// 1. identifier removed before the tag (e.g. "//" before "note")
+			// 2. block comment inserted before the tag (e.g. "/*" before tag)
 			try {
 				Version = args.AfterVersion.VersionNumber;
 				LastParsed = args.Before.GetLineFromPosition(args.Changes[0].OldPosition).Start.Position;
@@ -90,13 +85,13 @@ namespace Codist.Taggers
 				MessageBox.Show(String.Join("\n",
 					"Code margin exception:", args.Changes[0].OldPosition,
 					"Before length:", args.Before.Length,
-					"After length:", args.After.Length
+					"After length:", after.Length
 				));
 			}
 		}
 
 		public void Reset() {
-			Start = LastParsed = 0;
+			LastParsed = 0;
 			_Tags.Clear();
 		}
 	}
@@ -106,10 +101,11 @@ namespace Codist.Taggers
 	{
 		public IClassificationTag Tag { get; }
 		public SnapshotSpan Span => new SnapshotSpan(TextSnapshot, Start, Length);
+		public ITrackingSpan TrackingSpan { get; private set; }
 		public int Start { get; private set; }
-		public int Length { get; }
-		public int ContentOffset { get; private set; }
-		public int ContentLength { get; private set; }
+		public int Length { get; private set; }
+		public int ContentOffset { get; }
+		public int ContentLength { get; }
 
 		public int End => Start + Length;
 		public string Text => TextSnapshot.GetText(Start, Length);
@@ -123,6 +119,7 @@ namespace Codist.Taggers
 
 		public TaggedContentSpan(IClassificationTag tag, ITextSnapshot textSnapshot, int tagStart, int tagLength, int contentOffset, int contentLength) {
 			TextSnapshot = textSnapshot;
+			TrackingSpan = textSnapshot.CreateTrackingSpan(tagStart, tagLength, SpanTrackingMode.EdgeInclusive);
 			Tag = tag;
 			Start = tagStart;
 			Length = tagLength;
@@ -130,17 +127,29 @@ namespace Codist.Taggers
 			ContentLength = contentLength;
 		}
 
+		internal TaggedContentSpan(int start, int length) {
+			Start = start;
+			Length = length;
+		}
+
 		public bool Contains(int position) {
 			return position >= Start && position < End;
 		}
-		public void Shift(ITextSnapshot snapshot, int delta) {
-			TextSnapshot = snapshot;
-			Start += delta;
-		}
-
-		public void SetContent(int start, int length) {
-			ContentOffset = start;
-			ContentLength = length;
+		public bool Update(ITextSnapshot snapshot) {
+			if (TrackingSpan.TextBuffer != snapshot.TextBuffer) {
+				return true;
+			}
+			var span = TrackingSpan.GetSpan(snapshot);
+			if ((Length = span.Length) > 0) {
+				if (Tag is IValidationTag t && t.IsValid(span) == false) {
+					return false;
+				}
+				Start = span.Start;
+				TextSnapshot = snapshot;
+				TrackingSpan = snapshot.CreateTrackingSpan(Start, Length, SpanTrackingMode.EdgeInclusive);
+				return true;
+			}
+			return false;
 		}
 
 		public override string ToString() {

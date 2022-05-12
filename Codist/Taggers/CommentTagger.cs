@@ -44,9 +44,10 @@ namespace Codist.Taggers
 			}
 
 			_TextView = textView;
+			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
 			_Tags = textView.Properties.GetProperty<TaggerResult>(typeof(TaggerResult));
 			_Aggregator = textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>("TagAggregator");
-			_Aggregator.TagsChanged += AggregatorBatchedTagsChanged;
+			_Aggregator.BatchedTagsChanged += AggregatorBatchedTagsChanged;
 		}
 
 		internal FrameworkElement Margin { get; set; }
@@ -76,7 +77,7 @@ namespace Codist.Taggers
 			IEnumerable<IMappingTagSpan<IClassificationTag>> tagSpans;
 			try {
 				if (_Tags.LastParsed == 0) {
-					// perform a full parse for the first time
+					// perform a full parse at the first time
 					Debug.WriteLine("Full parse");
 					tagSpans = _Aggregator.GetTags(new SnapshotSpan(snapshot, 0, snapshot.Length));
 					_Tags.LastParsed = snapshot.Length;
@@ -121,6 +122,7 @@ namespace Codist.Taggers
 			if (IsComment(tagSpan.Tag.ClassificationType) == false) {
 				return null;
 			}
+			_Tags.ClearRange(snapshotSpan.Start, snapshotSpan.Length);
 			var text = snapshotSpan.GetText();
 			//NOTE: markup comment span does not include comment start token
 			var endOfCommentStartToken = GetCommentStartIndex(text);
@@ -187,11 +189,14 @@ namespace Codist.Taggers
 				}
 			}
 
-			return label.StyleApplication == CommentStyleApplication.Tag
-				? new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, label.LabelLength, contentStart - commentStart, contentEnd - contentStart)
-				: label.StyleApplication == CommentStyleApplication.Content
-				? new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + contentStart, contentEnd - contentStart, 0, contentEnd - contentStart)
-				: new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, contentEnd - commentStart, contentStart - commentStart, contentEnd - contentStart);
+			switch (label.StyleApplication) {
+				case CommentStyleApplication.Tag:
+					return new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, label.LabelLength, contentStart - commentStart, contentEnd - contentStart);
+				case CommentStyleApplication.Content:
+					return new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + contentStart, contentEnd - contentStart, 0, contentEnd - contentStart);
+				default:
+					return new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, contentEnd - commentStart, contentStart - commentStart, contentEnd - contentStart);
+			}
 		}
 
 		protected static bool Matches(SnapshotSpan span, string text) {
@@ -224,7 +229,7 @@ namespace Codist.Taggers
 				: (__CommentClasses[classification] = classification.Classification.IndexOf("Comment", StringComparison.OrdinalIgnoreCase) != -1);
 		}
 
-		void AggregatorBatchedTagsChanged(object sender, EventArgs args) {
+		void AggregatorBatchedTagsChanged(object sender, BatchedTagsChangedEventArgs args) {
 			Margin?.InvalidateVisual();
 		}
 
@@ -270,6 +275,13 @@ namespace Codist.Taggers
 			return CodeType.None;
 		}
 
+		void TextView_TextBufferChanged(object sender, TextContentChangedEventArgs args) {
+			if (args.Changes.Count == 0) {
+				return;
+			}
+			_Tags.PurgeOutdatedTags(args);
+		}
+
 		#region IDisposable Support
 		public void Dispose() {
 			if (_Tags != null) {
@@ -278,6 +290,7 @@ namespace Codist.Taggers
 				_Aggregator = null;
 				_Tags.Reset();
 				_Tags = null;
+				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
 				_TextView.Properties.RemoveProperty(nameof(CommentTagger));
 				Margin = null;
 			}
