@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using AppHelpers;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
-using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Taggers
 {
@@ -39,7 +33,7 @@ namespace Codist.Taggers
 		public static TextTaggerBase GetRegexTagger(IClassificationTag tag, string pattern, int useGroup, StringComparison comparison) {
 			return new RegexTagger { Pattern = pattern, StringComparison = comparison, UseGroup = useGroup, Tag = tag };
 		}
-		
+
 		sealed class StartWithTagger : TextTaggerBase
 		{
 			string _Prefix;
@@ -76,8 +70,8 @@ namespace Codist.Taggers
 			public string Content { get => _Content; set { _Content = value; _ContentLength = value.Length; } }
 
 			public override void GetTags(string text, ref SnapshotSpan span, ICollection<TaggedContentSpan> results) {
-				int i;
-				if ((i = text.IndexOf(_Content, StringComparison)) >= 0) {
+				int i = text.IndexOf(_Content, StringComparison);
+				if (i >= 0) {
 					results.Add(new TaggedContentSpan(Tag, span.Snapshot, span.Start + i, span.Length - i, i, text.Length - _ContentLength));
 				}
 			}

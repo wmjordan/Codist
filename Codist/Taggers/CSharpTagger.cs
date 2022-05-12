@@ -27,7 +27,6 @@ namespace Codist.Taggers
 		static readonly GeneralClassifications _GeneralClassifications = GeneralClassifications.Instance;
 		ConcurrentQueue<SnapshotSpan> _PendingSpans = new ConcurrentQueue<SnapshotSpan>();
 		CSharpTaggerProvider _TaggerProvider;
-		ITextView _View;
 		ITextBuffer _Buffer;
 		CancellationTokenSource _TaskBreaker;
 		ConditionalWeakTable<ITextSnapshot, ParserTask> _ParserTasks = new ConditionalWeakTable<ITextSnapshot, ParserTask>();
@@ -39,7 +38,6 @@ namespace Codist.Taggers
 		public CSharpTagger(CSharpTaggerProvider taggerProvider, ITextView view, ITextBuffer buffer) {
 			_TaggerProvider = taggerProvider;
 			_name = buffer.GetTextDocument()?.FilePath ?? buffer.CurrentSnapshot?.GetText(0, Math.Min(buffer.CurrentSnapshot.Length, 500));
-			_View = view;
 			_Buffer = buffer;
 			if (buffer is ITextBuffer2 b) {
 				b.ChangedOnBackground += TextBuffer_ChangedOnBackground;
@@ -56,7 +54,6 @@ namespace Codist.Taggers
 				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
 			}
 			var snapshot = spans[0].Snapshot;
-			var textBuffer = snapshot.TextBuffer;
 			SemanticModel model;
 			Workspace workspace;
 			if (parserTasks.TryGetValue(snapshot, out var task)) {
@@ -173,8 +170,6 @@ namespace Codist.Taggers
 				_Buffer = null;
 				_TaggerProvider = null;
 				_PendingSpans = null;
-				//_View.Closed -= View_Closed;
-				_View = null;
 			}
 		}
 
@@ -184,7 +179,7 @@ namespace Codist.Taggers
 			public Workspace Workspace;
 			public SemanticModel Model;
 
-			Document Document;
+			Document _Document;
 			CSharpTagger _Tagger;
 			int _State;
 
@@ -193,17 +188,17 @@ namespace Codist.Taggers
 				var w = Workspace.GetWorkspaceRegistration(buffer.AsTextContainer()).Workspace;
 				if (w != null) {
 					Workspace = w;
-					Document = w.GetDocument(buffer);
+					_Document = w.GetDocument(buffer);
 				}
 				Snapshot = snapshot;
 				_Tagger = tagger;
 			}
 
 			public bool StartParse(CancellationToken cancellationToken) {
-				if (Document == null || Interlocked.CompareExchange(ref _State, 1, 0) != 0) {
+				if (_Document == null || Interlocked.CompareExchange(ref _State, 1, 0) != 0) {
 					return false;
 				}
-				_ = Task.Run(async () => await ParseAsync(cancellationToken));
+				_ = Task.Run(() => ParseAsync(cancellationToken));
 				return true;
 			}
 
@@ -216,7 +211,7 @@ namespace Codist.Taggers
 				}
 				SemanticModel model;
 				try {
-					model = await Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+					model = await _Document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
 				}
 				catch (OperationCanceledException) {
 					goto CANCEL;
@@ -280,7 +275,7 @@ namespace Codist.Taggers
 				}
 				tagger.RemoveParser(this);
 				Workspace = null;
-				Document = null;
+				_Document = null;
 			}
 
 			static bool CancellableWait(int loop, CancellationToken cancellationToken) {

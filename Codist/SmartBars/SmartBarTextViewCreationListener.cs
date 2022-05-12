@@ -19,7 +19,7 @@ namespace Codist.SmartBars
 	internal sealed class SmartBarTextViewCreationListener : IWpfTextViewCreationListener
 	{
 		// Disable "Field is never assigned to..." and "Field is never used" compiler's warnings. Justification: the field is used by MEF.
-#pragma warning disable 649, 169
+#pragma warning disable 649, 169, IDE0044
 
 		/// <summary>
 		/// Defines the adornment layer for the scarlet adornment. This layer is ordered
@@ -33,7 +33,7 @@ namespace Codist.SmartBars
 		[Import(typeof(ITextSearchService2))]
 		ITextSearchService2 _TextSearchService;
 
-#pragma warning restore 649, 169
+#pragma warning restore 649, 169, IDE0044
 
 		/// <summary>
 		/// Instantiates a SelectionBar when a textView is created.
