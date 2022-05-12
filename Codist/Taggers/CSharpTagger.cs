@@ -692,18 +692,14 @@ namespace Codist.Taggers
 						if ((node.Parent as NameEqualsSyntax)?.Parent is UsingDirectiveSyntax) {
 							yield return _Classifications.AliasNamespace;
 						}
-						else if (node is AttributeArgumentSyntax) {
-							symbol = semanticModel.GetSymbolInfo(((AttributeArgumentSyntax)node).Expression).Symbol;
-							if (symbol != null && symbol.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
+						else if (node is AttributeArgumentSyntax attributeArgument) {
+							symbol = semanticModel.GetSymbolInfo(attributeArgument.Expression).Symbol;
+							if (symbol?.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
 								yield return _Classifications.ConstField;
 								yield return _Classifications.StaticMember;
 							}
 						}
-						symbol = node.Parent is MemberAccessExpressionSyntax ? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
-							: node.Parent.IsKind(SyntaxKind.Argument) ? semanticModel.GetSymbolInfo(((ArgumentSyntax)node.Parent).Expression).CandidateSymbols.FirstOrDefault()
-							: node.IsKind(SyntaxKind.SimpleBaseType) ? semanticModel.GetTypeInfo(((SimpleBaseTypeSyntax)node).Type).Type
-							: node.IsKind(SyntaxKind.TypeConstraint) ? semanticModel.GetTypeInfo(((TypeConstraintSyntax)node).Type).Type
-							: null;
+						symbol = FindSymbolOrSymbolCandidateForNode(node, semanticModel);
 						if (symbol is null) {
 							yield break;
 						}
@@ -876,6 +872,15 @@ namespace Codist.Taggers
 				else if (symbol.IsAbstract) {
 					yield return _Classifications.AbstractMember;
 				}
+			}
+
+			static ISymbol FindSymbolOrSymbolCandidateForNode(SyntaxNode node, SemanticModel semanticModel) {
+				return node.Parent.IsKind(SyntaxKind.SimpleMemberAccessExpression) ? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
+					: node.Parent.IsKind(SyntaxKind.Argument) ? semanticModel.GetSymbolInfo(((ArgumentSyntax)node.Parent).Expression).CandidateSymbols.FirstOrDefault()
+					: node.IsKind(SyntaxKind.SimpleBaseType) ? semanticModel.GetTypeInfo(((SimpleBaseTypeSyntax)node).Type).Type
+					: node.IsKind(SyntaxKind.TypeConstraint) ? semanticModel.GetTypeInfo(((TypeConstraintSyntax)node).Type).Type
+					: node.IsKind(SyntaxKind.ExpressionStatement) ? semanticModel.GetSymbolInfo(((ExpressionStatementSyntax)node).Expression).CandidateSymbols.FirstOrDefault()
+					: semanticModel.GetSymbolInfo(node).CandidateSymbols.FirstOrDefault();
 			}
 
 			static ITagSpan<IClassificationTag> CreateClassificationSpan(ITextSnapshot snapshotSpan, TextSpan span, ClassificationTag tag) {
