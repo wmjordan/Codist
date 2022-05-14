@@ -194,9 +194,14 @@ namespace Codist.Options
 
 		void PickColor(object sender, RoutedEventArgs e) {
 			using (var c = new System.Windows.Forms.ColorDialog() {
-				FullOpen = true,
-				Color = (Color.A == 0 ? DefaultColor() : Color).ToGdiColor()
+				FullOpen = true
 			}) {
+				if (Color.A != 0) {
+					c.Color = Color.ToGdiColor();
+				}
+				else if (DefaultColor != null) {
+					c.Color = DefaultColor().ToGdiColor();
+				}
 				if (c.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
 					Color = c.Color.ToWpfColor();
 				}

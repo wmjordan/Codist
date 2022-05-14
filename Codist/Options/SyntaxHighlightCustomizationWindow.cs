@@ -511,8 +511,7 @@ namespace Codist.Options
 				}
 				var button = new StyleSettingsButton(c, t, OnSelectStyle);
 				if (style != null && c.Classification == style.ClassificationType) {
-					button.IsChecked = true;
-					_SelectedStyleButton = button;
+					OnSelectStyle(button, null);
 					_SettingsGroup.Visibility = Visibility.Visible;
 					style = null;
 				}
