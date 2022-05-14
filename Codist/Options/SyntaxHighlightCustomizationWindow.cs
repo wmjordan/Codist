@@ -1042,9 +1042,9 @@ namespace Codist.Options
 						})
 					},
 				};
+				Background = ThemeHelper.EditorBackground;
 				PreviewLabelStyle(_Preview, t);
-				this.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
-					.ReferenceProperty(BackgroundProperty, EnvironmentColors.EnvironmentBackgroundBrushKey);
+				this.ReferenceStyle(VsResourceKeys.ButtonStyleKey);
 				Click += clickHandler;
 			}
 

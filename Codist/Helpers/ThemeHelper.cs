@@ -30,6 +30,7 @@ namespace Codist
 			};
 		}
 
+		public static System.Windows.Media.Brush EditorBackground => ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap("text").GetProperties(Constants.EditorProperties.TextViewBackground).GetBrush(EditorFormatDefinition.BackgroundBrushId);
 		public static GdiColor DocumentPageColor { get; private set; }
 		public static WpfBrush DocumentPageBrush { get; private set; }
 		public static GdiColor DocumentTextColor { get; private set; }
