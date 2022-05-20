@@ -17,8 +17,8 @@ namespace Codist.Taggers
 			var s1 = x.Start;
 			var s2 = y.Start;
 			return s1 < s2 ?
-				x.End < s2 ? -1 : 0
-				: s1 > y.End ? 1 : 0;
+				x.End <= s2 ? -1 : 0
+				: s1 >= y.End ? 1 : 0;
 		}));
 
 		/// <summary>The snapshot version.</summary>
