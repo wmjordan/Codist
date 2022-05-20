@@ -18,12 +18,12 @@ namespace Codist.SyntaxHighlight
 		internal static readonly Dictionary<IClassificationType, List<IClassificationType>> ClassificationTypeStore = InitClassificationTypes(_SyntaxStyleCache.Keys);
 
 		static Dictionary<IClassificationType, TextFormattingRunProperties> _BackupFormattings = new Dictionary<IClassificationType, TextFormattingRunProperties>(80);
-		static TextFormattingRunProperties _DefaultFormatting;
+		static TextFormattingRunProperties __DefaultFormatting;
 
 		internal static bool IdentifySymbolSource { get; private set; }
 		internal static int BackupFormatCount => _BackupFormattings.Count;
 
-		public static TextFormattingRunProperties GetBackupFormatting(IClassificationType classificationType) {
+		public static TextFormattingRunProperties GetBackupFormatting(this IClassificationType classificationType) {
 			lock (_syncRoot) {
 				return _BackupFormattings.TryGetValue(classificationType, out var r) ? r : null;
 			}
@@ -49,12 +49,15 @@ namespace Codist.SyntaxHighlight
 				if (update == false && _BackupFormattings.TryGetValue(classificationType, out var r)) {
 					return r;
 				}
-				else {
-					r = DefaultClassificationFormatMap.GetExplicitTextProperties(classificationType);
-					Debug.WriteLine("Backup format: " + classificationType.Classification + " " + (r.ForegroundBrushEmpty ? "<empty>" : r.ForegroundBrush.ToString()));
-					_BackupFormattings[classificationType] = r;
-					return r;
+				// hack: workaround for https://github.com/wmjordan/Codist/issues/199
+				if (classificationType.Classification?.Contains("Breakpoint") == true) {
+					return null;
 				}
+
+				r = DefaultClassificationFormatMap.GetExplicitTextProperties(classificationType);
+				Debug.WriteLine("Backup format: " + classificationType.Classification + " " + (r.ForegroundBrushEmpty ? "<empty>" : r.ForegroundBrush.ToString()));
+				_BackupFormattings[classificationType] = r;
+				return r;
 			}
 		}
 
@@ -117,26 +120,22 @@ namespace Codist.SyntaxHighlight
 
 		static void UpdateFormatCache(object sender, EventArgs args) {
 			var defaultFormat = DefaultClassificationFormatMap.DefaultTextProperties;
-			if (_DefaultFormatting == null) {
-				_DefaultFormatting = defaultFormat;
+			if (__DefaultFormatting == null) {
+				__DefaultFormatting = defaultFormat;
 			}
-			else if (_DefaultFormatting.ForegroundBrushSame(defaultFormat.ForegroundBrush) == false) {
-				Debug.WriteLine("DefaultFormatting Changed");
+			else if (__DefaultFormatting.ForegroundBrushSame(defaultFormat.ForegroundBrush) == false) {
+				Debug.WriteLine("DefaultFormatting changed");
 				// theme changed
 				lock (_syncRoot) {
 					var formattings = new Dictionary<IClassificationType, TextFormattingRunProperties>(_BackupFormattings.Count);
 					LoadFormattings(formattings);
 					_BackupFormattings = formattings;
-					_DefaultFormatting = defaultFormat;
+					__DefaultFormatting = defaultFormat;
 				}
 			}
 			lock (_syncRoot) {
 				UpdateIdentifySymbolSource(_SyntaxStyleCache);
 			}
-		}
-
-		internal static void LoadBackupFormattings() {
-			LoadFormattings(_BackupFormattings);
 		}
 
 		static Dictionary<IClassificationType, TextFormattingRunProperties> LoadFormattings(Dictionary<IClassificationType, TextFormattingRunProperties> formattings) {

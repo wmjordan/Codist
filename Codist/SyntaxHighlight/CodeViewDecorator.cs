@@ -18,9 +18,10 @@ namespace Codist.SyntaxHighlight
 	sealed class CodeViewDecorator
 	{
 		static readonly IClassificationType __BraceMatchingClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBraceMatching);
-		static bool _Initialized;
-		static FontFamily _DefaultFontFamily;
-		static double _DefaultFontSize;
+		static bool __Initialized;
+		static FontFamily __DefaultFontFamily;
+		static double __DefaultFontSize;
+
 		IWpfTextView _TextView;
 		IClassificationFormatMap _ClassificationFormatMap;
 		IClassificationTypeRegistryService _RegService;
@@ -33,7 +34,7 @@ namespace Codist.SyntaxHighlight
 		public CodeViewDecorator(IWpfTextView view) {
 			view.Closed += View_Closed;
 			view.VisualElement.IsVisibleChanged += VisualElement_IsVisibleChanged;
-			if (_Initialized == false) {
+			if (__Initialized == false) {
 				view.VisualElement.IsVisibleChanged += MarkInitialized;
 			}
 			Config.RegisterUpdateHandler(UpdateSyntaxHighlightConfig);
@@ -45,20 +46,13 @@ namespace Codist.SyntaxHighlight
 			_TextView = view;
 
 			_IsViewActive = true;
-			if (_Initialized) {
+			if (__Initialized) {
 				Debug.WriteLine("Decorate known types");
 				Decorate(FormatStore.ClassificationTypeStore.Keys, true);
 				_EditorFormatMap.FormatMappingChanged += FormatUpdated;
 			}
 			else {
 				_EditorFormatMap.FormatMappingChanged += BackupFormat;
-				_ClassificationFormatMap.BeginBatchUpdate();
-				foreach (var item in _ClassificationFormatMap.CurrentPriorityOrder) {
-					if (item != null && item != __BraceMatchingClassificationType) {
-						_ClassificationFormatMap.SetTextProperties(item, _ClassificationFormatMap.GetExplicitTextProperties(item));
-					}
-				}
-				_ClassificationFormatMap.EndBatchUpdate();
 			}
 		}
 
@@ -73,7 +67,7 @@ namespace Codist.SyntaxHighlight
 				_EditorFormatMap.FormatMappingChanged -= BackupFormat;
 				Debug.WriteLine("Decorator initialized");
 				Decorate(FormatStore.ClassificationTypeStore.Keys, true);
-				_Initialized = true;
+				__Initialized = true;
 				_EditorFormatMap.FormatMappingChanged -= FormatUpdated;
 				_EditorFormatMap.FormatMappingChanged += FormatUpdated;
 			}
@@ -97,8 +91,7 @@ namespace Codist.SyntaxHighlight
 
 		void UpdateSyntaxHighlightConfig(ConfigUpdatedEventArgs eventArgs) {
 			if (eventArgs.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)) {
-				var t = eventArgs.Parameter as string;
-				if (t != null) {
+				if (eventArgs.Parameter is string t) {
 					Decorate(new[] { ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(t) }, true);
 				}
 				else {
@@ -121,12 +114,12 @@ namespace Codist.SyntaxHighlight
 		void FormatUpdated(object sender, EventArgs e) {
 			Debug.WriteLine("ClassificationFormatMapping changed.");
 			var defaultProperties = _ClassificationFormatMap.DefaultTextProperties;
-			if (_DefaultFontFamily == defaultProperties.Typeface.FontFamily && _DefaultFontSize == defaultProperties.FontRenderingEmSize) {
+			if (__DefaultFontFamily == defaultProperties.Typeface.FontFamily && __DefaultFontSize == defaultProperties.FontRenderingEmSize) {
 				return;
 			}
 			Debug.WriteLine("Default text properties changed.");
-			_DefaultFontFamily = defaultProperties.Typeface.FontFamily;
-			_DefaultFontSize = defaultProperties.FontRenderingEmSize;
+			__DefaultFontFamily = defaultProperties.Typeface.FontFamily;
+			__DefaultFontSize = defaultProperties.FontRenderingEmSize;
 			// hack: it is weird that this property is not in sync with the Text editor format, we have to force that
 			_EditorFormatMap.GetProperties(Constants.EditorProperties.PlainText)
 				.SetTypeface(defaultProperties.Typeface);
@@ -143,7 +136,7 @@ namespace Codist.SyntaxHighlight
 					if (key == null) {
 						continue;
 					}
-					updated[key] = SetProperties(_ClassificationFormatMap.GetTextProperties(key), item.Value, _DefaultFontSize);
+					updated[key] = SetProperties(_ClassificationFormatMap.GetTextProperties(key), item.Value, __DefaultFontSize);
 				}
 			}
 			if (updated.Count > 0) {
@@ -160,18 +153,18 @@ namespace Codist.SyntaxHighlight
 		}
 
 		void Decorate(IEnumerable<IClassificationType> classifications, bool fullUpdate) {
-			if (Interlocked.CompareExchange(ref _IsDecorating, 1, 0) != 0) {
+			if (_ClassificationFormatMap.IsInBatchUpdate || Interlocked.CompareExchange(ref _IsDecorating, 1, 0) != 0) {
 				return;
 			}
 			try {
-				var c = FormatStore.DefaultEditorFormatMap.GetColor(Constants.EditorProperties.Text, EditorFormatDefinition.ForegroundColorId);
+				var c = _EditorFormatMap.GetColor(Constants.EditorProperties.Text, EditorFormatDefinition.ForegroundColorId);
 				if (c.A > 0) {
 					if (c != _ForeColor) {
 						Debug.WriteLine("Fore color changed: " + _ForeColor.ToString() + "->" + c.ToString());
 					}
 					_ForeColor = c;
 				}
-				c = FormatStore.DefaultEditorFormatMap.GetColor(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundColorId);
+				c = _EditorFormatMap.GetColor(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundColorId);
 				if (c.A > 0) {
 					_BackColor = c.Alpha(0);
 				}
@@ -187,9 +180,6 @@ namespace Codist.SyntaxHighlight
 		}
 
 		void DecorateClassificationTypes(IEnumerable<IClassificationType> classifications, bool fullUpdate) {
-			if (_ClassificationFormatMap.IsInBatchUpdate) {
-				return;
-			}
 			var defaultSize = _ClassificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
 			var updated = new Dictionary<IClassificationType, TextFormattingRunProperties>();
 			StyleBase style;
@@ -197,20 +187,25 @@ namespace Codist.SyntaxHighlight
 			foreach (var item in classifications) {
 				if (item == null
 					|| (style = FormatStore.GetOrCreateStyle(item)) == null
-					|| (textFormatting = FormatStore.GetOrSaveBackupFormatting(item, _Initialized == false)) == null) {
+					|| (textFormatting = FormatStore.GetOrSaveBackupFormatting(item, __Initialized == false)) == null) {
 					continue;
 				}
+
 				var p = SetProperties(textFormatting, style, defaultSize);
 				if (p != textFormatting || fullUpdate) {
 					updated[item] = p;
 				}
 			}
+			if (updated.Count == 0) {
+				return;
+			}
 			var refreshList = new List<(IClassificationType type, TextFormattingRunProperties property)>();
 			foreach (var item in updated) {
+				// hack: we have to update the sub-classficationTypes in order to make C# Braces and Parentheses highlighting work properly
 				foreach (var subType in item.Key.GetSubTypes()) {
 					if (updated.ContainsKey(subType) == false) {
 						if ((style = FormatStore.GetOrCreateStyle(subType)) == null
-							|| (textFormatting = FormatStore.GetBackupFormatting(subType)) == null) {
+							|| (textFormatting = subType.GetBackupFormatting()) == null) {
 							continue;
 						}
 						refreshList.Add((subType, SetProperties(textFormatting, style, defaultSize)));
@@ -243,7 +238,7 @@ namespace Codist.SyntaxHighlight
 				fontSize = 1;
 			}
 			if (string.IsNullOrWhiteSpace(settings.Font) == false || settings.Stretch.HasValue) {
-				format = format.SetTypeface(new Typeface(string.IsNullOrWhiteSpace(settings.Font) == false ? new FontFamily(settings.Font) : _DefaultFontFamily, FontStyles.Normal, FontWeights.Normal, settings.Stretch.HasValue ? FontStretch.FromOpenTypeStretch(settings.Stretch.Value) : FontStretches.Normal));
+				format = format.SetTypeface(new Typeface(string.IsNullOrWhiteSpace(settings.Font) == false ? new FontFamily(settings.Font) : __DefaultFontFamily, FontStyles.Normal, FontWeights.Normal, settings.Stretch.HasValue ? FontStretch.FromOpenTypeStretch(settings.Stretch.Value) : FontStretches.Normal));
 			}
 			if (settings.FontSize != 0) {
 				if (format.FontRenderingEmSizeEmpty || fontSize != format.FontRenderingEmSize) {
