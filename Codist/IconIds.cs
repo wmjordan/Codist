@@ -110,7 +110,7 @@ namespace Codist
 		public const int InvertOperator = KnownImageIds.Operator;
 		public const int AddXmlDoc = KnownImageIds.AddComment;
 		public const int TagCode = KnownImageIds.MarkupTag;
-		public const int TagXmlDocSee = KnownImageIds.GoToNext;
+		public const int TagXmlDocSee = KnownImageIds.Next;
 		public const int TagXmlDocPara = KnownImageIds.ParagraphHardReturn;
 		public const int TagBold = KnownImageIds.Bold;
 		public const int TagItalic = KnownImageIds.Italic;
@@ -170,7 +170,7 @@ namespace Codist
 		public const int FindMethodsMatchingSignature = KnownImageIds.ClassMethodReference;
 		public const int GoToReturnType = KnownImageIds.GoToDeclaration;
 		public const int GoToType = KnownImageIds.Type;
-		public const int GoToMember = KnownImageIds.GoToNext;
+		public const int GoToMember = KnownImageIds.Next;
 		public const int GoToSymbol = KnownImageIds.FindSymbol;
 		public const int GoToDeclaration = KnownImageIds.GoToDeclaration;
 		public const int Capitalize = KnownImageIds.Font;
