@@ -18,6 +18,8 @@ namespace Codist.Taggers
 		ITagAggregator<IClassificationTag> _Aggregator;
 		TaggerResult _Tags;
 		ITextView _TextView;
+		ITextBuffer _Buffer;
+
 #if DEBUG
 		readonly HashSet<string> _ClassificationTypes = new HashSet<string>();
 #endif
@@ -26,7 +28,7 @@ namespace Codist.Taggers
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 #pragma warning restore 67
 
-		protected CommentTagger(IClassificationTypeRegistryService registry, ITextView textView) {
+		protected CommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) {
 			if (__CommentClassifications == null) {
 				var t = typeof(CommentStyleTypes);
 				var styleNames = Enum.GetNames(t);
@@ -43,8 +45,10 @@ namespace Codist.Taggers
 				}
 			}
 
+			_Buffer = buffer;
 			_TextView = textView;
-			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
+			buffer.Changed += TextBuffer_Changed;
+			buffer.ContentTypeChanged += TextBuffer_ContentTypeChanged;
 			_Tags = textView.Properties.GetProperty<TaggerResult>(typeof(TaggerResult));
 			_Aggregator = textView.Properties.GetProperty<ITagAggregator<IClassificationTag>>("TagAggregator");
 			_Aggregator.BatchedTagsChanged += AggregatorBatchedTagsChanged;
@@ -57,11 +61,11 @@ namespace Codist.Taggers
 
 		public static CommentTagger Create(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer textBuffer) {
 			switch (GetCodeType(textBuffer)) {
-				case CodeType.CSharp: return new CSharpCommentTagger(registry, textView);
-				case CodeType.Markup: return new MarkupCommentTagger(registry, textView);
-				case CodeType.C: return new CCommentTagger(registry, textView);
-				case CodeType.Css: return new CssCommentTagger(registry, textView);
-				case CodeType.Js: return new JsCommentTagger(registry, textView);
+				case CodeType.CSharp: return new CSharpCommentTagger(registry, textView, textBuffer);
+				case CodeType.Markup: return new MarkupCommentTagger(registry, textView, textBuffer);
+				case CodeType.C: return new CCommentTagger(registry, textView, textBuffer);
+				case CodeType.Css: return new CssCommentTagger(registry, textView, textBuffer);
+				case CodeType.Js: return new JsCommentTagger(registry, textView, textBuffer);
 			}
 			return null;
 		}
@@ -275,11 +279,17 @@ namespace Codist.Taggers
 			return CodeType.None;
 		}
 
-		void TextView_TextBufferChanged(object sender, TextContentChangedEventArgs args) {
+		void TextBuffer_Changed(object sender, TextContentChangedEventArgs args) {
 			if (args.Changes.Count == 0) {
 				return;
 			}
 			_Tags.PurgeOutdatedTags(args);
+		}
+
+		void TextBuffer_ContentTypeChanged(object sender, ContentTypeChangedEventArgs e) {
+			if (GetCodeType(e.After.TextBuffer) != GetCodeType(e.Before.TextBuffer)) {
+				Dispose();
+			}
 		}
 
 		#region IDisposable Support
@@ -290,8 +300,11 @@ namespace Codist.Taggers
 				_Aggregator = null;
 				_Tags.Reset();
 				_Tags = null;
-				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
+				_Buffer.Changed -= TextBuffer_Changed;
+				_Buffer.ContentTypeChanged -= TextBuffer_ContentTypeChanged;
+				_Buffer = null;
 				_TextView.Properties.RemoveProperty(nameof(CommentTagger));
+				_TextView = null;
 				Margin = null;
 			}
 		}
@@ -304,7 +317,7 @@ namespace Codist.Taggers
 
 		sealed class CCommentTagger : CommentTagger
 		{
-			public CCommentTagger(IClassificationTypeRegistryService registry, ITextView textView) : base(registry, textView) {
+			public CCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
 			protected override int GetCommentStartIndex(string comment) {
@@ -320,7 +333,7 @@ namespace Codist.Taggers
 
 		sealed class CssCommentTagger : CommentTagger
 		{
-			public CssCommentTagger(IClassificationTypeRegistryService registry, ITextView textView) : base(registry, textView) {
+			public CssCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
 			protected override int GetCommentStartIndex(string comment) {
@@ -335,7 +348,7 @@ namespace Codist.Taggers
 		{
 			readonly ClassificationTag _PreprocessorKeywordTag;
 
-			public CSharpCommentTagger(IClassificationTypeRegistryService registry, ITextView textView) : base(registry, textView) {
+			public CSharpCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 				_PreprocessorKeywordTag = new ClassificationTag(registry.GetClassificationType(Constants.CodePreprocessorKeyword));
 			}
 			protected override TaggedContentSpan TagComments(SnapshotSpan snapshotSpan, IMappingTagSpan<IClassificationTag> tagSpan) {
@@ -359,7 +372,7 @@ namespace Codist.Taggers
 
 		sealed class JsCommentTagger : CommentTagger
 		{
-			public JsCommentTagger(IClassificationTypeRegistryService registry, ITextView textView) : base(registry, textView) {
+			public JsCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
 			protected override int GetCommentStartIndex(string comment) {
@@ -372,7 +385,7 @@ namespace Codist.Taggers
 
 		sealed class MarkupCommentTagger : CommentTagger
 		{
-			public MarkupCommentTagger(IClassificationTypeRegistryService registry, ITextView textView) : base(registry, textView) {
+			public MarkupCommentTagger(IClassificationTypeRegistryService registry, ITextView textView, ITextBuffer buffer) : base(registry, textView, buffer) {
 			}
 
 			protected override int GetCommentStartIndex(string comment) {

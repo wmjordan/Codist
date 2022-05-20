@@ -118,7 +118,7 @@ namespace Codist.Taggers
 				|| textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown) == false) {
 				return null;
 			}
-			return textView.Properties.GetOrCreateSingletonProperty(() => new MarkdownTagger(textView, Config.Instance.Features.MatchFlags(Features.SyntaxHighlight))) as ITagger<T>;
+			return textView.Properties.GetOrCreateSingletonProperty(() => new MarkdownTagger(textView, buffer, Config.Instance.Features.MatchFlags(Features.SyntaxHighlight))) as ITagger<T>;
 		}
 	}
 

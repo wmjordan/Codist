@@ -42,6 +42,7 @@ namespace Codist.Taggers
 			if (buffer is ITextBuffer2 b) {
 				b.ChangedOnBackground += TextBuffer_ChangedOnBackground;
 			}
+			buffer.ContentTypeChanged += TextBuffer_ContentTypeChanged;
 			//view.Closed += View_Closed;
 		}
 
@@ -132,6 +133,13 @@ namespace Codist.Taggers
 			TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(changedSpan));
 		}
 
+		void TextBuffer_ContentTypeChanged(object sender, ContentTypeChangedEventArgs e) {
+			if (e.AfterContentType.IsOfType(Constants.CodeTypes.CSharp) == false) {
+				ReleaseResources();
+				_Reference = 0;
+			}
+		}
+
 		public void IncrementReference() {
 			_Reference++;
 		}
@@ -165,6 +173,7 @@ namespace Codist.Taggers
 				if (_Buffer is ITextBuffer2 b) {
 					b.ChangedOnBackground -= TextBuffer_ChangedOnBackground;
 				}
+				_Buffer.ContentTypeChanged -= TextBuffer_ContentTypeChanged;
 				_TaggerProvider.DetachTagger(_Buffer);
 				_ParserTasks = null;
 				_Buffer = null;

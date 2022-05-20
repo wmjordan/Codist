@@ -13,26 +13,27 @@ namespace Codist.Taggers
 {
 	sealed class CSharpBlockTagger : ITagger<ICodeMemberTag>, IReuseableTagger
 	{
-		ITextBuffer _buffer;
-		int _refCount;
-		CodeBlock _root;
+		ITextBuffer _Buffer;
+		int _RefCount;
+		CodeBlock _Root;
 		CancellationTokenSource _Cancellation;
 
 		internal CSharpBlockTagger(ITextBuffer buffer) {
-			_buffer = buffer;
+			_Buffer = buffer;
+			_Buffer.ContentTypeChanged += TextBuffer_ContentTypeChanged;
 		}
 
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		public void AddRef() {
-			if (++_refCount == 1) {
-				_buffer.Changed += OnBufferChanged;
-				ScanBufferAsync(_buffer.CurrentSnapshot);
+			if (++_RefCount == 1) {
+				_Buffer.Changed += OnBufferChanged;
+				ScanBufferAsync(_Buffer.CurrentSnapshot);
 			}
 		}
 
 		public IEnumerable<ITagSpan<ICodeMemberTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
-			var root = _root;  //this.root could be set on a background thread, so get a snapshot.
+			var root = _Root;  //this.root could be set on a background thread, so get a snapshot.
 			if (root == null) {
 				yield break;
 			}
@@ -54,19 +55,27 @@ namespace Codist.Taggers
 		}
 
 		public void Release() {
-			if (--_refCount == 0) {
+			if (--_RefCount == 0) {
 				ReleaseResources();
 			}
 		}
 
 		void ReleaseResources() {
-			_buffer.Changed -= OnBufferChanged;
-			_buffer.Properties.RemoveProperty(typeof(CSharpBlockTaggerProvider));
-			_buffer = null;
+			_Buffer.ContentTypeChanged -= TextBuffer_ContentTypeChanged;
+			_Buffer.Changed -= OnBufferChanged;
+			_Buffer.Properties.RemoveProperty(typeof(CSharpBlockTaggerProvider));
+			_Buffer = null;
 
 			//Stop and blow away the old scan (even if it didn't finish, the results are not interesting anymore).
 			SyncHelper.CancelAndDispose(ref _Cancellation, false);
-			_root = null; //Allow the old root to be GC'd
+			_Root = null; //Allow the old root to be GC'd
+		}
+
+		void TextBuffer_ContentTypeChanged(object sender, ContentTypeChangedEventArgs e) {
+			if (e.AfterContentType.IsOfType(Constants.CodeTypes.CSharp) == false) {
+				ReleaseResources();
+				_RefCount = 0;
+			}
 		}
 
 		static async Task<CodeBlock> ParseAsync(ITextSnapshot snapshot, CancellationToken token) {
@@ -174,7 +183,7 @@ namespace Codist.Taggers
 			//The underlying buffer could be very large, meaning that doing the scan for all matches on the UI thread
 			//is a bad idea. Do the scan on the background thread and use a callback to raise the changed event when
 			//the entire scan has completed.
-			_root = await ParseAsync(snapshot, cancellationToken);
+			_Root = await ParseAsync(snapshot, cancellationToken);
 
 			//This delegate is executed on a background thread.
 			await Task.Run(() => TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(new SnapshotSpan(snapshot, 0, snapshot.Length))), cancellationToken);
