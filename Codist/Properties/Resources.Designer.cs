@@ -1285,6 +1285,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to View URL in browser.
+        /// </summary>
+        internal static string CMD_ViewUrlInBrowser {
+            get {
+                return ResourceManager.GetString("CMD_ViewUrlInBrowser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Donate via Wechat.
         /// </summary>
         internal static string CMD_WechatDonateLink {

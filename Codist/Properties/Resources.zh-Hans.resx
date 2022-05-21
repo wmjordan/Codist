@@ -1935,4 +1935,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_JumpList" xml:space="preserve">
     <value>跳转列表任务</value>
   </data>
+  <data name="CMD_ViewUrlInBrowser" xml:space="preserve">
+    <value>用浏览器打开网址</value>
+  </data>
 </root>

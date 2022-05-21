@@ -1946,4 +1946,7 @@ Right click: Wrap text menu...</value>
   <data name="T_JumpList" xml:space="preserve">
     <value>Jump List Shortcuts</value>
   </data>
+  <data name="CMD_ViewUrlInBrowser" xml:space="preserve">
+    <value>View URL in browser</value>
+  </data>
 </root>

@@ -1950,4 +1950,7 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="T_JumpList" xml:space="preserve">
     <value>Jump List Shortcuts</value>
   </data>
+  <data name="CMD_ViewUrlInBrowser" xml:space="preserve">
+    <value>View URL in browser</value>
+  </data>
 </root>

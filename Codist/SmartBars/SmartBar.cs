@@ -115,6 +115,7 @@ namespace Codist.SmartBars
 			}
 			else {
 				AddFindAndReplaceCommands();
+				AddViewInBrowserCommand();
 				if (Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowSyntaxClassificationInfo)) {
 					AddClassificationInfoCommand();
 				}

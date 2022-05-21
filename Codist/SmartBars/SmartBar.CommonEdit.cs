@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using AppHelpers;
+using Codist.Controls;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
@@ -340,6 +341,33 @@ namespace Codist.SmartBars
 			}
 			r.AddRange(__CaseCommands);
 			return r;
+		}
+
+		void AddViewInBrowserCommand() {
+			var s = View.Selection;
+			SnapshotSpan span;
+			int l;
+			if (s.IsEmpty || (l = (span = s.SelectedSpans[0]).Length) < 10 || l > 1023) {
+				return;
+			}
+			var ts = View.TextSnapshot;
+			if (ts[l = span.Start] != 'h' || ts[++l] != 't' || ts[++l] != 't' || ts[++l] != 'p') {
+				return;
+			}
+			if (ts[++l] == 's') {
+				if (ts[++l] != ':' || ts[++l] != '/' || ts[++l] != '/') {
+					return;
+				}
+			}
+			else if (ts[l] == ':') {
+				if (ts[++l] != ':' || ts[++l] != '/' || ts[++l] != '/') {
+					return;
+				}
+			}
+			else {
+				return;
+			}
+			AddCommand(ToolBar, IconIds.SearchWebSite, R.CMD_ViewUrlInBrowser + Environment.NewLine + span.GetText(), ctx => ExternalCommand.OpenWithWebBrowser(ctx.View.GetFirstSelectionText(), String.Empty));
 		}
 
 		static CommandItem[] GetCaseCommands() {
