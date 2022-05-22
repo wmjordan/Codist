@@ -1192,7 +1192,7 @@ namespace Codist.Options
 				var m = e.Source as ThemedMenuItem;
 				var prev = ContextMenu.Items.GetFirst<ThemedMenuItem>(i => i.Tag as string == Value);
 				if (prev != m) {
-					prev.Highlight(false);
+					prev?.Highlight(false);
 					m.Highlight(true);
 					Value = m.Tag as string;
 				}
