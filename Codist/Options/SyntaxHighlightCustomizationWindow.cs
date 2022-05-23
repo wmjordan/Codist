@@ -567,7 +567,7 @@ namespace Codist.Options
 				.Select(t => t.Tag.ClassificationType)
 				.ToList();
 			return classifications
-				.Union(classifications.SelectMany(i => i.BaseTypes))
+				.Union(classifications.SelectMany(i => i.GetBaseTypes()), TextEditorHelper.GetClassificationTypeComparer())
 				.Where(t => t.IsOfType("(TRANSIENT)") == false) // remove transient classification types
 				.ToList();
 		}

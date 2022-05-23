@@ -94,6 +94,9 @@ namespace Codist
 		public static IClassificationType CreateClassificationType(string classificationType) {
 			return new ClassificationCategory(classificationType);
 		}
+		public static IEqualityComparer<IClassificationType> GetClassificationTypeComparer() {
+			return ClassificationTypeComparer.Instance;
+		}
 
 		public static TextFormattingRunProperties GetRunProperties(this IClassificationFormatMap formatMap, string classificationType) {
 			var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType);
@@ -850,6 +853,19 @@ namespace Codist
 			public IEnumerable<IClassificationType> BaseTypes => Array.Empty<IClassificationType>();
 
 			public bool IsOfType(string type) { return false; }
+		}
+
+		internal sealed class ClassificationTypeComparer : IEqualityComparer<IClassificationType>
+		{
+			public static readonly ClassificationTypeComparer Instance = new ClassificationTypeComparer();
+
+			public bool Equals(IClassificationType x, IClassificationType y) {
+				return x.Classification == y.Classification;
+			}
+
+			public int GetHashCode(IClassificationType obj) {
+				return obj.Classification?.GetHashCode() ?? 0;
+			}
 		}
 
 		// hack: workaround for compatibility with VS 2017, 2019 and VS 2022
