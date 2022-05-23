@@ -565,7 +565,7 @@ namespace Codist.Options
 				.CreateTagAggregator<Microsoft.VisualStudio.Text.Tagging.IClassificationTag>(_WpfTextView)
 				.GetTags(span)
 				.Select(t => t.Tag.ClassificationType)
-				.ToList();
+				.ToList(); // cache the results for iterations below
 			return classifications
 				.Union(classifications.SelectMany(i => i.GetBaseTypes()), TextEditorHelper.GetClassificationTypeComparer())
 				.Where(t => t.IsOfType("(TRANSIENT)") == false) // remove transient classification types
@@ -1172,6 +1172,7 @@ namespace Codist.Options
 						MaxHeight = 300,
 						Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom,
 						PlacementTarget = this,
+						MinWidth = ActualWidth,
 						ItemsSource = new[] { new ThemedMenuItem(-1, R.T_NotSet, SetFont) { Tag = null } }
 							.Concat(WpfHelper.GetInstalledFonts().Select(f => new ThemedMenuItem(-1, f.Name, SetFont) { Tag = f.Name }))
 							//.Concat(WpfHelper.GetInstalledFonts()
