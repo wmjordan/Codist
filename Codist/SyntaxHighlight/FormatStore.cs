@@ -28,22 +28,6 @@ namespace Codist.SyntaxHighlight
 				return _BackupFormattings.TryGetValue(classificationType, out var r) ? r : null;
 			}
 		}
-		public static IEnumerable<IClassificationType> GetBaseTypes(this IClassificationType classificationType) {
-			var h = new HashSet<IClassificationType>();
-
-			return GetBaseTypes(classificationType, h);
-
-			IEnumerable<IClassificationType> GetBaseTypes(IClassificationType type, HashSet<IClassificationType> dedup) {
-				foreach (var item in type.BaseTypes) {
-					if (dedup.Add(item)) {
-						yield return item;
-						foreach (var c in GetBaseTypes(item, dedup)) {
-							yield return c;
-						}
-					}
-				}
-			}
-		}
 		public static TextFormattingRunProperties GetOrSaveBackupFormatting(IClassificationType classificationType, bool update) {
 			lock (_syncRoot) {
 				if (update == false && _BackupFormattings.TryGetValue(classificationType, out var r)) {

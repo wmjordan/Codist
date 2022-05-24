@@ -12,8 +12,11 @@ using Microsoft.VisualStudio.Text.Formatting;
 
 namespace Codist.SyntaxHighlight
 {
+	// The syntax highlight in VS is implemented in Microsoft.VisualStudio.Platform.VSEditor.dll
 	// see: Microsoft.VisualStudio.Text.Classification.Implementation.ClassificationFormatMap
 	// see: Microsoft.VisualStudio.Text.Classification.Implementation.ViewSpecificFormatMap
+	// see: Microsoft.VisualStudio.Text.Classification.Implementation.EditorFormatMap
+	// see: Microsoft.VisualStudio.Text.Formatting.Implementation.NormalizedSpanGenerator
 	// see: https://stackoverflow.com/questions/24404473/create-visual-studio-theme-specific-syntax-highlighting
 	sealed class CodeViewDecorator
 	{

@@ -88,20 +88,38 @@ namespace Codist
 		}
 		#endregion
 
+		#region Classification
 		public static ClassificationTag GetClassificationTag(this IClassificationTypeRegistryService registry, string clasificationType) {
 			return new ClassificationTag(registry.GetClassificationType(clasificationType));
 		}
-		public static IClassificationType CreateClassificationType(string classificationType) {
+
+		public static IClassificationType CreateClassificationCategory(string classificationType) {
 			return new ClassificationCategory(classificationType);
 		}
+
 		public static IEqualityComparer<IClassificationType> GetClassificationTypeComparer() {
 			return ClassificationTypeComparer.Instance;
+		}
+
+		public static IEnumerable<IClassificationType> GetBaseTypes(this IClassificationType classificationType) {
+			return GetBaseTypes(classificationType, new HashSet<IClassificationType>());
+		}
+		static IEnumerable<IClassificationType> GetBaseTypes(IClassificationType type, HashSet<IClassificationType> dedup) {
+			foreach (var item in type.BaseTypes) {
+				if (dedup.Add(item)) {
+					yield return item;
+					foreach (var c in GetBaseTypes(item, dedup)) {
+						yield return c;
+					}
+				}
+			}
 		}
 
 		public static TextFormattingRunProperties GetRunProperties(this IClassificationFormatMap formatMap, string classificationType) {
 			var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType);
 			return t == null ? null : formatMap.GetTextProperties(t);
 		}
+		#endregion
 
 		public static bool Mark<TKey>(this IPropertyOwner owner, TKey mark) {
 			if (owner.Properties.ContainsProperty(mark) == false) {
@@ -298,9 +316,9 @@ namespace Codist
 					}
 				}
 				if (edit.HasEffectiveChanges) {
-					var shot = edit.Apply();
+					var newSnapshot = edit.Apply();
 					if (s.HasValue) {
-						return view.TextSnapshot.CreateTrackingSpan(s.Value, SpanTrackingMode.EdgeInclusive).GetSpan(shot);
+						return view.TextSnapshot.CreateTrackingSpan(s.Value, SpanTrackingMode.EdgeInclusive).GetSpan(newSnapshot);
 					}
 				}
 				return null;
@@ -735,8 +753,7 @@ namespace Codist
 		}
 
 		public static bool IsVsixProject(this EnvDTE.Project project) {
-			var extenders = project?.ExtenderNames as string[];
-			return extenders != null && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
+			return project?.ExtenderNames is string[] extenders && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
 		}
 
 		public static bool IsCSharpProject(this EnvDTE.Project project) {
@@ -744,6 +761,7 @@ namespace Codist
 		}
 
 		public static EnvDTE.ProjectItem FindItem(this EnvDTE.Project project, params string[] itemNames) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			var items = project.ProjectItems;
 			var count = items.Count;
 			EnvDTE.ProjectItem p = null;
@@ -768,8 +786,7 @@ namespace Codist
 		public static bool IsVsixProject() {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			try {
-				var extenders = CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames as string[];
-				return extenders != null && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
+				return CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames is string[] extenders && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
 			}
 			catch (ArgumentException) {
 				// hack: for https://github.com/wmjordan/Codist/issues/124
@@ -778,8 +795,7 @@ namespace Codist
 		}
 
 		static VsTextView GetIVsTextView(IServiceProvider service, string filePath) {
-			IVsWindowFrame windowFrame;
-			return VsShellUtilities.IsDocumentOpen(service, filePath, Guid.Empty, out var uiHierarchy, out uint itemID, out windowFrame)
+			return VsShellUtilities.IsDocumentOpen(service, filePath, Guid.Empty, out var uiHierarchy, out uint itemID, out IVsWindowFrame windowFrame)
 				? VsShellUtilities.GetTextView(windowFrame)
 				: null;
 		}

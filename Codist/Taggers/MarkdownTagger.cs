@@ -11,12 +11,12 @@ namespace Codist.Taggers
 		internal static readonly ClassificationTag[] HeaderClassificationTypes = InitHeaderClassificationTypes();
 		internal static readonly ClassificationTag[] DummyHeaderTags = new ClassificationTag[7] {
 			null,
-			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText)),
-			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText)),
-			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText)),
-			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText)),
-			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText)),
-			new ClassificationTag(TextEditorHelper.CreateClassificationType(Constants.CodeText))
+			new ClassificationTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText)),
+			new ClassificationTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText)),
+			new ClassificationTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText)),
+			new ClassificationTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText)),
+			new ClassificationTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText)),
+			new ClassificationTag(TextEditorHelper.CreateClassificationCategory(Constants.CodeText))
 		}; // used when syntax highlight is disabled
 
 		readonly ClassificationTag[] _Tags;

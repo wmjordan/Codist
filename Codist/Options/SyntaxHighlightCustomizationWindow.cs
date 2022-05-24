@@ -545,7 +545,7 @@ namespace Codist.Options
 				}
 				var style = styles.FirstOrDefault(i => i.Id == item.Id) ?? item;
 				if (item.Category != category) {
-					r.Add(TextEditorHelper.CreateClassificationType(category = item.Category));
+					r.Add(TextEditorHelper.CreateClassificationCategory(category = item.Category));
 				}
 				r.Add(ctr.GetClassificationType(item.ClassificationType));
 			}
