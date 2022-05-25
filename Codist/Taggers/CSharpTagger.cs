@@ -772,9 +772,7 @@ namespace Codist.Taggers
 					case SymbolKind.Field:
 						var f = symbol as IFieldSymbol;
 						if (f.IsConst) {
-							yield return f.ContainingType.TypeKind == TypeKind.Enum ? _Classifications.EnumField
-					  : _Classifications.ConstField;
-							yield break;
+							yield return f.ContainingType.TypeKind == TypeKind.Enum ? _Classifications.EnumField : _Classifications.ConstField;
 						}
 						else {
 							yield return f.IsReadOnly ? _Classifications.ReadOnlyField
