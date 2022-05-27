@@ -1953,4 +1953,13 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="CMD_ViewUrlInBrowser" xml:space="preserve">
     <value>View URL in browser</value>
   </data>
+  <data name="OT_HideAccountIcon" xml:space="preserve">
+    <value>Hide account icon</value>
+  </data>
+  <data name="OT_HideSearchBox" xml:space="preserve">
+    <value>Hide search box</value>
+  </data>
+  <data name="OT_HideFeedbackButton" xml:space="preserve">
+    <value>Hide feedback button</value>
+  </data>
 </root>

@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.PlatformUI;
+using AppHelpers;
 
 namespace Codist.Controls
 {
@@ -14,6 +15,8 @@ namespace Codist.Controls
 		static StackPanel _TitleBarButtons;
 		static Border _TitleBlock;
 		static readonly string _RootSuffix = GetRootSuffix();
+		static readonly string __DefaultTitle = "Visual Studio" + _RootSuffix;
+		static bool _LayoutElementNotFound;
 
 		static string GetRootSuffix() {
 			var args = Environment.GetCommandLineArgs();
@@ -25,7 +28,32 @@ namespace Codist.Controls
 			return null;
 		}
 
-		static readonly string DefaultTitle = "Visual Studio" + _RootSuffix;
+		public static void ToggleUIElement(DisplayOptimizations element, bool show) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			var w = Application.Current.MainWindow;
+			var g = w.GetFirstVisualChild<Grid>(i => i.Name == "RootGrid");
+			if (g is null || g.Children.Count < 2) {
+				return;
+			}
+			string boxName;
+			switch (element) {
+				case DisplayOptimizations.HideSearchBox: boxName = CodistPackage.VsVersion.Major == 15 ? "PART_SearchBox" : "SearchBox"; break;
+				case DisplayOptimizations.HideAccountBox: boxName = "IDCardGrid"; break;
+				case DisplayOptimizations.HideFeedbackBox: boxName = "FeedbackButton"; break;
+				default: return;
+			}
+			var t = CodistPackage.VsVersion.Major == 15
+				? g.GetFirstVisualChild<FrameworkElement>(i => i.Name == boxName)
+					?.GetParent<ContentPresenter>(i => System.Windows.Media.VisualTreeHelper.GetParent(i) is StackPanel)
+				: g.GetFirstVisualChild<FrameworkElement>(i => i.Name == boxName)
+					?.GetParent<ContentPresenter>(i => i.Name == "DataTemplatePresenter");
+			if (t != null) {
+				t.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+			}
+			else {
+				_LayoutElementNotFound = true;
+			}
+		}
 
 		public static void CompactMenu() {
 			if (_MenuHolder != null) {
@@ -54,8 +82,7 @@ namespace Codist.Controls
 			if (menu is null) {
 				return;
 			}
-			var vsTitle = t.Children[3] as TextBlock;
-			if (vsTitle != null) {
+			if (t.Children[3] is TextBlock vsTitle) {
 				vsTitle.Visibility = Visibility.Collapsed;
 			}
 			_TitleBar = t;
@@ -70,7 +97,7 @@ namespace Codist.Controls
 			var title = new TextBlock { FontWeight = FontWeights.Bold };
 			title.SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.SystemCaptionTextBrushKey);
 			var sn = System.IO.Path.GetFileNameWithoutExtension(CodistPackage.DTE.Solution.FileName);
-			title.Text = sn.Length > 0 ? sn + _RootSuffix : DefaultTitle;
+			title.Text = sn.Length > 0 ? sn + _RootSuffix : __DefaultTitle;
 			t.Children.Insert(3, _TitleBlock = new Border { Child = title, Padding = new Thickness(7, 9, 7, 4) });
 			_TitleBlock.SetResourceReference(Border.BackgroundProperty, EnvironmentColors.SystemActiveCaptionBrushKey);
 
@@ -104,8 +131,7 @@ namespace Codist.Controls
 			_MenuHolder.Children.Insert(1, menu);
 			_MenuHolder.Visibility = Visibility.Visible;
 
-			var vsTitle = _TitleBar.Children[3] as TextBlock;
-			if (vsTitle != null) {
+			if (_TitleBar.Children[3] is TextBlock vsTitle) {
 				vsTitle.Visibility = Visibility.Visible;
 			}
 
@@ -119,16 +145,63 @@ namespace Codist.Controls
 			_TitleBlock = null;
 		}
 
+		public static void InitializeLayoutOverride() {
+			var options = Config.Instance.DisplayOptimizations;
+			if (options == DisplayOptimizations.None) {
+				return;
+			}
+			if (options.MatchFlags(DisplayOptimizations.CompactMenu)) {
+				CompactMenu();
+			}
+			InitHideElements(options);
+			if (options.MatchFlags(DisplayOptimizations.MainWindow)) {
+				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, true);
+			}
+			if (_LayoutElementNotFound) {
+				// hack: the UI elements to hide may not be added to app window when this method is executed
+				//    the solution load event is exploited to compensate that
+				SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OverrideLayoutAfterSolutionLoad;
+			}
+		}
+
+		public static void Reload(DisplayOptimizations options) {
+			if (options.MatchFlags(DisplayOptimizations.CompactMenu)) {
+				CompactMenu();
+			}
+			else {
+				UndoCompactMenu();
+			}
+			ToggleUIElement(DisplayOptimizations.HideSearchBox, !options.MatchFlags(DisplayOptimizations.HideSearchBox));
+			ToggleUIElement(DisplayOptimizations.HideAccountBox, !options.MatchFlags(DisplayOptimizations.HideAccountBox));
+			ToggleUIElement(DisplayOptimizations.HideFeedbackBox, !options.MatchFlags(DisplayOptimizations.HideFeedbackBox));
+			WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, options.MatchFlags(DisplayOptimizations.MainWindow));
+		}
+
+		static void OverrideLayoutAfterSolutionLoad(object sender, EventArgs e) {
+			SolutionEvents.OnAfterBackgroundSolutionLoadComplete -= OverrideLayoutAfterSolutionLoad;
+			InitHideElements(Config.Instance.DisplayOptimizations);
+		}
+
+		static void InitHideElements(DisplayOptimizations options) {
+			if (options.MatchFlags(DisplayOptimizations.HideSearchBox)) {
+				ToggleUIElement(DisplayOptimizations.HideSearchBox, false);
+			}
+			if (options.MatchFlags(DisplayOptimizations.HideAccountBox)) {
+				ToggleUIElement(DisplayOptimizations.HideAccountBox, false);
+			}
+			if (options.MatchFlags(DisplayOptimizations.HideFeedbackBox)) {
+				ToggleUIElement(DisplayOptimizations.HideFeedbackBox, false);
+			}
+		}
+
 		static void BeforeOpenSolution(object sender, BeforeOpenSolutionEventArgs args) {
-			var t = _TitleBlock?.Child as TextBlock;
-			if (t != null) {
+			if (_TitleBlock?.Child is TextBlock t) {
 				t.Text = System.IO.Path.GetFileNameWithoutExtension(args.SolutionFilename) + _RootSuffix;
 			}
 		}
 		static void AfterCloseSolution (object sender, EventArgs args) {
-			var t = _TitleBlock?.Child as TextBlock;
-			if (t != null) {
-				t.Text = DefaultTitle;
+			if (_TitleBlock?.Child is TextBlock t) {
+				t.Text = __DefaultTitle;
 			}
 		}
 		static void MainWindowActivated(object sender, EventArgs args) {

@@ -2175,6 +2175,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hide account icon.
+        /// </summary>
+        internal static string OT_HideAccountIcon {
+            get {
+                return ResourceManager.GetString("OT_HideAccountIcon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hide feedback button.
+        /// </summary>
+        internal static string OT_HideFeedbackButton {
+            get {
+                return ResourceManager.GetString("OT_HideFeedbackButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hide Quick Info until Shift key is pressed.
         /// </summary>
         internal static string OT_HideQuickInfoUntilShift {
@@ -2189,6 +2207,15 @@ namespace Codist.Properties {
         internal static string OT_HideQuickInfoUntilShiftTip {
             get {
                 return ResourceManager.GetString("OT_HideQuickInfoUntilShiftTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hide search box.
+        /// </summary>
+        internal static string OT_HideSearchBox {
+            get {
+                return ResourceManager.GetString("OT_HideSearchBox", resourceCulture);
             }
         }
         

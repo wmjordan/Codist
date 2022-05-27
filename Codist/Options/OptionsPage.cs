@@ -778,7 +778,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly Controls.IntegerBox _TopSpace, _BottomSpace;
-			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride;
+			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride, _HideSearchBox, _HideAccountBox, _HideFeedbackButton;
 			readonly OptionBox<BuildOptions> _BuildTimestamp;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -824,7 +824,10 @@ namespace Codist.Options
 					new DescriptionBox(R.OT_LayoutOverrideNote),
 					new WrapPanel {
 						Children = {
-							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.CompactMenu, UpdateMenuLayoutOption, R.OT_OverrideMainMenu).Set(ref _MenuLayoutOverride)
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.CompactMenu, UpdateMenuLayoutOption, R.OT_OverrideMainMenu).Set(ref _MenuLayoutOverride),
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.HideSearchBox, UpdateHideSearchBoxOption, R.OT_HideSearchBox).Set(ref _HideSearchBox),
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.HideAccountBox, UpdateHideAccountBoxOption, R.OT_HideAccountIcon).Set(ref _HideAccountBox),
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.HideFeedbackBox, UpdateHideFeedbackButtonOption, R.OT_HideFeedbackButton).Set(ref _HideFeedbackButton),
 						}
 					}
 					.ForEachChild((CheckBox b) => b.MinWidth = MinColumnWidth)
@@ -832,10 +835,6 @@ namespace Codist.Options
 				_TopSpace.ValueChanged += _TopSpace_ValueChanged;
 				_BottomSpace.ValueChanged += _BottomSpace_ValueChanged;
 
-				//_MenuLayoutOverride.IsEnabled = Application.Current.MainWindow
-				//	.GetFirstVisualChild<Grid>(i => i.Name == "RootGrid")
-				//	?.GetFirstVisualChild<Border>(i => i.Name == "MainWindowTitleBar")
-				//	?.Child is DockPanel;
 				_MenuLayoutOverride.IsEnabled = CodistPackage.VsVersion.Major == 15;
 			}
 
@@ -845,8 +844,10 @@ namespace Codist.Options
 				var o = config.DisplayOptimizations;
 				_MainWindow.UpdateWithOption(o);
 				_CodeWindow.UpdateWithOption(o);
+				_HideAccountBox.UpdateWithOption(o);
+				_HideFeedbackButton.UpdateWithOption(o);
+				_HideSearchBox.UpdateWithOption(o);
 				_BuildTimestamp.UpdateWithOption(config.BuildOptions);
-				//_UseLayoutRounding.UpdateWithOption(o);
 			}
 
 			void UpdateCodeWindowDisplayOption(DisplayOptimizations options, bool value) {
@@ -885,8 +886,28 @@ namespace Codist.Options
 				}
 				else {
 					Controls.LayoutOverrider.UndoCompactMenu();
-					//MessageBox.Show(R.T_LayoutOverrideRestore, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Information);
 				}
+				Config.Instance.FireConfigChangedEvent(Features.None);
+			}
+
+			void UpdateHideSearchBoxOption(DisplayOptimizations options, bool value) {
+				ToggleTitleBarElement(options, value, DisplayOptimizations.HideSearchBox);
+			}
+
+			void UpdateHideAccountBoxOption(DisplayOptimizations options, bool value) {
+				ToggleTitleBarElement(options, value, DisplayOptimizations.HideAccountBox);
+			}
+
+			void UpdateHideFeedbackButtonOption(DisplayOptimizations options, bool value) {
+				ToggleTitleBarElement(options, value, DisplayOptimizations.HideFeedbackBox);
+			}
+
+			void ToggleTitleBarElement(DisplayOptimizations options, bool value, DisplayOptimizations element) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.Set(options, value);
+				Controls.LayoutOverrider.ToggleUIElement(element, !value);
 				Config.Instance.FireConfigChangedEvent(Features.None);
 			}
 

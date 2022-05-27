@@ -260,6 +260,7 @@ namespace Codist
 				_LastLoaded = DateTime.Now;
 				return Instance;
 			}
+			Controls.LayoutOverrider.Reload(config.DisplayOptimizations);
 			_LastLoaded = DateTime.Now;
 			Debug.WriteLine("Config loaded");
 			return config;
@@ -718,7 +719,10 @@ namespace Codist
 		None,
 		MainWindow,
 		CodeWindow = 1 << 1,
-		CompactMenu = 1 << 2
+		CompactMenu = 1 << 2,
+		HideSearchBox = 1 << 3,
+		HideFeedbackBox = 1 << 4,
+		HideAccountBox = 1 << 5
 	}
 
 	[Flags]

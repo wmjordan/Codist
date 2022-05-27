@@ -131,13 +131,6 @@ namespace Codist
 
 			__BuildEvents = new AutoBuildVersion.BuildEvents(this);
 
-			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CompactMenu)) {
-				Controls.LayoutOverrider.CompactMenu();
-			}
-
-			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.MainWindow)) {
-				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, true);
-			}
 			//_extenderCookie = DTE.ObjectExtenders.RegisterExtenderProvider(VSConstants.CATID.CSharpFileProperties_string, BuildBots.AutoReplaceExtenderProvider.Name, new BuildBots.AutoReplaceExtenderProvider());
 			Commands.ScreenshotCommand.Initialize();
 			Commands.GetContentTypeCommand.Initialize();
@@ -146,30 +139,35 @@ namespace Codist
 			Commands.NaviBarSearchDeclarationCommand.Initialize();
 			Commands.ToggleAutoBuildVersionCommand.Initialize();
 			Display.JumpListEnhancer.Initialize();
+			Controls.LayoutOverrider.InitializeLayoutOverride();
 
 			if (Config.Instance.InitStatus != InitStatus.Normal) {
-				Config.Instance.SaveConfig(Config.ConfigPath); // save the file to prevent this notification from reoccurrence
-				try {
-					new Commands.VersionInfoBar(this).Show(Config.Instance.InitStatus);
-				}
-				catch (MissingMemberException) {
-					// HACK: For VS 2022, InfoBar is broken. Prompt to open page at this moment.
-					if (ShowYesNoBox(Properties.Resources.T_NewVersionPrompt, nameof(Codist))) {
-						OpenWebPage(Config.Instance.InitStatus);
-					}
-				}
-				if (Config.Instance.InitStatus == InitStatus.FirstLoad) {
-					// automatically load theme when first load
-					if (ThemeHelper.DocumentPageColor.ToWpfColor().IsDark()) {
-						Config.LoadConfig(Config.DarkTheme, StyleFilters.All);
-					}
-					else {
-						Config.LoadConfig(Config.LightTheme, StyleFilters.All);
-					}
-				}
+				InitializeOrUpgradeConfig();
 			}
 			Commands.SyntaxCustomizerWindowCommand.Initialize();
 			//ListEditorCommands();
+		}
+
+		void InitializeOrUpgradeConfig() {
+			Config.Instance.SaveConfig(Config.ConfigPath); // save the file to prevent this notification from reoccurrence
+			try {
+				new Commands.VersionInfoBar(this).Show(Config.Instance.InitStatus);
+			}
+			catch (MissingMemberException) {
+				// HACK: For VS 2022, InfoBar is broken. Prompt to open page at this moment.
+				if (ShowYesNoBox(Properties.Resources.T_NewVersionPrompt, nameof(Codist))) {
+					OpenWebPage(Config.Instance.InitStatus);
+				}
+			}
+			if (Config.Instance.InitStatus == InitStatus.FirstLoad) {
+				// automatically load theme when first load
+				if (ThemeHelper.DocumentPageColor.ToWpfColor().IsDark()) {
+					Config.LoadConfig(Config.DarkTheme, StyleFilters.All);
+				}
+				else {
+					Config.LoadConfig(Config.LightTheme, StyleFilters.All);
+				}
+			}
 		}
 
 		protected override void Dispose(bool disposing) {
