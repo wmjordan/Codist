@@ -15,13 +15,12 @@ namespace Codist.Margins
 	sealed class CommentMarginFactory : IWpfTextViewMarginProvider
 	{
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
-			var scrollBarContainer = marginContainer as IVerticalScrollBar;
 			var textView = wpfTextViewHost.TextView;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
-				&& scrollBarContainer != null
+				&& marginContainer is IVerticalScrollBar scrollBar
 				&& Taggers.CommentTagger.IsCommentTaggable(textView.TextBuffer)
 				&& textView.TextBuffer.MayBeEditor()
-				? new CommentMargin(textView, scrollBarContainer)
+				? new CommentMargin(textView, scrollBar)
 				: null;
 		}
 	}
@@ -36,10 +35,9 @@ namespace Codist.Margins
 	sealed class MarkdownMarginFactory : IWpfTextViewMarginProvider
 	{
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
-			var scrollBar = marginContainer as IVerticalScrollBar;
 			var textView = wpfTextViewHost.TextView;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
-				&& scrollBar != null
+				&& marginContainer is IVerticalScrollBar scrollBar
 				&& textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)
 				&& textView.TextBuffer.MayBeEditor()
 				? new CommentMargin(textView, scrollBar)
@@ -57,9 +55,8 @@ namespace Codist.Margins
 	sealed class CSharpMembersMarginFactory : IWpfTextViewMarginProvider
 	{
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
-			var scrollBar = marginContainer as IVerticalScrollBar;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
-				&& scrollBar != null
+				&& marginContainer is IVerticalScrollBar scrollBar
 				&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
 				? new CSharpMembersMargin(wpfTextViewHost.TextView, scrollBar)
 				: null;
@@ -87,11 +84,10 @@ namespace Codist.Margins
 	sealed class LineNumberMarginFactory : IWpfTextViewMarginProvider
 	{
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
-			var scrollBarContainer = marginContainer as IVerticalScrollBar;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
-				&& scrollBarContainer != null
+				&& marginContainer is IVerticalScrollBar scrollBar
 				&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
-				? new LineNumberMargin(wpfTextViewHost.TextView, scrollBarContainer)
+				? new LineNumberMargin(wpfTextViewHost.TextView, scrollBar)
 				: null;
 		}
 	}
@@ -105,11 +101,10 @@ namespace Codist.Margins
 	sealed class SelectionMarginFactory : IWpfTextViewMarginProvider
 	{
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
-			var scrollBarContainer = marginContainer as IVerticalScrollBar;
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
-				&& scrollBarContainer != null
+				&& marginContainer is IVerticalScrollBar scrollBar
 				&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
-				? new SelectionMargin(wpfTextViewHost.TextView, scrollBarContainer)
+				? new SelectionMargin(wpfTextViewHost.TextView, scrollBar)
 				: null;
 		}
 	}

@@ -47,8 +47,7 @@ namespace Codist.Commands
 
 		public void OnActionItemClicked(IVsInfoBarUIElement infoBarUIElement, IVsInfoBarActionItem actionItem) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			string context = actionItem.ActionContext as string;
-			switch (context) {
+			switch (actionItem.ActionContext as string) {
 				case "New": CodistPackage.OpenWebPage(InitStatus.FirstLoad); break;
 				case "More": CodistPackage.OpenWebPage(InitStatus.Upgraded); break;
 				case "Close": break;
@@ -58,42 +57,32 @@ namespace Codist.Commands
 
 		public void OnClosed(IVsInfoBarUIElement infoBarUIElement) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			if (_InfoBarUI != null) {
-				_InfoBarUI.Unadvise(_Cookie);
-			}
+			_InfoBarUI?.Unadvise(_Cookie);
 		}
 
 #pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 		bool ShowInfoBar(InfoBarHostControl host, InfoBarModel infoBar) {
-			var factory = _ServiceProvider.GetService(typeof(SVsInfoBarUIFactory)) as IVsInfoBarUIFactory;
-			if (factory is null) {
-				return false;
+			if (_ServiceProvider.GetService(typeof(SVsInfoBarUIFactory)) is IVsInfoBarUIFactory factory) {
+				_InfoBarUI = factory.CreateInfoBar(infoBar);
+				_InfoBarUI.Advise(this, out _Cookie);
+				host.AddInfoBar(_InfoBarUI);
+				return true;
 			}
-			_InfoBarUI = factory.CreateInfoBar(infoBar);
-			_InfoBarUI.Advise(this, out _Cookie);
-			host.AddInfoBar(_InfoBarUI);
-			return true;
+			return false;
 		}
 		bool TryCreateInfoBarUI(IVsInfoBar infoBar, out IVsInfoBarUIElement uiElement) {
-			var infoBarUIFactory = _ServiceProvider.GetService(typeof(SVsInfoBarUIFactory)) as IVsInfoBarUIFactory;
-			if (infoBarUIFactory is null) {
-				uiElement = null;
-				return false;
+			if (_ServiceProvider.GetService(typeof(SVsInfoBarUIFactory)) is IVsInfoBarUIFactory infoBarUIFactory) {
+				return (uiElement = infoBarUIFactory.CreateInfoBar(infoBar)) != null;
 			}
-			return (uiElement = infoBarUIFactory.CreateInfoBar(infoBar)) != null;
+			uiElement = null;
+			return false;
 		}
 
 		bool TryGetInfoBarHost(out InfoBarHostControl infoBarHost) {
-			var shell = _ServiceProvider.GetService(typeof(SVsShell)) as IVsShell;
-			if (shell is null) {
-				goto Exit;
+			if (_ServiceProvider.GetService(typeof(SVsShell)) is IVsShell shell
+				&& ErrorHandler.Failed(shell.GetProperty((int)__VSSPROPID7.VSSPROPID_MainWindowInfoBarHost, out object infoBarHostObj)) == false) {
+				return (infoBarHost = infoBarHostObj as InfoBarHostControl) != null;
 			}
-			object infoBarHostObj;
-			if (ErrorHandler.Failed(shell.GetProperty((int)__VSSPROPID7.VSSPROPID_MainWindowInfoBarHost, out infoBarHostObj))) {
-				goto Exit;
-			}
-			return (infoBarHost = infoBarHostObj as InfoBarHostControl) != null;
-			Exit:
 			infoBarHost = null;
 			return false;
 		}

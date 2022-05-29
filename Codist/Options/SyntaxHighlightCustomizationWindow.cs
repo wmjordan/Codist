@@ -355,8 +355,7 @@ namespace Codist.Options
 		}
 
 		void UnhookSelectionChangedEvent(object sender, EventArgs args) {
-			var view = sender as ITextView;
-			if (view != null) {
+			if (sender is ITextView view) {
 				view.Closed -= UnhookSelectionChangedEvent;
 				view.Selection.SelectionChanged -= HandleViewSelectionChangedEvent;
 			}

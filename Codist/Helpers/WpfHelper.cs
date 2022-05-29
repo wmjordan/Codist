@@ -323,8 +323,7 @@ namespace Codist
 			if (obj == null) {
 				return null;
 			}
-			var o = obj as TObject;
-			return o != null && (predicate == null || predicate(o)) ? o : obj.GetParent<TObject>(predicate);
+			return obj is TObject o && (predicate == null || predicate(o)) ? o : obj.GetParent<TObject>(predicate);
 		}
 		public static TParent GetParent<TParent>(this DependencyObject obj, Predicate<TParent> predicate = null)
 			where TParent : DependencyObject {
@@ -392,20 +391,6 @@ namespace Codist
 			}
 			return obj;
 		}
-
-		public static TDependencyObject SetValue<TDependencyObject, TValue>(this TDependencyObject obj, Action<TDependencyObject, TValue> setter, TValue value) where TDependencyObject : DependencyObject {
-			setter(obj, value);
-			return obj;
-		}
-
-		public static TElement Bind<TElement>(this TElement control, DependencyProperty dependency, string binding) where TElement : FrameworkElement {
-			control.SetBinding(dependency, binding);
-			return control;
-		}
-		public static TElement Bind<TElement>(this TElement control, DependencyProperty dependency, System.Windows.Data.BindingBase binding) where TElement : FrameworkElement {
-			control.SetBinding(dependency, binding);
-			return control;
-		}
 		#endregion
 
 		#region Template and style
@@ -450,11 +435,25 @@ namespace Codist
 		public static TObj Set<TObj>(this TObj obj, ref TObj field) where TObj : System.Windows.Threading.DispatcherObject {
 			return field = obj;
 		}
+
+		public static TDependencyObject SetValue<TDependencyObject, TValue>(this TDependencyObject obj, Action<TDependencyObject, TValue> setter, TValue value) where TDependencyObject : DependencyObject {
+			setter(obj, value);
+			return obj;
+		}
+
+		public static TElement Bind<TElement>(this TElement control, DependencyProperty dependency, string binding) where TElement : FrameworkElement {
+			control.SetBinding(dependency, binding);
+			return control;
+		}
+		public static TElement Bind<TElement>(this TElement control, DependencyProperty dependency, System.Windows.Data.BindingBase binding) where TElement : FrameworkElement {
+			control.SetBinding(dependency, binding);
+			return control;
+		}
+
 		public static TItem GetFirst<TItem>(this ItemCollection items, Predicate<TItem> predicate)
 			where TItem : UIElement {
 			foreach (var item in items) {
-				var i = item as TItem;
-				if (i != null && (predicate == null || predicate(i))) {
+				if (item is TItem i && (predicate == null || predicate(i))) {
 					return i;
 				}
 			}
@@ -554,13 +553,13 @@ namespace Codist
 		}
 
 		public static TItem Get<TItem>(this ResourceDictionary items, object key) {
-			return (items != null && items.Contains(key) && items[key] is TItem item)
+			return (items?.Contains(key) == true && items[key] is TItem item)
 				? item
 				: default;
 		}
 		public static TItem? GetNullable<TItem>(this ResourceDictionary items, object key)
 			where TItem : struct {
-			return (items != null && items.Contains(key) && items[key] is TItem item)
+			return (items?.Contains(key) == true && items[key] is TItem item)
 				? (TItem?)item
 				: null;
 		}

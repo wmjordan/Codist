@@ -112,12 +112,9 @@ namespace Codist.NaviBar
 						if (viewHost.Children.Count == 1) {
 							viewHost.Children.Insert(0, b);
 						}
-						else {
-							var c = viewHost.Children[0] as ContentControl;
-							if (c != null && c.Content == null) {
+						else if (viewHost.Children[0] is ContentControl c && c.Content == null) {
 								c.Content = b;
 							}
-						}
 						RegisterResurrectionHandler(b);
 					}
 					return;
@@ -131,7 +128,7 @@ namespace Codist.NaviBar
 				if (container == null) {
 					return;
 				}
-				if (_View != null && _View.IsClosed == false) {
+				if (_View?.IsClosed == false) {
 					var bar = new CSharpBar(_View) {
 						MinWidth = 200
 					};
@@ -151,7 +148,7 @@ namespace Codist.NaviBar
 			// Fixes https://github.com/wmjordan/Codist/issues/131
 			async void ResurrectNaviBar_OnUnloaded(object sender, RoutedEventArgs e) {
                 var view = _View;
-				if (view != null && view.IsClosed == false) {
+				if (view?.IsClosed == false) {
 					view.Properties.RemoveProperty(nameof(NaviBar));
 					await Task.Delay(1000).ConfigureAwait(false);
 					await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
