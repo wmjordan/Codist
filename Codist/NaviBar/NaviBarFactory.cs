@@ -106,7 +106,7 @@ namespace Codist.NaviBar
 				var naviBarHolder = _NaviBarHolder = cp.GetFirstVisualChild<Border>(b => b.Name == "DropDownBarMargin");
 				if (naviBarHolder == null) {
 					var viewHost = view.VisualElement.GetParent<Panel>(b => b.GetType().Name == "WpfMultiViewHost");
-					if (viewHost != null) {
+					if (viewHost != null && view.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
 						var b = new MarkdownBar(_View, _TextSearch);
 						DockPanel.SetDock(b, Dock.Top);
 						if (viewHost.Children.Count == 1) {
