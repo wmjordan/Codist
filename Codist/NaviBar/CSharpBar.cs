@@ -1011,7 +1011,7 @@ namespace Codist.NaviBar
 					var s = Symbol;
 					if (s != null) {
 						m.AddAnalysisCommands();
-						m.AddSymbolCommands();
+						m.AddCopyAndSearchSymbolCommands();
 						m.AddTitleItem(s.Name);
 					}
 					ContextMenu = m;
@@ -1072,7 +1072,7 @@ namespace Codist.NaviBar
 					if (s != null) {
 						m.Items.Add(new Separator());
 						m.AddAnalysisCommands();
-						m.AddSymbolCommands();
+						m.AddCopyAndSearchSymbolCommands();
 						m.AddTitleItem(Node.GetDeclarationSignature());
 					}
 					ContextMenu = m;

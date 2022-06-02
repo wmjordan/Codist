@@ -277,6 +277,16 @@ namespace Codist.Controls
 		}
 
 		void SetupContextMenu(CSharpSymbolContextMenu menu, SymbolItem item) {
+			if (item.Symbol != null) {
+				menu.AddAnalysisCommands();
+				menu.Items.Add(new Separator());
+				if (item.SyntaxNode == null && item.Symbol.HasSource()) {
+					menu.AddSymbolNodeCommands();
+				}
+				else {
+					menu.AddCopyAndSearchSymbolCommands();
+				}
+			}
 			if (item.SyntaxNode != null) {
 				SetupMenuCommand(item, IconIds.SelectCode, R.CMD_SelectCode, s => {
 					if (s.IsExternal) {
@@ -288,16 +298,6 @@ namespace Codist.Controls
 				});
 				//SetupMenuCommand(item, KnownImageIds.Copy, "Copy Code", s => Clipboard.SetText(s.SyntaxNode.ToFullString()));
 				item.SetSymbolToSyntaxNode();
-			}
-			if (item.Symbol != null) {
-				if (item.SyntaxNode == null && item.Symbol.HasSource()) {
-					menu.AddSymbolNodeCommands();
-				}
-				else {
-					menu.AddSymbolCommands();
-				}
-				menu.Items.Add(new Separator());
-				menu.AddAnalysisCommands();
 			}
 		}
 

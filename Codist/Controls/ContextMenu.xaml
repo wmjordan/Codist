@@ -104,7 +104,7 @@
 		</ControlTemplate.Triggers>
 	</ControlTemplate>
 	<!-- SubmenuHeader -->
-	<ControlTemplate x:Key="{x:Static MenuItem.SubmenuHeaderTemplateKey}" TargetType="{x:Type c:ThemedMenuItem}">
+	<ControlTemplate x:Key="{x:Static MenuItem.SubmenuHeaderTemplateKey}" TargetType="{x:Type MenuItem}">
 		<Border Name="Border" BorderThickness="1" Background="{TemplateBinding Panel.Background}" ClipToBounds="True">
 			<Grid>
 				<Grid.ColumnDefinitions>
@@ -120,10 +120,7 @@
 				<Popup Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
 					<Border Name="SubmenuBorder" SnapsToDevicePixels="True" Background="{DynamicResource VsBrush.CommandBarMenuBackgroundGradient}" BorderBrush="{DynamicResource VsBrush.CommandBarMenuBorder}" BorderThickness="1,1,1,1">
 						<StackPanel Margin="3">
-							<ContentPresenter x:Name="PopupHeader" Content="{TemplateBinding SubMenuHeader}" ContentSource="Tag" Margin="0,0,0,3"/>
-							<ScrollViewer Name="SubMenuScrollViewer" MaxHeight="{TemplateBinding SubMenuMaxHeight}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-								<ItemsPresenter Name="ItemsPresenter" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.DirectionalNavigation="Cycle"/>
-							</ScrollViewer>
+							<ItemsPresenter Name="ItemsPresenter" KeyboardNavigation.TabNavigation="Cycle" KeyboardNavigation.DirectionalNavigation="Cycle"/>
 						</StackPanel>
 					</Border>
 				</Popup>

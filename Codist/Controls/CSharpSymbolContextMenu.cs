@@ -26,30 +26,39 @@ namespace Codist.Controls
 			}
 		}
 		public void AddSymbolNodeCommands() {
-			if (_Host.Symbol.HasSource()) {
+			var symbol = _Host.Symbol;
+			if (symbol.HasSource()) {
 				Items.Add(CreateItem(IconIds.GoToDefinition, R.CMD_GoToDefinition, _Host.GoToSymbolDefinition));
-				if (_Host.Symbol.Kind != SymbolKind.Namespace && _Host.Node == null) {
+				if (symbol.Kind != SymbolKind.Namespace && _Host.Node == null) {
 					Items.Add(CreateItem(IconIds.SelectCode, R.CMD_SelectCode, _Host.SelectSymbolNode));
 				}
 			}
 			else if (_Host.Node != null) {
 				Items.Add(CreateItem(IconIds.SelectCode, R.CMD_SelectCode, _Host.SelectNode));
 			}
-			if (_Host.Symbol != null) {
-				Items.Add(CreateItem(IconIds.Copy, R.CMD_CopySymbolName, _Host.CopySymbolName));
-				if (_Host.Symbol.IsQualifiable()) {
-					Items.Add(CreateItem(IconIds.Copy, R.CMD_CopyQualifiedSymbolName, _Host.CopyQualifiedSymbolName));
-				}
-				if (_Host.Symbol.Kind == SymbolKind.Field && ((IFieldSymbol)_Host.Symbol).HasConstantValue) {
-					Items.Add(CreateItem(IconIds.Constant, R.CMD_CopyConstantValue, _Host.CopyConstantValue));
-				}
-			}
+			AddCopyAndSearchSymbolCommands();
 		}
 
-		public void AddSymbolCommands() {
+		public void AddCopyAndSearchSymbolCommands() {
+			var symbol = _Host.Symbol;
 			Items.Add(CreateItem(IconIds.Copy, R.CMD_CopySymbolName, _Host.CopySymbolName));
-			if (_Host.Symbol?.IsQualifiable() == true) {
+			if (symbol.IsQualifiable()) {
 				Items.Add(CreateItem(IconIds.Copy, R.CMD_CopyQualifiedSymbolName, _Host.CopyQualifiedSymbolName));
+			}
+			if (symbol.Kind == SymbolKind.Field && ((IFieldSymbol)symbol).HasConstantValue) {
+				Items.Add(CreateItem(IconIds.Constant, R.CMD_CopyConstantValue, _Host.CopyConstantValue));
+			}
+			if (symbol.CanBeReferencedByName) {
+				var search = CreateItem(IconIds.SearchWebSite, R.OT_WebSearch);
+				var symbolName = symbol.Name;
+				search.Items.AddRange(
+					Config.Instance.SearchEngines.ConvertAll(s => CreateItem(
+						IconIds.SearchWebSite,
+						R.CMD_SearchWith.Replace("<NAME>", s.Name),
+						(sender, args) => ExternalCommand.OpenWithWebBrowser(s.Pattern, symbolName))
+					)
+				);
+				Items.Add(search);
 			}
 		}
 
