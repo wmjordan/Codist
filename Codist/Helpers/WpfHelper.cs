@@ -690,6 +690,7 @@ namespace Codist
 	sealed class InstalledFont
 	{
 		internal static readonly string SystemLang = System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag;
+		FamilyTypeface[] _ExtraTypefaces;
 
 		public InstalledFont(FontFamily font) {
 			Font = font;
@@ -702,13 +703,11 @@ namespace Codist
 			if (Name == null) {
 				Name = Font.Source;
 			}
-			//ExtraTypefaces = font.FamilyTypefaces
-			//	.Where(i => i.IsStandardStyle() == false)
-			//	.ToArray();
 		}
 		public FontFamily Font { get; }
 		public string Name { get; }
-		//public FamilyTypeface[] ExtraTypefaces { get; }
+		public FamilyTypeface[] ExtraTypefaces => _ExtraTypefaces ?? (_ExtraTypefaces = Font.FamilyTypefaces.Where(i => i.IsStandardStyle() == false).ToArray());
+
 		public override string ToString() {
 			return Name;
 		}

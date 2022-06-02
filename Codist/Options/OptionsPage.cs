@@ -40,7 +40,7 @@ namespace Codist.Options
 		protected override void OnActivate(CancelEventArgs e) {
 			base.OnActivate(e);
 			if (Feature != Features.None && Control != null) {
-				Control.IsEnabled = Config.Instance.Features.MatchFlags(Feature);
+				Control.IsEnabled = Config.Instance.Features.HasAnyFlag(Feature);
 			}
 			Config.Instance.BeginUpdate();
 		}
@@ -934,7 +934,7 @@ namespace Codist.Options
 	{
 		UIElement _Child;
 
-		protected override Features Feature => Features.None;
+		protected override Features Feature => Features.SmartBar | Features.SuperQuickInfo;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
 
 		sealed class PageControl : OptionsPageContainer

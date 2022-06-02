@@ -23,6 +23,7 @@ Check out this list to see what _Codist_ can do for you.
   ![Feature Brief Scrollbar Marker](doc/feature-brief-scrollbar-marker.png)
 * [Auto Changing Version Numbers](#auto-changing-version-numbers)
 * [Display Enhancements](#display-enhancements)
+* [Jump List Shortcuts](#jump-list-shortcuts)
 * [Codist in Your Language](#codist-in-your-language)
 * [Others](#other-features)
 * [Comprehensive Configurations](#feature-control)
@@ -41,15 +42,15 @@ The following screenshots of the `TestPage.cs` file in the source code project d
 
   ![Syntax highlight](doc/highlight1.png) 
 
-  * The font size of type and member declarations can be enlarged, font families are also changeable, so it is much easier to spot them.
-  * Syntax highlight can be applied to braces and parentheses.
-  * Various syntax identifiers have different styles, temporary elements such as method parameters and local variables are italic, `static` symbols are underlined.
-  * Comment content can be tagged (e.g. _note_) and highlighted with individual style.
-  * Unnecessary code can be marked strike-through.
-  * Keywords are categorized and highlighted with various styles (e.g. `abstract` and `sealed`, `return` and `throw`, etc.).
-  * Overriding members (such as `ToString`) can be painted with gradient background color, so at a glance we know that the marked implementations have overrided their base classes.
-  * Imported symbols (from external assemblies, e.g. `NotImplementedException`, `ToString`) can be marked with a different style (bold here), distinguishing from symbols defined in your code.
-  * All the above styles are customizable.
+* The font size of type and member declarations can be enlarged, font families are also changeable, so it is much easier to spot them.
+* Syntax highlight can be applied to braces and parentheses.
+* Various syntax identifiers have different styles, temporary elements such as method parameters and local variables are italic, `static` symbols are underlined.
+* Comment content can be tagged (e.g. _note_) and highlighted with individual style.
+* Unnecessary code can be marked strike-through.
+* Keywords are categorized and highlighted with various styles (e.g. `abstract` and `sealed`, `return` and `throw`, etc.).
+* Overriding members (such as `ToString`) can be painted with gradient background color, so at a glance we know that the marked implementations have overrided their base classes.
+* Imported symbols (from external assemblies, e.g. `NotImplementedException`, `ToString`) can be marked with a different style (bold here), distinguishing from symbols defined in your code.
+* All the above styles are customizable.
 
 ### Default Syntax Highlight Themes
 
@@ -77,7 +78,7 @@ The customization window will pop up and listing syntax classifications applied 
 
   ![Syntax Highlight Customization Preview](doc/syntax-highlight-customization-preview.png)
 
-  From version 6.1 on, it is possible to define and change underline styles. Firstly assign a color for the **Line**, afterwards, more configuration elements will appear.
+  Underline styles can be customized. Firstly assign a color for the **Line**, afterwards, more configuration elements will appear.
 
 If you want to change another syntax element, click on the place where it is applied in the code document window. If the customization window is still opened, and the _Selected Code_ section under _Syntax Categories_ is selected, the list will display the corresponding syntax styles for the place you clicked immediately.
 
@@ -99,17 +100,17 @@ You can customize it in the *symbol markers* section under the *C#* section in t
 
 ## Comment Tagger and Styles
 
-  * The comment tagger highlights comments to your specific styles, according to the first token inside the comment.
-
-    Here are the effects how they are applied.
-
-    ![Comment syntax highlight](doc/syntax-highlight-comments.png)
-
-    To configure the comment tags, which identify comment types, click the *tags* section, under the *Tagged comments* section in the *Syntax Highlight Configurations* dialog, where you can add, remove or modify comment tags.
-
-    ![Syntax Highlight Comment Tags](doc/syntax-highlight-comment-tags.png)
-
-    To disable comment tagger, open the _Options_ dialog, find the _Codist/Syntax Highlight_ section and  uncheck the check box labeled _Enable comment tagger_ in the _Syntax Highlight_ option page.
+* The comment tagger highlights comments to your specific styles, according to the first token inside the comment.
+  
+  Here are the effects how they are applied.
+  
+  ![Comment syntax highlight](doc/syntax-highlight-comments.png)
+  
+  To configure the comment tags, which identify comment types, click the *tags* section, under the *Tagged comments* section in the *Syntax Highlight Configurations* dialog, where you can add, remove or modify comment tags.
+  
+  ![Syntax Highlight Comment Tags](doc/syntax-highlight-comment-tags.png)
+  
+  To disable comment tagger, open the _Options_ dialog, find the _Codist/Syntax Highlight_ section and  uncheck the check box labeled _Enable comment tagger_ in the _Syntax Highlight_ option page.
 
 ## Super Quick Info
 
@@ -123,41 +124,41 @@ To customize the *Super Quick Info*, adjust the settings in the options page.
 
   Options in the _General_ page apply to all code editor windows.
 
-  * **Hide Quick Info until Shift key is pressed**
+* **Hide Quick Info until Shift key is pressed**
+  
+  By default, _Quick Info_ appears when you hover your mouse over a symbol or syntax token in code editor. Some programmers think this behavior interferes their workflow. Checking this option will suppress the _Quick Info_ until Shift key is pressed.
 
-    By default, _Quick Info_ appears when you hover your mouse over a symbol or syntax token in code editor. Some programmers think this behavior interferes their workflow. Checking this option will suppress the _Quick Info_ until Shift key is pressed.
+* **Selection info**
+  
+  This option will show how many characters and lines in your selection (if your selection spans over multiple lines). So you don't have to count characters one by one.
+  
+  ![Super Quick Info Selection Length](doc/super-quick-info-selection-length.png)
 
-  * **Selection info**
+* **Color info**
+  
+  This option enables you preview color values. It works for hex color values (such as `#00FF00`，`#33993300`), named colors (such as `Black`, `White`, etc.). The 12 sample blocks under color values list the color as the foreground or background against various gray scale colors to help designers to determine the best readability.
+  
+  ![Super Quick Info - Color](doc/super-quick-info-color.png)
+  
+  In C# code editor, Codist can also analyze system colors (such as `SystemColors.WindowColor`, `SystemColors.Control`, etc.), `Color.FromArgb` or `Color.FromRgb` expression with constant values as well.
+  
+  ![Super Quick Info - C# Color](doc/super-quick-info-csharp-color.png)
+  
+  The color info not only works in code windows, but also in debugger _Watch_ window.
+  
+  ![Super Quick Info - Color](doc/super-quick-info-debugger-watch.png)
 
-    This option will show how many characters and lines in your selection (if your selection spans over multiple lines). So you don't have to count characters one by one.
+* **Quick Info item size**
+  
+  It is possible to limit the size of each Quick Info item, so the window won't cover your whole screen.
+  
+  By default, _Codist_ does not apply size limitations. You must manually set the _Max width_ and _Max height_ here. Extra height can be assigned to C# XML Documentations, so you can read more of them at a glance. If the contents exceed the width, they are wrapped, and scrollbars will appear when necessary, as the screenshot below demonstrates.
+  
+  ![Super Quick Info - Size](doc/super-quick-info-size.png)
 
-    ![Super Quick Info Selection Length](doc/super-quick-info-selection-length.png)
-
-  * **Color info**
-
-    This option enables you preview color values. It works for hex color values (such as `#00FF00`，`#33993300`), named colors (such as `Black`, `White`, etc.). The 12 sample blocks under color values list the color as the foreground or background against various gray scale colors to help designers to determine the best readability.
-
-    ![Super Quick Info - Color](doc/super-quick-info-color.png)
-
-    In C# code editor, Codist can also analyze system colors (such as `SystemColors.WindowColor`, `SystemColors.Control`, etc.), `Color.FromArgb` or `Color.FromRgb` expression with constant values as well.
-
-    ![Super Quick Info - C# Color](doc/super-quick-info-csharp-color.png)
-
-    The color info not only works in code windows, but also in debugger _Watch_ window.
-
-    ![Super Quick Info - Color](doc/super-quick-info-debugger-watch.png)
-
-  * **Quick Info item size**
-    
-    It is possible to limit the size of each Quick Info item, so the window won't cover your whole screen.
-
-    By default, _Codist_ does not apply size limitations. You must manually set the _Max width_ and _Max height_ here. Extra height can be assigned to C# XML Documentations, so you can read more of them at a glance. If the contents exceed the width, they are wrapped, and scrollbars will appear when necessary, as the screenshot below demonstrates.
-
-    ![Super Quick Info - Size](doc/super-quick-info-size.png)
-
-  * **Background**
-
-    From version 6.0 on, it is possible to change the background color of the Quick Info. Click the **Background** button and pick your favorite color.
+* **Background**
+  
+  The background color of the Quick Info can be changed. Click the **Background** button and pick your favorite color.
 
 ### C# Quick Info
 
@@ -166,19 +167,19 @@ _Super Quick Info_ especially enhances programming experience for C# programmers
 ![Super Quick Info - Options](doc/super-quick-info-csharp-options.png)
 
 * **Click and go** to source code of symbol definition
-
+  
   If a symbol is defined in your source code, you can click and go to its definition on the Quick Info window. No need to hit `F12` on your keyboard any more! Even more, _Codist_ also tells you where the symbol is defined if you hover your mouse over it.
-
+  
   ![Super Quick Info - Click and Go](doc/super-quick-info-click-go.png)
 
 * A **Context menu** with many symbol analysis commands will show up when you right click the signature of the symbol definition or any symbol that appears in the XML Doc.
-
+  
   ![Super Quick Info Csharp Menu](doc/super-quick-info-csharp-menu.png)
 
 * **Override XML Documentation**
-
+  
   The overridden XML Documentation makes the following changes to displayed documentation.
-
+  
   * More syntax colors (adopting syntax highlight colors) for symbols.
   * Icons for documetation parts.
   * Selectable content of the documentation.
@@ -186,29 +187,29 @@ _Super Quick Info_ especially enhances programming experience for C# programmers
   * Concise form of members (without leading namespace or containing type names, hover your mouse over a symbol to view its full definition).
   * Extra tags, such as `<b>` (for bold), `<i>` (for italic) and `<u>` (for underline) are supported.
   * Extra information from documentations (see below).
-  
+
 ![Super Quick Info Override Doc](doc/super-quick-info-override-doc.png)
-  
+
 When _Override XML Documentation_ checkbox is checked in the options page, it is also possible to activate options under it.
-  
+
 * **Inherit from base type or interfaces** option will show documentation description from base `class`es or implemeted `interface`s if the XML Doc description of the current symbol is absent.
   
   ![Super Quick Info - Inherit Base](doc/super-quick-info-inherit-base.png)
-  
+
 * **Inherit from `<inheritdoc cref="MemberName"/>` target** option will borrow description from the referenced `MemberName`.
   
   ![Super Quick Info Inheritdoc](doc/super-quick-info-inheritdoc.png)
-  
+
 * **Show `<returns>` XML Doc** and **Show `<remarks>` XML Doc** will add content of those tags.
-  
+
 * **Override `<exception>` XML Doc** option adds back documentations for exceptions to the Quick Info.
   
   ![Super Quick Info - Override Exception](doc/super-quick-info-override-exception.png)
-  
+
 _Codist_ shows XML Doc for those `namespace`s with an embedded `NamespaceDoc` class, like what is done in [SandCastle](https://github.com/EWSoftware/SHFB).
-  
+
  ![Super Quick Info Csharp Namespace](doc/super-quick-info-csharp-namespace.png)
-  
+
 * **Use alternative style** option moves the glyph of the symbol to the bottom-right of the quick info, and [removes individual hyperlinks within the symbol signature parts](https://github.com/wmjordan/Codist/issues/102), which comes with Visual Studio 2019 update 3, in order to make it easier to use the _Click and Go_ feature on the symbol.
 
 ### Additional Quick Info Items
@@ -218,30 +219,31 @@ _Codist_ shows XML Doc for those `namespace`s with an embedded `NamespaceDoc` cl
    ![Super Quick Info Csharp Items](doc/super-quick-info-csharp-items.png)
 
 * **Attributes** option shows attributes of a symbol.
+
 * **Base type** and **Interfaces** options shows inheritance and implementation info of a type. It is recommended to check **All ancestor types** and **Inherited interfaces** to display the complete info of the hierarchy of a type.
-
+  
   ![Super Quick Info Attribute Base Interface](doc/super-quick-info-attribute-base-interface.png)
-
+  
   **Note**: the `IDisposable` interface has special importance in .NET programming, thus it is assigned a special icon and pinned to the top of the interface list.
 
 * **Declaration** option shows modifiers to a symbol when it is not a public instance one.
-
+  
   ![Super Quick Info Declaration](doc/super-quick-info-declaration.png)
 
 * **Interface implementation** option shows if a member implements any interface.
-
+  
   ![Super Quick Info Interface Implementation](doc/super-quick-info-interface-implementation.png)
 
 * **Method overload** options shows possible overloads of a method (including applicable extension methods).
-
+  
   ![Super Quick Info - Method Overloads](doc/super-quick-info-method-overloads.png)
-
+  
   This option also helps you find out correct overloads when any argument passed to a method is incorrect.
-
+  
   ![Super Quick Info Param Candidate](doc/super-quick-info-param-candidate.png)
 
 * **Parameter of method** options shows whether a token or an expression is the parameter of a method in the argument list. What is more, the documentation of the parameter is also displayed.
-
+  
   ![Super Quick Info - Param](doc/super-quick-info-param.png)
 
 * **Type parameter** option shows information and documentation about type parameters.
@@ -249,11 +251,11 @@ _Codist_ shows XML Doc for those `namespace`s with an embedded `NamespaceDoc` cl
 * **Symbol location** shows where a symbol is defined.
 
 * **Numeric forms** shows decimal, hexadecimal and binary forms for constant integer and `Enum` values.
-
+  
   ![Super Quick Info Const](doc/super-quick-info-const.png)
-
+  
   The binary form is useful when working with bit flags.
-
+  
   ![Super Quick Info Enum](doc/super-quick-info-enum.png)
 
 * **String length and Hash codes** for string constants.
@@ -271,50 +273,50 @@ Basically, the _Navigation Bar_ serves the same purpose of the original one come
 
   Nodes on the _Navigation Bar_ are clickable.
 
-  1. Clicking on the left-most **Search Document node** will popup a menu, displaying namespaces and types defined in the active document.
+1. Clicking on the left-most **Search Document node** will popup a menu, displaying namespaces and types defined in the active document.
+   
+   On top of the menu, there is a **Search Declaration** box, within which you can type and search declarations.
+   
+   ![Navigation Bar Namespace Types](doc/navigation-bar-search.png)
+   
+   Besides the _Search Declaration_ box, there are three buttons. The first one is pressed by default, which restricts the search scope to active document. If the second one is pressed, it pops up the first button and expands the search scope to current project (see screen shot below). The third button clears the search box and reverts the items back to unfiltered namespaces and types.
+   
+   **Note**: Press `-` or `=` key on keyboard to switch search scope between current document and current project.
+   
+   ![Navigation Bar Search Declaration](doc/navigation-bar-search-declaration.png)
+   
+   **Note**: If the first character in the search box is an upper case one, the search will be **case-sensitive**, otherwise, it is case-insensitive.
+   
+   You can **drag and drop** items in the menu to reorder types within the document.
 
-     On top of the menu, there is a **Search Declaration** box, within which you can type and search declarations.
+2. Clicking on the **global namespace node**, which has a house as the icon, will popup a menu, displaying all root namespaces defined in the project and referenced assemblies, as well as types without any namespace. You can click namespaces to check out its sub-namespaces and types.
+   
+   ![Global namespaces](doc/navigation-bar-global-namespaces.png)
+   
+   There is also a search box in this menu, which filters content of the menu.
+   
+   There are several buttons beside the search box. Numbers on the buttons counts corrsponding items within the type. Hover your mouse cursor over the button, you can read meanings of them. Pressing down those buttons filters members within the menu to corresponding ones.
+   
+   You can right click items on the menu to bring out a context menu for curresponding members.
 
-     ![Navigation Bar Namespace Types](doc/navigation-bar-search.png)
+3. Clicking a **Namespace node** which follows the Document node will popup a menu, displaying namespaces and types defined in the corresponding namespace. You can click on those items and jump to the beginning of corresponding definitions.
 
-     Besides the _Search Declaration_ box, there are three buttons. The first one is pressed by default, which restricts the search scope to active document. If the second one is pressed, it pops up the first button and expands the search scope to current project (see screen shot below). The third button clears the search box and reverts the items back to unfiltered namespaces and types.
-
-     **Note**: Press `-` or `=` key on keyboard to switch search scope between current document and current project.
-
-     ![Navigation Bar Search Declaration](doc/navigation-bar-search-declaration.png)
-
-     **Note**: If the first character in the search box is an upper case one, the search will be **case-sensitive**, otherwise, it is case-insensitive.
-
-     You can **drag and drop** items in the menu to reorder types within the document.
-
-  2. Clicking on the **global namespace node**, which has a house as the icon, will popup a menu, displaying all root namespaces defined in the project and referenced assemblies, as well as types without any namespace. You can click namespaces to check out its sub-namespaces and types.
-
-     ![Global namespaces](doc/navigation-bar-global-namespaces.png)
-
-     There is also a search box in this menu, which filters content of the menu.
-
-     There are several buttons beside the search box. Numbers on the buttons counts corrsponding items within the type. Hover your mouse cursor over the button, you can read meanings of them. Pressing down those buttons filters members within the menu to corresponding ones.
-
-     You can right click items on the menu to bring out a context menu for curresponding members.
-
-  3. Clicking a **Namespace node** which follows the Document node will popup a menu, displaying namespaces and types defined in the corresponding namespace. You can click on those items and jump to the beginning of corresponding definitions.
-
-  4. Clicking on a **Type node** will popup a menu, displaying members and regions defined within the type. You can click on those items and jump to the definition of the corresponding member.
-
-     You can **drag and drop** items in the menu to reorder members, nested types and `#region`s within the document. If a `partial` type spans over several code files, it is also possible to rearrange members among them.
-
-     ![Navigation Bar Fields](doc/navigation-bar-fields.png)
-
-     The current symbol where the caret is on is highlighted.
-
-     Field values and auto-property expressions are also displayed on this menu. So, you can read the initial value of fields immediately.
-
-     You can right click items to bring out a context menu for the symbol.
-
-     ![Navigation Bar Fields](doc/navigation-bar-context-menu.png)
-
+4. Clicking on a **Type node** will popup a menu, displaying members and regions defined within the type. You can click on those items and jump to the definition of the corresponding member.
+   
+   You can **drag and drop** items in the menu to reorder members, nested types and `#region`s within the document. If a `partial` type spans over several code files, it is also possible to rearrange members among them.
+   
+   ![Navigation Bar Fields](doc/navigation-bar-fields.png)
+   
+   The current symbol where the caret is on is highlighted.
+   
+   Field values and auto-property expressions are also displayed on this menu. So, you can read the initial value of fields immediately.
+   
+   You can right click items to bring out a context menu for the symbol.
+   
+   ![Navigation Bar Fields](doc/navigation-bar-context-menu.png)
+   
    5. Clicking on a **Member node** will select the whole member. If you have the _Smart Bar_ feature on and let it appear when selection is changed, _Smart Bar_ will be displayed and let you perform actions onto the member.
-
+      
       ![Navigation Bar Select](doc/navigation-bar-select.png)
 
 ### Customization
@@ -323,20 +325,20 @@ Basically, the _Navigation Bar_ serves the same purpose of the original one come
 
 ![Navigation Bar Options](doc/navigation-bar-options.png)
 
-  * If **Syntax detail** option is set, the _Navigation Bar_ not only shows available types and declarations in the code window like the original navigation bar, but also syntax nodes such as statements and expressions containing the caret.
+* If **Syntax detail** option is set, the _Navigation Bar_ not only shows available types and declarations in the code window like the original navigation bar, but also syntax nodes such as statements and expressions containing the caret.
+  
+  ![Navigation Bar Syntax Details](doc/navigation-bar-syntax-details.png)
 
-    ![Navigation Bar Syntax Details](doc/navigation-bar-syntax-details.png)
+* If **Symbol info tip** option is set, you can read information about a symbol when you hover your mouse onto a node.
+  
+  ![Navigation Bar Symbol Info](doc/navigation-bar-symbol-info.png)
 
-  * If **Symbol info tip** option is set, you can read information about a symbol when you hover your mouse onto a node.
-
-    ![Navigation Bar Symbol Info](doc/navigation-bar-symbol-info.png)
-
-  * If **Highlight syntax range** option is set, when you hover the mouse over the node on the bar, corresponding span of the node will be highlighted in the editor.
-
-    ![Navigation Bar Node Range](doc/navigation-bar-node-range.png)
-
-   * If **Region** option is set, `#region` names will be displayed on the Navigation Bar. If you pad region names with some non-alphabetic characters like "`#region [====== private methods ======]`", you can check the **Trim non-letter characters in region** checkbox so only alphabetic part like "`private methods`" will be displayed on the _Navigation Bar_.
-
+* If **Highlight syntax range** option is set, when you hover the mouse over the node on the bar, corresponding span of the node will be highlighted in the editor.
+  
+  ![Navigation Bar Node Range](doc/navigation-bar-node-range.png)
+  
+  * If **Region** option is set, `#region` names will be displayed on the Navigation Bar. If you pad region names with some non-alphabetic characters like "`#region [====== private methods ======]`", you can check the **Trim non-letter characters in region** checkbox so only alphabetic part like "`private methods`" will be displayed on the _Navigation Bar_.
+  
   To customize drop-down menus of the _Navigation Bar,_ change options in the _Drop-down Menu_ tab.
 
 ### Markdown Navigation Bar
@@ -443,12 +445,12 @@ _Smart Bar_ also works on _Output_, _C# Interactive_, _Immediate (Debug)_, _Find
 
 _Scollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for the following syntax elements:
 
-  * **Line numbers** (marked with gray dashed lines and numbers)
-  * Selection range (marked with semi-trasparent color blocks over the bar)
-  * Special comments tagged by comment tagger (marked with small squares)
-  * C# `class`/`struct`/`interface`/`enum` **declarations** (marked with lines indicating their ranges and a square, and their names indicating their declaration locations)
-  * C# compiler directives, e.g. `#if`, `#else`, `#region`, `#pragma`, etc. (marked with a gray spot)
-  * C# symbol match marker (matches symbol under the caret, marked with an aqua square)
+* **Line numbers** (marked with gray dashed lines and numbers)
+* Selection range (marked with semi-trasparent color blocks over the bar)
+* Special comments tagged by comment tagger (marked with small squares)
+* C# `class`/`struct`/`interface`/`enum` **declarations** (marked with lines indicating their ranges and a square, and their names indicating their declaration locations)
+* C# compiler directives, e.g. `#if`, `#else`, `#region`, `#pragma`, etc. (marked with a gray spot)
+* C# symbol match marker (matches symbol under the caret, marked with an aqua square)
 
 Please see the first screenshot of this article. The markers can be toggled via the options page.
 
@@ -456,7 +458,7 @@ Please see the first screenshot of this article. The markers can be toggled via 
 
 ## Auto Changing Version Numbers
 
-From version 6.0 on, it is possible to automatically change version numbers for output assemblies before build.
+Codist can automatically change version numbers for output assemblies before build.
 
 To activate the behavior, right click the project in the Solution Explorer and select the _Auto Build Version Numbers..._ command.
 
@@ -486,6 +488,18 @@ It is possible to use Compact menu like _Visual Studio 2019_ in _Visual Studio 2
 
 ![Compact Menu](doc/compact-menu.png)
 
+From version 6.3 on, it is possible to hide some elements from the user interface of Visual Studio from options under the _Layout Override_ section.
+
+## Jump List Shortcuts
+
+Jump List is a menu section that appears when you right click the Visual Studio button on the taskbar. It lists your recently opened solutions, projects or documents.
+
+From version 6.3 on, Codist can add three shortcuts to that list when you check the _Jump List Shortcuts_ option. Those shortcuts start Visual Studio in a special mode.
+
+1. *No scaling mode*: disables DPI-awareness of Visual Studio and let you design WinForm applications with 100% scaling.
+2. *Safe mode*: disables most extensions in Visual Studio. If an extension keeps crashing the development environment, you can use the Safe mode to enter Visual Studio to disable or uninstall it.
+3. *Presentation mode*: opens a particular instance of Visual Studio which has its own settings and layouts.
+
 ## Codist in Your Language
 
 It is possible to localize _Codist_ to other language. Simplified Chinese (简体中文) and English are provided by default.
@@ -504,37 +518,37 @@ Open the *Codist* section in the *Tools->Options* dialog. In the *General* secti
 
 ![General customization](doc/general-options.png)
 
-  1. *Feature controllers* contains check boxes which can be used to enable/disable features of *Codist*.
+1. *Feature controllers* contains check boxes which can be used to enable/disable features of *Codist*.
+   
+   Someone who does not like the syntax highlight or use another syntax highlighter can also turn off the *Syntax Highlight* feature individually here.
+   
+   These **options will take effect on new document windows**. Existing document windows won't be affected.
 
-     Someone who does not like the syntax highlight or use another syntax highlighter can also turn off the *Syntax Highlight* feature individually here.
-
-     These **options will take effect on new document windows**. Existing document windows won't be affected.
-
-  2. To share or backup your settings of Codist, you can use the *Save* and *Load* buttons.
+2. To share or backup your settings of Codist, you can use the *Save* and *Load* buttons.
 
 # Acknowledgements
 
 I have learned a lot from the following extension projects (sorted by the time when I learned from them).
 
-  * CommentsPlus: https://github.com/mhoumann/CommentsPlus
-  * Better comments: https://github.com/omsharp/BetterComments
-  * Remarker: https://github.com/jgyo/remarker
-  * Font Sizer: https://github.com/Oceanware/FontSizer
-  * Visual Studio Productivity Power Tools: https://github.com/Microsoft/VS-PPT
-  * Inheritance Margin: https://github.com/tunnelvisionlabs/InheritanceMargin
-  * CoCo: https://github.com/GeorgeAlexandria/CoCo
-  * CodeBlockEndTag: https://github.com/KhaosCoders/VSCodeBlockEndTag
-  * UntabifyReplacement: https://github.com/cpmcgrath/UntabifyReplacement
-  * Extensiblity Tools: https://github.com/madskristensen/ExtensibilityTools
-  * CodeMaid: https://github.com/codecadwallader/codemaid
-  * Select Next Occurence: https://github.com/2mas/SelectNextOccurrence
-  * VSColorOutput: https://github.com/mike-ward/VSColorOutput
-  * NuGet: https://github.com/NuGet/NuGet.Build.Packaging
-  * GoToImplementation: https://github.com/GordianDotNet/GoToImplementation
-  * Roslyn: https://github.com/dotnet/roslyn
-  * Community.VisualStudio.Toolkit: https://github.com/VsixCommunity/Community.VisualStudio.Toolkit
-  * ReviewBoard: code.google.com/p/reviewboardvsx
-  * Tweaks: https://github.com/madskristensen/Tweakster
+* CommentsPlus: https://github.com/mhoumann/CommentsPlus
+* Better comments: https://github.com/omsharp/BetterComments
+* Remarker: https://github.com/jgyo/remarker
+* Font Sizer: https://github.com/Oceanware/FontSizer
+* Visual Studio Productivity Power Tools: https://github.com/Microsoft/VS-PPT
+* Inheritance Margin: https://github.com/tunnelvisionlabs/InheritanceMargin
+* CoCo: https://github.com/GeorgeAlexandria/CoCo
+* CodeBlockEndTag: https://github.com/KhaosCoders/VSCodeBlockEndTag
+* UntabifyReplacement: https://github.com/cpmcgrath/UntabifyReplacement
+* Extensiblity Tools: https://github.com/madskristensen/ExtensibilityTools
+* CodeMaid: https://github.com/codecadwallader/codemaid
+* Select Next Occurence: https://github.com/2mas/SelectNextOccurrence
+* VSColorOutput: https://github.com/mike-ward/VSColorOutput
+* NuGet: https://github.com/NuGet/NuGet.Build.Packaging
+* GoToImplementation: https://github.com/GordianDotNet/GoToImplementation
+* Roslyn: https://github.com/dotnet/roslyn
+* Community.VisualStudio.Toolkit: https://github.com/VsixCommunity/Community.VisualStudio.Toolkit
+* ReviewBoard: code.google.com/p/reviewboardvsx
+* Tweaks: https://github.com/madskristensen/Tweakster
 
 And every donaters, beta testers, feedback providers to this project.
 
