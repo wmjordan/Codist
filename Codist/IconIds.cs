@@ -150,8 +150,10 @@ namespace Codist
 		public const int FindInFile = KnownImageIds.FindInFile;
 		public const int ReplaceInFolder = KnownImageIds.ReplaceInFolder;
 		public const int SearchWebSite = KnownImageIds.OpenWebSite;
+		public const int CustomizeWebSearch = KnownImageIds.Edit;
 		public const int SurroundWith = KnownImageIds.AddSnippet;
 		public const int WrapText = KnownImageIds.CorrelationScope;
+		public const int CustomizeWrapText = KnownImageIds.Edit;
 		public const int ToggleParentheses = KnownImageIds.MaskedTextBox;
 		public const int NewGuid = KnownImageIds.NewNamedSet;
 		public const int IncrementNumber = KnownImageIds.Counter;
