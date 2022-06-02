@@ -58,6 +58,7 @@ namespace Codist.Controls
 						(sender, args) => ExternalCommand.OpenWithWebBrowser(s.Pattern, symbolName))
 					)
 				);
+				search.Items.Add(CreateItem(IconIds.CustomizeWebSearch, R.CMD_Customize, (sender, args) => CodistPackage.Instance.ShowOptionPage(typeof(Options.WebSearchPage))));
 				Items.Add(search);
 			}
 		}

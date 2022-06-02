@@ -1947,4 +1947,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="OT_HideFeedbackButton" xml:space="preserve">
     <value>隐藏反馈意见按钮</value>
   </data>
+  <data name="CMD_Customize" xml:space="preserve">
+    <value>自定义...</value>
+  </data>
 </root>

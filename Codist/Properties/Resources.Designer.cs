@@ -225,6 +225,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customize....
+        /// </summary>
+        internal static string CMD_Customize {
+            get {
+                return ResourceManager.GetString("CMD_Customize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cut selected text
         ///Right click: Cut line.
         /// </summary>

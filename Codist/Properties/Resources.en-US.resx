@@ -1958,4 +1958,7 @@ Right click: Wrap text menu...</value>
   <data name="OT_HideFeedbackButton" xml:space="preserve">
     <value>Hide feedback button</value>
   </data>
+  <data name="CMD_Customize" xml:space="preserve">
+    <value>Customize...</value>
+  </data>
 </root>
