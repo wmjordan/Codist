@@ -162,7 +162,8 @@ namespace Codist.QuickInfo
 			node = node.UnqualifyExceptNamespace();
 			LocateNodeInParameterList(ref node, ref token);
 
-			PROCESS:
+			ObjectCreationExpressionSyntax ctor;
+		PROCESS:
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowParameterInfo(qiContent, node, semanticModel);
 			}
@@ -185,7 +186,7 @@ namespace Codist.QuickInfo
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 				qiContent.Add(await ShowAvailabilityAsync(doc, token, cancellationToken).ConfigureAwait(false));
-				var ctor = node.Parent as ObjectCreationExpressionSyntax;
+				ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node, qiWrapper,
 					ctor?.Type == node ? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? symbol
 						//: node.Parent.IsKind(SyntaxKind.Attribute) ? symbol.ContainingType
@@ -197,22 +198,20 @@ namespace Codist.QuickInfo
 			}
 			ShowSymbolInfo(session, qiContent, node, symbol, semanticModel);
 		RETURN:
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo)) {
-				var ctor = node.Parent as ObjectCreationExpressionSyntax;
-				if (ctor != null && ctor.Type == node) {
-					symbol = semanticModel.GetSymbolOrFirstCandidate(ctor, cancellationToken) ?? symbol;
-					if (symbol == null) {
-						return null;
-					}
-					if (symbol.IsImplicitlyDeclared) {
-						symbol = symbol.ContainingType;
-					}
+			ctor = node.Parent as ObjectCreationExpressionSyntax;
+			if (ctor != null && ctor.Type == node) {
+				symbol = semanticModel.GetSymbolOrFirstCandidate(ctor, cancellationToken) ?? symbol;
+				if (symbol == null) {
+					return null;
 				}
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Diagnostics)) {
-					qiWrapper.SetDiagnostics(semanticModel.GetDiagnostics(token.Span, cancellationToken));
+				if (symbol.IsImplicitlyDeclared) {
+					symbol = symbol.ContainingType;
 				}
-				qiWrapper.ApplyClickAndGo(symbol, buffer, session);
 			}
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Diagnostics)) {
+				qiWrapper.SetDiagnostics(semanticModel.GetDiagnostics(token.Span, cancellationToken));
+			}
+			qiWrapper.ApplyClickAndGo(symbol, buffer, session);
 			return new QuickInfoItem(qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
 				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeExclusive)
 				: null, qiContent.ToUI());

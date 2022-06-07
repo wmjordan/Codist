@@ -1961,4 +1961,16 @@ Right click: Wrap text menu...</value>
   <data name="CMD_Customize" xml:space="preserve">
     <value>Customize...</value>
   </data>
+  <data name="OT_CtrlSuppress" xml:space="preserve">
+    <value>Suppress Super Quick Info when Ctrl key is pressed</value>
+  </data>
+  <data name="OT_CtrlSuppressTip" xml:space="preserve">
+    <value>Displays original Quick Info when Ctrl key is pressed</value>
+  </data>
+  <data name="OT_CtrlSuppressQuickInfo" xml:space="preserve">
+    <value>Suppress Super Quick Info when Ctrl key is pressed</value>
+  </data>
+  <data name="OT_CtrlSuppressQuickInfoTip" xml:space="preserve">
+    <value>Displays original Quick Info when Ctrl key is pressed</value>
+  </data>
 </root>

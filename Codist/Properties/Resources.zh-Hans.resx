@@ -1950,4 +1950,10 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="CMD_Customize" xml:space="preserve">
     <value>自定义...</value>
   </data>
+  <data name="OT_CtrlSuppressQuickInfo" xml:space="preserve">
+    <value>按下 Ctrl 键时禁用超级代码提示</value>
+  </data>
+  <data name="OT_CtrlSuppressQuickInfoTip" xml:space="preserve">
+    <value>按下 Ctrl 键时，显示原生的代码提示</value>
+  </data>
 </root>

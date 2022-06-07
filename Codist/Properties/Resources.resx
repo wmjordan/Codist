@@ -1965,4 +1965,10 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="CMD_Customize" xml:space="preserve">
     <value>Customize...</value>
   </data>
+  <data name="OT_CtrlSuppressQuickInfo" xml:space="preserve">
+    <value>Suppress Super Quick Info when Ctrl key is pressed</value>
+  </data>
+  <data name="OT_CtrlSuppressQuickInfoTip" xml:space="preserve">
+    <value>Displays original Quick Info when Ctrl key is pressed</value>
+  </data>
 </root>

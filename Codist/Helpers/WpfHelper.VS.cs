@@ -206,7 +206,7 @@ namespace Codist
 			return symbol.Render(alias, brush == null, brush);
 		}
 		public static Inline Render(this ISymbol symbol, string alias, bool bold, WpfBrush brush) {
-			var run = new SymbolLink(symbol, alias, Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ClickAndGo));
+			var run = new SymbolLink(symbol, alias);
 			if (bold) {
 				run.FontWeight = FontWeights.Bold;
 			}
@@ -217,8 +217,7 @@ namespace Codist
 		}
 		public static ScrollViewer Scrollable<TElement>(this TElement element)
 			where TElement : DependencyObject {
-			var t = element as TextBlock;
-			if (t != null && t.TextWrapping == TextWrapping.NoWrap) {
+			if (element is TextBlock t && t.TextWrapping == TextWrapping.NoWrap) {
 				t.TextWrapping = TextWrapping.Wrap;
 			}
 			return new ScrollViewer {
@@ -241,12 +240,10 @@ namespace Codist
 		{
 			ISymbol _Symbol;
 
-			public SymbolLink(ISymbol symbol, string alias, bool clickAndGo) {
+			public SymbolLink(ISymbol symbol, string alias) {
 				Text = alias ?? symbol.GetOriginalName();
 				_Symbol = symbol;
-				if (clickAndGo) {
-					MouseEnter += InitInteraction;
-				}
+				MouseEnter += InitInteraction;
 				ToolTip = String.Empty;
 				MouseRightButtonDown += LinkContextMenu;
 				Unloaded += SymbolLink_Unloaded;

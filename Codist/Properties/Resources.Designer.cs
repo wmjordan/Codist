@@ -1995,6 +1995,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Suppress Super Quick Info when Ctrl key is pressed.
+        /// </summary>
+        internal static string OT_CtrlSuppressQuickInfo {
+            get {
+                return ResourceManager.GetString("OT_CtrlSuppressQuickInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displays original Quick Info when Ctrl key is pressed.
+        /// </summary>
+        internal static string OT_CtrlSuppressQuickInfoTip {
+            get {
+                return ResourceManager.GetString("OT_CtrlSuppressQuickInfoTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Declaration.
         /// </summary>
         internal static string OT_Declaration {

@@ -729,6 +729,8 @@ namespace Codist
 	public enum QuickInfoOptions
 	{
 		None,
+		[Obsolete]
+		ClickAndGo = 0,
 		Attributes = 1,
 		BaseType = 1 << 1,
 		BaseTypeInheritence = 1 << 2,
@@ -756,12 +758,12 @@ namespace Codist
 		ExampleDoc = 1 << 25,
 		Color = 1 << 26,
 		Selection = 1 << 27,
-		ClickAndGo = 1 << 28,
+		CtrlSupress = 1 << 28,
 		CtrlQuickInfo = 1 << 29,
 		AlternativeStyle = 1 << 30,
 		DocumentationOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc,
-		QuickInfoOverride = DocumentationOverride | ClickAndGo | AlternativeStyle,
-		Default = Attributes | BaseType | BaseTypeInheritence | Interfaces | InterfacesInheritence | NumericValues | InterfaceImplementations | ClickAndGo | MethodOverload | Parameter | OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc | SeeAlsoDoc | ExceptionDoc | ReturnsDoc | RemarksDoc,
+		QuickInfoOverride = DocumentationOverride | AlternativeStyle,
+		Default = Attributes | BaseType | BaseTypeInheritence | Interfaces | InterfacesInheritence | NumericValues | InterfaceImplementations | MethodOverload | Parameter | OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc | SeeAlsoDoc | ExceptionDoc | ReturnsDoc | RemarksDoc,
 	}
 
 	[Flags]

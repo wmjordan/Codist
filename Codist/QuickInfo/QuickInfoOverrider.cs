@@ -161,13 +161,15 @@ namespace Codist.QuickInfo
 			void HookEvents(object sender, MouseEventArgs e) {
 				var s = sender as FrameworkElement;
 				s.MouseEnter -= HookEvents;
-				HighlightSymbol(sender, e);
-				s.Cursor = Cursors.Hand;
-				s.ToolTipOpening += ShowToolTip;
-				s.UseDummyToolTip();
-				s.MouseEnter += HighlightSymbol;
-				s.MouseLeave += RemoveSymbolHighlight;
-				s.MouseLeftButtonUp += GoToSource;
+				if (CodistPackage.VsVersion.Major == 15 || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
+					HighlightSymbol(sender, e);
+					s.Cursor = Cursors.Hand;
+					s.ToolTipOpening += ShowToolTip;
+					s.UseDummyToolTip();
+					s.MouseEnter += HighlightSymbol;
+					s.MouseLeave += RemoveSymbolHighlight;
+					s.MouseLeftButtonUp += GoToSource;
+				}
 				s.ContextMenuOpening += ShowContextMenu;
 				s.ContextMenuClosing += ReleaseQuickInfo;
 			}
@@ -472,11 +474,9 @@ namespace Codist.QuickInfo
 					if (signature != null) {
 						var list = (IList)signature.Inlines;
 						for (var i = 0; i < list.Count; i++) {
-							if (list[i] is Hyperlink link) {
-								var r = link.Inlines.FirstInline as Run;
-								if (r != null) {
-									list[i] = new Run { Text = r.Text, Foreground = r.Foreground, Background = r.Background };
-								}
+							if (list[i] is Hyperlink link
+								&& link.Inlines.FirstInline is Run r) {
+								list[i] = new Run { Text = r.Text, Foreground = r.Foreground, Background = r.Background };
 							}
 						}
 					}

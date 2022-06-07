@@ -278,7 +278,7 @@ namespace Codist.Options
 
 		sealed class PageControl : OptionsPageContainer
 		{
-			readonly OptionBox<QuickInfoOptions> _CtrlQuickInfo, _Selection, _Color, _ClickAndGo;
+			readonly OptionBox<QuickInfoOptions> _DisableUntilShift, _CtrlSuppress, _Selection, _Color;
 			readonly OptionBox<QuickInfoOptions> _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle;
 			readonly OptionBox<QuickInfoOptions> _Attributes, _BaseType, _BaseTypeInheritence, _Declaration, _SymbolLocation, _Interfaces, _InterfacesInheritence, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers;
 			readonly OptionBox<QuickInfoOptions>[] _Options;
@@ -289,8 +289,9 @@ namespace Codist.Options
 				var o = Config.Instance.QuickInfoOptions;
 				AddPage(R.OT_General,
 					new Note(R.OT_QuickInfoNote),
-					_CtrlQuickInfo = o.CreateOptionBox(QuickInfoOptions.CtrlQuickInfo, UpdateConfig, R.OT_HideQuickInfoUntilShift)
+					_DisableUntilShift = o.CreateOptionBox(QuickInfoOptions.CtrlQuickInfo, UpdateConfig, R.OT_HideQuickInfoUntilShift)
 						.SetLazyToolTip(() => R.OT_HideQuickInfoUntilShiftTip),
+					_CtrlSuppress = o.CreateOptionBox(QuickInfoOptions.CtrlSupress, UpdateConfig, R.OT_CtrlSuppressQuickInfo).SetLazyToolTip(() => R.OT_CtrlSuppressQuickInfoTip),
 					_Selection = o.CreateOptionBox(QuickInfoOptions.Selection, UpdateConfig, R.OT_SelectionInfo)
 						.SetLazyToolTip(() => R.OT_SelectionInfoTip),
 					_Color = o.CreateOptionBox(QuickInfoOptions.Color, UpdateConfig, R.OT_ColorInfo)
@@ -329,8 +330,6 @@ namespace Codist.Options
 					new Note(R.OT_CSharpNote),
 					new TitleBox(R.OT_QuickInfoOverride),
 					new DescriptionBox(R.OT_QuickInfoOverrideNote),
-					_ClickAndGo = o.CreateOptionBox(QuickInfoOptions.ClickAndGo, UpdateConfig, R.OT_ClickAndGo)
-						.SetLazyToolTip(() => R.OT_ClickAndGoTip),
 					_OverrideDefaultDocumentation = o.CreateOptionBox(QuickInfoOptions.OverrideDefaultDocumentation, UpdateConfig, R.OT_OverrideXmlDoc)
 						.SetLazyToolTip(() => R.OT_OverrideXmlDocTip),
 					_DocumentationFromBaseType = o.CreateOptionBox(QuickInfoOptions.DocumentationFromBaseType, UpdateConfig, R.OT_InheritXmlDoc)
@@ -387,7 +386,7 @@ namespace Codist.Options
 				_MaxHeight.ValueChanged += UpdateQuickInfoSize;
 				_MaxWidth.ValueChanged += UpdateQuickInfoSize;
 				_ExtraHeight.ValueChanged += UpdateQuickInfoSize;
-				_Options = new[] { _CtrlQuickInfo, _Selection, _Color, _ClickAndGo, _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _Attributes, _BaseType, _BaseTypeInheritence, _Declaration, _SymbolLocation, _Interfaces, _InterfacesInheritence, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, /*_NamespaceTypes, */_MethodOverload, _InterfaceMembers };
+				_Options = new[] { _DisableUntilShift, _CtrlSuppress, _Selection, _Color, _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _Attributes, _BaseType, _BaseTypeInheritence, _Declaration, _SymbolLocation, _Interfaces, _InterfacesInheritence, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, /*_NamespaceTypes, */_MethodOverload, _InterfaceMembers };
 				foreach (var item in new[] { _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _BaseTypeInheritence, _InterfacesInheritence }) {
 					item.WrapMargin(SubOptionMargin);
 				}
