@@ -458,7 +458,7 @@ namespace Codist.Options
 		void LoadSyntaxStyles(SyntaxStyleSource source) {
 			var l = _SettingsList.Children;
 			l.Clear();
-			_Notice.Visibility = _SettingsList.Visibility != Visibility.Visible ? Visibility.Visible : Visibility.Collapsed;
+			_Notice.Toggle(_SettingsList.Visibility != Visibility.Visible);
 			_AddTagButton.Visibility = _RemoveTagButton.Visibility = _TagSettingsGroup.Visibility = Visibility.Collapsed;
 			IEnumerable<IClassificationType> classifications;
 			switch (source) {
@@ -648,6 +648,7 @@ namespace Codist.Options
 				_ForegroundOpacityButton.Value = s.ForegroundOpacity;
 				_BackgroundOpacityButton.Value = s.BackgroundOpacity;
 				_BackgroundEffectBox.SelectedIndex = (int)s.BackgroundEffect;
+				_BackgroundEffectBox.Toggle(s.BackColor.A > 0);
 				_LineOpacityButton.Value = s.LineOpacity;
 				_LineThicknessBox.Value = s.LineThickness;
 				_LineOffsetBox.Value = s.LineOffset;
@@ -787,6 +788,7 @@ namespace Codist.Options
 		void OnBackColorChanged(Color color) {
 			Update(() => {
 				ActiveStyle.BackColor = color;
+				_BackgroundEffectBox.Toggle(color.A > 0);
 				return true;
 			});
 		}
@@ -794,7 +796,8 @@ namespace Codist.Options
 		void OnLineColorChanged(Color color) {
 			Update(() => {
 				ActiveStyle.LineColor = color;
-				_LineOpacityButton.Visibility = _LineStyleGroup.Visibility = color.A > 0 ? Visibility.Visible : Visibility.Collapsed;
+				_LineOpacityButton.Toggle(color.A > 0);
+				_LineStyleGroup.Toggle(color.A > 0);
 				return true;
 			});
 		}

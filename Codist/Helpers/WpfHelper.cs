@@ -432,6 +432,9 @@ namespace Codist
 		#endregion
 
 		#region Others
+		public static void Toggle(this UIElement control, bool visible) {
+			control.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+		}
 		public static TObj Set<TObj>(this TObj obj, ref TObj field) where TObj : System.Windows.Threading.DispatcherObject {
 			return field = obj;
 		}
