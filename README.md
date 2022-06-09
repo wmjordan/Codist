@@ -5,7 +5,7 @@ Codist 是一个致力于为 C# 程序员提供更佳的编码体验和效率的
 
 # Features
 
-Here's a breef but not complete demonstration of *Codist*'s enhancement to Visual Studio.
+Here's a brief but not complete demonstration of *Codist*'s enhancement to Visual Studio.
 
 ![Feature overview](doc/preview.png)
 
@@ -13,7 +13,7 @@ Check out this list to see what _Codist_ can do for you.
 
 * [Advanced Syntax Highlight](#advanced-c-syntax-highlight) ANY LANGUAGES, and [*Comment Tagger*](#comment-tagger-and-styles) highlights `to-do` style comments
   ![](doc/feature-brief-syntax-highlight.png)
-* [Super Quick Info](#super-quick-info) with extended XML Doc, symbol tooltips, selectable contents, appearance customization, etc.
+* [Super Quick Info](#super-quick-info) with extended XML Doc, symbol tool-tips, selectable contents, appearance customization, etc.
   ![Feature Brief Super Quick Info](doc/feature-brief-super-quick-info.png)
 * [Navigation Bar](#navigation-bar) with a drag-and-drop and filter enabled member list
   ![Feature Brief Navigation Bar](doc/feature-brief-navigation-bar.png)
@@ -28,7 +28,7 @@ Check out this list to see what _Codist_ can do for you.
 * [Others](#other-features)
 * [Comprehensive Configurations](#feature-control)
 * [Acknowledgements](#acknowledgements)
-* [License](#license), [Bugs and Sugguestions](#bugs-and-suggestions), [Donate](#support-codist-by-donation)
+* [License](#license), [Bugs and Suggestions](#bugs-and-suggestions), [Donate](#support-codist-by-donation)
 
 _Codist_ supports localization into other languages and it has both English and Chinese now.
 
@@ -48,7 +48,7 @@ The following screenshots of the `TestPage.cs` file in the source code project d
 * Comment content can be tagged (e.g. _note_) and highlighted with individual style.
 * Unnecessary code can be marked strike-through.
 * Keywords are categorized and highlighted with various styles (e.g. `abstract` and `sealed`, `return` and `throw`, etc.).
-* Overriding members (such as `ToString`) can be painted with gradient background color, so at a glance we know that the marked implementations have overrided their base classes.
+* Overriding members (such as `ToString`) can be painted with gradient background color, so at a glance we know that the marked implementations have overridden their base classes.
 * Imported symbols (from external assemblies, e.g. `NotImplementedException`, `ToString`) can be marked with a different style (bold here), distinguishing from symbols defined in your code.
 * All the above styles are customizable.
 
@@ -86,9 +86,9 @@ You can explore other syntax categories by clicking the list on the left of the 
 
 Syntax definitions in the _All languages_ section will list all syntax styles for any languages installed; those under _Tagged comments_ section apply to [comment taggers](#comment-tagger-and-styles), others apply to corresponding languages accordingly.
 
-**Note**: _Font size_ is relative value to editor default font size. Halfly checked checkboxes denote default syntax styles are used.
+**Note**: _Font size_ is relative value to editor default font size. Partially checked checkboxes denote default syntax styles are used.
 
-**A Side Note for Editor Font**: You may consider subsituting the font used by Visual Studio code editor with professionally designed fonts for programming, for instance, [IBM Plex Mono](https://github.com/IBM/plex), [Fira Code](https://github.com/tonsky/FiraCode), etc. Employing [MacType](https://github.com/snowie2000/mactype) can also enhance systemwide textual display quality, especially for Chinese, Japanese and Korean programmers.
+**A Side Note for Editor Font**: You may consider substituting the font used by Visual Studio code editor with professionally designed fonts for programming, for instance, [IBM Plex Mono](https://github.com/IBM/plex), [Fira Code](https://github.com/tonsky/FiraCode), etc. Employing [MacType](https://github.com/snowie2000/mactype) can also enhance system-wide textual display quality, especially for Chinese, Japanese and Korean programmers.
 
 ### My Symbols and External Symbols
 
@@ -114,7 +114,7 @@ You can customize it in the *symbol markers* section under the *C#* section in t
 
 ## Super Quick Info
 
-The quick info (the tooltip shown when you hover your mouse pointer on your C# source code) can be enhanced by *Codist*.
+The quick info (the tool-tip shown when you hover your mouse pointer on your C# source code) can be enhanced by *Codist*.
 
 ### General Quick Info
 
@@ -181,7 +181,7 @@ _Super Quick Info_ especially enhances programming experience for C# programmers
   The overridden XML Documentation makes the following changes to displayed documentation.
   
   * More syntax colors (adopting syntax highlight colors) for symbols.
-  * Icons for documetation parts.
+  * Icons for documentation parts.
   * Selectable content of the documentation.
   * Copyable quick info content (First select text with your mouse, then press `Ctrl + C` shortcut key, or right click to show up a context menu with Copy command).
   * Concise form of members (without leading namespace or containing type names, hover your mouse over a symbol to view its full definition).
@@ -192,7 +192,7 @@ _Super Quick Info_ especially enhances programming experience for C# programmers
 
 When _Override XML Documentation_ checkbox is checked in the options page, it is also possible to activate options under it.
 
-* **Inherit from base type or interfaces** option will show documentation description from base `class`es or implemeted `interface`s if the XML Doc description of the current symbol is absent.
+* **Inherit from base type or interfaces** option will show documentation description from base `class`es or implemented `interface`s if the XML Doc description of the current symbol is absent.
   
   ![Super Quick Info - Inherit Base](doc/super-quick-info-inherit-base.png)
 
@@ -263,7 +263,7 @@ _Codist_ shows XML Doc for those `namespace`s with an embedded `NamespaceDoc` cl
 
 ## Navigation Bar
 
-_Navigation bar_ locates at the top of the code editor window. It overrides the original navigation bar. When the _Navigation Bar_ is loadeded, it hides two drop-down lists on the original Navigation Bar, but preserves the project drop-down list.
+_Navigation bar_ locates at the top of the code editor window. It overrides the original navigation bar. When the _Navigation Bar_ is loaded, it hides two drop-down lists on the original Navigation Bar, but preserves the project drop-down list.
 
 Basically, the _Navigation Bar_ serves the same purpose of the original one comes with Visual Studio, displaying symbol information where the caret is placed.
 
@@ -295,9 +295,9 @@ Basically, the _Navigation Bar_ serves the same purpose of the original one come
    
    There is also a search box in this menu, which filters content of the menu.
    
-   There are several buttons beside the search box. Numbers on the buttons counts corrsponding items within the type. Hover your mouse cursor over the button, you can read meanings of them. Pressing down those buttons filters members within the menu to corresponding ones.
+   There are several buttons beside the search box. Numbers on the buttons counts corresponding items within the type. Hover your mouse cursor over the button, you can read meanings of them. Pressing down those buttons filters members within the menu to corresponding ones.
    
-   You can right click items on the menu to bring out a context menu for curresponding members.
+   You can right click items on the menu to bring out a context menu for corresponding members.
 
 3. Clicking a **Namespace node** which follows the Document node will popup a menu, displaying namespaces and types defined in the corresponding namespace. You can click on those items and jump to the beginning of corresponding definitions.
 
@@ -355,11 +355,11 @@ Similarly, you can type in the search box to filter down the titles.
 
   There are two toolbars on _Smart Bar_. The top bar contains general editing commands for all file types. Buttons on the bottom bar changes according to file types.
 
-Buttons on the *Smart Bar* changes according to your selection, typical buttons are editing operations (e.g. _Cut_, _Copy_, _Paste_,  _Delete_, _Duplicate_, _Formatting_, _Find_, etc.), code analysis operations (e.g. _Go to defintion_, _Find references_), refactoring operations (e.g. _Rename_, _Extract method_, etc.)
+Buttons on the *Smart Bar* changes according to your selection, typical buttons are editing operations (e.g. _Cut_, _Copy_, _Paste_,  _Delete_, _Duplicate_, _Formatting_, _Find_, etc.), code analysis operations (e.g. _Go to definition_, _Find references_), refactoring operations (e.g. _Rename_, _Extract method_, etc.)
 
   ![Smart Bar](doc/smart-bar.png)
 
-  Each button on _Smart Bar_ usually has multiple functions. Left clicking, right clicking, Ctrl+clicking and Shift+clicking trigger different commands. For details, see the tooltip for the buttons. Right clicking a button usually expands the effective range of a command to the whole line, or brings out a pop-up menu for more commands.
+  Each button on _Smart Bar_ usually has multiple functions. Left clicking, right clicking, Ctrl+clicking and Shift+clicking trigger different commands. For details, see the tool-tip for the buttons. Right clicking a button usually expands the effective range of a command to the whole line, or brings out a pop-up menu for more commands.
 
   ![Smart Bar](doc/smart-bar-2.png)
 
@@ -399,7 +399,7 @@ For Visual Studio extension developers, the preview offers more, for instances, 
 
 The **Find Implementations** command for an interface type will display all types that implement that interface. The same command will also appear for interface members, which finds out corresponding members that implement the specific interface member.
 
-When we begin to work with new libraries, we usually have to learn new types and APIs. Two typical senario are that "_what methods, properties return specific instance of a type?_" and "_what methods can an instance of a given type can be passed into?_". Thus, _Smart Bar_ provides _Find Instance Producer_ and _Find Instance as Parameter_ for type names. The following screen shot demonstrates the reslt of finding instance producers which returns an instance of `IWpfTextView`.
+When we begin to work with new libraries, we usually have to learn new types and APIs. Two typical scenario are that "_what methods, properties return specific instance of a type?_" and "_what methods can an instance of a given type can be passed into?_". Thus, _Smart Bar_ provides _Find Instance Producer_ and _Find Instance as Parameter_ for type names. The following screen shot demonstrates the result of finding instance producers which returns an instance of `IWpfTextView`.
 
   ![Smart Bar Instance Producer](doc/smart-bar-instance-producer.png)
 
@@ -421,7 +421,7 @@ To remove symbol marker, click the *Remove symbol mark* command in the drop-down
 
 Symbol markers will be cleared when the solution is unloaded.
 
-**Note**: The style of symbol markers can be customized in othe *Syntax highlight Configurations* dialog. The default colors are listed below. You also need to turn on the _Syntax Highlight_ feature in order to make this feature work.
+**Note**: The style of symbol markers can be customized in the *Syntax highlight Configurations* dialog. The default colors are listed below. You also need to turn on the _Syntax Highlight_ feature in order to make this feature work.
 
   ![Symbol marker Options](doc/symbolmarker-options.png)
 
@@ -443,10 +443,10 @@ _Smart Bar_ also works on _Output_, _C# Interactive_, _Immediate (Debug)_, _Find
 
 ## Scrollbar Marker
 
-_Scollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for the following syntax elements:
+_Scrollbar Marker_ draws extra glyphs and shapes on the vertical scrollbar for the following syntax elements:
 
 * **Line numbers** (marked with gray dashed lines and numbers)
-* Selection range (marked with semi-trasparent color blocks over the bar)
+* Selection range (marked with semi-transparent color blocks over the bar)
 * Special comments tagged by comment tagger (marked with small squares)
 * C# `class`/`struct`/`interface`/`enum` **declarations** (marked with lines indicating their ranges and a square, and their names indicating their declaration locations)
 * C# compiler directives, e.g. `#if`, `#else`, `#region`, `#pragma`, etc. (marked with a gray spot)
@@ -492,7 +492,7 @@ From version 6.3 on, it is possible to hide some elements from the user interfac
 
 ## Jump List Shortcuts
 
-Jump List is a menu section that appears when you right click the Visual Studio button on the taskbar. It lists your recently opened solutions, projects or documents.
+Jump List is a menu section that appears when you right click the Visual Studio button on the task bar. It lists your recently opened solutions, projects or documents.
 
 From version 6.3 on, Codist can add three shortcuts to that list when you check the _Jump List Shortcuts_ option. Those shortcuts start Visual Studio in a special mode.
 
