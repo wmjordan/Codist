@@ -91,6 +91,9 @@ namespace Codist.NaviBar
 
 			void AddNaviBar(object sender, RoutedEventArgs e) {
 				var view = sender as IWpfTextView ?? _View;
+				if (view.Properties.ContainsProperty(nameof(NaviBar))) {
+					return;
+				}
 				// don't add duplicated NaviBar
 				var cp = view.VisualElement?.GetParent<Border>(b => b.Name == "PART_ContentPanel");
 				if (cp == null) {
@@ -113,8 +116,8 @@ namespace Codist.NaviBar
 							viewHost.Children.Insert(0, b);
 						}
 						else if (viewHost.Children[0] is ContentControl c && c.Content == null) {
-								c.Content = b;
-							}
+							c.Content = b;
+						}
 						RegisterResurrectionHandler(b);
 					}
 					return;
