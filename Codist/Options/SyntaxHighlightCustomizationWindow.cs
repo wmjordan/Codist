@@ -40,6 +40,7 @@ namespace Codist.Options
 		readonly OpacityButton _ForegroundOpacityButton;
 		readonly ColorButton _BackgroundButton;
 		readonly OpacityButton _BackgroundOpacityButton;
+		readonly LabeledControl _BackgroundEffectControl;
 		readonly ComboBox _BackgroundEffectBox;
 		readonly ColorButton _LineColorButton;
 		readonly OpacityButton _LineOpacityButton;
@@ -198,7 +199,7 @@ namespace Codist.Options
 														.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey)
 														.Set(ref _BackgroundEffectBox)) {
 												Margin = WpfHelper.SmallMargin
-											},
+											}.Set(ref _BackgroundEffectControl),
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
@@ -648,7 +649,7 @@ namespace Codist.Options
 				_ForegroundOpacityButton.Value = s.ForegroundOpacity;
 				_BackgroundOpacityButton.Value = s.BackgroundOpacity;
 				_BackgroundEffectBox.SelectedIndex = (int)s.BackgroundEffect;
-				_BackgroundEffectBox.Toggle(s.BackColor.A > 0);
+				_BackgroundEffectControl.Toggle(s.BackColor.A > 0);
 				_LineOpacityButton.Value = s.LineOpacity;
 				_LineThicknessBox.Value = s.LineThickness;
 				_LineOffsetBox.Value = s.LineOffset;
@@ -788,7 +789,7 @@ namespace Codist.Options
 		void OnBackColorChanged(Color color) {
 			Update(() => {
 				ActiveStyle.BackColor = color;
-				_BackgroundEffectBox.Toggle(color.A > 0);
+				_BackgroundEffectControl.Toggle(color.A > 0);
 				return true;
 			});
 		}
