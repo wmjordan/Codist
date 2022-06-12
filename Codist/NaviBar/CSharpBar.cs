@@ -1086,7 +1086,8 @@ namespace Codist.NaviBar
 					Bar.HideMenu();
 					return;
 				}
-				if (Node.Kind().IsTypeDeclaration() == false || Node.IsKind(SyntaxKind.DelegateDeclaration)) {
+				if (Node.IsKind(SyntaxKind.RegionDirectiveTrivia) == false
+					&& (Node.Kind().IsTypeDeclaration() == false || Node.IsKind(SyntaxKind.DelegateDeclaration))) {
 					var span = Node.FullSpan;
 					if (span.Contains(Bar._SemanticContext.Position) && Node.SyntaxTree.FilePath == Bar._SemanticContext.Document.FilePath
 						|| Node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
@@ -1107,7 +1108,7 @@ namespace Codist.NaviBar
 					await CreateMenuForTypeSymbolNodeAsync(ct);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
 
-					_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.FindMembers().Select(s => new SymbolItem(s, null, false)));
+					_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.FindMembers().Select(s => new SymbolItem(s, null, false)) ?? Enumerable.Empty<SymbolItem>());
 					var footer = (TextBlock)_Menu.Footer;
 					if (_PartialCount > 1) {
 						footer.Append(ThemeHelper.GetImage(IconIds.PartialDocumentCount))
@@ -1163,6 +1164,9 @@ namespace Codist.NaviBar
 
 			async Task AddItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
 				AddMemberDeclarations(node, false, true);
+				if (node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+					return;
+				}
 				var externals = (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember)
 					&& (node as BaseTypeDeclarationSyntax).Modifiers.Any(SyntaxKind.PartialKeyword) ? MemberListOptions.ShowPartial : 0)
 					| (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.BaseClassMember) && (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(CodeAnalysisHelper.RecordDeclaration)) ? MemberListOptions.ShowBase : 0);
@@ -1235,6 +1239,15 @@ namespace Codist.NaviBar
 
 			void AddMemberDeclarations(SyntaxNode node, bool isExternal, bool includeDirectives) {
 				const byte UNDEFINED = 0xFF, TRUE = 1, FALSE = 0;
+				IEnumerable<SyntaxNode> scope;
+				if (node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+					var span = node.GetSematicSpan(true).ToTextSpan();
+					scope = node.FirstAncestorOrSelf<SyntaxNode>(n => n.Span.Contains(span), true).ChildNodes().Where(n => span.Contains(n.SpanStart));
+					includeDirectives = false;
+				}
+				else {
+					scope = node.ChildNodes();
+				}
 				var directives = includeDirectives && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.Region)
 					? node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia) || d.IsKind(SyntaxKind.EndRegionDirectiveTrivia))
 					: null;
@@ -1242,7 +1255,7 @@ namespace Codist.NaviBar
 				bool selected = false;
 				int pos = Bar.View.GetCaretPosition();
 				SyntaxNode lastNode = null;
-				foreach (var child in node.ChildNodes()) {
+				foreach (var child in scope) {
 					var childKind = child.Kind();
 					if (childKind.IsMemberDeclaration() == false && childKind.IsTypeDeclaration() == false) {
 						continue;
