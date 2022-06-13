@@ -156,6 +156,19 @@ namespace Codist
 			}
 			return false;
 		}
+		public static bool IsNonDelegateTypeDeclaration(this SyntaxKind kind) {
+			switch (kind) {
+				case SyntaxKind.ClassDeclaration:
+				case SyntaxKind.EnumDeclaration:
+				case SyntaxKind.EventDeclaration:
+				case SyntaxKind.InterfaceDeclaration:
+				case SyntaxKind.StructDeclaration:
+				case RecordDeclaration:
+				case RecordStructDesclaration:
+					return true;
+			}
+			return false;
+		}
 		public static bool IsNamespaceDeclaration(this SyntaxKind kind) {
 			switch (kind ) {
 				case SyntaxKind.NamespaceDeclaration:

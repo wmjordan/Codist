@@ -1086,43 +1086,44 @@ namespace Codist.NaviBar
 					Bar.HideMenu();
 					return;
 				}
-				if (Node.IsKind(SyntaxKind.RegionDirectiveTrivia) == false
-					&& (Node.Kind().IsTypeDeclaration() == false || Node.IsKind(SyntaxKind.DelegateDeclaration))) {
-					var span = Node.FullSpan;
-					if (span.Contains(Bar._SemanticContext.Position) && Node.SyntaxTree.FilePath == Bar._SemanticContext.Document.FilePath
-						|| Node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
-						// Hack: since SelectNode will move the cursor to the end of the span--the beginning of next node,
-						//    it will make next node selected, which is undesired in most cases
-						Bar.View.Selection.SelectionChanged -= Bar.Update;
-						Bar.View.SelectNode(Node, Keyboard.Modifiers != ModifierKeys.Control);
-						Bar.View.Selection.SelectionChanged += Bar.Update;
+				if (Node.IsKind(SyntaxKind.RegionDirectiveTrivia) && (Node.FirstAncestorOrSelf<MemberDeclarationSyntax>()?.Span.Contains(Node.Span)) != true
+					|| Node.Kind().IsNonDelegateTypeDeclaration()) {
+					// displays member list for type declarations or regions outside of member declaration
+					var ct = Bar._cancellationSource.GetToken();
+					try {
+						await CreateMenuForTypeSymbolNodeAsync(ct);
+						await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
+
+						_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.FindMembers().Select(s => new SymbolItem(s, null, false)) ?? Enumerable.Empty<SymbolItem>());
+						var footer = (TextBlock)_Menu.Footer;
+						if (_PartialCount > 1) {
+							footer.Append(ThemeHelper.GetImage(IconIds.PartialDocumentCount))
+								.Append(_PartialCount);
+						}
+						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
+							footer.Append(ThemeHelper.GetImage(IconIds.LineOfCode))
+								.Append(Node.GetLineSpan().Length + 1);
+						}
+						Bar.ShowMenu(this, _Menu);
+						_FilterBox?.FocusFilterBox();
 					}
-					else {
-						Node.GetIdentifierToken().GetLocation().GoToSource();
+					catch (OperationCanceledException) {
+						// ignore
 					}
 					return;
 				}
 
-				var ct = Bar._cancellationSource.GetToken();
-				try {
-					await CreateMenuForTypeSymbolNodeAsync(ct);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
-
-					_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.FindMembers().Select(s => new SymbolItem(s, null, false)) ?? Enumerable.Empty<SymbolItem>());
-					var footer = (TextBlock)_Menu.Footer;
-					if (_PartialCount > 1) {
-						footer.Append(ThemeHelper.GetImage(IconIds.PartialDocumentCount))
-							.Append(_PartialCount);
-					}
-					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
-						footer.Append(ThemeHelper.GetImage(IconIds.LineOfCode))
-							.Append(Node.GetLineSpan().Length + 1);
-					}
-					Bar.ShowMenu(this, _Menu);
-					_FilterBox?.FocusFilterBox();
+				var span = Node.FullSpan;
+				if (span.Contains(Bar._SemanticContext.Position) && Node.SyntaxTree.FilePath == Bar._SemanticContext.Document.FilePath
+					|| Node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+					// Hack: since SelectNode will move the cursor to the end of the span--the beginning of next node,
+					//    it will make next node selected, which is undesired in most cases
+					Bar.View.Selection.SelectionChanged -= Bar.Update;
+					Bar.View.SelectNode(Node, Keyboard.Modifiers != ModifierKeys.Control);
+					Bar.View.Selection.SelectionChanged += Bar.Update;
 				}
-				catch (OperationCanceledException) {
-					// ignore
+				else {
+					Node.GetIdentifierToken().GetLocation().GoToSource();
 				}
 			}
 
