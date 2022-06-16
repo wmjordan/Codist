@@ -85,8 +85,7 @@ namespace Codist
 			while (stack.Count > 0) {
 				cancellationToken.ThrowIfCancellationRequested();
 				var namespaceOrTypeSymbol = stack.Pop();
-				var namespaceSymbol2 = namespaceOrTypeSymbol as INamespaceSymbol;
-				if (namespaceSymbol2 != null) {
+				if (namespaceOrTypeSymbol is INamespaceSymbol namespaceSymbol2) {
 					foreach (var ns in namespaceSymbol2.GetMembers()) {
 						stack.Push(ns);
 					}
