@@ -68,7 +68,8 @@ namespace Codist
 					?? (node is AccessorDeclarationSyntax
 						? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 						: null)
-					?? (node is TypeParameterSyntax || node is ParameterSyntax || node.RawKind == (int)RecordDeclaration || node.RawKind == (int)RecordStructDesclaration ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null);
+					?? (node is TypeParameterSyntax || node is ParameterSyntax || node.RawKind == (int)RecordDeclaration || node.RawKind == (int)RecordStructDesclaration ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null)
+					?? (node.Parent.IsKind(SyntaxKind.ElementAccessExpression) ? semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node.Parent, cancellationToken).Symbol : null);
 		}
 
 		public static ISymbol GetSymbolOrFirstCandidate(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
@@ -1178,7 +1179,7 @@ namespace Codist
 		/// </summary>
 		static partial class NonPublicOrFutureAccessors
 		{
-			public static readonly Func<ITypeSymbol, bool> GetNamedTypeIsReadOnly = 
+			public static readonly Func<ITypeSymbol, bool> GetNamedTypeIsReadOnly =
 				typeof(ITypeSymbol).GetProperty("IsReadOnly") != null
 				? ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsReadOnly")
 				: ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsReadOnly", typeof(CSharpCompilation).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.NamedTypeSymbol", false));
