@@ -1956,4 +1956,16 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="OT_CtrlSuppressQuickInfoTip" xml:space="preserve">
     <value>按下 Ctrl 键时，显示原生的代码提示</value>
   </data>
+  <data name="T_Protected" xml:space="preserve">
+    <value>保护</value>
+  </data>
+  <data name="T_Public" xml:space="preserve">
+    <value>公共</value>
+  </data>
+  <data name="T_Internal" xml:space="preserve">
+    <value>内部</value>
+  </data>
+  <data name="T_Private" xml:space="preserve">
+    <value>私有</value>
+  </data>
 </root>

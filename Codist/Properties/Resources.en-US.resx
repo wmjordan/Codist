@@ -1973,4 +1973,16 @@ Right click: Wrap text menu...</value>
   <data name="OT_CtrlSuppressQuickInfoTip" xml:space="preserve">
     <value>Displays original Quick Info when Ctrl key is pressed</value>
   </data>
+  <data name="T_Protected" xml:space="preserve">
+    <value>Protected</value>
+  </data>
+  <data name="T_Public" xml:space="preserve">
+    <value>Public</value>
+  </data>
+  <data name="T_Internal" xml:space="preserve">
+    <value>Internal</value>
+  </data>
+  <data name="T_Private" xml:space="preserve">
+    <value>Private</value>
+  </data>
 </root>

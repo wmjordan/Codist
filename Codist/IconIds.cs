@@ -59,6 +59,8 @@ namespace Codist
 		public const int Attribute = KnownImageIds.FormPostBodyParameterNode;
 		public const int Return = KnownImageIds.Return;
 		public const int PublicSymbols = KnownImageIds.ModulePublic;
+		public const int ProtectedSymbols = KnownImageIds.ModuleProtected;
+		public const int InternalSymbols = KnownImageIds.ModuleInternal;
 		public const int PrivateSymbols = KnownImageIds.ModulePrivate;
 		public const int OverrideEvent = KnownImageIds.ModifyEvent;
 		public const int OverrideProperty = KnownImageIds.ModifyProperty;
@@ -68,7 +70,7 @@ namespace Codist
 		#endregion
 		#region user interface icons
 		public const int Filter = KnownImageIds.Filter;
-		public const int ClearFilter = KnownImageIds.StopFilter;
+		public const int ClearFilter = KnownImageIds.DeleteFilter;
 		public const int Search = KnownImageIds.SearchContract;
 		public const int Project = KnownImageIds.CSProjectNode;
 		public const int File = KnownImageIds.CSSourceFile;

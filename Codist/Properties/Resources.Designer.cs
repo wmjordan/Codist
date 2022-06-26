@@ -4664,6 +4664,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Internal.
+        /// </summary>
+        internal static string T_Internal {
+            get {
+                return ResourceManager.GetString("T_Internal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Internal and private.
         /// </summary>
         internal static string T_InternalPrivate {
@@ -5087,6 +5096,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Private.
+        /// </summary>
+        internal static string T_Private {
+            get {
+                return ResourceManager.GetString("T_Private", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to  producers.
         /// </summary>
         internal static string T_Producers {
@@ -5101,6 +5119,24 @@ namespace Codist.Properties {
         internal static string T_Project {
             get {
                 return ResourceManager.GetString("T_Project", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Protected.
+        /// </summary>
+        internal static string T_Protected {
+            get {
+                return ResourceManager.GetString("T_Protected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Public.
+        /// </summary>
+        internal static string T_Public {
+            get {
+                return ResourceManager.GetString("T_Public", resourceCulture);
             }
         }
         

@@ -110,7 +110,7 @@ namespace Codist.Controls
 			Margin = WpfHelper.MenuItemMargin;
 			Children.Add(ThemeHelper.GetImage(IconIds.Filter).WrapMargin(WpfHelper.GlyphMargin));
 			Children.Add(_FilterBox = new ThemedTextBox {
-				MinWidth = 150,
+				MinWidth = 120,
 				Margin = WpfHelper.GlyphMargin,
 				ToolTip = new ThemedToolTip(R.T_ResultFilter, R.T_ResultFilterTip)
 			});
@@ -415,7 +415,7 @@ namespace Codist.Controls
 
 		sealed class AccessibilityFilterButtonGroup : FilterButtonGroup
 		{
-			readonly ThemedToggleButton _PublicFilter, _PrivateFilter;
+			readonly ThemedToggleButton _PublicFilter, _ProtectedFilter, _InternalFilter, _PrivateFilter;
 			readonly Border _Separator;
 			MemberFilterTypes _Filters;
 			bool _uiLock;
@@ -423,12 +423,14 @@ namespace Codist.Controls
 			public override int Filters => (int)_Filters;
 
 			public AccessibilityFilterButtonGroup() {
-				_PublicFilter = CreateButton(IconIds.PublicSymbols, R.T_PublicProtected);
-				_PrivateFilter = CreateButton(IconIds.PrivateSymbols, R.T_InternalPrivate);
+				_PublicFilter = CreateButton(IconIds.PublicSymbols, R.T_Public);
+				_ProtectedFilter = CreateButton(IconIds.ProtectedSymbols, R.T_Protected);
+				_InternalFilter = CreateButton(IconIds.InternalSymbols, R.T_Internal);
+				_PrivateFilter = CreateButton(IconIds.PrivateSymbols, R.T_Private);
 				_Filters = MemberFilterTypes.AllAccessibilities;
 				Content = new StackPanel {
 					Children = {
-						_PublicFilter, _PrivateFilter,
+						_PublicFilter, _ProtectedFilter, _InternalFilter, _PrivateFilter,
 						(_Separator = CreateSeparator())
 					},
 					Orientation = Orientation.Horizontal
@@ -441,10 +443,16 @@ namespace Codist.Controls
 				}
 				var f = MemberFilterTypes.None;
 				if (_PublicFilter.IsChecked == true) {
-					f |= MemberFilterTypes.Public | MemberFilterTypes.Protected;
+					f |= MemberFilterTypes.Public;
+				}
+				if (_ProtectedFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Protected;
+				}
+				if (_InternalFilter.IsChecked == true) {
+					f |= MemberFilterTypes.Internal;
 				}
 				if (_PrivateFilter.IsChecked == true) {
-					f |= MemberFilterTypes.Internal | MemberFilterTypes.Private;
+					f |= MemberFilterTypes.Private;
 				}
 				if (f.HasAnyFlag(MemberFilterTypes.AllAccessibilities) == false) {
 					f |= MemberFilterTypes.AllAccessibilities;
@@ -456,7 +464,7 @@ namespace Codist.Controls
 			}
 
 			public override void UpdateNumbers(IEnumerable<SymbolItem> symbols) {
-				int pu = 0, pi = 0;
+				int pu = 0, pro = 0, i = 0, p = 0;
 				foreach (var item in symbols) {
 					var symbol = item.Symbol;
 					if (symbol == null || symbol.IsImplicitlyDeclared) {
@@ -464,23 +472,28 @@ namespace Codist.Controls
 					}
 					switch (symbol.DeclaredAccessibility) {
 						case Accessibility.Private:
+							++p; break;
 						case Accessibility.Internal:
+							++i; break;
 						case Accessibility.ProtectedAndInternal:
 						case Accessibility.ProtectedOrInternal:
-							++pi; break;
+							++pro; ++i; break;
 						case Accessibility.Public:
-						case Accessibility.Protected:
 							++pu; break;
+						case Accessibility.Protected:
+							++pro; break;
 					}
 				}
 				ToggleFilterButton(_PublicFilter, pu);
-				ToggleFilterButton(_PrivateFilter, pi);
-				_Separator.Visibility = (pu != 0 || pi != 0) ? Visibility.Visible : Visibility.Collapsed;
+				ToggleFilterButton(_ProtectedFilter, pro);
+				ToggleFilterButton(_InternalFilter, i);
+				ToggleFilterButton(_PrivateFilter, p);
+				_Separator.Visibility = (pu != 0 || pro != 0 || i != 0 || p != 0) ? Visibility.Visible : Visibility.Collapsed;
 			}
 
 			public override void ClearFilter() {
 				_uiLock = true;
-				_PublicFilter.IsChecked = _PrivateFilter.IsChecked = false;
+				_PublicFilter.IsChecked = _ProtectedFilter.IsChecked = _InternalFilter.IsChecked = _PrivateFilter.IsChecked = false;
 				_uiLock = false;
 				_Filters |= MemberFilterTypes.AllAccessibilities;
 			}
