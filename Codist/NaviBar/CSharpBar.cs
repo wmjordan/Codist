@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using AppHelpers;
@@ -522,7 +523,7 @@ namespace Codist.NaviBar
 									(_FinderBox = new MemberFinderBox() { MinWidth = 150, ToolTip = new ThemedToolTip(R.CMD_SearchDeclaration, R.T_SearchMemberTip) }),
 									(_ScopeBox = new SearchScopeBox {
 										Contents = {
-											new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter).ClearBorder()
+											new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter).SetValue(ToolTipService.SetPlacement, PlacementMode.Left).ClearBorder()
 										}
 									}),
 								}

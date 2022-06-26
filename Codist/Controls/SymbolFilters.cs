@@ -10,6 +10,7 @@ using AppHelpers;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.CodeAnalysis;
 using R = Codist.Properties.Resources;
+using System.Windows.Controls.Primitives;
 
 namespace Codist.Controls
 {
@@ -134,7 +135,7 @@ namespace Codist.Controls
 					break;
 			}
 			_FilterContainer.Add(_FilterGroups)
-				.Add(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilters).ClearBorder());
+				.Add(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilters).SetValue(ToolTipService.SetPlacement, PlacementMode.Left).ClearBorder());
 			_Filter = filter;
 			foreach (var item in _FilterGroups) {
 				item.FilterChanged += FilterBox_Changed;

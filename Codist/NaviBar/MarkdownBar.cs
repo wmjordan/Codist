@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using AppHelpers;
 using Codist.Controls;
@@ -219,7 +220,7 @@ namespace Codist.NaviBar
 									Margin = WpfHelper.SmallHorizontalMargin,
 									Child = new StackPanel {
 										Children = {
-											new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter)
+											new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilter).SetValue(ToolTipService.SetPlacement, PlacementMode.Left)
 										},
 										Orientation = Orientation.Horizontal
 									}

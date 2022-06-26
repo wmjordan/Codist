@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
@@ -81,7 +82,7 @@ namespace Codist.Controls
 		}
 	}
 
-	public sealed class ThemedToggleButton : System.Windows.Controls.Primitives.ToggleButton
+	public sealed class ThemedToggleButton : ToggleButton
 	{
 		TextBlock _Text;
 
@@ -92,6 +93,7 @@ namespace Codist.Controls
 				}
 			};
 			ToolTip = toolTip;
+			ToolTipService.SetPlacement(this, PlacementMode.Left);
 			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 
