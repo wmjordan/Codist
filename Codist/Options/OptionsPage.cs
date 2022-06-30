@@ -527,7 +527,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly OptionBox<NaviBarOptions> _SyntaxDetail, _SymbolToolTip, _RegionOnBar, _StripRegionNonLetter, _RangeHighlight,
-				_ParameterList, _ParameterListShowParamName, _FieldValue, /*_AutoPropertyAnnotation, */_MemberType, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode;
+				_ParameterList, _ParameterListShowParamName, _FieldValue, _AutoPropertyAsField, _MemberType, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode;
 			readonly OptionBox<NaviBarOptions>[] _Options;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -546,6 +546,8 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_TrimNonLetterRegionTip),
 					_RangeHighlight = o.CreateOptionBox(NaviBarOptions.RangeHighlight, UpdateConfig, R.OT_HighlightSyntaxRange)
 						.SetLazyToolTip(() => R.OT_HighlightSyntaxRangeTip),
+					_AutoPropertyAsField = o.CreateOptionBox(NaviBarOptions.AutoPropertiesAsFields, UpdateConfig, R.OT_FilterAutoPropertiesAsFields),
+					new DescriptionBox(R.OT_FilterAutoPropertiesAsFieldsNote),
 
 					new TitleBox(R.OT_CSharpNaviBarMenu),
 					_ParameterList = o.CreateOptionBox(NaviBarOptions.ParameterList, UpdateConfig, R.OT_MethodParameterList)
@@ -554,8 +556,6 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_ShowMethodParameterNameTip),
 					_FieldValue = o.CreateOptionBox(NaviBarOptions.FieldValue, UpdateConfig, R.OT_ValueOfFields)
 						.SetLazyToolTip(() => R.OT_ValueOfFieldsTip),
-					//_AutoPropertyAnnotation = o.CreateOptionBox(NaviBarOptions.AutoPropertyAnnotation, UpdateConfig, R.OT_PropertyAccessors)
-					//	.SetLazyToolTip(() => R.OT_PropertyAccessorsTip),
 					_MemberType = o.CreateOptionBox(NaviBarOptions.MemberType, UpdateConfig, R.OT_MemberTypes).SetLazyToolTip(() => R.OT_MemberTypesTip),
 					_PartialClassMember = o.CreateOptionBox(NaviBarOptions.PartialClassMember, UpdateConfig, R.OT_IncludePartialTypeMembers)
 						.SetLazyToolTip(() => R.OT_IncludePartialTypeMembersTip),
@@ -575,13 +575,12 @@ namespace Codist.Options
 					);
 
 				_Options = new[] { _SyntaxDetail, _SymbolToolTip, _RegionOnBar, _StripRegionNonLetter, _RangeHighlight,
-				_ParameterList, _ParameterListShowParamName, _FieldValue, /*_AutoPropertyAnnotation, */_MemberType, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode };
-				foreach (var item in new[] { _StripRegionNonLetter, _ParameterListShowParamName, /*_AutoPropertyAnnotation, */_RegionInMember }) {
+				_ParameterList, _ParameterListShowParamName, _FieldValue, _AutoPropertyAsField, _MemberType, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode };
+				foreach (var item in new[] { _StripRegionNonLetter, _ParameterListShowParamName, _RegionInMember }) {
 					item.WrapMargin(SubOptionMargin);
 				}
 				_RegionOnBar.BindDependentOptionControls(_StripRegionNonLetter);
 				_ParameterList.BindDependentOptionControls(_ParameterListShowParamName);
-				//_FieldValue.BindDependentOptionControls(_AutoPropertyAnnotation);
 				_Region.BindDependentOptionControls(_RegionInMember);
 			}
 

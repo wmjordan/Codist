@@ -1095,7 +1095,7 @@ namespace Codist.NaviBar
 						await CreateMenuForTypeSymbolNodeAsync(ct);
 						await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
 
-						_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.FindMembers().Select(s => new SymbolItem(s, null, false)) ?? Enumerable.Empty<SymbolItem>());
+						_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.GetMembers().Select(s => new SymbolItem(s, null, false)) ?? Enumerable.Empty<SymbolItem>());
 						var footer = (TextBlock)_Menu.Footer;
 						if (_PartialCount > 1) {
 							footer.Append(ThemeHelper.GetImage(IconIds.PartialDocumentCount))

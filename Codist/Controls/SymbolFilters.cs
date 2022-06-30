@@ -128,7 +128,7 @@ namespace Codist.Controls
 					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new InstanceFilterButtonGroup(), new SymbolUsageFilterButtonGroup(), new MemberFilterButtonGroup() };
 					break;
 				case SymbolFilterKind.Node:
-					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new MemberFilterButtonGroup() };
+					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new MemberFilterButtonGroup(Config.Instance.NaviBarOptions) };
 					break;
 				default:
 					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new InstanceFilterButtonGroup(), new MemberFilterButtonGroup() };
@@ -247,23 +247,27 @@ namespace Codist.Controls
 				case KnownImageIds.FieldPublic:
 				case KnownImageIds.ConstantPublic:
 				case KnownImageIds.PropertyPublic:
+					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.Field);
 				case IconIds.PublicPropertyMethod:
-					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.FieldAndProperty);
+					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.Property);
 				case KnownImageIds.FieldProtected:
 				case KnownImageIds.ConstantProtected:
 				case KnownImageIds.PropertyProtected:
+					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.Field);
 				case IconIds.ProtectedPropertyMethod:
-					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.FieldAndProperty);
+					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.Property);
 				case KnownImageIds.FieldInternal:
 				case KnownImageIds.ConstantInternal:
 				case KnownImageIds.PropertyInternal:
+					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.Field);
 				case IconIds.InternalPropertyMethod:
-					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.FieldAndProperty);
+					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.Property);
 				case KnownImageIds.FieldPrivate:
 				case KnownImageIds.ConstantPrivate:
 				case KnownImageIds.PropertyPrivate:
+					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.Field);
 				case IconIds.PrivatePropertyMethod:
-					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.FieldAndProperty);
+					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.Property);
 				case KnownImageIds.EventPublic:
 					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.Event);
 				case KnownImageIds.EventProtected:
@@ -606,14 +610,16 @@ namespace Codist.Controls
 		{
 			readonly ThemedToggleButton _FieldFilter, _PropertyFilter, _EventFilter, _MethodFilter, _TypeFilter;
 			readonly Border _Separator;
+			readonly bool _AutoPropertyAsField;
 			MemberFilterTypes _Filters;
 			bool _uiLock;
 
 			public override int Filters => (int)_Filters;
 
-			public MemberFilterButtonGroup() {
-				_FieldFilter = CreateButton(IconIds.Field, R.T_FieldsProperties);
-				_MethodFilter = CreateButton(IconIds.Method, R.T_Methods);
+			public MemberFilterButtonGroup(NaviBarOptions options = NaviBarOptions.None) {
+				bool autoPropertyAsField = _AutoPropertyAsField = options.MatchFlags(NaviBarOptions.AutoPropertiesAsFields);
+				_FieldFilter = CreateButton(IconIds.Field, autoPropertyAsField ? R.T_FieldsAndAutoProperties : R.T_FieldsProperties);
+				_MethodFilter = CreateButton(IconIds.Method, autoPropertyAsField ? R.T_AccessorsAndMethods : R.T_Methods);
 				_EventFilter = CreateButton(IconIds.Event, R.T_Events);
 				_TypeFilter = CreateButton(IconIds.TypeAndDelegate, R.T_TypesDelegates);
 
@@ -633,7 +639,7 @@ namespace Codist.Controls
 				}
 				var f = MemberFilterTypes.None;
 				if (_FieldFilter.IsChecked == true) {
-					f |= _PropertyFilter == null ? MemberFilterTypes.FieldAndProperty : MemberFilterTypes.Field;
+					f |= _AutoPropertyAsField ? MemberFilterTypes.Field : MemberFilterTypes.FieldOrProperty;
 				}
 				if (_PropertyFilter?.IsChecked == true) {
 					f |= MemberFilterTypes.Property;
@@ -642,7 +648,7 @@ namespace Codist.Controls
 					f |= MemberFilterTypes.Event;
 				}
 				if (_MethodFilter.IsChecked == true) {
-					f |= MemberFilterTypes.Method;
+					f |= _AutoPropertyAsField ? MemberFilterTypes.Property | MemberFilterTypes.Method : MemberFilterTypes.Method;
 				}
 				if (_TypeFilter.IsChecked == true) {
 					f |= MemberFilterTypes.TypeAndNamespace;
@@ -658,8 +664,24 @@ namespace Codist.Controls
 
 			public override void UpdateNumbers(IEnumerable<SymbolItem> symbols) {
 				int f = 0, m = 0, e = 0, t = 0;
-				foreach (var item in symbols) {
-					var symbol = item.Symbol;
+				HashSet<ISymbol> backingFields = null;
+				IEnumerable<ISymbol> members;
+				if (_AutoPropertyAsField) {
+					members = symbols.Select(s => s.Symbol).ToArray();
+					backingFields = new HashSet<ISymbol>();
+					foreach (var item in members) {
+						if (item != null
+							&& item.IsImplicitlyDeclared
+							&& item.Kind == SymbolKind.Field
+							&& ((IFieldSymbol)item).AssociatedSymbol != null) {
+							backingFields.Add(((IFieldSymbol)item).AssociatedSymbol);
+						}
+					}
+				}
+				else {
+					members = symbols.Select(s => s.Symbol);
+				}
+				foreach (var symbol in members) {
 					if (symbol == null || symbol.IsImplicitlyDeclared) {
 						continue;
 					}
@@ -667,8 +689,17 @@ namespace Codist.Controls
 						case SymbolKind.Event:
 							++e; break;
 						case SymbolKind.Field:
-						case SymbolKind.Property:
 							++f; break;
+						case SymbolKind.Property:
+							if (_AutoPropertyAsField
+								&& symbol.IsAbstract == false
+								&& backingFields.Contains(symbol) == false) {
+								++m;
+							}
+							else {
+								++f;
+							}
+							break;
 						case SymbolKind.Method:
 							var sm = symbol as IMethodSymbol;
 							if (sm.MethodKind == MethodKind.PropertyGet
@@ -963,11 +994,11 @@ namespace Codist.Controls
 		None,
 		Field = 1,
 		Property = 1 << 1,
-		FieldAndProperty = Field | Property,
+		FieldOrProperty = Field | Property,
 		Event = 1 << 2,
 		Method = 1 << 3,
 		TypeAndNamespace = 1 << 4,
-		AllMembers = FieldAndProperty | Event | Method | TypeAndNamespace,
+		AllMembers = FieldOrProperty | Event | Method | TypeAndNamespace,
 		Public = 1 << 5,
 		Protected = 1 << 6,
 		Internal = 1 << 7,

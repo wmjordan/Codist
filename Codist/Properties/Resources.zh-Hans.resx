@@ -1968,4 +1968,28 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_Private" xml:space="preserve">
     <value>私有</value>
   </data>
+  <data name="OT_FilterAutoPropertiesAsFields" xml:space="preserve">
+    <value>将自动属性视为字段一起筛选，而访问器属性则视为方法筛选</value>
+  </data>
+  <data name="OT_FilterAutoPropertiesAsFieldsNote" xml:space="preserve">
+    <value>在类成员下拉菜单的筛选器中，将自动属性视为字段，而访问器属性则视为方法来筛选</value>
+  </data>
+  <data name="OT_FilterProperties" xml:space="preserve">
+    <value>单独筛选属性</value>
+  </data>
+  <data name="OT_FitlerFieldsAndProperties" xml:space="preserve">
+    <value>将属性和字段一起筛选</value>
+  </data>
+  <data name="T_AccessorsAndMethods" xml:space="preserve">
+    <value>访问器属性和方法</value>
+  </data>
+  <data name="T_Fields" xml:space="preserve">
+    <value>字段</value>
+  </data>
+  <data name="T_FieldsAndAutoProperties" xml:space="preserve">
+    <value>字段和自动属性</value>
+  </data>
+  <data name="T_Properties" xml:space="preserve">
+    <value>属性</value>
+  </data>
 </root>

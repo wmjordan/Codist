@@ -844,13 +844,13 @@ namespace Codist
 		ParameterList = 1 << 10,
 		ParameterListShowParamName = 1 << 11,
 		FieldValue = 1 << 12,
-		AutoPropertyAnnotation = 1 << 13,
+		AutoPropertiesAsFields = 1 << 13,
 		PartialClassMember = 1 << 14,
 		Region = 1 << 15,
 		RegionInMember = 1 << 16,
 		BaseClassMember = 1 << 17,
 		MemberType = 1 << 18,
-		Default = RangeHighlight | RegionOnBar | ParameterList | FieldValue | AutoPropertyAnnotation | PartialClassMember | Region
+		Default = RangeHighlight | RegionOnBar | ParameterList | FieldValue | AutoPropertiesAsFields | PartialClassMember | Region
 	}
 
 	[Flags]

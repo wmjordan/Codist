@@ -1983,4 +1983,28 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="T_Private" xml:space="preserve">
     <value>Private</value>
   </data>
+  <data name="OT_FilterAutoPropertiesAsFields" xml:space="preserve">
+    <value>Filter auto properties with fields, accessor properties with methods</value>
+  </data>
+  <data name="OT_FilterAutoPropertiesAsFieldsNote" xml:space="preserve">
+    <value>In the type member drop-down list filter, treat auto properties as fields and accessor properties as methods</value>
+  </data>
+  <data name="OT_FilterProperties" xml:space="preserve">
+    <value>Filter all properties alone</value>
+  </data>
+  <data name="OT_FitlerFieldsAndProperties" xml:space="preserve">
+    <value>Filter all properties with fields</value>
+  </data>
+  <data name="T_AccessorsAndMethods" xml:space="preserve">
+    <value>Accessors and methods</value>
+  </data>
+  <data name="T_Fields" xml:space="preserve">
+    <value>Fields</value>
+  </data>
+  <data name="T_FieldsAndAutoProperties" xml:space="preserve">
+    <value>Fields and auto properties</value>
+  </data>
+  <data name="T_Properties" xml:space="preserve">
+    <value>Properties</value>
+  </data>
 </root>

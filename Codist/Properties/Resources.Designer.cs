@@ -2166,6 +2166,42 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Filter auto properties with fields, accessor properties with methods.
+        /// </summary>
+        internal static string OT_FilterAutoPropertiesAsFields {
+            get {
+                return ResourceManager.GetString("OT_FilterAutoPropertiesAsFields", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In the type member drop-down list filter, treat auto properties as fields and accessor properties as methods.
+        /// </summary>
+        internal static string OT_FilterAutoPropertiesAsFieldsNote {
+            get {
+                return ResourceManager.GetString("OT_FilterAutoPropertiesAsFieldsNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter all properties alone.
+        /// </summary>
+        internal static string OT_FilterProperties {
+            get {
+                return ResourceManager.GetString("OT_FilterProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter all properties with fields.
+        /// </summary>
+        internal static string OT_FitlerFieldsAndProperties {
+            get {
+                return ResourceManager.GetString("OT_FitlerFieldsAndProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Force Grayscale Text Rendering.
         /// </summary>
         internal static string OT_ForceGrayscaleTextRendering {
@@ -3854,6 +3890,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Accessors and methods.
+        /// </summary>
+        internal static string T_AccessorsAndMethods {
+            get {
+                return ResourceManager.GetString("T_AccessorsAndMethods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All languages.
         /// </summary>
         internal static string T_AllLanguages {
@@ -4547,6 +4592,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Fields.
+        /// </summary>
+        internal static string T_Fields {
+            get {
+                return ResourceManager.GetString("T_Fields", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fields and auto properties.
+        /// </summary>
+        internal static string T_FieldsAndAutoProperties {
+            get {
+                return ResourceManager.GetString("T_FieldsAndAutoProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Fields and properties.
         /// </summary>
         internal static string T_FieldsProperties {
@@ -5119,6 +5182,15 @@ namespace Codist.Properties {
         internal static string T_Project {
             get {
                 return ResourceManager.GetString("T_Project", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Properties.
+        /// </summary>
+        internal static string T_Properties {
+            get {
+                return ResourceManager.GetString("T_Properties", resourceCulture);
             }
         }
         
