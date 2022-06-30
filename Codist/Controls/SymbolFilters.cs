@@ -247,18 +247,22 @@ namespace Codist.Controls
 				case KnownImageIds.FieldPublic:
 				case KnownImageIds.ConstantPublic:
 				case KnownImageIds.PropertyPublic:
+				case IconIds.PublicPropertyMethod:
 					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.FieldAndProperty);
 				case KnownImageIds.FieldProtected:
 				case KnownImageIds.ConstantProtected:
 				case KnownImageIds.PropertyProtected:
+				case IconIds.ProtectedPropertyMethod:
 					return filterTypes.MatchFlags(MemberFilterTypes.Protected | MemberFilterTypes.FieldAndProperty);
 				case KnownImageIds.FieldInternal:
 				case KnownImageIds.ConstantInternal:
 				case KnownImageIds.PropertyInternal:
+				case IconIds.InternalPropertyMethod:
 					return filterTypes.MatchFlags(MemberFilterTypes.Internal | MemberFilterTypes.FieldAndProperty);
 				case KnownImageIds.FieldPrivate:
 				case KnownImageIds.ConstantPrivate:
 				case KnownImageIds.PropertyPrivate:
+				case IconIds.PrivatePropertyMethod:
 					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.FieldAndProperty);
 				case KnownImageIds.EventPublic:
 					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.Event);

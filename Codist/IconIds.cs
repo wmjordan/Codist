@@ -62,6 +62,10 @@ namespace Codist
 		public const int ProtectedSymbols = KnownImageIds.ModuleProtected;
 		public const int InternalSymbols = KnownImageIds.ModuleInternal;
 		public const int PrivateSymbols = KnownImageIds.ModulePrivate;
+		public const int PublicPropertyMethod = KnownImageIds.ObjectPublic;
+		public const int ProtectedPropertyMethod = KnownImageIds.ObjectProtected;
+		public const int InternalPropertyMethod = KnownImageIds.ObjectInternal;
+		public const int PrivatePropertyMethod = KnownImageIds.ObjectPrivate;
 		public const int OverrideEvent = KnownImageIds.ModifyEvent;
 		public const int OverrideProperty = KnownImageIds.ModifyProperty;
 		public const int OverrideMethod = KnownImageIds.ModifyMethod;

@@ -333,7 +333,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration: return GetInterfaceIcon((InterfaceDeclarationSyntax)node);
 				case SyntaxKind.MethodDeclaration: return GetMethodIcon((MethodDeclarationSyntax)node);
 				case SyntaxKind.ConstructorDeclaration: return GetConstructorIcon((ConstructorDeclarationSyntax)node);
-				case SyntaxKind.PropertyDeclaration:
+				case SyntaxKind.PropertyDeclaration: return GetPropertyIconExt((BasePropertyDeclarationSyntax)node);
 				case SyntaxKind.IndexerDeclaration: return GetPropertyIcon((BasePropertyDeclarationSyntax)node);
 				case SyntaxKind.OperatorDeclaration: return GetOperatorIcon((OperatorDeclarationSyntax)node);
 				case SyntaxKind.ConversionOperatorDeclaration: return IconIds.ConvertOperator;
@@ -506,12 +506,27 @@ namespace Codist
 				}
 				return IconIds.PrivateConstructor;
 			}
+			int GetPropertyIconExt(BasePropertyDeclarationSyntax syntax) {
+				bool autoProperty = syntax.Modifiers.Any(i => i.IsKind(SyntaxKind.AbstractKeyword))
+					|| syntax.AccessorList?.Accessors.All(i => i.Body == null && i.ExpressionBody == null) == true;
+				if (autoProperty) {
+					return GetPropertyIcon(syntax);
+				}
+				foreach (var modifier in syntax.Modifiers) {
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return IconIds.PublicPropertyMethod;
+						case SyntaxKind.InternalKeyword: return IconIds.InternalPropertyMethod;
+						case SyntaxKind.ProtectedKeyword: return IconIds.ProtectedPropertyMethod;
+					}
+				}
+				return IconIds.PrivatePropertyMethod;
+			}
 			int GetPropertyIcon(BasePropertyDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "public": return KnownImageIds.PropertyPublic;
-						case "internal": return KnownImageIds.PropertyInternal;
-						case "protected": return KnownImageIds.PropertyProtected;
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return KnownImageIds.PropertyPublic;
+						case SyntaxKind.InternalKeyword: return KnownImageIds.PropertyInternal;
+						case SyntaxKind.ProtectedKeyword: return KnownImageIds.PropertyProtected;
 					}
 				}
 				return KnownImageIds.PropertyPrivate;
