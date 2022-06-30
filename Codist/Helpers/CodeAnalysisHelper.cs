@@ -386,12 +386,12 @@ namespace Codist
 			int GetClassIcon(BaseTypeDeclarationSyntax syntax) {
 				bool isPartial = false;
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "public": return KnownImageIds.ClassPublic;
-						case "protected": return KnownImageIds.ClassProtected;
-						case "internal": return KnownImageIds.ClassInternal;
-						case "private": return KnownImageIds.ClassPrivate;
-						case "partial": isPartial = true; break;
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return KnownImageIds.ClassPublic;
+						case SyntaxKind.ProtectedKeyword: return KnownImageIds.ClassProtected;
+						case SyntaxKind.InternalKeyword: return KnownImageIds.ClassInternal;
+						case SyntaxKind.PrivateKeyword: return KnownImageIds.ClassPrivate;
+						case SyntaxKind.PartialKeyword: isPartial = true; break;
 					}
 				}
 				return isPartial ? IconIds.PartialClass : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.ClassInternal : KnownImageIds.ClassPrivate;
@@ -399,22 +399,22 @@ namespace Codist
 			int GetStructIcon(BaseTypeDeclarationSyntax syntax) {
 				bool isPartial = false;
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "public": return KnownImageIds.StructurePublic;
-						case "protected": return KnownImageIds.StructureProtected;
-						case "internal": return KnownImageIds.StructureInternal;
-						case "private": return KnownImageIds.StructurePrivate;
-						case "partial": isPartial = true; break;
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return KnownImageIds.StructurePublic;
+						case SyntaxKind.ProtectedKeyword: return KnownImageIds.StructureProtected;
+						case SyntaxKind.InternalKeyword: return KnownImageIds.StructureInternal;
+						case SyntaxKind.PrivateKeyword: return KnownImageIds.StructurePrivate;
+						case SyntaxKind.PartialKeyword: isPartial = true; break;
 					}
 				}
 				return isPartial ? IconIds.PartialStruct : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.StructureInternal : KnownImageIds.StructurePrivate;
 			}
 			int GetEnumIcon(EnumDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "public": return KnownImageIds.EnumerationPublic;
-						case "internal": return KnownImageIds.EnumerationInternal;
-						case "private": return KnownImageIds.EnumerationPrivate;
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return KnownImageIds.EnumerationPublic;
+						case SyntaxKind.InternalKeyword: return KnownImageIds.EnumerationInternal;
+						case SyntaxKind.PrivateKeyword: return KnownImageIds.EnumerationPrivate;
 					}
 				}
 				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.EnumerationInternal : KnownImageIds.EnumerationPrivate;
@@ -422,43 +422,43 @@ namespace Codist
 			int GetInterfaceIcon(InterfaceDeclarationSyntax syntax) {
 				bool isPartial = false;
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "public": return KnownImageIds.InterfacePublic;
-						case "internal": return KnownImageIds.InterfaceInternal;
-						case "private": return KnownImageIds.InterfacePrivate;
-						case "partial": isPartial = true; break;
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return KnownImageIds.InterfacePublic;
+						case SyntaxKind.InternalKeyword: return KnownImageIds.InterfaceInternal;
+						case SyntaxKind.PrivateKeyword: return KnownImageIds.InterfacePrivate;
+						case SyntaxKind.PartialKeyword: isPartial = true; break;
 					}
 				}
 				return isPartial ? IconIds.PartialInterface : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.InterfaceInternal : KnownImageIds.InterfacePrivate;
 			}
 			int GetEventIcon(BasePropertyDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "public": return KnownImageIds.EventPublic;
-						case "internal": return KnownImageIds.EventInternal;
-						case "protected": return KnownImageIds.EventProtected;
-						case "private": return KnownImageIds.EventPrivate;
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return KnownImageIds.EventPublic;
+						case SyntaxKind.InternalKeyword: return KnownImageIds.EventInternal;
+						case SyntaxKind.ProtectedKeyword: return KnownImageIds.EventProtected;
+						case SyntaxKind.PrivateKeyword: return KnownImageIds.EventPrivate;
 					}
 				}
 				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.EventInternal : KnownImageIds.EventPrivate;
 			}
 			int GetEventFieldIcon(EventFieldDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "public": return KnownImageIds.EventPublic;
-						case "internal": return KnownImageIds.EventInternal;
-						case "protected": return KnownImageIds.EventProtected;
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return KnownImageIds.EventPublic;
+						case SyntaxKind.InternalKeyword: return KnownImageIds.EventInternal;
+						case SyntaxKind.ProtectedKeyword: return KnownImageIds.EventProtected;
 					}
 				}
 				return KnownImageIds.EventPrivate;
 			}
 			int GetDelegateIcon(DelegateDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "public": return KnownImageIds.DelegatePublic;
-						case "internal": return KnownImageIds.DelegateInternal;
-						case "protected": return KnownImageIds.DelegateProtected;
-						case "private": return KnownImageIds.DelegatePrivate;
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return KnownImageIds.DelegatePublic;
+						case SyntaxKind.InternalKeyword: return KnownImageIds.DelegateInternal;
+						case SyntaxKind.ProtectedKeyword: return KnownImageIds.DelegateProtected;
+						case SyntaxKind.PrivateKeyword: return KnownImageIds.DelegatePrivate;
 					}
 				}
 				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.DelegateInternal : KnownImageIds.DelegatePrivate;
@@ -467,15 +467,15 @@ namespace Codist
 				bool isConst = false;
 				var accessibility = Accessibility.Private;
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "const": isConst = true; break;
-						case "public": accessibility = Accessibility.Public; break;
-						case "internal":
+					switch (modifier.Kind()) {
+						case SyntaxKind.ConstKeyword: isConst = true; break;
+						case SyntaxKind.PublicKeyword: accessibility = Accessibility.Public; break;
+						case SyntaxKind.InternalKeyword:
 							if (accessibility != Accessibility.Protected) {
 								accessibility = Accessibility.Internal;
 							}
 							break;
-						case "protected": accessibility = Accessibility.Protected; break;
+						case SyntaxKind.ProtectedKeyword: accessibility = Accessibility.Protected; break;
 					}
 				}
 				switch (accessibility) {
@@ -487,21 +487,21 @@ namespace Codist
 			}
 			int GetMethodIcon(MethodDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "public": return KnownImageIds.MethodPublic;
-						case "internal": return KnownImageIds.MethodInternal;
-						case "protected": return KnownImageIds.MethodProtected;
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return KnownImageIds.MethodPublic;
+						case SyntaxKind.InternalKeyword: return KnownImageIds.MethodInternal;
+						case SyntaxKind.ProtectedKeyword: return KnownImageIds.MethodProtected;
 					}
 				}
 				return KnownImageIds.MethodPrivate;
 			}
 			int GetConstructorIcon(ConstructorDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "public": return IconIds.PublicConstructor;
-						case "internal": return IconIds.InternalConstructor;
-						case "protected": return IconIds.ProtectedConstructor;
-						case "private": return IconIds.PrivateConstructor;
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return IconIds.PublicConstructor;
+						case SyntaxKind.InternalKeyword: return IconIds.InternalConstructor;
+						case SyntaxKind.ProtectedKeyword: return IconIds.ProtectedConstructor;
+						case SyntaxKind.PrivateKeyword: return IconIds.PrivateConstructor;
 					}
 				}
 				return IconIds.PrivateConstructor;
@@ -533,10 +533,10 @@ namespace Codist
 			}
 			int GetOperatorIcon(OperatorDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
-					switch (modifier.Text) {
-						case "public": return KnownImageIds.OperatorPublic;
-						case "internal": return KnownImageIds.OperatorInternal;
-						case "protected": return KnownImageIds.OperatorProtected;
+					switch (modifier.Kind()) {
+						case SyntaxKind.PublicKeyword: return KnownImageIds.OperatorPublic;
+						case SyntaxKind.InternalKeyword: return KnownImageIds.OperatorInternal;
+						case SyntaxKind.ProtectedKeyword: return KnownImageIds.OperatorProtected;
 					}
 				}
 				return KnownImageIds.OperatorPrivate;
