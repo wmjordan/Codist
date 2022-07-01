@@ -75,7 +75,7 @@ namespace Codist
 		#region user interface icons
 		public const int Filter = KnownImageIds.Filter;
 		public const int ClearFilter = KnownImageIds.DeleteFilter;
-		public const int Search = KnownImageIds.SearchContract;
+		public const int Search = KnownImageIds.Search;
 		public const int Project = KnownImageIds.CSProjectNode;
 		public const int File = KnownImageIds.CSSourceFile;
 		public const int FileEmpty = KnownImageIds.CSFile;

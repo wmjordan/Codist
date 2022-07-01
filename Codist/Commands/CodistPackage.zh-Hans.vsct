@@ -66,7 +66,7 @@
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationId" priority="0x0101" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
-				<Icon guid="ImageCatalogGuid" id="SearchContract" />
+				<Icon guid="ImageCatalogGuid" id="Search" />
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
@@ -76,7 +76,7 @@
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchDeclarationInProjectId" priority="0x0102" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
-				<Icon guid="ImageCatalogGuid" id="SearchContract" />
+				<Icon guid="ImageCatalogGuid" id="Search" />
 				<CommandFlag>DefaultDisabled</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
