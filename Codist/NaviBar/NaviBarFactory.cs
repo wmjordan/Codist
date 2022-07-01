@@ -91,10 +91,10 @@ namespace Codist.NaviBar
 
 			void AddNaviBar(object sender, RoutedEventArgs e) {
 				var view = sender as IWpfTextView ?? _View;
+				// don't add duplicated NaviBar
 				if (view.Properties.ContainsProperty(nameof(NaviBar))) {
 					return;
 				}
-				// don't add duplicated NaviBar
 				var cp = view.VisualElement?.GetParent<Border>(b => b.Name == "PART_ContentPanel");
 				if (cp == null) {
 					return;
@@ -102,7 +102,7 @@ namespace Codist.NaviBar
 				var naviBar = cp.GetFirstVisualChild<NaviBar>();
 				if (naviBar != null) {
 					//naviBar.BindView();
-					//view.Properties.AddProperty(nameof(NaviBar), naviBar);
+					view.Properties.AddProperty(nameof(NaviBar), naviBar);
 					return;
 				}
 
