@@ -828,29 +828,37 @@ namespace Codist
 				public ActiveViewTracker(IWpfTextView view) {
 					_ActiveTextView = _View = view;
 					ActiveTextViewChanged?.Invoke(view, new TextViewCreatedEventArgs(view));
-					view.Closed += TextViewClosed_UnloadView;
+					view.Closed += TextView_CloseView;
+					view.VisualElement.Loaded += TextView_SetActiveView;
 					view.VisualElement.MouseEnter += TextViewMouseEnter_SetActiveView;
-					view.GotAggregateFocus += TextViewGotFocus_SetActiveView;
+					view.GotAggregateFocus += TextView_SetActiveView;
 					_WpfTextViews.Add(view);
 				}
 
-				void TextViewGotFocus_SetActiveView(object sender, EventArgs e) {
-					_ActiveTextView = _View;
-					ActiveTextViewChanged?.Invoke(_View, new TextViewCreatedEventArgs(_View));
+				void TextView_SetActiveView(object sender, EventArgs e) {
+					if (_ActiveTextView != _View) {
+						_ActiveTextView = _View;
+						ActiveTextViewChanged?.Invoke(_View, new TextViewCreatedEventArgs(_View));
+					}
 				}
 
 				void TextViewMouseEnter_SetActiveView(object sender, MouseEventArgs e) {
 					_MouseOverTextView = _View;
 				}
 
-				void TextViewClosed_UnloadView(object sender, EventArgs e) {
+				void TextView_CloseView(object sender, EventArgs e) {
 					var v = sender as IWpfTextView;
-					v.Closed -= TextViewClosed_UnloadView;
+					v.Closed -= TextView_CloseView;
+					v.VisualElement.Loaded -= TextView_SetActiveView;
 					v.VisualElement.MouseEnter -= TextViewMouseEnter_SetActiveView;
-					v.GotAggregateFocus -= TextViewGotFocus_SetActiveView;
+					v.GotAggregateFocus -= TextView_SetActiveView;
 					_WpfTextViews.Remove(v);
-					System.Threading.Interlocked.CompareExchange(ref _MouseOverTextView, null, _View);
-					System.Threading.Interlocked.CompareExchange(ref _ActiveTextView, null, _View);
+					if (_MouseOverTextView == _View) {
+						_MouseOverTextView = null;
+					}
+					if (_ActiveTextView == _View) {
+						_ActiveTextView = null;
+					}
 					_View = null;
 				}
 			}
