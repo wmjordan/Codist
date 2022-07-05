@@ -15,6 +15,13 @@ namespace Codist.Controls
 		TextBlock _Content;
 		string _Hint;
 		readonly bool _IncludeContainerType;
+		internal SyntaxNode SyntaxNode { get; private set; }
+		internal ISymbol Symbol { get; private set; }
+		internal SymbolList Container { get; private set; }
+		internal Location Location { get; set; }
+
+		// the following properties must be public since they are also used in WPF
+		public SymbolUsageKind Usage { get; set; }
 
 		public int ImageId => _ImageId != 0 ? _ImageId : (_ImageId = Symbol != null ? Symbol.GetImageId() : SyntaxNode != null ? SyntaxNode.GetImageId() : -1);
 		public UIElement Icon => _Icon ?? (_Icon = Container?.IconProvider?.Invoke(this) ?? ThemeHelper.GetImage(ImageId != -1 ? ImageId : 0));
@@ -23,7 +30,6 @@ namespace Codist.Controls
 			get => _Hint ?? (_Hint = Symbol != null && Container != null ? GetSymbolConstaintValue(Symbol, Container.ContainerType == SymbolListType.EnumFlags) : String.Empty);
 			set => _Hint = value;
 		}
-		public SymbolUsageKind Usage { get; set; }
 		public bool IsExternal => Usage == SymbolUsageKind.External
 			|| Container != null && Container.ContainerType == SymbolListType.None && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
 		public TextBlock Content {
@@ -34,10 +40,6 @@ namespace Codist.Controls
 					: new ThemedMenuText());
 			set => _Content = value;
 		}
-		internal Location Location { get; set; }
-		internal SyntaxNode SyntaxNode { get; private set; }
-		internal ISymbol Symbol { get; private set; }
-		internal SymbolList Container { get; private set; }
 
 		public SymbolItem(SymbolList list) {
 			Container = list;
