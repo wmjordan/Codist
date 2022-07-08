@@ -92,7 +92,7 @@ namespace Codist.NaviBar
 				PopulateTypes();
 				_Note.Clear();
 				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
-					  _Note.Append(ThemeHelper.GetImage(IconIds.LineOfCode))
+					  _Note.AddImage(IconIds.LineOfCode)
 						.Append(Bar.View.TextSnapshot.LineCount);
 				}
 				Bar.ShowMenu(this, _Menu);

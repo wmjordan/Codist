@@ -105,6 +105,9 @@ namespace Codist
 			}
 		}
 
+		public static TextBlock AddImage(this TextBlock block, int imageId) {
+			return block.Append(ThemeHelper.GetImage(imageId));
+		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, bool bold, SymbolFormatter formatter) {
 			if (symbol != null) {
 				formatter.Format(block.Inlines, symbol, alias, bold);

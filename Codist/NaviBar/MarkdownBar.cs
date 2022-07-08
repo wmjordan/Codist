@@ -231,7 +231,7 @@ namespace Codist.NaviBar
 				};
 				Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
 						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey)     
-						.Append(ThemeHelper.GetImage(IconIds.LineOfCode))
+						.AddImage(IconIds.LineOfCode)
 						.Append(bar.View.TextSnapshot.LineCount);
 				_FinderBox.TextChanged += SearchCriteriaChanged;
 				_FinderBox.SetOnVisibleSelectAll();

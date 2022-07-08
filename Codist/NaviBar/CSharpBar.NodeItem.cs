@@ -76,11 +76,11 @@ namespace Codist.NaviBar
 						_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.GetMembers().Select(s => new SymbolItem(s, null, false)) ?? Enumerable.Empty<SymbolItem>());
 						var footer = (TextBlock)_Menu.Footer;
 						if (_PartialCount > 1) {
-							footer.Append(ThemeHelper.GetImage(IconIds.PartialDocumentCount))
+							footer.AddImage(IconIds.PartialDocumentCount)
 								.Append(_PartialCount);
 						}
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
-							footer.Append(ThemeHelper.GetImage(IconIds.LineOfCode))
+							footer.AddImage(IconIds.LineOfCode)
 								.Append(Node.GetLineSpan().Length + 1);
 						}
 						Bar.ShowMenu(this, _Menu);
