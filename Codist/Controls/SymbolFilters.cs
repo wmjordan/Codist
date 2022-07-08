@@ -692,7 +692,7 @@ namespace Codist.Controls
 							++f; break;
 						case SymbolKind.Property:
 							if (_AutoPropertyAsField
-								&& symbol.IsAbstract == false
+								&& symbol.IsAbstract
 								&& backingFields.Contains(symbol) == false) {
 								++m;
 							}

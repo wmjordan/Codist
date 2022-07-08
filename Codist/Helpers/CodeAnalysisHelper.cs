@@ -507,8 +507,8 @@ namespace Codist
 				return IconIds.PrivateConstructor;
 			}
 			int GetPropertyIconExt(BasePropertyDeclarationSyntax syntax) {
-				bool autoProperty = syntax.Modifiers.Any(i => i.IsKind(SyntaxKind.AbstractKeyword))
-					|| syntax.AccessorList?.Accessors.All(i => i.Body == null && i.ExpressionBody == null) == true;
+				bool autoProperty = syntax.Modifiers.Any(i => i.IsKind(SyntaxKind.AbstractKeyword)) == false
+					&& syntax.AccessorList?.Accessors.All(i => i.Body == null && i.ExpressionBody == null) == true;
 				if (autoProperty) {
 					return GetPropertyIcon(syntax);
 				}
@@ -725,7 +725,7 @@ namespace Codist
 				return syntax.ImplicitOrExplicitKeyword.Text + " " + ((syntax.Type as NameSyntax)?.GetName() ?? syntax.Type.ToString());
 			}
 			string GetSwitchSignature(SwitchSectionSyntax syntax) {
-				var label = (syntax as SwitchSectionSyntax).Labels.LastOrDefault();
+				var label = syntax.Labels.LastOrDefault();
 				return label is DefaultSwitchLabelSyntax ? "default"
 					: (label as CaseSwitchLabelSyntax)?.Value.ToString();
 			}
@@ -734,7 +734,20 @@ namespace Codist
 					?? syntax.GetFirstIdentifier()?.Identifier.Text;
 			}
 			string GetGenericSignature(string name, int arity) {
-				return arity > 0 ? name + "<" + new string(',', arity - 1) + ">" : name;
+				return arity > 0 ? name + GetGenericAritySignature(arity) : name;
+			}
+			string GetGenericAritySignature(int arity) {
+				switch (arity) {
+					case 0:
+					case 1: return "<>";
+					case 2: return "<,>";
+					case 3: return "<,,>";
+					case 4: return "<,,,>";
+					case 5: return "<,,,,>";
+					case 6: return "<,,,,,>";
+					case 7: return "<,,,,,,>";
+					default: return "<" + new String(',', arity - 1) + ">";
+				}
 			}
 			string GetVariableSignature(VariableDeclarationSyntax syntax, int pos) {
 				if (syntax == null) {
