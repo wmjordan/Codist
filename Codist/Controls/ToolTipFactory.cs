@@ -5,7 +5,6 @@ using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.VisualStudio.Utilities;
 using R = Codist.Properties.Resources;
 using System.Windows.Documents;
 using System.Windows;
@@ -23,7 +22,7 @@ namespace Codist
 				tip.Title.AddImage(symbol.GetImageId()).WrapMargin(WpfHelper.GlyphMargin);
 			}
 			tip.Title
-				.Append($"{symbol.GetAccessibility()}{symbol.GetAbstractionModifier()}{(symbol is INamedTypeSymbol nt ? nt.IsReadOnly() ? (nt.IsRefLike() ? "ref readonly " : "readonly ") : nt.IsRefLike() ? "ref " : String.Empty : String.Empty)}{(symbol is IPropertySymbol ps ? ps.ReturnsByRefReadonly ? "ref readonly " : ps.ReturnsByRef ? "ref " : String.Empty : String.Empty)}{(symbol as IMethodSymbol).GetSpecialMethodModifier()}{symbol.GetSymbolKindName()} ")
+				.Append($"{symbol.GetAccessibility()}{symbol.GetAbstractionModifier()}{symbol.GetValueAccessModifier()}{symbol.GetSymbolKindName()} ")
 				.Append(symbol.Name, true)
 				.Append(symbol.GetParameterString());
 			var content = tip.Content;

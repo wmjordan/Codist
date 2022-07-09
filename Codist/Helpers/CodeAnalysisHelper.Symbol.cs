@@ -160,6 +160,36 @@ namespace Codist
 			}
 		}
 
+
+		public static string GetValueAccessModifier(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.NamedType: return ShowTypeValueAccessModifier(symbol as ITypeSymbol);
+				case SymbolKind.Method: return (symbol as IMethodSymbol).GetSpecialMethodModifier();
+				case SymbolKind.Property: return ShowPropertyValueAccessModifier(symbol as IPropertySymbol);
+				case SymbolKind.Field: return ShowFieldValueAccessModifier(symbol as IFieldSymbol);
+				default: return String.Empty;
+			}
+
+			string ShowTypeValueAccessModifier(ITypeSymbol t) {
+				if (t.IsReadOnly()) {
+					return t.IsRefLike() ? "ref readonly " : "readonly ";
+				}
+				return t.IsRefLike() ? "ref " : String.Empty;
+			}
+
+			string ShowPropertyValueAccessModifier(IPropertySymbol p) {
+				return p.ReturnsByRefReadonly ? "ref readonly "
+					: p.ReturnsByRef ? "ref "
+					: String.Empty;
+			}
+
+			string ShowFieldValueAccessModifier(IFieldSymbol f) {
+				return f.IsReadOnly ? "readonly "
+					: f.IsVolatile ? "volatile "
+					: String.Empty;
+			}
+		}
+
 		public static string GetSpecialMethodModifier(this IMethodSymbol method) {
 			if (method == null) {
 				return null;
