@@ -128,19 +128,21 @@ namespace Codist
 
 		#region Symbol information
 		public static string GetAbstractionModifier(this ISymbol symbol) {
-			if (symbol.IsAbstract && (symbol.Kind != SymbolKind.NamedType || (symbol as INamedTypeSymbol).TypeKind != TypeKind.Interface)) {
-				return "abstract ";
+			if (symbol.IsAbstract) {
+				return symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Interface
+					? String.Empty
+					: "abstract ";
 			}
-			else if (symbol.IsStatic) {
+			if (symbol.IsStatic) {
 				return "static ";
 			}
-			else if (symbol.IsVirtual) {
+			if (symbol.IsVirtual) {
 				return "virtual ";
 			}
-			else if (symbol.IsOverride) {
+			if (symbol.IsOverride) {
 				return symbol.IsSealed ? "sealed override " : "override ";
 			}
-			else if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
+			if (symbol.IsSealed && (symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Class || symbol.Kind == SymbolKind.Method)) {
 				return "sealed ";
 			}
 			return String.Empty;
@@ -156,6 +158,29 @@ namespace Codist
 				case Accessibility.ProtectedOrInternal: return "protected internal ";
 				default: return String.Empty;
 			}
+		}
+
+		public static string GetSpecialMethodModifier(this IMethodSymbol method) {
+			if (method == null) {
+				return null;
+			}
+			string t = null;
+			if (method.IsAsync) {
+				t = "async ";
+			}
+			else if (method.IsExtern) {
+				t = "extern ";
+			}
+			if (method.ReturnsByRef) {
+				t += "ref ";
+			}
+			else if (method.ReturnsByRefReadonly) {
+				t += "ref readonly ";
+			}
+			else if (method.IsReadOnly()) {
+				t += "readonly ";
+			}
+			return t;
 		}
 
 		public static ISymbol GetAliasTarget(this ISymbol symbol) {
@@ -225,9 +250,6 @@ namespace Codist
 				case SymbolKind.Local: return IconIds.LocalVariable;
 				case SymbolKind.Method:
 					var m = symbol as IMethodSymbol;
-					//if (m.IsExtensionMethod) {
-					//	return KnownImageIds.ExtensionMethod;
-					//}
 					if (m.MethodKind == MethodKind.Constructor) {
 						switch (m.DeclaredAccessibility) {
 							case Accessibility.Public: return IconIds.PublicConstructor;
@@ -532,8 +554,7 @@ namespace Codist
 					var sig = type.GetFunctionPointerTypeSignature();
 					if (sig != null) {
 						output.Append("delegate*");
-						var cc = sig.GetCallingConvention();
-						switch (cc) {
+						switch (sig.GetCallingConvention()) {
 							case 0: break;
 							case 1: output.Append(" unmanaged[Cdecl]"); break;
 							case 2: output.Append(" unmanaged[Stdcall]"); break;
@@ -621,29 +642,6 @@ namespace Codist
 				case FunctionPointerType: return "function pointer";
 				default: return symbol.Kind.ToString();
 			}
-		}
-
-		public static string GetSpecialMethodModifier(this IMethodSymbol method) {
-			if (method == null) {
-				return null;
-			}
-			string t = null;
-			if (method.IsAsync) {
-				t = "async ";
-			}
-			else if (method.IsExtern) {
-				t = "extern ";
-			}
-			if (method.ReturnsByRef) {
-				t += "ref ";
-			}
-			else if (method.ReturnsByRefReadonly) {
-				t += "ref readonly ";
-			}
-			else if (method.IsReadOnly()) {
-				t += "readonly ";
-			}
-			return t;
 		}
 
 		public static bool IsAccessor(this IMethodSymbol method) {
