@@ -479,6 +479,10 @@ namespace Codist.Controls
 					if (symbol == null || symbol.IsImplicitlyDeclared) {
 						continue;
 					}
+					if (symbol.CanBeReferencedByName == false
+						&& ((symbol is IMethodSymbol ms) == false || ms.MethodKind != MethodKind.Constructor)) {
+						continue;
+					}
 					switch (symbol.DeclaredAccessibility) {
 						case Accessibility.Private:
 							++p; break;
@@ -685,6 +689,12 @@ namespace Codist.Controls
 					if (symbol == null || symbol.IsImplicitlyDeclared) {
 						continue;
 					}
+					if (symbol.CanBeReferencedByName == false) {
+						if ((symbol is IMethodSymbol ms) && ms.MethodKind == MethodKind.Constructor) {
+							++m;
+						}
+						continue;
+					}
 					switch (symbol.Kind) {
 						case SymbolKind.Event:
 							++e; break;
@@ -692,8 +702,7 @@ namespace Codist.Controls
 							++f; break;
 						case SymbolKind.Property:
 							if (_AutoPropertyAsField
-								&& symbol.IsAbstract
-								&& backingFields.Contains(symbol) == false) {
+								&& (symbol.IsAbstract || backingFields.Contains(symbol) == false)) {
 								++m;
 							}
 							else {
@@ -701,11 +710,6 @@ namespace Codist.Controls
 							}
 							break;
 						case SymbolKind.Method:
-							var sm = symbol as IMethodSymbol;
-							if (sm.MethodKind == MethodKind.PropertyGet
-								|| sm.MethodKind == MethodKind.PropertySet) {
-								continue;
-							}
 							++m; break;
 						case SymbolKind.NamedType:
 							++t; break;
