@@ -383,6 +383,7 @@ namespace Codist
 				case SyntaxKind.EndRegionDirectiveTrivia: return KnownImageIds.ToolstripPanelBottom;
 			}
 			return KnownImageIds.UnknownMember;
+
 			int GetClassIcon(BaseTypeDeclarationSyntax syntax) {
 				bool isPartial = false;
 				foreach (var modifier in syntax.Modifiers) {
@@ -440,7 +441,7 @@ namespace Codist
 						case SyntaxKind.PrivateKeyword: return KnownImageIds.EventPrivate;
 					}
 				}
-				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.EventInternal : KnownImageIds.EventPrivate;
+				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.EventInternal : syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration) ? KnownImageIds.EventPublic : KnownImageIds.EventPrivate;
 			}
 			int GetEventFieldIcon(EventFieldDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -448,9 +449,10 @@ namespace Codist
 						case SyntaxKind.PublicKeyword: return KnownImageIds.EventPublic;
 						case SyntaxKind.InternalKeyword: return KnownImageIds.EventInternal;
 						case SyntaxKind.ProtectedKeyword: return KnownImageIds.EventProtected;
+						case SyntaxKind.PrivateKeyword: return KnownImageIds.EventPrivate;
 					}
 				}
-				return KnownImageIds.EventPrivate;
+				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration) ? KnownImageIds.EventPublic : KnownImageIds.EventPrivate;
 			}
 			int GetDelegateIcon(DelegateDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -465,7 +467,7 @@ namespace Codist
 			}
 			int GetFieldIcon(FieldDeclarationSyntax syntax) {
 				bool isConst = false;
-				var accessibility = Accessibility.Private;
+				var accessibility = Accessibility.NotApplicable;
 				foreach (var modifier in syntax.Modifiers) {
 					switch (modifier.Kind()) {
 						case SyntaxKind.ConstKeyword: isConst = true; break;
@@ -476,14 +478,18 @@ namespace Codist
 							}
 							break;
 						case SyntaxKind.ProtectedKeyword: accessibility = Accessibility.Protected; break;
+						case SyntaxKind.PrivateKeyword: accessibility = Accessibility.Private; break;
 					}
 				}
 				switch (accessibility) {
 					case Accessibility.Public: return isConst ? KnownImageIds.ConstantPublic : KnownImageIds.FieldPublic;
 					case Accessibility.Internal: return isConst ? KnownImageIds.ConstantInternal : KnownImageIds.FieldInternal;
 					case Accessibility.Protected: return isConst ? KnownImageIds.ConstantProtected : KnownImageIds.FieldProtected;
+					case Accessibility.Private: return isConst ? KnownImageIds.ConstantPrivate : KnownImageIds.FieldPrivate;
 				}
-				return isConst ? KnownImageIds.ConstantPrivate : KnownImageIds.FieldPrivate;
+				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration)
+					? isConst ? KnownImageIds.ConstantPublic : KnownImageIds.FieldPublic
+					: isConst ? KnownImageIds.ConstantPrivate : KnownImageIds.FieldPrivate;
 			}
 			int GetMethodIcon(MethodDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -491,9 +497,10 @@ namespace Codist
 						case SyntaxKind.PublicKeyword: return KnownImageIds.MethodPublic;
 						case SyntaxKind.InternalKeyword: return KnownImageIds.MethodInternal;
 						case SyntaxKind.ProtectedKeyword: return KnownImageIds.MethodProtected;
+						case SyntaxKind.PrivateKeyword: return KnownImageIds.MethodPrivate;
 					}
 				}
-				return KnownImageIds.MethodPrivate;
+				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration) ? KnownImageIds.MethodPublic : KnownImageIds.MethodPrivate;
 			}
 			int GetConstructorIcon(ConstructorDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -517,9 +524,10 @@ namespace Codist
 						case SyntaxKind.PublicKeyword: return IconIds.PublicPropertyMethod;
 						case SyntaxKind.InternalKeyword: return IconIds.InternalPropertyMethod;
 						case SyntaxKind.ProtectedKeyword: return IconIds.ProtectedPropertyMethod;
+						case SyntaxKind.PrivateKeyword: return IconIds.PrivatePropertyMethod;
 					}
 				}
-				return IconIds.PrivatePropertyMethod;
+				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration) ? IconIds.PublicPropertyMethod : IconIds.PrivatePropertyMethod;
 			}
 			int GetPropertyIcon(BasePropertyDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -527,9 +535,10 @@ namespace Codist
 						case SyntaxKind.PublicKeyword: return KnownImageIds.PropertyPublic;
 						case SyntaxKind.InternalKeyword: return KnownImageIds.PropertyInternal;
 						case SyntaxKind.ProtectedKeyword: return KnownImageIds.PropertyProtected;
+						case SyntaxKind.PrivateKeyword: return KnownImageIds.PropertyPrivate;
 					}
 				}
-				return KnownImageIds.PropertyPrivate;
+				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration) ? KnownImageIds.PropertyPublic : KnownImageIds.PropertyPrivate;
 			}
 			int GetOperatorIcon(OperatorDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
