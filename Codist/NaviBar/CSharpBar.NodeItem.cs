@@ -120,19 +120,7 @@ namespace Codist.NaviBar
 					Owner = this
 				};
 				Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, true);
-				_Menu.Header = new WrapPanel {
-					Orientation = Orientation.Horizontal,
-					Children = {
-							new ThemedButton(new ThemedMenuText(Node.GetDeclarationSignature(), true)
-									.SetGlyph(ThemeHelper.GetImage(Node.GetImageId())), null,
-									() => Bar._SemanticContext.RelocateDeclarationNode(Node).GetLocation().GoToSource()) {
-								BorderThickness = WpfHelper.TinyMargin,
-								Margin = WpfHelper.SmallHorizontalMargin,
-								Padding = WpfHelper.SmallHorizontalMargin,
-							},
-							(_FilterBox = new SymbolFilterBox(_Menu)),
-						}
-				};
+				_Menu.Header = _FilterBox = new SymbolFilterBox(_Menu) { HorizontalAlignment = HorizontalAlignment.Right };
 				_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
 					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
 				Bar.SetupSymbolListMenu(_Menu);

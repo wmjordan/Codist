@@ -68,18 +68,7 @@ namespace Codist.NaviBar
 				if (_FilterBox != null) {
 					_FilterBox.FilterChanged -= FilterChanged;
 				}
-				_Menu.Header = new WrapPanel {
-					Orientation = Orientation.Horizontal,
-					Children = {
-							new Border {
-								Child = new ThemedMenuText(_Symbol.Name, true).SetGlyph(ThemeHelper.GetImage(IconIds.Namespace)),
-								BorderThickness = WpfHelper.TinyMargin,
-								Margin = WpfHelper.SmallHorizontalMargin,
-								Padding = WpfHelper.SmallHorizontalMargin,
-							},
-							(_FilterBox = new SymbolFilterBox(_Menu)),
-						}
-				};
+				_Menu.Header = _FilterBox = new SymbolFilterBox(_Menu) { HorizontalAlignment = HorizontalAlignment.Right };
 				_FilterBox.FilterChanged += FilterChanged;
 				_Menu.Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
 					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
