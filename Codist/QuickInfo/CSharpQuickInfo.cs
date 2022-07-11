@@ -934,6 +934,7 @@ namespace Codist.QuickInfo
 			var members = ImmutableArray.CreateBuilder<ISymbol>();
 			members.AddRange(type.FindMembers());
 			members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
+			var isInterface = type.TypeKind == TypeKind.Interface;
 			foreach (var member in members) {
 				var t = new ThemedTipText();
 				if (isInherit) {
@@ -942,6 +943,12 @@ namespace Codist.QuickInfo
 				t.AddSymbol(member, false, _SymbolFormatter);
 				if (member.Kind == SymbolKind.Method) {
 					t.AddParameters(((IMethodSymbol)member).Parameters, _SymbolFormatter);
+					if (isInterface && member.IsStatic == false && member.IsAbstract == false) {
+						t.Append(" ").AddImage(IconIds.DefaultInterfaceImplementation);
+					}
+				}
+				if (member.IsStatic) {
+					t.Append(" ").AddImage(IconIds.StaticMember);
 				}
 				doc.Append(new ThemedTipParagraph(member.GetImageId(), t));
 			}

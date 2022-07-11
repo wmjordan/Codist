@@ -711,11 +711,7 @@ namespace Codist.Controls
 					if (ms.IsGenericMethod) {
 						AddIcon(ref icons, IconIds.Generic);
 					}
-					if (_ContainerIsInterface == false) {
-						if (ms.IsAbstract) {
-							AddIcon(ref icons, IconIds.AbstractMember);
-						}
-						else if (ms.IsExtensionMethod) {
+					if (ms.IsExtensionMethod) {
 							AddIcon(ref icons, IconIds.ExtensionMethod);
 						}
 						else {
@@ -728,7 +724,17 @@ namespace Codist.Controls
 							if (ms.IsReadOnly()) {
 								AddIcon(ref icons, IconIds.ReadonlyMethod);
 							}
+						if (_ContainerIsInterface) {
+							if (ms.IsAbstract == false && ms.IsStatic == false) {
+								AddIcon(ref icons, IconIds.DefaultInterfaceImplementation);
 						}
+					}
+						else if (ms.IsAbstract) {
+							AddIcon(ref icons, IconIds.AbstractMember);
+						}
+					}
+					if (ms.ReturnsByRef || ms.ReturnsByRefReadonly) {
+						AddIcon(ref icons, IconIds.RefMember);
 					}
 					break;
 				case SymbolKind.NamedType:
@@ -815,7 +821,6 @@ namespace Codist.Controls
 							AddIcon(ref icons, IconIds.RefMember);
 						}
 					}
-
 					break;
 				case SymbolKind.Namespace:
 					return null;

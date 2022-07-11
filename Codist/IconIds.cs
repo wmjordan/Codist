@@ -13,6 +13,7 @@ namespace Codist
 		public const int ExtensionMethod = KnownImageIds.ExtensionMethod;
 		public const int StaticMember = KnownImageIds.Link;
 		public const int InstanceMember = KnownImageIds.BuildQueue;
+		public const int DefaultInterfaceImplementation = KnownImageIds.AddInterface;
 		public const int ReadonlyField = KnownImageIds.EncapsulateField;
 		public const int ReadonlyProperty = KnownImageIds.MoveProperty;
 		public const int ReadonlyMethod = KnownImageIds.MoveMethod;

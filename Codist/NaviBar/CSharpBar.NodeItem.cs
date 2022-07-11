@@ -333,7 +333,7 @@ namespace Codist.NaviBar
 
 				StackPanel GetMethodExtIcons(BaseMethodDeclarationSyntax m) {
 					StackPanel icons = null;
-					var isExt = false;
+					bool isExt = false, isStatic = false;
 					if (m.ParameterList.Parameters.FirstOrDefault()?.Modifiers.Any(SyntaxKind.ThisKeyword) == true) {
 						AddIcon(ref icons, IconIds.ExtensionMethod);
 						isExt = true;
@@ -345,6 +345,7 @@ namespace Codist.NaviBar
 							case SyntaxKind.StaticKeyword:
 								if (isExt == false) {
 									AddIcon(ref icons, IconIds.StaticMember);
+									isStatic = true;
 								}
 								break;
 							case SyntaxKind.UnsafeKeyword: AddIcon(ref icons, IconIds.Unsafe); break;
@@ -352,6 +353,11 @@ namespace Codist.NaviBar
 							case SyntaxKind.OverrideKeyword: AddIcon(ref icons, IconIds.OverrideMethod); break;
 							case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
 						}
+					}
+					if (isStatic == false && isExt == false
+						&& m.Parent.IsKind(SyntaxKind.InterfaceDeclaration)
+						&& (m.Body != null || m.ExpressionBody != null)) {
+						AddIcon(ref icons, IconIds.DefaultInterfaceImplementation);
 					}
 					return icons;
 				}
