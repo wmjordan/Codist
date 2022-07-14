@@ -107,9 +107,7 @@ namespace Codist.Controls
 				var item = SelectedIndex == -1 && HasItems
 					? ItemContainerGenerator.Items[0] as SymbolItem
 					: SelectedItem as SymbolItem;
-				if (item != null) {
-					item.GoToSource();
-				}
+				item?.GoToSource();
 				e.Handled = true;
 			}
 		}
@@ -453,9 +451,8 @@ namespace Codist.Controls
 				if (noKeyword) {
 					return o => SymbolFilterBox.FilterByImageId(memberFilter, ((SymbolItem)o).ImageId);
 				}
-				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				return o => SymbolFilterBox.FilterByImageId(memberFilter, ((SymbolItem)o).ImageId)
-						&& MatchKeywords(((SymbolItem)o).Content.GetText(), k, comparison);
+						&& MatchKeywords(((SymbolItem)o).Content.GetText(), k);
 			}
 			Predicate<object> FilterByMemberTypes(string[] k, MemberFilterTypes memberFilter) {
 				var noKeyword = k.Length == 0;
@@ -465,11 +462,10 @@ namespace Codist.Controls
 				if (noKeyword) {
 					return o => SymbolFilterBox.FilterBySymbol(memberFilter, ((SymbolItem)o).Symbol);
 				}
-				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				return o => {
 					var i = (SymbolItem)o;
 					return SymbolFilterBox.FilterBySymbol(memberFilter, i.Symbol)
-						&& MatchKeywords(i.Content.GetText(), k, comparison);
+						&& MatchKeywords(i.Content.GetText(), k);
 				};
 			}
 			Predicate<object> FilterByTypeKinds(string[] k, MemberFilterTypes typeFilter) {
@@ -483,24 +479,22 @@ namespace Codist.Controls
 						return i.Symbol != null && SymbolFilterBox.FilterBySymbolType(typeFilter, i.Symbol);
 					};
 				}
-				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				return o => {
 					var i = (SymbolItem)o;
 					return i.Symbol != null
 						&& SymbolFilterBox.FilterBySymbolType(typeFilter, i.Symbol)
-						&& MatchKeywords(i.Content.GetText(), k, comparison);
+						&& MatchKeywords(i.Content.GetText(), k);
 				};
 			}
 			Predicate<object> FilterByLocations(string[] k) {
 				if (k.Length == 0) {
 					return null;
 				}
-				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				return o => {
 					var i = (SymbolItem)o;
 					return i.Location != null
-						&& (MatchKeywords(((System.Windows.Documents.Run)i.Content.Inlines.FirstInline).Text, k, comparison)
-								|| MatchKeywords(i.Hint, k, comparison));
+						&& (MatchKeywords(((System.Windows.Documents.Run)i.Content.Inlines.FirstInline).Text, k)
+								|| MatchKeywords(i.Hint, k));
 				};
 			}
 			Predicate<object> FilterByUsages(string[] k, MemberFilterTypes filter) {
@@ -515,17 +509,17 @@ namespace Codist.Controls
 							&& (i.Symbol != null ? SymbolFilterBox.FilterBySymbol(filter, i.Symbol) : SymbolFilterBox.FilterByImageId(filter, i.ImageId));
 					};
 				}
-				var comparison = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				return o => {
 					var i = (SymbolItem)o;
 					return SymbolFilterBox.FilterByUsage(filter, i)
 						&& (i.Symbol != null
 							? SymbolFilterBox.FilterBySymbol(filter, i.Symbol)
 							: SymbolFilterBox.FilterByImageId(filter, i.ImageId))
-						&& MatchKeywords(i.Content.GetText(), k, comparison);
+						&& MatchKeywords(i.Content.GetText(), k);
 				};
 			}
-			bool MatchKeywords(string text, string[] k, StringComparison c) {
+			bool MatchKeywords(string text, string[] k) {
+				var c = Char.IsUpper(k[0][0]) ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 				var m = 0;
 				foreach (var item in k) {
 					if ((m = text.IndexOf(item, m, c)) == -1) {
