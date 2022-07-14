@@ -17,10 +17,14 @@ namespace Codist
 		XElement _Summary, _Remarks, _Returns;
 		bool _Preliminary;
 		List<XElement> _Parameters, _Exceptions, _TypeParameters, _SeeAlsos, _Sees, _Examples;
+		int _InheritedLevel;
 		List<XmlDoc> _InheritedXmlDocs;
 		XmlDoc _ExplicitInheritDoc;
 
-		public XmlDoc(ISymbol symbol, Compilation compilation) {
+		public XmlDoc(ISymbol symbol, Compilation compilation) : this(symbol, compilation, 0) {
+		}
+		public XmlDoc(ISymbol symbol, Compilation compilation, int level) {
+			_InheritedLevel = level;
 			if (symbol == null) {
 				return;
 			}
@@ -175,8 +179,8 @@ namespace Codist
 						var cref = item.Attribute("cref");
 						if (cref != null && String.IsNullOrEmpty(cref.Value) == false) {
 							var s = DocumentationCommentId.GetFirstSymbolForDeclarationId(cref.Value, _Compilation);
-							if (s != null) {
-								_ExplicitInheritDoc = new XmlDoc(s, _Compilation);
+							if (s != null && ++_InheritedLevel < 255) {
+								_ExplicitInheritDoc = new XmlDoc(s, _Compilation, _InheritedLevel);
 							}
 						}
 					}
@@ -256,7 +260,7 @@ namespace Codist
 		}
 
 		bool AddInheritedDocFromSymbol(ISymbol symbol) {
-			var doc = new XmlDoc(symbol, _Compilation);
+			var doc = new XmlDoc(symbol, _Compilation, _InheritedLevel + 1);
 			if (doc.HasDoc) {
 				_InheritedXmlDocs.Add(doc);
 				return true;
