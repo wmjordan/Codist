@@ -285,7 +285,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		ThemedTipDocument OverrideDocumentation(SyntaxNode node, IQuickInfoOverrider qiWrapper, ISymbol symbol, SemanticModel semanticModel) {
+		static ThemedTipDocument OverrideDocumentation(SyntaxNode node, IQuickInfoOverrider qiWrapper, ISymbol symbol, SemanticModel semanticModel) {
 			if (symbol == null) {
 				return null;
 			}
@@ -337,7 +337,7 @@ namespace Codist.QuickInfo
 			return tip;
 		}
 
-		void ShowCapturedVariables(SyntaxNode node, ISymbol symbol, SemanticModel semanticModel, ThemedTipDocument tip) {
+		static void ShowCapturedVariables(SyntaxNode node, ISymbol symbol, SemanticModel semanticModel, ThemedTipDocument tip) {
 			if (node is LambdaExpressionSyntax
 				|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
 				var ss = node is LambdaExpressionSyntax
@@ -543,7 +543,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		ThemedTipText ShowReturnInfo(ReturnStatementSyntax returns, SemanticModel semanticModel, CancellationToken cancellationToken) {
+		static ThemedTipText ShowReturnInfo(ReturnStatementSyntax returns, SemanticModel semanticModel, CancellationToken cancellationToken) {
 			if (returns == null) {
 				return null;
 			}
@@ -590,10 +590,6 @@ namespace Codist.QuickInfo
 				return t;
 			}
 			return null;
-		}
-
-		ITypeSymbol GetAwaitReturnType(SemanticModel semanticModel, AwaitExpressionSyntax expression, CancellationToken cancellationToken) {
-			return expression == null ? null : (semanticModel.GetSymbolOrFirstCandidate(expression.Expression, cancellationToken) as IMethodSymbol)?.GetReturnType();
 		}
 
 		static void ShowAttributesInfo(QiContainer qiContent, ISymbol symbol) {
@@ -1137,7 +1133,7 @@ namespace Codist.QuickInfo
 			qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.DeclarationModifier, _SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedTipText(), true, false))));
 		}
 
-		void ShowParameterInfo(QiContainer qiContent, SyntaxNode node, SemanticModel semanticModel) {
+		static void ShowParameterInfo(QiContainer qiContent, SyntaxNode node, SemanticModel semanticModel) {
 			var argument = node;
 			if (node.Kind() == SyntaxKind.NullLiteralExpression) {
 				argument = node.Parent;
@@ -1152,7 +1148,7 @@ namespace Codist.QuickInfo
 			} while ((argument = argument.Parent) != null && ++depth < 4);
 		}
 
-		void ShowArgumentInfo(QiContainer qiContent, SyntaxNode argument, SemanticModel semanticModel) {
+		static void ShowArgumentInfo(QiContainer qiContent, SyntaxNode argument, SemanticModel semanticModel) {
 			var argList = argument.Parent;
 			SeparatedSyntaxList<ArgumentSyntax> arguments;
 			int argIndex, argCount;
