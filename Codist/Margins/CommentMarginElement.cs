@@ -188,7 +188,7 @@ namespace Codist.Margins
 				if (ClassificationBrushMapper.TryGetValue(c, out b) == false) {
 					continue;
 				}
-				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, tag.Start));
+				var y = _ScrollBar.GetYCoordinateOfBufferPosition(tag.TrackingSpan.GetStartPoint(snapshot));
 				if (lastY + HalfMarkSize > y && lastBrush == b) {
 					// avoid drawing too many closed markers
 					continue;
