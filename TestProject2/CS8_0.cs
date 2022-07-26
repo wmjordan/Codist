@@ -25,7 +25,7 @@ namespace TestProject2.CS8_0
 	public interface IStaticImplementation
 	{
 		static readonly DateTime DefaultTime = DateTime.Now;
-		public static void PrintName() {
+		static void PrintName() {
 			Console.WriteLine(nameof(IStaticImplementation));
 		}
 		private static void PrintTime() {
