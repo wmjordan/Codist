@@ -480,7 +480,7 @@ namespace Codist.Controls
 						continue;
 					}
 					if (symbol.CanBeReferencedByName == false
-						&& ((symbol is IMethodSymbol ms) == false || ms.MethodKind != MethodKind.Constructor)) {
+						&& (symbol.Kind != SymbolKind.Method || ((IMethodSymbol)symbol).MethodKind != MethodKind.Constructor)) {
 						continue;
 					}
 					switch (symbol.DeclaredAccessibility) {

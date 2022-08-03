@@ -22,7 +22,8 @@ namespace Codist.Commands
 		}
 
 		static NaviBar.INaviBar GetNaviBar() {
-			return TextEditorHelper.GetActiveWpfDocumentView()?.Properties.TryGetProperty(nameof(NaviBar), out NaviBar.INaviBar bar) == true ? bar : null;
+			var v = TextEditorHelper.GetActiveWpfDocumentView();
+			return v == null || !v.Properties.TryGetProperty(nameof(NaviBar), out NaviBar.INaviBar bar) ? null : bar;
 		}
 
 		static void ExecuteSearchDeclaration(object sender, EventArgs e) {
