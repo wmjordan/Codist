@@ -108,8 +108,8 @@ namespace Codist.Taggers
 		public int ContentLength { get; }
 
 		public int End => Start + Length;
-		public string Text => TextSnapshot.GetText(Start, Length);
-		public string ContentText => TextSnapshot.GetText(Start + ContentOffset, ContentLength);
+		public string Text => TrackingSpan.GetText(TextSnapshot);
+		public string ContentText => (Start + ContentOffset + ContentLength) <= TextSnapshot.Length ?TextSnapshot.GetText(Start + ContentOffset, ContentLength) : String.Empty;
 
 		public ITextSnapshot TextSnapshot { get; private set; }
 
