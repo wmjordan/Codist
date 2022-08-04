@@ -65,6 +65,7 @@ namespace Codist.Taggers
 
 	static class ClassificationTagHelper
 	{
+		public static readonly IClassificationType Declaration = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CSharpDeclarationName);
 		public static readonly IClassificationType DeclarationBrace = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CSharpDeclarationBrace);
 		public static readonly IClassificationType BoldBrace = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBoldBrace);
 		public static readonly IClassificationType BoldDeclarationBrace = ServicesHelper.Instance.ClassificationTypeRegistry.CreateTransientClassificationType(DeclarationBrace, BoldBrace);
@@ -72,6 +73,13 @@ namespace Codist.Taggers
 		public static readonly ClassificationTag DeclarationBraceTag = new ClassificationTag(DeclarationBrace);
 		public static readonly ClassificationTag BoldBraceTag = new ClassificationTag(BoldBrace);
 		public static readonly ClassificationTag BoldDeclarationBraceTag = new ClassificationTag(BoldDeclarationBrace);
+
+		public static ClassificationTag CreateTransientClassificationTag(params IClassificationType[] tags) {
+			return new ClassificationTag(ServicesHelper.Instance.ClassificationTypeRegistry.CreateTransientClassificationType(tags));
+		}
+		public static ClassificationTag CreateTransientClassificationTag(params ClassificationTag[] tags) {
+			return new ClassificationTag(ServicesHelper.Instance.ClassificationTypeRegistry.CreateTransientClassificationType(Array.ConvertAll(tags, i => i.ClassificationType)));
+		}
 
 		public static T InitFields<T>(Func<IClassificationTypeRegistryService, IClassificationType, ClassificationTag> tagBuilder)
 			where T : class, new() {

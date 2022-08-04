@@ -347,6 +347,7 @@ namespace Codist.Taggers
 					var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace);
 					var lastTriviaSpan = default(TextSpan);
 					SyntaxNode node;
+					TagSpan<IClassificationTag> tag = null;
 					var r = GetAttributeNotationSpan(snapshot, textSpan, unitCompilation);
 					if (r != null) {
 						yield return r;
@@ -356,177 +357,44 @@ namespace Codist.Taggers
 						var ct = item.ClassificationType;
 						switch (ct) {
 							case "keyword":
-							case Constants.CodeKeywordControl: {
+							case Constants.CodeKeywordControl:
 								node = unitCompilation.FindNode(item.TextSpan, true, true);
 								if (node is MemberDeclarationSyntax || node is AccessorDeclarationSyntax) {
-									switch (unitCompilation.FindToken(item.TextSpan.Start).Kind()) {
-										case SyntaxKind.SealedKeyword:
-										case SyntaxKind.OverrideKeyword:
-										case SyntaxKind.AbstractKeyword:
-										case SyntaxKind.VirtualKeyword:
-										case SyntaxKind.ProtectedKeyword:
-										case SyntaxKind.NewKeyword:
-											yield return CreateClassificationSpan(snapshot, item.TextSpan, __Classifications.AbstractionKeyword);
-											continue;
-										case SyntaxKind.ThisKeyword:
-											yield return CreateClassificationSpan(snapshot, item.TextSpan, __Classifications.Declaration);
-											continue;
-										case SyntaxKind.UnsafeKeyword:
-										case SyntaxKind.FixedKeyword:
-											yield return CreateClassificationSpan(snapshot, item.TextSpan, __Classifications.ResourceKeyword);
-											continue;
-										case SyntaxKind.ExplicitKeyword:
-										case SyntaxKind.ImplicitKeyword:
-											yield return CreateClassificationSpan(snapshot, item.TextSpan, __GeneralClassifications.TypeCastKeyword);
-											yield return CreateClassificationSpan(snapshot, ((ConversionOperatorDeclarationSyntax)node).Type.Span, __Classifications.NestedDeclaration);
-											continue;
-										case SyntaxKind.ReadOnlyKeyword:
-											yield return CreateClassificationSpan(snapshot, item.TextSpan, __GeneralClassifications.TypeCastKeyword);
-											continue;
-										case CodeAnalysisHelper.RecordKeyword: // workaround for missing classification type for record identifier
-											textSpan = ((TypeDeclarationSyntax)node).Identifier.Span;
-											yield return CreateClassificationSpan(snapshot, textSpan, node.Kind() == CodeAnalysisHelper.RecordDeclaration ? __Classifications.ClassName : __Classifications.StructName);
-											yield return CreateClassificationSpan(snapshot, textSpan, __Classifications.Declaration);
-											continue;
-									}
-									continue;
-								}
-								switch (node.Kind()) {
-									case SyntaxKind.BreakStatement:
-										if (node.Parent is SwitchSectionSyntax) {
-											continue;
-										}
-										goto case SyntaxKind.ReturnStatement;
-									// highlights: return, yield return, yield break, throw and continue
-									case SyntaxKind.ReturnKeyword:
-									case SyntaxKind.GotoCaseStatement:
-									case SyntaxKind.GotoDefaultStatement:
-									case SyntaxKind.GotoStatement:
-									case SyntaxKind.ContinueStatement:
-									case SyntaxKind.ReturnStatement:
-									case SyntaxKind.YieldReturnStatement:
-									case SyntaxKind.YieldBreakStatement:
-									case SyntaxKind.ThrowStatement:
-									case SyntaxKind.ThrowExpression:
-										yield return CreateClassificationSpan(snapshot, item.TextSpan, __GeneralClassifications.ControlFlowKeyword);
-										continue;
-									case SyntaxKind.IfStatement:
-									case SyntaxKind.ElseClause:
-									case SyntaxKind.SwitchStatement:
-									case SyntaxKind.CaseSwitchLabel:
-									case SyntaxKind.DefaultSwitchLabel:
-									case CodeAnalysisHelper.SwitchExpression:
-									case SyntaxKind.CasePatternSwitchLabel:
-									case SyntaxKind.WhenClause:
-										yield return CreateClassificationSpan(snapshot, item.TextSpan, __GeneralClassifications.BranchingKeyword);
-										continue;
-									case SyntaxKind.ForStatement:
-									case SyntaxKind.ForEachStatement:
-									case SyntaxKind.ForEachVariableStatement:
-									case SyntaxKind.WhileStatement:
-									case SyntaxKind.DoStatement:
-									case SyntaxKind.SelectClause:
-									case SyntaxKind.FromClause:
-										yield return CreateClassificationSpan(snapshot, item.TextSpan, __GeneralClassifications.LoopKeyword);
-										continue;
-									case SyntaxKind.UsingStatement:
-									case SyntaxKind.FixedStatement:
-									case SyntaxKind.LockStatement:
-									case SyntaxKind.UnsafeStatement:
-									case SyntaxKind.TryStatement:
-									case SyntaxKind.CatchClause:
-									case SyntaxKind.CatchFilterClause:
-									case SyntaxKind.FinallyClause:
-									case SyntaxKind.StackAllocArrayCreationExpression:
-									case CodeAnalysisHelper.ImplicitStackAllocArrayCreationExpression:
-									case CodeAnalysisHelper.FunctionPointerCallingConvention:
-										yield return CreateClassificationSpan(snapshot, item.TextSpan, __Classifications.ResourceKeyword);
-										continue;
-									case SyntaxKind.LocalDeclarationStatement:
-										if (unitCompilation.FindToken(item.TextSpan.Start, true).Kind() == SyntaxKind.UsingKeyword) {
-											goto case SyntaxKind.UsingStatement;
-										}
-										continue;
-									case SyntaxKind.IsExpression:
-									case SyntaxKind.IsPatternExpression:
-									case SyntaxKind.AsExpression:
-									case SyntaxKind.RefExpression:
-									case SyntaxKind.RefType:
-									case SyntaxKind.CheckedExpression:
-									case SyntaxKind.CheckedStatement:
-									case SyntaxKind.UncheckedExpression:
-									case SyntaxKind.UncheckedStatement:
-										yield return CreateClassificationSpan(snapshot, item.TextSpan, __GeneralClassifications.TypeCastKeyword);
-										break;
-									case SyntaxKind.Argument:
-									case SyntaxKind.Parameter:
-									case SyntaxKind.CrefParameter:
-										switch (unitCompilation.FindToken(item.TextSpan.Start, true).Kind()) {
-											case SyntaxKind.InKeyword:
-											case SyntaxKind.OutKeyword:
-											case SyntaxKind.RefKeyword:
-												yield return CreateClassificationSpan(snapshot, item.TextSpan, __GeneralClassifications.TypeCastKeyword);
-												continue;
-										}
-										break;
-									case SyntaxKind.IdentifierName:
-										if (node.Parent.IsKind(SyntaxKind.TypeConstraint) && item.TextSpan.Length == 9 && node.ToString() == "unmanaged") {
-											goto case SyntaxKind.UnsafeStatement;
-										}
-										break;
-								}
-								continue;
-							}
-							case "operator":
-							case Constants.CodeOverloadedOperator: {
-								node = unitCompilation.FindNode(item.TextSpan);
-								if (node.RawKind == (int)SyntaxKind.DestructorDeclaration) {
-									yield return CreateClassificationSpan(snapshot, item.TextSpan, __Classifications.Declaration);
-									yield return CreateClassificationSpan(snapshot, item.TextSpan, __Classifications.ResourceKeyword);
-									continue;
-								}
-								var opMethod = semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node) as IMethodSymbol;
-								if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
-									if (node.RawKind == (int)SyntaxKind.OperatorDeclaration) {
-										yield return CreateClassificationSpan(snapshot, item.TextSpan, __Classifications.Declaration);
-									}
-									yield return CreateClassificationSpan(snapshot, item.TextSpan, __Classifications.OverrideMember);
-								}
-								continue;
-							}
-							case Constants.CodePunctuation:
-								if (item.TextSpan.Length == 1) {
-									var p = ClassifyPunctuation(item.TextSpan, snapshot, semanticModel, unitCompilation);
-									if (p != null) {
-										yield return p;
+									tag = ClassifyDeclarationKeyword(item.TextSpan, snapshot, node, unitCompilation, out var tag2);
+									if (tag2 != null) {
+										yield return tag2;
 									}
 								}
-								continue;
-							default:
-								if (ct == Constants.XmlDocDelimiter) {
-									if (lastTriviaSpan.Contains(item.TextSpan)) {
-										continue;
-									}
-									var trivia = unitCompilation.FindTrivia(item.TextSpan.Start);
-									switch (trivia.Kind()) {
-										case SyntaxKind.SingleLineDocumentationCommentTrivia:
-										case SyntaxKind.MultiLineDocumentationCommentTrivia:
-										case SyntaxKind.DocumentationCommentExteriorTrivia:
-											lastTriviaSpan = trivia.FullSpan;
-											yield return CreateClassificationSpan(snapshot, lastTriviaSpan, __Classifications.XmlDoc);
-											continue;
-									}
-								}
-								else if (ct == Constants.CodeIdentifier
-									//|| ct == Constants.CodeStaticSymbol
-									|| ct.EndsWith("name", StringComparison.Ordinal)) {
-									var itemSpan = item.TextSpan;
-									node = unitCompilation.FindNode(itemSpan, true);
-									foreach (var type in GetClassificationType(node, semanticModel)) {
-										yield return CreateClassificationSpan(snapshot, itemSpan, type);
-									}
+								else {
+									tag = ClassifyKeyword(item.TextSpan, snapshot, node, unitCompilation);
 								}
 								break;
+							case Constants.CodeOperator:
+							case Constants.CodeOverloadedOperator:
+								tag = ClassifyOperator(item.TextSpan, snapshot, semanticModel, unitCompilation);
+								break;
+							case Constants.CodePunctuation:
+								tag = ClassifyPunctuation(item.TextSpan, snapshot, semanticModel, unitCompilation);
+								break;
+							case Constants.XmlDocDelimiter:
+								tag = ClassifyXmlDoc(item.TextSpan, snapshot, unitCompilation, ref lastTriviaSpan);
+								break;
+							default:
+								tag = null;
+								break;
+						}
+						if (tag != null) {
+							yield return tag;
+							continue;
+						}
+						if (ct == Constants.CodeIdentifier
+							//|| ct == Constants.CodeStaticSymbol
+							|| ct.EndsWith("name", StringComparison.Ordinal)) {
+							var itemSpan = item.TextSpan;
+							node = unitCompilation.FindNode(itemSpan, true);
+							foreach (var type in GetClassificationType(node, semanticModel)) {
+								yield return CreateClassificationSpan(snapshot, itemSpan, type);
+							}
 						}
 					}
 				}
@@ -546,8 +414,140 @@ namespace Codist.Taggers
 				return null;
 			}
 
+			static TagSpan<IClassificationTag> ClassifyDeclarationKeyword(TextSpan itemSpan, ITextSnapshot snapshot, SyntaxNode node, CompilationUnitSyntax unitCompilation, out TagSpan<IClassificationTag> secondaryTag) {
+				secondaryTag = null;
+				switch (unitCompilation.FindToken(itemSpan.Start).Kind()) {
+					case SyntaxKind.SealedKeyword:
+					case SyntaxKind.OverrideKeyword:
+					case SyntaxKind.AbstractKeyword:
+					case SyntaxKind.VirtualKeyword:
+					case SyntaxKind.ProtectedKeyword:
+					case SyntaxKind.NewKeyword:
+						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.AbstractionKeyword);
+					case SyntaxKind.ThisKeyword:
+						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.Declaration);
+					case SyntaxKind.UnsafeKeyword:
+					case SyntaxKind.FixedKeyword:
+						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.ResourceKeyword);
+					case SyntaxKind.ExplicitKeyword:
+					case SyntaxKind.ImplicitKeyword:
+						secondaryTag = CreateClassificationSpan(snapshot, ((ConversionOperatorDeclarationSyntax)node).Type.Span, __Classifications.NestedDeclaration);
+						return CreateClassificationSpan(snapshot, itemSpan, __GeneralClassifications.TypeCastKeyword);
+					case SyntaxKind.ReadOnlyKeyword:
+						return CreateClassificationSpan(snapshot, itemSpan, __GeneralClassifications.TypeCastKeyword);
+					case CodeAnalysisHelper.RecordKeyword: // workaround for missing classification type for record identifier
+						itemSpan = ((TypeDeclarationSyntax)node).Identifier.Span;
+						return CreateClassificationSpan(snapshot, itemSpan, node.Kind() == CodeAnalysisHelper.RecordDeclaration ? TransientTags.StructDeclaration : TransientTags.ClassDeclaration);
+				}
+				return null;
+			}
+
+			static TagSpan<IClassificationTag> ClassifyKeyword(TextSpan itemSpan, ITextSnapshot snapshot, SyntaxNode node, CompilationUnitSyntax unitCompilation) {
+				switch (node.Kind()) {
+					case SyntaxKind.BreakStatement:
+						if (node.Parent is SwitchSectionSyntax) {
+							return null;
+						}
+						goto case SyntaxKind.ReturnStatement;
+					// highlights: return, yield return, yield break, throw and continue
+					case SyntaxKind.ReturnKeyword:
+					case SyntaxKind.GotoCaseStatement:
+					case SyntaxKind.GotoDefaultStatement:
+					case SyntaxKind.GotoStatement:
+					case SyntaxKind.ContinueStatement:
+					case SyntaxKind.ReturnStatement:
+					case SyntaxKind.YieldReturnStatement:
+					case SyntaxKind.YieldBreakStatement:
+					case SyntaxKind.ThrowStatement:
+					case SyntaxKind.ThrowExpression:
+						return CreateClassificationSpan(snapshot, itemSpan, __GeneralClassifications.ControlFlowKeyword);
+					case SyntaxKind.IfStatement:
+					case SyntaxKind.ElseClause:
+					case SyntaxKind.SwitchStatement:
+					case SyntaxKind.CaseSwitchLabel:
+					case SyntaxKind.DefaultSwitchLabel:
+					case CodeAnalysisHelper.SwitchExpression:
+					case SyntaxKind.CasePatternSwitchLabel:
+					case SyntaxKind.WhenClause:
+						return CreateClassificationSpan(snapshot, itemSpan, __GeneralClassifications.BranchingKeyword);
+					case SyntaxKind.ForStatement:
+					case SyntaxKind.ForEachStatement:
+					case SyntaxKind.ForEachVariableStatement:
+					case SyntaxKind.WhileStatement:
+					case SyntaxKind.DoStatement:
+					case SyntaxKind.SelectClause:
+					case SyntaxKind.FromClause:
+						return CreateClassificationSpan(snapshot, itemSpan, __GeneralClassifications.LoopKeyword);
+					case SyntaxKind.UsingStatement:
+					case SyntaxKind.FixedStatement:
+					case SyntaxKind.LockStatement:
+					case SyntaxKind.UnsafeStatement:
+					case SyntaxKind.TryStatement:
+					case SyntaxKind.CatchClause:
+					case SyntaxKind.CatchFilterClause:
+					case SyntaxKind.FinallyClause:
+					case SyntaxKind.StackAllocArrayCreationExpression:
+					case CodeAnalysisHelper.ImplicitStackAllocArrayCreationExpression:
+					case CodeAnalysisHelper.FunctionPointerCallingConvention:
+						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.ResourceKeyword);
+					case SyntaxKind.LocalDeclarationStatement:
+						if (unitCompilation.FindToken(itemSpan.Start, true).Kind() == SyntaxKind.UsingKeyword) {
+							goto case SyntaxKind.UsingStatement;
+						}
+						return null;
+					case SyntaxKind.IsExpression:
+					case SyntaxKind.IsPatternExpression:
+					case SyntaxKind.AsExpression:
+					case SyntaxKind.RefExpression:
+					case SyntaxKind.RefType:
+					case SyntaxKind.CheckedExpression:
+					case SyntaxKind.CheckedStatement:
+					case SyntaxKind.UncheckedExpression:
+					case SyntaxKind.UncheckedStatement:
+						return CreateClassificationSpan(snapshot, itemSpan, __GeneralClassifications.TypeCastKeyword);
+					case SyntaxKind.Argument:
+					case SyntaxKind.Parameter:
+					case SyntaxKind.CrefParameter:
+						switch (unitCompilation.FindToken(itemSpan.Start, true).Kind()) {
+							case SyntaxKind.InKeyword:
+							case SyntaxKind.OutKeyword:
+							case SyntaxKind.RefKeyword:
+								return CreateClassificationSpan(snapshot, itemSpan, __GeneralClassifications.TypeCastKeyword);
+						}
+						return null;
+					case SyntaxKind.IdentifierName:
+						if (node.Parent.IsKind(SyntaxKind.TypeConstraint) && itemSpan.Length == 9 && node.ToString() == "unmanaged") {
+							goto case SyntaxKind.UnsafeStatement;
+						}
+						return null;
+				}
+				return null;
+			}
+			static TagSpan<IClassificationTag> ClassifyOperator(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
+				var node = unitCompilation.FindNode(itemSpan);
+				if (node.RawKind == (int)SyntaxKind.DestructorDeclaration) {
+					return CreateClassificationSpan(snapshot, itemSpan, TransientTags.DestructorDeclaration);
+				}
+				var opMethod = semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node) as IMethodSymbol;
+				if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
+					if (node.RawKind == (int)SyntaxKind.OperatorDeclaration) {
+						return CreateClassificationSpan(snapshot, itemSpan, TransientTags.OverrideDeclaration);
+					}
+					else {
+						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.OverrideMember);
+					}
+				}
+				else if (opMethod?.MethodKind == MethodKind.LambdaMethod) {
+					var l = ClassifyLambdaExpression(itemSpan, snapshot, semanticModel, unitCompilation);
+					if (l != null) {
+						return l;
+					}
+				}
+				return null;
+			}
+
 			static TagSpan<IClassificationTag> ClassifyPunctuation(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
-				if (HighlightOptions.AllBraces) {
+				if (HighlightOptions.AllBraces && itemSpan.Length == 1) {
 					switch (snapshot[itemSpan.Start]) {
 						case '(':
 						case ')':
@@ -654,6 +654,37 @@ namespace Codist.Taggers
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
 					case SyntaxKind.Argument:
 						return ((ArgumentSyntax)node).Expression.IsKind(SyntaxKind.ImplicitStackAllocArrayCreationExpression) ? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor) : null;
+				}
+				return null;
+			}
+
+			static TagSpan<IClassificationTag> ClassifyLambdaExpression(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
+				if (HighlightOptions.AllBraces) {
+					var node = unitCompilation.FindNode(itemSpan, true, true);
+					if (node is LambdaExpressionSyntax) {
+						var ss = node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName);
+						if (ss != null) {
+							var df = semanticModel.AnalyzeDataFlow(ss);
+							if (df.ReadInside.Any(i => (i as ILocalSymbol)?.IsConst != true && df.VariablesDeclared.Contains(i) == false)) {
+								return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
+							}
+						}
+					}
+				}
+				return null;
+			}
+
+			static TagSpan<IClassificationTag> ClassifyXmlDoc(TextSpan itemSpan, ITextSnapshot snapshot, CompilationUnitSyntax unitCompilation, ref TextSpan lastTriviaSpan) {
+				if (lastTriviaSpan.Contains(itemSpan)) {
+					return null;
+				}
+				var trivia = unitCompilation.FindTrivia(itemSpan.Start);
+				switch (trivia.Kind()) {
+					case SyntaxKind.SingleLineDocumentationCommentTrivia:
+					case SyntaxKind.MultiLineDocumentationCommentTrivia:
+					case SyntaxKind.DocumentationCommentExteriorTrivia:
+						lastTriviaSpan = trivia.FullSpan;
+						return CreateClassificationSpan(snapshot, lastTriviaSpan, __Classifications.XmlDoc);
 				}
 				return null;
 			}
@@ -930,6 +961,14 @@ namespace Codist.Taggers
 			static TagSpan<IClassificationTag> CreateClassificationSpan(ITextSnapshot snapshotSpan, TextSpan span, ClassificationTag tag) {
 				return tag != null ? new TagSpan<IClassificationTag>(new SnapshotSpan(snapshotSpan, span.Start, span.Length), tag) : null;
 			}
+		}
+
+		static class TransientTags
+		{
+			public static readonly ClassificationTag ClassDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.ClassName.ClassificationType, ClassificationTagHelper.Declaration);
+			public static readonly ClassificationTag StructDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.StructName.ClassificationType, ClassificationTagHelper.Declaration);
+			public static readonly ClassificationTag DestructorDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.ResourceKeyword, __Classifications.Declaration);
+			public static readonly ClassificationTag OverrideDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.OverrideMember, __Classifications.Declaration);
 		}
 
 		static class HighlightOptions
