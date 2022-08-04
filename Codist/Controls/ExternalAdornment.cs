@@ -13,7 +13,7 @@ namespace Codist.Controls
 		internal const string QuickInfoSuppressionId = nameof(ExternalAdornment);
 
 		IWpfTextView _View;
-		readonly Canvas _Canvas;
+		Canvas _Canvas;
 		int _LayerZIndex;
 		bool _isDragging;
 		Point _beginDragPosition;
@@ -237,8 +237,9 @@ namespace Codist.Controls
 						d.Dispose();
 					}
 				}
-				_Canvas.PreviewMouseRightButtonUp += Canvas_PreviewMouseRightButtonUp;
+				_Canvas.PreviewMouseRightButtonUp -= Canvas_PreviewMouseRightButtonUp;
 				_Canvas.Children.Clear();
+				_Canvas = null;
 				_View = null;
 			}
 		}
