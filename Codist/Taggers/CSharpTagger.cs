@@ -293,10 +293,13 @@ namespace Codist.Taggers
 
 			void WorkspaceChanged(object sender, WorkspaceChangeEventArgs args) {
 				Debug.WriteLine($"Workspace {args.Kind}: {args.DocumentId}");
-				if (args.Kind == WorkspaceChangeKind.DocumentChanged
-					|| args.Kind == WorkspaceChangeKind.DocumentRemoved
-						&& args.DocumentId == _Document?.Id) {
+				switch (args.Kind) {
+					case WorkspaceChangeKind.DocumentChanged:
+					case WorkspaceChangeKind.DocumentRemoved:
+						if (args.DocumentId == _Document?.Id) {
 					return;
+				}
+						break;
 				}
 				ReparseAfterWorkspaceChange();
 			}
