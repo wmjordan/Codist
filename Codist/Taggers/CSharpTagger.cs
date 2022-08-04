@@ -244,13 +244,8 @@ namespace Codist.Taggers
 			void SubstituteParserResult() {
 				var tagger = _Tagger;
 				START:
-				var last = tagger._LastFinishedTask;
-				if (last == null) {
-					if (Interlocked.CompareExchange(ref tagger._LastFinishedTask, this, last) != last) {
-						goto START;
-					}
-				}
-				else {
+				var last = Interlocked.CompareExchange(ref tagger._LastFinishedTask, this, null);
+				if (last != null) {
 					var lastSnapshot = last.Snapshot;
 					if (lastSnapshot == null || _ForceUpdate || Snapshot.Version.VersionNumber > lastSnapshot.Version.VersionNumber) {
 						if (Interlocked.CompareExchange(ref tagger._LastFinishedTask, this, last) != last) {
@@ -260,6 +255,10 @@ namespace Codist.Taggers
 						last.Disconnect();
 						last._Model = null;
 						last._Snapshot = null;
+					}
+					else {
+						Disconnect();
+						return;
 					}
 				}
 				tagger.RemoveParser(this);
@@ -284,6 +283,7 @@ namespace Codist.Taggers
 					return;
 				}
 				tagger.RemoveParser(this);
+				Debug.WriteLine($"{_Document?.Id} Disconnected from workspace.");
 				if (_Workspace != null) {
 					_Workspace.WorkspaceChanged -= WorkspaceChanged;
 				}
@@ -297,8 +297,8 @@ namespace Codist.Taggers
 					case WorkspaceChangeKind.DocumentChanged:
 					case WorkspaceChangeKind.DocumentRemoved:
 						if (args.DocumentId == _Document?.Id) {
-					return;
-				}
+							return;
+						}
 						break;
 				}
 				ReparseAfterWorkspaceChange();
