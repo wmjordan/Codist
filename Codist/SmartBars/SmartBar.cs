@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -463,6 +464,10 @@ namespace Codist.SmartBars
 					_Bar.HideToolBar();
 				}
 				e.Handled = true;
+			}
+
+			protected override AutomationPeer OnCreateAutomationPeer() {
+				return null;
 			}
 
 			ContextMenu CreateContextMenuFromMenuFactory(CommandContext ctx) {

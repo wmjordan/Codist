@@ -510,6 +510,7 @@ namespace Codist.NaviBar
 			public virtual void Dispose() {
 				Node = null;
 				Bar = null;
+				Content = null;
 			}
 		}
 

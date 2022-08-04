@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -121,6 +122,10 @@ namespace Codist.Controls
 					}
 				}
 			}
+		}
+
+		protected override AutomationPeer OnCreateAutomationPeer() {
+			return null;
 		}
 
 		public virtual void Dispose() {

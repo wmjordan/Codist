@@ -5,6 +5,7 @@ using Codist.Controls;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using System.Windows;
+using System.Windows.Automation.Peers;
 
 namespace Codist.NaviBar
 {
@@ -37,6 +38,10 @@ namespace Codist.NaviBar
 				h.ShowContextMenu(e);
 				e.Handled = true;
 			}
+		}
+
+		protected override AutomationPeer OnCreateAutomationPeer() {
+			return null;
 		}
 
 		void View_Closed(object sender, EventArgs e) {
