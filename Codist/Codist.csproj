@@ -93,6 +93,7 @@
     <Compile Include="Display\JumpListEnhancer.cs" />
     <Compile Include="IconIds.cs" />
     <Compile Include="Margins\DisableChangeTrackerMargin.cs" />
+    <Compile Include="Margins\MarginElementBase.cs" />
     <Compile Include="Margins\SymbolReferenceMarkerStyle.cs" />
     <Compile Include="NaviBar\CSharpBar.GlobalNamespaceItem.cs" />
     <Compile Include="NaviBar\CSharpBar.NamespaceItem.cs" />
@@ -187,7 +188,7 @@
     <Compile Include="Helpers\XmlDocParser.cs" />
     <Compile Include="LineTransformers\LineHeightTransform.cs" />
     <Compile Include="Margins\CSharpMembersMargin.cs" />
-    <Compile Include="Margins\CommentMarginElement.cs" />
+    <Compile Include="Margins\CommentMargin.cs" />
     <Compile Include="Margins\LineNumberMargin.cs" />
     <Compile Include="Margins\MarginFactories.cs" />
     <Compile Include="Margins\MarkerStyle.cs" />

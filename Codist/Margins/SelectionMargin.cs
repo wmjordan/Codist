@@ -2,16 +2,13 @@
 using System.Windows;
 using System.Windows.Media;
 using AppHelpers;
-using Codist.Taggers;
-using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.Margins
 {
-	sealed class SelectionMargin : FrameworkElement, IDisposable, IWpfTextViewMargin
+	sealed class SelectionMargin : MarginElementBase, IDisposable, IWpfTextViewMargin
 	{
-		public const string MarginName = nameof(SelectionMargin);
 		const string FormatName = "Selected Text";
 		const double MarginOpacity = 0.3;
 
@@ -25,9 +22,6 @@ namespace Codist.Margins
 			_ScrollBar = scrollBar;
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 
-			IsHitTestVisible = false;
-			Width = 0;
-
 			Config.RegisterUpdateHandler(UpdateSelectionMarginConfig);
 			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Selection)) {
 				Visibility = Visibility.Visible;
@@ -39,13 +33,8 @@ namespace Codist.Margins
 			_TextView.Closed += _TextView_Closed;
 		}
 
-		public FrameworkElement VisualElement => this;
-		public double MarginSize => ActualWidth;
-		public bool Enabled => true;
-
-		public ITextViewMargin GetTextViewMargin(string marginName) {
-			return string.Equals(marginName, MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
-		}
+		public override string MarginName => nameof(SelectionMargin);
+		public override double MarginSize => 0;
 
 		void Setup() {
 			_EditorFormatMap.FormatMappingChanged += _EditorFormatMap_FormatMappingChanged;
@@ -136,7 +125,7 @@ namespace Codist.Margins
 			_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 		}
 
-		public void Dispose() {
+		public override void Dispose() {
 			if (_TextView != null) {
 				UnbindEvents();
 				_TextView = null;

@@ -11,9 +11,8 @@ using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.Margins
 {
-	sealed class CommentMargin : FrameworkElement, IWpfTextViewMargin
+	sealed class CommentMargin : MarginElementBase, IWpfTextViewMargin
 	{
-		public const string MarginName = nameof(CommentMargin);
 		//ToDo: Configurable marker styles
 		//ToDo: Change brush colors according to user settings
 		static readonly Pen CommentPen = new Pen(Brushes.LightGreen, 1);
@@ -50,8 +49,6 @@ namespace Codist.Margins
 			}
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 
-			IsHitTestVisible = false;
-			Width = MarkSize + MarkPadding + MarkPadding + /*extra padding*/ 2 * MarkPadding;
 			Visibility = Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.CodeMarginMask) ? Visibility.Visible : Visibility.Collapsed;
 
 			Config.RegisterUpdateHandler(UpdateCommentMarginConfig);
@@ -60,11 +57,14 @@ namespace Codist.Margins
 			//_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
 			_ScrollBar.TrackSpanChanged += OnMappingChanged;
 			_TextView.Closed += _TextView_Closed;
+
+			Width = MarginSize;
 		}
 
 		FrameworkElement IWpfTextViewMargin.VisualElement => this;
-		double ITextViewMargin.MarginSize => ActualWidth;
 		bool ITextViewMargin.Enabled => true;
+		public override string MarginName => nameof(CommentMargin);
+		public override double MarginSize => MarkSize + MarkPadding + MarkPadding + /*extra padding*/ 2 * MarkPadding;
 
 		static Dictionary<IClassificationType, Brush> InitClassificationBrushMapper() {
 			var r = ServicesHelper.Instance.ClassificationTypeRegistry;
@@ -87,10 +87,6 @@ namespace Codist.Margins
 				{ MarkdownTagger.HeaderClassificationTypes[1].ClassificationType, TaskBrush },
 				{ MarkdownTagger.DummyHeaderTags[1].ClassificationType, TaskBrush },
 			};
-		}
-
-		ITextViewMargin ITextViewMargin.GetTextViewMargin(string marginName) {
-			return string.Equals(marginName, MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
 		}
 
 		void UpdateCommentMarginConfig(ConfigUpdatedEventArgs e) {
@@ -248,7 +244,7 @@ namespace Codist.Margins
 		}
 
 		#region IDisposable Support
-		public void Dispose() {
+		public override void Dispose() {
 			if (_TextView != null) {
 				_TextView.Closed -= _TextView_Closed;
 				Config.UnregisterUpdateHandler(UpdateCommentMarginConfig);

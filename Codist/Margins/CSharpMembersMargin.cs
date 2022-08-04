@@ -23,10 +23,8 @@ namespace Codist.Margins
 	/// Helper class to handle the rendering of the members margin.
 	/// </summary>
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
-	sealed class CSharpMembersMargin : FrameworkElement, IWpfTextViewMargin
+	sealed class CSharpMembersMargin : MarginElementBase, IWpfTextViewMargin
 	{
-		public const string MarginName = nameof(CSharpMembersMargin);
-
 		//todo user customizable opacity of markers
 		const double MarkerSize = 3, Padding = 3, LineSize = 2, TypeLineSize = 1, TypeAlpha = 0.5, MemberAlpha = 0.5;
 
@@ -44,9 +42,6 @@ namespace Codist.Margins
 		/// <param name="textView">ITextView to which this <see cref="CSharpMembersMargin"/> will be attacheded.</param>
 		/// <param name="verticalScrollbar">Vertical scrollbar of the ITextViewHost that contains <paramref name="textView"/>.</param>
 		public CSharpMembersMargin(IWpfTextView textView, IVerticalScrollBar verticalScrollbar) {
-			IsHitTestVisible = false;
-			SnapsToDevicePixels = true;
-			Width = Padding + MarkerSize;
 			_MemberMarker = new MemberMarker(textView, verticalScrollbar, this);
 			_SymbolReferenceMarker = new SymbolReferenceMarker(textView, verticalScrollbar, this);
 			_FormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
@@ -59,11 +54,14 @@ namespace Codist.Margins
 			if (Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SymbolReference)) {
 				_SymbolReferenceMarker.HookEvents();
 			}
+
+			Width = MarginSize;
 		}
 
 		bool ITextViewMargin.Enabled => IsVisible;
 		FrameworkElement IWpfTextViewMargin.VisualElement => this;
-		double ITextViewMargin.MarginSize => Width;
+		public override string MarginName => nameof(CSharpMembersMargin);
+		public override double MarginSize => Padding + MarkerSize;
 
 		/// <summary>
 		/// Override for the FrameworkElement's OnRender. When called, redraw all markers 
@@ -134,16 +132,12 @@ namespace Codist.Margins
 			_RegionPen = new Pen(_RegionBackground ?? _RegionForeground, TypeLineSize);
 		}
 
-		ITextViewMargin ITextViewMargin.GetTextViewMargin(string marginName) {
-			return string.Equals(marginName, MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
-		}
-
 		void TextView_Closed(object sender, EventArgs e) {
 			(sender as IWpfTextView).Closed -= TextView_Closed;
 			Dispose();
 		}
 
-		public void Dispose() {
+		public override void Dispose() {
 			if (_SemanticContext != null) {
 				IsVisibleChanged -= _MemberMarker.OnIsVisibleChanged;
 				Config.UnregisterUpdateHandler(UpdateCSharpMembersMarginConfig);

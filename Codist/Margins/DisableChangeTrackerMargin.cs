@@ -6,16 +6,14 @@ using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.Margins
 {
-	sealed class DisableChangeTrackerMargin : FrameworkElement, IWpfTextViewMargin
+	sealed class DisableChangeTrackerMargin : MarginElementBase, IWpfTextViewMargin
 	{
-		internal const string MarginName = nameof(DisableChangeTrackerMargin);
 		readonly IWpfTextViewMargin _MarginContainer;
 		FrameworkElement _Tracker;
 		bool _DisabledChangeTracker, _TrackerEnabled = true;
 
-		public FrameworkElement VisualElement => this;
-		public double MarginSize => 0;
-		public bool Enabled => true;
+		public override string MarginName => nameof(DisableChangeTrackerMargin);
+		public override double MarginSize => 0;
 
 		public DisableChangeTrackerMargin(IWpfTextViewMargin marginContainer) {
 			marginContainer.VisualElement.MouseEnter += EnterMarginContainer;
@@ -44,13 +42,9 @@ namespace Codist.Margins
 			}
 		}
 
-		void IDisposable.Dispose() {
+		public override void Dispose() {
 			_MarginContainer.VisualElement.MouseEnter -= EnterMarginContainer;
 			Config.UnregisterUpdateHandler(ConfigUpdateHandler);
-		}
-
-		ITextViewMargin ITextViewMargin.GetTextViewMargin(string marginName) {
-			return string.Equals(marginName, MarginName, StringComparison.OrdinalIgnoreCase) ? this : null;
 		}
 	}
 }

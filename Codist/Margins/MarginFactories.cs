@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.Utilities;
 namespace Codist.Margins
 {
 	[Export(typeof(IWpfTextViewMarginProvider))]
-	[Name(CommentMargin.MarginName)]
+	[Name(nameof(CommentMargin))]
 	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = PredefinedMarginNames.OverviewMark)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.Code)]
@@ -27,7 +27,7 @@ namespace Codist.Margins
 
 	[Export(typeof(IWpfTextViewMarginProvider))]
 	[Name("MarkdownMargin")]
-	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = CommentMargin.MarginName)]
+	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = nameof(CommentMargin))]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.Code)]
 	[TextViewRole(PredefinedTextViewRoles.EmbeddedPeekTextView)]
@@ -46,8 +46,8 @@ namespace Codist.Margins
 	}
 
 	[Export(typeof(IWpfTextViewMarginProvider))]
-	[Name(CSharpMembersMargin.MarginName)]
-	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = CommentMargin.MarginName)]
+	[Name(nameof(CSharpMembersMargin))]
+	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = nameof(CommentMargin))]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.CSharp)]
 	[TextViewRole(PredefinedTextViewRoles.EmbeddedPeekTextView)]
@@ -64,7 +64,7 @@ namespace Codist.Margins
 	}
 
 	[Export(typeof(IWpfTextViewMarginProvider))]
-	[Name(DisableChangeTrackerMargin.MarginName)]
+	[Name(nameof(DisableChangeTrackerMargin))]
 	[MarginContainer(PredefinedMarginNames.LeftSelection)]
 	[ContentType(Constants.CodeTypes.Code)]
 	[TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
@@ -76,7 +76,7 @@ namespace Codist.Margins
 	}
 
 	[Export(typeof(IWpfTextViewMarginProvider))]
-	[Name(LineNumberMargin.MarginName)]
+	[Name(nameof(LineNumberMargin))]
 	[Order(Before = PredefinedMarginNames.OverviewChangeTracking)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.Text)]
@@ -93,7 +93,7 @@ namespace Codist.Margins
 	}
 
 	[Export(typeof(IWpfTextViewMarginProvider))]
-	[Name(SelectionMargin.MarginName)]
+	[Name(nameof(SelectionMargin))]
 	[Order(Before = PredefinedMarginNames.OverviewChangeTracking)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.Text)]
