@@ -192,8 +192,11 @@ namespace Codist.QuickInfo
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs e) {
 				var t = sender as TextBlock;
-				t.ToolTip = ShowSymbolLocation(_symbol, _symbol.HasSource() ? System.IO.Path.GetFileName(_symbol.Locations[0].SourceTree.FilePath) : _symbol.GetAssemblyModuleName());
-				t.ToolTipOpening -= ShowToolTip;
+				var s = _symbol;
+				if (s != null) {
+					t.ToolTip = ShowSymbolLocation(s, s.HasSource() ? System.IO.Path.GetFileName(s.Locations[0].SourceTree.FilePath) : s.GetAssemblyModuleName());
+					t.ToolTipOpening -= ShowToolTip;
+				}
 			}
 			async void ShowContextMenu(object sender, ContextMenuEventArgs e) {
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
