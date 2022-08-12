@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
@@ -432,6 +433,7 @@ namespace Codist
 		#endregion
 
 		#region Others
+		public static bool IsControlDown => (Keyboard.Modifiers & ModifierKeys.Control) != 0;
 		public static void Toggle(this UIElement control, bool visible) {
 			control.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
 		}

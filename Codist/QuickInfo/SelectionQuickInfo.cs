@@ -28,6 +28,9 @@ namespace Codist.QuickInfo
 
 		static async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			if (QuickInfoOverrider.CheckCtrlSuppression()) {
+				return null;
+			}
 			var textSnapshot = session.TextView.TextSnapshot;
 			var triggerPoint = session.GetTriggerPoint(textSnapshot).GetValueOrDefault();
 			try {

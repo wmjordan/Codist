@@ -36,6 +36,10 @@ namespace Codist.QuickInfo
 			return session.Properties.GetOrCreateSingletonProperty<DefaultOverrider>(() => new DefaultOverrider());
 		}
 
+		public static bool CheckCtrlSuppression() {
+			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlSupress) && WpfHelper.IsControlDown;
+		}
+
 		public static void HoldQuickInfo(DependencyObject quickInfoItem, bool hold) {
 			FindHolder(quickInfoItem)?.Hold(hold);
 		}

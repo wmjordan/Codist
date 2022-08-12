@@ -35,6 +35,9 @@ namespace Codist.QuickInfo
 
 		static async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			if (QuickInfoOverrider.CheckCtrlSuppression()) {
+				return null;
+			}
 			var buffer = session.TextView.TextBuffer;
 			var snapshot = session.TextView.TextSnapshot;
 			var navigator = ServicesHelper.Instance.TextStructureNavigator.GetTextStructureNavigator(buffer);

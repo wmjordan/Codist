@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
@@ -44,7 +43,7 @@ namespace Codist.QuickInfo
 
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			if (Keyboard.Modifiers == ModifierKeys.Control) {
+			if (QuickInfoOverrider.CheckCtrlSuppression()) {
 				return null;
 			}
 			// Map the trigger point down to our buffer.

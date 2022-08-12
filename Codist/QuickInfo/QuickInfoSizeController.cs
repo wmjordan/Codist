@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
@@ -18,9 +17,9 @@ namespace Codist.QuickInfo
 
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			return Keyboard.Modifiers != ModifierKeys.Control
-				? new QuickInfoItem(null, QuickInfoOverrider.CreateOverrider(session).Control)
-				: null;
+			return QuickInfoOverrider.CheckCtrlSuppression()
+				? null
+				: new QuickInfoItem(null, QuickInfoOverrider.CreateOverrider(session).Control);
 		}
 
 		void IDisposable.Dispose() {
