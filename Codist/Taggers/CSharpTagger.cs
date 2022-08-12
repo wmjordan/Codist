@@ -659,14 +659,14 @@ namespace Codist.Taggers
 			}
 
 			static TagSpan<IClassificationTag> ClassifyLambdaExpression(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
-				if (HighlightOptions.AllBraces) {
+				if (HighlightOptions.CapturingLambda) {
 					var node = unitCompilation.FindNode(itemSpan, true, true);
 					if (node is LambdaExpressionSyntax) {
 						var ss = node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName);
 						if (ss != null) {
 							var df = semanticModel.AnalyzeDataFlow(ss);
 							if (df.ReadInside.Any(i => (i as ILocalSymbol)?.IsConst != true && df.VariablesDeclared.Contains(i) == false)) {
-								return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
+								return CreateClassificationSpan(snapshot, itemSpan, __Classifications.ResourceKeyword);
 							}
 						}
 					}
@@ -979,7 +979,7 @@ namespace Codist.Taggers
 			public static TransientMemberTagHolder MemberBraceTags { get; private set; }
 
 			// use fields to cache option flags
-			public static bool AllBraces, AllParentheses, LocalFunctionDeclaration, NonPrivateField, StyleConstructorAsType;
+			public static bool AllBraces, AllParentheses, LocalFunctionDeclaration, NonPrivateField, StyleConstructorAsType, CapturingLambda;
 
 			static bool Init() {
 				Config.RegisterUpdateHandler(UpdateCSharpHighlighterConfig);
@@ -994,6 +994,7 @@ namespace Codist.Taggers
 				var o = e.Config.SpecialHighlightOptions;
 				AllBraces = o.HasAnyFlag(SpecialHighlightOptions.AllBraces);
 				AllParentheses = o.HasAnyFlag(SpecialHighlightOptions.AllParentheses);
+				CapturingLambda = o.MatchFlags(SpecialHighlightOptions.CapturingLambdaExpression);
 				var sp = o.MatchFlags(SpecialHighlightOptions.SpecialPunctuation);
 				if (sp) {
 					KeywordBraceTags = TransientKeywordTagHolder.BoldBraces.Clone();

@@ -1992,4 +1992,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_Properties" xml:space="preserve">
     <value>属性</value>
   </data>
+  <data name="OT_CapturingLambda" xml:space="preserve">
+    <value>突出显示捕获变量的 lambda 表达式</value>
+  </data>
 </root>

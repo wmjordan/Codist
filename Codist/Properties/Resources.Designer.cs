@@ -1822,6 +1822,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Highlight lambda expressions that capture variables.
+        /// </summary>
+        internal static string OT_CapturingLambda {
+            get {
+                return ResourceManager.GetString("OT_CapturingLambda", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Click and go to source code of symbol definition.
         /// </summary>
         internal static string OT_ClickAndGo {

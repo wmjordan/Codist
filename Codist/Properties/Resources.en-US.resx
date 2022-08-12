@@ -2009,4 +2009,7 @@ Right click: Wrap text menu...</value>
   <data name="T_Properties" xml:space="preserve">
     <value>Properties</value>
   </data>
+  <data name="OT_CapturingLambda" xml:space="preserve">
+    <value>Highlight lambda expressions that capture variables</value>
+  </data>
 </root>
