@@ -145,18 +145,14 @@ namespace Codist.SmartBars
 		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
-				AddCommand(toolBar, imageId, tooltip, (ctx) => {
-					TextEditorHelper.ExecuteEditorCommand(command);
-				});
+				AddCommand(toolBar, imageId, tooltip, (ctx) => TextEditorHelper.ExecuteEditorCommand(command));
 			}
 		}
 
 		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip, string command2) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
-				AddCommand(toolBar, imageId, tooltip, (ctx) => {
-					TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? command2 : command);
-				});
+				AddCommand(toolBar, imageId, tooltip, (ctx) => TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? command2 : command));
 			}
 		}
 
@@ -376,29 +372,29 @@ namespace Codist.SmartBars
 
 		protected sealed class CommandContext
 		{
-			readonly SmartBar _Bar;
-
 			public CommandContext(SmartBar bar, Control control) {
-				_Bar = bar;
+				Bar = bar;
 				Sender = control;
 			}
 			public CommandContext(SmartBar bar, Control control, bool rightClick) : this(bar, control) {
 				RightClick = rightClick;
 			}
-			public bool KeepToolBarOnClick { get; set; }
+			public SmartBar Bar { get; }
 			public bool RightClick { get; }
 			public Control Sender { get; }
-			public IWpfTextView View => _Bar.View;
-			public ITextSearchService2 TextSearchService => _Bar.TextSearchService;
-			public CancellationToken CancellationToken => _Bar._Cancellation.GetToken();
+			public bool KeepToolBarOnClick { get; set; }
+			public IWpfTextView View => Bar.View;
+			public ITextSearchService2 TextSearchService => Bar.TextSearchService;
+			public CancellationToken CancellationToken => Bar._Cancellation.GetToken();
+
 			public void HideToolBar() {
-				_Bar.HideToolBar();
+				Bar.HideToolBar();
 			}
 			public void KeepToolBar(bool refresh) {
-				_Bar.KeepToolbar();
+				Bar.KeepToolbar();
 				KeepToolBarOnClick = true;
 				if (refresh) {
-					_Bar.InternalCreateToolBar(CancellationToken);
+					Bar.InternalCreateToolBar(CancellationToken);
 				}
 			}
 		}

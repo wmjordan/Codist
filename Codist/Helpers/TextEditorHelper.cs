@@ -296,6 +296,16 @@ namespace Codist
 				return null;
 			}
 		}
+		public static ITextSnapshot Edit<TView, TArg>(this TView view, TArg arg, Action<TView, TArg, ITextEdit> action)
+			where TView : ITextView {
+			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
+				action(view, arg, edit);
+				if (edit.HasEffectiveChanges) {
+					return edit.Apply();
+				}
+				return null;
+			}
+		}
 		/// <summary>
 		/// Performs edit operation to each selected spans in the <paramref name="view"/>.
 		/// </summary>
