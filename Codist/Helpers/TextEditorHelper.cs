@@ -647,6 +647,10 @@ namespace Codist
 			return contentType.TypeName.IndexOf(typeName) != -1;
 		}
 
+		public static SnapshotSpan GetVisibleLineSpan(this IWpfTextView view) {
+			return new SnapshotSpan(view.TextViewLines.FirstVisibleLine.Start, view.TextViewLines.LastVisibleLine.End);
+		}
+
 		public static IWpfTextView GetMouseOverDocumentView() {
 			return _MouseOverTextView;
 		}
