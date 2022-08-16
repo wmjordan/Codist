@@ -296,7 +296,6 @@ namespace Codist.Taggers
 		public void Dispose() {
 			if (_Tags != null) {
 				_Aggregator.BatchedTagsChanged -= AggregatorBatchedTagsChanged;
-				_Aggregator.Dispose();
 				_Aggregator = null;
 				_Tags.Reset();
 				_Tags = null;
