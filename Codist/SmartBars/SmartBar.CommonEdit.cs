@@ -361,7 +361,7 @@ namespace Codist.SmartBars
 				}
 			}
 			else if (ts[l] == ':') {
-				if (ts[++l] != ':' || ts[++l] != '/' || ts[++l] != '/') {
+				if (ts[++l] != '/' || ts[++l] != '/') {
 					return;
 				}
 			}
