@@ -346,6 +346,7 @@ namespace Codist.Options
 			if (_WpfTextView != null) {
 				_WpfTextView.Selection.SelectionChanged += HandleViewSelectionChangedEvent;
 				_WpfTextView.Closed += UnhookSelectionChangedEvent;
+				SetFormatMap(_WpfTextView);
 			}
 		}
 
