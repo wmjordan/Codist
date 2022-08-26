@@ -79,7 +79,7 @@ namespace Codist.SmartBars
 			bool isDesignMode = CodistPackage.DebuggerStatus == DebuggerStatus.Design;
 			var isReadOnly = _Context.View.IsCaretInReadOnlyRegion();
 			var node = _Context.NodeIncludeTrivia;
-			if (isDesignMode && isReadOnly == false && (node is XmlTextSyntax)) {
+			if (isReadOnly == false && (node is XmlTextSyntax)) {
 				AddXmlDocCommands();
 				return;
 			}
@@ -140,7 +140,7 @@ namespace Codist.SmartBars
 					}
 				}
 			}
-			if (CodistPackage.DebuggerStatus != DebuggerStatus.Running && isReadOnly == false) {
+			if (isReadOnly == false) {
 				AddCommentCommands();
 			}
 			if (isDesignMode == false) {
@@ -158,7 +158,7 @@ namespace Codist.SmartBars
 				AddCommands(MyToolBar, IconIds.Marks, R.CMD_MarkSymbol, null, GetMarkerCommands);
 			}
 
-			if (/*isDesignMode && */isReadOnly == false) {
+			if (isReadOnly == false) {
 				AddRefactorCommands(node);
 			}
 		}
