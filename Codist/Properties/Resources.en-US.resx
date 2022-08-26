@@ -2012,4 +2012,7 @@ Right click: Wrap text menu...</value>
   <data name="OT_CapturingLambda" xml:space="preserve">
     <value>Highlight lambda expressions that capture variables</value>
   </data>
+  <data name="CMD_QuickAction" xml:space="preserve">
+    <value>Quick Actions and Refactoring...</value>
+  </data>
 </root>

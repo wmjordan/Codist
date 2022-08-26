@@ -142,6 +142,7 @@ namespace Codist.SmartBars
 			}
 			if (isReadOnly == false) {
 				AddCommentCommands();
+				AddEditorCommand(MyToolBar, IconIds.QuickAction, "View.QuickActionsForPosition", R.CMD_QuickAction);
 			}
 			if (isDesignMode == false) {
 				AddCommands(MyToolBar, IconIds.ToggleBreakpoint, R.CMD_Debugger, ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);

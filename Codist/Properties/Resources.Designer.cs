@@ -916,6 +916,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Quick Actions and Refactoring....
+        /// </summary>
+        internal static string CMD_QuickAction {
+            get {
+                return ResourceManager.GetString("CMD_QuickAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove.
         /// </summary>
         internal static string CMD_Remove {
