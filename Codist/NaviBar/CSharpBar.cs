@@ -507,10 +507,10 @@ namespace Codist.NaviBar
 			protected CSharpBar Bar { get; private set; }
 			public SyntaxNode Node { get; protected set; }
 			public abstract BarItemType ItemType { get; }
-			public virtual void Dispose() {
+			public override void Dispose() {
+				base.Dispose();
 				Node = null;
 				Bar = null;
-				Content = null;
 			}
 		}
 

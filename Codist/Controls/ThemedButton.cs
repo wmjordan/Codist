@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
 {
-	public sealed class ThemedButton : Button, IContextMenuHost
+	public sealed class ThemedButton : Button, IContextMenuHost, IDisposable
 	{
 		readonly Action _clickHanler;
 
@@ -48,9 +48,16 @@ namespace Codist.Controls
 		internal void PerformClick() {
 			OnClick();
 		}
+
+		public void Dispose() {
+			if (Content is StackPanel p) {
+				p.Children.DisposeCollection();
+			}
+			Content = null;
+		}
 	}
 
-	public class ThemedImageButton : Button
+	public class ThemedImageButton : Button, IDisposable
 	{
 		public static readonly DependencyProperty IsCheckedProperty = DependencyProperty.Register("IsChecked", typeof(bool), typeof(ThemedImageButton));
 		public static readonly DependencyProperty IsHighlightedProperty = DependencyProperty.Register("IsHighlighted", typeof(bool), typeof(ThemedImageButton));
@@ -85,9 +92,16 @@ namespace Codist.Controls
 		protected override AutomationPeer OnCreateAutomationPeer() {
 			return null;
 		}
+
+		public virtual void Dispose() {
+			if (Content is StackPanel p) {
+				p.Children.DisposeCollection();
+			}
+			Content = null;
+		}
 	}
 
-	public sealed class ThemedToggleButton : ToggleButton
+	public sealed class ThemedToggleButton : ToggleButton, IDisposable
 	{
 		TextBlock _Text;
 
@@ -114,6 +128,13 @@ namespace Codist.Controls
 					p.Children[1] = _Text = value;
 				}
 			}
+		}
+
+		public void Dispose() {
+			if (Content is StackPanel p) {
+				p.Children.DisposeCollection();
+			}
+			Content = null;
 		}
 	}
 }

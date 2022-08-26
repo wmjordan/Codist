@@ -228,7 +228,7 @@ namespace Codist.Controls
 			};
 		}
 
-		MenuItem CreateItem(int imageId, string title, RoutedEventHandler clickHandler) {
+		static MenuItem CreateItem(int imageId, string title, RoutedEventHandler clickHandler) {
 			var item = CreateItem(imageId, title);
 			item.Click += clickHandler;
 			return item;
@@ -242,7 +242,7 @@ namespace Codist.Controls
 		public void Dispose() {
 			_Host = null;
 			DataContext = null;
-			Items.Clear();
+			this.DisposeCollection();
 		}
 
 		#region Menu event handlers
