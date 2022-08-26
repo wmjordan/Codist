@@ -144,7 +144,7 @@ namespace Codist.Taggers
 			TypeCastKeyword = registry.GetClassificationTag(Constants.CSharpTypeCastKeyword);
 			Punctuation = registry.GetClassificationTag(Constants.CodePunctuation);
 			Keyword = registry.GetClassificationTag(Constants.CodeKeyword);
-			StrongBrace = registry.GetClassificationTag(Constants.CodeBoldBrace);
+			Bold = registry.GetClassificationTag(Constants.CodeBold);
 		}
 
 		public ClassificationTag BranchingKeyword { get; }
@@ -154,7 +154,7 @@ namespace Codist.Taggers
 		public ClassificationTag TypeCastKeyword { get; }
 		public ClassificationTag Keyword { get; }
 		public ClassificationTag Punctuation { get; }
-		public ClassificationTag StrongBrace { get; }
+		public ClassificationTag Bold { get; }
 	}
 
 	sealed class HighlightClassifications

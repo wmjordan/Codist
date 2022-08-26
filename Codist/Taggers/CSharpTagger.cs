@@ -714,7 +714,7 @@ namespace Codist.Taggers
 						if (ss != null) {
 							var df = semanticModel.AnalyzeDataFlow(ss);
 							if (df.ReadInside.Any(i => (i as ILocalSymbol)?.IsConst != true && df.VariablesDeclared.Contains(i) == false)) {
-								return CreateClassificationSpan(snapshot, itemSpan, __Classifications.ResourceKeyword);
+								return CreateClassificationSpan(snapshot, itemSpan, TransientKeywordTagHolder.Bold.Resource);
 							}
 						}
 					}
@@ -1045,7 +1045,7 @@ namespace Codist.Taggers
 				CapturingLambda = o.MatchFlags(SpecialHighlightOptions.CapturingLambdaExpression);
 				var sp = o.MatchFlags(SpecialHighlightOptions.SpecialPunctuation);
 				if (sp) {
-					KeywordBraceTags = TransientKeywordTagHolder.BoldBraces.Clone();
+					KeywordBraceTags = TransientKeywordTagHolder.Bold.Clone();
 					MemberBraceTags = TransientMemberTagHolder.BoldBraces.Clone();
 					MemberDeclarationBraceTags = TransientMemberTagHolder.BoldDeclarationBraces.Clone();
 				}
@@ -1055,20 +1055,20 @@ namespace Codist.Taggers
 					MemberDeclarationBraceTags = TransientMemberTagHolder.DeclarationBraces.Clone();
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.BranchBrace) == false) {
-					KeywordBraceTags.Branching = sp ? ClassificationTagHelper.BoldBraceTag : null;
+					KeywordBraceTags.Branching = sp ? ClassificationTagHelper.BoldTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.CastBrace) == false) {
-					KeywordBraceTags.TypeCast = sp ? ClassificationTagHelper.BoldBraceTag : null;
+					KeywordBraceTags.TypeCast = sp ? ClassificationTagHelper.BoldTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.LoopBrace) == false) {
-					KeywordBraceTags.Loop = sp ? ClassificationTagHelper.BoldBraceTag : null;
+					KeywordBraceTags.Loop = sp ? ClassificationTagHelper.BoldTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.ResourceBrace) == false) {
-					KeywordBraceTags.Resource = sp ? ClassificationTagHelper.BoldBraceTag : null;
+					KeywordBraceTags.Resource = sp ? ClassificationTagHelper.BoldTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.ParameterBrace) == false) {
-					MemberBraceTags.Constructor = sp ? ClassificationTagHelper.BoldBraceTag : null;
-					MemberBraceTags.Method = sp ? ClassificationTagHelper.BoldBraceTag : null;
+					MemberBraceTags.Constructor = sp ? ClassificationTagHelper.BoldTag : null;
+					MemberBraceTags.Method = sp ? ClassificationTagHelper.BoldTag : null;
 				}
 				if (o.MatchFlags(SpecialHighlightOptions.DeclarationBrace) == false) {
 					MemberDeclarationBraceTags.Class

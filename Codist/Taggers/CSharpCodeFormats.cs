@@ -10,7 +10,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	[Order(After = Constants.CodeKeywordControl)]
-	[Order(Before = Constants.CodeBoldBrace)]
+	[Order(Before = Constants.CodeBold)]
 	sealed class ControlFlowKeywordFormat : ClassificationFormatDefinition
 	{
 		public ControlFlowKeywordFormat() {
@@ -37,7 +37,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	[Order(After = Constants.CodeKeywordControl)]
-	[Order(Before = Constants.CodeBoldBrace)]
+	[Order(Before = Constants.CodeBold)]
 	sealed class BranchingKeywordFormat : ClassificationFormatDefinition
 	{
 		public BranchingKeywordFormat() {
@@ -51,7 +51,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	[Order(After = Constants.CodeKeywordControl)]
-	[Order(Before = Constants.CodeBoldBrace)]
+	[Order(Before = Constants.CodeBold)]
 	sealed class LoopKeywordFormat : ClassificationFormatDefinition
 	{
 		public LoopKeywordFormat() {
@@ -64,7 +64,7 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpTypeCastKeyword)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
-	[Order(Before = Constants.CodeBoldBrace)]
+	[Order(Before = Constants.CodeBold)]
 	sealed class TypeCastKeywordFormat : ClassificationFormatDefinition
 	{
 		public TypeCastKeywordFormat() {
@@ -78,7 +78,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeKeyword)]
 	[Order(After = Constants.CSharpBranchingKeyword)]
-	[Order(Before = Constants.CodeBoldBrace)]
+	[Order(Before = Constants.CodeBold)]
 	sealed class ResourceKeywordFormat : ClassificationFormatDefinition
 	{
 		public ResourceKeywordFormat() {
@@ -87,14 +87,14 @@ namespace Codist.Taggers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.CodeBoldBrace)]
-	[Name(Constants.CodeBoldBrace)]
+	[ClassificationType(ClassificationTypeNames = Constants.CodeBold)]
+	[Name(Constants.CodeBold)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
-	sealed class SpecialPunctuationFormat : ClassificationFormatDefinition
+	sealed class BoldFormat : ClassificationFormatDefinition
 	{
-		public SpecialPunctuationFormat() {
-			DisplayName = Constants.CodeBoldBrace;
+		public BoldFormat() {
+			DisplayName = Constants.CodeBold;
 			IsBold = true;
 		}
 	}

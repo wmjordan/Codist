@@ -34,9 +34,9 @@ namespace Codist.Taggers
 
 		public static readonly TransientMemberTagHolder DeclarationBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.DeclarationBrace)));
 
-		public static readonly TransientMemberTagHolder BoldDeclarationBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.BoldBrace, ClassificationTagHelper.DeclarationBrace)));
+		public static readonly TransientMemberTagHolder BoldDeclarationBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.Bold, ClassificationTagHelper.DeclarationBrace)));
 
-		public static readonly TransientMemberTagHolder BoldBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.BoldBrace)));
+		public static readonly TransientMemberTagHolder BoldBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.Bold)));
 
 		public TransientMemberTagHolder Clone() {
 			return (TransientMemberTagHolder)MemberwiseClone();
@@ -56,7 +56,7 @@ namespace Codist.Taggers
 
 		public static readonly TransientKeywordTagHolder Default = ClassificationTagHelper.InitFields<TransientKeywordTagHolder>((s, t) => new ClassificationTag(t));
 
-		public static readonly TransientKeywordTagHolder BoldBraces = ClassificationTagHelper.InitFields<TransientKeywordTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.BoldBrace)));
+		public static readonly TransientKeywordTagHolder Bold = ClassificationTagHelper.InitFields<TransientKeywordTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.Bold)));
 
 		public TransientKeywordTagHolder Clone() {
 			return (TransientKeywordTagHolder)MemberwiseClone();
@@ -67,11 +67,11 @@ namespace Codist.Taggers
 	{
 		public static readonly IClassificationType Declaration = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CSharpDeclarationName);
 		public static readonly IClassificationType DeclarationBrace = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CSharpDeclarationBrace);
-		public static readonly IClassificationType BoldBrace = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBoldBrace);
-		public static readonly IClassificationType BoldDeclarationBrace = ServicesHelper.Instance.ClassificationTypeRegistry.CreateTransientClassificationType(DeclarationBrace, BoldBrace);
+		public static readonly IClassificationType Bold = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBold);
+		public static readonly IClassificationType BoldDeclarationBrace = ServicesHelper.Instance.ClassificationTypeRegistry.CreateTransientClassificationType(DeclarationBrace, Bold);
 
 		public static readonly ClassificationTag DeclarationBraceTag = new ClassificationTag(DeclarationBrace);
-		public static readonly ClassificationTag BoldBraceTag = new ClassificationTag(BoldBrace);
+		public static readonly ClassificationTag BoldTag = new ClassificationTag(Bold);
 		public static readonly ClassificationTag BoldDeclarationBraceTag = new ClassificationTag(BoldDeclarationBrace);
 
 		public static ClassificationTag CreateTransientClassificationTag(params IClassificationType[] tags) {

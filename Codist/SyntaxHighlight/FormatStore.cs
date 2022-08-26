@@ -209,7 +209,7 @@ namespace Codist.SyntaxHighlight
 				}
 				AddSelfAndBase(d, i);
 			}
-			AddSelfAndBase(d, cts.GetClassificationType(Constants.CodeBoldBrace));
+			AddSelfAndBase(d, cts.GetClassificationType(Constants.CodeBold));
 			return d;
 
 			void AddSelfAndBase(Dictionary<IClassificationType, List<IClassificationType>> store, IClassificationType type) {
