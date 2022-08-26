@@ -169,17 +169,21 @@ namespace Codist
 			if (selection.Length >= 128) {
 				return TokenType.None;
 			}
-			string s = null;
-			if ((selection.Length == 36 || selection.Length == 38) && Guid.TryParse(s = selection.GetText(), out var result)) {
-				return TokenType.Guid;
-			}
-			if (selection.Length == 4 && (s = selection.GetText()).Equals("Guid", StringComparison.OrdinalIgnoreCase)) {
-				return TokenType.GuidPlaceHolder;
+			string s = selection.GetText();
+			switch (selection.Length) {
+				case 4:
+					if (s.Equals("Guid", StringComparison.OrdinalIgnoreCase)) {
+						return TokenType.GuidPlaceHolder;
+					}
+					break;
+				case 36:
+				case 38:
+					if (Guid.TryParse(s, out var result)) {
+						return TokenType.Guid;
+					}
+					break;
 			}
 			var t = TokenType.None;
-			if (s == null) {
-				s = selection.GetText();
-			}
 			if (s.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) {
 				if (s.Length > 2) {
 					s = s.Substring(2);
@@ -826,9 +830,10 @@ namespace Codist
 
 		[Export(typeof(IWpfTextViewCreationListener))]
 		[ContentType(Constants.CodeTypes.Code)]
+		[ContentType(Constants.CodeTypes.Output)]
 		[ContentType(Constants.CodeTypes.InteractiveContent)]
 		[TextViewRole(PredefinedTextViewRoles.Document)]
-		[TextViewRole(PredefinedTextViewRoles.Editable)]
+		[TextViewRole(PredefinedTextViewRoles.Interactive)]
 		sealed class ActiveViewTrackerFactory : IWpfTextViewCreationListener
 		{
 			public void TextViewCreated(IWpfTextView textView) {

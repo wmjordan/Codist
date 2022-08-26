@@ -241,7 +241,11 @@ namespace Codist.SyntaxHighlight
 				fontSize = 1;
 			}
 			if (string.IsNullOrWhiteSpace(settings.Font) == false || settings.Stretch.HasValue) {
-				format = format.SetTypeface(new Typeface(string.IsNullOrWhiteSpace(settings.Font) == false ? new FontFamily(settings.Font) : __DefaultFontFamily, FontStyles.Normal, FontWeights.Normal, settings.Stretch.HasValue ? FontStretch.FromOpenTypeStretch(settings.Stretch.Value) : FontStretches.Normal));
+				format = format.SetTypeface(new Typeface(
+					string.IsNullOrWhiteSpace(settings.Font) == false ? new FontFamily(settings.Font) : __DefaultFontFamily,
+					FontStyles.Normal,
+					FontWeights.Normal,
+					settings.Stretch.HasValue ? FontStretch.FromOpenTypeStretch(settings.Stretch.Value) : FontStretches.Normal));
 			}
 			if (settings.FontSize != 0) {
 				if (format.FontRenderingEmSizeEmpty || fontSize != format.FontRenderingEmSize) {
