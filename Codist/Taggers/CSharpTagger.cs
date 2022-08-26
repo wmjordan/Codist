@@ -37,6 +37,7 @@ namespace Codist.Taggers
 		int _Reference;
 		bool _IsVisible;
 		bool _HasBackgroundChange;
+		readonly bool _IsInteractiveWindow;
 		// debug info
 		readonly string _name;
 
@@ -45,7 +46,7 @@ namespace Codist.Taggers
 			_name = buffer.GetTextDocument()?.FilePath ?? buffer.CurrentSnapshot?.GetText(0, Math.Min(buffer.CurrentSnapshot.Length, 500));
 			if (view != null) {
 				_View = view;
-				if (IsInteractiveWindow(buffer) == false) {
+				if ((_IsInteractiveWindow = IsInteractiveWindow(buffer)) == false) {
 					view.VisualElement.IsVisibleChanged += VisualElement_IsVisibleChanged;
 				}
 			}
@@ -111,7 +112,7 @@ namespace Codist.Taggers
 					finishedTask = Volatile.Read(ref _LastFinishedTask);
 					goto GET_RESULT;
 				}
-				if (finishedSnapshot != null && finishedSnapshot.TextBuffer == snapshot.TextBuffer) {
+				if (workspace != null && finishedSnapshot != null && finishedSnapshot.TextBuffer == snapshot.TextBuffer) {
 					return UseOldResult(model, workspace, finishedSnapshot, spans, snapshot);
 				}
 			}
@@ -135,9 +136,6 @@ namespace Codist.Taggers
 		}
 
 		static IEnumerable<ITagSpan<IClassificationTag>> UseOldResult(SemanticModel model, Workspace workspace, ITextSnapshot finishedSnapshot, NormalizedSnapshotSpanCollection spans, ITextSnapshot snapshot) {
-			if (workspace == null) {
-				yield break;
-			}
 			foreach (var tagSpan in Parser.GetTags(MapToOldSpans(spans, finishedSnapshot), workspace, model, finishedSnapshot)) {
 				yield return new TagSpan<IClassificationTag>(tagSpan.Span.TranslateTo(snapshot, SpanTrackingMode.EdgeInclusive), tagSpan.Tag);
 			}
@@ -256,7 +254,7 @@ namespace Codist.Taggers
 					if (w != null) {
 						_Workspace = w;
 						_Document = w.GetDocument(_Buffer);
-						if (IsInteractiveWindow(_Buffer) == false) {
+						if (_Tagger?._IsInteractiveWindow == false) {
 							w.WorkspaceChanged += WorkspaceChanged;
 						}
 					}
