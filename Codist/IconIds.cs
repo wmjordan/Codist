@@ -138,6 +138,7 @@ namespace Codist
 		public const int LineOfCode = KnownImageIds.Code;
 		public const int InstanceProducer = KnownImageIds.NewItem;
 		public const int GoToDefinition = KnownImageIds.GoToDefinition;
+		public const int QuickAction = KnownImageIds.IntellisenseLightBulb;
 		public const int SelectCode = KnownImageIds.BlockSelection;
 		public const int SelectAll = KnownImageIds.SelectAll;
 		public const int Open = KnownImageIds.Open;
