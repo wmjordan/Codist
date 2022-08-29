@@ -77,7 +77,7 @@ namespace Codist
 		public const string CSharpControlFlowKeyword = "C#: Control flow keyword";
 		public const string CSharpLoopKeyword = "C#: Loop keyword";
 		public const string CSharpTypeCastKeyword = "C#: Type cast keyword";
-		public const string CodeBoldBrace = CodistPrefix + "Bold brace";
+		public const string CodeBold = CodistPrefix + "Bold";
 
 		public const string CodeClassName = "class name";
 		public const string CodeStructName = "struct name";
