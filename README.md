@@ -88,7 +88,7 @@ Syntax definitions in the _All languages_ section will list all syntax styles fo
 
 **Note**: _Font size_ is relative value to editor default font size. Partially checked checkboxes denote default syntax styles are used.
 
-**A Side Note for Editor Font**: You may consider substituting the font used by Visual Studio code editor with professionally designed fonts for programming, for instance, [IBM Plex Mono](https://github.com/IBM/plex), [Fira Code](https://github.com/tonsky/FiraCode), etc. Employing [MacType](https://github.com/snowie2000/mactype) can also enhance system-wide textual display quality, especially for Chinese, Japanese and Korean programmers.
+**A Side Note for Editor Font**: You may consider substituting the font used by Visual Studio code editor with professionally designed fonts for programming, for instance, [IBM Plex Mono](https://github.com/IBM/plex), [Fira Code](https://github.com/tonsky/FiraCode), etc. Employing [MacType](https://github.com/snowie2000/mactype) can significantly enhance system-wide textual display quality, especially for Chinese, Japanese and Korean programmers.
 
 ### My Symbols and External Symbols
 
@@ -528,7 +528,7 @@ Open the *Codist* section in the *Tools->Options* dialog. In the *General* secti
 
 # Acknowledgements
 
-I have learned a lot from the following extension projects (sorted by the time when I learned from them).
+I have learned a lot from the following extension projects (sorted by the time when I learned from them). Codist would not be what you see today without them.
 
 * CommentsPlus: https://github.com/mhoumann/CommentsPlus
 * Better comments: https://github.com/omsharp/BetterComments
@@ -550,7 +550,7 @@ I have learned a lot from the following extension projects (sorted by the time w
 * ReviewBoard: code.google.com/p/reviewboardvsx
 * Tweaks: https://github.com/madskristensen/Tweakster
 
-And every donaters, beta testers, feedback providers to this project.
+And thank you, every donaters, beta testers, feedback providers to this project.
 
 # License
 

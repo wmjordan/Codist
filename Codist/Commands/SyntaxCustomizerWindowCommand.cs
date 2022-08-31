@@ -1,12 +1,6 @@
 ﻿using System;
-using System.ComponentModel.Design;
-using System.Globalization;
-using System.Threading;
-using System.Threading.Tasks;
 using AppHelpers;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Task = System.Threading.Tasks.Task;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Commands
