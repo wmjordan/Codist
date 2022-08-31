@@ -22,23 +22,17 @@ namespace Codist.Controls
 	/// </summary>
 	public sealed class KeystrokeThief
 	{
-		readonly IOleComponentManager _manager;
-		uint _componentCookie;
-
-		KeystrokeThief(IOleComponentManager manager) {
-			_manager = manager ?? throw new ArgumentNullException("manager");
-		}
+		readonly static IOleComponentManager __Manager = ServicesHelper.Get<IOleComponentManager, SOleComponentManager>();
+		uint _ComponentCookie;
 
 		public bool IsStealing { get; set; }
 
 		public static void Bind(Window window) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			var componentManager = ServiceProvider.GetGlobalServiceAsync<SOleComponentManager, IOleComponentManager>().Result;
-			var thief = new KeystrokeThief(componentManager);
-			// window.Owner = Application.Current.MainWindow;
-			window.Activated += (s, args) => thief.StartStealing();
-			window.Deactivated += (s, args) => thief.StopStealing();
-			window.Closed += (s, args) => thief.StopStealing();
+			var thief = new KeystrokeThief();
+			window.Activated += thief.WindowActivate;
+			window.Deactivated += thief.WindowDeactivate;
+			window.Closed += thief.Release;
 		}
 
 		void RegisterDummyComponent() {
@@ -46,20 +40,35 @@ namespace Codist.Controls
 			var component = new EmptyOleComponent();
 			var regInfo = new OLECRINFO { grfcrf = 0U, grfcadvf = 0U, uIdleTimeInterval = 0U };
 			regInfo.cbSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf(regInfo);
-			int result = _manager.FRegisterComponent(component, new[] { regInfo }, out _componentCookie);
+			int result = __Manager.FRegisterComponent(component, new[] { regInfo }, out _ComponentCookie);
 			if (!ErrorHandler.Succeeded(result)) {
 				throw new InvalidOperationException("Could not register the OleComponent");
 			}
 
-			_manager.FOnComponentActivate(_componentCookie);
+			__Manager.FOnComponentActivate(_ComponentCookie);
 		}
 
 		void UnregisterDummyComponent() {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			_manager.FRevokeComponent(_componentCookie);
-			_componentCookie = 0;
+			__Manager.FRevokeComponent(_ComponentCookie);
+			_ComponentCookie = 0;
 		}
 
+		void WindowActivate(object sender, EventArgs e) {
+			StartStealing();
+		}
+
+		void WindowDeactivate(object sender, EventArgs e) {
+			StopStealing();
+		}
+
+		void Release(object sender, EventArgs e) {
+			StopStealing();
+			Window window = sender as Window;
+			window.Activated -= WindowActivate;
+			window.Deactivated -= WindowDeactivate;
+			window.Closed -= Release;
+		}
 
 		public void StartStealing() {
 			if (IsStealing == false) {

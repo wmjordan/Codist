@@ -1006,6 +1006,8 @@ namespace Codist.Options
 			UnhookSelectionChangedEvent(_WpfTextView, EventArgs.Empty);
 			TextEditorHelper.ActiveTextViewChanged -= HandleViewChangedEvent;
 			_FormatMap.ClassificationFormatMappingChanged -= RefreshList;
+			_WpfTextView = null;
+			_FormatMap = null;
 			base.OnClosed(e);
 		}
 		void Ok() {
@@ -1361,7 +1363,6 @@ namespace Codist.Options
 				_HighlightNonPrivateFieldDeclarationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				_HighlightConstructorAsTypeBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				_HighlightCapturingLambdaBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
-				//_Options = new[] { _MarkSpecialPunctuationBox, _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox, _HighlightLocalFunctionDeclarationBox, _HighlightNonPrivateFieldDeclarationBox };
 			}
 
 			void UpdateConfig(SpecialHighlightOptions options, bool set) {
