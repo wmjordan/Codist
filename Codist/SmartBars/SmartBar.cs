@@ -25,7 +25,7 @@ namespace Codist.SmartBars
 		internal const string QuickInfoSuppressionId = nameof(SmartBar);
 
 		/// <summary>The layer for the smart bar adornment.</summary>
-		IAdornmentLayer _ToolBarLayer;
+		ExternalAdornment _ToolBarLayer;
 		readonly ToolBarTray _ToolBarTray;
 		CancellationTokenSource _Cancellation = new CancellationTokenSource();
 		IWpfTextView _View;
@@ -41,7 +41,7 @@ namespace Codist.SmartBars
 		public SmartBar(IWpfTextView view, ITextSearchService2 textSearchService) {
 			_View = view ?? throw new ArgumentNullException(nameof(view));
 			_TextSearchService = textSearchService;
-			_ToolBarLayer = view.GetAdornmentLayer(nameof(SmartBar));
+			_ToolBarLayer = ExternalAdornment.GetOrCreate(view);
 			Config.RegisterUpdateHandler(UpdateSmartBarConfig);
 			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
 				_View.VisualElement.PreviewKeyUp += ViewKeyUp;
@@ -74,7 +74,7 @@ namespace Codist.SmartBars
 			_ToolBarTray.MouseEnter += ToolBarMouseEnter;
 			_ToolBarTray.MouseLeave += ToolBarMouseLeave;
 			_ToolBarTray.DragEnter += HideToolBar;
-			_ToolBarLayer.AddAdornment(AdornmentPositioningBehavior.ViewportRelative, null, null, _ToolBarTray, null);
+			_ToolBarLayer.Add(_ToolBarTray);
 			_ToolBarTray.Visibility = Visibility.Hidden;
 		}
 
@@ -212,12 +212,11 @@ namespace Codist.SmartBars
 			var v = View;
 			var pos = Mouse.GetPosition(v.VisualElement);
 			var rs = _ToolBarTray.RenderSize;
-			var x = pos.X - 35 + v.ViewportLeft;
-			var y = pos.Y - rs.Height - 10 + v.ViewportTop;
-			Canvas.SetLeft(_ToolBarTray, x < v.ViewportLeft ? v.ViewportLeft
-				: x + rs.Width < v.ViewportRight ? x
-				: v.ViewportRight - rs.Width);
-			Canvas.SetTop(_ToolBarTray, y < v.ViewportTop || x < 0 && v.Selection.IsReversed == false ? y + rs.Height + 30 : y);
+			var z = v.ZoomLevel / 100;
+			var x = (pos.X - 35) * z;
+			var y = (pos.Y - 10) * z - rs.Height;
+			Canvas.SetLeft(_ToolBarTray, Math.Min(x, v.ViewportWidth * z - rs.Width));
+			Canvas.SetTop(_ToolBarTray, y > 0 ? y : (pos.Y + 10) * z);
 		}
 
 		#region Event handlers
@@ -354,7 +353,6 @@ namespace Codist.SmartBars
 			_ToolBarTray.SizeChanged -= ToolBarSizeChanged;
 			_ToolBarTray.DragEnter -= HideToolBar;
 			if (_ToolBarTray != null) {
-				_ToolBarLayer.RemoveAdornment(_ToolBarTray);
 				_ToolBarLayer = null;
 			}
 			if (_View != null) {
@@ -415,7 +413,7 @@ namespace Codist.SmartBars
 				ToolTip = tooltip;
 				Cursor = Cursors.Hand;
 				BorderThickness = WpfHelper.TinyMargin;
-				Content = ThemeHelper.GetImage(imageId).WrapMargin(WpfHelper.SmallMargin);
+				Content = ThemeHelper.GetImage(imageId, (int)(ThemeHelper.DefaultIconSize * bar.View.ZoomFactor())).WrapMargin(WpfHelper.SmallMargin);
 				this.InheritStyle<Button>(SharedDictionaryManager.ThemedControls);
 				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			}

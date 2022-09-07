@@ -637,6 +637,11 @@ namespace Codist
 		#region TextView and editor
 		public static event EventHandler<TextViewCreatedEventArgs> ActiveTextViewChanged;
 
+		/// <summary>Gets the floating point zoom factor <c>(<see cref="IWpfTextView.ZoomLevel"/> / 100)</c> from specific view</summary>
+		public static double ZoomFactor(this IWpfTextView view) {
+			return view.ZoomLevel / 100;
+		}
+
 		/// <summary>A rough method to detect whether a document can be edited.</summary>
 		public static bool MayBeEditor(this ITextBuffer textBuffer) {
 			return textBuffer.IsReadOnly(0) == false || textBuffer.Properties.ContainsProperty(typeof(ITextDocument));

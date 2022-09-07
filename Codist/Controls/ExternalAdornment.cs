@@ -6,8 +6,9 @@ using Microsoft.VisualStudio.Text.Editor;
 
 namespace Codist.Controls
 {
-	// HACK: put the symbol list, smart bar, etc. on top of the WpfTextView
-	// don't use AdornmentLayer to do so, otherwise contained objects will go up and down when scrolling code window
+	// HACK: put the symbol list, smart bar, etc. on top of the WpfTextView.
+	// Don't use AdornmentLayer to do so, otherwise contained objects will go up and down when scrolling code window.
+	// Another side effect of AdornmentLayer is that it scales images automatically and makes CrispImages blurry (github: #213).
 	sealed class ExternalAdornment : ContentPresenter
 	{
 		internal const string QuickInfoSuppressionId = nameof(ExternalAdornment);
@@ -15,8 +16,8 @@ namespace Codist.Controls
 		IWpfTextView _View;
 		Canvas _Canvas;
 		int _LayerZIndex;
-		bool _isDragging;
-		Point _beginDragPosition;
+		bool _IsDragging;
+		Point _BeginDragPosition;
 
 		public ExternalAdornment(IWpfTextView view) {
 			UseLayoutRounding = true;
@@ -94,8 +95,7 @@ namespace Codist.Controls
 			if (_View.IsClosed == false) {
 				var children = _Canvas.Children;
 				for (int i = children.Count - 1; i >= 0; i--) {
-					var f = children[i].GetFirstVisualChild<TextBox>();
-					if (f != null && f.Focus()) {
+					if (children[i].GetFirstVisualChild<TextBox>()?.Focus() == true) {
 						return;
 					}
 				}
@@ -135,14 +135,15 @@ namespace Codist.Controls
 			if (args.Source is SymbolList symbolList) {
 				symbolList.ShowContextMenu(args);
 			}
-			args.Handled = true;
+			else if ((args.Source as FrameworkElement).GetParent<Button>() == null) {
+				args.Handled = true;
+			}
 		}
 
 		protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo) {
 			base.OnRenderSizeChanged(sizeInfo);
 			foreach (var item in _Canvas.Children) {
-				var child = item as FrameworkElement;
-				if (child != null) {
+				if (item is FrameworkElement child) {
 					ConstrainChildWindow(child, new Point(Canvas.GetLeft(child), Canvas.GetTop(child)));
 				}
 			}
@@ -191,21 +192,21 @@ namespace Codist.Controls
 			var s = e.Source as FrameworkElement;
 			var p = (e.OriginalSource as DependencyObject).GetParentOrSelf<FrameworkElement>();
 			if (e.LeftButton == MouseButtonState.Pressed) {
-				if (_isDragging == false && p.CaptureMouse()) {
-					_isDragging = true;
+				if (_IsDragging == false && p.CaptureMouse()) {
+					_IsDragging = true;
 					s.Cursor = Cursors.SizeAll;
-					_beginDragPosition = e.GetPosition(s);
+					_BeginDragPosition = e.GetPosition(s);
 				}
-				else if (_isDragging) {
+				else if (_IsDragging) {
 					var cp = e.GetPosition(this);
-					cp.X -= _beginDragPosition.X;
-					cp.Y -= _beginDragPosition.Y;
+					cp.X -= _BeginDragPosition.X;
+					cp.Y -= _BeginDragPosition.Y;
 					ConstrainChildWindow(s, cp);
 				}
 			}
 			else {
-				if (_isDragging) {
-					_isDragging = false;
+				if (_IsDragging) {
+					_IsDragging = false;
 					s.Cursor = null;
 					s.MouseMove -= MenuHeader_DragMove;
 					p.ReleaseMouseCapture();
