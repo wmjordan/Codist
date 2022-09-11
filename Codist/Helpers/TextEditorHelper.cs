@@ -226,8 +226,9 @@ namespace Codist
 
 		public static bool IsMultilineSelected(this ITextView textView) {
 			var s = textView.Selection;
-			return s.IsEmpty == false && s.SelectedSpans.Count > 0
-				&& textView.GetTextViewLineContainingBufferPosition(s.Start.Position) != textView.GetTextViewLineContainingBufferPosition(s.End.Position);
+			return s.IsEmpty == false
+				&& textView.TextSnapshot.GetLineNumberFromPosition(s.Start.Position)
+					!= textView.TextSnapshot.GetLineNumberFromPosition(s.End.Position);
 		}
 
 		public static void SelectNode(this SyntaxNode node, bool includeTrivia) {
