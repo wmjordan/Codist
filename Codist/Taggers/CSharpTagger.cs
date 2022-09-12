@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using AppHelpers;
 using Codist.SyntaxHighlight;
 using Microsoft.CodeAnalysis;
@@ -18,7 +17,6 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
-using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist.Taggers
 {
@@ -35,7 +33,7 @@ namespace Codist.Taggers
 		ConditionalWeakTable<ITextSnapshot, ParserTask> _ParserTasks = new ConditionalWeakTable<ITextSnapshot, ParserTask>();
 		ParserTask _LastFinishedTask;
 		int _Reference;
-		bool _IsVisible;
+		bool _HasFocus;
 		bool _HasBackgroundChange;
 		readonly bool _IsInteractiveWindow;
 		// debug info
@@ -47,7 +45,8 @@ namespace Codist.Taggers
 			if (view != null) {
 				_View = view;
 				if ((_IsInteractiveWindow = IsInteractiveWindow(buffer)) == false) {
-					view.VisualElement.IsVisibleChanged += VisualElement_IsVisibleChanged;
+					view.GotAggregateFocus += View_IsFocused;
+					view.LostAggregateFocus += View_LostFocus;
 				}
 			}
 			_Buffer = buffer;
@@ -57,9 +56,9 @@ namespace Codist.Taggers
 			buffer.ContentTypeChanged += TextBuffer_ContentTypeChanged;
 		}
 
-		void VisualElement_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e) {
-			_IsVisible = (bool)e.NewValue;
-			if (_IsVisible && _HasBackgroundChange) {
+		void View_IsFocused(object sender, EventArgs e) {
+			_HasFocus = true;
+			if (_HasBackgroundChange) {
 				_HasBackgroundChange = false;
 				var last = _LastFinishedTask;
 				if (last != null) {
@@ -72,6 +71,10 @@ namespace Codist.Taggers
 					}
 				}
 			}
+		}
+
+		void View_LostFocus(object sender, EventArgs e) {
+			_HasFocus = false;
 		}
 
 		/// <summary>This event is to notify the IDE that some tags are classified (from the parser thread).</summary>
@@ -126,8 +129,11 @@ namespace Codist.Taggers
 		}
 
 		void RefreshPendingSpans() {
+			var snapshot = _LastFinishedTask?.Snapshot;
 			while (_PendingSpans.TryDequeue(out var span)) {
-				TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
+				if (snapshot == span.Snapshot) {
+					TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
+				}
 			}
 		}
 
@@ -152,10 +158,13 @@ namespace Codist.Taggers
 			if (changes.Count == 0) {
 				return;
 			}
-			var start = changes[0].NewPosition;
-			var changedSpan = new SnapshotSpan(e.After, start, changes[changes.Count - 1].NewEnd - start);
-			Debug.WriteLine("Buffer changed: " + changedSpan);
-			TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(changedSpan));
+			if (TagsChanged != null) {
+				foreach (var item in changes) {
+					var changedSpan = new SnapshotSpan(e.After, item.NewSpan);
+					Debug.WriteLine($"{_Buffer.GetDocument().GetDocId()} changed: {changedSpan}");
+					TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(changedSpan));
+				}
+			}
 		}
 
 		void TextBuffer_ContentTypeChanged(object sender, ContentTypeChangedEventArgs e) {
@@ -196,7 +205,8 @@ namespace Codist.Taggers
 				}
 				_Buffer.ContentTypeChanged -= TextBuffer_ContentTypeChanged;
 				if (_View != null) {
-					_View.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
+					_View.GotAggregateFocus -= View_IsFocused;
+					_View.LostAggregateFocus -= View_LostFocus;
 				}
 				_TaggerProvider.DetachTagger(_Buffer);
 				_ParserTasks = null;
@@ -220,6 +230,7 @@ namespace Codist.Taggers
 			ITextBuffer _Buffer;
 			CSharpTagger _Tagger;
 			int _State;
+			int _HasHookedWorkspace;
 
 			public ITextSnapshot Snapshot => _Snapshot;
 			public Workspace Workspace => _Workspace;
@@ -232,11 +243,11 @@ namespace Codist.Taggers
 			}
 
 			public bool StartParse(CancellationToken cancellationToken) {
-				if (Interlocked.CompareExchange(ref _State, 1, 0) != 0) {
+				if (Interlocked.CompareExchange(ref _State, (int)ParserState.Working, 0) != 0) {
 					return false;
 				}
 				var parserTask = Task.Run(() => {
-					Debug.WriteLine("Start parsing " + Snapshot.Version + " on " + (TH.JoinableTaskContext.IsOnMainThread ? "MainThread" : "worker thread"));
+					Debug.WriteLine($"{_Buffer.GetDocument().GetDocId()} parsing {Snapshot.Version} on thread {Thread.CurrentThread.ManagedThreadId}");
 					if (cancellationToken.CanBeCanceled
 						&& Snapshot.Length > 1000
 						&& CancellableWait(Snapshot.Length > 60000 ? 100 : 30, cancellationToken) == false) {
@@ -254,9 +265,6 @@ namespace Codist.Taggers
 					if (w != null) {
 						_Workspace = w;
 						_Document = w.GetDocument(_Buffer);
-						if (_Tagger?._IsInteractiveWindow == false) {
-							w.WorkspaceChanged += WorkspaceChanged;
-						}
 					}
 				}
 				SemanticModel model;
@@ -267,16 +275,16 @@ namespace Codist.Taggers
 					CancelOrFault();
 					throw;
 				}
-				Debug.WriteLine("End parsing " + _Snapshot.Version);
+				Debug.WriteLine($"{_Buffer.GetDocument().GetDocId()} end parsing {Snapshot.Version} on thread {Thread.CurrentThread.ManagedThreadId}");
 				_State = (int)ParserState.Completed;
 				_Model = model;
-				SubstituteParserResult();
+				SubstituteParserResult(_Workspace);
 				if (_Model != null) {
 					_Tagger?.RefreshPendingSpans();
 				}
 			}
 
-			void SubstituteParserResult() {
+			void SubstituteParserResult(Workspace workspace) {
 				var tagger = _Tagger;
 				START:
 				var last = Interlocked.CompareExchange(ref tagger._LastFinishedTask, this, null);
@@ -297,6 +305,10 @@ namespace Codist.Taggers
 						return;
 					}
 				}
+				if (_Tagger?._IsInteractiveWindow == false && workspace != null
+					&& Interlocked.CompareExchange(ref _HasHookedWorkspace, 1, 0) == 0) {
+					workspace.WorkspaceChanged += WorkspaceChanged;
+				}
 				tagger.RemoveParser(this);
 			}
 
@@ -308,10 +320,11 @@ namespace Codist.Taggers
 			}
 
 			void CancelOrFault() {
-				Debug.WriteLine("Cancelled parsing " + _Snapshot.Version);
+				Debug.WriteLine($"{_Buffer.GetDocument().GetDocId()} parsing cancelled {_Snapshot.Version} on thread {Thread.CurrentThread.ManagedThreadId}");
 				_State = (int)ParserState.CancelledOrFaulted;
 				Disconnect();
 				_Snapshot = null;
+				Debug.Assert(_Model == null);
 			}
 
 			void Disconnect() {
@@ -319,11 +332,13 @@ namespace Codist.Taggers
 				if (tagger == null) {
 					return;
 				}
+				Debug.WriteLine($"{_Document.GetDocId()} disconnected from workspace.");
 				tagger.RemoveParser(this);
-				Debug.WriteLine($"{_Document?.Id} Disconnected from workspace.");
 				var w = _Workspace;
 				if (w != null) {
-					w.WorkspaceChanged -= WorkspaceChanged;
+					if (Interlocked.CompareExchange(ref _HasHookedWorkspace, 0, 1) == 1) {
+						w.WorkspaceChanged -= WorkspaceChanged;
+					}
 					_Workspace = null;
 				}
 				_Document = null;
@@ -332,22 +347,36 @@ namespace Codist.Taggers
 
 			void WorkspaceChanged(object sender, WorkspaceChangeEventArgs args) {
 				Debug.WriteLine($"Workspace {args.Kind}: {args.DocumentId}");
+				if (_State == 0) {
+					// ignore workspace changes if reparse is already scheduled
+					return;
+				}
+				var t = _Tagger;
+				if (t == null) {
+					return;
+				}
 				switch (args.Kind) {
 					case WorkspaceChangeKind.DocumentChanged:
 					case WorkspaceChangeKind.DocumentRemoved:
 						if (args.DocumentId == _Document?.Id) {
+							// skip notifications from current document
 							return;
 						}
 						break;
 				}
-				var t = _Tagger;
-				if (t != null) {
-					if (t._IsVisible) {
+
+				// at this place, we will receive the following change notifications:
+				// 1. from solution or project change
+				// 2. from the same document, but various configurations (should be omitted)
+				//   -- for instance, while editing a.cs (net45), we will get notified from a.cs (net50), a.cs (net60) etc. as well
+				if (t._HasFocus) {
+					if (args.Kind != WorkspaceChangeKind.DocumentChanged) {
+						// reparse occurs after current document is parsed and external document change is received
 						ReparseAfterWorkspaceChange();
 					}
-					else if (Interlocked.CompareExchange(ref _State, 0, (int)ParserState.Completed) == (int)ParserState.Completed){
-						t._HasBackgroundChange = true;
-					}
+				}
+				else if (Interlocked.CompareExchange(ref _State, 0, (int)ParserState.Completed) == (int)ParserState.Completed) {
+					t._HasBackgroundChange = true;
 				}
 			}
 
@@ -355,17 +384,28 @@ namespace Codist.Taggers
 				var tagger = _Tagger;
 				var snapshot = _Snapshot;
 				if (tagger?._PendingSpans != null && snapshot != null) {
-					var task = new ParserTask(snapshot, tagger);
-					if (task.StartParse(SyncHelper.CancelAndRetainToken(ref tagger._TaskBreaker))) {
-						tagger._PendingSpans.Enqueue(tagger._View.GetVisibleLineSpan());
-					}
+					// don't schedule reparse more than once
+					tagger._ParserTasks.GetValue(snapshot, CreateReparseTask);
 				}
+			}
+
+			ParserTask CreateReparseTask(ITextSnapshot s) {
+				var tagger = _Tagger;
+				if (tagger == null) {
+					return null;
+				}
+				Debug.WriteLine($"{_Buffer.GetDocument().GetDocId()} scheduled reparsing {Snapshot.Version}");
+				var task = new ParserTask(s, tagger);
+				if (task.StartParse(SyncHelper.CancelAndRetainToken(ref tagger._TaskBreaker))) {
+					tagger._PendingSpans.Enqueue(tagger._View.GetVisibleLineSpan());
+				}
+				return task;
 			}
 
 			static bool CancellableWait(int loop, CancellationToken cancellationToken) {
 				var p = 0;
 				do {
-					Thread.Sleep(10);
+					Thread.Sleep(1);
 					++p;
 					if (cancellationToken.IsCancellationRequested) {
 						return false;

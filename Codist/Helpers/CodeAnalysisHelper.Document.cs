@@ -79,5 +79,12 @@ namespace Codist
 		public static bool IsCSharp(this SemanticModel model) {
 			return model.Language == "C#";
 		}
+
+		public static string GetDocId(this Document document) {
+			if (document == null) {
+				return String.Empty;
+			}
+			return $"{document.Name}({document.Id.Id.ToString("N").Substring(0, 8)})";
+		}
 	}
 }
