@@ -16,7 +16,7 @@ namespace Codist.SmartBars
 	[ContentType(Constants.CodeTypes.HtmlxProjection)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
-	internal sealed class SmartBarTextViewCreationListener : IWpfTextViewCreationListener
+	internal sealed class SmartBarFactory : IWpfTextViewCreationListener
 	{
 		// Disable "Field is never assigned to..." and "Field is never used" compiler's warnings. Justification: the field is used by MEF.
 #pragma warning disable 649, 169, IDE0044

@@ -30,6 +30,7 @@ namespace Codist.Margins
 	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = nameof(CommentMargin))]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType(Constants.CodeTypes.Markdown)]
 	[TextViewRole(PredefinedTextViewRoles.EmbeddedPeekTextView)]
 	[TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
 	sealed class MarkdownMarginFactory : IWpfTextViewMarginProvider
@@ -66,7 +67,7 @@ namespace Codist.Margins
 	[Export(typeof(IWpfTextViewMarginProvider))]
 	[Name(nameof(DisableChangeTrackerMargin))]
 	[MarginContainer(PredefinedMarginNames.LeftSelection)]
-	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType(Constants.CodeTypes.Text)]
 	[TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
 	sealed class DisableChangeTrackerMarginFactory : IWpfTextViewMarginProvider
 	{

@@ -651,7 +651,8 @@ namespace Codist
 			return textBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out var d) ? d : null;
 		}
 		public static bool LikeContentType(this ITextBuffer textBuffer, string typeName) {
-			return textBuffer.ContentType.TypeName.IndexOf(typeName) != -1;
+			var n = textBuffer.ContentType.TypeName;
+			return n.IndexOf(typeName) != -1 || n.StartsWith(typeName, StringComparison.OrdinalIgnoreCase) || n.EndsWith(typeName, StringComparison.OrdinalIgnoreCase);
 		}
 		public static bool LikeContentType(this IContentType contentType, string typeName) {
 			return contentType.TypeName.IndexOf(typeName) != -1;
@@ -836,6 +837,7 @@ namespace Codist
 
 		[Export(typeof(IWpfTextViewCreationListener))]
 		[ContentType(Constants.CodeTypes.Code)]
+		[ContentType(Constants.CodeTypes.Text)]
 		//[ContentType(Constants.CodeTypes.Output)]
 		[ContentType(Constants.CodeTypes.InteractiveContent)]
 		[TextViewRole(PredefinedTextViewRoles.Document)]

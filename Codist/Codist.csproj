@@ -112,7 +112,7 @@
     </Compile>
     <Compile Include="QuickInfo\CSharpOpCodeQuickInfo.cs" />
     <Compile Include="QuickInfo\QuickInfoBackgroundController.cs" />
-    <Compile Include="Taggers\TaggerProviders.cs" />
+    <Compile Include="Taggers\TaggerFactories.cs" />
     <Compile Include="Taggers\TransientClassificationTagHolder.cs" />
     <Compile Include="Taggers\Classifications.cs" />
     <Compile Include="Taggers\CommentFormats.cs" />
@@ -205,11 +205,11 @@
     <Compile Include="SmartBars\MarkdownSmartBar.cs" />
     <Compile Include="SmartBars\SmartBar.CommonEdit.cs" />
     <Compile Include="SmartBars\SmartBar.cs" />
-    <Compile Include="SmartBars\SmartBarTextViewCreationListener.cs" />
-    <Compile Include="SyntaxHighlight\CodeViewDecorator.cs" />
+    <Compile Include="SmartBars\SmartBarFactory.cs" />
+    <Compile Include="SyntaxHighlight\HighlightDecorator.cs" />
     <Compile Include="SyntaxHighlight\FormatStore.cs" />
     <Compile Include="SyntaxHighlight\StyleBase.cs" />
-    <Compile Include="SyntaxHighlight\CodeViewCreationListener.cs" />
+    <Compile Include="SyntaxHighlight\DecoratorFactory.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.cs" />
     <Compile Include="QuickInfo\QuickInfoOverrider.cs" />
     <Compile Include="QuickInfo\SelectionQuickInfo.cs" />

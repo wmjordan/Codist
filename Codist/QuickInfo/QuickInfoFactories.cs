@@ -47,9 +47,9 @@ namespace Codist.QuickInfo
 	/// <para>It is also used to surpress Quick Info when mouse is hovered on the SmartBar or NaviBar menu.</para>
 	/// </summary>
 	[Export(typeof(IAsyncQuickInfoSourceProvider))]
-	[Name("Quick Info Visibility Controller")]
+	[Name(nameof(QuickInfoVisibilityController))]
 	[Order(Before = "Default Quick Info Presenter")]
-	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType(Constants.CodeTypes.Text)]
 	sealed class QuickInfoVisibilityControllerProvider : IAsyncQuickInfoSourceProvider
 	{
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {

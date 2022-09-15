@@ -18,7 +18,7 @@ namespace Codist.SyntaxHighlight
 	// see: Microsoft.VisualStudio.Text.Classification.Implementation.EditorFormatMap
 	// see: Microsoft.VisualStudio.Text.Formatting.Implementation.NormalizedSpanGenerator
 	// see: https://stackoverflow.com/questions/24404473/create-visual-studio-theme-specific-syntax-highlighting
-	sealed class CodeViewDecorator
+	sealed class HighlightDecorator
 	{
 		static readonly IClassificationType __BraceMatchingClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBraceMatching);
 		static bool __Initialized;
@@ -34,7 +34,7 @@ namespace Codist.SyntaxHighlight
 		volatile int _IsDecorating;
 		bool _IsViewActive;
 
-		public CodeViewDecorator(IWpfTextView view) {
+		public HighlightDecorator(IWpfTextView view) {
 			view.Closed += View_Closed;
 			view.VisualElement.IsVisibleChanged += VisualElement_IsVisibleChanged;
 			if (__Initialized == false) {
@@ -82,7 +82,7 @@ namespace Codist.SyntaxHighlight
 			_ClassificationFormatMap.ClassificationFormatMappingChanged -= FormatUpdated;
 			_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
 			_TextView.VisualElement.IsVisibleChanged -= MarkInitialized;
-			_TextView.Properties.RemoveProperty(typeof(CodeViewDecorator));
+			_TextView.Properties.RemoveProperty(typeof(HighlightDecorator));
 			_EditorFormatMap.FormatMappingChanged -= FormatUpdated;
 			_EditorFormatMap.FormatMappingChanged -= BackupFormat;
 			_TextView.Closed -= View_Closed;
