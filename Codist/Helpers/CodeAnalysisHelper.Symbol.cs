@@ -706,20 +706,73 @@ namespace Codist
 		}
 
 		public static bool IsAwaitable(this ITypeSymbol type) {
-			if (type is null || type.ContainingNamespace == null || type.ContainingNamespace.MetadataName != "System.Runtime.CompilerServices") {
+			if (type is null || type.IsStatic) {
 				return false;
 			}
-
 			foreach (var item in type.GetMembers(WellKnownMemberNames.GetAwaiter)) {
-				if (item.Kind != SymbolKind.Method) {
+				if (item.Kind != SymbolKind.Method || item.IsStatic) {
 					continue;
 				}
 				var m = (IMethodSymbol)item;
-				if (m.Parameters.Length == 0 && m.ReturnType.Name == "TaskAwaiter") {
+				if (m.Parameters.Length == 0
+					&& m.ReturnType.IsAwaiter()) {
 					return true;
 				}
 			}
 			return false;
+		}
+
+		public static bool IsAwaiter(this ITypeSymbol type) {
+			return type.ContainingNamespace.MetadataName == "System.Runtime.CompilerServices"
+					&& (type.Name == nameof(System.Runtime.CompilerServices.TaskAwaiter)
+						|| type.Name == nameof(System.Runtime.CompilerServices.ValueTaskAwaiter<int>))
+				|| IsCustomAwaiter(type);
+		}
+
+		static bool IsCustomAwaiter(ITypeSymbol type) {
+			int f = 0;
+			foreach (var item in type.GetMembers()) {
+				if (item.IsStatic) {
+					continue;
+				}
+				switch (item.Kind) {
+					case SymbolKind.Method:
+						var m = (IMethodSymbol)item;
+						if (m.IsGenericMethod) {
+							continue;
+						}
+						switch (m.Name) {
+							case "GetResult":
+								if (m.Parameters.Length == 0) {
+									f |= 1;
+								}
+								continue;
+							case "OnCompleted":
+								var mp = m.Parameters;
+								if (m.ReturnsVoid
+									&& mp.Length == 1
+									&& mp[0].Type.Name == "Action"
+									&& mp[0].Type.ContainingNamespace.MetadataName == "System"
+									&& (mp[0].Type as INamedTypeSymbol)?.IsGenericType == false) {
+									f |= 2;
+								}
+								continue;
+						}
+						continue;
+					case SymbolKind.Property:
+						if (item.Name == "IsCompleted" && item.GetReturnType()?.SpecialType == SpecialType.System_Boolean) {
+							f |= 4;
+						}
+						continue;
+				}
+			}
+			return f == 7;
+		}
+
+		public static bool IsDisposable(this ISymbol symbol) {
+			return symbol.Name == nameof(IDisposable)
+				&& (symbol = symbol.ContainingNamespace as INamedTypeSymbol)?.Name == nameof(System)
+				&& symbol.ContainingNamespace == null;
 		}
 
 		#region Protected/Future property accessors
