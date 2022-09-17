@@ -68,7 +68,7 @@ namespace Codist.SmartBars
 				ToolBars = { ToolBar, ToolBar2 },
 				IsLocked = true,
 				Cursor = Cursors.Arrow,
-				Background = Brushes.Transparent,
+				Background = null, // let the mouse to click throw transparent part of the ToolBarTray 
 				UseLayoutRounding = true
 			};
 			_ToolBarTray.MouseEnter += ToolBarMouseEnter;
@@ -94,7 +94,7 @@ namespace Codist.SmartBars
 		}
 
 		protected virtual void AddCommands(CancellationToken cancellationToken) {
-			var readOnly = View.IsCaretInReadOnlyRegion();
+			var readOnly = _View.IsCaretInReadOnlyRegion();
 			if (readOnly == false) {
 				AddCutCommand();
 			}
@@ -109,8 +109,8 @@ namespace Codist.SmartBars
 			//if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
 			//	AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");
 			//}
-			if (View.IsMultilineSelected()) {
-				if (View.Selection.Mode == TextSelectionMode.Stream) {
+			if (_View.IsMultilineSelected()) {
+				if (_View.Selection.Mode == TextSelectionMode.Stream) {
 					AddMultilineFindAndReplaceCommands();
 				}
 			}
@@ -163,7 +163,7 @@ namespace Codist.SmartBars
 				// postpone the even handler until the mouse button is released
 				await Task.Delay(100, cancellationToken);
 			}
-			if (View.Selection.IsEmpty || Interlocked.Exchange(ref _SelectionStatus, Working) != Selecting) {
+			if (_View.Selection.IsEmpty || Interlocked.Exchange(ref _SelectionStatus, Working) != Selecting) {
 				goto EXIT;
 			}
 			InternalCreateToolBar(cancellationToken);
@@ -187,12 +187,12 @@ namespace Codist.SmartBars
 			_ToolBarTray.Visibility = Visibility.Visible;
 			_ToolBarTray.Opacity = 0.3;
 			_ToolBarTray.SizeChanged += ToolBarSizeChanged;
-			View.VisualElement.MouseMove += ViewMouseMove;
+			_View.VisualElement.MouseMove += ViewMouseMove;
 		}
 
 		protected void HideToolBar() {
 			_ToolBarTray.Visibility = Visibility.Hidden;
-			View.VisualElement.MouseMove -= ViewMouseMove;
+			_View.VisualElement.MouseMove -= ViewMouseMove;
 			_LastShiftHit = DateTime.MinValue;
 		}
 
@@ -209,7 +209,7 @@ namespace Codist.SmartBars
 			if (DateTime.Now < _LastExecute.AddSeconds(1)) {
 				return;
 			}
-			var v = View;
+			var v = _View;
 			var pos = Mouse.GetPosition(v.VisualElement);
 			var rs = _ToolBarTray.RenderSize;
 			var z = v.ZoomLevel / 100;
@@ -222,7 +222,7 @@ namespace Codist.SmartBars
 		#region Event handlers
 		void UpdateSmartBarConfig(ConfigUpdatedEventArgs e) {
 			if (e.UpdatedFeature.MatchFlags(Features.SmartBar)) {
-				var v = View;
+				var v = _View;
 				v.VisualElement.PreviewKeyUp -= ViewKeyUp;
 				if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
 					v.VisualElement.PreviewKeyUp += ViewKeyUp;
@@ -235,14 +235,14 @@ namespace Codist.SmartBars
 		}
 
 		void ToolBarMouseEnter(object sender, EventArgs e) {
-			View.VisualElement.MouseMove -= ViewMouseMove;
-			((ToolBarTray)sender).Opacity = 1;
-			View.Properties[QuickInfoSuppressionId] = true;
+			_View.VisualElement.MouseMove -= ViewMouseMove;
+			_ToolBarTray.Opacity = 1;
+			_View.Properties[QuickInfoSuppressionId] = true;
 		}
 
 		void ToolBarMouseLeave(object sender, EventArgs e) {
-			View.VisualElement.MouseMove += ViewMouseMove;
-			View.Properties.RemoveProperty(QuickInfoSuppressionId);
+			_View.VisualElement.MouseMove += ViewMouseMove;
+			_View.Properties.RemoveProperty(QuickInfoSuppressionId);
 		}
 
 		void ToolBarSizeChanged(object sender, SizeChangedEventArgs e) {
@@ -315,9 +315,9 @@ namespace Codist.SmartBars
 			if (DateTime.Now < _LastExecute.AddSeconds(1) && _ToolBarTray.Visibility == Visibility.Visible) {
 				return;
 			}
-			if (View.Selection.IsEmpty) {
+			if (_View.Selection.IsEmpty) {
 				_ToolBarTray.Visibility = Visibility.Hidden;
-				View.VisualElement.MouseMove -= ViewMouseMove;
+				_View.VisualElement.MouseMove -= ViewMouseMove;
 				SyncHelper.CancelAndDispose(ref _Cancellation, true);
 				_SelectionStatus = 0;
 				return;
@@ -359,7 +359,6 @@ namespace Codist.SmartBars
 				_View.Selection.SelectionChanged -= ViewSelectionChanged;
 				_View.VisualElement.MouseMove -= ViewMouseMove;
 				_View.VisualElement.PreviewKeyUp -= ViewKeyUp;
-				//_View.LayoutChanged -= ViewLayoutChanged;
 				_View.Closed -= ViewClosed;
 				_View = null;
 			}
