@@ -150,16 +150,15 @@ namespace Codist
 			return members;
 		}
 
-		public static async Task<List<INamedTypeSymbol>> FindDerivedInterfacesAsync(this ITypeSymbol type, Project project, CancellationToken cancellationToken = default) {
+		/// <summary>Returns interfaces derived from the given interface <paramref name="type"/> in specific <paramref name="project"/>.</summary>
+		public static async Task<List<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
-			var r = new List<INamedTypeSymbol>();
+			var r = new List<INamedTypeSymbol>(7);
 			foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
-				if (item.TypeKind != TypeKind.Interface || item == type) {
-					continue;
-				}
-				var inf = item as INamedTypeSymbol;
-				if (inf.AllInterfaces.Contains(type)) {
-					r.Add(inf);
+				if (item.TypeKind == TypeKind.Interface
+					&& item != type
+					&& item.AllInterfaces.Contains(type)) {
+					r.Add(item);
 				}
 			}
 			return r;

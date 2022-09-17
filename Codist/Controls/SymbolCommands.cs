@@ -48,7 +48,7 @@ namespace Codist.Controls
 		}
 
 		internal static async Task FindSubInterfacesAsync(this SemanticContext context, ISymbol symbol) {
-			var interfaces = (await (symbol as INamedTypeSymbol).FindDerivedInterfacesAsync(context.Document.Project, default).ConfigureAwait(false)).ToList();
+			var interfaces = await (symbol as INamedTypeSymbol).FindDerivedInterfacesAsync(context.Document.Project, default).ConfigureAwait(false);
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 			ShowSymbolMenuForResult(symbol, context, interfaces, R.T_DerivedInterfaces, false);
 		}
