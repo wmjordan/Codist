@@ -1075,7 +1075,6 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowInterfaces(QiContainer qiContent, ITypeSymbol type) {
-			const string Disposable = "IDisposable";
 			var showAll = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
 			var interfaces = type.Interfaces;
 			if (interfaces.Length == 0 && showAll == false) {
@@ -1085,7 +1084,7 @@ namespace Codist.QuickInfo
 			var inheritedInterfaces = ImmutableArray.CreateBuilder<INamedTypeSymbol>(5);
 			INamedTypeSymbol disposable = null;
 			foreach (var item in interfaces) {
-				if (item.Name == Disposable) {
+				if (item.IsDisposable()) {
 					disposable = item;
 					continue;
 				}
@@ -1097,7 +1096,7 @@ namespace Codist.QuickInfo
 				if (interfaces.Contains(item)) {
 					continue;
 				}
-				if (item.Name == Disposable) {
+				if (item.IsDisposable()) {
 					disposable = item;
 					continue;
 				}
