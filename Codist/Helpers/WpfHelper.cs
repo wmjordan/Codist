@@ -332,10 +332,8 @@ namespace Codist
 				return null;
 			}
 			var p = obj;
-			TParent r;
 			while ((p = p.GetParent()) != null) {
-				r = p as TParent;
-				if (r != null && (predicate == null || predicate(r))) {
+				if (p is TParent r && (predicate == null || predicate(r))) {
 					return r;
 				}
 			}
