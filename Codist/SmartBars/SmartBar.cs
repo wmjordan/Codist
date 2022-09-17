@@ -68,7 +68,7 @@ namespace Codist.SmartBars
 				ToolBars = { ToolBar, ToolBar2 },
 				IsLocked = true,
 				Cursor = Cursors.Arrow,
-				Background = null, // let the mouse to click throw transparent part of the ToolBarTray 
+				Background = null, // enables the mouse to click throw transparent part of the ToolBarTray 
 				UseLayoutRounding = true
 			};
 			_ToolBarTray.MouseEnter += ToolBarMouseEnter;
@@ -82,12 +82,7 @@ namespace Codist.SmartBars
 		protected ToolBar ToolBar2 { get; }
 		protected IWpfTextView View => _View;
 		protected ITextSearchService2 TextSearchService => _TextSearchService;
-		protected CancellationToken CancellationToken {
-			get {
-				var c = _Cancellation;
-				return c != null ? c.Token : new CancellationToken(true);
-			}
-		}
+		protected CancellationToken CancellationToken => _Cancellation?.Token ?? new CancellationToken(true);
 
 		protected void AddCommand(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> handler) {
 			toolBar.Items.Add(new CommandButton(this, imageId, tooltip, handler));
@@ -106,9 +101,6 @@ namespace Codist.SmartBars
 				AddSpecialFormatCommand();
 				AddWrapTextCommand();
 			}
-			//if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
-			//	AddEditorCommand(ToolBar, KnownImageIds.ToolTip, "Edit.QuickInfo", "Show quick info");
-			//}
 			if (_View.IsMultilineSelected()) {
 				if (_View.Selection.Mode == TextSelectionMode.Stream) {
 					AddMultilineFindAndReplaceCommands();
@@ -121,8 +113,6 @@ namespace Codist.SmartBars
 					AddClassificationInfoCommand();
 				}
 			}
-			//AddEditorCommand(ToolBar, KnownImageIds.FindNext, "Edit.FindNextSelected", "Find next selected text\nRight click: Find previous selected", "Edit.FindPreviousSelected");
-			//AddEditorCommand(ToolBar, "Edit.Capitalize", KnownImageIds.ASerif, "Capitalize");
 		}
 
 		protected void AddCommands(ToolBar toolBar, int imageId, string tooltip, Action<CommandContext> leftClickHandler, Func<CommandContext, IEnumerable<CommandItem>> getItemsHandler) {

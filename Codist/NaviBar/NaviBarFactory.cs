@@ -49,33 +49,9 @@ namespace Codist.NaviBar
 					SemanticContext.GetOrCreateSingetonInstance(textView);
 					new Overrider(textView, _TextSearchService);
 				}
-#if DEBUG
-				else {
-					AssociateFileCodeModelOverrider();
-				}
-#endif
 			}
 		}
 
-#if DEBUG
-		static void AssociateFileCodeModelOverrider() {
-			Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
-			var model = CodistPackage.DTE.ActiveDocument?.ProjectItem?.FileCodeModel; // the active document can be null
-			if (model == null) {
-				return;
-			}
-			foreach (EnvDTE80.CodeElement2 item in model.CodeElements) {
-				//System.Diagnostics.Debug.WriteLine(item.Name + "," + item.Kind + "," + item.StartPoint.Line + "," + item.StartPoint.LineCharOffset);
-				if (item.IsCodeType && item.Kind != EnvDTE.vsCMElement.vsCMElementDelegate) {
-					var ct = (item as EnvDTE.CodeType).Members;
-					for (int i = 1; i <= ct.Count; i++) {
-						var member = ct.Item(i);
-						System.Diagnostics.Debug.WriteLine(member.Name + "," + member.Kind + "," + member.StartPoint.Line + "," + member.StartPoint.LineCharOffset);
-					}
-				}
-			}
-		}
-#endif
 
 		sealed class Overrider
 		{
