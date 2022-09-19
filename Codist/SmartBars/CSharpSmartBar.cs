@@ -87,24 +87,35 @@ namespace Codist.SmartBars
 			var nodeKind = node.Kind();
 			if (trivia.RawKind == 0) {
 				var token = _Context.Token;
-				if (token.Span.Contains(View.Selection, true)
-					&& (token.Kind() == SyntaxKind.IdentifierToken || token.RawKind == (int)SyntaxKind.SetKeyword || token.RawKind == (int)SyntaxKind.GetKeyword || token.RawKind == (int)CodeAnalysisHelper.InitKeyword)) {
-					if (nodeKind.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || nodeKind == SyntaxKind.VariableDeclarator || nodeKind == SyntaxKind.ForEachStatement || nodeKind == SyntaxKind.SingleVariableDesignation || node is AccessorDeclarationSyntax) {
-						// selection is within a symbol
-						_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
-						if (_Symbol != null) {
-							AddSymbolCommands(isReadOnly, node);
-						}
+				if (token.Span.Contains(View.Selection, true)) {
+					switch (token.Kind()) {
+						case SyntaxKind.IdentifierToken:
+						case SyntaxKind.SetKeyword:
+						case SyntaxKind.GetKeyword:
+						case CodeAnalysisHelper.InitKeyword:
+							if (nodeKind.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || nodeKind == SyntaxKind.VariableDeclarator || nodeKind == SyntaxKind.ForEachStatement || nodeKind == SyntaxKind.SingleVariableDesignation || node is AccessorDeclarationSyntax) {
+								// selection is within a symbol
+								_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
+								if (_Symbol != null) {
+									AddSymbolCommands(isReadOnly, node);
+								}
+							}
+							else if (nodeKind == SyntaxKind.TypeParameter) {
+								_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
+								if (_Symbol != null && isReadOnly == false) {
+									AddRenameCommand(node);
+								}
+							}
+							break;
+						default:
+							if (View.Selection.StreamSelectionSpan.Length < 4
+								&& token.RawKind >= (int)SyntaxKind.TildeToken
+								&& token.RawKind <= (int)SyntaxKind.PercentEqualsToken
+								&& SelectionIs<SyntaxNode>()) {
+								AddCommand(MyToolBar, IconIds.SelectBlock, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
+							}
+							break;
 					}
-					else if (nodeKind == SyntaxKind.TypeParameter) {
-						_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
-						if (_Symbol != null && isReadOnly == false) {
-							AddRenameCommand(node);
-						}
-					}
-				}
-				else if (token.RawKind >= (int)SyntaxKind.NumericLiteralToken && token.RawKind <= (int)SyntaxKind.StringLiteralToken) {
-					AddEditorCommand(MyToolBar, IconIds.FindReference, "Edit.FindAllReferences", R.CMD_FindAllReferences);
 				}
 				else if (nodeKind.IsRegionalDirective()) {
 					AddDirectiveCommands();
@@ -147,7 +158,6 @@ namespace Codist.SmartBars
 			if (isDesignMode == false) {
 				AddCommands(MyToolBar, IconIds.ToggleBreakpoint, R.CMD_Debugger, ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);
 			}
-			//AddCommands(MyToolBar, KnownImageIds.SelectFrame, "Expand selection...\nRight click: Duplicate...\nCtrl click item: Copy\nShift click item: Exclude whitespaces and comments", null, GetExpandSelectionCommands);
 		}
 
 		void AddSymbolCommands(bool isReadOnly, SyntaxNode node) {
@@ -204,6 +214,28 @@ namespace Codist.SmartBars
 			ctx.View.SelectSpan(new SnapshotSpan(ctx.View.TextSnapshot, Span.FromBounds(a.FullSpan.Start, b.FullSpan.End)));
 		}
 
+		bool SelectionIs<TNode>() where TNode : SyntaxNode {
+			var s = View.Selection.SelectedSpans.FirstOrDefault().ToTextSpan();
+			foreach (var item in _Context.NodeIncludeTrivia.AncestorsAndSelf()) {
+				if (item is TNode && item.Span.Contains(s) && item.Span != s) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		void SelectNodeAsKind<TNode>(CommandContext ctx) where TNode : SyntaxNode {
+			var s = View.Selection.SelectedSpans.FirstOrDefault().ToTextSpan();
+			foreach (var item in _Context.NodeIncludeTrivia.AncestorsAndSelf()) {
+				if (item is TNode && item.Span.Contains(s) && item.Span != s) {
+					ctx.KeepToolBar(false);
+					item.SelectNode(false);
+					ctx.KeepToolBar(true);
+					return;
+				}
+			}
+		}
+
 		void AddCommentCommands() {
 			AddCommand(MyToolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
 				if (ctx.RightClick) {
@@ -244,7 +276,8 @@ namespace Codist.SmartBars
 			if (node is ParameterSyntax && node.Parent is ParameterListSyntax) {
 				AddEditorCommand(MyToolBar, IconIds.ReorderParameters, "Refactor.ReorderParameters", R.CMD_ReorderParameters);
 			}
-			else if ((node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(SyntaxKind.StructDeclaration) || node.IsKind(CodeAnalysisHelper.RecordDeclaration) || node.IsKind(CodeAnalysisHelper.RecordStructDesclaration)) && (node as TypeDeclarationSyntax).Modifiers.Any(SyntaxKind.StaticKeyword) == false) {
+			else if ((node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(SyntaxKind.StructDeclaration) || node.IsKind(CodeAnalysisHelper.RecordDeclaration) || node.IsKind(CodeAnalysisHelper.RecordStructDesclaration))
+				&& (node as TypeDeclarationSyntax).Modifiers.Any(SyntaxKind.StaticKeyword) == false) {
 				AddEditorCommand(MyToolBar, IconIds.ExtractInterface, "Refactor.ExtractInterface", R.CMD_ExtractInterface);
 			}
 			else if (node.IsKind(SyntaxKind.VariableDeclarator) && node.Parent?.Parent.IsKind(SyntaxKind.FieldDeclaration) == true) {

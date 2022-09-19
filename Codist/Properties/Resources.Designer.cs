@@ -1096,6 +1096,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select Code Block
+        ///Select expression, argument list or code block for current syntax node.
+        /// </summary>
+        internal static string CMD_SelectBlock {
+            get {
+                return ResourceManager.GetString("CMD_SelectBlock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select Code.
         /// </summary>
         internal static string CMD_SelectCode {

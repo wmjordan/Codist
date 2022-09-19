@@ -14,7 +14,7 @@ namespace Codist.SyntaxHighlight
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType(Constants.CodeTypes.Text)]
 	[ContentType(Constants.CodeTypes.FindResults)]
-	//[ContentType(Constants.CodeTypes.Output)]
+	[ContentType(Constants.CodeTypes.Output)]
 	[ContentType(Constants.CodeTypes.InteractiveContent)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]

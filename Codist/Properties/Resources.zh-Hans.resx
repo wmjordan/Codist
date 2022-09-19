@@ -2010,4 +2010,8 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="CMD_UrlEncode" xml:space="preserve">
     <value>URL 编码</value>
   </data>
+  <data name="CMD_SelectBlock" xml:space="preserve">
+    <value>选择代码块
+选择当前语法节点对应的表达式、方法参数列表或代码块</value>
+  </data>
 </root>
