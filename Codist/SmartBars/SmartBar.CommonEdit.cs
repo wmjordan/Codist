@@ -20,6 +20,7 @@ namespace Codist.SmartBars
 		static readonly CommandItem[] __FindAndReplaceCommands = GetFindAndReplaceCommands();
 		static readonly CommandItem[] __MultilineFindAndReplaceCommands = GetMultilineFindAndReplaceCommands();
 		static readonly CommandItem[] __CaseCommands = GetCaseCommands();
+		static readonly CommandItem[] __WebCommands = GetWebCommands();
 		static readonly CommandItem[] __SurroundingCommands = GetSurroundingCommands();
 		static readonly CommandItem[] __DebugCommands = GetDebugCommands();
 
@@ -340,6 +341,7 @@ namespace Codist.SmartBars
 					TextEditorHelper.ExecuteEditorCommand("Edit.IncreaseLineIndent");
 				}));
 			}
+			r.AddRange(__WebCommands);
 			r.AddRange(__CaseCommands);
 			return r;
 		}
@@ -384,6 +386,26 @@ namespace Codist.SmartBars
 				new CommandItem(IconIds.None, R.CMD_Lowercase, ctx => {
 					ctx.KeepToolBarOnClick = true;
 					TextEditorHelper.ExecuteEditorCommand("Edit.MakeLowercase");
+				}),
+			};
+		}
+		static CommandItem[] GetWebCommands() {
+			return new CommandItem[] {
+				new CommandItem(IconIds.UrlEncode, R.CMD_UrlEncode, ctx => {
+					ctx.KeepToolBarOnClick = true;
+					Replace(ctx, System.Net.WebUtility.UrlEncode, true);
+				}),
+				new CommandItem(IconIds.UrlEncode, R.CMD_UrlDecode, ctx => {
+					ctx.KeepToolBarOnClick = true;
+					Replace(ctx, System.Net.WebUtility.UrlDecode, true);
+				}),
+				new CommandItem(IconIds.HtmlEncode, R.CMD_HtmlEncode, ctx => {
+					ctx.KeepToolBarOnClick = true;
+					Replace(ctx, System.Net.WebUtility.HtmlEncode, true);
+				}),
+				new CommandItem(IconIds.HtmlEncode, R.CMD_HtmlDecode, ctx => {
+					ctx.KeepToolBarOnClick = true;
+					Replace(ctx, System.Net.WebUtility.HtmlDecode, true);
 				}),
 			};
 		}

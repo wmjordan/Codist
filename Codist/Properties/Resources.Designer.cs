@@ -670,6 +670,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to HTML Decode.
+        /// </summary>
+        internal static string CMD_HtmlDecode {
+            get {
+                return ResourceManager.GetString("CMD_HtmlDecode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to HTML Encode.
+        /// </summary>
+        internal static string CMD_HtmlEncode {
+            get {
+                return ResourceManager.GetString("CMD_HtmlEncode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Increment number.
         /// </summary>
         internal static string CMD_IncrementNumber {
@@ -1299,6 +1317,24 @@ namespace Codist.Properties {
         internal static string CMD_Uppercase {
             get {
                 return ResourceManager.GetString("CMD_Uppercase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to URL Decode.
+        /// </summary>
+        internal static string CMD_UrlDecode {
+            get {
+                return ResourceManager.GetString("CMD_UrlDecode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to URL Encode.
+        /// </summary>
+        internal static string CMD_UrlEncode {
+            get {
+                return ResourceManager.GetString("CMD_UrlEncode", resourceCulture);
             }
         }
         

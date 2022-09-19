@@ -1998,4 +1998,16 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="CMD_QuickAction" xml:space="preserve">
     <value>快速操作和重构...</value>
   </data>
+  <data name="CMD_HtmlDecode" xml:space="preserve">
+    <value>HTML 解码</value>
+  </data>
+  <data name="CMD_HtmlEncode" xml:space="preserve">
+    <value>HTML 编码</value>
+  </data>
+  <data name="CMD_UrlDecode" xml:space="preserve">
+    <value>URL 解码</value>
+  </data>
+  <data name="CMD_UrlEncode" xml:space="preserve">
+    <value>URL 编码</value>
+  </data>
 </root>
