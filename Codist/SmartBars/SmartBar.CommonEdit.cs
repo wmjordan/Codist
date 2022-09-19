@@ -329,17 +329,6 @@ namespace Codist.SmartBars
 				if (View.IsMultilineSelected()) {
 					r.Add(new CommandItem(IconIds.JoinLines, R.CMD_JoinLines, ctx => ctx.View.JoinSelectedLines()));
 				}
-				var t = View.GetTextViewLineContainingBufferPosition(selection.Start.Position).Extent.GetText();
-				if (t.Length > 0 && (t[0] == ' ' || t[0] == '\t')) {
-					r.Add(new CommandItem(IconIds.Unindent, R.CMD_Unindent, ctx => {
-						ctx.KeepToolBarOnClick = true;
-						TextEditorHelper.ExecuteEditorCommand("Edit.DecreaseLineIndent");
-					}));
-				}
-				r.Add(new CommandItem(IconIds.Indent, R.CMD_Indent, ctx => {
-					ctx.KeepToolBarOnClick = true;
-					TextEditorHelper.ExecuteEditorCommand("Edit.IncreaseLineIndent");
-				}));
 			}
 			r.AddRange(__WebCommands);
 			r.AddRange(__CaseCommands);
