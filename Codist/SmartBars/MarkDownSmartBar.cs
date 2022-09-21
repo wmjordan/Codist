@@ -3,6 +3,7 @@ using System.Threading;
 using System.Windows.Controls;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using R = Codist.Properties.Resources;
 
 namespace Codist.SmartBars
 {
@@ -14,11 +15,11 @@ namespace Codist.SmartBars
 		ToolBar MyToolBar => ToolBar2;
 
 		protected override void AddCommands(CancellationToken cancellationToken) {
-			AddCommand(MyToolBar, IconIds.TagBold, "Toggle bold\nCtrl click: toggle and select next", ctx => WrapWith(ctx, "**", "**", true));
-			AddCommand(MyToolBar, IconIds.TagItalic, "Toggle italic\nCtrl click: toggle and select next", ctx => WrapWith(ctx, "_", "_", true));
-			AddCommand(MyToolBar, IconIds.TagCode, "Toggle code\nCtrl click: toggle and select next", ctx => WrapWith(ctx, "`", "`", true));
-			AddCommand(MyToolBar, IconIds.TagHyperLink, "Hyperlink", MakeUrl);
-			AddCommand(MyToolBar, IconIds.TagStrikeThrough, "Toggle strike through\nCtrl click: toggle and select next", ctx => WrapWith(ctx, "~~", "~~", true));
+			AddCommand(MyToolBar, IconIds.TagBold, R.CMD_MarkBold, ctx => WrapWith(ctx, "**", "**", true));
+			AddCommand(MyToolBar, IconIds.TagItalic, R.CMD_MarkItalic, ctx => WrapWith(ctx, "_", "_", true));
+			AddCommand(MyToolBar, IconIds.TagCode, R.CMD_MarkCode, ctx => WrapWith(ctx, "`", "`", true));
+			AddCommand(MyToolBar, IconIds.TagHyperLink, R.CMD_MarkLink, MakeUrl);
+			AddCommand(MyToolBar, IconIds.TagStrikeThrough, R.CMD_MarkStrikeThrough, ctx => WrapWith(ctx, "~~", "~~", true));
 			base.AddCommands(cancellationToken);
 		}
 
