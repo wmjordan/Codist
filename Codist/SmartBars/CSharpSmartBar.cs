@@ -292,6 +292,7 @@ namespace Codist.SmartBars
 			AddCommand(MyToolBar, IconIds.TagBold, R.CMD_TagXmlDocB, ctx => WrapWith(ctx, "<b>", "</b>", true));
 			AddCommand(MyToolBar, IconIds.TagItalic, R.CMD_TagXmlDocI, ctx => WrapWith(ctx, "<i>", "</i>", true));
 			AddCommand(MyToolBar, IconIds.TagUnderline, R.CMD_TagXmlDocU, ctx => WrapWith(ctx, "<u>", "</u>", true));
+			AddCommand(MyToolBar, IconIds.TagHyperLink, R.CMD_TagXmlDocA, MakeUrl);
 			AddCommand(MyToolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
 				if (ctx.RightClick) {
 					ctx.View.ExpandSelectionToLine();
@@ -331,6 +332,26 @@ namespace Codist.SmartBars
 					arg.ctx.HideToolBar();
 				}
 			});
+		}
+
+		static void MakeUrl(CommandContext ctx) {
+			var t = ctx.View.GetFirstSelectionText();
+			if (t.StartsWith("http://", StringComparison.Ordinal) || t.StartsWith("https://", StringComparison.Ordinal)) {
+				var s = WrapWith(ctx, "<a href=\"", "\">text</a>", false);
+				if (s.Snapshot != null) {
+					// select the "text"
+					ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.End - 8, 4), false);
+					ctx.View.Caret.MoveTo(s.End - 4);
+				}
+			}
+			else {
+				var s = WrapWith(ctx, "<a href=\"url\">", "</a>", false);
+				if (s.Snapshot != null) {
+					// select the "url"
+					ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + 9, 3), false);
+					ctx.View.Caret.MoveTo(s.Start + 12);
+				}
+			}
 		}
 
 		List<CommandItem> GetMarkerCommands(CommandContext arg) {

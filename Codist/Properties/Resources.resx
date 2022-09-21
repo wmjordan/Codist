@@ -2029,4 +2029,26 @@ ALL existing items will be REPLACE by default items.</value>
     <value>Select Code Block
 Select expression, argument list or code block for current syntax node</value>
   </data>
+  <data name="CMD_MarkBold" xml:space="preserve">
+    <value>Toggle Bold Mark
+Ctrl click: toggle and select next</value>
+  </data>
+  <data name="CMD_MarkCode" xml:space="preserve">
+    <value>Toggle Code Mark
+Ctrl click: toggle and select next</value>
+  </data>
+  <data name="CMD_MarkItalic" xml:space="preserve">
+    <value>Toggle Italic Mark
+Ctrl click: toggle and select next</value>
+  </data>
+  <data name="CMD_MarkLink" xml:space="preserve">
+    <value>Mark HTML Link</value>
+  </data>
+  <data name="CMD_MarkStrikeThrough" xml:space="preserve">
+    <value>Toggle Strike Through Mark
+Ctrl click: toggle and select next</value>
+  </data>
+  <data name="CMD_TagXmlDocA" xml:space="preserve">
+    <value>Tag XML Doc with HTML &lt;a&gt;</value>
+  </data>
 </root>

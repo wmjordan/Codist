@@ -787,6 +787,55 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Toggle Bold Mark
+        ///Ctrl click: toggle and select next.
+        /// </summary>
+        internal static string CMD_MarkBold {
+            get {
+                return ResourceManager.GetString("CMD_MarkBold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Toggle Code Mark
+        ///Ctrl click: toggle and select next.
+        /// </summary>
+        internal static string CMD_MarkCode {
+            get {
+                return ResourceManager.GetString("CMD_MarkCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Toggle Italic Mark
+        ///Ctrl click: toggle and select next.
+        /// </summary>
+        internal static string CMD_MarkItalic {
+            get {
+                return ResourceManager.GetString("CMD_MarkItalic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mark HTML Link.
+        /// </summary>
+        internal static string CMD_MarkLink {
+            get {
+                return ResourceManager.GetString("CMD_MarkLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Toggle Strike Through Mark
+        ///Ctrl click: toggle and select next.
+        /// </summary>
+        internal static string CMD_MarkStrikeThrough {
+            get {
+                return ResourceManager.GetString("CMD_MarkStrikeThrough", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mark symbol....
         /// </summary>
         internal static string CMD_MarkSymbol {
@@ -1165,6 +1214,15 @@ namespace Codist.Properties {
         internal static string CMD_SurroundWith {
             get {
                 return ResourceManager.GetString("CMD_SurroundWith", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tag XML Doc with HTML &lt;a&gt;.
+        /// </summary>
+        internal static string CMD_TagXmlDocA {
+            get {
+                return ResourceManager.GetString("CMD_TagXmlDocA", resourceCulture);
             }
         }
         

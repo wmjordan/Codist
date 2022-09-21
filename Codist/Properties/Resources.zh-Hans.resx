@@ -2014,4 +2014,26 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>选择代码块
 选择当前语法节点对应的表达式、方法参数列表或代码块</value>
   </data>
+  <data name="CMD_MarkBold" xml:space="preserve">
+    <value>切换粗体标记
+Ctrl 单击: 切换标记并选择下一处</value>
+  </data>
+  <data name="CMD_MarkCode" xml:space="preserve">
+    <value>切换代码标记
+Ctrl 单击: 切换标记并选择下一处</value>
+  </data>
+  <data name="CMD_MarkItalic" xml:space="preserve">
+    <value>切换斜体标记
+Ctrl 单击: 切换标记并选择下一处</value>
+  </data>
+  <data name="CMD_MarkLink" xml:space="preserve">
+    <value>标记为 HTML 连接</value>
+  </data>
+  <data name="CMD_MarkStrikeThrough" xml:space="preserve">
+    <value>切换删除线标记
+Ctrl 单击: 切换标记并选择下一处</value>
+  </data>
+  <data name="CMD_TagXmlDocA" xml:space="preserve">
+    <value>以 &lt;a href&gt; 包围</value>
+  </data>
 </root>
