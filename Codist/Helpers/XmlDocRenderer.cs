@@ -359,7 +359,7 @@ namespace Codist
 		void CreateLink(InlineCollection inlines, XElement e, XAttribute a) {
 			var link = new Hyperlink {
 				NavigateUri = new Uri(a.Value),
-				ToolTip = String.Join(Environment.NewLine, e.Attribute("title"), a.Value)
+				ToolTip = e.Attribute("title") != null ? e.Attribute("title").Value + Environment.NewLine + a.Value : a.Value
 			}.ClickToNavigate();
 			if (e.IsEmpty) {
 				link.Inlines.Add(a.Value);
