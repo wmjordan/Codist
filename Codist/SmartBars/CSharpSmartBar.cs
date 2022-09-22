@@ -114,6 +114,9 @@ namespace Codist.SmartBars
 								&& SelectionIs<SyntaxNode>()) {
 								AddCommand(MyToolBar, IconIds.SelectBlock, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
 							}
+							else if (token.RawKind >= (int)SyntaxKind.NumericLiteralToken && token.RawKind <= (int)SyntaxKind.StringLiteralToken) {
+								AddEditorCommand(MyToolBar, IconIds.FindReference, "Edit.FindAllReferences", R.CMD_FindAllReferences);
+							}
 							break;
 					}
 				}
