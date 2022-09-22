@@ -21,7 +21,8 @@ namespace Codist.SyntaxHighlight
 	sealed class DecoratorFactory : IWpfTextViewCreationListener
 	{
 		public void TextViewCreated(IWpfTextView textView) {
-			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false) {
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
+				|| textView.TextBuffer.MayBeEditor() == false) {
 				return;
 			}
 			textView.Properties.GetOrCreateSingletonProperty(() => new HighlightDecorator(textView));

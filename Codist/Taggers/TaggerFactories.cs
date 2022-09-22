@@ -20,7 +20,8 @@ namespace Codist.Taggers
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
 				|| CommentTagger.IsCommentTaggable(buffer) == false
-				|| buffer.MayBeEditor() == false) {
+				|| buffer.MayBeEditor() == false
+				|| textView.TextBuffer.MayBeEditor() == false) {
 				return null;
 			}
 			var vp = textView.Properties;
@@ -78,6 +79,7 @@ namespace Codist.Taggers
 			if (typeof(T) == typeof(IClassificationTag)
 				&& Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
 				&& buffer.MayBeEditor() // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
+				&& textView.TextBuffer.MayBeEditor()
 				) {
 				if (_Taggers.TryGetValue(buffer, out var tagger) == false) {
 					tagger = new CSharpTagger(this, textView as IWpfTextView, buffer);
