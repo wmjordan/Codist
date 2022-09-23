@@ -56,6 +56,8 @@ namespace Codist.Taggers
 			buffer.ContentTypeChanged += TextBuffer_ContentTypeChanged;
 		}
 
+		public ITextBuffer TextBuffer => _Buffer;
+
 		void View_IsFocused(object sender, EventArgs e) {
 			_HasFocus = true;
 			if (_HasBackgroundChange) {
@@ -129,16 +131,19 @@ namespace Codist.Taggers
 		}
 
 		void RefreshPendingSpans() {
-			var snapshot = _LastFinishedTask?.Snapshot;
-			while (_PendingSpans.TryDequeue(out var span)) {
-				if (snapshot == span.Snapshot) {
-					TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
+			var pendingSpans = _PendingSpans;
+			if (pendingSpans != null) {
+				var snapshot = _LastFinishedTask?.Snapshot;
+				while (pendingSpans.TryDequeue(out var span)) {
+					if (snapshot == span.Snapshot) {
+						TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
+					}
 				}
 			}
 		}
 
 		void RemoveParser(ParserTask task) {
-			_ParserTasks.Remove(task.Snapshot);
+			_ParserTasks?.Remove(task.Snapshot);
 		}
 
 		static IEnumerable<ITagSpan<IClassificationTag>> UseOldResult(SemanticModel model, Workspace workspace, ITextSnapshot finishedSnapshot, NormalizedSnapshotSpanCollection spans, ITextSnapshot snapshot) {
@@ -174,19 +179,12 @@ namespace Codist.Taggers
 			}
 		}
 
-		public void IncrementReference() {
-			_Reference++;
-		}
-
-		public void DecrementReference() {
-			if (--_Reference == 0) {
-				ReleaseResources();
-			}
-		}
-
 		public void Dispose() {
-			DecrementReference();
-			Debug.WriteLine(_Buffer?.GetTextDocument()?.FilePath + " ref: " + _Reference);
+			var b = _Buffer;
+			if (b != null) {
+				ReleaseResources();
+				Debug.WriteLine($"{b.GetTextDocument()?.FilePath} ref: {_Reference}");
+			}
 		}
 
 		void ReleaseResources() {
@@ -208,7 +206,6 @@ namespace Codist.Taggers
 					_View.GotAggregateFocus -= View_IsFocused;
 					_View.LostAggregateFocus -= View_LostFocus;
 				}
-				_TaggerProvider.DetachTagger(_Buffer);
 				_ParserTasks = null;
 				_Buffer = null;
 				_View = null;

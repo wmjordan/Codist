@@ -24,6 +24,7 @@ namespace Codist
 			public const string Markdown = "Markdown";
 			public const string Xml = "XML";
 			public const string FindResults = "FindResults";
+			public const string Output = "Output";
 			public const string InteractiveContent = "Interactive Content";
 		}
 
