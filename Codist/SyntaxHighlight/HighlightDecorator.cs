@@ -18,6 +18,12 @@ namespace Codist.SyntaxHighlight
 	// see: Microsoft.VisualStudio.Text.Classification.Implementation.EditorFormatMap
 	// see: Microsoft.VisualStudio.Text.Formatting.Implementation.NormalizedSpanGenerator
 	// see: https://stackoverflow.com/questions/24404473/create-visual-studio-theme-specific-syntax-highlighting
+	// The difficulties of the implementation are:
+	// 1. override TextFormattingRunProperties to change the display styles of classified type;
+	// 2. can revert to original styles;
+	// 3. detect when theme changes and still satisify 1 and 2 afterwards;
+	// 4. work in all text view;
+	// 5. good performance, don't do anything redundantly
 	sealed class HighlightDecorator
 	{
 		static readonly IClassificationType __BraceMatchingClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBraceMatching);
@@ -32,14 +38,11 @@ namespace Codist.SyntaxHighlight
 
 		Color _BackColor, _ForeColor;
 		volatile int _IsDecorating;
-		bool _IsViewActive;
+		bool _IsViewVisible;
 
 		public HighlightDecorator(IWpfTextView view) {
 			view.Closed += View_Closed;
 			view.VisualElement.IsVisibleChanged += VisualElement_IsVisibleChanged;
-			if (__Initialized == false) {
-				view.VisualElement.IsVisibleChanged += MarkInitialized;
-			}
 			Config.RegisterUpdateHandler(UpdateSyntaxHighlightConfig);
 
 			_ClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(view);
@@ -48,43 +51,31 @@ namespace Codist.SyntaxHighlight
 			_RegService = ServicesHelper.Instance.ClassificationTypeRegistry;
 			_TextView = view;
 
-			_IsViewActive = true;
-			if (__Initialized) {
-				Debug.WriteLine("Decorate known types");
-				Decorate(FormatStore.ClassificationTypeStore.Keys, true);
-				_EditorFormatMap.FormatMappingChanged += FormatUpdated;
+			_IsViewVisible = true;
+			if (view.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.Output) == false) {
+				Decorate(FormatStore.ClassificationTypeStore.Keys, __Initialized == false);
+				Debug.WriteLine("Attached highlight decorator for " + view.TextBuffer.ContentType);
+				if (__Initialized == false) {
+					__Initialized = true;
+				}
 			}
 			else {
-				_EditorFormatMap.FormatMappingChanged += BackupFormat;
+				Decorate(FormatStore.ClassificationTypeStore.Keys, false);
 			}
+			_EditorFormatMap.FormatMappingChanged += FormatUpdated;
 		}
 
 		void VisualElement_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-			_IsViewActive = (bool)e.NewValue;
-		}
-
-		void MarkInitialized(object sender, DependencyPropertyChangedEventArgs e) {
-			if ((bool)e.NewValue) {
-				_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
-				_TextView.VisualElement.IsVisibleChanged -= MarkInitialized;
-				_EditorFormatMap.FormatMappingChanged -= BackupFormat;
-				Debug.WriteLine("Decorator initialized");
-				Decorate(FormatStore.ClassificationTypeStore.Keys, true);
-				__Initialized = true;
-				_EditorFormatMap.FormatMappingChanged -= FormatUpdated;
-				_EditorFormatMap.FormatMappingChanged += FormatUpdated;
-			}
+			_IsViewVisible = (bool)e.NewValue;
 		}
 
 		void View_Closed(object sender, EventArgs e) {
-			_IsViewActive = false;
+			_IsViewVisible = false;
 			Config.UnregisterUpdateHandler(UpdateSyntaxHighlightConfig);
 			_ClassificationFormatMap.ClassificationFormatMappingChanged -= FormatUpdated;
 			_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
-			_TextView.VisualElement.IsVisibleChanged -= MarkInitialized;
 			_TextView.Properties.RemoveProperty(typeof(HighlightDecorator));
 			_EditorFormatMap.FormatMappingChanged -= FormatUpdated;
-			_EditorFormatMap.FormatMappingChanged -= BackupFormat;
 			_TextView.Closed -= View_Closed;
 			_ClassificationFormatMap = null;
 			_EditorFormatMap = null;
@@ -103,16 +94,6 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
-		void BackupFormat(object sender, FormatItemsEventArgs e) {
-			if (e.ChangedItems.Count > 0) {
-				foreach (var item in e.ChangedItems) {
-					var t = _RegService.GetClassificationType(item);
-					if (t != null) {
-						FormatStore.GetOrSaveBackupFormatting(t, true);
-					}
-				}
-			}
-		}
 
 		void FormatUpdated(object sender, EventArgs e) {
 			Debug.WriteLine("ClassificationFormatMapping changed.");
@@ -149,7 +130,7 @@ namespace Codist.SyntaxHighlight
 		}
 
 		void FormatUpdated(object sender, FormatItemsEventArgs e) {
-			if (_IsDecorating == 0 && _IsViewActive && e.ChangedItems.Count > 0) {
+			if (_IsDecorating == 0 && _IsViewVisible && e.ChangedItems.Count > 0) {
 				Debug.WriteLine("Format updated: " + e.ChangedItems.Count);
 				Decorate(e.ChangedItems.Select(_RegService.GetClassificationType), true);
 			}
@@ -176,6 +157,9 @@ namespace Codist.SyntaxHighlight
 			catch (Exception ex) {
 				Debug.WriteLine("Decorator exception: ");
 				Debug.WriteLine(ex);
+				if (Debugger.IsAttached) {
+					Debugger.Break();
+				}
 			}
 			finally {
 				_IsDecorating = 0;
@@ -226,7 +210,13 @@ namespace Codist.SyntaxHighlight
 					if (item.Key == __BraceMatchingClassificationType) {
 						continue;
 					}
-					_ClassificationFormatMap.SetTextProperties(item.Key, item.Value);
+					try {
+						_ClassificationFormatMap.SetTextProperties(item.Key, item.Value);
+					}
+					catch (Exception ex) {
+						// hack Weird bug in VS: NullReferenceException can occur here even if item.Key is not null
+						Debug.WriteLine($"Update format {item.Key.Classification} error: {ex}");
+					}
 					Debug.WriteLine("Update format: " + item.Key.Classification);
 				}
 				_ClassificationFormatMap.EndBatchUpdate();
