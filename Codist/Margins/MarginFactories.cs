@@ -80,7 +80,9 @@ namespace Codist.Margins
 	[Name(nameof(LineNumberMargin))]
 	[Order(Before = PredefinedMarginNames.OverviewChangeTracking)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
-	[ContentType(Constants.CodeTypes.Text)]
+	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType(Constants.CodeTypes.Markdown)]
+	[ContentType(Constants.CodeTypes.Output)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class LineNumberMarginFactory : IWpfTextViewMarginProvider
 	{
@@ -97,7 +99,9 @@ namespace Codist.Margins
 	[Name(nameof(SelectionMargin))]
 	[Order(Before = PredefinedMarginNames.OverviewChangeTracking)]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
-	[ContentType(Constants.CodeTypes.Text)]
+	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType(Constants.CodeTypes.Markdown)]
+	[ContentType(Constants.CodeTypes.Output)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class SelectionMarginFactory : IWpfTextViewMarginProvider
 	{

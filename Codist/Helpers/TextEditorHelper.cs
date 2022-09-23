@@ -645,10 +645,24 @@ namespace Codist
 
 		/// <summary>A rough method to detect whether a document can be edited.</summary>
 		public static bool MayBeEditor(this ITextBuffer textBuffer) {
-			return textBuffer.IsReadOnly(0) == false || textBuffer.Properties.ContainsProperty(typeof(ITextDocument));
+			return (textBuffer.IsReadOnly(0) == false || textBuffer.Properties.ContainsProperty(typeof(ITextDocument)))
+				&& textBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false;
 		}
 		public static ITextDocument GetTextDocument(this ITextBuffer textBuffer) {
 			return textBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out var d) ? d : null;
+		}
+		public static string GetText(this ITextBuffer textBuffer, int start, int end) {
+			var e = textBuffer.CurrentSnapshot.Length;
+			if (start >= e) {
+				start = e;
+			}
+			if (end >= e) {
+				end = e;
+			}
+			if (end <= start) {
+				return String.Empty;
+			}
+			return textBuffer.CurrentSnapshot.GetText(start, end - start);
 		}
 		public static bool LikeContentType(this ITextBuffer textBuffer, string typeName) {
 			var n = textBuffer.ContentType.TypeName;

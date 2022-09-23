@@ -12,7 +12,9 @@ namespace Codist.SmartBars
 	/// that instantiates the adornment on the event of a <see cref="IWpfTextView"/>'s creation
 	/// </summary>
 	[Export(typeof(IWpfTextViewCreationListener))]
-	[ContentType(Constants.CodeTypes.Text)]
+	[ContentType(Constants.CodeTypes.Code)]
+	[ContentType(Constants.CodeTypes.Markdown)]
+	[ContentType(Constants.CodeTypes.Output)]
 	[ContentType(Constants.CodeTypes.HtmlxProjection)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
@@ -52,7 +54,7 @@ namespace Codist.SmartBars
 			else if (textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
 				new MarkdownSmartBar(textView, _TextSearchService);
 			}
-			else if (contentType.IsOfType("output")
+			else if (contentType.IsOfType(Constants.CodeTypes.Output)
 				|| contentType.IsOfType(Constants.CodeTypes.FindResults)
 				|| contentType.IsOfType(Constants.CodeTypes.InteractiveContent)
 				|| contentType.IsOfType("DebugOutput")

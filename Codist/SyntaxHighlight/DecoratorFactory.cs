@@ -12,7 +12,7 @@ namespace Codist.SyntaxHighlight
 	/// Applies customized syntax highlight styles to editor.
 	/// </summary>
 	[Export(typeof(IWpfTextViewCreationListener))]
-	[ContentType(Constants.CodeTypes.Text)]
+	[ContentType(Constants.CodeTypes.Code)]
 	[ContentType(Constants.CodeTypes.FindResults)]
 	[ContentType(Constants.CodeTypes.Output)]
 	[ContentType(Constants.CodeTypes.InteractiveContent)]

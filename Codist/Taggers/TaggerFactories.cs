@@ -20,8 +20,8 @@ namespace Codist.Taggers
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
 				|| CommentTagger.IsCommentTaggable(buffer) == false
-				|| buffer.MayBeEditor() == false
-				|| textView.TextBuffer.MayBeEditor() == false) {
+				|| buffer.MayBeEditor() == false && textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false
+				) {
 				return null;
 			}
 			var vp = textView.Properties;
