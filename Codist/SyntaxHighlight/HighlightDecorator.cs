@@ -60,7 +60,7 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 			else {
-				Decorate(FormatStore.ClassificationTypeStore.Keys, false);
+				Decorate(_ClassificationFormatMap.CurrentPriorityOrder, false);
 			}
 			_EditorFormatMap.FormatMappingChanged += FormatUpdated;
 		}
@@ -101,7 +101,7 @@ namespace Codist.SyntaxHighlight
 			if (__DefaultFontFamily == defaultProperties.Typeface.FontFamily && __DefaultFontSize == defaultProperties.FontRenderingEmSize) {
 				return;
 			}
-			Debug.WriteLine("Default text properties changed.");
+			Debug.WriteLineIf(__DefaultFontFamily != null, "Default text properties changed.");
 			__DefaultFontFamily = defaultProperties.Typeface.FontFamily;
 			__DefaultFontSize = defaultProperties.FontRenderingEmSize;
 			// hack: it is weird that this property is not in sync with the Text editor format, we have to force that
