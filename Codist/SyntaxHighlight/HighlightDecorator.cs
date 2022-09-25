@@ -231,11 +231,7 @@ namespace Codist.SyntaxHighlight
 				fontSize = 1;
 			}
 			if (string.IsNullOrWhiteSpace(settings.Font) == false || settings.Stretch.HasValue) {
-				format = format.SetTypeface(new Typeface(
-					string.IsNullOrWhiteSpace(settings.Font) == false ? new FontFamily(settings.Font) : __DefaultFontFamily,
-					FontStyles.Normal,
-					FontWeights.Normal,
-					settings.Stretch.HasValue ? FontStretch.FromOpenTypeStretch(settings.Stretch.Value) : FontStretches.Normal));
+				format = SetFont(format, settings);
 			}
 			if (settings.FontSize != 0) {
 				if (format.FontRenderingEmSizeEmpty || fontSize != format.FontRenderingEmSize) {
@@ -267,74 +263,87 @@ namespace Codist.SyntaxHighlight
 				}
 			}
 			if (settings.BackColor.A > 0) {
-				var bc = settings.BackColor.A > 0 ? settings.BackColor
-				   : format.BackgroundBrushEmpty == false && format.BackgroundBrush is SolidColorBrush b ? b.Color
-				   : Colors.Transparent;
-				if (settings.BackgroundOpacity != 0) {
-					format = format.SetBackgroundOpacity(settings.BackgroundOpacity / 255.0);
-				}
-				if (bc.A > 0) {
-					var bb = format.BackgroundBrush as LinearGradientBrush;
-					switch (settings.BackgroundEffect) {
-						case BrushEffect.Solid:
-							if (format.BackgroundBrushEmpty || (format.BackgroundBrush as SolidColorBrush)?.Color != bc) {
-								format = format.SetBackground(bc);
-							}
-							break;
-						case BrushEffect.ToBottom:
-							if (bb == null || bb.StartPoint.Y > bb.EndPoint.Y || bb.GradientStops.Count != 2
-								|| bb.GradientStops[0].Color != _BackColor || bb.GradientStops[1].Color != bc) {
-								format = format.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 90));
-							}
-							break;
-						case BrushEffect.ToTop:
-							if (bb == null || bb.StartPoint.Y < bb.EndPoint.Y || bb.GradientStops.Count != 2
-								|| bb.GradientStops[0].Color != bc || bb.GradientStops[1].Color != _BackColor) {
-								format = format.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 90));
-							}
-							bb = new LinearGradientBrush(bc, _BackColor, 90);
-							break;
-						case BrushEffect.ToRight:
-							if (bb == null || bb.StartPoint.X >= bb.EndPoint.X || bb.GradientStops.Count != 2
-								|| bb.GradientStops[0].Color != _BackColor || bb.GradientStops[1].Color != bc) {
-								format = format.SetBackgroundBrush(new LinearGradientBrush(_BackColor, bc, 0));
-							}
-							break;
-						case BrushEffect.ToLeft:
-							if (bb == null || bb.StartPoint.X >= bb.EndPoint.X || bb.GradientStops.Count != 2
-								|| bb.GradientStops[0].Color != bc || bb.GradientStops[1].Color != _BackColor) {
-								format = format.SetBackgroundBrush(new LinearGradientBrush(bc, _BackColor, 0));
-							}
-							break;
-						default:
-							throw new NotImplementedException("Background effect not supported: " + settings.BackgroundEffect.ToString());
-					}
-				}
-			}
-			else if (settings.BackColor.A > 0) {
-				if (format.BackgroundBrushEmpty || (format.BackgroundBrush as SolidColorBrush)?.Color != settings.BackColor) {
-					format = format.SetBackground(settings.BackColor);
-				}
+				format = SetBackground(format, settings, _BackColor);
 			}
 			if (settings.Underline.HasValue || settings.Strikethrough.HasValue || settings.OverLine.HasValue || settings.LineColor.A > 0) {
-				var tdc = new TextDecorationCollection();
-				if (settings.Underline.GetValueOrDefault() || settings.LineColor.A > 0) {
-					if (settings.LineColor.A > 0) {
-						tdc.Add(GetLineDecoration(settings, TextDecorationLocation.Underline));
-					}
-					else {
-						tdc.Add(TextDecorations.Underline);
-					}
-				}
-				if (settings.Strikethrough.GetValueOrDefault()) {
-					tdc.Add(TextDecorations.Strikethrough);
-				}
-				if (settings.OverLine.GetValueOrDefault()) {
-					tdc.Add(TextDecorations.OverLine);
-				}
-				format = format.SetTextDecorations(tdc);
+				format = SetUnderlineFormat(format, settings);
 			}
 			return format;
+		}
+
+		static TextFormattingRunProperties SetFont(TextFormattingRunProperties format, StyleBase settings) {
+			return format.SetTypeface(new Typeface(
+				string.IsNullOrWhiteSpace(settings.Font) == false ? new FontFamily(settings.Font) : __DefaultFontFamily,
+				FontStyles.Normal,
+				FontWeights.Normal,
+				settings.Stretch.HasValue ? FontStretch.FromOpenTypeStretch(settings.Stretch.Value) : FontStretches.Normal));
+		}
+
+		static TextFormattingRunProperties SetBackground(TextFormattingRunProperties format, StyleBase settings, Color backColor) {
+			var bc = settings.BackColor.A > 0 ? settings.BackColor
+					: format.BackgroundBrushEmpty == false && format.BackgroundBrush is SolidColorBrush b ? b.Color
+					: Colors.Transparent;
+			if (settings.BackgroundOpacity != 0) {
+				format = format.SetBackgroundOpacity(settings.BackgroundOpacity / 255.0);
+			}
+			if (bc.A == 0) {
+				return format;
+			}
+			var bb = format.BackgroundBrush as LinearGradientBrush;
+			switch (settings.BackgroundEffect) {
+				case BrushEffect.Solid:
+					if (format.BackgroundBrushEmpty || (format.BackgroundBrush as SolidColorBrush)?.Color != bc) {
+						return format.SetBackground(bc);
+					}
+					break;
+				case BrushEffect.ToBottom:
+					if (bb == null || bb.StartPoint.Y > bb.EndPoint.Y || bb.GradientStops.Count != 2
+						|| bb.GradientStops[0].Color != backColor || bb.GradientStops[1].Color != bc) {
+						return format.SetBackgroundBrush(new LinearGradientBrush(backColor, bc, 90));
+					}
+					break;
+				case BrushEffect.ToTop:
+					if (bb == null || bb.StartPoint.Y < bb.EndPoint.Y || bb.GradientStops.Count != 2
+						|| bb.GradientStops[0].Color != bc || bb.GradientStops[1].Color != backColor) {
+						return format.SetBackgroundBrush(new LinearGradientBrush(bc, backColor, 90));
+					}
+					break;
+				case BrushEffect.ToRight:
+					if (bb == null || bb.StartPoint.X >= bb.EndPoint.X || bb.GradientStops.Count != 2
+						|| bb.GradientStops[0].Color != backColor || bb.GradientStops[1].Color != bc) {
+						return format.SetBackgroundBrush(new LinearGradientBrush(backColor, bc, 0));
+					}
+					break;
+				case BrushEffect.ToLeft:
+					if (bb == null || bb.StartPoint.X >= bb.EndPoint.X || bb.GradientStops.Count != 2
+						|| bb.GradientStops[0].Color != bc || bb.GradientStops[1].Color != backColor) {
+						return format.SetBackgroundBrush(new LinearGradientBrush(bc, backColor, 0));
+					}
+					break;
+				default:
+					throw new NotImplementedException("Background effect not supported: " + settings.BackgroundEffect.ToString());
+			}
+
+			return format;
+		}
+
+		static TextFormattingRunProperties SetUnderlineFormat(TextFormattingRunProperties format, StyleBase settings) {
+			var tdc = new TextDecorationCollection();
+			if (settings.Underline.GetValueOrDefault() || settings.LineColor.A > 0) {
+				if (settings.LineColor.A > 0) {
+					tdc.Add(GetLineDecoration(settings, TextDecorationLocation.Underline));
+				}
+				else {
+					tdc.Add(TextDecorations.Underline);
+				}
+			}
+			if (settings.Strikethrough.GetValueOrDefault()) {
+				tdc.Add(TextDecorations.Strikethrough);
+			}
+			if (settings.OverLine.GetValueOrDefault()) {
+				tdc.Add(TextDecorations.OverLine);
+			}
+			return format.SetTextDecorations(tdc);
 		}
 
 		static TextDecoration GetLineDecoration(StyleBase settings, TextDecorationLocation location) {

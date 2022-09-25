@@ -83,6 +83,7 @@ namespace Codist.Taggers
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
 				&& buffer.MayBeEditor() // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
 				&& textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false
+				&& textView.Roles.Contains("PREVIEWTOOLTIPTEXTVIEWROLE") == false
 				) {
 				if (textView.Roles.Contains("DIFF") && (textView as System.Windows.FrameworkElement)?.Parent != null) {
 					// hack workaround for inline DIFF view
