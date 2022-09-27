@@ -130,24 +130,8 @@ namespace Codist.QuickInfo
 					description.MouseEnter += HookEvents;
 					return;
 				}
-				if (symbol.Kind == SymbolKind.Method) {
-					if (((IMethodSymbol)symbol).MethodKind == MethodKind.LambdaMethod) {
-						using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(30)) {
-							var sb = sbr.Resource;
-							sb.Append('(');
-							foreach (var item in ((IMethodSymbol)symbol).Parameters) {
-								if (item.Ordinal > 0) {
-									sb.Append(", ");
-								}
-								sb.Append(item.Type.ToDisplayString(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat))
-									.Append(item.Type.GetParameterString())
-									.Append(' ')
-									.Append(item.Name);
-							}
-							sb.Append(')');
-							description.Append(sb.ToString(), ThemeHelper.DocumentTextBrush);
-						}
-					}
+				if (symbol.Kind == SymbolKind.Method && ((IMethodSymbol)symbol).MethodKind == MethodKind.LambdaMethod) {
+					ShowLambdaExpressionParameters(symbol, description);
 				}
 				description.UseDummyToolTip();
 				if (symbol.HasSource() == false && symbol.ContainingType?.HasSource() == true) {
@@ -156,6 +140,24 @@ namespace Codist.QuickInfo
 					symbol = symbol.ContainingType;
 				}
 				description.MouseEnter += HookEvents;
+			}
+
+			static void ShowLambdaExpressionParameters(ISymbol symbol, TextBlock description) {
+				using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(30)) {
+					var sb = sbr.Resource;
+					sb.Append('(');
+					foreach (var item in ((IMethodSymbol)symbol).Parameters) {
+						if (item.Ordinal > 0) {
+							sb.Append(", ");
+						}
+						sb.Append(item.Type.ToDisplayString(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat))
+							.Append(item.Type.GetParameterString())
+							.Append(' ')
+							.Append(item.Name);
+					}
+					sb.Append(')');
+					description.Append(sb.ToString(), ThemeHelper.DocumentTextBrush);
+				}
 			}
 
 			public static void Apply(ISymbol symbol, ITextBuffer textBuffer, TextBlock description, IAsyncQuickInfoSession quickInfoSession) {
