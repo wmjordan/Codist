@@ -7,30 +7,18 @@ using Microsoft.VisualStudio.Text.Operations;
 
 namespace Codist.SmartBars
 {
-	/// <summary>
-	/// Establishes an <see cref="IAdornmentLayer"/> to place the adornment on and exports the <see cref="IWpfTextViewCreationListener"/>
-	/// that instantiates the adornment on the event of a <see cref="IWpfTextView"/>'s creation
-	/// </summary>
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType(Constants.CodeTypes.Code)]
 	[ContentType(Constants.CodeTypes.Markdown)]
 	[ContentType(Constants.CodeTypes.Output)]
 	[ContentType(Constants.CodeTypes.HtmlxProjection)]
+	[ContentType(Constants.CodeTypes.InteractiveContent)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	internal sealed class SmartBarFactory : IWpfTextViewCreationListener
 	{
 		// Disable "Field is never assigned to..." and "Field is never used" compiler's warnings. Justification: the field is used by MEF.
 #pragma warning disable 649, 169, IDE0044
-
-		/// <summary>
-		/// Defines the adornment layer for the scarlet adornment. This layer is ordered
-		/// after the selection layer in the Z-order
-		/// </summary>
-		[Export(typeof(AdornmentLayerDefinition))]
-		[Name(nameof(SmartBar))]
-		[Order(After = PredefinedAdornmentLayers.Caret)]
-		AdornmentLayerDefinition _EditorAdornmentLayer;
 
 		[Import(typeof(ITextSearchService2))]
 		ITextSearchService2 _TextSearchService;
