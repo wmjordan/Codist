@@ -771,8 +771,8 @@ namespace Codist
 
 		public static bool IsDisposable(this ISymbol symbol) {
 			return symbol.Name == nameof(IDisposable)
-				&& (symbol = symbol.ContainingNamespace as INamedTypeSymbol)?.Name == nameof(System)
-				&& symbol.ContainingNamespace == null;
+				&& (symbol = symbol.ContainingNamespace)?.Name == nameof(System)
+				&& symbol.ContainingNamespace?.IsGlobalNamespace != false;
 		}
 
 		#region Protected/Future property accessors
