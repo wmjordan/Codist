@@ -79,6 +79,13 @@ namespace Codist.Taggers
 			return (typeof(T) == typeof(IClassificationTag)) ? CreateTagger(textView, buffer) as ITagger<T> : null;
 		}
 
+		public void RemoveTagger(ITextView textView) {
+			if (_Taggers.Remove(textView)) {
+				textView.Closed -= TextView_Closed;
+				--_taggerCount;
+			}
+		}
+
 		CSharpTagger CreateTagger(ITextView textView, ITextBuffer buffer) {
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
 				&& buffer.MayBeEditor() // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
@@ -96,9 +103,10 @@ namespace Codist.Taggers
 					textView.Closed += TextView_Closed;
 				}
 				else if (tagger.TextBuffer != buffer) {
-					tagger.Dispose();
-					_Taggers.Remove(textView);
-					_Taggers.Add(textView, tagger = new CSharpTagger(this, textView as IWpfTextView, buffer));
+					Debug.Assert(tagger.TextBuffer != null);
+					// one view, one tagger for buffers, OK?
+					// if we have multiple taggers asynchronously running, can this cause problem?
+					tagger.TextBuffer = buffer;
 				}
 				return tagger;
 			}
