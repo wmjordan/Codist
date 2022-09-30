@@ -20,6 +20,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 namespace Codist.Taggers
 {
 	/// <summary>A classifier for C# code syntax highlight.</summary>
+	[DebuggerDisplay("{GetDebuggerString()}")]
 	sealed class CSharpTagger : ITagger<IClassificationTag>, IDisposable
 	{
 		static readonly CSharpClassifications __Classifications = CSharpClassifications.Instance;
@@ -34,6 +35,7 @@ namespace Codist.Taggers
 		ParseResult _ParseResult;
 		bool _HasFocus;
 		bool _HasBackgroundChange;
+		ITextSnapshot _WorkingSnapshot;
 		readonly bool _IsInteractiveWindow;
 		// debug info
 		readonly string _name;
@@ -81,13 +83,17 @@ namespace Codist.Taggers
 				// drop previous pending spans when snapshot is changed
 				_PendingSpans = new ConcurrentQueue<SnapshotSpan>();
 			}
-			if (_Parser.State == ParserState.Working) {
-				// cancel existing parsing
-				_TaskBreaker?.Cancel();
+			if (snapshot != _WorkingSnapshot) {
+				_WorkingSnapshot = snapshot;
+				// don't schedule parsing unless snapshot is changed
+				if (_Parser.State == ParserState.Working) {
+					// cancel existing parsing
+					_TaskBreaker?.Cancel();
+				}
+				_Timer.Change(_ParseResult != null ? 300 : 100, Timeout.Infinite);
 			}
 			// queue the spans to be updated after parsing
 			EnqueueSpans(spans);
-			_Timer.Change(_ParseResult == null && snapshot.Length > 5000 ? 300 : 100, Timeout.Infinite); // schedule updating syntax model
 			return _ParseResult != null && _ParseResult.Snapshot.TextBuffer == snapshot.TextBuffer
 				? UseOldResult(spans, snapshot, _ParseResult) // use old results if possible
 				: Enumerable.Empty<ITagSpan<IClassificationTag>>();
@@ -179,8 +185,7 @@ namespace Codist.Taggers
 		void WorkspaceChanged(object sender, WorkspaceChangeEventArgs args) {
 			Debug.WriteLine($"Workspace {args.Kind}: {args.DocumentId}");
 			var parser = _Parser;
-			if (parser == null || parser.State == ParserState.Working) {
-				// ignore workspace changes if reparse is already scheduled
+			if (parser == null) {
 				return;
 			}
 			switch (args.Kind) {
@@ -214,11 +219,12 @@ namespace Codist.Taggers
 			if (changes.Count == 0) {
 				return;
 			}
-			if (TagsChanged != null) {
+			var tc = TagsChanged;
+			if (tc != null) {
 				foreach (var item in changes) {
 					var changedSpan = new SnapshotSpan(e.After, item.NewSpan);
 					Debug.WriteLine($"{_Buffer.GetDocument().GetDocId()} changed: {changedSpan}");
-					TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(changedSpan));
+					tc.Invoke(this, new SnapshotSpanEventArgs(changedSpan));
 				}
 			}
 		}
@@ -261,6 +267,11 @@ namespace Codist.Taggers
 			_ParseResult = default;
 			_Timer?.Dispose();
 			_Timer = null;
+			_WorkingSnapshot = null;
+		}
+
+		string GetDebuggerString() {
+			return $"{_Parser?.State} ({_name})";
 		}
 
 		static bool IsInteractiveWindow(ITextBuffer buffer) {
