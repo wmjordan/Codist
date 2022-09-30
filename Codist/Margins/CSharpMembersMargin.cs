@@ -22,7 +22,6 @@ namespace Codist.Margins
 	/// <summary>
 	/// Helper class to handle the rendering of the members margin.
 	/// </summary>
-	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
 	sealed class CSharpMembersMargin : MarginElementBase, IWpfTextViewMargin
 	{
 		//todo user customizable opacity of markers
@@ -138,7 +137,7 @@ namespace Codist.Margins
 		}
 
 		public override void Dispose() {
-			if (_SemanticContext != null) {
+			if (Interlocked.Exchange(ref _SemanticContext, null) != null) {
 				IsVisibleChanged -= _MemberMarker.OnIsVisibleChanged;
 				Config.UnregisterUpdateHandler(UpdateCSharpMembersMarginConfig);
 				_MemberMarker.Dispose();
@@ -147,7 +146,6 @@ namespace Codist.Margins
 				_MemberMarker = null;
 				_SymbolReferenceMarker = null;
 				_FormatMap = null;
-				_SemanticContext = null;
 			}
 		}
 
