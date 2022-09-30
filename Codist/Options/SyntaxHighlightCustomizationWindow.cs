@@ -471,7 +471,7 @@ namespace Codist.Options
 				case SyntaxStyleSource.Markdown: classifications = ToClassificationTypes(Config.Instance.MarkdownStyles); break;
 				case SyntaxStyleSource.Xml: classifications = ToClassificationTypes(Config.Instance.XmlCodeStyles); break;
 				case SyntaxStyleSource.CommentTagger: classifications = ToClassificationTypes(Config.Instance.CommentStyles); break;
-				case SyntaxStyleSource.PriorityOrder: classifications = _FormatMap.CurrentPriorityOrder.Where(i => i != __BraceMatchingClassificationType); break;
+				case SyntaxStyleSource.PriorityOrder: classifications = _FormatMap.CurrentPriorityOrder.Where(i => i != __BraceMatchingClassificationType && i?.Classification.Contains("Breakpoint") == false); break;
 				case SyntaxStyleSource.Selection:
 				default:
 					if (_WpfTextView == null) {
