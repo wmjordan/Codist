@@ -83,6 +83,7 @@ namespace Codist.Margins
 	[ContentType(Constants.CodeTypes.Code)]
 	[ContentType(Constants.CodeTypes.Markdown)]
 	[ContentType(Constants.CodeTypes.Output)]
+	[ContentType(Constants.CodeTypes.InteractiveContent)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class LineNumberMarginFactory : IWpfTextViewMarginProvider
 	{
@@ -102,6 +103,7 @@ namespace Codist.Margins
 	[ContentType(Constants.CodeTypes.Code)]
 	[ContentType(Constants.CodeTypes.Markdown)]
 	[ContentType(Constants.CodeTypes.Output)]
+	[ContentType(Constants.CodeTypes.InteractiveContent)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class SelectionMarginFactory : IWpfTextViewMarginProvider
 	{
