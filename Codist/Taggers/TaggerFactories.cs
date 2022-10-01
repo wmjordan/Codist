@@ -1,7 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using AppHelpers;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
@@ -72,43 +71,33 @@ namespace Codist.Taggers
 	[TagType(typeof(IClassificationTag))]
 	sealed class CSharpTaggerProvider : IViewTaggerProvider
 	{
-		readonly ConditionalWeakTable<ITextView, CSharpTagger> _Taggers = new ConditionalWeakTable<ITextView, CSharpTagger>();
+		readonly Dictionary<ITextView, CSharpTagger> _Taggers = new Dictionary<ITextView, CSharpTagger>();
+		CSharpTagger _LastTagger;
 		// for debug info
 		int _taggerCount;
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
-			return (typeof(T) == typeof(IClassificationTag)) ? CreateTagger(textView, buffer) as ITagger<T> : null;
+			return (typeof(T) == typeof(IClassificationTag)) ? GetTagger(textView, buffer) as ITagger<T> : null;
 		}
 
-		public void RemoveTagger(ITextView textView) {
-			if (_Taggers.Remove(textView)) {
-				textView.Closed -= TextView_Closed;
-				--_taggerCount;
-			}
-		}
-
-		CSharpTagger CreateTagger(ITextView textView, ITextBuffer buffer) {
+		ITagger<IClassificationTag> GetTagger(ITextView textView, ITextBuffer buffer) {
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
 				&& buffer.MayBeEditor() // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
 				&& textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false
 				&& textView.Roles.Contains("PREVIEWTOOLTIPTEXTVIEWROLE") == false
 				) {
-				if (textView.Roles.Contains("DIFF") && (textView as System.Windows.FrameworkElement)?.Parent != null) {
-					// hack workaround for inline DIFF view
-					return null;
+				CSharpTagger tagger;
+				if (textView == _LastTagger?.View) {
+					tagger = _LastTagger;
 				}
-				if (_Taggers.TryGetValue(textView, out var tagger) == false) {
-					_Taggers.Add(textView, tagger = new CSharpTagger(this, textView as IWpfTextView, buffer));
-					Debug.WriteLine("Attached tagger " + buffer.GetTextDocument()?.FilePath);
+				else if (_Taggers.TryGetValue(textView, out tagger)) {
+					_LastTagger = tagger;
+				}
+				else {
+					_Taggers.Add(textView, _LastTagger = tagger = new CSharpTagger(this, textView as IWpfTextView));
 					++_taggerCount;
 					textView.Closed += TextView_Closed;
 				}
-				else if (tagger.TextBuffer != buffer) {
-					Debug.Assert(tagger.TextBuffer != null);
-					// one view, one tagger for buffers, OK?
-					// if we have multiple taggers asynchronously running, can this cause problem?
-					tagger.TextBuffer = buffer;
-				}
-				return tagger;
+				return tagger.GetTagger(buffer);
 			}
 			return null;
 		}
@@ -116,8 +105,10 @@ namespace Codist.Taggers
 		void TextView_Closed(object sender, EventArgs e) {
 			var view = sender as ITextView;
 			view.Closed -= TextView_Closed;
+			if (_LastTagger?.View == view) {
+				_LastTagger = null;
+			}
 			if (_Taggers.TryGetValue(view, out var tagger)) {
-				Debug.WriteLine("Detach tagger " + tagger.TextBuffer?.GetTextDocument()?.FilePath);
 				tagger.Dispose();
 				_Taggers.Remove(view);
 				--_taggerCount;
