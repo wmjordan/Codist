@@ -72,9 +72,11 @@ namespace Codist.Taggers
 	sealed class CSharpTaggerProvider : IViewTaggerProvider
 	{
 		readonly Dictionary<ITextView, CSharpTagger> _Taggers = new Dictionary<ITextView, CSharpTagger>();
+		// cache the latest used tagger to improve performance
 		CSharpTagger _LastTagger;
 		// for debug info
 		int _taggerCount;
+
 		public ITagger<T> CreateTagger<T>(ITextView textView, ITextBuffer buffer) where T : ITag {
 			return (typeof(T) == typeof(IClassificationTag)) ? GetTagger(textView, buffer) as ITagger<T> : null;
 		}

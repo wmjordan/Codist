@@ -24,10 +24,13 @@ namespace Codist.Taggers
 	{
 		static readonly CSharpClassifications __Classifications = CSharpClassifications.Instance;
 		static readonly GeneralClassifications __GeneralClassifications = GeneralClassifications.Instance;
+
 		readonly Dictionary<ITextBuffer, BufferTagger> _Taggers = new Dictionary<ITextBuffer, BufferTagger>();
 		CSharpTaggerProvider _TaggerProvider;
 		IWpfTextView _View;
+		// cache the latest used tagger to improve performance
 		BufferTagger _LastTagger;
+		// used in Interactive window to detect #reset
 		Guid _LastSolutionId;
 		readonly bool _IsInteractiveWindow;
 
@@ -46,7 +49,7 @@ namespace Codist.Taggers
 					_Taggers.Add(buffer, tagger = new BufferTagger(this, _View, buffer));
 				}
 				if (_IsInteractiveWindow && _LastTagger != null) {
-					_LastTagger.DerefResource();
+					_LastTagger.ReleaseAsyncTimer();
 				}
 				_LastTagger = tagger;
 			}
@@ -172,7 +175,7 @@ namespace Codist.Taggers
 			void ReceivedParserResult(ParseResult result) {
 				var oldResult = Interlocked.Exchange(ref _ParseResult, result);
 				if (_IsInteractiveWindow) {
-					RemoveTaggersOnSolutionChange(result, oldResult);
+					RemoveTaggersOnSolutionChange(result);
 				}
 				else if (oldResult == null) {
 					result.Workspace.WorkspaceChanged += WorkspaceChanged;
@@ -188,15 +191,15 @@ namespace Codist.Taggers
 				}
 			}
 
-			void RemoveTaggersOnSolutionChange(ParseResult result, ParseResult oldResult) {
+			void RemoveTaggersOnSolutionChange(ParseResult result) {
 				Guid id;
-				 if (result.Workspace.CurrentSolution.Id.Id == (id = _Container._LastSolutionId)) {
+				var c = _Container;
+				if (c == null || result.Workspace.CurrentSolution.Id.Id == (id = c._LastSolutionId)) {
 					return;
 				}
-				var c = _Container;
+
 				foreach (var item in c._Taggers.ToList()) {
-					if (item.Value._ParseResult.Workspace.CurrentSolution.Id.Id != id) {
-						c._Taggers.Remove(item.Key);
+					if (item.Value._ParseResult?.Workspace.CurrentSolution.Id.Id != id) {
 						item.Value.Release();
 					}
 				}
@@ -330,7 +333,7 @@ namespace Codist.Taggers
 				}
 			}
 
-			internal void DerefResource() {
+			internal void ReleaseAsyncTimer() {
 				if (_TaskBreaker != null) {
 					_TaskBreaker.Cancel();
 					_TaskBreaker.Dispose();
