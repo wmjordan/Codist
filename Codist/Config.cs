@@ -16,7 +16,7 @@ namespace Codist
 {
 	sealed class Config
 	{
-		internal const string CurrentVersion = "6.5.2";
+		internal const string CurrentVersion = "6.5.3";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
 		internal const string LightTheme = ThemePrefix + "Light", PaleLightTheme = ThemePrefix + "PaleLight", DarkTheme = ThemePrefix + "Dark", PaleDarkTheme = ThemePrefix + "PaleDark", SimpleTheme = ThemePrefix + "Simple";
