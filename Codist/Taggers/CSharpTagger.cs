@@ -402,27 +402,25 @@ namespace Codist.Taggers
 			public ParserState State => (ParserState)_State;
 
 			public bool Start(ITextBuffer buffer, CancellationToken cancellationToken) {
-				if (Interlocked.CompareExchange(ref _State, (int)ParserState.Working, (int)ParserState.Idle) != (int)ParserState.Idle) {
-					return false;
-				}
-				return Task.Run(() => {
-					ITextSnapshot snapshot = buffer.CurrentSnapshot;
-					var workspace  = Workspace.GetWorkspaceRegistration(buffer.AsTextContainer()).Workspace;
-					if (workspace == null) {
-						goto QUIT;
-					}
-					Document document;
-					try {
-						document = workspace.GetDocument(buffer);
-					}
-					catch (InvalidOperationException) {
-						goto QUIT;
-					}
-					return ParseAsync(workspace, document, snapshot, cancellationToken);
-				QUIT:
-					Interlocked.CompareExchange(ref _State, (int)ParserState.Idle, (int)ParserState.Working);
-					return Task.CompletedTask;
-				}).IsCanceled == false;
+				return Interlocked.CompareExchange(ref _State, (int)ParserState.Working, (int)ParserState.Idle) == (int)ParserState.Idle
+					&& Task.Run(() => {
+						ITextSnapshot snapshot = buffer.CurrentSnapshot;
+						var workspace = Workspace.GetWorkspaceRegistration(buffer.AsTextContainer()).Workspace;
+						if (workspace == null) {
+							goto QUIT;
+						}
+						Document document;
+						try {
+							document = workspace.GetDocument(buffer);
+						}
+						catch (InvalidOperationException) {
+							goto QUIT;
+						}
+						return ParseAsync(workspace, document, snapshot, cancellationToken);
+					QUIT:
+						Interlocked.CompareExchange(ref _State, (int)ParserState.Idle, (int)ParserState.Working);
+						return Task.CompletedTask;
+					}).IsCanceled == false;
 			}
 
 			async Task ParseAsync(Workspace workspace, Document document, ITextSnapshot snapshot, CancellationToken cancellationToken) {

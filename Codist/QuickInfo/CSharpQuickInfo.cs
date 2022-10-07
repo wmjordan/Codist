@@ -851,8 +851,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowConstInfo(QiContainer qiContent, ISymbol symbol, object value) {
-			var sv = value as string;
-			if (sv != null) {
+			if (value is string sv) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
 					qiContent.Add(ShowStringInfo(sv, true));
 				}

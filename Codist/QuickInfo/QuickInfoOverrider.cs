@@ -508,7 +508,7 @@ namespace Codist.QuickInfo
 						var v16orLater = CodistPackage.VsVersion.Major >= 16;
 						ClearDefaultDocumentationItems(doc, v16orLater, items);
 						if (DocElement != null) {
-							OverrideDocElement(doc, v16orLater, items);
+							OverrideDocElement(items);
 						}
 						if (ExceptionDoc != null) {
 							OverrideExceptionDocElement(doc, v16orLater, items);
@@ -535,7 +535,7 @@ namespace Codist.QuickInfo
 					}
 				}
 
-				void OverrideDocElement(StackPanel doc, bool v16orLater, IList items) {
+				void OverrideDocElement(IList items) {
 					try {
 						if (items.Count > 1 && items[1] is TextBlock) {
 							items.RemoveAt(1);
