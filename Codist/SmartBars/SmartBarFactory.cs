@@ -1,15 +1,16 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using Microsoft.VisualStudio.Text.Editor;
-using Microsoft.VisualStudio.Utilities;
 using AppHelpers;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
+using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.SmartBars
 {
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType(Constants.CodeTypes.Code)]
 	[ContentType(Constants.CodeTypes.Markdown)]
+	[ContentType(Constants.CodeTypes.Text)]
 	[ContentType(Constants.CodeTypes.Output)]
 	[ContentType(Constants.CodeTypes.HtmlxProjection)]
 	[ContentType(Constants.CodeTypes.InteractiveContent)]
@@ -35,6 +36,9 @@ namespace Codist.SmartBars
 			}
 			// The toolbar will get wired to the text view events
 			var contentType = textView.TextBuffer.ContentType;
+			if (contentType.IsOfType("snippet picker")) {
+				return;
+			}
 			if (Constants.CodeTypes.CSharp.Equals(contentType.TypeName, StringComparison.OrdinalIgnoreCase)) {
 				SemanticContext.GetOrCreateSingetonInstance(textView);
 				new CSharpSmartBar(textView, _TextSearchService);
