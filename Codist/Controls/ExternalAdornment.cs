@@ -218,8 +218,11 @@ namespace Codist.Controls
 
 		void VisualElement_Loaded(object sender, RoutedEventArgs e) {
 			_View.VisualElement.Loaded -= VisualElement_Loaded;
-			_View.Selection.SelectionChanged += ViewSeletionChanged;
-			_View.VisualElement.GetParent<Grid>().Children.Add(this);
+			var container = _View.VisualElement.GetParent<Grid>();
+			if (container != null) {
+				_View.Selection.SelectionChanged += ViewSeletionChanged;
+				container.Children.Add(this);
+			}
 		}
 
 		void View_Closed(object sender, EventArgs e) {
@@ -227,7 +230,7 @@ namespace Codist.Controls
 				_View.Closed -= View_Closed;
 				_View.Selection.SelectionChanged -= ViewSeletionChanged;
 				_View.Properties.RemoveProperty(typeof(ExternalAdornment));
-				_View.VisualElement.GetParent<Grid>().Children.Remove(this);
+				_View.VisualElement.GetParent<Grid>()?.Children.Remove(this);
 				foreach (var item in _Canvas.Children) {
 					if (item is FrameworkElement fe) {
 						fe.MouseLeave -= ReleaseQuickInfo;
