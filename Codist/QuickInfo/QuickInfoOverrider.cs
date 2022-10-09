@@ -571,7 +571,7 @@ namespace Codist.QuickInfo
 				}
 
 				static CrispImage CreateEnlargedIcon(CrispImage icon) {
-					var bgIcon = new CrispImage { Moniker = icon.Moniker, Width = 48, Height = 48 };
+					var bgIcon = new CrispImage { Moniker = icon.Moniker, Width = ThemeHelper.XLargeIconSize, Height = ThemeHelper.XLargeIconSize };
 					bgIcon.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 					return bgIcon;
 				}

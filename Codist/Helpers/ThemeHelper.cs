@@ -19,6 +19,9 @@ namespace Codist
 	static class ThemeHelper
 	{
 		internal const int DefaultIconSize = 16;
+		internal const int MiddleIconSize = 24;
+		internal const int LargeIconSize = 32;
+		internal const int XLargeIconSize = 48;
 
 		static readonly IClassificationFormatMap __ToolTipFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("tooltip");
 		static ThemeHelper() {
