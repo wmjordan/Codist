@@ -386,6 +386,23 @@ namespace Codist.SmartBars
 			}
 		}
 
+		sealed class CommandToolTip : StackPanel
+		{
+			public CommandToolTip(int imageId, string tooltip) {
+				Orientation = Orientation.Horizontal;
+				var icon = ThemeHelper.GetImage(imageId, ThemeHelper.MiddleIconSize).WrapMargin(WpfHelper.MiddleMargin);
+				icon.VerticalAlignment = VerticalAlignment.Top;
+				Children.Add(icon);
+				var lines = tooltip.Split(new[] { "\r\n" }, StringSplitOptions.None);
+				var p = new StackPanel { Margin = WpfHelper.SmallMargin };
+				for (int i = 0; i < lines.Length; i++) {
+					p.Add(new ThemedTipText(lines[i]) { MaxWidth = 500, FontWeight = i == 0 ? FontWeights.Bold : FontWeights.Normal });
+				}
+				Children.Add(p);
+				this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+			}
+		}
+
 		sealed class CommandButton : Button, IDisposable
 		{
 			const string RightClickTag = "RightClick", LeftClickTag = "LeftClick";
@@ -399,7 +416,7 @@ namespace Codist.SmartBars
 				_Bar = bar;
 				_ClickHandler = clickHandler;
 				_MenuFactory = menuFactory;
-				ToolTip = tooltip;
+				this.SetLazyToolTip(() => new CommandToolTip(imageId, tooltip));
 				Cursor = Cursors.Hand;
 				BorderThickness = WpfHelper.TinyMargin;
 				Content = ThemeHelper.GetImage(imageId, (int)(ThemeHelper.DefaultIconSize * bar.View.ZoomFactor())).WrapMargin(WpfHelper.SmallMargin);
