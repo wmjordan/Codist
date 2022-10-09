@@ -19,7 +19,7 @@ namespace Codist
 				WpfHelper.SetUITextRenderOptions(tip, true);
 			}
 			if (forMemberList == false) {
-				tip.Title.AddImage(symbol.GetImageId()).WrapMargin(WpfHelper.GlyphMargin);
+				tip.Title.Append(ThemeHelper.GetImage(symbol.GetImageId()).WrapMargin(WpfHelper.GlyphMargin));
 			}
 			tip.Title
 				.Append($"{symbol.GetAccessibility()}{symbol.GetAbstractionModifier()}{symbol.GetValueAccessModifier()}{symbol.GetSymbolKindName()} ")
