@@ -94,8 +94,6 @@ namespace Codist.Controls
 	}
 	sealed class ThemedTipParagraph
 	{
-		const int PlaceHolderSize = WpfHelper.IconRightMargin + ThemeHelper.DefaultIconSize;
-
 		public ThemedTipParagraph(int iconId, TextBlock content) {
 			Icon = iconId;
 			Content = content ?? new ThemedTipText();
