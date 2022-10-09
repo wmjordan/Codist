@@ -35,6 +35,9 @@ namespace Codist.Controls
 					if (referrer.ContainingType != containerType) {
 						i.Hint = (referrer.ContainingType ?? referrer).ToDisplayString(CodeAnalysisHelper.MemberNameFormat);
 					}
+					if (occurance.Count > 1) {
+						i.Hint += " @" + occurance.Count;
+					}
 				}
 			}
 			m.ExtIconProvider = ExtIconProvider.Default.GetExtIconsWithUsage;
