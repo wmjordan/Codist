@@ -187,19 +187,6 @@ namespace Codist.Controls
 			}
 		}
 
-		internal void ShowSourceReference(TextBlock text) {
-			var sourceTree = Location.SourceTree;
-			var sourceSpan = Location.SourceSpan;
-			var sourceText = sourceTree.GetText();
-			var t = sourceText.ToString(new Microsoft.CodeAnalysis.Text.TextSpan(sourceSpan.Start > 100 ? sourceSpan.Start - 100 : 0, sourceSpan.Start > 100 ? 100 : sourceSpan.Start));
-			int i = t.LastIndexOfAny(new[] { '\r', '\n' });
-			text.Append(i != -1 ? t.Substring(i).TrimStart() : t.TrimStart())
-				.Append(sourceText.ToString(sourceSpan), true);
-			t = sourceText.ToString(new Microsoft.CodeAnalysis.Text.TextSpan(sourceSpan.End, sourceTree.Length - sourceSpan.End > 100 ? 100 : sourceTree.Length - sourceSpan.End));
-			i = t.IndexOfAny(new[] { '\r', '\n' });
-			text.Append(i != -1 ? t.Substring(0, i).TrimEnd() : t.TrimEnd());
-		}
-
 		public override string ToString() {
 			return Content.GetText();
 		}

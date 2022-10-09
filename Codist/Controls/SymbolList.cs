@@ -17,6 +17,7 @@ using GDI = System.Drawing;
 using Task = System.Threading.Tasks.Task;
 using WPF = System.Windows.Media;
 using R = Codist.Properties.Resources;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Codist.Controls
 {
@@ -392,7 +393,7 @@ namespace Codist.Controls
 				var tip = ToolTipFactory.CreateToolTip(item.Symbol, false, sc);
 				if (ContainerType == SymbolListType.SymbolReferrers && item.Location.IsInSource) {
 					// append location info to tip
-					item.ShowSourceReference(tip.AddTextBlock().Append(R.T_SourceReference).AppendLine());
+					ShowSourceReference(tip.AddTextBlock().Append(R.T_SourceReference).AppendLine(), item.Location);
 				}
 				return tip;
 			}
@@ -410,6 +411,19 @@ namespace Codist.Controls
 				}
 			}
 			return null;
+		}
+
+		static void ShowSourceReference(TextBlock text, Location location) {
+			var sourceTree = location.SourceTree;
+			var sourceSpan = location.SourceSpan;
+			var sourceText = sourceTree.GetText();
+			var t = sourceText.ToString(new TextSpan(Math.Max(sourceSpan.Start - 100, 0), Math.Min(sourceSpan.Start, 100)));
+			int i = t.LastIndexOfAny(new[] { '\r', '\n' });
+			text.Append(i != -1 ? t.Substring(i).TrimStart() : t.TrimStart())
+				.Append(sourceText.ToString(sourceSpan), true);
+			t = sourceText.ToString(new TextSpan(sourceSpan.End, Math.Min(sourceTree.Length - sourceSpan.End, 100)));
+			i = t.IndexOfAny(new[] { '\r', '\n' });
+			text.Append(i != -1 ? t.Substring(0, i).TrimEnd() : t.TrimEnd());
 		}
 		#endregion
 
