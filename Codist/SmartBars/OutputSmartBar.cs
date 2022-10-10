@@ -31,10 +31,10 @@ namespace Codist.SmartBars
 			}
 			switch (p) {
 				case PathIsFile:
-					AddCommand(MyToolBar, IconIds.Open, R.CMD_OpenOrExecuteFile, ctx => {
+					AddCommand(MyToolBar, IconIds.Open, $"{R.CMD_OpenOrExecuteFile}\n{t}", ctx => {
 						TryRun(t);
 					});
-					AddCommand(MyToolBar, IconIds.OpenFolder, R.CMD_OpenFolder, ctx => {
+					AddCommand(MyToolBar, IconIds.OpenFolder, $"{R.CMD_OpenFolder}\n{t}", ctx => {
 						Process.Start(new ProcessStartInfo("Explorer.exe", "/select,\"" + t + "\"") { WorkingDirectory = Environment.SystemDirectory });
 					});
 					switch (Path.GetExtension(t).ToLowerInvariant()) {
@@ -46,7 +46,7 @@ namespace Codist.SmartBars
 						case ".vbs":
 						case ".com":
 						case ".wsf":
-							AddCommand(MyToolBar, IconIds.OpenWithCmd, R.CMD_OpenFileInCmd, ctx => {
+							AddCommand(MyToolBar, IconIds.OpenWithCmd, $"{R.CMD_OpenFileInCmd}\n{t}", ctx => {
 								Process.Start(new ProcessStartInfo(Environment.SystemDirectory + "\\cmd.exe", "/K \"" + t + "\"") { WorkingDirectory = Path.GetDirectoryName(t) });
 							});
 							break;
@@ -58,10 +58,10 @@ namespace Codist.SmartBars
 					}
 					return;
 				case PathIsDirectory:
-					AddCommand(MyToolBar, IconIds.OpenFolder, R.CMD_OpenFolder, ctx => {
+					AddCommand(MyToolBar, IconIds.OpenFolder, $"{R.CMD_OpenFolder}\n{t}", ctx => {
 						TryRun(t);
 					});
-					AddCommand(MyToolBar, IconIds.OpenWithCmd, R.CMD_OpenFolderWithCmd, ctx => {
+					AddCommand(MyToolBar, IconIds.OpenWithCmd, $"{R.CMD_OpenFileInCmd}\n{t}", ctx => {
 						Process.Start(new ProcessStartInfo(Environment.SystemDirectory + "\\cmd.exe") { WorkingDirectory = t });
 					});
 					return;
