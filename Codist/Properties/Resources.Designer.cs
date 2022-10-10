@@ -255,7 +255,7 @@ namespace Codist.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Debugger...
         ///Left click: Toggle breakpoint
-        ///Right click: Debugger menu....
+        ///Right click: &quot;Debugger&quot; menu....
         /// </summary>
         internal static string CMD_Debugger {
             get {
@@ -275,8 +275,8 @@ namespace Codist.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Delete selected text
         ///Right click: Delete line
-        ///Ctrl click: Delete and select next
-        ///Shift click: Delete and select next (whole word).
+        ///Ctrl: Delete and select next
+        ///Shift: Delete and select next (whole word).
         /// </summary>
         internal static string CMD_DeleteSelectedText {
             get {
@@ -512,10 +512,10 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to Find next selected text
-        ///Ctrl click: Find match case
-        ///Shift click: Match whole word
-        ///Alt click: Insert caret at next match
-        ///Right click: Find and replace....
+        ///Ctrl: Match case
+        ///Shift: Match whole word
+        ///Alt: Insert caret at next match
+        ///Right click: &quot;Find and replace&quot; menu....
         /// </summary>
         internal static string CMD_FindReplace {
             get {
@@ -560,7 +560,8 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Formatting....
+        ///   Looks up a localized string similar to Formatting...
+        ///Format selected text, encode/decode, change case, etc..
         /// </summary>
         internal static string CMD_Formatting {
             get {
@@ -797,7 +798,7 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to Toggle Bold Mark
-        ///Ctrl click: toggle and select next.
+        ///Ctrl: toggle and select next.
         /// </summary>
         internal static string CMD_MarkBold {
             get {
@@ -807,7 +808,7 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to Toggle Code Mark
-        ///Ctrl click: toggle and select next.
+        ///Ctrl: toggle and select next.
         /// </summary>
         internal static string CMD_MarkCode {
             get {
@@ -817,7 +818,7 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to Toggle Italic Mark
-        ///Ctrl click: toggle and select next.
+        ///Ctrl: toggle and select next.
         /// </summary>
         internal static string CMD_MarkItalic {
             get {
@@ -836,7 +837,7 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to Toggle Strike Through Mark
-        ///Ctrl click: toggle and select next.
+        ///Ctrl: toggle and select next.
         /// </summary>
         internal static string CMD_MarkStrikeThrough {
             get {
@@ -845,7 +846,8 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Mark symbol....
+        ///   Looks up a localized string similar to Mark...
+        ///Mark symbol, breakpoint or bookmark.
         /// </summary>
         internal static string CMD_MarkSymbol {
             get {
@@ -946,8 +948,8 @@ namespace Codist.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Paste text from clipboard
         ///Right click: Paste over line
-        ///Ctrl click: Paste and select next
-        ///Shift click: Paste and select next (whole word).
+        ///Ctrl: Paste and select next
+        ///Shift: Paste and select next (whole word).
         /// </summary>
         internal static string CMD_Paste {
             get {
@@ -1060,6 +1062,17 @@ namespace Codist.Properties {
         internal static string CMD_ResetColor {
             get {
                 return ResourceManager.GetString("CMD_ResetColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Run to Cursor
+        ///Ctrl: Run flagged threads to cursor
+        ///Right click: Threads window.
+        /// </summary>
+        internal static string CMD_RunToCursor {
+            get {
+                return ResourceManager.GetString("CMD_RunToCursor", resourceCulture);
             }
         }
         

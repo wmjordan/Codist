@@ -228,7 +228,7 @@
   <data name="CMD_Debugger" xml:space="preserve">
     <value>调试器...
 左键：切换断点
-右键：调试器菜单...</value>
+右键：“调试器”菜单...</value>
   </data>
   <data name="CMD_DeleteAllBreakpoints" xml:space="preserve">
     <value>删除所有断点</value>
@@ -236,8 +236,8 @@
   <data name="CMD_DeleteSelectedText" xml:space="preserve">
     <value>删除选中文本
 右键：删除整行
-Ctrl单击：删除并选中下一项
-Shift单击：删除并选中下一项（整个单词）</value>
+Ctrl：删除并选中下一项
+Shift：删除并选中下一项（整个单词）</value>
   </data>
   <data name="CMD_DuplicateSelection" xml:space="preserve">
     <value>重复选中内容
@@ -257,10 +257,10 @@ Shift单击：删除并选中下一项（整个单词）</value>
   </data>
   <data name="CMD_FindReplace" xml:space="preserve">
     <value>查找下一个选中文本
-Ctrl 单击：匹配大小写
-Shift 单击：匹配整个单词
-Alt 单击：在下一个匹配位置插入光标
-右键：查找及替换...</value>
+Ctrl：匹配大小写
+Shift：匹配整个单词
+Alt：在下一个匹配位置插入光标
+右键：“查找及替换”菜单...</value>
   </data>
   <data name="CMD_FormatDocument" xml:space="preserve">
     <value>格式化文档</value>
@@ -269,7 +269,8 @@ Alt 单击：在下一个匹配位置插入光标
     <value>格式化选中内容</value>
   </data>
   <data name="CMD_Formatting" xml:space="preserve">
-    <value>文本格式...</value>
+    <value>文本格式...
+自动排版选中文本、编码解码、更改大小写等</value>
   </data>
   <data name="CMD_GoToDeclaration" xml:space="preserve">
     <value>转到声明</value>
@@ -307,13 +308,14 @@ Alt 单击：在下一个匹配位置插入光标
     <value>标记 &lt;NAME&gt;</value>
   </data>
   <data name="CMD_MarkSymbol" xml:space="preserve">
-    <value>标记符号...</value>
+    <value>标记...
+标记代码符号、断点或书签</value>
   </data>
   <data name="CMD_Paste" xml:space="preserve">
     <value>粘贴文本
-右键：覆盖整行粘贴
-Ctrl 单击：粘贴并选中下一项
-Shift单击：删除并选中下一项（整个单词）</value>
+右键：粘贴覆盖整行
+Ctrl：粘贴并选中下一项
+Shift：粘贴并选中下一项（整个单词）</value>
   </data>
   <data name="CMD_RenameSymbol" xml:space="preserve">
     <value>重命名符号...</value>
@@ -2016,22 +2018,22 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="CMD_MarkBold" xml:space="preserve">
     <value>切换粗体标记
-Ctrl 单击: 切换标记并选择下一处</value>
+Ctrl: 切换标记并选择下一处</value>
   </data>
   <data name="CMD_MarkCode" xml:space="preserve">
     <value>切换代码标记
-Ctrl 单击: 切换标记并选择下一处</value>
+Ctrl: 切换标记并选择下一处</value>
   </data>
   <data name="CMD_MarkItalic" xml:space="preserve">
     <value>切换斜体标记
-Ctrl 单击: 切换标记并选择下一处</value>
+Ctrl: 切换标记并选择下一处</value>
   </data>
   <data name="CMD_MarkLink" xml:space="preserve">
     <value>标记为 HTML 连接</value>
   </data>
   <data name="CMD_MarkStrikeThrough" xml:space="preserve">
     <value>切换删除线标记
-Ctrl 单击: 切换标记并选择下一处</value>
+Ctrl: 切换标记并选择下一处</value>
   </data>
   <data name="CMD_TagXmlDocA" xml:space="preserve">
     <value>以 &lt;a href&gt; 包围</value>
@@ -2053,5 +2055,10 @@ Ctrl 单击: 切换标记并选择下一处</value>
   </data>
   <data name="T_SymbolMenuHint" xml:space="preserve">
     <value>提示：右键点击菜单项可显示菜单</value>
+  </data>
+  <data name="CMD_RunToCursor" xml:space="preserve">
+    <value>运行到光标处
+Ctrl: 运行标记的线程到光标处
+Right click: 显示“线程”窗口</value>
   </data>
 </root>

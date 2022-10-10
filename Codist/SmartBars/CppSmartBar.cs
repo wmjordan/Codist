@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using System.Windows.Controls;
-using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
 using R = Codist.Properties.Resources;
@@ -21,7 +18,7 @@ namespace Codist.SmartBars
 		ToolBar MyToolBar => ToolBar2;
 
 		protected override void AddCommands(CancellationToken cancellationToken) {
-			base.AddCommands(cancellationToken);
+			var isReadOnly = View.IsCaretInReadOnlyRegion();
 			AddCommand(MyToolBar, IconIds.GoToDefinition, R.CMD_GoToDefinition, ctx => {
 				TextEditorHelper.ExecuteEditorCommand("Edit.GoToDefinition", GetCurrentWord(ctx.View));
 			});
@@ -31,8 +28,7 @@ namespace Codist.SmartBars
 			AddCommand(MyToolBar, IconIds.FindReference, R.CMD_FindAllReferences, ctx => {
 				TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences");
 			});
-			var mode = CodistPackage.DebuggerStatus;
-			if (mode != DebuggerStatus.Running) {
+			if (isReadOnly == false) {
 				//AddEditorCommand(MyToolBar, KnownImageIds.IntellisenseLightBulb, "EditorContextMenus.CodeWindow.QuickActionsForPosition", "Quick actions for position");
 				AddCommand(MyToolBar, IconIds.Comment, R.CMD_CommentSelection, ctx => {
 					if (ctx.RightClick) {
@@ -42,9 +38,7 @@ namespace Codist.SmartBars
 				});
 				AddEditorCommand(MyToolBar, IconIds.Uncomment, "Edit.UncommentSelection", R.CMD_UncommentSelection);
 			}
-			else if (mode != DebuggerStatus.Design) {
-				AddCommands(MyToolBar, IconIds.ToggleBreakpoint, R.CMD_Debugger, ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);
-			}
+			base.AddCommands(cancellationToken);
 		}
 
 		string GetCurrentWord(ITextView view) {

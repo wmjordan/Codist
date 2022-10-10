@@ -159,7 +159,7 @@ Right click: Cut line</value>
   <data name="CMD_Debugger" xml:space="preserve">
     <value>Debugger...
 Left click: Toggle breakpoint
-Right click: Debugger menu...</value>
+Right click: "Debugger" menu...</value>
   </data>
   <data name="CMD_DeleteAllBreakpoints" xml:space="preserve">
     <value>Delete All Breakpoints</value>
@@ -167,8 +167,8 @@ Right click: Debugger menu...</value>
   <data name="CMD_DeleteSelectedText" xml:space="preserve">
     <value>Delete selected text
 Right click: Delete line
-Ctrl click: Delete and select next
-Shift click: Delete and select next (whole word)</value>
+Ctrl: Delete and select next
+Shift: Delete and select next (whole word)</value>
   </data>
   <data name="CMD_DuplicateSelection" xml:space="preserve">
     <value>Duplicate selection
@@ -233,10 +233,10 @@ Right click: Duplicate line</value>
   </data>
   <data name="CMD_FindReplace" xml:space="preserve">
     <value>Find next selected text
-Ctrl click: Find match case
-Shift click: Match whole word
-Alt click: Insert caret at next match
-Right click: Find and replace...</value>
+Ctrl: Match case
+Shift: Match whole word
+Alt: Insert caret at next match
+Right click: "Find and replace" menu...</value>
   </data>
   <data name="CMD_FindSymbolwithName" xml:space="preserve">
     <value>Find Symbol with Name "&lt;NAME&gt;"...</value>
@@ -251,7 +251,8 @@ Right click: Find and replace...</value>
     <value>Format selection</value>
   </data>
   <data name="CMD_Formatting" xml:space="preserve">
-    <value>Formatting...</value>
+    <value>Formatting...
+Format selected text, encode/decode, change case, etc.</value>
   </data>
   <data name="CMD_GoTo" xml:space="preserve">
     <value>Go to &lt;TYPE&gt;</value>
@@ -304,13 +305,14 @@ Hint: To create a new GUID, type 'guid' (without quotes) and select it</value>
     <value>Mark &lt;NAME&gt;</value>
   </data>
   <data name="CMD_MarkSymbol" xml:space="preserve">
-    <value>Mark symbol...</value>
+    <value>Mark...
+Mark symbol, breakpoint or bookmark</value>
   </data>
   <data name="CMD_Paste" xml:space="preserve">
     <value>Paste text from clipboard
 Right click: Paste over line
-Ctrl click: Paste and select next
-Shift click: Paste and select next (whole word)</value>
+Ctrl: Paste and select next
+Shift: Paste and select next (whole word)</value>
   </data>
   <data name="CMD_Pin" xml:space="preserve">
     <value>Pin</value>
@@ -2031,22 +2033,22 @@ Select expression, argument list or code block for current syntax node</value>
   </data>
   <data name="CMD_MarkBold" xml:space="preserve">
     <value>Toggle Bold Mark
-Ctrl click: toggle and select next</value>
+Ctrl: toggle and select next</value>
   </data>
   <data name="CMD_MarkCode" xml:space="preserve">
     <value>Toggle Code Mark
-Ctrl click: toggle and select next</value>
+Ctrl: toggle and select next</value>
   </data>
   <data name="CMD_MarkItalic" xml:space="preserve">
     <value>Toggle Italic Mark
-Ctrl click: toggle and select next</value>
+Ctrl: toggle and select next</value>
   </data>
   <data name="CMD_MarkLink" xml:space="preserve">
     <value>Mark HTML Link</value>
   </data>
   <data name="CMD_MarkStrikeThrough" xml:space="preserve">
     <value>Toggle Strike Through Mark
-Ctrl click: toggle and select next</value>
+Ctrl: toggle and select next</value>
   </data>
   <data name="CMD_TagXmlDocA" xml:space="preserve">
     <value>Tag XML Doc with HTML &lt;a&gt;</value>
@@ -2068,5 +2070,10 @@ Ctrl click: toggle and select next</value>
   </data>
   <data name="T_SymbolMenuHint" xml:space="preserve">
     <value>Note: Right click menu item to bring out context menu</value>
+  </data>
+  <data name="CMD_RunToCursor" xml:space="preserve">
+    <value>Run to Cursor
+Ctrl: Run flagged threads to cursor
+Right click: Threads window</value>
   </data>
 </root>

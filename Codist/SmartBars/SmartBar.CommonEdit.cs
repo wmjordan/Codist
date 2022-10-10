@@ -24,8 +24,6 @@ namespace Codist.SmartBars
 		static readonly CommandItem[] __SurroundingCommands = GetSurroundingCommands();
 		static readonly CommandItem[] __DebugCommands = GetDebugCommands();
 
-		protected static IEnumerable<CommandItem> DebugCommands => __DebugCommands;
-
 		WrapText _RecentWrapText;
 
 		static void ExecuteAndFind(CommandContext ctx, string command, string text) {
@@ -362,6 +360,18 @@ namespace Codist.SmartBars
 			AddCommand(ToolBar, IconIds.SearchWebSite, R.CMD_ViewUrlInBrowser + Environment.NewLine + span.GetText(), ctx => ExternalCommand.OpenWithWebBrowser(ctx.View.GetFirstSelectionText(), String.Empty));
 		}
 
+		void AddDebuggerCommands() {
+			if (CodistPackage.DebuggerStatus != DebuggerStatus.Design) {
+				AddCommand(ToolBar2, IconIds.RunToCursor, R.CMD_RunToCursor, ctx => {
+					TextEditorHelper.ExecuteEditorCommand(
+						Keyboard.Modifiers.MatchFlags(ModifierKeys.Control) ? "Debug.RunFlaggedThreadsToCursor"
+							: ctx.RightClick ? "Debug.Threads"
+							: "Debug.RunToCursor");
+				});
+				AddCommands(ToolBar2, IconIds.ToggleBreakpoint, R.CMD_Debugger, ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => __DebugCommands);
+			}
+		}
+
 		static CommandItem[] GetCaseCommands() {
 			return new CommandItem[] {
 				new CommandItem(IconIds.Capitalize, R.CMD_Capitalize, ctx => {
@@ -402,7 +412,7 @@ namespace Codist.SmartBars
 			return new CommandItem[] {
 				new CommandItem(IconIds.Watch, R.CMD_AddWatch, c => TextEditorHelper.ExecuteEditorCommand("Debug.AddWatch")),
 				new CommandItem(IconIds.Watch, R.CMD_AddParallelWatch, c => TextEditorHelper.ExecuteEditorCommand("Debug.AddParallelWatch")),
-				new CommandItem(IconIds.DeleteBreakpoint, R.CMD_DeleteAllBreakpoints, c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints"))
+				new CommandItem(IconIds.DeleteBreakpoint, R.CMD_DeleteAllBreakpoints, c => TextEditorHelper.ExecuteEditorCommand("Debug.DeleteAllBreakpoints")),
 			};
 		}
 		static CommandItem[] GetFindAndReplaceCommands() {

@@ -9,7 +9,6 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
@@ -42,7 +41,6 @@ namespace Codist.SmartBars
 			if (UpdateSemanticModel() && _Context.NodeIncludeTrivia != null) {
 				AddContextualCommands(cancellationToken);
 			}
-			//MyToolBar.Items.Add(new Separator());
 			base.AddCommands(cancellationToken);
 		}
 
@@ -157,9 +155,6 @@ namespace Codist.SmartBars
 			if (isReadOnly == false) {
 				AddCommentCommands();
 				AddEditorCommand(MyToolBar, IconIds.QuickAction, "View.QuickActionsForPosition", R.CMD_QuickAction);
-			}
-			if (isDesignMode == false) {
-				AddCommands(MyToolBar, IconIds.ToggleBreakpoint, R.CMD_Debugger, ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => DebugCommands);
 			}
 		}
 
