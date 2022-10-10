@@ -569,6 +569,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Search within Global Namespace.
+        /// </summary>
+        internal static string CMD_GlobalNamespace {
+            get {
+                return ResourceManager.GetString("CMD_GlobalNamespace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Go to &lt;TYPE&gt;.
         /// </summary>
         internal static string CMD_GoTo {
@@ -1127,6 +1136,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Search within Namespace.
+        /// </summary>
+        internal static string CMD_SearchWithinNamespace {
+            get {
+                return ResourceManager.GetString("CMD_SearchWithinNamespace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to see what&apos;s new.
         /// </summary>
         internal static string CMD_SeeWhatsNew {
@@ -1530,6 +1548,33 @@ namespace Codist.Properties {
         internal static string CMDT_SaveTheme {
             get {
                 return ResourceManager.GetString("CMDT_SaveTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search declarations of namespace, types and members defined in current document or current project.
+        /// </summary>
+        internal static string CMDT_SearchDeclaration {
+            get {
+                return ResourceManager.GetString("CMDT_SearchDeclaration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display and search namespace and type names belong to global namespace.
+        /// </summary>
+        internal static string CMDT_SearchWithinGlobalNamespace {
+            get {
+                return ResourceManager.GetString("CMDT_SearchWithinGlobalNamespace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display and search namespace and type names belong to this namespace.
+        /// </summary>
+        internal static string CMDT_SearchWithinNamespace {
+            get {
+                return ResourceManager.GetString("CMDT_SearchWithinNamespace", resourceCulture);
             }
         }
         
@@ -5516,7 +5561,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Search member name with this input box.
+        ///   Looks up a localized string similar to Search type or member names with this input box.
         ///Use space to separate multiple search terms.
         ///- key: search current document
         ///= key: search current project.
@@ -5722,6 +5767,15 @@ namespace Codist.Properties {
         internal static string T_SymbolMarkers {
             get {
                 return ResourceManager.GetString("T_SymbolMarkers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Note: Right click menu item to bring out context menu.
+        /// </summary>
+        internal static string T_SymbolMenuHint {
+            get {
+                return ResourceManager.GetString("T_SymbolMenuHint", resourceCulture);
             }
         }
         

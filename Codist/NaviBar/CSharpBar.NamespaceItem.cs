@@ -7,6 +7,7 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
 using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
@@ -25,7 +26,8 @@ namespace Codist.NaviBar
 				_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(node, Bar._cancellationSource.GetToken()));
 				((TextBlock)Header).Text = _Symbol.Name;
 				Click += HandleClick;
-				this.UseDummyToolTip();
+				this.SetLazyToolTip(CreateToolTip);
+				ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Bottom);
 			}
 
 			public override BarItemType ItemType => BarItemType.Namespace;
@@ -123,6 +125,10 @@ namespace Codist.NaviBar
 					ContextMenu = m;
 				}
 				ContextMenu.IsOpen = true;
+			}
+
+			CommandToolTip CreateToolTip() {
+				return new CommandToolTip(IconIds.Namespace, R.CMD_SearchWithinNamespace, new TextBlock { TextWrapping = TextWrapping.Wrap }.Append(R.CMDT_SearchWithinNamespace));
 			}
 
 			public override void Dispose() {

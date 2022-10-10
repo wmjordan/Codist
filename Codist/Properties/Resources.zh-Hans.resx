@@ -1742,7 +1742,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>项目: </value>
   </data>
   <data name="T_SearchMemberTip" xml:space="preserve">
-    <value>在此键入搜索成员名称的关键词。
+    <value>在此键入搜索类或成员名称的关键词。
 用空格隔开多个搜索关键词。
 - 键: 搜索当前文档
 = 键: 搜索当前项目</value>
@@ -2035,5 +2035,23 @@ Ctrl 单击: 切换标记并选择下一处</value>
   </data>
   <data name="CMD_TagXmlDocA" xml:space="preserve">
     <value>以 &lt;a href&gt; 包围</value>
+  </data>
+  <data name="CMDT_SearchDeclaration" xml:space="preserve">
+    <value>搜索当前文档或当前项目中定义的类型或成员名称</value>
+  </data>
+  <data name="CMDT_SearchWithinGlobalNamespace" xml:space="preserve">
+    <value>搜索全局命名空间中定义的命名空间或类型名称</value>
+  </data>
+  <data name="CMDT_SearchWithinNamespace" xml:space="preserve">
+    <value>搜索当前命名空间中定义的命名空间或类型名称</value>
+  </data>
+  <data name="CMD_GlobalNamespace" xml:space="preserve">
+    <value>在全局命名空间中搜索</value>
+  </data>
+  <data name="CMD_SearchWithinNamespace" xml:space="preserve">
+    <value>在命名空间中搜索</value>
+  </data>
+  <data name="T_SymbolMenuHint" xml:space="preserve">
+    <value>提示：右键点击菜单项可显示菜单</value>
   </data>
 </root>

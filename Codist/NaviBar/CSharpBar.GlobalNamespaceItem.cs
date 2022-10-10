@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using Codist.Controls;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
 using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
@@ -20,7 +21,8 @@ namespace Codist.NaviBar
 
 			public GlobalNamespaceItem(CSharpBar bar) : base(bar, IconIds.GlobalNamespace, new ThemedToolBarText()) {
 				Click += HandleClick;
-				this.UseDummyToolTip();
+				this.SetLazyToolTip(CreateToolTip);
+				ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Bottom);
 			}
 
 			public override BarItemType ItemType => BarItemType.GlobalNamespace;
@@ -105,6 +107,10 @@ namespace Codist.NaviBar
 					var c = CodeAnalysisHelper.GetSpecificSymbolComparer(child);
 					_Menu.SelectedItem = _Menu.Symbols.FirstOrDefault(s => c(s.Symbol));
 				}
+			}
+
+			CommandToolTip CreateToolTip() {
+				return new CommandToolTip(IconIds.GlobalNamespace, R.CMD_GlobalNamespace, new TextBlock { TextWrapping = TextWrapping.Wrap }.Append(R.CMDT_SearchWithinGlobalNamespace));
 			}
 
 			public override void Dispose() {

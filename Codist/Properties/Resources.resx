@@ -1751,7 +1751,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>Project: </value>
   </data>
   <data name="T_SearchMemberTip" xml:space="preserve">
-    <value>Search member name with this input box.
+    <value>Search type or member names with this input box.
 Use space to separate multiple search terms.
 - key: search current document
 = key: search current project</value>
@@ -2050,5 +2050,23 @@ Ctrl click: toggle and select next</value>
   </data>
   <data name="CMD_TagXmlDocA" xml:space="preserve">
     <value>Tag XML Doc with HTML &lt;a&gt;</value>
+  </data>
+  <data name="CMDT_SearchDeclaration" xml:space="preserve">
+    <value>Search declarations of namespace, types and members defined in current document or current project</value>
+  </data>
+  <data name="CMDT_SearchWithinGlobalNamespace" xml:space="preserve">
+    <value>Display and search namespace and type names belong to global namespace</value>
+  </data>
+  <data name="CMDT_SearchWithinNamespace" xml:space="preserve">
+    <value>Display and search namespace and type names belong to this namespace</value>
+  </data>
+  <data name="CMD_GlobalNamespace" xml:space="preserve">
+    <value>Search within Global Namespace</value>
+  </data>
+  <data name="CMD_SearchWithinNamespace" xml:space="preserve">
+    <value>Search within Namespace</value>
+  </data>
+  <data name="T_SymbolMenuHint" xml:space="preserve">
+    <value>Note: Right click menu item to bring out context menu</value>
   </data>
 </root>
