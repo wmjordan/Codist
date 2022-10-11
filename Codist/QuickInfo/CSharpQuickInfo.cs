@@ -71,7 +71,9 @@ namespace Codist.QuickInfo
 			if (semanticModel == null) {
 				return null;
 			}
-			qiWrapper.OverrideBuiltInXmlDoc = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationOverride);
+			if (qiWrapper != null) {
+				qiWrapper.OverrideBuiltInXmlDoc = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationOverride);
+			}
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 
 			//look for occurrences of our QuickInfo words in the span
@@ -85,7 +87,9 @@ namespace Codist.QuickInfo
 					return null;
 				case SyntaxKind.OpenBraceToken:
 				case SyntaxKind.CloseBraceToken:
-					qiWrapper.OverrideBuiltInXmlDoc = false;
+					if (qiWrapper != null) {
+						qiWrapper.OverrideBuiltInXmlDoc = false;
+					}
 					break;
 				case SyntaxKind.SwitchKeyword: // switch info
 				case SyntaxKind.ThisKeyword: // convert to type below
@@ -207,10 +211,12 @@ namespace Codist.QuickInfo
 					symbol = symbol.ContainingType;
 				}
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Diagnostics)) {
-				qiWrapper.SetDiagnostics(semanticModel.GetDiagnostics(token.Span, cancellationToken));
+			if (qiWrapper != null) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Diagnostics)) {
+					qiWrapper.SetDiagnostics(semanticModel.GetDiagnostics(token.Span, cancellationToken));
+				}
+				qiWrapper.ApplyClickAndGo(symbol, buffer, session);
 			}
-			qiWrapper.ApplyClickAndGo(symbol, buffer, session);
 			return new QuickInfoItem(qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
 				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeExclusive)
 				: null, qiContent.ToUI());
