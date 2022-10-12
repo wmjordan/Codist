@@ -654,23 +654,11 @@ namespace Codist
 		public static string GetSymbolKindName(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event: return "event";
-				case SymbolKind.Field: return ((IFieldSymbol)symbol).IsConst ? "const" : "field";
+				case SymbolKind.Field: return "field";
 				case SymbolKind.Label: return "label";
-				case SymbolKind.Local: return ((ILocalSymbol)symbol).IsConst ? "local const" : "local";
-				case SymbolKind.Method:
-					return ((IMethodSymbol)symbol).IsExtensionMethod ? "extension" : "method";
-				case SymbolKind.NamedType:
-					switch (((INamedTypeSymbol)symbol).TypeKind) {
-						case TypeKind.Array: return "array";
-						case TypeKind.Dynamic: return "dynamic";
-						case TypeKind.Class: return "class";
-						case TypeKind.Delegate: return "delegate";
-						case TypeKind.Enum: return "enum";
-						case TypeKind.Interface: return "interface";
-						case TypeKind.Struct: return "struct";
-						case TypeKind.TypeParameter: return "type parameter";
-					}
-					return "type";
+				case SymbolKind.Local: return "local";
+				case SymbolKind.Method: return GetMethodKindName((IMethodSymbol)symbol);
+				case SymbolKind.NamedType: return GetTypeKindName((ITypeSymbol)symbol);
 				case SymbolKind.Namespace: return "namespace";
 				case SymbolKind.Parameter: return "parameter";
 				case SymbolKind.Property: return "property";
@@ -678,6 +666,38 @@ namespace Codist
 				case FunctionPointerType: return "function pointer";
 				default: return symbol.Kind.ToString();
 			}
+		}
+
+		private static string GetMethodKindName(IMethodSymbol method) {
+			if (method.IsExtensionMethod) {
+				return "extension";
+			}
+			switch (method.MethodKind) {
+				case MethodKind.StaticConstructor:
+				case MethodKind.Constructor: return "constructor";
+				case MethodKind.Destructor: return "destructor";
+				case MethodKind.PropertyGet: return "getter";
+				case MethodKind.PropertySet: return "setter";
+				case MethodKind.EventAdd: return "event add";
+				case MethodKind.EventRemove: return "event remove";
+				case MethodKind.LocalFunction: return "local function";
+				case MethodKind.LambdaMethod: return "lambda method";
+				default: return "method";
+			}
+		}
+
+		static string GetTypeKindName(ITypeSymbol type) {
+			switch (type.TypeKind) {
+						case TypeKind.Array: return "array";
+						case TypeKind.Dynamic: return "dynamic";
+				case TypeKind.Class: return type.IsRecord() ? "record" : "class";
+						case TypeKind.Delegate: return "delegate";
+						case TypeKind.Enum: return "enum";
+						case TypeKind.Interface: return "interface";
+				case TypeKind.Struct: return type.IsRecord() ? "record struct" : "struct";
+						case TypeKind.TypeParameter: return "type parameter";
+					}
+					return "type";
 		}
 
 		public static bool IsAccessor(this IMethodSymbol method) {
@@ -784,6 +804,9 @@ namespace Codist
 		#region Protected/Future property accessors
 		public static bool IsReadOnly(this ITypeSymbol type) {
 			return type != null && NonPublicOrFutureAccessors.GetNamedTypeIsReadOnly(type);
+		}
+		public static bool IsRecord(this ITypeSymbol type) {
+			return type != null && NonPublicOrFutureAccessors.GetTypeIsRecord(type);
 		}
 		public static bool IsRefLike(this ITypeSymbol type) {
 			return type != null && NonPublicOrFutureAccessors.GetNamedTypeIsRefLikeType(type);
@@ -1275,6 +1298,8 @@ namespace Codist
 				typeof(ITypeSymbol).GetProperty("IsRefLikeType") != null
 				? ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsRefLikeType")
 				: ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsRefLikeType", typeof(CSharpCompilation).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.NamedTypeSymbol", false));
+
+			public static readonly Func<ITypeSymbol, bool> GetTypeIsRecord = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsRecord");
 
 			public static readonly Func<IMethodSymbol, bool> GetMethodIsInitOnly = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, bool>("IsInitOnly");
 
