@@ -122,6 +122,12 @@ namespace Codist
 					return p[0].Name;
 				}
 			}
+			else if (symbol.Kind == SymbolKind.Event) {
+				var p = ((IEventSymbol)symbol).ExplicitInterfaceImplementations;
+				if (p.Length > 0) {
+					return p[0].Name;
+				}
+			}
 			return symbol.Name;
 		}
 		#endregion
