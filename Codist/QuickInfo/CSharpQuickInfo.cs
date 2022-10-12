@@ -1082,6 +1082,7 @@ namespace Codist.QuickInfo
 
 		static void ShowInterfaces(QiContainer qiContent, ITypeSymbol type) {
 			var showAll = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
+			type = type.OriginalDefinition;
 			var interfaces = type.Interfaces;
 			if (interfaces.Length == 0 && showAll == false) {
 				return;
