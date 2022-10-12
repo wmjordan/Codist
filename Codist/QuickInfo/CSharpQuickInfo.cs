@@ -259,10 +259,11 @@ namespace Codist.QuickInfo
 				candidates = symbolInfo.CandidateSymbols;
 				return symbolInfo.CandidateSymbols.FirstOrDefault();
 			}
+			SyntaxKind kind;
 			return symbolInfo.Symbol
-				?? (node.Kind().IsDeclaration() || node.Kind() == SyntaxKind.VariableDeclarator
+				?? ((kind = node.Kind()).IsDeclaration() || kind == SyntaxKind.VariableDeclarator || kind == SyntaxKind.SingleVariableDesignation && node.Parent.IsKind(SyntaxKind.DeclarationExpression)
 					? semanticModel.GetDeclaredSymbol(node, cancellationToken)
-					: node.IsKind(SyntaxKind.IdentifierName) && node.Parent.IsKind(SyntaxKind.NameEquals) && (node = node.Parent.Parent) != null && node.IsKind(SyntaxKind.UsingDirective)
+					: kind == SyntaxKind.IdentifierName && node.Parent.IsKind(SyntaxKind.NameEquals) && (node = node.Parent.Parent) != null && node.IsKind(SyntaxKind.UsingDirective)
 					? semanticModel.GetDeclaredSymbol(node, cancellationToken)?.GetAliasTarget()
 					: semanticModel.GetSymbolExt(node, cancellationToken));
 		}
