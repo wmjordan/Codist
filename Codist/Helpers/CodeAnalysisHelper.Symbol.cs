@@ -552,6 +552,7 @@ namespace Codist
 
 		public static string GetTypeName(this ITypeSymbol symbol) {
 			switch (symbol.Kind) {
+				case SymbolKind.NamedType:
 				case SymbolKind.ArrayType:
 				case SymbolKind.ErrorType:
 				case SymbolKind.PointerType:
@@ -562,11 +563,6 @@ namespace Codist
 						GetTypeName(symbol, b);
 						return b.ToString();
 					}
-				case SymbolKind.NamedType:
-					if (symbol is INamedTypeSymbol type && type.IsGenericType && type.Arity > 0) {
-						return symbol.Name + "<" + new string(',', type.Arity - 1) + ">";
-					}
-					goto default;
 				default:
 					return symbol.Name;
 			}
