@@ -579,7 +579,6 @@ namespace Codist
 					return;
 
 				case TypeKind.Dynamic:
-				case TypeKind.Error:
 					output.Append('?'); return;
 				case TypeKind.Module:
 				case TypeKind.TypeParameter:
