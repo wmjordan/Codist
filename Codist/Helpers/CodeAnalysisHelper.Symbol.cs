@@ -813,6 +813,9 @@ namespace Codist
 		public static bool IsRefLike(this ITypeSymbol type) {
 			return type != null && NonPublicOrFutureAccessors.GetNamedTypeIsRefLikeType(type);
 		}
+		public static byte GetNullableAnnotation(this ITypeSymbol type) {
+			return type != null ? NonPublicOrFutureAccessors.GetNullableAnnotation(type) : (byte)0;
+		}
 		public static bool IsInitOnly(this IMethodSymbol method) {
 			return method != null && NonPublicOrFutureAccessors.GetMethodIsInitOnly(method);
 		}
@@ -858,6 +861,19 @@ namespace Codist
 					return true;
 			}
 			return false;
+		}
+
+		public static ITypeSymbol GetNullableValueType(this ITypeSymbol type) {
+			if (type.IsValueType
+				&& type is INamedTypeSymbol nt
+				&& nt.IsGenericType
+				&& type.Name == nameof(Nullable)
+				&& type.ContainingNamespace?.Name == "System"
+				&& type.ContainingNamespace.ContainingNamespace?.IsGlobalNamespace == true
+				&& nt.TypeArguments.Length == 1) {
+				return nt.TypeArguments[0];
+			}
+			return null;
 		}
 
 		public static IReadOnlyList<ISymbol> GetExplicitInterfaceImplementations(this ISymbol symbol) {
@@ -1305,6 +1321,8 @@ namespace Codist
 				: ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsRefLikeType", typeof(CSharpCompilation).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.NamedTypeSymbol", false));
 
 			public static readonly Func<ITypeSymbol, bool> GetTypeIsRecord = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, bool>("IsRecord");
+
+			public static readonly Func<ITypeSymbol, byte> GetNullableAnnotation = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, byte>("NullableAnnotation");
 
 			public static readonly Func<IMethodSymbol, bool> GetMethodIsInitOnly = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, bool>("IsInitOnly");
 

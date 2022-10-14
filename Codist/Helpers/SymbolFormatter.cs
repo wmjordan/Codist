@@ -148,7 +148,11 @@ namespace Codist
 					var type = (INamedTypeSymbol)symbol;
 					var specialType = type.GetSpecialTypeAlias();
 					if (specialType != null) {
-						text.Add((alias ?? specialType).Render(Keyword)); return;
+				text.Add((alias ?? specialType).Render(Keyword));
+				if (type.GetNullableAnnotation() == 2) {
+					text.Add("?".Render(PlainText));
+				}
+				return;
 					}
 					switch (type.TypeKind) {
 						case TypeKind.Class:
@@ -162,6 +166,7 @@ namespace Codist
 						case TypeKind.Interface:
 							text.Add(symbol.Render(alias, bold, Interface)); break;
 						case TypeKind.Struct:
+					ITypeSymbol nullable;
 							if (type.IsTupleType) {
 								text.Add("(".Render(PlainText));
 								for (int i = 0; i < type.TupleElements.Length; i++) {
@@ -174,6 +179,10 @@ namespace Codist
 								}
 								text.Add(")".Render(PlainText));
 							}
+					else if ((nullable = type.GetNullableValueType()) != null) {
+						Format(text, nullable, null, false);
+						text.Add("?".Render(PlainText));
+					}
 							else {
 								text.Add(symbol.Render(alias, bold, Struct));
 							}
@@ -183,7 +192,10 @@ namespace Codist
 						default:
 							text.Add(symbol.MetadataName.Render(bold, false, Class)); return;
 					}
-					if (type.IsGenericType) {
+			if (type.GetNullableAnnotation() == 2) {
+				text.Add("?".Render(PlainText));
+			}
+			if (type.IsGenericType && type.IsTupleType == false) {
 						AddTypeArguments(text, type.TypeArguments);
 					}
 					return;
