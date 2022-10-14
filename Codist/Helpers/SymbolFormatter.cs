@@ -136,7 +136,35 @@ namespace Codist
 				case SymbolKind.Field:
 					text.Add(symbol.Render(alias, bold, ((IFieldSymbol)symbol).IsConst ? Const : Field));
 					return;
-				case SymbolKind.Method:
+				case SymbolKind.Method: FormatMethodName(text, symbol, alias, bold); return;
+				case SymbolKind.NamedType: FormatTypeName(text, symbol, alias, bold); return;
+				case SymbolKind.Namespace: text.Add(symbol.Name.Render(Namespace)); return;
+				case SymbolKind.Parameter: text.Add(symbol.Render(null, bold, Parameter)); return;
+				case SymbolKind.Property: text.Add(symbol.Render(alias, bold, Property)); return;
+				case SymbolKind.Local: text.Add(symbol.Render(null, bold, Local)); return;
+				case SymbolKind.TypeParameter:
+					if (((ITypeParameterSymbol)symbol).Variance != VarianceKind.None) {
+						text.Add((((ITypeParameterSymbol)symbol).Variance == VarianceKind.Out ? "out " : "in ").Render(Keyword));
+					}
+					text.Add(symbol.Render(null, bold, TypeParameter));
+					return;
+				case SymbolKind.PointerType:
+					Format(text, ((IPointerTypeSymbol)symbol).PointedAtType, alias, bold);
+					if (alias == null) {
+						text.Add("*".Render(PlainText));
+					}
+					return;
+				case SymbolKind.ErrorType:
+					text.Add(((symbol as INamedTypeSymbol).GetTypeName() ?? "?").Render(PlainText));
+					return;
+				case CodeAnalysisHelper.FunctionPointerType:
+					text.Add((symbol as ITypeSymbol).GetTypeName());
+					return;
+				default: text.Add(symbol.Name); return;
+			}
+		}
+
+		void FormatMethodName(InlineCollection text, ISymbol symbol, string alias, bool bold) {
 					var method = (IMethodSymbol)symbol;
 					text.Add(method.MethodKind == MethodKind.Constructor
 						? symbol.Render(alias ?? method.ContainingType.Name, bold, GetBrushForMethod(method))
@@ -148,8 +176,9 @@ namespace Codist
 					if (method.IsGenericMethod) {
 						AddTypeArguments(text, method.TypeArguments);
 					}
-					return;
-				case SymbolKind.NamedType:
+		}
+
+		void FormatTypeName(InlineCollection text, ISymbol symbol, string alias, bool bold) {
 					var type = (INamedTypeSymbol)symbol;
 					var specialType = type.GetSpecialTypeAlias();
 					if (specialType != null) {
@@ -203,23 +232,6 @@ namespace Codist
 			if (type.IsGenericType && type.IsTupleType == false) {
 						AddTypeArguments(text, type.TypeArguments);
 					}
-					return;
-				case SymbolKind.Namespace: text.Add(symbol.Name.Render(Namespace)); return;
-				case SymbolKind.Parameter: text.Add(symbol.Render(null, bold, Parameter)); return;
-				case SymbolKind.Property: text.Add(symbol.Render(alias, bold, Property)); return;
-				case SymbolKind.Local: text.Add(symbol.Render(null, bold, Local)); return;
-				case SymbolKind.TypeParameter: text.Add(symbol.Render(null, bold, TypeParameter)); return;
-				case SymbolKind.PointerType:
-					Format(text, ((IPointerTypeSymbol)symbol).PointedAtType, alias, bold);
-					if (alias == null) {
-						text.Add("*".Render(PlainText));
-					}
-					return;
-				case SymbolKind.ErrorType:
-					text.Add("?".Render(PlainText));
-					return;
-				default: text.Add(symbol.Name); return;
-			}
 		}
 
 		Brush GetBrushForMethod(IMethodSymbol m) {
