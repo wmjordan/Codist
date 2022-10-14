@@ -142,6 +142,8 @@ namespace Codist
 						? symbol.Render(alias ?? method.ContainingType.Name, bold, GetBrushForMethod(method))
 						: method.MethodKind == CodeAnalysisHelper.FunctionPointerMethod
 						? symbol.Render("delegate*", true, GetBrushForMethod(method))
+				: method.MethodKind == MethodKind.LambdaMethod
+				? symbol.Render("lambda", true, Method)
 						: symbol.Render(alias, bold, Method));
 					if (method.IsGenericMethod) {
 						AddTypeArguments(text, method.TypeArguments);
@@ -159,7 +161,7 @@ namespace Codist
 					}
 					switch (type.TypeKind) {
 						case TypeKind.Class:
-							text.Add(symbol.Render(alias ?? (type.IsAnonymousType ? "?" : null), bold, Class)); break;
+					text.Add(symbol.Render(alias ?? (type.IsAnonymousType ? "{anonymous}" : null), bold, Class)); break;
 						case TypeKind.Delegate:
 							text.Add(symbol.Render(alias, bold, Delegate)); break;
 						case TypeKind.Dynamic:
