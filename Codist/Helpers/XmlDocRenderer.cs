@@ -329,14 +329,14 @@ namespace Codist
 							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
 						}
 						else {
-							t = t.Replace("\n    ", "\n");
+							t = UnindentTextBlock(t);
 						}
 						if (t.Length > 0) {
 							inlines.Add(new Run(t));
 						}
 						break;
 					case XmlNodeType.CDATA:
-						inlines.Add(_isCode == 0 ? new Run(((XText)item).Value) : new Run(((XText)item).Value.Replace("\n    ", "\n").TrimEnd()));
+						inlines.Add(_isCode == 0 ? new Run(((XText)item).Value) : new Run(UnindentTextBlock(((XText)item).Value)));
 						break;
 					case XmlNodeType.EntityReference:
 					case XmlNodeType.Entity:
@@ -354,6 +354,57 @@ namespace Codist
 
 		static bool IsUrl(XAttribute a) {
 			return a.Value.StartsWith("http://", StringComparison.Ordinal) || a.Value.StartsWith("https://", StringComparison.Ordinal);
+		}
+
+		static string UnindentTextBlock(string text) {
+			if (text.Length < 100 && text.IndexOf("\n", StringComparison.OrdinalIgnoreCase) < 0) {
+				return text;
+			}
+			var lines = System.Collections.Immutable.ImmutableArray.CreateBuilder<(string t, int sc)>();
+			int c = Int32.MaxValue, i, ln = 0, last = 0;
+			bool cnt;
+			using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(100))
+			using (var r = new System.IO.StringReader(text)) {
+				var sb = sbr.Resource;
+				while (r.Peek() >= 0) {
+					var l = r.ReadLine().Replace("\t", "    ");
+					if (l.Length == 0 && c == Int32.MaxValue) {
+						// ignore leading empty lines
+						continue;
+					}
+					i = 0;
+					cnt = false;
+					foreach (var ch in l) {
+						if (ch == ' ') {
+							i++;
+						}
+						else {
+							cnt = true;
+							break;
+						}
+					}
+					ln++;
+					if (cnt) {
+						if (i < c) {
+							c = i;
+						}
+						last = ln;
+					}
+					lines.Add((l, i));
+				}
+				ln = 0;
+				foreach (var (t, sc) in lines) {
+					if (t.Length > 0 && sc >= c) {
+						sb.Append(t, c, t.Length - c);
+					}
+					if (++ln == last) {
+						// skip tailing empty lines
+						break;
+					}
+					sb.AppendLine();
+				}
+				return sb.ToString();
+			}
 		}
 
 		void CreateLink(InlineCollection inlines, XElement e, XAttribute a) {
