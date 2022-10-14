@@ -668,7 +668,7 @@ namespace Codist
 			}
 		}
 
-		private static string GetMethodKindName(IMethodSymbol method) {
+		static string GetMethodKindName(IMethodSymbol method) {
 			if (method.IsExtensionMethod) {
 				return "extension";
 			}
@@ -824,7 +824,9 @@ namespace Codist
 			return symbol?.TypeKind == FunctionPointer ? NonPublicOrFutureAccessors.GetFunctionPointerTypeSignature(symbol) : null;
 		}
 		public static AssemblySource GetSourceType(this IAssemblySymbol assembly) {
-			return assembly is null ? AssemblySource.Metadata : (AssemblySource)NonPublicOrFutureAccessors.GetAssemblySourceType(assembly);
+			return assembly is null
+				? AssemblySource.Metadata
+				: (AssemblySource)NonPublicOrFutureAccessors.GetAssemblySourceType(assembly);
 		}
 		#endregion
 
@@ -877,7 +879,7 @@ namespace Codist
 				case SymbolKind.Event: return (symbol as IEventSymbol).RaiseMethod;
 				case SymbolKind.NamedType:
 					var t = symbol as INamedTypeSymbol;
-					return t.TypeKind == TypeKind.Delegate ? t.DelegateInvokeMethod as IMethodSymbol : null;
+					return t.TypeKind == TypeKind.Delegate ? t.DelegateInvokeMethod : null;
 				default: return null;
 			}
 		}
@@ -886,7 +888,8 @@ namespace Codist
 			var asm = symbol.ContainingAssembly;
 			if (asm != null) {
 				foreach (var item in solution.Projects) {
-					if (item.SupportsCompilation && (await item.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).Assembly == asm) {
+					if (item.SupportsCompilation
+						&& (await item.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).Assembly == asm) {
 						return item;
 					}
 				}

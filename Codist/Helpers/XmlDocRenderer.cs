@@ -410,7 +410,7 @@ namespace Codist
 		void CreateLink(InlineCollection inlines, XElement e, XAttribute a) {
 			var link = new Hyperlink {
 				NavigateUri = new Uri(a.Value),
-				ToolTip = e.Attribute("title") != null ? e.Attribute("title").Value + Environment.NewLine + a.Value : a.Value
+				ToolTip = e.Attribute("title") != null ? $"{e.Attribute("title").Value}{Environment.NewLine}{a.Value}" : a.Value
 			}.ClickToNavigate();
 			if (e.IsEmpty) {
 				link.Inlines.Add(a.Value);
@@ -471,7 +471,7 @@ namespace Codist
 				span.FontFamily = GetCodeFont();
 			}
 			if (blockType == BLOCK_TITLE) {
-				span.FontWeight = System.Windows.FontWeights.Bold;
+				span.FontWeight = FontWeights.Bold;
 			}
 			inlines.Add(span);
 			InternalRender(e, span.Inlines, list);
@@ -485,10 +485,10 @@ namespace Codist
 		static void PopulateListNumber(InlineCollection text, ListContext list) {
 			string indent = list.Indent > 0 ? new string(' ', list.Indent) : String.Empty;
 			if (list.ListType > 0) {
-				text.Add(new Run(indent + ((int)list.ListType++).ToString() + ". ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
+				text.Add(new Run(indent + ((int)list.ListType++).ToString() + ". ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = FontWeights.Bold });
 			}
 			else if (list.ListType == ListType.Bullet) {
-				text.Add(new Run(list.Indent > 0 ? indent + " \u00B7 " : " \u00B7 ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = System.Windows.FontWeights.Bold });
+				text.Add(new Run(list.Indent > 0 ? indent + " \u00B7 " : " \u00B7 ") { Foreground = ThemeHelper.SystemGrayTextBrush, FontWeight = FontWeights.Bold });
 			}
 		}
 
@@ -576,7 +576,7 @@ namespace Codist
 			do {
 				switch (node.NodeType) {
 					case XmlNodeType.Element: return (XElement)node;
-					case XmlNodeType.Whitespace: continue;
+					case XmlNodeType.Whitespace:
 					case XmlNodeType.SignificantWhitespace: continue;
 					case XmlNodeType.Text:
 						if (((XText)node).Value.Trim().Length == 0) {

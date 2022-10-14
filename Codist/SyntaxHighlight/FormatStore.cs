@@ -39,7 +39,7 @@ namespace Codist.SyntaxHighlight
 				}
 
 				r = DefaultClassificationFormatMap.GetExplicitTextProperties(classificationType);
-				Debug.WriteLine("Backup format: " + classificationType.Classification + " " + (r.ForegroundBrushEmpty ? "<empty>" : r.ForegroundBrush.ToString()));
+				Debug.WriteLine($"Backup format: {classificationType.Classification} {(r.ForegroundBrushEmpty ? "<empty>" : r.ForegroundBrush.ToString())}");
 				_BackupFormattings[classificationType] = r;
 				return r;
 			}

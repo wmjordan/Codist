@@ -359,7 +359,7 @@ namespace Codist
 			}
 			block.Add(WpfHelper.Render(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class));
 			if (item.ConstructorArguments.Length == 0 && item.NamedArguments.Length == 0) {
-				var node = item.ApplicationSyntaxReference?.GetSyntax() as Microsoft.CodeAnalysis.CSharp.Syntax.AttributeSyntax;
+				var node = item.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
 				if (node?.ArgumentList?.Arguments.Count > 0) {
 					block.Add(node.ArgumentList.ToString().Render(ThemeHelper.SystemGrayTextBrush));
 				}

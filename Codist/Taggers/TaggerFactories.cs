@@ -72,7 +72,11 @@ namespace Codist.Taggers
 	sealed class CSharpTaggerProvider : IViewTaggerProvider
 	{
 		readonly Dictionary<ITextView, CSharpTagger> _Taggers = new Dictionary<ITextView, CSharpTagger>();
-		// cache the latest used tagger to improve performance
+
+		// note: cache the latest used tagger to improve performance
+		// in C# code editor, even displaying the Quick Info will call the CreateTagger method,
+		// thus we cache the last accessed tagger, identified by ITextView and ITextBuffer,
+		// in CSharpTaggerProvider and CSharpTagger respectively, to avoid dictionary lookup
 		CSharpTagger _LastTagger;
 		// for debug info
 		int _taggerCount;

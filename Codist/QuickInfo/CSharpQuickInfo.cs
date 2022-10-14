@@ -1340,7 +1340,7 @@ namespace Codist.QuickInfo
 						}
 						var pt = m.GetReturnType();
 						string alias = null;
-						if (pt != null && pt.IsAnonymousType) {
+						if (pt?.IsAnonymousType == true) {
 							Add(ref anonymousTypes, pt);
 							alias = "'" + AnonymousNumbers[anonymousTypes.IndexOf(pt)];
 						}

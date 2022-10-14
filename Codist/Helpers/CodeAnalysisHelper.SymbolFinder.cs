@@ -14,11 +14,10 @@ namespace Codist
 {
 	partial class CodeAnalysisHelper
 	{
-		public static IImmutableList<(string type, IImmutableList<ISymbol> members)> FindMembers(this ISymbol symbol) {
+		public static ImmutableArray<(string type, IImmutableList<ISymbol> members)> FindMembers(this ISymbol symbol) {
 			var r = ImmutableArray.CreateBuilder<(string type, IImmutableList<ISymbol> members)>();
 			r.Add((null, FindMembers(symbol)));
-			var type = symbol as INamedTypeSymbol;
-			if (type != null) {
+			if (symbol is INamedTypeSymbol type) {
 				switch (type.TypeKind) {
 					case TypeKind.Class:
 						while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
