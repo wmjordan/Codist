@@ -50,7 +50,7 @@ namespace Codist
 				if (inheritDoc != null && summary != null) {
 					tip.Append(new ThemedTipParagraph(IconIds.ReferencedXmlDoc, new ThemedTipText()
 							.Append(R.T_DocumentationFrom)
-							.AddSymbol(inheritDoc.Symbol.ContainingSymbol, false, _SymbolFormatter)
+							.AddSymbol(inheritDoc.Symbol.ContainingSymbol.OriginalDefinition, false, _SymbolFormatter)
 							.Append(".")
 							.AddSymbol(inheritDoc.Symbol, true, _SymbolFormatter)
 							.Append(":"))
