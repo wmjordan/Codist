@@ -84,6 +84,9 @@ namespace Codist
 			else if (symbol.Kind == SymbolKind.Local) {
 				ShowLocalDeclaration(symbol as ILocalSymbol, info);
 			}
+			else if (symbol.Kind == SymbolKind.Parameter) {
+				ShowParameterDeclaration(symbol as IParameterSymbol, info);
+			}
 			else {
 				ShowSymbolDeclaration(symbol, info);
 			}
@@ -543,6 +546,14 @@ namespace Codist
 				if (local.IsFixed) {
 					info.Append("fixed ", Keyword);
 				}
+			}
+		}
+
+		static void ShowParameterDeclaration(IParameterSymbol parameter, TextBlock info) {
+			switch (parameter.RefKind) {
+				case RefKind.Ref: info.Append("ref "); break;
+				case RefKind.Out: info.Append("out "); break;
+				case RefKind.In: info.Append("in "); break;
 			}
 		}
 
