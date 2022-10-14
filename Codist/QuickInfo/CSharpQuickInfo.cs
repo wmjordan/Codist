@@ -329,7 +329,7 @@ namespace Codist.QuickInfo
 				var summary = new XmlDoc(symbol, compilation)
 					.GetDescription(symbol);
 				if (summary != null) {
-					tip.Append(new ThemedTipParagraph(IconIds.ReferencedXmlDoc, new ThemedTipText(R.T_DocumentationFrom).AddSymbol(symbol, true, SymbolFormatter.Instance).Append(":")));
+					tip.Append(new ThemedTipParagraph(IconIds.ReferencedXmlDoc, new ThemedTipText(R.T_DocumentationFrom).AddSymbol(symbol.OriginalDefinition, true, SymbolFormatter.Instance).Append(":")));
 					new XmlDocRenderer(compilation, SymbolFormatter.Instance)
 						.Render(summary, tip, false);
 				}
