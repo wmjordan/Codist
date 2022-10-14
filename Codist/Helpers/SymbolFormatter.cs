@@ -547,10 +547,10 @@ namespace Codist
 		}
 
 		void ShowSymbolDeclaration(ISymbol symbol, TextBlock info) {
-			if (symbol.IsAbstract) {
+			if (symbol.IsAbstract && ((symbol is INamedTypeSymbol nt) == false || nt.TypeKind != TypeKind.Interface)) {
 				info.Append("abstract ", Keyword);
 			}
-			else if (symbol.IsStatic) {
+			else if (symbol.IsStatic && symbol.Kind != SymbolKind.Namespace) {
 				info.Append("static ", Keyword);
 			}
 			else if (symbol.IsVirtual) {
