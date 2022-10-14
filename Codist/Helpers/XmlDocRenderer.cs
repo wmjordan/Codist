@@ -75,7 +75,7 @@ namespace Codist
 					var para = new ThemedTipParagraph(IconIds.TypeParameters);
 					foreach (var param in typeParams) {
 						var p = doc.GetTypeParameter(param.Name);
-						if (p == null) {
+						if (p == null || IsEmptyElement(p)) {
 							continue;
 						}
 						if (para.Content.Inlines.FirstInline != null) {
@@ -97,7 +97,7 @@ namespace Codist
 					&& (symbol.Kind == SymbolKind.Method
 					|| symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Delegate)) {
 				var returns = doc.Returns ?? doc.ExplicitInheritDoc?.Returns ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Returns != null)?.Returns;
-				if (returns != null && returns.FirstNode != null) {
+				if (returns != null && IsEmptyElement(returns) == false) {
 					tip.Append(new ThemedTipParagraph(IconIds.Return, new ThemedTipText()
 						.Append(R.T_Returns, true)
 						.Append(returns == doc.Returns ? ": " : (R.T_Inherited + ": "))
@@ -111,7 +111,7 @@ namespace Codist
 					&& symbol.Kind != SymbolKind.Parameter
 					&& symbol.Kind != SymbolKind.TypeParameter) {
 				var remarks = doc.Remarks ?? doc.ExplicitInheritDoc?.Remarks ?? doc.InheritedXmlDocs.FirstOrDefault(i => i.Remarks != null)?.Remarks;
-				if (remarks != null && remarks.FirstNode != null) {
+				if (remarks != null && IsEmptyElement(remarks) == false) {
 					tip.Append(new ThemedTipParagraph(IconIds.RemarksXmlDoc, new ThemedTipText()
 						.Append(R.T_Remarks, true)
 						.Append(remarks == doc.Remarks ? ": " : (R.T_Inherited + ": "))
@@ -174,13 +174,13 @@ namespace Codist
 		}
 
 		public void Render(XElement content, TextBlock text) {
-			if (content == null || content.HasElements == false && content.IsEmpty) {
+			if (content == null || IsEmptyElement(content)) {
 				return;
 			}
 			Render(content, text.Inlines);
 		}
 		public void Render(XElement content, ThemedTipDocument doc, bool showSummaryIcon) {
-			if (content == null || content.HasElements == false && content.IsEmpty) {
+			if (content == null || IsEmptyElement(content)) {
 				return;
 			}
 			var paragraph = new ThemedTipParagraph(showSummaryIcon ? IconIds.XmlDocComment : 0);
@@ -508,6 +508,13 @@ namespace Codist
 				case "c": return true;
 			}
 			return false;
+		}
+
+		static bool IsEmptyElement(XElement element) {
+			XNode n;
+			return element.IsEmpty
+				|| (n = element.FirstNode) == null
+				|| n.NodeType == XmlNodeType.Text && n.NextNode == null && String.IsNullOrWhiteSpace(((XText)n).Value);
 		}
 
 		static XNode GetFirstContent(XElement element) {
