@@ -110,7 +110,10 @@ namespace Codist
 			if (symbol.Kind == SymbolKind.Method) {
 				var m = (IMethodSymbol)symbol;
 				if (m.MethodKind == MethodKind.ExplicitInterfaceImplementation) {
-					return m.ExplicitInterfaceImplementations[0].Name;
+					var mi = m.ExplicitInterfaceImplementations;
+					if (mi.Length > 0) {
+						return mi[0].Name;
+				}
 				}
 				if (m.MethodKind == MethodKind.Constructor) {
 					return m.ContainingType.Name;
