@@ -422,7 +422,7 @@ namespace Codist
 		}
 
 		XAttribute RenderSee(InlineCollection inlines, XElement e) {
-			var see = e.Attribute("cref");
+			var see = e.Attribute("cref") ?? e.Attribute("href");
 			if (see != null) {
 				if (IsUrl(see)) {
 					CreateLink(inlines, e, see);
