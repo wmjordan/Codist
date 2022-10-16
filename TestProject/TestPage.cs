@@ -63,11 +63,15 @@ text".Log(); // multiline string (string verbatim)
 			var anonymous = new { // anonymous type
 				sender, // property of anonymous type
 				@event = e,
-				time = DateTime.Now
+				time = DateTime.Now,
+				one = '\u4e00'
 			};
+			Console.WriteLine(anonymous);
+			Method<ConcreteClass>();
 		}
 
 		protected override int Property { get; set; } = 1;
+        public DateTime InitDate { get; } = DateTime.Now;
 		public int PropertyAddOne => unchecked(Property + 1);
 
 		public new void Method() { checked { Property--; } }
@@ -118,6 +122,12 @@ text".Log(); // multiline string (string verbatim)
 		/// <remarks>Don't take this too serious.</remarks>
 		/// <returns>Returns an instance of the generic type parameter.</returns>
 		delegate TObject Clone<TObject>(TObject obj);
+
+		/// <summary>A generic delegate with a parameter.</summary>
+		/// <typeparam name="TFrom">The generic type parameter of the delegate.</typeparam>
+		/// <typeparam name="TTo">  </typeparam>
+		delegate TTo CloneAs<TFrom, TTo>(TFrom from);
+
 		event EventHandler<EventArgs> MyEvent, MoreEvent;
 
 		/// <summary>

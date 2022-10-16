@@ -44,8 +44,8 @@ namespace TestProject
 	/// <see cref="ConcreteClass.Method"/>, or <see cref="ConcreteClass.Method{TGeneric}"/>.</para>
 	/// <para>The "<c>para</c>" elements no longer render empty lines.</para>
 	/// <para>You can style your comment with <b>bold</b>, <i>italic</i> and <u>underline</u>, or <b><i><u>combinations of them</u></i></b>.</para>
-    /// <para>You can separate contents with horizontal lines with <c>&lt;hr/></c> tags and sematically segment your paragraphs with <c>&lt;h1></c> to <c>&lt;h6></c> tags.</para>
-    /// <h1>Heading 1</h1>
+	/// <para>You can separate contents with horizontal lines with <c>&lt;hr/></c> tags and sematically segment your paragraphs with <c>&lt;h1></c> to <c>&lt;h6></c> tags.</para>
+	/// <h1>Heading 1</h1>
 	/// <hr/>
 	/// <para>See also: <seealso cref="NamespaceDoc"/>, <seealso cref="Test"/></para>
 	/// </summary>
@@ -53,8 +53,10 @@ namespace TestProject
 	/// <para>Enable <i>Show <c>&lt;remarks&gt;</c> XML Doc</i> option to read remarks for symbols.</para>
 	/// <para>You may also want to limit the max width and height of a Quick Info item by setting corresponding values in the Quick Info options.</para>
 	/// <code><![CDATA[
-	/// Console.WriteLine("some time &amp; some life");
+	/// Console.WriteLine("press any key to continue.");
 	/// Console.ReadKey();
+	///
+	/// Console.WriteLine("bye!");
 	/// ]]></code>
 	/// </remarks>
 	class Comments
