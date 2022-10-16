@@ -32,79 +32,6 @@ namespace Codist
 			});
 			return panel;
 		}
-		public static TextBlock AddParameters(this TextBlock block, ImmutableArray<IParameterSymbol> parameters, SymbolFormatter formatter) {
-			var inlines = block.Inlines;
-			inlines.Add("(");
-			for (var i = 0; i < parameters.Length; i++) {
-				if (i > 0) {
-					inlines.Add(", ");
-				}
-				var p = parameters[i];
-				if (p.IsOptional) {
-					inlines.Add("[");
-				}
-				AddParameterModifier(formatter, inlines, p);
-				formatter.Format(inlines, p.Type, null, false);
-				if (p.IsOptional) {
-					inlines.Add("]");
-				}
-			}
-			inlines.Add(")");
-			return block;
-		}
-		public static TextBlock AddParameters(this TextBlock block, ImmutableArray<IParameterSymbol> parameters, SymbolFormatter formatter, int argIndex) {
-			var inlines = block.Inlines;
-			inlines.Add("(");
-			for (var i = 0; i < parameters.Length; i++) {
-				if (i > 0) {
-					inlines.Add(", ");
-				}
-				var p = parameters[i];
-				if (p.IsOptional) {
-					inlines.Add("[");
-				}
-				AddParameterModifier(formatter, inlines, p);
-				formatter.Format(inlines, p.Type, null, false);
-				inlines.Add(" ");
-				if (String.IsNullOrEmpty(p.Name)) {
-					inlines.Add(("@" + i.ToString()).Render(i == argIndex, false, formatter.Parameter));
-				}
-				else {
-					inlines.Add(p.Render(null, i == argIndex, formatter.Parameter));
-				}
-				if (p.IsOptional) {
-					inlines.Add("]");
-				}
-			}
-			inlines.Add(")");
-			return block;
-		}
-
-		static void AddParameterModifier(SymbolFormatter formatter, InlineCollection inlines, IParameterSymbol p) {
-			switch (p.RefKind) {
-				case RefKind.Ref:
-					inlines.Add(new Run("ref ") {
-						Foreground = formatter.Keyword
-					});
-					return;
-				case RefKind.Out:
-					inlines.Add(new Run("out ") {
-						Foreground = formatter.Keyword
-					});
-					return;
-				case RefKind.In:
-					inlines.Add(new Run("in ") {
-						Foreground = formatter.Keyword
-					});
-					return;
-			}
-			if (p.IsParams) {
-				inlines.Add(new Run("params ") {
-					Foreground = formatter.Keyword
-				});
-			}
-		}
-
 		public static TextBlock AddImage(this TextBlock block, int imageId) {
 			return block.Append(ThemeHelper.GetImage(imageId));
 		}
@@ -144,11 +71,19 @@ namespace Codist
 		public static TextBlock AddSymbolDisplayParts(this TextBlock block, ImmutableArray<SymbolDisplayPart> parts, SymbolFormatter formatter, int argIndex) {
 			return formatter.Format(block, parts, argIndex);
 		}
+		public static TextBlock AddParameters(this TextBlock block, ImmutableArray<IParameterSymbol> parameters, SymbolFormatter formatter) {
+			return formatter.ShowParameters(block, parameters);
+		}
+		public static TextBlock AddParameters(this TextBlock block, ImmutableArray<IParameterSymbol> parameters, SymbolFormatter formatter, int argIndex) {
+			return formatter.ShowParameters(block, parameters, argIndex);
+		}
 		public static TextBlock AddXmlDoc(this TextBlock paragraph, XElement content, XmlDocRenderer docRenderer) {
 			docRenderer.Render(content, paragraph.Inlines);
 			return paragraph;
 		}
-
+		public static FrameworkElement AsSymbolLink(this UIElement element, ISymbol symbol) {
+			return new SymbolElement(symbol, element);
+		}
 		public static double? GetFontSize(this ResourceDictionary resource) {
 			return resource.GetNullable<double>(Constants.EditorFormatKeys.FontRenderingSize);
 		}
@@ -239,6 +174,99 @@ namespace Codist
 			TextOptions.SetTextRenderingMode(element, optimize ? TextRenderingMode.Grayscale : TextRenderingMode.Auto);
 		}
 
+
+		sealed class SymbolElement : Border
+		{
+			ISymbol _Symbol;
+
+			public SymbolElement(ISymbol symbol, UIElement content) {
+				Child = content;
+				_Symbol = symbol;
+				MouseEnter += InitInteraction;
+				Unloaded += SymbolLink_Unloaded;
+			}
+
+			void InitInteraction(object sender, MouseEventArgs e) {
+				MouseEnter -= InitInteraction;
+
+				Cursor = Cursors.Hand;
+				CornerRadius = new CornerRadius(3);
+				ToolTip = String.Empty;
+				Highlight(sender, e);
+				MouseEnter += Highlight;
+				MouseLeave += Leave;
+				MouseLeftButtonDown += LinkContextMenu;
+				MouseRightButtonDown += LinkContextMenu;
+			}
+
+			protected override void OnToolTipOpening(ToolTipEventArgs e) {
+				base.OnToolTipOpening(e);
+				var s = _Symbol;
+				if (s != null && ReferenceEquals(ToolTip, String.Empty)) {
+					ToolTip = ToolTipFactory.CreateToolTip(s, false, SemanticContext.GetHovered());
+					this.SetTipPlacementBottom();
+				}
+			}
+			async void LinkContextMenu(object sender, MouseButtonEventArgs e) {
+				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+				if (ContextMenu != null) {
+					ContextMenu.IsOpen = true;
+					return;
+				}
+				var ctx = SemanticContext.GetHovered();
+				if (ctx != null) {
+					await ctx.UpdateAsync(default);
+					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+					var s = _Symbol;
+					if (s != null) {
+						var m = new CSharpSymbolContextMenu(s, s.GetSyntaxNode(), ctx);
+						m.AddAnalysisCommands();
+						if (m.HasItems) {
+							m.Items.Add(new Separator());
+						}
+						m.AddSymbolNodeCommands();
+						m.AddTitleItem(s.GetOriginalName());
+						m.PlacementTarget = this;
+						m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+						QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, true);
+						m.Closed += DismissQuickInfo;
+						ContextMenu = m;
+						m.IsOpen = true;
+						Highlight(this, e);
+					}
+					e.Handled = true;
+				}
+			}
+
+			void DismissQuickInfo(object sender, RoutedEventArgs e) {
+				(sender as CSharpSymbolContextMenu).Closed -= DismissQuickInfo;
+				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, false);
+				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
+			}
+
+			void Highlight(object sender, MouseEventArgs e) {
+				Background = (_Symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(0.3);
+			}
+			void Leave(object sender, MouseEventArgs e) {
+				Background = WpfBrushes.Transparent;
+			}
+
+			void SymbolLink_Unloaded(object sender, RoutedEventArgs e) {
+				MouseEnter -= InitInteraction;
+				MouseLeftButtonDown -= LinkContextMenu;
+				MouseRightButtonDown -= LinkContextMenu;
+				MouseEnter -= Highlight;
+				MouseLeave -= Leave;
+				Unloaded -= SymbolLink_Unloaded;
+				if (ContextMenu is CSharpSymbolContextMenu m) {
+					m.Closed -= DismissQuickInfo;
+					m.Dispose();
+					ContextMenu = null;
+				}
+				_Symbol = null;
+			}
+		}
+
 		sealed class SymbolLink : Run
 		{
 			ISymbol _Symbol;
@@ -247,8 +275,6 @@ namespace Codist
 				Text = alias ?? symbol.GetOriginalName();
 				_Symbol = symbol;
 				MouseEnter += InitInteraction;
-				ToolTip = String.Empty;
-				MouseRightButtonDown += LinkContextMenu;
 				Unloaded += SymbolLink_Unloaded;
 			}
 
@@ -256,10 +282,12 @@ namespace Codist
 				MouseEnter -= InitInteraction;
 
 				Cursor = Cursors.Hand;
+				ToolTip = String.Empty;
 				Highlight(sender, e);
 				MouseEnter += Highlight;
 				MouseLeave += Leave;
 				MouseLeftButtonDown += GotoSymbol;
+				MouseRightButtonDown += LinkContextMenu;
 			}
 
 			protected override void OnToolTipOpening(ToolTipEventArgs e) {
@@ -288,31 +316,20 @@ namespace Codist
 						}
 						m.AddSymbolNodeCommands();
 						m.AddTitleItem(s.GetOriginalName());
+						QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, true);
+						m.Closed += DismissQuickInfo;
 						ContextMenu = m;
+						m.IsOpen = true;
+						Highlight(this, e);
 					}
 					e.Handled = true;
-					//m.IsOpen = true;
 				}
 			}
 
 			void DismissQuickInfo(object sender, RoutedEventArgs e) {
-				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
-			}
-
-			protected override void OnContextMenuOpening(ContextMenuEventArgs e) {
-				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, true);
-				if (ContextMenu != null) {
-					(ContextMenu as CSharpSymbolContextMenu).Closed += DismissQuickInfo;
-					ContextMenu.IsOpen = true;
-					e.Handled = true;
-				}
-				base.OnContextMenuOpening(e);
-			}
-
-			protected override void OnContextMenuClosing(ContextMenuEventArgs e) {
+				(sender as CSharpSymbolContextMenu).Closed -= DismissQuickInfo;
 				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, false);
-				(ContextMenu as CSharpSymbolContextMenu).Closed -= DismissQuickInfo;
-				base.OnContextMenuClosing(e);
+				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
 			}
 
 			void Highlight(object sender, MouseEventArgs e) {

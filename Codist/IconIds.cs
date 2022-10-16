@@ -53,6 +53,7 @@ namespace Codist
 		public const int GenericDefinition = KnownImageIds.Template;
 		public const int Region = KnownImageIds.Numeric;
 		public const int Unsafe = KnownImageIds.HotSpot;
+		public const int Obsoleted = KnownImageIds.Timeout;
 		public const int UnavailableSymbol = KnownImageIds.StatusWarning;
 		public const int LambdaExpression = KnownImageIds.PartitionFunction;
 		public const int ParenthesizedExpression = KnownImageIds.NamedSet;

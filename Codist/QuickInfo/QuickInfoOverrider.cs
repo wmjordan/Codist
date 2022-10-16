@@ -448,22 +448,42 @@ namespace Codist.QuickInfo
 					var icon = infoPanel.GetFirstVisualChild<CrispImage>();
 					var signature = infoPanel.GetFirstVisualChild<TextBlock>();
 
-					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
-						UseAlternativeStyle(infoPanel, titlePanel, icon, signature);
-					}
-
 					OverrideDocumentation(doc);
 
 					if (icon != null && signature != null) {
-						// apply click and go feature
-						if (ClickAndGoSymbol != null) {
-							ClickAndGo.Apply(ClickAndGoSymbol, TextBuffer, signature, QuickInfoSession);
+						// override signature style and apply "click and go" feature
+						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
+							if (ClickAndGoSymbol != null) {
+								titlePanel.Visibility = Visibility.Collapsed;
+								ShowAlternativeSignature(doc);
+								//ClickAndGo.Apply(ClickAndGoSymbol, TextBuffer, signature, QuickInfoSession);
+							}
+							else {
+								UseAlternativeStyle(infoPanel, titlePanel, icon, signature);
+							}
 						}
 						// fix the width of the signature part to prevent it from falling down to the next row
 						if (Config.Instance.QuickInfoMaxWidth >= 100) {
 							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 30;
 						}
 					}
+				}
+
+				void ShowAlternativeSignature(StackPanel docPanel) {
+					var s = ClickAndGoSymbol;
+					var icon = ThemeHelper.GetImage(s.GetImageId(), ThemeHelper.LargeIconSize)
+						.AsSymbolLink(s.OriginalDefinition);
+					icon.VerticalAlignment = VerticalAlignment.Top;
+					var desc = SymbolFormatter.Instance.ShowSignature(s);
+					if (Config.Instance.QuickInfoMaxWidth >= 100) {
+						desc.MaxWidth = Config.Instance.QuickInfoMaxWidth - (ThemeHelper.LargeIconSize + 30);
+					}
+
+					(docPanel.IsItemsHost ? (IList)docPanel.GetParent<ItemsControl>().Items : docPanel.Children)
+						.Insert(0, new StackPanel {
+							Orientation = Orientation.Horizontal,
+							Children = { icon, desc }
+						});
 				}
 
 				static void UseAlternativeStyle(StackPanel infoPanel, WrapPanel titlePanel, CrispImage icon, TextBlock signature) {
@@ -503,7 +523,7 @@ namespace Codist.QuickInfo
 					// 5. usage
 					// 6. exception
 					// 7. captured variables
-					if (OverrideBuiltInXmlDoc && (DocElement != null || ExceptionDoc != null)) {
+					if (OverrideBuiltInXmlDoc/* && (DocElement != null || ExceptionDoc != null)*/) {
 						var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
 						var v16orLater = CodistPackage.VsVersion.Major >= 16;
 						ClearDefaultDocumentationItems(doc, v16orLater, items);
