@@ -151,6 +151,18 @@ namespace Codist
 			return target;
 		}
 
+		internal static TTarget SetTipPlacementBottom<TTarget>(this TTarget target)
+			where TTarget : DependencyObject {
+			ToolTipService.SetPlacement(target, System.Windows.Controls.Primitives.PlacementMode.Bottom);
+			return target;
+		}
+
+		internal static TTarget SetTipPlacementTop<TTarget>(this TTarget target)
+			where TTarget : DependencyObject {
+			ToolTipService.SetPlacement(target, System.Windows.Controls.Primitives.PlacementMode.Top);
+			return target;
+		}
+
 		internal static Grid ShowNumericForms(SyntaxNode node) {
 			return ShowNumericForms(node.GetFirstToken().Value, node.Parent.Kind() == SyntaxKind.UnaryMinusExpression ? NumericForm.Negative : NumericForm.None);
 		}

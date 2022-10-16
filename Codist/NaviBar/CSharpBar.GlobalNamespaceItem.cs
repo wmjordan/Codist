@@ -21,8 +21,8 @@ namespace Codist.NaviBar
 
 			public GlobalNamespaceItem(CSharpBar bar) : base(bar, IconIds.GlobalNamespace, new ThemedToolBarText()) {
 				Click += HandleClick;
-				this.SetLazyToolTip(CreateToolTip);
-				ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Bottom);
+				this.SetLazyToolTip(() => new CommandToolTip(IconIds.GlobalNamespace, R.CMD_GlobalNamespace, new TextBlock { TextWrapping = TextWrapping.Wrap }.Append(R.CMDT_SearchWithinGlobalNamespace)));
+				this.SetTipPlacementBottom();
 			}
 
 			public override BarItemType ItemType => BarItemType.GlobalNamespace;
@@ -107,10 +107,6 @@ namespace Codist.NaviBar
 					var c = CodeAnalysisHelper.GetSpecificSymbolComparer(child);
 					_Menu.SelectedItem = _Menu.Symbols.FirstOrDefault(s => c(s.Symbol));
 				}
-			}
-
-			CommandToolTip CreateToolTip() {
-				return new CommandToolTip(IconIds.GlobalNamespace, R.CMD_GlobalNamespace, new TextBlock { TextWrapping = TextWrapping.Wrap }.Append(R.CMDT_SearchWithinGlobalNamespace));
 			}
 
 			public override void Dispose() {

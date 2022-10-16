@@ -523,7 +523,7 @@ namespace Codist.NaviBar
 				}
 
 				if (this.HasDummyToolTip()) {
-					ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Bottom);
+					this.SetTipPlacementBottom();
 					// todo: handle updated syntax node for RootItem
 					if (Symbol != null) {
 						var tip = ToolTipFactory.CreateToolTip(Symbol, true, Bar._SemanticContext);

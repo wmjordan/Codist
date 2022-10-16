@@ -63,8 +63,8 @@ namespace Codist.NaviBar
 				_ScopeBox.FilterChanged += SearchCriteriaChanged;
 				_ScopeBox.FilterChanged += ScopeBox_FilterChanged;
 
-				this.SetLazyToolTip(CreateToolTip);
-				ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Bottom);
+				this.SetLazyToolTip(() => new CommandToolTip(IconIds.Search, R.CMD_SearchDeclaration, new TextBlock { TextWrapping = TextWrapping.Wrap }.Append(R.CMDT_SearchDeclaration)));
+				this.SetTipPlacementBottom();
 			}
 
 			public override BarItemType ItemType => BarItemType.Root;
@@ -277,10 +277,6 @@ namespace Codist.NaviBar
 
 			void IContextMenuHost.ShowContextMenu(RoutedEventArgs args) {
 				ShowNamespaceAndTypeMenu((int)ScopeType.Undefined);
-			}
-
-			CommandToolTip CreateToolTip() {
-				return new CommandToolTip(IconIds.Search, R.CMD_SearchDeclaration, new TextBlock { TextWrapping = TextWrapping.Wrap }.Append(R.CMDT_SearchDeclaration));
 			}
 
 			public override void Dispose() {
