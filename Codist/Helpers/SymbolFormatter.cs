@@ -379,11 +379,14 @@ namespace Codist
 			return block;
 		}
 
-		internal void Format(InlineCollection block, AttributeData item, bool isReturn) {
+		internal void Format(InlineCollection block, AttributeData item, int attributeType) {
 			var a = item.AttributeClass.Name;
 			block.Add("[".Render(PlainText));
-			if (isReturn) {
-				block.Add("return".Render(Keyword));
+			if (attributeType != 0) {
+				block.Add((attributeType == 1 ? "return"
+					: attributeType == 2 ? "field"
+					: attributeType == 3 ? "assembly"
+					: "?").Render(Keyword));
 				block.Add(": ".Render(PlainText));
 			}
 			block.Add(WpfHelper.Render(item.AttributeConstructor ?? (ISymbol)item.AttributeClass, a.EndsWith("Attribute", StringComparison.Ordinal) ? a.Substring(0, a.Length - 9) : a, Class));

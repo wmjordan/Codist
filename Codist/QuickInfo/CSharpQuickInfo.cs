@@ -600,22 +600,25 @@ namespace Codist.QuickInfo
 
 		static void ShowAttributesInfo(QiContainer qiContent, ISymbol symbol) {
 			// todo: show inherited attributes
-			var p = ListAttributes(null, symbol.GetAttributes(), false);
+			var p = ListAttributes(null, symbol.GetAttributes(), 0);
 			if (symbol.Kind == SymbolKind.Method) {
-				p = ListAttributes(p, ((IMethodSymbol)symbol).GetReturnTypeAttributes(), true);
+				p = ListAttributes(p, ((IMethodSymbol)symbol).GetReturnTypeAttributes(), 1);
+			}
+			else if (symbol.Kind == SymbolKind.Property) {
+				p = ListAttributes(p, ((IPropertySymbol)symbol).GetPropertyBackingField()?.GetAttributes() ?? ImmutableArray<AttributeData>.Empty, 2);
 			}
 			if (p != null) {
 				qiContent.Add(new ThemedTipDocument().Append(p));
 			}
 
-			ThemedTipParagraph ListAttributes(ThemedTipParagraph paragraph, ImmutableArray<AttributeData> attributes, bool isMethodReturnAttrs) {
+			ThemedTipParagraph ListAttributes(ThemedTipParagraph paragraph, ImmutableArray<AttributeData> attributes, byte attrType) {
 				if (attributes.Length > 0) {
 					foreach (var item in attributes) {
 						if (item.AttributeClass.IsAccessible(true)) {
 							if (paragraph == null) {
 								paragraph = new ThemedTipParagraph(IconIds.Attribute, new ThemedTipText().Append(R.T_Attribute, true));
 							}
-							_SymbolFormatter.Format(paragraph.Content.AppendLine().Inlines, item, isMethodReturnAttrs);
+							_SymbolFormatter.Format(paragraph.Content.AppendLine().Inlines, item, attrType);
 						}
 					}
 				}

@@ -108,11 +108,11 @@ namespace Codist
 		static void ShowAttributes(ISymbol symbol, TextBlock content) {
 			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.Attributes)) {
 				foreach (var attr in symbol.GetAttributes()) {
-					SymbolFormatter.Instance.Format(content.AppendLine().Inlines, attr, false);
+					SymbolFormatter.Instance.Format(content.AppendLine().Inlines, attr, 0);
 				}
 				if (symbol.Kind == SymbolKind.Method) {
 					foreach (var attr in ((IMethodSymbol)symbol).GetReturnTypeAttributes()) {
-						SymbolFormatter.Instance.Format(content.AppendLine().Inlines, attr, true);
+						SymbolFormatter.Instance.Format(content.AppendLine().Inlines, attr, 1);
 					}
 				}
 			}
