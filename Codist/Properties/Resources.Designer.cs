@@ -2679,24 +2679,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Item Size.
-        /// </summary>
-        internal static string OT_ItemSize {
-            get {
-                return ResourceManager.GetString("OT_ItemSize", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Limit the maximum size of each items in Quick Info, preventing any item from taking up the whole screen.
-        /// </summary>
-        internal static string OT_ItemSizeNote {
-            get {
-                return ResourceManager.GetString("OT_ItemSizeNote", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Provides additional shortcuts, such as safe mode, no DPI scaling, etc. to jump list of Visual Studio.
         /// </summary>
         internal static string OT_JumpListTip {
@@ -2729,6 +2711,24 @@ namespace Codist.Properties {
         internal static string OT_LayoutOverrideNote {
             get {
                 return ResourceManager.GetString("OT_LayoutOverrideNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Limit Item Size.
+        /// </summary>
+        internal static string OT_LimitItemSize {
+            get {
+                return ResourceManager.GetString("OT_LimitItemSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Limit the maximum size of each items in Quick Info, preventing any item from taking up the whole screen.
+        /// </summary>
+        internal static string OT_LimitItemSizeNote {
+            get {
+                return ResourceManager.GetString("OT_LimitItemSizeNote", resourceCulture);
             }
         }
         
@@ -4187,6 +4187,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Awaitable.
+        /// </summary>
+        internal static string T_Awaitable {
+            get {
+                return ResourceManager.GetString("T_Awaitable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Background.
         /// </summary>
         internal static string T_Background {
@@ -4547,6 +4556,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [Deprecated].
+        /// </summary>
+        internal static string T_Deprecated {
+            get {
+                return ResourceManager.GetString("T_Deprecated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to  derived classes.
         /// </summary>
         internal static string T_DerivedClasses {
@@ -4732,6 +4750,15 @@ namespace Codist.Properties {
         internal static string T_Extending {
             get {
                 return ResourceManager.GetString("T_Extending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Extension.
+        /// </summary>
+        internal static string T_ExtensionMethod {
+            get {
+                return ResourceManager.GetString("T_ExtensionMethod", resourceCulture);
             }
         }
         

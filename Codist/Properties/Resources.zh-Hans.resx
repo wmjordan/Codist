@@ -957,11 +957,11 @@ Shift：粘贴并选中下一项（整个单词）</value>
   <data name="OT_InterfacesTip" xml:space="preserve">
     <value>显示成员实现的接口</value>
   </data>
-  <data name="OT_ItemSize" xml:space="preserve">
-    <value>内容条目尺寸</value>
+  <data name="OT_LimitItemSize" xml:space="preserve">
+    <value>限制内容条目尺寸</value>
   </data>
-  <data name="OT_ItemSizeNote" xml:space="preserve">
-    <value>在代码提示中限制内容条目的最大尺寸，避免提示内容占满屏幕</value>
+  <data name="OT_LimitItemSizeNote" xml:space="preserve">
+    <value>限制代码提示中内容条目的最大尺寸，避免提示内容占满屏幕</value>
   </data>
   <data name="OT_LineNumber" xml:space="preserve">
     <value>行号</value>
@@ -2060,5 +2060,14 @@ Ctrl: 切换标记并选择下一处</value>
     <value>运行到光标处
 Ctrl: 运行标记的线程到光标处
 Right click: 显示“线程”窗口</value>
+  </data>
+  <data name="T_Awaitable" xml:space="preserve">
+    <value>可等待的</value>
+  </data>
+  <data name="T_ExtensionMethod" xml:space="preserve">
+    <value>扩展方法</value>
+  </data>
+  <data name="T_Deprecated" xml:space="preserve">
+    <value>[已弃用]</value>
   </data>
 </root>

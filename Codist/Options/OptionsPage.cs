@@ -297,8 +297,8 @@ namespace Codist.Options
 					_Color = o.CreateOptionBox(QuickInfoOptions.Color, UpdateConfig, R.OT_ColorInfo)
 						.SetLazyToolTip(() => R.OT_ColorInfoTip),
 
-					new TitleBox(R.OT_ItemSize),
-					new DescriptionBox(R.OT_ItemSizeNote),
+					new TitleBox(R.OT_LimitItemSize),
+					new DescriptionBox(R.OT_LimitItemSizeNote),
 					new WrapPanel {
 						Children = {
 							new StackPanel().MakeHorizontal()
