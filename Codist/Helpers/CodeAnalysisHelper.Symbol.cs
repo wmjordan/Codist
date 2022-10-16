@@ -77,6 +77,47 @@ namespace Codist
 			return info.Symbol
 				?? (info.CandidateSymbols.Length > 0 ? info.CandidateSymbols[0] : null);
 		}
+
+		public static INamedTypeSymbol GetSystemTypeSymbol(this SemanticModel semanticModel, SyntaxKind kind) {
+			string typeName;
+			switch (kind) {
+				case SyntaxKind.BoolKeyword: typeName = nameof(Boolean); break;
+				case SyntaxKind.ByteKeyword: typeName = nameof(Byte); break;
+				case SyntaxKind.SByteKeyword: typeName = nameof(SByte); break;
+				case SyntaxKind.ShortKeyword: typeName = nameof(Int16); break;
+				case SyntaxKind.UShortKeyword: typeName = nameof(UInt16); break;
+				case SyntaxKind.IntKeyword: typeName = nameof(Int32); break;
+				case SyntaxKind.UIntKeyword: typeName = nameof(UInt32); break;
+				case SyntaxKind.LongKeyword: typeName = nameof(Int64); break;
+				case SyntaxKind.ULongKeyword: typeName = nameof(UInt64); break;
+				case SyntaxKind.FloatKeyword: typeName = nameof(Single); break;
+				case SyntaxKind.DoubleKeyword: typeName = nameof(Double); break;
+				case SyntaxKind.DecimalKeyword: typeName = nameof(Decimal); break;
+				case SyntaxKind.StringKeyword: typeName = nameof(String); break;
+				case SyntaxKind.CharKeyword: typeName = nameof(Char); break;
+				case SyntaxKind.ObjectKeyword: typeName = nameof(Object); break;
+				case SyntaxKind.VoidKeyword: typeName = "Void"; break;
+				default: return null;
+			}
+			return semanticModel.GetSystemTypeSymbol(typeName);
+		}
+		public static INamedTypeSymbol GetSystemTypeSymbol(this SemanticModel semanticModel, string typeName) {
+			return semanticModel.GetTypeSymbol(typeName, nameof(System));
+		}
+		public static INamedTypeSymbol GetTypeSymbol(this SemanticModel semanticModel, string name, params string[] namespaces) {
+			var n = semanticModel.Compilation.GlobalNamespace;
+			foreach (var item in namespaces) {
+				foreach (var m in n.GetNamespaceMembers()) {
+					if (m.Name == item) {
+						n = m;
+						goto NEXT;
+					}
+				}
+				return null;
+			NEXT:;
+			}
+			return n.GetTypeMembers(name).FirstOrDefault();
+		}
 		#endregion
 
 		#region Assembly and namespace
@@ -113,7 +154,7 @@ namespace Codist
 					var mi = m.ExplicitInterfaceImplementations;
 					if (mi.Length > 0) {
 						return mi[0].Name;
-				}
+					}
 				}
 				if (m.MethodKind == MethodKind.Constructor) {
 					return m.ContainingType.Name;
@@ -686,16 +727,16 @@ namespace Codist
 
 		static string GetTypeKindName(ITypeSymbol type) {
 			switch (type.TypeKind) {
-						case TypeKind.Array: return "array";
-						case TypeKind.Dynamic: return "dynamic";
+				case TypeKind.Array: return "array";
+				case TypeKind.Dynamic: return "dynamic";
 				case TypeKind.Class: return type.IsRecord() ? "record" : "class";
-						case TypeKind.Delegate: return "delegate";
-						case TypeKind.Enum: return "enum";
-						case TypeKind.Interface: return "interface";
+				case TypeKind.Delegate: return "delegate";
+				case TypeKind.Enum: return "enum";
+				case TypeKind.Interface: return "interface";
 				case TypeKind.Struct: return type.IsRecord() ? "record struct" : "struct";
-						case TypeKind.TypeParameter: return "type parameter";
-					}
-					return "type";
+				case TypeKind.TypeParameter: return "type parameter";
+			}
+			return "type";
 		}
 
 		public static bool IsAccessor(this IMethodSymbol method) {
@@ -704,6 +745,16 @@ namespace Codist
 				case MethodKind.EventRemove:
 				case MethodKind.PropertyGet:
 				case MethodKind.PropertySet:
+					return true;
+			}
+			return false;
+		}
+
+		public static bool IsTypeSpecialMethod(this IMethodSymbol method) {
+			switch (method.MethodKind) {
+				case MethodKind.Constructor:
+				case MethodKind.Destructor:
+				case MethodKind.StaticConstructor:
 					return true;
 			}
 			return false;
@@ -799,6 +850,19 @@ namespace Codist
 				&& symbol.ContainingNamespace?.IsGlobalNamespace != false;
 		}
 
+		public static bool IsObsolete(this ISymbol symbol) {
+			switch (symbol.Kind) {
+				case SymbolKind.Property:
+				case SymbolKind.Method:
+				case SymbolKind.Field:
+				case SymbolKind.NamedType:
+				case SymbolKind.Event:
+					return symbol.GetAttributes()
+						.Any(a => a.AttributeClass.MatchTypeName(nameof(ObsoleteAttribute), "System"));
+			}
+			return false;
+		}
+
 		#region Protected/Future property accessors
 		public static bool IsReadOnly(this ITypeSymbol type) {
 			return type != null && NonPublicOrFutureAccessors.GetNamedTypeIsReadOnly(type);
@@ -823,6 +887,9 @@ namespace Codist
 		}
 		public static IMethodSymbol GetFunctionPointerTypeSignature(this ITypeSymbol symbol) {
 			return symbol?.TypeKind == FunctionPointer ? NonPublicOrFutureAccessors.GetFunctionPointerTypeSignature(symbol) : null;
+		}
+		public static IFieldSymbol GetPropertyBackingField(this IPropertySymbol property) {
+			return property != null && property.ContainingAssembly.GetSourceType() != AssemblySource.Metadata ? NonPublicOrFutureAccessors.GetPropertyBackingField(property) : null;
 		}
 		public static AssemblySource GetSourceType(this IAssemblySymbol assembly) {
 			return assembly is null
@@ -1327,6 +1394,8 @@ namespace Codist
 			public static readonly Func<IMethodSymbol, byte> GetMethodCallingConvention = ReflectionHelper.CreateGetPropertyMethod<IMethodSymbol, byte>("CallingConvention");
 
 			public static readonly Func<ITypeSymbol, IMethodSymbol> GetFunctionPointerTypeSignature = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, IMethodSymbol>("Signature", typeof(ITypeSymbol).Assembly.GetType("Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol"));
+
+			public static readonly Func<IPropertySymbol, IFieldSymbol> GetPropertyBackingField = ReflectionHelper.CreateGetPropertyMethod<IPropertySymbol, IFieldSymbol>("BackingField", typeof(CSharpCompilation).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.SourcePropertySymbol"));
 
 			public static readonly Func<IAssemblySymbol, int> GetAssemblySourceType = CreateAssemblySourceTypeFunc();
 			static Func<IAssemblySymbol, int> CreateAssemblySourceTypeFunc() {

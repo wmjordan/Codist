@@ -53,6 +53,10 @@ namespace Codist.QuickInfo
 		}
 
 		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, ITextBuffer buffer, CancellationToken cancellationToken) {
+			ISymbol symbol;
+			SyntaxNode node;
+			ImmutableArray<ISymbol> candidates;
+			SyntaxToken token;
 			var qiWrapper = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
 				? QuickInfoOverrider.CreateOverrider(session)
 				: null;
@@ -77,9 +81,9 @@ namespace Codist.QuickInfo
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 
 			//look for occurrences of our QuickInfo words in the span
-			var token = unitCompilation.FindToken(subjectTriggerPoint, true);
+			token = unitCompilation.FindToken(subjectTriggerPoint, true);
 			var skipTriggerPointCheck = false;
-			SyntaxNode node;
+			symbol = null;
 			switch (token.Kind()) {
 				case SyntaxKind.WhitespaceTrivia:
 				case SyntaxKind.SingleLineCommentTrivia:
@@ -96,10 +100,13 @@ namespace Codist.QuickInfo
 				case SyntaxKind.BaseKeyword:
 				case SyntaxKind.OverrideKeyword:
 					break;
-				case SyntaxKind.NullKeyword:
 				case SyntaxKind.TrueKeyword:
 				case SyntaxKind.FalseKeyword:
+					symbol = semanticModel.GetSystemTypeSymbol(nameof(Boolean));
+					goto case SyntaxKind.NewKeyword;
+				case SyntaxKind.NullKeyword:
 				case SyntaxKind.NewKeyword:
+				case SyntaxKind.DefaultKeyword:
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 						break;
 					}
@@ -143,7 +150,17 @@ namespace Codist.QuickInfo
 					return new QuickInfoItem(currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive), qiContent.ToUI());
 				case SyntaxKind.VoidKeyword:
 					return null;
+				case SyntaxKind.TypeOfKeyword:
+					symbol = semanticModel.GetSystemTypeSymbol(nameof(Type));
+					break;
+				case SyntaxKind.StackAllocKeyword:
+					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span), cancellationToken).Type;
+					break;
 				default:
+					if (token.Kind().IsPredefinedSystemType()) {
+						symbol = semanticModel.GetSystemTypeSymbol(token.Kind());
+						break;
+					}
 					if (token.Span.Contains(subjectTriggerPoint, true) == false
 						|| token.IsReservedKeyword()) {
 						node = unitCompilation.FindNode(token.Span, false, false);
@@ -170,9 +187,10 @@ namespace Codist.QuickInfo
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 				ShowParameterInfo(qiContent, node, semanticModel);
 			}
-			ImmutableArray<ISymbol> candidates;
-			var symbol = token.IsKind(SyntaxKind.CloseBraceToken) ? null
+			if (symbol == null) {
+				symbol = token.IsKind(SyntaxKind.CloseBraceToken) ? null
 				: GetSymbol(semanticModel, node, ref candidates, cancellationToken);
+			}
 			if (token.IsKind(SyntaxKind.AwaitKeyword)
 				&& symbol != null && symbol.Kind == SymbolKind.Method) {
 				symbol = (symbol.GetReturnType() as INamedTypeSymbol).TypeArguments.FirstOrDefault();
@@ -181,11 +199,39 @@ namespace Codist.QuickInfo
 				ShowCandidateInfo(qiContent, candidates);
 			}
 			if (symbol == null) {
-				ShowMiscInfo(qiContent, node);
+				switch (token.Kind()) {
+					case SyntaxKind.StringLiteralToken:
+					case SyntaxKind.InterpolatedStringStartToken:
+					case SyntaxKind.InterpolatedStringEndToken:
+					case SyntaxKind.InterpolatedVerbatimStringStartToken:
+					case SyntaxKind.InterpolatedStringToken:
+					case SyntaxKind.InterpolatedStringTextToken:
+					case SyntaxKind.NameOfKeyword:
+						symbol = semanticModel.GetSystemTypeSymbol(nameof(String));
+						break;
+					case SyntaxKind.CharacterLiteralToken:
+						symbol = semanticModel.GetSystemTypeSymbol(nameof(Char));
+						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)
+						&& token.Span.Length >= 8) {
+							qiContent.Add(new ThemedTipText(token.ValueText) { FontSize = ThemeHelper.ToolTipFontSize * 2 });
+						}
+						else if (node.IsKind(SyntaxKind.Block) || node.IsKind(SyntaxKind.SwitchStatement)) {
+							ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
+						}
+						break;
+					case SyntaxKind.NumericLiteralToken:
+						symbol = semanticModel.GetSystemTypeSymbol(token.Value.GetType().Name);
+						break;
+					default:
 				if (node.IsKind(SyntaxKind.Block) || node.IsKind(SyntaxKind.SwitchStatement)) {
 					ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
 				}
+						break;
+				}
+				ShowMiscInfo(qiContent, node);
+				if (symbol == null) {
 				goto RETURN;
+			}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 				qiContent.Add(await ShowAvailabilityAsync(doc, token, cancellationToken).ConfigureAwait(false));
@@ -248,7 +294,8 @@ namespace Codist.QuickInfo
 		}
 
 		static ISymbol GetSymbol(SemanticModel semanticModel, SyntaxNode node, ref ImmutableArray<ISymbol> candidates, CancellationToken cancellationToken) {
-			if (node.IsKind(SyntaxKind.BaseExpression)) {
+			if (node.IsKind(SyntaxKind.BaseExpression)
+				|| node.IsKind(SyntaxKind.DefaultLiteralExpression)) {
 				return semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
 			}
 			else if (node.IsKind(SyntaxKind.ThisExpression)) {
