@@ -30,6 +30,13 @@ namespace Codist
 			if (t != null) {
 				content.Append(R.T_MemberType)
 					.Append(t.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
+
+				if (symbol.Kind == SymbolKind.Parameter) {
+					var p = symbol as IParameterSymbol;
+					if (p.HasExplicitDefaultValue) {
+						SymbolFormatter.Instance.AppendValue(tip.Title.Inlines, symbol, p.Type, p.ExplicitDefaultValue);
+			}
+				}
 			}
 			else if (symbol.Kind == SymbolKind.TypeParameter) {
 				content.Append(R.T_DefinedInType)

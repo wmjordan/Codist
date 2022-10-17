@@ -390,7 +390,7 @@ namespace Codist
 			}
 		}
 
-		void AppendValue(InlineCollection text, ISymbol symbol, ITypeSymbol type, object value) {
+		public void AppendValue(InlineCollection text, ISymbol symbol, ITypeSymbol type, object value) {
 			var r = symbol.DeclaringSyntaxReferences;
 			text.Add(" = ");
 			if (r.Length > 0 && GetHardCodedValue(text, r)) {
