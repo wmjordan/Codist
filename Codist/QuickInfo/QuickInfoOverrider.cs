@@ -627,6 +627,10 @@ namespace Codist.QuickInfo
 						if (c is OverriderControl || c is IInteractiveQuickInfoContent /* don't hack interactive content */) {
 							continue;
 						}
+						if (c is TextBlock tb) {
+							tb.LimitSize();
+							continue;
+						}
 						if (docPanel == c || docPanelHandled == false && cp.GetFirstVisualChild<StackPanel>(i => i == docPanel) != null) {
 							cp.LimitSize();
 							if (Config.Instance.QuickInfoXmlDocExtraHeight > 0 && Config.Instance.QuickInfoMaxHeight > 0) {
