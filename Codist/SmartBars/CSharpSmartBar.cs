@@ -107,8 +107,7 @@ namespace Codist.SmartBars
 							break;
 						default:
 							if (View.Selection.StreamSelectionSpan.Length < 4
-								&& token.RawKind >= (int)SyntaxKind.TildeToken
-								&& token.RawKind <= (int)SyntaxKind.PercentEqualsToken
+								&& (token.RawKind >= (int)SyntaxKind.TildeToken && token.RawKind <= (int)SyntaxKind.PercentEqualsToken || token.IsKind(SyntaxKind.IsKeyword) || token.IsKind(SyntaxKind.AsKeyword))
 								&& SelectionIs<SyntaxNode>()) {
 								AddCommand(MyToolBar, IconIds.SelectBlock, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
 							}
