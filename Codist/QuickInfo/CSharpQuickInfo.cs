@@ -95,22 +95,38 @@ namespace Codist.QuickInfo
 						qiWrapper.OverrideBuiltInXmlDoc = false;
 					}
 					break;
-				case SyntaxKind.SwitchKeyword: // switch info
 				case SyntaxKind.ThisKeyword: // convert to type below
 				case SyntaxKind.BaseKeyword:
 				case SyntaxKind.OverrideKeyword:
 					break;
 				case SyntaxKind.TrueKeyword:
 				case SyntaxKind.FalseKeyword:
+				case SyntaxKind.IsKeyword:
+				case SyntaxKind.AmpersandAmpersandToken:
+				case SyntaxKind.BarBarToken:
 					symbol = semanticModel.GetSystemTypeSymbol(nameof(Boolean));
-					goto case SyntaxKind.NewKeyword;
+					break;
+				case SyntaxKind.EqualsGreaterThanToken:
+					if ((node = unitCompilation.FindNode(token.Span)).IsKind(CodeAnalysisHelper.SwitchExpressionArm) && node.Parent.IsKind(CodeAnalysisHelper.SwitchExpression)) {
+						symbol = semanticModel.GetTypeInfo(node.Parent).ConvertedType;
+					}
+					break;
 				case SyntaxKind.NullKeyword:
 				case SyntaxKind.NewKeyword:
 				case SyntaxKind.DefaultKeyword:
+				case SyntaxKind.EqualsToken:
+				case SyntaxKind.SwitchKeyword:
+				case SyntaxKind.QuestionToken:
+				case SyntaxKind.QuestionQuestionToken:
+				case SyntaxKind.UnderscoreToken:
+					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span)).ConvertedType;
+					if (symbol == null) {
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 						break;
 					}
 					return null;
+					}
+					break;
 				case SyntaxKind.AsKeyword:
 					var asType = (unitCompilation.FindNode(token.Span) as BinaryExpressionSyntax)?.GetLastIdentifier();
 					if (asType != null) {
@@ -124,12 +140,17 @@ namespace Codist.QuickInfo
 				case SyntaxKind.AwaitKeyword:
 					node = (unitCompilation.FindNode(token.Span, false, true) as AwaitExpressionSyntax)?.Expression;
 					goto PROCESS;
+				case SyntaxKind.DotToken:
+					token = token.GetNextToken();
+					skipTriggerPointCheck = true;
+					break;
 				case SyntaxKind.OpenParenToken:
 				case SyntaxKind.CloseParenToken:
-				case SyntaxKind.DotToken:
 				case SyntaxKind.CommaToken:
 				case SyntaxKind.ColonToken:
 				case SyntaxKind.SemicolonToken:
+				case SyntaxKind.OpenBracketToken:
+				case SyntaxKind.CloseBracketToken:
 					token = token.GetPreviousToken();
 					skipTriggerPointCheck = true;
 					break;
@@ -155,6 +176,9 @@ namespace Codist.QuickInfo
 					break;
 				case SyntaxKind.StackAllocKeyword:
 					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span), cancellationToken).Type;
+					break;
+				case CodeAnalysisHelper.DotDotToken:
+					symbol = semanticModel.GetSystemTypeSymbol(nameof(Int32));
 					break;
 				default:
 					if (token.Kind().IsPredefinedSystemType()) {
@@ -308,7 +332,11 @@ namespace Codist.QuickInfo
 			}
 			SyntaxKind kind;
 			return symbolInfo.Symbol
-				?? ((kind = node.Kind()).IsDeclaration() || kind == SyntaxKind.VariableDeclarator || kind == SyntaxKind.SingleVariableDesignation && node.Parent.IsKind(SyntaxKind.DeclarationExpression)
+				?? ((kind = node.Kind()).IsDeclaration()
+						|| kind == SyntaxKind.VariableDeclarator
+						|| kind == SyntaxKind.SingleVariableDesignation && (node.Parent.IsKind(SyntaxKind.DeclarationExpression)
+							|| node.Parent.IsKind(SyntaxKind.DeclarationPattern)
+							|| node.Parent.IsKind(SyntaxKind.ParenthesizedVariableDesignation))
 					? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 					: kind == SyntaxKind.IdentifierName && node.Parent.IsKind(SyntaxKind.NameEquals) && (node = node.Parent.Parent) != null && node.IsKind(SyntaxKind.UsingDirective)
 					? semanticModel.GetDeclaredSymbol(node, cancellationToken)?.GetAliasTarget()
