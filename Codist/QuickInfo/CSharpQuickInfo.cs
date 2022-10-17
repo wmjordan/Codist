@@ -287,7 +287,7 @@ namespace Codist.QuickInfo
 				}
 				qiWrapper.ApplyClickAndGo(symbol, buffer, session);
 			}
-			return new QuickInfoItem(qiContent.Count > 0 && session.TextView.TextSnapshot == currentSnapshot
+			return new QuickInfoItem((qiContent.Count > 0 || symbol != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) && session.TextView.TextSnapshot == currentSnapshot
 				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeExclusive)
 				: null, qiContent.ToUI());
 		}

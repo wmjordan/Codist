@@ -435,6 +435,11 @@ namespace Codist.QuickInfo
 				void FixQuickInfo(StackPanel infoPanel) {
 					var titlePanel = infoPanel.GetFirstVisualChild<WrapPanel>();
 					if (titlePanel == null) {
+						if (ClickAndGoSymbol != null
+							&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
+							ShowAlternativeSignature(infoPanel);
+							OverrideDocumentation(infoPanel);
+						}
 						return;
 					}
 					var doc = titlePanel.GetParent<StackPanel>();
@@ -479,8 +484,15 @@ namespace Codist.QuickInfo
 						desc.MaxWidth = Config.Instance.QuickInfoMaxWidth - (ThemeHelper.LargeIconSize + 30);
 					}
 
-					(docPanel.IsItemsHost ? (IList)docPanel.GetParent<ItemsControl>().Items : docPanel.Children)
-						.Insert(0, new StackPanel {
+					IList container;
+					if (docPanel.IsItemsHost) {
+						var c = docPanel.GetParent<ItemsControl>();
+						container = c.ItemsSource as IList ?? c.Items;
+					}
+					else {
+						container = docPanel.Children;
+					}
+					container.Insert(0, new StackPanel {
 							Orientation = Orientation.Horizontal,
 							Children = { icon, desc }
 						});
