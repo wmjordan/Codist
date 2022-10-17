@@ -134,8 +134,11 @@ namespace Codist.Controls
 					_FilterGroups = new FilterButtonGroup[] { new AccessibilityFilterButtonGroup(), new InstanceFilterButtonGroup(), new MemberFilterButtonGroup() };
 					break;
 			}
-			_FilterContainer.Add(_FilterGroups)
-				.Add(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilters).SetValue(ToolTipService.SetPlacement, PlacementMode.Left).ClearBorder());
+			_FilterContainer
+				.Add(_FilterGroups)
+				.Add(new ThemedButton(IconIds.ClearFilter, R.CMD_ClearFilter, ClearFilters)
+					.SetValue(ToolTipService.SetPlacement, PlacementMode.Left)
+					.ClearBorder());
 			_Filter = filter;
 			foreach (var item in _FilterGroups) {
 				item.FilterChanged += FilterBox_Changed;

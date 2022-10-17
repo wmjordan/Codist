@@ -493,9 +493,9 @@ namespace Codist.QuickInfo
 						container = docPanel.Children;
 					}
 					container.Insert(0, new StackPanel {
-							Orientation = Orientation.Horizontal,
-							Children = { icon, desc }
-						});
+						Orientation = Orientation.Horizontal,
+						Children = { icon, desc }
+					});
 				}
 
 				static void UseAlternativeStyle(StackPanel infoPanel, WrapPanel titlePanel, CrispImage icon, TextBlock signature) {
@@ -653,8 +653,8 @@ namespace Codist.QuickInfo
 						if (c is ScrollViewer) {
 							continue;
 						}
-						var v = c as IWpfTextView; // snippet tooltip, some other default tooltip
-						if (v != null) {
+						// snippet tooltip, some other default tooltip
+						if (c is IWpfTextView v) {
 							// use the custom control to enable selection
 							cp.Content = new ThemedTipText {
 								Text = v.TextSnapshot.GetText()
@@ -667,8 +667,7 @@ namespace Codist.QuickInfo
 						}
 						o = c as DependencyObject;
 						if (o == null) {
-							var s = c as string;
-							if (s != null) {
+							if (c is string s) {
 								cp.Content = new ThemedTipText {
 									Text = s
 								}.Scrollable();

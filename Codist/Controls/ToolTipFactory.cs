@@ -35,7 +35,7 @@ namespace Codist
 					var p = symbol as IParameterSymbol;
 					if (p.HasExplicitDefaultValue) {
 						SymbolFormatter.Instance.AppendValue(tip.Title.Inlines, symbol, p.Type, p.ExplicitDefaultValue);
-			}
+					}
 				}
 			}
 			else if (symbol.Kind == SymbolKind.TypeParameter) {
@@ -50,7 +50,8 @@ namespace Codist
 			t = symbol.ContainingType;
 			if (t != null && t.TypeKind != TypeKind.Enum) {
 				content.AppendLineBreak()
-					.Append(t.GetSymbolKindName(), SymbolFormatter.Instance.Keyword).Append(": ")
+					.Append(t.GetSymbolKindName(), SymbolFormatter.Instance.Keyword)
+					.Append(": ")
 					.Append(t.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
 			}
 			if (forMemberList == false) {
@@ -58,17 +59,26 @@ namespace Codist
 					.Append(R.T_Namespace + symbol.ContainingNamespace?.ToString()).AppendLine();
 				if (symbol.Kind == SymbolKind.Namespace) {
 					// hack: workaround to exclude references that returns null from GetDocument
-					content.Append(R.T_Assembly).Append(String.Join(", ", ((INamespaceSymbol)symbol).ConstituentNamespaces.Select(n => n.GetAssemblyModuleName()).Distinct()))
-						.AppendLine().Append(R.T_Project).Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)))
-						.AppendLine().Append(R.T_Location).Append(symbol.Locations.Length);
+					content.Append(R.T_Assembly)
+						.Append(String.Join(", ", ((INamespaceSymbol)symbol).ConstituentNamespaces.Select(n => n.GetAssemblyModuleName()).Distinct()))
+						.AppendLine()
+						.Append(R.T_Project)
+						.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)))
+						.AppendLine()
+						.Append(R.T_Location)
+						.Append(symbol.Locations.Length);
 				}
 				else {
 					if (symbol.HasSource()) {
-						content.Append(R.T_SourceFile).Append(String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))))
-							.AppendLine().Append(R.T_Project).Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)));
+						content.Append(R.T_SourceFile)
+							.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))))
+							.AppendLine()
+							.Append(R.T_Project)
+							.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)));
 					}
 					else {
-						content.Append(R.T_Assembly).Append(symbol.GetAssemblyModuleName());
+						content.Append(R.T_Assembly)
+							.Append(symbol.GetAssemblyModuleName());
 					}
 
 					if (symbol.Kind == SymbolKind.NamedType) {
