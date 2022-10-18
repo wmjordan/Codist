@@ -477,12 +477,12 @@ namespace Codist
 			return null;
 		}
 
-		public static string GetParameterString(this ISymbol symbol) {
+		public static string GetParameterString(this ISymbol symbol, bool withParamName = false) {
 			switch (symbol.Kind) {
 				case SymbolKind.Property: return GetPropertyAccessors((IPropertySymbol)symbol);
-				case SymbolKind.Method: return GetMethodParameters((IMethodSymbol)symbol);
-				case SymbolKind.NamedType: return GetTypeParameters((INamedTypeSymbol)symbol);
-				case SymbolKind.Event: return GetMethodParameters(((IEventSymbol)symbol).Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol);
+				case SymbolKind.Method: return GetMethodParameters((IMethodSymbol)symbol, withParamName);
+				case SymbolKind.NamedType: return GetTypeParameters((INamedTypeSymbol)symbol, withParamName);
+				case SymbolKind.Event: return GetMethodParameters(((IEventSymbol)symbol).Type.GetMembers("Invoke").FirstOrDefault() as IMethodSymbol, withParamName);
 				default: return String.Empty;
 			}
 
@@ -510,7 +510,7 @@ namespace Codist
 					return sb.Append('}').ToString();
 				}
 			}
-			string GetMethodParameters(IMethodSymbol m) {
+			string GetMethodParameters(IMethodSymbol m, bool pn) {
 				if (m == null) {
 					return "(?)";
 				}
@@ -519,7 +519,7 @@ namespace Codist
 					if (m.IsGenericMethod) {
 						BuildTypeParametersString(sb, m.TypeParameters);
 					}
-					BuildParametersString(sb, m.Parameters);
+					BuildParametersString(sb, m.Parameters, pn);
 					return sb.ToString();
 				}
 			}
@@ -537,7 +537,7 @@ namespace Codist
 				}
 				sb.Append('>');
 			}
-			void BuildParametersString(StringBuilder sb, ImmutableArray<IParameterSymbol> paramList) {
+			void BuildParametersString(StringBuilder sb, ImmutableArray<IParameterSymbol> paramList, bool pn) {
 				sb.Append('(');
 				var p = false;
 				foreach (var item in paramList) {
@@ -556,20 +556,23 @@ namespace Codist
 						case RefKind.In: sb.Append("in "); break;
 					}
 					GetTypeName(item.Type, sb);
+					if (pn) {
+						sb.Append(' ').Append(item.Name);
+					}
 					if (item.IsOptional) {
 						sb.Append(']');
 					}
 				}
 				sb.Append(')');
 			}
-			string GetTypeParameters(INamedTypeSymbol t) {
+			string GetTypeParameters(INamedTypeSymbol t, bool pn) {
 				if (t.TypeKind == TypeKind.Delegate) {
 					using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
 						var sb = sbr.Resource;
 						if (t.IsGenericType) {
 							BuildTypeParametersString(sb, t.TypeParameters);
 						}
-						BuildParametersString(sb, t.DelegateInvokeMethod.Parameters);
+						BuildParametersString(sb, t.DelegateInvokeMethod.Parameters, pn);
 						return sb.ToString();
 					}
 				}

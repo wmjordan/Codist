@@ -24,7 +24,7 @@ namespace Codist
 			tip.Title
 				.Append($"{symbol.GetAccessibility()}{symbol.GetAbstractionModifier()}{symbol.GetValueAccessModifier()}{symbol.GetSymbolKindName()} ")
 				.Append(symbol.Name, true)
-				.Append(symbol.GetParameterString());
+				.Append(symbol.GetParameterString(true));
 			var content = tip.Content;
 			var t = symbol.GetReturnType();
 			if (t != null) {
