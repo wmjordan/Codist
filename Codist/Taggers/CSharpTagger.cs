@@ -606,7 +606,7 @@ namespace Codist.Taggers
 					case SyntaxKind.CatchFilterClause:
 					case SyntaxKind.FinallyClause:
 					case SyntaxKind.StackAllocArrayCreationExpression:
-					case CodeAnalysisHelper.ImplicitStackAllocArrayCreationExpression:
+					case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
 					case CodeAnalysisHelper.FunctionPointerCallingConvention:
 						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.ResourceKeyword);
 					case SyntaxKind.LocalDeclarationStatement:
@@ -769,7 +769,7 @@ namespace Codist.Taggers
 							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor)
 							: null;
 					case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
-					case CodeAnalysisHelper.ImplicitArrayCreationExpression:
+					case SyntaxKind.ImplicitArrayCreationExpression:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
 					case SyntaxKind.Argument:
 						return ((ArgumentSyntax)node).Expression.IsKind(SyntaxKind.ImplicitStackAllocArrayCreationExpression) ? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor) : null;
