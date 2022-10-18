@@ -193,9 +193,12 @@ namespace Codist
 							AppendValue(signature.Inlines, symbol, f.Type, f.ConstantValue);
 						}
 						else if (f.IsReadOnly && f.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-							signature.Append(" = ");
-							GetHardCodedValue(signature.Inlines, f.DeclaringSyntaxReferences);
+							var val = f.DeclaringSyntaxReferences.GetHardCodedValue();
+							if (val != null) {
+								signature.Inlines.Add(" = ");
+								ShowExpression(signature.Inlines, val);
 						}
+					}
 					}
 					break;
 				case SymbolKind.Parameter:
@@ -343,7 +346,7 @@ namespace Codist
 					}
 					if (exp != null) {
 						signature.Append(" => ");
-						ShowHardCodeExpression(signature.Inlines, exp);
+						ShowExpression(signature.Inlines, exp);
 						return;
 					}
 				}
@@ -364,54 +367,30 @@ namespace Codist
 			signature.Append("}");
 			if (init != null) {
 				signature.Append(" = ");
-				ShowHardCodeExpression(signature.Inlines, init);
+				ShowExpression(signature.Inlines, init);
 			}
 		}
 
 		public void AppendValue(InlineCollection text, ISymbol symbol, ITypeSymbol type, object value) {
 			var r = symbol.DeclaringSyntaxReferences;
+			ExpressionSyntax val;
 			text.Add(" = ");
-			if (r.Length > 0 && GetHardCodedValue(text, r)) {
+			if (r.Length > 0 && (val = r.GetHardCodedValue()) != null) {
+				ShowExpression(text, val);
 				return;
 			}
 			if (value == null) {
 				text.Add((type.IsValueType ? "default" : "null").Render(Keyword));
 			}
 			else if (value is string) {
-				text.Add(("\"" + value.ToString() + "\"").Render(Text));
+				text.Add($"\"{value}\"".Render(Text));
 			}
 			else {
 				text.Add(value.ToString().Render(Number));
 			}
 		}
 
-		bool GetHardCodedValue(InlineCollection text, ImmutableArray<SyntaxReference> refs) {
-			foreach (var item in refs) {
-				var node = item.GetSyntax();
-				ExpressionSyntax val;
-				if (node is ParameterSyntax p) {
-					if ((val = p.Default?.Value) != null) {
-						ShowHardCodeExpression(text, val);
-						return true;
-					}
-				}
-				else if (node is VariableDeclaratorSyntax v) {
-					if ((val = v.Initializer?.Value) != null) {
-						ShowHardCodeExpression(text, val);
-						return true;
-					}
-				}
-				else if (node is EnumMemberDeclarationSyntax en) {
-					if ((val = en.EqualsValue?.Value) != null) {
-						text.Add(val.NormalizeWhitespace().ToString().Render(EnumField));
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		void ShowHardCodeExpression(InlineCollection text, ExpressionSyntax exp) {
+		void ShowExpression(InlineCollection text, ExpressionSyntax exp) {
 			switch (exp.Kind()) {
 				case SyntaxKind.DefaultLiteralExpression:
 					text.Add("default".Render(Keyword)); return;
@@ -427,7 +406,42 @@ namespace Codist
 				case SyntaxKind.NullLiteralExpression:
 					text.Add("null".Render(Keyword)); return;
 			}
-			text.Add(exp.NormalizeWhitespace().ToString());
+			ShowExpressionRecursive(text, exp.NormalizeWhitespace());
+		}
+
+		void ShowExpressionRecursive(InlineCollection text, SyntaxNode node) {
+			foreach (var item in node.ChildNodesAndTokens()) {
+				if (item.IsToken) {
+					var t = item.AsToken();
+					if (t.HasLeadingTrivia && t.LeadingTrivia.Span.Length > 0) {
+						foreach (var lt in t.LeadingTrivia) {
+							text.Add(lt.ToString());
+						}
+					}
+					if (t.IsReservedKeyword()) {
+						text.Add(t.ToString().Render(Keyword));
+					}
+					else {
+						switch (t.Kind()) {
+							case SyntaxKind.CharacterLiteralToken:
+							case SyntaxKind.StringLiteralToken:
+								text.Add(t.ToString().Render(Text)); break;
+							case SyntaxKind.NumericLiteralToken:
+								text.Add(t.ToString().Render(Number)); break;
+							default:
+								text.Add(t.ToString()); break;
+						}
+					}
+					if (t.HasTrailingTrivia) {
+						foreach (var tt in t.TrailingTrivia) {
+							text.Add(tt.ToString());
+						}
+					}
+				}
+				else if (item.IsNode) {
+					ShowExpressionRecursive(text, item.AsNode());
+				}
+			}
 		}
 
 		void ShowGenericMethodConstraints(StackPanel desc, IMethodSymbol m) {
