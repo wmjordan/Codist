@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
@@ -42,9 +43,9 @@ namespace Codist
 			genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 		internal const SyntaxKind DotDotToken = (SyntaxKind)8222;
+		internal const SyntaxKind QuestionQuestionEqualsToken = (SyntaxKind)8284;
 		internal const SyntaxKind InitKeyword = (SyntaxKind)8443;
 		internal const SyntaxKind RecordKeyword = (SyntaxKind)8444;
-		internal const SyntaxKind ImplicitArrayCreationExpression = (SyntaxKind)8652;
 		internal const SyntaxKind ImplicitObjectCreationExpression = (SyntaxKind)8659;
 		internal const SyntaxKind FileScopedNamespaceDeclaration = (SyntaxKind)8845;
 		internal const SyntaxKind RecursivePattern = (SyntaxKind)9020;
@@ -52,7 +53,6 @@ namespace Codist
 		internal const SyntaxKind SwitchExpression = (SyntaxKind)9025;
 		internal const SyntaxKind SwitchExpressionArm = (SyntaxKind)9026;
 		internal const SyntaxKind VarPattern = (SyntaxKind)9027;
-		internal const SyntaxKind ImplicitStackAllocArrayCreationExpression = (SyntaxKind)9053;
 		internal const SyntaxKind FunctionPointerCallingConvention = (SyntaxKind)9059;
 		internal const SyntaxKind InitAccessorDeclaration = (SyntaxKind)9060;
 		internal const SyntaxKind WithInitializerExpression = (SyntaxKind)9062;
@@ -1009,6 +1009,29 @@ namespace Codist
 						break;
 				}
 			}
+		}
+
+		public static ExpressionSyntax GetHardCodedValue(this ImmutableArray<SyntaxReference> refs) {
+			foreach (var item in refs) {
+				var node = item.GetSyntax();
+				ExpressionSyntax val;
+				if (node is ParameterSyntax p) {
+					if ((val = p.Default?.Value) != null) {
+						return val;
+					}
+				}
+				else if (node is VariableDeclaratorSyntax v) {
+					if ((val = v.Initializer?.Value) != null) {
+						return val;
+					}
+				}
+				else if (node is EnumMemberDeclarationSyntax en) {
+					if ((val = en.EqualsValue?.Value) != null) {
+						return val;
+					}
+				}
+			}
+			return null;
 		}
 
 		public static Span GetLineSpan(this SyntaxNode node) {

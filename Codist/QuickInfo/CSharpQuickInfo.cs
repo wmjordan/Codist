@@ -111,14 +111,19 @@ namespace Codist.QuickInfo
 						symbol = semanticModel.GetTypeInfo(node.Parent).ConvertedType;
 					}
 					break;
+				case SyntaxKind.EqualsToken:
+					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.GetPreviousToken().Span)).ConvertedType;
+					break;
 				case SyntaxKind.NullKeyword:
 				case SyntaxKind.NewKeyword:
 				case SyntaxKind.DefaultKeyword:
-				case SyntaxKind.EqualsToken:
 				case SyntaxKind.SwitchKeyword:
 				case SyntaxKind.QuestionToken:
 				case SyntaxKind.QuestionQuestionToken:
+				case CodeAnalysisHelper.QuestionQuestionEqualsToken:
 				case SyntaxKind.UnderscoreToken:
+				case SyntaxKind.WhereKeyword:
+				case SyntaxKind.OrderByKeyword:
 					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span)).ConvertedType;
 					if (symbol == null) {
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
