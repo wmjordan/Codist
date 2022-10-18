@@ -197,8 +197,8 @@ namespace Codist
 							if (val != null) {
 								signature.Inlines.Add(" = ");
 								ShowExpression(signature.Inlines, val);
+							}
 						}
-					}
 					}
 					break;
 				case SymbolKind.Parameter:
@@ -243,11 +243,15 @@ namespace Codist
 			if (ns == null) {
 				return;
 			}
+			if (ns.IsGlobalNamespace) {
+				loc.Append(ns.ToString().Render(Namespace));
+				return;
+			}
 			var n = ImmutableArray.CreateBuilder<INamespaceSymbol>();
-			while (ns?.IsGlobalNamespace == false) {
+			do {
 				n.Add(ns);
 				ns = ns.ContainingNamespace;
-			}
+			} while (ns?.IsGlobalNamespace == false);
 			for (int i = n.Count - 1; i > 0; i--) {
 				loc.Append(n[i].Name.Render(Namespace)).Append(".");
 			}
@@ -476,7 +480,8 @@ namespace Codist
 		void ShowTypeParameters(StackPanel desc, ImmutableArray<ITypeParameterSymbol> tp, ImmutableArray<ITypeSymbol> ta) {
 			var tpl = tp.Length;
 			for (int i = 0; i < tpl; i++) {
-				var b = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush }.SetGlyph(ThemeHelper.GetImage(IconIds.GenericDefinition));
+				var b = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush }
+					.SetGlyph(ThemeHelper.GetImage(IconIds.GenericDefinition));
 				ShowTypeArgumentInfo(tp[i], ta[i], b);
 				desc.Add(b);
 			}
