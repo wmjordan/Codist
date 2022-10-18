@@ -75,7 +75,7 @@ namespace Codist
 			return formatter.ShowParameters(block, parameters);
 		}
 		public static TextBlock AddParameters(this TextBlock block, ImmutableArray<IParameterSymbol> parameters, SymbolFormatter formatter, int argIndex) {
-			return formatter.ShowParameters(block, parameters, argIndex);
+			return formatter.ShowParameters(block, parameters, true, false, argIndex);
 		}
 		public static TextBlock AddXmlDoc(this TextBlock paragraph, XElement content, XmlDocRenderer docRenderer) {
 			docRenderer.Render(content, paragraph.Inlines);

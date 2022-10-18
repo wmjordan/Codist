@@ -254,7 +254,7 @@ namespace Codist
 		public TextBlock ShowParameters(TextBlock block, ImmutableArray<IParameterSymbol> parameters) {
 			return ShowParameters(block, parameters, false, false);
 		}
-		public TextBlock ShowParameters(TextBlock block, ImmutableArray<IParameterSymbol> parameters, bool showParameterName, bool showDefault) {
+		public TextBlock ShowParameters(TextBlock block, ImmutableArray<IParameterSymbol> parameters, bool showParameterName, bool showDefault, int argIndex = -1) {
 			var inlines = block.Inlines;
 			inlines.Add(new TextBlock { Text = " (", VerticalAlignment = VerticalAlignment.Top });
 			var pl = parameters.Length;
@@ -274,7 +274,12 @@ namespace Codist
 				Format(inlines, p.Type, null, false);
 				if (showParameterName) {
 					inlines.Add(" ");
-					inlines.Add(p.Render(null, Parameter));
+					if (String.IsNullOrEmpty(p.Name)) {
+						inlines.Add(("@" + i.ToString()).Render(i == argIndex, false, Parameter));
+					}
+					else {
+						inlines.Add(p.Render(null, i == argIndex, Parameter));
+					}
 					if (showDefault && p.HasExplicitDefaultValue) {
 						AppendValue(inlines, p, p.Type, p.ExplicitDefaultValue);
 					}
@@ -288,33 +293,6 @@ namespace Codist
 				if (showParameterName) {
 					inlines = tmpInlines;
 					inlines.Add(span);
-				}
-			}
-			inlines.Add(")");
-			return block;
-		}
-		public TextBlock ShowParameters(TextBlock block, ImmutableArray<IParameterSymbol> parameters, int argIndex) {
-			var inlines = block.Inlines;
-			inlines.Add("(");
-			for (var i = 0; i < parameters.Length; i++) {
-				if (i > 0) {
-					inlines.Add(", ");
-				}
-				var p = parameters[i];
-				if (p.IsOptional) {
-					inlines.Add("[");
-				}
-				AddParameterModifier(inlines, p);
-				Format(inlines, p.Type, null, false);
-				inlines.Add(" ");
-				if (String.IsNullOrEmpty(p.Name)) {
-					inlines.Add(("@" + i.ToString()).Render(i == argIndex, false, Parameter));
-				}
-				else {
-					inlines.Add(p.Render(null, i == argIndex, Parameter));
-				}
-				if (p.IsOptional) {
-					inlines.Add("]");
 				}
 			}
 			inlines.Add(")");
