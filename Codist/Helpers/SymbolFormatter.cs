@@ -84,7 +84,7 @@ namespace Codist
 			var desc = new StackPanel { Margin = WpfHelper.MenuItemMargin };
 
 			#region Signature
-			var signature = ShowSymbolSignature(s);
+			var signature = ShowSymbolSignature(System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Shift ? symbol : s);
 			desc.Add(signature);
 			if (s.IsObsolete()) {
 				desc.Opacity = 0.6;
