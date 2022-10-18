@@ -33,6 +33,7 @@ namespace Codist
 			__ViewKindCodeGuid = new Guid(EnvDTE.Constants.vsViewKindCode);
 		static readonly HashSet<IWpfTextView> _WpfTextViews = new HashSet<IWpfTextView>();
 		static IWpfTextView _MouseOverTextView, _ActiveTextView;
+		static int _ActiveViewPosition;
 
 		#region Position
 		public static SnapshotPoint GetCaretPosition(this ITextView textView) {
@@ -510,6 +511,24 @@ namespace Codist
 			CodistPackage.DTE.TryExecuteCommand(command, args);
 		}
 
+		/// <summary>
+		/// <para>When we click from the Symbol Link or the context menu command on the Quick Info,
+		/// <see cref="OpenFile"/> command will be executed and caret will be moved to the new place.</para>
+		/// <para>While we <i>Navigate Backward</i>, the caret will be located at the place before Symbol Link 
+		/// or the context symbol command was executed, instead of the place that triggered
+		/// the Quick Info. This is inconvenient while browsing code files.</para>
+		/// <para>We use this function to keep the view position that triggers the Quick Info,
+		/// and use the position in the <see cref="MoveCaretToKeptViewPosition"/> function, before
+		/// <see cref="InternalOpenFile"/>.</para>
+		/// <para>So <i>Navigate Backward</i> command will restore the caret position to that point.</para>
+		/// </summary>
+		/// <param name="position"></param>
+		public static void KeepViewPosition(int position) {
+			_ActiveViewPosition = position;
+		}
+		public static void ForgetViewPosition() {
+			_ActiveViewPosition = -1;
+		}
 		public static void OpenFile(string file) {
 			OpenFile(file, (VsTextView v)=> { });
 		}
@@ -522,6 +541,14 @@ namespace Codist
 			if (File.Exists(file) == false) {
 				return;
 			}
+			if (_ActiveViewPosition > -1) {
+				MoveCaretToKeptViewPosition();
+			}
+
+			InternalOpenFile(file, action);
+		}
+
+		static void InternalOpenFile(string file, Action<VsTextView> action) {
 			try {
 				using (new NewDocumentStateScope(Keyboard.Modifiers == ModifierKeys.Shift ? __VSNEWDOCUMENTSTATE.NDS_Unspecified : __VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
 					VsShellUtilities.OpenDocument(ServiceProvider.GlobalProvider, file, __ViewKindCodeGuid, out var hierarchy, out var itemId, out var windowFrame, out var view);
@@ -532,6 +559,18 @@ namespace Codist
 				/* ignore */
 			}
 		}
+
+		static void MoveCaretToKeptViewPosition() {
+			var v = _MouseOverTextView ?? _ActiveTextView;
+			SnapshotPoint p;
+			if (v != null
+				&& _ActiveViewPosition < v.TextSnapshot.Length
+				&& v.Caret.ContainingTextViewLine.ContainsBufferPosition(p = new SnapshotPoint(v.TextSnapshot, _ActiveViewPosition)) == false) {
+				v.Caret.MoveTo(p);
+				_ActiveViewPosition = -1;
+			}
+		}
+
 		public static void OpenFile(string file, Action<IWpfTextView> action) {
 			OpenFile(file, (VsTextView view) => action(GetWpfTextView(view)));
 		}
@@ -879,6 +918,7 @@ namespace Codist
 				void TextView_SetActiveView(object sender, EventArgs e) {
 					if (_ActiveTextView != _View) {
 						_ActiveTextView = _View;
+						ForgetViewPosition();
 						ActiveTextViewChanged?.Invoke(_View, new TextViewCreatedEventArgs(_View));
 					}
 				}
@@ -888,6 +928,7 @@ namespace Codist
 				}
 
 				void TextView_CloseView(object sender, EventArgs e) {
+					ForgetViewPosition();
 					var v = sender as IWpfTextView;
 					v.Closed -= TextView_CloseView;
 					v.VisualElement.Loaded -= TextView_SetActiveView;

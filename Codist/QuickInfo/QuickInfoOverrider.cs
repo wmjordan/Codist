@@ -48,6 +48,10 @@ namespace Codist.QuickInfo
 			FindHolder(quickInfoItem)?.DismissAsync();
 		}
 
+		public static void KeepTriggerPoint(DependencyObject quickInfoItem) {
+			FindHolder(quickInfoItem)?.KeepTriggerPoint();
+		}
+
 		static IQuickInfoHolder FindHolder(DependencyObject quickInfoItem) {
 			var items = quickInfoItem.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl");
 			// version 16.1 or above
@@ -188,6 +192,7 @@ namespace Codist.QuickInfo
 			}
 
 			async void GoToSource(object sender, MouseButtonEventArgs e) {
+				FindHolder(e.Source as DependencyObject)?.KeepTriggerPoint();
 				var s = _symbol;
 				await _quickInfoSession.DismissAsync();
 				s.GoToDefinition();
@@ -257,6 +262,7 @@ namespace Codist.QuickInfo
 
 		interface IQuickInfoHolder
 		{
+			void KeepTriggerPoint();
 			void Hold(bool hold);
 			System.Threading.Tasks.Task DismissAsync();
 		}
@@ -322,6 +328,9 @@ namespace Codist.QuickInfo
 				public bool KeepQuickInfoOpen { get; set; }
 				public bool IsMouseOverAggregated { get; set; }
 
+				public void KeepTriggerPoint() {
+					TextEditorHelper.KeepViewPosition(QuickInfoSession.ApplicableToSpan.GetStartPoint(QuickInfoSession.TextView.TextSnapshot));
+				}
 				public void Hold(bool hold) {
 					IsMouseOverAggregated = hold;
 				}
@@ -477,7 +486,7 @@ namespace Codist.QuickInfo
 				void ShowAlternativeSignature(StackPanel docPanel) {
 					var s = ClickAndGoSymbol;
 					var icon = ThemeHelper.GetImage(s.GetImageId(), ThemeHelper.LargeIconSize)
-						.AsSymbolLink(s.OriginalDefinition);
+						.AsSymbolLink(Keyboard.Modifiers == ModifierKeys.Shift ? s : s.OriginalDefinition);
 					icon.VerticalAlignment = VerticalAlignment.Top;
 					var desc = SymbolFormatter.Instance.ShowSignature(s);
 					if (Config.Instance.QuickInfoMaxWidth >= 100) {
