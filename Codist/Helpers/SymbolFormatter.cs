@@ -386,8 +386,11 @@ namespace Codist
 			if (value == null) {
 				text.Add((type.IsValueType ? "default" : "null").Render(Keyword));
 			}
-			else if (value is string) {
-				text.Add($"\"{value}\"".Render(Text));
+			else if (value is string s) {
+				text.Add(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(s)).ToFullString().Render(Text));
+			}
+			else if (value is bool b) {
+				text.Add((b ? "true" : "false").Render(Keyword));
 			}
 			else {
 				text.Add(value.ToString().Render(Number));
@@ -395,31 +398,38 @@ namespace Codist
 		}
 
 		void ShowExpression(InlineCollection text, ExpressionSyntax exp) {
-			switch (exp.Kind()) {
-				case SyntaxKind.DefaultLiteralExpression:
-					text.Add("default".Render(Keyword)); return;
-				case SyntaxKind.CharacterLiteralExpression:
-				case SyntaxKind.StringLiteralExpression:
-					text.Add(exp.ToString().Render(Text)); return;
-				case SyntaxKind.NumericLiteralExpression:
-					text.Add(exp.ToString().Render(Number)); return;
-				case SyntaxKind.TrueLiteralExpression:
-					text.Add("true".Render(Keyword)); return;
-				case SyntaxKind.FalseLiteralExpression:
-					text.Add("false".Render(Keyword)); return;
-				case SyntaxKind.NullLiteralExpression:
-					text.Add("null".Render(Keyword)); return;
+			if (ShowCommonExpression(text, exp) == false) {
+				ShowExpressionRecursive(text, exp, " ", false);
 			}
-			ShowExpressionRecursive(text, exp.NormalizeWhitespace());
 		}
 
-		void ShowExpressionRecursive(InlineCollection text, SyntaxNode node) {
+		bool ShowCommonExpression(InlineCollection text, SyntaxNode node) {
+			switch (node.Kind()) {
+				case SyntaxKind.DefaultLiteralExpression:
+					text.Add("default".Render(Keyword)); return true;
+				case SyntaxKind.CharacterLiteralExpression:
+				case SyntaxKind.StringLiteralExpression:
+					text.Add(node.ToString().Render(Text)); return true;
+				case SyntaxKind.NumericLiteralExpression:
+					text.Add(node.ToString().Render(Number)); return true;
+				case SyntaxKind.TrueLiteralExpression:
+					text.Add("true".Render(Keyword)); return true;
+				case SyntaxKind.FalseLiteralExpression:
+					text.Add("false".Render(Keyword)); return true;
+				case SyntaxKind.NullLiteralExpression:
+					text.Add("null".Render(Keyword)); return true;
+				case SyntaxKind.IdentifierName:
+					text.Add(new NodeLink(node)); return true;
+			}
+			return false;
+		}
+		void ShowExpressionRecursive(InlineCollection text, SyntaxNode node, string whitespace, bool ws) {
 			foreach (var item in node.ChildNodesAndTokens()) {
 				if (item.IsToken) {
 					var t = item.AsToken();
 					if (t.HasLeadingTrivia && t.LeadingTrivia.Span.Length > 0) {
 						foreach (var lt in t.LeadingTrivia) {
-							text.Add(lt.ToString());
+							ShowTrivia(text, whitespace, ref ws, lt);
 						}
 					}
 					if (t.IsReservedKeyword()) {
@@ -437,14 +447,43 @@ namespace Codist
 						}
 					}
 					if (t.HasTrailingTrivia) {
+						ws = false;
 						foreach (var tt in t.TrailingTrivia) {
-							text.Add(tt.ToString());
+							ShowTrivia(text, whitespace, ref ws, tt);
 						}
 					}
 				}
 				else if (item.IsNode) {
-					ShowExpressionRecursive(text, item.AsNode());
+					if (ShowCommonExpression(text, item.AsNode())) {
+						if (item.HasTrailingTrivia) {
+							ws = false;
+							foreach (var tt in item.GetTrailingTrivia()) {
+								ShowTrivia(text, whitespace, ref ws, tt);
+							}
+						}
+					}
+					else {
+						ShowExpressionRecursive(text, item.AsNode(), " ", ws);
+					}
 				}
+			}
+		}
+
+		static void ShowTrivia(InlineCollection text, string whitespace, ref bool ws, SyntaxTrivia trivia) {
+			switch (trivia.Kind()) {
+				case SyntaxKind.WhitespaceTrivia:
+				case SyntaxKind.EndOfLineTrivia:
+					if (ws == false) {
+						text.Add(whitespace ?? trivia.ToString());
+						ws = true;
+					}
+					break;
+				//case SyntaxKind.SingleLineCommentTrivia:
+				//case SyntaxKind.MultiLineCommentTrivia:
+				//	return;
+				//default:
+				//	text.Add(trivia.ToString());
+				//	break;
 			}
 		}
 
@@ -656,6 +695,7 @@ namespace Codist
 					else if ((nullable = type.GetNullableValueType()) != null) {
 						Format(text, nullable, null, false);
 						text.Add("?".Render(PlainText));
+						return;
 					}
 					else {
 						text.Add(symbol.Render(alias, bold, Struct));
@@ -1075,6 +1115,54 @@ namespace Codist
 				else if (p.ReturnsByRef) {
 					info.Append("ref", Keyword);
 				}
+			}
+		}
+
+		sealed class NodeLink : Run
+		{
+			SyntaxNode _Node;
+
+			public NodeLink(SyntaxNode node) {
+				_Node = node;
+				Text = node.ToString();
+				MouseEnter += InitEventHandlers;
+			}
+
+			void InitEventHandlers(object sender, System.Windows.Input.MouseEventArgs e) {
+				Cursor = System.Windows.Input.Cursors.Hand;
+				MouseEnter -= InitEventHandlers;
+				NodeLink_MouseEnter(sender, e);
+				MouseEnter += NodeLink_MouseEnter;
+				MouseLeave += NodeLink_MouseLeave;
+				MouseLeftButtonDown += NodeLink_MouseLeftButtonDown;
+				Unloaded += NodeLink_Unloaded;
+			}
+
+			void NodeLink_Unloaded(object sender, RoutedEventArgs e) {
+				Unloaded -= NodeLink_Unloaded;
+				MouseEnter -= InitEventHandlers;
+				MouseEnter -= NodeLink_MouseEnter;
+				MouseLeave -= NodeLink_MouseLeave;
+				MouseLeftButtonDown -= NodeLink_MouseLeftButtonDown;
+				_Node = null;
+			}
+
+			async void NodeLink_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+				QuickInfo.QuickInfoOverrider.KeepTriggerPoint(this);
+
+				var s = (await TextEditorHelper.GetMouseOverDocumentView()?.TextBuffer.GetDocument().Project.GetCompilationAsync()).GetSemanticModel(_Node.SyntaxTree)
+					.GetSymbol(_Node);
+				s?.GoToDefinition();
+				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
+				e.Handled = true;
+			}
+
+			void NodeLink_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e) {
+				Background = Brushes.Transparent;
+			}
+
+			void NodeLink_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e) {
+				Background = SystemColors.GrayTextBrush.Alpha(0.3);
 			}
 		}
 	}
