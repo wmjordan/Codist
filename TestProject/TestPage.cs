@@ -111,8 +111,8 @@ text".Log(); // multiline string (string verbatim)
 
 		static string[] List(int value, params string[] text) {
 			return Array.ConvertAll(
-				Array.FindAll(text, t => t != null),
-				s => (value++).ToString() + "." + text[value - 1]
+				Array.FindAll(text, t => t != null && t.Length > 0),
+				s => (value++).ToString() + "." + text[value - 1] // captured variables: value, text
 			);
 		}
 

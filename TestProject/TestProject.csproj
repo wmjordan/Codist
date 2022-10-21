@@ -74,8 +74,10 @@
     <Compile Include="CS9_0.cs" />
     <Compile Include="ExtensionClass.cs" />
     <Compile Include="Generics.cs" />
+    <Compile Include="GlobalTypes.cs" />
     <Compile Include="IInterface.cs" />
     <Compile Include="InheritDoc.cs" />
+    <Compile Include="Methods.cs" />
     <Compile Include="MyEnum.cs" />
     <Compile Include="MyStruct.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
