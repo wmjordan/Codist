@@ -805,6 +805,8 @@ namespace Codist.QuickInfo
 			if (re) {
 				method = method.ReducedFrom;
 			}
+			var mst = method.IsStatic;
+			var mmod = method.GetSpecialMethodModifier();
 			var rt = method.ReturnType;
 			var mps = method.Parameters;
 			var ct = method.ContainingType;
@@ -827,6 +829,14 @@ namespace Codist.QuickInfo
 					continue;
 				}
 				var t = new ThemedTipText();
+				var st = om.IsStatic;
+				if (st) {
+					t.Append("static ".Render((st == mst ? SymbolFormatter.SemiTransparent : SymbolFormatter.Instance).Keyword));
+				}
+				var mod = om.GetSpecialMethodModifier();
+				if (mod != null) {
+					t.Append(mod.Render((mod == mmod ? SymbolFormatter.SemiTransparent : SymbolFormatter.Instance).Keyword));
+				}
 				if (om.MethodKind != MethodKind.Constructor) {
 					t.AddSymbol(om.ReturnType, false, CodeAnalysisHelper.AreEqual(om.ReturnType, rt, false) ? SymbolFormatter.SemiTransparent : _SymbolFormatter).Append(" ");
 				}
