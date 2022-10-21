@@ -156,14 +156,15 @@ namespace Codist
 		/// <summary>
 		/// Gets the <see cref="TextBlock.Text"/> of a <see cref="TextBlock"/>, or the concatenated <see cref="Run.Text"/>s of <see cref="Run"/> instances in the <see cref="TextBlock.Inlines"/>.
 		/// </summary>
-		public static string GetText(this TextBlock block) {
-			if (block.Inlines.Count == 0) {
-				return block.Text;
+		public static string GetText(this TextBlock text) {
+			if (text.Inlines.Count == 0) {
+				return text.Text;
 			}
 			using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(50)) {
 				var sb = sbr.Resource;
-				foreach (var inline in block.Inlines) {
-					sb.Append((inline as Run)?.Text);
+				foreach (var inline in text.Inlines) {
+					sb.Append((inline as Run)?.Text
+						?? ((inline as InlineUIContainer)?.Child as TextBlock)?.GetText());
 				}
 				return sb.ToString();
 			}
