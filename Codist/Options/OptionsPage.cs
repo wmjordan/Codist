@@ -880,10 +880,10 @@ namespace Codist.Options
 				}
 				Config.Instance.Set(options, value);
 				if (value) {
-					Controls.LayoutOverrider.CompactMenu();
+					Display.LayoutOverrider.CompactMenu();
 				}
 				else {
-					Controls.LayoutOverrider.UndoCompactMenu();
+					Display.LayoutOverrider.UndoCompactMenu();
 				}
 				Config.Instance.FireConfigChangedEvent(Features.None);
 			}
@@ -905,7 +905,7 @@ namespace Codist.Options
 					return;
 				}
 				Config.Instance.Set(options, value);
-				Controls.LayoutOverrider.ToggleUIElement(element, !value);
+				Display.LayoutOverrider.ToggleUIElement(element, !value);
 				Config.Instance.FireConfigChangedEvent(Features.None);
 			}
 

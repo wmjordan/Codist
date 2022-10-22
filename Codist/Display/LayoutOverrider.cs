@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.Shell.Events;
 using Microsoft.VisualStudio.PlatformUI;
 using AppHelpers;
 
-namespace Codist.Controls
+namespace Codist.Display
 {
 	static class LayoutOverrider
 	{
@@ -157,7 +157,7 @@ namespace Codist.Controls
 			if (options.MatchFlags(DisplayOptimizations.MainWindow)) {
 				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, true);
 			}
-			if (_LayoutElementNotFound) {
+			if (_LayoutElementNotFound && options.HasAnyFlag(DisplayOptimizations.HideSearchBox | DisplayOptimizations.HideFeedbackBox | DisplayOptimizations.HideAccountBox)) {
 				// hack: the UI elements to hide may not be added to app window when this method is executed
 				//    the solution load event is exploited to compensate that
 				SolutionEvents.OnAfterBackgroundSolutionLoadComplete += OverrideLayoutAfterSolutionLoad;

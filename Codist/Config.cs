@@ -260,7 +260,7 @@ namespace Codist
 				_LastLoaded = DateTime.Now;
 				return Instance;
 			}
-			Controls.LayoutOverrider.Reload(config.DisplayOptimizations);
+			Display.LayoutOverrider.Reload(config.DisplayOptimizations);
 			_LastLoaded = DateTime.Now;
 			Debug.WriteLine("Config loaded");
 			return config;

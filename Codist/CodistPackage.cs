@@ -139,7 +139,7 @@ namespace Codist
 			Commands.NaviBarSearchDeclarationCommand.Initialize();
 			Commands.ToggleAutoBuildVersionCommand.Initialize();
 			Display.JumpListEnhancer.Initialize();
-			Controls.LayoutOverrider.InitializeLayoutOverride();
+			Display.LayoutOverrider.InitializeLayoutOverride();
 
 			if (Config.Instance.InitStatus != InitStatus.Normal) {
 				InitializeOrUpgradeConfig();
