@@ -776,7 +776,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly Controls.IntegerBox _TopSpace, _BottomSpace;
-			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride, _HideSearchBox, _HideAccountBox, _HideFeedbackButton;
+			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride, _HideSearchBox, _HideAccountBox, _HideFeedbackButton, _CpuMonitor, _MemoryMonitor;
 			readonly OptionBox<BuildOptions> _BuildTimestamp;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -808,6 +808,15 @@ namespace Codist.Options
 					.ForEachChild((CheckBox b) => b.MinWidth = MinColumnWidth)
 					.SetLazyToolTip(() => R.OT_ForceGrayscaleTextRenderingTip),
 					new TextBox { TextWrapping = TextWrapping.Wrap, Text = R.OT_MacTypeLink, Padding = WpfHelper.SmallMargin, IsReadOnly = true },
+
+					new TitleBox(R.OT_ResourceMonitor),
+					new DescriptionBox(R.OT_ResourceMonitorNote),
+					new WrapPanel {
+						Children = {
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.ShowCpu, UpdateResourceManagerOption, R.OT_CpuUsage).Set(ref _CpuMonitor),
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.ShowMemory, UpdateResourceManagerOption, R.OT_MemoryUsage).Set(ref _MemoryMonitor)
+						}
+					},
 
 					new TitleBox(R.OT_Output),
 					new DescriptionBox(R.OT_OutputNote),
@@ -863,6 +872,15 @@ namespace Codist.Options
 				}
 				Config.Instance.Set(options, value);
 				WpfHelper.SetUITextRenderOptions(Application.Current.MainWindow, value);
+				Config.Instance.FireConfigChangedEvent(Features.None);
+			}
+
+			void UpdateResourceManagerOption(DisplayOptimizations options, bool value) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.Set(options, value);
+				Display.ResourceMonitor.Reload(Config.Instance.DisplayOptimizations);
 				Config.Instance.FireConfigChangedEvent(Features.None);
 			}
 

@@ -2070,4 +2070,24 @@ Right click: 显示“线程”窗口</value>
   <data name="T_Deprecated" xml:space="preserve">
     <value>[已弃用]</value>
   </data>
+  <data name="OT_CpuUsage" xml:space="preserve">
+    <value>处理器使用率</value>
+  </data>
+  <data name="OT_MemoryUsage" xml:space="preserve">
+    <value>内存使用率</value>
+  </data>
+  <data name="OT_ResourceMonitor" xml:space="preserve">
+    <value>资源监视器</value>
+  </data>
+  <data name="OT_ResourceMonitorNote" xml:space="preserve">
+    <value>在状态栏显示处理器和内存的使用比例</value>
+  </data>
+  <data name="T_CpuUsage" xml:space="preserve">
+    <value>处理器占用率
+所有内核的总处理器使用百分比（点击此处打开任务管理器）</value>
+  </data>
+  <data name="T_RamUsage" xml:space="preserve">
+    <value>内存占用率
+已分配内存占总内存的百分比（点击此处打开任务管理器）</value>
+  </data>
 </root>

@@ -2085,4 +2085,24 @@ Right click: Threads window</value>
   <data name="T_Deprecated" xml:space="preserve">
     <value>[Deprecated]</value>
   </data>
+  <data name="OT_CpuUsage" xml:space="preserve">
+    <value>Monitor CPU usage</value>
+  </data>
+  <data name="OT_MemoryUsage" xml:space="preserve">
+    <value>Monitor memory usage</value>
+  </data>
+  <data name="OT_ResourceMonitor" xml:space="preserve">
+    <value>Resource Monitor</value>
+  </data>
+  <data name="OT_ResourceMonitorNote" xml:space="preserve">
+    <value>Adds controls to the status bar, displaying CPU or momory usage</value>
+  </data>
+  <data name="T_CpuUsage" xml:space="preserve">
+    <value>CPU Usage
+Percent of processor time</value>
+  </data>
+  <data name="T_RamUsage" xml:space="preserve">
+    <value>Memory Usage
+Percent of memory in use</value>
+  </data>
 </root>

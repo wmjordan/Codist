@@ -85,7 +85,8 @@
     <Compile Include="Controls\IntegerBox.xaml.cs">
       <DependentUpon>IntegerBox.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\LayoutOverrider.cs" />
+    <Compile Include="Display\ResourceMonitor.cs" />
+    <Compile Include="Display\LayoutOverrider.cs" />
     <Compile Include="Controls\NumericUpDown.cs" />
     <Compile Include="Controls\SymbolCommands.cs" />
     <Compile Include="Controls\SymbolItem.cs" />
@@ -350,7 +351,7 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers">
-      <Version>2.9.8</Version>
+      <Version>3.3.3</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -396,7 +397,7 @@
       <Version>15.3.32</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools">
-      <Version>17.2.2186</Version>
+      <Version>17.4.2116</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

@@ -201,6 +201,8 @@ namespace Codist
 		public const int PickColor = KnownImageIds.ColorDialog;
 		public const int Reset = KnownImageIds.EmptyBucket;
 		public const int ResetTheme = KnownImageIds.CleanData;
+		public const int Cpu = KnownImageIds.Processor;
+		public const int Memory = KnownImageIds.Memory;
 		#endregion
 		#region symbol usage icons
 		public const int UseToWrite = KnownImageIds.Writeable;

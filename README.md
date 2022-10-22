@@ -549,6 +549,7 @@ I have learned a lot from the following extension projects (sorted by the time w
 * Community.VisualStudio.Toolkit: https://github.com/VsixCommunity/Community.VisualStudio.Toolkit
 * ReviewBoard: code.google.com/p/reviewboardvsx
 * Tweaks: https://github.com/madskristensen/Tweakster
+* VsStatus: https://github.com/madskristensen/VsStatus
 
 And thank you, every donaters, beta testers, feedback providers to this project.
 

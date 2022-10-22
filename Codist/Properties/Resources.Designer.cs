@@ -2130,6 +2130,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Monitor CPU usage.
+        /// </summary>
+        internal static string OT_CpuUsage {
+            get {
+                return ResourceManager.GetString("OT_CpuUsage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to C#.
         /// </summary>
         internal static string OT_CSharp {
@@ -2950,6 +2959,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Monitor memory usage.
+        /// </summary>
+        internal static string OT_MemoryUsage {
+            get {
+                return ResourceManager.GetString("OT_MemoryUsage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Method declaration spot.
         /// </summary>
         internal static string OT_MethodDeclarationSpot {
@@ -3282,6 +3300,24 @@ namespace Codist.Properties {
         internal static string OT_ResourceBraces {
             get {
                 return ResourceManager.GetString("OT_ResourceBraces", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Resource Monitor.
+        /// </summary>
+        internal static string OT_ResourceMonitor {
+            get {
+                return ResourceManager.GetString("OT_ResourceMonitor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adds controls to the status bar, displaying CPU or momory usage.
+        /// </summary>
+        internal static string OT_ResourceMonitorNote {
+            get {
+                return ResourceManager.GetString("OT_ResourceMonitorNote", resourceCulture);
             }
         }
         
@@ -4457,6 +4493,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CPU Usage
+        ///Percent of processor time.
+        /// </summary>
+        internal static string T_CpuUsage {
+            get {
+                return ResourceManager.GetString("T_CpuUsage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to To configure syntax highlight, open a code file first and execute this command..
         /// </summary>
         internal static string T_CustomizeSyntaxHighlightNote {
@@ -5425,6 +5471,16 @@ namespace Codist.Properties {
         internal static string T_PublicProtected {
             get {
                 return ResourceManager.GetString("T_PublicProtected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Memory Usage
+        ///Percent of memory in use.
+        /// </summary>
+        internal static string T_RamUsage {
+            get {
+                return ResourceManager.GetString("T_RamUsage", resourceCulture);
             }
         }
         

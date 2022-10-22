@@ -261,6 +261,7 @@ namespace Codist
 				return Instance;
 			}
 			Display.LayoutOverrider.Reload(config.DisplayOptimizations);
+			Display.ResourceMonitor.Reload(config.DisplayOptimizations);
 			_LastLoaded = DateTime.Now;
 			Debug.WriteLine("Config loaded");
 			return config;
@@ -722,7 +723,9 @@ namespace Codist
 		CompactMenu = 1 << 2,
 		HideSearchBox = 1 << 3,
 		HideFeedbackBox = 1 << 4,
-		HideAccountBox = 1 << 5
+		HideAccountBox = 1 << 5,
+		ShowCpu = 1 << 6,
+		ShowMemory = 1 << 7,
 	}
 
 	[Flags]
