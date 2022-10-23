@@ -126,10 +126,10 @@ namespace Codist.QuickInfo
 				case SyntaxKind.OrderByKeyword:
 					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span)).ConvertedType;
 					if (symbol == null) {
-					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
-						break;
-					}
-					return null;
+						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
+							break;
+						}
+						return null;
 					}
 					break;
 				case SyntaxKind.AsKeyword:
@@ -141,7 +141,7 @@ namespace Codist.QuickInfo
 					break;
 				case SyntaxKind.ReturnKeyword:
 					var tb = ShowReturnInfo(unitCompilation.FindNode(token.Span) as ReturnStatementSyntax, semanticModel, cancellationToken);
-					return tb != null ? new QuickInfoItem(token.Span.CreateSnapshotSpan(currentSnapshot).ToTrackingSpan(), tb) : null;
+					return tb != null ? CreateQuickInfoItem(session, token, tb) : null;
 				case SyntaxKind.AwaitKeyword:
 					node = (unitCompilation.FindNode(token.Span, false, true) as AwaitExpressionSyntax)?.Expression;
 					goto PROCESS;
@@ -173,7 +173,7 @@ namespace Codist.QuickInfo
 						.SetGlyph(ThemeHelper.GetImage(IconIds.Region))
 						.Append((unitCompilation.FindNode(token.Span, true, false) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
 						);
-					return new QuickInfoItem(currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive), qiContent.ToUI());
+					return CreateQuickInfoItem(session, token, qiContent.ToUI());
 				case SyntaxKind.VoidKeyword:
 					return null;
 				case SyntaxKind.TypeOfKeyword:
@@ -197,7 +197,7 @@ namespace Codist.QuickInfo
 							ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
 						}
 						if (qiContent.Count > 0) {
-							return new QuickInfoItem(currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeInclusive), qiContent.ToUI());
+							return CreateQuickInfoItem(session, token, qiContent.ToUI());
 						}
 						return null;
 					}
@@ -292,9 +292,14 @@ namespace Codist.QuickInfo
 				}
 				qiWrapper.ApplyClickAndGo(symbol, buffer, session);
 			}
-			return new QuickInfoItem((qiContent.Count > 0 || symbol != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) && session.TextView.TextSnapshot == currentSnapshot
-				? currentSnapshot.CreateTrackingSpan(token.SpanStart, token.Span.Length, SpanTrackingMode.EdgeExclusive)
-				: null, qiContent.ToUI());
+			return CreateQuickInfoItem(session, (qiContent.Count > 0 || symbol != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) && session.TextView.TextSnapshot == currentSnapshot
+				? token
+				: (SyntaxToken?)null, qiContent.ToUI());
+		}
+
+		static QuickInfoItem CreateQuickInfoItem(IAsyncQuickInfoSession session, SyntaxToken? token, object item) {
+			session.KeepViewPosition();
+			return new QuickInfoItem(token?.Span.CreateSnapshotSpan(session.TextView.TextSnapshot).ToTrackingSpan(), item);
 		}
 
 		static async Task<ThemedTipDocument> ShowAvailabilityAsync(Document doc, SyntaxToken token, CancellationToken cancellationToken) {
@@ -343,6 +348,8 @@ namespace Codist.QuickInfo
 							|| node.Parent.IsKind(SyntaxKind.DeclarationPattern)
 							|| node.Parent.IsKind(SyntaxKind.ParenthesizedVariableDesignation))
 					? semanticModel.GetDeclaredSymbol(node, cancellationToken)
+					// : kind == SyntaxKind.ArrowExpressionClause
+					// ? semanticModel.GetDeclaredSymbol(node.Parent, cancellationToken)
 					: kind == SyntaxKind.IdentifierName && node.Parent.IsKind(SyntaxKind.NameEquals) && (node = node.Parent.Parent) != null && node.IsKind(SyntaxKind.UsingDirective)
 					? semanticModel.GetDeclaredSymbol(node, cancellationToken)?.GetAliasTarget()
 					: semanticModel.GetSymbolExt(node, cancellationToken));

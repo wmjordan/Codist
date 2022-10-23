@@ -522,10 +522,21 @@ namespace Codist
 		/// <see cref="InternalOpenFile"/>.</para>
 		/// <para>So <i>Navigate Backward</i> command will restore the caret position to that point.</para>
 		/// </summary>
-		/// <param name="position"></param>
-		public static void KeepViewPosition(int position) {
-			_ActiveViewPosition = position;
+		public static void KeepViewPosition(this Microsoft.VisualStudio.Language.Intellisense.IAsyncQuickInfoSession session) {
+			if (session.TextView is IWpfTextView v) {
+				_ActiveTextView = v;
+				_ActiveViewPosition = session.GetTriggerPoint(v.TextSnapshot)?.Position ?? -1;
+				session.StateChanged += QuickInfoSession_StateChanged;
+			}
 		}
+
+		static void QuickInfoSession_StateChanged(object sender, Microsoft.VisualStudio.Language.Intellisense.QuickInfoSessionStateChangedEventArgs e) {
+			if (e.NewState == Microsoft.VisualStudio.Language.Intellisense.QuickInfoSessionState.Dismissed) {
+				ForgetViewPosition();
+				((Microsoft.VisualStudio.Language.Intellisense.IAsyncQuickInfoSession)sender).StateChanged -= QuickInfoSession_StateChanged;
+			}
+		}
+
 		public static void ForgetViewPosition() {
 			_ActiveViewPosition = -1;
 		}

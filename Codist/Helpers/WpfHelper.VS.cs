@@ -233,7 +233,6 @@ namespace Codist
 						ContextMenu = m;
 						m.IsOpen = true;
 						Highlight(this, e);
-						QuickInfo.QuickInfoOverrider.KeepTriggerPoint(this);
 					}
 					e.Handled = true;
 				}
@@ -241,7 +240,6 @@ namespace Codist
 
 			void DismissQuickInfo(object sender, RoutedEventArgs e) {
 				(sender as CSharpSymbolContextMenu).Closed -= DismissQuickInfo;
-				TextEditorHelper.ForgetViewPosition();
 				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, false);
 				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
 			}
@@ -322,7 +320,6 @@ namespace Codist
 						m.Closed += DismissQuickInfo;
 						ContextMenu = m;
 						m.IsOpen = true;
-						QuickInfo.QuickInfoOverrider.KeepTriggerPoint(this);
 						Highlight(this, e);
 					}
 					e.Handled = true;
@@ -331,7 +328,6 @@ namespace Codist
 
 			void DismissQuickInfo(object sender, RoutedEventArgs e) {
 				(sender as CSharpSymbolContextMenu).Closed -= DismissQuickInfo;
-				TextEditorHelper.ForgetViewPosition();
 				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, false);
 				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
 			}
@@ -344,7 +340,6 @@ namespace Codist
 			}
 
 			void GotoSymbol(object sender, RoutedEventArgs e) {
-				QuickInfo.QuickInfoOverrider.KeepTriggerPoint(this);
 				_Symbol.GoToDefinition();
 				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
 				e.Handled = true;

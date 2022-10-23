@@ -1148,8 +1148,6 @@ namespace Codist
 			}
 
 			async void NodeLink_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e) {
-				QuickInfo.QuickInfoOverrider.KeepTriggerPoint(this);
-
 				var s = (await TextEditorHelper.GetMouseOverDocumentView()?.TextBuffer.GetDocument().Project.GetCompilationAsync()).GetSemanticModel(_Node.SyntaxTree)
 					.GetSymbol(_Node);
 				s?.GoToDefinition();
