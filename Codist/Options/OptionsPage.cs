@@ -776,7 +776,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly Controls.IntegerBox _TopSpace, _BottomSpace;
-			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride, _HideSearchBox, _HideAccountBox, _HideFeedbackButton, _CpuMonitor, _MemoryMonitor;
+			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride, _HideSearchBox, _HideAccountBox, _HideFeedbackButton, _CpuMonitor, _MemoryMonitor, _DriveMonitor;
 			readonly OptionBox<BuildOptions> _BuildTimestamp;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -814,6 +814,7 @@ namespace Codist.Options
 					new WrapPanel {
 						Children = {
 							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.ShowCpu, UpdateResourceManagerOption, R.OT_CpuUsage).Set(ref _CpuMonitor),
+							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.ShowDrive, UpdateResourceManagerOption, R.OT_DriveUsage).Set(ref _DriveMonitor),
 							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.ShowMemory, UpdateResourceManagerOption, R.OT_MemoryUsage).Set(ref _MemoryMonitor)
 						}
 					},

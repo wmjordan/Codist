@@ -2130,7 +2130,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Monitor CPU usage.
+        ///   Looks up a localized string similar to Monitor CPU.
         /// </summary>
         internal static string OT_CpuUsage {
             get {
@@ -2252,6 +2252,15 @@ namespace Codist.Properties {
         internal static string OT_DonateLinkTip {
             get {
                 return ResourceManager.GetString("OT_DonateLinkTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Monitor disk.
+        /// </summary>
+        internal static string OT_DriveUsage {
+            get {
+                return ResourceManager.GetString("OT_DriveUsage", resourceCulture);
             }
         }
         
@@ -2959,7 +2968,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Monitor memory usage.
+        ///   Looks up a localized string similar to Monitor memory.
         /// </summary>
         internal static string OT_MemoryUsage {
             get {
@@ -3313,7 +3322,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Adds controls to the status bar, displaying CPU or momory usage.
+        ///   Looks up a localized string similar to Adds controls to the status bar, displaying computer resource usage.
         /// </summary>
         internal static string OT_ResourceMonitorNote {
             get {
@@ -4643,6 +4652,16 @@ namespace Codist.Properties {
         internal static string T_Dot {
             get {
                 return ResourceManager.GetString("T_Dot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disk Time Usage
+        ///Percent of logical disk time.
+        /// </summary>
+        internal static string T_DriveUsage {
+            get {
+                return ResourceManager.GetString("T_DriveUsage", resourceCulture);
             }
         }
         

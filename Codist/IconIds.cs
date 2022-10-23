@@ -203,6 +203,7 @@ namespace Codist
 		public const int ResetTheme = KnownImageIds.CleanData;
 		public const int Cpu = KnownImageIds.Processor;
 		public const int Memory = KnownImageIds.Memory;
+		public const int Drive = KnownImageIds.HardDrive;
 		#endregion
 		#region symbol usage icons
 		public const int UseToWrite = KnownImageIds.Writeable;

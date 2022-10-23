@@ -723,6 +723,8 @@ namespace Codist
 		HideAccountBox = 1 << 5,
 		ShowCpu = 1 << 6,
 		ShowMemory = 1 << 7,
+		ShowDrive = 1 << 8,
+		ResourceMonitors = ShowCpu | ShowMemory | ShowDrive
 	}
 
 	[Flags]

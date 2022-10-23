@@ -8,47 +8,47 @@ using Codist.Controls;
 using Microsoft.VisualStudio.PlatformUI;
 using AppHelpers;
 using R = Codist.Properties.Resources;
+using Microsoft.VisualStudio.Shell;
+using Task = System.Threading.Tasks.Task;
 
 namespace Codist.Display
 {
 	static class ResourceMonitor
 	{
 		static Timer _Timer;
-		static readonly StackPanel _MeterContainer = new StackPanel { Orientation = Orientation.Horizontal };
-		static Meter _CpuMeter, _RamMeter;
+		static readonly StackPanel _MeterContainer = new StackPanel {
+			Orientation = Orientation.Horizontal,
+			Children = { new ContentPresenter(), new ContentPresenter(), new ContentPresenter(), }
+		};
+		static Meter _CpuMeter, _RamMeter, _DriveMeter;
 		static int _IsInited;
 
 		public static void Reload(DisplayOptimizations option) {
-			if (option.HasAnyFlag(DisplayOptimizations.ShowCpu | DisplayOptimizations.ShowMemory) == false) {
+			if (option.HasAnyFlag(DisplayOptimizations.ResourceMonitors) == false) {
 				Stop();
 				return;
 			}
-			if (option.MatchFlags(DisplayOptimizations.ShowCpu)) {
-				if (_CpuMeter != null) {
-					_CpuMeter.Start();
-				}
-				else {
-					_CpuMeter = new CpuMeter();
-					_MeterContainer.Children.Insert(0, _CpuMeter);
-				}
-			}
-			else {
-				_CpuMeter?.Stop();
-			}
-			if (option.MatchFlags(DisplayOptimizations.ShowMemory)) {
-				if (_RamMeter != null) {
-					_RamMeter.Start();
-				}
-				else {
-					_RamMeter = new RamMeter();
-					_MeterContainer.Children.Add(_RamMeter);
-				}
-			}
-			else {
-				_RamMeter?.Stop();
-			}
+			ToggleMeter<CpuMeter>(0, option, DisplayOptimizations.ShowCpu, ref _CpuMeter);
+			ToggleMeter<DriveMeter>(1, option, DisplayOptimizations.ShowDrive, ref _DriveMeter);
+			ToggleMeter<RamMeter>(2, option, DisplayOptimizations.ShowMemory, ref _RamMeter);
 			if (_Timer == null) {
 				_Timer = new Timer(Update, null, 1000, 1000);
+			}
+		}
+
+		static void ToggleMeter<TMeter>(int index, DisplayOptimizations option, DisplayOptimizations flag, ref Meter meter) where TMeter : Meter, new() {
+			if (option.MatchFlags(flag)) {
+				if (meter != null) {
+					meter.Start();
+				}
+				else {
+					meter = new TMeter();
+					_MeterContainer.Children.RemoveAt(index);
+					_MeterContainer.Children.Insert(index, meter);
+				}
+			}
+			else {
+				meter?.Stop();
 			}
 		}
 
@@ -58,16 +58,23 @@ namespace Codist.Display
 				_Timer = null;
 				_CpuMeter?.Stop();
 				_RamMeter?.Stop();
+				_DriveMeter?.Stop();
 			}
 		}
 
 		static void Update(object dummy) {
+			UpdateAsync().FireAndForget();
+		}
+
+		async static Task UpdateAsync() {
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			if (_IsInited == 0) {
-				_MeterContainer.Dispatcher.Invoke(Init);
+				Init();
 				return;
 			}
 			_CpuMeter?.Update();
 			_RamMeter?.Update();
+			_DriveMeter?.Update();
 		}
 
 		static void Init() {
@@ -99,23 +106,25 @@ namespace Codist.Display
 			protected Meter(int iconId, string tooltip) {
 				Orientation = Orientation.Horizontal;
 				Children.Add(ThemeHelper.GetImage(iconId).WrapMargin(WpfHelper.SmallHorizontalMargin));
-				Children.Add(_Label = new TextBlock { MinWidth = 40, VerticalAlignment = VerticalAlignment.Center });
-				_Label.SetResourceReference(Control.ForegroundProperty, EnvironmentColors.StatusBarDefaultTextBrushKey);
+				Children.Add(_Label = new TextBlock { MinWidth = 40, VerticalAlignment = VerticalAlignment.Center }.ReferenceProperty(Control.ForegroundProperty, EnvironmentColors.StatusBarDefaultTextBrushKey));
 				_Counter = CreateCounter();
-				var t = new CommandToolTip(iconId, tooltip);
-				t.SetResourceReference(ImageThemingUtilities.ImageBackgroundColorProperty, EnvironmentColors.ToolTipColorKey);
-				ToolTip = t;
-				ToolTipService.SetPlacement(this, System.Windows.Controls.Primitives.PlacementMode.Top);
+				ToolTip = new CommandToolTip(iconId, tooltip)
+					.ReferenceCrispImageBackground(EnvironmentColors.ToolTipColorKey)
+					.SetTipPlacementTop();
 			}
 
 			protected TextBlock Label => _Label;
 
 			public void Update() {
-				try {
-					Dispatcher.Invoke(UpdateMeter);
+				var c = _Counter;
+				if (c == null) {
+					return;
 				}
-				catch (System.Threading.Tasks.TaskCanceledException) {
-					// ignore
+				try {
+					UpdateDisplay(c.NextValue());
+				}
+				catch (Exception ex) {
+					Debug.WriteLine(ex);
 				}
 			}
 
@@ -135,26 +144,13 @@ namespace Codist.Display
 					_Counter = null;
 				}
 			}
-
-			void UpdateMeter() {
-				var c = _Counter;
-				if (c == null) {
-					return;
-				}
-				try {
-					UpdateDisplay(c.NextValue());
-				}
-				catch (Exception ex) {
-					Debug.WriteLine(ex);
-				}
-			}
 		}
 
 		sealed class CpuMeter : Meter
 		{
 			const int SampleCount = 10;
 			readonly float[] _Samples = new float[SampleCount];
-			float _SampleSum;
+			float _SampleSum, _LastSample;
 			int _SampleIndex;
 
 			public CpuMeter() : base(IconIds.Cpu, R.T_CpuUsage) {
@@ -173,8 +169,16 @@ namespace Codist.Display
 				if (++_SampleIndex == SampleCount) {
 					_SampleIndex = 0;
 				}
-				counterValue = Math.Min(50, Math.Min(counterValue, _SampleSum / SampleCount)) / 50;
-				Background = counterValue < 0.2f ? Brushes.Transparent : Brushes.Red.Alpha(counterValue);
+				counterValue = Math.Min(50, _SampleSum / SampleCount) / 50;
+				if (counterValue < 0.2f) {
+					if (_LastSample >= 0.2f) {
+						ClearValue(BackgroundProperty);
+					}
+				}
+				else {
+					Background = Brushes.Red.Alpha(counterValue);
+				}
+				_LastSample = counterValue;
 			}
 		}
 
@@ -190,6 +194,42 @@ namespace Codist.Display
 			protected override void UpdateDisplay(float counterValue) {
 				Label.Text = counterValue.ToString("0") + "%";
 				Label.Opacity = (counterValue + 100) / 200;
+			}
+		}
+
+		sealed class DriveMeter : Meter
+		{
+			const int SampleCount = 10;
+			readonly float[] _Samples = new float[SampleCount];
+			float _SampleSum, _LastSample;
+			int _SampleIndex;
+
+			public DriveMeter() : base(IconIds.Drive, R.T_DriveUsage) {
+			}
+
+			protected override PerformanceCounter CreateCounter() {
+				return new PerformanceCounter("LogicalDisk", "% Disk Time", "_Total");
+			}
+
+			protected override void UpdateDisplay(float counterValue) {
+				Label.Text = counterValue.ToString("0") + "%";
+				Label.Opacity = (Math.Min(50, counterValue) + 50) / 100;
+				_SampleSum -= _Samples[_SampleIndex];
+				_Samples[_SampleIndex] = counterValue;
+				_SampleSum += counterValue;
+				if (++_SampleIndex == SampleCount) {
+					_SampleIndex = 0;
+				}
+				counterValue = Math.Min(30, Math.Min(counterValue, _SampleSum / SampleCount)) / 30;
+				if (counterValue < 0.2f) {
+					if (_LastSample >= 0.2f) {
+						ClearValue(BackgroundProperty);
+					}
+				}
+				else {
+					Background = Brushes.Red.Alpha(counterValue);
+				}
+				_LastSample = counterValue;
 			}
 		}
 	}
