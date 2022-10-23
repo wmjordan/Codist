@@ -14,9 +14,9 @@ namespace Codist.Controls
 		public ThemedButton(object content, object toolTip) {
 			Content = content;
 			ToolTip = toolTip;
-			this.ReferenceProperty(ForegroundProperty, CommonControlsColors.ButtonTextBrushKey);
-			this.ReferenceProperty(BackgroundProperty, CommonControlsColors.ButtonBrushKey);
-			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
+			this.ReferenceProperty(ForegroundProperty, CommonControlsColors.ButtonTextBrushKey)
+				.ReferenceProperty(BackgroundProperty, CommonControlsColors.ButtonBrushKey)
+				.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 
 		public ThemedButton(int imageId, object toolTip, Action onClickHandler)
@@ -73,8 +73,8 @@ namespace Codist.Controls
 					}
 				} : ThemeHelper.GetImage(imageId).WrapMargin(WpfHelper.SmallHorizontalMargin);
 			Header = content;
-			this.ReferenceStyle(typeof(ThemedImageButton));
-			this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
+			this.ReferenceStyle(typeof(ThemedImageButton))
+				.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
 		}
 		public object Header { get; }
 		public bool IsChecked {

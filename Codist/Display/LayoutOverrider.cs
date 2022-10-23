@@ -94,12 +94,15 @@ namespace Codist.Display
 
 			t.Children.Insert(2, _Menu = new InteractiveControlContainer(menu) { Margin = new Thickness(0, 7, 5, 4) });
 
-			var title = new TextBlock { FontWeight = FontWeights.Bold };
-			title.SetResourceReference(TextBlock.ForegroundProperty, EnvironmentColors.SystemCaptionTextBrushKey);
 			var sn = System.IO.Path.GetFileNameWithoutExtension(CodistPackage.DTE.Solution.FileName);
-			title.Text = sn.Length > 0 ? sn + _RootSuffix : __DefaultTitle;
-			t.Children.Insert(3, _TitleBlock = new Border { Child = title, Padding = new Thickness(7, 9, 7, 4) });
-			_TitleBlock.SetResourceReference(Border.BackgroundProperty, EnvironmentColors.SystemActiveCaptionBrushKey);
+			var title = new TextBlock {
+				FontWeight = FontWeights.Bold,
+				Text = sn.Length > 0 ? sn + _RootSuffix : __DefaultTitle
+			}.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemCaptionTextBrushKey);
+			t.Children.Insert(3, _TitleBlock = new Border {
+					Child = title,
+					Padding = new Thickness(7, 9, 7, 4)
+				}.ReferenceProperty(Border.BackgroundProperty, EnvironmentColors.SystemActiveCaptionBrushKey));
 
 			(_TitleBarButtons = t.GetFirstVisualChild<StackPanel>(i => i.Name == "WindowTitleBarButtons"))
 				.Children.Insert(0, _Account = new InteractiveControlContainer(account));

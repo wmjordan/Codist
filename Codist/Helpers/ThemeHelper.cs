@@ -135,8 +135,9 @@ namespace Codist
 			ImageThemingUtilities.SetImageBackgroundColor(target, color);
 		}
 
-		public static void ReferenceCrispImageBackground(this System.Windows.FrameworkElement target, object colorKey) {
+		public static TControl ReferenceCrispImageBackground<TControl>(this TControl target, ThemeResourceKey colorKey) where TControl : System.Windows.FrameworkElement {
 			target.SetResourceReference(ImageThemingUtilities.ImageBackgroundColorProperty, colorKey);
+			return target;
 		}
 		#endregion
 

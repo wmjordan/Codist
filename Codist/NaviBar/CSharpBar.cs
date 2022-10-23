@@ -500,8 +500,8 @@ namespace Codist.NaviBar
 		{
 			protected BarItem(CSharpBar bar, int imageId, TextBlock content) : base(imageId, content) {
 				Bar = bar;
-				this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey);
-				SetResourceReference(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
+				this.ReferenceCrispImageBackground(EnvironmentColors.MainWindowActiveCaptionColorKey)
+					.ReferenceProperty(ForegroundProperty, VsBrushes.CommandBarTextActiveKey);
 			}
 
 			protected CSharpBar Bar { get; private set; }
