@@ -178,12 +178,9 @@ namespace Codist
 		}
 
 		static void UpgradeConfig(Config config, Version v) {
-			if (v < new Version(6, 2)) {
-				if (v < new Version(5, 14) && config.WrapTexts.Count == 0) {
-					ResetWrapTexts(config.WrapTexts);
-				}
-				config.MarkerOptions |= MarkerOptions.SymbolReference;
-				__Updated?.Invoke(new ConfigUpdatedEventArgs(config, Features.ScrollbarMarkers));
+			if (v < new Version(6, 6) && config.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) == false) {
+				config.QuickInfoOptions |= QuickInfoOptions.AlternativeStyle;
+				__Updated?.Invoke(new ConfigUpdatedEventArgs(config, Features.SuperQuickInfo));
 			}
 		}
 
@@ -766,7 +763,7 @@ namespace Codist
 		AlternativeStyle = 1 << 30,
 		DocumentationOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc,
 		QuickInfoOverride = DocumentationOverride | AlternativeStyle,
-		Default = Attributes | BaseType | BaseTypeInheritence | Interfaces | InterfacesInheritence | NumericValues | InterfaceImplementations | MethodOverload | Parameter | OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc | SeeAlsoDoc | ExceptionDoc | ReturnsDoc | RemarksDoc,
+		Default = AlternativeStyle | Attributes | BaseType | BaseTypeInheritence | Interfaces | InterfacesInheritence | NumericValues | InterfaceImplementations | MethodOverload | Parameter | OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc | SeeAlsoDoc | ExceptionDoc | ReturnsDoc | RemarksDoc,
 	}
 
 	[Flags]

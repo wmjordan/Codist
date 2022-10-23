@@ -330,6 +330,8 @@ namespace Codist.Options
 					new Note(R.OT_CSharpNote),
 					new TitleBox(R.OT_QuickInfoOverride),
 					new DescriptionBox(R.OT_QuickInfoOverrideNote),
+					_AlternativeStyle = o.CreateOptionBox(QuickInfoOptions.AlternativeStyle, UpdateConfig, R.OT_AlternativeStyle)
+						.SetLazyToolTip(() => R.OT_AlternativeStyleTip),
 					_OverrideDefaultDocumentation = o.CreateOptionBox(QuickInfoOptions.OverrideDefaultDocumentation, UpdateConfig, R.OT_OverrideXmlDoc)
 						.SetLazyToolTip(() => R.OT_OverrideXmlDocTip),
 					_DocumentationFromBaseType = o.CreateOptionBox(QuickInfoOptions.DocumentationFromBaseType, UpdateConfig, R.OT_InheritXmlDoc)
@@ -348,8 +350,6 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_ShowExampleXmlDocTip),
 					_TextOnlyDoc = o.CreateOptionBox(QuickInfoOptions.TextOnlyDoc, UpdateConfig, R.OT_TextOnlyXmlDoc)
 						.SetLazyToolTip(() => R.OT_TextOnlyXmlDocTip),
-					_AlternativeStyle = o.CreateOptionBox(QuickInfoOptions.AlternativeStyle, UpdateConfig, R.OT_AlternativeStyle)
-						.SetLazyToolTip(() => R.OT_AlternativeStyleTip),
 
 					new TitleBox(R.OT_AdditionalQuickInfo),
 					new DescriptionBox(R.OT_AdditionalQuickInfoNote),

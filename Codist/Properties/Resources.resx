@@ -845,10 +845,10 @@ Use space to separate keywords.</value>
     <value>Markers for all code types</value>
   </data>
   <data name="OT_AlternativeStyle" xml:space="preserve">
-    <value>Use alternative style</value>
+    <value>Use enhanced symbol signature style</value>
   </data>
   <data name="OT_AlternativeStyleTip" xml:space="preserve">
-    <value>Uses an alternative style to display Quick Info, and unify the topmost link in the symbol definition part of Quick Info</value>
+    <value>Uses a concise, reorganized style (from symbol name, parameters, containing symbol, type to generic arguments) to display C# symbols</value>
   </data>
   <data name="OT_ApplyToCodeWindow" xml:space="preserve">
     <value>Apply to code window</value>

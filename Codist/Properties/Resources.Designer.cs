@@ -1786,7 +1786,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Use alternative style.
+        ///   Looks up a localized string similar to Use enhanced symbol signature style.
         /// </summary>
         internal static string OT_AlternativeStyle {
             get {
@@ -1795,7 +1795,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uses an alternative style to display Quick Info, and unify the topmost link in the symbol definition part of Quick Info.
+        ///   Looks up a localized string similar to Uses a concise, reorganized style (from symbol name, parameters, containing symbol, type to generic arguments) to display C# symbols.
         /// </summary>
         internal static string OT_AlternativeStyleTip {
             get {
