@@ -9,7 +9,7 @@ namespace TestProject
 	internal class Methods : IDisposable
 	{
 		public Methods() {
-			M(null);
+			M("");
 		}
 
 		~Methods() {

@@ -164,15 +164,12 @@ To customize the *Super Quick Info*, adjust the settings in the options page.
 
 _Super Quick Info_ especially enhances programming experience for C# programmers. There are plenty of options available in the options page.
 
-![Super Quick Info - Options](doc/super-quick-info-csharp-options.png)
+<img src="doc/super-quick-info-csharp-options.png" title="" alt="Super Quick Info - Options" width="617">
 
-* **Click and go** to source code of symbol definition
-  
-  If a symbol is defined in your source code, you can click and go to its definition on the Quick Info window. No need to hit `F12` on your keyboard any more! Even more, _Codist_ also tells you where the symbol is defined if you hover your mouse over it.
-  
-  ![Super Quick Info - Click and Go](doc/super-quick-info-click-go.png)
+* **Use enhanced symbol signature style** is a new setting in version 6.6, enabled by default, which optimizes the display of symbol signatures with a reorganized layout. The layout is especially optimized for long and complex signatures, yet ordinary short symbols can also benefit from it. The following is an example for the style. A large icon on the top-left part of the quick info can be clicked and brings out a menu for symbol analysis. Next to the icon is the name of the symbol with larger text size. Clicking on the name can jump to its definition. The parameters for the method are listed next. The reorganized layout never breaks the parameter type from its name, so it is easier to find out and locate each parameter type and name. Beneath the signature is the containing type of the symbol, as well the kind of the symbol. And the member type (return value) of the symbol is under the containing type.
+  ![C# optimized quick info](doc/csharp-optimized-quick-info.png)
 
-* A **Context menu** with many symbol analysis commands will show up when you right click the signature of the symbol definition or any symbol that appears in the XML Doc.
+* A **Context menu** with many symbol analysis commands will show up when you right click the signature of the symbol definition or any symbol that appears in the Super Quick Info.
   
   ![Super Quick Info Csharp Menu](doc/super-quick-info-csharp-menu.png)
 
@@ -209,8 +206,6 @@ When _Override XML Documentation_ checkbox is checked in the options page, it is
 _Codist_ shows XML Doc for those `namespace`s with an embedded `NamespaceDoc` class, like what is done in [SandCastle](https://github.com/EWSoftware/SHFB).
 
  ![Super Quick Info Csharp Namespace](doc/super-quick-info-csharp-namespace.png)
-
-* **Use alternative style** option moves the glyph of the symbol to the bottom-right of the quick info, and [removes individual hyperlinks within the symbol signature parts](https://github.com/wmjordan/Codist/issues/102), which comes with Visual Studio 2019 update 3, in order to make it easier to use the _Click and Go_ feature on the symbol.
 
 ### Additional Quick Info Items
 
@@ -478,17 +473,21 @@ Press the "Save" button to save the settings and Codist will change build number
 
 In the *Display* tab of the *General* options page, several display enhancement options are offered.
 
-![General Options Display](doc/display-options.png)
+<img src="doc/display-options.png" title="" alt="General Options Display" width="783">
 
-  Within the *Extra line margins* group box, you can adjust margins between lines to make code lines more readable.
+Within the *Extra line margins* group box, you can adjust margins between lines to make code lines more readable.
 
-  Programmers who do not like *ClearType* rendering, which made text blurry and colorful, may want to try _Force Grayscale Text Rendering_ options.
+Programmers who do not like *ClearType* rendering, which made text blurry and colorful, may want to try _Force Grayscale Text Rendering_ options.
+
+From version 6.6 on, resource monitors can be used to monitorCPU, disk and memory usage via the status bar on Visual Studio. Checking the *Monitor CPU*, *Monitor disk* or _Monitor memory_ check box enables the corresponding monitors.
+
+![Resource Monitors](doc/resource-monitors.png)
 
 It is possible to use Compact menu like _Visual Studio 2019_ in _Visual Studio 2017_. Simply checking the _Move main menu to title bar_ option will do.
 
 ![Compact Menu](doc/compact-menu.png)
 
-From version 6.3 on, it is possible to hide some elements from the user interface of Visual Studio from options under the _Layout Override_ section.
+By checking the check boxes started with "Hide...", it is possible to hide some elements from the user interface of Visual Studio from options under the _Layout Override_ section.
 
 ## Jump List Shortcuts
 
