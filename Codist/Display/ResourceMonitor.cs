@@ -22,6 +22,7 @@ namespace Codist.Display
 		};
 		static Meter _CpuMeter, _RamMeter, _DriveMeter;
 		static int _IsInited;
+		static CancellationTokenSource _CancellationTokenSource;
 
 		public static void Reload(DisplayOptimizations option) {
 			if (option.HasAnyFlag(DisplayOptimizations.ResourceMonitors) == false) {
@@ -63,11 +64,14 @@ namespace Codist.Display
 		}
 
 		static void Update(object dummy) {
-			UpdateAsync().FireAndForget();
+			UpdateAsync(SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
 		}
 
-		async static Task UpdateAsync() {
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+		async static Task UpdateAsync(CancellationToken cancellationToken) {
+			_CpuMeter?.Sample();
+			_RamMeter?.Sample();
+			_DriveMeter?.Sample();
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			if (_IsInited == 0) {
 				Init();
 				return;
@@ -102,6 +106,7 @@ namespace Codist.Display
 		{
 			readonly TextBlock _Label;
 			PerformanceCounter _Counter;
+			float _Value;
 
 			protected Meter(int iconId, string tooltip) {
 				Orientation = Orientation.Horizontal;
@@ -115,19 +120,23 @@ namespace Codist.Display
 
 			protected TextBlock Label => _Label;
 
-			public void Update() {
+			public void Sample() {
 				var c = _Counter;
-				if (c == null) {
-					return;
+				if (c != null) {
+					UpdateSample(_Value = c.NextValue());
 				}
+			}
+
+			public void Update() {
 				try {
-					UpdateDisplay(c.NextValue());
+					UpdateDisplay(_Value);
 				}
 				catch (Exception ex) {
 					Debug.WriteLine(ex);
 				}
 			}
 
+			protected virtual void UpdateSample(float counterValue) { }
 			protected abstract void UpdateDisplay(float counterValue);
 			protected abstract PerformanceCounter CreateCounter();
 
@@ -150,7 +159,7 @@ namespace Codist.Display
 		{
 			const int SampleCount = 10;
 			readonly float[] _Samples = new float[SampleCount];
-			float _SampleSum, _LastSample;
+			float _SampleSum, _LastCounter;
 			int _SampleIndex;
 
 			public CpuMeter() : base(IconIds.Cpu, R.T_CpuUsage) {
@@ -160,25 +169,28 @@ namespace Codist.Display
 				return new PerformanceCounter("Processor", "% Processor Time", "_Total");
 			}
 
-			protected override void UpdateDisplay(float counterValue) {
-				Label.Text = counterValue.ToString("0") + "%";
-				Label.Opacity = (Math.Min(50, counterValue) + 50) / 100;
+			protected override void UpdateSample(float counterValue) {
 				_SampleSum -= _Samples[_SampleIndex];
 				_Samples[_SampleIndex] = counterValue;
 				_SampleSum += counterValue;
 				if (++_SampleIndex == SampleCount) {
 					_SampleIndex = 0;
 				}
-				counterValue = Math.Min(50, _SampleSum / SampleCount) / 50;
+			}
+
+			protected override void UpdateDisplay(float counterValue) {
+				Label.Text = counterValue.ToString("0") + "%";
+				Label.Opacity = (Math.Min(50, counterValue) + 50) / 100;
+				counterValue = Math.Min(50, Math.Min(counterValue, _SampleSum / SampleCount)) / 50;
 				if (counterValue < 0.2f) {
-					if (_LastSample >= 0.2f) {
+					if (_LastCounter >= 0.2f) {
 						ClearValue(BackgroundProperty);
 					}
 				}
 				else {
-					Background = Brushes.Red.Alpha(counterValue);
+					Background = (counterValue < 0.4f ? Brushes.Yellow : counterValue < 0.6f ? Brushes.Orange : Brushes.Red).Alpha(counterValue);
 				}
-				_LastSample = counterValue;
+				_LastCounter = counterValue;
 			}
 		}
 
@@ -201,35 +213,40 @@ namespace Codist.Display
 		{
 			const int SampleCount = 10;
 			readonly float[] _Samples = new float[SampleCount];
-			float _SampleSum, _LastSample;
+			float _SampleSum, _LastCounter;
 			int _SampleIndex;
 
 			public DriveMeter() : base(IconIds.Drive, R.T_DriveUsage) {
 			}
 
 			protected override PerformanceCounter CreateCounter() {
-				return new PerformanceCounter("LogicalDisk", "% Disk Time", "_Total");
+				return new PerformanceCounter("PhysicalDisk", "% Idle Time", "_Total");
 			}
 
-			protected override void UpdateDisplay(float counterValue) {
-				Label.Text = counterValue.ToString("0") + "%";
-				Label.Opacity = (Math.Min(50, counterValue) + 50) / 100;
+			protected override void UpdateSample(float counterValue) {
+				counterValue = (float)Math.Round(100 - counterValue, 0);
 				_SampleSum -= _Samples[_SampleIndex];
 				_Samples[_SampleIndex] = counterValue;
 				_SampleSum += counterValue;
 				if (++_SampleIndex == SampleCount) {
 					_SampleIndex = 0;
 				}
+			}
+
+			protected override void UpdateDisplay(float counterValue) {
+				counterValue = (float)Math.Round(100 - counterValue, 0);
+				Label.Text = counterValue.ToString("0") + "%";
+				Label.Opacity = (Math.Min(50, counterValue) + 50) / 100;
 				counterValue = Math.Min(30, Math.Min(counterValue, _SampleSum / SampleCount)) / 30;
 				if (counterValue < 0.2f) {
-					if (_LastSample >= 0.2f) {
+					if (_LastCounter >= 0.2f) {
 						ClearValue(BackgroundProperty);
 					}
 				}
 				else {
 					Background = Brushes.Red.Alpha(counterValue);
 				}
-				_LastSample = counterValue;
+				_LastCounter = counterValue;
 			}
 		}
 	}
