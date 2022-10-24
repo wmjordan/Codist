@@ -234,7 +234,7 @@ namespace Codist.Display
 			}
 
 			protected override void UpdateDisplay(float counterValue) {
-				counterValue = (float)Math.Round(100 - counterValue, 0);
+				counterValue = counterValue > 100f ? 0f : (float)Math.Round(100 - counterValue, 0);
 				Label.Text = counterValue.ToString("0") + "%";
 				Label.Opacity = (Math.Min(50, counterValue) + 50) / 100;
 				counterValue = Math.Min(30, Math.Min(counterValue, _SampleSum / SampleCount)) / 30;
