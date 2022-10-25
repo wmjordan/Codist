@@ -3088,6 +3088,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Monitor network.
+        /// </summary>
+        internal static string OT_NetworkUsage {
+            get {
+                return ResourceManager.GetString("OT_NetworkUsage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Don&apos;t add margin between wrapped lines.
         /// </summary>
         internal static string OT_NoMarginBetweenWrappedLines {
@@ -5188,6 +5197,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Memory Usage
+        ///Percent of memory in use.
+        /// </summary>
+        internal static string T_MemoryUsage {
+            get {
+                return ResourceManager.GetString("T_MemoryUsage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Method overload:.
         /// </summary>
         internal static string T_MethodOverload {
@@ -5265,6 +5284,16 @@ namespace Codist.Properties {
         internal static string T_NavigationBar {
             get {
                 return ResourceManager.GetString("T_NavigationBar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Network Interface Usage
+        ///Sent or received bytes per second through all network interfaces.
+        /// </summary>
+        internal static string T_NetworkUsage {
+            get {
+                return ResourceManager.GetString("T_NetworkUsage", resourceCulture);
             }
         }
         
@@ -5490,16 +5519,6 @@ namespace Codist.Properties {
         internal static string T_PublicProtected {
             get {
                 return ResourceManager.GetString("T_PublicProtected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Memory Usage
-        ///Percent of memory in use.
-        /// </summary>
-        internal static string T_RamUsage {
-            get {
-                return ResourceManager.GetString("T_RamUsage", resourceCulture);
             }
         }
         

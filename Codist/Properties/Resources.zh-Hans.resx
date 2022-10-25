@@ -2086,7 +2086,7 @@ Right click: 显示“线程”窗口</value>
     <value>处理器占用率
 所有内核的总处理器使用百分比（点击此处打开任务管理器）</value>
   </data>
-  <data name="T_RamUsage" xml:space="preserve">
+  <data name="T_MemoryUsage" xml:space="preserve">
     <value>内存占用率
 已分配内存占总内存的百分比（点击此处打开任务管理器）</value>
   </data>
@@ -2096,5 +2096,12 @@ Right click: 显示“线程”窗口</value>
   <data name="T_DriveUsage" xml:space="preserve">
     <value>存储设备时间占用率
 所有存储设备操作时间的总使用百分比（点击此处打开任务管理器）</value>
+  </data>
+  <data name="OT_NetworkUsage" xml:space="preserve">
+    <value>网络使用量</value>
+  </data>
+  <data name="T_NetworkUsage" xml:space="preserve">
+    <value>网络接口流量（字节）
+通过所有网络接口的字节流量</value>
   </data>
 </root>

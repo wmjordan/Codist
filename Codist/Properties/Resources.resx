@@ -2101,7 +2101,7 @@ Right click: Threads window</value>
     <value>CPU Usage
 Percent of processor time</value>
   </data>
-  <data name="T_RamUsage" xml:space="preserve">
+  <data name="T_MemoryUsage" xml:space="preserve">
     <value>Memory Usage
 Percent of memory in use</value>
   </data>
@@ -2111,5 +2111,12 @@ Percent of memory in use</value>
   <data name="T_DriveUsage" xml:space="preserve">
     <value>Disk Time Usage
 Percent of logical disk time</value>
+  </data>
+  <data name="OT_NetworkUsage" xml:space="preserve">
+    <value>Monitor network</value>
+  </data>
+  <data name="T_NetworkUsage" xml:space="preserve">
+    <value>Network Interface Usage
+Sent or received bytes per second through all network interfaces</value>
   </data>
 </root>

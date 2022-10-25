@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using AppHelpers;
 using Codist.Controls;
 using Microsoft.VisualStudio.PlatformUI;
-using AppHelpers;
-using R = Codist.Properties.Resources;
 using Microsoft.VisualStudio.Shell;
+using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
 
 namespace Codist.Display
@@ -18,9 +20,9 @@ namespace Codist.Display
 		static Timer _Timer;
 		static readonly StackPanel _MeterContainer = new StackPanel {
 			Orientation = Orientation.Horizontal,
-			Children = { new ContentPresenter(), new ContentPresenter(), new ContentPresenter(), }
+			Children = { new ContentPresenter(), new ContentPresenter(), new ContentPresenter(), new ContentPresenter() }
 		};
-		static Meter _CpuMeter, _RamMeter, _DriveMeter;
+		static Meter _CpuMeter, _RamMeter, _DriveMeter, _NetworkMeter;
 		static int _IsInited;
 		static CancellationTokenSource _CancellationTokenSource;
 
@@ -32,6 +34,7 @@ namespace Codist.Display
 			ToggleMeter<CpuMeter>(0, option, DisplayOptimizations.ShowCpu, ref _CpuMeter);
 			ToggleMeter<DriveMeter>(1, option, DisplayOptimizations.ShowDrive, ref _DriveMeter);
 			ToggleMeter<RamMeter>(2, option, DisplayOptimizations.ShowMemory, ref _RamMeter);
+			ToggleMeter<NetworkMeter>(3, option, DisplayOptimizations.ShowNetwork, ref _NetworkMeter);
 			if (_Timer == null) {
 				_Timer = new Timer(Update, null, 1000, 1000);
 			}
@@ -60,6 +63,7 @@ namespace Codist.Display
 				_CpuMeter?.Stop();
 				_RamMeter?.Stop();
 				_DriveMeter?.Stop();
+				_NetworkMeter?.Stop();
 			}
 		}
 
@@ -71,6 +75,7 @@ namespace Codist.Display
 			_CpuMeter?.Sample();
 			_RamMeter?.Sample();
 			_DriveMeter?.Sample();
+			_NetworkMeter?.Sample();
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			if (_IsInited == 0) {
 				Init();
@@ -79,6 +84,7 @@ namespace Codist.Display
 			_CpuMeter?.Update();
 			_RamMeter?.Update();
 			_DriveMeter?.Update();
+			_NetworkMeter?.Update();
 		}
 
 		static void Init() {
@@ -105,29 +111,65 @@ namespace Codist.Display
 		abstract class Meter : StackPanel
 		{
 			readonly TextBlock _Label;
-			PerformanceCounter _Counter;
-			float _Value;
 
 			protected Meter(int iconId, string tooltip) {
 				Orientation = Orientation.Horizontal;
 				Children.Add(ThemeHelper.GetImage(iconId).WrapMargin(WpfHelper.SmallHorizontalMargin));
 				Children.Add(_Label = new TextBlock { MinWidth = 40, VerticalAlignment = VerticalAlignment.Center }.ReferenceProperty(Control.ForegroundProperty, EnvironmentColors.StatusBarDefaultTextBrushKey));
-				_Counter = CreateCounter();
 				ToolTip = new CommandToolTip(iconId, tooltip)
-					.ReferenceCrispImageBackground(EnvironmentColors.ToolTipColorKey)
-					.SetTipPlacementTop();
+					.ReferenceCrispImageBackground(EnvironmentColors.ToolTipColorKey);
+				this.SetTipPlacementTop();
 			}
 
 			protected TextBlock Label => _Label;
 
-			public void Sample() {
+			public abstract void Sample();
+			public abstract void Update();
+
+			public virtual void Start() {
+				Visibility = Visibility.Visible;
+			}
+			public virtual void Stop() {
+				Visibility = Visibility.Collapsed;
+			}
+		}
+
+		abstract class SinglePerformanceCounterMeter : Meter
+		{
+			PerformanceCounter _Counter;
+			float _Value;
+
+			protected SinglePerformanceCounterMeter(int iconId, string tooltip) : base(iconId, tooltip) {
+				_Counter = CreateCounter();
+			}
+
+			protected abstract PerformanceCounter CreateCounter();
+			protected virtual void UpdateSample(float counterValue) { }
+			protected abstract void UpdateDisplay(float counterValue);
+
+			public override void Start() {
+				base.Start();
+				if (_Counter == null) {
+					_Counter = CreateCounter();
+				}
+			}
+
+			public override void Stop() {
+				base.Stop();
+				if (_Counter != null) {
+					_Counter.Dispose();
+					_Counter = null;
+				}
+			}
+
+			public override void Sample() {
 				var c = _Counter;
 				if (c != null) {
 					UpdateSample(_Value = c.NextValue());
 				}
 			}
 
-			public void Update() {
+			public override void Update() {
 				try {
 					UpdateDisplay(_Value);
 				}
@@ -135,27 +177,60 @@ namespace Codist.Display
 					Debug.WriteLine(ex);
 				}
 			}
+		}
 
-			protected virtual void UpdateSample(float counterValue) { }
-			protected abstract void UpdateDisplay(float counterValue);
-			protected abstract PerformanceCounter CreateCounter();
+		abstract class MultiPerformanceCounterMeter : Meter
+		{
+			PerformanceCounter[] _Counters;
+			float[] _Values;
 
-			public virtual void Start() {
-				Visibility = Visibility.Visible;
-				if (_Counter == null) {
-					_Counter = CreateCounter();
+			protected MultiPerformanceCounterMeter(int iconId, string tooltip) : base(iconId, tooltip) {
+				_Counters = CreateCounters();
+				_Values = new float[_Counters.Length];
+			}
+
+			protected abstract PerformanceCounter[] CreateCounters();
+			protected virtual void UpdateSample(float[] counterValues) { }
+			protected abstract void UpdateDisplay(float[] counterValues);
+
+			public override void Start() {
+				base.Start();
+				if (_Counters == null) {
+					_Counters = CreateCounters();
 				}
 			}
-			public virtual void Stop() {
-				if (_Counter != null) {
-					Visibility = Visibility.Collapsed;
-					_Counter.Dispose();
-					_Counter = null;
+
+			public override void Stop() {
+				base.Stop();
+				if (_Counters != null) {
+					foreach (var item in _Counters) {
+						item.Dispose();
+					}
+					_Counters = null;
+				}
+			}
+
+			public override void Sample() {
+				var c = _Counters;
+				if (c != null) {
+					for (int i = 0; i < _Counters.Length; i++) {
+						_Values[i] = _Counters[i].NextValue();
+					}
+					UpdateSample(_Values);
+				}
+			}
+
+			public override void Update() {
+				try {
+					UpdateDisplay(_Values);
+				}
+				catch (Exception ex) {
+					Debug.WriteLine(ex);
 				}
 			}
 		}
 
-		sealed class CpuMeter : Meter
+		sealed class CpuMeter : SinglePerformanceCounterMeter
 		{
 			const int SampleCount = 10;
 			readonly float[] _Samples = new float[SampleCount];
@@ -194,9 +269,9 @@ namespace Codist.Display
 			}
 		}
 
-		sealed class RamMeter : Meter
+		sealed class RamMeter : SinglePerformanceCounterMeter
 		{
-			public RamMeter() : base(IconIds.Memory, R.T_RamUsage) {
+			public RamMeter() : base(IconIds.Memory, R.T_MemoryUsage) {
 			}
 
 			protected override PerformanceCounter CreateCounter() {
@@ -209,7 +284,7 @@ namespace Codist.Display
 			}
 		}
 
-		sealed class DriveMeter : Meter
+		sealed class DriveMeter : SinglePerformanceCounterMeter
 		{
 			const int SampleCount = 10;
 			readonly float[] _Samples = new float[SampleCount];
@@ -244,9 +319,66 @@ namespace Codist.Display
 					}
 				}
 				else {
-					Background = Brushes.Red.Alpha(counterValue);
+					Background = (counterValue < 0.4f ? Brushes.Yellow : counterValue < 0.6f ? Brushes.Orange : Brushes.Red).Alpha(counterValue);
 				}
 				_LastCounter = counterValue;
+			}
+		}
+
+		sealed class NetworkMeter : MultiPerformanceCounterMeter
+		{
+			const float MBit = 1024 * 1024, KBit = 1024;
+
+			static readonly Comparer<(string, float)> __Comparer = Comparer<(string, float)>.Create((x, y) => y.Item2.CompareTo(x.Item2));
+			bool _TooltipDisplayed;
+			PerformanceCounter[] _Counters;
+
+			public NetworkMeter() : base(IconIds.Network, R.T_NetworkUsage) {
+				ToolTipService.SetShowDuration(this, Int32.MaxValue);
+			}
+
+			protected override PerformanceCounter[] CreateCounters() {
+				var cc = new PerformanceCounterCategory("Network Interface");
+				var names = cc.GetInstanceNames();
+				var pc = new PerformanceCounter[names.Length];
+				for (int i = 0; i < pc.Length; i++) {
+					pc[i] = cc.GetCounters(names[i])[0];
+				}
+				return _Counters = pc;
+			}
+
+			protected override void UpdateDisplay(float[] counterValues) {
+				var v = counterValues.Sum();
+				Label.Text = FlowToReading(v);
+				Label.Opacity = v > MBit ? 0.8 : v > KBit ? 0.6 : 0.4;
+				if (_TooltipDisplayed && (ToolTip as CommandToolTip)?.Description is TextBlock t) {
+					ShowToolTip(counterValues, t);
+				}
+			}
+
+			void ShowToolTip(float[] counterValues, TextBlock t) {
+				(string name, float val)[] cv = new (string, float)[counterValues.Length];
+				for (int i = 0; i < cv.Length; i++) {
+					cv[i] = (_Counters[i].InstanceName, counterValues[i]);
+				}
+				Array.Sort(cv, __Comparer);
+				t.Text = String.Join(Environment.NewLine, cv.Select(i => $"{i.name}: {FlowToReading(i.val)}B"));
+			}
+
+			static string FlowToReading(float v) {
+				return v > MBit ? ((v / MBit).ToString("0.0") + "M")
+					: v > KBit ? ((v / KBit).ToString("0.0") + "K")
+					: v.ToString("0");
+			}
+
+			protected override void OnToolTipOpening(ToolTipEventArgs e) {
+				base.OnToolTipOpening(e);
+				_TooltipDisplayed = true;
+			}
+
+			protected override void OnToolTipClosing(ToolTipEventArgs e) {
+				base.OnToolTipClosing(e);
+				_TooltipDisplayed = false;
 			}
 		}
 	}

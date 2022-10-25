@@ -204,6 +204,7 @@ namespace Codist
 		public const int Cpu = KnownImageIds.Processor;
 		public const int Memory = KnownImageIds.Memory;
 		public const int Drive = KnownImageIds.HardDrive;
+		public const int Network = KnownImageIds.Network;
 		#endregion
 		#region symbol usage icons
 		public const int UseToWrite = KnownImageIds.Writeable;

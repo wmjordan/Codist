@@ -724,7 +724,8 @@ namespace Codist
 		ShowCpu = 1 << 6,
 		ShowMemory = 1 << 7,
 		ShowDrive = 1 << 8,
-		ResourceMonitors = ShowCpu | ShowMemory | ShowDrive
+		ShowNetwork = 1	<< 9,
+		ResourceMonitors = ShowCpu | ShowMemory | ShowDrive | ShowNetwork
 	}
 
 	[Flags]
