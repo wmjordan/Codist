@@ -331,10 +331,12 @@ namespace Codist.Display
 
 			static readonly Comparer<(string, float)> __Comparer = Comparer<(string, float)>.Create((x, y) => y.Item2.CompareTo(x.Item2));
 			bool _TooltipDisplayed;
+			float _LastCounter;
 			PerformanceCounter[] _Counters;
 
 			public NetworkMeter() : base(IconIds.Network, R.T_NetworkUsage) {
 				ToolTipService.SetShowDuration(this, Int32.MaxValue);
+				Label.Opacity = 0.4;
 			}
 
 			protected override PerformanceCounter[] CreateCounters() {
@@ -350,19 +352,43 @@ namespace Codist.Display
 			protected override void UpdateDisplay(float[] counterValues) {
 				var v = counterValues.Sum();
 				Label.Text = FlowToReading(v);
-				Label.Opacity = v > MBit ? 0.8 : v > KBit ? 0.6 : 0.4;
+				if (v > 30 * KBit) {
+					Label.Opacity = v > MBit ? 0.8 : 0.6;
+				}
+				else if (_LastCounter > 30 * KBit) {
+					Label.Opacity = 0.4;
+				}
+				_LastCounter = v;
 				if (_TooltipDisplayed && (ToolTip as CommandToolTip)?.Description is TextBlock t) {
 					ShowToolTip(counterValues, t);
 				}
 			}
 
 			void ShowToolTip(float[] counterValues, TextBlock t) {
+				if (counterValues.Length == 1) {
+					t.Text = _Counters[0].InstanceName + ": " + FlowToReading(counterValues[0]) + "B/s";
+					return;
+				}
+				ShowMultiValuesOnToolTip(counterValues, t);
+			}
+
+			void ShowMultiValuesOnToolTip(float[] counterValues, TextBlock t) {
 				(string name, float val)[] cv = new (string, float)[counterValues.Length];
 				for (int i = 0; i < cv.Length; i++) {
-					cv[i] = (_Counters[i].InstanceName, counterValues[i]);
+					var v = counterValues[i];
+					cv[i] = v > 0 ? (_Counters[i].InstanceName, v) : default;
 				}
 				Array.Sort(cv, __Comparer);
-				t.Text = String.Join(Environment.NewLine, cv.Select(i => $"{i.name}: {FlowToReading(i.val)}B"));
+				using (var r = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(100)) {
+					var sb = r.Resource;
+					foreach (var (name, val) in cv) {
+						if (sb.Length > 0) {
+							sb.AppendLine();
+						}
+						sb.Append(name).Append(": ").Append(FlowToReading(val)).Append("B/s");
+					}
+					t.Text = sb.ToString();
+				}
 			}
 
 			static string FlowToReading(float v) {
