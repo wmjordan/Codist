@@ -556,7 +556,7 @@ namespace Codist.Taggers
 						return CreateClassificationSpan(snapshot, itemSpan, __GeneralClassifications.TypeCastKeyword);
 					case CodeAnalysisHelper.RecordKeyword: // workaround for missing classification type for record identifier
 						itemSpan = ((TypeDeclarationSyntax)node).Identifier.Span;
-						return CreateClassificationSpan(snapshot, itemSpan, node.Kind() == CodeAnalysisHelper.RecordDeclaration ? TransientTags.StructDeclaration : TransientTags.ClassDeclaration);
+						return CreateClassificationSpan(snapshot, itemSpan, node.IsKind(CodeAnalysisHelper.RecordDeclaration) ? TransientTags.StructDeclaration : TransientTags.ClassDeclaration);
 				}
 				return null;
 			}
@@ -610,7 +610,7 @@ namespace Codist.Taggers
 					case CodeAnalysisHelper.FunctionPointerCallingConvention:
 						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.ResourceKeyword);
 					case SyntaxKind.LocalDeclarationStatement:
-						if (unitCompilation.FindToken(itemSpan.Start, true).Kind() == SyntaxKind.UsingKeyword) {
+						if (unitCompilation.FindToken(itemSpan.Start, true).IsKind(SyntaxKind.UsingKeyword)) {
 							goto case SyntaxKind.UsingStatement;
 						}
 						return null;
@@ -687,7 +687,7 @@ namespace Codist.Taggers
 				if (node is BaseTypeDeclarationSyntax == false
 					&& node is ExpressionSyntax == false
 					&& node is NamespaceDeclarationSyntax == false
-					&& node.Kind() != SyntaxKind.SwitchStatement && (node = node.Parent) == null) {
+					&& !node.IsKind(SyntaxKind.SwitchStatement) && (node = node.Parent) == null) {
 					return null;
 				}
 				var type = ClassifySyntaxNode(node, node is ExpressionSyntax ? HighlightOptions.MemberBraceTags : HighlightOptions.MemberDeclarationBraceTags, HighlightOptions.KeywordBraceTags);
@@ -781,7 +781,7 @@ namespace Codist.Taggers
 				if (HighlightOptions.CapturingLambda) {
 					var node = unitCompilation.FindNode(itemSpan, true, true);
 					if (node is LambdaExpressionSyntax) {
-						var ss = node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName);
+						var ss = node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.IsKind(SyntaxKind.IdentifierName) == false);
 						if (ss != null) {
 							var df = semanticModel.AnalyzeDataFlow(ss);
 							if (df.ReadInside.Any(i => (i as ILocalSymbol)?.IsConst != true && df.VariablesDeclared.Contains(i) == false)) {
@@ -878,7 +878,7 @@ namespace Codist.Taggers
 			}
 
 			static IEnumerable<ClassificationTag> GetClassificationType(SyntaxNode node, SemanticModel semanticModel) {
-				node = node.Kind() == SyntaxKind.Argument ? ((ArgumentSyntax)node).Expression : node;
+				node = node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node;
 				//System.Diagnostics.Debug.WriteLine(node.GetType().Name + node.Span.ToString());
 				var symbol = semanticModel.GetSymbolInfo(node).Symbol;
 				if (symbol is null) {

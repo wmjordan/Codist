@@ -181,7 +181,7 @@ namespace Codist
 		}
 
 		internal static Grid ShowNumericForms(SyntaxNode node) {
-			return ShowNumericForms(node.GetFirstToken().Value, node.Parent.Kind() == SyntaxKind.UnaryMinusExpression ? NumericForm.Negative : NumericForm.None);
+			return ShowNumericForms(node.GetFirstToken().Value, node.Parent.IsKind(SyntaxKind.UnaryMinusExpression) ? NumericForm.Negative : NumericForm.None);
 		}
 
 		internal static Grid ShowNumericForms(object value) {
@@ -260,7 +260,7 @@ namespace Codist
 					ref var b = ref bytes[i];
 					if (hasValue || b != 0) {
 						hasValue = true;
-						inlines.Add(bytes[i].ToString("X2"));
+						inlines.Add(b.ToString("X2"));
 						if ((i & 1) == 1) {
 							AddBackground(inlines);
 						}

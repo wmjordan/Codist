@@ -434,7 +434,7 @@ namespace Codist.QuickInfo
 			if (node is LambdaExpressionSyntax
 				|| (symbol as IMethodSymbol)?.MethodKind == MethodKind.LocalFunction) {
 				var ss = node is LambdaExpressionSyntax
-					? node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.Kind() != SyntaxKind.IdentifierName)
+					? node.AncestorsAndSelf().FirstOrDefault(i => i is StatementSyntax || i is ExpressionSyntax && i.IsKind(SyntaxKind.IdentifierName) == false)
 					: symbol.GetSyntaxNode();
 				if (ss != null) {
 					var df = semanticModel.AnalyzeDataFlow(ss);
@@ -801,7 +801,7 @@ namespace Codist.QuickInfo
 			if (_isCandidate) {
 				return;
 			}
-			var overloads = node.Kind() == SyntaxKind.MethodDeclaration || node.Kind() == SyntaxKind.ConstructorDeclaration
+			var overloads = node.IsKind(SyntaxKind.MethodDeclaration) || node.IsKind(SyntaxKind.ConstructorDeclaration)
 				? method.ContainingType.GetMembers(method.Name)
 				: semanticModel.GetMemberGroup(node);
 			if (overloads.Length < 2) {
@@ -1241,7 +1241,7 @@ namespace Codist.QuickInfo
 
 		static void ShowParameterInfo(QiContainer qiContent, SyntaxNode node, SemanticModel semanticModel) {
 			var argument = node;
-			if (node.Kind() == SyntaxKind.NullLiteralExpression) {
+			if (node.IsKind(SyntaxKind.NullLiteralExpression)) {
 				argument = node.Parent;
 			}
 			int depth = 0;
