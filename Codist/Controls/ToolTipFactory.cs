@@ -197,47 +197,17 @@ namespace Codist
 				return null;
 			}
 			switch (Type.GetTypeCode(value.GetType())) {
-				case TypeCode.Int32: {
-					var v = (int)value;
-					if (form == NumericForm.Negative) {
-						v = -v;
-					}
-					return ShowNumberAndBytes(
-						form == NumericForm.Unsigned ? ((uint)v).ToString() : v.ToString(),
-						new byte[] { (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
-				}
-				case TypeCode.Int64: {
-					var v = (long)value;
-					if (form == NumericForm.Negative) {
-						v = -v;
-					}
-					return ShowNumberAndBytes(
-						form == NumericForm.Unsigned ? ((ulong)v).ToString() : v.ToString(),
-						new byte[] { (byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
-				}
-				case TypeCode.Byte:
-					return ShowNumberAndBytes(((byte)value).ToString(), new byte[] { (byte)value });
-				case TypeCode.Int16: {
-					var v = (short)value;
-					if (form == NumericForm.Negative) {
-						v = (short)-v;
-					}
-					return ShowNumberAndBytes(
-						form == NumericForm.Unsigned ? ((ushort)v).ToString() : v.ToString(),
-						new byte[] { (byte)(v >> 8), (byte)v });
-				}
-				case TypeCode.Char: {
-					var v = (char)value;
-					return ShowNumberAndBytes(((ushort)v).ToString(), new byte[] { (byte)(v >> 8), (byte)v });
-				}
-				case TypeCode.UInt32:
-					return ShowNumericForms((int)(uint)value, NumericForm.Unsigned);
-				case TypeCode.UInt16:
-					return ShowNumericForms((short)(ushort)value, NumericForm.Unsigned);
-				case TypeCode.UInt64:
-					return ShowNumericForms((long)(ulong)value, NumericForm.Unsigned);
-				case TypeCode.SByte:
-					return ShowNumberAndBytes(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
+				case TypeCode.Int32: return ShowInt((int)value, form);
+				case TypeCode.Int64: return ShowInt64((long)value, form);
+				case TypeCode.Byte: return ShowNumberAndBytes(((byte)value).ToString(), new byte[] { (byte)value });
+				case TypeCode.Single: return ShowSingle((float)value, form);
+				case TypeCode.Double: return ShowDouble((double)value, form);
+				case TypeCode.Int16: return ShowInt16((short)value, form);
+				case TypeCode.Char: return ShowChar((char)value);
+				case TypeCode.UInt32: return ShowNumericForms((int)(uint)value, NumericForm.Unsigned);
+				case TypeCode.UInt16: return ShowNumericForms((short)(ushort)value, NumericForm.Unsigned);
+				case TypeCode.UInt64: return ShowNumericForms((long)(ulong)value, NumericForm.Unsigned);
+				case TypeCode.SByte: return ShowNumberAndBytes(((sbyte)value).ToString(), new byte[] { (byte)(sbyte)value });
 			}
 			return null;
 
@@ -301,6 +271,51 @@ namespace Codist
 
 			void AddBackground(InlineCollection inlines) {
 				inlines.LastInline.Background = ThemeHelper.TextSelectionHighlightBrush.Alpha(0.2);
+			}
+
+			Grid ShowInt(int v, NumericForm f) {
+				if (f == NumericForm.Negative) {
+					v = -v;
+				}
+				return ShowNumberAndBytes(
+					f == NumericForm.Unsigned ? ((uint)v).ToString() : v.ToString(),
+					new byte[] { (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
+			}
+
+			Grid ShowInt64(long v, NumericForm f) {
+				if (f == NumericForm.Negative) {
+					v = -v;
+				}
+				return ShowNumberAndBytes(
+					f == NumericForm.Unsigned ? ((ulong)v).ToString() : v.ToString(),
+					new byte[] { (byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v });
+			}
+
+			Grid ShowSingle(float v, NumericForm f) {
+				if (f == NumericForm.Negative) {
+					v = -v;
+				}
+				return ShowNumberAndBytes(v.ToString(), BitConverter.GetBytes(v));
+			}
+
+			Grid ShowDouble(double v, NumericForm f) {
+				if (f == NumericForm.Negative) {
+					v = -v;
+				}
+				return ShowNumberAndBytes(v.ToString(), BitConverter.GetBytes(v));
+			}
+
+			Grid ShowInt16(short v, NumericForm f) {
+				if (f == NumericForm.Negative) {
+					v = (short)-v;
+				}
+				return ShowNumberAndBytes(
+					f == NumericForm.Unsigned ? ((ushort)v).ToString() : v.ToString(),
+					new byte[] { (byte)(v >> 8), (byte)v });
+			}
+
+			Grid ShowChar(char v) {
+				return ShowNumberAndBytes(((ushort)v).ToString(), new byte[] { (byte)(v >> 8), (byte)v });
 			}
 		}
 
