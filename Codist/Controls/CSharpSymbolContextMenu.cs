@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using R = Codist.Properties.Resources;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Codist.Controls
 {
@@ -127,7 +128,7 @@ namespace Codist.Controls
 				Items.Add(CreateItem(IconIds.FindOverloads, R.CMD_FindOverrides, _Host.FindOverrides));
 			}
 			var st = _Host.Symbol.ContainingType;
-			if (st != null && st.TypeKind == TypeKind.Interface) {
+			if (st?.TypeKind == TypeKind.Interface) {
 				Items.Add(CreateItem(IconIds.FindImplementations, R.CMD_FindImplementations, _Host.FindImplementations));
 			}
 			if (_Host.Symbol.Kind != SymbolKind.Event) {
@@ -246,16 +247,16 @@ namespace Codist.Controls
 		}
 
 		#region Menu event handlers
-		static void FindAllReferences(object sender, RoutedEventArgs args) {
+		void FindAllReferences(object sender, RoutedEventArgs args) {
 			TextEditorHelper.ExecuteEditorCommand("Edit.FindAllReferences");
 		}
-		static void GoToMember(object sender, RoutedEventArgs args) {
+		void GoToMember(object sender, RoutedEventArgs args) {
 			TextEditorHelper.ExecuteEditorCommand("Edit.GoToMember");
 		}
-		static void GoToType(object sender, RoutedEventArgs args) {
+		void GoToType(object sender, RoutedEventArgs args) {
 			TextEditorHelper.ExecuteEditorCommand("Edit.GoToType");
 		}
-		static void GoToSymbol(object sender, RoutedEventArgs args) {
+		void GoToSymbol(object sender, RoutedEventArgs args) {
 			TextEditorHelper.ExecuteEditorCommand("Edit.GoToSymbol");
 		}
 		#endregion
@@ -346,10 +347,12 @@ namespace Codist.Controls
 				}
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindSymbolMembers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindMembersAsync(_Symbol);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindReturnTypeMembers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindMembersAsync(_Symbol.GetReturnType().ResolveElementType());
 			}
@@ -385,26 +388,32 @@ namespace Codist.Controls
 				m.Show();
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindReferrers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindReferrersAsync(_Symbol);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindTypeReferrers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindReferrersAsync(_Symbol, s => s.Kind == SymbolKind.NamedType, IsTypeReference);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindOverrides(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindOverridesAsync(_Symbol);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindDerivedClasses(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindDerivedClassesAsync(_Symbol);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindImplementations(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindImplementationsAsync(_Symbol);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindSubInterfaces(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindSubInterfacesAsync(_Symbol);
 			}
@@ -413,10 +422,12 @@ namespace Codist.Controls
 				_SemanticContext.FindMethodsBySignature(_Symbol);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindExtensionMethods(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindExtensionMethodsAsync(_Symbol);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindReturnTypeExtensionMethods(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindExtensionMethodsAsync(_Symbol.GetReturnType());
 			}
@@ -425,26 +436,32 @@ namespace Codist.Controls
 				_SemanticContext.FindSymbolWithName(_Symbol);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindConstructorReferrers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindReferrersAsync(_SemanticContext.SemanticModel.GetSymbolOrFirstCandidate(_Node.GetObjectCreationNode()));
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindObjectInitializers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindReferrersAsync(_Symbol, s => s.Kind == SymbolKind.Method);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindInstanceProducers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindInstanceProducerAsync(_Symbol);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindContainingTypeInstanceProducers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindInstanceProducerAsync(_Symbol.ContainingType);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindInstanceConsumers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol);
 			}
 
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindContainingTypeInstanceConsumers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol.ContainingType);
 			} 

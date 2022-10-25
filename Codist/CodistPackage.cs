@@ -104,6 +104,7 @@ namespace Codist
 		}
 
 		public static bool ShowYesNoBox(string message, string title) {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			return VsShellUtilities.PromptYesNo(
 				message,
 				title ?? nameof(Codist),

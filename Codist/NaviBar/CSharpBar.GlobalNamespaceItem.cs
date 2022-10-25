@@ -27,6 +27,7 @@ namespace Codist.NaviBar
 
 			public override BarItemType ItemType => BarItemType.GlobalNamespace;
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			async void HandleClick(object sender, RoutedEventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
 				if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {

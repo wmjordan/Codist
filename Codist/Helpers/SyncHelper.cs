@@ -28,7 +28,7 @@ namespace Codist
 
 		/// <summary>Starts a task and forget it.</summary>
 		public static void FireAndForget(this Task task) {
-			ThreadHelper.JoinableTaskFactory.RunAsync(async () => {
+			_ = ThreadHelper.JoinableTaskFactory.RunAsync(async () => {
 				try {
 #pragma warning disable VSTHRD003 // As a fire-and-forget continuation, deadlocks can't happen.
 					await task.ConfigureAwait(false);

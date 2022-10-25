@@ -146,6 +146,7 @@ namespace Codist.NaviBar
 			_RootItem.ClearSymbolList();
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 		async void Update(object sender, EventArgs e) {
 			HideMenu();
 			if (_cancellationSource != null) {

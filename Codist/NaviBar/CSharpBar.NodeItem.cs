@@ -59,6 +59,8 @@ namespace Codist.NaviBar
 				ContextMenu.IsOpen = true;
 			}
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "U2U1009:Async or iterator methods should avoid state machine generation for early exits (throws or synchronous returns)", Justification = "Event handler")]
 			async void HandleClick(object sender, RoutedEventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
 				if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {
@@ -130,30 +132,6 @@ namespace Codist.NaviBar
 				}
 			}
 
-			async Task AddItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
-				AddMemberDeclarations(node, false, true);
-				if (node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
-					return;
-				}
-				var externals = (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember)
-					&& (node as BaseTypeDeclarationSyntax).Modifiers.Any(SyntaxKind.PartialKeyword) ? MemberListOptions.ShowPartial : 0)
-					| (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.BaseClassMember) && (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(CodeAnalysisHelper.RecordDeclaration)) ? MemberListOptions.ShowBase : 0);
-				ISymbol symbol;
-				if (externals != 0) {
-					await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
-					symbol = await Bar._SemanticContext.GetSymbolAsync(node, cancellationToken).ConfigureAwait(true);
-					if (symbol == null) {
-						return;
-					}
-					if (externals.MatchFlags(MemberListOptions.ShowPartial)) {
-						await AddPartialTypeDeclarationsAsync(node as BaseTypeDeclarationSyntax, symbol, cancellationToken);
-					}
-					if (externals.MatchFlags(MemberListOptions.ShowBase) && symbol.Kind == SymbolKind.NamedType) {
-						await AddBaseTypeDeclarationsAsync(symbol as INamedTypeSymbol, cancellationToken);
-					}
-				}
-			}
-
 			async Task RefreshItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
 				var sm = Bar._SemanticContext.SemanticModel;
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
@@ -176,6 +154,32 @@ namespace Codist.NaviBar
 					}
 				}
 			}
+
+			Task AddItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
+				AddMemberDeclarations(node, false, true);
+				if (node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+					return Task.CompletedTask;
+				}
+				var externals = (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember)
+					&& (node as BaseTypeDeclarationSyntax).Modifiers.Any(SyntaxKind.PartialKeyword) ? MemberListOptions.ShowPartial : 0)
+					| (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.BaseClassMember) && (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(CodeAnalysisHelper.RecordDeclaration)) ? MemberListOptions.ShowBase : 0);
+				return externals == 0 ? Task.CompletedTask : AddExternalItemsAsync(node, externals, cancellationToken);
+			}
+
+			async Task AddExternalItemsAsync(SyntaxNode node, MemberListOptions externals, CancellationToken cancellationToken) {
+				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
+				var symbol = await Bar._SemanticContext.GetSymbolAsync(node, cancellationToken).ConfigureAwait(true);
+				if (symbol == null) {
+					return;
+				}
+				if (externals.MatchFlags(MemberListOptions.ShowPartial)) {
+					await AddPartialTypeDeclarationsAsync(node as BaseTypeDeclarationSyntax, symbol, cancellationToken);
+				}
+				if (externals.MatchFlags(MemberListOptions.ShowBase) && symbol.Kind == SymbolKind.NamedType) {
+					await AddBaseTypeDeclarationsAsync(symbol as INamedTypeSymbol, cancellationToken);
+				}
+			}
+
 			async Task AddPartialTypeDeclarationsAsync(BaseTypeDeclarationSyntax node, ISymbol symbol, CancellationToken cancellationToken) {
 				var current = node.SyntaxTree;
 				int c = 1;
@@ -188,6 +192,7 @@ namespace Codist.NaviBar
 				}
 				_PartialCount = c;
 			}
+
 			async Task AddBaseTypeDeclarationsAsync(INamedTypeSymbol symbol, CancellationToken cancellationToken) {
 				while ((symbol = symbol.BaseType) != null && symbol.HasSource()) {
 					foreach (var item in symbol.DeclaringSyntaxReferences) {

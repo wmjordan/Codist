@@ -28,7 +28,7 @@ namespace Codist.Taggers
 		public void AddRef() {
 			if (++_RefCount == 1) {
 				_Buffer.Changed += OnBufferChanged;
-				ScanBufferAsync(_Buffer.CurrentSnapshot);
+				_ = ScanBufferAsync(_Buffer.CurrentSnapshot);
 			}
 		}
 
@@ -164,6 +164,7 @@ namespace Codist.Taggers
 			}
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 		async void OnBufferChanged(object sender, TextContentChangedEventArgs e) {
 			try {
 				if (TextEditorHelper.AnyTextChanges(e.Before.Version, e.After.Version)) {

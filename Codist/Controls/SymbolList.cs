@@ -342,6 +342,7 @@ namespace Codist.Controls
 			_SymbolTip.Tag = null;
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 		async void MouseMove_ChangeToolTip(object sender, MouseEventArgs e) {
 			var li = GetMouseEventTarget(e);
 			if (li != null && _SymbolTip.Tag != li) {

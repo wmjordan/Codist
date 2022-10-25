@@ -559,6 +559,7 @@ namespace Codist
 			InternalOpenFile(file, action);
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "UIThread checked in caller")]
 		static void InternalOpenFile(string file, Action<VsTextView> action) {
 			try {
 				using (new NewDocumentStateScope(Keyboard.Modifiers == ModifierKeys.Shift ? __VSNEWDOCUMENTSTATE.NDS_Unspecified : __VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {
@@ -836,6 +837,7 @@ namespace Codist
 		}
 
 		public static T GetExtObjectAs<T>(this IVsHierarchy proj) where T : class {
+			ThreadHelper.ThrowIfNotOnUIThread();
 			return proj.GetProperty(Microsoft.VisualStudio.VSConstants.VSITEMID_ROOT, (int)VsHierarchyPropID.ExtObject, out var name) != 0
 				? null
 				: name as T;
@@ -998,10 +1000,12 @@ namespace Codist
 				}
 			}
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "UI Thread checked in caller")]
 			public NewDocumentStateScope(__VSNEWDOCUMENTSTATE state, Guid reason)
 				: this((uint)state, reason) {
 			}
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "UI Thread checked in caller")]
 			public NewDocumentStateScope(__VSNEWDOCUMENTSTATE2 state, Guid reason)
 				: this((uint)state, reason) {
 			}

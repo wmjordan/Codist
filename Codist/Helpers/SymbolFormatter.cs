@@ -99,11 +99,6 @@ namespace Codist
 				var csb = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush };
 				if (showContainer) {
 					csb.Append(ThemeHelper.GetImage(cs.GetImageId()).WrapMargin(WpfHelper.GlyphMargin));
-					//if (s.Kind == SymbolKind.NamedType) {
-					//	ShowContainingNamespace(s, csb);
-					//	csb.Append(" ");
-					//	goto TYPE_DECLARATION;
-					//}
 				}
 				if (cs is INamedTypeSymbol ct && (ct = ct.ContainingType) != null) {
 					ShowContainingTypes(ct, csb);
@@ -112,7 +107,7 @@ namespace Codist
 				if (showContainer) {
 					csb.AddSymbol(cs, false, this).Append(" ");
 				}
-			TYPE_DECLARATION:
+
 				desc.Add(ShowSymbolDeclaration(s, csb, true, false));
 				if (s.Kind == SymbolKind.Method
 					&& (m = (IMethodSymbol)s).MethodKind == MethodKind.ReducedExtension) {
@@ -1147,6 +1142,7 @@ namespace Codist
 				_Node = null;
 			}
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			async void NodeLink_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e) {
 				var s = (await TextEditorHelper.GetMouseOverDocumentView()?.TextBuffer.GetDocument().Project.GetCompilationAsync()).GetSemanticModel(_Node.SyntaxTree)
 					.GetSymbol(_Node);

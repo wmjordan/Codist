@@ -167,6 +167,7 @@ namespace Codist.NaviBar
 				_FinderBox.Focus();
 			}
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			async void SearchCriteriaChanged(object sender, EventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
 				var ct = Bar._cancellationSource.GetToken();

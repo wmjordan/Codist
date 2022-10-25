@@ -187,6 +187,7 @@ namespace Codist.QuickInfo
 				((TextBlock)sender).Background = Brushes.Transparent;
 			}
 
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			async void GoToSource(object sender, MouseButtonEventArgs e) {
 				var s = _symbol;
 				await _quickInfoSession.DismissAsync();
@@ -200,6 +201,7 @@ namespace Codist.QuickInfo
 					t.ToolTipOpening -= ShowToolTip;
 				}
 			}
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			async void ShowContextMenu(object sender, ContextMenuEventArgs e) {
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				var s = sender as FrameworkElement;
@@ -326,7 +328,7 @@ namespace Codist.QuickInfo
 					IsMouseOverAggregated = hold;
 				}
 				public System.Threading.Tasks.Task DismissAsync() {
-					return QuickInfoSession?.DismissAsync();
+					return QuickInfoSession?.DismissAsync() ?? System.Threading.Tasks.Task.CompletedTask;
 				}
 
 				protected override void OnVisualParentChanged(DependencyObject oldParent) {

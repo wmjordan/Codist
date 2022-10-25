@@ -126,6 +126,7 @@ namespace Codist.NaviBar
 			}
 
 			// Fixes https://github.com/wmjordan/Codist/issues/131
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			async void ResurrectNaviBar_OnUnloaded(object sender, RoutedEventArgs e) {
                 var view = _View;
 				if (view?.IsClosed == false) {

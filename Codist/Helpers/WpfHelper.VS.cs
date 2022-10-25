@@ -207,6 +207,8 @@ namespace Codist
 					this.SetTipPlacementBottom();
 				}
 			}
+
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			async void LinkContextMenu(object sender, MouseButtonEventArgs e) {
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {
@@ -297,6 +299,8 @@ namespace Codist
 					ToolTip = ToolTipFactory.CreateToolTip(s, false, SemanticContext.GetHovered());
 				}
 			}
+
+			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			async void LinkContextMenu(object sender, MouseButtonEventArgs e) {
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {

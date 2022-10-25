@@ -178,10 +178,12 @@ namespace Codist.AutoBuildVersion
 			}
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "UI Thread checked in caller")]
 		void WriteBuildText(string text) {
 			_Package.GetOutputPane(VSConstants.BuildOutput, "Build")?.OutputString(text);
 		}
 		[Conditional("DEBUG")]
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "UI Thread checked in caller")]
 		void WriteText(string text) {
 			_Package.GetOutputPane(VSConstants.OutputWindowPaneGuid.GeneralPane_guid, "General")?.OutputString(text);
 		}

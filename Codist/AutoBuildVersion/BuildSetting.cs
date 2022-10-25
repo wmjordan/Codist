@@ -16,6 +16,7 @@ namespace Codist.AutoBuildVersion
 		}
 
 		public static string GetConfigPath(Project project) {
+			Microsoft.VisualStudio.Shell.ThreadHelper.ThrowIfNotOnUIThread();
 			return Path.Combine(Path.GetDirectoryName(project.FullName), "obj", project.Name + ".autoversion.json");
 		}
 		public static BuildSetting Load(Project project) {
