@@ -994,34 +994,34 @@ namespace Codist.QuickInfo
 			if (interfaces.Length == 0) {
 				return;
 			}
-			var explicitIntfs = ImmutableArray.CreateBuilder<ITypeSymbol>(3);
+			var implementedIntfs = ImmutableArray.CreateBuilder<ITypeSymbol>(3);
 			ThemedTipDocument info = null;
 			var returnType = symbol.GetReturnType();
 			var parameters = symbol.GetParameters();
 			var typeParams = symbol.GetTypeParameters();
 			foreach (var intf in interfaces) {
-				foreach (var member in intf.GetMembers()) {
+				foreach (var member in intf.GetMembers(symbol.Name)) {
 					if (member.Kind == symbol.Kind
 						&& member.DeclaredAccessibility == Accessibility.Public
-						&& member.Name == symbol.Name
+						&& member.IsStatic == false
 						&& member.MatchSignature(symbol.Kind, returnType, parameters, typeParams)) {
-						explicitIntfs.Add(intf);
+						implementedIntfs.Add(intf);
 					}
 				}
 			}
-			if (explicitIntfs.Count > 0) {
+			if (implementedIntfs.Count > 0) {
 				info = new ThemedTipDocument().AppendTitle(IconIds.InterfaceImplementation, R.T_Implements);
-				foreach (var item in explicitIntfs) {
+				foreach (var item in implementedIntfs) {
 					info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
 				}
 			}
 			if (explicitImplementations != null) {
-				explicitIntfs.Clear();
-				explicitIntfs.AddRange(explicitImplementations.Select(i => i.ContainingType));
-				if (explicitIntfs.Count > 0) {
+				implementedIntfs.Clear();
+				implementedIntfs.AddRange(explicitImplementations.Select(i => i.ContainingType));
+				if (implementedIntfs.Count > 0) {
 					(info ?? (info = new ThemedTipDocument()))
 						.AppendTitle(IconIds.InterfaceImplementation, R.T_ExplicitImplements);
-					foreach (var item in explicitIntfs) {
+					foreach (var item in implementedIntfs) {
 						info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
 					}
 				}
