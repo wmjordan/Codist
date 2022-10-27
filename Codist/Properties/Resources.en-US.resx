@@ -2121,4 +2121,7 @@ Percent of logical disk time</value>
     <value>Network Interface Usage
 Sent or received bytes per second through all network interfaces</value>
   </data>
+  <data name="T_Bps" xml:space="preserve">
+    <value>B/s</value>
+  </data>
 </root>

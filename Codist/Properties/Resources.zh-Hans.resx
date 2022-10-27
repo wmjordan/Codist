@@ -2104,4 +2104,7 @@ Right click: 显示“线程”窗口</value>
     <value>网络接口流量（字节）
 通过所有网络接口的字节流量</value>
   </data>
+  <data name="T_Bps" xml:space="preserve">
+    <value>B/秒</value>
+  </data>
 </root>

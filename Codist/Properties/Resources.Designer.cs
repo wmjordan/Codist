@@ -4304,6 +4304,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to B/s.
+        /// </summary>
+        internal static string T_Bps {
+            get {
+                return ResourceManager.GetString("T_Bps", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Build finished..
         /// </summary>
         internal static string T_BuildFinished {

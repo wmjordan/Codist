@@ -330,6 +330,7 @@ namespace Codist.Display
 			const float MBit = 1024 * 1024, KBit = 1024;
 
 			static readonly Comparer<(string, float)> __Comparer = Comparer<(string, float)>.Create((x, y) => y.Item2.CompareTo(x.Item2));
+			static readonly string __0bps = "0" + R.T_Bps;
 			bool _TooltipDisplayed;
 			float _LastCounter;
 			PerformanceCounter[] _Counters;
@@ -366,7 +367,7 @@ namespace Codist.Display
 
 			void ShowToolTip(float[] counterValues, TextBlock t) {
 				if (counterValues.Length == 1) {
-					t.Text = _Counters[0].InstanceName + ": " + FlowToReading(counterValues[0]) + "B/s";
+					t.Text = _Counters[0].InstanceName + ": " + FlowToReading(counterValues[0]) + R.T_Bps;
 					return;
 				}
 				ShowMultiValuesOnToolTip(counterValues, t);
@@ -382,12 +383,14 @@ namespace Codist.Display
 				using (var r = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(100)) {
 					var sb = r.Resource;
 					foreach (var (name, val) in cv) {
-						if (sb.Length > 0) {
-							sb.AppendLine();
+						if (val != 0) {
+							if (sb.Length > 0) {
+								sb.AppendLine();
+							}
+							sb.Append(name).Append(": ").Append(FlowToReading(val)).Append(R.T_Bps);
 						}
-						sb.Append(name).Append(": ").Append(FlowToReading(val)).Append("B/s");
 					}
-					t.Text = sb.ToString();
+					t.Text = sb.Length == 0 ? __0bps : sb.ToString();
 				}
 			}
 
