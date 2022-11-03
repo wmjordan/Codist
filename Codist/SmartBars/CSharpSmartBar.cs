@@ -85,17 +85,29 @@ namespace Codist.SmartBars
 			var nodeKind = node.Kind();
 			if (trivia.RawKind == 0) {
 				var token = _Context.Token;
+				var tokenKind = token.Kind();
 				if (token.Span.Contains(View.Selection, true)) {
-					switch (token.Kind()) {
+					switch (tokenKind) {
 						case SyntaxKind.IdentifierToken:
 						case SyntaxKind.SetKeyword:
 						case SyntaxKind.GetKeyword:
 						case CodeAnalysisHelper.InitKeyword:
-							if (nodeKind.IsDeclaration() || node is TypeSyntax || node is ParameterSyntax || nodeKind == SyntaxKind.VariableDeclarator || nodeKind == SyntaxKind.ForEachStatement || nodeKind == SyntaxKind.SingleVariableDesignation || node is AccessorDeclarationSyntax) {
+							if (nodeKind.IsDeclaration()
+								|| nodeKind == SyntaxKind.PredefinedType
+								|| node is TypeSyntax
+								|| node is ParameterSyntax
+								|| nodeKind == SyntaxKind.VariableDeclarator
+								|| nodeKind == SyntaxKind.ForEachStatement
+								|| nodeKind == SyntaxKind.SingleVariableDesignation
+								|| node is AccessorDeclarationSyntax) {
 								// selection is within a symbol
 								_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
 								if (_Symbol != null) {
 									AddSymbolCommands(isReadOnly, node);
+								}
+
+								if (isReadOnly == false) {
+									AddRefactorCommands(node);
 								}
 							}
 							else if (nodeKind == SyntaxKind.TypeParameter) {
@@ -106,12 +118,15 @@ namespace Codist.SmartBars
 							}
 							break;
 						default:
+							if (tokenKind.IsPredefinedSystemType()) {
+								goto case SyntaxKind.IdentifierToken;
+							}
 							if (View.Selection.StreamSelectionSpan.Length < 4
-								&& (token.RawKind >= (int)SyntaxKind.TildeToken && token.RawKind <= (int)SyntaxKind.PercentEqualsToken || token.IsKind(SyntaxKind.IsKeyword) || token.IsKind(SyntaxKind.AsKeyword))
+								&& (tokenKind >= SyntaxKind.TildeToken && tokenKind <= SyntaxKind.PercentEqualsToken || tokenKind == SyntaxKind.IsKeyword || tokenKind == SyntaxKind.AsKeyword)
 								&& SelectionIs<SyntaxNode>()) {
 								AddCommand(MyToolBar, IconIds.SelectBlock, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
 							}
-							else if (token.RawKind >= (int)SyntaxKind.NumericLiteralToken && token.RawKind <= (int)SyntaxKind.StringLiteralToken) {
+							else if (tokenKind >= SyntaxKind.NumericLiteralToken && tokenKind <= SyntaxKind.StringLiteralToken) {
 								AddEditorCommand(MyToolBar, IconIds.FindReference, "Edit.FindAllReferences", R.CMD_FindAllReferences);
 							}
 							break;
@@ -121,10 +136,10 @@ namespace Codist.SmartBars
 					AddDirectiveCommands();
 				}
 				if (isReadOnly == false) {
-					if (token.IsKind(SyntaxKind.TrueKeyword) || token.IsKind(SyntaxKind.FalseKeyword)) {
+					if (tokenKind == SyntaxKind.TrueKeyword || tokenKind == SyntaxKind.FalseKeyword) {
 						AddCommand(MyToolBar, IconIds.ToggleValue, R.CMD_ToggleValue, ctx => Replace(ctx, v => v == "true" ? "false" : "true", true));
 					}
-					else if (token.IsKind(SyntaxKind.ExplicitKeyword) || token.IsKind(SyntaxKind.ImplicitKeyword)) {
+					else if (tokenKind == SyntaxKind.ExplicitKeyword || tokenKind == SyntaxKind.ImplicitKeyword) {
 						AddCommand(MyToolBar, IconIds.ToggleValue, R.CMD_ToggleOperator, ctx => Replace(ctx, v => v == "implicit" ? "explicit" : "implicit", true));
 					}
 					if (nodeKind == SyntaxKind.VariableDeclarator) {
@@ -164,10 +179,6 @@ namespace Codist.SmartBars
 			AddCommand(MyToolBar, IconIds.FindReference, R.CMD_AnalyzeSymbol, ShowSymbolContextMenu);
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) && Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
 				AddCommands(MyToolBar, IconIds.Marks, R.CMD_MarkSymbol, null, GetMarkerCommands);
-			}
-
-			if (isReadOnly == false) {
-				AddRefactorCommands(node);
 			}
 		}
 
@@ -260,7 +271,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddRenameCommand(SyntaxNode node) {
-			if (_Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
+			if (_Symbol != null && _Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 				AddCommand(MyToolBar, IconIds.Rename, R.CMD_RenameSymbol, ctx => {
 					ctx.KeepToolBar(false);
 					TextEditorHelper.ExecuteEditorCommand("Refactor.Rename");
@@ -270,15 +281,31 @@ namespace Codist.SmartBars
 
 		void AddRefactorCommands(SyntaxNode node) {
 			AddRenameCommand(node);
-			if (node is ParameterSyntax && node.Parent is ParameterListSyntax) {
-				AddEditorCommand(MyToolBar, IconIds.ReorderParameters, "Refactor.ReorderParameters", R.CMD_ReorderParameters);
-			}
-			else if ((node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(SyntaxKind.StructDeclaration) || node.IsKind(CodeAnalysisHelper.RecordDeclaration) || node.IsKind(CodeAnalysisHelper.RecordStructDesclaration))
-				&& (node as TypeDeclarationSyntax).Modifiers.Any(SyntaxKind.StaticKeyword) == false) {
-				AddEditorCommand(MyToolBar, IconIds.ExtractInterface, "Refactor.ExtractInterface", R.CMD_ExtractInterface);
-			}
-			else if (node.IsKind(SyntaxKind.VariableDeclarator) && node.Parent?.Parent.IsKind(SyntaxKind.FieldDeclaration) == true) {
-				AddEditorCommand(MyToolBar, IconIds.EncapsulateField, "Refactor.EncapsulateField", R.CMD_EncapsulateField);
+			switch (node.Kind()) {
+				case SyntaxKind.Parameter:
+					if (node.Parent.IsKind(SyntaxKind.ParameterList)) {
+						AddEditorCommand(MyToolBar, IconIds.ReorderParameters, "Refactor.ReorderParameters", R.CMD_ReorderParameters);
+					}
+					break;
+				case SyntaxKind.IdentifierName:
+				case SyntaxKind.PredefinedType:
+					if (node.Parent.IsKind(SyntaxKind.Parameter) && node.Parent.Parent.IsKind(SyntaxKind.ParameterList)) {
+						AddEditorCommand(MyToolBar, IconIds.ReorderParameters, "Refactor.ReorderParameters", R.CMD_ReorderParameters);
+					}
+					break;
+				case SyntaxKind.ClassDeclaration:
+				case SyntaxKind.StructDeclaration:
+				case CodeAnalysisHelper.RecordDeclaration:
+				case CodeAnalysisHelper.RecordStructDesclaration:
+					if ((node as TypeDeclarationSyntax).Modifiers.Any(SyntaxKind.StaticKeyword) == false) {
+						AddEditorCommand(MyToolBar, IconIds.ExtractInterface, "Refactor.ExtractInterface", R.CMD_ExtractInterface);
+					}
+					break;
+				case SyntaxKind.VariableDeclarator:
+					if (node.Parent?.Parent.IsKind(SyntaxKind.FieldDeclaration) == true) {
+						AddEditorCommand(MyToolBar, IconIds.EncapsulateField, "Refactor.EncapsulateField", R.CMD_EncapsulateField);
+					}
+					break;
 			}
 		}
 
