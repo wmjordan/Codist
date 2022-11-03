@@ -1108,7 +1108,7 @@ namespace Codist.QuickInfo
 			var classList = new ThemedTipText(R.T_BaseType, true)
 				.AddSymbol(baseType, null, _SymbolFormatter);
 			var info = new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.BaseTypes, classList));
-			while (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseTypeInheritence) && (baseType = baseType.BaseType) != null) {
+			while ((baseType = baseType.BaseType) != null) {
 				if (baseType.IsCommonClass() == false) {
 					classList.Inlines.Add(new ThemedTipText(" - ") { TextWrapping = TextWrapping.Wrap }.AddSymbol(baseType, null, _SymbolFormatter));
 				}
@@ -1182,12 +1182,8 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowInterfaces(QiContainer qiContent, ITypeSymbol type) {
-			var showAll = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.InterfacesInheritence);
 			type = type.OriginalDefinition;
 			var interfaces = type.Interfaces;
-			if (interfaces.Length == 0 && showAll == false) {
-				return;
-			}
 			var declaredInterfaces = ImmutableArray.CreateBuilder<INamedTypeSymbol>(interfaces.Length);
 			var inheritedInterfaces = ImmutableArray.CreateBuilder<(INamedTypeSymbol intf, ITypeSymbol baseType)>(5);
 			foreach (var item in interfaces) {

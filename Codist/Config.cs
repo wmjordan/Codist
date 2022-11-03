@@ -734,13 +734,15 @@ namespace Codist
 		None,
 		[Obsolete]
 		ClickAndGo = 0,
+		[Obsolete]
+		BaseTypeInheritence = 0,
+		[Obsolete]
+		InterfacesInheritence = 0,
 		Attributes = 1,
 		BaseType = 1 << 1,
-		BaseTypeInheritence = 1 << 2,
 		Declaration = 1 << 3,
 		SymbolLocation = 1 << 4,
 		Interfaces = 1 << 5,
-		InterfacesInheritence = 1 << 6,
 		NumericValues = 1 << 7,
 		String = 1 << 8,
 		Parameter = 1 << 9,
@@ -766,7 +768,7 @@ namespace Codist
 		AlternativeStyle = 1 << 30,
 		DocumentationOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc,
 		QuickInfoOverride = DocumentationOverride | AlternativeStyle,
-		Default = AlternativeStyle | Attributes | BaseType | BaseTypeInheritence | Interfaces | InterfacesInheritence | NumericValues | InterfaceImplementations | MethodOverload | Parameter | OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc | SeeAlsoDoc | ExceptionDoc | ReturnsDoc | RemarksDoc,
+		Default = AlternativeStyle | Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | MethodOverload | Parameter | OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc | SeeAlsoDoc | ExceptionDoc | ReturnsDoc | RemarksDoc,
 	}
 
 	[Flags]
