@@ -479,7 +479,7 @@ namespace Codist.QuickInfo
 				void ShowAlternativeSignature(StackPanel docPanel) {
 					var s = ClickAndGoSymbol;
 					var icon = ThemeHelper.GetImage(s.GetImageId(), ThemeHelper.LargeIconSize)
-						.AsSymbolLink(Keyboard.Modifiers == ModifierKeys.Shift ? s : s.OriginalDefinition);
+						.AsSymbolLink(Keyboard.Modifiers == ModifierKeys.Control ? s.OriginalDefinition : s);
 					icon.VerticalAlignment = VerticalAlignment.Top;
 					var desc = SymbolFormatter.Instance.ShowSignature(s);
 					if (Config.Instance.QuickInfoMaxWidth >= 100) {
