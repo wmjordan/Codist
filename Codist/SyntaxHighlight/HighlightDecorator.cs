@@ -52,17 +52,23 @@ namespace Codist.SyntaxHighlight
 			_TextView = view;
 
 			_IsViewVisible = true;
-			if (view.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.Output) == false) {
-				Decorate(FormatStore.ClassificationTypeStore.Keys, __Initialized == false);
-				Debug.WriteLine("Attached highlight decorator for " + view.TextBuffer.ContentType);
-				if (__Initialized == false) {
+			if (view.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.Output)) {
+				Decorate(_ClassificationFormatMap.CurrentPriorityOrder, false);
+			}
+			else if (__Initialized == false) {
+				view.VisualElement.IsVisibleChanged += InitHighlight;
+			}
+			_EditorFormatMap.FormatMappingChanged += FormatUpdated;
+		}
+
+		void InitHighlight(object sender, DependencyPropertyChangedEventArgs e) {
+			if ((bool)e.NewValue) {
+				_TextView.VisualElement.IsVisibleChanged -= InitHighlight;
+				if (Decorate(_ClassificationFormatMap.CurrentPriorityOrder, true)) {
+					Debug.WriteLine("Attached highlight decorator for " + _TextView.TextBuffer.ContentType);
 					__Initialized = true;
 				}
 			}
-			else {
-				Decorate(_ClassificationFormatMap.CurrentPriorityOrder, false);
-			}
-			_EditorFormatMap.FormatMappingChanged += FormatUpdated;
 		}
 
 		void VisualElement_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
@@ -74,6 +80,7 @@ namespace Codist.SyntaxHighlight
 			Config.UnregisterUpdateHandler(UpdateSyntaxHighlightConfig);
 			_ClassificationFormatMap.ClassificationFormatMappingChanged -= FormatUpdated;
 			_TextView.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
+			_TextView.VisualElement.IsVisibleChanged -= InitHighlight;
 			_TextView.Properties.RemoveProperty(typeof(HighlightDecorator));
 			_EditorFormatMap.FormatMappingChanged -= FormatUpdated;
 			_TextView.Closed -= View_Closed;
@@ -136,9 +143,9 @@ namespace Codist.SyntaxHighlight
 			}
 		}
 
-		void Decorate(IEnumerable<IClassificationType> classifications, bool fullUpdate) {
+		bool Decorate(IEnumerable<IClassificationType> classifications, bool fullUpdate) {
 			if (_ClassificationFormatMap.IsInBatchUpdate || Interlocked.CompareExchange(ref _IsDecorating, 1, 0) != 0) {
-				return;
+				return false;
 			}
 			try {
 				var c = _EditorFormatMap.GetColor(Constants.EditorProperties.Text, EditorFormatDefinition.ForegroundColorId);
@@ -153,6 +160,7 @@ namespace Codist.SyntaxHighlight
 					_BackColor = c.Alpha(0);
 				}
 				DecorateClassificationTypes(classifications, fullUpdate);
+				return true;
 			}
 			catch (Exception ex) {
 				Debug.WriteLine("Decorator exception: ");
@@ -160,6 +168,7 @@ namespace Codist.SyntaxHighlight
 				if (Debugger.IsAttached) {
 					Debugger.Break();
 				}
+				return false;
 			}
 			finally {
 				_IsDecorating = 0;
