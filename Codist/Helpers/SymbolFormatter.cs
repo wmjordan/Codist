@@ -28,11 +28,12 @@ namespace Codist
 			}
 		}
 
+		internal const double TransparentLevel = 0.6;
 		static readonly Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>> _BrushSetter = CreatePropertySetter();
 		internal static readonly SymbolFormatter Instance = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText), b => { b?.Freeze(); return b; });
 		internal static readonly SymbolFormatter SemiTransparent = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText), b => {
 			if (b != null) {
-				b = b.Alpha(0.6); b.Freeze();
+				b = b.Alpha(TransparentLevel); b.Freeze();
 			}
 			return b; });
 		readonly Func<Brush, Brush> _brushConfigurator;
@@ -87,7 +88,7 @@ namespace Codist
 			var signature = ShowSymbolSignature(System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Shift ? symbol : s);
 			desc.Add(signature);
 			if (s.IsObsolete()) {
-				desc.Opacity = 0.6;
+				desc.Opacity = TransparentLevel;
 				signature.Inlines.Add(new TextBlock { Margin = WpfHelper.SmallHorizontalMargin }.AddImage(IconIds.Obsoleted).Append(R.T_Deprecated));
 			}
 			#endregion

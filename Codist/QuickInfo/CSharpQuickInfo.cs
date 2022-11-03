@@ -1189,50 +1189,58 @@ namespace Codist.QuickInfo
 				return;
 			}
 			var declaredInterfaces = ImmutableArray.CreateBuilder<INamedTypeSymbol>(interfaces.Length);
-			var inheritedInterfaces = ImmutableArray.CreateBuilder<INamedTypeSymbol>(5);
-			INamedTypeSymbol disposable = null;
+			var inheritedInterfaces = ImmutableArray.CreateBuilder<(INamedTypeSymbol intf, ITypeSymbol baseType)>(5);
 			foreach (var item in interfaces) {
-				if (item.IsDisposable()) {
-					disposable = item;
-					continue;
-				}
 				if (item.DeclaredAccessibility == Accessibility.Public || item.Locations.Any(l => l.IsInSource)) {
 					declaredInterfaces.Add(item);
 				}
 			}
-			foreach (var item in type.AllInterfaces) {
-				if (interfaces.Contains(item)) {
-					continue;
+			HashSet<ITypeSymbol> all;
+			if (type.TypeKind == TypeKind.Class) {
+				all = new HashSet<ITypeSymbol>(interfaces);
+				foreach (var item in interfaces) {
+					FindInterfacesForType(type, item.Interfaces, inheritedInterfaces, all);
 				}
-				if (item.IsDisposable()) {
-					disposable = item;
-					continue;
-				}
-				if (showAll
-					&& (item.DeclaredAccessibility == Accessibility.Public || item.Locations.Any(l => l.IsInSource))) {
-					inheritedInterfaces.Add(item);
+				while ((type = type.BaseType) != null) {
+					FindInterfacesForType(type, type.Interfaces, inheritedInterfaces, all);
 				}
 			}
-			if (declaredInterfaces.Count == 0 && inheritedInterfaces.Count == 0 && disposable == null) {
+			else if (type.TypeKind == TypeKind.Interface) {
+				all = new HashSet<ITypeSymbol>(interfaces);
+				foreach (var item in interfaces) {
+					FindInterfacesForType(item, item.Interfaces, inheritedInterfaces, all);
+				}
+				FindInterfacesForType(type, type.Interfaces, inheritedInterfaces, all);
+			}
+			if (declaredInterfaces.Count == 0 && inheritedInterfaces.Count == 0) {
 				return;
 			}
 			var info = new ThemedTipDocument().AppendTitle(IconIds.Interface, R.T_Interface);
-			if (disposable != null) {
-				var t = ToUIText(disposable);
-				if (interfaces.Contains(disposable) == false) {
-					t.Append(R.T_Inherited);
-				}
-				info.Append(new ThemedTipParagraph(IconIds.Disposable, t));
-			}
 			foreach (var item in declaredInterfaces) {
-				if (item != disposable) {
-					info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item)));
-				}
+				info.Append(new ThemedTipParagraph(item.IsDisposable() ? IconIds.Disposable : item.GetImageId(), ToUIText(item)));
 			}
-			foreach (var item in inheritedInterfaces) {
-				info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item).Append(R.T_Inherited)));
+			foreach (var (intf, baseType) in inheritedInterfaces) {
+				info.Append(new ThemedTipParagraph(
+					intf.IsDisposable() ? IconIds.Disposable : intf.GetImageId(),
+					ToUIText(intf)
+						.Append(" : ", SymbolFormatter.SemiTransparent.PlainText)
+						.Append(ThemeHelper.GetImage(baseType.GetImageId()).WrapMargin(WpfHelper.GlyphMargin).SetOpacity(SymbolFormatter.TransparentLevel))
+						.AddSymbol(baseType, false, SymbolFormatter.SemiTransparent)));
 			}
 			qiContent.Add(info);
+		}
+
+		static void FindInterfacesForType(ITypeSymbol type, ImmutableArray<INamedTypeSymbol> interfaces, ImmutableArray<(INamedTypeSymbol, ITypeSymbol)>.Builder inheritedInterfaces, HashSet<ITypeSymbol> all) {
+			foreach (var item in interfaces) {
+				if (all.Add(item) && IsAccessibleInterface(item)) {
+					inheritedInterfaces.Add((item, type));
+					FindInterfacesForType(type.TypeKind == TypeKind.Class ? type : item, item.Interfaces, inheritedInterfaces, all);
+				}
+			}
+		}
+
+		static bool IsAccessibleInterface(INamedTypeSymbol type) {
+			return type.DeclaredAccessibility == Accessibility.Public || type.Locations.Any(l => l.IsInSource);
 		}
 
 		static void ShowDeclarationModifier(QiContainer qiContent, ISymbol symbol) {

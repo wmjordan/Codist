@@ -20,6 +20,10 @@ namespace TestProject
 
 		void VirtualMethod();
 	}
+
+	interface IMultiInterface : IInterface, System.Collections.Generic.ICollection<int>
+	{
+	}
 #else
 	// Excluded code here
 	class Unused
