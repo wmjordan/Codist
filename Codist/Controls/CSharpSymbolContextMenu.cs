@@ -93,7 +93,7 @@ namespace Codist.Controls
 					Items.Add(CreateItem(IconIds.FindReferencingSymbols, R.CMD_FindReferencedSymbols, _Host.FindReferencedSymbols));
 				}
 				//Items.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, _Host.Symbol, "No reference found", FindReferences));
-				Items.Add(CreateItem(IconIds.FindSymbolsWithName, R.CMD_FindSymbolwithName.Replace("<NAME>", _Host.Symbol.Name), _Host.FindSymbolWithName));
+				Items.Add(CreateItem(IconIds.FindSymbolsWithName, R.CMD_FindSymbolwithName, _Host.Symbol.Name).HandleEvent(MenuItem.ClickEvent, _Host.FindSymbolWithName));
 			}
 		}
 
@@ -199,15 +199,26 @@ namespace Codist.Controls
 		}
 
 		void CreateCommandsForReturnTypeCommand() {
-			var type = _Host.Symbol.GetReturnType();
-			if (type != null && type.SpecialType == SpecialType.None && type.TypeKind != TypeKind.TypeParameter && type.IsTupleType == false) {
+			if (_Host.Symbol.GetReturnType() is INamedTypeSymbol type
+				&& type.SpecialType == SpecialType.None
+				&& type.TypeKind != TypeKind.TypeParameter
+				&& type.TypeKind != TypeKind.Error
+				&& type.IsTupleType == false) {
 				var et = type.ResolveElementType();
-				Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf.Replace("<TYPE>", et.Name + et.GetParameterString()), _Host.FindReturnTypeMembers));
+				var gat = et.ResolveSingleGenericTypeArgument();
+				string typeName;
+				if (ReferenceEquals(gat, et) == false) {
+					typeName = gat.Name + gat.GetParameterString();
+					Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf, typeName).HandleEvent(MenuItem.ClickEvent, _Host.FindSpecialGenericReturnTypeMembers));
+					Items.Add(CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, typeName).HandleEvent(MenuItem.ClickEvent, _Host.GoToSpecialGenericSymbolReturnType));
+				}
+				typeName = et.Name + et.GetParameterString();
+				Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf, typeName).HandleEvent(MenuItem.ClickEvent, _Host.FindReturnTypeMembers));
 				if (type.IsStatic == false) {
-					Items.Add(CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor.Replace("<TYPE>", type.GetTypeName()), _Host.FindReturnTypeExtensionMethods));
+					Items.Add(CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor, typeName).HandleEvent(MenuItem.ClickEvent, _Host.FindReturnTypeExtensionMethods));
 				}
 				if (et.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-					Items.Add(CreateItem(IconIds.GoToReturnType, R.CMD_GoTo.Replace("<TYPE>", et.GetTypeName()), _Host.GoToSymbolReturnType));
+					Items.Add(CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, typeName).HandleEvent(MenuItem.ClickEvent, _Host.GoToSymbolReturnType));
 				}
 			}
 		}
@@ -227,6 +238,25 @@ namespace Codist.Controls
 				Icon = ThemeHelper.GetImage(imageId),
 				Header = new ThemedMenuText { Text = title }
 			};
+		}
+
+		static MenuItem CreateItem(int imageId, string title, string substitutions) {
+			var i = title.IndexOf('<');
+			if (i < -1) {
+				goto FALLBACK;
+			}
+			var i2 = title.IndexOf('>', i);
+			if (i2 < 0) {
+				goto FALLBACK;
+			}
+			return new MenuItem {
+				Icon = ThemeHelper.GetImage(imageId),
+				Header = new ThemedMenuText().Append(title.Substring(0, i))
+					.Append(new System.Windows.Documents.Run(substitutions) { TextDecorations = { TextDecorations.Underline } })
+					.Append(title.Substring(i2 + 1))
+			};
+			FALLBACK:
+			return CreateItem(imageId, title);
 		}
 
 		static MenuItem CreateItem(int imageId, string title, RoutedEventHandler clickHandler) {
@@ -299,6 +329,9 @@ namespace Codist.Controls
 			public void GoToSymbolReturnType(object sender, RoutedEventArgs args) {
 				_Symbol.GetReturnType().ResolveElementType().GoToSource();
 			}
+			public void GoToSpecialGenericSymbolReturnType(object sender, RoutedEventArgs args) {
+				_Symbol.GetReturnType().ResolveElementType().ResolveSingleGenericTypeArgument().GoToSource();
+			}
 			public void CopySymbolName(object sender, RoutedEventArgs args) {
 				try {
 					Clipboard.SetDataObject(_Symbol.GetOriginalName());
@@ -313,7 +346,7 @@ namespace Codist.Controls
 					string t;
 					switch (s.Kind) {
 						case SymbolKind.Namespace:
-						case SymbolKind.NamedType: t = s.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat); break;
+						case SymbolKind.NamedType: t = _Symbol.ToDisplayString(CodeAnalysisHelper.QualifiedTypeNameFormat); break;
 						case SymbolKind.Method:
 							var m = s as IMethodSymbol;
 							if (m.ReducedFrom != null) {
@@ -355,6 +388,11 @@ namespace Codist.Controls
 			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindReturnTypeMembers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindMembersAsync(_Symbol.GetReturnType().ResolveElementType());
+			}
+
+			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			public async void FindSpecialGenericReturnTypeMembers(object sender, RoutedEventArgs e) {
+				await _SemanticContext.FindMembersAsync(_Symbol.GetReturnType().ResolveElementType().ResolveSingleGenericTypeArgument());
 			}
 
 			public void FindReferencedSymbols(object sender, RoutedEventArgs e) {

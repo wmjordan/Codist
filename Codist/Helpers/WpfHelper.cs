@@ -437,6 +437,12 @@ namespace Codist
 		public static void Toggle(this UIElement control, bool visible) {
 			control.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
 		}
+		public static TElement SetOpacity<TElement>(this TElement control, double opacity)
+			where TElement : UIElement {
+			control.Opacity = opacity;
+			return control;
+		}
+
 		public static TObj Set<TObj>(this TObj obj, ref TObj field) where TObj : System.Windows.Threading.DispatcherObject {
 			return field = obj;
 		}
@@ -444,6 +450,11 @@ namespace Codist
 		public static TDependencyObject SetValue<TDependencyObject, TValue>(this TDependencyObject obj, Action<TDependencyObject, TValue> setter, TValue value) where TDependencyObject : DependencyObject {
 			setter(obj, value);
 			return obj;
+		}
+
+		public static TElement HandleEvent<TElement>(this TElement control, RoutedEvent routedEvent, RoutedEventHandler handler) where TElement : UIElement {
+			control.AddHandler(routedEvent, handler);
+			return control;
 		}
 
 		public static TElement Bind<TElement>(this TElement control, DependencyProperty dependency, string binding) where TElement : FrameworkElement {

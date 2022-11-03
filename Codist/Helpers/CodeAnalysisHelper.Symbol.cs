@@ -283,6 +283,19 @@ namespace Codist
 			return t;
 		}
 
+		public static ITypeSymbol ResolveSingleGenericTypeArgument(this ITypeSymbol type) {
+			return type != null
+					&& type.SpecialType == SpecialType.None
+					&& type.TypeKind != TypeKind.TypeParameter
+					&& type.IsTupleType == false
+					&& type is INamedTypeSymbol t
+					&& t.IsGenericType && t.IsUnboundGenericType == false && t.Arity == 1
+					&& (t = t.TypeArguments[0] as INamedTypeSymbol) != null
+					&& t.TypeKind != TypeKind.Error
+				? t
+				: type;
+		}
+
 		public static int GetImageId(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Assembly: return KnownImageIds.Assembly;
@@ -581,9 +594,10 @@ namespace Codist
 		}
 
 		public static bool MatchTypeName(this INamedTypeSymbol typeSymbol, string className, params string[] namespaces) {
-			if (typeSymbol.Name != className) {
-				return false;
-			}
+			return typeSymbol.Name == className && MatchNamespaces(typeSymbol, namespaces);
+		}
+
+		public static bool MatchNamespaces(this INamedTypeSymbol typeSymbol, params string[] namespaces) {
 			var ns = typeSymbol.ContainingNamespace;
 			foreach (var item in namespaces) {
 				if (ns == null || ns.IsGlobalNamespace || ns.Name != item) {
@@ -765,6 +779,10 @@ namespace Codist
 
 		public static bool IsBoundedGenericMethod(this IMethodSymbol method) {
 			return method != null && method.IsGenericMethod && method != method.OriginalDefinition;
+		}
+
+		public static bool IsObjectOrValueType(this INamedTypeSymbol type) {
+			return type.SpecialType == SpecialType.System_Object || type.SpecialType == SpecialType.System_ValueType;
 		}
 
 		public static bool IsCommonClass(this ISymbol symbol) {
