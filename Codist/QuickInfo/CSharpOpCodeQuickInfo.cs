@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Imaging;
 
 namespace Codist.QuickInfo
 {
@@ -28,11 +22,11 @@ namespace Codist.QuickInfo
 		public static void ShowOpCodeInfo(this QiContainer container, IFieldSymbol property) {
 			if (_OpCodes.TryGetValue(property.Name, out OpCode code)) {
 				container.Add(new ThemedTipDocument()
-					.AppendTitle(IconIds.OpCodes, code.OpCodeType.ToString() + " " + code.Name)
+					.AppendTitle(IconIds.OpCodes, $"{code.OpCodeType} {code.Name}")
 					.Append(new ThemedTipParagraph(new ThemedTipText("Value: 0x" + code.Value.ToString("X2"))
-						.AppendLine().Append("Operand type: " + code.OperandType.ToString())
-						.AppendLine().Append("Stack: " + code.StackBehaviourPop.ToString() + ", " + code.StackBehaviourPush.ToString())
-						.AppendLine().Append("Flow control: " + code.FlowControl.ToString())
+						.AppendLine().Append($"Operand type: {code.OperandType}")
+						.AppendLine().Append($"Stack behavior: {code.StackBehaviourPop}, {code.StackBehaviourPush}")
+						.AppendLine().Append($"Flow control: {code.FlowControl}")
 						))
 				);
 			}

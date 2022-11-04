@@ -73,16 +73,14 @@ namespace Codist.SmartBars
 		}
 
 		void AddContextualCommands(CancellationToken cancellationToken) {
-			// anti-pattern for a small margin of performance
-			bool isDesignMode = CodistPackage.DebuggerStatus == DebuggerStatus.Design;
 			var isReadOnly = _Context.View.IsCaretInReadOnlyRegion();
 			var node = _Context.NodeIncludeTrivia;
-			if (isReadOnly == false && (node is XmlTextSyntax)) {
+			var nodeKind = node.Kind();
+			if (isReadOnly == false && nodeKind == SyntaxKind.XmlText) {
 				AddXmlDocCommands();
 				return;
 			}
 			var trivia = _Context.GetNodeTrivia();
-			var nodeKind = node.Kind();
 			if (trivia.RawKind == 0) {
 				var token = _Context.Token;
 				var tokenKind = token.Kind();
@@ -95,7 +93,7 @@ namespace Codist.SmartBars
 							if (nodeKind.IsDeclaration()
 								|| nodeKind == SyntaxKind.PredefinedType
 								|| node is TypeSyntax
-								|| node is ParameterSyntax
+								|| nodeKind == SyntaxKind.Parameter
 								|| nodeKind == SyntaxKind.VariableDeclarator
 								|| nodeKind == SyntaxKind.ForEachStatement
 								|| nodeKind == SyntaxKind.SingleVariableDesignation
@@ -103,7 +101,7 @@ namespace Codist.SmartBars
 								// selection is within a symbol
 								_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
 								if (_Symbol != null) {
-									AddSymbolCommands(isReadOnly, node);
+									AddSymbolCommands(nodeKind);
 								}
 
 								if (isReadOnly == false) {
@@ -113,7 +111,7 @@ namespace Codist.SmartBars
 							else if (nodeKind == SyntaxKind.TypeParameter) {
 								_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
 								if (_Symbol != null && isReadOnly == false) {
-									AddRenameCommand(node);
+									AddRenameCommand();
 								}
 							}
 							break;
@@ -122,7 +120,9 @@ namespace Codist.SmartBars
 								goto case SyntaxKind.IdentifierToken;
 							}
 							if (View.Selection.StreamSelectionSpan.Length < 4
-								&& (tokenKind >= SyntaxKind.TildeToken && tokenKind <= SyntaxKind.PercentEqualsToken || tokenKind == SyntaxKind.IsKeyword || tokenKind == SyntaxKind.AsKeyword)
+								&& (tokenKind >= SyntaxKind.TildeToken && tokenKind <= SyntaxKind.PercentEqualsToken
+									|| tokenKind == SyntaxKind.IsKeyword
+									|| tokenKind == SyntaxKind.AsKeyword)
 								&& SelectionIs<SyntaxNode>()) {
 								AddCommand(MyToolBar, IconIds.SelectBlock, R.CMD_SelectBlock, SelectNodeAsKind<SyntaxNode>);
 							}
@@ -172,12 +172,13 @@ namespace Codist.SmartBars
 			}
 		}
 
-		void AddSymbolCommands(bool isReadOnly, SyntaxNode node) {
-			if (node.IsKind(SyntaxKind.IdentifierName) || node.IsKind(SyntaxKind.GenericName)) {
+		void AddSymbolCommands(SyntaxKind nodeKind) {
+			if (nodeKind == SyntaxKind.IdentifierName || nodeKind == SyntaxKind.GenericName) {
 				AddEditorCommand(MyToolBar, IconIds.GoToDefinition, "Edit.GoToDefinition", R.CMD_GoToDefinitionPeek, "Edit.PeekDefinition");
 			}
 			AddCommand(MyToolBar, IconIds.FindReference, R.CMD_AnalyzeSymbol, ShowSymbolContextMenu);
-			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) && Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
+				&& Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
 				AddCommands(MyToolBar, IconIds.Marks, R.CMD_MarkSymbol, null, GetMarkerCommands);
 			}
 		}
@@ -270,7 +271,7 @@ namespace Codist.SmartBars
 			}
 		}
 
-		void AddRenameCommand(SyntaxNode node) {
+		void AddRenameCommand() {
 			if (_Symbol != null && _Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 				AddCommand(MyToolBar, IconIds.Rename, R.CMD_RenameSymbol, ctx => {
 					ctx.KeepToolBar(false);
@@ -280,7 +281,7 @@ namespace Codist.SmartBars
 		}
 
 		void AddRefactorCommands(SyntaxNode node) {
-			AddRenameCommand(node);
+			AddRenameCommand();
 			switch (node.Kind()) {
 				case SyntaxKind.Parameter:
 					if (node.Parent.IsKind(SyntaxKind.ParameterList)) {
@@ -341,11 +342,11 @@ namespace Codist.SmartBars
 						if (((d as BaseMethodDeclarationSyntax)?.ParameterList
 							?? (d as DelegateDeclarationSyntax)?.ParameterList)
 								?.Parameters.Any(p => p.Identifier.Text == t) == true) {
-							edit.Replace(item, "<paramref name=\"" + t + "\"/>");
+							edit.Replace(item, $"<paramref name=\"{t}\"/>");
 							continue;
 						}
 						if (d.FindTypeParameter(t) != null) {
-							edit.Replace(item, "<typeparamref name=\"" + t + "\"/>");
+							edit.Replace(item, $"<typeparamref name=\"{t}\"/>");
 							continue;
 						}
 					}
@@ -358,7 +359,7 @@ namespace Codist.SmartBars
 			});
 		}
 
-		static void MakeUrl(CommandContext ctx) {
+		void MakeUrl(CommandContext ctx) {
 			var t = ctx.View.GetFirstSelectionText();
 			if (t.StartsWith("http://", StringComparison.Ordinal) || t.StartsWith("https://", StringComparison.Ordinal)) {
 				var s = WrapWith(ctx, "<a href=\"", "\">text</a>", false);
