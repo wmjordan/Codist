@@ -161,7 +161,7 @@ namespace Codist.SmartBars
 					else if (IsInvertableOperation(nodeKind)) {
 						AddCommand(MyToolBar, IconIds.InvertOperator, R.CMD_InvertOperator, InvertOperator);
 					}
-					else if (isDesignMode && nodeKind != SyntaxKind.TypeParameter) {
+					else if (isReadOnly == false && nodeKind != SyntaxKind.TypeParameter) {
 						AddEditorCommand(MyToolBar, IconIds.ExtractMethod, "Refactor.ExtractMethod", R.CMD_ExtractMethod);
 					}
 				}
