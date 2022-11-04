@@ -199,26 +199,28 @@ namespace Codist.Controls
 		}
 
 		void CreateCommandsForReturnTypeCommand() {
-			if (_Host.Symbol.GetReturnType() is INamedTypeSymbol type
-				&& type.SpecialType == SpecialType.None
-				&& type.TypeKind != TypeKind.TypeParameter
-				&& type.TypeKind != TypeKind.Error
-				&& type.IsTupleType == false) {
-				var et = type.ResolveElementType();
-				var gat = et.ResolveSingleGenericTypeArgument();
-				string typeName;
-				if (ReferenceEquals(gat, et) == false) {
-					typeName = gat.Name + gat.GetParameterString();
-					Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf, typeName).HandleEvent(MenuItem.ClickEvent, _Host.FindSpecialGenericReturnTypeMembers));
+			var rt = _Host.Symbol.GetReturnType();
+			if (rt.SpecialType != SpecialType.None
+				|| rt.TypeKind == TypeKind.TypeParameter
+				|| rt.TypeKind == TypeKind.Error
+				|| rt.IsTupleType) {
+				return;
+			}
+			var et = rt.ResolveElementType();
+			var ga = et.ResolveSingleGenericTypeArgument();
+			string typeName = et.Name + et.GetParameterString();
+			Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf, typeName).HandleEvent(MenuItem.ClickEvent, _Host.FindReturnTypeMembers));
+			if (rt.IsStatic == false) {
+				Items.Add(CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor, typeName).HandleEvent(MenuItem.ClickEvent, _Host.FindReturnTypeExtensionMethods));
+			}
+			if (et.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
+				Items.Add(CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, typeName).HandleEvent(MenuItem.ClickEvent, _Host.GoToSymbolReturnType));
+			}
+			if (ReferenceEquals(ga, et) == false) {
+				typeName = ga.Name + ga.GetParameterString();
+				Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf, typeName).HandleEvent(MenuItem.ClickEvent, _Host.FindSpecialGenericReturnTypeMembers));
+				if (ga.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
 					Items.Add(CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, typeName).HandleEvent(MenuItem.ClickEvent, _Host.GoToSpecialGenericSymbolReturnType));
-				}
-				typeName = et.Name + et.GetParameterString();
-				Items.Add(CreateItem(IconIds.ListMembers, R.CMD_FindMembersOf, typeName).HandleEvent(MenuItem.ClickEvent, _Host.FindReturnTypeMembers));
-				if (type.IsStatic == false) {
-					Items.Add(CreateItem(IconIds.ExtensionMethod, R.CMD_FindExtensionsFor, typeName).HandleEvent(MenuItem.ClickEvent, _Host.FindReturnTypeExtensionMethods));
-				}
-				if (et.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-					Items.Add(CreateItem(IconIds.GoToReturnType, R.CMD_GoTo, typeName).HandleEvent(MenuItem.ClickEvent, _Host.GoToSymbolReturnType));
 				}
 			}
 		}
