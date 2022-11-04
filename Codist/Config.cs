@@ -109,6 +109,8 @@ namespace Codist
 		public SymbolReferenceMarkerStyle SymbolReferenceMarkerSettings { get; } = new SymbolReferenceMarkerStyle();
 		public string BrowserPath { get; set; }
 		public string BrowserParameter { get; set; }
+		public string TaskManagerPath { get; set; }
+		public string TaskManagerParameter { get; set; }
 		internal bool IsChanged => _ConfigManager?.IsChanged ?? false;
 
 		public static void RegisterLoadHandler(Action<Config> handler) {

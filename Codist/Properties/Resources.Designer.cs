@@ -2805,6 +2805,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Locate the task manager.
+        /// </summary>
+        internal static string OT_LocateTaskManager {
+            get {
+                return ResourceManager.GetString("OT_LocateTaskManager", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Long method name.
         /// </summary>
         internal static string OT_LongMethodName {
@@ -3714,6 +3723,24 @@ namespace Codist.Properties {
         internal static string OT_TaggedCommentsTip {
             get {
                 return ResourceManager.GetString("OT_TaggedCommentsTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clicking monitor controls on the status bar can bring out Windows Task Manager. Change the path below to use another program..
+        /// </summary>
+        internal static string OT_TaskManagerNote {
+            get {
+                return ResourceManager.GetString("OT_TaskManagerNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Task manager program parameter (optional):.
+        /// </summary>
+        internal static string OT_TaskManagerParameter {
+            get {
+                return ResourceManager.GetString("OT_TaskManagerParameter", resourceCulture);
             }
         }
         

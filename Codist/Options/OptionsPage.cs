@@ -772,6 +772,8 @@ namespace Codist.Options
 			readonly Controls.IntegerBox _TopSpace, _BottomSpace;
 			readonly OptionBox<DisplayOptimizations> _MainWindow, _CodeWindow, _MenuLayoutOverride, _HideSearchBox, _HideAccountBox, _HideFeedbackButton, _CpuMonitor, _MemoryMonitor, _DriveMonitor, _NetworkMonitor;
 			readonly OptionBox<BuildOptions> _BuildTimestamp;
+			readonly TextBox _TaskManagerPath, _TaskManagerParameter;
+			readonly Button _BrowseTaskManagerPath;
 
 			public PageControl(OptionsPage page) : base(page) {
 				AddPage(R.OT_General,
@@ -813,6 +815,21 @@ namespace Codist.Options
 							Config.Instance.DisplayOptimizations.CreateOptionBox(DisplayOptimizations.ShowNetwork, UpdateResourceManagerOption, R.OT_NetworkUsage).Set(ref _NetworkMonitor)
 						}
 					},
+					new Note(R.OT_TaskManagerNote),
+					new Grid {
+						ColumnDefinitions = {
+							new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star), },
+							new ColumnDefinition { Width = new GridLength(100, GridUnitType.Pixel) }
+						},
+						Children = {
+							(_TaskManagerPath = new TextBox { Margin = WpfHelper.SmallHorizontalMargin, Text = Config.Instance.TaskManagerPath })
+								.SetValue(Grid.SetColumn, 0),
+							(_BrowseTaskManagerPath = new Button { Content = R.CMD_Browse, Margin = WpfHelper.SmallHorizontalMargin })
+								.SetValue(Grid.SetColumn, 1)
+						}
+					},
+					new Note(R.OT_TaskManagerParameter),
+					_TaskManagerParameter = new TextBox { Margin = WpfHelper.SmallHorizontalMargin, Text = Config.Instance.TaskManagerParameter },
 
 					new TitleBox(R.OT_Output),
 					new DescriptionBox(R.OT_OutputNote),
@@ -837,6 +854,19 @@ namespace Codist.Options
 					);
 				_TopSpace.ValueChanged += _TopSpace_ValueChanged;
 				_BottomSpace.ValueChanged += _BottomSpace_ValueChanged;
+				_TaskManagerPath.TextChanged += _TaskManagerPath_TextChanged;
+				_TaskManagerParameter.TextChanged += _TaskManagerParameter_TextChanged;
+				_BrowseTaskManagerPath.Click += (s, args) => {
+					var d = new OpenFileDialog {
+						Title = R.OT_LocateTaskManager,
+						CheckFileExists = true,
+						AddExtension = true,
+						Filter = R.OT_ExecutableFileFilter
+					};
+					if (d.ShowDialog() == true) {
+						_TaskManagerPath.Text = d.FileName;
+					}
+				};
 
 				_MenuLayoutOverride.IsEnabled = CodistPackage.VsVersion.Major == 15;
 			}
@@ -937,6 +967,22 @@ namespace Codist.Options
 				}
 				Config.Instance.TopSpace = (int)e.NewValue;
 				Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight);
+			}
+
+			void _TaskManagerParameter_TextChanged(object sender, TextChangedEventArgs e) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.TaskManagerParameter = _TaskManagerParameter.Text;
+				Config.Instance.FireConfigChangedEvent(Features.None);
+			}
+
+			void _TaskManagerPath_TextChanged(object sender, TextChangedEventArgs e) {
+				if (Page.IsConfigUpdating) {
+					return;
+				}
+				Config.Instance.TaskManagerPath = _TaskManagerPath.Text;
+				Config.Instance.FireConfigChangedEvent(Features.None);
 			}
 		}
 	}

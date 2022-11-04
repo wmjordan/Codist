@@ -30,5 +30,9 @@ namespace Codist.Controls
 				MessageBox.Show(R.T_FailedToLaunchBrowser + Environment.NewLine + ex.Message, nameof(Codist), MessageBoxButton.OK, MessageBoxImage.Exclamation);
 			}
 		}
+
+		public static void OpenTaskManager() {
+			System.Diagnostics.Process.Start(Config.Instance.TaskManagerPath ?? "TaskMgr.exe", Config.Instance.TaskManagerParameter);
+		}
 	}
 }

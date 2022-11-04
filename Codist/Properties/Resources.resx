@@ -2122,4 +2122,13 @@ Sent or received bytes per second through all network interfaces</value>
   <data name="T_Bps" xml:space="preserve">
     <value>B/s</value>
   </data>
+  <data name="OT_LocateTaskManager" xml:space="preserve">
+    <value>Locate the task manager</value>
+  </data>
+  <data name="OT_TaskManagerNote" xml:space="preserve">
+    <value>Clicking monitor controls on the status bar can bring out Windows Task Manager. Change the path below to use another program.</value>
+  </data>
+  <data name="OT_TaskManagerParameter" xml:space="preserve">
+    <value>Task manager program parameter (optional):</value>
+  </data>
 </root>

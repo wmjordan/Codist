@@ -101,7 +101,7 @@ namespace Codist.Display
 
 		static void StartTaskMgr(object sender, System.Windows.Input.MouseButtonEventArgs e) {
 			try {
-				Process.Start("TaskMgr.exe");
+				ExternalCommand.OpenTaskManager();
 			}
 			catch (Exception ex) {
 				Debug.WriteLine("Failed to start task manager: " + ex.ToString());

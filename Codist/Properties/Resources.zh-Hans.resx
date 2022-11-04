@@ -2107,4 +2107,13 @@ Right click: 显示“线程”窗口</value>
   <data name="T_Bps" xml:space="preserve">
     <value>B/秒</value>
   </data>
+  <data name="OT_LocateTaskManager" xml:space="preserve">
+    <value>指定任务管理器的位置</value>
+  </data>
+  <data name="OT_TaskManagerNote" xml:space="preserve">
+    <value>点击状态栏上的资源监视控件将打开系统的任务管理器。如需调用其它程序，可在下方的文本框中指定。</value>
+  </data>
+  <data name="OT_TaskManagerParameter" xml:space="preserve">
+    <value>任务管理器参数:</value>
+  </data>
 </root>
