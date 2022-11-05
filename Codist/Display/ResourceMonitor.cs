@@ -249,7 +249,6 @@ namespace Codist.Display
 			}
 
 			protected override PerformanceCounter CreateCounter() {
-				_WmiSearcher = new ManagementObjectSearcher("SELECT IDProcess, Name, PercentProcessorTime, Timestamp_Sys100NS FROM Win32_PerfRawData_PerfProc_Process WHERE IDProcess != 0");
 				return new PerformanceCounter("Processor", "% Processor Time", "_Total");
 			}
 
@@ -378,6 +377,16 @@ namespace Codist.Display
 			protected override void OnToolTipClosing(ToolTipEventArgs e) {
 				base.OnToolTipClosing(e);
 				_TooltipDisplayed = false;
+			}
+
+			public override void Start() {
+				base.Start();
+				_WmiSearcher = new ManagementObjectSearcher("SELECT IDProcess, Name, PercentProcessorTime, Timestamp_Sys100NS FROM Win32_PerfRawData_PerfProc_Process WHERE IDProcess != 0");
+			}
+
+			public override void Stop() {
+				base.Stop();
+				_WmiSearcher?.Dispose();
 			}
 		}
 
