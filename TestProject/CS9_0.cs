@@ -124,6 +124,35 @@ namespace TestProject.CS9_0
 				// ...
 			}
 		}
+		public static void Tuple(object o1, object o2) {
+			var t = (o1, o2);
+			if (t is (int k, string v)) {
+				Console.WriteLine("o1 is int && o2 is string");
+			}
+			switch (o1) {
+				case int: Console.WriteLine("o1 is int"); break;
+				case System.String: Console.WriteLine("o1 is string"); break;
+			}
+		}
+		public static void OperatorSwitch() {
+			var t = DateTime.Now.Year;
+			var n = t switch {
+				> 5000 => 10.00m + 5.00m,
+				< 3000 => 10.00m - 2.00m,
+				_ => 10.00m,
+			};
+			var log10 = t switch {
+				< 0 => -1,
+				>= 0 and < 10 => 0,
+				>= 10 and < 100 => 1,
+				>= 100 and < 1000 => 2,
+				>= 1000 and < 10000 => 3,
+				>= 10000 and < 100000 => 4,
+				>= 100000 and < 1000000 => 5,
+				>= 1000000 and < 10000000 => 6,
+				_ => 7
+			};
+		}
 	}
 	#endregion
 
@@ -207,6 +236,34 @@ namespace TestProject.CS9_0
 		}
 	}
 	#endregion
+
+	#region New expression
+	static class NewExpression
+	{
+		readonly static object _syncObj = new();
+		static void New() {
+			Dictionary<string, List<int>> field = new() { { "item1", new() { 1, 2, 3 } } };
+
+			TakeList(new() { 1, 2, 3 });
+		}
+		static void TakeList(List<int> values) {
+		}
+	}
+	#endregion
+
+	#region Partials
+	[Serializable]
+	sealed partial class PartAttribute : Attribute
+	{
+		public partial object Clone();
+	}
+	[AttributeUsage(AttributeTargets.Class)]
+	public partial class PartAttribute : ICloneable
+	{
+		public partial object Clone() { return this; }
+	}
+	#endregion
+
 	#region GetEnumeratorExtension
 	public static class BitEnumerable
 	{
