@@ -635,6 +635,7 @@ namespace Codist
 				case CodeAnalysisHelper.FunctionPointerType:
 					text.Add((symbol as ITypeSymbol).GetTypeName());
 					return;
+				case SymbolKind.Label: text.Add(symbol.Render(null, bold, null)); return;
 				default: text.Add(symbol.Name); return;
 			}
 		}
