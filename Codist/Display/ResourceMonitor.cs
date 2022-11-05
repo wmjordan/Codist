@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Management;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -234,13 +235,21 @@ namespace Codist.Display
 		{
 			const int SampleCount = 10;
 			readonly float[] _Samples = new float[SampleCount];
+			readonly List<(uint pid, string name, float cpu)> _ProcessUsages = new List<(uint, string, float)>(3);
+			readonly Dictionary<uint, ulong> _ProcCpuUsages = new Dictionary<uint, ulong>();
+			HashSet<uint> _Pids;
+			ManagementObjectSearcher _WmiSearcher;
+			ulong _LastSys100ns;
 			float _SampleSum, _LastCounter;
-			int _SampleIndex;
+			int _SampleIndex, _ProcSampleState;
+			bool _TooltipDisplayed;
 
 			public CpuMeter() : base(IconIds.Cpu, R.T_CpuUsage) {
+				ToolTipService.SetShowDuration(this, Int32.MaxValue);
 			}
 
 			protected override PerformanceCounter CreateCounter() {
+				_WmiSearcher = new ManagementObjectSearcher("SELECT IDProcess, Name, PercentProcessorTime, Timestamp_Sys100NS FROM Win32_PerfRawData_PerfProc_Process WHERE IDProcess != 0");
 				return new PerformanceCounter("Processor", "% Processor Time", "_Total");
 			}
 
@@ -250,6 +259,77 @@ namespace Codist.Display
 				_SampleSum += counterValue;
 				if (++_SampleIndex == SampleCount) {
 					_SampleIndex = 0;
+				}
+				if (_TooltipDisplayed) {
+					SampleProcessCpuUsage();
+				}
+			}
+
+			void SampleProcessCpuUsage() {
+				if (_ProcCpuUsages.Count == 0) {
+					if (_ProcSampleState != 0) {
+						return;
+					}
+					_ProcSampleState = 1;
+					InitCpuUsages();
+					return;
+				}
+				if (_ProcSampleState == 1) {
+					_ProcSampleState = 2;
+					CalculateCpuUsages();
+					_ProcSampleState = 1;
+				}
+			}
+
+			void InitCpuUsages() {
+				ulong t = 0;
+				foreach (var item in _WmiSearcher.Get()) {
+					if (t == 0) {
+						_LastSys100ns = t = (ulong)item.GetPropertyValue("Timestamp_Sys100NS");
+					}
+					_ProcCpuUsages[(uint)item.GetPropertyValue("IDProcess")] = (ulong)item.GetPropertyValue("PercentProcessorTime");
+				}
+				_Pids = new HashSet<uint>();
+			}
+
+			void CalculateCpuUsages() {
+				_ProcessUsages.Clear();
+				ulong t = 0;
+				ulong deltaT = 0;
+				_Pids.Clear();
+				foreach (var item in _WmiSearcher.Get()) {
+					if (t == 0) {
+						t = (ulong)item.GetPropertyValue("Timestamp_Sys100NS");
+						deltaT = t - _LastSys100ns;
+						_LastSys100ns = t;
+					}
+					uint pid = (uint)item.GetPropertyValue("IDProcess");
+					_Pids.Add(pid);
+					string name = (string)item.GetPropertyValue("Name");
+					ulong proc = (ulong)item.GetPropertyValue("PercentProcessorTime");
+					float cpu = (float)(proc - (_ProcCpuUsages.TryGetValue(pid, out var u) ? u : 0)) / deltaT;
+					if (cpu == 0) {
+						continue;
+					}
+					_ProcCpuUsages[pid] = proc;
+					_ProcessUsages.Add((pid, name, cpu));
+				}
+				if (_ProcCpuUsages.Count != _Pids.Count) {
+					// process count changed, remove inexist processes
+					RemoveInexistCpuUsage();
+				}
+				_ProcessUsages.Sort((x, y) => y.cpu.CompareTo(x.cpu));
+			}
+
+			void RemoveInexistCpuUsage() {
+				List<uint> remove = new List<uint>();
+				foreach (var item in _ProcCpuUsages) {
+					if (_Pids.Contains(item.Key) == false) {
+						remove.Add(item.Key);
+					}
+				}
+				foreach (var item in remove) {
+					_ProcCpuUsages.Remove(item);
 				}
 			}
 
@@ -266,6 +346,38 @@ namespace Codist.Display
 					Background = (counterValue < 0.4f ? Brushes.Yellow : counterValue < 0.6f ? Brushes.Orange : Brushes.Red).Alpha(counterValue);
 				}
 				_LastCounter = counterValue;
+				if (_TooltipDisplayed && (ToolTip as CommandToolTip)?.Description is TextBlock t) {
+					ShowToolTip(t);
+				}
+			}
+
+			void ShowToolTip(TextBlock t) {
+				using (var r = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(100)) {
+					var sb = r.Resource;
+					var pc = 100f / Environment.ProcessorCount;
+					int c = 0, i;
+					foreach (var (pid, name, usage) in _ProcessUsages) {
+						if (sb.Length > 0) {
+							sb.AppendLine();
+						}
+						sb.Append(name, 0, (i = name.IndexOf('#')) < 0 ? name.Length : i).Append(" (").Append(pid).Append("): ")
+							.Append((usage * pc).ToString("0.0")).Append('%');
+						if (++c == 4) {
+							break;
+						}
+					}
+					t.Text = sb.ToString();
+				}
+			}
+
+			protected override void OnToolTipOpening(ToolTipEventArgs e) {
+				base.OnToolTipOpening(e);
+				_TooltipDisplayed = true;
+			}
+
+			protected override void OnToolTipClosing(ToolTipEventArgs e) {
+				base.OnToolTipClosing(e);
+				_TooltipDisplayed = false;
 			}
 		}
 
