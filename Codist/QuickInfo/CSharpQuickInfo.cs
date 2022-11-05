@@ -159,6 +159,12 @@ namespace Codist.QuickInfo
 					token = token.GetPreviousToken();
 					skipTriggerPointCheck = true;
 					break;
+				case SyntaxKind.InKeyword:
+					if ((node = unitCompilation.FindNode(token.Span)).IsKind(SyntaxKind.ForEachStatement)
+						&& (symbol = semanticModel.GetForEachStatementInfo((CommonForEachStatementSyntax)node).GetEnumeratorMethod) != null) {
+						goto PROCESS;
+					}
+					break;
 				case SyntaxKind.LessThanToken:
 				case SyntaxKind.GreaterThanToken:
 					node = unitCompilation.FindNode(token.Span, false, false);

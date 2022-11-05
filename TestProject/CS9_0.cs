@@ -207,6 +207,24 @@ namespace TestProject.CS9_0
 		}
 	}
 	#endregion
+	#region GetEnumeratorExtension
+	public static class BitEnumerable
+	{
+		public static IEnumerator<int> GetEnumerator(this int value) {
+			for (int i = 0, v = value; i < 32; i++, v >>= 1) {
+				if ((v & 1) != 0) {
+					yield return i;
+				}
+			}
+		}
+
+		static void Run() {
+			foreach (var bit in 17) {
+				Console.WriteLine(bit);
+			}
+		}
+	}
+	#endregion
 }
 
 namespace System.Runtime.CompilerServices
