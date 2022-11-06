@@ -48,6 +48,7 @@ namespace Codist.Display
 				}
 				else {
 					meter = new TMeter();
+					meter.Start();
 					_MeterContainer.Children.RemoveAt(index);
 					_MeterContainer.Children.Insert(index, meter);
 				}
@@ -236,8 +237,7 @@ namespace Codist.Display
 			const int SampleCount = 10;
 			readonly float[] _Samples = new float[SampleCount];
 			readonly List<(uint pid, string name, float cpu)> _ProcessUsages = new List<(uint, string, float)>(3);
-			readonly Dictionary<uint, ulong> _ProcCpuUsages = new Dictionary<uint, ulong>();
-			HashSet<uint> _Pids;
+			readonly Dictionary<uint, (ulong counter, int version)> _ProcCpuUsages = new Dictionary<uint, (ulong, int)>();
 			ManagementObjectSearcher _WmiSearcher;
 			ulong _LastSys100ns;
 			float _SampleSum, _LastCounter;
@@ -246,6 +246,16 @@ namespace Codist.Display
 
 			public CpuMeter() : base(IconIds.Cpu, R.T_CpuUsage) {
 				ToolTipService.SetShowDuration(this, Int32.MaxValue);
+			}
+
+			public override void Start() {
+				base.Start();
+				_WmiSearcher = new ManagementObjectSearcher("SELECT IDProcess, Name, PercentProcessorTime, Timestamp_Sys100NS FROM Win32_PerfRawData_PerfProc_Process WHERE IDProcess != 0");
+			}
+
+			public override void Stop() {
+				base.Stop();
+				_WmiSearcher?.Dispose();
 			}
 
 			protected override PerformanceCounter CreateCounter() {
@@ -286,44 +296,44 @@ namespace Codist.Display
 					if (t == 0) {
 						_LastSys100ns = t = (ulong)item.GetPropertyValue("Timestamp_Sys100NS");
 					}
-					_ProcCpuUsages[(uint)item.GetPropertyValue("IDProcess")] = (ulong)item.GetPropertyValue("PercentProcessorTime");
+					_ProcCpuUsages[(uint)item.GetPropertyValue("IDProcess")] = ((ulong)item.GetPropertyValue("PercentProcessorTime"), (int)t);
 				}
-				_Pids = new HashSet<uint>();
 			}
 
 			void CalculateCpuUsages() {
 				_ProcessUsages.Clear();
 				ulong t = 0;
 				ulong deltaT = 0;
-				_Pids.Clear();
+				int c = 0;
+				int n = 0;
 				foreach (var item in _WmiSearcher.Get()) {
 					if (t == 0) {
 						t = (ulong)item.GetPropertyValue("Timestamp_Sys100NS");
 						deltaT = t - _LastSys100ns;
 						_LastSys100ns = t;
+						n = (int)t;
 					}
+					++c;
 					uint pid = (uint)item.GetPropertyValue("IDProcess");
-					_Pids.Add(pid);
 					string name = (string)item.GetPropertyValue("Name");
 					ulong proc = (ulong)item.GetPropertyValue("PercentProcessorTime");
-					float cpu = (float)(proc - (_ProcCpuUsages.TryGetValue(pid, out var u) ? u : 0)) / deltaT;
-					if (cpu == 0) {
-						continue;
+					float cpu = (float)(proc - (_ProcCpuUsages.TryGetValue(pid, out var u) ? u.counter : 0)) / deltaT;
+					_ProcCpuUsages[pid] = (proc, n);
+					if (cpu != 0) {
+						_ProcessUsages.Add((pid, name, cpu));
 					}
-					_ProcCpuUsages[pid] = proc;
-					_ProcessUsages.Add((pid, name, cpu));
 				}
-				if (_ProcCpuUsages.Count != _Pids.Count) {
+				if (_ProcCpuUsages.Count != c) {
 					// process count changed, remove inexist processes
-					RemoveInexistCpuUsage();
+					RemoveInexistCpuUsage(n);
 				}
 				_ProcessUsages.Sort((x, y) => y.cpu.CompareTo(x.cpu));
 			}
 
-			void RemoveInexistCpuUsage() {
+			void RemoveInexistCpuUsage(int n) {
 				List<uint> remove = new List<uint>();
 				foreach (var item in _ProcCpuUsages) {
-					if (_Pids.Contains(item.Key) == false) {
+					if (item.Value.version != n) {
 						remove.Add(item.Key);
 					}
 				}
@@ -359,7 +369,9 @@ namespace Codist.Display
 						if (sb.Length > 0) {
 							sb.AppendLine();
 						}
-						sb.Append(name, 0, (i = name.IndexOf('#')) < 0 ? name.Length : i).Append(" (").Append(pid).Append("): ")
+						i = name.IndexOf('#');
+						(i < 0 ? sb.Append(name) : sb.Append(name, 0, i))
+							.Append(" (").Append(pid).Append("): ")
 							.Append((usage * pc).ToString("0.0")).Append('%');
 						if (++c == 4) {
 							break;
@@ -377,16 +389,6 @@ namespace Codist.Display
 			protected override void OnToolTipClosing(ToolTipEventArgs e) {
 				base.OnToolTipClosing(e);
 				_TooltipDisplayed = false;
-			}
-
-			public override void Start() {
-				base.Start();
-				_WmiSearcher = new ManagementObjectSearcher("SELECT IDProcess, Name, PercentProcessorTime, Timestamp_Sys100NS FROM Win32_PerfRawData_PerfProc_Process WHERE IDProcess != 0");
-			}
-
-			public override void Stop() {
-				base.Stop();
-				_WmiSearcher?.Dispose();
 			}
 		}
 
