@@ -273,6 +273,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete &lt;if&gt; condition.
+        /// </summary>
+        internal static string CMD_DeleteCondition {
+            get {
+                return ResourceManager.GetString("CMD_DeleteCondition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Containing Block.
+        /// </summary>
+        internal static string CMD_DeleteContainingBlock {
+            get {
+                return ResourceManager.GetString("CMD_DeleteContainingBlock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete selected text
         ///Right click: Delete line
         ///Ctrl: Delete and select next
@@ -1003,6 +1021,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Refactor selection.
+        /// </summary>
+        internal static string CMD_RefactorSelection {
+            get {
+                return ResourceManager.GetString("CMD_RefactorSelection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove.
         /// </summary>
         internal static string CMD_Remove {
@@ -1249,6 +1276,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Swap operands
+        ///Swap left and right expressions around operator.
+        /// </summary>
+        internal static string CMD_SwapOperands {
+            get {
+                return ResourceManager.GetString("CMD_SwapOperands", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Tag XML Doc with HTML &lt;a&gt;.
         /// </summary>
         internal static string CMD_TagXmlDocA {
@@ -1452,6 +1489,24 @@ namespace Codist.Properties {
         internal static string CMD_WechatDonateLink {
             get {
                 return ResourceManager.GetString("CMD_WechatDonateLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrap in &lt;if&gt;.
+        /// </summary>
+        internal static string CMD_WrapInIf {
+            get {
+                return ResourceManager.GetString("CMD_WrapInIf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrap in &lt;try...catch&gt;.
+        /// </summary>
+        internal static string CMD_WrapInTryCatch {
+            get {
+                return ResourceManager.GetString("CMD_WrapInTryCatch", resourceCulture);
             }
         }
         

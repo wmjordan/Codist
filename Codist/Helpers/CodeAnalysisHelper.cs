@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Text;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Codist
 {
@@ -323,6 +324,10 @@ namespace Codist
 		public static NameSyntax GetFileScopedNamespaceDeclarationName(this SyntaxNode node) {
 			return node.IsKind(FileScopedNamespaceDeclaration) ? NonPublicOrFutureAccessors.GetFileScopedNamespaceName(node) : null;
 		}
+
+		public static bool IsTopmostIf(this IfStatementSyntax ifs) {
+			return ifs?.Parent.IsKind(SyntaxKind.ElseClause) != true;
+		}
 		#endregion
 
 		#region Node icon
@@ -355,12 +360,12 @@ namespace Codist
 				case SyntaxKind.FixedStatement: return KnownImageIds.Pin;
 				case SyntaxKind.ForEachStatement: return KnownImageIds.ForEach;
 				case SyntaxKind.ForStatement: return KnownImageIds.ForEachLoop;
-				case SyntaxKind.IfStatement: return KnownImageIds.If;
+				case SyntaxKind.IfStatement: return IconIds.If;
 				case SyntaxKind.LockStatement: return KnownImageIds.Lock;
 				case SyntaxKind.SwitchStatement: return KnownImageIds.FlowSwitch;
 				case SyntaxKind.SwitchSection: return KnownImageIds.FlowDecision;
-				case SyntaxKind.TryStatement: return KnownImageIds.TryCatch;
-				case SyntaxKind.UsingStatement: return KnownImageIds.TransactedReceiveScope;
+				case SyntaxKind.TryStatement: return IconIds.TryCatch;
+				case SyntaxKind.UsingStatement: return IconIds.Using;
 				case SyntaxKind.WhileStatement: return KnownImageIds.While;
 				case SyntaxKind.ParameterList: return KnownImageIds.Parameter;
 				case SyntaxKind.ParenthesizedExpression: return IconIds.ParenthesizedExpression;
@@ -1141,6 +1146,50 @@ namespace Codist
 				directive = directive.GetNextDirective(predicate);
 			} while (directive != null && directive.SpanStart < endOfNode);
 			return directives;
+		}
+		public static ImmutableArray<StatementSyntax> GetStatements(this SyntaxNode node, TextSpan span) {
+			if (span.Length == 0) {
+				goto NO_STATEMENT;
+			}
+			var statement = node.FindNode(new TextSpan(span.Start, 1)).FirstAncestorOrSelf<StatementSyntax>();
+			int spanEnd = span.End;
+			ImmutableArray<StatementSyntax>.Builder b = null;
+			TextSpan nodeSpan;
+			List<SyntaxNode> siblings = null;
+			int i = -1;
+			while (statement != null) {
+				if (span.Contains(nodeSpan = statement.Span) == false) {
+					goto NO_STATEMENT;
+				}
+				if (span.Start != nodeSpan.Start
+					&& (statement.HasLeadingTrivia == false || span.Start != statement.GetLeadingTrivia().Span.Start)) {
+					goto NO_STATEMENT;
+				}
+				if (statement.FullSpan.End <= spanEnd) {
+					nodeSpan = statement.FullSpan;
+				}
+				span = TextSpan.FromBounds(nodeSpan.End, spanEnd);
+				if (b == null) {
+					b = ImmutableArray.CreateBuilder<StatementSyntax>();
+					siblings = statement.Parent.ChildNodes().ToList();
+					i = siblings.IndexOf(statement);
+				}
+				b.Add(statement);
+				if (span.IsEmpty) {
+					break;
+				}
+				if (++i < siblings.Count) {
+					statement = siblings[i] as StatementSyntax;
+				}
+				else {
+					break;
+				}
+			}
+			if (span.Length == 0) {
+				return b.ToImmutable();
+			}
+		NO_STATEMENT:
+			return ImmutableArray<StatementSyntax>.Empty;
 		}
 		public static ParameterSyntax FindParameter(this BaseMethodDeclarationSyntax node, string name) {
 			return node?.ParameterList.Parameters.FirstOrDefault(p => p.Identifier.Text == name);

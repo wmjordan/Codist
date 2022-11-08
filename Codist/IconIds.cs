@@ -60,6 +60,9 @@ namespace Codist
 		public const int Argument = KnownImageIds.Parameter;
 		public const int Attribute = KnownImageIds.FormPostBodyParameterNode;
 		public const int Return = KnownImageIds.Return;
+		public const int If = KnownImageIds.If;
+		public const int TryCatch = KnownImageIds.TryCatch;
+		public const int Using = KnownImageIds.TransactedReceiveScope;
 		public const int PublicSymbols = KnownImageIds.ModulePublic;
 		public const int ProtectedSymbols = KnownImageIds.ModuleProtected;
 		public const int InternalSymbols = KnownImageIds.ModuleInternal;
@@ -110,10 +113,14 @@ namespace Codist
 		public const int Comment = KnownImageIds.CommentCode;
 		public const int Uncomment = KnownImageIds.UncommentCode;
 		public const int Rename = KnownImageIds.Rename;
+		public const int Refactoring = KnownImageIds.Refactoring;
 		public const int ReorderParameters = KnownImageIds.ReorderParameters;
 		public const int ExtractInterface = KnownImageIds.ExtractInterface;
 		public const int ExtractMethod = KnownImageIds.ExtractMethod;
+		public const int DeleteMethod = KnownImageIds.MethodMissing;
+		public const int DeleteCondition = KnownImageIds.DeleteClause;
 		public const int EncapsulateField = KnownImageIds.EncapsulateField;
+		public const int SwapOperands = KnownImageIds.SwitchSourceOrTarget;
 		public const int ToggleValue = KnownImageIds.ToggleButton;
 		public const int InvertOperator = KnownImageIds.Operator;
 		public const int AddXmlDoc = KnownImageIds.AddComment;

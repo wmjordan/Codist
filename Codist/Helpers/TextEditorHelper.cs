@@ -150,6 +150,10 @@ namespace Codist
 		public static string GetFirstSelectionText(this ITextView view) {
 			return view.TryGetFirstSelectionSpan(out var span) ? span.GetText() : String.Empty;
 		}
+		public static SnapshotSpan FirstSelectionSpan(this ITextView view) {
+			NormalizedSnapshotSpanCollection spans = view.Selection.SelectedSpans;
+			return spans.Count != 0 ? spans[0] : new SnapshotSpan();
+		}
 		public static bool TryGetFirstSelectionSpan(this ITextView view, out SnapshotSpan span) {
 			if (view.Selection.IsEmpty || view.Selection.SelectedSpans.Count < 1) {
 				span = new SnapshotSpan();
