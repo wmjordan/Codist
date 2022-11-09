@@ -1147,13 +1147,13 @@ namespace Codist
 			} while (directive != null && directive.SpanStart < endOfNode);
 			return directives;
 		}
-		public static ImmutableArray<StatementSyntax> GetStatements(this SyntaxNode node, TextSpan span) {
+		public static List<StatementSyntax> GetStatements(this SyntaxNode node, TextSpan span) {
 			if (span.Length == 0) {
 				goto NO_STATEMENT;
 			}
 			var statement = node.FindNode(new TextSpan(span.Start, 1)).FirstAncestorOrSelf<StatementSyntax>();
 			int spanEnd = span.End;
-			ImmutableArray<StatementSyntax>.Builder b = null;
+			List<StatementSyntax> b = null;
 			TextSpan nodeSpan;
 			List<SyntaxNode> siblings = null;
 			int i = -1;
@@ -1170,7 +1170,7 @@ namespace Codist
 				}
 				span = TextSpan.FromBounds(nodeSpan.End, spanEnd);
 				if (b == null) {
-					b = ImmutableArray.CreateBuilder<StatementSyntax>();
+					b = new List<StatementSyntax>();
 					siblings = statement.Parent.ChildNodes().ToList();
 					i = siblings.IndexOf(statement);
 				}
@@ -1186,10 +1186,10 @@ namespace Codist
 				}
 			}
 			if (span.Length == 0) {
-				return b.ToImmutable();
+				return b;
 			}
 		NO_STATEMENT:
-			return ImmutableArray<StatementSyntax>.Empty;
+			return null;
 		}
 		public static ParameterSyntax FindParameter(this BaseMethodDeclarationSyntax node, string name) {
 			return node?.ParameterList.Parameters.FirstOrDefault(p => p.Identifier.Text == name);

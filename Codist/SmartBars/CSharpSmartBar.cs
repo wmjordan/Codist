@@ -176,7 +176,7 @@ namespace Codist.SmartBars
 			}
 			if (isReadOnly == false) {
 				var statements = _Context.Compilation.GetStatements(_Context.View.FirstSelectionSpan().ToTextSpan());
-				if (statements.Length > 0) {
+				if (statements != null) {
 					AddEditorCommand(MyToolBar, IconIds.ExtractMethod, "Refactor.ExtractMethod", R.CMD_ExtractMethod);
 					AddCommand(MyToolBar, IconIds.Refactoring, R.CMD_RefactorSelection, ShowRefactorMenu);
 				}
@@ -234,17 +234,20 @@ namespace Codist.SmartBars
 			SwapOperandRefactoring.Refactor(_Context);
 		}
 
-		void ReplaceStatements(Func<ImmutableArray<StatementSyntax>, SyntaxAnnotation, SyntaxNode> refactor) {
+		void ReplaceStatements(Func<List<StatementSyntax>, SyntaxAnnotation, SyntaxNode> refactor) {
 			var view = View;
 			var statements = _Context.Compilation.GetStatements(view.FirstSelectionSpan().ToTextSpan());
 			var start = view.Selection.StreamSelectionSpan.Start.Position;
 			SyntaxAnnotation annStatement = new SyntaxAnnotation(),
 				annSelect = new SyntaxAnnotation();
+			var first = statements[0];
+			if (first.HasLeadingTrivia) {
+				statements[0] = first.WithoutLeadingTrivia();
+			}
 			SyntaxNode statement = refactor(statements, annSelect)
 				.WithAdditionalAnnotations(annStatement);
-			var root = statements[0].SyntaxTree.GetRoot()
-				.InsertNodesBefore(statements[0], new[] { statement })
-				.RemoveNodes(statements, SyntaxRemoveOptions.KeepNoTrivia);
+			var root = first.SyntaxTree.GetRoot()
+				.ReplaceNode(first, statement);
 			statement = Formatter.Format(root, annStatement, Workspace.GetWorkspaceRegistration(view.TextBuffer.AsTextContainer()).Workspace)
 				.GetAnnotatedNodes(annStatement)
 				.First();
@@ -580,14 +583,14 @@ namespace Codist.SmartBars
 
 		static class WrapStatementRefactoring
 		{
-			public static IfStatementSyntax WrapInIf(ImmutableArray<StatementSyntax> s, SyntaxAnnotation a) {
+			public static IfStatementSyntax WrapInIf(List<StatementSyntax> statements, SyntaxAnnotation a) {
 				return SF.IfStatement(
 					SF.LiteralExpression(SyntaxKind.TrueLiteralExpression).WithAdditionalAnnotations(a),
-					SF.Block(s));
+					SF.Block(statements));
 			}
 
-			public static TryStatementSyntax WrapInTryCatch(ImmutableArray<StatementSyntax> s, SyntaxAnnotation a) {
-				return SF.TryStatement(SF.Block(s),
+			public static TryStatementSyntax WrapInTryCatch(List<StatementSyntax> statements, SyntaxAnnotation a) {
+				return SF.TryStatement(SF.Block(statements),
 					new SyntaxList<CatchClauseSyntax>(
 						SF.CatchClause(SF.Token(SyntaxKind.CatchKeyword), SF.CatchDeclaration(SF.IdentifierName("Exception").WithAdditionalAnnotations(a), SF.Identifier("ex")),
 						null,
@@ -595,8 +598,8 @@ namespace Codist.SmartBars
 					null);
 			}
 
-			public static UsingStatementSyntax WrapInUsing(ImmutableArray<StatementSyntax> s, SyntaxAnnotation a) {
-				return SF.UsingStatement(null, SF.IdentifierName("disposable").WithAdditionalAnnotations(a), SF.Block(s));
+			public static UsingStatementSyntax WrapInUsing(List<StatementSyntax> statements, SyntaxAnnotation a) {
+				return SF.UsingStatement(null, SF.IdentifierName("disposable").WithAdditionalAnnotations(a), SF.Block(statements));
 			}
 		}
 
@@ -625,8 +628,35 @@ namespace Codist.SmartBars
 			}
 
 			public static void Refactor(SemanticContext ctx) {
-				var node = ctx.Node as BinaryExpressionSyntax;
-				var newNode = node.Update(node.Right, node.OperatorToken, node.Left);
+				var node = ctx.NodeIncludeTrivia as BinaryExpressionSyntax;
+				ExpressionSyntax right = node.Right, left = node.Left;
+				if (left == null || right == null) {
+					return;
+				}
+
+				#region Swap operands besides selected operator
+				if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift) == false) {
+					BinaryExpressionSyntax temp;
+					if ((temp = left as BinaryExpressionSyntax) != null
+						&& temp.RawKind == node.RawKind
+						&& temp.Right != null) {
+						left = temp.Right;
+						right = temp.Update(temp.Left, temp.OperatorToken, right);
+					}
+					else if ((temp = right as BinaryExpressionSyntax) != null
+						&& temp.RawKind == node.RawKind
+						&& temp.Left != null) {
+						left = temp.Update(left, temp.OperatorToken, temp.Right);
+						right = temp.Left;
+					}
+				}
+				#endregion
+
+				var newNode = node.Update(right.WithTrailingTrivia(left.GetTrailingTrivia()),
+					node.OperatorToken,
+					right.HasTrailingTrivia && right.GetTrailingTrivia().Last().IsKind(SyntaxKind.EndOfLineTrivia)
+						? left.WithLeadingTrivia(right.GetLeadingTrivia())
+						: left.WithoutTrailingTrivia());
 				ReplaceNodes(ctx.View, node, new[] { newNode });
 			}
 		}
@@ -743,7 +773,7 @@ namespace Codist.SmartBars
 					while (s.IsKind(SyntaxKind.Block)) {
 						s = s.Parent.FirstAncestorOrSelf<StatementSyntax>();
 					}
-					if (s != null) {
+					if (s != null && targets != null) {
 						ReplaceNodes(ctx.View, s, targets);
 					}
 				}
