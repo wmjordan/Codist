@@ -315,11 +315,11 @@ namespace Codist.Display
 					}
 					++c;
 					uint pid = (uint)item.GetPropertyValue("IDProcess");
-					string name = (string)item.GetPropertyValue("Name");
 					ulong proc = (ulong)item.GetPropertyValue("PercentProcessorTime");
 					float cpu = (float)(proc - (_ProcCpuUsages.TryGetValue(pid, out var u) ? u.counter : 0)) / deltaT;
 					_ProcCpuUsages[pid] = (proc, n);
 					if (cpu != 0) {
+						string name = (string)item.GetPropertyValue("Name");
 						_ProcessUsages.Add((pid, name, cpu));
 					}
 				}
