@@ -167,7 +167,7 @@ namespace Codist.QuickInfo
 					break;
 				case SyntaxKind.LessThanToken:
 				case SyntaxKind.GreaterThanToken:
-					node = unitCompilation.FindNode(token.Span, false, false);
+					node = unitCompilation.FindNode(token.Span);
 					if (node is BinaryExpressionSyntax) {
 						goto PROCESS;
 					}
@@ -177,7 +177,7 @@ namespace Codist.QuickInfo
 				case SyntaxKind.EndRegionKeyword:
 					qiContent.Add(new ThemedTipText(R.T_EndOfRegion)
 						.SetGlyph(ThemeHelper.GetImage(IconIds.Region))
-						.Append((unitCompilation.FindNode(token.Span, true, false) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
+						.Append((unitCompilation.FindNode(token.Span, true) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
 						);
 					return CreateQuickInfoItem(session, token, qiContent.ToUI());
 				case SyntaxKind.VoidKeyword:
@@ -198,7 +198,7 @@ namespace Codist.QuickInfo
 					}
 					if (token.Span.Contains(subjectTriggerPoint, true) == false
 						|| token.IsReservedKeyword()) {
-						node = unitCompilation.FindNode(token.Span, false, false);
+						node = unitCompilation.FindNode(token.Span);
 						if (node is StatementSyntax) {
 							ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
 						}
