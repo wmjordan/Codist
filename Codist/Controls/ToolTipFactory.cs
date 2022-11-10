@@ -136,13 +136,11 @@ namespace Codist
 		}
 
 		static void ShowNumericForms(ISymbol symbol, ThemedToolTip tip) {
-			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.NumericValues)) {
-				var f = symbol as IFieldSymbol;
-				if (f != null && f.IsConst) {
-					var p = ShowNumericForms(f);
-					if (p != null) {
-						tip.AddBorder().Child = p;
-					}
+			if (Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.NumericValues)
+				&& symbol is IFieldSymbol f && f.IsConst) {
+				var p = ShowNumericForms(f);
+				if (p != null) {
+					tip.AddBorder().Child = p;
 				}
 			}
 		}
