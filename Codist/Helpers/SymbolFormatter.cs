@@ -900,6 +900,23 @@ namespace Codist
 			block.Add(")]".Render(PlainText));
 		}
 
+		public void ShowFieldConstantText(InlineCollection text, IFieldSymbol field, bool preferHex) {
+			if (field.HasConstantValue == false) {
+				return;
+			}
+			ExpressionSyntax exp;
+			if (field.HasSource()
+				&& (exp = field.DeclaringSyntaxReferences.GetHardCodedValue()) != null) {
+				ShowExpression(text, exp);
+			}
+			else {
+				text.Add(preferHex && field.ConstantValue is IFormattable f
+					? "0x" + f.ToString("X4", System.Globalization.CultureInfo.InvariantCulture)
+					: field.ConstantValue?.ToString() ?? String.Empty);
+			}
+		}
+
+
 		static Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>> CreatePropertySetter() {
 			var r = new Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>>(19, StringComparer.OrdinalIgnoreCase);
 			foreach (var item in typeof(SymbolFormatter).GetProperties()) {

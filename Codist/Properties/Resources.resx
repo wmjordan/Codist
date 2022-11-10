@@ -2150,4 +2150,16 @@ Sent or received bytes per second through all network interfaces</value>
     <value>Swap operands
 Swap left and right expressions around operator</value>
   </data>
+  <data name="OT_EnumMembers" xml:space="preserve">
+    <value>Enum fields</value>
+  </data>
+  <data name="OT_EnumMembersTip" xml:space="preserve">
+    <value>Displays field names and values of an Enum type</value>
+  </data>
+  <data name="T_More" xml:space="preserve">
+    <value>And more...</value>
+  </data>
+  <data name="T_BitCount" xml:space="preserve">
+    <value>Bit count: </value>
+  </data>
 </root>

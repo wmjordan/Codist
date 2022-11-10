@@ -180,8 +180,15 @@ namespace Codist
 		}
 
 		static void UpgradeConfig(Config config, Version oldVersion) {
-			if (oldVersion < new Version(6, 6) && config.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) == false) {
+			if (oldVersion < new Version(6, 6)
+				&& config.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) == false) {
 				config.QuickInfoOptions |= QuickInfoOptions.AlternativeStyle;
+				__Updated?.Invoke(new ConfigUpdatedEventArgs(config, Features.SuperQuickInfo));
+			}
+			if (oldVersion < new Version(6, 7)
+				&& config.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)
+				&& config.QuickInfoOptions.MatchFlags(QuickInfoOptions.Enum) == false) {
+				config.QuickInfoOptions |= QuickInfoOptions.Enum;
 				__Updated?.Invoke(new ConfigUpdatedEventArgs(config, Features.SuperQuickInfo));
 			}
 		}
@@ -745,6 +752,7 @@ namespace Codist
 		Declaration = 1 << 3,
 		SymbolLocation = 1 << 4,
 		Interfaces = 1 << 5,
+		Enum = 1 << 6,
 		NumericValues = 1 << 7,
 		String = 1 << 8,
 		Parameter = 1 << 9,
@@ -770,7 +778,7 @@ namespace Codist
 		AlternativeStyle = 1 << 30,
 		DocumentationOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc,
 		QuickInfoOverride = DocumentationOverride | AlternativeStyle,
-		Default = AlternativeStyle | Attributes | BaseType | Interfaces | NumericValues | InterfaceImplementations | MethodOverload | Parameter | OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc | SeeAlsoDoc | ExceptionDoc | ReturnsDoc | RemarksDoc,
+		Default = AlternativeStyle | Attributes | BaseType | Interfaces | Enum | NumericValues | InterfaceImplementations | MethodOverload | Parameter | OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc | SeeAlsoDoc | ExceptionDoc | ReturnsDoc | RemarksDoc,
 	}
 
 	[Flags]

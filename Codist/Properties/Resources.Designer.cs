@@ -2329,6 +2329,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enum fields.
+        /// </summary>
+        internal static string OT_EnumMembers {
+            get {
+                return ResourceManager.GetString("OT_EnumMembers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displays field names and values of an Enum type.
+        /// </summary>
+        internal static string OT_EnumMembersTip {
+            get {
+                return ResourceManager.GetString("OT_EnumMembersTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Executable files (*.exe)|*.exe.
         /// </summary>
         internal static string OT_ExecutableFileFilter {
@@ -4377,6 +4395,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bit count: .
+        /// </summary>
+        internal static string T_BitCount {
+            get {
+                return ResourceManager.GetString("T_BitCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bottom gradient.
         /// </summary>
         internal static string T_BottomGradient {
@@ -5312,6 +5339,15 @@ namespace Codist.Properties {
         internal static string T_Methods {
             get {
                 return ResourceManager.GetString("T_Methods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to And more....
+        /// </summary>
+        internal static string T_More {
+            get {
+                return ResourceManager.GetString("T_More", resourceCulture);
             }
         }
         

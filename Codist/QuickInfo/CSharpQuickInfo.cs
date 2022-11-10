@@ -957,13 +957,16 @@ namespace Codist.QuickInfo
 				) {
 				ShowDeclarationModifier(qiContent, typeSymbol);
 			}
-			if (options.MatchFlags(QuickInfoOptions.BaseType)) {
-				if (typeSymbol.TypeKind == TypeKind.Enum) {
+			if (typeSymbol.TypeKind == TypeKind.Enum) {
+				if (options.MatchFlags(QuickInfoOptions.Enum)) {
 					ShowEnumInfo(qiContent, typeSymbol, true);
 				}
-				else {
-					ShowBaseType(qiContent, typeSymbol);
+				else if (options.MatchFlags(QuickInfoOptions.BaseType)) {
+					ShowEnumInfo(qiContent, typeSymbol, false);
 				}
+			}
+			else if (options.MatchFlags(QuickInfoOptions.BaseType)) {
+				ShowBaseType(qiContent, typeSymbol);
 			}
 			if (options.MatchFlags(QuickInfoOptions.Interfaces)) {
 				ShowInterfaces(qiContent, typeSymbol);
@@ -1122,11 +1125,7 @@ namespace Codist.QuickInfo
 			qiContent.Add(info);
 		}
 
-		static void ShowEnumInfo(QiContainer qiContent, INamedTypeSymbol type, bool fromEnum) {
-			if (!Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.BaseType)) {
-				return;
-			}
-
+		static void ShowEnumInfo(QiContainer qiContent, INamedTypeSymbol type, bool showMembers) {
 			var t = type.EnumUnderlyingType;
 			if (t == null) {
 				return;
@@ -1134,28 +1133,27 @@ namespace Codist.QuickInfo
 			var content = new ThemedTipText(R.T_EnumUnderlyingType, true).AddSymbol(t, true, _SymbolFormatter);
 			var s = new ThemedTipDocument()
 				.Append(new ThemedTipParagraph(IconIds.Enum, content));
-			if (fromEnum == false) {
+			if (showMembers == false) {
 				qiContent.Add(s);
 				return;
 			}
+			bool isFlags = type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"));
 			var c = 0;
 			object min = null, max = null, bits = null;
 			IFieldSymbol minName = null, maxName = null;
-			foreach (var m in type.GetMembers()) {
-				var f = m as IFieldSymbol;
-				if (f == null) {
-					continue;
-				}
+			Grid g = null;
+			foreach (var f in type.FindMembers().OfType<IFieldSymbol>().Where(i => i.ConstantValue != null)) {
 				var v = f.ConstantValue;
-				if (v == null) {
-					// hack: the value could somehow be null, if the semantic model is not completely loaded
-					return;
-				}
-				++c;
 				if (min == null) {
 					min = max = bits = v;
 					minName = maxName = f;
-					continue;
+					g = new Grid {
+						ColumnDefinitions = {
+							new ColumnDefinition(),
+							new ColumnDefinition()
+						}
+					};
+					goto NEXT;
 				}
 				if (UnsafeArithmeticHelper.IsGreaterThan(v, max)) {
 					max = v;
@@ -1166,25 +1164,53 @@ namespace Codist.QuickInfo
 					minName = f;
 				}
 				bits = UnsafeArithmeticHelper.Or(v, bits);
+			NEXT:
+				if (c < 64) {
+					g.RowDefinitions.Add(new RowDefinition());
+					var ft = new ThemedTipText {
+						TextAlignment = TextAlignment.Right,
+						Foreground = ThemeHelper.SystemGrayTextBrush,
+						Margin = WpfHelper.SmallHorizontalMargin
+					};
+					SymbolFormatter.Instance.ShowFieldConstantText(ft.Inlines, f, isFlags);
+					g.Add(new TextBlock { Foreground = ThemeHelper.ToolTipTextBrush }
+							.AddSymbol(f, false, _SymbolFormatter)
+							.SetGlyph(ThemeHelper.GetImage(IconIds.EnumField))
+							.SetValue(Grid.SetRow, c))
+						.Add(ft
+							.SetValue(Grid.SetRow, c)
+							.SetValue(Grid.SetColumn, 1));
+				}
+				else if (c == 64) {
+					g.RowDefinitions.Add(new RowDefinition());
+					g.Add(new ThemedTipText(R.T_More).SetValue(Grid.SetRow, c).SetValue(Grid.SetColumnSpan, 2));
+				}
+				++c;
 			}
 			if (min == null) {
 				return;
 			}
-			content.AppendLine().Append(R.T_EnumFieldCount, true).Append(c.ToString())
-				.AppendLine().Append(R.T_EnumMin, true)
-					.Append(min.ToString() + "(")
-					.Append(minName.Name, _SymbolFormatter.Enum)
-					.Append(")")
-				.AppendLine().Append(R.T_EnumMax, true)
-					.Append(max.ToString() + "(")
-					.Append(maxName.Name, _SymbolFormatter.Enum)
-					.Append(")");
-			if (type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"))) {
+			content.AppendLine().Append(R.T_EnumFieldCount, true).Append(c.ToString());
+				//.AppendLine().Append(R.T_EnumMin, true)
+				//			.Append(min.ToString() + "(")
+				//			.AddSymbol(minName, false, _SymbolFormatter)
+				//			.Append(")")
+				//		.AppendLine().Append(R.T_EnumMax, true)
+				//			.Append(max.ToString() + "(")
+				//			.AddSymbol(maxName, false, _SymbolFormatter)
+				//			.Append(")");
+			if (isFlags) {
 				var d = Convert.ToString(Convert.ToInt64(bits), 2);
-				content.AppendLine().Append(R.T_EnumAllFlags, true)
-					.Append($"{d} ({ d.Length}" + (d.Length > 1 ? " bits)" : " bit)"));
+				content.AppendLine().Append(R.T_BitCount, true)
+					.Append(d.Length.ToText())
+					.AppendLine()
+					.Append(R.T_EnumAllFlags, true)
+					.Append(d);
 			}
 			qiContent.Add(s);
+			if (g != null) {
+				qiContent.Add(g);
+			}
 		}
 
 		static void ShowInterfaces(QiContainer qiContent, ITypeSymbol type) {

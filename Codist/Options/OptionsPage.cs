@@ -280,7 +280,7 @@ namespace Codist.Options
 		{
 			readonly OptionBox<QuickInfoOptions> _DisableUntilShift, _CtrlSuppress, _Selection, _Color;
 			readonly OptionBox<QuickInfoOptions> _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle;
-			readonly OptionBox<QuickInfoOptions> _Attributes, _BaseType, _Declaration, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers;
+			readonly OptionBox<QuickInfoOptions> _Attributes, _BaseType, _Declaration, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers, _EnumMembers;
 			readonly OptionBox<QuickInfoOptions>[] _Options;
 			readonly Controls.IntegerBox _MaxWidth, _MaxHeight, _ExtraHeight;
 			readonly ColorButton _BackgroundButton;
@@ -359,6 +359,8 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_BaseTypeTip),
 					_Declaration = o.CreateOptionBox(QuickInfoOptions.Declaration, UpdateConfig, R.OT_Declaration)
 						.SetLazyToolTip(() => R.OT_DesclarationTip),
+					_EnumMembers = o.CreateOptionBox(QuickInfoOptions.Enum, UpdateConfig, R.OT_EnumMembers)
+						.SetLazyToolTip(() => R.OT_EnumMembersTip),
 					_Interfaces = o.CreateOptionBox(QuickInfoOptions.Interfaces, UpdateConfig, R.OT_Interfaces)
 						.SetLazyToolTip(() => R.OT_InterfacesTip),
 					_InterfaceImplementations = o.CreateOptionBox(QuickInfoOptions.InterfaceImplementations, UpdateConfig, R.OT_InterfaceImplementation)
