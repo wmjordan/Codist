@@ -179,6 +179,7 @@ namespace Codist
 		public const int Unindent = KnownImageIds.DecreaseIndent;
 		public const int Indent = KnownImageIds.IncreaseIndent;
 		public const int ListMembers = KnownImageIds.ListMembers;
+		public const int SymbolAnalysis = KnownImageIds.DimensionBrowserView;
 		public const int FindReference = KnownImageIds.ReferencedDimension;
 		public const int FindReferencingSymbols = KnownImageIds.ShowBuiltIns;
 		public const int FindReferrers = KnownImageIds.ShowCallerGraph;

@@ -290,7 +290,7 @@ namespace Codist.SmartBars
 			if (nodeKind == SyntaxKind.IdentifierName || nodeKind == SyntaxKind.GenericName) {
 				AddEditorCommand(MyToolBar, IconIds.GoToDefinition, "Edit.GoToDefinition", R.CMD_GoToDefinitionPeek, "Edit.PeekDefinition");
 			}
-			AddCommand(MyToolBar, IconIds.FindReference, R.CMD_AnalyzeSymbol, ShowSymbolContextMenu);
+			AddCommand(MyToolBar, IconIds.SymbolAnalysis, R.CMD_AnalyzeSymbol, ShowSymbolContextMenu);
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
 				&& Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
 				AddCommands(MyToolBar, IconIds.Marks, R.CMD_MarkSymbol, null, GetMarkerCommands);
