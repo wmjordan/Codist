@@ -33,12 +33,10 @@ text".Log(); // multiline string (string verbatim)
 				.Log(); // calling extension method
 
 			switch ((MyEnum)fieldId) {
-				case MyEnum.None:
-					break; // normal swtich break
-				case MyEnum.OK:
-					return; // control flow keyword
+				case MyEnum.None: break; // normal swtich break
+				case MyEnum.OK: return; // control flow keyword
 				default:
-					throw new NotImplementedException(fieldId.ToString() + " is not supported"); // control flow keyword
+					throw new NotImplementedException(fieldId.ToString()); // control flow keyword
 			}
 
 			for (int i = 0; i < 0XFF; i++) {
@@ -57,6 +55,7 @@ text".Log(); // multiline string (string verbatim)
 			}
 			END: // label
 			MyEvent += TestPage_MyEvent;
+			Method<ConcreteClass>();
 		}
 
 		private void TestPage_MyEvent(object sender, EventArgs e) {
@@ -67,7 +66,6 @@ text".Log(); // multiline string (string verbatim)
 				one = '\u4e00'
 			};
 			Console.WriteLine(anonymous);
-			Method<ConcreteClass>();
 		}
 
 		protected override int Property { get; set; } = 1;

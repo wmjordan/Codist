@@ -1175,6 +1175,10 @@ namespace Codist
 					i = siblings.IndexOf(statement);
 				}
 				b.Add(statement);
+				if (statement.Parent.IsKind(SyntaxKind.LabeledStatement)) {
+					siblings = statement.Parent.Parent.ChildNodes().ToList();
+					i = siblings.IndexOf(statement.Parent);
+				}
 				if (span.IsEmpty) {
 					break;
 				}
