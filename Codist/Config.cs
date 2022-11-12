@@ -304,6 +304,7 @@ namespace Codist
 			engines.Clear();
 			engines.AddRange(new[] {
 				new SearchEngine("Bing", "https://www.bing.com/search?q=%s"),
+				new SearchEngine("Google", "https://www.google.com/search?q=%s"),
 				new SearchEngine("StackOverflow", "https://stackoverflow.com/search?q=%s"),
 				new SearchEngine("GitHub", "https://github.com/search?q=%s"),
 				new SearchEngine("CodeProject", "https://www.codeproject.com/search.aspx?q=%s&x=0&y=0&sbo=kw"),
