@@ -210,6 +210,11 @@ namespace Codist
 			Debug.WriteLine(sb);
 		}
 		#endregion
+
+		static class Vs
+		{
+			public static readonly Version Version = Application.Current.MainWindow.GetType().Assembly.GetName().Version;
+		}
 	}
 #pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 
@@ -228,10 +233,5 @@ namespace Codist
 
 		internal static ResourceDictionary VirtualList => _VirtualList ?? (_VirtualList = WpfHelper.LoadComponent("controls/VirtualList.xaml").MergeWith(ThemedControls));
 		internal static ResourceDictionary SymbolList => _SymbolList ?? (_SymbolList = WpfHelper.LoadComponent("controls/SymbolList.xaml").MergeWith(ThemedControls));
-	}
-
-	static class Vs
-	{
-		public static readonly Version Version = Application.Current.MainWindow.GetType().Assembly.GetName().Version;
 	}
 }

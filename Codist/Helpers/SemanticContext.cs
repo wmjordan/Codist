@@ -39,7 +39,6 @@ namespace Codist
 		public IOutliningManager OutliningManager {
 			get => _OutliningManager ?? (_OutliningManager = ServicesHelper.Instance.OutliningManager.GetOutliningManager(View));
 		}
-		public SyntaxModel Model => _Model;
 		public Workspace Workspace => _Model.Workspace;
 		public Document Document => _Model.Document;
 		public SemanticModel SemanticModel => _Model.SemanticModel;
@@ -60,33 +59,6 @@ namespace Codist
 			set { _Position = value; ResetNodeInfo(); }
 		}
 
-		public Task<SyntaxModel> GetSyntaxModelAsync(CancellationToken cancellationToken = default) {
-			return GetSyntaxModelAsync(View.TextBuffer, cancellationToken);
-		}
-		public async Task<SyntaxModel> GetSyntaxModelAsync(ITextBuffer textBuffer, CancellationToken cancellationToken = default) {
-			var textContainer = textBuffer.AsTextContainer();
-			Document doc = null;
-			if (Workspace.TryGetWorkspace(textContainer, out var workspace)) {
-				var id = workspace.GetDocumentIdInCurrentContext(textContainer);
-				if (id is null == false && workspace.CurrentSolution.ContainsDocument(id)) {
-					doc = workspace.CurrentSolution.WithDocumentText(id, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(id);
-				}
-			}
-			else {
-				return null;
-			}
-			if (doc == Document) {
-				return _Model;
-			}
-			SemanticModel model;
-			return _Model = new SyntaxModel(
-				workspace,
-				doc,
-				model = await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false),
-				model.SyntaxTree.GetCompilationUnitRoot(cancellationToken),
-				await doc.GetSyntaxVersionAsync(cancellationToken)
-				);
-		}
 		public SyntaxNode GetNode(int position, bool includeTrivia, bool deep) {
 			return _Model.GetNode(position, includeTrivia, deep);
 		}
@@ -405,66 +377,64 @@ namespace Codist
 				_View.Properties.RemoveProperty(typeof(SemanticContext));
 				ResetNodeInfo();
 				_OutliningManager = null;
-				if (_Model != null) {
-					_Model.Release();
-				}
+				_Model?.Release();
 				_Model = null;
 				_View = null;
 				_Node = _NodeIncludeTrivia = null;
 				Token = default;
 			}
 		}
-	}
 
-	sealed class SyntaxModel
-	{
-		internal static readonly SyntaxModel Empty = new SyntaxModel(null, null, null, null, VersionStamp.Default);
+		sealed class SyntaxModel
+		{
+			internal static readonly SyntaxModel Empty = new SyntaxModel(null, null, null, null, VersionStamp.Default);
 
-		public Workspace Workspace;
-		public Document Document;
-		public SemanticModel SemanticModel;
-		public CompilationUnitSyntax Compilation;
-		public readonly VersionStamp Version;
+			public Workspace Workspace;
+			public Document Document;
+			public SemanticModel SemanticModel;
+			public CompilationUnitSyntax Compilation;
+			public readonly VersionStamp Version;
 
-		public SyntaxModel(Workspace workspace, Document document, SemanticModel semanticModel, CompilationUnitSyntax compilation, VersionStamp version) {
-			Workspace = workspace;
-			Document = document;
-			SemanticModel = semanticModel;
-			Compilation = compilation;
-			Version = version;
-		}
+			public SyntaxModel(Workspace workspace, Document document, SemanticModel semanticModel, CompilationUnitSyntax compilation, VersionStamp version) {
+				Workspace = workspace;
+				Document = document;
+				SemanticModel = semanticModel;
+				Compilation = compilation;
+				Version = version;
+			}
 
-		public SyntaxNode GetNode(int position, bool includeTrivia, bool deep) {
-			if (Compilation == null || Compilation.FullSpan.Contains(position) == false) {
-				return null;
-			}
-			var node = Compilation.FindNode(new TextSpan(position, 0), includeTrivia, deep);
-			SeparatedSyntaxList<VariableDeclaratorSyntax> variables;
-			if (node.IsKind(SyntaxKind.FieldDeclaration) || node.IsKind(SyntaxKind.EventFieldDeclaration)) {
-				variables = (node as BaseFieldDeclarationSyntax).Declaration.Variables;
-			}
-			else if (node.IsKind(SyntaxKind.VariableDeclaration)) {
-				variables = (node as VariableDeclarationSyntax).Variables;
-			}
-			else if (node.IsKind(SyntaxKind.LocalDeclarationStatement)) {
-				variables = (node as LocalDeclarationStatementSyntax).Declaration.Variables;
-			}
-			else {
-				return node;
-			}
-			foreach (var variable in variables) {
-				if (variable.Span.Contains(position)) {
+			public SyntaxNode GetNode(int position, bool includeTrivia, bool deep) {
+				if (Compilation == null || Compilation.FullSpan.Contains(position) == false) {
+					return null;
+				}
+				var node = Compilation.FindNode(new TextSpan(position, 0), includeTrivia, deep);
+				SeparatedSyntaxList<VariableDeclaratorSyntax> variables;
+				if (node.IsKind(SyntaxKind.FieldDeclaration) || node.IsKind(SyntaxKind.EventFieldDeclaration)) {
+					variables = (node as BaseFieldDeclarationSyntax).Declaration.Variables;
+				}
+				else if (node.IsKind(SyntaxKind.VariableDeclaration)) {
+					variables = (node as VariableDeclarationSyntax).Variables;
+				}
+				else if (node.IsKind(SyntaxKind.LocalDeclarationStatement)) {
+					variables = (node as LocalDeclarationStatementSyntax).Declaration.Variables;
+				}
+				else {
 					return node;
 				}
+				foreach (var variable in variables) {
+					if (variable.Span.Contains(position)) {
+						return node;
+					}
+				}
+				return node.FullSpan.Contains(position) ? node : null;
 			}
-			return node.FullSpan.Contains(position) ? node : null;
-		}
 
-		public void Release() {
-			Workspace = null;
-			Document = null;
-			SemanticModel = null;
-			Compilation = null;
+			public void Release() {
+				Workspace = null;
+				Document = null;
+				SemanticModel = null;
+				Compilation = null;
+			}
 		}
 	}
 }

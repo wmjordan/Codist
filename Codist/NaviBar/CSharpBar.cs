@@ -260,13 +260,12 @@ namespace Codist.NaviBar
 			if (await _SemanticContext.UpdateAsync(position, token).ConfigureAwait(false) == false) {
 				return ImmutableArray<SyntaxNode>.Empty;
 			}
-			var model = _SemanticContext.Model;
-			if (model.Compilation == null) {
+			if (_SemanticContext.Compilation == null) {
 				return ImmutableArray<SyntaxNode>.Empty;
 			}
 			// if the caret is at the beginning of the document, move to the first type declaration
 			if (position == 0) {
-				var n = model.Compilation.GetDecendantDeclarations(token).FirstOrDefault();
+				var n = _SemanticContext.Compilation.GetDecendantDeclarations(token).FirstOrDefault();
 				if (n != null) {
 					position = n.SpanStart;
 				}
