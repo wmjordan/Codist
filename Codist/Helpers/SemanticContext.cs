@@ -362,6 +362,14 @@ namespace Codist
 				.Where(c => c.CollapsedForm as string != "..."); // skip code blocks
 		}
 
+		public SyntaxTrivia GetLineComment() {
+			var token = Token;
+			var triviaList = token.HasLeadingTrivia ? token.LeadingTrivia : token.HasTrailingTrivia ? token.TrailingTrivia : default;
+			return triviaList.Equals(SyntaxTriviaList.Empty) == false && triviaList.FullSpan.Contains(View.Selection.Start.Position)
+				? triviaList.FirstOrDefault(i => i.IsLineComment())
+				: default;
+		}
+
 		void ResetNodeInfo() {
 			_Node = _NodeIncludeTrivia = null;
 			Token = default;

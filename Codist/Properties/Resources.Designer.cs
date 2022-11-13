@@ -291,6 +291,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete method.
+        /// </summary>
+        internal static string CMD_DeleteMethod {
+            get {
+                return ResourceManager.GetString("CMD_DeleteMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete selected text
         ///Right click: Delete line
         ///Ctrl: Delete and select next
@@ -874,6 +883,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Merge with parent &lt;NODE&gt;.
+        /// </summary>
+        internal static string CMD_MergeWithParent {
+            get {
+                return ResourceManager.GetString("CMD_MergeWithParent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Move up.
         /// </summary>
         internal static string CMD_MoveUp {
@@ -1254,6 +1272,15 @@ namespace Codist.Properties {
         internal static string CMD_SimpleTheme {
             get {
                 return ResourceManager.GetString("CMD_SimpleTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Split to nested &lt;if&gt;.
+        /// </summary>
+        internal static string CMD_SplitToNested {
+            get {
+                return ResourceManager.GetString("CMD_SplitToNested", resourceCulture);
             }
         }
         

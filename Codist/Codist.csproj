@@ -114,6 +114,9 @@
     </Compile>
     <Compile Include="QuickInfo\CSharpOpCodeQuickInfo.cs" />
     <Compile Include="QuickInfo\QuickInfoBackgroundController.cs" />
+    <Compile Include="Refactorings\ReplaceNodes.cs" />
+    <Compile Include="Refactorings\ReplaceStatements.cs" />
+    <Compile Include="Refactorings\ReplaceToken.cs" />
     <Compile Include="Taggers\TaggerFactories.cs" />
     <Compile Include="Taggers\TransientClassificationTagHolder.cs" />
     <Compile Include="Taggers\Classifications.cs" />

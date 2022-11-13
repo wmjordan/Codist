@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Text;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.CodeAnalysis.Formatting;
 
 namespace Codist
 {
@@ -1147,6 +1148,10 @@ namespace Codist
 			} while (directive != null && directive.SpanStart < endOfNode);
 			return directives;
 		}
+		public static StatementSyntax GetContainingStatement(this SyntaxNode node) {
+			var s = node.FirstAncestorOrSelf<StatementSyntax>();
+			return s.IsKind(SyntaxKind.Block) ? s.Parent.FirstAncestorOrSelf<StatementSyntax>() ?? s : s;
+		}
 		public static List<StatementSyntax> GetStatements(this SyntaxNode node, TextSpan span) {
 			if (span.Length == 0) {
 				goto NO_STATEMENT;
@@ -1271,6 +1276,16 @@ namespace Codist
 
 		public static ArgumentListSyntax GetImplicitObjectCreationArgumentList(this ExpressionSyntax syntax) {
 			return NonPublicOrFutureAccessors.GetImplicitObjectCreationArgumentList(syntax);
+		}
+
+		public static TSyntaxNode Format<TSyntaxNode>(this TSyntaxNode node, Workspace workspace, CancellationToken cancellation = default)
+			where TSyntaxNode : SyntaxNode {
+			return (TSyntaxNode)Formatter.Format(node, workspace, null, cancellation);
+		}
+
+		public static TSyntaxNode Format<TSyntaxNode>(this TSyntaxNode node, SyntaxAnnotation annotation, Workspace workspace, CancellationToken cancellation = default)
+			where TSyntaxNode : SyntaxNode {
+			return (TSyntaxNode)Formatter.Format(node, annotation, workspace, null, cancellation);
 		}
 
 		static partial class NonPublicOrFutureAccessors

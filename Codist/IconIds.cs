@@ -119,6 +119,8 @@ namespace Codist
 		public const int ExtractMethod = KnownImageIds.ExtractMethod;
 		public const int DeleteMethod = KnownImageIds.MethodMissing;
 		public const int DeleteCondition = KnownImageIds.DeleteClause;
+		public const int MergeCondition = KnownImageIds.GroupByClause;
+		public const int NestCondition = KnownImageIds.InsertClause;
 		public const int EncapsulateField = KnownImageIds.EncapsulateField;
 		public const int SwapOperands = KnownImageIds.SwitchSourceOrTarget;
 		public const int ToggleValue = KnownImageIds.ToggleButton;

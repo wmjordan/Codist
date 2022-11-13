@@ -2164,4 +2164,13 @@ Swap left and right expressions around operator</value>
   <data name="T_BitCount" xml:space="preserve">
     <value>Bit count: </value>
   </data>
+  <data name="CMD_DeleteMethod" xml:space="preserve">
+    <value>Delete method</value>
+  </data>
+  <data name="CMD_MergeWithParent" xml:space="preserve">
+    <value>Merge with parent &lt;NODE&gt;</value>
+  </data>
+  <data name="CMD_SplitToNested" xml:space="preserve">
+    <value>Split to nested &lt;if&gt;</value>
+  </data>
 </root>

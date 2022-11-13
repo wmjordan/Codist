@@ -9,15 +9,11 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using R = Codist.Properties.Resources;
-using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using System.Collections.Immutable;
-using Microsoft.CodeAnalysis.Formatting;
 
 namespace Codist.SmartBars
 {
@@ -25,7 +21,7 @@ namespace Codist.SmartBars
 	/// <summary>
 	/// An extended <see cref="SmartBar"/> for C# content type.
 	/// </summary>
-	sealed class CSharpSmartBar : SmartBar {
+	sealed partial class CSharpSmartBar : SmartBar {
 		static readonly Taggers.HighlightClassifications __HighlightClassifications = Taggers.HighlightClassifications.Instance;
 		SemanticContext _Context;
 		ExternalAdornment _SymbolListContainer;
@@ -162,15 +158,23 @@ namespace Codist.SmartBars
 						}
 					}
 					else if (node is ExpressionSyntax) {
-						if (InvertOperatorRefactoring.IsInvertableOperation(nodeKind)) {
+						if (Refactorings.ReplaceToken.InvertOperator.AcceptToken(token)) {
 							AddCommand(MyToolBar, IconIds.InvertOperator, R.CMD_InvertOperator, InvertOperator);
 						}
-						if (SwapOperandRefactoring.IsSwappableOperation(nodeKind)) {
+						if (Refactorings.ReplaceNodes.SwapOperands.AcceptNode(node)) {
 							AddCommand(MyToolBar, IconIds.SwapOperands, R.CMD_SwapOperands, SwapOperand);
 						}
+						if (Refactorings.ReplaceNodes.NestCondition.AcceptNode(node)) {
+							AddCommand(MyToolBar, IconIds.NestCondition, R.CMD_SplitToNested, SplitToNestedIf);
+						}
 					}
-					else if (nodeKind == SyntaxKind.IfStatement && node.Parent.IsKind(SyntaxKind.ElseClause) == false) {
-						AddCommand(MyToolBar, IconIds.DeleteCondition, R.CMD_DeleteCondition, RefactorToDeleteCondition);
+					else if (node is StatementSyntax) {
+						if (Refactorings.ReplaceNodes.DeleteCondition.AcceptNode(node)) {
+							AddCommand(MyToolBar, IconIds.DeleteCondition, R.CMD_DeleteCondition, RefactorToDeleteCondition);
+						}
+						if (Refactorings.ReplaceNodes.MergeCondition.AcceptNode(node)) {
+							AddCommand(MyToolBar, IconIds.MergeCondition, R.CMD_MergeWithParent.Replace("NODE", node.IsKind(SyntaxKind.IfStatement) ? "if" : "while"), MergeIf);
+						}
 					}
 				}
 			}
@@ -197,11 +201,8 @@ namespace Codist.SmartBars
 			};
 			m.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.If, R.CMD_WrapInIf, RefactorToIfStatement)));
 			m.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.TryCatch, R.CMD_WrapInTryCatch, RefactorToTryCatchStatement)));
-			var block = _Context.Node.Parent.FirstAncestorOrSelf<BlockSyntax>();
-			if (block != null) {
-				if (RemoveContainingStatementRefactoring.CheckContainingNode(block.Parent)) {
-					m.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.Delete, R.CMD_DeleteContainingBlock, RefactorToDeleteContainingBlock)));
-				}
+			if (Refactorings.ReplaceNodes.RemoveContainingStatement.AcceptNode(_Context.Node)) {
+				m.Items.Add(new CommandMenuItem(this, new CommandItem(IconIds.Delete, R.CMD_DeleteContainingBlock, RefactorToDeleteContainingBlock)));
 			}
 
 			ctx.Sender.ContextMenu = m;
@@ -210,80 +211,35 @@ namespace Codist.SmartBars
 		}
 
 		void RefactorToTryCatchStatement(CommandContext c) {
-			ReplaceStatements(WrapStatementRefactoring.WrapInTryCatch);
+			Refactorings.ReplaceStatements.WrapInTryCatch.Refactor(_Context);
 		}
 
 		void RefactorToIfStatement(CommandContext c) {
-			ReplaceStatements(WrapStatementRefactoring.WrapInIf);
-		}
-
-		void RefactorToUsingStatement(CommandContext c) {
-			ReplaceStatements(WrapStatementRefactoring.WrapInUsing);
+			Refactorings.ReplaceStatements.WrapInIf.Refactor(_Context);
 		}
 
 		void RefactorToDeleteCondition(CommandContext ctx) {
-			var ifs = ((IfStatementSyntax)_Context.Node).Statement;
-			ReplaceNodes(View, _Context.Node, ifs is BlockSyntax b ? b.Statements : new SyntaxList<StatementSyntax>(ifs));
+			Refactorings.ReplaceNodes.DeleteCondition.Refactor(_Context);
 		}
 
 		void InvertOperator(CommandContext ctx) {
-			Replace(ctx, InvertOperatorRefactoring.InvertOperator, true);
+			Refactorings.ReplaceToken.InvertOperator.Refactor(_Context);
 		}
 
 		void SwapOperand(CommandContext ctx) {
-			SwapOperandRefactoring.Refactor(_Context);
+			Refactorings.ReplaceNodes.SwapOperands.Refactor(_Context);
 		}
 
-		void ReplaceStatements(Func<List<StatementSyntax>, SyntaxAnnotation, SyntaxNode> refactor) {
-			var view = View;
-			var statements = _Context.Compilation.GetStatements(view.FirstSelectionSpan().ToTextSpan());
-			var start = view.Selection.StreamSelectionSpan.Start.Position;
-			SyntaxAnnotation annStatement = new SyntaxAnnotation(),
-				annSelect = new SyntaxAnnotation();
-			var first = statements[0];
-			if (first.HasLeadingTrivia) {
-				statements[0] = first.WithoutLeadingTrivia();
-			}
-			SyntaxNode statement = refactor(statements, annSelect)
-				.WithAdditionalAnnotations(annStatement);
-			var root = first.SyntaxTree.GetRoot()
-				.ReplaceNode(first, statement);
-			statement = Formatter.Format(root, annStatement, Workspace.GetWorkspaceRegistration(view.TextBuffer.AsTextContainer()).Workspace)
-				.GetAnnotatedNodes(annStatement)
-				.First();
-			view.Edit(
-				(rep: statement.ToString(), sel: view.FirstSelectionSpan()),
-				(v, p, edit) => edit.Replace(p.sel, p.rep)
-			);
-			var selSpan = statement.GetAnnotatedNodes(annSelect).First().Span;
-			view.SelectSpan(start.Position + (selSpan.Start - statement.SpanStart), selSpan.Length, 1);
+		void SplitToNestedIf(CommandContext ctx) {
+			Refactorings.ReplaceNodes.NestCondition.Refactor(_Context);
+		}
+
+		void MergeIf(CommandContext ctx) {
+			Refactorings.ReplaceNodes.MergeCondition.Refactor(_Context);
 		}
 
 		void RefactorToDeleteContainingBlock(CommandContext c) {
-			RemoveContainingStatementRefactoring.Refactor(_Context);
-		}
-
-		static void ReplaceNodes(IWpfTextView view, SyntaxNode oldNode, IEnumerable<SyntaxNode> newNodes) {
-			var start = view.Selection.StreamSelectionSpan.Start.Position;
-			var ann = new SyntaxAnnotation();
-			List<SyntaxNode> nodes = new List<SyntaxNode>();
-			foreach (var item in newNodes) {
-				nodes.Add(item.WithAdditionalAnnotations(ann));
-			}
-			var root = oldNode.SyntaxTree.GetRoot();
-			root = nodes.Count > 1
-				? root.ReplaceNode(oldNode, nodes)
-				: root.ReplaceNode(oldNode, nodes[0]);
-			newNodes = Formatter.Format(root, ann, Workspace.GetWorkspaceRegistration(view.TextBuffer.AsTextContainer()).Workspace)
-				.GetAnnotatedNodes(ann);
-			view.Edit(
-				(rep: String.Concat(newNodes.Select(i => i.ToFullString())), sel: oldNode.FullSpan.ToSpan()),
-				(v, p, edit) => edit.Replace(p.sel, p.rep)
-			);
-			view.Caret.MoveTo(new SnapshotPoint(view.TextSnapshot, newNodes.First().SpanStart));
-			if (nodes.Count == 1) {
-				view.Selection.Select(new SnapshotSpan(view.TextSnapshot, newNodes.First().Span.ToSpan()), false);
-			}
+			Refactorings.ReplaceNodes.RemoveContainingStatement.Refactor(_Context);
 		}
 
 		void AddSymbolCommands(SyntaxKind nodeKind) {
@@ -374,13 +330,7 @@ namespace Codist.SmartBars
 					}
 				}
 			}
-			var token = _Context.Token;
-			var triviaList = token.HasLeadingTrivia ? token.LeadingTrivia : token.HasTrailingTrivia ? token.TrailingTrivia : default;
-			var lineComment = new SyntaxTrivia();
-			if (triviaList.Equals(SyntaxTriviaList.Empty) == false && triviaList.FullSpan.Contains(View.Selection.Start.Position)) {
-				lineComment = triviaList.FirstOrDefault(i => i.IsLineComment());
-			}
-			if (lineComment.RawKind != 0) {
+			if (_Context.GetLineComment().RawKind != 0) {
 				AddEditorCommand(MyToolBar, IconIds.Uncomment, "Edit.UncommentSelection", R.CMD_UncommentSelection);
 			}
 		}
@@ -417,7 +367,7 @@ namespace Codist.SmartBars
 					}
 					break;
 				case SyntaxKind.MethodDeclaration:
-					AddCommand(MyToolBar, IconIds.DeleteMethod, "Delete method", ctx => {
+					AddCommand(MyToolBar, IconIds.DeleteMethod, R.CMD_DeleteMethod, ctx => {
 						ctx.View.SelectNode(node, true);
 						ctx.View.Edit(node, (view, n, edit) => {
 							edit.Delete(n.FullSpan.ToSpan());
@@ -581,86 +531,6 @@ namespace Codist.SmartBars
 			_Symbol = null;
 		}
 
-		static class WrapStatementRefactoring
-		{
-			public static IfStatementSyntax WrapInIf(List<StatementSyntax> statements, SyntaxAnnotation a) {
-				return SF.IfStatement(
-					SF.LiteralExpression(SyntaxKind.TrueLiteralExpression).WithAdditionalAnnotations(a),
-					SF.Block(statements));
-			}
-
-			public static TryStatementSyntax WrapInTryCatch(List<StatementSyntax> statements, SyntaxAnnotation a) {
-				return SF.TryStatement(SF.Block(statements),
-					new SyntaxList<CatchClauseSyntax>(
-						SF.CatchClause(SF.Token(SyntaxKind.CatchKeyword), SF.CatchDeclaration(SF.IdentifierName("Exception").WithAdditionalAnnotations(a), SF.Identifier("ex")),
-						null,
-						SF.Block())),
-					null);
-			}
-
-			public static UsingStatementSyntax WrapInUsing(List<StatementSyntax> statements, SyntaxAnnotation a) {
-				return SF.UsingStatement(null, SF.IdentifierName("disposable").WithAdditionalAnnotations(a), SF.Block(statements));
-			}
-		}
-
-		static class SwapOperandRefactoring
-		{
-			public static bool IsSwappableOperation(SyntaxKind kind) {
-				switch (kind) {
-					case SyntaxKind.BitwiseAndExpression:
-					case SyntaxKind.BitwiseOrExpression:
-					case SyntaxKind.LogicalOrExpression:
-					case SyntaxKind.LogicalAndExpression:
-					case SyntaxKind.EqualsExpression:
-					case SyntaxKind.NotEqualsExpression:
-					case SyntaxKind.GreaterThanExpression:
-					case SyntaxKind.GreaterThanOrEqualExpression:
-					case SyntaxKind.LessThanExpression:
-					case SyntaxKind.LessThanOrEqualExpression:
-					case SyntaxKind.AddExpression:
-					case SyntaxKind.SubtractExpression:
-					case SyntaxKind.MultiplyExpression:
-					case SyntaxKind.DivideExpression:
-					case SyntaxKind.CoalesceExpression:
-						return true;
-				}
-				return false;
-			}
-
-			public static void Refactor(SemanticContext ctx) {
-				var node = ctx.NodeIncludeTrivia as BinaryExpressionSyntax;
-				ExpressionSyntax right = node.Right, left = node.Left;
-				if (left == null || right == null) {
-					return;
-				}
-
-				#region Swap operands besides selected operator
-				if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift) == false) {
-					BinaryExpressionSyntax temp;
-					if ((temp = left as BinaryExpressionSyntax) != null
-						&& temp.RawKind == node.RawKind
-						&& temp.Right != null) {
-						left = temp.Right;
-						right = temp.Update(temp.Left, temp.OperatorToken, right);
-					}
-					else if ((temp = right as BinaryExpressionSyntax) != null
-						&& temp.RawKind == node.RawKind
-						&& temp.Left != null) {
-						left = temp.Update(left, temp.OperatorToken, temp.Right);
-						right = temp.Left;
-					}
-				}
-				#endregion
-
-				var newNode = node.Update(right.WithTrailingTrivia(left.GetTrailingTrivia()),
-					node.OperatorToken,
-					right.HasTrailingTrivia && right.GetTrailingTrivia().Last().IsKind(SyntaxKind.EndOfLineTrivia)
-						? left.WithLeadingTrivia(right.GetLeadingTrivia())
-						: left.WithoutTrailingTrivia());
-				ReplaceNodes(ctx.View, node, new[] { newNode });
-			}
-		}
-
 		static class InvertOperatorRefactoring
 		{
 			public static bool IsInvertableOperation(SyntaxKind kind) {
@@ -730,53 +600,6 @@ namespace Codist.SmartBars
 					case "|=": return "&=";
 				}
 				return null;
-			}
-		}
-
-		static class RemoveContainingStatementRefactoring
-		{
-			public static bool CheckContainingNode(SyntaxNode node) {
-				switch (node.Kind()) {
-					case SyntaxKind.ForEachStatement:
-					case SyntaxKind.ForEachVariableStatement:
-					case SyntaxKind.ForStatement:
-					case SyntaxKind.UsingStatement:
-					case SyntaxKind.WhileStatement:
-					case SyntaxKind.DoStatement:
-					case SyntaxKind.LockStatement:
-					case SyntaxKind.FixedStatement:
-					case SyntaxKind.UnsafeStatement:
-					case SyntaxKind.TryStatement:
-					case SyntaxKind.CheckedStatement:
-					case SyntaxKind.UncheckedStatement:
-						return true;
-					case SyntaxKind.IfStatement:
-						return ((IfStatementSyntax)node).IsTopmostIf();
-					case SyntaxKind.ElseClause:
-						return ((ElseClauseSyntax)node).Statement?.Kind() != SyntaxKind.IfStatement;
-				}
-				return false;
-			}
-
-			public static void Refactor(SemanticContext ctx) {
-				StatementSyntax s = ctx.Node.Parent.FirstAncestorOrSelf<BlockSyntax>();
-				if (s.Parent.IsKind(SyntaxKind.ElseClause)) {
-					var oldIf = s.FirstAncestorOrSelf<ElseClauseSyntax>().Parent.FirstAncestorOrSelf<IfStatementSyntax>();
-					var newIf = oldIf.WithElse(null);
-					var targets = ((BlockSyntax)s).Statements;
-					if (s != null) {
-						ReplaceNodes(ctx.View, oldIf, targets.Insert(0, newIf));
-					}
-				}
-				else {
-					var targets = s is BlockSyntax b ? b.Statements : (IEnumerable<SyntaxNode>)ctx.Compilation.GetStatements(ctx.View.FirstSelectionSpan().ToTextSpan());
-					while (s.IsKind(SyntaxKind.Block)) {
-						s = s.Parent.FirstAncestorOrSelf<StatementSyntax>();
-					}
-					if (s != null && targets != null) {
-						ReplaceNodes(ctx.View, s, targets);
-					}
-				}
 			}
 		}
 	}

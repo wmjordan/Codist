@@ -2147,4 +2147,13 @@ Right click: 显示“线程”窗口</value>
   <data name="T_BitCount" xml:space="preserve">
     <value>二进制位数: </value>
   </data>
+  <data name="CMD_DeleteMethod" xml:space="preserve">
+    <value>删除选中的方法</value>
+  </data>
+  <data name="CMD_MergeWithParent" xml:space="preserve">
+    <value>与上级 &lt;NODE&gt; 合并</value>
+  </data>
+  <data name="CMD_SplitToNested" xml:space="preserve">
+    <value>拆分为嵌套的 &lt;if&gt;</value>
+  </data>
 </root>
