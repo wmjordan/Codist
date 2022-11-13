@@ -662,7 +662,7 @@ namespace Codist
 						else {
 							sb.Append(t, p, i - p);
 						}
-						if (i > 0 && NeedSpace("(['\"", t[i - 1]) && j < t.Length && NeedSpace(")]'\"", t[j])) {
+						if (i > 0 && t[j] != '.' && NeedSpace("([{<'\"", t[i - 1]) && j < t.Length && NeedSpace(")]}>'\"", t[j])) {
 							sb.Append(' ');
 						}
 						i = j;
