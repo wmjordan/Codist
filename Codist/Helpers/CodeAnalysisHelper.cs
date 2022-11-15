@@ -329,6 +329,38 @@ namespace Codist
 		public static bool IsTopmostIf(this IfStatementSyntax ifs) {
 			return ifs?.Parent.IsKind(SyntaxKind.ElseClause) != true;
 		}
+
+		public static bool IsMultiLine(this SyntaxNode node, bool includeTrivia) {
+			if (includeTrivia && 
+				(node.HasLeadingTrivia && node.GetLeadingTrivia().IsMultiline()
+					|| node.HasTrailingTrivia && node.GetTrailingTrivia().IsMultiline())
+				) {
+				return true;
+			}
+			foreach (var item in node.ChildNodesAndTokens()) {
+				if (item.IsNode) {
+					if (item.AsNode().IsMultiLine(true)) {
+						return true;
+					}
+				}
+				else {
+					var token = item.AsToken();
+					if (token.HasLeadingTrivia && token.LeadingTrivia.IsMultiline()
+						|| token.HasTrailingTrivia && token.TrailingTrivia.IsMultiline()) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		public static bool IsMultiline(this SyntaxTriviaList trivias) {
+			foreach (var item in trivias) {
+				if (item.IsKind(SyntaxKind.EndOfLineTrivia)) {
+					return true;
+				}
+			}
+			return false;
+		}
 		#endregion
 
 		#region Node icon

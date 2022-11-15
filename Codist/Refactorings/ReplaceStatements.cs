@@ -11,26 +11,26 @@ namespace Codist.Refactorings
 {
 	sealed class ReplaceStatements
 	{
-		public static readonly ReplaceStatements WrapInIf = new ReplaceStatements((s,a) => {
+		public static readonly ReplaceStatements WrapInIf = new ReplaceStatements(s => {
 			return SF.IfStatement(
-				SF.LiteralExpression(SyntaxKind.TrueLiteralExpression).WithAdditionalAnnotations(a),
+				SF.LiteralExpression(SyntaxKind.TrueLiteralExpression).AnnotateSelect(),
 				SF.Block(s));
 		});
-		public static readonly ReplaceStatements WrapInTryCatch = new ReplaceStatements((s,a) => {
+		public static readonly ReplaceStatements WrapInTryCatch = new ReplaceStatements(s => {
 			return SF.TryStatement(SF.Block(s),
 				new SyntaxList<CatchClauseSyntax>(
-					SF.CatchClause(SF.Token(SyntaxKind.CatchKeyword), SF.CatchDeclaration(SF.IdentifierName("Exception").WithAdditionalAnnotations(a), SF.Identifier("ex")),
+					SF.CatchClause(SF.Token(SyntaxKind.CatchKeyword), SF.CatchDeclaration(SF.IdentifierName("Exception").AnnotateSelect(), SF.Identifier("ex")),
 					null,
 					SF.Block())),
 				null);
 		});
-		public static readonly ReplaceStatements WrapInUsing = new ReplaceStatements((s,a) => {
-			return SF.UsingStatement(null, SF.IdentifierName("disposable").WithAdditionalAnnotations(a), SF.Block(s));
+		public static readonly ReplaceStatements WrapInUsing = new ReplaceStatements(s => {
+			return SF.UsingStatement(null, SF.IdentifierName("disposable").AnnotateSelect(), SF.Block(s));
 		});
 
-		readonly Func<List<StatementSyntax>, SyntaxAnnotation, SyntaxNode> _Refactor;
+		readonly Func<List<StatementSyntax>, SyntaxNode> _Refactor;
 
-		ReplaceStatements(Func<List<StatementSyntax>, SyntaxAnnotation, SyntaxNode> refactor) {
+		ReplaceStatements(Func<List<StatementSyntax>, SyntaxNode> refactor) {
 			_Refactor = refactor;
 		}
 
@@ -38,13 +38,12 @@ namespace Codist.Refactorings
 			var view = context.View;
 			var statements = context.Compilation.GetStatements(view.FirstSelectionSpan().ToTextSpan());
 			var start = view.Selection.StreamSelectionSpan.Start.Position;
-			SyntaxAnnotation annStatement = new SyntaxAnnotation(),
-				annSelect = new SyntaxAnnotation();
+			SyntaxAnnotation annStatement = new SyntaxAnnotation();
 			var first = statements[0];
 			if (first.HasLeadingTrivia) {
 				statements[0] = first.WithoutLeadingTrivia();
 			}
-			SyntaxNode statement = _Refactor(statements, annSelect)
+			SyntaxNode statement = _Refactor(statements)
 				.WithAdditionalAnnotations(annStatement);
 			var root = first.SyntaxTree.GetRoot()
 				.ReplaceNode(first, statement);
@@ -55,8 +54,10 @@ namespace Codist.Refactorings
 				(rep: statement.ToString(), sel: view.FirstSelectionSpan()),
 				(v, p, edit) => edit.Replace(p.sel, p.rep)
 			);
-			var selSpan = statement.GetAnnotatedNodes(annSelect).First().Span;
-			view.SelectSpan(start.Position + (selSpan.Start - statement.SpanStart), selSpan.Length, 1);
+			var selSpan = statement.GetAnnotatedNodes(CodeFormatHelper.Select).FirstOrDefault().Span;
+			if (selSpan.Length != 0) {
+				view.SelectSpan(start.Position + (selSpan.Start - statement.SpanStart), selSpan.Length, 1);
+			}
 		}
 	}
 }

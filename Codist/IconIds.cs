@@ -121,6 +121,8 @@ namespace Codist
 		public const int DeleteCondition = KnownImageIds.DeleteClause;
 		public const int MergeCondition = KnownImageIds.GroupByClause;
 		public const int NestCondition = KnownImageIds.InsertClause;
+		public const int SplitCondition = KnownImageIds.UngroupClause;
+		public const int MultiLine = KnownImageIds.WordWrap;
 		public const int EncapsulateField = KnownImageIds.EncapsulateField;
 		public const int SwapOperands = KnownImageIds.SwitchSourceOrTarget;
 		public const int ToggleValue = KnownImageIds.ToggleButton;

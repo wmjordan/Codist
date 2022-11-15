@@ -2173,4 +2173,13 @@ Swap left and right expressions around operator</value>
   <data name="CMD_SplitToNested" xml:space="preserve">
     <value>Split to nested &lt;if&gt;</value>
   </data>
+  <data name="CMD_ConditionalOnMultiLines" xml:space="preserve">
+    <value>&lt;?:&gt; on multi-lines</value>
+  </data>
+  <data name="CMD_ConditionalToIfElse" xml:space="preserve">
+    <value>&lt;?:&gt; to &lt;if...else&gt;</value>
+  </data>
+  <data name="CMD_IfElseToConditional" xml:space="preserve">
+    <value>&lt;if...else&gt; to &lt;?:&gt;</value>
+  </data>
 </root>

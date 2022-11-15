@@ -2156,4 +2156,13 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_SplitToNested" xml:space="preserve">
     <value>拆分为嵌套的 &lt;if&gt;</value>
   </data>
+  <data name="CMD_ConditionalOnMultiLines" xml:space="preserve">
+    <value>将 &lt;?:&gt; 换行</value>
+  </data>
+  <data name="CMD_ConditionalToIfElse" xml:space="preserve">
+    <value>将 &lt;?:&gt; 转为 &lt;if...else&gt;</value>
+  </data>
+  <data name="CMD_IfElseToConditional" xml:space="preserve">
+    <value>将 &lt;if...else&gt; 转为 &lt;?:&gt;</value>
+  </data>
 </root>

@@ -167,6 +167,12 @@ namespace Codist.SmartBars
 						if (Refactorings.ReplaceNodes.NestCondition.AcceptNode(node)) {
 							AddCommand(MyToolBar, IconIds.NestCondition, R.CMD_SplitToNested, SplitToNestedIf);
 						}
+						if (Refactorings.ReplaceNodes.ChangeConditionalToIf.AcceptNode(node)) {
+							AddCommand(MyToolBar, IconIds.SplitCondition, R.CMD_ConditionalToIfElse, ChangeConditionalToIf);
+						}
+						if (Refactorings.ReplaceNodes.MultiLineConditional.AcceptNode(node)) {
+							AddCommand(MyToolBar, IconIds.MultiLine, R.CMD_ConditionalOnMultiLines, ConditionalToMultiLine);
+						}
 					}
 					else if (node is StatementSyntax) {
 						if (Refactorings.ReplaceNodes.DeleteCondition.AcceptNode(node)) {
@@ -174,6 +180,9 @@ namespace Codist.SmartBars
 						}
 						if (Refactorings.ReplaceNodes.MergeCondition.AcceptNode(node)) {
 							AddCommand(MyToolBar, IconIds.MergeCondition, R.CMD_MergeWithParent.Replace("NODE", node.IsKind(SyntaxKind.IfStatement) ? "if" : "while"), MergeIf);
+						}
+						if (Refactorings.ReplaceNodes.ChangeIfToConditional.AcceptNode(node)) {
+							AddCommand(MyToolBar, IconIds.MergeCondition, R.CMD_IfElseToConditional, ChangeIfToConditional);
 						}
 					}
 				}
@@ -236,6 +245,18 @@ namespace Codist.SmartBars
 
 		void MergeIf(CommandContext ctx) {
 			Refactorings.ReplaceNodes.MergeCondition.Refactor(_Context);
+		}
+
+		void ChangeIfToConditional(CommandContext ctx) {
+			Refactorings.ReplaceNodes.ChangeIfToConditional.Refactor(_Context);
+		}
+
+		void ChangeConditionalToIf(CommandContext ctx) {
+			Refactorings.ReplaceNodes.ChangeConditionalToIf.Refactor(_Context);
+		}
+
+		void ConditionalToMultiLine(CommandContext ctx) {
+			Refactorings.ReplaceNodes.MultiLineConditional.Refactor(_Context);
 		}
 
 		void RefactorToDeleteContainingBlock(CommandContext c) {

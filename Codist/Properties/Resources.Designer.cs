@@ -161,6 +161,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;?:&gt; on multi-lines.
+        /// </summary>
+        internal static string CMD_ConditionalOnMultiLines {
+            get {
+                return ResourceManager.GetString("CMD_ConditionalOnMultiLines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?:&gt; to &lt;if...else&gt;.
+        /// </summary>
+        internal static string CMD_ConditionalToIfElse {
+            get {
+                return ResourceManager.GetString("CMD_ConditionalToIfElse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Configure Codist Syntax Highlight.
         /// </summary>
         internal static string CMD_ConfigureSyntaxHighlight {
@@ -721,6 +739,15 @@ namespace Codist.Properties {
         internal static string CMD_HtmlEncode {
             get {
                 return ResourceManager.GetString("CMD_HtmlEncode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;if...else&gt; to &lt;?:&gt;.
+        /// </summary>
+        internal static string CMD_IfElseToConditional {
+            get {
+                return ResourceManager.GetString("CMD_IfElseToConditional", resourceCulture);
             }
         }
         

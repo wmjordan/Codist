@@ -6,6 +6,7 @@ using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -19,10 +20,16 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNodes SwapOperands = new SwapOperandsRefactoring();
 		public static readonly ReplaceNodes NestCondition = new NestConditionRefactoring();
 		public static readonly ReplaceNodes MergeCondition = new MergeConditionRefactoring();
+		public static readonly ReplaceNodes ChangeIfToConditional = new ChangeIfToConditionalRefactoring();
+		public static readonly ReplaceNodes ChangeConditionalToIf = new ChangeConditionalToIfRefactoring();
+		public static readonly ReplaceNodes MultiLineConditional = new MultilineConditionalRefactoring();
 
 		public abstract bool AcceptNode(SyntaxNode node);
 		public abstract void Refactor(SemanticContext ctx);
 
+		static void Replace(SemanticContext context, SyntaxNode oldNode, SyntaxNode newNode) {
+			Replace(context, oldNode, new[] { newNode });
+		}
 		static void Replace(SemanticContext context, SyntaxNode oldNode, IEnumerable<SyntaxNode> newNodes) {
 			var view = context.View;
 			var start = view.Selection.StreamSelectionSpan.Start.Position;
@@ -32,18 +39,19 @@ namespace Codist.Refactorings
 				nodes.Add(item.WithAdditionalAnnotations(ann));
 			}
 			var root = oldNode.SyntaxTree.GetRoot();
-			root = nodes.Count > 1
-				? root.ReplaceNode(oldNode, nodes)
-				: root.ReplaceNode(oldNode, nodes[0]);
-			newNodes = root.Format(ann, context.Workspace)
-				.GetAnnotatedNodes(ann);
+			root = (nodes.Count > 1
+					? root.ReplaceNode(oldNode, nodes)
+					: root.ReplaceNode(oldNode, nodes[0]))
+				.Format(CodeFormatHelper.Reformat, context.Workspace);
+			newNodes = root.GetAnnotatedNodes(ann);
+			var select = root.GetAnnotatedNodes(CodeFormatHelper.Select).FirstOrDefault().Span;
 			view.Edit(
 				(rep: String.Concat(newNodes.Select(i => i.ToFullString())), sel: oldNode.FullSpan.ToSpan()),
 				(v, p, edit) => edit.Replace(p.sel, p.rep)
 			);
 			view.Caret.MoveTo(new SnapshotPoint(view.TextSnapshot, newNodes.First().SpanStart));
-			if (nodes.Count == 1) {
-				view.Selection.Select(new SnapshotSpan(view.TextSnapshot, newNodes.First().Span.ToSpan()), false);
+			if (select.Length != 0) {
+				view.Selection.Select(new SnapshotSpan(view.TextSnapshot, select.ToSpan()), false);
 			}
 		}
 
@@ -55,7 +63,12 @@ namespace Codist.Refactorings
 
 			public override void Refactor(SemanticContext ctx) {
 				var ifs = ((IfStatementSyntax)ctx.Node).Statement;
-				Replace(ctx, ctx.Node, ifs is BlockSyntax b ? b.Statements : new SyntaxList<StatementSyntax>(ifs));
+				Replace(ctx,
+					ctx.Node,
+					ifs is BlockSyntax b
+						? b.Statements.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select)
+						: new SyntaxList<StatementSyntax>(ifs.AnnotateReformatAndSelect())
+					);
 			}
 		}
 
@@ -106,7 +119,7 @@ namespace Codist.Refactorings
 						s = s.Parent.FirstAncestorOrSelf<StatementSyntax>();
 					}
 					if (s != null && targets != null) {
-						Replace(ctx, s, targets);
+						Replace(ctx, s, targets.Select(i => i.AnnotateReformatAndSelect()));
 					}
 				}
 			}
@@ -166,7 +179,7 @@ namespace Codist.Refactorings
 					right.HasTrailingTrivia && right.GetTrailingTrivia().Last().IsKind(SyntaxKind.EndOfLineTrivia)
 						? left.WithLeadingTrivia(right.GetLeadingTrivia())
 						: left.WithoutTrailingTrivia());
-				Replace(ctx, node, new[] { newNode });
+				Replace(ctx, node, newNode.AnnotateReformatAndSelect());
 			}
 		}
 
@@ -190,12 +203,12 @@ namespace Codist.Refactorings
 				if (s is IfStatementSyntax ifs) {
 					var newIf = ifs.WithCondition(left.WithoutTrailingTrivia())
 						.WithStatement(SF.Block(SF.IfStatement(right, ifs.Statement)).Format(ctx.View.TextBuffer.GetWorkspace()));
-					Replace(ctx, ifs, new[] { newIf });
+					Replace(ctx, ifs, new[] { newIf.AnnotateReformatAndSelect() });
 				}
 				else if (s is WhileStatementSyntax ws) {
 					var newWhile = ws.WithCondition(left.WithoutTrailingTrivia())
 						.WithStatement(SF.Block(SF.IfStatement(right, ws.Statement)).Format(ctx.View.TextBuffer.GetWorkspace()));
-					Replace(ctx, ws, new[] { newWhile });
+					Replace(ctx, ws, new[] { newWhile.AnnotateReformatAndSelect() });
 				}
 			}
 
@@ -232,12 +245,12 @@ namespace Codist.Refactorings
 				if (s is IfStatementSyntax newIf) {
 					newIf = newIf.WithCondition(SF.BinaryExpression(SyntaxKind.LogicalAndExpression, newIf.Condition, ifs.Condition))
 						.WithStatement(b);
-					Replace(ctx, s, new[] { newIf });
+					Replace(ctx, s, new[] { newIf.AnnotateReformatAndSelect() });
 				}
 				else if (s is WhileStatementSyntax newWhile) {
 					newWhile = newWhile.WithCondition(SF.BinaryExpression(SyntaxKind.LogicalAndExpression, newWhile.Condition, ifs.Condition))
 						.WithStatement(b);
-					Replace(ctx, s, new[] { newWhile });
+					Replace(ctx, s, new[] { newWhile.AnnotateReformatAndSelect() });
 				}
 			}
 
@@ -254,10 +267,143 @@ namespace Codist.Refactorings
 					}
 					node = node.Parent;
 				}
-				if (node.IsKind(SyntaxKind.IfStatement) || node.IsKind(SyntaxKind.WhileStatement)) {
-					return node as StatementSyntax;
+				return node.IsKind(SyntaxKind.IfStatement) || node.IsKind(SyntaxKind.WhileStatement) ? node as StatementSyntax : null;
+			}
+		}
+
+		sealed class ChangeIfToConditionalRefactoring : ReplaceNodes
+		{
+			public override bool AcceptNode(SyntaxNode node) {
+				return GetConditionalStatement(node).ifStatement != null;
+			}
+
+			public override void Refactor(SemanticContext ctx) {
+				var (ifStatement, statement, elseStatement) = GetConditionalStatement(ctx.Node);
+				if (ifStatement == null) {
+					return;
 				}
-				return null;
+				SyntaxNode newNode;
+				switch (statement.Kind()) {
+					case SyntaxKind.ReturnStatement:
+						newNode = SF.ReturnStatement(
+							SF.ConditionalExpression(ifStatement.Condition.WithLeadingTrivia(SF.Space),
+								(statement as ReturnStatementSyntax).Expression,
+								(elseStatement as ReturnStatementSyntax).Expression)
+							);
+						break;
+					case SyntaxKind.ExpressionStatement:
+						var assignee = ((AssignmentExpressionSyntax)((ExpressionStatementSyntax)statement).Expression).Left;
+						newNode = SF.ExpressionStatement(
+							SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+								assignee,
+								SF.ConditionalExpression(ifStatement.Condition,
+									((AssignmentExpressionSyntax)((ExpressionStatementSyntax)statement).Expression).Right,
+									((AssignmentExpressionSyntax)((ExpressionStatementSyntax)elseStatement).Expression).Right))
+							);
+						break;
+					case SyntaxKind.YieldReturnStatement:
+						newNode = SF.YieldStatement(SyntaxKind.YieldReturnStatement,
+							SF.ConditionalExpression(ifStatement.Condition,
+								(statement as YieldStatementSyntax).Expression,
+								(elseStatement as YieldStatementSyntax).Expression));
+						break;
+					default:
+						return;
+				}
+				Replace(ctx, ifStatement, newNode.AnnotateReformatAndSelect());
+			}
+
+			static (IfStatementSyntax ifStatement, StatementSyntax statement, StatementSyntax elseStatement) GetConditionalStatement(SyntaxNode node) {
+				StatementSyntax ss, es;
+				SyntaxKind k;
+				if (node is IfStatementSyntax ifs
+					&& ifs.Else != null
+					&& (ss = ifs.Statement) != null
+					&& (ss = GetSingleStatement(ss)) != null
+					&& (es = ifs.Else.Statement) != null
+					&& (es = GetSingleStatement(es)) != null
+					&& es.IsKind(k = ss.Kind())
+					&& (k == SyntaxKind.ReturnStatement
+						|| k == SyntaxKind.YieldReturnStatement
+						|| (k == SyntaxKind.ExpressionStatement
+							&& ss is ExpressionStatementSyntax e
+							&& e.Expression is AssignmentExpressionSyntax a
+							&& es is ExpressionStatementSyntax ee
+							&& ee.Expression is AssignmentExpressionSyntax ea
+							&& a.Left.ToString() == ea.Left.ToString()))) {
+					return (ifs, ss, es);
+				}
+				return default;
+			}
+
+			static StatementSyntax GetSingleStatement(StatementSyntax statement) {
+				return statement is BlockSyntax b
+					? (b.Statements.Count == 1 ? b.Statements[0] : null)
+					: statement;
+			}
+		}
+
+		sealed class ChangeConditionalToIfRefactoring : ReplaceNodes
+		{
+			public override bool AcceptNode(SyntaxNode node) {
+				return node.IsKind(SyntaxKind.ConditionalExpression) && node.Parent is StatementSyntax;
+			}
+
+			public override void Refactor(SemanticContext ctx) {
+				var node = ctx.NodeIncludeTrivia as ConditionalExpressionSyntax;
+				SyntaxNode newNode;
+				StatementSyntax whenTrue, whenFalse;
+				if (node.Parent is ReturnStatementSyntax r) {
+					whenTrue = SF.ReturnStatement(node.WhenTrue);
+					whenFalse = SF.ReturnStatement(node.WhenFalse);
+				}
+				else if (node.Parent is ExpressionStatementSyntax es
+					&& es.Expression is AssignmentExpressionSyntax a
+					&& a.IsKind(SyntaxKind.SimpleAssignmentExpression)) {
+					whenTrue = SF.ExpressionStatement(SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, a.Left, node.WhenTrue));
+					whenFalse = SF.ExpressionStatement(SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, a.Left, node.WhenFalse));
+				}
+				else if (node.Parent is YieldStatementSyntax) {
+					whenTrue = SF.YieldStatement(SyntaxKind.YieldReturnStatement, node.WhenTrue);
+					whenFalse = SF.YieldStatement(SyntaxKind.YieldReturnStatement, node.WhenFalse);
+				}
+				else {
+					return;
+				}
+				newNode = SF.IfStatement(node.Condition.WithoutTrailingTrivia(),
+					SF.Block(whenTrue),
+					SF.ElseClause(SF.Block(whenFalse))
+					);
+				Replace(ctx, node.Parent, newNode.AnnotateReformatAndSelect());
+			}
+		}
+
+		sealed class MultilineConditionalRefactoring : ReplaceNodes
+		{
+			public override bool AcceptNode(SyntaxNode node) {
+				return node.IsKind(SyntaxKind.ConditionalExpression)
+					&& node.IsMultiLine(false) == false;
+			}
+
+			public override void Refactor(SemanticContext ctx) {
+				var conditional = ctx.NodeIncludeTrivia as ConditionalExpressionSyntax;
+				if (conditional == null) {
+					return;
+				}
+				// it is frustrating that the C# formatter removes trivias in ?: expressions
+				var options = ctx.Workspace.Options;
+				var indent = conditional.GetContainingStatement()
+					?.GetLeadingTrivia()
+					.Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia))
+					.Concat(new SyntaxTriviaList(SF.Whitespace(options.GetIndentString())))
+					.ToSyntaxTriviaList();
+				var newLine = SF.Whitespace(options.GetNewLineString());
+				var newNode = conditional.Update(conditional.Condition.WithTrailingTrivia(newLine),
+					conditional.QuestionToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
+					conditional.WhenTrue.WithTrailingTrivia(newLine),
+					conditional.ColonToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
+					conditional.WhenFalse);
+				Replace(ctx, conditional, newNode.AnnotateSelect());
 			}
 		}
 	}
