@@ -470,6 +470,23 @@ namespace Codist.Taggers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpPrivateMemberName)]
+	[Name(Constants.CSharpPrivateMemberName)]
+	[UserVisible(false)]
+	[Order(After = Constants.CodeIdentifier)]
+	[Order(After = Constants.CodeClassName)]
+	[Order(After = Constants.CodeMethodName)]
+	[Order(After = Constants.CodePropertyName)]
+	[Order(After = Constants.CodeEventName)]
+	[Order(After = Constants.CSharpUserSymbol)]
+	sealed class PrivateMemberFormat : ClassificationFormatDefinition
+	{
+		public PrivateMemberFormat() {
+			DisplayName = Constants.NameOfMe + ": private type or member";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpLabel)]
 	[Name(Constants.CSharpLabel)]
 	[UserVisible(false)]

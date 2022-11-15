@@ -160,6 +160,7 @@ namespace Codist
 		public const string CSharpVolatileFieldName = "C#: Volatile field";
 		public const string CSharpAbstractMemberName = "C#: Abstract member";
 		public const string CSharpSealedMemberName = "C#: Sealed class or member";
+		public const string CSharpPrivateMemberName = "C#: Private member";
 		public const string CSharpAttributeName = "C#: Attribute name";
 		public const string CSharpAttributeNotation = "C#: Attribute notation";
 		public const string CSharpLabel = "C#: Label";
@@ -568,7 +569,7 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpStaticMemberName)]
 		[BaseDefinition(Constants.CodeStaticSymbol)]
-		[Description("Name of static member, inheriting from Identifier")]
+		[Description("Name of static member, inheriting from static symbol")]
 		StaticMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpOverrideMemberName)]
@@ -582,6 +583,10 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpVirtualMemberName)]
 		[Description("Name of virtual member, inheriting from Identifier")]
 		VirtualMemberName,
+		[Category(Constants.SyntaxCategory.Declaration)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpPrivateMemberName)]
+		[Description("Name of private member, inheriting from Identifier")]
+		PrivateMemberName,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalDeclarationName)]
 		[Description("Declaration of local variable")]

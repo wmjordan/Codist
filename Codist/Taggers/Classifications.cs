@@ -40,6 +40,7 @@ namespace Codist.Taggers
 			ReadOnlyStruct = registry.GetClassificationTag(Constants.CSharpReadOnlyStructName);
 			RefStruct = registry.GetClassificationTag(Constants.CSharpRefStructName);
 			ResourceKeyword = registry.GetClassificationTag(Constants.CSharpResourceKeyword);
+			PrivateMember = registry.GetClassificationTag(Constants.CSharpPrivateMemberName);
 			SealedMember = registry.GetClassificationTag(Constants.CSharpSealedMemberName);
 			StaticMember = registry.GetClassificationTag(Constants.CSharpStaticMemberName);
 			StructName = registry.GetClassificationTag(Constants.CodeStructName);
@@ -104,6 +105,8 @@ namespace Codist.Taggers
 		public ClassificationTag OverrideMember { get; }
 
 		public ClassificationTag Parameter { get; }
+
+		public ClassificationTag PrivateMember { get; }
 
 		public ClassificationTag Property { get; }
 

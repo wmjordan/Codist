@@ -154,6 +154,11 @@ namespace Codist.Taggers
 		static ClassificationTypeDefinition Property;
 
 		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeIdentifier)]
+		[Name(Constants.CSharpPrivateMemberName)]
+		static ClassificationTypeDefinition PrivateMember;
+
+		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CSharpFieldName)]
 		[Name(Constants.CSharpReadOnlyFieldName)]
 		static ClassificationTypeDefinition ReadOnlyField;
