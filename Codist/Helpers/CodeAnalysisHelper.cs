@@ -1204,8 +1204,14 @@ namespace Codist
 				}
 				if (statement.FullSpan.End <= spanEnd) {
 					nodeSpan = statement.FullSpan;
+					span = TextSpan.FromBounds(nodeSpan.End, spanEnd);
 				}
-				span = TextSpan.FromBounds(nodeSpan.End, spanEnd);
+				else if (spanEnd < statement.FullSpan.End && spanEnd >= nodeSpan.End) {
+					span = default;
+				}
+				else {
+					span = TextSpan.FromBounds(nodeSpan.End, spanEnd);
+				}
 				if (b == null) {
 					b = new List<StatementSyntax>();
 					siblings = statement.Parent.ChildNodes().ToList();

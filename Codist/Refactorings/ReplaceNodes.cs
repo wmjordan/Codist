@@ -48,14 +48,14 @@ namespace Codist.Refactorings
 					: root.ReplaceNode(oldNode, nodes[0]))
 				.Format(CodeFormatHelper.Reformat, context.Workspace);
 			newNodes = root.GetAnnotatedNodes(ann);
-			var select = root.GetAnnotatedNodes(CodeFormatHelper.Select).FirstOrDefault().Span;
+			var select = root.GetAnnotatedNodes(CodeFormatHelper.Select).FirstOrDefault();
 			view.Edit(
 				(rep: String.Concat(newNodes.Select(i => i.ToFullString())), sel: oldNode.FullSpan.ToSpan()),
 				(v, p, edit) => edit.Replace(p.sel, p.rep)
 			);
 			view.Caret.MoveTo(new SnapshotPoint(view.TextSnapshot, newNodes.First().SpanStart));
-			if (select.Length != 0) {
-				view.Selection.Select(new SnapshotSpan(view.TextSnapshot, select.ToSpan()), false);
+			if (select != null) {
+				view.Selection.Select(new SnapshotSpan(view.TextSnapshot, select.Span.ToSpan()), false);
 			}
 		}
 
@@ -85,7 +85,8 @@ namespace Codist.Refactorings
 			public override string Title => R.CMD_DeleteContainingBlock;
 
 			public override bool Accept(SyntaxNode node) {
-				return GetRemovableAncestor(node.GetContainingStatement()) != null;
+				var s = node.GetContainingStatement();
+				return s != null && s.SpanStart == node.SpanStart && GetRemovableAncestor(s) != null;
 			}
 
 			static bool CanBeRemoved(SyntaxNode node) {
@@ -102,9 +103,8 @@ namespace Codist.Refactorings
 					case SyntaxKind.TryStatement:
 					case SyntaxKind.CheckedStatement:
 					case SyntaxKind.UncheckedStatement:
-						return true;
 					case SyntaxKind.IfStatement:
-						return ((IfStatementSyntax)node).IsTopmostIf();
+						return true;
 					case SyntaxKind.ElseClause:
 						return ((ElseClauseSyntax)node).Statement?.Kind() != SyntaxKind.IfStatement;
 				}
@@ -112,35 +112,42 @@ namespace Codist.Refactorings
 			}
 
 			public override void Refactor(SemanticContext ctx) {
-				StatementSyntax s = ctx.Node.Parent.FirstAncestorOrSelf<BlockSyntax>();
-				if (s == null) {
+				var statement = ctx.Node.GetContainingStatement();
+				var remove = GetRemovableAncestor(statement);
+				if (remove == null) {
 					return;
 				}
-				if (s.Parent.IsKind(SyntaxKind.ElseClause)) {
-					var oldIf = s.FirstAncestorOrSelf<ElseClauseSyntax>().Parent.FirstAncestorOrSelf<IfStatementSyntax>();
-					var newIf = oldIf.WithElse(null);
-					var targets = ((BlockSyntax)s).Statements;
-					Replace(ctx, oldIf, targets.Insert(0, newIf));
+				SyntaxList<StatementSyntax> keep;
+				if (statement.Parent is BlockSyntax b) {
+					keep = b.Statements;
 				}
 				else {
-					var targets = s is BlockSyntax b ? b.Statements : (IEnumerable<SyntaxNode>)ctx.Compilation.GetStatements(ctx.View.FirstSelectionSpan().ToTextSpan());
-					while (s.IsKind(SyntaxKind.Block)) {
-						s = s.Parent.FirstAncestorOrSelf<StatementSyntax>();
-					}
-					if (s != null && targets != null) {
-						Replace(ctx, s, targets.Select(i => i.AnnotateReformatAndSelect()));
-					}
+					keep = new SyntaxList<StatementSyntax>(statement);
 				}
+				if (remove.IsKind(SyntaxKind.ElseClause)) {
+					var ifs = remove.Parent as IfStatementSyntax;
+					if (ifs.Parent.IsKind(SyntaxKind.ElseClause)) {
+						Replace(ctx, ifs.Parent, (keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block) ? SF.ElseClause(SF.Block(keep)) : SF.ElseClause(keep[0])).AnnotateReformatAndSelect());
+						return;
+					}
+					remove = ifs;
+				}
+				keep = keep.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select);
+				Replace(ctx, remove, keep);
 			}
 
 			static SyntaxNode GetRemovableAncestor(SyntaxNode node) {
+				if (node == null) {
+					return null;
+				}
 				do {
 					if (CanBeRemoved(node = node.Parent)) {
 						return node;
-		}
-				} while (node is StatementSyntax == false && node.IsKind(SyntaxKind.Block) == false);
+					}
+				} while (node is StatementSyntax);
 				return null;
 			}
+		}
 
 		sealed class SwapOperandsRefactoring : ReplaceNodes
 		{
