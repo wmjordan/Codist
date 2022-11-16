@@ -200,33 +200,22 @@ namespace Codist.SmartBars
 				PlacementTarget = ctx.Sender,
 				Resources = SharedDictionaryManager.ContextMenu
 			};
-			var token = _Context.Token;
-			if (token.RawKind != 0) {
-				foreach (var item in __TokenRefactorings) {
-					if (item.Accept(token)) {
-						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.IconId, item.Title, c => item.Refactor(_Context))));
-					}
-				}
-			}
-			var node = _Context.NodeIncludeTrivia;
-			if (node != null) {
-				foreach (var item in __NodeRefactorings) {
-					if (item.Accept(node)) {
-						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.IconId, item.Title, c => item.Refactor(_Context))));
-					}
-				}
-			}
-			var statements = _Context.Compilation.GetStatements(_Context.View.FirstSelectionSpan().ToTextSpan());
-			if (statements != null) {
-				foreach (var item in __StatementRefactorings) {
-					if (item.Accept(statements)) {
-						m.Items.Add(new CommandMenuItem(this, new CommandItem(item.IconId, item.Title, c => item.Refactor(_Context))));
-					}
-				}
-			}
+			AddRefactoringCommands(m, __StatementRefactorings, _Context.Compilation.GetStatements(_Context.View.FirstSelectionSpan().ToTextSpan()));
+			AddRefactoringCommands(m, __TokenRefactorings, _Context.Token);
+			AddRefactoringCommands(m, __NodeRefactorings, _Context.NodeIncludeTrivia);
 			ctx.Sender.ContextMenu = m;
 			m.Closed += Menu_Closed;
 			m.IsOpen = true;
+		}
+
+		void AddRefactoringCommands<TSyntax>(ContextMenu menu, Refactorings.IRefactoring<TSyntax>[] refactorings, TSyntax syntax) {
+			if (syntax != null) {
+				foreach (var item in refactorings) {
+					if (item.Accept(syntax)) {
+						menu.Items.Add(new CommandMenuItem(this, new CommandItem(item.IconId, item.Title, c => item.Refactor(_Context))));
+					}
+				}
+			}
 		}
 
 		void AddSymbolCommands(SyntaxKind nodeKind) {
