@@ -2,14 +2,18 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Text;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Refactorings
 {
-	abstract class ReplaceToken
+	abstract class ReplaceToken : IRefactoring<SyntaxToken>
 	{
 		public static readonly ReplaceToken InvertOperator = new InvertOperatorRefactoring();
 
-		public abstract bool AcceptToken(SyntaxToken token);
+		public abstract int IconId { get; }
+		public abstract string Title { get; }
+
+		public abstract bool Accept(SyntaxToken token);
 		protected abstract string GetReplacement(SyntaxToken token);
 
 		public void Refactor(SemanticContext ctx) {
@@ -26,7 +30,10 @@ namespace Codist.Refactorings
 
 		sealed class InvertOperatorRefactoring : ReplaceToken
 		{
-			public override bool AcceptToken(SyntaxToken token) {
+			public override int IconId => IconIds.InvertOperator;
+			public override string Title => R.CMD_InvertOperator;
+
+			public override bool Accept(SyntaxToken token) {
 				switch (token.Kind()) {
 					case SyntaxKind.EqualsEqualsToken:
 					case SyntaxKind.ExclamationEqualsToken:

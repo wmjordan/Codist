@@ -9,11 +9,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
+using R = Codist.Properties.Resources;
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Codist.Refactorings
 {
-	abstract class ReplaceNodes
+	abstract class ReplaceNodes : IRefactoring<SyntaxNode>
 	{
 		public static readonly ReplaceNodes DeleteCondition = new DeleteConditionRefactoring();
 		public static readonly ReplaceNodes RemoveContainingStatement = new RemoveContainerRefactoring();
@@ -24,7 +25,10 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNodes ChangeConditionalToIf = new ChangeConditionalToIfRefactoring();
 		public static readonly ReplaceNodes MultiLineConditional = new MultilineConditionalRefactoring();
 
-		public abstract bool AcceptNode(SyntaxNode node);
+		public abstract int IconId { get; }
+		public abstract string Title { get; }
+
+		public abstract bool Accept(SyntaxNode node);
 		public abstract void Refactor(SemanticContext ctx);
 
 		static void Replace(SemanticContext context, SyntaxNode oldNode, SyntaxNode newNode) {
@@ -57,7 +61,10 @@ namespace Codist.Refactorings
 
 		sealed class DeleteConditionRefactoring : ReplaceNodes
 		{
-			public override bool AcceptNode(SyntaxNode node) {
+			public override int IconId => IconIds.DeleteCondition;
+			public override string Title => R.CMD_DeleteCondition;
+
+			public override bool Accept(SyntaxNode node) {
 				return node.IsKind(SyntaxKind.IfStatement) && node.Parent.IsKind(SyntaxKind.ElseClause) == false;
 			}
 
@@ -74,9 +81,11 @@ namespace Codist.Refactorings
 
 		sealed class RemoveContainerRefactoring : ReplaceNodes
 		{
-			public override bool AcceptNode(SyntaxNode node) {
-				node = node.Parent.FirstAncestorOrSelf<BlockSyntax>()?.Parent;
-				return node != null && CanBeRemoved(node);
+			public override int IconId => IconIds.Delete;
+			public override string Title => R.CMD_DeleteContainingBlock;
+
+			public override bool Accept(SyntaxNode node) {
+				return GetRemovableAncestor(node.GetContainingStatement()) != null;
 			}
 
 			static bool CanBeRemoved(SyntaxNode node) {
@@ -123,11 +132,22 @@ namespace Codist.Refactorings
 					}
 				}
 			}
+
+			static SyntaxNode GetRemovableAncestor(SyntaxNode node) {
+				do {
+					if (CanBeRemoved(node = node.Parent)) {
+						return node;
 		}
+				} while (node is StatementSyntax == false && node.IsKind(SyntaxKind.Block) == false);
+				return null;
+			}
 
 		sealed class SwapOperandsRefactoring : ReplaceNodes
 		{
-			public override bool AcceptNode(SyntaxNode node) {
+			public override int IconId => IconIds.SwapOperands;
+			public override string Title => R.CMD_SwapOperands;
+
+			public override bool Accept(SyntaxNode node) {
 				switch (node.Kind()) {
 					case SyntaxKind.BitwiseAndExpression:
 					case SyntaxKind.BitwiseOrExpression:
@@ -185,7 +205,10 @@ namespace Codist.Refactorings
 
 		sealed class NestConditionRefactoring : ReplaceNodes
 		{
-			public override bool AcceptNode(SyntaxNode node) {
+			public override int IconId => IconIds.NestCondition;
+			public override string Title => R.CMD_SplitToNested;
+
+			public override bool Accept(SyntaxNode node) {
 				return GetParentConditionalStatement(node) != null;
 			}
 
@@ -225,8 +248,17 @@ namespace Codist.Refactorings
 
 		sealed class MergeConditionRefactoring : ReplaceNodes
 		{
-			public override bool AcceptNode(SyntaxNode node) {
-				return GetParentConditionalStatement(node) != null;
+			string _NodeKind;
+
+			public override int IconId => IconIds.MergeCondition;
+			public override string Title => R.CMD_MergeWithParent.Replace("NODE", _NodeKind);
+
+			public override bool Accept(SyntaxNode node) {
+				if (GetParentConditionalStatement(node) != null) {
+					_NodeKind = node.IsKind(SyntaxKind.IfStatement) ? "if" : "while";
+					return true;
+				}
+				return false;
 			}
 
 			public override void Refactor(SemanticContext ctx) {
@@ -273,7 +305,10 @@ namespace Codist.Refactorings
 
 		sealed class ChangeIfToConditionalRefactoring : ReplaceNodes
 		{
-			public override bool AcceptNode(SyntaxNode node) {
+			public override int IconId => IconIds.MergeCondition;
+			public override string Title => R.CMD_IfElseToConditional;
+
+			public override bool Accept(SyntaxNode node) {
 				return GetConditionalStatement(node).ifStatement != null;
 			}
 
@@ -345,7 +380,10 @@ namespace Codist.Refactorings
 
 		sealed class ChangeConditionalToIfRefactoring : ReplaceNodes
 		{
-			public override bool AcceptNode(SyntaxNode node) {
+			public override int IconId => IconIds.SplitCondition;
+			public override string Title => R.CMD_ConditionalToIfElse;
+
+			public override bool Accept(SyntaxNode node) {
 				return node.IsKind(SyntaxKind.ConditionalExpression) && node.Parent is StatementSyntax;
 			}
 
@@ -380,7 +418,10 @@ namespace Codist.Refactorings
 
 		sealed class MultilineConditionalRefactoring : ReplaceNodes
 		{
-			public override bool AcceptNode(SyntaxNode node) {
+			public override int IconId => IconIds.MultiLine;
+			public override string Title => R.CMD_ConditionalOnMultiLines;
+
+			public override bool Accept(SyntaxNode node) {
 				return node.IsKind(SyntaxKind.ConditionalExpression)
 					&& node.IsMultiLine(false) == false;
 			}
