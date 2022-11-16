@@ -32,9 +32,6 @@ namespace Codist.Refactorings
 			var span = new Microsoft.VisualStudio.Text.SnapshotSpan(view.TextSnapshot, statements[0].FullSpan.Start, statements.Sum(s => s.FullSpan.Length));
 			SyntaxAnnotation annStatement = new SyntaxAnnotation();
 			var first = statements[0];
-			if (first.HasLeadingTrivia) {
-				statements[0] = first.WithoutLeadingTrivia();
-			}
 			SyntaxNode statement = Refactor(statements)
 				.WithAdditionalAnnotations(annStatement);
 			var root = first.SyntaxTree.GetRoot()
@@ -48,7 +45,7 @@ namespace Codist.Refactorings
 			);
 			var selSpan = statement.GetAnnotatedNodes(CodeFormatHelper.Select).FirstOrDefault().Span;
 			if (selSpan.Length != 0) {
-				view.SelectSpan(selectedSpan.Start.Position + (selSpan.Start - statement.SpanStart), selSpan.Length, 1);
+				view.SelectSpan(span.Start + (selSpan.Start - statement.FullSpan.Start), selSpan.Length, 1);
 			}
 		}
 
