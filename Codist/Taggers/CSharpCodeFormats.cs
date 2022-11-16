@@ -314,6 +314,7 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpReadOnlyStructName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeStructName)]
+	[Order(After = Constants.CodeRecordStructName)]
 	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class ReadOnlyStructFormat : ClassificationFormatDefinition
 	{
@@ -458,6 +459,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeClassName)]
+	[Order(After = Constants.CodeRecordClassName)]
 	[Order(After = Constants.CodeMethodName)]
 	[Order(After = Constants.CodePropertyName)]
 	[Order(After = Constants.CodeEventName)]
@@ -475,6 +477,7 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeClassName)]
+	[Order(After = Constants.CodeRecordClassName)]
 	[Order(After = Constants.CodeMethodName)]
 	[Order(After = Constants.CodePropertyName)]
 	[Order(After = Constants.CodeEventName)]

@@ -81,7 +81,9 @@ namespace Codist
 		public const string CodeBold = CodistPrefix + "Bold";
 
 		public const string CodeClassName = "class name";
+		public const string CodeRecordClassName = "record class name";
 		public const string CodeStructName = "struct name";
+		public const string CodeRecordStructName = "record struct name";
 		public const string CodeEnumName = "enum name";
 		public const string CodeInterfaceName = "interface name";
 		public const string CodeDelegateName = "delegate name";
@@ -372,8 +374,14 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
 		ClassName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeRecordClassName)]
+		RecordClassName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeStructName)]
 		StructName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeRecordStructName)]
+		RecordStructName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeInterfaceName)]
 		InterfaceName,
