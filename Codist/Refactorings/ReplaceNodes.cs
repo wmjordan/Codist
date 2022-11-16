@@ -130,6 +130,9 @@ namespace Codist.Refactorings
 						Replace(ctx, ifs.Parent, (keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block) ? SF.ElseClause(SF.Block(keep)) : SF.ElseClause(keep[0])).AnnotateReformatAndSelect());
 						return;
 					}
+					else {
+						keep = keep.Insert(0, ifs.WithElse(null));
+					}
 					remove = ifs;
 				}
 				keep = keep.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select);
