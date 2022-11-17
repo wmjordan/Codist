@@ -203,6 +203,7 @@ namespace Codist.Controls
 			if (rt.SpecialType != SpecialType.None
 				|| rt.TypeKind == TypeKind.TypeParameter
 				|| rt.TypeKind == TypeKind.Error
+				|| rt.TypeKind == TypeKind.Dynamic
 				|| rt.IsTupleType) {
 				return;
 			}

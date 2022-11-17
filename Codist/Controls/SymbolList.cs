@@ -126,16 +126,26 @@ namespace Codist.Controls
 		}
 
 		internal void SetupForSpecialTypes(ITypeSymbol type) {
+			INamespaceSymbol typeNamespace;
 			if (type == null) {
 				return;
 			}
-			if (type.TypeKind == TypeKind.Enum
-				&& type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"))) {
-				ContainerType = SymbolListType.EnumFlags;
+			switch (type.TypeKind) {
+				case TypeKind.Dynamic:
+					return;
+				case TypeKind.Enum:
+					if (type.GetAttributes().Any(a => a.AttributeClass.MatchTypeName(nameof(FlagsAttribute), "System"))) {
+						ContainerType = SymbolListType.EnumFlags;
+						return;
+					}
+					break;
+			}
+			typeNamespace = type.ContainingNamespace;
+			if (typeNamespace == null || typeNamespace.IsGlobalNamespace) {
 				return;
 			}
-			string typeNamespace = type.ContainingNamespace.ToString(), typeName = type.Name;
-			switch (typeNamespace) {
+			string typeName = type.Name;
+			switch (typeNamespace.ToString()) {
 				case "System.Drawing":
 					switch (typeName) {
 						case nameof(GDI.SystemBrushes):

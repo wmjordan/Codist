@@ -593,11 +593,11 @@ namespace Codist
 			}
 		}
 
-		public static bool MatchTypeName(this INamedTypeSymbol typeSymbol, string className, params string[] namespaces) {
+		public static bool MatchTypeName(this ITypeSymbol typeSymbol, string className, params string[] namespaces) {
 			return typeSymbol.Name == className && MatchNamespaces(typeSymbol, namespaces);
 		}
 
-		public static bool MatchNamespaces(this INamedTypeSymbol typeSymbol, params string[] namespaces) {
+		public static bool MatchNamespaces(this ITypeSymbol typeSymbol, params string[] namespaces) {
 			var ns = typeSymbol.ContainingNamespace;
 			foreach (var item in namespaces) {
 				if (ns == null || ns.IsGlobalNamespace || ns.Name != item) {
@@ -819,7 +819,8 @@ namespace Codist
 		}
 
 		public static bool IsAwaiter(this ITypeSymbol type) {
-			return type.ContainingNamespace.MetadataName == "System.Runtime.CompilerServices"
+			return type.TypeKind != TypeKind.Dynamic
+					&& type.MatchNamespaces("CompilerServices", "Runtime", "System")
 					&& (type.Name == nameof(System.Runtime.CompilerServices.TaskAwaiter)
 						|| type.Name == nameof(System.Runtime.CompilerServices.ValueTaskAwaiter<int>))
 				|| IsCustomAwaiter(type);
@@ -847,8 +848,7 @@ namespace Codist
 								var mp = m.Parameters;
 								if (m.ReturnsVoid
 									&& mp.Length == 1
-									&& mp[0].Type.Name == "Action"
-									&& mp[0].Type.ContainingNamespace.MetadataName == "System"
+									&& mp[0].Type.MatchTypeName("Action", "System")
 									&& (mp[0].Type as INamedTypeSymbol)?.IsGenericType == false) {
 									f |= 2;
 								}
