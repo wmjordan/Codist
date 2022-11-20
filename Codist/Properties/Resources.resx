@@ -2141,14 +2141,13 @@ Sent or received bytes per second through all network interfaces</value>
     <value>Wrap in &lt;try...catch&gt;</value>
   </data>
   <data name="CMD_DeleteCondition" xml:space="preserve">
-    <value>Delete &lt;if&gt; condition</value>
+    <value>Delete &lt;if&gt; Condition</value>
   </data>
   <data name="CMD_RefactorSelection" xml:space="preserve">
     <value>Refactor selection</value>
   </data>
   <data name="CMD_SwapOperands" xml:space="preserve">
-    <value>Swap operands
-Swap left and right expressions around operator</value>
+    <value>Swap Operands</value>
   </data>
   <data name="OT_EnumMembers" xml:space="preserve">
     <value>Enum fields</value>
@@ -2163,13 +2162,13 @@ Swap left and right expressions around operator</value>
     <value>Bit count: </value>
   </data>
   <data name="CMD_DeleteMethod" xml:space="preserve">
-    <value>Delete method</value>
+    <value>Delete Method</value>
   </data>
   <data name="CMD_MergeWithParent" xml:space="preserve">
-    <value>Merge with parent &lt;NODE&gt;</value>
+    <value>Merge with Parent &lt;NODE&gt;</value>
   </data>
   <data name="CMD_SplitToNested" xml:space="preserve">
-    <value>Split to nested &lt;if&gt;</value>
+    <value>Split to Nested &lt;if&gt;</value>
   </data>
   <data name="CMD_ConditionalOnMultiLines" xml:space="preserve">
     <value>&lt;?:&gt; on multi-lines</value>
@@ -2179,5 +2178,14 @@ Swap left and right expressions around operator</value>
   </data>
   <data name="CMD_IfElseToConditional" xml:space="preserve">
     <value>&lt;if...else&gt; to &lt;?:&gt;</value>
+  </data>
+  <data name="CMD_AddBraces" xml:space="preserve">
+    <value>Add Braces</value>
+  </data>
+  <data name="CMD_MergeStatementsToConditional" xml:space="preserve">
+    <value>Merge statements to &lt;?:&gt;</value>
+  </data>
+  <data name="CMD_WrapInElse" xml:space="preserve">
+    <value>Wrap in &lt;else&gt;</value>
   </data>
 </root>

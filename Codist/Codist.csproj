@@ -93,6 +93,7 @@
     <Compile Include="Controls\SymbolMenu.cs" />
     <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
     <Compile Include="Display\JumpListEnhancer.cs" />
+    <Compile Include="Helpers\SelectedStatementInfo.cs" />
     <Compile Include="IconIds.cs" />
     <Compile Include="Margins\DisableChangeTrackerMargin.cs" />
     <Compile Include="Margins\MarginElementBase.cs" />
@@ -116,9 +117,12 @@
     <Compile Include="QuickInfo\QuickInfoBackgroundController.cs" />
     <Compile Include="Helpers\CodeFormatHelper.cs" />
     <Compile Include="Refactorings\IRefactoring.cs" />
-    <Compile Include="Refactorings\ReplaceNodes.cs" />
-    <Compile Include="Refactorings\ReplaceStatements.cs" />
+    <Compile Include="Refactorings\RefactoringAction.cs" />
+    <Compile Include="Refactorings\RefactoringContext.cs" />
+    <Compile Include="Refactorings\ReplaceNode.cs" />
+    <Compile Include="Refactorings\Refactoring.cs" />
     <Compile Include="Refactorings\ReplaceToken.cs" />
+    <Compile Include="Refactorings\ReplaceNode.Statements.cs" />
     <Compile Include="Taggers\TaggerFactories.cs" />
     <Compile Include="Taggers\TransientClassificationTagHolder.cs" />
     <Compile Include="Taggers\Classifications.cs" />

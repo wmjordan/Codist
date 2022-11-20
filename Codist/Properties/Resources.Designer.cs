@@ -70,6 +70,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add Braces.
+        /// </summary>
+        internal static string CMD_AddBraces {
+            get {
+                return ResourceManager.GetString("CMD_AddBraces", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add Parallel Watch.
         /// </summary>
         internal static string CMD_AddParallelWatch {
@@ -291,7 +300,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete &lt;if&gt; condition.
+        ///   Looks up a localized string similar to Delete &lt;if&gt; Condition.
         /// </summary>
         internal static string CMD_DeleteCondition {
             get {
@@ -309,7 +318,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete method.
+        ///   Looks up a localized string similar to Delete Method.
         /// </summary>
         internal static string CMD_DeleteMethod {
             get {
@@ -910,7 +919,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Merge with parent &lt;NODE&gt;.
+        ///   Looks up a localized string similar to Merge statements to &lt;?:&gt;.
+        /// </summary>
+        internal static string CMD_MergeStatementsToConditional {
+            get {
+                return ResourceManager.GetString("CMD_MergeStatementsToConditional", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Merge with Parent &lt;NODE&gt;.
         /// </summary>
         internal static string CMD_MergeWithParent {
             get {
@@ -1303,7 +1321,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Split to nested &lt;if&gt;.
+        ///   Looks up a localized string similar to Split to Nested &lt;if&gt;.
         /// </summary>
         internal static string CMD_SplitToNested {
             get {
@@ -1330,8 +1348,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Swap operands
-        ///Swap left and right expressions around operator.
+        ///   Looks up a localized string similar to Swap Operands.
         /// </summary>
         internal static string CMD_SwapOperands {
             get {
@@ -1543,6 +1560,15 @@ namespace Codist.Properties {
         internal static string CMD_WechatDonateLink {
             get {
                 return ResourceManager.GetString("CMD_WechatDonateLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrap in &lt;else&gt;.
+        /// </summary>
+        internal static string CMD_WrapInElse {
+            get {
+                return ResourceManager.GetString("CMD_WrapInElse", resourceCulture);
             }
         }
         

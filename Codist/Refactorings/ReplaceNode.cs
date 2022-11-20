@@ -7,84 +7,124 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Formatting;
-using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.Text;
 using R = Codist.Properties.Resources;
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Codist.Refactorings
 {
-	abstract class ReplaceNodes : IRefactoring<SyntaxNode>
+	abstract partial class ReplaceNode
 	{
-		public static readonly ReplaceNodes DeleteCondition = new DeleteConditionRefactoring();
-		public static readonly ReplaceNodes RemoveContainingStatement = new RemoveContainerRefactoring();
-		public static readonly ReplaceNodes SwapOperands = new SwapOperandsRefactoring();
-		public static readonly ReplaceNodes NestCondition = new NestConditionRefactoring();
-		public static readonly ReplaceNodes MergeCondition = new MergeConditionRefactoring();
-		public static readonly ReplaceNodes ChangeIfToConditional = new ChangeIfToConditionalRefactoring();
-		public static readonly ReplaceNodes ChangeConditionalToIf = new ChangeConditionalToIfRefactoring();
-		public static readonly ReplaceNodes MultiLineConditional = new MultilineConditionalRefactoring();
+		public static readonly ReplaceNode AddBraces = new AddBracesRefactoring();
+		public static readonly ReplaceNode DeleteCondition = new DeleteConditionRefactoring();
+		public static readonly ReplaceNode RemoveContainingStatement = new RemoveContainerRefactoring();
+		public static readonly ReplaceNode SwapOperands = new SwapOperandsRefactoring();
+		public static readonly ReplaceNode NestCondition = new NestConditionRefactoring();
+		public static readonly ReplaceNode MergeCondition = new MergeConditionRefactoring();
+		public static readonly ReplaceNode ChangeIfToConditional = new ChangeIfToConditionalRefactoring();
+		public static readonly ReplaceNode ChangeConditionalToIf = new ChangeConditionalToIfRefactoring();
+		public static readonly ReplaceNode MultiLineConditional = new MultilineConditionalRefactoring();
 
-		public abstract int IconId { get; }
-		public abstract string Title { get; }
+		sealed class AddBracesRefactoring : ReplaceNode
+		{
+			public override int IconId => IconIds.AddBraces;
+			public override string Title => R.CMD_AddBraces;
 
-		public abstract bool Accept(SyntaxNode node);
-		public abstract void Refactor(SemanticContext ctx);
-
-		static void Replace(SemanticContext context, SyntaxNode oldNode, SyntaxNode newNode) {
-			Replace(context, oldNode, new[] { newNode });
-		}
-		static void Replace(SemanticContext context, SyntaxNode oldNode, IEnumerable<SyntaxNode> newNodes) {
-			var view = context.View;
-			var start = view.Selection.StreamSelectionSpan.Start.Position;
-			var ann = new SyntaxAnnotation();
-			List<SyntaxNode> nodes = new List<SyntaxNode>();
-			foreach (var item in newNodes) {
-				nodes.Add(item.WithAdditionalAnnotations(ann));
+			public override bool Accept(RefactoringContext ctx) {
+				var node = ctx.NodeIncludeTrivia;
+				switch (node.Kind()) {
+					case SyntaxKind.IfStatement:
+						return ((IfStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					case SyntaxKind.ForEachStatement:
+						return ((ForEachStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					case SyntaxKind.ForStatement:
+						return ((ForStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					case SyntaxKind.WhileStatement:
+						return ((WhileStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					case SyntaxKind.UsingStatement:
+						return ((UsingStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					case SyntaxKind.LockStatement:
+						return ((LockStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					case SyntaxKind.ElseClause:
+						return ((ElseClauseSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					case SyntaxKind.FixedStatement:
+						return ((FixedStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					case SyntaxKind.CaseSwitchLabel:
+						node = node.Parent;
+						goto case SyntaxKind.SwitchSection;
+					case SyntaxKind.SwitchSection:
+						var statements = ((SwitchSectionSyntax)node).Statements;
+						return statements.Count > 1 || statements[0].IsKind(SyntaxKind.Block) == false;
+					default: return false;
+				}
 			}
-			var root = oldNode.SyntaxTree.GetRoot();
-			root = (nodes.Count > 1
-					? root.ReplaceNode(oldNode, nodes)
-					: root.ReplaceNode(oldNode, nodes[0]))
-				.Format(CodeFormatHelper.Reformat, context.Workspace);
-			newNodes = root.GetAnnotatedNodes(ann);
-			var select = root.GetAnnotatedNodes(CodeFormatHelper.Select).FirstOrDefault();
-			view.Edit(
-				(rep: String.Concat(newNodes.Select(i => i.ToFullString())), sel: oldNode.FullSpan.ToSpan()),
-				(v, p, edit) => edit.Replace(p.sel, p.rep)
-			);
-			view.Caret.MoveTo(new SnapshotPoint(view.TextSnapshot, newNodes.First().SpanStart));
-			if (select != null) {
-				view.Selection.Select(new SnapshotSpan(view.TextSnapshot, select.Span.ToSpan()), false);
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				var node = ctx.Node;
+				StatementSyntax statement;
+				switch (node.Kind()) {
+					case SyntaxKind.IfStatement:
+						statement = ((IfStatementSyntax)node).Statement; break;
+					case SyntaxKind.ForEachStatement:
+						statement = ((ForEachStatementSyntax)node).Statement; break;
+					case SyntaxKind.ForStatement:
+						statement = ((ForStatementSyntax)node).Statement; break;
+					case SyntaxKind.WhileStatement:
+						statement = ((WhileStatementSyntax)node).Statement; break;
+					case SyntaxKind.UsingStatement:
+						statement = ((UsingStatementSyntax)node).Statement; break;
+					case SyntaxKind.LockStatement:
+						statement = ((LockStatementSyntax)node).Statement; break;
+					case SyntaxKind.FixedStatement:
+						statement = ((FixedStatementSyntax)node).Statement; break;
+					case SyntaxKind.ElseClause:
+						var oldElse = (ElseClauseSyntax)node;
+						var newElse = oldElse.WithStatement(SF.Block(oldElse.Statement)).AnnotateReformatAndSelect();
+						yield return Replace(oldElse, newElse);
+						yield break;
+					case SyntaxKind.CaseSwitchLabel:
+						node = node.Parent;
+						goto case SyntaxKind.SwitchSection;
+					case SyntaxKind.SwitchSection:
+						var oldSection = (SwitchSectionSyntax)node;
+						var newSection = oldSection.WithStatements(SF.SingletonList((StatementSyntax)SF.Block(oldSection.Statements))).AnnotateReformatAndSelect();
+						yield return Replace(oldSection, newSection);
+						yield break;
+					default: yield break;
+				}
+				if (statement != null) {
+					yield return Replace(statement, SF.Block(statement).AnnotateReformatAndSelect());
+				}
 			}
 		}
 
-		sealed class DeleteConditionRefactoring : ReplaceNodes
+		sealed class DeleteConditionRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.DeleteCondition;
 			public override string Title => R.CMD_DeleteCondition;
 
-			public override bool Accept(SyntaxNode node) {
+			public override bool Accept(RefactoringContext ctx) {
+				var node = ctx.NodeIncludeTrivia;
 				return node.IsKind(SyntaxKind.IfStatement) && node.Parent.IsKind(SyntaxKind.ElseClause) == false;
 			}
 
-			public override void Refactor(SemanticContext ctx) {
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var ifs = ((IfStatementSyntax)ctx.Node).Statement;
-				Replace(ctx,
-					ctx.Node,
-					ifs is BlockSyntax b
-						? b.Statements.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select)
-						: new SyntaxList<StatementSyntax>(ifs.AnnotateReformatAndSelect())
-					);
+				if (ifs is BlockSyntax b) {
+					yield return Replace(ctx.Node, b.Statements.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select));
+				}
+				else {
+					yield return Replace(ctx.Node, ifs.AnnotateReformatAndSelect());
+				}
 			}
 		}
 
-		sealed class RemoveContainerRefactoring : ReplaceNodes
+		sealed class RemoveContainerRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.Delete;
 			public override string Title => R.CMD_DeleteContainingBlock;
 
-			public override bool Accept(SyntaxNode node) {
+			public override bool Accept(RefactoringContext ctx) {
+				var node = ctx.NodeIncludeTrivia;
 				var s = node.GetContainingStatement();
 				return s != null && s.SpanStart == node.SpanStart && GetRemovableAncestor(s) != null;
 			}
@@ -111,11 +151,11 @@ namespace Codist.Refactorings
 				return false;
 			}
 
-			public override void Refactor(SemanticContext ctx) {
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var statement = ctx.Node.GetContainingStatement();
 				var remove = GetRemovableAncestor(statement);
 				if (remove == null) {
-					return;
+					yield break;
 				}
 				SyntaxList<StatementSyntax> keep;
 				if (statement.Parent is BlockSyntax b) {
@@ -127,8 +167,8 @@ namespace Codist.Refactorings
 				if (remove.IsKind(SyntaxKind.ElseClause)) {
 					var ifs = remove.Parent as IfStatementSyntax;
 					if (ifs.Parent.IsKind(SyntaxKind.ElseClause)) {
-						Replace(ctx, ifs.Parent, (keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block) ? SF.ElseClause(SF.Block(keep)) : SF.ElseClause(keep[0])).AnnotateReformatAndSelect());
-						return;
+						yield return Replace(ifs.Parent, (keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block) ? SF.ElseClause(SF.Block(keep)) : SF.ElseClause(keep[0])).AnnotateReformatAndSelect());
+						yield break;
 					}
 					else {
 						keep = keep.Insert(0, ifs.WithElse(null));
@@ -136,7 +176,7 @@ namespace Codist.Refactorings
 					remove = ifs;
 				}
 				keep = keep.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select);
-				Replace(ctx, remove, keep);
+				yield return Replace(remove, keep);
 			}
 
 			static SyntaxNode GetRemovableAncestor(SyntaxNode node) {
@@ -152,13 +192,13 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class SwapOperandsRefactoring : ReplaceNodes
+		sealed class SwapOperandsRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.SwapOperands;
 			public override string Title => R.CMD_SwapOperands;
 
-			public override bool Accept(SyntaxNode node) {
-				switch (node.Kind()) {
+			public override bool Accept(RefactoringContext ctx) {
+				switch (ctx.NodeIncludeTrivia.Kind()) {
 					case SyntaxKind.BitwiseAndExpression:
 					case SyntaxKind.BitwiseOrExpression:
 					case SyntaxKind.LogicalOrExpression:
@@ -179,11 +219,11 @@ namespace Codist.Refactorings
 				return false;
 			}
 
-			public override void Refactor(SemanticContext ctx) {
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia as BinaryExpressionSyntax;
 				ExpressionSyntax right = node.Right, left = node.Left;
 				if (left == null || right == null) {
-					return;
+					yield break;
 				}
 
 				#region Swap operands besides selected operator
@@ -209,24 +249,24 @@ namespace Codist.Refactorings
 					right.HasTrailingTrivia && right.GetTrailingTrivia().Last().IsKind(SyntaxKind.EndOfLineTrivia)
 						? left.WithLeadingTrivia(right.GetLeadingTrivia())
 						: left.WithoutTrailingTrivia());
-				Replace(ctx, node, newNode.AnnotateReformatAndSelect());
+				yield return Replace(node, newNode.AnnotateReformatAndSelect());
 			}
 		}
 
-		sealed class NestConditionRefactoring : ReplaceNodes
+		sealed class NestConditionRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.NestCondition;
 			public override string Title => R.CMD_SplitToNested;
 
-			public override bool Accept(SyntaxNode node) {
-				return GetParentConditionalStatement(node) != null;
+			public override bool Accept(RefactoringContext ctx) {
+				return GetParentConditionalStatement(ctx.NodeIncludeTrivia) != null;
 			}
 
-			public override void Refactor(SemanticContext ctx) {
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia as BinaryExpressionSyntax;
 				var s = GetParentConditionalStatement(node);
 				if (s == null) {
-					return;
+					yield break;
 				}
 				ExpressionSyntax right = node.Right, left = node.Left;
 				while ((node = node.Parent as BinaryExpressionSyntax) != null) {
@@ -235,13 +275,13 @@ namespace Codist.Refactorings
 
 				if (s is IfStatementSyntax ifs) {
 					var newIf = ifs.WithCondition(left.WithoutTrailingTrivia())
-						.WithStatement(SF.Block(SF.IfStatement(right, ifs.Statement)).Format(ctx.View.TextBuffer.GetWorkspace()));
-					Replace(ctx, ifs, new[] { newIf.AnnotateReformatAndSelect() });
+						.WithStatement(SF.Block(SF.IfStatement(right, ifs.Statement)).Format(ctx.SemanticContext.Workspace));
+					yield return Replace(ifs, newIf.AnnotateReformatAndSelect());
 				}
 				else if (s is WhileStatementSyntax ws) {
 					var newWhile = ws.WithCondition(left.WithoutTrailingTrivia())
-						.WithStatement(SF.Block(SF.IfStatement(right, ws.Statement)).Format(ctx.View.TextBuffer.GetWorkspace()));
-					Replace(ctx, ws, new[] { newWhile.AnnotateReformatAndSelect() });
+						.WithStatement(SF.Block(SF.IfStatement(right, ws.Statement)).Format(ctx.SemanticContext.Workspace));
+					yield return Replace(ws, newWhile.AnnotateReformatAndSelect());
 				}
 			}
 
@@ -256,14 +296,15 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class MergeConditionRefactoring : ReplaceNodes
+		sealed class MergeConditionRefactoring : ReplaceNode
 		{
 			string _NodeKind;
 
 			public override int IconId => IconIds.MergeCondition;
 			public override string Title => R.CMD_MergeWithParent.Replace("NODE", _NodeKind);
 
-			public override bool Accept(SyntaxNode node) {
+			public override bool Accept(RefactoringContext ctx) {
+				var node = ctx.NodeIncludeTrivia;
 				if (GetParentConditionalStatement(node) != null) {
 					_NodeKind = node.IsKind(SyntaxKind.IfStatement) ? "if" : "while";
 					return true;
@@ -271,11 +312,11 @@ namespace Codist.Refactorings
 				return false;
 			}
 
-			public override void Refactor(SemanticContext ctx) {
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var ifs = ctx.Node as IfStatementSyntax;
 				var s = GetParentConditionalStatement(ctx.Node);
 				if (s == null) {
-					return;
+					yield break;
 				}
 				if (ifs.Statement is BlockSyntax b) {
 					b = SF.Block(b.Statements);
@@ -285,15 +326,22 @@ namespace Codist.Refactorings
 				}
 
 				if (s is IfStatementSyntax newIf) {
-					newIf = newIf.WithCondition(SF.BinaryExpression(SyntaxKind.LogicalAndExpression, newIf.Condition, ifs.Condition))
+					newIf = newIf.WithCondition(SF.BinaryExpression(SyntaxKind.LogicalAndExpression, ParenthesizeLogicalOrExpression(newIf.Condition), ParenthesizeLogicalOrExpression(ifs.Condition)))
 						.WithStatement(b);
-					Replace(ctx, s, new[] { newIf.AnnotateReformatAndSelect() });
+					yield return Replace(s, newIf.AnnotateReformatAndSelect());
 				}
 				else if (s is WhileStatementSyntax newWhile) {
-					newWhile = newWhile.WithCondition(SF.BinaryExpression(SyntaxKind.LogicalAndExpression, newWhile.Condition, ifs.Condition))
+					newWhile = newWhile.WithCondition(SF.BinaryExpression(SyntaxKind.LogicalAndExpression, ParenthesizeLogicalOrExpression(newWhile.Condition), ParenthesizeLogicalOrExpression(ifs.Condition)))
 						.WithStatement(b);
-					Replace(ctx, s, new[] { newWhile.AnnotateReformatAndSelect() });
+					yield return Replace(s, newWhile.AnnotateReformatAndSelect());
 				}
+			}
+
+			static ExpressionSyntax ParenthesizeLogicalOrExpression(ExpressionSyntax expression) {
+				if (expression is BinaryExpressionSyntax b && b.IsKind(SyntaxKind.LogicalOrExpression)) {
+					return SF.ParenthesizedExpression(expression);
+				}
+				return expression;
 			}
 
 			static StatementSyntax GetParentConditionalStatement(SyntaxNode node) {
@@ -313,21 +361,21 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class ChangeIfToConditionalRefactoring : ReplaceNodes
+		sealed class ChangeIfToConditionalRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.MergeCondition;
 			public override string Title => R.CMD_IfElseToConditional;
 
-			public override bool Accept(SyntaxNode node) {
-				return GetConditionalStatement(node).ifStatement != null;
+			public override bool Accept(RefactoringContext ctx) {
+				return GetConditionalStatement(ctx.NodeIncludeTrivia).ifStatement != null;
 			}
 
-			public override void Refactor(SemanticContext ctx) {
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var (ifStatement, statement, elseStatement) = GetConditionalStatement(ctx.Node);
 				if (ifStatement == null) {
-					return;
+					yield break;
 				}
-				SyntaxNode newNode;
+				StatementSyntax newNode;
 				switch (statement.Kind()) {
 					case SyntaxKind.ReturnStatement:
 						newNode = SF.ReturnStatement(
@@ -353,9 +401,9 @@ namespace Codist.Refactorings
 								(elseStatement as YieldStatementSyntax).Expression));
 						break;
 					default:
-						return;
+						yield break;
 				}
-				Replace(ctx, ifStatement, newNode.AnnotateReformatAndSelect());
+				yield return Replace(ifStatement, newNode.AnnotateReformatAndSelect());
 			}
 
 			static (IfStatementSyntax ifStatement, StatementSyntax statement, StatementSyntax elseStatement) GetConditionalStatement(SyntaxNode node) {
@@ -370,12 +418,7 @@ namespace Codist.Refactorings
 					&& es.IsKind(k = ss.Kind())
 					&& (k == SyntaxKind.ReturnStatement
 						|| k == SyntaxKind.YieldReturnStatement
-						|| (k == SyntaxKind.ExpressionStatement
-							&& ss is ExpressionStatementSyntax e
-							&& e.Expression is AssignmentExpressionSyntax a
-							&& es is ExpressionStatementSyntax ee
-							&& ee.Expression is AssignmentExpressionSyntax ea
-							&& a.Left.ToString() == ea.Left.ToString()))) {
+						|| k == SyntaxKind.ExpressionStatement && ss.IsAssignedToSameTarget(es))) {
 					return (ifs, ss, es);
 				}
 				return default;
@@ -388,16 +431,17 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class ChangeConditionalToIfRefactoring : ReplaceNodes
+		sealed class ChangeConditionalToIfRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.SplitCondition;
 			public override string Title => R.CMD_ConditionalToIfElse;
 
-			public override bool Accept(SyntaxNode node) {
+			public override bool Accept(RefactoringContext ctx) {
+				var node = ctx.NodeIncludeTrivia;
 				return node.IsKind(SyntaxKind.ConditionalExpression) && node.Parent is StatementSyntax;
 			}
 
-			public override void Refactor(SemanticContext ctx) {
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia as ConditionalExpressionSyntax;
 				SyntaxNode newNode;
 				StatementSyntax whenTrue, whenFalse;
@@ -416,45 +460,44 @@ namespace Codist.Refactorings
 					whenFalse = SF.YieldStatement(SyntaxKind.YieldReturnStatement, node.WhenFalse);
 				}
 				else {
-					return;
+					yield break;
 				}
 				newNode = SF.IfStatement(node.Condition.WithoutTrailingTrivia(),
 					SF.Block(whenTrue),
 					SF.ElseClause(SF.Block(whenFalse))
 					);
-				Replace(ctx, node.Parent, newNode.AnnotateReformatAndSelect());
+				yield return Replace(node.Parent, newNode.AnnotateReformatAndSelect());
 			}
 		}
 
-		sealed class MultilineConditionalRefactoring : ReplaceNodes
+		sealed class MultilineConditionalRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.MultiLine;
 			public override string Title => R.CMD_ConditionalOnMultiLines;
 
-			public override bool Accept(SyntaxNode node) {
+			public override bool Accept(RefactoringContext ctx) {
+				var node = ctx.NodeIncludeTrivia;
 				return node.IsKind(SyntaxKind.ConditionalExpression)
 					&& node.IsMultiLine(false) == false;
 			}
 
-			public override void Refactor(SemanticContext ctx) {
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var conditional = ctx.NodeIncludeTrivia as ConditionalExpressionSyntax;
 				if (conditional == null) {
-					return;
+					yield break;
 				}
 				// it is frustrating that the C# formatter removes trivias in ?: expressions
-				var options = ctx.Workspace.Options;
+				var options = ctx.WorkspaceOptions;
 				var indent = conditional.GetContainingStatement()
-					?.GetLeadingTrivia()
-					.Where(t => t.IsKind(SyntaxKind.WhitespaceTrivia))
-					.Concat(new SyntaxTriviaList(SF.Whitespace(options.GetIndentString())))
-					.ToSyntaxTriviaList();
+					.GetPrecedingWhitespace()
+					.Add(SF.Whitespace(options.GetIndentString()));
 				var newLine = SF.Whitespace(options.GetNewLineString());
 				var newNode = conditional.Update(conditional.Condition.WithTrailingTrivia(newLine),
 					conditional.QuestionToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 					conditional.WhenTrue.WithTrailingTrivia(newLine),
 					conditional.ColonToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 					conditional.WhenFalse);
-				Replace(ctx, conditional, newNode.AnnotateSelect());
+				yield return Replace(conditional, newNode.AnnotateSelect());
 			}
 		}
 	}

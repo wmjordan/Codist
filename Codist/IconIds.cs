@@ -61,6 +61,7 @@ namespace Codist
 		public const int Attribute = KnownImageIds.FormPostBodyParameterNode;
 		public const int Return = KnownImageIds.Return;
 		public const int If = KnownImageIds.If;
+		public const int Else = KnownImageIds.GoToNextUncovered;
 		public const int TryCatch = KnownImageIds.TryCatch;
 		public const int Using = KnownImageIds.TransactedReceiveScope;
 		public const int PublicSymbols = KnownImageIds.ModulePublic;
@@ -117,6 +118,7 @@ namespace Codist
 		public const int ReorderParameters = KnownImageIds.ReorderParameters;
 		public const int ExtractInterface = KnownImageIds.ExtractInterface;
 		public const int ExtractMethod = KnownImageIds.ExtractMethod;
+		public const int AddBraces = KnownImageIds.AddNamespace;
 		public const int DeleteMethod = KnownImageIds.MethodMissing;
 		public const int DeleteCondition = KnownImageIds.DeleteClause;
 		public const int MergeCondition = KnownImageIds.GroupByClause;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Codist.Refactorings
 {
@@ -6,11 +7,7 @@ namespace Codist.Refactorings
 	{
 		int IconId { get; }
 		string Title { get; }
+		bool Accept(RefactoringContext context);
 		void Refactor(SemanticContext context);
-	}
-
-	interface IRefactoring<TSyntax> : IRefactoring
-	{
-		bool Accept(TSyntax node);
 	}
 }

@@ -2132,8 +2132,7 @@ Right click: 显示“线程”窗口</value>
     <value>重构选中的代码</value>
   </data>
   <data name="CMD_SwapOperands" xml:space="preserve">
-    <value>交换操作数
-交换操作符左右两侧的表达式</value>
+    <value>交换操作数</value>
   </data>
   <data name="OT_EnumMembers" xml:space="preserve">
     <value>Enum 字段</value>
@@ -2164,5 +2163,14 @@ Right click: 显示“线程”窗口</value>
   </data>
   <data name="CMD_IfElseToConditional" xml:space="preserve">
     <value>将 &lt;if...else&gt; 转为 &lt;?:&gt;</value>
+  </data>
+  <data name="CMD_AddBraces" xml:space="preserve">
+    <value>添加花括号</value>
+  </data>
+  <data name="CMD_MergeStatementsToConditional" xml:space="preserve">
+    <value>合并为 &lt;?:&gt;</value>
+  </data>
+  <data name="CMD_WrapInElse" xml:space="preserve">
+    <value>放到 &lt;else&gt; 里面</value>
   </data>
 </root>

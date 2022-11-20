@@ -21,11 +21,25 @@ namespace Codist.SmartBars
 	/// <summary>
 	/// An extended <see cref="SmartBar"/> for C# content type.
 	/// </summary>
-	sealed class CSharpSmartBar : SmartBar {
+	sealed class CSharpSmartBar : SmartBar
+	{
 		static readonly Taggers.HighlightClassifications __HighlightClassifications = Taggers.HighlightClassifications.Instance;
-		static readonly Refactorings.IRefactoring<SyntaxToken>[] __TokenRefactorings = new[] { Refactorings.ReplaceToken.InvertOperator };
-		static readonly Refactorings.IRefactoring<SyntaxNode>[] __NodeRefactorings = new[] { Refactorings.ReplaceNodes.ChangeConditionalToIf, Refactorings.ReplaceNodes.ChangeIfToConditional, Refactorings.ReplaceNodes.MergeCondition, Refactorings.ReplaceNodes.MultiLineConditional, Refactorings.ReplaceNodes.SwapOperands, Refactorings.ReplaceNodes.NestCondition, Refactorings.ReplaceNodes.DeleteCondition, Refactorings.ReplaceNodes.RemoveContainingStatement };
-		static readonly Refactorings.IRefactoring<List<StatementSyntax>>[] __StatementRefactorings = new[] { Refactorings.ReplaceStatements.WrapInIf, Refactorings.ReplaceStatements.WrapInTryCatch };
+		static readonly Refactorings.IRefactoring[] __Refactorings = new Refactorings.IRefactoring[] {
+			Refactorings.ReplaceToken.InvertOperator,
+			Refactorings.ReplaceNode.WrapInElse,
+			Refactorings.ReplaceNode.WrapInIf,
+			Refactorings.ReplaceNode.WrapInTryCatch,
+			Refactorings.ReplaceNode.WrapInConditional,
+			Refactorings.ReplaceNode.ChangeConditionalToIf,
+			Refactorings.ReplaceNode.ChangeIfToConditional,
+			Refactorings.ReplaceNode.MergeCondition,
+			Refactorings.ReplaceNode.MultiLineConditional,
+			Refactorings.ReplaceNode.SwapOperands,
+			Refactorings.ReplaceNode.NestCondition,
+			Refactorings.ReplaceNode.AddBraces,
+			Refactorings.ReplaceNode.DeleteCondition,
+			Refactorings.ReplaceNode.RemoveContainingStatement
+		};
 		SemanticContext _Context;
 		ExternalAdornment _SymbolListContainer;
 		ISymbol _Symbol;
@@ -83,7 +97,6 @@ namespace Codist.SmartBars
 				return;
 			}
 			var trivia = _Context.GetNodeTrivia();
-			bool hasRefactoring = false;
 			if (trivia.RawKind == 0) {
 				var token = _Context.Token;
 				var tokenKind = token.Kind();
@@ -161,19 +174,14 @@ namespace Codist.SmartBars
 							});
 						}
 					}
-					else {
-						hasRefactoring = HasRefactoring(__TokenRefactorings, token)
-							|| HasRefactoring(__NodeRefactorings, node);
-					}
 				}
 			}
 			if (isReadOnly == false) {
-				var statements = _Context.Compilation.GetStatements(_Context.View.FirstSelectionSpan().ToTextSpan());
-				if (statements != null) {
+				var refactoringContext = new Refactorings.RefactoringContext(_Context);
+				if (refactoringContext.SelectedStatementInfo.Statements != null) {
 					AddEditorCommand(MyToolBar, IconIds.ExtractMethod, "Refactor.ExtractMethod", R.CMD_ExtractMethod);
-					hasRefactoring = hasRefactoring || HasRefactoring(__StatementRefactorings, statements);
 				}
-				if (hasRefactoring) {
+				if (HasRefactoring(__Refactorings, refactoringContext)) {
 					AddCommand(MyToolBar, IconIds.Refactoring, R.CMD_RefactorSelection, ShowRefactorMenu);
 				}
 				AddCommentCommands();
@@ -181,9 +189,9 @@ namespace Codist.SmartBars
 			}
 		}
 
-		static bool HasRefactoring<TSyntax>(Refactorings.IRefactoring<TSyntax>[] refactorings, TSyntax syntax) {
+		static bool HasRefactoring(Refactorings.IRefactoring[] refactorings, Refactorings.RefactoringContext context) {
 			foreach (var item in refactorings) {
-				if (item.Accept(syntax)) {
+				if (item.Accept(context)) {
 					return true;
 				}
 			}
@@ -200,20 +208,17 @@ namespace Codist.SmartBars
 				PlacementTarget = ctx.Sender,
 				Resources = SharedDictionaryManager.ContextMenu
 			};
-			AddRefactoringCommands(m, __StatementRefactorings, _Context.Compilation.GetStatements(_Context.View.FirstSelectionSpan().ToTextSpan()));
-			AddRefactoringCommands(m, __TokenRefactorings, _Context.Token);
-			AddRefactoringCommands(m, __NodeRefactorings, _Context.NodeIncludeTrivia);
+			var rc = new Refactorings.RefactoringContext(_Context);
+			AddRefactoringCommands(m, __Refactorings, rc);
 			ctx.Sender.ContextMenu = m;
 			m.Closed += Menu_Closed;
 			m.IsOpen = true;
 		}
 
-		void AddRefactoringCommands<TSyntax>(ContextMenu menu, Refactorings.IRefactoring<TSyntax>[] refactorings, TSyntax syntax) {
-			if (syntax != null) {
-				foreach (var item in refactorings) {
-					if (item.Accept(syntax)) {
-						menu.Items.Add(new CommandMenuItem(this, new CommandItem(item.IconId, item.Title, c => item.Refactor(_Context))));
-					}
+		void AddRefactoringCommands(ContextMenu menu, Refactorings.IRefactoring[] refactorings, Refactorings.RefactoringContext ctx) {
+			foreach (var item in refactorings) {
+				if (item.Accept(ctx)) {
+					menu.Items.Add(new CommandMenuItem(this, new CommandItem(item.IconId, item.Title, c => item.Refactor(((CSharpSmartBar)c.Bar)._Context))));
 				}
 			}
 		}

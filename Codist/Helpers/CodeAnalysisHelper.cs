@@ -361,6 +361,14 @@ namespace Codist
 			}
 			return false;
 		}
+
+		public static bool IsAssignedToSameTarget(this StatementSyntax statement, StatementSyntax other) {
+			return statement is ExpressionStatementSyntax e
+				&& e.Expression is AssignmentExpressionSyntax a
+				&& other is ExpressionStatementSyntax ee
+				&& ee.Expression is AssignmentExpressionSyntax ea
+				&& SyntaxFactory.AreEquivalent(a.Left, ea.Left);
+		}
 		#endregion
 
 		#region Node icon
@@ -1162,6 +1170,21 @@ namespace Codist
 			}
 			return name.ToString();
 		}
+		/// <summary>Gets leading whitespaces of <paramref name="node"/>, excluding directives, comments and whitespaces before them.</summary>
+		public static SyntaxTriviaList GetPrecedingWhitespace(this SyntaxNode node) {
+			if (node == null || node.HasLeadingTrivia == false) {
+				return SyntaxTriviaList.Empty;
+			}
+			var trivias = node.GetLeadingTrivia();
+			int first;
+			for (int i = first = 0; i < trivias.Count; i++) {
+				var trivia = trivias[i];
+				if (trivia.IsKind(SyntaxKind.WhitespaceTrivia) == false) {
+					first = i + 1;
+				}
+			}
+			return first > 0 ? new SyntaxTriviaList(trivias.Skip(first)) : trivias;
+		}
 		public static List<DirectiveTriviaSyntax> GetDirectives(this SyntaxNode node, Func<DirectiveTriviaSyntax, bool> predicate = null) {
 			if (node.ContainsDirectives == false) {
 				return null;
@@ -1180,17 +1203,41 @@ namespace Codist
 			} while (directive != null && directive.SpanStart < endOfNode);
 			return directives;
 		}
+		public static StatementSyntax GetStatement(this LabeledStatementSyntax labeledStatement) {
+			var s = labeledStatement.Statement;
+			while (s is LabeledStatementSyntax labeled) {
+				s = labeled.Statement;
+			}
+			return s;
+		}
+		public static StatementSyntax GetSingleStatement(this StatementSyntax statement) {
+			return statement is BlockSyntax b ? b.GetSingleStatement() : statement;
+		}
+		public static StatementSyntax GetSingleStatement(this BlockSyntax block) {
+			START:
+			var s = block.Statements;
+			if (s.Count == 1) {
+				var first = s[0];
+				if (first.IsKind(SyntaxKind.Block)) {
+					block = (BlockSyntax)first;
+					goto START;
+				}
+				return first;
+			}
+			return null;
+		}
 		public static StatementSyntax GetContainingStatement(this SyntaxNode node) {
 			var s = node.FirstAncestorOrSelf<StatementSyntax>();
 			return s.IsKind(SyntaxKind.Block) ? s.Parent.FirstAncestorOrSelf<StatementSyntax>() ?? s : s;
 		}
-		public static List<StatementSyntax> GetStatements(this SyntaxNode node, TextSpan span) {
+		public static SelectedStatementInfo GetStatements(this SyntaxNode node, TextSpan span) {
 			if (span.Length == 0) {
 				goto NO_STATEMENT;
 			}
 			var statement = node.FindNode(new TextSpan(span.Start, 1)).FirstAncestorOrSelf<StatementSyntax>();
+			StatementSyntax preceding = null, following = null;
 			int spanEnd = span.End;
-			List<StatementSyntax> b = null;
+			List<StatementSyntax> selected = null;
 			TextSpan nodeSpan;
 			List<SyntaxNode> siblings = null;
 			int i = -1;
@@ -1212,18 +1259,18 @@ namespace Codist
 				else {
 					span = TextSpan.FromBounds(nodeSpan.End, spanEnd);
 				}
-				if (b == null) {
-					b = new List<StatementSyntax>();
+				if (selected == null) {
+					selected = new List<StatementSyntax>();
 					siblings = statement.Parent.ChildNodes().ToList();
 					i = siblings.IndexOf(statement);
 				}
-				b.Add(statement);
-				if (statement.Parent.IsKind(SyntaxKind.LabeledStatement)) {
-					siblings = statement.Parent.Parent.ChildNodes().ToList();
-					i = siblings.IndexOf(statement.Parent);
+				selected.Add(statement);
+				while (statement.Parent.IsKind(SyntaxKind.LabeledStatement)) {
+					siblings = (statement = (StatementSyntax)statement.Parent).Parent.ChildNodes().ToList();
+					i = siblings.IndexOf(statement);
 				}
-				if (span.IsEmpty) {
-					break;
+				if (preceding == null && i > 0) {
+					preceding = siblings[i - 1] as StatementSyntax;
 				}
 				if (++i < siblings.Count) {
 					statement = siblings[i] as StatementSyntax;
@@ -1231,12 +1278,18 @@ namespace Codist
 				else {
 					break;
 				}
+				if (span.IsEmpty) {
+					break;
+				}
+			}
+			if (siblings != null && i < siblings.Count) {
+				following = siblings[i] as StatementSyntax;
 			}
 			if (span.Length == 0) {
-				return b;
+				return new SelectedStatementInfo(preceding, selected, following);
 			}
 		NO_STATEMENT:
-			return null;
+			return default;
 		}
 		public static ParameterSyntax FindParameter(this BaseMethodDeclarationSyntax node, string name) {
 			return node?.ParameterList.Parameters.FirstOrDefault(p => p.Identifier.Text == name);
@@ -1314,16 +1367,6 @@ namespace Codist
 
 		public static ArgumentListSyntax GetImplicitObjectCreationArgumentList(this ExpressionSyntax syntax) {
 			return NonPublicOrFutureAccessors.GetImplicitObjectCreationArgumentList(syntax);
-		}
-
-		public static TSyntaxNode Format<TSyntaxNode>(this TSyntaxNode node, Workspace workspace, CancellationToken cancellation = default)
-			where TSyntaxNode : SyntaxNode {
-			return (TSyntaxNode)Formatter.Format(node, workspace, null, cancellation);
-		}
-
-		public static TSyntaxNode Format<TSyntaxNode>(this TSyntaxNode node, SyntaxAnnotation annotation, Workspace workspace, CancellationToken cancellation = default)
-			where TSyntaxNode : SyntaxNode {
-			return (TSyntaxNode)Formatter.Format(node, annotation, workspace, null, cancellation);
 		}
 
 		static partial class NonPublicOrFutureAccessors
