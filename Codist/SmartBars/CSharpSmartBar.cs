@@ -130,6 +130,9 @@ namespace Codist.SmartBars
 									AddRenameCommand();
 								}
 							}
+							if (_Symbol != null && isReadOnly == false) {
+								AddCommand(MyToolBar, IconIds.SelectAll, R.CMD_SelectSymbolInDocument, SelectSymbolOccurrences);
+							}
 							break;
 						default:
 							if (tokenKind.IsPredefinedSystemType()) {
@@ -231,6 +234,19 @@ namespace Codist.SmartBars
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
 				&& Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
 				AddCommands(MyToolBar, IconIds.Marks, R.CMD_MarkSymbol, null, GetMarkerCommands);
+			}
+		}
+
+		void SelectSymbolOccurrences(CommandContext ctx) {
+			var selections = ctx.View.GetMultiSelectionBroker();
+			var snapshot = ctx.View.TextSnapshot;
+			foreach (var refs in SyncHelper.RunSync(() => Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindReferencesAsync(_Symbol, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.Create(_Context.Document), default))) {
+				selections.AddSelectionRange(refs.Locations.Select(l => new Selection(new SnapshotSpan(snapshot, l.Location.SourceSpan.ToSpan()))));
+			}
+			foreach (var sr in _Symbol.Locations) {
+				if (sr.IsInSource && sr.SourceTree == _Context.Compilation.SyntaxTree) {
+					selections.AddSelection(new Selection(new SnapshotSpan(snapshot, sr.SourceSpan.ToSpan())));
+				}
 			}
 		}
 

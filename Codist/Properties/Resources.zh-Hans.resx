@@ -2170,6 +2170,10 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_MergeStatementsToConditional" xml:space="preserve">
     <value>合并为 &lt;?:&gt;</value>
   </data>
+  <data name="CMD_SelectSymbolInDocument" xml:space="preserve">
+    <value>选中符号的全部出现位置
+在当前文档中选中出现当前符号的所有位置</value>
+  </data>
   <data name="CMD_WrapInElse" xml:space="preserve">
     <value>放到 &lt;else&gt; 里面</value>
   </data>

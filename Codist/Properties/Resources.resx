@@ -2183,7 +2183,11 @@ Sent or received bytes per second through all network interfaces</value>
     <value>Add Braces</value>
   </data>
   <data name="CMD_MergeStatementsToConditional" xml:space="preserve">
-    <value>Merge statements to &lt;?:&gt;</value>
+    <value>Merge Statements to &lt;?:&gt;</value>
+  </data>
+  <data name="CMD_SelectSymbolInDocument" xml:space="preserve">
+    <value>Select Symbol in Document
+Select all occurrences of current symbol in active document</value>
   </data>
   <data name="CMD_WrapInElse" xml:space="preserve">
     <value>Wrap in &lt;else&gt;</value>

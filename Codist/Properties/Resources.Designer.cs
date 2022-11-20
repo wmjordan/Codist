@@ -919,7 +919,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Merge statements to &lt;?:&gt;.
+        ///   Looks up a localized string similar to Merge Statements to &lt;?:&gt;.
         /// </summary>
         internal static string CMD_MergeStatementsToConditional {
             get {
@@ -1290,6 +1290,16 @@ namespace Codist.Properties {
         internal static string CMD_SelectDirectiveRegion {
             get {
                 return ResourceManager.GetString("CMD_SelectDirectiveRegion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select Symbol in Document
+        ///Select all occurrences of current symbol in active document.
+        /// </summary>
+        internal static string CMD_SelectSymbolInDocument {
+            get {
+                return ResourceManager.GetString("CMD_SelectSymbolInDocument", resourceCulture);
             }
         }
         
