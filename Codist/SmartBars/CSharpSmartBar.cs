@@ -238,14 +238,27 @@ namespace Codist.SmartBars
 		}
 
 		void SelectSymbolOccurrences(CommandContext ctx) {
-			var selections = ctx.View.GetMultiSelectionBroker();
-			var snapshot = ctx.View.TextSnapshot;
-			foreach (var refs in SyncHelper.RunSync(() => Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindReferencesAsync(_Symbol, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.Create(_Context.Document), default))) {
-				selections.AddSelectionRange(refs.Locations.Select(l => new Selection(new SnapshotSpan(snapshot, l.Location.SourceSpan.ToSpan()))));
+			ctx.KeepToolBar(false);
+			if (UpdateSemanticModel() == false) {
+				return;
 			}
-			foreach (var sr in _Symbol.Locations) {
+			var selections = ctx.View.GetMultiSelectionBroker();
+			var symbol = _Symbol;
+			SelectSymbolDefinitionAndReferences(selections, symbol);
+			if (symbol.Kind == SymbolKind.Method
+				&& symbol is IMethodSymbol m && m.MethodKind == MethodKind.Constructor) {
+				SelectSymbolDefinitionAndReferences(selections, symbol.ContainingType);
+			}
+		}
+
+		void SelectSymbolDefinitionAndReferences(IMultiSelectionBroker selections, ISymbol symbol) {
+			var snapshot = selections.CurrentSnapshot;
+			foreach (var refs in SyncHelper.RunSync(() => Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindReferencesAsync(symbol, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.Create(_Context.Document), default))) {
+				selections.AddSelections(refs.Locations.Select(l => l.Location.SourceSpan));
+			}
+			foreach (var sr in symbol.Locations) {
 				if (sr.IsInSource && sr.SourceTree == _Context.Compilation.SyntaxTree) {
-					selections.AddSelection(new Selection(new SnapshotSpan(snapshot, sr.SourceSpan.ToSpan())));
+					selections.AddSelection(sr.SourceSpan);
 				}
 			}
 		}

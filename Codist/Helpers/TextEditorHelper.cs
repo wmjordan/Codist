@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Linq;
 using System.Windows.Input;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
@@ -131,6 +132,13 @@ namespace Codist
 		}
 
 		#region Selection
+		public static void AddSelection(this IMultiSelectionBroker selectionBroker, TextSpan span) {
+			selectionBroker.AddSelection(new Selection(span.CreateSnapshotSpan(selectionBroker.CurrentSnapshot)));
+		}
+		public static void AddSelections(this IMultiSelectionBroker selectionBroker, IEnumerable<TextSpan> spans) {
+			var snapshot = selectionBroker.CurrentSnapshot;
+			selectionBroker.AddSelectionRange(spans.Select(s => new Selection(s.CreateSnapshotSpan(snapshot))));
+		}
 		public static void ExpandSelectionToLine(this ITextView view) {
 			view.ExpandSelectionToLine(false);
 		}
