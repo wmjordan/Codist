@@ -103,7 +103,7 @@ namespace Codist.Refactorings
 
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia;
-				return node.IsKind(SyntaxKind.IfStatement) && node.Parent.IsKind(SyntaxKind.ElseClause) == false;
+				return node.IsKind(SyntaxKind.IfStatement) && node.Parent.IsKind(SyntaxKind.ElseClause) == false && (ctx.SelectedStatementInfo.Statements == null || ctx.SelectedStatementInfo.Statements.Count == 1);
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
