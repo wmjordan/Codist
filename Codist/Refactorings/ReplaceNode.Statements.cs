@@ -92,7 +92,11 @@ namespace Codist.Refactorings
 					default:
 						yield break;
 				}
-				yield return Replace(ifs, newStatement.WithLeadingTrivia(ifs.GetLeadingTrivia()).AnnotateSelect());
+				yield return Replace(ifs,
+					newStatement.WithLeadingTrivia(ifs.GetLeadingTrivia())
+						.WithTrailingTrivia(other.GetTrailingTrivia())
+						.AnnotateSelect()
+					);
 				yield return Remove(other);
 			}
 
