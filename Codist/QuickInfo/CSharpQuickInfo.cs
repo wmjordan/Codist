@@ -563,11 +563,11 @@ namespace Codist.QuickInfo
 
 		static void ShowBlockInfo(QiContainer qiContent, ITextSnapshot textSnapshot, SyntaxNode node, SemanticModel semanticModel) {
 			var lines = textSnapshot.GetLineSpan(node.Span).Length + 1;
-			if (lines > 100) {
-				qiContent.Add(new ThemedTipText(lines + R.T_Lines, true));
-			}
-			else if (lines > 1) {
-				qiContent.Add(lines + R.T_Lines);
+			if (lines > 1) {
+				qiContent.Add(
+					(lines > 100 ? new ThemedTipText(lines + R.T_Lines, true) : new ThemedTipText(lines + R.T_Lines))
+						.SetGlyph(ThemeHelper.GetImage(IconIds.LineOfCode))
+					);
 			}
 			var df = semanticModel.AnalyzeDataFlow(node);
 			var vd = df.VariablesDeclared;

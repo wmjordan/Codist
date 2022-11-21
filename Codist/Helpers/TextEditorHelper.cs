@@ -19,6 +19,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
+using Microsoft.VisualStudio.Language.Intellisense;
 
 namespace Codist
 {
@@ -58,7 +59,9 @@ namespace Codist
 
 		#region Spans
 		public static SnapshotSpan CreateSnapshotSpan(this TextSpan span, ITextSnapshot snapshot) {
-			return span.End < snapshot.Length ? new SnapshotSpan(snapshot, span.Start, span.Length) : (default);
+			return span.End < snapshot.Length
+				? new SnapshotSpan(snapshot, span.Start, span.Length)
+				: default;
 		}
 		public static Span ToSpan(this TextSpan span) {
 			return new Span(span.Start, span.Length);
@@ -308,20 +311,18 @@ namespace Codist
 			where TView : ITextView {
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
 				action(view, edit);
-				if (edit.HasEffectiveChanges) {
-					return edit.Apply();
-				}
-				return null;
+				return edit.HasEffectiveChanges
+					? edit.Apply()
+					: null;
 			}
 		}
 		public static ITextSnapshot Edit<TView, TArg>(this TView view, TArg arg, Action<TView, TArg, ITextEdit> action)
 			where TView : ITextView {
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
 				action(view, arg, edit);
-				if (edit.HasEffectiveChanges) {
-					return edit.Apply();
-				}
-				return null;
+				return edit.HasEffectiveChanges
+					? edit.Apply()
+					: null;
 			}
 		}
 		/// <summary>
@@ -534,7 +535,7 @@ namespace Codist
 		/// <see cref="InternalOpenFile"/>.</para>
 		/// <para>So <i>Navigate Backward</i> command will restore the caret position to that point.</para>
 		/// </summary>
-		public static void KeepViewPosition(this Microsoft.VisualStudio.Language.Intellisense.IAsyncQuickInfoSession session) {
+		public static void KeepViewPosition(this IAsyncQuickInfoSession session) {
 			if (session.TextView is IWpfTextView v) {
 				_ActiveTextView = v;
 				_ActiveViewPosition = session.GetTriggerPoint(v.TextSnapshot)?.Position ?? -1;
@@ -542,10 +543,10 @@ namespace Codist
 			}
 		}
 
-		static void QuickInfoSession_StateChanged(object sender, Microsoft.VisualStudio.Language.Intellisense.QuickInfoSessionStateChangedEventArgs e) {
-			if (e.NewState == Microsoft.VisualStudio.Language.Intellisense.QuickInfoSessionState.Dismissed) {
+		static void QuickInfoSession_StateChanged(object sender, QuickInfoSessionStateChangedEventArgs e) {
+			if (e.NewState == QuickInfoSessionState.Dismissed) {
 				ForgetViewPosition();
-				((Microsoft.VisualStudio.Language.Intellisense.IAsyncQuickInfoSession)sender).StateChanged -= QuickInfoSession_StateChanged;
+				((IAsyncQuickInfoSession)sender).StateChanged -= QuickInfoSession_StateChanged;
 			}
 		}
 

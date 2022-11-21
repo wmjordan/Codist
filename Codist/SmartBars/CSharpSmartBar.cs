@@ -26,14 +26,14 @@ namespace Codist.SmartBars
 		static readonly Taggers.HighlightClassifications __HighlightClassifications = Taggers.HighlightClassifications.Instance;
 		static readonly Refactorings.IRefactoring[] __Refactorings = new Refactorings.IRefactoring[] {
 			Refactorings.ReplaceToken.InvertOperator,
+			Refactorings.ReplaceNode.MergeToConditional,
 			Refactorings.ReplaceNode.WrapInElse,
 			Refactorings.ReplaceNode.WrapInIf,
 			Refactorings.ReplaceNode.WrapInTryCatch,
-			Refactorings.ReplaceNode.WrapInConditional,
+			Refactorings.ReplaceNode.MultiLineConditional,
 			Refactorings.ReplaceNode.ChangeConditionalToIf,
 			Refactorings.ReplaceNode.ChangeIfToConditional,
 			Refactorings.ReplaceNode.MergeCondition,
-			Refactorings.ReplaceNode.MultiLineConditional,
 			Refactorings.ReplaceNode.SwapOperands,
 			Refactorings.ReplaceNode.NestCondition,
 			Refactorings.ReplaceNode.AddBraces,

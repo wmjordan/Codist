@@ -414,7 +414,7 @@ namespace Codist.SmartBars
 					_ClickHandler(ctx);
 				}
 				else {
-					if (ContextMenu != null && ContextMenu.Tag as string == LeftClickTag) {
+					if (ContextMenu?.Tag as string == LeftClickTag) {
 						ContextMenu.IsOpen = true;
 						return;
 					}
@@ -429,7 +429,7 @@ namespace Codist.SmartBars
 
 			protected override void OnMouseRightButtonUp(MouseButtonEventArgs e) {
 				base.OnMouseRightButtonUp(e);
-				if (ContextMenu != null && ContextMenu.Tag as string == RightClickTag) {
+				if (ContextMenu?.Tag as string == RightClickTag) {
 					ContextMenu.IsOpen = true;
 					e.Handled = true;
 					return;
@@ -489,10 +489,6 @@ namespace Codist.SmartBars
 
 		protected sealed class CommandItem
 		{
-			public CommandItem(ISymbol symbol, string alias) {
-				Name = alias;
-				ImageId = symbol.GetImageId();
-			}
 			public CommandItem(int imageId, string name, Action<CommandContext> action)
 				: this(imageId, name, null, action) { }
 			public CommandItem(int imageId, string name, Action<MenuItem> controlInitializer, Action<CommandContext> action) {

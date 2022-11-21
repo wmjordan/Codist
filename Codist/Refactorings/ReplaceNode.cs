@@ -6,7 +6,6 @@ using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Formatting;
 using R = Codist.Properties.Resources;
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -22,7 +21,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode MergeCondition = new MergeConditionRefactoring();
 		public static readonly ReplaceNode ChangeIfToConditional = new ChangeIfToConditionalRefactoring();
 		public static readonly ReplaceNode ChangeConditionalToIf = new ChangeConditionalToIfRefactoring();
-		public static readonly ReplaceNode MultiLineConditional = new MultilineConditionalRefactoring();
+		public static readonly ReplaceNode MultiLineConditional = new MultiLineConditionalRefactoring();
 
 		sealed class AddBracesRefactoring : ReplaceNode
 		{
@@ -338,10 +337,9 @@ namespace Codist.Refactorings
 			}
 
 			static ExpressionSyntax ParenthesizeLogicalOrExpression(ExpressionSyntax expression) {
-				if (expression is BinaryExpressionSyntax b && b.IsKind(SyntaxKind.LogicalOrExpression)) {
-					return SF.ParenthesizedExpression(expression);
-				}
-				return expression;
+				return expression is BinaryExpressionSyntax b && b.IsKind(SyntaxKind.LogicalOrExpression)
+					? SF.ParenthesizedExpression(expression)
+					: expression;
 			}
 
 			static StatementSyntax GetParentConditionalStatement(SyntaxNode node) {
@@ -409,7 +407,7 @@ namespace Codist.Refactorings
 			static (IfStatementSyntax ifStatement, StatementSyntax statement, StatementSyntax elseStatement) GetConditionalStatement(SyntaxNode node) {
 				StatementSyntax ss, es;
 				SyntaxKind k;
-				if (node is IfStatementSyntax ifs
+				return node is IfStatementSyntax ifs
 					&& ifs.Else != null
 					&& (ss = ifs.Statement) != null
 					&& (ss = GetSingleStatement(ss)) != null
@@ -418,10 +416,9 @@ namespace Codist.Refactorings
 					&& es.IsKind(k = ss.Kind())
 					&& (k == SyntaxKind.ReturnStatement
 						|| k == SyntaxKind.YieldReturnStatement
-						|| k == SyntaxKind.ExpressionStatement && ss.IsAssignedToSameTarget(es))) {
-					return (ifs, ss, es);
-				}
-				return default;
+						|| k == SyntaxKind.ExpressionStatement && ss.IsAssignedToSameTarget(es))
+					? (ifs, ss, es)
+					: default;
 			}
 
 			static StatementSyntax GetSingleStatement(StatementSyntax statement) {
@@ -470,7 +467,7 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class MultilineConditionalRefactoring : ReplaceNode
+		sealed class MultiLineConditionalRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.MultiLine;
 			public override string Title => R.CMD_ConditionalOnMultiLines;

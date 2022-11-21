@@ -13,7 +13,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode WrapInIf = new WrapInIfRefactoring();
 		public static readonly ReplaceNode WrapInTryCatch = new WrapInTryCatchRefactoring();
 		public static readonly ReplaceNode WrapInElse = new WrapInElseRefactoring();
-		public static readonly ReplaceNode WrapInConditional = new WrapInConditionalRefactoring();
+		public static readonly ReplaceNode MergeToConditional = new MergeToConditionalRefactoring();
 
 		sealed class WrapInIfRefactoring : ReplaceNode
 		{
@@ -27,7 +27,7 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class WrapInConditionalRefactoring : ReplaceNode
+		sealed class MergeToConditionalRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.MergeCondition;
 			public override string Title => R.CMD_MergeStatementsToConditional;
