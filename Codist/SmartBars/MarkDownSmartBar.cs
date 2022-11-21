@@ -23,9 +23,9 @@ namespace Codist.SmartBars
 			base.AddCommands(cancellationToken);
 		}
 
-		static void MakeUrl(CommandContext ctx) {
+		void MakeUrl(CommandContext ctx) {
 			var t = ctx.View.GetFirstSelectionText();
-			if (t.StartsWith("http://", StringComparison.Ordinal) || t.StartsWith("https://", StringComparison.Ordinal)) {
+			if (MaybeUrl(t)) {
 				var s = WrapWith(ctx, "[title](", ")", false);
 				if (s.Snapshot != null) {
 					// select the "title"
@@ -34,13 +34,33 @@ namespace Codist.SmartBars
 				}
 			}
 			else {
-				var s = WrapWith(ctx, "[", "](url)", false);
+				string clip;
+				try {
+					clip = System.Windows.Clipboard.GetText();
+				}
+				catch (SystemException) {
+					// ignore
+					clip = null;
+				}
+				var s = MaybeUrl(clip) && clip.IndexOf(')') < 0
+					? WrapWith(ctx, "[", "](" + clip + ")", false)
+					: WrapWith(ctx, "[", "](url)", false);
 				if (s.Snapshot != null) {
 					// select the "url"
-					ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - 4, 3), false);
+					if (clip != null) {
+						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - clip.Length - 1, clip.Length), false);
+					}
+					else {
+						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - 4, 3), false);
+					}
 					ctx.View.Caret.MoveTo(s.End - 1);
 				}
 			}
+		}
+
+		static bool MaybeUrl(string text) {
+			return text?.Length > 7
+				&& (text.StartsWith("http://", StringComparison.Ordinal) || text.StartsWith("https://", StringComparison.Ordinal));
 		}
 	}
 }
