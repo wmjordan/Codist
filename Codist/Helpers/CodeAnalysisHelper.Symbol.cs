@@ -756,6 +756,12 @@ namespace Codist
 			return "type";
 		}
 
+		public static bool IsPublicConcreteInstance(this ISymbol symbol) {
+			return symbol.DeclaredAccessibility == Accessibility.Public
+				&& symbol.IsStatic == false
+				&& symbol.IsAbstract == false;
+		}
+
 		public static bool IsAccessor(this IMethodSymbol method) {
 			switch (method.MethodKind) {
 				case MethodKind.EventAdd:

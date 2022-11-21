@@ -82,6 +82,8 @@ namespace Codist
 		public const int Filter = KnownImageIds.Filter;
 		public const int ClearFilter = KnownImageIds.DeleteFilter;
 		public const int Search = KnownImageIds.Search;
+		public const int RunTest = KnownImageIds.RunTest;
+		public const int DebugTest = KnownImageIds.DebugSelection;
 		public const int Project = KnownImageIds.CSProjectNode;
 		public const int File = KnownImageIds.CSSourceFile;
 		public const int FileEmpty = KnownImageIds.CSFile;

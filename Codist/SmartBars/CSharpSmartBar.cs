@@ -40,6 +40,7 @@ namespace Codist.SmartBars
 			Refactorings.ReplaceNode.DeleteCondition,
 			Refactorings.ReplaceNode.RemoveContainingStatement
 		};
+		static readonly string[] __UnitTestingNamespace = new[] { "UnitTesting", "TestTools", "VisualStudio", "Microsoft" };
 		SemanticContext _Context;
 		ExternalAdornment _SymbolListContainer;
 		ISymbol _Symbol;
@@ -121,6 +122,18 @@ namespace Codist.SmartBars
 								}
 
 								if (isReadOnly == false) {
+									if (_Symbol?.IsPublicConcreteInstance() == true) {
+										if (nodeKind == SyntaxKind.MethodDeclaration) {
+											if (_Symbol.GetContainingTypes().All(t => t.IsPublicConcreteInstance()) && _Symbol.GetAttributes().Any(a => a.AttributeClass.MatchTypeName("TestMethodAttribute", __UnitTestingNamespace))) {
+												AddEditorCommand(MyToolBar, IconIds.DebugTest, "TestExplorer.DebugAllTestsInContext", R.CMD_DebugTestMethod, "TestExplorer.RunAllTestsInContext");
+											}
+										}
+										else if (nodeKind == SyntaxKind.ClassDeclaration) {
+											if (_Symbol.GetAttributes().Any(a => a.AttributeClass.MatchTypeName("TestClassAttribute", __UnitTestingNamespace))) {
+												AddEditorCommand(MyToolBar, IconIds.DebugTest, "TestExplorer.DebugAllTestsInContext", R.CMD_DebugTestClass, "TestExplorer.RunAllTestsInContext");
+											}
+										}
+									}
 									AddRefactorCommands(node);
 								}
 							}
@@ -130,8 +143,14 @@ namespace Codist.SmartBars
 									AddRenameCommand();
 								}
 							}
-							if (_Symbol != null && isReadOnly == false) {
-								AddCommand(MyToolBar, IconIds.SelectAll, R.CMD_SelectSymbolInDocument, SelectSymbolOccurrences);
+							if (_Symbol != null) {
+								if (isReadOnly == false) {
+									AddCommand(MyToolBar, IconIds.SelectAll, R.CMD_SelectSymbolInDocument, SelectSymbolOccurrences);
+								}
+								if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
+									&& Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
+									AddCommands(MyToolBar, IconIds.Marks, R.CMD_MarkSymbol, null, GetMarkerCommands);
+								}
 							}
 							break;
 						default:
@@ -231,10 +250,6 @@ namespace Codist.SmartBars
 				AddEditorCommand(MyToolBar, IconIds.GoToDefinition, "Edit.GoToDefinition", R.CMD_GoToDefinitionPeek, "Edit.PeekDefinition");
 			}
 			AddCommand(MyToolBar, IconIds.SymbolAnalysis, R.CMD_AnalyzeSymbol, ShowSymbolContextMenu);
-			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
-				&& Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
-				AddCommands(MyToolBar, IconIds.Marks, R.CMD_MarkSymbol, null, GetMarkerCommands);
-			}
 		}
 
 		void SelectSymbolOccurrences(CommandContext ctx) {

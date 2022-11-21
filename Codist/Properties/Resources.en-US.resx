@@ -2194,4 +2194,14 @@ Select all occurrences of current symbol in active document</value>
   <data name="CMD_WrapInElse" xml:space="preserve">
     <value>Wrap in &lt;else&gt;</value>
   </data>
+  <data name="CMD_DebugTestMethod" xml:space="preserve">
+    <value>Debug Test
+Debug test method
+Right click: Run test method</value>
+  </data>
+  <data name="CMD_DebugTestClass" xml:space="preserve">
+    <value>Debug Tests
+Debug unit tests in class
+Right click: Run unit tests in class</value>
+  </data>
 </root>

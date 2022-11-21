@@ -291,6 +291,28 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Debug Tests
+        ///Debug unit tests in class
+        ///Right click: Run unit tests in class.
+        /// </summary>
+        internal static string CMD_DebugTestClass {
+            get {
+                return ResourceManager.GetString("CMD_DebugTestClass", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Debug Test
+        ///Debug test method
+        ///Right click: Run test method.
+        /// </summary>
+        internal static string CMD_DebugTestMethod {
+            get {
+                return ResourceManager.GetString("CMD_DebugTestMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete All Breakpoints.
         /// </summary>
         internal static string CMD_DeleteAllBreakpoints {

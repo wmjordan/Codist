@@ -2177,4 +2177,14 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_WrapInElse" xml:space="preserve">
     <value>放到 &lt;else&gt; 里面</value>
   </data>
+  <data name="CMD_DebugTestMethod" xml:space="preserve">
+    <value>调试单元测试
+调试当前的单元测试方法
+右键: 执行单元测试方法</value>
+  </data>
+  <data name="CMD_DebugTestClass" xml:space="preserve">
+    <value>调试单元测试
+调试当前类的单元测试方法
+右键: 执行单元测试方法</value>
+  </data>
 </root>
