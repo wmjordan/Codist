@@ -22,6 +22,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode ChangeIfToConditional = new ChangeIfToConditionalRefactoring();
 		public static readonly ReplaceNode ChangeConditionalToIf = new ChangeConditionalToIfRefactoring();
 		public static readonly ReplaceNode MultiLineConditional = new MultiLineConditionalRefactoring();
+		public static readonly ReplaceNode MultiLineExpression = new MultiLineExpressionRefactoring();
 
 		sealed class AddBracesRefactoring : ReplaceNode
 		{
@@ -464,6 +465,96 @@ namespace Codist.Refactorings
 					SF.ElseClause(SF.Block(whenFalse))
 					);
 				yield return Replace(node.Parent, newNode.AnnotateReformatAndSelect());
+			}
+		}
+
+		sealed class MultiLineExpressionRefactoring : ReplaceNode
+		{
+			string _Title;
+			public override int IconId => IconIds.MultiLine;
+			public override string Title => _Title;
+
+			public override bool Accept(RefactoringContext ctx) {
+				var node = ctx.NodeIncludeTrivia;
+				var nodeKind = node.Kind();
+				switch (nodeKind) {
+					case SyntaxKind.LogicalAndExpression: _Title = R.CMD_LogicalAndOnMultiLines; break;
+					case SyntaxKind.LogicalOrExpression: _Title = R.CMD_LogicalOrOnMultiLines; break;
+					case SyntaxKind.CoalesceExpression: _Title = R.CMD_CoalesceOnMultiLines; break;
+					default: return false;
+				}
+				SyntaxNode p = node.Parent;
+				while (p.IsKind(nodeKind)) {
+					node = p;
+					p = p.Parent;
+				}
+				return (p is StatementSyntax || p.IsKind(SyntaxKind.EqualsValueClause)) && node.IsMultiLine(false) == false;
+			}
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				var node = ctx.NodeIncludeTrivia;
+				var nodeKind = node.Kind();
+				SyntaxNode p = node.Parent;
+				BinaryExpressionSyntax newExp = null;
+				while (p.IsKind(nodeKind)) {
+					p = p.Parent;
+				}
+				if (p is StatementSyntax == false && p.IsKind(SyntaxKind.EqualsValueClause) == false) {
+					yield break;
+				}
+				var options = ctx.WorkspaceOptions;
+				var indent = SF.TriviaList(SF.Whitespace(ctx.SemanticContext.View.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(p.SpanStart)))
+					.Add(SF.Whitespace(options.GetIndentString()));
+				var newLine = SF.Whitespace(options.GetNewLineString());
+				SyntaxToken token;
+				if (nodeKind == SyntaxKind.LogicalAndExpression) {
+					token = CreateTokenWithTrivia(indent, SyntaxKind.AmpersandAmpersandToken);
+					ReformatBinaryExpressions(ref node, ref newExp, newLine, token, nodeKind);
+				}
+				else if (nodeKind == SyntaxKind.LogicalOrExpression) {
+					token = CreateTokenWithTrivia(indent, SyntaxKind.BarBarToken);
+					ReformatBinaryExpressions(ref node, ref newExp, newLine, token, nodeKind);
+				}
+				else if (nodeKind == SyntaxKind.CoalesceExpression) {
+					token = CreateTokenWithTrivia(indent, SyntaxKind.QuestionQuestionToken);
+					ReformatCoalesceExpression(ref node, ref newExp, newLine, token, nodeKind);
+				}
+				else {
+					yield break;
+				}
+				yield return Replace(node, newExp.AnnotateSelect());
+			}
+
+			static SyntaxToken CreateTokenWithTrivia(SyntaxTriviaList indent, SyntaxKind syntaxKind) {
+				return SF.Token(syntaxKind).WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space);
+			}
+
+			static void ReformatBinaryExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxToken token, SyntaxKind nodeKind) {
+				var exp = (BinaryExpressionSyntax)node;
+				while (exp.Left.IsKind(nodeKind)) {
+					exp = (BinaryExpressionSyntax)exp.Left;
+				}
+				do {
+					node = exp;
+					newExp = exp.Update(((ExpressionSyntax)newExp ?? exp.Left).WithTrailingTrivia(newLine),
+						token,
+						exp.Right);
+					exp = exp.Parent as BinaryExpressionSyntax;
+				} while (exp != null);
+			}
+
+			static void ReformatCoalesceExpression(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxToken token, SyntaxKind nodeKind) {
+				var exp = (BinaryExpressionSyntax)node;
+				while (exp.Right.IsKind(nodeKind)) {
+					exp = (BinaryExpressionSyntax)exp.Right;
+				}
+				do {
+					node = exp;
+					newExp = exp.Update(exp.Left.WithTrailingTrivia(newLine),
+						token,
+						(ExpressionSyntax)newExp ?? exp.Right);
+					exp = exp.Parent as BinaryExpressionSyntax;
+				} while (exp != null);
 			}
 		}
 

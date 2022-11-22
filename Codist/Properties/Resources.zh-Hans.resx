@@ -2187,4 +2187,13 @@ Right click: 显示“线程”窗口</value>
 调试当前类的单元测试方法
 右键: 执行单元测试方法</value>
   </data>
+  <data name="CMD_CoalesceOnMultiLines" xml:space="preserve">
+    <value>将 &lt;??&gt; 换行</value>
+  </data>
+  <data name="CMD_LogicalAndOnMultiLines" xml:space="preserve">
+    <value>将 &lt;&amp;&amp;&gt; 换行</value>
+  </data>
+  <data name="CMD_LogicalOrOnMultiLines" xml:space="preserve">
+    <value>将 &lt;||&gt; 换行</value>
+  </data>
 </root>

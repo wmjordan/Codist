@@ -2204,4 +2204,13 @@ Right click: Run test method</value>
 Debug unit tests in class
 Right click: Run unit tests in class</value>
   </data>
+  <data name="CMD_CoalesceOnMultiLines" xml:space="preserve">
+    <value>&lt;??&gt; on Multi-lines</value>
+  </data>
+  <data name="CMD_LogicalAndOnMultiLines" xml:space="preserve">
+    <value>&lt;&amp;&amp;&gt; on Multi-lines</value>
+  </data>
+  <data name="CMD_LogicalOrOnMultiLines" xml:space="preserve">
+    <value>&lt;||&gt; on Multi-lines</value>
+  </data>
 </root>

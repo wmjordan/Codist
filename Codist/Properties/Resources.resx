@@ -2171,7 +2171,7 @@ Sent or received bytes per second through all network interfaces</value>
     <value>Split to Nested &lt;if&gt;</value>
   </data>
   <data name="CMD_ConditionalOnMultiLines" xml:space="preserve">
-    <value>&lt;?:&gt; on multi-lines</value>
+    <value>&lt;?:&gt; on Multi-lines</value>
   </data>
   <data name="CMD_ConditionalToIfElse" xml:space="preserve">
     <value>&lt;?:&gt; to &lt;if...else&gt;</value>
@@ -2201,5 +2201,14 @@ Right click: Run test method</value>
     <value>Debug Tests
 Debug unit tests in class
 Right click: Run unit tests in class</value>
+  </data>
+  <data name="CMD_CoalesceOnMultiLines" xml:space="preserve">
+    <value>&lt;??&gt; on Multi-lines</value>
+  </data>
+  <data name="CMD_LogicalAndOnMultiLines" xml:space="preserve">
+    <value>&lt;&amp;&amp;&gt; on Multi-lines</value>
+  </data>
+  <data name="CMD_LogicalOrOnMultiLines" xml:space="preserve">
+    <value>&lt;||&gt; on Multi-lines</value>
   </data>
 </root>

@@ -160,6 +160,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;??&gt; on Multi-lines.
+        /// </summary>
+        internal static string CMD_CoalesceOnMultiLines {
+            get {
+                return ResourceManager.GetString("CMD_CoalesceOnMultiLines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Comment selection
         ///Right click: Comment line.
         /// </summary>
@@ -170,7 +179,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?:&gt; on multi-lines.
+        ///   Looks up a localized string similar to &lt;?:&gt; on Multi-lines.
         /// </summary>
         internal static string CMD_ConditionalOnMultiLines {
             get {
@@ -860,6 +869,24 @@ namespace Codist.Properties {
         internal static string CMD_Load {
             get {
                 return ResourceManager.GetString("CMD_Load", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;&amp;&amp;&gt; on Multi-lines.
+        /// </summary>
+        internal static string CMD_LogicalAndOnMultiLines {
+            get {
+                return ResourceManager.GetString("CMD_LogicalAndOnMultiLines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;||&gt; on Multi-lines.
+        /// </summary>
+        internal static string CMD_LogicalOrOnMultiLines {
+            get {
+                return ResourceManager.GetString("CMD_LogicalOrOnMultiLines", resourceCulture);
             }
         }
         
