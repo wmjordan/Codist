@@ -199,20 +199,22 @@ namespace Codist.Refactorings
 
 			public override bool Accept(RefactoringContext ctx) {
 				switch (ctx.NodeIncludeTrivia.Kind()) {
+					case SyntaxKind.LogicalAndExpression:
+					case SyntaxKind.LogicalOrExpression:
 					case SyntaxKind.BitwiseAndExpression:
 					case SyntaxKind.BitwiseOrExpression:
-					case SyntaxKind.LogicalOrExpression:
-					case SyntaxKind.LogicalAndExpression:
+					case SyntaxKind.ExclusiveOrExpression:
 					case SyntaxKind.EqualsExpression:
 					case SyntaxKind.NotEqualsExpression:
-					case SyntaxKind.GreaterThanExpression:
-					case SyntaxKind.GreaterThanOrEqualExpression:
 					case SyntaxKind.LessThanExpression:
 					case SyntaxKind.LessThanOrEqualExpression:
+					case SyntaxKind.GreaterThanExpression:
+					case SyntaxKind.GreaterThanOrEqualExpression:
 					case SyntaxKind.AddExpression:
 					case SyntaxKind.SubtractExpression:
 					case SyntaxKind.MultiplyExpression:
 					case SyntaxKind.DivideExpression:
+					case SyntaxKind.ModuloExpression:
 					case SyntaxKind.CoalesceExpression:
 						return true;
 				}
