@@ -124,8 +124,10 @@ namespace Codist.SmartBars
 
 								if (isReadOnly == false) {
 									if (_Symbol?.IsPublicConcreteInstance() == true) {
-										if (nodeKind == SyntaxKind.MethodDeclaration) {
-											if (_Symbol.GetContainingTypes().All(t => t.IsPublicConcreteInstance()) && _Symbol.GetAttributes().Any(a => a.AttributeClass.MatchTypeName("TestMethodAttribute", __UnitTestingNamespace))) {
+										if (_Symbol.Kind == SymbolKind.Method) {
+											if (_Symbol.GetContainingTypes().All(t => t.IsPublicConcreteInstance())
+												&& ((IMethodSymbol)_Symbol).ReturnsVoid
+												&& _Symbol.GetAttributes().Any(a => a.AttributeClass.MatchTypeName("TestMethodAttribute", __UnitTestingNamespace))) {
 												AddEditorCommand(MyToolBar, IconIds.DebugTest, "TestExplorer.DebugAllTestsInContext", R.CMD_DebugTestMethod, "TestExplorer.RunAllTestsInContext");
 											}
 										}
