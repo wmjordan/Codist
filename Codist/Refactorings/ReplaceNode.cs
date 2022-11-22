@@ -479,22 +479,21 @@ namespace Codist.Refactorings
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				var conditional = ctx.NodeIncludeTrivia as ConditionalExpressionSyntax;
-				if (conditional == null) {
+				var node = ctx.NodeIncludeTrivia as ConditionalExpressionSyntax;
+				if (node == null) {
 					yield break;
 				}
 				// it is frustrating that the C# formatter removes trivias in ?: expressions
 				var options = ctx.WorkspaceOptions;
-				var indent = conditional.GetContainingStatement()
-					.GetPrecedingWhitespace()
+				var indent = SF.TriviaList(SF.Whitespace(ctx.SemanticContext.View.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(node.GetContainingStatement().SpanStart)))
 					.Add(SF.Whitespace(options.GetIndentString()));
 				var newLine = SF.Whitespace(options.GetNewLineString());
-				var newNode = conditional.Update(conditional.Condition.WithTrailingTrivia(newLine),
-					conditional.QuestionToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
-					conditional.WhenTrue.WithTrailingTrivia(newLine),
-					conditional.ColonToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
-					conditional.WhenFalse);
-				yield return Replace(conditional, newNode.AnnotateSelect());
+				var newNode = node.Update(node.Condition.WithTrailingTrivia(newLine),
+					node.QuestionToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
+					node.WhenTrue.WithTrailingTrivia(newLine),
+					node.ColonToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
+					node.WhenFalse);
+				yield return Replace(node, newNode.AnnotateSelect());
 			}
 		}
 	}

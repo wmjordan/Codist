@@ -728,6 +728,18 @@ namespace Codist
 			}
 			return textBuffer.CurrentSnapshot.GetText(start, end - start);
 		}
+		public static string GetLinePrecedingWhitespaceAtPosition(this ITextSnapshot textSnapshot, int position) {
+			var line = textSnapshot.GetLineFromPosition(position);
+			var s = line.Start;
+			int i = s;
+			while (line.Snapshot[i].IsCodeWhitespaceChar()) {
+				++i;
+			}
+			return line.Snapshot.GetText(s, i - s);
+		}
+		public static bool IsCodeWhitespaceChar(this char ch) {
+			return ch == ' ' || ch == '\t';
+		}
 		public static bool LikeContentType(this ITextBuffer textBuffer, string typeName) {
 			var n = textBuffer.ContentType.TypeName;
 			return n.IndexOf(typeName) != -1 || n.StartsWith(typeName, StringComparison.OrdinalIgnoreCase) || n.EndsWith(typeName, StringComparison.OrdinalIgnoreCase);
