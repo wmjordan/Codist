@@ -439,7 +439,8 @@ namespace Codist.Refactorings
 
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia;
-				return node.IsKind(SyntaxKind.ConditionalExpression) && node.Parent is StatementSyntax;
+				return node.IsKind(SyntaxKind.ConditionalExpression)
+					&& (node.Parent is StatementSyntax || node.Parent.IsKind(SyntaxKind.SimpleAssignmentExpression) && node.Parent.Parent.IsKind(SyntaxKind.ExpressionStatement));
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
