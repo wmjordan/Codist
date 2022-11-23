@@ -166,7 +166,9 @@ namespace Codist.Refactorings
 				if (remove.IsKind(SyntaxKind.ElseClause)) {
 					var ifs = remove.Parent as IfStatementSyntax;
 					if (ifs.Parent.IsKind(SyntaxKind.ElseClause)) {
-						yield return Replace(ifs.Parent, (keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block) ? SF.ElseClause(SF.Block(keep)) : SF.ElseClause(keep[0])).AnnotateReformatAndSelect());
+						yield return Replace(ifs.Parent, (keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block)
+							? SF.ElseClause(SF.Block(keep))
+							: SF.ElseClause(keep[0])).AnnotateReformatAndSelect());
 						yield break;
 					}
 					else {
@@ -357,7 +359,7 @@ namespace Codist.Refactorings
 					}
 					node = node.Parent;
 				}
-				return node.IsKind(SyntaxKind.IfStatement) || node.IsKind(SyntaxKind.WhileStatement) ? node as StatementSyntax : null;
+				return node.Kind().IsAny(SyntaxKind.IfStatement, SyntaxKind.WhileStatement) ? node as StatementSyntax : null;
 			}
 		}
 
@@ -497,11 +499,11 @@ namespace Codist.Refactorings
 					}
 				}
 				else {
-				while (p.IsKind(nodeKind)) {
-					node = p;
-					p = p.Parent;
+					while (p.IsKind(nodeKind)) {
+						node = p;
+						p = p.Parent;
+					}
 				}
-			}
 				return (p is StatementSyntax || p.IsKind(SyntaxKind.EqualsValueClause))
 					&& node.IsMultiLine(false) == false;
 			}
@@ -550,9 +552,9 @@ namespace Codist.Refactorings
 					}
 				}
 				else {
-				while (exp.Left.IsKind(nodeKind)) {
-					exp = (BinaryExpressionSyntax)exp.Left;
-				}
+					while (exp.Left.IsKind(nodeKind)) {
+						exp = (BinaryExpressionSyntax)exp.Left;
+					}
 				}
 				do {
 					node = exp;
