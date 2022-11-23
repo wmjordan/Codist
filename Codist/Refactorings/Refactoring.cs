@@ -43,7 +43,11 @@ namespace Codist.Refactorings
 				ctx,
 				(v, p, edit) => {
 					var root = p.SemanticContext.SemanticModel.SyntaxTree.GetRoot();
-					var actions = p.Actions = ((ReplaceNode)p.Refactoring).Refactor(p).ToArray();
+					var r = (ReplaceNode)p.Refactoring;
+					if (r.Accept(p) == false) {
+						return;
+					}
+					var actions = p.Actions = r.Refactor(p).ToArray();
 					foreach (var action in actions) {
 						switch (action.ActionType) {
 							case ActionType.Replace:
