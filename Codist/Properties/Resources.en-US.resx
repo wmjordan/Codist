@@ -2213,4 +2213,7 @@ Right click: Run unit tests in class</value>
   <data name="CMD_LogicalOrOnMultiLines" xml:space="preserve">
     <value>&lt;||&gt; on Multi-lines</value>
   </data>
+  <data name="CMD_OperandsOnMultiLines" xml:space="preserve">
+    <value>Operands on Multi-lines</value>
+  </data>
 </root>

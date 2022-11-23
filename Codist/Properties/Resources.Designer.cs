@@ -1058,6 +1058,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Operands on Multi-lines.
+        /// </summary>
+        internal static string CMD_OperandsOnMultiLines {
+            get {
+                return ResourceManager.GetString("CMD_OperandsOnMultiLines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pale Dark.
         /// </summary>
         internal static string CMD_PaleDarkTheme {

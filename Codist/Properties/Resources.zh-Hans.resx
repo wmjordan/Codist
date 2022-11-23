@@ -2196,4 +2196,7 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_LogicalOrOnMultiLines" xml:space="preserve">
     <value>将 &lt;||&gt; 换行</value>
   </data>
+  <data name="CMD_OperandsOnMultiLines" xml:space="preserve">
+    <value>将运算符换行</value>
+  </data>
 </root>

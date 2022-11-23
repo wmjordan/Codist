@@ -65,6 +65,9 @@ namespace Codist
 		internal const MethodKind FunctionPointerMethod = (MethodKind)18;
 
 		#region Node info
+		public static bool IsAny(this SyntaxKind kind, SyntaxKind kind1, SyntaxKind kind2) {
+			return kind == kind1 || kind == kind2;
+		}
 		public static bool IsPredefinedSystemType(this SyntaxKind kind) {
 			return kind >= SyntaxKind.BoolKeyword && kind <= SyntaxKind.ObjectKeyword;
 		}

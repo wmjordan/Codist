@@ -21,7 +21,6 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode MergeCondition = new MergeConditionRefactoring();
 		public static readonly ReplaceNode ChangeIfToConditional = new ChangeIfToConditionalRefactoring();
 		public static readonly ReplaceNode ChangeConditionalToIf = new ChangeConditionalToIfRefactoring();
-		public static readonly ReplaceNode MultiLineConditional = new MultiLineConditionalRefactoring();
 		public static readonly ReplaceNode MultiLineExpression = new MultiLineExpressionRefactoring();
 
 		sealed class AddBracesRefactoring : ReplaceNode
@@ -481,45 +480,57 @@ namespace Codist.Refactorings
 				var nodeKind = node.Kind();
 				switch (nodeKind) {
 					case SyntaxKind.LogicalAndExpression: _Title = R.CMD_LogicalAndOnMultiLines; break;
+					case SyntaxKind.AddExpression:
+					case SyntaxKind.SubtractExpression: _Title = R.CMD_OperandsOnMultiLines; break;
 					case SyntaxKind.LogicalOrExpression: _Title = R.CMD_LogicalOrOnMultiLines; break;
 					case SyntaxKind.CoalesceExpression: _Title = R.CMD_CoalesceOnMultiLines; break;
+					case SyntaxKind.ConditionalExpression:
+						_Title = R.CMD_ConditionalOnMultiLines;
+						return node.IsMultiLine(false) == false;
 					default: return false;
 				}
 				SyntaxNode p = node.Parent;
+				if (nodeKind.IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
+					while (p.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
+						node = p;
+						p = p.Parent;
+					}
+				}
+				else {
 				while (p.IsKind(nodeKind)) {
 					node = p;
 					p = p.Parent;
 				}
-				return (p is StatementSyntax || p.IsKind(SyntaxKind.EqualsValueClause)) && node.IsMultiLine(false) == false;
+			}
+				return (p is StatementSyntax || p.IsKind(SyntaxKind.EqualsValueClause))
+					&& node.IsMultiLine(false) == false;
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia;
 				var nodeKind = node.Kind();
-				SyntaxNode p = node.Parent;
-				BinaryExpressionSyntax newExp = null;
-				while (p.IsKind(nodeKind)) {
-					p = p.Parent;
-				}
-				if (p is StatementSyntax == false && p.IsKind(SyntaxKind.EqualsValueClause) == false) {
-					yield break;
-				}
 				var options = ctx.WorkspaceOptions;
-				var indent = SF.TriviaList(SF.Whitespace(ctx.SemanticContext.View.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(p.SpanStart)))
+				var indent = SF.TriviaList(SF.Whitespace(ctx.SemanticContext.View.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(node.GetContainingStatement().SpanStart)))
 					.Add(SF.Whitespace(options.GetIndentString()));
 				var newLine = SF.Whitespace(options.GetNewLineString());
+				BinaryExpressionSyntax newExp = null;
 				SyntaxToken token;
 				if (nodeKind == SyntaxKind.LogicalAndExpression) {
-					token = CreateTokenWithTrivia(indent, SyntaxKind.AmpersandAmpersandToken);
-					ReformatBinaryExpressions(ref node, ref newExp, newLine, token, nodeKind);
+					ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
+				}
+				else if (nodeKind.IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
+					ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
 				}
 				else if (nodeKind == SyntaxKind.LogicalOrExpression) {
-					token = CreateTokenWithTrivia(indent, SyntaxKind.BarBarToken);
-					ReformatBinaryExpressions(ref node, ref newExp, newLine, token, nodeKind);
+					ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
 				}
 				else if (nodeKind == SyntaxKind.CoalesceExpression) {
 					token = CreateTokenWithTrivia(indent, SyntaxKind.QuestionQuestionToken);
 					ReformatCoalesceExpression(ref node, ref newExp, newLine, token, nodeKind);
+				}
+				else if (nodeKind == SyntaxKind.ConditionalExpression) {
+					yield return ReformatConditionalExpression((ConditionalExpressionSyntax)node, indent, newLine);
+					yield break;
 				}
 				else {
 					yield break;
@@ -531,15 +542,22 @@ namespace Codist.Refactorings
 				return SF.Token(syntaxKind).WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space);
 			}
 
-			static void ReformatBinaryExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxToken token, SyntaxKind nodeKind) {
+			static void ReformatLogicalExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxTriviaList indent, SyntaxKind nodeKind) {
 				var exp = (BinaryExpressionSyntax)node;
+				if (nodeKind.IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
+					while (exp.Left.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
+						exp = (BinaryExpressionSyntax)exp.Left;
+					}
+				}
+				else {
 				while (exp.Left.IsKind(nodeKind)) {
 					exp = (BinaryExpressionSyntax)exp.Left;
+				}
 				}
 				do {
 					node = exp;
 					newExp = exp.Update(((ExpressionSyntax)newExp ?? exp.Left).WithTrailingTrivia(newLine),
-						token,
+						exp.OperatorToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 						exp.Right);
 					exp = exp.Parent as BinaryExpressionSyntax;
 				} while (exp != null);
@@ -558,35 +576,14 @@ namespace Codist.Refactorings
 					exp = exp.Parent as BinaryExpressionSyntax;
 				} while (exp != null);
 			}
-		}
 
-		sealed class MultiLineConditionalRefactoring : ReplaceNode
-		{
-			public override int IconId => IconIds.MultiLine;
-			public override string Title => R.CMD_ConditionalOnMultiLines;
-
-			public override bool Accept(RefactoringContext ctx) {
-				var node = ctx.NodeIncludeTrivia;
-				return node.IsKind(SyntaxKind.ConditionalExpression)
-					&& node.IsMultiLine(false) == false;
-			}
-
-			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				var node = ctx.NodeIncludeTrivia as ConditionalExpressionSyntax;
-				if (node == null) {
-					yield break;
-				}
-				// it is frustrating that the C# formatter removes trivias in ?: expressions
-				var options = ctx.WorkspaceOptions;
-				var indent = SF.TriviaList(SF.Whitespace(ctx.SemanticContext.View.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(node.GetContainingStatement().SpanStart)))
-					.Add(SF.Whitespace(options.GetIndentString()));
-				var newLine = SF.Whitespace(options.GetNewLineString());
+			static RefactoringAction ReformatConditionalExpression(ConditionalExpressionSyntax node, SyntaxTriviaList indent, SyntaxTrivia newLine) {
 				var newNode = node.Update(node.Condition.WithTrailingTrivia(newLine),
 					node.QuestionToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 					node.WhenTrue.WithTrailingTrivia(newLine),
 					node.ColonToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 					node.WhenFalse);
-				yield return Replace(node, newNode.AnnotateSelect());
+				return Replace(node, newNode.AnnotateSelect());
 			}
 		}
 	}
