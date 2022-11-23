@@ -121,6 +121,7 @@ namespace Codist
 		public const int ExtractInterface = KnownImageIds.ExtractInterface;
 		public const int ExtractMethod = KnownImageIds.ExtractMethod;
 		public const int AddBraces = KnownImageIds.AddNamespace;
+		public const int AsToCast = KnownImageIds.ReportingAction;
 		public const int DeleteMethod = KnownImageIds.MethodMissing;
 		public const int DeleteCondition = KnownImageIds.DeleteClause;
 		public const int MergeCondition = KnownImageIds.GroupByClause;

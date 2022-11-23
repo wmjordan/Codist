@@ -14,6 +14,7 @@ namespace Codist.Refactorings
 	abstract partial class ReplaceNode
 	{
 		public static readonly ReplaceNode AddBraces = new AddBracesRefactoring();
+		public static readonly ReplaceNode AsToCast = new AsToCastRefactoring();
 		public static readonly ReplaceNode DeleteCondition = new DeleteConditionRefactoring();
 		public static readonly ReplaceNode RemoveContainingStatement = new RemoveContainerRefactoring();
 		public static readonly ReplaceNode SwapOperands = new SwapOperandsRefactoring();
@@ -92,6 +93,34 @@ namespace Codist.Refactorings
 				}
 				if (statement != null) {
 					yield return Replace(statement, SF.Block(statement).AnnotateReformatAndSelect());
+				}
+			}
+		}
+
+		sealed class AsToCastRefactoring : ReplaceNode
+		{
+			string _Title;
+			public override int IconId => IconIds.AsToCast;
+			public override string Title => _Title;
+
+			public override bool Accept(RefactoringContext ctx) {
+				switch (ctx.Node.RawKind) {
+					case (int)SyntaxKind.AsExpression:
+						_Title = R.CMD_AsToCast;
+						return true;
+					case (int)SyntaxKind.CastExpression:
+						_Title = R.CMD_CastToAs;
+						return true;
+				}
+				return false;
+			}
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				if (ctx.Node is BinaryExpressionSyntax exp) {
+					yield return Replace(exp, SF.CastExpression(exp.Right.WithoutTrailingTrivia() as TypeSyntax, exp.Left).WithTriviaFrom(exp).AnnotateReformatAndSelect());
+				}
+				else if (ctx.Node is CastExpressionSyntax ce) {
+					yield return Replace(ce, SF.BinaryExpression(SyntaxKind.AsExpression, ce.Expression.WithoutTrailingTrivia(), ce.Type).WithTriviaFrom(ce.Expression).AnnotateReformatAndSelect());
 				}
 			}
 		}

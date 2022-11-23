@@ -2216,4 +2216,10 @@ Right click: Run unit tests in class</value>
   <data name="CMD_OperandsOnMultiLines" xml:space="preserve">
     <value>Operands on Multi-lines</value>
   </data>
+  <data name="CMD_AsToCast" xml:space="preserve">
+    <value>&lt;as&gt; to Cast</value>
+  </data>
+  <data name="CMD_CastToAs" xml:space="preserve">
+    <value>Cast to &lt;as&gt;</value>
+  </data>
 </root>

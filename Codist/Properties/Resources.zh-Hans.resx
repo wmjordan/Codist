@@ -2199,4 +2199,10 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_OperandsOnMultiLines" xml:space="preserve">
     <value>将运算符换行</value>
   </data>
+  <data name="CMD_AsToCast" xml:space="preserve">
+    <value>&lt;as&gt; 改为强制类型转换</value>
+  </data>
+  <data name="CMD_CastToAs" xml:space="preserve">
+    <value>强制类型转换改为 &lt;as&gt;</value>
+  </data>
 </root>

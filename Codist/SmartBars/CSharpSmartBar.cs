@@ -34,6 +34,7 @@ namespace Codist.SmartBars
 			Refactorings.ReplaceNode.ChangeConditionalToIf,
 			Refactorings.ReplaceNode.ChangeIfToConditional,
 			Refactorings.ReplaceNode.MergeCondition,
+			Refactorings.ReplaceNode.AsToCast,
 			Refactorings.ReplaceNode.SwapOperands,
 			Refactorings.ReplaceNode.NestCondition,
 			Refactorings.ReplaceNode.AddBraces,

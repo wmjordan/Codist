@@ -106,6 +106,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;as&gt; to Cast.
+        /// </summary>
+        internal static string CMD_AsToCast {
+            get {
+                return ResourceManager.GetString("CMD_AsToCast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bold.
         /// </summary>
         internal static string CMD_Bold {
@@ -138,6 +147,15 @@ namespace Codist.Properties {
         internal static string CMD_Capitalize {
             get {
                 return ResourceManager.GetString("CMD_Capitalize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cast to &lt;as&gt;.
+        /// </summary>
+        internal static string CMD_CastToAs {
+            get {
+                return ResourceManager.GetString("CMD_CastToAs", resourceCulture);
             }
         }
         
