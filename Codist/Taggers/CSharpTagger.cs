@@ -1038,6 +1038,17 @@ namespace Codist.Taggers
 						: __Classifications.UserSymbol;
 				}
 
+				if (symbol.DeclaredAccessibility == Accessibility.Private) {
+					switch (symbol.Kind) {
+						case SymbolKind.Property:
+						case SymbolKind.Method:
+						case SymbolKind.Field:
+						case SymbolKind.NamedType:
+						case SymbolKind.Event:
+							yield return __Classifications.PrivateMember;
+							break;
+					}
+				}
 				if (symbol.IsStatic) {
 					if (symbol.Kind != SymbolKind.Namespace) {
 						yield return __Classifications.StaticMember;
