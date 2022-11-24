@@ -455,6 +455,7 @@ namespace Codist.Taggers
 			public static IEnumerable<ITagSpan<IClassificationTag>> GetTags(IEnumerable<SnapshotSpan> spans, ParseResult result) {
 				var workspace = result.Workspace;
 				var semanticModel = result.Model;
+				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 				var snapshot = result.Snapshot;
 				var l = semanticModel.SyntaxTree.Length;
 				foreach (var span in spans) {
@@ -462,7 +463,6 @@ namespace Codist.Taggers
 						yield break;
 					}
 					var textSpan = new TextSpan(span.Start.Position, span.Length);
-					var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
 					var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace);
 					var lastTriviaSpan = default(TextSpan);
 					SyntaxNode node;
