@@ -20,8 +20,8 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode SwapOperands = new SwapOperandsRefactoring();
 		public static readonly ReplaceNode NestCondition = new NestConditionRefactoring();
 		public static readonly ReplaceNode MergeCondition = new MergeConditionRefactoring();
-		public static readonly ReplaceNode ChangeIfToConditional = new ChangeIfToConditionalRefactoring();
-		public static readonly ReplaceNode ChangeConditionalToIf = new ChangeConditionalToIfRefactoring();
+		public static readonly ReplaceNode IfToConditional = new IfToConditionalRefactoring();
+		public static readonly ReplaceNode ConditionalToIf = new ConditionalToIfRefactoring();
 		public static readonly ReplaceNode MultiLineExpression = new MultiLineExpressionRefactoring();
 
 		sealed class AddBracesRefactoring : ReplaceNode
@@ -392,7 +392,7 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class ChangeIfToConditionalRefactoring : ReplaceNode
+		sealed class IfToConditionalRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.MergeCondition;
 			public override string Title => R.CMD_IfElseToConditional;
@@ -473,7 +473,7 @@ namespace Codist.Refactorings
 		}
 		}
 
-		sealed class ChangeConditionalToIfRefactoring : ReplaceNode
+		sealed class ConditionalToIfRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.SplitCondition;
 			public override string Title => R.CMD_ConditionalToIfElse;
