@@ -138,12 +138,9 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var ifs = ((IfStatementSyntax)ctx.Node).Statement;
-				if (ifs is BlockSyntax b) {
-					yield return Replace(ctx.Node, b.Statements.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select));
-				}
-				else {
-					yield return Replace(ctx.Node, ifs.AnnotateReformatAndSelect());
-				}
+				yield return ifs is BlockSyntax b
+					? Replace(ctx.Node, b.Statements.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select))
+					: Replace(ctx.Node, ifs.AnnotateReformatAndSelect());
 			}
 		}
 
@@ -155,7 +152,9 @@ namespace Codist.Refactorings
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia;
 				var s = node.GetContainingStatement();
-				return s != null && s.SpanStart == node.SpanStart && GetRemovableAncestor(s) != null;
+				return s != null
+					&& s.SpanStart == node.SpanStart
+					&& GetRemovableAncestor(s) != null;
 			}
 
 			static bool CanBeRemoved(SyntaxNode node) {
@@ -471,7 +470,7 @@ namespace Codist.Refactorings
 					whenTrue.WithTrailingTrivia(newLine),
 					SF.Token(SyntaxKind.ColonToken).WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 					whenFalse);
-		}
+			}
 		}
 
 		sealed class ConditionalToIfRefactoring : ReplaceNode
