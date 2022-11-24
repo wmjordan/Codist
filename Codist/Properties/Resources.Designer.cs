@@ -106,6 +106,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Arguments on Multi-line.
+        /// </summary>
+        internal static string CMD_ArgumentsOnMultiLine {
+            get {
+                return ResourceManager.GetString("CMD_ArgumentsOnMultiLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;as&gt; to Cast.
         /// </summary>
         internal static string CMD_AsToCast {
@@ -430,6 +439,15 @@ namespace Codist.Properties {
         internal static string CMD_EncapsulateField {
             get {
                 return ResourceManager.GetString("CMD_EncapsulateField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expressions on Multi-Line.
+        /// </summary>
+        internal static string CMD_ExpressionsOnMultiLine {
+            get {
+                return ResourceManager.GetString("CMD_ExpressionsOnMultiLine", resourceCulture);
             }
         }
         
@@ -1099,6 +1117,15 @@ namespace Codist.Properties {
         internal static string CMD_PaleLightTheme {
             get {
                 return ResourceManager.GetString("CMD_PaleLightTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parameters on Multi-line.
+        /// </summary>
+        internal static string CMD_ParametersOnMultiLine {
+            get {
+                return ResourceManager.GetString("CMD_ParametersOnMultiLine", resourceCulture);
             }
         }
         

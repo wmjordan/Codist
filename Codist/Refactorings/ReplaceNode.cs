@@ -22,6 +22,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode MergeCondition = new MergeConditionRefactoring();
 		public static readonly ReplaceNode IfToConditional = new IfToConditionalRefactoring();
 		public static readonly ReplaceNode ConditionalToIf = new ConditionalToIfRefactoring();
+		public static readonly ReplaceNode MultiLineList = new MultiLineListRefactoring();
 		public static readonly ReplaceNode MultiLineExpression = new MultiLineExpressionRefactoring();
 
 		sealed class AddBracesRefactoring : ReplaceNode
@@ -625,6 +626,67 @@ namespace Codist.Refactorings
 					node.ColonToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 					node.WhenFalse);
 				return Replace(node, newNode.AnnotateSelect());
+			}
+		}
+
+		sealed class MultiLineListRefactoring : ReplaceNode
+		{
+			string _Title;
+			public override int IconId => IconIds.MultiLineList;
+			public override string Title => _Title;
+
+			public override bool Accept(RefactoringContext ctx) {
+				var node = ctx.Node;
+				if (node.Kind().IsAny(SyntaxKind.ArgumentList, SyntaxKind.ParameterList, SyntaxKind.ArrayInitializerExpression, SyntaxKind.ObjectInitializerExpression)
+					&& node.IsMultiLine(false) == false) {
+					if (node is ArgumentListSyntax al) {
+						if (al.Arguments.Count > 1) {
+							_Title = R.CMD_ArgumentsOnMultiLine;
+							return true;
+						}
+					}
+					else if (node is ParameterListSyntax pl) {
+						if (pl.Parameters.Count > 1) {
+							_Title = R.CMD_ParametersOnMultiLine;
+							return true;
+						}
+					}
+					else if (node is InitializerExpressionSyntax ie) {
+						if (ie.Expressions.Count > 1) {
+							_Title = R.CMD_ExpressionsOnMultiLine;
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				var node = ctx.Node;
+				var (indent, newLine) = ctx.GetIndentAndNewLine(node.SpanStart);
+				SyntaxNode newNode = null;
+				if (node is ArgumentListSyntax al) {
+					newNode = al.WithArguments(MultiLineList(al.Arguments, indent, newLine));
+				}
+				else if (node is ParameterListSyntax pl) {
+					newNode = pl.WithParameters(MultiLineList(pl.Parameters, indent, newLine));
+				}
+				else if (node is InitializerExpressionSyntax ie) {
+					newNode = ie.WithExpressions(MultiLineList(ie.Expressions, indent, newLine));
+				}
+
+				if (newNode != null) {
+					yield return Replace(node, newNode.AnnotateSelect());
+				}
+			}
+
+			static SeparatedSyntaxList<T> MultiLineList<T>(SeparatedSyntaxList<T> list, SyntaxTriviaList indent, SyntaxTrivia newLine) where T : SyntaxNode {
+				var l = new T[list.Count];
+				for (int i = 0; i < l.Length; i++) {
+					l[i] = i > 0 ? list[i].WithLeadingTrivia(indent) : list[i];
+				}
+				return SF.SeparatedList(l,
+					Enumerable.Repeat(SF.Token(SyntaxKind.CommaToken).WithTrailingTrivia(newLine), l.Length - 1));
 			}
 		}
 	}

@@ -2222,6 +2222,12 @@ Right click: Run unit tests in class</value>
   <data name="CMD_CastToAs" xml:space="preserve">
     <value>Cast to &lt;as&gt;</value>
   </data>
+  <data name="CMD_ArgumentsOnMultiLine" xml:space="preserve">
+    <value>Arguments on Multi-line</value>
+  </data>
+  <data name="CMD_ParametersOnMultiLine" xml:space="preserve">
+    <value>Parameters on Multi-line</value>
+  </data>
   <data name="OT_CSharpSmartBar" xml:space="preserve">
     <value>C# SmartBar</value>
   </data>
@@ -2232,4 +2238,6 @@ Right click: Run unit tests in class</value>
     <value>Use two units of indentation for wrapped syntax elements in multi-line refactorings</value>
   </data>
   <data name="CMD_ExpressionsOnMultiLine" xml:space="preserve">
+    <value>Expressions on Multi-Line</value>
+  </data>
 </root>

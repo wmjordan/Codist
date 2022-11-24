@@ -2205,6 +2205,12 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_CastToAs" xml:space="preserve">
     <value>强制类型转换改为 &lt;as&gt;</value>
   </data>
+  <data name="CMD_ArgumentsOnMultiLine" xml:space="preserve">
+    <value>将参数换行</value>
+  </data>
+  <data name="CMD_ParametersOnMultiLine" xml:space="preserve">
+    <value>将参数换行</value>
+  </data>
   <data name="OT_CSharpSmartBar" xml:space="preserve">
     <value>C# 智能工具条</value>
   </data>
@@ -2215,4 +2221,6 @@ Right click: 显示“线程”窗口</value>
     <value>在执行换行重构时，对换行的语法元素使用两个单位的空白缩进</value>
   </data>
   <data name="CMD_ExpressionsOnMultiLine" xml:space="preserve">
+    <value>将表达式换行</value>
+  </data>
 </root>
