@@ -2405,6 +2405,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to C# SmartBar.
+        /// </summary>
+        internal static string OT_CSharpSmartBar {
+            get {
+                return ResourceManager.GetString("OT_CSharpSmartBar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Suppress Super Quick Info when Ctrl key is pressed.
         /// </summary>
         internal static string OT_CtrlSuppressQuickInfo {
@@ -2473,6 +2482,24 @@ namespace Codist.Properties {
         internal static string OT_DonateLinkTip {
             get {
                 return ResourceManager.GetString("OT_DonateLinkTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Double indentation for multi-line refactorings.
+        /// </summary>
+        internal static string OT_DoubleIndentation {
+            get {
+                return ResourceManager.GetString("OT_DoubleIndentation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use two units of indentation for wrapped syntax elements in multi-line refactorings.
+        /// </summary>
+        internal static string OT_DoubleIndentationTip {
+            get {
+                return ResourceManager.GetString("OT_DoubleIndentationTip", resourceCulture);
             }
         }
         

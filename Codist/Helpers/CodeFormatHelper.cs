@@ -42,8 +42,11 @@ namespace Codist
 			where TNode : SyntaxNode {
 			return new SyntaxList<TNode>(nodes.Select(i => i.WithAdditionalAnnotations(annotations)));
 		}
-		public static string GetIndentString(this OptionSet options) {
+		public static string GetIndentString(this OptionSet options, int unit = 1) {
 			int indentSize = options.GetOption(FormattingOptions.IndentationSize, Lang);
+			if (unit > 1) {
+				indentSize *= unit;
+			}
 			return options.GetOption(FormattingOptions.UseTabs, "C#")
 				? new string('\t', indentSize / options.GetOption(FormattingOptions.TabSize, Lang))
 				: new string(' ', indentSize);

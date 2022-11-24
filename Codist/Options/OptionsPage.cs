@@ -480,7 +480,7 @@ namespace Codist.Options
 
 		sealed class PageControl : OptionsPageContainer
 		{
-			readonly OptionBox<SmartBarOptions> _ShiftToggleDisplay, _ManualDisplaySmartBar;
+			readonly OptionBox<SmartBarOptions> _ShiftToggleDisplay, _ManualDisplaySmartBar, _DoubleIndentRefactoring;
 			readonly OptionBox<SmartBarOptions>[] _Options;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -491,7 +491,11 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_ManualSmartBarTip),
 					_ShiftToggleDisplay = o.CreateOptionBox(SmartBarOptions.ShiftToggleDisplay, UpdateConfig, R.OT_ToggleSmartBar)
 						.SetLazyToolTip(() => R.OT_ToggleSmartBarTip),
-					new DescriptionBox(R.OT_ToggleSmartBarNote)
+					new DescriptionBox(R.OT_ToggleSmartBarNote),
+
+					new TitleBox(R.OT_CSharpSmartBar),
+					_DoubleIndentRefactoring = o.CreateOptionBox(SmartBarOptions.DoubleIndentRefactoring, UpdateConfig, R.OT_DoubleIndentation)
+						.SetLazyToolTip(() => R.OT_DoubleIndentationTip)
 					);
 
 				_Options = new[] { _ShiftToggleDisplay, _ManualDisplaySmartBar };

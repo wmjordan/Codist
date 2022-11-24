@@ -2205,4 +2205,14 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_CastToAs" xml:space="preserve">
     <value>强制类型转换改为 &lt;as&gt;</value>
   </data>
+  <data name="OT_CSharpSmartBar" xml:space="preserve">
+    <value>C# 智能工具条</value>
+  </data>
+  <data name="OT_DoubleIndentation" xml:space="preserve">
+    <value>换行重构时使用双倍缩进</value>
+  </data>
+  <data name="OT_DoubleIndentationTip" xml:space="preserve">
+    <value>在执行换行重构时，对换行的语法元素使用两个单位的空白缩进</value>
+  </data>
+  <data name="CMD_ExpressionsOnMultiLine" xml:space="preserve">
 </root>

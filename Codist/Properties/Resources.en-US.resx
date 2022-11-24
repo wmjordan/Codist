@@ -2222,4 +2222,14 @@ Right click: Run unit tests in class</value>
   <data name="CMD_CastToAs" xml:space="preserve">
     <value>Cast to &lt;as&gt;</value>
   </data>
+  <data name="OT_CSharpSmartBar" xml:space="preserve">
+    <value>C# SmartBar</value>
+  </data>
+  <data name="OT_DoubleIndentation" xml:space="preserve">
+    <value>Double indentation for multi-line refactorings</value>
+  </data>
+  <data name="OT_DoubleIndentationTip" xml:space="preserve">
+    <value>Use two units of indentation for wrapped syntax elements in multi-line refactorings</value>
+  </data>
+  <data name="CMD_ExpressionsOnMultiLine" xml:space="preserve">
 </root>

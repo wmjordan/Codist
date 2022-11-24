@@ -777,6 +777,7 @@ namespace Codist
 		ExpansionIncludeTrivia = 1 << 1,
 		ShiftToggleDisplay = 1 << 2,
 		ManualDisplaySmartBar = 1 << 3,
+		DoubleIndentRefactoring = 1 << 4,
 		Default = ExpansionIncludeTrivia | ShiftToggleDisplay
 	}
 

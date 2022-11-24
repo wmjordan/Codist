@@ -101,10 +101,7 @@ namespace Codist.Refactorings
 			}
 
 			static ConditionalExpressionSyntax MakeConditional(RefactoringContext ctx, IfStatementSyntax ifStatement, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse) {
-				var options = ctx.WorkspaceOptions;
-				var indent = ifStatement.GetPrecedingWhitespace()
-					.Add(SF.Whitespace(options.GetIndentString()));
-				var newLine = SF.Whitespace(options.GetNewLineString());
+				var (indent, newLine) = ctx.GetIndentAndNewLine(ifStatement.SpanStart);
 				return SF.ConditionalExpression(ifStatement.Condition.WithTrailingTrivia(newLine),
 					SF.Token(SyntaxKind.QuestionToken).WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 					whenTrue.WithTrailingTrivia(newLine),

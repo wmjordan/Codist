@@ -407,12 +407,14 @@ namespace Codist.Refactorings
 					yield break;
 				}
 				StatementSyntax newNode;
+				var (indent, newLine) = ctx.GetIndentAndNewLine(ifStatement.SpanStart);
 				switch (statement.Kind()) {
 					case SyntaxKind.ReturnStatement:
 						newNode = SF.ReturnStatement(
-							SF.ConditionalExpression(ifStatement.Condition.WithLeadingTrivia(SF.Space),
+							MakeConditionalExpression(ifStatement.Condition.WithLeadingTrivia(SF.Space),
 								(statement as ReturnStatementSyntax).Expression,
-								(elseStatement as ReturnStatementSyntax).Expression)
+								(elseStatement as ReturnStatementSyntax).Expression,
+								indent, newLine)
 							);
 						break;
 					case SyntaxKind.ExpressionStatement:
@@ -420,16 +422,18 @@ namespace Codist.Refactorings
 						newNode = SF.ExpressionStatement(
 							SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
 								assignee,
-								SF.ConditionalExpression(ifStatement.Condition,
+								MakeConditionalExpression(ifStatement.Condition,
 									((AssignmentExpressionSyntax)((ExpressionStatementSyntax)statement).Expression).Right,
-									((AssignmentExpressionSyntax)((ExpressionStatementSyntax)elseStatement).Expression).Right))
+									((AssignmentExpressionSyntax)((ExpressionStatementSyntax)elseStatement).Expression).Right,
+								indent, newLine))
 							);
 						break;
 					case SyntaxKind.YieldReturnStatement:
 						newNode = SF.YieldStatement(SyntaxKind.YieldReturnStatement,
-							SF.ConditionalExpression(ifStatement.Condition,
+							MakeConditionalExpression(ifStatement.Condition,
 								(statement as YieldStatementSyntax).Expression,
-								(elseStatement as YieldStatementSyntax).Expression));
+								(elseStatement as YieldStatementSyntax).Expression,
+								indent, newLine));
 						break;
 					default:
 						yield break;
@@ -459,6 +463,14 @@ namespace Codist.Refactorings
 					? (b.Statements.Count == 1 ? b.Statements[0] : null)
 					: statement;
 			}
+
+			static ConditionalExpressionSyntax MakeConditionalExpression(ExpressionSyntax condition, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse, SyntaxTriviaList indent, SyntaxTrivia newLine) {
+				return SF.ConditionalExpression(condition.WithTrailingTrivia(newLine),
+					SF.Token(SyntaxKind.QuestionToken).WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
+					whenTrue.WithTrailingTrivia(newLine),
+					SF.Token(SyntaxKind.ColonToken).WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
+					whenFalse);
+		}
 		}
 
 		sealed class ChangeConditionalToIfRefactoring : ReplaceNode
@@ -541,10 +553,7 @@ namespace Codist.Refactorings
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia;
 				var nodeKind = node.Kind();
-				var options = ctx.WorkspaceOptions;
-				var indent = SF.TriviaList(SF.Whitespace(ctx.SemanticContext.View.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(node.GetContainingStatement().SpanStart)))
-					.Add(SF.Whitespace(options.GetIndentString()));
-				var newLine = SF.Whitespace(options.GetNewLineString());
+				var (indent, newLine) = ctx.GetIndentAndNewLine(node);
 				BinaryExpressionSyntax newExp = null;
 				SyntaxToken token;
 				if (nodeKind == SyntaxKind.LogicalAndExpression) {
