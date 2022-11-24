@@ -556,7 +556,11 @@ namespace Codist.Taggers
 						return CreateClassificationSpan(snapshot, itemSpan, __GeneralClassifications.TypeCastKeyword);
 					case CodeAnalysisHelper.RecordKeyword: // workaround for missing classification type for record identifier
 						itemSpan = ((TypeDeclarationSyntax)node).Identifier.Span;
-						return CreateClassificationSpan(snapshot, itemSpan, node.IsKind(CodeAnalysisHelper.RecordDeclaration) ? TransientTags.StructDeclaration : TransientTags.ClassDeclaration);
+						return CreateClassificationSpan(snapshot,
+							itemSpan,
+							node.IsKind(CodeAnalysisHelper.RecordDeclaration)
+								? TransientTags.StructDeclaration
+								: TransientTags.ClassDeclaration);
 				}
 				return null;
 			}
@@ -635,7 +639,9 @@ namespace Codist.Taggers
 						}
 						return null;
 					case SyntaxKind.IdentifierName:
-						if (node.Parent.IsKind(SyntaxKind.TypeConstraint) && itemSpan.Length == 9 && node.ToString() == "unmanaged") {
+						if (node.Parent.IsKind(SyntaxKind.TypeConstraint)
+							&& itemSpan.Length == 9
+							&& node.ToString() == "unmanaged") {
 							goto case SyntaxKind.UnsafeStatement;
 						}
 						return null;
@@ -649,14 +655,13 @@ namespace Codist.Taggers
 				}
 				var opMethod = semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node) as IMethodSymbol;
 				if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
-					if (node.RawKind == (int)SyntaxKind.OperatorDeclaration) {
-						return CreateClassificationSpan(snapshot, itemSpan, TransientTags.OverrideDeclaration);
+					return CreateClassificationSpan(snapshot,
+						itemSpan,
+						node.RawKind == (int)SyntaxKind.OperatorDeclaration
+							? TransientTags.OverrideDeclaration
+							: __Classifications.OverrideMember);
 					}
-					else {
-						return CreateClassificationSpan(snapshot, itemSpan, __Classifications.OverrideMember);
-					}
-				}
-				else if (opMethod?.MethodKind == MethodKind.LambdaMethod) {
+				if (opMethod?.MethodKind == MethodKind.LambdaMethod) {
 					var l = ClassifyLambdaExpression(itemSpan, snapshot, semanticModel, unitCompilation);
 					if (l != null) {
 						return l;
@@ -687,14 +692,14 @@ namespace Codist.Taggers
 				if (node is BaseTypeDeclarationSyntax == false
 					&& node is ExpressionSyntax == false
 					&& node is NamespaceDeclarationSyntax == false
-					&& !node.IsKind(SyntaxKind.SwitchStatement) && (node = node.Parent) == null) {
+					&& !node.IsKind(SyntaxKind.SwitchStatement)
+					&& (node = node.Parent) == null) {
 					return null;
 				}
 				var type = ClassifySyntaxNode(node, node is ExpressionSyntax ? HighlightOptions.MemberBraceTags : HighlightOptions.MemberDeclarationBraceTags, HighlightOptions.KeywordBraceTags);
-				if (type != null) {
-					return CreateClassificationSpan(snapshot, itemSpan, type);
-				}
-				return null;
+				return type != null
+					? CreateClassificationSpan(snapshot, itemSpan, type)
+					: null;
 			}
 
 			static TagSpan<IClassificationTag> ClassifyParentheses(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
@@ -734,7 +739,9 @@ namespace Codist.Taggers
 					case SyntaxKind.FinallyClause:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.Resource);
 					case SyntaxKind.ParenthesizedVariableDesignation:
-						return CreateClassificationSpan(snapshot, itemSpan, node.Parent.IsKind(CodeAnalysisHelper.VarPattern) ? HighlightOptions.KeywordBraceTags.Branching : HighlightOptions.MemberBraceTags.Constructor);
+						return CreateClassificationSpan(snapshot, itemSpan, node.Parent.IsKind(CodeAnalysisHelper.VarPattern)
+							? HighlightOptions.KeywordBraceTags.Branching
+							: HighlightOptions.MemberBraceTags.Constructor);
 					case SyntaxKind.TupleExpression:
 					case SyntaxKind.TupleType:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
@@ -772,7 +779,9 @@ namespace Codist.Taggers
 					case SyntaxKind.ImplicitArrayCreationExpression:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
 					case SyntaxKind.Argument:
-						return ((ArgumentSyntax)node).Expression.IsKind(SyntaxKind.ImplicitStackAllocArrayCreationExpression) ? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor) : null;
+						return ((ArgumentSyntax)node).Expression.IsKind(SyntaxKind.ImplicitStackAllocArrayCreationExpression)
+							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor)
+							: null;
 				}
 				return null;
 			}
