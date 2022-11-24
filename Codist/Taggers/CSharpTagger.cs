@@ -150,10 +150,6 @@ namespace Codist.Taggers
 				if (snapshot.TextBuffer != _Buffer) {
 					goto NA;
 				}
-				if (isNewSnapshot && _PendingSpans?.IsEmpty == false) {
-					// drop previous pending spans when snapshot is changed
-					_PendingSpans = new ConcurrentQueue<SnapshotSpan>();
-				}
 				if (snapshot != _WorkingSnapshot) {
 					_WorkingSnapshot = snapshot;
 					// don't schedule parsing unless snapshot is changed
@@ -162,6 +158,8 @@ namespace Codist.Taggers
 						_TaskBreaker?.Cancel();
 					}
 					_Timer.Change(_ParseResult != null ? 300 : 100, Timeout.Infinite);
+				}
+				if (isNewSnapshot) {
 					// queue the spans to be updated after parsing
 					EnqueueSpans(spans);
 				}
@@ -228,6 +226,7 @@ namespace Codist.Taggers
 
 			void EnqueueSpans(NormalizedSnapshotSpanCollection spans) {
 				foreach (var item in spans) {
+					Debug.WriteLine($"Enqueue span {item}");
 					_PendingSpans.Enqueue(item);
 				}
 			}
@@ -239,6 +238,7 @@ namespace Codist.Taggers
 					if (snapshot != null) {
 						while (pendingSpans.TryDequeue(out var span)) {
 							if (snapshot == span.Snapshot) {
+								Debug.WriteLine($"Refresh span {span}");
 								TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
 							}
 						}
@@ -660,7 +660,7 @@ namespace Codist.Taggers
 						node.RawKind == (int)SyntaxKind.OperatorDeclaration
 							? TransientTags.OverrideDeclaration
 							: __Classifications.OverrideMember);
-					}
+				}
 				if (opMethod?.MethodKind == MethodKind.LambdaMethod) {
 					var l = ClassifyLambdaExpression(itemSpan, snapshot, semanticModel, unitCompilation);
 					if (l != null) {
@@ -707,13 +707,13 @@ namespace Codist.Taggers
 				switch (node.Kind()) {
 					case SyntaxKind.CastExpression:
 						return HighlightOptions.KeywordBraceTags.TypeCast != null
-							&& semanticModel.GetSymbolInfo(((CastExpressionSyntax)node).Type).Symbol != null
+								&& semanticModel.GetSymbolInfo(((CastExpressionSyntax)node).Type).Symbol != null
 							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.TypeCast)
 							: null;
 					case SyntaxKind.ParenthesizedExpression:
 						return (HighlightOptions.KeywordBraceTags.TypeCast != null
-							&& node.ChildNodes().FirstOrDefault().IsKind(SyntaxKind.AsExpression)
-							&& semanticModel.GetSymbolInfo(((BinaryExpressionSyntax)node.ChildNodes().First()).Right).Symbol != null)
+								&& node.ChildNodes().FirstOrDefault().IsKind(SyntaxKind.AsExpression)
+								&& semanticModel.GetSymbolInfo(((BinaryExpressionSyntax)node.ChildNodes().First()).Right).Symbol != null)
 							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.TypeCast)
 							: null;
 					case SyntaxKind.SwitchStatement:
