@@ -419,12 +419,12 @@ namespace Codist.Refactorings
 							);
 						break;
 					case SyntaxKind.ExpressionStatement:
-						var assignee = ((AssignmentExpressionSyntax)((ExpressionStatementSyntax)statement).Expression).Left;
+						var assignment = (AssignmentExpressionSyntax)((ExpressionStatementSyntax)statement).Expression;
 						newNode = SF.ExpressionStatement(
-							SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
-								assignee,
+							SF.AssignmentExpression(assignment.Kind(),
+								assignment.Left,
 								MakeConditionalExpression(ifStatement.Condition,
-									((AssignmentExpressionSyntax)((ExpressionStatementSyntax)statement).Expression).Right,
+									assignment.Right,
 									((AssignmentExpressionSyntax)((ExpressionStatementSyntax)elseStatement).Expression).Right,
 								indent, newLine))
 							);

@@ -373,6 +373,7 @@ namespace Codist
 				&& e.Expression is AssignmentExpressionSyntax a
 				&& other is ExpressionStatementSyntax ee
 				&& ee.Expression is AssignmentExpressionSyntax ea
+				&& a.OperatorToken.IsKind(ea.OperatorToken.Kind())
 				&& SyntaxFactory.AreEquivalent(a.Left, ea.Left);
 		}
 		#endregion

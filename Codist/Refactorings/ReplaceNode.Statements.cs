@@ -40,19 +40,18 @@ namespace Codist.Refactorings
 					&& ifs.Else == null
 					&& ifs.Statement != null
 					&& ((ifStatement = ifs.Statement.GetSingleStatement()) != null)
-					&& IsWrappable(ifStatement)
 					&& (otherStatement = s[1]).IsKind(ifStatement.Kind())
-					&& IsWrappable(otherStatement)
-					&& (ifStatement.IsKind(SyntaxKind.SimpleAssignmentExpression) == false || ifStatement.IsAssignedToSameTarget(otherStatement));
+					&& MayBeMerged(ifStatement, otherStatement);
 			}
 
-			static bool IsWrappable(StatementSyntax statement) {
+			static bool MayBeMerged(StatementSyntax statement, StatementSyntax other) {
 				switch (statement.Kind()) {
 					case SyntaxKind.ReturnStatement:
 						return ((ReturnStatementSyntax)statement).Expression != null;
 					case SyntaxKind.YieldReturnStatement:
-					case SyntaxKind.SimpleAssignmentExpression:
 						return true;
+					case SyntaxKind.ExpressionStatement:
+						return statement.IsAssignedToSameTarget(other);
 				}
 				return false;
 			}
@@ -73,13 +72,14 @@ namespace Codist.Refactorings
 							SF.Token(SyntaxKind.SemicolonToken)
 							);
 						break;
-					case SyntaxKind.SimpleAssignmentExpression:
-						var assignee = ((AssignmentExpressionSyntax)((ExpressionStatementSyntax)first).Expression).Left;
+					case SyntaxKind.ExpressionStatement:
+						var assignment = (AssignmentExpressionSyntax)((ExpressionStatementSyntax)first).Expression;
 						newStatement = SF.ExpressionStatement(
-							SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
-								assignee,
+							SF.AssignmentExpression(assignment.Kind(),
+								assignment.Left,
+								assignment.OperatorToken.WithTrailingTrivia(SF.Space),
 								MakeConditional(ctx, ifs,
-									((AssignmentExpressionSyntax)((ExpressionStatementSyntax)first).Expression).Right,
+									assignment.Right,
 									((AssignmentExpressionSyntax)((ExpressionStatementSyntax)other).Expression).Right))
 							);
 						break;
