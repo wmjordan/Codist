@@ -28,8 +28,6 @@ namespace Codist.SmartBars
 			Refactorings.ReplaceToken.InvertOperator,
 			Refactorings.ReplaceNode.MergeToConditional,
 			Refactorings.ReplaceNode.WrapInElse,
-			Refactorings.ReplaceNode.WrapInIf,
-			Refactorings.ReplaceNode.WrapInTryCatch,
 			Refactorings.ReplaceNode.MultiLineExpression,
 			Refactorings.ReplaceNode.MultiLineList,
 			Refactorings.ReplaceNode.ConditionalToIf,
@@ -39,6 +37,8 @@ namespace Codist.SmartBars
 			Refactorings.ReplaceNode.SwapOperands,
 			Refactorings.ReplaceNode.NestCondition,
 			Refactorings.ReplaceNode.AddBraces,
+			Refactorings.ReplaceNode.WrapInIf,
+			Refactorings.ReplaceNode.WrapInTryCatch,
 			Refactorings.ReplaceNode.DeleteCondition,
 			Refactorings.ReplaceNode.RemoveContainingStatement
 		};
