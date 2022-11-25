@@ -46,6 +46,9 @@ namespace Codist.AutoBuildVersion
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
 				WriteBuildText(DateTime.Now.ToLongTimeString() + " " + R.T_BuildFinished + Environment.NewLine);
 			}
+			// hack: workaround to fix a bug in VS that causes build animation does not stop
+			object icon = (short)Microsoft.VisualStudio.Shell.Interop.Constants.SBAI_Build;
+			ServicesHelper.Get<IVsStatusbar, SVsStatusbar>().Animation(0, ref icon);
 			_LockChangeTracking = false;
 			return VSConstants.S_OK;
 		}
@@ -140,7 +143,7 @@ namespace Codist.AutoBuildVersion
 			}
 
 			try {
-				var buildConfig = AutoBuildVersion.BuildSetting.Load(project);
+				var buildConfig = BuildSetting.Load(project);
 				if (buildConfig != null) {
 					var i = s.IndexOf('|');
 					if (i != -1) {
