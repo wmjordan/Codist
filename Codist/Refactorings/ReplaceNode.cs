@@ -93,7 +93,7 @@ namespace Codist.Refactorings
 					default: yield break;
 				}
 				if (statement != null) {
-					yield return Replace(statement, SF.Block(statement).AnnotateReformatAndSelect());
+					yield return Replace(statement.Parent, statement.Parent.ReplaceNode(statement, SF.Block(statement)).AnnotateReformatAndSelect());
 				}
 			}
 		}
