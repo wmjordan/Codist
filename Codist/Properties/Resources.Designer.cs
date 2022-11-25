@@ -106,7 +106,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Arguments on Multi-line.
+        ///   Looks up a localized string similar to Split Arguments into Lines.
         /// </summary>
         internal static string CMD_ArgumentsOnMultiLine {
             get {
@@ -187,7 +187,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;??&gt; on Multi-lines.
+        ///   Looks up a localized string similar to Split &lt;??&gt; into Lines.
         /// </summary>
         internal static string CMD_CoalesceOnMultiLines {
             get {
@@ -206,7 +206,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?:&gt; on Multi-lines.
+        ///   Looks up a localized string similar to Split &lt;?:&gt; into Lines.
         /// </summary>
         internal static string CMD_ConditionalOnMultiLines {
             get {
@@ -349,6 +349,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Split Declarations into Lines.
+        /// </summary>
+        internal static string CMD_DeclarationsOnMultiLine {
+            get {
+                return ResourceManager.GetString("CMD_DeclarationsOnMultiLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete All Breakpoints.
         /// </summary>
         internal static string CMD_DeleteAllBreakpoints {
@@ -443,7 +452,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Expressions on Multi-Line.
+        ///   Looks up a localized string similar to Split Expressions into Lines.
         /// </summary>
         internal static string CMD_ExpressionsOnMultiLine {
             get {
@@ -909,7 +918,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;&amp;&amp;&gt; on Multi-lines.
+        ///   Looks up a localized string similar to Split &lt;&amp;&amp;&gt; into Lines.
         /// </summary>
         internal static string CMD_LogicalAndOnMultiLines {
             get {
@@ -918,7 +927,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;||&gt; on Multi-lines.
+        ///   Looks up a localized string similar to Split &lt;||&gt; into Lines.
         /// </summary>
         internal static string CMD_LogicalOrOnMultiLines {
             get {
@@ -1094,7 +1103,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Operands on Multi-lines.
+        ///   Looks up a localized string similar to Split Operands into Lines.
         /// </summary>
         internal static string CMD_OperandsOnMultiLines {
             get {
@@ -1121,7 +1130,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Parameters on Multi-line.
+        ///   Looks up a localized string similar to Split Parameters into Lines.
         /// </summary>
         internal static string CMD_ParametersOnMultiLine {
             get {

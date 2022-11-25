@@ -39,6 +39,8 @@ namespace Codist.Refactorings
 						return ((ForEachStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
 					case SyntaxKind.ForStatement:
 						return ((ForStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
+					case SyntaxKind.ForEachVariableStatement:
+						return ((ForEachVariableStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
 					case SyntaxKind.WhileStatement:
 						return ((WhileStatementSyntax)node).Statement.IsKind(SyntaxKind.Block) == false;
 					case SyntaxKind.UsingStatement:
@@ -67,6 +69,8 @@ namespace Codist.Refactorings
 						statement = ((IfStatementSyntax)node).Statement; break;
 					case SyntaxKind.ForEachStatement:
 						statement = ((ForEachStatementSyntax)node).Statement; break;
+					case SyntaxKind.ForEachVariableStatement:
+						statement = ((ForEachVariableStatementSyntax)node).Statement; break;
 					case SyntaxKind.ForStatement:
 						statement = ((ForStatementSyntax)node).Statement; break;
 					case SyntaxKind.WhileStatement:
@@ -636,26 +640,33 @@ namespace Codist.Refactorings
 
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.Node;
-				if (node.Kind().IsAny(SyntaxKind.ArgumentList, SyntaxKind.ParameterList, SyntaxKind.ArrayInitializerExpression, SyntaxKind.ObjectInitializerExpression)
-					&& node.IsMultiLine(false) == false) {
-					if (node is ArgumentListSyntax al) {
-						if (al.Arguments.Count > 1) {
+				switch (node.Kind()) {
+					case SyntaxKind.ArgumentList:
+						if (((ArgumentListSyntax)node).Arguments.Count > 1 && node.IsMultiLine(false) == false) {
 							_Title = R.CMD_ArgumentsOnMultiLine;
 							return true;
 						}
-					}
-					else if (node is ParameterListSyntax pl) {
-						if (pl.Parameters.Count > 1) {
+						break;
+					case SyntaxKind.ParameterList:
+						if (((ParameterListSyntax)node).Parameters.Count > 1 && node.IsMultiLine(false) == false) {
 							_Title = R.CMD_ParametersOnMultiLine;
 							return true;
 						}
-					}
-					else if (node is InitializerExpressionSyntax ie) {
-						if (ie.Expressions.Count > 1) {
+						break;
+					case SyntaxKind.ArrayInitializerExpression:
+					case SyntaxKind.CollectionInitializerExpression:
+					case SyntaxKind.ObjectInitializerExpression:
+						if (((InitializerExpressionSyntax)node).Expressions.Count > 1 && node.IsMultiLine(false) == false) {
 							_Title = R.CMD_ExpressionsOnMultiLine;
 							return true;
 						}
-					}
+						break;
+					case SyntaxKind.VariableDeclaration:
+						if (((VariableDeclarationSyntax)node).Variables.Count > 1 && node.IsMultiLine(false) == false) {
+							_Title = R.CMD_DeclarationsOnMultiLine;
+							return true;
+						}
+						break;
 				}
 				return false;
 			}
@@ -665,27 +676,42 @@ namespace Codist.Refactorings
 				var (indent, newLine) = ctx.GetIndentAndNewLine(node.SpanStart);
 				SyntaxNode newNode = null;
 				if (node is ArgumentListSyntax al) {
-					newNode = al.WithArguments(MultiLineList(al.Arguments, indent, newLine));
+					newNode = al.WithArguments(MakeMultiLine(al.Arguments, indent, newLine));
 				}
 				else if (node is ParameterListSyntax pl) {
-					newNode = pl.WithParameters(MultiLineList(pl.Parameters, indent, newLine));
+					newNode = pl.WithParameters(MakeMultiLine(pl.Parameters, indent, newLine));
 				}
 				else if (node is InitializerExpressionSyntax ie) {
-					newNode = ie.WithExpressions(MultiLineList(ie.Expressions, indent, newLine));
+					newNode = MakeMultiLine(ie, indent, newLine);
 				}
-
+				else if (node is VariableDeclarationSyntax va) {
+					newNode = va.WithVariables(MakeMultiLine(va.Variables, indent, newLine));
+				}
 				if (newNode != null) {
 					yield return Replace(node, newNode.AnnotateSelect());
 				}
 			}
 
-			static SeparatedSyntaxList<T> MultiLineList<T>(SeparatedSyntaxList<T> list, SyntaxTriviaList indent, SyntaxTrivia newLine) where T : SyntaxNode {
+			static SeparatedSyntaxList<T> MakeMultiLine<T>(SeparatedSyntaxList<T> list, SyntaxTriviaList indent, SyntaxTrivia newLine) where T : SyntaxNode {
 				var l = new T[list.Count];
 				for (int i = 0; i < l.Length; i++) {
 					l[i] = i > 0 ? list[i].WithLeadingTrivia(indent) : list[i];
 				}
 				return SF.SeparatedList(l,
 					Enumerable.Repeat(SF.Token(SyntaxKind.CommaToken).WithTrailingTrivia(newLine), l.Length - 1));
+			}
+
+			static InitializerExpressionSyntax MakeMultiLine(InitializerExpressionSyntax initializer, SyntaxTriviaList indent, SyntaxTrivia newLine) {
+				var list = initializer.Expressions;
+				var l = new ExpressionSyntax[list.Count];
+				for (int i = 0; i < l.Length; i++) {
+					l[i] = list[i].WithLeadingTrivia(indent);
+				}
+				l[l.Length - 1] = l[l.Length - 1].WithTrailingTrivia(newLine);
+				return initializer.Update(initializer.OpenBraceToken.WithTrailingTrivia(newLine),
+					SF.SeparatedList(l, Enumerable.Repeat(SF.Token(SyntaxKind.CommaToken).WithTrailingTrivia(newLine), l.Length - 1)),
+					initializer.CloseBraceToken.WithLeadingTrivia(indent.RemoveAt(indent.Count - 1))
+				);
 			}
 		}
 	}

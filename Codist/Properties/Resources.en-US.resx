@@ -406,7 +406,7 @@ Shift: Paste and select next (whole word)</value>
     <value>..\Resources\Light Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="Simple" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Simple Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;gb2312</value>
+    <value>..\Resources\Simple Codist.json;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="T_AsParameter" xml:space="preserve">
     <value> as parameter</value>
@@ -517,6 +517,9 @@ Use space to separate keywords.</value>
   <data name="CMD_Load" xml:space="preserve">
     <value>Load...</value>
   </data>
+  <data name="CMDT_OpenDonatePage" xml:space="preserve">
+    <value>Open your browser and donate to project Codist</value>
+  </data>
   <data name="CMD_PostIssue" xml:space="preserve">
     <value>Post your opinions in the issues page</value>
   </data>
@@ -531,6 +534,9 @@ Use space to separate keywords.</value>
   </data>
   <data name="OT_ConfigurationFileTip" xml:space="preserve">
     <value>Use the following buttons to backup your settings or share the file with others</value>
+  </data>
+  <data name="CMD_DonateLink" xml:space="preserve">
+    <value>Donate via PayPal</value>
   </data>
   <data name="OT_DonateLinkTip" xml:space="preserve">
     <value>Recommended donation value is $19.99. But you can modify the amount to any value if you like</value>
@@ -1037,6 +1043,12 @@ ALL existing items will be REPLACE by default items.</value>
   <data name="OT_InterfacesTip" xml:space="preserve">
     <value>Displays interfaces implemented by the symbol</value>
   </data>
+  <data name="OT_LimitItemSize" xml:space="preserve">
+    <value>Limit Item Size</value>
+  </data>
+  <data name="OT_LimitItemSizeNote" xml:space="preserve">
+    <value>Limit the maximum size of each items in Quick Info, preventing any item from taking up the whole screen</value>
+  </data>
   <data name="OT_LineNumber" xml:space="preserve">
     <value>Line number</value>
   </data>
@@ -1458,7 +1470,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="CMDT_ResetTheme" xml:space="preserve">
     <value>Reset syntax highlight theme to default...</value>
   </data>
-  <data name="CMDT_SaveHighlightChanges" xml:space="preserve">
+  <data name="CMDT_SaveChanges" xml:space="preserve">
     <value>Confirm changes</value>
   </data>
   <data name="CMDT_SaveTheme" xml:space="preserve">
@@ -1467,7 +1479,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="CMDT_SimpleTheme" xml:space="preserve">
     <value>Load a predefined simple theme</value>
   </data>
-  <data name="CMDT_UndoHighlightChanges" xml:space="preserve">
+  <data name="CMDT_UndoChanges" xml:space="preserve">
     <value>Undo changes</value>
   </data>
   <data name="CMD_Bold" xml:space="preserve">
@@ -1665,17 +1677,11 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_Themes" xml:space="preserve">
     <value>Themes:</value>
   </data>
-  <data name="CMD_DonateLink" xml:space="preserve">
-    <value>Donate via PayPal</value>
+  <data name="CMDT_OpenWechatQrCode" xml:space="preserve">
+    <value>Donate to the author via scanning his Wechat QR Code</value>
   </data>
   <data name="CMD_WechatDonateLink" xml:space="preserve">
     <value>Donate via Wechat</value>
-  </data>
-  <data name="CMDT_OpenDonatePage" xml:space="preserve">
-    <value>Open your browser and donate to project Codist</value>
-  </data>
-  <data name="CMDT_OpenWechatQrCode" xml:space="preserve">
-    <value>Donate to the author via scanning his Wechat QR Code</value>
   </data>
   <data name="OT_LayoutOverride" xml:space="preserve">
     <value>Layout Override</value>
@@ -1825,6 +1831,10 @@ Right click: Wrap text menu...</value>
   <data name="OTC_Pattern" xml:space="preserve">
     <value>Pattern:</value>
   </data>
+  <data name="OT_ConfirmResetWrapText" xml:space="preserve">
+    <value>Do you want to reset wrap texts to default ones?
+ALL existing items will be REPLACE by default items.</value>
+  </data>
   <data name="OT_Indicator" xml:space="preserve">
     <value>Indicator</value>
   </data>
@@ -1957,12 +1967,6 @@ Right click: Wrap text menu...</value>
   <data name="CMD_Customize" xml:space="preserve">
     <value>Customize...</value>
   </data>
-  <data name="OT_CtrlSuppress" xml:space="preserve">
-    <value>Suppress Super Quick Info when Ctrl key is pressed</value>
-  </data>
-  <data name="OT_CtrlSuppressTip" xml:space="preserve">
-    <value>Displays original Quick Info when Ctrl key is pressed</value>
-  </data>
   <data name="OT_CtrlSuppressQuickInfo" xml:space="preserve">
     <value>Suppress Super Quick Info when Ctrl key is pressed</value>
   </data>
@@ -2072,12 +2076,6 @@ Ctrl: toggle and select next</value>
 Ctrl: Run flagged threads to cursor
 Right click: Threads window</value>
   </data>
-  <data name="OT_LimitItemSize" xml:space="preserve">
-    <value>Limit Item Size</value>
-  </data>
-  <data name="OT_LimitItemSizeNote" xml:space="preserve">
-    <value>Limit the maximum size of each items in Quick Info, preventing any item from taking up the whole screen</value>
-  </data>
   <data name="T_Awaitable" xml:space="preserve">
     <value>Awaitable</value>
   </data>
@@ -2149,7 +2147,7 @@ Sent or received bytes per second through all network interfaces</value>
     <value>Refactor selection</value>
   </data>
   <data name="CMD_SwapOperands" xml:space="preserve">
-    <value>Swap operands</value>
+    <value>Swap Operands</value>
   </data>
   <data name="OT_EnumMembers" xml:space="preserve">
     <value>Enum fields</value>
@@ -2164,16 +2162,16 @@ Sent or received bytes per second through all network interfaces</value>
     <value>Bit count: </value>
   </data>
   <data name="CMD_DeleteMethod" xml:space="preserve">
-    <value>Delete method</value>
+    <value>Delete Method</value>
   </data>
   <data name="CMD_MergeWithParent" xml:space="preserve">
-    <value>Merge with parent &lt;NODE&gt;</value>
+    <value>Merge with Parent &lt;NODE&gt;</value>
   </data>
   <data name="CMD_SplitToNested" xml:space="preserve">
-    <value>Split to nested &lt;if&gt;</value>
+    <value>Split to Nested &lt;if&gt;</value>
   </data>
   <data name="CMD_ConditionalOnMultiLines" xml:space="preserve">
-    <value>&lt;?:&gt; on multi-lines</value>
+    <value>Split &lt;?:&gt; into Lines</value>
   </data>
   <data name="CMD_ConditionalToIfElse" xml:space="preserve">
     <value>&lt;?:&gt; to &lt;if...else&gt;</value>
@@ -2205,16 +2203,16 @@ Debug unit tests in class
 Right click: Run unit tests in class</value>
   </data>
   <data name="CMD_CoalesceOnMultiLines" xml:space="preserve">
-    <value>&lt;??&gt; on Multi-lines</value>
+    <value>Split &lt;??&gt; into Lines</value>
   </data>
   <data name="CMD_LogicalAndOnMultiLines" xml:space="preserve">
-    <value>&lt;&amp;&amp;&gt; on Multi-lines</value>
+    <value>Split &lt;&amp;&amp;&gt; into Lines</value>
   </data>
   <data name="CMD_LogicalOrOnMultiLines" xml:space="preserve">
-    <value>&lt;||&gt; on Multi-lines</value>
+    <value>Split &lt;||&gt; into Lines</value>
   </data>
   <data name="CMD_OperandsOnMultiLines" xml:space="preserve">
-    <value>Operands on Multi-lines</value>
+    <value>Split Operands into Lines</value>
   </data>
   <data name="CMD_AsToCast" xml:space="preserve">
     <value>&lt;as&gt; to Cast</value>
@@ -2223,10 +2221,10 @@ Right click: Run unit tests in class</value>
     <value>Cast to &lt;as&gt;</value>
   </data>
   <data name="CMD_ArgumentsOnMultiLine" xml:space="preserve">
-    <value>Arguments on Multi-line</value>
+    <value>Split Arguments into Lines</value>
   </data>
   <data name="CMD_ParametersOnMultiLine" xml:space="preserve">
-    <value>Parameters on Multi-line</value>
+    <value>Split Parameters into Lines</value>
   </data>
   <data name="OT_CSharpSmartBar" xml:space="preserve">
     <value>C# SmartBar</value>
@@ -2238,6 +2236,9 @@ Right click: Run unit tests in class</value>
     <value>Use two units of indentation for wrapped syntax elements in multi-line refactorings</value>
   </data>
   <data name="CMD_ExpressionsOnMultiLine" xml:space="preserve">
-    <value>Expressions on Multi-Line</value>
+    <value>Split Expressions into Lines</value>
+  </data>
+  <data name="CMD_DeclarationsOnMultiLine" xml:space="preserve">
+    <value>Split Declarations into Lines</value>
   </data>
 </root>

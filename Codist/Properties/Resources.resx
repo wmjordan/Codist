@@ -2171,7 +2171,7 @@ Sent or received bytes per second through all network interfaces</value>
     <value>Split to Nested &lt;if&gt;</value>
   </data>
   <data name="CMD_ConditionalOnMultiLines" xml:space="preserve">
-    <value>&lt;?:&gt; on Multi-lines</value>
+    <value>Split &lt;?:&gt; into Lines</value>
   </data>
   <data name="CMD_ConditionalToIfElse" xml:space="preserve">
     <value>&lt;?:&gt; to &lt;if...else&gt;</value>
@@ -2203,16 +2203,16 @@ Debug unit tests in class
 Right click: Run unit tests in class</value>
   </data>
   <data name="CMD_CoalesceOnMultiLines" xml:space="preserve">
-    <value>&lt;??&gt; on Multi-lines</value>
+    <value>Split &lt;??&gt; into Lines</value>
   </data>
   <data name="CMD_LogicalAndOnMultiLines" xml:space="preserve">
-    <value>&lt;&amp;&amp;&gt; on Multi-lines</value>
+    <value>Split &lt;&amp;&amp;&gt; into Lines</value>
   </data>
   <data name="CMD_LogicalOrOnMultiLines" xml:space="preserve">
-    <value>&lt;||&gt; on Multi-lines</value>
+    <value>Split &lt;||&gt; into Lines</value>
   </data>
   <data name="CMD_OperandsOnMultiLines" xml:space="preserve">
-    <value>Operands on Multi-lines</value>
+    <value>Split Operands into Lines</value>
   </data>
   <data name="CMD_AsToCast" xml:space="preserve">
     <value>&lt;as&gt; to Cast</value>
@@ -2221,10 +2221,10 @@ Right click: Run unit tests in class</value>
     <value>Cast to &lt;as&gt;</value>
   </data>
   <data name="CMD_ArgumentsOnMultiLine" xml:space="preserve">
-    <value>Arguments on Multi-line</value>
+    <value>Split Arguments into Lines</value>
   </data>
   <data name="CMD_ParametersOnMultiLine" xml:space="preserve">
-    <value>Parameters on Multi-line</value>
+    <value>Split Parameters into Lines</value>
   </data>
   <data name="OT_CSharpSmartBar" xml:space="preserve">
     <value>C# SmartBar</value>
@@ -2236,6 +2236,9 @@ Right click: Run unit tests in class</value>
     <value>Use two units of indentation for wrapped syntax elements in multi-line refactorings</value>
   </data>
   <data name="CMD_ExpressionsOnMultiLine" xml:space="preserve">
-    <value>Expressions on Multi-Line</value>
+    <value>Split Expressions into Lines</value>
+  </data>
+  <data name="CMD_DeclarationsOnMultiLine" xml:space="preserve">
+    <value>Split Declarations into Lines</value>
   </data>
 </root>
