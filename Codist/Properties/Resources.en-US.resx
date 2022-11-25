@@ -2241,4 +2241,10 @@ Right click: Run unit tests in class</value>
   <data name="CMD_DeclarationsOnMultiLine" xml:space="preserve">
     <value>Split Declarations into Lines</value>
   </data>
+  <data name="CMD_DoToWhile" xml:space="preserve">
+    <value>&lt;do&gt; to &lt;while&gt;</value>
+  </data>
+  <data name="CMD_WhileToDo" xml:space="preserve">
+    <value>&lt;while&gt; to &lt;do&gt;</value>
+  </data>
 </root>

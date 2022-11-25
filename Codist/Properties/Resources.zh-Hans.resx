@@ -2226,4 +2226,10 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_DeclarationsOnMultiLine" xml:space="preserve">
     <value>将变量声明换行</value>
   </data>
+  <data name="CMD_DoToWhile" xml:space="preserve">
+    <value>&lt;do&gt; 改为 &lt;while&gt;</value>
+  </data>
+  <data name="CMD_WhileToDo" xml:space="preserve">
+    <value>&lt;while&gt; 改为 &lt;do&gt;</value>
+  </data>
 </root>

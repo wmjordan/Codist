@@ -424,6 +424,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;do&gt; to &lt;while&gt;.
+        /// </summary>
+        internal static string CMD_DoToWhile {
+            get {
+                return ResourceManager.GetString("CMD_DoToWhile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Duplicate selection
         ///Right click: Duplicate line.
         /// </summary>
@@ -1682,6 +1691,15 @@ namespace Codist.Properties {
         internal static string CMD_WechatDonateLink {
             get {
                 return ResourceManager.GetString("CMD_WechatDonateLink", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;while&gt; to &lt;do&gt;.
+        /// </summary>
+        internal static string CMD_WhileToDo {
+            get {
+                return ResourceManager.GetString("CMD_WhileToDo", resourceCulture);
             }
         }
         

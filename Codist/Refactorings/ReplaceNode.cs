@@ -22,6 +22,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode MergeCondition = new MergeConditionRefactoring();
 		public static readonly ReplaceNode IfToConditional = new IfToConditionalRefactoring();
 		public static readonly ReplaceNode ConditionalToIf = new ConditionalToIfRefactoring();
+		public static readonly ReplaceNode While = new WhileRefactoring();
 		public static readonly ReplaceNode MultiLineList = new MultiLineListRefactoring();
 		public static readonly ReplaceNode MultiLineExpression = new MultiLineExpressionRefactoring();
 
@@ -514,6 +515,39 @@ namespace Codist.Refactorings
 					SF.ElseClause(SF.Block(whenFalse))
 					);
 				yield return Replace(node.Parent, newNode.AnnotateReformatAndSelect());
+			}
+		}
+
+		sealed class WhileRefactoring : ReplaceNode
+		{
+			int _Icon;
+			string _Title;
+
+			public override int IconId => _Icon;
+			public override string Title => _Title;
+
+			public override bool Accept(RefactoringContext ctx) {
+				switch (ctx.Node.RawKind) {
+					case (int)SyntaxKind.WhileStatement:
+						_Icon = IconIds.DoWhile;
+						_Title = R.CMD_WhileToDo;
+						return true;
+					case (int)SyntaxKind.DoStatement:
+						_Icon = IconIds.While;
+						_Title = R.CMD_DoToWhile;
+						return true;
+				}
+				return false;
+			}
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				var node = ctx.Node;
+				if (node is WhileStatementSyntax ws) {
+					yield return Replace(node, SF.DoStatement(ws.Statement, ws.Condition).WithTriviaFrom(ws).AnnotateReformatAndSelect());
+				}
+				else if (node is DoStatementSyntax ds) {
+					yield return Replace(node, SF.WhileStatement(ds.Condition, ds.Statement).WithTriviaFrom(ds).AnnotateReformatAndSelect());
+				}
 			}
 		}
 
