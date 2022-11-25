@@ -1235,7 +1235,17 @@ namespace Codist
 		}
 		public static StatementSyntax GetContainingStatement(this SyntaxNode node) {
 			var s = node.FirstAncestorOrSelf<StatementSyntax>();
-			return s.IsKind(SyntaxKind.Block) ? s.Parent.FirstAncestorOrSelf<StatementSyntax>() ?? s : s;
+			while (s.IsKind(SyntaxKind.Block)) {
+				s = s.Parent.FirstAncestorOrSelf<StatementSyntax>();
+			}
+			return s;
+		}
+		public static SyntaxNode GetContainingStatementOrDeclaration(this SyntaxNode node) {
+			var s = node.FirstAncestorOrSelf<SyntaxNode>(n => n is StatementSyntax || n.Kind().IsDeclaration());
+			while (s.IsKind(SyntaxKind.Block)) {
+				s = s.Parent.FirstAncestorOrSelf<SyntaxNode>(n => n is StatementSyntax || n.Kind().IsDeclaration());
+			}
+			return s;
 		}
 		public static SelectedStatementInfo GetStatements(this SyntaxNode node, TextSpan span) {
 			if (span.Length == 0) {

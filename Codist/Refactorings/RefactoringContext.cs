@@ -26,7 +26,7 @@ namespace Codist.Refactorings
 		internal SyntaxNode NewRoot { get; set; }
 
 		public (SyntaxTriviaList indent, SyntaxTrivia newLine) GetIndentAndNewLine(SyntaxNode node) {
-			return GetIndentAndNewLine(node.GetContainingStatement().SpanStart);
+			return GetIndentAndNewLine((node.GetContainingStatementOrDeclaration() ?? node).SpanStart);
 		}
 
 		public (SyntaxTriviaList indent, SyntaxTrivia newLine) GetIndentAndNewLine(int position) {
