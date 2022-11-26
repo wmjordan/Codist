@@ -308,26 +308,32 @@ namespace Codist.QuickInfo
 			return new QuickInfoItem(token?.Span.CreateSnapshotSpan(session.TextView.TextSnapshot).ToTrackingSpan(), item);
 		}
 
-		static async Task<ThemedTipDocument> ShowAvailabilityAsync(Document doc, SyntaxToken token, CancellationToken cancellationToken) {
-			ThemedTipDocument r = null;
+		static Task<ThemedTipDocument> ShowAvailabilityAsync(Document doc, SyntaxToken token, CancellationToken cancellationToken) {
 			var solution = doc.Project.Solution;
-			if (solution.ProjectIds.Count > 0) {
-				var linkedDocuments = doc.GetLinkedDocumentIds();
-				if (linkedDocuments.Length > 0) {
-					ImmutableArray<ISymbol> candidates;
-					foreach (var id in linkedDocuments) {
-						var d = solution.GetDocument(id);
-						var sm = await d.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-						if (sm.IsCSharp() == false) {
-							continue;
-						}
-						if (GetSymbol(sm, sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(token.Span, true, true), ref candidates, cancellationToken) == null) {
-							if (r == null) {
-								r = new ThemedTipDocument().AppendTitle(IconIds.UnavailableSymbol, R.T_SymbolUnavailableIn);
-							}
-							r.Append(new ThemedTipParagraph(IconIds.Project, new ThemedTipText(d.Project.Name)));
-						}
+			if (solution.ProjectIds.Count == 0) {
+				return System.Threading.Tasks.Task.FromResult<ThemedTipDocument>(null);
+			}
+			var linkedDocuments = doc.GetLinkedDocumentIds();
+			if (linkedDocuments.Length == 0) {
+				return System.Threading.Tasks.Task.FromResult<ThemedTipDocument>(null);
+			}
+			return ShowAvailabilityAsync(token, solution, linkedDocuments, cancellationToken);
+		}
+
+		static async Task<ThemedTipDocument> ShowAvailabilityAsync(SyntaxToken token, Solution solution, ImmutableArray<DocumentId> linkedDocuments, CancellationToken cancellationToken) {
+			ThemedTipDocument r = null;
+			ImmutableArray<ISymbol> candidates;
+			foreach (var id in linkedDocuments) {
+				var d = solution.GetDocument(id);
+				var sm = await d.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+				if (sm.IsCSharp() == false) {
+					continue;
+				}
+				if (GetSymbol(sm, sm.SyntaxTree.GetCompilationUnitRoot(cancellationToken).FindNode(token.Span, true, true), ref candidates, cancellationToken) == null) {
+					if (r == null) {
+						r = new ThemedTipDocument().AppendTitle(IconIds.UnavailableSymbol, R.T_SymbolUnavailableIn);
 					}
+					r.Append(new ThemedTipParagraph(IconIds.Project, new ThemedTipText(d.Project.Name)));
 				}
 			}
 			return r;

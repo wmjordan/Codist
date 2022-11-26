@@ -138,7 +138,9 @@ namespace Codist.Refactorings
 
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia;
-				return node.IsKind(SyntaxKind.IfStatement) && node.Parent.IsKind(SyntaxKind.ElseClause) == false && (ctx.SelectedStatementInfo.Statements == null || ctx.SelectedStatementInfo.Statements.Count == 1);
+				return node.IsKind(SyntaxKind.IfStatement)
+					&& node.Parent.IsKind(SyntaxKind.ElseClause) == false
+					&& (ctx.SelectedStatementInfo.Statements == null || ctx.SelectedStatementInfo.Statements.Count == 1);
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
@@ -190,17 +192,14 @@ namespace Codist.Refactorings
 				if (remove == null) {
 					yield break;
 				}
-				SyntaxList<StatementSyntax> keep;
-				if (statement.Parent is BlockSyntax b) {
-					keep = b.Statements;
-				}
-				else {
-					keep = new SyntaxList<StatementSyntax>(statement);
-				}
+				SyntaxList<StatementSyntax> keep = statement.Parent is BlockSyntax b
+					? b.Statements
+					: new SyntaxList<StatementSyntax>(statement);
 				if (remove.IsKind(SyntaxKind.ElseClause)) {
 					var ifs = remove.Parent as IfStatementSyntax;
 					if (ifs.Parent.IsKind(SyntaxKind.ElseClause)) {
-						yield return Replace(ifs.Parent, (keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block)
+						yield return Replace(ifs.Parent,
+							(keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block)
 							? SF.ElseClause(SF.Block(keep))
 							: SF.ElseClause(keep[0])).AnnotateReformatAndSelect());
 						yield break;
@@ -210,8 +209,7 @@ namespace Codist.Refactorings
 					}
 					remove = ifs;
 				}
-				keep = keep.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select);
-				yield return Replace(remove, keep);
+				yield return Replace(remove, keep.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select));
 			}
 
 			static SyntaxNode GetRemovableAncestor(SyntaxNode node) {
