@@ -589,7 +589,7 @@ namespace Codist.Refactorings
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia;
 				var nodeKind = node.Kind();
-				var (indent, newLine) = ctx.GetIndentAndNewLine(node);
+				var (indent, newLine) = ctx.GetIndentAndNewLine(node.SpanStart);
 				BinaryExpressionSyntax newExp = null;
 				SyntaxToken token;
 				if (nodeKind == SyntaxKind.LogicalAndExpression) {
