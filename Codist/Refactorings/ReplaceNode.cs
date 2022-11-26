@@ -705,26 +705,26 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var node = ctx.Node;
-				var (indent, newLine) = ctx.GetIndentAndNewLine(node.SpanStart);
 				SyntaxNode newNode = null;
 				if (node is ArgumentListSyntax al) {
-					newNode = al.WithArguments(MakeMultiLine(al.Arguments, indent, newLine));
+					newNode = al.WithArguments(MakeMultiLine(al.Arguments, ctx));
 				}
 				else if (node is ParameterListSyntax pl) {
-					newNode = pl.WithParameters(MakeMultiLine(pl.Parameters, indent, newLine));
+					newNode = pl.WithParameters(MakeMultiLine(pl.Parameters, ctx));
 				}
 				else if (node is InitializerExpressionSyntax ie) {
-					newNode = MakeMultiLine(ie, indent, newLine);
+					newNode = MakeMultiLine(ie, ctx);
 				}
 				else if (node is VariableDeclarationSyntax va) {
-					newNode = va.WithVariables(MakeMultiLine(va.Variables, indent, newLine));
+					newNode = va.WithVariables(MakeMultiLine(va.Variables, ctx));
 				}
 				if (newNode != null) {
 					yield return Replace(node, newNode.AnnotateSelect());
 				}
 			}
 
-			static SeparatedSyntaxList<T> MakeMultiLine<T>(SeparatedSyntaxList<T> list, SyntaxTriviaList indent, SyntaxTrivia newLine) where T : SyntaxNode {
+			static SeparatedSyntaxList<T> MakeMultiLine<T>(SeparatedSyntaxList<T> list, RefactoringContext ctx) where T : SyntaxNode {
+				var (indent, newLine) = ctx.GetIndentAndNewLine(ctx.Node.SpanStart);
 				var l = new T[list.Count];
 				for (int i = 0; i < l.Length; i++) {
 					l[i] = i > 0 ? list[i].WithLeadingTrivia(indent) : list[i];
@@ -733,16 +733,18 @@ namespace Codist.Refactorings
 					Enumerable.Repeat(SF.Token(SyntaxKind.CommaToken).WithTrailingTrivia(newLine), l.Length - 1));
 			}
 
-			static InitializerExpressionSyntax MakeMultiLine(InitializerExpressionSyntax initializer, SyntaxTriviaList indent, SyntaxTrivia newLine) {
+			static InitializerExpressionSyntax MakeMultiLine(InitializerExpressionSyntax initializer, RefactoringContext ctx) {
+				var (indent, newLine) = ctx.GetIndentAndNewLine(ctx.Node.SpanStart, 0);
+				var indent2 = indent.Add(SF.Whitespace(ctx.WorkspaceOptions.GetIndentString()));
 				var list = initializer.Expressions;
 				var l = new ExpressionSyntax[list.Count];
 				for (int i = 0; i < l.Length; i++) {
-					l[i] = list[i].WithLeadingTrivia(indent);
+					l[i] = list[i].WithLeadingTrivia(indent2);
 				}
 				l[l.Length - 1] = l[l.Length - 1].WithTrailingTrivia(newLine);
 				return initializer.Update(initializer.OpenBraceToken.WithTrailingTrivia(newLine),
 					SF.SeparatedList(l, Enumerable.Repeat(SF.Token(SyntaxKind.CommaToken).WithTrailingTrivia(newLine), l.Length - 1)),
-					initializer.CloseBraceToken.WithLeadingTrivia(indent.RemoveAt(indent.Count - 1))
+					initializer.CloseBraceToken.WithLeadingTrivia(indent)
 				);
 			}
 		}

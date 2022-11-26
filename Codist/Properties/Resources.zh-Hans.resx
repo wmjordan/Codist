@@ -2232,4 +2232,7 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_WhileToDo" xml:space="preserve">
     <value>&lt;while&gt; 改为 &lt;do&gt;</value>
   </data>
+  <data name="CMD_SurroundWithRegion" xml:space="preserve">
+    <value>外侧插入 #region</value>
+  </data>
 </root>

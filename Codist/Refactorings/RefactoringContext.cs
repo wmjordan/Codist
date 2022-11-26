@@ -29,12 +29,14 @@ namespace Codist.Refactorings
 			return GetIndentAndNewLine((node.GetContainingStatementOrDeclaration() ?? node).SpanStart);
 		}
 
-		public (SyntaxTriviaList indent, SyntaxTrivia newLine) GetIndentAndNewLine(int position) {
+		public (SyntaxTriviaList indent, SyntaxTrivia newLine) GetIndentAndNewLine(int position, int indentUnit = -1) {
 			var options = WorkspaceOptions;
-			return (SF.TriviaList(SF.Whitespace(SemanticContext.View.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(position)))
-				.Add(SF.Whitespace(options.GetIndentString(Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.DoubleIndentRefactoring) ? 2 : 1))),
-				SF.Whitespace(options.GetNewLineString())
-				);
+			if (indentUnit < 0) {
+				indentUnit = Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.DoubleIndentRefactoring) ? 2 : 1;
+			}
+			string indent = SemanticContext.View.TextSnapshot.GetLinePrecedingWhitespaceAtPosition(position)
+				+ options.GetIndentString(indentUnit);
+			return (SF.TriviaList(SF.Whitespace(indent)), SF.Whitespace(options.GetNewLineString()));
 		}
 	}
 }

@@ -40,6 +40,7 @@ namespace Codist.SmartBars
 			Refactorings.ReplaceNode.AddBraces,
 			Refactorings.ReplaceNode.WrapInIf,
 			Refactorings.ReplaceNode.WrapInTryCatch,
+			Refactorings.ReplaceNode.WrapInRegion,
 			Refactorings.ReplaceNode.DeleteCondition,
 			Refactorings.ReplaceNode.RemoveContainingStatement
 		};

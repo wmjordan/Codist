@@ -1479,6 +1479,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Surround with #region.
+        /// </summary>
+        internal static string CMD_SurroundWithRegion {
+            get {
+                return ResourceManager.GetString("CMD_SurroundWithRegion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Swap Operands.
         /// </summary>
         internal static string CMD_SwapOperands {

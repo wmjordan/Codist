@@ -2247,4 +2247,7 @@ Right click: Run unit tests in class</value>
   <data name="CMD_WhileToDo" xml:space="preserve">
     <value>&lt;while&gt; to &lt;do&gt;</value>
   </data>
+  <data name="CMD_SurroundWithRegion" xml:space="preserve">
+    <value>Surround with #region</value>
+  </data>
 </root>

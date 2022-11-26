@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Editing;
 
 namespace Codist.Refactorings
 {
@@ -48,26 +49,11 @@ namespace Codist.Refactorings
 						return;
 					}
 					var actions = p.Actions = r.Refactor(p).ToArray();
-					foreach (var action in actions) {
-						switch (action.ActionType) {
-							case ActionType.Replace:
-								root = action.Original.Count == 1
-									? action.Insert.Count > 1 // bug in Roslyn requires this workaround
-										? root.ReplaceNode(action.FirstOriginal, action.Insert)
-										: root.ReplaceNode(action.FirstOriginal, action.Insert[0])
-									: root.InsertNodesBefore(action.FirstOriginal, action.Insert)
-										.RemoveNodes(action.Original, SyntaxRemoveOptions.KeepNoTrivia);
-								break;
-							case ActionType.InsertBefore:
-								root = root.InsertNodesBefore(action.FirstOriginal, action.Insert);
-								break;
-							case ActionType.InsertAfter:
-								root = root.InsertNodesAfter(action.FirstOriginal, action.Insert);
-								break;
-							case ActionType.Remove:
-								root = root.RemoveNodes(action.Original, SyntaxRemoveOptions.KeepNoTrivia);
-								break;
-						}
+					if (actions.Length > 1) {
+						root = ChangeDocumentWithActions(p.SemanticContext, actions);
+					}
+					else {
+						root = ChangeDocumentWithAction(root, actions[0]);
 					}
 					p.NewRoot = root = root.Format(CodeFormatHelper.Reformat, p.SemanticContext.Workspace);
 					foreach (var action in actions) {
@@ -94,13 +80,75 @@ namespace Codist.Refactorings
 				}
 				var inserted = ctx.NewRoot.GetAnnotatedNodes(action.Annotation).FirstOrDefault();
 				if (inserted != null) {
-					var selSpan = inserted.GetAnnotatedNodes(CodeFormatHelper.Select).FirstOrDefault()?.Span ?? default;
+					var selSpan = inserted.GetAnnotatedNodes(CodeFormatHelper.Select).FirstOrDefault()?.Span
+						?? inserted.GetAnnotatedTrivia(CodeFormatHelper.Select).FirstOrDefault().Span;
 					if (selSpan.Length != 0) {
 						context.View.SelectSpan(action.FirstOriginal.FullSpan.Start + (selSpan.Start - inserted.FullSpan.Start), selSpan.Length, 1);
 						return;
 					}
 				}
 			}
+		}
+
+		static SyntaxNode ChangeDocumentWithActions(SemanticContext context, RefactoringAction[] actions) {
+			var editor = new SyntaxEditor(context.Compilation, context.Workspace);
+			foreach (var action in actions) {
+				switch (action.ActionType) {
+					case ActionType.Replace:
+						if (action.Original.Count == 1) {
+							if (action.Insert.Count > 1) {
+								ReplaceNodes(editor, action.FirstOriginal, action.Insert);
+							}
+							else {
+								editor.ReplaceNode(action.FirstOriginal, action.Insert[0]);
+							}
+						}
+						else {
+							editor.InsertBefore(action.FirstOriginal, action.Insert);
+							RemoveNodes(editor, action.Original);
+						}
+						break;
+					case ActionType.InsertBefore:
+						editor.InsertBefore(action.FirstOriginal, action.Insert);
+						break;
+					case ActionType.InsertAfter:
+						editor.InsertAfter(action.FirstOriginal, action.Insert);
+						break;
+					case ActionType.Remove:
+						RemoveNodes(editor, action.Original);
+						break;
+				}
+			}
+			return editor.GetChangedRoot();
+		}
+
+		static SyntaxNode ChangeDocumentWithAction(SyntaxNode root, RefactoringAction action) {
+			switch (action.ActionType) {
+				case ActionType.Replace:
+					return action.Insert.Count == 1
+						? root.ReplaceNode(action.FirstOriginal, action.Insert[0])
+						: root.ReplaceNode(action.FirstOriginal, action.Insert);
+					// no need to remove old nodes since we won't use them later
+					// root.RemoveNodes(action.Original, SyntaxRemoveOptions.KeepNoTrivia);
+				case ActionType.InsertBefore:
+					return root.InsertNodesBefore(action.FirstOriginal, action.Insert);
+				case ActionType.InsertAfter:
+					return root.InsertNodesAfter(action.FirstOriginal, action.Insert);
+				case ActionType.Remove:
+					return root.RemoveNodes(action.Original, SyntaxRemoveOptions.KeepNoTrivia);
+			}
+			return root;
+		}
+
+		static void RemoveNodes(SyntaxEditor editor, IEnumerable<SyntaxNode> nodes) {
+			foreach (var item in nodes) {
+				editor.RemoveNode(item);
+			}
+		}
+
+		static void ReplaceNodes(SyntaxEditor editor, SyntaxNode original, IList<SyntaxNode> nodes) {
+			editor.InsertAfter(original, nodes);
+			editor.RemoveNode(original);
 		}
 	}
 }

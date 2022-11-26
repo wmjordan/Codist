@@ -13,6 +13,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode WrapInIf = new WrapInIfRefactoring();
 		public static readonly ReplaceNode WrapInTryCatch = new WrapInTryCatchRefactoring();
 		public static readonly ReplaceNode WrapInElse = new WrapInElseRefactoring();
+		public static readonly ReplaceNode WrapInRegion = new WrapInRegionRefactoring();
 		public static readonly ReplaceNode MergeToConditional = new MergeToConditionalRefactoring();
 
 		sealed class WrapInIfRefactoring : ReplaceNode
@@ -141,6 +142,48 @@ namespace Codist.Refactorings
 						null,
 						SF.Block())),
 					null).WithAdditionalAnnotations(CodeFormatHelper.Reformat));
+			}
+		}
+
+		sealed class WrapInRegionRefactoring : ReplaceNode
+		{
+			public override int IconId => IconIds.SurroundWith;
+			public override string Title => R.CMD_SurroundWithRegion;
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				var statements = ctx.SelectedStatementInfo.Statements;
+				var first = statements[0];
+				var last = statements[statements.Count - 1];
+				var (indent, newLine) = ctx.GetIndentAndNewLine(first.SpanStart, 0);
+				const string REGION_NAME = "RegionName";
+				if (first == last) {
+					yield return Replace(first,
+						first.WithLeadingTrivia(first.GetLeadingTrivia().Insert(0, GetRegionLeadingTrivia(REGION_NAME, indent, newLine)))
+							.WithTrailingTrivia(first.GetTrailingTrivia().Add(GetRegionTrailingTrivia(indent)).Add(newLine))
+						);
+				}
+				else {
+					yield return Replace(first,
+						first.WithLeadingTrivia(first.GetLeadingTrivia().Insert(0, GetRegionLeadingTrivia(REGION_NAME, indent, newLine)))
+						);
+					yield return Replace(last,
+						last.WithTrailingTrivia(last.GetTrailingTrivia().Add(GetRegionTrailingTrivia(indent)).Add(newLine))
+						);
+				}
+			}
+
+			static SyntaxTrivia GetRegionLeadingTrivia(string regionName, SyntaxTriviaList indent, SyntaxTrivia newLine) {
+				return SF.Trivia(
+					SF.RegionDirectiveTrivia(true).WithLeadingTrivia(indent)
+						.WithEndOfDirectiveToken(
+							SF.Token(
+								SF.TriviaList(SF.Space, SF.PreprocessingMessage(regionName).WithAdditionalAnnotations(CodeFormatHelper.Select)),
+								SyntaxKind.EndOfDirectiveToken,
+								SF.TriviaList(newLine))));
+			}
+
+			static SyntaxTrivia GetRegionTrailingTrivia(SyntaxTriviaList indent) {
+				return SF.Trivia(SF.EndRegionDirectiveTrivia(true).WithLeadingTrivia(indent));
 			}
 		}
 	}
