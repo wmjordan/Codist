@@ -64,6 +64,8 @@ namespace Codist
 		public const int Else = KnownImageIds.GoToNextUncovered;
 		public const int TryCatch = KnownImageIds.TryCatch;
 		public const int Using = KnownImageIds.TransactedReceiveScope;
+		public const int DoWhile = KnownImageIds.DoWhile;
+		public const int While = KnownImageIds.While;
 		public const int PublicSymbols = KnownImageIds.ModulePublic;
 		public const int ProtectedSymbols = KnownImageIds.ModuleProtected;
 		public const int InternalSymbols = KnownImageIds.ModuleInternal;
@@ -120,16 +122,16 @@ namespace Codist
 		public const int ReorderParameters = KnownImageIds.ReorderParameters;
 		public const int ExtractInterface = KnownImageIds.ExtractInterface;
 		public const int ExtractMethod = KnownImageIds.ExtractMethod;
+		public const int EncapsulateField = KnownImageIds.EncapsulateField;
 		public const int AddBraces = KnownImageIds.AddNamespace;
 		public const int AsToCast = KnownImageIds.ReportingAction;
 		public const int DeleteMethod = KnownImageIds.MethodMissing;
 		public const int DeleteCondition = KnownImageIds.DeleteClause;
 		public const int MergeCondition = KnownImageIds.GroupByClause;
-		public const int NestCondition = KnownImageIds.InsertClause;
+		public const int NestCondition = KnownImageIds.AddChildNode;
 		public const int SplitCondition = KnownImageIds.UngroupClause;
 		public const int MultiLine = KnownImageIds.WordWrap;
 		public const int MultiLineList = KnownImageIds.BulletList;
-		public const int EncapsulateField = KnownImageIds.EncapsulateField;
 		public const int SwapOperands = KnownImageIds.SwitchSourceOrTarget;
 		public const int ToggleValue = KnownImageIds.ToggleButton;
 		public const int InvertOperator = KnownImageIds.Operator;
