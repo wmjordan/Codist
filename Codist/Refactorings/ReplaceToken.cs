@@ -9,6 +9,7 @@ namespace Codist.Refactorings
 	abstract class ReplaceToken : IRefactoring
 	{
 		public static readonly ReplaceToken InvertOperator = new InvertOperatorRefactoring();
+		public static readonly ReplaceToken UseExplicitType = new UseExplicitTypeRefactoring();
 
 		public abstract int IconId { get; }
 		public abstract string Title { get; }
@@ -26,6 +27,25 @@ namespace Codist.Refactorings
 			);
 			view.MoveCaret(token.SpanStart);
 			view.Selection.Select(new SnapshotSpan(view.TextSnapshot, token.SpanStart, rep.Length), false);
+		}
+
+		sealed class UseExplicitTypeRefactoring : ReplaceToken
+		{
+			public override int IconId => IconIds.Class;
+			public override string Title => "Use Explicit Type";
+
+			public override bool Accept(RefactoringContext ctx) {
+				var token = ctx.Token;
+				return token.IsKind(SyntaxKind.IdentifierToken)
+					&& token.Text == "var"
+					&& ctx.SemanticContext.SemanticModel.GetSymbol(ctx.Node) != null;
+			}
+
+			protected override string GetReplacement(SemanticContext ctx, SyntaxToken token) {
+				return ctx.SemanticModel.GetSymbol(ctx.Node)
+					?.ToMinimalDisplayString(ctx.SemanticModel, ctx.Node.SpanStart)
+					?? "var";
+			}
 		}
 
 		sealed class InvertOperatorRefactoring : ReplaceToken
