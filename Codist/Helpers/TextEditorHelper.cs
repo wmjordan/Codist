@@ -42,6 +42,12 @@ namespace Codist
 			return textView.Caret.Position.BufferPosition;
 		}
 
+		public static CaretPosition MoveCaret(this ITextView textView, int position) {
+			return textView.Caret.MoveTo(position < textView.TextSnapshot.Length
+				? new SnapshotPoint(textView.TextSnapshot, position)
+				: new SnapshotPoint(textView.TextSnapshot, textView.TextSnapshot.Length));
+		}
+
 		public static bool IsCaretInReadOnlyRegion(this ITextView textView) {
 			return textView.TextBuffer.IsReadOnly(textView.Caret.Position.BufferPosition);
 		}

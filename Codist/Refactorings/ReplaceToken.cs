@@ -13,21 +13,18 @@ namespace Codist.Refactorings
 		public abstract int IconId { get; }
 		public abstract string Title { get; }
 
-		public bool Accept(RefactoringContext ctx) {
-			return Accept(ctx.Token);
-		}
-		protected abstract bool Accept(SyntaxToken token);
-		protected abstract string GetReplacement(SyntaxToken token);
+		public abstract bool Accept(RefactoringContext ctx);
+		protected abstract string GetReplacement(SemanticContext ctx, SyntaxToken token);
 
 		public void Refactor(SemanticContext ctx) {
 			var view = ctx.View;
 			var token = ctx.Token;
-			var rep = GetReplacement(token);
+			var rep = GetReplacement(ctx, token);
 			view.Edit(
 				(rep, sel: token.Span.ToSpan()),
 				(v, p, edit) => edit.Replace(p.sel, p.rep)
 			);
-			view.Caret.MoveTo(new SnapshotPoint(view.TextSnapshot, token.SpanStart));
+			view.MoveCaret(token.SpanStart);
 			view.Selection.Select(new SnapshotSpan(view.TextSnapshot, token.SpanStart, rep.Length), false);
 		}
 
@@ -36,8 +33,8 @@ namespace Codist.Refactorings
 			public override int IconId => IconIds.InvertOperator;
 			public override string Title => R.CMD_InvertOperator;
 
-			protected override bool Accept(SyntaxToken token) {
-				switch (token.Kind()) {
+			public override bool Accept(RefactoringContext ctx) {
+				switch (ctx.Token.Kind()) {
 					case SyntaxKind.EqualsEqualsToken:
 					case SyntaxKind.ExclamationEqualsToken:
 					case SyntaxKind.AmpersandAmpersandToken:
@@ -69,7 +66,7 @@ namespace Codist.Refactorings
 				return false;
 			}
 
-			protected override string GetReplacement(SyntaxToken token) {
+			protected override string GetReplacement(SemanticContext ctx, SyntaxToken token) {
 				switch (token.Kind()) {
 					case SyntaxKind.EqualsEqualsToken: return "!=";
 					case SyntaxKind.ExclamationEqualsToken: return "==";
