@@ -323,8 +323,8 @@ namespace Codist.Refactorings
 			static StatementSyntax GetParentConditionalStatement(SyntaxNode node) {
 				while (node.IsKind(SyntaxKind.LogicalAndExpression)) {
 					node = node.Parent;
-					if (node is IfStatementSyntax ifs) {
-						return ifs;
+					if (node.Kind().IsAny(SyntaxKind.IfStatement, SyntaxKind.WhileStatement)) {
+						return (StatementSyntax)node;
 					}
 				}
 				return null;
