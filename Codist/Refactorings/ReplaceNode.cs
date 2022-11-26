@@ -391,7 +391,9 @@ namespace Codist.Refactorings
 					}
 					node = node.Parent;
 				}
-				return node.Kind().IsAny(SyntaxKind.IfStatement, SyntaxKind.WhileStatement) ? node as StatementSyntax : null;
+				return node.Kind().IsAny(SyntaxKind.IfStatement, SyntaxKind.WhileStatement)
+					? node as StatementSyntax
+					: null;
 			}
 		}
 

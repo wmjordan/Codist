@@ -210,7 +210,11 @@ namespace Codist.QuickInfo
 					var ctx = SemanticContext.GetOrCreateSingetonInstance(v as IWpfTextView);
 					await ctx.UpdateAsync(_textBuffer, default);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-					var m = new CSharpSymbolContextMenu(_symbol, v.TextBuffer.ContentType.TypeName == Constants.CodeTypes.InteractiveContent ? null : ctx.GetNode(_quickInfoSession.ApplicableToSpan.GetStartPoint(v.TextSnapshot).Position, true, true), ctx);
+					var m = new CSharpSymbolContextMenu(_symbol,
+						v.TextBuffer.ContentType.TypeName == Constants.CodeTypes.InteractiveContent
+							? null
+							: ctx.GetNode(_quickInfoSession.ApplicableToSpan.GetStartPoint(v.TextSnapshot).Position, true, true),
+						ctx);
 					m.AddAnalysisCommands();
 					if (m.HasItems) {
 						m.Items.Add(new Separator());
