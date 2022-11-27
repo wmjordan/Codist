@@ -2254,4 +2254,6 @@ Right click: Run unit tests in class</value>
     <value>&lt;var&gt; to Explicit Type</value>
   </data>
   <data name="CMD_UseDefault" xml:space="preserve">
+    <value>Use &lt;default&gt;</value>
+  </data>
 </root>

@@ -135,6 +135,7 @@ namespace Codist
 		public const int SwapOperands = KnownImageIds.SwitchSourceOrTarget;
 		public const int ToggleValue = KnownImageIds.ToggleButton;
 		public const int InvertOperator = KnownImageIds.Operator;
+		public const int UseStaticField = KnownImageIds.LinkFile;
 		public const int AddXmlDoc = KnownImageIds.AddComment;
 		public const int TagCode = KnownImageIds.MarkupTag;
 		public const int TagXmlDocSee = KnownImageIds.Next;

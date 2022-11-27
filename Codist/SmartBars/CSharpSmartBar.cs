@@ -41,6 +41,7 @@ namespace Codist.SmartBars
 			Refactorings.ReplaceNode.WrapInIf,
 			Refactorings.ReplaceNode.WrapInTryCatch,
 			Refactorings.ReplaceNode.WrapInRegion,
+			Refactorings.ReplaceToken.UseStaticDefault,
 			Refactorings.ReplaceToken.UseExplicitType,
 			Refactorings.ReplaceNode.DeleteCondition,
 			Refactorings.ReplaceNode.RemoveContainingStatement

@@ -1686,6 +1686,14 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use &lt;default&gt;.
+        /// </summary>
+        internal static string CMD_UseDefault {
+            get {
+                return ResourceManager.GetString("CMD_UseDefault", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to &lt;var&gt; to Explicit Type.
         /// </summary>

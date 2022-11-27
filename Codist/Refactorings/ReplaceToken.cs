@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.VisualStudio.Text;
@@ -10,6 +11,7 @@ namespace Codist.Refactorings
 	{
 		public static readonly ReplaceToken InvertOperator = new InvertOperatorRefactoring();
 		public static readonly ReplaceToken UseExplicitType = new UseExplicitTypeRefactoring();
+		public static readonly ReplaceToken UseStaticDefault = new UseStaticDefaultRefactoring();
 
 		public abstract int IconId { get; }
 		public abstract string Title { get; }
@@ -45,6 +47,117 @@ namespace Codist.Refactorings
 				return ctx.SemanticModel.GetSymbol(ctx.Node)
 					?.ToMinimalDisplayString(ctx.SemanticModel, ctx.Node.SpanStart)
 					?? "var";
+			}
+		}
+
+		sealed class UseStaticDefaultRefactoring : ReplaceToken
+		{
+			string _Title;
+			public override int IconId => IconIds.UseStaticField;
+			public override string Title => _Title;
+
+			public override bool Accept(RefactoringContext ctx) {
+				var token = ctx.Token;
+				if (token.Kind().IsAny(SyntaxKind.NullKeyword, SyntaxKind.DefaultKeyword)
+					&& ctx.Node.FirstAncestorOrSelf<SyntaxNode>(n => n.IsKind(SyntaxKind.ParameterList)) == null
+					&& ctx.SemanticContext.SemanticModel.GetTypeInfo(ctx.Node).ConvertedType is ITypeSymbol type) {
+					if (type.TypeKind == TypeKind.Class || type.TypeKind == TypeKind.Struct) {
+						switch (type.SpecialType) {
+							case SpecialType.System_Boolean:
+								_Title = R.CMD_UseDefault.Replace("default", "false");
+								return true;
+							case SpecialType.System_Byte:
+							case SpecialType.System_UInt16:
+							case SpecialType.System_UInt32:
+							case SpecialType.System_UInt64:
+							case SpecialType.System_DateTime:
+								_Title = R.CMD_UseDefault.Replace("default", type.Name + ".MinValue");
+								return true;
+							case SpecialType.System_String:
+								_Title = R.CMD_UseDefault.Replace("default", "String.Empty");
+								return true;
+							case SpecialType.System_IntPtr:
+							case SpecialType.System_UIntPtr:
+								_Title = R.CMD_UseDefault.Replace("default", type.Name + ".Zero");
+								return true;
+							default:
+								if (type.MatchTypeName(nameof(TimeSpan), "System")) {
+									goto case SpecialType.System_DateTime;
+								}
+								break;
+						}
+						var m = type.GetMembers().FirstOrDefault(i => MayBeDefaultMemberName(i.Name)
+							&& i.IsStatic
+							&& (i is IFieldSymbol f && (f.IsConst || f.IsReadOnly)
+								|| i is IPropertySymbol p && p.IsReadOnly)
+							);
+						if (m != null) {
+							_Title = R.CMD_UseDefault.Replace("default", type.Name+"."+m.Name);
+							return true;
+						}
+
+						if (token.IsKind(SyntaxKind.NullKeyword)) {
+							_Title = R.CMD_UseDefault;
+							return true;
+						}
+					}
+
+					if (type.Kind == SymbolKind.ArrayType && type.BaseType.GetMembers("Empty").Length > 0) {
+						_Title = R.CMD_UseDefault.Replace("default", "Array.Empty");
+						return true;
+					}
+				}
+				return false;
+			}
+
+			protected override string GetReplacement(SemanticContext ctx, SyntaxToken token) {
+				if (!(ctx.SemanticModel.GetTypeInfo(ctx.Node).ConvertedType is ITypeSymbol type)) {
+					return String.Empty;
+				}
+				if (type.TypeKind == TypeKind.Class || type.TypeKind == TypeKind.Struct) {
+					switch (type.SpecialType) {
+						case SpecialType.System_Boolean:
+							return "false";
+						case SpecialType.System_Byte:
+						case SpecialType.System_UInt16:
+						case SpecialType.System_UInt32:
+						case SpecialType.System_UInt64:
+						case SpecialType.System_DateTime:
+							return type.ToMinimalDisplayString(ctx.SemanticModel, token.SpanStart) + ".MinValue";
+						case SpecialType.System_String:
+							return type.ToMinimalDisplayString(ctx.SemanticModel, token.SpanStart) + ".Empty";
+						case SpecialType.System_IntPtr:
+						case SpecialType.System_UIntPtr:
+							return type.ToMinimalDisplayString(ctx.SemanticModel, token.SpanStart) + ".Zero";
+						default:
+							if (type.MatchTypeName(nameof(TimeSpan), "System")) {
+								goto case SpecialType.System_DateTime;
+							}
+							break;
+					}
+
+					var m = type.GetMembers().FirstOrDefault(i => MayBeDefaultMemberName(i.Name)
+						&& i.IsStatic
+						&& (i is IFieldSymbol f && (f.IsConst || f.IsReadOnly)
+							|| i is IPropertySymbol p && p.IsReadOnly)
+						);
+					if (m != null) {
+						return type.ToMinimalDisplayString(ctx.SemanticModel, token.SpanStart) + "." + m.Name;
+					}
+
+					if (token.IsKind(SyntaxKind.NullKeyword)) {
+						return "default";
+					}
+				}
+
+				if (type.Kind == SymbolKind.ArrayType) {
+					return $"{type.BaseType.ToMinimalDisplayString(ctx.SemanticModel, token.SpanStart)}.Empty<{((IArrayTypeSymbol)type).ElementType.ToMinimalDisplayString(ctx.SemanticModel, token.SpanStart)}>";
+				}
+				return String.Empty;
+			}
+
+			static bool MayBeDefaultMemberName(string name) {
+				return name == "Empty" || name == "Default" || name == "Zero" || name == "Null";
 			}
 		}
 
@@ -115,7 +228,7 @@ namespace Codist.Refactorings
 					case SyntaxKind.AmpersandEqualsToken: return "|=";
 					case SyntaxKind.BarEqualsToken: return "&=";
 				}
-				return null;
+				return String.Empty;
 			}
 		}
 	}

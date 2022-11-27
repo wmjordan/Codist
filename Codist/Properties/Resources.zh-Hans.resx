@@ -2239,4 +2239,6 @@ Right click: 显示“线程”窗口</value>
     <value>将 &lt;var&gt; 改为显式类型</value>
   </data>
   <data name="CMD_UseDefault" xml:space="preserve">
+    <value>改用 &lt;default&gt;</value>
+  </data>
 </root>
