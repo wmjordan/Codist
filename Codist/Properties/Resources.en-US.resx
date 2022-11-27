@@ -2250,4 +2250,8 @@ Right click: Run unit tests in class</value>
   <data name="CMD_SurroundWithRegion" xml:space="preserve">
     <value>Surround with #region</value>
   </data>
+  <data name="CMD_UseExplicitType" xml:space="preserve">
+    <value>&lt;var&gt; to Explicit Type</value>
+  </data>
+  <data name="CMD_UseDefault" xml:space="preserve">
 </root>

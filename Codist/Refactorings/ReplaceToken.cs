@@ -32,7 +32,7 @@ namespace Codist.Refactorings
 		sealed class UseExplicitTypeRefactoring : ReplaceToken
 		{
 			public override int IconId => IconIds.Class;
-			public override string Title => "Use Explicit Type";
+			public override string Title => R.CMD_UseExplicitType;
 
 			public override bool Accept(RefactoringContext ctx) {
 				var token = ctx.Token;

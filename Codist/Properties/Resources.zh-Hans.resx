@@ -2235,4 +2235,8 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_SurroundWithRegion" xml:space="preserve">
     <value>外侧插入 #region</value>
   </data>
+  <data name="CMD_UseExplicitType" xml:space="preserve">
+    <value>将 &lt;var&gt; 改为显式类型</value>
+  </data>
+  <data name="CMD_UseDefault" xml:space="preserve">
 </root>
