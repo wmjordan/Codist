@@ -57,7 +57,7 @@ namespace Codist.Refactorings
 						goto case SyntaxKind.SwitchSection;
 					case SyntaxKind.SwitchSection:
 						var statements = ((SwitchSectionSyntax)node).Statements;
-						return statements.Count > 1 || statements[0].IsKind(SyntaxKind.Block) == false;
+						return statements.Count != 0 && statements[0].IsKind(SyntaxKind.Block) == false;
 					default: return false;
 				}
 			}
@@ -199,9 +199,9 @@ namespace Codist.Refactorings
 					var ifs = remove.Parent as IfStatementSyntax;
 					if (ifs.Parent.IsKind(SyntaxKind.ElseClause)) {
 						yield return Replace(ifs.Parent,
-							(keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block)
-							? SF.ElseClause(SF.Block(keep))
-							: SF.ElseClause(keep[0])).AnnotateReformatAndSelect());
+							(keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block) || keep.Count == 0
+								? SF.ElseClause(SF.Block(keep))
+								: SF.ElseClause(keep[0])).AnnotateReformatAndSelect());
 						yield break;
 					}
 					else {
