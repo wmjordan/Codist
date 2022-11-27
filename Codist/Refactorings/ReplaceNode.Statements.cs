@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,27 +15,35 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode WrapInRegion = new WrapInRegionRefactoring();
 		public static readonly ReplaceNode MergeToConditional = new MergeToConditionalRefactoring();
 
-		sealed class WrapInIfRefactoring : ReplaceNode
+		abstract class ReplaceStatements : ReplaceNode
+		{
+			public override bool Accept(RefactoringContext ctx) {
+				return ctx.SelectedStatementInfo.Items != null;
+			}
+		}
+
+		sealed class WrapInIfRefactoring : ReplaceStatements
 		{
 			public override int IconId => IconIds.If;
 			public override string Title => R.CMD_WrapInIf;
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				yield return Replace(ctx.SelectedStatementInfo.Statements, SF.IfStatement(
+				yield return Replace(ctx.SelectedStatementInfo.Items, SF.IfStatement(
 					SF.LiteralExpression(SyntaxKind.TrueLiteralExpression).AnnotateSelect(),
-					SF.Block(ctx.SelectedStatementInfo.Statements)).WithAdditionalAnnotations(CodeFormatHelper.Reformat));
+					SF.Block(ctx.SelectedStatementInfo.Items)).WithAdditionalAnnotations(CodeFormatHelper.Reformat));
 			}
 		}
 
-		sealed class MergeToConditionalRefactoring : ReplaceNode
+		sealed class MergeToConditionalRefactoring : ReplaceStatements
 		{
 			public override int IconId => IconIds.MergeCondition;
 			public override string Title => R.CMD_MergeStatementsToConditional;
 
 			public override bool Accept(RefactoringContext ctx) {
 				StatementSyntax ifStatement, otherStatement;
-				var s = ctx.SelectedStatementInfo.Statements;
-				return s?.Count == 2
+				List<StatementSyntax> s;
+				return base.Accept(ctx)
+					&& (s = ctx.SelectedStatementInfo.Items).Count == 2
 					&& s[0] is IfStatementSyntax ifs
 					&& ifs.Else == null
 					&& ifs.Statement != null
@@ -58,7 +65,7 @@ namespace Codist.Refactorings
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				var s = ctx.SelectedStatementInfo.Statements;
+				var s = ctx.SelectedStatementInfo.Items;
 				var ifs = s[0] as IfStatementSyntax;
 				var first = ifs.Statement.GetSingleStatement();
 				var other = s[1].GetSingleStatement();
@@ -111,32 +118,33 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class WrapInElseRefactoring : ReplaceNode
+		sealed class WrapInElseRefactoring : ReplaceStatements
 		{
 			public override int IconId => IconIds.Else;
 			public override string Title => R.CMD_WrapInElse;
 
 			public override bool Accept(RefactoringContext ctx) {
-				var p = ctx.SelectedStatementInfo.Preceding;
-				return p is IfStatementSyntax ifs && ifs.Else == null;
+				return base.Accept(ctx)
+					&& ctx.SelectedStatementInfo.Preceding is IfStatementSyntax ifs
+					&& ifs.Else == null;
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var ifs = ctx.SelectedStatementInfo.Preceding as IfStatementSyntax;
-				yield return Replace(ifs, ifs.WithElse(SF.ElseClause(ctx.SelectedStatementInfo.Statements.Count > 0 || ifs.Statement.IsKind(SyntaxKind.Block)
-					? SF.Block(ctx.SelectedStatementInfo.Statements)
-					: ctx.SelectedStatementInfo.Statements[0])).AnnotateReformatAndSelect());
-				yield return Remove(ctx.SelectedStatementInfo.Statements);
+				yield return Replace(ifs, ifs.WithElse(SF.ElseClause(ctx.SelectedStatementInfo.Items.Count > 0 || ifs.Statement.IsKind(SyntaxKind.Block)
+					? SF.Block(ctx.SelectedStatementInfo.Items)
+					: ctx.SelectedStatementInfo.Items[0])).AnnotateReformatAndSelect());
+				yield return Remove(ctx.SelectedStatementInfo.Items);
 			}
 		}
 
-		sealed class WrapInTryCatchRefactoring : ReplaceNode
+		sealed class WrapInTryCatchRefactoring : ReplaceStatements
 		{
 			public override int IconId => IconIds.TryCatch;
 			public override string Title => R.CMD_WrapInTryCatch;
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				yield return Replace(ctx.SelectedStatementInfo.Statements, SF.TryStatement(SF.Block(ctx.SelectedStatementInfo.Statements),
+				yield return Replace(ctx.SelectedStatementInfo.Items, SF.TryStatement(SF.Block(ctx.SelectedStatementInfo.Items),
 					new SyntaxList<CatchClauseSyntax>(
 						SF.CatchClause(SF.Token(SyntaxKind.CatchKeyword), SF.CatchDeclaration(SF.IdentifierName("Exception").AnnotateSelect(), SF.Identifier("ex")),
 						null,
@@ -145,13 +153,13 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class WrapInRegionRefactoring : ReplaceNode
+		sealed class WrapInRegionRefactoring : ReplaceStatements
 		{
 			public override int IconId => IconIds.SurroundWith;
 			public override string Title => R.CMD_SurroundWithRegion;
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				var statements = ctx.SelectedStatementInfo.Statements;
+				var statements = ctx.SelectedStatementInfo.Items;
 				var first = statements[0];
 				var last = statements[statements.Count - 1];
 				var (indent, newLine) = ctx.GetIndentAndNewLine(first.SpanStart, 0);

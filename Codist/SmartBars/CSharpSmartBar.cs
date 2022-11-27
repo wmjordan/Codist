@@ -208,7 +208,7 @@ namespace Codist.SmartBars
 			}
 			if (isReadOnly == false) {
 				var refactoringContext = new Refactorings.RefactoringContext(_Context);
-				if (refactoringContext.SelectedStatementInfo.Statements != null) {
+				if (refactoringContext.SelectedStatementInfo.Items != null) {
 					AddEditorCommand(MyToolBar, IconIds.ExtractMethod, "Refactor.ExtractMethod", R.CMD_ExtractMethod);
 				}
 				if (HasRefactoring(__Refactorings, refactoringContext)) {

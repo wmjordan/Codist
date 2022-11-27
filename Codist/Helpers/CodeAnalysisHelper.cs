@@ -183,7 +183,7 @@ namespace Codist
 			return false;
 		}
 		public static bool IsNamespaceDeclaration(this SyntaxKind kind) {
-			switch (kind ) {
+			switch (kind) {
 				case SyntaxKind.NamespaceDeclaration:
 				case FileScopedNamespaceDeclaration:
 					return true;
@@ -337,7 +337,7 @@ namespace Codist
 		}
 
 		public static bool IsMultiLine(this SyntaxNode node, bool includeTrivia) {
-			if (includeTrivia && 
+			if (includeTrivia &&
 				(node.HasLeadingTrivia && node.GetLeadingTrivia().IsMultiline()
 					|| node.HasTrailingTrivia && node.GetTrailingTrivia().IsMultiline())
 				) {
@@ -617,7 +617,7 @@ namespace Codist
 			return node is AssignmentExpressionSyntax ? KnownImageIds.Assign
 				: node is BinaryExpressionSyntax || node is PrefixUnaryExpressionSyntax || node is PostfixUnaryExpressionSyntax ? KnownImageIds.Operator
 				: KnownImageIds.Action;
-		} 
+		}
 		#endregion
 
 		public static bool MatchSignature(this MemberDeclarationSyntax node, SyntaxNode other) {
@@ -1221,7 +1221,7 @@ namespace Codist
 			return statement is BlockSyntax b ? b.GetSingleStatement() : statement;
 		}
 		public static StatementSyntax GetSingleStatement(this BlockSyntax block) {
-			START:
+		START:
 			var s = block.Statements;
 			if (s.Count == 1) {
 				var first = s[0];
@@ -1247,7 +1247,7 @@ namespace Codist
 			}
 			return s;
 		}
-		public static SelectedStatementInfo GetStatements(this SyntaxNode node, TextSpan span) {
+		public static SelectedSyntax<StatementSyntax> GetStatements(this SyntaxNode node, TextSpan span) {
 			if (span.Length == 0) {
 				goto NO_STATEMENT;
 			}
@@ -1303,11 +1303,12 @@ namespace Codist
 				following = siblings[i] as StatementSyntax;
 			}
 			if (span.Length == 0) {
-				return new SelectedStatementInfo(preceding, selected, following);
+				return new SelectedSyntax<StatementSyntax>(preceding, selected, following);
 			}
 		NO_STATEMENT:
 			return default;
 		}
+
 		public static ParameterSyntax FindParameter(this BaseMethodDeclarationSyntax node, string name) {
 			return node?.ParameterList.Parameters.FirstOrDefault(p => p.Identifier.Text == name);
 		}

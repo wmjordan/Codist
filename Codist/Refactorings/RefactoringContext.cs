@@ -1,6 +1,7 @@
 ﻿using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Options;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Codist.Refactorings
@@ -8,14 +9,14 @@ namespace Codist.Refactorings
 	sealed class RefactoringContext
 	{
 		readonly SemanticContext _SemanticContext;
-		SelectedStatementInfo? _SelectedStatementInfo;
+		SelectedSyntax<StatementSyntax>? _SelectedStatementInfo;
 
 		public RefactoringContext(SemanticContext semanticContext) {
 			_SemanticContext = semanticContext;
 		}
 
 		public SemanticContext SemanticContext => _SemanticContext;
-		public SelectedStatementInfo SelectedStatementInfo => (_SelectedStatementInfo ?? (_SelectedStatementInfo = _SemanticContext.Compilation.GetStatements(_SemanticContext.View.FirstSelectionSpan().ToTextSpan()))).Value;
+		public SelectedSyntax<StatementSyntax> SelectedStatementInfo => (_SelectedStatementInfo ?? (_SelectedStatementInfo = _SemanticContext.Compilation.GetStatements(_SemanticContext.View.FirstSelectionSpan().ToTextSpan()))).Value;
 		public SyntaxToken Token => _SemanticContext.Token;
 		public SyntaxNode Node => _SemanticContext.Node;
 		public SyntaxNode NodeIncludeTrivia => _SemanticContext.NodeIncludeTrivia;

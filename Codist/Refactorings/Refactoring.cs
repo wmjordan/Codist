@@ -11,9 +11,7 @@ namespace Codist.Refactorings
 		public abstract int IconId { get; }
 		public abstract string Title { get; }
 
-		public virtual bool Accept(RefactoringContext ctx) {
-			return ctx.SelectedStatementInfo.Statements != null;
-		}
+		public abstract bool Accept(RefactoringContext ctx);
 
 		public abstract IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx);
 

@@ -140,7 +140,7 @@ namespace Codist.Refactorings
 				var node = ctx.NodeIncludeTrivia;
 				return node.IsKind(SyntaxKind.IfStatement)
 					&& node.Parent.IsKind(SyntaxKind.ElseClause) == false
-					&& (ctx.SelectedStatementInfo.Statements == null || ctx.SelectedStatementInfo.Statements.Count == 1);
+					&& (ctx.SelectedStatementInfo.Items == null || ctx.SelectedStatementInfo.Items.Count == 1);
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {

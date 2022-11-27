@@ -93,7 +93,7 @@
     <Compile Include="Controls\SymbolMenu.cs" />
     <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
     <Compile Include="Display\JumpListEnhancer.cs" />
-    <Compile Include="Helpers\SelectedStatementInfo.cs" />
+    <Compile Include="Helpers\SelectedSelectedSyntax.cs" />
     <Compile Include="IconIds.cs" />
     <Compile Include="Margins\DisableChangeTrackerMargin.cs" />
     <Compile Include="Margins\MarginElementBase.cs" />
