@@ -68,6 +68,9 @@ namespace Codist
 		public static bool IsAny(this SyntaxKind kind, SyntaxKind kind1, SyntaxKind kind2) {
 			return kind == kind1 || kind == kind2;
 		}
+		public static bool IsAny(this SyntaxKind kind, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3) {
+			return kind == kind1 || kind == kind2 || kind == kind3;
+		}
 		public static bool IsAny(this SyntaxKind kind, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4) {
 			return kind == kind1 || kind == kind2 || kind == kind3 || kind == kind4;
 		}
@@ -1233,6 +1236,7 @@ namespace Codist
 			}
 			return null;
 		}
+
 		public static StatementSyntax GetContainingStatement(this SyntaxNode node) {
 			var s = node.FirstAncestorOrSelf<StatementSyntax>();
 			while (s.IsKind(SyntaxKind.Block)) {

@@ -340,9 +340,12 @@ namespace Codist.Refactorings
 			public override string Title => R.CMD_MergeWithParent.Replace("NODE", _NodeKind);
 
 			public override bool Accept(RefactoringContext ctx) {
-				var node = ctx.NodeIncludeTrivia;
-				if (GetParentConditionalStatement(node) != null) {
-					_NodeKind = node.IsKind(SyntaxKind.IfStatement) ? "if" : "while";
+				SyntaxNode node;
+				if (ctx.NodeIncludeTrivia is IfStatementSyntax ifs
+					&& (node = GetParentConditional(ifs)) != null) {
+					_NodeKind = node.IsKind(SyntaxKind.IfStatement) ? "if"
+						: node.IsKind(SyntaxKind.ElseClause) ? "else"
+						: "while";
 					return true;
 				}
 				return false;
@@ -350,7 +353,7 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var ifs = ctx.Node as IfStatementSyntax;
-				var s = GetParentConditionalStatement(ctx.Node);
+				var s = GetParentConditional(ifs);
 				if (s == null) {
 					yield break;
 				}
@@ -366,6 +369,10 @@ namespace Codist.Refactorings
 						.WithStatement(b);
 					yield return Replace(s, newIf.AnnotateReformatAndSelect());
 				}
+				else if (s is ElseClauseSyntax newElse) {
+					newElse = newElse.WithStatement(ifs);
+					yield return Replace(s, newElse.AnnotateReformatAndSelect());
+				}
 				else if (s is WhileStatementSyntax newWhile) {
 					newWhile = newWhile.WithCondition(SF.BinaryExpression(SyntaxKind.LogicalAndExpression, ParenthesizeLogicalOrExpression(newWhile.Condition), ParenthesizeLogicalOrExpression(ifs.Condition)))
 						.WithStatement(b);
@@ -379,12 +386,11 @@ namespace Codist.Refactorings
 					: expression;
 			}
 
-			static StatementSyntax GetParentConditionalStatement(SyntaxNode node) {
-				var ifs = node as IfStatementSyntax;
-				if (ifs == null || ifs.Else != null) {
+			static SyntaxNode GetParentConditional(IfStatementSyntax ifs) {
+				if (ifs.Else != null) {
 					return null;
 				}
-				node = node.Parent;
+				var node = ifs.Parent;
 				if (node.IsKind(SyntaxKind.Block)) {
 					var block = (BlockSyntax)node;
 					if (block.Statements.Count > 1) {
@@ -392,8 +398,8 @@ namespace Codist.Refactorings
 					}
 					node = node.Parent;
 				}
-				return node.Kind().IsAny(SyntaxKind.IfStatement, SyntaxKind.WhileStatement)
-					? node as StatementSyntax
+				return node.Kind().IsAny(SyntaxKind.IfStatement, SyntaxKind.WhileStatement, SyntaxKind.ElseClause)
+					? node
 					: null;
 			}
 		}
