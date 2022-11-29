@@ -111,7 +111,7 @@ namespace Codist.Refactorings
 			public override string Title => _Title;
 
 			public override bool Accept(RefactoringContext ctx) {
-				switch (ctx.Node.RawKind) {
+				switch (ctx.NodeIncludeTrivia.RawKind) {
 					case (int)SyntaxKind.AsExpression:
 						_Title = R.CMD_AsToCast;
 						return true;
@@ -123,10 +123,10 @@ namespace Codist.Refactorings
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				if (ctx.Node is BinaryExpressionSyntax exp) {
+				if (ctx.NodeIncludeTrivia is BinaryExpressionSyntax exp) {
 					yield return Replace(exp, SF.CastExpression(exp.Right.WithoutTrailingTrivia() as TypeSyntax, exp.Left).WithTriviaFrom(exp).AnnotateReformatAndSelect());
 				}
-				else if (ctx.Node is CastExpressionSyntax ce) {
+				else if (ctx.NodeIncludeTrivia is CastExpressionSyntax ce) {
 					yield return Replace(ce, SF.BinaryExpression(SyntaxKind.AsExpression, ce.Expression.WithoutTrailingTrivia(), ce.Type).WithTriviaFrom(ce.Expression).AnnotateReformatAndSelect());
 				}
 			}
