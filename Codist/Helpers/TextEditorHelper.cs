@@ -960,7 +960,7 @@ namespace Codist
 				}
 
 				void TextView_SetActiveView(object sender, EventArgs e) {
-					if (_ActiveTextView != _View) {
+					if (_ActiveTextView != _View && _View.HasAggregateFocus) {
 						_ActiveTextView = _View;
 						ForgetViewPosition();
 						ActiveTextViewChanged?.Invoke(_View, new TextViewCreatedEventArgs(_View));
