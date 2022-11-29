@@ -25,6 +25,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode While = new WhileRefactoring();
 		public static readonly ReplaceNode MultiLineList = new MultiLineListRefactoring();
 		public static readonly ReplaceNode MultiLineExpression = new MultiLineExpressionRefactoring();
+		public static readonly ReplaceNode MultiLineMemberAccess = new MultiLineMemberAccessRefactoring();
 
 		sealed class AddBracesRefactoring : ReplaceNode
 		{
@@ -748,6 +749,45 @@ namespace Codist.Refactorings
 					SF.SeparatedList(l, Enumerable.Repeat(SF.Token(SyntaxKind.CommaToken).WithTrailingTrivia(newLine), l.Length - 1)),
 					initializer.CloseBraceToken.WithLeadingTrivia(indent)
 				);
+			}
+		}
+
+		sealed class MultiLineMemberAccessRefactoring : ReplaceNode
+		{
+			public override int IconId => IconIds.MultiLineList;
+			public override string Title => R.CMD_MultiLineMemberAccess;
+
+			public override bool Accept(RefactoringContext ctx) {
+				return ctx.NodeIncludeTrivia.Kind().IsAny(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression);
+			}
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				var node = ctx.NodeIncludeTrivia;
+				var (indent, newLine) = ctx.GetIndentAndNewLine(node.SpanStart);
+				ExpressionSyntax newExp = null;
+				while (true) {
+					newExp = node is MemberAccessExpressionSyntax ma
+						? ma.Update((newExp ?? ma.Expression).WithTrailingTrivia(newLine),
+							ma.OperatorToken.WithLeadingTrivia(indent),
+							ma.Name)
+						: node is ConditionalAccessExpressionSyntax ca
+						? (ExpressionSyntax)ca.Update((newExp ?? ca.Expression).WithTrailingTrivia(newLine),
+							ca.OperatorToken.WithTrailingTrivia(indent),
+							ca.WhenNotNull)
+						: null;
+
+					if (node.Parent.Kind().IsAny(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression)) {
+						node = node.Parent;
+					}
+					else if (node.Parent.IsKind(SyntaxKind.InvocationExpression)
+						&& node.Parent.Parent.Kind().IsAny(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression)) {
+						node = node.Parent.Parent;
+					}
+					else {
+						break;
+					}
+				}
+				yield return Replace(node, newExp.AnnotateSelect());
 			}
 		}
 	}

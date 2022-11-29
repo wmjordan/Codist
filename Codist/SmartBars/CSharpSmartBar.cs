@@ -30,6 +30,7 @@ namespace Codist.SmartBars
 			Refactorings.ReplaceNode.WrapInElse,
 			Refactorings.ReplaceNode.MultiLineExpression,
 			Refactorings.ReplaceNode.MultiLineList,
+			Refactorings.ReplaceNode.MultiLineMemberAccess,
 			Refactorings.ReplaceNode.ConditionalToIf,
 			Refactorings.ReplaceNode.IfToConditional,
 			Refactorings.ReplaceNode.MergeCondition,
