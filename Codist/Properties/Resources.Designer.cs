@@ -187,30 +187,12 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Split &lt;??&gt; into Lines.
-        /// </summary>
-        internal static string CMD_CoalesceOnMultiLines {
-            get {
-                return ResourceManager.GetString("CMD_CoalesceOnMultiLines", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Comment selection
         ///Right click: Comment line.
         /// </summary>
         internal static string CMD_CommentSelection {
             get {
                 return ResourceManager.GetString("CMD_CommentSelection", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Split &lt;?:&gt; into Lines.
-        /// </summary>
-        internal static string CMD_ConditionalOnMultiLines {
-            get {
-                return ResourceManager.GetString("CMD_ConditionalOnMultiLines", resourceCulture);
             }
         }
         
@@ -349,15 +331,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Split Declarations into Lines.
-        /// </summary>
-        internal static string CMD_DeclarationsOnMultiLine {
-            get {
-                return ResourceManager.GetString("CMD_DeclarationsOnMultiLine", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Delete All Breakpoints.
         /// </summary>
         internal static string CMD_DeleteAllBreakpoints {
@@ -457,15 +430,6 @@ namespace Codist.Properties {
         internal static string CMD_EncapsulateField {
             get {
                 return ResourceManager.GetString("CMD_EncapsulateField", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Split Expressions into Lines.
-        /// </summary>
-        internal static string CMD_ExpressionsOnMultiLine {
-            get {
-                return ResourceManager.GetString("CMD_ExpressionsOnMultiLine", resourceCulture);
             }
         }
         
@@ -927,24 +891,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Split &lt;&amp;&amp;&gt; into Lines.
-        /// </summary>
-        internal static string CMD_LogicalAndOnMultiLines {
-            get {
-                return ResourceManager.GetString("CMD_LogicalAndOnMultiLines", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Split &lt;||&gt; into Lines.
-        /// </summary>
-        internal static string CMD_LogicalOrOnMultiLines {
-            get {
-                return ResourceManager.GetString("CMD_LogicalOrOnMultiLines", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Lowercase.
         /// </summary>
         internal static string CMD_Lowercase {
@@ -1049,6 +995,87 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Split &lt;??&gt; into Lines.
+        /// </summary>
+        internal static string CMD_MultiLineCoalesce {
+            get {
+                return ResourceManager.GetString("CMD_MultiLineCoalesce", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Split &lt;?:&gt; into Lines.
+        /// </summary>
+        internal static string CMD_MultiLineConditional {
+            get {
+                return ResourceManager.GetString("CMD_MultiLineConditional", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Split Declarations into Lines.
+        /// </summary>
+        internal static string CMD_MultiLineDeclarations {
+            get {
+                return ResourceManager.GetString("CMD_MultiLineDeclarations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Split Expressions into Lines.
+        /// </summary>
+        internal static string CMD_MultiLineExpressions {
+            get {
+                return ResourceManager.GetString("CMD_MultiLineExpressions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Split &lt;&amp;&amp;&gt; into Lines.
+        /// </summary>
+        internal static string CMD_MultiLineLogicalAnd {
+            get {
+                return ResourceManager.GetString("CMD_MultiLineLogicalAnd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Split &lt;||&gt; into Lines.
+        /// </summary>
+        internal static string CMD_MultiLineLogicalOr {
+            get {
+                return ResourceManager.GetString("CMD_MultiLineLogicalOr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Split Member Access into Lines.
+        /// </summary>
+        internal static string CMD_MultiLineMemberAccess {
+            get {
+                return ResourceManager.GetString("CMD_MultiLineMemberAccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Split Operands into Lines.
+        /// </summary>
+        internal static string CMD_MultiLineOperands {
+            get {
+                return ResourceManager.GetString("CMD_MultiLineOperands", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Split Parameters into Lines.
+        /// </summary>
+        internal static string CMD_MultiLineParameters {
+            get {
+                return ResourceManager.GetString("CMD_MultiLineParameters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New Item.
         /// </summary>
         internal static string CMD_NewItem {
@@ -1112,15 +1139,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Split Operands into Lines.
-        /// </summary>
-        internal static string CMD_OperandsOnMultiLines {
-            get {
-                return ResourceManager.GetString("CMD_OperandsOnMultiLines", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Pale Dark.
         /// </summary>
         internal static string CMD_PaleDarkTheme {
@@ -1135,15 +1153,6 @@ namespace Codist.Properties {
         internal static string CMD_PaleLightTheme {
             get {
                 return ResourceManager.GetString("CMD_PaleLightTheme", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Split Parameters into Lines.
-        /// </summary>
-        internal static string CMD_ParametersOnMultiLine {
-            get {
-                return ResourceManager.GetString("CMD_ParametersOnMultiLine", resourceCulture);
             }
         }
         

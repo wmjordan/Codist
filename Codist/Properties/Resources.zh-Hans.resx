@@ -2155,7 +2155,7 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_SplitToNested" xml:space="preserve">
     <value>拆分为嵌套的 &lt;if&gt;</value>
   </data>
-  <data name="CMD_ConditionalOnMultiLines" xml:space="preserve">
+  <data name="CMD_MultiLineConditional" xml:space="preserve">
     <value>将 &lt;?:&gt; 换行</value>
   </data>
   <data name="CMD_ConditionalToIfElse" xml:space="preserve">
@@ -2187,16 +2187,16 @@ Right click: 显示“线程”窗口</value>
 调试当前类的单元测试方法
 右键: 执行单元测试方法</value>
   </data>
-  <data name="CMD_CoalesceOnMultiLines" xml:space="preserve">
+  <data name="CMD_MultiLineCoalesce" xml:space="preserve">
     <value>将 &lt;??&gt; 换行</value>
   </data>
-  <data name="CMD_LogicalAndOnMultiLines" xml:space="preserve">
+  <data name="CMD_MultiLineLogicalAnd" xml:space="preserve">
     <value>将 &lt;&amp;&amp;&gt; 换行</value>
   </data>
-  <data name="CMD_LogicalOrOnMultiLines" xml:space="preserve">
+  <data name="CMD_MultiLineLogicalOr" xml:space="preserve">
     <value>将 &lt;||&gt; 换行</value>
   </data>
-  <data name="CMD_OperandsOnMultiLines" xml:space="preserve">
+  <data name="CMD_MultiLineOperands" xml:space="preserve">
     <value>将运算符换行</value>
   </data>
   <data name="CMD_AsToCast" xml:space="preserve">
@@ -2208,7 +2208,7 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_ArgumentsOnMultiLine" xml:space="preserve">
     <value>将参数换行</value>
   </data>
-  <data name="CMD_ParametersOnMultiLine" xml:space="preserve">
+  <data name="CMD_MultiLineParameters" xml:space="preserve">
     <value>将参数换行</value>
   </data>
   <data name="OT_CSharpSmartBar" xml:space="preserve">
@@ -2220,10 +2220,10 @@ Right click: 显示“线程”窗口</value>
   <data name="OT_DoubleIndentationTip" xml:space="preserve">
     <value>在执行换行重构时，对换行的语法元素使用两个单位的空白缩进</value>
   </data>
-  <data name="CMD_ExpressionsOnMultiLine" xml:space="preserve">
+  <data name="CMD_MultiLineExpressions" xml:space="preserve">
     <value>将表达式换行</value>
   </data>
-  <data name="CMD_DeclarationsOnMultiLine" xml:space="preserve">
+  <data name="CMD_MultiLineDeclarations" xml:space="preserve">
     <value>将变量声明换行</value>
   </data>
   <data name="CMD_DoToWhile" xml:space="preserve">
@@ -2240,5 +2240,8 @@ Right click: 显示“线程”窗口</value>
   </data>
   <data name="CMD_UseDefault" xml:space="preserve">
     <value>改用 &lt;default&gt;</value>
+  </data>
+  <data name="CMD_MultiLineMemberAccess" xml:space="preserve">
+    <value>将成员访问换行</value>
   </data>
 </root>

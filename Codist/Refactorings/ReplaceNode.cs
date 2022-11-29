@@ -562,13 +562,13 @@ namespace Codist.Refactorings
 				var node = ctx.NodeIncludeTrivia;
 				var nodeKind = node.Kind();
 				switch (nodeKind) {
-					case SyntaxKind.LogicalAndExpression: _Title = R.CMD_LogicalAndOnMultiLines; break;
+					case SyntaxKind.LogicalAndExpression: _Title = R.CMD_MultiLineLogicalAnd; break;
 					case SyntaxKind.AddExpression:
-					case SyntaxKind.SubtractExpression: _Title = R.CMD_OperandsOnMultiLines; break;
-					case SyntaxKind.LogicalOrExpression: _Title = R.CMD_LogicalOrOnMultiLines; break;
-					case SyntaxKind.CoalesceExpression: _Title = R.CMD_CoalesceOnMultiLines; break;
+					case SyntaxKind.SubtractExpression: _Title = R.CMD_MultiLineOperands; break;
+					case SyntaxKind.LogicalOrExpression: _Title = R.CMD_MultiLineLogicalOr; break;
+					case SyntaxKind.CoalesceExpression: _Title = R.CMD_MultiLineCoalesce; break;
 					case SyntaxKind.ConditionalExpression:
-						_Title = R.CMD_ConditionalOnMultiLines;
+						_Title = R.CMD_MultiLineConditional;
 						return node.IsMultiLine(false) == false;
 					default: return false;
 				}
@@ -684,7 +684,7 @@ namespace Codist.Refactorings
 						break;
 					case SyntaxKind.ParameterList:
 						if (((ParameterListSyntax)node).Parameters.Count > 1 && node.IsMultiLine(false) == false) {
-							_Title = R.CMD_ParametersOnMultiLine;
+							_Title = R.CMD_MultiLineParameters;
 							return true;
 						}
 						break;
@@ -692,13 +692,13 @@ namespace Codist.Refactorings
 					case SyntaxKind.CollectionInitializerExpression:
 					case SyntaxKind.ObjectInitializerExpression:
 						if (((InitializerExpressionSyntax)node).Expressions.Count > 1 && node.IsMultiLine(false) == false) {
-							_Title = R.CMD_ExpressionsOnMultiLine;
+							_Title = R.CMD_MultiLineExpressions;
 							return true;
 						}
 						break;
 					case SyntaxKind.VariableDeclaration:
 						if (((VariableDeclarationSyntax)node).Variables.Count > 1 && node.IsMultiLine(false) == false) {
-							_Title = R.CMD_DeclarationsOnMultiLine;
+							_Title = R.CMD_MultiLineDeclarations;
 							return true;
 						}
 						break;
