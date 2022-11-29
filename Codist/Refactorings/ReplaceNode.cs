@@ -370,7 +370,7 @@ namespace Codist.Refactorings
 					yield return Replace(s, newIf.AnnotateReformatAndSelect());
 				}
 				else if (s is ElseClauseSyntax newElse) {
-					newElse = newElse.WithStatement(ifs);
+					newElse = SF.ElseClause(newElse.ElseKeyword.WithTrailingTrivia(), ifs);
 					yield return Replace(s, newElse.AnnotateReformatAndSelect());
 				}
 				else if (s is WhileStatementSyntax newWhile) {
@@ -387,9 +387,6 @@ namespace Codist.Refactorings
 			}
 
 			static SyntaxNode GetParentConditional(IfStatementSyntax ifs) {
-				if (ifs.Else != null) {
-					return null;
-				}
 				var node = ifs.Parent;
 				if (node.IsKind(SyntaxKind.Block)) {
 					var block = (BlockSyntax)node;
@@ -398,7 +395,9 @@ namespace Codist.Refactorings
 					}
 					node = node.Parent;
 				}
-				return node.Kind().IsAny(SyntaxKind.IfStatement, SyntaxKind.WhileStatement, SyntaxKind.ElseClause)
+				return node.Kind().IsAny(SyntaxKind.IfStatement, SyntaxKind.WhileStatement)
+					? (ifs.Else != null ? node : null)
+					: node.IsKind(SyntaxKind.ElseClause)
 					? node
 					: null;
 			}
