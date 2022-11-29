@@ -82,7 +82,7 @@ namespace Codist
 			INamedTypeSymbol t;
 			IMethodSymbol m;
 			var s = symbol.OriginalDefinition;
-			var desc = new StackPanel { Margin = WpfHelper.MenuItemMargin };
+			var desc = new StackPanel { Margin = WpfHelper.MenuItemMargin, MaxWidth = Application.Current.MainWindow.Width };
 
 			#region Signature
 			var signature = ShowSymbolSignature(System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Shift ? symbol : s);
