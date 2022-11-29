@@ -496,31 +496,33 @@ namespace Codist.Refactorings
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				var node = ctx.NodeIncludeTrivia as ConditionalExpressionSyntax;
+				var condition = ctx.NodeIncludeTrivia as ConditionalExpressionSyntax;
+				var node = condition.Parent;
 				SyntaxNode newNode;
 				StatementSyntax whenTrue, whenFalse;
-				if (node.Parent is ReturnStatementSyntax r) {
-					whenTrue = SF.ReturnStatement(node.WhenTrue);
-					whenFalse = SF.ReturnStatement(node.WhenFalse);
+				if (node is ReturnStatementSyntax r) {
+					whenTrue = SF.ReturnStatement(condition.WhenTrue);
+					whenFalse = SF.ReturnStatement(condition.WhenFalse);
 				}
-				else if (node.Parent is ExpressionStatementSyntax es
-					&& es.Expression is AssignmentExpressionSyntax a
-					&& a.IsKind(SyntaxKind.SimpleAssignmentExpression)) {
-					whenTrue = SF.ExpressionStatement(SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, a.Left, node.WhenTrue));
-					whenFalse = SF.ExpressionStatement(SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, a.Left, node.WhenFalse));
+				else if (node is AssignmentExpressionSyntax ae
+					&& ae.IsKind(SyntaxKind.SimpleAssignmentExpression)
+					&& ae.Parent is ExpressionStatementSyntax es) {
+					node = es;
+					whenTrue = SF.ExpressionStatement(SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, ae.Left, condition.WhenTrue));
+					whenFalse = SF.ExpressionStatement(SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, ae.Left, condition.WhenFalse));
 				}
-				else if (node.Parent is YieldStatementSyntax) {
-					whenTrue = SF.YieldStatement(SyntaxKind.YieldReturnStatement, node.WhenTrue);
-					whenFalse = SF.YieldStatement(SyntaxKind.YieldReturnStatement, node.WhenFalse);
+				else if (node is YieldStatementSyntax) {
+					whenTrue = SF.YieldStatement(SyntaxKind.YieldReturnStatement, condition.WhenTrue);
+					whenFalse = SF.YieldStatement(SyntaxKind.YieldReturnStatement, condition.WhenFalse);
 				}
 				else {
 					yield break;
 				}
-				newNode = SF.IfStatement(node.Condition.WithoutTrailingTrivia(),
+				newNode = SF.IfStatement(condition.Condition.WithoutTrailingTrivia(),
 					SF.Block(whenTrue),
 					SF.ElseClause(SF.Block(whenFalse))
 					);
-				yield return Replace(node.Parent, newNode.AnnotateReformatAndSelect());
+				yield return Replace(node, newNode.AnnotateReformatAndSelect());
 			}
 		}
 
