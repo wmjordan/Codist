@@ -47,12 +47,12 @@ namespace Codist.Refactorings
 						return;
 					}
 					var actions = p.Actions = r.Refactor(p).ToArray();
-					if (actions.Length > 1) {
-						root = ChangeDocumentWithActions(p.SemanticContext, actions);
+					if (actions.Length == 0) {
+						return;
 					}
-					else {
-						root = ChangeDocumentWithAction(root, actions[0]);
-					}
+					root = actions.Length > 1
+						? ChangeDocumentWithActions(p.SemanticContext, actions)
+						: ChangeDocumentWithAction(root, actions[0]);
 					p.NewRoot = root = root.Format(CodeFormatHelper.Reformat, p.SemanticContext.Workspace);
 					foreach (var action in actions) {
 						switch (action.ActionType) {
