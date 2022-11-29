@@ -150,16 +150,6 @@ namespace Codist
 		}
 
 		void InitializeOrUpgradeConfig() {
-			Config.Instance.SaveConfig(Config.ConfigPath); // save the file to prevent this notification from reoccurrence
-			try {
-				new Commands.VersionInfoBar(this).Show(Config.Instance.InitStatus);
-			}
-			catch (MissingMemberException) {
-				// HACK: For VS 2022, InfoBar is broken. Prompt to open page at this moment.
-				if (ShowYesNoBox(Properties.Resources.T_NewVersionPrompt, nameof(Codist))) {
-					OpenWebPage(Config.Instance.InitStatus);
-				}
-			}
 			if (Config.Instance.InitStatus == InitStatus.FirstLoad) {
 				// automatically load theme when first load
 				if (ThemeHelper.DocumentPageColor.ToWpfColor().IsDark()) {
@@ -167,6 +157,19 @@ namespace Codist
 				}
 				else {
 					Config.LoadConfig(Config.LightTheme, StyleFilters.All);
+				}
+			}
+
+			// save the file to prevent following notification showing up again until future upgrade
+			Config.Instance.SaveConfig(Config.ConfigPath);
+
+			try {
+				new Commands.VersionInfoBar(this).Show(Config.Instance.InitStatus);
+			}
+			catch (MissingMemberException) {
+				// HACK: For VS 2022, InfoBar is broken. Prompt to open page at this moment.
+				if (ShowYesNoBox(Properties.Resources.T_NewVersionPrompt, nameof(Codist))) {
+					OpenWebPage(Config.Instance.InitStatus);
 				}
 			}
 		}
