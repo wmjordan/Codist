@@ -102,7 +102,13 @@ namespace Codist.SmartBars
 				if (ctx.RightClick) {
 					ctx.View.ExpandSelectionToLine();
 				}
-				TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
+
+				if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Control)) {
+					ctx.View.CopySelectionWithoutIndentation();
+				}
+				else {
+					TextEditorHelper.ExecuteEditorCommand("Edit.Copy");
+				}
 			});
 		}
 
@@ -111,7 +117,14 @@ namespace Codist.SmartBars
 				if (ctx.RightClick) {
 					ctx.View.ExpandSelectionToLine();
 				}
-				TextEditorHelper.ExecuteEditorCommand("Edit.Cut");
+
+				if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Control)) {
+					ctx.View.CopySelectionWithoutIndentation();
+					TextEditorHelper.ExecuteEditorCommand("Edit.Delete");
+				}
+				else {
+					TextEditorHelper.ExecuteEditorCommand("Edit.Cut");
+				}
 			});
 		}
 

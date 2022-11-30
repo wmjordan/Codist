@@ -20,6 +20,8 @@ using Microsoft.VisualStudio.Utilities;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
 using Microsoft.VisualStudio.Language.Intellisense;
+using System.Text;
+using System.Windows;
 
 namespace Codist
 {
@@ -702,6 +704,95 @@ namespace Codist
 				var ct = v.TextBuffer.ContentType;
 				return ct.IsOfType(Constants.CodeTypes.CSharp) || ct.IsOfType(Constants.CodeTypes.CPlusPlus) || ct.LikeContentType("TypeScript") || ct.LikeContentType("Java");
 			}
+		}
+
+		public static void CopySelectionWithoutIndentation(this ITextView view) {
+			if (view.Selection.SelectedSpans.Count > 1
+				|| view.Selection.Mode == TextSelectionMode.Box // Don't handle box selection
+				) {
+				goto BUILTIN_COPY;
+			}
+			var selection = view.FirstSelectionSpan();
+
+			ITextSnapshot snapshot = view.TextBuffer.CurrentSnapshot;
+			ITextSnapshotLine startLine, endLine;
+			var startOfSelection = selection.Start.Position;
+			var endOfSelection = selection.End.Position;
+			if (((startLine = snapshot.GetLineFromPosition(startOfSelection)) == null)
+				|| (endLine = snapshot.GetLineFromPosition(endOfSelection)) == startLine) {
+				goto BUILTIN_COPY;
+			}
+
+			var indentation = startOfSelection - startLine.Start.Position;
+			if (indentation == 0) {
+				int i = startOfSelection;
+				while (i < endOfSelection && snapshot[i].IsCodeWhitespaceChar()) {
+					++i;
+				}
+				if ((indentation = i - startOfSelection) == 0) {
+					goto BUILTIN_COPY;
+				}
+			}
+			else if (String.IsNullOrWhiteSpace(snapshot.GetText(startLine.Start.Position, indentation)) == false) {
+				goto BUILTIN_COPY;
+			}
+
+			var spans = new List<SnapshotSpan>();
+			var sb = new StringBuilder();
+			var line = startLine;
+			var n = startLine.LineNumber;
+			var endLineNumber = endLine.LineNumber;
+			while (true) {
+				if (line.Extent.IsEmpty) {
+					spans.Add(line.Extent);
+				}
+				else if (line.Length < indentation) {
+					int i = line.Start.Position;
+					for (; i < line.Length; i++) {
+						while (i < endOfSelection && snapshot[i].IsCodeWhitespaceChar()) {
+							++i;
+						}
+					}
+					if (i >= endOfSelection) {
+						break;
+					}
+					var extent = new SnapshotSpan(snapshot, Span.FromBounds(i, line.End));
+					spans.Add(extent);
+					sb.Append(extent.GetText().TrimEnd());
+				}
+				else {
+					if (line.Start + indentation >= endOfSelection) {
+						break;
+					}
+					var extent = new SnapshotSpan(snapshot, Span.FromBounds(line.Start + indentation, Math.Min(line.End.Position, endOfSelection)));
+					spans.Add(extent);
+					sb.Append(extent.GetText().TrimEnd());
+				}
+
+				if (n < endLineNumber) {
+					sb.AppendLine();
+					line = snapshot.GetLineFromLineNumber(++n);
+				}
+				else {
+					break;
+				}
+			}
+
+			var rtf = ServicesHelper.Instance.RtfService.GenerateRtf(new NormalizedSnapshotSpanCollection(spans), view);
+
+			var data = new DataObject();
+			data.SetText(rtf.TrimEnd(), TextDataFormat.Rtf);
+			data.SetText(sb.ToString(), TextDataFormat.UnicodeText);
+			try {
+				Clipboard.SetDataObject(data, false);
+			}
+			catch (SystemException) {
+				goto BUILTIN_COPY;
+			}
+			return;
+
+		BUILTIN_COPY:
+			ExecuteEditorCommand("Edit.Copy");
 		}
 		#endregion
 

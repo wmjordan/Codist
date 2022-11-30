@@ -147,14 +147,16 @@ Right click: Comment line</value>
   </data>
   <data name="CMD_CopySelectedText" xml:space="preserve">
     <value>Copy selected text
-Right click: Copy line</value>
+Right click: Copy line
+Ctrl: Without indentation</value>
   </data>
   <data name="CMD_CopySymbolName" xml:space="preserve">
     <value>Copy Symbol Name</value>
   </data>
   <data name="CMD_CutSelectedText" xml:space="preserve">
     <value>Cut selected text
-Right click: Cut line</value>
+Right click: Cut line
+Ctrl: Without indentation</value>
   </data>
   <data name="CMD_Debugger" xml:space="preserve">
     <value>Debugger...

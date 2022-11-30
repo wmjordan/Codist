@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Classification;
+using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.Text.Operations;
 using Microsoft.VisualStudio.Text.Tagging;
 
@@ -52,6 +53,9 @@ namespace Codist
 
 		[Import]
 		public Microsoft.VisualStudio.LanguageServices.VisualStudioWorkspace VisualStudioWorkspace { get; private set; }
+
+		[Import]
+		public IRtfBuilderService RtfService { get; set; }
 
 		public static TInterface Get<TInterface, VSInterface>() where TInterface : class {
 			ThreadHelper.ThrowIfNotOnUIThread();

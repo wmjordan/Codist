@@ -243,7 +243,8 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to Copy selected text
-        ///Right click: Copy line.
+        ///Right click: Copy line
+        ///Ctrl: Without indentation.
         /// </summary>
         internal static string CMD_CopySelectedText {
             get {
@@ -280,7 +281,8 @@ namespace Codist.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to Cut selected text
-        ///Right click: Cut line.
+        ///Right click: Cut line
+        ///Ctrl: Without indentation.
         /// </summary>
         internal static string CMD_CutSelectedText {
             get {
