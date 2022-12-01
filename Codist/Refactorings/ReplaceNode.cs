@@ -773,28 +773,53 @@ namespace Codist.Refactorings
 				var (indent, newLine) = ctx.GetIndentAndNewLine(node.SpanStart);
 				ExpressionSyntax newExp = null;
 				while (true) {
-					newExp = node is MemberAccessExpressionSyntax ma
-						? ma.Update((newExp ?? ma.Expression).WithTrailingTrivia(newLine),
-							ma.OperatorToken.WithLeadingTrivia(indent),
-							ma.Name)
-						: node is ConditionalAccessExpressionSyntax ca
-						? (ExpressionSyntax)ca.Update((newExp ?? ca.Expression).WithTrailingTrivia(newLine),
-							ca.OperatorToken.WithTrailingTrivia(indent),
-							ca.WhenNotNull)
-						: null;
+					if (node is MemberAccessExpressionSyntax ma) {
+						newExp = ma.Update((newExp ?? ma.Expression).WithTrailingTrivia(newLine), ma.OperatorToken.WithLeadingTrivia(indent), ma.Name);
+					}
+					else {
+						if (node is ConditionalAccessExpressionSyntax ca) {
+							if (ca.WhenNotNull.FullSpan.Contains(ctx.Token.FullSpan.Start)) {
+								newExp = (ExpressionSyntax)ca.Update(ca.Expression, ca.OperatorToken, (newExp ?? ca.WhenNotNull));
+							}
+							else {
+								newExp = (ExpressionSyntax)ca.Update((newExp ?? ca.Expression).WithTrailingTrivia(newLine), ca.OperatorToken.WithLeadingTrivia(indent), WrapAccess(ca.WhenNotNull, indent, newLine));
+							}
+						}
+						else {
+							break;
+						}
+					}
 
 					if (node.Parent.Kind().IsAny(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression)) {
 						node = node.Parent;
 					}
-					else if (node.Parent.IsKind(SyntaxKind.InvocationExpression)
-						&& node.Parent.Parent.Kind().IsAny(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression)) {
-						node = node.Parent.Parent;
+					else if (node.Parent is InvocationExpressionSyntax i
+						&& i.Parent.Kind().IsAny(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ConditionalAccessExpression)) {
+						newExp = i.Update(newExp, i.ArgumentList);
+						node = i.Parent;
 					}
 					else {
 						break;
 					}
 				}
 				yield return Replace(node, newExp.AnnotateSelect());
+			}
+
+			static ExpressionSyntax WrapAccess(ExpressionSyntax expression, SyntaxTriviaList indent, SyntaxTrivia newLine) {
+				if (expression is MemberAccessExpressionSyntax ma) {
+					return ma.Update(WrapAccess(ma.Expression, indent, newLine).WithTrailingTrivia(newLine),
+						ma.OperatorToken.WithLeadingTrivia(indent),
+						ma.Name);
+				}
+				else if (expression is InvocationExpressionSyntax i) {
+					return i.Update(WrapAccess(i.Expression, indent, newLine), i.ArgumentList);
+				}
+				else if (expression is ConditionalAccessExpressionSyntax ca) {
+					return ca.Update(ca.Expression.WithTrailingTrivia(newLine), ca.OperatorToken.WithLeadingTrivia(indent), WrapAccess(ca.WhenNotNull, indent, newLine));
+				}
+				else {
+					return expression;
+				}
 			}
 		}
 	}
