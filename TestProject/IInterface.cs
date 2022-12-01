@@ -41,4 +41,31 @@ namespace TestProject
 		// hover on the property you will read "Documentation from IInterface.Property".
 		MyEnum IInterface.Property { get; set; } // explicit interface implementation
 	}
+
+	namespace Namespaces
+	{
+		class A : B, IA { }
+
+		class B : C, IB, IExtra2, ICommon, IBOnly { }
+
+		class C : IC, ICommon, ICOnly { }
+
+		interface IA : IB { }
+
+		interface IB : IExtra1 { }
+
+		interface IBOnly : ICommonForBandC { }
+
+		interface ICOnly : ICommonForBandC { }
+
+		interface IC : IExtra2 { }
+
+		interface IExtra1 { }
+
+		interface IExtra2 { }
+
+		interface ICommon { }
+
+		interface ICommonForBandC { }
+	}
 }

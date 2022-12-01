@@ -1230,21 +1230,29 @@ namespace Codist.QuickInfo
 				}
 			}
 			HashSet<ITypeSymbol> all;
-			if (type.TypeKind == TypeKind.Class) {
-				all = new HashSet<ITypeSymbol>(interfaces);
-				foreach (var item in interfaces) {
-					FindInterfacesForType(type, item.Interfaces, inheritedInterfaces, all);
-				}
-				while ((type = type.BaseType) != null) {
-					FindInterfacesForType(type, type.Interfaces, inheritedInterfaces, all);
-				}
-			}
-			else if (type.TypeKind == TypeKind.Interface) {
-				all = new HashSet<ITypeSymbol>(interfaces);
-				foreach (var item in interfaces) {
-					FindInterfacesForType(item, item.Interfaces, inheritedInterfaces, all);
-				}
-				FindInterfacesForType(type, type.Interfaces, inheritedInterfaces, all);
+			switch (type.TypeKind) {
+				case TypeKind.Class:
+					all = new HashSet<ITypeSymbol>(interfaces);
+					while ((type = type.BaseType) != null) {
+						FindInterfacesForType(type, true, type.Interfaces, inheritedInterfaces, all);
+					}
+					foreach (var item in interfaces) {
+						FindInterfacesForType(item, true, item.Interfaces, inheritedInterfaces, all);
+					}
+					break;
+				case TypeKind.Interface:
+					all = new HashSet<ITypeSymbol>(interfaces);
+					foreach (var item in interfaces) {
+						FindInterfacesForType(item, false, item.Interfaces, inheritedInterfaces, all);
+					}
+					FindInterfacesForType(type, false, type.Interfaces, inheritedInterfaces, all);
+					break;
+				case TypeKind.Struct:
+					all = new HashSet<ITypeSymbol>(interfaces);
+					foreach (var item in interfaces) {
+						FindInterfacesForType(item, true, item.Interfaces, inheritedInterfaces, all);
+					}
+					break;
 			}
 			if (declaredInterfaces.Count == 0 && inheritedInterfaces.Count == 0) {
 				return;
@@ -1264,11 +1272,11 @@ namespace Codist.QuickInfo
 			qiContent.Add(info);
 		}
 
-		static void FindInterfacesForType(ITypeSymbol type, ImmutableArray<INamedTypeSymbol> interfaces, ImmutableArray<(INamedTypeSymbol, ITypeSymbol)>.Builder inheritedInterfaces, HashSet<ITypeSymbol> all) {
+		static void FindInterfacesForType(ITypeSymbol type, bool useType, ImmutableArray<INamedTypeSymbol> interfaces, ImmutableArray<(INamedTypeSymbol, ITypeSymbol)>.Builder inheritedInterfaces, HashSet<ITypeSymbol> all) {
 			foreach (var item in interfaces) {
 				if (all.Add(item) && IsAccessibleInterface(item)) {
 					inheritedInterfaces.Add((item, type));
-					FindInterfacesForType(type.TypeKind == TypeKind.Class ? type : item, item.Interfaces, inheritedInterfaces, all);
+					FindInterfacesForType(useType ? type : item, useType, item.Interfaces, inheritedInterfaces, all);
 				}
 			}
 		}
