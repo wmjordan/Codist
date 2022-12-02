@@ -2246,4 +2246,7 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_MultiLineMemberAccess" xml:space="preserve">
     <value>将成员访问换行</value>
   </data>
+  <data name="CMD_WrapInUsing" xml:space="preserve">
+    <value>放到 &lt;using&gt; 里面</value>
+  </data>
 </root>

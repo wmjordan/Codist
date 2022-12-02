@@ -1769,6 +1769,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Wrap in &lt;using&gt;.
+        /// </summary>
+        internal static string CMD_WrapInUsing {
+            get {
+                return ResourceManager.GetString("CMD_WrapInUsing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wrap selection with text
         ///Right click: Wrap text menu....
         /// </summary>

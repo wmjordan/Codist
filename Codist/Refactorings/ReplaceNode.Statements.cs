@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,6 +14,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode WrapInTryCatch = new WrapInTryCatchRefactoring();
 		public static readonly ReplaceNode WrapInElse = new WrapInElseRefactoring();
 		public static readonly ReplaceNode WrapInRegion = new WrapInRegionRefactoring();
+		public static readonly ReplaceNode WrapInUsing = new WrapInUsingRefactoring();
 		public static readonly ReplaceNode MergeToConditional = new MergeToConditionalRefactoring();
 
 		abstract class ReplaceStatements : ReplaceNode
@@ -150,6 +152,38 @@ namespace Codist.Refactorings
 						null,
 						SF.Block())),
 					null).WithAdditionalAnnotations(CodeFormatHelper.Reformat));
+			}
+		}
+
+		sealed class WrapInUsingRefactoring : ReplaceStatements
+		{
+			public override int IconId => IconIds.Using;
+			public override string Title => R.CMD_WrapInUsing;
+
+			public override bool Accept(RefactoringContext ctx) {
+				StatementSyntax s;
+				return base.Accept(ctx)
+					&& ((s = ctx.SelectedStatementInfo.Items[0]) is LocalDeclarationStatementSyntax loc
+							&& loc.Declaration.Variables.Count == 1
+							&& (ctx.SemanticContext.SemanticModel.GetSymbol(loc.Declaration.Type) as ITypeSymbol)
+								?.AllInterfaces.Any(i => i.IsDisposable()) == true
+						|| s is ExpressionStatementSyntax exp
+							&& exp.Expression is AssignmentExpressionSyntax a
+							&& (ctx.SemanticContext.SemanticModel.GetTypeInfo(a.Left).Type as ITypeSymbol)
+								?.AllInterfaces.Any(i => i.IsDisposable()) == true);
+			}
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				var statements = ctx.SelectedStatementInfo.Items;
+				var newBlock = SF.Block(ctx.SelectedStatementInfo.Items.Skip(1));
+				if (statements[0] is LocalDeclarationStatementSyntax loc) {
+					yield return Replace(ctx.SelectedStatementInfo.Items,
+						SF.UsingStatement(loc.Declaration.WithoutTrivia(), null, newBlock).AnnotateReformatAndSelect());
+				}
+				else if (statements[0] is ExpressionStatementSyntax exp) {
+					yield return Replace(ctx.SelectedStatementInfo.Items,
+						SF.UsingStatement(null, exp.Expression, newBlock).AnnotateReformatAndSelect());
+				}
 			}
 		}
 

@@ -2261,4 +2261,7 @@ Right click: Run unit tests in class</value>
   <data name="CMD_MultiLineMemberAccess" xml:space="preserve">
     <value>Split Member Access into Lines</value>
   </data>
+  <data name="CMD_WrapInUsing" xml:space="preserve">
+    <value>Wrap in &lt;using&gt;</value>
+  </data>
 </root>
