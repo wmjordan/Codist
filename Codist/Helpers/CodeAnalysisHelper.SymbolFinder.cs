@@ -467,7 +467,7 @@ namespace Codist
 			return r;
 		}
 
-		static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind, ReferenceLocation)>> results, ReferencedSymbol reference, string symbolSignature, Predicate<SyntaxNode> nodeFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
+		static async Task GroupReferenceByContainerAsync(Dictionary<ISymbol, List<(SymbolUsageKind usage, ReferenceLocation loc)>> results, ReferencedSymbol reference, string symbolSignature, Predicate<SyntaxNode> nodeFilter = null, Predicate<SymbolUsageKind> usageFilter = null, CancellationToken cancellationToken = default) {
 			var pu = GetPotentialUsageKinds(reference.Definition);
 			foreach (var docRefs in reference.Locations.GroupBy(l => l.Document)) {
 				var sm = await docRefs.Key.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
@@ -511,11 +511,20 @@ namespace Codist
 						continue;
 					}
 					if (results.TryGetValue(s, out var l)) {
+						var sf = location.Location.SourceTree.FilePath;
+						foreach (var item in l) {
+							if (item.usage == u
+								&& item.loc.Location.SourceSpan == ss
+								&& item.loc.Location.SourceTree.FilePath == sf) {
+								goto NEXT;
+							}
+						}
 						l.Add((u, location));
 					}
 					else {
 						results[s] = new List<(SymbolUsageKind, ReferenceLocation)> { (u, location) };
 					}
+				NEXT:;
 				}
 			}
 		}
