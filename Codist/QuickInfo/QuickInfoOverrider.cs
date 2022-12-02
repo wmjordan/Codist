@@ -55,7 +55,7 @@ namespace Codist.QuickInfo
 			return items.GetFirstVisualChild<StackPanel>(o => o is IQuickInfoHolder) as IQuickInfoHolder;
 		}
 
-		static StackPanel ShowSymbolLocation(ISymbol symbol, string path) {
+		static StackPanel ShowSymbolLocation(ISymbol symbol) {
 			var tooltip = new ThemedToolTip();
 			tooltip.Title.Append(symbol.GetOriginalName(), true);
 			var t = tooltip.Content;
@@ -197,7 +197,7 @@ namespace Codist.QuickInfo
 				var t = sender as TextBlock;
 				var s = _symbol;
 				if (s != null) {
-					t.ToolTip = ShowSymbolLocation(s, s.HasSource() ? System.IO.Path.GetFileName(s.Locations[0].SourceTree.FilePath) : s.GetAssemblyModuleName());
+					t.ToolTip = ShowSymbolLocation(s);
 					t.ToolTipOpening -= ShowToolTip;
 				}
 			}
