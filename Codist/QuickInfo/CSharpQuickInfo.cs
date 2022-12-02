@@ -1154,6 +1154,7 @@ namespace Codist.QuickInfo
 					min = max = bits = v;
 					minName = maxName = f;
 					g = new Grid {
+						HorizontalAlignment = HorizontalAlignment.Left,
 						ColumnDefinitions = {
 							new ColumnDefinition(),
 							new ColumnDefinition()
@@ -1177,7 +1178,7 @@ namespace Codist.QuickInfo
 						TextAlignment = TextAlignment.Right,
 						Foreground = ThemeHelper.SystemGrayTextBrush,
 						Margin = WpfHelper.SmallHorizontalMargin
-					};
+					}.Append("= ", ThemeHelper.SystemGrayTextBrush);
 					SymbolFormatter.Instance.ShowFieldConstantText(ft.Inlines, f, isFlags);
 					g.Add(new TextBlock { Foreground = ThemeHelper.ToolTipTextBrush }
 							.AddSymbol(f, false, _SymbolFormatter)
