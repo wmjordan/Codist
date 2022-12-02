@@ -171,6 +171,13 @@ namespace Codist
 			}
 		}
 
+		public static TTextBlock WrapAtWidth<TTextBlock>(this TTextBlock text, double width)
+			where TTextBlock : TextBlock {
+			text.MaxWidth = width;
+			text.TextWrapping = TextWrapping.Wrap;
+			return text;
+		}
+
 		public static Run Render(this string text, WpfBrush brush) {
 			var run = new Run(text);
 			if (brush != null) {

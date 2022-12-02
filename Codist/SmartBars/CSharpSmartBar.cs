@@ -239,6 +239,7 @@ namespace Codist.SmartBars
 				PlacementTarget = ctx.Sender,
 				Resources = SharedDictionaryManager.ContextMenu
 			};
+			m.SetValue(TextBlock.ForegroundProperty, ThemeHelper.MenuTextBrush);
 			var rc = new Refactorings.RefactoringContext(_Context);
 			AddRefactoringCommands(m, __Refactorings, rc);
 			ctx.Sender.ContextMenu = m;
