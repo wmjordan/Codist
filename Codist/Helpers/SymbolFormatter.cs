@@ -1163,9 +1163,17 @@ namespace Codist
 
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			async void NodeLink_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e) {
-				var s = (await TextEditorHelper.GetMouseOverDocumentView()?.TextBuffer.GetDocument().Project.GetCompilationAsync()).GetSemanticModel(_Node.SyntaxTree)
-					.GetSymbol(_Node);
-				s?.GoToDefinition();
+				try {
+					(await TextEditorHelper.GetMouseOverDocumentView()?.TextBuffer.GetDocument().Project.GetCompilationAsync())
+						.GetSemanticModel(_Node.SyntaxTree)
+						.GetSymbol(_Node)
+						?.GoToDefinition();
+				}
+				catch (ArgumentNullException) {
+					// hack: for a bug in Roslyn where TextBuffer.GetWorkspace can return null
+					// fallback to go to node
+					_Node.GetLocation().GoToSource();
+				}
 				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
 				e.Handled = true;
 			}
