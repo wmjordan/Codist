@@ -635,38 +635,38 @@ namespace Codist
 			var b = new ReusableResourceHolder<System.Text.StringBuilder>();
 			var sb = b.Resource;
 			var p = 0;
-			bool nl = false, noSlash = NoSlash(view);
+			bool newLine = false, noSlash = NoSlash(view);
 			for (int i = 0; i < t.Length; i++) {
 				switch (t[i]) {
 					case '\r':
 					case '\n':
-						nl = true;
+						newLine = true;
 						goto case ' ';
 					case ' ':
 					case FullWidthSpace:
 					case '\t':
-						int j;
-						for (j = i + 1; j < t.Length; j++) {
-							switch (t[j]) {
+						int n;
+						for (n = i + 1; n < t.Length; n++) {
+							switch (t[n]) {
 								case ' ':
 								case FullWidthSpace:
 								case '\t':
 									continue;
 								case '/':
-									if (nl && noSlash && (t[j-1] == '/' || j+1 < t.Length && t[j+1] == '/')) {
+									if (newLine && noSlash && (t[n - 1] == '/' || n + 1 < t.Length && t[n + 1] == '/')) {
 										continue;
 									}
 									goto default;
 								case '\n':
 								case '\r':
-									nl = true;
+									newLine = true;
 									continue;
 								default:
 									goto CHECK_NEW_LINE;
 							}
 						}
 					CHECK_NEW_LINE:
-						if (nl == false || j <= i) {
+						if (newLine == false || n <= i) {
 							continue;
 						}
 						if (sb == null) {
@@ -679,12 +679,12 @@ namespace Codist
 						else {
 							sb.Append(t, p, i - p);
 						}
-						if (i > 0 && t[j] != '.' && NeedSpace("([{<'\"", t[i - 1]) && j < t.Length && NeedSpace(")]}>'\"", t[j])) {
+						if (i > 0 && t[n] != '.' && NeedSpace("([<'\"", t[i - 1]) && n < t.Length && NeedSpace(")]>'\"", t[n])) {
 							sb.Append(' ');
 						}
-						i = j;
-						p = j;
-						nl = false;
+						i = n;
+						p = n;
+						newLine = false;
 						break;
 				}
 			}
@@ -702,7 +702,10 @@ namespace Codist
 			}
 			bool NoSlash(ITextView v) {
 				var ct = v.TextBuffer.ContentType;
-				return ct.IsOfType(Constants.CodeTypes.CSharp) || ct.IsOfType(Constants.CodeTypes.CPlusPlus) || ct.LikeContentType("TypeScript") || ct.LikeContentType("Java");
+				return ct.IsOfType(Constants.CodeTypes.CSharp)
+					|| ct.IsOfType(Constants.CodeTypes.CPlusPlus)
+					|| ct.LikeContentType("TypeScript")
+					|| ct.LikeContentType("Java");
 			}
 		}
 
