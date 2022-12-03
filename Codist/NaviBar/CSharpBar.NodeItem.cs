@@ -49,6 +49,7 @@ namespace Codist.NaviBar
 					m.AddNodeCommands();
 					var s = Symbol;
 					if (s != null) {
+						m.AddUnitTestCommands();
 						m.Items.Add(new Separator());
 						m.AddAnalysisCommands();
 						m.AddCopyAndSearchSymbolCommands();

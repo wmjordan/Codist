@@ -11,6 +11,7 @@ namespace Codist.Controls
 {
 	sealed class CSharpSymbolContextMenu : ContextMenu, IDisposable
 	{
+		static readonly string[] __UnitTestingNamespace = new[] { "UnitTesting", "TestTools", "VisualStudio", "Microsoft" };
 		UIHost _Host;
 
 		public CSharpSymbolContextMenu(ISymbol symbol, SyntaxNode node, SemanticContext semanticContext) {
@@ -105,6 +106,33 @@ namespace Codist.Controls
 			Items.Add(CreateItem(IconIds.GoToMember, R.CMD_GotoMember, GoToMember));
 			Items.Add(CreateItem(IconIds.GoToType, R.CMD_GotoType, GoToType));
 			Items.Add(CreateItem(IconIds.GoToSymbol, R.CMD_GotoSymbol, GoToSymbol));
+		}
+
+		public void AddUnitTestCommands() {
+			var symbol = _Host.Symbol;
+			if (symbol.HasSource() && symbol.IsPublicConcreteInstance()) {
+				bool isTest = false;
+				if (symbol.Kind == SymbolKind.Method) {
+					if (symbol.GetContainingTypes().All(t => t.IsPublicConcreteInstance())
+						&& ((IMethodSymbol)symbol).ReturnsVoid
+						&& symbol.GetAttributes().Any(a => a.AttributeClass.MatchTypeName("TestMethodAttribute", __UnitTestingNamespace))) {
+						isTest = true;
+					}
+				}
+				else if (symbol.Kind == SymbolKind.NamedType && ((ITypeSymbol)symbol).TypeKind == TypeKind.Class) {
+					if (symbol.GetAttributes().Any(a => a.AttributeClass.MatchTypeName("TestClassAttribute", __UnitTestingNamespace))) {
+						isTest = true;
+					}
+				}
+
+				if (isTest) {
+					Items.Add(CreateItem(IconIds.DebugTest, "Debug Unit Test")
+						.HandleEvent(MenuItem.ClickEvent, _Host.DebugUnitTest));
+					Items.Add(CreateItem(IconIds.RunTest, "Run Unit Test")
+						.HandleEvent(MenuItem.ClickEvent, _Host.RunUnitTest));
+				}
+			}
+
 		}
 
 		public void AddTitleItem(string name) {
@@ -320,6 +348,18 @@ namespace Codist.Controls
 			public void SelectSymbolNode(object sender, RoutedEventArgs args) {
 				_Symbol.GetSyntaxNode().SelectNode(true);
 			}
+			public void RunUnitTest(object sender, RoutedEventArgs args) {
+				if (_SemanticContext.Node.FirstAncestorOrSelf<SyntaxNode>(n => n.Kind().IsAny(SyntaxKind.ClassDeclaration, SyntaxKind.MethodDeclaration)) != _Node) {
+					_SemanticContext.View.MoveCaret(_Node.SpanStart);
+				}
+				TextEditorHelper.ExecuteEditorCommand("TestExplorer.RunAllTestsInContext");
+			}
+			public void DebugUnitTest(object sender, RoutedEventArgs args) {
+				if (_SemanticContext.Node.FirstAncestorOrSelf<SyntaxNode>(n => n.Kind().IsAny(SyntaxKind.ClassDeclaration, SyntaxKind.MethodDeclaration)) != _Node) {
+					_SemanticContext.View.MoveCaret(_Node.SpanStart);
+				}
+				TextEditorHelper.ExecuteEditorCommand("TestExplorer.DebugAllTestsInContext");
+			}
 			public void GoToSymbolDefinition(object sender, RoutedEventArgs args) {
 				var locs = _Symbol.GetSourceReferences();
 				if (locs.Length == 1) {
@@ -505,7 +545,7 @@ namespace Codist.Controls
 			[SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			public async void FindContainingTypeInstanceConsumers(object sender, RoutedEventArgs e) {
 				await _SemanticContext.FindInstanceAsParameterAsync(_Symbol.ContainingType);
-			} 
+			}
 			#endregion
 
 			bool IsTypeReference(SyntaxNode node) {
