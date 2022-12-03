@@ -741,56 +741,58 @@ namespace Codist
 			}
 
 			var spans = new List<SnapshotSpan>();
-			var sb = new StringBuilder();
 			var line = startLine;
 			var n = startLine.LineNumber;
 			var endLineNumber = endLine.LineNumber;
-			while (true) {
-				if (line.Extent.IsEmpty) {
-					spans.Add(line.Extent);
-				}
-				else if (line.Length < indentation) {
-					int i = line.Start.Position;
-					for (; i < line.Length; i++) {
-						while (i < endOfSelection && snapshot[i].IsCodeWhitespaceChar()) {
-							++i;
+			using (var b = ReusableStringBuilder.AcquireDefault(512)) {
+				var sb = b.Resource;
+				while (true) {
+					if (line.Extent.IsEmpty) {
+						spans.Add(line.Extent);
+					}
+					else if (line.Length < indentation) {
+						int i = line.Start.Position;
+						for (; i < line.Length; i++) {
+							while (i < endOfSelection && snapshot[i].IsCodeWhitespaceChar()) {
+								++i;
+							}
 						}
+						if (i >= endOfSelection) {
+							break;
+						}
+						var extent = new SnapshotSpan(snapshot, Span.FromBounds(i, line.End));
+						spans.Add(extent);
+						sb.Append(extent.GetText().TrimEnd());
 					}
-					if (i >= endOfSelection) {
+					else {
+						if (line.Start + indentation >= endOfSelection) {
+							break;
+						}
+						var extent = new SnapshotSpan(snapshot, Span.FromBounds(line.Start + indentation, Math.Min(line.End.Position, endOfSelection)));
+						spans.Add(extent);
+						sb.Append(extent.GetText().TrimEnd());
+					}
+
+					if (n < endLineNumber) {
+						sb.AppendLine();
+						line = snapshot.GetLineFromLineNumber(++n);
+					}
+					else {
 						break;
 					}
-					var extent = new SnapshotSpan(snapshot, Span.FromBounds(i, line.End));
-					spans.Add(extent);
-					sb.Append(extent.GetText().TrimEnd());
-				}
-				else {
-					if (line.Start + indentation >= endOfSelection) {
-						break;
-					}
-					var extent = new SnapshotSpan(snapshot, Span.FromBounds(line.Start + indentation, Math.Min(line.End.Position, endOfSelection)));
-					spans.Add(extent);
-					sb.Append(extent.GetText().TrimEnd());
 				}
 
-				if (n < endLineNumber) {
-					sb.AppendLine();
-					line = snapshot.GetLineFromLineNumber(++n);
-				}
-				else {
-					break;
-				}
-			}
+				var rtf = ServicesHelper.Instance.RtfService.GenerateRtf(new NormalizedSnapshotSpanCollection(spans), view);
 
-			var rtf = ServicesHelper.Instance.RtfService.GenerateRtf(new NormalizedSnapshotSpanCollection(spans), view);
-
-			var data = new DataObject();
-			data.SetText(rtf.TrimEnd(), TextDataFormat.Rtf);
-			data.SetText(sb.ToString(), TextDataFormat.UnicodeText);
-			try {
-				Clipboard.SetDataObject(data, false);
-			}
-			catch (SystemException) {
-				goto BUILTIN_COPY;
+				var data = new DataObject();
+				data.SetText(rtf.TrimEnd(), TextDataFormat.Rtf);
+				data.SetText(sb.ToString(), TextDataFormat.UnicodeText);
+				try {
+					Clipboard.SetDataObject(data, false);
+				}
+				catch (SystemException) {
+					goto BUILTIN_COPY;
+				}
 			}
 			return;
 
@@ -823,10 +825,9 @@ namespace Codist
 			if (end >= e) {
 				end = e;
 			}
-			if (end <= start) {
-				return String.Empty;
-			}
-			return textBuffer.CurrentSnapshot.GetText(start, end - start);
+			return end <= start
+				? String.Empty
+				: textBuffer.CurrentSnapshot.GetText(start, end - start);
 		}
 		public static string GetLinePrecedingWhitespaceAtPosition(this ITextSnapshot textSnapshot, int position) {
 			var line = textSnapshot.GetLineFromPosition(position);

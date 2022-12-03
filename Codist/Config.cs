@@ -19,7 +19,11 @@ namespace Codist
 		internal const string CurrentVersion = "6.6.0";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
-		internal const string LightTheme = ThemePrefix + "Light", PaleLightTheme = ThemePrefix + "PaleLight", DarkTheme = ThemePrefix + "Dark", PaleDarkTheme = ThemePrefix + "PaleDark", SimpleTheme = ThemePrefix + "Simple";
+		internal const string LightTheme = ThemePrefix + "Light",
+			PaleLightTheme = ThemePrefix + "PaleLight",
+			DarkTheme = ThemePrefix + "Dark",
+			PaleDarkTheme = ThemePrefix + "PaleDark",
+			SimpleTheme = ThemePrefix + "Simple";
 
 		static DateTime _LastSaved, _LastLoaded;
 		static int _LoadingConfig;
