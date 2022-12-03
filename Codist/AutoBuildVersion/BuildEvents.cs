@@ -76,7 +76,7 @@ namespace Codist.AutoBuildVersion
 			if (vsHierarchy != null) {
 				Project p = vsHierarchy.GetExtObjectAs<Project>();
 				if (p != null) {
-					WriteText($"Configuration of {p.UniqueName} changed to {p.ConfigurationManager.ActiveConfiguration.ConfigurationName}|{p.ConfigurationManager.ActiveConfiguration.PlatformName}.{Environment.NewLine}");
+					WriteText($"Configuration of {p.UniqueName} changed to {p.ConfigurationManager.ActiveConfiguration.ConfigurationName}|{p.ConfigurationManager.ActiveConfiguration.PlatformName}.");
 				}
 			}
 #endif
@@ -188,7 +188,7 @@ namespace Codist.AutoBuildVersion
 		[Conditional("DEBUG")]
 		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "UI Thread checked in caller")]
 		void WriteText(string text) {
-			_Package.GetOutputPane(VSConstants.OutputWindowPaneGuid.GeneralPane_guid, "General")?.OutputString(text);
+			CodistPackage.OutputString(text);
 		}
 
 		#region IVsSolutionEvents
@@ -196,7 +196,7 @@ namespace Codist.AutoBuildVersion
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var project = pHierarchy.GetExtObjectAs<Project>();
 			if (project != null) {
-				WriteText($"Project {project.UniqueName} loaded.{Environment.NewLine}");
+				WriteText($"Project {project.UniqueName} loaded.");
 			}
 			return VSConstants.S_OK;
 		}
@@ -226,7 +226,7 @@ namespace Codist.AutoBuildVersion
 			if (_RunningDocumentTable == null) {
 				(_RunningDocumentTable = ServicesHelper.Get<IVsRunningDocumentTable, SVsRunningDocumentTable>())?.AdviseRunningDocTableEvents(this, out _RunningDocumentTableCookie);
 			}
-			WriteText("Solution loaded." + Environment.NewLine);
+			WriteText("Solution loaded.");
 			return VSConstants.S_OK;
 		}
 
@@ -264,7 +264,7 @@ namespace Codist.AutoBuildVersion
 				if (_VsSolution.GetProjectOfGuid(ref pGuid, out var proj) == VSConstants.S_OK) {
 					var p = proj?.GetExtObjectAs<Project>();
 					if (p != null && _ChangedProjects.Add(p)) {
-						WriteText($"Project {p.Name}: updated.{Environment.NewLine}");
+						WriteText($"Project {p.Name}: updated.");
 					}
 				}
 			}

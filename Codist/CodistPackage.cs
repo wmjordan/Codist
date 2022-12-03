@@ -35,10 +35,12 @@ namespace Codist
 	{
 		/// <summary>CodistPackage GUID string.</summary>
 		const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
+		static Guid __PackageGuid = new Guid(PackageGuidString);
 
 		static OleMenuCommandService __Menu;
 		static IOleComponentManager __ComponentManager;
 		static AutoBuildVersion.BuildEvents __BuildEvents;
+		static IVsOutputWindowPane __OutputPane;
 
 		//int _extenderCookie;
 
@@ -111,6 +113,25 @@ namespace Codist
 				OLEMSGICON.OLEMSGICON_QUERY,
 				Instance.GetService(typeof(SVsUIShell)) as IVsUIShell);
 		}
+
+		public static void OutputString(string text) {
+			ThreadHelper.ThrowIfNotOnUIThread();
+			if (__OutputPane == null) {
+				__OutputPane = CreateOutputPane();
+			}
+			__OutputPane.OutputString(text + Environment.NewLine);
+		}
+
+		static IVsOutputWindowPane CreateOutputPane() {
+			var window = ServicesHelper.Get<IVsOutputWindow, SVsOutputWindow>();
+			if (window.CreatePane(ref __PackageGuid, nameof(Codist), 0, 1) == Microsoft.VisualStudio.VSConstants.S_OK) {
+				if (window.GetPane(ref __PackageGuid, out var pane) == 0) {
+					return pane;
+				}
+			}
+			return null;
+		}
+
 
 		#region Package Members
 		/// <summary>
