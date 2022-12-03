@@ -83,6 +83,7 @@ namespace Codist.QuickInfo
 			//look for occurrences of our QuickInfo words in the span
 			token = unitCompilation.FindToken(subjectTriggerPoint, true);
 			var skipTriggerPointCheck = false;
+			var isConvertedType = false;
 			symbol = null;
 			switch (token.Kind()) {
 				case SyntaxKind.WhitespaceTrivia:
@@ -105,14 +106,17 @@ namespace Codist.QuickInfo
 				case SyntaxKind.AmpersandAmpersandToken:
 				case SyntaxKind.BarBarToken:
 					symbol = semanticModel.GetSystemTypeSymbol(nameof(Boolean));
+					isConvertedType = true;
 					break;
 				case SyntaxKind.EqualsGreaterThanToken:
 					if ((node = unitCompilation.FindNode(token.Span)).IsKind(CodeAnalysisHelper.SwitchExpressionArm) && node.Parent.IsKind(CodeAnalysisHelper.SwitchExpression)) {
 						symbol = semanticModel.GetTypeInfo(node.Parent).ConvertedType;
+						isConvertedType = true;
 					}
 					break;
 				case SyntaxKind.EqualsToken:
 					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.GetPreviousToken().Span)).ConvertedType;
+					isConvertedType = true;
 					break;
 				case SyntaxKind.NullKeyword:
 				case SyntaxKind.NewKeyword:
@@ -131,6 +135,7 @@ namespace Codist.QuickInfo
 						}
 						return null;
 					}
+					isConvertedType = true;
 					break;
 				case SyntaxKind.AsKeyword:
 					var asType = (unitCompilation.FindNode(token.Span) as BinaryExpressionSyntax)?.GetLastIdentifier();
@@ -190,6 +195,7 @@ namespace Codist.QuickInfo
 					break;
 				case CodeAnalysisHelper.DotDotToken:
 					symbol = semanticModel.GetSystemTypeSymbol(nameof(Int32));
+					isConvertedType = true;
 					break;
 				default:
 					if (token.Kind().IsPredefinedSystemType()) {
@@ -243,6 +249,7 @@ namespace Codist.QuickInfo
 					case SyntaxKind.InterpolatedStringTextToken:
 					case SyntaxKind.NameOfKeyword:
 						symbol = semanticModel.GetSystemTypeSymbol(nameof(String));
+						isConvertedType = true;
 						break;
 					case SyntaxKind.CharacterLiteralToken:
 						symbol = semanticModel.GetSystemTypeSymbol(nameof(Char));
@@ -253,9 +260,11 @@ namespace Codist.QuickInfo
 						else if (node.IsKind(SyntaxKind.Block) || node.IsKind(SyntaxKind.SwitchStatement)) {
 							ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
 						}
+						isConvertedType = true;
 						break;
 					case SyntaxKind.NumericLiteralToken:
 						symbol = semanticModel.GetSystemTypeSymbol(token.Value.GetType().Name);
+						isConvertedType = true;
 						break;
 					default:
 						if (node.IsKind(SyntaxKind.Block) || node.IsKind(SyntaxKind.SwitchStatement)) {
@@ -277,10 +286,12 @@ namespace Codist.QuickInfo
 						: symbol,
 					semanticModel);
 			}
-			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
-				ShowAttributesInfo(qiContent, symbol);
+			if (isConvertedType == false) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
+					ShowAttributesInfo(qiContent, symbol);
+				}
+				ShowSymbolInfo(session, qiContent, node, symbol, semanticModel);
 			}
-			ShowSymbolInfo(session, qiContent, node, symbol, semanticModel);
 		RETURN:
 			ctor = node.Parent as ObjectCreationExpressionSyntax;
 			if (ctor != null && ctor.Type == node) {
