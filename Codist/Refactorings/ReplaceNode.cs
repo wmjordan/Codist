@@ -343,7 +343,9 @@ namespace Codist.Refactorings
 			public override bool Accept(RefactoringContext ctx) {
 				SyntaxNode node;
 				if (ctx.NodeIncludeTrivia is IfStatementSyntax ifs
-					&& (node = GetParentConditional(ifs)) != null) {
+					&& (node = GetParentConditional(ifs)) != null
+					&& node.SyntaxTree.GetText().Lines.GetLineFromPosition(node.SpanStart)
+						.SpanIncludingLineBreak.Contains(ifs.FullSpan.Start) == false) {
 					_NodeKind = node.IsKind(SyntaxKind.IfStatement) ? "if"
 						: node.IsKind(SyntaxKind.ElseClause) ? "else"
 						: "while";
