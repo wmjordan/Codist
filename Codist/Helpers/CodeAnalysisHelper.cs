@@ -340,27 +340,9 @@ namespace Codist
 		}
 
 		public static bool IsMultiLine(this SyntaxNode node, bool includeTrivia) {
-			if (includeTrivia &&
-				(node.HasLeadingTrivia && node.GetLeadingTrivia().IsMultiline()
-					|| node.HasTrailingTrivia && node.GetTrailingTrivia().IsMultiline())
-				) {
-				return true;
-			}
-			foreach (var item in node.ChildNodesAndTokens()) {
-				if (item.IsNode) {
-					if (item.AsNode().IsMultiLine(true)) {
-						return true;
-					}
-				}
-				else {
-					var token = item.AsToken();
-					if (token.HasLeadingTrivia && token.LeadingTrivia.IsMultiline()
-						|| token.HasTrailingTrivia && token.TrailingTrivia.IsMultiline()) {
-						return true;
-					}
-				}
-			}
-			return false;
+			var lines = node.SyntaxTree.GetText().Lines;
+			var span = includeTrivia ? node.FullSpan : node.Span;
+			return lines.GetLineFromPosition(span.Start).SpanIncludingLineBreak.Contains(span.End) == false;
 		}
 		public static bool IsMultiline(this SyntaxTriviaList trivias) {
 			foreach (var item in trivias) {
