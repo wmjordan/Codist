@@ -138,17 +138,18 @@ namespace Codist.Refactorings
 			public override string Title => R.CMD_DeleteCondition;
 
 			public override bool Accept(RefactoringContext ctx) {
-				var node = ctx.NodeIncludeTrivia;
-				return node.IsKind(SyntaxKind.IfStatement)
-					&& node.Parent.IsKind(SyntaxKind.ElseClause) == false
+				return ctx.Node is IfStatementSyntax ifs
+					&& ctx.SemanticContext.SemanticModel.AnalyzeDataFlow(ifs.Condition).VariablesDeclared.Length == 0
 					&& (ctx.SelectedStatementInfo.Items == null || ctx.SelectedStatementInfo.Items.Count == 1);
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				var ifs = ((IfStatementSyntax)ctx.Node).Statement;
-				yield return ifs is BlockSyntax b
-					? Replace(ctx.Node, b.Statements.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select))
-					: Replace(ctx.Node, ifs.AnnotateReformatAndSelect());
+				var node = ctx.Node;
+				yield return ((IfStatementSyntax)node).Statement is BlockSyntax b
+					? node.Parent.IsKind(SyntaxKind.ElseClause)
+						? Replace((ElseClauseSyntax)node.Parent, SF.ElseClause(SF.Block(b.Statements)).AnnotateReformatAndSelect())
+						: Replace(node, b.Statements.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select))
+					: Replace(node, ((IfStatementSyntax)node).Statement.AnnotateReformatAndSelect());
 			}
 		}
 
