@@ -121,7 +121,7 @@ namespace Codist
 			if (__Loaded != null) {
 				foreach (var h in __Loaded.GetInvocationList()) {
 					if (h.Equals(handler)) {
-						Debug.WriteLine("Error: " + handler + " has already been registered as load hander");
+						Debug.WriteLine("Error: " + handler + " has already been registered as load handler");
 						return;
 					}
 				}
@@ -137,13 +137,13 @@ namespace Codist
 					}
 				}
 			}
-			Debug.WriteLine("Error: " + handler + " has not been registered as load hander");
+			Debug.WriteLine("Error: " + handler + " has not been registered as load handler");
 		}
 		public static void RegisterUpdateHandler(Action<ConfigUpdatedEventArgs> handler) {
 			if (__Updated != null) {
 				foreach (var h in __Updated.GetInvocationList()) {
 					if (h.Equals(handler)) {
-						Debug.WriteLine("Error: " + handler + " has already been registered as update hander");
+						Debug.WriteLine("Error: " + handler + " has already been registered as update handler");
 						return;
 					}
 				}
@@ -159,7 +159,7 @@ namespace Codist
 					}
 				}
 			}
-			Debug.WriteLine("Error: " + handler + " has not been registered as update hander");
+			Debug.WriteLine("Error: " + handler + " has not been registered as update handler");
 		}
 
 		public static Config InitConfig() {
