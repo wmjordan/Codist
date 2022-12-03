@@ -593,8 +593,7 @@ namespace Codist.Refactorings
 						p = p.Parent;
 					}
 				}
-				return (p is StatementSyntax || p.IsKind(SyntaxKind.EqualsValueClause))
-					&& node.IsMultiLine(false) == false;
+				return node.IsMultiLine(false) == false;
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
