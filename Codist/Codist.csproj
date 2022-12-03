@@ -79,12 +79,24 @@
     <Compile Include="Commands\ToggleAutoBuildVersionCommand.cs" />
     <Compile Include="Commands\SyntaxCustomizerWindowCommand.cs" />
     <Compile Include="Commands\VersionInfoBar.cs" />
+    <Compile Include="Controls\AdornmentChildRemovedEventArgs.cs" />
     <Compile Include="Controls\CommandToolTip.cs" />
     <Compile Include="Controls\ExternalCommand.cs" />
+    <Compile Include="Controls\ExtIconProvider.cs" />
     <Compile Include="Controls\IContextMenuHost.cs" />
     <Compile Include="Controls\IntegerBox.xaml.cs">
       <DependentUpon>IntegerBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\MenuItemFilter.cs" />
+    <Compile Include="Controls\SearchScopeBox.cs" />
+    <Compile Include="Controls\SymbolFilterBox.cs" />
+    <Compile Include="Controls\SymbolItemTemplateSelector.cs" />
+    <Compile Include="Controls\SymbolListType.cs" />
+    <Compile Include="Controls\ThemedMenuText.cs" />
+    <Compile Include="Controls\ThemedTipDocument.cs" />
+    <Compile Include="Controls\ThemedTipParagraph.cs" />
+    <Compile Include="Controls\ThemedTipText.cs" />
+    <Compile Include="Controls\ThemedToolBarText.cs" />
     <Compile Include="Display\ResourceMonitor.cs" />
     <Compile Include="Display\LayoutOverrider.cs" />
     <Compile Include="Controls\NumericUpDown.cs" />
@@ -93,7 +105,11 @@
     <Compile Include="Controls\SymbolMenu.cs" />
     <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
     <Compile Include="Display\JumpListEnhancer.cs" />
+    <Compile Include="Helpers\AssemblySource.cs" />
+    <Compile Include="Helpers\InstalledFont.cs" />
     <Compile Include="Helpers\SelectedSelectedSyntax.cs" />
+    <Compile Include="Helpers\SymbolUsageKind.cs" />
+    <Compile Include="Helpers\TokenType.cs" />
     <Compile Include="IconIds.cs" />
     <Compile Include="Margins\DisableChangeTrackerMargin.cs" />
     <Compile Include="Margins\MarginElementBase.cs" />
@@ -102,6 +118,7 @@
     <Compile Include="NaviBar\CSharpBar.NamespaceItem.cs" />
     <Compile Include="NaviBar\CSharpBar.NodeItem.cs" />
     <Compile Include="NaviBar\CSharpBar.RootItem.cs" />
+    <Compile Include="NaviBar\INaviBar.cs" />
     <Compile Include="NaviBar\NaviBar.cs" />
     <Compile Include="Options\CommonControls.cs" />
     <Compile Include="Options\OptionsPage.cs">
@@ -113,9 +130,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="QuickInfo\ColorQuickInfoUI.cs" />
     <Compile Include="QuickInfo\CSharpOpCodeQuickInfo.cs" />
+    <Compile Include="QuickInfo\InfoContainer.cs" />
     <Compile Include="QuickInfo\QuickInfoBackgroundController.cs" />
     <Compile Include="Helpers\CodeFormatHelper.cs" />
+    <Compile Include="Refactorings\ActionType.cs" />
     <Compile Include="Refactorings\IRefactoring.cs" />
     <Compile Include="Refactorings\RefactoringAction.cs" />
     <Compile Include="Refactorings\RefactoringContext.cs" />
@@ -123,6 +143,13 @@
     <Compile Include="Refactorings\Refactoring.cs" />
     <Compile Include="Refactorings\ReplaceToken.cs" />
     <Compile Include="Refactorings\ReplaceNode.Statements.cs" />
+    <Compile Include="SyntaxHighlight\CodeStyle.cs" />
+    <Compile Include="SyntaxHighlight\CommentStyle.cs" />
+    <Compile Include="SyntaxHighlight\CppStyle.cs" />
+    <Compile Include="SyntaxHighlight\CSharpStyle.cs" />
+    <Compile Include="SyntaxHighlight\MarkdownStyle.cs" />
+    <Compile Include="SyntaxHighlight\SymbolMarkerStyle.cs" />
+    <Compile Include="SyntaxHighlight\XmlCodeStyle.cs" />
     <Compile Include="Taggers\TaggerFactories.cs" />
     <Compile Include="Taggers\TransientClassificationTagHolder.cs" />
     <Compile Include="Taggers\Classifications.cs" />
@@ -183,7 +210,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Controls\ThemedButton.cs" />
     <Compile Include="Controls\ThemedTextBox.cs" />
-    <Compile Include="Controls\ThemedText.cs" />
+    <Compile Include="Controls\TextEditorWrapper.cs" />
     <Compile Include="Controls\ThemedToolTip.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.cs" />
     <Compile Include="Helpers\CodeAnalysisHelper.Symbol.cs" />

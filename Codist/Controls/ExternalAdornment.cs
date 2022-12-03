@@ -264,13 +264,4 @@ namespace Codist.Controls
 			_View.Properties[QuickInfoSuppressionId] = true;
 		}
 	}
-
-	public class AdornmentChildRemovedEventArgs
-	{
-		public readonly UIElement RemovedElement;
-
-		public AdornmentChildRemovedEventArgs(UIElement removed) {
-			RemovedElement = removed;
-		}
-	}
 }

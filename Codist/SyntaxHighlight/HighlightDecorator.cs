@@ -225,6 +225,7 @@ namespace Codist.SyntaxHighlight
 					catch (Exception ex) {
 						// hack Weird bug in VS: NullReferenceException can occur here even if item.Key is not null
 						Debug.WriteLine($"Update format {item.Key.Classification} error: {ex}");
+						CodistPackage.OutputString(item.Key.Classification + " set properties error: " + ex.ToString());
 					}
 					Debug.WriteLine("Update format: " + item.Key.Classification);
 				}

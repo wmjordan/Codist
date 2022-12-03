@@ -19,7 +19,7 @@ namespace Codist.QuickInfo
 			return d;
 		}
 
-		public static void ShowOpCodeInfo(this QiContainer container, IFieldSymbol property) {
+		public static void ShowOpCodeInfo(this InfoContainer container, IFieldSymbol property) {
 			if (_OpCodes.TryGetValue(property.Name, out OpCode code)) {
 				container.Add(new ThemedTipDocument()
 					.AppendTitle(IconIds.OpCodes, $"{code.OpCodeType} {code.Name}")

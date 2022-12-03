@@ -11,13 +11,19 @@ namespace Codist.SyntaxHighlight
 	static class FormatStore
 	{
 		static readonly object _syncRoot = new object();
-		// note: the following fields are sequence-critical here
+
+		#region sequence-critical static fields
 		internal static readonly IEditorFormatMap DefaultEditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText);
+
 		internal static readonly IClassificationFormatMap DefaultClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(Constants.CodeText);
+
 		static Dictionary<string, StyleBase> _SyntaxStyleCache = InitSyntaxStyleCache();
-		internal static readonly Dictionary<IClassificationType, List<IClassificationType>> ClassificationTypeStore = InitClassificationTypes(_SyntaxStyleCache.Keys);
+
+		internal static readonly Dictionary<IClassificationType, List<IClassificationType>> ClassificationTypeStore = InitClassificationTypes(_SyntaxStyleCache.Keys); 
+		#endregion
 
 		static Dictionary<IClassificationType, TextFormattingRunProperties> _BackupFormattings = new Dictionary<IClassificationType, TextFormattingRunProperties>(80);
+
 		static TextFormattingRunProperties __DefaultFormatting;
 
 		internal static bool IdentifySymbolSource { get; private set; }

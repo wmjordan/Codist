@@ -38,12 +38,4 @@ namespace Codist.Refactorings
 			return String.Concat(root.GetAnnotatedNodes(Annotation).Select(n => n.ToFullString()));
 		}
 	}
-
-	enum ActionType
-	{
-		Replace,
-		InsertBefore,
-		InsertAfter,
-		Remove
-	}
 }

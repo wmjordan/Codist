@@ -60,7 +60,7 @@ namespace Codist.QuickInfo
 			var qiWrapper = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
 				? QuickInfoOverrider.CreateOverrider(session)
 				: null;
-			var qiContent = new QiContainer(qiWrapper);
+			var qiContent = new InfoContainer(qiWrapper);
 			var currentSnapshot = buffer.CurrentSnapshot;
 			var subjectTriggerPoint = session.GetTriggerPoint(currentSnapshot).GetValueOrDefault();
 			if (subjectTriggerPoint.Snapshot == null) {
@@ -474,7 +474,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowCandidateInfo(QiContainer qiContent, ImmutableArray<ISymbol> candidates) {
+		static void ShowCandidateInfo(InfoContainer qiContent, ImmutableArray<ISymbol> candidates) {
 			var info = new ThemedTipDocument().AppendTitle(IconIds.SymbolCandidate, R.T_Maybe);
 			foreach (var item in candidates) {
 				info.Append(new ThemedTipParagraph(item.GetImageId(), ToUIText(item.OriginalDefinition)));
@@ -482,7 +482,7 @@ namespace Codist.QuickInfo
 			qiContent.Add(info);
 		}
 
-		void ShowSymbolInfo(IAsyncQuickInfoSession session, QiContainer qiContent, SyntaxNode node, ISymbol symbol, SemanticModel semanticModel) {
+		void ShowSymbolInfo(IAsyncQuickInfoSession session, InfoContainer qiContent, SyntaxNode node, ISymbol symbol, SemanticModel semanticModel) {
 			switch (symbol.Kind) {
 				case SymbolKind.Event:
 					ShowEventInfo(qiContent, symbol as IEventSymbol);
@@ -555,7 +555,7 @@ namespace Codist.QuickInfo
 
 		}
 
-		static void ShowSymbolLocationInfo(QiContainer qiContent, ISymbol symbol) {
+		static void ShowSymbolLocationInfo(InfoContainer qiContent, ISymbol symbol) {
 			string asmName = symbol.GetAssemblyModuleName();
 			if (asmName != null) {
 				var item = new ThemedTipDocument()
@@ -578,7 +578,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowBlockInfo(QiContainer qiContent, ITextSnapshot textSnapshot, SyntaxNode node, SemanticModel semanticModel) {
+		static void ShowBlockInfo(InfoContainer qiContent, ITextSnapshot textSnapshot, SyntaxNode node, SemanticModel semanticModel) {
 			var lines = textSnapshot.GetLineSpan(node.Span).Length + 1;
 			if (lines > 1) {
 				qiContent.Add(
@@ -619,7 +619,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.ReadVariables, p)));
 			}
 		}
-		static void ShowMiscInfo(QiContainer qiContent, SyntaxNode node) {
+		static void ShowMiscInfo(InfoContainer qiContent, SyntaxNode node) {
 			Grid infoBox = null;
 			var nodeKind = node.Kind();
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && (nodeKind == SyntaxKind.NumericLiteralExpression || nodeKind == SyntaxKind.CharacterLiteralExpression)) {
@@ -701,7 +701,7 @@ namespace Codist.QuickInfo
 			return null;
 		}
 
-		static void ShowAttributesInfo(QiContainer qiContent, ISymbol symbol) {
+		static void ShowAttributesInfo(InfoContainer qiContent, ISymbol symbol) {
 			// todo: show inherited attributes
 			var p = ListAttributes(null, symbol.GetAttributes(), 0);
 			if (symbol.Kind == SymbolKind.Method) {
@@ -729,7 +729,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowPropertyInfo(QiContainer qiContent, IPropertySymbol property) {
+		static void ShowPropertyInfo(InfoContainer qiContent, IPropertySymbol property) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 				ShowAnonymousTypeInfo(qiContent, property);
 			}
@@ -744,7 +744,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowEventInfo(QiContainer qiContent, IEventSymbol ev) {
+		static void ShowEventInfo(InfoContainer qiContent, IEventSymbol ev) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) == false
 					&& (ev.DeclaredAccessibility != Accessibility.Public || ev.IsAbstract || ev.IsStatic || ev.IsOverride || ev.IsVirtual)
@@ -763,7 +763,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		void ShowFieldInfo(QiContainer qiContent, IFieldSymbol field) {
+		void ShowFieldInfo(InfoContainer qiContent, IFieldSymbol field) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) == false
 				&& (field.DeclaredAccessibility != Accessibility.Public || field.IsReadOnly || field.IsVolatile || field.IsStatic)
@@ -780,7 +780,7 @@ namespace Codist.QuickInfo
 				qiContent.ShowOpCodeInfo(field);
 			}
 
-			void ShowKnownImageId(QiContainer qc, IFieldSymbol f, int fieldValue) {
+			void ShowKnownImageId(InfoContainer qc, IFieldSymbol f, int fieldValue) {
 				var t = f.ContainingType;
 				if (t.MatchTypeName(nameof(Microsoft.VisualStudio.Imaging.KnownImageIds), "Imaging", "VisualStudio", "Microsoft")
 					|| t.MatchTypeName(nameof(IconIds), nameof(Codist))) {
@@ -789,7 +789,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		void ShowMethodInfo(QiContainer qiContent, SyntaxNode node, IMethodSymbol method, SemanticModel semanticModel) {
+		void ShowMethodInfo(InfoContainer qiContent, SyntaxNode node, IMethodSymbol method, SemanticModel semanticModel) {
 			var options = Config.Instance.QuickInfoOptions;
 			if (options.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 				ShowAnonymousTypeInfo(qiContent, method);
@@ -820,7 +820,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		void ShowOverloadsInfo(QiContainer qiContent, SyntaxNode node, IMethodSymbol method, SemanticModel semanticModel) {
+		void ShowOverloadsInfo(InfoContainer qiContent, SyntaxNode node, IMethodSymbol method, SemanticModel semanticModel) {
 			if (_isCandidate) {
 				return;
 			}
@@ -907,7 +907,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowTypeArguments(QiContainer qiContent, ImmutableArray<ITypeSymbol> args, ImmutableArray<ITypeParameterSymbol> typeParams) {
+		static void ShowTypeArguments(InfoContainer qiContent, ImmutableArray<ITypeSymbol> args, ImmutableArray<ITypeParameterSymbol> typeParams) {
 			var info = new ThemedTipDocument();
 			var l = args.Length;
 			var content = new ThemedTipText(R.T_TypeArgument, true);
@@ -918,7 +918,7 @@ namespace Codist.QuickInfo
 			qiContent.Add(info);
 		}
 
-		static void ShowNamespaceInfo(QiContainer qiContent, INamespaceSymbol nsSymbol) {
+		static void ShowNamespaceInfo(InfoContainer qiContent, INamespaceSymbol nsSymbol) {
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NamespaceTypes) == false) {
 				return;
 			}
@@ -944,7 +944,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		void ShowTypeInfo(QiContainer qiContent, SyntaxNode node, INamedTypeSymbol typeSymbol, SemanticModel semanticModel) {
+		void ShowTypeInfo(InfoContainer qiContent, SyntaxNode node, INamedTypeSymbol typeSymbol, SemanticModel semanticModel) {
 			var options = Config.Instance.QuickInfoOptions;
 			if (options.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) && typeSymbol.TypeKind == TypeKind.Class) {
 				ShowAnonymousTypeInfo(qiContent, typeSymbol);
@@ -994,7 +994,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowConstInfo(QiContainer qiContent, ISymbol symbol, object value) {
+		static void ShowConstInfo(InfoContainer qiContent, ISymbol symbol, object value) {
 			if (value is string sv) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.String)) {
 					qiContent.Add(ShowStringInfo(sv, true));
@@ -1011,7 +1011,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowInterfaceImplementation<TSymbol>(QiContainer qiContent, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations)
+		static void ShowInterfaceImplementation<TSymbol>(InfoContainer qiContent, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations)
 			where TSymbol : class, ISymbol {
 			if (symbol.IsStatic || symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.Any() == false) {
 				return;
@@ -1056,7 +1056,7 @@ namespace Codist.QuickInfo
 				qiContent.Add(info);
 			}
 		}
-		static void ShowInterfaceMembers(QiContainer qiContent, INamedTypeSymbol type) {
+		static void ShowInterfaceMembers(InfoContainer qiContent, INamedTypeSymbol type) {
 			var doc = new ThemedTipDocument();
 			doc.AppendTitle(IconIds.ListMembers, R.T_Member);
 			ShowMembers(type, doc, false);
@@ -1092,7 +1092,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowExtensionMethod(QiContainer qiContent, IMethodSymbol method) {
+		static void ShowExtensionMethod(InfoContainer qiContent, IMethodSymbol method) {
 			var info = new ThemedTipDocument()
 				.AppendParagraph(IconIds.ExtensionMethod, new ThemedTipText(R.T_ExtendedBy, true).AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), _SymbolFormatter, -1));
 			var extType = method.MethodKind == MethodKind.ReducedExtension ? method.ReceiverType : method.GetParameters()[0].Type;
@@ -1126,7 +1126,7 @@ namespace Codist.QuickInfo
 			return g;
 		}
 
-		static void ShowBaseType(QiContainer qiContent, ITypeSymbol typeSymbol) {
+		static void ShowBaseType(InfoContainer qiContent, ITypeSymbol typeSymbol) {
 			var baseType = typeSymbol.BaseType;
 			if (baseType == null || baseType.IsCommonClass()) {
 				return;
@@ -1142,7 +1142,7 @@ namespace Codist.QuickInfo
 			qiContent.Add(info);
 		}
 
-		static void ShowEnumInfo(QiContainer qiContent, INamedTypeSymbol type, bool showMembers) {
+		static void ShowEnumInfo(InfoContainer qiContent, INamedTypeSymbol type, bool showMembers) {
 			var t = type.EnumUnderlyingType;
 			if (t == null) {
 				return;
@@ -1231,7 +1231,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowInterfaces(QiContainer qiContent, ITypeSymbol type) {
+		static void ShowInterfaces(InfoContainer qiContent, ITypeSymbol type) {
 			type = type.OriginalDefinition;
 			var interfaces = type.Interfaces;
 			var declaredInterfaces = ImmutableArray.CreateBuilder<INamedTypeSymbol>(interfaces.Length);
@@ -1297,11 +1297,11 @@ namespace Codist.QuickInfo
 			return type.DeclaredAccessibility == Accessibility.Public || type.Locations.Any(l => l.IsInSource);
 		}
 
-		static void ShowDeclarationModifier(QiContainer qiContent, ISymbol symbol) {
+		static void ShowDeclarationModifier(InfoContainer qiContent, ISymbol symbol) {
 			qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.DeclarationModifier, _SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedTipText(), true, false))));
 		}
 
-		static void ShowParameterInfo(QiContainer qiContent, SyntaxNode node, SemanticModel semanticModel) {
+		static void ShowParameterInfo(InfoContainer qiContent, SyntaxNode node, SemanticModel semanticModel) {
 			var argument = node;
 			if (node.IsKind(SyntaxKind.NullLiteralExpression)) {
 				argument = node.Parent;
@@ -1316,7 +1316,7 @@ namespace Codist.QuickInfo
 			} while ((argument = argument.Parent) != null && ++depth < 4);
 		}
 
-		static void ShowArgumentInfo(QiContainer qiContent, SyntaxNode argument, SemanticModel semanticModel) {
+		static void ShowArgumentInfo(InfoContainer qiContent, SyntaxNode argument, SemanticModel semanticModel) {
 			var argList = argument.Parent;
 			SeparatedSyntaxList<ArgumentSyntax> arguments;
 			int argIndex, argCount;
@@ -1455,7 +1455,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static void ShowAnonymousTypeInfo(QiContainer container, ISymbol symbol) {
+		static void ShowAnonymousTypeInfo(InfoContainer container, ISymbol symbol) {
 			ITypeSymbol t;
 			ImmutableArray<ITypeSymbol>.Builder types = null;
 			switch (symbol.Kind) {
@@ -1490,7 +1490,7 @@ namespace Codist.QuickInfo
 				ShowAnonymousTypes(container, types, symbol);
 			}
 
-			void ShowAnonymousTypes(QiContainer c, ImmutableArray<ITypeSymbol>.Builder anonymousTypes, ISymbol currentSymbol) {
+			void ShowAnonymousTypes(InfoContainer c, ImmutableArray<ITypeSymbol>.Builder anonymousTypes, ISymbol currentSymbol) {
 				const string AnonymousNumbers = "abcdefghijklmnopqrstuvwxyz";
 				var d = new ThemedTipDocument().AppendTitle(IconIds.AnonymousType, R.T_AnonymousType);
 				for (var i = 0; i < anonymousTypes.Count; i++) {
@@ -1544,42 +1544,6 @@ namespace Codist.QuickInfo
 				_TextBuffer.Properties.RemoveProperty(typeof(CSharpQuickInfo));
 				_TextBuffer = null;
 			}
-		}
-	}
-
-	sealed class QiContainer
-	{
-		ImmutableArray<object>.Builder _List = ImmutableArray.CreateBuilder<object>();
-		public readonly IQuickInfoOverrider Overrider;
-
-		public QiContainer(IQuickInfoOverrider overrider) {
-			Overrider = overrider;
-		}
-
-		public int Count => _List.Count;
-
-		public void Insert(int index, object item) {
-			if (item != null) {
-				_List.Insert(index, item);
-			}
-		}
-		public void Add(object item) {
-			if (item != null) {
-				_List.Add(item);
-			}
-		}
-
-		public StackPanel ToUI() {
-			var s = new StackPanel();
-			foreach (var item in _List) {
-				if (item is UIElement u) {
-					s.Children.Add(u);
-				}
-				else if (item is string t) {
-					s.Children.Add(new ThemedTipText(t));
-				}
-			}
-			return s;
 		}
 	}
 }

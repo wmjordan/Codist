@@ -10,12 +10,6 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.NaviBar
 {
-	interface INaviBar
-	{
-		void ShowRootItemMenu(int parameter);
-		void ShowActiveItemMenu();
-	}
-
 	/// <summary>
 	/// Overrides default navigator to editor.
 	/// </summary>
