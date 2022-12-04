@@ -136,6 +136,7 @@
     <Compile Include="QuickInfo\QuickInfoBackgroundController.cs" />
     <Compile Include="Helpers\CodeFormatHelper.cs" />
     <Compile Include="Refactorings\ActionType.cs" />
+    <Compile Include="Refactorings\All.cs" />
     <Compile Include="Refactorings\IRefactoring.cs" />
     <Compile Include="Refactorings\RefactoringAction.cs" />
     <Compile Include="Refactorings\RefactoringContext.cs" />

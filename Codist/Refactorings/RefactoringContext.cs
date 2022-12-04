@@ -39,5 +39,14 @@ namespace Codist.Refactorings
 				+ options.GetIndentString(indentUnit);
 			return (SF.TriviaList(SF.Whitespace(indent)), SF.Whitespace(options.GetNewLineString()));
 		}
+
+		public bool AcceptAny(Refactorings.IRefactoring[] refactorings) {
+			foreach (var item in refactorings) {
+				if (item.Accept(this)) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 }

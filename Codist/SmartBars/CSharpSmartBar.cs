@@ -24,30 +24,6 @@ namespace Codist.SmartBars
 	sealed class CSharpSmartBar : SmartBar
 	{
 		static readonly Taggers.HighlightClassifications __HighlightClassifications = Taggers.HighlightClassifications.Instance;
-		static readonly Refactorings.IRefactoring[] __Refactorings = new Refactorings.IRefactoring[] {
-			Refactorings.ReplaceToken.InvertOperator,
-			Refactorings.ReplaceNode.MergeToConditional,
-			Refactorings.ReplaceNode.WrapInElse,
-			Refactorings.ReplaceNode.MultiLineExpression,
-			Refactorings.ReplaceNode.MultiLineList,
-			Refactorings.ReplaceNode.MultiLineMemberAccess,
-			Refactorings.ReplaceNode.ConditionalToIf,
-			Refactorings.ReplaceNode.IfToConditional,
-			Refactorings.ReplaceNode.MergeCondition,
-			Refactorings.ReplaceNode.While,
-			Refactorings.ReplaceNode.AsToCast,
-			Refactorings.ReplaceNode.SwapOperands,
-			Refactorings.ReplaceNode.NestCondition,
-			Refactorings.ReplaceNode.AddBraces,
-			Refactorings.ReplaceNode.WrapInUsing,
-			Refactorings.ReplaceNode.WrapInIf,
-			Refactorings.ReplaceNode.WrapInTryCatch,
-			Refactorings.ReplaceNode.WrapInRegion,
-			Refactorings.ReplaceToken.UseStaticDefault,
-			Refactorings.ReplaceToken.UseExplicitType,
-			Refactorings.ReplaceNode.DeleteCondition,
-			Refactorings.ReplaceNode.RemoveContainingStatement
-		};
 		static readonly string[] __UnitTestingNamespace = new[] { "UnitTesting", "TestTools", "VisualStudio", "Microsoft" };
 		SemanticContext _Context;
 		ExternalAdornment _SymbolListContainer;
@@ -213,21 +189,12 @@ namespace Codist.SmartBars
 				if (refactoringContext.SelectedStatementInfo.Items != null) {
 					AddEditorCommand(MyToolBar, IconIds.ExtractMethod, "Refactor.ExtractMethod", R.CMD_ExtractMethod);
 				}
-				if (HasRefactoring(__Refactorings, refactoringContext)) {
+				if (refactoringContext.AcceptAny(Refactorings.All.Refactorings)) {
 					AddCommand(MyToolBar, IconIds.Refactoring, R.CMD_RefactorSelection, ShowRefactorMenu);
 				}
 				AddCommentCommands();
 				AddEditorCommand(MyToolBar, IconIds.QuickAction, "View.QuickActionsForPosition", R.CMD_QuickAction);
 			}
-		}
-
-		static bool HasRefactoring(Refactorings.IRefactoring[] refactorings, Refactorings.RefactoringContext context) {
-			foreach (var item in refactorings) {
-				if (item.Accept(context)) {
-					return true;
-				}
-			}
-			return false;
 		}
 
 		void ShowRefactorMenu(CommandContext ctx) {
@@ -242,7 +209,7 @@ namespace Codist.SmartBars
 			};
 			m.SetValue(TextBlock.ForegroundProperty, ThemeHelper.MenuTextBrush);
 			var rc = new Refactorings.RefactoringContext(_Context);
-			AddRefactoringCommands(m, __Refactorings, rc);
+			AddRefactoringCommands(m, Refactorings.All.Refactorings, rc);
 			ctx.Sender.ContextMenu = m;
 			m.Closed += Menu_Closed;
 			m.IsOpen = true;
