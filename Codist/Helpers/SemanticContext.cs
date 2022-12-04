@@ -29,6 +29,10 @@ namespace Codist
 		public static SemanticContext GetOrCreateSingetonInstance(IWpfTextView view) {
 			return view.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(view));
 		}
+		public static SemanticContext GetActive() {
+			var view = TextEditorHelper.GetActiveWpfDocumentView();
+			return view == null ? null : GetOrCreateSingetonInstance(view);
+		}
 
 		SemanticContext(IWpfTextView textView) {
 			_View = textView;

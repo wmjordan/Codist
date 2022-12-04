@@ -100,6 +100,21 @@
 					<CanonicalName>CustomizeSyntaxHighlight</CanonicalName>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="CodeRefactoringId" priority="0x1000" type="Button">
+				<Parent guid="guidSHLMainMenu" id="IDG_REFACTORING_ADVANCED" />
+				<Icon guid="ImageCatalogGuid" id="Refactoring" />
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>DefaultDisabled</CommandFlag>
+				<Strings>
+					<MenuText>Refactoring Code...</MenuText>
+					<ButtonText>Refactorings</ButtonText>
+					<ToolTipText>Bring out the menu for refactoring code...</ToolTipText>
+					<CanonicalName>.Refactor.RefactoringCode</CanonicalName>
+					<LocCanonicalName>.Refactor.RefactoringCode</LocCanonicalName>
+				</Strings>
+			</Button>
 		</Buttons>
 	</Commands>
 </CommandTable>

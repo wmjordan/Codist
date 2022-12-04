@@ -33,5 +33,6 @@ namespace Codist.Commands
 		NaviBarSearchDeclarationInProject,
 		AutoBuildVersionWindow,
 		ToggleAutoBuldVersion,
+		CodeRefactoring,
 	}
 }
