@@ -68,8 +68,13 @@ namespace Codist.NaviBar
 					Bar.HideMenu();
 					return;
 				}
-				if (Node.IsKind(SyntaxKind.RegionDirectiveTrivia) && (Node.FirstAncestorOrSelf<MemberDeclarationSyntax>()?.Span.Contains(Node.Span)) != true
+				if (Node.IsKind(SyntaxKind.RegionDirectiveTrivia)
+						&& (Node.FirstAncestorOrSelf<MemberDeclarationSyntax>()?.Span.Contains(Node.Span)) != true
 					|| Node.Kind().IsNonDelegateTypeDeclaration()) {
+					if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Control)) {
+						Node.GetReference().GoToSource();
+						return;
+					}
 					// displays member list for type declarations or regions outside of member declaration
 					var ct = Bar._cancellationSource.GetToken();
 					try {
