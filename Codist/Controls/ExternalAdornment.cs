@@ -160,10 +160,10 @@ namespace Codist.Controls
 			if (newPos.X + child.ActualWidth > ActualWidth) {
 				newPos.X = ActualWidth - child.ActualWidth;
 			}
-			if (newPos.Y + child.ActualHeight < minVisibleSize) {
-				newPos.Y = minVisibleSize - child.ActualHeight;
-			}
-			else if (newPos.Y > ActualHeight - minVisibleSize) {
+			//if (newPos.Y + child.ActualHeight < minVisibleSize) {
+			//	newPos.Y = minVisibleSize - child.ActualHeight;
+			//}
+			if (newPos.Y > ActualHeight - minVisibleSize) {
 				newPos.Y = ActualHeight - minVisibleSize;
 			}
 			Canvas.SetLeft(child, newPos.X);
