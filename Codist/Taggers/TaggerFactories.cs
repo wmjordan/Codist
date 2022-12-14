@@ -86,26 +86,27 @@ namespace Codist.Taggers
 		}
 
 		ITagger<IClassificationTag> GetTagger(ITextView textView, ITextBuffer buffer) {
-			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
-				&& buffer.MayBeEditor() // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
-				&& textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false
-				&& textView.Roles.Contains("PREVIEWTOOLTIPTEXTVIEWROLE") == false
+			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
+				|| buffer.MayBeEditor() == false // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
+				|| textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType")
+				|| textView.Roles.Contains("PREVIEWTOOLTIPTEXTVIEWROLE")
+				|| textView.Roles.Contains("STICKYSCROLL_TEXT_VIEW") // disables advanced highlight for it does not work well if any style contains font size definition
 				) {
-				CSharpTagger tagger;
-				if (textView == _LastTagger?.View) {
-					tagger = _LastTagger;
-				}
-				else if (_Taggers.TryGetValue(textView, out tagger)) {
-					_LastTagger = tagger;
-				}
-				else {
-					_Taggers.Add(textView, _LastTagger = tagger = new CSharpTagger(this, textView as IWpfTextView));
-					++_taggerCount;
-					textView.Closed += TextView_Closed;
-				}
-				return tagger.GetTagger(buffer);
+				return null;
 			}
-			return null;
+			CSharpTagger tagger;
+			if (textView == _LastTagger?.View) {
+				tagger = _LastTagger;
+			}
+			else if (_Taggers.TryGetValue(textView, out tagger)) {
+				_LastTagger = tagger;
+			}
+			else {
+				_Taggers.Add(textView, _LastTagger = tagger = new CSharpTagger(this, textView as IWpfTextView));
+				++_taggerCount;
+				textView.Closed += TextView_Closed;
+			}
+			return tagger.GetTagger(buffer);
 		}
 
 		void TextView_Closed(object sender, EventArgs e) {
@@ -127,7 +128,9 @@ namespace Codist.Taggers
 	sealed class FindResultTaggerProvider : IClassifierProvider
 	{
 		public IClassifier GetClassifier(ITextBuffer buffer) {
-			return Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false ? null : new FindResultTagger();
+			return Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
+				? new FindResultTagger()
+				: null;
 		}
 	}
 
