@@ -17,7 +17,7 @@ Check out this list to see what _Codist_ can do for you.
   ![Feature Brief Super Quick Info](doc/feature-brief-super-quick-info.png)
 * [Navigation Bar](#navigation-bar) with a drag-and-drop and filter enabled member list
   ![Feature Brief Navigation Bar](doc/feature-brief-navigation-bar.png)
-* [Smart Bar](#smart-bar) with common edit commands and symbol reference analyzers
+* [Smart Bar](#smart-bar) with common edit commands, C# code refactoring and symbol reference analyzers
   ![Feature Brief Smart Bar](doc/feature-brief-smart-bar.png)
 * [Scrollbar Marker](#scrollbar-marker) draws a powerful mini code map
   ![Feature Brief Scrollbar Marker](doc/feature-brief-scrollbar-marker.png)
@@ -400,6 +400,14 @@ When we begin to work with new libraries, we usually have to learn new types and
 
 There are two buttons on the top right corner in the result list of symbol analysis commands. The _Pin_ button will keep the list on the screen. And you can use your mouse to drag those lists around.
 
+### Code Refactorings
+
+From version 7.0 on, quite a few code refactorings are provided via a button on the C# Smart Bar.
+
+  ![Smart Bar Code Refactoring](doc/smart-bar-refactoring.png)
+
+You can access the menu from keyboard by assigning a shortcut key to the `Refactor.RefactoringCode` command.
+
 ### Symbol Marker
 
 _Symbol marker_ draws markers for C# symbols.
@@ -529,26 +537,27 @@ Open the *Codist* section in the *Tools->Options* dialog. In the *General* secti
 
 I have learned a lot from the following extension projects (sorted by the time when I learned from them). Codist would not be what you see today without them.
 
-* CommentsPlus: https://github.com/mhoumann/CommentsPlus
-* Better comments: https://github.com/omsharp/BetterComments
-* Remarker: https://github.com/jgyo/remarker
-* Font Sizer: https://github.com/Oceanware/FontSizer
-* Visual Studio Productivity Power Tools: https://github.com/Microsoft/VS-PPT
-* Inheritance Margin: https://github.com/tunnelvisionlabs/InheritanceMargin
-* CoCo: https://github.com/GeorgeAlexandria/CoCo
-* CodeBlockEndTag: https://github.com/KhaosCoders/VSCodeBlockEndTag
-* UntabifyReplacement: https://github.com/cpmcgrath/UntabifyReplacement
-* Extensiblity Tools: https://github.com/madskristensen/ExtensibilityTools
-* CodeMaid: https://github.com/codecadwallader/codemaid
-* Select Next Occurence: https://github.com/2mas/SelectNextOccurrence
-* VSColorOutput: https://github.com/mike-ward/VSColorOutput
-* NuGet: https://github.com/NuGet/NuGet.Build.Packaging
-* GoToImplementation: https://github.com/GordianDotNet/GoToImplementation
-* Roslyn: https://github.com/dotnet/roslyn
-* Community.VisualStudio.Toolkit: https://github.com/VsixCommunity/Community.VisualStudio.Toolkit
+* [CommentsPlus](https://github.com/mhoumann/CommentsPlus), [Better comments](https://github.com/omsharp/BetterComments), [Remarker](https://github.com/jgyo/remarker): syntax tagger
+* [Font Sizer](https://github.com/Oceanware/FontSizer): changing font size in syntax styles
+* [Visual Studio Productivity Power Tools](https://github.com/Microsoft/VS-PPT): extending code window margin
+* [Inheritance Margin](https://github.com/tunnelvisionlabs/InheritanceMargin): extending code window margin
+* [CoCo](https://github.com/GeorgeAlexandria/CoCo): extensive syntax highlighting
+* [CodeBlockEndTag](https://github.com/KhaosCoders/VSCodeBlockEndTag): adornments
+* [UntabifyReplacement](https://github.com/cpmcgrath/UntabifyReplacement): replacing text in code window
+* [Extensiblity Tools](https://github.com/madskristensen/ExtensibilityTools)
+* [CodeMaid](https://github.com/codecadwallader/codemaid): how to support multi-language localization
+* [Select Next Occurence](https://github.com/2mas/SelectNextOccurrence): code navigation
+* [VSColorOutput](https://github.com/mike-ward/VSColorOutput): extending output window pane
+* [NuGet](https://github.com/NuGet/NuGet.Build.Packaging): build events
+* [GoToImplementation](https://github.com/GordianDotNet/GoToImplementation)
+* [Roslyn](https://github.com/dotnet/roslyn): lots about code analysis
+* [Community.VisualStudio.Toolkit](https://github.com/VsixCommunity/Community.VisualStudio.Toolkit): VS extension points
 * ReviewBoard: code.google.com/p/reviewboardvsx
-* Tweaks: https://github.com/madskristensen/Tweakster
-* VsStatus: https://github.com/madskristensen/VsStatus
+* [Tweaks](https://github.com/madskristensen/Tweakster): VS tweaks
+* [VsStatus](https://github.com/madskristensen/VsStatus): hacking the status bar
+* [Roslynator](https://github.com/JosefPihrt/Roslynator): hundreds of code refactorings and analyses
+* [ShowTheShortcut](https://github.com/madskristensen/ShowTheShortcut): discovering identifiers of executed commands
+* [Copy Nice](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.CopyNice): copying text without indentation
 
 And thank you, every donaters, beta testers, feedback providers to this project.
 
@@ -575,3 +584,5 @@ If you like _Codist_, consider [buying me a cup of Chinese tea](https://paypal.m
 You can donate any amount of money as you like. The recommended amount of donation is `$19.99`.
 
 5 donations have been received so far :)
+
+Well, you have already reached here. Why not give Codist a ★★★★★ rating on the [Visual Studio Extension Marketplace](https://marketplace.visualstudio.com/items?itemName=wmj.Codist)?
