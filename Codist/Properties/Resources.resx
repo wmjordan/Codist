@@ -2264,4 +2264,7 @@ Right click: Run unit tests in class</value>
   <data name="CMD_WrapInUsing" xml:space="preserve">
     <value>Wrap in &lt;using&gt;</value>
   </data>
+  <data name="OT_CtrlGoToSource" xml:space="preserve">
+    <value>Go to type definition when Ctrl key is pressed</value>
+  </data>
 </root>

@@ -2515,6 +2515,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Go to type definition when Ctrl key is pressed.
+        /// </summary>
+        internal static string OT_CtrlGoToSource {
+            get {
+                return ResourceManager.GetString("OT_CtrlGoToSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Suppress Super Quick Info when Ctrl key is pressed.
         /// </summary>
         internal static string OT_CtrlSuppressQuickInfo {

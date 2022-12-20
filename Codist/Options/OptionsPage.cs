@@ -526,7 +526,7 @@ namespace Codist.Options
 
 		sealed class PageControl : OptionsPageContainer
 		{
-			readonly OptionBox<NaviBarOptions> _SyntaxDetail, _SymbolToolTip, _RegionOnBar, _StripRegionNonLetter, _RangeHighlight,
+			readonly OptionBox<NaviBarOptions> _SyntaxDetail, _SymbolToolTip, _RegionOnBar, _StripRegionNonLetter, _RangeHighlight, _CtrlGoToSource,
 				_ParameterList, _ParameterListShowParamName, _FieldValue, _AutoPropertyAsField, _MemberType, _PartialClassMember, _BaseClassMember, _Region, _RegionInMember, _LineOfCode;
 			readonly OptionBox<NaviBarOptions>[] _Options;
 
@@ -548,6 +548,7 @@ namespace Codist.Options
 						.SetLazyToolTip(() => R.OT_HighlightSyntaxRangeTip),
 					_AutoPropertyAsField = o.CreateOptionBox(NaviBarOptions.AutoPropertiesAsFields, UpdateConfig, R.OT_FilterAutoPropertiesAsFields),
 					new DescriptionBox(R.OT_FilterAutoPropertiesAsFieldsNote),
+					_CtrlGoToSource = o.CreateOptionBox(NaviBarOptions.CtrlGoToSource, UpdateConfig, R.OT_CtrlGoToSource),
 
 					new TitleBox(R.OT_CSharpNaviBarMenu),
 					_ParameterList = o.CreateOptionBox(NaviBarOptions.ParameterList, UpdateConfig, R.OT_MethodParameterList)

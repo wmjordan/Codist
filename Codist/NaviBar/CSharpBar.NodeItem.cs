@@ -71,7 +71,8 @@ namespace Codist.NaviBar
 				if (Node.IsKind(SyntaxKind.RegionDirectiveTrivia)
 						&& (Node.FirstAncestorOrSelf<MemberDeclarationSyntax>()?.Span.Contains(Node.Span)) != true
 					|| Node.Kind().IsNonDelegateTypeDeclaration()) {
-					if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Control)) {
+					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CtrlGoToSource)
+						&& Keyboard.Modifiers.MatchFlags(ModifierKeys.Control)) {
 						Node.GetReference().GoToSource();
 						return;
 					}
