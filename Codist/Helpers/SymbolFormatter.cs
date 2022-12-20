@@ -1169,7 +1169,7 @@ namespace Codist
 						.GetSymbol(_Node)
 						?.GoToDefinition();
 				}
-				catch (ArgumentNullException) {
+				catch (ArgumentException) {
 					// hack: for a bug in Roslyn where TextBuffer.GetWorkspace can return null
 					// fallback to go to node
 					_Node.GetLocation().GoToSource();
