@@ -16,7 +16,7 @@ namespace Codist
 {
 	sealed class Config
 	{
-		internal const string CurrentVersion = "6.6.0";
+		internal const string CurrentVersion = "7.0.0";
 		const string ThemePrefix = "res:";
 		const int DefaultIconSize = 20;
 		internal const string LightTheme = ThemePrefix + "Light",
@@ -860,6 +860,7 @@ namespace Codist
 		RegionInMember = 1 << 16,
 		BaseClassMember = 1 << 17,
 		MemberType = 1 << 18,
+		CtrlGoToSource = 1 << 19,
 		Default = RangeHighlight | RegionOnBar | ParameterList | FieldValue | AutoPropertiesAsFields | PartialClassMember | Region
 	}
 
