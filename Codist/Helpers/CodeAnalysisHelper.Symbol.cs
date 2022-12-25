@@ -60,27 +60,27 @@ namespace Codist
 		}
 
 		public static INamedTypeSymbol GetSystemTypeSymbol(this SemanticModel semanticModel, SyntaxKind kind) {
-			string typeName;
+			SpecialType type;
 			switch (kind) {
-				case SyntaxKind.BoolKeyword: typeName = nameof(Boolean); break;
-				case SyntaxKind.ByteKeyword: typeName = nameof(Byte); break;
-				case SyntaxKind.SByteKeyword: typeName = nameof(SByte); break;
-				case SyntaxKind.ShortKeyword: typeName = nameof(Int16); break;
-				case SyntaxKind.UShortKeyword: typeName = nameof(UInt16); break;
-				case SyntaxKind.IntKeyword: typeName = nameof(Int32); break;
-				case SyntaxKind.UIntKeyword: typeName = nameof(UInt32); break;
-				case SyntaxKind.LongKeyword: typeName = nameof(Int64); break;
-				case SyntaxKind.ULongKeyword: typeName = nameof(UInt64); break;
-				case SyntaxKind.FloatKeyword: typeName = nameof(Single); break;
-				case SyntaxKind.DoubleKeyword: typeName = nameof(Double); break;
-				case SyntaxKind.DecimalKeyword: typeName = nameof(Decimal); break;
-				case SyntaxKind.StringKeyword: typeName = nameof(String); break;
-				case SyntaxKind.CharKeyword: typeName = nameof(Char); break;
-				case SyntaxKind.ObjectKeyword: typeName = nameof(Object); break;
-				case SyntaxKind.VoidKeyword: typeName = "Void"; break;
+				case SyntaxKind.BoolKeyword: type = SpecialType.System_Boolean; break;
+				case SyntaxKind.ByteKeyword: type = SpecialType.System_Byte; break;
+				case SyntaxKind.SByteKeyword: type = SpecialType.System_SByte; break;
+				case SyntaxKind.ShortKeyword: type = SpecialType.System_Int16; break;
+				case SyntaxKind.UShortKeyword: type = SpecialType.System_UInt16; break;
+				case SyntaxKind.IntKeyword: type = SpecialType.System_Int32; break;
+				case SyntaxKind.UIntKeyword: type = SpecialType.System_UInt32; break;
+				case SyntaxKind.LongKeyword: type = SpecialType.System_Int64; break;
+				case SyntaxKind.ULongKeyword: type = SpecialType.System_UInt64; break;
+				case SyntaxKind.FloatKeyword: type = SpecialType.System_Single; break;
+				case SyntaxKind.DoubleKeyword: type = SpecialType.System_Double; break;
+				case SyntaxKind.DecimalKeyword: type = SpecialType.System_Decimal; break;
+				case SyntaxKind.StringKeyword: type = SpecialType.System_String; break;
+				case SyntaxKind.CharKeyword: type = SpecialType.System_Char; break;
+				case SyntaxKind.ObjectKeyword: type = SpecialType.System_Object; break;
+				case SyntaxKind.VoidKeyword: type = SpecialType.System_Void; break;
 				default: return null;
 			}
-			return semanticModel.GetSystemTypeSymbol(typeName);
+			return semanticModel.Compilation.GetSpecialType(type);
 		}
 		public static INamedTypeSymbol GetSystemTypeSymbol(this SemanticModel semanticModel, string typeName) {
 			return semanticModel.GetTypeSymbol(typeName, nameof(System));

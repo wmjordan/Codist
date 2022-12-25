@@ -105,7 +105,7 @@ namespace Codist.QuickInfo
 				case SyntaxKind.IsKeyword:
 				case SyntaxKind.AmpersandAmpersandToken:
 				case SyntaxKind.BarBarToken:
-					symbol = semanticModel.GetSystemTypeSymbol(nameof(Boolean));
+					symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_Boolean);
 					isConvertedType = true;
 					break;
 				case SyntaxKind.EqualsGreaterThanToken:
@@ -194,7 +194,7 @@ namespace Codist.QuickInfo
 					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span), cancellationToken).Type;
 					break;
 				case CodeAnalysisHelper.DotDotToken:
-					symbol = semanticModel.GetSystemTypeSymbol(nameof(Int32));
+					symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_Int32);
 					isConvertedType = true;
 					break;
 				default:
@@ -248,11 +248,11 @@ namespace Codist.QuickInfo
 					case SyntaxKind.InterpolatedStringToken:
 					case SyntaxKind.InterpolatedStringTextToken:
 					case SyntaxKind.NameOfKeyword:
-						symbol = semanticModel.GetSystemTypeSymbol(nameof(String));
+						symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
 						isConvertedType = true;
 						break;
 					case SyntaxKind.CharacterLiteralToken:
-						symbol = semanticModel.GetSystemTypeSymbol(nameof(Char));
+						symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_Char);
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)
 						&& token.Span.Length >= 8) {
 							qiContent.Add(new ThemedTipText(token.ValueText) { FontSize = ThemeHelper.ToolTipFontSize * 2 });
