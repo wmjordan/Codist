@@ -60,6 +60,7 @@ namespace Codist
 		public const int Argument = KnownImageIds.Parameter;
 		public const int Attribute = KnownImageIds.FormPostBodyParameterNode;
 		public const int Return = KnownImageIds.Return;
+		public const int Value = KnownImageIds.Field;
 		public const int If = KnownImageIds.If;
 		public const int Else = KnownImageIds.GoToNextUncovered;
 		public const int TryCatch = KnownImageIds.TryCatch;
