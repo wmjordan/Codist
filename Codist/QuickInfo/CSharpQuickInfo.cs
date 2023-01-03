@@ -407,9 +407,10 @@ namespace Codist.QuickInfo
 			if (symbol == null) {
 				return null;
 			}
-			if (symbol.Kind == SymbolKind.Method && (symbol as IMethodSymbol)?.IsAccessor() == true) {
+			var ms = symbol as IMethodSymbol;
+			if (symbol.Kind == SymbolKind.Method && ms?.IsAccessor() == true) {
 				// hack: symbol could be Microsoft.CodeAnalysis.CSharp.Symbols.SourceMemberFieldSymbolFromDeclarator which is not IMethodSymbol
-				symbol = symbol.ContainingSymbol;
+				symbol = ms.AssociatedSymbol;
 			}
 			symbol = symbol.GetAliasTarget();
 			var compilation = semanticModel.Compilation;
@@ -436,7 +437,7 @@ namespace Codist.QuickInfo
 			}
 
 			// show type XML Doc for constructors
-			if ((symbol as IMethodSymbol)?.MethodKind == MethodKind.Constructor) {
+			if (ms?.MethodKind == MethodKind.Constructor) {
 				symbol = symbol.ContainingType;
 				var summary = new XmlDoc(symbol, compilation)
 					.GetDescription(symbol);
