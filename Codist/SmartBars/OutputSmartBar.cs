@@ -42,7 +42,7 @@ namespace Codist.SmartBars
 			AddCommand(MyToolBar, IconIds.Open, $"{R.CMD_OpenOrExecuteFile}\n{t}", ctx => {
 				TryRun(t);
 			});
-			AddCommand(MyToolBar, IconIds.OpenFolder, $"{R.CMD_OpenFolder}\n{t}", ctx => {
+			AddCommand(MyToolBar, IconIds.OpenFolder, $"{R.CMD_OpenFolder}\n{Path.GetDirectoryName(t)}", ctx => {
 				Process.Start(new ProcessStartInfo("Explorer.exe", $"/select,\"{t}\"") { WorkingDirectory = Environment.SystemDirectory });
 			});
 			switch (Path.GetExtension(t).ToLowerInvariant()) {
