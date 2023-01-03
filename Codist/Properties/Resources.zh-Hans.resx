@@ -2252,4 +2252,7 @@ Right click: 显示“线程”窗口</value>
   <data name="OT_CtrlGoToSource" xml:space="preserve">
     <value>按住 Ctrl 键点击类型的节点时，转到其定义</value>
   </data>
+  <data name="T_Value" xml:space="preserve">
+    <value>值</value>
+  </data>
 </root>

@@ -14,7 +14,7 @@ namespace Codist
 		readonly ISymbol _Symbol;
 		readonly Compilation _Compilation;
 		readonly bool _HasDoc;
-		XElement _Summary, _Remarks, _Returns;
+		XElement _Summary, _Remarks, _Returns, _Value;
 		bool _Preliminary;
 		List<XElement> _Parameters, _Exceptions, _TypeParameters, _SeeAlsos, _Sees, _Examples;
 		int _InheritedLevel;
@@ -52,6 +52,7 @@ namespace Codist
 		public XElement Summary => _Summary;
 		public XElement Remarks => _Remarks;
 		public XElement Returns => _Returns;
+		public XElement Value => _Value;
 		public IEnumerable<XElement> Examples => _Examples;
 		public IEnumerable<XElement> Exceptions => _Exceptions;
 		public IEnumerable<XElement> Sees => _Sees;
@@ -185,6 +186,8 @@ namespace Codist
 						}
 					}
 					break;
+				case "value":
+					_Value = item; break;
 				default:
 					return false;
 			}

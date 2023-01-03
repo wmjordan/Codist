@@ -6515,6 +6515,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Value.
+        /// </summary>
+        internal static string T_Value {
+            get {
+                return ResourceManager.GetString("T_Value", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Version number not found.
         /// </summary>
         internal static string T_VersionNumberNotFound {

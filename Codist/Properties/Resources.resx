@@ -2267,4 +2267,7 @@ Right click: Run unit tests in class</value>
   <data name="OT_CtrlGoToSource" xml:space="preserve">
     <value>Go to type definition when Ctrl key is pressed</value>
   </data>
+  <data name="T_Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
 </root>
