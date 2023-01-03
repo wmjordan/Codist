@@ -127,6 +127,7 @@ namespace Codist.Options
 			readonly Note _NoticeBox;
 
 			public PageControl(OptionsPage page) : base(page) {
+				Thickness linkMargin = new Thickness(23, 0, 3, 0);
 				var o = Config.Instance.Features;
 				AddPage(R.OT_General,
 					new TitleBox(R.OT_FeatureControllers),
@@ -157,19 +158,18 @@ namespace Codist.Options
 							(_SaveButton = new Button { Name = "_Save", Content = R.CMD_Save, ToolTip = R.OT_SaveConfigFileTip }),
 							(_OpenConfigFolderButton = new Button { Content = R.CMD_OpenConfigFolder, ToolTip = R.OT_OpenConfigFolderTip})
 						}
-					}
-					);
-				AddPage(R.OT_About,
+					},
+
 					new TitleBox(R.OT_ThankYou),
 					new Note(R.OT_ProjectWebSite),
-					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist", "https://github.com/wmjordan/Codist", R.CMD_GotoProjectWebSite),
+					new TextBlock { Margin = linkMargin }.AppendLink("github.com/wmjordan/Codist", "https://github.com/wmjordan/Codist", R.CMD_GotoProjectWebSite),
 					new Note(R.OT_ReportBugsAndSuggestions),
-					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist/issues", "https://github.com/wmjordan/Codist/issues", R.CMD_PostIssue),
+					new TextBlock { Margin = linkMargin }.AppendLink("github.com/wmjordan/Codist/issues", "https://github.com/wmjordan/Codist/issues", R.CMD_PostIssue),
 					new Note(R.OT_LatestRelease),
-					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink("github.com/wmjordan/Codist/releases", "https://github.com/wmjordan/Codist/releases", R.CMD_GotoProjectReleasePage),
-					new Note(R.OT_SupportCodst),
-					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink(R.CMD_DonateLink, "https://www.paypal.me/wmzuo/19.99", R.CMDT_OpenDonatePage),
-					new TextBlock { Margin = new Thickness(23, 0, 3, 0) }.AppendLink(R.CMD_WechatDonateLink, ShowWechatQrCode, R.CMDT_OpenWechatQrCode),
+					new TextBlock { Margin = linkMargin }.AppendLink("github.com/wmjordan/Codist/releases", "https://github.com/wmjordan/Codist/releases", R.CMD_GotoProjectReleasePage),
+					new TitleBox(R.OT_SupportCodst),
+					new TextBlock { Margin = linkMargin }.AppendLink(R.CMD_DonateLink, "https://www.paypal.me/wmzuo/19.99", R.CMDT_OpenDonatePage),
+					new TextBlock { Margin = linkMargin }.AppendLink(R.CMD_WechatDonateLink, ShowWechatQrCode, R.CMDT_OpenWechatQrCode),
 					new DescriptionBox(R.OT_DonateLinkTip)
 					);
 				_Options = new[] { _SyntaxHighlight, _SuperQuickInfo, _SmartBar, _NavigationBar, _ScrollbarMarker, _JumpListEnhancer };

@@ -3977,7 +3977,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Support future development of Codist:.
+        ///   Looks up a localized string similar to Support Codist!.
         /// </summary>
         internal static string OT_SupportCodst {
             get {

@@ -583,7 +583,7 @@ Use space to separate keywords.</value>
     <value>Provides a dynamic floating toolbar in your code editor</value>
   </data>
   <data name="OT_SupportCodst" xml:space="preserve">
-    <value>Support future development of Codist:</value>
+    <value>Support Codist!</value>
   </data>
   <data name="OT_SyntaxHighlightTip" xml:space="preserve">
     <value>Provides advanced syntax highlight and comment taggers</value>

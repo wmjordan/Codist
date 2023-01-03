@@ -722,7 +722,7 @@ Shift：粘贴并选中下一项（整个单词）</value>
     <value>感谢您使用 Codist</value>
   </data>
   <data name="OT_SupportCodst" xml:space="preserve">
-    <value>支持 Codist 未来的开发:</value>
+    <value>支持 Codist!</value>
   </data>
   <data name="T_Example" xml:space="preserve">
     <value>示例</value>
