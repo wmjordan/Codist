@@ -159,10 +159,18 @@ namespace Codist.QuickInfo
 				case SyntaxKind.CommaToken:
 				case SyntaxKind.ColonToken:
 				case SyntaxKind.SemicolonToken:
-				case SyntaxKind.OpenBracketToken:
-				case SyntaxKind.CloseBracketToken:
 					token = token.GetPreviousToken();
 					skipTriggerPointCheck = true;
+					break;
+				case SyntaxKind.OpenBracketToken:
+				case SyntaxKind.CloseBracketToken:
+					if ((node = unitCompilation.FindNode(token.Span)).IsKind(SyntaxKind.BracketedArgumentList)
+						&& node.Parent.IsKind(SyntaxKind.ElementAccessExpression)) {
+						symbol = semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node.Parent, cancellationToken).Symbol;
+					}
+					if (symbol == null) {
+						goto case SyntaxKind.OpenParenToken;
+					}
 					break;
 				case SyntaxKind.InKeyword:
 					if ((node = unitCompilation.FindNode(token.Span)).IsKind(SyntaxKind.ForEachStatement)
@@ -353,11 +361,13 @@ namespace Codist.QuickInfo
 		}
 
 		static ISymbol GetSymbol(SemanticModel semanticModel, SyntaxNode node, ref ImmutableArray<ISymbol> candidates, CancellationToken cancellationToken) {
-			if (node.IsKind(SyntaxKind.BaseExpression)
-				|| node.IsKind(SyntaxKind.DefaultLiteralExpression)) {
+			SyntaxKind kind = node.Kind();
+			if (kind == SyntaxKind.BaseExpression
+				|| kind == SyntaxKind.DefaultLiteralExpression
+				|| kind == SyntaxKind.ImplicitStackAllocArrayCreationExpression) {
 				return semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
 			}
-			else if (node.IsKind(SyntaxKind.ThisExpression)) {
+			if (kind == SyntaxKind.ThisExpression) {
 				return semanticModel.GetTypeInfo(node, cancellationToken).Type;
 			}
 			var symbolInfo = semanticModel.GetSymbolInfo(node, cancellationToken);
@@ -365,9 +375,8 @@ namespace Codist.QuickInfo
 				candidates = symbolInfo.CandidateSymbols;
 				return symbolInfo.CandidateSymbols.FirstOrDefault();
 			}
-			SyntaxKind kind;
 			return symbolInfo.Symbol
-				?? ((kind = node.Kind()).IsDeclaration()
+				?? (kind.IsDeclaration()
 						|| kind == SyntaxKind.VariableDeclarator
 						|| kind == SyntaxKind.SingleVariableDesignation && (node.Parent.IsKind(SyntaxKind.DeclarationExpression)
 							|| node.Parent.IsKind(SyntaxKind.DeclarationPattern)
