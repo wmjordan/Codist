@@ -43,6 +43,9 @@ namespace Codist
 			return new SyntaxList<TNode>(nodes.Select(i => i.WithAdditionalAnnotations(annotations)));
 		}
 		public static string GetIndentString(this OptionSet options, int unit = 1) {
+			if (unit == 0) {
+				return String.Empty;
+			}
 			int indentSize = options.GetOption(FormattingOptions.IndentationSize, Lang);
 			if (unit > 1) {
 				indentSize *= unit;
