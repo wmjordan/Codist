@@ -16,6 +16,7 @@ namespace Codist.Refactorings
 			ReplaceNode.IfToConditional,
 			ReplaceNode.MergeCondition,
 			ReplaceNode.While,
+			ReplaceNode.ConcatToInterpolatedString,
 			ReplaceNode.AsToCast,
 			ReplaceNode.SwapOperands,
 			ReplaceNode.NestCondition,

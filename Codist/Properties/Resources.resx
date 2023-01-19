@@ -2270,4 +2270,7 @@ Right click: Run unit tests in class</value>
   <data name="T_Value" xml:space="preserve">
     <value>Value</value>
   </data>
+  <data name="CMD_ConcatToInterpolatedString" xml:space="preserve">
+    <value>Concat to Interpolated String</value>
+  </data>
 </root>

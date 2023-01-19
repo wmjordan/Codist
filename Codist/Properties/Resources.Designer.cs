@@ -197,6 +197,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Concat to Interpolated String.
+        /// </summary>
+        internal static string CMD_ConcatToInterpolatedString {
+            get {
+                return ResourceManager.GetString("CMD_ConcatToInterpolatedString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?:&gt; to &lt;if...else&gt;.
         /// </summary>
         internal static string CMD_ConditionalToIfElse {

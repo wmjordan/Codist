@@ -26,6 +26,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode MultiLineList = new MultiLineListRefactoring();
 		public static readonly ReplaceNode MultiLineExpression = new MultiLineExpressionRefactoring();
 		public static readonly ReplaceNode MultiLineMemberAccess = new MultiLineMemberAccessRefactoring();
+		public static readonly ReplaceNode ConcatToInterpolatedString = new ConcatToInterpolatedStringRefactoring();
 
 		sealed class AddBracesRefactoring : ReplaceNode
 		{
@@ -820,6 +821,158 @@ namespace Codist.Refactorings
 				else {
 					return expression;
 				}
+			}
+		}
+
+		sealed class ConcatToInterpolatedStringRefactoring : ReplaceNode
+		{
+			const int CONCAT = 1, ADD = 2;
+			const char StartChar = '{', EndChar = '}';
+			const string Start = "{", End = "}", StartSubstitution = "{{", EndSubstitution = "}}";
+
+			static readonly char[] StartEndChars = new[] { StartChar, EndChar };
+			int _Mode;
+
+			public override int IconId => IconIds.InterpolatedString;
+			public override string Title => R.CMD_ConcatToInterpolatedString;
+
+			public override bool Accept(RefactoringContext ctx) {
+				var node = ctx.Node;
+				InvocationExpressionSyntax ie;
+				if (node is IdentifierNameSyntax name) {
+					if (name.GetName() == nameof(String.Concat)
+						&& (ie = node.FirstAncestorOrSelf<InvocationExpressionSyntax>()) != null
+						&& ie.ArgumentList.Arguments.Count > 1
+						&& ie.Expression.GetLastIdentifier() == name) {
+						_Mode = 1;
+						return true;
+					}
+				}
+				else if (node.IsKind(SyntaxKind.AddExpression)
+					&& ctx.SemanticContext.SemanticModel.GetTypeInfo(node).ConvertedType.SpecialType == SpecialType.System_String) {
+					_Mode = 2;
+					return true;
+				}
+				return false;
+			}
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				if (_Mode == CONCAT) {
+					var ie = ctx.Node.FirstAncestorOrSelf<InvocationExpressionSyntax>();
+					if (ie == null) {
+						yield break;
+					}
+					yield return Replace(ie,
+						SF.InterpolatedStringExpression(
+							SF.Token(SyntaxKind.InterpolatedStringStartToken),
+							new SyntaxList<InterpolatedStringContentSyntax>(ArgumentsToInterpolatedStringContents(ie.ArgumentList.Arguments))
+							).AnnotateSelect()
+						);
+				}
+				else if (_Mode == ADD) {
+					var node = ctx.Node;
+					while (node.Parent.IsKind(SyntaxKind.AddExpression)) {
+						node = node.Parent;
+					}
+					var add = (BinaryExpressionSyntax)node;
+					yield return Replace(add, SF.InterpolatedStringExpression(
+							SF.Token(SyntaxKind.InterpolatedStringStartToken),
+							new SyntaxList<InterpolatedStringContentSyntax>(AddExpressionsToInterpolatedStringContents(add))
+							).AnnotateSelect()
+						);
+				}
+			}
+
+			static IEnumerable<InterpolatedStringContentSyntax> ArgumentsToInterpolatedStringContents(SeparatedSyntaxList<ArgumentSyntax> arguments) {
+				return ExpressionsToInterpolatedStringContents(arguments.Select(a => a.Expression));
+			}
+
+			static IEnumerable<InterpolatedStringContentSyntax> AddExpressionsToInterpolatedStringContents(BinaryExpressionSyntax add) {
+				while (add.Left is BinaryExpressionSyntax bin && bin.IsKind(SyntaxKind.AddExpression)) {
+					add = bin;
+				}
+				return ExpressionsToInterpolatedStringContents(GetBinaryExpressionOperands(add));
+			}
+
+			static IEnumerable<InterpolatedStringContentSyntax> ExpressionsToInterpolatedStringContents(IEnumerable<ExpressionSyntax> expressions) {
+				foreach (var exp in expressions) {
+					switch (exp.Kind()) {
+						case SyntaxKind.StringLiteralExpression:
+							var s = (LiteralExpressionSyntax)exp;
+							var t = s.Token.Text;
+							switch (s.Token.Kind()) {
+								case SyntaxKind.StringLiteralToken:
+									t = t[0] == '@'
+										? t.Substring(2, t.Length - 3).Replace("\"\"", "\\\"")
+										: t.Substring(1, t.Length - 2);
+									t = ReplaceBraces(t);
+									break;
+								case SyntaxKind.InterpolatedStringToken:
+								case CodeAnalysisHelper.SingleLineRawStringLiteralToken:
+								case CodeAnalysisHelper.MultiLineRawStringLiteralToken:
+								default:
+									yield return (InterpolatedStringContentSyntax)SF.Interpolation(exp.WithoutTrivia());
+									goto NEXT;
+							}
+							yield return SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, s.Token.ValueText, default));
+						NEXT:
+							break;
+						case SyntaxKind.InterpolatedStringExpression:
+							var ise = (InterpolatedStringExpressionSyntax)exp;
+							if (ise.StringStartToken.IsKind(SyntaxKind.InterpolatedVerbatimStringStartToken)) {
+								foreach (var item in ise.Contents) {
+									if (item is InterpolatedStringTextSyntax ist
+										&& (t = ist.TextToken.Text).Contains("\"\"")) {
+										t = ReplaceBraces(t.Replace("\"\"", "\\\""));
+										yield return SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, ist.TextToken.ValueText, default));
+									}
+									else {
+										yield return item;
+									}
+								}
+							}
+							else {
+								foreach (var item in ise.Contents) {
+									yield return item;
+								}
+							}
+							break;
+						case SyntaxKind.CharacterLiteralExpression:
+							var c = (LiteralExpressionSyntax)exp;
+							t = c.Token.Text;
+							t = t.Substring(1, t.Length - 2);
+							switch (t) {
+								case Start: t = StartSubstitution; break;
+								case End: t = EndSubstitution; break;
+							}
+							yield return SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, c.Token.ValueText, default));
+							break;
+						case SyntaxKind.NullLiteralExpression:
+							yield return SF.InterpolatedStringText();
+							break;
+						case SyntaxKind.ConditionalExpression:
+							yield return SF.Interpolation(SF.ParenthesizedExpression(exp.WithoutTrivia()));
+							break;
+						default:
+							yield return SF.Interpolation(exp.WithoutTrivia());
+							break;
+					}
+				}
+			}
+
+			private static string ReplaceBraces(string t) {
+				return t.IndexOfAny(StartEndChars) >= 0
+					? t.Replace(Start, StartSubstitution).Replace(End, EndSubstitution)
+					: t;
+			}
+
+			static IEnumerable<ExpressionSyntax> GetBinaryExpressionOperands(BinaryExpressionSyntax bin) {
+				var kind = bin.Kind();
+				yield return bin.Left;
+				do {
+					yield return bin.Right;
+				}
+				while ((bin = bin.Parent as BinaryExpressionSyntax) != null && bin.IsKind(kind));
 			}
 		}
 	}

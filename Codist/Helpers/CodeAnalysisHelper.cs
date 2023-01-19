@@ -60,6 +60,8 @@ namespace Codist
 		internal const SyntaxKind WithInitializerExpression = (SyntaxKind)9062;
 		internal const SyntaxKind RecordDeclaration = (SyntaxKind)9063;
 		internal const SyntaxKind RecordStructDesclaration = (SyntaxKind)9068;
+		internal const SyntaxKind SingleLineRawStringLiteralToken = (SyntaxKind)8518;
+		internal const SyntaxKind MultiLineRawStringLiteralToken = (SyntaxKind)8519;
 		internal const SymbolKind FunctionPointerType = (SymbolKind)20;
 		internal const TypeKind FunctionPointer = (TypeKind)13;
 		internal const MethodKind FunctionPointerMethod = (MethodKind)18;

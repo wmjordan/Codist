@@ -133,6 +133,7 @@ namespace Codist
 		public const int SplitCondition = KnownImageIds.UngroupClause;
 		public const int MultiLine = KnownImageIds.WordWrap;
 		public const int MultiLineList = KnownImageIds.BulletList;
+		public const int InterpolatedString = KnownImageIds.Quote;
 		public const int SwapOperands = KnownImageIds.SwitchSourceOrTarget;
 		public const int ToggleValue = KnownImageIds.ToggleButton;
 		public const int InvertOperator = KnownImageIds.Operator;

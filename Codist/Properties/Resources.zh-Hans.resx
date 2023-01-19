@@ -2255,4 +2255,7 @@ Right click: 显示“线程”窗口</value>
   <data name="T_Value" xml:space="preserve">
     <value>值</value>
   </data>
+  <data name="CMD_ConcatToInterpolatedString" xml:space="preserve">
+    <value>将 Concat 转为插值字符串</value>
+  </data>
 </root>
