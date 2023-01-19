@@ -333,11 +333,8 @@ namespace Codist.NaviBar
 
 		void PositionMenu() {
 			if (_SymbolList != null && _ActiveItem != null) {
-				var activeItemPoint = _ActiveItem.TransformToVisual(_ActiveItem.GetParent<Grid>()).Transform(new Point());
-				var gridPoint = View.VisualElement.TranslatePoint(new Point(), View.VisualElement.GetParent<Grid>());
-				ListContainer.Position(_SymbolList,
-					new Point(activeItemPoint.X - gridPoint.X, activeItemPoint.Y - gridPoint.Y - 1 + _ActiveItem.ActualHeight),
-					30);
+				var p = _ActiveItem.TransformToVisual(View.VisualElement).Transform(new Point());
+				ListContainer.Position(_SymbolList, new Point(p.X, p.Y - 1 + _ActiveItem.ActualHeight), 30);
 			}
 		}
 
