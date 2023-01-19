@@ -38,6 +38,7 @@ namespace Codist.NaviBar
 			}
 
 			public override BarItemType ItemType => BarItemType.Node;
+			public SyntaxNode Node { get; private set; }
 			public bool IsSymbolNode => false;
 			public ISymbol Symbol => _Symbol ?? (_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(Node, Bar._cancellationSource.GetToken())));
 			public bool HasReferencedSymbols => _ReferencedSymbols != null && _ReferencedSymbols.Count > 0;

@@ -19,12 +19,12 @@ namespace Codist.NaviBar
 		{
 			SymbolList _Menu;
 			SymbolFilterBox _FilterBox;
-			ISymbol _Symbol;
+			NamespaceNode _Node;
+			bool _Disposed;
 
-			public NamespaceItem(CSharpBar bar, SyntaxNode node) : base(bar, IconIds.Namespace, new ThemedToolBarText()) {
-				Node = node;
-				_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(node, Bar._cancellationSource.GetToken()));
-				((TextBlock)Header).Text = _Symbol.Name;
+			public NamespaceItem(CSharpBar bar, NamespaceNode node) : base(bar, IconIds.Namespace, new ThemedToolBarText()) {
+				_Node = node;
+				((TextBlock)Header).Text = node.Name;
 				Click += HandleClick;
 				this.SetLazyToolTip(() => new CommandToolTip(IconIds.Namespace, R.CMD_SearchWithinNamespace, new TextBlock { TextWrapping = TextWrapping.Wrap }.Append(R.CMDT_SearchWithinNamespace)));
 				this.SetTipPlacementBottom();
@@ -32,7 +32,7 @@ namespace Codist.NaviBar
 
 			public override BarItemType ItemType => BarItemType.Namespace;
 			public bool IsSymbolNode { get; }
-			public ISymbol Symbol => _Symbol;
+			public ISymbol Symbol => _Node.GetSymbol(Bar._SemanticContext);
 
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
 			async void HandleClick(object sender, RoutedEventArgs e) {
@@ -77,7 +77,7 @@ namespace Codist.NaviBar
 					.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey);
 				Bar.SetupSymbolListMenu(_Menu);
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(false);
-				var items = await Bar._SemanticContext.GetNamespacesAndTypesAsync(_Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
+				var items = await Bar._SemanticContext.GetNamespacesAndTypesAsync(Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 				_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this, cancellationToken));
 			}
@@ -94,9 +94,7 @@ namespace Codist.NaviBar
 				await ctx.UpdateAsync(cancellationToken).ConfigureAwait(false);
 				if (sm != ctx.SemanticModel) {
 					_Menu.ClearSymbols();
-					_Symbol = await ctx.RelocateSymbolAsync(_Symbol, cancellationToken).ConfigureAwait(false);
-					//_Node = Bar._SemanticContext.RelocateDeclarationNode(_Node);
-					var items = await ctx.GetNamespacesAndTypesAsync(_Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
+					var items = await ctx.GetNamespacesAndTypesAsync(Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this, cancellationToken));
 					_Menu.RefreshItemsSource(true);
@@ -129,14 +127,13 @@ namespace Codist.NaviBar
 			}
 
 			public override void Dispose() {
-				if (Node != null) {
+				if (_Disposed == false) {
 					if (_Menu != null) {
 						Bar.DisposeSymbolList(_Menu);
 						_Menu = null;
 					}
 					base.Dispose();
 					Click -= HandleClick;
-					_Symbol = null;
 					if (_FilterBox != null) {
 						_FilterBox.FilterChanged -= FilterChanged;
 						_FilterBox = null;
@@ -146,6 +143,7 @@ namespace Codist.NaviBar
 						ContextMenu = null;
 					}
 					DataContext = null;
+					_Disposed = true;
 				}
 			}
 		}

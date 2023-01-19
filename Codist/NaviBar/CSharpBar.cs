@@ -172,16 +172,10 @@ namespace Codist.NaviBar
 				}
 				CHECK_NODE:
 				if (Items[i] is BarItem ni) {
-					if (ni.Node == nodes[i2]) {
+					if (ni.ItemType == BarItemType.Node && ((NodeItem)ni).Node == nodes[i2]) {
 						// keep the item if corresponding node is not updated
 						++i;
 						continue;
-					}
-					else if (ni.ItemType == BarItemType.Namespace
-						&& ni.Node.Kind().IsNamespaceDeclaration() == false) {
-						if (++i < ic) {
-							goto CHECK_NODE;
-						}
 					}
 					if (ni.ItemType == BarItemType.Namespace) {
 						i = FirstNodeIndex;
@@ -242,6 +236,8 @@ namespace Codist.NaviBar
 		}
 
 		void AddNamespaceNodes(SyntaxNode node, NameSyntax ns) {
+			var name = ns.GetName();
+			NamespaceNode nn = null;
 			if (node.Parent.IsKind(SyntaxKind.NamespaceDeclaration) == false) {
 				var nb = ImmutableArray.CreateBuilder<NameSyntax>();
 				while (ns is QualifiedNameSyntax q) {
@@ -249,10 +245,10 @@ namespace Codist.NaviBar
 					nb.Add(ns);
 				}
 				for (var i = nb.Count - 1; i >= 0; i--) {
-					Items.Add(new NamespaceItem(this, nb[i]));
+					Items.Add(new NamespaceItem(this, nn = new NamespaceNode(nb[i].GetName(), nn)));
 				}
 			}
-			Items.Add(new NamespaceItem(this, node));
+			Items.Add(new NamespaceItem(this, new NamespaceNode(name, nn)));
 		}
 
 		async Task<ImmutableArray<SyntaxNode>> UpdateModelAndGetContainingNodesAsync(CancellationToken token) {
@@ -505,11 +501,9 @@ namespace Codist.NaviBar
 			}
 
 			protected CSharpBar Bar { get; private set; }
-			public SyntaxNode Node { get; protected set; }
 			public abstract BarItemType ItemType { get; }
 			public override void Dispose() {
 				base.Dispose();
-				Node = null;
 				Bar = null;
 			}
 		}
@@ -570,6 +564,34 @@ namespace Codist.NaviBar
 			None,
 			ShowPartial,
 			ShowBase
+		}
+
+		sealed class NamespaceNode
+		{
+			public readonly string Name;
+			public readonly NamespaceNode Parent;
+
+			public NamespaceNode(string name, NamespaceNode parent) {
+				Name = name;
+				Parent = parent;
+			}
+
+			public INamespaceSymbol GetSymbol(SemanticContext context) {
+				return Parent != null
+					? FindSymbolFromParent(Parent.GetSymbol(context))
+					: FindSymbolFromParent(context.SemanticModel.Compilation.GlobalNamespace);
+			}
+
+			INamespaceSymbol FindSymbolFromParent(INamespaceSymbol p) {
+				foreach (var n in p.ConstituentNamespaces) {
+					foreach (var item in n.GetNamespaceMembers()) {
+						if (item.Name == Name) {
+							return item;
+						}
+					}
+				}
+				return null;
+			}
 		}
 	}
 }
