@@ -22,6 +22,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode MergeCondition = new MergeConditionRefactoring();
 		public static readonly ReplaceNode IfToConditional = new IfToConditionalRefactoring();
 		public static readonly ReplaceNode ConditionalToIf = new ConditionalToIfRefactoring();
+		public static readonly ReplaceNode SwapConditionResults = new SwapConditionResultsRefactoring();
 		public static readonly ReplaceNode While = new WhileRefactoring();
 		public static readonly ReplaceNode MultiLineList = new MultiLineListRefactoring();
 		public static readonly ReplaceNode MultiLineExpression = new MultiLineExpressionRefactoring();
@@ -525,6 +526,27 @@ namespace Codist.Refactorings
 					SF.ElseClause(SF.Block(whenFalse))
 					);
 				yield return Replace(node, newNode.AnnotateReformatAndSelect());
+			}
+		}
+
+		sealed class SwapConditionResultsRefactoring : ReplaceNode
+		{
+			public override int IconId => IconIds.SwapOperands;
+			public override string Title => R.CMD_SwapConditionResults;
+
+			public override bool Accept(RefactoringContext ctx) {
+				return ctx.Node.IsKind(SyntaxKind.ConditionalExpression);
+			}
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				if (ctx.Node is ConditionalExpressionSyntax node) {
+					yield return Replace(node,
+						node.Update(node.Condition,
+							node.QuestionToken,
+							node.WhenFalse.WithTriviaFrom(node.WhenTrue),
+							node.ColonToken,
+							node.WhenTrue.WithTriviaFrom(node.WhenFalse)).AnnotateSelect());
+				}
 			}
 		}
 

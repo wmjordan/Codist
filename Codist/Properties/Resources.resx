@@ -2273,4 +2273,7 @@ Right click: Run unit tests in class</value>
   <data name="CMD_ConcatToInterpolatedString" xml:space="preserve">
     <value>Concat to Interpolated String</value>
   </data>
+  <data name="CMD_SwapConditionResults" xml:space="preserve">
+    <value>Swap Condition Results</value>
+  </data>
 </root>

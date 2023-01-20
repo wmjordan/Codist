@@ -1508,6 +1508,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Swap Condition Results.
+        /// </summary>
+        internal static string CMD_SwapConditionResults {
+            get {
+                return ResourceManager.GetString("CMD_SwapConditionResults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Swap Operands.
         /// </summary>
         internal static string CMD_SwapOperands {
