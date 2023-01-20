@@ -6,6 +6,7 @@ namespace Codist.Refactorings
 	static class All
 	{
 		internal static readonly IRefactoring[] Refactorings = new IRefactoring[] {
+			ReplaceNode.ConcatToInterpolatedString,
 			ReplaceToken.InvertOperator,
 			ReplaceNode.MergeToConditional,
 			ReplaceNode.WrapInElse,
@@ -17,7 +18,6 @@ namespace Codist.Refactorings
 			ReplaceNode.MergeCondition,
 			ReplaceNode.SwapConditionResults,
 			ReplaceNode.While,
-			ReplaceNode.ConcatToInterpolatedString,
 			ReplaceNode.AsToCast,
 			ReplaceNode.SwapOperands,
 			ReplaceNode.NestCondition,
