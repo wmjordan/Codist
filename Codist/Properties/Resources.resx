@@ -2085,7 +2085,7 @@ Right click: Threads window</value>
     <value>Extension</value>
   </data>
   <data name="T_Deprecated" xml:space="preserve">
-    <value>[Deprecated]</value>
+    <value>Deprecated</value>
   </data>
   <data name="OT_CpuUsage" xml:space="preserve">
     <value>Monitor CPU</value>

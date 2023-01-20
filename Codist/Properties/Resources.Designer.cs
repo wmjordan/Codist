@@ -5050,7 +5050,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to [Deprecated].
+        ///   Looks up a localized string similar to Deprecated.
         /// </summary>
         internal static string T_Deprecated {
             get {

@@ -2070,7 +2070,7 @@ Right click: 显示“线程”窗口</value>
     <value>扩展方法</value>
   </data>
   <data name="T_Deprecated" xml:space="preserve">
-    <value>[已弃用]</value>
+    <value>已弃用</value>
   </data>
   <data name="OT_CpuUsage" xml:space="preserve">
     <value>处理器时间占用率</value>

@@ -89,7 +89,12 @@ namespace Codist
 			desc.Add(signature);
 			if (s.IsObsolete()) {
 				desc.Opacity = TransparentLevel;
-				signature.Inlines.Add(new TextBlock { Margin = WpfHelper.SmallHorizontalMargin }.AddImage(IconIds.Obsoleted).Append(R.T_Deprecated));
+				signature.Inlines.AddRange(new object[] {
+					new LineBreak(),
+					new InlineUIContainer (new TextBlock { Margin = WpfHelper.SmallHorizontalMargin }
+						.Append(ThemeHelper.GetImage(IconIds.Obsoleted).WrapMargin(WpfHelper.GlyphMargin))
+						.Append(R.T_Deprecated))
+				});
 			}
 			#endregion
 
