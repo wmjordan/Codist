@@ -494,8 +494,23 @@ namespace Codist.Refactorings
 
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia;
-				return node.IsKind(SyntaxKind.ConditionalExpression)
-					&& (node.Parent is StatementSyntax || node.Parent.IsKind(SyntaxKind.SimpleAssignmentExpression) && node.Parent.Parent.IsKind(SyntaxKind.ExpressionStatement));
+				if (node.IsKind(SyntaxKind.ConditionalExpression)) {
+					SyntaxNode p = node.Parent;
+					if (p is StatementSyntax) {
+						return true;
+					}
+					if (p.IsKind(SyntaxKind.SimpleAssignmentExpression)) {
+						return p.Parent.IsKind(SyntaxKind.ExpressionStatement);
+					}
+					if (p.IsKind(SyntaxKind.EqualsValueClause)) {
+						p = p.Parent;
+						return p.IsKind(SyntaxKind.VariableDeclarator)
+							&& p.Parent is VariableDeclarationSyntax v
+							&& v.Variables.Count == 1
+							&& v.Parent.IsKind(SyntaxKind.LocalDeclarationStatement);
+					}
+				}
+				return false;
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
@@ -517,6 +532,32 @@ namespace Codist.Refactorings
 				else if (node is YieldStatementSyntax) {
 					whenTrue = SF.YieldStatement(SyntaxKind.YieldReturnStatement, condition.WhenTrue);
 					whenFalse = SF.YieldStatement(SyntaxKind.YieldReturnStatement, condition.WhenFalse);
+				}
+				else if (node.IsKind(SyntaxKind.EqualsValueClause)
+					&& node.Parent is VariableDeclaratorSyntax v) {
+					whenTrue = SF.ExpressionStatement(SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, SF.IdentifierName(v.Identifier), condition.WhenTrue));
+					whenFalse = SF.ExpressionStatement(SF.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, SF.IdentifierName(v.Identifier), condition.WhenFalse));
+					if (v.Parent is VariableDeclarationSyntax d) {
+						var tn = d.Type;
+						if (tn.IsVar) {
+							tn = SF.ParseTypeName(ctx.SemanticContext.SemanticModel.GetSymbol(d.Type)
+								?.ToMinimalDisplayString(ctx.SemanticContext.SemanticModel, d.Type.SpanStart)
+								?? "var");
+						}
+						node = d.Parent;
+						yield return Replace(node, new SyntaxNode[] {
+							SF.LocalDeclarationStatement(
+								SF.VariableDeclaration(tn, SF.SeparatedList<VariableDeclaratorSyntax>(new[] {
+									SF.VariableDeclarator(v.Identifier.WithoutTrivia())
+								}))
+								).WithTriviaFrom(node),
+							SF.IfStatement(condition.Condition.WithoutTrailingTrivia(),
+								SF.Block(whenTrue),
+								SF.ElseClause(SF.Block(whenFalse))
+								).AnnotateReformatAndSelect()
+						});
+					}
+					yield break;
 				}
 				else {
 					yield break;
@@ -654,9 +695,9 @@ namespace Codist.Refactorings
 
 			static void ReformatAddExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxTriviaList indent, SyntaxKind nodeKind) {
 				var exp = (BinaryExpressionSyntax)node;
-					while (exp.Left.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
-						exp = (BinaryExpressionSyntax)exp.Left;
-					}
+				while (exp.Left.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
+					exp = (BinaryExpressionSyntax)exp.Left;
+				}
 				do {
 					node = exp;
 					newExp = exp.Update(((ExpressionSyntax)newExp ?? exp.Left).WithTrailingTrivia(newLine),
@@ -664,13 +705,13 @@ namespace Codist.Refactorings
 						exp.Right);
 					exp = exp.Parent as BinaryExpressionSyntax;
 				} while (exp != null && exp.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression));
-				}
+			}
 
 			static void ReformatLogicalExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxTriviaList indent, SyntaxKind nodeKind) {
 				var exp = (BinaryExpressionSyntax)node;
-					while (exp.Left.IsKind(nodeKind)) {
-						exp = (BinaryExpressionSyntax)exp.Left;
-					}
+				while (exp.Left.IsKind(nodeKind)) {
+					exp = (BinaryExpressionSyntax)exp.Left;
+				}
 				do {
 					node = exp;
 					newExp = exp.Update(((ExpressionSyntax)newExp ?? exp.Left).WithTrailingTrivia(newLine),
