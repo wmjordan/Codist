@@ -629,7 +629,7 @@ namespace Codist.Refactorings
 					ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
 				}
 				else if (nodeKind.IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
-					ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
+					ReformatAddExpressions(ref node, ref newExp, newLine, indent, nodeKind);
 				}
 				else if (nodeKind == SyntaxKind.LogicalOrExpression) {
 					ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
@@ -652,25 +652,32 @@ namespace Codist.Refactorings
 				return SF.Token(syntaxKind).WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space);
 			}
 
-			static void ReformatLogicalExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxTriviaList indent, SyntaxKind nodeKind) {
+			static void ReformatAddExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxTriviaList indent, SyntaxKind nodeKind) {
 				var exp = (BinaryExpressionSyntax)node;
-				if (nodeKind.IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
 					while (exp.Left.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
 						exp = (BinaryExpressionSyntax)exp.Left;
 					}
-				}
-				else {
-					while (exp.Left.IsKind(nodeKind)) {
-						exp = (BinaryExpressionSyntax)exp.Left;
-					}
-				}
 				do {
 					node = exp;
 					newExp = exp.Update(((ExpressionSyntax)newExp ?? exp.Left).WithTrailingTrivia(newLine),
 						exp.OperatorToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 						exp.Right);
 					exp = exp.Parent as BinaryExpressionSyntax;
-				} while (exp != null);
+				} while (exp != null && exp.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression));
+				}
+
+			static void ReformatLogicalExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxTriviaList indent, SyntaxKind nodeKind) {
+				var exp = (BinaryExpressionSyntax)node;
+					while (exp.Left.IsKind(nodeKind)) {
+						exp = (BinaryExpressionSyntax)exp.Left;
+					}
+				do {
+					node = exp;
+					newExp = exp.Update(((ExpressionSyntax)newExp ?? exp.Left).WithTrailingTrivia(newLine),
+						exp.OperatorToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
+						exp.Right);
+					exp = exp.Parent as BinaryExpressionSyntax;
+				} while (exp != null && exp.Left.IsKind(nodeKind));
 			}
 
 			static void ReformatCoalesceExpression(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxToken token, SyntaxKind nodeKind) {
