@@ -42,12 +42,13 @@ namespace Codist.SmartBars
 					// ignore
 					clip = null;
 				}
-				var s = MaybeUrl(clip) && clip.IndexOf(')') < 0
+				var u = MaybeUrl(clip);
+				var s = u && clip.IndexOf(')') < 0
 					? WrapWith(ctx, "[", "](" + clip + ")", false)
 					: WrapWith(ctx, "[", "](url)", false);
 				if (s.Snapshot != null) {
 					// select the "url"
-					if (clip != null) {
+					if (u) {
 						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - clip.Length - 1, clip.Length), false);
 					}
 					else {
