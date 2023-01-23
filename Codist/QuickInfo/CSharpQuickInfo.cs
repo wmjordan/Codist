@@ -128,7 +128,7 @@ namespace Codist.QuickInfo
 				case SyntaxKind.UnderscoreToken:
 				case SyntaxKind.WhereKeyword:
 				case SyntaxKind.OrderByKeyword:
-					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span)).ConvertedType;
+					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span, false, true)).ConvertedType;
 					if (symbol == null) {
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
 							break;
@@ -256,6 +256,8 @@ namespace Codist.QuickInfo
 					case SyntaxKind.InterpolatedStringToken:
 					case SyntaxKind.InterpolatedStringTextToken:
 					case SyntaxKind.NameOfKeyword:
+					case CodeAnalysisHelper.SingleLineRawStringLiteralToken:
+					case CodeAnalysisHelper.MultiLineRawStringLiteralToken:
 						symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
 						isConvertedType = true;
 						break;
