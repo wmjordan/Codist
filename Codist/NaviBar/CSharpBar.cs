@@ -539,7 +539,9 @@ namespace Codist.NaviBar
 			public GeometryAdornment(Color color, Geometry geometry, double thickness) {
 				_child = new DrawingVisual();
 				using (var context = _child.RenderOpen()) {
-					context.DrawGeometry(new SolidColorBrush(color.Alpha(25)), thickness < 0.1 ? null : new Pen(ThemeHelper.MenuHoverBorderBrush, thickness), geometry);
+					context.DrawGeometry(new SolidColorBrush(color.Alpha(25)),
+						thickness < 0.1 ? null : new Pen(ThemeHelper.MenuHoverBorderBrush, thickness),
+						geometry);
 				}
 				AddVisualChild(_child);
 			}

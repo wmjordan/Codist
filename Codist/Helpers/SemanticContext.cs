@@ -97,8 +97,9 @@ namespace Codist
 			var sr = symbol.DeclaringSyntaxReferences.FirstOrDefault(r => r.SyntaxTree != null);
 			try {
 				doc = GetDocument(sr?.SyntaxTree);
-				return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindSimilarSymbols(symbol, (await doc.GetSemanticModelAsync(cancellationToken)).Compilation, cancellationToken)
-				.FirstOrDefault() ?? symbol;
+				return Microsoft.CodeAnalysis.FindSymbols.SymbolFinder
+					.FindSimilarSymbols(symbol, (await doc.GetSemanticModelAsync(cancellationToken)).Compilation, cancellationToken)
+					.FirstOrDefault() ?? symbol;
 			}
 			catch (NullReferenceException) {
 				// ignore
