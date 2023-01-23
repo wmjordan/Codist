@@ -169,7 +169,7 @@ namespace Codist.Refactorings
 								?.AllInterfaces.Any(i => i.IsDisposable()) == true
 						|| s is ExpressionStatementSyntax exp
 							&& exp.Expression is AssignmentExpressionSyntax a
-							&& (ctx.SemanticContext.SemanticModel.GetTypeInfo(a.Left).Type as ITypeSymbol)
+							&& (ctx.SemanticContext.SemanticModel.GetTypeInfo(a.Left).Type)
 								?.AllInterfaces.Any(i => i.IsDisposable()) == true);
 			}
 
