@@ -5249,6 +5249,16 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ...
+        ///Expression too long.
+        /// </summary>
+        internal static string T_ExpressionTooLong {
+            get {
+                return ResourceManager.GetString("T_ExpressionTooLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Extended by: .
         /// </summary>
         internal static string T_ExtendedBy {

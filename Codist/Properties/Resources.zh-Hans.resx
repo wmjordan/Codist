@@ -2261,4 +2261,8 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_SwapConditionResults" xml:space="preserve">
     <value>调换结果</value>
   </data>
+  <data name="T_ExpressionTooLong" xml:space="preserve">
+    <value>...
+表达式过长，未完全显示</value>
+  </data>
 </root>

@@ -478,7 +478,7 @@ namespace Codist.NaviBar
 							if (vi.Value.IsKind(CodeAnalysisHelper.ImplicitObjectCreationExpression)) {
 								v = "new " + (fieldItem.SyntaxNode.Parent as VariableDeclarationSyntax).Type.ToString() + vi.Value.GetImplicitObjectCreationArgumentList().ToString();
 							}
-							fieldItem.Hint = ShowInitializerIndicator() + v;
+							fieldItem.Hint = ShowInitializerIndicator() + (v.Length > 200 ? v.Substring(0, 200) : v);
 						}
 					}
 				}

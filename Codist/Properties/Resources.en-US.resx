@@ -2276,4 +2276,8 @@ Right click: Run unit tests in class</value>
   <data name="CMD_SwapConditionResults" xml:space="preserve">
     <value>Swap Condition Results</value>
   </data>
+  <data name="T_ExpressionTooLong" xml:space="preserve">
+    <value>...
+Expression too long</value>
+  </data>
 </root>
