@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -30,11 +31,11 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var node = ctx.Node;
-				yield return ((IfStatementSyntax)node).Statement is BlockSyntax b
+				return Chain.Create(((IfStatementSyntax)node).Statement is BlockSyntax b
 					? node.Parent.IsKind(SyntaxKind.ElseClause)
 						? Replace((ElseClauseSyntax)node.Parent, SF.ElseClause(SF.Block(b.Statements)).AnnotateReformatAndSelect())
 						: Replace(node, b.Statements.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select))
-					: Replace(node, ((IfStatementSyntax)node).Statement.AnnotateReformatAndSelect());
+					: Replace(node, ((IfStatementSyntax)node).Statement.AnnotateReformatAndSelect()));
 			}
 		}
 		sealed class NestConditionRefactoring : ReplaceNode
@@ -50,7 +51,7 @@ namespace Codist.Refactorings
 				var node = ctx.NodeIncludeTrivia as BinaryExpressionSyntax;
 				var s = GetParentConditionalStatement(node);
 				if (s == null) {
-					yield break;
+					return Enumerable.Empty<RefactoringAction>();
 				}
 				ExpressionSyntax right = node.Right, left = node.Left;
 				while ((node = node.Parent as BinaryExpressionSyntax) != null) {
@@ -60,13 +61,14 @@ namespace Codist.Refactorings
 				if (s is IfStatementSyntax ifs) {
 					var newIf = ifs.WithCondition(left.WithoutTrailingTrivia())
 						.WithStatement(SF.Block(SF.IfStatement(right, ifs.Statement)).Format(ctx.SemanticContext.Workspace));
-					yield return Replace(ifs, newIf.AnnotateReformatAndSelect());
+					return Chain.Create(Replace(ifs, newIf.AnnotateReformatAndSelect()));
 				}
-				else if (s is WhileStatementSyntax ws) {
+				if (s is WhileStatementSyntax ws) {
 					var newWhile = ws.WithCondition(left.WithoutTrailingTrivia())
 						.WithStatement(SF.Block(SF.IfStatement(right, ws.Statement)).Format(ctx.SemanticContext.Workspace));
-					yield return Replace(ws, newWhile.AnnotateReformatAndSelect());
+					return Chain.Create(Replace(ws, newWhile.AnnotateReformatAndSelect()));
 				}
+				return Enumerable.Empty<RefactoringAction>();
 			}
 
 			static StatementSyntax GetParentConditionalStatement(SyntaxNode node) {
@@ -105,7 +107,7 @@ namespace Codist.Refactorings
 				var ifs = ctx.Node as IfStatementSyntax;
 				var s = GetParentConditional(ifs);
 				if (s == null) {
-					yield break;
+					return Enumerable.Empty<RefactoringAction>();
 				}
 				if (ifs.Statement is BlockSyntax b) {
 					b = SF.Block(b.Statements);
@@ -117,17 +119,18 @@ namespace Codist.Refactorings
 				if (s is IfStatementSyntax newIf) {
 					newIf = newIf.WithCondition(SF.BinaryExpression(SyntaxKind.LogicalAndExpression, ParenthesizeLogicalOrExpression(newIf.Condition), ParenthesizeLogicalOrExpression(ifs.Condition)))
 						.WithStatement(b);
-					yield return Replace(s, newIf.AnnotateReformatAndSelect());
+					return Chain.Create(Replace(s, newIf.AnnotateReformatAndSelect()));
 				}
-				else if (s is ElseClauseSyntax newElse) {
+				if (s is ElseClauseSyntax newElse) {
 					newElse = SF.ElseClause(newElse.ElseKeyword.WithTrailingTrivia(), ifs);
-					yield return Replace(s, newElse.AnnotateReformatAndSelect());
+					return Chain.Create(Replace(s, newElse.AnnotateReformatAndSelect()));
 				}
-				else if (s is WhileStatementSyntax newWhile) {
+				if (s is WhileStatementSyntax newWhile) {
 					newWhile = newWhile.WithCondition(SF.BinaryExpression(SyntaxKind.LogicalAndExpression, ParenthesizeLogicalOrExpression(newWhile.Condition), ParenthesizeLogicalOrExpression(ifs.Condition)))
 						.WithStatement(b);
-					yield return Replace(s, newWhile.AnnotateReformatAndSelect());
+					return Chain.Create(Replace(s, newWhile.AnnotateReformatAndSelect()));
 				}
+				return Enumerable.Empty<RefactoringAction>();
 			}
 
 			static ExpressionSyntax ParenthesizeLogicalOrExpression(ExpressionSyntax expression) {
@@ -163,7 +166,7 @@ namespace Codist.Refactorings
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var (ifStatement, statement, elseStatement) = GetConditionalStatement(ctx.Node);
 				if (ifStatement == null) {
-					yield break;
+					return Enumerable.Empty<RefactoringAction>();
 				}
 				StatementSyntax newNode;
 				var (indent, newLine) = ctx.GetIndentAndNewLine(ifStatement.SpanStart);
@@ -195,9 +198,9 @@ namespace Codist.Refactorings
 								indent, newLine));
 						break;
 					default:
-						yield break;
+						return Enumerable.Empty<RefactoringAction>();
 				}
-				yield return Replace(ifStatement, newNode.AnnotateReformatAndSelect());
+				return Chain.Create(Replace(ifStatement, newNode.AnnotateReformatAndSelect()));
 			}
 
 			static (IfStatementSyntax ifStatement, StatementSyntax statement, StatementSyntax elseStatement) GetConditionalStatement(SyntaxNode node) {
@@ -290,7 +293,7 @@ namespace Codist.Refactorings
 								?? "var");
 						}
 						node = d.Parent;
-						yield return Replace(node, new SyntaxNode[] {
+						return Chain.Create(Replace(node, new SyntaxNode[] {
 							SF.LocalDeclarationStatement(
 								SF.VariableDeclaration(tn, SF.SeparatedList<VariableDeclaratorSyntax>(new[] {
 									SF.VariableDeclarator(v.Identifier.WithoutTrivia())
@@ -300,18 +303,18 @@ namespace Codist.Refactorings
 								SF.Block(whenTrue),
 								SF.ElseClause(SF.Block(whenFalse))
 								).AnnotateReformatAndSelect()
-						});
+						}));
 					}
-					yield break;
+					return Enumerable.Empty<RefactoringAction>();
 				}
 				else {
-					yield break;
+					return Enumerable.Empty<RefactoringAction>();
 				}
 				newNode = SF.IfStatement(condition.Condition.WithoutTrailingTrivia(),
 					SF.Block(whenTrue),
 					SF.ElseClause(SF.Block(whenFalse))
 					);
-				yield return Replace(node, newNode.AnnotateReformatAndSelect());
+				return Chain.Create(Replace(node, newNode.AnnotateReformatAndSelect()));
 			}
 		}
 
@@ -326,13 +329,14 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				if (ctx.Node is ConditionalExpressionSyntax node) {
-					yield return Replace(node,
+					return Chain.Create(Replace(node,
 						node.Update(node.Condition,
 							node.QuestionToken,
 							node.WhenFalse.WithTriviaFrom(node.WhenTrue),
 							node.ColonToken,
-							node.WhenTrue.WithTriviaFrom(node.WhenFalse)).AnnotateSelect());
+							node.WhenTrue.WithTriviaFrom(node.WhenFalse)).AnnotateSelect()));
 				}
+				return Enumerable.Empty<RefactoringAction>();
 			}
 		}
 
@@ -361,11 +365,12 @@ namespace Codist.Refactorings
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var node = ctx.Node;
 				if (node is WhileStatementSyntax ws) {
-					yield return Replace(node, SF.DoStatement(ws.Statement, ws.Condition).WithTriviaFrom(ws).AnnotateReformatAndSelect());
+					return Chain.Create(Replace(node, SF.DoStatement(ws.Statement, ws.Condition).WithTriviaFrom(ws).AnnotateReformatAndSelect()));
 				}
-				else if (node is DoStatementSyntax ds) {
-					yield return Replace(node, SF.WhileStatement(ds.Condition, ds.Statement).WithTriviaFrom(ds).AnnotateReformatAndSelect());
+				if (node is DoStatementSyntax ds) {
+					return Chain.Create(Replace(node, SF.WhileStatement(ds.Condition, ds.Statement).WithTriviaFrom(ds).AnnotateReformatAndSelect()));
 				}
+				return Enumerable.Empty<RefactoringAction>();
 			}
 		}
 	}

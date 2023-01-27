@@ -30,9 +30,9 @@ namespace Codist.Refactorings
 			public override string Title => R.CMD_WrapInIf;
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				yield return Replace(ctx.SelectedStatementInfo.Items, SF.IfStatement(
+				return Chain.Create(Replace(ctx.SelectedStatementInfo.Items, SF.IfStatement(
 					SF.LiteralExpression(SyntaxKind.TrueLiteralExpression).AnnotateSelect(),
-					SF.Block(ctx.SelectedStatementInfo.Items)).WithAdditionalAnnotations(CodeFormatHelper.Reformat));
+					SF.Block(ctx.SelectedStatementInfo.Items)).WithAdditionalAnnotations(CodeFormatHelper.Reformat)));
 			}
 		}
 
@@ -100,14 +100,13 @@ namespace Codist.Refactorings
 								(other as YieldStatementSyntax).Expression));
 						break;
 					default:
-						yield break;
+						return Enumerable.Empty<RefactoringAction>();
 				}
-				yield return Replace(ifs,
+				return Chain.Create(Replace(ifs,
 					newStatement.WithLeadingTrivia(ifs.GetLeadingTrivia())
 						.WithTrailingTrivia(other.GetTrailingTrivia())
 						.AnnotateSelect()
-					);
-				yield return Remove(other);
+					)).Add(Remove(other));
 			}
 
 			static ConditionalExpressionSyntax MakeConditional(RefactoringContext ctx, IfStatementSyntax ifStatement, ExpressionSyntax whenTrue, ExpressionSyntax whenFalse) {
@@ -133,10 +132,10 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var ifs = ctx.SelectedStatementInfo.Preceding as IfStatementSyntax;
-				yield return Replace(ifs, ifs.WithElse(SF.ElseClause(ctx.SelectedStatementInfo.Items.Count > 0 || ifs.Statement.IsKind(SyntaxKind.Block)
+				return Chain.Create(Replace(ifs, ifs.WithElse(SF.ElseClause(ctx.SelectedStatementInfo.Items.Count > 0 || ifs.Statement.IsKind(SyntaxKind.Block)
 					? SF.Block(ctx.SelectedStatementInfo.Items)
-					: ctx.SelectedStatementInfo.Items[0])).AnnotateReformatAndSelect());
-				yield return Remove(ctx.SelectedStatementInfo.Items);
+					: ctx.SelectedStatementInfo.Items[0])).AnnotateReformatAndSelect()))
+					.Add(Remove(ctx.SelectedStatementInfo.Items));
 			}
 		}
 
@@ -146,12 +145,14 @@ namespace Codist.Refactorings
 			public override string Title => R.CMD_WrapInTryCatch;
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				yield return Replace(ctx.SelectedStatementInfo.Items, SF.TryStatement(SF.Block(ctx.SelectedStatementInfo.Items),
-					new SyntaxList<CatchClauseSyntax>(
-						SF.CatchClause(SF.Token(SyntaxKind.CatchKeyword), SF.CatchDeclaration(SF.IdentifierName("Exception").AnnotateSelect(), SF.Identifier("ex")),
-						null,
-						SF.Block())),
-					null).WithAdditionalAnnotations(CodeFormatHelper.Reformat));
+				return Chain.Create(Replace(ctx.SelectedStatementInfo.Items,
+					SF.TryStatement(SF.Block(ctx.SelectedStatementInfo.Items),
+						new SyntaxList<CatchClauseSyntax>(
+							SF.CatchClause(SF.Token(SyntaxKind.CatchKeyword), SF.CatchDeclaration(SF.IdentifierName("Exception").AnnotateSelect(), SF.Identifier("ex")),
+							null,
+							SF.Block())),
+						null).WithAdditionalAnnotations(CodeFormatHelper.Reformat)
+					));
 			}
 		}
 
@@ -177,13 +178,14 @@ namespace Codist.Refactorings
 				var statements = ctx.SelectedStatementInfo.Items;
 				var newBlock = SF.Block(ctx.SelectedStatementInfo.Items.Skip(1));
 				if (statements[0] is LocalDeclarationStatementSyntax loc) {
-					yield return Replace(ctx.SelectedStatementInfo.Items,
-						SF.UsingStatement(loc.Declaration.WithoutTrivia(), null, newBlock).AnnotateReformatAndSelect());
+					return Chain.Create(Replace(ctx.SelectedStatementInfo.Items,
+						SF.UsingStatement(loc.Declaration.WithoutTrivia(), null, newBlock).AnnotateReformatAndSelect()));
 				}
-				else if (statements[0] is ExpressionStatementSyntax exp) {
-					yield return Replace(ctx.SelectedStatementInfo.Items,
-						SF.UsingStatement(null, exp.Expression, newBlock).AnnotateReformatAndSelect());
+				if (statements[0] is ExpressionStatementSyntax exp) {
+					return Chain.Create(Replace(ctx.SelectedStatementInfo.Items,
+						SF.UsingStatement(null, exp.Expression, newBlock).AnnotateReformatAndSelect()));
 				}
+				return Enumerable.Empty<RefactoringAction>();
 			}
 		}
 
@@ -199,19 +201,17 @@ namespace Codist.Refactorings
 				var (indent, newLine) = ctx.GetIndentAndNewLine(first.SpanStart, 0);
 				const string REGION_NAME = "RegionName";
 				if (first == last) {
-					yield return Replace(first,
+					return Chain.Create(Replace(first,
 						first.WithLeadingTrivia(first.GetLeadingTrivia().Insert(0, GetRegionLeadingTrivia(REGION_NAME, indent, newLine)))
 							.WithTrailingTrivia(first.GetTrailingTrivia().Add(GetRegionTrailingTrivia(indent)).Add(newLine))
-						);
+						));
 				}
-				else {
-					yield return Replace(first,
+				return Chain.Create(Replace(first,
 						first.WithLeadingTrivia(first.GetLeadingTrivia().Insert(0, GetRegionLeadingTrivia(REGION_NAME, indent, newLine)))
-						);
-					yield return Replace(last,
+					)).
+					Add(Replace(last,
 						last.WithTrailingTrivia(last.GetTrailingTrivia().Add(GetRegionTrailingTrivia(indent)).Add(newLine))
-						);
-				}
+					));
 			}
 
 			static SyntaxTrivia GetRegionLeadingTrivia(string regionName, SyntaxTriviaList indent, SyntaxTrivia newLine) {

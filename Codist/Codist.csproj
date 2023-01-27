@@ -107,6 +107,7 @@
     <Compile Include="Display\EditorWindowDisplayOptimizer.cs" />
     <Compile Include="Display\JumpListEnhancer.cs" />
     <Compile Include="Helpers\AssemblySource.cs" />
+    <Compile Include="Helpers\Chain.cs" />
     <Compile Include="Helpers\InstalledFont.cs" />
     <Compile Include="Helpers\SelectedSelectedSyntax.cs" />
     <Compile Include="Helpers\SymbolUsageKind.cs" />

@@ -119,7 +119,14 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				if (ctx.NodeIncludeTrivia is BinaryExpressionSyntax exp) {
-					yield return Replace(exp, SF.CastExpression(exp.Right.WithoutTrailingTrivia() as TypeSyntax, exp.Left).WithTriviaFrom(exp).AnnotateReformatAndSelect());
+					return Chain.Create(Replace(exp, SF.CastExpression(exp.Right.WithoutTrailingTrivia() as TypeSyntax, exp.Left).WithTriviaFrom(exp).AnnotateReformatAndSelect()));
+				}
+				if (ctx.NodeIncludeTrivia is CastExpressionSyntax ce) {
+					return Chain.Create(Replace(ce, SF.BinaryExpression(SyntaxKind.AsExpression, ce.Expression.WithoutTrailingTrivia(), ce.Type).WithTriviaFrom(ce.Expression).AnnotateReformatAndSelect()));
+				}
+				return Enumerable.Empty<RefactoringAction>();
+			}
+		}
 				}
 				else if (ctx.NodeIncludeTrivia is CastExpressionSyntax ce) {
 					yield return Replace(ce, SF.BinaryExpression(SyntaxKind.AsExpression, ce.Expression.WithoutTrailingTrivia(), ce.Type).WithTriviaFrom(ce.Expression).AnnotateReformatAndSelect());
@@ -234,7 +241,7 @@ namespace Codist.Refactorings
 				var node = ctx.NodeIncludeTrivia as BinaryExpressionSyntax;
 				ExpressionSyntax right = node.Right, left = node.Left;
 				if (left == null || right == null) {
-					yield break;
+					return Enumerable.Empty<RefactoringAction>();
 				}
 
 				#region Swap operands besides selected operator
@@ -260,7 +267,7 @@ namespace Codist.Refactorings
 					right.HasTrailingTrivia && right.GetTrailingTrivia().Last().IsKind(SyntaxKind.EndOfLineTrivia)
 						? left.WithLeadingTrivia(right.GetLeadingTrivia())
 						: left.WithoutTrailingTrivia());
-				yield return Replace(node, newNode.AnnotateReformatAndSelect());
+				return Chain.Create(Replace(node, newNode.AnnotateReformatAndSelect()));
 			}
 		}
 
@@ -320,13 +327,12 @@ namespace Codist.Refactorings
 					ReformatCoalesceExpression(ref node, ref newExp, newLine, token, nodeKind);
 				}
 				else if (nodeKind == SyntaxKind.ConditionalExpression) {
-					yield return ReformatConditionalExpression((ConditionalExpressionSyntax)node, indent, newLine);
-					yield break;
+					return Chain.Create(ReformatConditionalExpression((ConditionalExpressionSyntax)node, indent, newLine));
 				}
 				else {
-					yield break;
+					return Enumerable.Empty<RefactoringAction>();
 				}
-				yield return Replace(node, newExp.AnnotateSelect());
+				return Chain.Create(Replace(node, newExp.AnnotateSelect()));
 			}
 
 			static SyntaxToken CreateTokenWithTrivia(SyntaxTriviaList indent, SyntaxKind syntaxKind) {
@@ -440,8 +446,9 @@ namespace Codist.Refactorings
 					newNode = va.WithVariables(MakeMultiLine(va.Variables, ctx));
 				}
 				if (newNode != null) {
-					yield return Replace(node, newNode.AnnotateSelect());
+					return Chain.Create(Replace(node, newNode.AnnotateSelect()));
 				}
+				return Enumerable.Empty<RefactoringAction>();
 			}
 
 			static SeparatedSyntaxList<T> MakeMultiLine<T>(SeparatedSyntaxList<T> list, RefactoringContext ctx) where T : SyntaxNode {
@@ -513,7 +520,7 @@ namespace Codist.Refactorings
 						break;
 					}
 				}
-				yield return Replace(node, newExp.AnnotateSelect());
+				return Chain.Create(Replace(node, newExp.AnnotateSelect()));
 			}
 
 			static ExpressionSyntax WrapAccess(ExpressionSyntax expression, SyntaxTriviaList indent, SyntaxTrivia newLine) {
@@ -570,27 +577,28 @@ namespace Codist.Refactorings
 				if (_Mode == CONCAT) {
 					var ie = ctx.Node.FirstAncestorOrSelf<InvocationExpressionSyntax>();
 					if (ie == null) {
-						yield break;
+						return Enumerable.Empty<RefactoringAction>();
 					}
-					yield return Replace(ie,
+					return Chain.Create(Replace(ie,
 						SF.InterpolatedStringExpression(
 							SF.Token(SyntaxKind.InterpolatedStringStartToken),
 							new SyntaxList<InterpolatedStringContentSyntax>(ArgumentsToInterpolatedStringContents(ie.ArgumentList.Arguments))
 							).AnnotateSelect()
-						);
+						));
 				}
-				else if (_Mode == ADD) {
+				if (_Mode == ADD) {
 					var node = ctx.Node;
 					while (node.Parent.IsKind(SyntaxKind.AddExpression)) {
 						node = node.Parent;
 					}
 					var add = (BinaryExpressionSyntax)node;
-					yield return Replace(add, SF.InterpolatedStringExpression(
+					return Chain.Create(Replace(add, SF.InterpolatedStringExpression(
 							SF.Token(SyntaxKind.InterpolatedStringStartToken),
 							new SyntaxList<InterpolatedStringContentSyntax>(AddExpressionsToInterpolatedStringContents(add))
 							).AnnotateSelect()
-						);
+						));
 				}
+				return Enumerable.Empty<RefactoringAction>();
 			}
 
 			static IEnumerable<InterpolatedStringContentSyntax> ArgumentsToInterpolatedStringContents(SeparatedSyntaxList<ArgumentSyntax> arguments) {
@@ -605,6 +613,7 @@ namespace Codist.Refactorings
 			}
 
 			static IEnumerable<InterpolatedStringContentSyntax> ExpressionsToInterpolatedStringContents(IEnumerable<ExpressionSyntax> expressions) {
+				var ch = new Chain<InterpolatedStringContentSyntax>();
 				foreach (var exp in expressions) {
 					switch (exp.Kind()) {
 						case SyntaxKind.StringLiteralExpression:
@@ -621,10 +630,10 @@ namespace Codist.Refactorings
 								case CodeAnalysisHelper.SingleLineRawStringLiteralToken:
 								case CodeAnalysisHelper.MultiLineRawStringLiteralToken:
 								default:
-									yield return (InterpolatedStringContentSyntax)SF.Interpolation(exp.WithoutTrivia());
+									ch.Add((InterpolatedStringContentSyntax)SF.Interpolation(exp.WithoutTrivia()));
 									goto NEXT;
 							}
-							yield return SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, s.Token.ValueText, default));
+							ch.Add(SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, s.Token.ValueText, default)));
 						NEXT:
 							break;
 						case SyntaxKind.InterpolatedStringExpression:
@@ -634,16 +643,16 @@ namespace Codist.Refactorings
 									if (item is InterpolatedStringTextSyntax ist
 										&& (t = ist.TextToken.Text).Contains("\"\"")) {
 										t = ReplaceBraces(t.Replace("\"\"", "\\\""));
-										yield return SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, ist.TextToken.ValueText, default));
+										ch.Add(SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, ist.TextToken.ValueText, default)));
 									}
 									else {
-										yield return item;
+										ch.Add(item);
 									}
 								}
 							}
 							else {
 								foreach (var item in ise.Contents) {
-									yield return item;
+									ch.Add(item);
 								}
 							}
 							break;
@@ -655,19 +664,20 @@ namespace Codist.Refactorings
 								case Start: t = StartSubstitution; break;
 								case End: t = EndSubstitution; break;
 							}
-							yield return SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, c.Token.ValueText, default));
+							ch.Add(SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, c.Token.ValueText, default)));
 							break;
 						case SyntaxKind.NullLiteralExpression:
-							yield return SF.InterpolatedStringText();
+							ch.Add(SF.InterpolatedStringText());
 							break;
 						case SyntaxKind.ConditionalExpression:
-							yield return SF.Interpolation(SF.ParenthesizedExpression(exp.WithoutTrivia()));
+							ch.Add(SF.Interpolation(SF.ParenthesizedExpression(exp.WithoutTrivia())));
 							break;
 						default:
-							yield return SF.Interpolation(exp.WithoutTrivia());
+							ch.Add(SF.Interpolation(exp.WithoutTrivia()));
 							break;
 					}
 				}
+				return ch;
 			}
 
 			private static string ReplaceBraces(string t) {
