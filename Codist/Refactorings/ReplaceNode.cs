@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.CodeAnalysis.Text;
 
 namespace Codist.Refactorings
 {
@@ -78,8 +79,23 @@ namespace Codist.Refactorings
 				}
 				var inserted = ctx.NewRoot.GetAnnotatedNodes(action.Annotation).FirstOrDefault();
 				if (inserted != null) {
-					var selSpan = inserted.GetAnnotatedNodes(CodeFormatHelper.Select).FirstOrDefault()?.Span
-						?? inserted.GetAnnotatedTrivia(CodeFormatHelper.Select).FirstOrDefault().Span;
+					TextSpan selSpan = default;
+					foreach (var item in inserted.GetAnnotatedNodes(CodeFormatHelper.Select)) {
+						selSpan = item.Span;
+						break;
+					}
+					if (selSpan.IsEmpty) {
+						foreach (var item in inserted.GetAnnotatedTokens(CodeFormatHelper.Select)) {
+							selSpan = item.Span;
+							break;
+						}
+						if (selSpan.IsEmpty) {
+							foreach (var item in inserted.GetAnnotatedTrivia(CodeFormatHelper.Select)) {
+								selSpan = item.Span;
+								break;
+							}
+						}
+					}
 					if (selSpan.Length != 0) {
 						context.View.SelectSpan(action.FirstOriginal.FullSpan.Start + (selSpan.Start - inserted.FullSpan.Start), selSpan.Length, 1);
 						return;
