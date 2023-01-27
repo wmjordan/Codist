@@ -99,13 +99,9 @@ namespace Codist.SmartBars
 				AddDeleteCommand();
 				AddSpecialFormatCommand();
 				AddWrapTextCommand();
+				AddEditAllMatchingCommand();
 			}
-			if (_View.IsMultilineSelected()) {
-				if (_View.Selection.Mode == TextSelectionMode.Stream) {
-					AddMultilineFindAndReplaceCommands();
-				}
-			}
-			else {
+			if (_View.IsMultilineSelected() == false) {
 				AddFindAndReplaceCommands();
 				AddViewInBrowserCommand();
 				if (Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowSyntaxClassificationInfo)) {

@@ -18,7 +18,6 @@ namespace Codist.SmartBars
 	partial class SmartBar
 	{
 		static readonly CommandItem[] __FindAndReplaceCommands = GetFindAndReplaceCommands();
-		static readonly CommandItem[] __MultilineFindAndReplaceCommands = GetMultilineFindAndReplaceCommands();
 		static readonly CommandItem[] __CaseCommands = GetCaseCommands();
 		static readonly CommandItem[] __WebCommands = GetWebCommands();
 		static readonly CommandItem[] __SurroundingCommands = GetSurroundingCommands();
@@ -161,14 +160,14 @@ namespace Codist.SmartBars
 			});
 		}
 
+		void AddEditAllMatchingCommand() {
+			AddCommand(ToolBar, IconIds.EditMatches, R.CMD_EditMatches, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.InsertCaretsatAllMatching"));
+		}
+
 		void AddFindAndReplaceCommands() {
 			AddCommands(ToolBar, IconIds.FindNext, R.CMD_FindReplace, QuickFind, ctx => __FindAndReplaceCommands.Concat(
 				Config.Instance.SearchEngines.ConvertAll(s => new CommandItem(IconIds.SearchWebSite, R.CMD_SearchWith.Replace("<NAME>", s.Name), c => SearchSelection(s.Pattern, c))))
 			);
-		}
-
-		void AddMultilineFindAndReplaceCommands() {
-			AddCommands(ToolBar, IconIds.FindNext, R.CMD_Find, QuickFind, ctx => __MultilineFindAndReplaceCommands);
 		}
 
 		void QuickFind(CommandContext ctx) {
@@ -434,12 +433,6 @@ namespace Codist.SmartBars
 				new CommandItem(IconIds.Replace, R.CMD_Replace, _ => TextEditorHelper.ExecuteEditorCommand("Edit.Replace")),
 				new CommandItem(IconIds.FindInFile, R.CMD_FindInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.FindinFiles")),
 				new CommandItem(IconIds.ReplaceInFolder, R.CMD_ReplaceInFiles, _ => TextEditorHelper.ExecuteEditorCommand("Edit.ReplaceinFiles")),
-				new CommandItem(IconIds.EditMatches, R.CMD_EditMatches, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.InsertCaretsatAllMatching")),
-			};
-		}
-		static CommandItem[] GetMultilineFindAndReplaceCommands() {
-			return new CommandItem[] {
-				new CommandItem(IconIds.EditMatches, R.CMD_EditMatches, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.InsertCaretsatAllMatching")),
 			};
 		}
 		static CommandItem[] GetSurroundingCommands() {
