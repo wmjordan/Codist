@@ -222,9 +222,24 @@ namespace Codist
 						new ThemedTipText(R.T_Decimal, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right },
 						new ThemedTipText(R.T_Hexadecimal, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 1),
 						new ThemedTipText(R.T_Binary, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 2),
-						new ThemedTipText(number) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
-						ToHexString(new ThemedTipText() { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }, bytes).WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
-						ToBinString(new ThemedTipText() { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }, bytes).WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
+						new ThemedTipText(number) {
+							Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5),
+							Foreground = ThemeHelper.TextBoxBrush,
+							Padding = WpfHelper.SmallHorizontalMargin,
+							FontFamily = ThemeHelper.CodeTextFont
+						}.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
+						ToHexString(new ThemedTipText() {
+							Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5),
+							Foreground = ThemeHelper.TextBoxBrush,
+							Padding = WpfHelper.SmallHorizontalMargin,
+							FontFamily = ThemeHelper.CodeTextFont
+						}, bytes).WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
+						ToBinString(new ThemedTipText() {
+							Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5),
+							Foreground = ThemeHelper.TextBoxBrush,
+							Padding = WpfHelper.SmallHorizontalMargin,
+							FontFamily = ThemeHelper.CodeTextFont
+						}, bytes).WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
 					}
 				};
 			}

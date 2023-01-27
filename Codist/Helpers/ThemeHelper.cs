@@ -24,9 +24,11 @@ namespace Codist
 		internal const int XLargeIconSize = 48;
 
 		static readonly IClassificationFormatMap __ToolTipFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap("tooltip");
+		static readonly IClassificationFormatMap __TextFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(Constants.CodeText);
 		static ThemeHelper() {
 			RefreshThemeCache();
 			__ToolTipFormatMap.ClassificationFormatMappingChanged += UpdateToolTipFormatMap;
+			__TextFormatMap.ClassificationFormatMappingChanged += UpdateTextFormatMap;
 			VSColorTheme.ThemeChanged += _ => {
 				System.Diagnostics.Debug.WriteLine("Theme changed.");
 				RefreshThemeCache();
@@ -34,6 +36,7 @@ namespace Codist
 		}
 
 		public static System.Windows.Media.Brush EditorBackground => ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap("text").GetProperties(Constants.EditorProperties.TextViewBackground).GetBrush(EditorFormatDefinition.BackgroundBrushId);
+		public static WpfFontFamily CodeTextFont { get; private set; }
 		public static GdiColor DocumentPageColor { get; private set; }
 		public static WpfBrush DocumentPageBrush { get; private set; }
 		public static GdiColor DocumentTextColor { get; private set; }
@@ -175,6 +178,10 @@ namespace Codist
 			ToolTipTextBrush = formatMap.ForegroundBrush as WpfBrush;
 			ToolTipFont = formatMap.Typeface.FontFamily;
 			ToolTipFontSize = formatMap.FontRenderingEmSize;
+		} 
+		static void UpdateTextFormatMap(object sender, EventArgs e) {
+			var formatMap = __TextFormatMap.DefaultTextProperties;
+			CodeTextFont = formatMap.Typeface.FontFamily;
 		} 
 		#endregion
 

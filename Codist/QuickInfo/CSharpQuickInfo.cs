@@ -1135,7 +1135,12 @@ namespace Codist.QuickInfo
 			if (showText) {
 				g.RowDefinitions.Add(new RowDefinition());
 				g.Children.Add(new ThemedTipText(R.T_Text, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 2));
-				g.Children.Add(new ThemedTipText(sv) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumn, 1));
+				g.Children.Add(new ThemedTipText(sv) {
+					Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5),
+					Foreground = ThemeHelper.TextBoxBrush,
+					Padding = WpfHelper.SmallHorizontalMargin,
+					FontFamily = ThemeHelper.CodeTextFont
+				}.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 2).SetValue(Grid.SetColumn, 1));
 			}
 			return g;
 		}
@@ -1202,7 +1207,8 @@ namespace Codist.QuickInfo
 					var ft = new ThemedTipText {
 						TextAlignment = TextAlignment.Right,
 						Foreground = ThemeHelper.SystemGrayTextBrush,
-						Margin = WpfHelper.SmallHorizontalMargin
+						Margin = WpfHelper.SmallHorizontalMargin,
+						FontFamily = ThemeHelper.CodeTextFont
 					}.Append("= ", ThemeHelper.SystemGrayTextBrush);
 					SymbolFormatter.Instance.ShowFieldConstantText(ft.Inlines, f, isFlags);
 					g.Add(new TextBlock { Foreground = ThemeHelper.ToolTipTextBrush }
