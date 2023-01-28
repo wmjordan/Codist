@@ -160,9 +160,15 @@ namespace Codist
 		#region Symbol information
 		public static string GetAbstractionModifier(this ISymbol symbol) {
 			if (symbol.IsAbstract) {
-				return symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Interface
-					? String.Empty
-					: "abstract ";
+				if (symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Interface) {
+					return String.Empty;
+				}
+				else if (symbol.IsStatic && (symbol.ContainingType as INamedTypeSymbol)?.TypeKind == TypeKind.Interface) {
+					return "static abstract ";
+				}
+				else {
+					return "abstract ";
+				}
 			}
 			if (symbol.IsStatic) {
 				return "static ";
@@ -334,6 +340,18 @@ namespace Codist
 							case Accessibility.ProtectedAndInternal:
 							case Accessibility.Internal: return IconIds.InternalConstructor;
 							default: return IconIds.Constructor;
+						}
+					}
+					else if (m.MethodKind == MethodKind.UserDefinedOperator) {
+						switch (m.DeclaredAccessibility) {
+							case Accessibility.Public: return KnownImageIds.OperatorPublic;
+							case Accessibility.Protected:
+							case Accessibility.ProtectedOrInternal:
+								return KnownImageIds.OperatorProtected;
+							case Accessibility.Private: return KnownImageIds.OperatorPrivate;
+							case Accessibility.ProtectedAndInternal:
+							case Accessibility.Internal: return KnownImageIds.OperatorInternal;
+							default: return KnownImageIds.Operator;
 						}
 					}
 					switch (m.DeclaredAccessibility) {

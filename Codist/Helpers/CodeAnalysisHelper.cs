@@ -591,9 +591,10 @@ namespace Codist
 						case SyntaxKind.PublicKeyword: return KnownImageIds.OperatorPublic;
 						case SyntaxKind.InternalKeyword: return KnownImageIds.OperatorInternal;
 						case SyntaxKind.ProtectedKeyword: return KnownImageIds.OperatorProtected;
+						case SyntaxKind.PrivateKeyword: return KnownImageIds.OperatorPrivate;
 					}
 				}
-				return KnownImageIds.OperatorPrivate;
+				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration) ? KnownImageIds.OperatorPublic : KnownImageIds.OperatorPrivate;
 			}
 		}
 

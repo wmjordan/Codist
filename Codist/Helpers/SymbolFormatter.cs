@@ -1084,11 +1084,16 @@ namespace Codist
 		}
 
 		void ShowSymbolDeclaration(ISymbol symbol, TextBlock info) {
-			if (symbol.IsAbstract && ((symbol is INamedTypeSymbol nt) == false || nt.TypeKind != TypeKind.Interface)) {
-				info.Append("abstract ", Keyword);
+			if (symbol.IsStatic) {
+				if (symbol.Kind != SymbolKind.Namespace) {
+					info.Append("static ", Keyword);
+				}
+				if (symbol.IsAbstract && (symbol.ContainingType as INamedTypeSymbol)?.TypeKind == TypeKind.Interface) {
+					info.Append("abstract ", Keyword);
+				}
 			}
-			else if (symbol.IsStatic && symbol.Kind != SymbolKind.Namespace) {
-				info.Append("static ", Keyword);
+			else if (symbol.IsAbstract && ((symbol is INamedTypeSymbol nt) == false || nt.TypeKind != TypeKind.Interface)) {
+				info.Append("abstract ", Keyword);
 			}
 			else if (symbol.IsVirtual) {
 				info.Append("virtual ", Keyword);
