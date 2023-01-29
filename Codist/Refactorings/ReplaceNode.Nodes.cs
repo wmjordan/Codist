@@ -356,7 +356,7 @@ namespace Codist.Refactorings
 				var statement = ctx.Node.GetContainingStatement();
 				var remove = GetRemovableAncestor(statement);
 				if (remove == null) {
-					yield break;
+					return Enumerable.Empty<RefactoringAction>();
 				}
 				SyntaxList<StatementSyntax> keep = statement.Parent is BlockSyntax b
 					? b.Statements
@@ -364,18 +364,17 @@ namespace Codist.Refactorings
 				if (remove.IsKind(SyntaxKind.ElseClause)) {
 					var ifs = remove.Parent as IfStatementSyntax;
 					if (ifs.Parent.IsKind(SyntaxKind.ElseClause)) {
-						yield return Replace(ifs.Parent,
+						return Chain.Create(Replace(ifs.Parent,
 							(keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block) || keep.Count == 0
 								? SF.ElseClause(SF.Block(keep))
-								: SF.ElseClause(keep[0])).AnnotateReformatAndSelect());
-						yield break;
+								: SF.ElseClause(keep[0])).AnnotateReformatAndSelect()));
 					}
 					else {
 						keep = keep.Insert(0, ifs.WithElse(null));
 					}
 					remove = ifs;
 				}
-				yield return Replace(remove, keep.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select));
+				return Chain.Create(Replace(remove, keep.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select)));
 			}
 
 			static SyntaxNode GetRemovableAncestor(SyntaxNode node) {
@@ -871,11 +870,12 @@ namespace Codist.Refactorings
 
 			static IEnumerable<ExpressionSyntax> GetBinaryExpressionOperands(BinaryExpressionSyntax bin) {
 				var kind = bin.Kind();
-				yield return bin.Left;
+				var ch = Chain.Create(bin.Left);
 				do {
-					yield return bin.Right;
+					ch.Add(bin.Right);
 				}
 				while ((bin = bin.Parent as BinaryExpressionSyntax) != null && bin.IsKind(kind));
+				return ch;
 			}
 		}
 	}
