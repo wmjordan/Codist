@@ -48,6 +48,7 @@ namespace Codist
 		internal const SyntaxKind QuestionQuestionEqualsToken = (SyntaxKind)8284;
 		internal const SyntaxKind InitKeyword = (SyntaxKind)8443;
 		internal const SyntaxKind RecordKeyword = (SyntaxKind)8444;
+		internal const SyntaxKind RequiredKeyword = (SyntaxKind)8447;
 		internal const SyntaxKind ImplicitObjectCreationExpression = (SyntaxKind)8659;
 		internal const SyntaxKind FileScopedNamespaceDeclaration = (SyntaxKind)8845;
 		internal const SyntaxKind RecursivePattern = (SyntaxKind)9020;
@@ -381,7 +382,7 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration: return GetPropertyIconExt((BasePropertyDeclarationSyntax)node);
 				case SyntaxKind.IndexerDeclaration: return GetPropertyIcon((BasePropertyDeclarationSyntax)node);
 				case SyntaxKind.OperatorDeclaration: return GetOperatorIcon((OperatorDeclarationSyntax)node);
-				case SyntaxKind.ConversionOperatorDeclaration: return IconIds.ConvertOperator;
+				case SyntaxKind.ConversionOperatorDeclaration: return GetConversionIcon((ConversionOperatorDeclarationSyntax)node);
 				case SyntaxKind.FieldDeclaration: return GetFieldIcon((FieldDeclarationSyntax)node);
 				case SyntaxKind.EnumMemberDeclaration: return IconIds.EnumField;
 				case SyntaxKind.VariableDeclarator: return node.Parent.Parent.GetImageId();
@@ -440,7 +441,9 @@ namespace Codist
 						case SyntaxKind.PartialKeyword: isPartial = true; break;
 					}
 				}
-				return isPartial ? IconIds.PartialClass : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.ClassInternal : KnownImageIds.ClassPrivate;
+				return isPartial ? IconIds.PartialClass
+					: syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.ClassInternal
+					: KnownImageIds.ClassPrivate;
 			}
 			int GetStructIcon(BaseTypeDeclarationSyntax syntax) {
 				bool isPartial = false;
@@ -453,7 +456,9 @@ namespace Codist
 						case SyntaxKind.PartialKeyword: isPartial = true; break;
 					}
 				}
-				return isPartial ? IconIds.PartialStruct : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.StructureInternal : KnownImageIds.StructurePrivate;
+				return isPartial ? IconIds.PartialStruct
+					: syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.StructureInternal
+					: KnownImageIds.StructurePrivate;
 			}
 			int GetEnumIcon(EnumDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -475,7 +480,9 @@ namespace Codist
 						case SyntaxKind.PartialKeyword: isPartial = true; break;
 					}
 				}
-				return isPartial ? IconIds.PartialInterface : syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.InterfaceInternal : KnownImageIds.InterfacePrivate;
+				return isPartial ? IconIds.PartialInterface
+					: syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.InterfaceInternal
+					: KnownImageIds.InterfacePrivate;
 			}
 			int GetEventIcon(BasePropertyDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -497,7 +504,9 @@ namespace Codist
 						case SyntaxKind.PrivateKeyword: return KnownImageIds.EventPrivate;
 					}
 				}
-				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration) ? KnownImageIds.EventPublic : KnownImageIds.EventPrivate;
+				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration)
+					? KnownImageIds.EventPublic
+					: KnownImageIds.EventPrivate;
 			}
 			int GetDelegateIcon(DelegateDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -508,7 +517,9 @@ namespace Codist
 						case SyntaxKind.PrivateKeyword: return KnownImageIds.DelegatePrivate;
 					}
 				}
-				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration) ? KnownImageIds.DelegateInternal : KnownImageIds.DelegatePrivate;
+				return syntax.Parent.IsKind(SyntaxKind.NamespaceDeclaration)
+					? KnownImageIds.DelegateInternal
+					: KnownImageIds.DelegatePrivate;
 			}
 			int GetFieldIcon(FieldDeclarationSyntax syntax) {
 				bool isConst = false;
@@ -545,7 +556,9 @@ namespace Codist
 						case SyntaxKind.PrivateKeyword: return KnownImageIds.MethodPrivate;
 					}
 				}
-				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration) ? KnownImageIds.MethodPublic : KnownImageIds.MethodPrivate;
+				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration)
+					? KnownImageIds.MethodPublic
+					: KnownImageIds.MethodPrivate;
 			}
 			int GetConstructorIcon(ConstructorDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -572,7 +585,9 @@ namespace Codist
 						case SyntaxKind.PrivateKeyword: return IconIds.PrivatePropertyMethod;
 					}
 				}
-				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration) ? IconIds.PublicPropertyMethod : IconIds.PrivatePropertyMethod;
+				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration)
+					? IconIds.PublicPropertyMethod
+					: IconIds.PrivatePropertyMethod;
 			}
 			int GetPropertyIcon(BasePropertyDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -583,7 +598,9 @@ namespace Codist
 						case SyntaxKind.PrivateKeyword: return KnownImageIds.PropertyPrivate;
 					}
 				}
-				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration) ? KnownImageIds.PropertyPublic : KnownImageIds.PropertyPrivate;
+				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration)
+					? KnownImageIds.PropertyPublic
+					: KnownImageIds.PropertyPrivate;
 			}
 			int GetOperatorIcon(OperatorDeclarationSyntax syntax) {
 				foreach (var modifier in syntax.Modifiers) {
@@ -594,7 +611,15 @@ namespace Codist
 						case SyntaxKind.PrivateKeyword: return KnownImageIds.OperatorPrivate;
 					}
 				}
-				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration) ? KnownImageIds.OperatorPublic : KnownImageIds.OperatorPrivate;
+				return syntax.Parent.IsKind(SyntaxKind.InterfaceDeclaration)
+					? KnownImageIds.OperatorPublic
+					: KnownImageIds.OperatorPrivate;
+			}
+
+			int GetConversionIcon(ConversionOperatorDeclarationSyntax syntax) {
+				return syntax.ImplicitOrExplicitKeyword.IsKind(SyntaxKind.ExplicitKeyword)
+					? IconIds.ExplicitConversion
+					: IconIds.ImplicitConversion;
 			}
 		}
 

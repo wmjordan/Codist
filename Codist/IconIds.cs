@@ -27,6 +27,7 @@ namespace Codist
 		public const int SealedMethod = KnownImageIds.MethodSealed;
 		public const int SealedEvent = KnownImageIds.EventSealed;
 		public const int SealedProperty = KnownImageIds.PropertySealed;
+		public const int RequiredMember = KnownImageIds.StatusRequired;
 		public const int Deconstructor = KnownImageIds.DeleteListItem;
 		public const int PublicConstructor = KnownImageIds.TypePublic;
 		public const int ProtectedConstructor = KnownImageIds.TypeProtected;
@@ -35,7 +36,8 @@ namespace Codist
 		public const int PartialClass = KnownImageIds.ClassShortcut;
 		public const int PartialInterface = KnownImageIds.InterfaceShortcut;
 		public const int PartialStruct = KnownImageIds.StructureShortcut;
-		public const int ConvertOperator = KnownImageIds.ConvertPartition;
+		public const int ImplicitConversion = KnownImageIds.MacroPublic;
+		public const int ExplicitConversion = KnownImageIds.MacroShortcut;
 		public const int LocalFunction = KnownImageIds.MethodSnippet;
 		public const int LocalVariable = KnownImageIds.LocalVariable;
 		public const int Namespace = KnownImageIds.Namespace;

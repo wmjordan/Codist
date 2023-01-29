@@ -389,6 +389,7 @@ namespace Codist.NaviBar
 								break;
 							case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
 							case SyntaxKind.RefKeyword: AddIcon(ref icons, IconIds.RefMember); break;
+							case CodeAnalysisHelper.RequiredKeyword: AddIcon(ref icons, IconIds.RequiredMember); break;
 						}
 					}
 					if (p.Type is RefTypeSyntax r) {

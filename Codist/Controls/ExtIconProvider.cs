@@ -39,23 +39,30 @@ namespace Codist.Controls
 						AddIcon(ref icons, IconIds.Generic);
 					}
 					if (ms.IsExtensionMethod) {
-							AddIcon(ref icons, IconIds.ExtensionMethod);
-						}
-						else {
-							if (ms.IsSealed) {
-								AddIcon(ref icons, IconIds.SealedMethod);
-							}
-							if (ms.IsOverride) {
-								AddIcon(ref icons, IconIds.OverrideMethod);
-							}
-							if (ms.IsReadOnly()) {
-								AddIcon(ref icons, IconIds.ReadonlyMethod);
-							}
-						if (_ContainerIsInterface) {
-							if (ms.IsAbstract == false && ms.IsStatic == false) {
-								AddIcon(ref icons, IconIds.DefaultInterfaceImplementation);
-						}
+						AddIcon(ref icons, IconIds.ExtensionMethod);
 					}
+					else {
+						if (ms.IsSealed) {
+							AddIcon(ref icons, IconIds.SealedMethod);
+						}
+						if (ms.IsOverride) {
+							AddIcon(ref icons, IconIds.OverrideMethod);
+						}
+						if (ms.IsReadOnly()) {
+							AddIcon(ref icons, IconIds.ReadonlyMethod);
+						}
+						if (_ContainerIsInterface) {
+							if (ms.IsAbstract == false) {
+								if (ms.IsStatic == false) {
+									AddIcon(ref icons, IconIds.DefaultInterfaceImplementation);
+								}
+							}
+							else {
+								if (ms.IsStatic) {
+									AddIcon(ref icons, IconIds.AbstractMember);
+								}
+							}
+						}
 						else if (ms.IsAbstract) {
 							AddIcon(ref icons, IconIds.AbstractMember);
 						}
@@ -143,6 +150,14 @@ namespace Codist.Controls
 									AddIcon(ref icons, IconIds.OverrideProperty);
 								}
 							}
+						}
+						else {
+							if (p.IsAbstract && p.IsStatic) {
+								AddIcon(ref icons, IconIds.AbstractMember);
+							}
+						}
+						if (p.IsRequired()) {
+							AddIcon(ref icons, IconIds.RequiredMember);
 						}
 						if (p.ReturnsByRef || p.ReturnsByRefReadonly) {
 							AddIcon(ref icons, IconIds.RefMember);

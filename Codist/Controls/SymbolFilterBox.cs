@@ -143,7 +143,7 @@ namespace Codist.Controls
 				case KnownImageIds.MethodPublic:
 				case IconIds.PublicConstructor:
 				case KnownImageIds.OperatorPublic:
-				case IconIds.ConvertOperator:
+				case IconIds.ImplicitConversion:
 					return filterTypes.MatchFlags(MemberFilterTypes.Public | MemberFilterTypes.Method);
 				case KnownImageIds.MethodProtected:
 				case IconIds.ProtectedConstructor:

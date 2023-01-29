@@ -1144,7 +1144,10 @@ namespace Codist
 					info.Append("ref readonly ", Keyword);
 				}
 				else if (p.ReturnsByRef) {
-					info.Append("ref", Keyword);
+					info.Append("ref ", Keyword);
+				}
+				if (p.IsRequired()) {
+					info.Append("required ", Keyword);
 				}
 			}
 		}

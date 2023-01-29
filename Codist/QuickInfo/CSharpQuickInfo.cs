@@ -1027,7 +1027,7 @@ namespace Codist.QuickInfo
 
 		static void ShowInterfaceImplementation<TSymbol>(InfoContainer qiContent, TSymbol symbol, IEnumerable<TSymbol> explicitImplementations)
 			where TSymbol : class, ISymbol {
-			if (symbol.IsStatic || symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.Any() == false) {
+			if (symbol.DeclaredAccessibility != Accessibility.Public && explicitImplementations.Any() == false) {
 				return;
 			}
 			var interfaces = symbol.ContainingType.AllInterfaces;
@@ -1043,7 +1043,6 @@ namespace Codist.QuickInfo
 				foreach (var member in intf.GetMembers(symbol.Name)) {
 					if (member.Kind == symbol.Kind
 						&& member.DeclaredAccessibility == Accessibility.Public
-						&& member.IsStatic == false
 						&& member.MatchSignature(symbol.Kind, returnType, parameters, typeParams)) {
 						implementedIntfs.Add(intf);
 					}

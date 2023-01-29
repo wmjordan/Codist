@@ -215,9 +215,10 @@ namespace Codist
 			}
 
 			string ShowPropertyValueAccessModifier(IPropertySymbol p) {
-				return p.ReturnsByRefReadonly ? "ref readonly "
-					: p.ReturnsByRef ? "ref "
-					: String.Empty;
+				return (p.IsRequired() ? "required " : String.Empty)
+					+ (p.ReturnsByRefReadonly ? "ref readonly "
+						: p.ReturnsByRef ? "ref "
+						: String.Empty);
 			}
 
 			string ShowFieldValueAccessModifier(IFieldSymbol f) {
@@ -353,6 +354,9 @@ namespace Codist
 							case Accessibility.Internal: return KnownImageIds.OperatorInternal;
 							default: return KnownImageIds.Operator;
 						}
+					}
+					else if (m.MethodKind == MethodKind.Conversion) {
+						return m.MetadataName == "op_Explicit" ? IconIds.ExplicitConversion : IconIds.ImplicitConversion;
 					}
 					switch (m.DeclaredAccessibility) {
 						case Accessibility.Public: return KnownImageIds.MethodPublic;
@@ -917,6 +921,9 @@ namespace Codist
 		public static IFieldSymbol GetPropertyBackingField(this IPropertySymbol property) {
 			return property != null && property.ContainingAssembly.GetSourceType() != AssemblySource.Metadata ? NonPublicOrFutureAccessors.GetPropertyBackingField(property) : null;
 		}
+		public static bool IsRequired(this IPropertySymbol property) {
+			return property != null && NonPublicOrFutureAccessors.GetPropertyIsRequired(property);
+		}
 		public static AssemblySource GetSourceType(this IAssemblySymbol assembly) {
 			return assembly is null
 				? AssemblySource.Metadata
@@ -1422,6 +1429,8 @@ namespace Codist
 			public static readonly Func<ITypeSymbol, IMethodSymbol> GetFunctionPointerTypeSignature = ReflectionHelper.CreateGetPropertyMethod<ITypeSymbol, IMethodSymbol>("Signature", typeof(ITypeSymbol).Assembly.GetType("Microsoft.CodeAnalysis.IFunctionPointerTypeSymbol"));
 
 			public static readonly Func<IPropertySymbol, IFieldSymbol> GetPropertyBackingField = ReflectionHelper.CreateGetPropertyMethod<IPropertySymbol, IFieldSymbol>("BackingField", typeof(CSharpCompilation).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Symbols.SourcePropertySymbol"));
+
+			public static readonly Func<IPropertySymbol, bool> GetPropertyIsRequired = ReflectionHelper.CreateGetPropertyMethod<IPropertySymbol, bool>("IsRequired");
 
 			public static readonly Func<IAssemblySymbol, int> GetAssemblySourceType = CreateAssemblySourceTypeFunc();
 			static Func<IAssemblySymbol, int> CreateAssemblySourceTypeFunc() {
