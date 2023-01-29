@@ -13,7 +13,7 @@ namespace Codist
 
 	/// <summary>A light-weight append-only single linked list.</summary>
 	/// <typeparam name="T">Type of the item on the list.</typeparam>
-	internal class Chain<T> : IEnumerable<T>
+	internal sealed class Chain<T> : IEnumerable<T>
 	{
 		Node _Head;
 		Node _Tail;
