@@ -778,7 +778,7 @@ namespace Codist.Refactorings
 					return Chain.Create(Replace(add, SF.InterpolatedStringExpression(
 							SF.Token(SyntaxKind.InterpolatedStringStartToken),
 							new SyntaxList<InterpolatedStringContentSyntax>(AddExpressionsToInterpolatedStringContents(add))
-							).AnnotateSelect()
+							).NormalizeWhitespace().AnnotateSelect()
 						));
 				}
 				return Enumerable.Empty<RefactoringAction>();
