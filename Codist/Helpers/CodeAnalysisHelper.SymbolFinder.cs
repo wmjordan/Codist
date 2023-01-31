@@ -135,10 +135,12 @@ namespace Codist
 		public static async Task<List<INamedTypeSymbol>> FindDerivedInterfacesAsync(this INamedTypeSymbol type, Project project, CancellationToken cancellationToken = default) {
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var r = new List<INamedTypeSymbol>(7);
+			var d = new SourceSymbolDeduper();
 			foreach (var item in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (item.TypeKind == TypeKind.Interface
 					&& item != type
-					&& item.AllInterfaces.Contains(type)) {
+					&& item.AllInterfaces.Contains(type)
+					&& d.TryAdd(item)) {
 					r.Add(item);
 				}
 			}
@@ -149,6 +151,7 @@ namespace Codist
 			var compilation = await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false);
 			var members = new List<IMethodSymbol>(10);
 			var isValueType = type.IsValueType;
+			var d = new SourceSymbolDeduper();
 			foreach (var typeSymbol in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (typeSymbol.IsStatic == false || typeSymbol.MightContainExtensionMethods == false) {
 					continue;
@@ -165,7 +168,7 @@ namespace Codist
 						continue;
 					}
 					var p = m.Parameters[0];
-					if (type.CanConvertTo(p.Type)) {
+					if (type.CanConvertTo(p.Type) && d.TryAdd(m)) {
 						members.Add(m);
 						continue;
 					}
@@ -187,7 +190,10 @@ namespace Codist
 						else if (constraintTypes.Any(i => i == type || type.CanConvertTo(i)) == false) {
 							continue;
 						}
-						members.Add(m);
+
+						if (d.TryAdd(m)) {
+							members.Add(m);
+						}
 					}
 				}
 			}
@@ -201,16 +207,21 @@ namespace Codist
 			var symbols = new SortedSet<ISymbol>(CreateSymbolComparer());
 			int maxNameLength = 0;
 			var predicate = CreateNameFilter(keywords, fullMatch, matchCase);
+			var d = new SourceSymbolDeduper();
 
 			foreach (var symbol in await SymbolFinder.FindSourceDeclarationsAsync(project, predicate, token).ConfigureAwait(false)) {
 				if (symbols.Count < resultLimit) {
-					symbols.Add(symbol);
+					if (d.TryAdd(symbol)) {
+						symbols.Add(symbol);
+					}
 				}
 				else {
 					maxNameLength = symbols.Max.Name.Length;
 					if (symbol.Name.Length < maxNameLength) {
 						symbols.Remove(symbols.Max);
-						symbols.Add(symbol);
+						if (d.TryAdd(symbol)) {
+							symbols.Add(symbol);
+						}
 					}
 				}
 			}
@@ -257,11 +268,12 @@ namespace Codist
 
 		public static IEnumerable<ISymbol> FindDeclarationMatchName(this Compilation compilation, string keywords, bool fullMatch, bool matchCase, CancellationToken cancellationToken = default) {
 			var filter = CreateNameFilter(keywords, fullMatch, matchCase);
+			var d = new SourceSymbolDeduper();
 			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (type.IsAccessible(true) == false) {
 					continue;
 				}
-				if (filter(type.Name)) {
+				if (filter(type.Name) && d.TryAdd(type)) {
 					yield return type;
 				}
 				if (cancellationToken.IsCancellationRequested) {
@@ -271,7 +283,8 @@ namespace Codist
 					if (member.Kind != SymbolKind.NamedType
 						&& member.CanBeReferencedByName
 						&& member.IsAccessible(false)
-						&& filter(member.GetOriginalName())) {
+						&& filter(member.GetOriginalName())
+						&& d.TryAdd(member)) {
 						yield return member;
 					}
 				}
@@ -282,6 +295,7 @@ namespace Codist
 			var rt = symbol.GetReturnType();
 			var pn = symbol.GetParameters();
 			var pl = pn.Length;
+			var d = new SourceSymbolDeduper();
 			foreach (var type in compilation.GlobalNamespace.GetAllTypes(cancellationToken)) {
 				if (myCodeOnly && type.HasSource() == false || type.IsAccessible(true) == false || ReferenceEquals(type, symbol)) {
 					continue;
@@ -322,7 +336,7 @@ namespace Codist
 							break;
 						}
 					}
-					if (pm) {
+					if (pm && d.TryAdd(member)) {
 						yield return member;
 					}
 				}

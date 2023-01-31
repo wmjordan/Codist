@@ -83,24 +83,31 @@ namespace Codist.Controls
 			implementations.Sort(CodeAnalysisHelper.CompareSymbol);
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context);
+			var d = new SourceSymbolDeduper();
 			if (symbol.Kind == SymbolKind.NamedType) {
 				st = (INamedTypeSymbol)symbol;
 				if (st.ConstructedFrom == st) {
 					foreach (var impl in implementations) {
-						m.Add(impl, false);
+						if (d.TryAdd(impl)) {
+							m.Add(impl, false);
+						}
 					}
 				}
 				else {
 					foreach (INamedTypeSymbol impl in implementations) {
 						if (impl.IsGenericType || impl.CanConvertTo(st)) {
-							m.Add(impl, false);
+							if (d.TryAdd(impl)) {
+								m.Add(impl, false);
+							}
 						}
 					}
 				}
 			}
 			else {
 				foreach (var impl in implementations) {
-					m.Add(impl, impl.ContainingSymbol);
+					if (d.TryAdd(impl)) {
+						m.Add(impl, impl.ContainingSymbol);
+					}
 				}
 			}
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
