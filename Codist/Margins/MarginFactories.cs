@@ -31,6 +31,7 @@ namespace Codist.Margins
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.Code)]
 	[ContentType(Constants.CodeTypes.Markdown)]
+	[ContentType(Constants.CodeTypes.VsMarkdown)]
 	[TextViewRole(PredefinedTextViewRoles.EmbeddedPeekTextView)]
 	[TextViewRole(PredefinedTextViewRoles.PrimaryDocument)]
 	sealed class MarkdownMarginFactory : IWpfTextViewMarginProvider
@@ -82,6 +83,7 @@ namespace Codist.Margins
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.Code)]
 	[ContentType(Constants.CodeTypes.Markdown)]
+	[ContentType(Constants.CodeTypes.VsMarkdown)]
 	[ContentType(Constants.CodeTypes.Output)]
 	[ContentType(Constants.CodeTypes.InteractiveContent)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
@@ -102,6 +104,7 @@ namespace Codist.Margins
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.Code)]
 	[ContentType(Constants.CodeTypes.Markdown)]
+	[ContentType(Constants.CodeTypes.VsMarkdown)]
 	[ContentType(Constants.CodeTypes.Output)]
 	[ContentType(Constants.CodeTypes.InteractiveContent)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]

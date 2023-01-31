@@ -16,6 +16,7 @@ namespace Codist.NaviBar
 	[Export(typeof(IWpfTextViewCreationListener))]
 	[ContentType(Constants.CodeTypes.Code)]
 	[ContentType(Constants.CodeTypes.Markdown)]
+	[ContentType(Constants.CodeTypes.VsMarkdown)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	sealed class NaviBarFactory : IWpfTextViewCreationListener
 	{

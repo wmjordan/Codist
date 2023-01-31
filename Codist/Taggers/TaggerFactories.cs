@@ -137,6 +137,7 @@ namespace Codist.Taggers
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.Code)]
 	[ContentType(Constants.CodeTypes.Markdown)]
+	[ContentType(Constants.CodeTypes.VsMarkdown)]
 	[TagType(typeof(IClassificationTag))]
 	sealed class MarkdownTaggerProvider : IViewTaggerProvider
 	{

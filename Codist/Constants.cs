@@ -21,7 +21,9 @@ namespace Codist
 			public const string CSharp = "CSharp";
 			public const string HtmlxProjection = "HTMLXProjection";
 			public const string Text = "Text";
+			[Obsolete("From VS 17.5 on, 'vs-markdown' is used instead of 'Markdown'")]
 			public const string Markdown = "Markdown";
+			public const string VsMarkdown = "vs-markdown";
 			public const string Xml = "XML";
 			public const string FindResults = "FindResults";
 			public const string Output = "Output";
