@@ -16,6 +16,8 @@ namespace Codist.SyntaxHighlight
 	[ContentType(Constants.CodeTypes.FindResults)]
 	[ContentType(Constants.CodeTypes.Output)]
 	[ContentType(Constants.CodeTypes.InteractiveContent)]
+	[ContentType(Constants.CodeTypes.Markdown)]
+	[ContentType(Constants.CodeTypes.VsMarkdown)]
 	[TextViewRole(PredefinedTextViewRoles.Document)]
 	[TextViewRole(PredefinedTextViewRoles.Interactive)]
 	sealed class DecoratorFactory : IWpfTextViewCreationListener
