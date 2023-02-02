@@ -765,7 +765,7 @@ namespace Codist.Refactorings
 						SF.InterpolatedStringExpression(
 							SF.Token(SyntaxKind.InterpolatedStringStartToken),
 							new SyntaxList<InterpolatedStringContentSyntax>(ArgumentsToInterpolatedStringContents(ie.ArgumentList.Arguments))
-							).AnnotateSelect()
+							).WithTrailingTrivia(ie.GetTrailingTrivia()).AnnotateSelect()
 						));
 				}
 				if (_Mode == ADD) {
@@ -777,7 +777,7 @@ namespace Codist.Refactorings
 					return Chain.Create(Replace(add, SF.InterpolatedStringExpression(
 							SF.Token(SyntaxKind.InterpolatedStringStartToken),
 							new SyntaxList<InterpolatedStringContentSyntax>(AddExpressionsToInterpolatedStringContents(add))
-							).NormalizeWhitespace().AnnotateSelect()
+							).NormalizeWhitespace().WithTrailingTrivia(add.GetTrailingTrivia()).AnnotateSelect()
 						));
 				}
 				return Enumerable.Empty<RefactoringAction>();
