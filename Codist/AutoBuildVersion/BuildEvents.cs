@@ -92,7 +92,7 @@ namespace Codist.AutoBuildVersion
 					PrintProperties(project.Properties, "project " + project.Name);
 					PrintProperties(project.ConfigurationManager.ActiveConfiguration.Properties, $"project {project.Name} active config");
 				}
-				if (Config.Instance.SupressAutoBuildVersion == false
+				if (Config.Instance.SuppressAutoBuildVersion == false
 					&& (_ChangedProjects.Remove(project) || project.IsDirty)) {
 					AutoChangeBuildVersion(cfgProj, project);
 				}

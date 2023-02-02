@@ -21,8 +21,8 @@ namespace Codist.Taggers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeComment)]
-		[Name(Constants.ExclaimationComment)]
-		static ClassificationTypeDefinition ExclaimationComment;
+		[Name(Constants.ExclamationComment)]
+		static ClassificationTypeDefinition ExclamationComment;
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeComment)]

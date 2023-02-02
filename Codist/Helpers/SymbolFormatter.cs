@@ -82,13 +82,13 @@ namespace Codist
 			INamedTypeSymbol t;
 			IMethodSymbol m;
 			var s = symbol.OriginalDefinition;
-			var desc = new StackPanel { Margin = WpfHelper.MenuItemMargin, MaxWidth = Application.Current.MainWindow.Width };
+			var p = new StackPanel { Margin = WpfHelper.MenuItemMargin, MaxWidth = Application.Current.MainWindow.Width };
 
 			#region Signature
 			var signature = ShowSymbolSignature(System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Shift ? symbol : s);
-			desc.Add(signature);
+			p.Add(signature);
 			if (s.IsObsolete()) {
-				desc.Opacity = TransparentLevel;
+				p.Opacity = TransparentLevel;
 				signature.Inlines.AddRange(new object[] {
 					new LineBreak(),
 					new InlineUIContainer (new TextBlock { Margin = WpfHelper.SmallHorizontalMargin }
@@ -114,7 +114,7 @@ namespace Codist
 					csb.AddSymbol(cs, false, this).Append(" ");
 				}
 
-				desc.Add(ShowSymbolDeclaration(s, csb, true, false));
+				p.Add(ShowSymbolDeclaration(s, csb, true, false));
 				if (s.Kind == SymbolKind.Method
 					&& (m = (IMethodSymbol)s).MethodKind == MethodKind.ReducedExtension) {
 					csb.AddImage(IconIds.ExtensionMethod)
@@ -128,7 +128,7 @@ namespace Codist
 			var rt = s.GetReturnType();
 			if (rt != null
 				&& (s.Kind != SymbolKind.Method || ((IMethodSymbol)s).IsTypeSpecialMethod() == false)) {
-				desc.Add(new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush }
+				p.Add(new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush }
 					.Append(ThemeHelper.GetImage(IconIds.Return).WrapMargin(WpfHelper.GlyphMargin))
 					.AddSymbol(rt, false, this)
 					.Append(rt.IsAwaitable() ? $" ({R.T_Awaitable})" : String.Empty));
@@ -140,14 +140,14 @@ namespace Codist
 				case SymbolKind.NamedType:
 					t = (INamedTypeSymbol)symbol;
 					if (t.IsGenericType) {
-						ShowGenericTypeConstraints(desc, t);
+						ShowGenericTypeConstraints(p, t);
 					}
 					goto END;
 				case SymbolKind.Method:
 					m = (IMethodSymbol)symbol;
 					do {
 						if (m.IsGenericMethod) {
-							ShowGenericMethodConstraints(desc, m);
+							ShowGenericMethodConstraints(p, m);
 						}
 					} while ((m = m.ContainingSymbol as IMethodSymbol) != null);
 					break;
@@ -158,11 +158,11 @@ namespace Codist
 					goto END;
 			}
 			if (cs != null && (t = symbol.GetContainingTypes().FirstOrDefault(ct => ct.IsGenericType)) != null) {
-				ShowGenericTypeConstraints(desc, t);
+				ShowGenericTypeConstraints(p, t);
 			}
 			#endregion
 			END:
-			return desc;
+			return p;
 		}
 
 		TextBlock ShowSymbolSignature(ISymbol symbol) {
@@ -219,7 +219,7 @@ namespace Codist
 						}
 						if (tp.HasConstraint()) {
 							signature.Append(": ");
-							ShowTypeConstaints(tp, signature);
+							ShowTypeConstraints(tp, signature);
 						}
 					}
 
@@ -495,28 +495,28 @@ namespace Codist
 			}
 		}
 
-		void ShowGenericMethodConstraints(StackPanel desc, IMethodSymbol m) {
+		void ShowGenericMethodConstraints(StackPanel panel, IMethodSymbol m) {
 			if (m.IsBoundedGenericMethod()) {
-				ShowTypeParameters(desc, m.TypeParameters, m.TypeArguments);
+				ShowTypeParameters(panel, m.TypeParameters, m.TypeArguments);
 			}
 			else {
-				ShowTypeParameterWithConstraint(desc, m.TypeParameters);
+				ShowTypeParameterWithConstraint(panel, m.TypeParameters);
 			}
 		}
 
-		void ShowGenericTypeConstraints(StackPanel desc, INamedTypeSymbol t) {
+		void ShowGenericTypeConstraints(StackPanel panel, INamedTypeSymbol t) {
 			do {
 				if (t.IsUnboundGenericType) {
-					ShowTypeParameterWithConstraint(desc, t.TypeParameters);
+					ShowTypeParameterWithConstraint(panel, t.TypeParameters);
 				}
 				else if (t.IsGenericType) {
 					if (t.IsDefinition == false) {
-						ShowTypeParameters(desc, t.TypeParameters, t.TypeArguments);
+						ShowTypeParameters(panel, t.TypeParameters, t.TypeArguments);
 					}
 					else {
 						foreach (var item in t.TypeParameters) {
 							if (item.HasConstraint()) {
-								desc.Add(ShowTypeParameterConstraints(item));
+								panel.Add(ShowTypeParameterConstraints(item));
 							}
 						}
 					}
@@ -524,20 +524,20 @@ namespace Codist
 			} while ((t = t.ContainingType) != null);
 		}
 
-		void ShowTypeParameters(StackPanel desc, ImmutableArray<ITypeParameterSymbol> tp, ImmutableArray<ITypeSymbol> ta) {
+		void ShowTypeParameters(StackPanel panel, ImmutableArray<ITypeParameterSymbol> tp, ImmutableArray<ITypeSymbol> ta) {
 			var tpl = tp.Length;
 			for (int i = 0; i < tpl; i++) {
 				var b = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush }
 					.SetGlyph(ThemeHelper.GetImage(IconIds.GenericDefinition));
 				ShowTypeArgumentInfo(tp[i], ta[i], b);
-				desc.Add(b);
+				panel.Add(b);
 			}
 		}
 
-		void ShowTypeParameterWithConstraint(StackPanel desc, ImmutableArray<ITypeParameterSymbol> parameters) {
+		void ShowTypeParameterWithConstraint(StackPanel panel, ImmutableArray<ITypeParameterSymbol> parameters) {
 			foreach (var item in parameters) {
 				if (item.HasConstraint()) {
-					desc.Add(ShowTypeParameterConstraints(item));
+					panel.Add(ShowTypeParameterConstraints(item));
 				}
 			}
 		}
@@ -547,7 +547,7 @@ namespace Codist
 				.SetGlyph(ThemeHelper.GetImage(IconIds.GenericDefinition))
 				.AddSymbol(item, false, TypeParameter)
 				.Append(": ");
-			ShowTypeConstaints(item, b);
+			ShowTypeConstraints(item, b);
 			return b;
 		}
 
@@ -578,36 +578,36 @@ namespace Codist
 				.AddSymbol(typeArgument, true, this);
 			if (typeParameter.HasConstraint()) {
 				text.Append(" (");
-				ShowTypeConstaints(typeParameter, text);
+				ShowTypeConstraints(typeParameter, text);
 				text.Append(")");
 			}
 		}
 
-		public void ShowTypeConstaints(ITypeParameterSymbol typeParameter, TextBlock text) {
+		public void ShowTypeConstraints(ITypeParameterSymbol typeParameter, TextBlock text) {
 			bool hasConstraint = false;
 			if (typeParameter.HasReferenceTypeConstraint) {
 				text.Append("class", Keyword);
 				hasConstraint = true;
 			}
 			else if (typeParameter.HasValueTypeConstraint) {
-				AppendSeparatorIfHasContraint(text, hasConstraint).Append("struct", Keyword);
+				AppendSeparatorIfHasConstraint(text, hasConstraint).Append("struct", Keyword);
 				hasConstraint = true;
 			}
 			if (typeParameter.HasUnmanagedTypeConstraint) {
-				AppendSeparatorIfHasContraint(text, hasConstraint).Append("unmanaged", Keyword);
+				AppendSeparatorIfHasConstraint(text, hasConstraint).Append("unmanaged", Keyword);
 				hasConstraint = true;
 			}
 			if (typeParameter.HasConstructorConstraint) {
-				AppendSeparatorIfHasContraint(text, hasConstraint).Append("new", Keyword).Append("()", PlainText);
+				AppendSeparatorIfHasConstraint(text, hasConstraint).Append("new", Keyword).Append("()", PlainText);
 				hasConstraint = true;
 			}
 			foreach (var constraint in typeParameter.ConstraintTypes) {
-				AppendSeparatorIfHasContraint(text, hasConstraint).AddSymbol(constraint, false, this);
+				AppendSeparatorIfHasConstraint(text, hasConstraint).AddSymbol(constraint, false, this);
 				hasConstraint = true;
 			}
 		}
 
-		TextBlock AppendSeparatorIfHasContraint(TextBlock text, bool c) {
+		TextBlock AppendSeparatorIfHasConstraint(TextBlock text, bool c) {
 			return c ? text.Append(", ".Render(PlainText)) : text;
 		}
 
@@ -779,7 +779,7 @@ namespace Codist
 				case CodeAnalysisHelper.RecordDeclaration:
 					return Class;
 				case SyntaxKind.StructDeclaration:
-				case CodeAnalysisHelper.RecordStructDesclaration:
+				case CodeAnalysisHelper.RecordStructDeclaration:
 					return Struct;
 				case SyntaxKind.InterfaceDeclaration: return Interface;
 				case SyntaxKind.EventDeclaration:

@@ -324,13 +324,13 @@ namespace Codist.Display
 					}
 				}
 				if (_ProcCpuUsages.Count != c) {
-					// process count changed, remove inexist processes
-					RemoveInexistCpuUsage(n);
+					// process count changed, remove inexistent processes
+					RemoveInexistentCpuUsage(n);
 				}
 				_ProcessUsages.Sort((x, y) => y.cpu.CompareTo(x.cpu));
 			}
 
-			void RemoveInexistCpuUsage(int n) {
+			void RemoveInexistentCpuUsage(int n) {
 				List<uint> remove = new List<uint>();
 				foreach (var item in _ProcCpuUsages) {
 					if (item.Value.version != n) {

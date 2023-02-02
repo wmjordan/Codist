@@ -72,10 +72,10 @@ namespace Codist.Controls
 
 		public IntegerBox() {
 			InitializeComponent();
-			tbmain.TextChanged += Tbmain_TextChanged;
+			tbmain.TextChanged += TextPartChanged;
 		}
 
-		void Tbmain_TextChanged(object sender, RoutedEventArgs e) {
+		void TextPartChanged(object sender, RoutedEventArgs e) {
 			if (Int32.TryParse(tbmain.Text, out int v)) {
 				Value = v;
 			}
@@ -106,13 +106,13 @@ namespace Codist.Controls
 
 		public override void OnApplyTemplate() {
 			base.OnApplyTemplate();
-			PART_DownButton.Click -= btdown_Click;
-			PART_UpButton.Click -= btup_Click;
-			PART_DownButton.Click += btdown_Click;
-			PART_UpButton.Click += btup_Click;
+			PART_DownButton.Click -= DownButtonClicked;
+			PART_UpButton.Click -= UpButtonClicked;
+			PART_DownButton.Click += DownButtonClicked;
+			PART_UpButton.Click += UpButtonClicked;
 		}
 
-		void btup_Click(object sender, RoutedEventArgs e) {
+		void UpButtonClicked(object sender, RoutedEventArgs e) {
 			if (Value < Maximum) {
 				Value += Step;
 				if (Value > Maximum)
@@ -120,7 +120,7 @@ namespace Codist.Controls
 			}
 		}
 
-		void btdown_Click(object sender, RoutedEventArgs e) {
+		void DownButtonClicked(object sender, RoutedEventArgs e) {
 			if (Value > Minimum) {
 				Value -= Step;
 				if (Value < Minimum)

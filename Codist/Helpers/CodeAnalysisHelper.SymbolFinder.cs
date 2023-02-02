@@ -440,7 +440,7 @@ namespace Codist
 			Predicate<SymbolUsageKind> usageFilter = null;
 			switch (symbol.Kind) {
 				case SymbolKind.NamedType:
-					// hack: In VS 2017 with Rosyln 2.10, we don't need this,
+					// hack: In VS 2017 with Roslyn 2.10, we don't need this,
 					//       but in VS 2019, we have to do that, otherwise we will get nothing.
 					//       The same to SymbolKind.Method.
 					if ((symbol as INamedTypeSymbol).IsBoundedGenericType()
@@ -587,7 +587,7 @@ namespace Codist
 			}
 			else if (possibleUsage.MatchFlags(SymbolUsageKind.Delegate)) {
 				var n = node.GetNodePurpose();
-				// todo detect delegate usage burried under calculation expressions
+				// todo detect delegate usage buried under calculation expressions
 				if (n.IsKind(SyntaxKind.Argument)) {
 					return SymbolUsageKind.Delegate;
 				}

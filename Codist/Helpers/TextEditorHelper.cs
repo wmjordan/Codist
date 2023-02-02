@@ -102,8 +102,8 @@ namespace Codist
 		#endregion
 
 		#region Classification
-		public static ClassificationTag GetClassificationTag(this IClassificationTypeRegistryService registry, string clasificationType) {
-			return new ClassificationTag(registry.GetClassificationType(clasificationType));
+		public static ClassificationTag GetClassificationTag(this IClassificationTypeRegistryService registry, string classificationType) {
+			return new ClassificationTag(registry.GetClassificationType(classificationType));
 		}
 
 		public static IClassificationType CreateClassificationCategory(string classificationType) {
@@ -407,8 +407,8 @@ namespace Codist
 					}
 				}
 				if (edit.HasEffectiveChanges) {
-					var snapsnot = edit.Apply();
-					firstModified = new SnapshotSpan(snapsnot, firstModified.Start, removed ? firstModified.Length - psLength : firstModified.Length + psLength);
+					var snapshot = edit.Apply();
+					firstModified = new SnapshotSpan(snapshot, firstModified.Start, removed ? firstModified.Length - psLength : firstModified.Length + psLength);
 				}
 			}
 			return firstModified;
@@ -443,8 +443,8 @@ namespace Codist
 					}
 				}
 				if (edit.HasEffectiveChanges) {
-					var snapsnot = edit.Apply();
-					firstModified = new SnapshotSpan(snapsnot, firstModified.Start, firstText.Length);
+					var snapshot = edit.Apply();
+					firstModified = new SnapshotSpan(snapshot, firstModified.Start, firstText.Length);
 				}
 			}
 			return firstModified;
@@ -898,8 +898,8 @@ namespace Codist
 		public static List<string> GetBuildConfigNames() {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var configs = new List<string>();
-			foreach (EnvDTE80.SolutionConfiguration2 conf in CodistPackage.DTE.Solution.SolutionBuild.SolutionConfigurations) {
-				foreach (EnvDTE.SolutionContext context in conf.SolutionContexts) {
+			foreach (EnvDTE80.SolutionConfiguration2 c in CodistPackage.DTE.Solution.SolutionBuild.SolutionConfigurations) {
+				foreach (EnvDTE.SolutionContext context in c.SolutionContexts) {
 					if (configs.Contains(context.ConfigurationName) == false) {
 						configs.Add(context.ConfigurationName);
 					}
@@ -911,10 +911,10 @@ namespace Codist
 		public static (string platformName, string configName) GetActiveBuildConfiguration(EnvDTE.Document document) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var pn = document.ProjectItem.ContainingProject.UniqueName;
-			foreach (EnvDTE80.SolutionConfiguration2 conf in CodistPackage.DTE.Solution.SolutionBuild.SolutionConfigurations) {
-				foreach (EnvDTE.SolutionContext context in conf.SolutionContexts) {
+			foreach (EnvDTE80.SolutionConfiguration2 c in CodistPackage.DTE.Solution.SolutionBuild.SolutionConfigurations) {
+				foreach (EnvDTE.SolutionContext context in c.SolutionContexts) {
 					if (context.ProjectName == pn) {
-						return (conf.PlatformName, context.ConfigurationName);
+						return (c.PlatformName, context.ConfigurationName);
 					}
 				}
 			}
@@ -924,8 +924,8 @@ namespace Codist
 		public static void SetActiveBuildConfiguration(EnvDTE.Document document, string configName) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var pn = document.ProjectItem.ContainingProject.UniqueName;
-			foreach (EnvDTE80.SolutionConfiguration2 conf in CodistPackage.DTE.Solution.SolutionBuild.SolutionConfigurations) {
-				foreach (EnvDTE.SolutionContext context in conf.SolutionContexts) {
+			foreach (EnvDTE80.SolutionConfiguration2 c in CodistPackage.DTE.Solution.SolutionBuild.SolutionConfigurations) {
+				foreach (EnvDTE.SolutionContext context in c.SolutionContexts) {
 					if (context.ProjectName == pn) {
 						context.ConfigurationName = configName;
 						return;

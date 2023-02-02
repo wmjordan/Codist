@@ -43,7 +43,7 @@ namespace Codist.AutoBuildVersion
 
 		/// <summary>Merge two <see cref="BuildConfigSetting"/>s named <paramref name="baseConfig"/> and <paramref name="specificConfig"/>. The latter one has higher precedence.</summary>
 		/// <param name="baseConfig">The base configuration name.</param>
-		/// <param name="specificConfig">The specifig configuration name.</param>
+		/// <param name="specificConfig">The specific configuration name.</param>
 		/// <returns>The merged configuration. If neither <paramref name="baseConfig"/> or <paramref name="specificConfig"/> exists, returns <see langword="null"/>.</returns>
 		public BuildConfigSetting Merge(string baseConfig, string specificConfig) {
 			TryGetValue(specificConfig, out var s);

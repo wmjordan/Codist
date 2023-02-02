@@ -146,7 +146,7 @@ namespace Codist.Taggers
 
 			var contentEnd = GetCommentEndIndex(text);
 
-			ClassificationTag ctag = null;
+			ClassificationTag tag = null;
 			CommentLabel label = null;
 			var contentStart = 0;
 			foreach (var item in Config.Instance.Labels) {
@@ -165,13 +165,13 @@ namespace Codist.Taggers
 				}
 
 				if (label == null || label.LabelLength < item.LabelLength) {
-					ctag = __CommentClassifications[(int)item.StyleID];
+					tag = __CommentClassifications[(int)item.StyleID];
 					label = item;
 					contentStart = c;
 				}
 			}
 
-			if (contentStart == 0 || ctag == null) {
+			if (contentStart == 0 || tag == null) {
 				return null;
 			}
 
@@ -195,11 +195,11 @@ namespace Codist.Taggers
 
 			switch (label.StyleApplication) {
 				case CommentStyleApplication.Tag:
-					return new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, label.LabelLength, contentStart - commentStart, contentEnd - contentStart);
+					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, label.LabelLength, contentStart - commentStart, contentEnd - contentStart);
 				case CommentStyleApplication.Content:
-					return new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + contentStart, contentEnd - contentStart, 0, contentEnd - contentStart);
+					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start + contentStart, contentEnd - contentStart, 0, contentEnd - contentStart);
 				default:
-					return new TaggedContentSpan(ctag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, contentEnd - commentStart, contentStart - commentStart, contentEnd - contentStart);
+					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, contentEnd - commentStart, contentStart - commentStart, contentEnd - contentStart);
 			}
 		}
 

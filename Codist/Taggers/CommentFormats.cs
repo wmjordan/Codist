@@ -34,15 +34,15 @@ namespace Codist.Taggers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
-	[ClassificationType(ClassificationTypeNames = Constants.ExclaimationComment)]
-	[Name(Constants.ExclaimationComment)]
+	[ClassificationType(ClassificationTypeNames = Constants.ExclamationComment)]
+	[Name(Constants.ExclamationComment)]
 	[UserVisible(false)]
 	[Order(After = Priority.High)]
-	sealed class ExclaimationCommentFormat : ClassificationFormatDefinition
+	sealed class ExclamationCommentFormat : ClassificationFormatDefinition
 	{
-		public ExclaimationCommentFormat() {
-			DisplayName = Constants.ExclaimationComment + " (//!?)";
-			ForegroundColor = Constants.ExclaimationColor;
+		public ExclamationCommentFormat() {
+			DisplayName = Constants.ExclamationComment + " (//!?)";
+			ForegroundColor = Constants.ExclamationColor;
 		}
 	}
 

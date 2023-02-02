@@ -70,7 +70,7 @@ namespace Codist.NaviBar
 
 		void Update(object sender, EventArgs e) {
 			HideMenu();
-			_ActiveTitleLabel.Text = _Tags.GetPreceedingTaggedSpan(View.GetCaretPosition().Position)?.ContentText ?? DefaultActiveTitle;
+			_ActiveTitleLabel.Text = _Tags.GetPrecedingTaggedSpan(View.GetCaretPosition().Position)?.ContentText ?? DefaultActiveTitle;
 		}
 
 		void HideMenu() {

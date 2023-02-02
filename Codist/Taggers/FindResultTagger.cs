@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 using AppHelpers;
 using Microsoft.CodeAnalysis.Classification;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
-using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Taggers
 {
@@ -16,9 +14,6 @@ namespace Codist.Taggers
 		static readonly IClassificationType __Number = __ClassificationTypes.GetClassificationType("line number");
 		static readonly IClassificationType __Url = __ClassificationTypes.GetClassificationType(Constants.CodeUrl);
 		static readonly Microsoft.VisualStudio.LanguageServices.VisualStudioWorkspace __Workspace = ServicesHelper.Instance.VisualStudioWorkspace;
-
-		public FindResultTagger() {
-		}
 
 		public event EventHandler<ClassificationChangedEventArgs> ClassificationChanged;
 

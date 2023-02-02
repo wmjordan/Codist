@@ -25,7 +25,7 @@ namespace Codist
 				?? semanticModel.GetTypeInfo(node, cancellationToken).Type
 				?? (node.IsKind(SyntaxKind.FieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as FieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
 					: node.IsKind(SyntaxKind.EventFieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as EventFieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
-					: node.IsKind(RecordDeclaration) || node.IsKind(RecordStructDesclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
+					: node.IsKind(RecordDeclaration) || node.IsKind(RecordStructDeclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 					: null)
 				;
 		}
@@ -49,7 +49,7 @@ namespace Codist
 					?? (node is AccessorDeclarationSyntax
 						? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 						: null)
-					?? (node is TypeParameterSyntax || node is ParameterSyntax || node.RawKind == (int)RecordDeclaration || node.RawKind == (int)RecordStructDesclaration ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null)
+					?? (node is TypeParameterSyntax || node is ParameterSyntax || node.RawKind == (int)RecordDeclaration || node.RawKind == (int)RecordStructDeclaration ? semanticModel.GetDeclaredSymbol(node, cancellationToken) : null)
 					?? (node.Parent.IsKind(SyntaxKind.ElementAccessExpression) ? semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node.Parent, cancellationToken).Symbol : null);
 		}
 
@@ -1144,8 +1144,8 @@ namespace Codist
 				return true;
 			}
 			if (target.TypeKind == TypeKind.TypeParameter) {
-				var param = target as ITypeParameterSymbol;
-				foreach (var item in param.ConstraintTypes) {
+				var tp = target as ITypeParameterSymbol;
+				foreach (var item in tp.ConstraintTypes) {
 					if (item.CanConvertTo(symbol)) {
 						return true;
 					}
@@ -1153,8 +1153,8 @@ namespace Codist
 				return false;
 			}
 			if (symbol.TypeKind == TypeKind.TypeParameter) {
-				var param = symbol as ITypeParameterSymbol;
-				foreach (var item in param.ConstraintTypes) {
+				var tp = symbol as ITypeParameterSymbol;
+				foreach (var item in tp.ConstraintTypes) {
 					if (item.CanConvertTo(target)) {
 						return true;
 					}

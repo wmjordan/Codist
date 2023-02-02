@@ -37,7 +37,7 @@ namespace Codist.QuickInfo
 		}
 
 		public static bool CheckCtrlSuppression() {
-			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlSupress) && WpfHelper.IsControlDown;
+			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.CtrlSuppress) && WpfHelper.IsControlDown;
 		}
 
 		public static void HoldQuickInfo(DependencyObject quickInfoItem, bool hold) {
@@ -207,7 +207,7 @@ namespace Codist.QuickInfo
 				var s = sender as FrameworkElement;
 				if (s.ContextMenu == null) {
 					var v = _quickInfoSession.TextView;
-					var ctx = SemanticContext.GetOrCreateSingetonInstance(v as IWpfTextView);
+					var ctx = SemanticContext.GetOrCreateSingletonInstance(v as IWpfTextView);
 					await ctx.UpdateAsync(_textBuffer, default);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 					var m = new CSharpSymbolContextMenu(_symbol,
@@ -485,9 +485,9 @@ namespace Codist.QuickInfo
 					var icon = ThemeHelper.GetImage(s.GetImageId(), ThemeHelper.LargeIconSize)
 						.AsSymbolLink(Keyboard.Modifiers == ModifierKeys.Control ? s.OriginalDefinition : s);
 					icon.VerticalAlignment = VerticalAlignment.Top;
-					var desc = SymbolFormatter.Instance.ShowSignature(s);
+					var signature = SymbolFormatter.Instance.ShowSignature(s);
 					if (Config.Instance.QuickInfoMaxWidth >= 100) {
-						desc.MaxWidth = Config.Instance.QuickInfoMaxWidth - (ThemeHelper.LargeIconSize + 30);
+						signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - (ThemeHelper.LargeIconSize + 30);
 					}
 
 					IList container;
@@ -500,7 +500,7 @@ namespace Codist.QuickInfo
 					}
 					container.Insert(0, new StackPanel {
 						Orientation = Orientation.Horizontal,
-						Children = { icon, desc }
+						Children = { icon, signature }
 					});
 				}
 

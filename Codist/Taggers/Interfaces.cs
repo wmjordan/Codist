@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.Text;
 
 namespace Codist.Taggers
 {
-	interface IReuseableTagger
+	interface IReusableTagger
 	{
 		void AddRef();
 		void Release();

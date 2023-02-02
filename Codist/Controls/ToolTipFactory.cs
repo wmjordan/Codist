@@ -44,7 +44,7 @@ namespace Codist
 				var tp = symbol as ITypeParameterSymbol;
 				if (tp.HasConstraint()) {
 					content.AppendLine().Append(R.T_Constraint);
-					SymbolFormatter.Instance.ShowTypeConstaints(tp, content);
+					SymbolFormatter.Instance.ShowTypeConstraints(tp, content);
 				}
 			}
 			t = symbol.ContainingType;

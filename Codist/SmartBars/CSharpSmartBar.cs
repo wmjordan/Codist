@@ -31,7 +31,7 @@ namespace Codist.SmartBars
 
 		public CSharpSmartBar(IWpfTextView view, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(view, textSearchService) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			_Context = SemanticContext.GetOrCreateSingetonInstance(view);
+			_Context = SemanticContext.GetOrCreateSingletonInstance(view);
 			_SymbolListContainer = ExternalAdornment.GetOrCreate(view);
 			view.Closed += View_Closed;
 		}
@@ -364,7 +364,7 @@ namespace Codist.SmartBars
 				case SyntaxKind.ClassDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case CodeAnalysisHelper.RecordDeclaration:
-				case CodeAnalysisHelper.RecordStructDesclaration:
+				case CodeAnalysisHelper.RecordStructDeclaration:
 					if ((node as TypeDeclarationSyntax).Modifiers.Any(SyntaxKind.StaticKeyword) == false) {
 						AddEditorCommand(MyToolBar, IconIds.ExtractInterface, "Refactor.ExtractInterface", R.CMD_ExtractInterface);
 					}

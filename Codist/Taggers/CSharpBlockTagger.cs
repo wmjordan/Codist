@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Taggers
 {
-	sealed class CSharpBlockTagger : ITagger<ICodeMemberTag>, IReuseableTagger
+	sealed class CSharpBlockTagger : ITagger<ICodeMemberTag>, IReusableTagger
 	{
 		ITextBuffer _Buffer;
 		int _RefCount;

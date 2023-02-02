@@ -32,7 +32,7 @@ namespace Codist.Commands
 		NaviBarSearchActiveClass,
 		NaviBarSearchDeclarationInProject,
 		AutoBuildVersionWindow,
-		ToggleAutoBuldVersion,
+		ToggleAutoBuildVersion,
 		CodeRefactoring,
 	}
 }

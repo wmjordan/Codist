@@ -9,7 +9,7 @@ namespace Codist.Controls
 {
 	public sealed class ThemedButton : Button, IContextMenuHost, IDisposable
 	{
-		readonly Action _clickHanler;
+		readonly Action _clickHandler;
 
 		public ThemedButton(object content, object toolTip) {
 			Content = content;
@@ -29,7 +29,7 @@ namespace Codist.Controls
 
 		public ThemedButton(object content, object toolTip, Action onClickHandler)
 			: this(content, toolTip) {
-			_clickHanler = onClickHandler;
+			_clickHandler = onClickHandler;
 			Click += ThemedButton_Click;
 		}
 
@@ -42,7 +42,7 @@ namespace Codist.Controls
 		}
 
 		void ThemedButton_Click(object sender, RoutedEventArgs e) {
-			_clickHanler?.Invoke();
+			_clickHandler?.Invoke();
 		}
 
 		internal void PerformClick() {

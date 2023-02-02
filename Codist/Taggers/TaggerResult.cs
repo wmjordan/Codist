@@ -12,7 +12,7 @@ namespace Codist.Taggers
 		// hack This is used to prevent the syntax classification info function from altering this result
 		internal static bool IsLocked;
 
-		// hack We assume that it is threadsafe to organize the tags with this
+		// hack We assume that it is thread-safe to organize the tags with this
 		readonly SortedSet<TaggedContentSpan> _Tags = new SortedSet<TaggedContentSpan>(Comparer<TaggedContentSpan>.Create((x, y) => {
 			var s1 = x.Start;
 			var s2 = y.Start;
@@ -28,7 +28,7 @@ namespace Codist.Taggers
 		public bool HasTag => _Tags.Count > 0;
 		public int Count => _Tags.Count;
 
-		public TaggedContentSpan GetPreceedingTaggedSpan(int position) {
+		public TaggedContentSpan GetPrecedingTaggedSpan(int position) {
 			var tags = _Tags;
 			TaggedContentSpan t = null;
 			foreach (var tag in tags.Reverse()) {

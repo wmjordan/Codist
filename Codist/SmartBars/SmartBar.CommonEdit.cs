@@ -67,7 +67,7 @@ namespace Codist.SmartBars
 			return firstModified;
 		}
 
-		/// <summary>When selection is not surrounded with <paramref name="prefix"/> and <paramref name="suffix"/>, surround each span of the corrent selection with <paramref name="prefix"/> and <paramref name="suffix"/>, and optionally select the first modified span if <paramref name="selectModified"/> is <see langword="true"/>; when surrounded, remove them.</summary>
+		/// <summary>When selection is not surrounded with <paramref name="prefix"/> and <paramref name="suffix"/>, surround each span of the current selection with <paramref name="prefix"/> and <paramref name="suffix"/>, and optionally select the first modified span if <paramref name="selectModified"/> is <see langword="true"/>; when surrounded, remove them.</summary>
 		/// <returns>The new span after modification. If modification is unsuccessful, the default of <see cref="SnapshotSpan"/> is returned.</returns>
 		protected static SnapshotSpan WrapWith(CommandContext ctx, string prefix, string suffix, bool selectModified) {
 			string s = ctx.View.GetFirstSelectionText();

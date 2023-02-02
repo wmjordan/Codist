@@ -227,7 +227,7 @@ namespace Codist.NaviBar
 			}
 			void FindInDocument(string text, CancellationToken token) {
 				var filter = CodeAnalysisHelper.CreateNameFilter(text, false, Char.IsUpper(text[0]));
-				foreach (var item in Bar._SemanticContext.Compilation.GetDecendantDeclarations(token)) {
+				foreach (var item in Bar._SemanticContext.Compilation.GetDescendantDeclarations(token)) {
 					if (filter(item.GetDeclarationSignature())) {
 						var i = _Menu.Add(item);
 						i.Content = SetHeader(item, true, false, true);

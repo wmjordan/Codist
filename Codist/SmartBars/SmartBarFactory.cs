@@ -40,7 +40,7 @@ namespace Codist.SmartBars
 				return;
 			}
 			if (Constants.CodeTypes.CSharp.Equals(contentType.TypeName, StringComparison.OrdinalIgnoreCase)) {
-				SemanticContext.GetOrCreateSingetonInstance(textView);
+				SemanticContext.GetOrCreateSingletonInstance(textView);
 				new CSharpSmartBar(textView, _TextSearchService);
 			}
 			else if (textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {

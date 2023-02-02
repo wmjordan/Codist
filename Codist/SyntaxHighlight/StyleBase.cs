@@ -173,11 +173,11 @@ namespace Codist.SyntaxHighlight
 
 	abstract class StyleBase<TStyle> : StyleBase where TStyle : Enum
 	{
-		string _ClassficationType, _Description;
+		string _ClassificationType, _Description;
 
 		public abstract TStyle StyleID { get; set; }
 
-		internal override string ClassificationType => _ClassficationType ?? (_ClassficationType = GetClassificationType());
+		internal override string ClassificationType => _ClassificationType ?? (_ClassificationType = GetClassificationType());
 		internal override string Description => _Description ?? (_Description = GetDescription());
 
 		protected string GetCategory() {

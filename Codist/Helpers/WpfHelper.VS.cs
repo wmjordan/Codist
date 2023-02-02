@@ -288,7 +288,7 @@ namespace Codist
 				Highlight(sender, e);
 				MouseEnter += Highlight;
 				MouseLeave += Leave;
-				MouseLeftButtonDown += GotoSymbol;
+				MouseLeftButtonDown += GoToSymbol;
 				MouseRightButtonDown += LinkContextMenu;
 			}
 
@@ -343,7 +343,7 @@ namespace Codist
 				Background = WpfBrushes.Transparent;
 			}
 
-			void GotoSymbol(object sender, RoutedEventArgs e) {
+			void GoToSymbol(object sender, RoutedEventArgs e) {
 				_Symbol.GoToDefinition();
 				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
 				e.Handled = true;
@@ -351,7 +351,7 @@ namespace Codist
 
 			void SymbolLink_Unloaded(object sender, RoutedEventArgs e) {
 				MouseEnter -= InitInteraction;
-				MouseLeftButtonDown -= GotoSymbol;
+				MouseLeftButtonDown -= GoToSymbol;
 				MouseRightButtonDown -= LinkContextMenu;
 				MouseEnter -= Highlight;
 				MouseLeave -= Leave;

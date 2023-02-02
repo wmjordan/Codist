@@ -28,7 +28,7 @@ namespace Codist.NaviBar
 		[Export(typeof(AdornmentLayerDefinition))]
 		[Name(nameof(CSharpBar.SyntaxNodeRange))]
 		[Order(After = PredefinedAdornmentLayers.CurrentLineHighlighter)]
-		AdornmentLayerDefinition _SyntaxNodeRangeAdormentLayer;
+		AdornmentLayerDefinition _SyntaxNodeRangeAdornmentLayer;
 
 		[Import(typeof(ITextSearchService2))]
 		ITextSearchService2 _TextSearchService;
@@ -41,7 +41,7 @@ namespace Codist.NaviBar
 				&& textView.TextBuffer.MayBeEditor()) {
 				if (textView.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp)
 					|| textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
-					SemanticContext.GetOrCreateSingetonInstance(textView);
+					SemanticContext.GetOrCreateSingletonInstance(textView);
 					new Overrider(textView, _TextSearchService);
 				}
 			}

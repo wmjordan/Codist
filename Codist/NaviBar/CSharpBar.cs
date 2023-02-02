@@ -103,7 +103,7 @@ namespace Codist.NaviBar
 			ListContainer.ChildRemoved += ListContainer_MenuRemoved;
 			Config.RegisterUpdateHandler(UpdateCSharpNaviBarConfig);
 			SyncHelper.CancelAndDispose(ref _cancellationSource, true);
-			_SemanticContext = SemanticContext.GetOrCreateSingetonInstance(View);
+			_SemanticContext = SemanticContext.GetOrCreateSingletonInstance(View);
 		}
 
 		protected override void UnbindView() {
@@ -261,7 +261,7 @@ namespace Codist.NaviBar
 			}
 			// if the caret is at the beginning of the document, move to the first type declaration
 			if (position == 0) {
-				var n = _SemanticContext.Compilation.GetDecendantDeclarations(token).FirstOrDefault();
+				var n = _SemanticContext.Compilation.GetDescendantDeclarations(token).FirstOrDefault();
 				if (n != null) {
 					position = n.SpanStart;
 				}

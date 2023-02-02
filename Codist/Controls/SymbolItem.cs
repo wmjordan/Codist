@@ -27,7 +27,7 @@ namespace Codist.Controls
 		public UIElement Icon => _Icon ?? (_Icon = Container?.IconProvider?.Invoke(this) ?? ThemeHelper.GetImage(ImageId != -1 ? ImageId : 0));
 		public UIElement ExtIcon => Container?.ExtIconProvider?.Invoke(this);
 		public string Hint {
-			get => _Hint ?? (_Hint = Symbol != null && Container != null && Symbol.Kind == SymbolKind.Field ? GetSymbolConstaintValue(Symbol, Container.ContainerType == SymbolListType.EnumFlags) : String.Empty);
+			get => _Hint ?? (_Hint = Symbol != null && Container != null && Symbol.Kind == SymbolKind.Field ? GetSymbolConstantValue(Symbol, Container.ContainerType == SymbolListType.EnumFlags) : String.Empty);
 			set => _Hint = value;
 		}
 		public bool IsExternal => Usage == SymbolUsageKind.External
@@ -160,7 +160,7 @@ namespace Codist.Controls
 			return t;
 		}
 
-		static string GetSymbolConstaintValue(ISymbol symbol, bool useHexBin) {
+		static string GetSymbolConstantValue(ISymbol symbol, bool useHexBin) {
 			var f = (IFieldSymbol)symbol;
 			if (f.HasConstantValue) {
 				return useHexBin && f.ConstantValue is IFormattable v ? "0x" + v.ToString("X4", System.Globalization.CultureInfo.InvariantCulture) : f.ConstantValue?.ToString();

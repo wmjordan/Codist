@@ -26,17 +26,17 @@ namespace Codist.Controls
 				.Append(R.T_Referrers);
 			if (referrers != null) {
 				var containerType = symbol.ContainingType;
-				foreach (var (referrer, occurance) in referrers) {
+				foreach (var (referrer, occurrence) in referrers) {
 					var i = m.Add(referrer, false);
-					i.Location = occurance.FirstOrDefault().Item2.Location;
-					foreach (var item in occurance) {
+					i.Location = occurrence.FirstOrDefault().Item2.Location;
+					foreach (var item in occurrence) {
 						i.Usage |= item.Item1;
 					}
 					if (referrer.ContainingType != containerType) {
 						i.Hint = (referrer.ContainingType ?? referrer).ToDisplayString(CodeAnalysisHelper.MemberNameFormat);
 					}
-					if (occurance.Count > 1) {
-						i.Hint += " @" + occurance.Count;
+					if (occurrence.Count > 1) {
+						i.Hint += " @" + occurrence.Count;
 					}
 				}
 			}

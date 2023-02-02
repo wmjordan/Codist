@@ -29,7 +29,7 @@ namespace Codist.Controls
 			var grid = view.VisualElement.GetParent<Grid>();
 			if (grid != null) {
 				grid.Children.Add(this);
-				view.Selection.SelectionChanged += ViewSeletionChanged;
+				view.Selection.SelectionChanged += ViewSelectionChanged;
 			}
 			else {
 				view.VisualElement.Loaded += VisualElement_Loaded;
@@ -220,7 +220,7 @@ namespace Codist.Controls
 			_View.VisualElement.Loaded -= VisualElement_Loaded;
 			var container = _View.VisualElement.GetParent<Grid>();
 			if (container != null) {
-				_View.Selection.SelectionChanged += ViewSeletionChanged;
+				_View.Selection.SelectionChanged += ViewSelectionChanged;
 				container.Children.Add(this);
 			}
 		}
@@ -228,7 +228,7 @@ namespace Codist.Controls
 		void View_Closed(object sender, EventArgs e) {
 			if (_View != null) {
 				_View.Closed -= View_Closed;
-				_View.Selection.SelectionChanged -= ViewSeletionChanged;
+				_View.Selection.SelectionChanged -= ViewSelectionChanged;
 				_View.Properties.RemoveProperty(typeof(ExternalAdornment));
 				_View.VisualElement.GetParent<Grid>()?.Children.Remove(this);
 				foreach (var item in _Canvas.Children) {
@@ -248,7 +248,7 @@ namespace Codist.Controls
 			}
 		}
 
-		void ViewSeletionChanged(object sender, EventArgs e) {
+		void ViewSelectionChanged(object sender, EventArgs e) {
 			ClearUnpinnedChildren();
 		}
 

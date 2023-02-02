@@ -38,13 +38,13 @@ namespace Codist.Margins
 		/// <summary>
 		/// Constructor for the <see cref="CSharpMembersMargin"/>.
 		/// </summary>
-		/// <param name="textView">ITextView to which this <see cref="CSharpMembersMargin"/> will be attacheded.</param>
+		/// <param name="textView">ITextView to which this <see cref="CSharpMembersMargin"/> will be attached.</param>
 		/// <param name="verticalScrollbar">Vertical scrollbar of the ITextViewHost that contains <paramref name="textView"/>.</param>
 		public CSharpMembersMargin(IWpfTextView textView, IVerticalScrollBar verticalScrollbar) {
 			_MemberMarker = new MemberMarker(textView, verticalScrollbar, this);
 			_SymbolReferenceMarker = new SymbolReferenceMarker(textView, verticalScrollbar, this);
 			_FormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
-			_SemanticContext = SemanticContext.GetOrCreateSingetonInstance(textView);
+			_SemanticContext = SemanticContext.GetOrCreateSingletonInstance(textView);
 			IsVisibleChanged += _MemberMarker.OnIsVisibleChanged;
 			textView.Closed += TextView_Closed;
 
@@ -236,7 +236,7 @@ namespace Codist.Margins
 			}
 
 			internal void Render(DrawingContext drawingContext) {
-				const int showMemberDeclarationThredshold = 30, longDeclarationLines = 50, labelSize = 8;
+				const int showMemberDeclarationThreshold = 30, longDeclarationLines = 50, labelSize = 8;
 				if (Config.Instance.MarkerOptions.HasAnyFlag(MarkerOptions.MemberDeclaration | MarkerOptions.RegionDirective) == false
 					|| _TextView.IsClosed) {
 					return;
@@ -287,7 +287,7 @@ namespace Codist.Margins
 							drawingContext.DrawLine(pen, new Point(level, y2), new Point(_Element.ActualWidth, y2));
 						}
 						y2 -= y1;
-						if (y2 > showMemberDeclarationThredshold && tag.Tag.Name != null) {
+						if (y2 > showMemberDeclarationThreshold && tag.Tag.Name != null) {
 							if (pen == null) {
 								pen = _Element.GetPenForCodeMemberType(tagType);
 							}

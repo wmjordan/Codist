@@ -21,7 +21,9 @@ namespace Codist
 			public const string CSharp = "CSharp";
 			public const string HtmlxProjection = "HTMLXProjection";
 			public const string Text = "Text";
-			[Obsolete("From VS 17.5 on, 'vs-markdown' is used instead of 'Markdown'")]
+			/// <summary>
+			/// From VS 17.5 on, 'vs-markdown' is used instead of 'Markdown'
+			/// </summary>
 			public const string Markdown = "Markdown";
 			public const string VsMarkdown = "vs-markdown";
 			public const string Xml = "XML";
@@ -217,18 +219,14 @@ namespace Codist
 		public const string MarkdownHeading5 = "Markdown: Heading 5";
 		public const string MarkdownHeading6 = "Markdown: Heading 6";
 
-		//public const string EditorIntellisense = "intellisense";
-		//public const string EditorSigHelp = "sighelp";
-		//public const string EditorSigHelpDoc = "sighelp-doc";
-
 		internal const string CodistPrefix = "Codist: ";
 		//! Important
 		//# Notice
 		public const string EmphasisComment = CodistPrefix + "Emphasis";
 		//? Question
 		public const string QuestionComment = CodistPrefix + "Question";
-		//!? Exclaimation
-		public const string ExclaimationComment = CodistPrefix + "Exclaimation";
+		//!? Exclamation
+		public const string ExclamationComment = CodistPrefix + "Exclamation";
 		//x Removed
 		public const string DeletionComment = CodistPrefix + "Deletion";
 
@@ -276,7 +274,7 @@ namespace Codist
 
 		public static readonly Color CommentColor = Colors.Green;
 		public static readonly Color QuestionColor = Colors.MediumPurple;
-		public static readonly Color ExclaimationColor = Colors.IndianRed;
+		public static readonly Color ExclamationColor = Colors.IndianRed;
 		public static readonly Color DeletionColor = Colors.Gray;
 		public static readonly Color ToDoColor = Colors.DarkBlue;
 		public static readonly Color NoteColor = Colors.Orange;
@@ -299,8 +297,8 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.QuestionComment)]
 		Question,
 		[Category(Constants.SyntaxCategory.Task)]
-		[ClassificationType(ClassificationTypeNames = Constants.ExclaimationComment)]
-		Exclaimation,
+		[ClassificationType(ClassificationTypeNames = Constants.ExclamationComment)]
+		Exclamation,
 		[Category(Constants.SyntaxCategory.Task)]
 		[ClassificationType(ClassificationTypeNames = Constants.DeletionComment)]
 		Deletion,
@@ -569,7 +567,7 @@ namespace Codist
 		Declaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpMemberDeclarationName)]
-		[Description("Declaration of type memeber: property, method, event, delegate, nested type, etc. (excluding fields), inheriting from Declaration")]
+		[Description("Declaration of type member: property, method, event, delegate, nested type, etc. (excluding fields), inheriting from Declaration")]
 		MemberDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationBrace)]

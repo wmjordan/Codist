@@ -24,14 +24,14 @@ namespace Codist
 
 		public static SemanticContext GetHovered() {
 			var view = TextEditorHelper.GetMouseOverDocumentView();
-			return view == null ? null : GetOrCreateSingetonInstance(view);
+			return view == null ? null : GetOrCreateSingletonInstance(view);
 		}
-		public static SemanticContext GetOrCreateSingetonInstance(IWpfTextView view) {
+		public static SemanticContext GetOrCreateSingletonInstance(IWpfTextView view) {
 			return view.Properties.GetOrCreateSingletonProperty(() => new SemanticContext(view));
 		}
 		public static SemanticContext GetActive() {
 			var view = TextEditorHelper.GetActiveWpfDocumentView();
-			return view == null ? null : GetOrCreateSingetonInstance(view);
+			return view == null ? null : GetOrCreateSingletonInstance(view);
 		}
 
 		SemanticContext(IWpfTextView textView) {

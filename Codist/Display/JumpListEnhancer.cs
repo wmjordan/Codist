@@ -34,7 +34,7 @@ namespace Codist.Display
 				if (args.Config.JumpListOptions.MatchFlags(JumpListOptions.SafeMode)) {
 					AddJumpListItem(list, devenv, R.T_SafeMode, R.T_SafeModeTip, "/SafeMode");
 				}
-				if (args.Config.JumpListOptions.MatchFlags(JumpListOptions.DemostrationMode)) {
+				if (args.Config.JumpListOptions.MatchFlags(JumpListOptions.DemonstrationMode)) {
 					AddJumpListItem(list, devenv, R.T_PresentationMode, R.T_PresentationModeTip, "/RootSuffix Demo");
 				}
 			}

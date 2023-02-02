@@ -60,7 +60,7 @@ namespace Codist
 		internal const SyntaxKind InitAccessorDeclaration = (SyntaxKind)9060;
 		internal const SyntaxKind WithInitializerExpression = (SyntaxKind)9062;
 		internal const SyntaxKind RecordDeclaration = (SyntaxKind)9063;
-		internal const SyntaxKind RecordStructDesclaration = (SyntaxKind)9068;
+		internal const SyntaxKind RecordStructDeclaration = (SyntaxKind)9068;
 		internal const SyntaxKind SingleLineRawStringLiteralToken = (SyntaxKind)8518;
 		internal const SyntaxKind MultiLineRawStringLiteralToken = (SyntaxKind)8519;
 		internal const SymbolKind FunctionPointerType = (SymbolKind)20;
@@ -102,7 +102,7 @@ namespace Codist
 				case SyntaxKind.OperatorDeclaration:
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.StructDeclaration:
-				case RecordStructDesclaration:
+				case RecordStructDeclaration:
 				case SyntaxKind.VariableDeclaration:
 				case SyntaxKind.LocalFunctionStatement:
 					//case SyntaxKind.VariableDeclarator:
@@ -120,7 +120,7 @@ namespace Codist
 				case SyntaxKind.EventDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
-				case RecordStructDesclaration:
+				case RecordStructDeclaration:
 					return DeclarationCategory.Type;
 				case SyntaxKind.FieldDeclaration:
 				case SyntaxKind.MethodDeclaration:
@@ -155,7 +155,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.NamespaceDeclaration:
 				case RecordDeclaration:
-				case RecordStructDesclaration:
+				case RecordStructDeclaration:
 				case FileScopedNamespaceDeclaration:
 					return true;
 			}
@@ -170,7 +170,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case RecordDeclaration:
-				case RecordStructDesclaration:
+				case RecordStructDeclaration:
 					return true;
 			}
 			return false;
@@ -183,7 +183,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.StructDeclaration:
 				case RecordDeclaration:
-				case RecordStructDesclaration:
+				case RecordStructDeclaration:
 					return true;
 			}
 			return false;
@@ -269,7 +269,7 @@ namespace Codist
 				case RecordDeclaration: return "record";
 				case SyntaxKind.EnumDeclaration: return "enum";
 				case SyntaxKind.StructDeclaration: return "struct";
-				case RecordStructDesclaration: return "record struct";
+				case RecordStructDeclaration: return "record struct";
 				case SyntaxKind.InterfaceDeclaration: return "interface";
 				case SyntaxKind.ConstructorDeclaration: return "constructor";
 				case SyntaxKind.ConversionOperatorDeclaration: return "conversion operator";
@@ -347,8 +347,8 @@ namespace Codist
 			var span = includeTrivia ? node.FullSpan : node.Span;
 			return lines.GetLineFromPosition(span.Start).SpanIncludingLineBreak.Contains(span.End) == false;
 		}
-		public static bool IsMultiline(this SyntaxTriviaList trivias) {
-			foreach (var item in trivias) {
+		public static bool IsMultiline(this SyntaxTriviaList triviaList) {
+			foreach (var item in triviaList) {
 				if (item.IsKind(SyntaxKind.EndOfLineTrivia)) {
 					return true;
 				}
@@ -374,7 +374,7 @@ namespace Codist
 					return GetClassIcon((BaseTypeDeclarationSyntax)node);
 				case SyntaxKind.EnumDeclaration: return GetEnumIcon((EnumDeclarationSyntax)node);
 				case SyntaxKind.StructDeclaration:
-				case RecordStructDesclaration:
+				case RecordStructDeclaration:
 					return GetStructIcon((BaseTypeDeclarationSyntax)node);
 				case SyntaxKind.InterfaceDeclaration: return GetInterfaceIcon((InterfaceDeclarationSyntax)node);
 				case SyntaxKind.MethodDeclaration: return GetMethodIcon((MethodDeclarationSyntax)node);
@@ -646,7 +646,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case RecordDeclaration:
-				case RecordStructDesclaration:
+				case RecordStructDeclaration:
 					var t1 = (TypeDeclarationSyntax)node;
 					var t2 = (TypeDeclarationSyntax)other;
 					return t1.Arity == t2.Arity && t1.Identifier.Text == t2.Identifier.Text;
@@ -731,7 +731,7 @@ namespace Codist
 				case SyntaxKind.StructDeclaration:
 				case SyntaxKind.InterfaceDeclaration:
 				case RecordDeclaration:
-				case RecordStructDesclaration:
+				case RecordStructDeclaration:
 					return GetTypeSignature((TypeDeclarationSyntax)node);
 				case SyntaxKind.EnumDeclaration: return ((EnumDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.MethodDeclaration: return GetMethodSignature((MethodDeclarationSyntax)node);
@@ -1033,13 +1033,13 @@ namespace Codist
 			return r;
 		}
 
-		public static IEnumerable<SyntaxNode> GetDecendantDeclarations(this SyntaxNode root, CancellationToken cancellationToken = default) {
+		public static IEnumerable<SyntaxNode> GetDescendantDeclarations(this SyntaxNode root, CancellationToken cancellationToken = default) {
 			foreach (var child in root.ChildNodes()) {
 				cancellationToken.ThrowIfCancellationRequested();
 				switch (child.Kind()) {
 					case SyntaxKind.CompilationUnit:
 					case SyntaxKind.NamespaceDeclaration:
-						foreach (var item in child.GetDecendantDeclarations(cancellationToken)) {
+						foreach (var item in child.GetDescendantDeclarations(cancellationToken)) {
 							yield return item;
 						}
 						break;
@@ -1050,7 +1050,7 @@ namespace Codist
 					case SyntaxKind.InterfaceDeclaration:
 					case SyntaxKind.StructDeclaration:
 					case RecordDeclaration:
-					case RecordStructDesclaration:
+					case RecordStructDeclaration:
 						yield return child;
 						goto case SyntaxKind.CompilationUnit;
 					case SyntaxKind.MethodDeclaration:
@@ -1108,7 +1108,7 @@ namespace Codist
 		/// <summary>Gets full span for ordinary nodes, excluding leading directives; gets span for regions.</summary>
 		public static Span GetSematicSpan(this SyntaxNode node, bool expandRegion) {
 			int start, end;
-			SyntaxTriviaList trivias;
+			SyntaxTriviaList tl;
 			SyntaxTrivia t;
 			if (node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
 				var region = node as RegionDirectiveTriviaSyntax;
@@ -1120,9 +1120,9 @@ namespace Codist
 						start = t.SpanStart;
 					}
 				}
-				trivias = (expandRegion ? (region.GetEndRegion() ?? (SyntaxNode)region) : region).GetTrailingTrivia();
-				for (int i = trivias.Count - 1; i >= 0; i--) {
-					t = trivias[i];
+				tl = (expandRegion ? (region.GetEndRegion() ?? (SyntaxNode)region) : region).GetTrailingTrivia();
+				for (int i = tl.Count - 1; i >= 0; i--) {
+					t = tl[i];
 					if (t.IsKind(SyntaxKind.EndOfLineTrivia)) {
 						end = t.Span.End;
 						break;
@@ -1138,9 +1138,9 @@ namespace Codist
 
 			start = span.Start;
 			end = span.End;
-			trivias = node.GetLeadingTrivia();
-			for (int i = trivias.Count - 1; i >= 0; i--) {
-				t = trivias[i];
+			tl = node.GetLeadingTrivia();
+			for (int i = tl.Count - 1; i >= 0; i--) {
+				t = tl[i];
 				if (t.IsDirective) {
 					start = t.FullSpan.End;
 					break;
@@ -1162,7 +1162,7 @@ namespace Codist
 				case SyntaxKind.InterfaceDeclaration:
 				case SyntaxKind.EnumDeclaration:
 				case RecordDeclaration:
-				case RecordStructDesclaration:
+				case RecordStructDeclaration:
 					return ((BaseTypeDeclarationSyntax)node).Identifier;
 				case SyntaxKind.DelegateDeclaration: return ((DelegateDeclarationSyntax)node).Identifier;
 				case SyntaxKind.MethodDeclaration: return ((MethodDeclarationSyntax)node).Identifier;
@@ -1195,15 +1195,15 @@ namespace Codist
 			if (node == null || node.HasLeadingTrivia == false) {
 				return SyntaxTriviaList.Empty;
 			}
-			var trivias = node.GetLeadingTrivia();
+			var lt = node.GetLeadingTrivia();
 			int first;
-			for (int i = first = 0; i < trivias.Count; i++) {
-				var trivia = trivias[i];
+			for (int i = first = 0; i < lt.Count; i++) {
+				var trivia = lt[i];
 				if (trivia.IsKind(SyntaxKind.WhitespaceTrivia) == false) {
 					first = i + 1;
 				}
 			}
-			return first > 0 ? new SyntaxTriviaList(trivias.Skip(first)) : trivias;
+			return first > 0 ? new SyntaxTriviaList(lt.Skip(first)) : lt;
 		}
 		public static List<DirectiveTriviaSyntax> GetDirectives(this SyntaxNode node, Func<DirectiveTriviaSyntax, bool> predicate = null) {
 			if (node.ContainsDirectives == false) {

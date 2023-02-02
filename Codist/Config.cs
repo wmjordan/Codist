@@ -25,8 +25,8 @@ namespace Codist
 			PaleDarkTheme = ThemePrefix + "PaleDark",
 			SimpleTheme = ThemePrefix + "Simple";
 
-		static DateTime _LastSaved, _LastLoaded;
-		static int _LoadingConfig;
+		static DateTime __LastSaved, __LastLoaded;
+		static int __LoadingConfig;
 		static Action<Config> __Loaded;
 		static Action<ConfigUpdatedEventArgs> __Updated;
 
@@ -84,7 +84,7 @@ namespace Codist
 		[DefaultValue(false)]
 		public bool NoSpaceBetweenWrappedLines { get; set; }
 		[JsonIgnore]
-		public bool SupressAutoBuildVersion { get; set; }
+		public bool SuppressAutoBuildVersion { get; set; }
 		[DefaultValue(DefaultIconSize)]
 		public int SmartBarButtonSize { get; set; } = DefaultIconSize;
 		public List<CommentLabel> Labels { get; } = new List<CommentLabel>();
@@ -198,7 +198,7 @@ namespace Codist
 		}
 
 		public static void LoadConfig(string configPath, StyleFilters styleFilter = StyleFilters.None) {
-			if (Interlocked.Exchange(ref _LoadingConfig, 1) != 0) {
+			if (Interlocked.Exchange(ref __LoadingConfig, 1) != 0) {
 				return;
 			}
 			Debug.WriteLine("Load config: " + configPath);
@@ -212,7 +212,7 @@ namespace Codist
 				Instance = GetDefaultConfig();
 			}
 			finally {
-				_LoadingConfig = 0;
+				__LoadingConfig = 0;
 			}
 		}
 
@@ -254,7 +254,7 @@ namespace Codist
 				ResetCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
 				Instance.Styles = config.Styles;
-				_LastLoaded = DateTime.Now;
+				__LastLoaded = DateTime.Now;
 				return Instance;
 			}
 			else if (styleFilter != StyleFilters.None) {
@@ -266,12 +266,12 @@ namespace Codist
 				MergeCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles, styleFilter);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
 				Instance.Styles = config.Styles;
-				_LastLoaded = DateTime.Now;
+				__LastLoaded = DateTime.Now;
 				return Instance;
 			}
 			Display.LayoutOverrider.Reload(config.DisplayOptimizations);
 			Display.ResourceMonitor.Reload(config.DisplayOptimizations);
-			_LastLoaded = DateTime.Now;
+			__LastLoaded = DateTime.Now;
 			Debug.WriteLine("Config loaded");
 			return config;
 		}
@@ -349,7 +349,7 @@ namespace Codist
 						Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
 					}));
 				if (path == ConfigPath) {
-					_LastSaved = _LastLoaded = DateTime.Now;
+					__LastSaved = __LastLoaded = DateTime.Now;
 					Debug.WriteLine("Config saved");
 				}
 			}
@@ -450,7 +450,7 @@ namespace Codist
 		}
 
 		static Config GetDefaultConfig() {
-			_LastLoaded = DateTime.Now;
+			__LastLoaded = DateTime.Now;
 			var c = new Config();
 			InitDefaultLabels(c.Labels);
 			ResetSearchEngines(c.SearchEngines);
@@ -472,7 +472,7 @@ namespace Codist
 				new CommentLabel("!", CommentStyleTypes.Emphasis),
 				new CommentLabel("#", CommentStyleTypes.Emphasis),
 				new CommentLabel("?", CommentStyleTypes.Question),
-				new CommentLabel("!?", CommentStyleTypes.Exclaimation),
+				new CommentLabel("!?", CommentStyleTypes.Exclamation),
 				new CommentLabel("x", CommentStyleTypes.Deletion, true),
 				new CommentLabel("+++", CommentStyleTypes.Heading1),
 				new CommentLabel("!!", CommentStyleTypes.Heading1),
@@ -515,7 +515,7 @@ namespace Codist
 		internal static CommentStyle[] GetDefaultCommentStyles() {
 			return new CommentStyle[] {
 				new CommentStyle(CommentStyleTypes.Emphasis, Constants.CommentColor) { Bold = true, FontSize = 10 },
-				new CommentStyle(CommentStyleTypes.Exclaimation, Constants.ExclaimationColor),
+				new CommentStyle(CommentStyleTypes.Exclamation, Constants.ExclamationColor),
 				new CommentStyle(CommentStyleTypes.Question, Constants.QuestionColor),
 				new CommentStyle(CommentStyleTypes.Deletion, Constants.DeletionColor) { Strikethrough = true },
 				new CommentStyle(CommentStyleTypes.ToDo, Colors.White) { BackColor = Constants.ToDoColor, ScrollBarMarkerStyle = ScrollbarMarkerStyle.Square },
@@ -559,29 +559,29 @@ namespace Codist
 
 		sealed class ConfigManager
 		{
-			int _version, _oldVersion;
+			int _Version, _OldVersion;
 			public ConfigManager() {
 				__Updated += MarkUpdated;
 			}
-			public bool IsChanged => _version != _oldVersion;
+			public bool IsChanged => _Version != _OldVersion;
 			void MarkUpdated(ConfigUpdatedEventArgs e) {
-				++_version;
+				++_Version;
 			}
 			internal void MarkVersioned() {
-				_oldVersion = _version;
+				_OldVersion = _Version;
 			}
 			internal void Quit(bool apply) {
 				__Updated -= MarkUpdated;
 				if (apply) {
-					if (_version != _oldVersion) {
+					if (_Version != _OldVersion) {
 						Instance.SaveConfig(null);
-						_oldVersion = _version;
+						_OldVersion = _Version;
 					}
 				}
 				else {
-					if (_version != _oldVersion) {
+					if (_Version != _OldVersion) {
 						LoadConfig(ConfigPath);
-						_version = _oldVersion;
+						_Version = _OldVersion;
 					}
 				}
 			}
@@ -612,7 +612,7 @@ namespace Codist
 	}
 	sealed class WrapText
 	{
-		string _Prefix, _Suffix, _Pattern, _Subsitution;
+		string _Prefix, _Suffix, _Pattern, _Substitution;
 		char _Indicator;
 		public const char DefaultIndicator = '$';
 		public WrapText(string pattern, string name = null, char indicator = DefaultIndicator) {
@@ -640,12 +640,12 @@ namespace Codist
 
 		internal string Prefix => _Prefix;
 		internal string Suffix => _Suffix;
-		internal string Substitution => _Subsitution;
+		internal string Substitution => _Substitution;
 
 		public string Wrap(string text) {
 			return _Prefix
 				+ text
-				+ (_Subsitution != null ? _Suffix.Replace(_Subsitution, text) : _Suffix);
+				+ (_Substitution != null ? _Suffix.Replace(_Substitution, text) : _Suffix);
 		}
 
 		void InternalUpdate() {
@@ -653,12 +653,12 @@ namespace Codist
 			if (_Pattern != null && (p = _Pattern.IndexOf(Indicator)) >= 0) {
 				_Prefix = _Pattern.Substring(0, p);
 				_Suffix = _Pattern.Substring(p + 1);
-				_Subsitution = _Suffix.Contains(Indicator) ? Indicator.ToString() : null;
+				_Substitution = _Suffix.Contains(Indicator) ? Indicator.ToString() : null;
 			}
 			else {
 				_Prefix = _Pattern;
 				_Suffix = String.Empty;
-				_Subsitution = null;
+				_Substitution = null;
 			}
 		}
 	}
@@ -737,9 +737,9 @@ namespace Codist
 		[Obsolete]
 		ClickAndGo = 0,
 		[Obsolete]
-		BaseTypeInheritence = 0,
+		BaseTypeInheritance = 0,
 		[Obsolete]
-		InterfacesInheritence = 0,
+		InterfacesInheritance = 0,
 		Attributes = 1,
 		BaseType = 1 << 1,
 		Declaration = 1 << 3,
@@ -766,6 +766,8 @@ namespace Codist
 		ExampleDoc = 1 << 25,
 		Color = 1 << 26,
 		Selection = 1 << 27,
+		CtrlSuppress = 1 << 28,
+		[Obsolete]
 		CtrlSupress = 1 << 28,
 		CtrlQuickInfo = 1 << 29,
 		AlternativeStyle = 1 << 30,
@@ -899,9 +901,11 @@ namespace Codist
 	{
 		None,
 		SafeMode = 1,
+		DemonstrationMode = 1 << 1,
+		[Obsolete]
 		DemostrationMode = 1 << 1,
 		NoScaling = 1 << 2,
-		Default = SafeMode | DemostrationMode | NoScaling
+		Default = SafeMode | DemonstrationMode | NoScaling
 	}
 
 	public enum ScrollbarMarkerStyle

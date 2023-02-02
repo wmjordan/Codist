@@ -26,7 +26,7 @@ namespace Codist.Margins
 		static readonly Brush UndoneBrush = new SolidColorBrush(Constants.UndoneColor);
 		static readonly Brush TaskBrush = new SolidColorBrush(Constants.TaskColor);
 		static readonly Brush PreProcessorBrush = Brushes.Gray;
-		static readonly Brush TaskBackgroundBrsh = Brushes.White.Alpha(0.5);
+		static readonly Brush TaskBackgroundBrush = Brushes.White.Alpha(0.5);
 		//note: this dictionary determines which style has a scrollbar marker
 		static readonly Dictionary<IClassificationType, Brush> ClassificationBrushMapper = InitClassificationBrushMapper();
 		const double MarkPadding = 1.0;
@@ -53,8 +53,8 @@ namespace Codist.Margins
 
 			Config.RegisterUpdateHandler(UpdateCommentMarginConfig);
 			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
-			IsVisibleChanged += OnViewOrMarginVisiblityChanged;
-			//_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisiblityChanged;
+			IsVisibleChanged += OnViewOrMarginVisibilityChanged;
+			//_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisibilityChanged;
 			_ScrollBar.TrackSpanChanged += OnMappingChanged;
 			_TextView.Closed += _TextView_Closed;
 
@@ -122,7 +122,7 @@ namespace Codist.Margins
 			InvalidateVisual();
 		}
 
-		void OnViewOrMarginVisiblityChanged(object sender, DependencyPropertyChangedEventArgs e) {
+		void OnViewOrMarginVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e) {
 			//There is no need to update event handlers if the visibility change is the result of an options change (since we will
 			//update the event handlers after changing all the options).
 			//
@@ -214,11 +214,11 @@ namespace Codist.Margins
 
 		/// <summary>draws task name (inverted) and the task content</summary>
 		static void DrawTaskMark(DrawingContext dc, Brush brush, double y, string taskName, string taskContent) {
-			//var ft = WpfHelper.ToFormattedText(taskName, 9, TaskBackgroundBrsh).SetBold();
+			//var ft = WpfHelper.ToFormattedText(taskName, 9, TaskBackgroundBrush).SetBold();
 			//dc.DrawRectangle(brush, EmptyPen, new Rect(0, y - ft.Height / 2, ft.Width, ft.Height));
 			//dc.DrawText(ft, new Point(0, y - ft.Height / 2));
 			var tt = WpfHelper.ToFormattedText(taskContent, 9, brush);
-			dc.DrawRectangle(TaskBackgroundBrsh, EmptyPen, new Rect(0, y - tt.Height / 2, tt.Width, tt.Height));
+			dc.DrawRectangle(TaskBackgroundBrush, EmptyPen, new Rect(0, y - tt.Height / 2, tt.Width, tt.Height));
 			dc.DrawText(tt, new Point(0, y - tt.Height / 2));
 		}
 
@@ -252,7 +252,7 @@ namespace Codist.Margins
 				_TextView.Properties.RemoveProperty(nameof(CommentTaggerProvider));
 				_TextView.Properties.RemoveProperty(typeof(TaggerResult));
 				_TextView = null;
-				IsVisibleChanged -= OnViewOrMarginVisiblityChanged;
+				IsVisibleChanged -= OnViewOrMarginVisibilityChanged;
 				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 				if (_CommentTagger != null) {
 					_CommentTagger.TagAdded -= CommentTagger_TagAdded;

@@ -34,7 +34,7 @@ namespace Codist
 		}
 
 		/// <summary>
-		/// Use it to remove paragraphs rendered by VS builtin implementation
+		/// Use it to remove paragraphs rendered by VS built-in implementation
 		/// </summary>
 		public int ParagraphCount { get; set; }
 

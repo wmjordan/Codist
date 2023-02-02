@@ -291,7 +291,7 @@ namespace Codist.Options
 					new Note(R.OT_QuickInfoNote),
 					_DisableUntilShift = o.CreateOptionBox(QuickInfoOptions.CtrlQuickInfo, UpdateConfig, R.OT_HideQuickInfoUntilShift)
 						.SetLazyToolTip(() => R.OT_HideQuickInfoUntilShiftTip),
-					_CtrlSuppress = o.CreateOptionBox(QuickInfoOptions.CtrlSupress, UpdateConfig, R.OT_CtrlSuppressQuickInfo).SetLazyToolTip(() => R.OT_CtrlSuppressQuickInfoTip),
+					_CtrlSuppress = o.CreateOptionBox(QuickInfoOptions.CtrlSuppress, UpdateConfig, R.OT_CtrlSuppressQuickInfo).SetLazyToolTip(() => R.OT_CtrlSuppressQuickInfoTip),
 					_Selection = o.CreateOptionBox(QuickInfoOptions.Selection, UpdateConfig, R.OT_SelectionInfo)
 						.SetLazyToolTip(() => R.OT_SelectionInfoTip),
 					_Color = o.CreateOptionBox(QuickInfoOptions.Color, UpdateConfig, R.OT_ColorInfo)

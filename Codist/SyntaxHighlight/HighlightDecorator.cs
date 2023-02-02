@@ -21,7 +21,7 @@ namespace Codist.SyntaxHighlight
 	// The difficulties of the implementation are:
 	// 1. override TextFormattingRunProperties to change the display styles of classified type;
 	// 2. can revert to original styles;
-	// 3. detect when theme changes and still satisify 1 and 2 afterwards;
+	// 3. detect when theme changes and still satisfy 1 and 2 afterwards;
 	// 4. work in all text view;
 	// 5. good performance, don't do anything redundantly
 	sealed class HighlightDecorator
@@ -197,7 +197,7 @@ namespace Codist.SyntaxHighlight
 			}
 			var refreshList = new List<(IClassificationType type, TextFormattingRunProperties property)>();
 			foreach (var item in updated) {
-				// hack: we have to update the sub-classficationTypes in order to make C# Braces and Parentheses highlighting work properly
+				// hack: we have to update the sub-classificationTypes in order to make C# Braces and Parentheses highlighting work properly
 				foreach (var subType in item.Key.GetSubTypes()) {
 					if (updated.ContainsKey(subType) == false) {
 						if ((style = FormatStore.GetOrCreateStyle(subType)) == null

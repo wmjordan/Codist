@@ -48,7 +48,7 @@ namespace Codist.Commands
 					return true;
 				}
 
-				message = "Version not found or verion number invalid in file " + fileName;
+				message = "Version not found or version number invalid in file " + fileName;
 			}
 			catch (Exception ex) {
 				message = ex.Message;
