@@ -774,10 +774,13 @@ namespace Codist.Refactorings
 						node = node.Parent;
 					}
 					var add = (BinaryExpressionSyntax)node;
-					return Chain.Create(Replace(add, SF.InterpolatedStringExpression(
+					if (add.Parent.IsKind(SyntaxKind.ParenthesizedExpression)) {
+						node = add.Parent;
+					}
+					return Chain.Create(Replace(node, SF.InterpolatedStringExpression(
 							SF.Token(SyntaxKind.InterpolatedStringStartToken),
 							new SyntaxList<InterpolatedStringContentSyntax>(AddExpressionsToInterpolatedStringContents(add))
-							).NormalizeWhitespace().WithTrailingTrivia(add.GetTrailingTrivia()).AnnotateSelect()
+							).NormalizeWhitespace().WithTriviaFrom(node).AnnotateSelect()
 						));
 				}
 				return Enumerable.Empty<RefactoringAction>();
