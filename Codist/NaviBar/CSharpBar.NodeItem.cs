@@ -540,7 +540,7 @@ namespace Codist.NaviBar
 					this.SetTipPlacementBottom();
 					// todo: handle updated syntax node for RootItem
 					if (Symbol != null) {
-						var tip = ToolTipFactory.CreateToolTip(Symbol, true, Bar._SemanticContext);
+						var tip = ToolTipHelper.CreateToolTip(Symbol, true, Bar._SemanticContext);
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
 							tip.AddTextBlock().Append(R.T_LineOfCode + (Node.GetLineSpan().Length + 1));
 						}

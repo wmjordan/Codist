@@ -11,7 +11,7 @@ using System.Windows;
 
 namespace Codist
 {
-	static class ToolTipFactory
+	static class ToolTipHelper
 	{
 		public static ThemedToolTip CreateToolTip(ISymbol symbol, bool forMemberList, SemanticContext context) {
 			var tip = new ThemedToolTip();

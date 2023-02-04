@@ -203,7 +203,7 @@ namespace Codist
 				base.OnToolTipOpening(e);
 				var s = _Symbol;
 				if (s != null && ReferenceEquals(ToolTip, String.Empty)) {
-					ToolTip = ToolTipFactory.CreateToolTip(s, false, SemanticContext.GetHovered());
+					ToolTip = ToolTipHelper.CreateToolTip(s, false, SemanticContext.GetHovered());
 					this.SetTipPlacementBottom();
 				}
 			}

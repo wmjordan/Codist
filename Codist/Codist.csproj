@@ -224,7 +224,7 @@
     <Compile Include="Helpers\ServicesHelper.cs" />
     <Compile Include="Helpers\TextEditorHelper.cs" />
     <Compile Include="Helpers\ThemeHelper.cs" />
-    <Compile Include="Controls\ToolTipFactory.cs" />
+    <Compile Include="Helpers\ToolTipHelper.cs" />
     <Compile Include="Helpers\UIHelper.cs" />
     <Compile Include="Helpers\WpfHelper.cs" />
     <Compile Include="Helpers\WpfHelper.VS.cs" />

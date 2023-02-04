@@ -390,7 +390,7 @@ namespace Codist.Controls
 					item.SetSymbolToSyntaxNode();
 				}
 				if (item.Symbol != null) {
-					var tip = ToolTipFactory.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, sc);
+					var tip = ToolTipHelper.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, sc);
 					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
 						tip.AddTextBlock()
 							.Append(R.T_LineOfCode + (item.SyntaxNode.GetLineSpan().Length + 1).ToString());
@@ -401,7 +401,7 @@ namespace Codist.Controls
 			}
 			if (item.Symbol != null) {
 				item.RefreshSymbol();
-				var tip = ToolTipFactory.CreateToolTip(item.Symbol, false, sc);
+				var tip = ToolTipHelper.CreateToolTip(item.Symbol, false, sc);
 				if (ContainerType == SymbolListType.SymbolReferrers && item.Location.IsInSource) {
 					// append location info to tip
 					ShowSourceReference(tip.AddTextBlock().Append(R.T_SourceReference).AppendLine(), item.Location);

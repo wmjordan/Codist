@@ -637,7 +637,7 @@ namespace Codist.QuickInfo
 			Grid infoBox = null;
 			var nodeKind = node.Kind();
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues) && (nodeKind == SyntaxKind.NumericLiteralExpression || nodeKind == SyntaxKind.CharacterLiteralExpression)) {
-				infoBox = ToolTipFactory.ShowNumericForms(node);
+				infoBox = ToolTipHelper.ShowNumericForms(node);
 			}
 			else if (nodeKind == SyntaxKind.SwitchStatement) {
 				var s = ((SwitchStatementSyntax)node).Sections.Count;
@@ -1015,7 +1015,7 @@ namespace Codist.QuickInfo
 				}
 			}
 			else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)) {
-				var s = ToolTipFactory.ShowNumericForms(value);
+				var s = ToolTipHelper.ShowNumericForms(value);
 				if (s != null) {
 					if (symbol != null) {
 						ShowEnumInfo(qiContent, symbol.ContainingType, false);
