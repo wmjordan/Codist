@@ -199,7 +199,7 @@ namespace Codist
 			if (t == null) {
 				return;
 			}
-			if (t.TypeKind == TypeKind.Class && t.BaseType != null) {
+			if (t.BaseType != null && (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct)) {
 				InheritDocumentation(t.BaseType, querySymbol);
 			}
 			// inherit from base type
