@@ -40,10 +40,10 @@ namespace Codist.SmartBars
 
 		void AddFilePathCommands(string t) {
 			AddCommand(MyToolBar, IconIds.Open, $"{R.CMD_OpenOrExecuteFile}\n{t}", ctx => {
-				TryRun(t);
+				FileHelper.TryRun(t);
 			});
 			AddCommand(MyToolBar, IconIds.OpenFolder, $"{R.CMD_OpenFolder}\n{Path.GetDirectoryName(t)}", ctx => {
-				Process.Start(new ProcessStartInfo("Explorer.exe", $"/select,\"{t}\"") { WorkingDirectory = Environment.SystemDirectory });
+				FileHelper.OpenInExplorer(t);
 			});
 			switch (Path.GetExtension(t).ToLowerInvariant()) {
 				case ".exe":
@@ -68,7 +68,7 @@ namespace Codist.SmartBars
 
 		void AddDirectoryPathCommands(string t) {
 			AddCommand(MyToolBar, IconIds.OpenFolder, $"{R.CMD_OpenFolder}\n{t}", ctx => {
-				TryRun(t);
+				FileHelper.TryRun(t);
 			});
 			AddCommand(MyToolBar, IconIds.OpenWithCmd, $"{R.CMD_OpenFileInCmd}\n{t}", ctx => {
 				Process.Start(new ProcessStartInfo(Environment.SystemDirectory + "\\cmd.exe") { WorkingDirectory = t });
@@ -150,21 +150,6 @@ namespace Codist.SmartBars
 			}
 			pathKind = 0;
 			return null;
-		}
-
-		static void TryRun(string path) {
-			if (path == null) {
-				return;
-			}
-			try {
-				Process.Start(path);
-			}
-			catch (System.ComponentModel.Win32Exception ex) {
-				CodistPackage.ShowMessageBox(ex.Message, null, true);
-			}
-			catch (FileNotFoundException) {
-				// ignore
-			}
 		}
 
 		static bool IsFileTypeRegisteredInVS(string fileName) {
