@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using VisualTreeHelper = System.Windows.Media.VisualTreeHelper;
 using WpfBrush = System.Windows.Media.Brush;
+using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using WpfText = System.Windows.Media.FormattedText;
 
@@ -151,6 +152,11 @@ namespace Codist
 		public static TTextBlock AppendLink<TTextBlock>(this TTextBlock block, string text, Action<Hyperlink> clickHandler, string toolTip)
 			where TTextBlock : TextBlock {
 			block.Inlines.Add(new Hyperlink { Inlines = { text }, ToolTip = toolTip }.ClickToNavigate(clickHandler));
+			return block;
+		}
+		public static TTextBlock AppendFileLink<TTextBlock>(this TTextBlock block, string file, string folder)
+			where TTextBlock : TextBlock {
+			block.Inlines.Add(new FileLink(folder, file));
 			return block;
 		}
 
@@ -701,6 +707,85 @@ namespace Codist
 				 && (typeface.Stretch == FontStretches.Normal);
 		}
 		#endregion
+
+		abstract class InteractiveRun : Run
+		{
+			public InteractiveRun() {
+				MouseEnter += InitInteraction;
+				Unloaded += Unload;
+			}
+
+			protected virtual Brush HighlightBrush {
+				get => SystemColors.HighlightBrush;
+			}
+
+			void InitInteraction(object sender, MouseEventArgs e) {
+				MouseEnter -= InitInteraction;
+
+				Cursor = Cursors.Hand;
+				ToolTip = String.Empty;
+				Highlight(sender, e);
+				MouseEnter += Highlight;
+				MouseLeave += Leave;
+
+				OnInitInteraction();
+			}
+
+			protected virtual void OnInitInteraction() { }
+			protected virtual void OnUnload() { }
+			protected virtual object CreateToolTip() => null;
+
+			protected void DoHighlight() {
+				Background = HighlightBrush.Alpha(0.3);
+			}
+
+			protected override void OnToolTipOpening(ToolTipEventArgs e) {
+				base.OnToolTipOpening(e);
+				if (ReferenceEquals(ToolTip, String.Empty)) {
+					ToolTip = CreateToolTip();
+				}
+			}
+
+			void Highlight(object sender, MouseEventArgs e) {
+				DoHighlight();
+			}
+
+			void Leave(object sender, MouseEventArgs e) {
+				Background = WpfBrushes.Transparent;
+			}
+
+			void Unload(object sender, RoutedEventArgs e) {
+				MouseEnter -= InitInteraction;
+				MouseEnter -= Highlight;
+				MouseLeave -= Leave;
+				Unloaded -= Unload;
+
+				OnUnload();
+			}
+		}
+
+		sealed class FileLink : InteractiveRun
+		{
+			readonly string _Folder;
+			readonly string _File;
+
+			public FileLink(string folder, string file) {
+				Text = _File = file;
+				_Folder = folder;
+			}
+
+			public string Folder => _Folder;
+			public string File => _File;
+
+			protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e) {
+				base.OnMouseLeftButtonDown(e);
+				FileHelper.OpenInExplorer(_Folder, _File);
+			}
+
+			protected override object CreateToolTip() {
+				return ToolTipHelper.CreateFileToolTip(_Folder, _File);
+			}
+		}
 
 		static class InstalledFonts
 		{

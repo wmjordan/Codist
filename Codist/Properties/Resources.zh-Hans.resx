@@ -2265,4 +2265,13 @@ Right click: 显示“线程”窗口</value>
     <value>...
 表达式过长，未完全显示</value>
   </data>
+  <data name="T_AssemblyDirectory" xml:space="preserve">
+    <value>程序集目录: </value>
+  </data>
+  <data name="T_AssemblyFile" xml:space="preserve">
+    <value>程序集文件: </value>
+  </data>
+  <data name="T_ClickToOpenInExplorer" xml:space="preserve">
+    <value>点击连接，在 Windows 资源管理器打开文件夹</value>
+  </data>
 </root>

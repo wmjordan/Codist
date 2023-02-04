@@ -1971,7 +1971,7 @@ namespace Codist.Properties {
         ///      &quot;ForegroundColor&quot;: &quot;#9370DB&quot;
         ///    },
         ///    {
-        ///      &quot;StyleID&quot;: &quot;Exclaimation&quot;,
+        ///      &quot;StyleID&quot;: &quot;Exclamation&quot;,
         ///      &quot;ForegroundColor&quot;: &quot;#F9FF0080&quot;
         ///    },
         ///    {
@@ -1984,7 +1984,7 @@ namespace Codist.Properties {
         ///      &quot;ForegroundColor&quot;: &quot;#CCCCCC&quot;,
         ///      &quot;BackgroundColor&quot;: &quot;#800000A0&quot;
         ///    },
-        ///    [rest of string was truncated]&quot;;.
+        ///     [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Dark {
             get {
@@ -2006,7 +2006,7 @@ namespace Codist.Properties {
         ///      &quot;ForegroundColor&quot;: &quot;#9370DB&quot;
         ///    },
         ///    {
-        ///      &quot;StyleID&quot;: &quot;Exclaimation&quot;,
+        ///      &quot;StyleID&quot;: &quot;Exclamation&quot;,
         ///      &quot;ForegroundColor&quot;: &quot;#F9FF0080&quot;
         ///    },
         ///    {
@@ -2018,7 +2018,7 @@ namespace Codist.Properties {
         ///      &quot;StyleID&quot;: &quot;ToDo&quot;,
         ///      &quot;Italic&quot;: false,
         ///      &quot;FontSize&quot;: 3.0,
-        ///  [rest of string was truncated]&quot;;.
+        ///   [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Light {
             get {
@@ -4635,6 +4635,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Assembly directory: .
+        /// </summary>
+        internal static string T_AssemblyDirectory {
+            get {
+                return ResourceManager.GetString("T_AssemblyDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assembly file: .
+        /// </summary>
+        internal static string T_AssemblyFile {
+            get {
+                return ResourceManager.GetString("T_AssemblyFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Attribute:.
         /// </summary>
         internal static string T_Attribute {
@@ -4820,6 +4838,15 @@ namespace Codist.Properties {
         internal static string T_Classes {
             get {
                 return ResourceManager.GetString("T_Classes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Click to open folder in Windows Explorer.
+        /// </summary>
+        internal static string T_ClickToOpenInExplorer {
+            get {
+                return ResourceManager.GetString("T_ClickToOpenInExplorer", resourceCulture);
             }
         }
         

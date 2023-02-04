@@ -269,35 +269,37 @@ namespace Codist
 			}
 		}
 
-		sealed class SymbolLink : Run
+		sealed class SymbolLink : InteractiveRun
 		{
 			ISymbol _Symbol;
 
 			public SymbolLink(ISymbol symbol, string alias) {
 				Text = alias ?? symbol.GetOriginalName();
 				_Symbol = symbol;
-				MouseEnter += InitInteraction;
-				Unloaded += SymbolLink_Unloaded;
 			}
 
-			void InitInteraction(object sender, MouseEventArgs e) {
-				MouseEnter -= InitInteraction;
+			protected override WpfBrush HighlightBrush => _Symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush;
 
-				Cursor = Cursors.Hand;
-				ToolTip = String.Empty;
-				Highlight(sender, e);
-				MouseEnter += Highlight;
-				MouseLeave += Leave;
+			protected override void OnInitInteraction() {
 				MouseLeftButtonDown += GoToSymbol;
 				MouseRightButtonDown += LinkContextMenu;
 			}
 
-			protected override void OnToolTipOpening(ToolTipEventArgs e) {
-				base.OnToolTipOpening(e);
-				var s = _Symbol;
-				if (s != null && ReferenceEquals(ToolTip, String.Empty)) {
-					ToolTip = ToolTipFactory.CreateToolTip(s, false, SemanticContext.GetHovered());
+			protected override void OnUnload() {
+				MouseLeftButtonDown -= GoToSymbol;
+				MouseRightButtonDown -= LinkContextMenu;
+				if (ContextMenu is CSharpSymbolContextMenu m) {
+					m.Closed -= DismissQuickInfo;
+					m.Dispose();
+					ContextMenu = null;
 				}
+				_Symbol = null;
+			}
+
+			protected override object CreateToolTip() {
+				return _Symbol != null
+					? ToolTipHelper.CreateToolTip(_Symbol, false, SemanticContext.GetHovered())
+					: base.CreateToolTip();
 			}
 
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
@@ -324,7 +326,7 @@ namespace Codist
 						m.Closed += DismissQuickInfo;
 						ContextMenu = m;
 						m.IsOpen = true;
-						Highlight(this, e);
+						DoHighlight();
 					}
 					e.Handled = true;
 				}
@@ -336,32 +338,10 @@ namespace Codist
 				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
 			}
 
-			void Highlight(object sender, MouseEventArgs e) {
-				Background = (_Symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(0.3);
-			}
-			void Leave(object sender, MouseEventArgs e) {
-				Background = WpfBrushes.Transparent;
-			}
-
 			void GoToSymbol(object sender, RoutedEventArgs e) {
 				_Symbol.GoToDefinition();
 				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
 				e.Handled = true;
-			}
-
-			void SymbolLink_Unloaded(object sender, RoutedEventArgs e) {
-				MouseEnter -= InitInteraction;
-				MouseLeftButtonDown -= GoToSymbol;
-				MouseRightButtonDown -= LinkContextMenu;
-				MouseEnter -= Highlight;
-				MouseLeave -= Leave;
-				Unloaded -= SymbolLink_Unloaded;
-				if (ContextMenu is CSharpSymbolContextMenu m) {
-					m.Closed -= DismissQuickInfo;
-					m.Dispose();
-					ContextMenu = null;
-				}
-				_Symbol = null;
 			}
 		}
 	}

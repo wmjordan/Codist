@@ -2280,4 +2280,13 @@ Right click: Run unit tests in class</value>
     <value>...
 Expression too long</value>
   </data>
+  <data name="T_AssemblyDirectory" xml:space="preserve">
+    <value>Assembly directory: </value>
+  </data>
+  <data name="T_AssemblyFile" xml:space="preserve">
+    <value>Assembly file: </value>
+  </data>
+  <data name="T_ClickToOpenInExplorer" xml:space="preserve">
+    <value>Click to open folder in Windows Explorer</value>
+  </data>
 </root>

@@ -13,6 +13,10 @@ namespace Codist
 {
 	static class ToolTipHelper
 	{
+		public static ThemedToolTip CreateFileToolTip(string folder, string file) {
+			return new ThemedToolTip(file, $"{R.T_Folder}{folder}{Environment.NewLine}{R.T_ClickToOpenInExplorer}");
+		}
+
 		public static ThemedToolTip CreateToolTip(ISymbol symbol, bool forMemberList, SemanticContext context) {
 			var tip = new ThemedToolTip();
 			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
@@ -77,8 +81,10 @@ namespace Codist
 							.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)));
 					}
 					else {
-						content.Append(R.T_Assembly)
-							.Append(symbol.GetAssemblyModuleName());
+						var (p, f) = context.SemanticModel.Compilation.GetReferencedAssemblyPath(symbol.ContainingAssembly);
+						if (String.IsNullOrEmpty(f) == false) {
+							content.Append(R.T_Assembly).Append(p).Append(f, true);
+						}
 					}
 
 					if (symbol.Kind == SymbolKind.NamedType) {

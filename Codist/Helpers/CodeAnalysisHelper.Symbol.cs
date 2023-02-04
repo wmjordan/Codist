@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FindSymbols;
 using Microsoft.VisualStudio.Imaging;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Utilities;
 
 namespace Codist
@@ -121,6 +120,17 @@ namespace Codist
 					yield return namedTypeSymbol;
 				}
 			}
+		}
+
+		/// <summary>Gets the folder and file of the referenced assembly path.</summary>
+		/// <returns>If <paramref name="asm"/> is from source code, folder is <see cref="String.Empty"/> and file is the assembly name.</returns>
+		public static (string folder, string file) GetReferencedAssemblyPath(this Compilation compilation, IAssemblySymbol asm) {
+			if (asm is null) {
+				return default;
+			}
+			return asm.GetSourceType() == AssemblySource.Metadata
+				? FileHelper.DeconstructPath(compilation.GetMetadataReference(asm).Display)
+				: (String.Empty, asm.Modules?.FirstOrDefault()?.Name ?? asm.Name);
 		}
 
 		public static string GetAssemblyModuleName(this ISymbol symbol) {

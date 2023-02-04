@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -551,7 +552,7 @@ namespace Codist.QuickInfo
 					break;
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation)) {
-				ShowSymbolLocationInfo(qiContent, symbol);
+				ShowSymbolLocationInfo(qiContent, semanticModel.Compilation, symbol);
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Declaration)
 				&& (node.Parent.IsKind(SyntaxKind.Argument) == false || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter) == false) /*the signature has already been displayed there*/) {
@@ -569,11 +570,21 @@ namespace Codist.QuickInfo
 
 		}
 
-		static void ShowSymbolLocationInfo(InfoContainer qiContent, ISymbol symbol) {
-			string asmName = symbol.GetAssemblyModuleName();
-			if (asmName != null) {
-				var item = new ThemedTipDocument()
-					.AppendParagraph(IconIds.Module, new ThemedTipText(R.T_Assembly, true).Append(asmName));
+		static void ShowSymbolLocationInfo(InfoContainer qiContent, Compilation compilation, ISymbol symbol) {
+			var (p, f) = compilation.GetReferencedAssemblyPath(symbol as IAssemblySymbol ?? symbol.ContainingAssembly);
+			if (String.IsNullOrEmpty(f) == false) {
+				var tt = new ThemedTipText(R.T_Assembly, true);
+				if (p.Length > 0) {
+					tt.AppendFileLink(f, p);
+				}
+				else {
+					var proj = symbol.GetSourceReferences().Select(r => SemanticContext.GetHovered().GetProject(r.SyntaxTree)).Where(i => i != null).FirstOrDefault();
+					if (proj != null && proj.OutputFilePath != null) {
+						(p, f) = FileHelper.DeconstructPath(proj.OutputFilePath);
+					}
+					tt.AppendFileLink(f, p);
+				}
+				var item = new ThemedTipDocument().AppendParagraph(IconIds.Module, tt);
 				switch (symbol.Kind) {
 					case SymbolKind.Field:
 					case SymbolKind.Property:
