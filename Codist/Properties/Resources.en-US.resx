@@ -1422,7 +1422,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>Common</value>
   </data>
   <data name="T_ContentTypeOfDocument" xml:space="preserve">
-    <value>Content type of document </value>
+    <value>Content type of document:</value>
   </data>
   <data name="T_CustomizeSyntaxHighlightNote" xml:space="preserve">
     <value>To configure syntax highlight, open a code file first and execute this command.</value>

@@ -4950,7 +4950,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Content type of document .
+        ///   Looks up a localized string similar to Content type of document:.
         /// </summary>
         internal static string T_ContentTypeOfDocument {
             get {

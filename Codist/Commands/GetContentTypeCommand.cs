@@ -38,26 +38,31 @@ namespace Codist.Commands
 				if (d != null) {
 					sb.Append(System.IO.Path.GetFileName(d.FilePath));
 				}
-				sb.AppendLine();
-				sb.AppendLine();
+				sb.AppendLine()
+					.AppendLine();
 				var h = new HashSet<IContentType>();
 				ShowContentType(t, sb, h, 0);
-				System.Windows.Forms.MessageBox.Show(sb.ToString(), nameof(Codist));
-			}
 
-			void ShowContentType (IContentType type, StringBuilder sb, HashSet<IContentType> h, int indent) {
-				sb.Append(' ', indent)
-					.Append(type.DisplayName);
-				if (type.DisplayName != type.TypeName) {
-					sb.Append('(')
+				sb.AppendLine()
+					.Append(R.T_ViewRoles)
+					.AppendLine(String.Join(", ", docWindow.Roles));
+
+				CodistPackage.ShowMessageBox(sb.ToString(), nameof(Codist), false);
+			}
+		}
+
+		static void ShowContentType (IContentType type, StringBuilder sb, HashSet<IContentType> h, int indent) {
+			sb.Append(' ', indent)
+				.Append(type.DisplayName);
+			if (type.DisplayName != type.TypeName) {
+				sb.Append('(')
 					.Append(type.TypeName)
 					.Append(')');
-				}
-				sb.AppendLine();
-				foreach (var bt in type.BaseTypes) {
-					if (h.Add(bt)) {
-						ShowContentType(bt, sb, h, indent + 2);
-					}
+			}
+			sb.AppendLine();
+			foreach (var bt in type.BaseTypes) {
+				if (h.Add(bt)) {
+					ShowContentType(bt, sb, h, indent + 2);
 				}
 			}
 		}

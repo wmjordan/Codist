@@ -1398,7 +1398,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>Codist 已经更新到 &lt;VERSION&gt;，请点击这里 </value>
   </data>
   <data name="T_ContentTypeOfDocument" xml:space="preserve">
-    <value>文档的内容类型 </value>
+    <value>文档的内容类型:</value>
   </data>
   <data name="T_FailedToSaveScreenshot" xml:space="preserve">
     <value>无法保存屏幕截图到 &lt;NAME&gt;。</value>
