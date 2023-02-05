@@ -815,10 +815,10 @@ namespace Codist.Refactorings
 								case CodeAnalysisHelper.SingleLineRawStringLiteralToken:
 								case CodeAnalysisHelper.MultiLineRawStringLiteralToken:
 								default:
-									ch.AddOrInit((InterpolatedStringContentSyntax)SF.Interpolation(exp.WithoutTrivia()));
+									ch.Add((InterpolatedStringContentSyntax)SF.Interpolation(exp.WithoutTrivia()));
 									goto NEXT;
 							}
-							ch.AddOrInit(SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, s.Token.ValueText, default)));
+							ch.Add(SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, s.Token.ValueText, default)));
 						NEXT:
 							break;
 						case SyntaxKind.InterpolatedStringExpression:
@@ -828,16 +828,16 @@ namespace Codist.Refactorings
 									if (item is InterpolatedStringTextSyntax ist
 										&& (t = ist.TextToken.Text).Contains("\"\"")) {
 										t = ReplaceBraces(t.Replace("\"\"", "\\\""));
-										ch.AddOrInit(SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, ist.TextToken.ValueText, default)));
+										ch.Add(SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, ist.TextToken.ValueText, default)));
 									}
 									else {
-										ch.AddOrInit(item);
+										ch.Add(item);
 									}
 								}
 							}
 							else {
 								foreach (var item in ise.Contents) {
-									ch.AddOrInit(item);
+									ch.Add(item);
 								}
 							}
 							break;
@@ -849,16 +849,16 @@ namespace Codist.Refactorings
 								case Start: t = StartSubstitution; break;
 								case End: t = EndSubstitution; break;
 							}
-							ch.AddOrInit(SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, c.Token.ValueText, default)));
+							ch.Add(SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, c.Token.ValueText, default)));
 							break;
 						case SyntaxKind.NullLiteralExpression:
-							ch.AddOrInit(SF.InterpolatedStringText());
+							ch.Add(SF.InterpolatedStringText());
 							break;
 						case SyntaxKind.ConditionalExpression:
-							ch.AddOrInit(SF.Interpolation(SF.ParenthesizedExpression(exp.WithoutTrivia())));
+							ch.Add(SF.Interpolation(SF.ParenthesizedExpression(exp.WithoutTrivia())));
 							break;
 						default:
-							ch.AddOrInit(SF.Interpolation(exp.WithoutTrivia()));
+							ch.Add(SF.Interpolation(exp.WithoutTrivia()));
 							break;
 					}
 				}

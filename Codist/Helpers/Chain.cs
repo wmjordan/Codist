@@ -13,32 +13,28 @@ namespace Codist
 
 	/// <summary>A light-weight append-only single linked list.</summary>
 	/// <typeparam name="T">Type of the item on the list.</typeparam>
-	internal sealed class Chain<T> : IEnumerable<T>
+	sealed class Chain<T> : IEnumerable<T>
 	{
 		Node _Head;
 		Node _Tail;
 
 		public Chain() {}
 		public Chain(T item) {
-			Init(item);
-		}
-
-		public void Init(T item) {
 			_Head = _Tail = new Node(item);
 		}
 
-		public void AddOrInit(T item) {
-			if (_Head == null) {
-				Init(item);
+		public Chain<T> Add(T item) {
+			if (_Head != null) {
+				_Tail = _Tail.Next = new Node(item);
 			}
 			else {
-				Add(item);
+				_Head = _Tail = new Node(item);
 			}
+			return this;
 		}
 
-		public Chain<T> Add(T item) {
-			_Tail = _Tail.Next = new Node(item);
-			return this;
+		public static Chain<T> operator +(Chain<T> chain, T item) {
+			return chain.Add(item);
 		}
 
 		public IEnumerator<T> GetEnumerator() {

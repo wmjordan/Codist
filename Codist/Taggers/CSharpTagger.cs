@@ -470,7 +470,7 @@ namespace Codist.Taggers
 					TagSpan<IClassificationTag> tag = null;
 					var r = GetAttributeNotationSpan(snapshot, textSpan, unitCompilation);
 					if (r != null) {
-						tags.AddOrInit(r);
+						tags.Add(r);
 					}
 
 					foreach (var item in classifiedSpans) {
@@ -482,7 +482,7 @@ namespace Codist.Taggers
 								if (node is MemberDeclarationSyntax || node is AccessorDeclarationSyntax) {
 									tag = ClassifyDeclarationKeyword(item.TextSpan, snapshot, node, unitCompilation, out var tag2);
 									if (tag2 != null) {
-										tags.AddOrInit(tag2);
+										tags.Add(tag2);
 									}
 								}
 								else {
@@ -504,7 +504,7 @@ namespace Codist.Taggers
 								break;
 						}
 						if (tag != null) {
-							tags.AddOrInit(tag);
+							tags.Add(tag);
 							continue;
 						}
 						if (ct == Constants.CodeIdentifier
@@ -513,7 +513,7 @@ namespace Codist.Taggers
 							var itemSpan = item.TextSpan;
 							node = unitCompilation.FindNode(itemSpan, true);
 							foreach (var type in GetClassificationType(node, semanticModel)) {
-								tags.AddOrInit(CreateClassificationSpan(snapshot, itemSpan, type));
+								tags.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 							}
 						}
 					}
@@ -898,13 +898,13 @@ namespace Codist.Taggers
 					if (symbol is null) {
 						// NOTE: handle alias in using directive
 						if ((node.Parent as NameEqualsSyntax)?.Parent is UsingDirectiveSyntax) {
-							tags.AddOrInit(__Classifications.AliasNamespace);
+							tags.Add(__Classifications.AliasNamespace);
 						}
 						else if (node is AttributeArgumentSyntax attributeArgument) {
 							symbol = semanticModel.GetSymbolInfo(attributeArgument.Expression).Symbol;
 							if (symbol?.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
-								tags.AddOrInit(__Classifications.ConstField);
-								tags.AddOrInit(__Classifications.StaticMember);
+								tags.Add(__Classifications.ConstField);
+								tags.Add(__Classifications.StaticMember);
 							}
 						}
 						symbol = FindSymbolOrSymbolCandidateForNode(node, semanticModel);
@@ -915,22 +915,22 @@ namespace Codist.Taggers
 					else {
 						switch (symbol.Kind) {
 							case SymbolKind.NamedType:
-								tags.AddOrInit(symbol.ContainingType != null
+								tags.Add(symbol.ContainingType != null
 									? __Classifications.NestedDeclaration
 									: __Classifications.Declaration);
 								break;
 							case SymbolKind.Event:
-								tags.AddOrInit(__Classifications.NestedDeclaration);
+								tags.Add(__Classifications.NestedDeclaration);
 								break;
 							case SymbolKind.Method:
 								if (HighlightOptions.LocalFunctionDeclaration
 									|| ((IMethodSymbol)symbol).MethodKind != MethodKind.LocalFunction) {
-									tags.AddOrInit(__Classifications.NestedDeclaration);
+									tags.Add(__Classifications.NestedDeclaration);
 								}
 								break;
 							case SymbolKind.Property:
 								if (symbol.ContainingType.IsAnonymousType == false) {
-									tags.AddOrInit(__Classifications.NestedDeclaration);
+									tags.Add(__Classifications.NestedDeclaration);
 								}
 								break;
 							case SymbolKind.Field:
@@ -945,11 +945,11 @@ namespace Codist.Taggers
 								else if (HighlightOptions.NonPrivateField
 									&& symbol.DeclaredAccessibility >= Accessibility.ProtectedAndInternal
 									&& symbol.ContainingType.TypeKind != TypeKind.Enum) {
-									tags.AddOrInit(__Classifications.NestedDeclaration);
+									tags.Add(__Classifications.NestedDeclaration);
 								}
 								break;
 							case SymbolKind.Local:
-								tags.AddOrInit(__Classifications.LocalDeclaration);
+								tags.Add(__Classifications.LocalDeclaration);
 								break;
 						}
 					}
@@ -968,54 +968,54 @@ namespace Codist.Taggers
 						goto EXIT;
 
 					case SymbolKind.Label:
-						tags.AddOrInit(__Classifications.Label);
+						tags.Add(__Classifications.Label);
 						goto EXIT;
 
 					case SymbolKind.TypeParameter:
-						tags.AddOrInit(__Classifications.TypeParameter);
+						tags.Add(__Classifications.TypeParameter);
 						goto EXIT;
 
 					case SymbolKind.Field:
 						var f = symbol as IFieldSymbol;
 						if (f.IsConst) {
-							tags.AddOrInit(f.ContainingType.TypeKind == TypeKind.Enum
+							tags.Add(f.ContainingType.TypeKind == TypeKind.Enum
 								? __Classifications.EnumField
 								: __Classifications.ConstField);
 						}
 						else {
-							tags.AddOrInit(f.IsReadOnly ? __Classifications.ReadOnlyField
+							tags.Add(f.IsReadOnly ? __Classifications.ReadOnlyField
 								: f.IsVolatile ? __Classifications.VolatileField
 								: __Classifications.Field);
 						}
 						break;
 
 					case SymbolKind.Property:
-						tags.AddOrInit(__Classifications.Property);
+						tags.Add(__Classifications.Property);
 						break;
 
 					case SymbolKind.Event:
-						tags.AddOrInit(__Classifications.Event);
+						tags.Add(__Classifications.Event);
 						break;
 
 					case SymbolKind.Local:
-						tags.AddOrInit(((ILocalSymbol)symbol).IsConst
+						tags.Add(((ILocalSymbol)symbol).IsConst
 							? __Classifications.ConstField
 							: __Classifications.LocalVariable);
 						break;
 
 					case SymbolKind.Namespace:
-						tags.AddOrInit(__Classifications.Namespace);
+						tags.Add(__Classifications.Namespace);
 						goto EXIT;
 
 					case SymbolKind.Parameter:
-						tags.AddOrInit(__Classifications.Parameter);
+						tags.Add(__Classifications.Parameter);
 						break;
 
 					case SymbolKind.Method:
 						var methodSymbol = symbol as IMethodSymbol;
 						switch (methodSymbol.MethodKind) {
 							case MethodKind.Constructor:
-								tags.AddOrInit(
+								tags.Add(
 									node is AttributeSyntax || node.Parent is AttributeSyntax || node.Parent?.Parent is AttributeSyntax
 										? __Classifications.AttributeName
 										: HighlightOptions.StyleConstructorAsType
@@ -1024,14 +1024,14 @@ namespace Codist.Taggers
 								break;
 							case MethodKind.Destructor:
 							case MethodKind.StaticConstructor:
-								tags.AddOrInit(HighlightOptions.StyleConstructorAsType
+								tags.Add(HighlightOptions.StyleConstructorAsType
 										? (methodSymbol.ContainingType.TypeKind == TypeKind.Struct
 											? __Classifications.StructName
 											: __Classifications.ClassName)
 										: __Classifications.ConstructorMethod);
 								break;
 							default:
-								tags.AddOrInit(methodSymbol.IsExtensionMethod ? __Classifications.ExtensionMethod
+								tags.Add(methodSymbol.IsExtensionMethod ? __Classifications.ExtensionMethod
 									: methodSymbol.IsExtern ? __Classifications.ExternMethod
 									: __Classifications.Method);
 								break;
@@ -1048,12 +1048,12 @@ namespace Codist.Taggers
 				if (SymbolMarkManager.HasBookmark) {
 					var markerStyle = SymbolMarkManager.GetSymbolMarkerStyle(symbol);
 					if (markerStyle != null) {
-						tags.AddOrInit(markerStyle);
+						tags.Add(markerStyle);
 					}
 				}
 
 				if (FormatStore.IdentifySymbolSource && symbol.IsMemberOrType() && symbol.ContainingAssembly != null) {
-					tags.AddOrInit(symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata
+					tags.Add(symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata
 						? __Classifications.MetadataSymbol
 						: __Classifications.UserSymbol);
 				}
@@ -1065,13 +1065,13 @@ namespace Codist.Taggers
 						case SymbolKind.Field:
 						case SymbolKind.NamedType:
 						case SymbolKind.Event:
-							tags.AddOrInit(__Classifications.PrivateMember);
+							tags.Add(__Classifications.PrivateMember);
 							break;
 					}
 				}
 				if (symbol.IsStatic) {
 					if (symbol.Kind != SymbolKind.Namespace) {
-						tags.AddOrInit(__Classifications.StaticMember);
+						tags.Add(__Classifications.StaticMember);
 						if (symbol.IsAbstract && symbol.ContainingType?.TypeKind == TypeKind.Interface) {
 							tags.Add(__Classifications.AbstractMember);
 						}
@@ -1082,23 +1082,23 @@ namespace Codist.Taggers
 					if (symbol.Kind == SymbolKind.NamedType
 						&& (type = (ITypeSymbol)symbol).TypeKind == TypeKind.Struct) {
 						if (type.IsReadOnly()) {
-							tags.AddOrInit(__Classifications.ReadOnlyStruct);
+							tags.Add(__Classifications.ReadOnlyStruct);
 						}
 						if (type.IsRefLike()) {
-							tags.AddOrInit(__Classifications.RefStruct);
+							tags.Add(__Classifications.RefStruct);
 						}
 						goto EXIT;
 					}
-					tags.AddOrInit(__Classifications.SealedMember);
+					tags.Add(__Classifications.SealedMember);
 				}
 				else if (symbol.IsOverride) {
-					tags.AddOrInit(__Classifications.OverrideMember);
+					tags.Add(__Classifications.OverrideMember);
 				}
 				else if (symbol.IsVirtual) {
-					tags.AddOrInit(__Classifications.VirtualMember);
+					tags.Add(__Classifications.VirtualMember);
 				}
 				else if (symbol.IsAbstract) {
-					tags.AddOrInit(__Classifications.AbstractMember);
+					tags.Add(__Classifications.AbstractMember);
 				}
 				EXIT:
 				return tags;
