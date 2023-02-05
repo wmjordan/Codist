@@ -383,45 +383,55 @@ namespace Codist.Controls
 			}
 
 			if (item.SyntaxNode != null) {
-				if (item.Symbol != null) {
-					item.RefreshSymbol();
-				}
-				else {
-					item.SetSymbolToSyntaxNode();
-				}
-				if (item.Symbol != null) {
-					var tip = ToolTipHelper.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, sc);
-					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
-						tip.AddTextBlock()
-							.Append(R.T_LineOfCode + (item.SyntaxNode.GetLineSpan().Length + 1).ToString());
-					}
-					return tip;
-				}
-				return ((Microsoft.CodeAnalysis.CSharp.SyntaxKind)item.SyntaxNode.RawKind).GetSyntaxBrief();
+				return CreateSyntaxNodeToolTip(item, sc);
 			}
 			if (item.Symbol != null) {
+				return CreateSymbolToolTip(item, sc);
+			}
+			if (item.Location != null) {
+				return CreateLocationToolTip(item, sc);
+			}
+			return null;
+		}
+
+		object CreateSyntaxNodeToolTip(SymbolItem item, SemanticContext sc) {
+			if (item.Symbol != null) {
 				item.RefreshSymbol();
-				var tip = ToolTipHelper.CreateToolTip(item.Symbol, false, sc);
-				if (ContainerType == SymbolListType.SymbolReferrers && item.Location.IsInSource) {
-					// append location info to tip
-					ShowSourceReference(tip.AddTextBlock().Append(R.T_SourceReference).AppendLine(), item.Location);
+			}
+			else {
+				item.SetSymbolToSyntaxNode();
+			}
+			if (item.Symbol != null) {
+				var tip = ToolTipHelper.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, sc);
+				if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
+					tip.AddTextBlock()
+						.Append(R.T_LineOfCode + (item.SyntaxNode.GetLineSpan().Length + 1).ToString());
 				}
 				return tip;
 			}
-			if (item.Location != null) {
-				if (item.Location.IsInSource) {
-					var f = item.Location.SourceTree.FilePath;
-					return new ThemedToolTip(Path.GetFileName(f), String.Join(Environment.NewLine,
-						R.T_Folder + Path.GetDirectoryName(f),
-						R.T_Line + (item.Location.GetLineSpan().StartLinePosition.Line + 1).ToString(),
-						R.T_Project + sc.GetDocument(item.Location.SourceTree)?.Project.Name
-					));
-				}
-				else {
-					return new ThemedToolTip(item.Location.MetadataModule.Name, R.T_ContainingAssembly + item.Location.MetadataModule.ContainingAssembly);
-				}
+			return ((Microsoft.CodeAnalysis.CSharp.SyntaxKind)item.SyntaxNode.RawKind).GetSyntaxBrief();
+		}
+
+		object CreateSymbolToolTip(SymbolItem item, SemanticContext sc) {
+			item.RefreshSymbol();
+			var tip = ToolTipHelper.CreateToolTip(item.Symbol, false, sc);
+			if (ContainerType == SymbolListType.SymbolReferrers && item.Location.IsInSource) {
+				// append location info to tip
+				ShowSourceReference(tip.AddTextBlock().Append(R.T_SourceReference).AppendLine(), item.Location);
 			}
-			return null;
+			return tip;
+		}
+
+		static object CreateLocationToolTip(SymbolItem item, SemanticContext sc) {
+			if (item.Location.IsInSource) {
+				var f = item.Location.SourceTree.FilePath;
+				return new ThemedToolTip(Path.GetFileName(f), String.Join(Environment.NewLine,
+					R.T_Folder + Path.GetDirectoryName(f),
+					R.T_Line + (item.Location.GetLineSpan().StartLinePosition.Line + 1).ToString(),
+					R.T_Project + sc.GetDocument(item.Location.SourceTree)?.Project.Name
+				));
+			}
+			return new ThemedToolTip(item.Location.MetadataModule.Name, R.T_ContainingAssembly + item.Location.MetadataModule.ContainingAssembly);
 		}
 
 		static void ShowSourceReference(TextBlock text, Location location) {
