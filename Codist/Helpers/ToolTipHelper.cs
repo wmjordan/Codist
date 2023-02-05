@@ -100,8 +100,16 @@ namespace Codist
 				}
 			}
 			ShowAttributes(symbol, content);
-			if (context.SemanticModel?.Compilation != null && Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.XmlDocSummary)) {
+			if (context.SemanticModel?.Compilation != null
+				&& Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.XmlDocSummary)) {
 				ShowXmlDocSummary(symbol, context.SemanticModel.Compilation, tip);
+
+				if (symbol.Kind == SymbolKind.Method
+					&& ((IMethodSymbol)symbol).MethodKind == MethodKind.Constructor
+					&& symbol.ContainingType.IsAttributeType()) {
+					tip.AddTextBlock().Append(R.T_DocumentationFrom).Append(symbol.ContainingType.Name, SymbolFormatter.Instance.Class).Append(":");
+					ShowXmlDocSummary(symbol.ContainingType, context.SemanticModel.Compilation, tip);
+				}
 			}
 			ShowNumericForms(symbol, tip);
 			if (symbol.Kind == SymbolKind.Property && Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.Colors)) {

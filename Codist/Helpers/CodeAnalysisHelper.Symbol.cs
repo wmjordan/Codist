@@ -275,6 +275,12 @@ namespace Codist
 			}
 		}
 
+		public static IEnumerable<INamedTypeSymbol> GetBaseTypes(this INamedTypeSymbol type) {
+			while ((type = type.BaseType) != null) {
+				yield return type;
+			}
+		}
+
 		public static ITypeSymbol ResolveElementType(this ITypeSymbol t) {
 			switch (t.Kind) {
 				case SymbolKind.ArrayType: return ResolveElementType(((IArrayTypeSymbol)t).ElementType);
@@ -804,6 +810,11 @@ namespace Codist
 
 		public static bool IsObjectOrValueType(this INamedTypeSymbol type) {
 			return type.SpecialType == SpecialType.System_Object || type.SpecialType == SpecialType.System_ValueType;
+		}
+
+		public static bool IsAttributeType(this INamedTypeSymbol type) {
+			return type?.TypeKind == TypeKind.Class
+				&& type.GetBaseTypes().Any(t => t.MatchTypeName(nameof(System.Attribute), "System"));
 		}
 
 		public static bool IsCommonClass(this ISymbol symbol) {
