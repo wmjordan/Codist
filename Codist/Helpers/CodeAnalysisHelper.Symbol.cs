@@ -128,8 +128,10 @@ namespace Codist
 			if (asm is null) {
 				return default;
 			}
+			MetadataReference mr;
 			return asm.GetSourceType() == AssemblySource.Metadata
-				? FileHelper.DeconstructPath(compilation.GetMetadataReference(asm).Display)
+					&& (mr = compilation.GetMetadataReference(asm)) != null
+				? FileHelper.DeconstructPath(mr.Display)
 				: (String.Empty, asm.Modules?.FirstOrDefault()?.Name ?? asm.Name);
 		}
 

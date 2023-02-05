@@ -10,6 +10,9 @@ namespace Codist
 	static class FileHelper
 	{
 		public static (string folder, string file) DeconstructPath(string path) {
+			if (path == null) {
+				return default;
+			}
 			try {
 				var folder = Path.GetDirectoryName(path);
 				if (folder.Length > 0 && folder[folder.Length - 1] != Path.DirectorySeparatorChar) {
