@@ -380,7 +380,7 @@ The second one is the **Analyze symbol...** button, a menu will pop up showing p
 
   ![Smart Bar Symbol Analysis](doc/smart-bar-symbol-analysis.png)
 
-Various commands will be conditionally listed under the **Analyze symbol...** menu. Here is a list of commmands for an interface.
+Various commands will be conditionally listed under the **Analyze symbol...** menu. Here is a list of commands for an interface.
 
   ![Smart Bar Symbol Analysis 2](doc/smart-bar-symbol-analysis-2.png)
 
@@ -544,9 +544,9 @@ I have learned a lot from the following extension projects (sorted by the time w
 * [CoCo](https://github.com/GeorgeAlexandria/CoCo): extensive syntax highlighting
 * [CodeBlockEndTag](https://github.com/KhaosCoders/VSCodeBlockEndTag): adornments
 * [UntabifyReplacement](https://github.com/cpmcgrath/UntabifyReplacement): replacing text in code window
-* [Extensiblity Tools](https://github.com/madskristensen/ExtensibilityTools)
+* [Extensibility Tools](https://github.com/madskristensen/ExtensibilityTools)
 * [CodeMaid](https://github.com/codecadwallader/codemaid): how to support multi-language localization
-* [Select Next Occurence](https://github.com/2mas/SelectNextOccurrence): code navigation
+* [Select Next Occurrence](https://github.com/2mas/SelectNextOccurrence): code navigation
 * [VSColorOutput](https://github.com/mike-ward/VSColorOutput): extending output window pane
 * [NuGet](https://github.com/NuGet/NuGet.Build.Packaging): build events
 * [GoToImplementation](https://github.com/GordianDotNet/GoToImplementation)
@@ -559,7 +559,7 @@ I have learned a lot from the following extension projects (sorted by the time w
 * [ShowTheShortcut](https://github.com/madskristensen/ShowTheShortcut): discovering identifiers of executed commands
 * [Copy Nice](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.CopyNice): copying text without indentation
 
-And thank you, every donaters, beta testers, feedback providers to this project.
+And thank you, every donators, beta testers, feedback providers to this project.
 
 # License
 
