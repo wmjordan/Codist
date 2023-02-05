@@ -590,7 +590,7 @@ namespace Codist
 				hasConstraint = true;
 			}
 			else if (typeParameter.HasValueTypeConstraint) {
-				AppendSeparatorIfHasConstraint(text, hasConstraint).Append("struct", Keyword);
+				text.Append("struct", Keyword);
 				hasConstraint = true;
 			}
 			if (typeParameter.HasUnmanagedTypeConstraint) {
@@ -630,7 +630,7 @@ namespace Codist
 				case SymbolKind.Property: text.Add(symbol.Render(alias, bold, Property)); return;
 				case SymbolKind.Local: text.Add(symbol.Render(null, bold, Local)); return;
 				case SymbolKind.TypeParameter:
-					if (((ITypeParameterSymbol)symbol).Variance != VarianceKind.None) {
+					if (alias != null && ((ITypeParameterSymbol)symbol).Variance != VarianceKind.None) {
 						text.Add((((ITypeParameterSymbol)symbol).Variance == VarianceKind.Out ? "out " : "in ").Render(Keyword));
 					}
 					text.Add(symbol.Render(null, bold, TypeParameter));
@@ -962,7 +962,8 @@ namespace Codist
 				if (i > 0) {
 					text.Add(", ".Render(PlainText));
 				}
-				Format(text, arguments[i], null, false);
+				var a = arguments[i];
+				Format(text, a, a.TypeKind == TypeKind.TypeParameter ? String.Empty : null, false);
 			}
 			text.Add(">".Render(PlainText));
 		}
