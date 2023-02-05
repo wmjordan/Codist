@@ -195,6 +195,8 @@ namespace Codist
 		public const int JoinLines = KnownImageIds.Join;
 		public const int Unindent = KnownImageIds.DecreaseIndent;
 		public const int Indent = KnownImageIds.IncreaseIndent;
+		public const int StageSelectedRange = KnownImageIds.Add;
+		public const int RevertSelectedRange = KnownImageIds.Undo;
 		public const int ListMembers = KnownImageIds.ListMembers;
 		public const int SymbolAnalysis = KnownImageIds.DimensionBrowserView;
 		public const int FindReference = KnownImageIds.ReferencedDimension;

@@ -26,6 +26,7 @@ namespace Codist.SmartBars
 		/// <summary>The layer for the smart bar adornment.</summary>
 		ExternalAdornment _ToolBarLayer;
 		readonly ToolBarTray _ToolBarTray;
+		readonly bool _IsDiffWindow;
 		CancellationTokenSource _Cancellation = new CancellationTokenSource();
 		IWpfTextView _View;
 		ITextSearchService2 _TextSearchService;
@@ -39,6 +40,7 @@ namespace Codist.SmartBars
 		/// <param name="view">The <see cref="IWpfTextView"/> upon which the adornment will be drawn</param>
 		public SmartBar(IWpfTextView view, ITextSearchService2 textSearchService) {
 			_View = view ?? throw new ArgumentNullException(nameof(view));
+			_IsDiffWindow = view.Roles.Contains("DIFF");
 			_TextSearchService = textSearchService;
 			_ToolBarLayer = ExternalAdornment.GetOrCreate(view);
 			Config.RegisterUpdateHandler(UpdateSmartBarConfig);
@@ -100,6 +102,9 @@ namespace Codist.SmartBars
 				AddSpecialFormatCommand();
 				AddWrapTextCommand();
 				AddEditAllMatchingCommand();
+			}
+			if (_IsDiffWindow) {
+				AddDiffCommands();
 			}
 			if (_View.IsMultilineSelected() == false) {
 				AddFindAndReplaceCommands();

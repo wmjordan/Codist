@@ -1297,6 +1297,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Revert Selected Range.
+        /// </summary>
+        internal static string CMD_RevertSelectedRange {
+            get {
+                return ResourceManager.GetString("CMD_RevertSelectedRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Run to Cursor
         ///Ctrl: Run flagged threads to cursor
         ///Right click: Threads window.
@@ -1477,6 +1486,15 @@ namespace Codist.Properties {
         internal static string CMD_SplitToNested {
             get {
                 return ResourceManager.GetString("CMD_SplitToNested", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stage Selected Range.
+        /// </summary>
+        internal static string CMD_StageSelectedRange {
+            get {
+                return ResourceManager.GetString("CMD_StageSelectedRange", resourceCulture);
             }
         }
         
@@ -6593,6 +6611,15 @@ namespace Codist.Properties {
         internal static string T_VersionRewriteMode {
             get {
                 return ResourceManager.GetString("T_VersionRewriteMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Roles of view: .
+        /// </summary>
+        internal static string T_ViewRoles {
+            get {
+                return ResourceManager.GetString("T_ViewRoles", resourceCulture);
             }
         }
         

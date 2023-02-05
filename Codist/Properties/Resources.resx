@@ -2289,4 +2289,13 @@ Expression too long</value>
   <data name="T_ClickToOpenInExplorer" xml:space="preserve">
     <value>Click to open folder in Windows Explorer</value>
   </data>
+  <data name="CMD_RevertSelectedRange" xml:space="preserve">
+    <value>Revert Selected Range</value>
+  </data>
+  <data name="CMD_StageSelectedRange" xml:space="preserve">
+    <value>Stage Selected Range</value>
+  </data>
+  <data name="T_ViewRoles" xml:space="preserve">
+    <value>Roles of view: </value>
+  </data>
 </root>

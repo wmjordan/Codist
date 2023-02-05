@@ -164,6 +164,11 @@ namespace Codist.SmartBars
 			AddCommand(ToolBar, IconIds.EditMatches, R.CMD_EditMatches, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.InsertCaretsatAllMatching"));
 		}
 
+		void AddDiffCommands() {
+			AddEditorCommand(ToolBar2, IconIds.StageSelectedRange, "Team.Git.StageSelectedRange", R.CMD_StageSelectedRange);
+			AddEditorCommand(ToolBar2, IconIds.RevertSelectedRange, "Team.Git.RevertSelectedRange", R.CMD_RevertSelectedRange);
+		}
+
 		void AddFindAndReplaceCommands() {
 			AddCommands(ToolBar, IconIds.FindNext, R.CMD_FindReplace, QuickFind, ctx => __FindAndReplaceCommands.Concat(
 				Config.Instance.SearchEngines.ConvertAll(s => new CommandItem(IconIds.SearchWebSite, R.CMD_SearchWith.Replace("<NAME>", s.Name), c => SearchSelection(s.Pattern, c))))

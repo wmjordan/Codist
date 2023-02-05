@@ -2274,4 +2274,13 @@ Right click: 显示“线程”窗口</value>
   <data name="T_ClickToOpenInExplorer" xml:space="preserve">
     <value>点击连接，在 Windows 资源管理器打开文件夹</value>
   </data>
+  <data name="CMD_RevertSelectedRange" xml:space="preserve">
+    <value>还原选中的内容</value>
+  </data>
+  <data name="CMD_StageSelectedRange" xml:space="preserve">
+    <value>暂存选中的内容</value>
+  </data>
+  <data name="T_ViewRoles" xml:space="preserve">
+    <value>视图角色: </value>
+  </data>
 </root>
