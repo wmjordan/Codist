@@ -1517,6 +1517,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Surround with #if.
+        /// </summary>
+        internal static string CMD_SurroundWithIf {
+            get {
+                return ResourceManager.GetString("CMD_SurroundWithIf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Surround with #region.
         /// </summary>
         internal static string CMD_SurroundWithRegion {

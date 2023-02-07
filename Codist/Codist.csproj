@@ -147,6 +147,7 @@
     <Compile Include="Refactorings\ReplaceNode.Conditions.cs" />
     <Compile Include="Refactorings\ReplaceNode.Nodes.cs" />
     <Compile Include="Refactorings\ReplaceNode.cs" />
+    <Compile Include="Refactorings\ReplaceText.cs" />
     <Compile Include="Refactorings\ReplaceToken.cs" />
     <Compile Include="Refactorings\ReplaceNode.Statements.cs" />
     <Compile Include="SyntaxHighlight\CodeStyle.cs" />

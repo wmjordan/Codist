@@ -2286,4 +2286,7 @@ Right click: 显示“线程”窗口</value>
   <data name="T_EndOfIf" xml:space="preserve">
     <value>#if 结束 </value>
   </data>
+  <data name="CMD_SurroundWithIf" xml:space="preserve">
+    <value>外侧插入 #if</value>
+  </data>
 </root>

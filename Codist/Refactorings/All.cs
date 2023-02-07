@@ -34,7 +34,9 @@ namespace Codist.Refactorings
 			ReplaceToken.UseStaticDefault,
 			ReplaceToken.UseExplicitType,
 			ReplaceNode.DeleteCondition,
-			ReplaceNode.RemoveContainingStatement
+			ReplaceNode.RemoveContainingStatement,
+			ReplaceText.WrapInRegion,
+			ReplaceText.WrapInIf,
 		};
 	}
 }
