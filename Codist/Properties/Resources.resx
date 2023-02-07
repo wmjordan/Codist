@@ -2298,4 +2298,7 @@ Expression too long</value>
   <data name="T_ViewRoles" xml:space="preserve">
     <value>Roles of view: </value>
   </data>
+  <data name="T_EndOfIf" xml:space="preserve">
+    <value>End of if </value>
+  </data>
 </root>

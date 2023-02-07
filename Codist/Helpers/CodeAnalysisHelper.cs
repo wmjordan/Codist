@@ -782,6 +782,10 @@ namespace Codist
 					return GetRegionSignature((RegionDirectiveTriviaSyntax)node);
 				case SyntaxKind.EndRegionDirectiveTrivia:
 					return GetEndRegionSignature((EndRegionDirectiveTriviaSyntax)node);
+				case SyntaxKind.IfDirectiveTrivia:
+					return GetIfSignature((IfDirectiveTriviaSyntax)node);
+				case SyntaxKind.EndIfDirectiveTrivia:
+					return GetEndIfSignature((EndIfDirectiveTriviaSyntax)node);
 			}
 			return null;
 			string GetTypeSignature(TypeDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
@@ -851,20 +855,15 @@ namespace Codist
 				return e.HasLeadingTrivia ? e.LeadingTrivia[0].ToString() : String.Empty;
 			}
 			string GetEndRegionSignature(EndRegionDirectiveTriviaSyntax syntax) {
-				DirectiveTriviaSyntax region = syntax;
-				int c = 1;
-				while ((region = region.GetPreviousDirective()) != null) {
-					if (region.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
-						--c;
-						if (c == 0) {
-							return GetRegionSignature(region as RegionDirectiveTriviaSyntax);
-						}
-					}
-					else if (region.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
-						++c;
-					}
-				}
-				return String.Empty;
+				var e = syntax.GetPrecedingDirective<RegionDirectiveTriviaSyntax, EndRegionDirectiveTriviaSyntax>(SyntaxKind.RegionDirectiveTrivia, SyntaxKind.EndRegionDirectiveTrivia);
+				return e != null ? GetRegionSignature(e) : String.Empty;
+			}
+			string GetIfSignature(IfDirectiveTriviaSyntax syntax) {
+				return syntax.Condition?.ToString() ?? String.Empty;
+			}
+			string GetEndIfSignature(EndIfDirectiveTriviaSyntax syntax) {
+				var e = syntax.GetPrecedingDirective<IfDirectiveTriviaSyntax, EndIfDirectiveTriviaSyntax>(SyntaxKind.IfDirectiveTrivia, SyntaxKind.EndIfDirectiveTrivia);
+				return e != null ? GetIfSignature(e) : String.Empty;
 			}
 		}
 
@@ -899,43 +898,59 @@ namespace Codist
 				return sb.ToString();
 			}
 		}
-		public static RegionDirectiveTriviaSyntax GetRegion(this EndRegionDirectiveTriviaSyntax syntax) {
-			if (syntax == null) {
+		public static TStartDirective GetPrecedingDirective<TStartDirective, TEndDirective>(this TEndDirective directive, SyntaxKind startSyntaxKind, SyntaxKind endSyntaxKind)
+			where TStartDirective : DirectiveTriviaSyntax
+			where TEndDirective : DirectiveTriviaSyntax {
+			if (directive == null) {
 				return null;
 			}
-			DirectiveTriviaSyntax region = syntax;
+			DirectiveTriviaSyntax d = directive;
 			int c = -1;
-			while ((region = region.GetPreviousDirective()) != null) {
-				if (region.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
+			while ((d = d.GetPreviousDirective()) != null) {
+				if (d.IsKind(endSyntaxKind)) {
 					--c;
 				}
-				else if (region.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+				else if (d.IsKind(startSyntaxKind)) {
 					++c;
 					if (c == 0) {
-						return region as RegionDirectiveTriviaSyntax;
+						return d as TStartDirective;
 					}
 				}
 			}
 			return null;
 		}
-		public static EndRegionDirectiveTriviaSyntax GetEndRegion(this RegionDirectiveTriviaSyntax syntax) {
-			if (syntax == null) {
+		public static RegionDirectiveTriviaSyntax GetRegion(this EndRegionDirectiveTriviaSyntax syntax) {
+			return GetPrecedingDirective<RegionDirectiveTriviaSyntax, EndRegionDirectiveTriviaSyntax>(syntax, SyntaxKind.RegionDirectiveTrivia, SyntaxKind.EndRegionDirectiveTrivia);
+		}
+		public static IfDirectiveTriviaSyntax GetIf(this EndIfDirectiveTriviaSyntax syntax) {
+			return GetPrecedingDirective<IfDirectiveTriviaSyntax, EndIfDirectiveTriviaSyntax>(syntax, SyntaxKind.IfDirectiveTrivia, SyntaxKind.EndIfDirectiveTrivia);
+		}
+		public static TEndDirective GetFollowingDirective<TStartDirective, TEndDirective>(this TStartDirective directive, SyntaxKind startSyntaxKind, SyntaxKind endSyntaxKind)
+			where TStartDirective : DirectiveTriviaSyntax
+			where TEndDirective : DirectiveTriviaSyntax {
+			if (directive == null) {
 				return null;
 			}
-			DirectiveTriviaSyntax region = syntax;
+			DirectiveTriviaSyntax d = directive;
 			int c = 1;
-			while ((region = region.GetNextDirective()) != null) {
-				if (region.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
+			while ((d = d.GetNextDirective()) != null) {
+				if (d.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
 					--c;
 					if (c == 0) {
-						return region as EndRegionDirectiveTriviaSyntax;
+						return d as TEndDirective;
 					}
 				}
-				else if (region.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+				else if (d.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
 					++c;
 				}
 			}
 			return null;
+		}
+		public static EndRegionDirectiveTriviaSyntax GetEndRegion(this RegionDirectiveTriviaSyntax syntax) {
+			return GetFollowingDirective<RegionDirectiveTriviaSyntax, EndRegionDirectiveTriviaSyntax>(syntax, SyntaxKind.RegionDirectiveTrivia, SyntaxKind.EndRegionDirectiveTrivia);
+		}
+		public static EndIfDirectiveTriviaSyntax GetEndIf(this IfDirectiveTriviaSyntax syntax) {
+			return GetFollowingDirective<IfDirectiveTriviaSyntax, EndIfDirectiveTriviaSyntax>(syntax, SyntaxKind.IfDirectiveTrivia, SyntaxKind.EndIfDirectiveTrivia);
 		}
 
 		public static string GetExpressionSignature(this ExpressionSyntax expression) {

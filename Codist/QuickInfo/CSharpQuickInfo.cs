@@ -188,10 +188,25 @@ namespace Codist.QuickInfo
 					else {
 						goto case SyntaxKind.OpenParenToken;
 					}
+				case SyntaxKind.HashToken:
+					token = token.GetNextToken();
+					if (token.IsKind(SyntaxKind.EndRegionKeyword)) {
+						goto case SyntaxKind.EndRegionKeyword;
+					}
+					else if (token.IsKind(SyntaxKind.EndIfKeyword)) {
+						goto case SyntaxKind.EndIfKeyword;
+					}
+					return null;
 				case SyntaxKind.EndRegionKeyword:
 					qiContent.Add(new ThemedTipText(R.T_EndOfRegion)
 						.SetGlyph(ThemeHelper.GetImage(IconIds.Region))
 						.Append((unitCompilation.FindNode(token.Span, true) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
+						);
+					return CreateQuickInfoItem(session, token, qiContent.ToUI());
+				case SyntaxKind.EndIfKeyword:
+					qiContent.Add(new ThemedTipText(R.T_EndOfIf)
+						.SetGlyph(ThemeHelper.GetImage(IconIds.Region))
+						.Append((unitCompilation.FindNode(token.Span, true) as EndIfDirectiveTriviaSyntax).GetIf()?.GetDeclarationSignature(), true)
 						);
 					return CreateQuickInfoItem(session, token, qiContent.ToUI());
 				case SyntaxKind.VoidKeyword:

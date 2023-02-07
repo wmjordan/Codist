@@ -5159,6 +5159,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to End of if .
+        /// </summary>
+        internal static string T_EndOfIf {
+            get {
+                return ResourceManager.GetString("T_EndOfIf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to End of region .
         /// </summary>
         internal static string T_EndOfRegion {

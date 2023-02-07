@@ -2283,4 +2283,7 @@ Right click: 显示“线程”窗口</value>
   <data name="T_ViewRoles" xml:space="preserve">
     <value>视图角色: </value>
   </data>
+  <data name="T_EndOfIf" xml:space="preserve">
+    <value>#if 结束 </value>
+  </data>
 </root>
