@@ -2286,6 +2286,18 @@ Right click: 显示“线程”窗口</value>
   <data name="T_EndOfIf" xml:space="preserve">
     <value>#if 结束 </value>
   </data>
+  <data name="CMD_MakeInternal" xml:space="preserve">
+    <value>改成 Internal</value>
+  </data>
+  <data name="CMD_MakePrivate" xml:space="preserve">
+    <value>改成 Private</value>
+  </data>
+  <data name="CMD_MakeProtected" xml:space="preserve">
+    <value>改成 Protected</value>
+  </data>
+  <data name="CMD_MakePublic" xml:space="preserve">
+    <value>改成 Public</value>
+  </data>
   <data name="CMD_SurroundWithIf" xml:space="preserve">
     <value>外侧插入 #if</value>
   </data>

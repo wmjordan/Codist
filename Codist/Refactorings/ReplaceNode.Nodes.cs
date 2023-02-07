@@ -182,19 +182,19 @@ namespace Codist.Refactorings
 				switch (_KeywordKind = accessibility) {
 					case SyntaxKind.PublicKeyword:
 						_IconId = IconIds.PublicSymbols;
-						_Title = "Make Public";
+						_Title = R.CMD_MakePublic;
 						break;
 					case SyntaxKind.ProtectedKeyword:
 						_IconId = IconIds.ProtectedSymbols;
-						_Title = "Make Protected";
+						_Title = R.CMD_MakeProtected;
 						break;
 					case SyntaxKind.InternalKeyword:
 						_IconId = IconIds.InternalSymbols;
-						_Title = "Make Internal";
+						_Title = R.CMD_MakeInternal;
 						break;
 					case SyntaxKind.PrivateKeyword:
 						_IconId = IconIds.PrivateSymbols;
-						_Title = "Make Private";
+						_Title = R.CMD_MakePrivate;
 						break;
 				}
 			}

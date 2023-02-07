@@ -911,6 +911,42 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Make Internal.
+        /// </summary>
+        internal static string CMD_MakeInternal {
+            get {
+                return ResourceManager.GetString("CMD_MakeInternal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Make Private.
+        /// </summary>
+        internal static string CMD_MakePrivate {
+            get {
+                return ResourceManager.GetString("CMD_MakePrivate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Make Protected.
+        /// </summary>
+        internal static string CMD_MakeProtected {
+            get {
+                return ResourceManager.GetString("CMD_MakeProtected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Make Public.
+        /// </summary>
+        internal static string CMD_MakePublic {
+            get {
+                return ResourceManager.GetString("CMD_MakePublic", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mark &lt;NAME&gt;.
         /// </summary>
         internal static string CMD_Mark {
