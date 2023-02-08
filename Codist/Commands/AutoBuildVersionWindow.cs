@@ -27,7 +27,7 @@ namespace Codist.Commands
 		public AutoBuildVersionWindow(EnvDTE.Project project) {
 			_Project = project;
 			BuildConfigSetting.TryGetAssemblyAttributeValues(project, out _CurrentAssemblyVersion, out _CurrentAssemblyFileVersion, out _Copyright);
-			Title = "Auto Build Version";
+			Title = R.T_AutoBuildVersion;
 			ShowInTaskbar = false;
 			Height = 250;
 			Width = 600;
@@ -44,17 +44,20 @@ namespace Codist.Commands
 					new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
 				},
 				Children = {
-
-					new Border {
-						BorderThickness = new Thickness(0,0,0,1),
-						Child = new StackPanel {
-							Orientation = Orientation.Horizontal,
-							Children = {
-								new Label { Content = R.T_Project }.ReferenceStyle(VsResourceKeys.ThemedDialogLabelStyleKey),
-								new Label { Content = project.Name }.ReferenceStyle(VsResourceKeys.ThemedDialogLabelStyleKey),
-							}
+					new StackPanel {
+						Children = {
+							new Border {
+								BorderThickness = new Thickness(0,0,0,1),
+								Child = new StackPanel {
+									Orientation = Orientation.Horizontal,
+									Children = {
+										new Label { Content = R.T_Project }.ReferenceStyle(VsResourceKeys.ThemedDialogLabelStyleKey),
+										new Label { Content = project.Name }.ReferenceStyle(VsResourceKeys.ThemedDialogLabelStyleKey),
+									}
+								}
+							}.ReferenceProperty(Border.BorderBrushProperty, VsBrushes.AccentBorderKey),
 						}
-					}.ReferenceProperty(Border.BorderBrushProperty, VsBrushes.AccentBorderKey).SetValue(Grid.SetColumnSpan, 2),
+					}.SetValue(Grid.SetColumnSpan, 2),
 
 					new StackPanel {
 						Margin = WpfHelper.SmallMargin,
@@ -72,6 +75,7 @@ namespace Codist.Commands
 							(_RewriteCopyrightYear = new CheckBox { Content = R.T_RewriteCopyrightYear }.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey)),
 							new WrapPanel {
 								Children = {
+									new ThemedButton(R.CMD_Reset, R.CMDT_ResetAutoBuildVersion, Reset){ Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
 									new ThemedButton(R.CMD_SaveBuildSetting, R.CMDT_SaveChanges, Ok) { IsDefault = true, Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
 									new ThemedButton(R.CMD_Cancel, R.CMDT_UndoChanges, Cancel) { IsCancel = true, Width = 80, Margin = new Thickness(10) }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
 								}
@@ -111,6 +115,9 @@ namespace Codist.Commands
 			if (o == false && s.ShouldRewrite) {
 				_Settings.Add(r, s);
 			}
+			else if (o && s.ShouldRewrite == false) {
+				_Settings.Remove(r);
+			}
 		}
 
 		void ReadBuildConfigSettings(string config) {
@@ -124,6 +131,12 @@ namespace Codist.Commands
 				_AssemblyFileVersion.Reset();
 				_RewriteCopyrightYear.IsChecked = false;
 			}
+		}
+
+		void Reset() {
+			var config = _Configuration.SelectedItem as string;
+			_Settings.Remove(config);
+			ReadBuildConfigSettings(config);
 		}
 
 		void Ok() {
@@ -188,18 +201,26 @@ namespace Codist.Commands
 				if (_UiLock) {
 					return;
 				}
+				UpdateVersionChangePreview();
+			}
+
+			void UpdateVersionChangePreview() {
 				_Preview.Content = Setting.ShouldRewrite
 					? (_OriginalValues + " => " + Setting.Rewrite(_PreviewValues[0], _PreviewValues[1], _PreviewValues[2], _PreviewValues[3]))
 					: _OriginalValues;
 			}
 
-			public VersionSetting Setting => new VersionSetting((VersionRewriteMode)_Major.SelectedIndex, (VersionRewriteMode)_Minor.SelectedIndex, (VersionRewriteMode)_Build.SelectedIndex, (VersionRewriteMode)_Revision.SelectedIndex);
+			public VersionSetting Setting => new VersionSetting((VersionRewriteMode)_Major.SelectedIndex,
+				(VersionRewriteMode)_Minor.SelectedIndex,
+				(VersionRewriteMode)_Build.SelectedIndex,
+				(VersionRewriteMode)_Revision.SelectedIndex);
 
 			public void Reset() {
 				_UiLock = true;
 				_Major.SelectedIndex = 0;
 				_Minor.SelectedIndex = 0;
 				_Build.SelectedIndex = 0;
+				_Preview.Content = _OriginalValues;
 				_UiLock = false;
 				_Revision.SelectedIndex = 0;
 			}
@@ -213,8 +234,9 @@ namespace Codist.Commands
 				_Major.SelectedIndex = (int)setting.Major;
 				_Minor.SelectedIndex = (int)setting.Minor;
 				_Build.SelectedIndex = (int)setting.Build;
-				_UiLock = false;
 				_Revision.SelectedIndex = (int)setting.Revision;
+				_UiLock = false;
+				UpdateVersionChangePreview();
 			}
 
 			public VersionSetting Get() {

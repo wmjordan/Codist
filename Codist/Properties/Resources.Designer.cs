@@ -1941,6 +1941,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reset current auto build version settings to default.
+        /// </summary>
+        internal static string CMDT_ResetAutoBuildVersion {
+            get {
+                return ResourceManager.GetString("CMDT_ResetAutoBuildVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reset syntax highlight theme to default....
         /// </summary>
         internal static string CMDT_ResetTheme {
@@ -4730,6 +4739,15 @@ namespace Codist.Properties {
         internal static string T_AttributeOf {
             get {
                 return ResourceManager.GetString("T_AttributeOf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto Build Version.
+        /// </summary>
+        internal static string T_AutoBuildVersion {
+            get {
+                return ResourceManager.GetString("T_AutoBuildVersion", resourceCulture);
             }
         }
         

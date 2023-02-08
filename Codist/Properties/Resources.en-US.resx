@@ -2316,4 +2316,10 @@ Expression too long</value>
   <data name="CMD_SurroundWithIf" xml:space="preserve">
     <value>Surround with #if</value>
   </data>
+  <data name="CMDT_ResetAutoBuildVersion" xml:space="preserve">
+    <value>Reset current auto build version settings to default</value>
+  </data>
+  <data name="T_AutoBuildVersion" xml:space="preserve">
+    <value>Auto Build Version</value>
+  </data>
 </root>

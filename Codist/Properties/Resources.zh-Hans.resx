@@ -2301,4 +2301,10 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_SurroundWithIf" xml:space="preserve">
     <value>外侧插入 #if</value>
   </data>
+  <data name="CMDT_ResetAutoBuildVersion" xml:space="preserve">
+    <value>清空当前选中的配置</value>
+  </data>
+  <data name="T_AutoBuildVersion" xml:space="preserve">
+    <value>自动更改生成目标的版本</value>
+  </data>
 </root>
