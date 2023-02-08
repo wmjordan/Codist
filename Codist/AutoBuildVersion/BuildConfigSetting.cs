@@ -118,9 +118,7 @@ namespace Codist.AutoBuildVersion
 						WriteBuildOutput($"{project.Name} {propertyName} => {t}");
 						return true;
 					}
-					else {
-						return false;
-					}
+					return false;
 				}
 			}
 			return false;
@@ -146,12 +144,6 @@ namespace Codist.AutoBuildVersion
 
 		static class AttributePattern
 		{
-			const string Pattern = @"(^\s*\[\s*assembly\s*:\s*AssemblyVersion(?:Attribute)?\s*\(\s*"")(\d+)\.(\d+)\.(\d+)\.(\d+)(\s*""\s*\)\s*\])";
-			const string CopyrightYearPattern = @"(^\s*\[\s*assembly\s*:\s*AssemblyCopyright(?:Attribute)?\s*\(\s*"".*)(20\d\d)(.*?\s*""\s*\)\s*\])";
-			internal static readonly Regex AssemblyVersion = new Regex(Pattern, RegexOptions.Compiled | RegexOptions.Multiline);
-			internal static readonly Regex AssemblyFileVersion = new Regex(Pattern.Replace("AssemblyVersion", "AssemblyFileVersion"), RegexOptions.Compiled | RegexOptions.Multiline);
-			internal static readonly Regex AssemblyCopyrightYear = new Regex(CopyrightYearPattern, RegexOptions.Compiled | RegexOptions.Multiline);
-
 			public static string[] GetMatchedVersion(Version v) {
 				return new[] { v.Major.ToText(), v.Minor.ToText(), v.Build.ToText(), v.Revision.ToText() };
 			}
@@ -170,8 +162,7 @@ namespace Codist.AutoBuildVersion
 			[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 			public static string GetProperty(Project project, string propertyName) {
 				try {
-					var p = project.Properties.Item(propertyName);
-					return p?.Value is string s ? s : null;
+					return project.Properties.Item(propertyName)?.Value is string s ? s : null;
 				}
 				catch (ArgumentException) {
 					return null;
