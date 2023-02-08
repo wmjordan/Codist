@@ -2307,4 +2307,7 @@ Right click: 显示“线程”窗口</value>
   <data name="T_AutoBuildVersion" xml:space="preserve">
     <value>自动更改生成目标的版本</value>
   </data>
+  <data name="CMD_SealClass" xml:space="preserve">
+    <value>将类密封</value>
+  </data>
 </root>

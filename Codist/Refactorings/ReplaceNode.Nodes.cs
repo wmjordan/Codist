@@ -136,7 +136,7 @@ namespace Codist.Refactorings
 		sealed class SealClassRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.SealedClass;
-			public override string Title => "Seal Class";
+			public override string Title => R.CMD_SealClass;
 
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.Node;

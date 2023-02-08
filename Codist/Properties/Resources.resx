@@ -2322,4 +2322,7 @@ Expression too long</value>
   <data name="T_AutoBuildVersion" xml:space="preserve">
     <value>Auto Build Version</value>
   </data>
+  <data name="CMD_SealClass" xml:space="preserve">
+    <value>Seal Class</value>
+  </data>
 </root>
