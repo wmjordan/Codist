@@ -17,6 +17,7 @@ namespace Codist.Refactorings
 			ReplaceNode.IfToConditional,
 			ReplaceNode.MergeCondition,
 			ReplaceNode.SwapConditionResults,
+			ReplaceNode.InlineVariable,
 			ReplaceNode.While,
 			ReplaceNode.AsToCast,
 			ReplaceNode.SealClass,

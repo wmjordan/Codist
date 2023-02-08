@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Windows.Input;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
 using R = Codist.Properties.Resources;
 using SF = Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -20,6 +22,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode MakeProtected = new ChangeAccessibilityRefactoring(SyntaxKind.ProtectedKeyword);
 		public static readonly ReplaceNode MakeInternal = new ChangeAccessibilityRefactoring(SyntaxKind.InternalKeyword);
 		public static readonly ReplaceNode MakePrivate = new ChangeAccessibilityRefactoring(SyntaxKind.PrivateKeyword);
+		public static readonly ReplaceNode InlineVariable = new InlineVariableRefactoring();
 		public static readonly ReplaceNode RemoveContainingStatement = new RemoveContainerRefactoring();
 		public static readonly ReplaceNode SwapOperands = new SwapOperandsRefactoring();
 		public static readonly ReplaceNode MultiLineList = new MultiLineListRefactoring();
@@ -255,31 +258,35 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var d = GetDeclarationNode(ctx);
+				RefactoringAction a;
 				if (d is BaseTypeDeclarationSyntax t) {
-					return Chain.Create(Replace(d, t
+					a = Replace(d, t
 						.WithoutLeadingTrivia()
 						.WithModifiers(ReplaceModifiers(t.Modifiers))
-						.WithLeadingTrivia(d.GetLeadingTrivia())));
+						.WithLeadingTrivia(d.GetLeadingTrivia()));
 				}
-				if (d is BaseMethodDeclarationSyntax m) {
-					return Chain.Create(Replace(d, m
+				else if (d is BaseMethodDeclarationSyntax m) {
+					a = Replace(d, m
 						.WithoutLeadingTrivia()
 						.WithModifiers(ReplaceModifiers(m.Modifiers))
-						.WithLeadingTrivia(d.GetLeadingTrivia())));
+						.WithLeadingTrivia(d.GetLeadingTrivia()));
 				}
-				if (d is BaseFieldDeclarationSyntax f) {
-					return Chain.Create(Replace(d, f
+				else if (d is BaseFieldDeclarationSyntax f) {
+					a = Replace(d, f
 						.WithoutLeadingTrivia()
 						.WithModifiers(ReplaceModifiers(f.Modifiers))
-						.WithLeadingTrivia(d.GetLeadingTrivia())));
+						.WithLeadingTrivia(d.GetLeadingTrivia()));
 				}
-				if (d is BasePropertyDeclarationSyntax p) {
-					return Chain.Create(Replace(d, p
+				else if (d is BasePropertyDeclarationSyntax p) {
+					a = Replace(d, p
 						.WithoutLeadingTrivia()
 						.WithModifiers(ReplaceModifiers(p.Modifiers))
-						.WithLeadingTrivia(d.GetLeadingTrivia())));
+						.WithLeadingTrivia(d.GetLeadingTrivia()));
 				}
-				return Enumerable.Empty<RefactoringAction>();
+				else {
+					return Enumerable.Empty<RefactoringAction>();
+				}
+				return Chain.Create(a);
 			}
 
 			SyntaxTokenList ReplaceModifiers(SyntaxTokenList original) {
@@ -314,6 +321,140 @@ namespace Codist.Refactorings
 							.WithAdditionalAnnotations(CodeFormatHelper.Select),
 						r[0].WithLeadingTrivia(SF.ElasticSpace)
 					});
+			}
+		}
+
+		sealed class InlineVariableRefactoring : ReplaceNode
+		{
+			public override int IconId => IconIds.LocalVariable;
+			public override string Title => R.CMD_InlineLocalVariable;
+
+			public override bool Accept(RefactoringContext ctx) {
+				var node = ctx.Node;
+				return node is VariableDeclaratorSyntax v
+					&& v.Initializer != null
+					&& v.Initializer.Value.Kind().IsAny(SyntaxKind.NullLiteralExpression, SyntaxKind.DefaultLiteralExpression) == false
+					&& v.Parent is VariableDeclarationSyntax d
+					&& d.Variables.Count == 1
+					&& d.Parent.IsKind(SyntaxKind.LocalDeclarationStatement)
+					&& d.Type is RefTypeSyntax == false;
+			}
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				var d = ctx.Node as VariableDeclaratorSyntax;
+				var value = d.Initializer.Value;
+				var inline = value is BinaryExpressionSyntax
+						|| value is LambdaExpressionSyntax
+						|| value.IsKind(SyntaxKind.ConditionalExpression)
+					? SF.ParenthesizedExpression(value)
+					: value;
+
+				var sc = ctx.SemanticContext;
+				var v = ValueType.None;
+				ISymbol s = null;
+				switch (value.Kind()) {
+					case SyntaxKind.SimpleMemberAccessExpression:
+						s = sc.SemanticModel.GetSymbolInfo(((MemberAccessExpressionSyntax)value).Name).Symbol;
+						break;
+					case SyntaxKind.IdentifierName:
+						s = sc.SemanticModel.GetSymbolInfo(value).Symbol;
+						break;
+					case SyntaxKind.NullLiteralExpression:
+						v = ValueType.Null; break;
+					case SyntaxKind.DefaultLiteralExpression:
+						v = ValueType.Default; break;
+					case SyntaxKind.StringLiteralExpression:
+					case SyntaxKind.NumericLiteralExpression:
+					case SyntaxKind.CharacterLiteralExpression:
+						v = ValueType.Const; break;
+				}
+				if (s != null) {
+					if (s is IFieldSymbol f && f.IsReadOnly == false && f.IsConst == false) {
+						v = ValueType.WriteRef;
+					}
+					else if (s is IPropertySymbol p && p.IsReadOnly == false) {
+						v = ValueType.Write;
+					}
+				}
+				var r = SyncHelper.RunSync(
+					() => SymbolFinder.FindReferencesAsync(sc.SemanticModel.GetDeclaredSymbol(d),
+						sc.Document.Project.Solution,
+						ImmutableHashSet.Create(sc.Document))
+					);
+				bool keep = false, replaced = false;
+				foreach (var item in r) {
+					foreach (var location in item.Locations) {
+						var rn = sc.Compilation.FindNode(location.Location.SourceSpan, false, true);
+						var rp = rn.Parent;
+						switch (rp.Kind()) {
+							case SyntaxKind.SimpleAssignmentExpression:
+							case SyntaxKind.AddAssignmentExpression:
+							case SyntaxKind.AndAssignmentExpression:
+							case SyntaxKind.DivideAssignmentExpression:
+							case SyntaxKind.ExclusiveOrAssignmentExpression:
+							case SyntaxKind.SubtractAssignmentExpression:
+							case SyntaxKind.MultiplyAssignmentExpression:
+							case SyntaxKind.ModuloAssignmentExpression:
+							case SyntaxKind.OrAssignmentExpression:
+							case SyntaxKind.LeftShiftAssignmentExpression:
+							case SyntaxKind.RightShiftAssignmentExpression:
+							case SyntaxKind.PostIncrementExpression:
+							case SyntaxKind.PostDecrementExpression:
+							case SyntaxKind.PreIncrementExpression:
+							case SyntaxKind.PreDecrementExpression:
+								if (v.MatchFlags(ValueType.Write) == false
+										&& rp.SpanStart == location.Location.SourceSpan.Start
+									|| v.HasAnyFlag(ValueType.Unassignable)) {
+									goto KEEP;
+								}
+								break;
+							case SyntaxKind.Argument:
+								if (v.MatchFlags(ValueType.Ref) == false
+									&& ((ArgumentSyntax)rp).RefKindKeyword.IsMissing == false) {
+									goto KEEP;
+								}
+								else {
+									replaced = true;
+									yield return Replace(rn, value.WithTriviaFrom(rn));
+									continue;
+								}
+							case SyntaxKind.IsExpression:
+							case SyntaxKind.IsPatternExpression:
+							case SyntaxKind.AsExpression:
+								if (v.HasAnyFlag(ValueType.Default | ValueType.Null)) {
+									goto KEEP;
+								}
+								break;
+							case SyntaxKind.MemberBindingExpression:
+							case SyntaxKind.PointerMemberAccessExpression:
+							case SyntaxKind.SimpleMemberAccessExpression:
+								if (v.HasAnyFlag(ValueType.Default | ValueType.Null)) {
+									goto KEEP;
+								}
+								break;
+						}
+						replaced = true;
+						yield return Replace(rn, inline.WithTriviaFrom(rn));
+					KEEP:
+						keep = true;
+					}
+				}
+
+				if (keep == false && replaced) {
+					yield return Remove(d.Parent.Parent);
+				}
+			}
+
+			enum ValueType
+			{
+				None,
+				Write = 1,
+				Ref = 2,
+				WriteRef = 3,
+				Null = 4,
+				Default = 8,
+				Const = 16,
+				Unassignable = Null | Default | Const
 			}
 		}
 
@@ -546,7 +687,7 @@ namespace Codist.Refactorings
 						exp.OperatorToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 						exp.Right);
 					exp = exp.Parent as BinaryExpressionSyntax;
-				} while (exp != null && exp.Left.IsKind(nodeKind));
+				} while (exp != null && exp.IsKind(nodeKind));
 			}
 
 			static void ReformatCoalesceExpression(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxToken token, SyntaxKind nodeKind) {

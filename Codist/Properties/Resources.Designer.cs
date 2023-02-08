@@ -839,6 +839,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Inline Local Variable.
+        /// </summary>
+        internal static string CMD_InlineLocalVariable {
+            get {
+                return ResourceManager.GetString("CMD_InlineLocalVariable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Insert comment.
         /// </summary>
         internal static string CMD_InsertComment {
