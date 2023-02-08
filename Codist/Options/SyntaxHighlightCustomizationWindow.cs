@@ -25,6 +25,7 @@ namespace Codist.Options
 		const int SMALL_LABEL_WIDTH = 60, MIDDLE_LABEL_WIDTH = 120;
 
 		readonly StackPanel _SettingsList;
+		readonly ThemedTextBox _SettingsFilterBox;
 		readonly Border _OptionPageHolder;
 		readonly TextBlock _Notice;
 		readonly ListBox _SyntaxSourceBox;
@@ -78,12 +79,14 @@ namespace Codist.Options
 						new ColumnDefinition { Width = new GridLength(10, GridUnitType.Star) }
 					},
 					Children = {
+#region Left pane
 						new StackPanel {
 							Margin = WpfHelper.MiddleMargin,
 							Children = {
 								new TextBlock {
 									Text = R.T_SyntaxCategories,
-									Height = 20,
+									Height = 24,
+									VerticalAlignment = VerticalAlignment.Bottom,
 									FontWeight = FontWeights.Bold
 								},
 								new ListBox {
@@ -101,33 +104,48 @@ namespace Codist.Options
 										new ClassificationCategoryItem(SyntaxStyleSource.PriorityOrder, R.T_AllLanguages)
 									}
 								}.Set(ref _SyntaxSourceBox).ReferenceStyle(VsResourceKeys.ThemedDialogListBoxStyleKey),
+
 								new TextBlock {
 									Text = R.T_Themes,
 									Height = 20,
 									FontWeight = FontWeights.Bold,
 									Margin = WpfHelper.TopItemMargin
 								},
-								new ThemedButton(IconIds.Load, R.CMD_Load, R.CMDT_LoadTheme, LoadTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.Set(ref _LoadThemeButton).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								new ThemedButton(IconIds.SaveAs, R.CMD_Save, R.CMDT_SaveTheme, SaveTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.Set(ref _SaveThemeButton).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								new ThemedButton(IconIds.ResetTheme, R.CMD_Reset, R.CMDT_ResetTheme, ResetTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }.Set(ref _ResetThemeButton).ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.Load, R.CMD_Load, R.CMDT_LoadTheme, LoadTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }
+									.Set(ref _LoadThemeButton)
+									.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SaveAs, R.CMD_Save, R.CMDT_SaveTheme, SaveTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }
+									.Set(ref _SaveThemeButton)
+									.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.ResetTheme, R.CMD_Reset, R.CMDT_ResetTheme, ResetTheme) { HorizontalContentAlignment = HorizontalAlignment.Left }
+									.Set(ref _ResetThemeButton)
+									.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+
 								new TextBlock {
 									Text = R.T_PredefinedThemes,
 									Height = 20,
 									FontWeight = FontWeights.Bold,
 									Margin = WpfHelper.TopItemMargin
 								},
-								new ThemedButton(IconIds.SyntaxTheme, R.CMD_LightTheme, R.CMDT_LightTheme, () => LoadTheme(Config.LightTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								new ThemedButton(IconIds.SyntaxTheme, R.CMD_PaleLightTheme, R.CMDT_PaleLightTheme, () => LoadTheme(Config.PaleLightTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								new ThemedButton(IconIds.SyntaxTheme, R.CMD_DarkTheme, R.CMDT_DarkTheme, () => LoadTheme(Config.DarkTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								new ThemedButton(IconIds.SyntaxTheme, R.CMD_PaleDarkTheme, R.CMDT_PaleDarkTheme, () => LoadTheme(Config.PaleDarkTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
-								new ThemedButton(IconIds.SyntaxTheme, R.CMD_SimpleTheme, R.CMDT_SimpleTheme, () => LoadTheme(Config.SimpleTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, R.CMD_LightTheme, R.CMDT_LightTheme, () => LoadTheme(Config.LightTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }
+									.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, R.CMD_PaleLightTheme, R.CMDT_PaleLightTheme, () => LoadTheme(Config.PaleLightTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }
+									.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, R.CMD_DarkTheme, R.CMDT_DarkTheme, () => LoadTheme(Config.DarkTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }
+									.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, R.CMD_PaleDarkTheme, R.CMDT_PaleDarkTheme, () => LoadTheme(Config.PaleDarkTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }
+									.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
+								new ThemedButton(IconIds.SyntaxTheme, R.CMD_SimpleTheme, R.CMDT_SimpleTheme, () => LoadTheme(Config.SimpleTheme)) { HorizontalContentAlignment = HorizontalAlignment.Left }
+									.ReferenceStyle(VsResourceKeys.ButtonStyleKey),
 							}
 						},
+#endregion
 
+#region Right pane
 						new Grid {
 							Margin = WpfHelper.MiddleMargin,
 							RowDefinitions = {
-								new RowDefinition { Height = new GridLength(20, GridUnitType.Pixel) },
+								new RowDefinition { Height = new GridLength(24, GridUnitType.Pixel) },
 								new RowDefinition { Height = new GridLength(10, GridUnitType.Star) },
 								new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
 								new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
@@ -136,15 +154,29 @@ namespace Codist.Options
 								new Grid {
 									ColumnDefinitions = {
 										new ColumnDefinition { Width = new GridLength(10, GridUnitType.Star) },
+										new ColumnDefinition { Width = new GridLength(120, GridUnitType.Pixel) },
 										new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
 										new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) },
 									},
 									Children = {
 										new TextBlock { Text = R.T_SyntaxStyles, FontWeight = FontWeights.Bold }.SetValue(Grid.SetColumn, 0),
+										new Border {
+											Padding = WpfHelper.SmallMargin,
+											Child = new StackPanel {
+												Orientation = Orientation.Horizontal,
+												Children = {
+													ThemeHelper.GetImage(IconIds.Filter).WrapMargin(WpfHelper.GlyphMargin),
+													new ThemedTextBox {
+														Width = 120,
+														Margin = WpfHelper.GlyphMargin
+													}.Set(ref _SettingsFilterBox)
+												}
+											}
+										}.SetValue(Grid.SetColumn, 1),
 										new Button { Content = R.CMD_Add }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
-											.Set(ref _AddTagButton).SetValue(Grid.SetColumn, 1),
+											.Set(ref _AddTagButton).SetValue(Grid.SetColumn, 2),
 										new Button { Content = R.CMD_Remove }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
-											.Set(ref _RemoveTagButton).SetValue(Grid.SetColumn, 2)
+											.Set(ref _RemoveTagButton).SetValue(Grid.SetColumn, 3)
 									}
 								},
 								new Border {
@@ -289,6 +321,7 @@ namespace Codist.Options
 							}
 						}
 						.SetValue(Grid.SetColumn, 1)
+#endregion
 					}
 				}.ReferenceProperty(TextBlock.ForegroundProperty, VsBrushes.ToolWindowTextKey)
 			}.ReferenceProperty(Border.BackgroundProperty, VsBrushes.ToolWindowBackgroundKey);
@@ -311,6 +344,7 @@ namespace Codist.Options
 			_AddTagButton.Click += AddTag;
 			_RemoveTagButton.Click += RemoveTag;
 			_TagBox.TextChanged += ApplyTag;
+			_SettingsFilterBox.TextChanged += FilterSettingsList;
 			Config.Instance.BeginUpdate();
 		}
 
@@ -434,6 +468,9 @@ namespace Codist.Options
 				});
 				_RemoveTagButton.Visibility = _TagSettingsGroup.Visibility = Visibility.Collapsed;
 			}
+			else {
+				FilterSettingsList(null, EventArgs.Empty);
+			}
 		}
 
 		StyleSettingsButton CreateButtonForLabel(CommentLabel label) {
@@ -533,6 +570,9 @@ namespace Codist.Options
 				});
 				_SettingsGroup.Visibility = Visibility.Collapsed;
 			}
+			else {
+				FilterSettingsList(null, EventArgs.Empty);
+			}
 		}
 
 		static IEnumerable<IClassificationType> ToClassificationTypes<TStyle>(List<TStyle> styles)
@@ -571,6 +611,24 @@ namespace Codist.Options
 				.Union(classifications.SelectMany(i => i.GetBaseTypes()), TextEditorHelper.GetClassificationTypeComparer())
 				.Where(t => t.IsOfType("(TRANSIENT)") == false) // remove transient classification types
 				.ToList();
+		}
+
+		void FilterSettingsList(object sender, EventArgs args) {
+			var t = _SettingsFilterBox.Text;
+			foreach (var item in _SettingsList.Children) {
+				if (item is StyleSettingsButton b) {
+					b.ToggleVisibility(b.Text.IndexOf(t, StringComparison.OrdinalIgnoreCase) != -1);
+				}
+			}
+			if (_SelectedStyleButton?.Visibility == Visibility.Collapsed) {
+				_SelectedStyleButton.IsChecked = false;
+				_SelectedStyleButton = null;
+				_SettingsGroup.Visibility = Visibility.Collapsed;
+			}
+			if (_SelectedCommentTag != null) {
+				_SelectedCommentTag = null;
+				_TagSettingsGroup.Visibility = Visibility.Collapsed;
+			}
 		}
 
 		void OnSelectTag(object sender, RoutedEventArgs e) {
@@ -865,6 +923,7 @@ namespace Codist.Options
 		}
 
 		void AddTag(object sender, EventArgs e) {
+			_SettingsFilterBox.Text = String.Empty;
 			Update(() => {
 				var label = new CommentLabel(
 					_TagBox.Text.Length > 0 ? _TagBox.Text : "TAG",
@@ -1030,7 +1089,7 @@ namespace Codist.Options
 
 			public StyleSettingsButton(IClassificationType ct, TextFormattingRunProperties t, RoutedEventHandler clickHandler) {
 				_Classification = ct;
-				_Style = FormatStore.GetOrCreateStyle(_Classification);
+				_Style = FormatStore.GetOrCreateStyle(ct);
 				HorizontalContentAlignment = HorizontalAlignment.Stretch;
 				Content = new StackPanel {
 					Orientation = Orientation.Horizontal,
@@ -1041,7 +1100,7 @@ namespace Codist.Options
 							IsEnabled = false
 						}).ReferenceStyle(VsResourceKeys.CheckBoxStyleKey),
 						(_Preview = new TextBlock {
-							Text = _Classification.Classification,
+							Text = ct.Classification,
 							Margin = WpfHelper.SmallMargin,
 							VerticalAlignment = VerticalAlignment.Center,
 							TextWrapping = TextWrapping.NoWrap
