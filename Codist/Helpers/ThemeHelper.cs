@@ -171,6 +171,7 @@ namespace Codist
 			SystemThreeDFaceColor = EnvironmentColors.SystemThreeDFaceColorKey.GetWpfColor();
 			SystemGrayTextBrush = EnvironmentColors.SystemGrayTextBrushKey.GetWpfBrush();
 			UpdateToolTipFormatMap(null, EventArgs.Empty);
+			UpdateTextFormatMap(null, EventArgs.Empty);
 		}
 
 		static void UpdateToolTipFormatMap(object sender, EventArgs e) {

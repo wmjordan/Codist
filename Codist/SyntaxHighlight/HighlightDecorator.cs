@@ -64,6 +64,11 @@ namespace Codist.SyntaxHighlight
 		void InitHighlight(object sender, DependencyPropertyChangedEventArgs e) {
 			if ((bool)e.NewValue) {
 				_TextView.VisualElement.IsVisibleChanged -= InitHighlight;
+				if (__DefaultFontFamily == null) {
+					var p = _ClassificationFormatMap.DefaultTextProperties;
+					__DefaultFontFamily = p.Typeface.FontFamily;
+					__DefaultFontSize = p.FontRenderingEmSize;
+				}
 				if (Decorate(_ClassificationFormatMap.CurrentPriorityOrder, true)) {
 					Debug.WriteLine("Attached highlight decorator for " + _TextView.TextBuffer.ContentType);
 					__Initialized = true;
