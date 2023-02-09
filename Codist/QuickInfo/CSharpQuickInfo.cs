@@ -34,7 +34,7 @@ namespace Codist.QuickInfo
 		public CSharpQuickInfo(ITextBuffer subjectBuffer) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			_TextBuffer = subjectBuffer;
-			_IsVsProject = TextEditorHelper.IsVsixProject();
+			_IsVsProject = VsShellHelper.IsVsixProject();
 		}
 
 		public CSharpQuickInfo Reference() {

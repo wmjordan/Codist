@@ -29,7 +29,7 @@ namespace Codist.Commands
 			foreach (UIHierarchyItem hi in items) {
 				var item = hi.Object as Project;
 				if (item != null
-					&& item.Kind == TextEditorHelper.CSharpProjectKind) {
+					&& item.Kind == VsShellHelper.CSharpProjectKind) {
 					return item;
 				}
 			}

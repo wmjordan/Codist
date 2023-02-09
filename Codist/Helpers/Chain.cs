@@ -33,6 +33,17 @@ namespace Codist
 			return this;
 		}
 
+		public bool Contains(T item) {
+			var t = _Head;
+			while (t != null) {
+				if (Comparer.Func(t.Value, item)) {
+					return true;
+				}
+				t = t.Next;
+			}
+			return false;
+		}
+
 		public static Chain<T> operator +(Chain<T> chain, T item) {
 			return chain.Add(item);
 		}
@@ -43,6 +54,11 @@ namespace Codist
 
 		IEnumerator IEnumerable.GetEnumerator() {
 			return GetEnumerator();
+		}
+
+		static class Comparer
+		{
+			public static readonly Func<T,T,bool> Func = EqualityComparer<T>.Default.Equals;
 		}
 
 		sealed class Node

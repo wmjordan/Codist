@@ -114,6 +114,7 @@
     <Compile Include="Helpers\SourceSymbolDeduper.cs" />
     <Compile Include="Helpers\SymbolUsageKind.cs" />
     <Compile Include="Helpers\TokenType.cs" />
+    <Compile Include="Helpers\VsShellHelper.cs" />
     <Compile Include="IconIds.cs" />
     <Compile Include="Margins\DisableChangeTrackerMargin.cs" />
     <Compile Include="Margins\MarginElementBase.cs" />

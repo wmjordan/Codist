@@ -123,16 +123,9 @@ namespace Codist.AutoBuildVersion
 
 		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "checked in caller")]
 		void PrintProperties(EnvDTE.Properties properties, string title) {
-			var c = properties.Count;
 			WriteBuildText(title + Environment.NewLine);
-			for (int i = 1; i <= c; i++) {
-				var p = properties.Item(i);
-				try {
-					WriteBuildText($"  {p.Name} = {p.Value}{Environment.NewLine}");
-				}
-				catch (System.Runtime.InteropServices.COMException) {
-					WriteBuildText($"  {p.Name} = ?{Environment.NewLine}");
-				}
+			foreach (var p in properties.Enumerate()) {
+				WriteBuildText($"  {p.Key} = {p.Value}{Environment.NewLine}");
 			}
 		}
 
