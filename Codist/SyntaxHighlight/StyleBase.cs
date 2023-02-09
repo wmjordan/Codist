@@ -28,8 +28,6 @@ namespace Codist.SyntaxHighlight
 		public bool? Strikethrough { get; set; }
 		/// <summary>Gets or sets whether the content rendered with underline.</summary>
 		public bool? Underline { get; set; }
-		/// <summary>Gets or sets whether the text is stretched.</summary>
-		public int? Stretch { get; set; }
 		/// <summary>Gets or sets the font size. Font size number is relative to the editor text size.</summary>
 		public double FontSize { get; set; }
 		/// <summary>Gets or sets the foreground color to render the text. The color format could be #AARRGGBB or #RRGGBB.</summary>
@@ -76,6 +74,8 @@ namespace Codist.SyntaxHighlight
 		public ScrollbarMarkerStyle ScrollBarMarkerStyle { get; set; }
 		/// <summary>Gets or sets the font.</summary>
 		public string Font { get; set; }
+		/// <summary>Gets or sets the font variant.</summary>
+		public string FontVariant { get; set; }
 
 		internal Color ForeColor { get => _ForeColor; set => _ForeColor = value; }
 		internal byte ForegroundOpacity { get => _ForeColorOpacity; set => _ForeColorOpacity = value; }
@@ -88,7 +88,7 @@ namespace Codist.SyntaxHighlight
 		internal abstract string Category { get; }
 
 		/// <summary>Returns whether any option in this style is set.</summary>
-		internal bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForegroundOpacity != 0 || BackgroundOpacity != 0 || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || Stretch.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false || LineColor.A > 0 || LineOpacity != 0 || LineThickness != 0 || LineStyle != LineStyle.Solid;
+		internal bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForegroundOpacity != 0 || BackgroundOpacity != 0 || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false || LineColor.A > 0 || LineOpacity != 0 || LineThickness != 0 || LineStyle != LineStyle.Solid;
 
 		internal abstract string ClassificationType { get; }
 		internal abstract string Description { get; }
@@ -103,7 +103,7 @@ namespace Codist.SyntaxHighlight
 			target.Underline = Underline;
 			target.Strikethrough = Strikethrough;
 			target.FontSize = FontSize;
-			target.Stretch = Stretch;
+			target.FontVariant = FontVariant;
 			target.BackgroundEffect = BackgroundEffect;
 			target.Font = Font;
 			target.ForeColor = ForeColor;
@@ -128,7 +128,7 @@ namespace Codist.SyntaxHighlight
 			}
 			if (filters.MatchFlags(StyleFilters.FontFamily)) {
 				target.Font = Font;
-				target.Stretch = Stretch;
+				target.FontVariant = FontVariant;
 			}
 			if (filters.MatchFlags(StyleFilters.FontSize)) {
 				target.FontSize = FontSize;
@@ -149,7 +149,7 @@ namespace Codist.SyntaxHighlight
 		internal void Reset() {
 			Bold = Italic = OverLine = Underline = Strikethrough = null;
 			FontSize = 0;
-			Stretch = null;
+			FontVariant = null;
 			BackgroundEffect = BrushEffect.Solid;
 			Font = null;
 			ForeColor = BackColor = LineColor = default;

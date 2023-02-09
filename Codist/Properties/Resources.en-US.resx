@@ -2328,4 +2328,7 @@ Expression too long</value>
   <data name="CMD_SealClass" xml:space="preserve">
     <value>Seal Class</value>
   </data>
+  <data name="T_Variant" xml:space="preserve">
+    <value>Variant:</value>
+  </data>
 </root>

@@ -2313,4 +2313,7 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_SealClass" xml:space="preserve">
     <value>将类密封</value>
   </data>
+  <data name="T_Variant" xml:space="preserve">
+    <value>变体:</value>
+  </data>
 </root>

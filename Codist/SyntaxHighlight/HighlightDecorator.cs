@@ -121,13 +121,16 @@ namespace Codist.SyntaxHighlight
 			var updated = new Dictionary<IClassificationType, TextFormattingRunProperties>();
 			foreach (var item in FormatStore.GetStyles()) {
 				// explicitly update formats when font name or font size is changed in font options
-				if (item.Value.Stretch.HasValue && String.IsNullOrWhiteSpace(item.Value.Font)
-					|| item.Value.FontSize != 0) {
+				var style = item.Value;
+				if (String.IsNullOrWhiteSpace(style.FontVariant) == false
+						&& String.IsNullOrWhiteSpace(style.Font)
+					|| style.FontSize != 0) {
 					var key = _RegService.GetClassificationType(item.Key);
 					if (key == null) {
+						CodistPackage.OutputString("Missing classification type: " + item.Key);
 						continue;
 					}
-					updated[key] = SetProperties(_ClassificationFormatMap.GetTextProperties(key), item.Value, __DefaultFontSize);
+					updated[key] = SetProperties(_ClassificationFormatMap.GetTextProperties(key), style, __DefaultFontSize);
 				}
 			}
 			if (updated.Count > 0) {
@@ -240,7 +243,8 @@ namespace Codist.SyntaxHighlight
 			if (fontSize < 1) {
 				fontSize = 1;
 			}
-			if (string.IsNullOrWhiteSpace(settings.Font) == false || settings.Stretch.HasValue) {
+			if (string.IsNullOrWhiteSpace(settings.Font) == false
+				|| String.IsNullOrWhiteSpace(settings.FontVariant) == false) {
 				format = SetFont(format, settings);
 			}
 			if (settings.FontSize != 0) {
@@ -282,11 +286,30 @@ namespace Codist.SyntaxHighlight
 		}
 
 		static TextFormattingRunProperties SetFont(TextFormattingRunProperties format, StyleBase settings) {
-			return format.SetTypeface(new Typeface(
-				string.IsNullOrWhiteSpace(settings.Font) == false ? new FontFamily(settings.Font) : __DefaultFontFamily,
-				FontStyles.Normal,
-				FontWeights.Normal,
-				settings.Stretch.HasValue ? FontStretch.FromOpenTypeStretch(settings.Stretch.Value) : FontStretches.Normal));
+			FontFamily f;
+			if (String.IsNullOrWhiteSpace(settings.Font) == false) {
+				f = new FontFamily(settings.Font);
+				bool isSubstitute = true;
+				foreach (var item in f.FamilyNames) {
+					if (item.Value?.Contains(settings.Font) == true) {
+						isSubstitute = false;
+						break;
+					}
+				}
+				if (isSubstitute) {
+					f = __DefaultFontFamily;
+				}
+				else if (String.IsNullOrWhiteSpace(settings.FontVariant) == false) {
+					var ft = f.FamilyTypefaces.FirstOrDefault(t => t.AdjustedFaceNames.Values.Contains(settings.FontVariant));
+					if (ft != null) {
+						return format.SetTypeface(new Typeface(new FontFamily($"{settings.Font} {settings.FontVariant}"), ft.Style, ft.Weight, ft.Stretch));
+					}
+				}
+			}
+			else {
+				f = __DefaultFontFamily;
+			}
+			return format.SetTypeface(new Typeface(f, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal));
 		}
 
 		static TextFormattingRunProperties SetBackground(TextFormattingRunProperties format, StyleBase settings, Color backColor) {

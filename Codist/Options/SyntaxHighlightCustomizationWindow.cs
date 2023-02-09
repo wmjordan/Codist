@@ -36,7 +36,7 @@ namespace Codist.Options
 		readonly StyleCheckBox _ItalicBox;
 		readonly StyleCheckBox _UnderlineBox;
 		readonly StyleCheckBox _StrikethroughBox;
-		readonly ComboBox _StretchBox;
+		readonly ComboBox _VariantBox;
 		readonly ColorButton _ForegroundButton;
 		readonly OpacityButton _ForegroundOpacityButton;
 		readonly ColorButton _BackgroundButton;
@@ -202,10 +202,10 @@ namespace Codist.Options
 													new LabeledControl(R.T_Size, SMALL_LABEL_WIDTH,
 														new NumericUpDown { Width = 80 }
 															.Set(ref _FontSizeBox)),
-													new LabeledControl(R.T_Stretch, SMALL_LABEL_WIDTH,
-														new ComboBox { Width = 80 }
+													new LabeledControl(R.T_Variant, SMALL_LABEL_WIDTH,
+														new ComboBox { MinWidth = 80 }
 															.ReferenceStyle(VsResourceKeys.ComboBoxStyleKey)
-															.Set(ref _StretchBox))
+															.Set(ref _VariantBox))
 												}
 											},
 											new WrapPanel {
@@ -328,8 +328,8 @@ namespace Codist.Options
 			SetFormatMap(wpfTextView);
 			_SyntaxSourceBox.SelectedIndex = 0;
 			_FontSizeBox.ValueChanged += ApplyFontSize;
-			_StretchBox.Items.AddRange(new[] { R.T_NotSet, R.T_Expanded, R.T_Normal, R.T_Condensed });
-			_StretchBox.SelectionChanged += OnStretchChanged;
+			_VariantBox.Items.AddRange(new[] { R.T_NotSet, R.T_Expanded, R.T_Normal, R.T_Condensed });
+			_VariantBox.SelectionChanged += OnFontVariantChanged;
 			LoadSyntaxStyles(SyntaxStyleSource.Selection);
 			_ForegroundButton.UseVsTheme();
 			_BackgroundButton.UseVsTheme();
@@ -690,6 +690,15 @@ namespace Codist.Options
 				var s = b.StyleSettings;
 				_FontButton.Value = s.Font;
 				_FontSizeBox.Value = (int)(s.FontSize > 100 ? 100 : s.FontSize < -10 ? -10 : s.FontSize);
+				ListVariantsForFont(s.Font);
+				if (_VariantBox.Items.Count > 0) {
+					if (String.IsNullOrWhiteSpace(s.FontVariant)) {
+						_VariantBox.SelectedIndex = 0;
+					}
+					else {
+						_VariantBox.SelectedValue = s.FontVariant;
+					}
+				}
 				_BoldBox.IsChecked = s.Bold;
 				_ItalicBox.IsChecked = s.Italic;
 				_UnderlineBox.IsChecked = s.Underline;
@@ -714,7 +723,6 @@ namespace Codist.Options
 				_LineOffsetBox.Value = s.LineOffset;
 				_LineStyleBox.SelectedIndex = (int)s.LineStyle;
 				_LineOpacityButton.Visibility = _LineStyleGroup.Visibility = s.LineColor.A > 0 ? Visibility.Visible : Visibility.Collapsed;
-				_StretchBox.SelectedIndex = GetStretchIndex(s.Stretch);
 				_BaseTypesList.Children.RemoveRange(1, _BaseTypesList.Children.Count - 1);
 				if (s.ClassificationType != null) {
 					var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(s.ClassificationType);
@@ -735,23 +743,27 @@ namespace Codist.Options
 			finally {
 				_Lock.Unlock();
 			}
+		}
 
-			int GetStretchIndex(int? stretch) {
-				if (stretch.HasValue == false) {
-					return 0;
+		void ListVariantsForFont(string font) {
+			_VariantBox.Items.Clear();
+			if (String.IsNullOrWhiteSpace(font) == false) {
+				var ff = new FontFamily(font);
+				var names = new List<string>();
+				foreach (var typeface in ff.FamilyTypefaces) {
+					if ((typeface.Weight == FontWeights.Regular || typeface.Weight == FontWeights.Bold)
+						&& typeface.Stretch == FontStretches.Normal) {
+						continue;
+					}
+					names.Add(typeface.GetTypefaceAdjustedName());
 				}
-				var v = stretch.Value;
-				if (v == FontStretches.Expanded.ToOpenTypeStretch()) {
-					return 1;
+				names.Sort();
+				if (names.Count > 0) {
+					_VariantBox.Items.Add(R.T_Default);
+					_VariantBox.Items.AddRange(names);
 				}
-				if (v == FontStretches.Normal.ToOpenTypeStretch()) {
-					return 2;
-				}
-				if (v == FontStretches.Condensed.ToOpenTypeStretch()) {
-					return 3;
-				}
-				return 0;
 			}
+			_VariantBox.IsEnabled = _VariantBox.Items.Count > 0;
 		}
 
 		void RefreshList(object sender, EventArgs e) {
@@ -772,14 +784,19 @@ namespace Codist.Options
 			Config.Instance.FireConfigChangedEvent(Features.SyntaxHighlight, ActiveStyle.ClassificationType);
 		}
 		void ApplyFont(string font) {
+			ListVariantsForFont(font);
 			Update(() => {
 				if (ActiveStyle.Font != font) {
 					ActiveStyle.Font = font;
+					if (_VariantBox.Items.Count > 0) {
+						_VariantBox.SelectedIndex = 0;
+					}
 					return true;
 				}
 				return false;
 			});
 		}
+
 		void ApplyFontSize(object sender, DependencyPropertyChangedEventArgs e) {
 			Update(() => {
 				double s = _FontSizeBox.Value;
@@ -905,17 +922,16 @@ namespace Codist.Options
 			});
 		}
 
-		void OnStretchChanged(object sender, EventArgs e) {
+		void OnFontVariantChanged(object sender, EventArgs e) {
 			Update(() => {
-				int? s;
-				switch (_StretchBox.SelectedIndex) {
-					case 1: s = FontStretches.Expanded.ToOpenTypeStretch(); break;
-					case 2: s = FontStretches.Normal.ToOpenTypeStretch(); break;
-					case 3: s = FontStretches.Condensed.ToOpenTypeStretch(); break;
-					default: s = null; break;
+				if (_VariantBox.SelectedIndex == 0
+					&& String.IsNullOrWhiteSpace(ActiveStyle.FontVariant) == false) {
+					ActiveStyle.FontVariant = null;
+					return true;
 				}
-				if (ActiveStyle.Stretch != s) {
-					ActiveStyle.Stretch = s;
+				var v = _VariantBox.SelectedValue as string;
+				if (ActiveStyle.FontVariant != v) {
+					ActiveStyle.FontVariant = v;
 					return true;
 				}
 				return false;
@@ -1067,6 +1083,9 @@ namespace Codist.Options
 			_FormatMap.ClassificationFormatMappingChanged -= RefreshList;
 			_WpfTextView = null;
 			_FormatMap = null;
+			if (IsClosing == false) {
+				Config.Instance.EndUpdate(false);
+			}
 			base.OnClosed(e);
 		}
 		void Ok() {
