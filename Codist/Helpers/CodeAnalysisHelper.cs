@@ -46,6 +46,7 @@ namespace Codist
 			miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 		internal const SyntaxKind DotDotToken = (SyntaxKind)8222;
 		internal const SyntaxKind QuestionQuestionEqualsToken = (SyntaxKind)8284;
+		internal const SyntaxKind WithKeyword = (SyntaxKind)8442;
 		internal const SyntaxKind InitKeyword = (SyntaxKind)8443;
 		internal const SyntaxKind RecordKeyword = (SyntaxKind)8444;
 		internal const SyntaxKind RequiredKeyword = (SyntaxKind)8447;

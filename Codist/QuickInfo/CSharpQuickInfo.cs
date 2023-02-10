@@ -141,6 +141,7 @@ namespace Codist.QuickInfo
 				case SyntaxKind.UnderscoreToken:
 				case SyntaxKind.WhereKeyword:
 				case SyntaxKind.OrderByKeyword:
+				case CodeAnalysisHelper.WithKeyword:
 					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span, false, true)).ConvertedType;
 					if (symbol == null) {
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
