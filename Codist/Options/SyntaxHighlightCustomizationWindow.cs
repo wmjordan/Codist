@@ -462,7 +462,7 @@ namespace Codist.Options
 
 			if (l.Count == 0) {
 				l.Add(new TextBlock {
-					Text = "No comment tag is defined. Use the Add button to add new comment tag definitions.",
+					Text = R.T_NoCommentTagDefined,
 					FontSize = 20,
 					TextWrapping = TextWrapping.Wrap
 				});
