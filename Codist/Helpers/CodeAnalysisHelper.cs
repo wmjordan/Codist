@@ -77,6 +77,9 @@ namespace Codist
 		public static bool IsAny(this SyntaxKind kind, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4) {
 			return kind == kind1 || kind == kind2 || kind == kind3 || kind == kind4;
 		}
+		public static bool IsAny(this SyntaxKind kind, SyntaxKind kind1, SyntaxKind kind2, SyntaxKind kind3, SyntaxKind kind4, SyntaxKind kind5) {
+			return kind == kind1 || kind == kind2 || kind == kind3 || kind == kind4 || kind == kind5;
+		}
 		public static bool IsPredefinedSystemType(this SyntaxKind kind) {
 			return kind >= SyntaxKind.BoolKeyword && kind <= SyntaxKind.ObjectKeyword;
 		}

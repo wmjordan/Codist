@@ -92,6 +92,18 @@ namespace Codist.QuickInfo
 				case SyntaxKind.MultiLineCommentTrivia:
 					return null;
 				case SyntaxKind.OpenBraceToken:
+					if ((node = unitCompilation.FindNode(token.Span))
+						.Kind().IsAny(SyntaxKind.ArrayInitializerExpression,
+							SyntaxKind.CollectionInitializerExpression,
+							SyntaxKind.ComplexElementInitializerExpression,
+							SyntaxKind.ObjectInitializerExpression,
+							CodeAnalysisHelper.WithInitializerExpression)) {
+						qiContent.Add(new ThemedTipText()
+							.SetGlyph(ThemeHelper.GetImage(IconIds.InstanceMember))
+							.Append(R.T_ExpressionCount)
+							.Append((node as InitializerExpressionSyntax).Expressions.Count.ToText(), true, false, _SymbolFormatter.Number));
+					}
+					goto case SyntaxKind.CloseBraceToken;
 				case SyntaxKind.CloseBraceToken:
 					if (qiWrapper != null) {
 						qiWrapper.OverrideBuiltInXmlDoc = false;

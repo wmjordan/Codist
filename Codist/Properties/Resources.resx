@@ -2331,4 +2331,7 @@ Expression too long</value>
   <data name="T_Variant" xml:space="preserve">
     <value>Variant:</value>
   </data>
+  <data name="T_ExpressionCount" xml:space="preserve">
+    <value>Expression count: </value>
+  </data>
 </root>

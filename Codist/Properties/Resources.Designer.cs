@@ -5384,6 +5384,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Expression count: .
+        /// </summary>
+        internal static string T_ExpressionCount {
+            get {
+                return ResourceManager.GetString("T_ExpressionCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ...
         ///Expression too long.
         /// </summary>
