@@ -305,7 +305,7 @@ namespace Codist.SyntaxHighlight
 					f = __DefaultFontFamily;
 				}
 				else if (String.IsNullOrWhiteSpace(settings.FontVariant) == false) {
-					var ft = f.FamilyTypefaces.FirstOrDefault(t => t.AdjustedFaceNames.Values.Contains(settings.FontVariant));
+					var ft = f.GetTypefaces().FirstOrDefault(t => t.FaceNames.Values.Contains(settings.FontVariant));
 					if (ft != null) {
 						return format.SetTypeface(new Typeface(new FontFamily($"{settings.Font} {settings.FontVariant}"), ft.Style, ft.Weight, ft.Stretch));
 					}

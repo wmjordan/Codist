@@ -749,15 +749,22 @@ namespace Codist.Options
 			_VariantBox.Items.Clear();
 			if (String.IsNullOrWhiteSpace(font) == false) {
 				var ff = new FontFamily(font);
+				var typefaces = new List<Typeface>();
 				var names = new List<string>();
-				foreach (var typeface in ff.FamilyTypefaces) {
+				foreach (var typeface in ff.GetTypefaces()) {
 					if ((typeface.Weight == FontWeights.Regular || typeface.Weight == FontWeights.Bold)
-						&& typeface.Stretch == FontStretches.Normal) {
+							&& typeface.Stretch == FontStretches.Normal) {
 						continue;
 					}
-					names.Add(typeface.GetTypefaceAdjustedName());
+					typefaces.Add(typeface);
 				}
-				names.Sort();
+				typefaces.Sort(TypefaceComparer.Instance);
+				var dedup = new HashSet<Typeface>(TypefaceComparer.Instance);
+				foreach (var item in typefaces) {
+					if (dedup.Add(item)) {
+						names.Add(item.GetTypefaceName());
+					}
+				}
 				if (names.Count > 0) {
 					_VariantBox.Items.Add(R.T_Default);
 					_VariantBox.Items.AddRange(names);
@@ -1161,18 +1168,24 @@ namespace Codist.Options
 				if (format.BackgroundBrushEmpty == false) {
 					label.Background = format.BackgroundBrush;
 				}
-				if (format.TypefaceEmpty == false) {
-					label.FontFamily = format.Typeface.FontFamily;
-					label.FontStretch = format.Typeface.Stretch;
-				}
-				if (format.FontRenderingEmSizeEmpty == false) {
-					label.FontSize = format.FontRenderingEmSize;
-				}
 				if (format.ItalicEmpty == false) {
 					label.FontStyle = format.Italic ? FontStyles.Italic : FontStyles.Normal;
 				}
 				if (format.BoldEmpty == false) {
 					label.FontWeight = format.Bold ? FontWeights.Bold : FontWeights.Normal;
+				}
+				if (format.TypefaceEmpty == false) {
+					label.FontFamily = format.Typeface.FontFamily;
+					label.FontStretch = format.Typeface.Stretch;
+					if (label.FontStyle == FontStyles.Normal) {
+						label.FontStyle = format.Typeface.Style;
+					}
+					if (label.FontWeight == FontWeights.Normal) {
+						label.FontWeight = format.Typeface.Weight;
+					}
+				}
+				if (format.FontRenderingEmSizeEmpty == false) {
+					label.FontSize = format.FontRenderingEmSize;
 				}
 				if (format.TextDecorationsEmpty == false) {
 					label.TextDecorations = format.TextDecorations;
@@ -1259,14 +1272,6 @@ namespace Codist.Options
 						MinWidth = ActualWidth,
 						ItemsSource = new[] { new ThemedMenuItem(-1, R.T_NotSet, SetFont) { Tag = null } }
 							.Concat(WpfHelper.GetInstalledFonts().Select(f => new ThemedMenuItem(-1, f.Name, SetFont) { Tag = f.Name }))
-							//.Concat(WpfHelper.GetInstalledFonts()
-							//	.SelectMany(f => new[] { new ThemedMenuItem(-1, f.Name, SetFont) { Tag = f.Name } }
-							//		.Concat(f.ExtraTypefaces.Where(t => t.Style == FontStyles.Normal).Select(t => {
-							//			var n = t.GetTypefaceAdjustedName();
-							//			return new ThemedMenuItem(-1, f.Name + " " + n, SetFont) { Tag = f.Name + " " + n };
-							//		}))
-							//	)
-							//)
 					};
 					ContextMenu.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 				}
@@ -1281,6 +1286,38 @@ namespace Codist.Options
 					m.Highlight(true);
 					Value = m.Tag as string;
 				}
+			}
+		}
+
+		sealed class TypefaceComparer : IEqualityComparer<Typeface>, IComparer<Typeface>
+		{
+			public static readonly TypefaceComparer Instance = new TypefaceComparer();
+			private TypefaceComparer() {}
+
+			public int Compare(Typeface x, Typeface y) {
+				int c;
+				return (c = FontStretch.Compare(x.Stretch, y.Stretch)) != 0
+					|| (c = FontWeight.Compare(x.Weight, y.Weight)) != 0
+					? c
+					: MapFontStyle(x.Style) - MapFontStyle(y.Style);
+			}
+
+			public bool Equals(Typeface x, Typeface y) {
+				return Triple(x).Equals(Triple(y));
+			}
+
+			public int GetHashCode(Typeface obj) {
+				return Triple(obj).GetHashCode();
+			}
+
+			static int MapFontStyle(FontStyle style) {
+				return style == FontStyles.Normal ? 0
+					: style == FontStyles.Italic ? 1
+					: 2;
+			}
+
+			static (FontWeight, FontStyle, FontStretch) Triple(Typeface typeface) {
+				return (typeface.Weight, typeface.Style == FontStyles.Oblique ? FontStyles.Italic : typeface.Style, typeface.Stretch);
 			}
 		}
 

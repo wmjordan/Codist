@@ -685,8 +685,8 @@ namespace Codist
 			}
 		}
 
-		public static string GetTypefaceAdjustedName(this FamilyTypeface typeface) {
-			var names = typeface.AdjustedFaceNames;
+		public static string GetTypefaceName(this Typeface typeface) {
+			var names = typeface.FaceNames;
 			if (names.Count == 1) {
 				return names.First().Value;
 			}
