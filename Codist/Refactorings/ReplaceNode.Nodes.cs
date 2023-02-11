@@ -375,6 +375,9 @@ namespace Codist.Refactorings
 					else if (s is IPropertySymbol p && p.IsReadOnly == false) {
 						v = ValueType.Write;
 					}
+					else if (s is IMethodSymbol m) {
+						v = ValueType.Delegate;
+					}
 				}
 				var r = SyncHelper.RunSync(
 					() => SymbolFinder.FindReferencesAsync(sc.SemanticModel.GetDeclaredSymbol(d),
@@ -410,7 +413,7 @@ namespace Codist.Refactorings
 								break;
 							case SyntaxKind.Argument:
 								if (v.MatchFlags(ValueType.Ref) == false
-									&& ((ArgumentSyntax)rp).RefKindKeyword.IsMissing == false) {
+									&& ((ArgumentSyntax)rp).RefKindKeyword.IsKind(SyntaxKind.None) == false) {
 									goto KEEP;
 								}
 								else {
@@ -428,13 +431,14 @@ namespace Codist.Refactorings
 							case SyntaxKind.MemberBindingExpression:
 							case SyntaxKind.PointerMemberAccessExpression:
 							case SyntaxKind.SimpleMemberAccessExpression:
-								if (v.HasAnyFlag(ValueType.Default | ValueType.Null)) {
+								if (v.HasAnyFlag(ValueType.Default | ValueType.Null | ValueType.Delegate)) {
 									goto KEEP;
 								}
 								break;
 						}
 						replaced = true;
 						yield return Replace(rn, inline.WithTriviaFrom(rn));
+						continue;
 					KEEP:
 						keep = true;
 					}
@@ -445,6 +449,7 @@ namespace Codist.Refactorings
 				}
 			}
 
+			[Flags]
 			enum ValueType
 			{
 				None,
@@ -454,7 +459,8 @@ namespace Codist.Refactorings
 				Null = 4,
 				Default = 8,
 				Const = 16,
-				Unassignable = Null | Default | Const
+				Unassignable = Null | Default | Const,
+				Delegate = 32
 			}
 		}
 
