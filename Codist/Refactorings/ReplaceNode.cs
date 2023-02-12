@@ -4,6 +4,8 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text;
 
 namespace Codist.Refactorings
 {
@@ -73,34 +75,28 @@ namespace Codist.Refactorings
 					}
 				}
 			);
-			foreach (var action in ctx.Actions) {
-				if (action.ActionType == ActionType.Remove) {
-					continue;
+			var ms = context.View.GetMultiSelectionBroker();
+			var ss = ms.CurrentSnapshot;
+			using (var b = ms.BeginBatchOperation()) {
+				foreach (var action in ctx.Actions) {
+					if (action.ActionType == ActionType.Remove) {
+						continue;
+					}
+					var inserted = ctx.NewRoot.GetAnnotatedNodes(action.Annotation).FirstOrDefault();
+					if (inserted == null || inserted.ContainsAnnotations == false) {
+						continue;
+					}
+					var s = action.FirstOriginal.FullSpan.Start;
+					var c = new Chain<TextSpan>();
+					foreach (var item in inserted.GetAnnotatedNodesAndTokens(CodeFormatHelper.Select)) {
+						c.Add(item.Span);
+					}
+					foreach (var item in inserted.GetAnnotatedTrivia(CodeFormatHelper.Select)) {
+						c.Add(item.Span);
+					}
+					ms.AddSelectionRange(c.Select(i => new Selection(new SnapshotSpan(ss, i.ToSpan()))));
 				}
-				var inserted = ctx.NewRoot.GetAnnotatedNodes(action.Annotation).FirstOrDefault();
-				if (inserted != null) {
-					TextSpan selSpan = default;
-					foreach (var item in inserted.GetAnnotatedNodes(CodeFormatHelper.Select)) {
-						selSpan = item.Span;
-						break;
-					}
-					if (selSpan.IsEmpty) {
-						foreach (var item in inserted.GetAnnotatedTokens(CodeFormatHelper.Select)) {
-							selSpan = item.Span;
-							break;
-						}
-						if (selSpan.IsEmpty) {
-							foreach (var item in inserted.GetAnnotatedTrivia(CodeFormatHelper.Select)) {
-								selSpan = item.Span;
-								break;
-							}
-						}
-					}
-					if (selSpan.Length != 0) {
-						context.View.SelectSpan(action.FirstOriginal.FullSpan.Start + (selSpan.Start - inserted.FullSpan.Start), selSpan.Length, 1);
-						return;
-					}
-				}
+				ms.TryRemoveSelection(ms.PrimarySelection);
 			}
 		}
 

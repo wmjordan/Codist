@@ -418,7 +418,7 @@ namespace Codist.Refactorings
 								}
 								else {
 									replaced = true;
-									yield return Replace(rn, value.WithTriviaFrom(rn));
+									yield return Replace(rn, value.AnnotateSelect().WithTriviaFrom(rn));
 									continue;
 								}
 							case SyntaxKind.IsExpression:
@@ -437,7 +437,7 @@ namespace Codist.Refactorings
 								break;
 						}
 						replaced = true;
-						yield return Replace(rn, inline.WithTriviaFrom(rn));
+						yield return Replace(rn, inline.AnnotateSelect().WithTriviaFrom(rn));
 						continue;
 					KEEP:
 						keep = true;

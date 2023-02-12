@@ -23,6 +23,8 @@ namespace Codist
 			_Head = _Tail = new Node(item);
 		}
 
+		public bool IsEmpty => _Head == null;
+
 		public Chain<T> Add(T item) {
 			if (_Head != null) {
 				_Tail = _Tail.Next = new Node(item);
