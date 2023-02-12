@@ -213,7 +213,6 @@ namespace Codist.Taggers
 		static ClassificationTypeDefinition XmlDoc;
 
 		[Export(typeof(ClassificationTypeDefinition))]
-		[BaseDefinition(Constants.CodePunctuation)]
 		[Name(Constants.CodeBold)]
 		static ClassificationTypeDefinition Bold;
 
