@@ -110,6 +110,7 @@
     <Compile Include="Helpers\Chain.cs" />
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\InstalledFont.cs" />
+    <Compile Include="Helpers\LogHelper.cs" />
     <Compile Include="Helpers\SelectedSelectedSyntax.cs" />
     <Compile Include="Helpers\SourceSymbolDeduper.cs" />
     <Compile Include="Helpers\SymbolUsageKind.cs" />

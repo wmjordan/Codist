@@ -37,6 +37,8 @@ namespace Codist
 
 		public string Version { get; set; }
 		internal InitStatus InitStatus { get; private set; }
+		public string LogPath { get => LogHelper.LogPath; set => LogHelper.LogPath = value; }
+		public bool ShouldSerializeLogPath() => String.IsNullOrEmpty(LogPath) == false;
 
 		[DefaultValue(Features.All)]
 		public Features Features { get; set; } = Features.All;
