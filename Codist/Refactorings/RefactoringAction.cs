@@ -31,8 +31,12 @@ namespace Codist.Refactorings
 			}
 		}
 
-		public SyntaxNode FirstOriginal => Original != null && Original.Count != 0 ? Original[0] : null;
-		public TextSpan OriginalSpan => Original?.Count > 0 ? TextSpan.FromBounds(Original[0].FullSpan.Start, Original[Original.Count - 1].FullSpan.End) : default;
+		public SyntaxNode FirstOriginal => Original != null && Original.Count != 0
+			? Original[0]
+			: null;
+		public TextSpan OriginalSpan => Original?.Count > 0
+			? TextSpan.FromBounds(Original[0].FullSpan.Start, Original[Original.Count - 1].FullSpan.End)
+			: default;
 
 		public string GetInsertionString(SyntaxNode root) {
 			return String.Concat(root.GetAnnotatedNodes(Annotation).Select(n => n.ToFullString()));

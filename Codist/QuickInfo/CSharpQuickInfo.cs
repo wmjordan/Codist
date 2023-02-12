@@ -245,10 +245,9 @@ namespace Codist.QuickInfo
 						if (node is StatementSyntax) {
 							ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
 						}
-						if (qiContent.Count > 0) {
-							return CreateQuickInfoItem(session, token, qiContent.ToUI());
-						}
-						return null;
+						return qiContent.Count > 0
+							? CreateQuickInfoItem(session, token, qiContent.ToUI())
+							: null;
 					}
 					break;
 			}
