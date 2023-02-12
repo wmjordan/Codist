@@ -53,6 +53,7 @@ namespace Codist
 			// not sited yet inside Visual Studio environment. The place to do all the other
 			// initialization is the Initialize method.
 			Instance = this;
+			$"{nameof(CodistPackage)} created".Log();
 		}
 
 		public static CodistPackage Instance { get; private set; }
@@ -142,6 +143,8 @@ namespace Codist
 		/// <param name="progress">A provider for progress updates.</param>
 		/// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
 		protected override async System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress) {
+			"Initializing package".Log();
+
 			await base.InitializeAsync(cancellationToken, progress);
 
 			SolutionEvents.OnAfterCloseSolution += (s, args) => {
@@ -168,6 +171,8 @@ namespace Codist
 				InitializeOrUpgradeConfig();
 			}
 			Commands.SyntaxCustomizerWindowCommand.Initialize();
+
+			"Package initialization finished".Log();
 			//ListEditorCommands();
 		}
 
@@ -198,6 +203,7 @@ namespace Codist
 
 		protected override void Dispose(bool disposing) {
 			base.Dispose(disposing);
+			LogHelper.ClearLog();
 			//DTE.ObjectExtenders.UnregisterExtenderProvider(_extenderCookie);
 		}
 

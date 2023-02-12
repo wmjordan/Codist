@@ -27,9 +27,9 @@ namespace Codist.SyntaxHighlight
 	sealed class HighlightDecorator
 	{
 		static readonly IClassificationType __BraceMatchingClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBraceMatching);
-		static bool __Initialized;
 		static FontFamily __DefaultFontFamily;
 		static double __DefaultFontSize;
+		static readonly HashSet<string> __InitializedContentTypes = new HashSet<string>();
 
 		IWpfTextView _TextView;
 		IClassificationFormatMap _ClassificationFormatMap;
@@ -55,23 +55,27 @@ namespace Codist.SyntaxHighlight
 			if (view.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.Output)) {
 				Decorate(_ClassificationFormatMap.CurrentPriorityOrder, false);
 			}
-			else if (__Initialized == false) {
+			else if (__InitializedContentTypes.Contains(view.TextBuffer.ContentType.TypeName) == false) {
 				view.VisualElement.IsVisibleChanged += InitHighlight;
 			}
 			_EditorFormatMap.FormatMappingChanged += FormatUpdated;
 		}
 
+		public string ContentType => _TextView.TextBuffer.ContentType.TypeName;
+		public bool IsInitialized => __InitializedContentTypes.Contains(ContentType);
+
 		void InitHighlight(object sender, DependencyPropertyChangedEventArgs e) {
 			if ((bool)e.NewValue) {
 				_TextView.VisualElement.IsVisibleChanged -= InitHighlight;
+				$"Initializing highlight for {ContentType}".Log();
 				if (__DefaultFontFamily == null) {
 					var p = _ClassificationFormatMap.DefaultTextProperties;
 					__DefaultFontFamily = p.Typeface.FontFamily;
 					__DefaultFontSize = p.FontRenderingEmSize;
 				}
 				if (Decorate(_ClassificationFormatMap.CurrentPriorityOrder, true)) {
-					Debug.WriteLine("Attached highlight decorator for " + _TextView.TextBuffer.ContentType);
-					__Initialized = true;
+					$"Attached highlight decorator for {ContentType}".Log();
+					__InitializedContentTypes.Add(ContentType);
 				}
 			}
 		}
@@ -108,7 +112,10 @@ namespace Codist.SyntaxHighlight
 
 
 		void FormatUpdated(object sender, EventArgs e) {
-			Debug.WriteLine("ClassificationFormatMapping changed.");
+			if (IsInitialized == false) {
+				return;
+			}
+			$"{ContentType} ClassificationFormatMapping changed.".Log();
 			var defaultProperties = _ClassificationFormatMap.DefaultTextProperties;
 			if (__DefaultFontFamily == defaultProperties.Typeface.FontFamily && __DefaultFontSize == defaultProperties.FontRenderingEmSize) {
 				return;
@@ -120,7 +127,7 @@ namespace Codist.SyntaxHighlight
 			_EditorFormatMap.GetProperties(Constants.EditorProperties.PlainText)
 				.SetTypeface(defaultProperties.Typeface);
 			if (_IsDecorating != 0) {
-				Debug.WriteLine("Cancelled formatMap update.");
+				$"{ContentType} cancelled formatMap update.".Log();
 				return;
 			}
 			var updated = new Dictionary<IClassificationType, TextFormattingRunProperties>();
@@ -132,34 +139,35 @@ namespace Codist.SyntaxHighlight
 					|| style.FontSize != 0) {
 					var key = _RegService.GetClassificationType(item.Key);
 					if (key == null) {
-						CodistPackage.OutputString("Missing classification type: " + item.Key);
+						$"Missing classification type: {item.Key}".Log();
 						continue;
 					}
 					updated[key] = SetProperties(_ClassificationFormatMap.GetTextProperties(key), style, __DefaultFontSize);
 				}
 			}
 			if (updated.Count > 0) {
-				Debug.WriteLine("Decorate updated format: " + updated.Count);
+				$"Decorate updated format: {updated.Count}".Log();
 				Decorate(updated.Keys, true);
 			}
 		}
 
 		void FormatUpdated(object sender, FormatItemsEventArgs e) {
 			if (_IsDecorating == 0 && _IsViewVisible && e.ChangedItems.Count > 0) {
-				Debug.WriteLine("Format updated: " + e.ChangedItems.Count);
+				$"{ContentType} format updated: {e.ChangedItems.Count}".Log();
 				Decorate(e.ChangedItems.Select(_RegService.GetClassificationType), true);
 			}
 		}
 
 		bool Decorate(IEnumerable<IClassificationType> classifications, bool fullUpdate) {
 			if (_ClassificationFormatMap.IsInBatchUpdate || Interlocked.CompareExchange(ref _IsDecorating, 1, 0) != 0) {
+				$"{ContentType} skipped decorate operation".Log();
 				return false;
 			}
 			try {
 				var c = _EditorFormatMap.GetColor(Constants.EditorProperties.Text, EditorFormatDefinition.ForegroundColorId);
 				if (c.A > 0) {
 					if (c != _ForeColor) {
-						Debug.WriteLine("Fore color changed: " + _ForeColor.ToString() + "->" + c.ToString());
+						$"Fore color changed: {_ForeColor.ToString()}->{c.ToString()}".Log();
 					}
 					_ForeColor = c;
 				}
@@ -171,8 +179,7 @@ namespace Codist.SyntaxHighlight
 				return true;
 			}
 			catch (Exception ex) {
-				Debug.WriteLine("Decorator exception: ");
-				Debug.WriteLine(ex);
+				$"Decorator exception: {ex}".Log();
 				if (Debugger.IsAttached) {
 					Debugger.Break();
 				}
@@ -186,12 +193,13 @@ namespace Codist.SyntaxHighlight
 		void DecorateClassificationTypes(IEnumerable<IClassificationType> classifications, bool fullUpdate) {
 			var defaultSize = _ClassificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
 			var updated = new Dictionary<IClassificationType, TextFormattingRunProperties>();
+			var initialized = IsInitialized;
 			StyleBase style;
 			TextFormattingRunProperties textFormatting;
 			foreach (var item in classifications) {
 				if (item == null
 					|| (style = FormatStore.GetOrCreateStyle(item)) == null
-					|| (textFormatting = FormatStore.GetOrSaveBackupFormatting(item, __Initialized == false)) == null) {
+					|| (textFormatting = FormatStore.GetOrSaveBackupFormatting(item, initialized)) == null) {
 					continue;
 				}
 
@@ -232,13 +240,12 @@ namespace Codist.SyntaxHighlight
 					}
 					catch (Exception ex) {
 						// hack Weird bug in VS: NullReferenceException can occur here even if item.Key is not null
-						Debug.WriteLine($"Update format {item.Key.Classification} error: {ex}");
-						CodistPackage.OutputString(item.Key.Classification + " set properties error: " + ex.ToString());
+						$"Update format error {item.Key.Classification}: {ex}".Log();
 					}
-					Debug.WriteLine("Update format: " + item.Key.Classification);
+					//$"Update format: {item.Key.Classification}".Log();
 				}
 				_ClassificationFormatMap.EndBatchUpdate();
-				Debug.WriteLine($"Decorated {updated.Count} formats");
+				$"{ContentType} decorated {updated.Count} formats".Log();
 			}
 		}
 
