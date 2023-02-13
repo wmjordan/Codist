@@ -93,8 +93,10 @@ namespace Codist.Controls
 					&& _Host.Symbol.Kind != SymbolKind.Namespace) {
 					Items.Add(CreateItem(IconIds.FindReferencingSymbols, R.CMD_FindReferencedSymbols, _Host.FindReferencedSymbols));
 				}
-				//Items.Add(CreateCommandMenu("Find references...", KnownImageIds.ReferencedDimension, _Host.Symbol, "No reference found", FindReferences));
-				Items.Add(CreateItem(IconIds.FindSymbolsWithName, R.CMD_FindSymbolwithName, _Host.Symbol.Name).HandleEvent(MenuItem.ClickEvent, _Host.FindSymbolWithName));
+
+				if (String.IsNullOrEmpty(_Host.Symbol.Name) == false) {
+					Items.Add(CreateItem(IconIds.FindSymbolsWithName, R.CMD_FindSymbolwithName, _Host.Symbol.Name).HandleEvent(MenuItem.ClickEvent, _Host.FindSymbolWithName));
+				}
 			}
 		}
 
