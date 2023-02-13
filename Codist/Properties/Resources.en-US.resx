@@ -2334,4 +2334,10 @@ Expression too long</value>
   <data name="T_ExpressionCount" xml:space="preserve">
     <value>Expression count: </value>
   </data>
+  <data name="CMD_DebugUnitTest" xml:space="preserve">
+    <value>Debug Unit Test</value>
+  </data>
+  <data name="CMD_RunUnitTest" xml:space="preserve">
+    <value>Run Unit Test</value>
+  </data>
 </root>

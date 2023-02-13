@@ -2319,4 +2319,10 @@ Right click: 显示“线程”窗口</value>
   <data name="T_ExpressionCount" xml:space="preserve">
     <value>表达式数量: </value>
   </data>
+  <data name="CMD_DebugUnitTest" xml:space="preserve">
+    <value>调试单元测试</value>
+  </data>
+  <data name="CMD_RunUnitTest" xml:space="preserve">
+    <value>运行单元测试</value>
+  </data>
 </root>

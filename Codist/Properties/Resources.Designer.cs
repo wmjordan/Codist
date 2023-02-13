@@ -342,6 +342,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Debug Unit Test.
+        /// </summary>
+        internal static string CMD_DebugUnitTest {
+            get {
+                return ResourceManager.GetString("CMD_DebugUnitTest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete All Breakpoints.
         /// </summary>
         internal static string CMD_DeleteAllBreakpoints {
@@ -1358,6 +1367,15 @@ namespace Codist.Properties {
         internal static string CMD_RunToCursor {
             get {
                 return ResourceManager.GetString("CMD_RunToCursor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Run Unit Test.
+        /// </summary>
+        internal static string CMD_RunUnitTest {
+            get {
+                return ResourceManager.GetString("CMD_RunUnitTest", resourceCulture);
             }
         }
         

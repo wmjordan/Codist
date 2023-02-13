@@ -128,9 +128,9 @@ namespace Codist.Controls
 				}
 
 				if (isTest) {
-					Items.Add(CreateItem(IconIds.DebugTest, "Debug Unit Test")
+					Items.Add(CreateItem(IconIds.DebugTest, R.CMD_DebugUnitTest)
 						.HandleEvent(MenuItem.ClickEvent, _Host.DebugUnitTest));
-					Items.Add(CreateItem(IconIds.RunTest, "Run Unit Test")
+					Items.Add(CreateItem(IconIds.RunTest, R.CMD_RunUnitTest)
 						.HandleEvent(MenuItem.ClickEvent, _Host.RunUnitTest));
 				}
 			}
