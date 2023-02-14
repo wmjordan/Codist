@@ -33,7 +33,7 @@ namespace Codist
 	[ProvideAutoLoad(UIContextGuids80.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
 	sealed class CodistPackage : AsyncPackage
 	{
-		/// <summary>CodistPackage GUID string.</summary>
+		/// <summary>CodistPackage GUID string. Should be the same as the one in <c>source.extension.vsixmanifest</c>.</summary>
 		const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
 		static Guid __PackageGuid = new Guid(PackageGuidString);
 
