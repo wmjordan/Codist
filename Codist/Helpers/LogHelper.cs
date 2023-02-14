@@ -7,6 +7,10 @@ using System.Threading;
 
 namespace Codist
 {
+	/// <summary>
+	/// <para>A simple logger which logs information to the file in <see cref="LogPath"/>. The file must pre-exist before <see cref="LogPath"/> is specified.</para>
+	/// <para>By default, all log methods are simply ignored. Specify "<c>LOG</c>" in <i>conditional compilation symbols</i> of the project.</para>
+	/// </summary>
 	static class LogHelper
 	{
 		static int _Sync;
@@ -17,6 +21,7 @@ namespace Codist
 			set => _Path = File.Exists(value) ? value : null;
 		}
 
+		[Conditional("LOG")]
 		public static void Log(this string message) {
 			if (_Path != null) {
 				WriteLog(message);
@@ -39,10 +44,12 @@ namespace Codist
 			}
 		}
 
+		[Conditional("LOG")]
 		public static void Log(this Exception exception) {
 			Log(exception.ToString());
 		}
 
+		[Conditional("LOG")]
 		public static void ClearLog() {
 			if (File.Exists(LogPath)) {
 				try {
