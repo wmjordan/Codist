@@ -883,7 +883,7 @@ namespace Codist.Refactorings
 			public override string Title => R.CMD_ConcatToInterpolatedString;
 
 			public override bool Accept(RefactoringContext ctx) {
-				var node = ctx.Node;
+				var node = ctx.NodeIncludeTrivia;
 				InvocationExpressionSyntax ie;
 				if (node is IdentifierNameSyntax name) {
 					if (name.GetName() == nameof(String.Concat)
@@ -904,7 +904,7 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				if (_Mode == CONCAT) {
-					var ie = ctx.Node.FirstAncestorOrSelf<InvocationExpressionSyntax>();
+					var ie = ctx.NodeIncludeTrivia.FirstAncestorOrSelf<InvocationExpressionSyntax>();
 					if (ie == null) {
 						return Enumerable.Empty<RefactoringAction>();
 					}
@@ -916,7 +916,7 @@ namespace Codist.Refactorings
 						));
 				}
 				if (_Mode == ADD) {
-					var node = ctx.Node;
+					var node = ctx.NodeIncludeTrivia;
 					while (node.Parent.IsKind(SyntaxKind.AddExpression)) {
 						node = node.Parent;
 					}
