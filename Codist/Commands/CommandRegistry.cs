@@ -14,11 +14,7 @@ namespace Codist.Commands
 		}
 
 		public static void Register(this Command command, EventHandler commandHandler, EventHandler queryStatusHandler = null) {
-			var cmd = new OleMenuCommand(commandHandler, command.GetID());
-			if (queryStatusHandler != null) {
-				cmd.BeforeQueryStatus += queryStatusHandler;
-			}
-			CodistPackage.MenuService.AddCommand(cmd);
+			CodistPackage.MenuService.AddCommand(new OleMenuCommand(commandHandler, null, queryStatusHandler, command.GetID()));
 		}
 	}
 
