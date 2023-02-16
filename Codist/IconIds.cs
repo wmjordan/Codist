@@ -129,6 +129,9 @@ namespace Codist
 		public const int AddBraces = KnownImageIds.AddNamespace;
 		public const int AsToCast = KnownImageIds.ReportingAction;
 		public const int DeleteMethod = KnownImageIds.MethodMissing;
+		public const int DeleteType = KnownImageIds.ClassMissing;
+		public const int DeleteProperty = KnownImageIds.PropertyMissing;
+		public const int DeleteEvent = KnownImageIds.EventMissing;
 		public const int DeleteCondition = KnownImageIds.DeleteClause;
 		public const int MergeCondition = KnownImageIds.GroupByClause;
 		public const int NestCondition = KnownImageIds.AddChildNode;

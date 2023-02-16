@@ -378,11 +378,47 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Delete Enum.
+        /// </summary>
+        internal static string CMD_DeleteEnum {
+            get {
+                return ResourceManager.GetString("CMD_DeleteEnum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Event.
+        /// </summary>
+        internal static string CMD_DeleteEvent {
+            get {
+                return ResourceManager.GetString("CMD_DeleteEvent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Interface.
+        /// </summary>
+        internal static string CMD_DeleteInterface {
+            get {
+                return ResourceManager.GetString("CMD_DeleteInterface", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delete Method.
         /// </summary>
         internal static string CMD_DeleteMethod {
             get {
                 return ResourceManager.GetString("CMD_DeleteMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Property.
+        /// </summary>
+        internal static string CMD_DeleteProperty {
+            get {
+                return ResourceManager.GetString("CMD_DeleteProperty", resourceCulture);
             }
         }
         
@@ -395,6 +431,15 @@ namespace Codist.Properties {
         internal static string CMD_DeleteSelectedText {
             get {
                 return ResourceManager.GetString("CMD_DeleteSelectedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete Type.
+        /// </summary>
+        internal static string CMD_DeleteType {
+            get {
+                return ResourceManager.GetString("CMD_DeleteType", resourceCulture);
             }
         }
         

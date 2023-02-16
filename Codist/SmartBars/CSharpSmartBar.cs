@@ -368,14 +368,24 @@ namespace Codist.SmartBars
 					if ((node as TypeDeclarationSyntax).Modifiers.Any(SyntaxKind.StaticKeyword) == false) {
 						AddEditorCommand(MyToolBar, IconIds.ExtractInterface, "Refactor.ExtractInterface", R.CMD_ExtractInterface);
 					}
+					AddCommand(MyToolBar, IconIds.DeleteType, R.CMD_DeleteType, DeleteCurrentNode);
 					break;
+				case SyntaxKind.InterfaceDeclaration:
+					AddCommand(MyToolBar, IconIds.DeleteType, R.CMD_DeleteInterface, DeleteCurrentNode);
+					break;
+				case SyntaxKind.ConstructorDeclaration:
+				case SyntaxKind.DestructorDeclaration:
 				case SyntaxKind.MethodDeclaration:
-					AddCommand(MyToolBar, IconIds.DeleteMethod, R.CMD_DeleteMethod, ctx => {
-						ctx.View.SelectNode(node, true);
-						ctx.View.Edit(node, (view, n, edit) => {
-							edit.Delete(n.FullSpan.ToSpan());
-						});
-					});
+					AddCommand(MyToolBar, IconIds.DeleteMethod, R.CMD_DeleteMethod, DeleteCurrentNode);
+					break;
+				case SyntaxKind.PropertyDeclaration:
+					AddCommand(MyToolBar, IconIds.DeleteProperty, R.CMD_DeleteProperty, DeleteCurrentNode);
+					break;
+				case SyntaxKind.EventDeclaration:
+					AddCommand(MyToolBar, IconIds.DeleteEvent, R.CMD_DeleteEvent, DeleteCurrentNode);
+					break;
+				case SyntaxKind.EnumDeclaration:
+					AddCommand(MyToolBar, IconIds.DeleteType, R.CMD_DeleteEnum, DeleteCurrentNode);
 					break;
 				case SyntaxKind.VariableDeclarator:
 					if (node.Parent?.Parent.IsKind(SyntaxKind.FieldDeclaration) == true) {
@@ -383,6 +393,14 @@ namespace Codist.SmartBars
 					}
 					break;
 			}
+		}
+
+		void DeleteCurrentNode(CommandContext ctx) {
+			var node = _Context.Node;
+			ctx.View.SelectNode(node, true);
+			ctx.View.Edit(node, (view, n, edit) => {
+				edit.Delete(n.FullSpan.ToSpan());
+			});
 		}
 
 		void AddXmlDocCommands() {

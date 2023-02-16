@@ -2355,4 +2355,19 @@ Expression too long</value>
   <data name="T_IncrementVersion" xml:space="preserve">
     <value>Increment Version</value>
   </data>
+  <data name="CMD_DeleteEnum" xml:space="preserve">
+    <value>Delete Enum</value>
+  </data>
+  <data name="CMD_DeleteEvent" xml:space="preserve">
+    <value>Delete Event</value>
+  </data>
+  <data name="CMD_DeleteInterface" xml:space="preserve">
+    <value>Delete Interface</value>
+  </data>
+  <data name="CMD_DeleteProperty" xml:space="preserve">
+    <value>Delete Property</value>
+  </data>
+  <data name="CMD_DeleteType" xml:space="preserve">
+    <value>Delete Type</value>
+  </data>
 </root>

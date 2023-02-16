@@ -2340,4 +2340,19 @@ Right click: 显示“线程”窗口</value>
   <data name="T_IncrementVersion" xml:space="preserve">
     <value>递增版本修订号</value>
   </data>
+  <data name="CMD_DeleteEnum" xml:space="preserve">
+    <value>删除枚举类型</value>
+  </data>
+  <data name="CMD_DeleteEvent" xml:space="preserve">
+    <value>删除事件</value>
+  </data>
+  <data name="CMD_DeleteInterface" xml:space="preserve">
+    <value>删除接口</value>
+  </data>
+  <data name="CMD_DeleteProperty" xml:space="preserve">
+    <value>删除属性</value>
+  </data>
+  <data name="CMD_DeleteType" xml:space="preserve">
+    <value>删除类型</value>
+  </data>
 </root>
