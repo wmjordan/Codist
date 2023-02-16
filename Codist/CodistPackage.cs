@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -197,8 +198,12 @@ namespace Codist
 			var c = commands.Count;
 			var s = new string[c];
 			var s2 = new string[c];
+			var d = new HashSet<string>();
 			for (int i = 0; i < s.Length; i++) {
 				var name = commands.Item(i+1).Name;
+				if (d.Add(name) == false) {
+					continue;
+				}
 				if (name.IndexOf('.') == -1) {
 					s[i] = name;
 				}
