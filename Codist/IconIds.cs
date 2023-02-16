@@ -128,6 +128,7 @@ namespace Codist
 		public const int EncapsulateField = KnownImageIds.EncapsulateField;
 		public const int AddBraces = KnownImageIds.AddNamespace;
 		public const int AsToCast = KnownImageIds.ReportingAction;
+		public const int DuplicateMethodDeclaration = KnownImageIds.MethodSet;
 		public const int DeleteMethod = KnownImageIds.MethodMissing;
 		public const int DeleteType = KnownImageIds.ClassMissing;
 		public const int DeleteProperty = KnownImageIds.PropertyMissing;

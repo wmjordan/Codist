@@ -2355,4 +2355,7 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_DeleteType" xml:space="preserve">
     <value>删除类型</value>
   </data>
+  <data name="CMD_DuplicateMethodDeclaration" xml:space="preserve">
+    <value>重复方法声明</value>
+  </data>
 </root>

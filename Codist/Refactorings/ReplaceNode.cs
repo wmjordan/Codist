@@ -36,6 +36,12 @@ namespace Codist.Refactorings
 		public static RefactoringAction Replace(SyntaxNode oldNode, IEnumerable<SyntaxNode> insert) {
 			return new RefactoringAction(ActionType.Replace, new List<SyntaxNode> { oldNode }, new List<SyntaxNode> (insert));
 		}
+		public static RefactoringAction InsertBefore(SyntaxNode oldNode, SyntaxNode insert) {
+			return new RefactoringAction(ActionType.InsertBefore, new List<SyntaxNode> { oldNode }, new List<SyntaxNode> { insert });
+		}
+		public static RefactoringAction InsertAfter(SyntaxNode oldNode, SyntaxNode insert) {
+			return new RefactoringAction(ActionType.InsertAfter, new List<SyntaxNode> { oldNode }, new List<SyntaxNode> { insert });
+		}
 
 		public void Refactor(SemanticContext context) {
 			var ctx = new RefactoringContext(context) {
@@ -98,6 +104,7 @@ namespace Codist.Refactorings
 				}
 				ms.TryRemoveSelection(ms.PrimarySelection);
 			}
+			context.View.Caret.EnsureVisible();
 		}
 
 		static SyntaxNode ChangeDocumentWithActions(SemanticContext context, RefactoringAction[] actions) {

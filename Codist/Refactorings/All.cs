@@ -21,6 +21,7 @@ namespace Codist.Refactorings
 			ReplaceNode.While,
 			ReplaceNode.AsToCast,
 			ReplaceNode.SealClass,
+			ReplaceNode.DuplicateMethodDeclaration,
 			ReplaceNode.MakePublic,
 			ReplaceNode.MakeProtected,
 			ReplaceNode.MakeInternal,

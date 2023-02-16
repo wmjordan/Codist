@@ -2370,4 +2370,7 @@ Expression too long</value>
   <data name="CMD_DeleteType" xml:space="preserve">
     <value>Delete Type</value>
   </data>
+  <data name="CMD_DuplicateMethodDeclaration" xml:space="preserve">
+    <value>Duplicate Method Declaration</value>
+  </data>
 </root>

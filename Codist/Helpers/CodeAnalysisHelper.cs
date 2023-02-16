@@ -1209,8 +1209,12 @@ namespace Codist
 			}
 			return name.ToString();
 		}
+		public static TSyntax WithWhitespaceFrom<TSyntax>(this TSyntax node, SyntaxNode from)
+			where TSyntax : SyntaxNode {
+			return node.WithLeadingTrivia(from.GetLeadingWhitespace()).WithTrailingTrivia(from.GetTrailingWhitespace());
+		}
 		/// <summary>Gets leading whitespaces of <paramref name="node"/>, excluding directives, comments and whitespaces before them.</summary>
-		public static SyntaxTriviaList GetPrecedingWhitespace(this SyntaxNode node) {
+		public static SyntaxTriviaList GetLeadingWhitespace(this SyntaxNode node) {
 			if (node == null || node.HasLeadingTrivia == false) {
 				return SyntaxTriviaList.Empty;
 			}
@@ -1223,6 +1227,21 @@ namespace Codist
 				}
 			}
 			return first > 0 ? new SyntaxTriviaList(lt.Skip(first)) : lt;
+		}
+		public static SyntaxTriviaList GetTrailingWhitespace(this SyntaxNode node) {
+			if (node == null || node.HasTrailingTrivia == false) {
+				return SyntaxTriviaList.Empty;
+			}
+			var lt = node.GetTrailingTrivia();
+			int first;
+			for (int i = first = 0; i < lt.Count; i++) {
+				var trivia = lt[i];
+				if (trivia.IsKind(SyntaxKind.WhitespaceTrivia) == false) {
+					first = i + 1;
+					break;
+				}
+			}
+			return first > 0 ? new SyntaxTriviaList(lt.Take(first)) : lt;
 		}
 		public static List<DirectiveTriviaSyntax> GetDirectives(this SyntaxNode node, Func<DirectiveTriviaSyntax, bool> predicate = null) {
 			if (node.ContainsDirectives == false) {

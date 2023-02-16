@@ -18,6 +18,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode AddBraces = new AddBracesRefactoring();
 		public static readonly ReplaceNode AsToCast = new AsToCastRefactoring();
 		public static readonly ReplaceNode SealClass = new SealClassRefactoring();
+		public static readonly ReplaceNode DuplicateMethodDeclaration = new DuplicateMethodDeclarationRefactoring();
 		public static readonly ReplaceNode MakePublic = new ChangeAccessibilityRefactoring(SyntaxKind.PublicKeyword);
 		public static readonly ReplaceNode MakeProtected = new ChangeAccessibilityRefactoring(SyntaxKind.ProtectedKeyword);
 		public static readonly ReplaceNode MakeInternal = new ChangeAccessibilityRefactoring(SyntaxKind.InternalKeyword);
@@ -169,6 +170,21 @@ namespace Codist.Refactorings
 							.WithTrailingTrivia(SF.ElasticSpace)
 							.WithAdditionalAnnotations(CodeFormatHelper.Select)))
 					.WithLeadingTrivia(d.GetLeadingTrivia())));
+			}
+		}
+
+		sealed class DuplicateMethodDeclarationRefactoring : ReplaceNode
+		{
+			public override int IconId => IconIds.DuplicateMethodDeclaration;
+			public override string Title => R.CMD_DuplicateMethodDeclaration;
+
+			public override bool Accept(RefactoringContext ctx) {
+				return ctx.Node.IsKind(SyntaxKind.MethodDeclaration);
+			}
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				var d = ctx.Node as MethodDeclarationSyntax;
+				return Chain.Create(InsertBefore(d, d.WithParameterList(d.ParameterList.AnnotateSelect()).WithBody(SF.Block().AnnotateReformat()).WithWhitespaceFrom(d)));
 			}
 		}
 

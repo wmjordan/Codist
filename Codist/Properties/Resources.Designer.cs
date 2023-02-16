@@ -471,6 +471,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Duplicate Method Declaration.
+        /// </summary>
+        internal static string CMD_DuplicateMethodDeclaration {
+            get {
+                return ResourceManager.GetString("CMD_DuplicateMethodDeclaration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Duplicate selection
         ///Right click: Duplicate line.
         /// </summary>

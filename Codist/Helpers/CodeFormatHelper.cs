@@ -24,6 +24,10 @@ namespace Codist
 			where TNode : SyntaxNode {
 			return node.WithAdditionalAnnotations(Select);
 		}
+		public static TNode AnnotateReformat<TNode>(this TNode node)
+			where TNode : SyntaxNode {
+			return node.WithAdditionalAnnotations(Reformat);
+		}
 
 		public static TSyntaxNode Format<TSyntaxNode>(this TSyntaxNode node, Workspace workspace, CancellationToken cancellation = default)
 			where TSyntaxNode : SyntaxNode {
