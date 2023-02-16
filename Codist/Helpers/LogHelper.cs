@@ -34,7 +34,7 @@ namespace Codist
 				SpinWait.SpinUntil(() => Volatile.Read(ref _Sync) == 0);
 			}
 			try {
-				File.AppendAllText(_Path, $"{DateTime.Now.ToShortTimeString()} {message}{Environment.NewLine}");
+				File.AppendAllText(_Path, $"{DateTime.Now.ToLongTimeString()} {message}{Environment.NewLine}");
 			}
 			catch (SystemException) {
 				// ignore
