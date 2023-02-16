@@ -38,7 +38,6 @@ namespace Codist
 		static Guid __PackageGuid = new Guid(PackageGuidString);
 
 		static OleMenuCommandService __Menu;
-		static IOleComponentManager __ComponentManager;
 		static AutoBuildVersion.BuildEvents __BuildEvents;
 		static IVsOutputWindowPane __OutputPane;
 
@@ -66,12 +65,6 @@ namespace Codist
 				return __Menu ?? (__Menu = Instance.GetService(typeof(System.ComponentModel.Design.IMenuCommandService)) as OleMenuCommandService);
 			}
 		}
-		public static IOleComponentManager OleComponentManager {
-			get {
-				ThreadHelper.ThrowIfNotOnUIThread();
-				return __ComponentManager ?? (__ComponentManager = ServiceProvider.GetGlobalServiceAsync<SOleComponentManager, IOleComponentManager>().ConfigureAwait(false).GetAwaiter().GetResult());
-			}
-		}
 
 		public static DebuggerStatus DebuggerStatus {
 			get {
@@ -96,17 +89,7 @@ namespace Codist
 			}
 		}
 
-		public static int ShowMessageBox(string message, string title, bool error) {
-			return VsShellUtilities.ShowMessageBox(
-				Instance,
-				message,
-				title ?? nameof(Codist),
-				error ? OLEMSGICON.OLEMSGICON_WARNING : OLEMSGICON.OLEMSGICON_INFO,
-				OLEMSGBUTTON.OLEMSGBUTTON_OK,
-				OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-		}
-
-		public static bool ShowYesNoBox(string message, string title) {
+		public static bool ShowYesNoBox(string message, string title = null) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			return VsShellUtilities.PromptYesNo(
 				message,
