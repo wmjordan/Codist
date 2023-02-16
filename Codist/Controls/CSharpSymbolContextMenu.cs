@@ -230,7 +230,8 @@ namespace Codist.Controls
 
 		void CreateCommandsForReturnTypeCommand() {
 			var rt = _Host.Symbol.GetReturnType();
-			if (rt.SpecialType != SpecialType.None
+			if (rt.SpecialType == SpecialType.System_Void
+				|| rt.SpecialType == SpecialType.System_Object
 				|| rt.TypeKind == TypeKind.TypeParameter
 				|| rt.TypeKind == TypeKind.Error
 				|| rt.TypeKind == TypeKind.Dynamic
