@@ -749,6 +749,12 @@ namespace Codist.Refactorings
 							return true;
 						}
 						break;
+					case SyntaxKind.AnonymousObjectCreationExpression:
+						if (((AnonymousObjectCreationExpressionSyntax)node).Initializers.Count > 1 && node.IsMultiLine(false) == false) {
+							_Title = R.CMD_MultiLineExpressions;
+							return true;
+						}
+						break;
 					case SyntaxKind.VariableDeclaration:
 						if (((VariableDeclarationSyntax)node).Variables.Count > 1 && node.IsMultiLine(false) == false) {
 							_Title = R.CMD_MultiLineDeclarations;
@@ -773,6 +779,9 @@ namespace Codist.Refactorings
 				}
 				else if (node is VariableDeclarationSyntax va) {
 					newNode = va.WithVariables(MakeMultiLine(va.Variables, ctx));
+				}
+				else if (node is AnonymousObjectCreationExpressionSyntax ao) {
+					newNode = MakeMultiLine(ao, ctx);
 				}
 				if (newNode != null) {
 					return Chain.Create(Replace(node, newNode.AnnotateSelect()));
@@ -800,6 +809,21 @@ namespace Codist.Refactorings
 				}
 				l[l.Length - 1] = l[l.Length - 1].WithTrailingTrivia(newLine);
 				return initializer.Update(initializer.OpenBraceToken.WithTrailingTrivia(newLine),
+					SF.SeparatedList(l, Enumerable.Repeat(SF.Token(SyntaxKind.CommaToken).WithTrailingTrivia(newLine), l.Length - 1)),
+					initializer.CloseBraceToken.WithLeadingTrivia(indent)
+				);
+			}
+
+			static AnonymousObjectCreationExpressionSyntax MakeMultiLine(AnonymousObjectCreationExpressionSyntax initializer, RefactoringContext ctx) {
+				var (indent, newLine) = ctx.GetIndentAndNewLine(ctx.Node.SpanStart, 0);
+				var indent2 = indent.Add(SF.Whitespace(ctx.WorkspaceOptions.GetIndentString()));
+				var list = initializer.Initializers;
+				var l = new AnonymousObjectMemberDeclaratorSyntax[list.Count];
+				for (int i = 0; i < l.Length; i++) {
+					l[i] = list[i].WithLeadingTrivia(indent2);
+				}
+				l[l.Length - 1] = l[l.Length - 1].WithTrailingTrivia(newLine);
+				return initializer.Update(initializer.NewKeyword, initializer.OpenBraceToken.WithTrailingTrivia(newLine),
 					SF.SeparatedList(l, Enumerable.Repeat(SF.Token(SyntaxKind.CommaToken).WithTrailingTrivia(newLine), l.Length - 1)),
 					initializer.CloseBraceToken.WithLeadingTrivia(indent)
 				);
