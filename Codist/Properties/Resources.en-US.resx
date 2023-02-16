@@ -2340,4 +2340,19 @@ Expression too long</value>
   <data name="CMD_RunUnitTest" xml:space="preserve">
     <value>Run Unit Test</value>
   </data>
+  <data name="CMD_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="CMD_Ok" xml:space="preserve">
+    <value>Ok</value>
+  </data>
+  <data name="CMD_Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="T_ErrorOpeningFile" xml:space="preserve">
+    <value>Error occurred while opening file path:</value>
+  </data>
+  <data name="T_IncrementVersion" xml:space="preserve">
+    <value>Increment Version</value>
+  </data>
 </root>

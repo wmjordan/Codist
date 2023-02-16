@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.Utilities;
 using System.Collections.Generic;
 using AppHelpers;
 using R = Codist.Properties.Resources;
+using Codist.Controls;
 
 namespace Codist.Commands
 {
@@ -47,7 +48,7 @@ namespace Codist.Commands
 					.Append(R.T_ViewRoles)
 					.AppendLine(String.Join(", ", docWindow.Roles));
 
-				CodistPackage.ShowMessageBox(sb.ToString(), nameof(Codist), false);
+				MessageWindow.Info(sb.ToString());
 			}
 		}
 

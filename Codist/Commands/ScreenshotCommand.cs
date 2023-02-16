@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using Codist.Controls;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
 
@@ -37,7 +38,7 @@ namespace Codist.Commands
 						WpfHelper.ScreenShot(g, f.FileName, (int)g.ActualWidth, (int)g.ActualHeight);
 					}
 					catch (Exception ex) {
-						CodistPackage.ShowMessageBox(R.T_FailedToSaveScreenshot.Replace("<NAME>", doc.Name) + Environment.NewLine + ex.Message, null, true);
+						MessageWindow.Error(ex, R.T_FailedToSaveScreenshot.Replace("<NAME>", doc.Name));
 					}
 				}
 			}

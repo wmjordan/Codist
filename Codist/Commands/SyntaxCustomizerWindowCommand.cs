@@ -1,5 +1,6 @@
 ﻿using System;
 using AppHelpers;
+using Codist.Controls;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
 
@@ -24,13 +25,13 @@ namespace Codist.Commands
 		internal static void Execute(object sender, EventArgs e) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false) {
-				CodistPackage.ShowMessageBox(R.T_SyntaxHighlightDisabled, R.CMD_ConfigureSyntaxHighlight, true);
+				MessageWindow.Error(R.T_SyntaxHighlightDisabled, R.CMD_ConfigureSyntaxHighlight);
 				return;
 			}
 			if (_Window == null || _Window.IsVisible == false) {
 				var v = TextEditorHelper.GetActiveWpfDocumentView();
 				if (v == null) {
-					CodistPackage.ShowMessageBox(R.T_CustomizeSyntaxHighlightNote, R.CMD_ConfigureSyntaxHighlight, true);
+					MessageWindow.Error(R.T_CustomizeSyntaxHighlightNote, R.CMD_ConfigureSyntaxHighlight);
 					return;
 				}
 				CreateWindow(v);

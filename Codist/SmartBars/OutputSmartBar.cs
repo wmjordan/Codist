@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Windows.Controls;
+using Codist.Controls;
 using Microsoft.VisualStudio.Text.Editor;
 using R = Codist.Properties.Resources;
 
@@ -25,7 +26,7 @@ namespace Codist.SmartBars
 				t = TryGetPathFromView(View, out p);
 			}
 			catch (Exception ex) {
-				CodistPackage.ShowMessageBox(ex.Message, null, true);
+				MessageWindow.Error(ex);
 				return;
 			}
 			switch (p) {

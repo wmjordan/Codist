@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using AppHelpers;
+using Codist.Controls;
 using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
@@ -149,7 +150,7 @@ namespace Codist.AutoBuildVersion
 				}
 			}
 			catch (Exception ex) {
-				CodistPackage.ShowMessageBox(ex.Message, "Changing version number failed.", true);
+				MessageWindow.Error(ex, "Changing version number failed.");
 			}
 		}
 
@@ -161,13 +162,13 @@ namespace Codist.AutoBuildVersion
 				if (item.Name.EndsWith(".vsixmanifest", StringComparison.OrdinalIgnoreCase)) {
 					if (item.IsOpen && item.IsDirty) {
 						item.Document.NewWindow().Activate();
-						CodistPackage.ShowMessageBox(item.Name + " is open and modified. Auto increment VSIX version number failed.", nameof(Codist), true);
+						MessageWindow.Error($"{item.Name} is open and modified. Auto increment VSIX version number failed.");
 					}
 					else if (Commands.IncrementVsixVersionCommand.IncrementVersion(item, out var message)) {
 						WriteBuildText(nameof(Codist) + ": " + message + Environment.NewLine);
 					}
 					else {
-						CodistPackage.ShowMessageBox(message, "Auto increment VSIX version number failed.", true);
+						MessageWindow.Error("Auto increment VSIX version number failed:" + message);
 					}
 					break;
 				}

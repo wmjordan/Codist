@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using R = Codist.Properties.Resources;
 
 namespace Codist
 {
@@ -34,7 +35,7 @@ namespace Codist
 				Process.Start(path);
 			}
 			catch (System.ComponentModel.Win32Exception ex) {
-				CodistPackage.ShowMessageBox(ex.Message, nameof(Codist), true);
+				Controls.MessageWindow.Error(ex, R.T_ErrorOpeningFile);
 			}
 			catch (FileNotFoundException) {
 				// ignore

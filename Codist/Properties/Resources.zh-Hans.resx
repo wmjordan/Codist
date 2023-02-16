@@ -2325,4 +2325,19 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_RunUnitTest" xml:space="preserve">
     <value>运行单元测试</value>
   </data>
+  <data name="CMD_No" xml:space="preserve">
+    <value>否</value>
+  </data>
+  <data name="CMD_Ok" xml:space="preserve">
+    <value>确定</value>
+  </data>
+  <data name="CMD_Yes" xml:space="preserve">
+    <value>是</value>
+  </data>
+  <data name="T_ErrorOpeningFile" xml:space="preserve">
+    <value>打开文件路径时出现错误：</value>
+  </data>
+  <data name="T_IncrementVersion" xml:space="preserve">
+    <value>递增版本修订号</value>
+  </data>
 </root>

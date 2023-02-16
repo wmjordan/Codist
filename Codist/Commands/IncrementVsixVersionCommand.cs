@@ -4,6 +4,8 @@ using System.Xml.Linq;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using EnvDTE;
+using Codist.Controls;
+using R = Codist.Properties.Resources;
 
 namespace Codist.Commands
 {
@@ -22,12 +24,17 @@ namespace Codist.Commands
 				return;
 			}
 			const int YesButton = 6;
-			if (item.Saved == false && YesButton == VsShellUtilities.ShowMessageBox(CodistPackage.Instance, item.Name + " is not saved.\nDiscard its changes?", "Increment Version", OLEMSGICON.OLEMSGICON_QUERY, OLEMSGBUTTON.OLEMSGBUTTON_YESNO, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_SECOND)) {
+			if (item.Saved == false && YesButton == VsShellUtilities.ShowMessageBox(CodistPackage.Instance, item.Name + " is not saved.\nDiscard its changes?", R.T_IncrementVersion, OLEMSGICON.OLEMSGICON_QUERY, OLEMSGBUTTON.OLEMSGBUTTON_YESNO, OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_SECOND)) {
 				return;
 			}
 			string message;
 			bool error = IncrementVersion(item, out message) == false;
-			CodistPackage.ShowMessageBox(message, "Increment Version", error);
+			if (error) {
+				MessageWindow.Error(message, R.T_IncrementVersion);
+			}
+			else {
+				MessageWindow.Info(message, R.T_IncrementVersion);
+			}
 		}
 #pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 

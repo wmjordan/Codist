@@ -1150,6 +1150,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        internal static string CMD_No {
+            get {
+                return ResourceManager.GetString("CMD_No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ok.
+        /// </summary>
+        internal static string CMD_Ok {
+            get {
+                return ResourceManager.GetString("CMD_Ok", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Open Config Folder.
         /// </summary>
         internal static string CMD_OpenConfigFolder {
@@ -1901,6 +1919,15 @@ namespace Codist.Properties {
         internal static string CMD_WrapText {
             get {
                 return ResourceManager.GetString("CMD_WrapText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        internal static string CMD_Yes {
+            get {
+                return ResourceManager.GetString("CMD_Yes", resourceCulture);
             }
         }
         
@@ -5348,6 +5375,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error occurred while opening file path:.
+        /// </summary>
+        internal static string T_ErrorOpeningFile {
+            get {
+                return ResourceManager.GetString("T_ErrorOpeningFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Events.
         /// </summary>
         internal static string T_Events {
@@ -5579,6 +5615,15 @@ namespace Codist.Properties {
         internal static string T_Implements {
             get {
                 return ResourceManager.GetString("T_Implements", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Increment Version.
+        /// </summary>
+        internal static string T_IncrementVersion {
+            get {
+                return ResourceManager.GetString("T_IncrementVersion", resourceCulture);
             }
         }
         

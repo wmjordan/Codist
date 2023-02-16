@@ -232,6 +232,10 @@ namespace Codist
 		public const int Memory = KnownImageIds.Memory;
 		public const int Drive = KnownImageIds.HardDrive;
 		public const int Network = KnownImageIds.Network;
+		public const int Question = KnownImageIds.StatusHelp;
+		public const int Info = KnownImageIds.StatusInformation;
+		public const int Error = KnownImageIds.StatusInvalid;
+		public const int Stop = KnownImageIds.StatusNo;
 		#endregion
 		#region symbol usage icons
 		public const int UseToWrite = KnownImageIds.Writeable;
