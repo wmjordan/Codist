@@ -25,15 +25,14 @@ namespace Codist.Controls
 			ResizeMode = ResizeMode.NoResize;
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
 			Owner = System.Windows.Application.Current.MainWindow;
-			MaxWidth = Math.Min(Math.Max(Owner.ActualWidth / 2, 600), Owner.ActualWidth);
-			MaxHeight = Math.Min(Math.Max(Owner.ActualHeight / 2, 400), Owner.ActualHeight);
 			Content = new StackPanel {
 				Margin = WpfHelper.MiddleMargin,
 				Children = {
 					new Grid {
+						MaxHeight = Math.Min(Math.Max(Owner.ActualHeight / 2, 400), Owner.ActualHeight),
 						ColumnDefinitions = {
 							new ColumnDefinition(),
-							new ColumnDefinition(),
+							new ColumnDefinition { MaxWidth = Math.Min(Math.Max(Owner.ActualWidth / 2, 800), Owner.ActualWidth) },
 						},
 						Children = {
 							new ContentPresenter().Set(ref _Icon),
@@ -130,8 +129,13 @@ namespace Codist.Controls
 			get => _Content.Content;
 			set {
 				if (value is string s) {
-					_Content.Content = new TextBox { Text = s, TextWrapping = TextWrapping.Wrap, IsReadOnly = true, Padding = WpfHelper.MiddleMargin }
-						.ReferenceProperty(ForegroundProperty, VsBrushes.InfoTextKey);
+					_Content.Content = new TextBox {
+						Text = s,
+						TextWrapping = TextWrapping.Wrap,
+						IsReadOnly = true,
+						Padding = WpfHelper.MiddleMargin,
+						VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+					}.ReferenceProperty(ForegroundProperty, VsBrushes.InfoTextKey);
 				}
 				else {
 					_Content.Content = value;
