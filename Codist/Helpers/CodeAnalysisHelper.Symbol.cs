@@ -85,6 +85,9 @@ namespace Codist
 			return semanticModel.GetTypeSymbol(typeName, nameof(System));
 		}
 		public static INamedTypeSymbol GetTypeSymbol(this SemanticModel semanticModel, string name, params string[] namespaces) {
+			return GetNamespaceSymbol(semanticModel, namespaces)?.GetTypeMembers(name).FirstOrDefault();
+		}
+		public static INamespaceSymbol GetNamespaceSymbol(this SemanticModel semanticModel, params string[] namespaces) {
 			var n = semanticModel.Compilation.GlobalNamespace;
 			foreach (var item in namespaces) {
 				foreach (var m in n.GetNamespaceMembers()) {
@@ -96,7 +99,7 @@ namespace Codist
 				return null;
 			NEXT:;
 			}
-			return n.GetTypeMembers(name).FirstOrDefault();
+			return n;
 		}
 		#endregion
 

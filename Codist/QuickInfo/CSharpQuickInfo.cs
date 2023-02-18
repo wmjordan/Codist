@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,20 +25,13 @@ namespace Codist.QuickInfo
 
 		static readonly SymbolFormatter _SymbolFormatter = SymbolFormatter.Instance;
 
-		readonly bool _IsVsProject;
+		SpecialProjectInfo _SpecialProject;
 		ITextBuffer _TextBuffer;
 		bool _isCandidate;
 		int _Ref;
 
 		public CSharpQuickInfo(ITextBuffer subjectBuffer) {
-			ThreadHelper.ThrowIfNotOnUIThread();
 			_TextBuffer = subjectBuffer;
-			_IsVsProject = VsShellHelper.IsVsixProject();
-		}
-
-		public CSharpQuickInfo Reference() {
-			++_Ref;
-			return this;
 		}
 
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
@@ -75,6 +67,9 @@ namespace Codist.QuickInfo
 			var semanticModel = await doc.GetSemanticModelAsync(cancellationToken);
 			if (semanticModel == null) {
 				return null;
+			}
+			if (_SpecialProject == null) {
+				_SpecialProject = new SpecialProjectInfo(semanticModel);
 			}
 			if (qiWrapper != null) {
 				qiWrapper.OverrideBuiltInXmlDoc = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationOverride);
@@ -571,7 +566,7 @@ namespace Codist.QuickInfo
 					ShowPropertyInfo(qiContent, symbol as IPropertySymbol);
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color)
 						&& session.Mark(nameof(ColorQuickInfoUI))) {
-						qiContent.Add(ColorQuickInfoUI.PreviewColorProperty(symbol as IPropertySymbol, _IsVsProject));
+						qiContent.Add(ColorQuickInfoUI.PreviewColorProperty(symbol as IPropertySymbol, _SpecialProject.MaybeVsProject));
 					}
 					break;
 				case SymbolKind.Namespace:
@@ -823,7 +818,7 @@ namespace Codist.QuickInfo
 				ShowDeclarationModifier(qiContent, field);
 			}
 			if (field.HasConstantValue) {
-				if (_IsVsProject && field.ConstantValue is int) {
+				if (_SpecialProject.MaybeVsProject && field.ConstantValue is int) {
 					ShowKnownImageId(qiContent, field, (int)field.ConstantValue);
 				}
 				ShowConstInfo(qiContent, field, field.ConstantValue);
@@ -1597,9 +1592,17 @@ namespace Codist.QuickInfo
 		}
 
 		public void Dispose() {
-			if (--_Ref == 0 && _TextBuffer != null) {
-				_TextBuffer.Properties.RemoveProperty(typeof(CSharpQuickInfo));
-				_TextBuffer = null;
+			_TextBuffer = null;
+		}
+
+		sealed class SpecialProjectInfo
+		{
+			public readonly bool IsCodist;
+			public readonly bool MaybeVsProject;
+
+			public SpecialProjectInfo(SemanticModel model) {
+				IsCodist = model.GetTypeSymbol(nameof(IconIds), nameof(Codist)) != null;
+				MaybeVsProject = model.GetNamespaceSymbol("Microsoft", "VisualStudio", "PlatformUI") != null || model.GetTypeSymbol(nameof(VsColors), "Microsoft", "VisualStudio", "Shell") != null;
 			}
 		}
 	}
