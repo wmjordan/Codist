@@ -43,49 +43,20 @@ namespace Codist
 				}
 			}
 			else if (symbol.Kind == SymbolKind.TypeParameter) {
-				content.Append(R.T_DefinedInType)
-					.Append(symbol.ContainingSymbol?.ToDisplayString(CodeAnalysisHelper.MemberNameFormat) ?? String.Empty, true);
-				var tp = symbol as ITypeParameterSymbol;
-				if (tp.HasConstraint()) {
-					content.AppendLine().Append(R.T_Constraint);
-					SymbolFormatter.Instance.ShowTypeConstraints(tp, content);
-				}
+				ShowTypeParameter(content, symbol);
 			}
 			t = symbol.ContainingType;
 			if (t != null && t.TypeKind != TypeKind.Enum) {
-				content.AppendLineBreak()
-					.Append(t.GetSymbolKindName(), SymbolFormatter.Instance.Keyword)
-					.Append(": ")
-					.Append(t.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
+				ShowSymbolKind(content, t);
 			}
 			if (forMemberList == false) {
 				content.AppendLineBreak()
 					.Append(R.T_Namespace + symbol.ContainingNamespace?.ToString()).AppendLine();
 				if (symbol.Kind == SymbolKind.Namespace) {
-					// hack: workaround to exclude references that returns null from GetDocument
-					content.Append(R.T_Assembly)
-						.Append(String.Join(", ", ((INamespaceSymbol)symbol).ConstituentNamespaces.Select(n => n.GetAssemblyModuleName()).Distinct()))
-						.AppendLine()
-						.Append(R.T_Project)
-						.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)))
-						.AppendLine()
-						.Append(R.T_Location)
-						.Append(symbol.Locations.Length);
+					ShowNamespaceSource(content, symbol, context);
 				}
 				else {
-					if (symbol.HasSource()) {
-						content.Append(R.T_SourceFile)
-							.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))))
-							.AppendLine()
-							.Append(R.T_Project)
-							.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)));
-					}
-					else if (context.SemanticModel?.Compilation != null) {
-						var (p, f) = context.SemanticModel.Compilation.GetReferencedAssemblyPath(symbol.ContainingAssembly);
-						if (String.IsNullOrEmpty(f) == false) {
-							content.Append(R.T_Assembly).Append(p).Append(f, true);
-						}
-					}
+					ShowSymbolSource(content, symbol, context);
 
 					if (symbol.Kind == SymbolKind.NamedType) {
 						switch (((INamedTypeSymbol)symbol).TypeKind) {
@@ -107,18 +78,61 @@ namespace Codist
 				if (symbol.Kind == SymbolKind.Method
 					&& ((IMethodSymbol)symbol).MethodKind == MethodKind.Constructor
 					&& symbol.ContainingType.IsAttributeType()) {
-					tip.AddTextBlock().Append(R.T_DocumentationFrom).Append(symbol.ContainingType.Name, SymbolFormatter.Instance.Class).Append(":");
-					ShowXmlDocSummary(symbol.ContainingType, context.SemanticModel.Compilation, tip);
+					ShowAttributeTypeXmlDoc(symbol, context, tip);
 				}
 			}
+
 			ShowNumericForms(symbol, tip);
 			if (symbol.Kind == SymbolKind.Property && Config.Instance.SymbolToolTipOptions.MatchFlags(SymbolToolTipOptions.Colors)) {
-				var preview = QuickInfo.ColorQuickInfoUI.PreviewColorProperty(symbol as IPropertySymbol, false);
-				if (preview != null) {
-					tip.Add(preview);
-				}
+				ShowColorPreview(symbol, tip);
 			}
 			return tip;
+		}
+
+		static void ShowTypeParameter(TextBlock content, ISymbol symbol) {
+			content.Append(R.T_DefinedInType)
+				.Append(symbol.ContainingSymbol?.ToDisplayString(CodeAnalysisHelper.MemberNameFormat) ?? String.Empty, true);
+			var tp = symbol as ITypeParameterSymbol;
+			if (tp.HasConstraint()) {
+				content.AppendLine().Append(R.T_Constraint);
+				SymbolFormatter.Instance.ShowTypeConstraints(tp, content);
+			}
+		}
+
+		static void ShowSymbolKind(TextBlock content, ITypeSymbol type) {
+			content.AppendLineBreak()
+				.Append(type.GetSymbolKindName(), SymbolFormatter.Instance.Keyword)
+				.Append(": ")
+				.Append(type.ToDisplayString(CodeAnalysisHelper.MemberNameFormat), true);
+		}
+
+		static void ShowNamespaceSource(TextBlock content, ISymbol symbol, SemanticContext context) {
+			content.Append(R.T_Assembly)
+				.Append(String.Join(", ", ((INamespaceSymbol)symbol).ConstituentNamespaces.Select(n => n.GetAssemblyModuleName()).Distinct()))
+				.AppendLine()
+				.Append(R.T_Project)
+				// hack: workaround to exclude references that returns null from GetDocument
+				.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)))
+				.AppendLine()
+				.Append(R.T_Location)
+				.Append(symbol.Locations.Length);
+		}
+
+		static void ShowSymbolSource(TextBlock content, ISymbol symbol, SemanticContext context) {
+			Compilation compilation;
+			if (symbol.HasSource()) {
+				content.Append(R.T_SourceFile)
+					.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => System.IO.Path.GetFileName(r.SyntaxTree.FilePath))))
+					.AppendLine()
+					.Append(R.T_Project)
+					.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)));
+			}
+			else if ((compilation = context.SemanticModel?.Compilation) != null) {
+				var (p, f) = compilation.GetReferencedAssemblyPath(symbol.ContainingAssembly);
+				if (String.IsNullOrEmpty(f) == false) {
+					content.Append(R.T_Assembly).Append(p).Append(f, true);
+				}
+			}
 		}
 
 		static void ShowDelegateSignature(TextBlock content, INamedTypeSymbol type) {
@@ -159,6 +173,11 @@ namespace Codist
 			}
 		}
 
+		static void ShowAttributeTypeXmlDoc(ISymbol symbol, SemanticContext context, ThemedToolTip tip) {
+			tip.AddTextBlock().Append(R.T_DocumentationFrom).Append(symbol.ContainingType.Name, SymbolFormatter.Instance.Class).Append(":");
+			ShowXmlDocSummary(symbol.ContainingType, context.SemanticModel.Compilation, tip);
+		}
+
 		static void ShowXmlDocSummary(ISymbol symbol, Compilation compilation, ThemedToolTip tip) {
 			var doc = new XmlDoc(symbol, compilation);
 			var summary = doc.GetDescription(symbol)
@@ -169,6 +188,13 @@ namespace Codist
 				if (Config.Instance.QuickInfoMaxWidth >= 100) {
 					tip.MaxWidth = Config.Instance.QuickInfoMaxWidth;
 				}
+			}
+		}
+
+		static void ShowColorPreview(ISymbol symbol, ThemedToolTip tip) {
+			var preview = QuickInfo.ColorQuickInfoUI.PreviewColorProperty(symbol as IPropertySymbol, false);
+			if (preview != null) {
+				tip.Add(preview);
 			}
 		}
 
