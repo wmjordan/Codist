@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
 
@@ -36,11 +37,15 @@ namespace Codist.Controls
 						},
 						Children = {
 							new ContentPresenter().Set(ref _Icon),
-							new ScrollViewer {
-								CanContentScroll = true,
-								VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-								Padding = WpfHelper.MiddleMargin
-							}.SetValue(Grid.SetColumn, 1).Set(ref _Content),
+							new Border {
+								BorderThickness = WpfHelper.TinyMargin,
+								Child = new ScrollViewer {
+									CanContentScroll = true,
+									VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+									Padding = WpfHelper.MiddleMargin,
+								}.ReferenceProperty(BackgroundProperty, CommonControlsColors.TextBoxBackgroundBrushKey)
+								.Set(ref _Content)
+							}.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey).SetValue(Grid.SetColumn, 1),
 						}
 					},
 					new StackPanel {
@@ -129,13 +134,9 @@ namespace Codist.Controls
 			get => _Content.Content;
 			set {
 				if (value is string s) {
-					_Content.Content = new TextBox {
-						Text = s,
-						TextWrapping = TextWrapping.Wrap,
-						IsReadOnly = true,
+					_Content.Content = new ThemedTipText(s) {
 						Padding = WpfHelper.MiddleMargin,
-						VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-					}.ReferenceProperty(ForegroundProperty, VsBrushes.InfoTextKey);
+					}.ReferenceProperty(ForegroundProperty, CommonControlsColors.TextBoxTextBrushKey);
 				}
 				else {
 					_Content.Content = value;
