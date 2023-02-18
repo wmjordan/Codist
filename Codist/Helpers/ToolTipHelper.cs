@@ -80,7 +80,7 @@ namespace Codist
 							.Append(R.T_Project)
 							.Append(String.Join(", ", symbol.GetSourceReferences().Select(r => context.GetProject(r.SyntaxTree)).Where(p => p != null).Distinct().Select(p => p.Name)));
 					}
-					else {
+					else if (context.SemanticModel?.Compilation != null) {
 						var (p, f) = context.SemanticModel.Compilation.GetReferencedAssemblyPath(symbol.ContainingAssembly);
 						if (String.IsNullOrEmpty(f) == false) {
 							content.Append(R.T_Assembly).Append(p).Append(f, true);
