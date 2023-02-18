@@ -2373,4 +2373,37 @@ Expression too long</value>
   <data name="CMD_DuplicateMethodDeclaration" xml:space="preserve">
     <value>Duplicate Method Declaration</value>
   </data>
+  <data name="T_CharacterCount" xml:space="preserve">
+    <value>Character count: </value>
+  </data>
+  <data name="T_DocumentProperties" xml:space="preserve">
+    <value>Document Properties</value>
+  </data>
+  <data name="T_LastModified" xml:space="preserve">
+    <value>Last Modified: </value>
+  </data>
+  <data name="T_LastSaved" xml:space="preserve">
+    <value>Last Saved: </value>
+  </data>
+  <data name="T_LineCount" xml:space="preserve">
+    <value>Line count: </value>
+  </data>
+  <data name="T_NotSaved" xml:space="preserve">
+    <value>Not saved yet</value>
+  </data>
+  <data name="T_TextBufferProperties" xml:space="preserve">
+    <value>Text Buffer Properties:</value>
+  </data>
+  <data name="T_TextEncoding" xml:space="preserve">
+    <value>Text Encoding: </value>
+  </data>
+  <data name="T_ViewProperties" xml:space="preserve">
+    <value>View Properties:</value>
+  </data>
+  <data name="T_Caret" xml:space="preserve">
+    <value>Caret: </value>
+  </data>
+  <data name="T_SelectionLength" xml:space="preserve">
+    <value>Selection Length: </value>
+  </data>
 </root>

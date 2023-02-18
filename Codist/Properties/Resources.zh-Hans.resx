@@ -2358,4 +2358,37 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_DuplicateMethodDeclaration" xml:space="preserve">
     <value>重复方法声明</value>
   </data>
+  <data name="T_CharacterCount" xml:space="preserve">
+    <value>字数: </value>
+  </data>
+  <data name="T_DocumentProperties" xml:space="preserve">
+    <value>文档属性</value>
+  </data>
+  <data name="T_LastModified" xml:space="preserve">
+    <value>最近变更时间: </value>
+  </data>
+  <data name="T_LastSaved" xml:space="preserve">
+    <value>最近保存时间: </value>
+  </data>
+  <data name="T_LineCount" xml:space="preserve">
+    <value>行数: </value>
+  </data>
+  <data name="T_NotSaved" xml:space="preserve">
+    <value>尚未存盘</value>
+  </data>
+  <data name="T_TextBufferProperties" xml:space="preserve">
+    <value>文本缓冲区属性:</value>
+  </data>
+  <data name="T_TextEncoding" xml:space="preserve">
+    <value>文本编码: </value>
+  </data>
+  <data name="T_ViewProperties" xml:space="preserve">
+    <value>视图属性:</value>
+  </data>
+  <data name="T_Caret" xml:space="preserve">
+    <value>光标位置: </value>
+  </data>
+  <data name="T_SelectionLength" xml:space="preserve">
+    <value>选中字数: </value>
+  </data>
 </root>

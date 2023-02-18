@@ -4995,11 +4995,29 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Caret: .
+        /// </summary>
+        internal static string T_Caret {
+            get {
+                return ResourceManager.GetString("T_Caret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Case sensitive.
         /// </summary>
         internal static string T_CaseSensitive {
             get {
                 return ResourceManager.GetString("T_CaseSensitive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Character count: .
+        /// </summary>
+        internal static string T_CharacterCount {
+            get {
+                return ResourceManager.GetString("T_CharacterCount", resourceCulture);
             }
         }
         
@@ -5316,6 +5334,15 @@ namespace Codist.Properties {
         internal static string T_DocumentationFrom {
             get {
                 return ResourceManager.GetString("T_DocumentationFrom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Document Properties.
+        /// </summary>
+        internal static string T_DocumentProperties {
+            get {
+                return ResourceManager.GetString("T_DocumentProperties", resourceCulture);
             }
         }
         
@@ -5754,6 +5781,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Last Modified: .
+        /// </summary>
+        internal static string T_LastModified {
+            get {
+                return ResourceManager.GetString("T_LastModified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last Saved: .
+        /// </summary>
+        internal static string T_LastSaved {
+            get {
+                return ResourceManager.GetString("T_LastSaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Left gradient.
         /// </summary>
         internal static string T_LeftGradient {
@@ -5777,6 +5822,15 @@ namespace Codist.Properties {
         internal static string T_LineColor {
             get {
                 return ResourceManager.GetString("T_LineColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Line count: .
+        /// </summary>
+        internal static string T_LineCount {
+            get {
+                return ResourceManager.GetString("T_LineCount", resourceCulture);
             }
         }
         
@@ -6085,6 +6139,15 @@ namespace Codist.Properties {
         internal static string T_NoSyntaxHighlightSelected {
             get {
                 return ResourceManager.GetString("T_NoSyntaxHighlightSelected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not saved yet.
+        /// </summary>
+        internal static string T_NotSaved {
+            get {
+                return ResourceManager.GetString("T_NotSaved", resourceCulture);
             }
         }
         
@@ -6462,6 +6525,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Selection Length: .
+        /// </summary>
+        internal static string T_SelectionLength {
+            get {
+                return ResourceManager.GetString("T_SelectionLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Signature: .
         /// </summary>
         internal static string T_Signature {
@@ -6732,6 +6804,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Text Buffer Properties:.
+        /// </summary>
+        internal static string T_TextBufferProperties {
+            get {
+                return ResourceManager.GetString("T_TextBufferProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Text Encoding: .
+        /// </summary>
+        internal static string T_TextEncoding {
+            get {
+                return ResourceManager.GetString("T_TextEncoding", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Themes:.
         /// </summary>
         internal static string T_Themes {
@@ -6836,6 +6926,15 @@ namespace Codist.Properties {
         internal static string T_VersionRewriteMode {
             get {
                 return ResourceManager.GetString("T_VersionRewriteMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to View Properties:.
+        /// </summary>
+        internal static string T_ViewProperties {
+            get {
+                return ResourceManager.GetString("T_ViewProperties", resourceCulture);
             }
         }
         

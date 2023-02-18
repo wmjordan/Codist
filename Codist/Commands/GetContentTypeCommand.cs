@@ -1,12 +1,12 @@
 ﻿using System;
-using System.ComponentModel.Design;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using AppHelpers;
+using Codist.Controls;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Utilities;
-using System.Collections.Generic;
-using AppHelpers;
 using R = Codist.Properties.Resources;
-using Codist.Controls;
 
 namespace Codist.Commands
 {
@@ -27,32 +27,59 @@ namespace Codist.Commands
 			if (doc == null) {
 				return;
 			}
-			var docWindow = TextEditorHelper.GetActiveWpfDocumentView();
-			if (docWindow == null) {
+			var view = TextEditorHelper.GetActiveWpfDocumentView();
+			if (view == null) {
 				return;
 			}
-			var t = docWindow.TextBuffer.ContentType;
+			DisplayDocumentWindowInfo(view);
+		}
+
+		static void DisplayDocumentWindowInfo(Microsoft.VisualStudio.Text.Editor.IWpfTextView view) {
+			var t = view.TextBuffer.ContentType;
 			using (var b = ReusableStringBuilder.AcquireDefault(100)) {
 				var sb = b.Resource;
-				var d = docWindow.TextBuffer.GetTextDocument();
-				sb.Append(R.T_ContentTypeOfDocument);
+				var d = view.TextBuffer.GetTextDocument();
 				if (d != null) {
-					sb.Append(System.IO.Path.GetFileName(d.FilePath));
+					sb.AppendLine(System.IO.Path.GetFileName(d.FilePath))
+						.Append(R.T_Folder).AppendLine(System.IO.Path.GetDirectoryName(d.FilePath))
+						.Append(R.T_TextEncoding).AppendLine(d.Encoding.EncodingName)
+						.Append(R.T_LastSaved).AppendLine(d.LastSavedTime == default ? R.T_NotSaved : d.LastSavedTime.ToLocalTime().ToString())
+						.Append(R.T_LastModified).AppendLine(d.LastContentModifiedTime.ToLocalTime().ToString());
 				}
 				sb.AppendLine()
-					.AppendLine();
-				var h = new HashSet<IContentType>();
-				ShowContentType(t, sb, h, 0);
+					.Append(R.T_LineCount)
+					.AppendLine(view.TextSnapshot.LineCount.ToText())
+					.Append(R.T_CharacterCount)
+					.AppendLine(view.TextSnapshot.Length.ToText());
 
 				sb.AppendLine()
-					.Append(R.T_ViewRoles)
-					.AppendLine(String.Join(", ", docWindow.Roles));
+					.Append(R.T_Selection)
+					.AppendLine($"{view.Selection.Start.Position.Position}-{view.Selection.End.Position.Position}")
+					.Append(R.T_SelectionLength)
+					.AppendLine(view.Selection.SelectedSpans.Sum(i => i.Length).ToString())
+					.Append(R.T_Caret)
+					.AppendLine(view.Caret.Position.BufferPosition.Position.ToString());
 
-				MessageWindow.Info(sb.ToString());
+				sb.AppendLine().AppendLine(R.T_ContentTypeOfDocument);
+				ShowContentType(t, sb, new HashSet<IContentType>(), 0);
+
+				sb.AppendLine()
+					.AppendLine(R.T_ViewRoles)
+					.AppendLine(String.Join(", ", view.Roles));
+
+				sb.AppendLine()
+					.AppendLine(R.T_ViewProperties)
+					.AppendLine(GetPropertyString(view.Properties));
+
+				sb.AppendLine()
+					.AppendLine(R.T_TextBufferProperties)
+					.AppendLine(GetPropertyString(view.TextBuffer.Properties));
+
+				MessageWindow.Info(sb.ToString(), R.T_DocumentProperties);
 			}
 		}
 
-		static void ShowContentType (IContentType type, StringBuilder sb, HashSet<IContentType> h, int indent) {
+		static void ShowContentType (IContentType type, StringBuilder sb, HashSet<IContentType> dedup, int indent) {
 			sb.Append(' ', indent)
 				.Append(type.DisplayName);
 			if (type.DisplayName != type.TypeName) {
@@ -62,10 +89,17 @@ namespace Codist.Commands
 			}
 			sb.AppendLine();
 			foreach (var bt in type.BaseTypes) {
-				if (h.Add(bt)) {
-					ShowContentType(bt, sb, h, indent + 2);
+				if (dedup.Add(bt)) {
+					ShowContentType(bt, sb, dedup, indent + 2);
 				}
 			}
+		}
+
+		static string GetPropertyString(PropertyCollection properties) {
+			return String.Join(Environment.NewLine, properties.PropertyList.Select(i => {
+					string k = i.Key.ToString(), v = i.Value?.ToString();
+					return k == v ? k : $"{k} = {v}";
+				}).OrderBy(i => i));
 		}
 	}
 }
