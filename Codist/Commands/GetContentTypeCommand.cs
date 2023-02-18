@@ -75,7 +75,7 @@ namespace Codist.Commands
 					.AppendLine(R.T_TextBufferProperties)
 					.AppendLine(GetPropertyString(view.TextBuffer.Properties));
 
-				MessageWindow.Info(sb.ToString(), R.T_DocumentProperties);
+				MessageWindow.Show(sb.ToString(), R.T_DocumentProperties);
 			}
 		}
 

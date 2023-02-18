@@ -58,10 +58,10 @@ namespace Codist.Controls
 			_DefaultButton.Click += DefaultButton_Click;
 		}
 
-		public static bool? Info(object content) {
+		public static bool? Show(object content) {
 			return new MessageWindow(content).ShowDialog();
 		}
-		public static bool? Info(object content, string title) {
+		public static bool? Show(object content, string title) {
 			return new MessageWindow(content, title).ShowDialog();
 		}
 		public static bool? Error(string content) {
