@@ -1422,7 +1422,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>Common</value>
   </data>
   <data name="T_ContentTypeOfDocument" xml:space="preserve">
-    <value>Content type of document:</value>
+    <value>Content Type:</value>
   </data>
   <data name="T_CustomizeSyntaxHighlightNote" xml:space="preserve">
     <value>To configure syntax highlight, open a code file first and execute this command.</value>
@@ -2296,7 +2296,7 @@ Expression too long</value>
     <value>Stage Selected Range</value>
   </data>
   <data name="T_ViewRoles" xml:space="preserve">
-    <value>Roles of view: </value>
+    <value>Roles of View: </value>
   </data>
   <data name="T_EndOfIf" xml:space="preserve">
     <value>End of if </value>
@@ -2343,8 +2343,8 @@ Expression too long</value>
   <data name="CMD_No" xml:space="preserve">
     <value>No</value>
   </data>
-  <data name="CMD_Ok" xml:space="preserve">
-    <value>Ok</value>
+  <data name="CMD_OK" xml:space="preserve">
+    <value>OK</value>
   </data>
   <data name="CMD_Yes" xml:space="preserve">
     <value>Yes</value>
@@ -2374,7 +2374,7 @@ Expression too long</value>
     <value>Duplicate Method Declaration</value>
   </data>
   <data name="T_CharacterCount" xml:space="preserve">
-    <value>Character count: </value>
+    <value>Character Count: </value>
   </data>
   <data name="T_DocumentProperties" xml:space="preserve">
     <value>Document Properties</value>
@@ -2386,7 +2386,7 @@ Expression too long</value>
     <value>Last Saved: </value>
   </data>
   <data name="T_LineCount" xml:space="preserve">
-    <value>Line count: </value>
+    <value>Line Count: </value>
   </data>
   <data name="T_NotSaved" xml:space="preserve">
     <value>Not saved yet</value>

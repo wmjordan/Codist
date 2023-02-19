@@ -2328,7 +2328,7 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_No" xml:space="preserve">
     <value>否</value>
   </data>
-  <data name="CMD_Ok" xml:space="preserve">
+  <data name="CMD_OK" xml:space="preserve">
     <value>确定</value>
   </data>
   <data name="CMD_Yes" xml:space="preserve">

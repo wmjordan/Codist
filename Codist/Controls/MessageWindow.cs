@@ -52,7 +52,7 @@ namespace Codist.Controls
 						Margin = WpfHelper.MiddleMargin,
 						HorizontalAlignment = HorizontalAlignment.Right,
 						Children = {
-							CreateButton(R.CMD_Ok, DefaultButton_Click).Set(ref _DefaultButton)
+							CreateButton(R.CMD_OK, DefaultButton_Click).Set(ref _DefaultButton)
 						}
 					}.Set(ref _ButtonPanel)
 				}

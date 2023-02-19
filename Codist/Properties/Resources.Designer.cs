@@ -1213,11 +1213,11 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ok.
+        ///   Looks up a localized string similar to OK.
         /// </summary>
-        internal static string CMD_Ok {
+        internal static string CMD_OK {
             get {
-                return ResourceManager.GetString("CMD_Ok", resourceCulture);
+                return ResourceManager.GetString("CMD_OK", resourceCulture);
             }
         }
         
@@ -5013,7 +5013,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Character count: .
+        ///   Looks up a localized string similar to Character Count: .
         /// </summary>
         internal static string T_CharacterCount {
             get {
@@ -5054,6 +5054,24 @@ namespace Codist.Properties {
         internal static string T_Classes {
             get {
                 return ResourceManager.GetString("T_Classes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Classifications for selected content:.
+        /// </summary>
+        internal static string T_ClassificationForSelectedContent {
+            get {
+                return ResourceManager.GetString("T_ClassificationForSelectedContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Classification tags:.
+        /// </summary>
+        internal static string T_ClassificationTags {
+            get {
+                return ResourceManager.GetString("T_ClassificationTags", resourceCulture);
             }
         }
         
@@ -5166,7 +5184,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Content type of document:.
+        ///   Looks up a localized string similar to Content Type:.
         /// </summary>
         internal static string T_ContentTypeOfDocument {
             get {
@@ -5826,7 +5844,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Line count: .
+        ///   Looks up a localized string similar to Line Count: .
         /// </summary>
         internal static string T_LineCount {
             get {
@@ -6723,6 +6741,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Syntax Classification Info.
+        /// </summary>
+        internal static string T_SyntaxClassificationInfo {
+            get {
+                return ResourceManager.GetString("T_SyntaxClassificationInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Syntax Highlight.
         /// </summary>
         internal static string T_SyntaxHighlight {
@@ -6939,7 +6966,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Roles of view: .
+        ///   Looks up a localized string similar to Roles of View: .
         /// </summary>
         internal static string T_ViewRoles {
             get {
