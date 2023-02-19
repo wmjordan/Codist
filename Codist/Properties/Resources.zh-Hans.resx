@@ -2391,4 +2391,13 @@ Right click: 显示“线程”窗口</value>
   <data name="T_SelectionLength" xml:space="preserve">
     <value>选中字数: </value>
   </data>
+  <data name="T_ClassificationForSelectedContent" xml:space="preserve">
+    <value>选中内容的语法归类:</value>
+  </data>
+  <data name="T_ClassificationTags" xml:space="preserve">
+    <value>归类标签:</value>
+  </data>
+  <data name="T_SyntaxClassificationInfo" xml:space="preserve">
+    <value>语法归类信息</value>
+  </data>
 </root>

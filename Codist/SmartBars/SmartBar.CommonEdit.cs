@@ -313,7 +313,7 @@ namespace Codist.SmartBars
 				var t = ServicesHelper.Instance.ViewTagAggregatorFactory.CreateTagAggregator<Microsoft.VisualStudio.Text.Tagging.IClassificationTag>(ctx.View).GetTags(span);
 				using (var b = ReusableStringBuilder.AcquireDefault(100)) {
 					var sb = b.Resource;
-					sb.AppendLine($"Classifications for selected {span.Length} characters:");
+					sb.AppendLine(R.T_ClassificationForSelectedContent);
 					foreach (var s in cs) {
 						sb.Append(s.Span.Span.ToString())
 							.Append(' ')
@@ -323,13 +323,13 @@ namespace Codist.SmartBars
 							.Append(s.Span.GetText())
 							.AppendLine();
 					}
-					sb.AppendLine().AppendLine("Tags:");
+					sb.AppendLine().AppendLine(R.T_ClassificationTags);
 					foreach (var item in t) {
 						sb.Append(item.Span.GetSpans(ctx.View.TextBuffer).ToString())
 							.Append(' ')
 							.AppendLine(item.Tag.ClassificationType.Classification);
 					}
-					System.Windows.Forms.MessageBox.Show(sb.ToString(), nameof(Codist));
+					MessageWindow.Show(sb.ToString(), R.T_SyntaxClassificationInfo);
 				}
 				Taggers.TaggerResult.IsLocked = false;
 			});

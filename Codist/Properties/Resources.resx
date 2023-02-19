@@ -2406,4 +2406,13 @@ Expression too long</value>
   <data name="T_SelectionLength" xml:space="preserve">
     <value>Selection Length: </value>
   </data>
+  <data name="T_ClassificationForSelectedContent" xml:space="preserve">
+    <value>Classifications for selected content:</value>
+  </data>
+  <data name="T_ClassificationTags" xml:space="preserve">
+    <value>Classification tags:</value>
+  </data>
+  <data name="T_SyntaxClassificationInfo" xml:space="preserve">
+    <value>Syntax Classification Info</value>
+  </data>
 </root>
