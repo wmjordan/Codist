@@ -29,7 +29,7 @@ namespace Codist.Commands
 				return;
 			}
 			if (_Window == null || _Window.IsVisible == false) {
-				var v = TextEditorHelper.GetActiveWpfDocumentView();
+				var v = TextEditorHelper.GetActiveWpfInteractiveView();
 				if (v == null) {
 					MessageWindow.Error(R.T_CustomizeSyntaxHighlightNote, R.CMD_ConfigureSyntaxHighlight);
 					return;
@@ -73,7 +73,7 @@ namespace Codist.Commands
 				var s = _Window.WindowState;
 				_Window.Close();
 				if (_Window.IsClosing == false) {
-					CreateWindow(TextEditorHelper.GetActiveWpfDocumentView());
+					CreateWindow(TextEditorHelper.GetActiveWpfInteractiveView());
 					_Window.Top = b.Top;
 					_Window.Left = b.Left;
 					_Window.Width = b.Width;

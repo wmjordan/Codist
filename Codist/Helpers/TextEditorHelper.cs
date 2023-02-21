@@ -32,7 +32,7 @@ namespace Codist
 		static /*readonly*/ Guid __IWpfTextViewHostGuid = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476"),
 			__ViewKindCodeGuid = new Guid(EnvDTE.Constants.vsViewKindCode);
 		static readonly HashSet<IWpfTextView> _WpfTextViews = new HashSet<IWpfTextView>();
-		static IWpfTextView _MouseOverTextView, _ActiveTextView;
+		static IWpfTextView _MouseOverDocumentView, _ActiveDocumentView, _ActiveInteractiveView;
 		static int _ActiveViewPosition;
 
 		#region Position
@@ -585,7 +585,7 @@ namespace Codist
 		/// </summary>
 		public static void KeepViewPosition(this IAsyncQuickInfoSession session) {
 			if (session.TextView is IWpfTextView v) {
-				_ActiveTextView = v;
+				_ActiveDocumentView = v;
 				_ActiveViewPosition = session.GetTriggerPoint(v.TextSnapshot)?.Position ?? -1;
 				session.StateChanged += QuickInfoSession_StateChanged;
 			}
@@ -634,7 +634,7 @@ namespace Codist
 		}
 
 		static void MoveCaretToKeptViewPosition() {
-			var v = _MouseOverTextView ?? _ActiveTextView;
+			var v = _MouseOverDocumentView ?? _ActiveDocumentView;
 			SnapshotPoint p;
 			if (v != null
 				&& _ActiveViewPosition < v.TextSnapshot.Length
@@ -894,12 +894,15 @@ namespace Codist
 		}
 
 		public static IWpfTextView GetMouseOverDocumentView() {
-			return _MouseOverTextView;
+			return _MouseOverDocumentView;
 		}
 		public static IWpfTextView GetActiveWpfDocumentView() {
-			return _ActiveTextView;
+			return _ActiveDocumentView;
 			//ThreadHelper.ThrowIfNotOnUIThread();
 			//return ServiceProvider.GlobalProvider.GetActiveWpfDocumentView();
+		}
+		public static IWpfTextView GetActiveWpfInteractiveView() {
+			return _ActiveInteractiveView;
 		}
 		public static IWpfTextView GetActiveWpfDocumentView(this IServiceProvider service) {
 			ThreadHelper.ThrowIfNotOnUIThread();
@@ -959,45 +962,60 @@ namespace Codist
 
 			sealed class ActiveViewTracker
 			{
+				readonly bool _IsDocument;
 				IWpfTextView _View;
 
 				public ActiveViewTracker(IWpfTextView view) {
-					_ActiveTextView = _View = view;
+					_ActiveInteractiveView = _View = view;
 					ActiveTextViewChanged?.Invoke(view, new TextViewCreatedEventArgs(view));
 					view.Closed += TextView_CloseView;
 					view.VisualElement.Loaded += TextView_SetActiveView;
 					view.VisualElement.MouseEnter += TextViewMouseEnter_SetActiveView;
 					view.GotAggregateFocus += TextView_SetActiveView;
-					_WpfTextViews.Add(view);
+					if (view.Roles.Any(i => i == PredefinedTextViewRoles.Document)) {
+						_IsDocument = true;
+						_ActiveDocumentView = view;
+						_WpfTextViews.Add(view);
+					}
 				}
 
 				void TextView_SetActiveView(object sender, EventArgs e) {
-					if (_ActiveTextView != _View && _View.HasAggregateFocus) {
-						_ActiveTextView = _View;
+					if (_ActiveInteractiveView != _View && _View.HasAggregateFocus) {
+						_ActiveInteractiveView = _View;
+						if (_IsDocument && _ActiveDocumentView != _View) {
+							_ActiveDocumentView = _View;
+						}
 						ForgetViewPosition();
 						ActiveTextViewChanged?.Invoke(_View, new TextViewCreatedEventArgs(_View));
 					}
 				}
 
 				void TextViewMouseEnter_SetActiveView(object sender, MouseEventArgs e) {
-					_MouseOverTextView = _View;
+					if (_IsDocument) {
+						_MouseOverDocumentView = _View;
+					}
 				}
 
 				void TextView_CloseView(object sender, EventArgs e) {
 					ForgetViewPosition();
-					var v = sender as IWpfTextView;
+					var v = _View;
+					if (_IsDocument) {
+						if (_MouseOverDocumentView == v) {
+							_MouseOverDocumentView = null;
+						}
+						if (_ActiveDocumentView == v) {
+							_ActiveDocumentView = null;
+						}
+						_WpfTextViews.Remove(v);
+					}
+					if (_ActiveInteractiveView == v) {
+						_ActiveInteractiveView = null;
+					}
+					_View = null;
 					v.Closed -= TextView_CloseView;
 					v.VisualElement.Loaded -= TextView_SetActiveView;
 					v.VisualElement.MouseEnter -= TextViewMouseEnter_SetActiveView;
 					v.GotAggregateFocus -= TextView_SetActiveView;
-					_WpfTextViews.Remove(v);
-					if (_MouseOverTextView == _View) {
-						_MouseOverTextView = null;
-					}
-					if (_ActiveTextView == _View) {
-						_ActiveTextView = null;
-					}
-					_View = null;
 				}
 			}
 		}

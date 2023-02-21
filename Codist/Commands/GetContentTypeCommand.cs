@@ -17,17 +17,13 @@ namespace Codist.Commands
 			Command.GetContentType.Register(Execute, (s, args) => {
 				ThreadHelper.ThrowIfNotOnUIThread();
 				((OleMenuCommand)s).Visible = Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowDocumentContentType)
-					&& TextEditorHelper.GetActiveWpfDocumentView() != null;
+					&& TextEditorHelper.GetActiveWpfInteractiveView() != null;
 			});
 		}
 
 		static void Execute(object sender, EventArgs e) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			var doc = CodistPackage.DTE.ActiveDocument;
-			if (doc == null) {
-				return;
-			}
-			var view = TextEditorHelper.GetActiveWpfDocumentView();
+			var view = TextEditorHelper.GetActiveWpfInteractiveView();
 			if (view == null) {
 				return;
 			}
