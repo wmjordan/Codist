@@ -41,12 +41,11 @@ namespace Codist.SmartBars
 			return ctx.View.FindNext(ctx.TextSearchService, t, TextEditorHelper.GetFindOptionsFromKeyboardModifiers());
 		}
 
-		protected static SnapshotSpan Replace(CommandContext ctx, Func<string, string> replaceHandler, bool selectModified) {
+		protected static IEnumerable<SnapshotSpan> Replace(CommandContext ctx, Func<string, string> replaceHandler, bool selectModified) {
 			ctx.KeepToolBar(false);
-			var firstModified = new SnapshotSpan();
 			string t = ctx.View.GetFirstSelectionText();
 			if (t.Length == 0) {
-				return firstModified;
+				return null;
 			}
 			var edited = ctx.View.EditSelection((view, edit, item) => {
 				var replacement = replaceHandler(item.GetText());
@@ -56,44 +55,43 @@ namespace Codist.SmartBars
 				return null;
 			});
 			if (edited != null) {
-				firstModified = edited.Value;
 				if (t != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift) && FindNext(ctx, t) == false) {
 					ctx.HideToolBar();
 				}
 				else if (selectModified) {
-					ctx.View.SelectSpan(firstModified);
+					ctx.View.SelectSpans(edited);
 				}
 			}
-			return firstModified;
+			return edited;
 		}
 
 		/// <summary>When selection is not surrounded with <paramref name="prefix"/> and <paramref name="suffix"/>, surround each span of the current selection with <paramref name="prefix"/> and <paramref name="suffix"/>, and optionally select the first modified span if <paramref name="selectModified"/> is <see langword="true"/>; when surrounded, remove them.</summary>
-		/// <returns>The new span after modification. If modification is unsuccessful, the default of <see cref="SnapshotSpan"/> is returned.</returns>
-		protected static SnapshotSpan WrapWith(CommandContext ctx, string prefix, string suffix, bool selectModified) {
+		/// <returns>The spans after modification. If modification is unsuccessful, <see langword="null"/> is returned.</returns>
+		protected static IEnumerable<SnapshotSpan> WrapWith(CommandContext ctx, string prefix, string suffix, bool selectModified) {
 			string s = ctx.View.GetFirstSelectionText();
 			ctx.KeepToolBar(false);
-			var firstModified = ctx.View.WrapWith(prefix, suffix);
+			var m = ctx.View.WrapWith(prefix, suffix);
 			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
 				&& FindNext(ctx, s) == false) {
 				ctx.HideToolBar();
 			}
 			else if (selectModified) {
-				ctx.View.SelectSpan(firstModified);
+				ctx.View.SelectSpans(m);
 			}
-			return firstModified;
+			return m;
 		}
-		protected static SnapshotSpan WrapWith(CommandContext ctx, WrapText wrapText, bool selectModified) {
+		protected static IEnumerable<SnapshotSpan> WrapWith(CommandContext ctx, WrapText wrapText, bool selectModified) {
 			string s = ctx.View.GetFirstSelectionText();
 			ctx.KeepToolBar(false);
-			var firstModified = ctx.View.WrapWith(wrapText);
+			var m = ctx.View.WrapWith(wrapText);
 			if (s != null && Keyboard.Modifiers.HasAnyFlag(ModifierKeys.Control | ModifierKeys.Shift)
 				&& FindNext(ctx, s) == false) {
 				ctx.HideToolBar();
 			}
 			else if (selectModified) {
-				ctx.View.SelectSpan(firstModified);
+				ctx.View.SelectSpans(m);
 			}
-			return firstModified;
+			return m;
 		}
 
 		void AddCopyCommand() {
@@ -222,52 +220,48 @@ namespace Codist.SmartBars
 				case TokenType.Digit | TokenType.Hex | TokenType.Letter:
 				case TokenType.Digit | TokenType.Hex | TokenType.ZeroXHex | TokenType.Letter:
 					AddCommand(ToolBar, IconIds.IncrementNumber, R.CMD_IncrementNumber, ctx => {
-						if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
-							ctx.KeepToolBar(false);
-							var u = ctx.View.EditSelection((v, edit, s) => {
-								var t = s.GetText();
-								var hex = tokenType.MatchFlags(TokenType.Hex);
-								if (long.TryParse(
-									hex ? t.Substring(2) : t,
-									hex ? NumberStyles.HexNumber : NumberStyles.Integer,
-									CultureInfo.InvariantCulture,
-									out var value)
-									) {
-									if (hex) {
-										if (tokenType.MatchFlags(TokenType.ZeroXHex)) {
-											t = t.Substring(0, 2) + (++value).ToString("X" + (t.Length - 2).ToString(CultureInfo.InvariantCulture));
-										}
-										else {
-											t = (++value).ToString("X" + t.Length.ToString(CultureInfo.InvariantCulture));
-										}
-									}
-									else {
-										t = (++value).ToString("D" + t.Length.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
-									}
-									if (edit.Replace(s.Span, t)) {
-										return new Span(s.Start, t.Length);
-									}
+						ctx.KeepToolBar(false);
+						var m = ctx.View.EditSelection((v, edit, s) => {
+							var t = s.GetText();
+							var hex = tokenType.MatchFlags(TokenType.Hex);
+							if (long.TryParse(
+								hex ? t.Substring(2) : t,
+								hex ? NumberStyles.HexNumber : NumberStyles.Integer,
+								CultureInfo.InvariantCulture,
+								out var value)
+								) {
+								if (hex) {
+									t = tokenType.MatchFlags(TokenType.ZeroXHex)
+										? t.Substring(0, 2) + (++value).ToString("X" + (t.Length - 2).ToString(CultureInfo.InvariantCulture))
+										: (++value).ToString("X" + t.Length.ToString(CultureInfo.InvariantCulture));
 								}
-								return null;
-							});
-							if (u.HasValue) {
-								ctx.View.SelectSpan(u.Value);
+								else {
+									t = (++value).ToString("D" + t.Length.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
+								}
+								if (edit.Replace(s.Span, t)) {
+									return new Span(s.Start, t.Length);
+								}
 							}
+							return null;
+						});
+						if (m != null) {
+							ctx.View.SelectSpans(m);
 						}
 					});
 					break;
 				case TokenType.Guid:
 				case TokenType.GuidPlaceHolder:
 					AddCommand(ToolBar, IconIds.NewGuid, R.CMD_GUID, ctx => {
-						if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
-							using (var ed = ctx.View.TextBuffer.CreateEdit()) {
-								var t = Guid.NewGuid().ToString(span.Length == 36 || span.Length == 4 ? "D" : span.GetText()[0] == '(' ? "P" : "B").ToUpperInvariant();
-								if (ed.Replace(span, t)) {
-									ed.Apply();
-									ctx.View.Selection.Select(new SnapshotSpan(ctx.View.TextSnapshot, span.Start, t.Length), false);
-									ctx.KeepToolBar(false);
-								}
+						ctx.KeepToolBar(false);
+						var m = ctx.View.EditSelection((v, ed, s) => {
+							var t = Guid.NewGuid().ToString(s.Length == 36 || s.Length == 4 ? "D" : s.GetText()[0] == '(' ? "P" : "B").ToUpperInvariant();
+							if (ed.Replace(s, t)) {
+								return new Span(s.Start, t.Length);
 							}
+							return null;
+						});
+						if (m != null) {
+							ctx.View.SelectSpans(m);
 						}
 					});
 					AddCommands(ToolBar, IconIds.FormatSelection, R.CMD_Formatting, null, _ => __CaseCommands);
@@ -294,7 +288,7 @@ namespace Codist.SmartBars
 		IEnumerable<CommandItem> CreateWrapTextMenu(CommandContext context) {
 			foreach (var item in Config.Instance.WrapTexts) {
 				yield return new CommandItem(IconIds.WrapText, String.IsNullOrEmpty(item.Name) ? item.Pattern : item.Name, null, ctx => {
-					if (WrapWith(ctx, item, true).IsEmpty == false) {
+					if (WrapWith(ctx, item, true) != Enumerable.Empty<SnapshotSpan>()) {
 						_RecentWrapText = item;
 					}
 				});
@@ -374,7 +368,7 @@ namespace Codist.SmartBars
 			else {
 				return;
 			}
-			AddCommand(ToolBar, IconIds.SearchWebSite, R.CMD_ViewUrlInBrowser + Environment.NewLine + span.GetText(), ctx => ExternalCommand.OpenWithWebBrowser(ctx.View.GetFirstSelectionText(), String.Empty));
+			AddCommand(ToolBar, IconIds.SearchWebSite, $"{R.CMD_ViewUrlInBrowser}{Environment.NewLine}{span.GetText()}", ctx => ExternalCommand.OpenWithWebBrowser(ctx.View.GetFirstSelectionText(), String.Empty));
 		}
 
 		void AddDebuggerCommands() {

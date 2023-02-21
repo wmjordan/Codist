@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -96,11 +97,14 @@ namespace Codist.NaviBar
 		}
 
 		void ToggleHyperLink(object sender, RoutedEventArgs e) {
-			var s = WrapWith("[", "](url)", false);
-			if (s.Snapshot != null) {
-				// select the "url"
-				View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - 4, 3), false);
-				View.Caret.MoveTo(s.End - 1);
+			var m = WrapWith("[", "](url)", false);
+			foreach (var s in m) {
+				if (s.Snapshot != null) {
+					// select the "url"
+					View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - 4, 3), false);
+					View.Caret.MoveTo(s.End - 1);
+					return;
+				}
 			}
 		}
 
@@ -168,17 +172,17 @@ namespace Codist.NaviBar
 			}
 		}
 
-		SnapshotSpan WrapWith(string prefix, string suffix, bool selectModified) {
+		IEnumerable<SnapshotSpan> WrapWith(string prefix, string suffix, bool selectModified) {
 			string s = View.GetFirstSelectionText();
-			var firstModified = View.WrapWith(prefix, suffix);
+			var modified = View.WrapWith(prefix, suffix);
 			if (s != null && Keyboard.Modifiers.MatchFlags(ModifierKeys.Control | ModifierKeys.Shift)
 				&& View.FindNext(_TextSearch, s, TextEditorHelper.GetFindOptionsFromKeyboardModifiers()) == false) {
 				//
 			}
-			else if (selectModified) {
-				View.SelectSpan(firstModified);
+			else if (selectModified && modified != null) {
+				View.SelectSpans(modified);
 			}
-			return firstModified;
+			return modified;
 		}
 
 		void View_Closed(object sender, EventArgs e) {

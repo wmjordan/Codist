@@ -95,6 +95,14 @@ namespace Codist
 			return Span.FromBounds(snapshot.GetLineNumberFromPosition(span.Start),
 				snapshot.GetLineNumberFromPosition(span.End));
 		}
+
+		public static SnapshotSpan MapTo(this ITextSnapshot oldSnapshot, Span span, ITextSnapshot newSnapshot) {
+			return new SnapshotSpan(oldSnapshot.CreateTrackingPoint(span.Start, PointTrackingMode.Negative).GetPoint(newSnapshot), span.Length);
+		}
+
+		public static SnapshotSpan MapTo(this ITextSnapshot oldSnapshot, TextSpan span, ITextSnapshot newSnapshot) {
+			return new SnapshotSpan(oldSnapshot.CreateTrackingPoint(span.Start, PointTrackingMode.Negative).GetPoint(newSnapshot), span.Length);
+		}
 		#endregion
 
 		#region Classification
@@ -181,14 +189,24 @@ namespace Codist
 		}
 
 		public static TokenType GetSelectedTokenType(this ITextView view) {
-			NormalizedSnapshotSpanCollection spans;
-			if (view.Selection.IsEmpty || (spans = view.Selection.SelectedSpans).Count > 1) {
+			if (view.Selection.IsEmpty) {
 				return TokenType.None;
 			}
-			var selection = spans[0];
-			if (selection.Length >= 128) {
-				return TokenType.None;
+			TokenType r = TokenType.None, t;
+			foreach (var selection in view.Selection.SelectedSpans) {
+				if (selection.Length > 128 || (t = GetSelectionTokenType(selection)) == TokenType.None) {
+					return TokenType.None;
+				}
+				r |= t;
+				if (r.MatchFlags(TokenType.Hex) && r.HasAnyFlag(TokenType.Dot | TokenType.Underscore)
+					|| r.MatchFlags(TokenType.ZeroXHex) && r.HasAnyFlag(TokenType.Hex | TokenType.Digit) == false) {
+					return TokenType.None;
+				}
 			}
+			return r;
+		}
+
+		static TokenType GetSelectionTokenType(SnapshotSpan selection) {
 			string s = selection.GetText();
 			switch (selection.Length) {
 				case 4:
@@ -236,10 +254,6 @@ namespace Codist
 				else {
 					return TokenType.None;
 				}
-			}
-			if (t.MatchFlags(TokenType.Hex) && t.HasAnyFlag(TokenType.Dot | TokenType.Underscore)
-				|| t.MatchFlags(TokenType.ZeroXHex) && t.HasAnyFlag(TokenType.Hex | TokenType.Digit) == false) {
-				return TokenType.None;
 			}
 			return t;
 		}
@@ -301,6 +315,36 @@ namespace Codist
 				view.Caret.MoveTo(moveCaret > 0 ? span.End : span.Start);
 			}
 		}
+
+		public static void SelectSpans(this ITextView view, IEnumerable<SnapshotSpan> spans) {
+			if (spans == null || spans == Enumerable.Empty<SnapshotSpan>()) {
+				return;
+			}
+			var b = view.GetMultiSelectionBroker();
+			var m = ServicesHelper.Instance.OutliningManager.GetOutliningManager(view);
+			SnapshotSpan first = default;
+			using (var o = b.BeginBatchOperation()) {
+				foreach (var span in spans) {
+					if (view.TextSnapshot != span.Snapshot) {
+						// should not be here
+						continue;
+					}
+					if (m != null) {
+						foreach (var c in m.GetCollapsedRegions(span)) {
+							m.Expand(c);
+						}
+					}
+					if (first.IsEmpty) {
+						first = span;
+					}
+					b.AddSelection(new Selection(span));
+				}
+			}
+
+			if (first.IsEmpty == false) {
+				view.ViewScroller.EnsureSpanVisible(first, EnsureSpanVisibleOptions.ShowStart);
+			}
+		}
 		#endregion
 
 		#region Edit
@@ -335,27 +379,27 @@ namespace Codist
 		/// <typeparam name="TView">The type of the view.</typeparam>
 		/// <param name="view">The <see cref="ITextView"/> to be edited.</param>
 		/// <param name="action">The edit operation against each selected span.</param>
-		/// <returns>Returns a new <see cref="SnapshotSpan"/> if <see cref="ITextEdit.HasEffectiveChanges"/> returns <see langword="true"/> and <paramref name="action"/> returns a <see cref="Span"/>, otherwise, returns <see langword="null"/>.</returns>
-		public static SnapshotSpan? EditSelection<TView>(this TView view, Func<TView, ITextEdit, SnapshotSpan, Span?> action)
+		/// <returns>Returns a collections of new <see cref="SnapshotSpan"/>s if <see cref="ITextEdit.HasEffectiveChanges"/> returns <see langword="true"/> and any <paramref name="action"/> returns a <see cref="Span"/>, otherwise, returns <see langword="null"/>.</returns>
+		public static IEnumerable<SnapshotSpan> EditSelection<TView>(this TView view, Func<TView, ITextEdit, SnapshotSpan, Span?> action)
 			where TView : ITextView {
+			Chain<Span> changedSpans = new Chain<Span>();
+			Span? s;
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
-				Span? s = null;
 				foreach (var item in view.Selection.SelectedSpans) {
-					if (s == null) {
-						s = action(view, edit, item);
-					}
-					else {
-						action(view, edit, item);
+					s = action(view, edit, item);
+					if (s.HasValue) {
+						changedSpans.Add(s.Value);
 					}
 				}
 				if (edit.HasEffectiveChanges) {
+					var oldSnapshot = view.TextSnapshot;
 					var newSnapshot = edit.Apply();
-					if (s.HasValue) {
-						return view.TextSnapshot.CreateTrackingSpan(s.Value, SpanTrackingMode.EdgeInclusive).GetSpan(newSnapshot);
+					if (changedSpans.IsEmpty == false) {
+						return changedSpans.Select(i => oldSnapshot.MapTo(i, newSnapshot));
 					}
 				}
-				return null;
 			}
+			return null;
 		}
 
 		public static FindOptions GetFindOptionsFromKeyboardModifiers() {
@@ -379,10 +423,11 @@ namespace Codist
 			return false;
 		}
 
-		public static SnapshotSpan WrapWith(this ITextView view, string prefix, string suffix) {
-			var firstModified = new SnapshotSpan();
-			var psLength = prefix.Length + suffix.Length;
-			var removed = false;
+		public static IEnumerable<SnapshotSpan> WrapWith(this ITextView view, string prefix, string suffix) {
+			var prefixLen = prefix.Length;
+			var psLength = prefixLen + suffix.Length;
+			var modified = new Chain<Span>();
+			var offset = 0;
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
 				foreach (var item in view.Selection.SelectedSpans) {
 					var t = item.GetText();
@@ -390,33 +435,33 @@ namespace Codist
 					if (t.Length > psLength
 						&& t.StartsWith(prefix, StringComparison.Ordinal)
 						&& t.EndsWith(suffix, StringComparison.Ordinal)
-						&& t.IndexOf(prefix, prefix.Length, t.Length - psLength) <= t.IndexOf(suffix, prefix.Length, t.Length - psLength)) {
-						if (edit.Replace(item, t.Substring(prefix.Length, t.Length - psLength))
-							&& firstModified.Snapshot == null) {
-							firstModified = item;
-							removed = true;
+						&& t.IndexOf(prefix, prefixLen, t.Length - psLength) <= t.IndexOf(suffix, prefixLen, t.Length - psLength)) {
+						if (edit.Replace(item, t.Substring(prefixLen, t.Length - psLength))) {
+							modified.Add(new Span(item.Start + offset, item.Length - psLength));
+							offset -= psLength;
 						}
 					}
 					// surround items
-					else if (edit.Replace(item, prefix + t + suffix) && firstModified.Snapshot == null) {
-						firstModified = item;
+					else if (edit.Replace(item, prefix + t + suffix)) {
+						modified.Add(new Span(item.Start + offset, item.Length + psLength));
+						offset += psLength;
 					}
 				}
 				if (edit.HasEffectiveChanges) {
 					var snapshot = edit.Apply();
-					firstModified = new SnapshotSpan(snapshot, firstModified.Start, removed ? firstModified.Length - psLength : firstModified.Length + psLength);
+					return modified.Select(i => new SnapshotSpan(snapshot, i));
 				}
 			}
-			return firstModified;
+			return Enumerable.Empty<SnapshotSpan>();
 		}
 
-		public static SnapshotSpan WrapWith(this ITextView view, WrapText wrapText) {
-			var firstModified = new SnapshotSpan();
+		public static IEnumerable<SnapshotSpan> WrapWith(this ITextView view, WrapText wrapText) {
+			var modified = new Chain<Span>();
 			var prefix = wrapText.Prefix;
 			var suffix = wrapText.Suffix;
 			var substitution = wrapText.Substitution;
 			var psLength = prefix.Length + suffix.Length;
-			string firstText = null;
+			var offset = 0;
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
 				foreach (var item in view.Selection.SelectedSpans) {
 					var t = item.GetText();
@@ -426,24 +471,23 @@ namespace Codist
 						&& t.StartsWith(prefix, StringComparison.Ordinal)
 						&& t.EndsWith(suffix, StringComparison.Ordinal)
 						&& t.IndexOf(prefix, prefix.Length, t.Length - psLength) <= t.IndexOf(suffix, prefix.Length, t.Length - psLength)) {
-						if (edit.Replace(item, t = t.Substring(prefix.Length, t.Length - psLength))
-							&& firstModified.Snapshot == null) {
-							firstModified = item;
-							firstText = t;
+						if (edit.Replace(item, t = t.Substring(prefix.Length, t.Length - psLength))) {
+							modified.Add(new Span(item.Start + offset, item.Length - psLength));
+							offset -= psLength;
 						}
 					}
 					// surround items
-					else if (edit.Replace(item, t = wrapText.Wrap(t)) && firstModified.Snapshot == null) {
-						firstModified = item;
-						firstText = t;
+					else if (edit.Replace(item, t = wrapText.Wrap(t))) {
+						modified.Add(new Span(item.Start + offset, item.Length + psLength));
+						offset += psLength;
 					}
 				}
 				if (edit.HasEffectiveChanges) {
 					var snapshot = edit.Apply();
-					firstModified = new SnapshotSpan(snapshot, firstModified.Start, firstText.Length);
+					return modified.Select(i => new SnapshotSpan(snapshot, i));
 				}
 			}
-			return firstModified;
+			return Enumerable.Empty<SnapshotSpan>();
 		}
 
 

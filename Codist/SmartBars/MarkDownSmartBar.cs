@@ -26,11 +26,13 @@ namespace Codist.SmartBars
 		void MakeUrl(CommandContext ctx) {
 			var t = ctx.View.GetFirstSelectionText();
 			if (MaybeUrl(t)) {
-				var s = WrapWith(ctx, "[title](", ")", false);
-				if (s.Snapshot != null) {
-					// select the "title"
-					ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + 1, 5), false);
-					ctx.View.Caret.MoveTo(s.Start + 6);
+				foreach (var s in WrapWith(ctx, "[title](", ")", false)) {
+					if (s.Snapshot != null) {
+						// select the "title"
+						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + 1, 5), false);
+						ctx.View.Caret.MoveTo(s.Start + 6);
+						return;
+					}
 				}
 			}
 			else {
@@ -43,18 +45,21 @@ namespace Codist.SmartBars
 					clip = null;
 				}
 				var u = MaybeUrl(clip);
-				var s = u && clip.IndexOf(')') < 0
+				var m = u && clip.IndexOf(')') < 0
 					? WrapWith(ctx, "[", "](" + clip + ")", false)
 					: WrapWith(ctx, "[", "](url)", false);
-				if (s.Snapshot != null) {
-					// select the "url"
-					if (u) {
-						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - clip.Length - 1, clip.Length), false);
+				foreach (var s in m) {
+					if (s.Snapshot != null) {
+						// select the "url"
+						if (u) {
+							ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - clip.Length - 1, clip.Length), false);
+						}
+						else {
+							ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - 4, 3), false);
+						}
+						ctx.View.Caret.MoveTo(s.End - 1);
+						return;
 					}
-					else {
-						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - 4, 3), false);
-					}
-					ctx.View.Caret.MoveTo(s.End - 1);
 				}
 			}
 		}

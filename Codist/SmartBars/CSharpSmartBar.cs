@@ -455,19 +455,23 @@ namespace Codist.SmartBars
 		void MakeUrl(CommandContext ctx) {
 			var t = ctx.View.GetFirstSelectionText();
 			if (t.StartsWith("http://", StringComparison.Ordinal) || t.StartsWith("https://", StringComparison.Ordinal)) {
-				var s = WrapWith(ctx, "<a href=\"", "\">text</a>", false);
-				if (s.Snapshot != null) {
-					// select the "text"
-					ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.End - 8, 4), false);
-					ctx.View.Caret.MoveTo(s.End - 4);
+				foreach (var s in WrapWith(ctx, "<a href=\"", "\">text</a>", false)) {
+					if (s.Snapshot != null) {
+						// select the "text"
+						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.End - 8, 4), false);
+						ctx.View.Caret.MoveTo(s.End - 4);
+						return;
+					}
 				}
 			}
 			else {
-				var s = WrapWith(ctx, "<a href=\"url\">", "</a>", false);
-				if (s.Snapshot != null) {
-					// select the "url"
-					ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + 9, 3), false);
-					ctx.View.Caret.MoveTo(s.Start + 12);
+				foreach (var s in WrapWith(ctx, "<a href=\"url\">", "</a>", false)) {
+					if (s.Snapshot != null) {
+						// select the "url"
+						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + 9, 3), false);
+						ctx.View.Caret.MoveTo(s.Start + 12);
+						return;
+					}
 				}
 			}
 		}
