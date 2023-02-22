@@ -405,6 +405,9 @@ namespace Codist.QuickInfo
 			if (kind == SyntaxKind.ThisExpression) {
 				return semanticModel.GetTypeInfo(node, cancellationToken).Type;
 			}
+			if (kind == SyntaxKind.TupleElement) {
+				return semanticModel.GetDeclaredSymbol(node, cancellationToken);
+			}
 			var symbolInfo = semanticModel.GetSymbolInfo(node, cancellationToken);
 			if (symbolInfo.CandidateReason != CandidateReason.None) {
 				candidates = symbolInfo.CandidateSymbols;
