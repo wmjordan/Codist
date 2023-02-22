@@ -15,6 +15,7 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Projection;
 using R = Codist.Properties.Resources;
 
 namespace Codist.QuickInfo
@@ -40,9 +41,18 @@ namespace Codist.QuickInfo
 				return null;
 			}
 			// Map the trigger point down to our buffer.
-			// It is weird that the session.TextView.TextBuffer != _TextBuffer and we can't get a Workspace from the former one
 			var buffer = _TextBuffer;
-			return buffer == null ? null : await InternalGetQuickInfoItemAsync(session, buffer, cancellationToken).ConfigureAwait(false);
+			if (buffer == null && session.TextView.TextBuffer is IProjectionBuffer projection) {
+				foreach (var sb in projection.SourceBuffers) {
+					if (session.GetTriggerPoint(sb) != null) {
+						buffer = sb;
+						break;
+					}
+				}
+			}
+			return buffer == null
+				? null
+				: await InternalGetQuickInfoItemAsync(session, buffer, cancellationToken).ConfigureAwait(false);
 		}
 
 		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, ITextBuffer buffer, CancellationToken cancellationToken) {
