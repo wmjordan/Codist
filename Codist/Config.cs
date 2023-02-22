@@ -768,9 +768,9 @@ namespace Codist
 		ExampleDoc = 1 << 25,
 		Color = 1 << 26,
 		Selection = 1 << 27,
-		CtrlSuppress = 1 << 28,
 		[Obsolete]
 		CtrlSupress = 1 << 28,
+		CtrlSuppress = 1 << 28,
 		CtrlQuickInfo = 1 << 29,
 		AlternativeStyle = 1 << 30,
 		DocumentationOverride = OverrideDefaultDocumentation | DocumentationFromBaseType | DocumentationFromInheritDoc,
@@ -893,7 +893,9 @@ namespace Codist
 	public enum DeveloperOptions
 	{
 		None,
+		[Obsolete]
 		ShowDocumentContentType = 1,
+		ShowWindowInformer = 1,
 		ShowSyntaxClassificationInfo = 1 << 1,
 		Default = None
 	}
@@ -903,9 +905,9 @@ namespace Codist
 	{
 		None,
 		SafeMode = 1,
-		DemonstrationMode = 1 << 1,
 		[Obsolete]
 		DemostrationMode = 1 << 1,
+		DemonstrationMode = 1 << 1,
 		NoScaling = 1 << 2,
 		Default = SafeMode | DemonstrationMode | NoScaling
 	}

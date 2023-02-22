@@ -2415,4 +2415,34 @@ Expression too long</value>
   <data name="T_SyntaxClassificationInfo" xml:space="preserve">
     <value>Syntax Classification Info</value>
   </data>
+  <data name="T_ContainingProject" xml:space="preserve">
+    <value>ContainingProject: </value>
+  </data>
+  <data name="T_DocumentExtenderCATID" xml:space="preserve">
+    <value>ExtenderCATID: </value>
+  </data>
+  <data name="T_DocumentExtenderNames" xml:space="preserve">
+    <value>ExtenderNames: </value>
+  </data>
+  <data name="T_DocumentKind" xml:space="preserve">
+    <value>Kind: </value>
+  </data>
+  <data name="T_Language" xml:space="preserve">
+    <value>Language: </value>
+  </data>
+  <data name="T_ProjectExtenderNames" xml:space="preserve">
+    <value>ContainingProject.ExtenderNames: </value>
+  </data>
+  <data name="T_ProjectItemProperties" xml:space="preserve">
+    <value>ProjectItem.Properties: </value>
+  </data>
+  <data name="T_WindowCaption" xml:space="preserve">
+    <value>ActiveWindow.Caption: </value>
+  </data>
+  <data name="T_WindowKind" xml:space="preserve">
+    <value>ActiveWindow.Kind: </value>
+  </data>
+  <data name="T_ActiveDocumentProperties" xml:space="preserve">
+    <value>ActiveDocument Properties:</value>
+  </data>
 </root>

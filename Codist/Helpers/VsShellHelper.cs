@@ -14,6 +14,9 @@ namespace Codist
 
 		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "checked in caller")]
 		public static IEnumerable<KeyValuePair<string, object>> Enumerate(this EnvDTE.Properties properties) {
+			if (properties == null) {
+				yield break;
+			}
 			var c = properties.Count;
 			for (int i = 1; i <= c; i++) {
 				var p = properties.Item(i);

@@ -4743,6 +4743,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ActiveDocument Properties:.
+        /// </summary>
+        internal static string T_ActiveDocumentProperties {
+            get {
+                return ResourceManager.GetString("T_ActiveDocumentProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All languages.
         /// </summary>
         internal static string T_AllLanguages {
@@ -5184,6 +5193,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ContainingProject: .
+        /// </summary>
+        internal static string T_ContainingProject {
+            get {
+                return ResourceManager.GetString("T_ContainingProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Content Type:.
         /// </summary>
         internal static string T_ContentTypeOfDocument {
@@ -5352,6 +5370,33 @@ namespace Codist.Properties {
         internal static string T_DocumentationFrom {
             get {
                 return ResourceManager.GetString("T_DocumentationFrom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ExtenderCATID: .
+        /// </summary>
+        internal static string T_DocumentExtenderCATID {
+            get {
+                return ResourceManager.GetString("T_DocumentExtenderCATID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ExtenderNames: .
+        /// </summary>
+        internal static string T_DocumentExtenderNames {
+            get {
+                return ResourceManager.GetString("T_DocumentExtenderNames", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kind: .
+        /// </summary>
+        internal static string T_DocumentKind {
+            get {
+                return ResourceManager.GetString("T_DocumentKind", resourceCulture);
             }
         }
         
@@ -5795,6 +5840,15 @@ namespace Codist.Properties {
         internal static string T_LambdaExpression {
             get {
                 return ResourceManager.GetString("T_LambdaExpression", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Language: .
+        /// </summary>
+        internal static string T_Language {
+            get {
+                return ResourceManager.GetString("T_Language", resourceCulture);
             }
         }
         
@@ -6283,6 +6337,24 @@ namespace Codist.Properties {
         internal static string T_Project {
             get {
                 return ResourceManager.GetString("T_Project", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ContainingProject.ExtenderNames: .
+        /// </summary>
+        internal static string T_ProjectExtenderNames {
+            get {
+                return ResourceManager.GetString("T_ProjectExtenderNames", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ProjectItem.Properties: .
+        /// </summary>
+        internal static string T_ProjectItemProperties {
+            get {
+                return ResourceManager.GetString("T_ProjectItemProperties", resourceCulture);
             }
         }
         
@@ -6971,6 +7043,24 @@ namespace Codist.Properties {
         internal static string T_ViewRoles {
             get {
                 return ResourceManager.GetString("T_ViewRoles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ActiveWindow.Caption: .
+        /// </summary>
+        internal static string T_WindowCaption {
+            get {
+                return ResourceManager.GetString("T_WindowCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ActiveWindow.Kind: .
+        /// </summary>
+        internal static string T_WindowKind {
+            get {
+                return ResourceManager.GetString("T_WindowKind", resourceCulture);
             }
         }
         

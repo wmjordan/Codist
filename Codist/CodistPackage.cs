@@ -142,7 +142,7 @@ namespace Codist
 
 			//_extenderCookie = DTE.ObjectExtenders.RegisterExtenderProvider(VSConstants.CATID.CSharpFileProperties_string, BuildBots.AutoReplaceExtenderProvider.Name, new BuildBots.AutoReplaceExtenderProvider());
 			Commands.ScreenshotCommand.Initialize();
-			Commands.GetContentTypeCommand.Initialize();
+			Commands.WindowInformerCommand.Initialize();
 			Commands.IncrementVsixVersionCommand.Initialize();
 			Commands.AutoBuildVersionWindowCommand.Initialize();
 			Commands.NaviBarSearchDeclarationCommand.Initialize();

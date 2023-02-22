@@ -72,7 +72,7 @@
     <Compile Include="AutoBuildVersion\VersionSetting.cs" />
     <Compile Include="Commands\AutoBuildVersionWindow.cs" />
     <Compile Include="Commands\CommandRegistry.cs" />
-    <Compile Include="Commands\GetContentTypeCommand.cs" />
+    <Compile Include="Commands\WindowInformerCommand.cs" />
     <Compile Include="Commands\AutoBuildVersionWindowCommand.cs" />
     <Compile Include="Commands\SemanticContextCommand.cs" />
     <Compile Include="Commands\ToggleAutoBuildVersionCommand.cs" />

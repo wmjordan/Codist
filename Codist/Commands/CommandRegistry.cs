@@ -21,7 +21,7 @@ namespace Codist.Commands
 	internal enum Command
 	{
 		CodeWindowScreenshot = 0x4001,
-		GetContentType,
+		WindowInformer,
 		IncrementVsixVersion,
 		SymbolFinderWindow,
 		SyntaxCustomizerWindow,
