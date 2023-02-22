@@ -29,6 +29,7 @@ namespace Codist.Options
 		readonly Border _OptionPageHolder;
 		readonly TextBlock _Notice;
 		readonly ListBox _SyntaxSourceBox;
+		readonly TextBlock _StyleNameHolder;
 		readonly Border _SettingsGroup, _TagSettingsGroup;
 		readonly FontButton _FontButton;
 		readonly NumericUpDown _FontSizeBox;
@@ -180,18 +181,21 @@ namespace Codist.Options
 									}
 								},
 								new Border {
-									BorderThickness = WpfHelper.TinyMargin,
 									Child = new StackPanel().Set(ref _SettingsList)
 								}.Set(ref _OptionPageHolder)
 								.Scrollable()
-								.SetValue(Grid.SetRow, 1)
-								.ReferenceProperty(Border.BorderBrushProperty, VsBrushes.ActiveBorderKey),
+								.SetValue(Grid.SetRow, 1),
 
 								new Border {
 									Visibility = Visibility.Collapsed,
 									Child = new StackPanel {
 										Children = {
-											new TextBlock { Text = R.T_StyleSettings, FontWeight = FontWeights.Bold },
+											new WrapPanel {
+												Children = {
+													new TextBlock { Text = R.T_StyleSettings, FontWeight = FontWeights.Bold },
+													new TextBlock { FontWeight = FontWeights.Bold, TextDecorations = { TextDecorations.Underline }, Margin = WpfHelper.MiddleHorizontalMargin }.Set(ref _StyleNameHolder),
+												}
+											},
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
@@ -419,7 +423,7 @@ namespace Codist.Options
 
 		void SyntaxSourceChanged(object source, RoutedEventArgs args) {
 			if (_SyntaxSourceBox.SelectedValue is IControlProvider c) {
-				_Notice.Visibility = _SettingsGroup.Visibility = _TagSettingsGroup.Visibility = _AddTagButton.Visibility = _RemoveTagButton.Visibility = Visibility.Collapsed;
+				_Notice.Visibility = _SettingsGroup.Visibility = _StyleNameHolder.Visibility = _TagSettingsGroup.Visibility = _AddTagButton.Visibility = _RemoveTagButton.Visibility = Visibility.Collapsed;
 				_OptionPageHolder.Child = c.Control;
 			}
 			else {
@@ -486,7 +490,7 @@ namespace Codist.Options
 			if (t == null) {
 				return null;
 			}
-			return new StyleSettingsButton(c, t, OnSelectTag) { Text = label.Label, Tag = label };
+			return new StyleSettingsButton(c, t, OnSelectTag) { Text = label.Label, Tag = label, ToolTip = label.Label };
 
 			CommentStyle FindCommentStyle(CommentLabel cl) {
 				var styleId = cl.StyleID;
@@ -512,7 +516,7 @@ namespace Codist.Options
 				case SyntaxStyleSource.Selection:
 				default:
 					if (_WpfTextView == null) {
-						_SettingsGroup.Visibility = Visibility.Collapsed;
+						_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Collapsed;
 						return;
 					}
 					classifications = GetClassificationsForSelection();
@@ -547,16 +551,16 @@ namespace Codist.Options
 				if (t == null) {
 					continue;
 				}
-				var button = new StyleSettingsButton(c, t, OnSelectStyle);
+				var button = new StyleSettingsButton(c, t, OnSelectStyle) { ToolTip = c.Classification };
 				if (style != null && c.Classification == style.ClassificationType) {
 					OnSelectStyle(button, null);
-					_SettingsGroup.Visibility = Visibility.Visible;
+					_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Visible;
 					style = null;
 				}
 				l.Add(button);
 			}
 			if (_SelectedStyleButton == null) {
-				_SettingsGroup.Visibility = Visibility.Collapsed;
+				_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Collapsed;
 			}
 			if (l.Count == 0) {
 				l.Add(new TextBlock {
@@ -568,7 +572,7 @@ namespace Codist.Options
 					FontSize = 20,
 					TextWrapping = TextWrapping.Wrap
 				});
-				_SettingsGroup.Visibility = Visibility.Collapsed;
+				_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Collapsed;
 			}
 			else {
 				FilterSettingsList(null, EventArgs.Empty);
@@ -623,7 +627,7 @@ namespace Codist.Options
 			if (_SelectedStyleButton?.Visibility == Visibility.Collapsed) {
 				_SelectedStyleButton.IsChecked = false;
 				_SelectedStyleButton = null;
-				_SettingsGroup.Visibility = Visibility.Collapsed;
+				_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Collapsed;
 			}
 			if (_SelectedCommentTag != null) {
 				_SelectedCommentTag = null;
@@ -681,13 +685,14 @@ namespace Codist.Options
 				_SelectedStyleButton.IsChecked = false;
 			}
 			else {
-				_SettingsGroup.Visibility = Visibility.Visible;
+				_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Visible;
 				_Notice.Visibility = Visibility.Collapsed;
 			}
 			_SelectedStyleButton = b;
 			try {
 				_Lock.Lock();
 				var s = b.StyleSettings;
+				_StyleNameHolder.Text = s.ClassificationType;
 				_FontButton.Value = s.Font;
 				_FontSizeBox.Value = (int)(s.FontSize > 100 ? 100 : s.FontSize < -10 ? -10 : s.FontSize);
 				ListVariantsForFont(s.Font);
