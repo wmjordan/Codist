@@ -27,6 +27,12 @@ namespace Codist
 				catch (System.Runtime.InteropServices.COMException) {
 					v = null;
 				}
+				catch (NotImplementedException) {
+					v = null;
+				}
+				catch (System.Reflection.TargetParameterCountException) {
+					v = null;
+				}
 				yield return new KeyValuePair<string, object>(p.Name, v);
 			}
 		}
