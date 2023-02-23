@@ -27,12 +27,9 @@ namespace Codist.QuickInfo
 		static readonly SymbolFormatter _SymbolFormatter = SymbolFormatter.Instance;
 
 		SpecialProjectInfo _SpecialProject;
-		ITextBuffer _TextBuffer;
 		bool _isCandidate;
-		int _Ref;
 
 		public CSharpQuickInfo(ITextBuffer subjectBuffer) {
-			_TextBuffer = subjectBuffer;
 		}
 
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
@@ -41,8 +38,8 @@ namespace Codist.QuickInfo
 				return null;
 			}
 			// Map the trigger point down to our buffer.
-			var buffer = _TextBuffer;
-			if (buffer == null && session.TextView.TextBuffer is IProjectionBuffer projection) {
+			var buffer = session.TextView.TextBuffer;
+			if (buffer is IProjectionBuffer projection) {
 				foreach (var sb in projection.SourceBuffers) {
 					if (session.GetTriggerPoint(sb) != null) {
 						buffer = sb;
@@ -1604,9 +1601,7 @@ namespace Codist.QuickInfo
 			return new ThemedTipText().AddSymbolDisplayParts(symbol.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
 		}
 
-		public void Dispose() {
-			_TextBuffer = null;
-		}
+		void IDisposable.Dispose() { }
 
 		sealed class SpecialProjectInfo
 		{
