@@ -13,11 +13,6 @@ namespace Codist.QuickInfo
 	internal sealed class SelectionQuickInfo : IAsyncQuickInfoSource
 	{
 		const string Name = "SelectionInfo";
-		ITextBuffer _TextBuffer;
-
-		public SelectionQuickInfo(ITextBuffer textBuffer) {
-			_TextBuffer = textBuffer;
-		}
 
 		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Selection) == false
@@ -41,12 +36,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		void IDisposable.Dispose() {
-			if (_TextBuffer != null) {
-				_TextBuffer.Properties.RemoveProperty(typeof(SelectionQuickInfo));
-				_TextBuffer = null;
-			}
-		}
+		void IDisposable.Dispose() {}
 
 		/// <summary>Displays numbers about selected characters and lines in quick info.</summary>
 		static QuickInfoItem ShowSelectionInfo(IAsyncQuickInfoSession session, SnapshotPoint point) {

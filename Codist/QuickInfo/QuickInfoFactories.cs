@@ -23,7 +23,7 @@ namespace Codist.QuickInfo
 	{
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new ColorQuickInfo(textBuffer))
+				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new ColorQuickInfo())
 				: null;
 		}
 	}
@@ -36,7 +36,7 @@ namespace Codist.QuickInfo
 	{
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new CSharpQuickInfo(textBuffer))
+				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new CSharpQuickInfo())
 				: null;
 		}
 	}
@@ -53,7 +53,7 @@ namespace Codist.QuickInfo
 	sealed class QuickInfoVisibilityControllerProvider : IAsyncQuickInfoSourceProvider
 	{
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
-			return textBuffer.Properties.GetOrCreateSingletonProperty(() => new QuickInfoVisibilityController(textBuffer));
+			return textBuffer.Properties.GetOrCreateSingletonProperty(() => new QuickInfoVisibilityController());
 		}
 	}
 
@@ -68,7 +68,7 @@ namespace Codist.QuickInfo
 
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new SelectionQuickInfo(textBuffer))
+				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new SelectionQuickInfo())
 				: null;
 		}
 	}
@@ -84,7 +84,7 @@ namespace Codist.QuickInfo
 
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? textBuffer.Properties.GetOrCreateSingletonProperty(()=> new QuickInfoSizeController(textBuffer))
+				? textBuffer.Properties.GetOrCreateSingletonProperty(()=> new QuickInfoSizeController())
 				: null;
 		}
 	}
@@ -100,7 +100,7 @@ namespace Codist.QuickInfo
 
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? textBuffer.Properties.GetOrCreateSingletonProperty(()=> new QuickInfoBackgroundController(textBuffer))
+				? textBuffer.Properties.GetOrCreateSingletonProperty(()=> new QuickInfoBackgroundController())
 				: null;
 		}
 	}

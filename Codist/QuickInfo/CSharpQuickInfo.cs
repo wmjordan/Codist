@@ -29,9 +29,6 @@ namespace Codist.QuickInfo
 		SpecialProjectInfo _SpecialProject;
 		bool _isCandidate;
 
-		public CSharpQuickInfo(ITextBuffer subjectBuffer) {
-		}
-
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			if (QuickInfoOverrider.CheckCtrlSuppression()) {

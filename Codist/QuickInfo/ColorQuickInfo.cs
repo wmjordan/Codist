@@ -10,12 +10,6 @@ namespace Codist.QuickInfo
 {
 	sealed class ColorQuickInfo : IAsyncQuickInfoSource
 	{
-		ITextBuffer _TextBuffer;
-
-		public ColorQuickInfo(ITextBuffer textBuffer) {
-			_TextBuffer = textBuffer;
-		}
-
 		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false
 				? System.Threading.Tasks.Task.FromResult<QuickInfoItem>(null)
@@ -44,11 +38,6 @@ namespace Codist.QuickInfo
 				: null;
 		}
 
-		void IDisposable.Dispose() {
-			if (_TextBuffer != null) {
-				_TextBuffer.Properties.RemoveProperty(typeof(ColorQuickInfo));
-				_TextBuffer = null;
-			}
-		}
+		void IDisposable.Dispose() {}
 	}
 }

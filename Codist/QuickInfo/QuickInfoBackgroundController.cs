@@ -13,11 +13,9 @@ namespace Codist.QuickInfo
 {
 	sealed class QuickInfoBackgroundController : IAsyncQuickInfoSource
 	{
-		ITextBuffer _TextBuffer;
 		Brush _Background;
 
-		public QuickInfoBackgroundController(ITextBuffer textBuffer) {
-			_TextBuffer = textBuffer;
+		public QuickInfoBackgroundController() {
 			UpdateBackgroundBrush();
 			Config.RegisterUpdateHandler(ConfigUpdated);
 		}
@@ -48,10 +46,6 @@ namespace Codist.QuickInfo
 		}
 
 		void IDisposable.Dispose() {
-			if (_TextBuffer != null) {
-				_TextBuffer.Properties.RemoveProperty(typeof(QuickInfoBackgroundController));
-				_TextBuffer = null;
-			}
 			Config.UnregisterUpdateHandler(ConfigUpdated);
 		}
 
