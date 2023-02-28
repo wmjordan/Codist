@@ -136,6 +136,13 @@ namespace Codist
 			var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType);
 			return t == null ? null : formatMap.GetTextProperties(t);
 		}
+		public static void DebugPrintCurrentPriorityOrder(this IClassificationFormatMap formatMap) {
+			foreach (var item in formatMap.CurrentPriorityOrder) {
+				if (item != null) {
+					System.Diagnostics.Debug.WriteLine(item.Classification);
+				}
+			}
+		}
 		#endregion
 
 		public static bool Mark<TKey>(this IPropertyOwner owner, TKey mark) {
