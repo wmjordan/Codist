@@ -4752,6 +4752,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ActiveWindow Properties:.
+        /// </summary>
+        internal static string T_ActiveWindowProperties {
+            get {
+                return ResourceManager.GetString("T_ActiveWindowProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All languages.
         /// </summary>
         internal static string T_AllLanguages {
@@ -4991,6 +5000,15 @@ namespace Codist.Properties {
         internal static string T_BuildVersion {
             get {
                 return ResourceManager.GetString("T_BuildVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Caption: .
+        /// </summary>
+        internal static string T_Caption {
+            get {
+                return ResourceManager.GetString("T_Caption", resourceCulture);
             }
         }
         
@@ -5429,6 +5447,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Type: .
+        /// </summary>
+        internal static string T_DTEType {
+            get {
+                return ResourceManager.GetString("T_DTEType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to End of if .
         /// </summary>
         internal static string T_EndOfIf {
@@ -5835,6 +5862,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Kind: .
+        /// </summary>
+        internal static string T_Kind {
+            get {
+                return ResourceManager.GetString("T_Kind", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to lambda expression.
         /// </summary>
         internal static string T_LambdaExpression {
@@ -6229,6 +6265,15 @@ namespace Codist.Properties {
         internal static string T_NotSet {
             get {
                 return ResourceManager.GetString("T_NotSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ObjectKind: .
+        /// </summary>
+        internal static string T_ObjectKind {
+            get {
+                return ResourceManager.GetString("T_ObjectKind", resourceCulture);
             }
         }
         
@@ -7043,24 +7088,6 @@ namespace Codist.Properties {
         internal static string T_ViewRoles {
             get {
                 return ResourceManager.GetString("T_ViewRoles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ActiveWindow.Caption: .
-        /// </summary>
-        internal static string T_WindowCaption {
-            get {
-                return ResourceManager.GetString("T_WindowCaption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ActiveWindow.Kind: .
-        /// </summary>
-        internal static string T_WindowKind {
-            get {
-                return ResourceManager.GetString("T_WindowKind", resourceCulture);
             }
         }
         

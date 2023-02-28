@@ -2433,13 +2433,22 @@ Expression too long</value>
   <data name="T_ProjectItemProperties" xml:space="preserve">
     <value>ProjectItem.Properties: </value>
   </data>
-  <data name="T_WindowCaption" xml:space="preserve">
-    <value>ActiveWindow.Caption: </value>
-  </data>
-  <data name="T_WindowKind" xml:space="preserve">
-    <value>ActiveWindow.Kind: </value>
+  <data name="T_Caption" xml:space="preserve">
+    <value>Caption: </value>
   </data>
   <data name="T_ActiveDocumentProperties" xml:space="preserve">
     <value>ActiveDocument Properties:</value>
+  </data>
+  <data name="T_ActiveWindowProperties" xml:space="preserve">
+    <value>ActiveWindow Properties:</value>
+  </data>
+  <data name="T_DTEType" xml:space="preserve">
+    <value>Type: </value>
+  </data>
+  <data name="T_Kind" xml:space="preserve">
+    <value>Kind: </value>
+  </data>
+  <data name="T_ObjectKind" xml:space="preserve">
+    <value>ObjectKind: </value>
   </data>
 </root>

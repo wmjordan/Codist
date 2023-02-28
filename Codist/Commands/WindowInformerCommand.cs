@@ -85,32 +85,39 @@ namespace Codist.Commands
 		}
 
 		static void ShowDTEDocumentProperties(StringBuilder sb) {
-			var doc = CodistPackage.DTE.ActiveDocument;
-			if (doc == null) {
+			var window = CodistPackage.DTE.ActiveWindow;
+			if (window == null) {
 				return;
 			}
 			sb.AppendLine()
-				.AppendLine(R.T_ActiveDocumentProperties)
-				.Append(R.T_Language).AppendLine(doc.Language)
-				.Append(R.T_DocumentKind).AppendLine(doc.Kind)
-				.Append(R.T_Type).AppendLine(doc.Type)
-				.Append(R.T_DocumentExtenderNames).AppendLine(String.Join(", ", doc.ExtenderNames as string[]))
-				.Append(R.T_DocumentExtenderCATID).Append(doc.ExtenderCATID).AppendLine();
-			try {
-				sb.Append(R.T_ContainingProject).AppendLine(doc.ProjectItem?.ContainingProject?.Name)
-					.Append(R.T_ProjectExtenderNames).AppendLine(String.Join(", ", doc.ProjectItem?.ContainingProject?.ExtenderNames as string[]));
-			}
-			catch (System.Runtime.InteropServices.COMException ex) {
-				sb.Append(R.T_ContainingProject).AppendLine(ex.Message);
-			}
-			sb.Append(R.T_WindowCaption).AppendLine(doc.ActiveWindow.Caption)
-				.Append(R.T_WindowKind).AppendLine(doc.ActiveWindow.Kind);
+				.AppendLine(R.T_ActiveWindowProperties)
+				.Append(R.T_Caption).AppendLine(window.Caption)
+				.Append(R.T_Kind).AppendLine(window.Kind)
+				.Append(R.T_ObjectKind).AppendLine(window.ObjectKind)
+				.Append(R.T_DTEType).AppendLine(window.Type.ToString());
 
-			sb.AppendLine(R.T_ProjectItemProperties);
-			var properties = doc.ProjectItem?.Properties;
-			if (properties != null) {
-				foreach (var item in properties.Enumerate()) {
-					sb.Append("* ").Append(item.Key).Append(" = ").Append(item.Value).AppendLine();
+			var doc = window.Document;
+			if (doc != null) {
+				sb.AppendLine()
+					.AppendLine(R.T_ActiveDocumentProperties)
+					.Append(R.T_Language).AppendLine(doc.Language)
+					.Append(R.T_Kind).AppendLine(doc.Kind)
+					.Append(R.T_DTEType).AppendLine(doc.Type)
+					.Append(R.T_DocumentExtenderNames).AppendLine(String.Join(", ", doc.ExtenderNames as string[]))
+					.Append(R.T_DocumentExtenderCATID).Append(doc.ExtenderCATID).AppendLine();
+				try {
+					sb.Append(R.T_ContainingProject).AppendLine(doc.ProjectItem?.ContainingProject?.Name)
+						.Append(R.T_ProjectExtenderNames).AppendLine(String.Join(", ", doc.ProjectItem?.ContainingProject?.ExtenderNames as string[]));
+				}
+				catch (System.Runtime.InteropServices.COMException ex) {
+					sb.Append(R.T_ContainingProject).AppendLine(ex.Message);
+				}
+				sb.AppendLine(R.T_ProjectItemProperties);
+				var properties = doc.ProjectItem?.Properties;
+				if (properties != null) {
+					foreach (var item in properties.Enumerate()) {
+						sb.Append("* ").Append(item.Key).Append(" = ").Append(item.Value).AppendLine();
+					}
 				}
 			}
 		}
