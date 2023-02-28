@@ -45,7 +45,7 @@ namespace Codist.Controls
 		}
 
 		internal static async Task FindDerivedClassesAsync(this SemanticContext context, ISymbol symbol) {
-			var classes = (await SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, context.Document.Project.Solution, null, default).ConfigureAwait(false)).ToList();
+			var classes = (await SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, context.Document.Project.Solution).ConfigureAwait(false)).ToList();
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 			ShowSymbolMenuForResult(symbol, context, classes, R.T_DerivedClasses, false);
 		}
@@ -58,7 +58,7 @@ namespace Codist.Controls
 
 		internal static async Task FindOverridesAsync(this SemanticContext context, ISymbol symbol) {
 			var ovs = ImmutableArray.CreateBuilder<ISymbol>();
-			ovs.AddRange(await SymbolFinder.FindOverridesAsync(symbol, context.Document.Project.Solution, null, default).ConfigureAwait(false));
+			ovs.AddRange(await SymbolFinder.FindOverridesAsync(symbol, context.Document.Project.Solution).ConfigureAwait(false));
 			int c = ovs.Count;
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context);
@@ -79,7 +79,7 @@ namespace Codist.Controls
 			if (symbol.Kind == SymbolKind.NamedType && (st = (INamedTypeSymbol)symbol).IsGenericType) {
 				s = st.OriginalDefinition;
 			}
-			var implementations = new List<ISymbol>(await SymbolFinder.FindImplementationsAsync(s, context.Document.Project.Solution, null, default).ConfigureAwait(false));
+			var implementations = new List<ISymbol>(await SymbolFinder.FindImplementationsAsync(s, context.Document.Project.Solution).ConfigureAwait(false));
 			implementations.Sort(CodeAnalysisHelper.CompareSymbol);
 			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context);
