@@ -1204,7 +1204,7 @@ namespace Codist
 			}
 
 			void NodeLink_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e) {
-				Background = SystemColors.GrayTextBrush.Alpha(0.3);
+				Background = SystemColors.GrayTextBrush.Alpha(WpfHelper.DimmedOpacity);
 			}
 		}
 	}

@@ -10,7 +10,6 @@ namespace Codist.Margins
 	sealed class SelectionMargin : MarginElementBase, IDisposable, IWpfTextViewMargin
 	{
 		const string FormatName = "Selected Text";
-		const double MarginOpacity = 0.3;
 
 		IWpfTextView _TextView;
 		IEditorFormatMap _EditorFormatMap;
@@ -73,7 +72,7 @@ namespace Codist.Margins
 		}
 
 		Brush GetMarginBrush() {
-			return (_EditorFormatMap.GetProperties(FormatName).Get<Brush>(EditorFormatDefinition.BackgroundBrushId) ?? ThemeHelper.FileTabProvisionalSelectionBrush).Alpha(MarginOpacity);
+			return (_EditorFormatMap.GetProperties(FormatName).Get<Brush>(EditorFormatDefinition.BackgroundBrushId) ?? ThemeHelper.FileTabProvisionalSelectionBrush).Alpha(WpfHelper.DimmedOpacity);
 		}
 
 		void TextView_SelectionChanged(object sender, EventArgs args) {

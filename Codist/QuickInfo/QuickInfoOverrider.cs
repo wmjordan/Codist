@@ -181,7 +181,7 @@ namespace Codist.QuickInfo
 			}
 
 			void HighlightSymbol(object sender, EventArgs e) {
-				((TextBlock)sender).Background = (_symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(0.3);
+				((TextBlock)sender).Background = (_symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(WpfHelper.DimmedOpacity);
 			}
 			void RemoveSymbolHighlight(object sender, MouseEventArgs e) {
 				((TextBlock)sender).Background = Brushes.Transparent;
@@ -508,7 +508,7 @@ namespace Codist.QuickInfo
 					if (icon != null) {
 						var b = infoPanel.GetParent<Border>();
 						b.Background = new VisualBrush(CreateEnlargedIcon(icon)) {
-							Opacity = 0.3,
+							Opacity = WpfHelper.DimmedOpacity,
 							AlignmentX = AlignmentX.Right,
 							AlignmentY = AlignmentY.Bottom,
 							TileMode = TileMode.None,

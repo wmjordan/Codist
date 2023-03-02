@@ -20,6 +20,7 @@ namespace Codist
 		static readonly string DummyToolTip = String.Empty;
 		internal const int IconRightMargin = 5;
 		internal const int SmallMarginSize = 3;
+		internal const double DimmedOpacity = 0.3;
 		internal static readonly WpfColor EmptyColor = new WpfColor();
 		internal static readonly Thickness NoMargin = new Thickness(0);
 		internal static readonly Thickness TinyMargin = new Thickness(1);
@@ -736,7 +737,7 @@ namespace Codist
 			protected virtual object CreateToolTip() => null;
 
 			protected void DoHighlight() {
-				Background = HighlightBrush.Alpha(0.3);
+				Background = HighlightBrush.Alpha(WpfHelper.DimmedOpacity);
 			}
 
 			protected override void OnToolTipOpening(ToolTipEventArgs e) {

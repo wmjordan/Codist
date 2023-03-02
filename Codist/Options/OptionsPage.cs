@@ -199,7 +199,7 @@ namespace Codist.Options
 
 			void HighlightNoticeBox(object sender, MouseButtonEventArgs e) {
 				_NoticeBox.BorderBrush = SystemColors.HighlightBrush;
-				_NoticeBox.Background = SystemColors.HighlightBrush.Alpha(0.3);
+				_NoticeBox.Background = SystemColors.HighlightBrush.Alpha(WpfHelper.DimmedOpacity);
 				_NoticeBox.Visibility = Visibility.Visible;
 				foreach (var item in _Options) {
 					item.PreviewMouseDown -= HighlightNoticeBox;

@@ -176,7 +176,7 @@ namespace Codist.SmartBars
 				ToolBar2.HideOverflow();
 			}
 			_ToolBarTray.Visibility = Visibility.Visible;
-			_ToolBarTray.Opacity = 0.3;
+			_ToolBarTray.Opacity = WpfHelper.DimmedOpacity;
 			_ToolBarTray.SizeChanged += ToolBarSizeChanged;
 			_View.VisualElement.MouseMove += ViewMouseMove;
 		}
