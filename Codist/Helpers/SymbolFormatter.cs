@@ -130,6 +130,7 @@ namespace Codist
 				&& (s.Kind != SymbolKind.Method || ((IMethodSymbol)s).IsTypeSpecialMethod() == false)) {
 				p.Add(new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush }
 					.Append(ThemeHelper.GetImage(IconIds.Return).WrapMargin(WpfHelper.GlyphMargin))
+					.Append(GetRefType(s), Keyword)
 					.AddSymbol(rt, false, this)
 					.Append(rt.IsAwaitable() ? $" ({R.T_Awaitable})" : String.Empty));
 			}
@@ -611,6 +612,26 @@ namespace Codist
 			return c ? text.Append(", ".Render(PlainText)) : text;
 		}
 
+		static string GetRefType(ISymbol symbol) {
+			if (symbol is IMethodSymbol m) {
+				if (m.ReturnsByRefReadonly) {
+					return "ref readonly ";
+				}
+				else if (m.ReturnsByRef) {
+					return "ref ";
+				}
+			}
+			else if (symbol is IPropertySymbol p) {
+				if (p.ReturnsByRefReadonly) {
+					return "ref readonly ";
+				}
+				else if (p.ReturnsByRef) {
+					return "ref ";
+				}
+			}
+			return null;
+		}
+
 		internal void Format(InlineCollection text, ISymbol symbol, string alias, bool bold) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:
@@ -1068,7 +1089,7 @@ namespace Codist
 					info.Append("static ", Keyword);
 				}
 				if (local.IsRef) {
-					info.Append(local.RefKind == RefKind.RefReadOnly ? "ref readonly " : "ref", Keyword);
+					info.Append(local.RefKind == RefKind.RefReadOnly ? "ref readonly " : "ref ", Keyword);
 				}
 				if (local.IsFixed) {
 					info.Append("fixed ", Keyword);
@@ -1135,18 +1156,19 @@ namespace Codist
 				}
 			}
 			if (symbol.Kind == SymbolKind.Method) {
-				var m = (symbol as IMethodSymbol).GetSpecialMethodModifier();
-				if (m != null) {
-					info.Append(m, Keyword);
+				if (symbol is IMethodSymbol m) {
+					if (m.IsAsync) {
+						info.Append("async ", Keyword);
+					}
+					else if (m.IsExtern) {
+						info.Append("extern ", Keyword);
+					}
+					if (m.IsReadOnly()) {
+						info.Append("readonly ", Keyword);
+					}
 				}
 			}
 			else if (symbol.Kind == SymbolKind.Property && symbol is IPropertySymbol p) {
-				if (p.ReturnsByRefReadonly) {
-					info.Append("ref readonly ", Keyword);
-				}
-				else if (p.ReturnsByRef) {
-					info.Append("ref ", Keyword);
-				}
 				if (p.IsRequired()) {
 					info.Append("required ", Keyword);
 				}
