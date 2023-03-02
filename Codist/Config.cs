@@ -123,7 +123,7 @@ namespace Codist
 			if (__Loaded != null) {
 				foreach (var h in __Loaded.GetInvocationList()) {
 					if (h.Equals(handler)) {
-						Debug.WriteLine("Error: " + handler + " has already been registered as load handler");
+						$"Error: {handler} has already been registered as load handler".Log();
 						return;
 					}
 				}
@@ -139,13 +139,13 @@ namespace Codist
 					}
 				}
 			}
-			Debug.WriteLine("Error: " + handler + " has not been registered as load handler");
+			$"Error: {handler} has not been registered as load handler".Log();
 		}
 		public static void RegisterUpdateHandler(Action<ConfigUpdatedEventArgs> handler) {
 			if (__Updated != null) {
 				foreach (var h in __Updated.GetInvocationList()) {
 					if (h.Equals(handler)) {
-						Debug.WriteLine("Error: " + handler + " has already been registered as update handler");
+						$"Error: {handler} has already been registered as update handler".Log();
 						return;
 					}
 				}
@@ -161,7 +161,7 @@ namespace Codist
 					}
 				}
 			}
-			Debug.WriteLine("Error: " + handler + " has not been registered as update handler");
+			$"Error: {handler} has not been registered as update handler".Log();
 		}
 
 		public static Config InitConfig() {
@@ -180,7 +180,7 @@ namespace Codist
 				return config;
 			}
 			catch (Exception ex) {
-				Debug.WriteLine(ex.ToString());
+				ex.Log();
 				return GetDefaultConfig();
 			}
 		}
@@ -203,14 +203,14 @@ namespace Codist
 			if (Interlocked.Exchange(ref __LoadingConfig, 1) != 0) {
 				return;
 			}
-			Debug.WriteLine("Load config: " + configPath);
+			$"Load config: {configPath}".Log();
 			try {
 				Instance = InternalLoadConfig(configPath, styleFilter);
 				__Loaded?.Invoke(Instance);
 				__Updated?.Invoke(new ConfigUpdatedEventArgs(Instance, styleFilter != StyleFilters.None ? Features.SyntaxHighlight : Features.All));
 			}
 			catch(Exception ex) {
-				Debug.WriteLine(ex.ToString());
+				ex.Log();
 				Instance = GetDefaultConfig();
 			}
 			finally {
@@ -274,7 +274,7 @@ namespace Codist
 			Display.LayoutOverrider.Reload(config.DisplayOptimizations);
 			Display.ResourceMonitor.Reload(config.DisplayOptimizations);
 			__LastLoaded = DateTime.Now;
-			Debug.WriteLine("Config loaded");
+			"Config loaded".Log();
 			return config;
 		}
 
@@ -352,11 +352,11 @@ namespace Codist
 					}));
 				if (path == ConfigPath) {
 					__LastSaved = __LastLoaded = DateTime.Now;
-					Debug.WriteLine("Config saved");
+					"Config saved".Log();
 				}
 			}
 			catch (Exception ex) {
-				Debug.WriteLine(ex.ToString());
+				ex.Log();
 			}
 			finally {
 				Styles = null;

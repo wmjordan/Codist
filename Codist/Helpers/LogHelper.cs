@@ -14,6 +14,7 @@ namespace Codist
 	static class LogHelper
 	{
 		static int _Sync;
+		static int _PSId = Process.GetCurrentProcess().Id;
 
 		static string _Path;
 		public static string LogPath {
@@ -37,7 +38,7 @@ namespace Codist
 				SpinWait.SpinUntil(() => Volatile.Read(ref _Sync) == 0);
 			}
 			try {
-				File.AppendAllText(_Path, $"{DateTime.Now.ToLongTimeString()}\t{message}{Environment.NewLine}");
+				File.AppendAllText(_Path, $"{_PSId.ToText()}\t{DateTime.Now.ToLongTimeString()}\t{message}{Environment.NewLine}");
 			}
 			catch (SystemException) {
 				// ignore
