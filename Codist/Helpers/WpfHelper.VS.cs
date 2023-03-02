@@ -247,7 +247,7 @@ namespace Codist
 			}
 
 			void Highlight(object sender, MouseEventArgs e) {
-				Background = (_Symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(0.3);
+				Background = (_Symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(WpfHelper.DimmedOpacity);
 			}
 			void Leave(object sender, MouseEventArgs e) {
 				Background = WpfBrushes.Transparent;
