@@ -88,7 +88,21 @@ namespace Codist.SyntaxHighlight
 		internal abstract string Category { get; }
 
 		/// <summary>Returns whether any option in this style is set.</summary>
-		internal bool IsSet => ForeColor.A > 0 || BackColor.A > 0 || ForegroundOpacity != 0 || BackgroundOpacity != 0 || Bold.HasValue || Italic.HasValue || Underline.HasValue || OverLine.HasValue || Strikethrough.HasValue || FontSize > 0 || String.IsNullOrEmpty(Font) == false || LineColor.A > 0 || LineOpacity != 0 || LineThickness != 0 || LineStyle != LineStyle.Solid;
+		internal bool IsSet => ForeColor.A > 0
+			|| BackColor.A > 0
+			|| ForegroundOpacity != 0
+			|| BackgroundOpacity != 0
+			|| Bold.HasValue
+			|| Italic.HasValue
+			|| Underline.HasValue
+			|| OverLine.HasValue
+			|| Strikethrough.HasValue
+			|| FontSize > 0
+			|| String.IsNullOrEmpty(Font) == false
+			|| LineColor.A > 0
+			|| LineOpacity != 0
+			|| LineThickness != 0
+			|| LineStyle != LineStyle.Solid;
 
 		internal abstract string ClassificationType { get; }
 		internal abstract string Description { get; }
@@ -148,13 +162,13 @@ namespace Codist.SyntaxHighlight
 		}
 		internal void Reset() {
 			Bold = Italic = OverLine = Underline = Strikethrough = null;
+			Font = null;
 			FontSize = 0;
 			FontVariant = null;
-			BackgroundEffect = BrushEffect.Solid;
-			Font = null;
 			ForeColor = BackColor = LineColor = default;
 			ForegroundOpacity = BackgroundOpacity = LineOpacity = LineThickness = LineOffset = 0;
 			LineStyle = LineStyle.Solid;
+			BackgroundEffect = BrushEffect.Solid;
 		}
 	}
 	sealed class SyntaxStyle : StyleBase

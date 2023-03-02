@@ -32,7 +32,7 @@ namespace Codist
 
 		ConfigManager _ConfigManager;
 
-		public static readonly string ConfigPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.NameOfMe + "\\Config.json";
+		public static readonly string ConfigPath = $"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}\\{Constants.NameOfMe}\\Config.json";
 		public static Config Instance = InitConfig();
 
 		public string Version { get; set; }
@@ -279,6 +279,7 @@ namespace Codist
 		}
 
 		public static void ResetStyles() {
+			FormatStore.Reset();
 			ResetCodeStyle(Instance.GeneralStyles, GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>());
 			ResetCodeStyle(Instance.CommentStyles, GetDefaultCommentStyles());
 			ResetCodeStyle(Instance.CodeStyles, GetDefaultCodeStyles<CSharpStyle, CSharpStyleTypes>());
