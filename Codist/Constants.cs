@@ -62,17 +62,6 @@ namespace Codist
 			public const string VisibleWhitespace = "Visible Whitespace";
 		}
 
-		public static class EditorFormatKeys
-		{
-			public const string FontRenderingSize = nameof(FontRenderingSize);
-			public const string IsItalic = nameof(IsItalic);
-			public const string IsBold = nameof(IsBold);
-			public const string ForegroundOpacity = nameof(ForegroundOpacity);
-			public const string BackgroundOpacity = nameof(BackgroundOpacity);
-			public const string TextDecorations = nameof(TextDecorations);
-			public const string Typeface = nameof(Typeface);
-		}
-
 		public const string CodeKeyword = "Keyword";// it is weird that there are two keyword with different cases in the resource dictionary: a Keyword and a PredefinedClassificationTypeNames.Keyword;
 		public const string CodeComment = PredefinedClassificationTypeNames.Comment;
 		public const string CodeText = "text";

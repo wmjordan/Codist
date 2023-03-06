@@ -30,6 +30,7 @@ namespace Codist.Options
 		readonly TextBlock _Notice;
 		readonly ListBox _SyntaxSourceBox;
 		readonly TextBlock _StyleNameHolder;
+		readonly Button _ResetButton;
 		readonly Border _SettingsGroup, _TagSettingsGroup;
 		readonly FontButton _FontButton;
 		readonly NumericUpDown _FontSizeBox;
@@ -194,6 +195,7 @@ namespace Codist.Options
 												Children = {
 													new TextBlock { Text = R.T_StyleSettings, FontWeight = FontWeights.Bold },
 													new TextBlock { FontWeight = FontWeights.Bold, TextDecorations = { TextDecorations.Underline }, Margin = WpfHelper.MiddleHorizontalMargin }.Set(ref _StyleNameHolder),
+													new Button { Content = R.CMD_Reset }.ReferenceStyle(VsResourceKeys.ButtonStyleKey).Set(ref _ResetButton)
 												}
 											},
 											new WrapPanel {
@@ -344,6 +346,7 @@ namespace Codist.Options
 			_BackgroundEffectBox.SelectionChanged += OnBackgroundEffectChanged;
 			_LineStyleBox.Items.AddRange(new[] { R.T_SolidLine, R.T_Dot, R.T_Dash, R.T_DashDot });
 			_LineStyleBox.SelectionChanged += OnLineStyleChanged;
+			_ResetButton.Click += ResetStyle;
 			_SyntaxSourceBox.SelectionChanged += SyntaxSourceChanged;
 			_AddTagButton.Click += AddTag;
 			_RemoveTagButton.Click += RemoveTag;
@@ -1063,7 +1066,7 @@ namespace Codist.Options
 					LoadTheme(d.FileName);
 				}
 				catch (Exception ex) {
-					MessageBox.Show(R.T_FailedToLoadStyleFile + Environment.NewLine + ex.Message, nameof(Codist));
+					MessageWindow.Error(ex.Message, R.T_FailedToLoadStyleFile);
 				}
 			}
 		}
@@ -1079,12 +1082,26 @@ namespace Codist.Options
 			}
 		}
 		void ResetTheme() {
-			if (MessageBox.Show(R.T_ConfirmResetSyntaxHighlight, nameof(Codist), MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+			if (MessageWindow.Show(R.T_ConfirmResetSyntaxHighlight) == true) {
 				Config.ResetStyles();
 			}
 		}
 		static void LoadTheme(string path) {
+			FormatStore.Reset();
 			Config.LoadConfig(path, StyleFilters.All);
+		}
+		void ResetStyle(object sender, EventArgs e) {
+			Update(() => {
+				if (_SelectedStyleButton.StyleSettings.IsSet == false) {
+					return false;
+				}
+				_SelectedStyleButton.StyleSettings.Reset();
+				FormatStore.Reset(_SelectedStyleButton.StyleSettings.ClassificationType);
+				var b = _SelectedStyleButton;
+				_SelectedStyleButton = null;
+				OnSelectStyle(b, new RoutedEventArgs());
+				return true;
+			});
 		}
 		#endregion
 

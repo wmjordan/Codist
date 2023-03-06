@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using AppHelpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -21,6 +22,9 @@ using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
+using WpfBrush = System.Windows.Media.Brush;
+using WpfBrushes = System.Windows.Media.Brushes;
+using WpfColor = System.Windows.Media.Color;
 
 namespace Codist
 {
@@ -136,6 +140,39 @@ namespace Codist
 			var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(classificationType);
 			return t == null ? null : formatMap.GetTextProperties(t);
 		}
+		public static string Print(this TextFormattingRunProperties format) {
+			using (var sbr = ReusableStringBuilder.AcquireDefault(100)) {
+				var sb = sbr.Resource;
+				if (format.TypefaceEmpty == false) {
+					sb.Append(format.Typeface.FontFamily.ToString()).Append('&');
+				}
+				if (format.FontRenderingEmSizeEmpty == false) {
+					sb.Append('#').Append(format.FontRenderingEmSize);
+				}
+				if (format.BoldEmpty == false) {
+					sb.Append(format.Bold == true ? "+B" : "-B");
+				}
+				if (format.ItalicEmpty == false) {
+					sb.Append(format.Italic == true ? "+I" : "-I");
+				}
+				if (format.ForegroundBrushEmpty == false) {
+					sb.Append(format.ForegroundBrush.ToString()).Append("@f");
+				}
+				if (format.ForegroundOpacityEmpty == false) {
+					sb.Append('%').Append(format.ForegroundOpacity.ToString("0.0#")).Append('O');
+				}
+				if (format.BackgroundBrushEmpty == false) {
+					sb.Append(format.BackgroundBrush.ToString()).Append("@b");
+				}
+				if (format.BackgroundOpacityEmpty == false) {
+					sb.Append('%').Append(format.BackgroundOpacity.ToString("0.0#")).Append('o');
+				}
+				if (format.TextDecorationsEmpty == false) {
+					sb.Append("TD");
+				}
+				return sb.ToString();
+			}
+		}
 		public static void DebugPrintCurrentPriorityOrder(this IClassificationFormatMap formatMap) {
 			foreach (var item in formatMap.CurrentPriorityOrder) {
 				if (item != null) {
@@ -143,6 +180,148 @@ namespace Codist
 				}
 			}
 		}
+		#region Format ResourceDictionary
+		public static double? GetFontSize(this ResourceDictionary resource) {
+			return resource.GetNullable<double>(ClassificationFormatDefinition.FontRenderingSizeId);
+		}
+		public static bool? GetItalic(this ResourceDictionary resource) {
+			return resource.GetNullable<bool>(ClassificationFormatDefinition.IsItalicId);
+		}
+		public static bool? GetBold(this ResourceDictionary resource) {
+			return resource.GetNullable<bool>(ClassificationFormatDefinition.IsBoldId);
+		}
+		public static double? GetOpacity(this ResourceDictionary resource) {
+			return resource.GetNullable<double>(ClassificationFormatDefinition.ForegroundOpacityId);
+		}
+		public static double? GetBackgroundOpacity(this ResourceDictionary resource) {
+			return resource.GetNullable<double>(ClassificationFormatDefinition.BackgroundOpacityId);
+		}
+		public static WpfBrush GetBrush(this ResourceDictionary resource, string resourceId = EditorFormatDefinition.ForegroundBrushId) {
+			return resource.Get<WpfBrush>(resourceId);
+		}
+		public static WpfBrush GetBackgroundBrush(this ResourceDictionary resource) {
+			return resource.Get<WpfBrush>(EditorFormatDefinition.BackgroundBrushId);
+		}
+		public static TextDecorationCollection GetTextDecorations(this ResourceDictionary resource) {
+			return resource.Get<TextDecorationCollection>(ClassificationFormatDefinition.TextDecorationsId);
+		}
+		public static TextEffectCollection GetTextEffects(this ResourceDictionary resource) {
+			return resource.Get<TextEffectCollection>(ClassificationFormatDefinition.TextEffectsId);
+		}
+		public static Typeface GetTypeface(this ResourceDictionary resource) {
+			return resource.Get<Typeface>(ClassificationFormatDefinition.TypefaceId);
+		}
+		public static WpfColor GetColor(this IEditorFormatMap map, string formatName, string resourceId = EditorFormatDefinition.ForegroundColorId) {
+			var p = map.GetProperties(formatName);
+			return p != null && p.Contains(resourceId) && (p[resourceId] is WpfColor color)
+				? color
+				: default;
+		}
+		public static WpfColor GetColor(this ResourceDictionary resource, string resourceId = EditorFormatDefinition.ForegroundColorId) {
+			return resource != null && resource.Contains(resourceId) && (resource[resourceId] is WpfColor color)
+				? color
+				: default;
+		}
+		public static WpfColor GetBackgroundColor(this ResourceDictionary resource) {
+			return resource.GetColor(EditorFormatDefinition.BackgroundColorId);
+		}
+		public static ResourceDictionary SetColor(this ResourceDictionary resource, WpfColor color) {
+			if (color.A != 0) {
+				resource[EditorFormatDefinition.ForegroundColorId] = color;
+				var b = new SolidColorBrush(color);
+				b.Freeze();
+				resource[EditorFormatDefinition.ForegroundBrushId] = b;
+			}
+			else {
+				resource.Remove(EditorFormatDefinition.ForegroundColorId);
+				resource.Remove(EditorFormatDefinition.ForegroundBrushId);
+			}
+			return resource;
+		}
+		public static ResourceDictionary SetBackgroundColor(this ResourceDictionary resource, WpfColor color) {
+			if (color.A != 0) {
+				resource[EditorFormatDefinition.BackgroundColorId] = color;
+				var b = new SolidColorBrush(color);
+				b.Freeze();
+				resource[EditorFormatDefinition.BackgroundBrushId] = b;
+			}
+			else {
+				resource.Remove(EditorFormatDefinition.BackgroundColorId);
+				resource.Remove(EditorFormatDefinition.BackgroundBrushId);
+			}
+			return resource;
+		}
+		public static ResourceDictionary SetBrush(this ResourceDictionary resource, WpfBrush brush) {
+			if (brush != null) {
+				brush.Freeze();
+				resource[EditorFormatDefinition.ForegroundBrushId] = brush;
+			}
+			else {
+				resource.Remove(EditorFormatDefinition.ForegroundColorId);
+				resource.Remove(EditorFormatDefinition.ForegroundBrushId);
+			}
+			return resource;
+		}
+		public static ResourceDictionary SetBackgroundBrush(this ResourceDictionary resource, WpfBrush brush) {
+			if (brush != null) {
+				brush.Freeze();
+				resource[EditorFormatDefinition.BackgroundBrushId] = brush;
+			}
+			else {
+				resource.Remove(EditorFormatDefinition.BackgroundColorId);
+				resource.Remove(EditorFormatDefinition.BackgroundBrushId);
+			}
+			return resource;
+		}
+		public static ResourceDictionary SetBold(this ResourceDictionary resource, bool? bold) {
+			if (bold != null) {
+				resource[ClassificationFormatDefinition.IsBoldId] = bold.Value;
+			}
+			else {
+				resource.Remove(ClassificationFormatDefinition.IsBoldId);
+			}
+			return resource;
+		}
+		public static ResourceDictionary SetItalic(this ResourceDictionary resource, bool? italic) {
+			if (italic != null) {
+				resource[ClassificationFormatDefinition.IsItalicId] = italic.Value;
+			}
+			else {
+				resource.Remove(ClassificationFormatDefinition.IsItalicId);
+			}
+			return resource;
+		}
+		public static ResourceDictionary SetFontSize(this ResourceDictionary resource, double? fontSize) {
+			if (fontSize != null) {
+				resource[ClassificationFormatDefinition.FontRenderingSizeId] = fontSize.Value;
+			}
+			else {
+				resource.Remove(ClassificationFormatDefinition.FontRenderingSizeId);
+			}
+			return resource;
+		}
+		public static ResourceDictionary SetTypeface(this ResourceDictionary resource, Typeface typeface) {
+			if (typeface != null) {
+				resource[ClassificationFormatDefinition.TypefaceId] = typeface;
+			}
+			else {
+				resource.Remove(ClassificationFormatDefinition.TypefaceId);
+			}
+			return resource;
+		}
+		public static ResourceDictionary SetTextDecorations(this ResourceDictionary resource, TextDecorationCollection decorations) {
+			if (decorations != null) {
+				resource[ClassificationFormatDefinition.TextDecorationsId] = decorations;
+			}
+			else {
+				resource.Remove(ClassificationFormatDefinition.TextDecorationsId);
+			}
+			return resource;
+		}
+		public static void Remove(this IEditorFormatMap map, string formatName, string key) {
+			map.GetProperties(formatName).Remove(key);
+		}
+		#endregion
 		#endregion
 
 		public static bool Mark<TKey>(this IPropertyOwner owner, TKey mark) {

@@ -130,7 +130,7 @@ namespace Codist
 		public static TTextBlock Append<TTextBlock>(this TTextBlock block, string text)
 			where TTextBlock : TextBlock {
 			if (text != null) {
-			block.Inlines.Add(new Run(text));
+				block.Inlines.Add(new Run(text));
 			}
 			return block;
 		}
@@ -145,7 +145,7 @@ namespace Codist
 		public static TTextBlock Append<TTextBlock>(this TTextBlock block, string text, bool bold, bool italic, WpfBrush brush)
 			where TTextBlock : TextBlock {
 			if (text != null) {
-			block.Inlines.Add(Render(text, bold, italic, brush));
+				block.Inlines.Add(Render(text, bold, italic, brush));
 			}
 			return block;
 		}
@@ -688,6 +688,15 @@ namespace Codist
 				s.ToolTip = v;
 				s.ToolTipOpening -= ShowLazyToolTip;
 			}
+		}
+
+		public static ResourceDictionary Copy(this ResourceDictionary resources) {
+			if (resources == null) {
+				return null;
+			}
+			var copy = new ResourceDictionary();
+			foreach (var key in resources.Keys) { copy[key] = resources[key]; }
+			return copy;
 		}
 
 		public static string GetTypefaceName(this Typeface typeface) {

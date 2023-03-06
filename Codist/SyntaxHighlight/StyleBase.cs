@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Media;
 using AppHelpers;
 using Microsoft.VisualStudio.Text.Classification;
@@ -88,24 +89,108 @@ namespace Codist.SyntaxHighlight
 		internal abstract string Category { get; }
 
 		/// <summary>Returns whether any option in this style is set.</summary>
-		internal bool IsSet => ForeColor.A > 0
-			|| BackColor.A > 0
-			|| ForegroundOpacity != 0
-			|| BackgroundOpacity != 0
+		internal bool IsSet => ForeColor.A != 0
+			|| BackColor.A != 0
 			|| Bold.HasValue
 			|| Italic.HasValue
 			|| Underline.HasValue
+			|| FontSize != 0
+			|| ForegroundOpacity != 0
+			|| BackgroundOpacity != 0
 			|| OverLine.HasValue
 			|| Strikethrough.HasValue
-			|| FontSize > 0
-			|| String.IsNullOrEmpty(Font) == false
-			|| LineColor.A > 0
-			|| LineOpacity != 0
-			|| LineThickness != 0
-			|| LineStyle != LineStyle.Solid;
+			|| String.IsNullOrEmpty(Font) == false;
 
 		internal abstract string ClassificationType { get; }
 		internal abstract string Description { get; }
+
+		internal Brush MakeBrush() {
+			return ForeColor.A != 0 ? new SolidColorBrush(ForeColor) : null;
+		}
+
+		internal Brush MakeBackgroundBrush(Color backColor) {
+			switch (BackgroundEffect) {
+				case BrushEffect.ToBottom:
+					return new LinearGradientBrush(backColor, BackColor, 90);
+				case BrushEffect.ToTop:
+					return new LinearGradientBrush(BackColor, backColor, 90);
+				case BrushEffect.ToRight:
+					return new LinearGradientBrush(backColor, BackColor, 0);
+				case BrushEffect.ToLeft:
+					return new LinearGradientBrush(BackColor, backColor, 0);
+				default:
+					return BackColor.A != 0 ? new SolidColorBrush(BackColor) : null;
+			}
+		}
+
+		internal Typeface MakeTypeface() {
+			var f = new FontFamily(Font);
+			bool fontValid = false;
+			foreach (var item in f.FamilyNames) {
+				if (item.Value?.Contains(Font) == true) {
+					fontValid = true;
+					break;
+				}
+			}
+			if (fontValid) {
+				if (String.IsNullOrWhiteSpace(FontVariant)) {
+					return new Typeface(f, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+				}
+				var ft = f.GetTypefaces().FirstOrDefault(t => t.FaceNames.Values.Contains(FontVariant));
+				if (ft != null) {
+					return new Typeface(new FontFamily($"{Font} {FontVariant}"), ft.Style, ft.Weight, ft.Stretch);
+				}
+			}
+			return null;
+		}
+
+		internal TextDecorationCollection MakeTextDecorations() {
+			var tdc = new TextDecorationCollection();
+			if (Underline == true || LineColor.A > 0) {
+				if (LineColor.A > 0) {
+					var d = new TextDecoration {
+						Location = TextDecorationLocation.Underline,
+						Pen = new Pen {
+							Brush = new SolidColorBrush(LineOpacity == 0 ? LineColor : LineColor.Alpha(LineOpacity))
+						}
+					};
+					if (LineOffset > 0) {
+						d.PenOffset = LineOffset;
+						d.PenOffsetUnit = TextDecorationUnit.Pixel;
+					}
+					if (LineThickness > 0) {
+						d.Pen.Thickness = LineThickness + 1;
+						d.PenThicknessUnit = TextDecorationUnit.Pixel;
+					}
+					if (LineStyle != LineStyle.Solid) {
+						switch (LineStyle) {
+							case LineStyle.Dot:
+								d.Pen.DashStyle = new DashStyle(new double[] { 2, 2 }, 0);
+								break;
+							case LineStyle.Dash:
+								d.Pen.DashStyle = new DashStyle(new double[] { 4, 4 }, 0);
+								break;
+							case LineStyle.DashDot:
+								d.Pen.DashStyle = new DashStyle(new double[] { 4, 4, 2, 4 }, 0);
+								break;
+							default:
+								break;
+						}
+					}
+					tdc.Add(d);
+				}
+				else {
+					tdc.Add(TextDecorations.Underline);
+				}
+			}
+			if (Strikethrough == true) {
+				tdc.Add(TextDecorations.Strikethrough);
+			}
+			if (OverLine == true) {
+				tdc.Add(TextDecorations.OverLine);
+			}
+			return tdc.Count > 0 ? tdc : null;
+		}
 
 		internal StyleBase Clone() {
 			return (StyleBase)MemberwiseClone();

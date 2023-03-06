@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Media;
 using AppHelpers;
-using Codist.Taggers;
 using Codist.Margins;
 using Codist.SyntaxHighlight;
+using Codist.Taggers;
 using Newtonsoft.Json;
 
 namespace Codist
@@ -280,15 +279,6 @@ namespace Codist
 
 		public static void ResetStyles() {
 			FormatStore.Reset();
-			ResetCodeStyle(Instance.GeneralStyles, GetDefaultCodeStyles<CodeStyle, CodeStyleTypes>());
-			ResetCodeStyle(Instance.CommentStyles, GetDefaultCommentStyles());
-			ResetCodeStyle(Instance.CodeStyles, GetDefaultCodeStyles<CSharpStyle, CSharpStyleTypes>());
-			ResetCodeStyle(Instance.CppStyles, GetDefaultCodeStyles<CppStyle, CppStyleTypes>());
-			ResetCodeStyle(Instance.MarkdownStyles, GetDefaultCodeStyles<MarkdownStyle, MarkdownStyleTypes>());
-			ResetCodeStyle(Instance.XmlCodeStyles, GetDefaultCodeStyles<XmlCodeStyle, XmlStyleTypes>());
-			ResetCodeStyle(Instance.SymbolMarkerStyles, GetDefaultCodeStyles<SymbolMarkerStyle, SymbolMarkerStyleTypes>());
-			ResetCodeStyle(Instance.MarkerSettings, GetDefaultMarkerStyles());
-			__Loaded?.Invoke(Instance);
 			__Updated?.Invoke(new ConfigUpdatedEventArgs(Instance, Features.SyntaxHighlight));
 		}
 
