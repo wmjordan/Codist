@@ -42,9 +42,6 @@ namespace Codist.Controls
 			}
 			else {
 				icon = ThemeHelper.GetImage(iconId).WrapMargin(WpfHelper.GlyphMargin);
-				if (_RowCount > 0) {
-					icon.Opacity = WpfHelper.DimmedOpacity;
-				}
 				icon.SetValue(VerticalAlignmentProperty, VerticalAlignment.Top);
 			}
 			icon.SetValue(Grid.RowProperty, _RowCount);
