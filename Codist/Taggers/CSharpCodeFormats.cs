@@ -90,7 +90,7 @@ namespace Codist.Taggers
 	[ClassificationType(ClassificationTypeNames = Constants.CodeBold)]
 	[Name(Constants.CodeBold)]
 	[UserVisible(false)]
-	[Order(After = Constants.CodeIdentifier)]
+	[Order(After = Priority.High)]
 	sealed class BoldFormat : ClassificationFormatDefinition
 	{
 		public BoldFormat() {
