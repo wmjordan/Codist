@@ -129,7 +129,9 @@ namespace Codist
 		}
 		public static TTextBlock Append<TTextBlock>(this TTextBlock block, string text)
 			where TTextBlock : TextBlock {
+			if (text != null) {
 			block.Inlines.Add(new Run(text));
+			}
 			return block;
 		}
 		public static TTextBlock Append<TTextBlock>(this TTextBlock block, string text, bool bold)
@@ -142,7 +144,9 @@ namespace Codist
 		}
 		public static TTextBlock Append<TTextBlock>(this TTextBlock block, string text, bool bold, bool italic, WpfBrush brush)
 			where TTextBlock : TextBlock {
+			if (text != null) {
 			block.Inlines.Add(Render(text, bold, italic, brush));
+			}
 			return block;
 		}
 		public static TTextBlock AppendLink<TTextBlock>(this TTextBlock block, string text, string uri, string toolTip)
