@@ -203,7 +203,7 @@ namespace Codist.SyntaxHighlight
 			readonly Dictionary<string, ChangeTrace> _Traces = new Dictionary<string, ChangeTrace>();
 			readonly Stack<string> _Formatters = new Stack<string>();
 			FormatContext _Context;
-			Brush _EditorBackground;
+			Color _EditorBackground;
 			double _DefaultFontSize;
 			int _Lock;
 
@@ -212,7 +212,7 @@ namespace Codist.SyntaxHighlight
 				_EditorFormatMap = editorFormatMap;
 				_ClassificationFormatMap = classificationFormatMap;
 				_DefaultFontSize = classificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
-				_EditorBackground = editorFormatMap.GetBrush(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundBrushId);
+				_EditorBackground = editorFormatMap.GetProperties(Constants.EditorProperties.TextViewBackground).GetBackgroundColor();
 				Config.RegisterUpdateHandler(UpdateHighlightAfterConfigurationChange);
 			}
 
@@ -309,8 +309,8 @@ namespace Codist.SyntaxHighlight
 					_EditorFormatMap.BeginBatchUpdate();
 					startedBatch = true;
 				}
-				var currentBg = _EditorFormatMap.GetBrush(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundBrushId);
-				var bgChanged = AreBrushesEqual(_EditorBackground, currentBg) == false;
+				var currentBg = _EditorFormatMap.GetProperties(Constants.EditorProperties.TextViewBackground).GetBackgroundColor();
+				var bgChanged = _EditorBackground != currentBg;
 				if (bgChanged) {
 					_EditorBackground = currentBg;
 					$"[{_Category}] background changed".Log();
@@ -321,7 +321,7 @@ namespace Codist.SyntaxHighlight
 					_DefaultFontSize = currentFontSize;
 					$"[{_Category}] font size changed".Log();
 				}
-				bool refreshClassName = false;
+				bool needRefresh = false;
 				try {
 					var dedup = new HashSet<IClassificationType>();
 					// ChangedItems collection is dynamic
@@ -333,12 +333,17 @@ namespace Codist.SyntaxHighlight
 
 					if (bgChanged || fsChanged) {
 						foreach (var item in __SyntaxStyleCache) {
-							if (bgChanged && item.Value.BackColor.A > 0 || fsChanged && item.Value.FontSize != 0) {
+							if (bgChanged && item.Value.BackColor.A > 0
+								|| fsChanged && item.Value.FontSize != 0) {
 								HighlightRecursive(__GetClassificationType(item.Key), dedup);
+								needRefresh = true;
 							}
 						}
 					}
-					refreshClassName = dedup.Contains(__GetClassificationType(Constants.CodeClassName));
+
+					if (needRefresh == false) {
+						needRefresh = dedup.Contains(__GetClassificationType(Constants.CodeClassName));
+					}
 				}
 				finally {
 					_Context = FormatContext.None;
@@ -346,7 +351,7 @@ namespace Codist.SyntaxHighlight
 						_EditorFormatMap.EndBatchUpdate();
 					}
 					_Formatters.Pop();
-					if (refreshClassName) {
+					if (needRefresh) {
 						Refresh();
 					}
 					_Lock--;
@@ -548,9 +553,9 @@ namespace Codist.SyntaxHighlight
 				/// <para>Changes properties of <paramref name="current"/>, according to <paramref name="style"/>.</para>
 				/// <para>Change method takes the following pattern:</para>
 				/// <list type="number">
-				/// <item><para>change the property, if is specified from style</para></item>
-				/// <item><para>if the property is not specified from style, but previously was, then revert it to the original</para></item>
-				/// <item><para>if the property is not specified from style, but changed externally, update the property in Origin</para></item>
+				/// <item><para>change the format if it is specified from style, and record the changes</para></item>
+				/// <item><para>if the format is not specified from style, but previously was, then revert it to the original and erase the changes</para></item>
+				/// <item><para>if the format is not specified from style, but changed externally, update the format in Origin</para></item>
 				/// </list>
 				/// </summary>
 				/// <param name="current">The properties to be changed.</param>
@@ -558,9 +563,6 @@ namespace Codist.SyntaxHighlight
 				/// <param name="highlighter">The highlighter providing global settings (background, default font size, etc.)</param>
 				/// <returns>What's changed</returns>
 				public FormatChanges Change(ResourceDictionary current, StyleBase style, Highlighter highlighter) {
-					if (style == null) {
-						style = new SyntaxStyle("NULL");
-					}
 					ChangeBold(current, style);
 					ChangeItalic(current, style);
 					ChangeBrush(current, style);
@@ -573,21 +575,20 @@ namespace Codist.SyntaxHighlight
 					return _FormatChanges;
 				}
 
-#region ResourceDictionary alteration methods
+				#region ResourceDictionary alteration methods
 				void ChangeBold(ResourceDictionary current, StyleBase style) {
 					bool? s;
-					if (style.Bold != null) {
-						if (style.Bold != current.GetBold()) {
+					if (style != null && style.Bold != null) {
+						if ((s = style.Bold) != current.GetBold()) {
 							_FormatChanges |= FormatChanges.Bold;
-							Changes.SetBold(style.Bold);
-							current.SetBold(style.Bold);
+							Changes.SetBold(s);
+							current.SetBold(s);
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.Bold)) {
 						_FormatChanges ^= FormatChanges.Bold;
-						s = Origin.GetBold();
 						Changes.SetBold(null);
-						current.SetBold(s);
+						current.SetBold(Origin.GetBold());
 					}
 					else if ((s = current.GetBold()) != Origin.GetBold()) {
 						Origin.SetBold(s);
@@ -596,18 +597,17 @@ namespace Codist.SyntaxHighlight
 
 				void ChangeItalic(ResourceDictionary current, StyleBase style) {
 					bool? s;
-					if (style.Italic != null) {
-						if (style.Italic != current.GetItalic()) {
+					if (style != null && style.Italic != null) {
+						if ((s = style.Italic) != current.GetItalic()) {
 							_FormatChanges |= FormatChanges.Italic;
-							Changes.SetItalic(style.Italic);
-							current.SetItalic(style.Italic);
+							Changes.SetItalic(s);
+							current.SetItalic(s);
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.Italic)) {
 						_FormatChanges ^= FormatChanges.Italic;
-						s = Origin.GetItalic();
 						Changes.SetItalic(null);
-						current.SetItalic(s);
+						current.SetItalic(Origin.GetItalic());
 					}
 					else if ((s = current.GetItalic()) != Origin.GetItalic()) {
 						Origin.SetItalic(s);
@@ -616,9 +616,8 @@ namespace Codist.SyntaxHighlight
 
 				void ChangeBrush(ResourceDictionary current, StyleBase style) {
 					Brush b;
-					if (style.ForeColor.A != 0) {
-						b = style.MakeBrush();
-						if (AreBrushesEqual(b, current.GetBrush()) == false) {
+					if (style != null && style.ForeColor.A != 0) {
+						if (AreBrushesEqual(b = style.MakeBrush(), current.GetBrush()) == false) {
 							_FormatChanges |= FormatChanges.ForegroundBrush;
 							Changes.SetBrush(b);
 							current.SetBrush(b);
@@ -626,9 +625,8 @@ namespace Codist.SyntaxHighlight
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.ForegroundBrush)) {
 						_FormatChanges ^= FormatChanges.ForegroundBrush;
-						b = Origin.GetBrush();
 						Changes.SetBrush(null);
-						current.SetBrush(b);
+						current.SetBrush(Origin.GetBrush());
 					}
 					else if (AreBrushesEqual((b = current.GetBrush()), Origin.GetBrush()) == false) {
 						Origin.SetBrush(b);
@@ -637,7 +635,7 @@ namespace Codist.SyntaxHighlight
 
 				void ChangeBackgroundBrush(ResourceDictionary current, StyleBase style, Highlighter highlighter) {
 					Brush b;
-					if (style.BackColor.A != 0) {
+					if (style != null && style.BackColor.A != 0) {
 						b = style.MakeBackgroundBrush(highlighter._EditorFormatMap.GetColor(Constants.EditorProperties.TextViewBackground, EditorFormatDefinition.BackgroundColorId));
 						if (AreBrushesEqual(b, current.GetBackgroundBrush()) == false) {
 							_FormatChanges |= FormatChanges.BackgroundBrush;
@@ -647,9 +645,8 @@ namespace Codist.SyntaxHighlight
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.BackgroundBrush)) {
 						_FormatChanges ^= FormatChanges.BackgroundBrush;
-						b = Origin.GetBackgroundBrush();
 						Changes.SetBackgroundBrush(null);
-						current.SetBackgroundBrush(b);
+						current.SetBackgroundBrush(Origin.GetBackgroundBrush());
 					}
 					else if (AreBrushesEqual((b = current.GetBackgroundBrush()), Origin.GetBackgroundBrush()) == false) {
 						Origin.SetBackgroundBrush(b);
@@ -658,19 +655,17 @@ namespace Codist.SyntaxHighlight
 
 				void ChangeOpacity(ResourceDictionary current, StyleBase style) {
 					double o;
-					if (style.ForegroundOpacity != 0) {
-						if (style.ForegroundOpacity != current.GetOpacity()) {
+					if (style != null && style.ForegroundOpacity != 0) {
+						if ((o = style.ForegroundOpacity / 255d) != current.GetOpacity()) {
 							_FormatChanges |= FormatChanges.ForegroundOpacity;
-							o = style.ForegroundOpacity / 255d;
 							Changes.SetOpacity(o);
 							current.SetOpacity(o);
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.ForegroundOpacity)) {
 						_FormatChanges ^= FormatChanges.ForegroundOpacity;
-						o = Origin.GetOpacity();
 						Changes.SetOpacity(0);
-						current.SetOpacity(o);
+						current.SetOpacity(Origin.GetOpacity());
 					}
 					else if ((o = current.GetOpacity()) != Origin.GetOpacity()) {
 						Origin.SetOpacity(o);
@@ -679,19 +674,17 @@ namespace Codist.SyntaxHighlight
 
 				void ChangeBackgroundOpacity(ResourceDictionary current, StyleBase style) {
 					double o;
-					if (style.BackgroundOpacity != 0) {
-						if (style.BackgroundOpacity != current.GetBackgroundOpacity()) {
+					if (style != null && style.BackgroundOpacity != 0) {
+						if ((o = style.BackgroundOpacity / 255d) != current.GetBackgroundOpacity()) {
 							_FormatChanges |= FormatChanges.BackgroundOpacity;
-							o = style.BackgroundOpacity / 255d;
 							Changes.SetBackgroundOpacity(o);
 							current.SetBackgroundOpacity(o);
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.BackgroundOpacity)) {
 						_FormatChanges ^= FormatChanges.BackgroundOpacity;
-						o = Origin.GetBackgroundOpacity();
 						Changes.SetBackgroundOpacity(0);
-						current.SetBackgroundOpacity(o);
+						current.SetBackgroundOpacity(Origin.GetBackgroundOpacity());
 					}
 					else if ((o = current.GetBackgroundOpacity()) != Origin.GetBackgroundOpacity()) {
 						Origin.SetBackgroundOpacity(o);
@@ -700,7 +693,7 @@ namespace Codist.SyntaxHighlight
 
 				void ChangeFontSize(ResourceDictionary current, StyleBase style, Highlighter highlighter) {
 					double? s;
-					if (style.FontSize != 0) {
+					if (style != null && style.FontSize != 0) {
 						s = highlighter._DefaultFontSize + style.FontSize;
 						if (s != current.GetFontSize()) {
 							_FormatChanges |= FormatChanges.FontSize;
@@ -710,9 +703,8 @@ namespace Codist.SyntaxHighlight
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.FontSize)) {
 						_FormatChanges ^= FormatChanges.FontSize;
-						s = Origin.GetFontSize();
 						Changes.SetFontSize(null);
-						current.SetFontSize(s);
+						current.SetFontSize(Origin.GetFontSize());
 					}
 					else if ((s = current.GetFontSize()) != Origin.GetFontSize()) {
 						Origin.SetFontSize(s);
@@ -720,31 +712,32 @@ namespace Codist.SyntaxHighlight
 				}
 
 				void ChangeTypeface(ResourceDictionary current, StyleBase style) {
-					var ct = current.GetTypeface();
-					if (String.IsNullOrEmpty(style.Font) == false) {
-						var t = style.MakeTypeface();
-						if (t != null && AreTypefaceEqual(ct, t) == false) {
+					Typeface ct;
+					if (style != null && String.IsNullOrEmpty(style.Font) == false) {
+						ct = style.MakeTypeface();
+						if (ct != null && AreTypefaceEqual(current.GetTypeface(), ct) == false) {
 							_FormatChanges |= FormatChanges.Typeface;
-							Changes.SetTypeface(t);
-							current.SetTypeface(t);
+							Changes.SetTypeface(ct);
+							current.SetTypeface(ct);
 						}
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.Typeface)) {
 						_FormatChanges ^= FormatChanges.Typeface;
-						ct = Origin.GetTypeface();
 						Changes.SetTypeface(null);
-						current.SetTypeface(ct);
+						current.SetTypeface(Origin.GetTypeface());
 					}
-					else if (ct != Origin.GetTypeface()) {
+					else if ((ct = current.GetTypeface()) != Origin.GetTypeface()) {
 						Origin.SetTypeface(ct);
 					}
 				}
 
 				void ChangeTextDecorations(ResourceDictionary current, StyleBase style) {
-					var ct = current.GetTextDecorations();
-					if (style.Underline != null || style.Strikethrough != null || style.OverLine != null || style.LineColor.A != 0) {
+					TextDecorationCollection td;
+					if (style != null
+						&& (style.Underline != null || style.Strikethrough != null || style.OverLine != null || style.LineColor.A != 0)) {
 						var t = style.MakeTextDecorations();
-						if (t != ct && (ct == null || t?.SequenceEqual(ct) != true)) {
+						if (t != (td = current.GetTextDecorations())
+							&& (td == null || t?.SequenceEqual(td) != true)) {
 							_FormatChanges |= FormatChanges.TextDecorations;
 							Changes.SetTextDecorations(t);
 							current.SetTextDecorations(t);
@@ -752,15 +745,14 @@ namespace Codist.SyntaxHighlight
 					}
 					else if (_FormatChanges.MatchFlags(FormatChanges.TextDecorations)) {
 						_FormatChanges ^= FormatChanges.TextDecorations;
-						ct = Origin.GetTextDecorations();
 						Changes.SetTextDecorations(null);
-						current.SetTextDecorations(ct);
+						current.SetTextDecorations(Origin.GetTextDecorations());
 					}
-					else if (ct != Origin.GetTextDecorations()) {
-						Origin.SetTextDecorations(ct);
+					else if ((td = current.GetTextDecorations()) != Origin.GetTextDecorations()) {
+						Origin.SetTextDecorations(td);
 					}
 				}
-#endregion
+				#endregion
 
 				public void Reset() {
 					Changes.Clear();

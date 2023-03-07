@@ -148,48 +148,62 @@ namespace Codist.SyntaxHighlight
 			var tdc = new TextDecorationCollection();
 			if (Underline == true || LineColor.A > 0) {
 				if (LineColor.A > 0) {
-					var d = new TextDecoration {
-						Location = TextDecorationLocation.Underline,
-						Pen = new Pen {
-							Brush = new SolidColorBrush(LineOpacity == 0 ? LineColor : LineColor.Alpha(LineOpacity))
-						}
-					};
-					if (LineOffset > 0) {
-						d.PenOffset = LineOffset;
-						d.PenOffsetUnit = TextDecorationUnit.Pixel;
-					}
-					if (LineThickness > 0) {
-						d.Pen.Thickness = LineThickness + 1;
-						d.PenThicknessUnit = TextDecorationUnit.Pixel;
-					}
-					if (LineStyle != LineStyle.Solid) {
-						switch (LineStyle) {
-							case LineStyle.Dot:
-								d.Pen.DashStyle = new DashStyle(new double[] { 2, 2 }, 0);
-								break;
-							case LineStyle.Dash:
-								d.Pen.DashStyle = new DashStyle(new double[] { 4, 4 }, 0);
-								break;
-							case LineStyle.DashDot:
-								d.Pen.DashStyle = new DashStyle(new double[] { 4, 4, 2, 4 }, 0);
-								break;
-							default:
-								break;
-						}
-					}
-					tdc.Add(d);
+					tdc.Add(MakeLineDecoration(TextDecorationLocation.Underline));
 				}
 				else {
 					tdc.Add(TextDecorations.Underline);
 				}
 			}
 			if (Strikethrough == true) {
-				tdc.Add(TextDecorations.Strikethrough);
+				if (LineColor.A > 0) {
+					tdc.Add(MakeLineDecoration(TextDecorationLocation.Strikethrough));
+				}
+				else {
+					tdc.Add(TextDecorations.Strikethrough);
+				}
 			}
 			if (OverLine == true) {
-				tdc.Add(TextDecorations.OverLine);
+				if (LineColor.A > 0) {
+					tdc.Add(MakeLineDecoration(TextDecorationLocation.OverLine));
+				}
+				else {
+					tdc.Add(TextDecorations.OverLine);
+				}
 			}
 			return tdc.Count > 0 ? tdc : null;
+		}
+
+		TextDecoration MakeLineDecoration(TextDecorationLocation location) {
+			var d = new TextDecoration {
+				Location = location,
+				Pen = new Pen {
+					Brush = new SolidColorBrush(LineOpacity == 0 ? LineColor : LineColor.Alpha(LineOpacity))
+				}
+			};
+			if (LineOffset != 0) {
+				d.PenOffset = LineOffset;
+				d.PenOffsetUnit = TextDecorationUnit.Pixel;
+			}
+			if (LineThickness > 0) {
+				d.Pen.Thickness = LineThickness + 1;
+				d.PenThicknessUnit = TextDecorationUnit.Pixel;
+			}
+			if (LineStyle != LineStyle.Solid) {
+				switch (LineStyle) {
+					case LineStyle.Dot:
+						d.Pen.DashStyle = new DashStyle(new double[] { 2, 2 }, 0);
+						break;
+					case LineStyle.Dash:
+						d.Pen.DashStyle = new DashStyle(new double[] { 4, 4 }, 0);
+						break;
+					case LineStyle.DashDot:
+						d.Pen.DashStyle = new DashStyle(new double[] { 4, 4, 2, 4 }, 0);
+						break;
+					default:
+						break;
+				}
+			}
+			return d;
 		}
 
 		internal StyleBase Clone() {
