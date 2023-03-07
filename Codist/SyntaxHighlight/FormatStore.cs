@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using AppHelpers;
@@ -564,6 +565,8 @@ namespace Codist.SyntaxHighlight
 					ChangeItalic(current, style);
 					ChangeBrush(current, style);
 					ChangeBackgroundBrush(current, style, highlighter);
+					ChangeOpacity(current, style);
+					ChangeBackgroundOpacity(current, style);
 					ChangeFontSize(current, style, highlighter);
 					ChangeTypeface(current, style);
 					ChangeTextDecorations(current, style);
@@ -653,6 +656,48 @@ namespace Codist.SyntaxHighlight
 					}
 				}
 
+				void ChangeOpacity(ResourceDictionary current, StyleBase style) {
+					double o;
+					if (style.ForegroundOpacity != 0) {
+						if (style.ForegroundOpacity != current.GetOpacity()) {
+							_FormatChanges |= FormatChanges.ForegroundOpacity;
+							o = style.ForegroundOpacity / 255d;
+							Changes.SetOpacity(o);
+							current.SetOpacity(o);
+						}
+					}
+					else if (_FormatChanges.MatchFlags(FormatChanges.ForegroundOpacity)) {
+						_FormatChanges ^= FormatChanges.ForegroundOpacity;
+						o = Origin.GetOpacity();
+						Changes.SetOpacity(0);
+						current.SetOpacity(o);
+					}
+					else if ((o = current.GetOpacity()) != Origin.GetOpacity()) {
+						Origin.SetOpacity(o);
+					}
+				}
+
+				void ChangeBackgroundOpacity(ResourceDictionary current, StyleBase style) {
+					double o;
+					if (style.BackgroundOpacity != 0) {
+						if (style.BackgroundOpacity != current.GetBackgroundOpacity()) {
+							_FormatChanges |= FormatChanges.BackgroundOpacity;
+							o = style.BackgroundOpacity / 255d;
+							Changes.SetBackgroundOpacity(o);
+							current.SetBackgroundOpacity(o);
+						}
+					}
+					else if (_FormatChanges.MatchFlags(FormatChanges.BackgroundOpacity)) {
+						_FormatChanges ^= FormatChanges.BackgroundOpacity;
+						o = Origin.GetBackgroundOpacity();
+						Changes.SetBackgroundOpacity(0);
+						current.SetBackgroundOpacity(o);
+					}
+					else if ((o = current.GetBackgroundOpacity()) != Origin.GetBackgroundOpacity()) {
+						Origin.SetBackgroundOpacity(o);
+					}
+				}
+
 				void ChangeFontSize(ResourceDictionary current, StyleBase style, Highlighter highlighter) {
 					double? s;
 					if (style.FontSize != 0) {
@@ -697,7 +742,7 @@ namespace Codist.SyntaxHighlight
 
 				void ChangeTextDecorations(ResourceDictionary current, StyleBase style) {
 					var ct = current.GetTextDecorations();
-					if (style.Underline != null || style.Strikethrough != null || style.OverLine != null) {
+					if (style.Underline != null || style.Strikethrough != null || style.OverLine != null || style.LineColor.A != 0) {
 						var t = style.MakeTextDecorations();
 						if (t != ct && (ct == null || t?.SequenceEqual(ct) != true)) {
 							_FormatChanges |= FormatChanges.TextDecorations;

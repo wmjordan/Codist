@@ -190,11 +190,11 @@ namespace Codist
 		public static bool? GetBold(this ResourceDictionary resource) {
 			return resource.GetNullable<bool>(ClassificationFormatDefinition.IsBoldId);
 		}
-		public static double? GetOpacity(this ResourceDictionary resource) {
-			return resource.GetNullable<double>(ClassificationFormatDefinition.ForegroundOpacityId);
+		public static double GetOpacity(this ResourceDictionary resource) {
+			return resource.GetNullable<double>(ClassificationFormatDefinition.ForegroundOpacityId) ?? 0d;
 		}
-		public static double? GetBackgroundOpacity(this ResourceDictionary resource) {
-			return resource.GetNullable<double>(ClassificationFormatDefinition.BackgroundOpacityId);
+		public static double GetBackgroundOpacity(this ResourceDictionary resource) {
+			return resource.GetNullable<double>(ClassificationFormatDefinition.BackgroundOpacityId) ?? 0d;
 		}
 		public static WpfBrush GetBrush(this ResourceDictionary resource, string resourceId = EditorFormatDefinition.ForegroundBrushId) {
 			return resource.Get<WpfBrush>(resourceId);
@@ -288,6 +288,24 @@ namespace Codist
 			}
 			else {
 				resource.Remove(ClassificationFormatDefinition.IsItalicId);
+			}
+			return resource;
+		}
+		public static ResourceDictionary SetOpacity(this ResourceDictionary resource, double opacity) {
+			if (opacity != 0) {
+				resource[ClassificationFormatDefinition.ForegroundOpacityId] = opacity;
+			}
+			else {
+				resource.Remove(ClassificationFormatDefinition.ForegroundOpacityId);
+			}
+			return resource;
+		}
+		public static ResourceDictionary SetBackgroundOpacity(this ResourceDictionary resource, double? opacity) {
+			if (opacity != null) {
+				resource[ClassificationFormatDefinition.BackgroundOpacityId] = opacity.Value;
+			}
+			else {
+				resource.Remove(ClassificationFormatDefinition.BackgroundOpacityId);
 			}
 			return resource;
 		}

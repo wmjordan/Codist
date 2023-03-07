@@ -162,6 +162,8 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeFieldName)]
+	[Order(After = Constants.CSharpStaticMemberName)]
+	[Order(After = Constants.CodeStaticSymbol)]
 	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class EnumFieldFormat : ClassificationFormatDefinition
 	{
