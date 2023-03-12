@@ -107,7 +107,8 @@ namespace Codist.QuickInfo
 					if (qiWrapper != null) {
 						qiWrapper.OverrideBuiltInXmlDoc = false;
 					}
-					break;
+					ShowBlockInfo(qiContent, currentSnapshot, node = unitCompilation.FindNode(token.Span), semanticModel);
+					goto RETURN;
 				case SyntaxKind.ThisKeyword: // convert to type below
 				case SyntaxKind.BaseKeyword:
 				case SyntaxKind.OverrideKeyword:
