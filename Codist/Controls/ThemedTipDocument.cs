@@ -60,9 +60,8 @@ namespace Codist.Controls
 			}
 			w -= WpfHelper.IconRightMargin + ThemeHelper.DefaultIconSize + WpfHelper.SmallMarginSize + WpfHelper.SmallMarginSize + 22/*scrollbar width*/;
 			foreach (var item in _Container.Children) {
-				var r = item as TextBlock;
-				if (r != null) {
-					r.MaxWidth = w;
+				if (item is FrameworkElement e) {
+					e.MaxWidth = w;
 				}
 			}
 		}
