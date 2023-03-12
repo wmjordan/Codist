@@ -388,25 +388,25 @@ namespace Codist.QuickInfo
 						return;
 					}
 					foreach (var item in infoPanel.Children) {
-						var cp = (item as UIElement).GetFirstVisualChild<TextBlock>();
-						if (cp == null) {
+						var tb = (item as UIElement).GetFirstVisualChild<TextBlock>();
+						if (tb == null) {
 							continue;
 						}
-						cp.LimitSize();
+						tb.LimitSize();
 						if (Diagnostics != null && Diagnostics.Count > 0) {
-							var t = cp.GetText();
+							var t = tb.GetText();
 							var d = Diagnostics.FirstOrDefault(i => i.GetMessage() == t);
 							if (d != null) {
-								cp.UseDummyToolTip();
-								cp.Tag = d;
-								cp.SetGlyph(ThemeHelper.GetImage(GetGlyphForSeverity(d.Severity)));
-								cp.ToolTipOpening += ShowToolTipForDiagnostics;
+								tb.UseDummyToolTip();
+								tb.Tag = d;
+								tb.SetGlyph(ThemeHelper.GetImage(GetGlyphForSeverity(d.Severity)));
+								tb.ToolTipOpening += ShowToolTipForDiagnostics;
 							}
 						}
 						else {
-							cp.SetGlyph(ThemeHelper.GetImage(KnownImageIds.StatusInformation));
+							tb.SetGlyph(ThemeHelper.GetImage(KnownImageIds.StatusInformation));
 						}
-						TextEditorWrapper.CreateFor(cp);
+						TextEditorWrapper.CreateFor(tb);
 					}
 
 					int GetGlyphForSeverity(DiagnosticSeverity severity) {
@@ -459,7 +459,9 @@ namespace Codist.QuickInfo
 					var icon = infoPanel.GetFirstVisualChild<CrispImage>();
 					var signature = infoPanel.GetFirstVisualChild<TextBlock>();
 
-					OverrideDocumentation(doc);
+					if (DocElement != null) {
+						OverrideDocumentation(doc);
+					}
 
 					if (icon != null && signature != null) {
 						// override signature style and apply "click and go" feature
@@ -634,6 +636,8 @@ namespace Codist.QuickInfo
 							continue;
 						}
 						if (c is TextBlock tb) {
+							TextEditorWrapper.CreateFor(tb);
+							tb.SetGlyph(ThemeHelper.GetImage(IconIds.Info));
 							tb.LimitSize();
 							continue;
 						}
@@ -697,7 +701,7 @@ namespace Codist.QuickInfo
 					}
 				}
 
-				static void MakeChildrenScrollable(StackPanel s) {
+				static void MakeChildrenScrollable(Panel s) {
 					var children = new DependencyObject[s.Children.Count];
 					var i = -1;
 					foreach (DependencyObject n in s.Children) {
@@ -705,14 +709,17 @@ namespace Codist.QuickInfo
 					}
 					s.Children.Clear();
 					foreach (var c in children) {
-						var d = c as ThemedTipDocument;
-						if (d != null) {
+						if (c is ThemedTipDocument d) {
 							foreach (var item in d.Paragraphs) {
-								//(item as FrameworkElement)?.LimitSize();
 								item.TextWrapping = TextWrapping.Wrap;
 							}
 							d.ApplySizeLimit();
 							d.WrapMargin(WpfHelper.SmallVerticalMargin);
+						}
+						else if (c is TextBlock t) {
+							t.TextWrapping = TextWrapping.Wrap;
+							t.SetGlyph(ThemeHelper.GetImage(IconIds.Info));
+							TextEditorWrapper.CreateFor(t);
 						}
 						s.Add(c.Scrollable().LimitSize());
 					}
@@ -725,12 +732,14 @@ namespace Codist.QuickInfo
 					}
 					s.Items.Clear();
 					foreach (var c in children) {
-						var t = c as TextBlock;
-						if (t != null) {
+						if (c is TextBlock t) {
 							t.TextWrapping = TextWrapping.Wrap;
 							s.Items.Add(t.Scrollable().LimitSize());
 						}
 						else {
+							if (c is Panel p) {
+								MakeChildrenScrollable(p);
+							}
 							s.Items.Add(c);
 						}
 					}
