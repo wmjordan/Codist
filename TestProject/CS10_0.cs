@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq.Expressions;
 
 namespace TestProject.CS10_0;
@@ -74,6 +75,6 @@ class Lambdas
 
 	void AttributesOnLambdas()
 	{
-		Func<string, int> parse = [Name("abc")] (s) => int.Parse(s);
+		Func<string, int> parse = [Description("abc")] (s) => int.Parse(s);
 	}
 }

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq; // unnccessary code
+using System.Linq; // unnecessary code
 using System.Runtime.InteropServices;
 
 namespace TestProject
@@ -33,7 +33,7 @@ text".Log(); // multiline string (string verbatim)
 				.Log(); // calling extension method
 
 			switch ((MyEnum)fieldId) {
-				case MyEnum.None: break; // normal swtich break
+				case MyEnum.None: break; // normal switch break
 				case MyEnum.OK: return; // control flow keyword
 				default:
 					throw new NotImplementedException(fieldId.ToString()); // control flow keyword
