@@ -41,6 +41,7 @@ namespace Codist
 			public const string CompilerMarked = "Compiler Marked";
 			public const string Declaration = nameof(Declaration);
 			public const string TypeDefinition = "Type Definition";
+			public const string Markup = nameof(Markup);
 			public const string Member = nameof(Member);
 			public const string Xml = "XML";
 			public const string Highlight = nameof(Highlight);
@@ -48,6 +49,7 @@ namespace Codist
 			public const string Task = nameof(Task);
 			public const string GeneralTask = "General Task";
 			public const string Source = nameof(Source);
+			public const string Style = nameof(Style);
 		}
 
 		public static class EditorProperties
@@ -114,6 +116,7 @@ namespace Codist
 		public const string CodeLocalName = "local name";
 		public const string CodeMethodName = "method name";
 		public const string CodeParameterName = "parameter name";
+		public const string CodeReassignedVariable = "reassigned variable";
 		public const string CodeStaticSymbol = "static symbol";
 		public const string CodeLabelName = "label name";
 		public const string CodeNavigableSymbol = "navigableSymbol";
@@ -127,6 +130,10 @@ namespace Codist
 		public const string XmlDocDelimiter = "xml doc comment - delimiter";
 		public const string XmlDocEntity = "xml doc comment - entity reference";
 		public const string XmlDocTag = "xml doc comment - name";
+
+		public const string MarkupAttribute = "markup attribute";
+		public const string MarkupAttributeValue = "markup attribute value";
+		public const string MarkupNode = "markup node";
 
 		public const string CSharpLocalVariableName = "C#: Local variable";
 		public const string CSharpParameterName = "C#: Parameter";
@@ -167,24 +174,31 @@ namespace Codist
 
 		public const string CppFunction = "cppFunction";
 		public const string CppClassTemplate = "cppClassTemplate";
+		public const string CppControlKeyword = "cppControlKeyword";
+		public const string CppEnumerator = "cppEnumerator";
 		public const string CppFunctionTemplate = "cppFunctionTemplate";
 		public const string CppEvent = "cppEvent";
 		public const string CppGenericType = "cppGenericType";
 		public const string CppGlobalVariable = "cppGlobalVariable";
+		public const string CppInactiveCodeClassification = "cppInactiveCodeClassification";
+		public const string CppInlineHint = "cppInlineHint";
 		public const string CppLabel = "cppLabel";
 		public const string CppLocalVariable = "cppLocalVariable";
-		public const string CppMacro = "cppMacro"; // not mapped
+		public const string CppMacro = "cppMacro";
 		public const string CppMemberField = "cppMemberField";
 		public const string CppMemberFunction = "cppMemberFunction";
 		public const string CppMemberOperator = "cppMemberOperator";
 		public const string CppNamespace = "cppNamespace";
-		public const string CppNewDelete = "cppNewDelete"; // not mapped
+		public const string CppNewDelete = "cppNewDelete";
 		public const string CppParameter = "cppParameter";
 		public const string CppOperator = "cppOperator";
 		public const string CppProperty = "cppProperty";
 		public const string CppRefType = "cppRefType"; // not mapped
+		public const string CppSolidCodeClassification = "cppSolidCodeClassification";
 		public const string CppStaticMemberField = "cppStaticMemberField"; // not mapped
 		public const string CppStaticMemberFunction = "cppStaticMemberFunction"; // not mapped
+		public const string CppStringDelimiterCharacter = "cppStringDelimiterCharacter";
+		public const string CppStringEscapeCharacter = "cppStringEscapeCharacter";
 		public const string CppType = "cppType";
 		public const string CppUserDefinedLiteralNumber = "cppUserDefinedLiteralNumber"; // not mapped
 		public const string CppUserDefinedLiteralRaw = "cppUserDefinedLiteralRaw"; // not mapped
@@ -207,6 +221,12 @@ namespace Codist
 		public const string MarkdownHeading4 = "Markdown: Heading 4";
 		public const string MarkdownHeading5 = "Markdown: Heading 5";
 		public const string MarkdownHeading6 = "Markdown: Heading 6";
+		public const string MarkdownVsBold = "vsMarkdown_bold";
+		public const string MarkdownVsItalic = "vsMarkdown_italic";
+		public const string MarkdownVsStrikethrough = "vsMarkdown_strikethrough";
+		public const string MarkdownVsSubscript = "vsMarkdown_subscript";
+		public const string MarkdownVsSuperscript = "vsMarkdown_superscript";
+		public const string MarkdownVsUrl = "vsMarkdown_url";
 
 		internal const string CodistPrefix = "Codist: ";
 		//! Important
@@ -360,6 +380,9 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CodeNamespaceName)]
 		NamespaceName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeModuleName)]
+		ModuleName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
 		ClassName,
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
@@ -395,6 +418,12 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.TypeDefinition)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeMethodName)]
 		MethodName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeParameterName)]
+		ParameterName,
+		[Category(Constants.SyntaxCategory.TypeDefinition)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeTypeParameterName)]
+		TypeParameterName,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeFormalLanguage)]
 		FormalLanguage,
@@ -414,14 +443,30 @@ namespace Codist
 		[Description("Multiline literal string")]
 		StringVerbatim,
 		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeStringEscapeCharacter)]
+		[Description("String escape character")]
+		StringEscapeCharacter,
+		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeOperator)]
 		Operator,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeLocalName)]
+		Local,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeReassignedVariable)]
+		ReassignedVariable,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodePunctuation)]
 		Punctuation,
 		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodeUrl)]
 		Url,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeLabelName)]
+		LabelName,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CodeStaticSymbol)]
+		StaticSymbol,
 		[Category(Constants.SyntaxCategory.Preprocessor)]
 		[ClassificationType(ClassificationTypeNames = Constants.CodePreprocessorText)]
 		PreprocessorText,
@@ -448,8 +493,17 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CppNewDelete)]
 		NewDelete,
 		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppControlKeyword)]
+		ControlKeyword,
+		[Category(Constants.SyntaxCategory.General)]
 		[ClassificationType(ClassificationTypeNames = Constants.CppOperator)]
 		Operator,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppStringEscapeCharacter)]
+		StringEscapeCharacter,
+		[Category(Constants.SyntaxCategory.General)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppStringDelimiterCharacter)]
+		StringDelimiterCharacter,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CppNamespace)]
 		Namespace,
@@ -516,6 +570,18 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Member)]
 		[ClassificationType(ClassificationTypeNames = Constants.CppStaticMemberFunction)]
 		StaticMemberFunction,
+		[Category(Constants.SyntaxCategory.Member)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppEnumerator)]
+		Enumerator,
+		[Category(Constants.SyntaxCategory.CompilerMarked)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppInactiveCodeClassification)]
+		InactiveCodeClassification,
+		[Category(Constants.SyntaxCategory.CompilerMarked)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppSolidCodeClassification)]
+		SolidCodeClassification,
+		[Category(Constants.SyntaxCategory.CompilerMarked)]
+		[ClassificationType(ClassificationTypeNames = Constants.CppInlineHint)]
+		InlineHint,
 	}
 	enum CSharpStyleTypes
 	{
@@ -758,6 +824,15 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Xml)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlText)]
 		XmlText,
+		[Category(Constants.SyntaxCategory.Markup)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkupAttribute)]
+		MarkupAttribute,
+		[Category(Constants.SyntaxCategory.Markup)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkupAttributeValue)]
+		MarkupAttributeValue,
+		[Category(Constants.SyntaxCategory.Markup)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkupNode)]
+		MarkupNode,
 	}
 
 	enum SymbolMarkerStyleTypes
@@ -822,6 +897,24 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Heading)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkdownHeading6)]
 		Heading6,
+		[Category(Constants.SyntaxCategory.Style)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsBold)]
+		Bold,
+		[Category(Constants.SyntaxCategory.Style)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsItalic)]
+		Italic,
+		[Category(Constants.SyntaxCategory.Style)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsStrikethrough)]
+		Strikethrough,
+		[Category(Constants.SyntaxCategory.Style)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsSuperscript)]
+		Superscript,
+		[Category(Constants.SyntaxCategory.Style)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsSubscript)]
+		Subscript,
+		[Category(Constants.SyntaxCategory.Style)]
+		[ClassificationType(ClassificationTypeNames = Constants.MarkdownVsUrl)]
+		Url,
 	}
 	enum MarkerStyleTypes
 	{
