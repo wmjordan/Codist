@@ -400,7 +400,7 @@ namespace Codist.QuickInfo
 			if (kind == SyntaxKind.ThisExpression) {
 				return semanticModel.GetTypeInfo(node, cancellationToken).Type;
 			}
-			if (kind == SyntaxKind.TupleElement) {
+			if (kind == SyntaxKind.TupleElement || kind == SyntaxKind.ForEachStatement) {
 				return semanticModel.GetDeclaredSymbol(node, cancellationToken);
 			}
 			var symbolInfo = semanticModel.GetSymbolInfo(node, cancellationToken);
