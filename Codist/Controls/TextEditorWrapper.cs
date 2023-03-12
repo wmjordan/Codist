@@ -10,6 +10,7 @@ namespace Codist.Controls
 	// https://stackoverflow.com/questions/136435/any-way-to-make-a-wpf-textblock-selectable
 	sealed class TextEditorWrapper
 	{
+		static readonly DependencyProperty __SelectableProperty = DependencyProperty.Register("IsSelectable", typeof(bool), typeof(TextBlock));
 		static readonly Type TextEditorType = Type.GetType("System.Windows.Documents.TextEditor, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
 		static readonly PropertyInfo IsReadOnlyProp = TextEditorType?.GetProperty("IsReadOnly", BindingFlags.Instance | BindingFlags.NonPublic);
 		static readonly PropertyInfo TextViewProp = TextEditorType?.GetProperty("TextView", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -43,11 +44,15 @@ namespace Codist.Controls
 			if (__IsInitialized == false) {
 				return null;
 			}
+			if (text.GetValue(__SelectableProperty) is bool b && b) {
+				return null;
+			}
 			text.Focusable = true;
 			var textContainer = TextContainerProp.GetValue(text);
 			var editor = new TextEditorWrapper(textContainer, text, false);
 			IsReadOnlyProp.SetValue(editor._editor, true);
 			TextViewProp.SetValue(editor._editor, TextContainerTextViewProp.GetValue(textContainer));
+			text.SetValue(__SelectableProperty, true);
 			return editor;
 		}
 
@@ -169,6 +174,7 @@ namespace Codist.Controls
 					}
 				}
 				TextViewProp.SetValue(_editor, null);
+				_uiScope.ClearValue(__SelectableProperty);
 				_uiScope = null;
 				_editor = null;
 			}
