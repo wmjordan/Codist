@@ -957,7 +957,7 @@ namespace Codist
 				var setFormatBrush = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(item.Name);
 				foreach (var ct in ctn) {
 					r.Add(ct, (f, m) => {
-						var brush = m.GetBrush(ctn);
+						var brush = m.GetAnyBrush(ctn);
 						setFormatBrush(f, f._brushConfigurator != null ? f._brushConfigurator(brush) : brush);
 					});
 				}

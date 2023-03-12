@@ -66,7 +66,7 @@ namespace Codist
 		public static double ToolTipFontSize { get; private set; }
 
 		#region Colors and brushes
-		public static System.Windows.Media.Brush GetBrush(this IEditorFormatMap formatMap, params string[] formatNames) {
+		public static System.Windows.Media.Brush GetAnyBrush(this IEditorFormatMap formatMap, params string[] formatNames) {
 			foreach (var item in formatNames) {
 				var r = formatMap.GetProperties(item);
 				var b = r.GetBrush();
