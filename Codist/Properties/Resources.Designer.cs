@@ -6060,6 +6060,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Member implementation:.
+        /// </summary>
+        internal static string T_MemberImplementation {
+            get {
+                return ResourceManager.GetString("T_MemberImplementation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to  members: {count} ({inherited} inherited).
         /// </summary>
         internal static string T_Members {

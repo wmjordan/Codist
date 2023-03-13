@@ -2454,4 +2454,7 @@ Expression too long</value>
   <data name="CMD_WrapInTryFinally" xml:space="preserve">
     <value>Wrap in &lt;try...finally&gt;</value>
   </data>
+  <data name="T_MemberImplementation" xml:space="preserve">
+    <value>Member implementation:</value>
+  </data>
 </root>

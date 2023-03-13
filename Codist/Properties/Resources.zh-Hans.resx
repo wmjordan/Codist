@@ -2442,4 +2442,7 @@ Right click: 显示“线程”窗口</value>
   <data name="CMD_WrapInTryFinally" xml:space="preserve">
     <value>放到 &lt;try...finally&gt; 里面</value>
   </data>
+  <data name="T_MemberImplementation" xml:space="preserve">
+    <value>接口成员实现:</value>
+  </data>
 </root>

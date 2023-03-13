@@ -202,6 +202,7 @@ namespace Codist
 		public const int StageSelectedRange = KnownImageIds.Add;
 		public const int RevertSelectedRange = KnownImageIds.Undo;
 		public const int ListMembers = KnownImageIds.ListMembers;
+		public const int MissingImplementation = KnownImageIds.StatusInvalid;
 		public const int SymbolAnalysis = KnownImageIds.DimensionBrowserView;
 		public const int FindReference = KnownImageIds.ReferencedDimension;
 		public const int FindReferencingSymbols = KnownImageIds.ShowBuiltIns;

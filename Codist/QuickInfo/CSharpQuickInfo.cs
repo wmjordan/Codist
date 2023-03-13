@@ -1023,7 +1023,8 @@ namespace Codist.QuickInfo
 				&& typeSymbol.TypeParameters[0] != typeSymbol.TypeArguments[0]) {
 				ShowTypeArguments(qiContent, typeSymbol.TypeArguments, typeSymbol.TypeParameters);
 			}
-			if (options.MatchFlags(QuickInfoOptions.MethodOverload)) {
+			if (typeSymbol.TypeKind == TypeKind.Class
+				&& options.MatchFlags(QuickInfoOptions.MethodOverload)) {
 				node = node.GetObjectCreationNode();
 				if (node != null) {
 					var method = semanticModel.GetSymbolOrFirstCandidate(node) as IMethodSymbol;
@@ -1057,7 +1058,12 @@ namespace Codist.QuickInfo
 			}
 			if (options.MatchFlags(QuickInfoOptions.InterfaceMembers)
 				&& typeSymbol.TypeKind == TypeKind.Interface) {
-				ShowInterfaceMembers(qiContent, typeSymbol);
+				var declarationType = node.FirstAncestorOrSelf<BaseListSyntax>()?.Parent;
+				INamedTypeSymbol declaredClass = declarationType != null && declarationType.Kind()
+					.IsAny(SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration, CodeAnalysisHelper.RecordDeclaration, CodeAnalysisHelper.RecordStructDeclaration)
+					? semanticModel.GetDeclaredSymbol(declarationType) as INamedTypeSymbol
+					: null;
+				ShowInterfaceMembers(qiContent, typeSymbol, declaredClass);
 			}
 		}
 
@@ -1122,19 +1128,19 @@ namespace Codist.QuickInfo
 				qiContent.Add(info);
 			}
 		}
-		static void ShowInterfaceMembers(InfoContainer qiContent, INamedTypeSymbol type) {
+		static void ShowInterfaceMembers(InfoContainer qiContent, INamedTypeSymbol type, INamedTypeSymbol declaredClass) {
 			var doc = new ThemedTipDocument();
-			doc.AppendTitle(IconIds.ListMembers, R.T_Member);
-			ShowMembers(type, doc, false);
+			doc.AppendTitle(IconIds.ListMembers, declaredClass != null ? R.T_MemberImplementation : R.T_Member);
+			ShowInterfaceMembers(type, declaredClass, doc, false);
 			foreach (var item in type.AllInterfaces) {
-				ShowMembers(item, doc, true);
+				ShowInterfaceMembers(item, declaredClass, doc, true);
 			}
 			if (doc.ParagraphCount > 1) {
 				qiContent.Add(doc);
 			}
 		}
 
-		static void ShowMembers(INamedTypeSymbol type, ThemedTipDocument doc, bool isInherit) {
+		static void ShowInterfaceMembers(INamedTypeSymbol type, INamedTypeSymbol declaredClass, ThemedTipDocument doc, bool isInherit) {
 			var members = ImmutableArray.CreateBuilder<ISymbol>();
 			members.AddRange(type.FindMembers());
 			members.Sort(CodeAnalysisHelper.CompareByAccessibilityKindName);
@@ -1144,7 +1150,19 @@ namespace Codist.QuickInfo
 				if (isInherit) {
 					t.AddSymbol(type, false, SymbolFormatter.SemiTransparent).Append(".");
 				}
+				if (declaredClass != null && member.IsAbstract) {
+					var implementation = declaredClass.FindImplementationForInterfaceMember(member);
+					if (implementation != null) {
+						t.AddSymbol(implementation, false, _SymbolFormatter);
+					}
+					else {
+						t.AddSymbol(member, false, _SymbolFormatter)
+							.Append(ThemeHelper.GetImage(IconIds.MissingImplementation).WrapMargin(WpfHelper.SmallHorizontalMargin).SetOpacity(WpfHelper.DimmedOpacity));
+					}
+				}
+				else {
 				t.AddSymbol(member, false, _SymbolFormatter);
+				}
 				if (member.Kind == SymbolKind.Method) {
 					t.AddParameters(((IMethodSymbol)member).Parameters, _SymbolFormatter);
 					if (isInterface && member.IsStatic == false && member.IsAbstract == false) {
