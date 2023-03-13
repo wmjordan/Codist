@@ -1114,8 +1114,10 @@ namespace Codist
 					info.Append("abstract ", Keyword);
 				}
 			}
-			else if (symbol.IsAbstract && ((symbol is INamedTypeSymbol nt) == false || nt.TypeKind != TypeKind.Interface)) {
-				info.Append("abstract ", Keyword);
+			else if (symbol.IsAbstract) {
+				if ((symbol as INamedTypeSymbol)?.TypeKind != TypeKind.Interface) {
+					info.Append("abstract ", Keyword);
+				}
 			}
 			else if (symbol.IsVirtual) {
 				info.Append("virtual ", Keyword);
