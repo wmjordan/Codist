@@ -1958,6 +1958,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Wrap in &lt;try...finally&gt;.
+        /// </summary>
+        internal static string CMD_WrapInTryFinally {
+            get {
+                return ResourceManager.GetString("CMD_WrapInTryFinally", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wrap in &lt;using&gt;.
         /// </summary>
         internal static string CMD_WrapInUsing {

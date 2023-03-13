@@ -32,6 +32,7 @@ namespace Codist.Refactorings
 			ReplaceNode.WrapInUsing,
 			ReplaceNode.WrapInIf,
 			ReplaceNode.WrapInTryCatch,
+			ReplaceNode.WrapInTryFinally,
 			ReplaceNode.WrapInRegion,
 			ReplaceToken.UseStaticDefault,
 			ReplaceToken.UseExplicitType,

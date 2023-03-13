@@ -2439,4 +2439,7 @@ Right click: 显示“线程”窗口</value>
   <data name="T_ObjectKind" xml:space="preserve">
     <value>ObjectKind: </value>
   </data>
+  <data name="CMD_WrapInTryFinally" xml:space="preserve">
+    <value>放到 &lt;try...finally&gt; 里面</value>
+  </data>
 </root>

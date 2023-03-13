@@ -12,6 +12,7 @@ namespace Codist.Refactorings
 	{
 		public static readonly ReplaceNode WrapInIf = new WrapInIfRefactoring();
 		public static readonly ReplaceNode WrapInTryCatch = new WrapInTryCatchRefactoring();
+		public static readonly ReplaceNode WrapInTryFinally = new WrapInTryFinallyRefactoring();
 		public static readonly ReplaceNode WrapInElse = new WrapInElseRefactoring();
 		public static readonly ReplaceNode WrapInRegion = new WrapInRegionRefactoring();
 		public static readonly ReplaceNode WrapInUsing = new WrapInUsingRefactoring();
@@ -152,6 +153,25 @@ namespace Codist.Refactorings
 							null,
 							SF.Block())),
 						null).WithAdditionalAnnotations(CodeFormatHelper.Reformat)
+					));
+			}
+		}
+
+		sealed class WrapInTryFinallyRefactoring : ReplaceStatements
+		{
+			public override int IconId => IconIds.TryCatch;
+			public override string Title => R.CMD_WrapInTryFinally;
+
+			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
+				var statements = ctx.SelectedStatementInfo.Items;
+				return Chain.Create(Replace(statements,
+					SF.TryStatement(SF.Block(statements),
+						default,
+						SF.FinallyClause(SF.Block(
+							SF.Token(SyntaxKind.OpenBraceToken),
+							new SyntaxList<StatementSyntax>(SF.EmptyStatement().AnnotateSelect()),
+							SF.Token(SyntaxKind.CloseBraceToken))
+						)).WithAdditionalAnnotations(CodeFormatHelper.Reformat)
 					));
 			}
 		}

@@ -2454,4 +2454,7 @@ Expression too long</value>
   <data name="T_ObjectKind" xml:space="preserve">
     <value>ObjectKind: </value>
   </data>
+  <data name="CMD_WrapInTryFinally" xml:space="preserve">
+    <value>Wrap in &lt;try...finally&gt;</value>
+  </data>
 </root>
