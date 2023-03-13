@@ -102,7 +102,11 @@ namespace Codist.QuickInfo
 							.Append(R.T_ExpressionCount)
 							.Append((node as InitializerExpressionSyntax).Expressions.Count.ToText(), true, false, _SymbolFormatter.Number));
 					}
-					goto case SyntaxKind.CloseBraceToken;
+					if (qiWrapper != null) {
+						qiWrapper.OverrideBuiltInXmlDoc = false;
+					}
+					ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
+					goto RETURN;
 				case SyntaxKind.CloseBraceToken:
 					if (qiWrapper != null) {
 						qiWrapper.OverrideBuiltInXmlDoc = false;
@@ -640,6 +644,9 @@ namespace Codist.QuickInfo
 					(lines > 100 ? new ThemedTipText(lines + R.T_Lines, true) : new ThemedTipText(lines + R.T_Lines))
 						.SetGlyph(ThemeHelper.GetImage(IconIds.LineOfCode))
 					);
+			}
+			if ((node is StatementSyntax || node is ExpressionSyntax || node is ConstructorInitializerSyntax) == false) {
+				return;
 			}
 			var df = semanticModel.AnalyzeDataFlow(node);
 			var vd = df.VariablesDeclared;
