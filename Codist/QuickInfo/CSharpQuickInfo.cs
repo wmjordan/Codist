@@ -131,6 +131,11 @@ namespace Codist.QuickInfo
 						isConvertedType = true;
 					}
 					break;
+				case SyntaxKind.ExclamationEqualsToken:
+				case SyntaxKind.EqualsEqualsToken:
+					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span)).ConvertedType;
+					isConvertedType = true;
+					break;
 				case SyntaxKind.EqualsToken:
 					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.GetPreviousToken().Span)).ConvertedType;
 					isConvertedType = true;
