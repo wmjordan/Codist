@@ -392,7 +392,7 @@ namespace Codist.QuickInfo
 						if (tb == null) {
 							continue;
 						}
-						tb.LimitSize();
+						OverrideTextBlock(tb);
 						if (Diagnostics != null && Diagnostics.Count > 0) {
 							var t = tb.GetText();
 							var d = Diagnostics.FirstOrDefault(i => i.GetMessage() == t);
@@ -403,10 +403,6 @@ namespace Codist.QuickInfo
 								tb.ToolTipOpening += ShowToolTipForDiagnostics;
 							}
 						}
-						else {
-							tb.SetGlyph(ThemeHelper.GetImage(KnownImageIds.StatusInformation));
-						}
-						TextEditorWrapper.CreateFor(tb);
 					}
 
 					int GetGlyphForSeverity(DiagnosticSeverity severity) {
@@ -456,7 +452,7 @@ namespace Codist.QuickInfo
 					titlePanel.HorizontalAlignment = HorizontalAlignment.Stretch;
 					doc.HorizontalAlignment = HorizontalAlignment.Stretch;
 
-					var icon = infoPanel.GetFirstVisualChild<CrispImage>();
+					var icon = titlePanel.GetFirstVisualChild<CrispImage>();
 					var signature = infoPanel.GetFirstVisualChild<TextBlock>();
 
 					if (DocElement != null) {
@@ -636,9 +632,7 @@ namespace Codist.QuickInfo
 							continue;
 						}
 						if (c is TextBlock tb) {
-							TextEditorWrapper.CreateFor(tb);
-							tb.SetGlyph(ThemeHelper.GetImage(IconIds.Info));
-							tb.LimitSize();
+							OverrideTextBlock(tb);
 							continue;
 						}
 						if (docPanel == c || docPanelHandled == false && cp.GetFirstVisualChild<StackPanel>(i => i == docPanel) != null) {
@@ -717,13 +711,20 @@ namespace Codist.QuickInfo
 							d.WrapMargin(WpfHelper.SmallVerticalMargin);
 						}
 						else if (c is TextBlock t) {
-							t.TextWrapping = TextWrapping.Wrap;
-							t.SetGlyph(ThemeHelper.GetImage(IconIds.Info));
-							TextEditorWrapper.CreateFor(t);
+							OverrideTextBlock(t);
 						}
 						s.Add(c.Scrollable().LimitSize());
 					}
 				}
+
+				static void OverrideTextBlock(TextBlock t) {
+					if (t is ThemedTipText == false
+						&& TextEditorWrapper.CreateFor(t) != null) {
+						t.TextWrapping = TextWrapping.Wrap;
+						t.SetGlyph(ThemeHelper.GetImage(IconIds.Info));
+					}
+				}
+
 				static void MakeChildrenScrollable(ItemsControl s) {
 					var children = new object[s.Items.Count];
 					var i = -1;
