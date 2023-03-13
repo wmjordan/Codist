@@ -676,7 +676,7 @@ namespace Codist.QuickInfo
 						p.Append(", ");
 					}
 					if (item.IsImplicitlyDeclared) {
-						p.Append(item.Name);
+						p.AddSymbol(item.GetReturnType(), item.Name, _SymbolFormatter);
 					}
 					else {
 						p.AddSymbol(item, false, _SymbolFormatter);
@@ -1161,7 +1161,7 @@ namespace Codist.QuickInfo
 					}
 				}
 				else {
-				t.AddSymbol(member, false, _SymbolFormatter);
+					t.AddSymbol(member, false, _SymbolFormatter);
 				}
 				if (member.Kind == SymbolKind.Method) {
 					t.AddParameters(((IMethodSymbol)member).Parameters, _SymbolFormatter);

@@ -48,6 +48,9 @@ namespace Codist
 			if (symbol != null) {
 				formatter.Format(block.Inlines, symbol, alias, false);
 			}
+			else if (String.IsNullOrEmpty(alias) == false) {
+				block.Inlines.Add(new Run(alias));
+			}
 			return block;
 		}
 		public static TextBlock AddSymbol(this TextBlock block, ISymbol symbol, string alias, WpfBrush brush) {
