@@ -195,11 +195,11 @@ namespace Codist.Taggers
 
 			switch (label.StyleApplication) {
 				case CommentStyleApplication.Tag:
-					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, label.LabelLength, contentStart - commentStart, contentEnd - contentStart);
+					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start.Position + commentStart, label.LabelLength, contentStart - commentStart, contentEnd - contentStart);
 				case CommentStyleApplication.Content:
-					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start + contentStart, contentEnd - contentStart, 0, contentEnd - contentStart);
+					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start.Position + contentStart, contentEnd - contentStart, 0, contentEnd - contentStart);
 				default:
-					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start + commentStart, contentEnd - commentStart, contentStart - commentStart, contentEnd - contentStart);
+					return new TaggedContentSpan(tag, snapshotSpan.Snapshot, snapshotSpan.Start.Position + commentStart, contentEnd - commentStart, contentStart - commentStart, contentEnd - contentStart);
 			}
 		}
 

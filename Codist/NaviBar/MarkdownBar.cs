@@ -101,7 +101,7 @@ namespace Codist.NaviBar
 			foreach (var s in m) {
 				if (s.Snapshot != null) {
 					// select the "url"
-					View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - 4, 3), false);
+					View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start.Position + s.Length - 4, 3), false);
 					View.Caret.MoveTo(s.End - 1);
 					return;
 				}

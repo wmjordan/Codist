@@ -58,7 +58,7 @@ namespace Codist.Refactorings
 					edit.Insert(s.Start.Position, _Start + newLine);
 					edit.Insert(s.End.Position, _End + newLine);
 				});
-				ctx.View.SelectSpan(sp + _SelectStart, _SelectLength, 1);
+				ctx.View.SelectSpan(sp.Position + _SelectStart, _SelectLength, 1);
 			}
 		}
 	}

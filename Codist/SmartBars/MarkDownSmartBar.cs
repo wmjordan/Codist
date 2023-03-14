@@ -29,7 +29,7 @@ namespace Codist.SmartBars
 				foreach (var s in WrapWith(ctx, "[title](", ")", false)) {
 					if (s.Snapshot != null) {
 						// select the "title"
-						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + 1, 5), false);
+						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start.Position + 1, 5), false);
 						ctx.View.Caret.MoveTo(s.Start + 6);
 						return;
 					}
@@ -52,10 +52,10 @@ namespace Codist.SmartBars
 					if (s.Snapshot != null) {
 						// select the "url"
 						if (u) {
-							ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - clip.Length - 1, clip.Length), false);
+							ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start.Position + s.Length - clip.Length - 1, clip.Length), false);
 						}
 						else {
-							ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + s.Length - 4, 3), false);
+							ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start.Position + s.Length - 4, 3), false);
 						}
 						ctx.View.Caret.MoveTo(s.End - 1);
 						return;

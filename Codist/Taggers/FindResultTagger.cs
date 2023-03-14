@@ -39,8 +39,8 @@ namespace Codist.Taggers
 			}
 			var snapshot = span.Snapshot;
 			var r = new List<ClassificationSpan> {
-				new ClassificationSpan(new SnapshotSpan(snapshot, span.Start + c1, b1 - c1), __Url),
-				new ClassificationSpan(new SnapshotSpan(snapshot, span.Start + b1 + 1, c2 - b1 - 1), __Number)
+				new ClassificationSpan(new SnapshotSpan(snapshot, span.Start.Position + c1, b1 - c1), __Url),
+				new ClassificationSpan(new SnapshotSpan(snapshot, span.Start.Position + b1 + 1, c2 - b1 - 1), __Number)
 			};
 
 			var filePath = t.Substring(c1, b1 - c1);
@@ -54,7 +54,7 @@ namespace Codist.Taggers
 						var lines = sourceText.Lines;
 						if (lineNumber < lines.Count) {
 							var sourceSpan = lines[lineNumber - 1].Span;
-							var offset = (int)span.Start + c2 + 2 - sourceSpan.Start;
+							var offset = (int)span.Start.Position + c2 + 2 - sourceSpan.Start;
 							// verify that the source text is the same as the find result
 							if (t.Length >= c2 + 2 + sourceSpan.Length
 								&& t.IndexOf(sourceText.GetSubText(sourceSpan).ToString(), c2 + 2, sourceSpan.Length) >= 0) {

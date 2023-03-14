@@ -468,7 +468,7 @@ namespace Codist.SmartBars
 				foreach (var s in WrapWith(ctx, "<a href=\"url\">", "</a>", false)) {
 					if (s.Snapshot != null) {
 						// select the "url"
-						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start + 9, 3), false);
+						ctx.View.Selection.Select(new SnapshotSpan(s.Snapshot, s.Start.Position + 9, 3), false);
 						ctx.View.Caret.MoveTo(s.Start + 12);
 						return;
 					}

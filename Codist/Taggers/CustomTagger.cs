@@ -72,7 +72,7 @@ namespace Codist.Taggers
 			public override void GetTags(string text, ref SnapshotSpan span, ICollection<TaggedContentSpan> results) {
 				int i = text.IndexOf(_Content, StringComparison);
 				if (i >= 0) {
-					results.Add(new TaggedContentSpan(Tag, span.Snapshot, span.Start + i, span.Length - i, i, text.Length - _ContentLength));
+					results.Add(new TaggedContentSpan(Tag, span.Snapshot, span.Start.Position + i, span.Length - i, i, text.Length - _ContentLength));
 				}
 			}
 		}
@@ -100,12 +100,12 @@ namespace Codist.Taggers
 					if (m.Groups.Count >= UseGroup) {
 						var g = m.Groups[UseGroup];
 						if (g.Success) {
-							results.Add(new TaggedContentSpan(Tag, span.Snapshot, span.Start + g.Index, g.Length, 0, g.Length));
+							results.Add(new TaggedContentSpan(Tag, span.Snapshot, span.Start.Position + g.Index, g.Length, 0, g.Length));
 						}
 					}
 				}
 				else {
-					results.Add(new TaggedContentSpan(Tag, span.Snapshot, span.Start + m.Index, m.Length, 0, m.Length));
+					results.Add(new TaggedContentSpan(Tag, span.Snapshot, span.Start.Position + m.Index, m.Length, 0, m.Length));
 				}
 			}
 

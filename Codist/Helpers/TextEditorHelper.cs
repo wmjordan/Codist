@@ -641,13 +641,13 @@ namespace Codist
 						&& t.EndsWith(suffix, StringComparison.Ordinal)
 						&& t.IndexOf(prefix, prefixLen, t.Length - psLength) <= t.IndexOf(suffix, prefixLen, t.Length - psLength)) {
 						if (edit.Replace(item, t.Substring(prefixLen, t.Length - psLength))) {
-							modified.Add(new Span(item.Start + offset, item.Length - psLength));
+							modified.Add(new Span(item.Start.Position + offset, item.Length - psLength));
 							offset -= psLength;
 						}
 					}
 					// surround items
 					else if (edit.Replace(item, prefix + t + suffix)) {
-						modified.Add(new Span(item.Start + offset, item.Length + psLength));
+						modified.Add(new Span(item.Start.Position + offset, item.Length + psLength));
 						offset += psLength;
 					}
 				}
@@ -676,13 +676,13 @@ namespace Codist
 						&& t.EndsWith(suffix, StringComparison.Ordinal)
 						&& t.IndexOf(prefix, prefix.Length, t.Length - psLength) <= t.IndexOf(suffix, prefix.Length, t.Length - psLength)) {
 						if (edit.Replace(item, t = t.Substring(prefix.Length, t.Length - psLength))) {
-							modified.Add(new Span(item.Start + offset, item.Length - psLength));
+							modified.Add(new Span(item.Start.Position + offset, item.Length - psLength));
 							offset -= psLength;
 						}
 					}
 					// surround items
 					else if (edit.Replace(item, t = wrapText.Wrap(t))) {
-						modified.Add(new Span(item.Start + offset, item.Length + psLength));
+						modified.Add(new Span(item.Start.Position + offset, item.Length + psLength));
 						offset += psLength;
 					}
 				}
@@ -918,7 +918,7 @@ namespace Codist
 							sb = b.Resource;
 						}
 						if (p == 0) {
-							span = new SnapshotSpan(span.Snapshot, span.Start + i, span.Length - i);
+							span = new SnapshotSpan(span.Snapshot, span.Start.Position + i, span.Length - i);
 						}
 						else {
 							sb.Append(t, p, i - p);
@@ -1009,10 +1009,10 @@ namespace Codist
 						sb.Append(extent.GetText().TrimEnd());
 					}
 					else {
-						if (line.Start + indentation >= endOfSelection) {
+						if (line.Start.Position + indentation >= endOfSelection) {
 							break;
 						}
-						var extent = new SnapshotSpan(snapshot, Span.FromBounds(line.Start + indentation, Math.Min(line.End.Position, endOfSelection)));
+						var extent = new SnapshotSpan(snapshot, Span.FromBounds(line.Start.Position + indentation, Math.Min(line.End.Position, endOfSelection)));
 						spans.Add(extent);
 						sb.Append(extent.GetText().TrimEnd());
 					}

@@ -139,9 +139,9 @@ namespace Codist.SmartBars
 						&& Char.IsLetterOrDigit(snapshot[end - 1])
 						&& snapshot[end] == ' '
 						&& (end == snapshot.Length - 2
-							|| "={<>(-+*/^!|?:~&%".IndexOf(snapshot[end + 1]) == -1)) {
+							|| "={<>(-+*/^!|?:~&%".IndexOf(snapshot[end.Position + 1]) == -1)) {
 						ctx.KeepToolBar(false);
-						s.Select(new SnapshotSpan(s.Start.Position, s.End.Position + 1), false);
+						s.Select(new SnapshotSpan(s.Start.Position, s.End.Position.Position + 1), false);
 					}
 				}
 				ExecuteAndFind(ctx, "Edit.Delete", t);
