@@ -379,6 +379,7 @@ namespace Codist.SmartBars
 							: ctx.RightClick ? "Debug.Threads"
 							: "Debug.RunToCursor");
 				});
+				AddEditorCommand(ToolBar2, IconIds.SetNextStatement, "Debug.SetNextStatement", R.CMD_SetNextStatement);
 				AddCommands(ToolBar2, IconIds.ToggleBreakpoint, R.CMD_Debugger, ctx => TextEditorHelper.ExecuteEditorCommand("Debug.ToggleBreakpoint"), ctx => __DebugCommands);
 			}
 		}

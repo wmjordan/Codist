@@ -2457,4 +2457,7 @@ Expression too long</value>
   <data name="T_MemberImplementation" xml:space="preserve">
     <value>Member implementation:</value>
   </data>
+  <data name="CMD_SetNextStatement" xml:space="preserve">
+    <value>Set Next Statement</value>
+  </data>
 </root>

@@ -1598,6 +1598,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Set Next Statement.
+        /// </summary>
+        internal static string CMD_SetNextStatement {
+            get {
+                return ResourceManager.GetString("CMD_SetNextStatement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Show Document Content Type....
         /// </summary>
         internal static string CMD_ShowDocumentContentType {

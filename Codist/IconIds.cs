@@ -161,6 +161,7 @@ namespace Codist
 		public const int Watch = KnownImageIds.Watch;
 		public const int DeleteBreakpoint = KnownImageIds.DeleteBreakpoint;
 		public const int RunToCursor = KnownImageIds.GoToLast;
+		public const int SetNextStatement = KnownImageIds.GoToNextInList;
 		public const int FormatSelection = KnownImageIds.FormatSelection;
 		public const int FormatDocument = KnownImageIds.FormatDocument;
 		public const int PartialDocumentCount = KnownImageIds.OpenDocumentFromCollection;

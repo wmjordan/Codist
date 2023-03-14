@@ -2445,4 +2445,7 @@ Right click: 显示“线程”窗口</value>
   <data name="T_MemberImplementation" xml:space="preserve">
     <value>接口成员实现:</value>
   </data>
+  <data name="CMD_SetNextStatement" xml:space="preserve">
+    <value>设为下一条语句</value>
+  </data>
 </root>
