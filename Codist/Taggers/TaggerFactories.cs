@@ -72,11 +72,12 @@ namespace Codist.Taggers
 	sealed class CSharpTaggerProvider : IViewTaggerProvider
 	{
 		readonly Dictionary<ITextView, CSharpTagger> _Taggers = new Dictionary<ITextView, CSharpTagger>();
+		static readonly string[] __TaggableRoles = new[] { PredefinedTextViewRoles.Document, PredefinedTextViewRoles.EmbeddedPeekTextView };
 
 		// note: cache the latest used tagger to improve performance
-		// in C# code editor, even displaying the Quick Info will call the CreateTagger method,
-		// thus we cache the last accessed tagger, identified by ITextView and ITextBuffer,
-		// in CSharpTaggerProvider and CSharpTagger respectively, to avoid dictionary lookup
+		//   In C# code editor, even displaying the Quick Info will call the CreateTagger method,
+		//   thus we cache the last accessed tagger, identified by ITextView and ITextBuffer,
+		//   in CSharpTaggerProvider and CSharpTagger respectively, to avoid dictionary lookup
 		CSharpTagger _LastTagger;
 		// for debug info
 		int _taggerCount;
@@ -89,6 +90,7 @@ namespace Codist.Taggers
 			if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight) == false
 				|| buffer.MayBeEditor() == false // it seems that the analyzer preview windows do not call the View_Close event handler, thus we exclude them here
 				|| textView.TextBuffer.ContentType.IsOfType("RoslynPreviewContentType")
+				|| textView.Roles.ContainsAny(__TaggableRoles) == false && textView.TextBuffer.ContentType.TypeName != Constants.CodeTypes.InteractiveContent
 				|| textView.Roles.Contains("PREVIEWTOOLTIPTEXTVIEWROLE")
 				|| textView.Roles.Contains("STICKYSCROLL_TEXT_VIEW") // disables advanced highlight for it does not work well if any style contains font size definition
 				) {
