@@ -109,6 +109,7 @@ namespace Codist.SyntaxHighlight
 		}
 
 		internal Brush MakeBackgroundBrush(Color backColor) {
+			backColor = backColor.Alpha(0);
 			switch (BackgroundEffect) {
 				case BrushEffect.ToBottom:
 					return new LinearGradientBrush(backColor, BackColor, 90);
