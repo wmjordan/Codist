@@ -140,10 +140,10 @@ namespace Codist.SmartBars
 			}
 		}
 
-		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip, string command2) {
+		protected void AddEditorCommand(ToolBar toolBar, int imageId, string command, string tooltip, string rightClickCommand) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			if (CodistPackage.DTE.Commands.Item(command).IsAvailable) {
-				AddCommand(toolBar, imageId, tooltip, (ctx) => TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? command2 : command));
+				AddCommand(toolBar, imageId, tooltip, (ctx) => TextEditorHelper.ExecuteEditorCommand(ctx.RightClick ? rightClickCommand : command));
 			}
 		}
 
