@@ -1073,15 +1073,23 @@ namespace Codist
 				? String.Empty
 				: textBuffer.CurrentSnapshot.GetText(start, end - start);
 		}
-		public static string GetLinePrecedingWhitespaceAtPosition(this ITextSnapshot textSnapshot, int position) {
-			var line = textSnapshot.GetLineFromPosition(position);
-			var s = line.Start;
+		public static int CountLinePrecedingWhitespace(this ITextSnapshotLine line) {
+			var ts = line.Snapshot;
+			var s = line.Start.Position;
 			int i = s;
-			while (line.Snapshot[i].IsCodeWhitespaceChar()) {
+			while (ts[i].IsCodeWhitespaceChar()) {
 				++i;
 			}
-			return line.Snapshot.GetText(s, i - s);
+			return i - s;
 		}
+		public static string GetLinePrecedingWhitespace(this ITextSnapshotLine line) {
+			return line.Snapshot.GetText(line.Start, line.CountLinePrecedingWhitespace());
+		}
+
+		public static string GetLinePrecedingWhitespaceAtPosition(this ITextSnapshot textSnapshot, int position) {
+			return GetLinePrecedingWhitespace(textSnapshot.GetLineFromPosition(position));
+		}
+
 		public static bool IsCodeWhitespaceChar(this char ch) {
 			return ch == ' ' || ch == '\t';
 		}
