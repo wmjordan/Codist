@@ -141,7 +141,7 @@ namespace Codist.SmartBars
 						&& (end == snapshot.Length - 2
 							|| "={<>(-+*/^!|?:~&%".IndexOf(snapshot[end.Position + 1]) == -1)) {
 						ctx.KeepToolBar(false);
-						s.Select(new SnapshotSpan(s.Start.Position, s.End.Position.Position + 1), false);
+						s.Select(new SnapshotSpan(s.Start.Position, s.End.Position + 1), false);
 					}
 				}
 				ExecuteAndFind(ctx, "Edit.Delete", t);
