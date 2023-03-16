@@ -552,13 +552,7 @@ namespace Codist
 		#endregion
 
 		#region Edit
-		/// <summary>
-		/// Begins an edit operation to the <paramref name="view"/>.
-		/// </summary>
-		/// <typeparam name="TView">The type of the view.</typeparam>
-		/// <param name="view">The <see cref="ITextView"/> to be edited.</param>
-		/// <param name="action">The edit operation.</param>
-		/// <returns>Returns a new <see cref="ITextSnapshot"/> if <see cref="ITextEdit.HasEffectiveChanges"/>  returns <see langword="true"/>, otherwise, returns <see langword="null"/>.</returns>
+		/// <inheritdoc cref="Edit{TView, TArg}(TView, TArg, Action{TView, TArg, ITextEdit})"/>
 		public static ITextSnapshot Edit<TView>(this TView view, Action<TView, ITextEdit> action)
 			where TView : ITextView {
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
@@ -568,6 +562,15 @@ namespace Codist
 					: null;
 			}
 		}
+		/// <summary>
+		/// Begins an edit operation to the <paramref name="view"/>.
+		/// </summary>
+		/// <typeparam name="TView">The type of the view.</typeparam>
+		/// <typeparam name="TArg">The type of the argument.</typeparam>
+		/// <param name="view">The <see cref="ITextView"/> to be edited.</param>
+		/// <param name="arg">The argument for <paramref name="action"/>.</param>
+		/// <param name="action">The edit operation.</param>
+		/// <returns>Returns a new <see cref="ITextSnapshot"/> if <see cref="ITextEdit.HasEffectiveChanges"/>  returns <see langword="true"/>, otherwise, returns <see langword="null"/>.</returns>
 		public static ITextSnapshot Edit<TView, TArg>(this TView view, TArg arg, Action<TView, TArg, ITextEdit> action)
 			where TView : ITextView {
 			using (var edit = view.TextSnapshot.TextBuffer.CreateEdit()) {
