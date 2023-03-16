@@ -17,12 +17,7 @@ namespace Codist.Refactorings
 	{
 		public static readonly ReplaceNode AddBraces = new AddBracesRefactoring();
 		public static readonly ReplaceNode AsToCast = new AsToCastRefactoring();
-		public static readonly ReplaceNode SealClass = new SealClassRefactoring();
 		public static readonly ReplaceNode DuplicateMethodDeclaration = new DuplicateMethodDeclarationRefactoring();
-		public static readonly ReplaceNode MakePublic = new ChangeAccessibilityRefactoring(SyntaxKind.PublicKeyword);
-		public static readonly ReplaceNode MakeProtected = new ChangeAccessibilityRefactoring(SyntaxKind.ProtectedKeyword);
-		public static readonly ReplaceNode MakeInternal = new ChangeAccessibilityRefactoring(SyntaxKind.InternalKeyword);
-		public static readonly ReplaceNode MakePrivate = new ChangeAccessibilityRefactoring(SyntaxKind.PrivateKeyword);
 		public static readonly ReplaceNode InlineVariable = new InlineVariableRefactoring();
 		public static readonly ReplaceNode RemoveContainingStatement = new RemoveContainerRefactoring();
 		public static readonly ReplaceNode SwapOperands = new SwapOperandsRefactoring();
@@ -137,42 +132,6 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class SealClassRefactoring : ReplaceNode
-		{
-			public override int IconId => IconIds.SealedClass;
-			public override string Title => R.CMD_SealClass;
-
-			public override bool Accept(RefactoringContext ctx) {
-				var node = ctx.Node;
-				ClassDeclarationSyntax d;
-				return node.IsKind(SyntaxKind.ClassDeclaration)
-					&& CanBeSealed((d = node as ClassDeclarationSyntax).Modifiers);
-			}
-
-			static bool CanBeSealed(SyntaxTokenList modifiers) {
-				foreach (var item in modifiers) {
-					switch (item.Kind()) {
-						case SyntaxKind.SealedKeyword:
-						case SyntaxKind.AbstractKeyword:
-						case SyntaxKind.StaticKeyword:
-							return false;
-					}
-				}
-				return true;
-			}
-
-			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				var d = ctx.Node as ClassDeclarationSyntax;
-				return Chain.Create(Replace(d, d
-					.WithoutLeadingTrivia()
-					.WithModifiers(d.Modifiers
-						.Add(SF.Token(SyntaxKind.SealedKeyword)
-							.WithTrailingTrivia(SF.ElasticSpace)
-							.WithAdditionalAnnotations(CodeFormatHelper.Select)))
-					.WithLeadingTrivia(d.GetLeadingTrivia())));
-			}
-		}
-
 		sealed class DuplicateMethodDeclarationRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.DuplicateMethodDeclaration;
@@ -185,158 +144,6 @@ namespace Codist.Refactorings
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var d = ctx.Node as MethodDeclarationSyntax;
 				return Chain.Create(InsertBefore(d, d.WithParameterList(d.ParameterList.AnnotateSelect()).WithBody(SF.Block().AnnotateReformat()).WithWhitespaceFrom(d)));
-			}
-		}
-
-		sealed class ChangeAccessibilityRefactoring : ReplaceNode
-		{
-			readonly SyntaxKind _KeywordKind;
-			readonly int _IconId;
-			readonly string _Title;
-
-			public override int IconId => _IconId;
-			public override string Title => _Title;
-
-			public ChangeAccessibilityRefactoring(SyntaxKind accessibility) {
-				switch (_KeywordKind = accessibility) {
-					case SyntaxKind.PublicKeyword:
-						_IconId = IconIds.PublicSymbols;
-						_Title = R.CMD_MakePublic;
-						break;
-					case SyntaxKind.ProtectedKeyword:
-						_IconId = IconIds.ProtectedSymbols;
-						_Title = R.CMD_MakeProtected;
-						break;
-					case SyntaxKind.InternalKeyword:
-						_IconId = IconIds.InternalSymbols;
-						_Title = R.CMD_MakeInternal;
-						break;
-					case SyntaxKind.PrivateKeyword:
-						_IconId = IconIds.PrivateSymbols;
-						_Title = R.CMD_MakePrivate;
-						break;
-				}
-			}
-
-			public override bool Accept(RefactoringContext ctx) {
-				var node = GetDeclarationNode(ctx);
-				return node != null && CanChangeAccessibility(node);
-			}
-
-			static MemberDeclarationSyntax GetDeclarationNode(RefactoringContext ctx) {
-				var node = ctx.Node;
-				if (node.IsKind(SyntaxKind.VariableDeclarator)) {
-					node = node.Parent.Parent;
-				}
-				return node as MemberDeclarationSyntax;
-			}
-
-			bool CanChangeAccessibility(MemberDeclarationSyntax d) {
-				var m = GetModifiers(d);
-				if (m.Any(_KeywordKind)
-					|| m.Any(SyntaxKind.OverrideKeyword)
-					|| d.IsKind(SyntaxKind.EnumMemberDeclaration)) {
-					return false;
-				}
-				switch (_KeywordKind) {
-					case SyntaxKind.PublicKeyword:
-					case SyntaxKind.InternalKeyword:
-						return true;
-					case SyntaxKind.ProtectedKeyword:
-						return m.Any(SyntaxKind.SealedKeyword) == false
-							&& d.Parent is ClassDeclarationSyntax c
-							&& c.Modifiers.Any(SyntaxKind.SealedKeyword) == false;
-					case SyntaxKind.PrivateKeyword:
-						if (d is BaseTypeDeclarationSyntax t
-							&& t.IsKind(SyntaxKind.InterfaceDeclaration) == false) {
-							return d.Parent is BaseTypeDeclarationSyntax;
-						}
-						return true;
-				}
-				return true;
-			}
-
-			static SyntaxTokenList GetModifiers(MemberDeclarationSyntax d) {
-				if (d is BaseTypeDeclarationSyntax t) {
-					return t.Modifiers;
-				}
-				if (d is BaseMethodDeclarationSyntax m) {
-					return m.Modifiers;
-				}
-				if (d is BaseFieldDeclarationSyntax f) {
-					return f.Modifiers;
-				}
-				if (d is BasePropertyDeclarationSyntax p) {
-					return p.Modifiers;
-				}
-				return default;
-			}
-
-			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				var d = GetDeclarationNode(ctx);
-				RefactoringAction a;
-				if (d is BaseTypeDeclarationSyntax t) {
-					a = Replace(d, t
-						.WithoutLeadingTrivia()
-						.WithModifiers(ReplaceModifiers(t.Modifiers))
-						.WithLeadingTrivia(d.GetLeadingTrivia()));
-				}
-				else if (d is BaseMethodDeclarationSyntax m) {
-					a = Replace(d, m
-						.WithoutLeadingTrivia()
-						.WithModifiers(ReplaceModifiers(m.Modifiers))
-						.WithLeadingTrivia(d.GetLeadingTrivia()));
-				}
-				else if (d is BaseFieldDeclarationSyntax f) {
-					a = Replace(d, f
-						.WithoutLeadingTrivia()
-						.WithModifiers(ReplaceModifiers(f.Modifiers))
-						.WithLeadingTrivia(d.GetLeadingTrivia()));
-				}
-				else if (d is BasePropertyDeclarationSyntax p) {
-					a = Replace(d, p
-						.WithoutLeadingTrivia()
-						.WithModifiers(ReplaceModifiers(p.Modifiers))
-						.WithLeadingTrivia(d.GetLeadingTrivia()));
-				}
-				else {
-					return Enumerable.Empty<RefactoringAction>();
-				}
-				return Chain.Create(a);
-			}
-
-			SyntaxTokenList ReplaceModifiers(SyntaxTokenList original) {
-				var r = original;
-				var replaced = false;
-				foreach (var item in original) {
-					switch (item.Kind()) {
-						case SyntaxKind.PublicKeyword:
-						case SyntaxKind.ProtectedKeyword:
-						case SyntaxKind.InternalKeyword:
-						case SyntaxKind.PrivateKeyword:
-							if (replaced == false) {
-								r = r.Replace(item, SF.Token(_KeywordKind).WithTriviaFrom(item).WithAdditionalAnnotations(CodeFormatHelper.Select));
-								replaced = true;
-							}
-							else {
-								r = r.Remove(item);
-							}
-							break;
-					}
-				}
-
-				if (replaced) {
-					return r;
-				}
-				if (original.Count == 0) {
-					return r.Add(SF.Token(_KeywordKind).WithTrailingTrivia(SF.ElasticSpace).WithAdditionalAnnotations(CodeFormatHelper.Select));
-				}
-				return r.ReplaceRange(r[0], new[] {
-						SF.Token(_KeywordKind)
-							.WithLeadingTrivia(r[0].LeadingTrivia)
-							.WithAdditionalAnnotations(CodeFormatHelper.Select),
-						r[0].WithLeadingTrivia(SF.ElasticSpace)
-					});
 			}
 		}
 
