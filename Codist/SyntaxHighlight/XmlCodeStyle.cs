@@ -7,6 +7,7 @@ namespace Codist.SyntaxHighlight
 	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class XmlCodeStyle : StyleBase<XmlStyleTypes>
 	{
+		string _Category;
 		public XmlCodeStyle() {
 		}
 		public XmlCodeStyle(XmlStyleTypes styleID, Color foregroundColor) {
@@ -19,7 +20,7 @@ namespace Codist.SyntaxHighlight
 		/// <summary>Gets or sets the comment style.</summary>
 		public override XmlStyleTypes StyleID { get; set; }
 
-		internal override string Category => StyleID != XmlStyleTypes.None ? Constants.SyntaxCategory.Xml : String.Empty;
+		internal override string Category => _Category ?? (_Category = GetCategory());
 
 		internal new CommentStyle Clone() {
 			return (CommentStyle)MemberwiseClone();

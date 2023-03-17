@@ -212,6 +212,7 @@ namespace Codist
 		public const string XmlName = "XML Name";
 		public const string XmlProcessingInstruction = "XML Processing Instruction";
 		public const string XmlText = "XML Text";
+		public const string XsltKeyword = "XSLT Keyword";
 
 		public const string MarkdownHeading1 = "Markdown: Heading 1";
 		public const string MarkdownHeading2 = "Markdown: Heading 2";
@@ -822,6 +823,9 @@ namespace Codist
 		[Category(Constants.SyntaxCategory.Xml)]
 		[ClassificationType(ClassificationTypeNames = Constants.XmlText)]
 		XmlText,
+		[Category(Constants.SyntaxCategory.Xml)]
+		[ClassificationType(ClassificationTypeNames = Constants.XsltKeyword)]
+		XsltKeyword,
 		[Category(Constants.SyntaxCategory.Markup)]
 		[ClassificationType(ClassificationTypeNames = Constants.MarkupAttribute)]
 		MarkupAttribute,

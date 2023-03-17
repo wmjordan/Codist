@@ -84,4 +84,13 @@ namespace Codist.Taggers
 	sealed class XmlTextFormat : ClassificationFormatDefinition
 	{
 	}
+
+	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.XsltKeyword)]
+	[Name(Constants.XsltKeyword)]
+	[UserVisible(false)]
+	[Order(Before = Priority.Default)]
+	sealed class XsltKeywordFormat : ClassificationFormatDefinition
+	{
+	}
 }
