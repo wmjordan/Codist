@@ -101,7 +101,7 @@ namespace Codist.Options
 										new ConfigPageItem<CSharpAdditionalHighlightConfigPage>("   "+R.T_Options),
 										new ClassificationCategoryItem(SyntaxStyleSource.CPlusPlus, "C++"),
 										new ClassificationCategoryItem(SyntaxStyleSource.Markdown, "Markdown"),
-										new ClassificationCategoryItem(SyntaxStyleSource.Xml, "XML"),
+										new ClassificationCategoryItem(SyntaxStyleSource.Xml, "XML/HTML"),
 										new ClassificationCategoryItem(SyntaxStyleSource.CommentTagger, R.T_TaggedComments),
 										new ClassificationCategoryItem(SyntaxStyleSource.CommentLabels, "   "+R.T_Tags),
 										new ClassificationCategoryItem(SyntaxStyleSource.PriorityOrder, R.T_AllLanguages)
