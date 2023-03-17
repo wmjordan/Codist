@@ -61,7 +61,6 @@ namespace Codist.Controls
 			SizeToContent = SizeToContent.WidthAndHeight;
 
 			_DefaultButton.IsDefault = true;
-			_DefaultButton.Click += DefaultButton_Click;
 		}
 
 		public static bool? Show(object content) {
