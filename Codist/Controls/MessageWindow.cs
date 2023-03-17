@@ -50,6 +50,7 @@ namespace Codist.Controls
 					},
 					new StackPanel {
 						Margin = WpfHelper.MiddleMargin,
+						Orientation = Orientation.Horizontal,
 						HorizontalAlignment = HorizontalAlignment.Right,
 						Children = {
 							CreateButton(R.CMD_OK, DefaultButton_Click).Set(ref _DefaultButton)
