@@ -111,11 +111,11 @@ namespace Codist.Controls
 				case MessageBoxButton.YesNoCancel:
 					_DefaultButton.Content = R.CMD_Yes;
 					_ButtonPanel.Children.Add(CreateButton(R.CMD_No, NegativeButton_Click));
-					_ButtonPanel.Children.Add(CreateButton(R.CMD_Cancel, CancelButton_Click));
-					break;
+					goto case MessageBoxButton.OKCancel;
 				case MessageBoxButton.YesNo:
 					_DefaultButton.Content = R.CMD_Yes;
-					_ButtonPanel.Children.Add(CreateButton(R.CMD_No, NegativeButton_Click));
+					_ButtonPanel.Children.Add(b = CreateButton(R.CMD_No, NegativeButton_Click));
+					b.IsCancel = true;
 					break;
 			}
 			int img;
@@ -163,7 +163,8 @@ namespace Codist.Controls
 			return new Button {
 				Margin = WpfHelper.MiddleMargin,
 				Content = content,
-			}.ReferenceStyle(VsResourceKeys.ButtonStyleKey);
+			}.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
+			.HandleEvent(Button.ClickEvent, clickHandler);
 		}
 	}
 }
