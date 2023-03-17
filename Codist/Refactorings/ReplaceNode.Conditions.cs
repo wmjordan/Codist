@@ -31,11 +31,20 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var node = ctx.Node;
-				return Chain.Create(((IfStatementSyntax)node).Statement is BlockSyntax b
-					? node.Parent.IsKind(SyntaxKind.ElseClause)
-						? Replace((ElseClauseSyntax)node.Parent, SF.ElseClause(SF.Block(b.Statements)).AnnotateReformatAndSelect())
-						: Replace(node, b.Statements.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select))
-					: Replace(node, ((IfStatementSyntax)node).Statement.AnnotateReformatAndSelect()));
+				var ifs = (IfStatementSyntax)node;
+				if (ifs.Statement is BlockSyntax b) {
+					if (node.Parent.IsKind(SyntaxKind.ElseClause)) {
+						return Chain.Create(Replace((ElseClauseSyntax)node.Parent, SF.ElseClause(SF.Block(b.Statements)).AnnotateReformatAndSelect()));
+					}
+					else {
+						var statements = b.Statements;
+						if (ifs.Else?.Statement is IfStatementSyntax) {
+							statements = statements.Add(ifs.Else.Statement);
+						}
+						return Chain.Create(Replace(node, statements.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select)));
+					}
+				}
+				return Chain.Create(Replace(node, ifs.Statement.AnnotateReformatAndSelect()));
 			}
 		}
 		sealed class NestConditionRefactoring : ReplaceNode
