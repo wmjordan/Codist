@@ -1568,9 +1568,6 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="OT_TypeCastBraces" xml:space="preserve">
     <value>Type cast parentheses</value>
   </data>
-  <data name="T_ApplyOn" xml:space="preserve">
-    <value>Apply on:</value>
-  </data>
   <data name="T_Background" xml:space="preserve">
     <value>Background</value>
   </data>
@@ -2459,5 +2456,8 @@ Expression too long</value>
   </data>
   <data name="CMD_SetNextStatement" xml:space="preserve">
     <value>Set Next Statement</value>
+  </data>
+  <data name="T_ApplyTo" xml:space="preserve">
+    <value>Apply to:</value>
   </data>
 </root>

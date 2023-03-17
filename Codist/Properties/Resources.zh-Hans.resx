@@ -1574,7 +1574,7 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   <data name="T_BottomGradient" xml:space="preserve">
     <value>从下到上渐变</value>
   </data>
-  <data name="T_ApplyOn" xml:space="preserve">
+  <data name="T_ApplyTo" xml:space="preserve">
     <value>应用于:</value>
   </data>
   <data name="OT_TypeCastBraces" xml:space="preserve">

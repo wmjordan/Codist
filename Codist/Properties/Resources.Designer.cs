@@ -4797,11 +4797,11 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Apply on:.
+        ///   Looks up a localized string similar to Apply to:.
         /// </summary>
-        internal static string T_ApplyOn {
+        internal static string T_ApplyTo {
             get {
-                return ResourceManager.GetString("T_ApplyOn", resourceCulture);
+                return ResourceManager.GetString("T_ApplyTo", resourceCulture);
             }
         }
         

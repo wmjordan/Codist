@@ -29,6 +29,7 @@ namespace Codist.Options
 		readonly Border _OptionPageHolder;
 		readonly TextBlock _Notice;
 		readonly ListBox _SyntaxSourceBox;
+		readonly Grid _RightPaneTitle;
 		readonly TextBlock _StyleNameHolder;
 		readonly Button _ResetButton;
 		readonly Border _SettingsGroup, _TagSettingsGroup;
@@ -180,7 +181,7 @@ namespace Codist.Options
 										new Button { Content = R.CMD_Remove }.ReferenceStyle(VsResourceKeys.ButtonStyleKey)
 											.Set(ref _RemoveTagButton).SetValue(Grid.SetColumn, 3)
 									}
-								},
+								}.Set(ref _RightPaneTitle),
 								new Border {
 									Child = new StackPanel().Set(ref _SettingsList)
 								}.Set(ref _OptionPageHolder)
@@ -301,7 +302,7 @@ namespace Codist.Options
 											new WrapPanel {
 												Margin = WpfHelper.SmallMargin,
 												Children = {
-													new TextBlock { Text = R.T_ApplyOn, Width = SMALL_LABEL_WIDTH, Margin = WpfHelper.SmallMargin },
+													new TextBlock { Text = R.T_ApplyTo, Width = SMALL_LABEL_WIDTH, Margin = WpfHelper.SmallMargin },
 													new RadioBox(R.OT_Tag, "TagApplication", OnTagApplicationChanged).Set(ref _TagApplyOnTagBox),
 													new RadioBox(R.OT_Content, "TagApplication", OnTagApplicationChanged).Set(ref _TagApplyOnContentBox),
 													new RadioBox(R.OT_TagContent, "TagApplication", OnTagApplicationChanged).Set(ref _TagApplyOnWholeBox),
@@ -426,11 +427,11 @@ namespace Codist.Options
 
 		void SyntaxSourceChanged(object source, RoutedEventArgs args) {
 			if (_SyntaxSourceBox.SelectedValue is IControlProvider c) {
-				_Notice.Visibility = _SettingsGroup.Visibility = _StyleNameHolder.Visibility = _TagSettingsGroup.Visibility = _AddTagButton.Visibility = _RemoveTagButton.Visibility = Visibility.Collapsed;
+				_Notice.Visibility = _RightPaneTitle.Visibility = _SettingsGroup.Visibility = _StyleNameHolder.Visibility = _TagSettingsGroup.Visibility = _AddTagButton.Visibility = _RemoveTagButton.Visibility = Visibility.Collapsed;
 				_OptionPageHolder.Child = c.Control;
 			}
 			else {
-				_SettingsList.Visibility = Visibility.Visible;
+				_SettingsList.Visibility = _RightPaneTitle.Visibility = Visibility.Visible;
 				_OptionPageHolder.Child = _SettingsList;
 				var style = ((ClassificationCategoryItem)_SyntaxSourceBox.SelectedValue).Style;
 				if (style == SyntaxStyleSource.CommentLabels) {
@@ -575,10 +576,11 @@ namespace Codist.Options
 					FontSize = 20,
 					TextWrapping = TextWrapping.Wrap
 				});
-				_SettingsGroup.Visibility = _StyleNameHolder.Visibility = Visibility.Collapsed;
+				_SettingsGroup.Visibility = _StyleNameHolder.Visibility = _RightPaneTitle.Visibility = Visibility.Collapsed;
 			}
 			else {
 				FilterSettingsList(null, EventArgs.Empty);
+				_RightPaneTitle.Visibility = Visibility.Visible;
 			}
 		}
 
