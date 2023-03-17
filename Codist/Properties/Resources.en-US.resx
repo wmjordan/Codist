@@ -2460,4 +2460,7 @@ Expression too long</value>
   <data name="T_ApplyTo" xml:space="preserve">
     <value>Apply to:</value>
   </data>
+  <data name="T_Language" xml:space="preserve">
+    <value>Language: </value>
+  </data>
 </root>
