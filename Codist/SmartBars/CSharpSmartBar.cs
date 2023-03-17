@@ -376,6 +376,7 @@ namespace Codist.SmartBars
 				case SyntaxKind.ConstructorDeclaration:
 				case SyntaxKind.DestructorDeclaration:
 				case SyntaxKind.MethodDeclaration:
+				case SyntaxKind.LocalFunctionStatement:
 					AddCommand(MyToolBar, IconIds.DeleteMethod, R.CMD_DeleteMethod, DeleteCurrentNode);
 					break;
 				case SyntaxKind.PropertyDeclaration:
