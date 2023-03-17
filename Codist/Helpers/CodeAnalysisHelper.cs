@@ -346,11 +346,17 @@ namespace Codist
 			return ifs?.Parent.IsKind(SyntaxKind.ElseClause) != true;
 		}
 
+		/// <summary>
+		/// Returns whether a <see cref="SyntaxNode"/> spans multiple lines.
+		/// </summary>
 		public static bool IsMultiLine(this SyntaxNode node, bool includeTrivia) {
 			var lines = node.SyntaxTree.GetText().Lines;
 			var span = includeTrivia ? node.FullSpan : node.Span;
 			return lines.GetLineFromPosition(span.Start).SpanIncludingLineBreak.Contains(span.End) == false;
 		}
+		/// <summary>
+		/// Returns whether a <see cref="SyntaxTriviaList"/> spans multiple lines.
+		/// </summary>
 		public static bool IsMultiline(this SyntaxTriviaList triviaList) {
 			foreach (var item in triviaList) {
 				if (item.IsKind(SyntaxKind.EndOfLineTrivia)) {
@@ -367,6 +373,23 @@ namespace Codist
 				&& ee.Expression is AssignmentExpressionSyntax ea
 				&& a.OperatorToken.IsKind(ea.OperatorToken.Kind())
 				&& SyntaxFactory.AreEquivalent(a.Left, ea.Left);
+		}
+
+		public static SyntaxTriviaList GetNonDirectiveLeadingTrivia(this SyntaxNode node) {
+			return node.HasLeadingTrivia == false
+				? default
+				: node.GetLeadingTrivia().GetNonDirectiveTrivia();
+		}
+
+		public static SyntaxTriviaList GetNonDirectiveTrivia(this SyntaxTriviaList list) {
+			int i;
+			for (i = list.Count - 1; i >= 0; i--) {
+				if (list[i].IsDirective == false) {
+					continue;
+				}
+				break;
+			}
+			return i == 0 ? list : new SyntaxTriviaList(list.Skip(i));
 		}
 		#endregion
 

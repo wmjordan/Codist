@@ -71,14 +71,16 @@ namespace Codist.Taggers
 	[TagType(typeof(IClassificationTag))]
 	sealed class CSharpTaggerProvider : IViewTaggerProvider
 	{
-		readonly Dictionary<ITextView, CSharpTagger> _Taggers = new Dictionary<ITextView, CSharpTagger>();
 		static readonly string[] __TaggableRoles = new[] { PredefinedTextViewRoles.Document, PredefinedTextViewRoles.EmbeddedPeekTextView };
+
+		readonly Dictionary<ITextView, CSharpTagger> _Taggers = new Dictionary<ITextView, CSharpTagger>();
 
 		// note: cache the latest used tagger to improve performance
 		//   In C# code editor, even displaying the Quick Info will call the CreateTagger method,
 		//   thus we cache the last accessed tagger, identified by ITextView and ITextBuffer,
 		//   in CSharpTaggerProvider and CSharpTagger respectively, to avoid dictionary lookup
 		CSharpTagger _LastTagger;
+
 		// for debug info
 		int _taggerCount;
 

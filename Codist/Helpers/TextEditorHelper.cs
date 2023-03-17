@@ -962,12 +962,12 @@ namespace Codist
 				) {
 				goto BUILTIN_COPY;
 			}
-			var selection = view.FirstSelectionSpan();
 
-			ITextSnapshot snapshot = view.TextBuffer.CurrentSnapshot;
-			ITextSnapshotLine startLine, endLine;
+			var snapshot = view.TextBuffer.CurrentSnapshot;
+			var selection = view.FirstSelectionSpan();
 			var startOfSelection = selection.Start.Position;
 			var endOfSelection = selection.End.Position;
+			ITextSnapshotLine startLine, endLine;
 			if (((startLine = snapshot.GetLineFromPosition(startOfSelection)) == null)
 				|| (endLine = snapshot.GetLineFromPosition(endOfSelection)) == startLine) {
 				goto BUILTIN_COPY;

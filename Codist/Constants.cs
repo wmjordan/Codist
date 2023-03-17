@@ -102,7 +102,6 @@ namespace Codist
 		public const string CodeSymbolReference = PredefinedClassificationTypeNames.SymbolReference;
 		public const string CodeUrl = "url";
 		public const string CodeFormalLanguage = PredefinedClassificationTypeNames.FormalLanguage;
-		#region Format names introduced in VS 2019
 		public const string CodeOverloadedOperator = "operator - overloaded";
 		public const string CodeStringEscapeCharacter = "string - escape character";
 		public const string CodeKeywordControl = "keyword - control";
@@ -120,7 +119,6 @@ namespace Codist
 		public const string CodeStaticSymbol = "static symbol";
 		public const string CodeLabelName = "label name";
 		public const string CodeNavigableSymbol = "navigableSymbol";
-		#endregion
 
 		public const string XmlDocAttributeName = "xml doc comment - attribute name";
 		public const string XmlDocAttributeQuotes = "xml doc comment - attribute quotes";
@@ -131,9 +129,9 @@ namespace Codist
 		public const string XmlDocEntity = "xml doc comment - entity reference";
 		public const string XmlDocTag = "xml doc comment - name";
 
-		public const string MarkupAttribute = "markup attribute";
-		public const string MarkupAttributeValue = "markup attribute value";
-		public const string MarkupNode = "markup node";
+		public const string MarkupAttribute = PredefinedClassificationTypeNames.MarkupAttribute;
+		public const string MarkupAttributeValue = PredefinedClassificationTypeNames.MarkupAttributeValue;
+		public const string MarkupNode = PredefinedClassificationTypeNames.MarkupNode;
 
 		public const string CSharpLocalVariableName = "C#: Local variable";
 		public const string CSharpParameterName = "C#: Parameter";

@@ -12,15 +12,15 @@ Here's a brief but not complete demonstration of *Codist*'s enhancement to Visua
 Check out this list to see what _Codist_ can do for you.
 
 * [Advanced Syntax Highlight](#advanced-c-syntax-highlight) ANY LANGUAGES, and [*Comment Tagger*](#comment-tagger-and-styles) highlights `to-do` style comments
-  ![](doc/feature-brief-syntax-highlight.png)
+   ![](doc/feature-brief-syntax-highlight.png)
 * [Super Quick Info](#super-quick-info) with extended XML Doc, symbol tool-tips, selectable contents, appearance customization, etc.
-  ![Feature Brief Super Quick Info](doc/feature-brief-super-quick-info.png)
+   ![Feature Brief Super Quick Info](doc/feature-brief-super-quick-info.png)
 * [Navigation Bar](#navigation-bar) with a drag-and-drop and filter enabled member list
-  ![Feature Brief Navigation Bar](doc/feature-brief-navigation-bar.png)
+   ![Feature Brief Navigation Bar](doc/feature-brief-navigation-bar.png)
 * [Smart Bar](#smart-bar) with common edit commands, C# code refactoring and symbol reference analyzers
-  ![Feature Brief Smart Bar](doc/feature-brief-smart-bar.png)
+   ![Feature Brief Smart Bar](doc/feature-brief-smart-bar.png)
 * [Scrollbar Marker](#scrollbar-marker) draws a powerful mini code map
-  ![Feature Brief Scrollbar Marker](doc/feature-brief-scrollbar-marker.png)
+   ![Feature Brief Scrollbar Marker](doc/feature-brief-scrollbar-marker.png)
 * [Auto Changing Version Numbers](#auto-changing-version-numbers)
 * [Display Enhancements](#display-enhancements)
 * [Jump List Shortcuts](#jump-list-shortcuts)
@@ -555,7 +555,7 @@ I have learned a lot from the following extension projects (sorted by the time w
 * ReviewBoard: code.google.com/p/reviewboardvsx
 * [Tweaks](https://github.com/madskristensen/Tweakster): VS tweaks
 * [VsStatus](https://github.com/madskristensen/VsStatus): hacking the status bar
-* [Roslynator](https://github.com/JosefPihrt/Roslynator): hundreds of code refactorings and analyses
+* [Roslynator](https://github.com/JosefPihrt/Roslynator): hundreds of code refactorings and analyzers
 * [ShowTheShortcut](https://github.com/madskristensen/ShowTheShortcut): discovering identifiers of executed commands
 * [Copy Nice](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.CopyNice): copying text without indentation
 
