@@ -299,7 +299,7 @@ namespace Codist.Refactorings
 						if (tn.IsVar) {
 							tn = SF.ParseTypeName(ctx.SemanticContext.SemanticModel.GetSymbol(d.Type)
 								?.ToMinimalDisplayString(ctx.SemanticContext.SemanticModel, d.Type.SpanStart)
-								?? "var");
+								?? "var").WithTrailingTrivia(SF.ElasticSpace);
 						}
 						node = d.Parent;
 						return Chain.Create(Replace(node, new SyntaxNode[] {
