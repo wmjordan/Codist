@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using AppHelpers;
+using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -82,7 +83,10 @@ namespace Codist
 			INamedTypeSymbol t;
 			IMethodSymbol m;
 			var s = symbol.OriginalDefinition;
-			var p = new StackPanel { Margin = WpfHelper.MenuItemMargin, MaxWidth = Application.Current.MainWindow.Width };
+			var p = new StackPanel {
+				Margin = WpfHelper.MenuItemMargin,
+				MaxWidth = Application.Current.MainWindow.Width
+			};
 
 			#region Signature
 			var signature = ShowSymbolSignature(System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Shift ? symbol : s);
@@ -172,6 +176,7 @@ namespace Codist
 				TextWrapping = TextWrapping.Wrap,
 				Foreground = PlainText
 			}.AddSymbol(symbol, true, this);
+			TextEditorWrapper.CreateFor(signature);
 			(signature.Inlines.FirstInline as Run).FontSize *= 1.2;
 
 			switch (symbol.Kind) {
