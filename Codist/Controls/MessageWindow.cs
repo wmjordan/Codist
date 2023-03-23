@@ -57,7 +57,8 @@ namespace Codist.Controls
 						}
 					}.Set(ref _ButtonPanel)
 				}
-			}.ReferenceProperty(Border.BackgroundProperty, VsBrushes.ToolWindowBackgroundKey);
+			};
+			this.ReferenceProperty(Window.BackgroundProperty, VsBrushes.ToolWindowBackgroundKey);
 			SizeToContent = SizeToContent.WidthAndHeight;
 
 			_DefaultButton.IsDefault = true;
