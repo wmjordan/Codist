@@ -341,6 +341,8 @@ namespace Codist.QuickInfo
 					if (p == null) {
 						goto EXIT;
 					}
+
+					try {
 					if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 						WpfHelper.SetUITextRenderOptions(p, true);
 					}
@@ -354,6 +356,11 @@ namespace Codist.QuickInfo
 					}
 					if (LimitItemSize) {
 						ApplySizeLimit(this.GetParent<StackPanel>());
+					}
+					}
+					catch (Exception ex) {
+						MessageWindow.Error(ex, R.T_SuperQuickInfo);
+						return;
 					}
 					EXIT:
 					// hides the parent container from taking excessive space in the quick info window

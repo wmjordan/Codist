@@ -82,6 +82,9 @@ namespace Codist.Controls
 		public static bool? Error(Exception content, string description) {
 			return new MessageWindow($"{description}{Environment.NewLine}{content.ToString()}", null, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
 		}
+		public static bool? Error(Exception content, string description, string title) {
+			return new MessageWindow($"{description}{Environment.NewLine}{content.ToString()}", title, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
+		}
 		public static bool? OkCancel(object content) {
 			return new MessageWindow(content, null, MessageBoxButton.OKCancel, MessageBoxImage.Question).ShowDialog();
 		}
