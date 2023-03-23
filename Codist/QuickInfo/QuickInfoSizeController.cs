@@ -13,7 +13,7 @@ namespace Codist.QuickInfo
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			return QuickInfoOverrider.CheckCtrlSuppression()
 				? null
-				: new QuickInfoItem(null, QuickInfoOverrider.CreateOverrider(session).Control);
+				: new QuickInfoItem(null, QuickInfoOverrider.CreateOverrider(session).CreateControl());
 		}
 
 		void IDisposable.Dispose() {}

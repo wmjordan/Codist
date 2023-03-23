@@ -41,7 +41,7 @@ namespace Codist.QuickInfo
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 			return Keyboard.Modifiers != ModifierKeys.Control && _Background != null
-				? new QuickInfoItem(null, new BackgroundController(_Background))
+				? new QuickInfoItem(null, new BackgroundController(_Background).Tag())
 				: null;
 		}
 

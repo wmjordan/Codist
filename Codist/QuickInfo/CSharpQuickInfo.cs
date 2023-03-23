@@ -358,9 +358,11 @@ namespace Codist.QuickInfo
 				}
 				qiWrapper.ApplyClickAndGo(symbol, buffer, session);
 			}
-			return CreateQuickInfoItem(session, (qiContent.Count > 0 || symbol != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) && session.TextView.TextSnapshot == currentSnapshot
-				? token
-				: (SyntaxToken?)null, qiContent.ToUI());
+			return CreateQuickInfoItem(session,
+				(qiContent.Count > 0 || symbol != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) && session.TextView.TextSnapshot == currentSnapshot
+					? token
+					: (SyntaxToken?)null,
+				qiContent.ToUI().Tag());
 		}
 
 		static QuickInfoItem CreateQuickInfoItem(IAsyncQuickInfoSession session, SyntaxToken? token, object item) {

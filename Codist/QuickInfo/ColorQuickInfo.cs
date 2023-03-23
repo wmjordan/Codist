@@ -34,7 +34,7 @@ namespace Codist.QuickInfo
 				brush = ColorHelper.GetBrush(word);
 			}
 			return brush != null && session.Mark(nameof(ColorQuickInfoUI))
-				? new QuickInfoItem(extent.ToTrackingSpan(), ColorQuickInfoUI.PreviewColor(brush))
+				? new QuickInfoItem(extent.ToTrackingSpan(), ColorQuickInfoUI.PreviewColor(brush).Tag())
 				: null;
 		}
 

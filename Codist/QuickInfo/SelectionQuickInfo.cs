@@ -85,7 +85,7 @@ namespace Codist.QuickInfo
 				}
 			}
 		RETURN:
-			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(ThemeHelper.GetImage(IconIds.SelectCode)));
+			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(ThemeHelper.GetImage(IconIds.SelectCode)).Tag());
 		}
 
 		sealed class Mark { }
