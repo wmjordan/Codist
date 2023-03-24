@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -12,6 +13,7 @@ using Newtonsoft.Json;
 namespace Codist.SyntaxHighlight
 {
 	/// <summary>The base style for syntax highlight elements.</summary>
+	[DebuggerDisplay("{ClassificationType}: {ForeColor} {FontSize}")]
 	abstract class StyleBase
 	{
 		static protected readonly Regex FriendlyNamePattern = new Regex(@"([a-z])([A-Z0-9])", RegexOptions.Singleline);

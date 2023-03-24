@@ -4,7 +4,6 @@ using System.Windows.Media;
 
 namespace Codist.SyntaxHighlight
 {
-	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class XmlCodeStyle : StyleBase<XmlStyleTypes>
 	{
 		string _Category;

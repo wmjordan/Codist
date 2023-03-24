@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
 namespace Codist.SyntaxHighlight
 {
-	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class CommentStyle : StyleBase<CommentStyleTypes>
 	{
 		string _Category;

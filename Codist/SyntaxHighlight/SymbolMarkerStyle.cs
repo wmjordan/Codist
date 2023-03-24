@@ -3,7 +3,6 @@ using System.Windows.Media;
 
 namespace Codist.SyntaxHighlight
 {
-	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class SymbolMarkerStyle : StyleBase<SymbolMarkerStyleTypes>
 	{
 		string _Category;
@@ -30,5 +29,4 @@ namespace Codist.SyntaxHighlight
 			return FriendlyNamePattern.Replace(StyleID.ToString(), "$1 $2");
 		}
 	}
-
 }

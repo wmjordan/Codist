@@ -1,8 +1,5 @@
-﻿using System.Diagnostics;
-
-namespace Codist.SyntaxHighlight
+﻿namespace Codist.SyntaxHighlight
 {
-	[DebuggerDisplay("{StyleID} {ForegroundColor} {FontSize}")]
 	sealed class MarkdownStyle : StyleBase<MarkdownStyleTypes>
 	{
 		string _Category;
