@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.InteropServices;
+using ComTypes = System.Runtime.InteropServices.ComTypes;
 
 namespace Codist
 {
@@ -98,6 +100,62 @@ namespace Codist
 					il.Emit(OpCodes.Ldnull);
 					return;
 			}
+		}
+
+		/// <summary>
+		/// Get's the underlying COM name of System.__COMObject.
+		/// </summary>
+		/// <seealso href="https://qiita.com/kob58im/items/4e6e773aebbf3ea4594d"/>
+		public static string GetTypeNameFromComObject(object obj) {
+			var disp = obj as IDispatch;
+			if (disp == null) {
+				return null;
+			}
+			int count;
+			int hResult = disp.GetTypeInfoCount(out count);
+			if (hResult < 0 || count < 1) { // failed or no type info
+				return null;
+			}
+
+			IntPtr ptr = IntPtr.Zero;
+			try {
+				disp.GetTypeInfo(0, 0, out ptr);
+				if (ptr == IntPtr.Zero) {
+					return null;
+				}
+
+				var typeInfo = Marshal.GetTypedObjectForIUnknown(ptr, typeof(ComTypes.ITypeInfo)) as ComTypes.ITypeInfo;
+
+				if (typeInfo == null) {
+					return null;
+				}
+				string strName;
+				string strDocString;
+				int dwHelpContext;
+				string strHelpFile;
+
+				typeInfo.GetDocumentation(-1, out strName, out strDocString, out dwHelpContext, out strHelpFile);
+				return strName;
+			}
+			finally {
+				if (ptr != IntPtr.Zero) {
+					Marshal.Release(ptr);
+					ptr = IntPtr.Zero;
+				}
+			}
+		}
+
+		[ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("00020400-0000-0000-c000-000000000046")]
+		private interface IDispatch
+		{
+			[PreserveSig]
+			int GetTypeInfoCount(out int count);
+			[PreserveSig]
+			int GetTypeInfo([In] int itinfo, [In] int lcid, out IntPtr typeinfo);
+			[PreserveSig]
+			int GetIDsOfNames();//dummy. don't call this method
+			[PreserveSig]
+			int Invoke();//dummy. don't call this method
 		}
 	}
 }

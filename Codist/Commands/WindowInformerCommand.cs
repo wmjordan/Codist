@@ -1,148 +1,490 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
 using AppHelpers;
 using Codist.Controls;
+using EnvDTE;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Text.Projection;
 using Microsoft.VisualStudio.Utilities;
 using R = Codist.Properties.Resources;
+using Window = EnvDTE.Window;
 
 namespace Codist.Commands
 {
-	/// <summary>A command which displays information about the active interactive window.</summary>
+	/// <summary>A command which displays information about the active window pane.</summary>
 	internal static class WindowInformerCommand
 	{
+		const int SubSectionFontSize = 14;
+
 		public static void Initialize() {
 			Command.WindowInformer.Register(Execute, (s, args) => {
 				ThreadHelper.ThrowIfNotOnUIThread();
 				((OleMenuCommand)s).Visible = Config.Instance.DeveloperOptions.MatchFlags(DeveloperOptions.ShowWindowInformer)
-					&& TextEditorHelper.GetActiveWpfInteractiveView() != null;
+					&& CodistPackage.DTE.ActiveWindow != null;
 			});
 		}
 
 		static void Execute(object sender, EventArgs e) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			var view = TextEditorHelper.GetActiveWpfInteractiveView();
-			if (view == null) {
-				return;
-			}
-			DisplayWindowInfo(view);
-		}
-
-		static void DisplayWindowInfo(Microsoft.VisualStudio.Text.Editor.IWpfTextView view) {
-			using (var b = ReusableStringBuilder.AcquireDefault(100)) {
-				var sb = b.Resource;
-				var d = view.TextBuffer.GetTextDocument();
-				string fileName;
-				if (d != null) {
-					sb.AppendLine(fileName = System.IO.Path.GetFileName(d.FilePath))
-						.Append(R.T_Folder).AppendLine(System.IO.Path.GetDirectoryName(d.FilePath))
-						.Append(R.T_TextEncoding).AppendLine(d.Encoding.EncodingName)
-						.Append(R.T_LastSaved).AppendLine(d.LastSavedTime == default ? R.T_NotSaved : d.LastSavedTime.ToLocalTime().ToString())
-						.Append(R.T_LastModified).AppendLine(d.LastContentModifiedTime.ToLocalTime().ToString());
-				}
-				else {
-					fileName = null;
-				}
-
-				ShowDTEDocumentProperties(sb);
-
-				sb.AppendLine()
-					.Append(R.T_LineCount)
-					.AppendLine(view.TextSnapshot.LineCount.ToText())
-					.Append(R.T_CharacterCount)
-					.AppendLine(view.TextSnapshot.Length.ToText());
-
-				sb.AppendLine()
-					.Append(R.T_Selection)
-					.AppendLine($"{view.Selection.Start.Position.Position}-{view.Selection.End.Position.Position}")
-					.Append(R.T_SelectionLength)
-					.AppendLine(view.Selection.SelectedSpans.Sum(i => i.Length).ToString())
-					.Append(R.T_Caret)
-					.AppendLine(view.Caret.Position.BufferPosition.Position.ToString());
-
-				sb.AppendLine().AppendLine(R.T_ContentTypeOfDocument);
-				ShowContentType(view.TextBuffer.ContentType, sb, new HashSet<IContentType>(), 0);
-
-				sb.AppendLine()
-					.AppendLine(R.T_ViewRoles)
-					.AppendLine(String.Join(", ", view.Roles));
-
-				sb.AppendLine()
-					.AppendLine(R.T_ViewProperties)
-					.AppendLine(GetPropertyString(view.Properties));
-
-				sb.AppendLine()
-					.AppendLine(R.T_TextBufferProperties)
-					.AppendLine(GetPropertyString(view.TextBuffer.Properties));
-
-				MessageWindow.Show(sb.ToString(),
-					fileName == null
-						? R.T_DocumentProperties
-						: $"{R.T_DocumentProperties} - {fileName}");
-			}
-		}
-
-		static void ShowDTEDocumentProperties(StringBuilder sb) {
 			var window = CodistPackage.DTE.ActiveWindow;
 			if (window == null) {
 				return;
 			}
-			sb.AppendLine()
-				.AppendLine(R.T_ActiveWindowProperties)
-				.Append(R.T_Caption).AppendLine(window.Caption)
-				.Append(R.T_Kind).AppendLine(window.Kind)
-				.Append(R.T_ObjectKind).AppendLine(window.ObjectKind)
-				.Append(R.T_DTEType).AppendLine(window.Type.ToString());
+			DisplayWindowInfo(window);
+		}
+
+		static void DisplayWindowInfo(Window window) {
+			var tb = new RichTextBox {
+				BorderThickness = WpfHelper.NoMargin,
+				Background = ThemeHelper.DocumentPageBrush,
+				Foreground = ThemeHelper.DocumentTextBrush,
+				FontFamily = ThemeHelper.CodeTextFont,
+				IsDocumentEnabled = true,
+				IsReadOnly = true,
+				IsReadOnlyCaretVisible = true,
+				AcceptsReturn = false
+			};
+			tb.ApplyTemplate();
+			tb.GetFirstVisualChild<ScrollViewer>().ReferenceStyle(Microsoft.VisualStudio.Shell.VsResourceKeys.ScrollViewerStyleKey);
+			var blocks = tb.Document.Blocks;
+			blocks.Clear();
+			Section s;
+
+			var view = window.Document?.GetActiveWpfDocumentView();
+			if (view != null) {
+				var d = view.TextBuffer.GetTextDocument();
+				if (d != null) {
+					s = NewSection(blocks, R.T_DocumentProperties);
+					AppendNameValue(s, R.T_FilePath, d.FilePath);
+					AppendNameValue(s, R.T_TextEncoding, d.Encoding.EncodingName);
+					AppendNameValue(s, R.T_LastSaved, d.LastSavedTime == default ? R.T_NotSaved : (object)d.LastSavedTime.ToLocalTime());
+					AppendNameValue(s, R.T_LastModified, d.LastContentModifiedTime.ToLocalTime());
+				}
+			}
+
+			if (view != null) {
+				s = NewSection(blocks, "IWpfTextView", SubSectionFontSize);
+				AppendNameValue(s, R.T_LineCount + " (TextSnapshot.LineCount)", view.TextSnapshot.LineCount);
+				AppendNameValue(s, R.T_CharacterCount + " (TextSnapshot.Length)", view.TextSnapshot.Length);
+
+				AppendNameValue(s, R.T_Selection, $"[{view.Selection.Start.Position.Position}-{view.Selection.End.Position.Position})");
+				AppendNameValue(s, R.T_SelectionLength, view.Selection.SelectedSpans.Sum(i => i.Length));
+				AppendNameValue(s, "SelectedSpans.Count", view.Selection.SelectedSpans.Count);
+
+				AppendNameValue(s, R.T_CaretPosition, view.Caret.Position.BufferPosition.Position);
+				AppendNameValue(s, "Caret.OverwriteMode", view.Caret.OverwriteMode);
+
+				Append(s, "TextBuffer.ContentType:");
+				ShowContentType(view.TextBuffer.ContentType, s, new HashSet<IContentType>(), 2);
+
+				if (view.TextBuffer is IProjectionBuffer projection) {
+					Append(s, "Projection.SourceBuffers.ContentType:");
+					foreach (var pb in projection.SourceBuffers) {
+						ShowContentType(pb.ContentType, s, new HashSet<IContentType>(), 2);
+					}
+				}
+
+				AppendNameValue(s, "Roles", view.Roles);
+
+				ShowPropertyCollection(s, view.Properties, "Properties:");
+
+				ShowPropertyCollection(s, view.TextBuffer.Properties, "TextBuffer.Properties:");
+			}
+
+			ShowDTEWindowProperties(blocks, window);
+
+			MessageWindow.Show(tb, $"{R.T_DocumentProperties} - {window.Caption}");
+		}
+
+		static void ShowDTEWindowProperties(BlockCollection blocks, Window window) {
+			var s = NewSection(blocks, "ActiveWindow", SubSectionFontSize);
+			AppendNameValue(s, "Caption", window.Caption);
+			AppendNameValue(s, "Kind", window.Kind);
+			try {
+				AppendNameValue(s, "ObjectKind", window.ObjectKind);
+			}
+			catch (NotImplementedException) {
+				// ignore
+			}
+			AppendNameValue(s, "Object", window.Object);
+			AppendNameValue(s, "Type", window.Type);
+			AppendNameValue(s, "AutoHides", window.AutoHides);
+			AppendNameValue(s, "DocumentData", window.DocumentData);
+			AppendNameValue(s, "Width", window.Width);
+			AppendNameValue(s, "Height", window.Height);
+			AppendNameValue(s, "Left", window.Left);
+			AppendNameValue(s, "Top", window.Top);
+
+			var projItem = window.ProjectItem;
+			Section ss;
+			if (projItem != null) {
+				ss = NewIndentSection(s, "ProjectItem:");
+				AppendNameValue(ss, "Name", projItem.Name);
+				try {
+					AppendNameValue(ss, "ContainingProject", projItem?.ContainingProject?.Name);
+					AppendNameValue(ss, "ContainingProject.ExtenderNames", projItem?.ContainingProject?.ExtenderNames);
+				}
+				catch (System.Runtime.InteropServices.COMException ex) {
+					AppendNameValue(ss, "ContainingProject", ex.Message);
+				}
+				if (projItem.Properties?.Count != 0) {
+					ss = NewIndentSection(ss, "Properties:");
+					foreach (var item in projItem.Properties.Enumerate().OrderBy(i => i.Key)) {
+						AppendNameValue(ss, item.Key, item.Value);
+					}
+				}
+			}
+
+			var ca = window.ContextAttributes;
+			if (ca != null && ca.Count != 0) {
+				ss = NewIndentSection(s, "ContextAttributes:");
+				foreach (ContextAttribute item in ca) {
+					AppendNameValue(ss, item.Name, item.Values);
+				}
+			}
 
 			var doc = window.Document;
 			if (doc != null) {
-				sb.AppendLine()
-					.AppendLine(R.T_ActiveDocumentProperties)
-					.Append(R.T_Language).AppendLine(doc.Language)
-					.Append(R.T_Kind).AppendLine(doc.Kind)
-					.Append(R.T_DTEType).AppendLine(doc.Type)
-					.Append(R.T_DocumentExtenderNames).AppendLine(String.Join(", ", doc.ExtenderNames as string[]))
-					.Append(R.T_DocumentExtenderCATID).Append(doc.ExtenderCATID).AppendLine();
+				ss = NewIndentSection(s, "Document:");
+				AppendNameValue(ss, "Language", doc.Language);
 				try {
-					sb.Append(R.T_ContainingProject).AppendLine(doc.ProjectItem?.ContainingProject?.Name)
-						.Append(R.T_ProjectExtenderNames).AppendLine(String.Join(", ", doc.ProjectItem?.ContainingProject?.ExtenderNames as string[]));
+					AppendNameValue(ss, "Kind", doc.Kind);
 				}
-				catch (System.Runtime.InteropServices.COMException ex) {
-					sb.Append(R.T_ContainingProject).AppendLine(ex.Message);
+				catch (NotImplementedException) {
+					// ignore
 				}
-				sb.AppendLine(R.T_ProjectItemProperties);
-				var properties = doc.ProjectItem?.Properties;
-				if (properties != null) {
-					foreach (var item in properties.Enumerate()) {
-						sb.Append("* ").Append(item.Key).Append(" = ").Append(item.Value).AppendLine();
+				AppendNameValue(ss, "Type", doc.Type);
+				AppendNameValue(ss, "ExtenderNames", doc.ExtenderNames);
+				AppendNameValue(ss, "ExtenderCATID", doc.ExtenderCATID);
+			}
+
+			ShowSpecialWindowTypeInfo(blocks, window);
+		}
+
+		static void ShowSpecialWindowTypeInfo(BlockCollection blocks, Window window) {
+			switch (window.Type) {
+				case vsWindowType.vsWindowTypeSolutionExplorer:
+					ShowDTESolutionSelectedItems(blocks);
+					break;
+				default:
+					break;
+			}
+		}
+
+		static void ShowDTESolutionSelectedItems(BlockCollection blocks) {
+			var items = (object[])CodistPackage.DTE.ToolWindows.SolutionExplorer.SelectedItems;
+			foreach (UIHierarchyItem hi in items) {
+				var obj = hi.Object;
+				if (obj is Project p) {
+					ShowDTEProjectProperties(blocks, p);
+				}
+				else if (obj is Solution s) {
+					ShowDTESolutionProperties(blocks, s);
+				}
+				else if (obj is ProjectItem pi) {
+					ShowDTEProjectItemProperties(blocks, pi);
+				}
+				else {
+					var ss = NewSection(blocks, "UIHierarchyItem", SubSectionFontSize);
+					AppendNameValue(ss, "Name", hi.Name);
+					AppendNameValue(ss, "Object", hi.Object);
+				}
+			}
+		}
+
+		static void ShowDTEProjectItemProperties(BlockCollection blocks, ProjectItem pi) {
+			var s = NewSection(blocks, "ProjectItem", SubSectionFontSize);
+			AppendNameValue(s, "Name", pi.Name);
+			var fc = pi.FileCount;
+			for (short i = 1; i <= fc; i++) {
+				AppendNameValue(s, "FileNames", pi.FileNames[i]);
+			}
+			AppendNameValue(s, "FileCodeModel", pi.FileCodeModel);
+			AppendNameValue(s, "Kind", pi.Kind);
+			AppendNameValue(s, "ExtenderCATID", pi.ExtenderCATID);
+			AppendNameValue(s, "ExtenderNames", pi.ExtenderNames);
+			AppendNameValue(s, "ContainingProject.Name", pi.ContainingProject?.Name);
+			AppendNameValue(s, "SubProject.Name", pi.SubProject?.Name);
+			AppendNameValue(s, "Object", pi.Object);
+			//AppendNameValue(s, "IsDirty", pi.IsDirty);
+			AppendNameValue(s, "IsOpen", pi.IsOpen);
+			//AppendNameValue(s, "Saved", pi.Saved);
+			try {
+				ShowPropertyCollection(s, pi.Properties, "Properties:");
+			}
+			catch (COMException ex) {
+				AppendNameValue(s, "Properties", ex.Message);
+			}
+		}
+
+		static void ShowDTESolutionProperties(BlockCollection blocks, Solution solution) {
+			var s = NewSection(blocks, "Solution", SubSectionFontSize);
+			AppendNameValue(s, "FullName", solution.FullName);
+			AppendNameValue(s, "IsDirty", solution.IsDirty);
+			AppendNameValue(s, "Saved", solution.Saved);
+			AppendNameValue(s, "Count", solution.Count);
+			AppendNameValue(s, "ExtenderCATID", solution.ExtenderCATID);
+			AppendNameValue(s, "ExtenderNames", solution.ExtenderNames);
+			AppendNameValue(s, "Globals.VariableNames", solution.Globals?.VariableNames);
+			ShowDTESolutionBuild(solution, s);
+			ShowPropertyCollection(s, solution.Properties, "Properties:");
+			var ss = NewIndentSection(s, "Projects:");
+			foreach (Project project in solution.Projects) {
+				AppendNameValue(ss, "Project.Name", project.Name);
+			}
+		}
+
+		static void ShowDTESolutionBuild(Solution solution, Section s) {
+			var sb = solution.SolutionBuild;
+			if (sb == null) {
+				return;
+			}
+			s = NewIndentSection(s, "SolutionBuild:");
+			var ac = sb.ActiveConfiguration;
+			Section ss, cs;
+			if (ac != null) {
+				ss = NewIndentSection(s, "ActiveConfiguration:");
+				AppendNameValue(ss, "Name", ac.Name);
+				if (ac.SolutionContexts.Count != 0) {
+					ss = NewIndentSection(ss, "SolutionContexts:");
+					foreach (SolutionContext item in ac.SolutionContexts) {
+						cs = NewIndentSection(ss, item.ProjectName);
+						AppendNameValue(cs, "ProjectName", item.ProjectName);
+						AppendNameValue(cs, "ConfigurationName", item.ConfigurationName);
+						AppendNameValue(cs, "PlatformName", item.PlatformName);
+						AppendNameValue(cs, "ShouldBuild", item.ShouldBuild);
+						AppendNameValue(cs, "ShouldDeploy", item.ShouldDeploy);
+					}
+				}
+			}
+			var sc = sb.SolutionConfigurations;
+			if (sc != null && sc.Count != 0) {
+				ss = NewIndentSection(s, "SolutionConfigurations:");
+				foreach (SolutionConfiguration item in sc) {
+					AppendNameValue(ss, "SolutionConfigurations.Name", item.Name);
+				}
+			}
+			AppendNameValue(s, "StartupProjects", sb.StartupProjects);
+			var bd = sb.BuildDependencies;
+			if (bd != null && bd.Count != 0) {
+				ss = NewIndentSection(s, "BuildDependencies:");
+				foreach (BuildDependency item in bd) {
+					cs = NewIndentSection(ss, item.Project.Name);
+					AppendNameValue(cs, "Project.Name", item.Project.Name);
+					AppendNameValue(cs, "RequiredProjects", item.RequiredProjects);
+				}
+			}
+		}
+
+		static void ShowDTEProjectProperties(BlockCollection blocks, Project project) {
+			var s = NewSection(blocks, "Project", SubSectionFontSize);
+			AppendNameValue(s, "Name", project.Name);
+			AppendNameValue(s, "UniqueName", project.UniqueName);
+			try {
+				AppendNameValue(s, "FullName", project.FullName);
+			}
+			catch (NotImplementedException) {
+				// ignore
+			}
+			AppendNameValue(s, "Kind", project.Kind);
+			AppendNameValue(s, "IsDirty", project.IsDirty);
+			AppendNameValue(s, "Saved", project.Saved);
+			AppendNameValue(s, "ExtenderCATID", project.ExtenderCATID);
+			AppendNameValue(s, "ExtenderNames", project.ExtenderNames);
+			AppendNameValue(s, "Globals.VariableNames", project.Globals?.VariableNames);
+			AppendNameValue(s, "Object", project.Object);
+			try {
+				ShowPropertyCollection(s, project.Properties, "Properties:");
+			}
+			catch (COMException ex) {
+				AppendNameValue(s, "Properties", ex.Message);
+			}
+		}
+
+		static void ShowContentType (IContentType type, Section section, HashSet<IContentType> dedup, int indent) {
+			Append(section, type.DisplayName != type.TypeName ? $"{type.DisplayName} ({type.TypeName})" : type.DisplayName, indent * 10);
+			foreach (var bt in type.BaseTypes) {
+				if (dedup.Add(bt)) {
+					ShowContentType(bt, section, dedup, indent + 1);
+				}
+			}
+		}
+
+		static void ShowPropertyCollection(Section section, PropertyCollection properties, string title) {
+			var s = NewIndentSection(section, title);
+			foreach (var item in properties.PropertyList.Select(i => {
+				return (n: i.Key.ToString(), k: i.Key, v: i.Value);
+			}).OrderBy(i => i.n)) {
+				AppendPropertyValue(s, item.n, item.k, item.v);
+			}
+		}
+		static void ShowPropertyCollection(Section section, EnvDTE.Properties properties, string title) {
+			if (properties == null || properties.Count == 0) {
+				return;
+			}
+			var s = NewIndentSection(section, title);
+			foreach (EnvDTE.Property item in properties) {
+				if (item.NumIndices > 0) {
+					AppendPropertyValue(s, item.Name, item.Name, null);
+				}
+				else {
+					try {
+						AppendPropertyValue(s, item.Name, item.Name, item.Value);
+					}
+					catch (COMException) {
+						AppendPropertyValue(s, item.Name, item.Name, null);
 					}
 				}
 			}
 		}
 
-		static void ShowContentType (IContentType type, StringBuilder sb, HashSet<IContentType> dedup, int indent) {
-			sb.Append(' ', indent)
-				.Append(type.DisplayName);
-			if (type.DisplayName != type.TypeName) {
-				sb.Append('(')
-					.Append(type.TypeName)
-					.Append(')');
-			}
-			sb.AppendLine();
-			foreach (var bt in type.BaseTypes) {
-				if (dedup.Add(bt)) {
-					ShowContentType(bt, sb, dedup, indent + 2);
+		static readonly Thickness ParagraphIndent = new Thickness(10, 0, 0, 0);
+		static readonly Thickness SectionIndent = new Thickness(10, 12, 0, 6);
+
+		static Section NewSection(BlockCollection blocks, string title) {
+			Section section = new Section {
+				Margin = SectionIndent,
+				Blocks = {
+					new Paragraph(new Run(title) { FontSize = 18, FontWeight = FontWeights.Bold, Foreground = SymbolFormatter.Instance.Class }) { TextIndent = -5, Margin = WpfHelper.SmallMargin }
 				}
+			};
+			blocks.Add(section);
+			return section;
+		}
+		static Section NewSection(BlockCollection blocks, string title, int fontSize) {
+			Section section = new Section {
+				Margin = SectionIndent,
+				Blocks = {
+					new Paragraph(new Run(title) { FontSize = fontSize, FontWeight = FontWeights.Bold, Foreground = SymbolFormatter.Instance.Class }) { TextIndent = -10, Margin = WpfHelper.SmallMargin }
+				}
+			};
+			blocks.Add(section);
+			return section;
+		}
+		static Section NewIndentSection(Section block, string title) {
+			Append(block, title);
+			Section section = new Section {
+				Margin = new Thickness(block.Margin.Left + 10, 0, 0, 0),
+			};
+			block.Blocks.Add(section);
+			return section;
+		}
+		static void AppendNameValue(Section section, string name, object value) {
+			Paragraph p = new Paragraph {
+				Margin = ParagraphIndent,
+				TextIndent = -10,
+				Inlines = {
+					new Run(name) { Foreground = SymbolFormatter.Instance.Property },
+					new Run(" = "),
+				}
+			};
+			AppendValueRun(p.Inlines, value);
+			section.Blocks.Add(p);
+		}
+		static void AppendPropertyValue(Section section, string name, object key, object value) {
+			Paragraph p = new Paragraph {
+				Margin = ParagraphIndent,
+				TextIndent = -10,
+				Inlines = {
+					CreateRunForKey(key),
+					new Run(": "),
+				}
+			};
+			AppendValueRun(p.Inlines, value);
+			section.Blocks.Add(p);
+		}
+		static void Append(Section section, string text, int indent = 0) {
+			section.Blocks.Add(new Paragraph {
+				Margin = ParagraphIndent,
+				TextIndent = indent - 10,
+				Inlines = {
+					new Run(text) { Foreground = SymbolFormatter.Instance.Property }
+				}
+			});
+		}
+		static void AppendValueRun(InlineCollection inlines, object value) {
+			if (value is Array a) {
+				inlines.Add(new Run("[") { Foreground = SymbolFormatter.SemiTransparent.PlainText });
+				for (int i = 0; i < a.Length; i++) {
+					if (i > 0) {
+						inlines.Add(new Run(", ") { Foreground = SymbolFormatter.SemiTransparent.PlainText });
+					}
+					inlines.Add(CreateRun(a.GetValue(i)));
+				}
+				inlines.Add(new Run("]") { Foreground = SymbolFormatter.SemiTransparent.PlainText });
+			}
+			else {
+				inlines.Add(CreateRun(value));
 			}
 		}
-
-		static string GetPropertyString(PropertyCollection properties) {
-			return String.Join(Environment.NewLine, properties.PropertyList.Select(i => {
-					string k = i.Key.ToString(), v = i.Value?.ToString();
-					return k == v ? $"* {k}" : $"* {k} = {v}";
-				}).OrderBy(i => i));
+		static Run CreateRun(object value) {
+			var f = SymbolFormatter.Instance;
+			if (value == null) {
+				return new Run("null") { Foreground = f.Keyword };
+			}
+			if (value is Type type) {
+				if (type.IsGenericType) {
+					return new Run(type.Name + "<" + new string(',', type.GenericTypeArguments.Length) + ">") {
+						Foreground = GetTypeBrush(f, type),
+						ToolTip = type
+					};
+				}
+				return new Run(type.DeclaringType != null ? (type.DeclaringType.Name + "+" + type.Name) : type.Name) {
+					Foreground = GetTypeBrush(f, type),
+					ToolTip = type.ToString()
+				};
+			}
+			switch (Type.GetTypeCode(type = value.GetType())) {
+				case TypeCode.Object:
+					if (type.IsEnum) {
+						return new Run(value.ToString()) { Foreground = f.EnumField };
+					}
+					if (type.Name == "__ComObject" && type.Namespace == "System") {
+						return new Run(ReflectionHelper.GetTypeNameFromComObject(value) ?? "System.__ComObject") { Foreground = f.Class };
+					}
+					goto default;
+				case TypeCode.Boolean: return new Run((bool)value ? "true" : "false") { Foreground = f.Keyword };
+				case TypeCode.Char: return new Run(value.ToString()) { Foreground = f.Text };
+				case TypeCode.SByte:
+				case TypeCode.Byte:
+				case TypeCode.Int16:
+				case TypeCode.UInt16:
+				case TypeCode.Int32:
+				case TypeCode.UInt32:
+				case TypeCode.Int64:
+				case TypeCode.UInt64:
+				case TypeCode.Single:
+				case TypeCode.Double:
+				case TypeCode.Decimal: return new Run(value.ToString()) { Foreground = f.Number };
+				case TypeCode.String:
+					var s = value.ToString();
+					return s.Length > 0
+						? new Run(s) { Foreground = f.Text }
+						: new Run("\"\"") { Foreground = SymbolFormatter.SemiTransparent.PlainText };
+				default:
+					return new Run(value.ToString());
+			}
+		}
+		static Run CreateRunForKey(object value) {
+			var t = value as Type;
+			return new Run(t is null ? value.ToString() : GetTypeName(t)) {
+				Foreground = SymbolFormatter.Instance.Property,
+				ToolTip = t is null ? null : t.ToString()
+			};
+		}
+		static string GetTypeName(Type type) {
+			return (type.DeclaringType != null ? (GetTypeName(type.DeclaringType) + "+" + type.Name) : type.Name)
+				+ (type.IsGenericType ? ("<" + new string(',', type.GenericTypeArguments.Length) + ">") : String.Empty);
+		}
+		static Brush GetTypeBrush(SymbolFormatter f, Type type) {
+			return type.IsClass ? f.Class : type.IsInterface ? f.Interface : type.IsValueType ? f.Struct : type.IsEnum ? f.Enum : f.PlainText;
 		}
 	}
 }

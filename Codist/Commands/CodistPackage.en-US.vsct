@@ -28,8 +28,8 @@
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-					<ButtonText>Show Document Content Type...</ButtonText>
-					<ToolTipText>Display content types of the current document</ToolTipText>
+					<ButtonText>Show Active Window Properties...</ButtonText>
+					<ToolTipText>Display properties of the active window</ToolTipText>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="IncrementVsixVersionId" priority="0x0100" type="Button">

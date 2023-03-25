@@ -733,7 +733,7 @@ Use space to separate keywords.</value>
     <value>Base type: </value>
   </data>
   <data name="T_Characters" xml:space="preserve">
-    <value> characters</value>
+    <value>characters</value>
   </data>
   <data name="T_Class" xml:space="preserve">
     <value>Class: </value>
@@ -763,7 +763,7 @@ Use space to separate keywords.</value>
     <value>Selected character:</value>
   </data>
   <data name="T_Selection" xml:space="preserve">
-    <value>Selection: </value>
+    <value>Selection</value>
   </data>
   <data name="T_Signature" xml:space="preserve">
     <value>Signature: </value>
@@ -772,7 +772,7 @@ Use space to separate keywords.</value>
     <value>Source file: </value>
   </data>
   <data name="T_Spans" xml:space="preserve">
-    <value> spans</value>
+    <value>spans</value>
   </data>
   <data name="T_Example" xml:space="preserve">
     <value>Example</value>
@@ -1420,9 +1420,6 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="T_Common" xml:space="preserve">
     <value>Common</value>
-  </data>
-  <data name="T_ContentTypeOfDocument" xml:space="preserve">
-    <value>Content Type:</value>
   </data>
   <data name="T_CustomizeSyntaxHighlightNote" xml:space="preserve">
     <value>To configure syntax highlight, open a code file first and execute this command.</value>
@@ -2374,19 +2371,19 @@ Expression too long</value>
     <value>Duplicate Method Declaration</value>
   </data>
   <data name="T_CharacterCount" xml:space="preserve">
-    <value>Character Count: </value>
+    <value>Character Count</value>
   </data>
   <data name="T_DocumentProperties" xml:space="preserve">
     <value>Document Properties</value>
   </data>
   <data name="T_LastModified" xml:space="preserve">
-    <value>Last Modified: </value>
+    <value>Last Modified</value>
   </data>
   <data name="T_LastSaved" xml:space="preserve">
-    <value>Last Saved: </value>
+    <value>Last Saved</value>
   </data>
   <data name="T_LineCount" xml:space="preserve">
-    <value>Line Count: </value>
+    <value>Line Count</value>
   </data>
   <data name="T_NotSaved" xml:space="preserve">
     <value>Not saved yet</value>
@@ -2395,16 +2392,16 @@ Expression too long</value>
     <value>Text Buffer Properties:</value>
   </data>
   <data name="T_TextEncoding" xml:space="preserve">
-    <value>Text Encoding: </value>
+    <value>Text Encoding</value>
   </data>
   <data name="T_ViewProperties" xml:space="preserve">
     <value>View Properties:</value>
   </data>
-  <data name="T_Caret" xml:space="preserve">
-    <value>Caret: </value>
+  <data name="T_CaretPosition" xml:space="preserve">
+    <value>Caret.Position</value>
   </data>
   <data name="T_SelectionLength" xml:space="preserve">
-    <value>Selection Length: </value>
+    <value>Selection Length</value>
   </data>
   <data name="T_ClassificationForSelectedContent" xml:space="preserve">
     <value>Classifications for selected content:</value>
@@ -2415,44 +2412,8 @@ Expression too long</value>
   <data name="T_SyntaxClassificationInfo" xml:space="preserve">
     <value>Syntax Classification Info</value>
   </data>
-  <data name="T_ContainingProject" xml:space="preserve">
-    <value>ContainingProject: </value>
-  </data>
-  <data name="T_DocumentExtenderCATID" xml:space="preserve">
-    <value>ExtenderCATID: </value>
-  </data>
-  <data name="T_DocumentExtenderNames" xml:space="preserve">
-    <value>ExtenderNames: </value>
-  </data>
   <data name="T_DocumentKind" xml:space="preserve">
     <value>Kind: </value>
-  </data>
-  <data name="T_Language" xml:space="preserve">
-    <value>Language: </value>
-  </data>
-  <data name="T_ProjectExtenderNames" xml:space="preserve">
-    <value>ContainingProject.ExtenderNames: </value>
-  </data>
-  <data name="T_ProjectItemProperties" xml:space="preserve">
-    <value>ProjectItem.Properties: </value>
-  </data>
-  <data name="T_Caption" xml:space="preserve">
-    <value>Caption: </value>
-  </data>
-  <data name="T_ActiveDocumentProperties" xml:space="preserve">
-    <value>ActiveDocument Properties:</value>
-  </data>
-  <data name="T_ActiveWindowProperties" xml:space="preserve">
-    <value>ActiveWindow Properties:</value>
-  </data>
-  <data name="T_DTEType" xml:space="preserve">
-    <value>Type: </value>
-  </data>
-  <data name="T_Kind" xml:space="preserve">
-    <value>Kind: </value>
-  </data>
-  <data name="T_ObjectKind" xml:space="preserve">
-    <value>ObjectKind: </value>
   </data>
   <data name="CMD_WrapInTryFinally" xml:space="preserve">
     <value>Wrap in &lt;try...finally&gt;</value>
@@ -2462,5 +2423,8 @@ Expression too long</value>
   </data>
   <data name="CMD_SetNextStatement" xml:space="preserve">
     <value>Set Next Statement</value>
+  </data>
+  <data name="T_FilePath" xml:space="preserve">
+    <value>FilePath</value>
   </data>
 </root>

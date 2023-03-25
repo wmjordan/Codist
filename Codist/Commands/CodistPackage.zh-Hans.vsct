@@ -11,7 +11,7 @@
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
 					<ButtonText>保存代码窗口截图...</ButtonText>
-					<ToolTipText>Take a screenshot for the active code window</ToolTipText>
+					<ToolTipText>对当前代码窗口截图，保存为图像文件</ToolTipText>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="GetContentTypeCommandId" priority="4133" type="Button">
@@ -21,8 +21,8 @@
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>IconIsMoniker</CommandFlag>
 				<Strings>
-					<ButtonText>显示文档内容类型...</ButtonText>
-					<ToolTipText>Display content types of the current document</ToolTipText>
+					<ButtonText>显示当前窗口属性...</ButtonText>
+					<ToolTipText>显示当前窗口的属性和文档属性</ToolTipText>
 				</Strings>
 			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="IncrementVsixVersionId" priority="0x0100" type="Button">
