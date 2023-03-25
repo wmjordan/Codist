@@ -74,9 +74,9 @@ namespace Codist.QuickInfo
 			}
 			info = new ThemedTipText() { Name = Name }
 				.Append(R.T_Selection, true)
-				.Append(c.ToString() + R.T_Characters);
+				.Append($": {c} {R.T_Characters}");
 			if (lines > 1) {
-				info.Append(", " + lines + R.T_Spans);
+				info.Append($", {lines} {R.T_Spans}");
 			}
 			else {
 				lines = selection.StreamSelectionSpan.SnapshotSpan.GetLineSpan().Length;
@@ -87,8 +87,6 @@ namespace Codist.QuickInfo
 		RETURN:
 			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(ThemeHelper.GetImage(IconIds.SelectCode)).Tag());
 		}
-
-		sealed class Mark { }
 	}
 
 }

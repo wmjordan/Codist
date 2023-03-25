@@ -1185,36 +1185,36 @@ namespace Codist.Options
 				PreviewLabelStyle(_Preview, formatMap.GetTextProperties(_Classification));
 			}
 
-			static TextBlock PreviewLabelStyle(TextBlock label, TextFormattingRunProperties format) {
+			static TextBlock PreviewLabelStyle(TextBlock preview, TextFormattingRunProperties format) {
 				if (format.ForegroundBrushEmpty == false) {
-					label.Foreground = format.ForegroundBrush;
+					preview.Foreground = format.ForegroundBrush;
 				}
 				if (format.BackgroundBrushEmpty == false) {
-					label.Background = format.BackgroundBrush;
+					preview.Background = format.BackgroundBrush;
 				}
 				if (format.ItalicEmpty == false) {
-					label.FontStyle = format.Italic ? FontStyles.Italic : FontStyles.Normal;
+					preview.FontStyle = format.Italic ? FontStyles.Italic : FontStyles.Normal;
 				}
 				if (format.BoldEmpty == false) {
-					label.FontWeight = format.Bold ? FontWeights.Bold : FontWeights.Normal;
+					preview.FontWeight = format.Bold ? FontWeights.Bold : FontWeights.Normal;
 				}
 				if (format.TypefaceEmpty == false) {
-					label.FontFamily = format.Typeface.FontFamily;
-					label.FontStretch = format.Typeface.Stretch;
-					if (label.FontStyle == FontStyles.Normal) {
-						label.FontStyle = format.Typeface.Style;
+					preview.FontFamily = format.Typeface.FontFamily;
+					preview.FontStretch = format.Typeface.Stretch;
+					if (preview.FontStyle == FontStyles.Normal) {
+						preview.FontStyle = format.Typeface.Style;
 					}
-					if (label.FontWeight == FontWeights.Normal) {
-						label.FontWeight = format.Typeface.Weight;
+					if (preview.FontWeight == FontWeights.Normal) {
+						preview.FontWeight = format.Typeface.Weight;
 					}
 				}
 				if (format.FontRenderingEmSizeEmpty == false) {
-					label.FontSize = format.FontRenderingEmSize;
+					preview.FontSize = format.FontRenderingEmSize;
 				}
 				if (format.TextDecorationsEmpty == false) {
-					label.TextDecorations = format.TextDecorations;
+					preview.TextDecorations = format.TextDecorations;
 				}
-				return label;
+				return preview;
 			}
 		}
 
