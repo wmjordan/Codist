@@ -19,25 +19,27 @@ namespace Codist
 {
 	sealed class SymbolFormatter
 	{
-		private SymbolFormatter(IEditorFormatMap formatMap, Func<Brush, Brush> brushConfigurator) {
-			_brushConfigurator = brushConfigurator;
-			if (formatMap != null) {
-				foreach (var setter in _BrushSetter) {
-					setter.Value(this, formatMap);
-				}
-				formatMap.FormatMappingChanged += FormatMap_FormatMappingChanged;
-			}
-		}
-
 		internal const double TransparentLevel = 0.6;
-		static readonly Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>> _BrushSetter = CreatePropertySetter();
+
+		static readonly Dictionary<string, Action<SymbolFormatter, IEditorFormatMap, Brush>> _BrushSetter = CreatePropertySetter();
 		internal static readonly SymbolFormatter Instance = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText), b => { b?.Freeze(); return b; });
 		internal static readonly SymbolFormatter SemiTransparent = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText), b => {
 			if (b != null) {
 				b = b.Alpha(TransparentLevel); b.Freeze();
 			}
 			return b; });
+
 		readonly Func<Brush, Brush> _brushConfigurator;
+		SymbolFormatter(IEditorFormatMap formatMap, Func<Brush, Brush> brushConfigurator) {
+			_brushConfigurator = brushConfigurator;
+			if (formatMap != null) {
+				var defaultBrush = formatMap.GetProperties(Constants.CodePlainText).GetBrush();
+				foreach (var setter in _BrushSetter) {
+					setter.Value(this, formatMap, defaultBrush);
+				}
+				formatMap.FormatMappingChanged += FormatMap_FormatMappingChanged;
+			}
+		}
 
 		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
 		public Brush Class { get; private set; }
@@ -955,15 +957,18 @@ namespace Codist
 		}
 
 
-		static Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>> CreatePropertySetter() {
-			var r = new Dictionary<string, Action<SymbolFormatter, IEditorFormatMap>>(19, StringComparer.OrdinalIgnoreCase);
+		static Dictionary<string, Action<SymbolFormatter, IEditorFormatMap, Brush>> CreatePropertySetter() {
+			var r = new Dictionary<string, Action<SymbolFormatter, IEditorFormatMap, Brush>>(19, StringComparer.OrdinalIgnoreCase);
 			foreach (var item in typeof(SymbolFormatter).GetProperties()) {
 				var ctn = item.GetCustomAttribute<ClassificationTypeAttribute>().ClassificationTypeNames.Split(';');
 				var setFormatBrush = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(item.Name);
 				foreach (var ct in ctn) {
-					r.Add(ct, (f, m) => {
-						var brush = m.GetAnyBrush(ctn);
-						setFormatBrush(f, f._brushConfigurator != null ? f._brushConfigurator(brush) : brush);
+					r.Add(ct, (f, m, defaultBrush) => {
+						var brush = m.GetAnyBrush(ctn) ?? defaultBrush;
+						if (f._brushConfigurator != null) {
+							brush = f._brushConfigurator(brush);
+						}
+						setFormatBrush(f, brush);
 					});
 				}
 			}
@@ -972,9 +977,10 @@ namespace Codist
 
 		void FormatMap_FormatMappingChanged(object sender, FormatItemsEventArgs e) {
 			var m = sender as IEditorFormatMap;
+			var defaultBrush = m.GetProperties(Constants.CodePlainText).GetBrush();
 			foreach (var item in e.ChangedItems) {
 				if (_BrushSetter.TryGetValue(item, out var a)) {
-					a(this, m);
+					a(this, m, defaultBrush);
 				}
 			}
 		}
