@@ -534,6 +534,21 @@ namespace Codist
 			string GetPropertyAccessors(IPropertySymbol p) {
 				using (var sbr = ReusableStringBuilder.AcquireDefault(30)) {
 					var sb = sbr.Resource;
+					var pp = p.Parameters;
+					if (pp.Length > 0) {
+						sb.Append('[');
+						bool s = false;
+						foreach (var item in pp) {
+							if (s) {
+								sb.Append(",");
+							}
+							else {
+								s = true;
+							}
+							sb.Append(item.Type.GetTypeName());
+						}
+						sb.Append(']');
+					}
 					sb.Append(" {");
 					var m = p.GetMethod;
 					if (m != null) {
@@ -621,7 +636,7 @@ namespace Codist
 						return sb.ToString();
 					}
 				}
-				return t.Arity > 0 ? "<" + new string(',', t.Arity - 1) + ">" : String.Empty;
+				return t.Arity > 0 ? $"<{new string (',', t.Arity - 1)}>" : String.Empty;
 			}
 		}
 
