@@ -44,6 +44,7 @@ namespace Codist.Controls
 									VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
 									Padding = WpfHelper.MiddleMargin,
 								}.ReferenceProperty(BackgroundProperty, CommonControlsColors.TextBoxBackgroundBrushKey)
+								.ReferenceStyle(VsResourceKeys.ScrollViewerStyleKey)
 								.Set(ref _Content)
 							}.ReferenceProperty(BorderBrushProperty, CommonControlsColors.TextBoxBorderBrushKey).SetValue(Grid.SetColumn, 1),
 						}
