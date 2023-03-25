@@ -26,7 +26,7 @@ namespace Codist.SyntaxHighlight
 				|| textView.TextBuffer.MayBeEditor() == false) {
 				return;
 			}
-			textView.Properties.GetOrCreateSingletonProperty(() => nameof(FormatStore));
+			textView.Properties.GetOrCreateSingletonProperty(typeof(FormatStore), () => nameof(FormatStore));
 			FormatStore.Highlight(textView);
 			//var formatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 			//ChangeEditorFormat(formatMap, "TextView Background", m => m[EditorFormatDefinition.BackgroundBrushId] = Brushes.LightGreen);
