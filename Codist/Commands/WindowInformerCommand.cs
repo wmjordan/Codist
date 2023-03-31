@@ -116,11 +116,16 @@ namespace Codist.Commands
 			AppendNameValue(s, "Object", window.Object);
 			AppendNameValue(s, "Type", window.Type);
 			AppendNameValue(s, "AutoHides", window.AutoHides);
+			AppendNameValue(s, "IsFloating", window.IsFloating);
 			AppendNameValue(s, "DocumentData", window.DocumentData);
+			// AppendNameValue(s, "HWnd", window.HWnd); // this property is unavailable in 64bit VS
 			AppendNameValue(s, "Width", window.Width);
 			AppendNameValue(s, "Height", window.Height);
 			AppendNameValue(s, "Left", window.Left);
 			AppendNameValue(s, "Top", window.Top);
+			AppendNameValue(s, "Linkable", window.Linkable);
+			AppendNameValue(s, "LinkedWindowFrame.Caption", window.LinkedWindowFrame?.Caption);
+			AppendNameValue(s, "Project.Name", window.Project?.Name);
 
 			var projItem = window.ProjectItem;
 			Section ss;
@@ -146,7 +151,7 @@ namespace Codist.Commands
 			if (ca != null && ca.Count != 0) {
 				ss = NewIndentSection(s, "ContextAttributes:");
 				foreach (ContextAttribute item in ca) {
-					AppendNameValue(ss, item.Name, item.Values);
+					AppendPropertyValue(ss, item.Name, item.Name, item.Values);
 				}
 			}
 
@@ -300,6 +305,34 @@ namespace Codist.Commands
 			AppendNameValue(s, "ExtenderNames", project.ExtenderNames);
 			AppendNameValue(s, "Globals.VariableNames", project.Globals?.VariableNames);
 			AppendNameValue(s, "Object", project.Object);
+			var cm = project.ConfigurationManager;
+			if (cm != null) {
+				var ss = NewIndentSection(s, "ConfigurationManager:");
+				AppendNameValue(ss, "ConfigurationRowNames", cm.ConfigurationRowNames);
+				AppendNameValue(ss, "Count", cm.Count);
+				AppendNameValue(ss, "PlatformNames", cm.PlatformNames);
+				AppendNameValue(ss, "SupportedPlatforms", cm.SupportedPlatforms);
+				var c = cm.ActiveConfiguration;
+				if (cm.ActiveConfiguration != null) {
+					ss = NewIndentSection(ss, "ActiveConfiguration:");
+					AppendNameValue(ss, "Type", c.Type);
+					AppendNameValue(ss, "ConfigurationName", c.ConfigurationName);
+					AppendNameValue(ss, "PlatformName", c.PlatformName);
+					AppendNameValue(ss, "ExtenderCATID", c.ExtenderCATID);
+					AppendNameValue(ss, "ExtenderNames", c.ExtenderNames);
+					AppendNameValue(ss, "IsBuildable", c.IsBuildable);
+					AppendNameValue(ss, "IsDeployable", c.IsDeployable);
+					AppendNameValue(ss, "IsRunable", c.IsRunable);
+					AppendNameValue(ss, "Object", c.Object);
+					AppendNameValue(ss, "Owner", c.Owner);
+					try {
+						ShowPropertyCollection(ss, c.Properties, "Properties:");
+					}
+					catch (COMException ex) {
+						AppendNameValue(ss, "Properties", ex.Message);
+					}
+				}
+			}
 			try {
 				ShowPropertyCollection(s, project.Properties, "Properties:");
 			}
@@ -330,18 +363,22 @@ namespace Codist.Commands
 				return;
 			}
 			var s = NewIndentSection(section, title);
-			foreach (EnvDTE.Property item in properties) {
-				if (item.NumIndices > 0) {
-					AppendPropertyValue(s, item.Name, item.Name, null);
+			foreach (var item in properties.OfType<EnvDTE.Property>().Select(p => {
+				object val;
+				if (p.NumIndices != 0) {
+					val = null;
 				}
 				else {
 					try {
-						AppendPropertyValue(s, item.Name, item.Name, item.Value);
+						val = p.Value;
 					}
 					catch (COMException) {
-						AppendPropertyValue(s, item.Name, item.Name, null);
+						val = null;
 					}
 				}
+				return new KeyValuePair<string, object>(p.Name, val);
+			}).OrderBy(i => i.Key)) {
+				AppendPropertyValue(s, item.Key, item.Key, item.Value);
 			}
 		}
 
