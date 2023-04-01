@@ -63,6 +63,10 @@ namespace Codist.QuickInfo
 				if (p != null && _Brush != null) {
 					p.Background = _Brush;
 				}
+				var b = this.GetParent<Border>();
+				if (b != null) {
+					b.Visibility = Visibility.Collapsed;
+				}
 			}
 		}
 	}

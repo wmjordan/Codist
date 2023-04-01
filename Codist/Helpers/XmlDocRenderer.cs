@@ -113,7 +113,8 @@ namespace Codist
 					tip.Append(new ThemedTipParagraph(IconIds.Value, new ThemedTipText()
 						.Append(R.T_Value, true)
 						.Append(value == doc.Value ? ": " : (R.T_Inherited + ": "))
-						.AddXmlDoc(value, this)));
+						.AddXmlDoc(value, this))
+						);
 				}
 			}
 			#endregion
@@ -126,8 +127,8 @@ namespace Codist
 					tip.Append(new ThemedTipParagraph(IconIds.RemarksXmlDoc, new ThemedTipText()
 						.Append(R.T_Remarks, true)
 						.Append(remarks == doc.Remarks ? ": " : (R.T_Inherited + ": "))
-						))
-						.Append(new ThemedTipParagraph(new ThemedTipText().AddXmlDoc(remarks, this)));
+						.AddXmlDoc(remarks, this))
+						);
 				}
 			}
 			#endregion

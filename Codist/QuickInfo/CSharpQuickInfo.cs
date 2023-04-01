@@ -358,11 +358,7 @@ namespace Codist.QuickInfo
 				}
 				qiWrapper.ApplyClickAndGo(symbol, buffer, session);
 			}
-			return CreateQuickInfoItem(session,
-				(qiContent.Count > 0 || symbol != null && Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) && session.TextView.TextSnapshot == currentSnapshot
-					? token
-					: (SyntaxToken?)null,
-				qiContent.ToUI().Tag());
+			return qiContent.Count == 0 ? null : CreateQuickInfoItem(session, token, qiContent.ToUI().Tag());
 		}
 
 		static QuickInfoItem CreateQuickInfoItem(IAsyncQuickInfoSession session, SyntaxToken? token, object item) {
@@ -1487,8 +1483,9 @@ namespace Codist.QuickInfo
 					.AddParameters(om.Parameters, _SymbolFormatter, argIndex);
 				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.Argument, content));
 				if (paramDoc != null) {
-					content.Append("\n" + argName, true, false, _SymbolFormatter.Parameter).Append(": ");
-					new XmlDocRenderer(semanticModel.Compilation, _SymbolFormatter).Render(paramDoc, content.Inlines);
+					content.Append("\n" + argName, true, false, _SymbolFormatter.Parameter)
+						.Append(": ")
+						.AddXmlDoc(paramDoc, new XmlDocRenderer(semanticModel.Compilation, _SymbolFormatter));
 				}
 				if (m.IsGenericMethod) {
 					for (int i = 0; i < m.TypeArguments.Length; i++) {
@@ -1496,8 +1493,8 @@ namespace Codist.QuickInfo
 						_SymbolFormatter.ShowTypeArgumentInfo(m.TypeParameters[i], m.TypeArguments[i], content);
 						var typeParamDoc = doc.GetTypeParameter(m.TypeParameters[i].Name);
 						if (typeParamDoc != null) {
-							content.Append(": ");
-							new XmlDocRenderer(semanticModel.Compilation, _SymbolFormatter).Render(typeParamDoc, content.Inlines);
+							content.Append(": ")
+								.AddXmlDoc(typeParamDoc, new XmlDocRenderer(semanticModel.Compilation, _SymbolFormatter));
 						}
 					}
 				}
