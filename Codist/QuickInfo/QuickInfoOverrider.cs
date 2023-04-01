@@ -408,7 +408,8 @@ namespace Codist.QuickInfo
 							foreach (var item in qi.GetDescendantChildren<ContentPresenter>()) {
 								if (item.Content is IWpfTextView v) {
 									item.Content = new ThemedTipText {
-										Text = v.TextSnapshot.GetText()
+										Text = v.TextSnapshot.GetText(),
+										Margin = WpfHelper.MiddleBottomMargin
 									}.SetGlyph(ThemeHelper.GetImage(IconIds.Info)).Scrollable();
 								}
 							}
@@ -618,14 +619,16 @@ namespace Codist.QuickInfo
 
 				void OverrideDocElement(IList items) {
 					try {
+						var d = _Overrider._DocElement;
 						if (items.Count > 1 && items[1] is TextBlock) {
 							items.RemoveAt(1);
-							items.Insert(1, _Overrider._DocElement);
+							items.Insert(1, d);
 						}
 						else {
-							items.Add(_Overrider._DocElement);
+							items.Add(d);
 						}
-						if (_Overrider._DocElement is ThemedTipDocument myDoc) {
+						if (d is ThemedTipDocument myDoc) {
+							myDoc.Margin = new Thickness(0, 3, 0, 0);
 							myDoc.ApplySizeLimit();
 						}
 					}
@@ -705,12 +708,9 @@ namespace Codist.QuickInfo
 						if (c is IWpfTextView v) {
 							// use the custom control to enable selection
 							cp.Content = new ThemedTipText {
-								Text = v.TextSnapshot.GetText()
-							}.Scrollable().LimitSize();
-							//v.VisualElement.LimitSize();
-							//v.Options.SetOptionValue(DefaultTextViewHostOptions.VerticalScrollBarName, true);
-							//v.Options.SetOptionValue(DefaultTextViewOptions.WordWrapStyleName, WordWrapStyles.WordWrap);
-							//v.Options.SetOptionValue(DefaultTextViewOptions.AutoScrollName, true);
+								Text = v.TextSnapshot.GetText(),
+								Margin = WpfHelper.MiddleBottomMargin
+							}.SetGlyph(ThemeHelper.GetImage(IconIds.Info)).Scrollable().LimitSize();
 							continue;
 						}
 						o = c as DependencyObject;

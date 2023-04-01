@@ -518,6 +518,20 @@ namespace Codist
 			}
 			var s = DocumentationCommentId.GetFirstSymbolForDeclarationId(symbol, _Compilation);
 			if (s != null) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ContainingType)) {
+					switch (s.Kind) {
+						case SymbolKind.Event:
+						case SymbolKind.Field:
+						case SymbolKind.Method:
+						case SymbolKind.NamedType:
+						case SymbolKind.Property:
+							if (s.ContainingType != null) {
+								_SymbolFormatter.Format(inlines, s.ContainingType, null, false);
+								inlines.Add(".");
+							}
+							break;
+					}
+				}
 				_SymbolFormatter.Format(inlines, s, null, false);
 				return;
 			}

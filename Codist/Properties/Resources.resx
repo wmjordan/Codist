@@ -2427,4 +2427,10 @@ Expression too long</value>
   <data name="T_FilePath" xml:space="preserve">
     <value>FilePath</value>
   </data>
+  <data name="OT_ShowSeeContainingType" xml:space="preserve">
+    <value>Show containing type for &lt;see/&gt;</value>
+  </data>
+  <data name="OT_ShowSeeContainingTypeTip" xml:space="preserve">
+    <value>Displays containing type for cross referenced symbols in XML Doc</value>
+  </data>
 </root>

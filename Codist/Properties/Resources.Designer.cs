@@ -4166,6 +4166,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show containing type for &lt;see/&gt;.
+        /// </summary>
+        internal static string OT_ShowSeeContainingType {
+            get {
+                return ResourceManager.GetString("OT_ShowSeeContainingType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displays containing type for cross referenced symbols in XML Doc.
+        /// </summary>
+        internal static string OT_ShowSeeContainingTypeTip {
+            get {
+                return ResourceManager.GetString("OT_ShowSeeContainingTypeTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Provides a dynamic floating toolbar in your code editor.
         /// </summary>
         internal static string OT_SmartBarTip {
