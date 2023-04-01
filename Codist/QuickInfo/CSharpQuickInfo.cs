@@ -507,6 +507,12 @@ namespace Codist.QuickInfo
 			ShowCapturedVariables(node, symbol, semanticModel, tip);
 
 			if (tip.ParagraphCount > 0) {
+				var i = tip.ParagraphCount;
+				foreach (var p in tip.Paragraphs) {
+					if (--i > 0) {
+						p.Padding = WpfHelper.MiddleBottomMargin;
+					}
+				}
 				qiWrapper.OverrideDocumentation(tip);
 			}
 			return tip;
@@ -1205,7 +1211,8 @@ namespace Codist.QuickInfo
 					new ThemedTipText(R.T_HashCode, true) { Margin = WpfHelper.GlyphMargin, TextAlignment = TextAlignment.Right }.SetValue(Grid.SetRow, 1),
 					new ThemedTipText(sv.Length.ToString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1),
 					new ThemedTipText(sv.GetHashCode().ToString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetRow, 1).SetValue(Grid.SetColumn, 1),
-				}
+				},
+				Margin = WpfHelper.MiddleBottomMargin
 			};
 			if (showText) {
 				g.RowDefinitions.Add(new RowDefinition());
@@ -1263,7 +1270,8 @@ namespace Codist.QuickInfo
 						ColumnDefinitions = {
 							new ColumnDefinition(),
 							new ColumnDefinition()
-						}
+						},
+						Margin = WpfHelper.MiddleBottomMargin
 					};
 					goto NEXT;
 				}

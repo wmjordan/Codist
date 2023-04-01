@@ -280,7 +280,8 @@ namespace Codist
 							Padding = WpfHelper.SmallHorizontalMargin,
 							FontFamily = ThemeHelper.CodeTextFont
 						}, bytes).WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin).SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
-					}
+					},
+					Margin = WpfHelper.MiddleBottomMargin,
 				};
 			}
 

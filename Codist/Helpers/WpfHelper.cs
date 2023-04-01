@@ -33,6 +33,8 @@ namespace Codist
 		internal static readonly Thickness SmallVerticalMargin = new Thickness(0, SmallMarginSize, 0, SmallMarginSize);
 		internal static readonly Thickness MiddleHorizontalMargin = new Thickness(6, 0, 6, 0);
 		internal static readonly Thickness MiddleVerticalMargin = new Thickness(0, 6, 0, 6);
+		internal static readonly Thickness MiddleTopMargin = new Thickness(0, 6, 0, 0);
+		internal static readonly Thickness MiddleBottomMargin = new Thickness(0, 0, 0, 6);
 		internal static readonly Thickness MenuItemMargin = new Thickness(6, 0, 6, 0);
 
 		#region TextBlock and Run

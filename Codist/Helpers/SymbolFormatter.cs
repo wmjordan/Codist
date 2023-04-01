@@ -175,7 +175,7 @@ namespace Codist
 
 		TextBlock ShowSymbolSignature(ISymbol symbol) {
 			var signature = new TextBlock {
-				Margin = WpfHelper.SmallVerticalMargin,
+				Margin = WpfHelper.MiddleBottomMargin,
 				TextWrapping = TextWrapping.Wrap,
 				Foreground = PlainText
 			}.AddSymbol(symbol, true, this);
