@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 using AppHelpers;
 using Codist.Controls;
@@ -91,7 +92,7 @@ namespace Codist
 			};
 
 			#region Signature
-			var signature = ShowSymbolSignature(System.Windows.Input.Keyboard.Modifiers == System.Windows.Input.ModifierKeys.Shift ? symbol : s);
+			var signature = ShowSymbolSignature(Keyboard.Modifiers == ModifierKeys.Shift ? symbol : s);
 			p.Add(signature);
 			if (s.IsObsolete()) {
 				p.Opacity = TransparentLevel;
@@ -1198,8 +1199,8 @@ namespace Codist
 				MouseEnter += InitEventHandlers;
 			}
 
-			void InitEventHandlers(object sender, System.Windows.Input.MouseEventArgs e) {
-				Cursor = System.Windows.Input.Cursors.Hand;
+			void InitEventHandlers(object sender, MouseEventArgs e) {
+				Cursor = Cursors.Hand;
 				MouseEnter -= InitEventHandlers;
 				NodeLink_MouseEnter(sender, e);
 				MouseEnter += NodeLink_MouseEnter;
@@ -1218,7 +1219,7 @@ namespace Codist
 			}
 
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
-			async void NodeLink_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+			async void NodeLink_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
 				try {
 					(await TextEditorHelper.GetMouseOverDocumentView()?.TextBuffer.GetDocument().Project.GetCompilationAsync())
 						.GetSemanticModel(_Node.SyntaxTree)
@@ -1234,11 +1235,11 @@ namespace Codist
 				e.Handled = true;
 			}
 
-			void NodeLink_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e) {
+			void NodeLink_MouseLeave(object sender, MouseEventArgs e) {
 				Background = Brushes.Transparent;
 			}
 
-			void NodeLink_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e) {
+			void NodeLink_MouseEnter(object sender, MouseEventArgs e) {
 				Background = SystemColors.GrayTextBrush.Alpha(WpfHelper.DimmedOpacity);
 			}
 		}
