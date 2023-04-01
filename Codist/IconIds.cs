@@ -240,6 +240,9 @@ namespace Codist
 		public const int Network = KnownImageIds.Network;
 		public const int Question = KnownImageIds.StatusHelp;
 		public const int Info = KnownImageIds.StatusInformation;
+		public const int Suggestion = KnownImageIds.StatusAlert;
+		public const int SevereWarning = KnownImageIds.StatusWarning;
+		public const int Warning = KnownImageIds.StatusWarningOutline;
 		public const int Error = KnownImageIds.StatusInvalid;
 		public const int Stop = KnownImageIds.StatusNo;
 		#endregion

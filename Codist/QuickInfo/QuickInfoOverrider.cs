@@ -763,8 +763,85 @@ namespace Codist.QuickInfo
 						&& TextEditorWrapper.CreateFor(t) != null
 						&& t.Inlines.FirstInline is InlineUIContainer == false) {
 						t.TextWrapping = TextWrapping.Wrap;
-						t.SetGlyph(ThemeHelper.GetImage(IconIds.Info));
+						t.SetGlyph(ThemeHelper.GetImage(GetIconIdForText(t)));
 					}
+				}
+
+				static int GetIconIdForText(TextBlock t) {
+					var f = t.Inlines.FirstInline;
+					var tt = ((f as Hyperlink)?.Inlines.FirstInline as Run)?.Text;
+					if (tt == null) {
+						tt = (f as Run)?.Text;
+						return tt == "SPELL" && t.Inlines.Count > 1 ? IconIds.Suggestion : IconIds.Info;
+					}
+					switch (tt.Length) {
+						case 7:
+							if (tt.StartsWith("IDE", StringComparison.Ordinal) && ToErrorCode(tt, 3) != 0) {
+								return IconIds.Suggestion;
+							}
+							break;
+						case 6:
+							if (tt[0] == 'C') {
+								if (tt[1] == 'A' && ToErrorCode(tt, 2) != 0) {
+									return IconIds.Suggestion;
+								}
+								int c;
+								if (tt[1] == 'S' && (c = ToErrorCode(tt, 2)) != 0) {
+									switch (CodeAnalysisHelper.GetWarningLevel(c)) {
+										case 0: return IconIds.Error;
+										case 1:
+										case 2: return IconIds.SevereWarning;
+									}
+								}
+							}
+							break;
+					}
+					return IsErrorCode(tt) ? IconIds.Warning : IconIds.Info;
+				}
+
+				static int ToErrorCode(string text, int index) {
+					var l = text.Length;
+					var code = 0;
+					for (int i = index; i < l; i++) {
+						var c = text[i];
+						if (c < '0' || c > '9') {
+							return 0;
+						}
+						code = code * 10 + c - '0';
+					}
+					return code;
+				}
+
+				static bool IsErrorCode(string text) {
+					const int START = 0, ALPHA = 1, NUMBER = 2;
+					var l = text.Length;
+					var s = START;
+					for (int i = 0; i < l; i++) {
+						var c = text[i];
+						switch (s) {
+							case START:
+								if (c < 'A' && c > 'Z') {
+									return false;
+								}
+								s = ALPHA;
+								continue;
+							case ALPHA:
+								if (c < 'A' && c > 'Z') {
+									if (c < '0' || c > '9') {
+										return false;
+									}
+									s = NUMBER;
+									continue;
+								}
+								continue;
+							case NUMBER:
+								if (c < '0' || c > '9') {
+									return false;
+								}
+								continue;
+						}
+					}
+					return s == NUMBER;
 				}
 
 				static void MakeChildrenScrollable(ItemsControl s) {

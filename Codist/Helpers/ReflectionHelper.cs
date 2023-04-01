@@ -65,6 +65,17 @@ namespace Codist
 			}
 			return null;
 		}
+		public static Func<TIn, TOut> CallStaticFunc<TIn, TOut>(MethodInfo method) {
+			if (method != null) {
+				var m = new DynamicMethod("Call" + method.Name, typeof(TOut), new[] { typeof(TIn) }, true);
+				var il = m.GetILGenerator();
+				il.Emit(OpCodes.Ldarg_0);
+				il.EmitCall(OpCodes.Call, method, null);
+				il.Emit(OpCodes.Ret);
+				return m.CreateDelegate<Func<TIn, TOut>>();
+			}
+			return null;
+		}
 		static void LoadDefault(this ILGenerator il, Type type) {
 			var t = type;
 			switch (Type.GetTypeCode(t)) {
