@@ -174,7 +174,7 @@ namespace Codist
 		}
 
 		static void ShowAttributeTypeXmlDoc(ISymbol symbol, SemanticContext context, ThemedToolTip tip) {
-			tip.AddTextBlock().Append(R.T_DocumentationFrom).Append(symbol.ContainingType.Name, SymbolFormatter.Instance.Class).Append(":");
+			tip.AddTextBlock().Append(symbol.ContainingType.Name, true, false, SymbolFormatter.Instance.Class).Append(":");
 			ShowXmlDocSummary(symbol.ContainingType, context.SemanticModel.Compilation, tip);
 		}
 

@@ -49,7 +49,6 @@ namespace Codist
 				summary = doc.GetInheritedDescription(symbol, out inheritDoc);
 				if (inheritDoc != null && summary != null) {
 					tip.Append(new ThemedTipParagraph(IconIds.ReferencedXmlDoc, new ThemedTipText()
-							.Append(R.T_DocumentationFrom)
 							.AddSymbol(inheritDoc.Symbol.ContainingSymbol.OriginalDefinition, false, _SymbolFormatter)
 							.Append(".")
 							.AddSymbol(inheritDoc.Symbol, true, _SymbolFormatter)
