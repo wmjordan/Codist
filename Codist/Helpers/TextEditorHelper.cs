@@ -1187,7 +1187,7 @@ namespace Codist
 					view.VisualElement.Loaded += TextView_SetActiveView;
 					view.VisualElement.MouseEnter += TextViewMouseEnter_SetActiveView;
 					view.GotAggregateFocus += TextView_SetActiveView;
-					if (view.Roles.Any(i => i == PredefinedTextViewRoles.Document)) {
+					if (view.Roles.Contains(PredefinedTextViewRoles.Document)) {
 						_IsDocument = true;
 						_ActiveDocumentView = view;
 						_WpfTextViews.Add(view);

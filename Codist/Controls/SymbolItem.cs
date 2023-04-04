@@ -81,7 +81,7 @@ namespace Codist.Controls
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		public bool GoToSource() {
-			if (Location != null && Location.IsInSource) {
+			if (Location?.IsInSource == true) {
 				GoToLocation();
 				return true;
 			}

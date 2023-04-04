@@ -540,7 +540,7 @@ namespace Codist
 						bool s = false;
 						foreach (var item in pp) {
 							if (s) {
-								sb.Append(",");
+								sb.Append(',');
 							}
 							else {
 								s = true;

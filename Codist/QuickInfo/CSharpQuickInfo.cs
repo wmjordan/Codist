@@ -619,7 +619,7 @@ namespace Codist.QuickInfo
 					tt.AppendFileLink(f, p);
 				}
 				else {
-					var proj = symbol.GetSourceReferences().Select(r => SemanticContext.GetHovered().GetProject(r.SyntaxTree)).Where(i => i != null).FirstOrDefault();
+					var proj = symbol.GetSourceReferences().Select(r => SemanticContext.GetHovered().GetProject(r.SyntaxTree)).FirstOrDefault(i => i != null);
 					if (proj != null && proj.OutputFilePath != null) {
 						(p, f) = FileHelper.DeconstructPath(proj.OutputFilePath);
 					}

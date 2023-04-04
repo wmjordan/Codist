@@ -197,7 +197,7 @@ namespace Codist.Controls
 			ShowSymbolMenuForResult(symbol, context, new List<ISymbol>(result), R.T_SignatureMatch, true);
 		}
 
-		internal static void ShowLocations(this SemanticContext context, ISymbol symbol, ICollection<SyntaxReference> locations, UIElement positionElement = null) {
+		internal static void ShowLocations(this SemanticContext context, ISymbol symbol, ImmutableArray<SyntaxReference> locations, UIElement positionElement = null) {
 			var m = new SymbolMenu(context, SymbolListType.Locations);
 			var locs = new SortedList<(string, string, int), Location>();
 			foreach (var item in locations) {

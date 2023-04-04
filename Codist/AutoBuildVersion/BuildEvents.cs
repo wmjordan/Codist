@@ -180,8 +180,7 @@ namespace Codist.AutoBuildVersion
 			_Package.GetOutputPane(VSConstants.BuildOutput, "Build")?.OutputString(text);
 		}
 		[Conditional("DEBUG")]
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "UI Thread checked in caller")]
-		void WriteText(string text) {
+		static void WriteText(string text) {
 			CodistPackage.OutputString(text);
 		}
 
@@ -254,11 +253,13 @@ namespace Codist.AutoBuildVersion
 		public int OnAfterSave(uint docCookie) {
 			if (_LockChangeTracking == false) {
 				ThreadHelper.ThrowIfNotOnUIThread();
-				var pGuid = (_RunningDocumentTable as IVsRunningDocumentTable4).GetDocumentProjectGuid(docCookie);
-				if (_VsSolution.GetProjectOfGuid(ref pGuid, out var proj) == VSConstants.S_OK) {
-					var p = proj?.GetExtObjectAs<Project>();
-					if (p != null && _ChangedProjects.Add(p)) {
-						WriteText($"Project {p.Name}: updated.");
+				if (_RunningDocumentTable is IVsRunningDocumentTable4 t) {
+					var pGuid = t.GetDocumentProjectGuid(docCookie);
+					if (_VsSolution.GetProjectOfGuid(ref pGuid, out var proj) == VSConstants.S_OK && proj != null) {
+						var p = proj.GetExtObjectAs<Project>();
+						if (p != null && _ChangedProjects.Add(p)) {
+							WriteText($"Project {p.Name}: updated.");
+						}
 					}
 				}
 			}
