@@ -1607,15 +1607,6 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show Document Content Type....
-        /// </summary>
-        internal static string CMD_ShowDocumentContentType {
-            get {
-                return ResourceManager.GetString("CMD_ShowDocumentContentType", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Show syntax classification info.
         /// </summary>
         internal static string CMD_ShowSyntaxClassificationInfo {
@@ -2261,20 +2252,20 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add &quot;Show Document Content Type&quot; command to File menu.
+        ///   Looks up a localized string similar to Add &quot;Show Active Window Properties&quot; command to File menu.
         /// </summary>
-        internal static string OT_AddShowDocumentContentType {
+        internal static string OT_AddShowActiveWindowProperties {
             get {
-                return ResourceManager.GetString("OT_AddShowDocumentContentType", resourceCulture);
+                return ResourceManager.GetString("OT_AddShowActiveWindowProperties", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Displays ContentType and base types of the active document.
+        ///   Looks up a localized string similar to Displays comprehensive information about the active window pane and its document.
         /// </summary>
-        internal static string OT_AddShowDocumentContentTypeTip {
+        internal static string OT_AddShowActiveWindowPropertiesTip {
             get {
-                return ResourceManager.GetString("OT_AddShowDocumentContentTypeTip", resourceCulture);
+                return ResourceManager.GetString("OT_AddShowActiveWindowPropertiesTip", resourceCulture);
             }
         }
         

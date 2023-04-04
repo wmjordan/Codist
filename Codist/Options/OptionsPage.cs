@@ -733,8 +733,8 @@ namespace Codist.Options
 
 					new TitleBox(R.OT_SyntaxDiagnostics),
 					new DescriptionBox(R.OT_SyntaxDiagnosticsNote),
-					_ShowDocumentContentType = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowDocumentContentType, UpdateConfig, R.OT_AddShowDocumentContentType)
-						.SetLazyToolTip(() => R.OT_AddShowDocumentContentTypeTip),
+					_ShowDocumentContentType = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowWindowInformer, UpdateConfig, R.OT_AddShowActiveWindowProperties)
+						.SetLazyToolTip(() => R.OT_AddShowActiveWindowPropertiesTip),
 					_ShowSyntaxClassificationInfo = Config.Instance.DeveloperOptions.CreateOptionBox(DeveloperOptions.ShowSyntaxClassificationInfo, UpdateConfig, R.OT_AddShowSyntaxClassifcationInfo)
 						.SetLazyToolTip(() => R.OT_AddShowSyntaxClassifcationInfoTip),
 

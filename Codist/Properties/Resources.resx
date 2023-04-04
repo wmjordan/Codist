@@ -822,11 +822,11 @@ Use space to separate keywords.</value>
   <data name="OT_AdditionalQuickInfoNote" xml:space="preserve">
     <value>The following options allow adding more items to the Quick Info</value>
   </data>
-  <data name="OT_AddShowDocumentContentType" xml:space="preserve">
-    <value>Add "Show Document Content Type" command to File menu</value>
+  <data name="OT_AddShowActiveWindowProperties" xml:space="preserve">
+    <value>Add "Show Active Window Properties" command to File menu</value>
   </data>
-  <data name="OT_AddShowDocumentContentTypeTip" xml:space="preserve">
-    <value>Displays ContentType and base types of the active document</value>
+  <data name="OT_AddShowActiveWindowPropertiesTip" xml:space="preserve">
+    <value>Displays comprehensive information about the active window pane and its document</value>
   </data>
   <data name="OT_AddShowSyntaxClassifcationInfo" xml:space="preserve">
     <value>Add "Show Syntax Classification Info" command to Smart Bar</value>
@@ -1405,9 +1405,6 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
   </data>
   <data name="CMD_SeeWhatsNew" xml:space="preserve">
     <value>see what's new</value>
-  </data>
-  <data name="CMD_ShowDocumentContentType" xml:space="preserve">
-    <value>Show Document Content Type...</value>
   </data>
   <data name="T_AllLanguages" xml:space="preserve">
     <value>All languages</value>
