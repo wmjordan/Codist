@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -9,7 +10,6 @@ using System.Windows.Media;
 using AppHelpers;
 using Codist.Controls;
 using EnvDTE;
-using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Projection;
 using Microsoft.VisualStudio.Utilities;
@@ -22,6 +22,9 @@ namespace Codist.Commands
 	internal static class WindowInformerCommand
 	{
 		const int SubSectionFontSize = 14;
+
+		static readonly Thickness __ParagraphIndent = new Thickness(10, 0, 0, 0);
+		static readonly Thickness __SectionIndent = new Thickness(10, 12, 0, 6);
 
 		public static void Initialize() {
 			Command.WindowInformer.Register(Execute, (s, args) => {
@@ -40,6 +43,7 @@ namespace Codist.Commands
 			DisplayWindowInfo(window);
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		static void DisplayWindowInfo(Window window) {
 			var tb = new RichTextBox {
 				BorderThickness = WpfHelper.NoMargin,
@@ -52,7 +56,7 @@ namespace Codist.Commands
 				AcceptsReturn = false
 			};
 			tb.ApplyTemplate();
-			tb.GetFirstVisualChild<ScrollViewer>().ReferenceStyle(Microsoft.VisualStudio.Shell.VsResourceKeys.ScrollViewerStyleKey);
+			tb.GetFirstVisualChild<ScrollViewer>().ReferenceStyle(VsResourceKeys.ScrollViewerStyleKey);
 			var blocks = tb.Document.Blocks;
 			blocks.Clear();
 			Section s;
@@ -103,6 +107,7 @@ namespace Codist.Commands
 			MessageWindow.Show(tb, $"{R.T_DocumentProperties} - {window.Caption}");
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		static void ShowDTEWindowProperties(BlockCollection blocks, Window window) {
 			var s = NewSection(blocks, "ActiveWindow", SubSectionFontSize);
 			AppendNameValue(s, "Caption", window.Caption);
@@ -151,7 +156,7 @@ namespace Codist.Commands
 			if (ca != null && ca.Count != 0) {
 				ss = NewIndentSection(s, "ContextAttributes:");
 				foreach (ContextAttribute item in ca) {
-					AppendPropertyValue(ss, item.Name, item.Name, item.Values);
+					AppendPropertyValue(ss, item.Name, item.Values);
 				}
 			}
 
@@ -173,6 +178,7 @@ namespace Codist.Commands
 			ShowSpecialWindowTypeInfo(blocks, window);
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		static void ShowSpecialWindowTypeInfo(BlockCollection blocks, Window window) {
 			switch (window.Type) {
 				case vsWindowType.vsWindowTypeSolutionExplorer:
@@ -183,6 +189,7 @@ namespace Codist.Commands
 			}
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		static void ShowDTESolutionSelectedItems(BlockCollection blocks) {
 			var items = (object[])CodistPackage.DTE.ToolWindows.SolutionExplorer.SelectedItems;
 			foreach (UIHierarchyItem hi in items) {
@@ -204,6 +211,7 @@ namespace Codist.Commands
 			}
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		static void ShowDTEProjectItemProperties(BlockCollection blocks, ProjectItem pi) {
 			var s = NewSection(blocks, "ProjectItem", SubSectionFontSize);
 			AppendNameValue(s, "Name", pi.Name);
@@ -229,6 +237,7 @@ namespace Codist.Commands
 			}
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		static void ShowDTESolutionProperties(BlockCollection blocks, Solution solution) {
 			var s = NewSection(blocks, "Solution", SubSectionFontSize);
 			AppendNameValue(s, "FullName", solution.FullName);
@@ -246,6 +255,7 @@ namespace Codist.Commands
 			}
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		static void ShowDTESolutionBuild(Solution solution, Section s) {
 			var sb = solution.SolutionBuild;
 			if (sb == null) {
@@ -288,6 +298,7 @@ namespace Codist.Commands
 			}
 		}
 
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		static void ShowDTEProjectProperties(BlockCollection blocks, Project project) {
 			var s = NewSection(blocks, "Project", SubSectionFontSize);
 			AppendNameValue(s, "Name", project.Name);
@@ -352,12 +363,11 @@ namespace Codist.Commands
 
 		static void ShowPropertyCollection(Section section, PropertyCollection properties, string title) {
 			var s = NewIndentSection(section, title);
-			foreach (var item in properties.PropertyList.Select(i => {
-				return (n: i.Key.ToString(), k: i.Key, v: i.Value);
-			}).OrderBy(i => i.n)) {
-				AppendPropertyValue(s, item.n, item.k, item.v);
+			foreach (var item in properties.PropertyList.Select(i => (n: i.Key.ToString(), k: i.Key, v: i.Value)).OrderBy(i => i.n)) {
+				AppendPropertyValue(s, item.k, item.v);
 			}
 		}
+		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
 		static void ShowPropertyCollection(Section section, EnvDTE.Properties properties, string title) {
 			if (properties == null || properties.Count == 0) {
 				return;
@@ -378,16 +388,13 @@ namespace Codist.Commands
 				}
 				return new KeyValuePair<string, object>(p.Name, val);
 			}).OrderBy(i => i.Key)) {
-				AppendPropertyValue(s, item.Key, item.Key, item.Value);
+				AppendPropertyValue(s, item.Key, item.Value);
 			}
 		}
 
-		static readonly Thickness ParagraphIndent = new Thickness(10, 0, 0, 0);
-		static readonly Thickness SectionIndent = new Thickness(10, 12, 0, 6);
-
 		static Section NewSection(BlockCollection blocks, string title) {
 			Section section = new Section {
-				Margin = SectionIndent,
+				Margin = __SectionIndent,
 				Blocks = {
 					new Paragraph(new Run(title) { FontSize = 18, FontWeight = FontWeights.Bold, Foreground = SymbolFormatter.Instance.Class }) { TextIndent = -5, Margin = WpfHelper.SmallMargin }
 				}
@@ -397,7 +404,7 @@ namespace Codist.Commands
 		}
 		static Section NewSection(BlockCollection blocks, string title, int fontSize) {
 			Section section = new Section {
-				Margin = SectionIndent,
+				Margin = __SectionIndent,
 				Blocks = {
 					new Paragraph(new Run(title) { FontSize = fontSize, FontWeight = FontWeights.Bold, Foreground = SymbolFormatter.Instance.Class }) { TextIndent = -10, Margin = WpfHelper.SmallMargin }
 				}
@@ -415,7 +422,7 @@ namespace Codist.Commands
 		}
 		static void AppendNameValue(Section section, string name, object value) {
 			Paragraph p = new Paragraph {
-				Margin = ParagraphIndent,
+				Margin = __ParagraphIndent,
 				TextIndent = -10,
 				Inlines = {
 					new Run(name) { Foreground = SymbolFormatter.Instance.Property },
@@ -425,9 +432,9 @@ namespace Codist.Commands
 			AppendValueRun(p.Inlines, value);
 			section.Blocks.Add(p);
 		}
-		static void AppendPropertyValue(Section section, string name, object key, object value) {
+		static void AppendPropertyValue(Section section, object key, object value) {
 			Paragraph p = new Paragraph {
-				Margin = ParagraphIndent,
+				Margin = __ParagraphIndent,
 				TextIndent = -10,
 				Inlines = {
 					CreateRunForKey(key),
@@ -439,7 +446,7 @@ namespace Codist.Commands
 		}
 		static void Append(Section section, string text, int indent = 0) {
 			section.Blocks.Add(new Paragraph {
-				Margin = ParagraphIndent,
+				Margin = __ParagraphIndent,
 				TextIndent = indent - 10,
 				Inlines = {
 					new Run(text) { Foreground = SymbolFormatter.Instance.Property }
@@ -513,7 +520,7 @@ namespace Codist.Commands
 			var t = value as Type;
 			return new Run(t is null ? value.ToString() : GetTypeName(t)) {
 				Foreground = SymbolFormatter.Instance.Property,
-				ToolTip = t is null ? null : t.ToString()
+				ToolTip = t?.ToString()
 			};
 		}
 		static string GetTypeName(Type type) {
