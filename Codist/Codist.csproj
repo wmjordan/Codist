@@ -244,7 +244,7 @@
     <Compile Include="Helpers\SymbolFormatter.cs" />
     <Compile Include="Helpers\XmlDocRenderer.cs" />
     <Compile Include="QuickInfo\QuickInfoFactories.cs" />
-    <Compile Include="QuickInfo\QuickInfoSizeController.cs" />
+    <Compile Include="QuickInfo\QuickInfoOverrideController.cs" />
     <Compile Include="SmartBars\CppSmartBar.cs" />
     <Compile Include="SmartBars\CSharpSmartBar.cs" />
     <Compile Include="SmartBars\OutputSmartBar.cs" />

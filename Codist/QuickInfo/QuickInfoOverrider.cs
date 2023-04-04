@@ -12,19 +12,21 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
+using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using Microsoft.VisualStudio.Text.Tagging;
 using R = Codist.Properties.Resources;
 using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
+using Microsoft.VisualStudio.Text.Adornments;
 
 namespace Codist.QuickInfo
 {
 	interface IQuickInfoOverrider
 	{
 		bool OverrideBuiltInXmlDoc { get; set; }
-		UIElement CreateControl();
-		void SetDiagnostics(IList<Diagnostic> diagnostics);
-		void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, IAsyncQuickInfoSession quickInfoSession);
+		UIElement CreateControl(IAsyncQuickInfoSession session);
+		void ApplyClickAndGo(ISymbol symbol);
 		void OverrideDocumentation(UIElement docElement);
 		void OverrideException(UIElement exceptionDoc);
 		void OverrideAnonymousTypeInfo(UIElement anonymousTypeInfo);
@@ -293,8 +295,9 @@ namespace Codist.QuickInfo
 			UIElement _DocElement;
 			UIElement _ExceptionDoc;
 			UIElement _AnonymousTypeInfo;
-			IList<Diagnostic> _Diagnostics;
 			IAsyncQuickInfoSession _Session;
+			ITagAggregator<IErrorTag> _ErrorTagger;
+			ErrorTags _ErrorTags;
 
 			public DefaultOverrider() {
 				if (Config.Instance.QuickInfoMaxHeight > 0 || Config.Instance.QuickInfoMaxWidth > 0) {
@@ -302,7 +305,10 @@ namespace Codist.QuickInfo
 				}
 			}
 
-			public UIElement CreateControl() {
+			public UIElement CreateControl(IAsyncQuickInfoSession session) {
+				_Session = session;
+				session.StateChanged -= ReleaseSession;
+				session.StateChanged += ReleaseSession;
 				return new UIOverrider(this);
 			}
 			public bool OverrideBuiltInXmlDoc {
@@ -310,11 +316,8 @@ namespace Codist.QuickInfo
 				set => _OverrideBuiltInXmlDoc = value;
 			}
 
-			public void ApplyClickAndGo(ISymbol symbol, ITextBuffer textBuffer, IAsyncQuickInfoSession quickInfoSession) {
+			public void ApplyClickAndGo(ISymbol symbol) {
 				_ClickAndGoSymbol = symbol;
-				_Session = quickInfoSession;
-				quickInfoSession.StateChanged -= ReleaseSession;
-				quickInfoSession.StateChanged += ReleaseSession;
 			}
 
 			public void OverrideDocumentation(UIElement docElement) {
@@ -326,8 +329,33 @@ namespace Codist.QuickInfo
 			public void OverrideAnonymousTypeInfo(UIElement anonymousTypeInfo) {
 				_AnonymousTypeInfo = anonymousTypeInfo;
 			}
-			public void SetDiagnostics(IList<Diagnostic> diagnostics) {
-				_Diagnostics = diagnostics;
+
+			ITagAggregator<IErrorTag> GetErrorTagger() {
+				return _Session?.TextView.Properties.GetOrCreateSingletonProperty(CreateErrorTagger);
+			}
+
+			ITagAggregator<IErrorTag> CreateErrorTagger() {
+				return ServicesHelper.Instance.ViewTagAggregatorFactory.CreateTagAggregator<IErrorTag>(_Session.TextView);
+			}
+
+			int GetIconIdForText(TextBlock textBlock) {
+				var f = textBlock.Inlines.FirstInline;
+				var tt = ((f as Hyperlink)?.Inlines.FirstInline as Run)?.Text;
+				if (tt == null) {
+					tt = (f as Run)?.Text;
+					if (tt == "SPELL" && textBlock.Inlines.Count > 1) {
+						return IconIds.Suggestion;
+					}
+				}
+
+				var errorTagger = GetErrorTagger();
+				if (errorTagger != null) {
+					if (_ErrorTags == null) {
+						_ErrorTags = new ErrorTags();
+					}
+					return _ErrorTags.GetIconIdForErrorCode(tt, errorTagger, _Session.ApplicableToSpan.GetSpan(_Session.TextView.TextSnapshot));
+				}
+				return 0;
 			}
 
 			void ReleaseSession(object sender, QuickInfoSessionStateChangedEventArgs args) {
@@ -337,8 +365,11 @@ namespace Codist.QuickInfo
 				var s = sender as IAsyncQuickInfoSession;
 				s.StateChanged -= ReleaseSession;
 				_ClickAndGoSymbol = null;
-				_Diagnostics = null;
 				_Session = null;
+				if (_ErrorTagger != null) {
+					_ErrorTagger.Dispose();
+					_ErrorTagger = null;
+				}
 			}
 
 			internal sealed class UIOverrider : TextBlock, IInteractiveQuickInfoContent, IQuickInfoHolder
@@ -372,14 +403,10 @@ namespace Codist.QuickInfo
 						if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 							WpfHelper.SetUITextRenderOptions(p, true);
 						}
-						if (p.Children.Count > 1) {
-							OverrideDiagnosticInfo(p);
-							p.SetValue(TextBlock.FontFamilyProperty, ThemeHelper.ToolTipFont);
-							p.SetValue(TextBlock.FontSizeProperty, ThemeHelper.ToolTipFontSize);
-						}
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) || _Overrider._ClickAndGoSymbol != null || _Overrider._LimitItemSize) {
 							FixQuickInfo(p);
 						}
+						_Overrider._ErrorTags?.Clear();
 						MakeTextualContentSelectableWithIcon(p);
 						if (_Overrider._LimitItemSize) {
 							ApplySizeLimit(this.GetParent<StackPanel>());
@@ -392,7 +419,6 @@ namespace Codist.QuickInfo
 					// hides the parent container from taking excessive space in the quick info window
 					this.GetParent<Border>().Collapse();
 					_Overrider._ClickAndGoSymbol = null;
-					_Overrider._Diagnostics = null;
 				}
 
 				void MakeTextualContentSelectableWithIcon(Panel p) {
@@ -417,69 +443,12 @@ namespace Codist.QuickInfo
 					}
 				}
 
-				void OverrideDiagnosticInfo(StackPanel panel) {
-					var infoPanel = panel.Children[1].GetFirstVisualChild<ItemsControl>()?.GetFirstVisualChild<StackPanel>();
-					if (infoPanel == null) {
-						// try the first item (symbol title may be absent)
-						infoPanel = panel.Children[0].GetFirstVisualChild<ItemsControl>()?.GetFirstVisualChild<StackPanel>();
-						if (infoPanel?.GetFirstVisualChild<WrapPanel>()?.GetFirstVisualChild<Image>() != null) {
-							return;
-						}
-					}
-					if (infoPanel == null) {
-						return;
-					}
-					foreach (var item in infoPanel.Children) {
-						var tb = (item as UIElement).GetFirstVisualChild<TextBlock>();
-						if (tb == null) {
-							continue;
-						}
-						if (_Overrider._Diagnostics != null && _Overrider._Diagnostics.Count > 0) {
-							var t = tb.GetText();
-							var d = _Overrider._Diagnostics.FirstOrDefault(i => i.GetMessage() == t);
-							if (d != null) {
-								tb.UseDummyToolTip();
-								tb.Tag = d;
-								tb.SetGlyph(ThemeHelper.GetImage(GetGlyphForSeverity(d.Severity)));
-								tb.ToolTipOpening += ShowToolTipForDiagnostics;
-							}
-						}
-					}
-
-					int GetGlyphForSeverity(DiagnosticSeverity severity) {
-						switch (severity) {
-							case DiagnosticSeverity.Warning: return KnownImageIds.StatusWarning;
-							case DiagnosticSeverity.Error: return KnownImageIds.StatusError;
-							case DiagnosticSeverity.Hidden: return KnownImageIds.StatusHidden;
-							default: return KnownImageIds.StatusInformation;
-						}
-					}
-
-					void ShowToolTipForDiagnostics(object sender, ToolTipEventArgs e) {
-						var t = sender as TextBlock;
-						var d = t.Tag as Diagnostic;
-						var tip = new ThemedToolTip();
-						tip.Title.Append(d.Descriptor.Category + " (" + d.Id + ")", true);
-						tip.Content.Append(d.Descriptor.Title.ToString());
-						if (String.IsNullOrEmpty(d.Descriptor.HelpLinkUri) == false) {
-							tip.Content.AppendLine().Append("Help: " + d.Descriptor.HelpLinkUri);
-						}
-						if (d.IsSuppressed) {
-							tip.Content.AppendLine().Append("Suppressed");
-						}
-						if (d.IsWarningAsError) {
-							tip.Content.AppendLine().Append("Content as error");
-						}
-						t.ToolTip = tip;
-						t.ToolTipOpening -= ShowToolTipForDiagnostics;
-					}
-				}
-
 				void FixQuickInfo(StackPanel infoPanel) {
 					var titlePanel = infoPanel.GetFirstVisualChild<WrapPanel>();
 					if (titlePanel == null) {
 						if (_Overrider._ClickAndGoSymbol != null
 							&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
+							// no built-in documentation, but Codist has it
 							ShowAlternativeSignature(infoPanel);
 							OverrideDocumentation(infoPanel);
 						}
@@ -758,90 +727,16 @@ namespace Codist.QuickInfo
 					}
 				}
 
-				static void OverrideTextBlock(TextBlock t) {
+				void OverrideTextBlock(TextBlock t) {
 					if (t is ThemedTipText == false
 						&& TextEditorWrapper.CreateFor(t) != null
 						&& t.Inlines.FirstInline is InlineUIContainer == false) {
 						t.TextWrapping = TextWrapping.Wrap;
-						t.SetGlyph(ThemeHelper.GetImage(GetIconIdForText(t)));
-					}
-				}
-
-				static int GetIconIdForText(TextBlock t) {
-					var f = t.Inlines.FirstInline;
-					var tt = ((f as Hyperlink)?.Inlines.FirstInline as Run)?.Text;
-					if (tt == null) {
-						tt = (f as Run)?.Text;
-						return tt == "SPELL" && t.Inlines.Count > 1 ? IconIds.Suggestion : IconIds.Info;
-					}
-					switch (tt.Length) {
-						case 7:
-							if (tt.StartsWith("IDE", StringComparison.Ordinal) && ToErrorCode(tt, 3) != 0) {
-								return IconIds.Suggestion;
-							}
-							break;
-						case 6:
-							if (tt[0] == 'C') {
-								if (tt[1] == 'A' && ToErrorCode(tt, 2) != 0) {
-									return IconIds.Suggestion;
-								}
-								int c;
-								if (tt[1] == 'S' && (c = ToErrorCode(tt, 2)) != 0) {
-									switch (CodeAnalysisHelper.GetWarningLevel(c)) {
-										case 0: return IconIds.Error;
-										case 1:
-										case 2: return IconIds.SevereWarning;
-									}
-								}
-							}
-							break;
-					}
-					return IsErrorCode(tt) ? IconIds.Warning : IconIds.Info;
-				}
-
-				static int ToErrorCode(string text, int index) {
-					var l = text.Length;
-					var code = 0;
-					for (int i = index; i < l; i++) {
-						var c = text[i];
-						if (c < '0' || c > '9') {
-							return 0;
-						}
-						code = code * 10 + c - '0';
-					}
-					return code;
-				}
-
-				static bool IsErrorCode(string text) {
-					const int START = 0, ALPHA = 1, NUMBER = 2;
-					var l = text.Length;
-					var s = START;
-					for (int i = 0; i < l; i++) {
-						var c = text[i];
-						switch (s) {
-							case START:
-								if (c < 'A' && c > 'Z') {
-									return false;
-								}
-								s = ALPHA;
-								continue;
-							case ALPHA:
-								if (c < 'A' && c > 'Z') {
-									if (c < '0' || c > '9') {
-										return false;
-									}
-									s = NUMBER;
-									continue;
-								}
-								continue;
-							case NUMBER:
-								if (c < '0' || c > '9') {
-									return false;
-								}
-								continue;
+						int iconId = _Overrider.GetIconIdForText(t);
+						if (iconId != 0) {
+							t.SetGlyph(ThemeHelper.GetImage(iconId));
 						}
 					}
-					return s == NUMBER;
 				}
 
 				static void MakeChildrenScrollable(ItemsControl s) {
@@ -863,6 +758,74 @@ namespace Codist.QuickInfo
 						}
 					}
 				}
+			}
+		}
+
+		sealed class ErrorTags
+		{
+			Dictionary<string, string> _TagHolder;
+
+			public void Clear() {
+				_TagHolder?.Clear();
+			}
+
+			public int GetIconIdForErrorCode(string code, ITagAggregator<IErrorTag> tagger, SnapshotSpan span) {
+				if (GetTags(tagger, span).TryGetValue(code, out var error)) {
+					if (error.Contains("suggestion")) {
+						return IconIds.Suggestion;
+					}
+					if (error.Contains("warning")) {
+						int c;
+						if (code[0] == 'C'
+							&& code[1] == 'S'
+							&& (c = ToErrorCode(code, 2)) != 0
+							&& CodeAnalysisHelper.GetWarningLevel(c) < 3) {
+							return IconIds.SevereWarning;
+						}
+						return IconIds.Warning;
+					}
+					if (error.Contains("error")) {
+						return IconIds.Error;
+					}
+					if (error.Contains("information")) {
+						return IconIds.Suggestion;
+					}
+				}
+				return 0;
+			}
+
+			Dictionary<string, string> GetTags(ITagAggregator<IErrorTag> tagger, SnapshotSpan span) {
+				if (_TagHolder == null) {
+					_TagHolder = new Dictionary<string, string>();
+				}
+				foreach (var tag in tagger.GetTags(span)) {
+					var content = tag.Tag.ToolTipContent;
+					if (content is ContainerElement ce) {
+						foreach (var cte in ce.Elements.Cast<ClassifiedTextElement>()) {
+							var firstRun = cte.Runs.First();
+							if (firstRun != null) {
+								_TagHolder[firstRun.Text] = tag.Tag.ErrorType;
+							}
+						}
+					}
+					else if (content is string t) {
+						_TagHolder[t] = tag.Tag.ErrorType;
+					}
+				}
+				return _TagHolder;
+			}
+
+			static int ToErrorCode(string text, int index) {
+				var l = text.Length;
+				var code = 0;
+				for (int i = index; i < l; i++) {
+					var c = text[i];
+					if (c < '0' || c > '9') {
+						return 0;
+					}
+					code = code * 10 + c - '0';
+				}
+				return code;
 			}
 		}
 	}

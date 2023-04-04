@@ -73,18 +73,18 @@ namespace Codist.QuickInfo
 		}
 	}
 
-	/// <summary>Controls size of quick info.</summary>
+	/// <summary>Provides size limitation, selectable text blocks, icon for warning messages, etc. to Quick Info.</summary>
 	[Export(typeof(IAsyncQuickInfoSourceProvider))]
 	[Name(Name)]
 	[Order(After = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.Text)]
-	sealed class QuickInfoSizeControllerProvider : IAsyncQuickInfoSourceProvider
+	sealed class QuickInfoOverrideProvider : IAsyncQuickInfoSourceProvider
 	{
-		const string Name = nameof(QuickInfoSizeController);
+		const string Name = nameof(QuickInfoOverrideController);
 
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
-				? textBuffer.Properties.GetOrCreateSingletonProperty(()=> new QuickInfoSizeController())
+				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new QuickInfoOverrideController())
 				: null;
 		}
 	}

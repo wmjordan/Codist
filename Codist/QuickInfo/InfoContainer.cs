@@ -7,14 +7,14 @@ namespace Codist.QuickInfo
 {
 	sealed class InfoContainer
 	{
-		ImmutableArray<object>.Builder _List = ImmutableArray.CreateBuilder<object>();
+		readonly ImmutableArray<object>.Builder _List = ImmutableArray.CreateBuilder<object>();
 		public readonly IQuickInfoOverrider Overrider;
 
 		public InfoContainer(IQuickInfoOverrider overrider) {
 			Overrider = overrider;
 		}
 
-		public int Count => _List.Count;
+		public int ItemCount => _List.Count;
 
 		public void Insert(int index, object item) {
 			if (item != null) {

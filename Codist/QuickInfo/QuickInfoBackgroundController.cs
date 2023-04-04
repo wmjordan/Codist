@@ -7,7 +7,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Text;
 
 namespace Codist.QuickInfo
 {

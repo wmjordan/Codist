@@ -54,10 +54,10 @@ namespace Codist.QuickInfo
 			SyntaxNode node;
 			ImmutableArray<ISymbol> candidates;
 			SyntaxToken token;
-			var qiWrapper = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
+			var overrider = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
 				? QuickInfoOverrider.CreateOverrider(session)
 				: null;
-			var qiContent = new InfoContainer(qiWrapper);
+			var container = new InfoContainer(overrider);
 			var currentSnapshot = buffer.CurrentSnapshot;
 			var subjectTriggerPoint = session.GetTriggerPoint(currentSnapshot).GetValueOrDefault();
 			if (subjectTriggerPoint.Snapshot == null) {
@@ -75,8 +75,8 @@ namespace Codist.QuickInfo
 			if (_SpecialProject == null) {
 				_SpecialProject = new SpecialProjectInfo(semanticModel);
 			}
-			if (qiWrapper != null) {
-				qiWrapper.OverrideBuiltInXmlDoc = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationOverride);
+			if (overrider != null) {
+				overrider.OverrideBuiltInXmlDoc = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationOverride);
 			}
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 
@@ -97,21 +97,21 @@ namespace Codist.QuickInfo
 							SyntaxKind.ComplexElementInitializerExpression,
 							SyntaxKind.ObjectInitializerExpression,
 							CodeAnalysisHelper.WithInitializerExpression)) {
-						qiContent.Add(new ThemedTipText()
+						container.Add(new ThemedTipText()
 							.SetGlyph(ThemeHelper.GetImage(IconIds.InstanceMember))
 							.Append(R.T_ExpressionCount)
 							.Append((node as InitializerExpressionSyntax).Expressions.Count.ToText(), true, false, _SymbolFormatter.Number));
 					}
-					if (qiWrapper != null) {
-						qiWrapper.OverrideBuiltInXmlDoc = false;
+					if (overrider != null) {
+						overrider.OverrideBuiltInXmlDoc = false;
 					}
-					ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
+					ShowBlockInfo(container, currentSnapshot, node, semanticModel);
 					goto RETURN;
 				case SyntaxKind.CloseBraceToken:
-					if (qiWrapper != null) {
-						qiWrapper.OverrideBuiltInXmlDoc = false;
+					if (overrider != null) {
+						overrider.OverrideBuiltInXmlDoc = false;
 					}
-					ShowBlockInfo(qiContent, currentSnapshot, node = unitCompilation.FindNode(token.Span), semanticModel);
+					ShowBlockInfo(container, currentSnapshot, node = unitCompilation.FindNode(token.Span), semanticModel);
 					goto RETURN;
 				case SyntaxKind.ThisKeyword: // convert to type below
 				case SyntaxKind.BaseKeyword:
@@ -220,17 +220,17 @@ namespace Codist.QuickInfo
 					}
 					return null;
 				case SyntaxKind.EndRegionKeyword:
-					qiContent.Add(new ThemedTipText(R.T_EndOfRegion)
+					container.Add(new ThemedTipText(R.T_EndOfRegion)
 						.SetGlyph(ThemeHelper.GetImage(IconIds.Region))
 						.Append((unitCompilation.FindNode(token.Span, true) as EndRegionDirectiveTriviaSyntax).GetRegion()?.GetDeclarationSignature(), true)
 						);
-					return CreateQuickInfoItem(session, token, qiContent.ToUI());
+					return CreateQuickInfoItem(session, token, container.ToUI());
 				case SyntaxKind.EndIfKeyword:
-					qiContent.Add(new ThemedTipText(R.T_EndOfIf)
+					container.Add(new ThemedTipText(R.T_EndOfIf)
 						.SetGlyph(ThemeHelper.GetImage(IconIds.Region))
 						.Append((unitCompilation.FindNode(token.Span, true) as EndIfDirectiveTriviaSyntax).GetIf()?.GetDeclarationSignature(), true)
 						);
-					return CreateQuickInfoItem(session, token, qiContent.ToUI());
+					return CreateQuickInfoItem(session, token, container.ToUI());
 				case SyntaxKind.VoidKeyword:
 					return null;
 				case SyntaxKind.TypeOfKeyword:
@@ -252,10 +252,10 @@ namespace Codist.QuickInfo
 						|| token.IsReservedKeyword()) {
 						node = unitCompilation.FindNode(token.Span);
 						if (node is StatementSyntax) {
-							ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
+							ShowBlockInfo(container, currentSnapshot, node, semanticModel);
 						}
-						return qiContent.Count > 0
-							? CreateQuickInfoItem(session, token, qiContent.ToUI())
+						return container.ItemCount > 0
+							? CreateQuickInfoItem(session, token, container.ToUI())
 							: null;
 					}
 					break;
@@ -271,7 +271,7 @@ namespace Codist.QuickInfo
 			ObjectCreationExpressionSyntax ctor;
 		PROCESS:
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Parameter)) {
-				ShowParameterInfo(qiContent, node, semanticModel);
+				ShowParameterInfo(container, node, semanticModel);
 			}
 			if (symbol == null) {
 				symbol = token.IsKind(SyntaxKind.CloseBraceToken) ? null
@@ -282,7 +282,7 @@ namespace Codist.QuickInfo
 				symbol = (symbol.GetReturnType() as INamedTypeSymbol).TypeArguments.FirstOrDefault();
 			}
 			if (_isCandidate = candidates.IsDefaultOrEmpty == false) {
-				ShowCandidateInfo(qiContent, candidates);
+				ShowCandidateInfo(container, candidates);
 			}
 			if (symbol == null) {
 				switch (token.Kind()) {
@@ -302,10 +302,10 @@ namespace Codist.QuickInfo
 						symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_Char);
 						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.NumericValues)
 						&& token.Span.Length >= 8) {
-							qiContent.Add(new ThemedTipText(token.ValueText) { FontSize = ThemeHelper.ToolTipFontSize * 2 });
+							container.Add(new ThemedTipText(token.ValueText) { FontSize = ThemeHelper.ToolTipFontSize * 2 });
 						}
 						else if (node.IsKind(SyntaxKind.Block) || node.IsKind(SyntaxKind.SwitchStatement)) {
-							ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
+							ShowBlockInfo(container, currentSnapshot, node, semanticModel);
 						}
 						isConvertedType = true;
 						break;
@@ -315,21 +315,21 @@ namespace Codist.QuickInfo
 						break;
 					default:
 						if (node.IsKind(SyntaxKind.Block) || node.IsKind(SyntaxKind.SwitchStatement)) {
-							ShowBlockInfo(qiContent, currentSnapshot, node, semanticModel);
+							ShowBlockInfo(container, currentSnapshot, node, semanticModel);
 						}
 						break;
 				}
-				ShowMiscInfo(qiContent, node);
+				ShowMiscInfo(container, node);
 				if (symbol == null) {
 					goto RETURN;
 				}
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 				if (isConvertedType == false) {
-					qiContent.Add(await ShowAvailabilityAsync(doc, token, cancellationToken).ConfigureAwait(false));
+					container.Add(await ShowAvailabilityAsync(doc, token, cancellationToken).ConfigureAwait(false));
 				}
 				ctor = node.Parent as ObjectCreationExpressionSyntax;
-				OverrideDocumentation(node, qiWrapper,
+				OverrideDocumentation(node, overrider,
 					ctor?.Type == node ? semanticModel.GetSymbolInfo(ctor, cancellationToken).Symbol ?? symbol
 						//: node.Parent.IsKind(SyntaxKind.Attribute) ? symbol.ContainingType
 						: symbol,
@@ -337,9 +337,9 @@ namespace Codist.QuickInfo
 			}
 			if (isConvertedType == false) {
 				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Attributes)) {
-					ShowAttributesInfo(qiContent, symbol);
+					ShowAttributesInfo(container, symbol);
 				}
-				ShowSymbolInfo(session, qiContent, node, symbol, semanticModel);
+				ShowSymbolInfo(session, container, node, symbol, semanticModel);
 			}
 		RETURN:
 			ctor = node.Parent as ObjectCreationExpressionSyntax;
@@ -352,13 +352,8 @@ namespace Codist.QuickInfo
 					symbol = symbol.ContainingType;
 				}
 			}
-			if (qiWrapper != null) {
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Diagnostics)) {
-					qiWrapper.SetDiagnostics(semanticModel.GetDiagnostics(token.Span, cancellationToken));
-				}
-				qiWrapper.ApplyClickAndGo(symbol, buffer, session);
-			}
-			return qiContent.Count == 0 ? null : CreateQuickInfoItem(session, token, qiContent.ToUI().Tag());
+			overrider?.ApplyClickAndGo(symbol);
+			return container.ItemCount == 0 ? null : CreateQuickInfoItem(session, token, container.ToUI().Tag());
 		}
 
 		static QuickInfoItem CreateQuickInfoItem(IAsyncQuickInfoSession session, SyntaxToken? token, object item) {
