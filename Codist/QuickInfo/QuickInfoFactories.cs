@@ -59,13 +59,11 @@ namespace Codist.QuickInfo
 
 	/// <summary>Shows information about selections.</summary>
 	[Export(typeof(IAsyncQuickInfoSourceProvider))]
-	[Name(Name)]
+	[Name(nameof(SelectionQuickInfoProvider))]
 	[Order(After = CSharpQuickInfo.Name)]
 	[ContentType(Constants.CodeTypes.Text)]
 	sealed class SelectionQuickInfoProvider : IAsyncQuickInfoSourceProvider
 	{
-		const string Name = nameof(SelectionQuickInfoProvider);
-
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
 				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new SelectionQuickInfo())
@@ -75,13 +73,11 @@ namespace Codist.QuickInfo
 
 	/// <summary>Provides size limitation, selectable text blocks, icon for warning messages, etc. to Quick Info.</summary>
 	[Export(typeof(IAsyncQuickInfoSourceProvider))]
-	[Name(Name)]
+	[Name(nameof(QuickInfoOverrideController))]
 	[Order(After = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.Text)]
 	sealed class QuickInfoOverrideProvider : IAsyncQuickInfoSourceProvider
 	{
-		const string Name = nameof(QuickInfoOverrideController);
-
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
 				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new QuickInfoOverrideController())
@@ -91,13 +87,11 @@ namespace Codist.QuickInfo
 
 	/// <summary>Controls background of quick info.</summary>
 	[Export(typeof(IAsyncQuickInfoSourceProvider))]
-	[Name(Name)]
+	[Name(nameof(QuickInfoBackgroundController))]
 	[Order(After = "Default Quick Info Presenter")]
 	[ContentType(Constants.CodeTypes.Text)]
 	sealed class QuickInfoBackgroundControllerProvider : IAsyncQuickInfoSourceProvider
 	{
-		const string Name = nameof(QuickInfoBackgroundController);
-
 		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
 			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
 				? textBuffer.Properties.GetOrCreateSingletonProperty(()=> new QuickInfoBackgroundController())
