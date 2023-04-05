@@ -23,7 +23,6 @@ using Microsoft.VisualStudio.Utilities;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
 using VsUserData = Microsoft.VisualStudio.TextManager.Interop.IVsUserData;
 using WpfBrush = System.Windows.Media.Brush;
-using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 
 namespace Codist
@@ -35,9 +34,9 @@ namespace Codist
 	{
 		static /*readonly*/ Guid __IWpfTextViewHostGuid = new Guid("8C40265E-9FDB-4f54-A0FD-EBB72B7D0476"),
 			__ViewKindCodeGuid = new Guid(EnvDTE.Constants.vsViewKindCode);
-		static readonly HashSet<IWpfTextView> _WpfTextViews = new HashSet<IWpfTextView>();
-		static IWpfTextView _MouseOverDocumentView, _ActiveDocumentView, _ActiveInteractiveView;
-		static int _ActiveViewPosition;
+		static readonly HashSet<IWpfTextView> __WpfTextViews = new HashSet<IWpfTextView>();
+		static IWpfTextView __MouseOverDocumentView, __ActiveDocumentView, __ActiveInteractiveView;
+		static int __ActiveViewPosition;
 
 		#region Position
 		public static SnapshotPoint GetCaretPosition(this ITextView textView) {
@@ -62,7 +61,6 @@ namespace Codist
 			var end = selection.End.Position.Position;
 			return span.Contains(start) && (span.Contains(end) || inclusive && span.End == end);
 		}
-
 		#endregion
 
 		#region Spans
@@ -792,8 +790,8 @@ namespace Codist
 		/// </summary>
 		public static void KeepViewPosition(this IAsyncQuickInfoSession session) {
 			if (session.TextView is IWpfTextView v) {
-				_ActiveDocumentView = v;
-				_ActiveViewPosition = session.GetTriggerPoint(v.TextSnapshot)?.Position ?? -1;
+				__ActiveDocumentView = v;
+				__ActiveViewPosition = session.GetTriggerPoint(v.TextSnapshot)?.Position ?? -1;
 				session.StateChanged += QuickInfoSession_StateChanged;
 			}
 		}
@@ -806,7 +804,7 @@ namespace Codist
 		}
 
 		public static void ForgetViewPosition() {
-			_ActiveViewPosition = -1;
+			__ActiveViewPosition = -1;
 		}
 		public static void OpenFile(string file) {
 			OpenFile(file, (VsTextView v)=> { });
@@ -820,7 +818,7 @@ namespace Codist
 			if (File.Exists(file) == false) {
 				return;
 			}
-			if (_ActiveViewPosition > -1) {
+			if (__ActiveViewPosition > -1) {
 				MoveCaretToKeptViewPosition();
 			}
 
@@ -841,13 +839,13 @@ namespace Codist
 		}
 
 		static void MoveCaretToKeptViewPosition() {
-			var v = _MouseOverDocumentView ?? _ActiveDocumentView;
+			var v = __MouseOverDocumentView ?? __ActiveDocumentView;
 			SnapshotPoint p;
 			if (v != null
-				&& _ActiveViewPosition < v.TextSnapshot.Length
-				&& v.Caret.ContainingTextViewLine.ContainsBufferPosition(p = new SnapshotPoint(v.TextSnapshot, _ActiveViewPosition)) == false) {
+				&& __ActiveViewPosition < v.TextSnapshot.Length
+				&& v.Caret.ContainingTextViewLine.ContainsBufferPosition(p = new SnapshotPoint(v.TextSnapshot, __ActiveViewPosition)) == false) {
 				v.Caret.MoveTo(p);
-				_ActiveViewPosition = -1;
+				__ActiveViewPosition = -1;
 			}
 		}
 
@@ -1109,15 +1107,15 @@ namespace Codist
 		}
 
 		public static IWpfTextView GetMouseOverDocumentView() {
-			return _MouseOverDocumentView;
+			return __MouseOverDocumentView;
 		}
 		public static IWpfTextView GetActiveWpfDocumentView() {
-			return _ActiveDocumentView;
+			return __ActiveDocumentView;
 			//ThreadHelper.ThrowIfNotOnUIThread();
 			//return ServiceProvider.GlobalProvider.GetActiveWpfDocumentView();
 		}
 		public static IWpfTextView GetActiveWpfInteractiveView() {
-			return _ActiveInteractiveView;
+			return __ActiveInteractiveView;
 		}
 		public static IWpfTextView GetActiveWpfDocumentView(this IServiceProvider service) {
 			ThreadHelper.ThrowIfNotOnUIThread();
@@ -1135,7 +1133,7 @@ namespace Codist
 		}
 
 		public static IWpfTextView GetWpfTextView(this System.Windows.UIElement element) {
-			foreach (var item in _WpfTextViews) {
+			foreach (var item in __WpfTextViews) {
 				if (item.VisualElement.IsVisible == false) {
 					continue;
 				}
@@ -1181,7 +1179,7 @@ namespace Codist
 				IWpfTextView _View;
 
 				public ActiveViewTracker(IWpfTextView view) {
-					_ActiveInteractiveView = _View = view;
+					__ActiveInteractiveView = _View = view;
 					ActiveTextViewChanged?.Invoke(view, new TextViewCreatedEventArgs(view));
 					view.Closed += TextView_CloseView;
 					view.VisualElement.Loaded += TextView_SetActiveView;
@@ -1189,16 +1187,16 @@ namespace Codist
 					view.GotAggregateFocus += TextView_SetActiveView;
 					if (view.Roles.Contains(PredefinedTextViewRoles.Document)) {
 						_IsDocument = true;
-						_ActiveDocumentView = view;
-						_WpfTextViews.Add(view);
+						__ActiveDocumentView = view;
+						__WpfTextViews.Add(view);
 					}
 				}
 
 				void TextView_SetActiveView(object sender, EventArgs e) {
-					if (_ActiveInteractiveView != _View && _View.HasAggregateFocus) {
-						_ActiveInteractiveView = _View;
-						if (_IsDocument && _ActiveDocumentView != _View) {
-							_ActiveDocumentView = _View;
+					if (__ActiveInteractiveView != _View && _View.HasAggregateFocus) {
+						__ActiveInteractiveView = _View;
+						if (_IsDocument && __ActiveDocumentView != _View) {
+							__ActiveDocumentView = _View;
 						}
 						ForgetViewPosition();
 						ActiveTextViewChanged?.Invoke(_View, new TextViewCreatedEventArgs(_View));
@@ -1207,7 +1205,7 @@ namespace Codist
 
 				void TextViewMouseEnter_SetActiveView(object sender, MouseEventArgs e) {
 					if (_IsDocument) {
-						_MouseOverDocumentView = _View;
+						__MouseOverDocumentView = _View;
 					}
 				}
 
@@ -1215,16 +1213,16 @@ namespace Codist
 					ForgetViewPosition();
 					var v = _View;
 					if (_IsDocument) {
-						if (_MouseOverDocumentView == v) {
-							_MouseOverDocumentView = null;
+						if (__MouseOverDocumentView == v) {
+							__MouseOverDocumentView = null;
 						}
-						if (_ActiveDocumentView == v) {
-							_ActiveDocumentView = null;
+						if (__ActiveDocumentView == v) {
+							__ActiveDocumentView = null;
 						}
-						_WpfTextViews.Remove(v);
+						__WpfTextViews.Remove(v);
 					}
-					if (_ActiveInteractiveView == v) {
-						_ActiveInteractiveView = null;
+					if (__ActiveInteractiveView == v) {
+						__ActiveInteractiveView = null;
 					}
 					_View = null;
 					v.Closed -= TextView_CloseView;
@@ -1276,12 +1274,10 @@ namespace Codist
 				}
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "UI Thread checked in caller")]
 			public NewDocumentStateScope(__VSNEWDOCUMENTSTATE state, Guid reason)
 				: this((uint)state, reason) {
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "UI Thread checked in caller")]
 			public NewDocumentStateScope(__VSNEWDOCUMENTSTATE2 state, Guid reason)
 				: this((uint)state, reason) {
 			}
