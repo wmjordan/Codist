@@ -163,7 +163,6 @@ namespace Codist.QuickInfo
 					continue;
 				}
 				if (a1.Kind() == SyntaxKind.SimpleMemberAccessExpression) {
-					var m = a1 as MemberAccessExpressionSyntax;
 					var s = semanticModel.GetSymbolInfo(a1).Symbol;
 					if (s == null) {
 						return null;
