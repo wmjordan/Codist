@@ -15,6 +15,7 @@ namespace Codist
 		readonly Compilation _Compilation;
 		readonly bool _HasDoc;
 		XElement _Summary, _Remarks, _Returns, _Value;
+		bool _IsTextOnly;
 		bool _Preliminary;
 		List<XElement> _Parameters, _Exceptions, _TypeParameters, _SeeAlsos, _Sees, _Examples;
 		int _InheritedLevel;
@@ -58,6 +59,7 @@ namespace Codist
 		public IEnumerable<XElement> Sees => _Sees;
 		public IEnumerable<XElement> SeeAlsos => _SeeAlsos;
 		public XmlDoc ExplicitInheritDoc => _ExplicitInheritDoc;
+		public bool IsTextOnly => _IsTextOnly;
 		public IEnumerable<XmlDoc> InheritedXmlDocs {
 			get {
 				if (_InheritedXmlDocs == null) {
@@ -131,19 +133,19 @@ namespace Codist
 				// ignore
 				return false;
 			}
-			if (d.FirstNode == null || d.HasElements == false) {
-				return false;
-			}
 			bool r = false;
+			if (d.FirstNode != null && d.HasElements) {
 			foreach (var item in d.Elements()) {
 				if (ParseDocSection(item)) {
 					r = true;
 				}
 			}
+			}
 			// use the member element if it begins or ends with a text node
 			// support: text only XML Doc
 			if (r == false && (d.FirstNode.NodeType == XmlNodeType.Text || d.LastNode.NodeType == XmlNodeType.Text)) {
 				_Summary = d;
+				_IsTextOnly = true;
 				r = true;
 			}
 			return r;
