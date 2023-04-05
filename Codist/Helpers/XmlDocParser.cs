@@ -135,11 +135,11 @@ namespace Codist
 			}
 			bool r = false;
 			if (d.FirstNode != null && d.HasElements) {
-			foreach (var item in d.Elements()) {
-				if (ParseDocSection(item)) {
-					r = true;
+				foreach (var item in d.Elements()) {
+					if (ParseDocSection(item)) {
+						r = true;
+					}
 				}
-			}
 			}
 			// use the member element if it begins or ends with a text node
 			// support: text only XML Doc
@@ -201,9 +201,6 @@ namespace Codist
 			if (t == null) {
 				return;
 			}
-			if (t.BaseType != null && (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct)) {
-				InheritDocumentation(t.BaseType, querySymbol);
-			}
 			// inherit from base type
 			if (ReferenceEquals(symbol, querySymbol) == false) {
 				var kind = querySymbol.Kind;
@@ -228,6 +225,9 @@ namespace Codist
 						return;
 					}
 				}
+			}
+			if (t.BaseType != null && (t.TypeKind == TypeKind.Class || t.TypeKind == TypeKind.Struct)) {
+				InheritDocumentation(t.BaseType, querySymbol);
 			}
 			// inherit from implemented interfaces
 			foreach (var item in t.Interfaces) {
