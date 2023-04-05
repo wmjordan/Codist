@@ -239,8 +239,10 @@ namespace Codist
 		public const int Drive = KnownImageIds.HardDrive;
 		public const int Network = KnownImageIds.Network;
 		public const int Question = KnownImageIds.StatusHelp;
+		public const int HiddenInfo = KnownImageIds.StatusHidden;
 		public const int Info = KnownImageIds.StatusInformation;
 		public const int Suggestion = KnownImageIds.StatusAlert;
+		public const int SyntaxError = KnownImageIds.StatusError;
 		public const int SevereWarning = KnownImageIds.StatusWarning;
 		public const int Warning = KnownImageIds.StatusWarningOutline;
 		public const int Error = KnownImageIds.StatusInvalid;

@@ -338,24 +338,20 @@ namespace Codist.QuickInfo
 				return ServicesHelper.Instance.ViewTagAggregatorFactory.CreateTagAggregator<IErrorTag>(_Session.TextView);
 			}
 
-			int GetIconIdForText(TextBlock textBlock) {
+			CrispImage GetIconForErrorText(TextBlock textBlock) {
 				var f = textBlock.Inlines.FirstInline;
 				var tt = ((f as Hyperlink)?.Inlines.FirstInline as Run)?.Text;
 				if (tt == null) {
 					tt = (f as Run)?.Text;
-					if (tt == "SPELL" && textBlock.Inlines.Count > 1) {
-						return IconIds.Suggestion;
+					if (tt == "SPELL") {
+						return ThemeHelper.GetImage(IconIds.Suggestion);
 					}
 				}
-
 				var errorTagger = GetErrorTagger();
-				if (errorTagger != null) {
-					if (_ErrorTags == null) {
-						_ErrorTags = new ErrorTags();
-					}
-					return _ErrorTags.GetIconIdForErrorCode(tt, errorTagger, _Session.ApplicableToSpan.GetSpan(_Session.TextView.TextSnapshot));
-				}
-				return 0;
+				return errorTagger != null
+					? (_ErrorTags ?? (_ErrorTags = new ErrorTags()))
+						.GetErrorIcon(tt, errorTagger, _Session.ApplicableToSpan.GetSpan(_Session.TextView.TextSnapshot))
+					: null;
 			}
 
 			void ReleaseSession(object sender, QuickInfoSessionStateChangedEventArgs args) {
@@ -732,9 +728,9 @@ namespace Codist.QuickInfo
 						&& TextEditorWrapper.CreateFor(t) != null
 						&& t.Inlines.FirstInline is InlineUIContainer == false) {
 						t.TextWrapping = TextWrapping.Wrap;
-						int iconId = _Overrider.GetIconIdForText(t);
-						if (iconId != 0) {
-							t.SetGlyph(ThemeHelper.GetImage(iconId));
+						CrispImage icon = _Overrider.GetIconForErrorText(t);
+						if (icon != null) {
+							t.SetGlyph(icon);
 						}
 					}
 				}
@@ -769,27 +765,40 @@ namespace Codist.QuickInfo
 				_TagHolder?.Clear();
 			}
 
-			public int GetIconIdForErrorCode(string code, ITagAggregator<IErrorTag> tagger, SnapshotSpan span) {
+			public CrispImage GetErrorIcon(string code, ITagAggregator<IErrorTag> tagger, SnapshotSpan span) {
 				if (GetTags(tagger, span).TryGetValue(code, out var error)) {
-					if (error.Contains("suggestion")) {
-						return IconIds.Suggestion;
+					if (code[0] == 'C' && code[1] == 'S' && error == PredefinedErrorTypeNames.Warning) {
+						return CodeAnalysisHelper.GetWarningLevel(ToErrorCode(code, 2)) < 3
+							? ThemeHelper.GetImage(IconIds.SevereWarning)
+							: ThemeHelper.GetImage(IconIds.Warning);
 					}
-					if (error.Contains("warning")) {
-						int c;
-						if (code[0] == 'C'
-							&& code[1] == 'S'
-							&& (c = ToErrorCode(code, 2)) != 0
-							&& CodeAnalysisHelper.GetWarningLevel(c) < 3) {
-							return IconIds.SevereWarning;
-						}
-						return IconIds.Warning;
-					}
-					if (error.Contains("error")) {
-						return IconIds.Error;
-					}
-					if (error.Contains("information")) {
-						return IconIds.Suggestion;
-					}
+					var iconId = GetIconIdForErrorType(error);
+					return iconId != 0 ? ThemeHelper.GetImage(iconId).SetValue(ToolTipService.SetToolTip, error) : null;
+				}
+				return null;
+			}
+
+			static int GetIconIdForErrorType(string error) {
+				switch (error) {
+					case PredefinedErrorTypeNames.Suggestion: return IconIds.HiddenInfo;
+					case PredefinedErrorTypeNames.HintedSuggestion: return IconIds.Info;
+					case PredefinedErrorTypeNames.Warning: return IconIds.Warning;
+					case PredefinedErrorTypeNames.SyntaxError: return IconIds.SyntaxError;
+					case PredefinedErrorTypeNames.CompilerError: return IconIds.Stop;
+					case PredefinedErrorTypeNames.OtherError: return IconIds.Error;
+				}
+				return GetIconIdForCustomErrorTypes(error);
+			}
+
+			static int GetIconIdForCustomErrorTypes(string error) {
+				if (error.Contains("suggestion")) {
+					return IconIds.Suggestion;
+				}
+				if (error.Contains("warning")) {
+					return IconIds.Warning;
+				}
+				if (error.Contains("error")) {
+					return IconIds.Error;
 				}
 				return 0;
 			}
