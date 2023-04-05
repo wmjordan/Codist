@@ -42,25 +42,35 @@ namespace Codist
 			var tip = new ThemedTipDocument();
 			var summary = doc.GetDescription(symbol);
 			XmlDoc inheritDoc = null;
-			bool showSummaryIcon = true;
+			bool inheritedXmlDoc = false;
 			#region Summary
 			if (summary == null
 					&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromBaseType)) {
 				summary = doc.GetInheritedDescription(symbol, out inheritDoc);
 				if (inheritDoc != null && summary != null) {
-					tip.Append(new ThemedTipParagraph(IconIds.ReferencedXmlDoc, new ThemedTipText()
-							.AddSymbol(inheritDoc.Symbol.ContainingSymbol.OriginalDefinition, false, _SymbolFormatter)
-							.Append(".")
-							.AddSymbol(inheritDoc.Symbol, true, _SymbolFormatter)
-							.Append(":"))
-					);
-					showSummaryIcon = false;
+					inheritedXmlDoc = true;
 				}
 			}
 			if (summary != null
-				&& (summary.Name.LocalName != XmlDocNodeName || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc))) {
+				&& (doc.IsTextOnly == false || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.TextOnlyDoc))) {
 				ParagraphCount = 0;
-				Render(summary, tip, showSummaryIcon);
+				if (summary != null && IsEmptyElement(summary) == false) {
+					ThemedTipParagraph paragraph;
+					if (inheritedXmlDoc) {
+						paragraph = new ThemedTipParagraph(IconIds.ReferencedXmlDoc, new ThemedTipText()
+							.AddSymbol(inheritDoc.Symbol.ContainingSymbol.OriginalDefinition, false, _SymbolFormatter)
+							.Append(".")
+							.AddSymbol(inheritDoc.Symbol, true, _SymbolFormatter)
+							.Append(": "));
+					}
+					else {
+						paragraph = new ThemedTipParagraph(IconIds.XmlDocComment);
+					}
+					Render(summary, paragraph.Content.Inlines);
+					if (paragraph.Content.Inlines.FirstInline != null) {
+						tip.Append(paragraph);
+					}
+				}
 				if (inheritDoc == null) {
 					tip.Tag = ParagraphCount;
 				}
@@ -190,16 +200,6 @@ namespace Codist
 				return;
 			}
 			Render(content, text.Inlines);
-		}
-		public void Render(XElement content, ThemedTipDocument doc, bool showSummaryIcon) {
-			if (content == null || IsEmptyElement(content)) {
-				return;
-			}
-			var paragraph = new ThemedTipParagraph(showSummaryIcon ? IconIds.XmlDocComment : 0);
-			Render(content, paragraph.Content.Inlines);
-			if (paragraph.Content.Inlines.FirstInline != null) {
-				doc.Append(paragraph);
-			}
 		}
 		public void Render(XContainer content, InlineCollection inlines) {
 			InternalRender(content, inlines, null);
