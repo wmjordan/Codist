@@ -195,6 +195,10 @@ namespace Codist.QuickInfo
 						goto case SyntaxKind.OpenParenToken;
 					}
 					break;
+				case SyntaxKind.UsingKeyword:
+					node = unitCompilation.FindNode(token.Span);
+					symbol = semanticModel.GetDisposeMethodForUsingStatement(node, cancellationToken);
+					goto PROCESS;
 				case SyntaxKind.InKeyword:
 					if ((node = unitCompilation.FindNode(token.Span)).IsKind(SyntaxKind.ForEachStatement)
 						&& (symbol = semanticModel.GetForEachStatementInfo((CommonForEachStatementSyntax)node).GetEnumeratorMethod) != null) {

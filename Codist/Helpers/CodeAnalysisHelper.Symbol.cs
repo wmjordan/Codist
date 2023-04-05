@@ -101,6 +101,33 @@ namespace Codist
 			}
 			return n;
 		}
+
+		public static IMethodSymbol GetDisposeMethodForUsingStatement(this SemanticModel semanticModel, SyntaxNode node, CancellationToken cancellationToken = default) {
+			ISymbol symbol = null;
+			if (node.IsKind(SyntaxKind.UsingStatement)) {
+				var us = (UsingStatementSyntax)node;
+				if (us.Declaration != null) {
+					symbol = semanticModel.GetSymbol(us.Declaration.Type, cancellationToken);
+				}
+				else if (us.Expression != null) {
+					symbol = semanticModel.GetTypeInfo(us.Expression, cancellationToken).Type;
+				}
+			}
+			else if (node.IsKind(SyntaxKind.LocalDeclarationStatement)) {
+				var ld = (LocalDeclarationStatementSyntax)node;
+				if (ld.Declaration != null) {
+					symbol = semanticModel.GetSymbol(ld.Declaration.Type, cancellationToken);
+				}
+			}
+
+			if (symbol is INamedTypeSymbol usingType) {
+				symbol = semanticModel.GetSystemTypeSymbol(nameof(IDisposable)).GetMembers(nameof(IDisposable.Dispose))[0];
+				if (usingType.TypeKind != TypeKind.Interface) {
+					return usingType.FindImplementationForInterfaceMember(symbol) as IMethodSymbol;
+				}
+			}
+			return symbol as IMethodSymbol;
+		}
 		#endregion
 
 		#region Assembly and namespace
