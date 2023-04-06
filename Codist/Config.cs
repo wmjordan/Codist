@@ -24,7 +24,9 @@ namespace Codist
 			PaleDarkTheme = ThemePrefix + "PaleDark",
 			SimpleTheme = ThemePrefix + "Simple";
 
+		#if DEBUG
 		static DateTime __LastSaved, __LastLoaded;
+		#endif
 		static int __LoadingConfig;
 		static Action<Config> __Loaded;
 		static Action<ConfigUpdatedEventArgs> __Updated;
@@ -255,7 +257,9 @@ namespace Codist
 				ResetCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
 				Instance.Styles = config.Styles;
+				#if DEBUG
 				__LastLoaded = DateTime.Now;
+				#endif
 				return Instance;
 			}
 			else if (styleFilter != StyleFilters.None) {
@@ -267,12 +271,16 @@ namespace Codist
 				MergeCodeStyle(Instance.SymbolMarkerStyles, config.SymbolMarkerStyles, styleFilter);
 				ResetCodeStyle(Instance.MarkerSettings, config.MarkerSettings);
 				Instance.Styles = config.Styles;
+				#if DEBUG
 				__LastLoaded = DateTime.Now;
+				#endif
 				return Instance;
 			}
 			Display.LayoutOverrider.Reload(config.DisplayOptimizations);
 			Display.ResourceMonitor.Reload(config.DisplayOptimizations);
+			#if DEBUG
 			__LastLoaded = DateTime.Now;
+			#endif
 			"Config loaded".Log();
 			return config;
 		}
@@ -342,7 +350,9 @@ namespace Codist
 						Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
 					}));
 				if (path == ConfigPath) {
+					#if DEBUG
 					__LastSaved = __LastLoaded = DateTime.Now;
+					#endif
 					"Config saved".Log();
 				}
 			}
@@ -443,7 +453,9 @@ namespace Codist
 		}
 
 		static Config GetDefaultConfig() {
+			#if DEBUG
 			__LastLoaded = DateTime.Now;
+			#endif
 			var c = new Config();
 			InitDefaultLabels(c.Labels);
 			ResetSearchEngines(c.SearchEngines);
