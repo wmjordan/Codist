@@ -83,14 +83,12 @@ namespace Codist
 					}
 					if (member.Kind != SymbolKind.Field
 						&& member.CanBeReferencedByName
-						&& (parameters = member.GetParameters()).IsDefaultOrEmpty == false) {
-						if (parameters.Any(strictMatch
+						&& (parameters = member.GetParameters()).IsDefaultOrEmpty == false
+						&& parameters.Any(strictMatch
 								? (Func<IParameterSymbol, bool>)(p => p.Type == type)
 								: (p => type.CanConvertTo(p.Type) && p.Type.IsCommonClass() == false))
 							&& type.CanAccess(member, assembly)) {
-
-							members.Add(member);
-						}
+						members.Add(member);
 					}
 				}
 			}

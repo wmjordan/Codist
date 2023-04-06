@@ -22,8 +22,8 @@ namespace Codist
 			return semanticModel.GetSymbolInfo(node, cancellationToken).Symbol
 				?? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 				?? semanticModel.GetTypeInfo(node, cancellationToken).Type
-				?? (node.IsKind(SyntaxKind.FieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as FieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
-					: node.IsKind(SyntaxKind.EventFieldDeclaration) ? semanticModel.GetDeclaredSymbol((node as EventFieldDeclarationSyntax).Declaration.Variables.First(), cancellationToken)
+				?? (node.IsKind(SyntaxKind.FieldDeclaration) ? semanticModel.GetDeclaredSymbol(((FieldDeclarationSyntax)node).Declaration.Variables.First(), cancellationToken)
+					: node.IsKind(SyntaxKind.EventFieldDeclaration) ? semanticModel.GetDeclaredSymbol(((EventFieldDeclarationSyntax)node).Declaration.Variables.First(), cancellationToken)
 					: node.IsKind(RecordDeclaration) || node.IsKind(RecordStructDeclaration) ? semanticModel.GetDeclaredSymbol(node, cancellationToken)
 					: null)
 				;
@@ -202,10 +202,10 @@ namespace Codist
 		#region Symbol information
 		public static string GetAbstractionModifier(this ISymbol symbol) {
 			if (symbol.IsAbstract) {
-				if (symbol.Kind == SymbolKind.NamedType && (symbol as INamedTypeSymbol).TypeKind == TypeKind.Interface) {
+				if (symbol.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)symbol).TypeKind == TypeKind.Interface) {
 					return String.Empty;
 				}
-				else if (symbol.IsStatic && (symbol.ContainingType as INamedTypeSymbol)?.TypeKind == TypeKind.Interface) {
+				else if (symbol.IsStatic && symbol.ContainingType?.TypeKind == TypeKind.Interface) {
 					return "static abstract ";
 				}
 				else {
@@ -238,7 +238,6 @@ namespace Codist
 				default: return String.Empty;
 			}
 		}
-
 
 		public static string GetValueAccessModifier(this ISymbol symbol) {
 			switch (symbol.Kind) {
@@ -302,7 +301,7 @@ namespace Codist
 		}
 
 		public static ISymbol GetAliasTarget(this ISymbol symbol) {
-			return symbol.Kind == SymbolKind.Alias ? (symbol as IAliasSymbol).Target : symbol;
+			return symbol.Kind == SymbolKind.Alias ? ((IAliasSymbol)symbol).Target : symbol;
 		}
 
 		public static IEnumerable<INamedTypeSymbol> GetContainingTypes(this ISymbol symbol) {
@@ -488,7 +487,7 @@ namespace Codist
 				case SymbolKind.Namespace: return IconIds.Namespace;
 				case SymbolKind.Parameter: return IconIds.Argument;
 				case SymbolKind.Property:
-					switch ((symbol as IPropertySymbol).DeclaredAccessibility) {
+					switch (((IPropertySymbol)symbol).DeclaredAccessibility) {
 						case Accessibility.Public: return KnownImageIds.PropertyPublic;
 						case Accessibility.Protected:
 						case Accessibility.ProtectedOrInternal:
@@ -505,8 +504,8 @@ namespace Codist
 
 		public static ImmutableArray<ITypeParameterSymbol> GetTypeParameters(this ISymbol symbol) {
 			switch (symbol.Kind) {
-				case SymbolKind.Method: return (symbol as IMethodSymbol).TypeParameters;
-				case SymbolKind.NamedType: return (symbol as INamedTypeSymbol).TypeParameters;
+				case SymbolKind.Method: return ((IMethodSymbol)symbol).TypeParameters;
+				case SymbolKind.NamedType: return ((INamedTypeSymbol)symbol).TypeParameters;
 				default: return ImmutableArray<ITypeParameterSymbol>.Empty;
 			}
 		}
@@ -858,7 +857,7 @@ namespace Codist
 		}
 
 		public static bool IsBoundedGenericMethod(this IMethodSymbol method) {
-			return method != null && method.IsGenericMethod && method != method.OriginalDefinition;
+			return method?.IsGenericMethod == true && method != method.OriginalDefinition;
 		}
 
 		public static bool IsObjectOrValueType(this INamedTypeSymbol type) {
@@ -867,21 +866,19 @@ namespace Codist
 
 		public static bool IsAttributeType(this INamedTypeSymbol type) {
 			return type?.TypeKind == TypeKind.Class
-				&& type.GetBaseTypes().Any(t => t.MatchTypeName(nameof(System.Attribute), "System"));
+				&& type.GetBaseTypes().Any(t => t.MatchTypeName(nameof(Attribute), "System"));
 		}
 
 		public static bool IsCommonClass(this ISymbol symbol) {
-			var type = symbol as ITypeSymbol;
-			if (type == null) {
-				return false;
-			}
-			switch (type.SpecialType) {
-				case SpecialType.System_Object:
-				case SpecialType.System_ValueType:
-				case SpecialType.System_Enum:
-				case SpecialType.System_MulticastDelegate:
-				case SpecialType.System_Delegate:
-					return true;
+			if (symbol is ITypeSymbol type) {
+				switch (type.SpecialType) {
+					case SpecialType.System_Object:
+					case SpecialType.System_ValueType:
+					case SpecialType.System_Enum:
+					case SpecialType.System_MulticastDelegate:
+					case SpecialType.System_Delegate:
+						return true;
+				}
 			}
 			return false;
 		}
@@ -1066,7 +1063,7 @@ namespace Codist
 		public static IMethodSymbol AsMethod(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Method: return symbol as IMethodSymbol;
-				case SymbolKind.Event: return (symbol as IEventSymbol).RaiseMethod;
+				case SymbolKind.Event: return ((IEventSymbol)symbol).RaiseMethod;
 				case SymbolKind.NamedType:
 					var t = symbol as INamedTypeSymbol;
 					return t.TypeKind == TypeKind.Delegate ? t.DelegateInvokeMethod : null;
@@ -1289,9 +1286,9 @@ namespace Codist
 					}
 					break;
 			}
-			return ((a = a.ContainingSymbol) != null ^ (b = b.ContainingSymbol) != null)
-				? a == null || HasSameName(a, b)
-				: true;
+			return ((a = a.ContainingSymbol) != null ^ (b = b.ContainingSymbol) != null) == false
+				|| a == null
+				|| HasSameName(a, b);
 		}
 
 		public static bool AreEqual(ITypeSymbol a, ITypeSymbol b, bool ignoreTypeConstraint) {
