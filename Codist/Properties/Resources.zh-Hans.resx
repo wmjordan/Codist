@@ -1243,10 +1243,10 @@ https://github.com/snowie2000/mactype/releases</value>
     <value>显示字符串的长度、散列值和文本内容</value>
   </data>
   <data name="OT_SymbolLocation" xml:space="preserve">
-    <value>符号位置</value>
+    <value>所属名称空间和程序集位置</value>
   </data>
   <data name="OT_SymbolLocationTip" xml:space="preserve">
-    <value>显示定义符号的位置</value>
+    <value>显示符号所属的名称空间和程序集位置</value>
   </data>
   <data name="OT_SymbolToolTip" xml:space="preserve">
     <value>符号代码提示</value>

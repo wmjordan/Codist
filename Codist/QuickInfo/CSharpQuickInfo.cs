@@ -617,35 +617,36 @@ namespace Codist.QuickInfo
 
 		static void ShowSymbolLocationInfo(InfoContainer qiContent, Compilation compilation, ISymbol symbol) {
 			var (p, f) = compilation.GetReferencedAssemblyPath(symbol as IAssemblySymbol ?? symbol.ContainingAssembly);
-			if (String.IsNullOrEmpty(f) == false) {
-				var tt = new ThemedTipText(R.T_Assembly, true);
-				if (p.Length > 0) {
-					tt.AppendFileLink(f, p);
-				}
-				else {
-					var proj = symbol.GetSourceReferences().Select(r => SemanticContext.GetHovered().GetProject(r.SyntaxTree)).FirstOrDefault(i => i != null);
-					if (proj != null && proj.OutputFilePath != null) {
-						(p, f) = FileHelper.DeconstructPath(proj.OutputFilePath);
-					}
-					tt.AppendFileLink(f, p);
-				}
-				var item = new ThemedTipDocument().AppendParagraph(IconIds.Module, tt);
-				switch (symbol.Kind) {
-					case SymbolKind.Field:
-					case SymbolKind.Property:
-					case SymbolKind.Event:
-					case SymbolKind.Method:
-					case SymbolKind.NamedType:
-						var ns = symbol.ContainingNamespace;
-						if (ns != null) {
-							var t = new ThemedTipText(R.T_Namespace, true);
-							_SymbolFormatter.ShowContainingNamespace(symbol, t);
-							item.AppendParagraph(IconIds.Namespace, t);
-						}
-						break;
-				}
-				qiContent.Add(item);
+			if (String.IsNullOrEmpty(f)) {
+				return;
 			}
+			var asmText = new ThemedTipText(R.T_Assembly, true);
+			var item = new ThemedTipDocument().AppendParagraph(IconIds.Module, asmText);
+			if (p.Length > 0) {
+				asmText.AppendFileLink(f, p);
+			}
+			else {
+				var proj = symbol.GetSourceReferences().Select(r => SemanticContext.GetHovered().GetProject(r.SyntaxTree)).FirstOrDefault(i => i != null);
+				if (proj != null && proj.OutputFilePath != null) {
+					(p, f) = FileHelper.DeconstructPath(proj.OutputFilePath);
+				}
+				asmText.AppendFileLink(f, p);
+			}
+			switch (symbol.Kind) {
+				case SymbolKind.Field:
+				case SymbolKind.Property:
+				case SymbolKind.Event:
+				case SymbolKind.Method:
+				case SymbolKind.NamedType:
+					var ns = symbol.ContainingNamespace;
+					if (ns != null) {
+						var nsText = new ThemedTipText(R.T_Namespace, true);
+						_SymbolFormatter.ShowContainingNamespace(symbol, nsText);
+						item.AppendParagraph(IconIds.Namespace, nsText);
+					}
+					break;
+			}
+			qiContent.Add(item);
 		}
 
 		static void ShowBlockInfo(InfoContainer qiContent, ITextSnapshot textSnapshot, SyntaxNode node, SemanticModel semanticModel) {

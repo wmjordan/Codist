@@ -4220,7 +4220,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Symbol location.
+        ///   Looks up a localized string similar to Containing namespace and assembly.
         /// </summary>
         internal static string OT_SymbolLocation {
             get {
@@ -4229,7 +4229,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Displays the location where a symbol is defined.
+        ///   Looks up a localized string similar to Displays containing namespace and location of the assembly where a symbol is defined.
         /// </summary>
         internal static string OT_SymbolLocationTip {
             get {

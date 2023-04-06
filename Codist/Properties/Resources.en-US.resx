@@ -1251,10 +1251,10 @@ Ctrl+1, Ctrl+3: Edit.SearchDeclarationInProject</value>
     <value>Displays length, hash code and content of strings</value>
   </data>
   <data name="OT_SymbolLocation" xml:space="preserve">
-    <value>Symbol location</value>
+    <value>Containing namespace and assembly</value>
   </data>
   <data name="OT_SymbolLocationTip" xml:space="preserve">
-    <value>Displays the location where a symbol is defined</value>
+    <value>Displays containing namespace and location of the assembly where a symbol is defined</value>
   </data>
   <data name="OT_SymbolToolTip" xml:space="preserve">
     <value>Symbol tool tip</value>
