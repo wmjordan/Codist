@@ -16,24 +16,24 @@ namespace Codist
 	{
 		public static ImmutableArray<(string type, IImmutableList<ISymbol> members)> FindMembers(this ISymbol symbol) {
 			var r = ImmutableArray.CreateBuilder<(string type, IImmutableList<ISymbol> members)>();
-			r.Add((null, FindMembers(symbol)));
+			r.Add((null, ListMembersByOrder(symbol)));
 			if (symbol is INamedTypeSymbol type) {
 				switch (type.TypeKind) {
 					case TypeKind.Class:
 						while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
-							r.Add((type.ToDisplayString(MemberNameFormat), FindMembers(type)));
+							r.Add((type.ToDisplayString(MemberNameFormat), ListMembersByOrder(type)));
 						}
 						break;
 					case TypeKind.Interface:
 						foreach (var item in type.AllInterfaces) {
-							r.Add((item.ToDisplayString(MemberNameFormat), FindMembers(item)));
+							r.Add((item.ToDisplayString(MemberNameFormat), ListMembersByOrder(item)));
 						}
 						break;
 				}
 			}
 			return r.ToImmutable();
 
-			IImmutableList<ISymbol> FindMembers(ISymbol source) {
+			IImmutableList<ISymbol> ListMembersByOrder(ISymbol source) {
 				var nsOrType = source as INamespaceOrTypeSymbol;
 				var members = nsOrType.FindMembers().ToImmutableArray();
 				if (source.Kind == SymbolKind.NamedType && ((INamedTypeSymbol)source).TypeKind == TypeKind.Enum) {
