@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using AppHelpers;
@@ -16,10 +15,10 @@ namespace Codist.SyntaxHighlight
 {
 	static class FormatStore
 	{
-		static readonly object _syncRoot = new object();
+		static readonly object __SyncRoot = new object();
 
 		#region sequence-critical static fields
-		static Func<string, IClassificationType> __GetClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType;
+		static readonly Func<string, IClassificationType> __GetClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType;
 
 		static Dictionary<string, StyleBase> __SyntaxStyleCache = InitSyntaxStyleCache();
 
@@ -39,6 +38,8 @@ namespace Codist.SyntaxHighlight
 				// since both EFM and CFM are shared between views with the same category,
 				//   we can avoid redundantly applying highlight styles to the same kinds of views
 				//   by caching applied categories
+				$"[{category}] highlighter created".Log();
+				highlighter.SubscribeConfigUpdateHandler();
 				highlighter.SubscribeFormatMappingChanges();
 				highlighter.Apply();
 				highlighter.Refresh();
@@ -53,7 +54,7 @@ namespace Codist.SyntaxHighlight
 
 		public static StyleBase GetOrCreateStyle(IClassificationType classificationType) {
 			var c = classificationType.Classification;
-			lock (_syncRoot) {
+			lock (__SyncRoot) {
 				if (__SyntaxStyleCache.TryGetValue(c, out var r)) {
 					return r;
 				}
@@ -102,7 +103,7 @@ namespace Codist.SyntaxHighlight
 		}
 
 		static void ResetStyleCache() {
-			lock (_syncRoot) {
+			lock (__SyncRoot) {
 				var cache = new Dictionary<string, StyleBase>(__SyntaxStyleCache.Count, StringComparer.OrdinalIgnoreCase);
 				LoadSyntaxStyleCache(cache);
 				__SyntaxStyleCache = cache;
@@ -213,20 +214,6 @@ namespace Codist.SyntaxHighlight
 				_ClassificationFormatMap = classificationFormatMap;
 				_DefaultFontSize = classificationFormatMap.DefaultTextProperties.FontRenderingEmSize;
 				_EditorBackground = editorFormatMap.GetProperties(Constants.EditorProperties.TextViewBackground).GetBackgroundColor();
-				Config.RegisterUpdateHandler(UpdateHighlightAfterConfigurationChange);
-			}
-
-			void UpdateHighlightAfterConfigurationChange(ConfigUpdatedEventArgs eventArgs) {
-				if (eventArgs.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)) {
-					_Context = FormatContext.Config;
-					if (eventArgs.Parameter is string t) {
-						Highlight(t);
-					}
-					else {
-						Apply();
-					}
-					_Context = FormatContext.None;
-				}
 			}
 
 			public TextFormattingRunProperties DefaultTextProperties => _ClassificationFormatMap.DefaultTextProperties;
@@ -285,6 +272,26 @@ namespace Codist.SyntaxHighlight
 				var y = __GetClassificationType(classificationY);
 				if (x != null && y != null) {
 					_ClassificationFormatMap.SwapPriorities(x, y);
+				}
+			}
+
+			public void SubscribeConfigUpdateHandler() {
+				Config.RegisterUpdateHandler(UpdateHighlightAfterConfigurationChange);
+			}
+			public void UnsubscribeConfigUpdateHandler() {
+				Config.UnregisterUpdateHandler(UpdateHighlightAfterConfigurationChange);
+			}
+
+			void UpdateHighlightAfterConfigurationChange(ConfigUpdatedEventArgs eventArgs) {
+				if (eventArgs.UpdatedFeature.MatchFlags(Features.SyntaxHighlight)) {
+					_Context = FormatContext.Config;
+					if (eventArgs.Parameter is string t) {
+						Highlight(t);
+					}
+					else {
+						Apply();
+					}
+					_Context = FormatContext.None;
 				}
 			}
 
@@ -385,8 +392,7 @@ namespace Codist.SyntaxHighlight
 				_Lock++;
 				var current = _EditorFormatMap.GetProperties(_ClassificationFormatMap.GetEditorFormatMapKey(classification));
 				var changes = FormatChanges.None;
-				bool hasTrace;
-				if ((hasTrace = _Traces.TryGetValue(c, out var trace)) == false) {
+				if (_Traces.TryGetValue(c, out var trace) == false) {
 					if (style == null) {
 						$"[{_Category}] skipped format {c}".Log();
 						goto EXIT;
@@ -628,7 +634,7 @@ namespace Codist.SyntaxHighlight
 						Changes.SetBrush(null);
 						current.SetBrush(Origin.GetBrush());
 					}
-					else if (AreBrushesEqual((b = current.GetBrush()), Origin.GetBrush()) == false) {
+					else if (AreBrushesEqual(b = current.GetBrush(), Origin.GetBrush()) == false) {
 						Origin.SetBrush(b);
 					}
 				}
@@ -648,7 +654,7 @@ namespace Codist.SyntaxHighlight
 						Changes.SetBackgroundBrush(null);
 						current.SetBackgroundBrush(Origin.GetBackgroundBrush());
 					}
-					else if (AreBrushesEqual((b = current.GetBackgroundBrush()), Origin.GetBackgroundBrush()) == false) {
+					else if (AreBrushesEqual(b = current.GetBackgroundBrush(), Origin.GetBackgroundBrush()) == false) {
 						Origin.SetBackgroundBrush(b);
 					}
 				}
@@ -734,7 +740,7 @@ namespace Codist.SyntaxHighlight
 				void ChangeTextDecorations(ResourceDictionary current, StyleBase style) {
 					TextDecorationCollection td;
 					if (style != null
-						&& (style.Underline != null || style.Strikethrough != null || style.OverLine != null || style.LineColor.A != 0)) {
+						&& (style.Underline != null || style.Strikethrough != null || style.OverLine != null)) {
 						var t = style.MakeTextDecorations();
 						if (t != (td = current.GetTextDecorations())
 							&& (td == null || t?.SequenceEqual(td) != true)) {

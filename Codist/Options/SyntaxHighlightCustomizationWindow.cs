@@ -862,14 +862,23 @@ namespace Codist.Options
 		void OnUnderlineChanged(bool? state) {
 			Update(() => {
 				ActiveStyle.Underline = state;
+				ToggleLineStyleControls();
 				return true;
 			});
 		}
 		void OnStrikeThroughChanged(bool? state) {
 			Update(() => {
 				ActiveStyle.Strikethrough = state;
+				ToggleLineStyleControls();
 				return true;
 			});
+		}
+
+		void ToggleLineStyleControls() {
+			var show = _UnderlineBox.IsChecked == true || _StrikethroughBox.IsChecked == true;
+			_LineColorButton.ToggleVisibility(show);
+			_LineOpacityButton.Toggle(show);
+			_LineStyleGroup.Toggle(show);
 		}
 
 		void OnForeColorChanged(Color color) {

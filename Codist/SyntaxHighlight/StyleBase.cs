@@ -149,13 +149,17 @@ namespace Codist.SyntaxHighlight
 
 		internal TextDecorationCollection MakeTextDecorations() {
 			var tdc = new TextDecorationCollection();
-			if (Underline == true || LineColor.A > 0) {
+			var hasSet = false;
+			if (Underline == true) {
 				if (LineColor.A > 0) {
 					tdc.Add(MakeLineDecoration(TextDecorationLocation.Underline));
 				}
 				else {
 					tdc.Add(TextDecorations.Underline);
 				}
+			}
+			else if (Underline == false) {
+				hasSet = true;
 			}
 			if (Strikethrough == true) {
 				if (LineColor.A > 0) {
@@ -165,6 +169,9 @@ namespace Codist.SyntaxHighlight
 					tdc.Add(TextDecorations.Strikethrough);
 				}
 			}
+			else if (Strikethrough == false) {
+				hasSet = true;
+			}
 			if (OverLine == true) {
 				if (LineColor.A > 0) {
 					tdc.Add(MakeLineDecoration(TextDecorationLocation.OverLine));
@@ -173,7 +180,10 @@ namespace Codist.SyntaxHighlight
 					tdc.Add(TextDecorations.OverLine);
 				}
 			}
-			return tdc.Count > 0 ? tdc : null;
+			else if (OverLine == false) {
+				hasSet = true;
+			}
+			return tdc.Count > 0 || hasSet ? tdc : null;
 		}
 
 		TextDecoration MakeLineDecoration(TextDecorationLocation location) {
