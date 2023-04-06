@@ -219,6 +219,9 @@ namespace Codist.Taggers
 	[Name(Constants.CSharpExtensionMethodName)]
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
+	[Order(After = Constants.CSharpMethodName)]
+	[Order(After = Constants.CSharpStaticMemberName)]
+	[Order(After = Constants.CodeStaticSymbol)]
 	[Order(After = Constants.CodeExtensionMethodName)]
 	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class ExtensionMethodFormat : ClassificationFormatDefinition
@@ -234,6 +237,8 @@ namespace Codist.Taggers
 	[UserVisible(false)]
 	[Order(After = Constants.CodeIdentifier)]
 	[Order(After = Constants.CodeMethodName)]
+	[Order(After = Constants.CSharpStaticMemberName)]
+	[Order(After = Constants.CodeStaticSymbol)]
 	[Order(Before = Constants.CSharpUserSymbol)]
 	sealed class ExternMethodFormat : ClassificationFormatDefinition
 	{
