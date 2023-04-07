@@ -24,7 +24,7 @@ namespace Codist.QuickInfo
 	{
 		internal const string Name = nameof(CSharpQuickInfo);
 
-		static readonly SymbolFormatter _SymbolFormatter = SymbolFormatter.Instance;
+		static readonly SymbolFormatter __SymbolFormatter = SymbolFormatter.Instance;
 
 		SpecialProjectInfo _SpecialProject;
 		bool _isCandidate;
@@ -97,7 +97,7 @@ namespace Codist.QuickInfo
 						container.Add(new ThemedTipText()
 							.SetGlyph(ThemeHelper.GetImage(IconIds.InstanceMember))
 							.Append(R.T_ExpressionCount)
-							.Append((node as InitializerExpressionSyntax).Expressions.Count.ToText(), true, false, _SymbolFormatter.Number));
+							.Append((node as InitializerExpressionSyntax).Expressions.Count.ToText(), true, false, __SymbolFormatter.Number));
 					}
 					if (overrider != null) {
 						overrider.OverrideBuiltInXmlDoc = false;
@@ -524,7 +524,7 @@ namespace Codist.QuickInfo
 						var p = new ThemedTipParagraph(IconIds.ReadVariables, new ThemedTipText().Append(R.T_CapturedVariables, true));
 						int i = 0;
 						foreach (var item in captured) {
-							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, false, _SymbolFormatter);
+							p.Content.Append(++i == 1 ? ": " : ", ").AddSymbol(item, false, __SymbolFormatter);
 						}
 						tip.Append(p);
 					}
@@ -604,9 +604,9 @@ namespace Codist.QuickInfo
 					var invoke = ((INamedTypeSymbol)st).DelegateInvokeMethod;
 					qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.Delegate,
 						new ThemedTipText(R.T_DelegateSignature, true).Append(": ")
-							.AddSymbol(invoke.ReturnType, false, _SymbolFormatter)
+							.AddSymbol(invoke.ReturnType, false, __SymbolFormatter)
 							.Append(" ")
-							.AddParameters(invoke.Parameters, _SymbolFormatter)
+							.AddParameters(invoke.Parameters, __SymbolFormatter)
 						)));
 				}
 			}
@@ -639,7 +639,7 @@ namespace Codist.QuickInfo
 					var ns = symbol.ContainingNamespace;
 					if (ns != null) {
 						var nsText = new ThemedTipText(R.T_Namespace, true);
-						_SymbolFormatter.ShowContainingNamespace(symbol, nsText);
+						__SymbolFormatter.ShowContainingNamespace(symbol, nsText);
 						item.AppendParagraph(IconIds.Namespace, nsText);
 					}
 					break;
@@ -667,7 +667,7 @@ namespace Codist.QuickInfo
 					if (s) {
 						p.Append(", ");
 					}
-					p.AddSymbol(item, false, _SymbolFormatter.Local);
+					p.AddSymbol(item, false, __SymbolFormatter.Local);
 					s = true;
 				}
 				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.LocalVariable, p)));
@@ -681,10 +681,10 @@ namespace Codist.QuickInfo
 						p.Append(", ");
 					}
 					if (item.IsImplicitlyDeclared) {
-						p.AddSymbol(item.GetReturnType(), item.Name, _SymbolFormatter);
+						p.AddSymbol(item.GetReturnType(), item.Name, __SymbolFormatter);
 					}
 					else {
-						p.AddSymbol(item, false, _SymbolFormatter);
+						p.AddSymbol(item, false, __SymbolFormatter);
 					}
 					s = true;
 				}
@@ -753,17 +753,17 @@ namespace Codist.QuickInfo
 					}
 					else {
 						t.Append(R.T_Return)
-							.AddSymbol(method.GetReturnType(), false, _SymbolFormatter)
+							.AddSymbol(method.GetReturnType(), false, __SymbolFormatter)
 							.Append(R.T_ReturnFor);
 					}
 				}
 				else {
 					t.Append(R.T_Return)
-						.AddSymbol(symbol?.GetReturnType(), false, _SymbolFormatter)
+						.AddSymbol(symbol?.GetReturnType(), false, __SymbolFormatter)
 						.Append(R.T_ReturnFor);
 				}
 				if (symbol != null) {
-					t.AddSymbol(symbol, node is LambdaExpressionSyntax ? R.T_LambdaExpression + name : null, _SymbolFormatter);
+					t.AddSymbol(symbol, node is LambdaExpressionSyntax ? R.T_LambdaExpression + name : null, __SymbolFormatter);
 				}
 				else {
 					t.Append(name);
@@ -793,7 +793,7 @@ namespace Codist.QuickInfo
 							if (paragraph == null) {
 								paragraph = new ThemedTipParagraph(IconIds.Attribute, new ThemedTipText().Append(R.T_Attribute, true));
 							}
-							_SymbolFormatter.Format(paragraph.Content.AppendLine().Inlines, item, attrType);
+							__SymbolFormatter.Format(paragraph.Content.AppendLine().Inlines, item, attrType);
 						}
 					}
 				}
@@ -826,7 +826,7 @@ namespace Codist.QuickInfo
 				if (ev.Type.GetMembers("Invoke").FirstOrDefault() is IMethodSymbol invoke
 					&& invoke.Parameters.Length == 2) {
 					qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.Event,
-						new ThemedTipText(R.T_EventSignature, true).AddParameters(invoke.Parameters, _SymbolFormatter)
+						new ThemedTipText(R.T_EventSignature, true).AddParameters(invoke.Parameters, __SymbolFormatter)
 						)));
 				}
 			}
@@ -940,13 +940,13 @@ namespace Codist.QuickInfo
 					t.Append(mod.Render((mod == mmod ? SymbolFormatter.SemiTransparent : SymbolFormatter.Instance).Keyword));
 				}
 				if (om.MethodKind != MethodKind.Constructor) {
-					t.AddSymbol(om.ReturnType, false, CodeAnalysisHelper.AreEqual(om.ReturnType, rt, false) ? SymbolFormatter.SemiTransparent : _SymbolFormatter).Append(" ");
+					t.AddSymbol(om.ReturnType, false, CodeAnalysisHelper.AreEqual(om.ReturnType, rt, false) ? SymbolFormatter.SemiTransparent : __SymbolFormatter).Append(" ");
 				}
 				if (ore) {
-					t.AddSymbol(om.ReceiverType, "this", (om.ContainingType != ct ? _SymbolFormatter : SymbolFormatter.SemiTransparent).Keyword).Append(".", SymbolFormatter.SemiTransparent.PlainText);
+					t.AddSymbol(om.ReceiverType, "this", (om.ContainingType != ct ? __SymbolFormatter : SymbolFormatter.SemiTransparent).Keyword).Append(".", SymbolFormatter.SemiTransparent.PlainText);
 				}
 				else if (om.ContainingType != ct) {
-					t.AddSymbol(om.ContainingType, false, _SymbolFormatter).Append(".", SymbolFormatter.SemiTransparent.PlainText);
+					t.AddSymbol(om.ContainingType, false, __SymbolFormatter).Append(".", SymbolFormatter.SemiTransparent.PlainText);
 				}
 				t.AddSymbol(om, true, SymbolFormatter.SemiTransparent);
 				t.Append("(", SymbolFormatter.SemiTransparent.PlainText);
@@ -954,7 +954,7 @@ namespace Codist.QuickInfo
 					var mp = mps.FirstOrDefault(p => p.Name == op.Name);
 					if (op.Ordinal == 0) {
 						if (ore == false && om.IsExtensionMethod) {
-							t.Append("this ", _SymbolFormatter.Keyword);
+							t.Append("this ", __SymbolFormatter.Keyword);
 						}
 					}
 					else {
@@ -969,7 +969,7 @@ namespace Codist.QuickInfo
 							mp = null;
 						}
 					}
-					t.AddSymbolDisplayParts(op.ToDisplayParts(CodeAnalysisHelper.InTypeOverloadDisplayFormat), mp == null ? _SymbolFormatter : SymbolFormatter.SemiTransparent, -1);
+					t.AddSymbolDisplayParts(op.ToDisplayParts(CodeAnalysisHelper.InTypeOverloadDisplayFormat), mp == null ? __SymbolFormatter : SymbolFormatter.SemiTransparent, -1);
 				}
 				t.Append(")", SymbolFormatter.SemiTransparent.PlainText);
 				overloadInfo.Append(new ThemedTipParagraph(overload.GetImageId(), t));
@@ -985,7 +985,7 @@ namespace Codist.QuickInfo
 			var content = new ThemedTipText(R.T_TypeArgument, true);
 			info.Append(new ThemedTipParagraph(IconIds.GenericDefinition, content));
 			for (int i = 0; i < l; i++) {
-				_SymbolFormatter.ShowTypeArgumentInfo(typeParams[i], args[i], content.AppendLine());
+				__SymbolFormatter.ShowTypeArgumentInfo(typeParams[i], args[i], content.AppendLine());
 			}
 			qiContent.Add(info);
 		}
@@ -998,7 +998,7 @@ namespace Codist.QuickInfo
 			if (namespaces.Length > 0) {
 				var info = new ThemedTipDocument().AppendTitle(IconIds.Namespace, R.T_Namespace);
 				foreach (var ns in namespaces) {
-					info.Append(new ThemedTipParagraph(IconIds.Namespace, new ThemedTipText().Append(ns.Name, _SymbolFormatter.Namespace)));
+					info.Append(new ThemedTipParagraph(IconIds.Namespace, new ThemedTipText().Append(ns.Name, __SymbolFormatter.Namespace)));
 				}
 				qiContent.Add(info);
 			}
@@ -1008,8 +1008,8 @@ namespace Codist.QuickInfo
 				var info = new StackPanel().Add(new ThemedTipText(R.T_Type, true));
 				foreach (var type in members) {
 					var t = new ThemedTipText().SetGlyph(ThemeHelper.GetImage(type.GetImageId()));
-					_SymbolFormatter.ShowSymbolDeclaration(type, t, true, true);
-					t.AddSymbol(type, false, _SymbolFormatter);
+					__SymbolFormatter.ShowSymbolDeclaration(type, t, true, true);
+					t.AddSymbol(type, false, __SymbolFormatter);
 					info.Add(t);
 				}
 				qiContent.Add(info.Scrollable());
@@ -1156,18 +1156,18 @@ namespace Codist.QuickInfo
 				if (declaredClass != null && member.IsAbstract) {
 					var implementation = declaredClass.FindImplementationForInterfaceMember(member);
 					if (implementation != null) {
-						t.AddSymbol(implementation, false, _SymbolFormatter);
+						t.AddSymbol(implementation, false, __SymbolFormatter);
 					}
 					else {
-						t.AddSymbol(member, false, _SymbolFormatter)
+						t.AddSymbol(member, false, __SymbolFormatter)
 							.Append(ThemeHelper.GetImage(IconIds.MissingImplementation).WrapMargin(WpfHelper.SmallHorizontalMargin).SetOpacity(WpfHelper.DimmedOpacity));
 					}
 				}
 				else {
-					t.AddSymbol(member, false, _SymbolFormatter);
+					t.AddSymbol(member, false, __SymbolFormatter);
 				}
 				if (member.Kind == SymbolKind.Method) {
-					t.AddParameters(((IMethodSymbol)member).Parameters, _SymbolFormatter);
+					t.AddParameters(((IMethodSymbol)member).Parameters, __SymbolFormatter);
 					if (isInterface && member.IsStatic == false && member.IsAbstract == false) {
 						t.Append(" ").AddImage(IconIds.DefaultInterfaceImplementation);
 					}
@@ -1181,10 +1181,10 @@ namespace Codist.QuickInfo
 
 		static void ShowExtensionMethod(InfoContainer qiContent, IMethodSymbol method) {
 			var info = new ThemedTipDocument()
-				.AppendParagraph(IconIds.ExtensionMethod, new ThemedTipText(R.T_ExtendedBy, true).AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), _SymbolFormatter, -1));
+				.AppendParagraph(IconIds.ExtensionMethod, new ThemedTipText(R.T_ExtendedBy, true).AddSymbolDisplayParts(method.ContainingType.ToDisplayParts(), __SymbolFormatter, -1));
 			var extType = method.MethodKind == MethodKind.ReducedExtension ? method.ReceiverType : method.GetParameters()[0].Type;
 			if (extType != null) {
-				info.AppendParagraph(extType.GetImageId(), new ThemedTipText(R.T_Extending, true).AddSymbol(extType, true, _SymbolFormatter));
+				info.AppendParagraph(extType.GetImageId(), new ThemedTipText(R.T_Extending, true).AddSymbol(extType, true, __SymbolFormatter));
 			}
 			qiContent.Add(info);
 		}
@@ -1225,11 +1225,11 @@ namespace Codist.QuickInfo
 				return;
 			}
 			var classList = new ThemedTipText(R.T_BaseType, true)
-				.AddSymbol(baseType, null, _SymbolFormatter);
+				.AddSymbol(baseType, null, __SymbolFormatter);
 			var info = new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.BaseTypes, classList));
 			while ((baseType = baseType.BaseType) != null) {
 				if (baseType.IsCommonClass() == false) {
-					classList.Inlines.Add(new ThemedTipText(" - ") { TextWrapping = TextWrapping.Wrap }.AddSymbol(baseType, null, _SymbolFormatter));
+					classList.Inlines.Add(new ThemedTipText(" - ") { TextWrapping = TextWrapping.Wrap }.AddSymbol(baseType, null, __SymbolFormatter));
 				}
 			}
 			qiContent.Add(info);
@@ -1240,7 +1240,7 @@ namespace Codist.QuickInfo
 			if (t == null) {
 				return;
 			}
-			var content = new ThemedTipText(R.T_EnumUnderlyingType, true).AddSymbol(t, true, _SymbolFormatter);
+			var content = new ThemedTipText(R.T_EnumUnderlyingType, true).AddSymbol(t, true, __SymbolFormatter);
 			var s = new ThemedTipDocument()
 				.Append(new ThemedTipParagraph(IconIds.Enum, content));
 			if (showMembers == false) {
@@ -1287,7 +1287,7 @@ namespace Codist.QuickInfo
 					}.Append("= ", ThemeHelper.SystemGrayTextBrush);
 					SymbolFormatter.Instance.ShowFieldConstantText(ft.Inlines, f, isFlags);
 					g.Add(new TextBlock { Foreground = ThemeHelper.ToolTipTextBrush }
-							.AddSymbol(f, false, _SymbolFormatter)
+							.AddSymbol(f, false, __SymbolFormatter)
 							.SetGlyph(ThemeHelper.GetImage(IconIds.EnumField))
 							.SetValue(Grid.SetRow, c))
 						.Add(ft
@@ -1393,7 +1393,7 @@ namespace Codist.QuickInfo
 		}
 
 		static void ShowDeclarationModifier(InfoContainer qiContent, ISymbol symbol) {
-			qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.DeclarationModifier, _SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedTipText(), true, false))));
+			qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.DeclarationModifier, __SymbolFormatter.ShowSymbolDeclaration(symbol, new ThemedTipText(), true, false))));
 		}
 
 		static void ShowParameterInfo(InfoContainer qiContent, SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken) {
@@ -1473,24 +1473,24 @@ namespace Codist.QuickInfo
 				var paramDoc = doc?.GetParameter(argName);
 				var content = new ThemedTipText(R.T_Argument, true)
 					.Append(R.T_ArgumentOf)
-					.AddSymbol(om.ReturnType, om.MethodKind == MethodKind.Constructor ? "new" : null, _SymbolFormatter)
+					.AddSymbol(om.ReturnType, om.MethodKind == MethodKind.Constructor ? "new" : null, __SymbolFormatter)
 					.Append(" ")
-					.AddSymbol(om.MethodKind != MethodKind.DelegateInvoke ? om : (ISymbol)om.ContainingType, true, _SymbolFormatter)
-					.AddParameters(om.Parameters, _SymbolFormatter, argIndex);
+					.AddSymbol(om.MethodKind != MethodKind.DelegateInvoke ? om : (ISymbol)om.ContainingType, true, __SymbolFormatter)
+					.AddParameters(om.Parameters, __SymbolFormatter, argIndex);
 				var info = new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.Argument, content));
 				if (paramDoc != null) {
-					content.Append("\n" + argName, true, false, _SymbolFormatter.Parameter)
+					content.Append("\n" + argName, true, false, __SymbolFormatter.Parameter)
 						.Append(": ")
-						.AddXmlDoc(paramDoc, new XmlDocRenderer(semanticModel.Compilation, _SymbolFormatter));
+						.AddXmlDoc(paramDoc, new XmlDocRenderer(semanticModel.Compilation, __SymbolFormatter));
 				}
 				if (m.IsGenericMethod) {
 					for (int i = 0; i < m.TypeArguments.Length; i++) {
 						content.Append("\n");
-						_SymbolFormatter.ShowTypeArgumentInfo(m.TypeParameters[i], m.TypeArguments[i], content);
+						__SymbolFormatter.ShowTypeArgumentInfo(m.TypeParameters[i], m.TypeArguments[i], content);
 						var typeParamDoc = doc.GetTypeParameter(m.TypeParameters[i].Name);
 						if (typeParamDoc != null) {
 							content.Append(": ")
-								.AddXmlDoc(typeParamDoc, new XmlDocRenderer(semanticModel.Compilation, _SymbolFormatter));
+								.AddXmlDoc(typeParamDoc, new XmlDocRenderer(semanticModel.Compilation, __SymbolFormatter));
 						}
 					}
 				}
@@ -1498,9 +1498,9 @@ namespace Codist.QuickInfo
 					var invoke = ((INamedTypeSymbol)p.Type).DelegateInvokeMethod;
 					info.Append(new ThemedTipParagraph(IconIds.Delegate,
 						new ThemedTipText(R.T_DelegateSignature, true).Append(": ")
-							.AddSymbol(invoke.ReturnType, false, _SymbolFormatter)
-							.Append(" ").Append(p.Name, true, false, _SymbolFormatter.Parameter)
-							.AddParameters(invoke.Parameters, _SymbolFormatter)
+							.AddSymbol(invoke.ReturnType, false, __SymbolFormatter)
+							.Append(" ").Append(p.Name, true, false, __SymbolFormatter.Parameter)
+							.AddParameters(invoke.Parameters, __SymbolFormatter)
 						));
 				}
 				foreach (var item in content.Inlines) {
@@ -1513,10 +1513,10 @@ namespace Codist.QuickInfo
 					if (attrs.Length > 0) {
 						var para = new ThemedTipParagraph(
 							IconIds.Attribute,
-							new ThemedTipText().Append(R.T_AttributeOf).Append(p.Name, true, false, _SymbolFormatter.Parameter).Append(":")
+							new ThemedTipText().Append(R.T_AttributeOf).Append(p.Name, true, false, __SymbolFormatter.Parameter).Append(":")
 						);
 						foreach (var attr in attrs) {
-							_SymbolFormatter.Format(para.Content.AppendLine().Inlines, attr, 0);
+							__SymbolFormatter.Format(para.Content.AppendLine().Inlines, attr, 0);
 						}
 						info.Append(para);
 					}
@@ -1532,7 +1532,7 @@ namespace Codist.QuickInfo
 							candidate.GetImageId(),
 							new ThemedTipText().AddSymbolDisplayParts(
 								candidate.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat),
-								_SymbolFormatter,
+								__SymbolFormatter,
 								argName == null ? argIndex : Int32.MinValue)
 						)
 					);
@@ -1592,7 +1592,7 @@ namespace Codist.QuickInfo
 				for (var i = 0; i < anonymousTypes.Count; i++) {
 					var type = anonymousTypes[i];
 					var content = new ThemedTipText()
-						.AddSymbol(type, "'" + AnonymousNumbers[i], _SymbolFormatter)
+						.AddSymbol(type, "'" + AnonymousNumbers[i], __SymbolFormatter)
 						.Append(" is { ");
 					foreach (var m in type.GetMembers()) {
 						if (m.Kind != SymbolKind.Property) {
@@ -1604,9 +1604,9 @@ namespace Codist.QuickInfo
 							Add(ref anonymousTypes, pt);
 							alias = "'" + AnonymousNumbers[anonymousTypes.IndexOf(pt)];
 						}
-						content.AddSymbol(pt, alias, _SymbolFormatter)
+						content.AddSymbol(pt, alias, __SymbolFormatter)
 							.Append(" ")
-							.AddSymbol(m, m == currentSymbol, _SymbolFormatter)
+							.AddSymbol(m, m == currentSymbol, __SymbolFormatter)
 							.Append(", ");
 					}
 					var run = content.Inlines.LastInline as System.Windows.Documents.Run;
@@ -1631,7 +1631,7 @@ namespace Codist.QuickInfo
 		}
 
 		static TextBlock ToUIText(ISymbol symbol) {
-			return new ThemedTipText().AddSymbolDisplayParts(symbol.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), _SymbolFormatter, -1);
+			return new ThemedTipText().AddSymbolDisplayParts(symbol.ToDisplayParts(CodeAnalysisHelper.QuickInfoSymbolDisplayFormat), __SymbolFormatter, -1);
 		}
 
 		void IDisposable.Dispose() { }

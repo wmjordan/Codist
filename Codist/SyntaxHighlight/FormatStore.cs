@@ -584,7 +584,7 @@ namespace Codist.SyntaxHighlight
 				#region ResourceDictionary alteration methods
 				void ChangeBold(ResourceDictionary current, StyleBase style) {
 					bool? s;
-					if (style != null && style.Bold != null) {
+					if (style?.Bold != null) {
 						if ((s = style.Bold) != current.GetBold()) {
 							_FormatChanges |= FormatChanges.Bold;
 							Changes.SetBold(s);
@@ -603,7 +603,7 @@ namespace Codist.SyntaxHighlight
 
 				void ChangeItalic(ResourceDictionary current, StyleBase style) {
 					bool? s;
-					if (style != null && style.Italic != null) {
+					if (style?.Italic != null) {
 						if ((s = style.Italic) != current.GetItalic()) {
 							_FormatChanges |= FormatChanges.Italic;
 							Changes.SetItalic(s);

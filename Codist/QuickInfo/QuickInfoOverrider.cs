@@ -12,7 +12,6 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
-using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
@@ -33,7 +32,7 @@ namespace Codist.QuickInfo
 
 	static class QuickInfoOverrider
 	{
-		static readonly object CodistQuickInfoItem = new object();
+		static readonly object __CodistQuickInfoItem = new object();
 
 		public static IQuickInfoOverrider CreateOverrider(IAsyncQuickInfoSession session) {
 			return session.Properties.GetOrCreateSingletonProperty(() => new DefaultOverrider());
@@ -41,12 +40,12 @@ namespace Codist.QuickInfo
 
 		public static TObj Tag<TObj>(this TObj obj)
 			where TObj : FrameworkElement {
-			obj.Tag = CodistQuickInfoItem;
+			obj.Tag = __CodistQuickInfoItem;
 			return obj;
 		}
 
 		static bool IsCodistQuickInfoItem(this FrameworkElement quickInfoItem) {
-			return quickInfoItem.Tag == CodistQuickInfoItem;
+			return quickInfoItem.Tag == __CodistQuickInfoItem;
 		}
 
 		public static bool CheckCtrlSuppression() {

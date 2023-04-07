@@ -21,7 +21,7 @@ namespace Codist
 		const int LIST_UNDEFINED = -1, LIST_BULLET = -2, LIST_NOT_NUMERIC = -3;
 		const int BLOCK_PARA = 0, BLOCK_ITEM = 1, BLOCK_OTHER = 2, BLOCK_TITLE = 3;
 
-		static readonly Regex _FixWhitespaces = new Regex(" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+		static readonly Regex __FixWhitespaces = new Regex(" {2,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
 		readonly Compilation _Compilation;
 		readonly SymbolFormatter _SymbolFormatter;
 
@@ -338,7 +338,7 @@ namespace Codist
 							if (t.Length == 0) {
 								break;
 							}
-							t = _FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
+							t = __FixWhitespaces.Replace(t.Replace('\n', ' '), " ");
 						}
 						else {
 							t = UnindentTextBlock(t);
