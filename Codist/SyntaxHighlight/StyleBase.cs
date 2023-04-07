@@ -86,6 +86,8 @@ namespace Codist.SyntaxHighlight
 		internal byte BackgroundOpacity { get => _BackColorOpacity; set => _BackColorOpacity = value; }
 		internal Color LineColor { get => _LineColor; set => _LineColor = value; }
 		internal byte LineOpacity { get => _LineOpacity; set => _LineOpacity = value; }
+		internal bool HasLine => Underline == true || Strikethrough == true || OverLine == true;
+		internal bool HasLineColor => HasLine && _LineColor.A != 0;
 
 		/// <summary>The category used in option pages to group style items</summary>
 		internal abstract string Category { get; }

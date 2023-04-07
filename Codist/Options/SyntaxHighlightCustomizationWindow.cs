@@ -732,7 +732,7 @@ namespace Codist.Options
 				_LineThicknessBox.Value = s.LineThickness;
 				_LineOffsetBox.Value = s.LineOffset;
 				_LineStyleBox.SelectedIndex = (int)s.LineStyle;
-				_LineOpacityButton.Visibility = _LineStyleGroup.Visibility = s.LineColor.A > 0 ? Visibility.Visible : Visibility.Collapsed;
+				_LineOpacityButton.Visibility = _LineStyleGroup.Visibility = s.HasLineColor ? Visibility.Visible : Visibility.Collapsed;
 				_BaseTypesList.Children.RemoveRange(1, _BaseTypesList.Children.Count - 1);
 				if (s.ClassificationType != null) {
 					var t = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(s.ClassificationType);
@@ -875,8 +875,9 @@ namespace Codist.Options
 		}
 
 		void ToggleLineStyleControls() {
-			var show = _UnderlineBox.IsChecked == true || _StrikethroughBox.IsChecked == true;
+			var show = ActiveStyle.HasLine;
 			_LineColorButton.ToggleVisibility(show);
+			show &= ActiveStyle.HasLineColor;
 			_LineOpacityButton.Toggle(show);
 			_LineStyleGroup.Toggle(show);
 		}
