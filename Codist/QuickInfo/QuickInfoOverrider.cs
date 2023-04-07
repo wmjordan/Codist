@@ -480,6 +480,9 @@ namespace Codist.QuickInfo
 						if (Config.Instance.QuickInfoMaxWidth >= 100) {
 							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 30;
 						}
+				}
+				else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) && _Overrider.ClickAndGoSymbol != null) {
+					ShowAlternativeSignature(doc);
 					}
 				}
 
