@@ -171,7 +171,10 @@ namespace Codist.QuickInfo
 					var tb = ShowReturnInfo(unitCompilation.FindNode(token.Span) as ReturnStatementSyntax, semanticModel, cancellationToken);
 					return tb != null ? CreateQuickInfoItem(session, token, tb) : null;
 				case SyntaxKind.AwaitKeyword:
-					node = (unitCompilation.FindNode(token.Span, false, true) as AwaitExpressionSyntax)?.Expression;
+					node = unitCompilation.FindNode(token.Span, false, true) as AwaitExpressionSyntax;
+					if (node != null) {
+						symbol = semanticModel.GetTypeInfo(node, cancellationToken).Type;
+					}
 					goto PROCESS;
 				case SyntaxKind.DotToken:
 					token = token.GetNextToken();
@@ -280,10 +283,6 @@ namespace Codist.QuickInfo
 			if (symbol == null) {
 				symbol = token.IsKind(SyntaxKind.CloseBraceToken) ? null
 				: GetSymbol(semanticModel, node, ref candidates, cancellationToken);
-			}
-			if (token.IsKind(SyntaxKind.AwaitKeyword)
-				&& symbol != null && symbol.Kind == SymbolKind.Method) {
-				symbol = (symbol.GetReturnType() as INamedTypeSymbol).TypeArguments.FirstOrDefault();
 			}
 			if (_isCandidate = candidates.IsDefaultOrEmpty == false) {
 				ShowCandidateInfo(container, candidates);
