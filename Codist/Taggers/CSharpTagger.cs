@@ -146,7 +146,7 @@ namespace Codist.Taggers
 				var snapshot = spans[0].Snapshot;
 				var isNewSnapshot = _ParseResult?.Snapshot != snapshot;
 				if (isNewSnapshot == false) {
-					return Tagger.GetTags(spans, _ParseResult);
+					return Tagger.GetTags(spans, _ParseResult, _TaskBreaker.GetToken());
 				}
 				if (snapshot.TextBuffer != _Buffer) {
 					goto NA;
@@ -165,7 +165,7 @@ namespace Codist.Taggers
 					EnqueueSpans(spans);
 				}
 				if (_ParseResult != null && _ParseResult.Snapshot.TextBuffer == snapshot.TextBuffer) {
-					return UseOldResult(spans, snapshot, _ParseResult);
+					return UseOldResult(spans, snapshot, _ParseResult, _TaskBreaker.GetToken());
 				}
 			NA:
 				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
@@ -248,8 +248,8 @@ namespace Codist.Taggers
 				}
 			}
 
-			IEnumerable<ITagSpan<IClassificationTag>> UseOldResult(NormalizedSnapshotSpanCollection spans, ITextSnapshot snapshot, ParseResult result) {
-				foreach (var tagSpan in Tagger.GetTags(MapToOldSpans(spans, _ParseResult.Snapshot), result)) {
+			IEnumerable<ITagSpan<IClassificationTag>> UseOldResult(NormalizedSnapshotSpanCollection spans, ITextSnapshot snapshot, ParseResult result, CancellationToken cancellationToken) {
+				foreach (var tagSpan in Tagger.GetTags(MapToOldSpans(spans, _ParseResult.Snapshot), result, cancellationToken)) {
 					yield return new TagSpan<IClassificationTag>(tagSpan.Span.TranslateTo(snapshot, SpanTrackingMode.EdgeInclusive), tagSpan.Tag);
 				}
 			}
@@ -454,19 +454,19 @@ namespace Codist.Taggers
 
 		static class Tagger
 		{
-			public static IEnumerable<ITagSpan<IClassificationTag>> GetTags(IEnumerable<SnapshotSpan> spans, ParseResult result) {
+			public static Chain<ITagSpan<IClassificationTag>> GetTags(IEnumerable<SnapshotSpan> spans, ParseResult result, CancellationToken cancellationToken) {
 				var workspace = result.Workspace;
 				var semanticModel = result.Model;
-				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot();
+				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 				var snapshot = result.Snapshot;
 				var l = semanticModel.SyntaxTree.Length;
 				var tags = new Chain<ITagSpan<IClassificationTag>>();
 				foreach (var span in spans) {
-					if (span.End > l) {
+					if (span.End > l || cancellationToken.IsCancellationRequested) {
 						return tags;
 					}
 					var textSpan = new TextSpan(span.Start.Position, span.Length);
-					var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace);
+					var classifiedSpans = Classifier.GetClassifiedSpans(semanticModel, textSpan, workspace, cancellationToken);
 					var lastTriviaSpan = default(TextSpan);
 					SyntaxNode node;
 					TagSpan<IClassificationTag> tag = null;
@@ -493,10 +493,10 @@ namespace Codist.Taggers
 								break;
 							case Constants.CodeOperator:
 							case Constants.CodeOverloadedOperator:
-								tag = ClassifyOperator(item.TextSpan, snapshot, semanticModel, unitCompilation);
+								tag = ClassifyOperator(item.TextSpan, snapshot, semanticModel, unitCompilation, cancellationToken);
 								break;
 							case Constants.CodePunctuation:
-								tag = ClassifyPunctuation(item.TextSpan, snapshot, semanticModel, unitCompilation);
+								tag = ClassifyPunctuation(item.TextSpan, snapshot, semanticModel, unitCompilation, cancellationToken);
 								break;
 							case Constants.XmlDocDelimiter:
 								tag = ClassifyXmlDoc(item.TextSpan, snapshot, unitCompilation, ref lastTriviaSpan);
@@ -514,7 +514,7 @@ namespace Codist.Taggers
 							|| ct.EndsWith("name", StringComparison.Ordinal)) {
 							var itemSpan = item.TextSpan;
 							node = unitCompilation.FindNode(itemSpan, true);
-							foreach (var type in GetClassificationType(node, semanticModel)) {
+							foreach (var type in GetClassificationType(node, semanticModel, cancellationToken)) {
 								tags.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 							}
 						}
@@ -652,12 +652,12 @@ namespace Codist.Taggers
 				}
 				return null;
 			}
-			static TagSpan<IClassificationTag> ClassifyOperator(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
+			static TagSpan<IClassificationTag> ClassifyOperator(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation, CancellationToken cancellationToken) {
 				var node = unitCompilation.FindNode(itemSpan);
 				if (node.RawKind == (int)SyntaxKind.DestructorDeclaration) {
 					return CreateClassificationSpan(snapshot, itemSpan, TransientTags.DestructorDeclaration);
 				}
-				var opMethod = semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node) as IMethodSymbol;
+				var opMethod = semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node, cancellationToken) as IMethodSymbol;
 				if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
 					return CreateClassificationSpan(snapshot,
 						itemSpan,
@@ -674,12 +674,12 @@ namespace Codist.Taggers
 				return null;
 			}
 
-			static TagSpan<IClassificationTag> ClassifyPunctuation(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
+			static TagSpan<IClassificationTag> ClassifyPunctuation(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation, CancellationToken cancellationToken) {
 				if (HighlightOptions.AllBraces && itemSpan.Length == 1) {
 					switch (snapshot[itemSpan.Start]) {
 						case '(':
 						case ')':
-							return HighlightOptions.AllParentheses ? ClassifyParentheses(itemSpan, snapshot, semanticModel, unitCompilation) : null;
+							return HighlightOptions.AllParentheses ? ClassifyParentheses(itemSpan, snapshot, semanticModel, unitCompilation, cancellationToken) : null;
 						case '{':
 						case '}':
 							return ClassifyCurlyBraces(itemSpan, snapshot, unitCompilation);
@@ -706,18 +706,18 @@ namespace Codist.Taggers
 					: null;
 			}
 
-			static TagSpan<IClassificationTag> ClassifyParentheses(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation) {
+			static TagSpan<IClassificationTag> ClassifyParentheses(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation, CancellationToken cancellationToken) {
 				var node = unitCompilation.FindNode(itemSpan, true, true);
 				switch (node.Kind()) {
 					case SyntaxKind.CastExpression:
 						return HighlightOptions.KeywordBraceTags.TypeCast != null
-								&& semanticModel.GetSymbolInfo(((CastExpressionSyntax)node).Type).Symbol != null
+								&& semanticModel.GetSymbolInfo(((CastExpressionSyntax)node).Type, cancellationToken).Symbol != null
 							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.TypeCast)
 							: null;
 					case SyntaxKind.ParenthesizedExpression:
 						return (HighlightOptions.KeywordBraceTags.TypeCast != null
 								&& node.ChildNodes().FirstOrDefault().IsKind(SyntaxKind.AsExpression)
-								&& semanticModel.GetSymbolInfo(((BinaryExpressionSyntax)node.ChildNodes().First()).Right).Symbol != null)
+								&& semanticModel.GetSymbolInfo(((BinaryExpressionSyntax)node.ChildNodes().First()).Right, cancellationToken).Symbol != null)
 							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.KeywordBraceTags.TypeCast)
 							: null;
 					case SyntaxKind.SwitchStatement:
@@ -890,26 +890,26 @@ namespace Codist.Taggers
 				return null;
 			}
 
-			static IEnumerable<ClassificationTag> GetClassificationType(SyntaxNode node, SemanticModel semanticModel) {
+			static Chain<ClassificationTag> GetClassificationType(SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken) {
 				node = node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node;
 				//System.Diagnostics.Debug.WriteLine(node.GetType().Name + node.Span.ToString());
-				var symbol = semanticModel.GetSymbolInfo(node).Symbol;
+				var symbol = semanticModel.GetSymbolInfo(node, cancellationToken).Symbol;
 				var tags = new Chain<ClassificationTag>();
 				if (symbol is null) {
-					symbol = semanticModel.GetDeclaredSymbol(node);
+					symbol = semanticModel.GetDeclaredSymbol(node, cancellationToken);
 					if (symbol is null) {
 						// NOTE: handle alias in using directive
 						if ((node.Parent as NameEqualsSyntax)?.Parent is UsingDirectiveSyntax) {
 							tags.Add(__Classifications.AliasNamespace);
 						}
 						else if (node is AttributeArgumentSyntax attributeArgument) {
-							symbol = semanticModel.GetSymbolInfo(attributeArgument.Expression).Symbol;
+							symbol = semanticModel.GetSymbolInfo(attributeArgument.Expression, cancellationToken).Symbol;
 							if (symbol?.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
 								tags.Add(__Classifications.ConstField);
 								tags.Add(__Classifications.StaticMember);
 							}
 						}
-						symbol = FindSymbolOrSymbolCandidateForNode(node, semanticModel);
+						symbol = FindSymbolOrSymbolCandidateForNode(node, semanticModel, cancellationToken);
 						if (symbol is null) {
 							goto EXIT;
 						}
@@ -938,7 +938,7 @@ namespace Codist.Taggers
 							case SymbolKind.Field:
 								if (node.IsKind(SyntaxKind.TupleElement)) {
 									if (((TupleElementSyntax)node).Identifier.IsKind(SyntaxKind.None)) {
-										symbol = semanticModel.GetTypeInfo(((TupleElementSyntax)node).Type).Type;
+										symbol = semanticModel.GetTypeInfo(((TupleElementSyntax)node).Type, cancellationToken).Type;
 										if (symbol is null) {
 											goto EXIT;
 										}
@@ -1106,13 +1106,13 @@ namespace Codist.Taggers
 				return tags;
 			}
 
-			static ISymbol FindSymbolOrSymbolCandidateForNode(SyntaxNode node, SemanticModel semanticModel) {
-				return node.Parent.IsKind(SyntaxKind.SimpleMemberAccessExpression) ? semanticModel.GetSymbolInfo(node.Parent).CandidateSymbols.FirstOrDefault()
-					: node.Parent.IsKind(SyntaxKind.Argument) ? semanticModel.GetSymbolInfo(((ArgumentSyntax)node.Parent).Expression).CandidateSymbols.FirstOrDefault()
-					: node.IsKind(SyntaxKind.SimpleBaseType) ? semanticModel.GetTypeInfo(((SimpleBaseTypeSyntax)node).Type).Type
-					: node.IsKind(SyntaxKind.TypeConstraint) ? semanticModel.GetTypeInfo(((TypeConstraintSyntax)node).Type).Type
-					: node.IsKind(SyntaxKind.ExpressionStatement) ? semanticModel.GetSymbolInfo(((ExpressionStatementSyntax)node).Expression).CandidateSymbols.FirstOrDefault()
-					: semanticModel.GetSymbolInfo(node).CandidateSymbols.FirstOrDefault();
+			static ISymbol FindSymbolOrSymbolCandidateForNode(SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken) {
+				return node.Parent.IsKind(SyntaxKind.SimpleMemberAccessExpression) ? semanticModel.GetSymbolInfo(node.Parent, cancellationToken).CandidateSymbols.FirstOrDefault()
+					: node.Parent.IsKind(SyntaxKind.Argument) ? semanticModel.GetSymbolInfo(((ArgumentSyntax)node.Parent).Expression, cancellationToken).CandidateSymbols.FirstOrDefault()
+					: node.IsKind(SyntaxKind.SimpleBaseType) ? semanticModel.GetTypeInfo(((SimpleBaseTypeSyntax)node).Type, cancellationToken).Type
+					: node.IsKind(SyntaxKind.TypeConstraint) ? semanticModel.GetTypeInfo(((TypeConstraintSyntax)node).Type, cancellationToken).Type
+					: node.IsKind(SyntaxKind.ExpressionStatement) ? semanticModel.GetSymbolInfo(((ExpressionStatementSyntax)node).Expression, cancellationToken).CandidateSymbols.FirstOrDefault()
+					: semanticModel.GetSymbolInfo(node, cancellationToken).CandidateSymbols.FirstOrDefault();
 			}
 
 			static TagSpan<IClassificationTag> CreateClassificationSpan(ITextSnapshot snapshotSpan, TextSpan span, ClassificationTag tag) {
