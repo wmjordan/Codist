@@ -22,7 +22,7 @@ namespace Codist
 	{
 		internal const double TransparentLevel = 0.6;
 
-		static readonly Dictionary<string, Action<SymbolFormatter, IEditorFormatMap, Brush>> _BrushSetter = CreatePropertySetter();
+		static readonly Dictionary<string, Action<SymbolFormatter, IEditorFormatMap, Brush>> __BrushSetter = CreatePropertySetter();
 		internal static readonly SymbolFormatter Instance = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText), b => { b?.Freeze(); return b; });
 		internal static readonly SymbolFormatter SemiTransparent = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText), b => {
 			if (b != null) {
@@ -30,12 +30,12 @@ namespace Codist
 			}
 			return b; });
 
-		readonly Func<Brush, Brush> _brushConfigurator;
+		readonly Func<Brush, Brush> _BrushConfigurator;
 		SymbolFormatter(IEditorFormatMap formatMap, Func<Brush, Brush> brushConfigurator) {
-			_brushConfigurator = brushConfigurator;
+			_BrushConfigurator = brushConfigurator;
 			if (formatMap != null) {
 				var defaultBrush = formatMap.GetProperties(Constants.CodePlainText).GetBrush();
-				foreach (var setter in _BrushSetter) {
+				foreach (var setter in __BrushSetter) {
 					setter.Value(this, formatMap, defaultBrush);
 				}
 				formatMap.FormatMappingChanged += FormatMap_FormatMappingChanged;
@@ -180,7 +180,7 @@ namespace Codist
 				Foreground = PlainText
 			}.AddSymbol(symbol, true, this);
 			TextEditorWrapper.CreateFor(signature);
-			(signature.Inlines.FirstInline as Run).FontSize *= 1.2;
+			signature.Inlines.FirstInline.FontSize *= 1.2;
 
 			switch (symbol.Kind) {
 				case SymbolKind.Property:
@@ -343,7 +343,7 @@ namespace Codist
 
 		void ShowPropertySignature(TextBlock signature, IPropertySymbol p) {
 			IMethodSymbol m;
-			ExpressionSyntax exp = null, init = null;
+			ExpressionSyntax exp, init = null;
 			if (p.Parameters.Length > 0) {
 				ShowParameters(signature, p.Parameters, true, true);
 			}
@@ -357,6 +357,9 @@ namespace Codist
 					}
 					else if (s.IsKind(SyntaxKind.IndexerDeclaration)) {
 						exp = ((IndexerDeclarationSyntax)s).ExpressionBody?.Expression;
+					}
+					else {
+						exp = null;
 					}
 					if (exp != null) {
 						signature.Append(" => ");
@@ -834,7 +837,7 @@ namespace Codist
 						if (part.Symbol.Kind == SymbolKind.Method) {
 							block.AddSymbol(part.Symbol, true, Method);
 						}
-						else if ((part.Symbol as INamedTypeSymbol).IsAnonymousType) {
+						else if (((INamedTypeSymbol)part.Symbol).IsAnonymousType) {
 							block.Append("?", Class);
 						}
 						else {
@@ -966,8 +969,8 @@ namespace Codist
 				foreach (var ct in ctn) {
 					r.Add(ct, (f, m, defaultBrush) => {
 						var brush = m.GetAnyBrush(ctn) ?? defaultBrush;
-						if (f._brushConfigurator != null) {
-							brush = f._brushConfigurator(brush);
+						if (f._BrushConfigurator != null) {
+							brush = f._BrushConfigurator(brush);
 						}
 						setFormatBrush(f, brush);
 					});
@@ -980,7 +983,7 @@ namespace Codist
 			var m = sender as IEditorFormatMap;
 			var defaultBrush = m.GetProperties(Constants.CodePlainText).GetBrush();
 			foreach (var item in e.ChangedItems) {
-				if (_BrushSetter.TryGetValue(item, out var a)) {
+				if (__BrushSetter.TryGetValue(item, out var a)) {
 					a(this, m, defaultBrush);
 				}
 			}
@@ -1008,8 +1011,8 @@ namespace Codist
 			}
 			switch (constant.Kind) {
 				case TypedConstantKind.Primitive:
-					if (constant.Value is bool) {
-						block.Add(WpfHelper.Render((bool)constant.Value ? "true" : "false", Keyword));
+					if (constant.Value is bool b) {
+						block.Add(WpfHelper.Render(b ? "true" : "false", Keyword));
 					}
 					else if (constant.Value is string) {
 						block.Add(constant.ToCSharpString().Render(Text));
@@ -1023,11 +1026,10 @@ namespace Codist
 					int d;
 					if (en.IndexOf('|') != -1) {
 						var items = constant.Type.GetMembers().Where(i => {
-							var field = i as IFieldSymbol;
-							return field != null
-								&& field.HasConstantValue
-								&& UnsafeArithmeticHelper.Equals(UnsafeArithmeticHelper.And(constant.Value, field.ConstantValue), field.ConstantValue)
-								&& UnsafeArithmeticHelper.IsZero(field.ConstantValue) == false;
+							return i is IFieldSymbol f
+								&& f.HasConstantValue
+								&& UnsafeArithmeticHelper.Equals(UnsafeArithmeticHelper.And(constant.Value, f.ConstantValue), f.ConstantValue)
+								&& UnsafeArithmeticHelper.IsZero(f.ConstantValue) == false;
 						});
 						var flags = items.ToArray();
 						for (int i = 0; i < flags.Length; i++) {
@@ -1122,7 +1124,7 @@ namespace Codist
 				if (symbol.Kind != SymbolKind.Namespace) {
 					info.Append("static ", Keyword);
 				}
-				if (symbol.IsAbstract && (symbol.ContainingType as INamedTypeSymbol)?.TypeKind == TypeKind.Interface) {
+				if (symbol.IsAbstract && symbol.ContainingType?.TypeKind == TypeKind.Interface) {
 					info.Append("abstract ", Keyword);
 				}
 			}
@@ -1144,7 +1146,7 @@ namespace Codist
 				}
 				if (o != null) {
 					var t = o.ContainingType;
-					if (t != null && t.IsCommonClass() == false) {
+					if (t?.IsCommonClass() == false) {
 						info.AddSymbol(t, null, this).Append(".").AddSymbol(o, null, this).Append(" ");
 					}
 				}
@@ -1197,6 +1199,7 @@ namespace Codist
 				_Node = node;
 				Text = node.ToString();
 				MouseEnter += InitEventHandlers;
+				Unloaded += NodeLink_Unloaded;
 			}
 
 			void InitEventHandlers(object sender, MouseEventArgs e) {
@@ -1206,7 +1209,6 @@ namespace Codist
 				MouseEnter += NodeLink_MouseEnter;
 				MouseLeave += NodeLink_MouseLeave;
 				MouseLeftButtonDown += NodeLink_MouseLeftButtonDown;
-				Unloaded += NodeLink_Unloaded;
 			}
 
 			void NodeLink_Unloaded(object sender, RoutedEventArgs e) {

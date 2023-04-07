@@ -25,8 +25,8 @@ namespace Codist
 		readonly Compilation _Compilation;
 		readonly SymbolFormatter _SymbolFormatter;
 
-		int _isCode;
-		FontFamily _codeFont;
+		int _IsCode;
+		FontFamily _CodeFont;
 
 		public XmlDocRenderer(Compilation compilation, SymbolFormatter symbolFormatter) {
 			_Compilation = compilation;
@@ -254,12 +254,12 @@ namespace Codist
 								RenderBlockContent(inlines, list, e, BLOCK_TITLE);
 								break;
 							case "code":
-								++_isCode;
+								++_IsCode;
 								var span = RenderBlockContent(inlines, list, e, BLOCK_OTHER);
 								span.FontFamily = GetCodeFont();
 								span.Background = ThemeHelper.ToolWindowBackgroundBrush;
 								span.Foreground = ThemeHelper.ToolWindowTextBrush;
-								--_isCode;
+								--_IsCode;
 								break;
 							case "item":
 								RenderBlockContent(inlines, list, e, BLOCK_ITEM);
@@ -276,9 +276,9 @@ namespace Codist
 								break;
 							case "c":
 							case "tt":
-								++_isCode;
+								++_IsCode;
 								StyleInner(e, inlines, new Span() { FontFamily = GetCodeFont(), Background = ThemeHelper.ToolWindowBackgroundBrush, Foreground = ThemeHelper.ToolWindowTextBrush });
-								--_isCode;
+								--_IsCode;
 								break;
 							case "b":
 							case "strong":
@@ -327,7 +327,7 @@ namespace Codist
 						break;
 					case XmlNodeType.Text:
 						string t = ((XText)item).Value;
-						if (_isCode == 0) {
+						if (_IsCode == 0) {
 							var previous = (item.PreviousNode as XElement)?.Name?.LocalName;
 							if (previous == null || IsInlineElementName(previous) == false) {
 								t = item.NextNode == null ? t.Trim() : t.TrimStart();
@@ -348,7 +348,7 @@ namespace Codist
 						}
 						break;
 					case XmlNodeType.CDATA:
-						inlines.Add(_isCode == 0 ? new Run(((XText)item).Value) : new Run(UnindentTextBlock(((XText)item).Value)));
+						inlines.Add(_IsCode == 0 ? new Run(((XText)item).Value) : new Run(UnindentTextBlock(((XText)item).Value)));
 						break;
 					case XmlNodeType.EntityReference:
 					case XmlNodeType.Entity:
@@ -479,7 +479,7 @@ namespace Codist
 				ParagraphCount++;
 			}
 			var span = new Span();
-			if (_isCode > 0) {
+			if (_IsCode > 0) {
 				span.FontFamily = GetCodeFont();
 			}
 			if (blockType == BLOCK_TITLE) {
@@ -567,11 +567,11 @@ namespace Codist
 		}
 
 		FontFamily GetCodeFont() {
-			if (_codeFont != null) {
-				return _codeFont;
+			if (_CodeFont != null) {
+				return _CodeFont;
 			}
 			ThemeHelper.GetFontSettings(Microsoft.VisualStudio.Shell.Interop.FontsAndColorsCategory.TextEditor, out var fontName, out var fontSize);
-			return _codeFont = new FontFamily(fontName);
+			return _CodeFont = new FontFamily(fontName);
 		}
 
 		static bool IsInlineElementName(string name) {
