@@ -176,11 +176,22 @@ namespace Codist
 			}
 			using (var sbr = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(50)) {
 				var sb = sbr.Resource;
-				foreach (var inline in text.Inlines) {
-					sb.Append((inline as Run)?.Text
-						?? ((inline as InlineUIContainer)?.Child as TextBlock)?.GetText());
-				}
+				GetInlinesText(text.Inlines, sb);
 				return sb.ToString();
+			}
+		}
+
+		static void GetInlinesText(InlineCollection inlines, System.Text.StringBuilder stringBuilder) {
+			foreach (var inline in inlines) {
+				if (inline is Run r) {
+					stringBuilder.Append(r.Text);
+				}
+				else if (inline is Span s) {
+					GetInlinesText(s.Inlines, stringBuilder);
+				}
+				else if (inline is InlineUIContainer c && c.Child is TextBlock tb) {
+					GetInlinesText(tb.Inlines, stringBuilder);
+				}
 			}
 		}
 
