@@ -414,10 +414,8 @@ namespace Codist.QuickInfo
 			void MakeTextualContentSelectableWithIcon(Panel p) {
 				var items = GetItems(p);
 				for (int i = 0; i < items.Count; i++) {
-					if (items[i] is DependencyObject qi) {
-						if ((qi as FrameworkElement).IsCodistQuickInfoItem()) {
-							continue;
-						}
+					if (items[i] is DependencyObject qi
+						&& ((qi as FrameworkElement)?.IsCodistQuickInfoItem()) != true) {
 						foreach (var tb in qi.GetDescendantChildren<TextBlock>()) {
 							OverrideTextBlock(tb);
 						}
