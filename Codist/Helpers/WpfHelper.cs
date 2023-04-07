@@ -17,7 +17,7 @@ namespace Codist
 {
 	static partial class WpfHelper
 	{
-		static readonly string DummyToolTip = String.Empty;
+		static readonly string __DummyToolTip = String.Empty;
 		internal const int IconRightMargin = 5;
 		internal const int SmallMarginSize = 3;
 		internal const double DimmedOpacity = 0.3;
@@ -224,7 +224,7 @@ namespace Codist
 		}
 
 		public static Hyperlink ClickToNavigate(this Hyperlink hyperlink) {
-			hyperlink.Click += (s, args) => { System.Diagnostics.Process.Start(((Hyperlink)s).NavigateUri.AbsoluteUri); };
+			hyperlink.Click += (s, args) => System.Diagnostics.Process.Start(((Hyperlink)s).NavigateUri.AbsoluteUri);
 			return hyperlink;
 		}
 		public static Hyperlink ClickToNavigate(this Hyperlink hyperlink, Action<Hyperlink> clickHandler) {
@@ -242,9 +242,9 @@ namespace Codist
 			text.SetFontWeight(FontWeights.Bold);
 			return text;
 		}
-		static readonly Typeface StatusText = SystemFonts.StatusFontFamily.GetTypefaces().First();
+		static readonly Typeface __StatusText = SystemFonts.StatusFontFamily.GetTypefaces().First();
 		public static WpfText ToFormattedText(string text, double size, WpfBrush brush) {
-			return new WpfText(text, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, StatusText, size, brush);
+			return new WpfText(text, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, __StatusText, size, brush);
 		}
 		#endregion
 
@@ -306,8 +306,7 @@ namespace Codist
 			}
 			if (Config.Instance.QuickInfoMaxWidth > 0) {
 				element.MaxWidth = Config.Instance.QuickInfoMaxWidth;
-				var t = element as TextBlock;
-				if (t != null && t.TextWrapping == TextWrapping.NoWrap) {
+				if (element is TextBlock t && t.TextWrapping == TextWrapping.NoWrap) {
 					t.TextWrapping = TextWrapping.Wrap;
 				}
 			}
@@ -692,17 +691,17 @@ namespace Codist
 
 		public static TObject UseDummyToolTip<TObject>(this TObject item)
 			where TObject : FrameworkElement {
-			item.ToolTip = DummyToolTip;
+			item.ToolTip = __DummyToolTip;
 			return item;
 		}
 
 		public static bool HasDummyToolTip(this FrameworkElement item) {
-			return ReferenceEquals(item.ToolTip, DummyToolTip);
+			return ReferenceEquals(item.ToolTip, __DummyToolTip);
 		}
 
 		public static TObject SetLazyToolTip<TObject>(this TObject item, Func<object> toolTipProvider)
 			where TObject : FrameworkElement {
-			item.ToolTip = DummyToolTip;
+			item.ToolTip = __DummyToolTip;
 			item.ToolTipOpening += ShowLazyToolTip;
 			return item;
 
@@ -753,12 +752,12 @@ namespace Codist
 
 		abstract class InteractiveRun : Run
 		{
-			public InteractiveRun() {
+			protected InteractiveRun() {
 				MouseEnter += InitInteraction;
 				Unloaded += Unload;
 			}
 
-			protected virtual Brush HighlightBrush {
+			protected virtual WpfBrush HighlightBrush {
 				get => SystemColors.HighlightBrush;
 			}
 
@@ -809,32 +808,29 @@ namespace Codist
 
 		sealed class FileLink : InteractiveRun
 		{
-			readonly string _Folder;
-			readonly string _File;
-
 			public FileLink(string folder, string file) {
-				Text = _File = file;
-				_Folder = folder;
+				Text = File = file;
+				Folder = folder;
 			}
 
-			public string Folder => _Folder;
-			public string File => _File;
+			public string Folder { get; }
+			public string File { get; }
 
 			protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e) {
 				base.OnMouseLeftButtonDown(e);
-				FileHelper.OpenInExplorer(_Folder, _File);
+				FileHelper.OpenInExplorer(Folder, File);
 			}
 
 			protected override object CreateToolTip() {
-				return ToolTipHelper.CreateFileToolTip(_Folder, _File);
+				return ToolTipHelper.CreateFileToolTip(Folder, File);
 			}
 		}
 
 		static class InstalledFonts
 		{
-			static readonly InstalledFont[] _InstalledFonts = Init();
+			static readonly InstalledFont[] __InstalledFonts = Init();
 
-			public static IEnumerable<InstalledFont> All => _InstalledFonts;
+			public static IEnumerable<InstalledFont> All => __InstalledFonts;
 
 			static InstalledFont[] Init() {
 				var systemFonts = Fonts.SystemFontFamilies;

@@ -118,7 +118,6 @@ namespace Codist
 			TextOptions.SetTextRenderingMode(element, optimize ? TextRenderingMode.Grayscale : TextRenderingMode.Auto);
 		}
 
-
 		sealed class SymbolElement : Border
 		{
 			ISymbol _Symbol;
@@ -139,8 +138,8 @@ namespace Codist
 				Highlight(sender, e);
 				MouseEnter += Highlight;
 				MouseLeave += Leave;
-				MouseLeftButtonDown += LinkContextMenu;
-				MouseRightButtonDown += LinkContextMenu;
+				MouseLeftButtonDown += ShowContextMenu;
+				MouseRightButtonDown += ShowContextMenu;
 			}
 
 			protected override void OnToolTipOpening(ToolTipEventArgs e) {
@@ -153,7 +152,7 @@ namespace Codist
 			}
 
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
-			async void LinkContextMenu(object sender, MouseButtonEventArgs e) {
+			async void ShowContextMenu(object sender, MouseButtonEventArgs e) {
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {
 					ContextMenu.IsOpen = true;
@@ -185,13 +184,13 @@ namespace Codist
 			}
 
 			void DismissQuickInfo(object sender, RoutedEventArgs e) {
-				(sender as CSharpSymbolContextMenu).Closed -= DismissQuickInfo;
+				((CSharpSymbolContextMenu)sender).Closed -= DismissQuickInfo;
 				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, false);
 				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
 			}
 
 			void Highlight(object sender, MouseEventArgs e) {
-				Background = (_Symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(WpfHelper.DimmedOpacity);
+				Background = (_Symbol.HasSource() ? SystemColors.HighlightBrush : SystemColors.GrayTextBrush).Alpha(DimmedOpacity);
 			}
 			void Leave(object sender, MouseEventArgs e) {
 				Background = WpfBrushes.Transparent;
@@ -199,8 +198,8 @@ namespace Codist
 
 			void SymbolLink_Unloaded(object sender, RoutedEventArgs e) {
 				MouseEnter -= InitInteraction;
-				MouseLeftButtonDown -= LinkContextMenu;
-				MouseRightButtonDown -= LinkContextMenu;
+				MouseLeftButtonDown -= ShowContextMenu;
+				MouseRightButtonDown -= ShowContextMenu;
 				MouseEnter -= Highlight;
 				MouseLeave -= Leave;
 				Unloaded -= SymbolLink_Unloaded;
@@ -226,12 +225,12 @@ namespace Codist
 
 			protected override void OnInitInteraction() {
 				MouseLeftButtonDown += GoToSymbol;
-				MouseRightButtonDown += LinkContextMenu;
+				MouseRightButtonDown += ShowContextMenu;
 			}
 
 			protected override void OnUnload() {
 				MouseLeftButtonDown -= GoToSymbol;
-				MouseRightButtonDown -= LinkContextMenu;
+				MouseRightButtonDown -= ShowContextMenu;
 				if (ContextMenu is CSharpSymbolContextMenu m) {
 					m.Closed -= DismissQuickInfo;
 					m.Dispose();
@@ -247,7 +246,7 @@ namespace Codist
 			}
 
 			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
-			async void LinkContextMenu(object sender, MouseButtonEventArgs e) {
+			async void ShowContextMenu(object sender, MouseButtonEventArgs e) {
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {
 					ContextMenu.IsOpen = true;
@@ -277,7 +276,7 @@ namespace Codist
 			}
 
 			void DismissQuickInfo(object sender, RoutedEventArgs e) {
-				(sender as CSharpSymbolContextMenu).Closed -= DismissQuickInfo;
+				((CSharpSymbolContextMenu)sender).Closed -= DismissQuickInfo;
 				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, false);
 				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
 			}

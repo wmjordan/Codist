@@ -29,7 +29,6 @@ namespace Codist.QuickInfo
 		void ApplyClickAndGo(ISymbol symbol);
 		void OverrideDocumentation(UIElement docElement);
 		void OverrideException(UIElement exceptionDoc);
-		void OverrideAnonymousTypeInfo(UIElement anonymousTypeInfo);
 	}
 
 	static class QuickInfoOverrider
@@ -37,7 +36,7 @@ namespace Codist.QuickInfo
 		static readonly object CodistQuickInfoItem = new object();
 
 		public static IQuickInfoOverrider CreateOverrider(IAsyncQuickInfoSession session) {
-			return session.Properties.GetOrCreateSingletonProperty<DefaultOverrider>(() => new DefaultOverrider());
+			return session.Properties.GetOrCreateSingletonProperty(() => new DefaultOverrider());
 		}
 
 		public static TObj Tag<TObj>(this TObj obj)
@@ -62,14 +61,14 @@ namespace Codist.QuickInfo
 			FindHolder(quickInfoItem)?.DismissAsync();
 		}
 
-		static IQuickInfoHolder FindHolder(DependencyObject quickInfoItem) {
+		static UIOverrider FindHolder(DependencyObject quickInfoItem) {
 			var items = quickInfoItem.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl");
 			// version 16.1 or above
 			items = items.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl") ?? items;
-			return items.GetFirstVisualChild<DefaultOverrider.UIOverrider>();
+			return items.GetFirstVisualChild<UIOverrider>();
 		}
 
-		static StackPanel ShowSymbolLocation(ISymbol symbol) {
+		static ThemedToolTip ShowSymbolLocation(ISymbol symbol) {
 			var tooltip = new ThemedToolTip();
 			tooltip.Title.Append(symbol.GetOriginalName(), true);
 			var t = tooltip.Content;
@@ -208,9 +207,9 @@ namespace Codist.QuickInfo
 				s.GoToDefinition();
 			}
 			void ShowToolTip(object sender, ToolTipEventArgs e) {
-				var t = sender as TextBlock;
 				var s = _symbol;
 				if (s != null) {
+					var t = sender as TextBlock;
 					t.ToolTip = ShowSymbolLocation(s);
 					t.ToolTipOpening -= ShowToolTip;
 				}
@@ -275,12 +274,6 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		interface IQuickInfoHolder
-		{
-			void Hold(bool hold);
-			System.Threading.Tasks.Task DismissAsync();
-		}
-
 		/// <summary>
 		/// The overrider for VS 15.8 and above versions.
 		/// </summary>
@@ -290,11 +283,11 @@ namespace Codist.QuickInfo
 		/// </remarks>
 		sealed class DefaultOverrider : IQuickInfoOverrider
 		{
+			readonly bool _LimitItemSize;
+			bool _OverrideBuiltInXmlDoc;
 			ISymbol _ClickAndGoSymbol;
-			bool _LimitItemSize, _OverrideBuiltInXmlDoc;
 			UIElement _DocElement;
 			UIElement _ExceptionDoc;
-			UIElement _AnonymousTypeInfo;
 			IAsyncQuickInfoSession _Session;
 			ITagAggregator<IErrorTag> _ErrorTagger;
 			ErrorTags _ErrorTags;
@@ -303,17 +296,22 @@ namespace Codist.QuickInfo
 				if (Config.Instance.QuickInfoMaxHeight > 0 || Config.Instance.QuickInfoMaxWidth > 0) {
 					_LimitItemSize = true;
 				}
+				_OverrideBuiltInXmlDoc = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.DocumentationOverride);
 			}
+			public bool LimitItemSize => _LimitItemSize;
+			public bool OverrideBuiltInXmlDoc { get => _OverrideBuiltInXmlDoc; set => _OverrideBuiltInXmlDoc = value; }
+			public ISymbol ClickAndGoSymbol => _ClickAndGoSymbol;
+			public IAsyncQuickInfoSession Session => _Session;
+			public UIElement DocElement => _DocElement;
+			public UIElement ExceptionDoc => _ExceptionDoc;
+			public ITagAggregator<IErrorTag> ErrorTagger => _ErrorTagger;
+			public ErrorTags ErrorTags => _ErrorTags;
 
 			public UIElement CreateControl(IAsyncQuickInfoSession session) {
 				_Session = session;
 				session.StateChanged -= ReleaseSession;
 				session.StateChanged += ReleaseSession;
 				return new UIOverrider(this);
-			}
-			public bool OverrideBuiltInXmlDoc {
-				get => _OverrideBuiltInXmlDoc;
-				set => _OverrideBuiltInXmlDoc = value;
 			}
 
 			public void ApplyClickAndGo(ISymbol symbol) {
@@ -326,9 +324,6 @@ namespace Codist.QuickInfo
 			public void OverrideException(UIElement exceptionDoc) {
 				_ExceptionDoc = exceptionDoc;
 			}
-			public void OverrideAnonymousTypeInfo(UIElement anonymousTypeInfo) {
-				_AnonymousTypeInfo = anonymousTypeInfo;
-			}
 
 			ITagAggregator<IErrorTag> GetErrorTagger() {
 				return _Session?.TextView.Properties.GetOrCreateSingletonProperty(CreateErrorTagger);
@@ -338,7 +333,7 @@ namespace Codist.QuickInfo
 				return ServicesHelper.Instance.ViewTagAggregatorFactory.CreateTagAggregator<IErrorTag>(_Session.TextView);
 			}
 
-			CrispImage GetIconForErrorText(TextBlock textBlock) {
+			public CrispImage GetIconForErrorText(TextBlock textBlock) {
 				var f = textBlock.Inlines.FirstInline;
 				var tt = ((f as Hyperlink)?.Inlines.FirstInline as Run)?.Text;
 				if (tt == null) {
@@ -367,394 +362,388 @@ namespace Codist.QuickInfo
 					_ErrorTagger = null;
 				}
 			}
+		}
 
-			internal sealed class UIOverrider : TextBlock, IInteractiveQuickInfoContent, IQuickInfoHolder
-			{
-				static readonly Thickness __TitlePanelMargin = new Thickness(0, 0, 30, 6);
+		sealed class UIOverrider : TextBlock, IInteractiveQuickInfoContent
+		{
+			static readonly Thickness __TitlePanelMargin = new Thickness(0, 0, 30, 6);
 
-				readonly DefaultOverrider _Overrider;
+			readonly DefaultOverrider _Overrider;
 
-				public UIOverrider(DefaultOverrider overrider) {
-					_Overrider = overrider;
+			public UIOverrider(DefaultOverrider overrider) {
+				_Overrider = overrider;
+			}
+
+			public bool KeepQuickInfoOpen { get; set; }
+			public bool IsMouseOverAggregated { get; set; }
+
+			public void Hold(bool hold) {
+				IsMouseOverAggregated = hold;
+			}
+			public System.Threading.Tasks.Task DismissAsync() {
+				return _Overrider.Session?.DismissAsync() ?? System.Threading.Tasks.Task.CompletedTask;
+			}
+
+			protected override void OnVisualParentChanged(DependencyObject oldParent) {
+				base.OnVisualParentChanged(oldParent);
+				var p = this.GetParent<StackPanel>();
+				if (p == null) {
+					goto EXIT;
 				}
 
-				public bool KeepQuickInfoOpen { get; set; }
-				public bool IsMouseOverAggregated { get; set; }
-
-				public void Hold(bool hold) {
-					IsMouseOverAggregated = hold;
-				}
-				public System.Threading.Tasks.Task DismissAsync() {
-					return _Overrider._Session?.DismissAsync() ?? System.Threading.Tasks.Task.CompletedTask;
-				}
-
-				protected override void OnVisualParentChanged(DependencyObject oldParent) {
-					base.OnVisualParentChanged(oldParent);
-					var p = this.GetParent<StackPanel>();
-					if (p == null) {
-						goto EXIT;
+				try {
+					if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
+						WpfHelper.SetUITextRenderOptions(p, true);
 					}
-
-					try {
-						if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
-							WpfHelper.SetUITextRenderOptions(p, true);
-						}
-						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) || _Overrider._ClickAndGoSymbol != null || _Overrider._LimitItemSize) {
-							FixQuickInfo(p);
-						}
-						_Overrider._ErrorTags?.Clear();
-						MakeTextualContentSelectableWithIcon(p);
-						if (_Overrider._LimitItemSize) {
-							ApplySizeLimit(this.GetParent<StackPanel>());
-						}
+					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) || _Overrider.ClickAndGoSymbol != null || _Overrider.LimitItemSize) {
+						FixQuickInfo(p);
 					}
-					catch (Exception ex) {
-						MessageWindow.Error(ex, R.T_SuperQuickInfo);
+					_Overrider.ErrorTags?.Clear();
+					MakeTextualContentSelectableWithIcon(p);
+					if (_Overrider.LimitItemSize) {
+						ApplySizeLimit(this.GetParent<StackPanel>());
 					}
-				EXIT:
-					// hides the parent container from taking excessive space in the quick info window
-					this.GetParent<Border>().Collapse();
-					_Overrider._ClickAndGoSymbol = null;
 				}
+				catch (Exception ex) {
+					MessageWindow.Error(ex, R.T_SuperQuickInfo);
+				}
+			EXIT:
+				// hides the parent container from taking excessive space in the quick info window
+				this.GetParent<Border>().Collapse();
+			}
 
-				void MakeTextualContentSelectableWithIcon(Panel p) {
-					var items = GetItems(p);
-					for (int i = _Overrider._ClickAndGoSymbol != null ? 1 : 0; i < items.Count; i++) {
-						if (items[i] is DependencyObject qi) {
-							if ((qi as FrameworkElement).IsCodistQuickInfoItem()) {
-								continue;
-							}
-							foreach (var tb in qi.GetDescendantChildren<TextBlock>()) {
-								OverrideTextBlock(tb);
-							}
-							foreach (var item in qi.GetDescendantChildren<ContentPresenter>()) {
-								if (item.Content is IWpfTextView v) {
-									item.Content = new ThemedTipText {
-										Text = v.TextSnapshot.GetText(),
-										Margin = WpfHelper.MiddleBottomMargin
-									}.SetGlyph(ThemeHelper.GetImage(IconIds.Info)).Scrollable();
-								}
+			void MakeTextualContentSelectableWithIcon(Panel p) {
+				var items = GetItems(p);
+				for (int i = 0; i < items.Count; i++) {
+					if (items[i] is DependencyObject qi) {
+						if ((qi as FrameworkElement).IsCodistQuickInfoItem()) {
+							continue;
+						}
+						foreach (var tb in qi.GetDescendantChildren<TextBlock>()) {
+							OverrideTextBlock(tb);
+						}
+						foreach (var item in qi.GetDescendantChildren<ContentPresenter>()) {
+							if (item.Content is IWpfTextView v) {
+								item.Content = new ThemedTipText {
+									Text = v.TextSnapshot.GetText(),
+									Margin = WpfHelper.MiddleBottomMargin
+								}.SetGlyph(ThemeHelper.GetImage(IconIds.Info)).Scrollable();
 							}
 						}
 					}
 				}
+			}
 
-				void FixQuickInfo(StackPanel infoPanel) {
-					var titlePanel = infoPanel.GetFirstVisualChild<WrapPanel>();
-					if (titlePanel == null) {
-						if (_Overrider._ClickAndGoSymbol != null
-							&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
-							// no built-in documentation, but Codist has it
-							ShowAlternativeSignature(infoPanel);
-							OverrideDocumentation(infoPanel);
-						}
-						return;
+			void FixQuickInfo(StackPanel infoPanel) {
+				var titlePanel = infoPanel.GetFirstVisualChild<WrapPanel>();
+				if (titlePanel == null) {
+					if (_Overrider.ClickAndGoSymbol != null
+						&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
+						// no built-in documentation, but Codist has it
+						ShowAlternativeSignature(infoPanel);
+						OverrideDocumentation(infoPanel);
 					}
-					var doc = titlePanel.GetParent<StackPanel>();
-					if (doc == null) {
-						return;
-					}
+					return;
+				}
+				var doc = titlePanel.GetParent<StackPanel>();
+				if (doc == null) {
+					return;
+				}
 
-					titlePanel.HorizontalAlignment = HorizontalAlignment.Stretch;
-					doc.HorizontalAlignment = HorizontalAlignment.Stretch;
+				titlePanel.HorizontalAlignment = HorizontalAlignment.Stretch;
+				doc.HorizontalAlignment = HorizontalAlignment.Stretch;
 
-					var icon = titlePanel.GetFirstVisualChild<CrispImage>();
-					var signature = infoPanel.GetFirstVisualChild<TextBlock>();
+				var icon = titlePanel.GetFirstVisualChild<CrispImage>();
+				var signature = infoPanel.GetFirstVisualChild<TextBlock>();
 
-					if (_Overrider._DocElement != null || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) && _Overrider._ClickAndGoSymbol != null) {
-						OverrideDocumentation(doc);
-					}
+				if (_Overrider.DocElement != null || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) && _Overrider.ClickAndGoSymbol != null) {
+					OverrideDocumentation(doc);
+				}
 
-					if (icon != null && signature != null) {
-						// override signature style and apply "click and go" feature
-						if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
-							if (_Overrider._ClickAndGoSymbol != null) {
-								titlePanel.Visibility = Visibility.Collapsed;
-								ShowAlternativeSignature(doc);
-							}
-							else {
-								UseAlternativeStyle(infoPanel, titlePanel, icon, signature);
-							}
+				if (icon != null && signature != null) {
+					// override signature style and apply "click and go" feature
+					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
+						if (_Overrider.ClickAndGoSymbol != null) {
+							titlePanel.Visibility = Visibility.Collapsed;
+							ShowAlternativeSignature(doc);
 						}
-						// fix the width of the signature part to prevent it from falling down to the next row
-						if (Config.Instance.QuickInfoMaxWidth >= 100) {
-							signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 30;
+						else {
+							UseAlternativeStyle(infoPanel, titlePanel, icon, signature);
 						}
+					}
+					// fix the width of the signature part to prevent it from falling down to the next row
+					if (Config.Instance.QuickInfoMaxWidth >= 100) {
+						signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 30;
+					}
 				}
 				else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) && _Overrider.ClickAndGoSymbol != null) {
 					ShowAlternativeSignature(doc);
-					}
+				}
+			}
+
+			void ShowAlternativeSignature(StackPanel docPanel) {
+				var s = _Overrider.ClickAndGoSymbol;
+				var icon = ThemeHelper.GetImage(s.GetImageId(), ThemeHelper.LargeIconSize)
+					.AsSymbolLink(Keyboard.Modifiers == ModifierKeys.Control ? s.OriginalDefinition : s);
+				icon.VerticalAlignment = VerticalAlignment.Top;
+				var signature = SymbolFormatter.Instance.ShowSignature(s);
+				if (Config.Instance.QuickInfoMaxWidth >= 100) {
+					signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - (ThemeHelper.LargeIconSize + 30);
 				}
 
-				void ShowAlternativeSignature(StackPanel docPanel) {
-					var s = _Overrider._ClickAndGoSymbol;
-					var icon = ThemeHelper.GetImage(s.GetImageId(), ThemeHelper.LargeIconSize)
-						.AsSymbolLink(Keyboard.Modifiers == ModifierKeys.Control ? s.OriginalDefinition : s);
-					icon.VerticalAlignment = VerticalAlignment.Top;
-					var signature = SymbolFormatter.Instance.ShowSignature(s);
-					if (Config.Instance.QuickInfoMaxWidth >= 100) {
-						signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - (ThemeHelper.LargeIconSize + 30);
-					}
+				IList container = GetItems(docPanel);
+				container.Insert(0, new StackPanel {
+					Orientation = Orientation.Horizontal,
+					Children = { icon, signature },
+				}.Tag());
+			}
 
-					IList container = GetItems(docPanel);
-					container.Insert(0, new StackPanel {
-						Orientation = Orientation.Horizontal,
-						Children = { icon, signature },
-					});
+			static IList GetItems(Panel docPanel) {
+				if (docPanel.IsItemsHost) {
+					var c = docPanel.GetParent<ItemsControl>();
+					return c.ItemsSource as IList ?? c.Items;
 				}
+				return docPanel.Children;
+			}
 
-				static IList GetItems(Panel docPanel) {
-					IList container;
-					if (docPanel.IsItemsHost) {
-						var c = docPanel.GetParent<ItemsControl>();
-						container = c.ItemsSource as IList ?? c.Items;
-					}
-					else {
-						container = docPanel.Children;
-					}
-
-					return container;
+			static void UseAlternativeStyle(StackPanel infoPanel, WrapPanel titlePanel, CrispImage icon, TextBlock signature) {
+				if (icon != null) {
+					var b = infoPanel.GetParent<Border>();
+					b.Background = new VisualBrush(CreateEnlargedIcon(icon)) {
+						Opacity = WpfHelper.DimmedOpacity,
+						AlignmentX = AlignmentX.Right,
+						AlignmentY = AlignmentY.Bottom,
+						TileMode = TileMode.None,
+						Stretch = Stretch.None,
+						Transform = new TranslateTransform(0, -6)
+					};
+					b.MinHeight = 60;
+					icon.Visibility = Visibility.Collapsed;
 				}
-
-				static void UseAlternativeStyle(StackPanel infoPanel, WrapPanel titlePanel, CrispImage icon, TextBlock signature) {
-					if (icon != null) {
-						var b = infoPanel.GetParent<Border>();
-						b.Background = new VisualBrush(CreateEnlargedIcon(icon)) {
-							Opacity = WpfHelper.DimmedOpacity,
-							AlignmentX = AlignmentX.Right,
-							AlignmentY = AlignmentY.Bottom,
-							TileMode = TileMode.None,
-							Stretch = Stretch.None,
-							Transform = new TranslateTransform(0, -6)
-						};
-						b.MinHeight = 60;
-						icon.Visibility = Visibility.Collapsed;
-					}
-					if (signature != null) {
-						var list = (IList)signature.Inlines;
-						for (var i = 0; i < list.Count; i++) {
-							if (list[i] is Hyperlink link
-								&& link.Inlines.FirstInline is Run r) {
-								list[i] = new Run { Text = r.Text, Foreground = r.Foreground, Background = r.Background };
-							}
-						}
-					}
-					titlePanel.Margin = __TitlePanelMargin;
-				}
-
-				void OverrideDocumentation(StackPanel doc) {
-					// https://github.com/dotnet/roslyn/blob/version-3.0.0/src/Features/Core/Portable/QuickInfo/CommonSemanticQuickInfoProvider.cs
-					// replace the default XML doc
-					// sequence of items in default XML Doc panel:
-					// 1. summary
-					// 2. generic type parameter
-					// 3. anonymous types
-					// 4. availability warning
-					// 5. usage
-					// 6. exception
-					// 7. captured variables
-					if (_Overrider._OverrideBuiltInXmlDoc/* && (DocElement != null || ExceptionDoc != null)*/) {
-						var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
-						var v16orLater = CodistPackage.VsVersion.Major >= 16;
-						ClearDefaultDocumentationItems(doc, v16orLater, items);
-						if (_Overrider._DocElement != null) {
-							OverrideDocElement(items);
-						}
-						if (_Overrider._ExceptionDoc != null) {
-							OverrideExceptionDocElement(doc, v16orLater, items);
+				if (signature != null) {
+					var list = (IList)signature.Inlines;
+					for (var i = 0; i < list.Count; i++) {
+						if (list[i] is Hyperlink link
+							&& link.Inlines.FirstInline is Run r) {
+							list[i] = new Run { Text = r.Text, Foreground = r.Foreground, Background = r.Background };
 						}
 					}
 				}
+				titlePanel.Margin = __TitlePanelMargin;
+			}
 
-				static void ClearDefaultDocumentationItems(StackPanel doc, bool v16orLater, IList items) {
-					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
-						if (v16orLater) {
-							items = doc.GetParent<ItemsControl>().Items;
-						}
-						try {
-							for (int i = items.Count - 1; i > 0; i--) {
-								var item = items[i];
-								if (v16orLater && item is Panel && item is ThemedTipDocument == false || item is TextBlock) {
-									items.RemoveAt(i);
-								}
-							}
-						}
-						catch (InvalidOperationException) {
-							// ignore exception: doc.Children was changed by another thread
-						}
+			void OverrideDocumentation(StackPanel doc) {
+				// https://github.com/dotnet/roslyn/blob/version-3.0.0/src/Features/Core/Portable/QuickInfo/CommonSemanticQuickInfoProvider.cs
+				// replace the default XML doc
+				// sequence of items in default XML Doc panel:
+				// 1. summary
+				// 2. generic type parameter
+				// 3. anonymous types
+				// 4. availability warning
+				// 5. usage
+				// 6. exception
+				// 7. captured variables
+				if (_Overrider.OverrideBuiltInXmlDoc) {
+					var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
+					var v16orLater = CodistPackage.VsVersion.Major >= 16;
+					ClearDefaultDocumentationItems(doc, v16orLater, items);
+					if (_Overrider.DocElement != null) {
+						OverrideDocElement(items);
+					}
+					if (_Overrider.ExceptionDoc != null) {
+						OverrideExceptionDocElement(doc, v16orLater, items);
 					}
 				}
+			}
 
-				void OverrideDocElement(IList items) {
-					try {
-						var d = _Overrider._DocElement;
-						if (items.Count > 1 && items[1] is TextBlock) {
-							items.RemoveAt(1);
-							items.Insert(1, d);
-						}
-						else {
-							items.Add(d);
-						}
-						if (d is ThemedTipDocument myDoc) {
-							myDoc.Margin = new Thickness(0, 3, 0, 0);
-							myDoc.ApplySizeLimit();
-						}
-					}
-					catch (ArgumentException) {
-						// ignore exception: Specified Visual is already a child of another Visual or the root of a CompositionTarget
-					}
-					catch (InvalidOperationException) {
-						// ignore exception: doc.Children was changed by another thread
-					}
-				}
-
-				void OverrideExceptionDocElement(StackPanel doc, bool v16orLater, IList items) {
+			static void ClearDefaultDocumentationItems(StackPanel doc, bool v16orLater, IList items) {
+				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 					if (v16orLater) {
 						items = doc.GetParent<ItemsControl>().Items;
 					}
 					try {
-						items.Add(_Overrider._ExceptionDoc);
-						//todo move this to ApplySizeLimit
-						(_Overrider._ExceptionDoc as ThemedTipDocument)?.ApplySizeLimit();
+						for (int i = items.Count - 1; i > 0; i--) {
+							var item = items[i];
+							if (v16orLater && item is Panel && item is ThemedTipDocument == false || item is TextBlock) {
+								items.RemoveAt(i);
+							}
+						}
 					}
 					catch (InvalidOperationException) {
 						// ignore exception: doc.Children was changed by another thread
 					}
 				}
+			}
 
-				static CrispImage CreateEnlargedIcon(CrispImage icon) {
-					var bgIcon = new CrispImage { Moniker = icon.Moniker, Width = ThemeHelper.XLargeIconSize, Height = ThemeHelper.XLargeIconSize };
-					bgIcon.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
-					return bgIcon;
-				}
-
-				static void ApplySizeLimit(StackPanel quickInfoPanel) {
-					if (quickInfoPanel == null) {
-						return;
+			void OverrideDocElement(IList items) {
+				try {
+					var d = _Overrider.DocElement;
+					if (items.Count > 1 && items[1] is TextBlock) {
+						items.RemoveAt(1);
+						items.Insert(1, d);
 					}
-					var docPanel = quickInfoPanel.Children[0].GetFirstVisualChild<WrapPanel>().GetParent<StackPanel>();
-					var docPanelHandled = docPanel == null; // don't process docPanel if it is not found
-					foreach (var item in quickInfoPanel.Children) {
-						var o = item as DependencyObject;
-						if (o == null) {
-							continue;
+					else {
+						items.Add(d);
+					}
+					if (d is ThemedTipDocument myDoc) {
+						myDoc.Margin = new Thickness(0, 3, 0, 0);
+						myDoc.ApplySizeLimit();
+					}
+				}
+				catch (ArgumentException) {
+					// ignore exception: Specified Visual is already a child of another Visual or the root of a CompositionTarget
+				}
+				catch (InvalidOperationException) {
+					// ignore exception: doc.Children was changed by another thread
+				}
+			}
+
+			void OverrideExceptionDocElement(StackPanel doc, bool v16orLater, IList items) {
+				if (v16orLater) {
+					items = doc.GetParent<ItemsControl>().Items;
+				}
+				try {
+					items.Add(_Overrider.ExceptionDoc);
+					//todo move this to ApplySizeLimit
+					(_Overrider.ExceptionDoc as ThemedTipDocument)?.ApplySizeLimit();
+				}
+				catch (InvalidOperationException) {
+					// ignore exception: doc.Children was changed by another thread
+				}
+			}
+
+			static CrispImage CreateEnlargedIcon(CrispImage icon) {
+				var bgIcon = new CrispImage { Moniker = icon.Moniker, Width = ThemeHelper.XLargeIconSize, Height = ThemeHelper.XLargeIconSize };
+				bgIcon.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
+				return bgIcon;
+			}
+
+			static void ApplySizeLimit(StackPanel quickInfoPanel) {
+				if (quickInfoPanel == null) {
+					return;
+				}
+				var docPanel = quickInfoPanel.Children[0].GetFirstVisualChild<WrapPanel>().GetParent<StackPanel>();
+				var docPanelHandled = docPanel == null; // don't process docPanel if it is not found
+				foreach (var item in quickInfoPanel.Children) {
+					var o = item as DependencyObject;
+					if (o == null) {
+						continue;
+					}
+					var cp = o.GetFirstVisualChild<ContentPresenter>();
+					if (cp == null) {
+						continue;
+					}
+					var c = cp.Content;
+					if (c is UIOverrider || c is IInteractiveQuickInfoContent /* don't hack interactive content */) {
+						continue;
+					}
+					if (c is TextBlock tb) {
+						continue;
+					}
+					if (docPanel == c || docPanelHandled == false && cp.GetFirstVisualChild<StackPanel>(i => i == docPanel) != null) {
+						cp.LimitSize();
+						if (Config.Instance.QuickInfoXmlDocExtraHeight > 0 && Config.Instance.QuickInfoMaxHeight > 0) {
+							cp.MaxHeight += Config.Instance.QuickInfoXmlDocExtraHeight;
 						}
-						var cp = o.GetFirstVisualChild<ContentPresenter>();
-						if (cp == null) {
-							continue;
+						foreach (var r in docPanel.Children) {
+							(r as ThemedTipDocument)?.ApplySizeLimit();
 						}
-						var c = cp.Content;
-						if (c is UIOverrider || c is IInteractiveQuickInfoContent /* don't hack interactive content */) {
-							continue;
-						}
-						if (c is TextBlock tb) {
-							continue;
-						}
-						if (docPanel == c || docPanelHandled == false && cp.GetFirstVisualChild<StackPanel>(i => i == docPanel) != null) {
-							cp.LimitSize();
-							if (Config.Instance.QuickInfoXmlDocExtraHeight > 0 && Config.Instance.QuickInfoMaxHeight > 0) {
-								cp.MaxHeight += Config.Instance.QuickInfoXmlDocExtraHeight;
-							}
-							foreach (var r in docPanel.Children) {
-								(r as ThemedTipDocument)?.ApplySizeLimit();
-							}
-							c = cp.Content;
-							cp.Content = null;
-							cp.Content = ((DependencyObject)c).Scrollable();
-							docPanelHandled = true;
-							continue;
-						}
-						else if (c is StackPanel s) {
-							MakeChildrenScrollable(s);
-							continue;
-						}
-						(c as ThemedTipDocument)?.ApplySizeLimit();
-						if (c is ScrollViewer) {
-							continue;
-						}
-						// snippet tooltip, some other default tooltip
-						if (c is IWpfTextView v) {
-							// use the custom control to enable selection
-							cp.Content = new ThemedTipText {
-								Text = v.TextSnapshot.GetText(),
-								Margin = WpfHelper.MiddleBottomMargin
-							}.SetGlyph(ThemeHelper.GetImage(IconIds.Info)).Scrollable().LimitSize();
-							continue;
-						}
-						o = c as DependencyObject;
-						if (o == null) {
-							if (c is string s) {
-								cp.Content = new ThemedTipText {
-									Text = s
-								}.Scrollable();
-							}
-							continue;
-						}
-						if (cp.Content is ItemsControl items && items.GetType().Name == "WpfToolTipItemsControl") {
-							try {
-								MakeChildrenScrollable(items);
-								continue;
-							}
-							catch (InvalidOperationException) {
-								// ignore
-#if DEBUG
-								throw;
-#endif
-							}
-						}
+						c = cp.Content;
 						cp.Content = null;
-						cp.Content = o.Scrollable();
+						cp.Content = ((DependencyObject)c).Scrollable();
+						docPanelHandled = true;
+						continue;
+					}
+					else if (c is StackPanel s) {
+						MakeChildrenScrollable(s);
+						continue;
+					}
+					(c as ThemedTipDocument)?.ApplySizeLimit();
+					if (c is ScrollViewer) {
+						continue;
+					}
+					// snippet tooltip, some other default tooltip
+					if (c is IWpfTextView v) {
+						// use the custom control to enable selection
+						cp.Content = new ThemedTipText {
+							Text = v.TextSnapshot.GetText(),
+							Margin = WpfHelper.MiddleBottomMargin
+						}.SetGlyph(ThemeHelper.GetImage(IconIds.Info)).Scrollable().LimitSize();
+						continue;
+					}
+					o = c as DependencyObject;
+					if (o == null) {
+						if (c is string s) {
+							cp.Content = new ThemedTipText {
+								Text = s
+							}.Scrollable();
+						}
+						continue;
+					}
+					if (cp.Content is ItemsControl items && items.GetType().Name == "WpfToolTipItemsControl") {
+						try {
+							MakeChildrenScrollable(items);
+							continue;
+						}
+						catch (InvalidOperationException) {
+							// ignore
+#if DEBUG
+							throw;
+#endif
+						}
+					}
+					cp.Content = null;
+					cp.Content = o.Scrollable();
+				}
+			}
+
+			static void MakeChildrenScrollable(Panel s) {
+				var children = new DependencyObject[s.Children.Count];
+				var i = -1;
+				foreach (DependencyObject n in s.Children) {
+					children[++i] = n;
+				}
+				s.Children.Clear();
+				foreach (var c in children) {
+					if (c is ThemedTipDocument d) {
+						foreach (var item in d.Paragraphs) {
+							item.TextWrapping = TextWrapping.Wrap;
+						}
+						d.ApplySizeLimit();
+						d.WrapMargin(WpfHelper.SmallVerticalMargin);
+					}
+					s.Add(c.Scrollable().LimitSize());
+				}
+			}
+
+			void OverrideTextBlock(TextBlock t) {
+				if (t is ThemedTipText == false
+					&& TextEditorWrapper.CreateFor(t) != null
+					&& t.Inlines.FirstInline is InlineUIContainer == false) {
+					t.TextWrapping = TextWrapping.Wrap;
+					CrispImage icon = _Overrider.GetIconForErrorText(t);
+					if (icon != null) {
+						t.SetGlyph(icon);
 					}
 				}
+			}
 
-				static void MakeChildrenScrollable(Panel s) {
-					var children = new DependencyObject[s.Children.Count];
-					var i = -1;
-					foreach (DependencyObject n in s.Children) {
-						children[++i] = n;
-					}
-					s.Children.Clear();
-					foreach (var c in children) {
-						if (c is ThemedTipDocument d) {
-							foreach (var item in d.Paragraphs) {
-								item.TextWrapping = TextWrapping.Wrap;
-							}
-							d.ApplySizeLimit();
-							d.WrapMargin(WpfHelper.SmallVerticalMargin);
-						}
-						s.Add(c.Scrollable().LimitSize());
-					}
+			static void MakeChildrenScrollable(ItemsControl s) {
+				var children = new object[s.Items.Count];
+				var i = -1;
+				foreach (object n in s.Items) {
+					children[++i] = n;
 				}
-
-				void OverrideTextBlock(TextBlock t) {
-					if (t is ThemedTipText == false
-						&& TextEditorWrapper.CreateFor(t) != null
-						&& t.Inlines.FirstInline is InlineUIContainer == false) {
-						t.TextWrapping = TextWrapping.Wrap;
-						CrispImage icon = _Overrider.GetIconForErrorText(t);
-						if (icon != null) {
-							t.SetGlyph(icon);
-						}
+				s.Items.Clear();
+				foreach (var c in children) {
+					if (c is TextBlock t) {
+						s.Items.Add(t.Scrollable().LimitSize());
 					}
-				}
-
-				static void MakeChildrenScrollable(ItemsControl s) {
-					var children = new object[s.Items.Count];
-					var i = -1;
-					foreach (object n in s.Items) {
-						children[++i] = n;
-					}
-					s.Items.Clear();
-					foreach (var c in children) {
-						if (c is TextBlock t) {
-							s.Items.Add(t.Scrollable().LimitSize());
+					else {
+						if (c is Panel p) {
+							MakeChildrenScrollable(p);
 						}
-						else {
-							if (c is Panel p) {
-								MakeChildrenScrollable(p);
-							}
-							s.Items.Add(c);
-						}
+						s.Items.Add(c);
 					}
 				}
 			}
