@@ -146,7 +146,12 @@ namespace Codist.Taggers
 				var snapshot = spans[0].Snapshot;
 				var isNewSnapshot = _ParseResult?.Snapshot != snapshot;
 				if (isNewSnapshot == false) {
-					return Tagger.GetTags(spans, _ParseResult, _TaskBreaker.GetToken());
+					try {
+						return Tagger.GetTags(spans, _ParseResult, _TaskBreaker.GetToken());
+					}
+					catch (OperationCanceledException) {
+						goto NA;
+					}
 				}
 				if (snapshot.TextBuffer != _Buffer) {
 					goto NA;
@@ -165,7 +170,12 @@ namespace Codist.Taggers
 					EnqueueSpans(spans);
 				}
 				if (_ParseResult != null && _ParseResult.Snapshot.TextBuffer == snapshot.TextBuffer) {
-					return UseOldResult(spans, snapshot, _ParseResult, _TaskBreaker.GetToken());
+					try {
+						return UseOldResult(spans, snapshot, _ParseResult, _TaskBreaker.GetToken());
+					}
+					catch (OperationCanceledException) {
+						goto NA;
+					}
 				}
 			NA:
 				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
