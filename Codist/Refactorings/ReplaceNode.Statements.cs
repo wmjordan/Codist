@@ -77,8 +77,8 @@ namespace Codist.Refactorings
 						newStatement = SF.ReturnStatement(
 							SF.Token(SyntaxKind.ReturnKeyword).WithTrailingTrivia(SF.Space),
 							MakeConditional(ctx, ifs,
-								(first as ReturnStatementSyntax).Expression,
-								(other as ReturnStatementSyntax).Expression),
+								((ReturnStatementSyntax)first).Expression,
+								((ReturnStatementSyntax)other).Expression),
 							SF.Token(SyntaxKind.SemicolonToken)
 							);
 						break;
@@ -96,8 +96,8 @@ namespace Codist.Refactorings
 					case SyntaxKind.YieldReturnStatement:
 						newStatement = SF.YieldStatement(SyntaxKind.YieldReturnStatement,
 							MakeConditional(ctx, ifs,
-								(first as YieldStatementSyntax).Expression,
-								(other as YieldStatementSyntax).Expression));
+								((YieldStatementSyntax)first).Expression,
+								((YieldStatementSyntax)other).Expression));
 						break;
 					default:
 						return Enumerable.Empty<RefactoringAction>();
@@ -189,7 +189,7 @@ namespace Codist.Refactorings
 								?.AllInterfaces.Any(i => i.IsDisposable()) == true
 						|| s is ExpressionStatementSyntax exp
 							&& exp.Expression is AssignmentExpressionSyntax a
-							&& (ctx.SemanticContext.SemanticModel.GetTypeInfo(a.Left).Type)
+							&& ctx.SemanticContext.SemanticModel.GetTypeInfo(a.Left).Type
 								?.AllInterfaces.Any(i => i.IsDisposable()) == true);
 			}
 

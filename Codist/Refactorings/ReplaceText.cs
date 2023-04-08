@@ -72,7 +72,7 @@ namespace Codist.Refactorings
 					int se = s.End.Position.Position;
 					var le = v.TextSnapshot.GetLineFromPosition(se - 1);
 					var newLine = sl.GetLineBreakText()
-						?? v.Options.GetOptionValue(Microsoft.VisualStudio.Text.Editor.DefaultOptions.NewLineCharacterOptionId);
+						?? v.Options.GetOptionValue(DefaultOptions.NewLineCharacterOptionId);
 					edit.Insert(sl.Start.Position, indent + _Start + newLine);
 					edit.Insert(le.EndIncludingLineBreak.Position, indent + _End + newLine);
 				});
@@ -94,9 +94,8 @@ namespace Codist.Refactorings
 
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.Node;
-				ClassDeclarationSyntax d;
 				return node.IsKind(SyntaxKind.ClassDeclaration)
-					&& CanBeSealed((d = node as ClassDeclarationSyntax).Modifiers);
+					&& CanBeSealed(((ClassDeclarationSyntax)node).Modifiers);
 			}
 
 			static bool CanBeSealed(SyntaxTokenList modifiers) {
@@ -262,7 +261,6 @@ namespace Codist.Refactorings
 					edit.Insert(param.tp, param.modifier + " ");
 				});
 				ctx.View.SelectSpan(tp, modifier.Length, 1);
-				return;
 			}
 
 			static string GetModifier(SyntaxKind kind) {

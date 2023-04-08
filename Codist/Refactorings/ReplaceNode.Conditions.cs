@@ -183,8 +183,8 @@ namespace Codist.Refactorings
 					case SyntaxKind.ReturnStatement:
 						newNode = SF.ReturnStatement(
 							MakeConditionalExpression(ifStatement.Condition.WithLeadingTrivia(SF.Space),
-								(statement as ReturnStatementSyntax).Expression,
-								(elseStatement as ReturnStatementSyntax).Expression,
+								((ReturnStatementSyntax)statement).Expression,
+								((ReturnStatementSyntax)elseStatement).Expression,
 								indent, newLine)
 							);
 						break;
@@ -202,8 +202,8 @@ namespace Codist.Refactorings
 					case SyntaxKind.YieldReturnStatement:
 						newNode = SF.YieldStatement(SyntaxKind.YieldReturnStatement,
 							MakeConditionalExpression(ifStatement.Condition,
-								(statement as YieldStatementSyntax).Expression,
-								(elseStatement as YieldStatementSyntax).Expression,
+								((YieldStatementSyntax)statement).Expression,
+								((YieldStatementSyntax)elseStatement).Expression,
 								indent, newLine));
 						break;
 					default:
@@ -273,9 +273,9 @@ namespace Codist.Refactorings
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var condition = ctx.NodeIncludeTrivia as ConditionalExpressionSyntax;
 				var node = condition.Parent;
-				SyntaxNode newNode;
+				IfStatementSyntax newNode;
 				StatementSyntax whenTrue, whenFalse;
-				if (node is ReturnStatementSyntax r) {
+				if (node is ReturnStatementSyntax) {
 					whenTrue = SF.ReturnStatement(condition.WhenTrue);
 					whenFalse = SF.ReturnStatement(condition.WhenFalse);
 				}

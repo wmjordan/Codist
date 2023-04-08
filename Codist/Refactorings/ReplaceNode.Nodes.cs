@@ -93,7 +93,7 @@ namespace Codist.Refactorings
 						var oldSection = (SwitchSectionSyntax)node;
 						var newSection = oldSection.WithStatements(SF.SingletonList((StatementSyntax)SF.Block(oldSection.Statements))).AnnotateReformatAndSelect();
 						return Chain.Create(Replace(oldSection, newSection));
-					default: 
+					default:
 						return Enumerable.Empty<RefactoringAction>();
 				}
 				if (statement != null) {
@@ -155,8 +155,7 @@ namespace Codist.Refactorings
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.Node;
 				return node is VariableDeclaratorSyntax v
-					&& v.Initializer != null
-					&& v.Initializer.Value.Kind().IsAny(SyntaxKind.NullLiteralExpression, SyntaxKind.DefaultLiteralExpression) == false
+					&& v.Initializer?.Value.Kind().IsAny(SyntaxKind.NullLiteralExpression, SyntaxKind.DefaultLiteralExpression) == false
 					&& v.Parent is VariableDeclarationSyntax d
 					&& d.Variables.Count == 1
 					&& d.Parent.IsKind(SyntaxKind.LocalDeclarationStatement)
@@ -278,7 +277,7 @@ namespace Codist.Refactorings
 				None,
 				Write = 1,
 				Ref = 2,
-				WriteRef = 3,
+				WriteRef = Write | Ref,
 				Null = 4,
 				Default = 8,
 				Const = 16,
@@ -398,8 +397,7 @@ namespace Codist.Refactorings
 
 				#region Swap operands besides selected operator
 				if (Keyboard.Modifiers.MatchFlags(ModifierKeys.Shift) == false) {
-					BinaryExpressionSyntax temp;
-					if ((temp = left as BinaryExpressionSyntax) != null
+					if (left is BinaryExpressionSyntax temp
 						&& temp.RawKind == node.RawKind
 						&& temp.Right != null) {
 						left = temp.Right;
@@ -469,7 +467,7 @@ namespace Codist.Refactorings
 					ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
 				}
 				else if (nodeKind.IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
-					ReformatAddExpressions(ref node, ref newExp, newLine, indent, nodeKind);
+					ReformatAddExpressions(ref node, ref newExp, newLine, indent);
 				}
 				else if (nodeKind == SyntaxKind.LogicalOrExpression) {
 					ReformatLogicalExpressions(ref node, ref newExp, newLine, indent, nodeKind);
@@ -491,7 +489,7 @@ namespace Codist.Refactorings
 				return SF.Token(syntaxKind).WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space);
 			}
 
-			static void ReformatAddExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxTriviaList indent, SyntaxKind nodeKind) {
+			static void ReformatAddExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxTriviaList indent) {
 				var exp = (BinaryExpressionSyntax)node;
 				while (exp.Left.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression)) {
 					exp = (BinaryExpressionSyntax)exp.Left;
@@ -502,7 +500,7 @@ namespace Codist.Refactorings
 						exp.OperatorToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 						exp.Right);
 					exp = exp.Parent as BinaryExpressionSyntax;
-				} while (exp != null && exp.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression));
+				} while (exp?.Kind().IsAny(SyntaxKind.AddExpression, SyntaxKind.SubtractExpression) == true);
 			}
 
 			static void ReformatLogicalExpressions(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxTriviaList indent, SyntaxKind nodeKind) {
@@ -516,7 +514,7 @@ namespace Codist.Refactorings
 						exp.OperatorToken.WithLeadingTrivia(indent).WithTrailingTrivia(SF.Space),
 						exp.Right);
 					exp = exp.Parent as BinaryExpressionSyntax;
-				} while (exp != null && exp.IsKind(nodeKind));
+				} while (exp?.IsKind(nodeKind) == true);
 			}
 
 			static void ReformatCoalesceExpression(ref SyntaxNode node, ref BinaryExpressionSyntax newExp, SyntaxTrivia newLine, SyntaxToken token, SyntaxKind nodeKind) {
@@ -590,7 +588,7 @@ namespace Codist.Refactorings
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
 				var node = ctx.Node;
-				SyntaxNode newNode = null;
+				CSharpSyntaxNode newNode = null;
 				if (node is ArgumentListSyntax al) {
 					newNode = al.WithArguments(MakeMultiLine(al.Arguments, ctx));
 				}
@@ -673,10 +671,10 @@ namespace Codist.Refactorings
 					else {
 						if (node is ConditionalAccessExpressionSyntax ca) {
 							if (ca.WhenNotNull.FullSpan.Contains(ctx.Token.FullSpan.Start)) {
-								newExp = (ExpressionSyntax)ca.Update(ca.Expression, ca.OperatorToken, (newExp ?? ca.WhenNotNull));
+								newExp = ca.Update(ca.Expression, ca.OperatorToken, newExp ?? ca.WhenNotNull);
 							}
 							else {
-								newExp = (ExpressionSyntax)ca.Update((newExp ?? ca.Expression).WithTrailingTrivia(newLine), ca.OperatorToken.WithLeadingTrivia(indent), WrapAccess(ca.WhenNotNull, indent, newLine));
+								newExp = ca.Update((newExp ?? ca.Expression).WithTrailingTrivia(newLine), ca.OperatorToken.WithLeadingTrivia(indent), WrapAccess(ca.WhenNotNull, indent, newLine));
 							}
 						}
 						else {
@@ -723,7 +721,7 @@ namespace Codist.Refactorings
 			const char StartChar = '{', EndChar = '}';
 			const string Start = "{", End = "}", StartSubstitution = "{{", EndSubstitution = "}}";
 
-			static readonly char[] StartEndChars = new[] { StartChar, EndChar };
+			static readonly char[] __StartEndChars = new[] { StartChar, EndChar };
 			int _Mode;
 
 			public override int IconId => IconIds.InterpolatedString;
@@ -809,7 +807,7 @@ namespace Codist.Refactorings
 								case CodeAnalysisHelper.SingleLineRawStringLiteralToken:
 								case CodeAnalysisHelper.MultiLineRawStringLiteralToken:
 								default:
-									ch.Add((InterpolatedStringContentSyntax)SF.Interpolation(exp.WithoutTrivia()));
+									ch.Add(SF.Interpolation(exp.WithoutTrivia()));
 									goto NEXT;
 							}
 							ch.Add(SF.InterpolatedStringText(SF.Token(default, SyntaxKind.InterpolatedStringTextToken, t, s.Token.ValueText, default)));
@@ -860,12 +858,12 @@ namespace Codist.Refactorings
 			}
 
 			private static string ReplaceBraces(string t) {
-				return t.IndexOfAny(StartEndChars) >= 0
+				return t.IndexOfAny(__StartEndChars) >= 0
 					? t.Replace(Start, StartSubstitution).Replace(End, EndSubstitution)
 					: t;
 			}
 
-			static IEnumerable<ExpressionSyntax> GetBinaryExpressionOperands(BinaryExpressionSyntax bin) {
+			static Chain<ExpressionSyntax> GetBinaryExpressionOperands(BinaryExpressionSyntax bin) {
 				var kind = bin.Kind();
 				var ch = Chain.Create(bin.Left);
 				do {
