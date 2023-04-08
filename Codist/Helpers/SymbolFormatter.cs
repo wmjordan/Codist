@@ -108,8 +108,9 @@ namespace Codist
 			#region Containing symbol
 			var cs = s.ContainingSymbol;
 			if (cs != null) {
-				var showContainer = s.Kind != SymbolKind.Namespace && cs.Kind != SymbolKind.Namespace;
-				var csb = new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush };
+				var showNs = Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.SymbolLocation) == false && cs.Kind == SymbolKind.Namespace;
+				var showContainer = showNs == false && s.Kind != SymbolKind.Namespace && cs.Kind != SymbolKind.Namespace;
+				var csb = new ThemedTipText();
 				if (showContainer) {
 					csb.Append(ThemeHelper.GetImage(cs.GetImageId()).WrapMargin(WpfHelper.GlyphMargin));
 				}
@@ -122,7 +123,13 @@ namespace Codist
 				}
 
 				p.Add(ShowSymbolDeclaration(s, csb, true, false));
-				if (s.Kind == SymbolKind.Method
+				if (showNs && ((INamespaceSymbol)cs).IsGlobalNamespace == false) {
+					var nsb = new ThemedTipText().Append(ThemeHelper.GetImage(IconIds.Namespace)
+						.WrapMargin(WpfHelper.GlyphMargin));
+					ShowContainingNamespace(symbol, nsb);
+					p.Add(nsb);
+				}
+				else if (s.Kind == SymbolKind.Method
 					&& (m = (IMethodSymbol)s).MethodKind == MethodKind.ReducedExtension) {
 					csb.AddImage(IconIds.ExtensionMethod)
 						.Append(" ")
