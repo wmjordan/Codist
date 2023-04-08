@@ -2430,4 +2430,10 @@ Expression too long</value>
   <data name="OT_AddShowActiveWindowPropertiesTip" xml:space="preserve">
     <value>Displays comprehensive information about the active window pane and its document</value>
   </data>
+  <data name="T_TakenAddress" xml:space="preserve">
+    <value>Taken Address (Unsafe): </value>
+  </data>
+  <data name="T_WrittenVariable" xml:space="preserve">
+    <value>Written Variable: </value>
+  </data>
 </root>

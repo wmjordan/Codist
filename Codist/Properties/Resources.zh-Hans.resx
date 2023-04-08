@@ -632,7 +632,7 @@ Shift：粘贴并选中下一项（整个单词）</value>
     <value>委托签名</value>
   </data>
   <data name="T_DeclaredVariable" xml:space="preserve">
-    <value>声明的变量: </value>
+    <value>声明变量: </value>
   </data>
   <data name="T_ExplicitImplements" xml:space="preserve">
     <value>显式实现接口:</value>
@@ -2414,5 +2414,11 @@ Right click: 显示“线程”窗口</value>
   </data>
   <data name="OT_ShowSeeContainingTypeTip" xml:space="preserve">
     <value>显示 &lt;see/&gt; 指向成员的类（默认隐藏，只显示成员名称）</value>
+  </data>
+  <data name="T_TakenAddress" xml:space="preserve">
+    <value>非安全取地址: </value>
+  </data>
+  <data name="T_WrittenVariable" xml:space="preserve">
+    <value>写入变量: </value>
   </data>
 </root>

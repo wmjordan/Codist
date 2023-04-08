@@ -6867,6 +6867,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Taken Address (Unsafe): .
+        /// </summary>
+        internal static string T_TakenAddress {
+            get {
+                return ResourceManager.GetString("T_TakenAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Text.
         /// </summary>
         internal static string T_Text {
@@ -7025,6 +7034,15 @@ namespace Codist.Properties {
         internal static string T_Write {
             get {
                 return ResourceManager.GetString("T_Write", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Written Variable: .
+        /// </summary>
+        internal static string T_WrittenVariable {
+            get {
+                return ResourceManager.GetString("T_WrittenVariable", resourceCulture);
             }
         }
     }

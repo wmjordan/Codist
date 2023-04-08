@@ -27,7 +27,7 @@ namespace Codist.QuickInfo
 		static readonly SymbolFormatter __SymbolFormatter = SymbolFormatter.Instance;
 
 		SpecialProjectInfo _SpecialProject;
-		bool _isCandidate;
+		bool _IsCandidate;
 
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -288,7 +288,7 @@ namespace Codist.QuickInfo
 				symbol = token.IsKind(SyntaxKind.CloseBraceToken) ? null
 				: GetSymbol(semanticModel, node, ref candidates, cancellationToken);
 			}
-			if (_isCandidate = candidates.IsDefaultOrEmpty == false) {
+			if (_IsCandidate = candidates.IsDefaultOrEmpty == false) {
 				ShowCandidateInfo(container, candidates);
 			}
 			if (symbol == null) {
@@ -666,24 +666,20 @@ namespace Codist.QuickInfo
 				return;
 			}
 			var df = semanticModel.AnalyzeDataFlow(node);
-			var vd = df.VariablesDeclared;
-			if (vd.IsEmpty == false) {
-				var p = new ThemedTipText(R.T_DeclaredVariable, true).Append(vd.Length).AppendLine();
-				var s = false;
-				foreach (var item in vd) {
-					if (s) {
-						p.Append(", ");
-					}
-					p.AddSymbol(item, false, __SymbolFormatter.Local);
-					s = true;
-				}
-				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.LocalVariable, p)));
+			if (df.Succeeded) {
+				ListVariables(R.T_DeclaredVariable, df.VariablesDeclared, IconIds.DeclaredVariables, qiContent);
+				ListVariables(R.T_ReadVariable, df.DataFlowsIn, IconIds.ReadVariables, qiContent);
+				ListVariables(R.T_WrittenVariable, df.DataFlowsOut, IconIds.WrittenVariables, qiContent);
+				ListVariables(R.T_TakenAddress, df.UnsafeAddressTaken, IconIds.RefVariables, qiContent);
 			}
-			vd = df.DataFlowsIn;
-			if (vd.IsEmpty == false) {
-				var p = new ThemedTipText(R.T_ReadVariable, true).Append(vd.Length).AppendLine();
-				var s = false;
-				foreach (var item in vd) {
+
+			void ListVariables(string title, ImmutableArray<ISymbol> variables, int icon, InfoContainer container) {
+				if (variables.IsEmpty) {
+					return;
+				}
+				var p = new ThemedTipText(title, true).Append(variables.Length).AppendLine();
+				bool s = false;
+				foreach (var item in variables) {
 					if (s) {
 						p.Append(", ");
 					}
@@ -695,7 +691,7 @@ namespace Codist.QuickInfo
 					}
 					s = true;
 				}
-				qiContent.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.ReadVariables, p)));
+				container.Add(new ThemedTipDocument().Append(new ThemedTipParagraph(icon, p)));
 			}
 		}
 		static void ShowMiscInfo(InfoContainer qiContent, SyntaxNode node) {
@@ -900,7 +896,7 @@ namespace Codist.QuickInfo
 		}
 
 		void ShowOverloadsInfo(InfoContainer qiContent, SyntaxNode node, IMethodSymbol method, SemanticModel semanticModel, CancellationToken cancellationToken) {
-			if (_isCandidate) {
+			if (_IsCandidate) {
 				return;
 			}
 			var overloads = node.IsKind(SyntaxKind.MethodDeclaration) || node.IsKind(SyntaxKind.ConstructorDeclaration)

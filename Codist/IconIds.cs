@@ -105,7 +105,10 @@ namespace Codist
 		public const int RemarksXmlDoc = KnownImageIds.CommentGroup;
 		public const int ExampleXmlDoc = KnownImageIds.EnableCode;
 		public const int SeeAlsoXmlDoc = KnownImageIds.Next;
+		public const int DeclaredVariables = KnownImageIds.AddVariable;
 		public const int ReadVariables = KnownImageIds.ExternalVariableValue;
+		public const int WrittenVariables = KnownImageIds.PromoteVariable;
+		public const int RefVariables = KnownImageIds.GlobalVariable;
 		public const int TypeAndDelegate = KnownImageIds.EntityContainer;
 		public const int ReturnValue = KnownImageIds.ReturnValue;
 		public const int AnonymousType = KnownImageIds.UserDataType;
