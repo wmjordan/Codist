@@ -82,6 +82,7 @@ namespace Codist.QuickInfo
 			var skipTriggerPointCheck = false;
 			var isConvertedType = false;
 			symbol = null;
+			ClassifyToken:
 			switch (token.Kind()) {
 				case SyntaxKind.WhitespaceTrivia:
 				case SyntaxKind.SingleLineCommentTrivia:
@@ -179,12 +180,18 @@ namespace Codist.QuickInfo
 					break;
 				case SyntaxKind.OpenParenToken:
 				case SyntaxKind.CloseParenToken:
+					node = unitCompilation.FindNode(token.Span, false, true);
+					if (node.IsKind(SyntaxKind.ArgumentList)) {
+						node = node.Parent;
+						goto PROCESS;
+					}
+					goto case SyntaxKind.CommaToken;
 				case SyntaxKind.CommaToken:
 				case SyntaxKind.ColonToken:
 				case SyntaxKind.SemicolonToken:
 					token = token.GetPreviousToken();
 					skipTriggerPointCheck = true;
-					break;
+					goto ClassifyToken;
 				case SyntaxKind.OpenBracketToken:
 				case SyntaxKind.CloseBracketToken:
 					if ((node = unitCompilation.FindNode(token.Span)).IsKind(SyntaxKind.BracketedArgumentList)
