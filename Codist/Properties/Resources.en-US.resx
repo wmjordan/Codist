@@ -2436,4 +2436,10 @@ Expression too long</value>
   <data name="T_WrittenVariable" xml:space="preserve">
     <value>Written Variable: </value>
   </data>
+  <data name="OT_UseCodeEditorFontForSee" xml:space="preserve">
+    <value>Use code editor font for &lt;see/&gt;</value>
+  </data>
+  <data name="OT_UseCodeEditorFontForSeeTip" xml:space="preserve">
+    <value>Render referenced names of &lt;see/&gt;, &lt;paramref/&gt;, &lt;typeparamref/&gt; with code editor font</value>
+  </data>
 </root>

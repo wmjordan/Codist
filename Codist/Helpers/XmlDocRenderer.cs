@@ -433,7 +433,7 @@ namespace Codist
 			}
 		}
 
-		XAttribute RenderSee(InlineCollection inlines, XElement e) {
+		void RenderSee(InlineCollection inlines, XElement e) {
 			var see = e.Attribute("cref") ?? e.Attribute("href");
 			if (see != null) {
 				if (IsUrl(see)) {
@@ -446,8 +446,6 @@ namespace Codist
 			else if ((see = e.Attribute("langword")) != null) {
 				RenderXmlDocSymbol(see.Value, inlines, SymbolKind.DynamicType);
 			}
-
-			return see;
 		}
 
 		XAttribute RenderParamRef(InlineCollection inlines, XElement e) {
@@ -505,6 +503,10 @@ namespace Codist
 		}
 
 		internal void RenderXmlDocSymbol(string symbol, InlineCollection inlines, SymbolKind symbolKind) {
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.UseCodeFontForXmlDocSymbol)) {
+				inlines = UseCodeEditorFont(inlines);
+			}
+
 			switch (symbolKind) {
 				case SymbolKind.Parameter:
 					inlines.Add(symbol.Render(false, _SymbolFormatter.Parameter == null, _SymbolFormatter.Parameter));
@@ -518,47 +520,61 @@ namespace Codist
 					return;
 			}
 			var s = DocumentationCommentId.GetFirstSymbolForDeclarationId(symbol, _Compilation);
-			if (s != null) {
-				if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ContainingType)) {
-					switch (s.Kind) {
-						case SymbolKind.Event:
-						case SymbolKind.Field:
-						case SymbolKind.Method:
-						case SymbolKind.NamedType:
-						case SymbolKind.Property:
-							if (s.ContainingType != null) {
-								_SymbolFormatter.Format(inlines, s.ContainingType, null, false);
-								inlines.Add(".");
-							}
-							break;
-					}
-				}
-				_SymbolFormatter.Format(inlines, s, null, false);
+			if (s == null) {
+				ShowBrokenLink(inlines, symbol, _SymbolFormatter);
 				return;
 			}
-			if (symbol.Length > 2 && symbol[1] == ':') {
-				switch (symbol[0]) {
-					case 'T':
-						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Class));
-						return;
-					case 'M':
-						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Method));
-						return;
-					case 'P':
-						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Property));
-						return;
-					case 'F':
-						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Field));
-						return;
-					case 'E':
-						inlines.Add(symbol.Substring(2).Render(false, true, _SymbolFormatter.Event));
-						return;
-					case '!':
-						inlines.Add(symbol.Substring(2).Render(true, true, null));
-						return;
+			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ContainingType)) {
+				ShowContainingType(inlines, s, _SymbolFormatter);
+			}
+			_SymbolFormatter.Format(inlines, s, null, false);
+
+			InlineCollection UseCodeEditorFont(InlineCollection ic) {
+				var span = new Span { FontFamily = ThemeHelper.CodeTextFont };
+				ic.Add(span);
+				return span.Inlines;
+			}
+
+			void ShowBrokenLink(InlineCollection ic, string link, SymbolFormatter sf) {
+				if (link.Length > 2 && link[1] == ':') {
+					switch (link[0]) {
+						case 'T':
+							ic.Add(link.Substring(2).Render(false, true, sf.Class));
+							return;
+						case 'M':
+							ic.Add(link.Substring(2).Render(false, true, sf.Method));
+							return;
+						case 'P':
+							ic.Add(link.Substring(2).Render(false, true, sf.Property));
+							return;
+						case 'F':
+							ic.Add(link.Substring(2).Render(false, true, sf.Field));
+							return;
+						case 'E':
+							ic.Add(link.Substring(2).Render(false, true, sf.Event));
+							return;
+						case '!':
+							ic.Add(link.Substring(2).Render(true, true, null));
+							return;
+					}
+				}
+				ic.Add(link);
+			}
+
+			void ShowContainingType(InlineCollection ic, ISymbol sym, SymbolFormatter sf) {
+				switch (sym.Kind) {
+					case SymbolKind.Event:
+					case SymbolKind.Field:
+					case SymbolKind.Method:
+					case SymbolKind.NamedType:
+					case SymbolKind.Property:
+						if (sym.ContainingType != null) {
+							sf.Format(ic, sym.ContainingType, null, false);
+							ic.Add(".");
+						}
+						break;
 				}
 			}
-			inlines.Add(symbol);
 		}
 
 		void StyleInner(XElement element, InlineCollection text, Span span) {

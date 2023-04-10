@@ -2421,4 +2421,10 @@ Right click: 显示“线程”窗口</value>
   <data name="T_WrittenVariable" xml:space="preserve">
     <value>写入变量: </value>
   </data>
+  <data name="OT_UseCodeEditorFontForSee" xml:space="preserve">
+    <value>用代码窗口的字体显示 &lt;see/&gt;</value>
+  </data>
+  <data name="OT_UseCodeEditorFontForSeeTip" xml:space="preserve">
+    <value>用代码编辑器窗口的字体显示 &lt;see/&gt;、&lt;paramref/&gt; 和&lt;typeparamref/&gt; 引用的代码名称</value>
+  </data>
 </root>

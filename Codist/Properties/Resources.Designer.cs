@@ -4508,6 +4508,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use code editor font for &lt;see/&gt;.
+        /// </summary>
+        internal static string OT_UseCodeEditorFontForSee {
+            get {
+                return ResourceManager.GetString("OT_UseCodeEditorFontForSee", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Render referenced names of &lt;see/&gt;, &lt;paramref/&gt;, &lt;typeparamref/&gt; with code editor font.
+        /// </summary>
+        internal static string OT_UseCodeEditorFontForSeeTip {
+            get {
+                return ResourceManager.GetString("OT_UseCodeEditorFontForSeeTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Initial value of fields and properties.
         /// </summary>
         internal static string OT_ValueOfFields {
