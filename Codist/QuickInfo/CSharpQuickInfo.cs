@@ -17,6 +17,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Projection;
 using R = Codist.Properties.Resources;
+using Task = System.Threading.Tasks.Task;
 
 namespace Codist.QuickInfo
 {
@@ -29,11 +30,7 @@ namespace Codist.QuickInfo
 		SpecialProjectInfo _SpecialProject;
 		bool _IsCandidate;
 
-		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			if (QuickInfoOverrider.CheckCtrlSuppression()) {
-				return null;
-			}
+		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			// Map the trigger point down to our buffer.
 			var buffer = session.TextView.TextBuffer;
 			if (buffer is IProjectionBuffer projection) {
@@ -44,31 +41,30 @@ namespace Codist.QuickInfo
 					}
 				}
 			}
-			return buffer == null
-				? null
-				: await InternalGetQuickInfoItemAsync(session, buffer, cancellationToken).ConfigureAwait(false);
+			if (buffer == null) {
+				return Task.FromResult<QuickInfoItem>(null);
+			}
+			var snapshot = buffer.CurrentSnapshot;
+			SnapshotPoint triggerPoint;
+			Document doc;
+			if ((triggerPoint = session.GetTriggerPoint(snapshot).GetValueOrDefault()).Snapshot == null
+				|| (doc = snapshot.GetOpenDocumentInCurrentContextWithChanges()) == null
+				) {
+				return Task.FromResult<QuickInfoItem>(null);
+			}
+			return InternalGetQuickInfoItemAsync(session, snapshot, triggerPoint, doc, cancellationToken);
 		}
 
-		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, ITextBuffer buffer, CancellationToken cancellationToken) {
+		async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, ITextSnapshot currentSnapshot, SnapshotPoint triggerPoint, Document document, CancellationToken cancellationToken) {
 			ISymbol symbol;
 			SyntaxNode node;
 			ImmutableArray<ISymbol> candidates;
 			SyntaxToken token;
-			var overrider = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
-				? QuickInfoOverrider.CreateOverrider(session)
-				: null;
-			var container = new InfoContainer(overrider);
-			var currentSnapshot = buffer.CurrentSnapshot;
-			var subjectTriggerPoint = session.GetTriggerPoint(currentSnapshot).GetValueOrDefault();
-			if (subjectTriggerPoint.Snapshot == null) {
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			if (QuickInfoOverrider.CheckCtrlSuppression()) {
 				return null;
 			}
-
-			var doc = currentSnapshot.GetOpenDocumentInCurrentContextWithChanges();
-			if (doc == null) {
-				return null;
-			}
-			var semanticModel = await doc.GetSemanticModelAsync(cancellationToken);
+			var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
 			if (semanticModel == null) {
 				return null;
 			}
@@ -78,10 +74,14 @@ namespace Codist.QuickInfo
 			var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 
 			//look for occurrences of our QuickInfo words in the span
-			token = unitCompilation.FindToken(subjectTriggerPoint, true);
+			token = unitCompilation.FindToken(triggerPoint, true);
 			var skipTriggerPointCheck = false;
 			var isConvertedType = false;
 			symbol = null;
+			var overrider = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
+				? QuickInfoOverrider.CreateOverrider(session)
+				: null;
+			var container = new InfoContainer(overrider);
 			ClassifyToken:
 			switch (token.Kind()) {
 				case SyntaxKind.WhitespaceTrivia:
@@ -259,7 +259,7 @@ namespace Codist.QuickInfo
 						symbol = semanticModel.GetSystemTypeSymbol(token.Kind());
 						break;
 					}
-					if (token.Span.Contains(subjectTriggerPoint, true) == false
+					if (token.Span.Contains(triggerPoint, true) == false
 						|| token.IsReservedKeyword()) {
 						node = unitCompilation.FindNode(token.Span);
 						if (node is StatementSyntax) {
@@ -273,7 +273,7 @@ namespace Codist.QuickInfo
 			}
 			node = unitCompilation.FindNode(token.Span, true, true);
 			if (node == null
-				|| skipTriggerPointCheck == false && node.Span.Contains(subjectTriggerPoint.Position, true) == false) {
+				|| skipTriggerPointCheck == false && node.Span.Contains(triggerPoint.Position, true) == false) {
 				return null;
 			}
 			node = node.UnqualifyExceptNamespace();
@@ -333,7 +333,7 @@ namespace Codist.QuickInfo
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation)) {
 				if (isConvertedType == false) {
-					container.Add(await ShowAvailabilityAsync(doc, token, cancellationToken).ConfigureAwait(false));
+					container.Add(await ShowAvailabilityAsync(document, token, cancellationToken).ConfigureAwait(false));
 				}
 				ctor = node.Parent as ObjectCreationExpressionSyntax;
 				OverrideDocumentation(node,
