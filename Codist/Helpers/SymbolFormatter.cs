@@ -142,7 +142,7 @@ namespace Codist
 			var rt = s.GetReturnType();
 			if (rt != null
 				&& (s.Kind != SymbolKind.Method || ((IMethodSymbol)s).IsTypeSpecialMethod() == false)) {
-				p.Add(new TextBlock { TextWrapping = TextWrapping.Wrap, Foreground = ThemeHelper.ToolTipTextBrush }
+				p.Add(new ThemedTipText()
 					.Append(ThemeHelper.GetImage(IconIds.Return).WrapMargin(WpfHelper.GlyphMargin))
 					.Append(GetRefType(s), Keyword)
 					.AddSymbol(rt, false, this)
