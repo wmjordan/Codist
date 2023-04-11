@@ -13,6 +13,7 @@ namespace Codist.Refactorings
 	{
 		public static readonly ReplaceText WrapInRegion = new WrapInTextRefactoring(R.CMD_SurroundWithRegion, "#region RegionName", "#endregion", 8/*lengthof("#region ")*/, 10/*lengthof(RegionName)*/);
 		public static readonly ReplaceText WrapInIf = new WrapInTextRefactoring(R.CMD_SurroundWithIf, "#if DEBUG", "#endif", 4/*lengthof("#if ")*/, 5/*lengthof(DEBUG)*/);
+		public static readonly ReplaceText CommentToRegion = new CommentToRegionRefactoring();
 		public static readonly ReplaceText SealClass = new SealClassRefactoring();
 		public static readonly ReplaceText MakePublic = new ChangeAccessibilityRefactoring(SyntaxKind.PublicKeyword);
 		public static readonly ReplaceText MakeProtected = new ChangeAccessibilityRefactoring(SyntaxKind.ProtectedKeyword);
@@ -42,8 +43,8 @@ namespace Codist.Refactorings
 			public override int IconId => IconIds.SurroundWith;
 			public override string Title => _Title;
 
-			public override bool Accept(RefactoringContext context) {
-				var v = context.SemanticContext.View;
+			public override bool Accept(RefactoringContext ctx) {
+				var v = ctx.SemanticContext.View;
 				var s = v.Selection;
 				if (s.IsEmpty || s.Mode != TextSelectionMode.Stream) {
 					return false;
@@ -57,7 +58,7 @@ namespace Codist.Refactorings
 					se = s.End.Position.Position;
 					le = sn.GetLineFromPosition(se - 1);
 					if (le.EndIncludingLineBreak.Position == se || le.End.Position == se) {
-						return IsWhitespaceTrivia(context.SemanticContext.Compilation.FindTrivia(ss)) && IsWhitespaceTrivia(context.SemanticContext.Compilation.FindTrivia(se));
+						return IsWhitespaceTrivia(ctx.SemanticContext.Compilation.FindTrivia(ss)) && IsWhitespaceTrivia(ctx.SemanticContext.Compilation.FindTrivia(se));
 					}
 				}
 				return false;
@@ -84,6 +85,77 @@ namespace Codist.Refactorings
 				return k == 0
 					|| k == (int)SyntaxKind.WhitespaceTrivia
 					|| k == (int)SyntaxKind.EndOfLineTrivia;
+			}
+		}
+
+		sealed class CommentToRegionRefactoring : ReplaceText
+		{
+			static readonly char[] __LeadingCommentChars = new[] { '/', ' ', '\t' };
+			public override int IconId => IconIds.Region;
+			public override string Title => "Comment to Region";
+
+			public override bool Accept(RefactoringContext ctx) {
+				var statements = ctx.SelectedStatementInfo.Items;
+				return statements != null
+					&& statements[0].HasLeadingTrivia
+					&& GetSoloSingleLineComment(statements[0].GetLeadingTrivia()).IsKind(SyntaxKind.SingleLineCommentTrivia);
+			}
+
+			public override void Refactor(SemanticContext ctx) {
+				const int LENGTH_OF_REGION = 8;
+				var comment = GetSoloSingleLineComment(new RefactoringContext(ctx).SelectedStatementInfo.Items[0].GetLeadingTrivia());
+				if (comment.FullSpan.Length == 0) {
+					return;
+				}
+				var commentText = comment.ToFullString().TrimStart(__LeadingCommentChars);
+				ctx.View.Edit(new { comment, commentText }, (v, p, edit) => {
+					var s = v.Selection;
+					var sl = v.TextSnapshot.GetLineFromPosition(v.Selection.Start.Position);
+					var indent = sl.GetLinePrecedingWhitespace();
+					var newLine = sl.GetLineBreakText()
+						?? v.Options.GetOptionValue(DefaultOptions.NewLineCharacterOptionId);
+					int se = s.End.Position.Position;
+					var le = v.TextSnapshot.GetLineFromPosition(se - 1); 
+					edit.Replace(p.comment.FullSpan.ToSpan(), "#region " + p.commentText);
+					edit.Insert(le.End, newLine + indent + "#endregion" + newLine);
+				});
+				ctx.View.SelectSpan(comment.SpanStart + LENGTH_OF_REGION, commentText.Length, 1);
+			}
+
+			static SyntaxTrivia GetSoloSingleLineComment(SyntaxTriviaList trivias) {
+				const int START = 0, COMMENT = 1, EOL = 2;
+				var s = START;
+				SyntaxTrivia comment = default;
+				foreach (var trivia in trivias) {
+					var k = trivia.Kind();
+					switch (s) {
+						case START:
+							switch (k) {
+								case SyntaxKind.WhitespaceTrivia:
+								case SyntaxKind.EndOfLineTrivia:
+									continue;
+								case SyntaxKind.SingleLineCommentTrivia:
+									s = COMMENT;
+									comment = trivia;
+									continue;
+							}
+							goto default;
+						case COMMENT:
+							if (k == SyntaxKind.EndOfLineTrivia) {
+								s = EOL;
+								continue;
+							}
+							goto default;
+						case EOL:
+							if (k == SyntaxKind.EndOfLineTrivia || k == SyntaxKind.WhitespaceTrivia) {
+								continue;
+							}
+							goto default;
+						default:
+							return default;
+					}
+				}
+				return s == EOL ? comment : default;
 			}
 		}
 
