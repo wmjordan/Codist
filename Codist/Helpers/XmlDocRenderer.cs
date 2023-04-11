@@ -525,7 +525,7 @@ namespace Codist
 				return;
 			}
 			if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.ContainingType)) {
-				ShowContainingType(inlines, s, _SymbolFormatter);
+				ShowContainingType(inlines, s, SymbolFormatter.SemiTransparent);
 			}
 			_SymbolFormatter.Format(inlines, s, null, false);
 
