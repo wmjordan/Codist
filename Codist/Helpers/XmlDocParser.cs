@@ -216,7 +216,8 @@ namespace Codist
 				var parameters = s.GetParameters();
 				var typeParams = s.GetTypeParameters();
 				var member = t.GetMembers(s.Name)
-					.FirstOrDefault(i => i.MatchSignature(kind, returnType, parameters, typeParams));
+					.FirstOrDefault(i => i.MatchSignature(kind, returnType, parameters, typeParams))
+					?? s.GetExplicitInterfaceImplementations()?.FirstOrDefault(i => i.ContainingType == t);
 				if (member != null) {
 					if (querySymbol.Kind == SymbolKind.Parameter) {
 						member = member.GetParameters()[((IParameterSymbol)querySymbol).Ordinal];
