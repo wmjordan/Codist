@@ -404,7 +404,8 @@ namespace Codist.QuickInfo
 					}
 				}
 				catch (Exception ex) {
-					MessageWindow.Error(ex, R.T_SuperQuickInfo);
+					Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Render, (Action<Exception>)((e) => MessageWindow.Error(e.ToString(), R.T_SuperQuickInfo)), ex);
+					return;
 				}
 			EXIT:
 				// hides the parent container from taking excessive space in the quick info window
