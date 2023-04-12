@@ -116,6 +116,7 @@ namespace Codist
 		public const int SymbolCandidate = KnownImageIds.CodeInformation;
 		public const int InterfaceImplementation = KnownImageIds.ImplementInterface;
 		public const int Disposable = KnownImageIds.ReferenceWarning;
+		public const int Discard = KnownImageIds.HiddenFile;
 		public const int BaseTypes = KnownImageIds.ParentChild;
 		public const int MethodOverloads = KnownImageIds.MethodSet;
 		public const int XmlDocComment = KnownImageIds.Comment;

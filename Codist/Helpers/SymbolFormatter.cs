@@ -140,8 +140,14 @@ namespace Codist
 
 			#region Member type
 			var rt = s.GetReturnType();
-			if (rt != null
-				&& (s.Kind != SymbolKind.Method || ((IMethodSymbol)s).IsTypeSpecialMethod() == false)) {
+			if (rt == null) {
+				if (s.Kind == SymbolKind.Discard) {
+					p.Add(new ThemedTipText()
+						.AddSymbol(((IDiscardSymbol)s).Type, false, this)
+						.Append($" ({R.T_Discard})"));
+				}
+			}
+			else if (s.Kind != SymbolKind.Method || ((IMethodSymbol)s).IsTypeSpecialMethod() == false) {
 				p.Add(new ThemedTipText()
 					.Append(ThemeHelper.GetImage(IconIds.Return).WrapMargin(WpfHelper.GlyphMargin))
 					.Append(GetRefType(s), Keyword)
@@ -687,6 +693,7 @@ namespace Codist
 					text.Add((symbol as ITypeSymbol).GetTypeName());
 					return;
 				case SymbolKind.Label: text.Add(symbol.Render(null, bold, null)); return;
+				case SymbolKind.Discard: text.Add("_".Render(Keyword)); return;
 				default: text.Add(symbol.Name); return;
 			}
 		}

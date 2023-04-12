@@ -498,6 +498,7 @@ namespace Codist
 						default: return KnownImageIds.Property;
 					}
 				case FunctionPointerType: return IconIds.FunctionPointer;
+				case SymbolKind.Discard: return IconIds.Discard;
 				default: return KnownImageIds.Item;
 			}
 		}

@@ -5383,6 +5383,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to discard.
+        /// </summary>
+        internal static string T_Discard {
+            get {
+                return ResourceManager.GetString("T_Discard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Documentation from .
         /// </summary>
         internal static string T_DocumentationFrom {

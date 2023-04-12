@@ -2442,4 +2442,7 @@ Expression too long</value>
   <data name="OT_UseCodeEditorFontForSeeTip" xml:space="preserve">
     <value>Render referenced names of &lt;see/&gt;, &lt;paramref/&gt;, &lt;typeparamref/&gt; with code editor font</value>
   </data>
+  <data name="T_Discard" xml:space="preserve">
+    <value>discard</value>
+  </data>
 </root>
