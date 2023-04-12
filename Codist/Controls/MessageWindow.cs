@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.VisualStudio.PlatformUI;
@@ -25,7 +21,7 @@ namespace Codist.Controls
 			ShowInTaskbar = false;
 			ResizeMode = ResizeMode.NoResize;
 			WindowStartupLocation = WindowStartupLocation.CenterOwner;
-			Owner = System.Windows.Application.Current.MainWindow;
+			Owner = Application.Current.MainWindow;
 			Content = new StackPanel {
 				Margin = WpfHelper.MiddleMargin,
 				Children = {
@@ -36,7 +32,7 @@ namespace Codist.Controls
 							new ColumnDefinition { MaxWidth = Math.Min(Math.Max(Owner.ActualWidth / 2, 800), Owner.ActualWidth) },
 						},
 						Children = {
-							new ContentPresenter().Set(ref _Icon),
+							new ContentPresenter { VerticalAlignment = VerticalAlignment.Top, Margin = WpfHelper.MiddleMargin }.Set(ref _Icon),
 							new Border {
 								BorderThickness = WpfHelper.TinyMargin,
 								Child = new ScrollViewer {
@@ -59,7 +55,7 @@ namespace Codist.Controls
 					}.Set(ref _ButtonPanel)
 				}
 			};
-			this.ReferenceProperty(Window.BackgroundProperty, VsBrushes.ToolWindowBackgroundKey);
+			this.ReferenceProperty(BackgroundProperty, VsBrushes.ToolWindowBackgroundKey);
 			SizeToContent = SizeToContent.WidthAndHeight;
 
 			_DefaultButton.IsDefault = true;
@@ -81,10 +77,10 @@ namespace Codist.Controls
 			return new MessageWindow(content, null, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
 		}
 		public static bool? Error(Exception content, string description) {
-			return new MessageWindow($"{description}{Environment.NewLine}{content.ToString()}", null, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
+			return new MessageWindow($"{description}{Environment.NewLine}{content}", null, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
 		}
 		public static bool? Error(Exception content, string description, string title) {
-			return new MessageWindow($"{description}{Environment.NewLine}{content.ToString()}", title, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
+			return new MessageWindow($"{description}{Environment.NewLine}{content}", title, MessageBoxButton.OK, MessageBoxImage.Error).ShowDialog();
 		}
 		public static bool? OkCancel(object content) {
 			return new MessageWindow(content, null, MessageBoxButton.OKCancel, MessageBoxImage.Question).ShowDialog();
