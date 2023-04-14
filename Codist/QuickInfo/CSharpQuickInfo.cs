@@ -408,7 +408,7 @@ namespace Codist.QuickInfo
 				|| kind == SyntaxKind.ImplicitStackAllocArrayCreationExpression) {
 				return semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
 			}
-			if (kind == SyntaxKind.ThisExpression) {
+			if (kind == SyntaxKind.ThisExpression || kind == CodeAnalysisHelper.VarPattern) {
 				return semanticModel.GetTypeInfo(node, cancellationToken).Type;
 			}
 			if (kind == SyntaxKind.TupleElement || kind == SyntaxKind.ForEachStatement) {

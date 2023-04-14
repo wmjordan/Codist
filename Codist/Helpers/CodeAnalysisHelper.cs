@@ -109,6 +109,7 @@ namespace Codist
 				case RecordStructDeclaration:
 				case SyntaxKind.VariableDeclaration:
 				case SyntaxKind.LocalFunctionStatement:
+				case SyntaxKind.SingleVariableDesignation:
 					//case SyntaxKind.VariableDeclarator:
 					return true;
 			}
@@ -248,6 +249,7 @@ namespace Codist
 				case SyntaxKind.GotoDefaultStatement:
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement:
+				case SwitchExpression:
 				case SyntaxKind.XmlComment:
 					return true;
 			}
@@ -295,7 +297,8 @@ namespace Codist
 				case SyntaxKind.IfStatement: return "if";
 				case SyntaxKind.LocalDeclarationStatement: return "local";
 				case SyntaxKind.LockStatement: return "lock";
-				case SyntaxKind.SwitchStatement: return "switch";
+				case SyntaxKind.SwitchStatement:
+				case SwitchExpression: return "switch";
 				case SyntaxKind.SwitchSection: return "switch section";
 				case SyntaxKind.TryStatement: return "try catch";
 				case SyntaxKind.UsingStatement: return "using";
@@ -425,7 +428,9 @@ namespace Codist
 				case SyntaxKind.ForStatement: return KnownImageIds.ForEachLoop;
 				case SyntaxKind.IfStatement: return IconIds.If;
 				case SyntaxKind.LockStatement: return KnownImageIds.Lock;
-				case SyntaxKind.SwitchStatement: return KnownImageIds.FlowSwitch;
+				case SyntaxKind.SwitchStatement:
+				case SwitchExpression:
+					return KnownImageIds.FlowSwitch;
 				case SyntaxKind.SwitchSection: return KnownImageIds.FlowDecision;
 				case SyntaxKind.TryStatement: return IconIds.TryCatch;
 				case SyntaxKind.UsingStatement: return IconIds.Using;
@@ -790,6 +795,7 @@ namespace Codist
 				case SyntaxKind.IfStatement: return ((IfStatementSyntax)node).Condition.GetExpressionSignature();
 				case SyntaxKind.SwitchSection: return GetSwitchSignature((SwitchSectionSyntax)node);
 				case SyntaxKind.SwitchStatement: return ((SwitchStatementSyntax)node).Expression.GetExpressionSignature();
+				case SwitchExpression: return (node.ChildNodes().FirstOrDefault() as ExpressionSyntax).GetExpressionSignature();
 				case SyntaxKind.WhileStatement: return ((WhileStatementSyntax)node).Condition.GetExpressionSignature();
 				case SyntaxKind.UsingStatement: return GetUsingSignature((UsingStatementSyntax)node);
 				case SyntaxKind.LockStatement: return ((LockStatementSyntax)node).Expression.GetExpressionSignature();
