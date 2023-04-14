@@ -27,7 +27,7 @@ namespace Codist
 			}
 			tip.Title
 				.Append($"{symbol.GetAccessibility()}{symbol.GetAbstractionModifier()}{symbol.GetValueAccessModifier()}{symbol.GetSymbolKindName()} ")
-				.Append(symbol.Name, true)
+				.Append(symbol.GetOriginalName(), true)
 				.Append(symbol.GetParameterString(true));
 			var content = tip.Content;
 			var t = symbol.GetReturnType();
@@ -44,6 +44,13 @@ namespace Codist
 			}
 			else if (symbol.Kind == SymbolKind.TypeParameter) {
 				ShowTypeParameter(content, symbol);
+			}
+			foreach (var item in symbol.GetExplicitInterfaceImplementations()) {
+				content.AppendLineBreak()
+					.Append(R.T_ExplicitImplements)
+					.Append(item.ContainingType.GetTypeName())
+					.Append(".")
+					.Append(item.Name);
 			}
 			t = symbol.ContainingType;
 			if (t != null && t.TypeKind != TypeKind.Enum) {

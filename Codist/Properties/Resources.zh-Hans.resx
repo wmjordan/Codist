@@ -635,7 +635,7 @@ Shift：粘贴并选中下一项（整个单词）</value>
     <value>声明变量: </value>
   </data>
   <data name="T_ExplicitImplements" xml:space="preserve">
-    <value>显式实现接口:</value>
+    <value>显式实现接口: </value>
   </data>
   <data name="T_Member" xml:space="preserve">
     <value>成员:</value>

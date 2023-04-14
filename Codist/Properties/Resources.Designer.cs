@@ -5582,7 +5582,7 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Explicit implements:.
+        ///   Looks up a localized string similar to Explicit implements: .
         /// </summary>
         internal static string T_ExplicitImplements {
             get {

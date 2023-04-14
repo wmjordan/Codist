@@ -652,7 +652,7 @@ Use space to separate keywords.</value>
     <value>Enum underlying type: </value>
   </data>
   <data name="T_ExplicitImplements" xml:space="preserve">
-    <value>Explicit implements:</value>
+    <value>Explicit implements: </value>
   </data>
   <data name="T_HashCode" xml:space="preserve">
     <value>Hash code</value>
