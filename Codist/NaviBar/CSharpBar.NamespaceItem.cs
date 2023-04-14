@@ -108,14 +108,20 @@ namespace Codist.NaviBar
 				var child = Bar.GetChildSymbolOnNaviBar(this, cancellationToken);
 				if (child != null && _Menu.HasItems) {
 					var c = CodeAnalysisHelper.GetSpecificSymbolComparer(child);
-					_Menu.SelectedItem = _Menu.Symbols.FirstOrDefault(s => c(s.Symbol));
+					foreach (var item in _Menu.Symbols) {
+						var s = item.Symbol;
+						if (c(s)) {
+							_Menu.SelectedItem = s;
+							break;
+						}
+					}
 				}
 			}
 
 			void IContextMenuHost.ShowContextMenu(RoutedEventArgs args) {
 				if (ContextMenu == null) {
-					var m = new CSharpSymbolContextMenu(Symbol, null, Bar._SemanticContext);
 					var s = Symbol;
+					var m = new CSharpSymbolContextMenu(s, null, Bar._SemanticContext);
 					if (s != null) {
 						m.AddAnalysisCommands();
 						m.AddCopyAndSearchSymbolCommands();

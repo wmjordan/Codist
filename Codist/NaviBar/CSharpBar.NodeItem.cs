@@ -46,9 +46,9 @@ namespace Codist.NaviBar
 
 			public void ShowContextMenu(RoutedEventArgs args) {
 				if (ContextMenu == null) {
-					var m = new CSharpSymbolContextMenu(Symbol, Node, Bar._SemanticContext);
-					m.AddNodeCommands();
 					var s = Symbol;
+					var m = new CSharpSymbolContextMenu(s, Node, Bar._SemanticContext);
+					m.AddNodeCommands();
 					if (s != null) {
 						m.AddUnitTestCommands();
 						m.Items.Add(new Separator());
@@ -539,8 +539,9 @@ namespace Codist.NaviBar
 				if (this.HasDummyToolTip()) {
 					this.SetTipPlacementBottom();
 					// todo: handle updated syntax node for RootItem
-					if (Symbol != null) {
-						var tip = ToolTipHelper.CreateToolTip(Symbol, true, Bar._SemanticContext);
+					var s = Symbol;
+					if (s != null) {
+						var tip = ToolTipHelper.CreateToolTip(s, true, Bar._SemanticContext);
 						if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.LineOfCode)) {
 							tip.AddTextBlock().Append(R.T_LineOfCode + (Node.GetLineSpan().Length + 1));
 						}
