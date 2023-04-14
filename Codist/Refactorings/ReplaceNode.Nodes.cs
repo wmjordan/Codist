@@ -548,7 +548,7 @@ namespace Codist.Refactorings
 			public override string Title => _Title;
 
 			public override bool Accept(RefactoringContext ctx) {
-				var node = ctx.Node;
+				var node = ctx.NodeIncludeTrivia;
 				switch (node.Kind()) {
 					case SyntaxKind.ArgumentList:
 						if (((ArgumentListSyntax)node).Arguments.Count > 1 && node.IsMultiLine(false) == false) {
@@ -587,7 +587,7 @@ namespace Codist.Refactorings
 			}
 
 			public override IEnumerable<RefactoringAction> Refactor(RefactoringContext ctx) {
-				var node = ctx.Node;
+				var node = ctx.NodeIncludeTrivia;
 				CSharpSyntaxNode newNode = null;
 				if (node is ArgumentListSyntax al) {
 					newNode = al.WithArguments(MakeMultiLine(al.Arguments, ctx));
