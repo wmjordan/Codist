@@ -88,7 +88,7 @@ namespace Codist.Controls
 					break;
 			}
 			if (_Host.Context.SemanticModel != null) {
-				if (_Host.Node != null && _Host.Node.Kind().IsDeclaration()
+				if (_Host.Node?.Kind().IsDeclaration() == true
 					&& _Host.Node.SyntaxTree == _Host.Context.SemanticModel.SyntaxTree
 					&& _Host.Symbol.Kind != SymbolKind.Namespace) {
 					Items.Add(CreateItem(IconIds.FindReferencingSymbols, R.CMD_FindReferencedSymbols, _Host.FindReferencedSymbols));
@@ -134,7 +134,6 @@ namespace Codist.Controls
 						.HandleEvent(MenuItem.ClickEvent, _Host.RunUnitTest));
 				}
 			}
-
 		}
 
 		public void AddTitleItem(string name) {
@@ -450,7 +449,7 @@ namespace Codist.Controls
 						.OrderBy(i => i.Key.ContainingType == containerType ? null : (i.Key.ContainingType ?? i.Key).Name)
 						.ThenBy(i => i.Key.Name)
 						.Select(i => i.Key)) {
-					var sl = s.DeclaringSyntaxReferences.First();
+					var sl = s.DeclaringSyntaxReferences[0];
 					SymbolItem i;
 					if (sl.SyntaxTree.FilePath != loc) {
 						i = m.Add(sl.ToLocation());

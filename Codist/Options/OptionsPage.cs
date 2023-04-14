@@ -271,7 +271,7 @@ namespace Codist.Options
 	[Guid("09020157-B191-464F-8F9B-F3100596BDF0")]
 	sealed class SuperQuickInfoOptionsPage : OptionsPage
 	{
-		UIElement _Child;
+		PageControl _Child;
 
 		protected override Features Feature => Features.SuperQuickInfo;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
@@ -437,7 +437,7 @@ namespace Codist.Options
 	[Guid("CF07BC0B-EF35-499B-8E7A-595638E93474")]
 	sealed class SyntaxHighlightOptionsPage : OptionsPage
 	{
-		UIElement _Child;
+		PageControl _Child;
 
 		protected override Features Feature => Features.SyntaxHighlight;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
@@ -477,7 +477,7 @@ namespace Codist.Options
 	[Guid("74A725E0-6B48-44F6-84AD-A0FD9D8BF710")]
 	sealed class SmartBarOptionsPage : OptionsPage
 	{
-		UIElement _Child;
+		PageControl _Child;
 
 		protected override Features Feature => Features.SmartBar;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
@@ -523,7 +523,7 @@ namespace Codist.Options
 	[Guid("CEBD6083-49F4-4579-94FF-C2774FFB4F9A")]
 	sealed class NavigationBarPage : OptionsPage
 	{
-		UIElement _Child;
+		PageControl _Child;
 
 		protected override Features Feature => Features.NaviBar;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
@@ -607,7 +607,7 @@ namespace Codist.Options
 	[Guid("CA523740-3DF6-4A0A-B01B-3C5D4CBD7AFF")]
 	sealed class ScrollBarMarkerPage : OptionsPage
 	{
-		UIElement _Child;
+		PageControl _Child;
 
 		protected override Features Feature => Features.ScrollbarMarkers;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
@@ -715,11 +715,10 @@ namespace Codist.Options
 		}
 	}
 
-
 	[Guid("3C54350C-A369-46F8-A74B-5180DA804DA1")]
 	sealed class ExtensionDeveloperPage : OptionsPage
 	{
-		UIElement _Child;
+		PageControl _Child;
 
 		protected override Features Feature => Features.None;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
@@ -766,7 +765,6 @@ namespace Codist.Options
 				Config.Instance.Set(options, set);
 				Config.Instance.FireConfigChangedEvent(Features.None);
 			}
-
 		}
 	}
 
@@ -1001,7 +999,7 @@ namespace Codist.Options
 	[Guid("4BD9DEDE-B83D-4552-8197-45BF050E20CA")]
 	sealed class WebSearchPage : OptionsPage
 	{
-		UIElement _Child;
+		PageControl _Child;
 
 		protected override Features Feature => Features.SmartBar | Features.SuperQuickInfo;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
@@ -1200,7 +1198,7 @@ namespace Codist.Options
 	[Guid("6A7DC1C9-2C62-43ED-9A72-B51B23CB9579")]
 	sealed class WrapTextPage : OptionsPage
 	{
-		UIElement _Child;
+		PageControl _Child;
 
 		protected override Features Feature => Features.None;
 		protected override UIElement Child => _Child ?? (_Child = new PageControl(this));
@@ -1208,7 +1206,7 @@ namespace Codist.Options
 		sealed class PageControl : OptionsPageContainer
 		{
 			readonly TextBox _Name, _Pattern, _Indicator;
-			readonly ListBox _List;
+			readonly ListView _List;
 			readonly Button _AddButton, _RemoveButton, _MoveUpButton, _ResetButton, _SaveButton;
 
 			public PageControl(OptionsPage page) : base(page) {
@@ -1242,10 +1240,10 @@ namespace Codist.Options
 									new ColumnDefinition { Width = new GridLength(5, GridUnitType.Star) },
 								},
 								RowDefinitions = {
-									new RowDefinition { },
-									new RowDefinition { },
-									new RowDefinition { },
-									new RowDefinition { }
+									new RowDefinition(),
+									new RowDefinition(),
+									new RowDefinition(),
+									new RowDefinition()
 								},
 								Children = {
 									new Label { Content = R.OTC_Name, Width = 60 },

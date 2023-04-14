@@ -51,7 +51,7 @@ namespace Codist
 			SetActiveBuildConfiguration(CodistPackage.DTE.ActiveDocument, configName);
 		}
 
-		public static IEnumerable<string> GetBuildConfigNames() {
+		public static Chain<string> GetBuildConfigNames() {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			var configs = new Chain<string>();
 			foreach (EnvDTE80.SolutionConfiguration2 c in CodistPackage.DTE.Solution.SolutionBuild.SolutionConfigurations) {
@@ -159,6 +159,5 @@ namespace Codist
 				return false;
 			}
 		}
-
 	}
 }

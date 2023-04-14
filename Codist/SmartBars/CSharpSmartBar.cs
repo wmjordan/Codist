@@ -399,9 +399,7 @@ namespace Codist.SmartBars
 		void DeleteCurrentNode(CommandContext ctx) {
 			var node = _Context.Node;
 			ctx.View.SelectNode(node, true);
-			ctx.View.Edit(node, (view, n, edit) => {
-				edit.Delete(n.FullSpan.ToSpan());
-			});
+			ctx.View.Edit(node, (view, n, edit) => edit.Delete(n.FullSpan.ToSpan()));
 		}
 
 		void AddXmlDocCommands() {

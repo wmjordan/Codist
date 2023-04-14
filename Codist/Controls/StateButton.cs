@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using AppHelpers;
@@ -15,7 +11,7 @@ namespace Codist.Controls
 		readonly TState _State;
 		readonly Func<TState> _StateGetter;
 		readonly Action<TState, bool> _StateSetter;
-		bool _lockUI;
+		bool _UiLock;
 
 		public StateButton(TState state, Func<TState> stateGetter, Action<TState, bool> stateSetter) {
 			_State = state;
@@ -25,18 +21,18 @@ namespace Codist.Controls
 		}
 
 		public void UpdateState() {
-			_lockUI = true;
+			_UiLock = true;
 			try {
 				IsChecked = _StateGetter().MatchFlags(_State);
 			}
 			finally {
-				_lockUI = false;
+				_UiLock = false;
 			}
 		}
 
 		protected override void OnChecked(RoutedEventArgs e) {
 			base.OnChecked(e);
-			if (_lockUI == false) {
+			if (_UiLock == false) {
 				_StateSetter(_State, IsChecked.GetValueOrDefault());
 			}
 		}

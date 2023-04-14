@@ -15,20 +15,21 @@ namespace Codist.Margins
 	{
 		//ToDo: Configurable marker styles
 		//ToDo: Change brush colors according to user settings
-		static readonly Pen CommentPen = new Pen(Brushes.LightGreen, 1);
-		static readonly Brush LineNumberBrush = Brushes.DarkGray;
-		static readonly Pen LineNumberPen = new Pen(LineNumberBrush, 1) { DashStyle = DashStyles.Dash };
-		static readonly Pen EmptyPen = new Pen();
-		static readonly Brush EmphasisBrush = new SolidColorBrush(Constants.CommentColor);
-		static readonly Brush ToDoBrush = new SolidColorBrush(Constants.ToDoColor);
-		static readonly Brush NoteBrush = new SolidColorBrush(Constants.NoteColor);
-		static readonly Brush HackBrush = new SolidColorBrush(Constants.HackColor);
-		static readonly Brush UndoneBrush = new SolidColorBrush(Constants.UndoneColor);
-		static readonly Brush TaskBrush = new SolidColorBrush(Constants.TaskColor);
-		static readonly Brush PreProcessorBrush = Brushes.Gray;
-		static readonly Brush TaskBackgroundBrush = Brushes.White.Alpha(0.5);
+		static readonly Pen __CommentPen = new Pen(Brushes.LightGreen, 1);
+		static readonly SolidColorBrush __LineNumberBrush = Brushes.DarkGray;
+		static readonly Pen __LineNumberPen = new Pen(__LineNumberBrush, 1) { DashStyle = DashStyles.Dash };
+		static readonly Pen __EmptyPen = new Pen();
+		static readonly SolidColorBrush __EmphasisBrush = new SolidColorBrush(Constants.CommentColor);
+		static readonly SolidColorBrush __ToDoBrush = new SolidColorBrush(Constants.ToDoColor);
+		static readonly SolidColorBrush __NoteBrush = new SolidColorBrush(Constants.NoteColor);
+		static readonly SolidColorBrush __HackBrush = new SolidColorBrush(Constants.HackColor);
+		static readonly SolidColorBrush __UndoneBrush = new SolidColorBrush(Constants.UndoneColor);
+		static readonly SolidColorBrush __TaskBrush = new SolidColorBrush(Constants.TaskColor);
+		static readonly SolidColorBrush __PreProcessorBrush = Brushes.Gray;
+		static readonly SolidColorBrush __TaskBackgroundBrush = Brushes.White.Alpha(0.5);
 		//note: this dictionary determines which style has a scrollbar marker
-		static readonly Dictionary<IClassificationType, Brush> ClassificationBrushMapper = InitClassificationBrushMapper();
+		static readonly Dictionary<IClassificationType, Brush> __ClassificationBrushMapper = InitClassificationBrushMapper();
+
 		const double MarkPadding = 1.0;
 		const double MarkSize = 4.0;
 		const double HalfMarkSize = MarkSize / 2 + MarkPadding;
@@ -69,23 +70,23 @@ namespace Codist.Margins
 		static Dictionary<IClassificationType, Brush> InitClassificationBrushMapper() {
 			var r = ServicesHelper.Instance.ClassificationTypeRegistry;
 			return new Dictionary<IClassificationType, Brush> {
-				{ r.GetClassificationType(Constants.EmphasisComment), EmphasisBrush },
-				{ r.GetClassificationType(Constants.TodoComment), ToDoBrush },
-				{ r.GetClassificationType(Constants.NoteComment), NoteBrush },
-				{ r.GetClassificationType(Constants.HackComment), HackBrush },
-				{ r.GetClassificationType(Constants.UndoneComment), UndoneBrush },
-				{ r.GetClassificationType(Constants.Task1Comment), TaskBrush },
-				{ r.GetClassificationType(Constants.Task2Comment), TaskBrush },
-				{ r.GetClassificationType(Constants.Task3Comment), TaskBrush },
-				{ r.GetClassificationType(Constants.Task4Comment), TaskBrush },
-				{ r.GetClassificationType(Constants.Task5Comment), TaskBrush },
-				{ r.GetClassificationType(Constants.Task6Comment), TaskBrush },
-				{ r.GetClassificationType(Constants.Task7Comment), TaskBrush },
-				{ r.GetClassificationType(Constants.Task8Comment), TaskBrush },
-				{ r.GetClassificationType(Constants.Task9Comment), TaskBrush },
-				{ r.GetClassificationType(Constants.CodePreprocessorKeyword), PreProcessorBrush },
-				{ MarkdownTagger.HeaderClassificationTypes[1].ClassificationType, TaskBrush },
-				{ MarkdownTagger.DummyHeaderTags[1].ClassificationType, TaskBrush },
+				{ r.GetClassificationType(Constants.EmphasisComment), __EmphasisBrush },
+				{ r.GetClassificationType(Constants.TodoComment), __ToDoBrush },
+				{ r.GetClassificationType(Constants.NoteComment), __NoteBrush },
+				{ r.GetClassificationType(Constants.HackComment), __HackBrush },
+				{ r.GetClassificationType(Constants.UndoneComment), __UndoneBrush },
+				{ r.GetClassificationType(Constants.Task1Comment), __TaskBrush },
+				{ r.GetClassificationType(Constants.Task2Comment), __TaskBrush },
+				{ r.GetClassificationType(Constants.Task3Comment), __TaskBrush },
+				{ r.GetClassificationType(Constants.Task4Comment), __TaskBrush },
+				{ r.GetClassificationType(Constants.Task5Comment), __TaskBrush },
+				{ r.GetClassificationType(Constants.Task6Comment), __TaskBrush },
+				{ r.GetClassificationType(Constants.Task7Comment), __TaskBrush },
+				{ r.GetClassificationType(Constants.Task8Comment), __TaskBrush },
+				{ r.GetClassificationType(Constants.Task9Comment), __TaskBrush },
+				{ r.GetClassificationType(Constants.CodePreprocessorKeyword), __PreProcessorBrush },
+				{ MarkdownTagger.HeaderClassificationTypes[1].ClassificationType, __TaskBrush },
+				{ MarkdownTagger.DummyHeaderTags[1].ClassificationType, __TaskBrush },
 			};
 		}
 
@@ -132,11 +133,6 @@ namespace Codist.Margins
 			UpdateEventHandlers(true);
 		}
 
-		Brush GetBrush(string name, string resource) {
-			var rd = _EditorFormatMap.GetProperties(name);
-			return rd.Contains(resource) ? rd[resource] as Brush : null;
-		}
-
 		bool UpdateEventHandlers(bool checkEvents) {
 			bool needEvents = checkEvents && _TextView.VisualElement.IsVisible;
 
@@ -181,7 +177,7 @@ namespace Codist.Margins
 				//todo: customizable marker style
 				var c = tag.Tag.ClassificationType;
 				Brush b;
-				if (ClassificationBrushMapper.TryGetValue(c, out b) == false) {
+				if (__ClassificationBrushMapper.TryGetValue(c, out b) == false) {
 					continue;
 				}
 				var y = _ScrollBar.GetYCoordinateOfBufferPosition(tag.TrackingSpan.GetStartPoint(snapshot));
@@ -189,13 +185,13 @@ namespace Codist.Margins
 					// avoid drawing too many closed markers
 					continue;
 				}
-				else if (b == PreProcessorBrush) {
+				else if (b == __PreProcessorBrush) {
 					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.CompilerDirective)) {
 						continue;
 					}
 					DrawMark(drawingContext, b, y, 0);
 				}
-				else if (b == TaskBrush) {
+				else if (b == __TaskBrush) {
 					if (!Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.SpecialComment)) {
 						continue;
 					}
@@ -214,17 +210,14 @@ namespace Codist.Margins
 
 		/// <summary>draws task name (inverted) and the task content</summary>
 		static void DrawTaskMark(DrawingContext dc, Brush brush, double y, string taskName, string taskContent) {
-			//var ft = WpfHelper.ToFormattedText(taskName, 9, TaskBackgroundBrush).SetBold();
-			//dc.DrawRectangle(brush, EmptyPen, new Rect(0, y - ft.Height / 2, ft.Width, ft.Height));
-			//dc.DrawText(ft, new Point(0, y - ft.Height / 2));
 			var tt = WpfHelper.ToFormattedText(taskContent, 9, brush);
-			dc.DrawRectangle(TaskBackgroundBrush, EmptyPen, new Rect(0, y - tt.Height / 2, tt.Width, tt.Height));
+			dc.DrawRectangle(__TaskBackgroundBrush, __EmptyPen, new Rect(0, y - tt.Height / 2, tt.Width, tt.Height));
 			dc.DrawText(tt, new Point(0, y - tt.Height / 2));
 		}
 
 		/// <summary>draws a rectangle, with a border</summary>
 		static void DrawCommentMark(DrawingContext dc, Brush brush, double y) {
-			dc.DrawRectangle(brush, CommentPen, new Rect(MarkPadding, y - HalfMarkSize, MarkSize, MarkSize));
+			dc.DrawRectangle(brush, __CommentPen, new Rect(MarkPadding, y - HalfMarkSize, MarkSize, MarkSize));
 		}
 
 		/// <summary>draws circle or a rectangle</summary>

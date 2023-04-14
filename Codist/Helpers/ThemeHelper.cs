@@ -84,7 +84,7 @@ namespace Codist
 		}
 		public static WpfBrush GetWpfBrush(this ThemeResourceKey resourceKey) {
 			return new WpfBrush(resourceKey.GetWpfColor());
-		} 
+		}
 		#endregion
 
 		public static void GetFontSettings(string categoryGuid, out string fontName, out int fontSize) {
@@ -179,11 +179,12 @@ namespace Codist
 			ToolTipTextBrush = formatMap.ForegroundBrush as WpfBrush;
 			ToolTipFont = formatMap.Typeface.FontFamily;
 			ToolTipFontSize = formatMap.FontRenderingEmSize;
-		} 
+		}
+
 		static void UpdateTextFormatMap(object sender, EventArgs e) {
 			var formatMap = __TextFormatMap.DefaultTextProperties;
 			CodeTextFont = formatMap.Typeface.FontFamily;
-		} 
+		}
 		#endregion
 
 		static class KnownMonikerNameMap

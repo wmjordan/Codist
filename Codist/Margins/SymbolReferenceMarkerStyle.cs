@@ -20,7 +20,7 @@ namespace Codist.Margins
 		public string ReferenceMarkerColor {
 			get => _ReferenceColor.ToHexString();
 			set {
-				UIHelper.ParseColor(value, out _ReferenceColor, out var dummy);
+				UIHelper.ParseColor(value, out _ReferenceColor, out _);
 				_Reference = new SolidColorBrush(_ReferenceColor.A != 0 ? _ReferenceColor : DefaultReferenceMarkerColor);
 			}
 		}
@@ -30,7 +30,7 @@ namespace Codist.Margins
 		public string WriteMarkerColor {
 			get => _WriteColor.ToHexString();
 			set {
-				UIHelper.ParseColor(value, out _WriteColor, out var dummy);
+				UIHelper.ParseColor(value, out _WriteColor, out _);
 				_Write = new SolidColorBrush(_WriteColor.A != 0 ? _WriteColor : DefaultWriteMarkerColor);
 				_SetNull = _Write != null ? new Pen(_Write, 1) : null;
 			}

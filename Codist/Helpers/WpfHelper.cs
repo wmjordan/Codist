@@ -503,6 +503,11 @@ namespace Codist
 			return control;
 		}
 
+		public static TElement DetachEvent<TElement>(this TElement control, RoutedEvent routedEvent, RoutedEventHandler handler) where TElement : UIElement {
+			control.RemoveHandler(routedEvent, handler);
+			return control;
+		}
+
 		public static TElement Bind<TElement>(this TElement control, DependencyProperty dependency, string binding) where TElement : FrameworkElement {
 			control.SetBinding(dependency, binding);
 			return control;

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using R = Codist.Properties.Resources;
-using System.Windows.Documents;
-using System.Windows;
 
 namespace Codist
 {
@@ -188,7 +188,7 @@ namespace Codist
 		static void ShowXmlDocSummary(ISymbol symbol, Compilation compilation, ThemedToolTip tip) {
 			var doc = new XmlDoc(symbol, compilation);
 			var summary = doc.GetDescription(symbol)
-				?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.GetInheritedDescription(symbol, out doc) : null);
+				?? (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.DocumentationFromInheritDoc) ? doc.GetInheritedDescription(symbol, out _) : null);
 			if (summary != null) {
 				var docContent = tip.AddTextBlock();
 				new XmlDocRenderer(compilation, SymbolFormatter.Instance).Render(summary, docContent);
@@ -386,6 +386,5 @@ namespace Codist
 			Negative,
 			Unsigned
 		}
-
 	}
 }

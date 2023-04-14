@@ -100,10 +100,8 @@ namespace Codist
 
 		public static void OutputString(string text) {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			if (__OutputPane == null) {
-				__OutputPane = CreateOutputPane();
-			}
-			__OutputPane.OutputString(text + Environment.NewLine);
+			(__OutputPane ?? (__OutputPane = CreateOutputPane()))
+				.OutputString(text + Environment.NewLine);
 		}
 
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
@@ -129,9 +127,7 @@ namespace Codist
 
 			await base.InitializeAsync(cancellationToken, progress);
 
-			SolutionEvents.OnAfterCloseSolution += (s, args) => {
-				Taggers.SymbolMarkManager.Clear();
-			};
+			SolutionEvents.OnAfterCloseSolution += (s, args) => Taggers.SymbolMarkManager.Clear();
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);

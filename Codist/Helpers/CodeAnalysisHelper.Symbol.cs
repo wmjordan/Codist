@@ -1191,7 +1191,7 @@ namespace Codist
 					|| symbol.DeclaredAccessibility == Accessibility.Protected
 					|| symbol.DeclaredAccessibility == Accessibility.ProtectedOrInternal
 					|| symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata)
-				&& (checkContainingType == false || symbol.ContainingType == null || symbol.ContainingType.IsAccessible(true));
+				&& (checkContainingType == false || symbol.ContainingType?.IsAccessible(true) != false);
 		}
 		#endregion
 
@@ -1432,7 +1432,9 @@ namespace Codist
 		}
 
 		public static bool IsBoundedGenericType(this INamedTypeSymbol type) {
-			return type != null && type.IsGenericType && type.IsUnboundGenericType == false && type != type.OriginalDefinition;
+			return type?.IsGenericType == true
+				&& type.IsUnboundGenericType == false
+				&& type != type.OriginalDefinition;
 		}
 
 		public static bool ContainsTypeArgument(this INamedTypeSymbol generic, ITypeSymbol target) {
@@ -1460,7 +1462,7 @@ namespace Codist
 			}
 			var retType = symbol.GetReturnType();
 			if (returnType == null && retType != null
-				|| returnType != null && returnType.CanConvertTo(retType) == false) {
+				|| returnType?.CanConvertTo(retType) == false) {
 				if (AreEqual(returnType, retType, false) == false) {
 					return false;
 				}

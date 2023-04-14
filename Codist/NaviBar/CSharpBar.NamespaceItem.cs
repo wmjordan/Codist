@@ -36,12 +36,12 @@ namespace Codist.NaviBar
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void HandleClick(object sender, RoutedEventArgs e) {
-				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
+				SyncHelper.CancelAndDispose(ref Bar._CancellationSource, true);
 				if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {
 					Bar.HideMenu();
 					return;
 				}
-				var ct = Bar._cancellationSource.GetToken();
+				var ct = Bar._CancellationSource.GetToken();
 				try {
 					await CreateMenuForNamespaceNodeAsync(ct);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
@@ -79,7 +79,7 @@ namespace Codist.NaviBar
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(false);
 				var items = await Bar._SemanticContext.GetNamespacesAndTypesAsync(Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-				_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this, cancellationToken));
+				_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 			}
 
 			void FilterChanged(object sender, SymbolFilterBox.FilterEventArgs e) {
@@ -96,7 +96,7 @@ namespace Codist.NaviBar
 					_Menu.ClearSymbols();
 					var items = await ctx.GetNamespacesAndTypesAsync(Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this, cancellationToken));
+					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 					_Menu.RefreshItemsSource(true);
 				}
 				else {
@@ -105,7 +105,7 @@ namespace Codist.NaviBar
 			}
 
 			void SelectChild(CancellationToken cancellationToken) {
-				var child = Bar.GetChildSymbolOnNaviBar(this, cancellationToken);
+				var child = Bar.GetChildSymbolOnNaviBar(this);
 				if (child != null && _Menu.HasItems) {
 					var c = CodeAnalysisHelper.GetSpecificSymbolComparer(child);
 					foreach (var item in _Menu.Symbols) {
@@ -149,6 +149,7 @@ namespace Codist.NaviBar
 						ContextMenu = null;
 					}
 					DataContext = null;
+					_Node = null;
 					_Disposed = true;
 				}
 			}

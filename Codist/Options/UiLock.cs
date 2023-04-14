@@ -1,23 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Codist.Options
 {
 	sealed class UiLock
 	{
-		int _locked;
+		int _Locked;
 
-		public bool IsLocked => _locked != 0;
+		public bool IsLocked => _Locked != 0;
 		public Action CommonEventAction { get; set; }
 		public Action PostEventAction { get; set; }
 		public bool Lock() {
-			return Interlocked.CompareExchange(ref _locked, 1, 0) == 0;
+			return Interlocked.CompareExchange(ref _Locked, 1, 0) == 0;
 		}
 		public bool Unlock() {
-			return Interlocked.CompareExchange(ref _locked, 0, 1) == 1;
+			return Interlocked.CompareExchange(ref _Locked, 0, 1) == 1;
 		}
 		public EventHandler HandleEvent (Action action) {
 			return (sender, args) => {

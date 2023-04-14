@@ -314,8 +314,7 @@ namespace Codist.SmartBars
 							.Append(s.ClassificationType.Classification)
 							.Append(':')
 							.Append(' ')
-							.Append(s.Span.GetText())
-							.AppendLine();
+							.AppendLine(s.Span.GetText());
 					}
 					sb.AppendLine().AppendLine(R.T_ClassificationTags);
 					foreach (var item in t) {
@@ -437,9 +436,7 @@ namespace Codist.SmartBars
 		}
 		static CommandItem[] GetSurroundingCommands() {
 			return new CommandItem[] {
-				new CommandItem(IconIds.SurroundWith, R.CMD_SurroundWith, ctx => {
-					TextEditorHelper.ExecuteEditorCommand("Edit.SurroundWith");
-				}),
+				new CommandItem(IconIds.SurroundWith, R.CMD_SurroundWith, ctx => TextEditorHelper.ExecuteEditorCommand("Edit.SurroundWith")),
 				new CommandItem(IconIds.ToggleParentheses, R.CMD_ToggleParentheses, ctx => {
 					if (ctx.View.TryGetFirstSelectionSpan(out var span)) {
 						WrapWith(ctx, "(", ")", true);
@@ -448,7 +445,7 @@ namespace Codist.SmartBars
 			};
 		}
 		static void SearchSelection(string url, CommandContext ctx) {
-			Controls.ExternalCommand.OpenWithWebBrowser(url, ctx.View.GetFirstSelectionText());
+			ExternalCommand.OpenWithWebBrowser(url, ctx.View.GetFirstSelectionText());
 		}
 	}
 }

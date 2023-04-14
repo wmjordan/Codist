@@ -50,7 +50,7 @@ namespace Codist.Taggers
 					for (int i = 0; i < text.Length; i++) {
 						if (Char.IsWhiteSpace(text[i]) == false) {
 							if (text.IndexOf(_Prefix, i, _PrefixLength, StringComparison) == i) {
-								results.Add(new TaggedContentSpan(Tag, span, i = i + _PrefixLength, text.Length - i));
+								results.Add(new TaggedContentSpan(Tag, span, i += _PrefixLength, text.Length - i));
 							}
 							return;
 						}

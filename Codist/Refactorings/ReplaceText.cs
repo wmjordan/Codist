@@ -96,8 +96,7 @@ namespace Codist.Refactorings
 
 			public override bool Accept(RefactoringContext ctx) {
 				var statements = ctx.SelectedStatementInfo.Items;
-				return statements != null
-					&& statements[0].HasLeadingTrivia
+				return statements?[0].HasLeadingTrivia == true
 					&& GetSoloSingleLineComment(statements[0].GetLeadingTrivia()).IsKind(SyntaxKind.SingleLineCommentTrivia);
 			}
 
@@ -329,9 +328,7 @@ namespace Codist.Refactorings
 				}
 
 				var tp = d.GetFirstToken().SpanStart;
-				ctx.View.Edit((tp, modifier), (view, param, edit) => {
-					edit.Insert(param.tp, param.modifier + " ");
-				});
+				ctx.View.Edit((tp, modifier), (view, param, edit) => edit.Insert(param.tp, param.modifier + " "));
 				ctx.View.SelectSpan(tp, modifier.Length, 1);
 			}
 

@@ -18,26 +18,26 @@ namespace Codist.Display
 {
 	static class ResourceMonitor
 	{
-		static Timer _Timer;
-		static readonly StackPanel _MeterContainer = new StackPanel {
+		static Timer __Timer;
+		static readonly StackPanel __MeterContainer = new StackPanel {
 			Orientation = Orientation.Horizontal,
 			Children = { new ContentPresenter(), new ContentPresenter(), new ContentPresenter(), new ContentPresenter() }
 		};
-		static Meter _CpuMeter, _RamMeter, _DriveMeter, _NetworkMeter;
-		static int _IsInited;
-		static CancellationTokenSource _CancellationTokenSource;
+		static Meter __CpuMeter, __RamMeter, __DriveMeter, __NetworkMeter;
+		static int __IsInited;
+		static CancellationTokenSource __CancellationTokenSource;
 
 		public static void Reload(DisplayOptimizations option) {
 			if (option.HasAnyFlag(DisplayOptimizations.ResourceMonitors) == false) {
 				Stop();
 				return;
 			}
-			ToggleMeter<CpuMeter>(0, option, DisplayOptimizations.ShowCpu, ref _CpuMeter);
-			ToggleMeter<DriveMeter>(1, option, DisplayOptimizations.ShowDrive, ref _DriveMeter);
-			ToggleMeter<RamMeter>(2, option, DisplayOptimizations.ShowMemory, ref _RamMeter);
-			ToggleMeter<NetworkMeter>(3, option, DisplayOptimizations.ShowNetwork, ref _NetworkMeter);
-			if (_Timer == null) {
-				_Timer = new Timer(Update, null, 1000, 1000);
+			ToggleMeter<CpuMeter>(0, option, DisplayOptimizations.ShowCpu, ref __CpuMeter);
+			ToggleMeter<DriveMeter>(1, option, DisplayOptimizations.ShowDrive, ref __DriveMeter);
+			ToggleMeter<RamMeter>(2, option, DisplayOptimizations.ShowMemory, ref __RamMeter);
+			ToggleMeter<NetworkMeter>(3, option, DisplayOptimizations.ShowNetwork, ref __NetworkMeter);
+			if (__Timer == null) {
+				__Timer = new Timer(Update, null, 1000, 1000);
 			}
 		}
 
@@ -49,8 +49,8 @@ namespace Codist.Display
 				else {
 					meter = new TMeter();
 					meter.Start();
-					_MeterContainer.Children.RemoveAt(index);
-					_MeterContainer.Children.Insert(index, meter);
+					__MeterContainer.Children.RemoveAt(index);
+					__MeterContainer.Children.Insert(index, meter);
 				}
 			}
 			else {
@@ -59,34 +59,34 @@ namespace Codist.Display
 		}
 
 		static void Stop() {
-			if (_Timer != null) {
-				_Timer.Dispose();
-				_Timer = null;
-				_CpuMeter?.Stop();
-				_RamMeter?.Stop();
-				_DriveMeter?.Stop();
-				_NetworkMeter?.Stop();
+			if (__Timer != null) {
+				__Timer.Dispose();
+				__Timer = null;
+				__CpuMeter?.Stop();
+				__RamMeter?.Stop();
+				__DriveMeter?.Stop();
+				__NetworkMeter?.Stop();
 			}
 		}
 
 		static void Update(object dummy) {
-			UpdateAsync(SyncHelper.CancelAndRetainToken(ref _CancellationTokenSource)).FireAndForget();
+			UpdateAsync(SyncHelper.CancelAndRetainToken(ref __CancellationTokenSource)).FireAndForget();
 		}
 
 		async static Task UpdateAsync(CancellationToken cancellationToken) {
-			_CpuMeter?.Sample();
-			_RamMeter?.Sample();
-			_DriveMeter?.Sample();
-			_NetworkMeter?.Sample();
+			__CpuMeter?.Sample();
+			__RamMeter?.Sample();
+			__DriveMeter?.Sample();
+			__NetworkMeter?.Sample();
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			if (_IsInited == 0) {
+			if (__IsInited == 0) {
 				Init();
 				return;
 			}
-			_CpuMeter?.Update();
-			_RamMeter?.Update();
-			_DriveMeter?.Update();
-			_NetworkMeter?.Update();
+			__CpuMeter?.Update();
+			__RamMeter?.Update();
+			__DriveMeter?.Update();
+			__NetworkMeter?.Update();
 		}
 
 		static void Init() {
@@ -94,10 +94,10 @@ namespace Codist.Display
 			if (statusPanel == null) {
 				return;
 			}
-			if (Interlocked.CompareExchange(ref _IsInited, 1, 0) == 0) {
-				_IsInited = 1;
-				statusPanel.Children.Insert(0, _MeterContainer);
-				_MeterContainer.MouseLeftButtonUp += StartTaskMgr;
+			if (Interlocked.CompareExchange(ref __IsInited, 1, 0) == 0) {
+				__IsInited = 1;
+				statusPanel.Children.Insert(0, __MeterContainer);
+				__MeterContainer.MouseLeftButtonUp += StartTaskMgr;
 			}
 		}
 
@@ -184,7 +184,7 @@ namespace Codist.Display
 		abstract class MultiPerformanceCounterMeter : Meter
 		{
 			PerformanceCounter[] _Counters;
-			float[] _Values;
+			readonly float[] _Values;
 
 			protected MultiPerformanceCounterMeter(int iconId, string tooltip) : base(iconId, tooltip) {
 				_Counters = CreateCounters();
@@ -331,7 +331,7 @@ namespace Codist.Display
 			}
 
 			void RemoveInexistentCpuUsage(int n) {
-				List<uint> remove = new List<uint>();
+				var remove = new List<uint>();
 				foreach (var item in _ProcCpuUsages) {
 					if (item.Value.version != n) {
 						remove.Add(item.Key);

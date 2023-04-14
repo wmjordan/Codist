@@ -16,6 +16,7 @@ namespace Codist
 		internal static ResourceDictionary NavigationBar => __Menu ?? (__Menu = WpfHelper.LoadComponent("controls/NavigationBar.xaml").MergeWith(ThemedControls));
 
 		internal static ResourceDictionary VirtualList => __VirtualList ?? (__VirtualList = WpfHelper.LoadComponent("controls/VirtualList.xaml").MergeWith(ThemedControls));
+
 		internal static ResourceDictionary SymbolList => __SymbolList ?? (__SymbolList = WpfHelper.LoadComponent("controls/SymbolList.xaml").MergeWith(ThemedControls));
 	}
 }

@@ -57,10 +57,8 @@ namespace Codist.Controls
 									AddIcon(ref icons, IconIds.DefaultInterfaceImplementation);
 								}
 							}
-							else {
-								if (ms.IsStatic) {
-									AddIcon(ref icons, IconIds.AbstractMember);
-								}
+							else if (ms.IsStatic) {
+								AddIcon(ref icons, IconIds.AbstractMember);
 							}
 						}
 						else if (ms.IsAbstract) {

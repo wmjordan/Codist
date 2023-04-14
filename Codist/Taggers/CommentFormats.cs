@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Taggers
 {
-
 	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.EmphasisComment)]
 	[Name(Constants.EmphasisComment)]

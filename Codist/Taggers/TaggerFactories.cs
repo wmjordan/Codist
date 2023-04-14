@@ -154,5 +154,4 @@ namespace Codist.Taggers
 			return textView.Properties.GetOrCreateSingletonProperty(() => new MarkdownTagger(textView, buffer, Config.Instance.Features.MatchFlags(Features.SyntaxHighlight))) as ITagger<T>;
 		}
 	}
-
 }

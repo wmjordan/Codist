@@ -21,7 +21,7 @@ namespace Codist.Display
 		}
 
 		void TextViewLoaded(object sender, EventArgs args) {
-			var e = sender as FrameworkElement;
+			var e = (FrameworkElement)sender;
 			e.Loaded -= TextViewLoaded;
 			if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 				WpfHelper.SetUITextRenderOptions(e, true);

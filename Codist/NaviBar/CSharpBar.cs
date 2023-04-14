@@ -30,7 +30,7 @@ namespace Codist.NaviBar
 		IAdornmentLayer _SyntaxNodeRangeAdornment;
 		SemanticContext _SemanticContext;
 
-		CancellationTokenSource _cancellationSource = new CancellationTokenSource();
+		CancellationTokenSource _CancellationSource = new CancellationTokenSource();
 		RootItem _RootItem;
 		GlobalNamespaceItem _GlobalNamespaceItem;
 		NodeItem _MouseHoverItem;
@@ -103,7 +103,7 @@ namespace Codist.NaviBar
 			View.Selection.SelectionChanged += Update;
 			ListContainer.ChildRemoved += ListContainer_MenuRemoved;
 			Config.RegisterUpdateHandler(UpdateCSharpNaviBarConfig);
-			SyncHelper.CancelAndDispose(ref _cancellationSource, true);
+			SyncHelper.CancelAndDispose(ref _CancellationSource, true);
 			_SemanticContext = SemanticContext.GetOrCreateSingletonInstance(View);
 		}
 
@@ -150,9 +150,9 @@ namespace Codist.NaviBar
 		[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 		async void Update(object sender, EventArgs e) {
 			HideMenu();
-			if (_cancellationSource != null) {
+			if (_CancellationSource != null) {
 				try {
-					await UpdateAsync(SyncHelper.CancelAndRetainToken(ref _cancellationSource)).ConfigureAwait(false);
+					await UpdateAsync(SyncHelper.CancelAndRetainToken(ref _CancellationSource)).ConfigureAwait(false);
 				}
 				catch (OperationCanceledException) {
 					// ignore
@@ -228,11 +228,11 @@ namespace Codist.NaviBar
 			if (memberNode == null) {
 				memberNode = Items.GetFirst<NodeItem>(n => n.HasReferencedSymbols);
 			}
-			if (memberNode != null && memberNode.HasReferencedSymbols) {
+			if (memberNode?.HasReferencedSymbols == true) {
 				foreach (var doc in memberNode.ReferencedSymbols) {
-					Items.Add(new SymbolNodeItem(this, doc));
+					Items.Add(new SymbolNodeItem(doc));
 				}
-			} 
+			}
 			#endregion
 		}
 
@@ -289,8 +289,8 @@ namespace Codist.NaviBar
 		}
 		public override void ShowActiveItemMenu() {
 			for (int i = Items.Count - 1; i >= 0; i--) {
-				var item = Items[i] as NodeItem;
-				if (item != null && item.Node.Kind().IsTypeDeclaration()) {
+				if (Items[i] is NodeItem item
+					&& item.Node.Kind().IsTypeDeclaration()) {
 					item.PerformClick();
 					return;
 				}
@@ -420,7 +420,7 @@ namespace Codist.NaviBar
 			return t;
 		}
 
-		ISymbol GetChildSymbolOnNaviBar(BarItem item, CancellationToken cancellationToken) {
+		ISymbol GetChildSymbolOnNaviBar(BarItem item) {
 			var p = Items.IndexOf(item);
 			return p != -1 && p < Items.Count - 1 ? (Items[p + 1] as ISymbolContainer)?.Symbol : null;
 		}
@@ -471,7 +471,7 @@ namespace Codist.NaviBar
 			(sender as ITextView).Closed -= View_Closed;
 			_SemanticContext = null;
 			_Buffer = null;
-			SyncHelper.CancelAndDispose(ref _cancellationSource, false);
+			SyncHelper.CancelAndDispose(ref _CancellationSource, false);
 			_SyntaxNodeRangeAdornment.RemoveAllAdornments();
 			_SyntaxNodeRangeAdornment = null;
 			if (_SymbolList != null) {
@@ -511,12 +511,10 @@ namespace Codist.NaviBar
 
 		sealed class SymbolNodeItem : ThemedImageButton
 		{
-			CSharpBar _Bar;
 			ISymbol _Symbol;
 
-			public SymbolNodeItem(CSharpBar bar, ISymbol symbol)
+			public SymbolNodeItem(ISymbol symbol)
 				: base (IconIds.GoToDefinition, new ThemedMenuText(symbol.GetOriginalName())) {
-				_Bar = bar;
 				_Symbol = symbol;
 				Opacity = 0.8;
 				Unloaded += SymbolNodeItem_Unloaded;
@@ -524,7 +522,6 @@ namespace Codist.NaviBar
 
 			void SymbolNodeItem_Unloaded(object sender, RoutedEventArgs e) {
 				Unloaded -= SymbolNodeItem_Unloaded;
-				_Bar = null;
 				_Symbol = null;
 			}
 
@@ -535,22 +532,22 @@ namespace Codist.NaviBar
 		}
 		sealed class GeometryAdornment : UIElement
 		{
-			readonly DrawingVisual _child;
+			readonly DrawingVisual _Child;
 
 			public GeometryAdornment(Color color, Geometry geometry, double thickness) {
-				_child = new DrawingVisual();
-				using (var context = _child.RenderOpen()) {
+				_Child = new DrawingVisual();
+				using (var context = _Child.RenderOpen()) {
 					context.DrawGeometry(new SolidColorBrush(color.Alpha(25)),
 						thickness < 0.1 ? null : new Pen(ThemeHelper.MenuHoverBorderBrush, thickness),
 						geometry);
 				}
-				AddVisualChild(_child);
+				AddVisualChild(_Child);
 			}
 
 			protected override int VisualChildrenCount => 1;
 
 			protected override Visual GetVisualChild(int index) {
-				return _child;
+				return _Child;
 			}
 		}
 

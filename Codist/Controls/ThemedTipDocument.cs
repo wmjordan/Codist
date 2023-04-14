@@ -14,7 +14,7 @@ namespace Codist.Controls
 			_Container = new Grid {
 				ColumnDefinitions = {
 					new ColumnDefinition { Width = new GridLength(PlaceHolderSize) },
-					new ColumnDefinition { }
+					new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }
 				}
 			};
 			Child = _Container;
@@ -36,7 +36,7 @@ namespace Codist.Controls
 		}
 		public ThemedTipDocument AppendParagraph(int iconId, TextBlock content) {
 			_Container.RowDefinitions.Add(new RowDefinition());
-			UIElement icon;
+			FrameworkElement icon;
 			if (iconId == 0) {
 				icon = new Border { Height = WpfHelper.IconRightMargin, Width = PlaceHolderSize };
 			}

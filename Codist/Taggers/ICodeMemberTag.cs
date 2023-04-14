@@ -17,9 +17,7 @@ namespace Codist
 	{
 		public CodeBlock(CodeBlock parent, CodeMemberType type, string name, SnapshotSpan span, int level) {
 			Parent = parent;
-			if (parent != null) {
-				parent.Children.Add(this);
-			}
+			parent?.Children.Add(this);
 			Type = type;
 			Name = name;
 			Span = span;

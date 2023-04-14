@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Taggers
@@ -42,10 +40,10 @@ namespace Codist.Taggers
 			_Bookmarks[new BookmarkedSymbol(symbol)] = classificationType;
 		}
 		internal static bool Remove(IBookmarkedSymbol symbol) {
-			return _Bookmarks.TryRemove(symbol, out var dummy);
+			return _Bookmarks.TryRemove(symbol, out _);
 		}
 		internal static bool Remove(ISymbol symbol) {
-			return _Bookmarks.TryRemove(new WrappedSymbol(symbol), out var dummy);
+			return _Bookmarks.TryRemove(new WrappedSymbol(symbol), out _);
 		}
 
 		static int GetHashCode(IBookmarkedSymbol symbol) {
@@ -69,9 +67,12 @@ namespace Codist.Taggers
 			public BookmarkedSymbol(ISymbol symbol) {
 				Name = symbol.Name;
 				Kind = symbol.Kind;
-				ContainingType = symbol.ContainingType != null ? new BookmarkedSymbolType(symbol.ContainingType) : EmptyBookmarkedSymbolType.Instance;
-				var rt = symbol.GetReturnType() as INamedTypeSymbol;
-				MemberType = rt != null ? new BookmarkedSymbolType(rt) : EmptyBookmarkedSymbolType.Instance;
+				ContainingType = symbol.ContainingType != null
+					? new BookmarkedSymbolType(symbol.ContainingType)
+					: EmptyBookmarkedSymbolType.Instance;
+				MemberType = symbol.GetReturnType() is INamedTypeSymbol rt
+					? new BookmarkedSymbolType(rt)
+					: EmptyBookmarkedSymbolType.Instance;
 				ImageId = symbol.GetImageId();
 				DisplayString = symbol.ToDisplayString();
 				//Reference = symbol.DeclaringSyntaxReferences.FirstOrDefault();
@@ -142,11 +143,9 @@ namespace Codist.Taggers
 			public IBookmarkedSymbolType ContainingType => _ContainingType ?? (_ContainingType = _Symbol.ContainingType != null ? new WrappedSymbolType(_Symbol.ContainingType) : EmptyBookmarkedSymbolType.Instance);
 			public IBookmarkedSymbolType MemberType {
 				get {
-					if (_MemberType != null) {
-						return _MemberType;
-					}
-					var t = _Symbol.GetReturnType() as INamedTypeSymbol;
-					return _MemberType = t != null ? new WrappedSymbolType(t) : EmptyBookmarkedSymbolType.Instance;
+					return _MemberType ?? (_MemberType = _Symbol.GetReturnType() is INamedTypeSymbol t
+						? new WrappedSymbolType(t)
+						: EmptyBookmarkedSymbolType.Instance);
 				}
 			}
 			public int ImageId => _Symbol.GetImageId();

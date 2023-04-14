@@ -9,11 +9,11 @@ namespace Codist.Taggers
 		where TTagger : class, IReusableTagger, ITagger<TTag>
 		where TTag : ITag
 	{
-		TTagger _tagger;
+		TTagger _Tagger;
 		public DisposableTagger(TTagger tagger) {
-			_tagger = tagger;
-			_tagger.AddRef();
-			_tagger.TagsChanged += OnTagsChanged;
+			_Tagger = tagger;
+			_Tagger.AddRef();
+			_Tagger.TagsChanged += OnTagsChanged;
 		}
 
 		void OnTagsChanged(object sender, SnapshotSpanEventArgs e) {
@@ -21,16 +21,16 @@ namespace Codist.Taggers
 		}
 
 		public IEnumerable<ITagSpan<TTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
-			return _tagger.GetTags(spans);
+			return _Tagger.GetTags(spans);
 		}
 
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		public void Dispose() {
-			if (_tagger != null) {
-				_tagger.TagsChanged -= OnTagsChanged;
-				_tagger.Release();
-				_tagger = null;
+			if (_Tagger != null) {
+				_Tagger.TagsChanged -= OnTagsChanged;
+				_Tagger.Release();
+				_Tagger = null;
 			}
 		}
 	}

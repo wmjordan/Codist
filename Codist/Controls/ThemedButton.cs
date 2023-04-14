@@ -9,7 +9,8 @@ namespace Codist.Controls
 {
 	public sealed class ThemedButton : Button, IContextMenuHost, IDisposable
 	{
-		readonly Action _clickHandler;
+		readonly Action _ClickAction;
+		readonly RoutedEventHandler _ClickHandler;
 
 		public ThemedButton(object content, object toolTip) {
 			Content = content;
@@ -29,20 +30,20 @@ namespace Codist.Controls
 
 		public ThemedButton(object content, object toolTip, Action onClickHandler)
 			: this(content, toolTip) {
-			_clickHandler = onClickHandler;
-			Click += ThemedButton_Click;
+			_ClickAction = onClickHandler;
+			this.HandleEvent(Button.ClickEvent, ThemedButton_Click);
 		}
 
 		public ThemedButton(object content, object toolTip, RoutedEventHandler clickHandler)
 			: this(content, toolTip) {
-			Click += clickHandler;
+			this.HandleEvent(Button.ClickEvent, _ClickHandler = clickHandler);
 		}
 
 		public void ShowContextMenu(RoutedEventArgs args) {
 		}
 
 		void ThemedButton_Click(object sender, RoutedEventArgs e) {
-			_clickHandler?.Invoke();
+			_ClickAction?.Invoke();
 		}
 
 		internal void PerformClick() {
@@ -52,6 +53,10 @@ namespace Codist.Controls
 		public void Dispose() {
 			if (Content is StackPanel p) {
 				p.Children.DisposeCollection();
+			}
+			this.DetachEvent(Button.ClickEvent, ThemedButton_Click);
+			if (_ClickHandler != null) {
+				this.DetachEvent(Button.ClickEvent, _ClickHandler);
 			}
 			Content = null;
 		}

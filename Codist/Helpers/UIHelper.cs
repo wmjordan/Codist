@@ -71,7 +71,7 @@ namespace Codist
 		static bool ParseByte(string text, int index, out byte value) {
 			var h = text[index];
 			var l = text[++index];
-			var b = 0;
+			int b;
 			if (h >= '0' && h <= '9') {
 				b = (h - '0') << 4;
 			}

@@ -9,7 +9,7 @@ namespace Codist.Controls
 	sealed class SearchScopeBox : UserControl
 	{
 		readonly ThemedToggleButton _ProjectFilter, _DocumentFilter;
-		bool _uiLock;
+		bool _UiLock;
 		private ScopeType _Filter;
 
 		public event EventHandler FilterChanged;
@@ -55,23 +55,23 @@ namespace Codist.Controls
 		}
 
 		void KeepChecked(object sender, RoutedEventArgs e) {
-			if (_uiLock) {
+			if (_UiLock) {
 				return;
 			}
-			_uiLock = true;
+			_UiLock = true;
 			(sender as ThemedToggleButton).IsChecked = true;
 			e.Handled = true;
-			_uiLock = false;
+			_UiLock = false;
 		}
 
 		void UpdateFilterValue(object sender, RoutedEventArgs eventArgs) {
-			if (_uiLock) {
+			if (_UiLock) {
 				return;
 			}
-			_uiLock = true;
+			_UiLock = true;
 			_ProjectFilter.IsChecked = _DocumentFilter.IsChecked = false;
 			(sender as ThemedToggleButton).IsChecked = true;
-			_uiLock = false;
+			_UiLock = false;
 			var f = sender == _DocumentFilter ? ScopeType.ActiveDocument
 				: sender == _ProjectFilter ? ScopeType.ActiveProject
 				: ScopeType.Undefined;

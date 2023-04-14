@@ -64,8 +64,8 @@ namespace Codist.Taggers
 			if (_TaggerProvider != null) {
 				if (_Taggers.Count > 0) {
 					// don't iterate _Taggers, since the Release method will change the collection
-					foreach (var item in _Taggers.ToList() /* hold taggers to be disposed */) {
-						item.Value.Release();
+					foreach (var tagger in _Taggers.Values.ToList() /* hold taggers to be disposed */) {
+						tagger.Release();
 					}
 					_Taggers.Clear();
 				}
@@ -198,9 +198,9 @@ namespace Codist.Taggers
 				}
 
 				// don't iterate _Taggers, since the Release method will change the collection
-				foreach (var item in c._Taggers.ToList()) {
-					if (item.Value._ParseResult?.Workspace.CurrentSolution.Id.Id != id) {
-						item.Value.Release();
+				foreach (var tagger in c._Taggers.Values.ToList()) {
+					if (tagger._ParseResult?.Workspace.CurrentSolution.Id.Id != id) {
+						tagger.Release();
 					}
 				}
 				c._LastSolutionId = result.Workspace.CurrentSolution.Id.Id;

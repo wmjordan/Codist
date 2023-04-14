@@ -446,7 +446,7 @@ namespace Codist
 				case SyntaxKind.XmlElement:
 				case SyntaxKind.XmlEmptyElement: return KnownImageIds.XMLElement;
 				case SyntaxKind.XmlComment: return KnownImageIds.XMLCommentTag;
-				case SyntaxKind.DestructorDeclaration: return IconIds.Deconstructor;
+				case SyntaxKind.DestructorDeclaration: return IconIds.Destructor;
 				case SyntaxKind.UncheckedStatement: return KnownImageIds.CheckBoxUnchecked;
 				case SyntaxKind.CheckedStatement: return KnownImageIds.CheckBoxChecked;
 				case SyntaxKind.ReturnStatement: return IconIds.Return;

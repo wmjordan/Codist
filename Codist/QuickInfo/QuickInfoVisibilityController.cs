@@ -5,7 +5,6 @@ using System.Windows.Input;
 using AppHelpers;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Text;
 
 namespace Codist.QuickInfo
 {

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
@@ -27,7 +25,7 @@ namespace Codist
 				throw new InvalidOperationException("textContainer is null");
 			}
 			var docId = workspace.GetDocumentIdInCurrentContext(textContainer);
-			if (docId == null) {
+			if (docId is null) {
 				throw new InvalidOperationException("docId is null");
 			}
 			return solution.WithDocumentText(docId, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(docId);
@@ -81,10 +79,9 @@ namespace Codist
 		}
 
 		public static string GetDocId(this Document document) {
-			if (document == null) {
-				return String.Empty;
-			}
-			return $"{document.Name}({document.Id.Id.ToString("N").Substring(0, 8)})";
+			return document == null
+				? String.Empty
+				: $"{document.Name}({document.Id.Id.ToString("N").Substring(0, 8)})";
 		}
 	}
 }

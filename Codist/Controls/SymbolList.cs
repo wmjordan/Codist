@@ -232,19 +232,17 @@ namespace Codist.Controls
 		void SetupListForKnownImageIds() {
 			ContainerType = SymbolListType.VsKnownImage;
 			IconProvider = s => {
-				var f = s.Symbol as IFieldSymbol;
-				return f == null || f.HasConstantValue == false || f.Type.SpecialType != SpecialType.System_Int32
-					? null
-					: ThemeHelper.GetImage((int)f.ConstantValue);
+				return s.Symbol is IFieldSymbol f && f.HasConstantValue && f.Type.SpecialType == SpecialType.System_Int32
+					? ThemeHelper.GetImage((int)f.ConstantValue)
+					: null;
 			};
 		}
 		void SetupListForKnownMonikers() {
 			ContainerType = SymbolListType.VsKnownImage;
 			IconProvider = s => {
-				var p = s.Symbol as IPropertySymbol;
-				return p == null || p.IsStatic == false
-					? null
-					: ThemeHelper.GetImage(p.Name);
+				return s.Symbol is IPropertySymbol p && p.IsStatic
+					? ThemeHelper.GetImage(p.Name)
+					: null;
 			};
 		}
 		static Border GetColorPreviewIcon(WPF.Brush brush) {
@@ -423,7 +421,7 @@ namespace Codist.Controls
 			return tip;
 		}
 
-		static object CreateLocationToolTip(SymbolItem item, SemanticContext sc) {
+		static ThemedToolTip CreateLocationToolTip(SymbolItem item, SemanticContext sc) {
 			if (item.Location.IsInSource) {
 				var f = item.Location.SourceTree.FilePath;
 				return new ThemedToolTip(Path.GetFileName(f), String.Join(Environment.NewLine,
@@ -619,8 +617,7 @@ namespace Codist.Controls
 					DragLeave += DragLeaveHandler;
 					QueryContinueDrag += QueryContinueDragHandler;
 					var r = DragDrop.DoDragDrop(s, i, DragDropEffects.Copy | DragDropEffects.Move);
-					var t = Footer as TextBlock;
-					if (t != null) {
+					if (Footer is TextBlock t) {
 						t.Text = null;
 					}
 					DragOver -= DragOverHandler;
@@ -642,12 +639,11 @@ namespace Codist.Controls
 					|| source.SyntaxNode.Span.IntersectsWith(target.SyntaxNode.Span) == false)) {
 				var copy = e.KeyStates.MatchFlags(DragDropKeyStates.ControlKey);
 				e.Effects = copy ? DragDropEffects.Copy : DragDropEffects.Move;
-				var t = Footer as TextBlock;
-				if (t != null) {
+				if (Footer is TextBlock t) {
 					t.Text = (e.GetPosition(li).Y < li.ActualHeight / 2
-							? (copy ? R.T_CopyBefore : R.T_MoveBefore)
-							: (copy ? R.T_CopyAfter : R.T_MoveAfter)
-							).Replace("<NAME>", target.SyntaxNode.GetDeclarationSignature());
+						? (copy ? R.T_CopyBefore : R.T_MoveBefore)
+						: (copy ? R.T_CopyAfter : R.T_MoveAfter)
+						).Replace("<NAME>", target.SyntaxNode.GetDeclarationSignature());
 				}
 			}
 			else {
@@ -657,8 +653,7 @@ namespace Codist.Controls
 		}
 
 		void DragLeaveHandler(object sender, DragEventArgs e) {
-			var t = Footer as TextBlock;
-			if (t != null) {
+			if (Footer is TextBlock t) {
 				t.Text = null;
 			}
 			e.Handled = true;
@@ -706,6 +701,5 @@ namespace Codist.Controls
 				ExtIconProvider = null;
 			}
 		}
-
 	}
 }

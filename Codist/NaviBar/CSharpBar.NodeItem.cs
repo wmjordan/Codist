@@ -41,7 +41,7 @@ namespace Codist.NaviBar
 			public override BarItemType ItemType => BarItemType.Node;
 			public SyntaxNode Node { get; private set; }
 			public bool IsSymbolNode => false;
-			public ISymbol Symbol => _Symbol ?? (_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(Node, Bar._cancellationSource.GetToken())));
+			public ISymbol Symbol => _Symbol ?? (_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(Node, Bar._CancellationSource.GetToken())));
 			public bool HasReferencedSymbols => _ReferencedSymbols != null && _ReferencedSymbols.Count > 0;
 			public List<ISymbol> ReferencedSymbols => _ReferencedSymbols ?? (_ReferencedSymbols = new List<ISymbol>());
 
@@ -65,7 +65,7 @@ namespace Codist.NaviBar
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			[SuppressMessage("Performance", "U2U1009:Async or iterator methods should avoid state machine generation for early exits (throws or synchronous returns)", Justification = Suppression.EventHandler)]
 			async void HandleClick(object sender, RoutedEventArgs e) {
-				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
+				SyncHelper.CancelAndDispose(ref Bar._CancellationSource, true);
 				if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {
 					Bar.HideMenu();
 					return;
@@ -79,7 +79,7 @@ namespace Codist.NaviBar
 						return;
 					}
 					// displays member list for type declarations or regions outside of member declaration
-					var ct = Bar._cancellationSource.GetToken();
+					var ct = Bar._CancellationSource.GetToken();
 					try {
 						await CreateMenuForTypeSymbolNodeAsync(ct);
 						await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);

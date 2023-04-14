@@ -16,7 +16,7 @@ namespace Codist.SyntaxHighlight
 	[DebuggerDisplay("{ClassificationType}: {ForeColor} {FontSize}")]
 	abstract class StyleBase
 	{
-		static protected readonly Regex FriendlyNamePattern = new Regex(@"([a-z])([A-Z0-9])", RegexOptions.Singleline);
+		static protected readonly Regex FriendlyNamePattern = new Regex("([a-z])([A-Z0-9])", RegexOptions.Singleline);
 		Color _ForeColor, _BackColor, _LineColor;
 		byte _ForeColorOpacity, _BackColorOpacity, _LineOpacity, _LineThickness, _LineOffset;
 
@@ -108,7 +108,7 @@ namespace Codist.SyntaxHighlight
 		internal abstract string ClassificationType { get; }
 		internal abstract string Description { get; }
 
-		internal Brush MakeBrush() {
+		internal SolidColorBrush MakeBrush() {
 			return ForeColor.A != 0 ? new SolidColorBrush(ForeColor) : null;
 		}
 

@@ -30,12 +30,12 @@ namespace Codist.NaviBar
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void HandleClick(object sender, RoutedEventArgs e) {
-				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
+				SyncHelper.CancelAndDispose(ref Bar._CancellationSource, true);
 				if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {
 					Bar.HideMenu();
 					return;
 				}
-				var ct = Bar._cancellationSource.GetToken();
+				var ct = Bar._CancellationSource.GetToken();
 				try {
 					await CreateMenuForGlobalNamespaceNodeAsync(ct);
 					_FilterBox.UpdateNumbers(_Menu.Symbols);
@@ -75,7 +75,7 @@ namespace Codist.NaviBar
 				if (d != null) {
 					var items = await Bar._SemanticContext.GetNamespacesAndTypesAsync((await d.Project.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace, cancellationToken).ConfigureAwait(false);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this, cancellationToken));
+					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 				}
 			}
 
@@ -98,13 +98,13 @@ namespace Codist.NaviBar
 				if (d != null) {
 					var items = await ctx.GetNamespacesAndTypesAsync((await d.Project.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace, cancellationToken).ConfigureAwait(false);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this, cancellationToken));
+					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 				}
 				_Menu.RefreshItemsSource(true);
 			}
 
 			void SelectChild(CancellationToken cancellationToken) {
-				var child = Bar.GetChildSymbolOnNaviBar(this, cancellationToken);
+				var child = Bar.GetChildSymbolOnNaviBar(this);
 				if (child != null && _Menu.HasItems) {
 					var c = CodeAnalysisHelper.GetSpecificSymbolComparer(child);
 					_Menu.SelectedItem = _Menu.Symbols.FirstOrDefault(s => c(s.Symbol));

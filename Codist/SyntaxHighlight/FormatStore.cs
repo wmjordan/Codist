@@ -63,7 +63,7 @@ namespace Codist.SyntaxHighlight
 				return r;
 			}
 		}
-		public static IEnumerable<KeyValuePair<string, StyleBase>> GetStyles() {
+		public static IReadOnlyDictionary<string, StyleBase> GetStyles() {
 			return __SyntaxStyleCache;
 		}
 
@@ -333,8 +333,7 @@ namespace Codist.SyntaxHighlight
 					var dedup = new HashSet<IClassificationType>();
 					// ChangedItems collection is dynamic
 					// cache the changes to prevent it from changing during the enumerating procedure
-					var changes = e.ChangedItems.ToList();
-					foreach (var item in changes) {
+					foreach (var item in e.ChangedItems.ToList()) {
 						HighlightRecursive(__GetClassificationType(item), dedup);
 					}
 

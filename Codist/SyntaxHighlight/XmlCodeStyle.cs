@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
 namespace Codist.SyntaxHighlight
 {
@@ -29,5 +27,4 @@ namespace Codist.SyntaxHighlight
 			return FriendlyNamePattern.Replace(StyleID.ToString(), "$1 $2");
 		}
 	}
-
 }

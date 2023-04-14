@@ -12,7 +12,7 @@ namespace Codist.QuickInfo
 {
 	sealed class QuickInfoBackgroundController : IAsyncQuickInfoSource
 	{
-		Brush _Background;
+		SolidColorBrush _Background;
 
 		public QuickInfoBackgroundController() {
 			UpdateBackgroundBrush();

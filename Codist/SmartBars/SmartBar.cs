@@ -8,7 +8,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using AppHelpers;
 using Codist.Controls;
-using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
@@ -468,8 +467,8 @@ namespace Codist.SmartBars
 				if (ContextMenu is IDisposable d) {
 					d.Dispose();
 				}
-				else if (ContextMenu != null) {
-					ContextMenu.DisposeCollection();
+				else {
+					ContextMenu?.DisposeCollection();
 				}
 			}
 

@@ -88,5 +88,4 @@ namespace Codist.QuickInfo
 			return new QuickInfoItem(activeSpan.ToTrackingSpan(), info.SetGlyph(ThemeHelper.GetImage(IconIds.SelectCode)).Tag());
 		}
 	}
-
 }

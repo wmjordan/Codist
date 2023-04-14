@@ -20,23 +20,23 @@ namespace Codist.NaviBar
 	{
 		const string DefaultActiveTitle = "Headings";
 		static readonly IClassificationType
-			_H1 = MarkdownTagger.HeaderClassificationTypes[1].ClassificationType,
-			_H2 = MarkdownTagger.HeaderClassificationTypes[2].ClassificationType,
-			_H3 = MarkdownTagger.HeaderClassificationTypes[3].ClassificationType,
-			_H4 = MarkdownTagger.HeaderClassificationTypes[4].ClassificationType,
-			_H5 = MarkdownTagger.HeaderClassificationTypes[5].ClassificationType,
-			_H6 = MarkdownTagger.HeaderClassificationTypes[6].ClassificationType,
-			_DummyTag1 = MarkdownTagger.DummyHeaderTags[1].ClassificationType,
-			_DummyTag2 = MarkdownTagger.DummyHeaderTags[2].ClassificationType,
-			_DummyTag3 = MarkdownTagger.DummyHeaderTags[3].ClassificationType,
-			_DummyTag4 = MarkdownTagger.DummyHeaderTags[4].ClassificationType,
-			_DummyTag5 = MarkdownTagger.DummyHeaderTags[5].ClassificationType,
-			_DummyTag6 = MarkdownTagger.DummyHeaderTags[6].ClassificationType;
+			__H1 = MarkdownTagger.HeaderClassificationTypes[1].ClassificationType,
+			__H2 = MarkdownTagger.HeaderClassificationTypes[2].ClassificationType,
+			__H3 = MarkdownTagger.HeaderClassificationTypes[3].ClassificationType,
+			__H4 = MarkdownTagger.HeaderClassificationTypes[4].ClassificationType,
+			__H5 = MarkdownTagger.HeaderClassificationTypes[5].ClassificationType,
+			__H6 = MarkdownTagger.HeaderClassificationTypes[6].ClassificationType,
+			__DummyTag1 = MarkdownTagger.DummyHeaderTags[1].ClassificationType,
+			__DummyTag2 = MarkdownTagger.DummyHeaderTags[2].ClassificationType,
+			__DummyTag3 = MarkdownTagger.DummyHeaderTags[3].ClassificationType,
+			__DummyTag4 = MarkdownTagger.DummyHeaderTags[4].ClassificationType,
+			__DummyTag5 = MarkdownTagger.DummyHeaderTags[5].ClassificationType,
+			__DummyTag6 = MarkdownTagger.DummyHeaderTags[6].ClassificationType;
 		readonly TaggerResult _Tags;
 		readonly ThemedToolBarText _ActiveTitleLabel;
 		MarkdownList _TitleList;
 		LocationItem[] _Titles;
-		ThemedImageButton _ActiveItem;
+		readonly ThemedImageButton _ActiveItem;
 		ITextSearchService2 _TextSearch;
 
 		public MarkdownBar(IWpfTextView view, ITextSearchService2 textSearch) : base(view) {
@@ -203,7 +203,7 @@ namespace Codist.NaviBar
 		sealed class MarkdownList : VirtualList
 		{
 			readonly MarkdownBar _Bar;
-			ThemedTextBox _FinderBox;
+			readonly ThemedTextBox _FinderBox;
 			Predicate<object> _Filter;
 
 			public MarkdownList(MarkdownBar bar) {
@@ -234,7 +234,7 @@ namespace Codist.NaviBar
 					}
 				};
 				Footer = new TextBlock { Margin = WpfHelper.MenuItemMargin }
-						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey)     
+						.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.SystemGrayTextBrushKey)
 						.AddImage(IconIds.LineOfCode)
 						.Append(bar.View.TextSnapshot.LineCount);
 				_FinderBox.TextChanged += SearchCriteriaChanged;
@@ -303,10 +303,10 @@ namespace Codist.NaviBar
 		sealed class LocationItem : ListItem
 		{
 			static Thickness
-				_H3Padding = new Thickness(10, 0, 0, 0),
-				_H4Padding = new Thickness(20, 0, 0, 0),
-				_H5Padding = new Thickness(30, 0, 0, 0),
-				_H6Padding = new Thickness(40, 0, 0, 0);
+				__H3Padding = new Thickness(10, 0, 0, 0),
+				__H4Padding = new Thickness(20, 0, 0, 0),
+				__H5Padding = new Thickness(30, 0, 0, 0),
+				__H6Padding = new Thickness(40, 0, 0, 0);
 			readonly TaggedContentSpan _Span;
 			readonly int _ImageId;
 
@@ -314,28 +314,28 @@ namespace Codist.NaviBar
 				_Span = span;
 				Content = new ThemedMenuText(span.ContentText);
 				var ct = span.Tag.ClassificationType;
-				if (ct == _H1 || ct == _DummyTag1) {
+				if (ct == __H1 || ct == __DummyTag1) {
 					Content.FontWeight = FontWeights.Bold;
 					_ImageId = IconIds.Heading1;
 				}
-				else if (ct == _H2 || ct == _DummyTag2) {
+				else if (ct == __H2 || ct == __DummyTag2) {
 					_ImageId = IconIds.Heading2;
 				}
-				else if (ct == _H3 || ct == _DummyTag3) {
+				else if (ct == __H3 || ct == __DummyTag3) {
 					_ImageId = IconIds.Heading3;
-					Content.Padding = _H3Padding;
+					Content.Padding = __H3Padding;
 				}
-				else if (ct == _H4 || ct == _DummyTag4) {
+				else if (ct == __H4 || ct == __DummyTag4) {
 					_ImageId = IconIds.Heading4;
-					Content.Padding = _H4Padding;
+					Content.Padding = __H4Padding;
 				}
-				else if (ct == _H5 || ct == _DummyTag5) {
+				else if (ct == __H5 || ct == __DummyTag5) {
 					_ImageId = IconIds.Heading5;
-					Content.Padding = _H5Padding;
+					Content.Padding = __H5Padding;
 				}
-				else if (ct == _H6 || ct == _DummyTag6) {
+				else if (ct == __H6 || ct == __DummyTag6) {
 					_ImageId = IconIds.None;
-					Content.Padding = _H6Padding;
+					Content.Padding = __H6Padding;
 				}
 			}
 

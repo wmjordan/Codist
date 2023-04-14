@@ -152,7 +152,7 @@ namespace Codist.Commands
 
 		sealed class AutoVersionSettingsControl : StackPanel
 		{
-			readonly ComboBox _Major, _Minor, _Build, _Revision;
+			readonly AutoVersionModeControl _Major, _Minor, _Build, _Revision;
 			readonly Label _Preview;
 			readonly string _OriginalValues;
 			readonly string[] _PreviewValues;

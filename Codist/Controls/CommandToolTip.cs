@@ -8,7 +8,7 @@ namespace Codist.Controls
 	sealed class CommandToolTip : StackPanel
 	{
 		const int TipWidth = 300;
-		StackPanel _TextPanel;
+		readonly StackPanel _TextPanel;
 
 		CommandToolTip(int imageId) {
 			Orientation = Orientation.Horizontal;

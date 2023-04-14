@@ -54,7 +54,7 @@ namespace Codist.Taggers
 						var lines = sourceText.Lines;
 						if (lineNumber < lines.Count) {
 							var sourceSpan = lines[lineNumber - 1].Span;
-							var offset = (int)span.Start.Position + c2 + 2 - sourceSpan.Start;
+							var offset = span.Start.Position + c2 + 2 - sourceSpan.Start;
 							// verify that the source text is the same as the find result
 							if (t.Length >= c2 + 2 + sourceSpan.Length
 								&& t.IndexOf(sourceText.GetSubText(sourceSpan).ToString(), c2 + 2, sourceSpan.Length) >= 0) {

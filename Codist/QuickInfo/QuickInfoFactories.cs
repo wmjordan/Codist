@@ -1,12 +1,7 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Utilities;
-using Microsoft.VisualStudio.Text.Operations;
 using AppHelpers;
 using Microsoft.VisualStudio.Text;
 

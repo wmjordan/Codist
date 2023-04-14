@@ -6,7 +6,6 @@ using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
 {
-
 	sealed class SymbolMenu : SymbolList
 	{
 		readonly StackPanel _HeaderPanel;
@@ -91,10 +90,9 @@ namespace Codist.Controls
 		}
 
 		void MenuItemSelect(object sender, MouseButtonEventArgs e) {
-			var menu = sender as VirtualList;
 			if (e.OccursOn<ListBoxItem>()) {
 				_ExternalAdornment.FocusOnTextView();
-				(menu.SelectedItem as SymbolItem)?.GoToSource();
+				((SymbolItem)((VirtualList)sender).SelectedItem)?.GoToSource();
 			}
 		}
 

@@ -39,6 +39,5 @@ namespace Codist.SyntaxHighlight
 			}
 			formatMap.SetProperties(propertyId, m);
 		}
-
 	}
 }

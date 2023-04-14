@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Threading;
 
 namespace Codist
@@ -13,19 +11,19 @@ namespace Codist
 	/// </summary>
 	static class LogHelper
 	{
-		static int _Sync;
-		static int _PSId = Process.GetCurrentProcess().Id;
+		static int __Sync;
+		static readonly int __PSId = Process.GetCurrentProcess().Id;
 
-		static string _Path;
+		static string __Path;
 		public static string LogPath {
-			get => _Path;
-			set => _Path = File.Exists(value) ? value : null;
+			get => __Path;
+			set => __Path = File.Exists(value) ? value : null;
 		}
 
 		[Conditional("LOG")]
 		[Conditional("DEBUG")]
 		public static void Log(this string message) {
-			if (_Path != null) {
+			if (__Path != null) {
 				WriteLog(message);
 			}
 			Debug.WriteLine(message);
@@ -34,17 +32,17 @@ namespace Codist
 		[Conditional("LOG")]
 		[Conditional("DEBUG")]
 		static void WriteLog(string message) {
-			while (Interlocked.CompareExchange(ref _Sync, 1, 0) != 0) {
-				SpinWait.SpinUntil(() => Volatile.Read(ref _Sync) == 0);
+			while (Interlocked.CompareExchange(ref __Sync, 1, 0) != 0) {
+				SpinWait.SpinUntil(() => Volatile.Read(ref __Sync) == 0);
 			}
 			try {
-				File.AppendAllText(_Path, $"{_PSId.ToText()}\t{DateTime.Now.ToLongTimeString()}\t{message}{Environment.NewLine}");
+				File.AppendAllText(__Path, $"{__PSId.ToText()}\t{DateTime.Now.ToLongTimeString()}\t{message}{Environment.NewLine}");
 			}
 			catch (SystemException) {
 				// ignore
 			}
 			finally {
-				Volatile.Write(ref _Sync, 0);
+				Volatile.Write(ref __Sync, 0);
 			}
 		}
 

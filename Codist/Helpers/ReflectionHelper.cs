@@ -24,7 +24,7 @@ namespace Codist
 				il.Emit(OpCodes.Ret);
 				return m.CreateDelegate<Func<TInstance, TField>>();
 			}
-			return (s) => null;
+			return (_) => null;
 		}
 		public static Func<TInstance, TProperty> CreateGetPropertyMethod<TInstance, TProperty>(string name, Type castType = null) where TInstance : class
 			{
@@ -48,7 +48,7 @@ namespace Codist
 				il.Emit(OpCodes.Ret);
 				return m.CreateDelegate<Func<TInstance, TProperty>>();
 			}
-			return (s) => default(TProperty);
+			return (_) => default;
 		}
 		public static Action<TInstance, TProperty> CreateSetPropertyMethod<TInstance, TProperty>(string name) where TInstance : class {
 			var type = typeof(TInstance);

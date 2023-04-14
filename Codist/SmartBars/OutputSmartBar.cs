@@ -40,12 +40,8 @@ namespace Codist.SmartBars
 		}
 
 		void AddFilePathCommands(string t) {
-			AddCommand(MyToolBar, IconIds.Open, $"{R.CMD_OpenOrExecuteFile}\n{t}", ctx => {
-				FileHelper.TryRun(t);
-			});
-			AddCommand(MyToolBar, IconIds.OpenFolder, $"{R.CMD_OpenFolder}\n{Path.GetDirectoryName(t)}", ctx => {
-				FileHelper.OpenInExplorer(t);
-			});
+			AddCommand(MyToolBar, IconIds.Open, $"{R.CMD_OpenOrExecuteFile}\n{t}", ctx => FileHelper.TryRun(t));
+			AddCommand(MyToolBar, IconIds.OpenFolder, $"{R.CMD_OpenFolder}\n{Path.GetDirectoryName(t)}", ctx => FileHelper.OpenInExplorer(t));
 			switch (Path.GetExtension(t).ToLowerInvariant()) {
 				case ".exe":
 				case ".bat":
@@ -61,16 +57,12 @@ namespace Codist.SmartBars
 					break;
 			}
 			if (IsFileTypeRegisteredInVS(t)) {
-				AddCommand(MyToolBar, IconIds.OpenWithVisualStudio, R.CMD_OpenWithVS, ctx => {
-					TextEditorHelper.OpenFile(t);
-				});
+				AddCommand(MyToolBar, IconIds.OpenWithVisualStudio, R.CMD_OpenWithVS, ctx => TextEditorHelper.OpenFile(t));
 			}
 		}
 
 		void AddDirectoryPathCommands(string t) {
-			AddCommand(MyToolBar, IconIds.OpenFolder, $"{R.CMD_OpenFolder}\n{t}", ctx => {
-				FileHelper.TryRun(t);
-			});
+			AddCommand(MyToolBar, IconIds.OpenFolder, $"{R.CMD_OpenFolder}\n{t}", ctx => FileHelper.TryRun(t));
 			AddCommand(MyToolBar, IconIds.OpenWithCmd, $"{R.CMD_OpenFileInCmd}\n{t}", ctx => {
 				Process.Start(new ProcessStartInfo(Environment.SystemDirectory + "\\cmd.exe") { WorkingDirectory = t });
 			});

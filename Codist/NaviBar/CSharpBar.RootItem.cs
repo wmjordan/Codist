@@ -170,8 +170,8 @@ namespace Codist.NaviBar
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void SearchCriteriaChanged(object sender, EventArgs e) {
-				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
-				var ct = Bar._cancellationSource.GetToken();
+				SyncHelper.CancelAndDispose(ref Bar._CancellationSource, true);
+				var ct = Bar._CancellationSource.GetToken();
 				try {
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
 					_Menu.ItemsSource = null;
@@ -250,7 +250,7 @@ namespace Codist.NaviBar
 				}
 				else {
 					// todo find async, sort later, incrementally
-					_IncrementalSearchContainer = result = await Bar._SemanticContext.Document.Project.FindDeclarationsAsync(symbolName, MaxResultLimit, false, Char.IsUpper(symbolName[0]), SymbolFilter.All, token).ConfigureAwait(false);
+					_IncrementalSearchContainer = result = await Bar._SemanticContext.Document.Project.FindDeclarationsAsync(symbolName, MaxResultLimit, false, Char.IsUpper(symbolName[0]), token).ConfigureAwait(false);
 					_PreviousSearchKeywords = symbolName;
 				}
 				int c = 0;

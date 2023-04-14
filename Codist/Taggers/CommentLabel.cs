@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
-using Microsoft.VisualStudio.Text.Classification;
 
 namespace Codist.Taggers
 {
-
 	[DebuggerDisplay("{Label} IgnoreCase: {IgnoreCase} AllowPunctuationDelimiter: {AllowPunctuationDelimiter}")]
 	sealed class CommentLabel
 	{
-		string _label;
+		string _Label;
 
 		public CommentLabel() {
 		}
@@ -27,10 +25,10 @@ namespace Codist.Taggers
 
 		/// <summary>Gets or sets the label to identifier the comment type.</summary>
 		public string Label {
-			get { return _label; }
+			get { return _Label; }
 			set {
 				value = value != null ? value.Trim() : String.Empty;
-				_label = value;
+				_Label = value;
 				LabelLength = value.Length;
 			}
 		}
@@ -52,7 +50,7 @@ namespace Codist.Taggers
 			label.AllowPunctuationDelimiter = AllowPunctuationDelimiter;
 			label.StyleApplication = StyleApplication;
 			label.StyleID = StyleID;
-			label._label = _label;
+			label._Label = _Label;
 			label.LabelLength = LabelLength;
 			label.Comparison = Comparison;
 		}

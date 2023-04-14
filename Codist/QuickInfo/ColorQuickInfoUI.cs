@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Codist.Controls;
@@ -6,10 +7,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using GdiColor = System.Drawing.Color;
+using R = Codist.Properties.Resources;
 using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
-using R = Codist.Properties.Resources;
-using System.Windows;
 
 namespace Codist.QuickInfo
 {
@@ -79,7 +79,7 @@ namespace Codist.QuickInfo
 							new ThemedTipText(c.ToHexString()) { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
 								.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin)
 								.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 1),
-							new ThemedTipText($"{v.Hue.ToString("0.###")}, {v.Saturation.ToString("0.###")}, {v.Luminosity.ToString("0.###")}") { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
+							new ThemedTipText($"{v.Hue:0.###}, {v.Saturation:0.###}, {v.Luminosity:0.###}") { Background = ThemeHelper.TextBoxBackgroundBrush.Alpha(0.5), Foreground = ThemeHelper.TextBoxBrush, Padding = WpfHelper.SmallHorizontalMargin }
 								.WrapBorder(ThemeHelper.TextBoxBorderBrush, WpfHelper.TinyMargin)
 								.SetValue(Grid.SetColumn, 1).SetValue(Grid.SetRow, 2),
 						}
@@ -179,6 +179,5 @@ namespace Codist.QuickInfo
 			}
 			return r;
 		}
-
 	}
 }

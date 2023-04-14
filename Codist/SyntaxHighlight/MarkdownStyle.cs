@@ -19,5 +19,4 @@
 			return FriendlyNamePattern.Replace(StyleID.ToString(), "$1 $2");
 		}
 	}
-
 }

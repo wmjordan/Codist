@@ -25,7 +25,7 @@ namespace Codist.Options
 			Title.Text = text;
 		}
 
-		public TextBlock Title { get; private set; }
+		public TextBlock Title { get; }
 	}
 
 	sealed class Note : Label
@@ -65,7 +65,7 @@ namespace Codist.Options
 			_CheckEventHandler = checkEventHandler;
 		}
 		public OptionBox(TOption initialValue, TOption option, Action<TOption, bool> checkEventHandler, Features updateFeature) : this(initialValue, option, checkEventHandler) {
-			_CheckEventHandler += (o, v) => Config.Instance.FireConfigChangedEvent(updateFeature);
+			_CheckEventHandler += (_, __) => Config.Instance.FireConfigChangedEvent(updateFeature);
 		}
 		public void UpdateWithOption(TOption newValue) {
 			IsChecked = newValue.MatchFlags(_Option);

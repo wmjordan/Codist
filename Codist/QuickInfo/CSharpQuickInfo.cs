@@ -617,7 +617,6 @@ namespace Codist.QuickInfo
 						)));
 				}
 			}
-
 		}
 
 		static void ShowSymbolLocationInfo(InfoContainer qiContent, Compilation compilation, ISymbol symbol) {

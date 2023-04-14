@@ -10,8 +10,8 @@ namespace Codist.Margins
 {
 	sealed class LineNumberMargin : MarginElementBase, IDisposable, IWpfTextViewMargin
 	{
-		static readonly SolidColorBrush LineNumberBrush = Brushes.DarkGray;
-		static readonly Pen LineNumberPen = new Pen(LineNumberBrush, 1) { DashStyle = DashStyles.Dash };
+		static readonly SolidColorBrush __LineNumberBrush = Brushes.DarkGray;
+		static readonly Pen __LineNumberPen = new Pen(__LineNumberBrush, 1) { DashStyle = DashStyles.Dash };
 		const double LineNumberRenderPadding = -3;
 
 		IWpfTextView _TextView;
@@ -104,12 +104,11 @@ namespace Codist.Margins
 					continue;
 				}
 				dy = y;
-				drawingContext.DrawLine(LineNumberPen, new Point(-100, y), new Point(100, y));
-				var t = WpfHelper.ToFormattedText(i.ToString(), 9, LineNumberBrush);
+				drawingContext.DrawLine(__LineNumberPen, new Point(-100, y), new Point(100, y));
+				var t = WpfHelper.ToFormattedText(i.ToString(), 9, __LineNumberBrush);
 				drawingContext.DrawText(t, new Point(_ScrollbarWidth - t.Width, y));
 			}
 		}
-
 
 		void TextView_Closed(object sender, EventArgs e) {
 			Dispose();

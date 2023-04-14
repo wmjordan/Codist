@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using GdiColor = System.Drawing.Color;
+using WpfBrushes = System.Windows.Media.Brushes;
 using WpfColor = System.Windows.Media.Color;
 using WpfColors = System.Windows.Media.Colors;
-using WpfBrush = System.Windows.Media.Brush;
-using WpfBrushes = System.Windows.Media.Brushes;
 
 namespace Codist
 {
@@ -20,8 +16,8 @@ namespace Codist
 	/// </summary>
 	static class ColorHelper
 	{
-		static readonly Type ObjectType = typeof(object);
-		static readonly Type ThemeResourceKeyType = typeof(ThemeResourceKey);
+		static readonly Type __ObjectType = typeof(object);
+		static readonly Type __ThemeResourceKeyType = typeof(ThemeResourceKey);
 
 		static class NamedColorCache
 		{
@@ -120,20 +116,20 @@ namespace Codist
 		}
 
 		public static SolidColorBrush GetVsResourceBrush(Type type, string name) {
-			var p = type.GetProperty(name, ObjectType)?.GetValue(null);
+			var p = type.GetProperty(name, __ObjectType)?.GetValue(null);
 			return p == null
 				? null
 				: System.Windows.Application.Current.Resources.Get<SolidColorBrush>(p);
 		}
 		public static SolidColorBrush GetVsResourceColor(Type type, string name) {
-			var p = type.GetProperty(name, ObjectType)?.GetValue(null);
+			var p = type.GetProperty(name, __ObjectType)?.GetValue(null);
 			return p == null
 				? null
 				: new SolidColorBrush(System.Windows.Application.Current.Resources.Get<WpfColor>(p));
 		}
 
 		public static SolidColorBrush GetVsThemeBrush(Type type, string name) {
-			var p = type.GetProperty(name, ThemeResourceKeyType);
+			var p = type.GetProperty(name, __ThemeResourceKeyType);
 			return (p?.GetValue(null) as ThemeResourceKey)?.GetWpfBrush();
 		}
 

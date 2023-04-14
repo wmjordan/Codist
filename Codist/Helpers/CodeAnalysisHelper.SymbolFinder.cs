@@ -201,7 +201,7 @@ namespace Codist
 		/// <summary>
 		/// Finds symbol declarations matching <paramref name="keywords"/> within given <paramref name="project"/>.
 		/// </summary>
-		public static async Task<IReadOnlyCollection<ISymbol>> FindDeclarationsAsync(this Project project, string keywords, int resultLimit, bool fullMatch, bool matchCase, SymbolFilter filter = SymbolFilter.All, CancellationToken token = default) {
+		public static async Task<IReadOnlyCollection<ISymbol>> FindDeclarationsAsync(this Project project, string keywords, int resultLimit, bool fullMatch, bool matchCase, CancellationToken token = default) {
 			var symbols = new SortedSet<ISymbol>(CreateSymbolComparer());
 			int maxNameLength = 0;
 			var predicate = CreateNameFilter(keywords, fullMatch, matchCase);
@@ -524,10 +524,10 @@ namespace Codist
 					}
 					if (results.TryGetValue(s, out var l)) {
 						var sf = location.Location.SourceTree.FilePath;
-						foreach (var item in l) {
-							if (item.usage == u
-								&& item.loc.Location.SourceSpan == ss
-								&& item.loc.Location.SourceTree.FilePath == sf) {
+						foreach (var (usage, loc) in l) {
+							if (usage == u
+								&& loc.Location.SourceSpan == ss
+								&& loc.Location.SourceTree.FilePath == sf) {
 								goto NEXT;
 							}
 						}

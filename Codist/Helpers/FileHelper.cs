@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using R = Codist.Properties.Resources;
 
 namespace Codist
@@ -43,7 +40,7 @@ namespace Codist
 		}
 
 		public static void OpenInExplorer(string path) {
-			var (folder, file) = DeconstructPath(path);
+			var (folder, _) = DeconstructPath(path);
 			OpenPathInExplorer(folder, path);
 		}
 

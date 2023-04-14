@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
@@ -8,9 +9,7 @@ namespace Codist.Commands
 	internal static class AutoBuildVersionWindowCommand
 	{
 		public static void Initialize() {
-			Command.AutoBuildVersionWindow.Register(Execute, (s, args) => {
-				((OleMenuCommand)s).Visible = GetSelectedProjectItem() != null;
-			});
+			Command.AutoBuildVersionWindow.Register(Execute, (s, args) => ((OleMenuCommand)s).Visible = GetSelectedProjectItem() != null);
 		}
 
 		static void Execute(object sender, EventArgs e) {
@@ -23,12 +22,12 @@ namespace Codist.Commands
 
 		static Project GetSelectedProjectItem() {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			var items = (object[])CodistPackage.DTE.ToolWindows.SolutionExplorer.SelectedItems;
-			foreach (UIHierarchyItem hi in items) {
-				var item = hi.Object as Project;
-				if (item != null
-					&& item.Kind == VsShellHelper.CSharpProjectKind) {
-					return item;
+			if (CodistPackage.DTE.ToolWindows.SolutionExplorer.SelectedItems is object[] selectedObjects) {
+				foreach (UIHierarchyItem hi in selectedObjects.OfType<UIHierarchyItem>()) {
+					if (hi.Object is Project item
+						&& item.Kind == VsShellHelper.CSharpProjectKind) {
+						return item;
+					}
 				}
 			}
 			return null;

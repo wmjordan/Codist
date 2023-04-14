@@ -47,12 +47,12 @@ namespace Codist
 		public Document Document => _Model.Document;
 		public SemanticModel SemanticModel => _Model.SemanticModel;
 		public CompilationUnitSyntax Compilation => _Model.Compilation;
-		public SyntaxNode Node => _Node != null && _Node.Span.Contains(_Position)
+		public SyntaxNode Node => _Node?.Span.Contains(_Position) == true
 			? _Node
 			: (_Node = GetNode(_Position, false, false));
 		public SyntaxNode NodeIncludeTrivia {
 			get {
-				return _NodeIncludeTrivia != null && _NodeIncludeTrivia.Span.Contains(_Position)
+				return _NodeIncludeTrivia?.Span.Contains(_Position) == true
 					? _NodeIncludeTrivia
 					: (_NodeIncludeTrivia = GetNode(_Position, true, true));
 			}
@@ -180,8 +180,8 @@ namespace Codist
 					MatchDeclarationNode(item, matches, signature, node);
 				}
 			}
-			else if (member is TypeDeclarationSyntax) {
-				foreach (var item in ((TypeDeclarationSyntax)member).Members) {
+			else if (member is TypeDeclarationSyntax t) {
+				foreach (var item in t.Members) {
 					MatchDeclarationNode(item, matches, signature, node);
 				}
 			}

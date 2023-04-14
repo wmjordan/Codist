@@ -8,7 +8,8 @@ using Microsoft.VisualStudio.PlatformUI;
 
 namespace Codist.Controls
 {
-	class VirtualList : ListBox, IDisposable {
+	class VirtualList : ListBox, IDisposable
+	{
 		public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register("Header", typeof(UIElement), typeof(VirtualList));
 		public static readonly DependencyProperty HeaderButtonsProperty = DependencyProperty.Register("HeaderButtons", typeof(UIElement), typeof(VirtualList));
 		public static readonly DependencyProperty FooterProperty = DependencyProperty.Register("Footer", typeof(UIElement), typeof(VirtualList));
@@ -139,24 +140,14 @@ namespace Codist.Controls
 	abstract class ListItem /*: INotifyPropertyChanged*/
 	{
 		UIElement _Icon;
-		TextBlock _Content;
-		string _Hint;
 
 		public abstract int ImageId { get; }
 		public UIElement Icon {
 			get => _Icon ?? ThemeHelper.GetImage(ImageId);
 			set => _Icon = value;
 		}
-		public string Hint {
-			get => _Hint;
-			set => _Hint = value;
-		}
-		public TextBlock Content {
-			get => _Content;
-			set => _Content = value;
-		}
+		public string Hint { get; set; }
+		public TextBlock Content { get; set; }
 		public VirtualList Container { get; }
-
 	}
-
 }

@@ -15,13 +15,13 @@ namespace Codist.Margins
 		[DefaultValue(Constants.EmptyColor)]
 		public string ForegroundColor {
 			get => ForeColor.ToHexString();
-			set => UIHelper.ParseColor(value, out _ForeColor, out var dummy);
+			set => UIHelper.ParseColor(value, out _ForeColor, out _);
 		}
 		/// <summary>Gets or sets the foreground color to render the marker. The color format could be #RRGGBBAA or #RRGGBB.</summary>
 		[DefaultValue(Constants.EmptyColor)]
 		public string BackgroundColor {
 			get => BackColor.ToHexString();
-			set => UIHelper.ParseColor(value, out _BackColor, out var dummy);
+			set => UIHelper.ParseColor(value, out _BackColor, out _);
 		}
 		internal Color ForeColor { get => _ForeColor; set => _ForeColor = value; }
 		internal Color BackColor { get => _BackColor; set => _BackColor = value; }

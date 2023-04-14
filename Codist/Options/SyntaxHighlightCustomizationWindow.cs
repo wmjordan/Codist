@@ -20,7 +20,7 @@ namespace Codist.Options
 {
 	sealed class SyntaxHighlightCustomizationWindow : Window
 	{
-		static readonly Thickness SubOptionMargin = new Thickness(24, 0, 0, 0);
+		static readonly Thickness __SubOptionMargin = new Thickness(24, 0, 0, 0);
 		static readonly IClassificationType __BraceMatchingClassificationType = ServicesHelper.Instance.ClassificationTypeRegistry.GetClassificationType(Constants.CodeBraceMatching);
 		const int SMALL_LABEL_WIDTH = 60, MIDDLE_LABEL_WIDTH = 120;
 
@@ -357,7 +357,6 @@ namespace Codist.Options
 		}
 
 		public bool IsClosing { get; private set; }
-		public bool IsReloading { get; private set; }
 		internal StyleBase ActiveStyle => _SelectedStyleButton?.StyleSettings;
 
 		#region List initializers
@@ -584,7 +583,7 @@ namespace Codist.Options
 			}
 		}
 
-		static IEnumerable<IClassificationType> ToClassificationTypes<TStyle>(List<TStyle> styles)
+		static List<IClassificationType> ToClassificationTypes<TStyle>(List<TStyle> styles)
 			where TStyle : StyleBase {
 			var r = new List<IClassificationType>(styles.Count + 4);
 			string category = null;
@@ -593,7 +592,8 @@ namespace Codist.Options
 				if (item.Category.Length == 0) {
 					continue;
 				}
-				var style = styles.FirstOrDefault(i => i.Id == item.Id) ?? item;
+				var id = item.Id;
+				var style = styles.Find(i => i.Id == id) ?? item;
 				if (item.Category != category) {
 					r.Add(TextEditorHelper.CreateClassificationCategory(category = item.Category));
 				}
@@ -1030,8 +1030,7 @@ namespace Codist.Options
 
 		void OnTagCaseSensitiveChanged(bool? value) {
 			Update(() => {
-				if (_SelectedCommentTag != null
-					&& _SelectedCommentTag.IgnoreCase != value == false) {
+				if (_SelectedCommentTag?.IgnoreCase != value == false) {
 					_SelectedCommentTag.IgnoreCase = value == false;
 					return true;
 				}
@@ -1501,10 +1500,9 @@ namespace Codist.Options
 						(_HighlightNonPrivateFieldDeclarationBox = o.CreateOptionBox(SpecialHighlightOptions.NonPrivateField, UpdateConfig, R.OT_ApplyToNonPrivateField)),
 						(_HighlightConstructorAsTypeBox = o.CreateOptionBox(SpecialHighlightOptions.UseTypeStyleOnConstructor, UpdateConfig, R.OT_StyleConstructorAsType)),
 						(_HighlightCapturingLambdaBox = o.CreateOptionBox(SpecialHighlightOptions.CapturingLambdaExpression, UpdateConfig, R.OT_CapturingLambda)),
-
 					});
 				foreach (var item in new[] { _HighlightDeclarationBracesBox, _HighlightParameterBracesBox, _HighlightCastParenthesesBox, _HighlightBranchBracesBox, _HighlightLoopBracesBox, _HighlightResourceBracesBox }) {
-					item.WrapMargin(SubOptionMargin);
+					item.WrapMargin(__SubOptionMargin);
 					item.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);
 				}
 				_MarkSpecialPunctuationBox.ReferenceStyle(VsResourceKeys.CheckBoxStyleKey);

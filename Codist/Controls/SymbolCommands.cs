@@ -239,31 +239,33 @@ namespace Codist.Controls
 			m.Show();
 		}
 
-		internal static async Task<ISymbol[]> GetNamespacesAndTypesAsync(this SemanticContext context, INamespaceSymbol s, CancellationToken cancellationToken) {
-			if (s == null) {
-				return Array.Empty<ISymbol>();
-			}
-			var ss = new HashSet<(Microsoft.CodeAnalysis.Text.TextSpan, string)>();
-			var a = new HashSet<ISymbol>(CodeAnalysisHelper.GetSymbolNameComparer());
-			var defOrRefMembers = new HashSet<INamespaceOrTypeSymbol>(s.GetMembers());
-			var nb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
-			var tb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
-			foreach (var ns in await s.FindSimilarNamespacesAsync(context.Document.Project, cancellationToken).ConfigureAwait(false)) {
-				foreach (var m in ns.GetMembers()) {
-					if (m.CanBeReferencedByName && m.IsImplicitlyDeclared == false && a.Add(m)) {
-						(m.IsNamespace ? nb : tb).Add(m);
+		internal static Task<ISymbol[]> GetNamespacesAndTypesAsync(this SemanticContext context, INamespaceSymbol symbol, CancellationToken cancellationToken) {
+			return symbol == null
+				? Task.FromResult(Array.Empty<ISymbol>())
+				: GetNamespacesAndTypesUncheckedAsync(context, symbol, cancellationToken);
+
+			async Task<ISymbol[]> GetNamespacesAndTypesUncheckedAsync(SemanticContext ctx, INamespaceSymbol s, CancellationToken ct) {
+				var ss = new HashSet<(Microsoft.CodeAnalysis.Text.TextSpan, string)>();
+				var a = new HashSet<ISymbol>(CodeAnalysisHelper.GetSymbolNameComparer());
+				var defOrRefMembers = new HashSet<INamespaceOrTypeSymbol>(s.GetMembers());
+				var nb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
+				var tb = ImmutableArray.CreateBuilder<INamespaceOrTypeSymbol>();
+				foreach (var ns in await s.FindSimilarNamespacesAsync(ctx.Document.Project, ct).ConfigureAwait(false)) {
+					foreach (var m in ns.GetMembers()) {
+						if (m.CanBeReferencedByName && m.IsImplicitlyDeclared == false && a.Add(m)) {
+							(m.IsNamespace ? nb : tb).Add(m);
+						}
 					}
-					continue;
 				}
+				var r = new ISymbol[nb.Count + tb.Count];
+				var i = -1;
+				foreach (var item in nb.OrderBy(n => n.Name)
+					.Concat(tb.OrderBy(n => n.Name).ThenBy(t => (t as INamedTypeSymbol)?.Arity ?? 0))
+					) {
+					r[++i] = item;
+				}
+				return r;
 			}
-			var r = new ISymbol[nb.Count + tb.Count];
-			var i = -1;
-			foreach (var item in nb.OrderBy(n => n.Name)
-				.Concat(tb.OrderBy(n => n.Name).ThenBy(t => (t as INamedTypeSymbol)?.Arity ?? 0))
-				) {
-				r[++i] = item;
-			}
-			return r;
 		}
 	}
 }

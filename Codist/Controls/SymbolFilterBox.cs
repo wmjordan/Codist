@@ -157,7 +157,7 @@ namespace Codist.Controls
 				case IconIds.PrivateConstructor:
 				case KnownImageIds.OperatorPrivate:
 					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.Method);
-				case IconIds.Deconstructor:
+				case IconIds.Destructor:
 				case IconIds.ExtensionMethod:
 					return filterTypes.MatchFlags(MemberFilterTypes.Method);
 				case KnownImageIds.FieldPublic:
@@ -343,7 +343,7 @@ namespace Codist.Controls
 			readonly ThemedToggleButton _PublicFilter, _ProtectedFilter, _InternalFilter, _PrivateFilter;
 			readonly Border _Separator;
 			MemberFilterTypes _Filters;
-			bool _uiLock;
+			bool _UiLock;
 
 			public override int Filters => (int)_Filters;
 
@@ -363,7 +363,7 @@ namespace Codist.Controls
 			}
 
 			protected override void UpdateFilterValue() {
-				if (_uiLock) {
+				if (_UiLock) {
 					return;
 				}
 				var f = MemberFilterTypes.None;
@@ -421,9 +421,9 @@ namespace Codist.Controls
 			}
 
 			public override void ClearFilter() {
-				_uiLock = true;
+				_UiLock = true;
 				_PublicFilter.IsChecked = _ProtectedFilter.IsChecked = _InternalFilter.IsChecked = _PrivateFilter.IsChecked = false;
-				_uiLock = false;
+				_UiLock = false;
 				_Filters |= MemberFilterTypes.AllAccessibilities;
 			}
 		}
@@ -433,7 +433,7 @@ namespace Codist.Controls
 			readonly ThemedToggleButton _ClassFilter, _StructFilter, _EnumFilter, _InterfaceFilter, _DelegateFilter, _NamespaceFilter;
 			readonly Border _Separator;
 			MemberFilterTypes _Filters;
-			bool _uiLock;
+			bool _UiLock;
 
 			public override int Filters => (int)_Filters;
 
@@ -456,7 +456,7 @@ namespace Codist.Controls
 			}
 
 			protected override void UpdateFilterValue() {
-				if (_uiLock) {
+				if (_UiLock) {
 					return;
 				}
 				var f = MemberFilterTypes.None;
@@ -518,10 +518,10 @@ namespace Codist.Controls
 			}
 
 			public override void ClearFilter() {
-				_uiLock = true;
+				_UiLock = true;
 				_ClassFilter.IsChecked = _InterfaceFilter.IsChecked = _DelegateFilter.IsChecked
 					= _StructFilter.IsChecked = _EnumFilter.IsChecked = _NamespaceFilter.IsChecked = false;
-				_uiLock = false;
+				_UiLock = false;
 				_Filters |= MemberFilterTypes.AllTypes;
 			}
 		}
@@ -532,7 +532,7 @@ namespace Codist.Controls
 			readonly Border _Separator;
 			readonly bool _AutoPropertyAsField;
 			MemberFilterTypes _Filters;
-			bool _uiLock;
+			bool _UiLock;
 
 			public override int Filters => (int)_Filters;
 
@@ -554,7 +554,7 @@ namespace Codist.Controls
 			}
 
 			protected override void UpdateFilterValue() {
-				if (_uiLock) {
+				if (_UiLock) {
 					return;
 				}
 				var f = MemberFilterTypes.None;
@@ -639,13 +639,13 @@ namespace Codist.Controls
 			}
 
 			public override void ClearFilter() {
-				_uiLock = true;
+				_UiLock = true;
 				_FieldFilter.IsChecked = _MethodFilter.IsChecked = _EventFilter.IsChecked
 					= _TypeFilter.IsChecked = false;
 				if (_PropertyFilter != null) {
 					_PropertyFilter.IsChecked = false;
 				}
-				_uiLock = false;
+				_UiLock = false;
 				_Filters |= MemberFilterTypes.AllMembers;
 			}
 		}
@@ -655,7 +655,7 @@ namespace Codist.Controls
 			readonly ThemedToggleButton _StaticMemberFilter, _InstanceMemberFilter;
 			readonly Border _Separator;
 			MemberFilterTypes _Filters;
-			bool _uiLock;
+			bool _UiLock;
 
 			public override int Filters => (int)_Filters;
 
@@ -674,7 +674,7 @@ namespace Codist.Controls
 			}
 
 			protected override void UpdateFilterValue() {
-				if (_uiLock) {
+				if (_UiLock) {
 					return;
 				}
 				var f = MemberFilterTypes.None;
@@ -713,9 +713,9 @@ namespace Codist.Controls
 			}
 
 			public override void ClearFilter() {
-				_uiLock = true;
+				_UiLock = true;
 				_InstanceMemberFilter.IsChecked = _StaticMemberFilter.IsChecked = false;
-				_uiLock = false;
+				_UiLock = false;
 				_Filters |= MemberFilterTypes.AllInstance;
 			}
 		}
@@ -725,7 +725,7 @@ namespace Codist.Controls
 			readonly ThemedToggleButton _WriteFilter, _ReadFilter, _EventFilter, _TypeCastFilter, _TypeReferenceFilter;
 			readonly Border _Separator;
 			MemberFilterTypes _Filters;
-			bool _uiLock;
+			bool _UiLock;
 
 			public override int Filters => (int)_Filters;
 
@@ -746,7 +746,7 @@ namespace Codist.Controls
 			}
 
 			protected override void UpdateFilterValue() {
-				if (_uiLock) {
+				if (_UiLock) {
 					return;
 				}
 				var f = MemberFilterTypes.None;
@@ -806,9 +806,9 @@ namespace Codist.Controls
 			}
 
 			public override void ClearFilter() {
-				_uiLock = true;
+				_UiLock = true;
 				_WriteFilter.IsChecked = _ReadFilter.IsChecked = _EventFilter.IsChecked =  _TypeCastFilter.IsChecked = _TypeReferenceFilter.IsChecked = false;
-				_uiLock = false;
+				_UiLock = false;
 				_Filters |= MemberFilterTypes.AllUsages;
 			}
 		}

@@ -975,7 +975,6 @@ namespace Codist
 			}
 		}
 
-
 		static Dictionary<string, Action<SymbolFormatter, IEditorFormatMap, Brush>> CreatePropertySetter() {
 			var r = new Dictionary<string, Action<SymbolFormatter, IEditorFormatMap, Brush>>(19, StringComparer.OrdinalIgnoreCase);
 			foreach (var item in typeof(SymbolFormatter).GetProperties()) {

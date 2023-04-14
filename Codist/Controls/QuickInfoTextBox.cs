@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Input;
 using System.Windows.Controls;
-using Codist;
 
 namespace Codist.Controls
 {
@@ -21,13 +20,15 @@ namespace Codist.Controls
 					Foreground = ThemeHelper.ToolWindowTextBrush,
 					IsOpen = true,
 					Items = {
-						new ThemedMenuItem(IconIds.Copy, Properties.Resources.CMD_CopySelection, (s, args)=> {
-							Copy();
-						})
+						new ThemedMenuItem(IconIds.Copy, Properties.Resources.CMD_CopySelection, CopyHandler)
 					}
 				};
 				ContextMenu.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			}
+		}
+
+		void CopyHandler (object s, System.Windows.RoutedEventArgs args) {
+			Copy();
 		}
 	}
 }
