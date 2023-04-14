@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -34,7 +34,7 @@ namespace Codist.NaviBar
 			public bool IsSymbolNode { get; }
 			public ISymbol Symbol => _Node.GetSymbol(Bar._SemanticContext);
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void HandleClick(object sender, RoutedEventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
 				if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {

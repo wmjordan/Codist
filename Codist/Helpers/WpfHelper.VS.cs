@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -151,7 +152,7 @@ namespace Codist
 				}
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void ShowContextMenu(object sender, MouseButtonEventArgs e) {
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {
@@ -245,7 +246,7 @@ namespace Codist
 					: base.CreateToolTip();
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void ShowContextMenu(object sender, MouseButtonEventArgs e) {
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {

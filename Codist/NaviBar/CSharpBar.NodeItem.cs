@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -61,8 +62,8 @@ namespace Codist.NaviBar
 				ContextMenu.IsOpen = true;
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "U2U1009:Async or iterator methods should avoid state machine generation for early exits (throws or synchronous returns)", Justification = "Event handler")]
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
+			[SuppressMessage("Performance", "U2U1009:Async or iterator methods should avoid state machine generation for early exits (throws or synchronous returns)", Justification = Suppression.EventHandler)]
 			async void HandleClick(object sender, RoutedEventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
 				if (_Menu != null && Bar._SymbolList == _Menu && _Menu.IsVisible) {

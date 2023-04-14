@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -121,7 +122,7 @@ namespace Codist.NaviBar
 			}
 
 			// Fixes https://github.com/wmjordan/Codist/issues/131
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void ResurrectNaviBar_OnUnloaded(object sender, RoutedEventArgs e) {
                 var view = _View;
 				if (view?.IsClosed == false) {

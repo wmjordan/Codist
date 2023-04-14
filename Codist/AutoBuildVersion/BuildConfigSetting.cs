@@ -69,7 +69,7 @@ namespace Codist.AutoBuildVersion
 			return r;
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		bool RewriteVersion(Project project, VersionSetting setting, string versionName) {
 			Property ver;
 			if (setting is null) {
@@ -95,7 +95,7 @@ namespace Codist.AutoBuildVersion
 			return false;
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		bool RewriteCopyrightYear(Project project, string propertyName) {
 			Property property;
 			try {
@@ -128,7 +128,7 @@ namespace Codist.AutoBuildVersion
 			return c >= '0' && c <= '9';
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		void WriteBuildOutput(string text) {
 			CodistPackage.Instance?.GetOutputPane(VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid, "Build")?.OutputString(nameof(Codist) + ": " + text + Environment.NewLine);
 		}
@@ -147,7 +147,8 @@ namespace Codist.AutoBuildVersion
 			public static string[] GetMatchedVersion(Version v) {
 				return new[] { v.Major.ToText(), v.Minor.ToText(), v.Build.ToText(), v.Revision.ToText() };
 			}
-			[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+
+			[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 			public static string[] GetMatchedVersion(Project project, string propertyName) {
 				try {
 					var ver = project.Properties.Item(propertyName);
@@ -159,7 +160,8 @@ namespace Codist.AutoBuildVersion
 					return null;
 				}
 			}
-			[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+
+			[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 			public static string GetProperty(Project project, string propertyName) {
 				try {
 					return project.Properties.Item(propertyName)?.Value is string s ? s : null;

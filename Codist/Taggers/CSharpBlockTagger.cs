@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
@@ -164,7 +165,7 @@ namespace Codist.Taggers
 			}
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+		[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 		async void OnBufferChanged(object sender, TextContentChangedEventArgs e) {
 			try {
 				if (TextEditorHelper.AnyTextChanges(e.Before.Version, e.After.Version)) {

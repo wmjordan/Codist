@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -825,7 +826,7 @@ namespace Codist
 			InternalOpenFile(file, action);
 		}
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "UIThread checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void InternalOpenFile(string file, Action<VsTextView> action) {
 			try {
 				using (new NewDocumentStateScope(Keyboard.Modifiers == ModifierKeys.Shift ? __VSNEWDOCUMENTSTATE.NDS_Unspecified : __VSNEWDOCUMENTSTATE.NDS_Provisional, Microsoft.VisualStudio.VSConstants.NewDocumentStateReason.Navigation)) {

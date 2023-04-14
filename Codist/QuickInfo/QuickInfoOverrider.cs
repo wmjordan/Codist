@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,11 +14,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using R = Codist.Properties.Resources;
 using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
-using Microsoft.VisualStudio.Text.Adornments;
 
 namespace Codist.QuickInfo
 {
@@ -199,7 +200,7 @@ namespace Codist.QuickInfo
 				((TextBlock)sender).Background = Brushes.Transparent;
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void GoToSource(object sender, MouseButtonEventArgs e) {
 				var s = _symbol;
 				await _quickInfoSession.DismissAsync();
@@ -213,7 +214,7 @@ namespace Codist.QuickInfo
 					t.ToolTipOpening -= ShowToolTip;
 				}
 			}
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void ShowContextMenu(object sender, ContextMenuEventArgs e) {
 				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
 				var s = sender as FrameworkElement;

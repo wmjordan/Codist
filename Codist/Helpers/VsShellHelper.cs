@@ -12,7 +12,7 @@ namespace Codist
 		public const string CSharpProjectKind = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}",
 			ProjectFolderKind = "{66A26720-8FB5-11D2-AA7E-00C04F688DDE}";
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		public static IEnumerable<KeyValuePair<string, object>> Enumerate(this EnvDTE.Properties properties) {
 			if (properties == null) {
 				yield break;

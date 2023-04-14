@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -167,7 +168,7 @@ namespace Codist.NaviBar
 				_FinderBox.Focus();
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void SearchCriteriaChanged(object sender, EventArgs e) {
 				SyncHelper.CancelAndDispose(ref Bar._cancellationSource, true);
 				var ct = Bar._cancellationSource.GetToken();

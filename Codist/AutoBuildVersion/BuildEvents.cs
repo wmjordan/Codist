@@ -122,7 +122,6 @@ namespace Codist.AutoBuildVersion
 		}
 		#endregion
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "checked in caller")]
 		void PrintProperties(EnvDTE.Properties properties, string title) {
 			WriteBuildText(title + Environment.NewLine);
 			foreach (var p in properties.Enumerate()) {
@@ -130,7 +129,7 @@ namespace Codist.AutoBuildVersion
 			}
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void AutoChangeBuildVersion(IVsCfg cfgProj, Project project) {
 			if (cfgProj.get_DisplayName(out var s) != VSConstants.S_OK) {
 				return;
@@ -175,7 +174,7 @@ namespace Codist.AutoBuildVersion
 			}
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "UI Thread checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		void WriteBuildText(string text) {
 			_Package.GetOutputPane(VSConstants.BuildOutput, "Build")?.OutputString(text);
 		}

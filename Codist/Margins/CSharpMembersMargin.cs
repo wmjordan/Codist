@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -199,7 +200,7 @@ namespace Codist.Margins
 				}
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void OnTagsChanged(object sender, EventArgs e) {
 				try {
 					var ct = SyncHelper.CancelAndRetainToken(ref _Element._Cancellation);
@@ -516,7 +517,7 @@ namespace Codist.Margins
 				}
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void UpdateReferences(object sender, EventArgs e) {
 				try {
 					SyncHelper.CancelAndDispose(ref _Margin._Cancellation, true);

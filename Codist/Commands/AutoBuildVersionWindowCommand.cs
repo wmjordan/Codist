@@ -13,7 +13,6 @@ namespace Codist.Commands
 			});
 		}
 
-#pragma warning disable VSTHRD010 // Invoke single-threaded types on Main thread
 		static void Execute(object sender, EventArgs e) {
 			var item = GetSelectedProjectItem();
 			if (item == null) {
@@ -21,7 +20,6 @@ namespace Codist.Commands
 			}
 			new AutoBuildVersionWindow(item) { Owner = Application.Current.MainWindow }.ShowDialog();
 		}
-#pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
 
 		static Project GetSelectedProjectItem() {
 			ThreadHelper.ThrowIfNotOnUIThread();

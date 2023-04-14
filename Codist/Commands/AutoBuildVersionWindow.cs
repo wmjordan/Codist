@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -23,7 +24,7 @@ namespace Codist.Commands
 		readonly string _Copyright;
 		readonly string[] _CurrentAssemblyVersion, _CurrentAssemblyFileVersion;
 
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Called from UI")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		public AutoBuildVersionWindow(EnvDTE.Project project) {
 			_Project = project;
 			BuildConfigSetting.TryGetAssemblyAttributeValues(project, out _CurrentAssemblyVersion, out _CurrentAssemblyFileVersion, out _Copyright);

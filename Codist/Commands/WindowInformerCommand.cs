@@ -43,7 +43,7 @@ namespace Codist.Commands
 			DisplayWindowInfo(window);
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void DisplayWindowInfo(Window window) {
 			var tb = new RichTextBox {
 				BorderThickness = WpfHelper.NoMargin,
@@ -112,7 +112,7 @@ namespace Codist.Commands
 			MessageWindow.Show(tb, $"{R.T_DocumentProperties} - {window.Caption}");
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void ShowDTEWindowProperties(BlockCollection blocks, Window window) {
 			var s = NewSection(blocks, "ActiveWindow", SubSectionFontSize);
 			AppendNameValue(s, "Caption", window.Caption);
@@ -140,20 +140,20 @@ namespace Codist.Commands
 			AppendNameValue(s, "Project.Name", window.Project?.Name);
 
 			Section ss;
-			var projItem = window.ProjectItem;
-			if (projItem != null) {
+			var pi = window.ProjectItem;
+			if (pi != null) {
 				ss = NewIndentSection(s, "ProjectItem:");
-				AppendNameValue(ss, "Name", projItem.Name);
+				AppendNameValue(ss, "Name", pi.Name);
 				try {
-					AppendNameValue(ss, "ContainingProject", projItem?.ContainingProject?.Name);
-					AppendNameValue(ss, "ContainingProject.ExtenderNames", projItem?.ContainingProject?.ExtenderNames);
+					AppendNameValue(ss, "ContainingProject", pi?.ContainingProject?.Name);
+					AppendNameValue(ss, "ContainingProject.ExtenderNames", pi?.ContainingProject?.ExtenderNames);
 				}
 				catch (COMException ex) {
 					AppendNameValue(ss, "ContainingProject", ex.Message);
 				}
-				if (projItem.Properties?.Count != 0) {
+				if (pi.Properties?.Count != 0) {
 					ss = NewIndentSection(ss, "Properties:");
-					foreach (var item in projItem.Properties.Enumerate().OrderBy(i => i.Key)) {
+					foreach (var item in pi.Properties.Enumerate().OrderBy(i => i.Key)) {
 						AppendNameValue(ss, item.Key, item.Value);
 					}
 				}
@@ -185,7 +185,7 @@ namespace Codist.Commands
 			ShowSpecialWindowTypeInfo(blocks, window);
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void ShowSpecialWindowTypeInfo(BlockCollection blocks, Window window) {
 			switch (window.Type) {
 				case vsWindowType.vsWindowTypeSolutionExplorer:
@@ -196,7 +196,7 @@ namespace Codist.Commands
 			}
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void ShowDTESolutionSelectedItems(BlockCollection blocks) {
 			if (CodistPackage.DTE.ToolWindows.SolutionExplorer.SelectedItems is object[] items) {
 				foreach (UIHierarchyItem hi in items.OfType<UIHierarchyItem>()) {
@@ -219,7 +219,7 @@ namespace Codist.Commands
 			}
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void ShowDTEProjectItemProperties(BlockCollection blocks, ProjectItem pi) {
 			var s = NewSection(blocks, "ProjectItem", SubSectionFontSize);
 			AppendNameValue(s, "Name", pi.Name);
@@ -245,7 +245,7 @@ namespace Codist.Commands
 			}
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void ShowDTESolutionProperties(BlockCollection blocks, Solution solution) {
 			var s = NewSection(blocks, "Solution", SubSectionFontSize);
 			AppendNameValue(s, "FullName", solution.FullName);
@@ -263,7 +263,7 @@ namespace Codist.Commands
 			}
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void ShowDTESolutionBuild(Solution solution, Section s) {
 			var sb = solution.SolutionBuild;
 			if (sb == null) {
@@ -306,7 +306,7 @@ namespace Codist.Commands
 			}
 		}
 
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void ShowDTEProjectProperties(BlockCollection blocks, Project project) {
 			var s = NewSection(blocks, "Project", SubSectionFontSize);
 			AppendNameValue(s, "Name", project.Name);
@@ -375,7 +375,7 @@ namespace Codist.Commands
 				AppendPropertyValue(s, k, v);
 			}
 		}
-		[SuppressMessage("Usage", "VSTHRD010:Invoke single-threaded types on Main thread", Justification = "Checked in caller")]
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void ShowPropertyCollection(Section section, EnvDTE.Properties properties, string title) {
 			if (properties == null || properties.Count == 0) {
 				return;

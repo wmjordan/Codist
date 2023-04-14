@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
@@ -1234,7 +1235,7 @@ namespace Codist
 				_Node = null;
 			}
 
-			[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "Event handler")]
+			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void NodeLink_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
 				try {
 					(await TextEditorHelper.GetMouseOverDocumentView()?.TextBuffer.GetDocument().Project.GetCompilationAsync())
