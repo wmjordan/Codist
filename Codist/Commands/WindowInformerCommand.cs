@@ -371,7 +371,7 @@ namespace Codist.Commands
 
 		static void ShowPropertyCollection(Section section, PropertyCollection properties, string title) {
 			var s = NewIndentSection(section, title);
-			foreach (var (n, k, v) in properties.PropertyList.Select(i => (n: i.Key.ToString(), k: i.Key, v: i.Value)).OrderBy(i => i.n)) {
+			foreach (var (n, k, v) in properties.PropertyList.Select(i => (n: i.Key is Type t ? GetTypeName(t) : i.Key.ToString(), k: i.Key, v: i.Value)).OrderBy(i => i.n)) {
 				AppendPropertyValue(s, k, v);
 			}
 		}
