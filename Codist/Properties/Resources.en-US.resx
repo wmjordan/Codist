@@ -2445,4 +2445,7 @@ Expression too long</value>
   <data name="T_Discard" xml:space="preserve">
     <value>discard</value>
   </data>
+  <data name="T_ActiveWindowProperties" xml:space="preserve">
+    <value>Active Window Properties</value>
+  </data>
 </root>

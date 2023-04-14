@@ -109,7 +109,7 @@ namespace Codist.Commands
 				blocks.Add(new Paragraph(new Run(ex.ToString())));
 			}
 
-			MessageWindow.Show(tb, $"{R.T_DocumentProperties} - {window.Caption}");
+			MessageWindow.Show(tb, $"{R.T_ActiveWindowProperties} - {window.Caption}");
 		}
 
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]

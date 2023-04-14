@@ -4788,6 +4788,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Active Window Properties.
+        /// </summary>
+        internal static string T_ActiveWindowProperties {
+            get {
+                return ResourceManager.GetString("T_ActiveWindowProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All languages.
         /// </summary>
         internal static string T_AllLanguages {

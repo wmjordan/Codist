@@ -2430,4 +2430,7 @@ Right click: 显示“线程”窗口</value>
   <data name="T_Discard" xml:space="preserve">
     <value>弃元</value>
   </data>
+  <data name="T_ActiveWindowProperties" xml:space="preserve">
+    <value>当前窗口属性</value>
+  </data>
 </root>
