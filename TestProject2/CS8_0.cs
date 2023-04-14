@@ -59,7 +59,7 @@ namespace TestProject2.CS8_0
 		}
 	}
 
-	public static class ImplmentationConsumer
+	public static class ImplementationConsumer
 	{
 		static void Main() {
 			var i = new AdvancedImplementation();

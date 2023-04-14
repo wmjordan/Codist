@@ -312,8 +312,8 @@ namespace Codist.Controls
 
 		void SetupMenuCommand(SymbolItem item, int imageId, string title, Action<SymbolItem> action) {
 			var mi = new ThemedMenuItem(imageId, title, (s, args) => {
-				var i = (ValueTuple<SymbolItem, Action<SymbolItem>>)((MenuItem)s).Tag;
-				i.Item2(i.Item1);
+				var (i, a) = (ValueTuple<SymbolItem, Action<SymbolItem>>)((MenuItem)s).Tag;
+				a(i);
 			}) {
 				Tag = (item, action)
 			};

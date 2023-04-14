@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
@@ -105,16 +106,15 @@ namespace Codist
 			__OutputPane.OutputString(text + Environment.NewLine);
 		}
 
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static IVsOutputWindowPane CreateOutputPane() {
 			var window = ServicesHelper.Get<IVsOutputWindow, SVsOutputWindow>();
-			if (window.CreatePane(ref __PackageGuid, nameof(Codist), 0, 1) == Microsoft.VisualStudio.VSConstants.S_OK) {
-				if (window.GetPane(ref __PackageGuid, out var pane) == 0) {
-					return pane;
-				}
+			if (window.CreatePane(ref __PackageGuid, nameof(Codist), 0, 1) == Microsoft.VisualStudio.VSConstants.S_OK
+				&& window.GetPane(ref __PackageGuid, out var pane) == 0) {
+				return pane;
 			}
 			return null;
 		}
-
 
 		#region Package Members
 		/// <summary>
@@ -234,21 +234,4 @@ namespace Codist
 		}
 	}
 #pragma warning restore VSTHRD010 // Invoke single-threaded types on Main thread
-
-	internal static class SharedDictionaryManager
-	{
-		static ResourceDictionary _Controls, _Menu, _ContextMenu, _VirtualList, _SymbolList;
-
-		internal static ResourceDictionary ThemedControls => _Controls ?? (_Controls = WpfHelper.LoadComponent("controls/ThemedControls.xaml"));
-
-		// to get started with our own context menu styles, see this answer on StackOverflow
-		// https://stackoverflow.com/questions/3391742/wpf-submenu-styling?rq=1
-		internal static ResourceDictionary ContextMenu => _ContextMenu ?? (_ContextMenu = WpfHelper.LoadComponent("controls/ContextMenu.xaml").MergeWith(ThemedControls));
-
-		// for menu styles, see https://docs.microsoft.com/en-us/dotnet/framework/wpf/controls/menu-styles-and-templates
-		internal static ResourceDictionary NavigationBar => _Menu ?? (_Menu = WpfHelper.LoadComponent("controls/NavigationBar.xaml").MergeWith(ThemedControls));
-
-		internal static ResourceDictionary VirtualList => _VirtualList ?? (_VirtualList = WpfHelper.LoadComponent("controls/VirtualList.xaml").MergeWith(ThemedControls));
-		internal static ResourceDictionary SymbolList => _SymbolList ?? (_SymbolList = WpfHelper.LoadComponent("controls/SymbolList.xaml").MergeWith(ThemedControls));
-	}
 }

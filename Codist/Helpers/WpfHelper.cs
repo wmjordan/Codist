@@ -372,7 +372,7 @@ namespace Codist
 			if (obj == null) {
 				return null;
 			}
-			return obj is TObject o && (predicate == null || predicate(o)) ? o : obj.GetParent<TObject>(predicate);
+			return obj is TObject o && (predicate == null || predicate(o)) ? o : obj.GetParent(predicate);
 		}
 		public static TParent GetParent<TParent>(this DependencyObject obj, Predicate<TParent> predicate = null)
 			where TParent : DependencyObject {
