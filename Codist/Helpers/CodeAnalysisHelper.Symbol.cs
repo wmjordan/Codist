@@ -344,19 +344,41 @@ namespace Codist
 				case SymbolKind.Assembly: return KnownImageIds.Assembly;
 				case SymbolKind.DynamicType: return KnownImageIds.Dynamic;
 				case SymbolKind.Event:
-					var ev = symbol as IEventSymbol;
+					return GetEventImageId((IEventSymbol)symbol);
+				case SymbolKind.Field:
+					return GetFieldImageId((IFieldSymbol)symbol);
+				case SymbolKind.Label: return KnownImageIds.Label;
+				case SymbolKind.Local: return IconIds.LocalVariable;
+				case SymbolKind.Method:
+					return GetMethodImageId((IMethodSymbol)symbol);
+				case SymbolKind.NamedType:
+					return GetTypeImageId((INamedTypeSymbol)symbol);
+				case SymbolKind.Namespace: return IconIds.Namespace;
+				case SymbolKind.Parameter: return IconIds.Argument;
+				case SymbolKind.Property:
+					return GetPropertyImageId((IPropertySymbol)symbol);
+				case FunctionPointerType: return IconIds.FunctionPointer;
+				case SymbolKind.Discard: return IconIds.Discard;
+				default: return KnownImageIds.Item;
+			}
+
+			int GetEventImageId(IEventSymbol ev) {
 					switch (ev.DeclaredAccessibility) {
 						case Accessibility.Public: return KnownImageIds.EventPublic;
 						case Accessibility.Protected:
 						case Accessibility.ProtectedOrInternal:
 							return KnownImageIds.EventProtected;
-						case Accessibility.Private: return KnownImageIds.EventPrivate;
+					case Accessibility.Private:
+						return ev.ExplicitInterfaceImplementations.Length != 0
+							? IconIds.ExplicitInterfaceEvent
+							: KnownImageIds.EventPrivate;
 						case Accessibility.ProtectedAndInternal:
 						case Accessibility.Internal: return KnownImageIds.EventInternal;
 						default: return IconIds.Event;
 					}
-				case SymbolKind.Field:
-					var f = symbol as IFieldSymbol;
+			}
+
+			int GetFieldImageId(IFieldSymbol f) {
 					if (f.IsConst) {
 						if (f.ContainingType.TypeKind == TypeKind.Enum) {
 							return IconIds.EnumField;
@@ -382,11 +404,11 @@ namespace Codist
 						case Accessibility.Internal: return KnownImageIds.FieldInternal;
 						default: return IconIds.Field;
 					}
-				case SymbolKind.Label: return KnownImageIds.Label;
-				case SymbolKind.Local: return IconIds.LocalVariable;
-				case SymbolKind.Method:
-					var m = symbol as IMethodSymbol;
-					if (m.MethodKind == MethodKind.Constructor) {
+			}
+
+			int GetMethodImageId(IMethodSymbol m) {
+				switch (m.MethodKind) {
+					case MethodKind.Constructor:
 						switch (m.DeclaredAccessibility) {
 							case Accessibility.Public: return IconIds.PublicConstructor;
 							case Accessibility.Protected:
@@ -397,8 +419,7 @@ namespace Codist
 							case Accessibility.Internal: return IconIds.InternalConstructor;
 							default: return IconIds.Constructor;
 						}
-					}
-					else if (m.MethodKind == MethodKind.UserDefinedOperator) {
+					case MethodKind.UserDefinedOperator:
 						switch (m.DeclaredAccessibility) {
 							case Accessibility.Public: return KnownImageIds.OperatorPublic;
 							case Accessibility.Protected:
@@ -409,22 +430,27 @@ namespace Codist
 							case Accessibility.Internal: return KnownImageIds.OperatorInternal;
 							default: return KnownImageIds.Operator;
 						}
-					}
-					else if (m.MethodKind == MethodKind.Conversion) {
-						return m.MetadataName == "op_Explicit" ? IconIds.ExplicitConversion : IconIds.ImplicitConversion;
+					case MethodKind.Conversion:
+						return m.MetadataName == "op_Explicit"
+							? IconIds.ExplicitConversion
+							: IconIds.ImplicitConversion;
 					}
 					switch (m.DeclaredAccessibility) {
 						case Accessibility.Public: return KnownImageIds.MethodPublic;
 						case Accessibility.Protected:
 						case Accessibility.ProtectedOrInternal:
 							return KnownImageIds.MethodProtected;
-						case Accessibility.Private: return KnownImageIds.MethodPrivate;
+					case Accessibility.Private:
+						return m.ExplicitInterfaceImplementations.Length != 0
+							? IconIds.ExplicitInterfaceMethod
+							: KnownImageIds.MethodPrivate;
 						case Accessibility.ProtectedAndInternal:
 						case Accessibility.Internal: return KnownImageIds.MethodInternal;
 						default: return IconIds.Method;
 					}
-				case SymbolKind.NamedType:
-					var t = symbol as INamedTypeSymbol;
+			}
+
+			int GetTypeImageId(INamedTypeSymbol t) {
 					switch (t.TypeKind) {
 						case TypeKind.Class:
 							switch (t.DeclaredAccessibility) {
@@ -484,22 +510,22 @@ namespace Codist
 						case TypeKind.TypeParameter:
 						default: return KnownImageIds.Type;
 					}
-				case SymbolKind.Namespace: return IconIds.Namespace;
-				case SymbolKind.Parameter: return IconIds.Argument;
-				case SymbolKind.Property:
-					switch (((IPropertySymbol)symbol).DeclaredAccessibility) {
+			}
+
+			int GetPropertyImageId(IPropertySymbol p) {
+				switch (p.DeclaredAccessibility) {
 						case Accessibility.Public: return KnownImageIds.PropertyPublic;
 						case Accessibility.Protected:
 						case Accessibility.ProtectedOrInternal:
 							return KnownImageIds.PropertyProtected;
-						case Accessibility.Private: return KnownImageIds.PropertyPrivate;
+					case Accessibility.Private:
+						return p.ExplicitInterfaceImplementations.Length != 0
+							? IconIds.ExplicitInterfaceProperty
+							: KnownImageIds.PropertyPrivate;
 						case Accessibility.ProtectedAndInternal:
 						case Accessibility.Internal: return KnownImageIds.PropertyInternal;
 						default: return KnownImageIds.Property;
 					}
-				case FunctionPointerType: return IconIds.FunctionPointer;
-				case SymbolKind.Discard: return IconIds.Discard;
-				default: return KnownImageIds.Item;
 			}
 		}
 

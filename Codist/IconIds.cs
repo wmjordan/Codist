@@ -80,6 +80,9 @@ namespace Codist
 		public const int OverrideEvent = KnownImageIds.ModifyEvent;
 		public const int OverrideProperty = KnownImageIds.ModifyProperty;
 		public const int OverrideMethod = KnownImageIds.ModifyMethod;
+		public const int ExplicitInterfaceEvent = KnownImageIds.MoveEvent;
+		public const int ExplicitInterfaceProperty = KnownImageIds.MoveProperty;
+		public const int ExplicitInterfaceMethod = KnownImageIds.MoveMethod;
 		public const int Constant = KnownImageIds.Constant;
 		public const int FunctionPointer = KnownImageIds.CallReturnInstructionPointer;
 		#endregion
