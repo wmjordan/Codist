@@ -188,11 +188,12 @@ namespace Codist
 					}
 					break;
 				case SymbolKind.Property:
-					var p = ((IPropertySymbol)symbol).ExplicitInterfaceImplementations;
+					var ps = (IPropertySymbol)symbol;
+					var p = ps.ExplicitInterfaceImplementations;
 					if (p.Length != 0) {
-						return p[0].Name;
+						return ps.IsIndexer ? p[0].Name.Replace("[]", String.Empty) : p[0].Name;
 					}
-					break;
+					return ps.IsIndexer ? ps.Name.Replace("[]", String.Empty) : ps.Name;
 				case SymbolKind.Event:
 					var e = ((IEventSymbol)symbol).ExplicitInterfaceImplementations;
 					if (e.Length != 0) {

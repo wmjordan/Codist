@@ -285,17 +285,24 @@ namespace Codist
 		public TextBlock ShowParameters(TextBlock block, ImmutableArray<IParameterSymbol> parameters) {
 			return ShowParameters(block, parameters, false, false);
 		}
-		public TextBlock ShowParameters(TextBlock block, ImmutableArray<IParameterSymbol> parameters, bool showParameterName, bool showDefault, int argIndex = -1) {
+		public TextBlock ShowParameters(TextBlock block, ImmutableArray<IParameterSymbol> parameters, bool showParameterName, bool showDefault, int argIndex = -1, bool isProperty = false) {
 			var inlines = block.Inlines;
-			inlines.Add(new TextBlock { Text = " (", VerticalAlignment = VerticalAlignment.Top });
+			inlines.Add(new TextBlock {
+				Text = isProperty ? " [" : " (",
+				VerticalAlignment = VerticalAlignment.Top
+			});
 			var pl = parameters.Length;
-			TextBlock span = null;
+			TextBlock inlineBlock = null;
 			InlineCollection tmpInlines = null;
 			for (var i = 0; i < pl;) {
 				if (showParameterName) {
-					span = new TextBlock { Margin = WpfHelper.SmallHorizontalMargin, TextWrapping = TextWrapping.Wrap, VerticalAlignment = VerticalAlignment.Top };
+					inlineBlock = new TextBlock {
+						Margin = WpfHelper.SmallHorizontalMargin,
+						TextWrapping = TextWrapping.Wrap,
+						VerticalAlignment = VerticalAlignment.Top
+					};
 					tmpInlines = inlines;
-					inlines = span.Inlines;
+					inlines = inlineBlock.Inlines;
 				}
 				var p = parameters[i];
 				if (p.IsOptional) {
@@ -323,10 +330,10 @@ namespace Codist
 				}
 				if (showParameterName) {
 					inlines = tmpInlines;
-					inlines.Add(span);
+					inlines.Add(inlineBlock);
 				}
 			}
-			inlines.Add(")");
+			inlines.Add(isProperty ? "]" : ")");
 			return block;
 		}
 
@@ -359,7 +366,7 @@ namespace Codist
 			IMethodSymbol m;
 			ExpressionSyntax exp, init = null;
 			if (p.Parameters.Length > 0) {
-				ShowParameters(signature, p.Parameters, true, true);
+				ShowParameters(signature, p.Parameters, true, true, -1, true);
 			}
 			if (p.IsReadOnly) {
 				var r = p.DeclaringSyntaxReferences;
