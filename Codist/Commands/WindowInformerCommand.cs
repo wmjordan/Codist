@@ -62,6 +62,13 @@ namespace Codist.Commands
 			Section s;
 
 			var view = window.Document?.GetActiveWpfDocumentView();
+			if (view == null) {
+				view = TextEditorHelper.GetActiveWpfInteractiveView();
+				if (view?.VisualElement.IsFocused == false) {
+					view = null;
+				}
+			}
+
 			if (view != null) {
 				var d = view.TextBuffer.GetTextDocument();
 				if (d != null) {
