@@ -970,13 +970,13 @@ namespace Codist
 			DirectiveTriviaSyntax d = directive;
 			int c = 1;
 			while ((d = d.GetNextDirective()) != null) {
-				if (d.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
+				if (d.IsKind(endSyntaxKind)) {
 					--c;
 					if (c == 0) {
 						return d as TEndDirective;
 					}
 				}
-				else if (d.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+				else if (d.IsKind(startSyntaxKind)) {
 					++c;
 				}
 			}
