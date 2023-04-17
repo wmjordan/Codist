@@ -42,11 +42,12 @@ namespace Codist
 
 		[DebuggerStepThrough]
 		public static CancellationToken CancelAndRetainToken(ref CancellationTokenSource tokenSource) {
-			return CancelAndDispose(ref tokenSource, true).GetToken();
+			CancelAndDispose(ref tokenSource, true);
+			return tokenSource.GetToken();
 		}
 
 		[DebuggerStepThrough]
-		public static CancellationTokenSource CancelAndDispose(ref CancellationTokenSource tokenSource, bool resurrect) {
+		public static void CancelAndDispose(ref CancellationTokenSource tokenSource, bool resurrect) {
 			var c = Interlocked.Exchange(ref tokenSource, resurrect ? new CancellationTokenSource() : null);
 			if (c != null) {
 				try {
@@ -60,7 +61,6 @@ namespace Codist
 				}
 				c.Dispose();
 			}
-			return tokenSource;
 		}
 		[DebuggerStepThrough]
 		public static CancellationToken GetToken(this CancellationTokenSource tokenSource) {

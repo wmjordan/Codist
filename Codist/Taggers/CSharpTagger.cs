@@ -92,7 +92,7 @@ namespace Codist.Taggers
 			IWpfTextView _View;
 			CSharpTagger _Container;
 			ITextBuffer _Buffer;
-			CancellationTokenSource _TaskBreaker;
+			CancellationTokenSource _ParserBreaker, _RenderBreaker;
 			AsyncParser _Parser;
 			Timer _Timer;
 			ParseResult _ParseResult;
@@ -146,7 +146,7 @@ namespace Codist.Taggers
 				var snapshot = spans[0].Snapshot;
 				var isNewSnapshot = _ParseResult?.Snapshot != snapshot;
 				if (isNewSnapshot == false) {
-					return Tagger.GetTags(spans, _ParseResult, _TaskBreaker.GetToken());
+					return Tagger.GetTags(spans, _ParseResult, SyncHelper.CancelAndRetainToken(ref _RenderBreaker));
 				}
 				if (snapshot.TextBuffer != _Buffer) {
 					goto NA;
@@ -156,7 +156,7 @@ namespace Codist.Taggers
 					// don't schedule parsing unless snapshot is changed
 					if (_Parser.State == ParserState.Working) {
 						// cancel existing parsing
-						_TaskBreaker?.Cancel();
+						_ParserBreaker?.Cancel();
 					}
 					_Timer.Change(_ParseResult != null ? 300 : 100, Timeout.Infinite);
 				}
@@ -165,7 +165,7 @@ namespace Codist.Taggers
 					EnqueueSpans(spans);
 				}
 				if (_ParseResult != null && _ParseResult.Snapshot.TextBuffer == snapshot.TextBuffer) {
-					return UseOldResult(spans, snapshot, _ParseResult, _TaskBreaker.GetToken());
+					return UseOldResult(spans, snapshot, _ParseResult, SyncHelper.CancelAndRetainToken(ref _RenderBreaker));
 				}
 			NA:
 				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
@@ -223,7 +223,7 @@ namespace Codist.Taggers
 			}
 
 			void StartAsyncParser(object state) {
-				_Parser?.Start(_Buffer, SyncHelper.CancelAndRetainToken(ref _TaskBreaker));
+				_Parser?.Start(_Buffer, SyncHelper.CancelAndRetainToken(ref _ParserBreaker));
 			}
 
 			void EnqueueSpans(NormalizedSnapshotSpanCollection spans) {
@@ -336,10 +336,10 @@ namespace Codist.Taggers
 			}
 
 			internal void ReleaseAsyncTimer() {
-				if (_TaskBreaker != null) {
-					_TaskBreaker.Cancel();
-					_TaskBreaker.Dispose();
-					_TaskBreaker = null;
+				if (_ParserBreaker != null) {
+					_ParserBreaker.Cancel();
+					_ParserBreaker.Dispose();
+					_ParserBreaker = null;
 				}
 				_Timer?.Dispose();
 				_Timer = null;
@@ -351,11 +351,8 @@ namespace Codist.Taggers
 					_View.LostAggregateFocus -= View_LostFocus;
 					_View = null;
 				}
-				if (_TaskBreaker != null) {
-					_TaskBreaker.Cancel();
-					_TaskBreaker.Dispose();
-					_TaskBreaker = null;
-				}
+				SyncHelper.CancelAndDispose(ref _ParserBreaker, false);
+				SyncHelper.CancelAndDispose(ref _RenderBreaker, false);
 				if (_Buffer != null) {
 					UnsubscribeBufferEvents(_Buffer);
 					_Container._Taggers.Remove(_Buffer);
@@ -685,18 +682,18 @@ namespace Codist.Taggers
 				}
 				if (semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node, cancellationToken) is IMethodSymbol opMethod) {
 					if (opMethod.MethodKind == MethodKind.UserDefinedOperator) {
-					return CreateClassificationSpan(snapshot,
-						itemSpan,
-						node.RawKind == (int)SyntaxKind.OperatorDeclaration
-							? TransientTags.OverrideDeclaration
-							: __Classifications.OverrideMember);
-				}
-					if (opMethod.MethodKind == MethodKind.LambdaMethod) {
-					var l = ClassifyLambdaExpression(itemSpan, snapshot, semanticModel, unitCompilation);
-					if (l != null) {
-						return l;
+						return CreateClassificationSpan(snapshot,
+							itemSpan,
+							node.RawKind == (int)SyntaxKind.OperatorDeclaration
+								? TransientTags.OverrideDeclaration
+								: __Classifications.OverrideMember);
 					}
-				}
+					if (opMethod.MethodKind == MethodKind.LambdaMethod) {
+						var l = ClassifyLambdaExpression(itemSpan, snapshot, semanticModel, unitCompilation);
+						if (l != null) {
+							return l;
+						}
+					}
 				}
 				return null;
 			}
@@ -973,7 +970,7 @@ namespace Codist.Taggers
 							case SymbolKind.Event:
 								if (HighlightOptions.NonPrivateField
 									&& symbol.DeclaredAccessibility >= Accessibility.ProtectedAndInternal) {
-								tags.Add(__Classifications.NestedDeclaration);
+									tags.Add(__Classifications.NestedDeclaration);
 								}
 								break;
 							case SymbolKind.Method:
