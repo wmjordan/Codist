@@ -86,7 +86,7 @@ namespace Codist
 		public StackPanel ShowSignature(ISymbol symbol) {
 			INamedTypeSymbol t;
 			IMethodSymbol m;
-			var s = symbol.OriginalDefinition;
+			var s = symbol.Kind != SymbolKind.NamedType || ((INamedTypeSymbol)symbol).IsTupleType == false ? symbol.OriginalDefinition : symbol;
 			var p = new StackPanel {
 				Margin = WpfHelper.MenuItemMargin,
 				MaxWidth = Application.Current.MainWindow.Width
@@ -667,10 +667,7 @@ namespace Codist
 		internal void Format(InlineCollection text, ISymbol symbol, string alias, bool bold) {
 			switch (symbol.Kind) {
 				case SymbolKind.ArrayType:
-					Format(text, ((IArrayTypeSymbol)symbol).ElementType, alias, bold);
-					if (alias == null) {
-						text.Add("[]".Render(PlainText));
-					}
+					FormatArrayType(text, (IArrayTypeSymbol)symbol, alias, bold);
 					return;
 				case SymbolKind.Event: text.Add(symbol.Render(alias, bold, Event)); return;
 				case SymbolKind.Field:
@@ -685,10 +682,7 @@ namespace Codist
 				case SymbolKind.RangeVariable:
 					text.Add(symbol.Render(null, bold, Local)); return;
 				case SymbolKind.TypeParameter:
-					if (alias != null && ((ITypeParameterSymbol)symbol).Variance != VarianceKind.None) {
-						text.Add((((ITypeParameterSymbol)symbol).Variance == VarianceKind.Out ? "out " : "in ").Render(Keyword));
-					}
-					text.Add(symbol.Render(null, bold, TypeParameter));
+					FormatTypeParameter(text, (ITypeParameterSymbol)symbol, alias, bold);
 					return;
 				case SymbolKind.PointerType:
 					Format(text, ((IPointerTypeSymbol)symbol).PointedAtType, alias, bold);
@@ -706,6 +700,20 @@ namespace Codist
 				case SymbolKind.Discard: text.Add("_".Render(Keyword)); return;
 				default: text.Add(symbol.Name); return;
 			}
+		}
+
+		void FormatArrayType(InlineCollection text, IArrayTypeSymbol a, string alias, bool bold) {
+			Format(text, a.ElementType, alias, bold);
+			if (alias == null) {
+				text.Add((a.Rank == 1 ? "[]" : $"[{new string(',', a.Rank - 1)}]").Render(PlainText));
+			}
+		}
+
+		void FormatTypeParameter(InlineCollection text, ITypeParameterSymbol t, string alias, bool bold) {
+			if (alias != null && t.Variance != VarianceKind.None) {
+				text.Add((t.Variance == VarianceKind.Out ? "out " : "in ").Render(Keyword));
+			}
+			text.Add(t.Render(null, bold, TypeParameter));
 		}
 
 		void FormatMethodName(InlineCollection text, ISymbol symbol, string alias, bool bold) {

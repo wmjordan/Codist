@@ -163,7 +163,7 @@ namespace Codist
 				if (ctx != null) {
 					await ctx.UpdateAsync(default);
 					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
-					var s = _Symbol;
+					var s = _Symbol.GetUnderlyingSymbol();
 					if (s != null) {
 						var m = new CSharpSymbolContextMenu(s, s.GetSyntaxNode(), ctx);
 						m.AddAnalysisCommands();

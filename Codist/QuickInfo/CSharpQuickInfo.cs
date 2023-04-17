@@ -15,6 +15,7 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
+using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Projection;
 using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
@@ -100,6 +101,11 @@ namespace Codist.QuickInfo
 							.Append(R.T_ExpressionCount)
 							.Append((node as InitializerExpressionSyntax).Expressions.Count.ToText(), true, false, __SymbolFormatter.Number));
 					}
+					else if (node.IsKind(SyntaxKind.Interpolation)) {
+						symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_String);
+						isConvertedType = true;
+						goto PROCESS;
+					}
 					if (overrider != null) {
 						overrider.OverrideBuiltInXmlDoc = false;
 					}
@@ -109,7 +115,10 @@ namespace Codist.QuickInfo
 					if (overrider != null) {
 						overrider.OverrideBuiltInXmlDoc = false;
 					}
-					ShowBlockInfo(container, currentSnapshot, node = unitCompilation.FindNode(token.Span), semanticModel);
+					if ((node = unitCompilation.FindNode(token.Span)).IsKind(SyntaxKind.Interpolation)) {
+						goto case SyntaxKind.CommaToken;
+					}
+					ShowBlockInfo(container, currentSnapshot, node, semanticModel);
 					goto RETURN;
 				case SyntaxKind.ThisKeyword: // convert to type below
 				case SyntaxKind.BaseKeyword:
@@ -139,7 +148,6 @@ namespace Codist.QuickInfo
 					isConvertedType = true;
 					break;
 				case SyntaxKind.NullKeyword:
-				case SyntaxKind.NewKeyword:
 				case SyntaxKind.DefaultKeyword:
 				case SyntaxKind.SwitchKeyword:
 				case SyntaxKind.QuestionToken:
@@ -247,8 +255,9 @@ namespace Codist.QuickInfo
 				case SyntaxKind.TypeOfKeyword:
 					symbol = semanticModel.GetSystemTypeSymbol(nameof(Type));
 					break;
+				case SyntaxKind.NewKeyword:
 				case SyntaxKind.StackAllocKeyword:
-					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span), cancellationToken).Type;
+					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span, false, true), cancellationToken).Type;
 					break;
 				case CodeAnalysisHelper.DotDotToken:
 					symbol = semanticModel.Compilation.GetSpecialType(SpecialType.System_Int32);
@@ -280,7 +289,7 @@ namespace Codist.QuickInfo
 			switch (node.Kind()) {
 				case SyntaxKind.Argument:
 				case SyntaxKind.ArgumentList:
-			LocateNodeInParameterList(ref node, ref token);
+					LocateNodeInParameterList(ref node, ref token);
 					break;
 				case SyntaxKind.LetClause:
 				case SyntaxKind.JoinClause:
@@ -416,13 +425,11 @@ namespace Codist.QuickInfo
 		}
 
 		static ISymbol GetSymbol(SemanticModel semanticModel, SyntaxNode node, ref ImmutableArray<ISymbol> candidates, CancellationToken cancellationToken) {
-			SyntaxKind kind = node.Kind();
-			if (kind == SyntaxKind.BaseExpression
-				|| kind == SyntaxKind.DefaultLiteralExpression
-				|| kind == SyntaxKind.ImplicitStackAllocArrayCreationExpression) {
+			var kind = node.Kind();
+			if (kind.IsAny(SyntaxKind.BaseExpression, SyntaxKind.DefaultLiteralExpression, SyntaxKind.ImplicitStackAllocArrayCreationExpression)) {
 				return semanticModel.GetTypeInfo(node, cancellationToken).ConvertedType;
 			}
-			if (kind == SyntaxKind.ThisExpression || kind == CodeAnalysisHelper.VarPattern) {
+			if (kind.IsAny(SyntaxKind.ThisExpression, CodeAnalysisHelper.VarPattern)) {
 				return semanticModel.GetTypeInfo(node, cancellationToken).Type;
 			}
 			if (kind.IsAny(SyntaxKind.TupleElement, SyntaxKind.ForEachStatement, SyntaxKind.FromClause, SyntaxKind.QueryContinuation)) {
@@ -486,6 +493,9 @@ namespace Codist.QuickInfo
 				symbol = ms.AssociatedSymbol;
 			}
 			symbol = symbol.GetAliasTarget();
+			if (symbol is IFieldSymbol f && f.CorrespondingTupleField != null) {
+				symbol = f.CorrespondingTupleField;
+			}
 			var compilation = semanticModel.Compilation;
 			var doc = new XmlDoc(symbol, compilation);
 			var docRenderer = new XmlDocRenderer(compilation, SymbolFormatter.Instance);
