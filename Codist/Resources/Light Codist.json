@@ -231,18 +231,12 @@
       "ForegroundColor": "#0000B3"
     },
     {
-      "StyleID": "MethodName",
-      "ForegroundColor": "#800000"
-    },
-    {
       "StyleID": "ExtensionMethodName",
       "Italic": true,
-      "Underline": true,
-      "ForegroundColor": "#800000"
+      "Underline": true
     },
     {
-      "StyleID": "ExternMethodName",
-      "ForegroundColor": "#800000",
+      "StyleID": "ExternMethodName"
       "BackgroundColor": "#FF0000",
       "BackgroundEffect": "ToBottom"
     },
