@@ -521,7 +521,7 @@ namespace Codist.Taggers
 							//|| ct == Constants.CodeStaticSymbol
 							|| ct.EndsWith("name", StringComparison.Ordinal)) {
 							var itemSpan = item.TextSpan;
-							node = unitCompilation.FindNode(itemSpan, true);
+							node = unitCompilation.FindNode(itemSpan, true, true);
 							foreach (var type in GetClassificationType(node, semanticModel, cancellationToken)) {
 								tags.Add(CreateClassificationSpan(snapshot, itemSpan, type));
 							}
@@ -665,19 +665,38 @@ namespace Codist.Taggers
 				if (node.RawKind == (int)SyntaxKind.DestructorDeclaration) {
 					return CreateClassificationSpan(snapshot, itemSpan, TransientTags.DestructorDeclaration);
 				}
-				var opMethod = semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node, cancellationToken) as IMethodSymbol;
-				if (opMethod?.MethodKind == MethodKind.UserDefinedOperator) {
+				if (node.IsKind(SyntaxKind.ArrowExpressionClause)) {
+					switch (node.Parent.Kind()) {
+						case SyntaxKind.MethodDeclaration:
+							return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.Method);
+						case SyntaxKind.PropertyDeclaration:
+						case SyntaxKind.GetAccessorDeclaration:
+						case SyntaxKind.SetAccessorDeclaration:
+						case SyntaxKind.IndexerDeclaration:
+							return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.Property);
+						case SyntaxKind.AddAccessorDeclaration:
+						case SyntaxKind.RemoveAccessorDeclaration:
+							return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.Event);
+						case SyntaxKind.ConstructorDeclaration:
+						case SyntaxKind.DestructorDeclaration:
+							return CreateClassificationSpan(snapshot, itemSpan, CSharpClassifications.Instance.ConstructorMethod);
+					}
+					return null;
+				}
+				if (semanticModel.GetSymbol(node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node, cancellationToken) is IMethodSymbol opMethod) {
+					if (opMethod.MethodKind == MethodKind.UserDefinedOperator) {
 					return CreateClassificationSpan(snapshot,
 						itemSpan,
 						node.RawKind == (int)SyntaxKind.OperatorDeclaration
 							? TransientTags.OverrideDeclaration
 							: __Classifications.OverrideMember);
 				}
-				if (opMethod?.MethodKind == MethodKind.LambdaMethod) {
+					if (opMethod.MethodKind == MethodKind.LambdaMethod) {
 					var l = ClassifyLambdaExpression(itemSpan, snapshot, semanticModel, unitCompilation);
 					if (l != null) {
 						return l;
 					}
+				}
 				}
 				return null;
 			}
@@ -693,7 +712,7 @@ namespace Codist.Taggers
 							return ClassifyCurlyBraces(itemSpan, snapshot, unitCompilation);
 						case '[':
 						case ']':
-							return ClassifyBrackets(itemSpan, snapshot, unitCompilation);
+							return ClassifyBrackets(itemSpan, snapshot, semanticModel, unitCompilation, cancellationToken);
 					}
 				}
 				return null;
@@ -704,11 +723,16 @@ namespace Codist.Taggers
 				if (node is BaseTypeDeclarationSyntax == false
 					&& node is ExpressionSyntax == false
 					&& node is NamespaceDeclarationSyntax == false
+					&& node is AccessorDeclarationSyntax == false
 					&& !node.IsKind(SyntaxKind.SwitchStatement)
 					&& (node = node.Parent) == null) {
 					return null;
 				}
-				var type = ClassifySyntaxNode(node, node is ExpressionSyntax ? HighlightOptions.MemberBraceTags : HighlightOptions.MemberDeclarationBraceTags, HighlightOptions.KeywordBraceTags);
+				var type = ClassifySyntaxNode(node,
+					node is ExpressionSyntax || node is AccessorDeclarationSyntax
+						? HighlightOptions.MemberBraceTags
+						: HighlightOptions.MemberDeclarationBraceTags,
+					HighlightOptions.KeywordBraceTags);
 				return type != null
 					? CreateClassificationSpan(snapshot, itemSpan, type)
 					: null;
@@ -777,23 +801,32 @@ namespace Codist.Taggers
 				return null;
 			}
 
-			static TagSpan<IClassificationTag> ClassifyBrackets(TextSpan itemSpan, ITextSnapshot snapshot, CompilationUnitSyntax unitCompilation) {
-				// highlight attribute annotation
+			static TagSpan<IClassificationTag> ClassifyBrackets(TextSpan itemSpan, ITextSnapshot snapshot, SemanticModel semanticModel, CompilationUnitSyntax unitCompilation, CancellationToken cancellationToken) {
 				var node = unitCompilation.FindNode(itemSpan, true, false);
+				if (node.IsKind(SyntaxKind.Argument)) {
+					node = ((ArgumentSyntax)node).Expression;
+				}
 				switch (node.Kind()) {
+					case SyntaxKind.BracketedArgumentList:
+						return (node = node.Parent).IsKind(SyntaxKind.ElementAccessExpression)
+							&& semanticModel.GetTypeInfo(((ElementAccessExpressionSyntax)node).Expression, cancellationToken).Type?.TypeKind != TypeKind.Array
+							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Property)
+							: node.IsKind(SyntaxKind.VariableDeclarator)
+							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberDeclarationBraceTags.Constructor)
+							: null;
+					case SyntaxKind.BracketedParameterList:
+						return node.Parent.IsKind(SyntaxKind.IndexerDeclaration)
+							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberDeclarationBraceTags.Property)
+							: null;
 					case SyntaxKind.AttributeList:
 						return CreateClassificationSpan(snapshot, node.Span, __Classifications.AttributeNotation);
 					case SyntaxKind.ArrayRankSpecifier:
-						return node.Parent.Parent.IsKind(SyntaxKind.ArrayCreationExpression)
+						return node.Parent.Parent.Kind().IsAny(SyntaxKind.ArrayCreationExpression, SyntaxKind.StackAllocArrayCreationExpression, SyntaxKind.ImplicitStackAllocArrayCreationExpression)
 							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor)
 							: null;
 					case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
 					case SyntaxKind.ImplicitArrayCreationExpression:
 						return CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor);
-					case SyntaxKind.Argument:
-						return ((ArgumentSyntax)node).Expression.IsKind(SyntaxKind.ImplicitStackAllocArrayCreationExpression)
-							? CreateClassificationSpan(snapshot, itemSpan, HighlightOptions.MemberBraceTags.Constructor)
-							: null;
 				}
 				return null;
 			}
@@ -855,18 +888,28 @@ namespace Codist.Taggers
 					case CodeAnalysisHelper.WithInitializerExpression:
 						return tag.Constructor;
 					case SyntaxKind.IndexerDeclaration:
-					case SyntaxKind.PropertyDeclaration: return tag.Property;
+					case SyntaxKind.PropertyDeclaration:
+					case SyntaxKind.GetAccessorDeclaration:
+					case SyntaxKind.SetAccessorDeclaration:
+						return tag.Property;
 					case SyntaxKind.ClassDeclaration:
 					case CodeAnalysisHelper.RecordDeclaration:
 						return tag.Class;
-					case SyntaxKind.InterfaceDeclaration: return tag.Interface;
-					case SyntaxKind.EnumDeclaration: return tag.Enum;
+					case SyntaxKind.InterfaceDeclaration:
+						return tag.Interface;
+					case SyntaxKind.EnumDeclaration:
+						return tag.Enum;
 					case CodeAnalysisHelper.RecordStructDeclaration:
 					case SyntaxKind.StructDeclaration:
 						return tag.Struct;
-					case SyntaxKind.Attribute: return __Classifications.AttributeName;
-					case SyntaxKind.EventDeclaration: return tag.Event;
-					case SyntaxKind.DelegateDeclaration: return tag.Delegate;
+					case SyntaxKind.Attribute:
+						return __Classifications.AttributeName;
+					case SyntaxKind.EventDeclaration:
+					case SyntaxKind.AddAccessorDeclaration:
+					case SyntaxKind.RemoveAccessorDeclaration:
+						return tag.Event;
+					case SyntaxKind.DelegateDeclaration:
+						return tag.Delegate;
 					case SyntaxKind.NamespaceDeclaration:
 						return tag.Namespace;
 					case SyntaxKind.IfStatement:
@@ -899,8 +942,6 @@ namespace Codist.Taggers
 			}
 
 			static Chain<ClassificationTag> GetClassificationType(SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken) {
-				node = node.IsKind(SyntaxKind.Argument) ? ((ArgumentSyntax)node).Expression : node;
-				//System.Diagnostics.Debug.WriteLine(node.GetType().Name + node.Span.ToString());
 				var symbol = semanticModel.GetSymbolInfo(node, cancellationToken).Symbol;
 				var tags = new Chain<ClassificationTag>();
 				if (symbol is null) {

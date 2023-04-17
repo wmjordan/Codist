@@ -19,7 +19,7 @@ namespace Codist.Taggers
 		public ClassificationTag Enum;
 		[ClassificationType(ClassificationTypeNames = Constants.CodeDelegateName)]
 		public ClassificationTag Delegate;
-		[ClassificationType(ClassificationTypeNames = Constants.CodeEventName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName)]
 		public ClassificationTag Event;
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName)]
 		public ClassificationTag Field;
