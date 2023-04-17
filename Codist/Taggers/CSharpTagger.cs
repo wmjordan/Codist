@@ -971,7 +971,10 @@ namespace Codist.Taggers
 									: __Classifications.Declaration);
 								break;
 							case SymbolKind.Event:
+								if (HighlightOptions.NonPrivateField
+									&& symbol.DeclaredAccessibility >= Accessibility.ProtectedAndInternal) {
 								tags.Add(__Classifications.NestedDeclaration);
+								}
 								break;
 							case SymbolKind.Method:
 								if (HighlightOptions.LocalFunctionDeclaration
