@@ -961,6 +961,8 @@ namespace Codist.Taggers
 							case SymbolKind.Local:
 								tags.Add(__Classifications.LocalDeclaration);
 								break;
+							case SymbolKind.RangeVariable:
+								return tags.Add(__Classifications.LocalDeclaration);
 						}
 					}
 				}

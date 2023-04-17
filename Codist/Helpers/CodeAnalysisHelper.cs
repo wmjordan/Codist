@@ -1226,6 +1226,9 @@ namespace Codist
 				case SyntaxKind.EventDeclaration: return ((EventDeclarationSyntax)node).Identifier;
 				case SyntaxKind.EnumMemberDeclaration: return ((EnumMemberDeclarationSyntax)node).Identifier;
 				case SyntaxKind.VariableDeclarator: return ((VariableDeclaratorSyntax)node).Identifier;
+				case SyntaxKind.LetClause: return ((LetClauseSyntax)node).Identifier;
+				case SyntaxKind.JoinClause: return ((JoinClauseSyntax)node).Identifier;
+				case SyntaxKind.JoinIntoClause: return ((JoinIntoClauseSyntax)node).Identifier;
 			}
 			return node.GetFirstToken();
 		}

@@ -681,7 +681,9 @@ namespace Codist
 				case SymbolKind.Namespace: text.Add(symbol.Name.Render(Namespace)); return;
 				case SymbolKind.Parameter: text.Add(symbol.Render(null, bold, Parameter)); return;
 				case SymbolKind.Property: text.Add(symbol.Render(alias, bold, Property)); return;
-				case SymbolKind.Local: text.Add(symbol.Render(null, bold, Local)); return;
+				case SymbolKind.Local:
+				case SymbolKind.RangeVariable:
+					text.Add(symbol.Render(null, bold, Local)); return;
 				case SymbolKind.TypeParameter:
 					if (alias != null && ((ITypeParameterSymbol)symbol).Variance != VarianceKind.None) {
 						text.Add((((ITypeParameterSymbol)symbol).Variance == VarianceKind.Out ? "out " : "in ").Render(Keyword));

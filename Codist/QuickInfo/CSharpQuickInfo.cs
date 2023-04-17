@@ -277,7 +277,21 @@ namespace Codist.QuickInfo
 				return null;
 			}
 			node = node.UnqualifyExceptNamespace();
+			switch (node.Kind()) {
+				case SyntaxKind.Argument:
+				case SyntaxKind.ArgumentList:
 			LocateNodeInParameterList(ref node, ref token);
+					break;
+				case SyntaxKind.LetClause:
+				case SyntaxKind.JoinClause:
+				case SyntaxKind.JoinIntoClause:
+					if (node.GetIdentifierToken().FullSpan == token.FullSpan) {
+						symbol = semanticModel.GetDeclaredSymbol(node, cancellationToken);
+					}
+					break;
+				case SyntaxKind.SkippedTokensTrivia:
+					return null;
+			}
 
 			ObjectCreationExpressionSyntax ctor;
 		PROCESS:
@@ -411,8 +425,14 @@ namespace Codist.QuickInfo
 			if (kind == SyntaxKind.ThisExpression || kind == CodeAnalysisHelper.VarPattern) {
 				return semanticModel.GetTypeInfo(node, cancellationToken).Type;
 			}
-			if (kind == SyntaxKind.TupleElement || kind == SyntaxKind.ForEachStatement) {
+			if (kind.IsAny(SyntaxKind.TupleElement, SyntaxKind.ForEachStatement, SyntaxKind.FromClause, SyntaxKind.QueryContinuation)) {
 				return semanticModel.GetDeclaredSymbol(node, cancellationToken);
+			}
+			if (node is QueryClauseSyntax q) {
+				if (node is OrderByClauseSyntax o && o.Orderings.Count != 0) {
+					return semanticModel.GetSymbolInfo(o.Orderings[0], cancellationToken).Symbol;
+				}
+				return semanticModel.GetQueryClauseInfo(q, cancellationToken).OperationInfo.Symbol;
 			}
 			var symbolInfo = semanticModel.GetSymbolInfo(node, cancellationToken);
 			if (symbolInfo.CandidateReason != CandidateReason.None) {
