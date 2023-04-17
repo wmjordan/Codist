@@ -19,6 +19,7 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Formatting;
 using Microsoft.VisualStudio.Text.Operations;
+using Microsoft.VisualStudio.Text.Projection;
 using Microsoft.VisualStudio.Text.Tagging;
 using Microsoft.VisualStudio.Utilities;
 using VsTextView = Microsoft.VisualStudio.TextManager.Interop.IVsTextView;
@@ -1055,7 +1056,9 @@ namespace Codist
 
 		/// <summary>A rough method to detect whether a document can be edited.</summary>
 		public static bool MayBeEditor(this ITextBuffer textBuffer) {
-			return (textBuffer.IsReadOnly(0) == false || textBuffer.Properties.ContainsProperty(typeof(ITextDocument)))
+			return (textBuffer.IsReadOnly(0) == false
+					|| textBuffer.Properties.ContainsProperty(typeof(ITextDocument))
+					|| textBuffer is IProjectionBuffer pb && pb.SourceBuffers.Any(MayBeEditor))
 				&& textBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false;
 		}
 		public static ITextDocument GetTextDocument(this ITextBuffer textBuffer) {
