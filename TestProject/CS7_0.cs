@@ -41,9 +41,15 @@ namespace TestProject.CS7_0
 		}
 
 		internal IEnumerable<(int ID, string Title)> GetCurrentItemsMobileList() {
+			var r = from item in new ToDoItem[0]
+					let firstCharInTitle = item.Title[0]
+					group item by firstCharInTitle into gid
+					orderby gid.Key
+					select gid;
 			return from item in new ToDoItem[0]
+				   join ritem in r on item.ID equals ritem.Key
 				   where !item.IsDone
-				   orderby item.DueDate
+				   orderby item.ID, item.IsDone, item.DueDate descending
 				   select (item.ID, item.Title);
 		}
 		public static double StandardDeviation(IEnumerable<double> sequence) {

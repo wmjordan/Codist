@@ -82,6 +82,7 @@
     <Compile Include="MyEnum.cs" />
     <Compile Include="MyStruct.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PunctuationsAndOperators.cs" />
     <Compile Include="TestPage.cs" />
     <Compile Include="VariableCaptures.cs" />
   </ItemGroup>
