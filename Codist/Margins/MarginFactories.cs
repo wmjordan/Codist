@@ -73,7 +73,10 @@ namespace Codist.Margins
 	sealed class DisableChangeTrackerMarginFactory : IWpfTextViewMarginProvider
 	{
 		public IWpfTextViewMargin CreateMargin(IWpfTextViewHost wpfTextViewHost, IWpfTextViewMargin marginContainer) {
-			return CodistPackage.VsVersion.Major >= 17 && wpfTextViewHost.TextView.TextBuffer.MayBeEditor() ? new DisableChangeTrackerMargin(marginContainer) : null;
+			return CodistPackage.VsVersion.Major >= 17
+				&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
+				? new DisableChangeTrackerMargin(marginContainer)
+				: null;
 		}
 	}
 

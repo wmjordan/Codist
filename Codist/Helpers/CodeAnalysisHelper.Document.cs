@@ -13,21 +13,12 @@ namespace Codist
 			if (workspace == null) {
 				throw new ArgumentNullException(nameof(workspace));
 			}
-			var solution = workspace.CurrentSolution;
-			if (solution == null) {
-				throw new InvalidOperationException("solution is null");
-			}
 			if (textBuffer == null) {
 				throw new InvalidOperationException("textBuffer is null");
 			}
-			var textContainer = textBuffer.AsTextContainer();
-			if (textContainer == null) {
-				throw new InvalidOperationException("textContainer is null");
-			}
-			var docId = workspace.GetDocumentIdInCurrentContext(textContainer);
-			if (docId is null) {
-				throw new InvalidOperationException("docId is null");
-			}
+			var solution = workspace.CurrentSolution ?? throw new InvalidOperationException("solution is null");
+			var textContainer = textBuffer.AsTextContainer() ?? throw new InvalidOperationException("textContainer is null");
+			var docId = workspace.GetDocumentIdInCurrentContext(textContainer) ?? throw new InvalidOperationException("docId is null");
 			return solution.WithDocumentText(docId, textContainer.CurrentText, PreservationMode.PreserveIdentity).GetDocument(docId);
 		}
 		public static Document GetDocument(this ITextBuffer textBuffer) {
@@ -39,8 +30,8 @@ namespace Codist
 
 		/// <summary>Gets all <see cref="Document"/>s from a given <see cref="Project"/> and referencing/referenced projects.</summary>
 		public static IEnumerable<Document> GetRelatedProjectDocuments(this Project project) {
-			foreach (var proj in GetRelatedProjects(project)) {
-				foreach (var doc in proj.Documents) {
+			foreach (var p in GetRelatedProjects(project)) {
+				foreach (var doc in p.Documents) {
 					yield return doc;
 				}
 			}
@@ -54,10 +45,10 @@ namespace Codist
 			var projects = new HashSet<Project>();
 			GetRelatedProjects(project, projects);
 			var id = project.Id;
-			foreach (var proj in project.Solution.Projects) {
-				if (projects.Contains(proj) == false
-					&& proj.AllProjectReferences.Any(p => p.ProjectId == id)) {
-					projects.Add(proj);
+			foreach (var p in project.Solution.Projects) {
+				if (projects.Contains(p) == false
+					&& p.AllProjectReferences.Any(i => i.ProjectId == id)) {
+					projects.Add(p);
 				}
 			}
 			return projects;

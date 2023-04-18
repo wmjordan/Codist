@@ -1122,26 +1122,30 @@ namespace Codist
 
 		public static IMethodSymbol AsMethod(this ISymbol symbol) {
 			switch (symbol.Kind) {
-				case SymbolKind.Method: return symbol as IMethodSymbol;
+				case SymbolKind.Method: return (IMethodSymbol)symbol;
 				case SymbolKind.Event: return ((IEventSymbol)symbol).RaiseMethod;
 				case SymbolKind.NamedType:
-					var t = symbol as INamedTypeSymbol;
+					var t = (INamedTypeSymbol)symbol;
 					return t.TypeKind == TypeKind.Delegate ? t.DelegateInvokeMethod : null;
 				default: return null;
 			}
 		}
 
-		public static async Task<Project> GetProjectAsync(this ISymbol symbol, Solution solution, CancellationToken cancellationToken = default) {
+		public static Task<Project> GetProjectAsync(this ISymbol symbol, Solution solution, CancellationToken cancellationToken = default) {
 			var asm = symbol.ContainingAssembly;
-			if (asm != null) {
-				foreach (var item in solution.Projects) {
+			return asm == null
+				? Task.FromResult<Project>(null)
+				: GetProjectAsync(asm, solution, cancellationToken);
+
+			async Task<Project> GetProjectAsync(IAssemblySymbol a, Solution s, CancellationToken ct) {
+				foreach (var item in s.Projects) {
 					if (item.SupportsCompilation
-						&& (await item.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).Assembly == asm) {
+						&& (await item.GetCompilationAsync(ct).ConfigureAwait(false)).Assembly == a) {
 						return item;
 					}
 				}
+				return null;
 			}
-			return null;
 		}
 		#endregion
 
@@ -1455,7 +1459,9 @@ namespace Codist
 
 		public static int CompareByFieldIntegerConst(ISymbol a, ISymbol b) {
 			IFieldSymbol fa = a as IFieldSymbol, fb = b as IFieldSymbol;
-			return fa == null ? -1 : fb == null ? 1 : Convert.ToInt64(fa.ConstantValue).CompareTo(Convert.ToInt64(fb.ConstantValue));
+			return fa == null ? -1
+				: fb == null ? 1
+				: Convert.ToInt64(fa.ConstantValue).CompareTo(Convert.ToInt64(fb.ConstantValue));
 		}
 
 		public static bool IsBoundedGenericType(this INamedTypeSymbol type) {
@@ -1512,13 +1518,8 @@ namespace Codist
 					}
 				}
 			}
-			if (typeParameters.IsDefault == false) {
-				var typeParams = method.TypeParameters;
-				if (typeParams.Length != typeParameters.Length) {
-					return false;
-				}
-			}
-			return true;
+			return typeParameters.IsDefaultOrEmpty
+				|| method.TypeParameters.Length == typeParameters.Length;
 		}
 
 		/// <summary>Returns whether a symbol could have an override.</summary>
@@ -1625,7 +1626,7 @@ namespace Codist
 					il.Emit(OpCodes.Ldc_I4_2);
 					il.Emit(OpCodes.Ret);
 				}
-				return m.CreateDelegate(typeof(Func<IAssemblySymbol, int>)) as Func<IAssemblySymbol, int>;
+				return m.CreateDelegate<Func<IAssemblySymbol, int>>();
 			}
 		}
 

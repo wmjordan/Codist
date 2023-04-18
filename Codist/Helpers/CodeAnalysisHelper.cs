@@ -824,6 +824,7 @@ namespace Codist
 					return GetEndIfSignature((EndIfDirectiveTriviaSyntax)node);
 			}
 			return null;
+
 			string GetTypeSignature(TypeDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
 			string GetMethodSignature(MethodDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
 			string GetDelegateSignature(DelegateDeclarationSyntax syntax) => GetGenericSignature(syntax.Identifier.Text, syntax.Arity);
@@ -866,7 +867,7 @@ namespace Codist
 					case 5: return "<,,,,>";
 					case 6: return "<,,,,,>";
 					case 7: return "<,,,,,,>";
-					default: return "<" + new String(',', arity - 1) + ">";
+					default: return "<" + new string(',', arity - 1) + ">";
 				}
 			}
 			string GetVariableSignature(VariableDeclarationSyntax syntax, int pos) {
@@ -1058,8 +1059,7 @@ namespace Codist
 		/// <summary>Gets the first expression containing current node which is of type <typeparamref name="TExpression"/>.</summary>
 		public static TExpression GetAncestorOrSelfExpression<TExpression>(this SyntaxNode node)
 			where TExpression : ExpressionSyntax {
-			TExpression r;
-			if ((r = node as TExpression) != null) {
+			if (node is TExpression r) {
 				return r;
 			}
 			if (node is ExpressionSyntax) {
@@ -1074,14 +1074,13 @@ namespace Codist
 		}
 		/// <summary>Gets the first node containing current node which is of type <typeparamref name="TSyntaxNode"/> and not <see cref="ExpressionSyntax"/>.</summary>
 		public static ExpressionSyntax GetLastAncestorExpressionNode(this SyntaxNode node) {
-			var r = node as ExpressionSyntax;
-			if (r == null) {
-				return null;
+			if (node is ExpressionSyntax r) {
+				while (node.Parent is ExpressionSyntax n) {
+					node = r = n;
+				}
+				return r;
 			}
-			while (node.Parent is ExpressionSyntax n) {
-				node = r = n;
-			}
-			return r;
+			return null;
 		}
 
 		public static IEnumerable<SyntaxNode> GetDescendantDeclarations(this SyntaxNode root, CancellationToken cancellationToken = default) {
@@ -1400,26 +1399,10 @@ namespace Codist
 			return node?.ParameterList.Parameters.FirstOrDefault(p => p.Identifier.Text == name);
 		}
 		public static TypeParameterSyntax FindTypeParameter(this SyntaxNode node, string name) {
-			TypeParameterListSyntax tp;
-			var m = node as MethodDeclarationSyntax;
-			if (m != null && m.Arity > 0) {
-				tp = m.TypeParameterList;
-			}
-			else {
-				var t = node as TypeDeclarationSyntax;
-				if (t != null && t.Arity > 0) {
-					tp = t.TypeParameterList;
-				}
-				else {
-					var d = node as DelegateDeclarationSyntax;
-					if (d != null && d.Arity > 0) {
-						tp = d.TypeParameterList;
-					}
-					else {
-						tp = null;
-					}
-				}
-			}
+			var tp = (node is MethodDeclarationSyntax m && m.Arity > 0) ? m.TypeParameterList
+				: node is TypeDeclarationSyntax t && t.Arity > 0 ? t.TypeParameterList
+				: node is DelegateDeclarationSyntax d && d.Arity > 0 ? d.TypeParameterList
+				: null;
 			return tp?.Parameters.FirstOrDefault(p => p.Identifier.Text == name);
 		}
 		public static bool IsLineComment(this SyntaxTrivia trivia) {
@@ -1481,7 +1464,9 @@ namespace Codist
 		static partial class NonPublicOrFutureAccessors
 		{
 			public static readonly Func<SyntaxNode, NameSyntax> GetFileScopedNamespaceName = ReflectionHelper.CreateGetPropertyMethod<SyntaxNode, NameSyntax>("Name", typeof(NamespaceDeclarationSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.FileScopedNamespaceDeclarationSyntax"));
+
 			public static readonly Func<ExpressionSyntax, ArgumentListSyntax> GetImplicitObjectCreationArgumentList = ReflectionHelper.CreateGetPropertyMethod<ExpressionSyntax, ArgumentListSyntax>("ArgumentList", typeof(ExpressionSyntax).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.Syntax.BaseObjectCreationExpressionSyntax"));
+
 			public static readonly Func<int, int> GetWarningLevel = ReflectionHelper.CallStaticFunc<int, int>(typeof(LanguageVersionFacts).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.ErrorFacts")?.GetMethod("GetWarningLevel", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)) ?? (Func<int, int>)((int _) => 3);
 		}
 	}

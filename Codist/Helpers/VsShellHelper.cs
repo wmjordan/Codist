@@ -109,9 +109,10 @@ namespace Codist
 
 			EnvDTE.Project FindProject(EnvDTE.ProjectItems items, string pp) {
 				for (int i = 1; i <= items.Count; i++) {
-					var p = items.Item(i);
-					if (p.Object is EnvDTE.Project proj && String.Equals(proj.FullName, pp, StringComparison.OrdinalIgnoreCase)) {
-						return proj;
+					var item = items.Item(i);
+					if (item.Object is EnvDTE.Project p
+						&& String.Equals(p.FullName, pp, StringComparison.OrdinalIgnoreCase)) {
+						return p;
 					}
 				}
 				return null;
