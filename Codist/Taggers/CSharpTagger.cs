@@ -1173,10 +1173,21 @@ namespace Codist.Taggers
 
 		static class TransientTags
 		{
-			public static readonly ClassificationTag ClassDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.ClassName.ClassificationType, ClassificationTagHelper.Declaration);
-			public static readonly ClassificationTag StructDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.StructName.ClassificationType, ClassificationTagHelper.Declaration);
-			public static readonly ClassificationTag DestructorDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.ResourceKeyword, __Classifications.Declaration);
-			public static readonly ClassificationTag OverrideDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.OverrideMember, __Classifications.Declaration);
+			public static readonly ClassificationTag ClassDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.ClassName, __Classifications.Declaration);
+
+			public static readonly ClassificationTag StructDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.StructName, __Classifications.Declaration);
+
+			public static readonly ClassificationTag ConstructorDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.ConstructorMethod, __Classifications.NestedDeclaration);
+
+			public static readonly ClassificationTag MethodDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.Method, __Classifications.NestedDeclaration);
+
+			public static readonly ClassificationTag EventDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.Event, __Classifications.NestedDeclaration);
+
+			public static readonly ClassificationTag PropertyDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.Property, __Classifications.NestedDeclaration);
+
+			public static readonly ClassificationTag DestructorDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.ResourceKeyword, __Classifications.NestedDeclaration);
+
+			public static readonly ClassificationTag OverrideDeclaration = ClassificationTagHelper.CreateTransientClassificationTag(__Classifications.OverrideMember, __Classifications.NestedDeclaration);
 		}
 
 		static class HighlightOptions
