@@ -27,9 +27,9 @@ namespace Codist.SmartBars
 #pragma warning restore 649, 169, IDE0044
 
 		/// <summary>
-		/// Instantiates a SelectionBar when a textView is created.
+		/// Instantiates a view-specific <see cref="SmartBar"/> when a textView is created.
 		/// </summary>
-		/// <param name="textView">The <see cref="IWpfTextView"/> upon which the adornment should be placed</param>
+		/// <param name="textView">The <see cref="IWpfTextView"/> where the <see cref="SmartBar"/> should be placed.</param>
 		public void TextViewCreated(IWpfTextView textView) {
 			if (Config.Instance.Features.MatchFlags(Features.SmartBar) == false
 				|| textView.TextBuffer.MayBeEditor() == false

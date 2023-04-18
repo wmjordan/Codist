@@ -363,7 +363,7 @@ namespace Codist.NaviBar
 			}
 		}
 
-		void ListContainer_MenuRemoved(object sender, AdornmentChildRemovedEventArgs e) {
+		void ListContainer_MenuRemoved(object sender, OverlayElementRemovedEventArgs e) {
 			if (_SymbolList == e.RemovedElement) {
 				if (_ActiveItem != null) {
 					_ActiveItem.IsHighlighted = false;

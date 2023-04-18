@@ -10,13 +10,13 @@ namespace Codist.Controls
 	{
 		readonly StackPanel _HeaderPanel;
 		readonly SymbolFilterBox _FilterBox;
-		ExternalAdornment _ExternalAdornment;
+		TextViewOverlay _ExternalAdornment;
 
 		public ThemedMenuText Title { get; }
 
 		public SymbolMenu(SemanticContext semanticContext) : this(semanticContext, SymbolListType.None) { }
 		public SymbolMenu(SemanticContext semanticContext, SymbolListType listType) : base(semanticContext) {
-			Container = _ExternalAdornment = ExternalAdornment.GetOrCreate(semanticContext.View);
+			Container = _ExternalAdornment = TextViewOverlay.GetOrCreate(semanticContext.View);
 			ContainerType = listType;
 			Header = _HeaderPanel = new StackPanel {
 				Margin = WpfHelper.MenuItemMargin,

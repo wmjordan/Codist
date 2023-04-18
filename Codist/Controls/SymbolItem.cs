@@ -137,7 +137,7 @@ namespace Codist.Controls
 		void CloseUnpinnedMenus() {
 			if (_Content.GetParent<ListBoxItem>()?.IsMouseOver == false
 				&& System.Windows.Input.Keyboard.Modifiers.MatchFlags(System.Windows.Input.ModifierKeys.Control) == false) {
-				ExternalAdornment.Get(Container.SemanticContext.View)?.ClearUnpinnedChildren();
+				TextViewOverlay.Get(Container.SemanticContext.View)?.ClearUnpinnedChildren();
 			}
 		}
 

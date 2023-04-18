@@ -78,7 +78,7 @@
     <Compile Include="Commands\ToggleAutoBuildVersionCommand.cs" />
     <Compile Include="Commands\SyntaxCustomizerWindowCommand.cs" />
     <Compile Include="Commands\VersionInfoBar.cs" />
-    <Compile Include="Controls\AdornmentChildRemovedEventArgs.cs" />
+    <Compile Include="Controls\OverlayElementRemovedEventArgs.cs" />
     <Compile Include="Controls\CommandToolTip.cs" />
     <Compile Include="Controls\ExternalCommand.cs" />
     <Compile Include="Controls\ExtIconProvider.cs" />
@@ -188,7 +188,7 @@
     <Compile Include="Commands\IncrementVsixVersionCommand.cs" />
     <Compile Include="Commands\NaviBarSearchDeclarationCommand.cs" />
     <Compile Include="Controls\CSharpSymbolContextMenu.cs" />
-    <Compile Include="Controls\ExternalAdornment.cs" />
+    <Compile Include="Controls\TextViewOverlay.cs" />
     <Compile Include="Controls\KeystrokeThief.cs" />
     <Compile Include="Controls\SymbolFilters.cs" />
     <Compile Include="Controls\QuickInfoTextBox.cs" />

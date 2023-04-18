@@ -26,13 +26,13 @@ namespace Codist.SmartBars
 		static readonly Taggers.HighlightClassifications __HighlightClassifications = Taggers.HighlightClassifications.Instance;
 		static readonly string[] __UnitTestingNamespace = new[] { "UnitTesting", "TestTools", "VisualStudio", "Microsoft" };
 		SemanticContext _Context;
-		ExternalAdornment _SymbolListContainer;
+		TextViewOverlay _SymbolListContainer;
 		ISymbol _Symbol;
 
 		public CSharpSmartBar(IWpfTextView view, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(view, textSearchService) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			_Context = SemanticContext.GetOrCreateSingletonInstance(view);
-			_SymbolListContainer = ExternalAdornment.GetOrCreate(view);
+			_SymbolListContainer = TextViewOverlay.GetOrCreate(view);
 			view.Closed += View_Closed;
 		}
 

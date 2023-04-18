@@ -22,8 +22,8 @@ namespace Codist.SmartBars
 		const int Selecting = 1, Working = 2;
 		internal const string QuickInfoSuppressionId = nameof(SmartBar);
 
-		/// <summary>The layer for the smart bar adornment.</summary>
-		ExternalAdornment _ToolBarLayer;
+		/// <summary>The layer for the smart bar.</summary>
+		TextViewOverlay _ToolBarLayer;
 		readonly ToolBarTray _ToolBarTray;
 		readonly bool _IsDiffWindow;
 		CancellationTokenSource _Cancellation = new CancellationTokenSource();
@@ -36,12 +36,12 @@ namespace Codist.SmartBars
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SmartBar"/> class.
 		/// </summary>
-		/// <param name="view">The <see cref="IWpfTextView"/> upon which the adornment will be drawn</param>
+		/// <param name="view">The <see cref="IWpfTextView"/> upon which the smart bar will be drawn.</param>
 		public SmartBar(IWpfTextView view, ITextSearchService2 textSearchService) {
 			_View = view ?? throw new ArgumentNullException(nameof(view));
 			_IsDiffWindow = view.Roles.Contains("DIFF");
 			_TextSearchService = textSearchService;
-			_ToolBarLayer = ExternalAdornment.GetOrCreate(view);
+			_ToolBarLayer = TextViewOverlay.GetOrCreate(view);
 			Config.RegisterUpdateHandler(UpdateSmartBarConfig);
 			if (Config.Instance.SmartBarOptions.MatchFlags(SmartBarOptions.ShiftToggleDisplay)) {
 				_View.VisualElement.PreviewKeyUp += ViewKeyUp;

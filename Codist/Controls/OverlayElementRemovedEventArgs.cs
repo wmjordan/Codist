@@ -2,11 +2,11 @@
 
 namespace Codist.Controls
 {
-	public class AdornmentChildRemovedEventArgs
+	public class OverlayElementRemovedEventArgs
 	{
 		public readonly UIElement RemovedElement;
 
-		public AdornmentChildRemovedEventArgs(UIElement removed) {
+		public OverlayElementRemovedEventArgs(UIElement removed) {
 			RemovedElement = removed;
 		}
 	}
