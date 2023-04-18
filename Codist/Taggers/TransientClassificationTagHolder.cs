@@ -30,13 +30,13 @@ namespace Codist.Taggers
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstructorMethodName)]
 		public ClassificationTag Constructor;
 
-		public static readonly TransientMemberTagHolder Default = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(t));
+		public static readonly TransientMemberTagHolder Default = ClassificationTagHelper.InitFields<TransientMemberTagHolder>(t => new ClassificationTag(t));
 
-		public static readonly TransientMemberTagHolder DeclarationBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.DeclarationBrace)));
+		public static readonly TransientMemberTagHolder DeclarationBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>(t => ClassificationTagHelper.CreateTransientClassificationTag(t, ClassificationTagHelper.DeclarationBrace));
 
-		public static readonly TransientMemberTagHolder BoldDeclarationBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.Bold, ClassificationTagHelper.DeclarationBrace)));
+		public static readonly TransientMemberTagHolder BoldDeclarationBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>(t => ClassificationTagHelper.CreateTransientClassificationTag(t, ClassificationTagHelper.Bold, ClassificationTagHelper.DeclarationBrace));
 
-		public static readonly TransientMemberTagHolder BoldBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.Bold)));
+		public static readonly TransientMemberTagHolder BoldBraces = ClassificationTagHelper.InitFields<TransientMemberTagHolder>(t => ClassificationTagHelper.CreateTransientClassificationTag(t, ClassificationTagHelper.Bold));
 
 		public TransientMemberTagHolder Clone() {
 			return (TransientMemberTagHolder)MemberwiseClone();
@@ -54,9 +54,9 @@ namespace Codist.Taggers
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeCastKeyword)]
 		public ClassificationTag TypeCast;
 
-		public static readonly TransientKeywordTagHolder Default = ClassificationTagHelper.InitFields<TransientKeywordTagHolder>((s, t) => new ClassificationTag(t));
+		public static readonly TransientKeywordTagHolder Default = ClassificationTagHelper.InitFields<TransientKeywordTagHolder>(t => new ClassificationTag(t));
 
-		public static readonly TransientKeywordTagHolder Bold = ClassificationTagHelper.InitFields<TransientKeywordTagHolder>((s, t) => new ClassificationTag(s.CreateTransientClassificationType(t, ClassificationTagHelper.Bold)));
+		public static readonly TransientKeywordTagHolder Bold = ClassificationTagHelper.InitFields<TransientKeywordTagHolder>(t => ClassificationTagHelper.CreateTransientClassificationTag(t, ClassificationTagHelper.Bold));
 
 		public TransientKeywordTagHolder Clone() {
 			return (TransientKeywordTagHolder)MemberwiseClone();
@@ -81,7 +81,7 @@ namespace Codist.Taggers
 			return new ClassificationTag(ServicesHelper.Instance.ClassificationTypeRegistry.CreateTransientClassificationType(Array.ConvertAll(tags, i => i.ClassificationType)));
 		}
 
-		public static T InitFields<T>(Func<IClassificationTypeRegistryService, IClassificationType, ClassificationTag> tagBuilder)
+		public static T InitFields<T>(Func<IClassificationType, ClassificationTag> tagBuilder)
 			where T : class, new() {
 			var c = ServicesHelper.Instance.ClassificationTypeRegistry;
 			var h = new T();
@@ -94,7 +94,7 @@ namespace Codist.Taggers
 				if (n != null) {
 					var t = c.GetClassificationType(n);
 					if (t != null) {
-						item.SetValue(h, tagBuilder(c, t));
+						item.SetValue(h, tagBuilder(t));
 					}
 				}
 			}
