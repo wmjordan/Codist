@@ -140,7 +140,7 @@ namespace Codist.QuickInfo
 					break;
 				case SyntaxKind.ExclamationEqualsToken:
 				case SyntaxKind.EqualsEqualsToken:
-					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span), cancellationToken).ConvertedType;
+					symbol = semanticModel.GetTypeInfo(unitCompilation.FindNode(token.Span, false, true), cancellationToken).ConvertedType;
 					isConvertedType = true;
 					break;
 				case SyntaxKind.EqualsToken:
@@ -167,7 +167,7 @@ namespace Codist.QuickInfo
 					isConvertedType = true;
 					break;
 				case SyntaxKind.AsKeyword:
-					var asType = (unitCompilation.FindNode(token.Span) as BinaryExpressionSyntax)?.GetLastIdentifier();
+					var asType = (unitCompilation.FindNode(token.Span, false, true) as BinaryExpressionSyntax)?.GetLastIdentifier();
 					if (asType != null) {
 						token = asType.Identifier;
 						skipTriggerPointCheck = true;
@@ -202,7 +202,7 @@ namespace Codist.QuickInfo
 					goto ClassifyToken;
 				case SyntaxKind.OpenBracketToken:
 				case SyntaxKind.CloseBracketToken:
-					if ((node = unitCompilation.FindNode(token.Span)).IsKind(SyntaxKind.BracketedArgumentList)
+					if ((node = unitCompilation.FindNode(token.Span, false, true)).IsKind(SyntaxKind.BracketedArgumentList)
 						&& node.Parent.IsKind(SyntaxKind.ElementAccessExpression)) {
 						symbol = semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node.Parent, cancellationToken).Symbol;
 					}
