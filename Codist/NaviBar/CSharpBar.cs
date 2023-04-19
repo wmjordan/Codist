@@ -524,11 +524,12 @@ namespace Codist.NaviBar
 		{
 			Root, GlobalNamespace, Namespace, Node
 		}
+		[Flags]
 		enum MemberListOptions
 		{
 			None,
-			ShowPartial,
-			ShowBase
+			ShowPartial = 1,
+			ShowBase = 1 << 1
 		}
 
 		sealed class NamespaceNode
