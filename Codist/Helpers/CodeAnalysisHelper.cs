@@ -217,6 +217,20 @@ namespace Codist
 			}
 			return false;
 		}
+		public static bool IsMethodDeclaration(this SyntaxKind kind) {
+			switch (kind) {
+				case SyntaxKind.MethodDeclaration:
+				case SyntaxKind.ConstructorDeclaration:
+				case SyntaxKind.LocalFunctionStatement:
+				case SyntaxKind.SimpleLambdaExpression:
+				case SyntaxKind.ParenthesizedLambdaExpression:
+				case SyntaxKind.DestructorDeclaration:
+				case SyntaxKind.OperatorDeclaration:
+				case SyntaxKind.ConversionOperatorDeclaration:
+					return true;
+			}
+			return false;
+		}
 
 		public static bool IsSyntaxBlock(this SyntaxKind kind) {
 			switch (kind) {
@@ -431,7 +445,10 @@ namespace Codist
 				case SyntaxKind.SwitchStatement:
 				case SwitchExpression:
 					return KnownImageIds.FlowSwitch;
-				case SyntaxKind.SwitchSection: return KnownImageIds.FlowDecision;
+				case SyntaxKind.SwitchSection:
+				case SyntaxKind.CaseSwitchLabel:
+				case SyntaxKind.DefaultSwitchLabel:
+					return KnownImageIds.FlowDecision;
 				case SyntaxKind.TryStatement: return IconIds.TryCatch;
 				case SyntaxKind.UsingStatement: return IconIds.Using;
 				case SyntaxKind.WhileStatement: return KnownImageIds.While;
@@ -822,6 +839,10 @@ namespace Codist
 					return GetIfSignature((IfDirectiveTriviaSyntax)node);
 				case SyntaxKind.EndIfDirectiveTrivia:
 					return GetEndIfSignature((EndIfDirectiveTriviaSyntax)node);
+				case SyntaxKind.CaseSwitchLabel:
+					return GetSwitchLabelSignature((CaseSwitchLabelSyntax)node);
+				case SyntaxKind.DefaultSwitchLabel:
+					return "default";
 			}
 			return null;
 
@@ -901,6 +922,13 @@ namespace Codist
 			string GetEndIfSignature(EndIfDirectiveTriviaSyntax syntax) {
 				var e = syntax.GetPrecedingDirective<IfDirectiveTriviaSyntax, EndIfDirectiveTriviaSyntax>(SyntaxKind.IfDirectiveTrivia, SyntaxKind.EndIfDirectiveTrivia);
 				return e != null ? GetIfSignature(e) : String.Empty;
+			}
+			string GetSwitchLabelSignature(CaseSwitchLabelSyntax syntax) {
+				var e = syntax.Value;
+				if (e.IsKind(SyntaxKind.SimpleMemberAccessExpression)) {
+					return e.GetLastIdentifier().ToString();
+				}
+				return e.ToString();
 			}
 		}
 
@@ -1441,9 +1469,7 @@ namespace Codist
 				originName = null;
 			}
 			var n = node;
-			while (n.IsKind(SyntaxKind.QualifiedName)
-				|| n.IsKind(SyntaxKind.SimpleMemberAccessExpression)
-				|| n.IsKind(SyntaxKind.PointerMemberAccessExpression)) {
+			while (n.Kind().IsAny(SyntaxKind.QualifiedName, SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.PointerMemberAccessExpression, SyntaxKind.MemberBindingExpression)) {
 				if (n is MemberAccessExpressionSyntax ma && ma.Name != originName) {
 					return node;
 				}

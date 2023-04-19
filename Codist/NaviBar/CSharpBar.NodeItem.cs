@@ -70,9 +70,8 @@ namespace Codist.NaviBar
 					Bar.HideMenu();
 					return;
 				}
-				if (Node.IsKind(SyntaxKind.RegionDirectiveTrivia)
-						&& (Node.FirstAncestorOrSelf<MemberDeclarationSyntax>()?.Span.Contains(Node.Span)) != true
-					|| Node.Kind().IsNonDelegateTypeDeclaration()) {
+				var kind = Node.Kind();
+				if (MayHaveChildNodeItems(kind)) {
 					if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.CtrlGoToSource)
 						&& Keyboard.Modifiers.MatchFlags(ModifierKeys.Control)) {
 						Node.GetReference().GoToSource();
@@ -84,6 +83,9 @@ namespace Codist.NaviBar
 						await CreateMenuForTypeSymbolNodeAsync(ct);
 						await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
 
+						if (_Menu.Symbols.Count == 0) {
+							goto GOTO_DEFINITION;
+						}
 						_FilterBox.UpdateNumbers((Symbol as ITypeSymbol)?.GetMembers().Select(s => new SymbolItem(s, null, false)) ?? Enumerable.Empty<SymbolItem>());
 						var footer = (TextBlock)_Menu.Footer;
 						if (_PartialCount > 1) {
@@ -103,9 +105,10 @@ namespace Codist.NaviBar
 					return;
 				}
 
+			GOTO_DEFINITION:
 				var span = Node.FullSpan;
 				if (span.Contains(Bar._SemanticContext.Position) && Node.SyntaxTree.FilePath == Bar._SemanticContext.Document.FilePath
-					|| Node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
+					|| kind == SyntaxKind.RegionDirectiveTrivia) {
 					// Hack: since SelectNode will move the cursor to the end of the span--the beginning of next node,
 					//    it will make next node selected, which is undesired in most cases
 					Bar.View.Selection.SelectionChanged -= Bar.Update;
@@ -115,6 +118,14 @@ namespace Codist.NaviBar
 				else {
 					Node.GetIdentifierToken().GetLocation().GoToSource();
 				}
+			}
+
+			bool MayHaveChildNodeItems(SyntaxKind kind) {
+				return kind == SyntaxKind.RegionDirectiveTrivia
+						&& (Node.FirstAncestorOrSelf<MemberDeclarationSyntax>()?.Span.Contains(Node.Span)) != true
+					|| kind.IsNonDelegateTypeDeclaration()
+					|| kind.IsMethodDeclaration()
+					|| kind == SyntaxKind.SwitchStatement;
 			}
 
 			async Task CreateMenuForTypeSymbolNodeAsync(CancellationToken cancellationToken) {
@@ -165,12 +176,28 @@ namespace Codist.NaviBar
 			}
 
 			Task AddItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
-				AddMemberDeclarations(node, false, true);
-				if (node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
-					return Task.CompletedTask;
+				var kind = node.Kind();
+				switch (kind) {
+					case SyntaxKind.SwitchStatement:
+						AddSwitchLabels(node);
+						return Task.CompletedTask;
+					case SyntaxKind.RegionDirectiveTrivia:
+						var span = node.GetSematicSpan(true).ToTextSpan();
+						var scope = node.FirstAncestorOrSelf<SyntaxNode>(n => n.Span.Contains(span), true).ChildNodes().Where(n => span.Contains(n.SpanStart));
+						AddMemberDeclarations(node, scope, false, false);
+						return Task.CompletedTask;
+					case SyntaxKind.MethodDeclaration:
+					case SyntaxKind.LocalFunctionStatement:
+					case SyntaxKind.ConstructorDeclaration:
+					case SyntaxKind.SimpleLambdaExpression:
+					case SyntaxKind.ParenthesizedLambdaExpression:
+					case SyntaxKind.DestructorDeclaration:
+						AddLocalFunctions(node);
+						return Task.CompletedTask;
 				}
+				AddMemberDeclarations(node, node.ChildNodes(), false, true);
 				var externals = (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.PartialClassMember)
-					&& (node as BaseTypeDeclarationSyntax).Modifiers.Any(SyntaxKind.PartialKeyword) ? MemberListOptions.ShowPartial : 0)
+					&& ((BaseTypeDeclarationSyntax)node).Modifiers.Any(SyntaxKind.PartialKeyword) ? MemberListOptions.ShowPartial : 0)
 					| (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.BaseClassMember) && (node.IsKind(SyntaxKind.ClassDeclaration) || node.IsKind(CodeAnalysisHelper.RecordDeclaration)) ? MemberListOptions.ShowBase : 0);
 				return externals == 0 ? Task.CompletedTask : AddExternalItemsAsync(node, externals, cancellationToken);
 			}
@@ -216,20 +243,11 @@ namespace Codist.NaviBar
 				i.Location = item.SyntaxTree.GetLocation(item.Span);
 				i.Content.Text = textOverride ?? System.IO.Path.GetFileName(item.SyntaxTree.FilePath);
 				i.Usage = SymbolUsageKind.Container;
-				AddMemberDeclarations(externalNode, true, includeDirectives);
+				AddMemberDeclarations(externalNode, externalNode.ChildNodes(), true, includeDirectives);
 			}
 
-			void AddMemberDeclarations(SyntaxNode node, bool isExternal, bool includeDirectives) {
+			void AddMemberDeclarations(SyntaxNode node, IEnumerable<SyntaxNode> scope, bool isExternal, bool includeDirectives) {
 				const byte UNDEFINED = 0xFF, TRUE = 1, FALSE = 0;
-				IEnumerable<SyntaxNode> scope;
-				if (node.IsKind(SyntaxKind.RegionDirectiveTrivia)) {
-					var span = node.GetSematicSpan(true).ToTextSpan();
-					scope = node.FirstAncestorOrSelf<SyntaxNode>(n => n.Span.Contains(span), true).ChildNodes().Where(n => span.Contains(n.SpanStart));
-					includeDirectives = false;
-				}
-				else {
-					scope = node.ChildNodes();
-				}
 				var directives = includeDirectives && Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.Region)
 					? node.GetDirectives(d => d.IsKind(SyntaxKind.RegionDirectiveTrivia) || d.IsKind(SyntaxKind.EndRegionDirectiveTrivia))
 					: null;
@@ -302,6 +320,40 @@ namespace Codist.NaviBar
 						if (item.IsKind(SyntaxKind.RegionDirectiveTrivia)
 							&& (lastNode == null || lastNode.Span.Contains(item.SpanStart) == false)) {
 							AddStartRegion(item, isExternal);
+						}
+					}
+				}
+			}
+
+			void AddSwitchLabels(SyntaxNode node) {
+				int pos = Bar.View.GetCaretPosition();
+				bool selected = false;
+				foreach (var section in ((SwitchStatementSyntax)node).Sections) {
+					foreach (var item in section.Labels) {
+						var i = _Menu.Add(item);
+						if (selected == false && section.FullSpan.Contains(pos)) {
+							selected = true;
+							i.Container.SelectedValue = i;
+						}
+					}
+				}
+			}
+
+			void AddLocalFunctions(SyntaxNode node) {
+				int pos = Bar.View.GetCaretPosition();
+				bool selected = false;
+				var scope = node is BaseMethodDeclarationSyntax m ? m.Body?.ChildNodes()
+					: node is LambdaExpressionSyntax l ? l.Body?.ChildNodes()
+					: null;
+				if (scope == null) {
+					return;
+				}
+				foreach (var item in scope) {
+					if (item.IsKind(SyntaxKind.LocalFunctionStatement)) {
+						var i = _Menu.Add(item);
+						if (selected == false && item.FullSpan.Contains(pos)) {
+							selected = true;
+							i.Container.SelectedValue = i;
 						}
 					}
 				}
