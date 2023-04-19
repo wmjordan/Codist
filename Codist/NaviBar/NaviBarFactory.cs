@@ -22,18 +22,8 @@ namespace Codist.NaviBar
 	sealed class NaviBarFactory : IWpfTextViewCreationListener
 	{
 #pragma warning disable 649, 169
-
-		/// <summary>
-		/// Defines the adornment layer for syntax node range highlight.
-		/// </summary>
-		[Export(typeof(AdornmentLayerDefinition))]
-		[Name(nameof(CSharpBar.SyntaxNodeRange))]
-		[Order(After = PredefinedAdornmentLayers.CurrentLineHighlighter)]
-		AdornmentLayerDefinition _SyntaxNodeRangeAdornmentLayer;
-
 		[Import(typeof(ITextSearchService2))]
 		ITextSearchService2 _TextSearchService;
-
 #pragma warning restore 649, 169
 
 		public void TextViewCreated(IWpfTextView textView) {

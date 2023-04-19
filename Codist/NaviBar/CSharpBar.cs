@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
@@ -27,7 +26,6 @@ namespace Codist.NaviBar
 		internal const string SyntaxNodeRange = nameof(SyntaxNodeRange);
 		static string __ProjectWideSearchExpression;
 
-		IAdornmentLayer _SyntaxNodeRangeAdornment;
 		SemanticContext _SemanticContext;
 
 		CancellationTokenSource _CancellationSource = new CancellationTokenSource();
@@ -39,7 +37,6 @@ namespace Codist.NaviBar
 		ITextBuffer _Buffer;
 
 		public CSharpBar(IWpfTextView view) : base(view) {
-			_SyntaxNodeRangeAdornment = View.GetAdornmentLayer(SyntaxNodeRange);
 			Name = nameof(CSharpBar);
 			BindView();
 			Items.Add(_RootItem = new RootItem(this));
@@ -51,10 +48,6 @@ namespace Codist.NaviBar
 		protected override void OnMouseMove(MouseEventArgs e) {
 			base.OnMouseMove(e);
 			if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RangeHighlight) == false) {
-				return;
-			}
-			var a = _SyntaxNodeRangeAdornment;
-			if (a == null) {
 				return;
 			}
 			if (_MouseHoverItem != null) {
@@ -70,9 +63,7 @@ namespace Codist.NaviBar
 				}
 
 				_MouseHoverItem = item;
-				if (a.IsEmpty == false) {
-					a.RemoveAllAdornments();
-				}
+				ViewOverlay.ClearRangeAdornments();
 				var node = item.Node;
 				if (node != null) {
 					var span = node.Span.CreateSnapshotSpan(View.TextSnapshot);
@@ -88,10 +79,8 @@ namespace Codist.NaviBar
 				}
 				return;
 			}
-			if (a.IsEmpty == false) {
-				a.RemoveAllAdornments();
-				_MouseHoverItem = null;
-			}
+			ViewOverlay.ClearRangeAdornments();
+			_MouseHoverItem = null;
 		}
 
 		internal protected override void BindView() {
@@ -101,7 +90,7 @@ namespace Codist.NaviBar
 			_Buffer = View.TextBuffer;
 			View.TextBuffer.Changed += TextBuffer_Changed;
 			View.Selection.SelectionChanged += Update;
-			ListContainer.ChildRemoved += ListContainer_MenuRemoved;
+			ViewOverlay.ChildRemoved += ViewOverlay_MenuRemoved;
 			Config.RegisterUpdateHandler(UpdateCSharpNaviBarConfig);
 			SyncHelper.CancelAndDispose(ref _CancellationSource, true);
 			_SemanticContext = SemanticContext.GetOrCreateSingletonInstance(View);
@@ -110,12 +99,12 @@ namespace Codist.NaviBar
 		protected override void UnbindView() {
 			View.Selection.SelectionChanged -= Update;
 			View.TextBuffer.Changed -= TextBuffer_Changed;
-			ListContainer.ChildRemoved -= ListContainer_MenuRemoved;
+			ViewOverlay.ChildRemoved -= ViewOverlay_MenuRemoved;
 			Config.UnregisterUpdateHandler(UpdateCSharpNaviBarConfig);
 		}
 
 		void HighlightNodeRanges(SyntaxNode node, SnapshotSpan span) {
-			_SyntaxNodeRangeAdornment.AddAdornment(span, null, new GeometryAdornment(ThemeHelper.MenuHoverBackgroundColor, View.TextViewLines.GetMarkerGeometry(span), 3));
+			ViewOverlay.AddRangeAdornment(span, ThemeHelper.MenuHoverBackgroundColor, 3);
 			var p = View.Caret.Position.BufferPosition;
 			if (span.Contains(p) == false) {
 				return;
@@ -127,7 +116,7 @@ namespace Codist.NaviBar
 					var nodeKind = n.Kind();
 					if (nodeKind != SyntaxKind.Block) {
 						span = n.Span.CreateSnapshotSpan(View.TextSnapshot);
-						_SyntaxNodeRangeAdornment.AddAdornment(span, null, new GeometryAdornment(ThemeHelper.MenuHoverBackgroundColor, View.TextViewLines.GetMarkerGeometry(span), nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() ? 1 : 0));
+						ViewOverlay.AddRangeAdornment(span, ThemeHelper.MenuHoverBackgroundColor, nodeKind.IsSyntaxBlock() || nodeKind.IsDeclaration() ? 1 : 0);
 					}
 				}
 				n = n.Parent;
@@ -136,10 +125,8 @@ namespace Codist.NaviBar
 
 		protected override void OnMouseLeave(MouseEventArgs e) {
 			base.OnMouseLeave(e);
-			if (_SyntaxNodeRangeAdornment?.IsEmpty == false) {
-				_SyntaxNodeRangeAdornment.RemoveAllAdornments();
-				_MouseHoverItem = null;
-			}
+			ViewOverlay.ClearRangeAdornments();
+			_MouseHoverItem = null;
 		}
 
 		void TextBuffer_Changed(object sender, TextContentChangedEventArgs e) {
@@ -308,30 +295,30 @@ namespace Codist.NaviBar
 		void ShowMenu(ThemedImageButton barItem, SymbolList menu) {
 			ref var l = ref _SymbolList;
 			if (l != menu) {
-				ListContainer.Remove(l);
+				ViewOverlay.Remove(l);
 				l = menu;
-				ListContainer.Add(menu);
+				ViewOverlay.Add(menu);
 				if (_ActiveItem != null) {
 					_ActiveItem.IsHighlighted = false;
 				}
 			}
 			_ActiveItem = barItem;
 			barItem.IsHighlighted = true;
-			menu.ItemsControlMaxHeight = ListContainer.DisplayHeight / 2;
+			menu.ItemsControlMaxHeight = ViewOverlay.DisplayHeight / 2;
 			menu.RefreshItemsSource();
 			menu.ScrollToSelectedItem();
 			menu.PreviewKeyUp -= OnMenuKeyUp;
 			menu.PreviewKeyUp += OnMenuKeyUp;
 			PositionMenu();
-			if (ListContainer.Contains(menu) == false) {
-				ListContainer.Add(menu);
+			if (ViewOverlay.Contains(menu) == false) {
+				ViewOverlay.Add(menu);
 			}
 		}
 
 		void PositionMenu() {
 			if (_SymbolList != null && _ActiveItem != null) {
 				var p = _ActiveItem.TransformToVisual(View.VisualElement).Transform(new Point());
-				ListContainer.Position(_SymbolList, new Point(p.X, p.Y - 1 + _ActiveItem.ActualHeight), 30);
+				ViewOverlay.Position(_SymbolList, new Point(p.X, p.Y - 1 + _ActiveItem.ActualHeight), 30);
 			}
 		}
 
@@ -359,11 +346,11 @@ namespace Codist.NaviBar
 		void HideMenu() {
 			var l = _SymbolList;
 			if (l != null) {
-				ListContainer.Remove(l);
+				ViewOverlay.Remove(l);
 			}
 		}
 
-		void ListContainer_MenuRemoved(object sender, OverlayElementRemovedEventArgs e) {
+		void ViewOverlay_MenuRemoved(object sender, OverlayElementRemovedEventArgs e) {
 			if (_SymbolList == e.RemovedElement) {
 				if (_ActiveItem != null) {
 					_ActiveItem.IsHighlighted = false;
@@ -472,8 +459,6 @@ namespace Codist.NaviBar
 			_SemanticContext = null;
 			_Buffer = null;
 			SyncHelper.CancelAndDispose(ref _CancellationSource, false);
-			_SyntaxNodeRangeAdornment.RemoveAllAdornments();
-			_SyntaxNodeRangeAdornment = null;
 			if (_SymbolList != null) {
 				DisposeSymbolList(_SymbolList);
 				_SymbolList = null;
@@ -488,7 +473,7 @@ namespace Codist.NaviBar
 				l.PreviewKeyUp -= OnMenuKeyUp;
 				l.MouseLeftButtonUp -= MenuItemSelect;
 				Controls.DragDropHelper.SetScrollOnDragDrop(l, false);
-				ListContainer?.Remove(l);
+				ViewOverlay?.Remove(l);
 				l.Dispose();
 			}
 		}
@@ -528,26 +513,6 @@ namespace Codist.NaviBar
 			protected override void OnClick() {
 				base.OnClick();
 				_Symbol.GoToSource();
-			}
-		}
-		sealed class GeometryAdornment : UIElement
-		{
-			readonly DrawingVisual _Child;
-
-			public GeometryAdornment(Color color, Geometry geometry, double thickness) {
-				_Child = new DrawingVisual();
-				using (var context = _Child.RenderOpen()) {
-					context.DrawGeometry(new SolidColorBrush(color.Alpha(25)),
-						thickness < 0.1 ? null : new Pen(ThemeHelper.MenuHoverBorderBrush, thickness),
-						geometry);
-				}
-				AddVisualChild(_Child);
-			}
-
-			protected override int VisualChildrenCount => 1;
-
-			protected override Visual GetVisualChild(int index) {
-				return _Child;
 			}
 		}
 

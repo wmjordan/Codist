@@ -76,7 +76,7 @@ namespace Codist.NaviBar
 
 		void HideMenu() {
 			if (_TitleList != null) {
-				ListContainer.Remove(_TitleList);
+				ViewOverlay.Remove(_TitleList);
 				_TitleList.SelectedItem = null;
 				_TitleList.Dispose();
 				_TitleList = null;
@@ -136,10 +136,10 @@ namespace Codist.NaviBar
 			}
 			if (_TitleList != menu) {
 				if (_TitleList != null) {
-					ListContainer.Remove(_TitleList);
+					ViewOverlay.Remove(_TitleList);
 					_TitleList.Dispose();
 				}
-				ListContainer.Add(menu);
+				ViewOverlay.Add(menu);
 				_TitleList = menu;
 			}
 			if (menu != null) {
@@ -208,7 +208,7 @@ namespace Codist.NaviBar
 
 			public MarkdownList(MarkdownBar bar) {
 				Style = SharedDictionaryManager.VirtualList.Get<Style>(typeof(VirtualList));
-				Container = bar.ListContainer;
+				Container = bar.ViewOverlay;
 				Header = new StackPanel {
 					Margin = WpfHelper.MenuItemMargin,
 					Children = {

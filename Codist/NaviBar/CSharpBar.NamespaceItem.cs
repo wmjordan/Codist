@@ -61,7 +61,7 @@ namespace Codist.NaviBar
 					return;
 				}
 				_Menu = new SymbolList(Bar._SemanticContext) {
-					Container = Bar.ListContainer,
+					Container = Bar.ViewOverlay,
 					ContainerType = SymbolListType.TypeList,
 					ExtIconProvider = ExtIconProvider.Default.GetExtIcons,
 					EnableVirtualMode = true,

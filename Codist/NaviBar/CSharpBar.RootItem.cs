@@ -32,7 +32,7 @@ namespace Codist.NaviBar
 
 			public RootItem(CSharpBar bar) : base(bar, IconIds.Search, new ThemedToolBarText()) {
 				_Menu = new SymbolList(bar._SemanticContext) {
-					Container = Bar.ListContainer,
+					Container = Bar.ViewOverlay,
 					ContainerType = SymbolListType.NodeList,
 					Header = new StackPanel {
 						Margin = WpfHelper.MenuItemMargin,

@@ -16,7 +16,7 @@ namespace Codist.NaviBar
 		protected NaviBar(IWpfTextView textView) {
 			_View = textView;
 			_View.Closed += View_Closed;
-			ListContainer = TextViewOverlay.GetOrCreate(textView);
+			ViewOverlay = TextViewOverlay.GetOrCreate(textView);
 			this.SetBackgroundForCrispImage(ThemeHelper.TitleBackgroundColor);
 			textView.Properties.AddProperty(nameof(NaviBar), this);
 			Resources = SharedDictionaryManager.NavigationBar;
@@ -30,7 +30,7 @@ namespace Codist.NaviBar
 		protected abstract void UnbindView();
 
 		protected IWpfTextView View => _View;
-		internal TextViewOverlay ListContainer { get; private set; }
+		internal TextViewOverlay ViewOverlay { get; private set; }
 
 		protected override void OnPreviewMouseRightButtonUp(MouseButtonEventArgs e) {
 			if ((e.Source as DependencyObject).GetParentOrSelf<DependencyObject>(o => o is IContextMenuHost) is IContextMenuHost h) {
@@ -54,7 +54,7 @@ namespace Codist.NaviBar
 				else if (visualParent is ContentControl c) {
 					c.Content = null;
 				}
-				ListContainer = null;
+				ViewOverlay = null;
 				DataContext = null;
 				this.DisposeCollection();
 				_View.Properties.RemoveProperty(nameof(NaviBar));
