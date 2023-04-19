@@ -253,7 +253,7 @@ namespace Codist.NaviBar
 									regionJustStart = TRUE;
 								}
 								else if (d.IsKind(SyntaxKind.EndRegionDirectiveTrivia)) {
-									// don't show #endregion if preceeding item is #region
+									// don't show #endregion if preceding item is #region
 									if (regionJustStart == FALSE) {
 										if (lastNode == null || lastNode.Span.Contains(d.SpanStart) == false) {
 											var item = new SymbolItem(_Menu);

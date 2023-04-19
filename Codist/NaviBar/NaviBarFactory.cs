@@ -62,15 +62,14 @@ namespace Codist.NaviBar
 				if (cp == null) {
 					return;
 				}
-				var naviBar = cp.GetFirstVisualChild<NaviBar>();
-				if (naviBar != null) {
-					//naviBar.BindView();
-					view.Properties.AddProperty(nameof(NaviBar), naviBar);
+				var bar = cp.GetFirstVisualChild<NaviBar>();
+				if (bar != null) {
+					view.Properties.AddProperty(nameof(NaviBar), bar);
 					return;
 				}
 
-				var naviBarHolder = _NaviBarHolder = cp.GetFirstVisualChild<Border>(b => b.Name == "DropDownBarMargin");
-				if (naviBarHolder == null) {
+				var barHolder = _NaviBarHolder = cp.GetFirstVisualChild<Border>(b => b.Name == "DropDownBarMargin");
+				if (barHolder == null) {
 					var viewHost = view.VisualElement.GetParent<Panel>(b => b.GetType().Name == "WpfMultiViewHost");
 					if (viewHost != null && view.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
 						var b = new MarkdownBar(_View, _TextSearch);
@@ -85,8 +84,8 @@ namespace Codist.NaviBar
 					}
 					return;
 				}
-				var dropDown1 = naviBarHolder.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown1");
-				var dropDown2 = naviBarHolder.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown2");
+				var dropDown1 = barHolder.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown1");
+				var dropDown2 = barHolder.GetFirstVisualChild<ComboBox>(c => c.Name == "DropDown2");
 				if (dropDown1 == null || dropDown2 == null) {
 					return;
 				}
@@ -95,15 +94,15 @@ namespace Codist.NaviBar
 					return;
 				}
 				if (_View?.IsClosed == false) {
-					var bar = new CSharpBar(_View) {
+					var b = new CSharpBar(_View) {
 						MinWidth = 200
 					};
-					bar.SetCurrentValue(Grid.ColumnProperty, 2);
-					bar.SetCurrentValue(Grid.ColumnSpanProperty, 3);
-					container.Children.Add(bar);
+					b.SetCurrentValue(Grid.ColumnProperty, 2);
+					b.SetCurrentValue(Grid.ColumnSpanProperty, 3);
+					container.Children.Add(b);
 					dropDown1.Visibility = Visibility.Hidden;
 					dropDown2.Visibility = Visibility.Hidden;
-					RegisterResurrectionHandler(bar);
+					RegisterResurrectionHandler(b);
 				}
 			}
 
