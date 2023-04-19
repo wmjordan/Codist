@@ -205,25 +205,28 @@ namespace Codist.Controls
 			}
 		}
 
+		static bool IsStaticProperty(SymbolItem s) {
+			return (s.Symbol as IPropertySymbol)?.IsStatic == true;
+		}
 		void SetupListForVsUIColors(Type type) {
 			ContainerType = SymbolListType.PredefinedColors;
-			IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsThemeBrush(type, s.Symbol.Name)) : null;
+			IconProvider = s => IsStaticProperty(s) ? GetColorPreviewIcon(ColorHelper.GetVsThemeBrush(type, s.Symbol.Name)) : null;
 		}
 		void SetupListForVsResourceColors(Type type) {
 			ContainerType = SymbolListType.PredefinedColors;
-			IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsResourceColor(type, s.Symbol.Name)) : null;
+			IconProvider = s => IsStaticProperty(s) ? GetColorPreviewIcon(ColorHelper.GetVsResourceColor(type, s.Symbol.Name)) : null;
 		}
 		void SetupListForVsResourceBrushes(Type type) {
 			ContainerType = SymbolListType.PredefinedColors;
-			IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetVsResourceBrush(type, s.Symbol.Name)) : null;
+			IconProvider = s => IsStaticProperty(s) ? GetColorPreviewIcon(ColorHelper.GetVsResourceBrush(type, s.Symbol.Name)) : null;
 		}
 		void SetupListForSystemColors() {
 			ContainerType = SymbolListType.PredefinedColors;
-			IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
+			IconProvider = s => IsStaticProperty(s) ? GetColorPreviewIcon(ColorHelper.GetSystemBrush(s.Symbol.Name)) : null;
 		}
 		void SetupListForColors() {
 			ContainerType = SymbolListType.PredefinedColors;
-			IconProvider = s => ((s.Symbol as IPropertySymbol)?.IsStatic == true) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name)) : null;
+			IconProvider = s => IsStaticProperty(s) ? GetColorPreviewIcon(ColorHelper.GetBrush(s.Symbol.Name)) : null;
 		}
 		void SetupListForKnownColors() {
 			ContainerType = SymbolListType.PredefinedColors;

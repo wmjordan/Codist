@@ -42,7 +42,7 @@ namespace Codist.NaviBar
 			public SyntaxNode Node { get; private set; }
 			public bool IsSymbolNode => false;
 			public ISymbol Symbol => _Symbol ?? (_Symbol = SyncHelper.RunSync(() => Bar._SemanticContext.GetSymbolAsync(Node, Bar._CancellationSource.GetToken())));
-			public bool HasReferencedSymbols => _ReferencedSymbols != null && _ReferencedSymbols.Count > 0;
+			public bool HasReferencedSymbols => _ReferencedSymbols?.Count > 0;
 			public List<ISymbol> ReferencedSymbols => _ReferencedSymbols ?? (_ReferencedSymbols = new List<ISymbol>());
 
 			public void ShowContextMenu(RoutedEventArgs args) {
@@ -121,7 +121,7 @@ namespace Codist.NaviBar
 				if (_Menu != null) {
 					((TextBlock)_Menu.Footer).Clear();
 					Controls.DragDropHelper.SetScrollOnDragDrop(_Menu, false);
-					await RefreshItemsAsync(Node, cancellationToken);
+					await RefreshItemsAsync(cancellationToken);
 					return;
 				}
 				_Menu = new SymbolList(Bar._SemanticContext) {
@@ -141,7 +141,7 @@ namespace Codist.NaviBar
 				}
 			}
 
-			async Task RefreshItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
+			async Task RefreshItemsAsync(CancellationToken cancellationToken) {
 				var sm = Bar._SemanticContext.SemanticModel;
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
 				if (sm != Bar._SemanticContext.SemanticModel) {
