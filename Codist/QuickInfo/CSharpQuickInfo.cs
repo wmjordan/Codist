@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Projection;
 using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
@@ -385,7 +384,16 @@ namespace Codist.QuickInfo
 				}
 			}
 			overrider?.ApplyClickAndGo(symbol);
-			return container.ItemCount == 0 ? null : CreateQuickInfoItem(session, token, container.ToUI().Tag());
+			if (container.ItemCount == 0) {
+				if (symbol != null) {
+					// place holder
+					container.Add(new ContentPresenter());
+				}
+				else {
+					return null;
+				}
+			}
+			return CreateQuickInfoItem(session, token, container.ToUI().Tag());
 		}
 
 		static QuickInfoItem CreateQuickInfoItem(IAsyncQuickInfoSession session, SyntaxToken? token, object item) {
