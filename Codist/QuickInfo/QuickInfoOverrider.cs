@@ -338,6 +338,9 @@ namespace Codist.QuickInfo
 				var tt = ((f as Hyperlink)?.Inlines.FirstInline as Run)?.Text;
 				if (tt == null) {
 					tt = (f as Run)?.Text;
+					if (tt == null) {
+						return null;
+					}
 					if (tt == "SPELL") {
 						return ThemeHelper.GetImage(IconIds.Suggestion);
 					}
