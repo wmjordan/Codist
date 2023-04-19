@@ -3698,6 +3698,24 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Highlight current syntax node in editor.
+        /// </summary>
+        internal static string OT_NodeRange {
+            get {
+                return ResourceManager.GetString("OT_NodeRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highlight text span for current syntax node covering quick info trigger point in the code editor.
+        /// </summary>
+        internal static string OT_NodeRangeTip {
+            get {
+                return ResourceManager.GetString("OT_NodeRangeTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Don&apos;t add margin between wrapped lines.
         /// </summary>
         internal static string OT_NoMarginBetweenWrappedLines {

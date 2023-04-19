@@ -280,7 +280,7 @@ namespace Codist.Options
 		{
 			readonly OptionBox<QuickInfoOptions> _DisableUntilShift, _CtrlSuppress, _Selection, _Color;
 			readonly OptionBox<QuickInfoOptions> _OverrideDefaultDocumentation, _DocumentationFromBaseType, _DocumentationFromInheritDoc, _TextOnlyDoc, _ReturnsDoc, _RemarksDoc, _ExceptionDoc, _SeeAlsoDoc, _ExampleDoc, _AlternativeStyle, _ContainingType, _CodeFontForXmlDocSymbol;
-			readonly OptionBox<QuickInfoOptions> _Attributes, _BaseType, _Declaration, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers, _EnumMembers;
+			readonly OptionBox<QuickInfoOptions> _NodeRange, _Attributes, _BaseType, _Declaration, _SymbolLocation, _Interfaces, _NumericValues, _String, _Parameter, _InterfaceImplementations, _TypeParameters, _NamespaceTypes, _MethodOverload, _InterfaceMembers, _EnumMembers;
 			readonly OptionBox<QuickInfoOptions>[] _Options;
 			readonly Controls.IntegerBox _MaxWidth, _MaxHeight, _ExtraHeight;
 			readonly ColorButton _BackgroundButton;
@@ -332,6 +332,8 @@ namespace Codist.Options
 					new DescriptionBox(R.OT_QuickInfoOverrideNote),
 					_AlternativeStyle = o.CreateOptionBox(QuickInfoOptions.AlternativeStyle, UpdateConfig, R.OT_AlternativeStyle)
 						.SetLazyToolTip(() => R.OT_AlternativeStyleTip),
+					_NodeRange = o.CreateOptionBox(QuickInfoOptions.NodeRange, UpdateConfig, R.OT_NodeRange)
+						.SetLazyToolTip(() => R.OT_NodeRangeTip),
 					_OverrideDefaultDocumentation = o.CreateOptionBox(QuickInfoOptions.OverrideDefaultDocumentation, UpdateConfig, R.OT_OverrideXmlDoc)
 						.SetLazyToolTip(() => R.OT_OverrideXmlDocTip),
 					_DocumentationFromBaseType = o.CreateOptionBox(QuickInfoOptions.DocumentationFromBaseType, UpdateConfig, R.OT_InheritXmlDoc)

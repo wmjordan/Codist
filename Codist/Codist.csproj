@@ -135,6 +135,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="QuickInfo\CSharpNodeRangeQuickInfo.cs" />
     <Compile Include="QuickInfo\ColorQuickInfoUI.cs" />
     <Compile Include="QuickInfo\CSharpOpCodeQuickInfo.cs" />
     <Compile Include="QuickInfo\InfoContainer.cs" />

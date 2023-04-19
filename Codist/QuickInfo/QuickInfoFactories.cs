@@ -36,6 +36,19 @@ namespace Codist.QuickInfo
 		}
 	}
 
+	[Export(typeof(IAsyncQuickInfoSourceProvider))]
+	[Name(nameof(CSharpNodeRangeQuickInfoSourceProvider))]
+	[Order(After = CSharpQuickInfo.Name)]
+	[ContentType(Constants.CodeTypes.CSharp)]
+	sealed class CSharpNodeRangeQuickInfoSourceProvider : IAsyncQuickInfoSourceProvider
+	{
+		public IAsyncQuickInfoSource TryCreateQuickInfoSource(ITextBuffer textBuffer) {
+			return Config.Instance.Features.MatchFlags(Features.SuperQuickInfo)
+				? textBuffer.Properties.GetOrCreateSingletonProperty(() => new CSharpNodeRangeQuickInfo())
+				: null;
+		}
+	}
+
 	/// <summary>
 	/// <para>Controls whether quick info should be displayed.</para>
 	/// <para>When activated, quick info will not be displayed unless Shift key is pressed.</para>

@@ -2448,4 +2448,10 @@ Expression too long</value>
   <data name="T_ActiveWindowProperties" xml:space="preserve">
     <value>Active Window Properties</value>
   </data>
+  <data name="OT_NodeRange" xml:space="preserve">
+    <value>Highlight current syntax node in editor</value>
+  </data>
+  <data name="OT_NodeRangeTip" xml:space="preserve">
+    <value>Highlight text span for current syntax node covering quick info trigger point in the code editor</value>
+  </data>
 </root>
