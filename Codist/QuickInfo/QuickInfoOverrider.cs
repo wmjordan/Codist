@@ -372,6 +372,7 @@ namespace Codist.QuickInfo
 			static readonly Thickness __TitlePanelMargin = new Thickness(0, 0, 30, 6);
 
 			readonly DefaultOverrider _Overrider;
+			bool _Overridden;
 
 			public UIOverrider(DefaultOverrider overrider) {
 				_Overrider = overrider;
@@ -389,6 +390,9 @@ namespace Codist.QuickInfo
 
 			protected override void OnVisualParentChanged(DependencyObject oldParent) {
 				base.OnVisualParentChanged(oldParent);
+				if (_Overridden) {
+					return;
+				}
 				var p = this.GetParent<StackPanel>();
 				if (p == null) {
 					goto EXIT;
@@ -412,6 +416,7 @@ namespace Codist.QuickInfo
 					return;
 				}
 			EXIT:
+				_Overridden = true;
 				// hides the parent container from taking excessive space in the quick info window
 				this.GetParent<Border>().Collapse();
 			}
