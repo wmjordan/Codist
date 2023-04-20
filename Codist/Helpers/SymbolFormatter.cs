@@ -23,63 +23,68 @@ namespace Codist
 	{
 		internal const double TransparentLevel = 0.6;
 
-		static readonly Dictionary<string, Action<SymbolFormatter, IEditorFormatMap, Brush>> __BrushSetter = CreatePropertySetter();
-		internal static readonly SymbolFormatter Instance = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText), b => { b?.Freeze(); return b; });
-		internal static readonly SymbolFormatter SemiTransparent = new SymbolFormatter(ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText), b => {
+		static readonly IEditorFormatMap __CodeFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(Constants.CodeText);
+		static readonly IClassificationFormatMap __CodeClassificationFormatMap = ServicesHelper.Instance.ClassificationFormatMap.GetClassificationFormatMap(Constants.CodeText);
+		static readonly Dictionary<string, Action<string, SymbolFormatter>> __BrushSetter = CreatePropertySetter();
+		internal static readonly SymbolFormatter Instance = new SymbolFormatter(b => { b?.Freeze(); return b; });
+		internal static readonly SymbolFormatter SemiTransparent = new SymbolFormatter(b => {
 			if (b != null) {
 				b = b.Alpha(TransparentLevel); b.Freeze();
 			}
-			return b; });
+			return b;
+		});
 
 		readonly Func<Brush, Brush> _BrushConfigurator;
-		SymbolFormatter(IEditorFormatMap formatMap, Func<Brush, Brush> brushConfigurator) {
+		SymbolFormatter(Func<Brush, Brush> brushConfigurator) {
 			_BrushConfigurator = brushConfigurator;
-			if (formatMap != null) {
-				var defaultBrush = formatMap.GetProperties(Constants.CodePlainText).GetBrush();
-				foreach (var setter in __BrushSetter) {
-					setter.Value(this, formatMap, defaultBrush);
-				}
-				formatMap.FormatMappingChanged += FormatMap_FormatMappingChanged;
+			var cfm = __CodeClassificationFormatMap;
+			foreach (var setter in __BrushSetter) {
+				setter.Value(setter.Key, this);
 			}
+			__CodeFormatMap.FormatMappingChanged += FormatMap_FormatMappingChanged;
 		}
+
+		/// <summary>
+		/// The default text brush.
+		/// </summary>
+		[ClassificationType(ClassificationTypeNames = Constants.CodePlainText)]
+		public Brush PlainText { get; private set; }
 
 		[ClassificationType(ClassificationTypeNames = Constants.CodeClassName)]
 		public Brush Class { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstFieldName + ";" + Constants.CodeConstantName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpConstFieldName)]
 		public Brush Const { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeDelegateName)]
 		public Brush Delegate { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeEnumName)]
 		public Brush Enum { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpEnumFieldName + ";" + Constants.CodeEnumMemberName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpEnumFieldName)]
 		public Brush EnumField { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName + ";" + Constants.CodeEventName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpEventName)]
 		public Brush Event { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName + ";" + Constants.CodeFieldName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpFieldName)]
 		public Brush Field { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeInterfaceName)]
 		public Brush Interface { get; private set; }
-		[ClassificationType(ClassificationTypeNames =Constants.CSharpLocalVariableName + ";" +  Constants.CodeLocalName)]
+		[ClassificationType(ClassificationTypeNames =Constants.CSharpLocalVariableName)]
 		public Brush Local { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeKeyword)]
 		public Brush Keyword { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpMethodName + ";" + Constants.CodeMethodName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpMethodName)]
 		public Brush Method { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName + ";" + Constants.CodeNamespaceName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpNamespaceName)]
 		public Brush Namespace { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeNumber)]
 		public Brush Number { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName + ";" + Constants.CodeParameterName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpParameterName)]
 		public Brush Parameter { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName + ";" + Constants.CodePropertyName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpPropertyName)]
 		public Brush Property { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CodePlainText)]
-		public Brush PlainText { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeStructName)]
 		public Brush Struct { get; private set; }
 		[ClassificationType(ClassificationTypeNames = Constants.CodeString)]
 		public Brush Text { get; private set; }
-		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeParameterName + ";" + Constants.CodeTypeParameterName)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpTypeParameterName)]
 		public Brush TypeParameter { get; private set; }
 
 		/// <summary>Display the Codist optimized symbol signature for Super Quick Info alternative style.</summary>
@@ -177,12 +182,16 @@ namespace Codist
 				case SymbolKind.ErrorType:
 				case SymbolKind.Label:
 				case SymbolKind.TypeParameter:
+				case SymbolKind.RangeVariable:
+				case SymbolKind.DynamicType:
+				case SymbolKind.Discard:
 					goto END;
 			}
 			if (cs != null && (t = symbol.GetContainingTypes().FirstOrDefault(ct => ct.IsGenericType)) != null) {
 				ShowGenericTypeConstraints(p, t);
 			}
 			#endregion
+
 			END:
 			return p;
 		}
@@ -994,34 +1003,6 @@ namespace Codist
 			}
 		}
 
-		static Dictionary<string, Action<SymbolFormatter, IEditorFormatMap, Brush>> CreatePropertySetter() {
-			var r = new Dictionary<string, Action<SymbolFormatter, IEditorFormatMap, Brush>>(19, StringComparer.OrdinalIgnoreCase);
-			foreach (var item in typeof(SymbolFormatter).GetProperties()) {
-				var ctn = item.GetCustomAttribute<ClassificationTypeAttribute>().ClassificationTypeNames.Split(';');
-				var setFormatBrush = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(item.Name);
-				foreach (var ct in ctn) {
-					r.Add(ct, (f, m, defaultBrush) => {
-						var brush = m.GetAnyBrush(ctn) ?? defaultBrush;
-						if (f._BrushConfigurator != null) {
-							brush = f._BrushConfigurator(brush);
-						}
-						setFormatBrush(f, brush);
-					});
-				}
-			}
-			return r;
-		}
-
-		void FormatMap_FormatMappingChanged(object sender, FormatItemsEventArgs e) {
-			var m = sender as IEditorFormatMap;
-			var defaultBrush = m.GetProperties(Constants.CodePlainText).GetBrush();
-			foreach (var item in e.ChangedItems) {
-				if (__BrushSetter.TryGetValue(item, out var a)) {
-					a(this, m, defaultBrush);
-				}
-			}
-		}
-
 		void AddTypeArguments(InlineCollection text, ImmutableArray<ITypeSymbol> arguments) {
 			if (arguments.Length == 0) {
 				return;
@@ -1220,6 +1201,30 @@ namespace Codist
 			else if (symbol.Kind == SymbolKind.Property && symbol is IPropertySymbol p) {
 				if (p.IsRequired()) {
 					info.Append("required ", Keyword);
+				}
+			}
+		}
+
+		static Dictionary<string, Action<string, SymbolFormatter>> CreatePropertySetter() {
+			var r = new Dictionary<string, Action<string, SymbolFormatter>>(19, StringComparer.OrdinalIgnoreCase);
+			foreach (var item in typeof(SymbolFormatter).GetProperties()) {
+				var ctn = item.GetCustomAttribute<ClassificationTypeAttribute>().ClassificationTypeNames;
+				var setFormatBrush = ReflectionHelper.CreateSetPropertyMethod<SymbolFormatter, Brush>(item.Name);
+				r.Add(ctn, (ct, f) => {
+					var brush = (ct == Constants.CodePlainText ? __CodeClassificationFormatMap.DefaultTextProperties :  __CodeClassificationFormatMap.GetRunProperties(ct)).ForegroundBrush;
+					if (f._BrushConfigurator != null) {
+						brush = f._BrushConfigurator(brush);
+					}
+					setFormatBrush(f, brush);
+				});
+			}
+			return r;
+		}
+
+		void FormatMap_FormatMappingChanged(object sender, FormatItemsEventArgs e) {
+			foreach (var item in e.ChangedItems) {
+				if (__BrushSetter.TryGetValue(item, out var updateBrush)) {
+					updateBrush(item, this);
 				}
 			}
 		}
