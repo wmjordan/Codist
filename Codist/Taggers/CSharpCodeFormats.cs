@@ -248,6 +248,20 @@ namespace Codist.Taggers
 	}
 
 	[Export(typeof(EditorFormatDefinition))]
+	[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalFunctionDeclarationName)]
+	[Name(Constants.CSharpLocalFunctionDeclarationName)]
+	[UserVisible(false)]
+	[Order(After = Constants.CodeIdentifier)]
+	[Order(After = Constants.CodeMethodName)]
+	[Order(Before = Constants.CSharpUserSymbol)]
+	sealed class LocalFunctionDeclarationFormat : ClassificationFormatDefinition
+	{
+		public LocalFunctionDeclarationFormat() {
+			DisplayName = Constants.NameOfMe + ": local function declaration";
+		}
+	}
+
+	[Export(typeof(EditorFormatDefinition))]
 	[ClassificationType(ClassificationTypeNames = Constants.CSharpMethodName)]
 	[Name(Constants.CSharpMethodName)]
 	[UserVisible(false)]

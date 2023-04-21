@@ -139,6 +139,7 @@ namespace Codist
 		public const string CSharpNamespaceName = "C#: Namespace";
 		public const string CSharpExtensionMethodName = "C#: Extension method";
 		public const string CSharpExternMethodName = "C#: Extern method";
+		public const string CSharpLocalFunctionDeclarationName = "C#: Local function declaration";
 		public const string CSharpMethodName = "C#: Method";
 		public const string CSharpEventName = "C#: Event";
 		public const string CSharpPropertyName = "C#: Property";
@@ -632,6 +633,10 @@ namespace Codist
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpMemberDeclarationName)]
 		[Description("Declaration of type member: property, method, event, delegate, nested type, etc. (excluding fields), inheriting from Declaration")]
 		MemberDeclaration,
+		[Category(Constants.SyntaxCategory.Declaration)]
+		[ClassificationType(ClassificationTypeNames = Constants.CSharpLocalFunctionDeclarationName)]
+		[Description("Declaration of local function, inheriting from method name")]
+		LocalFunctionDeclaration,
 		[Category(Constants.SyntaxCategory.Declaration)]
 		[ClassificationType(ClassificationTypeNames = Constants.CSharpDeclarationBrace)]
 		[BaseDefinition(Constants.CodePunctuation)]

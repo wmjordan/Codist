@@ -865,10 +865,11 @@ namespace Codist.Taggers
 					case SyntaxKind.AnonymousMethodExpression:
 					case SyntaxKind.SimpleLambdaExpression:
 					case SyntaxKind.ParenthesizedLambdaExpression:
-					case SyntaxKind.LocalFunctionStatement:
 					case SyntaxKind.ConversionOperatorDeclaration:
 					case SyntaxKind.OperatorDeclaration:
 						return tag.Method;
+					case SyntaxKind.LocalFunctionStatement:
+						return __Classifications.LocalFunctionDeclaration;
 					case SyntaxKind.InvocationExpression:
 						return ((((InvocationExpressionSyntax)node).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") ? null : tag.Method;
 					case SyntaxKind.ConstructorDeclaration:
@@ -977,6 +978,9 @@ namespace Codist.Taggers
 								if (HighlightOptions.LocalFunctionDeclaration
 									|| ((IMethodSymbol)symbol).MethodKind != MethodKind.LocalFunction) {
 									tags.Add(__Classifications.NestedDeclaration);
+								}
+								if (((IMethodSymbol)symbol).MethodKind == MethodKind.LocalFunction) {
+									tags.Add(__Classifications.LocalFunctionDeclaration);
 								}
 								break;
 							case SymbolKind.Property:

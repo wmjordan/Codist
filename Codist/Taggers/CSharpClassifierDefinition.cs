@@ -105,6 +105,12 @@ namespace Codist.Taggers
 
 		[Export(typeof(ClassificationTypeDefinition))]
 		[BaseDefinition(Constants.CodeIdentifier)]
+		[BaseDefinition(Constants.CSharpMethodName)]
+		[Name(Constants.CSharpLocalFunctionDeclarationName)]
+		static ClassificationTypeDefinition LocalFunction;
+
+		[Export(typeof(ClassificationTypeDefinition))]
+		[BaseDefinition(Constants.CodeIdentifier)]
 		[BaseDefinition(Constants.CodeLocalName)]
 		[Name(Constants.CSharpLocalVariableName)]
 		static ClassificationTypeDefinition LocalVariable;
