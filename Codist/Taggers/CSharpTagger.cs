@@ -953,7 +953,6 @@ namespace Codist.Taggers
 							symbol = semanticModel.GetSymbolInfo(attributeArgument.Expression, cancellationToken).Symbol;
 							if (symbol?.Kind == SymbolKind.Field && (symbol as IFieldSymbol)?.IsConst == true) {
 								tags.Add(__Classifications.ConstField);
-								tags.Add(__Classifications.StaticMember);
 							}
 						}
 						symbol = FindSymbolOrSymbolCandidateForNode(node, semanticModel, cancellationToken);
