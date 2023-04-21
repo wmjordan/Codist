@@ -150,6 +150,7 @@ namespace Codist.QuickInfo
 				case SyntaxKind.DefaultKeyword:
 				case SyntaxKind.SwitchKeyword:
 				case SyntaxKind.QuestionToken:
+				case SyntaxKind.ColonToken:
 				case SyntaxKind.QuestionQuestionToken:
 				case CodeAnalysisHelper.QuestionQuestionEqualsToken:
 				case SyntaxKind.UnderscoreToken:
@@ -194,7 +195,6 @@ namespace Codist.QuickInfo
 					}
 					goto case SyntaxKind.CommaToken;
 				case SyntaxKind.CommaToken:
-				case SyntaxKind.ColonToken:
 				case SyntaxKind.SemicolonToken:
 					token = token.GetPreviousToken();
 					skipTriggerPointCheck = true;
