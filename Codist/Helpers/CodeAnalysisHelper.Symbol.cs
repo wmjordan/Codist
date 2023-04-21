@@ -932,7 +932,7 @@ namespace Codist
 				&& type.GetBaseTypes().Any(t => t.MatchTypeName(nameof(Attribute), "System"));
 		}
 
-		public static bool IsCommonClass(this ISymbol symbol) {
+		public static bool IsCommonBaseType(this ISymbol symbol) {
 			if (symbol is ITypeSymbol type) {
 				switch (type.SpecialType) {
 					case SpecialType.System_Object:

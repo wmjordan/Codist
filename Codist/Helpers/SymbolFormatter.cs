@@ -1160,7 +1160,7 @@ namespace Codist
 				}
 				if (o != null) {
 					var t = o.ContainingType;
-					if (t?.IsCommonClass() == false) {
+					if (t?.IsCommonBaseType() == false) {
 						info.AddSymbol(t, null, this).Append(".").AddSymbol(o, null, this).Append(" ");
 					}
 				}

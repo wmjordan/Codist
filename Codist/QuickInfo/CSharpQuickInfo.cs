@@ -1261,14 +1261,14 @@ namespace Codist.QuickInfo
 
 		static void ShowBaseType(InfoContainer qiContent, ITypeSymbol typeSymbol) {
 			var baseType = typeSymbol.BaseType;
-			if (baseType == null || baseType.IsCommonClass()) {
+			if (baseType == null || baseType.IsCommonBaseType()) {
 				return;
 			}
 			var classList = new ThemedTipText(R.T_BaseType, true)
 				.AddSymbol(baseType, null, __SymbolFormatter);
 			var info = new ThemedTipDocument().Append(new ThemedTipParagraph(IconIds.BaseTypes, classList));
 			while ((baseType = baseType.BaseType) != null) {
-				if (baseType.IsCommonClass() == false) {
+				if (baseType.IsCommonBaseType() == false) {
 					classList.Inlines.Add(new ThemedTipText(" - ") { TextWrapping = TextWrapping.Wrap }.AddSymbol(baseType, null, __SymbolFormatter));
 				}
 			}
@@ -1682,7 +1682,7 @@ namespace Codist.QuickInfo
 			public readonly bool MaybeVsProject;
 
 			public SpecialProjectInfo(SemanticModel model) {
-				IsCodist = model.GetTypeSymbol(nameof(IconIds), nameof(Codist)) != null;
+				IsCodist = model.GetTypeSymbol(nameof(CodistPackage), nameof(Codist)) != null;
 				MaybeVsProject = model.GetNamespaceSymbol("Microsoft", "VisualStudio", "PlatformUI") != null || model.GetTypeSymbol(nameof(VsColors), "Microsoft", "VisualStudio", "Shell") != null;
 			}
 		}

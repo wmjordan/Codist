@@ -20,7 +20,7 @@ namespace Codist
 			if (symbol is INamedTypeSymbol type) {
 				switch (type.TypeKind) {
 					case TypeKind.Class:
-						while ((type = type.BaseType) != null && type.IsCommonClass() == false) {
+						while ((type = type.BaseType) != null && type.IsCommonBaseType() == false) {
 							r.Add((type.ToDisplayString(MemberNameFormat), ListMembersByOrder(type)));
 						}
 						break;
@@ -86,7 +86,7 @@ namespace Codist
 						&& (parameters = member.GetParameters()).IsDefaultOrEmpty == false
 						&& parameters.Any(strictMatch
 								? (Func<IParameterSymbol, bool>)(p => p.Type == type)
-								: (p => type.CanConvertTo(p.Type) && p.Type.IsCommonClass() == false))
+								: (p => type.CanConvertTo(p.Type) && p.Type.IsCommonBaseType() == false))
 							&& type.CanAccess(member, assembly)) {
 						members.Add(member);
 					}
