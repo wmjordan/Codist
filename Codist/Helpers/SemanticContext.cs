@@ -71,8 +71,8 @@ namespace Codist
 
 			if (Node != null) {
 				var triviaList = Token.HasLeadingTrivia ? Token.LeadingTrivia
-								: Token.HasTrailingTrivia ? Token.TrailingTrivia
-								: default;
+					: Token.HasTrailingTrivia ? Token.TrailingTrivia
+					: default;
 				if (triviaList.Equals(SyntaxTriviaList.Empty) == false
 					&& triviaList.FullSpan.Contains(_Position)) {
 					return triviaList.FirstOrDefault(i => i.Span.Contains(_Position));
@@ -90,10 +90,11 @@ namespace Codist
 		/// </summary>
 		public async Task<ISymbol> RelocateSymbolAsync(ISymbol symbol, CancellationToken cancellationToken = default) {
 			Document doc;
-			if (await UpdateAsync(cancellationToken) == false || Workspace == null) {
+			Workspace w;
+			if (await UpdateAsync(cancellationToken) == false || (w = Workspace) == null) {
 				return symbol;
 			}
-			var s = Workspace.CurrentSolution;
+			var s = w.CurrentSolution;
 			var sr = symbol.DeclaringSyntaxReferences.FirstOrDefault(r => r.SyntaxTree != null);
 			try {
 				doc = GetDocument(sr?.SyntaxTree);
@@ -159,10 +160,11 @@ namespace Codist
 
 		/// <summary>Locates document despite of version changes.</summary>
 		public Document GetDocument(SyntaxTree syntaxTree) {
-			if (Workspace == null || syntaxTree == null) {
+			Workspace w;
+			if (syntaxTree == null || (w = Workspace) == null) {
 				return null;
 			}
-			var s = Workspace.CurrentSolution;
+			var s = w.CurrentSolution;
 			var d = s.GetDocumentId(syntaxTree) ?? s.GetDocumentIdsWithFilePath(syntaxTree.FilePath).FirstOrDefault();
 			return d is null ? null : s.GetDocument(d);
 		}
@@ -242,16 +244,19 @@ namespace Codist
 				else {
 					return false;
 				}
-				if (doc != Document) {
-					SemanticModel model;
-					_Model = new SyntaxModel(
-						workspace,
-						doc,
-						model = await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false),
-						model.SyntaxTree.GetCompilationUnitRoot(cancellationToken),
-						await doc.GetSyntaxVersionAsync(cancellationToken)
-						);
+				SyntaxModel m = _Model;
+				var ver = await doc.GetSyntaxVersionAsync(cancellationToken).ConfigureAwait(false);
+				if (doc == Document && ver == m?.Version) {
+					return true;
 				}
+				SemanticModel model;
+				_Model = new SyntaxModel(
+					workspace,
+					doc,
+					model = await doc.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false),
+					model.SyntaxTree.GetCompilationUnitRoot(cancellationToken),
+					ver
+					);
 				return true;
 			}
 			catch (NullReferenceException) {
