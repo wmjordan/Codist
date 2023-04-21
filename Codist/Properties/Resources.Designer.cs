@@ -6750,6 +6750,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Squiggle.
+        /// </summary>
+        internal static string T_Squiggle {
+            get {
+                return ResourceManager.GetString("T_Squiggle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Static.
         /// </summary>
         internal static string T_Static {

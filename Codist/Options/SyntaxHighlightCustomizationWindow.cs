@@ -340,12 +340,12 @@ namespace Codist.Options
 			LoadSyntaxStyles(SyntaxStyleSource.Selection);
 			_ForegroundButton.UseVsTheme();
 			_BackgroundButton.UseVsTheme();
+			_BackgroundEffectBox.Items.AddRange(new[] { R.T_Solid, R.T_BottomGradient, R.T_TopGradient, R.T_RightGradient, R.T_LeftGradient });
+			_BackgroundEffectBox.SelectionChanged += OnBackgroundEffectChanged;
 			_LineColorButton.UseVsTheme();
 			_LineThicknessBox.ValueChanged += ApplyLineThickness;
 			_LineOffsetBox.ValueChanged += ApplyLineOffset;
-			_BackgroundEffectBox.Items.AddRange(new[] { R.T_Solid, R.T_BottomGradient, R.T_TopGradient, R.T_RightGradient, R.T_LeftGradient });
-			_BackgroundEffectBox.SelectionChanged += OnBackgroundEffectChanged;
-			_LineStyleBox.Items.AddRange(new[] { R.T_SolidLine, R.T_Dot, R.T_Dash, R.T_DashDot });
+			_LineStyleBox.Items.AddRange(new[] { R.T_SolidLine, R.T_Dot, R.T_Dash, R.T_DashDot, R.T_Squiggle });
 			_LineStyleBox.SelectionChanged += OnLineStyleChanged;
 			_ResetButton.Click += ResetStyle;
 			_SyntaxSourceBox.SelectionChanged += SyntaxSourceChanged;
@@ -732,6 +732,7 @@ namespace Codist.Options
 				_LineThicknessBox.Value = s.LineThickness;
 				_LineOffsetBox.Value = s.LineOffset;
 				_LineStyleBox.SelectedIndex = (int)s.LineStyle;
+				_LineColorButton.ToggleVisibility(s.HasLine);
 				_LineOpacityButton.Visibility = _LineStyleGroup.Visibility = s.HasLineColor ? Visibility.Visible : Visibility.Collapsed;
 				_BaseTypesList.Children.RemoveRange(1, _BaseTypesList.Children.Count - 1);
 				if (s.ClassificationType != null) {
@@ -943,6 +944,7 @@ namespace Codist.Options
 				var s = (LineStyle)_LineStyleBox.SelectedIndex;
 				if (ActiveStyle.LineStyle != s) {
 					ActiveStyle.LineStyle = s;
+					_LineOffsetBox.IsEnabled = _LineThicknessBox.IsEnabled = s != LineStyle.Squiggle;
 					return true;
 				}
 				return false;

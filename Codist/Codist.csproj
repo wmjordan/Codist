@@ -89,6 +89,7 @@
     <Compile Include="Controls\MenuItemFilter.cs" />
     <Compile Include="Controls\MessageWindow.cs" />
     <Compile Include="Controls\SearchScopeBox.cs" />
+    <Compile Include="Controls\SquiggleBrushCache.cs" />
     <Compile Include="Controls\SymbolFilterBox.cs" />
     <Compile Include="Controls\SymbolItemTemplateSelector.cs" />
     <Compile Include="Controls\SymbolListType.cs" />

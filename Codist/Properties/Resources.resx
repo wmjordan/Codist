@@ -2454,4 +2454,7 @@ Expression too long</value>
   <data name="OT_NodeRangeTip" xml:space="preserve">
     <value>Highlight text span for current syntax node covering quick info trigger point in the code editor</value>
   </data>
+  <data name="T_Squiggle" xml:space="preserve">
+    <value>Squiggle</value>
+  </data>
 </root>

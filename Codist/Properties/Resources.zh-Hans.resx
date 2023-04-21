@@ -2439,4 +2439,7 @@ Right click: 显示“线程”窗口</value>
   <data name="OT_NodeRangeTip" xml:space="preserve">
     <value>在编辑器上显示包含快速信息触发点的语法节点的范围</value>
   </data>
+  <data name="T_Squiggle" xml:space="preserve">
+    <value>波浪线</value>
+  </data>
 </root>
