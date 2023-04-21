@@ -450,7 +450,7 @@ namespace Codist.Commands
 				Margin = __ParagraphIndent,
 				TextIndent = -10,
 				Inlines = {
-					CreateRunForKey(key),
+					CreateRun(key).SetValue(TextElement.SetForeground, SymbolFormatter.Instance.Property),
 					new Run(": "),
 				}
 			};
@@ -523,13 +523,6 @@ namespace Codist.Commands
 				default:
 					return new Run(value.ToString());
 			}
-		}
-		static Run CreateRunForKey(object value) {
-			var t = value as Type;
-			return new Run(t is null ? value.ToString() : GetTypeName(t)) {
-				Foreground = SymbolFormatter.Instance.Property,
-				ToolTip = t?.ToString()
-			};
 		}
 		static string GetTypeName(Type type) {
 			return (type.DeclaringType != null ? (GetTypeName(type.DeclaringType) + "+" + type.Name) : type.Name)
