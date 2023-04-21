@@ -846,11 +846,13 @@ namespace Codist
 				case SyntaxKind.PropertyDeclaration:
 				case SyntaxKind.IndexerDeclaration: return Property;
 				case SyntaxKind.FieldDeclaration: return ((BaseFieldDeclarationSyntax)node).Modifiers.Any(SyntaxKind.ConstKeyword) ? Const : Field;
-				case SyntaxKind.ConstructorDeclaration: return GetBrush(node.Parent);
+				case SyntaxKind.ConstructorDeclaration:
+					return GetBrush(node.Parent);
 				case SyntaxKind.MethodDeclaration:
 				case SyntaxKind.LocalFunctionStatement:
 					return Method;
 				case SyntaxKind.ClassDeclaration:
+				case SyntaxKind.DestructorDeclaration:
 				case CodeAnalysisHelper.RecordDeclaration:
 					return Class;
 				case SyntaxKind.StructDeclaration:

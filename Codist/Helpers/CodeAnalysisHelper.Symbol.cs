@@ -194,6 +194,7 @@ namespace Codist
 							}
 							break;
 						case MethodKind.Constructor:
+						case MethodKind.StaticConstructor:
 							return m.ContainingType.Name;
 						case MethodKind.Destructor:
 							return "~" + m.ContainingType.Name;
@@ -445,6 +446,7 @@ namespace Codist
 			int GetMethodImageId(IMethodSymbol m) {
 				switch (m.MethodKind) {
 					case MethodKind.Constructor:
+					case MethodKind.StaticConstructor:
 						switch (m.DeclaredAccessibility) {
 							case Accessibility.Public: return IconIds.PublicConstructor;
 							case Accessibility.Protected:
@@ -455,6 +457,8 @@ namespace Codist
 							case Accessibility.Internal: return IconIds.InternalConstructor;
 							default: return IconIds.Constructor;
 						}
+					case MethodKind.Destructor:
+						return IconIds.Destructor;
 					case MethodKind.UserDefinedOperator:
 						switch (m.DeclaredAccessibility) {
 							case Accessibility.Public: return KnownImageIds.OperatorPublic;

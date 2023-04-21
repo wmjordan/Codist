@@ -610,7 +610,7 @@ namespace Codist.Controls
 						continue;
 					}
 					if (symbol.CanBeReferencedByName == false) {
-						if ((symbol is IMethodSymbol ms) && ms.MethodKind == MethodKind.Constructor) {
+						if ((symbol is IMethodSymbol ms) && (ms.MethodKind == MethodKind.Constructor || ms.MethodKind == MethodKind.StaticConstructor)) {
 							++m;
 						}
 						continue;

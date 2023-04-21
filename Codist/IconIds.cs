@@ -28,7 +28,7 @@ namespace Codist
 		public const int SealedEvent = KnownImageIds.EventSealed;
 		public const int SealedProperty = KnownImageIds.PropertySealed;
 		public const int RequiredMember = KnownImageIds.StatusRequired;
-		public const int Destructor = KnownImageIds.DeleteListItem;
+		public const int Destructor = KnownImageIds.DeleteEntity;
 		public const int PublicConstructor = KnownImageIds.TypePublic;
 		public const int ProtectedConstructor = KnownImageIds.TypeProtected;
 		public const int InternalConstructor = KnownImageIds.TypeInternal;
