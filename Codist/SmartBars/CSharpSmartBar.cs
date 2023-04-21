@@ -441,8 +441,15 @@ namespace Codist.SmartBars
 							edit.Replace(item, $"<typeparamref name=\"{t}\"/>");
 							continue;
 						}
+						while ((d = d.Ancestors().FirstOrDefault() as TypeDeclarationSyntax) != null) {
+							if (d.FindTypeParameter(t) != null) {
+								edit.Replace(item, $"<typeparamref name=\"{t}\"/>");
+								goto NEXT;
+							}
+						}
 					}
 					edit.Replace(item, (SyntaxFacts.GetKeywordKind(t) != SyntaxKind.None ? "<see langword=\"" : "<see cref=\"") + t + "\"/>");
+					NEXT:;
 				}
 				if (t != null && Keyboard.Modifiers.MatchFlags(ModifierKeys.Control | ModifierKeys.Shift)
 					&& FindNext(arg.ctx, t) == false) {
