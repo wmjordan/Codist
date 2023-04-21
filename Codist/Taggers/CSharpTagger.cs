@@ -867,9 +867,8 @@ namespace Codist.Taggers
 					case SyntaxKind.ParenthesizedLambdaExpression:
 					case SyntaxKind.ConversionOperatorDeclaration:
 					case SyntaxKind.OperatorDeclaration:
-						return tag.Method;
 					case SyntaxKind.LocalFunctionStatement:
-						return __Classifications.LocalFunctionDeclaration;
+						return tag.Method;
 					case SyntaxKind.InvocationExpression:
 						return ((((InvocationExpressionSyntax)node).Expression as IdentifierNameSyntax)?.Identifier.ValueText == "nameof") ? null : tag.Method;
 					case SyntaxKind.ConstructorDeclaration:
