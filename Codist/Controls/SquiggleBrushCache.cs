@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace Codist.Controls
 {
 	internal static class SquiggleBrushCache
 	{
-		static readonly ConditionalWeakTable<Brush, DrawingBrush> __BrushCache = new ConditionalWeakTable<Brush, DrawingBrush>();
+		static readonly ConditionalWeakTable<Brush, VisualBrush> __BrushCache = new ConditionalWeakTable<Brush, VisualBrush>();
 		static readonly Geometry __SquiggleGeometry = Geometry.Parse("M0,0 L1.5,-1.5 4.5,1.5 6,0");
 
-		public static DrawingBrush GetOrCreate(Brush colorBrush) {
+		public static VisualBrush GetOrCreate(Brush colorBrush) {
 			return __BrushCache.GetValue(colorBrush, CreateBrush);
 		}
 
-		static DrawingBrush CreateBrush(Brush colorBrush) {
+		static VisualBrush CreateBrush(Brush colorBrush) {
 			var pen = new Pen {
 				Brush = colorBrush,
 				EndLineCap = PenLineCap.Square,
@@ -42,7 +43,13 @@ namespace Codist.Controls
 			if (drawingBrush.CanFreeze) {
 				drawingBrush.Freeze();
 			}
-			return drawingBrush;
+			return new VisualBrush(new Rectangle {
+				Width = 200,
+				Height = 3,
+				Fill = drawingBrush,
+				VerticalAlignment = System.Windows.VerticalAlignment.Bottom,
+				HorizontalAlignment = System.Windows.HorizontalAlignment.Left
+			}) { Stretch = Stretch.UniformToFill };
 		}
 	}
 }

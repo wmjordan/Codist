@@ -210,7 +210,8 @@ namespace Codist.SyntaxHighlight
 					case LineStyle.Squiggle:
 						if (location == TextDecorationLocation.Underline) {
 							d.Pen.Brush = SquiggleBrushCache.GetOrCreate(d.Pen.Brush);
-							d.PenOffset = 3;
+							d.PenOffset = LineOffset;
+							d.PenOffsetUnit = TextDecorationUnit.Pixel;
 							d.Pen.Thickness = 3.0;
 							d.PenThicknessUnit = TextDecorationUnit.Pixel;
 							return d;

@@ -944,7 +944,7 @@ namespace Codist.Options
 				var s = (LineStyle)_LineStyleBox.SelectedIndex;
 				if (ActiveStyle.LineStyle != s) {
 					ActiveStyle.LineStyle = s;
-					_LineOffsetBox.IsEnabled = _LineThicknessBox.IsEnabled = s != LineStyle.Squiggle;
+					_LineThicknessBox.IsEnabled = s != LineStyle.Squiggle;
 					return true;
 				}
 				return false;
