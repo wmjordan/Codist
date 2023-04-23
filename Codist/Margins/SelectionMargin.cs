@@ -35,9 +35,9 @@ namespace Codist.Margins
 		public override double MarginSize => 0;
 
 		void Setup() {
-			_EditorFormatMap.FormatMappingChanged += _EditorFormatMap_FormatMappingChanged;
+			_EditorFormatMap.FormatMappingChanged += EditorFormatMap_FormatMappingChanged;
 			_TextView.Selection.SelectionChanged += TextView_SelectionChanged;
-			_ScrollBar.TrackSpanChanged += OnMappingChanged;
+			_ScrollBar.TrackSpanChanged += ScrollBar_TrackSpanChanged;
 			_SelectionBrush = GetMarginBrush();
 		}
 
@@ -48,8 +48,8 @@ namespace Codist.Margins
 			var setVisible = Config.Instance.MarkerOptions.MatchFlags(MarkerOptions.Selection);
 			var visible = Visibility == Visibility.Visible;
 			_TextView.Selection.SelectionChanged -= TextView_SelectionChanged;
-			_EditorFormatMap.FormatMappingChanged -= _EditorFormatMap_FormatMappingChanged;
-			_ScrollBar.TrackSpanChanged -= OnMappingChanged;
+			_EditorFormatMap.FormatMappingChanged -= EditorFormatMap_FormatMappingChanged;
+			_ScrollBar.TrackSpanChanged -= ScrollBar_TrackSpanChanged;
 			if (setVisible == false && visible) {
 				Visibility = Visibility.Collapsed;
 			}
@@ -60,7 +60,7 @@ namespace Codist.Margins
 			InvalidateVisual();
 		}
 
-		void _EditorFormatMap_FormatMappingChanged(object sender, FormatItemsEventArgs e) {
+		void EditorFormatMap_FormatMappingChanged(object sender, FormatItemsEventArgs e) {
 			foreach (var item in e.ChangedItems) {
 				if (item == FormatName) {
 					_SelectionBrush = GetMarginBrush();
@@ -81,7 +81,7 @@ namespace Codist.Margins
 		/// <summary>
 		/// Handler for the scrollbar changing its coordinate mapping.
 		/// </summary>
-		void OnMappingChanged(object sender, EventArgs e) {
+		void ScrollBar_TrackSpanChanged(object sender, EventArgs e) {
 			InvalidateVisual();
 		}
 		/// <summary>
@@ -114,8 +114,8 @@ namespace Codist.Margins
 		void UnbindEvents() {
 			Config.UnregisterUpdateHandler(UpdateSelectionMarginConfig);
 			_TextView.Selection.SelectionChanged -= TextView_SelectionChanged;
-			_EditorFormatMap.FormatMappingChanged -= _EditorFormatMap_FormatMappingChanged;
-			_ScrollBar.TrackSpanChanged -= OnMappingChanged;
+			_EditorFormatMap.FormatMappingChanged -= EditorFormatMap_FormatMappingChanged;
+			_ScrollBar.TrackSpanChanged -= ScrollBar_TrackSpanChanged;
 		}
 
 		public override void Dispose() {

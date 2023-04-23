@@ -46,7 +46,7 @@ namespace Codist.Margins
 			_SymbolReferenceMarker = new SymbolReferenceMarker(textView, verticalScrollbar, this);
 			_FormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 			_SemanticContext = SemanticContext.GetOrCreateSingletonInstance(textView);
-			IsVisibleChanged += _MemberMarker.OnIsVisibleChanged;
+			IsVisibleChanged += IsVisibleChangedHandler;
 
 			Config.RegisterUpdateHandler(UpdateCSharpMembersMarginConfig);
 			UpdateCSharpMembersMarginConfig(new ConfigUpdatedEventArgs(null, Features.ScrollbarMarkers));
@@ -130,9 +130,18 @@ namespace Codist.Margins
 			_RegionPen = new Pen(_RegionBackground ?? _RegionForeground, TypeLineSize);
 		}
 
+		void IsVisibleChangedHandler(object sender, DependencyPropertyChangedEventArgs e) {
+			if ((bool)e.NewValue) {
+				_MemberMarker.Activate();
+			}
+			else {
+				_MemberMarker.Deactivate();
+			}
+		}
+
 		public override void Dispose() {
 			if (Interlocked.Exchange(ref _SemanticContext, null) != null) {
-				IsVisibleChanged -= _MemberMarker.OnIsVisibleChanged;
+				IsVisibleChanged -= IsVisibleChangedHandler;
 				Config.UnregisterUpdateHandler(UpdateCSharpMembersMarginConfig);
 				_MemberMarker.Dispose();
 				_SymbolReferenceMarker.Dispose();
@@ -172,26 +181,25 @@ namespace Codist.Margins
 				}
 			}
 
-			internal void OnIsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-				if ((bool)e.NewValue) {
-					//todo refresh the margin when format mapping or syntax highlight style is changed
-					//Hook up to the various events we need to keep the margin current.
-					_ScrollBar.TrackSpanChanged += OnTagsChanged;
+			internal void Activate() {
+				//todo refresh the margin when format mapping or syntax highlight style is changed
+				//Hook up to the various events we need to keep the margin current.
+				_ScrollBar.TrackSpanChanged += OnTagsChanged;
 
-					_Element.UpdateSyntaxColors();
+				_Element.UpdateSyntaxColors();
 
-					_CodeMemberTagger = ServicesHelper.Instance.ViewTagAggregatorFactory.CreateTagAggregator<ICodeMemberTag>(_TextView);
-					_CodeMemberTagger.BatchedTagsChanged += OnTagsChanged;
+				_CodeMemberTagger = ServicesHelper.Instance.ViewTagAggregatorFactory.CreateTagAggregator<ICodeMemberTag>(_TextView);
+				_CodeMemberTagger.BatchedTagsChanged += OnTagsChanged;
 
-					//Force the margin to be re-rendered since things might have changed while the margin was hidden.
-					_Element.InvalidateVisual();
-				}
-				else {
-					_ScrollBar.TrackSpanChanged -= OnTagsChanged;
-					_CodeMemberTagger.BatchedTagsChanged -= OnTagsChanged;
-					_CodeMemberTagger.Dispose();
-					_CodeMemberTagger = null;
-				}
+				//Force the margin to be re-rendered since things might have changed while the margin was hidden.
+				_Element.InvalidateVisual();
+			}
+
+			internal void Deactivate() {
+				_ScrollBar.TrackSpanChanged -= OnTagsChanged;
+				_CodeMemberTagger.BatchedTagsChanged -= OnTagsChanged;
+				_CodeMemberTagger.Dispose();
+				_CodeMemberTagger = null;
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]

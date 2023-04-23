@@ -54,9 +54,8 @@ namespace Codist.Margins
 
 			Config.RegisterUpdateHandler(UpdateCommentMarginConfig);
 			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
-			IsVisibleChanged += OnViewOrMarginVisibilityChanged;
-			//_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisibilityChanged;
-			_ScrollBar.TrackSpanChanged += OnMappingChanged;
+			IsVisibleChanged += Margin_VisibilityChanged;
+			_ScrollBar.TrackSpanChanged += ScrollBar_TrackSpanChanged;
 
 			Width = MarginSize;
 		}
@@ -98,12 +97,12 @@ namespace Codist.Margins
 			if (setVisible == false && visible) {
 				Visibility = Visibility.Collapsed;
 				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
-				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
+				_ScrollBar.TrackSpanChanged -= ScrollBar_TrackSpanChanged;
 			}
 			else if (setVisible && visible == false) {
 				Visibility = Visibility.Visible;
 				_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
-				_ScrollBar.TrackSpanChanged += OnMappingChanged;
+				_ScrollBar.TrackSpanChanged += ScrollBar_TrackSpanChanged;
 			}
 			if (Visibility == Visibility.Visible) {
 				InvalidateVisual();
@@ -122,7 +121,7 @@ namespace Codist.Margins
 			InvalidateVisual();
 		}
 
-		void OnViewOrMarginVisibilityChanged(object sender, DependencyPropertyChangedEventArgs e) {
+		void Margin_VisibilityChanged(object sender, DependencyPropertyChangedEventArgs e) {
 			//There is no need to update event handlers if the visibility change is the result of an options change (since we will
 			//update the event handlers after changing all the options).
 			//
@@ -138,10 +137,10 @@ namespace Codist.Margins
 			if (needEvents != _HasEvents) {
 				_HasEvents = needEvents;
 				if (needEvents) {
-					_ScrollBar.TrackSpanChanged += OnMappingChanged;
+					_ScrollBar.TrackSpanChanged += ScrollBar_TrackSpanChanged;
 					return true;
 				}
-				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
+				_ScrollBar.TrackSpanChanged -= ScrollBar_TrackSpanChanged;
 			}
 
 			return false;
@@ -150,7 +149,7 @@ namespace Codist.Margins
 		/// <summary>
 		/// Handler for the scrollbar changing its coordinate mapping.
 		/// </summary>
-		void OnMappingChanged(object sender, EventArgs e) {
+		void ScrollBar_TrackSpanChanged(object sender, EventArgs e) {
 			InvalidateVisual();
 		}
 		/// <summary>
@@ -239,8 +238,8 @@ namespace Codist.Margins
 				_TextView.Properties.RemoveProperty(nameof(CommentTaggerProvider));
 				_TextView.Properties.RemoveProperty(typeof(TaggerResult));
 				_TextView = null;
-				IsVisibleChanged -= OnViewOrMarginVisibilityChanged;
-				_ScrollBar.TrackSpanChanged -= OnMappingChanged;
+				IsVisibleChanged -= Margin_VisibilityChanged;
+				_ScrollBar.TrackSpanChanged -= ScrollBar_TrackSpanChanged;
 				if (_CommentTagger != null) {
 					_CommentTagger.TagAdded -= CommentTagger_TagAdded;
 					_CommentTagger = null;
