@@ -29,7 +29,6 @@ namespace Codist.Margins
 
 			Config.RegisterUpdateHandler(UpdateLineNumberMarginConfig);
 			Setup();
-			_TextView.Closed += TextView_Closed;
 		}
 
 		public override string MarginName => nameof(LineNumberMargin);
@@ -110,17 +109,12 @@ namespace Codist.Margins
 			}
 		}
 
-		void TextView_Closed(object sender, EventArgs e) {
-			Dispose();
-		}
-
 		#region IDisposable Support
 		void Dispose(bool disposing) {
 			if (!_Disposed) {
 				if (disposing) {
 					Config.UnregisterUpdateHandler(UpdateLineNumberMarginConfig);
 					_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
-					_TextView.Closed -= TextView_Closed;
 					_ScrollBar.TrackSpanChanged -= OnMappingChanged;
 					_TextView = null;
 					_ScrollBar = null;

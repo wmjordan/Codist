@@ -57,7 +57,6 @@ namespace Codist.Margins
 			IsVisibleChanged += OnViewOrMarginVisibilityChanged;
 			//_TextView.VisualElement.IsVisibleChanged += OnViewOrMarginVisibilityChanged;
 			_ScrollBar.TrackSpanChanged += OnMappingChanged;
-			_TextView.Closed += _TextView_Closed;
 
 			Width = MarginSize;
 		}
@@ -232,14 +231,9 @@ namespace Codist.Margins
 			}
 		}
 
-		void _TextView_Closed(object sender, EventArgs e) {
-			Dispose();
-		}
-
 		#region IDisposable Support
 		public override void Dispose() {
 			if (_TextView != null) {
-				_TextView.Closed -= _TextView_Closed;
 				Config.UnregisterUpdateHandler(UpdateCommentMarginConfig);
 				_TextView.TextBuffer.Changed -= TextView_TextBufferChanged;
 				_TextView.Properties.RemoveProperty(nameof(CommentTaggerProvider));

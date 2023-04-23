@@ -29,7 +29,6 @@ namespace Codist.Margins
 			else {
 				Visibility = Visibility.Collapsed;
 			}
-			_TextView.Closed += _TextView_Closed;
 		}
 
 		public override string MarginName => nameof(SelectionMargin);
@@ -111,13 +110,8 @@ namespace Codist.Margins
 			}
 		}
 
-		void _TextView_Closed(object sender, EventArgs e) {
-			Dispose();
-		}
-
 		#region IDisposable Support
 		void UnbindEvents() {
-			_TextView.Closed -= _TextView_Closed;
 			Config.UnregisterUpdateHandler(UpdateSelectionMarginConfig);
 			_TextView.Selection.SelectionChanged -= TextView_SelectionChanged;
 			_EditorFormatMap.FormatMappingChanged -= _EditorFormatMap_FormatMappingChanged;

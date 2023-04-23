@@ -47,7 +47,6 @@ namespace Codist.Margins
 			_FormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 			_SemanticContext = SemanticContext.GetOrCreateSingletonInstance(textView);
 			IsVisibleChanged += _MemberMarker.OnIsVisibleChanged;
-			textView.Closed += TextView_Closed;
 
 			Config.RegisterUpdateHandler(UpdateCSharpMembersMarginConfig);
 			UpdateCSharpMembersMarginConfig(new ConfigUpdatedEventArgs(null, Features.ScrollbarMarkers));
@@ -129,11 +128,6 @@ namespace Codist.Margins
 			_RegionForeground = _FormatMap.GetAnyBrush(Constants.CodePreprocessorText);
 			_RegionBackground = _FormatMap.GetProperties(Constants.CodePreprocessorText).GetBackgroundBrush().Alpha(TypeAlpha);
 			_RegionPen = new Pen(_RegionBackground ?? _RegionForeground, TypeLineSize);
-		}
-
-		void TextView_Closed(object sender, EventArgs e) {
-			(sender as IWpfTextView).Closed -= TextView_Closed;
-			Dispose();
 		}
 
 		public override void Dispose() {
