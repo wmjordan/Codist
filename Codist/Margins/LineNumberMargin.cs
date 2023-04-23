@@ -96,16 +96,42 @@ namespace Codist.Margins
 			var snapshot = _TextView.TextSnapshot;
 			var lc = snapshot.LineCount;
 			var step = lc < 500 ? 50 : lc < 2000 ? 100 : lc < 3000 ? 200 : lc < 5000 ? 500 : lc < 20000 ? 1000 : lc < 100000 ? 5000 : 10000;
-			var dy = 0.0;
-			for (int i = step; i < lc; i += step) {
-				var y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, snapshot.GetLineFromLineNumber(i - 1).Start));
-				if (y - dy < 50) {
+			int i;
+			double prevY = 0, y, maxY;
+
+			#region Draw line count at bottom
+			var tt = WpfHelper.ToFormattedText(lc.ToText(), 9, __LineNumberBrush);
+			y = _ScrollBar.TrackSpanBottom - tt.Height;
+			DrawTextAdjusted(drawingContext, tt, y);
+			maxY = y - tt.Height;
+			#endregion
+
+			#region Draw intermediate line numbers
+			for (i = step; i < lc; i += step) {
+				y = _ScrollBar.GetYCoordinateOfBufferPosition(new SnapshotPoint(snapshot, snapshot.GetLineFromLineNumber(i - 1).Start));
+				if (y > maxY) {
+					break;
+				}
+				if (y - prevY < 50) {
 					continue;
 				}
-				dy = y;
+				prevY = y;
 				drawingContext.DrawLine(__LineNumberPen, new Point(-100, y), new Point(100, y));
-				var t = WpfHelper.ToFormattedText(i.ToString(), 9, __LineNumberBrush);
-				drawingContext.DrawText(t, new Point(_ScrollbarWidth - t.Width, y));
+				var t = WpfHelper.ToFormattedText(i.ToText(), 9, __LineNumberBrush);
+				DrawTextAdjusted(drawingContext, t, y);
+			}
+			#endregion
+		}
+
+		void DrawTextAdjusted(DrawingContext drawingContext, FormattedText t, double y) {
+			var x = _ScrollbarWidth - t.Width;
+			if (x < 0) {
+				drawingContext.PushTransform(new ScaleTransform(_ScrollbarWidth / t.Width, 1));
+				drawingContext.DrawText(t, new Point(0, y));
+				drawingContext.Pop();
+			}
+			else {
+				drawingContext.DrawText(t, new Point(x, y));
 			}
 		}
 

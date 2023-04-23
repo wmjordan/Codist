@@ -244,7 +244,7 @@ namespace Codist
 		}
 		static readonly Typeface __StatusText = SystemFonts.StatusFontFamily.GetTypefaces().First();
 		public static WpfText ToFormattedText(string text, double size, WpfBrush brush) {
-			return new WpfText(text, System.Globalization.CultureInfo.CurrentCulture, FlowDirection.LeftToRight, __StatusText, size, brush);
+			return new WpfText(text, System.Globalization.CultureInfo.InvariantCulture, FlowDirection.LeftToRight, __StatusText, size, brush);
 		}
 		#endregion
 
@@ -655,6 +655,7 @@ namespace Codist
 			toolBar.Loaded -= ToolBarLoaded;
 			toolBar.Loaded += ToolBarLoaded;
 			return toolBar;
+
 			void ToolBarLoaded(object sender, RoutedEventArgs args) {
 				var b = sender as ToolBar;
 				HideOverflowInternal(b);
