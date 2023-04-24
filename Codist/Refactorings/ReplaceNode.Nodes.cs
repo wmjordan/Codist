@@ -19,7 +19,7 @@ namespace Codist.Refactorings
 		public static readonly ReplaceNode AsToCast = new AsToCastRefactoring();
 		public static readonly ReplaceNode DuplicateMethodDeclaration = new DuplicateMethodDeclarationRefactoring();
 		public static readonly ReplaceNode InlineVariable = new InlineVariableRefactoring();
-		public static readonly ReplaceNode RemoveContainingStatement = new RemoveContainerRefactoring();
+		public static readonly ReplaceNode RemoveContainingStatement = new RemoveContainingStatementRefactoring();
 		public static readonly ReplaceNode SwapOperands = new SwapOperandsRefactoring();
 		public static readonly ReplaceNode MultiLineList = new MultiLineListRefactoring();
 		public static readonly ReplaceNode MultiLineExpression = new MultiLineExpressionRefactoring();
@@ -286,10 +286,10 @@ namespace Codist.Refactorings
 			}
 		}
 
-		sealed class RemoveContainerRefactoring : ReplaceNode
+		sealed class RemoveContainingStatementRefactoring : ReplaceNode
 		{
 			public override int IconId => IconIds.Delete;
-			public override string Title => R.CMD_DeleteContainingBlock;
+			public override string Title => R.CMD_DeleteContainingStatement;
 
 			public override bool Accept(RefactoringContext ctx) {
 				var node = ctx.NodeIncludeTrivia;
@@ -330,18 +330,15 @@ namespace Codist.Refactorings
 				SyntaxList<StatementSyntax> keep = statement.Parent is BlockSyntax b
 					? b.Statements
 					: new SyntaxList<StatementSyntax>(statement);
-				if (remove.IsKind(SyntaxKind.ElseClause)) {
-					var ifs = remove.Parent as IfStatementSyntax;
-					if (ifs.Parent.IsKind(SyntaxKind.ElseClause)) {
-						return Chain.Create(Replace(ifs.Parent,
-							(keep.Count > 1 || statement.Parent.IsKind(SyntaxKind.Block) || keep.Count == 0
-								? SF.ElseClause(SF.Block(keep))
-								: SF.ElseClause(keep[0])).AnnotateReformatAndSelect()));
-					}
-					else {
-						keep = keep.Insert(0, ifs.WithElse(null));
-					}
-					remove = ifs;
+				if (statement.Parent.IsKind(SyntaxKind.Block) && remove.Parent.IsKind(SyntaxKind.ElseClause)
+					|| keep.Count > 1 && remove.Parent.IsKind(SyntaxKind.Block) == false) {
+					var (indent, newLine) = ctx.GetIndentAndNewLine(remove.SpanStart, 0);
+					return Chain.Create(Replace(remove,
+						SF.Block(SF.Token(SyntaxKind.OpenBraceToken).WithTrailingTrivia(newLine),
+							keep,
+							SF.Token(SyntaxKind.CloseBraceToken).WithLeadingTrivia(indent))
+						.WithTriviaFrom(remove)
+						.AnnotateSelect()));
 				}
 				return Chain.Create(Replace(remove, keep.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select)));
 			}

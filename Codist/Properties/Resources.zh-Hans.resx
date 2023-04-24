@@ -2112,7 +2112,7 @@ Right click: 显示“线程”窗口</value>
   <data name="OT_TaskManagerParameter" xml:space="preserve">
     <value>任务管理器参数:</value>
   </data>
-  <data name="CMD_DeleteContainingBlock" xml:space="preserve">
+  <data name="CMD_DeleteContainingStatement" xml:space="preserve">
     <value>删除包含的语句</value>
   </data>
   <data name="CMD_WrapInIf" xml:space="preserve">

@@ -369,11 +369,11 @@ namespace Codist.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete Containing Block.
+        ///   Looks up a localized string similar to Delete Containing Statement.
         /// </summary>
-        internal static string CMD_DeleteContainingBlock {
+        internal static string CMD_DeleteContainingStatement {
             get {
-                return ResourceManager.GetString("CMD_DeleteContainingBlock", resourceCulture);
+                return ResourceManager.GetString("CMD_DeleteContainingStatement", resourceCulture);
             }
         }
         
