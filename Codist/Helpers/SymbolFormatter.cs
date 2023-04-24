@@ -866,6 +866,7 @@ namespace Codist
 				case SyntaxKind.EnumMemberDeclaration: return EnumField;
 				case SyntaxKind.NamespaceDeclaration: return Namespace;
 				case SyntaxKind.VariableDeclarator: return GetBrush(node.Parent.Parent);
+				case SyntaxKind.DefaultSwitchLabel: return Keyword;
 				default: return null;
 			}
 		}
