@@ -135,10 +135,10 @@ namespace Codist.Commands
 			AppendNameValue(s, "AutoHides", window.AutoHides);
 			AppendNameValue(s, "IsFloating", window.IsFloating);
 			// AppendNameValue(s, "HWnd", window.HWnd); // this property is unavailable in 64bit VS
-			AppendNameValue(s, "Width", window.Width);
-			AppendNameValue(s, "Height", window.Height);
 			AppendNameValue(s, "Left", window.Left);
 			AppendNameValue(s, "Top", window.Top);
+			AppendNameValue(s, "Width", window.Width);
+			AppendNameValue(s, "Height", window.Height);
 			AppendNameValue(s, "Linkable", window.Linkable);
 			AppendNameValue(s, "LinkedWindowFrame.Caption", window.LinkedWindowFrame?.Caption);
 			AppendNameValue(s, "Project.Name", window.Project?.Name);
@@ -172,22 +172,22 @@ namespace Codist.Commands
 			}
 
 			var doc = window.Document;
-			if (doc != null) {
-				ss = NewIndentSection(s, "Document:");
-				AppendNameValue(ss, "Language", doc.Language);
-				try {
-					AppendNameValue(ss, "Kind", doc.Kind);
-				}
-				catch (NotImplementedException) {
-					// ignore
-				}
-				AppendNameValue(ss, "Type", doc.Type);
-				AppendNameValue(ss, "ExtenderNames", doc.ExtenderNames);
-				AppendNameValue(ss, "ExtenderCATID", doc.ExtenderCATID);
-				AppendNameValue(ss, "DocumentData", window.DocumentData);
+			if (doc == null) {
+				ShowSpecialWindowTypeInfo(blocks, window);
+				return;
 			}
-
-			ShowSpecialWindowTypeInfo(blocks, window);
+			ss = NewIndentSection(s, "Document:");
+			AppendNameValue(ss, "Language", doc.Language);
+			try {
+				AppendNameValue(ss, "Kind", doc.Kind);
+			}
+			catch (NotImplementedException) {
+				// ignore
+			}
+			AppendNameValue(ss, "Type", doc.Type);
+			AppendNameValue(ss, "ExtenderNames", doc.ExtenderNames);
+			AppendNameValue(ss, "ExtenderCATID", doc.ExtenderCATID);
+			AppendNameValue(ss, "DocumentData", window.DocumentData);
 		}
 
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
@@ -490,9 +490,9 @@ namespace Codist.Commands
 				return new TypeRun(type, f);
 			}
 			type = value.GetType();
-					if (type.IsEnum) {
-						return new Run(value.ToString()) { Foreground = f.EnumField };
-					}
+			if (type.IsEnum) {
+				return new Run(value.ToString()) { Foreground = f.EnumField };
+			}
 			switch (Type.GetTypeCode(type)) {
 				case TypeCode.Object:
 					if (type.Name == "__ComObject" && type.Namespace == "System") {
