@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using Codist.Controls;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
@@ -81,7 +82,26 @@ namespace Codist.Commands
 
 		static Project GetSelectedProject() {
 			ThreadHelper.ThrowIfNotOnUIThread();
-			return CodistPackage.DTE.ActiveDocument?.ProjectItem.ContainingProject;
+			var dte = CodistPackage.DTE;
+			var p = dte.ActiveWindow.Project;
+			if (p != null) {
+				return p;
+			}
+			if (dte.ActiveWindow.Type == vsWindowType.vsWindowTypeSolutionExplorer) {
+				var o = (dte.ToolWindows.SolutionExplorer?.SelectedItems as object[])
+					.OfType<UIHierarchyItem>()
+					.FirstOrDefault()
+					?.Object;
+				if (o != null) {
+					if ((p = o as Project) != null) {
+						return p;
+					}
+					if (o is ProjectItem pi) {
+						return pi.ContainingProject;
+					}
+				}
+			}
+			return null;
 		}
 	}
 }
