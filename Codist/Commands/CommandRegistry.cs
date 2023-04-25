@@ -43,5 +43,7 @@ namespace Codist.Commands
 		ToggleAutoBuildVersion,
 		CodeRefactoring,
 		OpenOutputFolder,
+		OpenDebugOutputFolder,
+		OpenReleaseOutputFolder,
 	}
 }

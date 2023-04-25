@@ -67,6 +67,32 @@
 					<LocCanonicalName>.生成.打开输出文件夹</LocCanonicalName>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="OpenDebugOutputFolderId" priority="0x0102" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_BUILD_MISC" />
+				<Icon guid="ImageCatalogGuid" id="PackageFolderOpened" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DontCache</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>打开 Debug 输出文件夹</ButtonText>
+					<CanonicalName>.Build.OpenDebugOutputFolder</CanonicalName>
+					<LocCanonicalName>.生成.打开Debug输出文件夹</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="OpenReleaseOutputFolderId" priority="0x0102" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_BUILD_MISC" />
+				<Icon guid="ImageCatalogGuid" id="PackageFolderOpened" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DontCache</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>打开 Release 输出文件夹</ButtonText>
+					<CanonicalName>.Build.OpenReleaseOutputFolder</CanonicalName>
+					<LocCanonicalName>.生成.打开Release输出文件夹</LocCanonicalName>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="SearchMember" />

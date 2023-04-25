@@ -74,6 +74,32 @@
 					<LocCanonicalName>.Build.OpenOutputFolder</LocCanonicalName>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="OpenDebugOutputFolderId" priority="0x0102" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_BUILD_MISC" />
+				<Icon guid="ImageCatalogGuid" id="PackageFolderOpened" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DontCache</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Open Debug Output Folder</ButtonText>
+					<CanonicalName>.Build.OpenDebugOutputFolder</CanonicalName>
+					<LocCanonicalName>.Build.OpenDebugOutputFolder</LocCanonicalName>
+				</Strings>
+			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="OpenReleaseOutputFolderId" priority="0x0102" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_BUILD_MISC" />
+				<Icon guid="ImageCatalogGuid" id="PackageFolderOpened" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DontCache</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Open Release Output Folder</ButtonText>
+					<CanonicalName>.Build.OpenReleaseOutputFolder</CanonicalName>
+					<LocCanonicalName>.Build.OpenReleaseOutputFolder</LocCanonicalName>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="SearchMember" />

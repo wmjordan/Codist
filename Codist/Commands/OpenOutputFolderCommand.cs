@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Codist.Controls;
 using EnvDTE;
@@ -11,17 +12,49 @@ namespace Codist.Commands
 	{
 		public static void Initialize() {
 			Command.OpenOutputFolder.Register(Execute, (s, args) => ((OleMenuCommand)s).Visible = GetSelectedProject() != null);
+			Command.OpenDebugOutputFolder.Register(ExecuteDebug, (s, args) => ((OleMenuCommand)s).Visible = GetSelectedProjectConfigurationExceptActive("Debug") != null);
+			Command.OpenReleaseOutputFolder.Register(ExecuteRelease, (s, args) => ((OleMenuCommand)s).Visible = GetSelectedProjectConfigurationExceptActive("Release") != null);
 		}
 
 		static void Execute(object sender, EventArgs e) {
 			var p = GetSelectedProject();
-			if (p == null) {
-				return;
+			if (p != null) {
+				OpenOutputFolder(p, null);
 			}
+		}
+		static void ExecuteDebug(object sender, EventArgs e) {
+			var p = GetSelectedProject();
+			if (p != null) {
+				OpenOutputFolder(p, "Debug");
+			}
+		}
+		static void ExecuteRelease(object sender, EventArgs e) {
+			var p = GetSelectedProject();
+			if (p != null) {
+				OpenOutputFolder(p, "Release");
+			}
+		}
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
+		static Configuration GetSelectedProjectConfigurationExceptActive(string rowName) {
+			var cm = GetSelectedProject()?.ConfigurationManager;
+			if (cm?.ConfigurationRowNames is object[] rows) {
+				if (cm.ActiveConfiguration.ConfigurationName == rowName) {
+					return null;
+				}
+				for (int i = 0; i < rows.Length; i++) {
+					if (rows[i] is string s && s == rowName) {
+						return cm.Item(i+1);
+					}
+				}
+			}
+			return null;
+		}
 
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
+		static void OpenOutputFolder(Project p, string rowName) {
 			try {
 				if (p.Properties.Item("FullPath")?.Value is string projectPath
-					&& p.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath")?.Value is string confPath) {
+					&& (rowName == null ? p.ConfigurationManager.ActiveConfiguration : GetSelectedProjectConfigurationExceptActive(rowName))?.Properties.Item("OutputPath")?.Value is string confPath) {
 					var outputPath = Path.Combine(projectPath, confPath);
 					if (Directory.Exists(outputPath)) {
 						FileHelper.TryRun(outputPath);
