@@ -434,7 +434,7 @@ namespace Codist.Commands
 			return section;
 		}
 		static void AppendNameValue(Section section, string name, object value) {
-			Paragraph p = new Paragraph {
+			var p = new Paragraph {
 				Margin = __ParagraphIndent,
 				TextIndent = -10,
 				Inlines = {
@@ -446,7 +446,7 @@ namespace Codist.Commands
 			section.Blocks.Add(p);
 		}
 		static void AppendPropertyValue(Section section, object key, object value) {
-			Paragraph p = new Paragraph {
+			var p = new Paragraph {
 				Margin = __ParagraphIndent,
 				TextIndent = -10,
 				Inlines = {
@@ -526,8 +526,8 @@ namespace Codist.Commands
 			}
 		}
 		static string GetTypeName(Type type) {
-			return (type.DeclaringType != null ? (GetTypeName(type.DeclaringType) + "+" + type.Name) : type.Name)
-				+ (type.IsGenericType ? ("<" + String.Join(",", type.GenericTypeArguments.Select(GetTypeName)) + ">") : String.Empty);
+			return (type.DeclaringType != null ? $"{GetTypeName(type.DeclaringType)}+{type.Name}" : type.Name)
+				+ (type.IsGenericType ? $"<{String.Join(",", type.GenericTypeArguments.Select(GetTypeName))}>" : String.Empty);
 		}
 		static Brush GetTypeBrush(SymbolFormatter f, Type type) {
 			return type.IsClass ? f.Class
