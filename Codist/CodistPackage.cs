@@ -142,6 +142,7 @@ namespace Codist
 			Commands.NaviBarSearchDeclarationCommand.Initialize();
 			Commands.ToggleAutoBuildVersionCommand.Initialize();
 			Commands.SemanticContextCommand.Initialize();
+			Commands.OpenOutputFolderCommand.Initialize();
 			Display.JumpListEnhancer.Initialize();
 			Display.LayoutOverrider.InitializeLayoutOverride();
 

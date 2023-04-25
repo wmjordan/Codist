@@ -86,6 +86,7 @@
 			<IDSymbol name="AutoBuildVersionWindowId" value="0x4009" />
 			<IDSymbol name="IDG_VS_BUILD_SELECTION" value="0x1000" />
 			<IDSymbol name="ToggleAutoBuildVersionId" value="0x400A" />
+			<IDSymbol name="OpenOutputFolderId" value="0x400C" />
 			<IDSymbol name="IDG_VS_TOOLS_OPTIONS" value="0x1020" />
 			<IDSymbol name="SymbolFinderWindowCommandId" value="0x4004" />
 			<IDSymbol name="SyntaxCustomizeHighlightId" value="0x4005" />

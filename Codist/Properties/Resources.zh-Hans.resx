@@ -2442,4 +2442,13 @@ Right click: 显示“线程”窗口</value>
   <data name="T_Squiggle" xml:space="preserve">
     <value>波浪线</value>
   </data>
+  <data name="CMD_OpenOutputFolder" xml:space="preserve">
+    <value>打开输出文件夹</value>
+  </data>
+  <data name="T_FailedToOpenOutputFolder" xml:space="preserve">
+    <value>无法打开输出文件夹</value>
+  </data>
+  <data name="T_OutputFolderMissing" xml:space="preserve">
+    <value>输出文件夹不存在</value>
+  </data>
 </root>

@@ -2457,4 +2457,13 @@ Expression too long</value>
   <data name="T_Squiggle" xml:space="preserve">
     <value>Squiggle</value>
   </data>
+  <data name="CMD_OpenOutputFolder" xml:space="preserve">
+    <value>Open Output Folder</value>
+  </data>
+  <data name="T_FailedToOpenOutputFolder" xml:space="preserve">
+    <value>Failed to open output folder</value>
+  </data>
+  <data name="T_OutputFolderMissing" xml:space="preserve">
+    <value>Output folder does not exists</value>
+  </data>
 </root>

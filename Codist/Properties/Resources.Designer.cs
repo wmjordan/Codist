@@ -1267,6 +1267,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open Output Folder.
+        /// </summary>
+        internal static string CMD_OpenOutputFolder {
+            get {
+                return ResourceManager.GetString("CMD_OpenOutputFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Open file with Visual Studio.
         /// </summary>
         internal static string CMD_OpenWithVS {
@@ -5691,6 +5700,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to open output folder.
+        /// </summary>
+        internal static string T_FailedToOpenOutputFolder {
+            get {
+                return ResourceManager.GetString("T_FailedToOpenOutputFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to save screenshot for &lt;NAME&gt;..
         /// </summary>
         internal static string T_FailedToSaveScreenshot {
@@ -6310,6 +6328,15 @@ namespace Codist.Properties {
         internal static string T_Or {
             get {
                 return ResourceManager.GetString("T_Or", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Output folder does not exists.
+        /// </summary>
+        internal static string T_OutputFolderMissing {
+            get {
+                return ResourceManager.GetString("T_OutputFolderMissing", resourceCulture);
             }
         }
         

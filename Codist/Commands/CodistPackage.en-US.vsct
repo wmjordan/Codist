@@ -61,6 +61,19 @@
 					<ButtonText>Auto Build Version</ButtonText>
 				</Strings>
 			</Button>
+			<Button guid="guidCodistPackageCmdSet" id="OpenOutputFolderId" priority="0x0102" type="Button">
+				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_BUILD_MISC" />
+				<Icon guid="ImageCatalogGuid" id="PackageFolderOpened" />
+				<CommandFlag>DefaultInvisible</CommandFlag>
+				<CommandFlag>DontCache</CommandFlag>
+				<CommandFlag>DynamicVisibility</CommandFlag>
+				<CommandFlag>IconIsMoniker</CommandFlag>
+				<Strings>
+					<ButtonText>Open Output Folder</ButtonText>
+					<CanonicalName>.Build.OpenOutputFolder</CanonicalName>
+					<LocCanonicalName>.Build.OpenOutputFolder</LocCanonicalName>
+				</Strings>
+			</Button>
 			<Button guid="guidCodistPackageCmdSet" id="NaviBarSearchActiveClassId" priority="0x0100" type="Button">
 				<Parent guid="guidCodistPackageCmdSet" id="IDG_VS_EDIT_GOTO" />
 				<Icon guid="ImageCatalogGuid" id="SearchMember" />
