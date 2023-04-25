@@ -489,11 +489,12 @@ namespace Codist.Commands
 			if (value is Type type) {
 				return new TypeRun(type, f);
 			}
-			switch (Type.GetTypeCode(type = value.GetType())) {
-				case TypeCode.Object:
+			type = value.GetType();
 					if (type.IsEnum) {
 						return new Run(value.ToString()) { Foreground = f.EnumField };
 					}
+			switch (Type.GetTypeCode(type)) {
+				case TypeCode.Object:
 					if (type.Name == "__ComObject" && type.Namespace == "System") {
 						return new Run(ReflectionHelper.GetTypeNameFromComObject(value) ?? "System.__ComObject") { Foreground = f.Class };
 					}
