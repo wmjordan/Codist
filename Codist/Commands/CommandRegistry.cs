@@ -16,6 +16,17 @@ namespace Codist.Commands
 		public static void Register(this Command command, EventHandler commandHandler, EventHandler queryStatusHandler = null) {
 			CodistPackage.MenuService.AddCommand(new OleMenuCommand(commandHandler, null, queryStatusHandler, command.GetID()));
 		}
+
+		public static void Initialize() {
+			AutoBuildVersionWindowCommand.Initialize();
+			IncrementVsixVersionCommand.Initialize();
+			NaviBarSearchDeclarationCommand.Initialize();
+			OpenOutputFolderCommand.Initialize();
+			ScreenshotCommand.Initialize();
+			SemanticContextCommand.Initialize();
+			ToggleAutoBuildVersionCommand.Initialize();
+			WindowInformerCommand.Initialize();
+		}
 	}
 
 	internal enum Command
