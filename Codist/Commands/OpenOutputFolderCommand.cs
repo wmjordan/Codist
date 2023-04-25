@@ -11,7 +11,7 @@ namespace Codist.Commands
 	internal static class OpenOutputFolderCommand
 	{
 		public static void Initialize() {
-			Command.OpenOutputFolder.Register(Execute, (s, args) => ((OleMenuCommand)s).Visible = GetSelectedProject() != null);
+			Command.OpenOutputFolder.Register(Execute, (s, args) => ((OleMenuCommand)s).Visible = GetSelectedProject()?.ConfigurationManager != null);
 			Command.OpenDebugOutputFolder.Register(ExecuteDebug, (s, args) => ((OleMenuCommand)s).Visible = GetSelectedProjectConfigurationExceptActive("Debug") != null);
 			Command.OpenReleaseOutputFolder.Register(ExecuteRelease, (s, args) => ((OleMenuCommand)s).Visible = GetSelectedProjectConfigurationExceptActive("Release") != null);
 		}
