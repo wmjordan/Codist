@@ -333,6 +333,10 @@ namespace Codist.Refactorings
 				if (statement.Parent.IsKind(SyntaxKind.Block) && remove.Parent.IsKind(SyntaxKind.ElseClause)
 					|| keep.Count > 1 && remove.Parent.IsKind(SyntaxKind.Block) == false) {
 					var (indent, newLine) = ctx.GetIndentAndNewLine(remove.SpanStart, 0);
+					if (remove.IsKind(SyntaxKind.ElseClause)) {
+						return Chain.Create(InsertAfter(remove.Parent, keep.AttachAnnotation(CodeFormatHelper.Reformat, CodeFormatHelper.Select)))
+							.Add(Replace(remove.Parent, ((IfStatementSyntax)remove.Parent).WithElse(null)));
+					}
 					return Chain.Create(Replace(remove,
 						SF.Block(SF.Token(SyntaxKind.OpenBraceToken).WithTrailingTrivia(newLine),
 							keep,

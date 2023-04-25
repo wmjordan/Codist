@@ -42,6 +42,9 @@ namespace Codist.Refactorings
 		public static RefactoringAction InsertAfter(SyntaxNode oldNode, SyntaxNode insert) {
 			return new RefactoringAction(ActionType.InsertAfter, new List<SyntaxNode> { oldNode }, new List<SyntaxNode> { insert });
 		}
+		public static RefactoringAction InsertAfter(SyntaxNode oldNode, IEnumerable<SyntaxNode> insert) {
+			return new RefactoringAction(ActionType.InsertAfter, new List<SyntaxNode> { oldNode }, new List<SyntaxNode> (insert));
+		}
 
 		public void Refactor(SemanticContext context) {
 			var ctx = new RefactoringContext(context) {
