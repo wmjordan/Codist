@@ -196,7 +196,8 @@ namespace Codist.Commands
 				case vsWindowType.vsWindowTypeSolutionExplorer:
 					ShowDTESolutionSelectedItems(blocks);
 					break;
-				default:
+				case vsWindowType.vsWindowTypeOutput:
+					ShowDTEOutputWindows(blocks);
 					break;
 			}
 		}
@@ -222,6 +223,16 @@ namespace Codist.Commands
 						AppendNameValue(ss, "Object", hi.Object);
 					}
 				}
+			}
+		}
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
+		static void ShowDTEOutputWindows(BlockCollection blocks) {
+			var s = NewSection(blocks, "OutputWindow", SubSectionFontSize);
+			var o = CodistPackage.DTE.ToolWindows.OutputWindow;
+			AppendNameValue(s, "ActivePane.Name", o.ActivePane?.Name);
+			var ss = NewIndentSection(s, "OutputWindowPanes");
+			foreach (var item in o.OutputWindowPanes.OfType<OutputWindowPane>()) {
+				AppendNameValue(ss, item.Name, item.Guid);
 			}
 		}
 
