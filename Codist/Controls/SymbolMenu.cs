@@ -12,8 +12,6 @@ namespace Codist.Controls
 		readonly SymbolFilterBox _FilterBox;
 		TextViewOverlay _ExternalAdornment;
 
-		public ThemedMenuText Title { get; }
-
 		public SymbolMenu(SemanticContext semanticContext) : this(semanticContext, SymbolListType.None) { }
 		public SymbolMenu(SemanticContext semanticContext, SymbolListType listType) : base(semanticContext) {
 			Container = _ExternalAdornment = TextViewOverlay.GetOrCreate(semanticContext.View);
@@ -45,6 +43,8 @@ namespace Codist.Controls
 			MouseLeftButtonUp += MenuItemSelect;
 			_ExternalAdornment.MakeDraggable(this);
 		}
+
+		public ThemedMenuText Title { get; }
 
 		public override void Dispose() {
 			if (_ExternalAdornment != null) {

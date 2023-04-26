@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,6 +9,7 @@ namespace Codist.Controls
 	{
 		public static readonly DependencyProperty SubMenuHeaderProperty = DependencyProperty.Register("SubMenuHeader", typeof(FrameworkElement), typeof(ThemedMenuItem));
 		public static readonly DependencyProperty SubMenuMaxHeightProperty = DependencyProperty.Register("SubMenuMaxHeight", typeof(double), typeof(ThemedMenuItem));
+
 		RoutedEventHandler _ClickHandler;
 		FrameworkElement _SubMenuHeader;
 

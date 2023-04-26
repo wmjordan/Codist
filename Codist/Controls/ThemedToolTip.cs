@@ -7,17 +7,14 @@ namespace Codist.Controls
 {
 	sealed class ThemedToolTip : StackPanel
 	{
-		static Thickness _TitlePadding = new Thickness(5);
-		static Thickness _ContentPadding = new Thickness(8, 3, 8, 8);
-
-		public TextBlock Title { get; }
-		public TextBlock Content { get; }
+		static Thickness __TitlePadding = new Thickness(5);
+		static Thickness __ContentPadding = new Thickness(8, 3, 8, 8);
 
 		public ThemedToolTip() : this(null, null) {
 		}
 		public ThemedToolTip(string title, string content) {
 			Title = new TextBlock {
-				Padding = _TitlePadding,
+				Padding = __TitlePadding,
 				HorizontalAlignment = HorizontalAlignment.Stretch,
 				TextWrapping = TextWrapping.Wrap
 			}
@@ -36,15 +33,18 @@ namespace Codist.Controls
 			}
 		}
 
+		public TextBlock Title { get; }
+		public TextBlock Content { get; }
+
 		public TextBlock AddTextBlock() {
-			var t = new TextBlock { Padding = _ContentPadding, TextWrapping = TextWrapping.Wrap }
+			var t = new TextBlock { Padding = __ContentPadding, TextWrapping = TextWrapping.Wrap }
 				.ReferenceProperty(TextBlock.BackgroundProperty, EnvironmentColors.ToolTipBrushKey)
 				.ReferenceProperty(TextBlock.ForegroundProperty, EnvironmentColors.ToolTipTextBrushKey);
 			Children.Add(t);
 			return t;
 		}
 		public Border AddBorder() {
-			var t = new Border { Padding = _ContentPadding }
+			var t = new Border { Padding = __ContentPadding }
 				.ReferenceProperty(Border.BackgroundProperty, EnvironmentColors.ToolTipBrushKey);
 			Children.Add(t);
 			return t;

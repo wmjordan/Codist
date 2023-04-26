@@ -12,6 +12,7 @@ namespace Codist.Controls
 		}
 		public ThemedTipParagraph(TextBlock content) : this(0, content) {
 		}
+
 		public int Icon { get; }
 		public TextBlock Content { get; }
 	}

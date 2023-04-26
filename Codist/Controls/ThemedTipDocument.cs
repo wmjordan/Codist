@@ -10,6 +10,7 @@ namespace Codist.Controls
 		const int PlaceHolderSize = WpfHelper.IconRightMargin + ThemeHelper.DefaultIconSize;
 		readonly Grid _Container;
 		int _RowCount;
+
 		public ThemedTipDocument() {
 			_Container = new Grid {
 				ColumnDefinitions = {
@@ -19,6 +20,7 @@ namespace Codist.Controls
 			};
 			Child = _Container;
 		}
+
 		public IEnumerable<TextBlock> Paragraphs => _Container.Children.OfType<TextBlock>();
 		public int ParagraphCount => _RowCount;
 

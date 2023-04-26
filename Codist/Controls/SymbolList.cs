@@ -27,6 +27,7 @@ namespace Codist.Controls
 		Predicate<object> _Filter;
 		readonly ToolTip _SymbolTip;
 		readonly List<SymbolItem> _Symbols;
+		//ListBoxItem _HighlightItem;
 
 		public SymbolList(SemanticContext semanticContext) {
 			_Symbols = new List<SymbolItem>();
@@ -334,8 +335,38 @@ namespace Codist.Controls
 				SizeChanged += SizeChanged_RelocateToolTip;
 				MouseMove += MouseMove_ChangeToolTip;
 				MouseLeave += MouseLeave_HideToolTip;
+				//if (ContainerType == SymbolListType.NodeList) {
+				//	UnhookHighlightMouseEvent();
+				//	MouseMove += MouseMove_HighlightCode;
+				//	MouseLeave += MouseLeave_ClearCodeHighlight;
+				//}
 			}
 		}
+
+		//void MouseLeave_ClearCodeHighlight(object sender, MouseEventArgs e) {
+		//	UnhookHighlightMouseEvent();
+		//	_HighlightItem = null;
+		//}
+
+		//void MouseMove_HighlightCode(object sender, MouseEventArgs e) {
+		//	if (Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RangeHighlight) == false) {
+		//		return;
+		//	}
+		//	var li = GetMouseEventTarget(e);
+		//	if (li != null
+		//		&& _HighlightItem != li
+		//		&& li.Content is SymbolItem si
+		//		&& si.IsExternal == false) {
+		//		_HighlightItem = li;
+		//		TextViewOverlay.Get(SemanticContext.View)
+		//			?.SetRangeAdornment(si.SyntaxNode.Span.CreateSnapshotSpan(SemanticContext.View.TextSnapshot));
+		//	}
+		//}
+
+		//void UnhookHighlightMouseEvent() {
+		//	MouseMove -= MouseMove_HighlightCode;
+		//	MouseLeave -= MouseLeave_ClearCodeHighlight;
+		//}
 
 		void MouseLeave_HideToolTip(object sender, MouseEventArgs e) {
 			UnhookMouseEventAndHideToolTip();
@@ -692,6 +723,7 @@ namespace Codist.Controls
 			base.Dispose();
 			if (SemanticContext != null) {
 				UnhookMouseEventAndHideToolTip();
+				//UnhookHighlightMouseEvent();
 				_SymbolTip.PlacementTarget = null;
 				ClearSymbols();
 				if (ContextMenu is IDisposable d) {
