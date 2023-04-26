@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Management.Instrumentation;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -10,7 +12,8 @@ namespace Codist
 	static class VsShellHelper
 	{
 		public const string CSharpProjectKind = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}",
-			ProjectFolderKind = "{66A26720-8FB5-11D2-AA7E-00C04F688DDE}";
+			ProjectFolderKind = "{66A26720-8FB5-11D2-AA7E-00C04F688DDE}",
+			VsixProjectExtender = "VsixProjectExtender";
 
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		public static IEnumerable<KeyValuePair<string, object>> Enumerate(this EnvDTE.Properties properties) {
@@ -120,7 +123,7 @@ namespace Codist
 		}
 
 		public static bool IsVsixProject(this EnvDTE.Project project) {
-			return project?.ExtenderNames is string[] extenders && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
+			return project?.ExtenderNames is string[] extenders && Array.IndexOf(extenders, VsixProjectExtender) != -1;
 		}
 
 		public static bool IsCSharpProject(this EnvDTE.Project project) {
@@ -153,11 +156,45 @@ namespace Codist
 		public static bool IsVsixProject() {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			try {
-				return CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames is string[] extenders && Array.IndexOf(extenders, "VsixProjectExtender") != -1;
+				return CodistPackage.DTE.ActiveDocument?.ProjectItem?.ContainingProject?.ExtenderNames is string[] extenders && Array.IndexOf(extenders, VsixProjectExtender) != -1;
 			}
 			catch (ArgumentException) {
 				// hack: for https://github.com/wmjordan/Codist/issues/124
 				return false;
+			}
+		}
+
+		public static int OutputLine(string text) {
+			return OutputPane.OutputString(text);
+		}
+		public static void ClearOutputPane() {
+			OutputPane.ClearOutputPane();
+		}
+
+		static class OutputPane
+		{
+			static IVsOutputWindowPane _OutputPane;
+
+			static public int OutputString(string text) {
+				ThreadHelper.ThrowIfNotOnUIThread();
+				return (_OutputPane ?? (_OutputPane = CreateOutputPane()))
+					.OutputString(text + Environment.NewLine);
+			}
+
+			static public void ClearOutputPane() {
+				ThreadHelper.ThrowIfNotOnUIThread();
+				_OutputPane?.Clear();
+			}
+
+			[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
+			static IVsOutputWindowPane CreateOutputPane() {
+				var window = ServicesHelper.Get<IVsOutputWindow, SVsOutputWindow>();
+				var guid = new Guid(CodistPackage.PackageGuidString);
+				if (window.CreatePane(ref guid, nameof(Codist), 1, 0) == VSConstants.S_OK
+					&& window.GetPane(ref guid, out var pane) == 0) {
+					return pane;
+				}
+				return null;
 			}
 		}
 	}

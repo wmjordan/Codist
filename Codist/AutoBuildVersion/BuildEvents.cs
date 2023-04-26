@@ -180,7 +180,7 @@ namespace Codist.AutoBuildVersion
 		}
 		[Conditional("DEBUG")]
 		static void WriteText(string text) {
-			CodistPackage.OutputString(text);
+			VsShellHelper.OutputLine(text);
 		}
 
 		#region IVsSolutionEvents
@@ -236,6 +236,7 @@ namespace Codist.AutoBuildVersion
 			_RunningDocumentTable = null;
 			_ChangedProjects.Clear();
 			_RunningDocumentTableCookie = 0;
+			VsShellHelper.ClearOutputPane();
 			return VSConstants.S_OK;
 		}
 		#endregion

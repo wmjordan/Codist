@@ -8,10 +8,12 @@ namespace Codist
 {
 	public static class ExternalCommand
 	{
-		public static void OpenWithWebBrowser(string url, string text) {
+		public static void OpenWithWebBrowser(string url, string text = null) {
 			ThreadHelper.ThrowIfNotOnUIThread();
 			try {
-				url = url.Replace("%s", System.Net.WebUtility.UrlEncode(text));
+				if (String.IsNullOrEmpty(text) == false) {
+					url = url.Replace("%s", System.Net.WebUtility.UrlEncode(text));
+				}
 				if (Keyboard.Modifiers == ModifierKeys.Control) {
 					CodistPackage.DTE.ItemOperations.Navigate(url);
 				}

@@ -34,8 +34,7 @@ namespace Codist
 	sealed class CodistPackage : AsyncPackage
 	{
 		/// <summary>CodistPackage GUID string. Should be the same as the one in <c>source.extension.vsixmanifest</c>.</summary>
-		const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
-		static Guid __PackageGuid = new Guid(PackageGuidString);
+		internal const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
 
 		static OleMenuCommandService __Menu;
 		static AutoBuildVersion.BuildEvents __BuildEvents;
@@ -81,37 +80,12 @@ namespace Codist
 		public static void OpenWebPage(InitStatus status) {
 			switch (status) {
 				case InitStatus.FirstLoad:
-					Process.Start("https://github.com/wmjordan/Codist");
+					ExternalCommand.OpenWithWebBrowser("https://github.com/wmjordan/Codist");
 					break;
 				case InitStatus.Upgraded:
-					Process.Start("https://github.com/wmjordan/Codist/releases");
+					ExternalCommand.OpenWithWebBrowser("https://github.com/wmjordan/Codist/releases");
 					break;
 			}
-		}
-
-		public static bool ShowYesNoBox(string message, string title = null) {
-			ThreadHelper.ThrowIfNotOnUIThread();
-			return VsShellUtilities.PromptYesNo(
-				message,
-				title ?? nameof(Codist),
-				OLEMSGICON.OLEMSGICON_QUERY,
-				Instance.GetService(typeof(SVsUIShell)) as IVsUIShell);
-		}
-
-		public static void OutputString(string text) {
-			ThreadHelper.ThrowIfNotOnUIThread();
-			(__OutputPane ?? (__OutputPane = CreateOutputPane()))
-				.OutputString(text + Environment.NewLine);
-		}
-
-		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
-		static IVsOutputWindowPane CreateOutputPane() {
-			var window = ServicesHelper.Get<IVsOutputWindow, SVsOutputWindow>();
-			if (window.CreatePane(ref __PackageGuid, nameof(Codist), 0, 1) == Microsoft.VisualStudio.VSConstants.S_OK
-				&& window.GetPane(ref __PackageGuid, out var pane) == 0) {
-				return pane;
-			}
-			return null;
 		}
 
 		#region Package Members
