@@ -744,12 +744,12 @@ namespace Codist.QuickInfo
 					foreach (var section in ((SwitchStatementSyntax)node).Sections) {
 						cases += section.Labels.Count;
 					}
-					qiContent.Add($"{s} switch sections, {cases} cases");
+					qiContent.Add(new ThemedTipText($"{s} switch sections, {cases} cases").SetGlyph(ThemeHelper.GetImage(IconIds.Switch)));
 				}
 				else if (s == 1) {
 					s = ((SwitchStatementSyntax)node).Sections[0].Labels.Count;
 					if (s > 1) {
-						qiContent.Add($"1 switch section, {s} cases");
+						qiContent.Add(new ThemedTipText($"1 switch section, {s} cases").SetGlyph(ThemeHelper.GetImage(IconIds.Switch)));
 					}
 				}
 			}

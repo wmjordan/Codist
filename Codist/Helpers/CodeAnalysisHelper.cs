@@ -436,23 +436,23 @@ namespace Codist
 				case FileScopedNamespaceDeclaration: return IconIds.Namespace;
 				case SyntaxKind.ArgumentList:
 				case SyntaxKind.AttributeArgumentList: return IconIds.Argument;
-				case SyntaxKind.DoStatement: return KnownImageIds.DoWhile;
-				case SyntaxKind.FixedStatement: return KnownImageIds.Pin;
+				case SyntaxKind.DoStatement: return IconIds.DoWhile;
+				case SyntaxKind.FixedStatement: return IconIds.Pin;
 				case SyntaxKind.ForEachStatement: return KnownImageIds.ForEach;
 				case SyntaxKind.ForStatement: return KnownImageIds.ForEachLoop;
 				case SyntaxKind.IfStatement: return IconIds.If;
 				case SyntaxKind.LockStatement: return KnownImageIds.Lock;
 				case SyntaxKind.SwitchStatement:
 				case SwitchExpression:
-					return KnownImageIds.FlowSwitch;
+					return IconIds.Switch;
 				case SyntaxKind.SwitchSection:
 				case SyntaxKind.CaseSwitchLabel:
 				case SyntaxKind.DefaultSwitchLabel:
-					return KnownImageIds.FlowDecision;
+					return IconIds.SwitchSection;
 				case SyntaxKind.TryStatement: return IconIds.TryCatch;
 				case SyntaxKind.UsingStatement: return IconIds.Using;
-				case SyntaxKind.WhileStatement: return KnownImageIds.While;
-				case SyntaxKind.ParameterList: return KnownImageIds.Parameter;
+				case SyntaxKind.WhileStatement: return IconIds.While;
+				case SyntaxKind.ParameterList: return IconIds.Argument;
 				case SyntaxKind.ParenthesizedExpression: return IconIds.ParenthesizedExpression;
 				case SyntaxKind.ParenthesizedLambdaExpression:
 				case SyntaxKind.SimpleLambdaExpression: return IconIds.LambdaExpression;

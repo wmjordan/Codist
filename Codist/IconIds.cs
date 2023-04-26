@@ -69,6 +69,8 @@ namespace Codist
 		public const int Using = KnownImageIds.TransactedReceiveScope;
 		public const int DoWhile = KnownImageIds.DoWhile;
 		public const int While = KnownImageIds.While;
+		public const int Switch = KnownImageIds.FlowSwitch;
+		public const int SwitchSection = KnownImageIds.FlowDecision;
 		public const int PublicSymbols = KnownImageIds.ModulePublic;
 		public const int ProtectedSymbols = KnownImageIds.ModuleProtected;
 		public const int InternalSymbols = KnownImageIds.ModuleInternal;

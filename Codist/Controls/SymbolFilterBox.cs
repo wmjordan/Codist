@@ -194,9 +194,9 @@ namespace Codist.Controls
 					return filterTypes.MatchFlags(MemberFilterTypes.Private | MemberFilterTypes.Event);
 				case IconIds.Region: // #region
 					return filterTypes == MemberFilterTypes.All;
-				case KnownImageIds.MethodSnippet:
+				case IconIds.LocalFunction:
 					return filterTypes.MatchFlags(MemberFilterTypes.Method | MemberFilterTypes.Private);
-				case KnownImageIds.FlowDecision:
+				case IconIds.SwitchSection:
 					return filterTypes.MatchFlags(MemberFilterTypes.AllMembers);
 			}
 			return false;
