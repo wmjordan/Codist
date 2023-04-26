@@ -87,18 +87,16 @@ namespace Codist.Commands
 			if (p != null) {
 				return p;
 			}
-			if (dte.ActiveWindow.Type == vsWindowType.vsWindowTypeSolutionExplorer) {
-				var o = (dte.ToolWindows.SolutionExplorer?.SelectedItems as object[])
-					.OfType<UIHierarchyItem>()
-					.FirstOrDefault()
-					?.Object;
-				if (o != null) {
-					if ((p = o as Project) != null) {
-						return p;
-					}
-					if (o is ProjectItem pi) {
-						return pi.ContainingProject;
-					}
+			var o = (dte.ToolWindows.SolutionExplorer?.SelectedItems as object[])
+				?.OfType<UIHierarchyItem>()
+				.FirstOrDefault()
+				?.Object;
+			if (o != null) {
+				if ((p = o as Project) != null) {
+					return p;
+				}
+				if (o is ProjectItem pi) {
+					return pi.ContainingProject;
 				}
 			}
 			return null;
