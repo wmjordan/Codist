@@ -206,14 +206,15 @@ namespace Codist.Commands
 			if (CodistPackage.DTE.ToolWindows.SolutionExplorer.SelectedItems is object[] items) {
 				foreach (UIHierarchyItem hi in items.OfType<UIHierarchyItem>()) {
 					var obj = hi.Object;
-					if (obj is Project p) {
+					if (obj is ProjectItem pi) {
+						ShowDTEProjectItemProperties(blocks, pi);
+					}
+					else if (obj is Project p) {
 						ShowDTEProjectProperties(blocks, p);
 					}
 					else if (obj is Solution s) {
 						ShowDTESolutionProperties(blocks, s);
-					}
-					else if (obj is ProjectItem pi) {
-						ShowDTEProjectItemProperties(blocks, pi);
+						ShowDTEProperties(blocks);
 					}
 					else {
 						var ss = NewSection(blocks, "UIHierarchyItem", SubSectionFontSize);
@@ -362,6 +363,32 @@ namespace Codist.Commands
 			}
 			catch (COMException ex) {
 				AppendNameValue(s, "Properties", ex.Message);
+			}
+		}
+
+		static void ShowDTEProperties(BlockCollection blocks) {
+			var s = NewSection(blocks, "DTE", SubSectionFontSize);
+			var dte = CodistPackage.DTE;
+			AppendNameValue(s, "Edition", dte.Edition);
+			AppendNameValue(s, "DisplayMode", dte.DisplayMode);
+			AppendNameValue(s, "Mode", dte.Mode);
+			AppendNameValue(s, "Solution.FullName", dte.Solution.FullName);
+			AppendNameValue(s, "ActiveDocument.Name", dte.ActiveDocument?.Name);
+			AppendNameValue(s, "ActiveSolutionProjects", dte.ActiveSolutionProjects);
+			AppendNameValue(s, "SelectedItems.Count", dte.SelectedItems.Count);
+			AppendNameValue(s, "ActiveWindow.Caption", dte.ActiveWindow?.Caption);
+			AppendNameValue(s, "CommandLineArguments", dte.CommandLineArguments);
+			AppendNameValue(s, "RegistryRoot", dte.RegistryRoot);
+			AppendNameValue(s, "WindowConfigurations.ActiveConfigurationName", dte.WindowConfigurations?.ActiveConfigurationName);
+			AppendNameValue(s, "Windows/Caption", dte.Windows.OfType<Window>().Select(w => w.Caption).ToArray());
+			AppendNameValue(s, "Version", dte.Version);
+
+			var ca = dte.ContextAttributes;
+			if (ca != null && ca.Count != 0) {
+				s = NewIndentSection(s, "ContextAttributes:");
+				foreach (ContextAttribute item in ca) {
+					AppendPropertyValue(s, item.Name, item.Values);
+				}
 			}
 		}
 
