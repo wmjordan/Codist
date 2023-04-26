@@ -173,17 +173,17 @@ namespace Codist
 
 		static class OutputPane
 		{
-			static IVsOutputWindowPane _OutputPane;
+			static IVsOutputWindowPane __OutputPane;
 
 			static public int OutputString(string text) {
 				ThreadHelper.ThrowIfNotOnUIThread();
-				return (_OutputPane ?? (_OutputPane = CreateOutputPane()))
+				return (__OutputPane ?? (__OutputPane = CreateOutputPane()))
 					.OutputString(text + Environment.NewLine);
 			}
 
 			static public void ClearOutputPane() {
 				ThreadHelper.ThrowIfNotOnUIThread();
-				_OutputPane?.Clear();
+				__OutputPane?.Clear();
 			}
 
 			[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
