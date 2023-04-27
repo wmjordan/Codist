@@ -33,8 +33,15 @@ namespace Codist.Controls
 		static readonly Type __TextEditorCopyPaste = Type.GetType("System.Windows.Documents.TextEditorCopyPaste, PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35");
 		static readonly MethodInfo __CopyMethod = __TextEditorCopyPaste?.GetMethod("Copy", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { __TextEditorType, typeof(bool) }, null);
 
-		static readonly bool __IsInitialized = __IsReadOnlyProp != null && __TextViewProp != null && __RegisterMethod != null
-			&& __TextContainerTextViewProp != null && __TextSelectionProp != null && __TextSelectionContains != null && __TextRangeIsEmptyProp != null && __TextContainerProp != null;
+		static readonly bool __IsInitialized = __IsReadOnlyProp != null
+			&& __TextViewProp != null
+			&& __RegisterMethod != null
+			&& __TextContainerTextViewProp != null
+			&& __TextSelectionProp != null
+			&& __TextSelectionContains != null
+			&& __TextRangeIsEmptyProp != null
+			&& __TextContainerProp != null
+			&& RegisterCommandHandlers(typeof(TextBlock), true, true, true);
 		static readonly bool __CanCopy = __CopyMethod != null;
 
 		FrameworkElement _UiScope;
@@ -56,7 +63,7 @@ namespace Codist.Controls
 			return editor;
 		}
 
-		public TextEditorWrapper(object textContainer, FrameworkElement uiScope, bool isUndoEnabled) {
+		TextEditorWrapper(object textContainer, FrameworkElement uiScope, bool isUndoEnabled) {
 			_Editor = Activator.CreateInstance(__TextEditorType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance, null, new[] { textContainer, uiScope, isUndoEnabled }, null);
 			_UiScope = uiScope;
 			uiScope.PreviewMouseLeftButtonDown += HandleSelectStart;
@@ -72,8 +79,9 @@ namespace Codist.Controls
 			return false;
 		}
 
-		public static void RegisterCommandHandlers(Type controlType, bool acceptsRichContent, bool readOnly, bool registerEventListeners) {
+		static bool RegisterCommandHandlers(Type controlType, bool acceptsRichContent, bool readOnly, bool registerEventListeners) {
 			__RegisterMethod?.Invoke(null, new object[] { controlType, acceptsRichContent, readOnly, registerEventListeners });
+			return __RegisterMethod != null;
 		}
 
 		void HandleSelectStart(object sender, MouseButtonEventArgs e) {
@@ -83,7 +91,6 @@ namespace Codist.Controls
 			// lazy initialization (only when selection is started)
 			if (_UiScope.ContextMenu == null) {
 				_UiScope.PreviewKeyUp += HandleCopyShortcut;
-				//_uiScope.ContextMenuOpening += ShowContextMenu;
 				_UiScope.Style = new Style(_UiScope.GetType()) {
 					Setters = {
 						new Setter(System.Windows.Controls.Primitives.TextBoxBase.SelectionBrushProperty, ThemeHelper.TextSelectionHighlightBrush)
@@ -128,7 +135,8 @@ namespace Codist.Controls
 			var s = sender as FrameworkElement;
 			var selection = __TextSelectionProp.GetValue(_Editor);
 			var selectionEmpty = (bool)__TextRangeIsEmptyProp.GetValue(selection);
-			if (selectionEmpty || (bool)__TextSelectionContains.Invoke(selection, new object[] { new Point(e.CursorLeft, e.CursorTop) }) == false) {
+			if (selectionEmpty
+				|| (bool)__TextSelectionContains.Invoke(selection, new object[] { new Point(e.CursorLeft, e.CursorTop) }) == false) {
 				_UiScope.ContextMenu.IsOpen = false;
 				e.Handled = true;
 				return;
@@ -172,6 +180,7 @@ namespace Codist.Controls
 						item.Click -= HandleMouseCopy;
 						item.Click -= HandleWebSearch;
 					}
+					_UiScope.ContextMenu = null;
 				}
 				__TextViewProp.SetValue(_Editor, null);
 				_UiScope.ClearValue(__SelectableProperty);

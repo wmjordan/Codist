@@ -348,7 +348,7 @@ namespace Codist
 		public static DependencyObject GetParent(this DependencyObject obj) {
 			return obj is Visual ? VisualTreeHelper.GetParent(obj) : LogicalTreeHelper.GetParent(obj);
 		}
-		public static IEnumerable<TChild> GetDescendantChildren<TChild>(this DependencyObject obj, Predicate<TChild> predicate = null)
+		public static IEnumerable<TChild> GetDescendantChildren<TChild>(this DependencyObject obj, Predicate<TChild> predicate = null, Predicate<DependencyObject> precedeToChildren = null)
 			where TChild : DependencyObject {
 			if (obj == null) {
 				yield break;
@@ -359,8 +359,10 @@ namespace Codist
 				if (c is TChild r && (predicate == null || predicate(r))) {
 					yield return r;
 				}
-				foreach (var item in c.GetDescendantChildren(predicate)) {
-					yield return item;
+				if (precedeToChildren == null || precedeToChildren(c)) {
+					foreach (var item in c.GetDescendantChildren(predicate, precedeToChildren)) {
+						yield return item;
+					}
 				}
 			}
 		}

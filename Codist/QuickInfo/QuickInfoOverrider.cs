@@ -284,7 +284,7 @@ namespace Codist.QuickInfo
 		sealed class DefaultOverrider : IQuickInfoOverrider
 		{
 			readonly bool _LimitItemSize;
-			bool _OverrideBuiltInXmlDoc;
+			bool _OverrideBuiltInXmlDoc, _IsCSharpDoc;
 			ISymbol _ClickAndGoSymbol;
 			UIElement _DocElement;
 			UIElement _ExceptionDoc;
@@ -300,6 +300,7 @@ namespace Codist.QuickInfo
 			}
 			public bool LimitItemSize => _LimitItemSize;
 			public bool OverrideBuiltInXmlDoc { get => _OverrideBuiltInXmlDoc; set => _OverrideBuiltInXmlDoc = value; }
+			public bool IsCSharpDoc => _IsCSharpDoc;
 			public ISymbol ClickAndGoSymbol => _ClickAndGoSymbol;
 			public IAsyncQuickInfoSession Session => _Session;
 			public UIElement DocElement => _DocElement;
@@ -309,6 +310,7 @@ namespace Codist.QuickInfo
 
 			public UIElement CreateControl(IAsyncQuickInfoSession session) {
 				_Session = session;
+				_IsCSharpDoc = session.TextView.TextBuffer.IsContentTypeIncludingProjection(Constants.CodeTypes.CSharp);
 				session.StateChanged -= ReleaseSession;
 				session.StateChanged += ReleaseSession;
 				return new UIOverrider(this);
@@ -426,7 +428,7 @@ namespace Codist.QuickInfo
 				for (int i = 0; i < items.Count; i++) {
 					if (items[i] is DependencyObject qi
 						&& ((qi as FrameworkElement)?.IsCodistQuickInfoItem()) != true) {
-						foreach (var tb in qi.GetDescendantChildren<TextBlock>()) {
+						foreach (var tb in qi.GetDescendantChildren((Predicate<TextBlock>)null, WorkaroundForTypeScriptQuickInfo)) {
 							OverrideTextBlock(tb);
 						}
 						foreach (var item in qi.GetDescendantChildren<ContentPresenter>()) {
@@ -439,6 +441,10 @@ namespace Codist.QuickInfo
 						}
 					}
 				}
+
+				// Note See GitHub: #255, TypeScript package Quick Info places TextBlock inside Button,
+				//   overriding the TextBlock will break the Button
+				bool WorkaroundForTypeScriptQuickInfo(DependencyObject c) => c is Button == false;
 			}
 
 			void FixQuickInfo(StackPanel infoPanel) {
@@ -474,7 +480,7 @@ namespace Codist.QuickInfo
 							titlePanel.Visibility = Visibility.Collapsed;
 							ShowAlternativeSignature(doc);
 						}
-						else {
+						else if (_Overrider.IsCSharpDoc) {
 							UseAlternativeStyle(infoPanel, titlePanel, icon, signature);
 						}
 					}

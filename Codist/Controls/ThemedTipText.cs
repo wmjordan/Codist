@@ -8,9 +8,6 @@ namespace Codist.Controls
 	/// </summary>
 	sealed class ThemedTipText : TextBlock
 	{
-		static ThemedTipText() {
-			TextEditorWrapper.RegisterCommandHandlers(typeof(TextBlock), true, true, true);
-		}
 		public ThemedTipText() {
 			TextWrapping = TextWrapping.Wrap;
 			Foreground = ThemeHelper.ToolTipTextBrush;

@@ -1103,6 +1103,10 @@ namespace Codist
 		public static bool LikeContentType(this IContentType contentType, string typeName) {
 			return contentType.TypeName.IndexOf(typeName) != -1;
 		}
+		public static bool IsContentTypeIncludingProjection(this ITextBuffer textBuffer, string typeName) {
+			return textBuffer.ContentType.IsOfType(typeName)
+				|| textBuffer is IProjectionBuffer p && p.SourceBuffers.Any(i => i.IsContentTypeIncludingProjection(typeName));
+		}
 
 		public static SnapshotSpan GetVisibleLineSpan(this IWpfTextView view) {
 			return new SnapshotSpan(view.TextViewLines.FirstVisibleLine.Start, view.TextViewLines.LastVisibleLine.End);
