@@ -2451,4 +2451,7 @@ Right click: 显示“线程”窗口</value>
   <data name="T_OutputFolderMissing" xml:space="preserve">
     <value>输出文件夹不存在</value>
   </data>
+  <data name="OT_ShowOutputPaneAfterBuild" xml:space="preserve">
+    <value>在生成结束时显示输出窗口</value>
+  </data>
 </root>

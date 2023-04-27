@@ -4130,6 +4130,15 @@ namespace Codist.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show Output window when build finishes.
+        /// </summary>
+        internal static string OT_ShowOutputPaneAfterBuild {
+            get {
+                return ResourceManager.GetString("OT_ShowOutputPaneAfterBuild", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Show &lt;remarks/&gt; XML Doc.
         /// </summary>
         internal static string OT_ShowRemarksXmlDoc {

@@ -2466,4 +2466,7 @@ Expression too long</value>
   <data name="T_OutputFolderMissing" xml:space="preserve">
     <value>Output folder does not exists</value>
   </data>
+  <data name="OT_ShowOutputPaneAfterBuild" xml:space="preserve">
+    <value>Show Output window when build finishes</value>
+  </data>
 </root>

@@ -886,6 +886,7 @@ namespace Codist
 		None,
 		BuildTimestamp = 1,
 		PrintSolutionProjectProperties = 1 << 1,
+		ShowOutputPaneAfterBuild = 1 << 2,
 		VsixAutoIncrement = 1 << 8,
 		Default = None
 	}
