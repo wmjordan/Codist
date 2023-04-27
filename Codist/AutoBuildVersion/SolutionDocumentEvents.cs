@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -10,31 +10,32 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using R = Codist.Properties.Resources;
 
-namespace Codist.AutoBuildVersion
+namespace Codist
 {
 	/// <summary>
-	/// Events related to building projects and solutions.
+	/// Events related to loading, unloading and building projects and solutions.
 	/// </summary>
 	/// <remarks>
-	/// <para>We could have used <see cref="EnvDTE.BuildEvents"/>. However, VS 2022 won't work without importing Microsoft.VisualStudio.Shell.Interop v17, which breaks Codist on VS 2017 and VS 2019. Thus we rewrite one which implements the interfaces that <see cref="EnvDTE.BuildEvents"/> does.</para>
+	/// <para>We could have used <see cref="BuildEvents"/>. However, VS 2022 won't work without importing Microsoft.VisualStudio.Shell.Interop v17, which breaks Codist on VS 2017 and VS 2019. Thus we rewrite one which implements the interfaces that <see cref="BuildEvents"/> does.</para>
 	/// <para>Further more, auto-build-version feature is also implemented with the <see cref="IVsSolutionEvents"/> and <see cref="IVsRunningDocTableEvents3"/> events.</para>
 	/// </remarks>
-	public sealed class BuildEvents : IVsUpdateSolutionEvents2, IVsSolutionEvents, IVsRunningDocTableEvents3
+	public sealed class SolutionDocumentEvents : IVsUpdateSolutionEvents2, IVsSolutionEvents, IVsRunningDocTableEvents3
 	{
-		readonly CodistPackage _Package;
 		readonly HashSet<Project> _ChangedProjects = new HashSet<Project>();
 		readonly IVsSolution _VsSolution;
+		readonly IVsOutputWindowPane _OutputWindowPane;
 		uint _VsSolutionCookie, _RunningDocumentTableCookie;
 		IVsRunningDocumentTable _RunningDocumentTable;
 		bool _LockChangeTracking;
 
-		internal BuildEvents(CodistPackage package) {
-			ThreadHelper.ThrowIfNotOnUIThread("BuildEvents.ctor");
+		internal SolutionDocumentEvents() {
+			ThreadHelper.ThrowIfNotOnUIThread("SolutionDocumentEvents.ctor");
 			ServicesHelper.Get<IVsSolutionBuildManager, SVsSolutionBuildManager>().AdviseUpdateSolutionEvents(this, out _);
 			(_VsSolution = ServicesHelper.Get<IVsSolution, SVsSolution>()).AdviseSolutionEvents(this, out _VsSolutionCookie);
-			// we don't always rely on the OnAfterOpenSolution event, a solution could have been loaded before CodistPackage is initialized
-			(_RunningDocumentTable = ServicesHelper.Get<IVsRunningDocumentTable, SVsRunningDocumentTable>())?.AdviseRunningDocTableEvents(this, out _RunningDocumentTableCookie);
-			_Package = package;
+			(_RunningDocumentTable = ServicesHelper.Get<IVsRunningDocumentTable, SVsRunningDocumentTable>())
+				?.AdviseRunningDocTableEvents(this, out _RunningDocumentTableCookie);
+			var g = VSConstants.OutputWindowPaneGuid.BuildOutputPane_guid;
+			ServicesHelper.Get<IVsOutputWindow, SVsOutputWindow>().GetPane(ref g, out _OutputWindowPane);
 		}
 
 		#region IVsUpdateSolutionEvents2
@@ -47,21 +48,30 @@ namespace Codist.AutoBuildVersion
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
 				WriteBuildText(DateTime.Now.ToLongTimeString() + " " + R.T_BuildFinished + Environment.NewLine);
 			}
+
 			// hack: workaround to fix a bug in VS that causes build animation does not stop
 			object icon = (short)Microsoft.VisualStudio.Shell.Interop.Constants.SBAI_Build;
 			ServicesHelper.Get<IVsStatusbar, SVsStatusbar>().Animation(0, ref icon);
+
+			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.ShowOutputPaneAfterBuild)
+				&& CodistPackage.DebuggerStatus == DebuggerStatus.Design) {
+				_OutputWindowPane?.Activate();
+				TextEditorHelper.ExecuteEditorCommand("View.Output");
+			}
 			_LockChangeTracking = false;
 			return VSConstants.S_OK;
 		}
 
 		public int UpdateSolution_StartUpdate(ref int cancelUpdate) {
 			ThreadHelper.ThrowIfNotOnUIThread();
+
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.BuildTimestamp)) {
 				WriteBuildText(DateTime.Now.ToLongTimeString() + " " + R.T_BuildStarted + Environment.NewLine);
 			}
 			if (Config.Instance.BuildOptions.MatchFlags(BuildOptions.PrintSolutionProjectProperties)) {
 				PrintProperties(CodistPackage.DTE.Solution.Properties, "Solution " + CodistPackage.DTE.Solution.FileName);
 			}
+
 			_LockChangeTracking = true;
 			return VSConstants.S_OK;
 		}
@@ -94,8 +104,9 @@ namespace Codist.AutoBuildVersion
 					PrintProperties(project.ConfigurationManager.ActiveConfiguration.Properties, $"project {project.Name} active config");
 				}
 				if (Config.Instance.SuppressAutoBuildVersion == false
-					&& (_ChangedProjects.Remove(project) || project.IsDirty)) {
-					AutoChangeBuildVersion(cfgProj, project);
+					&& (_ChangedProjects.Remove(project) || project.IsDirty)
+					&& cfgProj.get_DisplayName(out var configDisplayName) == VSConstants.S_OK) {
+					AutoChangeBuildVersion(configDisplayName, project);
 				}
 			}
 			return VSConstants.S_OK;
@@ -129,20 +140,15 @@ namespace Codist.AutoBuildVersion
 			}
 		}
 
-		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
-		static void AutoChangeBuildVersion(IVsCfg cfgProj, Project project) {
-			if (cfgProj.get_DisplayName(out var s) != VSConstants.S_OK) {
-				return;
-			}
-
+		static void AutoChangeBuildVersion(string configDisplayName, Project project) {
 			try {
-				var buildConfig = BuildSetting.Load(project);
+				var buildConfig = AutoBuildVersion.BuildSetting.Load(project);
 				if (buildConfig != null) {
-					var i = s.IndexOf('|');
+					var i = configDisplayName.IndexOf('|');
 					if (i != -1) {
-						s = s.Substring(0, i);
+						configDisplayName = configDisplayName.Substring(0, i);
 					}
-					var setting = buildConfig.Merge("<Any>", s);
+					var setting = buildConfig.Merge("<Any>", configDisplayName);
 					if (setting != null && setting.ShouldRewrite) {
 						setting.RewriteVersion(project);
 					}
@@ -176,7 +182,7 @@ namespace Codist.AutoBuildVersion
 
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		void WriteBuildText(string text) {
-			_Package.GetOutputPane(VSConstants.BuildOutput, "Build")?.OutputString(text);
+			_OutputWindowPane?.OutputString(text);
 		}
 		[Conditional("DEBUG")]
 		static void WriteText(string text) {

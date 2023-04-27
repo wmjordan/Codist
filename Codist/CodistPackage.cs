@@ -37,7 +37,6 @@ namespace Codist
 		internal const string PackageGuidString = "c7b93d20-621f-4b21-9d28-d51157ef0b94";
 
 		static OleMenuCommandService __Menu;
-		static AutoBuildVersion.BuildEvents __BuildEvents;
 		static IVsOutputWindowPane __OutputPane;
 
 		//int _extenderCookie;
@@ -105,8 +104,6 @@ namespace Codist
 			// When initialized asynchronously, the current thread may be a background thread at this point.
 			// Do any initialization that requires the UI thread after switching to the UI thread.
 			await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-
-			__BuildEvents = new AutoBuildVersion.BuildEvents(this);
 
 			//_extenderCookie = DTE.ObjectExtenders.RegisterExtenderProvider(VSConstants.CATID.CSharpFileProperties_string, BuildBots.AutoReplaceExtenderProvider.Name, new BuildBots.AutoReplaceExtenderProvider());
 			Commands.CommandRegistry.Initialize();

@@ -274,7 +274,7 @@
     <Compile Include="QuickInfo\QuickInfoOverride.cs" />
     <Compile Include="QuickInfo\SelectionQuickInfo.cs" />
     <Compile Include="QuickInfo\QuickInfoVisibilityController.cs" />
-    <Compile Include="AutoBuildVersion\BuildEvents.cs" />
+    <Compile Include="AutoBuildVersion\SolutionDocumentEvents.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">
