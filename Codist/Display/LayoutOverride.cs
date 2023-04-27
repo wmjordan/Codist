@@ -8,7 +8,7 @@ using AppHelpers;
 
 namespace Codist.Display
 {
-	static class LayoutOverrider
+	static class LayoutOverride
 	{
 		static DockPanel __TitleBar, __MenuHolder;
 		static InteractiveControlContainer __Account, __Menu;

@@ -174,7 +174,7 @@ namespace Codist
 						m.AddTitleItem(s.GetOriginalName());
 						m.PlacementTarget = this;
 						m.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-						QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, true);
+						QuickInfo.QuickInfoOverride.HoldQuickInfo(this, true);
 						m.Closed += DismissQuickInfo;
 						ContextMenu = m;
 						m.IsOpen = true;
@@ -186,8 +186,8 @@ namespace Codist
 
 			void DismissQuickInfo(object sender, RoutedEventArgs e) {
 				((CSharpSymbolContextMenu)sender).Closed -= DismissQuickInfo;
-				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, false);
-				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
+				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, false);
+				QuickInfo.QuickInfoOverride.DismissQuickInfo(this);
 			}
 
 			void Highlight(object sender, MouseEventArgs e) {
@@ -266,7 +266,7 @@ namespace Codist
 						}
 						m.AddSymbolNodeCommands();
 						m.AddTitleItem(s.GetOriginalName());
-						QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, true);
+						QuickInfo.QuickInfoOverride.HoldQuickInfo(this, true);
 						m.Closed += DismissQuickInfo;
 						ContextMenu = m;
 						m.IsOpen = true;
@@ -278,13 +278,13 @@ namespace Codist
 
 			void DismissQuickInfo(object sender, RoutedEventArgs e) {
 				((CSharpSymbolContextMenu)sender).Closed -= DismissQuickInfo;
-				QuickInfo.QuickInfoOverrider.HoldQuickInfo(this, false);
-				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
+				QuickInfo.QuickInfoOverride.HoldQuickInfo(this, false);
+				QuickInfo.QuickInfoOverride.DismissQuickInfo(this);
 			}
 
 			void GoToSymbol(object sender, RoutedEventArgs e) {
 				_Symbol.GoToDefinition();
-				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
+				QuickInfo.QuickInfoOverride.DismissQuickInfo(this);
 				e.Handled = true;
 			}
 		}

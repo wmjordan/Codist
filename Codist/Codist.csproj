@@ -114,7 +114,7 @@
     <Compile Include="Controls\ThemedTipText.cs" />
     <Compile Include="Controls\ThemedToolBarText.cs" />
     <Compile Include="Display\ResourceMonitor.cs" />
-    <Compile Include="Display\LayoutOverrider.cs" />
+    <Compile Include="Display\LayoutOverride.cs" />
     <Compile Include="Controls\NumericUpDown.cs" />
     <Compile Include="Controls\SymbolCommands.cs" />
     <Compile Include="Controls\SymbolItem.cs" />
@@ -271,7 +271,7 @@
     <Compile Include="SyntaxHighlight\StyleBase.cs" />
     <Compile Include="SyntaxHighlight\HighlighterFactory.cs" />
     <Compile Include="QuickInfo\CSharpQuickInfo.cs" />
-    <Compile Include="QuickInfo\QuickInfoOverrider.cs" />
+    <Compile Include="QuickInfo\QuickInfoOverride.cs" />
     <Compile Include="QuickInfo\SelectionQuickInfo.cs" />
     <Compile Include="QuickInfo\QuickInfoVisibilityController.cs" />
     <Compile Include="AutoBuildVersion\BuildEvents.cs" />

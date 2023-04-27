@@ -13,7 +13,7 @@ namespace Codist.Controls
 
 		protected override void OnMouseRightButtonUp(MouseButtonEventArgs e) {
 			base.OnMouseRightButtonUp(e);
-			QuickInfo.QuickInfoOverrider.HoldQuickInfo(e.Source as System.Windows.DependencyObject, true);
+			QuickInfo.QuickInfoOverride.HoldQuickInfo(e.Source as System.Windows.DependencyObject, true);
 			if (ContextMenu == null) {
 				ContextMenu = new ContextMenu {
 					Resources = SharedDictionaryManager.ContextMenu,

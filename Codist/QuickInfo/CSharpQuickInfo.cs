@@ -61,7 +61,7 @@ namespace Codist.QuickInfo
 			ImmutableArray<ISymbol> candidates;
 			SyntaxToken token;
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			if (QuickInfoOverrider.CheckCtrlSuppression()) {
+			if (QuickInfoOverride.CheckCtrlSuppression()) {
 				return null;
 			}
 			var semanticModel = await document.GetSemanticModelAsync(cancellationToken);
@@ -79,7 +79,7 @@ namespace Codist.QuickInfo
 			var isConvertedType = false;
 			symbol = null;
 			var overrider = Config.Instance.QuickInfoOptions.HasAnyFlag(QuickInfoOptions.QuickInfoOverride)
-				? QuickInfoOverrider.CreateOverrider(session)
+				? QuickInfoOverride.CreateOverride(session)
 				: null;
 			var container = new InfoContainer(overrider);
 			ClassifyToken:
@@ -491,7 +491,7 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		static ThemedTipDocument OverrideDocumentation(SyntaxNode node, IQuickInfoOverrider qiWrapper, ISymbol symbol, SemanticModel semanticModel, CancellationToken cancellationToken) {
+		static ThemedTipDocument OverrideDocumentation(SyntaxNode node, IQuickInfoOverride qiWrapper, ISymbol symbol, SemanticModel semanticModel, CancellationToken cancellationToken) {
 			if (symbol == null) {
 				return null;
 			}

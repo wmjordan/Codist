@@ -22,7 +22,7 @@ using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist.QuickInfo
 {
-	interface IQuickInfoOverrider
+	interface IQuickInfoOverride
 	{
 		bool OverrideBuiltInXmlDoc { get; set; }
 		UIElement CreateControl(IAsyncQuickInfoSession session);
@@ -31,12 +31,12 @@ namespace Codist.QuickInfo
 		void OverrideException(UIElement exceptionDoc);
 	}
 
-	static class QuickInfoOverrider
+	static class QuickInfoOverride
 	{
 		static readonly object __CodistQuickInfoItem = new object();
 
-		public static IQuickInfoOverrider CreateOverrider(IAsyncQuickInfoSession session) {
-			return session.Properties.GetOrCreateSingletonProperty(() => new DefaultOverrider());
+		public static IQuickInfoOverride CreateOverride(IAsyncQuickInfoSession session) {
+			return session.Properties.GetOrCreateSingletonProperty(() => new DefaultOverride());
 		}
 
 		public static TObj Tag<TObj>(this TObj obj)
@@ -61,11 +61,11 @@ namespace Codist.QuickInfo
 			FindHolder(quickInfoItem)?.DismissAsync();
 		}
 
-		static UIOverrider FindHolder(DependencyObject quickInfoItem) {
+		static UIOverride FindHolder(DependencyObject quickInfoItem) {
 			var items = quickInfoItem.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl");
 			// version 16.1 or above
 			items = items.GetParent<ItemsControl>(i => i.GetType().Name == "WpfToolTipItemsControl") ?? items;
-			return items.GetFirstVisualChild<UIOverrider>();
+			return items.GetFirstVisualChild<UIOverride>();
 		}
 
 		static ThemedToolTip ShowSymbolLocation(ISymbol symbol) {
@@ -275,13 +275,13 @@ namespace Codist.QuickInfo
 		}
 
 		/// <summary>
-		/// The overrider for VS 15.8 and above versions.
+		/// The override for VS 15.8 and above versions.
 		/// </summary>
 		/// <remarks>
 		/// <para>The original implementation of QuickInfo locates at: Common7\IDE\CommonExtensions\Microsoft\Editor\Microsoft.VisualStudio.Platform.VSEditor.dll</para>
 		/// <para>class: Microsoft.VisualStudio.Text.AdornmentLibrary.ToolTip.Implementation.WpfToolTipControl</para>
 		/// </remarks>
-		sealed class DefaultOverrider : IQuickInfoOverrider
+		sealed class DefaultOverride : IQuickInfoOverride
 		{
 			readonly bool _LimitItemSize;
 			bool _OverrideBuiltInXmlDoc, _IsCSharpDoc;
@@ -292,7 +292,7 @@ namespace Codist.QuickInfo
 			ITagAggregator<IErrorTag> _ErrorTagger;
 			ErrorTags _ErrorTags;
 
-			public DefaultOverrider() {
+			public DefaultOverride() {
 				if (Config.Instance.QuickInfoMaxHeight > 0 || Config.Instance.QuickInfoMaxWidth > 0) {
 					_LimitItemSize = true;
 				}
@@ -313,7 +313,7 @@ namespace Codist.QuickInfo
 				_IsCSharpDoc = session.TextView.TextBuffer.IsContentTypeIncludingProjection(Constants.CodeTypes.CSharp);
 				session.StateChanged -= ReleaseSession;
 				session.StateChanged += ReleaseSession;
-				return new UIOverrider(this);
+				return new UIOverride(this);
 			}
 
 			public void ApplyClickAndGo(ISymbol symbol) {
@@ -369,15 +369,15 @@ namespace Codist.QuickInfo
 			}
 		}
 
-		sealed class UIOverrider : TextBlock, IInteractiveQuickInfoContent
+		sealed class UIOverride : TextBlock, IInteractiveQuickInfoContent
 		{
 			static readonly Thickness __TitlePanelMargin = new Thickness(0, 0, 30, 6);
 
-			readonly DefaultOverrider _Overrider;
+			readonly DefaultOverride _Override;
 			bool _Overridden;
 
-			public UIOverrider(DefaultOverrider overrider) {
-				_Overrider = overrider;
+			public UIOverride(DefaultOverride overrider) {
+				_Override = overrider;
 			}
 
 			public bool KeepQuickInfoOpen { get; set; }
@@ -387,7 +387,7 @@ namespace Codist.QuickInfo
 				IsMouseOverAggregated = hold;
 			}
 			public System.Threading.Tasks.Task DismissAsync() {
-				return _Overrider.Session?.DismissAsync() ?? System.Threading.Tasks.Task.CompletedTask;
+				return _Override.Session?.DismissAsync() ?? System.Threading.Tasks.Task.CompletedTask;
 			}
 
 			protected override void OnVisualParentChanged(DependencyObject oldParent) {
@@ -404,12 +404,12 @@ namespace Codist.QuickInfo
 					if (Config.Instance.DisplayOptimizations.MatchFlags(DisplayOptimizations.CodeWindow)) {
 						WpfHelper.SetUITextRenderOptions(p, true);
 					}
-					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) || _Overrider.ClickAndGoSymbol != null || _Overrider.LimitItemSize) {
+					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.OverrideDefaultDocumentation) || _Override.ClickAndGoSymbol != null || _Override.LimitItemSize) {
 						FixQuickInfo(p);
 					}
-					_Overrider.ErrorTags?.Clear();
+					_Override.ErrorTags?.Clear();
 					MakeTextualContentSelectableWithIcon(p);
-					if (_Overrider.LimitItemSize) {
+					if (_Override.LimitItemSize) {
 						ApplySizeLimit(this.GetParent<StackPanel>());
 					}
 				}
@@ -450,7 +450,7 @@ namespace Codist.QuickInfo
 			void FixQuickInfo(StackPanel infoPanel) {
 				var titlePanel = infoPanel.GetFirstVisualChild<WrapPanel>();
 				if (titlePanel == null) {
-					if (_Overrider.ClickAndGoSymbol != null
+					if (_Override.ClickAndGoSymbol != null
 						&& Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
 						// no built-in documentation, but Codist has it
 						ShowAlternativeSignature(infoPanel);
@@ -469,18 +469,18 @@ namespace Codist.QuickInfo
 				var icon = titlePanel.GetFirstVisualChild<CrispImage>();
 				var signature = infoPanel.GetFirstVisualChild<TextBlock>();
 
-				if (_Overrider.DocElement != null || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) && _Overrider.ClickAndGoSymbol != null) {
+				if (_Override.DocElement != null || Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) && _Override.ClickAndGoSymbol != null) {
 					OverrideDocumentation(doc);
 				}
 
 				if (icon != null && signature != null) {
 					// override signature style and apply "click and go" feature
 					if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle)) {
-						if (_Overrider.ClickAndGoSymbol != null) {
+						if (_Override.ClickAndGoSymbol != null) {
 							titlePanel.Visibility = Visibility.Collapsed;
 							ShowAlternativeSignature(doc);
 						}
-						else if (_Overrider.IsCSharpDoc) {
+						else if (_Override.IsCSharpDoc) {
 							UseAlternativeStyle(infoPanel, titlePanel, icon, signature);
 						}
 					}
@@ -489,13 +489,13 @@ namespace Codist.QuickInfo
 						signature.MaxWidth = Config.Instance.QuickInfoMaxWidth - icon.Width - 30;
 					}
 				}
-				else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) && _Overrider.ClickAndGoSymbol != null) {
+				else if (Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.AlternativeStyle) && _Override.ClickAndGoSymbol != null) {
 					ShowAlternativeSignature(doc);
 				}
 			}
 
 			void ShowAlternativeSignature(StackPanel docPanel) {
-				var s = _Overrider.ClickAndGoSymbol;
+				var s = _Override.ClickAndGoSymbol;
 				var icon = ThemeHelper.GetImage(s.GetImageId(), ThemeHelper.LargeIconSize)
 					.AsSymbolLink(Keyboard.Modifiers == ModifierKeys.Control ? s.OriginalDefinition : s);
 				icon.VerticalAlignment = VerticalAlignment.Top;
@@ -556,14 +556,14 @@ namespace Codist.QuickInfo
 				// 5. usage
 				// 6. exception
 				// 7. captured variables
-				if (_Overrider.OverrideBuiltInXmlDoc) {
+				if (_Override.OverrideBuiltInXmlDoc) {
 					var items = doc.IsItemsHost ? (IList)doc.GetParent<ItemsControl>().Items : doc.Children;
 					var v16orLater = CodistPackage.VsVersion.Major >= 16;
 					ClearDefaultDocumentationItems(doc, v16orLater, items);
-					if (_Overrider.DocElement != null) {
+					if (_Override.DocElement != null) {
 						OverrideDocElement(items);
 					}
-					if (_Overrider.ExceptionDoc != null) {
+					if (_Override.ExceptionDoc != null) {
 						OverrideExceptionDocElement(doc, v16orLater, items);
 					}
 				}
@@ -590,7 +590,7 @@ namespace Codist.QuickInfo
 
 			void OverrideDocElement(IList items) {
 				try {
-					var d = _Overrider.DocElement;
+					var d = _Override.DocElement;
 					if (items.Count > 1 && items[1] is TextBlock) {
 						items.RemoveAt(1);
 						items.Insert(1, d);
@@ -616,9 +616,9 @@ namespace Codist.QuickInfo
 					items = doc.GetParent<ItemsControl>().Items;
 				}
 				try {
-					items.Add(_Overrider.ExceptionDoc);
+					items.Add(_Override.ExceptionDoc);
 					//todo move this to ApplySizeLimit
-					(_Overrider.ExceptionDoc as ThemedTipDocument)?.ApplySizeLimit();
+					(_Override.ExceptionDoc as ThemedTipDocument)?.ApplySizeLimit();
 				}
 				catch (InvalidOperationException) {
 					// ignore exception: doc.Children was changed by another thread
@@ -647,7 +647,7 @@ namespace Codist.QuickInfo
 						continue;
 					}
 					var c = cp.Content;
-					if (c is UIOverrider || c is IInteractiveQuickInfoContent /* don't hack interactive content */) {
+					if (c is UIOverride || c is IInteractiveQuickInfoContent /* don't hack interactive content */) {
 						continue;
 					}
 					if (c is TextBlock tb) {
@@ -734,7 +734,7 @@ namespace Codist.QuickInfo
 					&& TextEditorWrapper.CreateFor(t) != null
 					&& t.Inlines.FirstInline is InlineUIContainer == false) {
 					t.TextWrapping = TextWrapping.Wrap;
-					CrispImage icon = _Overrider.GetIconForErrorText(t);
+					CrispImage icon = _Override.GetIconForErrorText(t);
 					if (icon != null) {
 						t.SetGlyph(icon);
 					}

@@ -33,19 +33,19 @@ namespace Codist.NaviBar
 				if (textView.TextBuffer.ContentType.IsOfType(Constants.CodeTypes.CSharp)
 					|| textView.TextBuffer.LikeContentType(Constants.CodeTypes.Markdown)) {
 					SemanticContext.GetOrCreateSingletonInstance(textView);
-					new Overrider(textView, _TextSearchService);
+					new Override(textView, _TextSearchService);
 				}
 			}
 		}
 
 
-		sealed class Overrider
+		sealed class Override
 		{
 			IWpfTextView _View;
 			ITextSearchService2 _TextSearch;
 			FrameworkElement _NaviBarHolder;
 
-			public Overrider(IWpfTextView view, ITextSearchService2 textSearch) {
+			public Override(IWpfTextView view, ITextSearchService2 textSearch) {
 				_View = view;
 				_TextSearch = textSearch;
 				view.VisualElement.Loaded += AddNaviBar;

@@ -1274,7 +1274,7 @@ namespace Codist
 					// fallback to go to node
 					_Node.GetLocation().GoToSource();
 				}
-				QuickInfo.QuickInfoOverrider.DismissQuickInfo(this);
+				QuickInfo.QuickInfoOverride.DismissQuickInfo(this);
 				e.Handled = true;
 			}
 

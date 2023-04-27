@@ -111,7 +111,7 @@ namespace Codist
 			//_extenderCookie = DTE.ObjectExtenders.RegisterExtenderProvider(VSConstants.CATID.CSharpFileProperties_string, BuildBots.AutoReplaceExtenderProvider.Name, new BuildBots.AutoReplaceExtenderProvider());
 			Commands.CommandRegistry.Initialize();
 			Display.JumpListEnhancer.Initialize();
-			Display.LayoutOverrider.InitializeLayoutOverride();
+			Display.LayoutOverride.InitializeLayoutOverride();
 
 			if (Config.Instance.InitStatus != InitStatus.Normal) {
 				InitializeOrUpgradeConfig();

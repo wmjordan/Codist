@@ -39,7 +39,7 @@ namespace Codist.QuickInfo
 
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			return QuickInfoOverrider.CheckCtrlSuppression() == false && _Background != null
+			return QuickInfoOverride.CheckCtrlSuppression() == false && _Background != null
 				? new QuickInfoItem(null, new BackgroundController(_Background).Tag())
 				: null;
 		}

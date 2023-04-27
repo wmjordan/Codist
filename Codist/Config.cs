@@ -270,7 +270,7 @@ namespace Codist
 				#endif
 				return Instance;
 			}
-			Display.LayoutOverrider.Reload(config.DisplayOptimizations);
+			Display.LayoutOverride.Reload(config.DisplayOptimizations);
 			Display.ResourceMonitor.Reload(config.DisplayOptimizations);
 			#if DEBUG
 			__LastLoaded = DateTime.Now;

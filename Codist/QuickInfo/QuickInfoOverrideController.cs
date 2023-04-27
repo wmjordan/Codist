@@ -10,9 +10,9 @@ namespace Codist.QuickInfo
 	{
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			return QuickInfoOverrider.CheckCtrlSuppression()
+			return QuickInfoOverride.CheckCtrlSuppression()
 				? null
-				: new QuickInfoItem(null, QuickInfoOverrider.CreateOverrider(session).CreateControl(session));
+				: new QuickInfoItem(null, QuickInfoOverride.CreateOverride(session).CreateControl(session));
 		}
 
 		void IDisposable.Dispose() {}

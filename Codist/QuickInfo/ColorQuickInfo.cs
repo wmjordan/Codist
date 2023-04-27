@@ -17,7 +17,7 @@ namespace Codist.QuickInfo
 
 		static async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-			if (QuickInfoOverrider.CheckCtrlSuppression()) {
+			if (QuickInfoOverride.CheckCtrlSuppression()) {
 				return null;
 			}
 			var buffer = session.TextView.TextBuffer;

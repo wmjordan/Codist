@@ -141,7 +141,7 @@ namespace Codist.Controls
 				e.Handled = true;
 				return;
 			}
-			QuickInfo.QuickInfoOverrider.HoldQuickInfo(s, true);
+			QuickInfo.QuickInfoOverride.HoldQuickInfo(s, true);
 		}
 		void HandleContextMenuClosing(object sender, ContextMenuEventArgs e) {
 			// clears selection
@@ -150,12 +150,12 @@ namespace Codist.Controls
 			__TextRangeSelect.Invoke(selection, new object[] { anchor, anchor });
 		}
 		void ReleaseQuickInfo(object sender, RoutedEventArgs e) {
-			QuickInfo.QuickInfoOverrider.HoldQuickInfo(_UiScope, false);
+			QuickInfo.QuickInfoOverride.HoldQuickInfo(_UiScope, false);
 			_UiScope.ContextMenu = null;
 		}
 		void HandleMouseCopy(object sender, RoutedEventArgs e) {
 			if (e.Handled = Copy()) {
-				QuickInfo.QuickInfoOverrider.DismissQuickInfo(_UiScope);
+				QuickInfo.QuickInfoOverride.DismissQuickInfo(_UiScope);
 			}
 		}
 		void HandleCopyShortcut(object sender, KeyEventArgs e) {
