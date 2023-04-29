@@ -87,6 +87,14 @@ namespace Codist.Commands
 				AppendNameValue(s, R.T_CaretPosition, view.Caret.Position.BufferPosition.Position);
 				AppendNameValue(s, "Caret.OverwriteMode", view.Caret.OverwriteMode);
 
+				AppendNameValue(s, "ViewportLeft", view.ViewportLeft);
+				AppendNameValue(s, "ViewportTop", view.ViewportTop);
+				AppendNameValue(s, "ViewportWidth", view.ViewportWidth);
+				AppendNameValue(s, "ViewportHeight", view.ViewportHeight);
+				AppendNameValue(s, "VisualElement.ActualWidth", view.VisualElement.ActualWidth);
+				AppendNameValue(s, "VisualElement.ActualHeight", view.VisualElement.ActualHeight);
+				AppendNameValue(s, "TextViewLines.Count", view.TextViewLines.Count);
+
 				Append(s, "TextBuffer.ContentType:");
 				ShowContentType(view.TextBuffer.ContentType, s, new HashSet<IContentType>(), 2);
 
