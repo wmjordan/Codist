@@ -61,13 +61,10 @@ namespace Codist.Commands
 			blocks.Clear();
 			Section s;
 
-			var view = window.Document?.GetActiveWpfDocumentView();
-			if (view == null) {
-				view = TextEditorHelper.GetActiveWpfInteractiveView();
+			var view = TextEditorHelper.GetActiveWpfInteractiveView();
 				if (view?.VisualElement.IsFocused == false) {
-					view = null;
+				view = window.Document?.GetActiveWpfDocumentView();
 				}
-			}
 
 			if (view != null) {
 				var d = view.TextBuffer.GetTextDocument();
