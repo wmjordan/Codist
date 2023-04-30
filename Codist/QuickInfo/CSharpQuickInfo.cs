@@ -1101,8 +1101,8 @@ namespace Codist.QuickInfo
 			}
 			if (options.MatchFlags(QuickInfoOptions.InterfaceMembers)
 				&& typeSymbol.TypeKind == TypeKind.Interface) {
-				var declarationType = node.FirstAncestorOrSelf<BaseListSyntax>()?.Parent;
-				INamedTypeSymbol declaredClass = declarationType?.Kind()
+				var declarationType = (node.Parent.Parent as BaseListSyntax)?.Parent;
+				var declaredClass = declarationType?.Kind()
 					.IsAny(SyntaxKind.ClassDeclaration, SyntaxKind.StructDeclaration, CodeAnalysisHelper.RecordDeclaration, CodeAnalysisHelper.RecordStructDeclaration) == true
 					? semanticModel.GetDeclaredSymbol(declarationType, cancellationToken) as INamedTypeSymbol
 					: null;
@@ -1660,6 +1660,7 @@ namespace Codist.QuickInfo
 				}
 				c.Insert(0, d);
 			}
+
 			void Add(ref ImmutableArray<ITypeSymbol>.Builder list, ITypeSymbol type) {
 				if ((list ?? (list = ImmutableArray.CreateBuilder<ITypeSymbol>())).Contains(type) == false) {
 					list.Add(type);
