@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
 using AppHelpers;
 using EnvDTE;
 using Microsoft.VisualStudio;

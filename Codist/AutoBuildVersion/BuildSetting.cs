@@ -41,6 +41,17 @@ namespace Codist.AutoBuildVersion
 			}
 		}
 
+		public void RewriteVersion(Project project, string buildConfig) {
+			var i = buildConfig.IndexOf('|');
+			if (i != -1) {
+				buildConfig = buildConfig.Substring(0, i);
+			}
+			var setting = Merge("<Any>", buildConfig);
+			if (setting?.ShouldRewrite == true) {
+				setting.RewriteVersion(project);
+			}
+		}
+
 		/// <summary>Merge two <see cref="BuildConfigSetting"/>s named <paramref name="baseConfig"/> and <paramref name="specificConfig"/>. The latter one has higher precedence.</summary>
 		/// <param name="baseConfig">The base configuration name.</param>
 		/// <param name="specificConfig">The specific configuration name.</param>

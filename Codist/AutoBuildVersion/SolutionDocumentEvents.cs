@@ -142,17 +142,7 @@ namespace Codist
 
 		static void AutoChangeBuildVersion(string configDisplayName, Project project) {
 			try {
-				var buildConfig = AutoBuildVersion.BuildSetting.Load(project);
-				if (buildConfig != null) {
-					var i = configDisplayName.IndexOf('|');
-					if (i != -1) {
-						configDisplayName = configDisplayName.Substring(0, i);
-					}
-					var setting = buildConfig.Merge("<Any>", configDisplayName);
-					if (setting != null && setting.ShouldRewrite) {
-						setting.RewriteVersion(project);
-					}
-				}
+				AutoBuildVersion.BuildSetting.Load(project)?.RewriteVersion(project, configDisplayName);
 			}
 			catch (Exception ex) {
 				MessageWindow.Error(ex, "Changing version number failed.");
