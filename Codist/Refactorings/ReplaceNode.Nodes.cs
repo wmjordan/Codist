@@ -330,7 +330,7 @@ namespace Codist.Refactorings
 				SyntaxList<StatementSyntax> keep = statement.Parent is BlockSyntax b
 					? b.Statements
 					: new SyntaxList<StatementSyntax>(statement);
-				if (statement.Parent.IsKind(SyntaxKind.Block) && remove.Parent.IsKind(SyntaxKind.ElseClause)
+				if (statement.Parent.IsKind(SyntaxKind.Block) && (remove.Parent.IsKind(SyntaxKind.ElseClause) || remove.IsKind(SyntaxKind.ElseClause))
 					|| keep.Count > 1 && remove.Parent.IsKind(SyntaxKind.Block) == false) {
 					var (indent, newLine) = ctx.GetIndentAndNewLine(remove.SpanStart, 0);
 					if (remove.IsKind(SyntaxKind.ElseClause)) {
