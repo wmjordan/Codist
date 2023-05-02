@@ -51,7 +51,7 @@ namespace Codist.Refactorings
 			try {
 				RefactorInternal(context);
 			}
-			catch (Exception ex) {
+			catch (Exception ex) when (System.Diagnostics.Debugger.IsAttached == false) {
 				MessageWindow.Error(ex, Title);
 			}
 		}
