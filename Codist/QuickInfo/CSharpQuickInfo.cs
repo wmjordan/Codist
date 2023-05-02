@@ -1196,12 +1196,11 @@ namespace Codist.QuickInfo
 				if (declaredClass != null && member.IsAbstract) {
 					var implementation = declaredClass.FindImplementationForInterfaceMember(member);
 					if (implementation != null) {
-						t.AddSymbol(implementation, false, __SymbolFormatter);
+						doc.Append(new ThemedTipParagraph(implementation.GetImageId(), t.AddSymbol(implementation, member.GetOriginalName(), false, __SymbolFormatter)));
+						continue;
 					}
-					else {
-						t.AddSymbol(member, false, __SymbolFormatter)
-							.Append(ThemeHelper.GetImage(IconIds.MissingImplementation).WrapMargin(WpfHelper.SmallHorizontalMargin).SetOpacity(WpfHelper.DimmedOpacity));
-					}
+					t.AddSymbol(member, false, __SymbolFormatter)
+						.Append(ThemeHelper.GetImage(IconIds.MissingImplementation).WrapMargin(WpfHelper.SmallHorizontalMargin).SetOpacity(WpfHelper.DimmedOpacity));
 				}
 				else {
 					t.AddSymbol(member, false, __SymbolFormatter);
