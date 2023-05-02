@@ -41,8 +41,8 @@ namespace Codist.Margins
 		/// </summary>
 		/// <param name="textView">ITextView to which this <see cref="CSharpMembersMargin"/> will be attached.</param>
 		/// <param name="verticalScrollbar">Vertical scrollbar of the ITextViewHost that contains <paramref name="textView"/>.</param>
-		public CSharpMembersMargin(IWpfTextView textView, IVerticalScrollBar verticalScrollbar) {
-			_MemberMarker = new MemberMarker(textView, verticalScrollbar, this);
+		public CSharpMembersMargin(IWpfTextView textView, IVerticalScrollBar verticalScrollbar)
+			: base(textView) {
 			_SymbolReferenceMarker = new SymbolReferenceMarker(textView, verticalScrollbar, this);
 			_FormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
 			_SemanticContext = SemanticContext.GetOrCreateSingletonInstance(textView);

@@ -16,7 +16,7 @@ namespace Codist.Margins
 		IVerticalScrollBar _ScrollBar;
 		Brush _SelectionBrush;
 
-		public SelectionMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) {
+		public SelectionMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) : base(textView) {
 			_TextView = textView;
 			_ScrollBar = scrollBar;
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);

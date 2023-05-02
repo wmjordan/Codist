@@ -41,7 +41,8 @@ namespace Codist.Margins
 		CommentTagger _CommentTagger;
 		bool _HasEvents;
 
-		public CommentMargin(IWpfTextView textView, IVerticalScrollBar verticalScrollbar) {
+		public CommentMargin(IWpfTextView textView, IVerticalScrollBar verticalScrollbar)
+			: base(textView) {
 			_TextView = textView;
 			_ScrollBar = verticalScrollbar;
 			_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());

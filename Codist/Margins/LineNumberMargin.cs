@@ -20,7 +20,8 @@ namespace Codist.Margins
 		double _ScrollbarWidth;
 		bool _Disposed;
 
-		public LineNumberMargin(IWpfTextView textView, IVerticalScrollBar scrollBar) {
+		public LineNumberMargin(IWpfTextView textView, IVerticalScrollBar scrollBar)
+			: base(textView) {
 			_TextView = textView;
 			_ScrollBar = scrollBar;
 			_EditorFormatMap = ServicesHelper.Instance.EditorFormatMap.GetEditorFormatMap(textView);
