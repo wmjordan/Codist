@@ -13,7 +13,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Taggers
@@ -26,11 +25,11 @@ namespace Codist.Taggers
 		ConcurrentQueue<SnapshotSpan> _PendingSpans = new ConcurrentQueue<SnapshotSpan>();
 		CancellationTokenSource _RenderBreaker;
 
-		ITextBufferParser _Tagger;
+		ITextBufferParser _Parser;
 
 		public CSharpTagger(CSharpParser parser, ITextBuffer buffer) {
-			_Tagger = parser.GetParser(buffer);
-			_Tagger.StateUpdated += HandleParseResult;
+			_Parser = parser.GetParser(buffer);
+			_Parser.StateUpdated += HandleParseResult;
 		}
 
 		void HandleParseResult(object sender, EventArgs<SemanticState> result) {
@@ -51,7 +50,7 @@ namespace Codist.Taggers
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
-			if (_Tagger.TryGetSemanticState(spans[0].Snapshot, out var r)) {
+			if (_Parser.TryGetSemanticState(spans[0].Snapshot, out var r)) {
 				return Tagger.GetTags(spans, r, SyncHelper.CancelAndRetainToken(ref _RenderBreaker));
 			}
 			foreach (var item in spans) {
@@ -78,7 +77,11 @@ namespace Codist.Taggers
 		public void Dispose() {
 			_PendingSpans = null;
 			SyncHelper.CancelAndDispose(ref _RenderBreaker, false);
-
+			ITextBufferParser t = _Parser;
+			if (t != null) {
+				t.Dispose();
+				_Parser = null;
+			}
 		}
 
 		internal static class Tagger
@@ -94,7 +97,7 @@ namespace Codist.Taggers
 			static Chain<ITagSpan<IClassificationTag>> GetTagsInternal(IEnumerable<SnapshotSpan> spans, SemanticState result, CancellationToken cancellationToken) {
 				var workspace = result.Workspace;
 				var semanticModel = result.Model;
-				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
+				var compilationUnit = result.GetCompilationUnit(cancellationToken);
 				var snapshot = result.Snapshot;
 				var l = semanticModel.SyntaxTree.Length;
 				var tags = new Chain<ITagSpan<IClassificationTag>>();
@@ -107,7 +110,7 @@ namespace Codist.Taggers
 					var lastTriviaSpan = default(TextSpan);
 					SyntaxNode node;
 					TagSpan<IClassificationTag> tag = null;
-					var r = GetAttributeNotationSpan(snapshot, textSpan, unitCompilation);
+					var r = GetAttributeNotationSpan(snapshot, textSpan, compilationUnit);
 					if (r != null) {
 						tags.Add(r);
 					}
@@ -117,26 +120,26 @@ namespace Codist.Taggers
 						switch (ct) {
 							case "keyword":
 							case Constants.CodeKeywordControl:
-								node = unitCompilation.FindNode(item.TextSpan, true, true);
+								node = compilationUnit.FindNode(item.TextSpan, true, true);
 								if (node is MemberDeclarationSyntax || node is AccessorDeclarationSyntax) {
-									tag = ClassifyDeclarationKeyword(item.TextSpan, snapshot, node, unitCompilation, out var tag2);
+									tag = ClassifyDeclarationKeyword(item.TextSpan, snapshot, node, compilationUnit, out var tag2);
 									if (tag2 != null) {
 										tags.Add(tag2);
 									}
 								}
 								else {
-									tag = ClassifyKeyword(item.TextSpan, snapshot, node, unitCompilation);
+									tag = ClassifyKeyword(item.TextSpan, snapshot, node, compilationUnit);
 								}
 								break;
 							case Constants.CodeOperator:
 							case Constants.CodeOverloadedOperator:
-								tag = ClassifyOperator(item.TextSpan, snapshot, semanticModel, unitCompilation, cancellationToken);
+								tag = ClassifyOperator(item.TextSpan, snapshot, semanticModel, compilationUnit, cancellationToken);
 								break;
 							case Constants.CodePunctuation:
-								tag = ClassifyPunctuation(item.TextSpan, snapshot, semanticModel, unitCompilation, cancellationToken);
+								tag = ClassifyPunctuation(item.TextSpan, snapshot, semanticModel, compilationUnit, cancellationToken);
 								break;
 							case Constants.XmlDocDelimiter:
-								tag = ClassifyXmlDoc(item.TextSpan, snapshot, unitCompilation, ref lastTriviaSpan);
+								tag = ClassifyXmlDoc(item.TextSpan, snapshot, compilationUnit, ref lastTriviaSpan);
 								break;
 							default:
 								tag = null;
@@ -150,7 +153,7 @@ namespace Codist.Taggers
 							//|| ct == Constants.CodeStaticSymbol
 							|| ct.EndsWith("name", StringComparison.Ordinal)) {
 							textSpan = item.TextSpan;
-							node = unitCompilation.FindNode(textSpan, true, true);
+							node = compilationUnit.FindNode(textSpan, true, true);
 							foreach (var type in GetClassificationType(node, semanticModel, cancellationToken)) {
 								tags.Add(CreateClassificationSpan(snapshot, textSpan, type));
 							}
