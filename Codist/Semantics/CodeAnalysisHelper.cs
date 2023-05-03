@@ -116,7 +116,7 @@ namespace Codist
 			return false;
 		}
 
-		public static DeclarationCategory GetDeclarationCategory(this SyntaxKind kind) {
+		static DeclarationCategory GetDeclarationCategory(this SyntaxKind kind) {
 			switch (kind) {
 				case SyntaxKind.ClassDeclaration:
 				case RecordDeclaration:
@@ -1495,15 +1495,15 @@ namespace Codist
 
 			public static readonly Func<int, int> GetWarningLevel = ReflectionHelper.CallStaticFunc<int, int>(typeof(LanguageVersionFacts).Assembly.GetType("Microsoft.CodeAnalysis.CSharp.ErrorFacts")?.GetMethod("GetWarningLevel", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)) ?? (Func<int, int>)((int _) => 3);
 		}
-	}
 
-	[Flags]
-	enum DeclarationCategory
-	{
-		None,
-		Type = 1,
-		Namespace = 1 << 1,
-		Member = 1 << 2,
-		Local = 1 << 3
+		[Flags]
+		enum DeclarationCategory
+		{
+			None,
+			Type = 1,
+			Namespace = 1 << 1,
+			Member = 1 << 2,
+			Local = 1 << 3
+		}
 	}
 }
