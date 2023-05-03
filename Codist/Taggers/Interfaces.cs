@@ -5,17 +5,6 @@ using Microsoft.VisualStudio.Text;
 
 namespace Codist.Taggers
 {
-	interface IReusableTagger
-	{
-		void AddRef();
-		void Release();
-	}
-
-	interface IValidationTag : Microsoft.VisualStudio.Text.Tagging.IClassificationTag
-	{
-		bool IsValid(SnapshotSpan span);
-	}
-
 	/// <summary>Interface for text-based custom tagger.</summary>
 	interface ITextTagger
 	{

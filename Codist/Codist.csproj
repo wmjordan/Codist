@@ -180,6 +180,7 @@
     <Compile Include="SyntaxHighlight\SymbolMarkerStyle.cs" />
     <Compile Include="SyntaxHighlight\XmlCodeStyle.cs" />
     <Compile Include="Semantics\CSharpParser.cs" />
+    <Compile Include="Taggers\TaggedContentSpan.cs" />
     <Compile Include="Taggers\TaggerFactories.cs" />
     <Compile Include="Taggers\TransientClassificationTagHolder.cs" />
     <Compile Include="Taggers\Classifications.cs" />
@@ -195,7 +196,6 @@
     <Compile Include="Taggers\CSharpTagger.cs" />
     <Compile Include="Taggers\CSharpClassifierDefinition.cs" />
     <Compile Include="Taggers\CSharpCodeFormats.cs" />
-    <Compile Include="Taggers\DisposableTagger.cs" />
     <Compile Include="Taggers\HighlighterDefinitions.cs" />
     <Compile Include="Taggers\HighlighterFormats.cs" />
     <Compile Include="Taggers\Interfaces.cs" />
