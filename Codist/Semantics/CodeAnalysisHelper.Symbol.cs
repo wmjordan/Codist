@@ -185,31 +185,9 @@ namespace Codist
 		public static string GetOriginalName(this ISymbol symbol) {
 			switch (symbol.Kind) {
 				case SymbolKind.Method:
-					var m = (IMethodSymbol)symbol;
-					switch (m.MethodKind) {
-						case MethodKind.ExplicitInterfaceImplementation:
-							var mi = m.ExplicitInterfaceImplementations;
-							if (mi.Length != 0) {
-								return mi[0].Name;
-							}
-							break;
-						case MethodKind.Constructor:
-						case MethodKind.StaticConstructor:
-							return m.ContainingType.Name;
-						case MethodKind.Destructor:
-							return "~" + m.ContainingType.Name;
-					}
-					break;
+					return GetOriginalName((IMethodSymbol)symbol);
 				case SymbolKind.Property:
-					var ps = (IPropertySymbol)symbol;
-					var p = ps.ExplicitInterfaceImplementations;
-					if (p.Length != 0) {
-						ps = p[0];
-					}
-					if (ps.IsIndexer) {
-						return ps.Name.Replace("[]", String.Empty);
-					}
-					break;
+					return GetOriginalName((IPropertySymbol)symbol);
 				case SymbolKind.Event:
 					var e = ((IEventSymbol)symbol).ExplicitInterfaceImplementations;
 					if (e.Length != 0) {
@@ -218,6 +196,33 @@ namespace Codist
 					break;
 			}
 			return symbol.Name;
+		}
+
+		static string GetOriginalName(this IMethodSymbol m) {
+			switch (m.MethodKind) {
+				case MethodKind.ExplicitInterfaceImplementation:
+					var mi = m.ExplicitInterfaceImplementations;
+					if (mi.Length != 0) {
+						return mi[0].Name;
+					}
+					break;
+				case MethodKind.Constructor:
+				case MethodKind.StaticConstructor:
+					return m.ContainingType.Name;
+				case MethodKind.Destructor:
+					return "~" + m.ContainingType.Name;
+			}
+			return m.Name;
+		}
+
+		public static string GetOriginalName(this IPropertySymbol ps) {
+			var p = ps.ExplicitInterfaceImplementations;
+			if (p.Length != 0) {
+				ps = p[0];
+			}
+			return ps.IsIndexer
+				? ps.Name.Replace("[]", String.Empty)
+				: ps.Name;
 		}
 		#endregion
 

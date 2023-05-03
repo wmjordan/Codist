@@ -678,7 +678,7 @@ namespace Codist
 				case SymbolKind.ArrayType:
 					FormatArrayType(text, (IArrayTypeSymbol)symbol, alias, bold);
 					return;
-				case SymbolKind.Event: text.Add(symbol.Render(alias, bold, Event)); return;
+				case SymbolKind.Event: FormatEventName(text, (IEventSymbol)symbol, alias, bold); return;
 				case SymbolKind.Field:
 					text.Add(symbol.Render(alias, bold, ((IFieldSymbol)symbol).IsConst ? Const : Field));
 					return;
@@ -686,7 +686,7 @@ namespace Codist
 				case SymbolKind.NamedType: FormatTypeName(text, symbol, alias, bold); return;
 				case SymbolKind.Namespace: text.Add(symbol.Name.Render(Namespace)); return;
 				case SymbolKind.Parameter: text.Add(symbol.Render(null, bold, Parameter)); return;
-				case SymbolKind.Property: text.Add(symbol.Render(alias, bold, Property)); return;
+				case SymbolKind.Property: FormatPropertyName(text, (IPropertySymbol)symbol, alias, bold); return;
 				case SymbolKind.Local:
 				case SymbolKind.RangeVariable:
 					text.Add(symbol.Render(null, bold, Local)); return;
@@ -718,6 +718,10 @@ namespace Codist
 			}
 		}
 
+		void FormatEventName(InlineCollection text, IEventSymbol e, string alias, bool bold) {
+			text.Add(e.Render(alias ?? e.ExplicitInterfaceImplementations.FirstOrDefault()?.Name, bold, Event));
+		}
+
 		void FormatTypeParameter(InlineCollection text, ITypeParameterSymbol t, string alias, bool bold) {
 			if (alias != null && t.Variance != VarianceKind.None) {
 				text.Add((t.Variance == VarianceKind.Out ? "out " : "in ").Render(Keyword));
@@ -727,16 +731,32 @@ namespace Codist
 
 		void FormatMethodName(InlineCollection text, ISymbol symbol, string alias, bool bold) {
 			var method = (IMethodSymbol)symbol;
-			text.Add(method.MethodKind == MethodKind.Constructor
-				? symbol.Render(alias ?? method.ContainingType.Name, bold, GetBrushForMethod(method))
-				: method.MethodKind == CodeAnalysisHelper.FunctionPointerMethod
-				? symbol.Render("delegate*", true, GetBrushForMethod(method))
-				: method.MethodKind == MethodKind.LambdaMethod
-				? symbol.Render("lambda", true, Method)
-				: symbol.Render(alias, bold, Method));
+			Inline inline;
+			switch (method.MethodKind) {
+				case MethodKind.Constructor:
+					inline = symbol.Render(alias ?? method.ContainingType.Name, bold, GetBrushForMethod(method));
+					break;
+				case MethodKind.LambdaMethod:
+					inline = symbol.Render("lambda", true, Method);
+					break;
+				case CodeAnalysisHelper.FunctionPointerMethod:
+					inline = symbol.Render("delegate*", true, GetBrushForMethod(method));
+					break;
+				case MethodKind.ExplicitInterfaceImplementation:
+					inline = method.Render(method.ExplicitInterfaceImplementations[0].Name, bold, Method);
+					break;
+				default:
+					inline = symbol.Render(alias, bold, Method);
+					break;
+			}
+			text.Add(inline);
 			if (method.IsGenericMethod) {
 				AddTypeArguments(text, method.TypeArguments);
 			}
+		}
+
+		void FormatPropertyName(InlineCollection text, IPropertySymbol p, string alias, bool bold) {
+			text.Add(p.Render(alias ?? p.GetOriginalName(), bold, Property));
 		}
 
 		void FormatTypeName(InlineCollection text, ISymbol symbol, string alias, bool bold) {
