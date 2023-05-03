@@ -47,25 +47,6 @@ namespace Codist.Taggers
 		}
 	}
 
-	[Export(typeof(ITaggerProvider))]
-	[ContentType(Constants.CodeTypes.CSharp)]
-	[TagType(typeof(ICodeMemberTag))]
-	[TextViewRole(PredefinedTextViewRoles.Document)]
-	sealed class CSharpBlockTaggerProvider : ITaggerProvider
-	{
-		public ITagger<T> CreateTagger<T>(ITextBuffer buffer) where T : ITag {
-			if (typeof(T) != typeof(ICodeMemberTag) || buffer.MayBeEditor() == false) {
-				return null;
-			}
-
-			var tagger = buffer.Properties.GetOrCreateSingletonProperty(
-				typeof(CSharpBlockTaggerProvider),
-				() => new CSharpBlockTagger(buffer)
-			);
-			return new DisposableTagger<CSharpBlockTagger, ICodeMemberTag>(tagger) as ITagger<T>;
-		}
-	}
-
 	[Export(typeof(IViewTaggerProvider))]
 	[ContentType(Constants.CodeTypes.CSharp)]
 	[TagType(typeof(IClassificationTag))]
@@ -111,14 +92,14 @@ namespace Codist.Taggers
 			if (_Taggers.TryGetValue(textView, out var bufferTaggers)) {
 				if (bufferTaggers.TryGetValue(buffer, out var tagger)) {
 					return tagger;
-			}
+				}
 				bufferTaggers.Add(_LastTextBuffer = buffer, _LastTagger = CreateTagger());
 				return _LastTagger;
 			}
 			_Taggers.Add(_LastView = textView, new Dictionary<ITextBuffer, CSharpTagger>() {
 					{ _LastTextBuffer = buffer, _LastTagger = CreateTagger() }
 				});
-				textView.Closed += TextView_Closed;
+			textView.Closed += TextView_Closed;
 			return _LastTagger;
 		}
 
@@ -136,7 +117,7 @@ namespace Codist.Taggers
 				}
 				_Taggers.Remove(view);
 			}
-			}
+		}
 
 		CSharpTagger CreateTagger() {
 			++_taggerCount;

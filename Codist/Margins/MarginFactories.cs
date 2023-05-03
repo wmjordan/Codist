@@ -48,7 +48,7 @@ namespace Codist.Margins
 	}
 
 	[Export(typeof(IWpfTextViewMarginProvider))]
-	[Name(nameof(CSharpMembersMargin))]
+	[Name(nameof(CSharpMargin))]
 	[Order(After = PredefinedMarginNames.OverviewChangeTracking, Before = nameof(CommentMargin))]
 	[MarginContainer(PredefinedMarginNames.VerticalScrollBar)]
 	[ContentType(Constants.CodeTypes.CSharp)]
@@ -60,7 +60,7 @@ namespace Codist.Margins
 			return Config.Instance.Features.MatchFlags(Features.ScrollbarMarkers)
 				&& marginContainer is IVerticalScrollBar scrollBar
 				&& wpfTextViewHost.TextView.TextBuffer.MayBeEditor()
-				? new CSharpMembersMargin(wpfTextViewHost.TextView, scrollBar)
+				? new CSharpMargin(wpfTextViewHost.TextView, scrollBar)
 				: null;
 		}
 	}
