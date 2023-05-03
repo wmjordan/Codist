@@ -48,7 +48,7 @@ namespace Codist
 		/// <remarks>A <see cref="IWpfTextView"/> may contain several <see cref="ITextBuffer"/>s, thus we can have multiple <see cref="TextBufferParser"/> for the same view at the same time.</remarks>
 		public ITextBufferParser GetParser(ITextBuffer buffer) {
 			TextBufferParser parser;
-			if (buffer != _LastParser?.Buffer) {
+			if (buffer != _LastParser?.TextBuffer) {
 				if (_Parsers.TryGetValue(buffer, out parser) == false) {
 					_Parsers.Add(buffer, parser = new TextBufferParser(this, buffer));
 				}
@@ -124,7 +124,7 @@ namespace Codist
 			public event EventHandler<EventArgs<SemanticState>> StateUpdated;
 
 			internal bool IsDisposed => _Parser == null;
-			internal ITextBuffer Buffer => _Buffer;
+			public ITextBuffer TextBuffer => _Buffer;
 
 			public void Ref() {
 				_Ref++;
@@ -214,7 +214,7 @@ namespace Codist
 					oldResult.Workspace.WorkspaceChanged -= WorkspaceChanged;
 					result.Workspace.WorkspaceChanged += WorkspaceChanged;
 				}
-				StateUpdated?.Invoke(_Container._View, new EventArgs<SemanticState>(result));
+				StateUpdated?.Invoke(this, new EventArgs<SemanticState>(result));
 
 				if (IsDisposed) {
 					// prevent leak after disposal
