@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using AppHelpers;
 using Codist.SyntaxHighlight;
 using Microsoft.CodeAnalysis;
@@ -19,64 +18,55 @@ using Microsoft.VisualStudio.Text.Tagging;
 
 namespace Codist.Taggers
 {
-	/// <summary>A classifier for C# code syntax highlight.</summary>
-	sealed class CSharpTagger : IDisposable
+	sealed class CSharpTagger : ITagger<IClassificationTag>, IDisposable
 	{
 		static readonly CSharpClassifications __Classifications = CSharpClassifications.Instance;
 		static readonly GeneralClassifications __GeneralClassifications = GeneralClassifications.Instance;
 
-		readonly Dictionary<ITextBuffer, BufferTagger> _Taggers = new Dictionary<ITextBuffer, BufferTagger>();
-		CSharpTaggerProvider _TaggerProvider;
-		IWpfTextView _View;
-		// cache the latest used tagger to improve performance
-		BufferTagger _LastTagger;
-		// used in Interactive window to detect #reset
-		Guid _LastSolutionId;
-		readonly bool _IsInteractiveWindow;
+		ConcurrentQueue<SnapshotSpan> _PendingSpans = new ConcurrentQueue<SnapshotSpan>();
+		CancellationTokenSource _RenderBreaker;
 
-		public CSharpTagger(CSharpTaggerProvider taggerProvider, IWpfTextView view) {
-			_View = view;
-			_TaggerProvider = taggerProvider;
-			_IsInteractiveWindow = IsInteractiveWindow(view.TextBuffer);
+		ITextBufferParser _Tagger;
+
+		public CSharpTagger(CSharpParser parser, ITextBuffer buffer) {
+			_Tagger = parser.GetParser(buffer);
+			_Tagger.StateUpdated += HandleParseResult;
 		}
 
-		public ITextView View => _View;
-
-		public ITagger<IClassificationTag> GetTagger(ITextBuffer buffer) {
-			BufferTagger tagger;
-			if (buffer != _LastTagger?.Buffer) {
-				if (_Taggers.TryGetValue(buffer, out tagger) == false) {
-					_Taggers.Add(buffer, tagger = new BufferTagger(this, _View, buffer));
-				}
-				if (_IsInteractiveWindow && _LastTagger != null) {
-					_LastTagger.ReleaseAsyncTimer();
-				}
-				_LastTagger = tagger;
-			}
-			else {
-				tagger = _LastTagger;
-			}
-			tagger.Ref();
-			return tagger;
-		}
-
-		public void Dispose() {
-			if (_TaggerProvider != null) {
-				if (_Taggers.Count > 0) {
-					// don't iterate _Taggers, since the Release method will change the collection
-					foreach (var tagger in _Taggers.Values.ToList() /* hold taggers to be disposed */) {
-						tagger.Release();
+		void HandleParseResult(object sender, EventArgs<SemanticState> result) {
+			var pendingSpans = _PendingSpans;
+			if (pendingSpans != null) {
+				var snapshot = result.Data.Snapshot;
+				if (snapshot != null) {
+					while (pendingSpans.TryDequeue(out var span)) {
+						if (snapshot == span.Snapshot) {
+							Debug.WriteLine($"Refresh span {span}");
+							TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
+						}
 					}
-					_Taggers.Clear();
 				}
-				_LastTagger = null;
-				_TaggerProvider = null;
-				_View = null;
 			}
 		}
 
-		static bool IsInteractiveWindow(ITextBuffer buffer) {
-			return buffer.Properties.PropertyList.Any(o => (o.Key as Type)?.Name == "InteractiveWindow");
+		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
+
+		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
+			if (_Tagger.TryGetSemanticState(spans[0].Snapshot, out var r)) {
+				return Tagger.GetTags(spans, r, SyncHelper.CancelAndRetainToken(ref _RenderBreaker));
+			}
+			foreach (var item in spans) {
+				Debug.WriteLine($"Enqueue span {item}");
+				_PendingSpans.Enqueue(item);
+			}
+			return r == null
+				? Enumerable.Empty<ITagSpan<IClassificationTag>>()
+				: UseOldResult(spans, spans[0].Snapshot, r, SyncHelper.CancelAndRetainToken(ref _RenderBreaker));
+		}
+
+		static IEnumerable<ITagSpan<IClassificationTag>> UseOldResult(NormalizedSnapshotSpanCollection spans, ITextSnapshot snapshot, SemanticState result, CancellationToken cancellationToken) {
+			foreach (var tagSpan in Tagger.GetTags(MapToOldSpans(spans, result.Snapshot), result, cancellationToken)) {
+				yield return new TagSpan<IClassificationTag>(tagSpan.Span.TranslateTo(snapshot, SpanTrackingMode.EdgeInclusive), tagSpan.Tag);
+			}
 		}
 
 		static IEnumerable<SnapshotSpan> MapToOldSpans(NormalizedSnapshotSpanCollection spans, ITextSnapshot last) {
@@ -85,373 +75,15 @@ namespace Codist.Taggers
 			}
 		}
 
-		[DebuggerDisplay("{GetDebuggerString()}")]
-		sealed class BufferTagger : ITagger<IClassificationTag>, IDisposable
-		{
-			ConcurrentQueue<SnapshotSpan> _PendingSpans = new ConcurrentQueue<SnapshotSpan>();
-			IWpfTextView _View;
-			CSharpTagger _Container;
-			ITextBuffer _Buffer;
-			CancellationTokenSource _ParserBreaker, _RenderBreaker;
-			AsyncParser _Parser;
-			Timer _Timer;
-			ParseResult _ParseResult;
-			bool _HasFocus;
-			bool _HasBackgroundChange;
-			ITextSnapshot _WorkingSnapshot;
-			int _Ref;
-			readonly bool _IsInteractiveWindow;
-			// debug info
-			readonly string _Name;
+		public void Dispose() {
+			_PendingSpans = null;
+			SyncHelper.CancelAndDispose(ref _RenderBreaker, false);
 
-			public BufferTagger(CSharpTagger container, IWpfTextView view, ITextBuffer buffer) {
-				_Name = buffer.GetTextDocument()?.FilePath ?? buffer.CurrentSnapshot?.GetText(0, Math.Min(buffer.CurrentSnapshot.Length, 500));
-				if (view != null) {
-					_View = view;
-					if ((_IsInteractiveWindow = container._IsInteractiveWindow) == false) {
-						view.GotAggregateFocus += View_IsFocused;
-						view.LostAggregateFocus += View_LostFocus;
-					}
-				}
-				_Container = container;
-				_Buffer = buffer;
-				_Timer = new Timer(StartAsyncParser);
-				_Parser = new AsyncParser(ReceivedParserResult);
-				SubscribeBufferEvents(buffer);
-			}
-
-			internal bool IsDisposed => _Parser == null;
-			internal ITextBuffer Buffer => _Buffer;
-
-			/// <summary>This event is to notify the IDE that some tags are classified (from the parser thread).</summary>
-			public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
-
-			public void Ref() {
-				_Ref++;
-				Debug.WriteLine($"Ref+ {_Ref} {_Name}");
-			}
-
-			internal void Release() {
-				if (Interlocked.Exchange(ref _Parser, null) != null) {
-					Debug.WriteLine($"{_Name} tagger released");
-					ReleaseResources();
-					_Ref = 0;
-				}
-			}
-
-			IEnumerable<ITagSpan<IClassificationTag>> ITagger<IClassificationTag>.GetTags(NormalizedSnapshotSpanCollection spans) {
-				if (_Parser == null) {
-					goto NA;
-				}
-				var snapshot = spans[0].Snapshot;
-				var isNewSnapshot = _ParseResult?.Snapshot != snapshot;
-				if (isNewSnapshot == false) {
-					return Tagger.GetTags(spans, _ParseResult, SyncHelper.CancelAndRetainToken(ref _RenderBreaker));
-				}
-				if (snapshot.TextBuffer != _Buffer) {
-					goto NA;
-				}
-				if (snapshot != _WorkingSnapshot) {
-					_WorkingSnapshot = snapshot;
-					// don't schedule parsing unless snapshot is changed
-					if (_Parser.State == ParserState.Working) {
-						// cancel existing parsing
-						_ParserBreaker?.Cancel();
-					}
-					_Timer.Change(_ParseResult != null ? 300 : 100, Timeout.Infinite);
-				}
-				if (isNewSnapshot) {
-					// queue the spans to be updated after parsing
-					EnqueueSpans(spans);
-				}
-				if (_ParseResult != null && _ParseResult.Snapshot.TextBuffer == snapshot.TextBuffer) {
-					return UseOldResult(spans, snapshot, _ParseResult, SyncHelper.CancelAndRetainToken(ref _RenderBreaker));
-				}
-			NA:
-				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
-			}
-
-			void ReceivedParserResult(ParseResult result) {
-				var oldResult = Interlocked.Exchange(ref _ParseResult, result);
-				if (_IsInteractiveWindow) {
-					RemoveTaggersOnSolutionChange(result);
-				}
-				else if (oldResult == null) {
-					result.Workspace.WorkspaceChanged += WorkspaceChanged;
-				}
-				else if (oldResult.Workspace != result.Workspace) {
-					oldResult.Workspace.WorkspaceChanged -= WorkspaceChanged;
-					result.Workspace.WorkspaceChanged += WorkspaceChanged;
-				}
-				RefreshPendingSpans();
-				if (IsDisposed) {
-					// prevent leak after disposal
-					ReleaseResources();
-				}
-			}
-
-			void RemoveTaggersOnSolutionChange(ParseResult result) {
-				Guid id;
-				var c = _Container;
-				if (c == null || result.Workspace.CurrentSolution.Id.Id == (id = c._LastSolutionId)) {
-					return;
-				}
-
-				// don't iterate _Taggers, since the Release method will change the collection
-				foreach (var tagger in c._Taggers.Values.ToList()) {
-					if (tagger._ParseResult?.Workspace.CurrentSolution.Id.Id != id) {
-						tagger.Release();
-					}
-				}
-				c._LastSolutionId = result.Workspace.CurrentSolution.Id.Id;
-				TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(c._View.GetVisibleLineSpan()));
-			}
-
-			void View_IsFocused(object sender, EventArgs e) {
-				_HasFocus = true;
-				if (_HasBackgroundChange) {
-					_HasBackgroundChange = false;
-					if (_ParseResult != null) {
-						_Timer.Change(300, Timeout.Infinite);
-						_PendingSpans.Enqueue(_View.GetVisibleLineSpan());
-					}
-				}
-			}
-
-			void View_LostFocus(object sender, EventArgs e) {
-				_HasFocus = false;
-			}
-
-			void StartAsyncParser(object state) {
-				_Parser?.Start(_Buffer, SyncHelper.CancelAndRetainToken(ref _ParserBreaker));
-			}
-
-			void EnqueueSpans(NormalizedSnapshotSpanCollection spans) {
-				foreach (var item in spans) {
-					Debug.WriteLine($"Enqueue span {item}");
-					_PendingSpans.Enqueue(item);
-				}
-			}
-
-			void RefreshPendingSpans() {
-				var pendingSpans = _PendingSpans;
-				if (pendingSpans != null) {
-					var snapshot = _ParseResult.Snapshot;
-					if (snapshot != null) {
-						while (pendingSpans.TryDequeue(out var span)) {
-							if (snapshot == span.Snapshot) {
-								Debug.WriteLine($"Refresh span {span}");
-								TagsChanged?.Invoke(this, new SnapshotSpanEventArgs(span));
-							}
-						}
-					}
-				}
-			}
-
-			IEnumerable<ITagSpan<IClassificationTag>> UseOldResult(NormalizedSnapshotSpanCollection spans, ITextSnapshot snapshot, ParseResult result, CancellationToken cancellationToken) {
-				foreach (var tagSpan in Tagger.GetTags(MapToOldSpans(spans, _ParseResult.Snapshot), result, cancellationToken)) {
-					yield return new TagSpan<IClassificationTag>(tagSpan.Span.TranslateTo(snapshot, SpanTrackingMode.EdgeInclusive), tagSpan.Tag);
-				}
-			}
-
-			void SubscribeBufferEvents(ITextBuffer buffer) {
-				if (buffer is ITextBuffer2 b) {
-					b.ChangedOnBackground += TextBuffer_ChangedOnBackground;
-				}
-				buffer.ContentTypeChanged += TextBuffer_ContentTypeChanged;
-			}
-
-			void UnsubscribeBufferEvents(ITextBuffer buffer) {
-				if (buffer != null) {
-					if (buffer is ITextBuffer2 b) {
-						b.ChangedOnBackground -= TextBuffer_ChangedOnBackground;
-					}
-					buffer.ContentTypeChanged -= TextBuffer_ContentTypeChanged;
-				}
-			}
-
-			void WorkspaceChanged(object sender, WorkspaceChangeEventArgs args) {
-				Debug.WriteLine($"Workspace {args.Kind}: {args.DocumentId}");
-				var parser = _Parser;
-				if (parser == null) {
-					return;
-				}
-				switch (args.Kind) {
-					case WorkspaceChangeKind.DocumentChanged:
-					case WorkspaceChangeKind.DocumentRemoved:
-						if (args.DocumentId == _ParseResult?.DocumentId) {
-							// skip notifications from current document
-							return;
-						}
-						break;
-				}
-
-				// at this place, we will receive the following change notifications:
-				// 1. from solution or project change
-				// 2. from the same document, but various configurations (should be omitted)
-				//   -- for instance, while editing a.cs (net45), we will get notified from a.cs (net50), a.cs (net60) etc. as well
-				if (_HasFocus) {
-					if (args.Kind != WorkspaceChangeKind.DocumentChanged) {
-						// reparse occurs after current document is parsed and external document change is received
-						// timer may have been disposed in other thread, thus we check it again
-						_Timer?.Change(300, Timeout.Infinite);
-					}
-				}
-				else if (parser.State == ParserState.Idle) {
-					_HasBackgroundChange = true;
-				}
-			}
-
-			void TextBuffer_ChangedOnBackground(object sender, TextContentChangedEventArgs e) {
-				var changes = e.Changes;
-				if (changes.Count == 0) {
-					return;
-				}
-				var tc = TagsChanged;
-				if (tc != null) {
-					foreach (var item in changes) {
-						var changedSpan = new SnapshotSpan(e.After, item.NewSpan);
-						Debug.WriteLine($"{_Buffer.GetDocument().GetDocId()} changed: {changedSpan}");
-						tc.Invoke(this, new SnapshotSpanEventArgs(changedSpan));
-					}
-				}
-			}
-
-			void TextBuffer_ContentTypeChanged(object sender, ContentTypeChangedEventArgs e) {
-				if (_IsInteractiveWindow == false
-					&& e.AfterContentType.IsOfType(Constants.CodeTypes.CSharp) == false) {
-					Dispose();
-				}
-			}
-
-			public void Dispose() {
-				if (--_Ref > 0) {
-					Debug.WriteLine($"Ref- {_Ref} {_Name}");
-					return;
-				}
-				if (Interlocked.Exchange(ref _Parser, null) != null) {
-					Debug.WriteLine($"{_Name} tagger disposed");
-					ReleaseResources();
-				}
-			}
-
-			internal void ReleaseAsyncTimer() {
-				if (_ParserBreaker != null) {
-					_ParserBreaker.Cancel();
-					_ParserBreaker.Dispose();
-					_ParserBreaker = null;
-				}
-				_Timer?.Dispose();
-				_Timer = null;
-			}
-
-			void ReleaseResources() {
-				if (_View != null) {
-					_View.GotAggregateFocus -= View_IsFocused;
-					_View.LostAggregateFocus -= View_LostFocus;
-					_View = null;
-				}
-				SyncHelper.CancelAndDispose(ref _ParserBreaker, false);
-				SyncHelper.CancelAndDispose(ref _RenderBreaker, false);
-				if (_Buffer != null) {
-					UnsubscribeBufferEvents(_Buffer);
-					_Container._Taggers.Remove(_Buffer);
-					_Container = null;
-					_Buffer = null;
-				}
-				_PendingSpans = null;
-				if (_IsInteractiveWindow == false && _ParseResult?.Workspace != null) {
-					_ParseResult.Workspace.WorkspaceChanged -= WorkspaceChanged;
-				}
-				_ParseResult = default;
-				_Timer?.Dispose();
-				_Timer = null;
-				_WorkingSnapshot = null;
-			}
-
-			string GetDebuggerString() {
-				return $"{_Parser?.State} {_Ref} ({_Name})";
-			}
 		}
 
-		sealed class ParseResult
+		internal static class Tagger
 		{
-			public readonly Workspace Workspace;
-			public readonly SemanticModel Model;
-			public readonly ITextSnapshot Snapshot;
-			public readonly DocumentId DocumentId;
-
-			public ParseResult(Workspace workspace, SemanticModel model, ITextSnapshot snapshot, DocumentId documentId) {
-				Workspace = workspace;
-				Model = model;
-				Snapshot = snapshot;
-				DocumentId = documentId;
-			}
-		}
-
-		sealed class AsyncParser
-		{
-			readonly Action<ParseResult> _Callback;
-			int _State;
-
-			public AsyncParser(Action<ParseResult> callback) {
-				_Callback = callback;
-			}
-
-			public ParserState State => (ParserState)_State;
-
-			public bool Start(ITextBuffer buffer, CancellationToken cancellationToken) {
-				return Interlocked.CompareExchange(ref _State, (int)ParserState.Working, (int)ParserState.Idle) == (int)ParserState.Idle
-					&& Task.Run(() => {
-						ITextSnapshot snapshot = buffer.CurrentSnapshot;
-						var workspace = Workspace.GetWorkspaceRegistration(buffer.AsTextContainer()).Workspace;
-						if (workspace == null) {
-							goto QUIT;
-						}
-						Document document;
-						try {
-							document = workspace.GetDocument(buffer);
-						}
-						catch (InvalidOperationException) {
-							goto QUIT;
-						}
-						return ParseAsync(workspace, document, snapshot, cancellationToken);
-					QUIT:
-						Interlocked.CompareExchange(ref _State, (int)ParserState.Idle, (int)ParserState.Working);
-						return Task.CompletedTask;
-					}).IsCanceled == false;
-			}
-
-			async Task ParseAsync(Workspace workspace, Document document, ITextSnapshot snapshot, CancellationToken cancellationToken) {
-				SemanticModel model;
-				try {
-					model = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-				}
-				catch (OperationCanceledException) {
-					Interlocked.CompareExchange(ref _State, (int)ParserState.Idle, (int)ParserState.Working);
-					throw;
-				}
-				if (Interlocked.CompareExchange(ref _State, (int)ParserState.Completed, (int)ParserState.Working) == (int)ParserState.Working) {
-					Debug.WriteLine($"{snapshot.TextBuffer.GetDocument().GetDocId()} end parsing {snapshot.Version} on thread {Thread.CurrentThread.ManagedThreadId}");
-					_Callback(new ParseResult(workspace, model, snapshot, document.Id));
-					Interlocked.CompareExchange(ref _State, (int)ParserState.Idle, (int)ParserState.Completed);
-				}
-				else {
-					Interlocked.CompareExchange(ref _State, (int)ParserState.Idle, (int)ParserState.Working);
-				}
-			}
-		}
-
-		enum ParserState
-		{
-			Idle,
-			Working,
-			Completed,
-		}
-
-		static class Tagger
-		{
-			public static IEnumerable<ITagSpan<IClassificationTag>> GetTags(IEnumerable<SnapshotSpan> spans, ParseResult result, CancellationToken cancellationToken) {
+			public static IEnumerable<ITagSpan<IClassificationTag>> GetTags(IEnumerable<SnapshotSpan> spans, SemanticState result, CancellationToken cancellationToken) {
 				try {
 					return GetTagsInternal(spans, result, cancellationToken);
 				}
@@ -459,7 +91,7 @@ namespace Codist.Taggers
 					return Enumerable.Empty<ITagSpan<IClassificationTag>>();
 				}
 			}
-			static Chain<ITagSpan<IClassificationTag>> GetTagsInternal(IEnumerable<SnapshotSpan> spans, ParseResult result, CancellationToken cancellationToken) {
+			static Chain<ITagSpan<IClassificationTag>> GetTagsInternal(IEnumerable<SnapshotSpan> spans, SemanticState result, CancellationToken cancellationToken) {
 				var workspace = result.Workspace;
 				var semanticModel = result.Model;
 				var unitCompilation = semanticModel.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
@@ -517,10 +149,10 @@ namespace Codist.Taggers
 						if (ct == Constants.CodeIdentifier
 							//|| ct == Constants.CodeStaticSymbol
 							|| ct.EndsWith("name", StringComparison.Ordinal)) {
-							var itemSpan = item.TextSpan;
-							node = unitCompilation.FindNode(itemSpan, true, true);
+							textSpan = item.TextSpan;
+							node = unitCompilation.FindNode(textSpan, true, true);
 							foreach (var type in GetClassificationType(node, semanticModel, cancellationToken)) {
-								tags.Add(CreateClassificationSpan(snapshot, itemSpan, type));
+								tags.Add(CreateClassificationSpan(snapshot, textSpan, type));
 							}
 						}
 					}

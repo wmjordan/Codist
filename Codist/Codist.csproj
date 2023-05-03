@@ -95,6 +95,7 @@
     <Compile Include="Commands\VersionInfoBar.cs" />
     <Compile Include="Controls\OverlayElementRemovedEventArgs.cs" />
     <Compile Include="Controls\CommandToolTip.cs" />
+    <Compile Include="Helpers\EventArgs.cs" />
     <Compile Include="Helpers\ExternalCommand.cs" />
     <Compile Include="Controls\ExtIconProvider.cs" />
     <Compile Include="Controls\IContextMenuHost.cs" />
@@ -126,7 +127,9 @@
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\InstalledFont.cs" />
     <Compile Include="Helpers\LogHelper.cs" />
+    <Compile Include="Semantics\ITextBufferParser.cs" />
     <Compile Include="Semantics\SelectedSyntax.cs" />
+    <Compile Include="Semantics\SemanticState.cs" />
     <Compile Include="Semantics\SourceSymbolDeduper.cs" />
     <Compile Include="Semantics\SymbolUsageKind.cs" />
     <Compile Include="Semantics\TokenType.cs" />
@@ -176,6 +179,7 @@
     <Compile Include="SyntaxHighlight\MarkdownStyle.cs" />
     <Compile Include="SyntaxHighlight\SymbolMarkerStyle.cs" />
     <Compile Include="SyntaxHighlight\XmlCodeStyle.cs" />
+    <Compile Include="Semantics\CSharpParser.cs" />
     <Compile Include="Taggers\TaggerFactories.cs" />
     <Compile Include="Taggers\TransientClassificationTagHolder.cs" />
     <Compile Include="Taggers\Classifications.cs" />

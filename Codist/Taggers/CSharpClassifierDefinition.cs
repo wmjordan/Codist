@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.Utilities;
 
 namespace Codist.Taggers
 {
-	/// <summary>Classification type definition export for <see cref="CSharpTagger"/>.</summary>
+	/// <summary>Classification type definition export for <see cref="CSharpParser"/>.</summary>
 	static class CSharpClassificationDefinition
 	{
 #pragma warning disable 169, IDE0044

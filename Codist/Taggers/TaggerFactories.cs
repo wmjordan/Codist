@@ -73,12 +73,18 @@ namespace Codist.Taggers
 	{
 		static readonly string[] __TaggableRoles = new[] { PredefinedTextViewRoles.Document, PredefinedTextViewRoles.EmbeddedPeekTextView };
 
-		readonly Dictionary<ITextView, CSharpTagger> _Taggers = new Dictionary<ITextView, CSharpTagger>();
+		// note: we could have used WeakDictionary to hold our references,
+		//   and release references when the view is finalized
+		//   unfortunately memory leak in VS sometimes prevents IWpfTextView from being released properly,
+		//   thus the WeakDictionary can't be used
+		readonly Dictionary<ITextView, Dictionary<ITextBuffer, CSharpTagger>> _Taggers = new Dictionary<ITextView, Dictionary<ITextBuffer, CSharpTagger>>();
 
 		// note: cache the latest used tagger to improve performance
 		//   In C# code editor, even displaying the Quick Info will call the CreateTagger method,
 		//   thus we cache the last accessed tagger, identified by ITextView and ITextBuffer,
-		//   in CSharpTaggerProvider and CSharpTagger respectively, to avoid dictionary lookup
+		//   to avoid quite a few dictionary lookup operations
+		ITextView _LastView;
+		ITextBuffer _LastTextBuffer;
 		CSharpTagger _LastTagger;
 
 		// for debug info
@@ -98,32 +104,43 @@ namespace Codist.Taggers
 				) {
 				return null;
 			}
-			CSharpTagger tagger;
-			if (textView == _LastTagger?.View) {
-				tagger = _LastTagger;
+			if (_LastView == textView && _LastTextBuffer == buffer) {
+				return _LastTagger;
 			}
-			else if (_Taggers.TryGetValue(textView, out tagger)) {
-				_LastTagger = tagger;
+
+			if (_Taggers.TryGetValue(textView, out var bufferTaggers)) {
+				if (bufferTaggers.TryGetValue(buffer, out var tagger)) {
+					return tagger;
 			}
-			else {
-				_Taggers.Add(textView, _LastTagger = tagger = new CSharpTagger(this, textView as IWpfTextView));
-				++_taggerCount;
+				bufferTaggers.Add(_LastTextBuffer = buffer, _LastTagger = CreateTagger());
+				return _LastTagger;
+			}
+			_Taggers.Add(_LastView = textView, new Dictionary<ITextBuffer, CSharpTagger>() {
+					{ _LastTextBuffer = buffer, _LastTagger = CreateTagger() }
+				});
 				textView.Closed += TextView_Closed;
-			}
-			return tagger.GetTagger(buffer);
+			return _LastTagger;
 		}
 
 		void TextView_Closed(object sender, EventArgs e) {
 			var view = sender as ITextView;
 			view.Closed -= TextView_Closed;
-			if (_LastTagger?.View == view) {
+			if (_LastView == view) {
+				_LastTextBuffer = null;
 				_LastTagger = null;
 			}
-			if (_Taggers.TryGetValue(view, out var tagger)) {
-				tagger.Dispose();
+			if (_Taggers.TryGetValue(view, out var viewTaggers)) {
+				foreach (var item in viewTaggers) {
+					item.Value.Dispose();
+					--_taggerCount;
+				}
 				_Taggers.Remove(view);
-				--_taggerCount;
 			}
+			}
+
+		CSharpTagger CreateTagger() {
+			++_taggerCount;
+			return new CSharpTagger(CSharpParser.GetOrCreate(_LastView as IWpfTextView), _LastTextBuffer);
 		}
 	}
 
