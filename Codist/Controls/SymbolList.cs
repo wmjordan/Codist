@@ -416,10 +416,10 @@ namespace Codist.Controls
 			}
 
 			if (item.SyntaxNode != null) {
-				return CreateSyntaxNodeToolTip(item, sc);
+				return await CreateSyntaxNodeToolTipAsync(item, sc);
 			}
 			if (item.Symbol != null) {
-				return CreateSymbolToolTip(item, sc);
+				return await CreateSymbolToolTipAsync(item, sc);
 			}
 			if (item.Location != null) {
 				return CreateLocationToolTip(item, sc);
@@ -427,12 +427,12 @@ namespace Codist.Controls
 			return null;
 		}
 
-		object CreateSyntaxNodeToolTip(SymbolItem item, SemanticContext sc) {
+		async Task<object> CreateSyntaxNodeToolTipAsync(SymbolItem item, SemanticContext sc) {
 			if (item.Symbol != null) {
-				item.RefreshSymbol();
+				await item.RefreshSymbolAsync(default);
 			}
 			else {
-				item.SetSymbolToSyntaxNode();
+				await item.SetSymbolToSyntaxNodeAsync();
 			}
 			if (item.Symbol != null) {
 				var tip = ToolTipHelper.CreateToolTip(item.Symbol, ContainerType == SymbolListType.NodeList, sc);
@@ -445,8 +445,8 @@ namespace Codist.Controls
 			return ((Microsoft.CodeAnalysis.CSharp.SyntaxKind)item.SyntaxNode.RawKind).GetSyntaxBrief();
 		}
 
-		object CreateSymbolToolTip(SymbolItem item, SemanticContext sc) {
-			item.RefreshSymbol();
+		async Task<object> CreateSymbolToolTipAsync(SymbolItem item, SemanticContext sc) {
+			await item.RefreshSymbolAsync(default);
 			var tip = ToolTipHelper.CreateToolTip(item.Symbol, false, sc);
 			if (ContainerType == SymbolListType.SymbolReferrers && item.Location.IsInSource) {
 				// append location info to tip

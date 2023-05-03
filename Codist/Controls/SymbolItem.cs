@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using AppHelpers;
@@ -170,6 +172,9 @@ namespace Codist.Controls
 		internal void SetSymbolToSyntaxNode() {
 			Symbol = SyncHelper.RunSync(() => Container.SemanticContext.GetSymbolAsync(SyntaxNode));
 		}
+		internal async Task SetSymbolToSyntaxNodeAsync() {
+			Symbol = await Container.SemanticContext.GetSymbolAsync(SyntaxNode);
+		}
 		internal void RefreshSyntaxNode() {
 			var node = Container.SemanticContext.RelocateDeclarationNode(SyntaxNode);
 			if (node != null && node != SyntaxNode) {
@@ -178,10 +183,23 @@ namespace Codist.Controls
 		}
 		internal void RefreshSymbol() {
 			if (Symbol.ContainingAssembly.GetSourceType() != AssemblySource.Metadata) {
-				var symbol = Container.SemanticContext.RelocateSymbolAsync(Symbol).GetAwaiter().GetResult();
+				var symbol = Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.Run(() => Container.SemanticContext.RelocateSymbolAsync(Symbol));
 				if (symbol != null && symbol != Symbol) {
 					Symbol = symbol;
 				}
+			}
+		}
+		internal Task RefreshSymbolAsync(CancellationToken cancellationToken) {
+			if (Symbol.ContainingAssembly.GetSourceType() == AssemblySource.Metadata) {
+				return Task.CompletedTask;
+			}
+			return RefreshSymbolInternalAsync(cancellationToken);
+		}
+
+		async Task RefreshSymbolInternalAsync(CancellationToken cancellationToken) {
+			var symbol = await Container.SemanticContext.RelocateSymbolAsync(Symbol, cancellationToken);
+			if (symbol != null && symbol != Symbol) {
+				Symbol = symbol;
 			}
 		}
 
