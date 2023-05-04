@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using System.Windows.Controls;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
@@ -14,13 +13,12 @@ namespace Codist.SmartBars
 
 		ToolBar MyToolBar => ToolBar2;
 
-		protected override void AddCommands(CancellationToken cancellationToken) {
+		protected override void AddCommands() {
 			AddCommand(MyToolBar, IconIds.TagBold, R.CMD_MarkBold, ctx => WrapWith(ctx, "**", "**", true));
 			AddCommand(MyToolBar, IconIds.TagItalic, R.CMD_MarkItalic, ctx => WrapWith(ctx, "_", "_", true));
 			AddCommand(MyToolBar, IconIds.TagCode, R.CMD_MarkCode, ctx => WrapWith(ctx, "`", "`", true));
 			AddCommand(MyToolBar, IconIds.TagHyperLink, R.CMD_MarkLink, MakeUrl);
 			AddCommand(MyToolBar, IconIds.TagStrikeThrough, R.CMD_MarkStrikeThrough, ctx => WrapWith(ctx, "~~", "~~", true));
-			base.AddCommands(cancellationToken);
 		}
 
 		void MakeUrl(CommandContext ctx) {

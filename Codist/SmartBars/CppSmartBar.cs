@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using System.Windows.Controls;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Operations;
@@ -17,7 +16,7 @@ namespace Codist.SmartBars
 
 		ToolBar MyToolBar => ToolBar2;
 
-		protected override void AddCommands(CancellationToken cancellationToken) {
+		protected override void AddCommands() {
 			var isReadOnly = View.IsCaretInReadOnlyRegion();
 			AddCommand(MyToolBar, IconIds.GoToDefinition, R.CMD_GoToDefinition, ctx => {
 				TextEditorHelper.ExecuteEditorCommand("Edit.GoToDefinition", GetCurrentWord(ctx.View));
@@ -38,7 +37,6 @@ namespace Codist.SmartBars
 				});
 				AddEditorCommand(MyToolBar, IconIds.Uncomment, "Edit.UncommentSelection", R.CMD_UncommentSelection);
 			}
-			base.AddCommands(cancellationToken);
 		}
 
 		string GetCurrentWord(ITextView view) {

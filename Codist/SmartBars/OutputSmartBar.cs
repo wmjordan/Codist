@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using System.Windows.Controls;
 using Codist.Controls;
 using Microsoft.VisualStudio.Text.Editor;
@@ -18,8 +17,7 @@ namespace Codist.SmartBars
 
 		ToolBar MyToolBar => ToolBar;
 
-		protected override void AddCommands(CancellationToken cancellationToken) {
-			base.AddCommands(cancellationToken);
+		protected override void AddCommands() {
 			int p;
 			string t;
 			try {

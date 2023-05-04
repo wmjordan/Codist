@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
 using AppHelpers;
@@ -9,10 +10,10 @@ using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
+using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 using R = Codist.Properties.Resources;
 
 namespace Codist.SmartBars
@@ -30,7 +31,7 @@ namespace Codist.SmartBars
 		ISymbol _Symbol;
 
 		public CSharpSmartBar(IWpfTextView view, Microsoft.VisualStudio.Text.Operations.ITextSearchService2 textSearchService) : base(view, textSearchService) {
-			ThreadHelper.ThrowIfNotOnUIThread();
+			TH.ThrowIfNotOnUIThread();
 			_Context = SemanticContext.GetOrCreateSingletonInstance(view);
 			_SymbolListContainer = TextViewOverlay.GetOrCreate(view);
 			view.Closed += View_Closed;
@@ -38,11 +39,10 @@ namespace Codist.SmartBars
 
 		ToolBar MyToolBar => ToolBar2;
 
-		protected override void AddCommands(CancellationToken cancellationToken) {
-			if (UpdateSemanticModel() && _Context.NodeIncludeTrivia != null) {
-				AddContextualCommands(cancellationToken);
+		protected override async Task AddCommandsAsync(CancellationToken cancellationToken) {
+			if (await UpdateAsync() && _Context.NodeIncludeTrivia != null) {
+				await AddContextualCommands(cancellationToken);
 			}
-			base.AddCommands(cancellationToken);
 		}
 
 		static CommandItem CreateCommandMenu(int imageId, string title, string emptyMenuTitle, Action<CommandContext, MenuItem> itemPopulator) {
@@ -73,7 +73,7 @@ namespace Codist.SmartBars
 			};
 		}
 
-		void AddContextualCommands(CancellationToken cancellationToken) {
+		async Task AddContextualCommands(CancellationToken cancellationToken) {
 			var isReadOnly = _Context.View.IsCaretInReadOnlyRegion();
 			var node = _Context.NodeIncludeTrivia;
 			var nodeKind = node.Kind();
@@ -100,7 +100,7 @@ namespace Codist.SmartBars
 								|| nodeKind == SyntaxKind.SingleVariableDesignation
 								|| node is AccessorDeclarationSyntax) {
 								// selection is within a symbol
-								_Symbol = SyncHelper.RunSync(() => _Context.GetSymbolAsync(cancellationToken));
+								_Symbol = await _Context.GetSymbolAsync(cancellationToken);
 								if (_Symbol != null) {
 									AddSymbolCommands(nodeKind);
 								}
@@ -131,7 +131,7 @@ namespace Codist.SmartBars
 							}
 							if (_Symbol != null) {
 								if (isReadOnly == false) {
-									AddCommand(MyToolBar, IconIds.SelectAll, R.CMD_SelectSymbolInDocument, SelectSymbolOccurrences);
+									AddCommand(MyToolBar, IconIds.SelectAll, R.CMD_SelectSymbolInDocument, SelectSymbolOccurrencesAsync);
 								}
 								if (Config.Instance.Features.MatchFlags(Features.SyntaxHighlight)
 									&& Taggers.SymbolMarkManager.CanBookmark(_Symbol)) {
@@ -230,23 +230,22 @@ namespace Codist.SmartBars
 			AddCommand(MyToolBar, IconIds.SymbolAnalysis, R.CMD_AnalyzeSymbol, ShowSymbolContextMenu);
 		}
 
-		void SelectSymbolOccurrences(CommandContext ctx) {
+		async Task SelectSymbolOccurrencesAsync(CommandContext ctx) {
 			ctx.KeepToolBar(false);
-			if (UpdateSemanticModel() == false) {
-				return;
-			}
-			var selections = ctx.View.GetMultiSelectionBroker();
-			var symbol = _Symbol;
-			SelectSymbolDefinitionAndReferences(selections, symbol);
-			if (symbol.Kind == SymbolKind.Method
-				&& symbol is IMethodSymbol m && m.MethodKind == MethodKind.Constructor) {
-				SelectSymbolDefinitionAndReferences(selections, symbol.ContainingType);
+			if (await UpdateAsync()) {
+				var selections = ctx.View.GetMultiSelectionBroker();
+				var symbol = _Symbol;
+				await SelectSymbolDefinitionAndReferencesAsync(selections, symbol);
+				if (symbol.Kind == SymbolKind.Method
+					&& symbol is IMethodSymbol m && m.MethodKind == MethodKind.Constructor) {
+					await SelectSymbolDefinitionAndReferencesAsync(selections, symbol.ContainingType);
+				}
 			}
 		}
 
-		void SelectSymbolDefinitionAndReferences(IMultiSelectionBroker selections, ISymbol symbol) {
+		async Task SelectSymbolDefinitionAndReferencesAsync(IMultiSelectionBroker selections, ISymbol symbol) {
 			var snapshot = selections.CurrentSnapshot;
-			foreach (var refs in SyncHelper.RunSync(() => Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindReferencesAsync(symbol, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.Create(_Context.Document), default))) {
+			foreach (var refs in await Microsoft.CodeAnalysis.FindSymbols.SymbolFinder.FindReferencesAsync(symbol, _Context.Document.Project.Solution, System.Collections.Immutable.ImmutableHashSet.Create(_Context.Document), default)) {
 				selections.AddSelections(refs.Locations.Select(l => l.Location.SourceSpan));
 			}
 			foreach (var sr in symbol.Locations) {
