@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.VisualStudio.Language.Intellisense;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using R = Codist.Properties.Resources;
 
@@ -22,7 +21,7 @@ namespace Codist.QuickInfo
 		}
 
 		static async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			if (QuickInfoOverride.CheckCtrlSuppression()) {
 				return null;
 			}

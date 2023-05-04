@@ -3,10 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Language.Intellisense;
-using Microsoft.VisualStudio.Shell;
 
 namespace Codist.QuickInfo
 {
@@ -38,7 +36,7 @@ namespace Codist.QuickInfo
 		}
 
 		public async Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			return QuickInfoOverride.CheckCtrlSuppression() == false && _Background != null
 				? new QuickInfoItem(null, new BackgroundController(_Background).Tag())
 				: null;

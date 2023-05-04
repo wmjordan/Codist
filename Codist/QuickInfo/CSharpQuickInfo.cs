@@ -60,7 +60,7 @@ namespace Codist.QuickInfo
 			SyntaxNode node;
 			ImmutableArray<ISymbol> candidates;
 			SyntaxToken token;
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			if (QuickInfoOverride.CheckCtrlSuppression()) {
 				return null;
 			}

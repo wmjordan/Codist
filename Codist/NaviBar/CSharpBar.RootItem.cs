@@ -15,7 +15,6 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
-using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist.NaviBar
 {
@@ -173,7 +172,7 @@ namespace Codist.NaviBar
 				SyncHelper.CancelAndDispose(ref Bar._CancellationSource, true);
 				var ct = Bar._CancellationSource.GetToken();
 				try {
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
+					await SyncHelper.SwitchToMainThreadAsync(ct);
 					_Menu.ItemsSource = null;
 					_Menu.ClearSymbols();
 					var s = _FinderBox.Text.Trim();
@@ -200,7 +199,7 @@ namespace Codist.NaviBar
 							await FindInProjectAsync(s, ct);
 							break;
 					}
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
+					await SyncHelper.SwitchToMainThreadAsync(ct);
 					_Menu.RefreshItemsSource();
 					_Menu.UpdateLayout();
 				}

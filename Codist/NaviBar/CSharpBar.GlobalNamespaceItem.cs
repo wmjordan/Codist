@@ -74,7 +74,7 @@ namespace Codist.NaviBar
 				var d = Bar._SemanticContext.Document;
 				if (d != null) {
 					var items = await Bar._SemanticContext.GetNamespacesAndTypesAsync((await d.Project.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace, cancellationToken).ConfigureAwait(false);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 				}
 			}
@@ -97,7 +97,7 @@ namespace Codist.NaviBar
 				var d = ctx.Document;
 				if (d != null) {
 					var items = await ctx.GetNamespacesAndTypesAsync((await d.Project.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).GlobalNamespace, cancellationToken).ConfigureAwait(false);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 				}
 				_Menu.RefreshItemsSource(true);

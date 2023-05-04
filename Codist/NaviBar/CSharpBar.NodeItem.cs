@@ -15,7 +15,6 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
-using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist.NaviBar
 {
@@ -81,7 +80,7 @@ namespace Codist.NaviBar
 					var ct = Bar._CancellationSource.GetToken();
 					try {
 						await CreateMenuForTypeSymbolNodeAsync(ct);
-						await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
+						await SyncHelper.SwitchToMainThreadAsync(ct);
 
 						if (_Menu.Symbols.Count == 0) {
 							goto GOTO_DEFINITION;

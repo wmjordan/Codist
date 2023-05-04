@@ -44,7 +44,7 @@ namespace Codist.NaviBar
 				var ct = Bar._CancellationSource.GetToken();
 				try {
 					await CreateMenuForNamespaceNodeAsync(ct);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
+					await SyncHelper.SwitchToMainThreadAsync(ct);
 					_FilterBox.UpdateNumbers(_Menu.Symbols);
 					Bar.ShowMenu(this, _Menu);
 				}
@@ -78,7 +78,7 @@ namespace Codist.NaviBar
 				Bar.SetupSymbolListMenu(_Menu);
 				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(false);
 				var items = await Bar._SemanticContext.GetNamespacesAndTypesAsync(Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
-				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 				_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 			}
 
@@ -95,7 +95,7 @@ namespace Codist.NaviBar
 				if (sm != ctx.SemanticModel) {
 					_Menu.ClearSymbols();
 					var items = await ctx.GetNamespacesAndTypesAsync(Symbol as INamespaceSymbol, cancellationToken).ConfigureAwait(false);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 					_Menu.AddNamespaceItems(items, Bar.GetChildSymbolOnNaviBar(this));
 					_Menu.RefreshItemsSource(true);
 				}

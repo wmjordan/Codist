@@ -8,7 +8,6 @@ using System.Windows;
 using System.Windows.Input;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.FindSymbols;
-using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 using R = Codist.Properties.Resources;
 
 namespace Codist.Controls
@@ -16,10 +15,9 @@ namespace Codist.Controls
 	static class SymbolCommands
 	{
 		internal static async Task FindReferrersAsync(this SemanticContext context, ISymbol symbol, Predicate<ISymbol> definitionFilter = null, Predicate<SyntaxNode> nodeFilter = null) {
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			await SyncHelper.SwitchToMainThreadAsync(default);
 			var filter = Keyboard.Modifiers == ModifierKeys.Control ? (s => s == symbol) : definitionFilter;
-			var referrers = await symbol.FindReferrersAsync(context.Document.Project, filter, nodeFilter).ConfigureAwait(false);
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			var referrers = await symbol.FindReferrersAsync(context.Document.Project, filter, nodeFilter);
 			var m = new SymbolMenu(context, SymbolListType.SymbolReferrers);
 			m.Title.SetGlyph(ThemeHelper.GetImage(symbol.GetImageId()))
 				.AddSymbol(symbol, null, true, SymbolFormatter.Instance)
@@ -46,13 +44,13 @@ namespace Codist.Controls
 
 		internal static async Task FindDerivedClassesAsync(this SemanticContext context, ISymbol symbol) {
 			var classes = (await SymbolFinder.FindDerivedClassesAsync(symbol as INamedTypeSymbol, context.Document.Project.Solution).ConfigureAwait(false)).ToList();
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			await SyncHelper.SwitchToMainThreadAsync(default);
 			ShowSymbolMenuForResult(symbol, context, classes, R.T_DerivedClasses, false);
 		}
 
 		internal static async Task FindSubInterfacesAsync(this SemanticContext context, ISymbol symbol) {
 			var interfaces = await (symbol as INamedTypeSymbol).FindDerivedInterfacesAsync(context.Document.Project, default).ConfigureAwait(false);
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			await SyncHelper.SwitchToMainThreadAsync(default);
 			ShowSymbolMenuForResult(symbol, context, interfaces, R.T_DerivedInterfaces, false);
 		}
 
@@ -60,7 +58,7 @@ namespace Codist.Controls
 			var ovs = ImmutableArray.CreateBuilder<ISymbol>();
 			ovs.AddRange(await SymbolFinder.FindOverridesAsync(symbol, context.Document.Project.Solution).ConfigureAwait(false));
 			int c = ovs.Count;
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			await SyncHelper.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context);
 			foreach (var item in ovs) {
 				m.Add(item, item.ContainingType);
@@ -81,7 +79,7 @@ namespace Codist.Controls
 			}
 			var implementations = new List<ISymbol>(await SymbolFinder.FindImplementationsAsync(s, context.Document.Project.Solution).ConfigureAwait(false));
 			implementations.Sort(CodeAnalysisHelper.CompareSymbol);
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			await SyncHelper.SwitchToMainThreadAsync(default);
 			var m = new SymbolMenu(context);
 			var d = new SourceSymbolDeduper();
 			if (symbol.Kind == SymbolKind.NamedType) {
@@ -122,7 +120,7 @@ namespace Codist.Controls
 			string countLabel;
 			if (symbol.Kind == SymbolKind.Namespace) {
 				var items = await context.GetNamespacesAndTypesAsync(symbol as INamespaceSymbol, default).ConfigureAwait(false);
-				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
+				await SyncHelper.SwitchToMainThreadAsync();
 				m = new SymbolMenu(context, SymbolListType.TypeList);
 				m.AddRange(items.Select(s => new SymbolItem(s, m, false)));
 				countLabel = R.T_NamespaceMembers.Replace("{count}", items.Length.ToString());
@@ -131,7 +129,7 @@ namespace Codist.Controls
 				var members = symbol.FindMembers();
 				int count = members[0].members.Count;
 				var items = ImmutableArray.CreateBuilder<SymbolItem>(members.Sum(i => i.members.Count));
-				await TH.JoinableTaskFactory.SwitchToMainThreadAsync();
+				await SyncHelper.SwitchToMainThreadAsync();
 				m = new SymbolMenu(context, symbol.Kind == SymbolKind.Namespace ? SymbolListType.TypeList : SymbolListType.None);
 				foreach (var item in members) {
 					var t = item.type;
@@ -162,26 +160,23 @@ namespace Codist.Controls
 		}
 
 		internal static async Task FindInstanceAsParameterAsync(this SemanticContext context, ISymbol symbol) {
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			await SyncHelper.SwitchToMainThreadAsync(default);
 			var strictMatch = Keyboard.Modifiers == ModifierKeys.Control;
-			var members = await(symbol as ITypeSymbol).FindInstanceAsParameterAsync(context.Document.Project, strictMatch, default).ConfigureAwait(false);
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			var members = await(symbol as ITypeSymbol).FindInstanceAsParameterAsync(context.Document.Project, strictMatch, default);
 			ShowSymbolMenuForResult(symbol, context, members, R.T_AsParameter, true);
 		}
 
 		internal static async Task FindInstanceProducerAsync(this SemanticContext context, ISymbol symbol) {
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			await SyncHelper.SwitchToMainThreadAsync(default);
 			var strict = Keyboard.Modifiers == ModifierKeys.Control;
-			var members = await(symbol as ITypeSymbol).FindSymbolInstanceProducerAsync(context.Document.Project, strict, default).ConfigureAwait(false);
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			var members = await(symbol as ITypeSymbol).FindSymbolInstanceProducerAsync(context.Document.Project, strict, default);
 			ShowSymbolMenuForResult(symbol, context, members, R.T_Producers, true);
 		}
 
 		internal static async Task FindExtensionMethodsAsync(this SemanticContext context, ISymbol symbol) {
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			await SyncHelper.SwitchToMainThreadAsync(default);
 			var strict = Keyboard.Modifiers == ModifierKeys.Control;
-			var members = await(symbol as ITypeSymbol).FindExtensionMethodsAsync(context.Document.Project, strict, default).ConfigureAwait(false);
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+			var members = await(symbol as ITypeSymbol).FindExtensionMethodsAsync(context.Document.Project, strict, default);
 			ShowSymbolMenuForResult(symbol, context, members, R.T_Extensions, true);
 		}
 

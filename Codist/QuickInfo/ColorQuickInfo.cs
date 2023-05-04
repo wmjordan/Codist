@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using AppHelpers;
 using Microsoft.VisualStudio.Language.Intellisense;
-using Microsoft.VisualStudio.Shell;
 
 namespace Codist.QuickInfo
 {
@@ -11,12 +10,12 @@ namespace Codist.QuickInfo
 	{
 		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			return Config.Instance.QuickInfoOptions.MatchFlags(QuickInfoOptions.Color) == false
-				? System.Threading.Tasks.Task.FromResult<QuickInfoItem>(null)
+				? Task.FromResult<QuickInfoItem>(null)
 				: InternalGetQuickInfoItemAsync(session, cancellationToken);
 		}
 
 		static async Task<QuickInfoItem> InternalGetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			if (QuickInfoOverride.CheckCtrlSuppression()) {
 				return null;
 			}

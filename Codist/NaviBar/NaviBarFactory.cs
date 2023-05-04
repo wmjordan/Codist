@@ -117,7 +117,7 @@ namespace Codist.NaviBar
 				if (view?.IsClosed == false) {
 					view.Properties.RemoveProperty(nameof(NaviBar));
 					await Task.Delay(1000).ConfigureAwait(false);
-					await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+					await SyncHelper.SwitchToMainThreadAsync(default);
 					if (view.VisualElement.IsVisible) {
 						AddNaviBar(view, e);
 					}

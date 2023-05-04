@@ -10,7 +10,6 @@ using System.Windows.Media;
 using AppHelpers;
 using Codist.Controls;
 using Microsoft.VisualStudio.PlatformUI;
-using Microsoft.VisualStudio.Shell;
 using R = Codist.Properties.Resources;
 using Task = System.Threading.Tasks.Task;
 
@@ -78,7 +77,7 @@ namespace Codist.Display
 			__RamMeter?.Sample();
 			__DriveMeter?.Sample();
 			__NetworkMeter?.Sample();
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+			await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 			if (__IsInited == 0) {
 				Init();
 				return;

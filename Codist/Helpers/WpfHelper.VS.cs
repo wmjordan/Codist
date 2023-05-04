@@ -10,7 +10,6 @@ using System.Xml.Linq;
 using Codist.Controls;
 using Microsoft.CodeAnalysis;
 using Microsoft.VisualStudio.Shell;
-using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 using WpfBrush = System.Windows.Media.Brush;
 using WpfBrushes = System.Windows.Media.Brushes;
 
@@ -154,7 +153,7 @@ namespace Codist
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void ShowContextMenu(object sender, MouseButtonEventArgs e) {
-				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+				await SyncHelper.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {
 					ContextMenu.IsOpen = true;
 					return;
@@ -162,7 +161,7 @@ namespace Codist
 				var ctx = SemanticContext.GetHovered();
 				if (ctx != null) {
 					await ctx.UpdateAsync(default);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+					await SyncHelper.SwitchToMainThreadAsync(default);
 					var s = _Symbol.GetUnderlyingSymbol();
 					if (s != null) {
 						var m = new CSharpSymbolContextMenu(s, s.GetSyntaxNode(), ctx);
@@ -248,7 +247,7 @@ namespace Codist
 
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void ShowContextMenu(object sender, MouseButtonEventArgs e) {
-				await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+				await SyncHelper.SwitchToMainThreadAsync(default);
 				if (ContextMenu != null) {
 					ContextMenu.IsOpen = true;
 					return;
@@ -256,7 +255,7 @@ namespace Codist
 				var ctx = SemanticContext.GetHovered();
 				if (ctx != null) {
 					await ctx.UpdateAsync(default);
-					await TH.JoinableTaskFactory.SwitchToMainThreadAsync(default);
+					await SyncHelper.SwitchToMainThreadAsync(default);
 					var s = _Symbol;
 					if (s != null) {
 						var m = new CSharpSymbolContextMenu(s, s.GetSyntaxNode(), ctx);

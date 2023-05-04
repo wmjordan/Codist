@@ -17,7 +17,6 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 using Task = System.Threading.Tasks.Task;
-using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist.NaviBar
 {
@@ -149,7 +148,7 @@ namespace Codist.NaviBar
 
 		async Task UpdateAsync(CancellationToken token) {
 			var nodes = await UpdateModelAndGetContainingNodesAsync(token);
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(token);
+			await SyncHelper.SwitchToMainThreadAsync(token);
 			int ic = Items.Count, c = Math.Min(ic, nodes.Length);
 			int i, i2;
 			#region Remove outdated nodes on NaviBar
@@ -252,7 +251,7 @@ namespace Codist.NaviBar
 					position = n.SpanStart;
 				}
 			}
-			await TH.JoinableTaskFactory.SwitchToMainThreadAsync(token);
+			await SyncHelper.SwitchToMainThreadAsync(token);
 			return _SemanticContext.GetContainingNodes(position,
 				Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail),
 				Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionOnBar));

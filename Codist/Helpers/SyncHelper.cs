@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ThreadHelper = Microsoft.VisualStudio.Shell.ThreadHelper;
@@ -8,6 +9,12 @@ namespace Codist
 {
 	static class SyncHelper
 	{
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD004:Await SwitchToMainThreadAsync", Justification = "Shortcut")]
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Microsoft.VisualStudio.Threading.JoinableTaskFactory.MainThreadAwaitable SwitchToMainThreadAsync(CancellationToken cancellationToken = default) {
+			return ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+		}
+
 		public static void RunSync(Func<Task> func) {
 			try {
 				ThreadHelper.JoinableTaskFactory.Run(func);

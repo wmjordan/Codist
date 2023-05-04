@@ -75,7 +75,7 @@ namespace Codist.Margins
 						await m.UpdateAsync(e.Data, ct).ConfigureAwait(false);
 					}
 				}
-				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
+				await SyncHelper.SwitchToMainThreadAsync(ct);
 				InvalidateVisual();
 			}
 			catch (OperationCanceledException) {
@@ -613,7 +613,7 @@ namespace Codist.Margins
 				var ct = SyncHelper.CancelAndRetainToken(ref _Cancellation);
 				try {
 					if (await UpdateAsync(null, ct).ConfigureAwait(false)) {
-						await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(ct);
+						await SyncHelper.SwitchToMainThreadAsync(ct);
 						_Margin.InvalidateVisual();
 					}
 				}

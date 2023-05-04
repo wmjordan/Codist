@@ -55,7 +55,7 @@ namespace Codist.Commands
 		public static async Task InitializeAsync(AsyncPackage package) {
 			// Switch to the main thread - the call to AddCommand in SymbolFinderWindowCommand's constructor requires
 			// the UI thread.
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
+			await SyncHelper.SwitchToMainThreadAsync(package.DisposalToken);
 
 			var commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
 			Instance = new SymbolFinderWindowCommand(package, commandService);
