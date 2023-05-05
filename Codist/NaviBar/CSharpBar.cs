@@ -411,8 +411,8 @@ namespace Codist.NaviBar
 			return p != -1 && p < Items.Count - 1 ? (Items[p + 1] as ISymbolContainer)?.Symbol : null;
 		}
 
-		static void AddParameterList(TextBlock t, SyntaxNode node) {
-			ParameterListSyntax p = null;
+		static void AddParameterList(TextBlock text, SyntaxNode node) {
+			BaseParameterListSyntax p;
 			if (node is BaseMethodDeclarationSyntax bm) {
 				p = bm.ParameterList;
 			}
@@ -422,8 +422,14 @@ namespace Codist.NaviBar
 			else if (node is OperatorDeclarationSyntax o) {
 				p = o.ParameterList;
 			}
+			else if (node is IndexerDeclarationSyntax id) {
+				p = id.ParameterList;
+			}
+			else {
+				return;
+			}
 			if (p != null) {
-				t.Append(p.GetParameterListSignature(Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName)), ThemeHelper.SystemGrayTextBrush);
+				text.Append(p.GetParameterListSignature(Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.ParameterListShowParamName)), ThemeHelper.SystemGrayTextBrush);
 			}
 		}
 

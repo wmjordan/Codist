@@ -795,7 +795,7 @@ namespace Codist
 				case SyntaxKind.EventFieldDeclaration: return GetVariableSignature(((EventFieldDeclarationSyntax)node).Declaration, position);
 				case SyntaxKind.FieldDeclaration: return GetVariableSignature(((FieldDeclarationSyntax)node).Declaration, position);
 				case SyntaxKind.DestructorDeclaration: return ((DestructorDeclarationSyntax)node).Identifier.Text;
-				case SyntaxKind.IndexerDeclaration: return "Indexer";
+				case SyntaxKind.IndexerDeclaration: return "this";
 				case SyntaxKind.OperatorDeclaration: return ((OperatorDeclarationSyntax)node).OperatorToken.Text;
 				case SyntaxKind.PropertyDeclaration: return ((PropertyDeclarationSyntax)node).Identifier.Text;
 				case SyntaxKind.EnumMemberDeclaration: return ((EnumMemberDeclarationSyntax)node).Identifier.Text;
@@ -932,13 +932,14 @@ namespace Codist
 			}
 		}
 
-		public static string GetParameterListSignature(this ParameterListSyntax parameters, bool useParamName) {
+		public static string GetParameterListSignature(this BaseParameterListSyntax parameters, bool useParamName) {
 			if (parameters.Parameters.Count == 0) {
 				return "()";
 			}
+			var isIndexer = parameters.Parent.IsKind(SyntaxKind.IndexerDeclaration);
 			using (var r = Microsoft.VisualStudio.Utilities.ReusableStringBuilder.AcquireDefault(30)) {
 				var sb = r.Resource;
-				sb.Append('(');
+				sb.Append(isIndexer ? '[' : '(');
 				foreach (var item in parameters.Parameters) {
 					if (sb.Length > 1) {
 						sb.Append(',');
@@ -959,10 +960,11 @@ namespace Codist
 						sb.Append(']');
 					}
 				}
-				sb.Append(')');
+				sb.Append(isIndexer ? ']' : ')');
 				return sb.ToString();
 			}
 		}
+
 		public static TStartDirective GetPrecedingDirective<TStartDirective, TEndDirective>(this TEndDirective directive, SyntaxKind startSyntaxKind, SyntaxKind endSyntaxKind)
 			where TStartDirective : DirectiveTriviaSyntax
 			where TEndDirective : DirectiveTriviaSyntax {
