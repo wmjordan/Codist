@@ -62,9 +62,9 @@ namespace Codist.Commands
 			Section s;
 
 			var view = TextEditorHelper.GetActiveWpfInteractiveView();
-				if (view?.VisualElement.IsFocused == false) {
+			if (view?.VisualElement.IsFocused == false) {
 				view = window.Document?.GetActiveWpfDocumentView();
-				}
+			}
 
 			if (view != null) {
 				var d = view.TextBuffer.GetTextDocument();
@@ -86,6 +86,7 @@ namespace Codist.Commands
 
 				AppendNameValue(s, R.T_CaretPosition, view.Caret.Position.BufferPosition.Position);
 				AppendNameValue(s, "Caret.OverwriteMode", view.Caret.OverwriteMode);
+				AppendNameValue(s, "Caret.ContainingTextViewLine.Extent.Length", view.Caret.ContainingTextViewLine.Extent.Length);
 
 				AppendNameValue(s, "ViewportLeft", view.ViewportLeft);
 				AppendNameValue(s, "ViewportTop", view.ViewportTop);
@@ -382,6 +383,7 @@ namespace Codist.Commands
 			}
 		}
 
+		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.CheckedInCaller)]
 		static void ShowDTEProperties(BlockCollection blocks) {
 			var s = NewSection(blocks, "DTE", SubSectionFontSize);
 			var dte = CodistPackage.DTE;
