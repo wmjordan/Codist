@@ -38,14 +38,14 @@ namespace Codist.Commands
 		[SuppressMessage("Usage", Suppression.VSTHRD010, Justification = Suppression.EventHandler)]
 		static Configuration GetSelectedProjectConfigurationExceptActive(string rowName) {
 			var cm = GetSelectedProject()?.ConfigurationManager;
-			if (cm?.ConfigurationRowNames is object[] rows) {
-				if (cm.ActiveConfiguration.ConfigurationName == rowName) {
-					return null;
-				}
-				for (int i = 0; i < rows.Length; i++) {
-					if (rows[i] is string s && s == rowName) {
-						return cm.Item(i+1);
-					}
+			if (cm == null || cm.ActiveConfiguration.ConfigurationName == rowName) {
+				return null;
+			}
+			var p = cm.ActiveConfiguration.PlatformName;
+			for (int i = cm.Count; i > 0; i--) {
+				var item = cm.Item(i);
+				if (item.ConfigurationName == rowName && item.PlatformName == p) {
+					return item;
 				}
 			}
 			return null;
