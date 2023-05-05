@@ -152,17 +152,20 @@ namespace Codist.NaviBar
 			}
 
 			async Task RefreshItemsAsync(CancellationToken cancellationToken) {
-				var sm = Bar._SemanticContext.SemanticModel;
-				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
-				if (sm != Bar._SemanticContext.SemanticModel) {
+				var ctx = Bar._SemanticContext;
+				var sm = ctx.SemanticModel;
+				await ctx.UpdateAsync(cancellationToken).ConfigureAwait(false);
+				if (sm != ctx.SemanticModel) {
 					_Menu.ClearSymbols();
 					_Symbol = null;
-					Node = Bar._SemanticContext.RelocateDeclarationNode(Node);
+					Node = await ctx.RelocateDeclarationNodeAsync(Node).ConfigureAwait(false);
 					await AddItemsAsync(Node, cancellationToken);
+					await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 					_Menu.RefreshItemsSource(true);
 					return;
 				}
 				// select node item which contains caret
+				await SyncHelper.SwitchToMainThreadAsync(cancellationToken);
 				var pos = Bar.View.GetCaretPosition();
 				foreach (var item in _Menu.Symbols) {
 					if (item.Usage != SymbolUsageKind.Container) {
@@ -202,8 +205,8 @@ namespace Codist.NaviBar
 			}
 
 			async Task AddExternalItemsAsync(SyntaxNode node, MemberListOptions externals, CancellationToken cancellationToken) {
-				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(true);
-				var symbol = await Bar._SemanticContext.GetSymbolAsync(node, cancellationToken).ConfigureAwait(true);
+				await Bar._SemanticContext.UpdateAsync(cancellationToken).ConfigureAwait(false);
+				var symbol = await Bar._SemanticContext.GetSymbolAsync(node, cancellationToken).ConfigureAwait(false);
 				if (symbol == null) {
 					return;
 				}
@@ -237,7 +240,7 @@ namespace Codist.NaviBar
 			}
 
 			async Task AddExternalNodesAsync(SyntaxReference item, string textOverride, bool includeDirectives, CancellationToken cancellationToken) {
-				var externalNode = await item.GetSyntaxAsync(cancellationToken);
+				var externalNode = await item.GetSyntaxAsync(cancellationToken).ConfigureAwait(false);
 				var i = _Menu.Add(externalNode);
 				i.Location = item.SyntaxTree.GetLocation(item.Span);
 				i.Content.Text = textOverride ?? System.IO.Path.GetFileName(item.SyntaxTree.FilePath);

@@ -113,7 +113,7 @@ namespace Codist
 		/// </summary>
 		/// <param name="node">The old node.</param>
 		/// <returns>The new node.</returns>
-		public SyntaxNode RelocateDeclarationNode(SyntaxNode node) {
+		public async Task<SyntaxNode> RelocateDeclarationNodeAsync(SyntaxNode node) {
 			if (node.SyntaxTree == SemanticModel.SyntaxTree) {
 				// the syntax tree is the same (not changed)
 				return node;
@@ -128,7 +128,7 @@ namespace Codist
 			if (String.Equals(node.SyntaxTree.FilePath, SemanticModel.SyntaxTree.FilePath, StringComparison.OrdinalIgnoreCase) == false) {
 				// not the same document
 				var d = GetDocument(node.SyntaxTree);
-				if (d == null || (root = SyncHelper.RunSync(() => d.GetSemanticModelAsync())?.SyntaxTree.GetCompilationUnitRoot()) == null) {
+				if (d == null || (root = (await d.GetSemanticModelAsync())?.SyntaxTree.GetCompilationUnitRoot()) == null) {
 					// document no longer exists
 					return null;
 				}

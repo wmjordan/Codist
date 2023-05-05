@@ -38,6 +38,7 @@ namespace Codist.Controls
 				PlacementTarget = this
 			};
 			Resources = SharedDictionaryManager.SymbolList;
+			PreviewKeyDown += SymbolList_PreviewKeyDown;
 		}
 
 		public SemanticContext SemanticContext { get; private set; }
@@ -101,17 +102,23 @@ namespace Codist.Controls
 			}
 		}
 
-		protected override void OnPreviewKeyDown(KeyEventArgs e) {
-			base.OnPreviewKeyDown(e);
+		void SymbolList_PreviewKeyDown(object sender, KeyEventArgs e) {
 			if (e.OriginalSource is TextBox == false || e.Handled) {
 				return;
 			}
 			if (e.Key == Key.Enter) {
-				var item = SelectedIndex == -1 && HasItems
+				GoToSourceAsync(SelectedIndex == -1 && HasItems
 					? ItemContainerGenerator.Items[0] as SymbolItem
-					: SelectedItem as SymbolItem;
-				item?.GoToSource();
+					: SelectedItem as SymbolItem);
 				e.Handled = true;
+			}
+
+			async void GoToSourceAsync(SymbolItem i) {
+				try {
+					await i?.GoToSourceAsync();
+		}
+				catch (OperationCanceledException) {
+				}
 			}
 		}
 
@@ -411,7 +418,7 @@ namespace Codist.Controls
 			var sc = SemanticContext;
 			if ((item = li.Content as SymbolItem) == null
 				|| sc == null
-				|| await sc.UpdateAsync(default).ConfigureAwait(true) == false) {
+				|| await sc.UpdateAsync(default) == false) {
 				return null;
 			}
 
@@ -641,8 +648,9 @@ namespace Codist.Controls
 			}
 
 			async void Handler(SymbolItem i, MouseEventArgs args) {
-				if (await SemanticContext.UpdateAsync(default).ConfigureAwait(true)) {
-					i.RefreshSyntaxNode();
+				if (await SemanticContext.UpdateAsync(default).ConfigureAwait(false)) {
+					await i.RefreshSyntaxNodeAsync().ConfigureAwait(false);
+					await SyncHelper.SwitchToMainThreadAsync();
 					var s = args.Source as FrameworkElement;
 					MouseMove -= BeginDragHandler;
 					DragOver += DragOverHandler;
@@ -693,12 +701,17 @@ namespace Codist.Controls
 			e.Handled = true;
 		}
 
-		void DropHandler(object sender, DragEventArgs e) {
+		async void DropHandler(object sender, DragEventArgs e) {
 			var li = GetDragEventTarget(e);
 			SymbolItem source, target;
 			if (li != null && (target = li.Content as SymbolItem)?.SyntaxNode != null
 				&& (source = GetDragData(e)) != null) {
-				target.RefreshSyntaxNode();
+				try {
+				await target.RefreshSyntaxNodeAsync();
+				}
+				catch (OperationCanceledException) {
+					return;
+				}
 				var copy = e.KeyStates.MatchFlags(DragDropKeyStates.ControlKey);
 				var before = e.GetPosition(li).Y < li.ActualHeight / 2;
 				SemanticContext.View.CopyOrMoveSyntaxNode(source.SyntaxNode, target.SyntaxNode, copy, before);

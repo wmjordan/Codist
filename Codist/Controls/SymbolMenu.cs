@@ -89,10 +89,15 @@ namespace Codist.Controls
 			_FilterBox.UpdateNumbers(Symbols);
 		}
 
-		void MenuItemSelect(object sender, MouseButtonEventArgs e) {
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
+		async void MenuItemSelect(object sender, MouseButtonEventArgs e) {
 			if (e.OccursOn<ListBoxItem>()) {
 				_ExternalAdornment.FocusOnTextView();
-				((SymbolItem)((VirtualList)sender).SelectedItem)?.GoToSource();
+				try {
+					await ((SymbolItem)((VirtualList)sender).SelectedItem)?.GoToSourceAsync();
+				}
+				catch (OperationCanceledException) {
+				}
 			}
 		}
 

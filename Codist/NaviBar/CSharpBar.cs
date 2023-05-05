@@ -364,8 +364,19 @@ namespace Codist.NaviBar
 				return;
 			}
 			View.VisualElement.Focus();
-			if ((menu.SelectedItem as SymbolItem)?.GoToSource() == true) {
-				HideMenu();
+			if (menu.SelectedItem is SymbolItem i) {
+				GoToSourceAndHideMenuAsync(this, i);
+			}
+
+			async void GoToSourceAndHideMenuAsync(CSharpBar me, SymbolItem item) {
+				try {
+					if (await item.GoToSourceAsync()) {
+						me.HideMenu();
+					}
+				}
+				catch (OperationCanceledException) {
+					// ignore
+				}
 			}
 		}
 
