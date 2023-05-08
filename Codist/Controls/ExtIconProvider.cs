@@ -45,6 +45,9 @@ namespace Codist.Controls
 						if (ms.IsSealed) {
 							AddIcon(ref icons, IconIds.SealedMethod);
 						}
+						else if (ms.IsVirtual) {
+							AddIcon(ref icons, IconIds.VirtualMember);
+						}
 						if (ms.IsOverride) {
 							AddIcon(ref icons, IconIds.OverrideMethod);
 						}
@@ -119,6 +122,9 @@ namespace Codist.Controls
 							if (symbol.IsSealed) {
 								AddIcon(ref icons, IconIds.SealedEvent);
 							}
+							else if (symbol.IsVirtual) {
+								AddIcon(ref icons, IconIds.VirtualMember);
+							}
 							if (symbol.IsOverride) {
 								AddIcon(ref icons, IconIds.OverrideEvent);
 							}
@@ -143,6 +149,9 @@ namespace Codist.Controls
 							else {
 								if (symbol.IsSealed) {
 									AddIcon(ref icons, IconIds.SealedProperty);
+								}
+								else if (symbol.IsVirtual) {
+									AddIcon(ref icons, IconIds.VirtualMember);
 								}
 								if (symbol.IsOverride) {
 									AddIcon(ref icons, IconIds.OverrideProperty);

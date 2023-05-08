@@ -420,6 +420,7 @@ namespace Codist.NaviBar
 							case SyntaxKind.SealedKeyword: AddIcon(ref icons, IconIds.SealedMethod); break;
 							case SyntaxKind.OverrideKeyword: AddIcon(ref icons, IconIds.OverrideMethod); break;
 							case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
+							case SyntaxKind.VirtualKeyword: AddIcon(ref icons, IconIds.VirtualMember); break;
 						}
 					}
 					if (isStatic == false && isExt == false
@@ -444,6 +445,7 @@ namespace Codist.NaviBar
 								break;
 							case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyMethod); break;
 							case SyntaxKind.RefKeyword: AddIcon(ref icons, IconIds.RefMember); break;
+							case SyntaxKind.VirtualKeyword: AddIcon(ref icons, IconIds.VirtualMember); break;
 							case CodeAnalysisHelper.RequiredKeyword: AddIcon(ref icons, IconIds.RequiredMember); break;
 						}
 					}
@@ -484,6 +486,7 @@ namespace Codist.NaviBar
 							case SyntaxKind.ReadOnlyKeyword: AddIcon(ref icons, IconIds.ReadonlyField); break;
 							case SyntaxKind.VolatileKeyword: AddIcon(ref icons, IconIds.VolatileField); break;
 							case SyntaxKind.StaticKeyword: AddIcon(ref icons, IconIds.StaticMember); break;
+							case SyntaxKind.VirtualKeyword: AddIcon(ref icons, IconIds.VirtualMember); break;
 						}
 					}
 					return icons;

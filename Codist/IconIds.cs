@@ -82,6 +82,7 @@ namespace Codist
 		public const int OverrideEvent = KnownImageIds.ModifyEvent;
 		public const int OverrideProperty = KnownImageIds.ModifyProperty;
 		public const int OverrideMethod = KnownImageIds.ModifyMethod;
+		public const int VirtualMember = KnownImageIds.Online;
 		public const int ExplicitInterfaceEvent = KnownImageIds.RenameEvent;
 		public const int ExplicitInterfaceProperty = KnownImageIds.RenameProperty;
 		public const int ExplicitInterfaceMethod = KnownImageIds.RenameMethod;
