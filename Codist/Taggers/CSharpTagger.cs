@@ -50,7 +50,11 @@ namespace Codist.Taggers
 		public event EventHandler<SnapshotSpanEventArgs> TagsChanged;
 
 		public IEnumerable<ITagSpan<IClassificationTag>> GetTags(NormalizedSnapshotSpanCollection spans) {
-			if (_Parser.TryGetSemanticState(spans[0].Snapshot, out var r)) {
+			var p = _Parser;
+			if (p == null) {
+				return Enumerable.Empty<ITagSpan<IClassificationTag>>();
+			}
+			if (p.TryGetSemanticState(spans[0].Snapshot, out var r)) {
 				return Tagger.GetTags(spans, r, SyncHelper.CancelAndRetainToken(ref _RenderBreaker));
 			}
 			foreach (var item in spans) {
