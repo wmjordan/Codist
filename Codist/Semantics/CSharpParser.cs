@@ -15,6 +15,7 @@ namespace Codist
 	sealed class CSharpParser : IDisposable
 	{
 		readonly Dictionary<ITextBuffer, TextBufferParser> _Parsers = new Dictionary<ITextBuffer, TextBufferParser>();
+		readonly object _SyncObj = new object();
 		IWpfTextView _View;
 		// cache the latest used parser to improve performance
 		TextBufferParser _LastParser;
@@ -68,11 +69,13 @@ namespace Codist
 			if (_View != null) {
 				_View.VisualElement.IsVisibleChanged -= VisualElement_IsVisibleChanged;
 				if (_Parsers.Count > 0) {
-					// don't iterate _Parsers, since the Release method will change the collection
-					foreach (var tagger in _Parsers.Values.ToList() /* hold parsers to be disposed */) {
-						tagger.Release();
+					lock (_SyncObj) {
+						// don't iterate _Parsers, since the Release method will change the collection
+						foreach (var tagger in _Parsers.Values.ToList() /* hold parsers to be disposed */) {
+							tagger.Release();
+						}
+						_Parsers.Clear();
 					}
-					_Parsers.Clear();
 				}
 				_LastParser = null;
 				_View = null;
@@ -90,8 +93,10 @@ namespace Codist
 
 		void VisualElement_IsVisibleChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e) {
 			var v = _IsVisible = (bool)e.NewValue;
-			foreach (var tagger in _Parsers.Values) {
-				tagger.OnViewVisibilityChanged(v);
+			lock (_SyncObj) {
+				foreach (var tagger in _Parsers.Values) {
+					tagger.OnViewVisibilityChanged(v);
+				}
 			}
 		}
 
@@ -229,10 +234,12 @@ namespace Codist
 					return;
 				}
 
-				// don't iterate _Parsers, since the Release method will change the collection
-				foreach (var tagger in c._Parsers.Values.ToList()) {
-					if (tagger._State?.Workspace.CurrentSolution.Id.Id != id) {
-						tagger.Release();
+				lock (c._SyncObj) {
+					// don't iterate _Parsers, since the Release method will change the collection
+					foreach (var tagger in c._Parsers.Values.ToList()) {
+						if (tagger._State?.Workspace.CurrentSolution.Id.Id != id) {
+							tagger.Release();
+						}
 					}
 				}
 			}
@@ -242,7 +249,7 @@ namespace Codist
 					_HasBackgroundChange = false;
 					if (_State != null) {
 						// schedule a refresh
-						_Timer.Change(300, Timeout.Infinite);
+						_Timer?.Change(300, Timeout.Infinite);
 					}
 				}
 			}
@@ -325,7 +332,9 @@ namespace Codist
 				SyncHelper.CancelAndDispose(ref _ParserBreaker, false);
 				if (_Buffer != null) {
 					UnsubscribeBufferEvents(_Buffer);
-					_Container._Parsers.Remove(_Buffer);
+					lock (_Container._SyncObj) {
+						_Container._Parsers.Remove(_Buffer);
+					}
 					_Container = null;
 					_Buffer = null;
 				}
