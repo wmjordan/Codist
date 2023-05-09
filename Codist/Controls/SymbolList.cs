@@ -116,7 +116,7 @@ namespace Codist.Controls
 			async void GoToSourceAsync(SymbolItem i) {
 				try {
 					await i?.GoToSourceAsync();
-		}
+				}
 				catch (OperationCanceledException) {
 				}
 			}
@@ -150,7 +150,7 @@ namespace Codist.Controls
 					break;
 			}
 			typeNamespace = type.ContainingNamespace;
-			if (typeNamespace == null || typeNamespace.IsGlobalNamespace) {
+			if (typeNamespace?.IsGlobalNamespace != false) {
 				return;
 			}
 			string typeName = type.Name;
@@ -160,12 +160,16 @@ namespace Codist.Controls
 						case nameof(GDI.SystemBrushes):
 						case nameof(GDI.SystemPens):
 						case nameof(GDI.SystemColors):
-							SetupListForSystemColors(); return;
+							SetupListForSystemColors();
+							return;
 						case nameof(GDI.Color):
 						case nameof(GDI.Brushes):
 						case nameof(GDI.Pens):
-							SetupListForColors(); return;
-						case nameof(GDI.KnownColor): SetupListForKnownColors(); return;
+							SetupListForColors();
+							return;
+						case nameof(GDI.KnownColor):
+							SetupListForKnownColors();
+							return;
 					}
 					return;
 				case "System.Windows":
@@ -707,7 +711,7 @@ namespace Codist.Controls
 			if (li != null && (target = li.Content as SymbolItem)?.SyntaxNode != null
 				&& (source = GetDragData(e)) != null) {
 				try {
-				await target.RefreshSyntaxNodeAsync();
+					await target.RefreshSyntaxNodeAsync();
 				}
 				catch (OperationCanceledException) {
 					return;

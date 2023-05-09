@@ -333,10 +333,8 @@ namespace Codist.NaviBar
 						((ThemedImageButton)Items[i - 1]).PerformClick();
 					}
 				}
-				else {
-					if ((i = Items.IndexOf(_ActiveItem)) < Items.Count - 1) {
-						((ThemedImageButton)Items[i + 1]).PerformClick();
-					}
+				else if ((i = Items.IndexOf(_ActiveItem)) < Items.Count - 1) {
+					((ThemedImageButton)Items[i + 1]).PerformClick();
 				}
 				e.Handled = true;
 			}
@@ -444,11 +442,11 @@ namespace Codist.NaviBar
 			}
 		}
 
-		static void AddReturnType(SymbolItem i, SyntaxNode node) {
-			if (String.IsNullOrEmpty(i.Hint)) {
+		static void AddReturnType(SymbolItem item, SyntaxNode node) {
+			if (String.IsNullOrEmpty(item.Hint)) {
 				var t = node.GetMemberDeclarationType();
 				if (t != null) {
-					i.Hint = t.ToString();
+					item.Hint = t.ToString();
 				}
 			}
 		}

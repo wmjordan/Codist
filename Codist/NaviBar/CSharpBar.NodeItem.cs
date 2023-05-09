@@ -178,8 +178,7 @@ namespace Codist.NaviBar
 			}
 
 			Task AddItemsAsync(SyntaxNode node, CancellationToken cancellationToken) {
-				var kind = node.Kind();
-				switch (kind) {
+				switch (node.Kind()) {
 					case SyntaxKind.SwitchStatement:
 						AddSwitchLabels(node);
 						return Task.CompletedTask;

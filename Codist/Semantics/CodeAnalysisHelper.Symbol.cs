@@ -51,15 +51,17 @@ namespace Codist
 				return s;
 			}
 			node = node.Parent;
-			k = node.Kind();
-			if (k.IsAny(SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.PointerMemberAccessExpression)) {
-				s = semanticModel.GetSymbolInfo(node, cancellationToken).CandidateSymbols.FirstOrDefault();
+			if (node == null) {
+				return null;
 			}
-			else if (k == SyntaxKind.Argument) {
-				s = semanticModel.GetSymbolInfo(((ArgumentSyntax)node).Expression, cancellationToken).CandidateSymbols.FirstOrDefault();
-			}
-			else if (k == SyntaxKind.ElementAccessExpression) {
-				s = semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node, cancellationToken).Symbol;
+			switch (node.Kind()) {
+				case SyntaxKind.SimpleMemberAccessExpression:
+				case SyntaxKind.PointerMemberAccessExpression:
+					return semanticModel.GetSymbolInfo(node, cancellationToken).CandidateSymbols.FirstOrDefault();
+				case SyntaxKind.Argument:
+					return semanticModel.GetSymbolInfo(((ArgumentSyntax)node).Expression, cancellationToken).CandidateSymbols.FirstOrDefault();
+				case SyntaxKind.ElementAccessExpression:
+					return semanticModel.GetSymbolInfo((ElementAccessExpressionSyntax)node, cancellationToken).Symbol;
 			}
 			return s;
 		}

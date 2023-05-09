@@ -22,6 +22,7 @@ namespace Codist.Controls
 		internal SymbolList Container { get; private set; }
 		internal Location Location { get; set; }
 
+		#region WPF shared properties
 		// the following properties must be public since they are also used in WPF
 		public SymbolUsageKind Usage { get; set; }
 
@@ -33,7 +34,7 @@ namespace Codist.Controls
 			set => _Hint = value;
 		}
 		public bool IsExternal => Usage == SymbolUsageKind.External
-			|| Container != null && Container.ContainerType == SymbolListType.None && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
+			|| Container?.ContainerType == SymbolListType.None && Symbol?.ContainingAssembly.GetSourceType() == AssemblySource.Metadata;
 		public TextBlock Content {
 			get => _Content ?? (_Content = Symbol != null
 				? CreateContentForSymbol(Symbol, _IncludeContainerType, true)
@@ -42,6 +43,7 @@ namespace Codist.Controls
 					: new ThemedMenuText());
 			set => _Content = value;
 		}
+		#endregion
 
 		public SymbolItem(SymbolList list) {
 			Container = list;

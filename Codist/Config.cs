@@ -491,7 +491,7 @@ namespace Codist
 			where TStyle : StyleBase<TStyleType>, new()
 			where TStyleType : struct, Enum {
 			foreach (var s in GetDefaultCodeStyles<TStyle, TStyleType>()) {
-				if (s.Id > 0 && styles.FindIndex(i => ClrHacker.DirectCompare(i.StyleID, s.StyleID)) == -1) {
+				if (s.Id > 0 && styles.Find(i => ClrHacker.DirectCompare(i.StyleID, s.StyleID)) == null) {
 					styles.Add(s);
 				}
 			}

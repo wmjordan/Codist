@@ -206,6 +206,7 @@ namespace Codist.QuickInfo
 				await _quickInfoSession.DismissAsync();
 				s.GoToDefinition();
 			}
+
 			void ShowToolTip(object sender, ToolTipEventArgs e) {
 				var s = _symbol;
 				if (s != null) {
@@ -214,6 +215,7 @@ namespace Codist.QuickInfo
 					t.ToolTipOpening -= ShowToolTip;
 				}
 			}
+
 			[SuppressMessage("Usage", Suppression.VSTHRD100, Justification = Suppression.EventHandler)]
 			async void ShowContextMenu(object sender, ContextMenuEventArgs e) {
 				await SyncHelper.SwitchToMainThreadAsync(default);
