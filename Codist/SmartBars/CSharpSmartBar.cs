@@ -236,10 +236,30 @@ namespace Codist.SmartBars
 				var selections = ctx.View.GetMultiSelectionBroker();
 				var symbol = _Symbol;
 				await SelectSymbolDefinitionAndReferencesAsync(selections, symbol);
-				if (symbol.Kind == SymbolKind.Method
-					&& symbol is IMethodSymbol m && m.MethodKind == MethodKind.Constructor) {
-					await SelectSymbolDefinitionAndReferencesAsync(selections, symbol.ContainingType);
+				switch (symbol.Kind) {
+					case SymbolKind.NamedType:
+						if (symbol is INamedTypeSymbol t && t.TypeKind == TypeKind.Class) {
+							foreach (var tm in t.GetMembers()) {
+								if (tm.Kind == SymbolKind.Method
+									&& tm.IsImplicitlyDeclared == false
+									&& IsTypeNamedMethod((IMethodSymbol)tm)) {
+									await SelectSymbolDefinitionAndReferencesAsync(selections, tm);
+								}
+							}
+						}
+						break;
+					case SymbolKind.Method:
+						if (symbol is IMethodSymbol m && IsTypeNamedMethod(m)) {
+							await SelectSymbolDefinitionAndReferencesAsync(selections, symbol = symbol.ContainingType);
+							goto case SymbolKind.NamedType;
+						}
+						break;
 				}
+				}
+
+			bool IsTypeNamedMethod(IMethodSymbol m) {
+				var k = m.MethodKind;
+				return k == MethodKind.Constructor || k == MethodKind.StaticConstructor || k == MethodKind.Destructor;
 			}
 		}
 
