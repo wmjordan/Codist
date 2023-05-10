@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Management.Instrumentation;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -164,8 +164,12 @@ namespace Codist
 			}
 		}
 
+		[Conditional("LOG")]
+		public static void Log(string text) {
+			OutputPane.OutputLine(text);
+		}
 		public static int OutputLine(string text) {
-			return OutputPane.OutputString(text);
+			return OutputPane.OutputLine(text);
 		}
 		public static void ClearOutputPane() {
 			OutputPane.ClearOutputPane();
@@ -175,7 +179,7 @@ namespace Codist
 		{
 			static IVsOutputWindowPane __OutputPane;
 
-			static public int OutputString(string text) {
+			static public int OutputLine(string text) {
 				ThreadHelper.ThrowIfNotOnUIThread();
 				return (__OutputPane ?? (__OutputPane = CreateOutputPane()))
 					.OutputString(text + Environment.NewLine);
@@ -191,7 +195,7 @@ namespace Codist
 				var window = ServicesHelper.Get<IVsOutputWindow, SVsOutputWindow>();
 				var guid = new Guid(CodistPackage.PackageGuidString);
 				if (window.CreatePane(ref guid, nameof(Codist), 1, 0) == VSConstants.S_OK
-					&& window.GetPane(ref guid, out var pane) == 0) {
+					&& window.GetPane(ref guid, out var pane) == VSConstants.S_OK) {
 					return pane;
 				}
 				return null;
