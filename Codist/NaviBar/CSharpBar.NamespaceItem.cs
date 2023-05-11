@@ -84,7 +84,7 @@ namespace Codist.NaviBar
 
 			void FilterChanged(object sender, SymbolFilterBox.FilterEventArgs e) {
 				if (e.FilterText.Length == 0) {
-					SelectChild(default);
+					SelectChild();
 				}
 			}
 
@@ -100,11 +100,11 @@ namespace Codist.NaviBar
 					_Menu.RefreshItemsSource(true);
 				}
 				else {
-					SelectChild(cancellationToken);
+					SelectChild();
 				}
 			}
 
-			void SelectChild(CancellationToken cancellationToken) {
+			void SelectChild() {
 				var child = Bar.GetChildSymbolOnNaviBar(this);
 				if (child != null && _Menu.HasItems) {
 					var c = CodeAnalysisHelper.GetSpecificSymbolComparer(child);
