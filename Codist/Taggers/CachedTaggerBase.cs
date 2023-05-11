@@ -16,7 +16,7 @@ namespace Codist.Taggers
 		protected CachedTaggerBase(ITextView textView) {
 			_TextView = textView;
 			_TextView.TextBuffer.Changed += TextView_TextBufferChanged;
-			_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
+			_Tags = textView.GetOrCreateSingletonProperty<TaggerResult>();
 			textView.Closed += TextView_Closed;
 		}
 

@@ -45,7 +45,7 @@ namespace Codist.Margins
 			: base(textView) {
 			_TextView = textView;
 			_ScrollBar = verticalScrollbar;
-			_Tags = textView.Properties.GetOrCreateSingletonProperty(() => new TaggerResult());
+			_Tags = textView.GetOrCreateSingletonProperty<TaggerResult>();
 			if (textView.Properties.TryGetProperty(nameof(CommentTaggerProvider), out _CommentTagger)) {
 				_CommentTagger.TagAdded += CommentTagger_TagAdded;
 			}

@@ -1079,6 +1079,10 @@ namespace Codist
 					|| textBuffer is IProjectionBuffer pb && pb.SourceBuffers.Any(MayBeEditor))
 				&& textBuffer.ContentType.IsOfType("RoslynPreviewContentType") == false;
 		}
+		public static TObject GetOrCreateSingletonProperty<TObject>(this IPropertyOwner propertyOwner)
+			where TObject : class, new() {
+			return propertyOwner.Properties.GetOrCreateSingletonProperty(() => new TObject());
+		}
 		public static ITextDocument GetTextDocument(this ITextBuffer textBuffer) {
 			return textBuffer.Properties.TryGetProperty<ITextDocument>(typeof(ITextDocument), out var d) ? d : null;
 		}

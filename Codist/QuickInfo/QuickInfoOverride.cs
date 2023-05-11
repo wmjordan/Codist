@@ -18,7 +18,6 @@ using Microsoft.VisualStudio.Text.Adornments;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Text.Tagging;
 using R = Codist.Properties.Resources;
-using TH = Microsoft.VisualStudio.Shell.ThreadHelper;
 
 namespace Codist.QuickInfo
 {
@@ -36,7 +35,7 @@ namespace Codist.QuickInfo
 		static readonly object __CodistQuickInfoItem = new object();
 
 		public static IQuickInfoOverride CreateOverride(IAsyncQuickInfoSession session) {
-			return session.Properties.GetOrCreateSingletonProperty(() => new DefaultOverride());
+			return session.GetOrCreateSingletonProperty<DefaultOverride>();
 		}
 
 		public static TObj Tag<TObj>(this TObj obj)
