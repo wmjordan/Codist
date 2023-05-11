@@ -173,8 +173,8 @@ namespace Codist.SmartBars
 			_ToolBarTray.Visibility = Visibility.Hidden;
 			ToolBar.DisposeCollection();
 			ToolBar2.DisposeCollection();
-			AddCommands();
 			await AddCommandsAsync(cancellationToken);
+			AddCommands();
 			SetToolBarPosition();
 			if (ToolBar2.Items.Count == 0) {
 				ToolBar2.Visibility = Visibility.Collapsed;
