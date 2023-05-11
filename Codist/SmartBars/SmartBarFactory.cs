@@ -41,7 +41,7 @@ namespace Codist.SmartBars
 			if (contentType.IsOfType("snippet picker")) {
 				return;
 			}
-			if (Constants.CodeTypes.CSharp.Equals(contentType.TypeName, StringComparison.OrdinalIgnoreCase)) {
+			if (textView.TextBuffer.IsContentTypeIncludingProjection(Constants.CodeTypes.CSharp)) {
 				SemanticContext.GetOrCreateSingletonInstance(textView);
 				new CSharpSmartBar(textView, _TextSearchService);
 			}

@@ -81,7 +81,7 @@ namespace Codist.SmartBars
 				AddXmlDocCommands();
 				return;
 			}
-			var trivia = _Context.GetNodeTrivia();
+			var trivia = _Context.NodeTrivia;
 			if (trivia.RawKind == 0) {
 				var token = _Context.Token;
 				var tokenKind = token.Kind();
@@ -255,7 +255,7 @@ namespace Codist.SmartBars
 						}
 						break;
 				}
-				}
+			}
 
 			bool IsTypeNamedMethod(IMethodSymbol m) {
 				var k = m.MethodKind;

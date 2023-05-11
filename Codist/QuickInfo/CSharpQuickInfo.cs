@@ -32,15 +32,7 @@ namespace Codist.QuickInfo
 
 		public Task<QuickInfoItem> GetQuickInfoItemAsync(IAsyncQuickInfoSession session, CancellationToken cancellationToken) {
 			// Map the trigger point down to our buffer.
-			var buffer = session.TextView.TextBuffer;
-			if (buffer is IProjectionBuffer projection) {
-				foreach (var sb in projection.SourceBuffers) {
-					if (session.GetTriggerPoint(sb) != null) {
-						buffer = sb;
-						break;
-					}
-				}
-			}
+			var buffer = session.GetSourceBuffer();
 			if (buffer == null) {
 				return Task.FromResult<QuickInfoItem>(null);
 			}

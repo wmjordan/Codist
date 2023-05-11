@@ -777,6 +777,18 @@ namespace Codist
 			CodistPackage.DTE.TryExecuteCommand(command, args);
 		}
 
+		public static ITextBuffer GetSourceBuffer(this IAsyncQuickInfoSession session) {
+			var buffer = session.TextView.TextBuffer;
+			if (buffer is IProjectionBuffer projection) {
+				foreach (var sb in projection.SourceBuffers) {
+					if (session.GetTriggerPoint(sb) != null) {
+						return sb;
+					}
+				}
+			}
+			return buffer;
+		}
+
 		/// <summary>
 		/// <para>When we click from the Symbol Link or the context menu command on the Quick Info,
 		/// <see cref="OpenFile"/> command will be executed and caret will be moved to the new place.</para>

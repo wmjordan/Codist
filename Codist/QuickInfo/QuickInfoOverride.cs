@@ -228,7 +228,7 @@ namespace Codist.QuickInfo
 					var m = new CSharpSymbolContextMenu(_symbol,
 						v.TextBuffer.ContentType.TypeName == Constants.CodeTypes.InteractiveContent
 							? null
-							: ctx.GetNode(_quickInfoSession.ApplicableToSpan.GetStartPoint(v.TextSnapshot).Position, true, true),
+							: ctx.GetNode(_quickInfoSession.ApplicableToSpan.GetStartPoint(v.TextSnapshot), true, true),
 						ctx);
 					m.AddAnalysisCommands();
 					if (m.HasItems) {

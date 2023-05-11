@@ -239,20 +239,22 @@ namespace Codist.NaviBar
 		}
 
 		async Task<ImmutableArray<SyntaxNode>> UpdateModelAndGetContainingNodesAsync(CancellationToken token) {
-			int position = View.GetCaretPosition();
-			if (await _SemanticContext.UpdateAsync(position, token).ConfigureAwait(false) == false
-				|| _SemanticContext.Compilation == null) {
+			var position = View.GetCaretPosition();
+			var ctx = _SemanticContext;
+			if (ctx == null
+				|| await ctx.UpdateAsync(position, token).ConfigureAwait(false) == false
+				|| ctx.Compilation == null) {
 				return ImmutableArray<SyntaxNode>.Empty;
 			}
 			// if the caret is at the beginning of the document, move to the first type declaration
 			if (position == 0) {
-				var n = _SemanticContext.Compilation.GetDescendantDeclarations(token).FirstOrDefault();
+				var n = ctx.Compilation.GetDescendantDeclarations(token).FirstOrDefault();
 				if (n != null) {
-					position = n.SpanStart;
+					position = new SnapshotPoint(position.Snapshot, n.SpanStart);
 				}
 			}
 			await SyncHelper.SwitchToMainThreadAsync(token);
-			return _SemanticContext.GetContainingNodes(position,
+			return ctx.GetContainingNodes(position,
 				Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.SyntaxDetail),
 				Config.Instance.NaviBarOptions.MatchFlags(NaviBarOptions.RegionOnBar));
 		}
